@@ -19,6 +19,8 @@ create its ancestor collections if necessary.  The intent is of this
 script is to quietly load the data package into the default parent
 collection "/DPR/vol1".
 
+See inlined documentation for usage details.  
+
 To load the sample dataset into Fedora, type:
 
 ```bash
