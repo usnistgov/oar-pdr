@@ -1,0 +1,92 @@
+{
+    "@context": [
+        "http://www.nist.gov/dp/di/ont/profile-schema-onto.json",
+        {
+            "podo": "http://www.nist.gov/dp/di/ont/pod-onto.json",
+            "pod": "https://project-open-data.cio.gov/v1.1/schema#",
+            "dcat": "http://www.w3.org/ns/dcat#",
+            "org": "http://www.w3.org/ns/org#",
+            "vcard": "http://www.w3.org/2006/vcard/ns#",
+            "foaf": "http://xmlns.com/foaf/0.1/",
+            "dc": "http://purl.org/dc/terms/",
+            "sch": "http://schema.org/"
+        }
+    ],
+    "@type": "psch:ProfileSchema",
+    "@id": "http://www.nist.gov/dp/di/ont/pod-onto.json",
+    "isDefinedBy": [
+        {
+            "@type": "owl:Class",
+            "@id": "pod:Dataset",
+            "prefLabel": "Dataset",
+            "definition": "a resource that is useful in a data-driven application",
+            "note": [ "This name connotates a meaning more specific--namely, accessible data--than how it is generally used in the NIST data platform." ],
+            "referenceClass": "dcat:Dataset"
+            "equivalentClass": {
+                "@type": "owl:Class",
+                "owl:intersectionOf": [
+                    {
+                        "@type": "owl:Restriction",
+                        "owl:onProperty": "pod:title",
+                        "minCardinality": 1,
+                        "maxCardinality": 1,
+                    },
+                    {
+                        "@type": "owl:Restriction",
+                        "owl:onProperty": "pod:contactPoint",
+                        "minCardinality": 1,
+                        "maxCardinality": 1,
+                    }
+                ]
+            }
+        },
+        {
+            "@type": "owl:ObjectProperty",
+            "@id": "pod:title",
+            "prefLabel": "title",
+            "altLabel": "Title",
+            "definition": "Human-readable name of the asset. Should be in plain English and include sufficient detail to facilitate search and discovery.",
+            "domain": "pod:Dataset",
+            "range": "xsd:string",
+            "referenceProperty": "dc:title"
+        },
+        {
+            "@type": "owl:ObjectProperty",
+            "@id": "pod:contactPoint",
+            "prefLabel": "contactPoint",
+            "definition": "information for contacting someone regarding the subject",
+            "range": "pod:Dataset",
+            "domain": "pod:ContactPoint"
+        },
+        {
+            "@type": "owl:Class",
+            "@id": "pod:ContactPoint",
+            "prefLabel": "ContactPoint",
+            "definition":  "an entity that can be contacted regarding a Dataset",
+            "note": [
+                "This is typically represented as a blank node.",
+                "The @type must be set to 'vcard:Contact'"
+            ],
+            "referenceClass": "vcard:Contact"
+        },
+        {
+            "@type": "owl:ObjectProperty",
+            "@id": "pod:fn",
+            "prefLabel": "fn",
+            "definition": "The full name of the resource contact",
+            "note": [
+                "The name may refer to a person, a position, or an organization"
+            ],
+            "referenceProperty": "vcard:fn"
+        },
+        {
+            "@type": "owl:ObjectProperty",
+            "@id": "pod:hasEmail",
+            "prefLabel": "hasEmail",
+            "definition": "The email address of the resource contact",
+            "referenceProperty": "vcard:hasEmail"
+        }
+    ]
+}
+
+    
