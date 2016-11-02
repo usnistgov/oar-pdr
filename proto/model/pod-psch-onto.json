@@ -21,7 +21,7 @@
             "prefLabel": "Dataset",
             "definition": "a resource that is useful in a data-driven application",
             "note": [ "This name connotates a meaning more specific--namely, accessible data--than how it is generally used in the NIST data platform." ],
-            "referenceClass": "dcat:Dataset"
+            "referenceClass": "dcat:Dataset",
             "equivalentClass": {
                 "@type": "owl:Class",
                 "owl:intersectionOf": [
