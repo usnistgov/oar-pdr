@@ -122,7 +122,7 @@
                     "notes": [
                         "This is a container for two fields that together make up the contact information for the dataset. contactPoint should always contain both the person’s appropriately formatted full name (fn) and email (hasEmail)."
                     ],
-                    "$ref": "/definitions/ContactPoint"
+                    "$ref": "/definitions/ContactPoint",
                     "asOntology": {
                         "@context": "profile-schema-onto.json",
                         "prefLabel": "Contact Name and Email",
