@@ -1,6 +1,6 @@
 {
     "@context": [
-        "http://www.nist.gov/dp/di/ont/profile-schema-onto.json",
+        "http://www.nist.gov/od/dm/ont/profile-schema-onto.json",
         {
             "podo": "http://www.nist.gov/dp/di/ont/pod-onto.json",
             "pod": "https://project-open-data.cio.gov/v1.1/schema#",

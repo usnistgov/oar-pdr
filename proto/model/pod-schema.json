@@ -43,11 +43,11 @@
         },
 
         "Dataset": {
-            "definition": "",
+            "description": "",
             "properties": {
                 "title": {
                     "title": "Title",
-                    "definition": "Human-readable name of the asset",
+                    "description": "Human-readable name of the asset",
                     "notes": [
                         "Value should be in plain English and include sufficient detail to facilitate search and discovery",
                         "Acronyms should be avoided"
@@ -62,7 +62,7 @@
 
                 "description": {
                     "title": "Description",                    
-                    "definition": "Human-readable description (e.g., an abstract) with sufficient detail to enable a user to quickly understand whether the asset is of interest.",
+                    "description": "Human-readable description (e.g., an abstract) with sufficient detail to enable a user to quickly understand whether the asset is of interest.",
                     "notes": [
                         "This should be human-readable and understandable to an average person."
                     ],
@@ -77,7 +77,7 @@
 
                 "keyword": {
                     "title": "Tags",
-                    "definition": "Tags (or keywords) help users discover your dataset; please include terms that would be used by technical and non-technical users.",
+                    "description": "Tags (or keywords) help users discover your dataset; please include terms that would be used by technical and non-technical users.",
                     "notes": [
                         "Surround each keyword with quotes. Separate keywords with commas. Avoid duplicate keywords in the same record."
                     ],
@@ -92,7 +92,7 @@
                 },
 
                 "modified": {
-                    "definition": "Most recent date on which the dataset was changed, updated or modified.",
+                    "description": "Most recent date on which the dataset was changed, updated or modified.",
                     "notes": [
                         "Dates should be ISO 8601 of highest resolution. In other words, as much of YYYY-MM-DDThh:mm:ss.sTZD as is relevant to this dataset. If there is a need to reflect that the dataset is continually updated, ISO 8601 formatting can account for this with repeating intervals. For instance, R/P1D for daily, R/P2W for every two weeks, and R/PT5M for every five minutes."
                     ],
@@ -105,7 +105,7 @@
                 },
 
                 "publisher": {
-                    "definition": "The publishing entity and optionally their parent organization(s).",
+                    "description": "The publishing entity and optionally their parent organization(s).",
                     "notes": [
                         "This is a container for a publisher object which groups together the fields: name and subOrganization. The subOrganization field can also contain a publisher object which allows one to describe an organization’s hierarchy. Where greater specificity is desired, include as many levels of publisher as is useful, in ascending order, using the below format."
                     ],
@@ -118,7 +118,7 @@
                 },
 
                 "contactPoint": {
-                    "definition": "Contact person’s name and email for the asset",
+                    "description": "Contact person’s name and email for the asset",
                     "notes": [
                         "This is a container for two fields that together make up the contact information for the dataset. contactPoint should always contain both the person’s appropriately formatted full name (fn) and email (hasEmail)."
                     ],
@@ -131,7 +131,7 @@
                 },
                 
                 "identifier": {
-                    "definition": "A unique identifier for the dataset or API as maintained within an Agency catalog or database",
+                    "description": "A unique identifier for the dataset or API as maintained within an Agency catalog or database",
                     "notes": [
                         "This field allows third parties to maintain a consistent record for datasets even if title or URLs are updated. Agencies may integrate an existing system for maintaining unique identifiers. Each identifier must be unique across the agency’s catalog and remain fixed. It is highly recommended that a URI (preferably an HTTP URL) be used to provide a globally unique identifier. Identifier URLs should be designed and maintained to persist indefinitely regardless of whether the URL of the resource itself changes."
                     ],
@@ -146,7 +146,7 @@
 
                 "accessLevel": {
                     "title": "Public Access Level",
-                    "definition": "The degree to which this dataset could be made publicly-available, regardless of whether it has been made available",
+                    "description": "The degree to which this dataset could be made publicly-available, regardless of whether it has been made available",
                     "notes": [
                     ],
                     "type": "string",
@@ -171,7 +171,7 @@
 
                 "bureauCode": {
                     "title": "Bureau Code",
-                    "definition": "an identifier provided by the OMB Circular A-11, Appendix C that identifies the originating federal agency",
+                    "description": "an identifier provided by the OMB Circular A-11, Appendix C that identifies the originating federal agency",
                     "notes": [
                         "OMB Circular A-11, Appendix C is available via http://www.whitehouse.gov/sites/default/files/omb/assets/a11_current_year/app_c.pdf",
                         "A machine-readable listing of the defined codes is available via https://project-open-data.cio.gov/data/omb_bureau_codes.csv",
@@ -192,7 +192,7 @@
 
                 "programCode": {
                     "title": "Program Code",
-                    "definition": "an identifier provided by the Federal Program Inventory that identifies the primary program related to this data asset",
+                    "description": "an identifier provided by the Federal Program Inventory that identifies the primary program related to this data asset",
                     "notes": [
                         "A machine-readable listing of the defined codes is available via https://www.performance.gov/sites/default/files/files/FederalProgramInventory_FY13_MachineReadable_091613.xls",
                         "Codes have the format of 015:001"
@@ -212,7 +212,7 @@
 
                 "license": {
                     "title": "License",
-                    "definition": "A pointer to the license or non-license (i.e. Public Domain) statement with which the dataset or API has been published",
+                    "description": "A pointer to the license or non-license (i.e. Public Domain) statement with which the dataset or API has been published",
                     "notes": [
                         "See Open Licenses (https://project-open-data.cio.gov/open-licenses/) for more information."
                     ],
@@ -374,26 +374,6 @@
                         "prefLabel": "Data Standard",
                         "referenceProperty": "dc:conformsTo",
                         "owl:range": "xsd:anyURI"
-                    }
-                },
-                
-                "conformsTo": {
-                    "title": "Data Standard",
-                    "description": "URI used to identify a standardized specification the dataset conforms to",
-                    "anyOf": [
-                        {
-                            "type": "string",
-                            "format": "uri"
-                        },
-                        {
-                            "type": "null"
-                        }
-                    ],
-                    "asOntology": {
-                        "@context": "profile-schema-onto.json",
-                        "prefLabel": "Homepage URL",
-                        "referenceProperty": "dc:conformsTo",
-                        "range": "xsd:anyURI"
                     }
                 },
                 
@@ -657,7 +637,7 @@
                 },
                 "fn": {
                     "title": "Contact Name",
-                    "definition": "full name of the contact person, role, or organization",
+                    "description": "full name of the contact person, role, or organization",
                     "type": "string",
                     "minLength": 1,
                     "asOntology": {
@@ -669,7 +649,7 @@
                 },
                 "hasEmail": {
                     "title": "Email",
-                    "definition": "The email address of the resource contact",
+                    "description": "The email address of the resource contact",
                     "type": "string",
                     "pattern": "^mailto:[\\w\\_\\~\\!\\$\\&\\'\\(\\)\\*\\+\\,\\;\\=\\:.-]+@[\\w.-]+\\.[\\w.-]+?$",
                     "asOntology": {
