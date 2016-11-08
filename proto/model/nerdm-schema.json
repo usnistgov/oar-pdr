@@ -32,7 +32,7 @@
                         "Each element in the array should be considered a separate paragraph"
                     ],
                     "type": "array",
-                    "items": "string"
+                    "items": { "type": "string" },
                     "minItems": 1,
                     "asOntology": {
                         "@context": "profile-schema-onto.json",
@@ -114,32 +114,6 @@
                         "@context": "profile-schema-onto.json",
                         "prefLabel": "Contact Information",
                         "referenceProperty": "dcat:contactPoint"
-                    }
-                },
-                
-                "identifier": {
-                    "definition": "A (primary) unique identifier for the resource",
-                    "notes": [
-                        "It is expected that this field will contain type of identifier that is of a uniform type across all resource descriptions in the system",
-                        "This identifier should, by default, resolve to the metadata record (or some rendering of it) rather than to the resource itself (e.g. via its landing page)."
-                    ],
-                    "type": "string",
-                    "minLength": 5,
-                    "asOntology": {
-                        "@context": "profile-schema-onto.json",
-                        "prefLabel": "Unique Identifier",
-                        "referenceProperty": "dc:identifier"
-                    }
-                },
-
-                "altIdentifier": {
-                    "definition": "an alternate unique identifier in a specified identifier scheme"
-                    "type": "array",
-                    "item": { "$ref": "/definitions/Identifier" },
-                    "asOntology": {
-                        "@context": "profile-schema-onto.json",
-                        "prefLabel": "Alternate Identifier",
-                        "referenceProperty": "dc:identifier"
                     }
                 },
                 
@@ -307,7 +281,58 @@
                             "type": "null"
                         }
                     ]
+                },
+
+                "@id": {
+                    "definition": "A (primary) unique identifier for the resource",
+                    "notes": [
+                        "It is expected that this field will contain a type of identifier that is of a uniform type across all resource descriptions in the system",
+                        "This identifier should, by default, resolve to the metadata record (or some rendering of it) rather than to the resource itself (e.g. via its landing page)."
+                    ],
+                    "type": "string",
+                    "minLength": 5,
+                    "asOntology": {
+                        "@context": "profile-schema-onto.json",
+                        "prefLabel": "Unique Identifier",
+                        "referenceProperty": "dc:identifier"
+                    }
+                },
+
+                "doi": {
+                    "definition": "A Digital Object Identifier (DOI) in non-resolving form.",
+                    "notes": [
+                        "The DOI value should not have the resolver URI base, but should have the form 'doi:NNNNN/XXXXXX'",
+                        "It is expected that this will primarily be Datacite DOIs"
+                    ],
+                    "type": "string",
+                    "pattern": "^doi:[0-9]+/.*$",
+                    "minLength": 5,
+                    "asOntology": {
+                        "@context": "profile-schema-onto.json",
+                        "prefLabel": "Unique Identifier",
+                        "referenceProperty": "dc:identifier"
+                    }
+                },
+
+                "@type": {
+                    "description":  "the linked-data class type for this resource",
+                    "notes": [
+                        "If this resource is not to be considered a subtype of the nrd:Resource, its value should be 'nrd:Resource'."
+                    ]
+                },
+
+                "resourceType": {
+                    "description": "the subclasses of a NERDm Resource that this resource can be categorized as",
+                    "notes": [
+                        "Class labels have the form 'subclass [: subclass ...]' in which each colon-separated name is the name of a class that is a direct child of the class given just before it.",
+                        "Classes listed here can imply the existence of particular properties",
+                        "The $extendedSchemas property can be used as a sibling to validate this resource node against all relevent subclass types.",
+                        "The @type property can be used as a sibling indicate the primary resource type for compliance with JSON-LD"
+                    ],
+                    "type": "array",
+                    "items": { "type": "string" }
                 }
+
             },
 
             "required": [
@@ -331,7 +356,7 @@
                 }
             },
             "required": [ "title" ]
-        }
+        },
 
         "ISO8601DateRange": {
             "title": "Last Update",
@@ -360,7 +385,7 @@
                     "title": "Metadata Context",
                     "description": "IRI for the JSON-LD data type. This should be org:Organization for each publisher",
                     "type": "string",
-                    "enum": [ "org:Organization" ],
+                    "enum": [ "org:Organization" ]
                 },
                 "name": {
                     "title": "Publisher Name",
@@ -371,7 +396,7 @@
                         "@context": "profile-schema-onto.json",
                         "referenceProperty": "skos:prefLabel"
                     }
-                }
+                },
                 "subOrganizationOf": {
                     "description": "A parent organizational entity",
                     "$ref": "/definitions/Organization",
@@ -391,7 +416,7 @@
             "properties": {
                 "@type": {
                     "type": "string",
-                    "enum": [ "vcard:Contact" ],
+                    "enum": [ "vcard:Contact" ]
                 },
                 "fn": {
                     "title": "Contact Name",
@@ -490,7 +515,7 @@
                 }
 
             },
-            "required": [ "value" ]
+            "required": [ "value" ],
             "asOntology": {
                 "@context": "profile-schema-onto.json",
                 "@id": "mads:Identifier",
