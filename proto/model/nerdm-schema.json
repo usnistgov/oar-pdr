@@ -8,13 +8,12 @@
     "definitions": {
 
         "Resource": {
-            "definition": "a resource (e.g. data collection, service, website or tool) that can participate in a data-driven application",
-            "type": "object",
+            "description": "a resource (e.g. data collection, service, website or tool) that can participate in a data-driven application",
             "properties": {
 
                 "title": {
                     "title": "Title",
-                    "definition": "Human-readable, descriptive name of the resource",
+                    "description": "Human-readable, descriptive name of the resource",
                     "notes": [
                         "Acronyms should be avoided"
                     ],
@@ -28,7 +27,7 @@
 
                 "description": {
                     "title": "Description",                    
-                    "definition": "Human-readable description (e.g., an abstract) of the resource",
+                    "description": "Human-readable description (e.g., an abstract) of the resource",
                     "notes": [
                         "Each element in the array should be considered a separate paragraph"
                     ],
@@ -44,7 +43,7 @@
 
                 "keyword": {
                     "title": "Tags",
-                    "definition": "Tags (or keywords) help users discover your dataset; please include terms that would be used by technical and non-technical users.",
+                    "description": "Tags (or keywords) help users discover your dataset; please include terms that would be used by technical and non-technical users.",
                     "notes": [
                         "Surround each keyword with quotes. Separate keywords with commas. Avoid duplicate keywords in the same record."
                     ],
@@ -59,7 +58,7 @@
                 },
 
                 "modified": {
-                    "definition": "Most recent date on which the dataset was changed, updated or modified.",
+                    "description": "Most recent date on which the dataset was changed, updated or modified.",
                     "notes": [
                         "Dates should be ISO 8601 of highest resolution. In other words, as much of YYYY-MM-DDThh:mm:ss.sTZD as is relevant to this dataset. If there is a need to reflect that the dataset is continually updated, ISO 8601 formatting can account for this with repeating intervals. For instance, R/P1D for daily, R/P2W for every two weeks, and R/PT5M for every five minutes."
                     ],
@@ -92,7 +91,7 @@
                 },
                 
                 "publisher": {
-                    "definition": "The publishing entity and optionally their parent organization(s).",
+                    "description": "The publishing entity and optionally their parent organization(s).",
                     "notes": [
                         "This is a container for a publisher object which groups together the fields: name and subOrganization. The subOrganization field can also contain a publisher object which allows one to describe an organization’s hierarchy. Where greater specificity is desired, include as many levels of publisher as is useful, in ascending order, using the below format."
                     ],
@@ -105,7 +104,7 @@
                 },
 
                 "contactPoint": {
-                    "definition": "Contact information for getting more information about this resource",
+                    "description": "Contact information for getting more information about this resource",
                     "notes": [
                         "This should include at least a name and an email address",
                         "The information can reflect either a person or a group (such as a help desk)"
@@ -120,7 +119,7 @@
                 
                 "accessLevel": {
                     "title": "Public Access Level",
-                    "definition": "The degree to which this dataset could be made publicly-available, regardless of whether it has been made available",
+                    "description": "The degree to which this dataset could be made publicly-available, regardless of whether it has been made available",
                     "notes": [
                     ],
                     "type": "string",
@@ -145,7 +144,7 @@
 
                 "license": {
                     "title": "License",
-                    "definition": "A pointer to the primary license or non-license (i.e. Public Domain) statement with which the dataset or API has been published",
+                    "description": "A pointer to the primary license or non-license (i.e. Public Domain) statement with which the dataset or API has been published",
                     "notes": [
                         "Software and data developed primarily by federal employees must be considered in the public domain; software primarily developed by contract can be assigned a license, including an open source license.",
                         "By default, NIST-produced data and software should point to http://www.nist.gov/data/license.cfm",
@@ -285,7 +284,7 @@
                 },
 
                 "@id": {
-                    "definition": "A (primary) unique identifier for the resource",
+                    "description": "A (primary) unique identifier for the resource",
                     "notes": [
                         "It is expected that this field will contain a type of identifier that is of a uniform type across all resource descriptions in the system",
                         "This identifier should, by default, resolve to the metadata record (or some rendering of it) rather than to the resource itself (e.g. via its landing page)."
@@ -300,7 +299,7 @@
                 },
 
                 "doi": {
-                    "definition": "A Digital Object Identifier (DOI) in non-resolving form.",
+                    "description": "A Digital Object Identifier (DOI) in non-resolving form.",
                     "notes": [
                         "The DOI value should not have the resolver URI base, but should have the form 'doi:NNNNN/XXXXXX'",
                         "It is expected that this will primarily be Datacite DOIs"
@@ -316,10 +315,15 @@
                 },
 
                 "@type": {
-                    "description":  "the linked-data class type for this resource",
+                    "description":  "the linked-data class types for this resource",
                     "notes": [
+                        "The value must always be given as an array, even when only one type is provided.",
+                        "Multiple values indicate that the Resource can be considered of multiple types",
                         "If this resource is not to be considered a subtype of the nrd:Resource, its value should be 'nrd:Resource'."
-                    ]
+                        
+                    ],
+                    "type": "array",
+                    "items": { "type": "string" } 
                 },
 
                 "resourceType": {
@@ -343,20 +347,45 @@
         },
 
         "ResourceReference": {
-            "definition":  "a reference to another resource that may have an associated ID",
+            "description":  "a reference to another resource that may have an associated ID",
+            "notes": [
+                "While providing a @type property is recommended, it is required if the @id is given."
+            ],
             "type": "object",
             "properties": {
                 "title": {
-                    "definition": "the name of the resource being referenced",
+                    "description": "the name of the resource being referenced",
                     "notes": [
                         "This value is intended for display.",
                         "This can be, but is not required to be, the same title given in the metadata record describing the resource"
                     ],
                     "type": "string",
                     "minLength": 1
+                },
+                "@id": {
+                    "description": "the local identifier for the referenced resource that resolves (preferentially) to a local description",
+                    "type": "string",
+                    "format": "uri"
+                },
+                "@type": {
+                    "description":  "the linked-data class types for the referenced resource",
+                    "notes": [
+                        "The value must always be given as an array, even when only one type is provided.",
+                        "Multiple values indicate that the Resource can be considered of multiple types; it is recommended that the primary type (usually the most specific) should be given first.",
+                        "If this resource is not to be considered a subtype of the nrd:Resource, its value should be 'nrd:Resource'."
+                        
+                    ],
+                    "type": "array",
+                    "items": { "type": "string" } 
+                    
                 }
             },
-            "required": [ "title" ]
+            "required": [ "title" ],
+            "dependencies": {
+                "@id": {
+                    "required": [ "@type" ]
+                }
+            }
         },
 
         "ISO8601DateRange": {
@@ -411,7 +440,7 @@
         },
 
         "ContactInfo": {
-            "definition": "Information describing various ways to contact an entity",
+            "description": "Information describing various ways to contact an entity",
             "notes": [
             ],
             "properties": {
@@ -421,7 +450,7 @@
                 },
                 "fn": {
                     "title": "Contact Name",
-                    "definition": "full name of the contact person, role, or organization",
+                    "description": "full name of the contact person, role, or organization",
                     "type": "string",
                     "minLength": 1,
                     "asOntology": {
@@ -433,7 +462,7 @@
             
                 "email": {
                     "title": "Email",
-                    "definition": "The email address of the resource contact",
+                    "description": "The email address of the resource contact",
                     "type": "string",
                     "pattern": "^[\\w\\_\\~\\!\\$\\&\\'\\(\\)\\*\\+\\,\\;\\=\\:.-]+@[\\w.-]+\\.[\\w.-]+?$",
                     "asOntology": {
@@ -486,11 +515,11 @@
         },
 
         "Identifier": {
-            "definition":  "a complete description of an identifier, including the scheme that it adheres to",
+            "description":  "a complete description of an identifier, including the scheme that it adheres to",
             "title": "Identifier",
             "properties": {
                 "scheme": {
-                    "definition": "a label indicating the system that the identifier adheres to",
+                    "description": "a label indicating the system that the identifier adheres to",
                     "notes": [
                         "this label may imply a particular resolver to use"
                     ],
@@ -503,7 +532,7 @@
                 },
 
                 "value": {
-                    "definition": "the value of the identifier",
+                    "description": "the value of the identifier",
                     "notes": [
                         "if no scheme is provided, a URI form of the identifier should be given"
                     ],

@@ -1,0 +1,504 @@
+{
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "$extensionSchemas": ["http://mgi.nist.gov/mgi-json-schema/v0.1"],
+    "id": "http://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#",
+    "rev": "wd1",
+    "title": "The NERDm extension metadata for Published Data",
+    "description": "These classes extend the based NERDm schema to different types of published data",
+    "definitions": {
+
+        "PublishedDataResource": {
+            "description": "a resource that can/should have a record in NIST's public data listing (PDL)",
+            "notes": [
+                "This must be convertable to compliant and complete POD record; thus, this class adds all remaining POD elements missing from the core"
+            ],
+            "allOf": [
+                { "$ref": "http://www.nist.gov/od/dm/nerdm-schema/v0.1#/definitions/Resource"},
+                {
+                    "type": "object",
+                    "properties": {
+
+                        "accrualPeriodicity": {
+                            "title": "Frequency",
+                            "description": "Frequency with which dataset is published.",
+                            "anyOf": [
+                                {
+                                    "enum": [
+                                        "irregular"
+                                    ],
+                                    "valueDocumentation": {
+                                        "irregular": {
+                                            "description": "the data is updated or republished on an irregular schedule"
+                                        }
+                                    }
+                                },
+                                {
+                                    "type": "string",
+                                    "pattern": "^R\\/P(?:\\d+(?:\\.\\d+)?Y)?(?:\\d+(?:\\.\\d+)?M)?(?:\\d+(?:\\.\\d+)?W)?(?:\\d+(?:\\.\\d+)?D)?(?:T(?:\\d+(?:\\.\\d+)?H)?(?:\\d+(?:\\.\\d+)?M)?(?:\\d+(?:\\.\\d+)?S)?)?$"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "asOntology": {
+                                "@conxtext": "profile-schema-onto.json",
+                                "prefLabel": "Frequency",
+                                "referenceProperty": "dc:accrualPeriodicity"
+                            }
+                        },
+                
+                        "bureauCode": {
+                            "title": "Bureau Code",
+                            "description": "an identifier provided by the OMB Circular A-11, Appendix C that identifies the originating federal agency",
+                            "notes": [
+                                "OMB Circular A-11, Appendix C is available via http://www.whitehouse.gov/sites/default/files/omb/assets/a11_current_year/app_c.pdf",
+                                "A machine-readable listing of the defined codes is available via https://project-open-data.cio.gov/data/omb_bureau_codes.csv",
+                                "Codes have the format of 015:01"
+                            ],
+                            "type": "array",
+                            "items": {
+                                "type": "string",
+                                "pattern": "^[0-9]{3}:[0-9]{2}$"
+                            },
+                            "uniqueItems": true,
+                            "asOntology": {
+                                "@context": "profile-schema-onto.json",
+                                "prefLabel": "Bureau Code",
+                                "referenceProperty": "pod:bureauCode"
+                            }
+                        },
+
+                        "programCode": {
+                            "title": "Program Code",
+                            "description": "an identifier provided by the Federal Program Inventory that identifies the primary program related to this data asset",
+                            "notes": [
+                                "A machine-readable listing of the defined codes is available via https://www.performance.gov/sites/default/files/files/FederalProgramInventory_FY13_MachineReadable_091613.xls",
+                                "Codes have the format of 015:001"
+                            ],
+                            "type": "array",
+                            "items": {
+                                "type": "string",
+                                "pattern": "^[0-9]{3}:[0-9]{3}$"
+                            },
+                            "uniqueItems": true,
+                            "asOntology": {
+                                "@context": "profile-schema-onto.json",
+                                "prefLabel": "Program Code",
+                                "referenceProperty": "pod:programCode"
+                            }
+                        },
+
+                        "dataQuality": {
+                            "title": "Data Quality",
+                            "description": "Whether the dataset meets the agency's Information Quality Guidelines",
+                            "anyOf": [
+                                {
+                                    "type": "boolean"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "asOntology": {
+                                "@context": "profile-schema-onto.json",
+                                "prefLabel": "Data Quality",
+                                "referenceProperty": "pod:dataQuality"
+                            }
+                        },
+                
+                        "primaryITInvestmentUII": {
+                            "title": "Primary IT Investment UII",
+                            "description": "The IT Unique Investment Identifier (UII) that is associated with this dataset",
+                            "anyOf": [
+                                {
+                                    "type": "string",
+                                    "pattern": "[0-9]{3}-[0-9]{9}"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "asOntology": {
+                                "@context": "profile-schema-onto.json",
+                                "prefLabel": "Primary IT Investment UII",
+                                "referenceProperty": "pod:primaryITInvestmentUII"
+                            }
+                        },
+
+                        "distribution": {
+                            "title": "Distribution",
+                            "description": "Distribution objects describing different ways to access this resource",
+                            "anyOf": [
+                                {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "/definitions/Distribution"
+                                    },
+                                    "minItems": 1,
+                                    "uniqueItems": true
+                                }
+                            ],
+                            "asOntology": {
+                                "@context": "profile-schema-onto.json",
+                                "prefLabel": "Distribution",
+                                "referenceProperty": "dcat:distribution"
+                            }
+                        },
+
+                        "systemOfRecords": {
+                            "title": "System of Records",
+                            "description": "The URL to the System of Records Notice related to this dataset if is so designated under the Privacy Act of 1974",
+                            "anyOf": [
+                                {
+                                    "type": "string",
+                                    "minLength": 1
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ]
+                        }
+                        
+                    },
+                    "required": [ "bureauCode", "programCode" ]
+                }
+            ]
+        },
+
+        "Distribution": {
+            "description": "a description of a downloadable version or portion of a dataset",
+            "type": "object",
+            "properties": {
+                "@type": {  
+                    "description": "IRI for the Distribution JSON-LD data type",
+                    "notes": [
+                        "This must be dcat:Distribution for each Distribution."
+                    ],
+                    "enum": [
+                        "dcat:Distribution"
+                    ]
+                },
+                
+                "downloadURL": {
+                    "title": "Download URL",
+                    "description": "URL providing direct access to a downloadable file of a dataset",
+                    "type": "string",
+                    "format": "uri",
+                    "asOntology": {
+                        "@context": "profile-schema-onto.json",
+                        "prefLabel": "Download URL",
+                        "referenceProperty": "dcat:downloadURL"
+                    }
+                },
+                
+                "mediaType": {
+                    "title": "Media Type",
+                    "description": "The machine-readable file format (IANA Media Type or MIME Type) of the distribution’s downloadURL",
+                    "anyOf": [
+                        {
+                            "pattern": "^[-\\w]+/[-\\w]+(\\.[-\\w]+)*([+][-\\w]+)?$",
+                            "type": "string"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "asOntology": {
+                        "@context": "profile-schema-onto.json",
+                        "prefLabel": "Media Type",
+                        "referenceProperty": "dcat:mediaType"
+                    }
+                },
+
+                "format": {
+                    "title": "Format",
+                    "description": "A human-readable description of the file format of a distribution",
+                    "anyOf": [
+                        {
+                            "type": "string",
+                            "minLength": 1
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "asOntology": {
+                        "@context": "profile-schema-onto.json",
+                        "prefLabel": "Format",
+                        "referenceProperty": "dc:format"
+                    }
+                },
+                
+                "accessURL": {
+                    "title": "Access URL",
+                    "description": "URL providing indirect access to a dataset",
+                    "notes": [
+                        "This field is intended specifically for web-based access via mechanisms other than direct file-based downloads."
+                    ],
+                    "anyOf": [
+                        {
+                            "type": "string",
+                            "format": "uri"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "asOntology": {
+                        "@context": "profile-schema-onto.json",
+                        "prefLabel": "Access URL",
+                        "referenceProperty": "dcat:accessURL"
+                    }
+                },
+                
+                "description": {
+                    "title": "Description",
+                    "description": "Human-readable description of the distribution",
+                    "anyOf": [
+                        {
+                            "type": "string",
+                            "minLength": 1
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "asOntology": {
+                        "@context": "profile-schema-onto.json",
+                        "prefLabel": "Description",
+                        "referenceProperty": "dc:description"
+                    }
+                },
+                
+                "title": {
+                    "title": "Title",
+                    "description": "Human-readable name of the distribution",
+                    "anyOf": [
+                        {
+                            "type": "string",
+                            "minLength": 1
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "asOntology": {
+                        "@context": "profile-schema-onto.json",
+                        "prefLabel": "Title",
+                        "referenceProperty": "dc:title"
+                    }
+                },
+                
+                "conformsTo": {
+                    "title": "Data Standard",
+                    "description": "URI used to identify a standardized specification the distribution conforms to",
+                    "anyOf": [
+                        {
+                            "type": "string",
+                            "format": "uri"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "asOntology": {
+                        "@context": "profile-schema-onto.json",
+                        "prefLabel": "Data Standard",
+                        "referenceProperty": "dc:conformsTo"
+                    }
+                },
+                
+                "describedBy": {
+                    "title": "Data Dictionary",
+                    "description": "URL to the data dictionary for the distribution found at the downloadURL",
+                    "anyOf": [
+                        {
+                            "type": "string",
+                            "format": "uri"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "asOntology": {
+                        "@context": "profile-schema-onto.json",
+                        "prefLabel": "Data Dictionary",
+                        "referenceProperty": "http://www.w3.org/2007/05/powder-s#describedby"
+                    }
+                },
+                
+                "describedByType": {
+                    "title": "Data Dictionary Type",
+                    "description": "The machine-readable file format (IANA Media Type or MIME Type) of the distribution’s describedBy URL",
+                    "anyOf": [
+                        {
+                            "pattern": "^[-\\w]+/[-\\w]+(\\.[-\\w]+)*([+][-\\w]+)?$",
+                            "type": "string"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "asOntology": {
+                        "@context": "profile-schema-onto.json",
+                        "prefLabel": "Data Dictionary Type",
+                        "referenceProperty": "pod:describedByType"
+                    }
+                }
+                
+            },
+
+            "dependencies": {
+                "downloadURL": {
+                    "description": "if downloadURL is specified, a non-null mediaType must also be specified",
+                    "properties": {
+                        "mediaType": {
+                            "type": "string",
+                            "pattern": "^[-\\w]+/[-\\w]+(\\.[-\\w]+)*([+][-\\w]+)?$"
+                        }
+                    },
+                    "required": [
+                        "mediaType"
+                    ]
+                }
+            }
+        },
+
+        "DataPublication": {
+            "description": "Data presented by one or more authors as citable publication",
+            "allOf": [
+                { "$ref": "/definitions/PublishedDataResource" },
+                {
+                    "type": "object",
+                    "properties": {
+                        "authors": {
+                            "description": "the ordered list of authors of this data publication",
+                            "notes": [
+                                "Authors should generally be assumed to be considered creators of the data; where this is is not true or insufficient, the contributors property can be used ot add or clarify who contributed to data creation."
+                            ],
+                            "type": "array",
+                            "items": { "$ref": "/definitions/Person" },
+                            "asOntology": {
+                                "@conxtext": "profile-schema-onto.json",
+                                "prefLabel": "Authors",
+                                "referenceProperty": "bibo:authorList"
+                            }
+                        },
+                        "recommendedCitation": {
+                            "description": "a recommended formatting of a citation to this data publication",
+                            "type": "string",
+                            "asOntology": {
+                                "@conxtext": "profile-schema-onto.json",
+                                "prefLabel": "Cite as",
+                                "referenceProperty": "dc:bibliographicCitation"
+                            }
+                        }
+                    }
+                }
+            ]
+        },
+
+        "Person": {
+            "description": "an identification a Person contributing to the publication of a resource",
+            "notes": [
+                "The information here is intended to reflect information about the person at teh time of the contribution or publication."
+            ],
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "description": "the class indicating that this is a Person"
+                    "type": "string",
+                    "enum": [
+                        "foaf:Person"
+                    ]
+                },
+
+                "@id": {
+                    "description": "a local identifier for the person representing the latest state of that person known to the system"
+                    "type": "string",
+                    "format": "uri"
+                }
+                
+                "fn": {
+                    "description": "the author's full name in the preferred format",
+                    "type": "string",
+                    "minLength": 1,
+                    "asOntology": {
+                        "@context": "profile-schema-onto.json",
+                        "prefLabel": "Contact Name",
+                        "referenceProperty": "vcard:fn"
+                    }
+                },
+
+                "givenName": {
+                    "description":  "the author's given name",
+                    "notes": [
+                        "Often referred to in English-speaking conventions as the first name"
+                    ],
+                    "type": "string",
+                    "minLength": 1,
+                    "asOntology": {
+                        "@context": "profile-schema-onto.json",
+                        "prefLabel": "First Name",
+                        "referenceProperty": "foaf:givenName"
+                    }
+                },
+
+                "familyName": {
+                    "description":  "the author's family name",
+                    "notes": [
+                        "Often referred to in English-speaking conventions as the last name"
+                    ],
+                    "type": "string",
+                    "minLength": 1,
+                    "asOntology": {
+                        "@context": "profile-schema-onto.json",
+                        "prefLabel": "Last Name",
+                        "referenceProperty": "foaf:familyName"
+                    }
+                },
+
+                "middleName": {
+                    "description":  "the author's middle names or initials",
+                    "notes": [
+                        "Often referred to in English-speaking conventions as the first name"
+                    ],
+                    "type": "string",
+                    "minLength": 1,
+                    "asOntology": {
+                        "@context": "profile-schema-onto.json",
+                        "prefLabel": "Middle Names or Initials",
+                        "referenceProperty": "vcard:middleName"
+                    }
+                },
+
+                "orcid": {
+                    "description":  "the author's ORCID",
+                    "notes:": [
+                        "The value should not include the resolving URI base (http://orcid.org)"
+                    ],
+                    "$ref": "/definitions/ORCIDpath",
+                    "asOntology": {
+                        "@context": "profile-schema-onto.json",
+                        "prefLabel": "Last Name",
+                        "referenceProperty": "vivo:orcidid"
+                    }
+                },
+
+                "affiliation": {
+                    "description": "The institution the person was affiliated with at the time of publication", 
+                    "$ref": "http://www.nist.gov/od/dm/nerdm-schema/v0.1#/definitions/ResourceReference" },
+                }
+                
+            },
+            "required": [ "fn" ]
+        },
+
+        "ORCIDpath": {
+            "description": "the format of the path portion of an ORCID identifier (i.e. without the preceding resolver URL base)",
+            "type": "string",
+            "pattern": "^[0-9]{4}-[0-9]{4}-[0-9]{4}-[0-9]{3}[0-9X]$"
+        }
+    }
+}
+
