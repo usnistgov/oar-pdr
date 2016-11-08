@@ -14,7 +14,7 @@
         "URLContext": {
             "description": "a reference to an arbitrary jsonld file",
             "type": "string",
-            "format": "uri",
+            "format": "uri"
         },
         "PODContext": {
             "description": "compliant content for the @context property in a POD JSON-LD document",
@@ -297,7 +297,7 @@
                         {
                             "type": "null"
                         }
-                    ]
+                    ],
                     "asOntology": {
                         "@context": "profile-schema-onto.json",
                         "prefLabel": "Temporal",
@@ -312,7 +312,7 @@
                         {
                             "type": "array",
                             "items": {
-                                "$ref": "distribution.json",
+                                "$ref": "distribution.json"
                             },
                             "minItems": 1,
                             "uniqueItems": true
@@ -399,7 +399,7 @@
                     "title": "Data Dictionary",
                     "description": "URL to the data dictionary for the dataset or API.",
                     "notes": [
-                        "Note that documentation other than a data dictionary can be referenced using Related Documents (references).",
+                        "Note that documentation other than a data dictionary can be referenced using Related Documents (references)."
                     ],
                     "anyOf": [
                         {
@@ -423,7 +423,7 @@
                     "anyOf": [
                         {
                             "type": "string",
-                            "pattern": "^[-\\w]+/[-\\w]+(\\.[-\\w]+)*([+][-\\w]+)?$",
+                            "pattern": "^[-\\w]+/[-\\w]+(\\.[-\\w]+)*([+][-\\w]+)?$"
                         },
                         {
                             "type": "null"
@@ -444,7 +444,7 @@
                             "type": "string",
                             "minLength": 1
                         }
-                    ],
+                    ]
                 },
                 
                 "issued": {
@@ -603,7 +603,7 @@
                     "title": "Metadata Context",
                     "description": "IRI for the JSON-LD data type. This should be org:Organization for each publisher",
                     "type": "string",
-                    "enum": [ "org:Organization" ],
+                    "enum": [ "org:Organization" ]
                 },
                 "name": {
                     "title": "Publisher Name",
@@ -614,7 +614,7 @@
                         "@context": "profile-schema-onto.json",
                         "referenceProperty": "skos:prefLabel"
                     }
-                }
+                },
                 "subOrganizationOf": {
                     "description": "A parent organizational entity",
                     "$ref": "/definitions/Organization",
@@ -625,7 +625,7 @@
                 }
             },
             "required": [ "name" ]
-        }
+        },
 
         "ContactPoint": {
             "description": "Contact person’s name and email for the asset",
@@ -633,7 +633,7 @@
             "properties": {
                 "@type": {
                     "type": "string",
-                    "enum": [ "vcard:Contact" ],
+                    "enum": [ "vcard:Contact" ]
                 },
                 "fn": {
                     "title": "Contact Name",

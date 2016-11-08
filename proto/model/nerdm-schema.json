@@ -3,12 +3,13 @@
     "$extensionSchemas": ["http://mgi.nist.gov/mgi-json-schema/v0.1"],
     "id": "http://www.nist.gov/od/dm/nerdm-schema/v0.1#",
     "rev": "wd1",
-    "title": "US Project Open Data Schema as Extended JSON Schema",
-    "description": "This JSON Schema expresses the POD schema (v1.1) so that instances can be validated via a JSON Schema validater",
+    "title": "The JSON Schema for the NIST Extended Resource Data model (NERDm)",
+    "description": "A JSON Schema specfying the core NERDm classes",
     "definitions": {
 
         "Resource": {
             "definition": "a resource (e.g. data collection, service, website or tool) that can participate in a data-driven application",
+            "type": "object",
             "properties": {
 
                 "title": {
