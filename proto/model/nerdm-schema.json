@@ -62,7 +62,7 @@
                     "notes": [
                         "Dates should be ISO 8601 of highest resolution. In other words, as much of YYYY-MM-DDThh:mm:ss.sTZD as is relevant to this dataset. If there is a need to reflect that the dataset is continually updated, ISO 8601 formatting can account for this with repeating intervals. For instance, R/P1D for daily, R/P2W for every two weeks, and R/PT5M for every five minutes."
                     ],
-                    "$ref": "ISO8601DateRange",
+                    "$ref": "#/definitions/ISO8601DateRange",
                     "asOntology": {
                         "@context": "profile-schema-onto.json",
                         "prefLabel": "Last Update",
@@ -95,7 +95,7 @@
                     "notes": [
                         "This is a container for a publisher object which groups together the fields: name and subOrganization. The subOrganization field can also contain a publisher object which allows one to describe an organization’s hierarchy. Where greater specificity is desired, include as many levels of publisher as is useful, in ascending order, using the below format."
                     ],
-                    "$ref": "/definitions/Organization",
+                    "$ref": "#/definitions/Organization",
                     "asOntology": {
                         "@context": "profile-schema-onto.json",
                         "prefLabel": "Publisher",
@@ -109,7 +109,7 @@
                         "This should include at least a name and an email address",
                         "The information can reflect either a person or a group (such as a help desk)"
                     ],
-                    "$ref": "/definitions/ContactInfo",
+                    "$ref": "#/definitions/ContactInfo",
                     "asOntology": {
                         "@context": "profile-schema-onto.json",
                         "prefLabel": "Contact Information",
@@ -193,7 +193,7 @@
                 "isPartOf": {
                     "title": "Collection",
                     "description": "The collection of which the dataset is a subset",
-                    "$ref": "/definitions/ResourceReference",
+                    "$ref": "#/definitions/ResourceReference",
                     "asOntology": {
                         "@context": "profile-schema-onto.json",
                         "prefLabel": "Collection",
@@ -246,7 +246,7 @@
                     "title": "Related Documents",
                     "description": "Related documents such as technical information about a dataset, developer documentation, etc.",
                     "type": "array",
-                    "items": { "$ref": "/definition/DocumentReference" },
+                    "items": { "$ref": "#/definitions/DocumentReference" },
                     "asOntology": {
                         "@context": "profile-schema-onto.json",
                         "prefLabel": "References",
@@ -298,7 +298,7 @@
                         "It is expected that this will primarily be Datacite DOIs"
                     ],
                     "type": "string",
-                    "pattern": "^doi:[0-9]+/.*$",
+                    "pattern": "^doi:[0-9]+\\.[0-9]+/.*$",
                     "minLength": 5,
                     "asOntology": {
                         "@context": "profile-schema-onto.json",
@@ -326,13 +326,13 @@
                     ],
                     "type": "array",
                     "items": { "type": "string" } 
-                },
+                }
 
             },
 
             "required": [
-                "title", "description", "identifier", "landingPage",
-                "publisher", "contactPoint", "accessLevel"
+                "title", "description", "landingPage", "publisher", 
+                "contactPoint", "accessLevel"
             ]
         },
 
@@ -346,7 +346,7 @@
                 },
 
                 "location": {
-                    "description": "the URL for accessing the document"
+                    "description": "the URL for accessing the document",
                     "notes": [
                         "It is assumed that the document can be viewed via a web browser (e.g. HTML, PDF, etc.)"
                     ],
@@ -359,12 +359,12 @@
                     "notes": [
                         "This is intended to be briefer than a citation."
                     ],
-                    "type": "string",
+                    "type": "string"
                 },
 
                 "citation": {
-                    "a full formated citation string for the reference, appropriate for inclusion in a bibliography"
-                    "type": "string"
+                    "description": "a full formated citation string for the reference, appropriate for inclusion in a bibliography",
+                    "type": "string",
                     "asOntology": {
                         "@conxtext": "profile-schema-onto.json",
                         "prefLabel": "Cite as",
@@ -373,7 +373,7 @@
                 },
 
                 "refid": {
-                    "description": "An persistent ID for the referenced document."
+                    "description": "An persistent ID for the referenced document.",
                     "notes": [
                         "The ID should be given in a form (e.g. with a scheme prefix) such that its type is obvious.  Use 'doi:' for Cross-ref or Datacite IDs.",
                         "location may use the URL form of the ID."
@@ -402,7 +402,7 @@
                 "Documents may be listed more than once having different types, namely both 'isDocumentedBy' and 'isSourceOf'; however, it is recommended that such multiple classifications should be minimized."
             ],
             "allOf": [
-                { "$ref": "/definitions/DocumentReference" },
+                { "$ref": "#/definitions/DocumentReference" },
                 {
                     "properties": {
                         "refType": {
@@ -410,54 +410,54 @@
                             "enum": [ "IsDocumentedBy", "IsSupplementedBy",
                                       "IsCitedBy", "Cites", "IsReviewedBy",
                                       "IsReferencedBy", "References",
-                                      "IsSourceOf", "IsDerivedFrom"   ]
+                                      "IsSourceOf", "IsDerivedFrom"   ],
                             "valueDocumentation": {
                                 "IsDocumentedBy": {
-                                    "description": "The referenced document provides documentation of the resource."
+                                    "description": "The referenced document provides documentation of the resource.",
                                     "notes": [
                                     ]
                                 },
                                 "IsSupplementedBy": {
-                                    "description": "The referenced document is a supplement to the resource."
+                                    "description": "The referenced document is a supplement to the resource.",
                                     "notes": [
                                     ]
                                 },
                                 "IsCitedBy": {
-                                    "description": "The referenced document cites the resource in some way."
+                                    "description": "The referenced document cites the resource in some way.",
                                     "notes": [
                                         "This relationship indicates is lighter than IsReferenceBy: the referenced document may discuss this resource without drawing on and using data or information from this resource."
                                     ]
                                 },
                                 "Cites": {
-                                    "description": "This resource cites the referenced document."
+                                    "description": "This resource cites the referenced document.",
                                     "notes": [
                                         "Like IsCitedBy, this relationship indicates is lighter than References: the referenced document may discuss this resource without drawing on and using data or information from this resource."
                                     ]
                                 },
                                 "IsReviewedBy": {
-                                    "description": "The referenced document reviews this resource."
+                                    "description": "The referenced document reviews this resource.",
                                     "notes": [
                                         "This is a lighter relationship than the resource property, describedBy; the latter refers to a document that is the primary, detailed description and/or analysis of this resource"
                                     ]
                                 },
                                 "IsReferencedBy": {
-                                    "description": "The resource is used as a source of information by the referenced document."
+                                    "description": "The resource is used as a source of information by the referenced document.",
                                     "notes": [
                                     ]
                                 },
                                 "References": {
-                                    "description": "The referenced document is used as a source of information by the resource."
+                                    "description": "The referenced document is used as a source of information by the resource.",
                                     "notes": [
                                     ]
                                 },
                                 "IsSourceOf": {
-                                    "description": "The resource is the source of upon which the referenced document is based."
+                                    "description": "The resource is the source of upon which the referenced document is based.",
                                     "notes": [
                                         "In other words, the referenced document is derived from the resource."
                                     ]
                                 },
                                 "IsDerivedFrom": {
-                                    "description": "The referenced document is the source upon which the resource is based."
+                                    "description": "The referenced document is the source upon which the resource is based.",
                                     "notes": [
                                         "In other words, the resource is derived from the referenced document."
                                     ]
@@ -468,7 +468,7 @@
                     "required": [ "refType" ]
                 }
             ]
-        }
+        },
 
         "ResourceReference": {
             "description":  "a reference to another resource that may have an associated ID",
@@ -553,7 +553,7 @@
                 },
                 "subOrganizationOf": {
                     "description": "A parent organizational entity",
-                    "$ref": "/definitions/Organization",
+                    "$ref": "#/definitions/Organization",
                     "asOntology": {
                         "@context": "profile-schema-onto.json",
                         "referenceProperty": "org:subOrganizationOf"
@@ -600,7 +600,7 @@
                     "description": "the contact mailing address",
                     "notes": [
                     ],
-                    "$ref": "/definitions/PostalAddress",
+                    "$ref": "#/definitions/PostalAddress",
                     "asOntology": {
                         "@context": "profile-schema-onto.json",
                         "prefLabel": "Contact Address",
@@ -705,5 +705,7 @@
                 "referenceClass": "mads:Identifier"
             }
         }
-    }
+    },
+
+    "$ref": "#/definitions/Resource"
 }

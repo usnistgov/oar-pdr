@@ -1,9 +1,11 @@
 {
     "@context": "https://www.nist.gov/od/dm/nerdm-pub-context.jsonld",
+    "$schema": "https://www.nist.gov/od/dm/nerdm-schema/v0.1#",
+    "$extensionSchemas": [ "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#" ],
 
-    "@type": [ "nrdp:DataPublication", "nrdp:PublishedDataResource" ]
+    "@type": [ "nrdp:DataPublication", "nrdp:PublishedDataResource" ],
     "@id": "ark:/88434/sdp0fjspek351",
-    "doi": "10.18434/T42S31",
+    "doi": "doi:10.18434/T42S31",
     "title": "NIST-JANAF Thermochemical Tables - SRD 13",
     "abbrev": "SRD#13",
     "authors": [
@@ -111,13 +113,19 @@
             "@type": "deo:BibliographicReference",
             "refType": "IsDocumentedBy",
             "label": "JPCRD Monograph: NIST-JANAF Thermochemical Tables, Pt. 1 (AL-C",
-            "location": "http://kinetics.nist.gov/janaf/pdf/JANAF-FourthEd-1998-1Vol1-Intro.pdf"
+            "location": "http://kinetics.nist.gov/janaf/pdf/JANAF-FourthEd-1998-1Vol1-Intro.pdf",
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/v0.1#/definitions/DCiteDocumentReference"
+            ]
         },
         {
             "@type": "deo:BibliographicReference",
-            "role": "IsDocuementedBy",
+            "refType": "IsDocumentedBy",
             "label": "JPCRD Monograph: NIST-JANAF Thermochemical Tables, Pt. 2 (Cr-Zr)",
-            "location": "http://kinetics.nist.gov/janaf/pdf/JANAF-FourthEd-1998-1Vol2-Intro.pdf"
+            "location": "http://kinetics.nist.gov/janaf/pdf/JANAF-FourthEd-1998-1Vol2-Intro.pdf",
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/v0.1#/definitions/DCiteDocumentReference"
+            ]
         }
     ],
     "accessLevel": "public",

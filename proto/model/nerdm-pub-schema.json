@@ -132,7 +132,7 @@
                                 {
                                     "type": "array",
                                     "items": {
-                                        "$ref": "/definitions/Distribution"
+                                        "$ref": "#/definitions/Distribution"
                                     },
                                     "minItems": 1,
                                     "uniqueItems": true
@@ -351,7 +351,7 @@
                     "notes": [
                         "This should be the raw identifier without any resolver URL base or scheme"
                     ],
-                    "type": "string"
+                    "type": "string",
                     "minLength": 6,
                     "asOntology": {
                         "@context": "profile-schema-onto.json",
@@ -381,7 +381,7 @@
         "DataPublication": {
             "description": "Data presented by one or more authors as citable publication",
             "allOf": [
-                { "$ref": "/definitions/PublishedDataResource" },
+                { "$ref": "#/definitions/PublishedDataResource" },
                 {
                     "type": "object",
                     "properties": {
@@ -399,7 +399,7 @@
                                 "Authors should generally be assumed to be considered creators of the data; where this is is not true or insufficient, the contributors property can be used ot add or clarify who contributed to data creation."
                             ],
                             "type": "array",
-                            "items": { "$ref": "/definitions/Person" },
+                            "items": { "$ref": "#/definitions/Person" },
                             "asOntology": {
                                 "@conxtext": "profile-schema-onto.json",
                                 "prefLabel": "Authors",
@@ -493,7 +493,7 @@
                     "notes:": [
                         "The value should not include the resolving URI base (http://orcid.org)"
                     ],
-                    "$ref": "/definitions/ORCIDpath",
+                    "$ref": "#/definitions/ORCIDpath",
                     "asOntology": {
                         "@context": "profile-schema-onto.json",
                         "prefLabel": "Last Name",

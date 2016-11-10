@@ -1,0 +1,6 @@
+{
+    "https://www.nist.gov/od/dm/nerdm-schema/v0.1#": "../nerdm-schema.json",
+    "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#": "../nerdm-pub-schema.json",
+    "http://mgi.nist.gov/mgi-json-schema/v0.1": "/home/rlp3/NIST/ODI/registry/mgi-resmd/schemas/json/res-md_schema.json",
+    "http://json-schema.org/draft-04/schema#": "/home/rlp3/NIST/ODI/registry/mgi-resmd/schemas/json/extern/json-schema.json"
+}
