@@ -1,7 +1,7 @@
 {
     "@context": "https://www.nist.gov/od/dm/nerdm-pub-context.jsonld",
     "$schema": "https://www.nist.gov/od/dm/nerdm-schema/v0.1#",
-    "$extensionSchemas": [ "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#" ],
+    "$extensionSchemas": [ "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataPublication" ],
 
     "@type": [ "nrdp:DataPublication", "nrdp:PublishedDataResource" ],
     "@id": "ark:/88434/sdp0fjspek351",
@@ -14,11 +14,11 @@
             "givenName": "M.",
             "middleName": "W.",
             "familyName": "Chase",
-            "affiliation": {
+            "affiliation": [{
                 "@type": [ "org:Organization" ],
                 "title": "National Institute of Standards and Technology (NIST)",
                 "@id": "sdporg:NIST"
-            },
+            }],
             "proxyFor": "sdpperson:Chase-MW"
         },
         {
@@ -26,11 +26,11 @@
             "givenName": "C.",
             "middleName": "A.",
             "familyName": "Davies",
-            "affiliation": {
+            "affiliation": [{
                 "@type": [ "org:Organization" ],
                 "title": "National Institute of Standards and Technology (NIST)",
                 "@id": "sdporg:NIST"
-            },
+            }],
             "proxyFor": "sdpperson:Davies-CA"
         },
         {
@@ -38,11 +38,11 @@
             "givenName": "J.",
             "middleName": "R.",
             "familyName": "Downey",
-            "affiliation": {
+            "affiliation": [{
                 "@type": [ "org:Organization" ],
                 "title": "National Institute of Standards and Technology (NIST)",
                 "@id": "sdporg:NIST"
-            },
+            }],
             "proxyFor": "sdpperson:Downey-JR"
         },
         {
@@ -50,11 +50,11 @@
             "givenName": "D.",
             "middleName": "J.",
             "familyName": "Frurip",
-            "affiliation": {
+            "affiliation": [{
                 "@type": [ "org:Organization" ],
                 "title": "National Institute of Standards and Technology (NIST)",
                 "@id": "sdporg:NIST"
-            },
+            }],
             "proxyFor": "sdpperson:Frurip-DJ"
         },
         {
@@ -62,11 +62,11 @@
             "givenName": "R.",
             "middleName": "A.",
             "familyName": "McDonald",
-            "affiliation": {
+            "affiliation": [{
                 "@type": [ "org:Organization" ],
                 "title": "National Institute of Standards and Technology (NIST)",
                 "@id": "sdporg:NIST"
-            },
+            }],
             "proxyFor": "sdpperson:McDonald-RA"
         },
         {
@@ -74,11 +74,11 @@
             "givenName": "A.",
             "middleName": "N.",
             "familyName": "Syverud",
-            "affiliation": {
+            "affiliation": [{
                 "@type": [ "org:Organization" ],
                 "title": "National Institute of Standards and Technology (NIST)",
                 "@id": "sdporg:NIST"
-            },
+            }],
             "proxyFor": "sdpperson:Syverud-AN"
         }        
     ],

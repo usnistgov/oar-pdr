@@ -1,7 +1,7 @@
 {
     "$schema": "http://json-schema.org/draft-04/schema#",
     "$extensionSchemas": ["http://mgi.nist.gov/mgi-json-schema/v0.1"],
-    "id": "http://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#",
+    "id": "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#",
     "rev": "wd1",
     "title": "The NERDm extension metadata for Published Data",
     "description": "These classes extend the based NERDm schema to different types of published data",
@@ -13,7 +13,7 @@
                 "This must be convertable to compliant and complete POD record; thus, this class adds all remaining POD elements missing from the core"
             ],
             "allOf": [
-                { "$ref": "http://www.nist.gov/od/dm/nerdm-schema/v0.1#/definitions/Resource"},
+                { "$ref": "https://www.nist.gov/od/dm/nerdm-schema/v0.1#/definitions/Resource"},
                 {
                     "type": "object",
                     "properties": {
@@ -502,8 +502,11 @@
                 },
 
                 "affiliation": {
-                    "description": "The institution the person was affiliated with at the time of publication", 
-                    "$ref": "http://www.nist.gov/od/dm/nerdm-schema/v0.1#/definitions/ResourceReference",
+                    "description": "The institution the person was affiliated with at the time of publication",
+                    "type": "array",
+                    "items": {
+                        "$ref": "https://www.nist.gov/od/dm/nerdm-schema/v0.1#/definitions/ResourceReference"
+                    },
                     "asOntology": {
                         "@context": "profile-schema-onto.json",
                         "prefLabel": "Affiliation",
@@ -526,7 +529,14 @@
                 }
             },
             "required": [ "fn" ]
+        },
+
+        "ORCIDpath": {
+            "description": "the format of the path portion of an ORCID identifier (i.e. without the preceding resolver URL base)",
+            "type": "string",
+            "pattern": "^[0-9]{4}-[0-9]{4}-[0-9]{4}-[0-9]{3}[0-9X]$"
         }
+        
     }
 }
 
