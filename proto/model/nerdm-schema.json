@@ -1,7 +1,7 @@
 {
     "$schema": "http://json-schema.org/draft-04/schema#",
     "$extensionSchemas": ["http://mgi.nist.gov/mgi-json-schema/v0.1"],
-    "id": "http://www.nist.gov/od/dm/nerdm-schema/v0.1#",
+    "id": "https://www.nist.gov/od/dm/nerdm-schema/v0.1#",
     "rev": "wd1",
     "title": "The JSON Schema for the NIST Extended Resource Data model (NERDm)",
     "description": "A JSON Schema specfying the core NERDm classes",
@@ -238,27 +238,20 @@
                     "asOntology": {
                         "@context": "profile-schema-onto.json",
                         "prefLabel": "Homepage URL",
-                        "referenceProperty": "foaf:homepage"
+                        "referenceProperty": "dcat:landingPage"
                     }
                 },
                 
                 "references": {
                     "title": "Related Documents",
                     "description": "Related documents such as technical information about a dataset, developer documentation, etc.",
-                    "anyOf": [
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string",
-                                "format": "uri"
-                            },
-                            "minItems": 1,
-                            "uniqueItems": true
-                        },
-                        {
-                            "type": "null"
-                        }
-                    ]
+                    "type": "array",
+                    "items": { "$ref": "/definition/DocumentReference" },
+                    "asOntology": {
+                        "@context": "profile-schema-onto.json",
+                        "prefLabel": "References",
+                        "referenceProperty": "dc:references"
+                    }
                 },
                 
                 "theme": {
@@ -314,6 +307,15 @@
                     }
                 },
 
+                "abbrev": {
+                    "description": "an abbreviated form of the resource's title",
+                    "notes": [
+                        "this can be used as a label for a compact display or text for a link to this resource"
+                    ],
+                    "type": "string",
+                    "maxLength": 24
+                },
+
                 "@type": {
                     "description":  "the linked-data class types for this resource",
                     "notes": [
@@ -326,18 +328,6 @@
                     "items": { "type": "string" } 
                 },
 
-                "resourceType": {
-                    "description": "the subclasses of a NERDm Resource that this resource can be categorized as",
-                    "notes": [
-                        "Class labels have the form 'subclass [: subclass ...]' in which each colon-separated name is the name of a class that is a direct child of the class given just before it.",
-                        "Classes listed here can imply the existence of particular properties",
-                        "The $extendedSchemas property can be used as a sibling to validate this resource node against all relevent subclass types.",
-                        "The @type property can be used as a sibling indicate the primary resource type for compliance with JSON-LD"
-                    ],
-                    "type": "array",
-                    "items": { "type": "string" }
-                }
-
             },
 
             "required": [
@@ -345,6 +335,140 @@
                 "publisher", "contactPoint", "accessLevel"
             ]
         },
+
+        "DocumentReference": {
+            "description": "descriptive reference to a document",
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "enum": [ "deo:BibliographicReference" ]
+                },
+
+                "location": {
+                    "description": "the URL for accessing the document"
+                    "notes": [
+                        "It is assumed that the document can be viewed via a web browser (e.g. HTML, PDF, etc.)"
+                    ],
+                    "type": "string",
+                    "format": "uri"
+                },
+
+                "label": {
+                    "description": "a recommended label or title to display as the text for a link to the document",
+                    "notes": [
+                        "This is intended to be briefer than a citation."
+                    ],
+                    "type": "string",
+                },
+
+                "citation": {
+                    "a full formated citation string for the reference, appropriate for inclusion in a bibliography"
+                    "type": "string"
+                    "asOntology": {
+                        "@conxtext": "profile-schema-onto.json",
+                        "prefLabel": "Cite as",
+                        "referenceProperty": "dc:bibliographicCitation"
+                    }
+                },
+
+                "refid": {
+                    "description": "An persistent ID for the referenced document."
+                    "notes": [
+                        "The ID should be given in a form (e.g. with a scheme prefix) such that its type is obvious.  Use 'doi:' for Cross-ref or Datacite IDs.",
+                        "location may use the URL form of the ID."
+                    ],
+                    "type": "string"
+                },
+
+                "refType": {
+                    "description": "the type of relationship that this document has with the resource",
+                    "notes": [
+                        "This is equivalent to the Datacite relationType in that the term is a predicate that connects the resource as the subject to the referenced document as the object (e.g. resource IsDocumentedBy referenced-doc)",
+                        "The DCiteDocumentReference type sets DataCite terms as controlled vocabulary"
+                    ],
+                    "type": "string"
+                }
+            },
+            "required": [ "@type", "location" ]
+        },
+
+        "DCiteDocumentReference": {
+            "description": "a descriptive reference to a document with a controlled vocabulary for its reference type (refType)",
+            "notes": [
+                "This object is intended to point to human-readable documents",
+                "Use 'isDocumentedBy' to indicate documents that provide the most comprehensive explanation of the contents of the resource.  List these documents in order of importance (as the first one will be exported as the 'describedBy' document when converted to the POD schema).",
+                "Use 'isSourceOf' if the document provides analysis and interpretation of the resource.  In particular, journal articles that are co-published with this resource should be listed with this type.  It is recommended that these documents be listed either in order of publication date or importance.",
+                "Documents may be listed more than once having different types, namely both 'isDocumentedBy' and 'isSourceOf'; however, it is recommended that such multiple classifications should be minimized."
+            ],
+            "allOf": [
+                { "$ref": "/definitions/DocumentReference" },
+                {
+                    "properties": {
+                        "refType": {
+                            "type": "string",
+                            "enum": [ "IsDocumentedBy", "IsSupplementedBy",
+                                      "IsCitedBy", "Cites", "IsReviewedBy",
+                                      "IsReferencedBy", "References",
+                                      "IsSourceOf", "IsDerivedFrom"   ]
+                            "valueDocumentation": {
+                                "IsDocumentedBy": {
+                                    "description": "The referenced document provides documentation of the resource."
+                                    "notes": [
+                                    ]
+                                },
+                                "IsSupplementedBy": {
+                                    "description": "The referenced document is a supplement to the resource."
+                                    "notes": [
+                                    ]
+                                },
+                                "IsCitedBy": {
+                                    "description": "The referenced document cites the resource in some way."
+                                    "notes": [
+                                        "This relationship indicates is lighter than IsReferenceBy: the referenced document may discuss this resource without drawing on and using data or information from this resource."
+                                    ]
+                                },
+                                "Cites": {
+                                    "description": "This resource cites the referenced document."
+                                    "notes": [
+                                        "Like IsCitedBy, this relationship indicates is lighter than References: the referenced document may discuss this resource without drawing on and using data or information from this resource."
+                                    ]
+                                },
+                                "IsReviewedBy": {
+                                    "description": "The referenced document reviews this resource."
+                                    "notes": [
+                                        "This is a lighter relationship than the resource property, describedBy; the latter refers to a document that is the primary, detailed description and/or analysis of this resource"
+                                    ]
+                                },
+                                "IsReferencedBy": {
+                                    "description": "The resource is used as a source of information by the referenced document."
+                                    "notes": [
+                                    ]
+                                },
+                                "References": {
+                                    "description": "The referenced document is used as a source of information by the resource."
+                                    "notes": [
+                                    ]
+                                },
+                                "IsSourceOf": {
+                                    "description": "The resource is the source of upon which the referenced document is based."
+                                    "notes": [
+                                        "In other words, the referenced document is derived from the resource."
+                                    ]
+                                },
+                                "IsDerivedFrom": {
+                                    "description": "The referenced document is the source upon which the resource is based."
+                                    "notes": [
+                                        "In other words, the resource is derived from the referenced document."
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "required": [ "refType" ]
+                }
+            ]
+        }
 
         "ResourceReference": {
             "description":  "a reference to another resource that may have an associated ID",
@@ -483,6 +607,7 @@
                         "referenceProperty": "vcard:hasAddress"
                     }
                 },
+                
                 "phoneNumber": {
                     "description": "the contact telephone number",
                     "notes": [ "Complete international dialing codes should be given, e.g. '+1-410-338-1234'" ],
@@ -493,6 +618,7 @@
                         "referenceProperty": "vcard:hasTelephone"
                     }
                 },
+                
                 "timezone": {
                     "description": "the time zone where the contact typically operates",
                     "type" : "string",
@@ -501,6 +627,20 @@
                         "@context": "profile-schema-onto.json",
                         "prefLabel": "Contact Address",
                         "referenceProperty": "transit:timezone"
+                    }
+                },
+                
+                "proxyFor": {
+                    "description": "a local identifier representing this person",
+                    "notes": [
+                        "This identifier is expected to point to an up-to-date description of the person as known to the local system.  The properties associated with that identifier may be different those given in the current record."
+                    ],
+                    "type": "string",
+                    "format": "uri",
+                    "asOntology": {
+                        "@context": "profile-schema-onto.json",
+                        "prefLabel": "Current Person Information",
+                        "referenceProperty": "ore:proxyFor"
                     }
                 }
                 
@@ -511,6 +651,17 @@
                 "@type": "owl:Class",
                 "prefLabel": "Contact Information",
                 "referenceClass": "vcard:Contact"
+            }
+
+        },
+
+        "PostalAddress": {
+            "description": "a line-delimited listing of a postal address",
+            "type": "array",
+            "item": { "type": "string", "minLength": 1 },
+            "asOntology": {
+                "@context": "profile-schema-onto.json",
+                "referenceProperty": "vcard:hasAddress"
             }
         },
 

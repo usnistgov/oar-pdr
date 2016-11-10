@@ -344,8 +344,22 @@
                         "prefLabel": "Data Dictionary Type",
                         "referenceProperty": "pod:describedByType"
                     }
-                }
+                },
                 
+                "ediid": {
+                    "description": "The identifier assigned by the NIST Enterprise Data Inventory",
+                    "notes": [
+                        "This should be the raw identifier without any resolver URL base or scheme"
+                    ],
+                    "type": "string"
+                    "minLength": 6,
+                    "asOntology": {
+                        "@context": "profile-schema-onto.json",
+                        "prefLabel": "Unique Identifier",
+                        "referenceProperty": "nrdp:EDIidentifier"
+                    }
+                }
+
             },
 
             "dependencies": {
@@ -371,6 +385,14 @@
                 {
                     "type": "object",
                     "properties": {
+                        "subtitle": {
+                            "description": "a secondary or sub-title for the resource",
+                            "type": "string"
+                        },
+                        "aka": {
+                            "description": "other (unofficial) titles that this resource is sometimes known as",
+                            "type": "string"
+                        },
                         "authors": {
                             "description": "the ordered list of authors of this data publication",
                             "notes": [
@@ -406,19 +428,13 @@
             "type": "object",
             "properties": {
                 "@type": {
-                    "description": "the class indicating that this is a Person"
+                    "description": "the class indicating that this is a Person",
                     "type": "string",
                     "enum": [
                         "foaf:Person"
                     ]
                 },
 
-                "@id": {
-                    "description": "a local identifier for the person representing the latest state of that person known to the system"
-                    "type": "string",
-                    "format": "uri"
-                }
-                
                 "fn": {
                     "description": "the author's full name in the preferred format",
                     "type": "string",
@@ -487,17 +503,29 @@
 
                 "affiliation": {
                     "description": "The institution the person was affiliated with at the time of publication", 
-                    "$ref": "http://www.nist.gov/od/dm/nerdm-schema/v0.1#/definitions/ResourceReference" },
+                    "$ref": "http://www.nist.gov/od/dm/nerdm-schema/v0.1#/definitions/ResourceReference",
+                    "asOntology": {
+                        "@context": "profile-schema-onto.json",
+                        "prefLabel": "Affiliation",
+                        "referenceProperty": "schema:affiliation"
+                    } 
+                },
+
+                "proxyFor": {
+                    "description": "a local identifier representing this person",
+                    "notes": [
+                        "This identifier is expected to point to an up-to-date description of the person as known to the local system.  The properties associated with that identifier may be different those given in the current record."
+                    ],
+                    "type": "string",
+                    "format": "uri",
+                    "asOntology": {
+                        "@context": "profile-schema-onto.json",
+                        "prefLabel": "Current Person Information",
+                        "referenceProperty": "ore:proxyFor"
+                    }
                 }
-                
             },
             "required": [ "fn" ]
-        },
-
-        "ORCIDpath": {
-            "description": "the format of the path portion of an ORCID identifier (i.e. without the preceding resolver URL base)",
-            "type": "string",
-            "pattern": "^[0-9]{4}-[0-9]{4}-[0-9]{4}-[0-9]{3}[0-9X]$"
         }
     }
 }
