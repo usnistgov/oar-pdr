@@ -190,6 +190,40 @@
                     }
                 },
 
+                "components": {
+                    "description": "a listing of the various component resources, tools, and distributions of this resource",
+                    "notes": [
+                        "Records for the resources referenced in this list should specify this resource in its isPartOf field.",
+                        "The @type property will indicate which type of component it is.  The first value in the @type list should be considered the primary or most important classification.",
+                        "If an item's @type includes dcat:Distribution, the item should be convertable to a distribution in the POD schema.",
+                        "The order should be considered meaningful (at least for components of the same type).  The meaning or intention behind the order can depend on the type; however, generally, display of the components of a common type should preserve the order.  For clarity then, it is recommended that items of the same primary type should be grouped together in the list."
+                    ],
+                    "type": "array",
+                    "items": { "$ref": "#/definitions/Component" },
+                    "minLength": 1,
+                    "uniqueItems": true
+                },
+
+                "conformsTo": {
+                    "title": "Standard",
+                    "description": "URI used to identify a standardized specification the resource conforms to",
+                    "anyOf": [
+                        {
+                            "type": "string",
+                            "format": "uri"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "asOntology": {
+                        "@context": "profile-schema-onto.json",
+                        "prefLabel": "Data Standard",
+                        "referenceProperty": "dc:conformsTo",
+                        "owl:range": "xsd:anyURI"
+                    }
+                },
+                
                 "isPartOf": {
                     "title": "Collection",
                     "description": "The collection of which the dataset is a subset",
@@ -312,8 +346,11 @@
                     "notes": [
                         "this can be used as a label for a compact display or text for a link to this resource"
                     ],
-                    "type": "string",
-                    "maxLength": 24
+                    "type": "array",
+                    "items": {
+                        "type": "string",
+                        "maxLength": 24
+                    }
                 },
 
                 "@type": {
@@ -473,7 +510,7 @@
         "ResourceReference": {
             "description":  "a reference to another resource that may have an associated ID",
             "notes": [
-                "While providing a @type property is recommended, it is required if the @id is given."
+                "While providing a resType property is recommended, it is required if the proxyFor ID is given."
             ],
             "type": "object",
             "properties": {
@@ -486,12 +523,20 @@
                     "type": "string",
                     "minLength": 1
                 },
-                "@id": {
-                    "description": "the local identifier for the referenced resource that resolves (preferentially) to a local description",
+                "proxyFor": {
+                    "description": "a local identifier representing this resource",
+                    "notes": [
+                        "This identifier is expected to point to an up-to-date description of the resource as known to the local system.  The properties associated with that identifier may be different those given in the current record."
+                    ],
                     "type": "string",
-                    "format": "uri"
+                    "format": "uri",
+                    "asOntology": {
+                        "@context": "profile-schema-onto.json",
+                        "prefLabel": "Current Person Information",
+                        "referenceProperty": "ore:proxyFor"
+                    }
                 },
-                "@type": {
+                "resourceType": {
                     "description":  "the linked-data class types for the referenced resource",
                     "notes": [
                         "The value must always be given as an array, even when only one type is provided.",
@@ -506,10 +551,67 @@
             },
             "required": [ "title" ],
             "dependencies": {
-                "@id": {
-                    "required": [ "@type" ]
+                "proxyFor": {
+                    "required": [ "resType" ]
                 }
             }
+        },
+
+        "Component": {
+            "description": "a description of a component of a resource",
+            "type": "object",
+            "notes": [
+                "Include a $extensionSchema property to validate this description against a Component sub-type"
+            ],
+            "properties": {
+                "@type": {
+                    "description": "the types of components that this component can be classified as",
+                    "notes": [
+                        "the first value should be considered its primary type.  This is usually a subtype of Component."
+                    ],
+                    "type": "array",
+                    "items": { "type": "string" }
+                },
+                "title": {
+                    "description": "a descriptive title for the component",
+                    "type": "string"
+                },
+                "description": {
+                    "description": "a description of the nature and contents of the component, including the role it plays as part of the resource",
+                    "type": "string"
+                },
+                "conformsTo": {
+                    "title": "Standard",
+                    "description": "URI used to identify a standardized specification the component conforms to",
+                    "anyOf": [
+                        {
+                            "type": "string",
+                            "format": "uri"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "asOntology": {
+                        "@context": "profile-schema-onto.json",
+                        "prefLabel": "Data Standard",
+                        "referenceProperty": "dc:conformsTo"
+                    }
+                }
+                
+            }
+        },
+
+        "IncludedResource": {
+            "description": "A reference to another resource (which has its own record) that is a part of this resource",
+            "notes": [
+                "Include 'nrd:IncludedResource' as a value to @type",
+                "The title should be (but is not required to be) the title provided in the included resource's metadata record."
+            ],
+            "allOf": [
+                { "$ref": "#/definitions/Component" },
+                { "$ref": "#/definitions/ResourceReference" }
+            ]
         },
 
         "ISO8601DateRange": {

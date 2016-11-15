@@ -125,26 +125,6 @@
                             }
                         },
 
-                        "distribution": {
-                            "title": "Distribution",
-                            "description": "Distribution objects describing different ways to access this resource",
-                            "anyOf": [
-                                {
-                                    "type": "array",
-                                    "items": {
-                                        "$ref": "#/definitions/Distribution"
-                                    },
-                                    "minItems": 1,
-                                    "uniqueItems": true
-                                }
-                            ],
-                            "asOntology": {
-                                "@context": "profile-schema-onto.json",
-                                "prefLabel": "Distribution",
-                                "referenceProperty": "dcat:distribution"
-                            }
-                        },
-
                         "systemOfRecords": {
                             "title": "System of Records",
                             "description": "The URL to the System of Records Notice related to this dataset if is so designated under the Privacy Act of 1974",
@@ -165,217 +145,116 @@
             ]
         },
 
-        "Distribution": {
-            "description": "a description of a downloadable version or portion of a dataset",
-            "type": "object",
-            "properties": {
-                "@type": {  
-                    "description": "IRI for the Distribution JSON-LD data type",
-                    "notes": [
-                        "This must be dcat:Distribution for each Distribution."
-                    ],
-                    "enum": [
-                        "dcat:Distribution"
-                    ]
-                },
-                
-                "downloadURL": {
-                    "title": "Download URL",
-                    "description": "URL providing direct access to a downloadable file of a dataset",
-                    "type": "string",
-                    "format": "uri",
-                    "asOntology": {
-                        "@context": "profile-schema-onto.json",
-                        "prefLabel": "Download URL",
-                        "referenceProperty": "dcat:downloadURL"
-                    }
-                },
-                
-                "mediaType": {
-                    "title": "Media Type",
-                    "description": "The machine-readable file format (IANA Media Type or MIME Type) of the distribution’s downloadURL",
-                    "anyOf": [
-                        {
-                            "pattern": "^[-\\w]+/[-\\w]+(\\.[-\\w]+)*([+][-\\w]+)?$",
-                            "type": "string"
-                        },
-                        {
-                            "type": "null"
-                        }
-                    ],
-                    "asOntology": {
-                        "@context": "profile-schema-onto.json",
-                        "prefLabel": "Media Type",
-                        "referenceProperty": "dcat:mediaType"
-                    }
-                },
-
-                "format": {
-                    "title": "Format",
-                    "description": "A human-readable description of the file format of a distribution",
-                    "anyOf": [
-                        {
-                            "type": "string",
-                            "minLength": 1
-                        },
-                        {
-                            "type": "null"
-                        }
-                    ],
-                    "asOntology": {
-                        "@context": "profile-schema-onto.json",
-                        "prefLabel": "Format",
-                        "referenceProperty": "dc:format"
-                    }
-                },
-                
-                "accessURL": {
-                    "title": "Access URL",
-                    "description": "URL providing indirect access to a dataset",
-                    "notes": [
-                        "This field is intended specifically for web-based access via mechanisms other than direct file-based downloads."
-                    ],
-                    "anyOf": [
-                        {
-                            "type": "string",
-                            "format": "uri"
-                        },
-                        {
-                            "type": "null"
-                        }
-                    ],
-                    "asOntology": {
-                        "@context": "profile-schema-onto.json",
-                        "prefLabel": "Access URL",
-                        "referenceProperty": "dcat:accessURL"
-                    }
-                },
-                
-                "description": {
-                    "title": "Description",
-                    "description": "Human-readable description of the distribution",
-                    "anyOf": [
-                        {
-                            "type": "string",
-                            "minLength": 1
-                        },
-                        {
-                            "type": "null"
-                        }
-                    ],
-                    "asOntology": {
-                        "@context": "profile-schema-onto.json",
-                        "prefLabel": "Description",
-                        "referenceProperty": "dc:description"
-                    }
-                },
-                
-                "title": {
-                    "title": "Title",
-                    "description": "Human-readable name of the distribution",
-                    "anyOf": [
-                        {
-                            "type": "string",
-                            "minLength": 1
-                        },
-                        {
-                            "type": "null"
-                        }
-                    ],
-                    "asOntology": {
-                        "@context": "profile-schema-onto.json",
-                        "prefLabel": "Title",
-                        "referenceProperty": "dc:title"
-                    }
-                },
-                
-                "conformsTo": {
-                    "title": "Data Standard",
-                    "description": "URI used to identify a standardized specification the distribution conforms to",
-                    "anyOf": [
-                        {
-                            "type": "string",
-                            "format": "uri"
-                        },
-                        {
-                            "type": "null"
-                        }
-                    ],
-                    "asOntology": {
-                        "@context": "profile-schema-onto.json",
-                        "prefLabel": "Data Standard",
-                        "referenceProperty": "dc:conformsTo"
-                    }
-                },
-                
-                "describedBy": {
-                    "title": "Data Dictionary",
-                    "description": "URL to the data dictionary for the distribution found at the downloadURL",
-                    "anyOf": [
-                        {
-                            "type": "string",
-                            "format": "uri"
-                        },
-                        {
-                            "type": "null"
-                        }
-                    ],
-                    "asOntology": {
-                        "@context": "profile-schema-onto.json",
-                        "prefLabel": "Data Dictionary",
-                        "referenceProperty": "http://www.w3.org/2007/05/powder-s#describedby"
-                    }
-                },
-                
-                "describedByType": {
-                    "title": "Data Dictionary Type",
-                    "description": "The machine-readable file format (IANA Media Type or MIME Type) of the distribution’s describedBy URL",
-                    "anyOf": [
-                        {
-                            "pattern": "^[-\\w]+/[-\\w]+(\\.[-\\w]+)*([+][-\\w]+)?$",
-                            "type": "string"
-                        },
-                        {
-                            "type": "null"
-                        }
-                    ],
-                    "asOntology": {
-                        "@context": "profile-schema-onto.json",
-                        "prefLabel": "Data Dictionary Type",
-                        "referenceProperty": "pod:describedByType"
-                    }
-                },
-                
-                "ediid": {
-                    "description": "The identifier assigned by the NIST Enterprise Data Inventory",
-                    "notes": [
-                        "This should be the raw identifier without any resolver URL base or scheme"
-                    ],
-                    "type": "string",
-                    "minLength": 6,
-                    "asOntology": {
-                        "@context": "profile-schema-onto.json",
-                        "prefLabel": "Unique Identifier",
-                        "referenceProperty": "nrdp:EDIidentifier"
-                    }
-                }
-
-            },
-
-            "dependencies": {
-                "downloadURL": {
-                    "description": "if downloadURL is specified, a non-null mediaType must also be specified",
+        "DataFile": {
+            "description": "a description of a downloadable, finite stream of data",
+            "allOf": [
+                { "$ref": "https://www.nist.gov/od/dm/nerdm-schema/v0.1#/definitions/Component" },
+                {
                     "properties": {
-                        "mediaType": {
+                        
+                        "downloadURL": {
+                            "title": "Download URL",
+                            "description": "URL providing direct access to a downloadable file of a dataset",
                             "type": "string",
-                            "pattern": "^[-\\w]+/[-\\w]+(\\.[-\\w]+)*([+][-\\w]+)?$"
+                            "format": "uri",
+                            "asOntology": {
+                                "@context": "profile-schema-onto.json",
+                                "prefLabel": "Download URL",
+                                "referenceProperty": "dcat:downloadURL"
+                            }
+                        },
+                        
+                        "mediaType": {
+                            "title": "Media Type",
+                            "description": "The machine-readable file format (IANA Media Type or MIME Type) of the file’s downloadURL",
+                            "anyOf": [
+                                {
+                                    "pattern": "^[-\\w]+/[-\\w]+(\\.[-\\w]+)*([+][-\\w]+)?$",
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "asOntology": {
+                                "@context": "profile-schema-onto.json",
+                                "prefLabel": "Media Type",
+                                "referenceProperty": "dcat:mediaType"
+                            }
+                        },
+
+                        "format": {
+                            "title": "Format",
+                            "description": "A human-readable description of the file format of a distribution",
+                            "anyOf": [
+                                {
+                                    "type": "string",
+                                    "minLength": 1
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "asOntology": {
+                                "@context": "profile-schema-onto.json",
+                                "prefLabel": "Format",
+                                "referenceProperty": "dc:format"
+                            }
+                        },
+                
+                        "describedBy": {
+                            "title": "Data Dictionary",
+                            "description": "URL to the data dictionary for the distribution found at the downloadURL",
+                            "anyOf": [
+                                {
+                                    "type": "string",
+                                    "format": "uri"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "asOntology": {
+                                "@context": "profile-schema-onto.json",
+                                "prefLabel": "Data Dictionary",
+                                "referenceProperty": "http://www.w3.org/2007/05/powder-s#describedby"
+                            }
+                        },
+                        
+                        "describedByType": {
+                            "title": "Data Dictionary Type",
+                            "description": "The machine-readable file format (IANA Media Type or MIME Type) of the file’s describedBy URL",
+                            "anyOf": [
+                                {
+                                    "pattern": "^[-\\w]+/[-\\w]+(\\.[-\\w]+)*([+][-\\w]+)?$",
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "asOntology": {
+                                "@context": "profile-schema-onto.json",
+                                "prefLabel": "Data Dictionary Type",
+                                "referenceProperty": "pod:describedByType"
+                            }
                         }
+                        
                     },
-                    "required": [
-                        "mediaType"
-                    ]
+
+                    "dependencies": {
+                        "downloadURL": {
+                            "properties": {
+                                "mediaType": {
+                                    "type": "string",
+                                    "pattern": "^[-\\w]+/[-\\w]+(\\.[-\\w]+)*([+][-\\w]+)?$"
+                                }
+                            },
+                            "required": [ "mediaType" ]
+                        }
+                    }
                 }
-            }
+            ]
         },
 
         "DataPublication": {
@@ -387,11 +266,13 @@
                     "properties": {
                         "subtitle": {
                             "description": "a secondary or sub-title for the resource",
-                            "type": "string"
+                            "type": "array",
+                            "items": { "type": "string" }
                         },
                         "aka": {
                             "description": "other (unofficial) titles that this resource is sometimes known as",
-                            "type": "string"
+                            "type": "array",
+                            "items": { "type": "string" }
                         },
                         "authors": {
                             "description": "the ordered list of authors of this data publication",
