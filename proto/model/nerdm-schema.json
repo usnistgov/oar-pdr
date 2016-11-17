@@ -369,7 +369,7 @@
 
             "required": [
                 "title", "description", "landingPage", "publisher", 
-                "contactPoint", "accessLevel"
+                "contactPoint", "accessLevel", "@id", "@type"
             ]
         },
 
