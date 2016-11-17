@@ -1,0 +1,69 @@
+{
+    "@context": "https://www.nist.gov/od/dm/nerdm-pub-context.jsonld",
+    "$schema": "https://www.nist.gov/od/dm/nerdm-schema/v0.1#",
+    "$extensionSchemas": [ "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataPublication" ],
+
+    "@type": [ "nrdp:Database", "nrdp:SRD", "nrdp:PublishedDataResource" ],
+    "@id": "ark:/88434/sdp0fjspek353",
+    "title": "NIST High Temperature Superconducting Materials Database - SRD 62",
+    "abbrev": [ "SRD#62" ],
+    "isPartOf": {
+        "title": "NIST Ceramics WebBook - SRD 151",
+        "proxyFor": "ark:/88434/sdp0fjspek352",
+        "resType": [ "nrdp:Portal", "nrdp:SRD" ]
+    }
+    "contactPoint": {
+        "hasEmail": "mailto:angela.lee@nist.gov",
+        "@type": "vcard:Contact",
+        "fn": "Angela Lee",
+        "address": [
+            "Standard Reference Data Program",
+            "National Institute of Standards and Technology",
+            "Gaithersburg, MD 20899-2300"
+        ],
+        "phoneNumber": "+1-301-975-2200"
+    },
+    "modified": "2015-06-22",
+    
+    "ediid": "ECBCC1C130112ED9E04306570681B10723",
+    "landingPage": "http://srdata.nist.gov/CeramicDataPortal/hit",
+    
+    "description": [
+        "The NIST WWW High Temperature Superconductors database (WebHTS) provides evaluated thermal, mechanical, and superconducting property data for oxide superconductors. The range of materials covers the major series of compounds derived from the Y-Ba-Cu-O, Bi-Sr-Ca-Cu-O, Tl-Sr-Ca-Cu-O, and La-Cu-O chemical families, along with numerous other variants of the cuprate and bismuthate materials that are known to have superconducting phases. The materials are described by specification and characterization information that includes processing details and chemical compositions. Physical characteristics such as density and crystal structure are given in numeric tables. All measured values are evaluated and supported by descriptions of the measurement methods, procedures, and conditions. In all cases, the sources of the data are fully documented in a comprehensive bibliography."
+    ],
+    "keyword": [
+        "high-temperature",
+        "high-temperature superconducting materials",
+        "high-temperature superconducting materials database"
+    ],
+    "references": [
+        {
+            "refType": "IsDocumentedBy",
+            "label": "User Manual",
+            "location": "https://srdata.nist.gov/CeramicDataPortal/Manual/HtsHelper"
+        }
+    ]
+    "accessLevel": "public",
+    "license": "http://www.nist.gov/data/license.cfm",
+    "dataQuality": true,
+
+    "components": [
+        {
+            "@type": [ "nrdp:SearchPage", "nrdp:Tool" ],
+            "accessURL": "http://srdata.nist.gov/CeramicDataPortal/hit"
+            "description": "This web page allows users to search the database by author's last name, publication source, chemical family, informal name, publication volume, publication year, structure type, and properties."
+        }
+    ]
+
+    "publisher": {
+        "@type": "org:Organization",
+        "name": "National Institute of Standards and Technology"
+    },
+    "language": [ "en" ],
+    "bureauCode": [
+        "006:55"
+    ],
+    "programCode": [
+        "006:052"
+    ]
+}

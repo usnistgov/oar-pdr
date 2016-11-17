@@ -5,6 +5,7 @@
 
     "@type": [ "nrdp:Portal", "nrdp:SRD", "nrdp:PublishedDataResource" ],
     "@id": "ark:/88434/sdp0fjspek352",
+    "doi": "doi:10.18434/T4XS3S",
     "title": "NIST Ceramics WebBook - SRD 151",
     "abbrev": [ "SRD#151" ],
     "aka": [ "NIST Ceramics Portal" ],
