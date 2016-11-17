@@ -11,7 +11,7 @@
         "title": "NIST Ceramics WebBook - SRD 151",
         "proxyFor": "ark:/88434/sdp0fjspek352",
         "resType": [ "nrdp:Portal", "nrdp:SRD" ]
-    }
+    },
     "contactPoint": {
         "hasEmail": "mailto:angela.lee@nist.gov",
         "@type": "vcard:Contact",
@@ -38,11 +38,14 @@
     ],
     "references": [
         {
+            "@type": "deo:BibliographicReference",
             "refType": "IsDocumentedBy",
             "label": "User Manual",
             "location": "https://srdata.nist.gov/CeramicDataPortal/Manual/HtsHelper"
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/v0.1#/definitions/DCiteDocumentReference"
         }
-    ]
+    ],
     "accessLevel": "public",
     "license": "http://www.nist.gov/data/license.cfm",
     "dataQuality": true,
@@ -50,10 +53,10 @@
     "components": [
         {
             "@type": [ "nrdp:SearchPage", "nrdp:Tool" ],
-            "accessURL": "http://srdata.nist.gov/CeramicDataPortal/hit"
+            "accessURL": "http://srdata.nist.gov/CeramicDataPortal/hit",
             "description": "This web page allows users to search the database by author's last name, publication source, chemical family, informal name, publication volume, publication year, structure type, and properties."
         }
-    ]
+    ],
 
     "publisher": {
         "@type": "org:Organization",
