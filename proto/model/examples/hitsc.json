@@ -41,9 +41,10 @@
             "@type": "deo:BibliographicReference",
             "refType": "IsDocumentedBy",
             "label": "User Manual",
-            "location": "https://srdata.nist.gov/CeramicDataPortal/Manual/HtsHelper"
+            "location": "https://srdata.nist.gov/CeramicDataPortal/Manual/HtsHelper",
             "$extensionSchemas": [
                 "https://www.nist.gov/od/dm/nerdm-schema/v0.1#/definitions/DCiteDocumentReference"
+            ]
         }
     ],
     "accessLevel": "public",
