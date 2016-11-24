@@ -1,0 +1,3333 @@
+{
+    "@context": "https://www.nist.gov/od/dm/nerdm-pub-context.jsonld",
+    "$schema": "https://www.nist.gov/od/dm/nerdm-schema/v0.1#",
+    "$extensionSchemas": [ "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataPublication" ],
+
+    "@type": [ "nrd:SRD", "nrdp:DataPublication", "nrdp:PublishedDataResource" ],
+    "@id": "ark:/88434/sdp0fjspek351",
+    "doi": "doi:10.18434/T42S31",
+    "title": "NIST-JANAF Thermochemical Tables - SRD 13",
+    "abbrev": [ "SRD#13" ],
+    "authors": [
+        {
+            "fn": "M.W. Chase, Jr.",
+            "givenName": "M.",
+            "middleName": "W.",
+            "familyName": "Chase",
+            "affiliation": [{
+                "@type": [ "org:Organization" ],
+                "title": "National Institute of Standards and Technology (NIST)",
+                "@id": "sdporg:NIST"
+            }],
+            "proxyFor": "sdpperson:Chase-MW"
+        },
+        {
+            "fn": "C.A. Davies",
+            "givenName": "C.",
+            "middleName": "A.",
+            "familyName": "Davies",
+            "affiliation": [{
+                "@type": [ "org:Organization" ],
+                "title": "National Institute of Standards and Technology (NIST)",
+                "@id": "sdporg:NIST"
+            }],
+            "proxyFor": "sdpperson:Davies-CA"
+        },
+        {
+            "fn": "J.R. Downey, Jr.",
+            "givenName": "J.",
+            "middleName": "R.",
+            "familyName": "Downey",
+            "affiliation": [{
+                "@type": [ "org:Organization" ],
+                "title": "National Institute of Standards and Technology (NIST)",
+                "@id": "sdporg:NIST"
+            }],
+            "proxyFor": "sdpperson:Downey-JR"
+        },
+        {
+            "fn": "D.J. Frurip",
+            "givenName": "D.",
+            "middleName": "J.",
+            "familyName": "Frurip",
+            "affiliation": [{
+                "@type": [ "org:Organization" ],
+                "title": "National Institute of Standards and Technology (NIST)",
+                "@id": "sdporg:NIST"
+            }],
+            "proxyFor": "sdpperson:Frurip-DJ"
+        },
+        {
+            "fn": "R.A. McDonald",
+            "givenName": "R.",
+            "familyName": "McDonald",
+            "affiliation": [{
+                "@type": [ "org:Organization" ],
+                "title": "National Institute of Standards and Technology (NIST)",
+                "@id": "sdporg:NIST"
+            }],
+            "proxyFor": "sdpperson:McDonald-RA"
+        },
+        {
+            "fn": "A.N. Syverud",
+            "givenName": "A.",
+            "middleName": "N.",
+            "familyName": "Syverud",
+            "affiliation": [{
+                "@type": [ "org:Organization" ],
+                "title": "National Institute of Standards and Technology (NIST)",
+                "@id": "sdporg:NIST"
+            }],
+            "proxyFor": "sdpperson:Syverud-AN"
+        }        
+    ],
+    "contactPoint": {
+        "hasEmail": "mailto:thomas.allison@nist.gov",
+        "fn": "Thomas Allison",
+        "address": [
+            "Standard Reference Data Program",
+            "National Institute of Standards and Technology",
+            "Gaithersburg, MD 20899"
+        ]
+    },
+    "issued": "1964",
+    "modified": "2013-01-01",
+
+    
+    "ediid": "ECBCC1C1301D2ED9E04306570681B10735",
+    "landingPage": "http://kinetics.nist.gov/janaf/",
+
+    "description": [
+        "This Fourth Edition to NIST-JANAF (Joint Army-Navy-Air Force) Thermochemical Tables contains tables of recommended temperature-dependent values for the standard enthalpy of formation Gibbs (free) energy of formation, the logarithm of equilibrium constant of formation, the heat capacity, entropy, enthalpy, and Gibbs energy function for 48 elements and many of their compounds.  This publication is a current collection of all tables issued through 1997 under contracts with the U.S. Departement of Energy and the U.S. Air Force Office of Scientific Research, NASA, the JANNAF Combustion Subcommittee, and the SRD Program."
+    ],
+    "keyword": [
+        "thermochemical tables",
+        "enthalpy",
+        "entropy",
+        "Gibbs free energy",
+        "equilibrium constant of formation"
+    ],
+    "references": [
+        {
+            "@type": "deo:BibliographicReference",
+            "refType": "IsDocumentedBy",
+            "label": "JPCRD Monograph: NIST-JANAF Thermochemical Tables, Pt. 1 (AL-C",
+            "location": "http://kinetics.nist.gov/janaf/pdf/JANAF-FourthEd-1998-1Vol1-Intro.pdf",
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/v0.1#/definitions/DCiteDocumentReference"
+            ]
+        },
+        {
+            "@type": "deo:BibliographicReference",
+            "refType": "IsDocumentedBy",
+            "label": "JPCRD Monograph: NIST-JANAF Thermochemical Tables, Pt. 2 (Cr-Zr)",
+            "location": "http://kinetics.nist.gov/janaf/pdf/JANAF-FourthEd-1998-1Vol2-Intro.pdf",
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/v0.1#/definitions/DCiteDocumentReference"
+            ]
+        }
+    ],
+    "accessLevel": "public",
+    "license": "http://www.nist.gov/data/license.cfm",
+    "components": [
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_B-101.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Titanium Boride"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_B-102.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Titanium Boride"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_B-103.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Zirconium Boride"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_B-104.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Zirconium Boride"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_B-105.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Zirconium Boride"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_B-106.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Trichloroboroxin"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_B-107.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Fluoroboroxin"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_B-108.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Difluoroboroxin"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_B-109.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Trifluoroboroxin"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_B-110.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Trifluoroboroxin"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_B-111.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Boroxin"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_B-112.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Boroxin"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_B-113.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Boric Acid"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_B-114.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Borazine"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_B-115.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Potassium Borate"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_B-116.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Potassium Borate"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_B-117.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Potassium Borate"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_B-118.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Lithium Borate"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_B-119.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Lithium Borate"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_B-120.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Lithium Borate"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_B-121.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Magnesium Boride"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_B-122.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Sodium Borate"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_B-123.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Sodium Borate"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_B-124.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Sodium Borate"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_B-125.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Lead Borate"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_B-126.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Pentaborane"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_B-127.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Pentaborane"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_B-128.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Potassium Borate"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_B-129.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Lithium Borate"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_B-130.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Sodium Borate"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_B-131.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Lead Borate"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_B-132.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Potassium Borate"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_B-133.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Potassium Borate"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_B-134.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Potassium Borate"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_B-135.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Lithium Borate"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_B-136.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Decaborane"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_B-137.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Decaborane"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_B-138.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Decaborane"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_B-139.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Decaborane"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_janaf-zipfile.zip",
+            "mediaType": "application/zip",
+            "description": "A zipped file of all 1,799 JANAF species, index, and definition files.",
+            "title": "Compressed folder of all JANAF files"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_janaf.species.json",
+            "mediaType": "application/json",
+            "description": "An index file containing metadata for each of the species, including chemical name, data file name, CAS Number (Chemical Abstracts Registry Number), molecular formula (in Hill-sorted order), and state (or phase).",
+            "title": "JANAF Species Index"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Al-001.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Aluminum"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Al-002.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Aluminum"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Al-003.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Aluminum"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Al-004.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Aluminum"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Al-005.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Aluminum"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Al-006.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Aluminum, Ion"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Al-007.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Aluminum, Ion"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Al-008.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Aluminum Borate"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Al-009.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Aluminum Bromide"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Al-010.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Aluminum Bromide"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Al-011.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Aluminum Bromide"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Al-012.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Aluminum Bromide"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Al-013.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Aluminum Bromide"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Al-014.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Aluminum Chloride"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Al-015.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Aluminum Chloride, Ion"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Al-016.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Aluminum Chloride Fluoride"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Al-017.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Aluminum Chloride Fluoride, Ion"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Al-018.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Aluminum Chloride Fluoride"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Al-019.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Aluminum Chloride Oxide"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Al-020.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Aluminum Chloride Oxide"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Al-021.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Aluminum Chloride"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Al-022.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Aluminum Chloride, Ion"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Al-023.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Aluminum Chloride, Ion"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Al-024.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Aluminum Chloride Fluoride"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Al-025.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Aluminum Chloride"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Al-026.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Aluminum Chloride"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Al-027.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Aluminum Chloride"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Al-028.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Aluminum Chloride"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Al-029.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Potassium Tetrachloroaluminate"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Al-030.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Sodium Tetrachloroaluminate"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Al-031.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Potassium Hexachloroaluminate"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Al-032.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Sodium Hexachloroaluminate"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Al-033.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Aluminum Fluoride"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Al-034.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Aluminum Fluoride, Ion"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Al-035.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Aluminum Fluoride Oxide"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Al-036.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Aluminum Fluoride"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Al-037.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Aluminum Fluoride, Ion"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Al-038.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Aluminum Fluoride, Ion"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Al-039.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Aluminum Fluoride Oxide"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Al-040.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Aluminum Fluoride Oxide, Ion"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Al-041.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Aluminum Fluoride"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Al-042.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Aluminum Fluoride"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Al-043.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Aluminum Fluoride"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Al-044.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Aluminum Fluoride"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Al-045.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Tetrafluoroaluminate, Ion"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Al-046.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Lithium Tetrafluoroaluminate"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Al-047.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Sodium Tetrafluoroaluminate"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Al-048.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Potassium Hexafluoraluminate"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Al-049.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Lithium Hexafluoroaluminate"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Al-050.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Lithium Hexafluoroaluminate"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Al-051.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Lithium Hexafluoroaluminate"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Al-052.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Cryolite, Alpha"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Al-053.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Cryolite, Beta"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Al-054.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Cryolite"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Al-055.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Cryolite"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Al-056.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Aluminum Hydride"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Al-057.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Aluminum Hydride Oxide"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Al-058.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Aluminum Hydroxide"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Al-059.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Aluminum Hydroxide, Ion"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Al-060.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Aluminum Hydroxide, Ion"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Al-061.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Aluminum Hydroxide Oxide"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Al-062.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Lithium Tetrahydroaluminate"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Al-063.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Aluminum Iodide"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Al-064.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Aluminum Iodide"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Al-065.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Aluminum Iodide"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Al-066.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Aluminum Iodide"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Al-067.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Aluminum Iodide"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Al-068.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Lithium Aluminum Oxide"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Al-069.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Lithium Aluminum Oxide"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Al-070.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Lithium Aluminum Oxide"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Al-071.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Aluminum Nitride"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Al-072.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Aluminum Nitride"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Al-073.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Sodium Aluminum Oxide"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Al-074.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Aluminum Oxide"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Al-075.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Aluminum Oxide, Ion"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Al-076.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Aluminum Oxide, Ion"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Al-077.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Aluminum Oxide"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Al-078.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Aluminum Oxide, Ion"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Al-079.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Aluminum Sulfide"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Al-080.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Aluminum"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Al-081.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Beryllium Aluminum Oxide"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Al-082.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Beryllium Aluminum Oxide"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Al-083.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Beryllium Aluminum Oxide"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Al-084.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Aluminum Bromide"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Al-085.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Aluminum Chloride"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Rn-002.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Radon, Ion"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Al-086.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Potassium Aluminum Chloride"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Al-087.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Aluminum Fluoride"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Al-088.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Aluminum Iodide"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Al-089.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Magnesium Aluminum Oxide"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Al-090.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Magnesium Aluminum Oxide"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Al-091.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Magnesium Aluminum Oxide"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Al-092.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Aluminum Oxide"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Al-093.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Aluminum Oxide, Ion"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Al-094.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Aluminum Oxide"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Al-095.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Aluminum Oxide, Ion"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Al-096.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Aluminum Oxide, Alpha"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Al-097.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Aluminum Oxide, Delta"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Al-098.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Aluminum Oxide, Gamma"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Al-099.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Aluminum Oxide, Kappa"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Al-100.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Aluminum Oxide"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Al-101.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Aluminum Oxide"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Al-102.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Aluminum Silicate, Andalusite"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Al-103.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Aluminum Silicate, Kyanite"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Al-104.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Aluminum Silicate, Sillimanite"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Al-105.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Aluminum Sulfide"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Al-106.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Chiolite"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Al-107.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Chiolite"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Al-108.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Chiolite"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Al-109.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Beryllium Aluminum Oxide"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Al-110.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Beryllium Aluminum Oxide"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Al-111.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Beryllium Aluminum Oxide"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Al-112.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Aluminum Silicate, Mullite"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Ar-001.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Argon"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Ar-002.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Argon, Ion"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_B-001.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Boron"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_B-002.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Boron, Beta-Rhombohedral"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_B-003.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Boron"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_B-004.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Boron"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_B-005.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Boron"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_B-006.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Boron, Ion"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_B-007.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Boron, Ion"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_B-008.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Beryllium Borate"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_B-009.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Bromoborane"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_B-010.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Bromochloroborane"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_B-011.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Bromodichloroborane"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_B-012.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Bromofluoroborane"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_B-013.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Bromodifluoroborane"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_B-014.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Boron Bromide Oxide"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_B-015.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Dibromoborane"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_B-016.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Dibromochloroborane"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_B-017.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Dibromofluoroborane"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_B-018.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Dibromoborane"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_B-019.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Tribromoborane"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_B-020.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Tribromoborane"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_B-021.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Chloroborane"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_B-022.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Chloroborane, Ion"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_B-023.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Chlorofluoroborane"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_B-024.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Chlorodifluoroborane"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_B-025.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Boron Chloride Oxide"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_B-026.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Dichloroborane"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_B-027.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Dichloroborane, Ion"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_B-028.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Dichloroborane, Ion"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_B-029.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Dichlorofluoroborane"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_B-030.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Dichloroborane"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_B-031.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Trichloroborane"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_B-032.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Fluoroborane"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_B-033.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Boron Fluoride Oxide"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_B-034.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Difluoroborane"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_B-035.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Difluoroborane, Ion"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_B-036.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Difluoroborane, Ion"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_B-037.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Difluoroborane"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_B-038.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Difluorohydroxyborane"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_B-039.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Boron Fluoride Oxide"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_B-040.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Trifluoroborane"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_B-041.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Potassium Tetrafluoroborate"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_B-042.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Potassium Tetrafluoroborate"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_B-043.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Potassium Tetrafluoroborate"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_B-044.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Potassium Tetrafluoroborate"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_B-045.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Borane"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_B-046.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Boron Hydride Oxide"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_B-047.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Boron Hydride Oxide, Ion"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_B-048.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Boron Hydride Oxide, Ion"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_B-049.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Boric Acid"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_B-050.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Boric Acid"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_B-051.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Boron Hydride Sulfide"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_B-052.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Boron Hydride Sulfide, Ion"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_B-053.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Borane"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_B-054.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Dihydroxyborane"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_B-055.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Borane"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_B-056.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Boric Acid"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_B-057.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Boric Acid"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_B-058.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Potassium Tetrahydroborate"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_B-059.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Lithium Tetrahydroborate"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_B-060.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Sodium Tetrahydroborate"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_B-061.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Iodoborane"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_B-062.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Diiodoborane"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_B-063.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Triiodoborane"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_B-064.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Potassium Borate"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_B-065.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Potassium Borate"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_B-066.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Potassium Borate"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_B-067.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Potassium Borate"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_B-068.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Lithium Borate"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_B-069.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Lithium Borate"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_B-070.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Lithium Borate"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_B-071.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Lithium Borate"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_B-072.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Boron Nitride"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_B-073.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Boron Nitride"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_B-074.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Sodium Borate"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_B-075.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Sodium Borate"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_B-076.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Sodium Borate"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_B-077.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Sodium Borate"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_B-078.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Boron Oxide"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_B-079.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Boron Oxide"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_B-080.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Boron Oxide, Ion"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_B-081.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Boron Sulfide"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_B-082.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Titanium Boride"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_B-083.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Boron"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_B-084.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Beryllium Borate"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_B-085.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Beryllium Borate"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_B-086.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Dichloroborane"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_B-087.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Difluoroborane"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_B-088.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Difluoroborane Oxide"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_B-089.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Dihydroxyborane"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_B-090.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Dihydroxyborane"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_B-091.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Diborane"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_B-092.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Magnesium Boride"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_B-093.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Boron Oxide"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_B-094.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Boron Oxide"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_B-095.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Boron Oxide"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_B-096.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Boron Oxide"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_B-097.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Boron Oxide"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_B-098.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Boron Oxide"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_B-099.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Lead Borate"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_B-100.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Titanium Boride"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_B-140.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Lead Borate"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Ba-001.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Barium"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Ba-002.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Barium"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Ba-003.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Barium"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Br-004.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Calcium Bromide"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Br-005.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Bromine Chloride"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Br-006.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Bromine Fluoride"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Br-007.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Bromine Fluoride"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Br-008.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Bromine Fluoride"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Br-009.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Sulfur Bromide Fluoride"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Br-010.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Hydrogen Bromide"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Br-011.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Bromosilane"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Br-012.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Ammonium Bromide"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Br-013.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Mercury Bromide"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Br-014.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Iodine Bromide"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Br-015.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Potassium Bromide"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Br-016.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Potassium Bromide"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Br-017.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Potassium Bromide"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Br-018.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Potassium Bromide"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Br-019.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Lithium Bromide"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Br-020.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Lithium Bromide"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Br-021.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Lithium Bromide"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Br-022.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Lithium Bromide"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Br-023.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Magnesium Bromide"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Br-024.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Molybdenum Bromide"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Br-025.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Bromoimidogen"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Br-026.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Nitrosyl Bromide"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Br-027.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Sodium Bromide"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Br-028.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Sodium Bromide"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Br-029.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Sodium Bromide"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Br-030.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Sodium Bromide"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Br-031.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Phosphorus Bromide"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Br-032.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Lead Bromide"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Br-033.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Bromosilylidyne"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Br-034.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Strontium Bromide"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Br-035.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Titanium Bromide"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Br-036.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Tungsten Bromide"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Br-037.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Zirconium Bromide"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Br-038.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Bromine"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Br-039.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Bromine"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Br-040.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Bromine"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Br-041.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Calcium Bromide"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Br-042.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Calcium Bromide"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Br-043.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Calcium Bromide"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Br-044.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Calcium Bromide"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Br-045.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Iron Bromide"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Br-046.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Iron Bromide"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Br-047.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Iron Bromide"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Br-048.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Iron Bromide"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Br-049.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Dibromosilane"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Br-050.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Mercury Bromide"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Br-051.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Mercury Bromide"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Br-052.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Mercury Bromide"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Br-053.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Mercury Bromide"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Br-054.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Mercury Bromide"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Br-055.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Potassium Bromide"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Br-056.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Lithium Bromide"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Br-057.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Magnesium Bromide"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Br-058.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Magnesium Bromide"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Br-059.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Magnesium Bromide"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Br-060.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Magnesium Bromide"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Br-061.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "title": "Magnesium Bromide, Ion"
+        }
+    ],
+    "publisher": {
+        "@type": "org:Organization",
+        "name": "National Institute of Standards and Technology"
+    },
+    "language": [ "en"  ],
+    "bureauCode": [
+        "006:55"
+    ],
+    "programCode": [
+        "006:052"
+    ]
+}
