@@ -8,7 +8,7 @@
         "Warehouse": {
             "properties": {
                 "altIdentifier": {
-                    "definition": "an alternate unique identifier in a specified identifier scheme"
+                    "definition": "an alternate unique identifier in a specified identifier scheme",
                     "type": "array",
                     "item": { "$ref": "/definitions/Identifier" },
                     "asOntology": {
@@ -48,10 +48,10 @@
                         "prefLabel": "Distribution",
                         "referenceProperty": "dcat:distribution"
                     }
-                },
+                }
 
                 
-            }
+            },
                 
             "required": [  ]
         },

@@ -9,6 +9,7 @@ datadir = os.path.join(os.path.dirname(__file__), "data")
 janaffile = os.path.join(datadir, "janaf_pod.json")
 pdlfile = os.path.join(datadir, "nist-pdl-oct2016.json")
 jqlib = os.path.dirname(os.path.abspath(os.path.dirname(__file__)))
+schemadir = os.path.join(os.path.dirname(jqlib), "model")
 
 class TestJanaf(unittest.TestCase):  # 
 
@@ -29,7 +30,7 @@ class TestJanaf(unittest.TestCase):  #
         
         exts = self.out['$extensionSchemas']
         self.assertEquals(len(exts), 1)
-        self.assertIn(nerdmpub+"/definitions/PublishedDataResources", exts)
+        self.assertIn(nerdmpub+"/definitions/PublishedDataResource", exts)
 
     def test_restypes(self):
         types = self.out['@type']
@@ -82,8 +83,42 @@ class TestJanaf(unittest.TestCase):  #
             self.assertTrue(comps[0][prop].startswith("http://www.nist.gov/"),
                             prop+" property not a URL: "+comps[0][prop])
 
-    def test_valid(self):
-        pass
+    def test_references(self):
+        refs =self.out['references']
+        self.assertEquals(len(refs), 1)
+
+        self.assertIsInstance(refs[0]['@type'], types.StringTypes)
+        self.assertEquals(refs[0]['@type'], "deo:BibliographicReference")
+        self.assertEquals(refs[0]['refType'], "IsReferencedBy")
+        self.assertEquals(refs[0]['location'],
+                          "http://www.nist.gov/data/PDFfiles/jpcrdS1V14.pdf")
+
+        exts = refs[0]['$extensionSchemas']
+        self.assertEquals(len(exts), 1)
+        self.assertIn(nerdm+"/definitions/DCiteDocumentReference", exts)
+        
+
+class TestValidateNerdm(unittest.TestCase):
+
+    def setUp(self):
+        loader = ejs.SchemaLoader.from_directory(schemadir)
+        self.val = ejs.ExtValidator(loader)
+
+    def test_janaf(self):
+        out = send_file_thru_jq('nerdm::podds2resource', janaffile,
+                                {"id": "ark:ID"})
+        self.val.validate(out, False, True)
+
+    def test_with_doi(self):
+        with open(pdlfile) as fd:
+            cat = json.load(fd)
+
+        ds = cat['dataset'][-1]
+        ds = json.dumps(ds)
+        out = send_jsonstr_thru_jq('nerdm::podds2resource', ds, {"id": "ark:ID"})
+
+        self.val.validate(out, False, True)
+        
 
 def format_argopts(argdata):
     """
@@ -97,7 +132,32 @@ def format_argopts(argdata):
             argopts += [ "--argjson", name, json.dumps(argdata[name]) ]
 
     return argopts
+
+def send_jsonstr_thru_jq(jqfilter, datastr, args=None):
+    """
+    This executes jq with JSON data from the given file and returns the converted
+    output.
+
+    :param str jqfilter:  The jq filter to apply to the input
+    :param str datastr:   The input data as a JSON-formatted string
+    :param dict args:     arguments to pass in via --argjson
+    """
+    argopts = format_argopts(args)
     
+    cmd = "jq -L {0}".format(jqlib).split() + argopts
+
+    def impnerdm(filter):
+        return 'import "pod2nerdm" as nerdm; ' + filter
+    cmd.append(impnerdm(jqfilter))
+    
+    proc = subproc.Popen(cmd, stdout=subproc.PIPE, stderr=subproc.PIPE,
+                         stdin=subproc.PIPE)
+    (out, err) = proc.communicate(datastr)
+
+    if proc.returncode != 0:
+        raise RuntimeError(err + "\nFailed jq command: "+formatcmd(cmd))
+
+    return json.loads(out)
 
 def send_file_thru_jq(jqfilter, filepath, args=None):
     """

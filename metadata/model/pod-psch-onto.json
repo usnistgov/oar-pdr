@@ -29,13 +29,13 @@
                         "@type": "owl:Restriction",
                         "owl:onProperty": "pod:title",
                         "minCardinality": 1,
-                        "maxCardinality": 1,
+                        "maxCardinality": 1
                     },
                     {
                         "@type": "owl:Restriction",
                         "owl:onProperty": "pod:contactPoint",
                         "minCardinality": 1,
-                        "maxCardinality": 1,
+                        "maxCardinality": 1
                     }
                 ]
             }

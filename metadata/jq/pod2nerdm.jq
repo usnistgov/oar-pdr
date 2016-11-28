@@ -32,7 +32,7 @@ def nerdm_context: "https://www.nist.gov/od/dm/nerdm-pub-context.jsonld";
 
 # where the Datacite Document Reference types are defined
 #
-def dciteRefType: "https://www.nist.gov/od/dm/nerdm-schema/v0.1#/definitions/DCiteDocumentReference";
+def dciteRefType: nerdm_schema + "/definitions/DCiteDocumentReference";
 
 # the resource identifier provided on the command line
 #
@@ -132,7 +132,7 @@ def podds2resource:
     {
         "@context": nerdm_context,
         "$schema": nerdm_schema,
-        "$extensionSchemas": [ nerdm_pub_schema + "/definitions/PublishedDataResources" ],
+        "$extensionSchemas": [ nerdm_pub_schema + "/definitions/PublishedDataResource" ],
         "@type": [ "nrdp:PublishedDataResource" ],
         "@id": resid,
         "doi": (.distribution + []) | doiFromDist,
@@ -159,7 +159,6 @@ def podds2resource:
     if .references then .references = (.references | map(cvtref)) else del(.references) end |
     if .components then .components = (.components | map(dist2comp)) else del(.components) end |
     if .doi then . else del(.doi) end |
-    if .landingPage then . else del(.landingPage) end |
     if .issued then . else del(.issued) end 
 ;
 
