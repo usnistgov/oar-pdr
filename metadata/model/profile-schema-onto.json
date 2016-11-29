@@ -1,0 +1,55 @@
+{
+    "@context": {
+        "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+        "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+        "owl": "http://www.w3.org/2002/07/owl#",
+        "skos": "http://www.w3.org/2004/02/skos/core#",
+        "xsd": "http://www.w3.org/2001/XMLSchema#",
+        "psch": "http://www.nist.gov/dp/di/ont/pod-onto.json#",
+
+        "isDefinedBy": "rdfs:isDefinedBy",
+        "prefLabel": "owl:prefLabel",
+        "altLabel": "owl:altLabel",
+        "hiddenLabel": "owl:hiddenLabel",
+        "definition": "skos:definition",
+        "notes": "skos:note",
+        "equivalentClass": "owl:equivalentClass",
+        "equivalentProperty": "owl:equivalentProperty",
+        "subClassOf": "rdfs:subClassOf",
+        "imports": "owl:imports",
+        "domain": "rdfs:domain",
+        "range": "rdfs:range",
+
+        "referenceClass": "psch:referenceClass",
+        "referenceProperty": "psch:referenceProperty"
+    },
+    "@type": "owl:Ontology",
+    "@id": "http://www.nist.gov/dp/di/ont/pod-onto.json",
+    "prefLabel": "psch",
+    "isDefinedBy": [
+        {
+            "@type": "owl:Class",
+            "@id": "psch:ProfileSchema",
+            "subClassOf": "owl:Ontology",
+            "definition": "An ontology that can be expressed as a profile on existing ontologies by virtue of the fact that all Classes and Properties are equivalent to Classes and Properties in existing source ontologies, apart from possible restrictions on the value ranges",
+            "notes": [
+                "the referenceClass and referenceProperty give the specific things that the defined Class or Property is preferentially equivalent to.  In a JSON-LD context, a property label should resolve via the context to the specified reference property."
+            ]
+        },
+        {
+            "@type": "owl:ObjectProperty",
+            "@id": "psch:referenceClass",
+            "subClassOf": "owl:equivalentClass",
+            "definition": "The preferred class to associate with the subject class as its semantic equivalent"
+        },
+        {
+            "@type": "owl:ObjectProperty",
+            "@id": "psch:referenceProperty",
+            "subClassOf": "owl:equivalentProperty",
+            "definition": "The preferred property to associate with the subject property as its semantic equivalent",
+            "notes": [
+                "In a JSON-LD context, the object property to associate with the subject property via a label mapping."
+            ]
+        }
+    ]
+}
