@@ -63,6 +63,67 @@ class TestJqCommand(unittest.TestCase):
         data = {"id": "ID", "goob": "gurn"}
         out = self.jqc.process_data("[.goob]", json.dumps(data))
         self.assertEquals(out, ["gurn"])
+
+class TestJq(unittest.TestCase):
+
+    def test_ctr(self):
+        jqt = jq.Jq("[.goob]")
+        self.assertEquals(jqt.filter, "[.goob]")
+        self.assertIsNone(jqt.cmd.library)
+        self.assertEquals(jqt.args, {})
+        
+        jqt = jq.Jq("[.goob]", jqlibdir)
+        self.assertEquals(jqt.filter, "[.goob]")
+        self.assertEquals(jqt.cmd.library, jqlibdir)
+        self.assertEquals(jqt.args, {})
+        
+        jqt = jq.Jq("[.goob]", jqlibdir, ["gurn"])
+        self.assertEquals(jqt.filter, 'import "gurn" as gurn; [.goob]')
+        self.assertEquals(jqt.cmd.library, jqlibdir)
+        self.assertEquals(jqt.args, {})
+
+        with self.assertRaises(ValueError):
+            jqt = jq.Jq("[.goob]", modules=["gurn"])
+        with self.assertRaises(ValueError):
+            jqt = jq.Jq("[.goob]", args=["gurn"])
+        
+        jqt = jq.Jq("[.goob]", jqlibdir, ["gurn", "pod2nerdm:nerdm"])
+        self.assertEquals(jqt.filter,
+                  'import "gurn" as gurn; import "pod2nerdm" as nerdm; [.goob]')
+        self.assertEquals(jqt.cmd.library, jqlibdir)
+        self.assertEquals(jqt.args, {})
+        
+        jqt = jq.Jq("[.goob]", jqlibdir, ["gurn"],
+                    {"id": "ark:ID", "goob": "gurn"})
+        self.assertEquals(jqt.filter, 'import "gurn" as gurn; [.goob]')
+        self.assertEquals(jqt.cmd.library, jqlibdir)
+        self.assertEquals(jqt.args, {"id": "ark:ID", "goob": "gurn"})
+        
+        jqt = jq.Jq("[.goob]", args={"id": "ark:ID", "goob": "gurn"})
+        self.assertEquals(jqt.filter, '[.goob]')
+        self.assertIsNone(jqt.cmd.library)
+        self.assertEquals(jqt.args, {"id": "ark:ID", "goob": "gurn"})
+
+    def test_transform(self):
+        jqt = jq.Jq("[.goob]")
+        data = {"id": "ID", "goob": "gurn"}
+        out = jqt.transform(json.dumps(data))
+        self.assertEquals(out, ["gurn"])
+
+    def test_transform_w_args(self):
+        data = {"id": "ID", "goob": "gurn"}
+        jqt = jq.Jq("[$goob]", args=data)
+        out = jqt.transform(json.dumps({}))
+        self.assertEquals(out, ["gurn"])
+
+        out = jqt.transform(json.dumps({}), {"goob": "hank"})
+        self.assertEquals(out, ["hank"])
+
+    def test_transform_file(self):
+        jqt = jq.Jq(".accessLevel")
+        out = jqt.transform_file(janaffile)
+        self.assertEquals(out, 'public')
+        
         
         
 if __name__ == '__main__':

@@ -20,7 +20,7 @@ class JqCommand(object):
         """
         self.libargs = []
         if libdir:
-            self.library(libdir)
+            self.library = libdir
 
         self.jqexe = jqpath
         if not self.jqexe:
@@ -149,14 +149,14 @@ class Jq(object):
         self.cmd = JqCommand(libpath)
 
         modimport = ''
-        for mod in modules:
-            pref = mod
-            if ':' in mod:
-                mod, pref = mod.rsplit(':')
-            modimport += 'import "{0}" as "{1}"; '
+        if modules:
+            for mod in modules:
+                pref = mod
+                if ':' in mod:
+                    mod, pref = mod.rsplit(':')
+                modimport += 'import "{0}" as {1}; '.format(mod, pref)
 
         self.filter = modimport + jqfilter
-
         
         self.args = {}
         if args:
