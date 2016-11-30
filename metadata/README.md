@@ -53,6 +53,25 @@ following:
 jq -L jq --arg id ark:ID -f jq/podcat2nerdres.jq jq/tests/data/nist-pdl-oct2016.json > nist-resources.json
 ```
 
+## Converting a POD Catalog
+
+An entire POD Catalog document can be converted to a set of NERDm
+Resource files (i.e. each output file containing one Resource record)
+using the `pdl2resource.py` script.  Here's an example running the
+script on the example PDL file that is in the `jq/tests/data` directory:
+
+```
+scripts/pdl2resources.py -d tmp jq/tests/data/nist-pdl-oct2016.json
+```
+
+The `-d` option sets the directory where the output files are stored.
+Other command-line options allow one to convert only a portion of the
+datasets found in the file; run with the `--help` option to see the
+details.
+
+With this script each output resource docuemnt is assigned an ARK
+identifier.  
+
 ## Validating a NERDm record
 
 This module includes a schema documents that can be used to validate
