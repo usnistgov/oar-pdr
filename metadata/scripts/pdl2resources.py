@@ -9,6 +9,15 @@
 from __future__ import print_function
 import os, sys, errno, json
 from argparse import ArgumentParser
+
+basedir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+try:
+    import nistoar
+except ImportError, e:
+    nistoardir = os.path.join(basedir, "python")
+    sys.path.append(nistoardir)
+    import nistoar
+
 from nistoar.nerdm.convert import PODds2Res
 from nistoar.id.minter import PDRMinter
 
@@ -16,7 +25,6 @@ prog = os.path.basename(sys.argv[0])
 if not prog or prog == 'python':
     prog = "pdl2resources"
 
-basedir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 jqlib = os.path.join(basedir, "jq")
 IDSEQ = 2000
 
