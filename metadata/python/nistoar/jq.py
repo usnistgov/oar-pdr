@@ -2,6 +2,9 @@
 A python interface to the PDR's jq-based JSON transformation
 """
 import os, json, subprocess as subproc, types
+from collections import OrderedDict
+
+jsonDecoder = json.JSONDecoder(object_pairs_hook=OrderedDict)
 
 class JqCommand(object):
     """
@@ -58,7 +61,7 @@ class JqCommand(object):
             raise RuntimeError(err + "\nFailed jq command: " +
                                self._format_cmd(cmd))
 
-        return json.loads(out)
+        return jsonDecoder.decode(out)
 
     def process_file(self, jqfilter, filepath, args=None):
         """ 
@@ -79,7 +82,7 @@ class JqCommand(object):
             raise RuntimeError(err + "\nFailed jq command: " +
                                self._format_cmd(cmd))
 
-        return json.loads(out)
+        return jsonDecoder.decode(out)
 
     def _format_cmd(self, cmd):
         for i in range(len(cmd)):
