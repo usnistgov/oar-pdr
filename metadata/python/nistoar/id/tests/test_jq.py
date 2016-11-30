@@ -123,6 +123,16 @@ class TestJq(unittest.TestCase):
         jqt = jq.Jq(".accessLevel")
         out = jqt.transform_file(janaffile)
         self.assertEquals(out, 'public')
+
+    def test_transform_file_w_mod(self):
+        jqt = jq.Jq('nerdm::podds2resource | .["@id"]',
+                    jqlibdir, ["pod2nerdm:nerdm"],
+                    {"id": "ID", "goob": "gurn"})
+        out = jqt.transform_file(janaffile)
+        self.assertEquals(out, 'ID')
+        
+        out = jqt.transform_file(janaffile, {"id": "ark:ID"})
+        self.assertEquals(out, 'ark:ID')
         
         
         
