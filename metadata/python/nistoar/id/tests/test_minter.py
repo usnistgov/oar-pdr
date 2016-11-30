@@ -158,7 +158,15 @@ class TestNoidMinter(unittest.TestCase):
                    "id {0} forgotten for mask={1}".format(repr(id), repr(mask)))
 
 
-    
+class TestNoidMinter(unittest.TestCase):
+
+    def setUp(self):
+        self.minter = minter.PDRMinter()
+
+    def testMint(self):
+        self.minter.nextn = 5432
+        self.assertEquals(self.minter.mint(), "ark:/88434/pdr06f90")
+
 
         
 if __name__ == '__main__':

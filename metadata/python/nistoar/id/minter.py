@@ -204,7 +204,20 @@ class NoidMinter(IDMinter):
                 n += tot * p
                 tot*= ((mask[-1-i]=='d' and len(noid.DIGIT)) or len(noid.XDIGIT))
             return n
-                
 
+NIST_ARK_NAAN = "88434"
+PDR_SHOULDER = "pdr0"        
+                
+class PDRMinter(NoidMinter):
+    """
+    An identifier minter customized for the PDR
+    """
+
+    def __init__(self, count=1, shoulder=PDR_SHOULDER):
+        super(PDRMinter, self).__init__('ark:/{0}/{1}.zeeek'.
+                                        format(NIST_ARK_NAAN, PDR_SHOULDER),
+                                        count)
+
+                                        
 
     
