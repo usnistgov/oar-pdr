@@ -1,7 +1,7 @@
 FROM oarpdr/jq:latest
 
-RUN apt-get install -y python python-pip python-dev unzip
-RUN pip install json-spec jsonschema requests pynoid
+RUN apt-get update && apt-get install -y python python-pip python-dev unzip
+RUN pip install json-spec jsonschema requests
 
 WORKDIR /root
 RUN curl -L -o ejsonschema.zip \
