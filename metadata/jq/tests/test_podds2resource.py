@@ -135,8 +135,8 @@ def format_argopts(argdata):
 
 def send_jsonstr_thru_jq(jqfilter, datastr, args=None):
     """
-    This executes jq with JSON data from the given file and returns the converted
-    output.
+    This executes jq with JSON data from the given JSON string and returns the 
+    converted output.
 
     :param str jqfilter:  The jq filter to apply to the input
     :param str datastr:   The input data as a JSON-formatted string
