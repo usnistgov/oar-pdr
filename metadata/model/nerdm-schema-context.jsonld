@@ -1,0 +1,46 @@
+{
+    "@context": {
+        "@vocab": "http://www.w3.org/ns/dcat#",
+        "dcat": "http://www.w3.org/ns/dcat#",
+        "dc": "http://purl.org/dc/terms/",
+        "org": "http://www.w3.org/ns/org#",
+        "xs": "http://www.w3.org/2001/XMLSchema#",
+        "ore": "http://www.openarchives.org/ore/terms/",
+        "vcard": "http://www.w3.org/2006/vcard/ns#",
+        "skos": "http://www.w3.org/2004/02/skos/core#",
+        "deo": "http://purl.org/spar/deo/",
+        "org": "",
+        "pod": "https://project-open-data.cio.gov/v1.1/schema#",
+        "nrd": "https://www.nist.gov/od/dm/nerdm-schema/v0.1#",
+        "sdpperson": "https://nist.org/od/dm/person/",
+
+        "title": "dc:title",
+        "description": "dc:description",
+        "modified": {
+            "@id": "dc:modified",
+            "@type": "xs:date"
+        },
+        "issued": {
+            "@id": "dc:issued",
+            "@type": "xs:date"
+        },
+        "publisher": "dc:publisher",
+        "accessLevel": "pod:accessLevel",
+        "license": "dc:license",
+        "rights": "dc:rights",
+        "isPartOf": "dc:isPartOf",
+        "language": "dc:language",
+        "references": "dc:references",
+        "label": "rdfs:prefLabel",
+        "theme": "dcat:themeTaxonomy",
+        "subOrganizationOf": "org:subOrganizationOf",
+        "name": "skos:prefLabel",
+        "fn": "vcard:fn",
+        "hasEmail": "vcard:email",
+        "proxyFor": "ore:proxyFor"
+    }
+
+    "@id": "https://www.nist.gov/od/dm/nerdm-context.jsonld",
+    "title": "The core NIST Extended Resource Data model (NERDm) JSON-LD context",
+    "description": "This is the base context definition for encoding core NERDm metadata in JSON-LD format"
+}
