@@ -146,6 +146,7 @@ def podds2resource:
         
         description: [ .description ],
         keyword,
+        theme,
 
         references,
         accessLevel,
@@ -159,6 +160,7 @@ def podds2resource:
     if .references then .references = (.references | map(cvtref)) else del(.references) end |
     if .components then .components = (.components | map(dist2comp)) else del(.components) end |
     if .doi then . else del(.doi) end |
+    if .theme then . else del(.theme) end |
     if .issued then . else del(.issued) end 
 ;
 

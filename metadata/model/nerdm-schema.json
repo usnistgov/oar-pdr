@@ -686,7 +686,7 @@
                     }
                 },
             
-                "email": {
+                "hasEmail": {
                     "title": "Email",
                     "description": "The email address of the resource contact",
                     "type": "string",
