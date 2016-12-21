@@ -11,6 +11,14 @@ import os, sys, errno, json
 from argparse import ArgumentParser
 
 basedir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if 'OAR_DIR' in os.environ:
+    basedir = os.environ['OAR_DIR']
+    oarpypath = os.path.join(basedir, "python")
+    
+if 'OAR_PYTHONPATH' in os.environ:
+    oarpypath = os.environ['OAR_PYTHONPATH']
+
+sys.path.extend(oarpypath.split(os.pathsep))
 try:
     import nistoar
 except ImportError, e:
