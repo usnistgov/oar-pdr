@@ -1,5 +1,8 @@
 #! /bin/bash
 #
+# This script installs the various metadata tools into a deployment (i.e.
+# install) directory.
+#
 set -e
 prog=`basename $0`
 execdir=`dirname $0`
@@ -8,7 +11,7 @@ base=`(cd $execdir/.. > /dev/null 2>&1; pwd)`
 
 ##########
 true ${SOURCE_DIR:=$base}
-true ${INSTALL_DIR:=/app/pdr/nerdm}
+true ${INSTALL_DIR:=/usr/local}
 ##########
 
 # handle command line options
@@ -39,9 +42,16 @@ while [ "$1" != "" ]; do
   shift
 done
 
-true ${SCHEMA_DIR:=$INSTALL_DIR/schemas}
-true ${JQ_LIBDIR:=$INSTALL_DIR/jq}
-true ${PY_LIBDIR:=$INSTALL_DIR/python} 
+[ "$INSTALL_DIR" = "/usr/local" ] && {
+    true ${PY_LIBDIR:=$INSTALL_DIR/lib/python2.7/dist-packages}
+}
+[ "$INSTALL_DIR" = "/usr" ] && {
+    true ${PY_LIBDIR:=$INSTALL_DIR/lib/python2.7}
+}
+
+true ${SCHEMA_DIR:=$INSTALL_DIR/lib/schemas}
+true ${JQ_LIBDIR:=$INSTALL_DIR/lib/jq}
+true ${PY_LIBDIR:=$INSTALL_DIR/lib/python} 
 true ${BINDIR:=$INSTALL_DIR/bin}
 
 # install the schemas

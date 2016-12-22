@@ -26,7 +26,8 @@ metadata files.
 
 If relying on the Docker container for the prerequisite tools (see
 above), start the container via the `run.sh` to start a bash shell.
-Change into metadata directory to run the examples described below.  
+Inside this shell, the curent directory will be `oar-pdr/metadata`
+(i.e. the directory that contains this README).  
 
 To convert a single POD format Dataset document into a NERDm Resource
 document, run the `jq` command with the following pattern:
@@ -85,11 +86,19 @@ validate -L model janaf_nerdm.json
 
 ## Running Tests
 
-To run all the tests associated with this metadata component, type:
+To run all the tests associated with this metadata component (assuming
+all prerequisites are installed), type:
 
 ```
   scripts/testall.py
 ```
 
-Before prerequisite packages are installed ahead of time (see above).
+If prerequisites are not installed (e.g. they're not easily
+installable), you can test the metadat component via docker as
+described above.  To run the tests within docker, type:
+
+```
+  docker/run.sh testall
+```
+
 

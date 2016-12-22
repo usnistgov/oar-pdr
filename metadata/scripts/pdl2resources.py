@@ -11,7 +11,8 @@ import os, sys, errno, json
 from argparse import ArgumentParser
 
 basedir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-if 'OAR_DIR' in os.environ:
+oarpypath = os.path.join(basedir, "python")
+if 'OAR_HOME' in os.environ:
     basedir = os.environ['OAR_DIR']
     oarpypath = os.path.join(basedir, "python")
     
