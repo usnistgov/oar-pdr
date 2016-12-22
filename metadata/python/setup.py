@@ -7,6 +7,6 @@ setup(name='nistoar',
       author="Ray Plante",
       author_email="raymond.plante@nist.gov",
       url='https://github.com/usnistgov/oar-pdr',
-      packags=['nistoar', 'nistoar.jq', 'nistoar.nerdm', 'nistoar.id']
+      packages=['nistoar', 'nistoar.nerdm', 'nistoar.id']
 )
 

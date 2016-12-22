@@ -1,6 +1,7 @@
 #! /bin/bash
 #
 set -e
+prog=`basename $0`
 execdir=`dirname $0`
 [ "$execdir" = "" -o "$execdir" = "." ] && execdir=$PWD
 base=`(cd $execdir/.. > /dev/null 2>&1; pwd)`
@@ -28,7 +29,7 @@ while [ "$1" != "" ]; do
         SOURCE_DIR=$1
         ;;
     -*)
-        echo "$prog: unsupported option: " $1
+        echo "$prog: unsupported option:" $1
         false
         ;;
     *)
@@ -41,7 +42,7 @@ done
 true ${SCHEMA_DIR:=$INSTALL_DIR/schemas}
 true ${JQ_LIBDIR:=$INSTALL_DIR/jq}
 true ${PY_LIBDIR:=$INSTALL_DIR/python} 
-true ${BINDIR:=$INSTALL_DIR/bin} 
+true ${BINDIR:=$INSTALL_DIR/bin}
 
 # install the schemas
 mkdir -p $SCHEMA_DIR
