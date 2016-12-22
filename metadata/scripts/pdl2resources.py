@@ -15,9 +15,12 @@ oarpypath = os.path.join(basedir, "python")
 if 'OAR_HOME' in os.environ:
     basedir = os.environ['OAR_HOME']
     oarpypath = os.path.join(basedir, "python")
+    jqlib = os.path.join(basedir, "lib", "jq")
     
 if 'OAR_PYTHONPATH' in os.environ:
     oarpypath = os.environ['OAR_PYTHONPATH']
+if 'OAR_JQ_LIB' in os.environ:
+    jqlib = os.environ['OAR_JQ_LIB']
 
 sys.path.extend(oarpypath.split(os.pathsep))
 try:
@@ -34,7 +37,6 @@ prog = os.path.basename(sys.argv[0])
 if not prog or prog == 'python':
     prog = "pdl2resources"
 
-jqlib = os.path.join(basedir, "jq")
 IDSEQ = 2000
 
 description = \
