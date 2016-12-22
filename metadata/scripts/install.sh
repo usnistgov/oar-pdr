@@ -49,7 +49,8 @@ done
     true ${PY_LIBDIR:=$INSTALL_DIR/lib/python2.7}
 }
 
-true ${SCHEMA_DIR:=$INSTALL_DIR/lib/schemas}
+true ${ETC_DIR:=$INSTALL_DIR/etc}
+true ${SCHEMA_DIR:=$ETC_DIR/schemas}
 true ${JQ_LIBDIR:=$INSTALL_DIR/lib/jq}
 true ${PY_LIBDIR:=$INSTALL_DIR/lib/python} 
 true ${BINDIR:=$INSTALL_DIR/bin}
@@ -74,3 +75,7 @@ mkdir -p $BINDIR
 echo cp $SOURCE_DIR/scripts/pdl2resources.py $BINDIR
 cp $SOURCE_DIR/scripts/pdl2resources.py $BINDIR
 
+#install miscellaneous data files
+mkdir -p $ETC_DIR/samples
+echo cp $SOURCE_DIR/jq/tests/data/nist-pdl-oct2016.json $ETC_DIR/samples
+cp $SOURCE_DIR/jq/tests/data/nist-pdl-oct2016.json $ETC_DIR/samples
