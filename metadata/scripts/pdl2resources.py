@@ -13,7 +13,7 @@ from argparse import ArgumentParser
 basedir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 oarpypath = os.path.join(basedir, "python")
 if 'OAR_HOME' in os.environ:
-    basedir = os.environ['OAR_DIR']
+    basedir = os.environ['OAR_HOME']
     oarpypath = os.path.join(basedir, "python")
     
 if 'OAR_PYTHONPATH' in os.environ:
