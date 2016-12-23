@@ -43,7 +43,7 @@ POD Dataset document, `janaf_pod.json`; to convert it, then, to NERDm,
 type:
 
 ```
-jq -L jq --arg id ark:ID -f jq/podds2nerdres.jq jq/tests/data/javaf_pod.json > janaf_nerdm.json
+jq -L jq --arg id ark:ID -f jq/podds2nerdres.jq jq/tests/data/janaf_pod.json > janaf_nerdm.json
 ```
 
 The test data directory also contains a copy of the NIST PDL Catalog;
