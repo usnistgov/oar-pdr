@@ -21,6 +21,10 @@ if 'OAR_PYTHONPATH' in os.environ:
     oarpypath = os.environ['OAR_PYTHONPATH']
 if 'OAR_JQ_LIB' in os.environ:
     jqlib = os.environ['OAR_JQ_LIB']
+else:
+    print("jq library location is unknown; please, set the OAR_HOME or "
+          "OAR_JQ_LIB environment variable", file=sys.stderr)
+    sys.exit(10)
 
 sys.path.extend(oarpypath.split(os.pathsep))
 try:
