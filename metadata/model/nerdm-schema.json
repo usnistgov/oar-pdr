@@ -48,12 +48,22 @@
                         "Surround each keyword with quotes. Separate keywords with commas. Avoid duplicate keywords in the same record."
                     ],
                     "type": "array",
-                    "minItems": 1,
                     "items": { "type": "string", "minLength": 1 },
                     "asOntology": {
                         "@context": "profile-schema-onto.json",
                         "prefLabel": "Tags",
                         "referenceProperty": "dcat:keyword"
+                    }
+                },
+
+                "topic": {
+                    "description": "Identified tags referring to things or concepts that this resource addresses or speaks to",
+                    "type": "array",
+                    "items": { "$ref": "#/definitions/Topic" },
+                    "asOntology": {
+                        "@context": "profile-schema-onto.json",
+                        "prefLabel": "Topic",
+                        "referenceProperty": "foaf:topic"
                     }
                 },
 
@@ -557,6 +567,109 @@
             }
         },
 
+        "Inventory": {
+            "description": "an inventory summary of the components that are part of a Resource",
+            "type": "object",
+            "properties": {
+                "subcollectionCount": {
+                    "description": "the number of top-level subcollection components in this resource",
+                    "type": "integer"
+                },
+                "deepSubcollectionCount": {
+                    "description": "the total number of subcollection components throughout the subcollection hierarchy",
+                    "type": "integer"
+                },
+                "byType": {
+                    "description": "a deep, total inventory broken down by type",
+                    "notes": [
+                        "These numbers provide totals for the entire hierarchy"
+                    ],
+                    "type": "array",
+                    "items": { "$ref": "#/definitions/TypeInventory" }
+                },
+
+                "bySubcollection": {
+                    "description": "a hierarchical breakdown of the component inventory by subcollection",
+                    "notes": [
+                        "This captures the inventory for the top level collection, with nodes for subcollections"
+                    ],
+                    "$ref": "#/definitions/CollectionInventory" 
+                },
+
+                "matching": {
+                    "description": "an inventory of components that match a particular query",
+                    "type": "array",
+                    "items": { "$ref": "#/definitions/MatchingInventory" }
+                }
+            }
+        },
+
+        "MatchingInventory": {
+            "description": "an inventor of components that matched a specified search query",
+            "notes": [
+                "This is expected to be injected into a NERDm record as a result of a search query, as opposed to being included in static versions"
+            ],
+            "allOf": [ 
+                { "$ref": "#/definitions/Inventory" },
+                {
+                    "properties": {
+                        "query": {
+                            "description": "a string representing the query to which this inventory matches",
+                            "type": "string"
+                        }
+                    }
+                }
+            ]
+        },
+
+        "TypeInventory": {
+            "description": "a count of the number of components of a given type",
+            "type": "object",
+            "properties": {
+                "forType": {
+                    "description": "the type of component",
+                    "notes": [
+                        "This should be an abbreviated URI as used for @type values"
+                    ],
+                    "type": "string"
+                },
+                "count": {
+                    "description": "the number of occurences found for this type",
+                    "type": "integer"
+                },
+                "label": {
+                    "description": "a label for the type and count",
+                    "type": "string"
+                }
+            },
+            "required": [ "forType", "count" ]
+        },
+
+        "CollectionInventory": {
+            "description": "an inventory that breaks down numbers by the hierarchical collection, where this type describes a node in the hierarchy",
+            "notes": [
+                "The idea here is to provide numbers for each subdirectory"
+            ],
+            "type": "object",
+            "properties": {
+                "collname": {
+                    "description": "the name of the subcollection that this inventory applies to",
+                    "type": "string"
+                },
+                "byType": {
+                    "description": "a breakdown of the inventory of components in this collection by type",
+                    "type": "array",
+                    "items": { "$ref": "#/definitions/TypeInventory" }
+                },
+                "subcolls": {
+                    "description": "component inventories for subcollections",
+                    "type": "array",
+                    "items": { "$ref": "#/definitions/CollectionInventory" }
+                }
+            },
+            "required": [ "collname" ]
+        },
+
         "Component": {
             "description": "a description of a component of a resource",
             "type": "object",
@@ -579,6 +692,16 @@
                 "description": {
                     "description": "a description of the nature and contents of the component, including the role it plays as part of the resource",
                     "type": "string"
+                },
+                "topic": {
+                    "description": "Identified tags referring to things or concepts that this component addresses or speaks to",
+                    "type": "array",
+                    "items": { "$ref": "#/definitions/Topic" },
+                    "asOntology": {
+                        "@context": "profile-schema-onto.json",
+                        "prefLabel": "Topic",
+                        "referenceProperty": "foaf:topic"
+                    }
                 },
                 "conformsTo": {
                     "title": "Standard",
@@ -631,6 +754,56 @@
                   "pattern": "^(R\\d*\\/)?([\\+-]?\\d{4}(?!\\d{2}\\b))((-?)((0[1-9]|1[0-2])(\\4([12]\\d|0[1-9]|3[01]))?|W([0-4]\\d|5[0-2])(-?[1-7])?|(00[1-9]|0[1-9]\\d|[12]\\d{2}|3([0-5]\\d|6[1-6])))([T\\s]((([01]\\d|2[0-3])((:?)[0-5]\\d)?|24\\:?00)([\\.,]\\d+(?!:))?)?(\\18[0-5]\\d([\\.,]\\d+)?)?([zZ]|([\\+-])([01]\\d|2[0-3]):?([0-5]\\d)?)?)?)?(\\/)P(?:\\d+(?:\\.\\d+)?Y)?(?:\\d+(?:\\.\\d+)?M)?(?:\\d+(?:\\.\\d+)?W)?(?:\\d+(?:\\.\\d+)?D)?(?:T(?:\\d+(?:\\.\\d+)?H)?(?:\\d+(?:\\.\\d+)?M)?(?:\\d+(?:\\.\\d+)?S)?)?$"
                 }
             ]
+        },
+
+        "Topic": {
+            "description": "a container for an identified concept term or proper thing",
+            "notes": [
+                "A concept term refers to a subject or keyword term, like 'magnetism' while a proper thing is a particular instance of a concept that has a name, like the planet 'Saturn' or the person called 'Abraham Lincoln'",
+                "The meaning of concept is that given by the OWL ontology (owl:Concept); the meaning of thing is that given by the SKOS ontology (skos:Thing).  See also the FOAF ontology."
+            ],
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "description": "a label indicating whether the value refers to a concept or a thing",
+                    "type": "string",
+                    "enum": [ "Concept", "Thing" ],
+                    "valueDocumentation": {
+                        "Concept": {
+                            "description": "label indicating that the value refers to a concept (as in owl:Concept)"
+                        },
+                        "Thing": {
+                            "description": "label indicating that the value refers to a named person, place, or thing (as in skos:Thing)"
+                        }
+                    }
+                },
+
+                "scheme": {
+                    "description": "a URI that identifies the controlled vocabulary, registry, or identifier system that the value is defined in.",
+                    "type": "string",
+                    "format": "uri",
+                    "asOnotology": {
+                        "@context": "profile-schema-onto.json",
+                        "prefLabel": "Schema",
+                        "referenceProperty": "vold:vocabulary"
+                    }
+                },
+
+                "@id": {
+                    "description": "the unique identifier identifying the concept or thing",
+                    "type": "string",
+                    "format": "uri"
+                },
+
+                "tag": {
+                    "description": "a short, display-able token that locally represents the concept or thing",
+                    "notes": [
+                        "As a token, it is intended that applications can search for this value and find all resources that are talking about the same thing.  Thus, regardless of whether the @id field is provided, all references to the same concept or thing should use the same tag value."
+                    ],
+                    "type": "string"
+                }
+            },
+            "required": [ "@type", "tag" ]
         },
 
         "Organization": {

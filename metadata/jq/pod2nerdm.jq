@@ -57,6 +57,7 @@ def cvtref:  {
 # Output: a Component object with an DataFile type given as @type
 #
 def dist2download: 
+    .["filepath"] = ( .downloadURL | sub(".*/"; "") ) |
     .["@type"] = [ "nrdp:DataFile", "dcat:Distribution" ] |
     .["$extensionSchemas"] = [ "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile" ] 
 ;

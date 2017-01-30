@@ -2,14 +2,14 @@ These are (hand-created) examples of records that are compliant with
 the schemas provided in the parent directory.  They are:
 
 * **ceramicsportal.json** -- The Ceramics Webbook, example of a NIST Portal
-  * Resource Types:  Portal, SRD, PublishedDataResource
+  * Resource Types:  Portal, SRD, PublicDataResource
   * Features:
     * The Portal includes access several other registered collections;
       this record provides links to them as components (type: IncludedResource).
 
 * **hitsc.json** -- The High-T Superconducting materials database, an
   example of a Database with custom search page
-  * Resource Types:  Database, SRD, PublishedDataResource
+  * Resource Types:  Database, SRD, PublicDataResource
   * Features:
     * includes reference to documentation (user manual); reference metadata
       indicates that this document is specifically documentation via a
@@ -17,7 +17,7 @@ the schemas provided in the parent directory.  They are:
     * Search page provided as a component (type: SearchPage, Tool)
 
 * **janaf.json** -- JANAF Thermochemical Tables, an example of a data publicatoin
-  * Resource Types:  DataPublication, SRD, PublishedDataResource
+  * Resource Types:  DataPublication, SRD, PublicDataResource
   * Features:
     * Includes full author list
     * Includes DOI
