@@ -4,7 +4,7 @@ import unittest as test
 from collections import OrderedDict
 
 import nistoar.preserv.validate as val
-import nistoar.preserv.utils as utils
+import nistoar.preserv.exceptions as exceptions
 
 datadir = os.path.join(os.path.dirname(__file__), "data")
 
@@ -157,7 +157,13 @@ class TestAggregatedAssessment(test.TestCase):
                                      "sell!", "stay!", "buy!"])
     
 
-class TestTrivialPrervationValidator(test.TestCase):
+class TestValidater(test.TestCase):
+
+    def test_noctr(self):
+        with self.assertRaises(TypeError):
+            validater = val.Validater("goob")
+
+class TestTrivialPrervationValidater(test.TestCase):
 
     def test_validate(self):
         indir = datadir
@@ -166,7 +172,7 @@ class TestTrivialPrervationValidator(test.TestCase):
         with warn.catch_warnings(record=True) as w:
             validater = val.PreservationValidater(datadir)
             self.assertEqual( len(w), 1 )
-            self.assertTrue(issubclass(w[0].category,utils.ConfigurationWarning))
+            self.assertTrue(issubclass(w[0].category,exceptions.ConfigurationWarning))
 
         out = validater.validate()
         self.assertIsInstance(out, val.Assessment)
@@ -174,7 +180,7 @@ class TestTrivialPrervationValidator(test.TestCase):
 
     def test_badvalidater(self):
         validater = val.PreservationValidater(datadir, {'goob': 'hank'})
-        with self.assertRaises(utils.ConfigurationException):
+        with self.assertRaises(exceptions.ConfigurationException):
             out = validater.validate()
 
 

@@ -8,7 +8,7 @@ from warnings import warn
 from abc import ABCMeta, abstractmethod, abstractproperty
 from collections import OrderedDict, MutableMapping
 
-from .utils import ConfigurationWarning, ConfigurationException
+from .exceptions import ConfigurationWarning, ConfigurationException
 
 logger = logging.getLogger(__name__)
 
