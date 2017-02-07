@@ -7,17 +7,17 @@ structured, and the Prepper class does the reorganization as necessary.
 
 """
 
-import os, errno, logging
+import os, errno, logging, re, json
 from shutil import copy2 as copy
 from abc import ABCMeta, abstractmethod, abstractproperty
 
 from ..validate import SIPValidater, SimpleAssessment
 from ..exceptions import (SIPDirectoryError, SIPDirectoryNotFound,
-                          StateException, PODError)
+                          ConfigurationException, StateException, PODError)
 
 log = logging.getLogger(__name__)
 
-DEF_MBAG_VERSION = 0.2
+DEF_MBAG_VERSION = "0.2"
 MIDAS_POD_FILE = "_pod.json"
 AIP_POD_FILE = "metadata/pod.json"
 
@@ -52,22 +52,22 @@ class SIPPrepper(object):
         self.bagdir = None
 
         # ensure we have a readable directory
-        if not self.indir:
+        if not self.sipdir:
             raise ValueError("DirStructureValidator: No input directory "
                              "provided")
-        if not os.path.exists(self.indir):
+        if not os.path.exists(self.sipdir):
             raise SIPDirectoryNotFound(indir)
-        if not os.path.isdir(self.indir):
+        if not os.path.isdir(self.sipdir):
             raise SIPDirectoryError(indir, "not a directory")
-        if not os.access(self.indir, os.R_OK|os.X_OK):
+        if not os.access(self.sipdir, os.R_OK|os.X_OK):
             raise SIPDirectoryError(indir, "lacking read/cd permission")
 
         # do a sanity check on the bag parent directory
         if not self.cfg.get('relative_to_indir', False):
-            sipdir = os.abspath(self.sipdir)
+            sipdir = os.path.abspath(self.sipdir)
             if sipdir[-1] != os.sep:
                 sipdir += '/'
-            if os.abspath(self.bagparent).startswith(sipdir):
+            if os.path.abspath(self.bagparent).startswith(sipdir):
                 if self.cfg.get('relative_to_indir') == False:
                     # you said it was not relative, but it sure looks that way
                     raise ConfigurationException("'relative_to_indir'=False but"
@@ -76,18 +76,21 @@ class SIPPrepper(object):
                                                  "submitted directory (" +
                                                  self.sipdir+")")
                 # bagparent is inside sipdir
-                self.bagparent = os.abspath(self.bagparent)[len(sipdir):]
+                self.bagparent = os.path.abspath(self.bagparent)[len(sipdir):]
                 self.cfg['relative_to_indir'] = True
+
+        if self.cfg.get('relative_to_indir'):
+            self.bagparent = os.path.join(self.sipdir, self.bagparent)
 
     def ensure_bag_parent_dir(self):
         if not os.path.exists(self.bagparent):
             if self.cfg.get('relative_to_indir'):
-                bagparent = os.path.join(self.sipdir, self.bagparent)
                 try:
-                    os.makedirs(bagparent)
+                    os.makedirs(self.bagparent)
                 except OSError, e:
+                    bagparent = self.bagparent[len(self.sipdir):]
                     raise SIPDirectoryError("unable to create working bag ("+
-                                            self.bagparent + ") under SIP "+
+                                            bagparent + ") under SIP "+
                                             "dir: " + str(e), cause=e)
             else:
                 raise StateException("Bag Workspace dir does not exist: " +
@@ -113,10 +116,10 @@ class SIPPrepper(object):
         """
         return the name to use for the working bag directory
         """
-        fmt = self.cfg.get('bag_name_format', "{0}.mbag{1}_{2}")
+        fmt = self.cfg.get('bag_name_format', "{0}.mbag{1}-{2}")
         bseq = self.cfg.get('mbag_seqno', 1)
         bver = self.cfg.get('mbag_version', DEF_MBAG_VERSION)
-        bver = re.sub(bver, r'\.', '_')
+        bver = re.sub(r'\.', '_', bver)
         return fmt.format(dsid, bver, bseq)
 
     def read_pod(self, podfile):
@@ -124,7 +127,7 @@ class SIPPrepper(object):
             with open(podfile) as fd:
                 return json.load(fd)
         except IOError, ex:
-            raise PODError("Unable to read POD file: "+str(ex), file=podfile)
+            raise PODError("Unable to read POD file: "+str(ex), src=podfile)
 
     def set_bagdir(self):
         podfile = self.find_pod_file()
@@ -132,8 +135,9 @@ class SIPPrepper(object):
         try: 
             self.dsid = self.poddata['identifier']
         except KeyError, ex:
-            raise PODError("Missing identifier field", file=podfile)
-        self.bagdir = os.path.join(self.bagparent, self.form_bag_name())
+            raise PODError("Missing identifier field", src=podfile)
+        self.bagdir = os.path.join(self.bagparent,
+                                   self.form_bagdir_name(self.dsid))
 
     def ensure_bagdir(self):
         """
@@ -149,9 +153,9 @@ class SIPPrepper(object):
                 os.mkdir(self.bagdir)
             except OSError, e:
                 raise StateException("Unable to create working bag directory: "+
-                                     self.bagdir)
+                                     self.bagdir+": "+str(e), cause=e)
 
-        if os.access(self.bagdir, os.OK_R|os.OK_W|os.OK_X):
+        if not os.access(self.bagdir, os.R_OK|os.W_OK|os.X_OK):
             raise StateException("Insufficient permissions on bag directory: " +
                                  self.bagdir)
 

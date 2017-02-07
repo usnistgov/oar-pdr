@@ -1,0 +1,149 @@
+{
+    "@context": "https://www.nist.gov/od/dm/nerdm-pub-context.jsonld",
+    "$schema": "https://www.nist.gov/od/dm/nerdm-schema/v0.1#",
+    "$extensionSchemas": [
+        "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/PublishedDataResource"
+    ],
+    "@type": [
+        "nrdp:PublishedDataResource"
+    ],
+    "@id": "ark:/88434/pdr02p1s",
+    "doi": "doi:10.18434/T4SW26",
+    "title": "OptSortSph: Sorting Spherical Dielectric Particles in a Standing-Wave Interference Field",
+    "contactPoint": {
+        "hasEmail": "mailto:zachary.levine@nist.gov",
+        "fn": "Zachary Levine"
+    },
+    "modified": "2016-07-01",
+    "ediid": "3A1EE2F169DD3B8CE0531A570681DB5D1491",
+    "landingPage": "https://www.nist.gov/nvl/project-index-optical-method-sorting-nanoparticles-size",
+    "description": [
+        "Software to predict the optical sorting of particles in a standing-wave laser interference field"
+    ],
+    "keyword": [
+        "optical sorting",
+        "laser interference field",
+        "nanoparticles",
+        "convection of fluid"
+    ],
+    "theme": [
+        "Optical physics"
+    ],
+    "references": [
+        {
+            "@type": "deo:BibliographicReference",
+            "refType": "IsReferencedBy",
+            "location": "https://dx.doi.org/10.1364/OE.24.014100",
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/v0.1#/definitions/DCiteDocumentReference"
+            ]
+        }
+    ],
+    "accessLevel": "public",
+    "license": "http://www.nist.gov/open/license.cfm",
+    "components": [
+        {
+            "downloadURL": "https://s3.amazonaws.com/nist-midas/1491_optSortSphEvaluated20160701.cdf",
+            "title": "CDF version of the Mathematica notebook",
+            "description": "A .cdf version of the Mathematica notebook. A reader for this file is available at: http://www.wolfram.com/cdf/",
+            "mediaType": "application/vnd.wolfram.player",
+            "filepath": "1491_optSortSphEvaluated20160701.cdf",
+            "@type": [
+                "nrdp:DataFile",
+                "dcat:Distribution"
+            ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ]
+        },
+        {
+            "downloadURL": "https://s3.amazonaws.com/nist-midas/1491_optSortSphEvaluated20160701.cdf.sha256",
+            "mediaType": "text/plain",
+            "title": "SHA-256 file for the CDF version of the Mathematica notebook",
+            "filepath": "1491_optSortSphEvaluated20160701.cdf.sha256",
+            "@type": [
+                "nrdp:DataFile",
+                "dcat:Distribution"
+            ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ]
+        },
+        {
+            "accessURL": "http://doi.org/10.18434/T4SW26",
+            "mediaType": "application/zip",
+            "title": "DOI access for OptSortSph: Sorting Spherical Dielectric Particles in a Standing-Wave Interference Field",
+            "description": "Software to predict the optical sorting of particles in a standing-wave laser interference field",
+            "format": "Digital Object Identifier, a persistent identifier",
+            "@type": [
+                "nrd:Hidden",
+                "dcat:Distribution"
+            ]
+        },
+        {
+            "downloadURL": "https://s3.amazonaws.com/nist-midas/1491_optSortSphEvaluated20160701.nb",
+            "mediaType": "application/mathematica",
+            "title": "Download for the Mathematica notebook",
+            "filepath": "1491_optSortSphEvaluated20160701.nb",
+            "@type": [
+                "nrdp:DataFile",
+                "dcat:Distribution"
+            ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ]
+        },
+        {
+            "downloadURL": "https://s3.amazonaws.com/nist-midas/1491_optSortSph20160701.m",
+            "mediaType": "text/plain",
+            "title": "ASCII version of the code (without documentation)",
+            "filepath": "1491_optSortSph20160701.m",
+            "@type": [
+                "nrdp:DataFile",
+                "dcat:Distribution"
+            ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ]
+        },
+        {
+            "downloadURL": "https://s3.amazonaws.com/nist-midas/1491_optSortSphEvaluated20160701.nb.sha256",
+            "mediaType": "text/plain",
+            "title": "SHA-256 file for Mathematica download file",
+            "filepath": "1491_optSortSphEvaluated20160701.nb.sha256",
+            "@type": [
+                "nrdp:DataFile",
+                "dcat:Distribution"
+            ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ]
+        },
+        {
+            "downloadURL": "https://s3.amazonaws.com/nist-midas/1491_optSortSph20160701.m.sha256",
+            "mediaType": "text/plain",
+            "title": "SHA-256 file for ASCII version of the code",
+            "filepath": "1491_optSortSph20160701.m.sha256",
+            "@type": [
+                "nrdp:DataFile",
+                "dcat:Distribution"
+            ],
+            "$extensionSchemas": [
+                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ]
+        }
+    ],
+    "publisher": {
+        "@type": "org:Organization",
+        "name": "National Institute of Standards and Technology"
+    },
+    "language": [
+        "en"
+    ],
+    "bureauCode": [
+        "006:55"
+    ],
+    "programCode": [
+        "006:045"
+    ]
+}

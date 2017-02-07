@@ -20,7 +20,7 @@ class PreservationException(Exception):
     """
     a base class for exceptions occuring in the preservation system
     """
-    def __init__(msg=None, cause=None):
+    def __init__(self, msg=None, cause=None):
         if not msg:
             if cause:
                 msg = str(cause)
