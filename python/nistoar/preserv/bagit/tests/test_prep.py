@@ -1,4 +1,6 @@
-import os, pdb, shutil
+import os, pdb, shutil, logging
+from cStringIO import StringIO
+from io import BytesIO
 import warnings as warn
 import unittest as test
 from collections import OrderedDict
@@ -35,8 +37,21 @@ class TestMIDASPrepper(test.TestCase):
 
     def setUp(self):
         self.tf = Tempfiles()
+        self.resetLog()
+
+    def resetLog(self):
+        self.logfile = self.tf.track("test.log")
+        with open(self.logfile, 'w') as fd:
+            pass
+        logging.basicConfig(filename=self.logfile, level=logging.DEBUG)
+
+    def logcontents(self):
+        logging.shutdown()
+        with open(self.logfile) as fd:
+            return fd.read()
 
     def tearDown(self):
+        logging.shutdown()
         self.tf.clean()
 
     def test_ctor(self):
@@ -99,11 +114,11 @@ class TestMIDASPrepper(test.TestCase):
                                        {'pod_locations': ['goober.json',
                                                           prep.MIDAS_POD_FILE ]})
         podf = prpr.find_pod_file()
-        self.assertEqual(podf, os.path.join(self.testsip, prep.MIDAS_POD_FILE))
+        self.assertEqual(podf, prep.MIDAS_POD_FILE)
 
         prpr = prep.MIDASFormatPrepper(self.testsip, outdir, {})
         podf = prpr.find_pod_file()
-        self.assertEqual(podf, os.path.join(self.testsip, prep.MIDAS_POD_FILE))
+        self.assertEqual(podf, prep.MIDAS_POD_FILE)
 
     def test_form_bagdir_name(self):
         prpr = prep.MIDASFormatPrepper("/tmp", "/tmp/gomer", {})
@@ -219,8 +234,200 @@ class TestMIDASPrepper(test.TestCase):
         self.assertTrue(os.path.isdir(os.path.join(prpr.bagdir,'metadata')))
         self.assertTrue(os.path.exists(os.path.join(prpr.bagdir,'metameta')))
         self.assertTrue(os.path.isdir(os.path.join(prpr.bagdir,'metameta')))
+
+    def test_submitted_files(self):
+        sipdir = self.setup_insitu()
+        outdir = os.path.join(sipdir, "_wbag")
+        prpr = prep.MIDASFormatPrepper(sipdir, outdir, {})
+
+        files = [f for f in prpr.list_submitted_files()]
+        self.assertIn("_pod.json", files)
+        self.assertIn("_nerdm.json", files)
+        self.assertIn("trial1.json", files)
+        self.assertIn("trial2.json", files)
+        self.assertIn("trial3/trial3a.json", files)
+        self.assertEqual(len(files), 5)
+
+        os.mkdir(os.path.join(sipdir,".goob"))
+        files = [f for f in prpr.list_submitted_files()]
+        self.assertEqual(len(files), 5)
+        self.assertIn("hidden directory", self.logcontents())
+        self.assertNotIn("hidden file", self.logcontents())
+        self.resetLog()
+        with open(os.path.join(sipdir,".goober.txt"), 'w') as fd:
+            fd.write("\n")
+        files = [f for f in prpr.list_submitted_files()]
+        self.assertEqual(len(files), 5)
+        self.assertIn("hidden directory", self.logcontents())
+        self.assertIn("hidden file", self.logcontents())
+
+        
+    def test_ensure_metaddata_file(self):
+        sipdir = self.setup_insitu()
+        outdir = os.path.join(sipdir, "_wbag")
+        prpr = prep.MIDASFormatPrepper(sipdir, outdir, {})
+
+        prpr.ensure_metadata_file("_pod.json", "pod.json")
+        self.assertIsNotNone(prpr.dsid)
+        self.assertIsNotNone(prpr.bagdir)
+        self.assertTrue(os.path.exists(prpr.bagdir))
+        self.assertTrue(not os.path.exists(os.path.join(prpr.bagdir,'metadata')))
+        self.assertTrue(os.path.exists(os.path.join(prpr.bagdir,'pod.json')))
+        self.assertTrue(os.path.isfile(os.path.join(prpr.bagdir,'pod.json')))
         
 
+        prpr.ensure_metadata_file("_pod.json", "pod.json")
+        self.assertIsNotNone(prpr.dsid)
+        self.assertIsNotNone(prpr.bagdir)
+        self.assertTrue(os.path.exists(prpr.bagdir))
+        self.assertTrue(not os.path.exists(os.path.join(prpr.bagdir,'metadata')))
+        self.assertTrue(os.path.exists(os.path.join(prpr.bagdir,'pod.json')))
+        self.assertTrue(os.path.isfile(os.path.join(prpr.bagdir,'pod.json')))
+        self.assertNotIn("Updating apparent copy", self.logcontents())
+        self.resetLog()
+        
+        prpr.ensure_metadata_file("trial1.json",
+                                  os.path.join("metadata","goob.json"))
+        self.assertTrue(os.path.exists(os.path.join(prpr.bagdir,'metadata')))
+        self.assertTrue(os.path.isdir(os.path.join(prpr.bagdir,'metadata')))
+        self.assertTrue(os.path.exists(os.path.join(prpr.bagdir,'pod.json')))
+        self.assertTrue(os.path.isfile(os.path.join(prpr.bagdir,
+                                                    'metadata','goob.json')))
+
+        # try an update to file to test overwrite
+        outfile = os.path.join(prpr.bagdir, 'metadata', 'goob.json')
+        sz = os.stat(outfile).st_size
+        with open(os.path.join(sipdir, "trial1.json"), "a") as fd:
+            fd.write("\n\n")
+        prpr.ensure_metadata_file("trial1.json",
+                                  os.path.join("metadata","goob.json"))
+        self.assertEqual(os.stat(outfile).st_size, sz+2)
+        self.assertIn("Updating apparent copy", self.logcontents())
+        
+        with open(os.path.join(sipdir, "trial1.json"), "a") as fd:
+            fd.write("\n\n")
+        self.resetLog()
+        prpr.cfg['ignore_rm_copy_warning'] = True
+        prpr.ensure_metadata_file("trial1.json",
+                                  os.path.join("metadata","goob.json"))
+        self.assertEqual(os.stat(outfile).st_size, sz+4)
+        self.assertEqual(len(self.logcontents()), 0)
+
+    def test_ensure_data_file(self):
+        sipdir = self.setup_insitu()
+        outdir = os.path.join(sipdir, "_wbag")
+        prpr = prep.MIDASFormatPrepper(sipdir, outdir, {})
+
+        prpr.ensure_data_file("trial1.json")
+        self.assertIsNotNone(prpr.dsid)
+        self.assertIsNotNone(prpr.bagdir)
+        self.assertTrue(os.path.exists(prpr.bagdir))
+        self.assertTrue(os.path.exists(os.path.join(prpr.bagdir,'data')))
+        self.assertTrue(os.path.exists(os.path.join(prpr.bagdir,'data','trial1.json')))
+        self.assertTrue(os.path.isfile(os.path.join(prpr.bagdir,'data','trial1.json')))
+
+        prpr.ensure_data_file("trial1.json")
+        self.assertTrue(os.path.exists(os.path.join(prpr.bagdir,'data')))
+        self.assertTrue(os.path.exists(os.path.join(prpr.bagdir,'data','trial1.json')))
+        self.assertTrue(os.path.isfile(os.path.join(prpr.bagdir,'data','trial1.json')))
+        self.assertNotIn("Updating apparent copy", self.logcontents())
+        self.resetLog()
+
+        outfile = os.path.join(prpr.bagdir, 'data', 'trial1.json')
+        sz = os.stat(outfile).st_size
+        with open(os.path.join(sipdir, "trial1.json"), "a") as fd:
+            fd.write("\n\n")
+        prpr.ensure_data_file("trial1.json")
+        self.assertEqual(os.stat(outfile).st_size, sz+2)
+        # because it's a hard link...
+        self.assertNotIn("Updating apparent copy", self.logcontents())
+        self.resetLog()
+
+        os.remove(outfile)
+        prpr.ensure_metadata_file("trial1.json", "data/trial1.json")
+        with open(os.path.join(sipdir, "trial1.json"), "a") as fd:
+            fd.write("\n\n")
+        prpr.ensure_data_file("trial1.json")
+        self.assertEqual(os.stat(outfile).st_size, sz+4)
+        self.assertIn("Updating apparent copy", self.logcontents())
+        self.resetLog()
+
+        os.remove(outfile)
+        prpr.ensure_metadata_file("trial1.json", "data/trial1.json")
+        with open(os.path.join(sipdir, "trial1.json"), "a") as fd:
+            fd.write("\n\n")
+        prpr.cfg['ignore_rm_copy_warning'] = True
+        prpr.ensure_data_file("trial1.json")
+        self.assertEqual(os.stat(outfile).st_size, sz+6)
+        self.assertNotIn("Updating apparent copy", self.logcontents())
+        
+    def test_ensure_all_data_files(self):
+        sipdir = self.setup_insitu()
+        outdir = os.path.join(sipdir, "_wbag")
+        prpr = prep.MIDASFormatPrepper(sipdir, outdir, {})
+
+        prpr.ensure_all_data_files(["_pod.json", "mets.xml"])
+        self.assertTrue(os.path.exists(os.path.join(prpr.bagdir,
+                                                    'data','trial1.json')))
+        self.assertTrue(os.path.exists(os.path.join(prpr.bagdir,
+                                                    'data','trial2.json')))
+        self.assertTrue(os.path.exists(os.path.join(prpr.bagdir,'data','trial3',
+                                                    'trial3a.json')))
+        self.assertTrue(os.path.exists(os.path.join(prpr.bagdir,
+                                                    'data','_nerdm.json')))
+        self.assertTrue(not os.path.exists(os.path.join(prpr.bagdir,
+                                                        'data','_pod.json')))
+
+    def test_ensure_preparation(self):
+        sipdir = self.setup_insitu()
+        outdir = os.path.join(sipdir, "_wbag")
+        prpr = prep.MIDASFormatPrepper(sipdir, outdir,
+                                    {'allow_metadata_files': [ "_nerdm.json" ]})
+
+        prpr.ensure_preparation()
+        self.assertIsNotNone(prpr.dsid)
+        self.assertIsNotNone(prpr.bagdir)
+        self.assertTrue(os.path.exists(prpr.bagdir))
+        self.assertTrue(os.path.exists(os.path.join(prpr.bagdir,'data')))
+        self.assertTrue(os.path.isdir(os.path.join(prpr.bagdir,'data')))
+        self.assertTrue(os.path.exists(os.path.join(prpr.bagdir,'metadata')))
+        self.assertTrue(os.path.isdir(os.path.join(prpr.bagdir,'metadata')))
+        
+        self.assertTrue(os.path.exists(os.path.join(prpr.bagdir,
+                                                    'data','trial1.json')))
+        self.assertTrue(os.path.exists(os.path.join(prpr.bagdir,
+                                                    'data','trial2.json')))
+        self.assertTrue(os.path.exists(os.path.join(prpr.bagdir,'data','trial3',
+                                                    'trial3a.json')))
+        self.assertTrue(os.path.exists(os.path.join(prpr.bagdir,
+                                                    'metadata','_nerdm.json')))
+        self.assertTrue(os.path.exists(os.path.join(prpr.bagdir,
+                                                    'metadata','pod.json')))
+
+    def test_ensure_preparation2(self):
+        sipdir = self.setup_insitu()
+        outdir = os.path.join(sipdir, "_wbag")
+        prpr = prep.MIDASFormatPrepper(sipdir, outdir, {})
+
+        prpr.ensure_preparation()
+        self.assertIsNotNone(prpr.dsid)
+        self.assertIsNotNone(prpr.bagdir)
+        self.assertTrue(os.path.exists(prpr.bagdir))
+        self.assertTrue(os.path.exists(os.path.join(prpr.bagdir,'data')))
+        self.assertTrue(os.path.isdir(os.path.join(prpr.bagdir,'data')))
+        self.assertTrue(os.path.exists(os.path.join(prpr.bagdir,'metadata')))
+        self.assertTrue(os.path.isdir(os.path.join(prpr.bagdir,'metadata')))
+        
+        self.assertTrue(os.path.exists(os.path.join(prpr.bagdir,
+                                                    'data','trial1.json')))
+        self.assertTrue(os.path.exists(os.path.join(prpr.bagdir,
+                                                    'data','trial2.json')))
+        self.assertTrue(os.path.exists(os.path.join(prpr.bagdir,'data','trial3',
+                                                    'trial3a.json')))
+        self.assertTrue(os.path.exists(os.path.join(prpr.bagdir,
+                                                    'data','_nerdm.json')))
+        self.assertTrue(os.path.exists(os.path.join(prpr.bagdir,
+                                                    'metadata','pod.json')))
 
 if __name__ == '__main__':
     test.main()

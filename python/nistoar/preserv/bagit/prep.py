@@ -130,7 +130,7 @@ class SIPPrepper(object):
             raise PODError("Unable to read POD file: "+str(ex), src=podfile)
 
     def set_bagdir(self):
-        podfile = self.find_pod_file()
+        podfile = os.path.join(self.sipdir, self.find_pod_file())
         self.poddata = self.read_pod(podfile)
         try: 
             self.dsid = self.poddata['identifier']
@@ -147,8 +147,8 @@ class SIPPrepper(object):
         if not self.bagdir:
             self.set_bagdir()
 
-        self.ensure_bag_parent_dir()
         if not os.path.exists(self.bagdir):
+            self.ensure_bag_parent_dir()
             try:
                 os.mkdir(self.bagdir)
             except OSError, e:
@@ -192,29 +192,31 @@ class SIPPrepper(object):
 
     def ensure_data_file(self, inpath):
         """
-        create a hard line to a data file in output working bag directory.
+        create a hard link to a data file in output working bag directory.
         A data file is a file provided by the dataset's author (as opposed 
         to a metadata file, like a POD file).
 
         :param inpath  str:  the path to the data file relative to the base
                              SIP directory.
         """
+        self.ensure_bagdir()
         outfile = os.path.join(self.bagdir, 'data', inpath)
         infile = os.path.join(self.sipdir, inpath)
-        assert os.path.isfile(infile)
+        if not os.path.exists(infile) or not os.path.isfile(infile):
+            raise ValueError("Not an existing file: "+inpath)
         
-        if not exists(outfile):
+        if not os.path.exists(outfile):
             outdir = os.path.dirname(outfile)
-            if not exists(outdir):
+            if not os.path.exists(outdir):
                 os.makedirs(outdir)
             os.link(infile, outfile)
             
-        elif stat(infile).st_mtime > stat(outfile).st_mtime:
+        elif os.stat(infile).st_mtime > os.stat(outfile).st_mtime:
             # this extra check is in case the file was copied here or otherwise
             # does not match the input file (based on its modification time)
             if not self.cfg.get('ignore_rm_copy_warning'):
                 log.warn("Updating apparent copy of data file: "+inpath)
-            os.remove(inpath)
+            os.remove(outfile)
             os.link(infile, outfile)
 
     def ensure_metadata_file(self, inpath, outpath, allow_update=True):
@@ -229,22 +231,24 @@ class SIPPrepper(object):
         :param outpath str:  the path to copy the file to in the working bag
                              directory
         """
+        self.ensure_bagdir()
         outfile = os.path.join(self.bagdir, outpath)
         infile = os.path.join(self.sipdir, inpath)
         
-        if not exists(outfile):
+        if not os.path.exists(outfile):
             outdir = os.path.dirname(outfile)
-            if not exists(outdir):
+            if not os.path.exists(outdir):
                 os.makedirs(outdir)
             copy(infile, outfile)
             
-        elif allow_update and stat(infile).st_mtime > stat(outfile).st_mtime:
+        elif allow_update and \
+             os.stat(infile).st_mtime > os.stat(outfile).st_mtime:
             if not self.cfg.get('ignore_rm_copy_warning'):
-                log.warn("Updating apparent copy of data file: "+inpath)
-            os.remove(inpath)
+                log.warn("Updating apparent copy of metadata file: "+inpath)
+            os.remove(outfile)
             copy(infile, outfile)
 
-    def list_submitted_files():
+    def list_submitted_files(self):
         """
         return a list of all files that are part of the submission.  This 
         implementation simply returns a deep list of plain files as paths 
@@ -254,7 +258,7 @@ class SIPPrepper(object):
         """
         start = re.compile(self.sipdir+r'/?')
         for root, dirs, files in os.walk(self.sipdir):
-            root = start.sub(root, '')
+            root = start.sub('', root)
 
             for file in files:
                 if file.startswith('.'):
@@ -291,8 +295,8 @@ class MIDASFormatPrepper(SIPPrepper):
         """
         locs = self.cfg.get('pod_locations', [ MIDAS_POD_FILE ])
         for loc in locs:
-            loc = os.path.join(self.sipdir, loc)
-            if os.path.exists(loc):
+            path = os.path.join(self.sipdir, loc)
+            if os.path.exists(path):
                 return loc
         raise PODError("POD file not found in expected locations: "+str(locs))
 
@@ -307,11 +311,11 @@ class MIDASFormatPrepper(SIPPrepper):
             
         start = re.compile(self.sipdir+r'/?')
         for root, dirs, files in os.walk(self.sipdir):
-            root = start.sub(root, '')
+            root = start.sub('', root)
             for file in files:
                 file = os.path.join(root,file)
                 if file not in metadata_files:
-                    self.ensure_data_datafile(file)
+                    self.ensure_data_file(file)
 
     def ensure_preparation(self):
         """
@@ -330,7 +334,7 @@ class MIDASFormatPrepper(SIPPrepper):
             dest[podfile] = dest[MIDAS_POD_FILE]
             del dest[MIDAS_POD_FILE]
         md_files = [ podfile ]
-        self._extend_file_list(dirs, 'allow_metadata_files')
+        self._extend_file_list(md_files, 'allow_metadata_files')
 
         # find all the files and replicate them into the output working
         # bag directory
