@@ -274,6 +274,14 @@ class SIPPrepper(object):
                              os.path.join(root, h[1]))
                     del dirs[h[0]]
 
+            # make sure the output directory is not searched
+            if not root and self.cfg.get('relative_to_indir'):
+                ignore = [d for d in enumerate(dirs)
+                          if d[1] in [ os.path.basename(self.bagparent) ]]
+                if ignore:
+                    for h in reversed(ignore):
+                        del dirs[h[0]]
+
 
 class MIDASFormatPrepper(SIPPrepper):
     """

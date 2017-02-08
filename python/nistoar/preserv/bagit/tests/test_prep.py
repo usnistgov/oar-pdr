@@ -404,6 +404,32 @@ class TestMIDASPrepper(test.TestCase):
         self.assertTrue(os.path.exists(os.path.join(prpr.bagdir,
                                                     'metadata','pod.json')))
 
+        # make sure we don't interpret output directory as input data
+        self.assertEqual(len([f for f in prpr.list_submitted_files()
+                                if '_wbag' in f]), 0)
+
+        # ensure indepodent
+        prpr.ensure_preparation()
+        self.assertTrue(os.path.exists(prpr.bagdir))
+        self.assertTrue(os.path.exists(os.path.join(prpr.bagdir,'data')))
+        self.assertTrue(os.path.isdir(os.path.join(prpr.bagdir,'data')))
+        self.assertTrue(os.path.exists(os.path.join(prpr.bagdir,'metadata')))
+        self.assertTrue(os.path.isdir(os.path.join(prpr.bagdir,'metadata')))
+        
+        self.assertTrue(os.path.exists(os.path.join(prpr.bagdir,
+                                                    'data','trial1.json')))
+        self.assertTrue(os.path.exists(os.path.join(prpr.bagdir,
+                                                    'data','trial2.json')))
+        self.assertTrue(os.path.exists(os.path.join(prpr.bagdir,'data','trial3',
+                                                    'trial3a.json')))
+        self.assertTrue(os.path.exists(os.path.join(prpr.bagdir,
+                                                    'metadata','_nerdm.json')))
+        self.assertTrue(os.path.exists(os.path.join(prpr.bagdir,
+                                                    'metadata','pod.json')))
+        self.assertEqual(len([f for f in prpr.list_submitted_files()
+                                if '_wbag' in f]), 0)
+
+
     def test_ensure_preparation2(self):
         sipdir = self.setup_insitu()
         outdir = os.path.join(sipdir, "_wbag")
