@@ -200,6 +200,14 @@
                     }
                 },
 
+                "inventory": {
+                    "description": "a summary of the components that are associated with this resource",
+                    "notes": [
+                        "This property is an aid for processing resources with a large number of components.  This summary allows the actual components content to be missing or incomplete in a trasmitted version of the record."
+                    ],
+                    "$ref": "#/definitions/Inventory"
+                },
+
                 "components": {
                     "description": "a listing of the various component resources, tools, and distributions of this resource",
                     "notes": [
@@ -569,61 +577,16 @@
 
         "Inventory": {
             "description": "an inventory summary of the components that are part of a Resource",
-            "type": "object",
-            "properties": {
-                "subcollectionCount": {
-                    "description": "the number of top-level subcollection components in this resource",
-                    "type": "integer"
-                },
-                "deepSubcollectionCount": {
-                    "description": "the total number of subcollection components throughout the subcollection hierarchy",
-                    "type": "integer"
-                },
-                "byType": {
-                    "description": "a deep, total inventory broken down by type",
-                    "notes": [
-                        "These numbers provide totals for the entire hierarchy"
-                    ],
-                    "type": "array",
-                    "items": { "$ref": "#/definitions/TypeInventory" }
-                },
-
-                "bySubcollection": {
-                    "description": "a hierarchical breakdown of the component inventory by subcollection",
-                    "notes": [
-                        "This captures the inventory for the top level collection, with nodes for subcollections"
-                    ],
-                    "$ref": "#/definitions/CollectionInventory" 
-                },
-
-                "matching": {
-                    "description": "an inventory of components that match a particular query",
-                    "type": "array",
-                    "items": { "$ref": "#/definitions/MatchingInventory" }
-                }
-            }
-        },
-
-        "MatchingInventory": {
-            "description": "an inventor of components that matched a specified search query",
-            "notes": [
-                "This is expected to be injected into a NERDm record as a result of a search query, as opposed to being included in static versions"
-            ],
-            "allOf": [ 
-                { "$ref": "#/definitions/Inventory" },
-                {
-                    "properties": {
-                        "query": {
-                            "description": "a string representing the query to which this inventory matches",
-                            "type": "string"
-                        }
-                    }
-                }
-            ]
+            "type": "array",
+            "minItems": 1,
+            "items": { "$ref": "#/definitions/CollectionInventory" }
         },
 
         "TypeInventory": {
             "description": "a count of the number of components of a given type",
+            "notes": [
+                "This type is intended for use in the context of a (named) collection of components wihtin a hierarchy of components.  In the property documentation, the 'current collection' refers to that context."
+            ],
             "type": "object",
             "properties": {
                 "forType": {
@@ -633,16 +596,20 @@
                     ],
                     "type": "string"
                 },
-                "count": {
-                    "description": "the number of occurences found for this type",
+                "childCount": {
+                    "description": "the number of components of this type that are a direct child of the current collection",
+                    "type": "integer"
+                },
+                "descCount": {
+                    "description": "the number of components of this type that are anywhere below the current collection",
                     "type": "integer"
                 },
                 "label": {
-                    "description": "a label for the type and count",
+                    "description": "a recommended label for the type and count",
                     "type": "string"
                 }
             },
-            "required": [ "forType", "count" ]
+            "required": [ "forType", "descCount" ]
         },
 
         "CollectionInventory": {
@@ -652,22 +619,38 @@
             ],
             "type": "object",
             "properties": {
-                "collname": {
-                    "description": "the name of the subcollection that this inventory applies to",
+                "forCollection": {
+                    "description": "the name of the collection that this inventory applies to",
+                    "notes": [
+                        "This is intended to be a /-delimited name that reflects the position of the subcollection in the hierarchy, as given in the Subcollection filepath field of the collection component.",
+                        "The root collection should be refered to with an empty string"
+                    ],
                     "type": "string"
+                },
+                "childCount": {
+                    "description": "the number of relevent components that are a direct child of the collection",
+                    "type": "integer"
+                },
+                "descCount": {
+                    "description": "the number of relevent components that are anywhere below the collection",
+                    "type": "integer"
                 },
                 "byType": {
                     "description": "a breakdown of the inventory of components in this collection by type",
                     "type": "array",
                     "items": { "$ref": "#/definitions/TypeInventory" }
                 },
-                "subcolls": {
-                    "description": "component inventories for subcollections",
+                "childCollections": {
+                    "description": "an array listing the names of the subcollections that are direct children of the collection",
+                    "notes": [
+                        "Each name should be the full filepath value that refleces the position of the subcollection in the hierarchy, relative to the root, as given in the Subcollection filepath field of the collection component.  This makes it possible to select the subcollection's inventory (via forCollection) or its Subcollection component (via filepath)",
+                        "The order of the listing should be considered significant"
+                    ],
                     "type": "array",
-                    "items": { "$ref": "#/definitions/CollectionInventory" }
+                    "items": { "type": "string" }
                 }
             },
-            "required": [ "collname" ]
+            "required": [ "forCollection" ]
         },
 
         "Component": {

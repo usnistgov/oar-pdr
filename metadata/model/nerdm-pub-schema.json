@@ -197,15 +197,7 @@
                         "format": {
                             "title": "Format",
                             "description": "A human-readable description of the file format of a distribution",
-                            "anyOf": [
-                                {
-                                    "type": "string",
-                                    "minLength": 1
-                                },
-                                {
-                                    "type": "null"
-                                }
-                            ],
+                            "$ref": "#/definitions/Format",
                             "asOntology": {
                                 "@context": "profile-schema-onto.json",
                                 "prefLabel": "Format",
@@ -343,7 +335,7 @@
                 },
 
                 "@id": {
-                    "description": "the unique identifier identifying the concept or thing",
+                    "description": "the unique identifier for the format",
                     "type": "string",
                     "format": "uri"
                 },
@@ -355,8 +347,7 @@
                     ],
                     "type": "string"
                 }
-            },
-            "required": [ "@type", "tag" ]
+            }
         },
 
         "DataPublication": {

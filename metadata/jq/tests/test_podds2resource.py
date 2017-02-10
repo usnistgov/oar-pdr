@@ -30,13 +30,13 @@ class TestJanaf(unittest.TestCase):  #
         
         exts = self.out['$extensionSchemas']
         self.assertEquals(len(exts), 1)
-        self.assertIn(nerdmpub+"/definitions/PublishedDataResource", exts)
+        self.assertIn(nerdmpub+"/definitions/PublicDataResource", exts)
 
     def test_restypes(self):
         types = self.out['@type']
         self.assertIsInstance(types, list)
         self.assertEquals(len(types), 1)
-        self.assertEquals(types[0], "nrdp:PublishedDataResource")
+        self.assertEquals(types[0], "nrdp:PublicDataResource")
 
     def test_arestr(self):
         props = "title modified ediid landingPage license".split()
