@@ -60,12 +60,12 @@
                 {
                     "forType": "nrdp:SearchPage",
                     "childCount": 1,
-                    "descCount": 1,
+                    "descCount": 1
                 },
                 {
                     "forType": "nrdp:Tool",
                     "childCount": 1,
-                    "descCount": 1,
+                    "descCount": 1
                 }
             ],
             "childCollections": []
