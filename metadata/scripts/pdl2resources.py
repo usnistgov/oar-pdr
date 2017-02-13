@@ -76,7 +76,7 @@ def main(args):
             pdldata = json.load(fd)
     except IOError, e:
         raise RuntimeError("Unable to read PDL file ({0}): {1}".
-                           format(opts.file, str(e)))
+                           format(opts.pdlfile, str(e)))
     except ValueError, e:
         raise RuntimeError("JSON Syntax error: "+str(e))
 

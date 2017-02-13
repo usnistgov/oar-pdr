@@ -1,6 +1,6 @@
 {
     "$schema": "http://json-schema.org/draft-04/schema#",
-    "$extensionSchemas": ["http://mgi.nist.gov/mgi-json-schema/v0.1"],
+    "$extensionSchemas": ["https://www.nist.gov/od/dm/enhanced-json-schema/v0.1#"],
     "id": "https://www.nist.gov/od/dm/nerdm-schema/v0.1#",
     "rev": "wd1",
     "title": "The JSON Schema for the NIST Extended Resource Data model (NERDm)",
