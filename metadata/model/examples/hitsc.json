@@ -51,6 +51,26 @@
     "license": "http://www.nist.gov/data/license.cfm",
     "dataQuality": true,
 
+    "inventory": [
+        {
+            "forCollection": "",
+            "childCount": 0,
+            "descCount": 0,
+            "byType": [
+                {
+                    "forType": "nrdp:SearchPage",
+                    "childCount": 1,
+                    "descCount": 1,
+                },
+                {
+                    "forType": "nrdp:Tool",
+                    "childCount": 1,
+                    "descCount": 1,
+                }
+            ],
+            "childCollections": []
+        }
+    ],
     "components": [
         {
             "@type": [ "nrdp:SearchPage", "nrdp:Tool" ],

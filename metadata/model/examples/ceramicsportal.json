@@ -41,6 +41,21 @@
     "license": "http://www.nist.gov/data/license.cfm",
     "dataQuality": true,
 
+    "inventory": [
+        {
+            "forCollection": "",
+            "childCount": 6,
+            "descCount": 6,
+            "byType": [
+                {
+                    "forType": "nrd:IncludedResource",
+                    "childCount": 6,
+                    "descCount": 6,
+                }
+            ],
+            "childCollections": []
+        }
+    ],
     "components": [
         { 
             "@type": [ "nrd:IncludedResource" ],

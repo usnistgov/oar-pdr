@@ -129,6 +129,26 @@
     ],
     "accessLevel": "public",
     "license": "http://www.nist.gov/data/license.cfm",
+    "inventory": [
+        {
+            "forCollection": "",
+            "childCount": 318,
+            "descCount": 318,
+            "byType": [
+                {
+                    "forType": "dcat:Distribution",
+                    "childCount": 318,
+                    "descCount": 318
+                },
+                {
+                    "forType": "nrdp:DataFile",
+                    "childCount": 318,
+                    "descCount": 318
+                }
+            ],
+            "childCollections": []
+        }
+    ],
     "components": [
         {
             "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
