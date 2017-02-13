@@ -247,6 +247,7 @@ def podds2resource:
         description: [ .description ],
         keyword,
         theme,
+        topic: [],
 
         references,
         accessLevel,

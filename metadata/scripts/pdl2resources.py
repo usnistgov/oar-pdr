@@ -7,8 +7,9 @@
 # identifiers will be assigned to each one.  
 #
 from __future__ import print_function
-import os, sys, errno, json
+import os, sys, errno, json, re
 from argparse import ArgumentParser
+from collections import OrderedDict
 
 basedir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 oarpypath = os.path.join(basedir, "python")
@@ -60,6 +61,8 @@ def define_opts(progname=None):
                         default=0)
     parser.add_argument('-c', '--count', metavar='COUNT', type=int, dest='count',
                         help="export no more than COUNT records", default=-1)
+    parser.add_argument('-T', '--fix-theme', dest='fixtheme',action='store_true',
+                        help="add controlled topic values based on given themes")
 
     return parser
 
@@ -87,6 +90,10 @@ def main(args):
     if opts.start >= len(dss):
         raise RuntimeError("Not enough datasets found for requested starting record: start={0} > found={1}".format(opts.start, len(dss)))
 
+    tax = None
+    if opts.fixtheme:
+        tax = load_theme_vocab()
+
     extracted = 0
     lim = len(dss)
     if opts.count >= 0:
@@ -95,6 +102,8 @@ def main(args):
         id = minter.mint()
         basename = id[id.index("pdr0"):]
         res = cvtr.convert_data(dss[i], minter.mint())
+        if opts.fixtheme:
+            set_theme_as_topic(res, tax)
         with open(os.path.join(opts.odir,basename+".json"), 'w') as fd:
             json.dump(res, fd, indent=4, separators=(',', ': '))
         extracted += 1
@@ -103,6 +112,58 @@ def main(args):
         print("Warning: No output files written.", file=sys.stderr)
 
     return extracted
+
+def load_theme_vocab():
+    vocabfile = os.path.join(os.path.dirname(os.path.dirname(__file__)),
+                             "model", "theme-taxonomy.json")
+    if not os.path.exists(vocabfile):
+        raise RuntimeError("Unable to find taxonomy file: "+vocabfile)
+
+    with open(vocabfile) as fd:
+        return json.load(fd)
+
+_match_ignore = "& / and or".split()
+_ignore_chars = re.compile(r"[()]")
+
+def match_term(theme, terms):
+    words = [w for w in _ignore_chars.sub('', theme).split()
+               if w not in _match_ignore]
+
+    # find the theme words in the same order
+    patt = r"\b" + r"\b.*\b".join(words) + r"\b"
+    matches = [t for t in terms if re.match(patt, t['term'], re.I)]
+
+    # find the best match: pull out the matching words, the match with the least
+    # left is considered the best match    
+    min = 20
+    best = -1
+    for i,m in enumerate(matches):
+        stripped = m['term']
+        for word in words:
+            stripped = re.sub(r'\b'+word+r'\b', '', stripped).strip()
+        if len(stripped) < min:
+            min = len(stripped)
+            best = i
+
+    if best >= 0:
+        return matches[best]
+    else:
+        return None
+
+def set_theme_as_topic(rec, tax):
+    tmpl = OrderedDict([("@type", "Concept"), ("scheme", tax['@id'])])
+    
+    if rec.get('theme') and isinstance(rec.get('theme'), list):
+        for term in rec['theme']:
+            matched = match_term(term, tax['vocab'])
+            if matched:
+                if 'topic' not in rec:
+                    rec['topic'] = []
+                words=[w for w in [matched.get('parent'), matched['term']] if w]
+                tag = tmpl.copy()
+                tag.update( [("tag", ": ".join(words))] )
+                rec['topic'].append(tag)
+            
 
 if __name__ == '__main__':
     try:
