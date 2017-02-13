@@ -4,7 +4,7 @@
     "$extensionSchemas": [ "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataPublication" ],
 
     "@type": [ "nrd:SRD", "nrdp:DataPublication", "nrdp:PublicDataResource" ],
-    "@id": "ark:/88434/sdp0fjspek351",
+    "@id": "ark:/88434/pdr02d4t",
     "doi": "doi:10.18434/T42S31",
     "title": "NIST-JANAF Thermochemical Tables - SRD 13",
     "abbrev": [ "SRD#13" ],
