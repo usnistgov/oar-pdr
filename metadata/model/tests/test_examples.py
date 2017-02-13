@@ -29,6 +29,9 @@ class TestExamples(test.TestCase):
     def test_validate_janaf(self):
         self.validate_file("janaf.json")
 
+    def test_validate_janaf_hier(self):
+        self.validate_file("janaf-hier.json")
+
     def test_validate_hitsc(self):
         self.validate_file("hitsc.json")
 
