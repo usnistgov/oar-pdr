@@ -15,14 +15,15 @@ basedir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 oarpypath = os.path.join(basedir, "python")
 if 'OAR_HOME' in os.environ:
     basedir = os.environ['OAR_HOME']
-    oarpypath = os.path.join(basedir, "python")
+    oarpypath = os.path.join(basedir, "lib", "python") +":"+ \
+                os.path.join(basedir, "python")
     jqlib = os.path.join(basedir, "lib", "jq")
     
 if 'OAR_PYTHONPATH' in os.environ:
     oarpypath = os.environ['OAR_PYTHONPATH']
 if 'OAR_JQ_LIB' in os.environ:
     jqlib = os.environ['OAR_JQ_LIB']
-else:
+if not os.path.exists(jqlib):
     print("jq library location is unknown; please, set the OAR_HOME or "
           "OAR_JQ_LIB environment variable", file=sys.stderr)
     sys.exit(10)

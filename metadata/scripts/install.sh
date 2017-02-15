@@ -79,3 +79,15 @@ cp $SOURCE_DIR/scripts/pdl2resources.py $BINDIR
 mkdir -p $ETC_DIR/samples
 echo cp $SOURCE_DIR/jq/tests/data/nist-pdl-oct2016.json $ETC_DIR/samples
 cp $SOURCE_DIR/jq/tests/data/nist-pdl-oct2016.json $ETC_DIR/samples
+
+for f in `ls -d $SOURCE_DIR/model/examples/*.json`; do
+    echo cp $f $ETC_DIR/samples
+    cp $f $ETC_DIR/samples
+done
+
+mkdir -p $ETC_DIR/model
+for f in `ls -d $SOURCE_DIR/model/*.json{,ld}`; do
+    echo cp $f $ETC_DIR/model
+    cp $f $ETC_DIR/model
+done
+
