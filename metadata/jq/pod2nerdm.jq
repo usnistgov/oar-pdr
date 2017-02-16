@@ -47,7 +47,7 @@ def cvtref:  {
     "@type": "deo:BibliographicReference",
     "refType": "IsReferencedBy",
     "location": .,
-    "$extensionSchemas": [ dciteRefType ]
+    "_extensionSchemas": [ dciteRefType ]
 };
 
 # conversion for a POD-to-NERDm distribution node.  A distribution gets converted
@@ -59,7 +59,7 @@ def cvtref:  {
 def dist2download: 
     .["filepath"] = ( .downloadURL | sub(".*/"; "") ) |
     .["@type"] = [ "nrdp:DataFile", "dcat:Distribution" ] |
-    .["$extensionSchemas"] = [ "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile" ] |
+    .["_extensionSchemas"] = [ "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile" ] |
     if .format then .format = { description: .format } else . end
 ;
 
@@ -231,8 +231,8 @@ def inventory_components:
 def podds2resource:
     {
         "@context": nerdm_context,
-        "$schema": nerdm_schema,
-        "$extensionSchemas": [ nerdm_pub_schema + "/definitions/PublicDataResource" ],
+        "_schema": nerdm_schema,
+        "_extensionSchemas": [ nerdm_pub_schema + "/definitions/PublicDataResource" ],
         "@type": [ "nrdp:PublicDataResource" ],
         "@id": resid,
         "doi": (.distribution + []) | doiFromDist,

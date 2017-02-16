@@ -24,11 +24,11 @@ class TestJanaf(unittest.TestCase):  #
         self.assertEquals(self.out['@context'],
                           "https://www.nist.gov/od/dm/nerdm-pub-context.jsonld")
     def test_schema(self):
-        self.assertEquals(self.out['$schema'],
+        self.assertEquals(self.out['_schema'],
                           "https://www.nist.gov/od/dm/nerdm-schema/v0.1#")
     def test_extsch(self):
         
-        exts = self.out['$extensionSchemas']
+        exts = self.out['_extensionSchemas']
         self.assertEquals(len(exts), 1)
         self.assertIn(nerdmpub+"/definitions/PublicDataResource", exts)
 
@@ -69,7 +69,7 @@ class TestJanaf(unittest.TestCase):  #
             self.assertIsInstance(comps[0][prop], types.StringTypes,
                 "Property '{0}' not a string: {1}".format(prop, comps[0][prop]))
 
-        exts = comps[0]['$extensionSchemas']
+        exts = comps[0]['_extensionSchemas']
         self.assertEquals(len(exts), 1)
         self.assertIn(nerdmpub+"/definitions/DataFile", exts)
 
@@ -93,7 +93,7 @@ class TestJanaf(unittest.TestCase):  #
         self.assertEquals(refs[0]['location'],
                           "http://www.nist.gov/data/PDFfiles/jpcrdS1V14.pdf")
 
-        exts = refs[0]['$extensionSchemas']
+        exts = refs[0]['_extensionSchemas']
         self.assertEquals(len(exts), 1)
         self.assertIn(nerdm+"/definitions/DCiteDocumentReference", exts)
         
@@ -102,7 +102,7 @@ class TestValidateNerdm(unittest.TestCase):
 
     def setUp(self):
         loader = ejs.SchemaLoader.from_directory(schemadir)
-        self.val = ejs.ExtValidator(loader)
+        self.val = ejs.ExtValidator(loader, ejsprefix='_')
 
     def test_janaf(self):
         out = send_file_thru_jq('nerdm::podds2resource', janaffile,

@@ -49,14 +49,14 @@ null
 #
 include "pod2nerdm"; map(cvtref)
 [ "http://goob.net/doc1.txt", "https://goob.gov/doc2.txt" ]
-[{ "@type": "deo:BibliographicReference", "refType": "IsReferencedBy", "$extensionSchemas": [ "https://www.nist.gov/od/dm/nerdm-schema/v0.1#/definitions/DCiteDocumentReference" ], "location": "http://goob.net/doc1.txt"}, { "@type": "deo:BibliographicReference", "refType": "IsReferencedBy", "$extensionSchemas": [ "https://www.nist.gov/od/dm/nerdm-schema/v0.1#/definitions/DCiteDocumentReference" ], "location": "https://goob.gov/doc2.txt"}]
+[{ "@type": "deo:BibliographicReference", "refType": "IsReferencedBy", "_extensionSchemas": [ "https://www.nist.gov/od/dm/nerdm-schema/v0.1#/definitions/DCiteDocumentReference" ], "location": "http://goob.net/doc1.txt"}, { "@type": "deo:BibliographicReference", "refType": "IsReferencedBy", "_extensionSchemas": [ "https://www.nist.gov/od/dm/nerdm-schema/v0.1#/definitions/DCiteDocumentReference" ], "location": "https://goob.gov/doc2.txt"}]
 
 #--------------
 # testing dist2download()
 #
 include "pod2nerdm"; dist2download
 {"describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json", "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_B-101.json", "mediaType": "application/json","title": "Titanium Boride" }
-{"describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json", "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_B-101.json","mediaType": "application/json", "title": "Titanium Boride", "filepath":"srd13_B-101.json", "@type": ["nrdp:DataFile","dcat:Distribution"],"$extensionSchemas": ["https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"]}
+{"describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json", "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_B-101.json","mediaType": "application/json", "title": "Titanium Boride", "filepath":"srd13_B-101.json", "@type": ["nrdp:DataFile","dcat:Distribution"],"_extensionSchemas": ["https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"]}
 
 #--------------
 # testing dist2hidden()
@@ -96,7 +96,7 @@ include "pod2nerdm"; dist2comp
 #
 include "pod2nerdm"; dist2comp
 {"describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json", "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_B-101.json", "mediaType": "application/json","title": "Titanium Boride" }
-{"describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json", "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_B-101.json","mediaType": "application/json", "title": "Titanium Boride", "filepath":"srd13_B-101.json", "@type": ["nrdp:DataFile","dcat:Distribution"],"$extensionSchemas": ["https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"]}
+{"describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json", "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_B-101.json","mediaType": "application/json", "title": "Titanium Boride", "filepath":"srd13_B-101.json", "@type": ["nrdp:DataFile","dcat:Distribution"],"_extensionSchemas": ["https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"]}
 
 #--------------
 # testing dist2comp()
@@ -106,7 +106,7 @@ include "pod2nerdm"; dist2comp
 #
 include "pod2nerdm"; dist2comp
 {"accessURL": "http://www.nsrl.nist.gov/Downloads.htm","conformsTo": "http://www.nsrl.nist.gov/Documents/Data-Formats-of-the-NSRL-Reference-Data-Set-16.pdf","downloadURL": "http://www.nsrl.nist.gov/RDS/rds_2.50/RDS_250.iso","format": "ISO 9660 disk image","mediaType": "application/zip" }
-{"accessURL": "http://www.nsrl.nist.gov/Downloads.htm","conformsTo": "http://www.nsrl.nist.gov/Documents/Data-Formats-of-the-NSRL-Reference-Data-Set-16.pdf","downloadURL": "http://www.nsrl.nist.gov/RDS/rds_2.50/RDS_250.iso","format": { "description": "ISO 9660 disk image"},"mediaType": "application/zip", "filepath":"RDS_250.iso", "@type": ["nrdp:DataFile","dcat:Distribution"],"$extensionSchemas": ["https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"] }
+{"accessURL": "http://www.nsrl.nist.gov/Downloads.htm","conformsTo": "http://www.nsrl.nist.gov/Documents/Data-Formats-of-the-NSRL-Reference-Data-Set-16.pdf","downloadURL": "http://www.nsrl.nist.gov/RDS/rds_2.50/RDS_250.iso","format": { "description": "ISO 9660 disk image"},"mediaType": "application/zip", "filepath":"RDS_250.iso", "@type": ["nrdp:DataFile","dcat:Distribution"],"_extensionSchemas": ["https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"] }
 
 #--------------
 # testing dist2comp()

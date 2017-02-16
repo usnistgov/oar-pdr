@@ -36,7 +36,7 @@ class TestConvert(test.TestCase):
             shutil.rmtree(tmpdir)
 
     def setUp(self):
-        self.val = ejs.ExtValidator.with_schema_dir(schemadir)
+        self.val = ejs.ExtValidator.with_schema_dir(schemadir, ejsprefix='_')
 
     
     def test_convert(self):

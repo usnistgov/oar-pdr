@@ -17,7 +17,11 @@ if 'OAR_HOME' in os.environ:
     basedir = os.environ['OAR_HOME']
     oarpypath = os.path.join(basedir, "lib", "python") +":"+ \
                 os.path.join(basedir, "python")
-    jqlib = os.path.join(basedir, "lib", "jq")
+jqlib = os.path.join(basedir, "lib", "jq")
+if not os.path.exists(jqlib):
+    jqlib2 = os.path.join(basedir, "jq")
+    if os.path.exists(jqlib2):
+        jqlib = jqlib2
     
 if 'OAR_PYTHONPATH' in os.environ:
     oarpypath = os.environ['OAR_PYTHONPATH']

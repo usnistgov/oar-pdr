@@ -17,7 +17,7 @@ class TestExamples(test.TestCase):
 
     def setUp(self):
         loader = ejs.SchemaLoader.from_directory(schemadir)
-        self.val = ejs.ExtValidator(loader)
+        self.val = ejs.ExtValidator(loader, ejsprefix='_')
 
     def validate_file(self, filename):
         fpath = os.path.join(exdir, filename)

@@ -1,7 +1,7 @@
 {
     "@context": "https://www.nist.gov/od/dm/nerdm-pub-context.jsonld",
-    "$schema": "https://www.nist.gov/od/dm/nerdm-schema/v0.1#",
-    "$extensionSchemas": [ "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataPublication" ],
+    "_schema": "https://www.nist.gov/od/dm/nerdm-schema/v0.1#",
+    "_extensionSchemas": [ "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataPublication" ],
 
     "@type": [ "nrdp:Database", "nrdp:SRD", "nrdp:PublishedDataResource" ],
     "@id": "ark:/88434/sdp0fjspek353",
@@ -42,7 +42,7 @@
             "refType": "IsDocumentedBy",
             "label": "User Manual",
             "location": "https://srdata.nist.gov/CeramicDataPortal/Manual/HtsHelper",
-            "$extensionSchemas": [
+            "_extensionSchemas": [
                 "https://www.nist.gov/od/dm/nerdm-schema/v0.1#/definitions/DCiteDocumentReference"
             ]
         }
