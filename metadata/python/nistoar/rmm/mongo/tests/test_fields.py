@@ -12,12 +12,9 @@ schemadir = os.path.join(basedir, "model")
 fldschemafile = os.path.join(schemadir, "field-help-schema.json")
 flddatafile = os.path.join(schemadir, "nerdm-fields-help.json")
 
-dbhost = None
-dbname = None
+dburl = None
 if os.environ.get('MONGO_TESTDB_URL'):
-    parts = urlparse.urlparse(os.environ.get('MONGO_TESTDB_URL'))
-    dbhost = parts.netloc
-    dbname = parts.path.strip('/')
+    dburl = os.environ.get('MONGO_TESTDB_URL')
 
 assert os.path.exists(schemadir), schemadir
 
@@ -40,10 +37,10 @@ class TestFieldsDocs(test.TestCase):
 class TestFieldLoader(test.TestCase):
 
     def setUp(self):
-        self.ldr = fields.FieldLoader(dbhost, dbname, schemadir)
+        self.ldr = fields.FieldLoader(dburl, schemadir)
 
     def tearDown(self):
-        client = MongoClient("mongodb://{0}/{1}".format(dbhost, dbname))
+        client = MongoClient(dburl)
         db = client.get_default_database()
         if "fields" in db.collection_names():
             db.drop_collection("fields")

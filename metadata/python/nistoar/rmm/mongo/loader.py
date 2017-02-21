@@ -8,7 +8,7 @@ from pymongo import MongoClient
 from ejsonschema import ExtValidator
 from ejsonschema import ValidationError, SchemaError, RefResolutionError
 
-_dbhost_re = re.compile(r"^\w+(\.\w+)*(:\d+)?$")
+_dburl_re = re.compile(r"^mongodb://\w+(\.\w+)*(:\d+)?/\w+$")
 
 class Loader(object):
     """
@@ -16,27 +16,24 @@ class Loader(object):
     """
     __metaclass__ = ABCMeta
 
-    def __init__(self, dbhost, dbname, collname=None, schemadir=None):
+    def __init__(self, dburl, collname=None, schemadir=None):
         """
         create the loader.  Validation will always be skipped if a schemadir
         is not provided.
 
-        :param dbhost str:    the hostname and port number to use to access the 
-                              MongoDB database in the form HOST:PORT.
-        :param dbname str:    the MongoDB database name to load data into
+        :param dburl  str:    the URL of MongoDB database in the form,
+                              'mongodb://HOST:PORT/DBNAME' 
         :param collname str:  the collection name within the database to load 
                               data into
         :param schemadir str: the path to a directory containing the JSON 
                               schemas needed to validate the input JSON data;
                               if None, validation will always be skipped.
         """
-        if not _dbhost_re.match(dbhost):
-            raise ValueError("Loader: Bad dbhost format (need HOST[:PORT}): "+
-                             dbhost)
-        self.dbhost = dbhost
-        self.db = dbname
+        if not _dburl_re.match(dburl):
+            raise ValueError("Loader: Bad dburl format (need 'mongodb://HOST[:PORT]/DBNAME'): "+
+                             dburl)
+        self._dburl = dburl
         self.coll = collname
-        self._dburl = "mongodb://{0}/{1}".format(dbhost, dbname)
 
         if schemadir:
             self._val = ExtValidator.with_schema_dir(schemadir, ejsprefix='_')
@@ -258,6 +255,16 @@ class LoadLog(object):
         if errs is not None and not isinstance(errs, list):
             errs = [errs]
         self._results.append(LoadResult(key, errs))
+        return self
+
+    def merge(self, otherlog):
+        """
+        merge the results from another LoadLog into this one
+
+        :return self:
+        """
+        for res in otherlog._results:
+            self._results.append(res)
         return self
 
 class RecordIngestError(Exception):

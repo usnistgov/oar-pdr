@@ -9,7 +9,8 @@ into the database.
 """
 import json
 
-from .loader import Loader, RecordIngestError, UpdateWarning, LoadLog
+from .loader import (Loader, RecordIngestError, JSONEncodingError,
+                     UpdateWarning, LoadLog)
 from .loader import ValidationError, SchemaError, RefResolutionError
 
 DEF_BASE_SCHEMA = "https://www.nist.gov/od/dm/field-help/v0.1#"
@@ -21,18 +22,23 @@ class FieldLoader(Loader):
     database.
     """
 
-    def __init__(self, dbhost, dbname, schemadir, defschema=DEF_SCHEMA):
+    def __init__(self, dburl, schemadir, onupdate='quiet', defschema=DEF_SCHEMA):
         """
         create the loader.  
 
-        :param dbhost str:     the hostname and port number to use to access 
-                               the MongoDB database in the form HOST:PORT.
-        :param dbname str:     the MongoDB database name to load data into
+        :param dburl  str:    the URL of MongoDB database in the form,
+                              'mongodb://HOST:PORT/DBNAME' 
         :param schemadir str:  the path to a directory containing the JSON 
                             schemas needed to validate the input JSON data.
+        :param onupdate:    a string or function that controls reactions to 
+                            the need to update an existing record; see 
+                            documentation for load_data().
+        :param defschema str:  the URI for the schema to validated new records 
+                               against by default. 
         """
-        super(FieldLoader, self).__init__(dbhost, dbname, "fields", schemadir)
+        super(FieldLoader, self).__init__(dburl, "fields", schemadir)
         self._schema = defschema
+        self.onupdate = onupdate
 
     def load(self, fielddata, validate=True, results=None):
         """
@@ -81,20 +87,19 @@ class FieldLoader(Loader):
             if validate:
                 schemauri = fielddata.get("_schema")
                 if not schemauri:
-                    schemauri = DEF_SCHEMA
+                    schemauri = self._schema
 
                 errs = self.validate(fielddata, schemauri)
                 if errs:
                     return results.add(key, errs)
 
             try:
-                self.load_data(fielddata, key)
+                self.load_data(fielddata, key, self.onupdate)
             except Exception, ex:
                 errs = [ex]
             return results.add(key, errs)
 
     def load_array(self, fielddata, validate=True, results=None):
-        probs = []
         for fd in fielddata:
             results = self.load_obj(fd, validate, results)
 
