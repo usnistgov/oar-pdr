@@ -16,6 +16,8 @@ from .loader import ValidationError, SchemaError, RefResolutionError
 DEF_BASE_SCHEMA = "https://www.nist.gov/od/dm/field-help/v0.1#"
 DEF_SCHEMA = DEF_BASE_SCHEMA + "/definitions/FieldInfo"
 
+COLLECTION_NAME="fields"
+
 class FieldLoader(Loader):
     """
     a class for validating and loading field documentation into the Mongo 
@@ -36,7 +38,7 @@ class FieldLoader(Loader):
         :param defschema str:  the URI for the schema to validated new records 
                                against by default. 
         """
-        super(FieldLoader, self).__init__(dburl, "fields", schemadir)
+        super(FieldLoader, self).__init__(dburl, COLLECTION_NAME, schemadir)
         self._schema = defschema
         self.onupdate = onupdate
 
