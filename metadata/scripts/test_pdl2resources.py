@@ -40,7 +40,7 @@ class TestConvert(test.TestCase):
 
     
     def test_convert(self):
-        script = "python {0} -d {1} {2}".format(cvtscript, outdir, pdlfile)
+        script = "python {0} -d {1} -T {2}".format(cvtscript, outdir, pdlfile)
         self.assertEquals(os.system(script), 0)
 
         files = [f for f in os.listdir(outdir) if f.endswith(".json")]
