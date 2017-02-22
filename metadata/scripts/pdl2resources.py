@@ -43,6 +43,12 @@ except ImportError, e:
 from nistoar.nerdm.convert import PODds2Res
 from nistoar.id.minter import PDRMinter
 
+schemadir = os.path.join(basedir, "etc", "schemas")
+if not os.path.exists(schemadir):
+    sdir = os.path.join(basedir, "model")
+    if os.path.exists(sdir):
+        schemadir = sdir
+
 prog = os.path.basename(sys.argv[0])
 if not prog or prog == 'python':
     prog = "pdl2resources"
@@ -119,8 +125,7 @@ def main(args):
     return extracted
 
 def load_theme_vocab():
-    vocabfile = os.path.join(os.path.dirname(os.path.dirname(__file__)),
-                             "model", "theme-taxonomy.json")
+    vocabfile = os.path.join(schemadir, "theme-taxonomy.json")
     if not os.path.exists(vocabfile):
         raise RuntimeError("Unable to find taxonomy file: "+vocabfile)
 
