@@ -120,7 +120,7 @@ def load_from_dir(dirpath, loader, validate=True):
     return loader.load_from_dir(dirpath, validate)
 
 def load_from_file(filepath, loader, validate=True):
-    return loader.load_from_dir(filepath, validate)
+    return loader.load_from_file(filepath, validate)
 
     
 if __name__ == '__main__':
