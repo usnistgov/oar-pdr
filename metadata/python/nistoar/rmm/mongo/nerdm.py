@@ -1,7 +1,7 @@
 """
 load NERDm records into the RMM's MongoDB database
 """
-import json
+import json, os, sys
 
 from .loader import (Loader, RecordIngestError, JSONEncodingError,
                      UpdateWarning, LoadLog)
@@ -35,7 +35,7 @@ class NERDmLoader(Loader):
         self._schema = defschema
         self.onupdate = onupdate
 
-    def load(self, resrec, validate=True, results=None):
+    def load(self, resrec, validate=True, results=None, id=None):
         """
         load a NERDm resource record into the database
         :param resrec dict:   the resource JSON record to load
@@ -44,13 +44,17 @@ class NERDmLoader(Loader):
                             data is not valid.
         """
         if not results:
-            results = LoadLog("NERDm resources")
+            results = self._mkloadlog()
 
         try:
             key = { "@id": resrec['@id'] }
         except KeyError, ex:
-            return results.add({'@id': '?'},
+            if id is None:
+                id = str({'@id': '?'})
+            return results.add(id,
                      RecordIngestError("Data is missing input key value, @id"))
+        if id is None:
+            id = key    
 
         errs = None
         if validate:
@@ -60,13 +64,16 @@ class NERDmLoader(Loader):
 
             errs = self.validate(resrec, schemauri)
             if errs:
-                return results.add(key, errs)
+                return results.add(id, errs)
 
         try:
             self.load_data(resrec, key, self.onupdate)
         except Exception, ex:
             errs = [ex]
         return results.add(key, errs)
+
+    def _mkloadlog(self):
+        return LoadLog("NERDm resources")
 
     def load_from_file(self, filepath, validate=True, results=None):
         """
@@ -77,7 +84,7 @@ class NERDmLoader(Loader):
                 data = json.load(fd)
             except ValueError, ex:
                 raise JSONEncodingError(ex)
-        return self.load(data, validate=validate, results=results)
+        return self.load(data, validate=validate, results=results, id=filepath)
 
     def load_from_dir(self, dirpath, validate=True, results=None):
         """
@@ -92,8 +99,12 @@ class NERDmLoader(Loader):
 
             for f in files:
                 if f.startswith('.') or not f.endswith('.json'):
-                    results = self.load_from_file(os.path.join(root, f),
-                                                  validate, results)
-
+                    continue
+                f = os.path.join(root, f) 
+                results = self.load_from_file(f, validate, results)
+                                                  
+        if not results:
+            results = self._mkloadlog()
+            
         return results
 

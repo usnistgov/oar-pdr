@@ -148,7 +148,7 @@ class Loader(object):
             raise RecordIngestError("Failed to load record: "+str(ex), ex)
 
     @abstractmethod
-    def load(self, data, validate=True, results=None):
+    def load(self, data, validate=True, results=None, id=None):
         """
         load the given data into the database
         :param data:  the data to load
@@ -157,7 +157,10 @@ class Loader(object):
                             data is not valid.
         :param results ResultLog:  if provided, add the loading results to this 
                             ResultLog object.
-        :return ResultLog:  a log successes and failures
+        :param id:    a name to record results against in the returned LoadLog;
+                      if not provided, the extracted key will be used as 
+                      applicable.  
+        :return LoadLog:  a log successes and failures
         """
         raise NotImplemented
 
@@ -263,8 +266,9 @@ class LoadLog(object):
 
         :return self:
         """
-        for res in otherlog._results:
-            self._results.append(res)
+        if otherlog:
+            for res in otherlog._results:
+                self._results.append(res)
         return self
 
 class RecordIngestError(Exception):

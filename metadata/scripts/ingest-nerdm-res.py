@@ -31,18 +31,23 @@ except ImportError, e:
     sys.path.append(nistoardir)
     import nistoar
 
-from nistoar.rmm.mongo.fields import (FieldLoader, LoadLog, RecordIngestError,
-                                      JSONEncodingError)
+from nistoar.rmm.mongo.nerdm import (NERDmLoader, LoadLog, RecordIngestError,
+                                     JSONEncodingError)
 
 description = \
-"""ingest field information data into the RMM"""
+"""ingest NERDm resource data into the RMM.
+
+Files or directories can be listed on the command-line.  When a directory is
+listed, this script will search the directory (and its subdirectories) for files
+with the '.json' extension and attempt to load them as NERDm files.  
+"""
 
 epilog = None
 
 def define_opts(progname=None):
     parser = ArgumentParser(progname, None, description, epilog)
-    parser.add_argument('fldfile', metavar='FIELDDATAFILE', type=str, nargs='+',
-                        help="a file containing the field data")
+    parser.add_argument('nerdfile', metavar='NERDFILEDIR', type=str, nargs='+',
+                        help="a file or directory containing the resource data")
     parser.add_argument('-V', '--skip-validate', dest='validate', default=True,
                         action="store_false",
                         help="do not attempt to validate the records before "+
@@ -70,28 +75,24 @@ def main(args):
         opts.quiet = True
 
     stat = 0
-    loader = FieldLoader(opts.url, schemadir)
+    loader = NERDmLoader(opts.url, schemadir)
     if opts.warn and not opts.quiet:
         loader.onupdate = 'warn'
         warnings.simplefilter("once")
     totres = LoadLog()
 
-    for fldfile in opts.fldfile:
+    for nerdpath in opts.nerdfile:
         validate = opts.validate
 
-        try:
-            with open(fldfile) as fd:
-                doc = json.load(fd)
-        except ValueError, ex:
-            stat = 1
-            totres.add(fldfile, [ JSONEncodingError(ex) ])
-            if not opts.silent:
-                print("{0}: JSON encoding error in {1}: {2}"
-                      .format(parser.prog, fldfile, str(ex)),
-                      file=sys.stderr)
-            continue
+        if os.path.isdir(nerdpath):
+            res = load_from_dir(nerdpath, loader, validate)
+        elif os.path.isfile(nerdpath):
+            res = load_from_file(nerdpath, loader, validate)
+        elif not os.path.exists(nerdpath):
+            res = LoadLog().add(nerdpath, [ "File not found." ])
+        else:
+            res = LoadLog().add(nerdpath, [ "Filepath not loadable." ])
 
-        res = loader.load(doc, validate, id=fldfile)
         totres.merge(res)
 
         if not opts.silent and res.failure_count > 0:
@@ -115,6 +116,11 @@ def main(args):
         stat = 1
     return stat
 
+def load_from_dir(dirpath, loader, validate=True):
+    return loader.load_from_dir(dirpath, validate)
+
+def load_from_file(filepath, loader, validate=True):
+    return loader.load_from_dir(filepath, validate)
 
     
 if __name__ == '__main__':
