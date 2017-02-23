@@ -79,6 +79,8 @@ echo cp $SOURCE_DIR/scripts/ingest-field-info.py $BINDIR
 cp $SOURCE_DIR/scripts/ingest-field-info.py $BINDIR
 echo cp $SOURCE_DIR/scripts/ingest-nerdm-res.py $BINDIR
 cp $SOURCE_DIR/scripts/ingest-nerdm-res.py $BINDIR
+echo cp $SOURCE_DIR/scripts/ingest-taxonomy.py $BINDIR
+cp $SOURCE_DIR/scripts/ingest-taxonomy.py $BINDIR
 
 #install miscellaneous data files
 mkdir -p $ETC_DIR/samples
