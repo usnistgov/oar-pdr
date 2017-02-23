@@ -35,6 +35,11 @@
                     "type": "integer"
                 },
 
+                "label": {
+                    "description": "a label to use to represent this term in a display",
+                    "type": "string"
+                },
+
                 "tags": {
                     "description": "labels that can identify the term's use",
                     "notes": [
