@@ -1,5 +1,6 @@
 {
-    "@id": "https//www.nist.gov/od/sch/nist-themes/v1.0",
+    "_schema": "https://www.nist.gov/od/dm/simple-taxonomy/v1.0",
+    "@id": "https://www.nist.gov/od/dm/nist-themes/v1.0",
     "title": "The NIST Research Theme Taxonomy",
     "version": "1.0",
     "description": "terms for tagging resources with research themes",

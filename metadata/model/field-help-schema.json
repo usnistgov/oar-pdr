@@ -84,6 +84,27 @@
                 "This wraps an array of FieldInfo objects in an object so that a schema property can be attached to it."
             ],
             "properties": {
+                "@id":  {
+                    "description": "a URI identifier for the taxonomy",
+                    "type": "string",
+                    "format": "uri"
+                },
+
+                "title": {
+                    "description": "a title for the taxonomy",
+                    "type": "string"
+                },
+
+                "version": {
+                    "description": "a version string for the taxonomy",
+                    "type": "string"
+                },
+
+                "description": {
+                    "description": "an explanatory description of the purpose of the taxonomy",
+                    "type": "string"
+                },
+
                 "fields": {
                     "type": "array",
                     "items": { "$ref": "#/definitions/FieldInfo" }
