@@ -12,7 +12,7 @@ from shutil import copy2 as copy
 from abc import ABCMeta, abstractmethod, abstractproperty
 
 from ..validate import SIPValidater, SimpleAssessment
-from ..exceptions import (SIPDirectoryError, SIPDirectoryNotFound,
+from ..exceptions import (SIPDirectoryError, SIPDirectoryNotFound, NERDError,
                           ConfigurationException, StateException, PODError)
 
 log = logging.getLogger(__name__)
@@ -128,6 +128,13 @@ class SIPPrepper(object):
                 return json.load(fd)
         except IOError, ex:
             raise PODError("Unable to read POD file: "+str(ex), src=podfile)
+
+    def read_nerd(self, nerdfile):
+        try:
+            with open(nerdfile) as fd:
+                return json.load(fd)
+        except IOError, ex:
+            raise PODError("Unable to read NERD file: "+str(ex), src=nerdfile)
 
     def set_bagdir(self):
         podfile = os.path.join(self.sipdir, self.find_pod_file())

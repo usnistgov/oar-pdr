@@ -100,3 +100,18 @@ class PODError(StateException):
         super(PODError, self).__init__(msg, cause)
         self.source = src
 
+class NERDError(StateException):
+    """
+    a problem found in the provided NERDm data for the dataset
+    """
+    def __init__(self, msg, cause=None, src=None):
+        """
+        :param msg   str:   the error message
+        :param cause Exception:  an optional underlying cause
+        :param src   str:   the name of the file where the data came from
+        """
+        if src:
+            msg += " ({0})".format(src)
+        super(NERDError, self).__init__(msg, cause)
+        self.source = src
+
