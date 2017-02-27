@@ -57,8 +57,9 @@ true ${BINDIR:=$INSTALL_DIR/bin}
 
 # install the schemas
 mkdir -p $SCHEMA_DIR
-echo "cp $SOURCE_DIR/model/*.json* $SCHEMA_DIR"
-cp $SOURCE_DIR/model/*.json* $SCHEMA_DIR
+schemafiles=`ls -d $SOURCE_DIR/model/*.json{,ld} | grep -v nerdm-fields-help`
+echo cp $schemafiles $SCHEMA_DIR
+cp $schemafiles $SCHEMA_DIR
 
 # install the jq modules
 mkdir -p $JQ_LIBDIR
@@ -74,8 +75,23 @@ echo Installing python libraries into $PY_LIBDIR...
 mkdir -p $BINDIR
 echo cp $SOURCE_DIR/scripts/pdl2resources.py $BINDIR
 cp $SOURCE_DIR/scripts/pdl2resources.py $BINDIR
+echo cp $SOURCE_DIR/scripts/ingest-field-info.py $BINDIR
+cp $SOURCE_DIR/scripts/ingest-field-info.py $BINDIR
+echo cp $SOURCE_DIR/scripts/ingest-nerdm-res.py $BINDIR
+cp $SOURCE_DIR/scripts/ingest-nerdm-res.py $BINDIR
+echo cp $SOURCE_DIR/scripts/ingest-taxonomy.py $BINDIR
+cp $SOURCE_DIR/scripts/ingest-taxonomy.py $BINDIR
 
 #install miscellaneous data files
 mkdir -p $ETC_DIR/samples
 echo cp $SOURCE_DIR/jq/tests/data/nist-pdl-oct2016.json $ETC_DIR/samples
 cp $SOURCE_DIR/jq/tests/data/nist-pdl-oct2016.json $ETC_DIR/samples
+echo cp $SOURCE_DIR/model/nerdm-fields-help.json $ETC_DIR/samples
+cp $SOURCE_DIR/model/nerdm-fields-help.json $ETC_DIR/samples
+
+for f in `ls -d $SOURCE_DIR/model/examples/*.json`; do
+    echo cp $f $ETC_DIR/samples
+    cp $f $ETC_DIR/samples
+done
+
+

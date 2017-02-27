@@ -1,16 +1,16 @@
 {
     "$schema": "http://json-schema.org/draft-04/schema#",
-    "$extensionSchemas": ["http://mgi.nist.gov/mgi-json-schema/v0.1"],
+    "$extensionSchemas": ["https://www.nist.gov/od/dm/enhanced-json-schema/v0.1#"],
     "id": "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#",
     "rev": "wd1",
-    "title": "The NERDm extension metadata for Published Data",
+    "title": "The NERDm extension metadata for Public Data",
     "description": "These classes extend the based NERDm schema to different types of published data",
     "definitions": {
 
-        "PublishedDataResource": {
+        "PublicDataResource": {
             "description": "a resource that can/should have a record in NIST's public data listing (PDL)",
             "notes": [
-                "This must be convertable to compliant and complete POD record; thus, this class adds all remaining POD elements missing from the core"
+                "This must be convertable to a compliant and complete POD record; thus, this class adds all remaining POD elements missing from the core"
             ],
             "allOf": [
                 { "$ref": "https://www.nist.gov/od/dm/nerdm-schema/v0.1#/definitions/Resource"},
@@ -151,6 +151,17 @@
                 { "$ref": "https://www.nist.gov/od/dm/nerdm-schema/v0.1#/definitions/Component" },
                 {
                     "properties": {
+
+                        "filepath": {
+                            "description": "a name for the data file reflecting its hierarchical location in the data source collection",
+                            "notes": [
+                                "Forward slashes delimit the hierarchical names in the path",
+                                "If there are no slashes in this value, this file is assumed to be at the top of the file hierarchy",
+                                "The base name of this value (i.e. the last field in the path) can be used as the default filename to give to the file if downloaded.",
+                                "The component title may have the same value."
+                            ],
+                            "type": "string"
+                        },
                         
                         "downloadURL": {
                             "title": "Download URL",
@@ -186,15 +197,7 @@
                         "format": {
                             "title": "Format",
                             "description": "A human-readable description of the file format of a distribution",
-                            "anyOf": [
-                                {
-                                    "type": "string",
-                                    "minLength": 1
-                                },
-                                {
-                                    "type": "null"
-                                }
-                            ],
+                            "$ref": "#/definitions/Format",
                             "asOntology": {
                                 "@context": "profile-schema-onto.json",
                                 "prefLabel": "Format",
@@ -241,6 +244,7 @@
                         }
                         
                     },
+                    "required": [ "filepath" ],
 
                     "dependencies": {
                         "downloadURL": {
@@ -257,10 +261,99 @@
             ]
         },
 
+        "Subcollection": {
+            "description": "A grouping of components within a named subcollection of the resource",
+            "notes": [
+                "This Component subtype implements hierarchical resources; a subcollection is equivalent to a directory that can contain other components, including other subcollections."
+            ],
+            "allOf": [
+                { "$ref": "https://www.nist.gov/od/dm/nerdm-schema/v0.1#/definitions/Component" },
+                {
+                    "properties": {
+                        
+                        "filepath": {
+                            "description": "a name for the data file reflecting its hierarchical location in the data source collection",
+                            "notes": [
+                                "Forward slashes delimit the hierarchical names in the path",
+                                "If there are no slashes in this value, this file is assumed to be at the top of the file hierarchy",
+                                "The base name of this value (i.e. the last field in the path) can be used as the default filename to give to the file if downloaded.",
+                                "The component title may have the same value."
+                            ],
+                            "type": "string"
+                        },
+                        
+                        "contains": {
+                            "description": "a listing of resource components that are directly part of this subcollection",
+                            "notes": [
+                                "Each item is a URI identifier (possibly abbreviated)"
+                            ],
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            },
+                            "asOntology": {
+                                "@context": "profile-schema-onto.json",
+                                "prefLabel": "contains",
+                                "referenceProperty": "ldp:contains"
+                            }
+                        },
+
+                        "hasParent": {
+                            "description": "The identifier for the parent collection that contains this subcollection",
+                            "type": "string"
+                        }
+                        
+                    },
+                    "required": [ "filepath" ]
+                }
+            ],
+            "asOntology": {
+                "@context": "profile-schema-onto.json",
+                "prefLabel": "Subcollection",
+                "referenceProperty": "fedora:Container"
+            }
+        },
+
+        "Format": {
+            "description": "a description of a file format that a file employs",
+            "type": "object",
+            "properties": {
+                "description": {
+                    "description": "a human-readable description of the format",
+                    "type": "string"
+                },
+                
+                "scheme": {
+                    "description": "a URI that identifies the format type registry or identification system that the value is defined in.",
+                    "type": "string",
+                    "format": "uri",
+                    "asOnotology": {
+                        "@context": "profile-schema-onto.json",
+                        "prefLabel": "Schema",
+                        "referenceProperty": "vold:vocabulary"
+                    }
+                },
+
+                "@id": {
+                    "description": "the unique identifier for the format",
+                    "type": "string",
+                    "format": "uri"
+                },
+
+                "tag": {
+                    "description": "a short, display-able token or abbreviation for the format",
+                    "notes": [
+                        "As a token, it is intended that applications can search for this value and find all files having the same format.  Thus, regardless of whether the @id field is provided, all references to the same format should use the same tag value."
+                    ],
+                    "type": "string"
+                }
+            }
+        },
+
         "DataPublication": {
             "description": "Data presented by one or more authors as citable publication",
             "allOf": [
-                { "$ref": "#/definitions/PublishedDataResource" },
+                { "$ref": "#/definitions/PublicDataResource" },
                 {
                     "type": "object",
                     "properties": {

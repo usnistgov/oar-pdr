@@ -1,0 +1,120 @@
+{
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "$extensionSchemas": ["https://www.nist.gov/od/dm/enhanced-json-schema/v0.1#"],
+    "id": "https://www.nist.gov/od/dm/field-help/v0.1#",
+    "rev": "wd1",
+    "tile": "Metadata Field Help Information",
+    "description": "types for encoding helpful information about metadata fields",
+    "definitions": {
+        "Info": {
+            "description": "common information",
+            "type": "object",
+            "properties": {
+                "label": {
+                    "description": "a string that can be used as a label display for the end user",
+                    "type": "string"
+                },
+                "tags": {
+                    "description": "labels that indicate some use for the field",
+                    "notes": [
+                        "tags can be arbitrary values, but it is expected that several fields will have a common tag to indicate a common use"
+                    ],
+                    "type": "array",
+                    "items": { "type": "string" }
+                },
+                "tips": {
+                    "description": "help messages that can be associated with particular contexts",
+                    "type": "object",
+                    "additionalProperties": { "type": "string" }
+                }
+                
+            }
+            
+        },
+        "FieldInfo": {
+            "description": "information about a metadata field",
+            "allOf": [
+                { "$ref": "#/definitions/Info" },
+                {
+                    "properties": {
+                        "name": {
+                            "description": "the name of the metadata field",
+                            "notes": [
+                                "if the field is embedded in another object, this name should be a path in dot-notation"
+                            ],
+                            "type": "string"
+                        },
+                        "type": {
+                            "description": "the computer type of legal values",
+                            "type": "string"
+                        },
+                        "item_type": {
+                            "description": "when the field is of type array, this is the type expected for the values of the array",
+                            "type": "string"
+                        },
+                        "values": {
+                            "description": "help info associated with particular values of the field",
+                            "type": "array",
+                            "items": { "$ref": "#/definitions/ValueInfo" }
+                        }
+                    }
+                }
+            ],
+            "required": [ "name", "type" ]
+        },
+        "ValueInfo": {
+            "description": "documentation for a particular value of a field",
+            "allOf": [
+                { "$ref": "#/definitions/Info" },
+                {
+                    "properties": {
+                        "value": {
+                            "description": "the field value being documented",
+                            "type": "string"
+                        }
+                    }
+                }
+            ],
+            "required": [ "value" ]
+        },
+
+        "FieldCatalog": {
+            "description": "a list of FieldInfo objects",
+            "notes": [
+                "This wraps an array of FieldInfo objects in an object so that a schema property can be attached to it."
+            ],
+            "properties": {
+                "@id":  {
+                    "description": "a URI identifier for the taxonomy",
+                    "type": "string",
+                    "format": "uri"
+                },
+
+                "title": {
+                    "description": "a title for the taxonomy",
+                    "type": "string"
+                },
+
+                "version": {
+                    "description": "a version string for the taxonomy",
+                    "type": "string"
+                },
+
+                "description": {
+                    "description": "an explanatory description of the purpose of the taxonomy",
+                    "type": "string"
+                },
+
+                "fields": {
+                    "type": "array",
+                    "items": { "$ref": "#/definitions/FieldInfo" }
+                }
+            },
+            "required": [ "fields" ]
+        }
+    },
+
+    "type": "array",
+    "items": { "$ref": "#/definitions/FieldInfo"  }
+    
+}

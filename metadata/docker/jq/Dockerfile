@@ -1,4 +1,4 @@
-From ubuntu:15.04
+From oarpdr/pymongo
 
 RUN apt-get update && \
     apt-get install -y curl 

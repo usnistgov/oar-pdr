@@ -1,7 +1,7 @@
 {
     "@context": "https://www.nist.gov/od/dm/nerdm-pub-context.jsonld",
-    "$schema": "https://www.nist.gov/od/dm/nerdm-schema/v0.1#",
-    "$extensionSchemas": [ "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataPublication" ],
+    "_schema": "https://www.nist.gov/od/dm/nerdm-schema/v0.1#",
+    "_extensionSchemas": [ "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataPublication" ],
 
     "@type": [ "nrdp:Portal", "nrdp:SRD", "nrdp:PublishedDataResource" ],
     "@id": "ark:/88434/sdp0fjspek352",
@@ -41,45 +41,60 @@
     "license": "http://www.nist.gov/data/license.cfm",
     "dataQuality": true,
 
+    "inventory": [
+        {
+            "forCollection": "",
+            "childCount": 6,
+            "descCount": 6,
+            "byType": [
+                {
+                    "forType": "nrd:IncludedResource",
+                    "childCount": 6,
+                    "descCount": 6
+                }
+            ],
+            "childCollections": []
+        }
+    ],
     "components": [
         { 
             "@type": [ "nrd:IncludedResource" ],
-            "$extensionSchemas": [ "https://www.nist.gov/od/dm/nerdm-schema/v0.1#/definitions/IncludedResource" ],
+            "_extensionSchemas": [ "https://www.nist.gov/od/dm/nerdm-schema/v0.1#/definitions/IncludedResource" ],
             "title": "NIST High Temperature Superconducting Materials Database - SRD 62",
             "proxyFor": "ark:/88434/sdp0fjspek353",
             "resType": [ "nrd:SRD", "nrd:Database", "nrd:DataPublication" ]
         },
         { 
             "@type": [ "nrd:IncludedResource" ],
-            "$extensionSchemas": [ "https://www.nist.gov/od/dm/nerdm-schema/v0.1#/definitions/IncludedResource" ],
+            "_extensionSchemas": [ "https://www.nist.gov/od/dm/nerdm-schema/v0.1#/definitions/IncludedResource" ],
             "title": "NIST Structural Ceramics Database - SRD 30",
             "proxyFor": "ark:/88434/sdp0fjspek354",
             "resType": [ "nrd:SRD", "nrd:Database", "nrd:DataPublication" ]
         },
         { 
             "@type": [ "nrd:IncludedResource" ],
-            "$extensionSchemas": [ "https://www.nist.gov/od/dm/nerdm-schema/v0.1#/definitions/IncludedResource" ],
+            "_extensionSchemas": [ "https://www.nist.gov/od/dm/nerdm-schema/v0.1#/definitions/IncludedResource" ],
             "title": "NIST Property Data Summaries for Advanced Materials - SRD 150",
             "proxyFor": "ark:/88434/sdp0fjspek355",
             "resType": [ "nrd:SRD", "nrd:DataPublication" ]
         },
         { 
             "@type": [ "nrd:IncludedResource" ],
-            "$extensionSchemas": [ "https://www.nist.gov/od/dm/nerdm-schema/v0.1#/definitions/IncludedResource" ],
+            "_extensionSchemas": [ "https://www.nist.gov/od/dm/nerdm-schema/v0.1#/definitions/IncludedResource" ],
             "title": "Elastic Moduli data for Polycrystalline Ceramics - NISTIR 6853",
             "proxyFor": "ark:/88434/sdp0fjspek354",
             "resType": [ "nrd:DataPublication" ]
         },
         { 
             "@type": [ "nrd:IncludedResource" ],
-            "$extensionSchemas": [ "https://www.nist.gov/od/dm/nerdm-schema/v0.1#/definitions/IncludedResource" ],
+            "_extensionSchemas": [ "https://www.nist.gov/od/dm/nerdm-schema/v0.1#/definitions/IncludedResource" ],
             "title": "Fracture Toughness/Fracture Energy Data for Oxide Glass - SRD 137",
             "proxyFor": "ark:/88434/sdp0fjspek354",
             "resType": [ "nrd:SRD", "nrd:DataPublication" ]
         },
         { 
             "@type": [ "nrd:IncludedResource" ],
-            "$extensionSchemas": [ "https://www.nist.gov/od/dm/nerdm-schema/v0.1#/definitions/IncludedResource" ],
+            "_extensionSchemas": [ "https://www.nist.gov/od/dm/nerdm-schema/v0.1#/definitions/IncludedResource" ],
             "title": "Fracture Toughness/Fracture Energy Data for - SRD 138",
             "proxyFor": "ark:/88434/sdp0fjspek354",
             "resType": [ "nrd:SRD", "nrd:DataPublication" ]
