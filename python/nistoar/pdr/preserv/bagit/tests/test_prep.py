@@ -6,8 +6,8 @@ import unittest as test
 from collections import OrderedDict
 
 from nistoar.tests import Tempfiles, rmtmpdir
-import nistoar.preserv.bagit.prep as prep
-import nistoar.preserv.exceptions as exceptions
+import nistoar.pdr.preserv.bagit.prep as prep
+import nistoar.pdr.preserv.exceptions as exceptions
 
 # datadir = nistoar/preserv/tests/data
 datadir = os.path.join(
