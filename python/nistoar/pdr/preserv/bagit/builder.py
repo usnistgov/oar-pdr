@@ -2,11 +2,15 @@
 Tools for building a NIST Preservation bags
 """
 import os, errno, logging, re, json
-from shutil import copy2 as copy
+from shutil import copy2 as filecopy
+from copy import deepcopy
+from collections import Mapping
 
-from ..exceptions import (SIPDirectoryError, SIPDirectoryNotFound, NERDError,
+from ..exceptions import (SIPDirectoryError, SIPDirectoryNotFound, 
                           ConfigurationException, StateException, PODError)
 from .. import PreservationSystem
+from ....nerdm.exceptions import (NERDError, NERDTypeError)
+from ....nerdm.convert import PODds2Res
 
 NORM=15  # Log Level for recording normal activity
 logging.addLevelName(NORM, "NORMAL")
@@ -16,6 +20,7 @@ DEF_BAGLOG_FORMAT = "%(asctime)s %(levelname)s: %(message)s"
 
 DEF_MBAG_VERSION = "0.2"
 
+POD_FILENAME = "pod.json"
 NERDMD_FILENAME = "nerdm.json"
 FILEMD_FILENAME = NERDMD_FILENAME
 RESMD_FILENAME  = NERDMD_FILENAME
@@ -30,12 +35,59 @@ NERD_PRE = "nrd"
 NERDPUB_PRE = "nrdp"
 NERDM_SCH_ID_BASE = "https://www.nist.gov/od/dm/nerdm-schema/"
 NERDMPUB_SCH_ID_BASE = "https://www.nist.gov/od/dm/nerdm-schema/pub/"
-NERDM_SCH_VER = "0.1"
+NERDM_SCH_VER = "v0.1"
 NERDMPUB_SCH_VER = NERDM_SCH_VER
-NERDM_SCH_ID = NERDM_SCH_ID_BASE + NERDM_SCH_VER
-NERDMPUB_SCH_ID = NERDMPUB_SCH_ID_BASE + NERDMPUB_SCH_VER
-NERD_DEF = NERDM_SCH_ID + "#/definitions/"
-NERDPUB_DEF = NERDMPUB_SCH_ID + "#/definitions/"
+NERDM_SCH_ID = NERDM_SCH_ID_BASE + NERDM_SCH_VER + "#"
+NERDMPUB_SCH_ID = NERDMPUB_SCH_ID_BASE + NERDMPUB_SCH_VER + "#"
+NERD_DEF = NERDM_SCH_ID + "/definitions/"
+NERDPUB_DEF = NERDMPUB_SCH_ID + "/definitions/"
+DATAFILE_TYPE = NERDPUB_PRE + ":DataFile"
+SUBCOLL_TYPE = NERDPUB_PRE + ":Subcollection"
+
+def find_jq_lib(config=None):
+    """
+    return the directory containing the location of the jq libraries
+    """
+    def assert_exists(dir, ctxt=""):
+        if not os.path.exists(dir):
+            "{0}directory does not exist: {1}".format(ctxt, dir)
+            raise ConfigurationException(msg)
+
+    # check local configuration
+    if config and 'jq_lib' in config:
+        assert_exists(config['jq_lib'], "config param 'jq_lib' ")
+        return config['jq_lib']
+            
+    # check environment variable
+    if 'OAR_JQ_LIB' in os.environ:
+        assert_exists(os.environ['OAR_JQ_LIB'], "env var OAR_JQ_LIB ")
+        return os.environ['OAR_JQ_LIB']
+
+    # look relative to a base directory
+    if 'OAR_HOME' in os.environ:
+        # this is normally an installation directory (where lib/jq is our
+        # directory) but we also allow it to be the source directory
+        assert_exists(os.environ['OAR_HOME'], "env var OAR_HOME ")
+        basedir = os.environ['OAR_HOME']
+        candidates = [os.path.join(basedir, 'lib', 'jq'),
+                      os.path.join(basedir, 'jq')]
+    else:
+        # guess some locations based on the location of the executing code.
+        # The code might be coming from an installation, build, or source
+        # directory.
+        import nistoar
+        basedir = os.path.dirname(os.path.dirname(os.path.dirname(
+                                            os.path.abspath(nistoar.__file__))))
+        candidates = [os.path.join(basedir, 'jq')]
+        basedir = os.path.dirname(os.path.dirname(basedir))
+        candidates.append(os.path.join(basedir, 'jq'))
+    for dir in candidates:
+        if os.path.exists(dir):
+            return dir
+        
+    return None
+
+def_jq_libdir = find_jq_lib()
 
 class BagBuilder(PreservationSystem):
     """
@@ -74,6 +126,9 @@ class BagBuilder(PreservationSystem):
         self.log.setLevel(NORM)
         self._logname = self.cfg.get('log_filename', 'preserv.log')
         self._loghdlr = None
+
+        jqlib = self.cfg.get('jq_lib', def_jq_libdir)
+        self.pod2nrd = PODds2Res(jqlib)
 
 
     @property
@@ -168,6 +223,10 @@ class BagBuilder(PreservationSystem):
             raise StateException("Failed to create directory tree ({0}): {1}"
                                  .format(str(ex), pdir), cause=ex)
 
+        self.ensure_metadata_dirs(destpath)
+
+    def ensure_metadata_dirs(self, destpath):
+
         path = os.path.join(self.bagdir, "metadata", destpath)
         try:
             if not os.path.exists(path):
@@ -207,15 +266,7 @@ class BagBuilder(PreservationSystem):
                 raise StateException("Failed to create directory tree ({0}): {1}"
                                      .format(str(ex), pdir), cause=ex)
 
-        path = os.path.join(self.bagdir, "metadata", destpath)
-        try:
-            if not os.path.exists(path):
-                os.makedirs(path)
-        except Exception, ex:
-            pdir = os.path.join(os.path.basename(self.bagdir),
-                                "metadata", destpath)
-            raise StateException("Failed to create directory tree ({0}): {1}"
-                                 .format(str(ex), pdir), cause=ex)
+        self.ensure_metadata_dirs(destpath)
         
     def _extend_file_list(self, filelist, param):
         extras = self.cfg.get(param)
@@ -257,23 +308,88 @@ class BagBuilder(PreservationSystem):
                                attempted.  Resulting metadata will be written 
                                into the metadata directory. 
         """
-        pass
+        self.ensure_datafile_dirs(destpath)
+        outfile = os.path.join(self.bagdir, 'data', destpath)
 
+        if srcpath:
+            if hardlink:
+                try:
+                    os.link(srcpath, outfile)
+                    self.record("Added data file at "+destdir)
+                except OSError, ex:
+                    msg = "Unable to create link for data file ("+ destpath + \
+                          "): "+ str(ex)
+                    if self.cfg.get('copy_on_link_failure', True):
+                        hardlink = False
+                        self.log.warning(msg)
+                    else:
+                        self.log.exception(msg, exc_info=True)
+                        raise StateException(msg)
+            if not hardlink:
+                try:
+                    filecopy(srcpath, outfile)
+                    self.record("Added data file at "+destpath)
+                except Exception, ex:
+                    msg = "Unable to copy data file (" + srcpath + \
+                          ") into bag (" + outfile + "): " + str(ex)
+                    self.log.exception(msg, exc_info=True)
+                    raise StateException(msg, cause=ex)
+    
+        if initmd:
+            self.init_filemd_for(destpath, write=True, examine=srcpath)
+            
     def add_metadata_for_file(self, destpath, mdata):
         """
         write metadata for the component at the given destination path to the 
         proper location under the metadata directory.
+
+        This implementation will provide default values for key values that 
+        are missing.
         """
-        self.ensure_datafile_dirs(destpath)
-        self._write_json(mdata, self.nerdm_file_for(destpath))
+        if not isinstance(mdata, Mapping):
+            raise NERDTypeError("dict", type(mdata), "NERDm Component")
+        
+        md = self._create_init_filemd_for(destpath)
+        md.update(mdata)
+        
+        try:
+            if not isinstance(md['@type'], list):
+                raise NERDTypeError('list', str(mdata['@type']), '@type')
+
+            if DATAFILE_TYPE not in md['@type']:
+                md['@type'].append(DATAFILE_TYPE)
+                    
+        except TypeError, ex:
+            raise NERDTypeError(msg="Unknown DataFile property type error",
+                                cause=ex)
+
+        self.ensure_metadata_dirs(destpath)
+        self._write_json(md, self.nerdm_file_for(destpath))
 
     def add_metadata_for_coll(self, destpath, mdata):
         """
         write metadata for the component at the given destination path to the 
         proper location under the metadata directory.
         """
-        self.ensure_coll_dirs(destpath)
-        self._write_json(mdata, self.nerdm_file_for(destpath))
+        if not isinstance(mdata, Mapping):
+            raise NERDTypeError("dict", type(mdata), "NERDm Component")
+        
+        md = self._create_init_collmd_for(destpath)
+        md.update(mdata)
+        
+        try:
+            if not isinstance(md['@type'], list):
+                raise NERDTypeError('list', str(md['@type']), '@type')
+
+            if SUBCOLL_TYPE not in md['@type']:
+                md['@type'].append(SUBCOLL_TYPE)
+                    
+        except TypeError, ex:
+            raise NERDTypeError(msg="Unknown DataFile property type error",
+                                cause=ex)
+
+        self.ensure_metadata_dirs(destpath)
+        self._write_json(md, self.nerdm_file_for(destpath))
 
     def nerdm_file_for(self, destpath):
         """
@@ -311,7 +427,7 @@ class BagBuilder(PreservationSystem):
         mdata = self._create_init_filemd_for(destpath)
         if examine:
             datafile = os.path.join(self.bagdir, "data", destpath)
-            if os.path.exist(datafile):
+            if os.path.exists(datafile):
                 self._add_extracted_metadata(datafile, mdata,
                                              self.cfg.get('file_md_extract'))
             else:
@@ -415,3 +531,102 @@ class BagBuilder(PreservationSystem):
         go into this bag's log file.  
         """
         self.log.log(NORM, msg, *args, **kwargs)
+
+    def add_res_nerd(self, mdata, savefilemd=True):
+        """
+        write out the resource-level NERDm data into the bag.  
+
+        :param mdata      dict:  the JSON object containing the NERDm Resource 
+                                   metadata
+        :param savefilemd bool:  if True (default), any DataFile or 
+                                   Subcollection metadata will be split off and 
+                                   saved in the appropriate locations for 
+                                   file metadata.
+        """
+        self.ensure_bag_structure()
+        
+        # validate type
+        if mdata.get("_schema") != NERDM_SCH_ID:
+            if self.cfg.get('ensure_nerdm_type_on_add', True):
+                raise NERDError("Not a NERDm Resource Record; wrong schema id: "+
+                                str(mdata.get("_schema")))
+            else:
+                self.log.warning("provided NERDm data does not look like a "+
+                                 "Resource record")
+        
+        if "components" in mdata:
+            components = mdata['components']
+            if not isinstance(components, list):
+                raise NERDTypeError("list", str(type(mdata['components'])),
+                                    'components')
+            for i in range(len(components)-1, -1, -1):
+                if DATAFILE_TYPE in components[i].get('@type',[]):
+                    if savefilemd and 'filepath' not in components[i]:
+                        msg = "DataFile missing 'filepath' property"
+                        if '@id' in components[i]:
+                            msg += " ({0})".format(components[i]['@id'])
+                        self.warning(msg)
+                    else:
+                        if savefilemd:
+                            self.add_metadata_for_file(components[i]['filepath'],
+                                                       components[i])
+                        components.pop(i)
+                            
+                elif SUBCOLL_TYPE in components[i].get('@type',[]):
+                    if savefilemd and 'filepath' not in components[i]:
+                        msg = "Subcollection missing 'filepath' property"
+                        if '@id' in components[i]:
+                            msg += " ({0})".format(components[i]['@id'])
+                        self.warning(msg)
+                    else:
+                        if savefilemd:
+                            self.add_metadata_for_coll(components[i]['filepath'],
+                                                       components[i])
+                        components.pop(i)
+                            
+        self._write_json(mdata, self.nerdm_file_for(""))
+                                             
+
+    def add_ds_pod(self, pdata, convert=True, savefilemd=True):
+        """
+        write out the dataset-level POD data into the bag.
+
+        :param pdata dict:   the JSON object containing the POD Dataset metadata
+        :param convert bool: if True, in addition to writing the POD file, it 
+                             will be converted to NERDm data and written out 
+                             as well.
+        :param savefilemd bool:  if True (default) and convert=True, any DataFile
+                             or Subcollection metadata will be split off and 
+                             saved in the appropriate locations for file 
+                             metadata.
+        """
+        if not isinstance(pdata, Mapping):
+            raise NERDTypeError("dict", type(pdata), "POD Dataset")
+
+        self._write_json(mdata,
+                         os.path.join(self.bagdir, "metadata", POD_FILENAME))
+        
+        if convert:
+            mdata = self.pod2res.convert_data(pdata, self.mint_id())
+            self.add_res_nerd(mdata, savefilemd)
+
+        
+    def add_annotation_for(self, destpath, mdata):
+        """
+        add the given data as annotations to the metadata for the file or 
+        collection with the given path.  This metadata represents updates to 
+        the base level metadata.  This metadata will be merged in with the 
+        base level to create the final NERDm metadata (when finalize_bad() is 
+        called).  
+
+        :param destpath str:   the desired path for the file relative to the 
+                               root of the dataset.  An empty string means that
+                               the annotation should be associated with the 
+                               resource-level metadata.
+        :param mdata Mapping:  a dictionary with the annotating metadata.
+        """
+        if not isinstance(mdata, Mapping):
+            raise NERDTypeError("dict", type(mdata), "Annotation data")
+        self.ensure_metadata_dirs(destpath)
+        self._write_json(mdata, self.annot_file_for(destpath))
+    
