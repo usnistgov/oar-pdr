@@ -1,7 +1,8 @@
 """
 Tools for building a NIST Preservation bags
 """
-import os, errno, logging, re, json
+import os, errno, logging, re, json, hashlib
+import pynoid as noid
 from shutil import copy2 as filecopy
 from copy import deepcopy
 from collections import Mapping
@@ -11,6 +12,7 @@ from ..exceptions import (SIPDirectoryError, SIPDirectoryNotFound,
 from .. import PreservationSystem
 from ....nerdm.exceptions import (NERDError, NERDTypeError)
 from ....nerdm.convert import PODds2Res
+from ....id import PDRMinter
 
 NORM=15  # Log Level for recording normal activity
 logging.addLevelName(NORM, "NORMAL")
@@ -89,13 +91,23 @@ def find_jq_lib(config=None):
 
 def_jq_libdir = find_jq_lib()
 
+def checksum_of(filepath):
+    """
+    return the checksum for the 
+    """
+    sum = hashlib.sha256()
+    with open(filepath) as fd:
+        sum.update(fd.read())
+    return sum.hexdigest()
+
 class BagBuilder(PreservationSystem):
     """
     A class for building up and populating a BagIt bag compliant with the 
     NIST Profile.
     """
 
-    def __init__(self, parentdir, bagname, config=None, logger=None):
+    def __init__(self, parentdir, bagname, config=None, id=None, minter=None,
+                 logger=None):
         """
         create the Builder to build a bag with a given name
 
@@ -104,6 +116,11 @@ class BagBuilder(PreservationSystem):
         :param bagname str:    the name to give to the bag
         :param config dict:    a dictionary of configuration data (see class
                                  documentation for supported parameters). 
+        :param id      str:    the ARK identifier to assign to this record.  If 
+                                 None, one will be minted automatically when it
+                                 is needed.  
+        :param minter IDMinter: an IDMinter to use to mint a new identifier to 
+                                 assign to this dataset.  
         :param logger Logger:  a Logger object to send messages to.  This will 
                                  used to send messages to a preservation log
                                  inside the bag.  
@@ -115,11 +132,12 @@ class BagBuilder(PreservationSystem):
         self._name = bagname
         self._pdir = parentdir
         self._bagdir = os.path.join(self._pdir, self._name)
+        self._mbagver = DEF_MBAG_VERSION
 
         if not config:
             config = {}
         self.cfg = config
-        
+        self._id = self._fix_id(id)
         if not logger:
             logger = log
         self.log = logger
@@ -127,9 +145,35 @@ class BagBuilder(PreservationSystem):
         self._logname = self.cfg.get('log_filename', 'preserv.log')
         self._loghdlr = None
 
+        if not minter:
+            cfg = self.cfg.get('id_minter', {})
+            minter = PDRMinter(self._pdir, cfg)
+            if not os.path.exists(minter.registry.store):
+                self.log.warn("Creating new ID minter for bag, "+self._name)
+        self._minter = minter
+        
         jqlib = self.cfg.get('jq_lib', def_jq_libdir)
         self.pod2nrd = PODds2Res(jqlib)
 
+    def _fix_id(self, id):
+        if id is None:
+            return None
+        if re.search(r"^/?\d+", id):
+            id = "ark:/" + id.lstrip('/')
+        elif re.search(r"^A[Rr][Kk]:", id):
+            id = "ark" + id[3:]
+
+        if not re.match(r"^ark:/\d+/\w", id):
+            raise ValueError("Invalid ARK identifier provided: "+id)
+        if self.cfg.get('validate_id', True) and not noid.validate(id):
+            raise ValueError("Invalid ARK identifier provided (bad check char): "
+                             +id)
+            
+        return id
+
+    def _mint_id(self, ediid):
+        seedkey = self.cfg.get('id_minter', {}).get('ediid_data_key', 'ediid')
+        return self._minter.mint({ seedkey: ediid })
 
     @property
     def bagname(self):
@@ -140,8 +184,20 @@ class BagBuilder(PreservationSystem):
         return self._bagdir
 
     @property
+    def multibag_version(self):
+        """
+        the version of the NIST BagIt Profile that this builder is set to 
+        build to.  
+        """
+        return self._mbagver
+
+    @property
     def logname(self):
         return self._logname
+
+    @property
+    def id(self):
+        return self._id
 
     def ensure_bagdir(self):
         """
@@ -206,9 +262,10 @@ class BagBuilder(PreservationSystem):
                                root of the dataset.
         """
         destpath = os.path.normpath(destpath)
-        if os.path.isabs(destpath) or destpath.startswith(".."+os.sep):
-            raise ValueError("ensure_datafile_dirs: destpath cannot be an "
-                             "absolute path")
+        if os.path.isabs(destpath):
+            raise ValueError("collection path cannot be absolute: "+destpath)
+        if destpath.startswith(".."+os.sep):
+            raise ValueError("collection path cannot contain ..: "+destpath)
 
         ddir = os.path.join(self.bagdir, "data")
         if not os.path.exists(ddir):
@@ -223,9 +280,9 @@ class BagBuilder(PreservationSystem):
             raise StateException("Failed to create directory tree ({0}): {1}"
                                  .format(str(ex), pdir), cause=ex)
 
-        self.ensure_metadata_dirs(destpath)
+        self._ensure_metadata_dirs(destpath)
 
-    def ensure_metadata_dirs(self, destpath):
+    def _ensure_metadata_dirs(self, destpath):
 
         path = os.path.join(self.bagdir, "metadata", destpath)
         try:
@@ -236,6 +293,15 @@ class BagBuilder(PreservationSystem):
                                 "metadata", destpath)
             raise StateException("Failed to create directory tree ({0}): {1}"
                                  .format(str(ex), pdir), cause=ex)
+
+    def ensure_metadata_dirs(self, destpath):
+        destpath = os.path.normpath(destpath)
+        if os.path.isabs(destpath):
+            raise ValueError("data path cannot be absolute: "+destpath)
+        if destpath.startswith(".."+os.sep):
+            raise ValueError("data path cannot contain ..: "+destpath)
+
+        self._ensure_metadata_dirs(destpath)
         
 
     def ensure_datafile_dirs(self, destpath):
@@ -391,13 +457,20 @@ class BagBuilder(PreservationSystem):
         self.ensure_metadata_dirs(destpath)
         self._write_json(md, self.nerdm_file_for(destpath))
 
+    def pod_file(self):
+        """
+        return the path to the output POD dataset metadata file
+        """
+        return os.path.join(self.bagdir, "metadata", POD_FILENAME)
+
     def nerdm_file_for(self, destpath):
         """
         return the path to NERDm metadata file that corresponds to a data file
         or subcollection with the given collection path.
 
         :param destpath str:  the path to the data file relative to the 
-                              dataset's root.
+                              dataset's root.  An empty value indicates the 
+                              NERDm resource-level file.  
         """
         return os.path.join(self.bagdir, "metadata", destpath, FILEMD_FILENAME)
 
@@ -412,7 +485,7 @@ class BagBuilder(PreservationSystem):
         return os.path.join(self.bagdir, "metadata", destpath,
                             FILEANNOT_FILENAME)
 
-    def init_filemd_for(self, destpath, write=False, examine=False):
+    def init_filemd_for(self, destpath, write=False, examine=None):
         """
         create some initial file metadata for a file at a given path.
 
@@ -421,17 +494,25 @@ class BagBuilder(PreservationSystem):
         :param write   bool:  if True, write the metadata into its proper 
                               location in the bag.  This will overwrite 
                               any existing (non-annotation) metadata.  
-        :param examine bool:  if True, examine the file and surmise and 
-                              extract additional metadata.
+        :param examine str or bool:  if a str, it is taken to be the path 
+                              to a copy of the source data file to examine 
+                              to surmise and extract additional metadata.
+                              If it otherwise evaluates to True, the copy 
+                              previously copied to the output bag will be 
+                              examined.
         """
         mdata = self._create_init_filemd_for(destpath)
         if examine:
-            datafile = os.path.join(self.bagdir, "data", destpath)
+            if isinstance(examine, (str, unicode)):
+                datafile = examine
+            else:
+                datafile = os.path.join(self.bagdir, "data", destpath)
+                
             if os.path.exists(datafile):
                 self._add_extracted_metadata(datafile, mdata,
                                              self.cfg.get('file_md_extract'))
             else:
-                log.warn("Unable to examine data file: doesn't exist yet: " +
+                log.warn("Unable to examine data file: doesn't exist (yet): " +
                          destpath)
         if write:
             self.add_metadata_for_file(destpath, mdata)
@@ -474,7 +555,16 @@ class BagBuilder(PreservationSystem):
                                  .format(destfile, str(ex)), cause=ex)
 
     def _add_extracted_metadata(self, dfile, mdata, config):
-        pass
+        self._add_osfile_metadata(dfile, mdata, config)
+        self._add_checksum(dfile, mdata, config)
+
+    def _add_osfile_metadata(self, dfile, mdata, config):
+        mdata['size'] = os.stat(dfile).st_size
+    def _add_checksum(self, dfile, mdata, config):
+        mdata['hash'] = {
+            'algorithm': { 'tag': 'sha256' },
+            'value': checksum_of(dfile)
+        }
 
     def _create_init_filemd_for(self, destpath):
         out = {
@@ -602,15 +692,21 @@ class BagBuilder(PreservationSystem):
         """
         if not isinstance(pdata, Mapping):
             raise NERDTypeError("dict", type(pdata), "POD Dataset")
+        self.ensure_bag_structure()
 
-        self._write_json(mdata,
+        self._write_json(pdata,
                          os.path.join(self.bagdir, "metadata", POD_FILENAME))
-        
-        if convert:
-            mdata = self.pod2res.convert_data(pdata, self.mint_id())
-            self.add_res_nerd(mdata, savefilemd)
 
-        
+        nerd = None
+        if convert:
+            if not self._id:
+                self._id = self._mint_id(pdata.get('identifier'))
+                self.record("Assigning new identifier: " + self.id)
+                
+            nerd = self.pod2nrd.convert_data(pdata, self.id)
+            self.add_res_nerd(nerd, savefilemd)
+        return nerd
+
     def add_annotation_for(self, destpath, mdata):
         """
         add the given data as annotations to the metadata for the file or 

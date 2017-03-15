@@ -15,17 +15,24 @@ datadir = os.path.join(
     "tests", "data", "simplesip"
 )
 
+loghdlr = None
+rootlog = None
 def setUpModule():
     ensure_tmpdir()
 #    logging.basicConfig(filename=os.path.join(tmpdir(),"test_builder.log"),
 #                        level=logging.INFO)
     rootlog = logging.getLogger()
-    hdlr = logging.FileHandler(os.path.join(tmpdir(),"test_builder.log"))
-    hdlr.setLevel(logging.INFO)
-    hdlr.setFormatter(logging.Formatter(bldr.DEF_BAGLOG_FORMAT))
-    rootlog.addHandler(hdlr)
+    loghdlr = logging.FileHandler(os.path.join(tmpdir(),"test_builder.log"))
+    loghdlr.setLevel(logging.INFO)
+    loghdlr.setFormatter(logging.Formatter(bldr.DEF_BAGLOG_FORMAT))
+    rootlog.addHandler(loghdlr)
 
 def tearDownModule():
+    global loghdlr
+    if loghdlr:
+        if rootlog:
+            rootlog.removeLog(loghdlr)
+        loghdlr = None
     rmtmpdir()
 
 class TestBuilder(test.TestCase):
@@ -36,6 +43,7 @@ class TestBuilder(test.TestCase):
         self.tf = Tempfiles()
         self.bag = bldr.BagBuilder(self.tf.root, "testbag")
         self.tf.track("testbag")
+        self.tf.track("issued-ids.json")
 
     def tearDown(self):
         self.bag._unset_logfile()
@@ -48,12 +56,29 @@ class TestBuilder(test.TestCase):
         self.assertTrue(self.bag.log)
         self.assertFalse(self.bag._loghdlr)
         self.assertEqual(self.bag.logname, "preserv.log")
+        self.assertIsNone(self.bag.id)
 
     def test_ensure_bagdir(self):
         self.bag.ensure_bagdir()
 
         self.assertTrue(os.path.exists(self.bag.bagdir))
 
+    def test_fix_id(self):
+        self.assertIsNone(self.bag._fix_id(None))
+        fixed = "ark:/88434/pdr06f90"
+        self.assertEqual(self.bag._fix_id(fixed), fixed)
+        self.assertEqual(self.bag._fix_id("Ark:/88434/pdr06f90"), fixed)
+        self.assertEqual(self.bag._fix_id("ARK:/88434/pdr06f90"), fixed)
+        self.assertEqual(self.bag._fix_id("/88434/pdr06f90"), fixed)
+        self.assertEqual(self.bag._fix_id("88434/pdr06f90"), fixed)
+
+        self.bag = bldr.BagBuilder(self.tf.root, "testbag", id="88434/pdr06f90")
+        self.assertEqual(self.bag.id, fixed)
+
+    def test_mint_id(self):
+        ediid = 'EBC9DB05EDEA5B0EE043065706812DF81'
+        self.assertEqual(self.bag._mint_id(ediid), 'ark:/88434/mds00nbc5c')
+        
     def test_logging(self):
         self.test_ensure_bagdir()
         
@@ -138,10 +163,39 @@ class TestBuilder(test.TestCase):
                                                     "metadata",path)))
 
         # test illegal paths
-        with self.assertRaises(Exception):
+        with self.assertRaises(ValueError):
             self.bag.ensure_coll_dirs("/foo/bar")
-        with self.assertRaises(Exception):
+        with self.assertRaises(ValueError):
             self.bag.ensure_coll_dirs("foo/../../bar")
+
+    def test_ensure_metadata_dirs(self):
+        path = os.path.join("trial1","gold")
+        self.bag.ensure_metadata_dirs(path)
+
+        self.assertTrue(os.path.exists(self.bag.bagdir))
+        self.assertFalse(os.path.exists(os.path.join(self.bag.bagdir,"data")))
+        self.assertTrue(os.path.exists(os.path.join(self.bag.bagdir,"metadata")))
+        
+        self.assertFalse(os.path.exists(os.path.join(self.bag.bagdir,
+                                                     "data",path)))
+        self.assertTrue(os.path.exists(os.path.join(self.bag.bagdir,
+                                                    "metadata",path)))
+
+        # is indepotent
+        self.bag.ensure_coll_dirs(path)
+        self.assertTrue(os.path.exists(os.path.join(self.bag.bagdir,
+                                                    "metadata",path)))
+
+        # test illegal paths
+        with self.assertRaises(ValueError):
+            self.bag.ensure_metadata_dirs("/foo/bar")
+        with self.assertRaises(ValueError):
+            self.bag.ensure_metadata_dirs("foo/../../bar")
+
+
+    def test_pod_file(self):
+        self.assertEquals(self.bag.pod_file(),
+                      os.path.join(self.bag.bagdir,"metadata","pod.json"))
 
     def test_nerdm_file_for(self):
         path = os.path.join("trial1","gold","file.dat")
@@ -204,6 +258,26 @@ class TestBuilder(test.TestCase):
             data = json.load(fd)
         self.assertEquals(data, md)
 
+    def test_examine(self):
+        path = os.path.join("trial1","gold","trial1.json")
+        need = {
+            "@id": "cmps/"+path,
+            "@type": [ "nrdp:DataFile" ],
+            "filepath": path,
+            "_extensionSchemas": [ "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile" ],
+            "size": 69,
+            "hash": {
+                "algorithm": { "tag": "sha256" },
+                "value": \
+              "d155d99281ace123351a311084cd8e34edda6a9afcddd76eb039bad479595ec9"
+            }
+        }
+        datafile = os.path.join(datadir, "trial1.json")
+
+        mdata = self.bag.init_filemd_for(path, write=False, examine=datafile)
+        self.assertEquals(mdata, need)
+        
+
     def test_init_collmd_for(self):
         path = os.path.join("trial1","gold")
         md = self.bag.init_collmd_for(path)
@@ -241,7 +315,13 @@ class TestBuilder(test.TestCase):
             "@id": "cmps/"+path,
             "@type": [ "nrdp:DataFile" ],
             "filepath": path,
-            "_extensionSchemas": [ "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile" ]
+            "_extensionSchemas": [ "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile" ],
+            "size": 69,
+            "hash": {
+                "algorithm": { "tag": "sha256" },
+                "value": \
+              "d155d99281ace123351a311084cd8e34edda6a9afcddd76eb039bad479595ec9"
+            }
         }
         with open(bagmdpath) as fd:
             data = json.load(fd)
@@ -335,7 +415,58 @@ class TestBuilder(test.TestCase):
         with open(annotfile) as fd:
             data = json.load(fd)
         self.assertEqual(data, mdata)
-        
+
+
+    def test_add_ds_pod(self):
+        podfile = os.path.join(datadir, "_pod.json")
+        with open(podfile) as fd:
+            poddata = json.load(fd)
+        self.bag.add_ds_pod(poddata, convert=False)
+        self.assertTrue(os.path.exists(self.bag.pod_file()))
+        with open(self.bag.pod_file()) as fd:
+            data = json.load(fd)
+        self.assertEqual(data, poddata)
+        self.assertFalse(os.path.exists(self.bag.nerdm_file_for("")))
+        self.assertFalse(os.path.exists(self.bag.nerdm_file_for("trial1.json")))
+        self.assertFalse(os.path.exists(self.bag.nerdm_file_for("trial3/trial3a.json")))
+
+    def test_add_ds_pod_convert(self):
+        podfile = os.path.join(datadir, "_pod.json")
+        with open(podfile) as fd:
+            poddata = json.load(fd)
+        self.bag.add_ds_pod(poddata, convert=True, savefilemd=False)
+        self.assertTrue(os.path.exists(self.bag.pod_file()))
+
+        nerdfile = self.bag.nerdm_file_for("")
+        self.assertTrue(os.path.exists(nerdfile))
+        with open(nerdfile) as fd:
+            data = json.load(fd)
+        self.assertEqual(data['modified'], poddata['modified'])
+        self.assertEqual(data['@id'], "ark:/88434/mds00hw91v")
+        self.assertFalse(os.path.exists(self.bag.nerdm_file_for("trial1.json")))
+        self.assertFalse(os.path.exists(self.bag.nerdm_file_for("trial3/trial3a.json")))
+
+    def test_add_ds_pod_filemd(self):
+        podfile = os.path.join(datadir, "_pod.json")
+        with open(podfile) as fd:
+            poddata = json.load(fd)
+        #pdb.set_trace()
+        self.bag.add_ds_pod(poddata, convert=True, savefilemd=True)
+        self.assertTrue(os.path.exists(self.bag.pod_file()))
+
+        nerdfile = self.bag.nerdm_file_for("")
+        self.assertTrue(os.path.exists(nerdfile))
+        with open(nerdfile) as fd:
+            data = json.load(fd)
+        self.assertEqual(data['modified'], poddata['modified'])
+        self.assertEqual(data['@id'], "ark:/88434/mds00hw91v")
+        self.assertTrue(os.path.exists(self.bag.nerdm_file_for("trial1.json")))
+        self.assertTrue(os.path.exists(self.bag.nerdm_file_for("trial3/trial3a.json")))
+        nerdfile = self.bag.nerdm_file_for("trial3/trial3a.json")
+        with open(nerdfile) as fd:
+            data = json.load(fd)
+        self.assertEquals(data['filepath'], "trial3/trial3a.json")
+        self.assertEquals(data['@id'], "cmps/trial3/trial3a.json")
 
 if __name__ == '__main__':
     test.main()
