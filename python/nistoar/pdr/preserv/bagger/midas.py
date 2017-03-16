@@ -32,6 +32,29 @@ class MIDASMetadataBagger(SIPBagger):
 
     Note that user-provided datafiles are added to the output directory as a 
     hard link.  That is, no bytes are copied.  Metadata data files are copied.
+
+    This class can take a configuration dictionary on construction; the 
+    following parameters are supported:
+    :param bag_builder     dict: a set of parameters to pass to the BagBuilder
+                                 object used to populate the output bag (see
+                                 BagBuilder class documentation for supported
+                                 parameters).
+    :param merge_etc       str:  the path to the directory containing the 
+                                 metadata merge rule configurations.  If not
+                                 set, the directory will be searched for in 
+                                 some possible default locations.
+    :param hard_link_data bool:  if True, copy data files into the bag using
+                                 a hard link whenever possible (default: True)
+    :param pod_locations  list of str:  a list of relative file paths where 
+                                 the POD dataset file might be found, in 
+                                 order of preference.  (Default: ["_pod.json"])
+    :param update_by_checksum_size_lim int:  a size limit in bytes for which 
+                                 files less than this will be checked to see 
+                                 if it has changed (not yet implemented).
+    :param conponent_merge_convention str: the merge convention name to use to
+                                 merge MIDAS-provided component metadata with 
+                                 the PDR's initial component metadata (default:
+                                 'dev').
     """
 
     def __init__(self, midasid, workdir, reviewdir, uploaddir=None, config={},

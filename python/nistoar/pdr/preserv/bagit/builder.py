@@ -151,6 +151,31 @@ class BagBuilder(PreservationSystem):
     """
     A class for building up and populating a BagIt bag compliant with the 
     NIST Profile.
+
+    This class can take a configuration dictionary on construction; the 
+    following parameters are supported:
+    :param log_filename str:  the name to give to the logfile to embed into
+                              the output bag (default: 'preserv.log')
+    :param bag_log_format str:  a format string used to format the embedded
+                              log file.
+    :param id_minter   dict:  a set of parameters to pass to an IDMinter
+                              object upon creation (if a minter is not 
+                              provided).
+    :param jq_lib       str:  the full path to the JQ transform library 
+                              directory; if not set, the directory is 
+                              searched for in a few typical places.
+    :param validate_id bool:  If True, an identifier provided to the 
+                              constructor will be checked for transcription
+                              error.  (default: True)
+    :param copy_on_link_failure bool:  If True, then when moving datafiles 
+                              to output bag via a hardlink, then the file 
+                              will get copied if the linking fails.  
+    :param file_md_extrace dict:  a set of parameters to pass to the configured
+                              file metadata extractor.
+    :param json_indent  int:  The amount of indent to use when exporting JSON
+                              data (default: 4)
+    :param ensure_nerdm_type_on_add bool:  if True, make sure that the resource
+                              metadata has a recognized value for "_schema".
     """
 
     def __init__(self, parentdir, bagname, config=None, id=None, minter=None,
