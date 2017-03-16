@@ -14,9 +14,10 @@ from shutil import copy2 as copy
 from abc import ABCMeta, abstractmethod, abstractproperty
 
 from .base import SIPBagger, moddate_of, checksum_of
-from ..bagit.builder import BagBuilder
+from ..bagit.builder import BagBuilder, def_merge_etcdir
 from ..exceptions import (SIPDirectoryError, SIPDirectoryNotFound, 
                           ConfigurationException, StateException, PODError)
+from nistoar.nerdm.merge import MergerFactory
 
 log = logging.getLogger(__name__)
 
@@ -53,6 +54,8 @@ class MIDASMetadataBagger(SIPBagger):
 
         # ensure we have at least one readable input directory
         for dir in (reviewdir, uploaddir):
+            if not dir:
+                continue
             indir = os.path.join(dir, midasid)
             if os.path.exists(indir):
                 if not os.path.isdir(indir):
@@ -60,7 +63,7 @@ class MIDASMetadataBagger(SIPBagger):
                 if not os.access(indir, os.R_OK|os.X_OK):
                     raise SIPDirectoryError(indir, "lacking read/cd permission")
                 self._indirs.append(indir)
-                if indir.startswith(reviewdir):
+                if reviewdir and indir.startswith(reviewdir):
                     self.state = 'review'
 
         if not self._indirs:
@@ -70,12 +73,24 @@ class MIDASMetadataBagger(SIPBagger):
 
         self.bagbldr = BagBuilder(self.bagparent, self.name,
                                   self.cfg.get('bag_builder', {}),
-                                  minter=minter, logger=log)
+                                  minter=minter,
+                                  logger=log.getChild(self.name[:8]+'...'))
+        mergeetc = self.cfg.get('merge_etc', def_merge_etcdir)
+        self._merger_factory = MergerFactory(mergeetc)
 
         self.hardlinkdata = self.cfg.get('hard_link_data', True)
         self.inpodfile = None
         self.resmd = None
         self.datafiles = None
+
+        self.ensure_bag_parent_dir()
+
+    @property
+    def bagdir(self):
+        """
+        The path to the output bag directory.
+        """
+        return self.bagbldr.bagdir
 
     def find_pod_file(self):
         """
@@ -95,7 +110,7 @@ class MIDASMetadataBagger(SIPBagger):
     def ensure_res_metadata(self):
         """
         copy over, if necessary, the latest version of the POD metadata to 
-        the output bag.
+        the output bag and convert it to NERDm.
         """
         if not self.inpodfile:
             self._set_pod_file()
@@ -107,10 +122,14 @@ class MIDASMetadataBagger(SIPBagger):
         if not update:
             # mod dates; input is newer, we'll update
             update = instamp > moddate_of(outpod)
+            if update:
+                log.info("Detected change in POD file (by date); updating.")
         if not update:
             # we'll double check with the checksum in case mod dates are
             # not accurate
             update = checksum_of(self.inpodfile) != checksum_of(outpod)
+            if update:
+                log.info("Detected change in POD file (by checksum); updating.")
 
         if update:
             pod = self.read_pod(self.inpodfile)
@@ -135,7 +154,7 @@ class MIDASMetadataBagger(SIPBagger):
         # precedence
         for root in self._indirs:
             root = root.rstrip('/')
-            for dir, files, subdirs in os.walk(root):
+            for dir, subdirs, files in os.walk(root):
                 reldir = dir[len(root)+1:]
                 for f in files:
                     if f.startswith('.') or \
@@ -166,7 +185,8 @@ class MIDASMetadataBagger(SIPBagger):
         nerdfile = self.bagbldr.nerdm_file_for(destpath)
 
         update = False
-        if moddate_for(inpath) > moddate_for(nerdfile):
+        if not os.path.exists(nerdfile) or \
+           moddate_of(inpath) > moddate_of(nerdfile):
             # data file is newer; update its metadata
             update = True
         elif os.stat(inpath).st_size \
@@ -176,7 +196,20 @@ class MIDASMetadataBagger(SIPBagger):
         
         if update:
             nerd = self.bagbldr.init_filemd_for(destpath, examine=inpath)
+
+            if resmd:
+                # look for applicable metadata in the resource metadata
+                comps = resmd.get('components', [])
+                match = [c for c in comps if c['@id'] == nerd['@id']]
+                if match:
+                    conv = self.cfg.get('component_merge_convention', 'dev')
+                    merger = self._merger_for(conv, "DataFile")
+                    nerd = merger.merge(match[0], nerd)
+
             self.bagbldr.add_metadata_for_file(destpath, nerd)
+
+    def _merger_for(self, convention, objtype):
+        return self._merger_factory.make_merger(convention, objtype)
 
     def ensure_subcoll_metadata(self):
         if not self.datafiles:
@@ -190,8 +223,8 @@ class MIDASMetadataBagger(SIPBagger):
                 filenerd = self.bagbldr.nerdm_file_for(filepath)
                 if not os.path.exists(collnerd) or \
                    (os.path.exists(filenerd) and 
-                    moddate_for(collnerd) < moddata_for(filenerd)):
-                      self.bagbldr.init_collmd_for(filepath)
+                    moddate_of(collnerd) < moddate_of(filenerd)):
+                      self.bagbldr.init_collmd_for(collpath, write=True)
                       colls.add(collpath)
         
 
@@ -214,7 +247,7 @@ class MIDASMetadataBagger(SIPBagger):
         ensure that all data files are described in the output bag as well as
         (if nodata=False) copied over.  
         """
-        self.datafiles = self.data_file_inventory(self);
+        self.datafiles = self.data_file_inventory();
         for destpath, inpath in self.datafiles.items():
             self.ensure_file_metadata(inpath, destpath, self.resmd)
 

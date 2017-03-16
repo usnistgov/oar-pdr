@@ -1,4 +1,4 @@
-import os, sys, pdb, shutil, logging, json
+import os, sys, pdb, shutil, logging, json, subprocess
 from cStringIO import StringIO
 from io import BytesIO
 import warnings as warn
@@ -57,6 +57,12 @@ class TestBuilder(test.TestCase):
         self.assertFalse(self.bag._loghdlr)
         self.assertEqual(self.bag.logname, "preserv.log")
         self.assertIsNone(self.bag.id)
+        self.assertIsNone(self.bag.ediid)
+
+    def test_download_url(self):
+        self.assertEqual(self.bag._download_url('goob',
+                                                os.path.join("foo", "bar.json")),
+                         "https://www.nist.gov/od/ds/goob/foo/bar.json")
 
     def test_ensure_bagdir(self):
         self.bag.ensure_bagdir()
@@ -241,10 +247,11 @@ class TestBuilder(test.TestCase):
         path = os.path.join("trial1","gold","file.dat")
         need = {
             "@id": "cmps/"+path,
-            "@type": [ "nrdp:DataFile" ],
+            "@type": [ "nrdp:DataFile", "nrdp:Distribution" ],
             "filepath": path,
             "_extensionSchemas": [ "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile" ]
         }
+        dlurl = "https://www.nist.gov/od/ds/goob/trial1/gold/file.dat"
         mdf = os.path.join(self.bag.bagdir, "metadata", path, "nerdm.json")
         self.assertFalse(os.path.exists(mdf))
 
@@ -262,7 +269,7 @@ class TestBuilder(test.TestCase):
         path = os.path.join("trial1","gold","trial1.json")
         need = {
             "@id": "cmps/"+path,
-            "@type": [ "nrdp:DataFile" ],
+            "@type": [ "nrdp:DataFile", "nrdp:Distribution" ],
             "filepath": path,
             "_extensionSchemas": [ "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile" ],
             "size": 69,
@@ -313,7 +320,7 @@ class TestBuilder(test.TestCase):
 
         need = {
             "@id": "cmps/"+path,
-            "@type": [ "nrdp:DataFile" ],
+            "@type": [ "nrdp:DataFile", "nrdp:Distribution" ],
             "filepath": path,
             "_extensionSchemas": [ "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile" ],
             "size": 69,
@@ -340,7 +347,7 @@ class TestBuilder(test.TestCase):
 
         need = {
             "@id": "cmps/"+path,
-            "@type": [ "nrdp:DataFile" ],
+            "@type": [ "nrdp:DataFile", "nrdp:Distribution" ],
             "filepath": path,
             "_extensionSchemas": [ "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile" ]
         }
@@ -349,10 +356,12 @@ class TestBuilder(test.TestCase):
         self.assertEqual(data, need)
 
     def test_add_res_nerd(self):
+        self.assertIsNone(self.bag.ediid)
         with open(os.path.join(datadir, "_nerdm.json")) as fd:
             mdata = json.load(fd)
 
         self.bag.add_res_nerd(mdata)
+        self.assertEqual(self.bag.ediid, mdata['ediid'])
         ddir = os.path.join(self.bag.bagdir,"data")
         mdir = os.path.join(self.bag.bagdir,"metadata")
         nerdfile = os.path.join(mdir,"nerdm.json")
@@ -397,6 +406,30 @@ class TestBuilder(test.TestCase):
                                 if not f.startswith('.') and
                                    not f.endswith('.json')]), 0)
 
+    def test_update_ediid(self):
+        self.assertIsNone(self.bag.ediid)
+        with open(os.path.join(datadir, "_nerdm.json")) as fd:
+            mdata = json.load(fd)
+        self.bag.add_res_nerd(mdata)
+        self.assertIsNotNone(self.bag.ediid)
+
+        destpath = "foo/bar.json"
+        dlurl = "https://www.nist.gov/od/ds/"+self.bag.ediid+'/'+destpath
+        self.bag.init_filemd_for(destpath, write=True)
+        with open(self.bag.nerdm_file_for(destpath)) as fd:
+            mdata = json.load(fd)
+        self.assertTrue(mdata['downloadURL'], dlurl)
+
+        self.bag.ediid = "gurn"
+
+        with open(self.bag.nerdm_file_for("")) as fd:
+            mdata = json.load(fd)
+        self.assertEqual(mdata['ediid'], 'gurn')
+        dlurl = "https://www.nist.gov/od/ds/gurn/"+destpath
+        with open(self.bag.nerdm_file_for(destpath)) as fd:
+            mdata = json.load(fd)
+        self.assertEqual(mdata['downloadURL'], dlurl)
+
     def test_add_annotation_for(self):
         mdata = { "foo": "bar" }
         self.bag.add_annotation_for("goob", mdata)
@@ -418,11 +451,13 @@ class TestBuilder(test.TestCase):
 
 
     def test_add_ds_pod(self):
+        self.assertIsNone(self.bag.ediid)
         podfile = os.path.join(datadir, "_pod.json")
         with open(podfile) as fd:
             poddata = json.load(fd)
         self.bag.add_ds_pod(poddata, convert=False)
         self.assertTrue(os.path.exists(self.bag.pod_file()))
+        self.assertIsNone(self.bag.ediid)
         with open(self.bag.pod_file()) as fd:
             data = json.load(fd)
         self.assertEqual(data, poddata)
@@ -431,11 +466,13 @@ class TestBuilder(test.TestCase):
         self.assertFalse(os.path.exists(self.bag.nerdm_file_for("trial3/trial3a.json")))
 
     def test_add_ds_pod_convert(self):
+        self.assertIsNone(self.bag.ediid)
         podfile = os.path.join(datadir, "_pod.json")
         with open(podfile) as fd:
             poddata = json.load(fd)
         self.bag.add_ds_pod(poddata, convert=True, savefilemd=False)
         self.assertTrue(os.path.exists(self.bag.pod_file()))
+        self.assertEqual(self.bag.ediid, poddata['identifier'])
 
         nerdfile = self.bag.nerdm_file_for("")
         self.assertTrue(os.path.exists(nerdfile))
@@ -467,6 +504,27 @@ class TestBuilder(test.TestCase):
             data = json.load(fd)
         self.assertEquals(data['filepath'], "trial3/trial3a.json")
         self.assertEquals(data['@id'], "cmps/trial3/trial3a.json")
+
+
+class TestChecksum(test.TestCase):
+
+    def test_checksum_of(self):
+        dfile = os.path.join(datadir,"trial1.json")
+        self.assertEqual(bldr.checksum_of(dfile), self.syssum(dfile))
+        dfile = os.path.join(datadir,"trial2.json")
+        self.assertEqual(bldr.checksum_of(dfile), self.syssum(dfile))
+        dfile = os.path.join(datadir,"trial3/trial3a.json")
+        self.assertEqual(bldr.checksum_of(dfile), self.syssum(dfile))
+
+    def syssum(self, filepath):
+        cmd = ["sha256sum", filepath]
+        proc = subprocess.Popen(cmd, stdout=subprocess.PIPE,
+                                     stderr=subprocess.PIPE)
+        (out, err) = proc.communicate()
+        if proc.returncode != 0:
+            raise RuntimeError(err + "\nFailed sha256sum command: " +
+                               " ".join(cmd))
+        return out.split()[0]
 
 if __name__ == '__main__':
     test.main()

@@ -5,7 +5,7 @@ import os, errno, logging, re, json, hashlib
 import pynoid as noid
 from shutil import copy2 as filecopy
 from copy import deepcopy
-from collections import Mapping
+from collections import Mapping, OrderedDict
 
 from ..exceptions import (SIPDirectoryError, SIPDirectoryNotFound, 
                           ConfigurationException, StateException, PODError)
@@ -45,10 +45,11 @@ NERD_DEF = NERDM_SCH_ID + "/definitions/"
 NERDPUB_DEF = NERDMPUB_SCH_ID + "/definitions/"
 DATAFILE_TYPE = NERDPUB_PRE + ":DataFile"
 SUBCOLL_TYPE = NERDPUB_PRE + ":Subcollection"
+DISTSERV = "https://www.nist.gov/od/ds/"
 
 def find_jq_lib(config=None):
     """
-    return the directory containing the location of the jq libraries
+    return the directory containing the jq libraries
     """
     def assert_exists(dir, ctxt=""):
         if not os.path.exists(dir):
@@ -90,6 +91,52 @@ def find_jq_lib(config=None):
     return None
 
 def_jq_libdir = find_jq_lib()
+
+def find_merge_etc(config=None):
+    """
+    return the directory containing the merge rules
+    """
+    def assert_exists(dir, ctxt=""):
+        if not os.path.exists(dir):
+            "{0}directory does not exist: {1}".format(ctxt, dir)
+            raise ConfigurationException(msg)
+
+    # check local configuration
+    if config and 'merge_rules_lib' in config:
+        assert_exists(config['merge_rules_lib'],
+                      "config param 'merge_rules_lib' ")
+        return config['merge_rules_lib']
+            
+    # check environment variable
+    if 'OAR_MERGE_ETC' in os.environ:
+        assert_exists(os.environ['OAR_MERGE_ETC'], "env var OAR_MERGE_ETC ")
+        return os.environ['OAR_MERGE_ETC']
+
+    # look relative to a base directory
+    if 'OAR_HOME' in os.environ:
+        # this is normally an installation directory (where lib/jq is our
+        # directory) but we also allow it to be the source directory
+        assert_exists(os.environ['OAR_HOME'], "env var OAR_HOME ")
+        basedir = os.environ['OAR_HOME']
+        candidates = [os.path.join(basedir, 'etc', 'merge')]
+
+    else:
+        # guess some locations based on the location of the executing code.
+        # The code might be coming from an installation, build, or source
+        # directory.
+        import nistoar
+        basedir = os.path.dirname(os.path.dirname(os.path.dirname(
+                                            os.path.abspath(nistoar.__file__))))
+        candidates = [os.path.join(basedir, 'etc', 'merge')]
+        basedir = os.path.dirname(os.path.dirname(basedir))
+        candidates.append(os.path.join(basedir, 'etc', 'merge'))
+    for dir in candidates:
+        if os.path.exists(dir):
+            return dir
+        
+    return None
+
+def_merge_etcdir = find_merge_etc()
 
 def checksum_of(filepath):
     """
@@ -138,6 +185,7 @@ class BagBuilder(PreservationSystem):
             config = {}
         self.cfg = config
         self._id = self._fix_id(id)
+        self._ediid = None
         if not logger:
             logger = log
         self.log = logger
@@ -198,6 +246,56 @@ class BagBuilder(PreservationSystem):
     @property
     def id(self):
         return self._id
+
+    @property
+    def ediid(self):
+        return self._ediid
+
+    @ediid.setter
+    def ediid(self, val):
+        if val:
+            self.record("Setting ediid: " + val)
+        elif self._ediid:
+            self.record("Unsetting ediid")
+        self._ediid = val
+        self._upd_ediid(val)
+        self._upd_downloadurl(val)
+
+    def _upd_ediid(self, ediid):
+        # this updates the ediid metadatum in the resource nerdm.json
+        mdfile = self.nerdm_file_for("")
+        if os.path.exists(mdfile):
+            mdata = self._read_nerd(mdfile)
+            if mdata.get('ediid') != ediid:
+                if ediid:
+                    mdata['ediid'] = ediid
+                elif 'ediid' in mdata:
+                    del mdata['ediid']
+                self._write_json(mdata, mdfile)
+
+    def _upd_downloadurl(self, ediid):
+        mdtree = os.path.join(self.bagdir, 'metadata')
+        dftype = ":".join([NERDPUB_PRE, "DataFile"])
+        if os.path.exists(mdtree):
+            for dir, subdirs, files in os.walk(mdtree):
+                if FILEMD_FILENAME in files:
+                    mdfile = os.path.join(dir, FILEMD_FILENAME)
+                    mdata = self._read_nerd(mdfile)
+                    if dftype in mdata.get("@type", []) and  \
+                       mdata.get('filepath') and             \
+                       mdata.get("downloadURL", DISTSERV)    \
+                            .startswith(DISTSERV):
+                        if ediid:
+                            mdata["downloadURL"] = \
+                               self._download_url(self.ediid, mdata['filepath'])
+                                    
+                        else:
+                            del mdata["downloadURL"]
+                        self._write_json(mdata, mdfile)
+
+    def _download_url(self, ediid, destpath):
+        path = "/".join(destpath.split(os.sep))
+        return DISTSERV + ediid + '/' + path
 
     def ensure_bagdir(self):
         """
@@ -414,7 +512,7 @@ class BagBuilder(PreservationSystem):
         """
         if not isinstance(mdata, Mapping):
             raise NERDTypeError("dict", type(mdata), "NERDm Component")
-        
+
         md = self._create_init_filemd_for(destpath)
         md.update(mdata)
         
@@ -545,6 +643,13 @@ class BagBuilder(PreservationSystem):
 
         return mdata
 
+    def _read_nerd(self, nerdfile):
+        try:
+            with open(nerdfile) as fd:
+                return json.load(fd, object_pairs_hook=OrderedDict)
+        except IOError, ex:
+            raise NERDError("Unable to read NERD file: "+str(ex), src=nerdfile)
+
     def _write_json(self, jsdata, destfile):
         indent = self.cfg.get('json_indent', 4)
         try:
@@ -569,10 +674,13 @@ class BagBuilder(PreservationSystem):
     def _create_init_filemd_for(self, destpath):
         out = {
             "@id": "cmps/" + destpath,
-            "@type": [ ":".join([NERDPUB_PRE, "DataFile"]) ],
+            "@type": [ ":".join([NERDPUB_PRE, "DataFile"]),
+                       ":".join([NERDPUB_PRE, "Distribution"])  ],
             "filepath": destpath,
             "_extensionSchemas": [ NERDPUB_DEF + "DataFile" ]
         }
+        if self.ediid:
+            out['downloadURL'] = self._download_url(self.ediid, destpath)
         return out
 
     def _create_init_collmd_for(self, destpath):
@@ -634,6 +742,7 @@ class BagBuilder(PreservationSystem):
                                    file metadata.
         """
         self.ensure_bag_structure()
+        mdata = deepcopy(mdata)
         
         # validate type
         if mdata.get("_schema") != NERDM_SCH_ID:
@@ -673,7 +782,14 @@ class BagBuilder(PreservationSystem):
                             self.add_metadata_for_coll(components[i]['filepath'],
                                                        components[i])
                         components.pop(i)
-                            
+
+        if 'inventory' in mdata:
+            # we'll recalculate the inventory at the end; for now, get rid of it.
+            del mdata['inventory']
+        if 'ediid' in mdata:
+            # this will trigger updates to DataFile components
+            self.ediid = mdata['ediid']
+
         self._write_json(mdata, self.nerdm_file_for(""))
                                              
 
@@ -689,6 +805,8 @@ class BagBuilder(PreservationSystem):
                              or Subcollection metadata will be split off and 
                              saved in the appropriate locations for file 
                              metadata.
+
+        :return dict:  the NERDm-converted metadata or None if convert=False
         """
         if not isinstance(pdata, Mapping):
             raise NERDTypeError("dict", type(pdata), "POD Dataset")
