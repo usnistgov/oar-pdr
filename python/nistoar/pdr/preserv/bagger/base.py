@@ -7,6 +7,7 @@ import os, json
 from collections import OrderedDict
 from abc import ABCMeta, abstractmethod, abstractproperty
 
+from .. import PreservationSystem
 from ..exceptions import (SIPDirectoryError, SIPDirectoryNotFound, 
                           ConfigurationException, StateException, PODError)
 from ..bagit.builder import checksum_of
@@ -17,7 +18,7 @@ def moddate_of(filepath):
     """
     return os.stat(filepath).st_mtime
 
-class SIPBagger(object):
+class SIPBagger(PreservationSystem):
     """
     This class will prepare an SIP organized in a particular form 
     by re-organizing its contents into a working bag.  Subclasses adapt 

@@ -8,4 +8,5 @@ create bags (via the BagBuilder class).  For example, the MIDASBagger
 understands how to bag up data provided by MIDAS.  
 """
 
+from midas import MIDASMetadataBagger
 

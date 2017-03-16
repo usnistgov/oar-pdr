@@ -212,6 +212,8 @@ class MIDASMetadataBagger(SIPBagger):
            moddate_of(inpath) > moddate_of(nerdfile):
             # data file is newer; update its metadata
             update = True
+            log.info("Detected change in data file (by date); updating " +
+                     destpath)
         elif os.stat(inpath).st_size \
              < self.cfg.get('update_by_checksum_size_lim', 0):
             # not implemented yet
