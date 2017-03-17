@@ -150,5 +150,62 @@ class NISTBag(PreservationSystem):
             raise NERDError("Unable to read NERD file: "+str(ex),
                             cause=ex, src=nerdfile, sys=self)
 
-    
+    def comp_exists(self, comppath):
+        """
+        return True if the given path points to an existing component.
+        The component is not guaranteed to be complete in its description.
+        To exist, the path must exist either under the bag's data directory 
+        or as a directory under the metadata directory.
+        """
+        if comppath == "":
+            return True
+
+        path = os.path.join(self.data_dir, comppath)
+        if os.path.exists(path):
+            return True
+
+        path = os.path.join(self.metadata_dir, comppath)
+        if os.path.isdir(path):
+            return True
+
+        return False
+
+    def is_data_file(self, comppath):
+        """
+        return True if the given component path appears to point to a 
+        data file.
+        """
+        if not comppath:
+            return False
+
+        path = os.path.join(self.data_dir, comppath)
+        if os.path.isfile(path):
+            return True
+
+        path = self.nerd_file_for(comppath)
+        if os.path.exists(path):
+            mdata = self.read_nerd(path)
+            return any([t for t in mdata['@type'] if ':DataFile' in t])
+
+        return False
+
+    def is_subcoll(self, comppath):
+        """
+        return True if the given component path appears to point to a 
+        data file.
+        """
+        if not comppath:
+            return False
+
+        path = os.path.join(self.data_dir, comppath)
+        if os.path.isdir(path):
+            return True
+
+        path = self.nerd_file_for(comppath)
+        if os.path.exists(path):
+            mdata = self.read_nerd(path)
+            return any([t for t in mdata['@type'] if ':Subcollection' in t])
+
+        return False
+
     

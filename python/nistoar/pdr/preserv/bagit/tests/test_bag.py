@@ -69,7 +69,27 @@ class TestNISTBag(test.TestCase):
         self.assertEqual(len(data['inventory']), 2)
         self.assertEqual(data['inventory'][0]['childCount'], 4)
         self.assertEqual(data['inventory'][0]['descCount'], 5)
-        
+
+    def test_comp_exists(self):
+        self.assertTrue( self.bag.comp_exists("trial1.json") )
+        self.assertTrue( self.bag.comp_exists("trial2.json") )
+        self.assertTrue( self.bag.comp_exists("trial3") )
+        self.assertTrue( self.bag.comp_exists("trial3/trial3a.json") )
+        self.assertFalse( self.bag.comp_exists("trial4") )
+
+    def test_is_data_file(self):
+        self.assertTrue( self.bag.is_data_file("trial1.json") )
+        self.assertTrue( self.bag.is_data_file("trial2.json") )
+        self.assertFalse( self.bag.is_data_file("trial3") )
+        self.assertTrue( self.bag.is_data_file("trial3/trial3a.json") )
+        self.assertFalse( self.bag.is_data_file("trial4") )
+
+    def test_is_subcoll(self):
+        self.assertFalse( self.bag.is_subcoll("trial1.json") )
+        self.assertFalse( self.bag.is_subcoll("trial2.json") )
+        self.assertTrue( self.bag.is_subcoll("trial3") )
+        self.assertFalse( self.bag.is_subcoll("trial3/trial3a.json") )
+        self.assertFalse( self.bag.is_subcoll("trial4") )
 
 
 if __name__ == '__main__':
