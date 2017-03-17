@@ -82,15 +82,17 @@ class MIDASMetadataBagger(SIPBagger):
             indir = os.path.join(dir, midasid)
             if os.path.exists(indir):
                 if not os.path.isdir(indir):
-                    raise SIPDirectoryError(indir, "not a directory")
+                    raise SIPDirectoryError(indir, "not a directory", sys=self)
                 if not os.access(indir, os.R_OK|os.X_OK):
-                    raise SIPDirectoryError(indir, "lacking read/cd permission")
+                    raise SIPDirectoryError(indir, "lacking read/cd permission",
+                                            sys=self)
                 self._indirs.append(indir)
                 if reviewdir and indir.startswith(reviewdir):
                     self.state = 'review'
 
         if not self._indirs:
-            raise SIPDirectoryError(msg="No input directories available")
+            raise SIPDirectoryError(msg="No input directories available",
+                                    sys=self)
         
         super(MIDASMetadataBagger, self).__init__(workdir, config)
 
@@ -125,7 +127,8 @@ class MIDASMetadataBagger(SIPBagger):
                 path = os.path.join(indir, loc)
                 if os.path.exists(path):
                     return path
-        raise PODError("POD file not found in expected locations: "+str(locs))
+        raise PODError("POD file not found in expected locations: "+str(locs),
+                       sys=self)
 
     def _set_pod_file(self):
         self.inpodfile = self.find_pod_file()

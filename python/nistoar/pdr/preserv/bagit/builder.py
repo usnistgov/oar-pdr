@@ -54,7 +54,7 @@ def find_jq_lib(config=None):
     def assert_exists(dir, ctxt=""):
         if not os.path.exists(dir):
             "{0}directory does not exist: {1}".format(ctxt, dir)
-            raise ConfigurationException(msg)
+            raise ConfigurationException(msg, sys=self)
 
     # check local configuration
     if config and 'jq_lib' in config:
@@ -99,7 +99,7 @@ def find_merge_etc(config=None):
     def assert_exists(dir, ctxt=""):
         if not os.path.exists(dir):
             "{0}directory does not exist: {1}".format(ctxt, dir)
-            raise ConfigurationException(msg)
+            raise ConfigurationException(msg, sys=self)
 
     # check local configuration
     if config and 'merge_rules_lib' in config:
@@ -199,7 +199,7 @@ class BagBuilder(PreservationSystem):
         """
         if not os.path.exists(parentdir):
             raise StateException("Bag Workspace dir does not exist: " +
-                                 parentdir)
+                                 parentdir, sys=self)
             
         self._name = bagname
         self._pdir = parentdir
@@ -334,11 +334,11 @@ class BagBuilder(PreservationSystem):
                 didit = True
             except OSError, e:
                 raise StateException("Unable to create bag directory: "+
-                                     self.bagdir+": "+str(e), cause=e)
+                                     self.bagdir+": "+str(e), cause=e, sys=self)
 
         if not os.access(self.bagdir, os.R_OK|os.W_OK|os.X_OK):
             raise StateException("Insufficient permissions on bag directory: " +
-                                 self.bagdir)
+                                 self.bagdir, sys=self)
 
         if not self._loghdlr:
             self._set_logfile()
@@ -401,7 +401,7 @@ class BagBuilder(PreservationSystem):
         except Exception, ex:
             pdir = os.path.join(os.path.basename(self.bagdir), "data", pdir)
             raise StateException("Failed to create directory tree ({0}): {1}"
-                                 .format(str(ex), pdir), cause=ex)
+                                 .format(str(ex), pdir), cause=ex, sys=self)
 
         self._ensure_metadata_dirs(destpath)
 
@@ -415,7 +415,7 @@ class BagBuilder(PreservationSystem):
             pdir = os.path.join(os.path.basename(self.bagdir),
                                 "metadata", destpath)
             raise StateException("Failed to create directory tree ({0}): {1}"
-                                 .format(str(ex), pdir), cause=ex)
+                                 .format(str(ex), pdir), cause=ex, sys=self)
 
     def ensure_metadata_dirs(self, destpath):
         destpath = os.path.normpath(destpath)
@@ -453,7 +453,7 @@ class BagBuilder(PreservationSystem):
             except Exception, ex:
                 pdir = os.path.join(os.path.basename(self.bagdir), "data", pdir)
                 raise StateException("Failed to create directory tree ({0}): {1}"
-                                     .format(str(ex), pdir), cause=ex)
+                                     .format(str(ex), pdir), cause=ex, sys=self)
 
         self.ensure_metadata_dirs(destpath)
         
@@ -513,7 +513,7 @@ class BagBuilder(PreservationSystem):
                         self.log.warning(msg)
                     else:
                         self.log.exception(msg, exc_info=True)
-                        raise StateException(msg)
+                        raise StateException(msg, sys=self)
             if not hardlink:
                 try:
                     filecopy(srcpath, outfile)
@@ -522,7 +522,7 @@ class BagBuilder(PreservationSystem):
                     msg = "Unable to copy data file (" + srcpath + \
                           ") into bag (" + outfile + "): " + str(ex)
                     self.log.exception(msg, exc_info=True)
-                    raise StateException(msg, cause=ex)
+                    raise StateException(msg, cause=ex, sys=self)
     
         if initmd:
             self.init_filemd_for(destpath, write=True, examine=srcpath)

@@ -49,38 +49,38 @@ class PrePubMetadataService(PublishSystem):
         if not workdir:
             workdir = self.cfg.get('working_dir')
         if not workdir:
-            raise ConfigurationException("Missing required config parameters: "
-                                         "working_dir")
+            raise ConfigurationException("Missing required config parameters: "+
+                                         "working_dir", sys=self)
         if not os.path.isdir(workdir):
             raise StateException("Working directory does not exist as a " +
-                                 "directory: " + workdir)
+                                 "directory: " + workdir, sys=self)
         self.workdir = workdir
 
         if not reviewdir:
             reviewdir = self.cfg.get('review_dir')
         if not reviewdir:
-            raise ConfigurationException("Missing required config parameters: "
-                                         "review_dir")
+            raise ConfigurationException("Missing required config parameters: "+
+                                         "review_dir", sys=self)
         if not os.path.isdir(reviewdir):
             raise StateException("MIDAS review directory does not exist as a " +
-                                 "directory: " + reviewdir)
+                                 "directory: " + reviewdir, sys=self)
         self.reviewdir = reviewdir
 
         if not uploaddir:
             uploaddir = self.cfg.get('upload_dir')
         if not uploaddir:
-            raise ConfigurationException("Missing required config parameters: "
-                                         "upload_dir")
+            raise ConfigurationException("Missing required config parameters: "+
+                                         "upload_dir", sys=self)
         if not os.path.isdir(uploaddir):
             raise StateException("MIDAS Upload directory does not exist as a " +
-                                 "directory: " + uploaddir)
+                                 "directory: " + uploaddir, sys=self)
         self.uploaddir = uploaddir
 
         if not idregdir:
             idregdir = self.cfg.get('id_registry_dir', self.workdir)
         if not os.path.isdir(idregdir):
             raise StateException("ID Registry directory does not exist as a " +
-                                 "directory: " + idregdir)
+                                 "directory: " + idregdir, sys=self)
 
         self._minter = self._create_minter(idregdir)
 

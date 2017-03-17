@@ -28,7 +28,7 @@ class NISTBag(PreservationSystem):
     def __init__(self, rootdir, merge_annots=False):
         if not os.path.isdir(rootdir):
             raise StateException("Bag directory does not exist as a directory: "+
-                                 rootdir)
+                                 rootdir, sys=self)
         self._dir = rootdir
         self._name = os.path.basename(rootdir)
 
@@ -140,7 +140,7 @@ class NISTBag(PreservationSystem):
                 return json.load(fd, object_pairs_hook=OrderedDict)
         except IOError, ex:
             raise PODError("Unable to read POD file: "+str(ex),
-                           cause=ex, src=podfile)
+                           cause=ex, src=podfile, sys=self)
 
     def read_nerd(self, nerdfile):
         try:
@@ -148,7 +148,7 @@ class NISTBag(PreservationSystem):
                 return json.load(fd, object_pairs_hook=OrderedDict)
         except IOError, ex:
             raise NERDError("Unable to read NERD file: "+str(ex),
-                            cause=ex, src=nerdfile)
+                            cause=ex, src=nerdfile, sys=self)
 
     
     
