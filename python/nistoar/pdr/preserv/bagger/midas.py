@@ -15,8 +15,8 @@ from abc import ABCMeta, abstractmethod, abstractproperty
 
 from .base import SIPBagger, moddate_of, checksum_of
 from ..bagit.builder import BagBuilder, def_merge_etcdir
-from ..exceptions import (SIPDirectoryError, SIPDirectoryNotFound, 
-                          ConfigurationException, StateException, PODError)
+from .. import (SIPDirectoryError, SIPDirectoryNotFound, 
+                ConfigurationException, StateException, PODError)
 from nistoar.nerdm.merge import MergerFactory
 
 log = logging.getLogger(__name__)

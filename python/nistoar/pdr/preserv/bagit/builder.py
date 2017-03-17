@@ -7,8 +7,8 @@ from shutil import copy2 as filecopy
 from copy import deepcopy
 from collections import Mapping, OrderedDict
 
-from ..exceptions import (SIPDirectoryError, SIPDirectoryNotFound, 
-                          ConfigurationException, StateException, PODError)
+from .. import (SIPDirectoryError, SIPDirectoryNotFound, 
+                ConfigurationException, StateException, PODError)
 from .. import PreservationSystem
 from ....nerdm.exceptions import (NERDError, NERDTypeError)
 from ....nerdm.convert import PODds2Res

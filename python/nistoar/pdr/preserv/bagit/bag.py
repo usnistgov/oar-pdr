@@ -6,8 +6,7 @@ import os, logging, re, json, hashlib
 from collections import OrderedDict
 
 from .. import PreservationSystem
-from ..exceptions import (SIPDirectoryError, SIPDirectoryNotFound, NERDError,
-                          ConfigurationException, StateException, PODError)
+from .. import NERDError, PODError, StateException
 from .builder import find_jq_lib
 from ....nerdm.merge import MergerFactory
 from ....nerdm.convert import ComponentCounter

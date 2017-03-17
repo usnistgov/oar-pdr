@@ -1,6 +1,7 @@
 """
 Provide tools creating and updating PDR data publications
 """
+from ..exceptions import *
 from ... import pdr as _pdr
 from .. import PDRSystem
 

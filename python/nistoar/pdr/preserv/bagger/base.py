@@ -8,8 +8,7 @@ from collections import OrderedDict
 from abc import ABCMeta, abstractmethod, abstractproperty
 
 from .. import PreservationSystem
-from ..exceptions import (SIPDirectoryError, SIPDirectoryNotFound, 
-                          ConfigurationException, StateException, PODError)
+from .. import SIPDirectoryError, NERDError, PODError, StateException
 from ..bagit.builder import checksum_of
 
 def moddate_of(filepath):

@@ -7,7 +7,7 @@ import os, logging, re, json
 
 from collections import Mapping
 from .. import PublishSystem
-from ..exceptions import *
+from .. import ConfigurationException, StateException
 from ...preserv.bagger import MIDASMetadataBagger
 from ...preserv.bagit import NISTBag
 from ....id import PDRMinter
