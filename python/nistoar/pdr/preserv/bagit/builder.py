@@ -3,7 +3,7 @@ Tools for building a NIST Preservation bags
 """
 import os, errno, logging, re, json, hashlib
 import pynoid as noid
-from shutil import copy2 as filecopy
+from shutil import copy2 as filecopy, rmtree
 from copy import deepcopy
 from collections import Mapping, OrderedDict
 
@@ -868,4 +868,54 @@ class BagBuilder(PreservationSystem):
             raise NERDTypeError("dict", type(mdata), "Annotation data")
         self.ensure_metadata_dirs(destpath)
         self._write_json(mdata, self.annot_file_for(destpath))
+    
+    def remove_component(self, destpath, trimcolls=False):
+        """
+        remove a data file or subcollection and all its associated metadata 
+        from the bag.  
+
+        Note that it is not an error to attempt to remove a component that 
+        does not actually exist in the bag; rather, a warning is written to 
+        the log.  
+
+        :param destpath  str:  the root-collection-relative path to the data
+                               file
+        :parm trimcolls bool:  If True, remove any ancestor subcollections that
+                               become empty as a result of the removal.
+        :return bool:  True if anything was found and removed.  
+        """
+        exists = False
+        if not destpath:
+            raise ValueError("Empty destpath argument (not allowed to remove "
+                             "root collection)")
+        
+        # First look for metadata
+        target = os.path.join(self.bagdir, "metadata", destpath)
+        if os.path.isdir(target):
+            exists = True
+            rmtree(target)
+        elif os.path.exists(target):
+            raise BadBagRequest("Request path does not look like a data "+
+                                "component (it's a file in the metadata tree): "+
+                                destpath, bagname=self.bagname, sys=self)
+
+        # remove the data file if it exists
+        target = os.path.join(self.bagdir, "data", destpath)
+        if os.path.isfile(target):
+            exists = True
+            os.remove(target)
+
+        if not exists:
+            self.log.warning("Data component requested for removal does not exist in bag: %s",
+                             destpath)
+
+        if trimcolls:
+            destpath = os.path.dirname(destpath)
+
+            # is this collection empty?
+            if destpath:
+                pass
+
+        return exists
+
     

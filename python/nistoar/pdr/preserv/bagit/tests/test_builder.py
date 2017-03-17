@@ -1,5 +1,6 @@
 import os, sys, pdb, shutil, logging, json, subprocess
 from cStringIO import StringIO
+from shutil import copy2 as filecopy, rmtree
 from io import BytesIO
 import warnings as warn
 import unittest as test
@@ -504,6 +505,72 @@ class TestBuilder(test.TestCase):
             data = json.load(fd)
         self.assertEquals(data['filepath'], "trial3/trial3a.json")
         self.assertEquals(data['@id'], "cmps/trial3/trial3a.json")
+
+    def test_remove_component(self):
+        path = os.path.join("trial1","gold","trial1.json")
+        bagfilepath = os.path.join(self.bag.bagdir, 'data',path)
+        bagmdpath = os.path.join(self.bag.bagdir, 'metadata',path,"nerdm.json")
+        self.assertFalse( os.path.exists(bagfilepath) )
+        self.assertFalse( os.path.exists(bagmdpath) )
+        self.assertFalse( os.path.exists(os.path.dirname(bagmdpath)) )
+        self.assertFalse( os.path.exists(os.path.dirname(bagfilepath)) )
+
+        # add and remove data and metadata
+        self.bag.add_data_file(path, os.path.join(datadir,"trial1.json"))
+        self.assertTrue( os.path.exists(bagfilepath) )
+        self.assertTrue( os.path.exists(bagmdpath) )
+
+        self.assertTrue(self.bag.remove_component(path))
+        self.assertFalse( os.path.exists(bagfilepath) )
+        self.assertFalse( os.path.exists(bagmdpath) )
+        self.assertFalse( os.path.exists(os.path.dirname(bagmdpath)) )
+        self.assertTrue( os.path.exists(os.path.dirname(bagfilepath)) )
+
+        # add and remove just metadata
+        self.bag.init_filemd_for(path, write=True,
+                                 examine=os.path.join(datadir,"trial1.json"))
+        self.assertFalse( os.path.exists(bagfilepath) )
+        self.assertTrue( os.path.exists(bagmdpath) )
+
+        self.assertTrue(self.bag.remove_component(path))
+        self.assertFalse( os.path.exists(bagfilepath) )
+        self.assertFalse( os.path.exists(bagmdpath) )
+        self.assertFalse( os.path.exists(os.path.dirname(bagmdpath)) )
+        self.assertTrue( os.path.exists(os.path.dirname(bagfilepath)) )
+
+        # just a data file exists
+        self.assertFalse( os.path.exists(os.path.join(self.bag.bagdir,
+                                                      "data", "trial1.json")) )
+        filecopy(os.path.join(datadir,"trial1.json"),
+                 os.path.join(self.bag.bagdir, "data", "trial1.json"))
+        self.assertTrue( os.path.exists(os.path.join(self.bag.bagdir,
+                                                      "data", "trial1.json")) )
+        self.assertTrue(self.bag.remove_component("trial1.json"))
+        self.assertFalse( os.path.exists(os.path.join(self.bag.bagdir,
+                                                      "data", "trial1.json")) )
+
+    def test_remove_component_trim(self):
+        path = os.path.join("trial1","gold","trial1.json")
+        path2 = os.path.join("trial1","trial2.json")
+        bagfilepath = os.path.join(self.bag.bagdir, 'data',path)
+        bagmdpath = os.path.join(self.bag.bagdir, 'metadata',path,"nerdm.json")
+        self.assertFalse( os.path.exists(bagfilepath) )
+        self.assertFalse( os.path.exists(bagmdpath) )
+        self.assertFalse( os.path.exists(os.path.dirname(bagmdpath)) )
+        self.assertFalse( os.path.exists(os.path.dirname(bagfilepath)) )
+
+        self.bag.add_data_file(path, os.path.join(datadir,"trial1.json"))
+        self.bag.add_data_file(path2, os.path.join(datadir,"trial2.json"))
+        self.assertTrue( os.path.exists(bagfilepath) )
+        self.assertTrue( os.path.exists(bagmdpath) )
+
+        self.assertTrue(self.bag.remove_component(path, True))
+        self.assertFalse( os.path.exists(bagfilepath) )
+        self.assertFalse( os.path.exists(bagmdpath) )
+        self.assertFalse( os.path.exists(os.path.dirname(bagmdpath)) )
+        self.assertFalse( os.path.exists(os.path.dirname(bagfilepath)) )
+        self.assertFalse( os.path.exists(os.path.dirname(os.path.dirname(bagmdpath))) )
+        self.assertFalse( os.path.exists(os.path.dirname(os.path.dirname(bagfilepath))) )
 
 
 class TestChecksum(test.TestCase):
