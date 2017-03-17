@@ -550,27 +550,39 @@ class TestBuilder(test.TestCase):
                                                       "data", "trial1.json")) )
 
     def test_remove_component_trim(self):
-        path = os.path.join("trial1","gold","trial1.json")
-        path2 = os.path.join("trial1","trial2.json")
-        bagfilepath = os.path.join(self.bag.bagdir, 'data',path)
-        bagmdpath = os.path.join(self.bag.bagdir, 'metadata',path,"nerdm.json")
-        self.assertFalse( os.path.exists(bagfilepath) )
-        self.assertFalse( os.path.exists(bagmdpath) )
-        self.assertFalse( os.path.exists(os.path.dirname(bagmdpath)) )
-        self.assertFalse( os.path.exists(os.path.dirname(bagfilepath)) )
+        gold = os.path.join("trial1","gold")
+        golddir = os.path.join(self.bag.bagdir, "data", gold)
+        t1path = os.path.join(gold, "trial1.json")
+        t2path = os.path.join("trial1","trial2.json")
+        t1bagfilepath = os.path.join(self.bag.bagdir, 'data',t1path)
+        t1bagmdpath = os.path.join(self.bag.bagdir, 'metadata',
+                                   t1path,"nerdm.json")
+        t2bagfilepath = os.path.join(self.bag.bagdir, 'data',t2path)
+        t2bagmdpath = os.path.join(self.bag.bagdir, 'metadata',
+                                   t2path,"nerdm.json")
+        self.assertFalse( os.path.exists(t1bagfilepath) )
+        self.assertFalse( os.path.exists(t1bagmdpath) )
+        self.assertFalse( os.path.exists(os.path.dirname(t1bagmdpath)) )
+        self.assertFalse( os.path.exists(os.path.dirname(t1bagfilepath)) )
 
-        self.bag.add_data_file(path, os.path.join(datadir,"trial1.json"))
-        self.bag.add_data_file(path2, os.path.join(datadir,"trial2.json"))
-        self.assertTrue( os.path.exists(bagfilepath) )
-        self.assertTrue( os.path.exists(bagmdpath) )
+        self.bag.add_data_file(t1path, os.path.join(datadir,"trial1.json"))
+        self.bag.add_data_file(t2path, os.path.join(datadir,"trial2.json"))
+        self.assertTrue( os.path.exists(t1bagfilepath) )
+        self.assertTrue( os.path.exists(t1bagmdpath) )
+        self.assertTrue( os.path.exists(t2bagfilepath) )
+        self.assertTrue( os.path.exists(t2bagmdpath) )
 
-        self.assertTrue(self.bag.remove_component(path, True))
-        self.assertFalse( os.path.exists(bagfilepath) )
-        self.assertFalse( os.path.exists(bagmdpath) )
-        self.assertFalse( os.path.exists(os.path.dirname(bagmdpath)) )
-        self.assertFalse( os.path.exists(os.path.dirname(bagfilepath)) )
-        self.assertFalse( os.path.exists(os.path.dirname(os.path.dirname(bagmdpath))) )
-        self.assertFalse( os.path.exists(os.path.dirname(os.path.dirname(bagfilepath))) )
+        self.assertTrue(self.bag.remove_component(t1path, True))
+
+        self.assertFalse( os.path.exists(t1bagfilepath) )
+        self.assertFalse( os.path.exists(t1bagmdpath) )
+        self.assertFalse( os.path.exists(os.path.dirname(t1bagmdpath)) )
+        self.assertFalse( os.path.exists(os.path.dirname(t1bagfilepath)) )
+        self.assertFalse( os.path.exists(os.path.dirname(os.path.dirname(t1bagmdpath))) )
+
+        self.assertFalse( os.path.exists( golddir ) )
+        self.assertTrue( os.path.exists(t2bagfilepath) )
+        self.assertTrue( os.path.exists(t2bagmdpath) )
 
 
 class TestChecksum(test.TestCase):

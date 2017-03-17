@@ -91,6 +91,23 @@ class TestNISTBag(test.TestCase):
         self.assertFalse( self.bag.is_subcoll("trial3/trial3a.json") )
         self.assertFalse( self.bag.is_subcoll("trial4") )
 
+        self.assertTrue( self.bag.is_subcoll("") )
+
+    def test_subcoll_children(self):
+        # pdb.set_trace()
+        children = self.bag.subcoll_children("")
+        self.assertEqual(len(children), 3)
+        for child in "trial1.json trial2.json trial3".split():
+            self.assertIn(child, children)
+
+        children = self.bag.subcoll_children("trial3")
+        self.assertEqual(len(children), 1)
+        self.assertEqual(children[0], "trial3a.json")
+
+        with self.assertRaises(bag.BadBagRequest):
+            self.bag.subcoll_children("trial1.json")
+        with self.assertRaises(bag.BadBagRequest):
+            self.bag.subcoll_children("trial4")
 
 if __name__ == '__main__':
     test.main()

@@ -13,6 +13,8 @@ from .. import PreservationSystem
 from ....nerdm.exceptions import (NERDError, NERDTypeError)
 from ....nerdm.convert import PODds2Res
 from ....id import PDRMinter
+from ... import def_jq_libdir
+from .bag import NISTBag
 
 NORM=15  # Log Level for recording normal activity
 logging.addLevelName(NORM, "NORMAL")
@@ -46,97 +48,6 @@ NERDPUB_DEF = NERDMPUB_SCH_ID + "/definitions/"
 DATAFILE_TYPE = NERDPUB_PRE + ":DataFile"
 SUBCOLL_TYPE = NERDPUB_PRE + ":Subcollection"
 DISTSERV = "https://www.nist.gov/od/ds/"
-
-def find_jq_lib(config=None):
-    """
-    return the directory containing the jq libraries
-    """
-    def assert_exists(dir, ctxt=""):
-        if not os.path.exists(dir):
-            "{0}directory does not exist: {1}".format(ctxt, dir)
-            raise ConfigurationException(msg, sys=self)
-
-    # check local configuration
-    if config and 'jq_lib' in config:
-        assert_exists(config['jq_lib'], "config param 'jq_lib' ")
-        return config['jq_lib']
-            
-    # check environment variable
-    if 'OAR_JQ_LIB' in os.environ:
-        assert_exists(os.environ['OAR_JQ_LIB'], "env var OAR_JQ_LIB ")
-        return os.environ['OAR_JQ_LIB']
-
-    # look relative to a base directory
-    if 'OAR_HOME' in os.environ:
-        # this is normally an installation directory (where lib/jq is our
-        # directory) but we also allow it to be the source directory
-        assert_exists(os.environ['OAR_HOME'], "env var OAR_HOME ")
-        basedir = os.environ['OAR_HOME']
-        candidates = [os.path.join(basedir, 'lib', 'jq'),
-                      os.path.join(basedir, 'jq')]
-    else:
-        # guess some locations based on the location of the executing code.
-        # The code might be coming from an installation, build, or source
-        # directory.
-        import nistoar
-        basedir = os.path.dirname(os.path.dirname(os.path.dirname(
-                                            os.path.abspath(nistoar.__file__))))
-        candidates = [os.path.join(basedir, 'jq')]
-        basedir = os.path.dirname(os.path.dirname(basedir))
-        candidates.append(os.path.join(basedir, 'jq'))
-    for dir in candidates:
-        if os.path.exists(dir):
-            return dir
-        
-    return None
-
-def_jq_libdir = find_jq_lib()
-
-def find_merge_etc(config=None):
-    """
-    return the directory containing the merge rules
-    """
-    def assert_exists(dir, ctxt=""):
-        if not os.path.exists(dir):
-            "{0}directory does not exist: {1}".format(ctxt, dir)
-            raise ConfigurationException(msg, sys=self)
-
-    # check local configuration
-    if config and 'merge_rules_lib' in config:
-        assert_exists(config['merge_rules_lib'],
-                      "config param 'merge_rules_lib' ")
-        return config['merge_rules_lib']
-            
-    # check environment variable
-    if 'OAR_MERGE_ETC' in os.environ:
-        assert_exists(os.environ['OAR_MERGE_ETC'], "env var OAR_MERGE_ETC ")
-        return os.environ['OAR_MERGE_ETC']
-
-    # look relative to a base directory
-    if 'OAR_HOME' in os.environ:
-        # this is normally an installation directory (where lib/jq is our
-        # directory) but we also allow it to be the source directory
-        assert_exists(os.environ['OAR_HOME'], "env var OAR_HOME ")
-        basedir = os.environ['OAR_HOME']
-        candidates = [os.path.join(basedir, 'etc', 'merge')]
-
-    else:
-        # guess some locations based on the location of the executing code.
-        # The code might be coming from an installation, build, or source
-        # directory.
-        import nistoar
-        basedir = os.path.dirname(os.path.dirname(os.path.dirname(
-                                            os.path.abspath(nistoar.__file__))))
-        candidates = [os.path.join(basedir, 'etc', 'merge')]
-        basedir = os.path.dirname(os.path.dirname(basedir))
-        candidates.append(os.path.join(basedir, 'etc', 'merge'))
-    for dir in candidates:
-        if os.path.exists(dir):
-            return dir
-        
-    return None
-
-def_merge_etcdir = find_merge_etc()
 
 def checksum_of(filepath):
     """
@@ -205,6 +116,7 @@ class BagBuilder(PreservationSystem):
         self._pdir = parentdir
         self._bagdir = os.path.join(self._pdir, self._name)
         self._mbagver = DEF_MBAG_VERSION
+        self._bag = None
 
         if not config:
             config = {}
@@ -343,7 +255,8 @@ class BagBuilder(PreservationSystem):
         if not self._loghdlr:
             self._set_logfile()
         if didit:
-            self.record("Created bag with name, %s", self.bagname)    
+            self.record("Created bag with name, %s", self.bagname)
+        self._bag = NISTBag(self.bagdir)
 
     def _set_logfile(self):
         if self._loghdlr:
@@ -884,15 +797,16 @@ class BagBuilder(PreservationSystem):
                                become empty as a result of the removal.
         :return bool:  True if anything was found and removed.  
         """
-        exists = False
+        removed = False
         if not destpath:
             raise ValueError("Empty destpath argument (not allowed to remove "
                              "root collection)")
+        self.ensure_bag_structure()
         
         # First look for metadata
         target = os.path.join(self.bagdir, "metadata", destpath)
         if os.path.isdir(target):
-            exists = True
+            removed = True
             rmtree(target)
         elif os.path.exists(target):
             raise BadBagRequest("Request path does not look like a data "+
@@ -902,20 +816,24 @@ class BagBuilder(PreservationSystem):
         # remove the data file if it exists
         target = os.path.join(self.bagdir, "data", destpath)
         if os.path.isfile(target):
-            exists = True
+            removed = True
             os.remove(target)
+        elif os.path.isdir(target):
+            removed = True
+            rmtree(target)
 
-        if not exists:
-            self.log.warning("Data component requested for removal does not exist in bag: %s",
-                             destpath)
-
-        if trimcolls:
+        if destpath and trimcolls:
             destpath = os.path.dirname(destpath)
 
             # is this collection empty?
-            if destpath:
-                pass
+            if destpath and len(self._bag.subcoll_children(destpath)) == 0:
+                if self.remove_component(destpath):
+                    removed = True
 
-        return exists
+        if not removed:
+            self.log.warning("Data component requested for removal does not exist in bag: %s",
+                             destpath)
+
+        return removed
 
     

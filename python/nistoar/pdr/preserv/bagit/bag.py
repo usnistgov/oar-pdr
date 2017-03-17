@@ -7,7 +7,8 @@ from collections import OrderedDict
 
 from .. import PreservationSystem
 from .. import NERDError, PODError, StateException
-from .builder import find_jq_lib
+from .exceptions import BadBagRequest
+from ... import def_jq_libdir, def_merge_etcdir
 from ....nerdm.merge import MergerFactory
 from ....nerdm.convert import ComponentCounter
 
@@ -16,7 +17,7 @@ NERDMD_FILENAME = "nerdm.json"
 ANNOT_FILENAME = "annot.json"
 DEFAULT_MERGE_CONVENTION = "dev"
 
-JQLIB = find_jq_lib()
+JQLIB = def_jq_libdir
 
 class NISTBag(PreservationSystem):
     """
@@ -194,6 +195,9 @@ class NISTBag(PreservationSystem):
         return True if the given component path appears to point to a 
         data file.
         """
+        if comppath == "":
+            # the root collection is considered a subcollection
+            return True
         if not comppath:
             return False
 
@@ -208,4 +212,30 @@ class NISTBag(PreservationSystem):
 
         return False
 
+    def subcoll_children(self, comppath):
+        """
+        return a list of a subcollection's contents (i.e it's direct children 
+        only).  Each entry is just the basename of the component's filepath
+        value.  
+        """
+        if not self.is_subcoll(comppath):
+            raise BadBagRequest("Does not point to a subcollection: "+comppath,
+                                bagname=self.name, sys=self)
+
+        children = set()
+        cdir = os.path.join(self.data_dir, comppath)
+        if os.path.exists(cdir):
+            for c in os.listdir(cdir):
+                if not c.startswith('.') and not c.startswith('_'):
+                    children.add( c )
+
+        cdir = os.path.join(self.metadata_dir, comppath)
+        if os.path.exists(cdir):
+            # add in child metadata directories that have a nerdm.json file
+            for c in os.listdir(cdir):
+                if not c.startswith('.') and not c.startswith('_') \
+                   and os.path.exists(os.path.join(cdir,c,NERDMD_FILENAME)):
+                    children.add( c )
+
+        return list(children)
     
