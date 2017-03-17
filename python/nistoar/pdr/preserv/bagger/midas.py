@@ -14,7 +14,8 @@ from shutil import copy2 as copy
 from abc import ABCMeta, abstractmethod, abstractproperty
 
 from .base import SIPBagger, moddate_of, checksum_of
-from ..bagit.builder import BagBuilder, def_merge_etcdir
+from ..bagit.builder import BagBuilder, NERDMD_FILENAME
+from ... import def_merge_etcdir
 from .. import (SIPDirectoryError, SIPDirectoryNotFound, 
                 ConfigurationException, StateException, PODError)
 from nistoar.nerdm.merge import MergerFactory
@@ -275,10 +276,30 @@ class MIDASMetadataBagger(SIPBagger):
         ensure that all data files are described in the output bag as well as
         (if nodata=False) copied over.  
         """
+        self.bagbldr.ensure_bag_structure()
         self.datafiles = self.data_file_inventory();
+
+        # what files are in the bag now but not in the input area?
+        remove = set()
+        datadir = os.path.join(self.bagdir,"metadata")
+        for dir, subdirs, files in os.walk(datadir):
+            if dir == datadir:
+                continue
+            if NERDMD_FILENAME in files:
+                filepath = dir[len(datadir)+1:]
+                if filepath not in self.datafiles:
+                    remove.add(filepath)
+
+        # now make sure have all the files from the input area
         for destpath, inpath in self.datafiles.items():
             self.ensure_file_metadata(inpath, destpath, self.resmd)
 
             if not nodata:
                 self.bagbldr.add_data_file(destpath, inpath,
                                            self.hardlinkdata, initmd=False)
+
+        # and remove the removed files (and trim emptied subcollections)
+        for filepath in remove:
+            self.bagbldr.remove_component(filepath, True)
+
+        

@@ -195,6 +195,36 @@ class TestMIDASMetadataBaggerMixed(test.TestCase):
             self.assertTrue(os.path.exists(os.path.join(metadir, filepath,
                                                         "nerdm.json")))
         
+    def test_ensure_data_files_wremove(self):
+        metadir = os.path.join(self.bagdir, 'metadata')
+        self.assertFalse(os.path.exists(self.bagdir))
+        self.assertIsNone(self.bagr.datafiles)
+
+        self.bagr.ensure_data_files()
+        self.assertIsNotNone(self.bagr.datafiles)
+
+        self.assertTrue(os.path.exists(metadir))
+        for filepath in self.bagr.datafiles:
+            self.assertTrue(os.path.exists(os.path.join(metadir, filepath,
+                                                        "nerdm.json")))
+
+        self.bagr.bagbldr.init_filemd_for( os.path.join("gold","trial5.json"),
+                                           write=True,
+                                           examine=os.path.join(self.revdir,
+                                                                self.midasid,
+                                                                "trial1.json") )
+        t5path = os.path.join( metadir,"gold","trial5.json","nerdm.json")
+        self.assertTrue(os.path.exists(t5path))
+
+        pdb.set_trace()
+        self.bagr.ensure_data_files()
+        self.assertTrue(os.path.exists(metadir))
+        for filepath in self.bagr.datafiles:
+            self.assertTrue(os.path.exists(os.path.join(metadir, filepath,
+                                                        "nerdm.json")))
+        self.assertFalse(os.path.exists(t5path))
+        
+        
     def test_ensure_subcoll_metadata(self):
         metadir = os.path.join(self.bagdir, 'metadata')
         self.assertFalse(os.path.exists(self.bagdir))

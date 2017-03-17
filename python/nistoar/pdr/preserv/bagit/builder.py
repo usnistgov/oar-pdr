@@ -15,6 +15,7 @@ from ....nerdm.convert import PODds2Res
 from ....id import PDRMinter
 from ... import def_jq_libdir
 from .bag import NISTBag
+from .exceptions import BadBagRequest
 
 NORM=15  # Log Level for recording normal activity
 logging.addLevelName(NORM, "NORMAL")
@@ -289,7 +290,7 @@ class BagBuilder(PreservationSystem):
             if not os.path.exists(dir):
                 os.mkdir(dir)
 
-    def ensure_coll_dirs(self, destpath):
+    def ensure_ansc_collmd(self, destpath):
         """
         ensure that the directories to contain a subcollection with a given 
         path and its metadata exist.
@@ -439,6 +440,20 @@ class BagBuilder(PreservationSystem):
     
         if initmd:
             self.init_filemd_for(destpath, write=True, examine=srcpath)
+
+    def ensure_colls_for(self, destpath):
+        """
+        ensure that all enclosing collections for the component at destpath
+        have had their metadata initialized.  
+        """
+        destpath = os.path.dirname(destpath)
+        metadir = os.path.join(self.bagdir, "metadata")
+        while destpath != "":
+            mdfile = self.nerdm_file_for(destpath)
+            if not os.path.exists(mdfile):
+                self.init_collmd_for(destpath, write=True)
+
+            destpath = os.path.dirname(destpath)
             
     def add_metadata_for_file(self, destpath, mdata):
         """
@@ -552,6 +567,7 @@ class BagBuilder(PreservationSystem):
                          destpath)
         if write:
             self.add_metadata_for_file(destpath, mdata)
+            self.ensure_ansc_collmd(destpath)
 
         return mdata
 
@@ -577,7 +593,11 @@ class BagBuilder(PreservationSystem):
                 log.warn("Unable to examine data file: doesn't exist yet: " +
                          destpath)
         if write:
-            self.add_metadata_for_coll(destpath, mdata)
+            if destpath:
+                self.add_metadata_for_coll(destpath, mdata)
+            else:
+                self.log.error("Cannot put subcollection metadata in the root "+
+                               "collection; will skip writing")
 
         return mdata
 
