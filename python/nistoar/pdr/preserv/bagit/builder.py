@@ -418,7 +418,7 @@ class BagBuilder(PreservationSystem):
             if hardlink:
                 try:
                     os.link(srcpath, outfile)
-                    self.record("Added data file at "+destdir)
+                    self.record("Added data file at "+destpath)
                 except OSError, ex:
                     msg = "Unable to create link for data file ("+ destpath + \
                           "): "+ str(ex)

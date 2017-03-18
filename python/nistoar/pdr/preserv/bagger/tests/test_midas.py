@@ -216,7 +216,6 @@ class TestMIDASMetadataBaggerMixed(test.TestCase):
         t5path = os.path.join( metadir,"gold","trial5.json","nerdm.json")
         self.assertTrue(os.path.exists(t5path))
 
-        pdb.set_trace()
         self.bagr.ensure_data_files()
         self.assertTrue(os.path.exists(metadir))
         for filepath in self.bagr.datafiles:
@@ -264,7 +263,13 @@ class TestMIDASMetadataBaggerMixed(test.TestCase):
         self.assertEqual(mdata['filepath'], "trial3")
         self.assertIn("nrdp:Subcollection", mdata['@type'])
         
+    def test_ensure_preparation(self):
+        metadir = os.path.join(self.bagdir, 'metadata')
+        self.assertFalse(os.path.exists(self.bagdir))
+        self.assertIsNone(self.bagr.datafiles)
 
+        self.bagr.prepare()
+        self.assertTrue( os.path.exists(self.bagdir + ".lock") )
         
 class TestMIDASMetadataBaggerReview(test.TestCase):
 

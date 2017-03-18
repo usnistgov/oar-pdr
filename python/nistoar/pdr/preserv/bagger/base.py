@@ -3,7 +3,7 @@ This module provides the base interface and implementation for the SIPBagger
 infrastructure.  At the center is the SIPBagger class that serves as an 
 abstract base for subclasses that understand different input sources.
 """
-import os, json
+import os, json, filelock
 from collections import OrderedDict
 from abc import ABCMeta, abstractmethod, abstractproperty
 
@@ -39,6 +39,7 @@ class SIPBagger(PreservationSystem):
         """
         self.bagparent = outdir
         self.cfg = config
+        self.lock = None
 
     @abstractproperty
     def bagdir(self):
@@ -79,6 +80,23 @@ class SIPBagger(PreservationSystem):
                             output directory.
         """
         raise NotImplemented
+
+    def prepare(self, nodata=False, lock=True):
+        """
+        initialize the output working bag directory by calling 
+        ensure_preparation().  This operation is wrapped in the acquisition
+        of a file lock.
+        """
+        if lock:
+            if not self.lock:
+                self.ensure_bag_parent_dir()
+                lockfile = self.bagdir + ".lock"
+                self.lock = filelock.FileLock(lockfile)
+            
+            with self.lock:
+                self.ensure_preparation(nodata)
+        else:
+            self.ensure_preparation(nodata)
 
     def read_pod(self, podfile):
         try:
