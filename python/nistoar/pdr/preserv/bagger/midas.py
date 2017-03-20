@@ -14,13 +14,15 @@ from shutil import copy2 as copy
 from abc import ABCMeta, abstractmethod, abstractproperty
 
 from .base import SIPBagger, moddate_of, checksum_of, read_nerd, read_pod
+from .base import PreservationSystem
 from ..bagit.builder import BagBuilder, NERDMD_FILENAME
 from ... import def_merge_etcdir
 from .. import (SIPDirectoryError, SIPDirectoryNotFound, 
                 ConfigurationException, StateException, PODError)
 from nistoar.nerdm.merge import MergerFactory
 
-log = logging.getLogger(__name__)
+_sys = PreservationSystem()
+log = logging.getLogger(_sys.system_abbrev).getChild(_sys.subsystem_abbrev)
 
 DEF_MBAG_VERSION = "0.2"
 DEF_MIDAS_POD_FILE = "_pod.json"

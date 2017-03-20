@@ -1,7 +1,7 @@
 """
 A web service front-end to the PrePubMetadataService.
 """
-import os, logging, json
+import os, sys, threading, logging, json
 from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
 
 from .. import PublishSystem
@@ -140,7 +140,7 @@ def _define_cli_options(progname):
     
     return parser
 
-LOG_FORMAT = "%(asctime)s %(name) %(levelname)s: %(message)s"
+LOG_FORMAT = "%(asctime)s %(name)s %(levelname)s: %(message)s"
 
 def _configure_log(logfile, level=None, format=None):
     if level is None:
@@ -154,15 +154,13 @@ def _configure_log(logfile, level=None, format=None):
     hdlr.setFormatter(format)
     logging.getLogger().addHandler(hdlr)
 
-def from_cli(args, progname="ppmdserve"):
+def from_cli(args, progname="ppmdserve", config=None):
     """
     Launch the web server from the command line.
-
     """
     parser = _define_cli_options(progname)
     opts = parser.parse_args(args)
 
-    config = {}
     if opts.cfgfile:
         if not os.path.exists(opts.cfgfile):
             raise ConfigurationException("Config file not found: " +
@@ -175,7 +173,7 @@ def from_cli(args, progname="ppmdserve"):
                 # YAML format
                 raise NotImplemented
 
-    else:
+    elif not config:
         # get configuration from the configuration service
         raise NotImplemented
 
