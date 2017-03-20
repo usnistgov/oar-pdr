@@ -13,7 +13,7 @@ import os, errno, logging, re, json
 from shutil import copy2 as copy
 from abc import ABCMeta, abstractmethod, abstractproperty
 
-from .base import SIPBagger, moddate_of, checksum_of
+from .base import SIPBagger, moddate_of, checksum_of, read_nerd, read_pod
 from ..bagit.builder import BagBuilder, NERDMD_FILENAME
 from ... import def_merge_etcdir
 from .. import (SIPDirectoryError, SIPDirectoryNotFound, 
@@ -92,8 +92,8 @@ class MIDASMetadataBagger(SIPBagger):
                     self.state = 'review'
 
         if not self._indirs:
-            raise SIPDirectoryError(msg="No input directories available",
-                                    sys=self)
+            raise SIPDirectoryNotFound(msg="No input directories available",
+                                       sys=self)
         
         super(MIDASMetadataBagger, self).__init__(workdir, config)
 
@@ -159,11 +159,10 @@ class MIDASMetadataBagger(SIPBagger):
                 log.info("Detected change in POD file (by checksum); updating.")
 
         if update:
-            pod = self.read_pod(self.inpodfile)
-            self.resmd = self.bagbldr.add_ds_pod(pod, convert=True,
+            self.resmd = self.bagbldr.add_ds_pod(self.inpodfile, convert=True,
                                                  savefilemd=False)
         else:
-            self.resmd = self.read_nerd(outnerd)
+            self.resmd = read_nerd(outnerd)
 
     def data_file_inventory(self):
         """

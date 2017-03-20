@@ -7,7 +7,7 @@ import os, json, filelock
 from collections import OrderedDict
 from abc import ABCMeta, abstractmethod, abstractproperty
 
-from .. import PreservationSystem
+from .. import PreservationSystem, read_nerd, read_pod
 from .. import SIPDirectoryError, NERDError, PODError, StateException
 from ..bagit.builder import checksum_of
 
@@ -98,19 +98,6 @@ class SIPBagger(PreservationSystem):
         else:
             self.ensure_preparation(nodata)
 
-    def read_pod(self, podfile):
-        try:
-            with open(podfile) as fd:
-                return json.load(fd, object_pairs_hook=OrderedDict)
-        except IOError, ex:
-            raise PODError("Unable to read POD file: "+str(ex), src=podfile)
-
-    def read_nerd(self, nerdfile):
-        try:
-            with open(nerdfile) as fd:
-                return json.load(fd, object_pairs_hook=OrderedDict)
-        except IOError, ex:
-            raise NERDError("Unable to read NERD file: "+str(ex), src=nerdfile)
 
 
 

@@ -149,38 +149,42 @@ class TestBuilder(test.TestCase):
         with self.assertRaises(Exception):
             self.bag.ensure_datafile_dirs("foo/../../bar")
 
-    def test_ensure_coll_dirs(self):
+    def test_ensure_ansc_collmd(self):
         path = os.path.join("trial1","gold")
-        self.bag.ensure_coll_dirs(path)
+        self.bag.ensure_ansc_collmd(path)
 
         self.assertTrue(os.path.exists(self.bag.bagdir))
         self.assertTrue(os.path.exists(os.path.join(self.bag.bagdir,"data")))
         self.assertTrue(os.path.exists(os.path.join(self.bag.bagdir,"metadata")))
         
+        self.assertFalse(os.path.exists(os.path.join(self.bag.bagdir,
+                                                     "data",path)))
         self.assertTrue(os.path.exists(os.path.join(self.bag.bagdir,
-                                                    "data",path)))
-        self.assertTrue(os.path.exists(os.path.join(self.bag.bagdir,
-                                                    "metadata",path)))
+                                              "metadata","trial1","nerdm.json")))
+        self.assertFalse(os.path.exists(os.path.join(self.bag.bagdir,
+                                                     "metadata",path)))
 
         # is indepotent
-        self.bag.ensure_coll_dirs(path)
+        self.bag.ensure_ansc_collmd(path)
+        self.assertFalse(os.path.exists(os.path.join(self.bag.bagdir,
+                                                     "data",path)))
         self.assertTrue(os.path.exists(os.path.join(self.bag.bagdir,
-                                                    "data",path)))
-        self.assertTrue(os.path.exists(os.path.join(self.bag.bagdir,
-                                                    "metadata",path)))
+                                              "metadata","trial1","nerdm.json")))
+        self.assertFalse(os.path.exists(os.path.join(self.bag.bagdir,
+                                                     "metadata",path)))
 
         # test illegal paths
         with self.assertRaises(ValueError):
-            self.bag.ensure_coll_dirs("/foo/bar")
+            self.bag.ensure_ansc_collmd("/foo/bar")
         with self.assertRaises(ValueError):
-            self.bag.ensure_coll_dirs("foo/../../bar")
+            self.bag.ensure_ansc_collmd("foo/../../bar")
 
     def test_ensure_metadata_dirs(self):
         path = os.path.join("trial1","gold")
         self.bag.ensure_metadata_dirs(path)
 
         self.assertTrue(os.path.exists(self.bag.bagdir))
-        self.assertFalse(os.path.exists(os.path.join(self.bag.bagdir,"data")))
+        self.assertTrue(os.path.exists(os.path.join(self.bag.bagdir,"data")))
         self.assertTrue(os.path.exists(os.path.join(self.bag.bagdir,"metadata")))
         
         self.assertFalse(os.path.exists(os.path.join(self.bag.bagdir,
@@ -189,7 +193,7 @@ class TestBuilder(test.TestCase):
                                                     "metadata",path)))
 
         # is indepotent
-        self.bag.ensure_coll_dirs(path)
+        self.bag.ensure_metadata_dirs(path)
         self.assertTrue(os.path.exists(os.path.join(self.bag.bagdir,
                                                     "metadata",path)))
 

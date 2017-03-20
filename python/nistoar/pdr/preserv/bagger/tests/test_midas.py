@@ -97,14 +97,14 @@ class TestMIDASMetadataBaggerMixed(test.TestCase):
         self.assertEqual(self.bagr.inpodfile,
                          os.path.join(self.upldir, self.midasid, "_pod.json"))
 
-        data = self.bagr.read_pod(os.path.join(metadir, "pod.json"))
+        data = midas.read_pod(os.path.join(metadir, "pod.json"))
         self.assertIsInstance(data, OrderedDict)
-        src = self.bagr.read_pod(self.bagr.inpodfile)
+        src = midas.read_pod(self.bagr.inpodfile)
         self.assertEqual(data, src)
         self.assertEqual(data.keys(), src.keys())  # confirms same order
 
         self.assertIsNotNone(self.bagr.resmd)
-        data = self.bagr.read_nerd(os.path.join(metadir, "nerdm.json"))
+        data = midas.read_nerd(os.path.join(metadir, "nerdm.json"))
         self.assertEqual(len(data['components']), 1)
         self.assertIsInstance(data, OrderedDict)
         self.assertNotIn('inventory', data)
@@ -157,7 +157,7 @@ class TestMIDASMetadataBaggerMixed(test.TestCase):
         self.assertTrue(os.path.exists(self.bagdir))
         self.assertTrue(os.path.exists(mdfile))
 
-        data = self.bagr.read_nerd(mdfile)
+        data = midas.read_nerd(mdfile)
         self.assertEqual(data['size'], 70)
         self.assertTrue(data['hash']['value'])
         self.assertEqual(data['downloadURL'], dlurl)
@@ -176,7 +176,7 @@ class TestMIDASMetadataBaggerMixed(test.TestCase):
         self.assertTrue(os.path.exists(self.bagdir))
         self.assertTrue(os.path.exists(mdfile))
 
-        data = self.bagr.read_nerd(mdfile)
+        data = midas.read_nerd(mdfile)
         self.assertEqual(data['size'], 70)
         self.assertTrue(data['hash']['value'])
         self.assertTrue(data['downloadURL'])
@@ -234,7 +234,7 @@ class TestMIDASMetadataBaggerMixed(test.TestCase):
         mdfile = os.path.join(metadir, "trial3", "nerdm.json")
         self.assertTrue(os.path.exists(mdfile))
 
-        mdata = self.bagr.read_nerd(mdfile)
+        mdata = midas.read_nerd(mdfile)
         self.assertEqual(mdata['filepath'], "trial3")
         self.assertIn("nrdp:Subcollection", mdata['@type'])
 
@@ -259,7 +259,7 @@ class TestMIDASMetadataBaggerMixed(test.TestCase):
         mdfile = os.path.join(metadir, "trial3", "nerdm.json")
         self.assertTrue(os.path.exists(mdfile))
 
-        mdata = self.bagr.read_nerd(mdfile)
+        mdata = midas.read_nerd(mdfile)
         self.assertEqual(mdata['filepath'], "trial3")
         self.assertIn("nrdp:Subcollection", mdata['@type'])
         

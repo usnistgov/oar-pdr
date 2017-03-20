@@ -9,7 +9,7 @@ from collections import Mapping, OrderedDict
 
 from .. import (SIPDirectoryError, SIPDirectoryNotFound, 
                 ConfigurationException, StateException, PODError)
-from .. import PreservationSystem
+from .. import PreservationSystem, read_nerd, read_pod, write_json
 from ....nerdm.exceptions import (NERDError, NERDTypeError)
 from ....nerdm.convert import PODds2Res
 from ....id import PDRMinter
@@ -203,7 +203,7 @@ class BagBuilder(PreservationSystem):
         # this updates the ediid metadatum in the resource nerdm.json
         mdfile = self.nerdm_file_for("")
         if os.path.exists(mdfile):
-            mdata = self._read_nerd(mdfile)
+            mdata = read_nerd(mdfile)
             if mdata.get('ediid') != ediid:
                 if ediid:
                     mdata['ediid'] = ediid
@@ -218,7 +218,7 @@ class BagBuilder(PreservationSystem):
             for dir, subdirs, files in os.walk(mdtree):
                 if FILEMD_FILENAME in files:
                     mdfile = os.path.join(dir, FILEMD_FILENAME)
-                    mdata = self._read_nerd(mdfile)
+                    mdata = read_nerd(mdfile)
                     if dftype in mdata.get("@type", []) and  \
                        mdata.get('filepath') and             \
                        mdata.get("downloadURL", DISTSERV)    \
@@ -304,23 +304,17 @@ class BagBuilder(PreservationSystem):
         if destpath.startswith(".."+os.sep):
             raise ValueError("collection path cannot contain ..: "+destpath)
 
-        ddir = os.path.join(self.bagdir, "data")
-        if not os.path.exists(ddir):
-            self.ensure_bag_structure()
+        collpath = os.path.dirname(destpath)
+        self._ensure_metadata_dirs(collpath)
 
-        path = os.path.join(ddir, destpath)
-        try:
-            if not os.path.exists(path):
-                os.makedirs(path)
-        except Exception, ex:
-            pdir = os.path.join(os.path.basename(self.bagdir), "data", pdir)
-            raise StateException("Failed to create directory tree ({0}): {1}"
-                                 .format(str(ex), pdir), cause=ex, sys=self)
-
-        self._ensure_metadata_dirs(destpath)
+        while collpath != "":
+            if not os.path.exists(self.nerdm_file_for(collpath)):
+                self.init_collmd_for(collpath, write=True, examine=False)
+            collpath = os.path.dirname(collpath)
 
     def _ensure_metadata_dirs(self, destpath):
 
+        self.ensure_bag_structure()
         path = os.path.join(self.bagdir, "metadata", destpath)
         try:
             if not os.path.exists(path):
@@ -414,6 +408,11 @@ class BagBuilder(PreservationSystem):
         self.ensure_datafile_dirs(destpath)
         outfile = os.path.join(self.bagdir, 'data', destpath)
 
+        msg = "Adding file, " + destpath
+        if initmd:
+            msg += ", and intializing metadata"
+        self.record(msg)
+
         if srcpath:
             if hardlink:
                 try:
@@ -480,8 +479,13 @@ class BagBuilder(PreservationSystem):
             raise NERDTypeError(msg="Unknown DataFile property type error",
                                 cause=ex)
 
-        self.ensure_metadata_dirs(destpath)
-        self._write_json(md, self.nerdm_file_for(destpath))
+        try:
+            self.ensure_metadata_dirs(destpath)
+            self.record("Adding file metadata for %s", destpath)
+            self._write_json(md, self.nerdm_file_for(destpath))
+        except Exception, ex:
+            self.log.exception("Trouble adding metadata: %s", str(ex))
+            raise
 
     def add_metadata_for_coll(self, destpath, mdata):
         """
@@ -505,8 +509,13 @@ class BagBuilder(PreservationSystem):
             raise NERDTypeError(msg="Unknown DataFile property type error",
                                 cause=ex)
 
-        self.ensure_metadata_dirs(destpath)
-        self._write_json(md, self.nerdm_file_for(destpath))
+        try:
+            self.ensure_metadata_dirs(destpath)
+            self.record("Adding collection metadata for %s", destpath)
+            self._write_json(md, self.nerdm_file_for(destpath))
+        except Exception, ex:
+            self.log.exception("Trouble adding metadata: "+str(ex))
+            raise
 
     def pod_file(self):
         """
@@ -552,6 +561,7 @@ class BagBuilder(PreservationSystem):
                               previously copied to the output bag will be 
                               examined.
         """
+        self.record("Initializing metadata for file %s", destpath)
         mdata = self._create_init_filemd_for(destpath)
         if examine:
             if isinstance(examine, (str, unicode)):
@@ -583,6 +593,7 @@ class BagBuilder(PreservationSystem):
         :param examine bool:  if True, examine all files below the collection
                               to extract additional metadata.
         """
+        self.record("Initializing metadata for subcollection %s", destpath)
         mdata = self._create_init_collmd_for(destpath)
         if examine:
             colldir = os.path.join(self.bagdir, "data", destpath)
@@ -601,21 +612,9 @@ class BagBuilder(PreservationSystem):
 
         return mdata
 
-    def _read_nerd(self, nerdfile):
-        try:
-            with open(nerdfile) as fd:
-                return json.load(fd, object_pairs_hook=OrderedDict)
-        except IOError, ex:
-            raise NERDError("Unable to read NERD file: "+str(ex), src=nerdfile)
-
     def _write_json(self, jsdata, destfile):
         indent = self.cfg.get('json_indent', 4)
-        try:
-            with open(destfile, 'w') as fd:
-                json.dump(jsdata, fd, indent=indent, separators=(',', ': '))
-        except Exception, ex:
-            raise StateException("{0}: Failed to write JSON data to file: {1}"
-                                 .format(destfile, str(ex)), cause=ex)
+        write_json(jsdata, destfile, indent)
 
     def _add_extracted_metadata(self, dfile, mdata, config):
         self._add_osfile_metadata(dfile, mdata, config)
@@ -701,6 +700,8 @@ class BagBuilder(PreservationSystem):
         """
         self.ensure_bag_structure()
         mdata = deepcopy(mdata)
+
+        self.record("Adding resourse-level metadata")
         
         # validate type
         if mdata.get("_schema") != NERDM_SCH_ID:
@@ -751,11 +752,14 @@ class BagBuilder(PreservationSystem):
         self._write_json(mdata, self.nerdm_file_for(""))
                                              
 
-    def add_ds_pod(self, pdata, convert=True, savefilemd=True):
+    def add_ds_pod(self, pod, convert=True, savefilemd=True):
         """
         write out the dataset-level POD data into the bag.
 
-        :param pdata dict:   the JSON object containing the POD Dataset metadata
+        :param pod str or dict:  the POD Dataset metadata; if a str, the value
+                             is the full pathname to a file containing the JSON
+                             data; if it is a dictionary, it is the parsed JSON 
+                             metadata.
         :param convert bool: if True, in addition to writing the POD file, it 
                              will be converted to NERDm data and written out 
                              as well.
@@ -766,12 +770,24 @@ class BagBuilder(PreservationSystem):
 
         :return dict:  the NERDm-converted metadata or None if convert=False
         """
-        if not isinstance(pdata, Mapping):
-            raise NERDTypeError("dict", type(pdata), "POD Dataset")
+        if not isinstance(pod, (str, unicode, Mapping)):
+            raise NERDTypeError("dict", type(pod), "POD Dataset")
         self.ensure_bag_structure()
 
-        self._write_json(pdata,
-                         os.path.join(self.bagdir, "metadata", POD_FILENAME))
+        if self.log.isEnabledFor(logging.INFO):
+            msg = "Adding POD data"
+            if convert:
+                msg += " and converting to NERDm"
+
+        outfile = os.path.join(self.bagdir, "metadata", POD_FILENAME)
+        pdata = None
+        if not isinstance(pod, Mapping):
+            if convert:
+                pdata = read_pod(pod)
+            filecopy(pod, outfile)
+        else:
+            pdata = pod
+            self._write_json(pdata, outfile)
 
         nerd = None
         if convert:

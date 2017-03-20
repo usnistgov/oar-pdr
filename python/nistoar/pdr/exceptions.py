@@ -173,7 +173,7 @@ class SIPDirectoryNotFound(SIPDirectoryError):
     """
     An exception indicating the SIPDirectory does not exist
     """
-    def __init__(self, dir, cause=None, msg=None, sys=None):
+    def __init__(self, dir=None, cause=None, msg=None, sys=None):
         """
         :param dir  str:   the directory giving the problem
         :param cause Exception:  a caught exception that represents the 

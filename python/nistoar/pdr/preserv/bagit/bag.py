@@ -5,7 +5,7 @@ Tools for reading data from a bag
 import os, logging, re, json, hashlib
 from collections import OrderedDict
 
-from .. import PreservationSystem
+from .. import PreservationSystem, read_nerd, read_pod
 from .. import NERDError, PODError, StateException
 from .exceptions import BadBagRequest
 from ... import def_jq_libdir, def_merge_etcdir
@@ -135,22 +135,6 @@ class NISTBag(PreservationSystem):
 
         return resmd
 
-    def read_pod(self, podfile):
-        try:
-            with open(podfile) as fd:
-                return json.load(fd, object_pairs_hook=OrderedDict)
-        except IOError, ex:
-            raise PODError("Unable to read POD file: "+str(ex),
-                           cause=ex, src=podfile, sys=self)
-
-    def read_nerd(self, nerdfile):
-        try:
-            with open(nerdfile) as fd:
-                return json.load(fd, object_pairs_hook=OrderedDict)
-        except IOError, ex:
-            raise NERDError("Unable to read NERD file: "+str(ex),
-                            cause=ex, src=nerdfile, sys=self)
-
     def comp_exists(self, comppath):
         """
         return True if the given path points to an existing component.
@@ -239,3 +223,8 @@ class NISTBag(PreservationSystem):
 
         return list(children)
     
+    def read_nerd(self, nerdfile):
+        return read_nerd(nerdfile)
+
+    def read_pod(self, podfile):
+        return read_pod(podfile)
