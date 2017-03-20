@@ -85,7 +85,6 @@ class TestWebServer(test.TestCase):
 
     def test_good_id(self):
         resp = self.get("/midas/3A1EE2F169DD3B8CE0531A570681DB5D1491/goob.txt")
-        pdb.set_trace()
         self.assertEqual(resp.status, 200)
 
         data = json.loads(resp.read())
