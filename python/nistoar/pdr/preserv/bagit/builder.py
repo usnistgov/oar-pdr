@@ -632,7 +632,7 @@ class BagBuilder(PreservationSystem):
         out = {
             "@id": "cmps/" + destpath,
             "@type": [ ":".join([NERDPUB_PRE, "DataFile"]),
-                       ":".join([NERDPUB_PRE, "Distribution"])  ],
+                       "dcat:Distribution" ],
             "filepath": destpath,
             "_extensionSchemas": [ NERDPUB_DEF + "DataFile" ]
         }

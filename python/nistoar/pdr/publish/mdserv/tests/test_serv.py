@@ -5,17 +5,20 @@ import warnings as warn
 import unittest as test
 from collections import OrderedDict
 from copy import deepcopy
+import ejsonschema as ejs
 
 from nistoar.tests import *
+from nistoar.pdr import def_jq_libdir
 import nistoar.pdr.preserv.bagit.builder as bldr
 import nistoar.pdr.publish.mdserv.serv as serv
 import nistoar.pdr.preserv.exceptions as exceptions
 
 # datadir = nistoar/preserv/tests/data
-datadir = os.path.join(
-    os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__)))),
-    "preserv", "tests", "data"
-)
+pdrmoddir = os.path.dirname(os.path.dirname(
+                 os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+datadir = os.path.join(pdrmoddir, "preserv", "tests", "data")
+jqlibdir = def_jq_libdir
+schemadir = os.path.join(os.path.dirname(jqlibdir), "model")
 
 loghdlr = None
 rootlog = None
@@ -109,6 +112,21 @@ class TestPrePubMetadataService(test.TestCase):
         self.assertEqual(data['inventory'][0]['childCount'], 4)
         self.assertEqual(data['inventory'][0]['descCount'], 5)
         
+    def test_resolve_id(self):
+        metadir = os.path.join(self.bagdir, 'metadata')
+        self.assertFalse(os.path.exists(self.bagdir))
+
+        mdata = self.srv.resolve_id(self.midasid)
+
+        loader = ejs.SchemaLoader.from_directory(schemadir)
+        val = ejs.ExtValidator(loader, ejsprefix='_')
+        val.validate(mdata, False, True)
+
+        data = self.srv.resolve_id(self.midasid)
+        self.assertEqual(data, mdata)
+
+        with self.assertRaises(serv.SIPDirectoryNotFound):
+            self.srv.resolve_id("asldkfjsdalfk")
 
 
 if __name__ == '__main__':

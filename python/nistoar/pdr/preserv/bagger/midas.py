@@ -280,14 +280,18 @@ class MIDASMetadataBagger(SIPBagger):
 
         # what files are in the bag now but not in the input area?
         remove = set()
-        datadir = os.path.join(self.bagdir,"metadata")
-        for dir, subdirs, files in os.walk(datadir):
-            if dir == datadir:
+        mdatadir = os.path.join(self.bagdir,"metadata")
+        for dir, subdirs, files in os.walk(mdatadir):
+            if dir == mdatadir:
                 continue
             if NERDMD_FILENAME in files:
-                filepath = dir[len(datadir)+1:]
+                filepath = dir[len(mdatadir)+1:]
                 if filepath not in self.datafiles:
-                    remove.add(filepath)
+                    # found a component with this filepath, but is it a datafile?
+                    mdata = read_nerd(os.path.join(dir,NERDMD_FILENAME))
+                    if ":DataFile" in mdata.get("@type", []):
+                        # yes, it is a data file
+                        remove.add(filepath)
 
         # now make sure have all the files from the input area
         for destpath, inpath in self.datafiles.items():
