@@ -291,7 +291,7 @@ class MIDASMetadataBagger(SIPBagger):
                 if filepath not in self.datafiles:
                     # found a component with this filepath, but is it a datafile?
                     mdata = read_nerd(os.path.join(dir,NERDMD_FILENAME))
-                    if ":DataFile" in mdata.get("@type", []):
+                    if any([":DataFile" in t for t in mdata.get("@type", [])]):
                         # yes, it is a data file
                         remove.add(filepath)
 
