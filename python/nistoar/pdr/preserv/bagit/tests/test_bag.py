@@ -5,9 +5,9 @@ import warnings as warn
 import unittest as test
 from collections import OrderedDict
 
-from nistoar.tests import *
+from nistoar.testing import *
 import nistoar.pdr.preserv.bagit.bag as bag
-import nistoar.pdr.preserv.exceptions as exceptions
+import nistoar.pdr.exceptions as exceptions
 
 # datadir = nistoar/preserv/tests/data
 datadir = os.path.join(

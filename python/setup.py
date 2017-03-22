@@ -1,4 +1,4 @@
-import os, sys, subprocess, pdb
+import os, sys, subprocess, pdb, unittest
 from distutils.core import setup
 from distutils.command.build import build as _build
 
@@ -45,7 +45,7 @@ setup(name='nistoar',
       packages=['nistoar.pdr', 'nistoar.pdr.publish',
                 'nistoar.pdr.publish.mdserv',
                 'nistoar.pdr.preserv', 'nistoar.pdr.preserv.bagger',
-                'nistoar.pdr.preserv.bagit'
+                'nistoar.pdr.preserv.bagit', 'nistoar.testing'
             ],
       cmdclass={'build': build}
 )

@@ -8,7 +8,7 @@ from warnings import warn
 from abc import ABCMeta, abstractmethod, abstractproperty
 from collections import OrderedDict, MutableMapping
 
-from .exceptions import ConfigurationWarning, ConfigurationException
+from ..exceptions import PDRWarning, ConfigurationException
 
 logger = logging.getLogger(__name__)
 
@@ -99,7 +99,7 @@ class PreservationValidater(SIPValidater):
         super(PreservationValidater, self).__init__(indir, desc)
         
         if not validaters:
-            warn("No specific validaters in place", ConfigurationWarning)
+            warn("No specific validaters in place", PDRWarning)
             validaters = OrderedDict()
         self.vd8ers = validaters
 

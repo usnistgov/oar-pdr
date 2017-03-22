@@ -6,10 +6,10 @@ import unittest as test
 from collections import OrderedDict
 from copy import deepcopy
 
-from nistoar.tests import *
+from nistoar.testing import *
 import nistoar.pdr.preserv.bagit.builder as bldr
 import nistoar.pdr.preserv.bagger.midas as midas
-import nistoar.pdr.preserv.exceptions as exceptions
+import nistoar.pdr.exceptions as exceptions
 
 # datadir = nistoar/preserv/tests/data
 datadir = os.path.join(

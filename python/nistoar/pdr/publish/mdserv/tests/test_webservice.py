@@ -2,7 +2,7 @@ import os, sys, pdb, shutil, logging, json
 import unittest as test
 import threading, httplib
 
-from nistoar.tests import *
+from nistoar.testing import *
 import nistoar.pdr.preserv.bagit.builder as bldr
 from nistoar.pdr.publish.mdserv import webservice as wsrvc
 

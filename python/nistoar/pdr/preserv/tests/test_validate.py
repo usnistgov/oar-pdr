@@ -172,7 +172,7 @@ class TestTrivialPrervationValidater(test.TestCase):
         with warn.catch_warnings(record=True) as w:
             validater = val.PreservationValidater(datadir)
             self.assertEqual( len(w), 1 )
-            self.assertTrue(issubclass(w[0].category,exceptions.ConfigurationWarning))
+            self.assertTrue(issubclass(w[0].category,exceptions.PDRWarning))
 
         out = validater.validate()
         self.assertIsInstance(out, val.Assessment)

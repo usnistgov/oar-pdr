@@ -2,7 +2,7 @@ import os, pdb, shutil
 import warnings as warn
 import unittest as test
 
-from nistoar.tests import tmpdir, ensure_tmpdir, rmtmpdir, rmdir, Tempfiles
+from nistoar.testing import tmpdir, ensure_tmpdir, rmtmpdir, rmdir, Tempfiles
 
 class TestFunctions(test.TestCase):
 

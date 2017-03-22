@@ -6,9 +6,9 @@ import warnings as warn
 import unittest as test
 from collections import OrderedDict
 
-from nistoar.tests import *
+from nistoar.testing import *
 import nistoar.pdr.preserv.bagit.builder as bldr
-import nistoar.pdr.preserv.exceptions as exceptions
+import nistoar.pdr.exceptions as exceptions
 
 # datadir = nistoar/preserv/tests/data
 datadir = os.path.join(
@@ -252,7 +252,7 @@ class TestBuilder(test.TestCase):
         path = os.path.join("trial1","gold","file.dat")
         need = {
             "@id": "cmps/"+path,
-            "@type": [ "nrdp:DataFile", "nrdp:Distribution" ],
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
             "filepath": path,
             "_extensionSchemas": [ "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile" ]
         }
@@ -274,7 +274,7 @@ class TestBuilder(test.TestCase):
         path = os.path.join("trial1","gold","trial1.json")
         need = {
             "@id": "cmps/"+path,
-            "@type": [ "nrdp:DataFile", "nrdp:Distribution" ],
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
             "filepath": path,
             "_extensionSchemas": [ "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile" ],
             "size": 69,
@@ -325,7 +325,7 @@ class TestBuilder(test.TestCase):
 
         need = {
             "@id": "cmps/"+path,
-            "@type": [ "nrdp:DataFile", "nrdp:Distribution" ],
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
             "filepath": path,
             "_extensionSchemas": [ "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile" ],
             "size": 69,
@@ -352,7 +352,7 @@ class TestBuilder(test.TestCase):
 
         need = {
             "@id": "cmps/"+path,
-            "@type": [ "nrdp:DataFile", "nrdp:Distribution" ],
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
             "filepath": path,
             "_extensionSchemas": [ "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile" ]
         }

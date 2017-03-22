@@ -7,7 +7,7 @@ from collections import OrderedDict
 from copy import deepcopy
 import ejsonschema as ejs
 
-from nistoar.tests import *
+from nistoar.testing import *
 from nistoar.pdr import def_jq_libdir
 import nistoar.pdr.preserv.bagit.builder as bldr
 import nistoar.pdr.publish.mdserv.serv as serv
