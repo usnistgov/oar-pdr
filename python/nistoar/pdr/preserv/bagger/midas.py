@@ -63,7 +63,7 @@ class MIDASMetadataBagger(SIPBagger):
     def __init__(self, midasid, workdir, reviewdir, uploaddir=None, config={},
                  minter=None):
         """
-        Create an SIPPrepper to operate on data provided by MIDAS
+        Create an SIPBagger to operate on data provided by MIDAS
 
         :param midasid   str:  the identifier provided by MIDAS, used as the 
                                name of the directory containing the data.
@@ -73,6 +73,8 @@ class MIDASMetadataBagger(SIPBagger):
                                datasets in the review state.
         :param uploaddir str:  the path to the directory containing submitted
                                datasets not yet in the review state.
+        :param config   dict:  a dictionary providing configuration parameters
+        :param minter IDMinter: a minter to use for minting new identifiers.
         """
         self.name = midasid
         self.state = 'upload'
@@ -308,3 +310,122 @@ class MIDASMetadataBagger(SIPBagger):
             self.bagbldr.remove_component(filepath, True)
 
         
+class PreservationBagger(SIPBagger):
+    """
+    This class finalizes the bagging of data provided by MIDAS into the final 
+    bag for preservation.  
+
+    This class uses the MIDASMetadataBagger to update the NERDm metadata to 
+    latest copies of the files provided through MIDAS.  It then builds the 
+    final bag, including the data files and all required ancillary files.  
+    """
+
+    def __init__(self, midasid, bagparent, reviewdir, mddir,
+                 config={}, minter=None):
+                 
+        """
+        Create an SIPBagger to operate on data provided by MIDAS.
+
+        :param midasid   str:  the identifier provided by MIDAS, used as the 
+                               name of the directory containing the data.
+        :param bagparent str:  the path to the directory where the preservation
+                               bag should be written.  
+        :param reviewdir str:  the path to the directory containing submitted
+                               datasets in the review state.
+        :param mddir     str:  the path to the directory that may contain a
+                               metadata bag prepared for previewing or updating
+                               the landing page.
+        :param config   dict:  a dictionary providing configuration parameters
+        :param minter IDMinter: a minter to use for minting new identifiers.
+        """
+        self.name = midasid
+        self.indir = reviewdir
+        self.mddir = mddir
+        self.minter = minter
+
+        super(PreservationBagger, self).__init__(bagparent, config)
+
+        # do a sanity check on the bag parent directory
+        if not self.cfg.get('relative_to_indir', False):
+            sipdir = os.path.abspath(self.indir)
+            if sipdir[-1] != os.sep:
+                sipdir += '/'
+            if os.path.abspath(self.bagparent).startswith(sipdir):
+                if self.cfg.get('relative_to_indir') == False:
+                    # you said it was not relative, but it sure looks that way
+                    raise ConfigurationException("'relative_to_indir'=False but"
+                                                 +" bag dir (" + self.bagparent+
+                                                 ") appears to be below "+
+                                                 "submitted directory (" +
+                                                 self.sipdir+")")
+                # bagparent is inside sipdir
+                self.bagparent = os.path.abspath(self.bagparent)[len(sipdir):]
+                self.cfg['relative_to_indir'] = True
+
+        if self.cfg.get('relative_to_indir'):
+            self.bagparent = os.path.join(self.indir, self.bagparent)
+
+        self.bagbldr = BagBuilder(self.bagparent,
+                                  self.form_bag_name(self.midasid),
+                                  self.cfg.get('bag_builder', {}),
+                                  minter=minter,
+                                  logger=log.getChild(self.name[:8]+'...'))
+        
+
+        self.ensure_bag_parent_dir()
+
+    @property
+    def bagdir(self):
+        """
+        The path to the output bag directory.
+        """
+        return self.bagbldr.bagdir
+
+    def ensure_metadata_preparation(self):
+        """
+        prepare the NERDm metadata.  
+
+        This uses the MIDASMetadataBagger class to convert the MIDA POD data 
+        into NERDm and to extract metadata from the uploaded files.  
+        """
+
+        # start by bagging up the metadata.  If this was done before (prior to
+        # final preservation time), the previous metadata bag will be updated.
+        mdbagger = MIDASMetadataBagger(self.midasid, self.mddir, self.indir,
+                                       config=self.cfg, self.minter)
+        mdbagger.prepare()
+        self.datafiles = mdbagger.datafiles
+
+        # copy the contents of the metadata bag into the final preservation bag
+        if os.path.exists(self.bagdir):
+            # note: caller should be responsible for locking the preservation
+            # of the SIP and cleaning up afterward.  Thus, this case should
+            # not really occur
+            log.warn("Removing previous version of preservation bag, %s",
+                     self.bagbldr.bagname)
+            if os.path.isdir(self.bagdir):
+                shutil.rmtree(self.bagdir)
+            else:
+                shutil.remove(self.bagdir)
+        shutil.copytree(mdbagger.bagdir, self.bagdir)
+        
+        # by ensuring the output preservation bag directory, we set up loggning
+        self.bagbldr.ensure_bagdir()
+
+    def form_bagdir_name(self, dsid, bagseq=0):
+        """
+        return the name to use for the working bag directory
+        """
+        fmt = self.cfg.get('bag_name_format', "{0}.mbag{1}-{2}")
+        bver = self.cfg.get('mbag_version', DEF_MBAG_VERSION)
+        bver = re.sub(r'\.', '_', bver)
+        return fmt.format(dsid, bver, bagseq)
+
+    def add_data_files(self):
+        """
+        link in copies of the dataset's data files
+        """
+        for dfile, srcpath in self.datafiles.items():
+            self.bagbldr.add_data_file(dfile, srcpath, True, False)
+
+    
