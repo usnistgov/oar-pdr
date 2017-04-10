@@ -27,3 +27,10 @@ class BadBagRequest(BagItException):
     """
     pass
 
+class BagProfileError(BagItException):
+    """
+    an exception indicating that the current state of the bag being accessed 
+    is inconsistent with the NIST BagIt Profile.
+    """
+    pass
+

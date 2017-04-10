@@ -9,6 +9,7 @@ from collections import Mapping, OrderedDict
 
 from .. import (SIPDirectoryError, SIPDirectoryNotFound, 
                 ConfigurationException, StateException, PODError)
+from .exceptions import BagProfileError
 from .. import PreservationSystem, read_nerd, read_pod, write_json
 from ....nerdm.exceptions import (NERDError, NERDTypeError)
 from ....nerdm.convert import PODds2Res
