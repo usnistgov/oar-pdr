@@ -623,9 +623,9 @@ class BagBuilder(PreservationSystem):
     def _add_osfile_metadata(self, dfile, mdata, config):
         mdata['size'] = os.stat(dfile).st_size
     def _add_checksum(self, dfile, mdata, config):
-        mdata['hash'] = {
+        mdata['checksum'] = {
             'algorithm': { 'tag': 'sha256' },
-            'value': checksum_of(dfile)
+            'hash': checksum_of(dfile)
         }
 
     def _create_init_filemd_for(self, destpath):
@@ -872,4 +872,59 @@ class BagBuilder(PreservationSystem):
 
         return removed
 
-    
+    def write_data_manifest(self, confirm=False):
+        """
+        Write the manifest-<algorithm>.txt file based on the data files that 
+        are currently in the data directory.  Each datafile must have a 
+        corresponding metadata file that contains the correct checksum.  
+
+        :param confirm bool:  if False (default), the checksum found in the
+                              data file's metadata will be assumed to be 
+                              correct and added to the manifest file.  If 
+                              True, the checksum will be calculated to ensure
+                              the value in the metadata file is correct.
+        """
+        self.ensure_merged_annotations()
+        manfile = os.path.join(self.bagdir, "manifest-sha256.txt")
+        try:
+          with open(manfile, 'w') as fd:
+            for datapath in self._bag._iter_data_files():
+                md = self._bag.nerd_metadata_for(datapath, merge_annots=False)
+                checksum = md.get('checksum')
+                if not checksum or 'hash' not in checksum:
+                    raise BagProfileError("Missing checksum for datafile: "+
+                                          datapath)
+                algo = checksum.get('algorithm', {}).get('value')
+                if algo != 'sha256':
+                    raise BagProfileError("Unexpected checksum algorithm found: "+
+                                          algo)
+                checksum = checksum['hash']
+                if confirm:
+                    if checksum_of(self._bag._full_dpath(datapath)) != checksum:
+                        raise BagProfileError("Checksum failure for "+datapath)
+
+                self._record_checksum(fd, checksum,os.path.join('data', datapath))
+
+        except Exception, e:
+            if os.path.exists(manfile):
+                os.remove(manfile)
+            raise
+
+    def _record_checksum(self, fd, checksum, filepath):
+        fd.write(checksum)
+        fd.write(' ')
+        fd.write(filepath)
+        fd.write('\n')        
+                       
+    def ensure_merged_annotations(self):
+        """
+        ensure that the annotations have been merged primary NERDm metadata.
+        """
+        pass
+
+    def validate_manifest_syntax(self, filepath):
+        """
+        check the contents of the given manifest file for proper syntax.  It 
+        does not check that the values are correct.
+        """
+        pass

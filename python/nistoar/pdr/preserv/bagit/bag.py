@@ -9,7 +9,7 @@ from .. import PreservationSystem, read_nerd, read_pod
 from .. import NERDError, PODError, StateException
 from .exceptions import BadBagRequest
 from ... import def_jq_libdir, def_merge_etcdir
-from ....nerdm.merge import MergerFactory
+from ....nerdm.merge import MergerFactory, Merger
 from ....nerdm.convert import ComponentCounter
 
 POD_FILENAME = "pod.json"
@@ -59,6 +59,9 @@ class NISTBag(PreservationSystem):
         """
         return self._datadir
 
+    def _full_dpath(self, comppath):
+        return os.path.join(self.data_dir, comppath)
+
     @property
     def metadata_dir(self):
         """
@@ -72,8 +75,35 @@ class NISTBag(PreservationSystem):
     def nerd_file_for(self, destpath):
         return os.path.join(self._metadir, destpath, NERDMD_FILENAME)
 
-    def nerd_metadata_for(self, destpath):
-        return self.read_nerd(self.nerd_file_for(destpath))
+    def nerd_metadata_for(self, destpath, merg_annots=None):
+        """
+        return the component metadata for a given path to a component.
+
+        :param merge_annots bool or Merger:  merge in any annotation data 
+                                   found for the component.  (Default is the 
+                                   value of the 'merge_annots' constructor 
+                                   argument.)  For a complete bag, annotations 
+                                   will already be merged into main NERDm 
+                                   metadata; however, if this is not the case, 
+                                   yet, one can merge on the fly while creating 
+                                   the record.  If the value is a Merger object
+                                   that object will be used to merge in the 
+                                   annotations.
+        """
+        nerdfile = self.nerd_file_for(destpath)
+        out = self.read_nerd(nerdfile)
+
+        annotfile = os.path.join(os.path.dirname(nerdfile), ANNOTS_FILENAME)
+        if merge_annots and os.path.exists(annotfile):
+            if isinstance(merge_annots, Merger):
+                compmerger = merge_annots
+            else:
+                compmerger = MergerFactory.make_merger(merge_annots, 'Component')
+
+            annots = self.read_nerd(annotfile)
+            comp = compmerger.merge(comp, annots)
+
+        return out
 
     def nerdm_record(self, merge_annots=None):
         """
@@ -145,7 +175,7 @@ class NISTBag(PreservationSystem):
         if comppath == "":
             return True
 
-        path = os.path.join(self.data_dir, comppath)
+        path = self._full_dpath(comppath)
         if os.path.exists(path):
             return True
 
@@ -163,7 +193,7 @@ class NISTBag(PreservationSystem):
         if not comppath:
             return False
 
-        path = os.path.join(self.data_dir, comppath)
+        path = self._full_dpath(comppath)
         if os.path.isfile(path):
             return True
 
@@ -185,7 +215,7 @@ class NISTBag(PreservationSystem):
         if not comppath:
             return False
 
-        path = os.path.join(self.data_dir, comppath)
+        path = self._full_dpath(comppath)
         if os.path.isdir(path):
             return True
 
@@ -207,7 +237,7 @@ class NISTBag(PreservationSystem):
                                 bagname=self.name, sys=self)
 
         children = set()
-        cdir = os.path.join(self.data_dir, comppath)
+        cdir = self._full_dpath(comppath)
         if os.path.exists(cdir):
             for c in os.listdir(cdir):
                 if not c.startswith('.') and not c.startswith('_'):
@@ -228,3 +258,18 @@ class NISTBag(PreservationSystem):
 
     def read_pod(self, podfile):
         return read_pod(podfile)
+
+    def iter_data_files(self):
+        """
+        iterate through the data files available under the data directory.
+
+        :return generator:  
+        """
+        for dir, subdirs, files in os.walk(self.data_dir):
+            reldir = dir[len(root)+1:]
+            for f in files:
+                # if f.startswith('.'):
+                #     continue
+                yield os.path.join(reldir, f)
+
+
