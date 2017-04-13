@@ -9,4 +9,5 @@ set -e
 
 $execdir/buildall.sh
 
+echo docker run -ti --rm -v $codedir:/dev/oar-pdr oarpdr/mdtests "$@"
 exec docker run -ti --rm -v $codedir:/dev/oar-pdr oarpdr/mdtests "$@"
