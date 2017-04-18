@@ -11,6 +11,7 @@ if not confsrc:
     raise ConfigurationError("ppmdserver: nist-oar configuration not provided")
 
 cfg = config.resolve_configuration(confsrc)
+config.configure_log(cfg)
 application = wsgi.app(cfg)
 
 

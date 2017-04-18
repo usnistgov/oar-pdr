@@ -1,9 +1,15 @@
 """
 Utilities for obtaining a configuration for the metadata service
 """
-import os, logging
+import os, logging, json, yaml
 
-oar_home = uwsgi.opt.get('oar_home')
+oar_home = None
+try:
+    import uwsgi
+    oar_home = uwsgi.opt.get('oar_home')
+except ImportError:
+    pass
+
 if not oar_home:
     oar_home = os.environ.get('OAR_HOME', '/app/pdr')
 
@@ -30,7 +36,7 @@ def resolve_configuration(location):
                 
         if ':' in location:
             # from network
-            raise NotImplemented
+            raise NotImplementedError
 
     cfgfile = os.path.join(oar_home, 'etc', 'config', 'mdserv.yaml')
     if not os.path.exists(cfgfile):
@@ -49,7 +55,10 @@ def load_from_file(configfile):
             return json.load(fd)
         else:
             # YAML format
-            raise NotImplemented
+            return yaml.load(fd)
+
+LOG_FORMAT = "%(asctime)s %(name)s %(levelname)s: %(message)s"
+_log_handler = None
 
 def configure_log(logfile=None, level=None, format=None, config=None):
     """
@@ -84,21 +93,22 @@ def configure_log(logfile=None, level=None, format=None, config=None):
         format = LOG_FORMAT
     frmtr = logging.Formatter(format)
 
-    hdlr = logging.FileHandler(logfile)
-    hdlr.setLevel(level)
-    hdlr.setFormatter(format)
-    logging.getLogger().addHandler(hdlr)
+    global _log_handler
+    _log_handler = logging.FileHandler(logfile)
+    _log_handler.setLevel(level)
+    _log_handler.setFormatter(frmtr)
+    logging.getLogger().addHandler(_log_handler)
 
 def retrieve_configuration(serverport):
     """
     retrieve the metadata server's configuration from the configuration server
     """
-    raise NotImplemented
+    raise NotImplementedError
 
 def lookup_config_server(serverport):
     """
     consult the discovery service to get the location of the configuration 
     service.
     """
-    raise NotImplemented
+    raise NotImplementedError
 

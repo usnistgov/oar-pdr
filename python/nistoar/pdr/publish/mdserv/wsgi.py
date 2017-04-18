@@ -6,6 +6,7 @@ necessary for integration into a WSGI server.  It should be replaced with
 a framework-based implementation if any further capabilities are needed.
 """
 import os, sys, logging, json
+from wsgiref.headers import Headers
 
 from .. import PublishSystem
 from .serv import (PrePubMetadataService, SIPDirectoryNotFound,
@@ -24,7 +25,7 @@ class PrePubMetadaRequestApp(object):
 
     def handle_request(self, env, start_resp):
         handler = Handler(self.mdsvc, env, start_resp)
-        handler.handle()
+        return handler.handle()
 
     def __call__(self, env, start_resp):
         return self.handle_request(env, start_resp)
@@ -37,8 +38,8 @@ class Handler(object):
         self._svc = service
         self._env = wsgienv
         self._start = start_resp
-        self._meth = env.get('REQUEST_METHOD', 'GET')
-        self._hdr = Headers()
+        self._meth = wsgienv.get('REQUEST_METHOD', 'GET')
+        self._hdr = Headers([])
         self._code = 0
         self._msg = "unknown status"
 
@@ -55,7 +56,7 @@ class Handler(object):
 
     def end_headers(self):
         status = "{0} {1}".format(str(self._code), self._msg)
-        self._start(status, self._hdr)
+        self._start(status, self._hdr.items())
 
     def handle(self):
         meth_handler = 'do_'+self._meth
@@ -63,9 +64,10 @@ class Handler(object):
         path = self._env.get('PATH_INFO', '/')[1:]
 
         if hasattr(self, meth_handler):
-            getattr(self, meth_handler)(path)
+            return getattr(self, meth_handler)(path)
         else:
-            self.send_error(403, self._meth + " not supported on this resource")
+            return self.send_error(403, self._meth +
+                                   " not supported on this resource")
 
 
     def do_GET(self, path):
@@ -79,18 +81,23 @@ class Handler(object):
             mdata = self._svc.resolve_id(path)
         except SIPDirectoryNotFound, ex:
             #TODO: consider sending a 301
-            self.send_error(404, "Dataset with ID={0} not available".format(id))
+            self.send_error(404,"Dataset with ID={0} not available".format(path))
             return []
         except Exception, ex:
             log.exception("Internal error: "+str(ex))
-            self.send_error(500, "Internal error: "+ str(ex))
+            self.send_error(500, "Internal error")
             return []
 
-        self.send_response(200, "Identifier found")
+        self.set_response(200, "Identifier found")
         self.add_header('ContentType', 'application/json')
         self.end_headers()
 
         return [ json.dumps(mdata, indent=4, separators=(',', ': ')) ]
 
+        
+    def do_HEAD(self, path):
+
+        self.do_GET(path)
+        return []
         
 

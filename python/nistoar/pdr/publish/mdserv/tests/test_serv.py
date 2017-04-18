@@ -11,7 +11,7 @@ from nistoar.testing import *
 from nistoar.pdr import def_jq_libdir
 import nistoar.pdr.preserv.bagit.builder as bldr
 import nistoar.pdr.publish.mdserv.serv as serv
-import nistoar.pdr.preserv.exceptions as exceptions
+import nistoar.pdr.exceptions as exceptions
 
 # datadir = nistoar/preserv/tests/data
 pdrmoddir = os.path.dirname(os.path.dirname(

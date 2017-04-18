@@ -25,7 +25,7 @@ def tearDownModule():
     global loghdlr
     if loghdlr:
         if rootlog:
-            rootlog.removeLog(loghdlr)
+            rootlog.removeHandler(loghdlr)
         loghdlr = None
     rmtmpdir()
 

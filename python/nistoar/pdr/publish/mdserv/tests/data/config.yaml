@@ -1,0 +1,6 @@
+working_dir:     '/pdr/work'
+review_dir:      '/midas/review'
+upload_dir:      '/midas/upload'
+id_registry_dir: '/pdr'
+
+

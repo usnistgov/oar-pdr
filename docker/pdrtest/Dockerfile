@@ -1,5 +1,7 @@
 FROM oarmeta/ejsonschema
 
+RUN apt-get update && apt-get install -y python-yaml uwsgi
+
 COPY entrypoint.sh /root/entrypoint.sh
 
 RUN mkdir -p /dev/oar-pdr
