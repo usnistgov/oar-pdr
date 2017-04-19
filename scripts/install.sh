@@ -29,4 +29,4 @@ echo Installing python libraries into $PY_LIBDIR...
 
 $oarmd_pkg/scripts/install_extras.sh --install-dir=$INSTALL_DIR
 
-
+mkdir -p $INSTALL_DIR/var/logs

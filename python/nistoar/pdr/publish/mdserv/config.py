@@ -88,7 +88,7 @@ def configure_log(logfile=None, level=None, format=None, config=None):
         logfile = os.path.join(logdir, logfile)
     
     if level is None:
-        level = logging.INFO
+        level = logging.DEBUG
     if not format:
         format = LOG_FORMAT
     frmtr = logging.Formatter(format)
