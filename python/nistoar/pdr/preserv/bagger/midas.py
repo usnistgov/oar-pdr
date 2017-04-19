@@ -107,6 +107,9 @@ class MIDASMetadataBagger(SIPBagger):
                                   minter=minter,
                                   logger=log.getChild(self.name[:8]+'...'))
         mergeetc = self.cfg.get('merge_etc', def_merge_etcdir)
+        if not mergeetc:
+            raise StateException("Unable to locate the merge configuration "+
+                                 "directory")
         self._merger_factory = MergerFactory(mergeetc)
 
         self.hardlinkdata = self.cfg.get('hard_link_data', True)

@@ -144,6 +144,9 @@ def find_merge_etc(config=None):
                                             os.path.abspath(nistoar.__file__)))))
         candidates = [os.path.join(basedir, 'etc', 'merge')]
         candidates.append(os.path.join(basedir, 'oar-metadata', 'etc', 'merge'))
+        basedir = os.path.dirname(basedir)
+        candidates.append(os.path.join(basedir, 'oar-metadata', 'etc', 'merge'))
+        candidates.append(os.path.join(basedir, 'etc', 'merge'))
 
     for dir in candidates:
         if os.path.exists(dir):

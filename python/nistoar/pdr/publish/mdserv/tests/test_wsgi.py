@@ -108,6 +108,31 @@ class TestApp(test.TestCase):
         self.assertGreater(len(self.resp), 0)
         self.assertIn("403", self.resp[0])
 
+    def test_get_datafile(self):
+        req = {
+            'PATH_INFO': '/3A1EE2F169DD3B8CE0531A570681DB5D1491/trial1.json',
+            'REQUEST_METHOD': 'GET'
+        }
+        body = self.svc(req, self.start)
+
+        self.assertGreater(len(self.resp), 0)
+        self.assertIn("200", self.resp[0])
+        redirect = [r for r in self.resp if "X-Accel-Redirect:" in r]
+        self.assertGreater(len(redirect), 0)
+        self.assertEqual(redirect[0],"X-Accel-Redirect: /midasdata/review_dir/3A1EE2F169DD3B8CE0531A570681DB5D1491/trial1.json")
+
+    def test_get_datafile2(self):
+        req = {
+            'PATH_INFO': '/3A1EE2F169DD3B8CE0531A570681DB5D1491/trial3/trial3a.json',
+            'REQUEST_METHOD': 'GET'
+        }
+        body = self.svc(req, self.start)
+
+        self.assertGreater(len(self.resp), 0)
+        self.assertIn("200", self.resp[0])
+        redirect = [r for r in self.resp if "X-Accel-Redirect:" in r]
+        self.assertGreater(len(redirect), 0)
+        self.assertEqual(redirect[0],"X-Accel-Redirect: /midasdata/upload_dir/3A1EE2F169DD3B8CE0531A570681DB5D1491/trial3/trial3a.json")
         
 
         
