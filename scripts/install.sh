@@ -30,3 +30,8 @@ echo Installing python libraries into $PY_LIBDIR...
 $oarmd_pkg/scripts/install_extras.sh --install-dir=$INSTALL_DIR
 
 mkdir -p $INSTALL_DIR/var/logs
+mkdir -p $INSTALL_DIR/var/testmidas/work
+echo cp -r $SOURCE_DIR/python/nistoar/pdr/preserv/tests/data/midassip \
+           $INSTALL_DIR/var/testmidas/midas
+cp -r $SOURCE_DIR/python/nistoar/pdr/preserv/tests/data/midassip \
+      $INSTALL_DIR/var/testmidas/midas

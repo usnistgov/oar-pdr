@@ -1,7 +1,7 @@
 """
 Utilities for obtaining a configuration for the metadata service
 """
-import os, logging, json, yaml
+import os, sys, logging, json, yaml
 
 oar_home = None
 try:
@@ -60,7 +60,8 @@ def load_from_file(configfile):
 LOG_FORMAT = "%(asctime)s %(name)s %(levelname)s: %(message)s"
 _log_handler = None
 
-def configure_log(logfile=None, level=None, format=None, config=None):
+def configure_log(logfile=None, level=None, format=None, config=None,
+                  addstderr=False):
     """
     configure the log file, setting the output file, threshold, and format
     as necessary.  These can be provided explicitly or provided via the 
@@ -74,6 +75,8 @@ def configure_log(logfile=None, level=None, format=None, config=None):
     :param format str:   the formatting string to configure the logfile with
     :param config dict:  a configuration dictionary to draw logging configuration
                          values from.  
+    :param addstderr bool:  If True, send ERROR and more severe messages to 
+                         the standard error stream (default: False).
     """
     if not config:
         config = {}
@@ -85,6 +88,8 @@ def configure_log(logfile=None, level=None, format=None, config=None):
         # the OAR_LOG_DIR environment variable; the former takes precedence
         deflogdir = os.path.join(oar_home,'var','logs')
         logdir = config.get('logdir', os.environ.get('OAR_LOG_DIR', deflogdir))
+        if not os.path.exists(logdir):
+            logdir = "/tmp"
         logfile = os.path.join(logdir, logfile)
     
     if level is None:
@@ -97,7 +102,17 @@ def configure_log(logfile=None, level=None, format=None, config=None):
     _log_handler = logging.FileHandler(logfile)
     _log_handler.setLevel(level)
     _log_handler.setFormatter(frmtr)
-    logging.getLogger().addHandler(_log_handler)
+    rootlogger = logging.getLogger()
+    rootlogger.addHandler(_log_handler)
+    rootlogger.setLevel(logging.DEBUG)
+
+    if addstderr:
+        handler = logging.StreamHandler(sys.stderr)
+        handler.setLevel(logging.ERROR)
+        handler.setFormatter(logging.Formatter(format))
+        rootlogger.addHandler(handler)
+        rootlogger.error("FYI: Writing log messages to %s",logfile)
+        
 
 def retrieve_configuration(serverport):
     """

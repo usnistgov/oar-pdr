@@ -34,7 +34,16 @@ while [ "$1" != "" ]; do
                 echo 10 > testall.exit
                 exit
             }
-            python -c 'import sys, json; fd = open("mdserv_out.txt"); data = json.load(fd); sys.exit(0 if data["doi"]=="doi:10.18434/T4SW26" else 20)'
+            python -c 'import sys, json; fd = open("mdserv_out.txt"); data = json.load(fd); sys.exit(0 if data["doi"]=="doi:10.18434/T4SW26" else 11)' || {
+                echo $? > testall.exit
+                exit
+            }
+            curl http://localhost/midas/3A1EE2F169DD3B8CE0531A570681DB5D1491/trial1.json \
+                 > mdserv_out.txt || {
+                echo 20 > testall.exit
+                exit
+            }
+            python -c 'import sys, json; fd = open("mdserv_out.txt"); data = json.load(fd); sys.exit(0 if data["name"]=="tx1" else 21)'
             echo $? > testall.exit
             if cat testall.exit; then
                 echo All tests passed
@@ -70,7 +79,7 @@ while [ "$1" != "" ]; do
             ;;
         *)
             echo Unknown command: $1
-            echo Available commands:  testall testshell install shell installshell testmdserv
+            echo Available commands:  testall testshell install shell installshell testmdservshell
             ;;
     esac
     
