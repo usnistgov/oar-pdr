@@ -80,9 +80,9 @@ class Handler(object):
     def do_GET(self, path):
 
         if not path:
-            self.code = 404
+            self.code = 403
             self.send_error(self.code, "No identifier given")
-            return []
+            return ["Server ready\n"]
 
         if path.startswith('/'):
             path = path[1:]
