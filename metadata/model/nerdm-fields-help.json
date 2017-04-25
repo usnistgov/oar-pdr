@@ -43,7 +43,7 @@
     {
         "name": "title",
         "type": "string",
-        "label": "resource title",
+        "label": "Resource Title",
         "tags": [ "searchable", "filterable" ],
         "tips": {
             "search": ""
@@ -53,7 +53,7 @@
         "name": "contactPoint",
         "type": "object",
         "label": "Point of Contact",
-        "tags": [ "" ],
+        "tags": [ "filterable" ],
         "tips": {
             "search": "a person or group that can be contacted about this resource"
         }
@@ -62,7 +62,7 @@
         "name": "contactPoint.hasEmail",
         "type": "object",
         "label": "contact email address",
-        "tags": [ "searchable", "filterable" ],
+        "tags": [ "searchable" ],
         "tips": {
             "search": "the contact's email address"
         }
@@ -80,7 +80,7 @@
         "name": "modified",
         "type": "date",
         "label": "date of last modification",
-        "tags": [ "filterable" ],
+        "tags": [ ],
         "tips": {
             "search": "The date that this resource was last updated"
         }
@@ -89,7 +89,7 @@
         "name": "issued",
         "type": "date",
         "label": "date of first release",
-        "tags": [ "filterable" ],
+        "tags": [ ],
         "tips": {
             "search": "The date that this resource was first released"
         }
@@ -116,7 +116,7 @@
         "name": "description",
         "type": "string",
         "label": "Resource Description",
-        "tags": [ "" ],
+        "tags": [ "filterable" ],
         "tips": {
             "search": "A summary of what this resource is about"
         }
@@ -210,7 +210,7 @@
         "name": "doi",
         "type": "string",
         "label": "DOI",
-        "tags": [ "searchable", "id" ],
+        "tags": [ "searchable", "id","filterable" ],
         "tips": {
             "search": "The persistent Digital Object Identifier (for reference purposes)"
         }
@@ -219,7 +219,7 @@
         "name": "abbrev",
         "type": "string",
         "label": "abbreviated name",
-        "tags": [ "searchable", "filterable", "smalldisplay" ],
+        "tags": [ "searchable", "smalldisplay" ],
         "tips": {
             "search": ""
         }
@@ -274,7 +274,7 @@
         "name": "component.title",
         "type": "string",
         "label": "title",
-        "tags": [ "searchable", "filterable" ],
+        "tags": [ "searchable" ],
         "tips": {
             "search": ""
         }
@@ -283,7 +283,7 @@
         "name": "component.description",
         "type": "string",
         "label": "title",
-        "tags": [ "searchable", "filterable" ],
+        "tags": [ "searchable" ],
         "tips": {
             "search": ""
         }
@@ -301,7 +301,7 @@
         "name": "component.topic.tag",
         "type": "str",
         "label": "research topic",
-        "tags": [ "searchable", "filterable" ],
+        "tags": [ "searchable" ],
         "tips": {
             "search": "vocabulary terms that describe what this part is about"
         }
@@ -319,7 +319,7 @@
         "name": "component.filepath",
         "type": "string",
         "label": "full data file or collection name",
-        "tags": [ "searchable", "filterable" ],
+        "tags": [ "searchable" ],
         "tips": {
             "search": ""
         }
@@ -346,7 +346,7 @@
         "name": "component.format.tag",
         "type": "object",
         "label": "File's format type",
-        "tags": [ "searchable", "filterable" ],
+        "tags": [ "searchable" ],
         "tips": {
             "search": ""
         }
