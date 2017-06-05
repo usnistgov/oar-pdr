@@ -10,7 +10,6 @@ process for the preservation service.
 The implementations use the BagBuilder class to populate the output bag.   
 """
 import os, errno, logging, re, json
-from shutil import copy2 as copy
 from abc import ABCMeta, abstractmethod, abstractproperty
 
 from .base import SIPBagger, moddate_of, checksum_of, read_nerd, read_pod

@@ -25,7 +25,9 @@ def the_test_suite(pydir):
 def testall(pydir):
     bdir = os.path.join(pydir, "build")
     build_py(pydir, bdir)
-    test.TextTestRunner().run(the_test_suite(pydir))
+    result = test.TextTestRunner().run(the_test_suite(pydir))
+    return result.wasSuccessful()
 
 if __name__ == '__main__':
-    testall(pydir)
+    if not testall(pydir):
+        sys.exit(1)

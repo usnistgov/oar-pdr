@@ -3,7 +3,7 @@ Tools for building a NIST Preservation bags
 """
 import os, errno, logging, re, json, hashlib
 import pynoid as noid
-from shutil import copy2 as filecopy, rmtree
+from shutil import copy as filecopy, rmtree
 from copy import deepcopy
 from collections import Mapping, OrderedDict
 
@@ -135,7 +135,7 @@ class BagBuilder(PreservationSystem):
             cfg = self.cfg.get('id_minter', {})
             minter = PDRMinter(self._pdir, cfg)
             if not os.path.exists(minter.registry.store):
-                self.log.warn("Creating new ID minter for bag, "+self._name)
+                self.log.warning("Creating new ID minter for bag, "+self._name)
         self._minter = minter
         
         jqlib = self.cfg.get('jq_lib', def_jq_libdir)
@@ -373,13 +373,13 @@ class BagBuilder(PreservationSystem):
             if hasattr(extras, '__iter__'):
                 bad = [f for f in extras if not isinstance(f, (str, unicode))]
                 if bad:
-                    self.log.warn("Ignoring entries in config param, "+param+
-                                  ", with non-string type: " + str(bad))
+                    self.log.warning("Ignoring entries in config param, "+param+
+                                     ", with non-string type: " + str(bad))
                     extras = [f for f in extras if isinstance(f, (str, unicode))]
                 filelist.extend(extras)
             else:
-                self.log.warn("Ignoring config param, 'extra_tag_dirs': " +
-                              "wrong value type: " + str(extras))
+                self.log.warning("Ignoring config param, 'extra_tag_dirs': " +
+                                 "wrong value type: " + str(extras))
 
     def add_data_file(self, destpath, srcpath=None, hardlink=False, initmd=True):
         """
@@ -573,8 +573,8 @@ class BagBuilder(PreservationSystem):
                 self._add_extracted_metadata(datafile, mdata,
                                              self.cfg.get('file_md_extract'))
             else:
-                log.warn("Unable to examine data file: doesn't exist (yet): " +
-                         destpath)
+                log.warning("Unable to examine data file: doesn't exist (yet): "+
+                            destpath)
         if write:
             self.add_metadata_for_file(destpath, mdata)
             self.ensure_ansc_collmd(destpath)
@@ -601,8 +601,8 @@ class BagBuilder(PreservationSystem):
                 self._add_extracted_metadata(datafile, mdata,
                                              self.cfg.get('file_md_extract'))
             else:
-                log.warn("Unable to examine data file: doesn't exist yet: " +
-                         destpath)
+                log.warning("Unable to examine data file: doesn't exist yet: " +
+                            destpath)
         if write:
             if destpath:
                 self.add_metadata_for_coll(destpath, mdata)
@@ -778,6 +778,7 @@ class BagBuilder(PreservationSystem):
             msg = "Adding POD data"
             if convert:
                 msg += " and converting to NERDm"
+            self.log.info(msg)
 
         outfile = os.path.join(self.bagdir, "metadata", POD_FILENAME)
         pdata = None

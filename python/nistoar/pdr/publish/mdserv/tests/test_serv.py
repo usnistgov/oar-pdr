@@ -164,6 +164,7 @@ class TestPrePubMetadataService(test.TestCase):
         val = ejs.ExtValidator(loader, ejsprefix='_')
         val.validate(mdata, False, True)
 
+        # resolve_id() needs to be indepodent
         data = self.srv.resolve_id(self.midasid)
         self.assertEqual(data, mdata)
 
