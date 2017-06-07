@@ -4,7 +4,7 @@ import unittest as test
 from collections import OrderedDict
 
 import nistoar.pdr.preserv.validate as val
-import nistoar.pdr.preserv.exceptions as exceptions
+import nistoar.pdr.exceptions as exceptions
 
 datadir = os.path.join(os.path.dirname(__file__), "data")
 

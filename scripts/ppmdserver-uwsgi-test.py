@@ -20,8 +20,8 @@ if uwsgi.opt.get('oar_midas_dir'):
     datadir = uwsgi.opt.get('oar_midas_dir')
 else:
     datadir = os.path.join(os.path.dirname(os.path.dirname(
-                           os.path.abspath(__file__))), "python",
-                           "nistoar", "pdr", "preserv", "tests", "data")
+                           os.path.abspath(__file__))), "python", "tests", 
+                           "nistoar", "pdr", "preserv", "data")
 
 midasid = '3A1EE2F169DD3B8CE0531A570681DB5D1491'
 
@@ -35,8 +35,8 @@ def adjust_config(config):
             doclean = True 
     if datadir == 'SRCTESTDATA':
         datadir = os.path.join(os.path.dirname(os.path.dirname(
-                               os.path.abspath(__file__))), "python",
-                        "nistoar", "pdr", "preserv", "tests", "data", "midassip")
+                               os.path.abspath(__file__))), "python", "tests", 
+                               "nistoar", "pdr", "preserv", "data", "midassip")
 
     out = copy.deepcopy(config)
     out.update( {
