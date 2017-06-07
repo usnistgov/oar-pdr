@@ -1,3 +1,15 @@
+#!/usr/bin/python
+#
+# discover and execute all the unit tests in the tests tree or only those
+# within specified packages.
+#
+# Usage:  runtests.py [PACKAGE ...]
+#
+# PACKAGE is a package to run tests for, either using path or module delimits.
+# Nominally, a PACKAGE would start with "tests", but if it starts with 
+# "nistoar", "tests" will be automatically prepended to the name.  If arguments
+# are not given, all tests will be run.
+#
 import unittest, os, sys, re
 import nistoar.pdr as pdr
 
@@ -94,4 +106,8 @@ if __name__ == '__main__':
             mod = "tests."+mod
         suites.append( discover(mod) )
 
-    unittest.TextTestRunner().run(unittest.TestSuite(suites))
+    result = unittest.TextTestRunner().run(unittest.TestSuite(suites))
+    if not result.wasSuccessful():
+        sys.exit(1)
+    sys.exit(0)
+    
