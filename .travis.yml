@@ -1,0 +1,12 @@
+language: python
+
+sudo: required
+
+services:
+  - docker
+
+before_install:
+  - cd docker && bash ./buildall.sh
+
+script:
+  - bash ./run.sh testall
