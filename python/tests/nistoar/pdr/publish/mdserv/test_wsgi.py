@@ -7,8 +7,8 @@ import nistoar.pdr.publish.mdserv.config as config
 import nistoar.pdr.publish.mdserv.wsgi as wsgi
 
 datadir = os.path.join(
-    os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__)))),
-    "preserv", "tests", "data"
+    os.path.dirname(os.path.dirname(os.path.dirname(__file__))),
+    "preserv", "data"
 )
 rootlog = None
 def setUpModule():

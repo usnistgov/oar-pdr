@@ -16,8 +16,8 @@ import nistoar.pdr.exceptions as exceptions
 testdir = os.path.dirname(os.path.abspath(__file__))
 testdatadir = os.path.join(testdir, 'data')
 # datadir = nistoar/preserv/tests/data
-pdrmoddir = os.path.dirname(os.path.dirname(os.path.dirname(testdir)))
-datadir = os.path.join(pdrmoddir, "preserv", "tests", "data")
+pdrmoddir = os.path.dirname(os.path.dirname(testdir))
+datadir = os.path.join(pdrmoddir, "preserv", "data")
 jqlibdir = def_jq_libdir
 schemadir = os.path.join(os.path.dirname(jqlibdir), "model")
 

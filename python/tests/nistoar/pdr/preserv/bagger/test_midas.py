@@ -12,10 +12,7 @@ import nistoar.pdr.preserv.bagger.midas as midas
 import nistoar.pdr.exceptions as exceptions
 
 # datadir = nistoar/preserv/tests/data
-datadir = os.path.join(
-    os.path.dirname(os.path.dirname(os.path.dirname(__file__))),
-    "tests", "data"
-)
+datadir = os.path.join( os.path.dirname(os.path.dirname(__file__)), "data" )
 
 loghdlr = None
 rootlog = None
