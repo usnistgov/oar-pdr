@@ -20,6 +20,8 @@ pdrmoddir = os.path.dirname(os.path.dirname(testdir))
 datadir = os.path.join(pdrmoddir, "preserv", "data")
 jqlibdir = def_jq_libdir
 schemadir = os.path.join(os.path.dirname(jqlibdir), "model")
+if not os.path.exists(schemadir) and os.environ.get('OAR_HOME'):
+    schemadir = os.path.join(os.environ['OAR_HOME'], "etc", "schemas")
 
 loghdlr = None
 rootlog = None
