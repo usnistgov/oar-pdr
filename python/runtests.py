@@ -11,6 +11,11 @@
 # are not given, all tests will be run.
 #
 import unittest, os, sys, re
+
+if 'OAR_PYTHONPATH' in os.environ:
+    sys.path.insert(0, os.environ['OAR_PYTHONPATH'])
+elif 'OAR_HOME' in os.environ:
+    sys.path.insert(0, os.path.join(os.environ['OAR_HOME'],'lib','python'))
 import nistoar.pdr as pdr
 
 def _path2mod(path):
@@ -107,6 +112,8 @@ if __name__ == '__main__':
         suites.append( discover(mod) )
 
     result = unittest.TextTestRunner().run(unittest.TestSuite(suites))
+    if result.testsRun == 0:
+        sys.exit(2)
     if not result.wasSuccessful():
         sys.exit(1)
     sys.exit(0)

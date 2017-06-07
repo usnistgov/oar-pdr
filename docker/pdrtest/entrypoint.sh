@@ -43,7 +43,7 @@ case "$1" in
             stat=$?
         set +x
 
-        [ "$stat" -ne 0 ] && {
+        [ "$stat" != "0" ] && {
             echo "testall: One or more server tests failed (last=$stat)"
             exitopwith testall 3
         }
@@ -56,9 +56,10 @@ case "$1" in
         ;;
     testshell)
         libdir=`ls /dev/oar-pdr/python/build | grep lib.`
-        export PYTHONPATH=/dev/oar-pdr/python/build/$libdir
+        export OAR_PYTHONPATH=/dev/oar-pdr/python/build/$libdir
         export OAR_JQ_LIB=/dev/oar-pdr/oar-metadata/jq
         export OAR_MERGE_ETC=/dev/oar-pdr/oar-metadata/etc/merge
+        export PYTHONPATH=$OAR_PYTHONPATH
         exec /bin/bash
         ;;
     shell)
