@@ -1,7 +1,18 @@
 """
 The uWSGI script for launching the metadata server.
 """
+import os, sys
 import uwsgi
+try:
+    import nistoar
+except ImportError:
+    oarpath = os.environ.get('OAR_PYTHONPATH')
+    if not oarpath and 'OAR_HOME' in os.environ:
+        oarpath = os.path.join(os.environ['OAR_HOME'], "lib", "python")
+    if oarpath:
+        sys.path.insert(0, oarpath)
+    import nistoar
+
 from nistoar.pdr.exceptions import ConfigurationException
 from nistoar.pdr.publish.mdserv import wsgi, config
 
