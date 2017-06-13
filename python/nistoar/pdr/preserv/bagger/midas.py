@@ -10,7 +10,6 @@ process for the preservation service.
 The implementations use the BagBuilder class to populate the output bag.   
 """
 import os, errno, logging, re, json
-from shutil import copy2 as copy
 from abc import ABCMeta, abstractmethod, abstractproperty
 
 from .base import SIPBagger, moddate_of, checksum_of, read_nerd, read_pod
@@ -94,6 +93,9 @@ class MIDASMetadataBagger(SIPBagger):
                 self._indirs.append(indir)
                 if reviewdir and indir.startswith(reviewdir):
                     self.state = 'review'
+                log.debug("Found input dir: %s", indir)
+            else:
+                log.debug("Candidate dir does not exist: %s", indir)    
 
         if not self._indirs:
             raise SIPDirectoryNotFound(msg="No input directories available",
@@ -106,6 +108,9 @@ class MIDASMetadataBagger(SIPBagger):
                                   minter=minter,
                                   logger=log.getChild(self.name[:8]+'...'))
         mergeetc = self.cfg.get('merge_etc', def_merge_etcdir)
+        if not mergeetc:
+            raise StateException("Unable to locate the merge configuration "+
+                                 "directory")
         self._merger_factory = MergerFactory(mergeetc)
 
         self.hardlinkdata = self.cfg.get('hard_link_data', True)
@@ -256,6 +261,7 @@ class MIDASMetadataBagger(SIPBagger):
                 if not os.path.exists(collnerd) or \
                    (os.path.exists(filenerd) and 
                     moddate_of(collnerd) < moddate_of(filenerd)):
+                      log.debug("Adding metadata for collection: %s", collpath)
                       self.bagbldr.init_collmd_for(collpath, write=True)
                       colls.add(collpath)
         
@@ -295,10 +301,12 @@ class MIDASMetadataBagger(SIPBagger):
                     mdata = read_nerd(os.path.join(dir,NERDMD_FILENAME))
                     if any([":DataFile" in t for t in mdata.get("@type", [])]):
                         # yes, it is a data file
+                        log.debug("Will remove dropped data file: %s", filepath)
                         remove.add(filepath)
 
         # now make sure have all the files from the input area
         for destpath, inpath in self.datafiles.items():
+            log.debug("Adding submitted data file: %s", destpath)
             self.ensure_file_metadata(inpath, destpath, self.resmd)
 
             if not nodata:

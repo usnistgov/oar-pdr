@@ -1,6 +1,10 @@
 FROM oarmeta/ejsonschema
 
+RUN apt-get update && apt-get install -y python-yaml nginx curl less \
+                                         uwsgi uwsgi-plugin-python 
+
 COPY entrypoint.sh /root/entrypoint.sh
+COPY nginx.conf /etc/nginx/nginx.conf
 
 RUN mkdir -p /dev/oar-pdr
 WORKDIR /dev/oar-pdr

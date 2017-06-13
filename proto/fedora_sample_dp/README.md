@@ -26,3 +26,8 @@ To load the sample dataset into Fedora, type:
 ```bash
 bash installSample.sh
 ```
+
+Note that `installSample.sh` assumes that the sample dataset, 95DP01, is the
+current directory.  (This dataset is available from
+http://odiwiki.nist.gov/ODI/FedoraDataModel; it is not publically
+available at this time.) 

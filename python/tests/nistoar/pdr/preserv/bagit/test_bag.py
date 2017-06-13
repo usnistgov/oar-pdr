@@ -9,11 +9,8 @@ from nistoar.testing import *
 import nistoar.pdr.preserv.bagit.bag as bag
 import nistoar.pdr.exceptions as exceptions
 
-# datadir = nistoar/preserv/tests/data
-datadir = os.path.join(
-    os.path.dirname(os.path.dirname(os.path.dirname(__file__))),
-    "tests", "data"
-)
+# datadir = nistoar/preserv/data
+datadir = os.path.join( os.path.dirname(os.path.dirname(__file__)), "data" )
 bagdir = os.path.join(datadir, "metadatabag")
 
 class TestNISTBag(test.TestCase):

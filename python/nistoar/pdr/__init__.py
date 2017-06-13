@@ -97,6 +97,8 @@ def find_jq_lib(config=None):
         candidates = [os.path.join(basedir, 'jq')]
         basedir = os.path.dirname(os.path.dirname(basedir))
         candidates.append(os.path.join(basedir, 'jq'))
+        candidates.append(os.path.join(basedir, 'oar-metadata', 'jq'))
+        
     for dir in candidates:
         if os.path.exists(dir):
             return dir
@@ -138,11 +140,14 @@ def find_merge_etc(config=None):
         # The code might be coming from an installation, build, or source
         # directory.
         import nistoar
-        basedir = os.path.dirname(os.path.dirname(os.path.dirname(
-                                            os.path.abspath(nistoar.__file__))))
+        basedir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(
+                                            os.path.abspath(nistoar.__file__)))))
         candidates = [os.path.join(basedir, 'etc', 'merge')]
-        basedir = os.path.dirname(os.path.dirname(basedir))
+        candidates.append(os.path.join(basedir, 'oar-metadata', 'etc', 'merge'))
+        basedir = os.path.dirname(basedir)
+        candidates.append(os.path.join(basedir, 'oar-metadata', 'etc', 'merge'))
         candidates.append(os.path.join(basedir, 'etc', 'merge'))
+
     for dir in candidates:
         if os.path.exists(dir):
             return dir

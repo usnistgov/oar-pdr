@@ -7,8 +7,8 @@ import nistoar.pdr.preserv.bagit.builder as bldr
 from nistoar.pdr.publish.mdserv import webservice as wsrvc
 
 datadir = os.path.join(
-    os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__)))),
-    "preserv", "tests", "data"
+    os.path.dirname(os.path.dirname(os.path.dirname(__file__))),
+    "preserv", "data"
 )
 loghdlr = None
 rootlog = None
@@ -25,7 +25,7 @@ def tearDownModule():
     global loghdlr
     if loghdlr:
         if rootlog:
-            rootlog.removeLog(loghdlr)
+            rootlog.removeHandler(loghdlr)
         loghdlr = None
     rmtmpdir()
 

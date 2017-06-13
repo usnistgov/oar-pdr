@@ -11,8 +11,11 @@ print "Executing all tests..."
 
 print "Executing pdr python tests..."
 
-testpy = os.path.join(scriptdir, "testpy.py")
+testpy = os.path.join(pydir, "runtests.py")
 notok = os.system("python {0}".format(testpy))
+if notok == 2:
+    print "**ERROR: no unit tests found!"
+    status += 3
 if notok:
     print "**ERROR: some or all python unit tests failed"
     status += 2

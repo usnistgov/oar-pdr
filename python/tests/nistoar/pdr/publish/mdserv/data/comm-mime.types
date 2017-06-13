@@ -1,0 +1,13 @@
+###############################################################################
+#
+#  MIME media types and the extensions that represent them.
+#
+###########3
+
+application/xhtml+xml                           xhtml xht
+application/xml                                 xml xsd
+application/xml-dtd
+application/xml-external-parsed-entity
+application/xslt+xml                            xsl xslt
+application/xspf+xml                            xspf
+application/zip                                 zip

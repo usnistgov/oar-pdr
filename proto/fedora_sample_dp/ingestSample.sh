@@ -25,10 +25,13 @@ CREATE_PARENT=1
 VERBOSE=
 
 set -e
-set -x
+#set -x
 
 function ingest {
     [ "$CREATE_PARENT" != "" ] && create_parent
+    [ "$VERBOSE" == "" ] || {
+        echo bash ingestDP.sh -u $BASE $VERBOSE
+    }
     bash ingestDP.sh -u $BASE $VERBOSE
 }
 
@@ -107,6 +110,10 @@ while [[ $# -ge 1 ]]; do
             ;;
     esac
 done
+
+[ "${#args}" -gt 0 ] && {
+    PARENT=${args[0]}
+}
 
 [ "$FEDORA" = "" ] && FEDORA=http://$FEDORAHOST/rest
 [ "$BASE" = "" ] && BASE=$FEDORA$PARENT

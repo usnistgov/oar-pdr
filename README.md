@@ -17,9 +17,23 @@ scripts    --> Tools for running the services and running all tests
 ## Prerequisites
 
 The oar-metadata package is a prerequisite which is configured as git
-sub-module of this package.  This means if you clone the git
-repository, you should get the oar-metadata automatically.  See
-oar-metadata/READM.md for a list of its prerequisites.
+sub-module of this package.  This means after you clone the git
+repository, you should use `git submodule` to pull in the oar-metadata
+package into it:
+
+```
+git submodule update --init
+```
+
+See oar-metadata/README.md for a list of its prerequisites.
+
+As an alternative to explicitly installing prerequisites to run
+the tests, the `docker` directory contains scripts for building a
+Docker container with these installed.  Running the `docker/run.sh`
+script will build the containers (caching them locally), start the
+container, and put the user in a bash shell in the container.  From
+there, one can run the tests or use the `jq` and `validate` tools to
+interact with metadata files.
 
 
 

@@ -151,7 +151,7 @@ def _configure_log(logfile, level=None, format=None):
 
     hdlr = logging.FileHandler(logfile)
     hdlr.setLevel(level)
-    hdlr.setFormatter(format)
+    hdlr.setFormatter(frmtr)
     logging.getLogger().addHandler(hdlr)
 
 def from_cli(args, progname="ppmdserve", config=None):
