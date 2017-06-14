@@ -153,8 +153,7 @@ Code   | Name         | Condition
 202    | Accepted     | Preservation was successfully initiated but is still in progress.  The GET method can be used to poll the preservations progress and eventually recieve the names and checksums.
 400    | Bad Request  | The input URL was badly formed and therefore not recognized.
 404    | Not Found    | A dataset with the given UUID could not be found (in the review area).
-409    | Conflict     | Preservation has yet to be requested for the first time, or another preservation request is already in progress.
-was already requested for this UUID and either is in progress or has already complete; use GET to determine its status.  
+409    | Conflict     | Preservation has yet to be requested for the first time, or another preservation request is already in progress; use GET to determine its status.  
 410    | Gone         | Preservation for dataset with the given UUID was previously requested, but the information on the results is no longer available.  In other words, the information has "aged out" and been deleted.
 500    | Server Error | An error occured on the server that is not due to the users input but is not recoverable.  A subsequent call via GET may return a 402 (Not Found) response.  
 
