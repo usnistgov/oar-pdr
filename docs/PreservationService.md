@@ -59,6 +59,7 @@ its publication through the MIDAS interface.  MIDAS "delivers" the
 data via the PUT method:
 
 Method | PUT
+-------|------------
 URL    | <tt>https://datapubtest.nist.gov/preserv/midas/</tt>_UUID_
 Input  | None
 Output | JSON, status of preservation
@@ -91,6 +92,7 @@ limited time after it has completed), one can check on the status of
 the preservation process:
 
 Method | GET
+-------|------------
 URL    | <tt>https://datapubtest.nist.gov/preserv/midas/</tt>_UUID_
 Input  | None
 Output | JSON, status of preservation
@@ -130,6 +132,7 @@ member data files), the updates can be preserved with a call to the
 PATCH method.
 
 Method | PATCH
+-------|------------
 URL    | <tt>https://datapubtest.nist.gov/preserv/midas/</tt>_UUID_
 Input  | None
 Output | JSON, status of preservation
