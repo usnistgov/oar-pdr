@@ -330,7 +330,6 @@ class PreservationBagger(SIPBagger):
 
     def __init__(self, midasid, bagparent, reviewdir, mddir,
                  config={}, minter=None):
-                 
         """
         Create an SIPBagger to operate on data provided by MIDAS.
 
@@ -437,3 +436,15 @@ class PreservationBagger(SIPBagger):
             self.bagbldr.add_data_file(dfile, srcpath, True, False)
 
     
+    def make_bag(self):
+        """
+        convert the input SIP into a bag ready for preservation.  More 
+        specifically, the result will be a bag directory with finalized 
+        content, ready for serialization.  
+
+        :return str:  the path to the finalized bag directory
+        """
+        self.prepare(nodate=False)
+        self.bagbldr.finalize_bag()
+        return self.bagbldr.bagdir
+

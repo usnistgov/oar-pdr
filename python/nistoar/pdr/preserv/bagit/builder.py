@@ -655,14 +655,14 @@ class BagBuilder(PreservationSystem):
         Assume that all needed data and minimal metadata have been added to the
         bag and fill out the remaining bag components to complete the bag.
 
-        The following configuration paramters will control activities are 
+        The following configuration paramters will control which activities are 
         included in the finalizing step:
           :param 'examine' bool:   if True, this will ensure that all files have
                                      been examined and had metadata extracted.  
           :param 'trim_folders' bool:  if True, remove all empty data directories
 
         :return list:  a list of errors encountered while trying to complete
-                       the bag.  An empty bag indicates that the bag is complete
+                       the bag.  An empty list indicates that the bag is complete
                        and ready to preserved.  
         """
         raise NotImplemented
@@ -806,7 +806,7 @@ class BagBuilder(PreservationSystem):
         add the given data as annotations to the metadata for the file or 
         collection with the given path.  This metadata represents updates to 
         the base level metadata.  This metadata will be merged in with the 
-        base level to create the final NERDm metadata (when finalize_bad() is 
+        base level to create the final NERDm metadata (when finalize_bag() is 
         called).  
 
         :param destpath str:   the desired path for the file relative to the 

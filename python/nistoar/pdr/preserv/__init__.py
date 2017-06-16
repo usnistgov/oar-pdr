@@ -26,6 +26,8 @@ class PreservationSystem(PDRSystem):
     @property
     def subsystem_abbrev(self): return _PRESSUBSYSABBREV
 
+sys = PreservationSystem()
+
 def read_nerd(nerdfile):
     """
     read the JSON-formatted NERDm metadata in the given file
