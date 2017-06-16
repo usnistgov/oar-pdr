@@ -3,22 +3,25 @@ Tools for serializing and running checksums on bags
 """
 import subprocess as sp
 from cStringIO import StringIO
+import logging, os
 
-from .exception import BagSerializationError
-from . import sys as _sys
+from .exceptions import BagSerializationError
+from .. import sys as _sys
 
 def _exec(cmd, dir, log):
     log.info("serializing bag: %s", ' '.join(cmd))
 
-    out = StringIO()
-    err = StringIO()
-    try:
-        sp.check_call(cmd, stdout=out, stderr=err, cwd=dir)
-    except sp.CalledProcessError, ex:
+    proc = sp.Popen(cmd, stdout=sp.PIPE, stderr=sp.PIPE, cwd=dir)
+    out, err = map(lambda s: s.strip(), proc.communicate())
+
+    if out:
+        log.debug("%s:\n%s", cmd[0], out)
+
+    if proc.returncode > 0:
         log.error("%s exited with error (%d): %s", cmd[0], proc.returncode, err)
-        raise
-    finally:
-        log.debug("output from %s:\n%s", cmd[0], out)
+        raise sp.CalledProcessError(proc.returncode, cmd, err)
+    else:
+        log.debug(err)
 
 zip_error = {
     '12': "zip has nothing to do",
@@ -39,6 +42,11 @@ def zip_serialize(bagdir, destfile, log):
     try:
         _exec(cmd, parent, log)
     except sp.CalledProcessError, ex:
+        if os.path.exists(destfile):
+            try:
+                os.remove(destfile)
+            except Exception:
+                pass
         message = zip_error.get(str(ex.returncode))
         if not message:
             message = "Bag serialization failure using zip (consult log)"
@@ -54,10 +62,15 @@ def zip7_serialize(bagdir, destfile, log):
     try:
         _exec(cmd, parent, log)
     except sp.CalledProcessError, ex:
+        if os.path.exists(destfile):
+            try:
+                os.remove(destfile)
+            except Exception:
+                pass
         if ex.returncode == 1:
-            message = "7z could not read one or more files"
+            msg = "7z could not read one or more files"
         else:
-            message = "Bag serialization failure using 7z (consult log)"
+            msg = "Bag serialization failure using 7z (consult log)"
         raise BagSerializationError(msg, name, ex, sys=_sys)
 
 class Serializer(object):
@@ -76,6 +89,13 @@ class Serializer(object):
 
     def setLog(self, log):
         self.log = log
+
+    @property
+    def formats(self):
+        """
+        a list of the names of formats supported by this serializer
+        """
+        return self._map.keys()
 
     def register(self, format, serfunc):
         """
@@ -106,7 +126,7 @@ class Serializer(object):
             if self.log:
                 log = self.log
             else:
-                log = logging.getLogger(_sys.system_abbrev).
+                log = logging.getLogger(_sys.system_abbrev).\
                               getChild(_sys.subsystem_abbrev)
         self._map[format](bagdir, destdir, log)
 
@@ -117,6 +137,6 @@ class DefaultSerializer(Serializer):
 
     def __init__(self, log=None):
         super(DefaultSerializer, self).__init__({
-            "zip": zip_serializer,
-            "7z": zip7_serializer
+            "zip": zip_serialize,
+            "7z": zip7_serialize
         }, log)
