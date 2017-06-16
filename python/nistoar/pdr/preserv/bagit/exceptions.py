@@ -34,3 +34,10 @@ class BagProfileError(BagItException):
     """
     pass
 
+class BagSerializationError(BagItException):
+    """
+    an exception resulting from a failure serializing or unserializing
+    a bag.
+    """
+    pass
+

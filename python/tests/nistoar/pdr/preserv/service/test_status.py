@@ -17,7 +17,7 @@ class TestReadWrite(test.TestCase):
         'goob': 'gurn',
         'age': 5
     }
-    
+
     def tearDown(self):
         if os.path.exists(self.cachefile):
             os.remove(self.cachefile)
@@ -50,6 +50,10 @@ class TestSIPStatus(test.TestCase):
     def tearDown(self):
         self.tf.clean()
 
+    def read_data(self, filepath):
+        with open(filepath) as fd:
+            return json.load(fd)
+    
     def test_ctor(self):
         data = {
             'id': 'ffff',
@@ -80,8 +84,7 @@ class TestSIPStatus(test.TestCase):
         self.assertTrue(isinstance(self.status.data['update_stamp'], float))
         self.assertIn('update_date', self.status.data)
 
-        with open(self.status._cachefile) as fd:
-            data = json.load(fd)
+        data = self.read_data(self.status._cachefile)
         self.assertIn('update_stamp', data)
         self.assertTrue(isinstance(data['update_stamp'], float))
         self.assertIn('update_date', data)
@@ -110,6 +113,9 @@ class TestSIPStatus(test.TestCase):
         self.assertTrue(not os.path.exists(self.status._cachefile))
         self.status.data['gurn'] = 'goob'
 
+        with self.assertRaises(ValueError):
+            self.status.update("hanky")
+
         self.status.update(status.SUCCESSFUL)
         self.assertTrue(os.path.exists(self.status._cachefile))
         self.assertEquals(self.status.data['state'], 'successful')
@@ -118,8 +124,7 @@ class TestSIPStatus(test.TestCase):
         self.assertNotIn('start_stamp', self.status.data)
         self.assertNotIn('start_date', self.status.data)
         
-        with open(self.status._cachefile) as fd:
-            data = json.load(fd)
+        data = self.read_data(self.status._cachefile)
         self.assertEquals(data['state'], 'successful')
         self.assertEqual(data['message'], 
                          status.user_message[status.SUCCESSFUL])
@@ -176,7 +181,19 @@ class TestSIPStatus(test.TestCase):
         self.assertNotIn('id', history[1])
         self.assertEqual(history[1]['state'], status.FAILED)
 
-        
+    def test_record_progress(self):
+        self.assertEquals(self.status.data['state'], status.PENDING)
+
+        self.status.record_progress("almost there")
+        data = self.read_data(self.status._cachefile)
+        self.assertEquals(data['state'], status.PENDING)
+        self.assertEquals(data['message'], "almost there")
+
+        self.status.start()
+        self.status.record_progress("started")
+        data = self.read_data(self.status._cachefile)
+        self.assertEquals(data['state'], status.IN_PROGRESS)
+        self.assertEquals(data['message'], "started")
 
 
 

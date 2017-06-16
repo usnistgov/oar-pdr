@@ -168,6 +168,14 @@ class SIPStatus(object):
         self._data['start_date'] = time.asctime()
         self.update(IN_PROGRESS, message)
 
+    def record_progress(self, message):
+        """
+        Update the status with a user-oriented message.  The state will be 
+        unchanged, but the data will be cached to disk.
+        """
+        self._data['message'] = message
+        self.cache()
+
     def refresh(self):
         """
         Read the cached status data and replace the data in memory.
