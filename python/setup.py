@@ -45,7 +45,8 @@ setup(name='nistoar',
       packages=['nistoar.pdr', 'nistoar.pdr.publish',
                 'nistoar.pdr.publish.mdserv',
                 'nistoar.pdr.preserv', 'nistoar.pdr.preserv.bagger',
-                'nistoar.pdr.preserv.bagit', 'nistoar.testing'
+                'nistoar.pdr.preserv.bagit', 'nistoar.pdr.preserv.service',
+                'nistoar.testing'
             ],
       cmdclass={'build': build}
 )
