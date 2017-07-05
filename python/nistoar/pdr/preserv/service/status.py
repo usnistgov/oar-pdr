@@ -30,6 +30,109 @@ user_message = {
     FORGOTTEN:   "Preservation history is no longer available"
 }
 
+LOCK_WRITE = fcntl.LOCK_EX
+LOCK_READ  = fcntl.LOCK_SH
+
+class SIPStatusFile(object):
+    """
+    a class used to manage locked access to the status data file
+    """
+    LOCK_WRITE = fcntl.LOCK_EX
+    LOCK_READ  = fcntl.LOCK_SH
+    
+    def __init__(self, filepath, locktype=None):
+        """
+        create the file wrapper
+        :param filepath  str: the path to the file
+        :param locktype:      the type of lock to acquire.  The value should 
+                              be either LOCK_READ or LOCK_WRITE.
+                              If None, no lock is acquired.  
+        """
+        self._file = filepath
+        self._fd = None
+        self._type = None
+
+        if locktype is not None:
+            self.acquire(locktype)
+
+    def __del__(self):
+        self.release()
+
+    @property
+    def lock_type(self):
+        """
+        the current type of lock held, or None if no lock is held.
+        """
+        return self._type
+
+    def acquire(self, locktype):
+        """
+        set a lock on the file
+        """
+        if self._fd:
+            if self._type == locktype:
+                return False
+            elif locktype == self.LOCK_WRITE:
+                raise RuntimeError("Release the read lock before "+
+                                   "requesting write lock")
+
+        if locktype == LOCK_READ:
+            self._fd = open(self._file)
+            fcntl.flock(self._fd, fcntl.LOCK_SH)
+            self._type = LOCK_READ
+        elif locktype == LOCK_WRITE:
+            self._fd = open(self._file, 'w')
+            fcntl.flock(self._fd, fcntl.LOCK_EX)
+            self._type = LOCK_WRITE
+        else:
+            raise ValueError("Not a recognized lock type: "+ str(locktype))
+        return True
+
+    def release(self):
+        if self._fd:
+            self._fd.seek(0, os.SEEK_END)
+            fcntl.flock(self._fd, fcntl.LOCK_UN)
+            self._fd.close()
+            self._fd = None
+            self._type = None
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, ex_type, ex_val, ex_tb):
+        self.release()
+
+    def read_data(self):
+        """
+        read the status data from the configured file.  If a lock is not 
+        currently set, one is acquired and immediately released.  
+        """
+        release = self.acquire(LOCK_READ)
+        self._fd.seek(0)
+        out = json.load(self._fd, object_pairs_hook=OrderedDict)
+        if release:
+            self.release()
+        return out
+        
+    def write_data(self, data):
+        """
+        write the status data to the configured file.  If a lock is not 
+        currently set, one is acquired and immediately released.  
+        """
+        release = self.acquire(LOCK_WRITE)
+        self._fd.seek(0)
+        json.dump(data, self._fd, indent=2, separators=(',', ': '))
+        if release:
+            self.release()
+
+    @classmethod
+    def read(cls, filepath):
+        return cls(filepath).read_data()
+
+    @classmethod
+    def write(cls, filepath, data):
+        cls(filepath).write_data(data)
+
 def _read_status(filepath):
     try:
         with open(filepath) as fd:
@@ -56,7 +159,6 @@ def _write_status(filepath, data):
         raise StateException("Can't open preservation status file: "
                              +filepath+": "+str(ex), cause=ex,
                              sys=preservsys)
-    
 
 class SIPStatus(object):
     """
@@ -91,20 +193,24 @@ class SIPStatus(object):
         if _data:
             self._data = deepcopy(_data)
         elif os.path.exists(self._cachefile):
-            self._data = _read_status(self._cachefile)
+            self._data = SIPStatusFile.read(self._cachefile)
         else:
             self._data = OrderedDict([
-                ('state', PENDING),
-                ('message', user_message[PENDING])
+                ('sys', {}),
+                ('user', OrderedDict([
+                    ('state', PENDING),
+                    ('message', user_message[PENDING])
+                ])),
+                ('history', [])
             ])
-        self._data['id'] = id
+        self._data['user']['id'] = id
 
     @property
     def id(self):
         """
         the SIP's identifier
         """
-        return self._data['id']
+        return self._data['user']['id']
 
     @property
     def data(self):
@@ -131,9 +237,9 @@ class SIPStatus(object):
                                          +cachedir+": "+str(ex), cause=ex,
                                          sys=preservsys)
 
-        self._data['update_stamp'] = time.time()
-        self._data['update_date'] = time.asctime()
-        _write_status(self._cachefile, self._data)
+        self._data['user']['update_time'] = time.time()
+        self._data['user']['updated'] = time.asctime()
+        SIPStatusFile.write(self._cachefile, self._data)
         
     def update(self, label, message=None):
         """
@@ -151,8 +257,8 @@ class SIPStatus(object):
             raise ValueError("Not a recognized state label: "+label)
         if not message:
             message = user_message[label]
-        self._data['state'] = label
-        self._data['message'] = message
+        self._data['user']['state'] = label
+        self._data['user']['message'] = message
         self.cache()
         
 
@@ -164,8 +270,8 @@ class SIPStatus(object):
                              explaining this state.  If not provided, a default
                              explanation is set. 
         """
-        self._data['start_stamp'] = time.time()
-        self._data['start_date'] = time.asctime()
+        self._data['user']['start_time'] = time.time()
+        self._data['user']['started'] = time.asctime()
         self.update(IN_PROGRESS, message)
 
     def record_progress(self, message):
@@ -173,7 +279,7 @@ class SIPStatus(object):
         Update the status with a user-oriented message.  The state will be 
         unchanged, but the data will be cached to disk.
         """
-        self._data['message'] = message
+        self._data['user']['message'] = message
         self.cache()
 
     def refresh(self):
@@ -181,7 +287,16 @@ class SIPStatus(object):
         Read the cached status data and replace the data in memory.
         """
         if os.path.exists(self._cachefile):
-            self._data = _read_status(self._cachefile)
+            self._data = SIPStatusFile.read(self._cachefile)
+
+    def user_export(self):
+        """
+        return the porion of the status data intended for export through the
+        preservation service interface.  
+        """
+        out = deepcopy(self._data['user'])
+        out['history'] = self._data['history']
+        return out
 
 
     @classmethod
@@ -191,20 +306,21 @@ class SIPStatus(object):
         SIP.  
         """
         prev = SIPStatus(sipid, cfg)
-        if 'update_stamp' not in prev.data:
+        if 'update_time' not in prev.data['user']:
             return prev
 
         pending = SIPStatus('__noid__', {})
-        if 'history' in prev.data:
+        if 'history' in prev.data and prev.data['history']:
             pending.data['history'] = deepcopy(prev.data['history'])
-            del prev.data['history']
-        del prev.data['id']
+
+        del prev.data['user']['id']
         if 'history' in pending.data:
-            pending.data['history'].insert(0, prev.data)
+            pending.data['history'].insert(0, prev.data['user'])
         else:
-            pending.data['history'] = [ prev.data ]
+            pending.data['history'] = [ prev.data['user'] ]
 
-
-        return SIPStatus(sipid, cfg, _data=pending.data)
+        out = SIPStatus(sipid, cfg, _data=pending.data)
+        out.cache()
+        return out
 
         
