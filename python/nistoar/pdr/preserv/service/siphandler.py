@@ -41,10 +41,18 @@ class SIPHandler(object):
         self._sipid = sipid
         self.cfg = deepcopy(config)
         self._minter = minter
+        if not serializer:
+            serializer = DefaultSerializer()
+        self._ser = serializer
+
+        self.workdir = self.cfg['working_dir']
+        assert self.workdir
 
         # set up the Status manager
         stcfg = self.cfg.get('status_manager', {})
-        # merge in common config
+        if 'cachedir' not in stcfg:
+            stcfg['cachedir'] = os.path.join(self.workdir, "preserv_status")
+        
         self._status = SIPStatus(self._sipid, stcfg)
 
 
@@ -73,7 +81,7 @@ class SIPHandler(object):
         :return dict:  a summary of the preservation process, including bag
                        files' checksum hashes.  This is 
         """
-        raise NotImplemented
+        raise NotImplementedError()
 
     @property
     def status(self):
@@ -117,31 +125,79 @@ class SIPHandler(object):
     
 class MIDASSIPHandler(object):
     """
-    The abstract interface for processing an Submission Information Package 
+    The interface for processing an Submission Information Package 
     (SIP) from the MIDAS system.
     """
 
-    def __init__(self, config, minter=None, serializer=None):
+    def __init__(self, sipid, config, minter=None, serializer=None):
         """
-        Configure the handler
+        Configure the handler to process a specific SIP with a given 
+        identifier.  The SIP identifier (together with the type of the 
+        handler) implies a location for SIP content.  
 
+        :param sipid   str:  an identifer for the SIP that implies its 
+                             location.
         :param config dict:  a configuration dictionary specific to the 
-                             MIDAS SIPHandler.
-        :param minter IDMinter:  the IDMinter to use to minter new IDs, 
+                             intended type of SIPHandler.
+        :param minter IDMinter:  the IDMinter to use to minter new AIP IDs, 
                              overriding what might be provided by the 
-                             configuration or the default for the MIDAS
+                             configuration or the default for the type of 
                              SIPHandler
         :param serializer Serializer:  a Serializer instance to use to 
                              serialize bags.  If not provided the
                              DefaultSerializer from the .serialize module
                              will be used.
         """
-        self.cfg = config
-        self._minter = minter
-        if not serializer:
-            self._ser = DefaultSerializer()
+        super(MIDASSIPHandler, self).__init__(sipid, config, minter, serializer)
 
-    def bagit(self, sipid, serialtype=None, destdir=None, params=None):
+    def bagit(self, serialtype=None, destdir=None, params=None):
+        """
+        create an AIP in the form of serialized BagIt bags from the 
+        identified SIP.  The name of the serialized bag files are 
+        controlled by the implementation.
+
+        :param serialtype str:  the type of serialization to apply; this 
+                                must be a name recognized by the system.  
+                                If not provided a default serialization 
+                                will be applied (as given in the configuration).
+        :param destdir str:     the path to a directory where the serialized
+                                bag(s) will be written.  If not provided the
+                                configured directory will be used.  
+        :param params dict:     SIP-specific parameters to apply to the 
+                                creation of the AIP.  These can over-ride 
+                                SIP-default behavior as set by the 
+                                configuration.
+        """
+        pass
+
+class MIDASSIPImplHandler(object):
+    """
+    The abstract interface for processing an Submission Information Package 
+    (SIP) from the MIDAS system.
+    """
+
+    def __init__(self, sipid, config, minter=None, serializer=None):
+        """
+        Configure the handler to process a specific SIP with a given 
+        identifier.  The SIP identifier (together with the type of the 
+        handler) implies a location for SIP content.  
+
+        :param sipid   str:  an identifer for the SIP that implies its 
+                             location.
+        :param config dict:  a configuration dictionary specific to the 
+                             intended type of SIPHandler.
+        :param minter IDMinter:  the IDMinter to use to minter new AIP IDs, 
+                             overriding what might be provided by the 
+                             configuration or the default for the type of 
+                             SIPHandler
+        :param serializer Serializer:  a Serializer instance to use to 
+                             serialize bags.  If not provided the
+                             DefaultSerializer from the .serialize module
+                             will be used.
+        """
+        super(MIDASSIPHandler, self).__init__(sipid, config, minter, serializer)
+
+    def bagit(self, serialtype=None, destdir=None, params=None):
         """
         create an AIP in the form of serialized BagIt bags from the 
         identified SIP.  The name of the serialized bag files are 
