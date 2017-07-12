@@ -1,0 +1,3 @@
+[submodule "oar-metadata"]
+	path = oar-metadata
+	url = https://github.com/usnistgov/oar-metadata.git
