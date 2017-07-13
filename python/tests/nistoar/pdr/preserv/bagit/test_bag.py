@@ -13,6 +13,23 @@ import nistoar.pdr.exceptions as exceptions
 datadir = os.path.join( os.path.dirname(os.path.dirname(__file__)), "data" )
 bagdir = os.path.join(datadir, "metadatabag")
 
+baghier = [
+    {
+        "filepath": "trial1.json"
+    },
+    {
+        "filepath": "trial2.json"
+    },
+    {
+        "filepath": "trial3",
+        "children": [
+            {
+                "filepath": "trial3/trial3a.json"
+            }
+        ]
+    }
+]
+
 class TestNISTBag(test.TestCase):
 
     def setUp(self):
@@ -66,6 +83,8 @@ class TestNISTBag(test.TestCase):
         self.assertEqual(len(data['inventory']), 2)
         self.assertEqual(data['inventory'][0]['childCount'], 4)
         self.assertEqual(data['inventory'][0]['descCount'], 5)
+
+        self.assertEqual(data['dataHierarchy'], baghier)
 
     def test_comp_exists(self):
         self.assertTrue( self.bag.comp_exists("trial1.json") )

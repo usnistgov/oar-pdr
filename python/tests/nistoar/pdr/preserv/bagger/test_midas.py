@@ -109,6 +109,7 @@ class TestMIDASMetadataBaggerMixed(test.TestCase):
         del data['components']
         del src['components']
         del src['inventory']
+        del src['dataHierarchy']
         self.assertEqual(data, src)
         self.assertEqual(data.keys(), src.keys())  # same order
 
