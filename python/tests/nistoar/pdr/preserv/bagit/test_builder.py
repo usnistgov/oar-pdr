@@ -389,6 +389,8 @@ class TestBuilder(test.TestCase):
             data = json.load(fd)
         self.assertEqual(data['ediid'], '3A1EE2F169DD3B8CE0531A570681DB5D1491')
         self.assertEqual(len(data['components']), 1)
+        self.assertNotIn('inventory', data)
+        self.assertNotIn('dataHierarchy', data)
 
         with open(os.path.join(mdir,
                   "1491_optSortSphEvaluated20160701.cdf","nerdm.json")) as fd:

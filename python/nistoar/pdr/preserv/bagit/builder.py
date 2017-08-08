@@ -745,6 +745,10 @@ class BagBuilder(PreservationSystem):
         if 'inventory' in mdata:
             # we'll recalculate the inventory at the end; for now, get rid of it.
             del mdata['inventory']
+        if 'dataHierarchy' in mdata:
+            # we'll recalculate the dataHierarchy at the end; for now, get rid
+            # of it.
+            del mdata['dataHierarchy']
         if 'ediid' in mdata:
             # this will trigger updates to DataFile components
             self.ediid = mdata['ediid']
