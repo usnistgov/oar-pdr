@@ -202,6 +202,10 @@ class MIDASMetadataBagger(SIPBagger):
                        os.path.join(reldir,f) in podlocs:
                         # skip dot-files and pod files written by MIDAS
                         continue
+                    if f.endswith('.sha256') and f[:-len('.sha256')] in files:
+                        # skip any file that appears to be a hashfile of another
+                        # existing file.
+                        continue
                     datafiles[os.path.join(reldir, f)] = os.path.join(dir, f)
 
         return datafiles
