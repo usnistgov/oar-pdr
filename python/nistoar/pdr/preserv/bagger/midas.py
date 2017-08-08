@@ -78,10 +78,18 @@ class MIDASMetadataBagger(SIPBagger):
         self._indirs = []
 
         # ensure we have at least one readable input directory
+        indirname = midasid
+        if len(midasid) > 32:
+            # MIDAS drops the first 32 chars. of the ediid for the data
+            # directory names
+            indirname = midasid[32:]
+        else:
+            log.warn("Unexpected MIDAS ID (too short): "+midasid)
+
         for dir in (reviewdir, uploaddir):
             if not dir:
                 continue
-            indir = os.path.join(dir, midasid)
+            indir = os.path.join(dir, indirname)
             if os.path.exists(indir):
                 if not os.path.isdir(indir):
                     raise SIPDirectoryError(indir, "not a directory", sys=self)

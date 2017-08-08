@@ -119,7 +119,7 @@ class TestApp(test.TestCase):
         self.assertIn("200", self.resp[0])
         redirect = [r for r in self.resp if "X-Accel-Redirect:" in r]
         self.assertGreater(len(redirect), 0)
-        self.assertEqual(redirect[0],"X-Accel-Redirect: /midasdata/review_dir/3A1EE2F169DD3B8CE0531A570681DB5D1491/trial1.json")
+        self.assertEqual(redirect[0],"X-Accel-Redirect: /midasdata/review_dir/1491/trial1.json")
 
     def test_get_datafile2(self):
         req = {
@@ -132,7 +132,7 @@ class TestApp(test.TestCase):
         self.assertIn("200", self.resp[0])
         redirect = [r for r in self.resp if "X-Accel-Redirect:" in r]
         self.assertGreater(len(redirect), 0)
-        self.assertEqual(redirect[0],"X-Accel-Redirect: /midasdata/upload_dir/3A1EE2F169DD3B8CE0531A570681DB5D1491/trial3/trial3a.json")
+        self.assertEqual(redirect[0],"X-Accel-Redirect: /midasdata/upload_dir/1491/trial3/trial3a.json")
         
 
         

@@ -58,9 +58,9 @@ class TestMIDASMetadataBaggerMixed(test.TestCase):
         self.assertEqual(self.bagr.state, "review")
         self.assertEqual(len(self.bagr._indirs), 2)
         self.assertEqual(self.bagr._indirs[0],
-                         os.path.join(self.revdir, self.midasid))
+                         os.path.join(self.revdir, self.midasid[32:]))
         self.assertEqual(self.bagr._indirs[1],
-                         os.path.join(self.upldir, self.midasid))
+                         os.path.join(self.upldir, self.midasid[32:]))
         self.assertIsNotNone(self.bagr.bagbldr)
         self.assertIsNone(self.bagr.inpodfile)
         self.assertIsNone(self.bagr.resmd)
@@ -71,14 +71,14 @@ class TestMIDASMetadataBaggerMixed(test.TestCase):
 
     def test_find_pod_file(self):
         self.assertEqual(self.bagr.find_pod_file(),
-                         os.path.join(self.upldir,self.midasid,'_pod.json'))
+                         os.path.join(self.upldir,self.midasid[32:],'_pod.json'))
         self.assertIsNone(self.bagr.inpodfile)
 
     def test_set_pod_file(self):
         self.assertIsNone(self.bagr.inpodfile)
         self.bagr._set_pod_file()
         self.assertEqual(self.bagr.inpodfile,
-                         os.path.join(self.upldir,self.midasid,'_pod.json'))
+                         os.path.join(self.upldir,self.midasid[32:],'_pod.json'))
 
     def test_ensure_res_metadata(self):
         self.assertFalse(os.path.exists(self.bagdir))
@@ -92,7 +92,7 @@ class TestMIDASMetadataBaggerMixed(test.TestCase):
         self.assertTrue(os.path.exists(os.path.join(metadir, "pod.json")))
         self.assertTrue(os.path.exists(os.path.join(metadir, "nerdm.json")))
         self.assertEqual(self.bagr.inpodfile,
-                         os.path.join(self.upldir, self.midasid, "_pod.json"))
+                         os.path.join(self.upldir,self.midasid[32:],"_pod.json"))
 
         data = midas.read_pod(os.path.join(metadir, "pod.json"))
         self.assertIsInstance(data, OrderedDict)
@@ -124,8 +124,8 @@ class TestMIDASMetadataBaggerMixed(test.TestCase):
         self.assertEqual(data['@context'][1]['@base'], data['@id'])
 
     def test_data_file_inventory(self):
-        uplsip = os.path.join(self.upldir, self.midasid)
-        revsip = os.path.join(self.revdir, self.midasid)
+        uplsip = os.path.join(self.upldir, self.midasid[32:])
+        revsip = os.path.join(self.revdir, self.midasid[32:])
 
         datafiles = self.bagr.data_file_inventory()
         self.assertIsInstance(datafiles, dict)
@@ -148,7 +148,7 @@ class TestMIDASMetadataBaggerMixed(test.TestCase):
 
         destpath = os.path.join("trial3", "trial3a.json")
         dlurl = "https://www.nist.gov/od/ds/gurn/"+destpath
-        dfile = os.path.join(self.upldir, self.midasid, destpath)
+        dfile = os.path.join(self.upldir, self.midasid[32:], destpath)
         self.bagr.ensure_file_metadata(dfile, destpath)
 
         mdfile = os.path.join(self.bagdir, 'metadata', destpath, "nerdm.json")
@@ -167,7 +167,7 @@ class TestMIDASMetadataBaggerMixed(test.TestCase):
         self.bagr.ensure_res_metadata()
 
         destpath = os.path.join("trial3", "trial3a.json")
-        dfile = os.path.join(self.upldir, self.midasid, destpath)
+        dfile = os.path.join(self.upldir, self.midasid[32:], destpath)
         self.bagr.ensure_file_metadata(dfile, destpath, self.bagr.resmd)
 
         mdfile = os.path.join(self.bagdir, 'metadata', destpath, "nerdm.json")
@@ -209,7 +209,7 @@ class TestMIDASMetadataBaggerMixed(test.TestCase):
         self.bagr.bagbldr.init_filemd_for( os.path.join("gold","trial5.json"),
                                            write=True,
                                            examine=os.path.join(self.revdir,
-                                                                self.midasid,
+                                                               self.midasid[32:],
                                                                 "trial1.json") )
         t5path = os.path.join( metadir,"gold","trial5.json","nerdm.json")
         self.assertTrue(os.path.exists(t5path))
@@ -291,7 +291,7 @@ class TestMIDASMetadataBaggerReview(test.TestCase):
         self.assertEqual(self.bagr.state, "review")
         self.assertEqual(len(self.bagr._indirs), 1)
         self.assertEqual(self.bagr._indirs[0],
-                         os.path.join(self.revdir, self.midasid))
+                         os.path.join(self.revdir, self.midasid[32:]))
         self.assertIsNotNone(self.bagr.bagbldr)
         self.assertIsNone(self.bagr.inpodfile)
         self.assertIsNone(self.bagr.resmd)
@@ -301,10 +301,10 @@ class TestMIDASMetadataBaggerReview(test.TestCase):
 
     def test_find_pod_file(self):
         self.assertEquals(self.bagr.find_pod_file(),
-                          os.path.join(self.revdir,self.midasid,'_pod.json'))
+                         os.path.join(self.revdir,self.midasid[32:],'_pod.json'))
 
     def test_data_file_inventory(self):
-        revsip = os.path.join(self.revdir, self.midasid)
+        revsip = os.path.join(self.revdir, self.midasid[32:])
 
         datafiles = self.bagr.data_file_inventory()
         self.assertIsInstance(datafiles, dict)
@@ -344,7 +344,7 @@ class TestMIDASMetadataBaggerUpload(test.TestCase):
         self.assertEqual(self.bagr.state, "upload")
         self.assertEqual(len(self.bagr._indirs), 1)
         self.assertEqual(self.bagr._indirs[0],
-                         os.path.join(self.upldir, self.midasid))
+                         os.path.join(self.upldir, self.midasid[32:]))
         self.assertIsNotNone(self.bagr.bagbldr)
         self.assertIsNone(self.bagr.inpodfile)
         self.assertIsNone(self.bagr.resmd)
@@ -354,10 +354,10 @@ class TestMIDASMetadataBaggerUpload(test.TestCase):
 
     def test_find_pod_file(self):
         self.assertEquals(self.bagr.find_pod_file(),
-                          os.path.join(self.upldir,self.midasid,'_pod.json'))
+                          os.path.join(self.upldir,self.midasid[32:],'_pod.json'))
 
     def test_data_file_inventory(self):
-        uplsip = os.path.join(self.upldir, self.midasid)
+        uplsip = os.path.join(self.upldir, self.midasid[32:])
 
         datafiles = self.bagr.data_file_inventory()
         self.assertIsInstance(datafiles, dict)

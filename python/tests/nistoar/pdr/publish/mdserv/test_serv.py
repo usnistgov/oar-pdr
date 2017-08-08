@@ -176,13 +176,13 @@ class TestPrePubMetadataService(test.TestCase):
     def test_locate_data_file(self):
         loc = self.srv.locate_data_file(self.midasid, 'trial3/trial3a.json')
         self.assertEquals(len(loc), 2)
-        self.assertEquals(loc[0], os.path.join(self.upldir,self.midasid,
+        self.assertEquals(loc[0], os.path.join(self.upldir,self.midasid[32:],
                                                'trial3/trial3a.json'))
         self.assertEquals(loc[1], "application/json")
 
         loc = self.srv.locate_data_file(self.midasid, 'trial1.json')
         self.assertEquals(len(loc), 2)
-        self.assertEquals(loc[0], os.path.join(self.revdir,self.midasid,
+        self.assertEquals(loc[0], os.path.join(self.revdir,self.midasid[32:],
                                                'trial1.json'))
         self.assertEquals(loc[1], "application/json")
 
