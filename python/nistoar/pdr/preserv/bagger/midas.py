@@ -247,7 +247,8 @@ class MIDASMetadataBagger(SIPBagger):
             if resmd:
                 # look for applicable metadata in the resource metadata
                 comps = resmd.get('components', [])
-                match = [c for c in comps if c['@id'] == nerd['@id']]
+                match = [c for c in comps if '@id' in c and
+                                             c['@id'] == nerd['@id']]
                 if match:
                     conv = self.cfg.get('component_merge_convention', 'dev')
                     merger = self._merger_for(conv, "DataFile")

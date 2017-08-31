@@ -48,7 +48,7 @@ NERD_DEF = NERDM_SCH_ID + "/definitions/"
 NERDPUB_DEF = NERDMPUB_SCH_ID + "/definitions/"
 DATAFILE_TYPE = NERDPUB_PRE + ":DataFile"
 SUBCOLL_TYPE = NERDPUB_PRE + ":Subcollection"
-DISTSERV = "https://www.nist.gov/od/ds/"
+DISTSERV = "https://data.nist.gov/od/ds/"
 
 def checksum_of(filepath):
     """

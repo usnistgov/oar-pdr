@@ -23,12 +23,6 @@
             "title": "JSON version of the Mathematica notebook"
         },
         {
-            "description": "First trial of experiment",
-            "downloadURL": "https://www.nist.gov/od/ds/3A1EE2F169DD3B8CE0531A570681DB5D1491/trial3/trial3a.json",
-            "mediaType": "application/json",
-            "title": "JSON version of the Mathematica notebook"
-        },
-        {
             "accessURL": "http://doi.org/10.18434/T4SW26",
             "description": "Software to predict the optical sorting of particles in a standing-wave laser interference field",
             "format": "Digital Object Identifier, a persistent identifier",

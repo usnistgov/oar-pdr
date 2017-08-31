@@ -102,6 +102,8 @@ class TestMIDASMetadataBaggerMixed(test.TestCase):
 
         self.assertIsNotNone(self.bagr.resmd)
         data = midas.read_nerd(os.path.join(metadir, "nerdm.json"))
+
+        # should contain only non-file components:
         self.assertEqual(len(data['components']), 1)
         self.assertIsInstance(data, OrderedDict)
         self.assertNotIn('inventory', data)
@@ -117,8 +119,8 @@ class TestMIDASMetadataBaggerMixed(test.TestCase):
         data = self.bagr.resmd
         self.assertEqual(data['@id'], "ark:/88434/mds00hw91v")
         self.assertEqual(data['doi'], "doi:10.18434/T4SW26")
-        self.assertEqual(len(data['components']), 4)
-        self.assertEqual(data['components'][3]['@type'][0], 'nrd:Hidden')
+        self.assertEqual(len(data['components']), 3)
+        self.assertEqual(data['components'][2]['@type'][0], 'nrd:Hidden')
         self.assertIsInstance(data['@context'], list)
         self.assertEqual(len(data['@context']), 2)
         self.assertEqual(data['@context'][1]['@base'], data['@id'])
@@ -176,6 +178,22 @@ class TestMIDASMetadataBaggerMixed(test.TestCase):
 
         data = midas.read_nerd(mdfile)
         self.assertEqual(data['size'], 70)
+        self.assertTrue(data['hash']['value'])
+        self.assertTrue(data['downloadURL'])
+
+        # trial3a.json has no matching distribution in _pod.json; thus, no desc
+        self.assertNotIn('description', data)
+
+        destpath = os.path.join("trial2.json")
+        dfile = os.path.join(self.revdir, self.midasid[32:], destpath)
+        self.bagr.ensure_file_metadata(dfile, destpath, self.bagr.resmd)
+
+        mdfile = os.path.join(self.bagdir, 'metadata', destpath, "nerdm.json")
+        self.assertTrue(os.path.exists(self.bagdir))
+        self.assertTrue(os.path.exists(mdfile))
+
+        data = midas.read_nerd(mdfile)
+        self.assertEqual(data['size'], 69)
         self.assertTrue(data['hash']['value'])
         self.assertTrue(data['downloadURL'])
         self.assertTrue(data['description'])
