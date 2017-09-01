@@ -10,7 +10,7 @@ from .. import NERDError, PODError, StateException
 from .exceptions import BadBagRequest
 from ... import def_jq_libdir, def_merge_etcdir
 from ....nerdm.merge import MergerFactory, Merger
-from ....nerdm.convert import ComponentCounter
+from ....nerdm.convert import ComponentCounter, HierarchyBuilder
 
 POD_FILENAME = "pod.json"
 NERDMD_FILENAME = "nerdm.json"
@@ -24,7 +24,7 @@ class NISTBag(PreservationSystem):
     an interface for reading data in a NIST-compliant BagIt bag.
     """
 
-    # NOTE: this is an imcomplete implementation 
+    # NOTE: this is an incomplete implementation 
 
     def __init__(self, rootdir, merge_annots=False):
         if not os.path.isdir(rootdir):
@@ -152,16 +152,43 @@ class NISTBag(PreservationSystem):
                 out['components'].append(comp)
 
         if 'inventory' not in out:
-            self.inventory(out)
+            self.update_inventory_in(out)
+        self.update_hierarchy_in(out)
+        
         return out
 
-    def inventory(self, resmd):
+    @classmethod
+    def update_inventory_in(cls, resmd):
+        """
+        For the given NERDm record, add or update its 'inventory' 
+        property to reflect its current set of components.
+        """
         resmd['inventory'] = {}
 
         if 'components' in resmd:
             components = resmd['components']
             cc = ComponentCounter(JQLIB)
             resmd['inventory'] = cc.inventory(components)
+
+        return resmd
+
+    @classmethod
+    def update_hierarchy_in(cls, resmd):
+        """
+        For the given NERDm record, add or update its 'dataHierarchy' 
+        property to reflect its current set of components.  If the 
+        components do not include any DataFile or Subcollection components,
+        the 'dataHierarchy' property will be remove from the given record (or
+        otherwise not added).  
+        """
+        hier = []
+        if 'dataHierarchy' in resmd:
+            del resmd['dataHierarchy']
+        if 'components' in resmd:
+            hb = HierarchyBuilder(JQLIB)
+            hier = hb.build_hierarchy(resmd['components'])
+        if hier:
+            resmd['dataHierarchy'] = hier
 
         return resmd
 
