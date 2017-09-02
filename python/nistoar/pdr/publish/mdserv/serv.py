@@ -177,7 +177,7 @@ class PrePubMetadataService(PublishSystem):
         bag = NISTBag(bagger.bagdir, True)
         dfmd = bag.nerdm_component(filepath)
         if 'mediaType' in dfmd and dfmd['mediaType']:
-            mt = dfmd['mediaType']
+            mt = str(dfmd['mediaType'])
         else:
             mt = self.mimetypes.get(os.path.splitext(loc)[1][1:],
                                     'application/octet-stream')
