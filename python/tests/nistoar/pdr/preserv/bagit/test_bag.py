@@ -7,6 +7,7 @@ from collections import OrderedDict
 
 from nistoar.testing import *
 import nistoar.pdr.preserv.bagit.bag as bag
+import nistoar.pdr.preserv.bagit.exceptions as bagex
 import nistoar.pdr.exceptions as exceptions
 
 # datadir = nistoar/preserv/data
@@ -72,6 +73,14 @@ class TestNISTBag(test.TestCase):
         self.assertIn("@type", data)
         self.assertIn("nrdp:DataFile", data['@type'])
 
+    def test_nerdm_component(self):
+        data = self.bag.nerdm_component('trial3/trial3a.json')
+        self.assertEqual(data['filepath'], 'trial3/trial3a.json')
+        self.assertEqual(data['mediaType'], "application/json")
+
+        with self.assertRaises(bagex.ComponentNotFound):
+            self.bag.nerdm_component('goober')
+        
     def test_nerdm_record(self):
         data = self.bag.nerdm_record()
         self.assertIn("ediid", data)

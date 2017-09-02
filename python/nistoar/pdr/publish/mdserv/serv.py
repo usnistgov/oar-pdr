@@ -4,12 +4,13 @@ landing page service.  It uses an SIPBagger to create the NERDm metadata from
 POD metadata provided by MIDAS and assembles it into an exportable form.  
 """
 import os, logging, re, json
-
 from collections import Mapping
+
 from .. import PublishSystem
 from ...exceptions import ConfigurationException, StateException, SIPDirectoryNotFound
 from ...preserv.bagger import MIDASMetadataBagger
 from ...preserv.bagit import NISTBag
+from ...utils import build_mime_type_map
 from ....id import PDRMinter
 
 log = logging.getLogger(PublishSystem().subsystem_abbrev)
@@ -171,79 +172,15 @@ class PrePubMetadataService(PublishSystem):
             return (None, None)
 
         loc = bagger.datafiles[filepath]
-        mt = self.mimetypes.get(os.path.splitext(loc)[1][1:],
-                                'application/octet-stream')
+
+        # determine the MIME type to send data as
+        bag = NISTBag(bagger.bagdir, True)
+        dfmd = bag.nerdm_component(filepath)
+        if 'mediaType' in dfmd and dfmd['mediaType']:
+            mt = str(dfmd['mediaType'])
+        else:
+            mt = self.mimetypes.get(os.path.splitext(loc)[1][1:],
+                                    'application/octet-stream')
         return (loc, mt)
         
         
-def_ext2mime = {
-    "html": "text/html",
-    "txt":  "text/plain",
-    "xml":  "text/xml",
-    "json": "application/json"
-}
-
-def update_mimetypes_from_file(map, filepath):
-    """
-    load the MIME-type mappings from the given file into the given dictionary 
-    mapping extensions to MIME-type values.  The file can have either an nginx
-    configuration format or the common format (i.e. used by Apache).  
-    """
-    if map is None:
-        map = {}
-    if not isinstance(map, Mapping):
-        raise ValueError("map argument is not dictionary-like: "+ str(type(map)))
-
-    commline = re.compile(r'^\s*#')
-    nginx_fmt_start = re.compile(r'^\s*types\s+{')
-    nginx_fmt_end = re.compile(r'^\s*}')
-    with open(filepath) as fd:
-        line = '#'
-        while line and (line.strip() == '' or commline.search(line)):
-            line = fd.readline()
-
-        if line:
-            line = line.strip()
-            if nginx_fmt_start.search(line):
-                # nginx format
-                line = fd.readline()
-                while line:
-                    if nginx_fmt_end.search(line):
-                        break
-                    line = line.strip()
-                    if line and not commline.search(line):
-                        words = line.rstrip(';').split()
-                        if len(words) > 1:
-                            for ext in words[1:]:
-                                map[ext] = words[0]
-                    line = fd.readline()
-
-            else:
-                # common server format
-                while line:
-                    if commline.search(line):
-                        continue
-                    words = line.strip().split()
-                    if len(words) > 1:
-                        for ext in words[1:]:
-                            map[ext] = words[0]
-                    line = fd.readline()
-
-    return map
-
-def build_mime_type_map(filelist):
-    """
-    return a dictionary mapping filename extensions to MIME-types, given an 
-    ordered list of files defining mappings.  Entries in files appearing later 
-    in the list can override those in the earlier ones.  Files can be in either 
-    the nginx configuration format or the common format (i.e. used by Apache).  
-
-    :param filelist array:  a list of filepaths defining the MIME-types to
-                            extensions mappings.
-    """
-    out = def_ext2mime.copy()
-    for file in filelist:
-        update_mimetypes_from_file(out, file)
-    return out
-
-

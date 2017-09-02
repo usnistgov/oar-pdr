@@ -42,12 +42,13 @@ setup(name='nistoar',
       author_email="raymond.plante@nist.gov",
       url='https://github.com/usnistgov/oar-pdr',
       scripts=[ '../scripts/ppmdserver.py', '../scripts/ppmdserver-uwsgi.py' ],
-      packages=['nistoar.pdr', 'nistoar.pdr.publish',
+      packages=['nistoar.pdr', 'nistoar.pdr.publish', 
                 'nistoar.pdr.publish.mdserv',
                 'nistoar.pdr.preserv', 'nistoar.pdr.preserv.bagger',
                 'nistoar.pdr.preserv.bagit', 'nistoar.pdr.preserv.service',
                 'nistoar.testing'
             ],
+      package_data={'nistoar.pdr': [ 'data/*' ]},
       cmdclass={'build': build}
 )
 

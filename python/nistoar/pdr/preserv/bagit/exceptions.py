@@ -27,6 +27,12 @@ class BadBagRequest(BagItException):
     """
     pass
 
+class ComponentNotFound(BadBagRequest):
+    """
+    an exception resulting from a request of a non-existent component
+    """
+    pass
+
 class BagProfileError(BagItException):
     """
     an exception indicating that the current state of the bag being accessed 

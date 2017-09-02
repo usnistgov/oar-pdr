@@ -1,7 +1,7 @@
 """
 Tools for building a NIST Preservation bags
 """
-import os, errno, logging, re, json, hashlib
+import os, errno, logging, re, json, hashlib, pkg_resources
 import pynoid as noid
 from shutil import copy as filecopy, rmtree
 from copy import deepcopy
@@ -11,6 +11,7 @@ from .. import (SIPDirectoryError, SIPDirectoryNotFound,
                 ConfigurationException, StateException, PODError)
 from .exceptions import BagProfileError
 from .. import PreservationSystem, read_nerd, read_pod, write_json
+from ...utils import build_mime_type_map
 from ....nerdm.exceptions import (NERDError, NERDTypeError)
 from ....nerdm.convert import PODds2Res
 from ....id import PDRMinter
@@ -49,7 +50,7 @@ NERD_DEF = NERDM_SCH_ID + "/definitions/"
 NERDPUB_DEF = NERDMPUB_SCH_ID + "/definitions/"
 DATAFILE_TYPE = NERDPUB_PRE + ":DataFile"
 SUBCOLL_TYPE = NERDPUB_PRE + ":Subcollection"
-DISTSERV = "https://www.nist.gov/od/ds/"
+DISTSERV = "https://data.nist.gov/od/ds/"
 
 def checksum_of(filepath):
     """
@@ -131,6 +132,7 @@ class BagBuilder(PreservationSystem):
         self.log.setLevel(NORM)
         self._logname = self.cfg.get('log_filename', 'preserv.log')
         self._loghdlr = None
+        self._mimetypes = None
 
         if not minter:
             cfg = self.cfg.get('id_minter', {})
@@ -570,6 +572,7 @@ class BagBuilder(PreservationSystem):
             else:
                 datafile = os.path.join(self.bagdir, "data", destpath)
                 
+            self._add_mediatype(datafile, mdata, {})
             if os.path.exists(datafile):
                 self._add_extracted_metadata(datafile, mdata,
                                              self.cfg.get('file_md_extract'))
@@ -598,12 +601,14 @@ class BagBuilder(PreservationSystem):
         mdata = self._create_init_collmd_for(destpath)
         if examine:
             colldir = os.path.join(self.bagdir, "data", destpath)
-            if os.path.exist(datafile):
-                self._add_extracted_metadata(datafile, mdata,
-                                             self.cfg.get('file_md_extract'))
-            else:
-                log.warning("Unable to examine data file: doesn't exist yet: " +
-                            destpath)
+
+            # FIX
+            # if os.path.exist(datafile):
+            #    self._add_extracted_metadata(datafile, mdata,
+            #                                 self.cfg.get('file_md_extract'))
+            # else:
+            #     log.warning("Unable to examine data file: doesn't exist yet: " +
+            #                 destpath)
         if write:
             if destpath:
                 self.add_metadata_for_coll(destpath, mdata)
@@ -628,6 +633,13 @@ class BagBuilder(PreservationSystem):
             'algorithm': { 'tag': 'sha256' },
             'hash': checksum_of(dfile)
         }
+    def _add_mediatype(self, dfile, mdata, config):
+        if not self._mimetypes:
+            mtfile = pkg_resources.resource_filename('nistoar.pdr',
+                                                     'data/mime.types')
+            self._mimetypes = build_mime_type_map([mtfile])
+        mdata['mediaType'] = self._mimetypes.get(os.path.splitext(dfile)[1][1:],
+                                                 'application/octet-stream')
 
     def _create_init_filemd_for(self, destpath):
         out = {

@@ -80,10 +80,18 @@ class MIDASMetadataBagger(SIPBagger):
         self._indirs = []
 
         # ensure we have at least one readable input directory
+        indirname = midasid
+        if len(midasid) > 32:
+            # MIDAS drops the first 32 chars. of the ediid for the data
+            # directory names
+            indirname = midasid[32:]
+        else:
+            log.warn("Unexpected MIDAS ID (too short): "+midasid)
+
         for dir in (reviewdir, uploaddir):
             if not dir:
                 continue
-            indir = os.path.join(dir, midasid)
+            indir = os.path.join(dir, indirname)
             if os.path.exists(indir):
                 if not os.path.isdir(indir):
                     raise SIPDirectoryError(indir, "not a directory", sys=self)
@@ -196,6 +204,10 @@ class MIDASMetadataBagger(SIPBagger):
                        os.path.join(reldir,f) in podlocs:
                         # skip dot-files and pod files written by MIDAS
                         continue
+                    if f.endswith('.sha256') and f[:-len('.sha256')] in files:
+                        # skip any file that appears to be a hashfile of another
+                        # existing file.
+                        continue
                     datafiles[os.path.join(reldir, f)] = os.path.join(dir, f)
 
         return datafiles
@@ -237,7 +249,8 @@ class MIDASMetadataBagger(SIPBagger):
             if resmd:
                 # look for applicable metadata in the resource metadata
                 comps = resmd.get('components', [])
-                match = [c for c in comps if c['@id'] == nerd['@id']]
+                match = [c for c in comps if '@id' in c and
+                                             c['@id'] == nerd['@id']]
                 if match:
                     conv = self.cfg.get('component_merge_convention', 'dev')
                     merger = self._merger_for(conv, "DataFile")
