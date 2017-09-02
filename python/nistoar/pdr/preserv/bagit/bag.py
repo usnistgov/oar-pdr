@@ -7,7 +7,7 @@ from collections import OrderedDict
 
 from .. import PreservationSystem, read_nerd, read_pod
 from .. import NERDError, PODError, StateException
-from .exceptions import BadBagRequest
+from .exceptions import BadBagRequest, ComponentNotFound
 from ... import def_jq_libdir, def_merge_etcdir
 from ....nerdm.merge import MergerFactory
 from ....nerdm.convert import ComponentCounter, HierarchyBuilder
@@ -126,6 +126,39 @@ class NISTBag(PreservationSystem):
         self.update_hierarchy_in(out)
         
         return out
+
+    def nerdm_component(self, filepath, merge_annots=None):
+        """
+        return a NERDm Component JSON object describing the item with given
+        filepath.
+
+        :param filepath      str:  the (relative) path to the component of 
+                                   interest
+        :param merge_annots bool:  merge in any annotation data found in the bag.
+                                   (Default is the value of the 'merge_annots'
+                                   constructor argument.)  For a complete bag,
+                                   annotations will already be merged into main
+                                   NERDm metadata; however, if this is not the 
+                                   case, yet, one can merge on the fly while 
+                                   creating the record.  
+        """
+        compdir = os.path.join(self._metadir, filepath)
+        if not os.path.exists(compdir):
+          raise ComponentNotFound("Component not found (no metadata directory): "
+                                  +filepath, os.path.basename(self._name))
+        metafile = os.path.join(compdir, NERDMD_FILENAME)
+        if not os.path.exists(metafile):
+          raise ComponentNotFound("Component not found (no metadata file): "
+                                  +filepath, os.path.basename(self._name))
+        comp = self.read_nerd(metafile)
+
+        if merge_annots:
+            annotfile = os.path.join(compdir,ANNOTS_FILENAME)
+            if os.path.exists(annotfile):
+                annots = self.read_nerd(annotfile)
+                comp = compmerger.merge(comp, annots)
+
+        return comp
 
     @classmethod
     def update_inventory_in(cls, resmd):

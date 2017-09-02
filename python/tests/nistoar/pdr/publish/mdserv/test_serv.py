@@ -122,7 +122,8 @@ class TestPrePubMetadataService(test.TestCase):
         for comp in comps:
             if 'downloadURL' in comp:
                 dlcount += 1
-                self.assertTrue(comp['downloadURL'].startswith('https://www.nist.gov/od/ds/3A1EE2F169DD3B8CE0531A570681DB5D1491/'))
+                self.assertTrue(comp['downloadURL'].startswith('https://data.nist.gov/od/ds/3A1EE2F169DD3B8CE0531A570681DB5D1491/'),
+                                "{0} does not start with https://data.nist.gov/od/ds/3A1EE2F169DD3B8CE0531A570681DB5D1491/".format(comp['downloadURL']))
         self.assertEquals(dlcount, 3)
         
     def test_make_nerdm_record_cvt_dlurls(self):
@@ -192,45 +193,6 @@ class TestPrePubMetadataService(test.TestCase):
         self.assertIsNone(loc[0])
         self.assertIsNone(loc[1])
 
-class TestMimeTypeLoading(test.TestCase):
-
-    def test_defaults(self):
-
-        self.assertEquals(serv.def_ext2mime['json'], "application/json")
-        self.assertEquals(serv.def_ext2mime['txt'], "text/plain")
-        self.assertEquals(serv.def_ext2mime['xml'], "text/xml")
-
-    def test_update_mimetypes_from_file(self):
-        map = serv.update_mimetypes_from_file(None,
-                                  os.path.join(testdatadir, "nginx-mime.types"))
-        self.assertEquals(map['mml'], "text/mathml")
-        self.assertEquals(map['jpg'], "image/jpeg")
-        self.assertEquals(map['jpeg'], "image/jpeg")
-
-        map = serv.update_mimetypes_from_file(map,
-                                  os.path.join(testdatadir, "comm-mime.types"))
-        self.assertEquals(map['zip'], "application/zip")
-        self.assertEquals(map['xml'], "application/xml")
-        self.assertEquals(map['xsd'], "application/xml")
-        self.assertEquals(map['mml'], "text/mathml")
-        self.assertEquals(map['jpg'], "image/jpeg")
-        self.assertEquals(map['jpeg'], "image/jpeg")
-
-    def test_build_mime_type_map(self):
-        map = serv.build_mime_type_map([])
-        self.assertEquals(map['txt'], "text/plain")
-        self.assertEquals(map['xml'], "text/xml")
-        self.assertEquals(map['json'], "application/json")
-        self.assertNotIn('mml', map)
-        self.assertNotIn('xsd', map)
-        
-        map = serv.build_mime_type_map(
-            [os.path.join(testdatadir, "nginx-mime.types"),
-             os.path.join(testdatadir, "comm-mime.types")])
-        self.assertEquals(map['txt'], "text/plain")
-        self.assertEquals(map['mml'], "text/mathml")
-        self.assertEquals(map['xml'], "application/xml")
-        self.assertEquals(map['xsd'], "application/xml")
         
         
 

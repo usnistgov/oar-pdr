@@ -12,13 +12,13 @@
     "distribution": [
         {
             "description": "First trial of experiment",
-            "downloadURL": "https://www.nist.gov/od/ds/3A1EE2F169DD3B8CE0531A570681DB5D1491/trial1.json",
+            "downloadURL": "https://data.nist.gov/od/ds/3A1EE2F169DD3B8CE0531A570681DB5D1491/trial1.json",
             "mediaType": "application/json",
             "title": "JSON version of the Mathematica notebook"
         },
         {
             "description": "Second trial of experiment",
-            "downloadURL": "https://www.nist.gov/od/ds/3A1EE2F169DD3B8CE0531A570681DB5D1491/trial2.json",
+            "downloadURL": "https://data.nist.gov/od/ds/3A1EE2F169DD3B8CE0531A570681DB5D1491/trial2.json",
             "mediaType": "application/json",
             "title": "JSON version of the Mathematica notebook"
         },
