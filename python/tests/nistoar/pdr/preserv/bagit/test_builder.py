@@ -279,9 +279,9 @@ class TestBuilder(test.TestCase):
             "_extensionSchemas": [ "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile" ],
             "size": 69,
             "mediaType": "application/json",
-            "hash": {
-                "algorithm": { "tag": "sha256" },
-                "value": \
+            "checksum": {
+                "algorithm": { "@type": "Thing", "tag": "sha256" },
+                "hash": \
               "d155d99281ace123351a311084cd8e34edda6a9afcddd76eb039bad479595ec9"
             }
         }
@@ -330,9 +330,9 @@ class TestBuilder(test.TestCase):
             "_extensionSchemas": [ "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile" ],
             "size": 69,
             "mediaType": "application/json",
-            "hash": {
-                "algorithm": { "tag": "sha256" },
-                "value": \
+            "checksum": {
+                "algorithm": { "@type": "Thing", "tag": "sha256" },
+                "hash": \
               "d155d99281ace123351a311084cd8e34edda6a9afcddd76eb039bad479595ec9"
             }
         }

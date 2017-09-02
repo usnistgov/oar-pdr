@@ -14,7 +14,7 @@ from ....nerdm.convert import ComponentCounter, HierarchyBuilder
 
 POD_FILENAME = "pod.json"
 NERDMD_FILENAME = "nerdm.json"
-ANNOT_FILENAME = "annot.json"
+ANNOTS_FILENAME = "annot.json"
 DEFAULT_MERGE_CONVENTION = "dev"
 
 JQLIB = def_jq_libdir
@@ -75,7 +75,7 @@ class NISTBag(PreservationSystem):
     def nerd_file_for(self, destpath):
         return os.path.join(self._metadir, destpath, NERDMD_FILENAME)
 
-    def nerd_metadata_for(self, destpath, merg_annots=None):
+    def nerd_metadata_for(self, filepath, merge_annots=None):
         """
         return the component metadata for a given path to a component.
 
@@ -90,11 +90,20 @@ class NISTBag(PreservationSystem):
                                    that object will be used to merge in the 
                                    annotations.
         """
-        nerdfile = self.nerd_file_for(destpath)
+        nerdfile = self.nerd_file_for(filepath)
+        if not os.path.exists(nerdfile):
+          raise ComponentNotFound("Component not found: " + filepath, 
+                                  os.path.basename(self._name))
         out = self.read_nerd(nerdfile)
 
+        if merge_annots is None:
+            merge_annots = self._mergeannots
         annotfile = os.path.join(os.path.dirname(nerdfile), ANNOTS_FILENAME)
         if merge_annots and os.path.exists(annotfile):
+            if merge_annots is True:
+                merge_annots = DEFAULT_MERGE_CONVENTION
+            compmerger = MergerFactory.make_merger(merge_annots, 'Component')
+            
             if isinstance(merge_annots, Merger):
                 compmerger = merge_annots
             else:
@@ -156,39 +165,6 @@ class NISTBag(PreservationSystem):
         self.update_hierarchy_in(out)
         
         return out
-
-    def nerdm_component(self, filepath, merge_annots=None):
-        """
-        return a NERDm Component JSON object describing the item with given
-        filepath.
-
-        :param filepath      str:  the (relative) path to the component of 
-                                   interest
-        :param merge_annots bool:  merge in any annotation data found in the bag.
-                                   (Default is the value of the 'merge_annots'
-                                   constructor argument.)  For a complete bag,
-                                   annotations will already be merged into main
-                                   NERDm metadata; however, if this is not the 
-                                   case, yet, one can merge on the fly while 
-                                   creating the record.  
-        """
-        compdir = os.path.join(self._metadir, filepath)
-        if not os.path.exists(compdir):
-          raise ComponentNotFound("Component not found (no metadata directory): "
-                                  +filepath, os.path.basename(self._name))
-        metafile = os.path.join(compdir, NERDMD_FILENAME)
-        if not os.path.exists(metafile):
-          raise ComponentNotFound("Component not found (no metadata file): "
-                                  +filepath, os.path.basename(self._name))
-        comp = self.read_nerd(metafile)
-
-        if merge_annots:
-            annotfile = os.path.join(compdir,ANNOTS_FILENAME)
-            if os.path.exists(annotfile):
-                annots = self.read_nerd(annotfile)
-                comp = compmerger.merge(comp, annots)
-
-        return comp
 
     @classmethod
     def update_inventory_in(cls, resmd):

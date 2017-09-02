@@ -175,7 +175,7 @@ class PrePubMetadataService(PublishSystem):
 
         # determine the MIME type to send data as
         bag = NISTBag(bagger.bagdir, True)
-        dfmd = bag.nerdm_component(filepath)
+        dfmd = bag.nerd_metadata_for(filepath)
         if 'mediaType' in dfmd and dfmd['mediaType']:
             mt = str(dfmd['mediaType'])
         else:

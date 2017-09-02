@@ -159,7 +159,7 @@ class TestMIDASMetadataBaggerMixed(test.TestCase):
 
         data = midas.read_nerd(mdfile)
         self.assertEqual(data['size'], 70)
-        self.assertTrue(data['hash']['value'])
+        self.assertTrue(data['checksum']['hash'])
         self.assertEqual(data['downloadURL'], dlurl)
         self.assertNotIn('description', data)
 
@@ -178,7 +178,9 @@ class TestMIDASMetadataBaggerMixed(test.TestCase):
 
         data = midas.read_nerd(mdfile)
         self.assertEqual(data['size'], 70)
-        self.assertTrue(data['hash']['value'])
+        self.assertTrue(data['checksum']['hash'])
+        self.assertEqual(data['checksum']['algorithm'],
+                         { "@type": "Thing", "tag": "sha256" })
         self.assertTrue(data['downloadURL'])
 
         # trial3a.json has no matching distribution in _pod.json; thus, no desc
@@ -194,7 +196,9 @@ class TestMIDASMetadataBaggerMixed(test.TestCase):
 
         data = midas.read_nerd(mdfile)
         self.assertEqual(data['size'], 69)
-        self.assertTrue(data['hash']['value'])
+        self.assertTrue(data['checksum']['hash'])
+        self.assertEqual(data['checksum']['algorithm'],
+                         { "@type": "Thing", "tag": "sha256" })
         self.assertTrue(data['downloadURL'])
         self.assertTrue(data['description'])
 

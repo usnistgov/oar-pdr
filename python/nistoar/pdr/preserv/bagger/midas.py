@@ -412,7 +412,7 @@ class PreservationBagger(SIPBagger):
         # start by bagging up the metadata.  If this was done before (prior to
         # final preservation time), the previous metadata bag will be updated.
         mdbagger = MIDASMetadataBagger(self.midasid, self.mddir, self.indir,
-                                       config=self.cfg, self.minter)
+                                       config=self.cfg, minter=self.minter)
         mdbagger.prepare()
         self.datafiles = mdbagger.datafiles
 

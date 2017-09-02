@@ -630,7 +630,7 @@ class BagBuilder(PreservationSystem):
         mdata['size'] = os.stat(dfile).st_size
     def _add_checksum(self, dfile, mdata, config):
         mdata['checksum'] = {
-            'algorithm': { 'tag': 'sha256' },
+            'algorithm': { '@type': "Thing", 'tag': 'sha256' },
             'hash': checksum_of(dfile)
         }
     def _add_mediatype(self, dfile, mdata, config):
