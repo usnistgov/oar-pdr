@@ -32,11 +32,22 @@ zip_error = {
     '6': "component file too large"
 }
 
-def zip_serialize(bagdir, destfile, log):
+def zip_serialize(bagdir, destdir, log, destfile=None):
     """
     serialize a bag with zip
+
+    :param bagdir   str:  path to the bag root directory to be serialized
+    :param destdir  str:  path to the output directory to write serialized 
+                             file to.  
+    :param log   Logger:  a logger to write messages to
+    :param destfile str:  the name to give to the serialized file.  If not 
+                             provided, one will be constructed from the 
+                             bag directory name (and an appropriate extension)
     """
     parent, name = os.path.split(bagdir)
+    if not destfile:
+        destfile = name+'.zip'
+    destfile = os.path.join(destdir, destfile)
     
     cmd = "zip -r".split() + [ destfile, name ]
     try:
@@ -50,13 +61,24 @@ def zip_serialize(bagdir, destfile, log):
         message = zip_error.get(str(ex.returncode))
         if not message:
             message = "Bag serialization failure using zip (consult log)"
-        raise BagSerializationError(msg, name, ex, sys=_sys)
+        raise BagSerializationError(message, name, ex, sys=_sys)
 
-def zip7_serialize(bagdir, destfile, log):
+def zip7_serialize(bagdir, destdir, log, destfile=None):
     """
     serialize a bag with 7zip
+
+    :param bagdir   str:  path to the bag root directory to be serialized
+    :param destdir  str:  path to the output directory to write serialized 
+                             file to.  
+    :param log   Logger:  a logger to write messages to
+    :param destfile str:  the name to give to the serialized file.  If not 
+                             provided, one will be constructed from the 
+                             bag directory name (and an appropriate extension)
     """
     parent, name = os.path.split(bagdir)
+    if not destfile:
+        destfile = name+'.7z'
+    destfile = os.path.join(destdir, destfile)
     
     cmd = "7z a -t7z".split() + [ destfile, name ]
     try:

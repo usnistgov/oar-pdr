@@ -37,15 +37,31 @@ class TestSerialize(test.TestCase):
 
     def setUp(self):
         self.tf = Tempfiles()
+        self.tmpdir = self.tf.mkdir("ser")
         
     def tearDown(self):
         self.tf.clean()
         
     def test_zip_serialize(self):
-        outzip = self.tf.track("badsip.zip")
+        destfile = "badsip.zip"
+        outzip = os.path.join(self.tmpdir, destfile)
         self.assertTrue(not os.path.exists(outzip))
 
-        ser.zip_serialize(badsip, outzip, log)
+        ser.zip_serialize(badsip, self.tmpdir, log, destfile)
+        self.assertTrue(os.path.exists(outzip))
+        self.assertTrue(zip.is_zipfile(outzip))
+        z = zip.ZipFile(outzip)
+        contents = z.namelist()
+        self.assertEqual(len(contents), 2)
+        self.assertIn("badsip/", contents)
+        self.assertIn("badsip/trial1.json", contents)
+        
+    def test_zip_serialize_auto(self):
+        destfile = "badsip.zip"
+        outzip = os.path.join(self.tmpdir, destfile)
+        self.assertTrue(not os.path.exists(outzip))
+
+        ser.zip_serialize(badsip, self.tmpdir, log)
         self.assertTrue(os.path.exists(outzip))
         self.assertTrue(zip.is_zipfile(outzip))
         z = zip.ZipFile(outzip)
@@ -55,20 +71,31 @@ class TestSerialize(test.TestCase):
         self.assertIn("badsip/trial1.json", contents)
         
     def test_7z_serialize(self):
-        outzip = self.tf.track("badsip.7z")
+        destfile = "badsip.7z"
+        outzip = os.path.join(self.tmpdir, destfile)
         self.assertTrue(not os.path.exists(outzip))
 
-        ser.zip7_serialize(badsip, outzip, log)
+        ser.zip7_serialize(badsip, self.tmpdir, log, destfile)
+        self.assertTrue(os.path.exists(outzip))
+        # can't test contents yet
+        
+    def test_7z_serialize_auto(self):
+        destfile = "badsip.7z"
+        outzip = os.path.join(self.tmpdir, destfile)
+        self.assertTrue(not os.path.exists(outzip))
+
+        ser.zip7_serialize(badsip, self.tmpdir, log)
         self.assertTrue(os.path.exists(outzip))
         # can't test contents yet
         
     def test_7z_serialize_fail(self):
         outzip = self.tf.track("badsip.7z")
+        destdir, destfile = os.path.split(outzip)
         self.assertTrue(not os.path.exists(outzip))
 
         baddir = os.path.join(badsip, "goob")
         with self.assertRaises(BagSerializationError):
-            ser.zip7_serialize(baddir, outzip, log)
+            ser.zip7_serialize(baddir, destdir, log, destfile)
         self.assertTrue(not os.path.exists(outzip))
 
 class TestDefaultSerializer(test.TestCase):
@@ -87,7 +114,7 @@ class TestDefaultSerializer(test.TestCase):
         outzip = self.tf.track("badsip.zip")
         self.assertTrue(not os.path.exists(outzip))
 
-        self.ser.serialize(badsip, outzip, "zip", log)
+        self.ser.serialize(badsip, os.path.dirname(outzip), "zip", log)
         self.assertTrue(os.path.exists(outzip))
         self.assertTrue(zip.is_zipfile(outzip))
         z = zip.ZipFile(outzip)
@@ -100,7 +127,7 @@ class TestDefaultSerializer(test.TestCase):
         outzip = self.tf.track("badsip.7z")
         self.assertTrue(not os.path.exists(outzip))
 
-        self.ser.serialize(badsip, outzip, "7z", log)
+        self.ser.serialize(badsip, os.path.dirname(outzip), "7z", log)
         self.assertTrue(os.path.exists(outzip))
         # can't test contents yet
         
