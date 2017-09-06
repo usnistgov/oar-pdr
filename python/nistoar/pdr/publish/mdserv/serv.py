@@ -25,6 +25,27 @@ class PrePubMetadataService(PublishSystem):
     NERDm metadata.  This class then will serve out the final, combined NERDm 
     record, converting (if so configured) the downloadURLs to bypass the 
     data distribution service (as is necessary for the pre-publication data).  
+
+    This class takes a configuration dictionary at construction; the following
+    properties are supported:
+
+    :prop working_dir str #req:  an existing directory where working data can
+                      can be stored.  
+    :prop review_dir  str #req:  an existing directory containing MIDAS review
+                      data
+    :prop upload_dir  str #req:  an existing directory containing MIDAS upload
+                      data
+    :prop id_registry_dir str:   a directory to store the minted ID registry.
+                      the default is the value of the working directory.
+    :prop mimetype_files list of str ([]):   an ordered list of filepaths to 
+                      files that map file extensions to default MIME types.  
+                      Mappings in the latter files override those in the former 
+                      ones.
+    :prop id_minter dict ({}):  a dictionary for configuring the ID minter 
+                      instance.
+    :prop bagger dict ({}):  a dictionary for configuring the SIPBagger instance
+                      used to process the SIP (see SIPBagger implementation 
+                      documentation for supported sub-properties).  
     """
 
     def __init__(self, config, workdir=None, reviewdir=None, uploaddir=None,
@@ -108,7 +129,13 @@ class PrePubMetadataService(PublishSystem):
         Bag up the metadata from data provided by MIDAS for a given MIDAS ID.  
         """
         cfg = self.cfg.get('bagger', {})
-        bagger = MIDASMetadataBagger(id, self.workdir, self.reviewdir,
+        workdir = os.path.join(self.workdir, 'mdserv')
+        if not os.path.exists(workdir):
+            os.mkdir(workdir)
+        elif not os.path.isdir(workdir):
+            raise StateException("Working directory path not a directory: " +
+                                 workdir)
+        bagger = MIDASMetadataBagger(id, workdir, self.reviewdir,
                                      self.uploaddir, cfg, self._minter)
         bagger.ensure_preparation()
         return bagger
