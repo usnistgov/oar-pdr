@@ -168,7 +168,7 @@ class SIPStatus(object):
     that multiple processes can access it.  
     """
 
-    def __init__(self, id, config=None, _data=None):
+    def __init__(self, id, config=None, sysdata=None, _data=None):
         """
         open up the status for the given identifier.  Initial data can be 
         provided or, if no cached data exist, it can be initialized with 
@@ -180,6 +180,7 @@ class SIPStatus(object):
                              defaults will be used; in particular, the status
                              data will be cached to /tmp (intended only for 
                              testing purposes).
+        :param sysdata dict: if not None, include this data as system data
         :param _data dict:   initialize the status with this data.  This is 
                              not intended for public use.   
         """
@@ -198,12 +199,14 @@ class SIPStatus(object):
             self._data = OrderedDict([
                 ('sys', {}),
                 ('user', OrderedDict([
-                    ('state', PENDING),
-                    ('message', user_message[PENDING])
+                    ('state', FORGOTTEN),
+                    ('message', user_message[FORGOTTEN])
                 ])),
                 ('history', [])
             ])
         self._data['user']['id'] = id
+        if sysdata:
+            self._data['sys'].update(sysdata)
 
     @property
     def id(self):
@@ -213,13 +216,29 @@ class SIPStatus(object):
         return self._data['user']['id']
 
     @property
+    def message(self):
+        """
+        the SIP's current status message
+        """
+        return self._data['user']['message']
+
+    @property
+    def state(self):
+        """
+        the SIP's status state.  
+
+        :return str:  one of NOT_FOUND, READY, PENDING, IN_PROGRESS, SUCCESSFUL,
+                      FAILED, FORGOTTEN
+        """
+        return self._data['user']['state']
+
+    def __str__(self):
+        return "{0} status: {1}: {2}".format(self.id, self.state, self.message)
+
+    @property
     def data(self):
         """
-        the current status data.  Required fields include:
-        :prop id    str:  the SIP's id
-        :prop state str:  controlled name for the current state of preservation
-                          of the SIP
-        :prop message str:  a user-oriented message explaining the state
+        the current status data.  
         """
         return self._data
 
@@ -260,7 +279,26 @@ class SIPStatus(object):
         self._data['user']['state'] = label
         self._data['user']['message'] = message
         self.cache()
-        
+
+    def reset(self, message=None):
+        """
+        Save the current status information as part of its history and then 
+        reset that status to PENDING,
+
+        :param message str:  an optional message for display to the end user
+                             explaining this state.  If not provided, a default
+                             explanation is set. 
+        """
+        if 'update_time' in self._data['user']:
+            # save the current status only if it was previously cached to disk
+            oldstatus = deepcopy(self._data['user'])
+            del oldstatus['id']
+            if 'history' in self.data:
+                self._data['history'].insert(0, oldstatus)
+            else:
+                self._data['history'] = [ oldstatus ]
+
+        self.update(PENDING, message)
 
     def start(self, message=None):
         """
@@ -291,7 +329,7 @@ class SIPStatus(object):
 
     def user_export(self):
         """
-        return the porion of the status data intended for export through the
+        return the portion of the status data intended for export through the
         preservation service interface.  
         """
         out = deepcopy(self._data['user'])
@@ -300,27 +338,16 @@ class SIPStatus(object):
 
 
     @classmethod
-    def for_update(cls, sipid, cfg=None):
+    def for_update(cls, sipid, cfg=None, sysdata=None):
         """
         create an SIPStatus to track an update to a previously preserved
         SIP.  
         """
-        prev = SIPStatus(sipid, cfg)
-        if 'update_time' not in prev.data['user']:
-            return prev
+        out = SIPStatus(sipid, cfg)
+        if 'update_time' not in out.data['user']:
+            return out
 
-        pending = SIPStatus('__noid__', {})
-        if 'history' in prev.data and prev.data['history']:
-            pending.data['history'] = deepcopy(prev.data['history'])
-
-        del prev.data['user']['id']
-        if 'history' in pending.data:
-            pending.data['history'].insert(0, prev.data['user'])
-        else:
-            pending.data['history'] = [ prev.data['user'] ]
-
-        out = SIPStatus(sipid, cfg, _data=pending.data)
-        out.cache()
+        out.reset("update requested; will start shortly")
         return out
 
         

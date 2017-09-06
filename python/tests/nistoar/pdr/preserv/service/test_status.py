@@ -187,8 +187,8 @@ class TestSIPStatus(test.TestCase):
         data = {
             'user': {
                 'id': 'ffff',
-                'state': "pending",
-                'message': status.user_message[status.PENDING]
+                'state': "forgotten",
+                'message': status.user_message[status.FORGOTTEN]
             },
             'sys': {},
             'history': []
@@ -207,6 +207,10 @@ class TestSIPStatus(test.TestCase):
         self.assertEqual(self.status.data, data)
         self.assertEquals(self.status._cachefile, "/tmp/sipstatus/ffff.json")
 
+    def test_str(self):
+        self.status.update(status.PENDING, "starting soon")
+        self.assertEqual(str(self.status), "ffff status: pending: starting soon")
+
     def test_cache(self):
         self.assertTrue(not os.path.exists(self.status._cachefile))
         self.status.data['gurn'] = 'goob'
@@ -224,9 +228,9 @@ class TestSIPStatus(test.TestCase):
         self.assertIn('gurn', data)
         self.assertEqual(data['user']['id'], 'ffff')
         self.assertEqual(data['gurn'], 'goob')
-        self.assertEqual(data['user']['state'], 'pending')
+        self.assertEqual(data['user']['state'], 'forgotten')
         self.assertEqual(data['user']['message'], 
-                         status.user_message[status.PENDING])
+                         status.user_message[status.FORGOTTEN])
 
         self.status = status.SIPStatus("ffff", self.cfg)
         self.assertIn('gurn', self.status.data)
@@ -296,6 +300,19 @@ class TestSIPStatus(test.TestCase):
         self.assertEqual(data['state'],  status.IN_PROGRESS)
         self.assertEqual(data['history'][0]['state'],  status.FAILED)
         
+    def test_reset(self):
+        self.assertEqual(self.status.state, status.FORGOTTEN)
+
+        self.status.reset()
+        self.assertEqual(self.status.state, status.PENDING)
+        self.assertEqual(self.status.data['history'], [])
+        
+        self.status.start()
+        self.status.update(status.FAILED)
+        self.status.reset()
+        self.assertEqual(self.status.state, status.PENDING)
+        self.assertEqual(self.status.data['history'][0]['state'], status.FAILED)
+
         
 
     def test_for_update(self):
@@ -329,11 +346,11 @@ class TestSIPStatus(test.TestCase):
         self.assertEqual(history[1]['state'], status.FAILED)
 
     def test_record_progress(self):
-        self.assertEquals(self.status.data['user']['state'], status.PENDING)
+        self.assertEquals(self.status.data['user']['state'], status.FORGOTTEN)
 
         self.status.record_progress("almost there")
         data = self.read_data(self.status._cachefile)
-        self.assertEquals(data['user']['state'], status.PENDING)
+        self.assertEquals(data['user']['state'], status.FORGOTTEN)
         self.assertEquals(data['user']['message'], "almost there")
 
         self.status.start()
