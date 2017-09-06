@@ -63,6 +63,8 @@ def zip_serialize(bagdir, destdir, log, destfile=None):
             message = "Bag serialization failure using zip (consult log)"
         raise BagSerializationError(message, name, ex, sys=_sys)
 
+    return destfile
+
 def zip7_serialize(bagdir, destdir, log, destfile=None):
     """
     serialize a bag with 7zip
@@ -94,6 +96,8 @@ def zip7_serialize(bagdir, destdir, log, destfile=None):
         else:
             msg = "Bag serialization failure using 7z (consult log)"
         raise BagSerializationError(msg, name, ex, sys=_sys)
+
+    return destfile
 
 class Serializer(object):
     """
@@ -150,7 +154,7 @@ class Serializer(object):
             else:
                 log = logging.getLogger(_sys.system_abbrev).\
                               getChild(_sys.subsystem_abbrev)
-        self._map[format](bagdir, destdir, log)
+        return self._map[format](bagdir, destdir, log)
 
 class DefaultSerializer(Serializer):
     """
