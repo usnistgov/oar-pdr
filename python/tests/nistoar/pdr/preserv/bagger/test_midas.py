@@ -11,7 +11,7 @@ import nistoar.pdr.preserv.bagit.builder as bldr
 import nistoar.pdr.preserv.bagger.midas as midas
 import nistoar.pdr.exceptions as exceptions
 
-# datadir = nistoar/preserv/tests/data
+# datadir = nistoar/preserv/data
 datadir = os.path.join( os.path.dirname(os.path.dirname(__file__)), "data" )
 
 loghdlr = None
@@ -396,8 +396,97 @@ class TestMIDASMetadataBaggerUpload(test.TestCase):
         self.assertEqual(datafiles["trial3/trial3a.json"],
                          os.path.join(uplsip, "trial3/trial3a.json"))
 
+class TestPreservationBagger(test.TestCase):
+    
+    testsip = os.path.join(datadir, "midassip")
+    midasid = '3A1EE2F169DD3B8CE0531A570681DB5D1491'
 
+    def setUp(self):
+        self.tf = Tempfiles()
+        self.workdir = self.tf.mkdir("bagger")
+        self.mddir = os.path.join(self.workdir, "mddir")
+        os.mkdir(self.mddir)
 
+        # TODO: copy input data to writable location
+        testsip = os.path.join(self.testsip, "review")
+        self.revdir = os.path.join(self.workdir, "review")
+        shutil.copytree(testsip, self.revdir)
+        config = { 'relative_to_indir': True,
+                   'bag_builder': { 'copy_on_link_failure': False }
+               }
+        
+        self.bagr = midas.PreservationBagger(self.midasid, '_preserv',
+                                             self.revdir, self.mddir, config)
+        self.sipdir = os.path.join(self.revdir, "1491")
+        self.bagparent = os.path.join(self.sipdir, "_preserv")
+
+    def tearDown(self):
+        self.bagr.bagbldr._unset_logfile()
+        self.bagr = None
+        self.tf.clean()
+
+    def test_ctor(self):
+        self.assertEqual(self.bagr.name, self.midasid)
+        self.assertEqual(self.bagr.indir, self.sipdir)
+        self.assertEqual(self.bagr.mddir, self.mddir)
+        self.assertEqual(self.bagr.bagparent, self.bagparent)
+        self.assertIsNotNone(self.bagr.bagbldr)
+        self.assertTrue(os.path.exists(self.bagparent))
+
+        bagdir = os.path.join(self.bagparent, self.midasid+".mbag0_2-0")
+        self.assertEqual(self.bagr.bagdir, bagdir)
+
+    def test_find_pod_file(self):
+        podfile = self.bagr.find_pod_file()
+        self.assertEqual(os.path.basename(podfile), "_pod.json")
+        self.assertEqual(podfile, os.path.join(self.bagr.indir, "_pod.json"))
+
+    def test_form_bag_name(self):
+        self.bagr.cfg['mbag_version'] = "1.2"
+        bagname = self.bagr.form_bag_name("goober", 3)
+        self.assertEqual(bagname, "goober.mbag1_2-3")
+
+    def test_ensure_metadata_preparation(self):
+        self.bagr.ensure_metadata_preparation()
+        self.assertTrue(os.path.exists(self.bagr.bagdir),
+                        "Output bag dir not created")
+        self.assertTrue(os.path.exists(os.path.join(self.bagr.bagdir, "data")))
+        self.assertTrue(os.path.exists(os.path.join(self.bagr.bagdir,
+                                                    "metadata")))
+        self.assertTrue(os.path.exists(os.path.join(self.bagr.bagdir,
+                                                    "preserv.log")))
+        self.assertTrue(os.path.isdir(os.path.join(self.bagr.bagdir,
+                                                   "metadata", "trial1.json")))
+        self.assertTrue(os.path.isfile(os.path.join(self.bagr.bagdir,
+                                      "metadata", "trial1.json", "nerdm.json")))
+
+        # data files do not yet appear in output bag
+        self.assertTrue(not os.path.isdir(os.path.join(self.bagr.bagdir,
+                                                       "data", "trial1.json")),
+                        "Datafiles copied prematurely")
+        
+
+    def test_preparation(self):
+        self.bagr.ensure_preparation()
+        self.assertTrue(os.path.exists(self.bagr.bagdir),
+                        "Output bag dir not created")
+        self.assertTrue(os.path.exists(os.path.join(self.bagr.bagdir, "data")))
+        self.assertTrue(os.path.exists(os.path.join(self.bagr.bagdir,
+                                                    "metadata")))
+        self.assertTrue(os.path.exists(os.path.join(self.bagr.bagdir,
+                                                    "preserv.log")))
+        self.assertTrue(os.path.isdir(os.path.join(self.bagr.bagdir,
+                                                   "metadata", "trial1.json")))
+        self.assertTrue(os.path.isfile(os.path.join(self.bagr.bagdir,
+                                      "metadata", "trial1.json", "nerdm.json")))
+
+        self.assertTrue(os.path.isfile(os.path.join(self.bagr.bagdir,
+                                                   "data", "trial1.json")))
+        self.assertTrue(os.path.isfile(os.path.join(self.bagr.bagdir,
+                                                   "data", "trial2.json")))
+        self.assertTrue(os.path.isfile(os.path.join(self.bagr.bagdir,
+                                             "data", "trial3", "trial3a.json")))
+        
 
 if __name__ == '__main__':
     test.main()

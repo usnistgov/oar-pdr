@@ -9,7 +9,7 @@ process for the preservation service.
 
 The implementations use the BagBuilder class to populate the output bag.   
 """
-import os, errno, logging, re, json
+import os, errno, logging, re, json, shutil
 from abc import ABCMeta, abstractmethod, abstractproperty
 
 from .base import SIPBagger, moddate_of, checksum_of, read_nerd, read_pod
@@ -25,6 +25,16 @@ log = logging.getLogger(_sys.system_abbrev).getChild(_sys.subsystem_abbrev)
 
 DEF_MBAG_VERSION = "0.2"
 DEF_MIDAS_POD_FILE = "_pod.json"
+
+def _midadid_to_dirname(midasid, log=None):
+    out = midasid
+    if len(midasid) > 32:
+        # MIDAS drops the first 32 chars. of the ediid for the data
+        # directory names
+        out = midasid[32:]
+    elif log:
+        log.warn("Unexpected MIDAS ID (too short): "+midasid)
+    return out
 
 class MIDASMetadataBagger(SIPBagger):
     """
@@ -85,13 +95,7 @@ class MIDASMetadataBagger(SIPBagger):
         self._indirs = []
 
         # ensure we have at least one readable input directory
-        indirname = midasid
-        if len(midasid) > 32:
-            # MIDAS drops the first 32 chars. of the ediid for the data
-            # directory names
-            indirname = midasid[32:]
-        else:
-            log.warn("Unexpected MIDAS ID (too short): "+midasid)
+        indirname = _midadid_to_dirname(midasid, log)
 
         for dir in (reviewdir, uploaddir):
             if not dir:
@@ -381,7 +385,7 @@ class PreservationBagger(SIPBagger):
     """
 
     def __init__(self, midasid, bagparent, reviewdir, mddir,
-                 config={}, minter=None):
+                 config=None, minter=None):
         """
         Create an SIPBagger to operate on data provided by MIDAS.
 
@@ -398,10 +402,17 @@ class PreservationBagger(SIPBagger):
         :param minter IDMinter: a minter to use for minting new identifiers.
         """
         self.name = midasid
-        self.indir = reviewdir
         self.mddir = mddir
         self.minter = minter
+        self.reviewdir = reviewdir
 
+        self.indir = os.path.join(self.reviewdir,
+                                  _midadid_to_dirname(midasid, log))
+        if not os.path.exists(self.indir):
+            raise SIPDirectoryNotFound(self.indir)
+
+        if config is None:
+            config = {}
         super(PreservationBagger, self).__init__(bagparent, config)
 
         # do a sanity check on the bag parent directory
@@ -423,15 +434,14 @@ class PreservationBagger(SIPBagger):
 
         if self.cfg.get('relative_to_indir'):
             self.bagparent = os.path.join(self.indir, self.bagparent)
+        self.ensure_bag_parent_dir()
 
         self.bagbldr = BagBuilder(self.bagparent,
-                                  self.form_bag_name(self.midasid),
+                                  self.form_bag_name(self.name),
                                   self.cfg.get('bag_builder', {}),
                                   minter=minter,
                                   logger=log.getChild(self.name[:8]+'...'))
         
-
-        self.ensure_bag_parent_dir()
 
     @property
     def bagdir(self):
@@ -450,9 +460,9 @@ class PreservationBagger(SIPBagger):
 
         # start by bagging up the metadata.  If this was done before (prior to
         # final preservation time), the previous metadata bag will be updated.
-        mdbagger = MIDASMetadataBagger(self.midasid, self.mddir, self.indir,
+        mdbagger = MIDASMetadataBagger(self.name, self.mddir, self.reviewdir,
                                        config=self.cfg, minter=self.minter)
-        mdbagger.prepare()
+        mdbagger.prepare(nodata=True)
         self.datafiles = mdbagger.datafiles
 
         # copy the contents of the metadata bag into the final preservation bag
@@ -470,6 +480,8 @@ class PreservationBagger(SIPBagger):
         
         # by ensuring the output preservation bag directory, we set up loggning
         self.bagbldr.ensure_bagdir()
+        self.bagbldr.log.info("Preparing final bag for preservation as %s",
+                              os.path.basename(self.bagdir))
 
     def find_pod_file(self):
         """
@@ -483,7 +495,19 @@ class PreservationBagger(SIPBagger):
         raise PODError("POD file not found in expected locations: "+str(locs),
                        sys=self)
 
-    def form_bagdir_name(self, dsid, bagseq=0):
+    def ensure_preparation(self, nodata=False):
+        """
+        create and update the output working bag directory to ensure it is 
+        a re-organized version of the SIP, ready for annotation 
+        and preservation.  
+
+        :param nodata bool: if True, do not copy (or link) data files to the
+                            output directory.
+        """
+        self.ensure_metadata_preparation()
+        self.add_data_files()
+
+    def form_bag_name(self, dsid, bagseq=0):
         """
         return the name to use for the working bag directory
         """
