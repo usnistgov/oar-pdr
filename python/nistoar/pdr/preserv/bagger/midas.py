@@ -13,14 +13,14 @@ import os, errno, logging, re, json
 from abc import ABCMeta, abstractmethod, abstractproperty
 
 from .base import SIPBagger, moddate_of, checksum_of, read_nerd, read_pod
-from .base import PreservationSystem
+from .base import sys as _sys
 from ..bagit.builder import BagBuilder, NERDMD_FILENAME
 from ... import def_merge_etcdir
-from .. import (SIPDirectoryError, SIPDirectoryNotFound, 
+from .. import (SIPDirectoryError, SIPDirectoryNotFound,
                 ConfigurationException, StateException, PODError)
 from nistoar.nerdm.merge import MergerFactory
 
-_sys = PreservationSystem()
+# _sys = PreservationSystem()
 log = logging.getLogger(_sys.system_abbrev).getChild(_sys.subsystem_abbrev)
 
 DEF_MBAG_VERSION = "0.2"
@@ -37,26 +37,31 @@ class MIDASMetadataBagger(SIPBagger):
 
     This class can take a configuration dictionary on construction; the 
     following parameters are supported:
-    :param bag_builder     dict: a set of parameters to pass to the BagBuilder
+    :prop bag_builder dict ({}): a set of parameters to pass to the BagBuilder
                                  object used to populate the output bag (see
                                  BagBuilder class documentation for supported
                                  parameters).
-    :param merge_etc       str:  the path to the directory containing the 
+    :prop merge_etc        str:  the path to the directory containing the 
                                  metadata merge rule configurations.  If not
                                  set, the directory will be searched for in 
                                  some possible default locations.
-    :param hard_link_data bool:  if True, copy data files into the bag using
-                                 a hard link whenever possible (default: True)
-    :param pod_locations  list of str:  a list of relative file paths where 
-                                 the POD dataset file might be found, in 
-                                 order of preference.  (Default: ["_pod.json"])
-    :param update_by_checksum_size_lim int:  a size limit in bytes for which 
+    :prop hard_link_data boo (True)l:  if True, copy data files into the bag 
+                                 using a hard link whenever possible.
+    :prop pod_locations  list of str (["_pod.json"]):  a list of relative file 
+                                 paths where the POD dataset file might be 
+                                 found, in order of preference.  
+    :prop update_by_checksum_size_lim int (0):  a size limit in bytes for which 
                                  files less than this will be checked to see 
                                  if it has changed (not yet implemented).
-    :param conponent_merge_convention str: the merge convention name to use to
-                                 merge MIDAS-provided component metadata with 
-                                 the PDR's initial component metadata (default:
-                                 'dev').
+    :prop conponent_merge_convention str ("dev"): the merge convention name to 
+                                 use to merge MIDAS-provided component metadata
+                                 with the PDR's initial component metadata.
+    :prop relative_to_indir bool (False):  If True, the output bag directory 
+       is expected to be under one of the input directories; this base class
+       will then ensure that it has write permission to create the output 
+       directory.  If False, the bagger may raise an exception if the 
+       requested output bag directory is found within an input SIP directory,
+       regardless of whether the process has permission to write there.  
     """
 
     def __init__(self, midasid, workdir, reviewdir, uploaddir=None, config={},
@@ -339,6 +344,40 @@ class PreservationBagger(SIPBagger):
     This class uses the MIDASMetadataBagger to update the NERDm metadata to 
     latest copies of the files provided through MIDAS.  It then builds the 
     final bag, including the data files and all required ancillary files.  
+
+    This class takes a configuration dictionary on construction; the 
+    following parameters are supported:
+    :prop bag_builder dict ({}): a set of parameters to pass to the BagBuilder
+                                 object used to populate the output bag (see
+                                 BagBuilder class documentation for supported
+                                 parameters).
+    :prop merge_etc        str:  the path to the directory containing the 
+                                 metadata merge rule configurations.  If not
+                                 set, the directory will be searched for in 
+                                 some possible default locations.
+    :prop hard_link_data bool (True):  if True, copy data files into the bag 
+                                 using a hard link whenever possible.
+    :prop pod_locations  list of str (["_pod.json"]):  a list of relative file 
+                                 paths where the POD dataset file might be 
+                                 found, in order of preference.  
+    :prop update_by_checksum_size_lim int (0):  a size limit in bytes for which 
+                                 files less than this will be checked to see 
+                                 if it has changed (not yet implemented).
+    :prop conponent_merge_convention str ("dev"): the merge convention name to 
+                                 use to merge MIDAS-provided component metadata
+                                 with the PDR's initial component metadata.
+    :prop relative_to_indir bool (False):  If True, the output bag directory 
+       is expected to be under one of the input directories; this base class
+       will then ensure that it has write permission to create the output 
+       directory.  If False, the bagger may raise an exception if the 
+       requested output bag directory is found within an input SIP directory,
+       regardless of whether the process has permission to write there.  
+    :prop bag_name_format str ("{0}.mbag{1}-{2}"):  a python format string 
+       to use to form a name for the output bag.  The data required to turn
+       the format string into a name are: (0) the dataset identifier, (1)
+       a bag profile version string, and (2) a bag sequence number.
+    :prop mbag_version str:  the version string for bag profile for output
+       bags.  
     """
 
     def __init__(self, midasid, bagparent, reviewdir, mddir,
@@ -432,6 +471,18 @@ class PreservationBagger(SIPBagger):
         # by ensuring the output preservation bag directory, we set up loggning
         self.bagbldr.ensure_bagdir()
 
+    def find_pod_file(self):
+        """
+        find an existing pod file given a list of existing possible locations
+        """
+        locs = self.cfg.get('pod_locations', [ DEF_MIDAS_POD_FILE ])
+        for loc in locs:
+            path = os.path.join(self.indir, loc)
+            if os.path.exists(path):
+                return path
+        raise PODError("POD file not found in expected locations: "+str(locs),
+                       sys=self)
+
     def form_bagdir_name(self, dsid, bagseq=0):
         """
         return the name to use for the working bag directory
@@ -457,7 +508,7 @@ class PreservationBagger(SIPBagger):
 
         :return str:  the path to the finalized bag directory
         """
-        self.prepare(nodate=False)
+        self.prepare(nodata=False)
         self.bagbldr.finalize_bag()
         return self.bagbldr.bagdir
 
