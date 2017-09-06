@@ -3,14 +3,19 @@ This module provides an abstract interface turning a Submission Information
 Package (SIP) into an Archive Information Package (BagIt bags).  It also 
 includes implementations for different known SIPs
 """
+import os, logging
 from abc import ABCMeta, abstractmethod, abstractproperty
 from collections import OrderedDict
 from copy import deepcopy
 
 from ..bagit.serialize import DefaultSerializer
-from ..bagger.base import checksum_of, PreservationException
+from ..bagger.base import checksum_of, PreservationError
 from ..bagger.midas import PreservationBagger
+from .. import (ConfigurationException, StateException, PODError)
 from .. import sys as _sys
+from . import status
+
+log = logging.getLogger(_sys.system_abbrev).getChild(_sys.subsystem_abbrev)
 
 class SIPHandler(object):
     """
@@ -163,7 +168,7 @@ class SIPHandler(object):
 
         return [file1, csumfile]
     
-class MIDASSIPHandler(object):
+class MIDASSIPHandler(SIPHandler):
     """
     The interface for processing an Submission Information Package 
     (SIP) from the MIDAS system.
@@ -171,7 +176,9 @@ class MIDASSIPHandler(object):
     This handler takes a configuration dictionary on construction. The 
     following properties are supported:
 
-    :prop working_dir str #req:  a directory where this handler can store its
+    :prop bagparent_dir str #req:  a directory to write output bag to (before
+                                 serialization).
+    :prop working_dir str None:  a directory where this handler can store its
                                  working data.
     :prop status_manager dict ({'cachedir': ...}): configuration properties for 
                                  for the SIPStatus object used to track the 
@@ -207,16 +214,29 @@ class MIDASSIPHandler(object):
         """
         super(MIDASSIPHandler, self).__init__(sipid, config, minter, serializer)
 
-        self.workdir = self.cfg.get('working_dir')
-        if not self.workdir:
-            raise ConfigurationException("Missing required config property: "+
-                                         "working_dir")
-        if not os.path.exists(self.workdir):
-            os.mkdir(self.workdir)
-        
+        workdir = self.cfg.get('working_dir')
+        if workdir and not os.path.exists(workdir):
+            os.mkdir(workdir)
+
+        isrel = self.cfg.get('bagger',{}).get('relative_to_indir')
+        bagparent = self.cfg.get('bagparent_dir')
+        if not bagparent:
+            bagparent = "_preserv"
+        if not os.path.isabs(bagparent):
+            if not isrel:
+                if not workdir:
+                    raise ConfigurationException("Missing needed config "+
+                                                 "property: workdir_dir")
+                bagparent = os.path.join(workdir, "preserv")
+
         self.stagedir = self.cfg.get('staging_dir')
         if not self.stagedir:
-            self.stagedir = os.path.join(self.workdir, "_stage")
+            self.stagedir = "stage"
+        if not os.path.isabs(self.stagedir):
+            if not workdir:
+              raise ConfigurationException("Missing needed config property: "+
+                                           "working_dir")
+            self.stagedir = os.path.join(workdir, self.stagedir)
         if not os.path.exists(self.stagedir):
             os.mkdir(self.stagedir)
         
@@ -230,14 +250,21 @@ class MIDASSIPHandler(object):
 
         self.mdbagdir = self.cfg.get('mdbag_dir')
         if not self.mdbagdir:
-            raise ConfigurationException("Missing required config property: "+
-                                         "mdbag_dir")
+            self.mdbagdir = "mdserv"
+        if not os.path.isabs(self.mdbagdir):
+            if not workdir:
+              raise ConfigurationException("Missing needed config property: "+
+                                           "working_dir")
+            self.stagedir = os.path.join(workdir, self.mdbagdir)
+            if not os.path.exists(self.mdbagdir):
+                os.mkdir(self.mdbagdir)
         if not os.path.exists(self.mdbagdir):
-            os.mkdir(self.mdbagdir)
+            raise StateException("Metadata directory does not exist as a " +
+                                 "directory: " + self.mdbagdir)
         
-        self.bagger = PreservationBagger(sipid, self.workdir, self.sipparent,
+        self.bagger = PreservationBagger(sipid, bagparent, self.sipparent,
                                          self.mdbagdir, config.get('bagger'),
-                                         self.minter)
+                                         self._minter)
 
     def isready(self):
         """
@@ -266,10 +293,10 @@ class MIDASSIPHandler(object):
             try:
                 self.bagger.find_pod_file()
             except PODError, e:
-                self.status.update(status.NOT_FOUND, "missing POD record")
+                self.set_state(status.NOT_FOUND, "missing POD record")
                 return False
 
-            self.status.update(status.READY)
+            self.set_state(status.READY)
             
         return True
                 
@@ -294,7 +321,7 @@ class MIDASSIPHandler(object):
         """
         if not self.isready():
             raise StateException("{0}: SIP is not ready: {1}".
-                                 format(self._sipid, self.status.message),
+                                 format(self._sipid, self._status.message),
                                  sys=_sys)
 
         bagdir = self.bagger.make_bag()
@@ -305,13 +332,13 @@ class MIDASSIPHandler(object):
                 os.rename(f, self.storedir)
             except OSError, ex:
                 msg = "{0}: {1}".format(f, ex.message)
-                logger.error(msg)
+                log.error(msg)
                 errors.append(msg)
 
         if errors:
             msg = "Failed to copy all preservation files to long-term " \
                   "storage dir ({0})"
             msg = msg.format(self.storedir)
-            self.status.update(status.FAILED, msg)
+            self.set_state(status.FAILED, msg)
             raise PreservationError(msg, errors)
 
