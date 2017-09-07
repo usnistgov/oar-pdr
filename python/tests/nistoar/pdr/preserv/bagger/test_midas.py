@@ -487,6 +487,29 @@ class TestPreservationBagger(test.TestCase):
         self.assertTrue(os.path.isfile(os.path.join(self.bagr.bagdir,
                                              "data", "trial3", "trial3a.json")))
         
+    def test_make_bag(self):
+        self.bagr.make_bag()
+        self.assertTrue(os.path.exists(self.bagr.bagdir),
+                        "Output bag dir not created")
+        self.assertTrue(os.path.exists(os.path.join(self.bagr.bagdir, "data")))
+        self.assertTrue(os.path.exists(os.path.join(self.bagr.bagdir,
+                                                    "metadata")))
+        self.assertTrue(os.path.exists(os.path.join(self.bagr.bagdir,
+                                                    "preserv.log")))
+        self.assertTrue(os.path.isdir(os.path.join(self.bagr.bagdir,
+                                                   "metadata", "trial1.json")))
+        self.assertTrue(os.path.isfile(os.path.join(self.bagr.bagdir,
+                                      "metadata", "trial1.json", "nerdm.json")))
+
+        self.assertTrue(os.path.isfile(os.path.join(self.bagr.bagdir,
+                                                   "data", "trial1.json")))
+        self.assertTrue(os.path.isfile(os.path.join(self.bagr.bagdir,
+                                                   "data", "trial2.json")))
+        self.assertTrue(os.path.isfile(os.path.join(self.bagr.bagdir,
+                                             "data", "trial3", "trial3a.json")))
+
+        # test for BagIt required files
+        
 
 if __name__ == '__main__':
     test.main()

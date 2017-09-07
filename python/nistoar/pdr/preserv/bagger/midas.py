@@ -505,7 +505,8 @@ class PreservationBagger(SIPBagger):
                             output directory.
         """
         self.ensure_metadata_preparation()
-        self.add_data_files()
+        if not nodata:
+            self.add_data_files()
 
     def form_bag_name(self, dsid, bagseq=0):
         """

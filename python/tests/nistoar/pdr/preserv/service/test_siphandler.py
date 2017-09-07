@@ -41,6 +41,8 @@ class TestMIDASSIPHandler(test.TestCase):
         # os.mkdir(self.stagedir)
         self.mdserv = os.path.join(self.troot, "mdserv")
         os.mkdir(self.mdserv)
+        self.store = os.path.join(self.troot, "store")
+        os.mkdir(self.store)
         self.statusdir = os.path.join(self.troot, "status")
         os.mkdir(self.statusdir)
 
@@ -48,6 +50,7 @@ class TestMIDASSIPHandler(test.TestCase):
 
         self.config = {
             "working_dir": self.workdir,
+            "store_dir": self.store,
             "staging_dir": self.stagedir,
             "review_dir":  self.revdir,
             "mdbag_dir":   self.mdserv,
@@ -82,6 +85,14 @@ class TestMIDASSIPHandler(test.TestCase):
         self.assertEqual(self.sip.state, status.FORGOTTEN)
         self.assertTrue(self.sip.isready())
         self.assertEqual(self.sip.state, status.READY)
+
+    def test_bagit(self):
+        self.sip.bagit()
+        self.assertTrue(os.path.exists(os.path.join(self.store,
+                                                self.midasid+".mbag0_2-0.zip")))
+        self.assertTrue(os.path.exists(os.path.join(self.store,
+                                         self.midasid+".mbag0_2-0.zip.sha256")))
+        
 
 if __name__ == '__main__':
     test.main()

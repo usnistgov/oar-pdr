@@ -68,6 +68,12 @@ class SIPHandler(object):
         self.workdir = self.cfg['working_dir']
         assert self.workdir
 
+        self.storedir = self.cfg['store_dir']
+        assert self.storedir
+        if not os.path.isdir(self.storedir):
+            raise StateException("LT-storage directory does not exist as a "+
+                                 "directory: " + self.storedir)
+
         # set up the Status manager
         stcfg = self.cfg.get('status_manager', {})
         if 'cachedir' not in stcfg:
@@ -160,7 +166,7 @@ class SIPHandler(object):
         
         file1 = self._ser.serialize(bagdir, destdir, format)
         for file in [file1]:
-            csumfile = os.path.splitext(file)[0] + ".sha256"
+            csumfile = file + ".sha256"
             csum = checksum_of(file)
             with open(csumfile, 'w') as fd:
                 fd.write(csum)
@@ -319,18 +325,25 @@ class MIDASSIPHandler(SIPHandler):
                                 SIP-default behavior as set by the 
                                 configuration.
         """
+        if not serialtype:
+            serialtype = 'zip'
+        if not destdir:
+            destdir = self.storedir
+
         if not self.isready():
             raise StateException("{0}: SIP is not ready: {1}".
                                  format(self._sipid, self._status.message),
                                  sys=_sys)
 
         bagdir = self.bagger.make_bag()
-        savefiles = self._serialize(bagdir, stagedir, serialtype)
+        savefiles = self._serialize(bagdir, self.stagedir, serialtype)
         errors = []
         for f in savefiles:
             try:
-                os.rename(f, self.storedir)
+                # TODO: change to copy so that we can more easily roll back
+                os.rename(f, os.path.join(destdir, os.path.basename(f)))
             except OSError, ex:
+                # TODO: Roll back! (do not copy as much as possible)
                 msg = "{0}: {1}".format(f, ex.message)
                 log.error(msg)
                 errors.append(msg)

@@ -677,7 +677,7 @@ class BagBuilder(PreservationSystem):
                        the bag.  An empty list indicates that the bag is complete
                        and ready to preserved.  
         """
-        raise NotImplemented
+        self.log.error("Bag finalization not implemented!")
 
     def __del__(self):
         self._unset_logfile()
@@ -691,7 +691,8 @@ class BagBuilder(PreservationSystem):
                        or non-compliant.  An empty bag indicates that the bag 
                        is complete and ready to preserved.  
         """
-        raise NotImplemented
+        self.log.error("Bag validation not implemented!")
+        return []
 
     def record(self, msg, *args, **kwargs):
         """

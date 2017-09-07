@@ -147,7 +147,7 @@ class Serializer(object):
         """
         if format not in self._map:
             raise BagSerializationError("Serialization format not supported: "+
-                                        format)
+                                        str(format))
         if not log:
             if self.log:
                 log = self.log

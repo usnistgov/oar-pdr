@@ -126,7 +126,8 @@ class PreservationError(PDRException):
         :param cause Exception:  an underlying cause in the form of an 
                              Exception instance.
         """
-        super(PreservationError, self).__init__(msg, cause, sys=_sys)
+        super(PreservationError, self).__init__(msg, cause,
+                                                sys=PreservationSystem())
         self.errors = []
         if errors:
             self.errors.extend(errors)
