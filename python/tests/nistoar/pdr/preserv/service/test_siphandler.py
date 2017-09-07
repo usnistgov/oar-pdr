@@ -87,11 +87,13 @@ class TestMIDASSIPHandler(test.TestCase):
         self.assertEqual(self.sip.state, status.READY)
 
     def test_bagit(self):
+        self.assertEqual(self.sip.state, status.FORGOTTEN)
         self.sip.bagit()
         self.assertTrue(os.path.exists(os.path.join(self.store,
                                                 self.midasid+".mbag0_2-0.zip")))
         self.assertTrue(os.path.exists(os.path.join(self.store,
                                          self.midasid+".mbag0_2-0.zip.sha256")))
+        self.assertEqual(self.sip.state, status.SUCCESSFUL)
         
 
 if __name__ == '__main__':

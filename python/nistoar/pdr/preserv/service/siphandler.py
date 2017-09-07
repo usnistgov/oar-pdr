@@ -38,6 +38,7 @@ class SIPHandler(object):
                                  a directory call 'preserv_status' just below
                                  the working directory ('working_dir').  
     """
+    __metaclass__ = ABCMeta
 
     def __init__(self, sipid, config, minter=None, serializer=None):
         """
@@ -84,7 +85,7 @@ class SIPHandler(object):
         self._status = status.SIPStatus(self._sipid, stcfg)
 
     @abstractmethod
-    def isready(self):
+    def isready(self, _inprogress=False):
         """
         do a quick check of the input SIP to determine if it can be 
         processed into an AIP.  If it is not ready, return False.
@@ -95,8 +96,10 @@ class SIPHandler(object):
         proceed.  The child implementation should then do a quick check that the
         input data exists and appears to be in a state ready for preservation.  
         """
-        return self._status.state in (status.FORGOTTEN, status.PENDING,
-                                      status.READY)
+        ok = [status.FORGOTTEN, status.PENDING, status.READY]
+        if _inprogress:
+            ok.append(status.IN_PROGRESS)
+        return self._status.state in ok
 
     @abstractmethod
     def bagit(self, serialtype=None, destdir=None, params=None):
@@ -130,7 +133,7 @@ class SIPHandler(object):
         """
         a dictionary describing the current status of the SIP's preservation.
         """
-        return self._status.data
+        return self._status.user_export()
 
     @property
     def state(self):
@@ -272,7 +275,7 @@ class MIDASSIPHandler(SIPHandler):
                                          self.mdbagdir, config.get('bagger'),
                                          self._minter)
 
-    def isready(self):
+    def isready(self, _inprogress=False):
         """
         do a quick check of the input SIP to determine if it can be 
         processed into an AIP.  If it is not ready, return False.
@@ -287,7 +290,7 @@ class MIDASSIPHandler(SIPHandler):
         :return bool:  True if the requested SIP appears to be ready for 
                        preservation; False, otherwise.
         """
-        if not super(MIDASSIPHandler, self).isready():
+        if not super(MIDASSIPHandler, self).isready(_inprogress):
             return False
 
         if self.state != status.READY:
@@ -325,18 +328,24 @@ class MIDASSIPHandler(SIPHandler):
                                 SIP-default behavior as set by the 
                                 configuration.
         """
+        self._status.start()
         if not serialtype:
             serialtype = 'zip'
         if not destdir:
             destdir = self.storedir
 
-        if not self.isready():
+        if not self.isready(_inprogress=True):
             raise StateException("{0}: SIP is not ready: {1}".
                                  format(self._sipid, self._status.message),
                                  sys=_sys)
 
+        self._status.record_progress("Collecting metadata and files")
         bagdir = self.bagger.make_bag()
+
+        self._status.record_progress("Serializing")
         savefiles = self._serialize(bagdir, self.stagedir, serialtype)
+
+        self._status.record_progress("Delivering preservation artifacts")
         errors = []
         for f in savefiles:
             try:
@@ -355,3 +364,4 @@ class MIDASSIPHandler(SIPHandler):
             self.set_state(status.FAILED, msg)
             raise PreservationError(msg, errors)
 
+        self.set_state(status.SUCCESSFUL)

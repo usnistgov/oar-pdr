@@ -3,12 +3,14 @@ This module provides the business logic for the Preservation Service.
 """
 from copy import deepcopy
 from abc import ABCMeta, abstractmethod, abstractproperty
-import threading, time, errno
+import os, logging, threading, time, errno
 
 from detach import Detach
 
 from ...exceptions import PDRException, StateException, ConfigurationException
+from ....id import PDRMinter
 from . import status
+from . import siphandler as hndlr
 
 from .. import sys as _sys
 log = logging.getLogger(_sys.system_abbrev).getChild(_sys.subsystem_abbrev)
@@ -23,6 +25,7 @@ class PreservationService(object):
     (i.e. either via Python threads or subprocesses, depending on the 
     implementation), multiple requests can be managed simultaneously. 
     """
+    __metaclass__ = ABCMeta
 
     def __init__(self, config):
         """
@@ -61,6 +64,9 @@ class PreservationService(object):
         self.idregdir = self.cfg.get('id_registry_dir')
         if not self.idregdir:
             self.idregdir = os.path.join(self.workdir, 'idreg')
+        if not os.path.exists(self.idregdir):
+            os.mkdir(self.idregdir)
+
         self.minters = {}
 
     def preserve(self, sipid, siptype=None, timeout=None):
@@ -89,31 +95,31 @@ class PreservationService(object):
                                          siptype)
         
         hdlr = self._make_handler(sipid, siptype)
-        if hdlr.status.state == status.FORGOTTEN:
+        if hdlr.state == status.FORGOTTEN:
             # lay claim to this SIP by updating the state
-            hdlr.reset()
+            hdlr._status.reset()
 
-        elif hdlr.status.state == status.FAILED:
+        elif hdlr.state == status.FAILED:
             # restarting a previously failed attempt
             log.warn("%s: Retrying previously failed preservation attempt",
                      sipid)
-            hdlr.reset()
+            hdlr._status.reset()
 
-        elif hdlr.status.state == status.SUCCESSFUL:
+        elif hdlr.state == status.SUCCESSFUL:
             log.warn("%s: Non-update request for previously preserved SIP",
                      sipid)
             raise StateException("initial preservation already completed " +
                                  "for "+sipid)
-        else:
+
+        elif hdlr.state == status.IN_PROGRESS:
             log.warn("%s: requested preservation is already in progress", sipid)
             raise StateException("preservation already underway for "+sipid)
 
-        if not hdlr.confirm_ready():
+        if not hdlr.isready():
             raise StateException("Requested SIP cannot be preserved: " +
                                  hdlr.status.message)
             
-        self.launch_handler(hdlr)
-        return hdlr.status
+        return self._launch_handler(hdlr, timeout)[0]
 
     @abstractmethod
     def _launch_handler(self, handler, timeout=None):
@@ -139,9 +145,18 @@ class PreservationService(object):
         :return dict:  a dictionary wiht metadata describing the status of 
                        preservation effort.
         """
-        hdlr = self._make_handler(sipid, siptype)
-        return hdlr.status
-
+        try: 
+            hdlr = self._make_handler(sipid, siptype)
+            return hdlr.status
+        except Exception, ex:
+            log.exception("Failed to create a handler for siptype=%s, "+
+                          "sipid=%s while checking status", sipid, siptype)
+            out = { "id": sipid,
+                    "state": status.NOT_FOUND,
+                    "message":
+                         "Unable to get status as siptype={0}".format(siptype),
+                    "history": [] }
+            return out
 
     @abstractmethod
     def update(self, sipid, siptype=None, timeout=None):
@@ -184,6 +199,8 @@ class PreservationService(object):
             pcfg['working_dir'] = os.path.join(self.workdir, 'preserv')
         if 'store_dir' not in pcfg:
             pcfg['store_dir'] = self.storedir
+        if 'id_registry_dir' not in pcfg:
+            pcfg['id_registry_dir'] = self.idregdir
         if 'mdbag_dir' not in pcfg:
             pcfg['mdbag_dir'] = cfg4type.get('mdserv',{}).get('working_dir',
                                         os.path.join(self.workdir, 'mdserv'))
@@ -199,7 +216,7 @@ class PreservationService(object):
             self.minters[siptype] = PDRMinter(mntrdir, cfg)
 
         if siptype == 'midas':
-            return MIDASSIPHandler(sipid, pcfg, self.minters[siptype])
+            return hndlr.MIDASSIPHandler(sipid, pcfg, self.minters[siptype])
         else:
             raise PDRException("SIP type not supported: "+siptype, sys=_sys)
 
@@ -221,41 +238,69 @@ class ThreadedPreservationService(PreservationService):
         """
         super(ThreadedPreservationService, self).__init__(config)
 
-
-
     class _HandlerThread(threading.Thread):
-        def __init__(self, handler, serialtype, destdir, params):
+        def __init__(self, handler, serialtype, destdir, params=None):
+            if params is None:
+                params = {}
+            tname = params.get('worker_name')
+            threading.Thread.__init__(self, name=tname)
             self._hdlr = handler
             self._stype = serialtype
             self._dest = destdir
-            self._params = parems
+            self._params = params
         def run(self):
             time.sleep(0)
             self._hdlr.bagit(self._stype, self._dest, self._params)
 
-    def launch_handler(self, handler, timeout=None):
+    def _launch_handler(self, handler, timeout=None):
         """
         launch the given handler in a separate thread.  After launching, 
         this function will join with the thread for a maximum time given by 
-        the timeout value.  
+        the timeout value.  If not provided, the configured value of 
+        'sync_timeout' will be used.  
+
+        :param handler SIPHandler:  the handler to launch
+        :param timeout        int:  the time in seconds to wait for the 
+                                      handler to finish before returning an 
+                                      asynchronous response.
         """
-        t = _HandlerThread('zip', self.store_dir, None)
-        t.start()
+        t = None
+        try: 
+            t = self._HandlerThread(handler, 'zip', self.storedir,
+                                    {'worker-name': handler._sipid})
+            t.start()
 
-        syncto = self.cfg.get('sync_timeout', 5)
-        t.join(syncto)
+            if timeout is None:
+                timeout = self.cfg.get('sync_timeout', 5)
+            t.join(timeout)
 
-        # the thread either finished or we timed-out waiting for it
-        if not t.is_alive():
-            if handler.state == status.IN_PROGRESS:
-                handler.status.update(status.FAILED,
+            # the thread either finished or we timed-out waiting for it
+            if not t.is_alive():
+                log.info("%s: preservation completed synchronously",
+                         handler._sipid)
+                if handler.state == status.IN_PROGRESS:
+                    handler.status.update(status.FAILED,
                                  "preservation thread died for unknown reasons")
-            elif handler.state == status.READY:
-                handler.status.update(status.FAILED,
+                elif handler.state == status.READY:
+                    handler.status.update(status.FAILED,
                              "preservation failed to start for unknown reasons")
+            else:
+                log.info("%s: preservation running asynchronously",
+                         handler._sipid)
 
-        return handler.status.user_export()
+        except Exception, ex:
+            log.exception("Failed to launch handler for sipid=%s",
+                          handler._sipid)
+            handler.set_state(status.FAILED,
+                        "Failed to launch preservation due to internal error")
 
+        return (handler.status, t)
+
+    def update(self, sipid, siptype=None, timeout=None):
+        raise NotImplemented()
+
+
+# NOT WORKING (use ThreadedPreservationService)
 
 class MultiprocPreservationService(PreservationService):
     """
@@ -286,21 +331,27 @@ class MultiprocPreservationService(PreservationService):
                 return True
             else:
                 raise
+        return True
 
-    def launch_handler(self, handler, timeout=None):
+    def _launch_handler(self, handler, timeout=None):
         """
         launch the given handler in a separate thread.  After launching, 
         this function will join with the thread for a maximum time given by 
         the timeout value.  
         """
-        with Detach() as d:
+        cpid = None
+        try:
+          with Detach() as d:
             if d.pid:
                 # parent process: wait a short bit to see if the child finishes
                 # quickly
-                syncto = self.cfg.get('sync_timeout', 5)
+                cpid = d.pid
+
+                if timeout is None:
+                    timeout = self.cfg.get('sync_timeout', 5)
                 starttime = time.time()
                 since = time.time() - starttime
-                while since < syncto:
+                while since < timeout:
                     if not self._pid_is_alive(d.pid):
                         break
                     time.sleep(1)
@@ -308,14 +359,34 @@ class MultiprocPreservationService(PreservationService):
 
                 if not self._pid_is_alive(d.pid):
                     if handler.state == status.IN_PROGRESS:
-                        handler.status.update(status.FAILED,
+                        handler.set_state(status.FAILED,
                                  "preservation thread died for unknown reasons")
                     elif handler.state == status.READY:
-                        handler.status.update(status.FAILED,
+                        handler.set_state(status.FAILED,
                              "preservation failed to start for unknown reasons")
 
-                return handler.status.user_export()
+                return (handler.status, d.pid)
             else:
                 # child
-                handler.bagit('zip', self.store_dir)
+                try:
+                    handler.bagit('zip', self.storedir)
+                except Exception, e:
+                    log.exception("Preservation handler failed: %s", str(e))
+                finally:
+                    ex = ((handler.state != status.SUCCESSFUL) and 1) or 0
+                    sys.exit(ex)
+
+        except Exception, e:
+            if cpid is None:
+                log.exception("Failed to launch preservation process: %s",str(e))
+                handler.set_state(status.FAILED,
+                                  "Failed to launch preservation process")
+                return (handler.status, None)
+            else:
+                log.exception("Unexpected failure while monitoring "+
+                              "preservation process: %s", str(e))
+                return (handler.status, cpid)
+
+    def update(self, sipid, siptype=None, timeout=None):
+        raise NotImplemented()
 

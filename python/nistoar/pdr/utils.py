@@ -4,6 +4,8 @@ Utility functions useful across the pdr package
 from collections import OrderedDict, Mapping
 import json, re
 
+from .exceptions import (NERDError, PODError, StateException)
+
 def read_nerd(nerdfile):
     """
     read the JSON-formatted NERDm metadata in the given file
