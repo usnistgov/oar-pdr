@@ -74,12 +74,12 @@ class TestNISTBag(test.TestCase):
         self.assertIn("nrdp:DataFile", data['@type'])
 
     def test_nerdm_component(self):
-        data = self.bag.nerdm_component('trial3/trial3a.json')
+        data = self.bag.nerd_metadata_for('trial3/trial3a.json')
         self.assertEqual(data['filepath'], 'trial3/trial3a.json')
         self.assertEqual(data['mediaType'], "application/json")
 
         with self.assertRaises(bagex.ComponentNotFound):
-            self.bag.nerdm_component('goober')
+            self.bag.nerd_metadata_for('goober')
         
     def test_nerdm_record(self):
         data = self.bag.nerdm_record()
