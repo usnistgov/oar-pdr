@@ -163,9 +163,9 @@ class SIPDirectoryError(PDRException):
                 problem = "SIP directory not provided"
         if not msg:
             if dir:
-                msg = "Problem with SIP directory, {0}: {1}".format(dir, prob)
+                msg = "Problem with SIP directory, {0}: {1}".format(dir, problem)
             else:
-                msg = prob
+                msg = problem
         super(SIPDirectoryError, self).__init__(msg, cause, sys)
         self.problem = problem
                     

@@ -9,10 +9,10 @@ from collections import OrderedDict
 from copy import deepcopy
 
 from ..bagit.serialize import DefaultSerializer
-from ..bagger.base import checksum_of, PreservationError
+from ..bagger.base import checksum_of
 from ..bagger.midas import PreservationBagger
 from .. import (ConfigurationException, StateException, PODError)
-from .. import sys as _sys
+from .. import PreservationException, sys as _sys
 from . import status
 
 log = logging.getLogger(_sys.system_abbrev).getChild(_sys.subsystem_abbrev)
@@ -96,7 +96,7 @@ class SIPHandler(object):
         proceed.  The child implementation should then do a quick check that the
         input data exists and appears to be in a state ready for preservation.  
         """
-        ok = [status.FORGOTTEN, status.PENDING, status.READY]
+        ok = [status.FORGOTTEN, status.PENDING, status.READY, status.NOT_READY]
         if _inprogress:
             ok.append(status.IN_PROGRESS)
         return self._status.state in ok
@@ -143,14 +143,14 @@ class SIPHandler(object):
         """
         return self._status.state
 
-    def set_state(self, state, message=None):
+    def set_state(self, state, message=None, cache=True):
         """
         update the status of the preservation to that of the given label.
         A message intended for the external user can optionally be provided.
         This status will get cached to disk so that it is accessible by other
         processes.
         """
-        self._status.update(state, message)
+        self._status.update(state, message, cache)
 
     def _serialize(self, bagdir, destdir, format=None):
         """
@@ -285,7 +285,7 @@ class MIDASSIPHandler(SIPHandler):
         is returned if this is not true, and the child implementation should not 
         proceed.  The child implementation should then do a quick check that the
         input data exists and appears to be in a state ready for preservation.  
-        It should finally set the current state to READY.
+        It should finally set the _ready field to True.
 
         :return bool:  True if the requested SIP appears to be ready for 
                        preservation; False, otherwise.
@@ -296,16 +296,19 @@ class MIDASSIPHandler(SIPHandler):
         if self.state != status.READY:
             # check for the existence of the input data
             if not os.path.exists(self.bagger.indir):
-                self.status.update(status.NOT_FOUND)
+                self.set_state(status.NOT_FOUND, cache=False)
+                return False
 
             # make sure the input SIP includes a POD file
             try:
                 self.bagger.find_pod_file()
             except PODError, e:
-                self.set_state(status.NOT_FOUND, "missing POD record")
+                self.set_state(status.NOT_READY, "missing POD record", False)
                 return False
 
-            self.set_state(status.READY)
+            if self.state == status.FORGOTTEN or self.state == status.NOT_READY:
+                self.set_state(status.READY,
+                               cache=(self.state == status.NOT_READY))
             
         return True
                 
@@ -362,6 +365,6 @@ class MIDASSIPHandler(SIPHandler):
                   "storage dir ({0})"
             msg = msg.format(self.storedir)
             self.set_state(status.FAILED, msg)
-            raise PreservationError(msg, errors)
+            raise PreservationException(msg, errors)
 
         self.set_state(status.SUCCESSFUL)

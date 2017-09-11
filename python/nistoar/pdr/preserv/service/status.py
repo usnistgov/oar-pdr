@@ -11,18 +11,20 @@ from .. import sys as preservsys
 
 NOT_FOUND   = "not found"
 READY       = "ready"
+NOT_READY   = "not ready"
 PENDING     = "pending"
 IN_PROGRESS = "in progress"
 SUCCESSFUL  = "successful"
 FAILED      = "failed"
 FORGOTTEN   = "forgotten"
 
-states = [ NOT_FOUND, READY, PENDING, 
+states = [ NOT_FOUND, READY, NOT_READY, PENDING, 
            IN_PROGRESS, SUCCESSFUL, FAILED, FORGOTTEN ]
 
 user_message = {
     NOT_FOUND:   "Data not found for given identifier",
     READY:       "Data is available for preservation",
+    NOT_READY:   "Data found appears not ready for preservation",
     PENDING:     "Preservation requested, will start shortly",
     IN_PROGRESS: "Preservation processing in progress",
     SUCCESSFUL:  "Data was successfully preserved",
@@ -260,7 +262,7 @@ class SIPStatus(object):
         self._data['user']['updated'] = time.asctime()
         SIPStatusFile.write(self._cachefile, self._data)
         
-    def update(self, label, message=None):
+    def update(self, label, message=None, cache=True):
         """
         change the state of the processing.  In addition to updating the 
         data in-memory, the full, current set of status metadata will be 
@@ -278,7 +280,8 @@ class SIPStatus(object):
             message = user_message[label]
         self._data['user']['state'] = label
         self._data['user']['message'] = message
-        self.cache()
+        if cache:
+            self.cache()
 
     def reset(self, message=None):
         """
@@ -351,3 +354,12 @@ class SIPStatus(object):
         return out
 
         
+    @classmethod
+    def requests(cls, config):
+        """
+        return a list of SIP IDs for which there exist status information
+        """
+        cachedir = config.get('cachedir', '/tmp/sipstatus')
+        return [ os.path.splitext(id)[0] for id in os.listdir(cachedir)
+                                         if not id.startswith('_') and
+                                            not id.startswith('.')          ]

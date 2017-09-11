@@ -7,12 +7,13 @@ import os, logging, threading, time, errno
 
 from detach import Detach
 
-from ...exceptions import PDRException, StateException, ConfigurationException
+from ...exceptions import (PDRException, StateException,
+                           ConfigurationException, SIPDirectoryNotFound)
 from ....id import PDRMinter
 from . import status
 from . import siphandler as hndlr
 
-from .. import sys as _sys
+from .. import PreservationException, sys as _sys
 log = logging.getLogger(_sys.system_abbrev).getChild(_sys.subsystem_abbrev)
 
 
@@ -103,21 +104,23 @@ class PreservationService(object):
             # restarting a previously failed attempt
             log.warn("%s: Retrying previously failed preservation attempt",
                      sipid)
+            # FIX: did it fail previously on an update?
             hdlr._status.reset()
 
         elif hdlr.state == status.SUCCESSFUL:
             log.warn("%s: Non-update request for previously preserved SIP",
                      sipid)
-            raise StateException("initial preservation already completed " +
-                                 "for "+sipid)
+            raise RerequestException(hdlr.state,
+                            "initial preservation already completed for "+sipid)
 
         elif hdlr.state == status.IN_PROGRESS:
             log.warn("%s: requested preservation is already in progress", sipid)
-            raise StateException("preservation already underway for "+sipid)
+            raise RerequestException(hdlr.state,
+                                     "preservation already underway for "+sipid)
 
         if not hdlr.isready():
-            raise StateException("Requested SIP cannot be preserved: " +
-                                 hdlr.status.message)
+            raise PreservationException("Requested SIP cannot be preserved: " +
+                                        hdlr.status.message)
             
         return self._launch_handler(hdlr, timeout)[0]
 
@@ -147,16 +150,47 @@ class PreservationService(object):
         """
         try: 
             hdlr = self._make_handler(sipid, siptype)
+            if hdlr.state == status.FORGOTTEN or hdlr.state == status.NOT_READY:
+                hdlr.isready()
             return hdlr.status
+        except SIPDirectoryNotFound, ex:
+            out = { "id": sipid,
+                    "state": status.NOT_FOUND,
+                    "message": status.user_message[status.NOT_FOUND],
+                    "history": [] }
+            return out
         except Exception, ex:
             log.exception("Failed to create a handler for siptype=%s, "+
                           "sipid=%s while checking status", sipid, siptype)
             out = { "id": sipid,
-                    "state": status.NOT_FOUND,
+                    "state": status.NOT_READY,
                     "message":
                          "Unable to get status as siptype={0}".format(siptype),
                     "history": [] }
             return out
+
+    def requests(self, siptype=None):
+        """
+        return the known SIP identifiers for which preservation requests 
+        have been made.  These values can be used to return status information 
+        via the status() method.  
+
+        :param siptype str: return IDs only of the given type.  If None, all 
+             types are returned.
+        :return dict:  a dictionary where the keys are identifiers and the values
+             are their corresponding SIP type names.  
+        """
+        out = {}
+        stcfg = self.cfg.get('sip_type', {})
+        for tp in stcfg.keys():
+            if siptype and siptype != tp:
+                continue
+            hndlrcfg = self._get_handler_config(tp)
+            ids = status.SIPStatus.requests(hndlrcfg.get('status_manager',{}))
+            for id in ids:
+                out[id] = tp
+
+        return out
 
     @abstractmethod
     def update(self, sipid, siptype=None, timeout=None):
@@ -180,7 +214,8 @@ class PreservationService(object):
         :return dict:  a dictionary wiht metadata describing the status of 
                        preservation effort.
         """
-        raise NotImplementedError()
+        raise NotImplemented()
+        
 
     def _make_handler(self, sipid, siptype=None):
         """
@@ -188,7 +223,26 @@ class PreservationService(object):
         """
         if not siptype:
             siptype = 'midas'
+
+        pcfg = self._get_handler_config(siptype)
             
+        # get an IDMinter we can use
+        if siptype not in self.minters:
+            mntrdir = pcfg.get('id_registry_dir',
+                               self.cfg.get('id_registry_dir',
+                                            os.path.join(self.workdir, 'idreg')))
+            cfg = pcfg.get('id_minter', {})
+            self.minters[siptype] = PDRMinter(mntrdir, cfg)
+
+        if siptype == 'midas':
+            return hndlr.MIDASSIPHandler(sipid, pcfg, self.minters[siptype])
+        else:
+            raise PDRException("SIP type not supported: "+siptype, sys=_sys)
+
+    def _get_handler_config(self, siptype):
+        # from our service configuration, build a configuration object that
+        # can be used to preserve an SIP of a particular type
+        
         cfg4type = self.cfg.get('sip_type', {}).get(siptype, {})
 
         # fold the common parameters into the preserv parameters
@@ -204,23 +258,9 @@ class PreservationService(object):
         if 'mdbag_dir' not in pcfg:
             pcfg['mdbag_dir'] = cfg4type.get('mdserv',{}).get('working_dir',
                                         os.path.join(self.workdir, 'mdserv'))
-        if 'status_manager' not in pcfg:
-            pcfg['status_manager'] = self.cfg.get('status_manager', {})
 
-        # get an IDMinter we can use
-        if siptype not in self.minters:
-            mntrdir = pcfg.get('id_registry_dir',
-                               self.cfg.get('id_registry_dir',
-                                            os.path.join(self.workdir, 'idreg')))
-            cfg = pcfg.get('id_minter', {})
-            self.minters[siptype] = PDRMinter(mntrdir, cfg)
+        return pcfg
 
-        if siptype == 'midas':
-            return hndlr.MIDASSIPHandler(sipid, pcfg, self.minters[siptype])
-        else:
-            raise PDRException("SIP type not supported: "+siptype, sys=_sys)
-
-    
 class ThreadedPreservationService(PreservationService):
     """
     A class that asynchronously handles requests to ingest and preserve 
@@ -297,7 +337,41 @@ class ThreadedPreservationService(PreservationService):
         return (handler.status, t)
 
     def update(self, sipid, siptype=None, timeout=None):
-        raise NotImplemented()
+        # Unimplemented: simulating asynchronous response
+        
+        if siptype not in self.siptypes:
+            raise ConfigurationException("No support configured for SIP type: "+
+                                         siptype)
+        
+        hdlr = self._make_handler(sipid, siptype)
+        if hdlr.state == status.FORGOTTEN or hdlr.state == status.READY:
+            # lay claim to this SIP by updating the state
+            hdlr._status.reset()
+
+        elif hdlr.state == status.FAILED:
+            # restarting a previously failed attempt
+            log.warn("%s: Retrying previously failed preservation attempt",
+                     sipid)
+            # FIX: did it fail previously on an update?
+            hdlr._status.reset()
+
+        elif hdlr.state == status.SUCCESSFUL:
+            log.info("%s: Update request for previously preserved SIP",
+                     sipid)
+            hdlr._status.reset()
+
+        elif hdlr.state == status.IN_PROGRESS:
+            log.warn("%s: preservation is already in progress", sipid)
+            raise RerequestException(hdlr.state,
+                                     "preservation already underway for "+sipid)
+
+        if not hdlr.isready():
+            raise PreservationException("Requested SIP cannot be preserved: " +
+                                        hdlr.status.message)
+
+        log.warn("Update is unimplemented! (Pretending to work asynchronously)")
+        hdlr.set_state(status.IN_PROGRESS)
+        return hdlr.status
 
 
 # NOT WORKING (use ThreadedPreservationService)
@@ -389,4 +463,17 @@ class MultiprocPreservationService(PreservationService):
 
     def update(self, sipid, siptype=None, timeout=None):
         raise NotImplemented()
+
+class RerequestException(PreservationException):
+    """
+    User has requested to preserve an SIP that has already been requested.  
+    Providing the status state will reflect whether the original request was 
+    successful, in progress, or otherwise failed.  
+    """
+    def __init__(self, request_state, msg=None):
+        if not msg:
+            "SIP preservation has already been requested ({0})".\
+                format(request_state)
+        super(RerequestException, self).__init__(msg)
+        self.state = request_state
 

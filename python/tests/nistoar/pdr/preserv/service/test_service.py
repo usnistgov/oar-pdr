@@ -186,7 +186,7 @@ class TestThreadedPreservationService(test.TestCase):
                    t.join()
         
         try:
-            with self.assertRaises(StateException):
+            with self.assertRaises(serv.RerequestException):
                 stat = self.svc.preserve(self.midasid, 'midas', 2)
         finally:
             for t in threading.enumerate():
@@ -199,16 +199,30 @@ class TestThreadedPreservationService(test.TestCase):
         hndlr.set_state(status.IN_PROGRESS)
         
         try:
-            with self.assertRaises(StateException):
+            with self.assertRaises(serv.RerequestException):
                 stat = self.svc.preserve(self.midasid, 'midas', 2)
         finally:
             for t in threading.enumerate():
                 if t.name == self.midasid:
                    t.join()
 
+    def test_status2(self):
+        stat = self.svc.status("FFFFFFFFFF")
+        self.assertEqual(stat['state'], status.NOT_FOUND)
+        self.assertTrue(not os.path.exists(os.path.join(self.statusdir,
+                                                        "FFFFFFFFFF.json")))
+
+        os.mkdir(os.path.join(self.revdir, "FFFFFFFFFF"))
+        stat = self.svc.status("FFFFFFFFFF")
+        self.assertEqual(stat['state'], status.NOT_READY)
+        self.assertTrue(not os.path.exists(os.path.join(self.statusdir,
+                                                        "FFFFFFFFFF.json")))
+        
     def test_status(self):
         stat = self.svc.status(self.midasid)
-        self.assertEqual(stat['state'], status.FORGOTTEN)
+        self.assertEqual(stat['state'], status.READY)
+        self.assertTrue(not os.path.exists(os.path.join(self.statusdir,
+                                                        self.midasid+".json")))
         
         hndlr = self.svc._make_handler(self.midasid, 'midas')
         hndlr.set_state(status.IN_PROGRESS)
@@ -229,8 +243,28 @@ class TestThreadedPreservationService(test.TestCase):
 
     def test_status_badtype(self):
         stat = self.svc.status(self.midasid, 'goob')
-        self.assertEqual(stat['state'], status.NOT_FOUND)
+        self.assertEqual(stat['state'], status.NOT_READY)
 
+    def test_requests(self):
+        reqs = self.svc.requests()
+        self.assertEqual(len(reqs), 0)
+        
+        hndlr = self.svc._make_handler(self.midasid, 'midas')
+        hndlr.set_state(status.IN_PROGRESS)
+        reqs = self.svc.requests()
+        self.assertIn(self.midasid, reqs)
+        self.assertEqual(reqs[self.midasid], 'midas')
+        self.assertEqual(len(reqs), 1)
+        
+        reqs = self.svc.requests('goob')
+        self.assertEqual(len(reqs), 0)
+
+        reqs = self.svc.requests('midas')
+        self.assertIn(self.midasid, reqs)
+        self.assertEqual(reqs[self.midasid], 'midas')
+        self.assertEqual(len(reqs), 1)
+        
+        
 
 class TestMultiprocPreservationService(test.TestCase):
 

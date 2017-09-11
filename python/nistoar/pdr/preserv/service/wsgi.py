@@ -6,9 +6,11 @@ necessary for integration into a WSGI server.  It should be replaced with
 a framework-based implementation if any further capabilities are needed.
 """
 
-import os, sys, logging, json
+import os, sys, logging, json, cgi
 from wsgiref.headers import Headers
 
+from .service import ThreadedPreservationService, RerequestException
+from . import status
 from .. import PreservationSystem
 
 log = logging.getLogger(PreservationSystem().subsystem_abbrev).getChild("preserve")
@@ -18,7 +20,15 @@ DEF_BASE_PATH = "/"
 class PreservationRequestApp(object):
 
     def __init__(self, config):
-        self.base_path = config.get('base_path', DEF_BASE_PATH)
+        self.cfg = config
+        try:
+            wd = config['working_dir']
+            self.base_path = config.get('base_path', DEF_BASE_PATH)
+        except KeyError, e:
+            key = e.message
+            raise ConfigurationException("Missing required config param: "+
+                                         key)
+
         self.preserv = ThreadedPreservationService(config)
         self.siptype = 'midas'
 
@@ -33,35 +43,40 @@ app = PreservationRequestApp
 
 class Handler(object):
 
-    def __init__(self, service, siptype, wsgienv, start_resp):
+    def __init__(self, service, siptype, wsgienv, start_resp,
+                 authkey=None):
         self._svc = service
-        self._fmap = filemap
         self._env = wsgienv
         self._start = start_resp
         self._meth = wsgienv.get('REQUEST_METHOD', 'GET')
         self._hdr = Headers([])
         self._code = 0
         self._msg = "unknown status"
+        self._auth = authkey
 
     def send_error(self, code, message):
-        status = "{0} {1}".format(str(code), message)
-        self._start(status, [], sys.exc_info())
+        stat = "{0} {1}".format(str(code), message)
+        self._start(stat, [], sys.exc_info())
 
     def add_header(self, name, value):
         self._hdr.add_header(name, value)
 
     def set_response(self, code, message):
-        self._code = 200
+        self._code = code
         self._msg = message
 
     def end_headers(self):
-        status = "{0} {1}".format(str(self._code), self._msg)
-        self._start(status, self._hdr.items())
+        stat = "{0} {1}".format(str(self._code), self._msg)
+        self._start(stat, self._hdr.items())
 
     def handle(self):
         meth_handler = 'do_'+self._meth
 
-        path = self._env.get('PATH_INFO', '/')[1:]
+        path = self._env.get('PATH_INFO', '/').strip('/')
+        params = cgi.parse_qs(self._env.get('QUERY_STRING', ''))
+        if not self.authorize(params.get('auth',[])):
+            self.send_error(401, "Not authorized")
+            return []
 
         if hasattr(self, meth_handler):
             return getattr(self, meth_handler)(path)
@@ -69,14 +84,206 @@ class Handler(object):
             return self.send_error(403, self._meth +
                                    " not supported on this resource")
 
+    def authorize(self, auths):
+        if self._auth:
+            return self._auth == auths[-1]  # match the last value provided
+        return len(auths) == 0
+
     def do_GET(self, path):
         # return the status on request or a list of previous requests
-        pass
+        steps = path.split('/')
+        if steps[0] == '':
+            try:
+                out = json.dumps(['midas'])
+            except Exception, ex:
+                log.exception("Internal error: "+str(ex))
+                self.send_error(500, "Internal error")
+                return ["[]"]
+
+            self.set_response(200, "Supported SIP Types")
+            self.add_header('ContentType', 'application/json')
+            self.end_headers()
+            return [out]
+            
+        elif steps[0] == 'midas':
+            if len(steps) > 2:
+                path = '/'.join(steps[1:])
+                self.send_error(400, "Unsupported SIP identifier: "+path)
+                return []
+            elif len(steps) > 1:
+                if steps[1].startswith("_") or steps[1].startswith("."): 
+                    self.send_error(400, "Unsupported SIP identifier: "+path)
+                    return []
+                
+                return self.request_status(steps[1])
+            else:
+                return self.requests()
+        else:
+            self.send_error(404, "SIP Type not supported")
+            return ["[]"]
+
+    def do_HEAD(self, path):
+        self.do_GET(path)
+        return []
+
+    def requests(self):
+        """
+        return a list of identifiers for which preservation has been 
+        requested.
+        """
+        try: 
+            reqs = self._svc.requests('midas')
+            out = json.dumps(reqs.keys())
+        except Exception, ex:
+            log.exception("Internal error: "+str(ex))
+            self.send_error(500, "Internal error")
+            return ['[]']
+
+        self.set_response(200, "Preservation requests by SIP ID")
+        self.add_header('ContentType', 'application/json')
+        self.end_headers()
+        return [out]
+
+    def request_status(self, sipid):
+        """
+        return the status of a particular preservation request
+        """
+        try:
+            stat = self._svc.status(sipid, 'midas')
+            out = json.dumps(stat)
+        except Exception, ex:
+            log.exception("Internal error: "+str(ex))
+            self.send_error(500, "Internal error")
+            return ["{}"]
+            
+        if stat['state'] == status.FORGOTTEN:
+            self.set_response(404, "Preservation history for SIP identifer not found "+
+                              "(or forgotten)")
+        elif stat['state'] == status.NOT_FOUND:
+            self.set_response(404, "Preservation history for SIP identifer not found")
+
+        elif stat['state'] == status.READY:
+            self.set_response(404, "Preservation history for SIP identifer not found (but is ready)")
+
+        else:
+            self.set_response(200, "Preservation record found")
+
+        self.add_header('ContentType', 'application/json')
+        self.end_headers()
+        return [out]
 
     def do_PATCH(self, path):
         # create an update request
-        pass
 
-    def do_POST(self, path):
+        steps = path.split('/')
+        if steps[0] == '':
+            self.send_error(403, "PATCH is not supported on this resource")
+            return ['{}']
+            
+        elif steps[0] == 'midas':
+            if len(steps) > 2:
+                path = '/'.join(steps[1:])
+                self.send_error(400, "Not a legal SIP ID: "+path)
+            elif len(steps) > 1:
+                return self.update_sip(steps[1])
+            else:
+                self.send_error(403, "PATCH not supported on this resource")
+        else:
+            self.send_error(404, "SIP Type not supported")
+            return ["{}"]
+
+    def update_sip(self, sipid):
+
+        try: 
+            out = self._svc.update(sipid, 'midas')
+        
+            if out['state'] == status.NOT_FOUND:
+                log.warn("Requested SIP ID not found: "+sipid)
+                self.set_response(404, "SIP not found (or is not ready)")
+            elif out['state'] == status.SUCCESSFUL:
+                log.info("SIP update request completed synchronously: "+
+                         sipid)
+                self.set_response(201, "SIP update completed successfully")
+            elif out['state'] == status.FAILED:
+                log.error(stat['message'])
+                self.set_response(500, "SIP update failed: " +
+                                  stat['message'])
+            else:
+                log.info("SIP update request in progress asynchronously: " +
+                         sipid)
+                self.set_response(202, "SIP " + out['message'])
+
+            out = json.dumps(out)
+
+        except RerequestException, ex:
+            log.warn("Rerequest of SIP update detected: "+sipid)
+            self.set_response(403, "Preservation update for SIP was already "+
+                              "requested (current status: "+ex.state+")")
+            
+        self.add_header('ContentType', 'application/json')
+        self.end_headers()
+        return [out]
+
+        
+
+    def do_PUT(self, path):
         # create a new preservation request
-        pass
+        
+        steps = path.split('/')
+        if steps[0] == '':
+            self.send_error(403, "PUT is not supported on this resource")
+            return ['{}']
+            
+        elif steps[0] == 'midas':
+            if len(steps) > 2:
+                path = '/'.join(steps[1:])
+                self.send_error(400, "Not a legal SIP ID: "+path)
+            elif len(steps) > 1:
+                return self.preserve_sip(steps[1])
+            else:
+                self.send_error(403, "PUT not supported on this resource")
+        else:
+            self.send_error(404, "SIP Type not supported")
+            return ["{}"]
+
+    def preserve_sip(self, sipid):
+        out = {}
+        try: 
+            out = self._svc.preserve(sipid, 'midas')
+        
+            if out['state'] == status.NOT_FOUND:
+                log.warn("Requested SIP ID not found: "+sipid)
+                self.set_response(404, "SIP not found")
+            elif out['state'] == status.NOT_READY:
+                log.warn("Premature request for SIP preservation (not ready): "+
+                         sipid)
+                self.set_response(409, "SIP is not ready")
+            elif out['state'] == status.SUCCESSFUL:
+                log.info("SIP preservation request completed synchronously: "+
+                         sipid)
+                self.set_response(201, "SIP preservation completed successfully")
+            elif out['state'] == status.FAILURE:
+                log.error(out.message)
+                self.set_response(500, "SIP preservation failed: " +
+                                  out.message)
+            else:
+                log.info("SIP preservation request in progress asynchronously: "+
+                         sipid)
+                self.set_response(202, "SIP "+out.message)
+
+            out = json.dumps(out)
+
+        except RerequestException, ex:
+            log.warn("Rerequest of SIP detected: "+sipid)
+            self.set_response(403, "Preservation for SIP was already requested "+
+                              "(current status: "+ex.state+")")
+
+        except Exception, ex:
+            log.exception("preservation request failure for sip=%s: %s",
+                          sipid, str(ex))
+            self.set_response(500, "Internal server error")
+            
+        self.add_header('ContentType', 'application/json')
+        self.end_headers()
+        return [out]
+
