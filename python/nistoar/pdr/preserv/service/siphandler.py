@@ -166,7 +166,8 @@ class SIPHandler(object):
                                 will be applied (as given in the configuration).
         """
         #TODO:  splitting large submissions
-        
+
+        self._status.data['user']['bagfiles'] = []
         file1 = self._ser.serialize(bagdir, destdir, format)
         for file in [file1]:
             csumfile = file + ".sha256"
@@ -175,6 +176,13 @@ class SIPHandler(object):
                 fd.write(csum)
                 fd.write('\n')
 
+            # write the checksum to our status object
+            self._status.data['user']['bagfiles'].append({
+                'name': os.path.basename(file),
+                'sha256': csum
+            })
+
+        self._status.cache()
         return [file1, csumfile]
     
 class MIDASSIPHandler(SIPHandler):

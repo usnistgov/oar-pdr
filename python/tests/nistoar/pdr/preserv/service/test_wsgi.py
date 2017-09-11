@@ -255,6 +255,7 @@ class TestApp(test.TestCase):
         data = json.loads(body[0])
         self.assertEqual(data['id'], self.midasid)
         self.assertEqual(data['state'], "successful")
+        self.assertEqual(len(data['bagfiles']), 1)
 
         self.resp = []
         req = {
@@ -284,6 +285,7 @@ class TestApp(test.TestCase):
         data = json.loads(body[0])
         self.assertEqual(data['id'], self.midasid)
         self.assertEqual(data['state'], "successful")
+        self.assertEqual(len(data['bagfiles']), 1)
 
     def test_bad_patch(self):
         req = {

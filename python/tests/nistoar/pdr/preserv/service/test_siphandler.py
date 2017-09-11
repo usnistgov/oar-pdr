@@ -89,11 +89,20 @@ class TestMIDASSIPHandler(test.TestCase):
     def test_bagit(self):
         self.assertEqual(self.sip.state, status.FORGOTTEN)
         self.sip.bagit()
-        self.assertTrue(os.path.exists(os.path.join(self.store,
+        self.assertTrue(os.path.exists(os.path.join(self.store, 
                                                 self.midasid+".mbag0_2-0.zip")))
-        self.assertTrue(os.path.exists(os.path.join(self.store,
-                                         self.midasid+".mbag0_2-0.zip.sha256")))
+
+        csumfile = os.path.join(self.store, self.midasid+".mbag0_2-0.zip.sha256")
+        self.assertTrue(os.path.exists(csumfile))
+        with open(csumfile) as fd:
+            csum = fd.read().strip()
+        
         self.assertEqual(self.sip.state, status.SUCCESSFUL)
+        self.assertIn('bagfiles', self.sip.status)
+        self.assertEqual(len(self.sip.status['bagfiles']), 1)
+        self.assertEqual(self.sip.status['bagfiles'][0]['name'], 
+                                                self.midasid+".mbag0_2-0.zip")
+        self.assertEqual(self.sip.status['bagfiles'][0]['sha256'], csum)
         
 
 if __name__ == '__main__':
