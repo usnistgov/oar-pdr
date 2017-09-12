@@ -169,6 +169,33 @@ class TestApp(test.TestCase):
         self.assertEqual(data['id'], self.midasid)
         self.assertEqual(data['state'], "ready")
 
+    def test_not_found(self):
+        req = {
+            'PATH_INFO': '/midas/goober',
+            'REQUEST_METHOD': 'GET'
+        }
+
+        body = self.svc(req, self.start)
+        self.assertGreater(len(self.resp), 0)
+        self.assertIn("404", self.resp[0])
+        self.assertGreater(len(body), 0)
+        data = json.loads(body[0])
+        self.assertEqual(data['id'], 'goober')
+        self.assertEqual(data['state'], "not found")
+
+        req = {
+            'PATH_INFO': '/midas/goober/',
+            'REQUEST_METHOD': 'GET'
+        }
+
+        body = self.svc(req, self.start)
+        self.assertGreater(len(self.resp), 0)
+        self.assertIn("404", self.resp[0])
+        self.assertGreater(len(body), 0)
+        data = json.loads(body[0])
+        self.assertEqual(data['id'], 'goober')
+        self.assertEqual(data['state'], "not found")
+
     def test_get_types(self):
         req = {
             'PATH_INFO': '/',

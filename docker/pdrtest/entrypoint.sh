@@ -10,8 +10,18 @@ function install {
 }
 
 function launch_test_mdserv {
+    service nginx stop
     echo starting uwsgi...
-    uwsgi --daemonize $OAR_HOME/var/logs/uwsgi.log --plugin python --uwsgi-socket :9090 --wsgi-file scripts/ppmdserver-uwsgi-test.py
+    uwsgi --daemonize $OAR_HOME/var/logs/uwsgi.log --plugin python --uwsgi-socket :9090 --wsgi-file scripts/ppmdserver-uwsgi-test.py --pidfile $OAR_HOME/var/mdserv.pid
+    echo starting nginx...
+    service nginx start
+}
+
+function launch_test_preserver {
+    service nginx stop
+    kill `cat $OAR_HOME/var/mdserv.pid` && sleep 1
+    echo starting uwsgi...
+    uwsgi --daemonize $OAR_HOME/var/logs/uwsgi.log --plugin python --uwsgi-socket :9090 --wsgi-file scripts/preserver-uwsgi-test.py --pidfile $OAR_HOME/var/preserver.pid
     echo starting nginx...
     service nginx start
 }
@@ -43,6 +53,26 @@ case "$1" in
             stat=$?
         set +x
 
+        echo Launching/testing the preservation service via nginx...
+        launch_test_preserver
+
+        set -x
+        curl -v http://localhost/preserve/midas/3A1EE2F169DD3B8CE0531A570681DB5D1491 \
+             > stat_out.txt; \
+             python -c 'import sys, json; fd = open("stat_out.txt"); data = json.load(fd); sys.exit(0 if data["state"]=="ready" else 11)' || \
+             stat=$?
+        
+        curl http://localhost/preserve/midas/goober \
+             > stat_out.txt; \
+             python -c 'import sys, json; fd = open("stat_out.txt"); data = json.load(fd); sys.exit(0 if data["state"]=="not found" else 11)' || \
+             stat=$?; 
+        
+        curl -X PUT http://localhost/preserve/midas/3A1EE2F169DD3B8CE0531A570681DB5D1491 \
+             > stat_out.txt; \
+             python -c 'import sys, json; fd = open("stat_out.txt"); data = json.load(fd); sys.exit(0 if data["state"]=="successful" else 11)' || \
+             stat=$?; 
+        set +x
+        
         [ "$stat" != "0" ] && {
             echo "testall: One or more server tests failed (last=$stat)"
             exitopwith testall 3
@@ -73,9 +103,13 @@ case "$1" in
         install && launch_test_mdserv
         exec /bin/bash
         ;;
+    testpreserveshell)
+        install && launch_test_preserver
+        exec /bin/bash
+        ;;
     *)
         echo Unknown command: $1
-        echo Available commands:  testall testshell install shell installshell testmdservshell
+        echo Available commands:  testall testshell install shell installshell testmdservshell testpreserveshell
         ;;
 esac
 
