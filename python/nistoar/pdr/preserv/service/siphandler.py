@@ -363,6 +363,7 @@ class MIDASSIPHandler(SIPHandler):
         savefiles = self._serialize(bagdir, self.stagedir, serialtype)
 
         self._status.record_progress("Delivering preservation artifacts")
+        log.debug("writing files to %s", destdir)
         errors = []
         for f in savefiles:
             try:
@@ -370,8 +371,10 @@ class MIDASSIPHandler(SIPHandler):
                 os.rename(f, os.path.join(destdir, os.path.basename(f)))
             except OSError, ex:
                 # TODO: Roll back! (do not copy as much as possible)
-                msg = "{0}: {1}".format(f, ex.message)
+                msg = "{0}: {1}".format(f, str(ex))
                 log.error(msg)
+                log.debug("failed destination file: %s",
+                          os.path.join(destdir, os.path.basename(f)))
                 errors.append(msg)
 
         if errors:

@@ -66,7 +66,7 @@ def zip_serialize(bagdir, destdir, log, destfile=None):
         raise StateException("Can't serialize to missing destination directory: "
                              +destdir)
     
-    cmd = "zip -r".split() + [ destfile, name ]
+    cmd = "zip -qr".split() + [ destfile, name ]
     try:
         _exec(cmd, parent, log)
     except sp.CalledProcessError, ex:
