@@ -48,6 +48,12 @@ def zip_serialize(bagdir, destdir, log, destfile=None):
     if not destfile:
         destfile = name+'.zip'
     destfile = os.path.join(destdir, destfile)
+
+    if not os.path.exists(bagdir):
+        raise StateException("Can't serialize missing bag directory: "+bagdir)
+    if not os.path.exists(destdir):
+        raise StateException("Can't serialize to missing destination directory: "
+                             +destdir)
     
     cmd = "zip -r".split() + [ destfile, name ]
     try:
