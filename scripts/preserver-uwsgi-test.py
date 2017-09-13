@@ -54,6 +54,8 @@ def adjust_config(config):
                                "nistoar", "pdr", "preserv", "data", "midassip")
         revdir = os.path.join(workdir, "review")
         print >> sys.stderr, "copying review data"
+        if os.path.isdir(revdir):
+            shutil.rmtree(revdir)
         shutil.copytree(os.path.join(datadir,'review'), revdir)
         assert os.path.exists(revdir)
     else:

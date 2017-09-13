@@ -57,7 +57,7 @@ case "$1" in
         launch_test_preserver
 
         set -x
-        curl -v http://localhost/preserve/midas/3A1EE2F169DD3B8CE0531A570681DB5D1491 \
+        curl http://localhost/preserve/midas/3A1EE2F169DD3B8CE0531A570681DB5D1491 \
              > stat_out.txt; \
              python -c 'import sys, json; fd = open("stat_out.txt"); data = json.load(fd); sys.exit(0 if data["state"]=="ready" else 11)' || \
              stat=$?
