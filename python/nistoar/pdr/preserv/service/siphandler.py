@@ -68,6 +68,8 @@ class SIPHandler(object):
 
         self.workdir = self.cfg['working_dir']
         assert self.workdir
+        if not os.path.exists(self.workdir):
+            os.mkdir(self.workdir)
 
         self.storedir = self.cfg['store_dir']
         assert self.storedir
@@ -79,6 +81,8 @@ class SIPHandler(object):
         stcfg = self.cfg.get('status_manager', {})
         if 'cachedir' not in stcfg:
             stcfg['cachedir'] = os.path.join(self.workdir, "preserv_status")
+        if not os.path.exists(stcfg['cachedir']):
+            os.mkdir(stcfg['cachedir'])
 
         # The initial state will be FORGOTTEN unless another handler has
         # already started.
