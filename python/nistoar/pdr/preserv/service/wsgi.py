@@ -31,9 +31,13 @@ class PreservationRequestApp(object):
 
         self.preserv = ThreadedPreservationService(config)
         self.siptype = 'midas'
+        self._auth = self.cfg.get('auth_key')
+        if not self._auth:
+            log.warn("Service launched without authorization key defined")
 
     def handle_request(self, env, start_resp):
-        handler = Handler(self.preserv, self.siptype, env, start_resp)
+        handler = Handler(self.preserv, self.siptype,
+                          env, start_resp, self._auth)
         return handler.handle()
 
     def __call__(self, env, start_resp):
@@ -79,14 +83,20 @@ class Handler(object):
             return []
 
         if hasattr(self, meth_handler):
-            return getattr(self, meth_handler)(path)
+            out = getattr(self, meth_handler)(path)
+            if isinstance(out, list) and len(out) > 0:
+                out.append('\n')
+            return out
         else:
             return self.send_error(403, self._meth +
                                    " not supported on this resource")
 
     def authorize(self, auths):
         if self._auth:
-            return self._auth == auths[-1]  # match the last value provided
+            # match the last value provided
+            return len(auths) > 0 and self._auth == auths[-1]  
+        if len(auths) > 0:
+            log.warn("Authorization key provided, but none has been configured")
         return len(auths) == 0
 
     def do_GET(self, path):
@@ -155,8 +165,12 @@ class Handler(object):
             log.exception("Internal error: "+str(ex))
             self.send_error(500, "Internal error")
             return ["{}"]
+
+        if stat['state'] == status.NOT_READY and \
+           stat['message'].startswith('Internal Error'):
+            self.set_response(500, stat['message'])
             
-        if stat['state'] == status.FORGOTTEN:
+        elif stat['state'] == status.FORGOTTEN:
             self.set_response(404, "Preservation history for SIP identifer not found "+
                               "(or forgotten)")
         elif stat['state'] == status.NOT_FOUND:

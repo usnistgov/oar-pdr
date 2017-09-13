@@ -1,4 +1,5 @@
 import os, pdb, sys, logging, threading, time, json
+from copy import deepcopy
 import unittest as test
 
 from nistoar.testing import *
@@ -387,7 +388,66 @@ class TestApp(test.TestCase):
         self.assertEqual(data['id'], self.midasid)
         self.assertEqual(data['state'], "in progress")
 
+    def test_auth(self):
 
+        # test rejection when auth key provide but wsgi configured to take one
+        req = {
+            'PATH_INFO': '/midas/'+self.midasid,
+            'REQUEST_METHOD': 'GET',
+            'QUERY_STRING': 'goob=able&auth=9e73'
+        }
+        body = self.svc(req, self.start)
+        self.assertIn("401", self.resp[0])
+        self.assertEqual(body, [])
+
+        # now configure the service to require a key
+        cfg = deepcopy(self.config)
+        cfg['auth_key'] = '9e73'
+        self.svc = wsgi.app(cfg)
+
+        # test successful acceptance of key
+        self.resp = []
+        body = self.svc(req, self.start)
+        self.assertGreater(len(self.resp), 0)
+        self.assertIn("404", self.resp[0])
+        self.assertGreater(len(body), 0)
+        data = json.loads(body[0])
+        self.assertEqual(data['id'], '3A1EE2F169DD3B8CE0531A570681DB5D1491')
+        self.assertEqual(data['state'], "ready")
+
+        # test that acceptance of last key provided
+        req['QUERY_STRING'] = 'goob=able&auth=gurn&auth=9e73'
+        self.resp = []
+        body = self.svc(req, self.start)
+        self.assertGreater(len(self.resp), 0)
+        self.assertIn("404", self.resp[0])
+        self.assertGreater(len(body), 0)
+        data = json.loads(body[0])
+        self.assertEqual(data['id'], '3A1EE2F169DD3B8CE0531A570681DB5D1491')
+        self.assertEqual(data['state'], "ready")
+
+        req['QUERY_STRING'] = 'goob=able&auth=9e73&auth=gurn'
+        self.resp = []
+        body = self.svc(req, self.start)
+        self.assertIn("401", self.resp[0])
+        self.assertEqual(body, [])
+
+        # test single rejections
+        req['QUERY_STRING'] = 'goob=able&auth=gurn'
+        self.resp = []
+        body = self.svc(req, self.start)
+        self.assertIn("401", self.resp[0])
+        self.assertEqual(body, [])
+
+        # test lack of auth key
+        del req['QUERY_STRING']
+        self.resp = []
+        body = self.svc(req, self.start)
+        self.assertIn("401", self.resp[0])
+        self.assertEqual(body, [])
+
+        
+        
         
 
 if __name__ == '__main__':
