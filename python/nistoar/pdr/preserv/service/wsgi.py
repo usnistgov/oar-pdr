@@ -277,9 +277,9 @@ class Handler(object):
                          sipid)
                 self.set_response(201, "SIP preservation completed successfully")
             elif out['state'] == status.FAILED:
-                log.error(out.message)
+                log.error(out['message'])
                 self.set_response(500, "SIP preservation failed: " +
-                                  out.message)
+                                  out['message'])
             else:
                 log.info("SIP preservation request in progress asynchronously: "+
                          sipid)
