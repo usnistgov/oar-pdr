@@ -23,5 +23,8 @@ if not confsrc:
     raise ConfigurationException("preserver: nist-oar configuration not provided")
 
 cfg = config.resolve_configuration(confsrc)
-config.configure_log(config=cfg)
+logcfg = cfg.get('sip_type',{}).get('midas',{}).get('preserv',{})
+if 'logfile' not in logcfg:
+    logcfg['logfile'] = 'preservation.log'
+config.configure_log(config=logcfg)
 application = wsgi.app(cfg)
