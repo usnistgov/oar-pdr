@@ -293,8 +293,12 @@ class ThreadedPreservationService(PreservationService):
             self._dest = destdir
             self._params = params
         def run(self):
-            time.sleep(0)
-            self._hdlr.bagit(self._stype, self._dest, self._params)
+            try:
+                time.sleep(0)
+                self._hdlr.bagit(self._stype, self._dest, self._params)
+            except Exception, ex:
+                log.exception("Bagging failure: %s", str(ex))
+                self._hdlr.set_state(status.FAILED, "Unexpected failure")
 
     def _launch_handler(self, handler, timeout=None):
         """
