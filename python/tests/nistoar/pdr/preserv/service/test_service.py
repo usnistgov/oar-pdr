@@ -124,7 +124,7 @@ class TestThreadedPreservationService(test.TestCase):
     def test_launch_sync(self):
         hndlr = self.svc._make_handler(self.midasid, 'midas')
         self.assertEqual(hndlr.state, status.FORGOTTEN)
-        stat = self.svc._launch_handler(hndlr, 5)
+        (stat, thrd) = self.svc._launch_handler(hndlr, 5)
 
         self.assertEqual(stat['state'], status.SUCCESSFUL)
         self.assertTrue(os.path.exists(os.path.join(self.store,
@@ -133,10 +133,10 @@ class TestThreadedPreservationService(test.TestCase):
                                          self.midasid+".mbag0_2-0.zip.sha256")))
         self.assertEqual(hndlr.state, status.SUCCESSFUL)
         
-    def test_launch_sync(self):
+    def test_launch_async(self):
         hndlr = self.svc._make_handler(self.midasid, 'midas')
         self.assertEqual(hndlr.state, status.FORGOTTEN)
-        (stat, thrd) = self.svc._launch_handler(hndlr, 5)
+        (stat, thrd) = self.svc._launch_handler(hndlr, 0)
 
         self.assertEqual(stat['state'], status.SUCCESSFUL)
         try:

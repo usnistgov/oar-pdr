@@ -148,7 +148,7 @@ class PreservationService(object):
         :return dict:  a dictionary wiht metadata describing the status of 
                        preservation effort.
         """
-        try: 
+        try:
             hdlr = self._make_handler(sipid, siptype)
             if hdlr.state == status.FORGOTTEN or hdlr.state == status.NOT_READY:
                 hdlr.isready()
@@ -165,7 +165,7 @@ class PreservationService(object):
             out = { "id": sipid,
                     "state": status.NOT_READY,
                     "message":
-                         "Unable to get status as siptype={0}".format(siptype),
+                         "Internal Error: Unable to get status as siptype={0}".format(siptype),
                     "history": [] }
             return out
 

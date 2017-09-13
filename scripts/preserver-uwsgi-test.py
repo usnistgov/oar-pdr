@@ -52,6 +52,12 @@ def adjust_config(config):
         datadir = os.path.join(os.path.dirname(os.path.dirname(
                                os.path.abspath(__file__))), "python", "tests", 
                                "nistoar", "pdr", "preserv", "data", "midassip")
+        revdir = os.path.join(workdir, "review")
+        print >> sys.stderr, "copying review data"
+        shutil.copytree(os.path.join(datadir,'review'), revdir)
+        assert os.path.exists(revdir)
+    else:
+        revdir = os.path.join(datadir, 'review')
 
     out = copy.deepcopy(config)
     out.update( {
@@ -61,7 +67,7 @@ def adjust_config(config):
         'sip_type': {
             'midas': {
                 'common': {
-                    'review_dir':        os.path.join(datadir, "review"),
+                    'review_dir': revdir,
                     "id_minter": { "shoulder_for_edi": "edi0" },
                 },
                 "mdserv": {
@@ -103,6 +109,8 @@ if not os.path.exists(workdir):
 
 if doclean:
     for item in os.listdir(workdir):
+        if item == 'review':
+            continue
         ipath = os.path.join(workdir, item)
         try:
             if os.path.isfile(ipath) or os.path.islink(ipath):

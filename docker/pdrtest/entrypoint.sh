@@ -19,7 +19,7 @@ function launch_test_mdserv {
 
 function launch_test_preserver {
     service nginx stop
-    kill `cat $OAR_HOME/var/mdserv.pid` && sleep 1
+    [ -e "$OAR_HOME/var/mdserv.pid" ] && kill `cat $OAR_HOME/var/mdserv.pid` && sleep 1
     echo starting uwsgi...
     uwsgi --daemonize $OAR_HOME/var/logs/uwsgi.log --plugin python --uwsgi-socket :9090 --wsgi-file scripts/preserver-uwsgi-test.py --pidfile $OAR_HOME/var/preserver.pid
     echo starting nginx...
