@@ -209,7 +209,13 @@ class MIDASMetadataBagger(SIPBagger):
             for dir, subdirs, files in os.walk(root):
                 reldir = dir[len(root)+1:]
                 for f in files:
-                    if f.startswith('.') or \
+                    # don't descend into subdirectories with ignorable names
+                    for d in range(len(subdirs)-1, -1, -1):
+                        if subdirs[d].startswith('.') or \
+                           subdirs[d].startswith('_'):
+                            del subdirs[d]
+                    
+                    if f.startswith('.') or f.startswith('_') or \
                        os.path.join(reldir,f) in podlocs:
                         # skip dot-files and pod files written by MIDAS
                         continue
