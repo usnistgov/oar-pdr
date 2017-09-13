@@ -3,7 +3,7 @@ This module provides an abstract interface turning a Submission Information
 Package (SIP) into an Archive Information Package (BagIt bags).  It also 
 includes implementations for different known SIPs
 """
-import os, logging
+import os, shutil, logging
 from abc import ABCMeta, abstractmethod, abstractproperty
 from collections import OrderedDict
 from copy import deepcopy
@@ -365,23 +365,30 @@ class MIDASSIPHandler(SIPHandler):
         self._status.record_progress("Delivering preservation artifacts")
         log.debug("writing files to %s", destdir)
         errors = []
-        for f in savefiles:
-            try:
-                # TODO: change to copy so that we can more easily roll back
-                os.rename(f, os.path.join(destdir, os.path.basename(f)))
-            except OSError, ex:
-                # TODO: Roll back! (do not copy as much as possible)
-                msg = "{0}: {1}".format(f, str(ex))
-                log.error(msg)
-                log.debug("failed destination file: %s",
-                          os.path.join(destdir, os.path.basename(f)))
-                errors.append(msg)
-
-        if errors:
-            msg = "Failed to copy all preservation files to long-term " \
-                  "storage dir ({0})"
-            msg = msg.format(self.storedir)
+        try:
+            for f in savefiles:
+                shutil.copy(f, destdir)
+        except OSError, ex:
+            log.error("Failed to copy preservation file: %s\n" +
+                      "  to long-term storage: %s", f, destdir)
+            log.exception("Reason: %s", str(ex))
+            log.error("Rolling back successfully copied files")
+            msg = "Failed to copy preservation files to long-term storage"
             self.set_state(status.FAILED, msg)
-            raise PreservationException(msg, errors)
+
+            for f in savefiles:
+                f = os.path.join(destdir, os.path.basename(f))
+                if os.path.exists(f):
+                    os.remove(f)
+
+            raise PreservationException(msg, [str(ex)])
 
         self.set_state(status.SUCCESSFUL)
+
+        # clean up staging area
+        for f in savefiles:
+            try:
+                os.remove(f)
+            except Exception, ex:
+                log.error("Trouble cleaning up serialized bag in staging dir: "+
+                          "\n  %s\nReason: %s", f, str(ex))
