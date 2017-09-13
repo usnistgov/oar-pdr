@@ -10,6 +10,7 @@ from .. import sys as _sys
 
 def _exec(cmd, dir, log):
     log.info("serializing bag: %s", ' '.join(cmd))
+    log.debug("expecting bag in dir: %s", dir)
 
     proc = sp.Popen(cmd, stdout=sp.PIPE, stderr=sp.PIPE, cwd=dir)
     out, err = map(lambda s: s.strip(), proc.communicate())
@@ -68,6 +69,7 @@ def zip_serialize(bagdir, destdir, log, destfile=None):
         if not message:
             message = "Bag serialization failure using zip (consult log)"
         raise BagSerializationError(message, name, ex, sys=_sys)
+    except 
 
     return destfile
 
