@@ -248,7 +248,9 @@ class MIDASSIPHandler(SIPHandler):
                 if not workdir:
                     raise ConfigurationException("Missing needed config "+
                                                  "property: workdir_dir")
-                bagparent = os.path.join(workdir, "preserv")
+                bagparent = os.path.join(workdir, bagparent)
+                if not os.path.exists(bagparent):
+                    os.mkdir(bagparent)
 
         self.stagedir = self.cfg.get('staging_dir')
         if not self.stagedir:
