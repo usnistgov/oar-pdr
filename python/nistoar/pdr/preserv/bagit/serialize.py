@@ -12,11 +12,18 @@ def _exec(cmd, dir, log):
     log.info("serializing bag: %s", ' '.join(cmd))
     log.debug("expecting bag in dir: %s", dir)
 
+    out = None
     try:
         proc = sp.Popen(cmd, stdout=sp.PIPE, stderr=sp.PIPE, cwd=dir)
         out, err = map(lambda s: s.strip(), proc.communicate())
+    except OSError, ex:
+        log.exception("serialize command failed to exec: "+str(ex))
+        if ex.errno == 2:
+            log.error("Is the serializer command, %s, installed?", cmd[0])
+        raise 
     except Exception, ex:
         log.exception("serialize command failed to exec: "+str(ex))
+        raise 
 
     if out:
         log.debug("%s:\n%s", cmd[0], out)
