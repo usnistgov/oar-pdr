@@ -276,7 +276,7 @@ class Handler(object):
                 log.info("SIP preservation request completed synchronously: "+
                          sipid)
                 self.set_response(201, "SIP preservation completed successfully")
-            elif out['state'] == status.FAILURE:
+            elif out['state'] == status.FAILED:
                 log.error(out.message)
                 self.set_response(500, "SIP preservation failed: " +
                                   out.message)

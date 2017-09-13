@@ -315,7 +315,7 @@ class ThreadedPreservationService(PreservationService):
             t.start()
 
             if timeout is None:
-                timeout = self.cfg.get('sync_timeout', 5)
+                timeout = float(self.cfg.get('sync_timeout', 5))
             t.join(timeout)
 
             # the thread either finished or we timed-out waiting for it
@@ -323,10 +323,10 @@ class ThreadedPreservationService(PreservationService):
                 log.info("%s: preservation completed synchronously",
                          handler._sipid)
                 if handler.state == status.IN_PROGRESS:
-                    handler.status.update(status.FAILED,
+                    handler.set_state(status.FAILED,
                                  "preservation thread died for unknown reasons")
                 elif handler.state == status.READY:
-                    handler.status.update(status.FAILED,
+                    handler.set_state(status.FAILED,
                              "preservation failed to start for unknown reasons")
             else:
                 log.info("%s: preservation running asynchronously",
