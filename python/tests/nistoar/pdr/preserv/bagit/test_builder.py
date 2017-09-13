@@ -63,7 +63,7 @@ class TestBuilder(test.TestCase):
     def test_download_url(self):
         self.assertEqual(self.bag._download_url('goob',
                                                 os.path.join("foo", "bar.json")),
-                         "https://www.nist.gov/od/ds/goob/foo/bar.json")
+                         "https://data.nist.gov/od/ds/goob/foo/bar.json")
 
     def test_ensure_bagdir(self):
         self.bag.ensure_bagdir()
@@ -278,6 +278,7 @@ class TestBuilder(test.TestCase):
             "filepath": path,
             "_extensionSchemas": [ "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile" ],
             "size": 69,
+            "mediaType": "application/json",
             "hash": {
                 "algorithm": { "tag": "sha256" },
                 "value": \
@@ -288,7 +289,6 @@ class TestBuilder(test.TestCase):
 
         mdata = self.bag.init_filemd_for(path, write=False, examine=datafile)
         self.assertEquals(mdata, need)
-        
 
     def test_init_collmd_for(self):
         path = os.path.join("trial1","gold")
@@ -329,6 +329,7 @@ class TestBuilder(test.TestCase):
             "filepath": path,
             "_extensionSchemas": [ "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile" ],
             "size": 69,
+            "mediaType": "application/json",
             "hash": {
                 "algorithm": { "tag": "sha256" },
                 "value": \
@@ -421,7 +422,7 @@ class TestBuilder(test.TestCase):
         self.assertIsNotNone(self.bag.ediid)
 
         destpath = "foo/bar.json"
-        dlurl = "https://www.nist.gov/od/ds/"+self.bag.ediid+'/'+destpath
+        dlurl = "https://data.nist.gov/od/ds/"+self.bag.ediid+'/'+destpath
         self.bag.init_filemd_for(destpath, write=True)
         with open(self.bag.nerdm_file_for(destpath)) as fd:
             mdata = json.load(fd)
@@ -432,7 +433,7 @@ class TestBuilder(test.TestCase):
         with open(self.bag.nerdm_file_for("")) as fd:
             mdata = json.load(fd)
         self.assertEqual(mdata['ediid'], 'gurn')
-        dlurl = "https://www.nist.gov/od/ds/gurn/"+destpath
+        dlurl = "https://data.nist.gov/od/ds/gurn/"+destpath
         with open(self.bag.nerdm_file_for(destpath)) as fd:
             mdata = json.load(fd)
         self.assertEqual(mdata['downloadURL'], dlurl)
