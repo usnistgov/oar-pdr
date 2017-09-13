@@ -26,5 +26,5 @@ cfg = config.resolve_configuration(confsrc)
 logcfg = cfg.get('sip_type',{}).get('midas',{}).get('preserv',{})
 if 'logfile' not in logcfg:
     logcfg['logfile'] = 'preservation.log'
-config.configure_log(config=logcfg)
+config.configure_log(config=logcfg, addstderr=True)
 application = wsgi.app(cfg)

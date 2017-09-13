@@ -68,11 +68,11 @@ class PreservationService(object):
         if not os.path.exists(self.idregdir):
             os.mkdir(self.idregdir)
 
+        self.minters = {}
+
         # ensure the environemnt is set up
         for tp in self.siptypes:
             self.status("_noid", tp)
-
-        self.minters = {}
 
     def preserve(self, sipid, siptype=None, timeout=None):
         """
