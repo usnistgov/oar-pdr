@@ -393,6 +393,8 @@ class MIDASSIPHandler(SIPHandler):
             cksfiles = [f for f in savefiles if ckspat.search(f)]
             cksfiles.sort(key=lambda f: int(ckspat.search(f).group(1)),
                           reverse=True)
+            log.debug("copying %s checksum files to %s",
+                      str(len(cksfiles)), self.bagger.indir)
             for f in cksfiles:
                 try:
                     sigfile = sigbase+ckspat.search(f).group(1)+'.sha256'
