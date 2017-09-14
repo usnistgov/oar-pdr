@@ -3,7 +3,7 @@ This module provides an abstract interface turning a Submission Information
 Package (SIP) into an Archive Information Package (BagIt bags).  It also 
 includes implementations for different known SIPs
 """
-import os, shutil, logging
+import os, re, shutil, logging
 from abc import ABCMeta, abstractmethod, abstractproperty
 from collections import OrderedDict
 from copy import deepcopy
@@ -383,6 +383,31 @@ class MIDASSIPHandler(SIPHandler):
 
             raise PreservationException(msg, [str(ex)])
 
+        # Now write copies of the checksum files to the review SIP dir.
+        # MIDAS will scoop these up and save them in its database.
+        # The file with sequence number 0 must be written last; this is a
+        # signal that preservation is complete.
+        try:
+            sigbase = self._sipid+"_"
+            ckspat = re.compile(self._sipid+r'.*-(\d+).\w+.sha256$')
+            cksfiles = [f for f in savefiles if ckspat.search(f)]
+            cksfiles.sort(key=lambda f: int(ckspat.search(f).group(1)),
+                          reverse=True)
+            for f in cksfiles:
+                try:
+                    sigfile = sigbase+ckspat.search(f).group(1)+'.sha256'
+                    sigfile = os.path.join(self.bagger.indir,sigfile)
+                    log.debug("copying checksum file to %s", sigfile)
+                    shutil.copyfile(f, sigfile)
+                except Exception, ex:
+                    log.exception("Failed to copy checksum file to review dir:"+
+                                  "\n %s to\n %s\nReason: %s", f,
+                                  open.path.join(self.bagger.indir), str(ex))
+                    
+        except Exception, ex:
+            log.exception("%s: Failure while writing checksum file(s) to "+
+                          "review dir: %s", self._sipid, str(ex))
+                
         self.set_state(status.SUCCESSFUL)
 
         # clean up staging area

@@ -14,7 +14,7 @@ def setUpModule():
     ensure_tmpdir()
     rootlog = logging.getLogger()
     loghdlr = logging.FileHandler(os.path.join(tmpdir(),"test_siphandler.log"))
-    loghdlr.setLevel(logging.INFO)
+    loghdlr.setLevel(logging.DEBUG)
     rootlog.addHandler(loghdlr)
 
 def tearDownModule():
@@ -103,6 +103,10 @@ class TestMIDASSIPHandler(test.TestCase):
         self.assertEqual(self.sip.status['bagfiles'][0]['name'], 
                                                 self.midasid+".mbag0_2-0.zip")
         self.assertEqual(self.sip.status['bagfiles'][0]['sha256'], csum)
+
+        # check for checksum files in review dir
+        cf = os.path.join(self.revdir, "1491", self.midasid+"_0.sha256")
+        self.assertTrue(os.path.exists(cf), "Does not exist: "+cf)
         
 
 if __name__ == '__main__':
