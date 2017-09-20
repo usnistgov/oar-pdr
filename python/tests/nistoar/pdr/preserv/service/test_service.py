@@ -241,6 +241,13 @@ class TestThreadedPreservationService(test.TestCase):
         stat = self.svc.status(self.midasid)
         self.assertEqual(stat['state'], status.SUCCESSFUL)
 
+        # if there is no longer a cached status file, ensure that we notice
+        # when there is bag in the store dir
+        os.remove(os.path.join(self.statusdir, self.midasid+'.json'))
+        stat = self.svc.status(self.midasid)
+        self.assertEqual(stat['state'], status.SUCCESSFUL)
+        self.assertIn('orgotten', stat['message'])
+
     def test_status_badtype(self):
         stat = self.svc.status(self.midasid, 'goob')
         self.assertEqual(stat['state'], status.NOT_READY)

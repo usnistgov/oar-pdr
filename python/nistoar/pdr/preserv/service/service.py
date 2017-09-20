@@ -283,7 +283,7 @@ class ThreadedPreservationService(PreservationService):
         super(ThreadedPreservationService, self).__init__(config)
 
     class _HandlerThread(threading.Thread):
-        def __init__(self, handler, serialtype, destdir, params=None):
+        def __init__(self, handler, serialtype, params=None, destdir=None):
             if params is None:
                 params = {}
             tname = params.get('worker_name')
@@ -314,8 +314,7 @@ class ThreadedPreservationService(PreservationService):
         """
         t = None
         try: 
-            t = self._HandlerThread(handler, 'zip', self.storedir,
-                                    {'worker-name': handler._sipid})
+            t = self._HandlerThread(handler, 'zip', {'worker-name': handler._sipid})
             t.start()
 
             if timeout is None:

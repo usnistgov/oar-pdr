@@ -188,6 +188,22 @@ class SIPHandler(object):
 
         self._status.cache()
         return [file1, csumfile]
+
+    def _is_ingested(self):
+        """
+        return True if some version of this SIP has been ingested into the PDR already.
+        """
+        #FUTURE: this should query a PDR service to determine if the it exists
+        raise NotImplemented()
+
+    @abstractmethod
+    def _is_preserved(self):
+        """
+        return True if some version of this SIP has been preserved (i.e. sent successfully through
+        the Preservation Service).  This look for as definitive evidence of success (i.e. existence
+        in long-term storage) as possible.
+        """
+        raise NotImplemented()
     
 class MIDASSIPHandler(SIPHandler):
     """
@@ -288,6 +304,11 @@ class MIDASSIPHandler(SIPHandler):
         self.bagger = PreservationBagger(sipid, bagparent, self.sipparent,
                                          self.mdbagdir, config.get('bagger'),
                                          self._minter)
+
+        if self.state == status.FORGOTTEN and self._is_preserved():
+            self.set_state(status.SUCCESSFUL, 
+                           "SIP with forgotten state is apparently already preserved")
+            
 
     def isready(self, _inprogress=False):
         """
@@ -419,3 +440,13 @@ class MIDASSIPHandler(SIPHandler):
             except Exception, ex:
                 log.error("Trouble cleaning up serialized bag in staging dir: "+
                           "\n  %s\nReason: %s", f, str(ex))
+
+    def _is_preserved(self):
+        """
+        return True if some version of this SIP has been preserved (i.e. sent successfully through
+        the Preservation Service).  This look for as definitive evidence of success (i.e. existence
+        in long-term storage) as possible.
+        """
+        bagname = self.bagger.form_bag_name(self.bagger.name)
+        return len([f for f in os.listdir(self.storedir) if f.startswith(bagname)]) > 0
+    

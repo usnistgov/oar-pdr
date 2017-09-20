@@ -108,6 +108,20 @@ class TestMIDASSIPHandler(test.TestCase):
         cf = os.path.join(self.revdir, "1491", self.midasid+"_0.sha256")
         self.assertTrue(os.path.exists(cf), "Does not exist: "+cf)
         
+    def test_is_preserved(self):
+        self.assertEqual(self.sip.state, status.FORGOTTEN)
+        self.assertFalse(self.sip._is_preserved())
+        self.sip.bagit()
+        self.assertTrue(self.sip._is_preserved())
+
+        # if there is no longer a cached status file, ensure that we notice
+        # when there is bag in the store dir
+        os.remove(os.path.join(self.statusdir, self.midasid+'.json'))
+        self.sip = sip.MIDASSIPHandler(self.midasid, self.config)
+        stat = self.sip.status
+        self.assertEqual(stat['state'], status.SUCCESSFUL)
+        self.assertIn('orgotten', stat['message'])
+
 
 if __name__ == '__main__':
     test.main()
