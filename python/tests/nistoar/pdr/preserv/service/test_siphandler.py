@@ -105,7 +105,7 @@ class TestMIDASSIPHandler(test.TestCase):
         self.assertEqual(self.sip.status['bagfiles'][0]['sha256'], csum)
 
         # check for checksum files in review dir
-        cf = os.path.join(self.revdir, "1491", self.midasid+"_0.sha256")
+        cf = os.path.join(self.revdir, "1491/_preserv", self.midasid+"_0.sha256")
         self.assertTrue(os.path.exists(cf), "Does not exist: "+cf)
         
     def test_is_preserved(self):

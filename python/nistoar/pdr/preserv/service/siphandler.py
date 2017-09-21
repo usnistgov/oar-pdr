@@ -419,7 +419,7 @@ class MIDASSIPHandler(SIPHandler):
             for f in cksfiles:
                 try:
                     sigfile = sigbase+ckspat.search(f).group(1)+'.sha256'
-                    sigfile = os.path.join(self.bagger.indir,sigfile)
+                    sigfile = os.path.join(self.bagger.bagparent,sigfile)
                     log.debug("copying checksum file to %s", sigfile)
                     shutil.copyfile(f, sigfile)
                 except Exception, ex:
