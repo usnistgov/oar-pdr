@@ -662,22 +662,65 @@ class BagBuilder(PreservationSystem):
         }
         return out
     
-    def finalize_bag(self):
+    def finalize_bag(self, finalcfg=None):
         """
         Assume that all needed data and minimal metadata have been added to the
         bag and fill out the remaining bag components to complete the bag.
 
-        The following configuration paramters will control which activities are 
-        included in the finalizing step:
-          :param 'examine' bool:   if True, this will ensure that all files have
-                                     been examined and had metadata extracted.  
-          :param 'trim_folders' bool:  if True, remove all empty data directories
+        When finalcfg (dict) is provided, its properties will be used to control 
+        behavior of the bag finalization.  If not provided, the configuration 
+        property 'finalize' provided at construction will control finalization.
+        The following finalize sub-properties will be recognized:
+          :param 'ensure_component_metadata' bool (True):   if True, this will ensure 
+                    that all data files and subcollections have been examined 
+                    and had metadata extracted.  
+          :param 'trim_folders' bool (False):  if True, remove all empty data directories
 
         :return list:  a list of errors encountered while trying to complete
                        the bag.  An empty list indicates that the bag is complete
                        and ready to preserved.  
         """
-        self.log.error("Bag finalization not implemented!")
+        if finalcfg is None:
+            finalcfg = self.cfg.get('finalize', {})
+
+        # Start by trimming the empty data folders
+        trim = finalcfg.get('trim_folders', False)
+        if trim:
+            self.trim_data_folders()
+
+        # Make sure all remaining components have metadata
+        if finalcfg.get('ensure_component_metadata', True):
+            self.ensure_comp_metadata(examine=True)
+
+        # Now trim empty metadata folders
+        if trim:
+            self.trim_metadata_folders()
+
+        self.log.error("Implementation of Bag finalization is not complete!")
+
+    def trim_data_folders(self, rmmeta=False):
+        """
+        look through the data directory for empty subdirectories and remove 
+        them.  This will also eliminate the corresponding metadata folders 
+        unless (1) they contain metadata files, AND (2) rmmeta is False.
+
+        :param rmmeta bool:  If False, only purge a corresponding metadata 
+                             directory if it contains no metadata.  If True,
+                             any metadata for components that do not exist
+                             under data will be removed. 
+        """
+        self.log.warn("Data folder trimming not implemented, yet")
+
+    def trim_meatadata_folders(self):
+        """
+        """
+        self.log.warn("Metadata folder trimming not implemented, yet")
+
+    def ensure_comp_metadata(self, examine=True):
+        """
+        """
+        self.log.warn("Metadata assurance not implemented, yet")
+
 
     def __del__(self):
         self._unset_logfile()
