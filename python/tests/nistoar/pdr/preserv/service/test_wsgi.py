@@ -98,6 +98,19 @@ class TestApp(test.TestCase):
 
         self.assertEqual(self.svc.preserv.siptypes, ['midas'])
 
+    def test_evil_id(self):
+        req = {
+            'PATH_INFO': '/midas/foo<a HrEf="VbScRiPt/MsgBox(11713)">',
+            'REQUEST_METHOD': 'GET'
+        }
+
+        body = self.svc(req, self.start)
+        self.assertGreater(len(self.resp), 0)
+        self.assertIn("400", self.resp[0])
+        self.assertIn('foo<a', self.resp[0])
+        self.assertEqual(len(body), 0)
+        
+
     def test_bad_id(self):
         req = {
             'PATH_INFO': '/midas/foo/bar',

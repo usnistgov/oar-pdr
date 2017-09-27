@@ -6,7 +6,7 @@ necessary for integration into a WSGI server.  It should be replaced with
 a framework-based implementation if any further capabilities are needed.
 """
 
-import os, sys, logging, json, cgi
+import os, sys, logging, json, cgi, re
 from wsgiref.headers import Headers
 
 from .service import ThreadedPreservationService, RerequestException
@@ -46,6 +46,8 @@ class PreservationRequestApp(object):
 app = PreservationRequestApp
 
 class Handler(object):
+
+    badidre = re.compile(r"[<>\s]")
 
     def __init__(self, service, siptype, wsgienv, start_resp,
                  authkey=None):
@@ -121,11 +123,14 @@ class Handler(object):
                 self.send_error(400, "Unsupported SIP identifier: "+path)
                 return []
             elif len(steps) > 1:
-                if steps[1].startswith("_") or steps[1].startswith("."): 
+                if steps[1].startswith("_") or steps[1].startswith(".") or \
+                   self.badidre.search(steps[1]):
+                    
                     self.send_error(400, "Unsupported SIP identifier: "+path)
                     return []
                 
                 return self.request_status(steps[1])
+                
             else:
                 return self.requests()
         else:
