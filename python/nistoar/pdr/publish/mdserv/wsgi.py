@@ -5,7 +5,7 @@ This module provides the most basic implementation of a WSGI application
 necessary for integration into a WSGI server.  It should be replaced with 
 a framework-based implementation if any further capabilities are needed.
 """
-import os, sys, logging, json
+import os, sys, logging, json, re
 from wsgiref.headers import Headers
 
 from .. import PublishSystem
@@ -39,6 +39,8 @@ class PrePubMetadaRequestApp(object):
 app = PrePubMetadaRequestApp
 
 class Handler(object):
+
+    badidre = re.compile(r"[<>\s]")
 
     def __init__(self, service, filemap, wsgienv, start_resp):
         self._svc = service
@@ -88,6 +90,9 @@ class Handler(object):
             path = path[1:]
         parts = path.split('/')
         dsid = parts[0]
+        if self.badidre.search(dsid):
+            self.send_error(400, "Unsupported SIP identifier: "+dsid)
+            return []
         filepath = "/".join(parts[1:])
 
         if filepath:
@@ -108,7 +113,7 @@ class Handler(object):
             return []
 
         self.set_response(200, "Identifier found")
-        self.add_header('ContentType', 'application/json')
+        self.add_header('Content-Type', 'application/json')
         self.end_headers()
 
         return [ json.dumps(mdata, indent=4, separators=(',', ': ')) ]
@@ -136,7 +141,7 @@ class Handler(object):
             log.debug("Sending file via X-Accel-Redirect: %s", xsend)
 
         self.set_response(200, "Data file found")
-        self.add_header('ContentType', mtype)
+        self.add_header('Content-Type', mtype)
         if xsend:
             self.add_header('X-Accel-Redirect', xsend)
         self.end_headers()

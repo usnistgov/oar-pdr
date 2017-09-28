@@ -6,7 +6,7 @@ necessary for integration into a WSGI server.  It should be replaced with
 a framework-based implementation if any further capabilities are needed.
 """
 
-import os, sys, logging, json, cgi
+import os, sys, logging, json, cgi, re
 from wsgiref.headers import Headers
 
 from .service import ThreadedPreservationService, RerequestException
@@ -46,6 +46,8 @@ class PreservationRequestApp(object):
 app = PreservationRequestApp
 
 class Handler(object):
+
+    badidre = re.compile(r"[<>\s]")
 
     def __init__(self, service, siptype, wsgienv, start_resp,
                  authkey=None):
@@ -111,21 +113,24 @@ class Handler(object):
                 return ["[]"]
 
             self.set_response(200, "Supported SIP Types")
-            self.add_header('ContentType', 'application/json')
+            self.add_header('Content-Type', 'application/json')
             self.end_headers()
             return [out]
-            
+
         elif steps[0] == 'midas':
             if len(steps) > 2:
                 path = '/'.join(steps[1:])
                 self.send_error(400, "Unsupported SIP identifier: "+path)
                 return []
             elif len(steps) > 1:
-                if steps[1].startswith("_") or steps[1].startswith("."): 
+                if steps[1].startswith("_") or steps[1].startswith(".") or \
+                   self.badidre.search(steps[1]):
+                    
                     self.send_error(400, "Unsupported SIP identifier: "+path)
                     return []
                 
                 return self.request_status(steps[1])
+                
             else:
                 return self.requests()
         else:
@@ -150,7 +155,7 @@ class Handler(object):
             return ['[]']
 
         self.set_response(200, "Preservation requests by SIP ID")
-        self.add_header('ContentType', 'application/json')
+        self.add_header('Content-Type', 'application/json')
         self.end_headers()
         return [out]
 
@@ -182,7 +187,7 @@ class Handler(object):
         else:
             self.set_response(200, "Preservation record found")
 
-        self.add_header('ContentType', 'application/json')
+        self.add_header('Content-Type', 'application/json')
         self.end_headers()
         return [out]
 
@@ -234,7 +239,7 @@ class Handler(object):
             self.set_response(403, "Preservation update for SIP was already "+
                               "requested (current status: "+ex.state+")")
             
-        self.add_header('ContentType', 'application/json')
+        self.add_header('Content-Type', 'application/json')
         self.end_headers()
         return [out]
 
@@ -297,7 +302,7 @@ class Handler(object):
                           sipid, str(ex))
             self.set_response(500, "Internal server error")
             
-        self.add_header('ContentType', 'application/json')
+        self.add_header('Content-Type', 'application/json')
         self.end_headers()
         return [out]
 

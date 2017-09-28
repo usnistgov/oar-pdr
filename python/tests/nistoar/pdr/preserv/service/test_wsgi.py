@@ -98,6 +98,19 @@ class TestApp(test.TestCase):
 
         self.assertEqual(self.svc.preserv.siptypes, ['midas'])
 
+    def test_evil_id(self):
+        req = {
+            'PATH_INFO': '/midas/foo<a HrEf="VbScRiPt/MsgBox(11713)">',
+            'REQUEST_METHOD': 'GET'
+        }
+
+        body = self.svc(req, self.start)
+        self.assertGreater(len(self.resp), 0)
+        self.assertIn("400", self.resp[0])
+        self.assertIn('foo<a', self.resp[0])
+        self.assertEqual(len(body), 0)
+        
+
     def test_bad_id(self):
         req = {
             'PATH_INFO': '/midas/foo/bar',
@@ -152,6 +165,7 @@ class TestApp(test.TestCase):
         body = self.svc(req, self.start)
         self.assertGreater(len(self.resp), 0)
         self.assertIn("404", self.resp[0])
+        self.assertGreater(len([l for l in self.resp if "Content-Type:" in l]),0)
         self.assertGreater(len(body), 0)
         data = json.loads(body[0])
         self.assertEqual(data['id'], self.midasid)
@@ -165,6 +179,7 @@ class TestApp(test.TestCase):
         body = self.svc(req, self.start)
         self.assertGreater(len(self.resp), 0)
         self.assertIn("404", self.resp[0])
+        self.assertGreater(len([l for l in self.resp if "Content-Type:" in l]),0)
         self.assertGreater(len(body), 0)
         data = json.loads(body[0])
         self.assertEqual(data['id'], self.midasid)
@@ -180,6 +195,7 @@ class TestApp(test.TestCase):
         self.assertGreater(len(self.resp), 0)
         self.assertIn("404", self.resp[0])
         self.assertGreater(len(body), 0)
+        self.assertGreater(len([l for l in self.resp if "Content-Type:" in l]),0)
         data = json.loads(body[0])
         self.assertEqual(data['id'], 'goober')
         self.assertEqual(data['state'], "not found")
@@ -193,6 +209,7 @@ class TestApp(test.TestCase):
         self.assertGreater(len(self.resp), 0)
         self.assertIn("404", self.resp[0])
         self.assertGreater(len(body), 0)
+        self.assertGreater(len([l for l in self.resp if "Content-Type:" in l]),0)
         data = json.loads(body[0])
         self.assertEqual(data['id'], 'goober')
         self.assertEqual(data['state'], "not found")
@@ -206,6 +223,7 @@ class TestApp(test.TestCase):
         body = self.svc(req, self.start)
         self.assertGreater(len(self.resp), 0)
         self.assertIn("200", self.resp[0])
+        self.assertGreater(len([l for l in self.resp if "Content-Type:" in l]),0)
         self.assertGreater(len(body), 0)
         data = json.loads(body[0])
         self.assertTrue(isinstance(data, list))
@@ -222,6 +240,7 @@ class TestApp(test.TestCase):
         self.assertGreater(len(self.resp), 0)
         self.assertIn("200", self.resp[0])
         self.assertGreater(len(body), 0)
+        self.assertGreater(len([l for l in self.resp if "Content-Type:" in l]),0)
         data = json.loads(body[0])
         self.assertTrue(isinstance(data, list))
         self.assertEqual(len(data), 0)
@@ -236,6 +255,7 @@ class TestApp(test.TestCase):
         self.assertGreater(len(self.resp), 0)
         self.assertIn("200", self.resp[0])
         self.assertGreater(len(body), 0)
+        self.assertGreater(len([l for l in self.resp if "Content-Type:" in l]),0)
         data = json.loads(body[0])
         self.assertTrue(isinstance(data, list))
         self.assertEqual(len(data), 0)
@@ -280,6 +300,7 @@ class TestApp(test.TestCase):
         self.assertGreater(len(self.resp), 0)
         self.assertIn("201", self.resp[0])
         self.assertGreater(len(body), 0)
+        self.assertGreater(len([l for l in self.resp if "Content-Type:" in l]),0)
         data = json.loads(body[0])
         self.assertEqual(data['id'], self.midasid)
         self.assertEqual(data['state'], "successful")
@@ -295,6 +316,7 @@ class TestApp(test.TestCase):
         self.assertGreater(len(self.resp), 0)
         self.assertIn("200", self.resp[0])
         self.assertGreater(len(body), 0)
+        self.assertGreater(len([l for l in self.resp if "Content-Type:" in l]),0)
         data = json.loads(body[0])
         self.assertTrue(isinstance(data, list))
         self.assertIn(self.midasid, data)
@@ -310,6 +332,7 @@ class TestApp(test.TestCase):
         self.assertGreater(len(self.resp), 0)
         self.assertIn("200", self.resp[0])
         self.assertGreater(len(body), 0)
+        self.assertGreater(len([l for l in self.resp if "Content-Type:" in l]),0)
         data = json.loads(body[0])
         self.assertEqual(data['id'], self.midasid)
         self.assertEqual(data['state'], "successful")
@@ -355,6 +378,7 @@ class TestApp(test.TestCase):
         self.assertGreater(len(self.resp), 0)
         self.assertIn("202", self.resp[0])
         self.assertGreater(len(body), 0)
+        self.assertGreater(len([l for l in self.resp if "Content-Type:" in l]),0)
         data = json.loads(body[0])
         self.assertEqual(data['id'], self.midasid)
         self.assertEqual(data['state'], "in progress")
@@ -369,6 +393,7 @@ class TestApp(test.TestCase):
         self.assertGreater(len(self.resp), 0)
         self.assertIn("200", self.resp[0])
         self.assertGreater(len(body), 0)
+        self.assertGreater(len([l for l in self.resp if "Content-Type:" in l]),0)
         data = json.loads(body[0])
         self.assertTrue(isinstance(data, list))
         self.assertIn(self.midasid, data)
@@ -384,6 +409,7 @@ class TestApp(test.TestCase):
         self.assertGreater(len(self.resp), 0)
         self.assertIn("200", self.resp[0])
         self.assertGreater(len(body), 0)
+        self.assertGreater(len([l for l in self.resp if "Content-Type:" in l]),0)
         data = json.loads(body[0])
         self.assertEqual(data['id'], self.midasid)
         self.assertEqual(data['state'], "in progress")
