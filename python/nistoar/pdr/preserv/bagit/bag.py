@@ -324,3 +324,59 @@ class NISTBag(PreservationSystem):
                         raise BagFormatError('Bad fetch.txt line syntax: "' +
                                              line + '"')
                     yield tuple(out)
+
+    def iter_tagfile_lines(self, filepath):
+        """
+        iterate through the lines contained in tagfile with a given path.
+
+        :param filepath str:  the full path to tag file (not relative to the 
+                              bag's base directory).
+        """
+        with open(filepath) as fd:
+            for line in fd:
+                yield line.rstrip()
+
+    def get_baginfo_data(self, altfile=None):
+        """
+        return the name-value data from the bag's bag-info.txt file as an
+        OrderedDict dictionary with array values.  An empty dictionary is 
+        returned if the file does not exist.
+
+        :param altfile str:   path to the bag-info.txt file that should be 
+                              read; if not provided, the standard "bag-info.txt"
+                              file inside the bag will be read.  
+        """
+        out = OrderedDict()
+        infofile = altfile
+        if not infofile:
+            infofile = os.path.join(self.dir, "bag-info.txt")
+        if not os.path.exists(infofile):
+            return out
+
+        leadspc = re.compile("^\s+")
+        taglines = self.iter_tagfile_lines(infofile)
+        try:
+            line = taglines.next()
+        except StopIteration, ex:
+            return out
+
+        def parseline():
+            parts = [p.strip() for p in line.split(':', 1)]
+            if len(parts) < 2:
+                parts.append('')
+            if parts[0] in out:
+                out[parts[0]].append(parts[1])
+            else:
+                out[parts[0]] = [ parts[1] ]
+
+        for nxtline in taglines:
+            if leadspc.match(nxtline):
+                line += leadspc.sub(' ',nxtline)
+                continue
+            parseline()
+            line = nxtline
+            
+        parseline()
+                    
+        return out
+    

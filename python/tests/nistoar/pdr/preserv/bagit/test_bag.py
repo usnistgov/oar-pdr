@@ -143,6 +143,33 @@ class TestNISTBag(test.TestCase):
         self.assertEqual(fdata[0][2], "data/trial1.json")
         self.assertEqual(fdata[1][2], "data/trial2.json")
         self.assertEqual(fdata[2][2], "data/trial3/trial3a.json")
+
+    def test_get_baginfo_data(self):
+        data = self.bag.get_baginfo_data()
+
+        self.assertEqual(data.keys(),
+                         ["Source-Organization", "Organization-Address",
+                          "External-Description", "Bag-Count"])
+
+        self.assertEqual(len([data[k] for k in data
+                                      if not isinstance(data[k], list)]), 0)
+        for k in [ "Organization-Address", "External-Description", "Bag-Count"]:
+            self.assertEqual(len(data[k]), 1)
+        self.assertEqual(len(data['Source-Organization']), 2)
+        self.assertEqual(data['Source-Organization'],
+                         [ "National Institute of Standards and Technology",
+                           "Office of Data and Informatics" ])
+        self.assertEqual(data['Organization-Address'],
+                         [ "100 Bureau Drive, Mail Stop 1000, " +
+                           "Gaithersburg, MD 20899" ])
+        self.assertEqual(data['External-Description'],
+                         [ "This is a test bag created for testing bag "+
+                           "access.  It contains no data files, but it "+
+                           "includes various other metadata files." ])
+        self.assertEqual(data['Bag-Count'], [ "1 of 1" ])
+
+    
+                         
                          
 
 if __name__ == '__main__':
