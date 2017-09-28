@@ -715,19 +715,74 @@ class BagBuilder(PreservationSystem):
         :param rmmeta bool:  If False, only purge a corresponding metadata 
                              directory if it contains no metadata.  If True,
                              any metadata for components that do not exist
-                             under data will be removed. 
+                             under data nor in the fetch.txt will be removed. 
         """
-        self.log.warn("Data folder trimming not implemented, yet")
+        # ascend the data directory from leaves to root, looking for empty
+        # directories
+        droot = os.path.join(self.bagdir, "data")
+        mroot = os.path.join(self.bagdir, "metadata")
+        for ddir, subdirs, files in os.walk(droot, topdown=False):
+            subdirs = [d for d in subdirs
+                         if os.path.exists(os.path.join(ddir, d))]
+            if len(files) == 0 and len(subdirs) == 0:
+                # the data directory is empty
+                try:
+                    os.rmdir(ddir)
 
-    def trim_meatadata_folders(self):
+                    # check the contents of the corresponding metadata dir
+                    mdir = os.path.join(mroot, ddir[len(droot)+1:])
+                    if os.path.exists(mdir):
+                        if os.path.isdir(mdir):
+                            # is there anything in the metadata directory?
+                            mcont = [os.path.join(mdir, d)
+                                     for d in os.listdir(mdir)]
+
+                            # rm metadata directory if it's empty or rmmeta=True
+                            if len(mcont) == 0 or rmmeta:
+                                rmtree(mdir)
+
+                        else:
+                            self.log.error("NIST bag profile error: not a " +
+                                           "directory: " +
+                                  os.path.join("metadata", ddir[len(droot)+1:]))
+                except OSError, ex:
+                    self.log.exception("Failed to remove empty data dir: " +
+                                       ddir + ": " + str(ex))
+                    
+    def trim_metadata_folders(self):
         """
+        look for empty directories in the metadata tree and remove them.  
         """
-        self.log.warn("Metadata folder trimming not implemented, yet")
+        mroot = os.path.join(self.bagdir, "metadata")
+        for mdir, subdirs, files in os.walk(mroot, topdown=False):
+            subdirs = [d for d in subdirs
+                         if os.path.exists(os.path.join(mdir, d))]
+            if len(files) == 0 and len(subdirs) == 0:
+                # the metadata directory is empty
+                try:
+                    os.rmdir(mdir)
+                except OSError, ex:
+                    self.log.exception("Failed to remove empty metadata dir: " +
+                                       mdir + ": " + str(ex))
+
 
     def ensure_comp_metadata(self, examine=True):
         """
+        iterate through all the data files found under the data directory
+        and ensure there is metadata describing them.  
+
+        :param examine bool:  if true, actually examine the files to extract
+                              additional metadata (e.g. size, checksum, type, 
+                              etc.)
         """
-        self.log.warn("Metadata assurance not implemented, yet")
+        bag = NISTBag(self.bagdir)
+        for dfile in bag.iter_data_files():
+            mddir = os.path.join(self.bagdir,'metadata',dfile)
+            mdfile = os.path.join(mddir, FILEMD_FILENAME)
+            if examine or not os.path.exists(mdfile):
+               self.init_filemd_for(dfile, write=True, examine=examine)
+               # do we need a rubric for avoiding rewriting of metadata
+               # when examine=True?
 
 
     def __del__(self):

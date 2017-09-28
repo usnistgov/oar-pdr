@@ -9,6 +9,7 @@ from collections import OrderedDict
 from nistoar.testing import *
 import nistoar.pdr.preserv.bagit.builder as bldr
 import nistoar.pdr.exceptions as exceptions
+from nistoar.pdr.utils import read_nerd
 
 # datadir = nistoar/preserv/tests/data
 datadir = os.path.join(
@@ -637,6 +638,147 @@ class TestBuilder(test.TestCase):
                                 "Datafile not found: "+parts[1])
                 self.assertEqual(parts[0], bldr.checksum_of(dfp))
         self.assertEqual(c, len(datafiles))
+
+    def test_trim_metadata_folders(self):
+        manfile = os.path.join(self.bag.bagdir, "manifest-sha256.txt")
+        datafiles = [ "trial1.json", "trial2.json", 
+                      os.path.join("trial3", "trial3a.json") ]
+        for df in datafiles:
+            self.bag.add_data_file(df, os.path.join(datadir, df))
+        metadir = os.path.join(self.bag.bagdir,"metadata")
+        t3dir = os.path.join(metadir,"trial3")
+
+        empties = [ os.path.join(t3dir,"cal","volt"),
+                    os.path.join(t3dir,"cal","temp"),
+                    os.path.join(metadir,"trial1.json","special") ]
+        for d in empties:
+            os.makedirs(d)
+
+        for d in empties:
+            self.assertTrue(os.path.isdir(d))
+
+        self.bag.trim_metadata_folders()
+
+        for d in empties:
+            self.assertTrue(not os.path.exists(d))
+        self.assertTrue(not os.path.exists(os.path.join(t3dir,"cal")))
+        
+    def test_trim_data_folders(self):
+        manfile = os.path.join(self.bag.bagdir, "manifest-sha256.txt")
+        datafiles = [ "trial1.json", "trial2.json", 
+                      os.path.join("trial3", "trial3a.json") ]
+        bdatadir = os.path.join(self.bag.bagdir,"data")
+        metadir = os.path.join(self.bag.bagdir,"metadata")
+        t3dir = os.path.join(bdatadir,"trial3")
+        for df in datafiles:
+            self.bag.add_data_file(df, os.path.join(datadir, df))
+
+        # create some empty data directories
+        empties = [ os.path.join("trial3","cal","volt"),
+                    os.path.join("trial3","cal","temp") ]
+        for d in empties:
+            os.makedirs(os.path.join(bdatadir, d))
+        os.makedirs(os.path.join(metadir,"cal","volt"))
+        
+        # remove a data file so we are left with just its metadata
+        t2mdir = os.path.join(metadir, "trial2.json")
+        os.remove(os.path.join(bdatadir, "trial2.json"))
+        os.remove(os.path.join(bdatadir, "trial3", "trial3a.json"))
+
+        for d in empties:
+            self.assertTrue(os.path.isdir(os.path.join(bdatadir, d)))
+        for df in datafiles:
+            self.assertTrue(os.path.isdir(os.path.join(metadir,df)))
+
+        self.bag.trim_data_folders(False)
+
+        for d in empties:
+            self.assertTrue(not os.path.exists(os.path.join(bdatadir, d)))
+            self.assertTrue(not os.path.exists(os.path.join(metadir, d)))
+        self.assertTrue(not os.path.exists(os.path.join(t3dir,"cal")))
+
+        for df in datafiles:
+            self.assertTrue(os.path.isdir(os.path.join(metadir,df)))
+        self.assertTrue(os.path.isdir(os.path.join(metadir,"trial2.json")))
+        self.assertTrue(os.path.exists(os.path.join(metadir,
+                                                    "trial3","trial3a.json")))
+
+        # try again with rmmeta=True
+        for d in empties:
+            d = os.path.join(bdatadir, d)
+            if not os.path.exists(d):
+                os.makedirs(d)
+
+        self.bag.trim_data_folders(True)
+        
+        for d in empties:
+            self.assertTrue(not os.path.exists(os.path.join(bdatadir, d)))
+            self.assertTrue(not os.path.exists(os.path.join(metadir, d)))
+        self.assertTrue(not os.path.exists(os.path.join(t3dir,"cal")))
+
+        self.assertTrue(os.path.isdir(os.path.join(metadir,"trial1.json")))
+        self.assertTrue(os.path.isdir(os.path.join(metadir,"trial2.json")))
+        self.assertTrue(not os.path.exists(os.path.join(bdatadir, "trial3")))
+        self.assertTrue(not os.path.exists(os.path.join(metadir, "trial3")))
+
+        
+    def test_ensure_comp_metadata(self):
+        manfile = os.path.join(self.bag.bagdir, "manifest-sha256.txt")
+        datafiles = [ "trial1.json", "trial2.json" ]
+        nomd_datafile = os.path.join("trial3", "trial3a.json") 
+        bdatadir = os.path.join(self.bag.bagdir,"data")
+        metadir = os.path.join(self.bag.bagdir,"metadata")
+        t3dir = os.path.join(bdatadir,"trial3")
+        for df in datafiles:
+            self.bag.add_data_file(df, os.path.join(datadir, df))
+        self.bag.add_data_file(nomd_datafile,
+                               os.path.join(datadir, nomd_datafile),
+                               initmd=False)
+
+        for df in datafiles + [nomd_datafile]:
+            self.assertTrue( os.path.isfile(os.path.join(bdatadir, df)) )
+        for df in datafiles:
+            self.assertTrue( os.path.isfile(os.path.join(metadir, df,
+                                                         "nerdm.json")) )
+        self.assertFalse( os.path.exists(os.path.join(metadir, nomd_datafile,
+                                                      "nerdm.json")) )
+
+        self.bag.ensure_comp_metadata(False)
+
+        for df in datafiles:
+            self.assertTrue( os.path.isfile(os.path.join(metadir, df,
+                                                         "nerdm.json")) )
+        mdfile = os.path.join(metadir, nomd_datafile, "nerdm.json")
+        self.assertTrue( os.path.isfile(mdfile) )
+
+        data = read_nerd(mdfile)
+        for prop in "@id @type filepath".split():
+            self.assertIn(prop, data)
+        for prop in "mediaType checksum size".split():
+            self.assertNotIn(prop, data)
+
+        # now try it with examine=True
+        rmtree(os.path.join(metadir, nomd_datafile))
+        for df in datafiles + [nomd_datafile]:
+            self.assertTrue( os.path.isfile(os.path.join(bdatadir, df)) )
+        for df in datafiles:
+            self.assertTrue( os.path.isfile(os.path.join(metadir, df,
+                                                         "nerdm.json")) )
+        self.assertFalse( os.path.exists(os.path.join(metadir, nomd_datafile)) )
+
+        self.bag.ensure_comp_metadata(True)
+
+        for df in datafiles:
+            self.assertTrue( os.path.isfile(os.path.join(metadir, df,
+                                                         "nerdm.json")) )
+        mdfile = os.path.join(metadir, nomd_datafile, "nerdm.json")
+        self.assertTrue( os.path.isfile(mdfile) )
+
+        data = read_nerd(mdfile)
+        for prop in "@id @type filepath mediaType checksum size".split():
+            self.assertIn(prop, data)
+
+        
 
 class TestChecksum(test.TestCase):
 
