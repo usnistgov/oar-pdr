@@ -40,6 +40,13 @@ class BagProfileError(BagItException):
     """
     pass
 
+class BagFormatError(BagItException):
+    """
+    an exception indicating that the bag access encountered a violation of 
+    proper format for a bag according to the base BagIt standard.
+    """
+    pass
+
 class BagSerializationError(BagItException):
     """
     an exception resulting from a failure serializing or unserializing

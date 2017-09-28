@@ -7,7 +7,7 @@ from collections import OrderedDict
 
 from .. import PreservationSystem, read_nerd, read_pod
 from .. import NERDError, PODError, StateException
-from .exceptions import BadBagRequest, ComponentNotFound
+from .exceptions import BadBagRequest, ComponentNotFound, BagFormatError
 from ... import def_jq_libdir, def_merge_etcdir
 from ....nerdm.merge import MergerFactory, Merger
 from ....nerdm.convert import ComponentCounter, HierarchyBuilder
@@ -308,4 +308,19 @@ class NISTBag(PreservationSystem):
                 #     continue
                 yield os.path.join(reldir, f)
 
-
+    def iter_fetch_records(self):
+        """
+        iterate through the file fetching info from the bag's fetch file.  Each
+        iteration returns a 3-tuple of URL, length, and bag file path for a file
+        available for fetching.  The file paths are always relative to the 
+        bag's base directory.  
+        """
+        fetchfile = os.path.join(self.dir, "fetch.txt")
+        if os.path.exists(fetchfile):
+            with open(fetchfile) as fd:
+                for line in fd:
+                    out = line.strip().split()
+                    if len(out) != 3 or len([i for i in out if len(i) > 0]) != 3:
+                        raise BagFormatError('Bad fetch.txt line syntax: "' +
+                                             line + '"')
+                    yield tuple(out)

@@ -10,7 +10,7 @@ import nistoar.pdr.preserv.bagit.bag as bag
 import nistoar.pdr.preserv.bagit.exceptions as bagex
 import nistoar.pdr.exceptions as exceptions
 
-# datadir = nistoar/preserv/data
+# datadir = nistoar/pdr/preserv/data
 datadir = os.path.join( os.path.dirname(os.path.dirname(__file__)), "data" )
 bagdir = os.path.join(datadir, "metadatabag")
 
@@ -133,6 +133,17 @@ class TestNISTBag(test.TestCase):
             self.bag.subcoll_children("trial1.json")
         with self.assertRaises(bag.BadBagRequest):
             self.bag.subcoll_children("trial4")
+
+    def test_iter_fetch_records(self):
+        fdata = [t for t in self.bag.iter_fetch_records()]
+        self.assertEqual(len(fdata), 3)
+        self.assertEqual(len([i[0] for i in fdata
+                                  if i[0].startswith('http://example.org/')]), 3)
+        self.assertEqual(len([i[1] for i in fdata if int(i[1])]), 3)
+        self.assertEqual(fdata[0][2], "data/trial1.json")
+        self.assertEqual(fdata[1][2], "data/trial2.json")
+        self.assertEqual(fdata[2][2], "data/trial3/trial3a.json")
+                         
 
 if __name__ == '__main__':
     test.main()
