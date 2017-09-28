@@ -696,6 +696,14 @@ class BagBuilder(PreservationSystem):
         if trim:
             self.trim_metadata_folders()
 
+        self.write_data_manifest(finalcfg.get('confirm_checksums', False))
+        # write_mbag_files
+        # write_ore_file
+        # write_pidmapping_file
+        # write_info_file
+        # write_about_file
+        # write_premis_files
+
         self.log.error("Implementation of Bag finalization is not complete!")
 
     def trim_data_folders(self, rmmeta=False):
@@ -950,16 +958,16 @@ class BagBuilder(PreservationSystem):
         manfile = os.path.join(self.bagdir, "manifest-sha256.txt")
         try:
           with open(manfile, 'w') as fd:
-            for datapath in self._bag._iter_data_files():
+            for datapath in self._bag.iter_data_files():
                 md = self._bag.nerd_metadata_for(datapath, merge_annots=False)
                 checksum = md.get('checksum')
                 if not checksum or 'hash' not in checksum:
                     raise BagProfileError("Missing checksum for datafile: "+
                                           datapath)
-                algo = checksum.get('algorithm', {}).get('value')
+                algo = checksum.get('algorithm', {}).get('tag')
                 if algo != 'sha256':
                     raise BagProfileError("Unexpected checksum algorithm found: "+
-                                          algo)
+                                          str(algo))
                 checksum = checksum['hash']
                 if confirm:
                     if checksum_of(self._bag._full_dpath(datapath)) != checksum:

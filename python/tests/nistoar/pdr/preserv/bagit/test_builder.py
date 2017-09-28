@@ -591,6 +591,52 @@ class TestBuilder(test.TestCase):
         self.assertTrue( os.path.exists(t2bagfilepath) )
         self.assertTrue( os.path.exists(t2bagmdpath) )
 
+    def test_write_data_manifest(self):
+        manfile = os.path.join(self.bag.bagdir, "manifest-sha256.txt")
+        datafiles = [ "trial1.json", "trial2.json", 
+                      os.path.join("trial3", "trial3a.json") ]
+        for df in datafiles:
+            self.bag.add_data_file(df, os.path.join(datadir, df))
+
+        self.bag.write_data_manifest(False)
+        self.assertTrue(os.path.exists(manfile))
+        c = 0
+        fc = {}
+        with open(manfile) as fd:
+            for line in fd:
+                c += 1
+                parts = line.strip().split(' ', 1)
+                self.assertEqual(len(parts), 2,
+                                 "Bad manifest file syntax, line %d: %s" %
+                                 (c, line.rstrip()))
+                self.assertTrue(parts[1].startswith('data/'),
+                                "Incorrect path name: "+parts[1])
+                self.assertIn(parts[1][5:], datafiles)
+                dfp = os.path.join(self.bag.bagdir, parts[1])
+                self.assertTrue(os.path.exists(dfp),
+                                "Datafile not found: "+parts[1])
+                self.assertEqual(parts[0], bldr.checksum_of(dfp))
+        self.assertEqual(c, len(datafiles))
+
+        self.bag.write_data_manifest(True)
+        self.assertTrue(os.path.exists(manfile))
+        c = 0
+        fc = {}
+        with open(manfile) as fd:
+            for line in fd:
+                c += 1
+                parts = line.strip().split(' ', 1)
+                self.assertEqual(len(parts), 2,
+                                 "Bad manifest file syntax, line %d: %s" %
+                                 (c, line.rstrip()))
+                self.assertTrue(parts[1].startswith('data/'),
+                                "Incorrect path name: "+parts[1])
+                self.assertIn(parts[1][5:], datafiles)
+                dfp = os.path.join(self.bag.bagdir, parts[1])
+                self.assertTrue(os.path.exists(dfp),
+                                "Datafile not found: "+parts[1])
+                self.assertEqual(parts[0], bldr.checksum_of(dfp))
+        self.assertEqual(c, len(datafiles))
 
 class TestChecksum(test.TestCase):
 

@@ -302,7 +302,7 @@ class NISTBag(PreservationSystem):
         :return generator:  
         """
         for dir, subdirs, files in os.walk(self.data_dir):
-            reldir = dir[len(root)+1:]
+            reldir = dir[len(self.data_dir)+1:]
             for f in files:
                 # if f.startswith('.'):
                 #     continue
