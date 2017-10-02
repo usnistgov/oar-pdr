@@ -144,8 +144,8 @@ class TestNISTBag(test.TestCase):
         self.assertEqual(fdata[1][2], "data/trial2.json")
         self.assertEqual(fdata[2][2], "data/trial3/trial3a.json")
 
-    def test_get_baginfo_data(self):
-        data = self.bag.get_baginfo_data()
+    def test_get_baginfo(self):
+        data = self.bag.get_baginfo()
 
         self.assertEqual(data.keys(),
                          ["Source-Organization", "Organization-Address",

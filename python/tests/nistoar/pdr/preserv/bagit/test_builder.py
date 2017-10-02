@@ -1,4 +1,4 @@
-import os, sys, pdb, shutil, logging, json, subprocess
+import os, sys, pdb, shutil, logging, json, subprocess, re
 from cStringIO import StringIO
 from shutil import copy2 as filecopy, rmtree
 from io import BytesIO
@@ -778,7 +778,92 @@ class TestBuilder(test.TestCase):
         for prop in "@id @type filepath mediaType checksum size".split():
             self.assertIn(prop, data)
 
+    def test_write_mbag_files(self):
+        manfile = os.path.join(self.bag.bagdir, "manifest-sha256.txt")
+        datafiles = [ "trial1.json", "trial2.json", 
+                      os.path.join("trial3", "trial3a.json") ]
+        for df in datafiles:
+            self.bag.add_data_file(df, os.path.join(datadir, df))
+
+        gmtag = os.path.join(self.bag.bagdir,"multibag", "group-members.txt")
+        gdtag = os.path.join(self.bag.bagdir,"multibag", "group-directory.txt")
+                             
+        self.assertTrue(not os.path.exists(gmtag))
+        self.assertTrue(not os.path.exists(gdtag))
+
+        # pdb.set_trace()
+        self.bag.write_mbag_files()
+
+        self.assertTrue(os.path.exists(gmtag))
+        self.assertTrue(os.path.exists(gdtag))
+
+        with open(gmtag) as fd:
+            lines = fd.readlines()
+        self.assertEqual(lines, [self.bag.bagname+'\n'])
+
+        members = [os.path.join("data", d) for d in datafiles] + \
+                  ["metadata/pod.json", "metadata/nerdm.json"] + \
+                  [os.path.join("metadata", d, "nerdm.json") for d in datafiles]
         
+        with open(gdtag) as fd:
+            i = 0;
+            for line in fd:
+                self.assertEqual(line.strip(), members[i]+' '+self.bag.bagname)
+                i += 1
+
+    def test_write_bagit_ver(self):
+        self.bag.write_bagit_ver()
+        data = OrderedDict()
+        delim = re.compile(":\s*")
+        with open(os.path.join(self.bag.bagdir, "bagit.txt")) as fd:
+            for line in fd:
+                parts = delim.split(line.strip(), 1)
+                data[parts[0]] = parts[1]
+        self.assertEqual(data.keys(), ["BagIt-Version",
+                                       "Tag-File-Character-Encoding"])
+        self.assertEqual(data.values(), ["0.97", "UTF-8"])
+
+    def test_write_about(self):
+        self.bag.ensure_bagdir()
+        with self.assertRaises(bldr.BagProfileError):
+            self.bag.write_about_file()
+        
+        with open(os.path.join(datadir, "_nerdm.json")) as fd:
+            mdata = json.load(fd)
+        self.bag.add_res_nerd(mdata)
+        with self.assertRaises(bldr.BagProfileError):
+            self.bag.write_about_file()
+        
+        podfile = os.path.join(datadir, "_pod.json")
+        with open(podfile) as fd:
+            poddata = json.load(fd)
+        self.bag.add_ds_pod(poddata, convert=False)
+
+        aboutfile = os.path.join(self.bag.bagdir,"about.txt")
+        self.assertTrue( not os.path.exists(aboutfile) )
+        self.bag.write_about_file()
+        self.assertTrue( os.path.exists(aboutfile) )
+
+        with open(aboutfile) as fd:
+            lines = fd.readlines()
+
+        # pdb.set_trace()
+        self.assertIn("NIST Public Data", lines[0])
+        self.assertIn("OptSortSph:", lines[2])
+        self.assertIn("Zachary Levine [1] and John J. Curry [1]", lines[4])
+        self.assertIn("[1] National ", lines[5])
+        self.assertIn("Identifier: doi:10.18434/", lines[6])
+        self.assertIn("(ark:/88434/", lines[6])
+        self.assertIn("Contact: Zachary ", lines[8])
+        self.assertIn(" (zachary.levine@nist.gov)", lines[8])
+        self.assertIn("         100 Bureau ", lines[9])
+        self.assertIn("         Mail Stop", lines[10])
+        self.assertIn("         Gaithersburg, ", lines[11])
+        self.assertIn("         Phone: 1-301-975-", lines[12])
+        self.assertIn("Software to", lines[14])
+        self.assertIn("More information:", lines[17])
+        self.assertIn("https://dx.doi.org/10.18434/", lines[18])
+            
 
 class TestChecksum(test.TestCase):
 

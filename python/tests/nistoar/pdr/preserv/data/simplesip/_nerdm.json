@@ -10,11 +10,34 @@
     "@id": "ark:/88434/pdr02p1s",
     "doi": "doi:10.18434/T4SW26",
     "title": "OptSortSph: Sorting Spherical Dielectric Particles in a Standing-Wave Interference Field",
+    "authors": [
+        {
+            "fn": "Zachary Levine",
+            "givenName": "Zachary",
+            "middleName": "H.",
+            "familyName": "Levine",
+            "affiliation": "National Institute of Standards and Technology"
+        },
+        {
+            "givenName": "John",
+            "middleName": "J.",
+            "familyName": "Curry",
+            "affiliation": "National Institute of Standards and Technology"
+        }
+    ],
     "contactPoint": {
         "hasEmail": "mailto:zachary.levine@nist.gov",
-        "fn": "Zachary Levine"
+        "fn": "Zachary Levine",
+        "postalAddress": [
+            "100 Bureau Dr.",
+            "Mail Stop 1588",
+            "Gaithersburg, MD 20899"
+        ],
+        "phoneNumber": "1-301-975-5678"
     },
     "modified": "2016-07-01",
+    "doi": "10.18434/T4SW26",
+    "@id": "ark:/88434/mds00hw91v",
     "ediid": "3A1EE2F169DD3B8CE0531A570681DB5D1491",
     "landingPage": "https://www.nist.gov/nvl/project-index-optical-method-sorting-nanoparticles-size",
     "description": [

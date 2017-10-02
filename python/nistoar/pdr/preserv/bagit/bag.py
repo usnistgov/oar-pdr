@@ -336,7 +336,7 @@ class NISTBag(PreservationSystem):
             for line in fd:
                 yield line.rstrip()
 
-    def get_baginfo_data(self, altfile=None):
+    def get_baginfo(self, altfile=None):
         """
         return the name-value data from the bag's bag-info.txt file as an
         OrderedDict dictionary with array values.  An empty dictionary is 

@@ -47,6 +47,13 @@ class BagFormatError(BagItException):
     """
     pass
 
+class BagWriteError(BagItException):
+    """
+    an exception indicating an error while constructing or writing into 
+    a bag.
+    """
+    pass
+
 class BagSerializationError(BagItException):
     """
     an exception resulting from a failure serializing or unserializing
