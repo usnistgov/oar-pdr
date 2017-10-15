@@ -14,6 +14,7 @@ from ..bagger.midas import PreservationBagger
 from .. import (ConfigurationException, StateException, PODError)
 from .. import PreservationException, sys as _sys
 from . import status
+from ...ingest.rmm import IngestClient
 
 log = logging.getLogger(_sys.system_abbrev).getChild(_sys.subsystem_abbrev)
 
@@ -307,8 +308,12 @@ class MIDASSIPHandler(SIPHandler):
 
         if self.state == status.FORGOTTEN and self._is_preserved():
             self.set_state(status.SUCCESSFUL, 
-                           "SIP with forgotten state is apparently already preserved")
-            
+                      "SIP with forgotten state is apparently already preserved")
+
+        self._ingester = None
+        ingcfg = self.cfg.get('ingester')
+        if ingcfg:
+            self._ingester = IngestClient(ingcfg, log.getChild("ingester"))
 
     def isready(self, _inprogress=False):
         """
@@ -377,12 +382,15 @@ class MIDASSIPHandler(SIPHandler):
                                  format(self._sipid, self._status.message),
                                  sys=_sys)
 
+        # Create the bag
         self._status.record_progress("Collecting metadata and files")
         bagdir = self.bagger.make_bag()
 
+        # zip it up 
         self._status.record_progress("Serializing")
         savefiles = self._serialize(bagdir, self.stagedir, serialtype)
 
+        # copy the zipped files to long-term storage ("public" directory)
         self._status.record_progress("Delivering preservation artifacts")
         log.debug("writing files to %s", destdir)
         errors = []
@@ -403,6 +411,15 @@ class MIDASSIPHandler(SIPHandler):
                     os.remove(f)
 
             raise PreservationException(msg, [str(ex)])
+
+        # Stage the full NERDm record for ingest into the RMM
+        if self._ingester:
+            try:
+                bag = NISTBag(self.bagger.bagdir)
+                self._ingester.stage(bag.nerdm_record(), self.bagger.name)
+            except Exception as ex:
+                log.exception("Failure staging NERM record for " +
+                              self.bagger.name + ": " + str(ex))
 
         # Now write copies of the checksum files to the review SIP dir.
         # MIDAS will scoop these up and save them in its database.
@@ -432,6 +449,14 @@ class MIDASSIPHandler(SIPHandler):
                           "review dir: %s", self._sipid, str(ex))
                 
         self.set_state(status.SUCCESSFUL)
+
+        # submit NERDm record to ingest service
+        if self._ingester and self._ingester.is_staged(self.bagger.name):
+            try:
+                self._ingester.submit(self.bagger.name)
+            except Exception as ex:
+                self.log.exception("Failed to ingest record with name=" +
+                                   self.bagger.name + "into RMM: " + str(ex))
 
         # clean up staging area
         for f in savefiles:

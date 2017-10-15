@@ -60,7 +60,7 @@ class Handler(object):
         self._hdr.add_header(name, value)
 
     def set_response(self, code, message):
-        self._code = 200
+        self._code = code
         self._msg = message
 
     def end_headers(self):

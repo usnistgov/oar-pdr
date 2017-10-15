@@ -57,7 +57,11 @@ class TestMIDASSIPHandler(test.TestCase):
             "status_manager": { "cachedir": self.statusdir },
             "logdir": self.workdir,
             "bagparent_dir": "_preserv",
-            "bagger": { 'relative_to_indir': True }
+            "bagger": { 'relative_to_indir': True },
+            "ingester": {
+                "data_dir":  os.path.join(self.workdir, "ingest"),
+                "submit": "none"
+            }
         }
         
         self.sip = sip.MIDASSIPHandler(self.midasid, self.config)
