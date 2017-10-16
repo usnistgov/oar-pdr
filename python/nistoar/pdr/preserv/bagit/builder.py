@@ -2,11 +2,11 @@
 Tools for building a NIST Preservation bags
 """
 from __future__ import print_function
-import os, errno, logging, re, json, hashlib, pkg_resources, textwrap
+import os, errno, logging, re, json, hashlib, pkg_resources, textwrap, datetime
 import pynoid as noid
 from shutil import copy as filecopy, rmtree
 from copy import deepcopy
-from collections import Mapping, OrderedDict
+from collections import Mapping, Sequence, OrderedDict
 
 from .. import (SIPDirectoryError, SIPDirectoryNotFound, 
                 ConfigurationException, StateException, PODError)
@@ -702,10 +702,10 @@ class BagBuilder(PreservationSystem):
         self.write_mbag_files()
         # write_ore_file
         # write_pidmapping_file
-        self.ensure_baginfo()
         self.write_about_file()
         # write_premis_file
         self.write_bagit_ver()
+        self.ensure_baginfo()
 
         self.log.error("Implementation of Bag finalization is not complete!")
 
@@ -905,8 +905,68 @@ class BagBuilder(PreservationSystem):
         if not self._bag:
             self.ensure_bagdir()
 
-        initdata = self.cfg.get('init_bag_info', {})
+        initdata = self.cfg.get('init_bag_info', OrderedDict())
+
+        # add items based on bag's contents
+        nerdm = self._bag.nerd_metadata_for("")
+        initdata['Bagging-Date'] = datetime.date.today().isoformat()
+        initdata['Bag-Group-Identifier'] = nerdm.get('ediid') or self.ediid
+        initdata['Internal-Sender-Identifier'] = self.bagname
+
+        if nerdm.get('description'):
+            initdata['External-Description'] = nerdm['description']
+        else:
+            initdata['External-Description'] = \
+"This collection contains data for the NIST data resource entitled, {0}". \
+format(nerdm['title'])
+
+        initdata['External-Identifier'] = [self.id]
+        if nerdm.get('doi'):
+            initdata['External-Identifier'].append(nerdm['doi'])
+
+        # Calculate the payload Oxum
+        oxum = self._measure_oxum(self._bag._datadir)
+        initdata['Payload-Oxum'] = "{0}.{1}".format(oxum[0], oxum[1])
+
+        # write everything except Bag-Size
         self.write_baginfo_data(initdata, overwrite)
+
+        # calculate and write the size of the bag 
+        oxum = self._measure_oxum(self.bagdir)
+        size = self._format_bytes(oxum[0])
+        oxum[0] += len("Bag-Size: {0} ".format(size))
+        size = self._format_bytes(oxum[0])
+        szdata = {
+            'Bag-Size': size
+        }
+        self.write_baginfo_data(szdata, overwrite=False)
+
+    def _measure_oxum(self, rootdir):
+        size = 0
+        count = 0
+        for root, subdirs, files in os.walk(rootdir):
+            count += len(files)
+            for f in files:
+                size += os.stat(os.path.join(root,f)).st_size
+        return [size, count]
+
+    def _format_bytes(self, nbytes):
+        prefs = ["", "k", "M", "G", "T"]
+        ordr = 0
+        while nbytes >= 1000.0 and ordr < 4:
+            nbytes /= 1000.0
+            ordr += 1
+        pref = prefs[ordr]
+        ordr = 0
+        while nbytes >= 10.0:
+            nbytes /= 10.0
+            ordr += 1
+        nbytes = str(round(nbytes, 3) * 10**ordr)
+        if '.' in nbytes:
+            nbytes = re.sub(r"0+$", "", nbytes)
+        if nbytes.endswith('.'):
+            nbytes = nbytes[:-1]    
+        return "{0} {1}B".format(nbytes, pref)
 
     def write_baginfo_data(self, data, overwrite=False):
         """
@@ -927,6 +987,9 @@ class BagBuilder(PreservationSystem):
             out = OrderedDict()
             for name, vals in newdata.items():
                 out[name] = []
+                if isinstance(vals, (str, unicode)) or \
+                   not isinstance(vals, Sequence):
+                    vals = [vals]
                 if name in currdata:
                     for val in vals:
                         if val not in currdata[name]:
@@ -944,13 +1007,19 @@ class BagBuilder(PreservationSystem):
     def _write_baginfo_data(self, data, overwrite=False):
         mode = 'w'
         if not overwrite:
-            mode += 'a'
+            mode = 'a'
 
         infofile = os.path.join(self.bagdir, "bag-info.txt")
         with open(infofile, mode) as fd:
-            for name, vals in data:
+            for name, vals in data.items():
+                if isinstance(vals, (str, unicode)) or \
+                   not isinstance(vals, Sequence):
+                    vals = [vals]
                 for val in vals:
-                    print("{0}: {1}".format(name, val), file=fd)
+                    out = "{0}: {1}".format(name, val)
+                    if len(out) > 79:
+                        out = textwrap.fill(out, 79, subsequent_indent=' ')
+                    print(out, file=fd)
 
     def trim_data_folders(self, rmmeta=False):
         """

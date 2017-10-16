@@ -43,7 +43,23 @@ class TestBuilder(test.TestCase):
 
     def setUp(self):
         self.tf = Tempfiles()
-        self.bag = bldr.BagBuilder(self.tf.root, "testbag")
+        self.cfg = {
+            "init_bag_info": {
+                "Source-Organization":
+                     ["National Institute of Standards and Technology"],
+                "Contact-Name": "NIST Data Support Team",
+                "Contact-Email": ["datasupport@nist.gov"],
+                "Organization-Address": ["100 Bureau Dr.",
+                                         "Gaithersburg, MD 20899"],
+                "NIST-BagIt-Version": "0.2",
+                "NIST-POD-Metadata": "metadata/pod.json",
+                "NIST-NERDm-Metadata": "metadata/nerdm.json",
+                "Multibag-Version": "0.2",
+                "Multibag-Tag-Directory": "multibag"
+            }
+        }
+
+        self.bag = bldr.BagBuilder(self.tf.root, "testbag", self.cfg)
         self.tf.track("testbag")
         self.tf.track("issued-ids.json")
 
@@ -812,6 +828,7 @@ class TestBuilder(test.TestCase):
                 i += 1
 
     def test_write_bagit_ver(self):
+        self.bag.cfg['bagit_version'] = "0.98"
         self.bag.write_bagit_ver()
         data = OrderedDict()
         delim = re.compile(":\s*")
@@ -821,7 +838,110 @@ class TestBuilder(test.TestCase):
                 data[parts[0]] = parts[1]
         self.assertEqual(data.keys(), ["BagIt-Version",
                                        "Tag-File-Character-Encoding"])
-        self.assertEqual(data.values(), ["0.97", "UTF-8"])
+        self.assertEqual(data.values(), ["0.98", "UTF-8"])
+
+    def test_write_baginfo_data(self):
+        data = self.cfg['init_bag_info']
+        infofile = os.path.join(self.bag.bagdir,"bag-info.txt")
+        self.assertFalse(os.path.exists(infofile))
+
+        self.bag.write_baginfo_data(data, overwrite=True)
+
+        self.assertTrue(os.path.exists(infofile))
+        with open(infofile) as fd:
+            lines = fd.readlines()
+        self.assertIn("Source-Organization: "+
+                      "National Institute of Standards and Technology\n",
+                      lines)
+        self.assertIn("Contact-Email: datasupport@nist.gov\n", lines)
+        self.assertIn("Multibag-Version: 0.2\n", lines)
+        self.assertEqual(len([l for l in lines
+                                if "Organization-Address: " in l]), 2)
+
+        data = OrderedDict([
+            ("Goober-Name", "Gurn Cranston"),
+            ("Foo", "Bar")
+        ])
+        self.bag.write_baginfo_data(data, overwrite=True)
+
+        self.assertTrue(os.path.exists(infofile))
+        with open(infofile) as fd:
+            lines = fd.readlines()
+        self.assertEqual(len(lines), 2)
+        self.assertEqual(lines[0], "Goober-Name: Gurn Cranston\n")
+        self.assertEqual(lines[1], "Foo: Bar\n")
+
+        data = self.cfg['init_bag_info']
+        data['Foo'] = "Bang"
+        self.bag.write_baginfo_data(data, overwrite=False)
+
+        with open(infofile) as fd:
+            lines = fd.readlines()
+        self.assertIn("Goober-Name: Gurn Cranston\n", lines)
+        self.assertIn("Foo: Bar\n", lines)
+        self.assertEqual(lines[0], "Goober-Name: Gurn Cranston\n")
+        self.assertEqual(lines[1], "Foo: Bar\n")
+        self.assertIn("Source-Organization: "+
+                      "National Institute of Standards and Technology\n",
+                      lines)
+        self.assertIn("Contact-Email: datasupport@nist.gov\n", lines)
+        self.assertIn("Multibag-Version: 0.2\n", lines)
+        self.assertEqual(len([l for l in lines
+                                if "Organization-Address: " in l]), 2)
+        self.assertEqual(len([l for l in lines
+                                if "Foo: " in l]), 2)
+
+    def test_ensure_baginfo(self):
+        path = os.path.join("trial1","gold","trial1.json")
+        datafile = os.path.join(datadir,"trial1.json")
+        datafilesz = os.stat(datafile).st_size
+        podfile = os.path.join(datadir, "_pod.json")
+
+        self.bag.add_data_file(path, datafile)
+        path = os.path.join("trial1","trial2.json")
+        self.bag.add_data_file(path, datafile)
+        with open(podfile) as fd:
+            pod = json.load(fd)
+        self.bag.add_ds_pod(pod, convert=True)
+
+        self.bag.ensure_baginfo()
+
+        infofile = os.path.join(self.bag.bagdir, "bag-info.txt")
+        self.assertTrue(os.path.exists(infofile))
+        with open(infofile) as fd:
+            lines = fd.readlines()
+
+        self.assertIn("Source-Organization: "+
+                      "National Institute of Standards and Technology\n",
+                      lines)
+        self.assertIn("Contact-Email: datasupport@nist.gov\n", lines)
+        self.assertIn("Multibag-Version: 0.2\n", lines)
+        self.assertEqual(len([l for l in lines
+                                if "Organization-Address: " in l]), 2)
+        self.assertIn("Internal-Sender-Identifier: "+self.bag.bagname+'\n',
+                      lines)
+        self.assertEqual(len([l for l in lines
+                                if "External-Identifier: " in l]), 2)
+        wrapping = [l for l in lines if ':' not in l]
+        self.assertEqual(len(wrapping), 1)
+        self.assertEqual(len([l for l in wrapping if l.startswith(' ')]), 1)
+
+        oxum = [l for l in lines if "Payload-Oxum: " in l]
+        self.assertEqual(len(oxum), 1)
+        oxum = [int(n) for n in oxum[0].split(': ')[1].split('.')]
+        self.assertEqual(oxum[1], 2)
+        self.assertEqual(oxum[0], 2*datafilesz)
+        bagsz = [l for l in lines if "Bag-Size: " in l]
+        self.assertEqual(len(bagsz), 1)
+        bagsz = bagsz[0]
+        self.assertIn("kB", bagsz)
+
+    def test_format_bytes(self):
+        self.assertEqual(self.bag._format_bytes(108), "108 B")
+        self.assertEqual(self.bag._format_bytes(34569), "34.57 kB")
+        self.assertEqual(self.bag._format_bytes(9834569), "9.835 MB")
+        self.assertEqual(self.bag._format_bytes(19834569), "19.83 MB")
+        self.assertEqual(self.bag._format_bytes(14419834569), "14.42 GB")
 
     def test_write_about(self):
         self.bag.ensure_bagdir()
