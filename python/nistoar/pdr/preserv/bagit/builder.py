@@ -57,9 +57,13 @@ def checksum_of(filepath):
     """
     return the checksum for the 
     """
+    bfsz = 10240000   # 10 MB buffer
     sum = hashlib.sha256()
     with open(filepath) as fd:
-        sum.update(fd.read())
+        while True:
+            buf = fd.read(bfsz)
+            if not buf: break
+            sum.update(buf)
     return sum.hexdigest()
 
 class BagBuilder(PreservationSystem):
