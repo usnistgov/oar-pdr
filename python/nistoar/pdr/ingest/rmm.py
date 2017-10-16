@@ -1,10 +1,12 @@
 """
 Module providing client-side support for the RMM ingest service.  
 """
-import os, sys, shutil, logging, requests, json
+import os, sys, shutil, logging, requests
 from collections import Mapping, Sequence
 
-from ..exceptions import StateException, ConfigurationException, PDRException
+from ..exceptions import (StateException, ConfigurationException, PDRException,
+                          NERDError)
+from ..utils import write_json, read_nerd
 
 def submit_for_ingest(record, endpoint, name=None):
     """
@@ -140,8 +142,7 @@ class IngestClient(object):
             name = os.path.split(record.get('@id'))[-1]
 
         outfile = os.path.join(self._stagedir, name+".json")
-        with open(outfile, 'w') as fd:
-            json.dump(record, fd)
+        write_json(record, outfile)
 
     def staged_names(self):
         """
@@ -186,9 +187,7 @@ class IngestClient(object):
         try:
             shutil.move(recfile, self._inprogdir)
             recfile = os.path.join(self._inprogdir, name+".json")
-
-            with open(recfile) as fd:
-                rec = json.load(fd)
+            rec = read_nerd(recfile)
 
             try:
 
@@ -229,7 +228,7 @@ class IngestClient(object):
             self.log.exception(msg)
             raise StateException(msg, cause=ex)
         
-        except IOError as ex:
+        except (IOError, NERDError) as ex:
             # problem reading file
             self.log.exception("Problem reading data from JSON file, {0}: {1}"
                                .format(recfile, str(ex)))

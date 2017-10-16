@@ -456,8 +456,8 @@ class MIDASSIPHandler(SIPHandler):
             try:
                 self._ingester.submit(self.bagger.name)
             except Exception as ex:
-                self.log.exception("Failed to ingest record with name=" +
-                                   self.bagger.name + "into RMM: " + str(ex))
+                log.exception("Failed to ingest record with name=" +
+                              self.bagger.name + "into RMM: " + str(ex))
 
         # clean up staging area
         for f in savefiles:
