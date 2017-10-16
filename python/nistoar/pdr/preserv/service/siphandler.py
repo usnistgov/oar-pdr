@@ -9,6 +9,7 @@ from collections import OrderedDict
 from copy import deepcopy
 
 from ..bagit.serialize import DefaultSerializer
+from ..bagit.bag import NISTBag
 from ..bagger.base import checksum_of
 from ..bagger.midas import PreservationBagger
 from .. import (ConfigurationException, StateException, PODError)
@@ -418,8 +419,8 @@ class MIDASSIPHandler(SIPHandler):
                 bag = NISTBag(self.bagger.bagdir)
                 self._ingester.stage(bag.nerdm_record(), self.bagger.name)
             except Exception as ex:
-                log.exception("Failure staging NERM record for " +
-                              self.bagger.name + ": " + str(ex))
+                log.exception("Failure staging NERDm record for " +
+                              self.bagger.name + " for ingest: " + str(ex))
 
         # Now write copies of the checksum files to the review SIP dir.
         # MIDAS will scoop these up and save them in its database.
