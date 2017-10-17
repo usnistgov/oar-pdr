@@ -50,8 +50,8 @@ class TestPrePubMetadataService(test.TestCase):
 
     def setUp(self):
         self.tf = Tempfiles()
-        self.workdir = self.tf.mkdir("publish")
-        self.bagparent = os.path.join(self.workdir, 'mdserv')
+        self.workdir = self.tf.mkdir("mdserv")
+        self.bagparent = self.workdir
         self.upldir = os.path.join(self.testsip, "upload")
         self.revdir = os.path.join(self.testsip, "review")
         config = {

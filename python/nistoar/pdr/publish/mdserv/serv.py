@@ -129,13 +129,12 @@ class PrePubMetadataService(PublishSystem):
         Bag up the metadata from data provided by MIDAS for a given MIDAS ID.  
         """
         cfg = self.cfg.get('bagger', {})
-        workdir = os.path.join(self.workdir, 'mdserv')
-        if not os.path.exists(workdir):
+        if not os.path.exists(self.workdir):
             os.mkdir(workdir)
-        elif not os.path.isdir(workdir):
+        elif not os.path.isdir(self.workdir):
             raise StateException("Working directory path not a directory: " +
-                                 workdir)
-        bagger = MIDASMetadataBagger(id, workdir, self.reviewdir,
+                                 self.workdir)
+        bagger = MIDASMetadataBagger(id, self.workdir, self.reviewdir,
                                      self.uploaddir, cfg, self._minter)
         bagger.ensure_preparation()
         return bagger
