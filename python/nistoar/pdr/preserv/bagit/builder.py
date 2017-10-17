@@ -1106,12 +1106,32 @@ format(nerdm['title'])
         if not self._bag:
             self.ensure_bagdir()
         for dfile in self._bag.iter_data_files():
-            mddir = os.path.join(self.bagdir,'metadata',dfile)
-            mdfile = os.path.join(mddir, FILEMD_FILENAME)
+            mdfile = self._bag.nerd_file_for(dfile)
             if examine or not os.path.exists(mdfile):
-               self.init_filemd_for(dfile, write=True, examine=examine)
-               # do we need a rubric for avoiding rewriting of metadata
-               # when examine=True?
+                # we'll merge the new examination with the previous:
+                # except 'checksum', previous data will over-ride new 
+                if os.path.exists(mdfile):
+                    oldmd = self._bag.nerd_metadata_for(dfile)
+                else:
+                    oldmd = OrderedDict()
+
+                # generate metadata
+                md = self.init_filemd_for(dfile, write=False, examine=examine)
+
+                # merge it with the previous metadata
+                cksm = md.get('checksum')
+                sz = md.get('size')
+                md.update(oldmd)
+                override = {}
+                if cksm:
+                    override['checksum'] = cksm
+                if sz:
+                    override['size'] = sz
+                md.update(override)
+
+                # write it out
+                self.add_metadata_for_file(dfile, md)
+                self.ensure_ansc_collmd(dfile)
 
 
     def __del__(self):
