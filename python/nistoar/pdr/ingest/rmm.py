@@ -115,7 +115,7 @@ class IngestClient(object):
                                  .format(mdir, str(ex)))
 
         self._endpt = get_endpoint(self._cfg)
-        if not self._endpt.startswith('https://'):
+        if self._endpt and not self._endpt.startswith('https://'):
             self.log.warn("Non HTTPS endpoint for ingest service: " +
                           self._cfg.get("service_endpoint","?"))
 
