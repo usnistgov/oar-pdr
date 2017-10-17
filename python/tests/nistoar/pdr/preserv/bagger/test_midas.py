@@ -488,9 +488,6 @@ class TestPreservationBagger(test.TestCase):
                                              "data", "trial3", "trial3a.json")))
         
     def test_make_bag(self):
-        pdb.set_trace()
-        # self.bagr = midas.PreservationBagger(self.midasid, '_preserv',
-        #                                      self.revdir, self.mddir, config)
         self.bagr.make_bag()
         self.assertTrue(os.path.exists(self.bagr.bagdir),
                         "Output bag dir not created")
@@ -522,6 +519,9 @@ class TestPreservationBagger(test.TestCase):
         self.assertIn("nrdp:DataFile", md.get("@type", []))
         self.assertIn("dcat:Distribution", md.get("@type", []))
         self.assertIn("downloadURL", md)
+        self.assertIn("title", md)
+        self.assertEqual(md.get("title"),
+                         "JSON version of the Mathematica notebook")
         
         # test for BagIt-required files
         self.assertTrue(os.path.isfile(os.path.join(self.bagr.bagdir,

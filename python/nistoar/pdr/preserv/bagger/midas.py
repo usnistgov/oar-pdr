@@ -540,6 +540,11 @@ class PreservationBagger(SIPBagger):
         :return str:  the path to the finalized bag directory
         """
         self.prepare(nodata=False)
-        self.bagbldr.finalize_bag()
+
+        finalcfg = self.cfg.get('bag_builder', {}).get('finalize', {})
+        if finalcfg.get('ensure_component_metadata') is None:
+            finalcfg['ensure_component_metadata'] = False
+        self.bagbldr.finalize_bag(finalcfg)
+
         return self.bagbldr.bagdir
 

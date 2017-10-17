@@ -455,6 +455,7 @@ class MIDASSIPHandler(SIPHandler):
         if self._ingester and self._ingester.is_staged(self.bagger.name):
             try:
                 self._ingester.submit(self.bagger.name)
+                log.info("Submitted NERDm record to RMM")
             except Exception as ex:
                 log.exception("Failed to ingest record with name=" +
                               self.bagger.name + "into RMM: " + str(ex))
