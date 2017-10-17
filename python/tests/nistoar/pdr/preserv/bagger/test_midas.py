@@ -488,6 +488,9 @@ class TestPreservationBagger(test.TestCase):
                                              "data", "trial3", "trial3a.json")))
         
     def test_make_bag(self):
+        pdb.set_trace()
+        # self.bagr = midas.PreservationBagger(self.midasid, '_preserv',
+        #                                      self.revdir, self.mddir, config)
         self.bagr.make_bag()
         self.assertTrue(os.path.exists(self.bagr.bagdir),
                         "Output bag dir not created")
@@ -508,7 +511,35 @@ class TestPreservationBagger(test.TestCase):
         self.assertTrue(os.path.isfile(os.path.join(self.bagr.bagdir,
                                              "data", "trial3", "trial3a.json")))
 
-        # test for BagIt required files
+        # test if we lost the downloadURLs
+        mdf = os.path.join(self.bagr.bagdir,
+                           "metadata", "trial1.json", "nerdm.json")
+        with open(mdf) as fd:
+            md = json.load(fd)
+        self.assertIn("checksum", md)
+        self.assertIn("size", md)
+        self.assertIn("mediaType", md)
+        self.assertIn("nrdp:DataFile", md.get("@type", []))
+        self.assertIn("dcat:Distribution", md.get("@type", []))
+        self.assertIn("downloadURL", md)
+        
+        # test for BagIt-required files
+        self.assertTrue(os.path.isfile(os.path.join(self.bagr.bagdir,
+                                                    "bagit.txt")))
+        self.assertTrue(os.path.isfile(os.path.join(self.bagr.bagdir,
+                                                    "bag-info.txt")))
+        self.assertTrue(os.path.isfile(os.path.join(self.bagr.bagdir,
+                                                    "manifest-sha256.txt")))
+        
+        # test for NIST-required files
+        self.assertTrue(os.path.isdir(os.path.join(self.bagr.bagdir,
+                                                   "multibag")))
+        self.assertTrue(os.path.isfile(os.path.join(self.bagr.bagdir,
+                                            "multibag", "group-members.txt")))
+        self.assertTrue(os.path.isfile(os.path.join(self.bagr.bagdir,
+                                            "multibag", "group-directory.txt")))
+        self.assertTrue(os.path.isfile(os.path.join(self.bagr.bagdir,
+                                                   "about.txt")))
         
 
 if __name__ == '__main__':

@@ -150,6 +150,9 @@ class BagBuilder(PreservationSystem):
         jqlib = self.cfg.get('jq_lib', def_jq_libdir)
         self.pod2nrd = PODds2Res(jqlib)
 
+        if os.path.exists(self.bagdir):
+            self.ensure_bagdir() # this initializes some data like self._bag
+
     def _fix_id(self, id):
         if id is None:
             return None
@@ -267,6 +270,12 @@ class BagBuilder(PreservationSystem):
         if didit:
             self.record("Created bag with name, %s", self.bagname)
         self._bag = NISTBag(self.bagdir)
+        if os.path.exists(self._bag.nerd_file_for("")):
+            # load the resource-level metadata that's already there
+            md = self._bag.nerd_metadata_for("")
+            self._id = md.get('@id')
+            self._ediid = md.get('ediid')
+        
 
     def _set_logfile(self):
         if self._loghdlr:
