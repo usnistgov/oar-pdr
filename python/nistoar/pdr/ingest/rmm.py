@@ -39,7 +39,13 @@ def submit_for_ingest(record, endpoint, name=None):
             raise IngestServerError(resp.status_code, resp.reason, name,
                             message="Unexpected response from server: {0} {1}"
                                     .format(resp.status_code, resp.reason))
-        
+    except ValueError as ex:
+        if resp.text and ("<body" in resp.text or "<BODY" in resp.text):
+            IngestServerError(message="HTML returned where JSON expected "+
+                              "(is service URL correct?)")
+        else:
+            IngestServerError(message="Unable to parse response as JSON "+
+                              "(is service URL correct?)")
     except requests.RequestException as ex:
         raise IngestServerError(message="Trouble connecting to ingest service: "+
                                 str(ex), cause=ex)
@@ -214,6 +220,12 @@ class IngestClient(object):
                 # code is fixed!)
                 self.log.error("Bad call to ingest services: got response: " +
                                str(ex.status) + " " + ex.reason)
+                shutil.move(recfile, self._stagedir)
+                raise
+            except Exception as ex:
+                # Huh?  (resubmit after code is fixed!)
+                self.error("Unexpected error during call to ingest service: "+
+                           str(ex))
                 shutil.move(recfile, self._stagedir)
                 raise
 
