@@ -132,6 +132,11 @@ class TestIngestClient(test.TestCase):
         self.assertTrue(self.cl._endpt)
         self.assertEqual(self.cl.submit_mode, "named")
 
+        # look for a warning about our service endpoint
+        with open(os.path.join(tmpdir(),"test_rmm.log")) as fd:
+            warnings = [l for l in fd if "Non-HTTPS" in l]
+        self.assertGreater(len(warnings), 0)
+
     def test_stage(self):
         rec = getrec()
         self.cl.stage(rec, 'bru')
