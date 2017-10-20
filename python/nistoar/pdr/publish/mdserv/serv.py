@@ -139,7 +139,7 @@ class PrePubMetadataService(PublishSystem):
         bagger.ensure_preparation()
         return bagger
 
-    def make_nerdm_record(self, bagdir, baseurl=None):
+    def make_nerdm_record(self, bagdir, datafiles=None, baseurl=None):
         """
         Given a metadata bag, generate a complete NERDm resource record.  
 
@@ -151,10 +151,17 @@ class PrePubMetadataService(PublishSystem):
         providing a baseurl argument.  The value in both cases is the base URL
         to convert the download URLs to.  The config parameter, 
         'datadist_base_path', indicates the base URL path to look for to 
-        recognize data distribution service URLs.
+        recognize data distribution service URLs.  If datafiles is also 
+        provided, substitution is restricted to those data files given in 
+        that lookup map.
 
         :param bagdir str:  the directory representing the output bag to serve
                             the metadata from 
+        :param datafiles str:  a mapping of filepath property values to 
+                            locations to existing data files on disk; 
+                            substitution is done for filepaths that match
+                            one of the paths in the dictionary.  If None,
+                            this requirement is not applied.  
         :param baseurl str: the baseurl to convert downloadURLs to; if None,
                             conversion will not be applied unless 
                             'download_base_url' is set (see above).  
@@ -170,8 +177,17 @@ class PrePubMetadataService(PublishSystem):
                 ddspath = '/' + ddspath
             pat = re.compile(r'https?://[\w\.]+(:\d+)?'+ddspath)
             for comp in out['components']:
+                # do a download URL substitution if 1) it looks like a
+                # distribution service URL, and 2) the file exists in our
+                # SIP areas.  
                 if 'downloadURL' in comp and pat.search(comp['downloadURL']):
-                    comp['downloadURL'] = pat.sub(baseurl, comp['downloadURL'])
+                    # it matches
+                    filepath = comp.get('filepath',
+                                        pat.sub('',comp['downloadURL']))
+                    if datafiles is None or filepath in datafiles:
+                        # it exists
+                        comp['downloadURL'] = pat.sub(baseurl,
+                                                      comp['downloadURL'])
 
         return out
 
@@ -180,7 +196,8 @@ class PrePubMetadataService(PublishSystem):
         return a full NERDm resource record corresponding to the given 
         MIDAS ID.  
         """
-        return self.make_nerdm_record(self.prepare_metadata_bag(id).bagdir)
+        bagger = self.prepare_metadata_bag(id)
+        return self.make_nerdm_record(bagger.bagdir, bagger.datafiles)
 
     def locate_data_file(self, id, filepath):
         """

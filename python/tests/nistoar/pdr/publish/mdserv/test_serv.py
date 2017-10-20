@@ -157,6 +157,25 @@ class TestPrePubMetadataService(test.TestCase):
                 self.assertTrue(comp['downloadURL'].startswith('https://mdserv.nist.gov/'+self.midasid+'/'),
                                 "Bad conversion of URL: "+comp['downloadURL'])
         self.assertEquals(dlcount, 3)
+
+        datafiles = { "trial1.json": "blah/blah/trial1.json" }
+        data = self.srv.make_nerdm_record(bagdir, datafiles, 
+                                          baseurl='https://mdserv.nist.gov/')
+
+        comps = data['components']
+        dlcount = 0
+        for comp in comps:
+            if 'downloadURL' in comp:
+                dlcount += 1
+                if comp['filepath'] == "trial1.json":
+                    self.assertTrue(comp['downloadURL'].startswith('https://mdserv.nist.gov/'+self.midasid+'/'),
+                                "Bad conversion of URL: "+comp['downloadURL'])
+                else:
+                    self.assertFalse(comp['downloadURL'].startswith('https://mdserv.nist.gov/'+self.midasid+'/'),
+                                "Bad conversion of URL: "+comp['downloadURL'])
+        self.assertEquals(dlcount, 3)
+
+        
         
     def test_resolve_id(self):
         metadir = os.path.join(self.bagdir, 'metadata')
