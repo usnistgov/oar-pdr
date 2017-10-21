@@ -35,6 +35,8 @@ class NISTBag(PreservationSystem):
 
         self._datadir = os.path.join(rootdir, "data")
         self._metadir = os.path.join(rootdir, "metadata")
+        self._bagitver = None
+        self._tagencoding = None
 
         self._mergeannots = merge_annots
 
@@ -68,6 +70,32 @@ class NISTBag(PreservationSystem):
         the path to the metadata directory for the bag
         """
         return self._metadir
+
+    @property
+    def bagit_version(self):
+        """
+        the version of the BagIt standard that this bag claims to be compliant
+        with, or None if it is not specified.
+        """
+        if not self._bagitver:
+            self._load_bagit_version()
+        return self._bagitver
+
+    @property
+    def tag_encoding(self):
+        """
+        the character encoding used in tag files, or None if not specified
+        """
+        if not self._tagencoding:
+            self._load_bagit_version()
+        return self._tagencoding
+
+    def _load_bagit_version(self):
+        bagitf = os.path.join(self.dir, "bagit.txt")
+        info = self.get_baginfo(bagitf)
+        self._bagitver = info.get('BagIt-Version', [None])[0]
+        self._tagencoding = info.get('Tag-File-Character-Encoding', [None])[0]
+    
 
     def pod_file(self):
         return os.path.join(self._metadir, POD_FILENAME)

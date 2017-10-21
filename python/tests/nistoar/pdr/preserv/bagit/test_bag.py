@@ -12,7 +12,7 @@ import nistoar.pdr.exceptions as exceptions
 
 # datadir = nistoar/pdr/preserv/data
 datadir = os.path.join( os.path.dirname(os.path.dirname(__file__)), "data" )
-bagdir = os.path.join(datadir, "metadatabag")
+bagdir = os.path.join(datadir, "samplembag")
 
 baghier = [
     {
@@ -41,7 +41,7 @@ class TestNISTBag(test.TestCase):
 
     def test_ctor(self):
         self.assertEqual(self.bag.dir, bagdir)
-        self.assertEqual(self.bag.name, "metadatabag")
+        self.assertEqual(self.bag.name, "samplembag")
         self.assertEqual(self.bag.data_dir, os.path.join(bagdir, "data"))
         self.assertEqual(self.bag.metadata_dir, os.path.join(bagdir, "metadata"))
         self.assertEqual(self.bag.pod_file(),
@@ -147,9 +147,10 @@ class TestNISTBag(test.TestCase):
     def test_get_baginfo(self):
         data = self.bag.get_baginfo()
 
-        self.assertEqual(data.keys(),
-                         ["Source-Organization", "Organization-Address",
-                          "External-Description", "Bag-Count"])
+        self.assertEqual(len(data.keys()), 10)
+        for key in ["Source-Organization", "Organization-Address",
+                    "External-Description", "Bag-Count"]:
+            self.assertIn(key, data)
 
         self.assertEqual(len([data[k] for k in data
                                       if not isinstance(data[k], list)]), 0)
@@ -168,6 +169,13 @@ class TestNISTBag(test.TestCase):
                            "includes various other metadata files." ])
         self.assertEqual(data['Bag-Count'], [ "1 of 1" ])
 
+    def test_bagit_version(self):
+        self.assertEqual(self.bag.bagit_version, "0.97")
+        self.assertEqual(self.bag.tag_encoding, "UTF-8")
+    
+    def test_tag_encoding(self):
+        self.assertEqual(self.bag.tag_encoding, "UTF-8")
+        self.assertEqual(self.bag.bagit_version, "0.97")
     
                          
                          
