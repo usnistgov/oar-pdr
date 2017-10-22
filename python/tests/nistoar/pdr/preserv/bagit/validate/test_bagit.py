@@ -222,9 +222,14 @@ class TestBagItValidator(test.TestCase):
         with open(bif, 'w') as fd:
             print(" Incorrect", file=fd)
             print("name: value", file=fd)
+            print("Bagging-Date: 2017", file=fd)
+            print("Bag-Size: 2017", file=fd)
         errs = self.valid8.test_baginfo(self.bag)
-        self.assertEqual(len(errs), 1)
+        self.assertEqual(len(errs), 3, "Unexpected # of errors: [\n  " +
+                         "\n  ".join([str(e) for e in errs]) + "\n]")
         self.assertTrue(has_error(errs, "2.2.2-2"))
+        self.assertTrue(has_error(errs, "2.2.2-Bagging-Date"))
+        self.assertTrue(has_error(errs, "2.2.2-Bag-Size"))
         self.assertEqual(errs[0].type, "error")
 
     def test_test_fetch_txt(self):
@@ -252,9 +257,52 @@ class TestBagItValidator(test.TestCase):
         self.assertEqual(errs, [],
                          "False Positives: "+ str([str(e) for e in errs]))
         
-        
-            
-                         
+class TestFmts(test.TestCase):
+    def test_email(self):
+        self.assertTrue(val._fmt_email("raymond.plante@nist.gov"))
+        self.assertTrue(val._fmt_email("ray10171964@gmail.com"))
+        self.assertFalse(val._fmt_email("rlp3@nist"))
+        self.assertFalse(val._fmt_email("rlp3nist"))
+        self.assertFalse(val._fmt_email("ra#964@gmail.com"))
+
+    def test_date(self):
+        self.assertTrue(val._fmt_date("2017-10-19"))
+        self.assertTrue(val._fmt_date("1907-01-19"))
+        self.assertTrue(val._fmt_date("2007-12-20"))
+        self.assertTrue(val._fmt_date("2007-12-30"))
+        self.assertTrue(val._fmt_date("2007-12-31"))
+        self.assertFalse(val._fmt_date("2007-1-19"))
+        self.assertFalse(val._fmt_date("2007-01-9"))
+        self.assertFalse(val._fmt_date("2007-21-19"))
+        self.assertFalse(val._fmt_date("2007-12-34"))
+
+    def test_bagsz(self):
+        self.assertTrue(val._fmt_bagsz("132 kb"))
+        self.assertTrue(val._fmt_bagsz("132. kB"))
+        self.assertTrue(val._fmt_bagsz("132.23 MB"))
+        self.assertTrue(val._fmt_bagsz("0.23 GB"))
+        self.assertTrue(val._fmt_bagsz(".230 Tb"))
+        self.assertFalse(val._fmt_bagsz(". Tb"))
+        self.assertFalse(val._fmt_bagsz("23 bytes"))
+        self.assertFalse(val._fmt_bagsz("Four kilobytes"))
+
+    def test_bagcnt(self):
+        self.assertTrue(val._fmt_bagcnt("1 of 1"))
+        self.assertTrue(val._fmt_bagcnt("5 of ?"))
+        self.assertTrue(val._fmt_bagcnt("23 of 198"))
+        self.assertFalse(val._fmt_bagcnt("12"))
+        self.assertFalse(val._fmt_bagcnt("12 of X"))
+        self.assertFalse(val._fmt_bagcnt("X of 23"))
+
+    def test_oxum(self):
+        self.assertTrue(val._fmt_oxum("0.0"))
+        self.assertTrue(val._fmt_oxum("23481.23"))
+        self.assertTrue(val._fmt_oxum("8.3"))
+        self.assertFalse(val._fmt_oxum(".3"))
+        self.assertFalse(val._fmt_oxum("3."))
+        self.assertFalse(val._fmt_oxum("3."))
+        self.assertFalse(val._fmt_oxum("Four"))
+        self.assertFalse(val._fmt_oxum("243509"))
 
 if __name__ == '__main__':
     test.main()

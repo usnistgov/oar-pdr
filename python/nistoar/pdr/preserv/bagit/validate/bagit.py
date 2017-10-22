@@ -196,6 +196,18 @@ class BagItValidator(ValidatorBase):
             out += self.check_baginfo_format(baginfof)
             baginfo = bag.get_baginfo()
 
+            data = bag.get_baginfo()
+            for fld in _fmt_tests:
+                if fld in data:
+                    for val in data[fld]:
+                        if not _fmt_tests[fld](val):
+                            if fld == "Bag-Size":
+                                out += [self._warn("2.2.2-"+fld,
+                  "Not recommended value format for {0}: {1}".format(fld, val))]
+                            else:
+                                out += [self._err("2.2.2-"+fld,
+                        "Incorrect value format for {0}: {1}".format(fld, val))]
+
         else:
             out += [self._rec("2.2.2-1", "Recommend adding a bag-info.txt file")]
 
@@ -273,3 +285,32 @@ class BagItValidator(ValidatorBase):
             out.append(self._err(URL,  "Missing length and/or filename "+
                                  "fields " + errs[URL]))
         return out
+
+_emailre = re.compile("^\w[\w\.]*@(\w+\.)+\w+$")
+def _fmt_email(value):
+    return _emailre.match(value) is not None
+
+_datere = re.compile("^\d\d\d\d-[01]\d-(([012]\d)|(3[01]))$")
+def _fmt_date(value):
+    return _datere.match(value) is not None
+
+_bagszre = re.compile("^\s*((\d+\.?)|(\d*\.\d+)) [kMGTZ]?[bB]\s*$")
+def _fmt_bagsz(value):
+    return _bagszre.match(value) is not None
+
+_bagcntre = re.compile("^[123456789]\d* of (([123456789]\d*)|\?)$")
+def _fmt_bagcnt(value):
+    return _bagcntre.match(value) is not None
+
+_oxumre = re.compile("^\d+\.\d+$")
+def _fmt_oxum(value):
+    return _oxumre.match(value) is not None
+
+_fmt_tests = {
+    "Bag-Size": _fmt_bagsz,
+    "Payload-Oxum": _fmt_oxum,
+    "Bag-Count": _fmt_bagcnt,
+    "Contact-Email": _fmt_email,
+    "Bagging-Date": _fmt_date
+}
+
