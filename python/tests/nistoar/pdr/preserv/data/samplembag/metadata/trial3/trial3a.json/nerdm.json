@@ -1,0 +1,21 @@
+{
+    "filepath": "trial3/trial3a.json",
+    "checksum": {
+        "hash": "7b58010c841b7748a48a7ac6366258d5b5a8d23d756951b6059c0e80daad516b",
+        "algorithm": {
+            "tag": "sha256",
+            "@type": "Thing"
+        }
+    },
+    "mediaType": "application/json",
+    "downloadURL": "https://data.nist.gov/od/ds/3A1EE2F169DD3B8CE0531A570681DB5D1491/trial3/trial3a.json",
+    "size": 70,
+    "@id": "cmps/trial3/trial3a.json",
+    "@type": [
+        "nrdp:DataFile",
+        "dcat:Distribution"
+    ],
+    "_extensionSchemas": [
+        "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+    ]
+}

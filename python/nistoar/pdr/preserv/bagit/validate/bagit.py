@@ -3,6 +3,7 @@ This module implements a validator for the base BagIt standard
 """
 import os, re
 from collections import OrderedDict
+from urlparse import urlparse
 
 from .base import Validator, ValidatorBase, ValidationIssue, _VIE, _VIW, _VIR
 from ..bag import NISTBag
@@ -68,11 +69,18 @@ class BagItValidator(ValidatorBase):
         return out
 
     def test_manifest(self, bag):
-        out = []
         tcfg = self.cfg.get("test_manifest", {})
         check = tcfg.get('check_checksums', True)
+        return self._test_manifest(bag, "manifest", check)
 
-        manire = re.compile(r'^manifest-(\w+).txt$')
+    def test_tagmanifest(self, bag):
+        tcfg = self.cfg.get("test_manifest", {})
+        check = tcfg.get('check_checksums', True)
+        return self._test_manifest(bag, "tagmanifest", check)
+
+    def _test_manifest(self, bag, basename, check):
+        out = []
+        manire = re.compile(r'^{0}-(\w+).txt$'.format(basename))
         manifests = [f for f in os.listdir(bag.dir) if manire.match(f)]
         if len(manifests) > 0:
             for mfile in manifests:
@@ -96,7 +104,8 @@ class BagItValidator(ValidatorBase):
                             parts[1] = parts[1][1:]
                             parts.append('*')
 
-                        if not parts[1].startswith('data/'):
+                        if basename == "manifest" and \
+                           not parts[1].startswith('data/'):
                             notdata.append(parts[1])
                         else:
                             paths[parts[1]] = parts[0]
@@ -113,8 +122,8 @@ class BagItValidator(ValidatorBase):
                 if notdata:
                     s = (len(notdata) > 1 and "s") or ""
                     out += [self._err("2.1.3-3",
-                  "bag-info.txt lists {0} non-payload (i.e. under data/) file{1}"
-                                      .format(len(notdata), s))]
+                        "{0} lists {1} non-payload (i.e. under data/) file{2}"
+                                      .format(mfile, len(notdata), s))]
 
                 # make sure all paths exist
                 badpaths = []
@@ -130,7 +139,7 @@ class BagItValidator(ValidatorBase):
                 if badpaths:
                     for datap in badpaths[:4]:
                         out += [self._err("3-1-2",
-                                        "Path in manifest missing in payload: "+
+                                          "Path in manifest missing in bag: "+
                                           datap)]
                     if len(badpaths) > 4:
                         addl = len(badpaths) - 3
@@ -141,7 +150,8 @@ class BagItValidator(ValidatorBase):
                 # check that all files in the payload are listed in the manifest
                 notfound = []
                 failed = []
-                for root, subdirs, files in os.walk(bag.data_dir):
+                if basename == "manifest":
+                  for root, subdirs, files in os.walk(bag.data_dir):
                     for f in files:
                         fp = os.path.join(root, f)
                         assert fp.startswith(bag.dir+'/')
@@ -173,7 +183,7 @@ class BagItValidator(ValidatorBase):
             "{0}: Checksums don't match for {1} additional payload (data/) files"
                                        .format(mfile, addl))
 
-        else:
+        elif basename == "manifest":
             out += [self._err("2.1.3-1", "No manifest-<alg>.txt files found")]
 
         return out
@@ -213,4 +223,53 @@ class BagItValidator(ValidatorBase):
                               "bag-info.txt format issues found (lines {0})"
                               .format(", ".join([str(b) for b in badlines])))]
 
+        return out
+
+    def test_fetch_txt(self, bag):
+        
+        ff = os.path.join(bag.dir, "fetch.txt")
+        if not os.path.exists(ff):
+            return []
+
+        FMT = "2.2.3-1"
+        ICL = "2.2.3-2"
+        URL = "2.2.3-3"
+        errs = { FMT: [], ICL: [], URL: [] }
+        i = 0
+        with open(ff) as fd:
+            for line in fd:
+                i += 1
+                parts = line.split()
+                if len(parts) < 3:
+                  errs[FMT].append(i)
+                  continue
+              
+                try:
+                    int(parts[1])
+                except ValueError as ex:
+                    errs[ICL].append(i)
+                    continue
+
+                url = urlparse(parts[0])
+                if not url.scheme or not url.netloc:
+                    errs[URL].append(i)
+
+        out = []
+        for err in (FMT, ICL, URL):
+            if len(errs[err]) > 0:
+                if len(errs[err]) > 4:
+                    errs[err][3] = "..."
+                s = (len(errs[err]) > 1 and "s") or ""
+                errs[err] = "(line{0} {1})" \
+                    .format(s, ", ".join([str(e) for e in errs[err]]))
+                
+        if errs[FMT]:
+            out.append(self._err(FMT,  "Missing length and/or filename "+
+                                 "fields " + errs[FMT]))
+        if errs[ICL]:
+            out.append(self._err(ICL,  "Content length (field 2) not an "+
+                                 "integer " + errs[ICL]))
+        if errs[URL]:
+            out.append(self._err(URL,  "Missing length and/or filename "+
+                                 "fields " + errs[URL]))
         return out
