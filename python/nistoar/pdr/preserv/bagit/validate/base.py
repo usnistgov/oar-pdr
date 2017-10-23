@@ -168,7 +168,7 @@ class ValidatorBase(Validator):
 
     def validate(self, bag):
         out = []
-        for test in self.test_methods():
+        for test in self.the_test_methods():
             try:
                 out.extend( getattr(self, test)(bag) )
             except Exception, ex:

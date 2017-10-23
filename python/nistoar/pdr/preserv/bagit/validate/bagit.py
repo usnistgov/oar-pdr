@@ -5,7 +5,7 @@ import os, re
 from collections import OrderedDict
 from urlparse import urlparse
 
-from .base import Validator, ValidatorBase, ValidationIssue, _VIE, _VIW, _VIR
+from .base import Validator, ValidatorBase
 from ..bag import NISTBag
 from ..builder import checksum_of
 

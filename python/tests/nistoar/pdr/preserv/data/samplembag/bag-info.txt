@@ -13,3 +13,8 @@ External-Identifier: ark:/88434/edi00hw91c
 External-Identifier: doi:10.18434/T4SW26
 Payload-Oxum: 208.3
 Bag-Size: 10.28 kB
+Multibag-Version: 0.2
+Multibag-Tag-Directory: multibag
+Multibag-Reference: http://odiwiki.nist.gov/ODI/AIPSpec
+Multibag-Head-Version: 1.0
+Internal-Sender-Description: This is a sample head bag.

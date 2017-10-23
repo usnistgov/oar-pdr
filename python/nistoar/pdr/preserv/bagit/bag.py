@@ -37,6 +37,7 @@ class NISTBag(PreservationSystem):
         self._metadir = os.path.join(rootdir, "metadata")
         self._bagitver = None
         self._tagencoding = None
+        self._mbagdir = None
 
         self._mergeannots = merge_annots
 
@@ -95,7 +96,23 @@ class NISTBag(PreservationSystem):
         info = self.get_baginfo(bagitf)
         self._bagitver = info.get('BagIt-Version', [None])[0]
         self._tagencoding = info.get('Tag-File-Character-Encoding', [None])[0]
-    
+
+    @property
+    def multibag_dir(self):
+        """
+        the path to the multibag tag directory for the bag.  None is returned
+        if this bag does not appear to be a "multibag" bag.
+        """
+        if self._mbagdir is None:
+            data = self.get_baginfo()
+            vals = data.get("Multibag-Tag-Directory")
+            if vals:
+                self._mbagdir = vals[-1]
+            elif data.get("Multibag-Version"):
+                return "multibag"
+
+        return self._mbagdir
+            
 
     def pod_file(self):
         return os.path.join(self._metadir, POD_FILENAME)

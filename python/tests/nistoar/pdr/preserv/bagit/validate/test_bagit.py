@@ -256,6 +256,42 @@ class TestBagItValidator(test.TestCase):
         errs = self.valid8.test_fetch_txt(self.bag)
         self.assertEqual(errs, [],
                          "False Positives: "+ str([str(e) for e in errs]))
+
+    def test_validate(self):
+        errs = self.valid8.validate(self.bag)
+        self.assertEqual(errs, [],
+                         "False Positives: "+ str([str(e) for e in errs]))
+
+        # Mess up bag to see if all tests are getting run
+        bagitf = os.path.join(self.bag.dir, "bagit.txt")
+        with open(bagitf, 'w') as fd:
+            print("BagIt-Version: 1.0", file=fd)
+
+        shutil.rmtree(self.bag.data_dir)
+
+        mf = os.path.join(self.bag.dir, "tagmanifest-sha256.txt")
+        with open(mf, 'a') as fd:
+            print("alskdf", file=fd)
+
+        bif = os.path.join(self.bag.dir, "bag-info.txt")
+        with open(bif, 'a') as fd:
+            print("Incorrect", file=fd)
+        ff = os.path.join(self.bag.dir, "fetch.txt")
+        with open(ff, 'a') as fd:
+            print("Incorrect", file=fd)
+        
+        errs = self.valid8.validate(self.bag)
+        self.assertGreater(len(errs), 0)
+        self.assertTrue(has_error(errs, "2.1.1-3"))
+        self.assertTrue(has_error(errs, "2.1.1-4"))
+        self.assertTrue(has_error(errs, "2.1.1-4"))
+        self.assertTrue(has_error(errs, "2.2.3-1"))
+        self.assertTrue(has_error(errs, "2.2.2-2"))
+        self.assertTrue(has_error(errs, "2.1.2"))
+        self.assertTrue(has_error(errs, "2.1.3-2"))
+        self.assertTrue(has_error(errs, "3-1-2"))
+                         
+        
         
 class TestFmts(test.TestCase):
     def test_email(self):

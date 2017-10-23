@@ -147,7 +147,7 @@ class TestNISTBag(test.TestCase):
     def test_get_baginfo(self):
         data = self.bag.get_baginfo()
 
-        self.assertEqual(len(data.keys()), 10)
+        self.assertEqual(len(data.keys()), 15)
         for key in ["Source-Organization", "Organization-Address",
                     "External-Description", "Bag-Count"]:
             self.assertIn(key, data)
@@ -176,6 +176,9 @@ class TestNISTBag(test.TestCase):
     def test_tag_encoding(self):
         self.assertEqual(self.bag.tag_encoding, "UTF-8")
         self.assertEqual(self.bag.bagit_version, "0.97")
+
+    def test_multibag_dir(self):
+        self.assertEqual(self.bag.multibag_dir, "multibag")
     
                          
                          
