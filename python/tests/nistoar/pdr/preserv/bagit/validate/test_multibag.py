@@ -61,7 +61,7 @@ class TestMultibagValidator(test.TestCase):
         errs = self.valid8.test_version(self.bag)
         self.assertEqual(len(errs.failed()), 1, "Unexpected # of errors: [\n  " +
                          "\n  ".join([str(e) for e in errs.failed()]) + "\n]")
-        self.assertTrue(has_error(errs, "1.2-Version-val"))
+        self.assertTrue(has_error(errs, "2-Version-val"))
 
         with open(bif, 'w') as fd:
             for line in biflines:
@@ -70,7 +70,7 @@ class TestMultibagValidator(test.TestCase):
         errs = self.valid8.test_version(self.bag)
         self.assertEqual(len(errs.failed()), 1, "Unexpected # of errors: [\n  " +
                          "\n  ".join([str(e) for e in errs.failed()]) + "\n]")
-        self.assertTrue(has_error(errs, "1.2-Version"))
+        self.assertTrue(has_error(errs, "2-Version"))
 
     def test_test_reference(self):
         errs = self.valid8.test_reference(self.bag)
@@ -89,7 +89,7 @@ class TestMultibagValidator(test.TestCase):
         errs = self.valid8.test_reference(self.bag)
         self.assertEqual(len(errs.failed()), 2, "Unexpected # of errors: [\n  " +
                          "\n  ".join([str(e) for e in errs.failed()]) + "\n]")
-        self.assertTrue(has_error(errs, "1.2-Reference-val"))
+        self.assertTrue(has_error(errs, "2-Reference-val"))
         
         with open(bif, 'w') as fd:
             for line in biflines:
@@ -99,7 +99,7 @@ class TestMultibagValidator(test.TestCase):
         errs = self.valid8.test_reference(self.bag)
         self.assertEqual(len(errs.failed()), 1, "Unexpected # of errors: [\n  " +
                          "\n  ".join([str(e) for e in errs.failed()]) + "\n]")
-        self.assertTrue(has_error(errs, "1.2-Reference-val"))
+        self.assertTrue(has_error(errs, "2-Reference-val"))
         
         with open(bif, 'w') as fd:
             for line in biflines:
@@ -108,7 +108,7 @@ class TestMultibagValidator(test.TestCase):
         errs = self.valid8.test_reference(self.bag)
         self.assertEqual(len(errs.failed()), 1, "Unexpected # of errors: [\n  " +
                          "\n  ".join([str(e) for e in errs.failed()]) + "\n]")
-        self.assertTrue(has_error(errs, "1.2-Reference"))
+        self.assertTrue(has_error(errs, "2-Reference"))
         
     def test_test_tag_directory(self):
         errs = self.valid8.test_tag_directory(self.bag)
@@ -127,7 +127,7 @@ class TestMultibagValidator(test.TestCase):
         errs = self.valid8.test_tag_directory(self.bag)
         self.assertEqual(len(errs.failed()), 1, "Unexpected # of errors: [\n  " +
                          "\n  ".join([str(e) for e in errs.failed()]) + "\n]")
-        self.assertTrue(has_error(errs, "1.2-Tag-Directory"))
+        self.assertTrue(has_error(errs, "2-Tag-Directory"))
         
         with open(bif, 'w') as fd:
             for line in biflines:
@@ -137,7 +137,7 @@ class TestMultibagValidator(test.TestCase):
         errs = self.valid8.test_tag_directory(self.bag)
         self.assertEqual(len(errs.failed()), 1, "Unexpected # of errors: [\n  " +
                          "\n  ".join([str(e) for e in errs.failed()]) + "\n]")
-        self.assertTrue(has_error(errs, "1.2-Tag-Directory"))
+        self.assertTrue(has_error(errs, "2-Tag-Directory"))
         
         with open(bif, 'w') as fd:
             for line in biflines:
@@ -148,7 +148,7 @@ class TestMultibagValidator(test.TestCase):
         errs = self.valid8.test_tag_directory(self.bag)
         self.assertEqual(len(errs.failed()), 1, "Unexpected # of errors: [\n  " +
                          "\n  ".join([str(e) for e in errs.failed()]) + "\n]")
-        self.assertTrue(has_error(errs, "1.2-Tag-Directory"))
+        self.assertTrue(has_error(errs, "2-Tag-Directory"))
         
         with open(bif, 'w') as fd:
             for line in biflines:
@@ -158,7 +158,7 @@ class TestMultibagValidator(test.TestCase):
         errs = self.valid8.test_tag_directory(self.bag)
         self.assertEqual(len(errs.failed()), 1, "Unexpected # of errors: [\n  " +
                          "\n  ".join([str(e) for e in errs.failed()]) + "\n]")
-        self.assertTrue(has_error(errs, "1.2-Tag-Directory"))
+        self.assertTrue(has_error(errs, "2-Tag-Directory"))
         
         
     def test_test_head_version(self):
@@ -178,7 +178,7 @@ class TestMultibagValidator(test.TestCase):
         errs = self.valid8.test_head_version(self.bag, True)
         self.assertEqual(len(errs.failed()), 1, "Unexpected # of errors: [\n  " +
                          "\n  ".join([str(e) for e in errs.failed()]) + "\n]")
-        self.assertTrue(has_error(errs, "1.2-Head-Version"))
+        self.assertTrue(has_error(errs, "2-Head-Version"))
         
         with open(bif, 'w') as fd:
             for line in biflines:
@@ -189,7 +189,7 @@ class TestMultibagValidator(test.TestCase):
         errs = self.valid8.test_head_version(self.bag, True)
         self.assertEqual(len(errs.failed()), 1, "Unexpected # of errors: [\n  " +
                          "\n  ".join([str(e) for e in errs.failed()]) + "\n]")
-        self.assertTrue(has_error(errs, "1.2-Head-Version"))
+        self.assertTrue(has_error(errs, "2-Head-Version"))
         
         with open(bif, 'w') as fd:
             for line in biflines:
@@ -198,7 +198,7 @@ class TestMultibagValidator(test.TestCase):
         errs = self.valid8.test_head_version(self.bag, True)
         self.assertEqual(len(errs.failed()), 1, "Unexpected # of errors: [\n  " +
                          "\n  ".join([str(e) for e in errs.failed()]) + "\n]")
-        self.assertTrue(has_error(errs, "1.2-Head-Version"))
+        self.assertTrue(has_error(errs, "2-Head-Version"))
         
     def test_test_head_deprecates(self):
         errs = self.valid8.test_head_deprecates(self.bag, True)
@@ -218,7 +218,7 @@ class TestMultibagValidator(test.TestCase):
         errs = self.valid8.test_head_deprecates(self.bag, True)
         self.assertEqual(len(errs.failed()), 1, "Unexpected # of errors: [\n  " +
                          "\n  ".join([str(e) for e in errs.failed()]) + "\n]")
-        self.assertTrue(has_error(errs, "1.2-Head-Deprecates"))
+        self.assertTrue(has_error(errs, "2-Head-Deprecates"))
         
         with open(bif, 'w') as fd:
             for line in biflines:
@@ -236,7 +236,7 @@ class TestMultibagValidator(test.TestCase):
         errs = self.valid8.test_head_deprecates(self.bag, True)
         self.assertEqual(len(errs.failed()), 2, "Unexpected # of errors: [\n  " +
                          "\n  ".join([str(e) for e in errs.failed()]) + "\n]")
-        self.assertTrue(has_error(errs, "1.2-Head-Deprecates"))
+        self.assertTrue(has_error(errs, "2-Head-Deprecates"))
         
     def test_test_baginfo_recs(self):
         errs = self.valid8.test_baginfo_recs(self.bag)
@@ -256,7 +256,7 @@ class TestMultibagValidator(test.TestCase):
         errs = self.valid8.test_baginfo_recs(self.bag)
         self.assertEqual(len(errs.failed()), 2, "Unexpected # of errors: [\n  " +
                          "\n  ".join([str(e) for e in errs.failed()]) + "\n]")
-        self.assertTrue(has_error(errs, "1.2-2"))
+        self.assertTrue(has_error(errs, "2-2"))
         
 
 
