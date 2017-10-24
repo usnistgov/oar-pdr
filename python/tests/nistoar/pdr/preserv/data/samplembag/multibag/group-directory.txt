@@ -1,5 +1,5 @@
-data/trial1.json 3A1EE2F169DD3B8CE0531A570681DB5D1491.mbag0_2-0
-data/trial2.json 3A1EE2F169DD3B8CE0531A570681DB5D1491.mbag0_2-0
-data/trial3/trial3a.json 3A1EE2F169DD3B8CE0531A570681DB5D1491.mbag0_2-0
-metadata/pod.json 3A1EE2F169DD3B8CE0531A570681DB5D1491.mbag0_2-0
-metadata/nerdm.json 3A1EE2F169DD3B8CE0531A570681DB5D1491.mbag0_2-0
+data/trial1.json samplebag
+data/trial2.json samplebag
+data/trial3/trial3a.json samplebag
+metadata/pod.json samplebag
+metadata/nerdm.json samplebag

@@ -134,7 +134,8 @@ class BagItValidator(ValidatorBase):
                         paths[parts[1]] = parts[0]
 
             t = self._issue("2.1.3-2",
-                            "Manifest file must follow specified syntax")
+                            "Manifest file lines must match format "+
+                            "CHECKSUM FILENAME")
             comms = None
             if badlines:
                 if len(badlines) > 4:
@@ -270,7 +271,8 @@ class BagItValidator(ValidatorBase):
                 if not fmtre.match(line) and (i == 1 or not cntre.match(line)):
                     badlines.append(i)
 
-        t = self._issue("2.2.2-2","bag-info.txt file must match required format")
+        t = self._issue("2.2.2-2","bag-info.txt lines must match "+
+                        "label-colon-value format")
         comm = None
         if badlines:
             s = (len(badlines) > 1 and "s") or ""

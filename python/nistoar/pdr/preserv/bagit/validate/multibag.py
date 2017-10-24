@@ -79,13 +79,15 @@ class MultibagValidator(ValidatorBase):
             mdir = data["Multibag-Tag-Directory"]
 
             t = self._issue("2-Tag-Directory",
-            "bag-info.txt: Value for Multibag-Tag-Directory should not be empty")
+                            "bag-info.txt: Value for Multibag-Tag-Directory "+
+                            "should not be empty")
             out._err(t, len(mdir) > 0 and mdir[-1])
             if t.failed():
                 return out
 
             t = self._issue("2-Tag-Directory",
-         "bag-info.txt: Multibag-Tag-Directory element should only appear once")
+                            "bag-info.txt: Multibag-Tag-Directory element "+
+                            "should only appear once")
             out._err(t, len(mdir) == 1)
 
             t = self._issue("2-Tag-Directory",
@@ -94,7 +96,8 @@ class MultibagValidator(ValidatorBase):
 
         else:
             t = self._issue("2-Tag-Directory",
-                         "Default Multibag-Tag-Directory, multibag, must exist")
+                            "Default Multibag-Tag-Directory, multibag, must "+
+                            "exist as a directory")
             out._err(t, os.path.exists(os.path.join(bag.dir, "multibag")))
 
         return out
@@ -109,18 +112,21 @@ class MultibagValidator(ValidatorBase):
             value = data["Multibag-Head-Version"] 
 
             t = self._issue("2-Head-Version",
-            "bag-info.txt: Value for Multibag-Head-Version should not be empty")
+                            "bag-info.txt: Value for Multibag-Head-Version "+
+                            "should not be empty")
             out._warn(t, len(value) > 0 and value[-1])
             if t.failed():
                 return out
 
             t = self._issue("2-Head-Version",
-         "bag-info.txt: Multibag-Head-Version element should only appear once")
+                            "bag-info.txt: Multibag-Head-Version element "+
+                            "should only appear once")
             out._warn(t, len(value) == 1)
 
         else:
             t = self._issue("2-Head-Version",
-                "Head bag: bag-info.txt must have Multibag-Head-Version element")
+                            "Head bag: bag-info.txt must have "+
+                            "Multibag-Head-Version element")
             out._err(t,  ishead)
 
         return out
@@ -183,3 +189,186 @@ class MultibagValidator(ValidatorBase):
 
         return out
 
+    def test_group_members(self, bag, want=ALL, results=None, ishead=False):
+        out = results
+        if not out:
+            out = ValidationResults(bag.name, want)
+
+        mdir = bag.multibag_dir
+        assert mdir
+        if not os.path.isdir(mdir):
+            t = self._issue("2-Tag-Directory",
+                            "Multibag-Tag-Directory must exist as directory")
+            out._err(t, False)
+            return out
+
+        gmemf = os.path.join(mdir, "group-members.txt")
+        t = self._issue("3.0-1", "Multibag tag directory must contain a "+
+                        "group-members.txt file")
+        out._err(t, os.path.isfile(gmemf))
+        if t.failed():
+            return out
+
+        badfmt = []
+        badurl = []
+        replicated = []
+        found = set()
+        foundme = False
+        last = None
+        with open(gmemf) as fd:
+            i = 0
+            for line in fd:
+                i += 1
+                parts = line.strip().split()
+                last = parts[0]
+                if last == bag.name:
+                    foundme = True
+                if last in found:
+                    replicated.append(i)
+                else:
+                    found.add(last)
+                if len(parts) > 2:
+                    badfmt.append(i)
+                if len(parts) > 1:
+                    url = urlparse(parts[1])
+                    if not url.scheme or url.netloc:
+                        badurl.append(i)
+
+        t = self._issue("3.1-1", "group-members.txt lines must match "+
+                        "format, BAGNAME [URL]")
+        comm = None
+        if badfmt:
+            s = (len(badfmt) > 1 and "s") or ""
+            if len(badfmt) > 4:
+                badfmt[3] = '...'
+                badfmt = badfmt[:4]
+            comm = "line{0} {1}".format(s, ", ".join([str(b) for b in badfmt]))
+        out._err(t, len(badfmt) == 0, comm)
+
+        t = self._issue("3.1-2", "group-members.txt: URL field must be an "+
+                        "absolute URL")
+        comm = None
+        if badurl:
+            s = (len(badurl) > 1 and "s") or ""
+            if len(badurl) > 4:
+                badurl[3] = '...'
+                badurl = badurl[:4]
+            comm = "line{0} {1}".format(s, ", ".join([str(b) for b in badurl]))
+        out._err(t, len(badurl) == 0, comm)
+
+        t = self._issue("3.1-3", "group-members.txt must list current bag name")
+        out._err(t, foundme)
+
+        if ishead:
+            t = self._issue("3.1-4", "group-members.txt: Head bag must be "+
+                            "listed last")
+            out._err(t, last == bag.name)
+
+        t = self._issue("3.1-5", "group-members.txt: a bag name should only be "+
+                        "listed once")
+        comm = None
+        if len(replicated) > 0:
+            s = (len(replicated) > 1 and "s") or ""
+            if len(replicated) > 4:
+                replicated[3] = '...'
+                replicated = replicated[:4]
+            comm= "line{0} {1}".format(s,", ".join([str(b) for b in replicated]))
+        out._warn(t, len(replicated) == 0, comm)
+            
+
+        return out
+
+    def test_group_directory(self, bag, want=ALL, results=None, ishead=False):
+        out = results
+        if not out:
+            out = ValidationResults(bag.name, want)
+
+        mdir = bag.multibag_dir
+        assert mdir
+        if not os.path.isdir(mdir):
+            t = self._issue("2-Tag-Directory",
+                            "Multibag-Tag-Directory must exist as directory")
+            out._err(t, False)
+            return out
+
+        gdirf = os.path.join(mdir, "group-directory.txt")
+        t = self._issue("3.0-2", "Multibag tag directory must contain a "+
+                        "group-directory.txt file")
+        out._err(t, os.path.isfile(gdirf))
+        if t.failed():
+            return out
+
+        badfmt = []
+        replicated = []
+        missing = []
+        paths = set()
+        with open(gdirf) as fd:
+            i = 0
+            for line in fd:
+                i += 1
+                parts = line.strip().split()
+                if parts[0] in paths:
+                    replicated.append(i)
+                else:
+                    paths.add(parts[0])
+                if len(parts) != 2:
+                    badfmt.append(i)
+
+                if len(parts) > 1 and parts[1] == bag.name and \
+                   not os.path.isfile(os.path.join(bag.dir, parts[0])):
+                    missing.append(i)
+
+        t = self._issue("3.2-1", "group-directory.txt lines must match format, "+
+                        "FILEPATH BAGNAME")
+        comm = None
+        if len(badfmt) > 0:
+            s = (len(badfmt) > 1 and "s") or ""
+            if len(badfmt) > 4:
+                badfmt[3] = '...'
+                badfmt = badfmt[:4]
+            comm= "line{0} {1}".format(s,", ".join([str(b) for b in badfmt]))
+        out._err(t, len(badfmt) == 0, comm)
+
+        t = self._issue("3.2-2", "group-directory.txt: file path for current "+
+                        "bag must exist as a file")
+        comm = None
+        if len(missing) > 0:
+            s = (len(missing) > 1 and "s") or ""
+            if len(missing) > 4:
+                missing[3] = '...'
+                missing = missing[:4]
+            comm= "line{0} {1}".format(s,", ".join([str(b) for b in missing]))
+        out._err(t, len(missing) == 0, comm)
+
+        t = self._issue("3.2-3", "group-directory.txt: a file path must be "+
+                        "listed only once")
+        comm = None
+        if len(replicated) > 0:
+            s = (len(replicated) > 1 and "s") or ""
+            if len(replicated) > 4:
+                replicated[3] = '...'
+                replicated = replicated[:4]
+            comm= "line{0} {1}".format(s,", ".join([str(b) for b in replicated]))
+        out._warn(t, len(replicated) == 0, comm)
+        
+        # get a list of the payload files
+        missing = []
+        for root, subdirs, files in os.walk(bag.data_dir):
+            for f in files:
+                if f.startswith(".") or f.startswith("_"):
+                    continue
+                path = os.path.join(root, f)[len(bag.dir)+1:]
+                if path not in paths:
+                    missing.append(path)
+        
+        t = self._issue("3.2-4", "all payload file should "+
+                        "be listed in the group-directory.txt file")
+        comm = None
+        if len(missing) > 0:
+            s = (len(missing) > 1 and "s") or ""
+            comm = [ "{0} payload file{1} missing from group-directory.txt"
+                     .format(len(missing), s) ]
+            comm += missing
+        out._rec(t, len(missing) == 0)
+
+        return out

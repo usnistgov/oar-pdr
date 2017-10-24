@@ -140,7 +140,8 @@ class ValidationResults(object):
         issue._passed = bool(passed)
 
         if comments:
-            if not isinstance(comments, Sequence):
+            if isinstance(comments, (str, unicode)) or \
+               not isinstance(comments, Sequence):
                 comments = [ comments ]
             for comm in comments:
                 issue.add_comment(comm)

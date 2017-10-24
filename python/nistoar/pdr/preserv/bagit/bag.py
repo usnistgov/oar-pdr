@@ -107,9 +107,9 @@ class NISTBag(PreservationSystem):
             data = self.get_baginfo()
             vals = data.get("Multibag-Tag-Directory")
             if vals:
-                self._mbagdir = vals[-1]
+                self._mbagdir = os.path.join(self.dir, vals[-1])
             elif data.get("Multibag-Version"):
-                return "multibag"
+                return os.path.join(self.dir, "multibag")
 
         return self._mbagdir
             
