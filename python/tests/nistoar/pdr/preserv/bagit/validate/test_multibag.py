@@ -234,7 +234,7 @@ class TestMultibagValidator(test.TestCase):
         with open(bif, 'w') as fd:
             for line in biflines:
                 fd.write(line)
-            print("Multibag-Head-Deprecates: 0.9", file=fd)
+            print("Multibag-Head-Deprecates: 0.9, samplebag.mbag0_2-1", file=fd)
             print("Multibag-Head-Deprecates: 1.2", file=fd)
 
         errs = self.valid8.test_head_deprecates(self.bag, True)
@@ -243,9 +243,10 @@ class TestMultibagValidator(test.TestCase):
 
         with open(bif, 'a') as fd:
             print("Multibag-Head-Deprecates: ", file=fd)
+            print("Multibag-Head-Deprecates: 0.8, oldbag, olderbag", file=fd)
             print("Multibag-Head-Version: 1.2", file=fd)
         errs = self.valid8.test_head_deprecates(self.bag, True)
-        self.assertEqual(len(errs.failed()), 2, "Unexpected # of errors: [\n  " +
+        self.assertEqual(len(errs.failed()), 3, "Unexpected # of errors: [\n  " +
                          "\n  ".join([str(e) for e in errs.failed()]) + "\n]")
         self.assertTrue(has_error(errs, "2-Head-Deprecates"))
         

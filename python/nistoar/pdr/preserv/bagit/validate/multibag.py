@@ -162,14 +162,28 @@ class MultibagValidator(ValidatorBase):
 
             empty = False
             selfdeprecating = False
+            badfmt = []
             for val in values:
                 empty = empty or not val
-                selfdeprecating = selfdeprecating or val == headver
+                parts = [p.strip() for p in val.split(',')]
+                if len(parts) > 2:
+                    badfmt.append(val)
+                selfdeprecating = selfdeprecating or val == headver or \
+                                  (len(parts) > 1 and parts[1] == bag.name)
 
+            t = self._issue("2-Head-Deprecates",
+                            "bag-info.txt: Multibag-Head-Deprecates value must "+
+                            "match format: VERSION, [BAGNAME]")
+            comm = None
+            if len(badfmt) > 0:
+                comm = list(badfmt)
+            out._err(t, len(badfmt) == 0, comm)
+            
             t = self._issue("2-Head-Deprecates",
                             "bag-info.txt: Value for Multibag-Head-Deprecates "+
                             "should not be empty")
             out._warn(t, not empty)
+
             t = self._issue("2-Head-Deprecates",
                             "bag-info.txt: Multibag-Head-Deprecates should not "+
                             "deprecate itself")
