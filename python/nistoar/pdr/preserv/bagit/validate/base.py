@@ -2,6 +2,14 @@
 This module provides the base validator class
 """
 from abc import ABCMeta, abstractmethod, abstractproperty
+from collections import Sequence, OrderedDict
+
+ERROR = 1
+WARN  = 2
+REC   = 4
+ALL   = 7
+PROB  = 3
+issuetypes = [ ERROR, WARN, REC ]
 
 class Validator(object):
     """
@@ -18,20 +26,159 @@ class Validator(object):
         self.cfg = config
 
     @abstractmethod
-    def validate(self, bag, types='ewr'):
+    def validate(self, bag, want=ALL, results=None):
         """
         run the embeded tests, returning a list of errors.  If the returned
         list is empty, then the bag is considered validated.  
 
         :param bag NISTBag:  an NISTBag instance wrapping the bag directory
-        :return list of ValidationError objects:  the errors that were detected.
+        :param want    int:  bit-wise and-ed codes indicating which types of 
+                             test results are desired.  A validator may (but 
+                             is not required to) use this value to skip 
+                             execution of certain tests.
+        :param results ValidationResults: a ValidationResults to add result
+                             information to; if provided, this instance will 
+                             be the one returned by this method.
+        :return ValidationResults:  the results of applying requested validation
+                             tests
         """
-        return []
+        return ValidationResults(bag.name, want)
 
-issue_types = [ "error", "warning", "recommendation" ]
-ERROR = issue_types[0]
-WARN  = issue_types[1]
-REC   = issue_types[2]
+class ValidationResults(object):
+    """
+    a container for collecting results from validation tests
+    """
+    def __init__(self, bagname, want=ALL):
+        """
+        initialize an empty set of results for a particular bag
+
+        :param bagname str:   the name of the bag being validated
+        :param want    int:   the desired types of tests to collect.  This 
+                              controls the result of ok().
+        """
+        self.bagname = bagname
+        self.want    = want
+
+        self.results = {
+            ERROR: [],
+            WARN:  [],
+            REC:   []
+        }
+
+    def applied(self, issuetype=ALL):
+        """
+        return a list of the validation tests that were applied of the
+        requested types:
+        :param issuetype int:  an bit-wise and-ing of the desired issue types
+                               (default: ALL)
+        """
+        out = []
+        if ERROR & ALL:
+            out += self.results[ERROR]
+        if WARN & ALL:
+            out += self.results[WARN]
+        if REC & ALL:
+            out += self.results[REC]
+        return out
+
+    def count_applied(self, issuetype=ALL):
+        """
+        return the number of validation tests of requested types that were 
+        applied to the named bag.
+        """
+        return len(applied(issuetype))
+
+    def failed(self, issuetype=ALL):
+        """
+        return the validation tests of the requested types which failed when
+        applied to the named bag.
+        """
+        return [issue for issue in self.applied(issuetype) if issue.failed()]
+    
+    def count_failed(self, issuetype=ALL):
+        """
+        return the number of validation tests of requested types which failed
+        when applied to the named bag.
+        """
+        return len(self.failed(issuetype))
+
+    def passed(self, issuetype=ALL):
+        """
+        return the validation tests of the requested types which passed when
+        applied to the named bag.
+        """
+        return [issue for issue in self.applied(issuetype) if issue.passed()]
+    
+    def count_passed(self, issuetype=ALL):
+        """
+        return the number of validation tests of requested types which passed
+        when applied to the named bag.
+        """
+        return len(self.passed(issuetype))
+
+    def ok(self):
+        """
+        return True if none of the validation tests of the types specified by 
+        the constructor's want parameter failed.
+        """
+        return self.count_failed(self.want) == 0
+
+    def _add_issue(self, issue, type, passed, comments=None):
+        """
+        add an issue to this result.  The issue will be updated with its 
+        type set to type and its status set to passed (True) or failed (False).
+
+        :param issue   ValidationIssue:  the issue to add
+        :param type    int:              the issue type code (ERROR, WARN, 
+                                         or REC)
+        :param passed  bool:             either True or False, indicating whether
+                                         the issue test passed or failed
+        :param comments str or list of str:  one or more comments to add to the 
+                                         issue instance.
+        """
+        issue.type = type
+        issue._passed = bool(passed)
+
+        if comments:
+            if not isinstance(comments, Sequence):
+                comments = [ comments ]
+            for comm in comments:
+                issue.add_comment(comm)
+        
+        self.results[type].append(issue)
+
+    def _err(self, issue, passed, comments=None):
+        """
+        add an issue to this result.  The issue will be updated with its 
+        type set to ERROR and its status set to passed (True) or failed (False).
+
+        :param issue   ValidationIssue:  the issue to add
+        :param passed  bool:             either True or False, indicating whether
+                                         the issue test passed or failed
+        :param comments str or list of str:  one or more comments to add to the 
+                                         issue instance.
+        """
+        self._add_issue(issue, ERROR, passed, comments)
+
+    def _warn(self, issue, passed, comments=None):
+        """
+        add an issue to this result.  The issue will be updated with its 
+        type set to WARN and its status set to passed (True) or failed (False).
+        """
+        self._add_issue(issue, WARN, passed, comments)
+
+    def _rec(self, issue, passed, comments=None):
+        """
+        add an issue to this result.  The issue will be updated with its 
+        type set to REC and its status set to passed (True) or failed (False).
+        """
+        self._add_issue(issue, REC, passed, comments)
+
+
+type_labels = { ERROR: "error", WARN: "warning", REC: "recommendation" }
+ERROR_LAB = type_labels[ERROR]
+WARN_LAB  = type_labels[WARN]
+REC_LAB   = type_labels[REC]
 
 class ValidationIssue(object):
     """
@@ -39,20 +186,29 @@ class ValidationIssue(object):
     describing the type of error, identity of the recommendation that was 
     violated, and a prose description of the violation.
     """
-    ERROR = issue_types[0]
-    WARN  = issue_types[1]
-    REC   = issue_types[2]
+    ERROR = issuetypes[0]
+    WARN  = issuetypes[1]
+    REC   = issuetypes[2]
     
-    def __init__(self, profile, idlabel='', issuetype=ERROR, message=''):
+    def __init__(self, profile, profver, idlabel='', issuetype=ERROR,
+                 spec='', passed=True, comments=None):
+        if comments and not isinstance(comments, Sequence):
+            comments = [ comments ]
+
         self._prof = profile
+        self._pver = profver
         self._lab = idlabel
-        self._msg = message
+        self._spec = spec
         self.type = issuetype
+        self._passed = passed
+        self._comm = []
+        if comments:
+            self._comm.extend([str(c) for c in comments])
 
     @property
     def profile(self):
         """
-        The name (and version) of the BagIt profile that this error references
+        The name of the BagIt profile that this issue references
         """
         return self._prof
     @profile.setter
@@ -60,10 +216,20 @@ class ValidationIssue(object):
         self._prof = name
 
     @property
+    def profile_version(self):
+        """
+        The version of the nameed BagIt profile that this issue references
+        """
+        return self._pver
+    @profile_version.setter
+    def profile_version(self, version):
+        self._pver = version
+
+    @property
     def label(self):
         """
         A label that identifies the recommendation within the profile that 
-        was violated.  
+        was tested.  
         """
         return self._lab
     @label.setter
@@ -78,34 +244,84 @@ class ValidationIssue(object):
         return self._type
     @type.setter
     def type(self, issuetype):
-        if issuetype not in issue_types:
+        if issuetype not in issuetypes:
             raise ValueError("ValidationIssue: not a recognized issue type: "+
                              issuetype)
         self._type = issuetype
 
     @property
-    def message(self):
+    def specification(self):
         """
-        the explanation of what went wrong
+        the explanation of the requirement or recommendation that the test
+        checks for
         """
-        return self._msg
-    @message.setter
-    def message(self, text):
-        self._msg = text
+        return self._spec
+    @specification.setter
+    def specification(self, text):
+        self._spec = text
+
+    def add_comment(self, text):
+        """
+        attach a comment to this issue.  The comment typically provides some 
+        context-specific information about how a issue failed (e.g. by 
+        specifying a line number)
+        """
+        self._comm.append(str(text))
+
+    @property
+    def comments(self):
+        """
+        return a tuple of strings giving comments about the issue that are
+        context-specific to its application
+        """
+        return tuple(self._comm)
+
+    def passed(self):
+        """
+        return True if this test is marked as having passed.
+        """
+        return self._passed
+
+    def failed(self):
+        """
+        return True if this test is marked as having passed.
+        """
+        return not self.passed()
 
     def __str__(self):
-        return "{0}: {1} {2}: {3}".format(self.type.upper(), self.profile, 
-                                          self.label, self.message)
+        status = (self.passed() and "PASSED") or type_labels[self._type].upper()
+        out = "{0}: {1} {2} {3}: {4}".format(status, self.profile, 
+                                             self.profile_version,
+                                             self.label, self.specification)
+        if self._comm and self._comm[0]:
+            out += " ({0})".format(self._comm[0])
+        return out
 
     def to_tuple(self):
         """
         return a tuple containing the issue data
         """
-        return (self.type, self.profile, self.label, self.message)
+        return (self.type, self.profile, self.profile_version, self.label, 
+                self.specification, self._passed, self._comm)
+
+    def to_json_obj(self):
+        """
+        return an OrderedDict that can be encoded into a JSON object node
+        which contains the data in this ValidationIssue.
+        """
+        return OrderedDict([
+            ("type", type_labels[self.type]),
+            ("profile_name", self.profile),
+            ("profile_version", self.profile_version),
+            ("label", self.label),
+            ("spec", self.message),
+            ("comments", self.comments)
+        ])
 
     @classmethod
     def from_tuple(cls, data):
-        return ValidationIssue(data[1], data[2], data[0], data[3])
+        return ValidationIssue(data[1], data[2], data[3], data[0], 
+                               data[4], data[5], data[6])
 
 class AggregatedValidator(Validator):
     """
@@ -115,10 +331,13 @@ class AggregatedValidator(Validator):
         super(AggregatedValidator, self).__init__()
         self._vals = list(validators)
 
-    def validate(self, bag):
-        out = []
+    def validate(self, bag, want=ALL, results=None):
+        out = results
+        if not out:
+            out = ValidationResults(bag.name, want)
+
         for v in self._vals:
-            out.extend(v.validate(bag))
+            v.validate(bag, want, out)
         return out
 
 
@@ -130,7 +349,7 @@ class ValidatorBase(Validator):
     test that can return a list of errors.  The method should accept a 
     NISTBag instance as its first argument.  
     """
-    profile = None
+    profile = (None, None)
     
     def __init__(self, config):
         super(ValidatorBase, self).__init__(config)
@@ -166,15 +385,20 @@ class ValidatorBase(Validator):
         """
         return [name for name in dir(self) if name.startswith('test_')]
 
-    def validate(self, bag):
-        out = []
+    def validate(self, bag, want=ALL, results=None):
+        out = results
+        if not out:
+            out = ValidationResults(bag.name, want)
+
         for test in self.the_test_methods():
             try:
-                out.extend( getattr(self, test)(bag) )
+                getattr(self, test)(bag, want, out) 
             except Exception, ex:
-                out.extend( ValidationIssue(self.profile, ERROR, test,
+                out._err( ValidationIssue(self.profile[0], self.profile[1],
+                                          "validator failure", ERROR, 
                                      "test method, {0}, raised an exception: {1}"
-                                            .format(test, str(ex))) )
+                                            .format(test, str(ex)), False),
+                          False )
         return out
 
     def _list_payload_files(self, bag):
@@ -184,26 +408,12 @@ class ValidatorBase(Validator):
             out.update([os.path.join(root, f) for f in files])
         return out
 
-    def _err(self, label, message):
-        return _VIE(self.profile, label, message) 
-    def _warn(self, label, message):
-        return _VIW(self.profile, label, message) 
-    def _rec(self, label, message):
-        return _VIR(self.profile, label, message) 
+    def _issue(self, label, message):
+        """
+        return a new ValidationIssue instance that is part of this validator's
+        profile.  The issue type will be set to ERROR and its status, to passed.
+        """
+        return ValidationIssue(self.profile[0], self.profile[1], label, ERROR,
+                               message, True)
 
-# These are convenience subclasses of ValidationIssue that allows for
-# briefer instantiations
-
-class _VIE(ValidationIssue):
-    def __init__(self, profile, label, message):
-        super(_VIE, self).__init__(profile, label, ValidationIssue.ERROR, 
-                                   message)
-class _VIW(ValidationIssue):
-    def __init__(self, profile, label, message):
-        super(_VIW, self).__init__(profile, label, ValidationIssue.WARN, 
-                                   message)
-class _VIR(ValidationIssue):
-    def __init__(self, profile, label, message):
-        super(_VIR, self).__init__(profile, label, ValidationIssue.REC, 
-                                   message)
 

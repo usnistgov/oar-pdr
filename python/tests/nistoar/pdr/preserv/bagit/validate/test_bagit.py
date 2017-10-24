@@ -21,7 +21,7 @@ def tearDownModule():
     rmtmpdir()
 
 def has_error(errs, label):
-    return len([e for e in errs if e.label == label]) > 0
+    return len([e for e in errs.failed() if e.label == label]) > 0
     
 class TestBagItValidator(test.TestCase):
 
@@ -72,61 +72,61 @@ class TestBagItValidator(test.TestCase):
 
     def test_test_bagit_txt(self):
         errs = self.valid8.test_bagit_txt(self.bag)
-        self.assertEqual(errs, [],
-                         "False Positives: "+ str([str(e) for e in errs]))
+        self.assertEqual(errs.count_failed(), 0,
+                       "False Positives: "+ str([str(e) for e in errs.failed()]))
 
         bagitf = os.path.join(self.bag.dir, "bagit.txt")
         with open(bagitf, 'w') as fd:
             print("BagIt-Version: 1.0", file=fd)
         errs = self.valid8.test_bagit_txt(self.bag)
-        self.assertGreater(len(errs), 0)
+        self.assertGreater(errs.count_failed(), 0)
         self.assertTrue(has_error(errs, "2.1.1-3"))
         self.assertTrue(has_error(errs, "2.1.1-4"))
                          
         with open(bagitf, 'w') as fd:
             print("Tag-File-Character-Encoding: 1.0", file=fd)
         errs = self.valid8.test_bagit_txt(self.bag)
-        self.assertGreater(len(errs), 0)
+        self.assertGreater(len(errs.failed()), 0)
         self.assertTrue(has_error(errs, "2.1.1-2"))
         self.assertTrue(has_error(errs, "2.1.1-5"))
 
         os.remove(bagitf)
         errs = self.valid8.test_bagit_txt(self.bag)
-        self.assertGreater(len(errs), 0)
+        self.assertGreater(len(errs.failed()), 0)
         self.assertTrue(has_error(errs, "2.1.1-1"))
 
     def test_test_data_dir(self):
         errs = self.valid8.test_data_dir(self.bag)
-        self.assertEqual(errs, [],
-                         "False Positives: "+ str([str(e) for e in errs]))
+        self.assertEqual(errs.failed(), [],
+                      "False Positives: "+ str([str(e) for e in errs.failed()]))
 
         shutil.rmtree(self.bag.data_dir)
         errs = self.valid8.test_data_dir(self.bag)
-        self.assertGreater(len(errs), 0)
+        self.assertGreater(len(errs.failed()), 0)
         self.assertTrue(has_error(errs, "2.1.2"))
 
     def test_test_manifest(self):
         errs = self.valid8.test_manifest(self.bag)
-        self.assertEqual(errs, [],
-                         "False Positives: "+ str([str(e) for e in errs]))
+        self.assertEqual(errs.failed(), [],
+                      "False Positives: "+ str([str(e) for e in errs.failed()]))
 
         mf = os.path.join(self.bag.dir, "manifest-sha256.txt")
         with open(mf, 'a') as fd:
             print("sd9wh32 metadata/nerdm.json", file=fd)
         errs = self.valid8.test_manifest(self.bag)
-        self.assertEqual(len(errs), 1)
+        self.assertEqual(len(errs.failed()), 1)
         self.assertTrue(has_error(errs, "2.1.3-3"))
 
         with open(mf, 'a') as fd:
             print("blah", file=fd)
             print("a secret garden", file=fd)
         errs = self.valid8.test_manifest(self.bag)
-        self.assertEqual(len(errs), 2)
+        self.assertEqual(len(errs.failed()), 2)
         self.assertTrue(has_error(errs, "2.1.3-2"))
 
         os.remove(mf)
         errs = self.valid8.test_manifest(self.bag)
-        self.assertEqual(len(errs), 1)
+        self.assertEqual(len(errs.failed()), 1)
         self.assertTrue(has_error(errs, "2.1.3-1"))
         
         with open(os.path.join(bagdir, "manifest-sha256.txt")) as fd:
@@ -140,11 +140,11 @@ class TestBagItValidator(test.TestCase):
             print("sd8h2h20hgw data/trial3", file=fd)
             print("sd8h2h20hgw data/goober.txt", file=fd)
         errs = self.valid8.test_manifest(self.bag)
-        self.assertEqual(len(errs), 4)
+        self.assertEqual(len(errs.failed()), 4)
         self.assertTrue(has_error(errs, "2.1.3-7"))
         self.assertTrue(has_error(errs, "3-1-2"))
         self.assertTrue(has_error(errs, "2.1.3-4"))
-        self.assertTrue(has_error(errs, "2.1.3-5"))
+        self.assertTrue(has_error(errs, "3-2-2"))
 
         self.valid8.cfg = {
             "test_manifest": {
@@ -152,29 +152,29 @@ class TestBagItValidator(test.TestCase):
             }
         }
         errs = self.valid8.test_manifest(self.bag)
-        self.assertEqual(len(errs), 3)
+        self.assertEqual(len(errs.failed()), 3)
         self.assertTrue(has_error(errs, "2.1.3-7"))
         self.assertTrue(has_error(errs, "3-1-2"))
         self.assertTrue(has_error(errs, "2.1.3-4"))
             
     def test_test_tagmanifest(self):
         errs = self.valid8.test_tagmanifest(self.bag)
-        self.assertEqual(errs, [],
-                         "False Positives: "+ str([str(e) for e in errs]))
+        self.assertEqual(errs.failed(), [],
+                      "False Positives: "+ str([str(e) for e in errs.failed()]))
 
         mf = os.path.join(self.bag.dir, "tagmanifest-sha256.txt")
         with open(mf, 'a') as fd:
             print("blah", file=fd)
             print("a secret garden", file=fd)
         errs = self.valid8.test_tagmanifest(self.bag)
-        self.assertEqual(len(errs), 1, "Unexpected # of errors: [\n  " +
-                         "\n  ".join([str(e) for e in errs]) + "\n]")
+        self.assertEqual(len(errs.failed()), 1, "Unexpected # of errors: [\n  " +
+                         "\n  ".join([str(e) for e in errs.failed()]) + "\n]")
         self.assertTrue(has_error(errs, "2.1.3-2"))
 
         os.remove(mf)
         errs = self.valid8.test_tagmanifest(self.bag)
-        self.assertEqual(len(errs), 0, "Unexpected # of errors: [\n  " +
-                         "\n  ".join([str(e) for e in errs]) + "\n]")
+        self.assertEqual(len(errs.failed()), 0, "Unexpected # of errors: [\n  " +
+                         "\n  ".join([str(e) for e in errs.failed()]) + "\n]")
         
         with open(os.path.join(bagdir, "manifest-sha256.txt")) as fd:
             lines = fd.readlines()
@@ -187,10 +187,11 @@ class TestBagItValidator(test.TestCase):
             print("sd8h2h20hgw data/trial3", file=fd)
             print("sd8h2h20hgw data/goober.txt", file=fd)
         errs = self.valid8.test_tagmanifest(self.bag)
-        self.assertEqual(len(errs), 2, "Unexpected # of errors: [\n  " +
-                         "\n  ".join([str(e) for e in errs]) + "\n]")
+        self.assertEqual(len(errs.failed()), 3, "Unexpected # of errors: [\n  " +
+                         "\n  ".join([str(e) for e in errs.failed()]) + "\n]")
         self.assertTrue(has_error(errs, "2.1.3-7"))
         self.assertTrue(has_error(errs, "3-1-2"))
+        self.assertTrue(has_error(errs, "3-2-2"))
 
         self.valid8.cfg = {
             "test_manifest": {
@@ -198,26 +199,26 @@ class TestBagItValidator(test.TestCase):
             }
         }
         errs = self.valid8.test_manifest(self.bag)
-        self.assertEqual(len(errs), 0)
+        self.assertEqual(len(errs.failed()), 0)
             
     def test_test_baginfo(self):
         errs = self.valid8.test_baginfo(self.bag)
-        self.assertEqual(errs, [],
-                         "False Positives: "+ str([str(e) for e in errs]))
+        self.assertEqual(errs.failed(), [],
+                       "False Positives: "+ str([str(e) for e in errs.failed()]))
 
         bif = os.path.join(self.bag.dir, "bag-info.txt")
         with open(bif, 'a') as fd:
             print("Incorrect", file=fd)
         errs = self.valid8.test_baginfo(self.bag)
-        self.assertEqual(len(errs), 1)
+        self.assertEqual(len(errs.failed()), 1)
         self.assertTrue(has_error(errs, "2.2.2-2"))
-        self.assertEqual(errs[0].type, "error")
+        self.assertEqual(errs.failed()[0].type, val.ERROR)
         
         os.remove(bif)
         errs = self.valid8.test_baginfo(self.bag)
-        self.assertEqual(len(errs), 1)
+        self.assertEqual(len(errs.failed()), 1)
         self.assertTrue(has_error(errs, "2.2.2-1"))
-        self.assertEqual(errs[0].type, "recommendation")
+        self.assertEqual(errs.failed()[0].type, val.REC)
         
         with open(bif, 'w') as fd:
             print(" Incorrect", file=fd)
@@ -225,17 +226,17 @@ class TestBagItValidator(test.TestCase):
             print("Bagging-Date: 2017", file=fd)
             print("Bag-Size: 2017", file=fd)
         errs = self.valid8.test_baginfo(self.bag)
-        self.assertEqual(len(errs), 3, "Unexpected # of errors: [\n  " +
-                         "\n  ".join([str(e) for e in errs]) + "\n]")
+        self.assertEqual(len(errs.failed()), 3, "Unexpected # of errors: [\n  " +
+                         "\n  ".join([str(e) for e in errs.failed()]) + "\n]")
         self.assertTrue(has_error(errs, "2.2.2-2"))
         self.assertTrue(has_error(errs, "2.2.2-Bagging-Date"))
         self.assertTrue(has_error(errs, "2.2.2-Bag-Size"))
-        self.assertEqual(errs[0].type, "error")
+        self.assertEqual(errs.failed()[0].type, val.ERROR)
 
     def test_test_fetch_txt(self):
         errs = self.valid8.test_fetch_txt(self.bag)
-        self.assertEqual(errs, [],
-                         "False Positives: "+ str([str(e) for e in errs]))
+        self.assertEqual(errs.failed(), [],
+                      "False Positives: "+ str([str(e) for e in errs.failed()]))
 
         ff = os.path.join(self.bag.dir, "fetch.txt")
         with open(ff, 'a') as fd:
@@ -245,22 +246,22 @@ class TestBagItValidator(test.TestCase):
             print("data/goober 20 http://goober.net/get", file=fd)
             
         errs = self.valid8.test_fetch_txt(self.bag)
-        self.assertEqual(len(errs), 3, "Unexpected # of errors: [\n  " +
-                         "\n  ".join([str(e) for e in errs]) + "\n]")
+        self.assertEqual(len(errs.failed()), 3, "Unexpected # of errors: [\n  " +
+                         "\n  ".join([str(e) for e in errs.failed()]) + "\n]")
         self.assertTrue(has_error(errs, "2.2.3-1"))
         self.assertTrue(has_error(errs, "2.2.3-2"))
         self.assertTrue(has_error(errs, "2.2.3-3"))
-        self.assertEqual(errs[0].type, "error")
+        self.assertEqual(errs.failed()[0].type, val.ERROR)
 
         os.remove(ff)
         errs = self.valid8.test_fetch_txt(self.bag)
-        self.assertEqual(errs, [],
-                         "False Positives: "+ str([str(e) for e in errs]))
+        self.assertEqual(errs.failed(), [],
+                      "False Positives: "+ str([str(e) for e in errs.failed()]))
 
     def test_validate(self):
         errs = self.valid8.validate(self.bag)
-        self.assertEqual(errs, [],
-                         "False Positives: "+ str([str(e) for e in errs]))
+        self.assertEqual(errs.failed(), [],
+                       "False Positives: "+ str([str(e) for e in errs.failed()]))
 
         # Mess up bag to see if all tests are getting run
         bagitf = os.path.join(self.bag.dir, "bagit.txt")
@@ -281,7 +282,7 @@ class TestBagItValidator(test.TestCase):
             print("Incorrect", file=fd)
         
         errs = self.valid8.validate(self.bag)
-        self.assertGreater(len(errs), 0)
+        self.assertGreater(len(errs.failed()), 0)
         self.assertTrue(has_error(errs, "2.1.1-3"))
         self.assertTrue(has_error(errs, "2.1.1-4"))
         self.assertTrue(has_error(errs, "2.1.1-4"))

@@ -5,7 +5,8 @@ import os, re
 from collections import OrderedDict
 from urlparse import urlparse
 
-from .base import Validator, ValidatorBase
+from .base import (Validator, ValidatorBase, ALL, ValidationResults,
+                   ERROR, WARN, REC, ALL, PROB)
 from ..bag import NISTBag
 from ..builder import checksum_of
 
@@ -17,204 +18,247 @@ class BagItValidator(ValidatorBase):
     """
     A validator that runs tests for compliance to the base BagIt standard
     """
-    profile = "BagIt v0.97"
+    profile = ("BagIt", "v0.97")
 
     def __init__(self, config=None):
         super(BagItValidator, self).__init__(config)
 
-    def test_bagit_txt(self, bag):
+    def test_bagit_txt(self, bag, want=ALL, results=None):
         """
         test that the bagit.txt file exists and has the required contents
         """
-        out = []
+        out = results
+        if not out:
+            out = ValidationResults(bag.name, want)
         bagitf = os.path.join(bag.dir, "bagit.txt")
-        if os.path.exists(bagitf):
-            baginfo = bag.get_baginfo(bagitf)
-            try:
-                if baginfo['BagIt-Version'] != ["0.97"]:
-                    out.append( self._err("2.1.1-3",
-                                     "bagit.txt: BagIt-Version not set to 0.97"))
-            except KeyError:
-                out.append( self._err("2.1.1-2",
-                                   "bagit.txt: missing element: BagIt-Version") )
-            try:
-                if baginfo['Tag-File-Character-Encoding'] != ["UTF-8"]:
-                    out.append( self._err("2.1.1-5",
-                                     "bagit.txt: Tag-File-Character-Encoding "+
-                                     "not set to UTF-8"))
-            except KeyError:
-                out.append( self._err("2.1.1-4",
-                                      "bagit.txt: missing element: " +
-                                      "Tag-File-Character-Encoding") )
 
-            if len(out) == 0 and \
-               baginfo.keys() != ["BagIt-Version","Tag-File-Character-Encoding"]:
-                out.append( self._rec("2.1.1-6",
-                                      "bagit.txt: recommend using this " +
-                                      "element order: BagIt-Version " +
-                                      "Tag-File-Character-Encoding") )
+        t = self._issue("2.1.1-1", "Bag must contain a bag-info.txt file")
+        out._err(t, os.path.exists(bagitf))
+        if t.failed():
+            return out
+        
+        baginfo = bag.get_baginfo(bagitf)
+        t = self._issue("2.1.1-2",
+                        "bagit.txt must contain element: BagIt-Version")
+        out._err(t, 'BagIt-Version' in baginfo)
 
-        else:
-            out.append(self._err("2.1.1-1", "bag-info.txt file is missing"))
+        if t.passed():
+            t = self._issue("2.1.1-3",
+                            "bagit.txt: BagIt-Version must be set to {0}"
+                            .format(self.profile[1]))
+            out._err(t, baginfo['BagIt-Version'] == ["0.97"])
 
+        t = self._issue("2.1.1-4",
+                  "bagit.txt must contain element: Tag-File-Character-Encoding")
+        out._err(t, 'Tag-File-Character-Encoding' in baginfo)
+
+        if t.passed():
+            t = self._issue("2.1.1-5",
+                "bagit.txt: Tag-File-Character-Encoding must be set to 'UTF-8'")
+            out._err(t, baginfo['Tag-File-Character-Encoding'] == ["UTF-8"])
+
+        t = self._issue("2.1.1-6", "bagit.txt: recommend using this " +
+                                   "element order: BagIt-Version, " +
+                                   "Tag-File-Character-Encoding")
+        out._rec(t, baginfo.keys() == ["BagIt-Version",
+                                        "Tag-File-Character-Encoding"])
         return out
 
-    def test_data_dir(self, bag):
+    def test_data_dir(self, bag, want=ALL, results=None):
         """
         test that the data directory exists
         """
-        out = []
-        if not os.path.exists(os.path.join(bag.dir, "data")):
-            out += [ self._err("2.1.2", "Missing payload directory, data/") ]
+        out = results
+        if not out:
+            out = ValidationResults(bag.name, want)
+
+        t = self._issue("2.1.2", "Bag must contain payload directory, data/")
+        out._err(t, os.path.exists(os.path.join(bag.dir, "data")))
+
         return out
 
-    def test_manifest(self, bag):
+    def test_manifest(self, bag, want=ALL, results=None):
+        out = results
+        if not out:
+            out = ValidationResults(bag.name, want)
+
         tcfg = self.cfg.get("test_manifest", {})
         check = tcfg.get('check_checksums', True)
-        return self._test_manifest(bag, "manifest", check)
+        return self._test_manifest(bag, "manifest", check, out, want)
 
-    def test_tagmanifest(self, bag):
+    def test_tagmanifest(self, bag, want=ALL, results=None):
+        out = results
+        if not out:
+            out = ValidationResults(bag.name, want)
+
         tcfg = self.cfg.get("test_manifest", {})
         check = tcfg.get('check_checksums', True)
-        return self._test_manifest(bag, "tagmanifest", check)
+        return self._test_manifest(bag, "tagmanifest", check, out, want)
 
-    def _test_manifest(self, bag, basename, check):
-        out = []
+    def _test_manifest(self, bag, basename, check, out, want=ALL):
         manire = re.compile(r'^{0}-(\w+).txt$'.format(basename))
         manifests = [f for f in os.listdir(bag.dir) if manire.match(f)]
-        if len(manifests) > 0:
-            for mfile in manifests:
-                alg = manire.match(mfile).group(1)
-                csfunc = None
-                if alg in csfunctions:
-                    csfunc = csfunctions[alg]
 
-                badlines = []
-                notdata = []
-                paths = OrderedDict()
-                with open(os.path.join(bag.dir, mfile)) as fd:
-                    i = 0
-                    for line in fd:
-                        i += 1
-                        parts = line.split()
-                        if len(parts) != 2:
-                            badlines.append(i)
-                            continue
-                        if parts[1].startswith('*'):
-                            parts[1] = parts[1][1:]
-                            parts.append('*')
+        if basename == "manifest":
+            t = self._issue("2.1.3-1", "Bag requires at least one "+
+                            "manifest-<alg>.txt file")
+            out._err(t, len(manifests) > 0)
+            if t.failed():
+                return out
+        
+        for mfile in manifests:
+            alg = manire.match(mfile).group(1)
+            csfunc = None
+            if alg in csfunctions:
+                csfunc = csfunctions[alg]
 
-                        if basename == "manifest" and \
-                           not parts[1].startswith('data/'):
-                            notdata.append(parts[1])
-                        else:
-                            paths[parts[1]] = parts[0]
+            badlines = []
+            notdata = []
+            paths = OrderedDict()
+            with open(os.path.join(bag.dir, mfile)) as fd:
+                i = 0
+                for line in fd:
+                    i += 1
+                    parts = line.split()
+                    if len(parts) != 2:
+                        badlines.append(i)
+                        continue
+                    if parts[1].startswith('*'):
+                        parts[1] = parts[1][1:]
+                        parts.append('*')
 
-                if badlines:
-                    if len(badlines) > 4:
-                        badlines[3] = "..."
-                        badlines = badlines[:4]
-                    out += [self._err("2.1.3-2",
-                                      "{0} format issues found (lines {1})"
-                                      .format(mfile, ", ".join([str(b)
-                                                        for b in badlines])))]
+                    if basename == "manifest" and \
+                       not parts[1].startswith('data/'):
+                        notdata.append((i, parts[1]))
+                    else:
+                        paths[parts[1]] = parts[0]
 
-                if notdata:
-                    s = (len(notdata) > 1 and "s") or ""
-                    out += [self._err("2.1.3-3",
-                        "{0} lists {1} non-payload (i.e. under data/) file{2}"
-                                      .format(mfile, len(notdata), s))]
+            t = self._issue("2.1.3-2",
+                            "Manifest file must follow specified syntax")
+            comms = None
+            if badlines:
+                if len(badlines) > 4:
+                    badlines[3] = "..."
+                    badlines = badlines[:4]
+                s = (len(badlines) > 1 and "s") or ""
+                comms = "{0}: line{1} {2}" \
+                        .format(mfile, s, ", ".join([str(b) for b in badlines]))
+            out._err(t, len(badlines) == 0, comms)
 
-                # make sure all paths exist
-                badpaths = []
-                for datap in paths:
-                    fp = os.path.join(bag.dir, datap)
-                    if not os.path.exists(fp):
-                        badpaths.append(datap)
-                    elif not os.path.isfile(fp):
-                        out += [self._err("2.1.3-7",
-                                          "Manifest entry is not a file: "+
-                                          datap)]
+            t = self._issue("2.1.3-3",
+                            "manifest-<alg>.txt file lists only payload files")
+            comms = None
+            if notdata:
+                s = (len(notdata) > 1 and "s") or ""
+                if len(notdata) > 4:
+                    notdata[3] = ("...", notdata[3][1])
+                comms = ["{0}: line{1} {2}" 
+                  .format(mfile, s, ", ".join([str(n[0]) for n in notdata[:4]]))]
+                comms.extend( [n[1] for n in notdata] )
+            out._err(t, len(notdata) == 0, comms)
 
-                if badpaths:
-                    for datap in badpaths[:4]:
-                        out += [self._err("3-1-2",
-                                          "Path in manifest missing in bag: "+
-                                          datap)]
-                    if len(badpaths) > 4:
-                        addl = len(badpaths) - 3
-                        out[-1] = self._err("3-1-2",
-                   "{0} additional files missing from payload (data/) directory"
-                                            .format(addl))
+            # make sure all paths exist
+            missing = []
+            notafile = []
+            for datap in paths:
+                fp = os.path.join(bag.dir, datap)
+                if not os.path.exists(fp):
+                    missing.append(datap)
+                elif not os.path.isfile(fp):
+                    notafile.append(datap)
 
-                # check that all files in the payload are listed in the manifest
-                notfound = []
-                failed = []
-                if basename == "manifest":
-                  for root, subdirs, files in os.walk(bag.data_dir):
-                    for f in files:
-                        fp = os.path.join(root, f)
-                        assert fp.startswith(bag.dir+'/')
-                        datap = fp[len(bag.dir)+1:]
+            t = self._issue("2.1.3-7", "Manifest must list only files")
+            comm = None
+            if len(notafile) > 0:
+                s = (len(notafile) > 1 and "s") or ""
+                comm = ["{0} non-file{1} listed in {2}"
+                        .format(len(notafile), s, mfile)]
+                comm += notafile
+            out._err(t, len(notafile) == 0, comm)
 
-                        if datap not in paths:
+            t = self._issue("3-1-2",
+                            "Bag must contain all files listed in manifest")
+            comm = None
+            if len(missing) > 0:
+                s = (len(missing) > 1 and "s") or ""
+                comm = ["{0} missing file{1} from {2}"
+                        .format(len(missing), s, mfile)]
+                comm += missing
+            out._err(t, len(missing) == 0, comm)
+
+            # check that all files in the payload are listed in the manifest
+            notfound = []
+            failed = []
+            if check or basename == "manifest":
+              top = (basename == "manifest" and bag.data_dir) or bag.dir
+              for root, subdirs, files in os.walk(top):
+                for f in files:
+                    fp = os.path.join(root, f)
+                    assert fp.startswith(bag.dir+'/')
+                    datap = fp[len(bag.dir)+1:]
+
+                    if datap not in paths:
+                        if basename == "manifest":
                             notfound.append(datap)
-                        elif check and csfunc and csfunc(fp) != paths[datap]:
-                            failed.append(datap)
+                    elif check and csfunc and csfunc(fp) != paths[datap]:
+                        failed.append(datap)
 
-                if notfound:
-                    for datap in notfound[:4]:
-                        out += [self._rec("2.1.3-4",
-                                          "Payload file not listed in {0}: {1}"
-                                          .format(mfile, datap))]
-                    if len(notfound) > 4:
-                        addl = len(notfound) - 3
-                        out[-1] = self._rec("2.1.3-4",
-                          "{0} additional payload (data/) files missing from {1}"
-                                            .format(addl, mfile))
-                if failed:
-                    for datap in failed[:4]:
-                        out += [self._err("2.1.3-5",
-                        "{0}: Recorded checksum does not match payload file: {1}"
-                                     .format(mfile, datap))]
-                    if len(notfound) > 4:
-                        addl = len(notfound) - 3
-                        out[-1] = self._err("2.1.3-5",
-            "{0}: Checksums don't match for {1} additional payload (data/) files"
-                                       .format(mfile, addl))
+            t = self._issue("2.1.3-4",
+                     "All payload files must be listed in at least one manifest")
+            comm = None
+            if len(notfound) > 0:
+                s = (len(notfound) > 1 and "s") or ""
+                comm = ["{0} payload file{1} not listed in {2}"
+                        .format(len(notfound), s, mfile)]
+                comm += notfound
+            out._rec(t, len(notfound) == 0, comm)
 
-        elif basename == "manifest":
-            out += [self._err("2.1.3-1", "No manifest-<alg>.txt files found")]
+            t = self._issue("3-2-2", "Every checksum must be verifiable")
+            if len(failed) > 0:
+                s = (len(failed) > 1 and "s") or ""
+                es = (len(failed) == 1 and "es") or ""
+                comm = ["{0} recorded checksum{1} in {2} do{3} not verify against file"
+                       .format(len(failed), s, mfile, es)]
+                comm += failed
+            out._err(t, len(failed) == 0, comm)
 
         return out
             
-    def test_baginfo(self, bag):
-        out = []
+    def test_baginfo(self, bag, want=ALL, results=None):
+        out = results
+        if not out:
+            out = ValidationResults(bag.name, want)
         baginfof = os.path.join(bag.dir, "bag-info.txt")
 
-        if os.path.exists(baginfof):
-            out += self.check_baginfo_format(baginfof)
-            baginfo = bag.get_baginfo()
+        t = self._issue("2.2.2-1", "A bag should include a bag-info.txt file")
+        out._rec(t, os.path.exists(baginfof))
+        if t.failed():
+            return out
+        
+        self.check_baginfo_format(baginfof, out)
+        data = bag.get_baginfo()
+        for fld in _fmt_tests:
+            if fld in data:
+                badvals = []
+                t = self._issue("2.2.2-"+fld,
+                                "{0} value should match format, {1}"
+                                .format(fld, _fmt_tests[fld][0]))
+                for val in data[fld]:
+                    if not _fmt_tests[fld][1](val):
+                        badvals.append(val)
 
-            data = bag.get_baginfo()
-            for fld in _fmt_tests:
-                if fld in data:
-                    for val in data[fld]:
-                        if not _fmt_tests[fld](val):
-                            if fld == "Bag-Size":
-                                out += [self._warn("2.2.2-"+fld,
-                  "Not recommended value format for {0}: {1}".format(fld, val))]
-                            else:
-                                out += [self._err("2.2.2-"+fld,
-                        "Incorrect value format for {0}: {1}".format(fld, val))]
-
-        else:
-            out += [self._rec("2.2.2-1", "Recommend adding a bag-info.txt file")]
+                comm = None
+                if len(badvals) > 0:
+                    comm = list(badvals)
+                if fld == "Bag-Size":
+                    out._rec(t, len(badvals) == 0, comm)
+                else:
+                    out._err(t, len(badvals) == 0, comm)
 
         return out
 
-    def check_baginfo_format(self, baginfof):
-        out = []
+    def check_baginfo_format(self, baginfof, results):
+        out = results
 
         badlines = []
         fmtre = re.compile("^[\w\-]+\s*:\s*\S.*$")
@@ -226,22 +270,26 @@ class BagItValidator(ValidatorBase):
                 if not fmtre.match(line) and (i == 1 or not cntre.match(line)):
                     badlines.append(i)
 
+        t = self._issue("2.2.2-2","bag-info.txt file must match required format")
+        comm = None
         if badlines:
+            s = (len(badlines) > 1 and "s") or ""
             if len(badlines) > 4:
                 badlines[3] = '...'
                 badlines = badlines[:4]
-
-            out += [self._err("2.2.2-2",
-                              "bag-info.txt format issues found (lines {0})"
-                              .format(", ".join([str(b) for b in badlines])))]
+            comm = "line{0} {1}".format(s, ", ".join([str(b) for b in badlines]))
+        out._err(t, len(badlines) == 0, comm)
 
         return out
 
-    def test_fetch_txt(self, bag):
+    def test_fetch_txt(self, bag, want=ALL, results=None):
+        out = results
+        if not out:
+            out = ValidationResults(bag.name, want)
         
         ff = os.path.join(bag.dir, "fetch.txt")
         if not os.path.exists(ff):
-            return []
+            return out
 
         FMT = "2.2.3-1"
         ICL = "2.2.3-2"
@@ -266,24 +314,24 @@ class BagItValidator(ValidatorBase):
                 if not url.scheme or not url.netloc:
                     errs[URL].append(i)
 
-        out = []
         for err in (FMT, ICL, URL):
             if len(errs[err]) > 0:
                 if len(errs[err]) > 4:
                     errs[err][3] = "..."
                 s = (len(errs[err]) > 1 and "s") or ""
-                errs[err] = "(line{0} {1})" \
+                errs[err] = "Malformed: line{0} {1})" \
                     .format(s, ", ".join([str(e) for e in errs[err]]))
-                
-        if errs[FMT]:
-            out.append(self._err(FMT,  "Missing length and/or filename "+
-                                 "fields " + errs[FMT]))
-        if errs[ICL]:
-            out.append(self._err(ICL,  "Content length (field 2) not an "+
-                                 "integer " + errs[ICL]))
-        if errs[URL]:
-            out.append(self._err(URL,  "Missing length and/or filename "+
-                                 "fields " + errs[URL]))
+
+        t = self._issue(FMT,
+                        "fetch.txt lines must match format URL LENGTH FILENAME")
+        out._err(t, not bool(errs[FMT]), errs[FMT])
+
+        t = self._issue(ICL,  "Content length (field 2) must be an integer")
+        out._err(t, not bool(errs[ICL]), errs[ICL])
+
+        t = self._issue(URL,  "First field must be a URL")
+        out._err(t, not bool(errs[URL]), errs[URL])
+
         return out
 
 _emailre = re.compile("^\w[\w\.]*@(\w+\.)+\w+$")
@@ -307,10 +355,10 @@ def _fmt_oxum(value):
     return _oxumre.match(value) is not None
 
 _fmt_tests = {
-    "Bag-Size": _fmt_bagsz,
-    "Payload-Oxum": _fmt_oxum,
-    "Bag-Count": _fmt_bagcnt,
-    "Contact-Email": _fmt_email,
-    "Bagging-Date": _fmt_date
+    "Bag-Size": ("D.D Xb", _fmt_bagsz),
+    "Payload-Oxum": ("NNN.NNN", _fmt_oxum),
+    "Bag-Count": ("N of N", _fmt_bagcnt),
+    "Contact-Email": ("NAME@NETADDR", _fmt_email),
+    "Bagging-Date": ("YYYY-MM-DD", _fmt_date)
 }
 
