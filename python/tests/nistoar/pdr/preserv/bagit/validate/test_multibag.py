@@ -339,6 +339,29 @@ class TestMultibagValidator(test.TestCase):
                          "\n  ".join([str(e) for e in errs.failed()]) + "\n]")
         self.assertTrue(has_error(errs, "3.0-2"))
 
+    def test_validate(self):
+        errs = self.valid8.validate(self.bag)
+        self.assertEqual(errs.failed(), [],
+                       "False Positives: "+ str([str(e) for e in errs.failed()]))
+
+        # Mess up bag to see if tests are getting run
+        os.remove(os.path.join(self.bag.multibag_dir, "group-members.txt"))
+
+        bif = os.path.join(self.bag.dir, "bag-info.txt")
+        with open(bif, 'a') as fd:
+            print("Multibag-Head-Version: 1.2", file=fd)
+
+        bif = os.path.join(self.bag.multibag_dir, "group-directory.txt")
+        with open(bif, 'a') as fd:
+            print("data/trial1.json anotherbag", file=fd)
+
+        errs = self.valid8.validate(self.bag)
+        self.assertEqual(len(errs.failed()), 3, "Unexpected # of errors: [\n  " +
+                         "\n  ".join([str(e) for e in errs.failed()]) + "\n]")
+        self.assertTrue(has_error(errs, "3.2-3"))
+        self.assertTrue(has_error(errs, "3.0-1"))
+        self.assertTrue(has_error(errs, "2-Head-Version"))
+        
 
 if __name__ == '__main__':
     test.main()

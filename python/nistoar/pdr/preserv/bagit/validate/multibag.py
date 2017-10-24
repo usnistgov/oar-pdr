@@ -392,3 +392,4 @@ class MultibagValidator(ValidatorBase):
         out._rec(t, len(missing) == 0)
 
         return out
+
