@@ -26,7 +26,7 @@ class Validator(object):
         self.cfg = config
 
     @abstractmethod
-    def validate(self, bag, want=ALL, results=None):
+    def validate(self, bag, want=ALL, results=None, **kw):
         """
         run the embeded tests, returning a list of errors.  If the returned
         list is empty, then the bag is considered validated.  
@@ -332,7 +332,7 @@ class AggregatedValidator(Validator):
         super(AggregatedValidator, self).__init__()
         self._vals = list(validators)
 
-    def validate(self, bag, want=ALL, results=None):
+    def validate(self, bag, want=ALL, results=None, **kw):
         out = results
         if not out:
             out = ValidationResults(bag.name, want)
@@ -386,7 +386,7 @@ class ValidatorBase(Validator):
         """
         return [name for name in dir(self) if name.startswith('test_')]
 
-    def validate(self, bag, want=ALL, results=None):
+    def validate(self, bag, want=ALL, results=None, *kw):
         out = results
         if not out:
             out = ValidationResults(bag.name, want)

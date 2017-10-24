@@ -283,7 +283,7 @@ class TestMultibagValidator(test.TestCase):
             print("goober_bag bag.zip", file=fd)
             print("gurn_bag bag.zip foobar", file=fd)
 
-        errs = self.valid8.test_group_members(self.bag, ishead=True)
+        errs = self.valid8.test_group_members(self.bag)
         self.assertEqual(len(errs.failed()), 4, "Unexpected # of errors: [\n  " +
                          "\n  ".join([str(e) for e in errs.failed()]) + "\n]")
         self.assertTrue(has_error(errs, "3.1-1"))
@@ -300,9 +300,10 @@ class TestMultibagValidator(test.TestCase):
         with open(gmf, 'w') as fd:
             print("goober_bag", file=fd)
         errs = self.valid8.test_group_members(self.bag)
-        self.assertEqual(len(errs.failed()), 1, "Unexpected # of errors: [\n  " +
+        self.assertEqual(len(errs.failed()), 2, "Unexpected # of errors: [\n  " +
                          "\n  ".join([str(e) for e in errs.failed()]) + "\n]")
         self.assertTrue(has_error(errs, "3.1-3"))
+        self.assertTrue(has_error(errs, "3.1-4"))
 
     def test_test_group_directory(self):
         errs = self.valid8.test_group_directory(self.bag)

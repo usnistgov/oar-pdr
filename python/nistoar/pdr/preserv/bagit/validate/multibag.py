@@ -75,6 +75,13 @@ class MultibagValidator(ValidatorBase):
             out = ValidationResults(bag.name, want)
 
         data = bag.get_baginfo()
+        headver = data.get("Multibag-Head-Version", [""])[-1]
+        
+        t = self._issue("2-Tag-Directory",
+                        "bag-info.txt: Multibag-Tag-Directory element "+
+                        "should only be set for Head Bags")
+        out._err(t, "Multibag-Tag-Directory" not in data or headver)
+
         if "Multibag-Tag-Directory" in data:
             mdir = data["Multibag-Tag-Directory"]
 
@@ -87,14 +94,14 @@ class MultibagValidator(ValidatorBase):
 
             t = self._issue("2-Tag-Directory",
                             "bag-info.txt: Multibag-Tag-Directory element "+
-                            "should only appear once")
+                            "should only appear no more than once")
             out._err(t, len(mdir) == 1)
 
             t = self._issue("2-Tag-Directory",
                             "Multibag-Tag-Directory must exist as directory")
             out._err(t, os.path.isdir(os.path.join(bag.dir, mdir[-1])))
 
-        else:
+        elif headver:
             t = self._issue("2-Tag-Directory",
                             "Default Multibag-Tag-Directory, multibag, must "+
                             "exist as a directory")
@@ -131,20 +138,21 @@ class MultibagValidator(ValidatorBase):
 
         return out
 
-    def test_head_deprecates(self, bag, want=ALL, results=None, ishead=False):
+    def test_head_deprecates(self, bag, want=ALL, results=None):
         out = results
         if not out:
             out = ValidationResults(bag.name, want)
 
         data = bag.get_baginfo()
         headver = data.get("Multibag-Head-Version", [""])[-1]
+
+        t = self._issue("2-Head-Deprecates",
+                        "bag-info.txt: Multibag-Head-Deprecates element "+
+                        "should only be set for Head Bags")
+        out._err(t, "Multibag-Head-Deprecates" not in data or headver)
+
         if "Multibag-Head-Deprecates" in data:
             values = data["Multibag-Head-Deprecates"]
-
-            t = self._issue("2-Head-Deprecates",
-                            "bag-info.txt: Multibag-Head-Deprecates "+
-                            "element should only appear in non-head bags")
-            out._warn(t, not ishead)
 
             t = self._issue("2-Head-Deprecates",
           "bag-info.txt: Value for Multibag-Head-Deprecates should not be empty")
@@ -189,16 +197,22 @@ class MultibagValidator(ValidatorBase):
 
         return out
 
-    def test_group_members(self, bag, want=ALL, results=None, ishead=False):
+    def test_group_members(self, bag, want=ALL, results=None):
         out = results
         if not out:
             out = ValidationResults(bag.name, want)
 
         mdir = bag.multibag_dir
+        ishead = bag.is_headbag()
+        
         assert mdir
-        if not os.path.isdir(mdir):
-            t = self._issue("2-Tag-Directory",
-                            "Multibag-Tag-Directory must exist as directory")
+        if os.path.isdir(mdir) != ishead:
+            if ishead:
+                t = self._issue("2-Tag-Directory",
+                                "Multibag-Tag-Directory must exist as directory")
+            else:
+                t = self._issue("2-Tag-Directory",
+                        "Multibag-Tag-Directory should only exist in a Head Bag")
             out._err(t, False)
             return out
 
@@ -284,10 +298,16 @@ class MultibagValidator(ValidatorBase):
             out = ValidationResults(bag.name, want)
 
         mdir = bag.multibag_dir
+        ishead = bag.is_headbag()
+        
         assert mdir
-        if not os.path.isdir(mdir):
-            t = self._issue("2-Tag-Directory",
-                            "Multibag-Tag-Directory must exist as directory")
+        if os.path.isdir(mdir) != ishead:
+            if ishead:
+                t = self._issue("2-Tag-Directory",
+                                "Multibag-Tag-Directory must exist as directory")
+            else:
+                t = self._issue("2-Tag-Directory",
+                        "Multibag-Tag-Directory should only exist in a Head Bag")
             out._err(t, False)
             return out
 

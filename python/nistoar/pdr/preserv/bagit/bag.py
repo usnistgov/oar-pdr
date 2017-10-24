@@ -112,7 +112,13 @@ class NISTBag(PreservationSystem):
                 return os.path.join(self.dir, "multibag")
 
         return self._mbagdir
-            
+
+    def is_headbag(self):
+        """
+        return True is if this bag claims to be a "head bag" in compliance
+        with the multibag BagIt profile.
+        """
+        return bool(self.get_baginfo().get("Multibag-Head-Version",[""])[-1])
 
     def pod_file(self):
         return os.path.join(self._metadir, POD_FILENAME)

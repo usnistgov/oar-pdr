@@ -178,8 +178,11 @@ class TestNISTBag(test.TestCase):
         self.assertEqual(self.bag.bagit_version, "0.97")
 
     def test_multibag_dir(self):
-        self.assertEqual(self.bag.multibag_dir, "multibag")
-    
+        self.assertEqual(self.bag.multibag_dir,
+                         os.path.join(self.bag.dir,"multibag"))
+
+    def test_is_headbag(self):
+        self.assertTrue(self.bag.is_headbag())
                          
                          
 
