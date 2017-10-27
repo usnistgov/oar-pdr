@@ -2,6 +2,7 @@ Source-Organization: National Institute of Standards and Technology
 Source-Organization: Office of Data and Informatics
 Organization-Address  : 100 Bureau Drive, Mail Stop 1000,
     Gaithersburg, MD 20899
+Contact-Email:  datasupport@nist.gov
 External-Description :This is a test bag created for testing bag access.  It
 	contains no data files, but it includes various
  other metadata files.
@@ -18,3 +19,4 @@ Multibag-Tag-Directory: multibag
 Multibag-Reference: http://odiwiki.nist.gov/ODI/AIPSpec
 Multibag-Head-Version: 1.0
 Internal-Sender-Description: This is a sample head bag.
+NIST-BagIt-Version: 0.2
