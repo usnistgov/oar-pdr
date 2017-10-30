@@ -73,11 +73,11 @@ class ValidationResults(object):
                                (default: ALL)
         """
         out = []
-        if ERROR & ALL:
+        if ERROR & issuetype:
             out += self.results[ERROR]
-        if WARN & ALL:
+        if WARN & issuetype:
             out += self.results[WARN]
-        if REC & ALL:
+        if REC & issuetype:
             out += self.results[REC]
         return out
 
@@ -86,7 +86,7 @@ class ValidationResults(object):
         return the number of validation tests of requested types that were 
         applied to the named bag.
         """
-        return len(applied(issuetype))
+        return len(self.applied(issuetype))
 
     def failed(self, issuetype=ALL):
         """
@@ -146,6 +146,9 @@ class ValidationResults(object):
             for comm in comments:
                 issue.add_comment(comm)
         
+        issue = ValidationIssue(issue._prof, issue._pver, issue._lab,
+                                issue.type, issue._spec, issue._passed,
+                               (issue.comments and list(issue.comments)) or None)
         self.results[type].append(issue)
 
     def _err(self, issue, passed, comments=None):

@@ -57,7 +57,7 @@ class TestMultibagValidator(test.TestCase):
 
     def test_all_test_methods(self):
         expect = ["test_"+m for m in
-          "name bagit_mdels version nist_md metadata_dir pod nerdm".split()]
+          "name bagit_mdels version nist_md metadata_dir pod nerdm metadata_tree nerdm_validity".split()]
         expect.sort()
         meths = self.valid8.all_test_methods()
         meths.sort()
@@ -140,7 +140,7 @@ class TestMultibagValidator(test.TestCase):
                 if not line.startswith('NIST-BagIt-Version:'):
                     fd.write(line)
 
-        errs = self.valid8.test_version(self.bag, True)
+        errs = self.valid8.test_version(self.bag)
         self.assertEqual(len(errs.failed()), 1, "Unexpected # of errors: [\n  " +
                          "\n  ".join([str(e) for e in errs.failed()]) + "\n]")
         self.assertTrue(has_error(errs, "3-3-1"))
@@ -235,8 +235,122 @@ class TestMultibagValidator(test.TestCase):
                          "\n  ".join([str(e) for e in errs.failed()]) + "\n]")
         self.assertTrue(has_error(errs, "4.1-3-1"))
 
-            
+    def test_test_metadat_tree(self):
+        errs = self.valid8.test_metadata_tree(self.bag)
+        self.assertEqual(errs.failed(), [],
+                      "False Positives: "+ str([str(e) for e in errs.failed()]))
 
+        os.remove(os.path.join(self.bag.metadata_dir,"trial1.json","nerdm.json"))
+        os.remove(os.path.join(self.bag.metadata_dir,"trial3","nerdm.json"))
+        errs = self.valid8.test_metadata_tree(self.bag)
+        self.assertEqual(len(errs.failed()), 1, "# of errors != 1: [\n  " +
+                         "\n  ".join([str(e) for e in errs.failed()]) + "\n]")
+        self.assertEqual(errs.failed()[0].label, "4.1-5")
+        
+        os.rmdir(os.path.join(self.bag.metadata_dir,"trial1.json"))
+        errs = self.valid8.test_metadata_tree(self.bag)
+        self.assertEqual(len(errs.failed()), 2, "# of errors != 2: [\n  " +
+                         "\n  ".join([str(e) for e in errs.failed()]) + "\n]")
+        self.assertEqual(errs.failed()[0].label, "4.1-4-1b")
+        self.assertEqual(errs.failed()[1].label, "4.1-5")
+        
+        shutil.rmtree(os.path.join(self.bag.metadata_dir,"trial3"))
+        errs = self.valid8.test_metadata_tree(self.bag)
+        self.assertEqual(len(errs.failed()), 2, "# of errors != 2: [\n  " +
+                         "\n  ".join([str(e) for e in errs.failed()]) + "\n]")
+        self.assertEqual(errs.failed()[0].label, "4.1-4-1a")
+        self.assertEqual(errs.failed()[1].label, "4.1-4-1b")
+
+        shutil.copyfile(os.path.join(self.bag.data_dir,"trial1.json"),
+                        os.path.join(self.bag.metadata_dir,"trial1.json"))
+        shutil.copyfile(os.path.join(self.bag.data_dir,"trial1.json"),
+                        os.path.join(self.bag.metadata_dir,"trial3"))
+        errs = self.valid8.test_metadata_tree(self.bag)
+        self.assertEqual(len(errs.failed()), 3, "# of errors != 3: [\n  " +
+                         "\n  ".join([str(e) for e in errs.failed()]) + "\n]")
+        self.assertEqual(errs.failed()[0].label, "4.1-4-1b")
+        self.assertEqual(errs.failed()[1].label, "4.1-4-1a")
+        self.assertEqual(errs.failed()[2].label, "4.1-4-1b")
+
+        os.mkdir(os.path.join(self.bag.data_dir, ".secret"))
+        errs = self.valid8.test_metadata_tree(self.bag)
+        self.assertEqual(len(errs.failed()), 4, "# of errors != 4: [\n  " +
+                         "\n  ".join([str(e) for e in errs.failed()]) + "\n]")
+        self.assertTrue(has_error(errs, "4.1-4-1a"))
+        self.assertTrue(has_error(errs, "4.1-4-1b"))
+        self.assertTrue(has_error(errs, "4.1-4-5"))
+        
+    def test_test_nerdm_validity(self):
+        errs = self.valid8.test_nerdm_validity(self.bag)
+        self.assertEqual(errs.failed(), [],
+                      "False Positives: "+ str([str(e) for e in errs.failed()]))
+
+        # set incorrect filepath
+        mdf = os.path.join(self.bag.metadata_dir, "trial1.json", "nerdm.json")
+        with open(mdf) as fd:
+            gooddata = json.load(fd, object_pairs_hook=OrderedDict)
+        data = OrderedDict(gooddata)
+        data['filepath'] = "goober/gurn"
+        with open(mdf,'w') as fd:
+            json.dump(data, fd, indent=2, separators=(',', ': '))
+
+        errs = self.valid8.test_nerdm_validity(self.bag)
+        self.assertEqual(len(errs.failed()), 1, "# of errors != 1: [\n  " +
+                         "\n  ".join([str(e) for e in errs.failed()]) + "\n]")
+        self.assertEqual(errs.failed()[0].label, "4.1-4-2e")
+        
+        # give data file wrong @type
+        data = OrderedDict(gooddata)
+        data['@type'] = ["nerdm:GooberMan"]
+        with open(mdf,'w') as fd:
+            json.dump(data, fd, indent=2, separators=(',', ': '))
+
+        errs = self.valid8.test_nerdm_validity(self.bag)
+        self.assertEqual(len(errs.failed()), 1, "# of errors != 1: [\n  " +
+                         "\n  ".join([str(e) for e in errs.failed()]) + "\n]")
+        self.assertEqual(errs.failed()[0].label, "4.1-4-2c")
+
+        # give subcollection wrong @type
+        mdf = os.path.join(self.bag.metadata_dir, "trial3", "nerdm.json")
+        with open(mdf) as fd:
+            gooddata2 = json.load(fd, object_pairs_hook=OrderedDict)
+        data = OrderedDict(gooddata2)
+        data['@type'] = ["nerdm:GooberMan"]
+        with open(mdf,'w') as fd:
+            json.dump(data, fd, indent=2, separators=(',', ': '))
+
+        errs = self.valid8.test_nerdm_validity(self.bag)
+        self.assertEqual(len(errs.failed()), 2, "# of errors != 2: [\n  " +
+                         "\n  ".join([str(e) for e in errs.failed()]) + "\n]")
+        self.assertEqual(errs.failed()[0].label, "4.1-4-2c")
+        self.assertEqual(errs.failed()[1].label, "4.1-4-2d")
+
+        # make metadata invalid
+        data['filepath'] = [ data['filepath'] ]
+        with open(mdf,'w') as fd:
+            json.dump(data, fd, indent=2, separators=(',', ': '))
+
+        errs = self.valid8.test_nerdm_validity(self.bag)
+        self.assertEqual(len(errs.failed()), 4, "# of errors != 4: [\n  " +
+                         "\n  ".join([str(e) for e in errs.failed()]) + "\n]")
+        self.assertEqual(errs.failed()[0].label, "4.1-4-2c")
+        self.assertEqual(errs.failed()[1].label, "4.1-4-2e")
+        self.assertEqual(errs.failed()[2].label, "4.1-4-2d")
+        self.assertEqual(errs.failed()[3].label, "4.1-4-2b")
+
+        # make metadata not legal
+        with open(mdf,'w') as fd:
+            fd.write('{["filepath": '+str(data['filepath'])+']}')
+
+        errs = self.valid8.test_nerdm_validity(self.bag)
+        self.assertEqual(len(errs.failed()), 2, "# of errors != 2: [\n  " +
+                         "\n  ".join([str(e) for e in errs.failed()]) + "\n]")
+        self.assertEqual(errs.failed()[0].label, "4.1-4-2c")
+        self.assertEqual(errs.failed()[1].label, "4.1-4-2a")
+
+        
+        
+        
 
 if __name__ == '__main__':
     test.main()

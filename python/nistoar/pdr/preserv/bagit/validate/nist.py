@@ -2,7 +2,7 @@
 This module implements a validator for the NIST-generated bags
 """
 import os, re, json
-from collections import OrderedDict
+from collections import OrderedDict, Mapping
 from urlparse import urlparse
 
 import ejsonschema as ejs
@@ -15,6 +15,9 @@ from ..bag import NISTBag
 
 DEF_BASE_NERDM_SCHEMA = "https://data.nist.gov/od/dm/nerdm-schema/v0.1#"
 DEF_NERDM_RESOURCE_SCHEMA = DEF_BASE_NERDM_SCHEMA + "/definitions/Resource"
+DEF_PUB_NERDM_SCHEMA = "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.1#"
+DEF_NERDM_DATAFILE_SCHEMA = DEF_PUB_NERDM_SCHEMA + "/definitions/DataFile"
+DEF_NERDM_SUBCOLL_SCHEMA = DEF_PUB_NERDM_SCHEMA + "/definitions/Subcollection"
 DEF_BASE_POD_SCHEMA = "http://data.nist.gov/od/dm/pod-schema/v1.1#"
 DEF_POD_DATASET_SCHEMA = DEF_BASE_POD_SCHEMA + "/definitions/Dataset"
 
@@ -41,6 +44,9 @@ class NISTBagValidator(ValidatorBase):
             }
 
     def test_name(self, bag, want=ALL, results=None):
+        """
+        Test that the bag has a compliant name
+        """
         out = results
         if not out:
             out = ValidationResults(bag.name, want)
@@ -57,6 +63,10 @@ class NISTBagValidator(ValidatorBase):
         return out
 
     def test_bagit_mdels(self, bag, want=ALL, results=None):
+        """
+        test that the bag-info.txt has the required/recommended metadata 
+        elements defined by the BagIt standard.
+        """
         out = results
         if not out:
             out = ValidationResults(bag.name, want)
@@ -101,6 +111,9 @@ class NISTBagValidator(ValidatorBase):
         return out;
 
     def test_version(self, bag, want=ALL, results=None):
+        """
+        test that the bag-info.txt file includes the NIST BagIt Profile version
+        """
         out = results
         if not out:
             out = ValidationResults(bag.name, want)
@@ -128,6 +141,10 @@ class NISTBagValidator(ValidatorBase):
         return out
         
     def test_nist_md(self, bag, want=ALL, results=None):
+        """
+        Test that the bag-info.txt file includes the required NIST-specific
+        metadata elements.
+        """
         out = results
         if not out:
             out = ValidationResults(bag.name, want)
@@ -168,6 +185,9 @@ class NISTBagValidator(ValidatorBase):
         return out
 
     def test_metadata_dir(self, bag, want=ALL, results=None):
+        """
+        test that the metadata tag directory exists.
+        """
         out = results
         if not out:
             out = ValidationResults(bag.name, want)
@@ -179,6 +199,9 @@ class NISTBagValidator(ValidatorBase):
         return out
 
     def test_pod(self, bag, want=ALL, results=None):
+        """
+        Test the existence and validity of the POD metadata file
+        """
         out = results
         if not out:
             out = ValidationResults(bag.name, want)
@@ -232,6 +255,10 @@ class NISTBagValidator(ValidatorBase):
         return "_"
 
     def test_nerdm(self, bag, want=ALL, results=None):
+        """
+        Test the existence and the validity of the resource-level NERDm
+        metadata file.  
+        """
         out = results
         if not out:
             out = ValidationResults(bag.name, want)
@@ -253,7 +280,6 @@ class NISTBagValidator(ValidatorBase):
             out._err(t, False, comm)
             return out
 
-        comm = None
         if self.validate:
             flav = self._get_mdval_flavor(data)
             schemauri = data.get(flav+"schema")
@@ -261,12 +287,13 @@ class NISTBagValidator(ValidatorBase):
                 schemauri = DEF_NERDM_RESOURCE_SCHEMA
             verrs = self.mdval[flav].validate(data, schemauri=schemauri,
                                               strict=True, raiseex=False)
+            comm = None
             if verrs:
                 s = (len(verrs) > 1 and "s") or ""
                 comm = ["{0} validation error{1} detected"
                         .format(len(verrs), s)]
                 comm += [str(e) for e in verrs]
-        out._err(t, not comm, comm)
+            out._err(t, not comm, comm)
             
         t = self._issue("4.1-3-2", "metadata/nerdm.json must be a NERDm "+
                         "Resource record")
@@ -279,8 +306,219 @@ class NISTBagValidator(ValidatorBase):
 
         return out
 
-        
+    def test_metadata_tree(self, bag, want=ALL, results=None):
+        """
+        Test for the proper structure of the metadata tag directory tree.
+        """
+        out = results
+        if not out:
+            out = ValidationResults(bag.name, want)
+        metadir = os.path.join(bag.dir, "metadata")
+        datadir = os.path.join(bag.dir, "data")
 
+        dotdir   = []
+        dotfile  = []
+        misngdir = []
+        misngfil = []
+        dnotadir = []
+        fnotadir = []
+        nonerd   = []
+        for root, subdirs, files in os.walk(datadir):
+            for dir in subdirs:
+                path = os.path.join(root[len(datadir)-5:], dir)
+                if dir.startswith('.'):
+                    dotdir.append(path)
+                    continue
+                dir = os.path.join(root, dir)
+                mdir = os.path.join(metadir, dir[len(datadir)+1:])
+                if not os.path.exists(mdir):
+                    misngdir.append(path)
+                elif not os.path.isdir(mdir):
+                    dnotadir.append("meta"+path)
+                elif not os.path.exists(os.path.join(mdir,"nerdm.json")):
+                    nonerd.append("meta"+path)
+
+            for f in files:
+                path = os.path.join(root[len(datadir)-4:], f)
+                if f.startswith('.'):
+                    dotfile.append(path)
+                    continue
+                f = os.path.join(metadir, root[len(datadir)+1:], f)
+                if not os.path.exists(f):
+                    misngfil.append(path)
+                elif not os.path.isdir(f):
+                    fnotadir.append("meta"+path)
+                elif not os.path.exists(os.path.join(f,"nerdm.json")):
+                    nonerd.append("meta"+path)
+
+        t = self._issue("4.1-4-5", "Data directory should not contain files "+
+                        "or directories that start with '.'")
+        comm = None
+        if len(dotdir) > 0:
+            s = (len(dotdir) > 1 and "ies") or "y"
+            comm = [ "{0} dot-director{1} found".format(len(dotdir), s) ]
+            comm += dotdir
+        out._warn(t, len(dotdir) == 0, comm)
+        
+        t = self._issue("4.1-4-1a", "Data directory must be mirrored by a "+
+                        "metadata directory")
+        comm = None
+        if len(misngdir) > 0:
+            s = (len(misngdir) > 1 and "ies are") or "y is"
+            comm = [ "{0} data director{1} not mirrored in metadata directory"
+                     .format(len(misngdir), s) ]
+            comm += misngdir
+        out._err(t, len(misngdir) == 0, comm)
+        
+        t = self._issue("4.1-4-1b", "Data file must be mirrored by a "+
+                        "metadata directory")
+        comm = None
+        if len(misngfil) > 0:
+            s = (len(misngfil) > 1 and "s are") or " is"
+            comm = [ "{0} data file{1} not mirrored in metadata directory"
+                     .format(len(misngfil), s) ]
+            comm += misngfil
+        out._err(t, len(misngfil) == 0, comm)
+        
+        t = self._issue("4.1-4-1a", "Data directory must be mirrored by a "+
+                        "metadata directory")
+        comm = None
+        if len(dnotadir) > 0:
+            s = (len(dnotadir) > 1 and "ies") or "y"
+            comm = [ "{0} data director{1} mirrored by non-director{1}"
+                     .format(len(dnotadir), s) ]
+            comm += dnotadir
+        out._err(t, len(dnotadir) == 0, comm)
+        
+        t = self._issue("4.1-4-1b", "Data file must be mirrored by a "+
+                        "metadata directory")
+        comm = None
+        if len(fnotadir) > 0:
+            fs = (len(fnotadir) > 1 and "s") or ""
+            s = (len(fnotadir) > 1 and "ies") or "y"
+            comm = [ "{0} data file{1} mirrored by non-director{2}"
+                     .format(len(fnotadir), fs, s) ]
+            comm += fnotadir
+        out._err(t, len(fnotadir) == 0, comm)
+        
+        t = self._issue("4.1-5", "Every metadata subdirectory must contain a "+
+                        "nerdm.json file")
+        comm = None
+        if len(nonerd) > 0:
+            s = (len(fnotadir) > 1 and "s") or ""
+            comm = [ "Missing nerdm.json file{1} for {0} data tree item{1}"
+                     .format(len(nonerd), s) ]
+            comm += nonerd
+        out._err(t, len(nonerd) == 0, comm)
+
+        return out
+
+    def test_nerdm_validity(self, bag, want=ALL, results=None):
+        out = results
+        if not out:
+            out = ValidationResults(bag.name, want)
+        metadir = os.path.join(bag.dir, "metadata")
+        datadir = os.path.join(bag.dir, "data")
+
+        vt = self._issue("4.1-4-2b", "A data file directory must " +
+                         "contain a valid NERDm metadata file.")
+        ft = self._issue("4.1-4-2c", "A data file's NERDm data must be of "+
+                         "@type=nrdp:DataFile.")
+        ct = self._issue("4.1-4-2d", "A data directory's NERDm data must be "+
+                         "of @type=nrdp:Subcollection.")
+        for root, subdirs, files in os.walk(datadir):
+            for f in files:
+                path = os.path.join(root[len(datadir):], f)
+                mdf = os.path.join(metadir, path, "nerdm.json")
+                if not os.path.isfile(mdf):
+                    continue
+
+                data = self._check_comp_legal(mdf, path, out)
+                if data is None:
+                    continue
+
+                comm = None
+                ok = '@type' in data and "nrdp:DataFile" in data['@type']
+                if not ok:
+                    comm = [path + ": " + str(data['@type'])]
+                out._err(ft, ok, comm)
+
+                if self.validate:
+                    flav = self._get_mdval_flavor(data)
+                    schemauri = data.get(flav+"schema")
+                    if not schemauri:
+                        schemauri = DEF_NERDM_DATAFILE_SCHEMA
+                    verrs = self.mdval[flav].validate(data, schemauri=schemauri,
+                                                      strict=True, raiseex=False)
+                    comm = None
+                    if verrs:
+                        s = (len(verrs) > 1 and "s") or ""
+                        comm = ["{0} validation error{1} detected"
+                                .format(len(verrs), s)]
+                        comm += [str(e) for e in verrs]
+                    out._err(vt, not comm, comm)
+            
+            for d in subdirs:
+                path = os.path.join(root[len(datadir):], d)
+                mdf = os.path.join(metadir, path, "nerdm.json")
+                if not os.path.isfile(mdf):
+                    continue
+
+                data = self._check_comp_legal(mdf, path, out)
+                if data is None:
+                    continue
+
+                comm = None
+                ok = '@type' in data and "nrdp:Subcollection" in data['@type']
+                if not ok:
+                    comm = [path + ": " + str(data['@type'])]
+                out._err(ct, ok, comm)
+
+                if self.validate:
+                    flav = self._get_mdval_flavor(data)
+                    schemauri = data.get(flav+"schema")
+                    if not schemauri:
+                        schemauri = DEF_NERDM_SUBCOLL_SCHEMA
+                    verrs = self.mdval[flav].validate(data, schemauri=schemauri,
+                                                      strict=True, raiseex=False)
+                    comm = None
+                    if verrs:
+                        s = (len(verrs) > 1 and "s") or ""
+                        comm = ["{0} validation error{1} detected"
+                                .format(len(verrs), s)]
+                        comm += [str(e) for e in verrs]
+                    out._err(vt, not comm, comm)
+            
+        return out
+
+    def _check_comp_legal(self, nerdmf, path, res):
+        vt = self._issue("4.1-4-2a", "A data file directory must " +
+                         "contain a legal NERDm metadata file.")
+        pt = self._issue("4.1-4-2e", "A data component's NERDm data must have "+
+                         "a correct filepath property")
+        try:
+            with open(nerdmf) as fd:
+                data = json.load(fd, object_pairs_hook=OrderedDict)
+        except ValueError as ex:
+            res._err(vt, False,
+                     ["metadata/"+path+"/nerdm.json: Not a legal JSON file"])
+            return None
+
+        comm = None
+        ok = isinstance(data, Mapping)
+        if not ok:
+            comm = ["metadata/"+path+"/nerdm.json: content is not a JSON object"]
+        res._err(vt, ok, comm)
+        if vt.failed():
+            return None
+
+        comm = None
+        ok = 'filepath' in data and data['filepath'] == path
+        if not ok:
+            comm = [path + ": filepath: " + str(data.get('filepath'))]
+        res._err(pt, ok, comm)
+
+        return data
 
 
 class NISTAIPValidator(AggregatedValidator):

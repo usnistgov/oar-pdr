@@ -18,6 +18,6 @@
         "dcat:Distribution"
     ],
     "_extensionSchemas": [
-        "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+        "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
     ]
 }
