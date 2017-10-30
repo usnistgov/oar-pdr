@@ -5,6 +5,6 @@
         "nrdp:Subcollection"
     ],
     "_extensionSchemas": [
-        "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/Subcollection"
+        "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/Subcollection"
     ]
 }

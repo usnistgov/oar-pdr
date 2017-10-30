@@ -41,8 +41,8 @@ COLLANNOT_FILENAME = ANNOT_FILENAME
 
 NERD_PRE = "nrd"
 NERDPUB_PRE = "nrdp"
-NERDM_SCH_ID_BASE = "https://www.nist.gov/od/dm/nerdm-schema/"
-NERDMPUB_SCH_ID_BASE = "https://www.nist.gov/od/dm/nerdm-schema/pub/"
+NERDM_SCH_ID_BASE = "https://data.nist.gov/od/dm/nerdm-schema/"
+NERDMPUB_SCH_ID_BASE = "https://data.nist.gov/od/dm/nerdm-schema/pub/"
 NERDM_SCH_VER = "v0.1"
 NERDMPUB_SCH_VER = NERDM_SCH_VER
 NERDM_SCH_ID = NERDM_SCH_ID_BASE + NERDM_SCH_VER + "#"

@@ -271,7 +271,7 @@ class TestBuilder(test.TestCase):
             "@id": "cmps/"+path,
             "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
             "filepath": path,
-            "_extensionSchemas": [ "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile" ]
+            "_extensionSchemas": [ "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile" ]
         }
         dlurl = "https://www.nist.gov/od/ds/goob/trial1/gold/file.dat"
         mdf = os.path.join(self.bag.bagdir, "metadata", path, "nerdm.json")
@@ -293,7 +293,7 @@ class TestBuilder(test.TestCase):
             "@id": "cmps/"+path,
             "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
             "filepath": path,
-            "_extensionSchemas": [ "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile" ],
+            "_extensionSchemas": [ "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile" ],
             "size": 69,
             "mediaType": "application/json",
             "checksum": {
@@ -314,7 +314,7 @@ class TestBuilder(test.TestCase):
             "@id": "cmps/"+path,
             "@type": [ "nrdp:Subcollection" ],
             "filepath": path,
-            "_extensionSchemas": [ "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/Subcollection" ]
+            "_extensionSchemas": [ "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/Subcollection" ]
         }
         mdf = os.path.join(self.bag.bagdir, "metadata", path, "nerdm.json")
         self.assertFalse(os.path.exists(mdf))
@@ -344,7 +344,7 @@ class TestBuilder(test.TestCase):
             "@id": "cmps/"+path,
             "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
             "filepath": path,
-            "_extensionSchemas": [ "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile" ],
+            "_extensionSchemas": [ "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile" ],
             "size": 69,
             "mediaType": "application/json",
             "checksum": {
@@ -372,7 +372,7 @@ class TestBuilder(test.TestCase):
             "@id": "cmps/"+path,
             "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
             "filepath": path,
-            "_extensionSchemas": [ "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile" ]
+            "_extensionSchemas": [ "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile" ]
         }
         with open(bagmdpath) as fd:
             data = json.load(fd)

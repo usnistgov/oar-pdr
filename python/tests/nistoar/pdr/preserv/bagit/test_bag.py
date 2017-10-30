@@ -147,7 +147,7 @@ class TestNISTBag(test.TestCase):
     def test_get_baginfo(self):
         data = self.bag.get_baginfo()
 
-        self.assertEqual(len(data.keys()), 15)
+        self.assertEqual(len(data.keys()), 17)
         for key in ["Source-Organization", "Organization-Address",
                     "External-Description", "Bag-Count"]:
             self.assertIn(key, data)
