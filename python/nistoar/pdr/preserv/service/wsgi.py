@@ -31,8 +31,12 @@ class PreservationRequestApp(object):
 
         self.preserv = ThreadedPreservationService(config)
         self.siptype = 'midas'
-        self._auth = self.cfg.get('auth_key')
-        if not self._auth:
+        authkey = config.get('auth_key')
+        authmeth= config.get('auth_method')
+        if authmeth != 'header':
+            authmeth = 'qparam'
+        self._auth = (authmeth, authkey)
+        if not self._auth[1]:
             log.warn("Service launched without authorization key defined")
 
     def handle_request(self, env, start_resp):
@@ -50,7 +54,7 @@ class Handler(object):
     badidre = re.compile(r"[<>\s]")
 
     def __init__(self, service, siptype, wsgienv, start_resp,
-                 authkey=None):
+                 auth=None):
         self._svc = service
         self._env = wsgienv
         self._start = start_resp
@@ -58,7 +62,7 @@ class Handler(object):
         self._hdr = Headers([])
         self._code = 0
         self._msg = "unknown status"
-        self._auth = authkey
+        self._auth = auth
 
     def send_error(self, code, message):
         stat = "{0} {1}".format(str(code), message)
@@ -79,10 +83,8 @@ class Handler(object):
         meth_handler = 'do_'+self._meth
 
         path = self._env.get('PATH_INFO', '/').strip('/')
-        params = cgi.parse_qs(self._env.get('QUERY_STRING', ''))
-        if not self.authorize(params.get('auth',[])):
-            self.send_error(401, "Not authorized")
-            return []
+        if not self.authorize():
+            return self.send_unauthorized()
 
         if hasattr(self, meth_handler):
             out = getattr(self, meth_handler)(path)
@@ -93,13 +95,39 @@ class Handler(object):
             return self.send_error(403, self._meth +
                                    " not supported on this resource")
 
-    def authorize(self, auths):
-        if self._auth:
+    def authorize(self):
+        if self._auth[0] == 'header':
+            return self.authorize_via_headertoken()
+        else:
+            return self.authorize_via_queryparam()
+
+    def authorize_via_queryparam(self):
+        params = cgi.parse_qs(self._env.get('QUERY_STRING', ''))
+        auths = params.get('auth',[])
+        if self._auth[1]:
             # match the last value provided
-            return len(auths) > 0 and self._auth == auths[-1]  
+            return len(auths) > 0 and self._auth[1] == auths[-1]  
         if len(auths) > 0:
             log.warn("Authorization key provided, but none has been configured")
         return len(auths) == 0
+
+    def authorize_via_headertoken(self):
+        authhdr = self._env.get('HTTP_AUTHORIZATION', "")
+        log.debug("Request HTTP_AUTHORIZATION: %s", authhdr)
+        parts = authhdr.split()
+        if self._auth[1]:
+            return len(parts) > 1 and parts[0] == "Bearer" and \
+                self._auth[1] == parts[1]
+        if authhdr:
+            log.warn("Authorization key provided, but none has been configured")
+        return authhdr == ""
+
+    def send_unauthorized(self):
+        self.set_response(401, "Not authorized")
+        if self._auth[0] == 'header':
+            self.add_header('WWW-Authenticate', 'Bearer')
+        self.end_headers()
+        return []
 
     def do_GET(self, path):
         # return the status on request or a list of previous requests
