@@ -12,6 +12,7 @@ except ImportError:
     uwsgi=uwsgi_mod()
 
 authkey = uwsgi.opt.get("auth_key")
+authmeth = uwsgi.opt.get("auth_meth", "qparam")
             
 class SimIngest(object):
     def handle_request(self, env, start_resp):
@@ -30,7 +31,7 @@ class SimIngestHandler(object):
         self._hdr = Headers([])
         self._code = 0
         self._msg = "unknown status"
-        self._auth = authkey
+        self._auth = (authmeth, authkey)
 
     def send_error(self, code, message):
         status = "{0} {1}".format(str(code), message)
@@ -53,20 +54,48 @@ class SimIngestHandler(object):
 
         path = self._env.get('PATH_INFO', '/')[1:]
         params = cgi.parse_qs(self._env.get('QUERY_STRING', ''))
-        if not self.authorize(params.get('auth',[])):
-            return self.send_error(401, "Not authorized")
+        print("AUTH METHOD: %s" % self._auth[0], file=sys.stderr)
+        if not self.authorize():
+            return self.send_unauthorized()
 
         if hasattr(self, meth_handler):
             return getattr(self, meth_handler)(path, params)
         else:
             return self.send_error(403, self._meth +
                                    " not supported on this resource")
+    def authorize(self):
+        if self._auth[0] == 'header':
+            return self.authorize_via_headertoken()
+        else:
+            return self.authorize_via_queryparam()
 
-    def authorize(self, auths):
-        if self._auth:
+    def authorize_via_queryparam(self):
+        params = cgi.parse_qs(self._env.get('QUERY_STRING', ''))
+        auths = params.get('auth',[])
+        if self._auth[1]:
             # match the last value provided
-            return len(auths) > 0 and self._auth == auths[-1]  
+            return len(auths) > 0 and self._auth[1] == auths[-1]  
+        if len(auths) > 0:
+            log.warn("Authorization key provided, but none has been configured")
         return len(auths) == 0
+
+    def authorize_via_headertoken(self):
+        authhdr = self._env.get('HTTP_AUTHORIZATION', "")
+        print("Request HTTP_AUTHORIZATION: %s" % authhdr, file=sys.stderr)
+        parts = authhdr.split()
+        if self._auth[1]:
+            return len(parts) > 1 and parts[0] == "Bearer" and \
+                self._auth[1] == parts[1]
+        if authhdr:
+            log.warn("Authorization key provided, but none has been configured")
+        return authhdr == ""
+
+    def send_unauthorized(self):
+        self.set_response(401, "Not authorized")
+        if self._auth[0] == 'header':
+            self.add_header('WWW-Authenticate', 'Bearer')
+        self.end_headers()
+        return []
 
     def do_GET(self, path, params=None):
         path = path.strip('/')

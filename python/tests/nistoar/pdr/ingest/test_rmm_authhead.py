@@ -14,18 +14,19 @@ assert os.path.exists(testrec)
 
 port = 9091
 url = "http://localhost:{0}/nerdm/".format(port)
-endpt = url + "?auth=critic"
+endpt = url
 
 def startService(authmeth=None):
     tdir = tmpdir()
     srvport = port
-    if authmeth == 'header':
-        srvport += 1
+#    if authmeth == 'header':
+#        srvport += 1
     pidfile = os.path.join(tdir,"simsrv"+str(srvport)+".pid")
     
     wpy = "python/tests/nistoar/pdr/ingest/sim_ingest_srv.py"
     cmd = "uwsgi --daemonize {0} --plugin python --http-socket :{1} " \
-          "--wsgi-file {2} --set-ph auth_key=critic --pidfile {3}"
+          "--wsgi-file {2} --set-ph auth_key=critic --set-ph auth_meth=header " \
+          "--pidfile {3}"
     cmd = cmd.format(os.path.join(tdir,"simsrv.log"), srvport,
                      os.path.join(basedir, wpy), pidfile)
     os.system(cmd)
@@ -33,8 +34,8 @@ def startService(authmeth=None):
 def stopService(authmeth=None):
     tdir = tmpdir()
     srvport = port
-    if authmeth == 'header':
-        srvport += 1
+#    if authmeth == 'header':
+#        srvport += 1
     pidfile = os.path.join(tdir,"simsrv"+str(srvport)+".pid")
     
     cmd = "uwsgi --stop {0}".format(os.path.join(tdir,
@@ -50,7 +51,7 @@ def setUpModule():
     loghdlr = logging.FileHandler(os.path.join(tmpdir(),"test_rmm.log"))
     loghdlr.setLevel(logging.DEBUG)
     rootlog.addHandler(loghdlr)
-    startService()
+    startService("header")
 
 def tearDownModule():
     global loghdlr
@@ -58,7 +59,7 @@ def tearDownModule():
         if rootlog:
             rootlog.removeLog(loghdlr)
         loghdlr = None
-    stopService()
+    stopService("header")
     rmtmpdir()
 
 def getrec():
@@ -67,15 +68,17 @@ def getrec():
 
 class TestSubmit(test.TestCase):
 
+    authhdr = {"Authorization": "Bearer critic"}
+
     def test_service_up(self):
-        resp = requests.get(endpt)
+        resp = requests.get(endpt, headers=self.authhdr)
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(resp.reason, "Service is ready")
 
     def test_unauth(self):
         rec = getrec()
         try:
-            rmm.submit_for_ingest(rec, url, 'bo')
+            rmm.submit_for_ingest(rec, url, 'bo', authmeth='header')
             self.fail("Failed to raise IngestException")
         except rmm.IngestAuthzError as ex:
             self.assertEqual(ex.status, 401)
@@ -83,7 +86,7 @@ class TestSubmit(test.TestCase):
     def test_clienterror(self):
         rec = getrec()
         try:
-            rmm.submit_for_ingest(rec, url+"/goob/?auth=critic", 'bo')
+            rmm.submit_for_ingest(rec, url+"/goob/", 'bo', 'critic', 'header')
             self.fail("Failed to raise IngestException")
         except rmm.IngestClientError as ex:
             self.assertGreater(ex.status, 400)
@@ -91,7 +94,8 @@ class TestSubmit(test.TestCase):
     def test_invalid(self):
         rec = getrec()
         try:
-            rmm.submit_for_ingest(rec, endpt+"&strictness=abusive", 'bo')
+            rmm.submit_for_ingest(rec, endpt+"?strictness=abusive", 'bo',
+                                  'critic', 'header')
             self.fail("Failed to raise IngestException")
         except rmm.NotValidForIngest as ex:
             self.assertEqual(ex.status, 400)
@@ -101,7 +105,7 @@ class TestSubmit(test.TestCase):
         try:
             rec = getrec()
             stopService()
-            rmm.submit_for_ingest(rec, endpt, 'bo')
+            rmm.submit_for_ingest(rec, endpt, 'bo', 'critic', 'header')
         except rmm.IngestServerError as ex:
             self.assertIsNone(ex.status)
         finally:
@@ -109,7 +113,7 @@ class TestSubmit(test.TestCase):
 
     def test_ok(self):
         rec = getrec()
-        rmm.submit_for_ingest(rec, endpt, 'bo')
+        rmm.submit_for_ingest(rec, endpt, 'bo', 'critic', 'header')
 
 
 class TestIngestClient(test.TestCase):
@@ -125,6 +129,7 @@ class TestIngestClient(test.TestCase):
         self.cfg = {
             "data_dir": self.datadir,
             "auth_key": "critic",
+            "auth_method": "header",
             "service_endpoint": url,
             "failed_dir": self.faildir
         }
