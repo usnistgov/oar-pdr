@@ -472,6 +472,40 @@ class TestApp(test.TestCase):
         self.assertIn("401", self.resp[0])
         self.assertEqual(body, [])
 
+        # test header access key
+        cfg['auth_method'] = 'header'
+        self.svc = wsgi.app(cfg)
+
+        self.resp = []
+        body = self.svc(req, self.start)
+        self.assertIn("401", self.resp[0])
+        self.assertIn("WWW-Authenticate: Bearer", self.resp)
+        self.assertEqual(body, [])
+
+        self.resp = []
+        req['HTTP_AUTHORIZATION'] = 'Bearer 9e73'
+        body = self.svc(req, self.start)
+        self.assertGreater(len(self.resp), 0)
+        self.assertIn("404", self.resp[0])
+        self.assertGreater(len(body), 0)
+        data = json.loads(body[0])
+        self.assertEqual(data['id'], '3A1EE2F169DD3B8CE0531A570681DB5D1491')
+        self.assertEqual(data['state'], "ready")
+
+        self.resp = []
+        req['HTTP_AUTHORIZATION'] = 'Token 9e73'
+        body = self.svc(req, self.start)
+        self.assertIn("401", self.resp[0])
+        self.assertIn("WWW-Authenticate: Bearer", self.resp)
+        self.assertEqual(body, [])
+
+        self.resp = []
+        req['HTTP_AUTHORIZATION'] = 'Bearer'
+        body = self.svc(req, self.start)
+        self.assertIn("401", self.resp[0])
+        self.assertIn("WWW-Authenticate: Bearer", self.resp)
+        self.assertEqual(body, [])
+        
         
         
         

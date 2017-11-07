@@ -8,13 +8,21 @@ from ..exceptions import (StateException, ConfigurationException, PDRException,
                           NERDError)
 from ..utils import write_json, read_nerd
 
-def submit_for_ingest(record, endpoint, name=None):
+def submit_for_ingest(record, endpoint, name=None,
+                      authkey=None, authmeth='qparam'):
     """
     Send the given JSON data-object to the ingest service.
 
     :param record  dict:  the NERDm record object to be ingested
     :param endpoint str:  the URL endpoint for the ingest service to use.  
     :param name     str:  a name to refer to the input record if things go wrong.
+    :param authkey  str:  an authorization token; this should be None if no
+                             token is required.
+    :param authmeth str:  the method to use to send the authorization token; 
+                             recognized values are 'header' (send via an 
+                             Authorization header field) or 'qparam' (send
+                             as a query parameter to the URL).  If not provided,
+                             'qparam' is assumed.
 
     :raises TypeError:          if the input is not a Mapping (dict-like) object.
     :raises IngestClientError:  raised ingest fails due to a client problem 
@@ -24,8 +32,17 @@ def submit_for_ingest(record, endpoint, name=None):
     :raises IngestAuthrError:   raised if the ingest fails due to an 
                                 authorization error.  
     """
+    hdrs = None
+    if authkey:
+        if authmeth == 'header':
+            hdrs = { "Authorization": "Bearer "+authkey }
+        elif '?' in endpoint:
+            endpoint += "&auth="+authkey
+        else:
+            endpoint += "?auth="+authkey
+    
     try:
-        resp = requests.post(endpoint, json=record)
+        resp = requests.post(endpoint, json=record, headers=hdrs)
         if resp.status_code >= 500:
             raise IngestServerError(resp.status_code, resp.reason, name)
         elif resp.status_code == 401:
@@ -58,11 +75,7 @@ def get_endpoint(config):
     """
     if not config.get("service_endpoint"):
         return None
-
-    endpt = config['service_endpoint']
-    if config.get('auth_key'):
-        endpt += "?auth=" + config['auth_key']
-    return endpt
+    return config['service_endpoint']
 
 class IngestClient(object):
     """
@@ -124,6 +137,12 @@ class IngestClient(object):
         if self._endpt and not self._endpt.startswith('https://'):
             self.log.warn("Non-HTTPS endpoint for ingest service: " +
                           self._cfg.get("service_endpoint","?"))
+        self._auth = [self._cfg.get('auth_method', 'qparam'),
+                      self._cfg.get('auth_key', "")]
+        if self._auth[0] not in ["qparam", "header"]:
+            self.log.warn("authorization method not recognized: " +
+                          self._auth[0] + "; reverting to 'header'")
+            self._auth[0] = 'header'
 
         self.submit_mode = self._cfg.get("submit", "named")
         if self.submit_mode not in "named all none":
@@ -200,7 +219,8 @@ class IngestClient(object):
 
             try:
 
-                submit_for_ingest(rec, self._endpt, name)
+                submit_for_ingest(rec, self._endpt, name,
+                                  self._auth[1], self._auth[0])
 
             except NotValidForIngest as ex:
                 # the file is bad, send it to jail
