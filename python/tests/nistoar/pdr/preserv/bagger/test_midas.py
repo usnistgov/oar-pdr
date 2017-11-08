@@ -164,6 +164,13 @@ class TestMIDASMetadataBaggerMixed(test.TestCase):
         self.assertNotIn('description', data)
 
     def test_ensure_file_metadata_resmd(self):
+        # fix the config and recreate
+        self.bagr.cfg.setdefault('bag_builder', {})
+        self.bagr.cfg['bag_builder']['distrib_service_baseurl'] = \
+                        "https://testdata.nist.gov/od/ds"
+        self.bagr = midas.MIDASMetadataBagger(self.midasid, self.bagparent,
+                                              self.revdir, self.upldir,
+                                              self.bagr.cfg)
         self.assertFalse(os.path.exists(self.bagdir))
 
         self.bagr.ensure_res_metadata()
@@ -182,6 +189,8 @@ class TestMIDASMetadataBaggerMixed(test.TestCase):
         self.assertEqual(data['checksum']['algorithm'],
                          { "@type": "Thing", "tag": "sha256" })
         self.assertTrue(data['downloadURL'])
+        self.assertTrue(data['downloadURL'].startswith('https://testdata.nist.gov/'),
+                        "Unexpected downloadURL: "+ data['downloadURL'])
 
         # trial3a.json has no matching distribution in _pod.json; thus, no desc
         self.assertNotIn('description', data)
