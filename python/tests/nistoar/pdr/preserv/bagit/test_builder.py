@@ -273,19 +273,39 @@ class TestBuilder(test.TestCase):
             "filepath": path,
             "_extensionSchemas": [ "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile" ]
         }
-        dlurl = "https://www.nist.gov/od/ds/goob/trial1/gold/file.dat"
         mdf = os.path.join(self.bag.bagdir, "metadata", path, "nerdm.json")
         self.assertFalse(os.path.exists(mdf))
+        self.assertEqual(self.bag._distbase, "https://data.nist.gov/od/ds/")
 
         md = self.bag.init_filemd_for(path)
         self.assertEquals(md, need)
         self.assertFalse(os.path.exists(mdf))
+        self.assertFalse(self.bag.ediid)
+        self.assertNotIn('downloadURL', md)
 
         md = self.bag.init_filemd_for(path, True)
         self.assertTrue(os.path.exists(mdf))
         with open(mdf) as fd:
             data = json.load(fd)
         self.assertEquals(data, md)
+
+        self.bag._ediid = "gooberid"
+        dlurl = "https://data.nist.gov/od/ds/gooberid/trial1/gold/file.dat"
+        md = self.bag.init_filemd_for(path)
+        self.assertTrue(self.bag.ediid)
+        self.assertIn('downloadURL', md)
+        self.assertEqual(md['downloadURL'], dlurl)
+
+        self.cfg['distrib_service_baseurl'] = "https://testdata.nist.gov/od/ds"
+        self.bag = bldr.BagBuilder(self.tf.root, "testbag", self.cfg)
+        self.assertEqual(self.bag._distbase, "https://testdata.nist.gov/od/ds/")
+        self.bag._ediid = "gooberid"
+        dlurl = "https://testdata.nist.gov/od/ds/gooberid/trial1/gold/file.dat"
+        md = self.bag.init_filemd_for(path)
+        self.assertTrue(self.bag.ediid)
+        self.assertIn('downloadURL', md)
+        self.assertEqual(md['downloadURL'], dlurl)
+        
 
     def test_examine(self):
         path = os.path.join("trial1","gold","trial1.json")

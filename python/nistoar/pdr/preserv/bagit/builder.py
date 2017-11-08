@@ -139,6 +139,9 @@ class BagBuilder(PreservationSystem):
         self._loghdlr = None
         self._mimetypes = None
         self._mbtagdir = None
+        self._distbase = self.cfg.get('distrib_service_baseurl', DISTSERV)
+        if not self._distbase.endswith('/'):
+            self._distbase += '/'
 
         if not minter:
             cfg = self.cfg.get('id_minter', {})
@@ -233,8 +236,8 @@ class BagBuilder(PreservationSystem):
                     mdata = read_nerd(mdfile)
                     if dftype in mdata.get("@type", []) and  \
                        mdata.get('filepath') and             \
-                       mdata.get("downloadURL", DISTSERV)    \
-                            .startswith(DISTSERV):
+                       mdata.get("downloadURL", self._distbase)    \
+                            .startswith(self._distbase):
                         if ediid:
                             mdata["downloadURL"] = \
                                self._download_url(self.ediid, mdata['filepath'])
@@ -245,7 +248,7 @@ class BagBuilder(PreservationSystem):
 
     def _download_url(self, ediid, destpath):
         path = "/".join(destpath.split(os.sep))
-        return DISTSERV + ediid + '/' + path
+        return self._distbase + ediid + '/' + path
 
     def ensure_bagdir(self):
         """
