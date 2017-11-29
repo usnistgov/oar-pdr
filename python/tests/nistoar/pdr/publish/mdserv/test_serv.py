@@ -50,14 +50,15 @@ class TestPrePubMetadataService(test.TestCase):
 
     def setUp(self):
         self.tf = Tempfiles()
-        self.bagparent = self.tf.mkdir("publish")
+        self.workdir = self.tf.mkdir("mdserv")
+        self.bagparent = self.workdir
         self.upldir = os.path.join(self.testsip, "upload")
         self.revdir = os.path.join(self.testsip, "review")
         config = {
-            'working_dir':     self.bagparent,
+            'working_dir':     self.workdir,
             'review_dir':      self.revdir,
             'upload_dir':      self.upldir,
-            'id_registry_dir': self.bagparent
+            'id_registry_dir': self.workdir
         }
         self.srv = serv.PrePubMetadataService(config)
         self.bagdir = os.path.join(self.bagparent, self.midasid)
@@ -67,11 +68,11 @@ class TestPrePubMetadataService(test.TestCase):
         self.tf.clean()
 
     def test_ctor(self):
-        self.assertEquals(self.srv.workdir, self.bagparent)
+        self.assertEquals(self.srv.workdir, self.workdir)
         self.assertEquals(self.srv.uploaddir, self.upldir)
         self.assertEquals(self.srv.reviewdir, self.revdir)
         self.assertEquals(os.path.dirname(self.srv._minter.registry.store),
-                          self.bagparent)
+                          self.workdir)
 
     def test_prepare_metadata_bag(self):
         metadir = os.path.join(self.bagdir, 'metadata')
@@ -156,6 +157,25 @@ class TestPrePubMetadataService(test.TestCase):
                 self.assertTrue(comp['downloadURL'].startswith('https://mdserv.nist.gov/'+self.midasid+'/'),
                                 "Bad conversion of URL: "+comp['downloadURL'])
         self.assertEquals(dlcount, 3)
+
+        datafiles = { "trial1.json": "blah/blah/trial1.json" }
+        data = self.srv.make_nerdm_record(bagdir, datafiles, 
+                                          baseurl='https://mdserv.nist.gov/')
+
+        comps = data['components']
+        dlcount = 0
+        for comp in comps:
+            if 'downloadURL' in comp:
+                dlcount += 1
+                if comp['filepath'] == "trial1.json":
+                    self.assertTrue(comp['downloadURL'].startswith('https://mdserv.nist.gov/'+self.midasid+'/'),
+                                "Bad conversion of URL: "+comp['downloadURL'])
+                else:
+                    self.assertFalse(comp['downloadURL'].startswith('https://mdserv.nist.gov/'+self.midasid+'/'),
+                                "Bad conversion of URL: "+comp['downloadURL'])
+        self.assertEquals(dlcount, 3)
+
+        
         
     def test_resolve_id(self):
         metadir = os.path.join(self.bagdir, 'metadata')

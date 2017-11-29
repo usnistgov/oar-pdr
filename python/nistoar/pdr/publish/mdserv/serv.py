@@ -25,6 +25,27 @@ class PrePubMetadataService(PublishSystem):
     NERDm metadata.  This class then will serve out the final, combined NERDm 
     record, converting (if so configured) the downloadURLs to bypass the 
     data distribution service (as is necessary for the pre-publication data).  
+
+    This class takes a configuration dictionary at construction; the following
+    properties are supported:
+
+    :prop working_dir str #req:  an existing directory where working data can
+                      can be stored.  
+    :prop review_dir  str #req:  an existing directory containing MIDAS review
+                      data
+    :prop upload_dir  str #req:  an existing directory containing MIDAS upload
+                      data
+    :prop id_registry_dir str:   a directory to store the minted ID registry.
+                      the default is the value of the working directory.
+    :prop mimetype_files list of str ([]):   an ordered list of filepaths to 
+                      files that map file extensions to default MIME types.  
+                      Mappings in the latter files override those in the former 
+                      ones.
+    :prop id_minter dict ({}):  a dictionary for configuring the ID minter 
+                      instance.
+    :prop bagger dict ({}):  a dictionary for configuring the SIPBagger instance
+                      used to process the SIP (see SIPBagger implementation 
+                      documentation for supported sub-properties).  
     """
 
     def __init__(self, config, workdir=None, reviewdir=None, uploaddir=None,
@@ -108,12 +129,17 @@ class PrePubMetadataService(PublishSystem):
         Bag up the metadata from data provided by MIDAS for a given MIDAS ID.  
         """
         cfg = self.cfg.get('bagger', {})
+        if not os.path.exists(self.workdir):
+            os.mkdir(workdir)
+        elif not os.path.isdir(self.workdir):
+            raise StateException("Working directory path not a directory: " +
+                                 self.workdir)
         bagger = MIDASMetadataBagger(id, self.workdir, self.reviewdir,
                                      self.uploaddir, cfg, self._minter)
         bagger.ensure_preparation()
         return bagger
 
-    def make_nerdm_record(self, bagdir, baseurl=None):
+    def make_nerdm_record(self, bagdir, datafiles=None, baseurl=None):
         """
         Given a metadata bag, generate a complete NERDm resource record.  
 
@@ -125,10 +151,17 @@ class PrePubMetadataService(PublishSystem):
         providing a baseurl argument.  The value in both cases is the base URL
         to convert the download URLs to.  The config parameter, 
         'datadist_base_path', indicates the base URL path to look for to 
-        recognize data distribution service URLs.
+        recognize data distribution service URLs.  If datafiles is also 
+        provided, substitution is restricted to those data files given in 
+        that lookup map.
 
         :param bagdir str:  the directory representing the output bag to serve
                             the metadata from 
+        :param datafiles str:  a mapping of filepath property values to 
+                            locations to existing data files on disk; 
+                            substitution is done for filepaths that match
+                            one of the paths in the dictionary.  If None,
+                            this requirement is not applied.  
         :param baseurl str: the baseurl to convert downloadURLs to; if None,
                             conversion will not be applied unless 
                             'download_base_url' is set (see above).  
@@ -144,8 +177,17 @@ class PrePubMetadataService(PublishSystem):
                 ddspath = '/' + ddspath
             pat = re.compile(r'https?://[\w\.]+(:\d+)?'+ddspath)
             for comp in out['components']:
+                # do a download URL substitution if 1) it looks like a
+                # distribution service URL, and 2) the file exists in our
+                # SIP areas.  
                 if 'downloadURL' in comp and pat.search(comp['downloadURL']):
-                    comp['downloadURL'] = pat.sub(baseurl, comp['downloadURL'])
+                    # it matches
+                    filepath = comp.get('filepath',
+                                        pat.sub('',comp['downloadURL']))
+                    if datafiles is None or filepath in datafiles:
+                        # it exists
+                        comp['downloadURL'] = pat.sub(baseurl,
+                                                      comp['downloadURL'])
 
         return out
 
@@ -154,7 +196,8 @@ class PrePubMetadataService(PublishSystem):
         return a full NERDm resource record corresponding to the given 
         MIDAS ID.  
         """
-        return self.make_nerdm_record(self.prepare_metadata_bag(id).bagdir)
+        bagger = self.prepare_metadata_bag(id)
+        return self.make_nerdm_record(bagger.bagdir, bagger.datafiles)
 
     def locate_data_file(self, id, filepath):
         """
@@ -175,7 +218,7 @@ class PrePubMetadataService(PublishSystem):
 
         # determine the MIME type to send data as
         bag = NISTBag(bagger.bagdir, True)
-        dfmd = bag.nerdm_component(filepath)
+        dfmd = bag.nerd_metadata_for(filepath)
         if 'mediaType' in dfmd and dfmd['mediaType']:
             mt = str(dfmd['mediaType'])
         else:

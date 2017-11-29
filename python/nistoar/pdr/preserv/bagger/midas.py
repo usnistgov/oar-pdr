@@ -9,22 +9,32 @@ process for the preservation service.
 
 The implementations use the BagBuilder class to populate the output bag.   
 """
-import os, errno, logging, re, json
+import os, errno, logging, re, json, shutil
 from abc import ABCMeta, abstractmethod, abstractproperty
 
 from .base import SIPBagger, moddate_of, checksum_of, read_nerd, read_pod
-from .base import PreservationSystem
+from .base import sys as _sys
 from ..bagit.builder import BagBuilder, NERDMD_FILENAME
 from ... import def_merge_etcdir
-from .. import (SIPDirectoryError, SIPDirectoryNotFound, 
+from .. import (SIPDirectoryError, SIPDirectoryNotFound,
                 ConfigurationException, StateException, PODError)
 from nistoar.nerdm.merge import MergerFactory
 
-_sys = PreservationSystem()
+# _sys = PreservationSystem()
 log = logging.getLogger(_sys.system_abbrev).getChild(_sys.subsystem_abbrev)
 
 DEF_MBAG_VERSION = "0.2"
 DEF_MIDAS_POD_FILE = "_pod.json"
+
+def _midadid_to_dirname(midasid, log=None):
+    out = midasid
+    if len(midasid) > 32:
+        # MIDAS drops the first 32 chars. of the ediid for the data
+        # directory names
+        out = midasid[32:]
+    elif log:
+        log.warn("Unexpected MIDAS ID (too short): "+midasid)
+    return out
 
 class MIDASMetadataBagger(SIPBagger):
     """
@@ -37,32 +47,37 @@ class MIDASMetadataBagger(SIPBagger):
 
     This class can take a configuration dictionary on construction; the 
     following parameters are supported:
-    :param bag_builder     dict: a set of parameters to pass to the BagBuilder
+    :prop bag_builder dict ({}): a set of parameters to pass to the BagBuilder
                                  object used to populate the output bag (see
                                  BagBuilder class documentation for supported
                                  parameters).
-    :param merge_etc       str:  the path to the directory containing the 
+    :prop merge_etc        str:  the path to the directory containing the 
                                  metadata merge rule configurations.  If not
                                  set, the directory will be searched for in 
                                  some possible default locations.
-    :param hard_link_data bool:  if True, copy data files into the bag using
-                                 a hard link whenever possible (default: True)
-    :param pod_locations  list of str:  a list of relative file paths where 
-                                 the POD dataset file might be found, in 
-                                 order of preference.  (Default: ["_pod.json"])
-    :param update_by_checksum_size_lim int:  a size limit in bytes for which 
+    :prop hard_link_data boo (True)l:  if True, copy data files into the bag 
+                                 using a hard link whenever possible.
+    :prop pod_locations  list of str (["_pod.json"]):  a list of relative file 
+                                 paths where the POD dataset file might be 
+                                 found, in order of preference.  
+    :prop update_by_checksum_size_lim int (0):  a size limit in bytes for which 
                                  files less than this will be checked to see 
                                  if it has changed (not yet implemented).
-    :param conponent_merge_convention str: the merge convention name to use to
-                                 merge MIDAS-provided component metadata with 
-                                 the PDR's initial component metadata (default:
-                                 'dev').
+    :prop conponent_merge_convention str ("dev"): the merge convention name to 
+                                 use to merge MIDAS-provided component metadata
+                                 with the PDR's initial component metadata.
+    :prop relative_to_indir bool (False):  If True, the output bag directory 
+       is expected to be under one of the input directories; this base class
+       will then ensure that it has write permission to create the output 
+       directory.  If False, the bagger may raise an exception if the 
+       requested output bag directory is found within an input SIP directory,
+       regardless of whether the process has permission to write there.  
     """
 
     def __init__(self, midasid, workdir, reviewdir, uploaddir=None, config={},
                  minter=None):
         """
-        Create an SIPPrepper to operate on data provided by MIDAS
+        Create an SIPBagger to operate on data provided by MIDAS
 
         :param midasid   str:  the identifier provided by MIDAS, used as the 
                                name of the directory containing the data.
@@ -72,19 +87,15 @@ class MIDASMetadataBagger(SIPBagger):
                                datasets in the review state.
         :param uploaddir str:  the path to the directory containing submitted
                                datasets not yet in the review state.
+        :param config   dict:  a dictionary providing configuration parameters
+        :param minter IDMinter: a minter to use for minting new identifiers.
         """
         self.name = midasid
         self.state = 'upload'
         self._indirs = []
 
         # ensure we have at least one readable input directory
-        indirname = midasid
-        if len(midasid) > 32:
-            # MIDAS drops the first 32 chars. of the ediid for the data
-            # directory names
-            indirname = midasid[32:]
-        else:
-            log.warn("Unexpected MIDAS ID (too short): "+midasid)
+        indirname = _midadid_to_dirname(midasid, log)
 
         for dir in (reviewdir, uploaddir):
             if not dir:
@@ -198,7 +209,13 @@ class MIDASMetadataBagger(SIPBagger):
             for dir, subdirs, files in os.walk(root):
                 reldir = dir[len(root)+1:]
                 for f in files:
-                    if f.startswith('.') or \
+                    # don't descend into subdirectories with ignorable names
+                    for d in range(len(subdirs)-1, -1, -1):
+                        if subdirs[d].startswith('.') or \
+                           subdirs[d].startswith('_'):
+                            del subdirs[d]
+                    
+                    if f.startswith('.') or f.startswith('_') or \
                        os.path.join(reldir,f) in podlocs:
                         # skip dot-files and pod files written by MIDAS
                         continue
@@ -329,3 +346,205 @@ class MIDASMetadataBagger(SIPBagger):
             self.bagbldr.remove_component(filepath, True)
 
         
+class PreservationBagger(SIPBagger):
+    """
+    This class finalizes the bagging of data provided by MIDAS into the final 
+    bag for preservation.  
+
+    This class uses the MIDASMetadataBagger to update the NERDm metadata to 
+    latest copies of the files provided through MIDAS.  It then builds the 
+    final bag, including the data files and all required ancillary files.  
+
+    This class takes a configuration dictionary on construction; the 
+    following parameters are supported:
+    :prop bag_builder dict ({}): a set of parameters to pass to the BagBuilder
+                                 object used to populate the output bag (see
+                                 BagBuilder class documentation for supported
+                                 parameters).
+    :prop merge_etc        str:  the path to the directory containing the 
+                                 metadata merge rule configurations.  If not
+                                 set, the directory will be searched for in 
+                                 some possible default locations.
+    :prop hard_link_data bool (True):  if True, copy data files into the bag 
+                                 using a hard link whenever possible.
+    :prop pod_locations  list of str (["_pod.json"]):  a list of relative file 
+                                 paths where the POD dataset file might be 
+                                 found, in order of preference.  
+    :prop update_by_checksum_size_lim int (0):  a size limit in bytes for which 
+                                 files less than this will be checked to see 
+                                 if it has changed (not yet implemented).
+    :prop conponent_merge_convention str ("dev"): the merge convention name to 
+                                 use to merge MIDAS-provided component metadata
+                                 with the PDR's initial component metadata.
+    :prop relative_to_indir bool (False):  If True, the output bag directory 
+       is expected to be under one of the input directories; this base class
+       will then ensure that it has write permission to create the output 
+       directory.  If False, the bagger may raise an exception if the 
+       requested output bag directory is found within an input SIP directory,
+       regardless of whether the process has permission to write there.  
+    :prop bag_name_format str ("{0}.mbag{1}-{2}"):  a python format string 
+       to use to form a name for the output bag.  The data required to turn
+       the format string into a name are: (0) the dataset identifier, (1)
+       a bag profile version string, and (2) a bag sequence number.
+    :prop mbag_version str:  the version string for bag profile for output
+       bags.  
+    """
+
+    def __init__(self, midasid, bagparent, reviewdir, mddir,
+                 config=None, minter=None):
+        """
+        Create an SIPBagger to operate on data provided by MIDAS.
+
+        :param midasid   str:  the identifier provided by MIDAS, used as the 
+                               name of the directory containing the data.
+        :param bagparent str:  the path to the directory where the preservation
+                               bag should be written.  
+        :param reviewdir str:  the path to the directory containing submitted
+                               datasets in the review state.
+        :param mddir     str:  the path to the directory that may contain a
+                               metadata bag prepared for previewing or updating
+                               the landing page.
+        :param config   dict:  a dictionary providing configuration parameters
+        :param minter IDMinter: a minter to use for minting new identifiers.
+        """
+        self.name = midasid
+        self.mddir = mddir
+        self.minter = minter
+        self.reviewdir = reviewdir
+
+        self.indir = os.path.join(self.reviewdir,
+                                  _midadid_to_dirname(midasid, log))
+        if not os.path.exists(self.indir):
+            raise SIPDirectoryNotFound(self.indir)
+
+        if config is None:
+            config = {}
+        super(PreservationBagger, self).__init__(bagparent, config)
+
+        # do a sanity check on the bag parent directory
+        if not self.cfg.get('relative_to_indir', False):
+            sipdir = os.path.abspath(self.indir)
+            if sipdir[-1] != os.sep:
+                sipdir += '/'
+            if os.path.abspath(self.bagparent).startswith(sipdir):
+                if self.cfg.get('relative_to_indir') == False:
+                    # you said it was not relative, but it sure looks that way
+                    raise ConfigurationException("'relative_to_indir'=False but"
+                                                 +" bag dir (" + self.bagparent+
+                                                 ") appears to be below "+
+                                                 "submitted directory (" +
+                                                 self.sipdir+")")
+                # bagparent is inside sipdir
+                self.bagparent = os.path.abspath(self.bagparent)[len(sipdir):]
+                self.cfg['relative_to_indir'] = True
+
+        if self.cfg.get('relative_to_indir'):
+            self.bagparent = os.path.join(self.indir, self.bagparent)
+        self.ensure_bag_parent_dir()
+
+        self.bagbldr = BagBuilder(self.bagparent,
+                                  self.form_bag_name(self.name),
+                                  self.cfg.get('bag_builder', {}),
+                                  minter=minter,
+                                  logger=log.getChild(self.name[:8]+'...'))
+        
+
+    @property
+    def bagdir(self):
+        """
+        The path to the output bag directory.
+        """
+        return self.bagbldr.bagdir
+
+    def ensure_metadata_preparation(self):
+        """
+        prepare the NERDm metadata.  
+
+        This uses the MIDASMetadataBagger class to convert the MIDA POD data 
+        into NERDm and to extract metadata from the uploaded files.  
+        """
+
+        # start by bagging up the metadata.  If this was done before (prior to
+        # final preservation time), the previous metadata bag will be updated.
+        mdbagger = MIDASMetadataBagger(self.name, self.mddir, self.reviewdir,
+                                       config=self.cfg, minter=self.minter)
+        mdbagger.prepare(nodata=True)
+        self.datafiles = mdbagger.datafiles
+
+        # copy the contents of the metadata bag into the final preservation bag
+        if os.path.exists(self.bagdir):
+            # note: caller should be responsible for locking the preservation
+            # of the SIP and cleaning up afterward.  Thus, this case should
+            # not really occur
+            log.warn("Removing previous version of preservation bag, %s",
+                     self.bagbldr.bagname)
+            if os.path.isdir(self.bagdir):
+                shutil.rmtree(self.bagdir)
+            else:
+                shutil.remove(self.bagdir)
+        shutil.copytree(mdbagger.bagdir, self.bagdir)
+        
+        # by ensuring the output preservation bag directory, we set up loggning
+        self.bagbldr.ensure_bagdir()
+        self.bagbldr.log.info("Preparing final bag for preservation as %s",
+                              os.path.basename(self.bagdir))
+
+    def find_pod_file(self):
+        """
+        find an existing pod file given a list of existing possible locations
+        """
+        locs = self.cfg.get('pod_locations', [ DEF_MIDAS_POD_FILE ])
+        for loc in locs:
+            path = os.path.join(self.indir, loc)
+            if os.path.exists(path):
+                return path
+        raise PODError("POD file not found in expected locations: "+str(locs),
+                       sys=self)
+
+    def ensure_preparation(self, nodata=False):
+        """
+        create and update the output working bag directory to ensure it is 
+        a re-organized version of the SIP, ready for annotation 
+        and preservation.  
+
+        :param nodata bool: if True, do not copy (or link) data files to the
+                            output directory.
+        """
+        self.ensure_metadata_preparation()
+        if not nodata:
+            self.add_data_files()
+
+    def form_bag_name(self, dsid, bagseq=0):
+        """
+        return the name to use for the working bag directory
+        """
+        fmt = self.cfg.get('bag_name_format', "{0}.mbag{1}-{2}")
+        bver = self.cfg.get('mbag_version', DEF_MBAG_VERSION)
+        bver = re.sub(r'\.', '_', bver)
+        return fmt.format(dsid, bver, bagseq)
+
+    def add_data_files(self):
+        """
+        link in copies of the dataset's data files
+        """
+        for dfile, srcpath in self.datafiles.items():
+            self.bagbldr.add_data_file(dfile, srcpath, True, False)
+
+    
+    def make_bag(self):
+        """
+        convert the input SIP into a bag ready for preservation.  More 
+        specifically, the result will be a bag directory with finalized 
+        content, ready for serialization.  
+
+        :return str:  the path to the finalized bag directory
+        """
+        self.prepare(nodata=False)
+
+        finalcfg = self.cfg.get('bag_builder', {}).get('finalize', {})
+        if finalcfg.get('ensure_component_metadata') is None:
+            finalcfg['ensure_component_metadata'] = False
+        self.bagbldr.finalize_bag(finalcfg)
+
+        return self.bagbldr.bagdir
+

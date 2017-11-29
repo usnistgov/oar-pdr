@@ -1,0 +1,13 @@
+This data package contain NIST Public Data
+
+OptSortSph: Sorting Spherical Dielectric Particles in a Standing-Wave
+Interference Field
+Identifier: doi:doi:10.18434/T4SW26 (ark:/88434/edi00hw91c)
+
+Contact: Zachary Levine (zachary.levine@nist.gov)
+
+Software to predict the optical sorting of particles in a standing-
+wave laser interference field
+
+More information:
+https://dx.doi.org/doi:10.18434/T4SW26

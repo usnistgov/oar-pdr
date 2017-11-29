@@ -83,6 +83,7 @@ class TestApp(test.TestCase):
         self.assertGreater(len(self.resp), 0)
         self.assertIn("200", self.resp[0])
         self.assertGreater(len(body), 0)
+        self.assertGreater(len([l for l in self.resp if "Content-Type:" in l]),0)
         data = json.loads(body[0])
         self.assertEqual(data['ediid'], '3A1EE2F169DD3B8CE0531A570681DB5D1491')
         self.assertEqual(len(data['components']), 5)

@@ -24,3 +24,25 @@ class PreservationSystem(PDRSystem):
     @property
     def subsystem_abbrev(self): return _PRESSUBSYSABBREV
 
+sys = PreservationSystem()
+
+class PreservationException(PDRException):
+    """
+    An exception indicating that an attempt to create and save a preservation 
+    bundle failed.
+    """
+    def __init__(self, msg=None, errors=None, cause=None):
+        """
+        create an exception, optionally listing things that went wrong
+
+        :param msg     str:  a general message describing the failure
+        :param errors list:  a list of specific error messages indicating 
+                               multiple errors that occurred.
+        :param cause Exception:  an underlying cause in the form of an 
+                             Exception instance.
+        """
+        super(PreservationException, self).__init__(msg, cause, sys=sys)
+        self.errors = []
+        if errors:
+            self.errors.extend(errors)
+

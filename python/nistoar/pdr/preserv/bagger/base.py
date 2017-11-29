@@ -7,8 +7,9 @@ import os, json, filelock
 from collections import OrderedDict
 from abc import ABCMeta, abstractmethod, abstractproperty
 
-from .. import PreservationSystem, read_nerd, read_pod
-from .. import SIPDirectoryError, NERDError, PODError, StateException
+from .. import PreservationSystem, sys, read_nerd, read_pod
+from .. import (SIPDirectoryError, PDRException, NERDError, PODError,
+                StateException)
 from ..bagit.builder import checksum_of
 
 def moddate_of(filepath):
@@ -23,12 +24,24 @@ class SIPBagger(PreservationSystem):
     by re-organizing its contents into a working bag.  Subclasses adapt 
     different SIP format.  This abstract class provides common code.  
 
-    SIPPrepper implementations should be written to be indepodent: running 
+    SIPBagger implementations should be written to be indepodent: running 
     it mutliple times on the same input and output directories should result
     in the same end state.  That is, if run a second time and nothing is 
     different in the input directory, nothing changes in the output directory.
     If a file is added in the input directory and the prepper is rerun, that
     new file will get added to the output directory.  
+
+    SIPBagger implementations make use of a configuration dictionary to 
+    control its behavior.  Most of the supported properties are defined by 
+    the specific implementation class; however, this base class supports the 
+    following properties:
+
+    :prop relative_to_indir bool (False):  If True, the output bag directory 
+       is expected to be under one of the input directories; this base class
+       will then ensure that it has write permission to create the output 
+       directory.  If False, the bagger may raise an exception if the 
+       requested output bag directory is found within an input SIP directory,
+       regardless of whether the process has permission to write there.  
     """
     __metaclass__ = ABCMeta
 

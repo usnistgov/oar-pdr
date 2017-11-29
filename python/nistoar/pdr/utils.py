@@ -4,6 +4,8 @@ Utility functions useful across the pdr package
 from collections import OrderedDict, Mapping
 import json, re
 
+from .exceptions import (NERDError, PODError, StateException)
+
 def read_nerd(nerdfile):
     """
     read the JSON-formatted NERDm metadata in the given file
@@ -13,9 +15,12 @@ def read_nerd(nerdfile):
     try:
         with open(nerdfile) as fd:
             return json.load(fd, object_pairs_hook=OrderedDict)
+    except ValueError, ex:
+        raise NERDError("Unable to parse NERD file, " + nerdfile + ": "+str(ex),
+                       cause=ex, src=nerdfile)
     except IOError, ex:
-        raise NERDError("Unable to read NERD file: "+str(ex),
-                        cause=ex, src=nerdfile, sys=self)
+        raise NERDError("Unable to read NERD file, " + nerdfile + ": "+str(ex),
+                        cause=ex, src=nerdfile)
 
 def read_pod(podfile):
     """
@@ -26,9 +31,12 @@ def read_pod(podfile):
     try:
         with open(podfile) as fd:
             return json.load(fd, object_pairs_hook=OrderedDict)
+    except ValueError, ex:
+        raise PODError("Unable to parse POD file, " + podfile + ": "+str(ex),
+                       cause=ex, src=podfile)
     except IOError, ex:
-        raise PODError("Unable to read POD file: "+str(ex),
-                       cause=ex, src=podfile, sys=self)
+        raise PODError("Unable to read POD file, " + podfile + ": "+str(ex),
+                       cause=ex, src=podfile)
 
 def write_json(jsdata, destfile, indent=4):
     """

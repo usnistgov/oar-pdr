@@ -66,7 +66,6 @@ def discover_testfiles(within='tests', testsparent=None):
 
 def loadtestfiles(testfiles=[]):
     subsuites = []
-
     for tf in testfiles:
         if tf.endswith(".py"):
             pkg = _path2mod(os.path.dirname(tf))

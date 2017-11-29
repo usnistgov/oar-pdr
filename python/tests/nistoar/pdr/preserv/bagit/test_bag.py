@@ -10,9 +10,9 @@ import nistoar.pdr.preserv.bagit.bag as bag
 import nistoar.pdr.preserv.bagit.exceptions as bagex
 import nistoar.pdr.exceptions as exceptions
 
-# datadir = nistoar/preserv/data
+# datadir = nistoar/pdr/preserv/data
 datadir = os.path.join( os.path.dirname(os.path.dirname(__file__)), "data" )
-bagdir = os.path.join(datadir, "metadatabag")
+bagdir = os.path.join(datadir, "samplembag")
 
 baghier = [
     {
@@ -41,7 +41,7 @@ class TestNISTBag(test.TestCase):
 
     def test_ctor(self):
         self.assertEqual(self.bag.dir, bagdir)
-        self.assertEqual(self.bag.name, "metadatabag")
+        self.assertEqual(self.bag.name, "samplembag")
         self.assertEqual(self.bag.data_dir, os.path.join(bagdir, "data"))
         self.assertEqual(self.bag.metadata_dir, os.path.join(bagdir, "metadata"))
         self.assertEqual(self.bag.pod_file(),
@@ -74,12 +74,12 @@ class TestNISTBag(test.TestCase):
         self.assertIn("nrdp:DataFile", data['@type'])
 
     def test_nerdm_component(self):
-        data = self.bag.nerdm_component('trial3/trial3a.json')
+        data = self.bag.nerd_metadata_for('trial3/trial3a.json')
         self.assertEqual(data['filepath'], 'trial3/trial3a.json')
         self.assertEqual(data['mediaType'], "application/json")
 
         with self.assertRaises(bagex.ComponentNotFound):
-            self.bag.nerdm_component('goober')
+            self.bag.nerd_metadata_for('goober')
         
     def test_nerdm_record(self):
         data = self.bag.nerdm_record()
@@ -133,6 +133,58 @@ class TestNISTBag(test.TestCase):
             self.bag.subcoll_children("trial1.json")
         with self.assertRaises(bag.BadBagRequest):
             self.bag.subcoll_children("trial4")
+
+    def test_iter_fetch_records(self):
+        fdata = [t for t in self.bag.iter_fetch_records()]
+        self.assertEqual(len(fdata), 3)
+        self.assertEqual(len([i[0] for i in fdata
+                                  if i[0].startswith('http://example.org/')]), 3)
+        self.assertEqual(len([i[1] for i in fdata if int(i[1])]), 3)
+        self.assertEqual(fdata[0][2], "data/trial1.json")
+        self.assertEqual(fdata[1][2], "data/trial2.json")
+        self.assertEqual(fdata[2][2], "data/trial3/trial3a.json")
+
+    def test_get_baginfo(self):
+        data = self.bag.get_baginfo()
+
+        self.assertEqual(len(data.keys()), 17)
+        for key in ["Source-Organization", "Organization-Address",
+                    "External-Description", "Bag-Count"]:
+            self.assertIn(key, data)
+
+        self.assertEqual(len([data[k] for k in data
+                                      if not isinstance(data[k], list)]), 0)
+        for k in [ "Organization-Address", "External-Description", "Bag-Count"]:
+            self.assertEqual(len(data[k]), 1)
+        self.assertEqual(len(data['Source-Organization']), 2)
+        self.assertEqual(data['Source-Organization'],
+                         [ "National Institute of Standards and Technology",
+                           "Office of Data and Informatics" ])
+        self.assertEqual(data['Organization-Address'],
+                         [ "100 Bureau Drive, Mail Stop 1000, " +
+                           "Gaithersburg, MD 20899" ])
+        self.assertEqual(data['External-Description'],
+                         [ "This is a test bag created for testing bag "+
+                           "access.  It contains no data files, but it "+
+                           "includes various other metadata files." ])
+        self.assertEqual(data['Bag-Count'], [ "1 of 1" ])
+
+    def test_bagit_version(self):
+        self.assertEqual(self.bag.bagit_version, "0.97")
+        self.assertEqual(self.bag.tag_encoding, "UTF-8")
+    
+    def test_tag_encoding(self):
+        self.assertEqual(self.bag.tag_encoding, "UTF-8")
+        self.assertEqual(self.bag.bagit_version, "0.97")
+
+    def test_multibag_dir(self):
+        self.assertEqual(self.bag.multibag_dir,
+                         os.path.join(self.bag.dir,"multibag"))
+
+    def test_is_headbag(self):
+        self.assertTrue(self.bag.is_headbag())
+                         
+                         
 
 if __name__ == '__main__':
     test.main()

@@ -33,3 +33,31 @@ class ComponentNotFound(BadBagRequest):
     """
     pass
 
+class BagProfileError(BagItException):
+    """
+    an exception indicating that the current state of the bag being accessed 
+    is inconsistent with the NIST BagIt Profile.
+    """
+    pass
+
+class BagFormatError(BagItException):
+    """
+    an exception indicating that the bag access encountered a violation of 
+    proper format for a bag according to the base BagIt standard.
+    """
+    pass
+
+class BagWriteError(BagItException):
+    """
+    an exception indicating an error while constructing or writing into 
+    a bag.
+    """
+    pass
+
+class BagSerializationError(BagItException):
+    """
+    an exception resulting from a failure serializing or unserializing
+    a bag.
+    """
+    pass
+

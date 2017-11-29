@@ -1,0 +1,21 @@
+2017-10-20 11:15:13,615 NORMAL: Created bag with name, 3A1EE2F169DD3B8CE0531A570681DB5D1491
+2017-10-20 11:15:13,615 INFO: Adding POD data and converting to NERDm
+2017-10-20 11:15:13,616 NORMAL: Assigning new identifier: ark:/88434/edi00hw91c
+2017-10-20 11:15:13,640 NORMAL: Adding resourse-level metadata
+2017-10-20 11:15:13,640 NORMAL: Setting ediid: 3A1EE2F169DD3B8CE0531A570681DB5D1491
+2017-10-20 11:15:13,640 NORMAL: Initializing metadata for file trial1.json
+2017-10-20 11:15:13,644 NORMAL: Adding file metadata for trial1.json
+2017-10-20 11:15:13,644 NORMAL: Initializing metadata for file trial2.json
+2017-10-20 11:15:13,647 NORMAL: Adding file metadata for trial2.json
+2017-10-20 11:15:13,648 NORMAL: Initializing metadata for file trial3/trial3a.json
+2017-10-20 11:15:13,648 NORMAL: Adding file metadata for trial3/trial3a.json
+2017-10-20 11:15:13,648 NORMAL: Initializing metadata for subcollection trial3
+2017-10-20 11:15:13,648 NORMAL: Adding collection metadata for trial3
+2017-10-20 11:15:13,650 INFO: Preparing final bag for preservation as 3A1EE2F169DD3B8CE0531A570681DB5D1491.mbag0_2-0
+2017-10-20 11:15:13,650 NORMAL: Adding file, trial1.json
+2017-10-20 11:15:13,650 NORMAL: Added data file at trial1.json
+2017-10-20 11:15:13,651 NORMAL: Adding file, trial2.json
+2017-10-20 11:15:13,651 NORMAL: Added data file at trial2.json
+2017-10-20 11:15:13,651 NORMAL: Adding file, trial3/trial3a.json
+2017-10-20 11:15:13,651 NORMAL: Added data file at trial3/trial3a.json
+2017-10-20 11:15:13,653 ERROR: Implementation of Bag finalization is not complete!

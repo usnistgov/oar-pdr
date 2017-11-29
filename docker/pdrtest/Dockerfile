@@ -1,7 +1,8 @@
 FROM oarmeta/ejsonschema
 
 RUN apt-get update && apt-get install -y python-yaml nginx curl less \
-                                         uwsgi uwsgi-plugin-python 
+                                         uwsgi uwsgi-plugin-python zip p7zip-full
+RUN pip install Detach
 
 COPY entrypoint.sh /root/entrypoint.sh
 COPY nginx.conf /etc/nginx/nginx.conf
