@@ -74,9 +74,20 @@ class TestNotice(test.TestCase):
         self.assertEqual(notice.issued, jd['issued'])
         self.assertEqual(notice.metadata, jd['metadata'])
 
-    def test_from_json(self):
+    def test_from_json_str(self):
         j = json.dumps(notice_data)
         notice = notify.Notice.from_json(j)
+
+        d = notice_data.copy()
+        self.assertEqual(notice.type, d['type'])
+        self.assertEqual(notice.title, d['title'])
+        self.assertEqual(notice.description, d['description'])
+        self.assertEqual(notice.origin, d['origin'])
+        self.assertEqual(notice.issued, d['issued'])
+        self.assertEqual(notice.metadata, d['metadata'])
+
+    def test_from_json_dict(self):
+        notice = notify.Notice.from_json(notice_data)
 
         d = notice_data.copy()
         self.assertEqual(notice.type, d['type'])

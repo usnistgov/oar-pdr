@@ -1,21 +1,21 @@
 """
 This module proivdes the implementation for email-based notifications.
 """
-
-import os, smtplib, json
-from email.mime.text import MIMEText
+from __future__ import absolute_import
+import os, smtplib, json, textwrap
 from cStringIO import StringIO
+from email.mime.text import MIMEText
 
 from .base import NotificationTarget, ChannelService
 from ..exceptions import ConfigurationException
 
 def _fmtemail(empair):
-    if isinstance(empair, tuple):
-        return '"{0}" <{1}>' % empair
+    if isinstance(empair, (list, tuple)):
+        return '"{0}" <{1}>'.format(*empair)
     return empair
 
 def _rawemail(empair):
-    if isinstance(empair, tuple):
+    if isinstance(empair, (list, tuple)):
         return empair[1]
     return empair
 
@@ -29,7 +29,7 @@ class Mailer(ChannelService):
 
         try:
             self._server = self.cfg['smtp_server']
-            self._port = self.cfg.get('port')
+            self._port = self.cfg.get('smtp_port')
         except KeyError as ex:
             raise ConfigurationException("Missing email notification "+
                                          "configuration property: "+str(ex))
@@ -37,7 +37,7 @@ class Mailer(ChannelService):
             raise ConfigurationException("Bad email notification "+
                                          "config property value/type "+str(ex))
 
-    def send_email(self, from, addrs, message=""):
+    def send_email(self, fromaddr, addrs, message=""):
         """
         send an email to a list of addresses
 
@@ -48,7 +48,7 @@ class Mailer(ChannelService):
                            send.
         """
         smtp = smtplib.SMTP(self._server, self._port)
-        smtp.sendmail(from, addrs, message)
+        smtp.sendmail(fromaddr, addrs, message)
         smtp.quit()
 
 class EmailTarget(NotificationTarget):
@@ -80,18 +80,18 @@ class EmailTarget(NotificationTarget):
             raise TypeError("service is not of type Mailer")
 
         try:
-            self._from = self._hdr['From']
+            self._from = self._cfg['from']
             
             self._hdr = {}
-            self._hdr['To'] = self.cfg['to']
-            self._hdr['Cc'] = self.cfg.get('cc', [])
-            self._hdr['Bcc'] = self.cfg.get('bcc', [])
+            self._hdr['To'] = self._cfg['to']
+            self._hdr['Cc'] = self._cfg.get('cc', [])
+            self._hdr['Bcc'] = self._cfg.get('bcc', [])
         except KeyError as ex:
             raise ConfigurationException("Missing email notification "+
                                          "configuration property: "+str(ex))
 
         self._recips = []
-        for key in self._hdr:
+        for key in "To Cc Bcc".split():
             # quick check of format
             if isinstance(self._hdr[key], (str, unicode)):
                 self._hdr[key] = [self._hdr[key]]
@@ -107,7 +107,7 @@ class EmailTarget(NotificationTarget):
         self._from = _rawemail(self._from) 
 
     @property
-    def from(self):
+    def fromaddr(self):
         """
         the address to show as the sender of the email notification
         """
@@ -158,8 +158,9 @@ class EmailTarget(NotificationTarget):
 
         hdr = self._hdr.copy()
         msg['From'] = hdr.pop('From')
+        msg['To'] = ", ".join(hdr.pop('To'))
         if 'Cc' in hdr:
-            msg['Cc'] = hdr.pop('Cc')
+            msg['Cc'] = ", ".join(hdr.pop('Cc'))
         if 'Bcc' in hdr:
             hdr.pop('Bcc')
         msg['Subject'] = subject
@@ -168,12 +169,13 @@ class EmailTarget(NotificationTarget):
 
     def format_body(self, notice):
         """
-        format the body of the email from data in the notice
+        format the body of the email from data in the notice.  The output does 
+        not include the message header. 
         """
         out = StringIO()
-        out.write("Notifcation Type: {0}\n".format(notice.type))
+        out.write("Notification Type: {0}\n".format(notice.type))
         if notice.origin:
-            out.write("Origin: {0}\n".format(notice.type))
+            out.write("Origin: {0}\n".format(notice.origin))
         out.write("\n")
         if notice.title:
             out.write(textwrap.fill(notice.title, 80) + "\n\n")
@@ -182,12 +184,12 @@ class EmailTarget(NotificationTarget):
         if not isinstance(desc, list):
             desc = [desc]
         for d in desc:
-            out.write(textwrap.fill(desc))
+            out.write(textwrap.fill(d, 80))
             out.write('\n\n')
 
         out.write("Issued: {0}\n".format(notice.issued))
-        for key in self._md:
-            val = self._md[key]
+        for key in notice.metadata:
+            val = notice.metadata[key]
             if isinstance(val, list):
                 val = json.dumps(val, indent=2, separators=(', ', ': '))
             else:

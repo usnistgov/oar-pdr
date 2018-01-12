@@ -141,8 +141,10 @@ class Notice(object):
         """
         if isinstance(data, (str, unicode)):
             data = json.loads(data)
-        elif has_attr(data, 'read'):
+        elif hasattr(data, 'read'):
             data = json.load(data)
+        if not isinstance(data, Mapping):
+            raise TypeError("Notice.from_json(): arg is not JSON data")
 
         mdata = data.get("metadata", {})
         return Notice(data.get('type'), data.get('title'),
