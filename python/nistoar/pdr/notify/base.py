@@ -2,8 +2,10 @@
 This module proivdes the base interface and infrastructure for the notification 
 service.
 """
+from datetime import datetime
 from abc import ABCMeta, abstractmethod, abstractproperty
-from collections import Mapping
+from collections import Mapping, OrderedDict
+import json
 
 class NotificationTarget(object):
     """
@@ -121,11 +123,15 @@ class Notice(object):
         out = OrderedDict([
             ("type", self.type),
             ("title", self.title),
-            ("description", self.description),
-            ("origin", self.origin),
-            ("issued", self.issued),
-            ("metadata", self.metadata)
+            ("issued", self.issued)
         ])
+        if self.description:
+            out['description'] = self.description
+        if self.origin:
+            out['origin'] = self.origin
+        if self.origin:
+            out['metadata'] = self.metadata
+
         return json.dumps(out)
 
     @classmethod
