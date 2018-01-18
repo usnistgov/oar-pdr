@@ -37,20 +37,6 @@ class TestEmailFilters(test.TestCase):
     def test_rawemail(self):
         self.assertEqual(notify._rawemail(['Name', 'addr']), 'addr')
 
-class FakeMailer(notify.Mailer):
-    def __init__(self, config, cache):
-        super(FakeMailer, self).__init__(config)
-        self.cache = cache
-
-    def send_email(self, froma, addrs, message=""):
-        with open(os.path.join(self.cache, "notice.txt"), 'w') as fd:
-            fd.write("To ")
-            fd.write(" ".join(addrs))
-            fd.write("\n")
-            fd.write("From "+froma)
-            fd.write("\n")
-            fd.write(message)
-
 class TestMailer(test.TestCase):
 
     config = {
@@ -61,7 +47,7 @@ class TestMailer(test.TestCase):
     def setUp(self):
         self.tf = Tempfiles()
         self.tmpdir = self.tf.mkdir("mailer")
-        self.mailer = FakeMailer(self.config, self.tmpdir)
+        self.mailer = notify.FakeMailer(self.config, self.tmpdir)
 
     def tearDown(self):
         self.tf.clean()
@@ -107,7 +93,7 @@ class TestEmailTarget(test.TestCase):
     def setUp(self):
         self.tf = Tempfiles()
         self.tmpdir = self.tf.mkdir("mailer")
-        self.mailer = FakeMailer(self.mailer_config, self.tmpdir)
+        self.mailer = notify.FakeMailer(self.mailer_config, self.tmpdir)
         self.target = notify.EmailTarget(self.mailer, self.target_config)
 
     def tearDown(self):
@@ -125,7 +111,7 @@ class TestEmailTarget(test.TestCase):
 
         self.assertEqual(self.target.mail_header['From'],
                          '"PDR Notification System" <oardist@nist.gov>')
-        self.assertIn('"Raymond Plante" <raymond.plante@nist.gov>',
+        self.assertIn('"OAR PDR Operators: Raymond Plante" <raymond.plante@nist.gov>',
                       self.target.mail_header['To'])
         self.assertIn('"Sys admin" <oarsysadmin@nist.gov>',
                       self.target.mail_header['Cc'])
@@ -139,26 +125,44 @@ class TestEmailTarget(test.TestCase):
     def test_format_body(self):
         note = Notice.from_json(notice_data)
         body = self.target.format_body(note).split("\n")
-        self.assertEqual(body[0], "Notification Type: FAILURE")
-        self.assertEqual(body[1], "Origin: Preservation")
-        self.assertEqual(body[3], "data is devoid of science")
-        self.assertEqual(body[5], "The data is dull and uninteresting.  Pure noise is less tedious than this data.")
-        self.assertEqual(body[6], "It reads like 'Smoke on the Water' but without the changing notes.")
-        self.assertEqual(body[8], "This data should not be saved")
+        self.assertEqual(body[0], "Attention: OAR PDR Operators")
+        self.assertEqual(body[1], "Notification Type: FAILURE")
+        self.assertEqual(body[2], "Origin: Preservation")
+        self.assertEqual(body[4], "data is devoid of science")
+        self.assertEqual(body[6], "The data is dull and uninteresting.  Pure noise is less tedious than this data.")
+        self.assertEqual(body[7], "It reads like 'Smoke on the Water' but without the changing notes.")
+        self.assertEqual(body[9], "This data should not be saved")
 
-        self.assertTrue(body[10].startswith("Issued: "))
-        self.assertEqual(body[11], "color: grey")
-        self.assertEqual(body[12], "excitation: False")
+        self.assertTrue(body[11].startswith("Issued: "))
+        self.assertEqual(body[12], "color: grey")
+        self.assertEqual(body[13], "excitation: False")
         
     def test_make_message(self):
         hdr = self.target._make_message("Done!", "Yahoo!").split('\n')
         self.assertIn('From: "PDR Notification System" <oardist@nist.gov>', hdr)
-        self.assertIn('To: "Raymond Plante" <raymond.plante@nist.gov>,', hdr)
+        self.assertIn('To: "OAR PDR Operators: Raymond Plante" <raymond.plante@nist.gov>,', hdr)
         self.assertIn(' "Gretchen Greene" <gretchen.greene@nist.gov>', hdr)
         self.assertIn('Cc: "Sys admin" <oarsysadmin@nist.gov>', hdr)
         self.assertIn('Subject: Done!', hdr)
         self.assertIn('Yahoo!', hdr)
 
+    def test_send_notice(self):
+        note = Notice.from_json(notice_data)
+        self.target.send_notice(note)
+
+        with open(os.path.join(self.mailer.cache, "notice.txt")) as fd:
+            msg = fd.read().split("\n")
+
+        self.assertEqual(msg[0],
+                         "To raymond.plante@nist.gov gretchen.greene@nist.gov oarsysadmin@nist.gov boss@nist.gov")
+        self.assertEqual(msg[1], "From oardist@nist.gov")
+        # self.assertTrue(msg[2].startswith("From oardist@nist.gov "))
+        self.assertIn('From: "PDR Notification System" <oardist@nist.gov>', msg)
+        self.assertIn('To: "OAR PDR Operators: Raymond Plante" <raymond.plante@nist.gov>,', msg)
+        self.assertIn(' "Gretchen Greene" <gretchen.greene@nist.gov>', msg)
+        self.assertIn('Cc: "Sys admin" <oarsysadmin@nist.gov>', msg)
+        self.assertIn('Subject: PDR Notice: FAILURE: data is devoid of science', msg)
+        self.assertIn('The data is dull and uninteresting.  Pure noise is less tedious than this data.', msg)
 
 if __name__ == '__main__':
     test.main()

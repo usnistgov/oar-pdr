@@ -1,0 +1,22 @@
+archive_targets: [ operators ]
+channels:
+  - name: nistemail
+    type: email
+    smtp_server: email.nist.gov
+  - name: fakeemail
+    type: fakeemail
+  - name: archive
+    type: file
+    dir:  /data/pdr/notify
+targets:
+  - name: operators
+    channel: nistemail
+    type: email
+    from: ['PDR Notification System', 'oardist@nist.gov']
+    to:
+      - ['Raymond Plante', 'raymond.plante@nist.gov']
+      - ['Gretchen Greene', 'gretchen.greene@nist.gov']
+    cc:
+      - ['Sys admin', 'oarsysadmin@nist.gov']
+    bcc:
+      - ['Big boss', 'boss@nist.gov']

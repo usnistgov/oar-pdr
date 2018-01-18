@@ -1,6 +1,26 @@
 """
 This module proivdes the base interface and infrastructure for the notification 
 service.
+
+The notification framework has three basic classes:
+
+   *  ChannelService -- a service that can send notifications via some 
+        "channel"--i.e. distribution mechanism (like email or text message).
+        Implementations of this base class specialize for the particular
+        mechanism.
+   *  NotificationTarget -- a logical destination for a notifications.  A 
+        target is configured with a name that represents a particular role 
+        or responsibility for receiving messages of a particular concern 
+        (like "operator" or "webmaster").  Implementations of this base 
+        class are specialized for a particular channel, and instances are 
+        attached to the appropriate ChannelService.
+   *  Notice -- a container for the notification.  
+
+A notification is distributed to configured recipients by creating a Notice
+and sending it to a NotificationTarget.  The NotificationTarget formats the 
+message appropriately and sends it to the ChannelService with the configured 
+set of recipients.  The ChannelService sends the message using its particular 
+distribution mechanism.  
 """
 from datetime import datetime
 from abc import ABCMeta, abstractmethod, abstractproperty
@@ -43,11 +63,16 @@ class NotificationTarget(object):
         self.fullname = self._cfg.get('fullname', fullname)
 
     @abstractmethod
-    def send_notice(self, notice):
+    def send_notice(self, notice, targetname=None, fullname=None):
         """
-        send the given notice to this notification target.
+        send the given notice to this notification target.  The target is 
+        not guaranteed to use either the targetname or fullname inputs.
 
         :param notice Notice:  the notification to send to the target
+        :param targetname str: a name to use as the name of the target, 
+                               over-riding this target's configured name.
+        :param fullname str: a name to use as the full name of the target, 
+                               over-riding this target's configured fullname.
         """
         pass
 
@@ -132,7 +157,11 @@ class Notice(object):
         if self.origin:
             out['metadata'] = self.metadata
 
-        return json.dumps(out)
+        fmt = {}
+        if pretty:
+            fmt['indent'] = 2
+            fmt['separators'] = (', ', ': ')
+        return json.dumps(out, **fmt)
 
     @classmethod
     def from_json(cls, data):
