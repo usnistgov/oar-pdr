@@ -10,6 +10,7 @@ notifications through multiple channels.  From the client's perspective,
 notifications are sent to a named "target" representing a logical role (like 
 an operator or a curator or a webmaster).  
 """
-# import .archive as archive
-# import .email as email
-# from .base import Notice
+from .base import Notice, ChannelService, NotificationTarget
+from .service import NotificationService
+from . import archive
+from . import email

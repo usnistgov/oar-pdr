@@ -216,7 +216,7 @@ class TargetManager(object):
         Instantiate and register a NotificationTarget with a name as described 
         by the given channel configuration.  The configuration dictionary 
         must include a 'type' property that is a name for NotificationTarget 
-        class (as registered via register_channel().
+        class (as registered via register_channel_class()).
 
         :param config dict: the configuration describing the desired channel
         :param name    str: a name to give to the channel (over-riding the 
@@ -321,30 +321,20 @@ class NotificationService(object):
                     "Config Property 'archive_targets' is set, but '" +
                     archiver + "' channel not configured.")
               
-    def notify(self, target, type, summary, desc=None, origin=None, issued=None):
+    def distribute(self, target, notice):
         """
         send a notification to a target with a given name
 
         :param target str or list of str:  a logical name or a list of names 
                             for groups to receive a notification
-        :param type   str:  a label indicating the type or severity of the 
-                            notification
-        :param summary str: a short title or summary for the notification
-        :param desc  str or list of str:  a longer description of the 
-                            notification.  When the value is a list, each 
-                            string item is a paragraph.
-        :param origin str:  a label indicating the system sending the 
-                            notification.
-        :param issued str:  a formatted string for the timestamp when the 
-                            notification condition was created.  If None,
-                            the current time will be used.
+        :param notice Notice:  a fully-formed notification to distribute to 
+                            the target(s).
         """
         if not isinstance(target, (list, tuple)):
             target = [target]
 
         failed = []
         for name in target:
-            notice = Notice(type, summary, desc, origin, issued)
             if name in self._targets2archive:
                 self.archive(notice, name)
                 
@@ -360,8 +350,43 @@ class NotificationService(object):
                 msg = "requested targets have not been configured: " + \
                       ", ".join(target)
             raise ValueError(msg)
+        
+
+    def notify(self, target, type, summary, desc=None, origin=None,
+               metadata=None, issued=None):
+        """
+        send a notification to a target with a given name.  This calls 
+        distribute() internally
+
+        :param target str or list of str:  a logical name or a list of names 
+                            for groups to receive a notification
+        :param type   str:  a label indicating the type or severity of the 
+                            notification
+        :param summary str: a short title or summary for the notification
+        :param desc  str or list of str:  a longer description of the 
+                            notification.  When the value is a list, each 
+                            string item is a paragraph.
+        :param origin str:  a label indicating the system sending the 
+                            notification.
+        :param metadata dict:  a dictionary of additional metadata to attach 
+                            to the notification.  All property values must be 
+                            convertable to a string via str().
+        :param issued str:  a formatted string for the timestamp when the 
+                            notification condition was created.  If None,
+                            the current time will be used.
+        """
+        if metadata is None:
+            metadata = {}
+        self.distribute(target,
+                        Notice(type, summary, desc, origin, issued, **metadata))
 
     def archive(self, notice, name):
+        """
+        Send a notification to the configured archive.
+
+        :param notice Notice:  the notification to send
+        :param notice name:    the target name to archive it under
+        """
         if not self._archiver:
             log.error("Notification archiving requested but 'archive' channel "+
                       "not configured!")
