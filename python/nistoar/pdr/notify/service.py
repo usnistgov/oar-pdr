@@ -399,7 +399,7 @@ class NotificationService(object):
             raise ValueError(msg)
 
     def notify(self, target, type, summary, desc=None, origin=None,
-               metadata=None, issued=None):
+               issued=None, **metadata):
         """
         send a notification to a target with a given name.  This calls 
         distribute() internally
@@ -414,20 +414,20 @@ class NotificationService(object):
                             string item is a paragraph.
         :param origin str:  a label indicating the system sending the 
                             notification.
-        :param metadata dict:  a dictionary of additional metadata to attach 
-                            to the notification.  All property values must be 
-                            convertable to a string via str().
         :param issued str:  a formatted string for the timestamp when the 
                             notification condition was created.  If None,
                             the current time will be used.
+        :param metadata dict:  a dictionary of additional metadata to attach 
+                            to the notification.  All property values must be 
+                            convertable to a string via str().
         """
         if metadata is None:
             metadata = {}
         self.distribute(target,
                         Notice(type, summary, desc, origin, issued, **metadata))
 
-    def alert(self, type, summary, desc=None, origin=None, metadata=None,
-              issued=None):
+    def alert(self, type, summary, desc=None, origin=None, issued=None,
+              **metadata):
         """
         send a notification to all targets that configured as subscribing 
         to those of the given type.  If the type is not recognized or has 
@@ -441,16 +441,16 @@ class NotificationService(object):
                             string item is a paragraph.
         :param origin str:  a label indicating the system sending the 
                             notification.
-        :param metadata dict:  a dictionary of additional metadata to attach 
-                            to the notification.  All property values must be 
-                            convertable to a string via str().
         :param issued str:  a formatted string for the timestamp when the 
                             notification condition was created.  If None,
                             the current time will be used.
+        :param metadata dict:  a dictionary of additional metadata to attach 
+                            to the notification.  All property values must be 
+                            convertable to a string via str().
         """
         if type in self._subscribers:
             self.notify(self._subscribers[type], type, summary, desc, origin,
-                        metadata, issued)
+                        issued, **metadata)
 
     def archive(self, notice, name):
         """

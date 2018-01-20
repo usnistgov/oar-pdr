@@ -70,6 +70,11 @@ class PreservationService(object):
 
         self.minters = {}
 
+        # setup the notification system, if requested
+        self._notifier = None
+        if self.cfg.get('notifier'):
+            self._notifier = NotificationService(self.cfg['notifier'])
+
         # ensure the environemnt is set up
         for tp in self.siptypes:
             self.status("_noid", tp)
@@ -239,7 +244,8 @@ class PreservationService(object):
             self.minters[siptype] = PDRMinter(mntrdir, cfg)
 
         if siptype == 'midas':
-            return hndlr.MIDASSIPHandler(sipid, pcfg, self.minters[siptype])
+            return hndlr.MIDASSIPHandler(sipid, pcfg, self.minters[siptype],
+                                         self._notifier)
         else:
             raise PDRException("SIP type not supported: "+siptype, sys=_sys)
 
@@ -272,9 +278,6 @@ class ThreadedPreservationService(PreservationService):
     multiple types of SIPs.  Because requests are handled asynchronously 
     (i.e. in separate Python threads), multiple requests can be managed 
     simultaneously. 
-
-    NOTE:  This implementation is currently not being used.  The production
-    system uses MultiprocPreservationService.  
     """
     def __init__(self, config):
         """
@@ -299,6 +302,13 @@ class ThreadedPreservationService(PreservationService):
             except Exception, ex:
                 log.exception("Bagging failure: %s", str(ex))
                 self._hdlr.set_state(status.FAILED, "Unexpected failure")
+
+                # alert a human!
+                if self._hdlr.notifier:
+                    self._hdlr.notifier.alert("preserve.failure",
+                                              origin=self._hdlr.name,
+                      summary="Preservation failed for SIP="+self._hdlr._sipid,
+                                              desc=str(ex), id=self._hdlr._sipid)
 
     def _launch_handler(self, handler, timeout=None):
         """
@@ -453,6 +463,14 @@ class MultiprocPreservationService(PreservationService):
                     handler.bagit('zip', self.storedir)
                 except Exception, e:
                     log.exception("Preservation handler failed: %s", str(e))
+
+                    # alert a human!
+                    if self._hdlr.notifier:
+                        self._hdlr.notifier.alert("preserve.failure",
+                                                  origin=self._hdlr.name,
+                      summary="Preservation failed for SIP="+self._hdlr._sipid,
+                                                  desc=str(ex),
+                                                  id=self._hdlr._sipid)
                 finally:
                     ex = ((handler.state != status.SUCCESSFUL) and 1) or 0
                     sys.exit(ex)
