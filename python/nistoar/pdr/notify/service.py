@@ -335,6 +335,25 @@ class NotificationService(object):
                     "Config Property 'archive_targets' is set, but '" +
                     archiver + "' channel not configured.")
 
+        self._subscribers = {}
+        if 'alerts' in config:
+            for alert in config['alerts']:
+                if alert.get('type'):
+                    self._subscribers[alert['type']] = set()
+                    
+                    targets = alert.get('targets', [])
+                    if not isinstance(targets, (list, tuple, set)):
+                        targets = [targets]
+
+                    # warn about undefined targets
+                    notdefined = [t for t in targets if t not in self._targetmgr]
+                    if notdefined:
+                        log.warn("%s alert subscriber target(s) not defined: %s",
+                                 alert['type'], ", ".join(notdefined))
+                    targets = [t for t in targets if t in self._targetmgr]
+                    
+                    self._subscribers[alert['type']] |= set(targets)
+
     @property
     def channels(self):
         """
@@ -358,7 +377,7 @@ class NotificationService(object):
         :param notice Notice:  a fully-formed notification to distribute to 
                             the target(s).
         """
-        if not isinstance(target, (list, tuple)):
+        if not isinstance(target, (list, tuple, set)):
             target = [target]
 
         failed = []
@@ -378,7 +397,6 @@ class NotificationService(object):
                 msg = "requested targets have not been configured: " + \
                       ", ".join(failed)
             raise ValueError(msg)
-        
 
     def notify(self, target, type, summary, desc=None, origin=None,
                metadata=None, issued=None):
@@ -407,6 +425,32 @@ class NotificationService(object):
             metadata = {}
         self.distribute(target,
                         Notice(type, summary, desc, origin, issued, **metadata))
+
+    def alert(self, type, summary, desc=None, origin=None, metadata=None,
+              issued=None):
+        """
+        send a notification to all targets that configured as subscribing 
+        to those of the given type.  If the type is not recognized or has 
+        no subscribers, the notification is not sent.  
+
+        :param type   str:  a label indicating the type or severity of the 
+                            notification
+        :param summary str: a short title or summary for the notification
+        :param desc  str or list of str:  a longer description of the 
+                            notification.  When the value is a list, each 
+                            string item is a paragraph.
+        :param origin str:  a label indicating the system sending the 
+                            notification.
+        :param metadata dict:  a dictionary of additional metadata to attach 
+                            to the notification.  All property values must be 
+                            convertable to a string via str().
+        :param issued str:  a formatted string for the timestamp when the 
+                            notification condition was created.  If None,
+                            the current time will be used.
+        """
+        if type in self._subscribers:
+            self.notify(self._subscribers[type], type, summary, desc, origin,
+                        metadata, issued)
 
     def archive(self, notice, name):
         """

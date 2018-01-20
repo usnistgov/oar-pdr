@@ -1,3 +1,8 @@
+alerts:
+  - type: preserv_success
+    targets: [ dev ]
+  - type: preserv_failure
+    targets: [ operators ]
 archive_targets: [ operators ]
 channels:
   - name: nistemail
@@ -20,3 +25,9 @@ targets:
       - ['Sys admin', 'oarsysadmin@nist.gov']
     bcc:
       - ['Big boss', 'boss@nist.gov']
+  - name: dev
+    channel: nistemail
+    type: email
+    from: ['PDR Notification System', 'oardist@nist.gov']
+    to:
+      - ['Raymond Plante', 'raymond.plante@nist.gov']

@@ -184,6 +184,10 @@ class TestTargetManager(test.TestCase):
             mgr.define_target(tcfg, "busey")
 
 service_cfg = {
+    "alerts": [
+        { "type": "FAILURE", "targets": [ 'operators' ]},
+        { "type": "success", "targets": [ 'me' ]},
+    ],
     "archive_targets": [ "operators" ],
     "channels": [{
         "type": "email",
@@ -281,6 +285,30 @@ class TestNotificationService(test.TestCase):
         self.assertTrue(os.path.exists(cache))
         
         self.svc.notify("operators", "info", "Un-oh")
+        self.assertTrue(os.path.exists(archfile1))
+        self.assertTrue(not os.path.exists(archfile2))
+        self.assertTrue(os.path.exists(cache))
+        
+    def test_alert(self):
+        archfile1 = os.path.join(self.arcdir, "operators.txt")
+        archfile2 = os.path.join(self.arcdir, "me.txt")
+        cache = os.path.join(self.mbox, "notice.txt")
+
+        self.assertTrue(not os.path.exists(archfile1))
+        self.assertTrue(not os.path.exists(archfile2))
+        self.assertTrue(not os.path.exists(cache))
+
+        self.svc.alert("goober", "Hey, wake up!")
+        self.assertTrue(not os.path.exists(archfile1))
+        self.assertTrue(not os.path.exists(archfile2))
+        self.assertTrue(not os.path.exists(cache))
+
+        self.svc.alert("success", "Hey, wake up!")
+        self.assertTrue(not os.path.exists(archfile1))
+        self.assertTrue(not os.path.exists(archfile2))
+        self.assertTrue(os.path.exists(cache))
+        
+        self.svc.alert("FAILURE", "Un-oh")
         self.assertTrue(os.path.exists(archfile1))
         self.assertTrue(not os.path.exists(archfile2))
         self.assertTrue(os.path.exists(cache))
