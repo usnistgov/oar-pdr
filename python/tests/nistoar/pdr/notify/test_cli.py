@@ -1,4 +1,4 @@
-import os, sys, pdb, json
+import os, sys, pdb, json, logging
 import unittest as test
 from copy import deepcopy
 from StringIO import StringIO
@@ -28,6 +28,10 @@ notice_data = {
 
 def setUpModule():
     ensure_tmpdir()
+    rootlog = logging.getLogger()
+    loghdlr = logging.FileHandler(os.path.join(tmpdir(),"test_builder.log"))
+    loghdlr.setLevel(logging.INFO)
+    rootlog.addHandler(loghdlr)
 
 def tearDownModule():
     rmtmpdir()
@@ -120,25 +124,29 @@ class TestCLI(test.TestCase):
     def test_build_ops_config(self):
         parser = cli.define_options("goob")
         args = "-t goob@nist.gov -f me@nist.gov -s boo "+\
-               "-t help@nist.gov -m email.nist.gov"
+               "-t help@nist.gov -m email.nist.gov -A /tmp"
         opts = parser.parse_args(args.split())
         cfg = cli.build_ops_config(opts)
 
         self.assertIn('channels', cfg)
         self.assertIn('targets', cfg)
-        self.assertEqual(len(cfg['channels']), 1)
+        self.assertEqual(len(cfg['channels']), 2)
         self.assertEqual(cfg['channels'][0]["smtp_server"], "email.nist.gov")
         self.assertEqual(cfg['channels'][0]["name"], "email")
         self.assertEqual(cfg['channels'][0]["type"], "email")
+        self.assertEqual(cfg['channels'][1]["dir"], "/tmp")
+        self.assertEqual(cfg['channels'][1]["name"], "archive")
+        self.assertEqual(cfg['channels'][1]["type"], "archive")
         self.assertEqual(len(cfg['targets']), 1)
-        self.assertEqual(cfg['targets'][0]["name"], "email")
+        self.assertEqual(cfg['targets'][0]["name"], "ops")
         self.assertEqual(cfg['targets'][0]["type"], "email")
         self.assertEqual(cfg['targets'][0]["channel"], "email")
         self.assertEqual(cfg['targets'][0]["from"], "me@nist.gov")
         self.assertEqual(cfg['targets'][0]["to"],
                          ["goob@nist.gov", "help@nist.gov"])
+        self.assertEqual(cfg['archive_targets'], ['ops'])
         
-        args = "-m email.nist.gov:825 -s boo".split()
+        args = "-m email.nist.gov:825 -s boo -T admin -A /tmp".split()
         args += [ "-t", '"Goober" <goob@nist.gov>',
                   '-f', '"Myself J. Eye" <me@nist.gov>',
                   '-t',  'help@nist.gov' ]
@@ -147,19 +155,23 @@ class TestCLI(test.TestCase):
 
         self.assertIn('channels', cfg)
         self.assertIn('targets', cfg)
-        self.assertEqual(len(cfg['channels']), 1)
+        self.assertEqual(len(cfg['channels']), 2)
         self.assertEqual(cfg['channels'][0]["smtp_server"], "email.nist.gov")
         self.assertEqual(cfg['channels'][0]["smtp_port"], 825)
         self.assertEqual(cfg['channels'][0]["name"], "email")
         self.assertEqual(cfg['channels'][0]["type"], "email")
+        self.assertEqual(cfg['channels'][1]["dir"], "/tmp")
+        self.assertEqual(cfg['channels'][1]["name"], "archive")
+        self.assertEqual(cfg['channels'][1]["type"], "archive")
         self.assertEqual(len(cfg['targets']), 1)
-        self.assertEqual(cfg['targets'][0]["name"], "email")
+        self.assertEqual(cfg['targets'][0]["name"], "admin")
         self.assertEqual(cfg['targets'][0]["type"], "email")
         self.assertEqual(cfg['targets'][0]["channel"], "email")
         self.assertEqual(cfg['targets'][0]["from"],
                          ["Myself J. Eye", "me@nist.gov"])
         self.assertEqual(cfg['targets'][0]["to"],
                          [["Goober", "goob@nist.gov"], "help@nist.gov"])
+        self.assertEqual(cfg['archive_targets'], ['admin'])
 
         args = "-s boo".split()
         args += [ "-t", '"Goober" <goob@nist.gov>',
@@ -171,13 +183,22 @@ class TestCLI(test.TestCase):
         self.assertNotIn('channels', cfg)
         self.assertIn('targets', cfg)
         self.assertEqual(len(cfg['targets']), 1)
-        self.assertEqual(cfg['targets'][0]["name"], "email")
+        self.assertEqual(cfg['targets'][0]["name"], "ops")
         self.assertEqual(cfg['targets'][0]["type"], "email")
         self.assertEqual(cfg['targets'][0]["channel"], "email")
         self.assertEqual(cfg['targets'][0]["from"],
                          ["Myself J. Eye", "me@nist.gov"])
         self.assertEqual(cfg['targets'][0]["to"],
                          [["Goober", "goob@nist.gov"], "help@nist.gov"])
+
+        # test failure when -A dir does not exist
+        args = "-s boo -A /goober".split()
+        args += [ "-t", '"Goober" <goob@nist.gov>',
+                  '-f', '"Myself J. Eye" <me@nist.gov>',
+                  '-t',  'help@nist.gov' ]
+        opts = parser.parse_args(args)
+        with self.assertRaises(cli.Failure):
+            cfg = cli.build_ops_config(opts)
 
     def test_create_notice(self):
         parser = cli.define_options("goob")

@@ -149,8 +149,10 @@ class EmailTarget(NotificationTarget):
             
             self._hdr = {}
             self._hdr['To']  = deepcopy( self._cfg['to'] )
-            self._hdr['Cc']  = deepcopy( self._cfg.get('cc', []) )
-            self._hdr['Bcc'] = deepcopy( self._cfg.get('bcc', []) )
+            if 'cc' in self._cfg:
+                self._hdr['Cc'] = deepcopy( self._cfg['cc'] )
+            if 'bcc' in self._cfg:
+                self._hdr['Bcc'] = deepcopy( self._cfg['bcc'] )
         except KeyError as ex:
             raise ConfigurationException("Missing email notification "+
                                          "configuration property: "+str(ex))
@@ -158,6 +160,9 @@ class EmailTarget(NotificationTarget):
         
         self._recips = []
         for key in "To Cc Bcc".split():
+            if key not in self._hdr:
+                continue
+            
             # quick check of format
             if isinstance(self._hdr[key], (str, unicode)):
                 # we're allowing the config value to be just a single
@@ -177,7 +182,7 @@ class EmailTarget(NotificationTarget):
 
             self._recips += [_rawemail(e) for e in self._hdr[key]]
             self._hdr[key] = [_fmtemail(e) for e in self._hdr[key]]
-        del self._hdr['Bcc']
+        self._hdr.pop('Bcc', [])
         
         self._hdr['From'] = _fmtemail(self._from)
         self._from = _rawemail(self._from) 
@@ -257,7 +262,7 @@ class EmailTarget(NotificationTarget):
                                (default: self.fullname)
         """
         if not fullname:
-            fullname = self.fullname
+            fullname = self.fullname or self.name
 
         out = StringIO()
         out.write("Attention: {0}\n".format(fullname))

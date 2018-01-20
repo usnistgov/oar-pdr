@@ -211,6 +211,13 @@ class TargetManager(object):
         """
         return name in self._channels
 
+    @property
+    def channel_names(self):
+        """
+        the names of configured ChannelService instances
+        """
+        return self._channels.keys()
+
     def define_target(self, config, name=None):
         """
         Instantiate and register a NotificationTarget with a name as described 
@@ -240,7 +247,7 @@ class TargetManager(object):
                 "Target class with name='"+name+"' is not defined")
         if channel not in self._channels:
             raise ConfigurationException("Target "+name+": Channel with name='"+
-                                         name+"' is not defined")
+                                         channel+"' is not defined")
 
         target = self._targetcls[tp](self._channels[channel], config)
         if name in self._targets:
@@ -269,6 +276,13 @@ class TargetManager(object):
         targetname.
         """
         return targetname in self._targets
+
+    @property
+    def targets(self):
+        """
+        the names of the configured targets
+        """
+        return self._targets.keys()
 
     def __contains__(self, targetname):
         """
@@ -320,6 +334,20 @@ class NotificationService(object):
                 raise ConfigurationException(
                     "Config Property 'archive_targets' is set, but '" +
                     archiver + "' channel not configured.")
+
+    @property
+    def channels(self):
+        """
+        the names of available channels
+        """
+        return self._targetmgr.channel_names
+              
+    @property
+    def targets(self):
+        """
+        the names of available targets.  
+        """
+        return self._targetmgr.targets
               
     def distribute(self, target, notice):
         """
@@ -345,10 +373,10 @@ class NotificationService(object):
                 failed.append(name)
         if failed:
             if len(failed) == 1:
-                msg = "requested target has not been configured: "+target
+                msg = "requested target has not been configured: "+failed[0]
             else:
                 msg = "requested targets have not been configured: " + \
-                      ", ".join(target)
+                      ", ".join(failed)
             raise ValueError(msg)
         
 

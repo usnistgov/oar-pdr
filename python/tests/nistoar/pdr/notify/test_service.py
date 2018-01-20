@@ -109,12 +109,14 @@ class TestTargetManager(test.TestCase):
         self.assertTrue(not mgr.has_channel("arch"))
         self.assertTrue(mgr.has_channel("archive"))
         self.assertTrue(mgr.get_channel("archive") is ch)
+        self.assertEqual(mgr.channel_names, ['archive'])
         
         ch = mgr.define_channel(cfg, "arch")
         self.assertTrue(isinstance(ch, Archiver))
         self.assertTrue(mgr.has_channel("arch"))
         self.assertTrue(mgr.get_channel("arch") is ch)
         self.assertTrue(mgr.get_channel("archive") is not ch)
+        self.assertEqual(mgr.channel_names, ['arch', 'archive'])
 
         del cfg['name']
         with self.assertRaises(ConfigurationException):
@@ -160,12 +162,14 @@ class TestTargetManager(test.TestCase):
         self.assertIn('gary', mgr)
         self.assertTrue(mgr.get('gary') is tgt)
         self.assertTrue(mgr['gary'] is tgt)
+        self.assertEqual(mgr.targets, ['gary'])
 
         del tcfg['name']
         with self.assertRaises(ConfigurationException):
             mgr.define_target(tcfg)
         mgr.define_target(tcfg, "cooper")
         self.assertIn('cooper', mgr)
+        self.assertEqual(mgr.targets, ['cooper', 'gary'])
 
         del tcfg['channel']
         with self.assertRaises(ConfigurationException):
@@ -182,7 +186,6 @@ class TestTargetManager(test.TestCase):
 service_cfg = {
     "archive_targets": [ "operators" ],
     "channels": [{
-        "name": "nistemail",
         "type": "email",
         "smtp_server": "email.nist.gov",
         "name": "fakeemail",
@@ -234,6 +237,9 @@ class TestNotificationService(test.TestCase):
     def test_ctor(self):
         self.assertEqual(self.svc._targets2archive, ['operators'])
         self.assertTrue(self.svc._archiver)
+
+        self.assertEqual(self.svc.channels, ['fakeemail', 'archive' ])
+        self.assertEqual(self.svc.targets, ['me', 'operators' ])
 
         tm = notify.TargetManager()
         tm.register_channel_class("fakeemail",

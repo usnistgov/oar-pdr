@@ -1,14 +1,17 @@
 """
 provide command-line interface support to the notification framework
 """
-import os, sys, re, yaml
+import os, sys, re, yaml, logging
 from argparse import ArgumentParser
 
-from .service import NotificationService
+from .service import NotificationService, TargetManager
 from .email import Mailer
 from .archive import Archiver
 from .base import ChannelService, Notice
 from ..config import load_from_file
+from ..exceptions import ConfigurationException
+
+log = logging.getLogger("Notify").getChild("cli")
 
 def define_options(progname):
     """
@@ -43,13 +46,16 @@ def define_options(progname):
                              "address or name-annotated one (use quotes to "+
                              "escape shell parsing)")
     parser.add_argument('-T', '--target-name', type=str, metavar='LABEL',
-                        default='ops',
+                        default='ops', dest='etarget',
                         help="set the name of the email target created from "+
                              "the -ftm options")
     parser.add_argument('-O', '--stdout', action='store_true', dest='stdout',
                         help="send the notification message to standard output "+
                              "instead of submitting it to its configured "+
                              "channels (overrides -m).")
+    parser.add_argument('-A', '--archive-dir', type=str, dest='archdir',
+                        metavar='DIR',
+                        help="a directory to archive email notifications to")
 
     parser.add_argument('-o', '--origin', type=str, metavar='LABEL',
                         dest='origin',
@@ -65,6 +71,11 @@ def define_options(progname):
     parser.add_argument('-I', '--stdin', action='store_true',
                         help="read standard input for text to use as the "+
                              "lengthier description of the notification")
+
+    parser.add_argument('targets', metavar='TARGET', type=str, nargs='*',
+                        default=[],
+                        help='name of notification target(s) to send the '+
+                             "notification to (default: -T value or 'ops')")
     return parser
 
 def main(progname, args):
@@ -86,7 +97,10 @@ def main(progname, args):
 
     # build a configuration from command-line arguments (if present); the aim
     # is to build a target called 'ops' that will send an email alert
-    clicfg = build_ops_config(opts)
+    try:
+        clicfg = build_ops_config(opts)
+    except ValueError as ex:
+        raise Failure(exitcode=4, cause=ex)
 
     # combine configs
     if clicfg:
@@ -94,6 +108,10 @@ def main(progname, args):
                              config.get('channels', [])
         config['targets']  = clicfg.get('targets',  []) + \
                              config.get('targets',  [])
+        if 'archive_targets' in clicfg:
+            config['archive_targets'] = \
+                              list(set(clicfg['archive_targets'] + \
+                                       config.get('archive_targets', [])))
     
     # adjust the configuration to send to stdout if requested
     tm = None
@@ -104,7 +122,7 @@ def main(progname, args):
         chcfg = { "name": "stdoutmail",
                   "type": "stdoutmail" }
         tm.define_channel(chcfg)
-        tm.register_channel_class("stdoutmail", StdoutArchive)
+        tm.register_channel_class("stdoutarch", StdoutArchiver)
         chcfg = { "name": "stdoutarch",
                   "type": "stdoutarch" }
         tm.define_channel(chcfg)
@@ -118,11 +136,13 @@ def main(progname, args):
                 echans.add(chan['name'])
             elif chan.get('type') == 'archive':
                 achans.add(chan['name'])
+        echans.add('email')
+        achans.add('archive')
 
         # now update the targets to swap out the channels
         for target in config['targets']:
             if target.get('channel') in echans:
-                target['channel'] = 'stdoutemail'
+                target['channel'] = 'stdoutmail'
             elif target.get('channel') in achans:
                 target['channel'] = 'stdoutarchive'
 
@@ -136,7 +156,12 @@ def main(progname, args):
     notice = create_notice(opts)
 
     # send the notification
-    service.distribute(notice)
+    if not opts.targets:
+        opts.targets = [opts.etarget]
+    try:
+        service.distribute(opts.targets, notice)
+    except ValueError as ex:
+        raise Failure(exitcode=3, cause=ex)
 
 
 class Failure(Exception):
@@ -182,6 +207,9 @@ def build_ops_config(opts):
     if not opts.to:
         raise Failure("One or more recipients required via --to argument " +
                       "for email notifications", 1)
+    if not opts.mailserver and not opts.stdout:
+        log.warn("unable to define 'email' channel without --mailserver "+
+                 "argument")
 
     if opts.mailserver:
         echan = { "name": "email", "type": "email" }
@@ -194,7 +222,7 @@ def build_ops_config(opts):
                 raise Failure("Port number not an integer: "+parts[1])
         out['channels'] = [echan]
 
-    etarget = { "name": "email", "type": "email", "channel": "email" }
+    etarget = { "name": opts.etarget, "type": "email", "channel": "email" }
     parts = _parse_addr(opts.frm)
     if len(parts) == 2:
         etarget['from'] = parts[0]
@@ -212,6 +240,19 @@ def build_ops_config(opts):
             arg = parts[-1]
 
     out['targets'] = [etarget]
+
+    if opts.archdir:
+        if not os.path.isdir(opts.archdir):
+            raise Failure("Requested archive directory does not exist: "+
+                          opts.archdir)
+        chan = { "name": "archive", "type": "archive",
+                 "dir": opts.archdir }
+        if 'channels' in out:
+            out['channels'].append(chan)
+        else:
+            out['channels'] = [chan]
+        out['archive_targets'] = [opts.etarget]
+    
     return out
 
 
