@@ -34,6 +34,7 @@ class TestThreadedPreservationService(test.TestCase):
 
     def setUp(self):
         self.tf = Tempfiles()
+        self.narch = self.tf.mkdir("notify")
         self.troot = self.tf.mkdir("siphandler")
         self.revdir = os.path.join(self.troot, "review")
         os.mkdir(self.revdir)
@@ -70,6 +71,32 @@ class TestThreadedPreservationService(test.TestCase):
                         "status_manager": { "cachedir": self.statusdir },
                     }
                 }
+            },
+            "notifier": {
+                "channels": [
+                    {
+                        "name": "arch",
+                        "type": "archive",
+                        "dir": self.narch
+                    }
+                ],
+                "targets": [
+                    {
+                        "name": "archive",
+                        "type": "archive",
+                        "channel": "arch"
+                    }
+                ],
+                "alerts": [
+                    {
+                        "type": "preserve.failure",
+                        "targets": [ "archive" ]
+                    },
+                    {
+                        "type": "preserve.success",
+                        "targets": [ "archive" ]
+                    }
+                ]
             }
         }
 
@@ -89,6 +116,7 @@ class TestThreadedPreservationService(test.TestCase):
         self.assertTrue(os.path.exists(self.store))
 
         self.assertEqual(self.svc.siptypes, ['midas'])
+        self.assertIsNotNone(self.svc._notifier)
 
     def test_make_handler(self):
         hndlr = self.svc._make_handler(self.midasid, 'midas')
@@ -98,6 +126,7 @@ class TestThreadedPreservationService(test.TestCase):
                         "hndlr is not an SIPHandler")
         self.assertTrue(isinstance(hndlr, MIDASSIPHandler),
                         "hndlr wrong type for 'midas': "+str(type(hndlr)))
+        self.assertIsNotNone(hndlr.notifier)
 
         self.assertEqual(hndlr.cfg['working_dir'],
                          os.path.join(self.workdir,'preserv'))
@@ -168,6 +197,8 @@ class TestThreadedPreservationService(test.TestCase):
                                          self.midasid+".mbag0_2-0.zip.sha256")))
 
     def test_preserve(self):
+        self.assertFalse(os.path.exists(os.path.join(self.narch,"archive.txt")))
+
         try:
             stat = self.svc.preserve(self.midasid, 'midas', 2)
             self.assertEqual(stat['state'], status.SUCCESSFUL)
@@ -175,6 +206,8 @@ class TestThreadedPreservationService(test.TestCase):
             for t in threading.enumerate():
                 if t.name == self.midasid:
                    t.join()
+
+        self.assertTrue(os.path.exists(os.path.join(self.narch,"archive.txt")))
         
     def test_preserve_noupdate(self):
         try:

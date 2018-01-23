@@ -12,6 +12,7 @@ from ...exceptions import (PDRException, StateException,
 from ....id import PDRMinter
 from . import status
 from . import siphandler as hndlr
+from ...notify import NotificationService
 
 from .. import PreservationException, sys as _sys
 log = logging.getLogger(_sys.system_abbrev).getChild(_sys.subsystem_abbrev)
@@ -245,7 +246,7 @@ class PreservationService(object):
 
         if siptype == 'midas':
             return hndlr.MIDASSIPHandler(sipid, pcfg, self.minters[siptype],
-                                         self._notifier)
+                                         notifier=self._notifier)
         else:
             raise PDRException("SIP type not supported: "+siptype, sys=_sys)
 
