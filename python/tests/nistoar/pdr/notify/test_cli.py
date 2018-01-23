@@ -59,7 +59,7 @@ class TestCLI(test.TestCase):
         self.assertIsNone(opts.cfgfile)
         self.assertEqual(opts.to, [])
 
-        args = "-T gurn -IO -l WARN -s Hello! -t goob@nist.gov -f me@nist.gov "+\
+        args = "-T gurn -IO -l WARN -s Hello! -t goob@nist.gov -f me.eye@nist.gov "+\
                " -t help@nist.gov -o pdr -c config.yml -m email.nist.gov"
         opts = parser.parse_args(args.split())
         self.assertEqual(opts.summary, "Hello!")
@@ -69,7 +69,7 @@ class TestCLI(test.TestCase):
         self.assertTrue(opts.stdin)
         self.assertTrue(opts.stdout)
         self.assertEqual(opts.to, ["goob@nist.gov", "help@nist.gov"])
-        self.assertEqual(opts.frm, "me@nist.gov")
+        self.assertEqual(opts.frm, "me.eye@nist.gov")
         self.assertEqual(opts.cfgfile, "config.yml")
         
     def test_Failure(self):

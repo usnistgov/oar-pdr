@@ -258,7 +258,7 @@ def build_ops_config(opts):
 
 def _parse_addr(addrstr):
     annotatedre = re.compile(r'^\s*"([^"]+)"\s*\<([^\>]+)\>\s*')
-    barere = re.compile(r'^\w+@\w+(\.\w+)+$')
+    barere = re.compile(r'^\w[\w\.]*@\w+(\.\w+)+$')
     sepre = re.compile(r'\s*,\s*')
 
     annotated = annotatedre.search(addrstr)
