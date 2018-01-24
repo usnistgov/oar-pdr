@@ -284,7 +284,6 @@ class TestNotificationService(test.TestCase):
         self.assertTrue(not os.path.exists(archfile2))
         self.assertTrue(not os.path.exists(cache))
 
-        pdb.set_trace()
         self.svc.notify("me", "info", "Hey, wake up!")
         self.assertTrue(not os.path.exists(archfile1))
         self.assertTrue(not os.path.exists(archfile2))

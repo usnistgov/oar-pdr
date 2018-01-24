@@ -1,6 +1,8 @@
 import os, sys, pdb, json
 import unittest as test
 
+import nistoar.pdr as pdr
+pdr.platform_profile = "unittest"
 from nistoar.testing import *
 from nistoar.pdr.notify.base import Notice
 import nistoar.pdr.notify.email as notify
@@ -135,7 +137,8 @@ class TestEmailTarget(test.TestCase):
 
         self.assertTrue(body[11].startswith("Issued: "))
         self.assertEqual(body[12], "color: grey")
-        self.assertEqual(body[13], "excitation: False")
+        self.assertEqual(body[13], "platform: unittest")
+        self.assertEqual(body[14], "excitation: False")
         
     def test_make_message(self):
         hdr = self.target._make_message("Done!", "Yahoo!").split('\n')
