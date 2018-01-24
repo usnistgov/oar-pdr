@@ -6,6 +6,19 @@ from abc import ABCMeta, abstractmethod, abstractproperty
 
 from .version import __version__
 
+def _get_platform_profile_name():
+    """
+    determine the name of the platform environment that the PDR system is 
+    running within.  This name is used to retrieve configuration data 
+    appropriate for the platform.  
+
+    Currently, this name is passed in via the OAR_PLATFORM_PROFILE environment
+    variable.
+    """
+    return os.environ.get('OAR_PLATFORM_PROFILE', 'unknown')
+
+platform_profile = _get_platform_profile_name()
+
 class SystemInfoMixin(object):
     """
     a mixin for getting information about the current system that a class is 

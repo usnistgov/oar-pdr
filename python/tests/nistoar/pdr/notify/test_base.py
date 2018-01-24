@@ -1,7 +1,9 @@
 import os, sys, pdb, json
 import unittest as test
 
+import nistoar.pdr as pdr
 import nistoar.pdr.notify.base as notify
+pdr.platform_profile = "unittest"
 
 testdir = os.path.dirname(os.path.abspath(__file__))
 testdatadir = os.path.join(testdir, 'data')
@@ -25,6 +27,7 @@ class TestNotice(test.TestCase):
 
     def test_ctor(self):
         d = notice_data.copy()
+        d['metadata']['platform'] = 'unittest'
         notice = notify.Notice(d['type'], d['title'], d['description'], 
                                d['origin'], d['issued'],
                                color=d['metadata']['color'],
@@ -48,6 +51,8 @@ class TestNotice(test.TestCase):
         self.assertTrue(isinstance(notice.issued, str))
         self.assertGreater(len(notice.issued), 0)
         self.assertEqual(notice.metadata, d['metadata'])
+
+        
 
     def test_now(self):
         d = notice_data.copy()

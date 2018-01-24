@@ -1,4 +1,4 @@
-import os, sys, pdb, json
+import os, sys, pdb, json, logging
 import unittest as test
 from copy import deepcopy
 
@@ -29,6 +29,11 @@ notice_data = {
 
 def setUpModule():
     ensure_tmpdir()
+    rootlog = logging.getLogger()
+    loghdlr = logging.FileHandler(os.path.join(tmpdir(),"test_notifier.log"))
+    loghdlr.setLevel(logging.DEBUG)
+    rootlog.addHandler(loghdlr)
+    rootlog.setLevel(logging.DEBUG)
 
 def tearDownModule():
     rmtmpdir()
@@ -279,6 +284,7 @@ class TestNotificationService(test.TestCase):
         self.assertTrue(not os.path.exists(archfile2))
         self.assertTrue(not os.path.exists(cache))
 
+        pdb.set_trace()
         self.svc.notify("me", "info", "Hey, wake up!")
         self.assertTrue(not os.path.exists(archfile1))
         self.assertTrue(not os.path.exists(archfile2))

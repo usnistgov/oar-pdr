@@ -382,6 +382,8 @@ class NotificationService(object):
 
         failed = []
         for name in target:
+            log.debug("Sending notification type=%s to target %s",
+                      notice.type, name)
             if name in self._targets2archive:
                 self.archive(notice, name)
                 

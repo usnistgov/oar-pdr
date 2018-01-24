@@ -27,6 +27,8 @@ from abc import ABCMeta, abstractmethod, abstractproperty
 from collections import Mapping, OrderedDict
 import json
 
+from ... import pdr as _pdr
+
 class NotificationTarget(object):
     """
     a base class for a destination to send notifications to.
@@ -126,6 +128,8 @@ class Notice(object):
             issued = self.now()
         self._issued = issued
         self._md = mdata.copy()
+        if 'platform' not in self._md:
+            self._md['platform'] = _pdr.platform_profile
 
     @property
     def issued(self):
