@@ -904,7 +904,7 @@ class BagBuilder(PreservationSystem):
 
                 for bf in self._bag.iter_data_files():
                     nerdf = os.path.join("metadata", bf, "nerdm.json")
-                    if os.path.exists(nerdf):
+                    if os.path.exists(os.path.join(self.bagdir, nerdf)):
                         print(nerdf, self.bagname, file=fd)
 
 

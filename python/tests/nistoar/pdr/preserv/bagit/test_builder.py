@@ -841,11 +841,17 @@ class TestBuilder(test.TestCase):
                   ["metadata/pod.json", "metadata/nerdm.json"] + \
                   [os.path.join("metadata", d, "nerdm.json") for d in datafiles]
         
+        # FIX: component order is significant!
+        # with open(gdtag) as fd:
+        #    i = 0;
+        #    for line in fd:
+        #        self.assertEqual(line.strip(), members[i]+' '+self.bag.bagname)
+        #        i += 1
+        #
         with open(gdtag) as fd:
-            i = 0;
-            for line in fd:
-                self.assertEqual(line.strip(), members[i]+' '+self.bag.bagname)
-                i += 1
+            lines = set([line.strip() for line in fd])
+        for member in members:
+            self.assertIn(member+' '+self.bag.bagname, lines)
 
     def test_write_bagit_ver(self):
         self.bag.cfg['bagit_version'] = "0.98"

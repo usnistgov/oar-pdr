@@ -42,7 +42,8 @@ class SIPHandler(object):
     """
     __metaclass__ = ABCMeta
 
-    def __init__(self, sipid, config, minter=None, serializer=None):
+    def __init__(self, sipid, config, minter=None, serializer=None,
+                 notifier=None):
         """
         Configure the handler to process a specific SIP with a given 
         identifier.  The SIP identifier (together with the type of the 
@@ -60,6 +61,8 @@ class SIPHandler(object):
                              serialize bags.  If not provided the
                              DefaultSerializer from the .serialize module
                              will be used.
+        :param notifier NotificationService: the service for pushing alerts
+                             to real people.
         """
         self._sipid = sipid
         self.cfg = deepcopy(config)
@@ -89,6 +92,9 @@ class SIPHandler(object):
         # The initial state will be FORGOTTEN unless another handler has
         # already started.
         self._status = status.SIPStatus(self._sipid, stcfg)
+
+        # set the notification service we can send alerts to
+        self.notifier = notifier
 
     @abstractmethod
     def isready(self, _inprogress=False):
@@ -231,8 +237,10 @@ class MIDASSIPHandler(SIPHandler):
     :prop review_dir str #req:  an existing directory containing MIDAS SIPs
     
     """
+    name = "MIDAS-SIP"
 
-    def __init__(self, sipid, config, minter=None, serializer=None):
+    def __init__(self, sipid, config, minter=None, serializer=None,
+                 notifier=None):
         """
         Configure the handler to process a specific SIP with a given 
         identifier.  The SIP identifier (together with the type of the 
@@ -250,8 +258,11 @@ class MIDASSIPHandler(SIPHandler):
                              serialize bags.  If not provided the
                              DefaultSerializer from the .serialize module
                              will be used.
+        :param notifier NotificationService: the service for pushing alerts
+                             to real people.
         """
-        super(MIDASSIPHandler, self).__init__(sipid, config, minter, serializer)
+        super(MIDASSIPHandler, self).__init__(sipid, config, minter, serializer,
+                                              notifier)
 
         workdir = self.cfg.get('working_dir')
         if workdir and not os.path.exists(workdir):
@@ -419,8 +430,14 @@ class MIDASSIPHandler(SIPHandler):
                 bag = NISTBag(self.bagger.bagdir)
                 self._ingester.stage(bag.nerdm_record(), self.bagger.name)
             except Exception as ex:
-                log.exception("Failure staging NERDm record for " +
-                              self.bagger.name + " for ingest: " + str(ex))
+                msg = "Failure staging NERDm record for " + self.bagger.name + \
+                      " for ingest: " + str(ex)
+                log.exception(msg)
+                # send an alert email to interested subscribers
+                if self.notifier:
+                    self.notifier.alert("preserve.failure", origin=self.name,
+                                  summary="Ingest failed for "+self.bagger.name,
+                                        desc=msg, id=self.bagger.name)
 
         # Now write copies of the checksum files to the review SIP dir.
         # MIDAS will scoop these up and save them in its database.
@@ -434,6 +451,7 @@ class MIDASSIPHandler(SIPHandler):
                           reverse=True)
             log.debug("copying %s checksum files to %s",
                       str(len(cksfiles)), self.bagger.indir)
+            cpfailures = []
             for f in cksfiles:
                 try:
                     sigfile = sigbase+ckspat.search(f).group(1)+'.sha256'
@@ -441,13 +459,26 @@ class MIDASSIPHandler(SIPHandler):
                     log.debug("copying checksum file to %s", sigfile)
                     shutil.copyfile(f, sigfile)
                 except Exception, ex:
-                    log.exception("Failed to copy checksum file to review dir:"+
-                                  "\n %s to\n %s\nReason: %s", f,
-                                  open.path.join(self.bagger.indir), str(ex))
+                    msg = "Failed to copy checksum file to review dir:" + \
+                          "\n %s to\n %s\nReason: %s" % \
+                          (f, sigfile, str(ex))
+                    log.exception(msg)
+                    cpfailures.append(msg)
+
+            if cpfailures and self.notifier:
+                # alert subscribers of these failures with an email
+                self.notifier.alert("preserve.failure", origin=self.name,
+                                    summary="checksum file copy failure",
+                                    desc=msg)
                     
         except Exception, ex:
-            log.exception("%s: Failure while writing checksum file(s) to "+
-                          "review dir: %s", self._sipid, str(ex))
+            msg = "%s: Failure while writing checksum file(s) to " + \
+                  "review dir: %s" % (self._sipid, str(ex))
+            log.exception(msg)
+            if self.notifier:
+                self.notifier.alert("preserve.failure", origin=self.name,
+                                    summary="checksum file write failure",
+                                    desc=msg, id=self._sipid)
                 
         self.set_state(status.SUCCESSFUL)
 
@@ -457,8 +488,20 @@ class MIDASSIPHandler(SIPHandler):
                 self._ingester.submit(self.bagger.name)
                 log.info("Submitted NERDm record to RMM")
             except Exception as ex:
-                log.exception("Failed to ingest record with name=" +
-                              self.bagger.name + "into RMM: " + str(ex))
+                msg = "Failed to ingest record with name=" + \
+                      self.bagger.name + "into RMM: " + str(ex)
+                log.exception(msg)
+
+                if self.notifier:
+                    self.notifier.alert("ingest.failure", origin=self.name,
+                          summary="NERDm ingest failure: " + self.bagger.name,
+                                        desc=msg, id=self.bagger.name)
+
+        # tell a human that things are great!
+        if self.notifier:
+            self.notifier.alert("preserve.success", origin=self.name,
+                           summary="New MIDAS SIP preserved: "+self.bagger.name,
+                                id=self.bagger.name)
 
         # clean up staging area
         for f in savefiles:

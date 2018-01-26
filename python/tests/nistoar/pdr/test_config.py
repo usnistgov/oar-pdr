@@ -3,7 +3,7 @@ import unittest as test
 from nistoar.testing import *
 from nistoar.pdr import def_jq_libdir
 
-import nistoar.pdr.publish.mdserv.config as config
+import nistoar.pdr.config as config
 
 datadir = os.path.join(os.path.dirname(__file__), "data")
 tmpd = None
@@ -20,7 +20,7 @@ class TestConfig(test.TestCase):
 
     def test_load_from_service(self):
         with self.assertRaises(NotImplementedError):
-            config.load_from_service("mdserver/dev")
+            config.load_from_service("goob/dev")
 
     def test_lookup_config_server(self):
         with self.assertRaises(NotImplementedError):

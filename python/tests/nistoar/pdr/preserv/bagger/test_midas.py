@@ -298,7 +298,8 @@ class TestMIDASMetadataBaggerMixed(test.TestCase):
         self.assertIsNone(self.bagr.datafiles)
 
         self.bagr.prepare()
-        self.assertTrue( os.path.exists(self.bagdir + ".lock") )
+        self.assertIsNotNone(self.bagr.datafiles)
+        self.assertFalse(not os.path.exists(self.bagdir))
         
 class TestMIDASMetadataBaggerReview(test.TestCase):
 
