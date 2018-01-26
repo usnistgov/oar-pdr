@@ -1,0 +1,78 @@
+{
+    "@context": [
+        "https://data.nist.gov/od/dm/nerdm-pub-context.jsonld",
+        {
+            "@base": "ark:/88434/mds00hw91v"
+        }
+    ],
+    "_schema": "https://data.nist.gov/od/dm/nerdm-schema/v0.1#",
+    "_extensionSchemas": [
+        "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/PublicDataResource"
+    ],
+    "@type": [
+        "nrdp:PublicDataResource"
+    ],
+    "@id": "ark:/88434/mds00hw91v",
+    "doi": "doi:10.18434/T4SW26",
+    "title": "OptSortSph: Sorting Spherical Dielectric Particles in a Standing-Wave Interference Field",
+    "contactPoint": {
+        "fn": "Zachary Levine",
+        "hasEmail": "mailto:zachary.levine@nist.gov"
+    },
+    "modified": "2016-07-01",
+    "ediid": "3A1EE2F169DD3B8CE0531A570681DB5D1491",
+    "landingPage": "https://www.nist.gov/nvl/project-index-optical-method-sorting-nanoparticles-size",
+    "description": [
+        "Software to predict the optical sorting of particles in a standing-wave laser interference field"
+    ],
+    "keyword": [
+        "optical sorting",
+        "laser interference field",
+        "nanoparticles",
+        "convection of fluid"
+    ],
+    "theme": [
+        "Optical physics"
+    ],
+    "topic": [],
+    "references": [
+        {
+            "@type": "deo:BibliographicReference",
+            "@id": "#ref:10.1364/OE.24.014100",
+            "refType": "IsReferencedBy",
+            "location": "https://dx.doi.org/10.1364/OE.24.014100",
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/v0.1#/definitions/DCiteDocumentReference"
+            ]
+        }
+    ],
+    "accessLevel": "public",
+    "license": "http://www.nist.gov/open/license.cfm",
+    "components": [
+        {
+            "accessURL": "http://doi.org/10.18434/T4SW26",
+            "description": "Software to predict the optical sorting of particles in a standing-wave laser interference field",
+            "format": "Digital Object Identifier, a persistent identifier",
+            "mediaType": "application/zip",
+            "title": "DOI access for OptSortSph: Sorting Spherical Dielectric Particles in a Standing-Wave Interference Field",
+            "@type": [
+                "nrd:Hidden",
+                "dcat:Distribution"
+            ],
+            "@id": "#doi:10.18434/T4SW26"
+        }
+    ],
+    "publisher": {
+        "@type": "org:Organization",
+        "name": "National Institute of Standards and Technology"
+    },
+    "language": [
+        "en"
+    ],
+    "bureauCode": [
+        "006:55"
+    ],
+    "programCode": [
+        "006:045"
+    ]
+}

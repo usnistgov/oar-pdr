@@ -1,0 +1,10 @@
+{
+    "filepath": "trial3",
+    "@id": "cmps/trial3",
+    "@type": [
+        "nrdp:Subcollection"
+    ],
+    "_extensionSchemas": [
+        "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/Subcollection"
+    ]
+}

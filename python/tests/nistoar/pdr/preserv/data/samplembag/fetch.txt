@@ -1,0 +1,3 @@
+http://example.org/trial1.json 69 data/trial1.json
+http://example.org/trial1.json 69 data/trial2.json
+http://example.org/trial3/trial3a.json 5 data/trial3/trial3a.json

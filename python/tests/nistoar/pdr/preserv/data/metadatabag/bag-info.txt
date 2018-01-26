@@ -1,0 +1,8 @@
+Source-Organization: National Institute of Standards and Technology
+Source-Organization: Office of Data and Informatics
+Organization-Address  : 100 Bureau Drive, Mail Stop 1000,
+    Gaithersburg, MD 20899
+External-Description :This is a test bag created for testing bag access.  It
+	contains no data files, but it includes various
+ other metadata files.
+Bag-Count: 1 of 1
