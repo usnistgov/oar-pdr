@@ -1,0 +1,80 @@
+#! /bin/bash
+#
+# makedist:  build the package's distributions
+#
+# This package only provides one distribution: pdr-nerdm
+#
+set -e
+prog=`basename $0`
+execdir=`dirname $0`
+[ "$execdir" = "" -o "$execdir" = "." ] && execdir=$PWD
+PACKAGE_DIR=`(cd $execdir/.. > /dev/null 2>&1; pwd)`
+SOURCE_DIR=$PACKAGE_DIR
+
+# Update this list with the names of the individual component names
+# 
+DISTNAMES=(pdr)
+
+# handle command line options
+while [ "$1" != "" ]; do 
+  case "$1" in
+    --dist-dir=*)
+        DIST_DIR=`echo $1 | sed -e 's/[^=]*=//'`
+        ;;
+    --dist-dir)
+        shift
+        DIST_DIR=$1
+        ;;
+    --source-dir=*|--dir=*)
+        SOURCE_DIR=`echo $1 | sed -e 's/[^=]*=//'`
+        ;;
+    -d|--dir|--source-dir)
+        shift
+        SOURCE_DIR=$1
+        ;;
+    -*)
+        echo "$prog: unsupported option:" $1
+        false
+        ;;
+    pdr)
+        # assuming just one distribution
+        true
+        ;;
+    *)
+        echo "${prog}: ${1}: unrecognized distribution name"
+        false
+        ;;
+  esac
+  shift
+done
+
+true ${DIST_DIR:=$SOURCE_DIR/dist}
+
+# set the current version.  This will inject the version into the code, if 
+# needed.
+#
+set -x
+scripts/setversion.sh
+[ -n "$PACKAGE_NAME" ] || PACKAGE_NAME=`cat VERSION | awk '{print $1}'`
+version=`cat VERSION | awk '{print $2}'`
+vers4fn=`echo $version | sed -re 's#[/\s]+#_#g'`
+
+# build the components
+installdir=$DIST_DIR/pdr
+set -x
+mkdir -p $installdir
+scripts/install.sh --install-dir=$installdir
+
+# ENTER COMMANDS for creating the dependency file(s)
+#
+# A dependency file should be called DISTNAME-${version}_dep.json
+
+
+# Bundle the distribution
+(cd $DIST_DIR && zip -qr ${DISTNAMES[0]}-${vers4fn}.zip pdr)
+
+set +x
+echo Created distribution in dist directory: 
+echo ${DISTNAMES[0]}-${vers4fn}.zip
+
+
