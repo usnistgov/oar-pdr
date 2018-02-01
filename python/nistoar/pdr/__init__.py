@@ -4,7 +4,10 @@ Provide functionality for the Public Data Repository
 import os
 from abc import ABCMeta, abstractmethod, abstractproperty
 
-from .version import __version__
+try:
+    from .version import __version__
+except ImportError:
+    __version__ = "(unset)"
 
 def _get_platform_profile_name():
     """

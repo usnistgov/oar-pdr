@@ -54,6 +54,7 @@ true ${DIST_DIR:=$SOURCE_DIR/dist}
 # needed.
 #
 set -x
+oar-metadata/scripts/setversion.sh
 scripts/setversion.sh
 [ -n "$PACKAGE_NAME" ] || PACKAGE_NAME=`cat VERSION | awk '{print $1}'`
 version=`cat VERSION | awk '{print $2}'`
