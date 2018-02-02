@@ -1,6 +1,6 @@
 FROM oar-metadata/ejsonschema
 
-RUN apt-get update && apt-get install -y python-yaml nginx curl wget less \
+RUN apt-get update && apt-get install -y python-yaml nginx curl wget less sudo \
                                          uwsgi uwsgi-plugin-python zip p7zip-full
 ENV GOSU_VERSION 1.10
 RUN set -ex; \
@@ -29,15 +29,19 @@ RUN grep -qs :${devuid}: /etc/group || \
 RUN grep -Pqs ":${devuid}:\d+:" /etc/passwd || \
     useradd -m --comment "OAR Developer" --shell /bin/bash \
             --gid $devuid --uid $devuid $devuser
+RUN echo $devuser "ALL=(ALL)" NOPASSWD:ALL > /etc/sudoers.d/90-developers
 
 RUN pip install Detach
 
-COPY entrypoint.sh /root/entrypoint.sh
+COPY entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod a+rx /usr/local/bin/entrypoint.sh
 COPY nginx.conf /etc/nginx/nginx.conf
+RUN chmod a+r /etc/nginx/nginx.conf
 
-RUN mkdir -p /dev/oar-pdr
+RUN mkdir -p /dev/oar-pdr /app && chmod a+rwx /app
 WORKDIR /dev/oar-pdr
 
 ENV PYTHONPATH /dev/oar-pdr/python/build/
 
-ENTRYPOINT ["/root/entrypoint.sh"]
+USER $devuser
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
