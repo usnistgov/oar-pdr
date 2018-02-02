@@ -1,0 +1,18 @@
+#! /bin/bash
+#
+# testall:  run all package tests
+#
+set -e
+prog=`basename $0`
+execdir=`dirname $0`
+[ "$execdir" = "" -o "$execdir" = "." ] && execdir=$PWD
+PACKAGE_DIR=`(cd $execdir/.. > /dev/null 2>&1; pwd)`
+
+$PACKAGE_DIR/scripts/setversion.sh
+(cd $PACKAGE_DIR/python && python setup.py build)
+
+export OAR_PYTHONPATH=`ls -d $PACKAGE_DIR/python/build/lib.* | head -1`
+export OAR_JQ_LIB=$PACKAGE_DIR/oar-metadata/jq
+export OAR_MERGE_ETC=$PACKAGE_DIR/oar-metadata/etc/merge
+exec $PACKAGE_DIR/python/runtests.py
+
