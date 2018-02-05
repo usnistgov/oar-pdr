@@ -69,6 +69,13 @@ scripts/install.sh --install-dir=$installdir
 # ENTER COMMANDS for creating the dependency file(s)
 #
 # A dependency file should be called DISTNAME-${version}_dep.json
+if [ -n "$PYTHONPATH" ]; then
+    export PYTHONPATH=$installdir/lib:$PYTHONPATH
+else
+    export PYTHONPATH=$installdir/lib
+fi
+$execdir/record_deps.py ${DISTNAMES[0]} $version \
+                        > $DIST_DIR/${DISTNAMES[0]}-${vers4fn}_dep.json
 
 
 # Bundle the distribution
