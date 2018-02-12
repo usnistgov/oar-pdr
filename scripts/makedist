@@ -49,6 +49,8 @@ while [ "$1" != "" ]; do
 done
 
 true ${DIST_DIR:=$SOURCE_DIR/dist}
+BUILD_DIR=$SOURCE_DIR/dist
+mkdir -p $BUILD_DIR $DIST_DIR
 
 # set the current version.  This will inject the version into the code, if 
 # needed.
@@ -61,7 +63,7 @@ version=`cat VERSION | awk '{print $2}'`
 vers4fn=`echo $version | sed -re 's#[/\s]+#_#g'`
 
 # build the components
-installdir=$DIST_DIR/pdr
+installdir=$BUILD_DIR/pdr
 set -x
 mkdir -p $installdir
 scripts/install.sh --install-dir=$installdir
@@ -69,17 +71,18 @@ scripts/install.sh --install-dir=$installdir
 # ENTER COMMANDS for creating the dependency file(s)
 #
 # A dependency file should be called DISTNAME-${version}_dep.json
+mkdir -p $DIST_DIR
 if [ -n "$PYTHONPATH" ]; then
-    export PYTHONPATH=$installdir/lib:$PYTHONPATH
+    export PYTHONPATH=$installdir/lib/python:$PYTHONPATH
 else
-    export PYTHONPATH=$installdir/lib
+    export PYTHONPATH=$installdir/lib/python
 fi
 $execdir/record_deps.py ${DISTNAMES[0]} $version \
                         > $DIST_DIR/${DISTNAMES[0]}-${vers4fn}_dep.json
 
 
 # Bundle the distribution
-(cd $DIST_DIR && zip -qr ${DISTNAMES[0]}-${vers4fn}.zip pdr)
+(cd $BUILD_DIR && zip -qr $DIST_DIR/${DISTNAMES[0]}-${vers4fn}.zip pdr)
 
 set +x
 echo Created distribution in dist directory: 

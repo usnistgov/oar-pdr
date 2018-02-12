@@ -38,6 +38,9 @@ RUN chmod a+rx /usr/local/bin/entrypoint.sh
 COPY nginx.conf /etc/nginx/nginx.conf
 RUN chmod a+r /etc/nginx/nginx.conf
 
+VOLUME /dev/oar-pdr
+VOLUME /app/dist
+
 RUN mkdir -p /dev/oar-pdr /app && chmod a+rwx /app
 WORKDIR /dev/oar-pdr
 

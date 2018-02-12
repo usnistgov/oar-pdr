@@ -6,4 +6,4 @@ execdir=`dirname $0`
 export CODEDIR=`(cd $execdir/.. > /dev/null 2>&1; pwd)`
 export DOCKERDIR=$execdir
 
-exec $DOCKERDIR/run.sh makedist
+exec $DOCKERDIR/run.sh makedist "$@"

@@ -31,16 +31,19 @@ function exitopwith {
     exit $2
 }
 
+cmd=$1
 case "$1" in
     makedist)
-        scripts/makedist
+        shift
+        scripts/makedist "$@"
         ;;
     testall)
         install || {
             echo "testall: Failed to install oar-pdr"
             exitopwith testall 2
         }
-        scripts/testall && stat=$?
+        shift
+        scripts/testall "$@" && stat=$?
         echo Launching/testing the metadata server via nginx...
         launch_test_mdserv
         
@@ -116,7 +119,7 @@ case "$1" in
         ;;
 esac
 
-[ $? -ne 0 ] && exitopwith $1 1
+[ $? -ne 0 ] && exitopwith $cmd 1
 true
 
     

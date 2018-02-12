@@ -7,4 +7,4 @@ export CODEDIR=`(cd $execdir/.. > /dev/null 2>&1; pwd)`
 export DOCKERDIR=$CODEDIR/docker
 
 $DOCKERDIR/dockbuild.sh
-exec $DOCKERDIR/makedist
+exec $DOCKERDIR/makedist "$@"
