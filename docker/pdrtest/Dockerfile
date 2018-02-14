@@ -1,7 +1,8 @@
 FROM oar-metadata/ejsonschema
 
 RUN apt-get update && apt-get install -y python-yaml nginx curl wget less sudo \
-                                         uwsgi uwsgi-plugin-python zip p7zip-full
+                                         uwsgi uwsgi-plugin-python zip \
+                                         p7zip-full git
 ENV GOSU_VERSION 1.10
 RUN set -ex; \
     arch="$(dpkg --print-architecture | awk -F- '{ print $NF }')"; \
