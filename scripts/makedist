@@ -32,6 +32,15 @@ while [ "$1" != "" ]; do
         shift
         SOURCE_DIR=$1
         ;;
+    --cache-dir=*)
+        CACHE_DIR=`echo $1 | sed -e 's/[^=]*=//'`
+        # NOTE: CACHE_DIR is ignored
+        ;;
+    -c|--cache-dir)
+        shift
+        CACHE_DIR=$1
+        # NOTE: CACHE_DIR is ignored
+        ;;
     -*)
         echo "$prog: unsupported option:" $1
         false
