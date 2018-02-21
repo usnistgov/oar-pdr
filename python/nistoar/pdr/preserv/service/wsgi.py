@@ -9,7 +9,8 @@ a framework-based implementation if any further capabilities are needed.
 import os, sys, logging, json, cgi, re
 from wsgiref.headers import Headers
 
-from .service import ThreadedPreservationService, RerequestException
+from .service import (ThreadedPreservationService, RerequestException,
+                      ConfigurationException)
 from . import status
 from .. import PreservationSystem
 

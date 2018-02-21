@@ -12,7 +12,10 @@ function install {
 function launch_test_mdserv {
     service nginx stop
     echo starting uwsgi...
-    uwsgi --daemonize $OAR_HOME/var/logs/uwsgi.log --plugin python --uwsgi-socket :9090 --wsgi-file scripts/ppmdserver-uwsgi-test.py --pidfile $OAR_HOME/var/mdserv.pid
+    workdir=$PWD/_ppmdserver-test-$$
+    [ ! -e "$workdir" ] || rm -r $workdir
+    mkdir -p $workdir
+    uwsgi --daemonize $workdir/uwsgi.log --plugin python --uwsgi-socket :9090 --wsgi-file scripts/ppmdserver-uwsgi.py --pidfile $OAR_HOME/var/mdserv.pid --set-ph oar_testmode_workdir=$workdir
     echo starting nginx...
     service nginx start
 }
@@ -21,7 +24,10 @@ function launch_test_preserver {
     service nginx stop
     [ -e "$OAR_HOME/var/mdserv.pid" ] && kill `cat $OAR_HOME/var/mdserv.pid` && sleep 1
     echo starting uwsgi...
-    uwsgi --daemonize $OAR_HOME/var/logs/uwsgi.log --plugin python --uwsgi-socket :9090 --wsgi-file scripts/preserver-uwsgi-test.py --pidfile $OAR_HOME/var/preserver.pid
+    workdir=$PWD/_preserver-test-$$
+    [ ! -e "$workdir" ] || rm -r $workdir
+    mkdir -p $workdir
+    uwsgi --daemonize $workdir/uwsgi.log --plugin python --uwsgi-socket :9090 --wsgi-file scripts/preserver-uwsgi-test.py --pidfile $OAR_HOME/var/preserver.pid --set-ph oar_testmode_workdir=$workdir
     echo starting nginx...
     service nginx start
 }
@@ -57,6 +63,11 @@ case "$1" in
         launch_test_preserver
 
         set -x
+        curl http://localhost/preserve/ \
+             > stat_out.txt; \
+             python -c 'import sys, json; fd = open("stat_out.txt"); data = json.load(fd); sys.exit(0 if data==["midas"] else 11)' || \
+             stat=$?
+        
         curl http://localhost/preserve/midas/3A1EE2F169DD3B8CE0531A570681DB5D1491 \
              > stat_out.txt; \
              python -c 'import sys, json; fd = open("stat_out.txt"); data = json.load(fd); sys.exit(0 if data["state"]=="ready" else 11)' || \

@@ -102,9 +102,9 @@ def configure_log(logfile=None, level=None, format=None, config=None,
         logfile = os.path.join(logdir, logfile)
     
     if level is None:
-        level = logging.DEBUG
+        level = config.get('loglevel', logging.DEBUG)
     if not format:
-        format = LOG_FORMAT
+        format = config.get('logformat', LOG_FORMAT)
     frmtr = logging.Formatter(format)
 
     global _log_handler
