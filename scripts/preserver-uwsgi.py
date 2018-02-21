@@ -1,5 +1,46 @@
 """
 The uWSGI script for launching the preservation service
+
+This script makes the preservation service deployable as a web service 
+via uwsgi.  For example, one can launch the service with the following 
+command:
+
+  uwsgi --plugin python --http-socket :9090 --wsgi-file preserver-uwsgi.py \
+        --set-ph oar_config_loc=preserver_conf.yml
+
+This script supports a few uwsgi config variables via the --set-ph option; 
+the main one, oar_config_loc, identifies the file path or URL to the 
+preservation configuration file.  This variable must be provided via the 
+uwsgi command-line (as shown above) unless one is launching in test mode.
+
+In test mode, key preservation service configuration parameters will be 
+over-ridden to set up and use a test environment, including test data.  This 
+mode is turned on by specifying any of the following uwsgi config variables:
+
+   :param oar_testmode bool:  If set, test mode is turned on with a default
+                              service configuration.  Use of other 
+                              oar_testmode_* variables will override the 
+                              defaults.  
+   :param oar_testmode_workdir str:  A working directory for all output data
+                              and logs as well as some input data.  The 
+                              default is ./_preserver-test.$$, where $$ is 
+                              uwsgi's proces ID.
+   :param oar_testmode_midas_parent str:  The path to a directory that contains
+                              stand-ins for the MIDAS data directories.  By 
+                              default is set to a directory within the test
+                              directory that contains test data.  
+   :param oar_testmode_clean_workdir bool:  If true and the working directory
+                              exists, clean it out to restore it to a "virgin"
+                              state.
+   :param oar_testmode_storedir str:  the path to the directory where AIP 
+                              files written.
+
+This script also pays attention to the following environment variables:
+
+   OAR_HOME          The directory where the OAR PDR system is installed; this 
+                        is used to find the OAR PDR python package, nistoar.
+   OAR_PYTHONPATH    The directory containing the PDR python module, nistoar.
+                        This overrides what is implied by OAR_HOME.
 """
 import os, sys, shutil, copy, logging
 import uwsgi
@@ -101,7 +142,7 @@ def clean_working_dir(workdir):
 #####
 
 # determine where the configuration is coming from
-confsrc = uwsgi.opt.get("oar_config_file")
+confsrc = uwsgi.opt.get("oar_config_loc")
 if confsrc:
     cfg = config.resolve_configuration(confsrc)
 elif is_in_test_mode():

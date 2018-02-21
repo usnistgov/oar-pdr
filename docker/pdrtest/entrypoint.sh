@@ -27,7 +27,7 @@ function launch_test_preserver {
     workdir=$PWD/_preserver-test-$$
     [ ! -e "$workdir" ] || rm -r $workdir
     mkdir -p $workdir
-    uwsgi --daemonize $workdir/uwsgi.log --plugin python --uwsgi-socket :9090 --wsgi-file scripts/preserver-uwsgi-test.py --pidfile $OAR_HOME/var/preserver.pid --set-ph oar_testmode_workdir=$workdir
+    uwsgi --daemonize $workdir/uwsgi.log --plugin python --uwsgi-socket :9090 --wsgi-file scripts/preserver-uwsgi.py --pidfile $OAR_HOME/var/preserver.pid --set-ph oar_testmode_workdir=$workdir
     echo starting nginx...
     service nginx start
 }
