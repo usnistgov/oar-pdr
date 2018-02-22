@@ -19,6 +19,8 @@ These include:
                               If empty, the default configuration is returned.
    :param oar_config_appname str:  the application/component name for the 
                               configuration. 
+   :param oar_config_timeout int:  the number of seconds to wait for the 
+                              configuration service to come up.
    :param oar_config_file str:  a local file path or remote URL that holds the 
                               configuration; if given, it will override the 
                               use of the configuration service.  (This should 
@@ -51,6 +53,12 @@ This script also pays attention to the following environment variables:
    OAR_CONFIG_SERVICE  The base URL for the configuration service; this is 
                           overridden by the oar_config_service uwsgi variable. 
    OAR_CONFIG_ENV      The application/component name for the configuration; 
+                          this is only used if OAR_CONFIG_SERVICE is used.
+   OAR_CONFIG_TIMEOUT  The max number of seconds to wait for the configuration 
+                          service to come up (default: 10);
+                          this is only used if OAR_CONFIG_SERVICE is used.
+   OAR_CONFIG_APP      The name of the component/application to retrieve 
+                          configuration data for (default: pdr-publish);
                           this is only used if OAR_CONFIG_SERVICE is used.
 """
 import os, sys, logging, copy
@@ -130,9 +138,13 @@ if confsrc:
 elif 'oar_config_service' in uwsgi.opt:
     srvc = config.ConfigService(uwsgi.opt.get('oar_config_service'),
                                 uwsgi.opt.get('oar_config_env'))
-    cfg = srvc.get('oar-config_appname', 'pdr-publish')
+    srvc.wait_until_up(int(uwsgi.opt.get('oar_config_timeout', 10)),
+                       True, sys.stderr)
+    cfg = srvc.get(uwsgi.opt.get('oar-config_appname', 'pdr-publish'))
 elif config.service:
-    cfg = config.service.get('oar-config_appname', 'pdr-publish')
+    config.service.wait_until_up(int(os.environ.get('OAR_CONFIG_TIMEOUT', 10)),
+                                 True, sys.stderr)
+    cfg = config.service.get(os.environ.get('OAR_CONFIG_APP', 'pdr-publish'))
 elif is_in_test_mode():
     cfg = {}
 else:

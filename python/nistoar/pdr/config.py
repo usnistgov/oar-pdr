@@ -1,7 +1,8 @@
 """
 Utilities for obtaining a configuration for the metadata service
 """
-import os, sys, logging, json, yaml, collections
+from __future__ import print_function
+import os, sys, logging, json, yaml, collections, time
 from urlparse import urlparse
 
 from .exceptions import ConfigurationException
@@ -179,6 +180,50 @@ class ConfigService(object):
         except requests.exceptions.RequestException:
             return False
 
+    def wait_until_up(self, timeout=10, rais=True):
+        """
+        poll the service until responds.  
+        :param timeout int:  the maximum number of seconds to wait before 
+                             timing out.
+        :param rais bool:    if True, raise a ConfifigurationException if
+                             the timeout period is reached without a response 
+                             from the service.
+        :param verboseout file:  a file stream to send message about waiting;
+                             if None, no messages are printed.
+        :return bool:  True if the service is detected as up; False, if the 
+                       timeout period is exceeded (unless rais=True).
+        :raises ConfifigurationException: if rais=True and the timeout period
+                       is exceeded without getting a response from the service.
+        """
+        start = time.time()
+        if self.is_up():
+            if verboseout:
+                print("PDR: configuration service is ready", file=verboseout)
+            return True
+        if verboseout:
+            print("PDR: Waiting for configuration service...", file=verboseout)
+
+        updated = start
+        while time.time()-start < timeout:
+            if verboseout and time.time()-updated > 10:
+                print("PDR: ...waiting...")
+                updated = time.time()
+                
+            time.sleep(2)
+            
+            if self.is_up():
+                if verboseout:
+                    print("PDR: ...ready", file=verboseout)
+                return True
+
+        if verboseout:
+            print("PDR: ...timed out!")        
+        if rais:
+            raise ConfigurationException("Waiting for configuration service "+
+                                         "timed out")
+        return False
+        
+
     def get(self, component, envprof=None):
         """
         retrieve the configuration for the service or component with the 
@@ -215,6 +260,11 @@ class ConfigService(object):
 
     @classmethod
     def extract(cls, rawdata, comp="unknown"):
+        """
+        extract component configuration from the config service response.
+        This includes combining the environment/profile-specific data
+        with the defaults.  
+        """
         try:
             name = rawdata.get('name') or comp 
             vers = rawdata['propertySources']

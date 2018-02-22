@@ -164,9 +164,12 @@ if confsrc:
 elif 'oar_config_service' in uwsgi.opt:
     srvc = config.ConfigService(uwsgi.opt.get('oar_config_service'),
                                 uwsgi.opt.get('oar_config_env'))
-    cfg = srvc.get('oar-config_appname', 'pdr-publish')
+    srvc.wait_until_up(uwsgi.opt.get('oar_config_timeout', 10), True, sys.stderr)
+    cfg = srvc.get(uwsgi.opt.get('oar-config_appname', 'pdr-publish'))
 elif config.service:
-    cfg = config.service.get('oar-config_appname', 'pdr-publish')
+    config.service.wait_until_up(int(os.environ.get('OAR_CONFIG_TIMEOUT', 10)),
+                                 True, sys.stderr)
+    cfg = config.service.get(os.environ.get('OAR_CONFIG_APP', 'pdr-publish'))
 elif is_in_test_mode():
     cfg = {}
 else:
