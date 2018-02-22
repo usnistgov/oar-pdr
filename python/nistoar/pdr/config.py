@@ -279,6 +279,9 @@ class ConfigService(object):
             raise ConfigurationException("Bad data schema for label="+name+
                                       ": wrong type for propertySources: "+
                                       str(type(vers)))
+        if len(vers) == 0:
+            raise ConfigurationException(name+": config data for app name not "+
+                                         "found")
 
         out = vers.pop(0)
         if not isinstance(out, collections.Mapping):
