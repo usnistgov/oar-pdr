@@ -245,7 +245,7 @@ class ConfigService(object):
         try:
             resp = requests.get(self.url_for(component, envprof))
             resp.raise_for_status()
-            return self._extract(resp.json(), comonent, flat)
+            return self._extract(resp.json(), component, flat)
         except ValueError as ex:
             raise ConfigurationException("Config service response: "+str(ex))
         except requests.exceptions.RequestException as ex:
