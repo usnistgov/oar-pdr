@@ -241,7 +241,7 @@ class ConfigService(object):
         :return dict:  the parsed configuration data 
         """
         try:
-            raw = request.get(self.url_for(component, envprof))
+            raw = requests.get(self.url_for(component, envprof))
             return self._extract(raw)
         except requests.exceptions.RequestException as ex:
             raise ConfigurationException("Failed to access configuration for "+
