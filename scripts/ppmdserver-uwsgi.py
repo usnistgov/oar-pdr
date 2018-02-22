@@ -6,12 +6,24 @@ via uwsgi.  For example, one can launch the service with the following
 command:
 
   uwsgi --plugin python --http-socket :9090 --wsgi-file ppmdserver-uwsgi.py \
-        --set-ph oar_config_loc=preserver_conf.yml
+        --set-ph oar_config_file=preserver_conf.yml
 
 This script supports a few uwsgi config variables via the --set-ph option; 
-the main one, oar_config_loc, identifies the file path or URL to the 
-preservation configuration file.  This variable must be provided via the 
-uwsgi command-line (as shown above) unless one is launching in test mode.
+these are the primary way to inject service configuration into the service.  
+These include:
+
+   :param oar_config_service str:  a base URL for the OAR configuration 
+                              service.
+   :param oar_config_env str:  the environment/profile label to use to 
+                              select the version appropriate for the platform.
+                              If empty, the default configuration is returned.
+   :param oar_config_appname str:  the application/component name for the 
+                              configuration. 
+   :param oar_config_file str:  a local file path or remote URL that holds the 
+                              configuration; if given, it will override the 
+                              use of the configuration service.  (This should 
+                              not be a configuraiton service URL; use 
+                              oar_config_service instead.)
 
 In test mode, key preservation service configuration parameters will be 
 over-ridden to set up and use a test environment, including test data.  This 
@@ -32,10 +44,14 @@ mode is turned on by specifying any of the following uwsgi config variables:
 
 This script also pays attention to the following environment variables:
 
-   OAR_HOME          The directory where the OAR PDR system is installed; this 
-                        is used to find the OAR PDR python package, nistoar.
-   OAR_PYTHONPATH    The directory containing the PDR python module, nistoar.
-                        This overrides what is implied by OAR_HOME.
+   OAR_HOME            The directory where the OAR PDR system is installed; this 
+                          is used to find the OAR PDR python package, nistoar.
+   OAR_PYTHONPATH      The directory containing the PDR python module, nistoar.
+                          This overrides what is implied by OAR_HOME.
+   OAR_CONFIG_SERVICE  The base URL for the configuration service; this is 
+                          overridden by the oar_config_service uwsgi variable. 
+   OAR_CONFIG_ENV      The application/component name for the configuration; 
+                          this is only used if OAR_CONFIG_SERVICE is used.
 """
 import os, sys, logging, copy
 from copy import deepcopy
@@ -108,19 +124,15 @@ def clean_working_dir(workdir):
 #####
             
 # determine where the configuration is coming from
-confsrc = uwsgi.opt.get("oar_config_loc")
+confsrc = uwsgi.opt.get("oar_config_file")
 if confsrc:
     cfg = config.resolve_configuration(confsrc)
 elif 'oar_config_service' in uwsgi.opt:
-    srvc = uwsgi.opt.get('oar_config_service')
-    if srvc:
-        confsrc = srvc + '/' + uwsgi.opt.get('oar_config_appname', 'pdr-publish')
-        if 'oar_config_env' in uwsgi.opt:
-            confsrc += '/' + uwsgi.opt.get('oar_config_appname', '')
-    
-if confsrc:
-    cfg = config.resolve_configuration(confsrc)
-    cfg = extract_mdserver_config(cfg)
+    srvc = config.ConfigService(uwsgi.opt.get('oar_config_service'),
+                                uwsgi.opt.get('oar_config_env'))
+    cfg = srvc.get('oar-config_appname', 'pdr-publish')
+elif config.service:
+    cfg = config.service.get('oar-config_appname', 'pdr-publish')
 elif is_in_test_mode():
     cfg = {}
 else:

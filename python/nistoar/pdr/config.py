@@ -1,7 +1,8 @@
 """
 Utilities for obtaining a configuration for the metadata service
 """
-import os, sys, logging, json, yaml
+import os, sys, logging, json, yaml, collections
+from urlparse import urlparse
 
 from .exceptions import ConfigurationException
 
@@ -122,7 +123,146 @@ def configure_log(logfile=None, level=None, format=None, config=None,
         rootlogger.addHandler(handler)
         rootlogger.error("FYI: Writing log messages to %s",logfile)
         
+class ConfigService(object):
+    """
+    an interface to the configuration service
+    """
 
+    def __init__(self, urlbase, envprof=None):
+        """
+        initialize the service.
+        :param urlbase str:  the base URL for the service which must include 
+                             the scheme (either http: or https:), the server,
+                             and the base path.  It can also include a port
+                             number.
+        :param envprof str:  the label indicating the default environment 
+                             profile (usually, one of 'local', 'dev', 'test',
+                             or 'prod').
+        """
+        self._base = urlbase
+        self._prof = envprof
+        if not self._base.endswith('/'):
+            self._base += '/'
+
+        u = urlparse(self._base)
+        msg = "Insufficient config service URL: "+self._base+" ({0})"
+        if not u.scheme:
+            raise ConfigurationException(msg.format("missing http/https"))
+        if not u.netloc:
+            raise ConfigurationException(msg.format("missing server name"))
+
+    def url_for(self, component, envprof=None):
+        """
+        return the proper URL for access the configuration for a given 
+        component.  
+        :param component   the name for the service or component that 
+                              configuration data is desired for
+        :param envprof     the desired version of the configuration given 
+                              its environment/profile name.  If not provided,
+                              the profile set at construction time will 
+                              be assumed.
+        """
+        if not envprof:
+            envprof = self._prof
+        if envprof:
+            component = '/'.join([component, envprof])
+        
+        return self._base + component
+
+    def is_up(self):
+        """
+        return true if the service appears to be up.  
+        """
+        try:
+            resp = requests.get(self.url_for("ready"))
+            return resp.status_code and resp.status_code < 500
+        except requests.exceptions.RequestException:
+            return False
+
+    def get(self, component, envprof=None):
+        """
+        retrieve the configuration for the service or component with the 
+        given name.  Internally, this will transform the raw output from 
+        the service into a configuration ready to give to the PDR component
+        (including combining the profile specializations with default values).
+
+        :param component   the name for the service or component that 
+                              configuration data is desired for
+        :param envprof     the desired version of the configuration given 
+                              its environment/profile name.  If not provided,
+                              the profile set at construction time will 
+                              be assumed.
+        :return dict:  the parsed configuration data 
+        """
+        try:
+            raw = request.get(self.url_for(component, envprof))
+            return self._extract(raw)
+        except requests.exceptions.RequestException as ex:
+            raise ConfigurationException("Failed to access configuration for "+
+                                         component + ": " + str(ex))
+
+    def _extract(self, rawdata, comp="unknown"):
+        return self.__class__.extract(rawdata, comp)
+
+    @classmethod
+    def _deep_update(cls, defdict, upddict):
+        for k, v in upddict.iteritems():
+            if isinstance(v, collections.Mapping):
+                defdict[k] = cls._deep_update(defdict.get(k, v.__class__()), v)
+            else:
+                defdict[k] = v
+        return defdict
+
+    @classmethod
+    def extract(cls, rawdata, comp="unknown"):
+        try:
+            name = rawdata.get('name') or comp 
+            vers = rawdata['propertySources']
+        except KeyError, ex:
+            raise ConfigurationException("Missing config param for label="+name+
+                                         ": "+str(ex))
+        if not isinstance(vers, list):
+            raise ConfigurationException("Bad data schema for label="+name+
+                                      ": wrong type for propertySources: "+
+                                      str(type(vers)))
+
+        out = vers.pop(0)
+        if not isinstance(out, collections.Mapping):
+            raise ConfigurationException("Bad data schema for label="+name+
+                                      ": wrong type for propertySources "+
+                                      "item: "+ str(type(vers)))
+        for ver in vers:
+            if not isinstance(ver, collections.Mapping):
+                raise ConfigurationException("Bad data schema for label="+
+                                 name+": wrong type for propertySources "+
+                                      "item: "+ str(type(vers)))
+            cls._deep_update(out, ver)
+
+        return out
+
+    @classmethod
+    def from_env(cls):
+        """
+        return an instance of ConfigService based on environment variables
+        or None if the proper environment is not set up.  To return an instance,
+        the OAR_CONFIG_SERVICE environment variable needs to contain the 
+        service's base URL.  If OAR_CONFIG_ENV is set, it will be taken as 
+        the environment/platform label.  
+
+        :raise ConfigurationException: if base URL in OAR_CONFIGSERVICE is 
+                                       malformed.
+        """
+        if 'OAR_CONFIG_SERVICE' in os.environ:
+            prof = os.environ.get('OAR_CONFIG_ENV')
+            return ConfigService(os.environ['OAR_CONFIG_SERVICE'], prof)
+        return None
+
+service = None
+try:
+    service = ConfigService.from_env()
+except:
+    pass
+        
 def load_from_service(handle):
     """
     retrieve the metadata server's configuration from the configuration server.
