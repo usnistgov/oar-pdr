@@ -213,13 +213,9 @@ class TestConfigService(test.TestCase):
     "label": None
 }
         out = {
-            "source": {
-                "RMMAPI": "https://goob/rmm/",
-                "SDPAPI": "https://localhost/sdp/", 
-                "LANDING": "https://localhost/rmm/", 
-            }, 
-            "name": "classpath:config/oar-uri/oar-uri.yml",
-            "hail": "fire"
+            "RMMAPI": "https://goob/rmm/",
+            "SDPAPI": "https://localhost/sdp/", 
+            "LANDING": "https://localhost/rmm/", 
         }
 
         self.assertEqual(config.ConfigService.extract(data), out)

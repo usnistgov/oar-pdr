@@ -283,17 +283,17 @@ class ConfigService(object):
             raise ConfigurationException(name+": config data for app name not "+
                                          "found")
 
-        out = vers.pop(0)
-        if not isinstance(out, collections.Mapping):
+        try:
+            out = vers.pop(0)['source']
+            for ver in vers:
+                cls._deep_update(out, ver['source'])
+        except TypeError as ex:
             raise ConfigurationException("Bad data schema for label="+name+
-                                      ": wrong type for propertySources "+
-                                      "item: "+ str(type(vers)))
-        for ver in vers:
-            if not isinstance(ver, collections.Mapping):
-                raise ConfigurationException("Bad data schema for label="+
-                                 name+": wrong type for propertySources "+
-                                      "item: "+ str(type(vers)))
-            cls._deep_update(out, ver)
+                                         ": wrong type for propertySources "+
+                                         "item: "+ str(type(vers)))
+        except KeyError as ex:
+            raise ConfigurationException("Bad data schema for label="+name+
+                                         ": missing property: "+str(ex))
 
         return out
 
