@@ -3,6 +3,7 @@ Utilities for obtaining a configuration for the metadata service
 """
 from __future__ import print_function
 import os, sys, logging, json, yaml, collections, time
+import requests
 from urlparse import urlparse
 
 from .exceptions import ConfigurationException
