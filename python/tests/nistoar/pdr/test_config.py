@@ -1,4 +1,4 @@
-import os, sys, pdb, shutil, logging, json
+import os, sys, pdb, shutil, logging, json, re
 import unittest as test
 from nistoar.testing import *
 from nistoar.pdr import def_jq_libdir
@@ -150,7 +150,64 @@ class TestConfigService(test.TestCase):
             if 'OAR_CONFIG_ENV' in os.environ:
                 del os.environ['OAR_CONFIG_ENV']
 
-    def test_extract(self):
+    def test_cvtarrays(self):
+        d = {
+            "a": {
+                "[1]": "ia",
+                "[5]": {
+                    "ib": {
+                        "[0]": "ibb",
+                        "[3]": "ibe"
+                    },
+                    "[0]": "0a",
+                },
+                "[0]": "ic",
+                "[3]": "id"
+            }
+        }
+        out = {
+            "a": [ "ic", "ia", "id", {
+                "ib": [ "ibb", "ibe" ],
+                "[0]": "0a"
+            }]
+        }
+        self.assertEqual(config.ConfigService._cvtarrays(d), out)
+
+    def test_inflate(self):
+        d = {
+            "working_dir": "/data/pdr",
+            "store_dir":   "/data/store",
+            'notifier.alerts[1].type': "preserve.success",
+            'notifier.alerts[1].targets[0]': "dev",
+            'notifier.alerts[0].type': "preserve.failure",
+            'notifier.alerts[0].targets[0]': "oarop",
+            'sip_type.midas.common.review_dir': "/data/review",
+            'sip_type.midas.common.upload_dir': "/data/upload",
+        }
+        out = {
+            "working_dir": "/data/pdr",
+            "store_dir":   "/data/store",
+            "notifier": {
+                "alerts": [{
+                    "type": "preserve.failure",
+                    "targets": [ "oarop" ]
+                }, {
+                    "type": "preserve.success",
+                    "targets": [ "dev" ]
+                }]
+            },
+            "sip_type": {
+                "midas": {
+                    "common": {
+                        "review_dir": "/data/review",
+                        "upload_dir": "/data/upload"
+                    }
+                }
+            }
+        }
+        self.assertEqual(config.ConfigService._inflate(d), out)
+
+    def test_deep_update(self):
         d = {
             "a": {
                 "a.b": 1,
@@ -185,7 +242,7 @@ class TestConfigService(test.TestCase):
         self.assertEqual(n, out)
         self.assertIs(n, d)
 
-    def test_extract(self):
+    def test_extract1(self):
         data = \
 {
     "propertySources": [
@@ -219,6 +276,112 @@ class TestConfigService(test.TestCase):
         }
 
         self.assertEqual(config.ConfigService.extract(data), out)
+
+    def test_extract2(self):
+        data = \
+{
+    "propertySources": [
+        {
+            "source": {
+                "working_dir": "/data/pdr",
+                "store_dir":   "/data/store",
+                'notifier.alerts[1].type': "preserve.success",
+                'notifier.alerts[1].targets[0]': "dev",
+                'notifier.alerts[0].type': "preserve.failure",
+                'notifier.alerts[0].targets[0]': "oarop",
+                'sip_type.midas.common.review_dir': "/data/review",
+                'sip_type.midas.common.upload_dir': "/data/upload",
+            }, 
+            "name": "classpath:config/oar-uri/oar-uri.yml"
+        },
+        {
+            "source": {
+                "store_dir":   "/var/data/store",
+                'sip_type.midas.common.review_dir': "/var/data/review",
+                'notifier.alerts[1].type': "preserve.win",
+                'notifier.alerts[1].targets[3]': "oarop",
+            },
+            "name": "classpath:config/oar-uri/oar-uri-dev.yml"
+        }
+    ], 
+    "version": None, 
+    "name": "oaruri", 
+    "profiles": [
+        "local"
+    ], 
+    "label": None
+}
+
+        out = {
+            "working_dir": "/data/pdr",
+            "store_dir":   "/var/data/store",
+            "notifier": {
+                "alerts": [{
+                    "type": "preserve.failure",
+                    "targets": [ "oarop" ]
+                }, {
+                    "type": "preserve.win",
+                    "targets": [ "dev", "oarop" ]
+                }]
+            },
+            "sip_type": {
+                "midas": {
+                    "common": {
+                        "review_dir": "/var/data/review",
+                        "upload_dir": "/data/upload"
+                    }
+                }
+            }
+        }
+        self.assertEqual(config.ConfigService.extract(data), out)
+
+    def test_extract3(self):
+        data = \
+{
+    "propertySources": [
+        {
+            "source": {
+                "working_dir": "/data/pdr",
+                "store_dir":   "/data/store",
+                'notifier.alerts[1].type': "preserve.success",
+                'notifier.alerts[1].targets[0]': "dev",
+                'notifier.alerts[0].type': "preserve.failure",
+                'notifier.alerts[0].targets[0]': "oarop",
+                'sip_type.midas.common.review_dir': "/data/review",
+                'sip_type.midas.common.upload_dir': "/data/upload",
+            }, 
+            "name": "classpath:config/oar-uri/oar-uri.yml"
+        },
+        {
+            "source": {
+                "store_dir":   "/var/data/store",
+                'sip_type.midas.common.review_dir': "/var/data/review",
+                'notifier.alerts[1].type': "preserve.win",
+                'notifier.alerts[1].targets[3]': "oarop",
+            },
+            "name": "classpath:config/oar-uri/oar-uri-dev.yml"
+        }
+    ], 
+    "version": None, 
+    "name": "oaruri", 
+    "profiles": [
+        "local"
+    ], 
+    "label": None
+}
+
+        out = { "working_dir": "/data/pdr",
+                "store_dir":   "/var/data/store",
+                'notifier.alerts[1].type': "preserve.win",
+                'notifier.alerts[1].targets[0]': "dev",
+                'notifier.alerts[1].targets[3]': "oarop",
+                'notifier.alerts[0].type': "preserve.failure",
+                'notifier.alerts[0].targets[0]': "oarop",
+                'sip_type.midas.common.review_dir': "/var/data/review",
+                'sip_type.midas.common.upload_dir': "/data/upload"  }
+
+        self.assertEqual(config.ConfigService.extract(data, flat=True), out)
+        
 
     def test_defservice(self):
         self.assertNotIn('OAR_CONFIG_SERVICE', os.environ)

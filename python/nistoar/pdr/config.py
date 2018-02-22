@@ -2,7 +2,7 @@
 Utilities for obtaining a configuration for the metadata service
 """
 from __future__ import print_function
-import os, sys, logging, json, yaml, collections, time
+import os, sys, logging, json, yaml, collections, time, re
 import requests
 from urlparse import urlparse
 
@@ -225,33 +225,35 @@ class ConfigService(object):
         return False
         
 
-    def get(self, component, envprof=None):
+    def get(self, component, envprof=None, flat=False):
         """
         retrieve the configuration for the service or component with the 
         given name.  Internally, this will transform the raw output from 
         the service into a configuration ready to give to the PDR component
         (including combining the profile specializations with default values).
 
-        :param component   the name for the service or component that 
+        :param component str: the name for the service or component that 
                               configuration data is desired for
-        :param envprof     the desired version of the configuration given 
+        :param envprof   str: the desired version of the configuration given 
                               its environment/profile name.  If not provided,
                               the profile set at construction time will 
                               be assumed.
+        :param flat     bool: if true, keep the flat structure provided directly
+                              by the config server.
         :return dict:  the parsed configuration data 
         """
         try:
             resp = requests.get(self.url_for(component, envprof))
             resp.raise_for_status()
-            return self._extract(resp.json())
+            return self._extract(resp.json(), comonent, flat)
         except ValueError as ex:
             raise ConfigurationException("Config service response: "+str(ex))
         except requests.exceptions.RequestException as ex:
             raise ConfigurationException("Failed to access configuration for "+
                                          component + ": " + str(ex))
 
-    def _extract(self, rawdata, comp="unknown"):
-        return self.__class__.extract(rawdata, comp)
+    def _extract(self, rawdata, comp="unknown", flat=False):
+        return self.__class__.extract(rawdata, comp, flat)
 
     @classmethod
     def _deep_update(cls, defdict, upddict):
@@ -262,8 +264,43 @@ class ConfigService(object):
                 defdict[k] = v
         return defdict
 
+    _idxre = re.compile(r'\[(\d+)\]')
     @classmethod
-    def extract(cls, rawdata, comp="unknown"):
+    def _inflate(cls, flat):
+        out = flat.__class__()
+        for key in flat:
+            levs = cls._idxre.sub(r'.\g<0>', key)
+            levs = levs.split('.')
+            pv = out
+            while levs:
+                lev = levs.pop(0)
+                if len(levs) == 0: 
+                    pv[lev] = flat[key]
+                else:
+                    if not isinstance(pv.get(lev), collections.Mapping):
+                        pv[lev] = flat.__class__()
+                    pv = pv[lev]
+
+        return cls._cvtarrays(out)
+
+    @classmethod
+    def _cvtarrays(cls, md):
+        if not isinstance(md, collections.Mapping):
+            return md
+        
+        keys = md.keys()
+        m = [cls._idxre.match(k) for k in keys]
+        if all(m):
+            ary = [( int(m[i].group(1)), md[keys[i]] ) for i in range(len(m))]
+            ary.sort(lambda x,y: cmp(x[0], y[0]))
+            return [ cls._cvtarrays(el[1]) for el in ary ]
+        else:
+            for k in keys:
+                md[k] = cls._cvtarrays(md[k])
+            return md
+
+    @classmethod
+    def extract(cls, rawdata, comp="unknown", flat=False):
         """
         extract component configuration from the config service response.
         This includes combining the environment/profile-specific data
@@ -286,7 +323,9 @@ class ConfigService(object):
         try:
             out = vers.pop(0)['source']
             for ver in vers:
-                cls._deep_update(out, ver['source'])
+                out.update(ver['source'])
+            if not flat:
+                out = cls._inflate(out)
         except TypeError as ex:
             raise ConfigurationException("Bad data schema for label="+name+
                                          ": wrong type for propertySources "+
