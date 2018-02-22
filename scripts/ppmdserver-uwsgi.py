@@ -145,6 +145,7 @@ elif config.service:
     config.service.wait_until_up(int(os.environ.get('OAR_CONFIG_TIMEOUT', 10)),
                                  True, sys.stderr)
     cfg = config.service.get(os.environ.get('OAR_CONFIG_APP', 'pdr-publish'))
+    cfg = extract_mdserv_config(cfg)
 elif is_in_test_mode():
     cfg = {}
 else:
