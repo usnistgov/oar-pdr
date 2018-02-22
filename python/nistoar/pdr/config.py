@@ -180,7 +180,7 @@ class ConfigService(object):
         except requests.exceptions.RequestException:
             return False
 
-    def wait_until_up(self, timeout=10, rais=True):
+    def wait_until_up(self, timeout=10, rais=True, verboseout=None):
         """
         poll the service until responds.  
         :param timeout int:  the maximum number of seconds to wait before 
