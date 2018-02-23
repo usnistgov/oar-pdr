@@ -119,7 +119,6 @@ class Handler(object):
 
     def authorize_via_headertoken(self):
         authhdr = self._env.get('HTTP_AUTHORIZATION', "")
-        log.debug("Request HTTP_AUTHORIZATION: %s", authhdr)
         parts = authhdr.split()
         if self._auth[1]:
             return len(parts) > 1 and parts[0] == "Bearer" and \
