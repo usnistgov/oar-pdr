@@ -1,5 +1,5 @@
 """
-Utilities for obtaining a configuration for the metadata service
+Utilities for obtaining configuration data for services
 """
 from __future__ import print_function
 import os, sys, logging, json, yaml, collections, time, re
@@ -321,9 +321,8 @@ class ConfigService(object):
                                          "found")
 
         try:
-            out = vers.pop(0)['source']
-            for ver in vers:
-                out.update(ver['source'])
+            out = vers[-1]['source']
+            out.update(vers[0]['source'])
             if not flat:
                 out = cls._inflate(out)
         except TypeError as ex:

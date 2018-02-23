@@ -248,17 +248,17 @@ class TestConfigService(test.TestCase):
     "propertySources": [
         {
             "source": {
-                "RMMAPI": "https://localhost/rmm/", 
-                "SDPAPI": "https://localhost/sdp/", 
-            }, 
-            "name": "classpath:config/oar-uri/oar-uri.yml"
-        },
-        {
-            "source": {
                 "RMMAPI": "https://goob/rmm/",
                 "LANDING": "https://localhost/rmm/", 
                 "SDPAPI": "https://localhost/sdp/", 
             },
+            "name": "classpath:config/oar-uri/oar-uri.yml"
+        },
+        {
+            "source": {
+                "RMMAPI": "https://localhost/rmm/", 
+                "SDPAPI": "https://localhost/sdp/", 
+            }, 
             "hail": "fire"
         }
     ], 
@@ -283,6 +283,15 @@ class TestConfigService(test.TestCase):
     "propertySources": [
         {
             "source": {
+                "store_dir":   "/var/data/store",
+                'sip_type.midas.common.review_dir': "/var/data/review",
+                'notifier.alerts[1].type': "preserve.win",
+                'notifier.alerts[1].targets[3]': "oarop",
+            },
+            "name": "classpath:config/oar-uri/oar-uri.yml"
+        },
+        {
+            "source": {
                 "working_dir": "/data/pdr",
                 "store_dir":   "/data/store",
                 'notifier.alerts[1].type': "preserve.success",
@@ -292,15 +301,6 @@ class TestConfigService(test.TestCase):
                 'sip_type.midas.common.review_dir': "/data/review",
                 'sip_type.midas.common.upload_dir': "/data/upload",
             }, 
-            "name": "classpath:config/oar-uri/oar-uri.yml"
-        },
-        {
-            "source": {
-                "store_dir":   "/var/data/store",
-                'sip_type.midas.common.review_dir': "/var/data/review",
-                'notifier.alerts[1].type': "preserve.win",
-                'notifier.alerts[1].targets[3]': "oarop",
-            },
             "name": "classpath:config/oar-uri/oar-uri-dev.yml"
         }
     ], 
@@ -341,6 +341,15 @@ class TestConfigService(test.TestCase):
     "propertySources": [
         {
             "source": {
+                "store_dir":   "/var/data/store",
+                'sip_type.midas.common.review_dir': "/var/data/review",
+                'notifier.alerts[1].type': "preserve.win",
+                'notifier.alerts[1].targets[3]': "oarop",
+            },
+            "name": "classpath:config/oar-uri/oar-uri.yml"
+        },
+        {
+            "source": {
                 "working_dir": "/data/pdr",
                 "store_dir":   "/data/store",
                 'notifier.alerts[1].type': "preserve.success",
@@ -350,15 +359,6 @@ class TestConfigService(test.TestCase):
                 'sip_type.midas.common.review_dir': "/data/review",
                 'sip_type.midas.common.upload_dir': "/data/upload",
             }, 
-            "name": "classpath:config/oar-uri/oar-uri.yml"
-        },
-        {
-            "source": {
-                "store_dir":   "/var/data/store",
-                'sip_type.midas.common.review_dir': "/var/data/review",
-                'notifier.alerts[1].type': "preserve.win",
-                'notifier.alerts[1].targets[3]': "oarop",
-            },
             "name": "classpath:config/oar-uri/oar-uri-dev.yml"
         }
     ], 
