@@ -70,7 +70,12 @@ class Handler(object):
         self._start(stat, [], sys.exc_info())
 
     def add_header(self, name, value):
-        self._hdr.add_header(name, value)
+        # Caution: HTTP does not support Unicode characters (see
+        # https://www.python.org/dev/peps/pep-0333/#unicode-issues);
+        # thus, this will raise a UnicodeEncodeError if the input strings
+        # include Unicode (char code > 255).
+        e = "ISO-8859-1"
+        self._hdr.add_header(name.encode(e), value.encode(e))
 
     def set_response(self, code, message):
         self._code = code
