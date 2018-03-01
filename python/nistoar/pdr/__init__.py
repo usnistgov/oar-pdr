@@ -77,10 +77,12 @@ def find_jq_lib(config=None):
     """
     return the directory containing the jq libraries
     """
+    from .exceptions import ConfigurationException
+    
     def assert_exists(dir, ctxt=""):
         if not os.path.exists(dir):
-            "{0}directory does not exist: {1}".format(ctxt, dir)
-            raise ConfigurationException(msg, sys=self)
+            msg = "{0}directory does not exist: {1}".format(ctxt, dir)
+            raise ConfigurationException(msg)
 
     # check local configuration
     if config and 'jq_lib' in config:
@@ -124,10 +126,12 @@ def find_merge_etc(config=None):
     """
     return the directory containing the merge rules
     """
+    from .exceptions import ConfigurationException
+    
     def assert_exists(dir, ctxt=""):
         if not os.path.exists(dir):
-            "{0}directory does not exist: {1}".format(ctxt, dir)
-            raise ConfigurationException(msg, sys=self)
+            msg = "{0}directory does not exist: {1}".format(ctxt, dir)
+            raise ConfigurationException(msg)
 
     # check local configuration
     if config and 'merge_rules_lib' in config:
