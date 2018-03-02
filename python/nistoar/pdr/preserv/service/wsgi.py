@@ -9,7 +9,8 @@ a framework-based implementation if any further capabilities are needed.
 import os, sys, logging, json, cgi, re
 from wsgiref.headers import Headers
 
-from .service import ThreadedPreservationService, RerequestException
+from .service import (ThreadedPreservationService, RerequestException,
+                      ConfigurationException)
 from . import status
 from .. import PreservationSystem
 
@@ -69,7 +70,12 @@ class Handler(object):
         self._start(stat, [], sys.exc_info())
 
     def add_header(self, name, value):
-        self._hdr.add_header(name, value)
+        # Caution: HTTP does not support Unicode characters (see
+        # https://www.python.org/dev/peps/pep-0333/#unicode-issues);
+        # thus, this will raise a UnicodeEncodeError if the input strings
+        # include Unicode (char code > 255).
+        e = "ISO-8859-1"
+        self._hdr.add_header(name.encode(e), value.encode(e))
 
     def set_response(self, code, message):
         self._code = code
@@ -113,7 +119,6 @@ class Handler(object):
 
     def authorize_via_headertoken(self):
         authhdr = self._env.get('HTTP_AUTHORIZATION', "")
-        log.debug("Request HTTP_AUTHORIZATION: %s", authhdr)
         parts = authhdr.split()
         if self._auth[1]:
             return len(parts) > 1 and parts[0] == "Bearer" and \
