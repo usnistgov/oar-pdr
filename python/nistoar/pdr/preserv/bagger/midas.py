@@ -120,6 +120,15 @@ class MIDASMetadataBagger(SIPBagger):
         
         super(MIDASMetadataBagger, self).__init__(workdir, config)
 
+        # make sure the ID provided matches the one in the pod file
+        podfile = self.find_pod_file()
+        if podfile:
+            # this will raise a PODError if the file is not valid
+            pod = read_pod(podfile)
+            if pod.get('identifier') != midasid:
+                raise SIPDirectoryNotFound(msg="No matching SIP available",
+                                           sys=self)
+
         self.bagbldr = BagBuilder(self.bagparent, self.name,
                                   self.cfg.get('bag_builder', {}),
                                   minter=minter,

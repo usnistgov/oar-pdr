@@ -38,6 +38,7 @@ class TestMIDASMetadataBaggerMixed(test.TestCase):
 
     testsip = os.path.join(datadir, "midassip")
     midasid = '3A1EE2F169DD3B8CE0531A570681DB5D1491'
+    wrongid = '333333333333333333333333333333331491'
 
     def setUp(self):
         self.tf = Tempfiles()
@@ -68,6 +69,11 @@ class TestMIDASMetadataBaggerMixed(test.TestCase):
 
         self.assertTrue(os.path.exists(self.bagparent))
         self.assertFalse(os.path.exists(self.bagdir))
+
+    def test_wrong_ediid(self):
+        with self.assertRaises(midas.SIPDirectoryNotFound):
+            self.bagr = midas.MIDASMetadataBagger(self.wrongid, self.bagparent,
+                                                  self.revdir, self.upldir)
 
     def test_find_pod_file(self):
         self.assertEqual(self.bagr.find_pod_file(),
