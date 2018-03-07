@@ -13,7 +13,8 @@ class TestSystemInfo(test.TestCase):
 
     def test_version(self):
         si = MySystemInfo()
-        self.assertEqual(si.system_version, "dev")
+        self.assertNotEqual(si.system_version, "dev")
+        self.assertGreater(len(si.system_version), 1)
 
     def test_sysname(self):
         si = MySystemInfo()
@@ -35,7 +36,8 @@ class TestPDRSystem(test.TestCase):
 
     def test_version(self):
         si = pdr.PDRSystem()
-        self.assertEqual(si.system_version, "dev")
+        self.assertNotEqual(si.system_version, "dev")
+        self.assertGreater(len(si.system_version), 1)
 
     def test_sysname(self):
         si = pdr.PDRSystem()

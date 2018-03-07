@@ -1,0 +1,12 @@
+
+%PROG% -- Build all (or requested) docker images found in the docker directory
+
+Usage: %PROG% [-lq] [image_dir ...]
+
+Options:
+   --logfile=FILEPATH, -l FILEPATH   Log file to record build output to
+   --quiet, -q                       Suppress messages to terminal
+
+Arguments:
+   image_dir ...      names of docker directories for the images that should 
+                      (re-)build; only these will be built.
