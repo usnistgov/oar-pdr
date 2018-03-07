@@ -8,7 +8,8 @@ class TestPreservationSystem(test.TestCase):
 
     def test_version(self):
         si = pres.PreservationSystem()
-        self.assertEqual(si.system_version, "dev")
+        self.assertNotEqual(si.system_version, "dev")
+        self.assertGreater(len(si.system_version), 1)
 
     def test_sysname(self):
         si = pres.PreservationSystem()
