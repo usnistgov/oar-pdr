@@ -516,7 +516,6 @@ class TestPreservationBagger(test.TestCase):
                                              "data", "trial3", "trial3a.json")))
         
     def test_make_bag(self):
-        pdb.set_trace()
         self.bagr.make_bag()
         self.assertTrue(os.path.exists(self.bagr.bagdir),
                         "Output bag dir not created")
