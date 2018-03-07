@@ -1,4 +1,4 @@
-import os, sys, pdb, shutil, logging, json, subprocess, re
+import os, sys, pdb, shutil, logging, json, re
 from cStringIO import StringIO
 from shutil import copy2 as filecopy, rmtree
 from io import BytesIO
@@ -11,7 +11,7 @@ import nistoar.pdr.preserv.bagit.builder as bldr
 import nistoar.pdr.exceptions as exceptions
 from nistoar.pdr.utils import read_nerd
 
-# datadir = nistoar/preserv/tests/data
+# datadir = tests/nistoar/pdr/preserv/data
 datadir = os.path.join(
     os.path.dirname(os.path.dirname(__file__)),
     "data", "simplesip"
@@ -1010,26 +1010,6 @@ class TestBuilder(test.TestCase):
         self.assertIn("More information:", lines[17])
         self.assertIn("https://dx.doi.org/10.18434/", lines[18])
             
-
-class TestChecksum(test.TestCase):
-
-    def test_checksum_of(self):
-        dfile = os.path.join(datadir,"trial1.json")
-        self.assertEqual(bldr.checksum_of(dfile), self.syssum(dfile))
-        dfile = os.path.join(datadir,"trial2.json")
-        self.assertEqual(bldr.checksum_of(dfile), self.syssum(dfile))
-        dfile = os.path.join(datadir,"trial3/trial3a.json")
-        self.assertEqual(bldr.checksum_of(dfile), self.syssum(dfile))
-
-    def syssum(self, filepath):
-        cmd = ["sha256sum", filepath]
-        proc = subprocess.Popen(cmd, stdout=subprocess.PIPE,
-                                     stderr=subprocess.PIPE)
-        (out, err) = proc.communicate()
-        if proc.returncode != 0:
-            raise RuntimeError(err + "\nFailed sha256sum command: " +
-                               " ".join(cmd))
-        return out.split()[0]
 
 if __name__ == '__main__':
     test.main()

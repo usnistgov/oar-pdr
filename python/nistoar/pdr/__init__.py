@@ -173,3 +173,55 @@ def find_merge_etc(config=None):
 
 def_merge_etcdir = find_merge_etc()
 
+def find_schema_dir(config=None):
+    """
+    return the directory containing the NERDm schema files
+    """
+    from .exceptions import ConfigurationException
+    
+    def assert_exists(dir, ctxt=""):
+        if not os.path.exists(dir):
+            msg = "{0}directory does not exist: {1}".format(ctxt, dir)
+            raise ConfigurationException(msg)
+
+    # check local configuration
+    if config and 'nerdm_schemas_dir' in config:
+        assert_exists(config['nerdm_schemas_dir'],
+                      "config param 'nerdm_schemas_dir' ")
+        return config['nerdm_schemas_dir']
+            
+    # check environment variable
+    if 'OAR_SCHEMA_DIR' in os.environ:
+        assert_exists(os.environ['OAR_SCHEMA_DIR'],
+                      "env var OAR_SCHEMA_DIR ")
+        return os.environ['OAR_SCHEMA_DIR']
+
+    # look relative to a base directory
+    if 'OAR_HOME' in os.environ:
+        # this is normally an installation directory (where lib/jq is our
+        # directory) but we also allow it to be the source directory
+        assert_exists(os.environ['OAR_HOME'], "env var OAR_HOME ")
+        basedir = os.environ['OAR_HOME']
+        candidates = [os.path.join(basedir, 'etc', 'schemas')]
+
+    else:
+        # guess some locations based on the location of the executing code.
+        # The code might be coming from an installation, build, or source
+        # directory.
+        import nistoar
+        basedir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(
+                                            os.path.abspath(nistoar.__file__)))))
+        candidates = [os.path.join(basedir, 'etc', 'schemas')]
+        candidates.append(os.path.join(basedir, 'oar-metadata', 'etc','schemas'))
+        basedir = os.path.dirname(basedir)
+        candidates.append(os.path.join(basedir, 'oar-metadata', 'etc','schemas'))
+        candidates.append(os.path.join(basedir, 'etc', 'schemas'))
+
+    for dir in candidates:
+        if os.path.exists(dir):
+            return dir
+        
+    return None
+
+def_schema_dir = find_schema_dir()
+

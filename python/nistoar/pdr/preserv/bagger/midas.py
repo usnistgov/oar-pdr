@@ -16,7 +16,7 @@ from .base import SIPBagger, moddate_of, checksum_of, read_nerd, read_pod
 from .base import sys as _sys
 from ..bagit.builder import BagBuilder, NERDMD_FILENAME
 from ... import def_merge_etcdir
-from .. import (SIPDirectoryError, SIPDirectoryNotFound,
+from .. import (SIPDirectoryError, SIPDirectoryNotFound, AIPValidationError,
                 ConfigurationException, StateException, PODError)
 from nistoar.nerdm.merge import MergerFactory
 
@@ -554,6 +554,50 @@ class PreservationBagger(SIPBagger):
         if finalcfg.get('ensure_component_metadata') is None:
             finalcfg['ensure_component_metadata'] = False
         self.bagbldr.finalize_bag(finalcfg)
+        if finalcfg.get('validate', True):
+            # this will raise an exception if any issues are found
+            self._validate(finalcfg.get('validator', {}))
 
         return self.bagbldr.bagdir
 
+    def _validate(self, config):
+        """
+        run a final validation on the output bag
+
+        :param config dict:  a configuration to pass to the validator; see 
+                             nistoar.pdr.preserv.bagit.validate for details.
+                             If not provided, the configuration for this 
+                             builder will be checked for the 'validator' 
+                             property to use as the configuration.
+        """
+        ERR = "error"
+        WARN= "warn"
+        REC = "rec"
+        raiseon_words = [ ERR, WARN, REC ]
+        
+        raiseon = config.get('raise_on', WARN)
+        if raiseon and raiseon not in raiseon_words:
+            raise ConfigurationException("raise_on property not one of "+
+                                         str(raiseon) + ": " + raiseon)
+        
+        res = self.bagbldr.validate(config)
+
+        itp = res.PROB
+        if raiseon:
+            itp = ((raiseon == ERR)  and res.ERR)  or \
+                  ((raiseon == WARN) and res.PROB) or res.ALL
+            
+        issues = res.failed(itp)
+        if len(issues):
+            log.warn("Bag Validation issues detected for id="+self.name)
+            for iss in issues:
+                if iss.type == iss.ERROR:
+                    log.error(str(iss))
+                elif iss.type == iss.WARN:
+                    log.warn(str(iss))
+                else:
+                    log.info(str(iss))
+
+            if raiseon:
+                raise AIPValidationError("Bag Validation errors detected",
+                                         errors=[str(i) for i in issues])

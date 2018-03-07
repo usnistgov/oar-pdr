@@ -427,9 +427,21 @@ class TestPreservationBagger(test.TestCase):
         testsip = os.path.join(self.testsip, "review")
         self.revdir = os.path.join(self.workdir, "review")
         shutil.copytree(testsip, self.revdir)
-        config = { 'relative_to_indir': True,
-                   'bag_builder': { 'copy_on_link_failure': False }
-               }
+        config = {
+            'relative_to_indir': True,
+            'bag_builder': {
+                'copy_on_link_failure': False,
+                'init_bag_info': {
+                    'Source-Organization':
+                        "National Institute of Standards and Technology",
+                    'Contact-Email': ["datasupport@nist.gov"],
+                    'Organization-Address': [
+                        "100 Bureau Dr., Gaithersburg, MD 20899"],
+                    'NIST-BagIt-Version': "0.2",
+                    'Multibag-Version': "0.2"
+                }
+            }
+        }
         
         self.bagr = midas.PreservationBagger(self.midasid, '_preserv',
                                              self.revdir, self.mddir, config)
@@ -504,6 +516,7 @@ class TestPreservationBagger(test.TestCase):
                                              "data", "trial3", "trial3a.json")))
         
     def test_make_bag(self):
+        pdb.set_trace()
         self.bagr.make_bag()
         self.assertTrue(os.path.exists(self.bagr.bagdir),
                         "Output bag dir not created")
