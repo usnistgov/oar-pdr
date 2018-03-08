@@ -44,7 +44,9 @@ function get_tag {
         #opts=
         errfile=/tmp/git-describe-$$_err.txt
         git describe $opts 2> $errfile || {
-            grep -qs 'No names found' $errfile || {
+            grep -qs 'No names found' $errfile || \
+            grep -qs 'No tags can describe' $errfile || \
+            {
                 echo setversion: git describe failed: 1>&2
                 cat $errfile 1>&2
                 rm $errfile
