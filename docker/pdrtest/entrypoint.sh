@@ -10,18 +10,18 @@ function install {
 }
 
 function launch_test_mdserv {
-    service nginx stop
+    sudo service nginx stop
     echo starting uwsgi...
     workdir=$PWD/_ppmdserver-test-$$
     [ ! -e "$workdir" ] || rm -r $workdir
     mkdir -p $workdir
     uwsgi --daemonize $workdir/uwsgi.log --plugin python --uwsgi-socket :9090 --wsgi-file scripts/ppmdserver-uwsgi.py --pidfile $OAR_HOME/var/mdserv.pid --set-ph oar_testmode_workdir=$workdir
     echo starting nginx...
-    service nginx start
+    sudo service nginx start
 }
 
 function launch_test_preserver {
-    service nginx stop
+    sudo service nginx stop
     [ -e "$OAR_HOME/var/mdserv.pid" ] && kill `cat $OAR_HOME/var/mdserv.pid` && sleep 1
     echo starting uwsgi...
     workdir=$PWD/_preserver-test-$$
@@ -29,7 +29,7 @@ function launch_test_preserver {
     mkdir -p $workdir
     uwsgi --daemonize $workdir/uwsgi.log --plugin python --uwsgi-socket :9090 --wsgi-file scripts/preserver-uwsgi.py --pidfile $OAR_HOME/var/preserver.pid --set-ph oar_testmode_workdir=$workdir
     echo starting nginx...
-    service nginx start
+    sudo service nginx start
 }
 
 function exitopwith {
@@ -37,23 +37,29 @@ function exitopwith {
     exit $2
 }
 
+cmd=$1
 case "$1" in
+    makedist)
+        shift
+        scripts/makedist "$@"
+        ;;
     testall)
         install || {
             echo "testall: Failed to install oar-pdr"
             exitopwith testall 2
         }
-        scripts/testall.py && stat=$?
+        shift
+        scripts/testall "$@" && stat=$?
         echo Launching/testing the metadata server via nginx...
         launch_test_mdserv
         
         set -x
-        curl http://localhost/midas/3A1EE2F169DD3B8CE0531A570681DB5D1491 \
+        curl http://localhost:8080/midas/3A1EE2F169DD3B8CE0531A570681DB5D1491 \
              > mdserv_out.txt && \
              python -c 'import sys, json; fd = open("mdserv_out.txt"); data = json.load(fd); sys.exit(0 if data["doi"]=="doi:10.18434/T4SW26" else 11)' || \
              stat=$?
         
-        curl http://localhost/midas/3A1EE2F169DD3B8CE0531A570681DB5D1491/trial1.json \
+        curl http://localhost:8080/midas/3A1EE2F169DD3B8CE0531A570681DB5D1491/trial1.json \
              > mdserv_out.txt && \
             python -c 'import sys, json; fd = open("mdserv_out.txt"); data = json.load(fd); sys.exit(0 if data["name"]=="tx1" else 21)' || \
             stat=$?
@@ -63,22 +69,22 @@ case "$1" in
         launch_test_preserver
 
         set -x
-        curl http://localhost/preserve/ \
+        curl http://localhost:8080/preserve/ \
              > stat_out.txt; \
              python -c 'import sys, json; fd = open("stat_out.txt"); data = json.load(fd); sys.exit(0 if data==["midas"] else 11)' || \
              stat=$?
         
-        curl http://localhost/preserve/midas/3A1EE2F169DD3B8CE0531A570681DB5D1491 \
+        curl http://localhost:8080/preserve/midas/3A1EE2F169DD3B8CE0531A570681DB5D1491 \
              > stat_out.txt; \
              python -c 'import sys, json; fd = open("stat_out.txt"); data = json.load(fd); sys.exit(0 if data["state"]=="ready" else 11)' || \
              stat=$?
         
-        curl http://localhost/preserve/midas/goober \
+        curl http://localhost:8080/preserve/midas/goober \
              > stat_out.txt; \
              python -c 'import sys, json; fd = open("stat_out.txt"); data = json.load(fd); sys.exit(0 if data["state"]=="not found" else 11)' || \
              stat=$?; 
         
-        curl -X PUT http://localhost/preserve/midas/3A1EE2F169DD3B8CE0531A570681DB5D1491 \
+        curl -X PUT http://localhost:8080/preserve/midas/3A1EE2F169DD3B8CE0531A570681DB5D1491 \
              > stat_out.txt; \
              python -c 'import sys, json; fd = open("stat_out.txt"); data = json.load(fd); sys.exit(0 if data["state"]=="successful" else 11)' || \
              stat=$?; 
@@ -120,11 +126,11 @@ case "$1" in
         ;;
     *)
         echo Unknown command: $1
-        echo Available commands:  testall testshell install shell installshell testmdservshell testpreserveshell
+        echo Available commands:  makedist testall testshell install shell installshell testmdservshell testpreserveshell
         ;;
 esac
 
-[ $? -ne 0 ] && exitopwith $1 1
+[ $? -ne 0 ] && exitopwith $cmd 1
 true
 
     

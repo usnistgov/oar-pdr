@@ -1,0 +1,19 @@
+
+Usage: $prog [-lq] [cmd [cmd_options]]
+
+Options:
+   --no-remove, -r                   Don't remove container after exiting
+   --logfile=FILEPATH, -l FILEPATH   Log file to record build output to
+   --quiet, -q                       Suppress messages to terminal
+
+Arguments:
+   cmd     The command to run in the container; one of
+              $RUN_COMMANDS
+
+Commands:
+   build   Build the package and write build products into a zip file
+             called PACKAGE-dist.zip
+   test    Build the build products and run all unit tests
+   bshell  Build the build products and then start an interactive shell
+   shell   Start an interactive shell (without building anything first)
+
