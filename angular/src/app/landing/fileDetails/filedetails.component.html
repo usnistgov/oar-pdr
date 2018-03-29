@@ -1,0 +1,36 @@
+
+  <div class="filecard">
+    <div class="ui-g filesection">
+        <div class="ui-g-12 ui-md-12 ui-lg-12 ui-sm-10">
+          <span class="textstyle1 fDetailsfFont">
+            <span *ngIf="fileDetails['downloadURL']"> File </span>
+            <span *ngIf="!fileDetails['downloadURL']"> Subcollection</span>
+          </span>
+          <!-- <button pButton style="position:relative; float:right;" class="ui-button-success" type="button" (click)="download()" label="Download"></button> -->
+          <a *ngIf="fileDetails['downloadURL']" style="position:relative; float:right;"  href="{{this.fileDetails['downloadURL']}}" class="faa faa-download faa-lg" title="Download File" ></a>
+          <h4><span *ngIf="fileDetails['title']"> {{ fileDetails["title"]}} </span></h4>
+          <br><span class="font10">Path: <b>{{fileDetails["filepath"]}}</b></span>
+          <span *ngIf="fileDetails['downloadURL']" class="font8"> <br>Type:<b>{{fileDetails["mediaType"]}}</b></span>
+          <span class="font8"><br>Size:
+             <span *ngIf="fileDetails['size']" >{{fileDetails["size"]}}  bytes</span>
+             <span *ngIf="!fileDetails['size']" >Not specified</span>
+
+         </span>
+        </div>
+
+        <div class="ui-g-12 ui-md-12 ui-lg-12 ui-sm-12">
+            <span *ngIf="fileDetails['description']" class="font10"><b>Description:</b> </span>
+            <div *ngIf="fileDetails['description']" class="well filedesc" >
+                {{ fileDetails["description"] }}
+            </div>
+            <span *ngIf="fileDetails['Keyword']" class="font10"><b>Topic Keyword:</b>
+                 {{ fileDetails["Keyword"] }}
+            </span>
+      <br>
+      <span *ngIf="fileDetails['metadata']" class="font10"><b>Collection Metadata:</b>
+                 {{ fileDetails["metadata"] }}
+            </span>
+    </div>
+  </div>
+</div>
+<!--</div>-->

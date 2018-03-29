@@ -1,0 +1,69 @@
+<style id="antiClickjack">
+  body {
+    display: none !important;
+  }
+</style>
+<script type="text/javascript">
+  if (self === top) {
+    var antiClickjack = document.getElementById("antiClickjack");
+    antiClickjack.parentNode.removeChild(antiClickjack);
+  } else {
+    top.location = self.location;
+  }
+</script>
+
+<div [ngClass]="{'layout-wrapper':true,'layout-compact':layoutCompact}">
+
+    <div [ngClass]="{'layout-container':false,'menu-layout-static':(layoutMode=='static'||layoutMode=='horizontal'),
+              'menu-layout-overlay':(layoutMode=='overlay'),'menu-layout-horizontal':(layoutMode=='horizontal')}">
+  
+   <div class="topbar clearfix header-background" >
+          <div class="header-div">
+            <a href="/" title="National Institute of Standards and Technology" class="header__logo-link" rel="home">
+            <img class="Fleft" srcset="./assets/images/nist-pdr-rev.png" alt="National Institute of Standards and Technology"
+                 title="National Institute of Standards and Technology" >
+              </a>
+              <!--<img class="Fleft" srcset="./assets/images/beta-pdr.png"> -->
+              <span class="badge" style="background-color:#8f3919">1.0.0-beta</span>
+              <span *ngIf="checkinternal()" class="badge" style="background-color:darkcyan">Review Version</span>
+              <div align="right" class="header-links">
+               <a href="/pdr/#/about" ><span class="textlinks"><b>About</b></span></a>
+               | <a href="{{ SDPAPI }}" onclick="window.open(this.href, 'search'); return false"><span class="textlinks"><b>Search</b></span></a>
+               | <span style="background-color: #046b99;" (click)="login()" class="textlinks" *ngIf="!loginuser"><b>Login</b></span>
+                  <span style=" background-color: #046b99;"  (click)="login()" class="textlinks" *ngIf="loginuser"><b>Logout</b></span>
+                 
+               <!-- <p-menubar [model]="topmenu" ></p-menubar>    -->
+              </div>
+          </div>
+      </div>
+    </div>
+  </div>
+  <!-- <div style="background-color: #20272a;"[ngClass]="{'layout-wrapper':true,'layout-compact':layoutCompact}">
+    <div class="ui-g">
+        <div class="ui-g-6 ui-md-6 ui-lg-6 ui-sm-12">
+            <div class="ui-g">
+                <div class="ui-g-4 ui-md-4 ui-lg-4 ui-sm-4">
+                    <a href="/" title="National Institute of Standards and Technology" class="header__logo-link" rel="home">
+                      <img class="Fleft" srcset="./assets/images/nist-pdr-small.png" alt="National Institute of Standards and Technology"
+                           title="National Institute of Standards and Technology" >
+                    </a>
+                </div>
+                <div class="ui-g-5 ui-md-5 ui-lg-5 ui-sm-5">
+                    <span class="badge" style="background-color:#8f3919">1.0.0-beta</span>
+                    <span *ngIf="checkinternal()" class="badge" style="background-color:darkcyan">Review Version</span>          
+                </div> 
+                <div class="ui-g-3 ui-md-3 ui-lg-3 ui-sm-3"></div> 
+            </div>
+        </div>
+        <div class="ui-g-6 ui-md-6 ui-lg-6 ui-sm-12">
+          <div align="right">
+            <ul style="float:right">
+              <li><a href="/pdr/#/about">About</a></li>
+              <li><a href="{{ SDPAPI }}">Search</a></li>
+              <li><a href="#login">Login</a></li>
+            </ul>
+          </div>
+        </div>
+
+  </div>
+</div> -->

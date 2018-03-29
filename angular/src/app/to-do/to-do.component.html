@@ -1,0 +1,48 @@
+<div class="container">
+  <div class="col-md-12">
+    <h1>My To-Dos</h1>
+    <table class="table table-bordered table-striped table-hover">
+      <thead>
+        <tr>
+          <th class="text-center">To-Do</th>
+          <th class="text-center">Due</th>       
+          <th class="text-center">Notes</th>       
+          <th class="text-center">Done</th>       
+          <th class="text-center"></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let todo of todos">       
+          <td>{{ todo.name }}</td>
+          <td>{{ todo.due | date: 'EE, MMM dd' }}</td>       
+          <td>{{ todo.notes }}</td>
+          <td class="text-center">
+            <input type="checkbox" [checked]="todo.done" [disabled]="true">
+          </td>
+          <td class="text-center">
+            <button class="btn btn-info" (click)="showEditForm(todo)">
+              <i class="fas fa-pencil-alt"></i>
+            </button>
+            <button class="btn btn-danger" (click)="removeToDo(todo)">
+              <i class="fas fa-trash-alt"></i>
+            </button>
+          </td>       
+        </tr>
+      </tbody>
+    </table>
+    <button class="btn btn-success" (click)="showNewForm()">
+      <i class="fas fa-plus"></i>
+    </button>
+    <form *ngIf="showForm()" [formGroup]="formGroup" (ngSubmit)="saveTodo(formGroup.value)">
+      <h2>{{headerText}}</h2>
+      <p>To-Do <input type="text" name="name" formControlName="name" /></p>
+      <p>Due <input type="date" name="due" formControlName="due"/></p>
+      <p>Done <input type="checkbox" name="done" formControlName="done" /></p>    
+      <p>Notes <input type="text" name="notes" formControlName="notes" /></p>
+      <p>
+        <input type="submit" class="btn btn-primary" value="Save">
+        <input type="button" class="btn btn-warning" value="Cancel" (click)="cancelEditTodo()">
+      </p>
+    </form>
+  </div>
+ </div>
