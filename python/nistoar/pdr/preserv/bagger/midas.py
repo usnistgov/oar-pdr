@@ -604,4 +604,4 @@ class PreservationBagger(SIPBagger):
 
         else:
             log.info("%s: bag validation completed without issues",
-                     self.bagbldr.name)
+                     self.bagbldr.bagname)
