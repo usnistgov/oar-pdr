@@ -601,3 +601,6 @@ class PreservationBagger(SIPBagger):
             if raiseon:
                 raise AIPValidationError("Bag Validation errors detected",
                                          errors=[str(i) for i in issues])
+
+        else:
+            log.info("%s: bag validation completed without issues", self.name)
