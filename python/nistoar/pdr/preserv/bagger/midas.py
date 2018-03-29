@@ -603,4 +603,5 @@ class PreservationBagger(SIPBagger):
                                          errors=[str(i) for i in issues])
 
         else:
-            log.info("%s: bag validation completed without issues", self.name)
+            log.info("%s: bag validation completed without issues",
+                     self.bagbldr.name)
