@@ -357,7 +357,29 @@ try:
     service = ConfigService.from_env()
 except:
     pass
-        
+
+def merge_config(primary, defconf):
+    """
+    do a deep merge of a default configuration dictionary into a primary one
+    provided to an application.  A value in the primary dictionary will override
+    those given in the default.  This function may update one of the input 
+    dictionaries.
+
+    :param primary dict:  the configuration dictionary provided to the 
+                          application at run-time.
+    :param defconf dict:  the default configuration dictionary 
+    :return dict:   the merged dictionary.  This may be one of the input 
+                    instances updated as needed (i.e. not a copy)
+    """
+    for key in primary:
+        if isinstance(primary[key], collections.Mapping) and \
+           isinstance(defconf.get(key), collections.Mapping):
+            defconf[key] = merge_config(primary[key], defconf[key])
+        else:
+            defconf[key] = primary[key]
+
+    return defconf
+
 def load_from_service(handle):
     """
     retrieve the metadata server's configuration from the configuration server.

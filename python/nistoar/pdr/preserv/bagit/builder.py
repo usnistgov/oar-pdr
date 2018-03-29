@@ -16,7 +16,8 @@ from ...utils import build_mime_type_map, checksum_of
 from ....nerdm.exceptions import (NERDError, NERDTypeError)
 from ....nerdm.convert import PODds2Res
 from ....id import PDRMinter
-from ... import def_jq_libdir
+from ... import def_jq_libdir, def_etc_dir
+from ...config import load_from_file, merge_config
 from .bag import NISTBag
 from .exceptions import BadBagRequest
 from .validate.nist import NISTAIPValidator
@@ -114,15 +115,17 @@ class BagBuilder(PreservationSystem):
         self._mbagver = DEF_MBAG_VERSION
         self._bag = None
 
-        if not config:
-            config = {}
-        self.cfg = config
-        self._id = self._fix_id(id)
-        self._ediid = None
         if not logger:
             logger = log
         self.log = logger
         self.log.setLevel(NORM)
+        
+        if not config:
+            config = {}
+        self.cfg = self._merge_def_config(config)
+        
+        self._id = self._fix_id(id)
+        self._ediid = None
         self._logname = self.cfg.get('log_filename', 'preserv.log')
         self._loghdlr = None
         self._mimetypes = None
@@ -143,6 +146,20 @@ class BagBuilder(PreservationSystem):
 
         if os.path.exists(self.bagdir):
             self.ensure_bagdir() # this initializes some data like self._bag
+
+    def _merge_def_config(self, config):
+        if not def_etc_dir:
+            self.log.warning("BagBuilder: Can't load default config: " +
+                             "can't find etc directory")
+            return config
+        defconffile = os.path.join(def_etc_dir, "nist_bagger_conf.yml")
+        if not os.path.exists(defconffile):
+            self.log.warning("BagBuilder: default config file not found: " +
+                             defconffile)
+            return config
+
+        defconf = load_from_file(defconffile)
+        return merge_config(config, defconf)
 
     def _fix_id(self, id):
         if id is None:
@@ -279,7 +296,7 @@ class BagBuilder(PreservationSystem):
         self.log.addHandler(self._loghdlr)
         
     def _unset_logfile(self):
-        if self._loghdlr:
+        if hasattr(self, '_loghdlr') and self._loghdlr:
             self.log.removeHandler(self._loghdlr)
             self._loghdlr.close()
             self._loghdlr = None

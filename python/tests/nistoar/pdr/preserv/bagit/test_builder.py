@@ -45,17 +45,9 @@ class TestBuilder(test.TestCase):
         self.tf = Tempfiles()
         self.cfg = {
             "init_bag_info": {
-                "Source-Organization":
-                     ["National Institute of Standards and Technology"],
-                "Contact-Name": "NIST Data Support Team",
-                "Contact-Email": ["datasupport@nist.gov"],
+                'NIST-BagIt-Version': "X.3",
                 "Organization-Address": ["100 Bureau Dr.",
-                                         "Gaithersburg, MD 20899"],
-                "NIST-BagIt-Version": "0.2",
-                "NIST-POD-Metadata": "metadata/pod.json",
-                "NIST-NERDm-Metadata": "metadata/nerdm.json",
-                "Multibag-Version": "0.2",
-                "Multibag-Tag-Directory": "multibag"
+                                         "Gaithersburg, MD 20899"]
             }
         }
 
@@ -76,6 +68,10 @@ class TestBuilder(test.TestCase):
         self.assertEqual(self.bag.logname, "preserv.log")
         self.assertIsNone(self.bag.id)
         self.assertIsNone(self.bag.ediid)
+
+        baginfo = self.bag.cfg['init_bag_info']
+        self.assertEqual(baginfo['NIST-BagIt-Version'], 'X.3')
+        self.assertEqual(baginfo['Contact-Email'], ["datasupport@nist.gov"])
 
     def test_download_url(self):
         self.assertEqual(self.bag._download_url('goob',
@@ -867,7 +863,7 @@ class TestBuilder(test.TestCase):
         self.assertEqual(data.values(), ["0.98", "UTF-8"])
 
     def test_write_baginfo_data(self):
-        data = self.cfg['init_bag_info']
+        data = self.bag.cfg['init_bag_info']
         infofile = os.path.join(self.bag.bagdir,"bag-info.txt")
         self.assertFalse(os.path.exists(infofile))
 
@@ -897,7 +893,7 @@ class TestBuilder(test.TestCase):
         self.assertEqual(lines[0], "Goober-Name: Gurn Cranston\n")
         self.assertEqual(lines[1], "Foo: Bar\n")
 
-        data = self.cfg['init_bag_info']
+        data = self.bag.cfg['init_bag_info']
         data['Foo'] = "Bang"
         self.bag.write_baginfo_data(data, overwrite=False)
 
