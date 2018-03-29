@@ -38,6 +38,7 @@ class TestMIDASMetadataBaggerMixed(test.TestCase):
 
     testsip = os.path.join(datadir, "midassip")
     midasid = '3A1EE2F169DD3B8CE0531A570681DB5D1491'
+    wrongid = '333333333333333333333333333333331491'
 
     def setUp(self):
         self.tf = Tempfiles()
@@ -68,6 +69,11 @@ class TestMIDASMetadataBaggerMixed(test.TestCase):
 
         self.assertTrue(os.path.exists(self.bagparent))
         self.assertFalse(os.path.exists(self.bagdir))
+
+    def test_wrong_ediid(self):
+        with self.assertRaises(midas.SIPDirectoryNotFound):
+            self.bagr = midas.MIDASMetadataBagger(self.wrongid, self.bagparent,
+                                                  self.revdir, self.upldir)
 
     def test_find_pod_file(self):
         self.assertEqual(self.bagr.find_pod_file(),
@@ -421,9 +427,21 @@ class TestPreservationBagger(test.TestCase):
         testsip = os.path.join(self.testsip, "review")
         self.revdir = os.path.join(self.workdir, "review")
         shutil.copytree(testsip, self.revdir)
-        config = { 'relative_to_indir': True,
-                   'bag_builder': { 'copy_on_link_failure': False }
-               }
+        config = {
+            'relative_to_indir': True,
+            'bag_builder': {
+                'copy_on_link_failure': False,
+                'init_bag_info': {
+                    'Source-Organization':
+                        "National Institute of Standards and Technology",
+                    'Contact-Email': ["datasupport@nist.gov"],
+                    'Organization-Address': [
+                        "100 Bureau Dr., Gaithersburg, MD 20899"],
+                    'NIST-BagIt-Version': "0.2",
+                    'Multibag-Version': "0.2"
+                }
+            }
+        }
         
         self.bagr = midas.PreservationBagger(self.midasid, '_preserv',
                                              self.revdir, self.mddir, config)

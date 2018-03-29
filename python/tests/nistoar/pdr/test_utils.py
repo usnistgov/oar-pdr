@@ -1,10 +1,11 @@
-import os, sys, pdb, json
+import os, sys, pdb, json, subprocess
 import unittest as test
 
 import nistoar.pdr.utils as utils
 
 testdir = os.path.dirname(os.path.abspath(__file__))
 testdatadir = os.path.join(testdir, 'data')
+testdatadir2 = os.path.join(testdir, 'preserv', 'data', 'simplesip')
 
 class TestMimeTypeLoading(test.TestCase):
 
@@ -45,6 +46,26 @@ class TestMimeTypeLoading(test.TestCase):
         self.assertEquals(map['mml'], "text/mathml")
         self.assertEquals(map['xml'], "application/xml")
         self.assertEquals(map['xsd'], "application/xml")
+
+class TestChecksum(test.TestCase):
+
+    def test_checksum_of(self):
+        dfile = os.path.join(testdatadir2,"trial1.json")
+        self.assertEqual(utils.checksum_of(dfile), self.syssum(dfile))
+        dfile = os.path.join(testdatadir2,"trial2.json")
+        self.assertEqual(utils.checksum_of(dfile), self.syssum(dfile))
+        dfile = os.path.join(testdatadir2,"trial3/trial3a.json")
+        self.assertEqual(utils.checksum_of(dfile), self.syssum(dfile))
+
+    def syssum(self, filepath):
+        cmd = ["sha256sum", filepath]
+        proc = subprocess.Popen(cmd, stdout=subprocess.PIPE,
+                                     stderr=subprocess.PIPE)
+        (out, err) = proc.communicate()
+        if proc.returncode != 0:
+            raise RuntimeError(err + "\nFailed sha256sum command: " +
+                               " ".join(cmd))
+        return out.split()[0]
 
 
 

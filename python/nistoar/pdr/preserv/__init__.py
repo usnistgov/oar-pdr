@@ -46,3 +46,10 @@ class PreservationException(PDRException):
         if errors:
             self.errors.extend(errors)
 
+class AIPValidationError(PreservationException):
+    """
+    An indication that the an Archive Information Package (AIP) (usually,
+    the preservation bag) is not valid.
+    """
+    pass
+

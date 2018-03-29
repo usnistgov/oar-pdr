@@ -2,7 +2,7 @@
 Tools for building a NIST Preservation bags
 """
 from __future__ import print_function
-import os, errno, logging, re, json, hashlib, pkg_resources, textwrap, datetime
+import os, errno, logging, re, json, pkg_resources, textwrap, datetime
 import pynoid as noid
 from shutil import copy as filecopy, rmtree
 from copy import deepcopy
@@ -12,13 +12,15 @@ from .. import (SIPDirectoryError, SIPDirectoryNotFound,
                 ConfigurationException, StateException, PODError)
 from .exceptions import BagProfileError, BagWriteError
 from .. import PreservationSystem, read_nerd, read_pod, write_json
-from ...utils import build_mime_type_map
+from ...utils import build_mime_type_map, checksum_of
 from ....nerdm.exceptions import (NERDError, NERDTypeError)
 from ....nerdm.convert import PODds2Res
 from ....id import PDRMinter
-from ... import def_jq_libdir
+from ... import def_jq_libdir, def_etc_dir
+from ...config import load_from_file, merge_config
 from .bag import NISTBag
 from .exceptions import BadBagRequest
+from .validate.nist import NISTAIPValidator
 
 NORM=15  # Log Level for recording normal activity
 logging.addLevelName(NORM, "NORMAL")
@@ -52,19 +54,6 @@ NERDPUB_DEF = NERDMPUB_SCH_ID + "/definitions/"
 DATAFILE_TYPE = NERDPUB_PRE + ":DataFile"
 SUBCOLL_TYPE = NERDPUB_PRE + ":Subcollection"
 DISTSERV = "https://data.nist.gov/od/ds/"
-
-def checksum_of(filepath):
-    """
-    return the checksum for the 
-    """
-    bfsz = 10240000   # 10 MB buffer
-    sum = hashlib.sha256()
-    with open(filepath) as fd:
-        while True:
-            buf = fd.read(bfsz)
-            if not buf: break
-            sum.update(buf)
-    return sum.hexdigest()
 
 class BagBuilder(PreservationSystem):
     """
@@ -126,15 +115,17 @@ class BagBuilder(PreservationSystem):
         self._mbagver = DEF_MBAG_VERSION
         self._bag = None
 
-        if not config:
-            config = {}
-        self.cfg = config
-        self._id = self._fix_id(id)
-        self._ediid = None
         if not logger:
             logger = log
         self.log = logger
         self.log.setLevel(NORM)
+        
+        if not config:
+            config = {}
+        self.cfg = self._merge_def_config(config)
+        
+        self._id = self._fix_id(id)
+        self._ediid = None
         self._logname = self.cfg.get('log_filename', 'preserv.log')
         self._loghdlr = None
         self._mimetypes = None
@@ -155,6 +146,20 @@ class BagBuilder(PreservationSystem):
 
         if os.path.exists(self.bagdir):
             self.ensure_bagdir() # this initializes some data like self._bag
+
+    def _merge_def_config(self, config):
+        if not def_etc_dir:
+            self.log.warning("BagBuilder: Can't load default config: " +
+                             "can't find etc directory")
+            return config
+        defconffile = os.path.join(def_etc_dir, "nist_bagger_conf.yml")
+        if not os.path.exists(defconffile):
+            self.log.warning("BagBuilder: default config file not found: " +
+                             defconffile)
+            return config
+
+        defconf = load_from_file(defconffile)
+        return merge_config(config, defconf)
 
     def _fix_id(self, id):
         if id is None:
@@ -291,7 +296,7 @@ class BagBuilder(PreservationSystem):
         self.log.addHandler(self._loghdlr)
         
     def _unset_logfile(self):
-        if self._loghdlr:
+        if hasattr(self, '_loghdlr') and self._loghdlr:
             self.log.removeHandler(self._loghdlr)
             self._loghdlr.close()
             self._loghdlr = None
@@ -944,6 +949,9 @@ format(nerdm['title'])
         oxum = self._measure_oxum(self._bag._datadir)
         initdata['Payload-Oxum'] = "{0}.{1}".format(oxum[0], oxum[1])
 
+        # right now, all bags are multibags, version 1
+        initdata['Multibag-Head-Version'] = "1"
+
         # write everything except Bag-Size
         self.write_baginfo_data(initdata, overwrite)
 
@@ -1140,17 +1148,29 @@ format(nerdm['title'])
     def __del__(self):
         self._unset_logfile()
 
-    def validate(self):
+    def validate(self, config=None):
         """
         Determine if the bag is complete and compliant with the NIST BagIt
         profile.
 
-        :return list:  a list of errors indicating where the bag is incomplete
-                       or non-compliant.  An empty bag indicates that the bag 
-                       is complete and ready to preserved.  
+        :param config dict:  a configuration to pass to the validator; see 
+                             nistoar.pdr.preserv.bagit.validate for details.
+                             If not provided, the configuration for this 
+                             builder will be checked for the 'validator' 
+                             property to use as the configuration.
+                             
+        :return ValidationResults:  a 
+                             nistoar.pdr.preserv.bagit.validate.ValidationResults
+                             instance containing the lists of errors, warnings, 
+                             or recommendations resulting. 
         """
-        self.log.error("Bag validation not implemented!")
-        return []
+        if not self._bag:
+            raise BagItException("Bag directory for id=" + self._name +
+                                 "has not been created.")
+        if config is None:
+            self.cfg.get('validator', {})
+        vld8r = NISTAIPValidator(config)
+        return vld8r.validate(self._bag)
 
     def record(self, msg, *args, **kwargs):
         """
@@ -1399,9 +1419,3 @@ format(nerdm['title'])
         """
         pass
 
-    def validate_manifest_syntax(self, filepath):
-        """
-        check the contents of the given manifest file for proper syntax.  It 
-        does not check that the values are correct.
-        """
-        pass

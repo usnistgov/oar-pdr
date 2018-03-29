@@ -1,4 +1,4 @@
-import os, pdb, sys, logging, threading, time, json
+import os, pdb, sys, logging, threading, time, json, yaml
 from copy import deepcopy
 import unittest as test
 
@@ -56,6 +56,9 @@ class TestApp(test.TestCase):
 
         shutil.copytree(self.sipdata, os.path.join(self.revdir, "1491"))
 
+        with open(os.path.join(datadir, "bagger_conf.yml")) as fd:
+            baggercfg = yaml.load(fd)
+            
         self.config = {
             "working_dir": self.workdir,
             "store_dir": self.store,
@@ -72,7 +75,7 @@ class TestApp(test.TestCase):
                     "preserv": {
                         "bagparent_dir": "_preserv",
                         "staging_dir": self.stagedir,
-                        "bagger": { 'relative_to_indir': True },
+                        "bagger": baggercfg,
                         "status_manager": { "cachedir": self.statusdir },
                     }
                 }
