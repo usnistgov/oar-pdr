@@ -1061,6 +1061,9 @@ format(nerdm['title'])
         droot = os.path.join(self.bagdir, "data")
         mroot = os.path.join(self.bagdir, "metadata")
         for ddir, subdirs, files in os.walk(droot, topdown=False):
+            if ddir == droot:
+                # don't delete the root "data" directory
+                continue
             subdirs = [d for d in subdirs
                          if os.path.exists(os.path.join(ddir, d))]
             if len(files) == 0 and len(subdirs) == 0:
