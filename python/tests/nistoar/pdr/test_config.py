@@ -53,6 +53,25 @@ class TestConfig(test.TestCase):
         with self.assertRaises(NotImplementedError):
             cfg = config.resolve_configuration(cfgfile)
 
+    def test_merge_config(self):
+        app = {
+            "foo": "bar",
+            "goob": { "gurn": "cranston", "hank": "aaron" },
+            "zub": "dub",
+            "tell": { "a": 1 }
+        }
+        defc = {
+            "black": "blue",
+            "goob": { "gurn": "gomer", "patty": "duke" },
+            "tell": 1,
+            "zub": { "dub": 2}
+        }
+        out = config.merge_config(app, defc)
+        self.assertEqual(out['foo'], 'bar')
+        self.assertEqual(out['goob'], { 'gurn': 'cranston', "hank": "aaron",
+                                        'patty': "duke" })
+        self.assertEqual(out['zub'], 'dub')
+        self.assertEqual(out['tell'], {"a": 1})
 
 class TestLogConfig(test.TestCase):
 

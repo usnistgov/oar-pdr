@@ -48,6 +48,12 @@ class ValidationResults(object):
     """
     a container for collecting results from validation tests
     """
+    ERROR = ERROR
+    WARN  = WARN
+    REC   = REC
+    ALL   = ALL
+    PROB  = PROB
+    
     def __init__(self, bagname, want=ALL):
         """
         initialize an empty set of results for a particular bag
