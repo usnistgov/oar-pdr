@@ -538,6 +538,18 @@ class TestPreservationBagger(test.TestCase):
                                                    "metadata", "trial1.json")))
         self.assertTrue(os.path.isfile(os.path.join(self.bagr.bagdir,
                                       "metadata", "trial1.json", "nerdm.json")))
+        self.assertTrue(os.path.isdir(os.path.join(self.bagr.bagdir,
+                                                   "metadata", "trial2.json")))
+        self.assertTrue(os.path.isfile(os.path.join(self.bagr.bagdir,
+                                      "metadata", "trial2.json", "nerdm.json")))
+        self.assertTrue(os.path.isdir(os.path.join(self.bagr.bagdir,
+                                          "metadata", "trial3", "trial3a.json")))
+        self.assertTrue(os.path.isfile(os.path.join(self.bagr.bagdir,
+                            "metadata", "trial3", "trial3a.json", "nerdm.json")))
+        self.assertTrue(os.path.isdir(os.path.join(self.bagr.bagdir,
+                                                   "metadata", "sim.json")))
+        self.assertTrue(os.path.isfile(os.path.join(self.bagr.bagdir,
+                                      "metadata", "sim.json", "nerdm.json")))
 
         self.assertTrue(os.path.isfile(os.path.join(self.bagr.bagdir,
                                                    "data", "trial1.json")))
@@ -545,6 +557,8 @@ class TestPreservationBagger(test.TestCase):
                                                    "data", "trial2.json")))
         self.assertTrue(os.path.isfile(os.path.join(self.bagr.bagdir,
                                              "data", "trial3", "trial3a.json")))
+        self.assertFalse(os.path.isfile(os.path.join(self.bagr.bagdir,
+                                                     "data", "sim.json")))
 
         # test if we lost the downloadURLs
         mdf = os.path.join(self.bagr.bagdir,
