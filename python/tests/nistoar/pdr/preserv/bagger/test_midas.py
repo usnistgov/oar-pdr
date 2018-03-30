@@ -125,8 +125,8 @@ class TestMIDASMetadataBaggerMixed(test.TestCase):
         data = self.bagr.resmd
         self.assertEqual(data['@id'], "ark:/88434/mds00hw91v")
         self.assertEqual(data['doi'], "doi:10.18434/T4SW26")
-        self.assertEqual(len(data['components']), 3)
-        self.assertEqual(data['components'][2]['@type'][0], 'nrd:Hidden')
+        self.assertEqual(len(data['components']), 4)
+        self.assertEqual(data['components'][3]['@type'][0], 'nrd:Hidden')
         self.assertIsInstance(data['@context'], list)
         self.assertEqual(len(data['@context']), 2)
         self.assertEqual(data['@context'][1]['@base'], data['@id'])
@@ -148,6 +148,16 @@ class TestMIDASMetadataBaggerMixed(test.TestCase):
         # copy of trial3a.json in upload overrides
         self.assertEqual(datafiles["trial3/trial3a.json"],
                          os.path.join(uplsip, "trial3/trial3a.json"))
+
+    def test_data_file_distribs(self):
+        # pod has not been loaded yet
+        self.assertEqual(self.bagr.data_file_distribs(), [])
+
+        self.bagr.ensure_res_metadata()
+        files = self.bagr.data_file_distribs()
+        self.assertIn('trial1.json', files)
+        self.assertIn('trial2.json', files)
+        self.assertEqual(len(files), 3) # {trial1,trial2,sim}.json + access_comp
 
     def test_ensure_file_metadata(self):
         self.assertFalse(os.path.exists(self.bagdir))
