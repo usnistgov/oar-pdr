@@ -2,7 +2,6 @@ import { NgModule, ModuleWithProviders } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
-
 import { SearchService } from './search-service/index';
 import { FootbarComponent } from './footbar/index';
 import { HeadbarComponent } from './headbar/index';

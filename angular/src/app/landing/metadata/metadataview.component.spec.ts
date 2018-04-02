@@ -1,9 +1,8 @@
 import { MetadataView } from './metadataview.component';
-
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { By }           from '@angular/platform-browser';
 import { DebugElement } from '@angular/core';
-export function main() {
+
   describe('MetadataViewComponent', function () {
     let de: DebugElement;
     let comp: MetadataView;
@@ -24,4 +23,4 @@ export function main() {
   
     
   });
-}
+

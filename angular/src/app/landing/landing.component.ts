@@ -90,7 +90,7 @@ export class LandingComponent implements OnInit {
    */
   constructor(private route: ActivatedRoute, private el: ElementRef, 
               private titleService: Title, private commonVar : CommonVarService) {
-   
+
     this.commonVar.userObservable.subscribe(value => {
       this.loginuser = value;
       console.log(this.loginuser);

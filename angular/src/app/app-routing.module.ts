@@ -2,7 +2,6 @@ import { NgModule }             from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 
 //import { AboutComponent }   from './about/About.component';
-import { ToDoComponent } from './to-do/to-do.component';
 import { LandingAboutComponent } from './landingabout/landingabout.component';
 import { LandingComponent } from './landing/landing.component';
 import { NoidComponent } from './landing/noid.component';
@@ -12,7 +11,6 @@ import { SearchResolve } from './landing/search-service.resolve';
 const routes: Routes = [
   { path: '', redirectTo: '/aboutlanding', pathMatch: 'full' },
   { path: 'aboutlanding', component: LandingAboutComponent },
- { path: 'todo', component: ToDoComponent },
  {path: 'id/:id',
    children: [
    {

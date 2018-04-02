@@ -4,8 +4,9 @@ import { DebugElement } from '@angular/core';
 import { By } from '@angular/platform-browser';
 
 import { HeadbarComponent } from './headbar.component';
+import { CommonVarService } from '../common-var/common-var.service';
 
-export function main() {
+
   describe('AppComponent', () => {
     let component: HeadbarComponent;
     let fixture: ComponentFixture<HeadbarComponent>;
@@ -13,6 +14,8 @@ export function main() {
     beforeEach(async(() => {
       TestBed.configureTestingModule({
         declarations: [HeadbarComponent]
+        ,providers:[ CommonVarService]
+        ,imports:[ RouterTestingModule ]
       })
         .compileComponents();
     }));
@@ -23,4 +26,4 @@ export function main() {
       fixture.detectChanges();
     });
   });
-}
+

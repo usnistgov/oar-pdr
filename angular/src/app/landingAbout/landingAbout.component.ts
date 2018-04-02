@@ -1,9 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { DatePipe } from '@angular/common';
-import { FormBuilder, FormGroup } from '@angular/forms';
-
-import { Todo } from '../to-do/to-do';
-import { TodoService } from '../to-do/to-do.service';
+// import { FormBuilder, FormGroup } from '@angular/forms';
 
 
 
@@ -13,12 +10,10 @@ import { TodoService } from '../to-do/to-do.service';
   styleUrls: ['./landingAbout.component.css']
 })
 export class LandingAboutComponent implements OnInit {
-  formGroup: FormGroup;
-  todos: Todo[];
+ 
+ headerText: string;
 
-  headerText: string;
-
-  constructor(private _todoService: TodoService, private _formBuilder: FormBuilder) {
+  constructor() {
     
   }
 

@@ -4,10 +4,6 @@ import { NgModule } from '@angular/core';
 
 import {ButtonModule} from 'primeng/primeng';
 import { AppComponent } from './app.component';
-import { ToDoComponent } from './to-do/to-do.component';
-import { TodoService } from './to-do/to-do.service';
-// import { FontsService } from '../fonts/fonts.service';
-
 import { PLATFORM_ID, APP_ID, Inject } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { AppRoutingModule } from './app-routing.module';
@@ -47,7 +43,6 @@ import {NgbModule} from '@ng-bootstrap/ng-bootstrap';
 @NgModule({
   declarations: [
     AppComponent,
-    ToDoComponent,
     LandingAboutComponent,
     LandingComponent,
     // SimilarsComponent,
@@ -73,7 +68,7 @@ import {NgbModule} from '@ng-bootstrap/ng-bootstrap';
    
   ],
   exports: [Collaspe],
-  providers: [TodoService,  Title, SearchService,SearchResolve, CommonVarService ],
+  providers: [ Title, SearchService,SearchResolve, CommonVarService ],
   bootstrap: [AppComponent],
   schemas: [ CUSTOM_ELEMENTS_SCHEMA ,NO_ERRORS_SCHEMA]
 

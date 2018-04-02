@@ -15,7 +15,7 @@ import { Collaspe } from './collapse.directive';
 
 })
 class TestComponent { }
-export function main() {
+
 describe('Collaspe Directive', () => {
   let component: TestComponent;
   let fixture: ComponentFixture<TestComponent>;
@@ -41,4 +41,4 @@ describe('Collaspe Directive', () => {
   });
 
 
-  });}
+  });
