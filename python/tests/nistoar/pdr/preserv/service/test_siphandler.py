@@ -1,4 +1,4 @@
-import os, pdb, sys, logging
+import os, pdb, sys, logging, yaml
 import unittest as test
 
 from nistoar.testing import *
@@ -48,6 +48,9 @@ class TestMIDASSIPHandler(test.TestCase):
 
         shutil.copytree(self.sipdata, os.path.join(self.revdir, "1491"))
 
+        with open(os.path.join(datadir, "bagger_conf.yml")) as fd:
+            baggercfg = yaml.load(fd)
+            
         self.config = {
             "working_dir": self.workdir,
             "store_dir": self.store,
@@ -57,7 +60,7 @@ class TestMIDASSIPHandler(test.TestCase):
             "status_manager": { "cachedir": self.statusdir },
             "logdir": self.workdir,
             "bagparent_dir": "_preserv",
-            "bagger": { 'relative_to_indir': True },
+            "bagger": baggercfg,
             "ingester": {
                 "data_dir":  os.path.join(self.workdir, "ingest"),
                 "submit": "none"
@@ -92,6 +95,7 @@ class TestMIDASSIPHandler(test.TestCase):
 
     def test_bagit(self):
         self.assertEqual(self.sip.state, status.FORGOTTEN)
+        # pdb.set_trace()
         self.sip.bagit()
         self.assertTrue(os.path.exists(os.path.join(self.store, 
                                                 self.midasid+".mbag0_2-0.zip")))

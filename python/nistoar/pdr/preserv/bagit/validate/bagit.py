@@ -8,7 +8,7 @@ from urlparse import urlparse
 from .base import (Validator, ValidatorBase, ALL, ValidationResults,
                    ERROR, WARN, REC, ALL, PROB)
 from ..bag import NISTBag
-from ..builder import checksum_of
+from ....utils import checksum_of
 
 csfunctions = {
     "sha256":  checksum_of

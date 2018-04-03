@@ -35,3 +35,5 @@ echo cp -r $SOURCE_DIR/python/tests/nistoar/pdr/preserv/data/midassip \
            $INSTALL_DIR/var/testmidas/midas
 cp -r $SOURCE_DIR/python/tests/nistoar/pdr/preserv/data/midassip \
       $INSTALL_DIR/var/testmidas/midas
+echo cp -r $SOURCE_DIR/etc $INSTALL_DIR
+cp -r $SOURCE_DIR/etc $INSTALL_DIR

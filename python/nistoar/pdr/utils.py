@@ -2,7 +2,7 @@
 Utility functions useful across the pdr package
 """
 from collections import OrderedDict, Mapping
-import json, re
+import hashlib, json, re
 
 from .exceptions import (NERDError, PODError, StateException)
 
@@ -119,4 +119,17 @@ def build_mime_type_map(filelist):
         update_mimetypes_from_file(out, file)
     return out
 
+
+def checksum_of(filepath):
+    """
+    return the checksum for the given file
+    """
+    bfsz = 10240000   # 10 MB buffer
+    sum = hashlib.sha256()
+    with open(filepath) as fd:
+        while True:
+            buf = fd.read(bfsz)
+            if not buf: break
+            sum.update(buf)
+    return sum.hexdigest()
 

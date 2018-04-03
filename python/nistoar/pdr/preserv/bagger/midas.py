@@ -16,7 +16,7 @@ from .base import SIPBagger, moddate_of, checksum_of, read_nerd, read_pod
 from .base import sys as _sys
 from ..bagit.builder import BagBuilder, NERDMD_FILENAME
 from ... import def_merge_etcdir
-from .. import (SIPDirectoryError, SIPDirectoryNotFound,
+from .. import (SIPDirectoryError, SIPDirectoryNotFound, AIPValidationError,
                 ConfigurationException, StateException, PODError)
 from nistoar.nerdm.merge import MergerFactory
 
@@ -120,6 +120,15 @@ class MIDASMetadataBagger(SIPBagger):
         
         super(MIDASMetadataBagger, self).__init__(workdir, config)
 
+        # make sure the ID provided matches the one in the pod file
+        podfile = self.find_pod_file()
+        if podfile:
+            # this will raise a PODError if the file is not valid
+            pod = read_pod(podfile)
+            if pod.get('identifier') != midasid:
+                raise SIPDirectoryNotFound(msg="No matching SIP available",
+                                           sys=self)
+
         self.bagbldr = BagBuilder(self.bagparent, self.name,
                                   self.cfg.get('bag_builder', {}),
                                   minter=minter,
@@ -185,8 +194,12 @@ class MIDASMetadataBagger(SIPBagger):
                 log.info("Detected change in POD file (by checksum); updating.")
 
         if update:
+            # Note: setting savefilemd=True because there may be files that are
+            # part of the data set but don't exist in the input directories.
+            # These could be files available via external URLs or files preserved
+            # as part of a previous version.  
             self.resmd = self.bagbldr.add_ds_pod(self.inpodfile, convert=True,
-                                                 savefilemd=False)
+                                                 savefilemd=True)
         else:
             self.resmd = read_nerd(outnerd)
 
@@ -231,7 +244,7 @@ class MIDASMetadataBagger(SIPBagger):
         """
         examine the given file and update the file metadata if necessary.
 
-        If the file has an file modication time later than the corresponding 
+        If the file has a file modication time later than the corresponding 
         file metadata (if the latter exists), the metadata will be updated.  
         For smaller files, the files checksum will be checked as well:  if the 
         checksum is different from the previously record one, the file metadata
@@ -247,29 +260,41 @@ class MIDASMetadataBagger(SIPBagger):
         nerdfile = self.bagbldr.nerdm_file_for(destpath)
 
         update = False
-        if not os.path.exists(nerdfile) or \
-           moddate_of(inpath) > moddate_of(nerdfile):
+        if not os.path.exists(nerdfile):
+            update = True
+            log.info("Initializing metadata for datafile, %s", destpath)
+        elif moddate_of(inpath) > moddate_of(nerdfile):
             # data file is newer; update its metadata
             update = True
-            log.info("Detected change in data file (by date); updating " +
+            log.info("Detected change in data file (by date); updating %s",
                      destpath)
         elif os.stat(inpath).st_size \
              < self.cfg.get('update_by_checksum_size_lim', 0):
             # not implemented yet
             pass
+
+        nerd = None
+        if resmd:
+            # look for applicable metadata in the resource metadata
+            comps = resmd.get('components', [])
+            match = [c for c in comps if 'filepath' in c and
+                                         c['filepath'] == destpath]
+            if match:
+                nerd = match[0]
+                missing = [k for k in "size mediaType checksum".split()
+                             if k not in nerd.keys()]
+                if missing:
+                    update = True
+                    log.info("Extending file metadata for %s", destpath)
         
         if update:
-            nerd = self.bagbldr.init_filemd_for(destpath, examine=inpath)
-
-            if resmd:
-                # look for applicable metadata in the resource metadata
-                comps = resmd.get('components', [])
-                match = [c for c in comps if '@id' in c and
-                                             c['@id'] == nerd['@id']]
-                if match:
-                    conv = self.cfg.get('component_merge_convention', 'dev')
-                    merger = self._merger_for(conv, "DataFile")
-                    nerd = merger.merge(match[0], nerd)
+            init = self.bagbldr.init_filemd_for(destpath, examine=inpath)
+            if nerd:
+                conv = self.cfg.get('component_merge_convention', 'dev')
+                merger = self._merger_for(conv, "DataFile")
+                nerd = merger.merge(nerd, init)
+            else:
+                nerd = init
 
             self.bagbldr.add_metadata_for_file(destpath, nerd)
 
@@ -314,9 +339,15 @@ class MIDASMetadataBagger(SIPBagger):
         (if nodata=False) copied over.  
         """
         self.bagbldr.ensure_bag_structure()
-        self.datafiles = self.data_file_inventory();
 
-        # what files are in the bag now but not in the input area?
+        # get the list of data files found in the input directories
+        self.datafiles = self.data_file_inventory()
+
+        # get the list of data files described in the POD record
+        fdists = self.data_file_distribs()
+
+        # what files are in the bag now but not in the input area and
+        # were not enumerated in the input POD file?
         remove = set()
         mdatadir = os.path.join(self.bagdir,"metadata")
         for dir, subdirs, files in os.walk(mdatadir):
@@ -324,7 +355,8 @@ class MIDASMetadataBagger(SIPBagger):
                 continue
             if NERDMD_FILENAME in files:
                 filepath = dir[len(mdatadir)+1:]
-                if filepath not in self.datafiles:
+                if filepath not in self.datafiles and \
+                   filepath not in fdists:
                     # found a component with this filepath, but is it a datafile?
                     mdata = read_nerd(os.path.join(dir,NERDMD_FILENAME))
                     if any([":DataFile" in t for t in mdata.get("@type", [])]):
@@ -344,6 +376,23 @@ class MIDASMetadataBagger(SIPBagger):
         # and remove the removed files (and trim emptied subcollections)
         for filepath in remove:
             self.bagbldr.remove_component(filepath, True)
+
+    def data_file_distribs(self):
+        """
+        return a list of filepaths for files described in the POD record.
+        This list may include files not in one of the input disks but is 
+        available from an external URL.  
+        """
+        out = []
+        if self.bagbldr and self.bagbldr._bag:
+            podf = self.bagbldr._bag.pod_file()
+            if os.path.exists(podf):
+                pod = self.bagbldr._bag.read_pod(podf)
+                nerd = self.bagbldr.pod2nrd.convert_data(pod, "ZZZ")
+                if 'components' in nerd:
+                    out = [c['filepath'] for c in nerd['components']
+                                         if 'filepath' in c]
+        return out
 
         
 class PreservationBagger(SIPBagger):
@@ -545,6 +594,54 @@ class PreservationBagger(SIPBagger):
         if finalcfg.get('ensure_component_metadata') is None:
             finalcfg['ensure_component_metadata'] = False
         self.bagbldr.finalize_bag(finalcfg)
+        if finalcfg.get('validate', True):
+            # this will raise an exception if any issues are found
+            self._validate(finalcfg.get('validator', {}))
 
         return self.bagbldr.bagdir
 
+    def _validate(self, config):
+        """
+        run a final validation on the output bag
+
+        :param config dict:  a configuration to pass to the validator; see 
+                             nistoar.pdr.preserv.bagit.validate for details.
+                             If not provided, the configuration for this 
+                             builder will be checked for the 'validator' 
+                             property to use as the configuration.
+        """
+        ERR = "error"
+        WARN= "warn"
+        REC = "rec"
+        raiseon_words = [ ERR, WARN, REC ]
+        
+        raiseon = config.get('raise_on', WARN)
+        if raiseon and raiseon not in raiseon_words:
+            raise ConfigurationException("raise_on property not one of "+
+                                         str(raiseon) + ": " + raiseon)
+        
+        res = self.bagbldr.validate(config)
+
+        itp = res.PROB
+        if raiseon:
+            itp = ((raiseon == ERR)  and res.ERR)  or \
+                  ((raiseon == WARN) and res.PROB) or res.ALL
+            
+        issues = res.failed(itp)
+        if len(issues):
+            log.warn("Bag Validation issues detected for id="+self.name)
+            for iss in issues:
+                if iss.type == iss.ERROR:
+                    log.error(str(iss))
+                elif iss.type == iss.WARN:
+                    log.warn(str(iss))
+                else:
+                    log.info(str(iss))
+
+            if raiseon:
+                raise AIPValidationError("Bag Validation errors detected",
+                                         errors=[str(i) for i in issues])
+
+        else:
+            log.info("%s: bag validation completed without issues",
+                     self.bagbldr.bagname)

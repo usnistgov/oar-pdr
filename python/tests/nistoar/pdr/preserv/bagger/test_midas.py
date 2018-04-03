@@ -38,6 +38,7 @@ class TestMIDASMetadataBaggerMixed(test.TestCase):
 
     testsip = os.path.join(datadir, "midassip")
     midasid = '3A1EE2F169DD3B8CE0531A570681DB5D1491'
+    wrongid = '333333333333333333333333333333331491'
 
     def setUp(self):
         self.tf = Tempfiles()
@@ -68,6 +69,11 @@ class TestMIDASMetadataBaggerMixed(test.TestCase):
 
         self.assertTrue(os.path.exists(self.bagparent))
         self.assertFalse(os.path.exists(self.bagdir))
+
+    def test_wrong_ediid(self):
+        with self.assertRaises(midas.SIPDirectoryNotFound):
+            self.bagr = midas.MIDASMetadataBagger(self.wrongid, self.bagparent,
+                                                  self.revdir, self.upldir)
 
     def test_find_pod_file(self):
         self.assertEqual(self.bagr.find_pod_file(),
@@ -119,8 +125,8 @@ class TestMIDASMetadataBaggerMixed(test.TestCase):
         data = self.bagr.resmd
         self.assertEqual(data['@id'], "ark:/88434/mds00hw91v")
         self.assertEqual(data['doi'], "doi:10.18434/T4SW26")
-        self.assertEqual(len(data['components']), 3)
-        self.assertEqual(data['components'][2]['@type'][0], 'nrd:Hidden')
+        self.assertEqual(len(data['components']), 4)
+        self.assertEqual(data['components'][3]['@type'][0], 'nrd:Hidden')
         self.assertIsInstance(data['@context'], list)
         self.assertEqual(len(data['@context']), 2)
         self.assertEqual(data['@context'][1]['@base'], data['@id'])
@@ -142,6 +148,16 @@ class TestMIDASMetadataBaggerMixed(test.TestCase):
         # copy of trial3a.json in upload overrides
         self.assertEqual(datafiles["trial3/trial3a.json"],
                          os.path.join(uplsip, "trial3/trial3a.json"))
+
+    def test_data_file_distribs(self):
+        # pod has not been loaded yet
+        self.assertEqual(self.bagr.data_file_distribs(), [])
+
+        self.bagr.ensure_res_metadata()
+        files = self.bagr.data_file_distribs()
+        self.assertIn('trial1.json', files)
+        self.assertIn('trial2.json', files)
+        self.assertEqual(len(files), 3) # {trial1,trial2,sim}.json + access_comp
 
     def test_ensure_file_metadata(self):
         self.assertFalse(os.path.exists(self.bagdir))
@@ -421,9 +437,21 @@ class TestPreservationBagger(test.TestCase):
         testsip = os.path.join(self.testsip, "review")
         self.revdir = os.path.join(self.workdir, "review")
         shutil.copytree(testsip, self.revdir)
-        config = { 'relative_to_indir': True,
-                   'bag_builder': { 'copy_on_link_failure': False }
-               }
+        config = {
+            'relative_to_indir': True,
+            'bag_builder': {
+                'copy_on_link_failure': False,
+                'init_bag_info': {
+                    'Source-Organization':
+                        "National Institute of Standards and Technology",
+                    'Contact-Email': ["datasupport@nist.gov"],
+                    'Organization-Address': [
+                        "100 Bureau Dr., Gaithersburg, MD 20899"],
+                    'NIST-BagIt-Version': "0.2",
+                    'Multibag-Version': "0.2"
+                }
+            }
+        }
         
         self.bagr = midas.PreservationBagger(self.midasid, '_preserv',
                                              self.revdir, self.mddir, config)
@@ -510,6 +538,18 @@ class TestPreservationBagger(test.TestCase):
                                                    "metadata", "trial1.json")))
         self.assertTrue(os.path.isfile(os.path.join(self.bagr.bagdir,
                                       "metadata", "trial1.json", "nerdm.json")))
+        self.assertTrue(os.path.isdir(os.path.join(self.bagr.bagdir,
+                                                   "metadata", "trial2.json")))
+        self.assertTrue(os.path.isfile(os.path.join(self.bagr.bagdir,
+                                      "metadata", "trial2.json", "nerdm.json")))
+        self.assertTrue(os.path.isdir(os.path.join(self.bagr.bagdir,
+                                          "metadata", "trial3", "trial3a.json")))
+        self.assertTrue(os.path.isfile(os.path.join(self.bagr.bagdir,
+                            "metadata", "trial3", "trial3a.json", "nerdm.json")))
+        self.assertTrue(os.path.isdir(os.path.join(self.bagr.bagdir,
+                                                   "metadata", "sim.json")))
+        self.assertTrue(os.path.isfile(os.path.join(self.bagr.bagdir,
+                                      "metadata", "sim.json", "nerdm.json")))
 
         self.assertTrue(os.path.isfile(os.path.join(self.bagr.bagdir,
                                                    "data", "trial1.json")))
@@ -517,6 +557,8 @@ class TestPreservationBagger(test.TestCase):
                                                    "data", "trial2.json")))
         self.assertTrue(os.path.isfile(os.path.join(self.bagr.bagdir,
                                              "data", "trial3", "trial3a.json")))
+        self.assertFalse(os.path.isfile(os.path.join(self.bagr.bagdir,
+                                                     "data", "sim.json")))
 
         # test if we lost the downloadURLs
         mdf = os.path.join(self.bagr.bagdir,

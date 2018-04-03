@@ -12,6 +12,8 @@ from .base import (Validator, ValidatorBase, ALL, ValidationResults,
 from .bagit import BagItValidator
 from .multibag import MultibagValidator
 from ..bag import NISTBag
+from ..... import pdr
+from .. import ConfigurationException
 
 DEF_BASE_NERDM_SCHEMA = "https://data.nist.gov/od/dm/nerdm-schema/v0.1#"
 DEF_NERDM_RESOURCE_SCHEMA = DEF_BASE_NERDM_SCHEMA + "/definitions/Resource"
@@ -27,17 +29,23 @@ class NISTBagValidator(ValidatorBase):
     A validator that runs tests for compliance for the NIST Preservation Bag
     Profile.  Specifically, this validator only covers the NIST Profile-specific
     parts (excluding Multibag and basic BagIt compliance; see 
-    PreservationBagValidator)
+    NISTAIPValidator)
     """
     profile = ("NIST", "0.2")
     namere = re.compile("^(\w+).mbag(\d+)_(\d+)-(\d+)$")
     
     def __init__(self, config=None):
         super(NISTBagValidator, self).__init__(config)
-        self.validate = self.cfg.get('validate_metadata', True)
+        self._validatemd = self.cfg.get('validate_metadata', True)
         self.mdval = None
-        if self.validate:
-            schemadir = self.cfg.get('nerdm_schema_dir')
+        if self._validatemd:
+            schemadir = self.cfg.get('nerdm_schema_dir', pdr.def_schema_dir)
+            if not schemadir:
+                raise ConfigurationException("Need to set nerdm_schema_dir when "
+                                             +"validate_metadata is True")
+            if not os.path.exists(schemadir):
+                raise ConfigurationException("nerdm_schema_dir directory does "+
+                                             "exist: " + schemadir)
             self.mdval = {
                 "_": ejs.ExtValidator.with_schema_dir(schemadir, ejsprefix='_'),
                 "$": ejs.ExtValidator.with_schema_dir(schemadir, ejsprefix='$')
@@ -224,7 +232,7 @@ class NISTBagValidator(ValidatorBase):
             return out
         
         comm = None
-        if self.validate:
+        if self._validatemd:
             flav = self._get_mdval_flavor(data)
             schemauri = data.get(flav+"schema")
             if not schemauri:
@@ -280,7 +288,7 @@ class NISTBagValidator(ValidatorBase):
             out._err(t, False, comm)
             return out
 
-        if self.validate:
+        if self._validatemd:
             flav = self._get_mdval_flavor(data)
             schemauri = data.get(flav+"schema")
             if not schemauri:
@@ -443,7 +451,7 @@ class NISTBagValidator(ValidatorBase):
                     comm = [path + ": " + str(data['@type'])]
                 out._err(ft, ok, comm)
 
-                if self.validate:
+                if self._validatemd:
                     flav = self._get_mdval_flavor(data)
                     schemauri = data.get(flav+"schema")
                     if not schemauri:
@@ -474,7 +482,7 @@ class NISTBagValidator(ValidatorBase):
                     comm = [path + ": " + str(data['@type'])]
                 out._err(ct, ok, comm)
 
-                if self.validate:
+                if self._validatemd:
                     flav = self._get_mdval_flavor(data)
                     schemauri = data.get(flav+"schema")
                     if not schemauri:
@@ -529,11 +537,11 @@ class NISTAIPValidator(AggregatedValidator):
     def __init__(self, config=None):
         if not config:
             config = {}
-        bagit = BagitValidator(config=config.get("bagit", {}))
+        bagit = BagItValidator(config=config.get("bagit", {}))
         multibag = MultibagValidator(config=config.get("multibag", {}))
         nist = NISTBagValidator(config=config.get("nist", {}))
 
-        super(PreservationBagValidator, self).__init__(
+        super(NISTAIPValidator, self).__init__(
             bagit,
             multibag,
             nist
