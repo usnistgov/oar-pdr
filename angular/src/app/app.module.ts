@@ -52,7 +52,7 @@ import {NgbModule} from '@ng-bootstrap/ng-bootstrap';
   ],
   imports: [
     //BrowserModule,
-    BrowserModule.withServerTransition({ appId: 'to-do-service' }),
+    BrowserModule.withServerTransition({ appId: 'PDR-LandingPage' }),
     FormsModule,
     ReactiveFormsModule,
     AppRoutingModule,

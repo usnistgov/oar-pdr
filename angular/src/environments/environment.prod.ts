@@ -11,10 +11,10 @@ declare var OAR_APP_ENV: any;
 
 export const environment = {
   production: false,
-  RMMAPI: OAR_APP_ENV.RMMAPI,
-  SDPAPI: OAR_APP_ENV.SDPAPI,
-  PDRAPI: OAR_APP_ENV.PDRAPI,
-  DISTAPI: OAR_APP_ENV.DISTAPI,
-  METAPI: OAR_APP_ENV.METAPI,
-  LANDING: OAR_APP_ENV.LANDING
+  RMMAPI: "http://data.nist.gov/rmm/",
+  SDPAPI:  'http://testdata.nist.gov/sdp/',
+  PDRAPI:  'http://localhost:5555/#/id/',
+  DISTAPI: 'http://localhost/disturl/',
+  METAPI:  'http://localhost/metaurl/',
+  LANDING: 'http://data.nist.gov/rmm/'
 };
