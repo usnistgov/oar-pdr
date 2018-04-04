@@ -1,193 +1,149 @@
-
 .style-horizontal {
-    border: 0;
-    height: 1px;
-    background: #333;
-    background-image: linear-gradient(to right, #ccc, #333, #ccc);
-  }
-  
-  .background-white
-  {
-    background-color:#ffffff;
-  }
-  
-  .white
-  {
-    color:#ffffff;
-  }
-  
-  .title
-  {
-    color:#1471AE;
-    font-size: 27px;
-    clear: both;
-    font-family: "Source Sans Pro", "Helvetica Neue", "Helvetica", "Roboto", "Arial", sans-serif;
-    line-height: 1.3;
-    margin-bottom: .5em;
-    margin-top: 1.5em;
-  }
-  
-  .recordType{
-    font-family: Arial, Helvetica, sans-serif; 
-    color:#707070; 
-    font-size: 14;
-  }
-  
-  :host /deep/ .ui-tree {
-    padding: 0.625em 1em/2;
-    font-weight:bold;
-    font-size: small;
-  }
-  
-  
-  :host /deep/ .ui-treenode-label{
-    font-style: italic;
-    color: #1471AE;
-  
-  }
-  :host /deep/ .ui-treenode{
-    background-color:#ffffff;
-    word-wrap: break-word;
-  }
-  
-  
-  :host /deep/ .ui-tree .ui-treenode-children{
-    background-color:#ffffff;
-  }
-  
-  
-  :host /deep/ .ui-tree .ui-tree-container {
-    /*background-color: #f399f3;*/
-    /*width: 250px;*/
-    position: relative;
-    float: left;
-  }
-  
-  
-  
-  /*:host /deep/ .ui-menuitem{
-    font-style: italic;
-  
-  }*/
-  
-  /*:host /deep/ .ui-menu{
-    background-color: #004e8e;
-  }*/
-  
-  /*:host /deep/ .rightMenuStyle >.ui-menu  {
-    font-style: italic;
-    background-color: #e1dcdc;
-  }*/
-  
-  
-  
-  
-  
-  :host /deep/ .rightMenuStyle > .ui-menu  .ui-menu-list li.ui-widget-header{
-    background-color: #B8D4E6;
-    padding: 2%;
-    padding-left: 5%;
-    font-weight: bold;
-    font-family: "Source Sans Pro", "Helvetica Neue", "Helvetica", "Roboto", "Arial", sans-serif;
- 
-    
-  }
-  
-  :host /deep/ .rightMenuStyle > .ui-menu .ui-menu-list li.ui-menuitem .ui-menuitem-link{
-    line-height: 0;
-    min-height: 0;
-    padding: 2px;
-    font-family: "Source Sans Pro", "Helvetica Neue", "Helvetica", "Roboto", "Arial", sans-serif;
-    padding-left: 5%;
-    
-    /*font-family: 'Franklin Gothic Medium';*/
-    /*font-style: italic; font-size: 10pt;*/
-  
-  }
-  
-  :host /deep/ .rightMenuStyle > .ui-menu .ui-menu-list li.ui-menuitem{
-    background-color:#E7F0F6;
-    font-family: "Source Sans Pro", "Helvetica Neue", "Helvetica", "Roboto", "Arial", sans-serif;
- 
-    word-wrap: break-word;
-  
-  }
-
-  :host /deep/ .rightMenuStyle > .ui-menu {
-    padding: 0 0;
-    min-width:  8.5em;
-    font-family: "Source Sans Pro", "Helvetica Neue", "Helvetica", "Roboto", "Arial", sans-serif;
- 
-  }
-
-  
-  /* Description section */
-  .welldesc{
-    background-color:#006495;
-    text-align: left;
-    color: white;
-  }
-  :host /deep/ citationDialog > button.ui-button-icon-only{  
-    border-radius: 50%;
-    width: 1.5em;
-    height: 1.5em;
-  }
-  
-  .fileinfosection{
-    background-color:#F3F3F3; 
-    padding: 2.5rem 2.5rem 2.5rem 2.5rem;
-  }
-  
-  .fileinfocard{
-    padding: 0 2.5rem 2.5rem 2.5rem;
-  }
-  .landingcard{
-    background-color:#ffffff;
-    /* padding: 0 7.5rem 2.5rem 2.5rem; */
-    padding: 2.5rem 2.5rem 2.5rem 2.5rem;
-  }
-
-  .contactcard{
-    font-family: sans-serif;
-    font-style: inherit;
-    color:#484646; 
-    font-size: 12px;
-    width: 17.5em;
-    min-width:  8.5em; 
-    word-wrap: break-word;
-  }
-  /* body .ui-widget-content */
-  .citeString{
-    font-family:  sans-serif;
-    font-style:italic;
-    color:#484646; 
-    font-size: 12;
-  }
-  .copyCite{
-    position:relative;
-    float:right;
-  }
-  
-  :host /deep/ .ui-widget-content{
-    border: 0px;
-    
-  }
-
-  .button {
-    display: none;
-  }
-  span:hover + .button {
-    display: inline-block;
-  }
-.font12{
-  font-size: 12px;
+  border: 0;
+  height: 1px;
+  background: #333;
+  background-image: linear-gradient(to right, #ccc, #333, #ccc);
 }
 
-u.dotted{
-  border-bottom: 1px dashed #999;
-  text-decoration: none; 
+.background-white
+{
+  background-color:#ffffff;
 }
-hr {
-    margin-top: 1px;
-    margin-bottom: 1px;
-  }
+
+.white
+{
+  color:#ffffff;
+}
+
+.title
+{
+  color:#1471AE;
+  font-size: 20px;
+}
+
+.recordType{
+  font-family: Arial, Helvetica, sans-serif; 
+  color:#707070; 
+  font-size: 14;
+}
+
+:host /deep/ .ui-tree {
+  padding: 0.625em 1em/2;
+  font-weight:bold;
+  font-size: small;
+}
+
+
+:host /deep/ .ui-treenode-label{
+  font-style: italic;
+  color: #1471AE;
+
+}
+:host /deep/ .ui-treenode{
+  background-color:#ffffff;
+  word-wrap: break-word;
+}
+
+
+:host /deep/ .ui-tree .ui-treenode-children{
+  background-color:#ffffff;
+}
+
+
+:host /deep/ .ui-tree .ui-tree-container {
+  /*background-color: #f399f3;*/
+  /*width: 250px;*/
+  position: relative;
+  float: left;
+}
+
+
+:host /deep/ .leftMenuStyle > .ui-menu  .ui-menu-list li.ui-widget-header{
+  background-color: #B4B0B0;
+  font-weight: bold;
+  /*font-family: 'Franklin Gothic Urw Cond';*/
+  font-family: Sans-Serif;
+  padding: 2%;
+  padding-left: 5%;
+}
+:host /deep/ .leftMenuStyle > .ui-menu .ui-menu-list li.ui-menuitem .ui-menuitem-link{
+  line-height: 0;
+  min-height: 1.5em;
+  /*font-family: 'Franklin Gothic Urw Cond';*/
+  font-family: 'Roboto';
+  background-color: #e8e7e7;
+  word-wrap: break-word;
+  /*padding: 5%; */
+}
+
+:host /deep/ .leftMenuStyle > .ui-menu .ui-menu-list li.ui-menuitem .ui-menuitem-link:hover {
+  background-color: #ffffff;
+  color: #000000; }
+
+
+:host /deep/ .rightMenuStyle > .ui-menu  .ui-menu-list li.ui-widget-header{
+  background-color: #B8D4E6;
+  padding: 2%;
+  padding-left: 5%;
+  font-family: 'Roboto';
+  font-weight: bold;
+}
+
+:host /deep/ .rightMenuStyle > .ui-menu .ui-menu-list li.ui-menuitem .ui-menuitem-link{
+  line-height: 0;
+  min-height: 0;
+  padding: 2px;
+  font-family: 'Roboto';
+  padding-left: 5%;
+  /*font-family: 'Franklin Gothic Medium';*/
+  /*font-style: italic; font-size: 10pt;*/
+
+}
+
+:host /deep/ .rightMenuStyle > .ui-menu .ui-menu-list li.ui-menuitem{
+  background-color:#E7F0F6;
+  font-family: 'Sans-Serif';
+  word-wrap: break-word;
+}
+
+:host /deep/ .ui-widget-content{
+  border: 0px;
+}
+
+:host /deep/ .ui-state-active, :host /deep/ .ui-state-highlight{
+  background-color: #E7F0F6;
+}
+/* Description section */
+.welldesc{
+  background-color:#006495;
+  text-align: left;
+  color: white;
+}
+:host /deep/ citationDialog > button.ui-button-icon-only{  
+  border-radius: 50%;
+  width: 1.5em;
+  height: 1.5em;
+}
+
+.fileinfosection{
+  background-color:#F3F3F3; 
+  padding: 2.5rem 2.5rem 2.5rem 2.5rem;
+}
+
+.fileinfocard{
+  padding: 0 2.5rem 2.5rem 2.5rem;
+}
+.landingcard{
+  padding: 2.5rem 2.5rem 2.5rem 2.5rem;
+  margin-bottom: 0rem;
+}
+.citeString{
+  font-family:  Franklin Gothic Urw;
+  font-style:italic;
+  color:#484646; 
+  font-size: 12;
+}
+.copyCite{
+  position:relative;
+  float:right;
+}

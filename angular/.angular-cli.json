@@ -19,11 +19,13 @@
       "testTsconfig": "tsconfig.spec.json",
       "prefix": "app",
       "styles": [
-        "styles.scss",
+        "styles.scss",       
         "../node_modules/bootstrap/dist/css/bootstrap.min.css",
         "../node_modules/primeng/resources/primeng.css",
-        "./styles/font-awesome/css/font-awesome.min.css"
-        
+        "./styles/ultima-ng/layout/css/layout-indigo.css",
+        "./styles/ultima-ng/theme/theme-indigo.css",
+        "./styles/font-awesome/css/font-awesome.min.css",
+        "./styles/main.css"
          ],
       "scripts": [
         "../node_modules/lodash/lodash.min.js",
@@ -53,16 +55,15 @@
       "tsconfig": "tsconfig.server.json",
       "testTsconfig": "tsconfig.spec.json",
       "prefix": "app",
-    
-
       "styles": [
-        "styles.scss",
-               
+        "styles.scss",       
         "../node_modules/bootstrap/dist/css/bootstrap.min.css",
         "../node_modules/primeng/resources/primeng.css",
-        "./styles/font-awesome/css/font-awesome.min.css"
-
-         ],
+        "./styles/ultima-ng/layout/css/layout-indigo.css",
+        "./styles/ultima-ng/theme/theme-indigo.css",
+        "./styles/font-awesome/css/font-awesome.min.css",
+        "./styles/main.css"
+       ],
       "scripts": [
         "../node_modules/lodash/lodash.min.js",
         "../node_modules/jspdf/dist/jspdf.min.js",

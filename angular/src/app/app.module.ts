@@ -40,6 +40,8 @@ import { HttpClientModule } from '@angular/common/http';
 import { HttpModule } from '@angular/http';
 import {NgbModule} from '@ng-bootstrap/ng-bootstrap';
 
+import { ErrorComponent,UserErrorComponent } from './landing/error.component';
+
 @NgModule({
   declarations: [
     AppComponent,
@@ -48,7 +50,8 @@ import {NgbModule} from '@ng-bootstrap/ng-bootstrap';
     // SimilarsComponent,
     //SanitizeHtmlDirective,
     Collaspe,MetadataComponent,FileDetailsComponent,
-    DescriptionComponent,  KeyValuePipe, MetadataView, NoidComponent,NerdmComponent
+    DescriptionComponent,  KeyValuePipe, MetadataView, NoidComponent,NerdmComponent,
+    ErrorComponent,UserErrorComponent 
   ],
   imports: [
     //BrowserModule,

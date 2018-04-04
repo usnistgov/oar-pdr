@@ -7,6 +7,7 @@ import { LandingComponent } from './landing/landing.component';
 import { NoidComponent } from './landing/noid.component';
 import { NerdmComponent } from './landing/nerdm.component';
 import { SearchResolve } from './landing/search-service.resolve';
+import { ErrorComponent, UserErrorComponent } from './landing/error.component';
 
 const routes: Routes = [
   { path: '', redirectTo: '/aboutlanding', pathMatch: 'full' },
@@ -47,6 +48,23 @@ const routes: Routes = [
     {
       path: '',
       component: NerdmComponent
+    }
+  ]
+},{
+  path: 'error/:id',
+  children: [
+    {
+      path: '',
+      component: ErrorComponent
+    }
+  ]
+}
+,{
+  path: 'usererror/:id',
+  children: [
+    {
+      path: '',
+      component: UserErrorComponent
     }
   ]
 }
