@@ -1004,7 +1004,7 @@ class TestBuilder(test.TestCase):
         self.assertIn("         Phone: 1-301-975-", lines[12])
         self.assertIn("Software to", lines[14])
         self.assertIn("More information:", lines[17])
-        self.assertIn("https://dx.doi.org/10.18434/", lines[18])
+        self.assertIn("https://doi.org/10.18434/", lines[18])
             
 
 if __name__ == '__main__':

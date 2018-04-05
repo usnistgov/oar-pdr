@@ -832,7 +832,7 @@ class BagBuilder(PreservationSystem):
 
                 # landing page
                 if nerdm.get('doi'):
-                    print("More information:\nhttps://dx.doi.org/" +
+                    print("More information:\nhttps://doi.org/" +
                           nerdm.get('doi'), file=fd)
                 elif nerdm.get('landingPage'):
                     print("More information:\n" + nerdm.get('landingPage'),
