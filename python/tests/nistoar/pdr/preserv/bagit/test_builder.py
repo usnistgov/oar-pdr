@@ -71,7 +71,8 @@ class TestBuilder(test.TestCase):
 
         baginfo = self.bag.cfg['init_bag_info']
         self.assertEqual(baginfo['NIST-BagIt-Version'], 'X.3')
-        self.assertEqual(baginfo['Contact-Email'], ["datasupport@nist.gov"])
+        self.assertEqual(baginfo['Contact-Email'], ["datasupport@nist.gov"],
+                         "Failed to load default config params")
 
     def test_download_url(self):
         self.assertEqual(self.bag._download_url('goob',
@@ -265,7 +266,7 @@ class TestBuilder(test.TestCase):
         path = os.path.join("trial1","gold","file.dat")
         need = {
             "@id": "cmps/"+path,
-            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "@type": [ "nrdp:DataFile", "nrdp:DownloadableFile", "dcat:Distribution" ],
             "filepath": path,
             "_extensionSchemas": [ "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile" ]
         }
@@ -301,13 +302,60 @@ class TestBuilder(test.TestCase):
         self.assertTrue(self.bag.ediid)
         self.assertIn('downloadURL', md)
         self.assertEqual(md['downloadURL'], dlurl)
-        
+
+    def test_init_filemd_for_checksumfile(self):
+        path = os.path.join("trial1","gold","file.dat")
+        need = {
+            "@id": "cmps/"+path,
+            "@type": [ "nrdp:ChecksumFile", "nrdp:DownloadableFile", "dcat:Distribution" ],
+            "filepath": path,
+            "_extensionSchemas": [ "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/ChecksumFile" ]
+        }
+        mdf = os.path.join(self.bag.bagdir, "metadata", path, "nerdm.json")
+        self.assertFalse(os.path.exists(mdf))
+        self.assertEqual(self.bag._distbase, "https://data.nist.gov/od/ds/")
+
+        md = self.bag.init_filemd_for(path, disttype="ChecksumFile")
+        self.assertEquals(md, need)
+        self.assertFalse(os.path.exists(mdf))
+        self.assertFalse(self.bag.ediid)
+        self.assertNotIn('downloadURL', md)
+
+        path2 = path+".md5"
+        need['@id'] = "cmps/"+path2
+        need['filepath'] = path2
+        mdf = os.path.join(self.bag.bagdir, "metadata", path2, "nerdm.json")
+        self.assertFalse(os.path.exists(mdf))
+        self.assertEqual(self.bag._distbase, "https://data.nist.gov/od/ds/")
+
+        md = self.bag.init_filemd_for(path2, disttype="ChecksumFile")
+        self.assertEquals(md, need)
+        self.assertFalse(os.path.exists(mdf))
+        self.assertFalse(self.bag.ediid)
+        self.assertNotIn('downloadURL', md)
+
+        path2 = path+".sha256"
+        need['@id'] = "cmps/"+path2
+        need['filepath'] = path2
+        need['describes'] = "cmps/"+path
+        need['description'] = "SHA-256 checksum value for " + \
+                              os.path.basename(path)
+        need['algorithm'] = {'@type': 'Thing', 'tag': 'sha256'}
+        mdf = os.path.join(self.bag.bagdir, "metadata", path2, "nerdm.json")
+        self.assertFalse(os.path.exists(mdf))
+        self.assertEqual(self.bag._distbase, "https://data.nist.gov/od/ds/")
+
+        md = self.bag.init_filemd_for(path2, disttype="ChecksumFile")
+        self.assertEquals(md, need)
+        self.assertFalse(os.path.exists(mdf))
+        self.assertFalse(self.bag.ediid)
+        self.assertNotIn('downloadURL', md)
 
     def test_examine(self):
         path = os.path.join("trial1","gold","trial1.json")
         need = {
             "@id": "cmps/"+path,
-            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "@type": [ "nrdp:DataFile", "nrdp:DownloadableFile", "dcat:Distribution" ],
             "filepath": path,
             "_extensionSchemas": [ "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile" ],
             "size": 69,
@@ -358,7 +406,7 @@ class TestBuilder(test.TestCase):
 
         need = {
             "@id": "cmps/"+path,
-            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "@type": [ "nrdp:DataFile", "nrdp:DownloadableFile", "dcat:Distribution" ],
             "filepath": path,
             "_extensionSchemas": [ "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile" ],
             "size": 69,
@@ -386,7 +434,7 @@ class TestBuilder(test.TestCase):
 
         need = {
             "@id": "cmps/"+path,
-            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "@type": [ "nrdp:DataFile", "nrdp:DownloadableFile", "dcat:Distribution" ],
             "filepath": path,
             "_extensionSchemas": [ "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile" ]
         }
