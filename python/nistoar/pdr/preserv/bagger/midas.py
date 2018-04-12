@@ -14,7 +14,7 @@ from abc import ABCMeta, abstractmethod, abstractproperty
 
 from .base import SIPBagger, moddate_of, checksum_of, read_nerd, read_pod
 from .base import sys as _sys
-from ..bagit.builder import BagBuilder, NERDMD_FILENAME
+from ..bagit.builder import BagBuilder, NERDMD_FILENAME, FILEMD_FILENAME
 from ... import def_merge_etcdir
 from .. import (SIPDirectoryError, SIPDirectoryNotFound, AIPValidationError,
                 ConfigurationException, StateException, PODError)
@@ -25,6 +25,8 @@ log = logging.getLogger(_sys.system_abbrev).getChild(_sys.subsystem_abbrev)
 
 DEF_MBAG_VERSION = "0.2"
 DEF_MIDAS_POD_FILE = "_pod.json"
+SUPPORTED_CHECKSUM_ALGS = [ "sha256" ];
+DEF_CHECKSUM_ALG = "sha256"
 
 def _midadid_to_dirname(midasid, log=None):
     out = midasid
@@ -205,8 +207,8 @@ class MIDASMetadataBagger(SIPBagger):
 
     def data_file_inventory(self):
         """
-        get a list of the data files available to be part 
-        of this dataset.
+        get a list of the data files available to be part of this dataset.
+        This will include any accompanying hash files.
 
         :return dict: a mapping of logical filepaths relative to the dataset 
                       root to full paths to the input data file for all data
@@ -232,15 +234,13 @@ class MIDASMetadataBagger(SIPBagger):
                        os.path.join(reldir,f) in podlocs:
                         # skip dot-files and pod files written by MIDAS
                         continue
-                    if f.endswith('.sha256') and f[:-len('.sha256')] in files:
-                        # skip any file that appears to be a hashfile of another
-                        # existing file.
-                        continue
+
                     datafiles[os.path.join(reldir, f)] = os.path.join(dir, f)
 
         return datafiles
 
-    def ensure_file_metadata(self, inpath, destpath, resmd=None):
+    def ensure_file_metadata(self, inpath, destpath, resmd=None,
+                             disttype="DataFile"):
         """
         examine the given file and update the file metadata if necessary.
 
@@ -256,6 +256,10 @@ class MIDASMetadataBagger(SIPBagger):
                                   data collection
         :param resmd Mapping:  the NERDm resource metadata, which may include
                                a component entry for this file.  
+        :param disttype str:  the default file distribution type to assign to 
+                              the file (with the default default being 
+                              "DataFile"); if examine is True, the type may 
+                              change based on inspection of the file.  
         """
         nerdfile = self.bagbldr.nerdm_file_for(destpath)
 
@@ -288,7 +292,8 @@ class MIDASMetadataBagger(SIPBagger):
                     log.info("Extending file metadata for %s", destpath)
         
         if update:
-            init = self.bagbldr.init_filemd_for(destpath, examine=inpath)
+            init = self.bagbldr.init_filemd_for(destpath, examine=inpath,
+                                                disttype=disttype)
             if nerd:
                 conv = self.cfg.get('component_merge_convention', 'dev')
                 merger = self._merger_for(conv, "DataFile")
@@ -296,7 +301,7 @@ class MIDASMetadataBagger(SIPBagger):
             else:
                 nerd = init
 
-            self.bagbldr.add_metadata_for_file(destpath, nerd)
+            self.bagbldr.add_metadata_for_file(destpath, nerd, disttype=disttype)
 
     def _merger_for(self, convention, objtype):
         return self._merger_factory.make_merger(convention, objtype)
@@ -343,8 +348,12 @@ class MIDASMetadataBagger(SIPBagger):
         # get the list of data files found in the input directories
         self.datafiles = self.data_file_inventory()
 
-        # get the list of data files described in the POD record
-        fdists = self.data_file_distribs()
+        # Now clean-up files that have effectively been removed.
+        #
+        # for this we need a list of data files described in the POD record;
+        # distribution records have not necessarily been created for files
+        # currently in the input directories (i.e. those in self.datafiles)
+        fdists = self.pod_file_distribs()
 
         # what files are in the bag now but not in the input area and
         # were not enumerated in the input POD file?
@@ -359,15 +368,27 @@ class MIDASMetadataBagger(SIPBagger):
                    filepath not in fdists:
                     # found a component with this filepath, but is it a datafile?
                     mdata = read_nerd(os.path.join(dir,NERDMD_FILENAME))
-                    if any([":DataFile" in t for t in mdata.get("@type", [])]):
+                    comptypes = mdata.get("@type", [])
+                    if any([":DownloadableFile" in t for t in comptypes]):
                         # yes, it is a data file
                         log.debug("Will remove dropped data file: %s", filepath)
                         remove.add(filepath)
 
-        # now make sure have all the files from the input area
+        # add all the files from the input area
         for destpath, inpath in self.datafiles.items():
-            log.debug("Adding submitted data file: %s", destpath)
-            self.ensure_file_metadata(inpath, destpath, self.resmd)
+            disttype = "DataFile"
+            if destpath.endswith('.'+DEF_CHECKSUM_ALG) and \
+               os.path.splitext(destpath)[0] in self.datafiles:
+                # this looks like a checksum file for one of the data files
+                if not self.cfg.get('checksum_files', True):
+                    continue
+                # save as a ChecksumFile distribution
+                disttype = "ChecksumFile"
+                log.debug("Adding checksum file: %s", destpath)
+            else:
+                log.debug("Adding submitted data file: %s", destpath)
+
+            self.ensure_file_metadata(inpath, destpath, self.resmd, disttype)
 
             if not nodata:
                 self.bagbldr.add_data_file(destpath, inpath,
@@ -377,11 +398,47 @@ class MIDASMetadataBagger(SIPBagger):
         for filepath in remove:
             self.bagbldr.remove_component(filepath, True)
 
-    def data_file_distribs(self):
+        self._check_checksum_files()
+
+    def _check_checksum_files(self):
+        # This file will look all of the files that have been identified as
+        # ChecksumFiles to see if the value they contain matches the value
+        # stored in the metadata for the datafile it is associated with.  If
+        # they do not match, the valid metadata flag for the checksum file
+        # will be set to false.
+        for df in self.datafiles:
+            csnerdf = self.bagbldr.nerdm_file_for(df)
+            csnerd = read_nerd(csnerdf)
+            if any([":ChecksumFile" in t for t in csnerd.get("@type",[])]):
+                dfpath = self.datafiles[df]
+                try:
+                    with open(dfpath) as fd:
+                        cs = fd.readline().split()[0]
+                except Exception as ex:
+                    log.warn(df+": unexpected contents in checksum file (%s)" % \
+                             str(ex))
+                    continue
+
+                # this data file is a checksum file
+                described = csnerd.get("describes","cmps/")[5:]
+                if described in self.datafiles:
+                    nerdf = self.bagbldr.nerdm_file_for(described)
+                    nerd = read_nerd(nerdf)
+
+                    if nerd.get('checksum',{}).get('hash','') == cs:
+                        log.debug(df+": hash value looks valid")
+                        csnerd['valid'] = True
+                    else:
+                        log.warn(df+": hash value in file looks invalid")
+                        csnerd['valid'] = False
+                    self.bagbldr._write_json(csnerd, csnerdf)
+
+    def pod_file_distribs(self):
         """
         return a list of filepaths for files described in the POD record.
         This list may include files not in one of the input disks but is 
-        available from an external URL.  
+        available from an external URL.  This may include MIDAS-generated
+        checksum (sha256) files.  
         """
         out = []
         if self.bagbldr and self.bagbldr._bag:
@@ -593,6 +650,7 @@ class PreservationBagger(SIPBagger):
         finalcfg = self.cfg.get('bag_builder', {}).get('finalize', {})
         if finalcfg.get('ensure_component_metadata') is None:
             finalcfg['ensure_component_metadata'] = False
+
         self.bagbldr.finalize_bag(finalcfg)
         if finalcfg.get('validate', True):
             # this will raise an exception if any issues are found

@@ -480,30 +480,43 @@ class BagBuilder(PreservationSystem):
 
             destpath = os.path.dirname(destpath)
             
-    def add_metadata_for_file(self, destpath, mdata):
+    def add_metadata_for_file(self, destpath, mdata, disttype="DataFile"):
         """
         write metadata for the component at the given destination path to the 
         proper location under the metadata directory.
 
         This implementation will provide default values for key values that 
         are missing.
+
+        :param destpath str:  the path to the data file that metadata is being
+                              provided for
+        :param mdata   dict:  a Mapping object containing the metadat to 
+                              associate with the file.  This will be merged 
+                              with default data.  
+        :param disttype str:  the default file distribution type to assign to 
+                              the file (with the default default being 
+                              "DataFile"); if examine is True, the type may 
+                              change based on inspection of the file.  
         """
         if not isinstance(mdata, Mapping):
             raise NERDTypeError("dict", type(mdata), "NERDm Component")
 
-        md = self._create_init_filemd_for(destpath)
+        md = self._create_init_filemd_for(destpath, disttype=disttype)
         md.update(mdata)
-        
-        try:
-            if not isinstance(md['@type'], list):
-                raise NERDTypeError('list', str(mdata['@type']), '@type')
 
-            if DATAFILE_TYPE not in md['@type']:
-                md['@type'].append(DATAFILE_TYPE)
-                    
-        except TypeError, ex:
-            raise NERDTypeError(msg="Unknown DataFile property type error",
-                                cause=ex)
+# We now have other types of files (e.g. ChecksumFile); do not ensure
+# DataFile type
+#
+#        try:
+#            if not isinstance(md['@type'], list):
+#                raise NERDTypeError('list', str(mdata['@type']), '@type')
+#
+#            if DATAFILE_TYPE not in md['@type']:
+#                md['@type'].append(DATAFILE_TYPE)
+#                    
+#        except TypeError, ex:
+#            raise NERDTypeError(msg="Unknown DataFile property type error",
+#                                cause=ex)
 
         try:
             self.ensure_metadata_dirs(destpath)
@@ -571,7 +584,8 @@ class BagBuilder(PreservationSystem):
         return os.path.join(self.bagdir, "metadata", destpath,
                             FILEANNOT_FILENAME)
 
-    def init_filemd_for(self, destpath, write=False, examine=None):
+    def init_filemd_for(self, destpath, write=False, examine=None,
+                        disttype="DataFile"):
         """
         create some initial file metadata for a file at a given path.
 
@@ -586,9 +600,13 @@ class BagBuilder(PreservationSystem):
                               If it otherwise evaluates to True, the copy 
                               previously copied to the output bag will be 
                               examined.
+        :param disttype str:  the default file distribution type to assign to 
+                              the file (with the default default being 
+                              "DataFile"); if examine is True, the type may 
+                              change based on inspection of the file.  
         """
         self.record("Initializing metadata for file %s", destpath)
-        mdata = self._create_init_filemd_for(destpath)
+        mdata = self._create_init_filemd_for(destpath, disttype=disttype)
         if examine:
             if isinstance(examine, (str, unicode)):
                 datafile = examine
@@ -664,16 +682,45 @@ class BagBuilder(PreservationSystem):
         mdata['mediaType'] = self._mimetypes.get(os.path.splitext(dfile)[1][1:],
                                                  'application/octet-stream')
 
-    def _create_init_filemd_for(self, destpath):
+    _file_types = {
+        "DataFile": [
+            [ ":".join([NERDPUB_PRE, "DataFile"]),
+              ":".join([NERDPUB_PRE, "DownloadableFile"]),
+              "dcat:Distribution" ],
+            [ NERDPUB_DEF + "DataFile" ]
+        ],
+        "ChecksumFile": [
+            [ ":".join([NERDPUB_PRE, "ChecksumFile"]),
+              ":".join([NERDPUB_PRE, "DownloadableFile"]),
+              "dcat:Distribution" ],
+            [ NERDPUB_DEF + "ChecksumFile" ]
+        ]
+    }
+    _checksum_alg_names = { "sha256": "SHA-256" }
+
+    def _create_init_filemd_for(self, destpath, disttype="DataFile"):
+        if disttype not in self._file_types:
+            raise ValueError("Unsupported file distribution type: "+disttype)
         out = {
             "@id": "cmps/" + destpath,
-            "@type": [ ":".join([NERDPUB_PRE, "DataFile"]),
-                       "dcat:Distribution" ],
+            "@type": deepcopy(self._file_types[disttype][0]),
             "filepath": destpath,
-            "_extensionSchemas": [ NERDPUB_DEF + "DataFile" ]
         }
         if self.ediid:
             out['downloadURL'] = self._download_url(self.ediid, destpath)
+
+        if disttype == 'ChecksumFile':
+            fname = os.path.splitext(destpath)
+            if fname[1] and fname[1][1:] in self._checksum_alg_names:
+                out['algorithm'] = { "@type": "Thing", "tag": fname[1][1:] }
+                out['describes'] = "cmps/" + fname[0]
+                out['description'] = "checksum value for " + \
+                                     os.path.basename(fname[0])
+                out['description'] = self._checksum_alg_names[fname[1][1:]] + \
+                                     ' ' + out['description']
+
+        out["_extensionSchemas"] =  deepcopy(self._file_types[disttype][1])
+
         return out
 
     def _create_init_collmd_for(self, destpath):

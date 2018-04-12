@@ -89,7 +89,7 @@ class TestWebServer(test.TestCase):
 
         data = json.loads(resp.read())
         self.assertEqual(data['ediid'], '3A1EE2F169DD3B8CE0531A570681DB5D1491')
-        self.assertEqual(len(data['components']), 6)
+        self.assertEqual(len(data['components']), 8)
         
 
 

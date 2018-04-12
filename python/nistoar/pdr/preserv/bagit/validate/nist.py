@@ -446,7 +446,9 @@ class NISTBagValidator(ValidatorBase):
                     continue
 
                 comm = None
-                ok = '@type' in data and "nrdp:DataFile" in data['@type']
+                ok = '@type' in data and \
+                     ("nrdp:DataFile" in data['@type'] or \
+                      "nrdp:ChecksumFile" in data['@type'])
                 if not ok:
                     comm = [path + ": " + str(data['@type'])]
                 out._err(ft, ok, comm)
