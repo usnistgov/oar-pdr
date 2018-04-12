@@ -7,6 +7,7 @@ import pynoid as noid
 from shutil import copy as filecopy, rmtree
 from copy import deepcopy
 from collections import Mapping, Sequence, OrderedDict
+from urllib import quote as urlencode
 
 from .. import (SIPDirectoryError, SIPDirectoryNotFound, 
                 ConfigurationException, StateException, PODError)
@@ -253,7 +254,7 @@ class BagBuilder(PreservationSystem):
 
     def _download_url(self, ediid, destpath):
         path = "/".join(destpath.split(os.sep))
-        return self._distbase + ediid + '/' + path
+        return self._distbase + ediid + '/' + urlencode(path)
 
     def ensure_bagdir(self):
         """
@@ -702,7 +703,7 @@ class BagBuilder(PreservationSystem):
         if disttype not in self._file_types:
             raise ValueError("Unsupported file distribution type: "+disttype)
         out = {
-            "@id": "cmps/" + destpath,
+            "@id": "cmps/" + urlencode(destpath),
             "@type": deepcopy(self._file_types[disttype][0]),
             "filepath": destpath,
         }
@@ -725,7 +726,7 @@ class BagBuilder(PreservationSystem):
 
     def _create_init_collmd_for(self, destpath):
         out = {
-            "@id": "cmps/" + destpath,
+            "@id": "cmps/" + urlencode(destpath),
             "@type": [ ":".join([NERDPUB_PRE, "Subcollection"]) ],
             "filepath": destpath,
             "_extensionSchemas": [ NERDPUB_DEF + "Subcollection" ]

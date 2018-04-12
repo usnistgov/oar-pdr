@@ -303,6 +303,25 @@ class TestBuilder(test.TestCase):
         self.assertIn('downloadURL', md)
         self.assertEqual(md['downloadURL'], dlurl)
 
+    def test_init_filemd_for_encoding(self):
+        path = os.path.join("trial 1","1%gold","iron+wine.dat")
+        epath = "trial%201/1%25gold/iron%2Bwine.dat"
+        self.bag._ediid = "gooberid"
+        need = {
+            "@id": "cmps/"+epath,
+            "@type": [ "nrdp:DataFile", "nrdp:DownloadableFile", "dcat:Distribution" ],
+            "filepath": path,
+            "downloadURL": "https://data.nist.gov/od/ds/gooberid/trial%201/1%25gold/iron%2Bwine.dat",
+            "_extensionSchemas": [ "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile" ]
+        }
+        mdf = os.path.join(self.bag.bagdir, "metadata", path, "nerdm.json")
+        self.assertFalse(os.path.exists(mdf))
+        self.assertEqual(self.bag._distbase, "https://data.nist.gov/od/ds/")
+
+        md = self.bag.init_filemd_for(path)
+        self.assertEquals(md, need)
+        self.assertFalse(os.path.exists(mdf))
+
     def test_init_filemd_for_checksumfile(self):
         path = os.path.join("trial1","gold","file.dat")
         need = {
