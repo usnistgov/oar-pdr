@@ -53,6 +53,7 @@ NERDMPUB_SCH_ID = NERDMPUB_SCH_ID_BASE + NERDMPUB_SCH_VER + "#"
 NERD_DEF = NERDM_SCH_ID + "/definitions/"
 NERDPUB_DEF = NERDMPUB_SCH_ID + "/definitions/"
 DATAFILE_TYPE = NERDPUB_PRE + ":DataFile"
+DOWNLOADABLEFILE_TYPE = NERDPUB_PRE + ":DownloadableFile"
 SUBCOLL_TYPE = NERDPUB_PRE + ":Subcollection"
 DISTSERV = "https://data.nist.gov/od/ds/"
 
@@ -1261,7 +1262,8 @@ format(nerdm['title'])
                 raise NERDTypeError("list", str(type(mdata['components'])),
                                     'components')
             for i in range(len(components)-1, -1, -1):
-                if DATAFILE_TYPE in components[i].get('@type',[]):
+                tps = components[i].get('@type',[])
+                if DOWNLOADABLEFILE_TYPE in tps or DATAFILE_TYPE in tps:
                     if savefilemd and 'filepath' not in components[i]:
                         msg = "DataFile missing 'filepath' property"
                         if '@id' in components[i]:
