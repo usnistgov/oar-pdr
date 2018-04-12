@@ -503,17 +503,20 @@ class BagBuilder(PreservationSystem):
 
         md = self._create_init_filemd_for(destpath, disttype=disttype)
         md.update(mdata)
-        
-        try:
-            if not isinstance(md['@type'], list):
-                raise NERDTypeError('list', str(mdata['@type']), '@type')
 
-            if DATAFILE_TYPE not in md['@type']:
-                md['@type'].append(DATAFILE_TYPE)
-                    
-        except TypeError, ex:
-            raise NERDTypeError(msg="Unknown DataFile property type error",
-                                cause=ex)
+# We now have other types of files (e.g. ChecksumFile); do not ensure
+# DataFile type
+#
+#        try:
+#            if not isinstance(md['@type'], list):
+#                raise NERDTypeError('list', str(mdata['@type']), '@type')
+#
+#            if DATAFILE_TYPE not in md['@type']:
+#                md['@type'].append(DATAFILE_TYPE)
+#                    
+#        except TypeError, ex:
+#            raise NERDTypeError(msg="Unknown DataFile property type error",
+#                                cause=ex)
 
         try:
             self.ensure_metadata_dirs(destpath)

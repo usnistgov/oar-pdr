@@ -301,7 +301,7 @@ class MIDASMetadataBagger(SIPBagger):
             else:
                 nerd = init
 
-            self.bagbldr.add_metadata_for_file(destpath, nerd)
+            self.bagbldr.add_metadata_for_file(destpath, nerd, disttype=disttype)
 
     def _merger_for(self, convention, objtype):
         return self._merger_factory.make_merger(convention, objtype)

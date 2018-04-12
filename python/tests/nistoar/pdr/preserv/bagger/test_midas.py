@@ -199,6 +199,7 @@ class TestMIDASMetadataBaggerMixed(test.TestCase):
         self.assertEqual(data['@type'][0], "nrdp:ChecksumFile")
         self.assertEqual(data['@type'][1], "nrdp:DownloadableFile")
         self.assertEqual(data['@type'][2], "dcat:Distribution")
+        self.assertEqual(len(data['@type']), 3)
         self.assertTrue(data['_extensionSchemas'][0]
                         .endswith("#/definitions/ChecksumFile"))
         self.assertEqual(data['size'], 65)
