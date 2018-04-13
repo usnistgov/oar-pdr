@@ -40,7 +40,7 @@
             "@type": "deo:BibliographicReference",
             "@id": "#ref:10.1364/OE.24.014100",
             "refType": "IsReferencedBy",
-            "location": "https://dx.doi.org/10.1364/OE.24.014100",
+            "location": "https://doi.org/10.1364/OE.24.014100",
             "_extensionSchemas": [
                 "https://data.nist.gov/od/dm/nerdm-schema/v0.1#/definitions/DCiteDocumentReference"
             ]
@@ -50,7 +50,7 @@
     "license": "http://www.nist.gov/open/license.cfm",
     "components": [
         {
-            "accessURL": "http://doi.org/10.18434/T4SW26",
+            "accessURL": "https://doi.org/10.18434/T4SW26",
             "description": "Software to predict the optical sorting of particles in a standing-wave laser interference field",
             "format": "Digital Object Identifier, a persistent identifier",
             "mediaType": "application/zip",

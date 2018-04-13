@@ -10,4 +10,4 @@ Software to predict the optical sorting of particles in a standing-
 wave laser interference field
 
 More information:
-https://dx.doi.org/doi:10.18434/T4SW26
+https://doi.org/doi:10.18434/T4SW26

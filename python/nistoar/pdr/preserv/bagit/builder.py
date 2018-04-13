@@ -7,6 +7,7 @@ import pynoid as noid
 from shutil import copy as filecopy, rmtree
 from copy import deepcopy
 from collections import Mapping, Sequence, OrderedDict
+from urllib import quote as urlencode
 
 from .. import (SIPDirectoryError, SIPDirectoryNotFound, 
                 ConfigurationException, StateException, PODError)
@@ -52,6 +53,7 @@ NERDMPUB_SCH_ID = NERDMPUB_SCH_ID_BASE + NERDMPUB_SCH_VER + "#"
 NERD_DEF = NERDM_SCH_ID + "/definitions/"
 NERDPUB_DEF = NERDMPUB_SCH_ID + "/definitions/"
 DATAFILE_TYPE = NERDPUB_PRE + ":DataFile"
+DOWNLOADABLEFILE_TYPE = NERDPUB_PRE + ":DownloadableFile"
 SUBCOLL_TYPE = NERDPUB_PRE + ":Subcollection"
 DISTSERV = "https://data.nist.gov/od/ds/"
 
@@ -253,7 +255,7 @@ class BagBuilder(PreservationSystem):
 
     def _download_url(self, ediid, destpath):
         path = "/".join(destpath.split(os.sep))
-        return self._distbase + ediid + '/' + path
+        return self._distbase + ediid + '/' + urlencode(path)
 
     def ensure_bagdir(self):
         """
@@ -480,30 +482,43 @@ class BagBuilder(PreservationSystem):
 
             destpath = os.path.dirname(destpath)
             
-    def add_metadata_for_file(self, destpath, mdata):
+    def add_metadata_for_file(self, destpath, mdata, disttype="DataFile"):
         """
         write metadata for the component at the given destination path to the 
         proper location under the metadata directory.
 
         This implementation will provide default values for key values that 
         are missing.
+
+        :param destpath str:  the path to the data file that metadata is being
+                              provided for
+        :param mdata   dict:  a Mapping object containing the metadat to 
+                              associate with the file.  This will be merged 
+                              with default data.  
+        :param disttype str:  the default file distribution type to assign to 
+                              the file (with the default default being 
+                              "DataFile"); if examine is True, the type may 
+                              change based on inspection of the file.  
         """
         if not isinstance(mdata, Mapping):
             raise NERDTypeError("dict", type(mdata), "NERDm Component")
 
-        md = self._create_init_filemd_for(destpath)
+        md = self._create_init_filemd_for(destpath, disttype=disttype)
         md.update(mdata)
-        
-        try:
-            if not isinstance(md['@type'], list):
-                raise NERDTypeError('list', str(mdata['@type']), '@type')
 
-            if DATAFILE_TYPE not in md['@type']:
-                md['@type'].append(DATAFILE_TYPE)
-                    
-        except TypeError, ex:
-            raise NERDTypeError(msg="Unknown DataFile property type error",
-                                cause=ex)
+# We now have other types of files (e.g. ChecksumFile); do not ensure
+# DataFile type
+#
+#        try:
+#            if not isinstance(md['@type'], list):
+#                raise NERDTypeError('list', str(mdata['@type']), '@type')
+#
+#            if DATAFILE_TYPE not in md['@type']:
+#                md['@type'].append(DATAFILE_TYPE)
+#                    
+#        except TypeError, ex:
+#            raise NERDTypeError(msg="Unknown DataFile property type error",
+#                                cause=ex)
 
         try:
             self.ensure_metadata_dirs(destpath)
@@ -571,7 +586,8 @@ class BagBuilder(PreservationSystem):
         return os.path.join(self.bagdir, "metadata", destpath,
                             FILEANNOT_FILENAME)
 
-    def init_filemd_for(self, destpath, write=False, examine=None):
+    def init_filemd_for(self, destpath, write=False, examine=None,
+                        disttype="DataFile"):
         """
         create some initial file metadata for a file at a given path.
 
@@ -586,9 +602,13 @@ class BagBuilder(PreservationSystem):
                               If it otherwise evaluates to True, the copy 
                               previously copied to the output bag will be 
                               examined.
+        :param disttype str:  the default file distribution type to assign to 
+                              the file (with the default default being 
+                              "DataFile"); if examine is True, the type may 
+                              change based on inspection of the file.  
         """
         self.record("Initializing metadata for file %s", destpath)
-        mdata = self._create_init_filemd_for(destpath)
+        mdata = self._create_init_filemd_for(destpath, disttype=disttype)
         if examine:
             if isinstance(examine, (str, unicode)):
                 datafile = examine
@@ -664,21 +684,50 @@ class BagBuilder(PreservationSystem):
         mdata['mediaType'] = self._mimetypes.get(os.path.splitext(dfile)[1][1:],
                                                  'application/octet-stream')
 
-    def _create_init_filemd_for(self, destpath):
+    _file_types = {
+        "DataFile": [
+            [ ":".join([NERDPUB_PRE, "DataFile"]),
+              ":".join([NERDPUB_PRE, "DownloadableFile"]),
+              "dcat:Distribution" ],
+            [ NERDPUB_DEF + "DataFile" ]
+        ],
+        "ChecksumFile": [
+            [ ":".join([NERDPUB_PRE, "ChecksumFile"]),
+              ":".join([NERDPUB_PRE, "DownloadableFile"]),
+              "dcat:Distribution" ],
+            [ NERDPUB_DEF + "ChecksumFile" ]
+        ]
+    }
+    _checksum_alg_names = { "sha256": "SHA-256" }
+
+    def _create_init_filemd_for(self, destpath, disttype="DataFile"):
+        if disttype not in self._file_types:
+            raise ValueError("Unsupported file distribution type: "+disttype)
         out = {
-            "@id": "cmps/" + destpath,
-            "@type": [ ":".join([NERDPUB_PRE, "DataFile"]),
-                       "dcat:Distribution" ],
+            "@id": "cmps/" + urlencode(destpath),
+            "@type": deepcopy(self._file_types[disttype][0]),
             "filepath": destpath,
-            "_extensionSchemas": [ NERDPUB_DEF + "DataFile" ]
         }
         if self.ediid:
             out['downloadURL'] = self._download_url(self.ediid, destpath)
+
+        if disttype == 'ChecksumFile':
+            fname = os.path.splitext(destpath)
+            if fname[1] and fname[1][1:] in self._checksum_alg_names:
+                out['algorithm'] = { "@type": "Thing", "tag": fname[1][1:] }
+                out['describes'] = "cmps/" + fname[0]
+                out['description'] = "checksum value for " + \
+                                     os.path.basename(fname[0])
+                out['description'] = self._checksum_alg_names[fname[1][1:]] + \
+                                     ' ' + out['description']
+
+        out["_extensionSchemas"] =  deepcopy(self._file_types[disttype][1])
+
         return out
 
     def _create_init_collmd_for(self, destpath):
         out = {
-            "@id": "cmps/" + destpath,
+            "@id": "cmps/" + urlencode(destpath),
             "@type": [ ":".join([NERDPUB_PRE, "Subcollection"]) ],
             "filepath": destpath,
             "_extensionSchemas": [ NERDPUB_DEF + "Subcollection" ]
@@ -832,7 +881,7 @@ class BagBuilder(PreservationSystem):
 
                 # landing page
                 if nerdm.get('doi'):
-                    print("More information:\nhttps://dx.doi.org/" +
+                    print("More information:\nhttps://doi.org/" +
                           nerdm.get('doi'), file=fd)
                 elif nerdm.get('landingPage'):
                     print("More information:\n" + nerdm.get('landingPage'),
@@ -1213,7 +1262,8 @@ format(nerdm['title'])
                 raise NERDTypeError("list", str(type(mdata['components'])),
                                     'components')
             for i in range(len(components)-1, -1, -1):
-                if DATAFILE_TYPE in components[i].get('@type',[]):
+                tps = components[i].get('@type',[])
+                if DOWNLOADABLEFILE_TYPE in tps or DATAFILE_TYPE in tps:
                     if savefilemd and 'filepath' not in components[i]:
                         msg = "DataFile missing 'filepath' property"
                         if '@id' in components[i]:
