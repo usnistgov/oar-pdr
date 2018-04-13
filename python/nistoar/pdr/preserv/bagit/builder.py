@@ -7,6 +7,7 @@ import pynoid as noid
 from shutil import copy as filecopy, rmtree
 from copy import deepcopy
 from collections import Mapping, Sequence, OrderedDict
+from urllib import quote as urlencode
 
 from .. import (SIPDirectoryError, SIPDirectoryNotFound, 
                 ConfigurationException, StateException, PODError)
@@ -52,6 +53,7 @@ NERDMPUB_SCH_ID = NERDMPUB_SCH_ID_BASE + NERDMPUB_SCH_VER + "#"
 NERD_DEF = NERDM_SCH_ID + "/definitions/"
 NERDPUB_DEF = NERDMPUB_SCH_ID + "/definitions/"
 DATAFILE_TYPE = NERDPUB_PRE + ":DataFile"
+DOWNLOADABLEFILE_TYPE = NERDPUB_PRE + ":DownloadableFile"
 SUBCOLL_TYPE = NERDPUB_PRE + ":Subcollection"
 DISTSERV = "https://data.nist.gov/od/ds/"
 
@@ -253,7 +255,7 @@ class BagBuilder(PreservationSystem):
 
     def _download_url(self, ediid, destpath):
         path = "/".join(destpath.split(os.sep))
-        return self._distbase + ediid + '/' + path
+        return self._distbase + ediid + '/' + urlencode(path)
 
     def ensure_bagdir(self):
         """
@@ -702,7 +704,7 @@ class BagBuilder(PreservationSystem):
         if disttype not in self._file_types:
             raise ValueError("Unsupported file distribution type: "+disttype)
         out = {
-            "@id": "cmps/" + destpath,
+            "@id": "cmps/" + urlencode(destpath),
             "@type": deepcopy(self._file_types[disttype][0]),
             "filepath": destpath,
         }
@@ -725,7 +727,7 @@ class BagBuilder(PreservationSystem):
 
     def _create_init_collmd_for(self, destpath):
         out = {
-            "@id": "cmps/" + destpath,
+            "@id": "cmps/" + urlencode(destpath),
             "@type": [ ":".join([NERDPUB_PRE, "Subcollection"]) ],
             "filepath": destpath,
             "_extensionSchemas": [ NERDPUB_DEF + "Subcollection" ]
@@ -1260,7 +1262,8 @@ format(nerdm['title'])
                 raise NERDTypeError("list", str(type(mdata['components'])),
                                     'components')
             for i in range(len(components)-1, -1, -1):
-                if DATAFILE_TYPE in components[i].get('@type',[]):
+                tps = components[i].get('@type',[])
+                if DOWNLOADABLEFILE_TYPE in tps or DATAFILE_TYPE in tps:
                     if savefilemd and 'filepath' not in components[i]:
                         msg = "DataFile missing 'filepath' property"
                         if '@id' in components[i]:
