@@ -15,7 +15,7 @@ class MultibagValidator(ValidatorBase):
     In particular, this validator tests whether a given bag can be consider
     part of a multibag aggregation.  
     """
-    profile = ("Multibag", "0.2")
+    profile = ("Multibag", "0.3")
 
     def __init__(self, config=None):
         super(MultibagValidator, self).__init__(config)
@@ -39,8 +39,8 @@ class MultibagValidator(ValidatorBase):
         out._warn(t, len(data["Multibag-Version"]) == 1)
 
         t = self._issue("2-Version-val",
-                      "Multibag-Version must be set to '0.2'")
-        out._err(t, data["Multibag-Version"][-1] == "0.2")
+                      "Multibag-Version must be set to '0.3'")
+        out._err(t, data["Multibag-Version"][-1] == "0.3")
         
         return out
 

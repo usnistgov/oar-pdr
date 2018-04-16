@@ -23,7 +23,7 @@ from nistoar.nerdm.merge import MergerFactory
 # _sys = PreservationSystem()
 log = logging.getLogger(_sys.system_abbrev).getChild(_sys.subsystem_abbrev)
 
-DEF_MBAG_VERSION = "0.2"
+DEF_MBAG_VERSION = "0.3"
 DEF_MIDAS_POD_FILE = "_pod.json"
 SUPPORTED_CHECKSUM_ALGS = [ "sha256" ];
 DEF_CHECKSUM_ALG = "sha256"
