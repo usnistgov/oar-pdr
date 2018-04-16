@@ -98,9 +98,9 @@ class TestMIDASSIPHandler(test.TestCase):
         # pdb.set_trace()
         self.sip.bagit()
         self.assertTrue(os.path.exists(os.path.join(self.store, 
-                                                self.midasid+".mbag0_2-0.zip")))
+                                                self.midasid+".mbag0_3-0.zip")))
 
-        csumfile = os.path.join(self.store, self.midasid+".mbag0_2-0.zip.sha256")
+        csumfile = os.path.join(self.store, self.midasid+".mbag0_3-0.zip.sha256")
         self.assertTrue(os.path.exists(csumfile))
         with open(csumfile) as fd:
             csum = fd.read().strip()
@@ -109,7 +109,7 @@ class TestMIDASSIPHandler(test.TestCase):
         self.assertIn('bagfiles', self.sip.status)
         self.assertEqual(len(self.sip.status['bagfiles']), 1)
         self.assertEqual(self.sip.status['bagfiles'][0]['name'], 
-                                                self.midasid+".mbag0_2-0.zip")
+                                                self.midasid+".mbag0_3-0.zip")
         self.assertEqual(self.sip.status['bagfiles'][0]['sha256'], csum)
 
         # check for checksum files in review dir

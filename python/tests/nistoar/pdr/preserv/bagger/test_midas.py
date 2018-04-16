@@ -507,8 +507,8 @@ class TestPreservationBagger(test.TestCase):
                     'Contact-Email': ["datasupport@nist.gov"],
                     'Organization-Address': [
                         "100 Bureau Dr., Gaithersburg, MD 20899"],
-                    'NIST-BagIt-Version': "0.2",
-                    'Multibag-Version': "0.2"
+                    'NIST-BagIt-Version': "0.3",
+                    'Multibag-Version': "0.3"
                 }
             }
         }
@@ -531,7 +531,7 @@ class TestPreservationBagger(test.TestCase):
         self.assertIsNotNone(self.bagr.bagbldr)
         self.assertTrue(os.path.exists(self.bagparent))
 
-        bagdir = os.path.join(self.bagparent, self.midasid+".mbag0_2-0")
+        bagdir = os.path.join(self.bagparent, self.midasid+".mbag0_3-0")
         self.assertEqual(self.bagr.bagdir, bagdir)
 
     def test_find_pod_file(self):
@@ -647,9 +647,9 @@ class TestPreservationBagger(test.TestCase):
         self.assertTrue(os.path.isdir(os.path.join(self.bagr.bagdir,
                                                    "multibag")))
         self.assertTrue(os.path.isfile(os.path.join(self.bagr.bagdir,
-                                            "multibag", "group-members.txt")))
+                                            "multibag", "member-bags.tsv")))
         self.assertTrue(os.path.isfile(os.path.join(self.bagr.bagdir,
-                                            "multibag", "group-directory.txt")))
+                                            "multibag", "file-lookup.tsv")))
         self.assertTrue(os.path.isfile(os.path.join(self.bagr.bagdir,
                                                    "about.txt")))
         

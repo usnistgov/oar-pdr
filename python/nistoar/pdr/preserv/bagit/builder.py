@@ -936,31 +936,31 @@ class BagBuilder(PreservationSystem):
         if baseurl and not baseurl.endswith('/'):
             baseurl += '/'
 
-        # write the group-members.txt file
-        tagfile = os.path.join(tagdir, "group-members.txt")
+        # write the member-bags.tsv file
+        tagfile = os.path.join(tagdir, "member-bags.tsv")
         try:
             with open(tagfile, 'w') as fd:
                 fd.write(self.bagname)
                 if baseurl:
-                    fd.write(' '+baseurl+self.bagname)
+                    fd.write('\t'+baseurl+self.bagname)
                 fd.write('\n')
 
-            # write the group-directory.txt file
-            tagfile = os.path.join(tagdir, "group-directory.txt")
+            # write the file-lookup.tsv file
+            tagfile = os.path.join(tagdir, "file-lookup.tsv")
+            fmt = "{0}\t{1}\n"
             with open(tagfile, 'w') as fd:
                 for bf in self._bag.iter_data_files():
-                    print(os.path.join("data", bf), self.bagname, file=fd)
+                    fd.write(fmt.format(os.path.join("data", bf), self.bagname))
 
-                print(os.path.join("metadata", "pod.json"),
-                      self.bagname, file=fd)
-                print(os.path.join("metadata", "nerdm.json"),
-                      self.bagname, file=fd)
+                fd.write(fmt.format(os.path.join("metadata", "pod.json"),
+                                    self.bagname))
+                fd.write(fmt.format(os.path.join("metadata", "nerdm.json"),
+                                    self.bagname))
 
                 for bf in self._bag.iter_data_files():
                     nerdf = os.path.join("metadata", bf, "nerdm.json")
                     if os.path.exists(os.path.join(self.bagdir, nerdf)):
-                        print(nerdf, self.bagname, file=fd)
-
+                        fd.write(fmt.format(nerdf, self.bagname))
 
         except OSError, ex:
             raise BagWriteError("Failed to write tag file: "+tagfile+

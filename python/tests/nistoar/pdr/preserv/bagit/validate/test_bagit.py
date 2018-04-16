@@ -167,9 +167,10 @@ class TestBagItValidator(test.TestCase):
             print("blah", file=fd)
             print("a secret garden", file=fd)
         errs = self.valid8.test_tagmanifest(self.bag)
-        self.assertEqual(len(errs.failed()), 1, "Unexpected # of errors: [\n  " +
+        self.assertEqual(len(errs.failed()), 2, "Unexpected # of errors: [\n  " +
                          "\n  ".join([str(e) for e in errs.failed()]) + "\n]")
         self.assertTrue(has_error(errs, "2.1.3-2"))
+        self.assertTrue(has_error(errs, "3-1-2"))
 
         os.remove(mf)
         errs = self.valid8.test_tagmanifest(self.bag)
