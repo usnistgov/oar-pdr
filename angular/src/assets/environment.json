@@ -1,0 +1,4 @@
+{
+    "RMMAPI": "http://localhost:8082/rmm/",
+    "SDPAPI":  "http://testdata.nist.gov/sdp/"
+}

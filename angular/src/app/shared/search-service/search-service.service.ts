@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Http, Response,URLSearchParams } from '@angular/http';
+import { Http, Response,URLSearchParams,RequestOptions, Headers } from '@angular/http';
 import { Observable } from 'rxjs/Observable';
 import 'rxjs/add/operator/map';
 import 'rxjs/add/operator/catch';
@@ -14,9 +14,9 @@ import * as _ from 'lodash';
 @Injectable()
 export class SearchService {
   //private RestAPIURL: string = Config.API;
-  private rmmApi : string = "http://testdata.nist.gov/rmm/"; // environment.RMMAPI;
+  private rmmApi : string = "http://localhost:8082/rmm/"; // environment.RMMAPI;
   private metaApi : string = "";// environment.METAPI;
-  private landingBackend : string = "http://testdata.nist.gov/rmm/";// environment.LANDING;
+  private landingBackend : string = "http://localhost:8082/rmm/";// environment.LANDING;
   private serviceApi : string;
   /**
    * Creates a new SearchService with the injected Http.
@@ -43,10 +43,30 @@ export class SearchService {
   }
 
   searchById(searchValue:string): Observable<string[]> {
-        if (_.includes(this.landingBackend,'rmm') && _.includes(searchValue,'ark'))
+    
+    if (_.includes(this.landingBackend,'rmm') && _.includes(searchValue,'ark'))
       this.landingBackend = this.landingBackend+'records?@id=';
     else if(_.includes(this.landingBackend,'rmm'))
-      this.landingBackend = this.landingBackend+'records/'; //+"records?exclude=_id&ediid=";
+      this.landingBackend = this.landingBackend+'records/'; 
+
+      //console.log(this.landingBackend+ searchValue);
+      // let myHeaders = new Headers();
+      // myHeaders.append("Access-Control-Allow-Origin", '*');   
+
+  //     this.http.get("http://localhost:8082/rmm/records/3A1EE2F169DD3B8CE0531A570681DB5D1491")
+  //   .map(res => res.json())
+  //   .subscribe(data => {
+  //     console.log("Test here::");
+  //     console.log(JSON.stringify(data));
+  // }, error =>{console.log("This subscribe method error:"+error) });
+
+  //     this.http.get("http://localhost:8082/rmm/records/3A1EE2F169DD3B8CE0531A570681DB5D1491")
+  //     .toPromise()
+  //     .then(data => {
+  //       console.log( "TEST  data :: "+data);
+  //     }).catch(( error ) => {
+  //       console.log("Error reading data :"+error);
+  //     }); 
 
     return this.http.get(this.landingBackend+ searchValue)
       .map((res: Response)  => res.json())

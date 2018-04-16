@@ -1,6 +1,6 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { NgModule } from '@angular/core';
+import { NgModule,APP_INITIALIZER } from '@angular/core';
 
 import {ButtonModule} from 'primeng/primeng';
 import { AppComponent } from './app.component';
@@ -41,7 +41,13 @@ import { HttpModule } from '@angular/http';
 import {NgbModule} from '@ng-bootstrap/ng-bootstrap';
 
 import { ErrorComponent,UserErrorComponent } from './landing/error.component';
+import { AppConfig } from './shared/config-service/config.service';
 
+const appInitializerFn = (appConfig: AppConfig) => {
+  return () => {
+    return appConfig.loadAppConfig();
+  };
+};
 @NgModule({
   declarations: [
     AppComponent,
@@ -71,7 +77,14 @@ import { ErrorComponent,UserErrorComponent } from './landing/error.component';
    
   ],
   exports: [Collaspe],
-  providers: [ Title, SearchService,SearchResolve, CommonVarService ],
+  providers: [ Title, SearchService,SearchResolve, CommonVarService
+    , AppConfig, {
+      provide: APP_INITIALIZER,
+      useFactory: appInitializerFn,
+      multi: true,
+      deps: [AppConfig]
+    }  
+  ],
   bootstrap: [AppComponent],
   schemas: [ CUSTOM_ELEMENTS_SCHEMA ,NO_ERRORS_SCHEMA]
 

@@ -110,6 +110,10 @@
   border: 0px;
 }
 
+:host /deep/ .ui-menu{
+  padding: 0;
+}
+
 :host /deep/ .ui-state-active, :host /deep/ .ui-state-highlight{
   background-color: #E7F0F6;
 }

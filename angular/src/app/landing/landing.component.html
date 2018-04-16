@@ -1,4 +1,4 @@
-<style id="antiClickjack">
+<!-- <style id="antiClickjack">
     body {
       display: none !important;
     }
@@ -12,12 +12,12 @@
     } else {
       top.location = self.location;
     }
-  </script>
+  </script> -->
   
   <div class="ui-grid ui-grid-responsive ui-grid-pad center">
     <div class="card landingcard">
   
-  <div *ngIf="recordDisplay?.length == 0 ">
+  <div *ngIf="record?.length == 0 || isId === false">
       <div class="ui-g">
          <div class="ui-g-10 ui-md-10 ui-lg-10 ui-sm-12" style="padding-left: 1%">
               <b>No Landing page available</b>
@@ -25,30 +25,30 @@
          </div>
       </div>
   </div>
-   <div *ngIf="recordDisplay.length !== 0">
+   <div *ngIf="record.length !== 0">
       <div class="ui-g" style="padding-bottom: 1%; padding-right:1%;">
           <div class="ui-g-10 ui-md-10 ui-lg-10 ui-sm-12">
               <div class="ui-g">
                   <div class="ui-g-12 ui-md-12 ui-lg-12 ui-sm-11">
-                      <span class="recordType" [ngSwitch]="recordDisplay['@type'][0]">
+                      <span class="recordType" [ngSwitch]="record['@type'][0]">
                           <b *ngSwitchCase="'nrd:SRD'">Standard Reference Data</b>
                           <b *ngSwitchCase="'nrdp:DataPublication'">Data Publication</b>
                           <b *ngSwitchCase="'nrdp:PublicDataResource'">Public Data Resource</b>
                           <b *ngSwitchDefault></b>
                       </span><br>
                       <span class="title" style="text-align: left; vertical-align: top; ">
-                          <h2>{{recordDisplay.title}}</h2>
+                          <h2>{{record.title}}</h2>
                       </span>
-                      <div class="" *ngIf="recordDisplay.authors">
-                          <span *ngFor="let author of recordDisplay.authors; let i = index">
-                              {{ author.fn}}<span *ngIf="i < recordDisplay.authors.length-1 ">,</span>
+                      <div class="" *ngIf="record.authors">
+                          <span *ngFor="let author of record.authors; let i = index">
+                              {{ author.fn}}<span *ngIf="i < record.authors.length-1 ">,</span>
                           </span>
                           <i style="cursor: pointer;" class ="faa" [ngClass]="{'faa-plus-square-o': !clickAuthors, 'faa-minus-square-o': clickAuthors}" aria-hidden="true" (click)="isCollapsedContent = !isCollapsedContent; clickAuthors = expandClick();"></i>
                       </div>
                       <div [collapse]="!isCollapsedContent" class="card card-block card-header">
-                          <div class="" *ngIf="recordDisplay.authors">
+                          <div class="" *ngIf="record.authors">
                               <span><b>Authors:</b></span>
-                              <div *ngFor="let author of recordDisplay.authors; let i = index">
+                              <div *ngFor="let author of record.authors; let i = index">
                                   <span>{{ author.fn}}</span>,
                                   <span *ngFor="let aff of author.affiliation">
                                        <br>{{aff.title}}
@@ -57,28 +57,28 @@
                           </div>
                       </div>
                       <br>
-                      <div class="" *ngIf="recordDisplay.contactPoint">
+                      <div class="" *ngIf="record.contactPoint">
                           Contact:
                           <strong>
-                              <a *ngIf="isEmail" href="{{recordDisplay.contactPoint.hasEmail}}" target="_top">
-                                  {{recordDisplay.contactPoint.fn}}</a>
-                              <span *ngIf="!isEmail">{{recordDisplay.contactPoint.fn}}</span>
+                              <a *ngIf="isEmail" href="{{record.contactPoint.hasEmail}}" target="_top">
+                                  {{record.contactPoint.fn}}</a>
+                              <span *ngIf="!isEmail">{{record.contactPoint.fn}}</span>
                           </strong>..
                           <i style="cursor: pointer;" class="faa" [ngClass]="{'faa-plus-square-o': !clickContact, 'faa-minus-square-o': clickContact}"
                           aria-hidden="true" (click)="closeContent = !closeContent; clickContact=expandContact();"></i>
                           <div [collapse]="!closeContent">
                               <div class="card">
-                                  <span class="" *ngIf="recordDisplay.contactPoint.fn">
-                                      <span>{{recordDisplay.contactPoint.fn}}</span>
+                                  <span class="" *ngIf="record.contactPoint.fn">
+                                      <span>{{record.contactPoint.fn}}</span>
                                   </span>
                                   <br><strong>Email:</strong>
                                   <span class="" *ngIf="isEmail">
-                                      <a *ngIf="isEmail" href="{{recordDisplay.contactPoint.hasEmail}}" target="_top">
-                                       {{recordDisplay.contactPoint.hasEmail.split(":")[1]}}</a>
+                                      <a *ngIf="isEmail" href="{{record.contactPoint.hasEmail}}" target="_top">
+                                       {{record.contactPoint.hasEmail.split(":")[1]}}</a>
                                   </span>
-                                  <div class="" *ngIf="recordDisplay.contactPoint.address">
+                                  <div class="" *ngIf="record.contactPoint.address">
                                       <span><b>Address:</b></span>
-                                       <div *ngFor="let address of recordDisplay.contactPoint.address">
+                                       <div *ngFor="let address of record.contactPoint.address">
                                           {{address}}
                                       </div>
                                   </div>
@@ -87,38 +87,38 @@
                       </div>
                       <div>
                           <span *ngIf="isId">Identifier: </span>
-                          <span *ngIf="isDOI" ><i>  <a href="http://doi.org/{{recordDisplay.doi.split(':')[1]}}">{{recordDisplay.doi}}</a></i></span>
-                          <span  *ngIf="!isDOI"><i> <a href="{{pdrApi}}{{recordDisplay['@id']}}">{{recordDisplay["@id"]}}</a></i> </span>
+                          <span *ngIf="isDOI" ><i>  <a href="http://doi.org/{{record.doi.split(':')[1]}}">{{record.doi}}</a></i></span>
+                          <span  *ngIf="!isDOI"><i> <a href="{{pdrApi}}{{record['@id']}}">{{record["@id"]}}</a></i> </span>
                           <span *ngIf="checkReferences()"><br>
                           <span>Described in article: </span>
-                              <small *ngFor="let refs of recordDisplay['references']; let i =index">
+                              <small *ngFor="let refs of record['references']; let i =index">
                                  
                                   <span style="padding-left:2.75em" *ngIf="refs.refType == 'IsDocumentedBy'">
                                       <br><i class="faa faa-external-link">
                                       <a href={{refs.location}} target="blank" >{{ refs.label }}</a></i>
-                                  <span *ngIf="i < recordDisplay.references.length-1 ">,</span>
+                                  <span *ngIf="i < record.references.length-1 ">,</span>
                                   </span>
                               </small>
                           </span><br>
-                          <span class="" *ngIf="recordDisplay.issued">  First Released: <strong>{{recordDisplay.issued}}</strong></span>
-                          <span class="" *ngIf="recordDisplay.modified"> Last modified: <strong>{{recordDisplay.modified}}</strong></span>
+                          <span class="" *ngIf="record.issued">  First Released: <strong>{{record.issued}}</strong></span>
+                          <span class="" *ngIf="record.modified"> Last modified: <strong>{{record.modified}}</strong></span>
                       </div>
                   </div>
-                  <div  *ngIf="recordDisplay.length !== 0" class="ui-sm-1 visible-xs-block visible-sm-block ">
+                  <div  *ngIf="record.length !== 0" class="ui-sm-1 visible-xs-block visible-sm-block ">
                       <button type="button" pButton icon="faa faa-list" (click)="menu3.toggle($event)"></button>
-                       <p-menu #menu3 class="rightMenuStyle" popup="popup" [model]="rightmenu" appendTo="body"></p-menu>
+                       <p-menu #menu3 class="rightMenuStyle" popup="popup" [model]="rightmenu"></p-menu>
                   </div>
               </div>
               <div class="ui-g">
                   <div class="ui-g-12 ui-md-12 ui-lg-12 ui-sm-12">
                       <div *ngIf="metadata != true && similarResources != true ">
-                          <description-resources [record]="recordDisplay" [files]="files" [distdownload]="distdownload" ></description-resources>
+                          <description-resources [record]="record" [files]="files" [distdownload]="distdownload" ></description-resources>
                       </div>
                       <div *ngIf="metadata == true && similarResources != true ">
-                          <metadata-detail [recordDisplay]="recordDisplay" [serviceApi]="serviceApi" ></metadata-detail>
+                          <metadata-detail [record]="record" [serviceApi]="serviceApi" ></metadata-detail>
                       </div>
                   </div>
-                  <div *ngIf="recordDisplay.length !== 0">
+                  <div *ngIf="record.length !== 0">
                       <p-dialog  class="citationDialog" [closable]="false" [(visible)]="display" modal="modal" width="310" height="310" responsive="true" #citeDialog>
                           <p-header> Citation
                               <button style="position:relative; float:right;" type="button" pButton icon="faa faa-close" (click)="closeDialog()"></button>
@@ -134,18 +134,21 @@
           <div class="ui-g-2 ui-md-2 ui-lg-2 ui-sm-12">
               <div class="ui-g">
                   <div class="ui-g-12 ui-md-12 ui-lg-12 ui-sm-12">
-                     <div class="visible-lg-block visible-md-block ">
+                     <!-- <div class="visible-lg-block visible-md-block "> -->
                           <p-menu  class="rightMenuStyle" [model]="rightmenu"></p-menu>
-                     </div>
+                     <!-- </div> -->
   
                   </div>
               </div>
               <div ng2-sticky class="ui-g">
                   <div class="ui-g-12 ui-md-12 ui-lg-12 ui-sm-12">
-                      <div ng2-sticky><p-menu class="leftMenuStyle" [model]="leftmenu" ></p-menu> </div>
+                      <div ng2-sticky>
+                          <p-menu class="leftMenuStyle" [model]="leftmenu" ></p-menu> 
+                      </div>
                   </div>
               </div>
           </div>
       </div>
    </div>
-  </div></div>
+  </div>
+</div>

@@ -31,7 +31,7 @@ export class ErrorComponent {
     }
   ngAfterViewInit(){
 
-   window.history.replaceState( {} , '#/error/', '/error/');
+   //window.history.replaceState( {} , '#/error/', '/error/');
   }
 }
 
@@ -62,6 +62,6 @@ export class ErrorComponent {
       }
     ngAfterViewInit(){
   
-     window.history.replaceState( {} , '#/error/', '/error/');
+     //window.history.replaceState( {} , '#/error/', '/error/');
     }
   }

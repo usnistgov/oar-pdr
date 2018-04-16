@@ -16,7 +16,7 @@ import { Component, Input, Pipe,PipeTransform } from '@angular/core';
         <br>
         <span style="font-size:8pt;color:grey;" >* item[number] indicates an array not a key name</span>
         <br><br>
-       <fieldset-view [entry]="recordDisplay"></fieldset-view>
+       <fieldset-view [entry]="record"></fieldset-view>
       </div>
     </div>
   `
@@ -24,11 +24,11 @@ import { Component, Input, Pipe,PipeTransform } from '@angular/core';
 
 export class MetadataComponent {
   
-  @Input() recordDisplay: any[];
+  @Input() record: any[];
   @Input() serviceApi : string;
    
   ngOnInit() {
-      delete this.recordDisplay["_id"];
+      delete this.record["_id"];
   }
    
   generateArray(obj){
