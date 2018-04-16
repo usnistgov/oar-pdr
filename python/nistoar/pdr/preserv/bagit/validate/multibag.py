@@ -15,7 +15,7 @@ class MultibagValidator(ValidatorBase):
     In particular, this validator tests whether a given bag can be consider
     part of a multibag aggregation.  
     """
-    profile = ("Multibag", "0.2")
+    profile = ("Multibag", "0.3")
 
     def __init__(self, config=None):
         super(MultibagValidator, self).__init__(config)
@@ -39,8 +39,8 @@ class MultibagValidator(ValidatorBase):
         out._warn(t, len(data["Multibag-Version"]) == 1)
 
         t = self._issue("2-Version-val",
-                      "Multibag-Version must be set to '0.2'")
-        out._err(t, data["Multibag-Version"][-1] == "0.2")
+                      "Multibag-Version must be set to '0.3'")
+        out._err(t, data["Multibag-Version"][-1] == "0.3")
         
         return out
 
@@ -211,7 +211,7 @@ class MultibagValidator(ValidatorBase):
 
         return out
 
-    def test_group_members(self, bag, want=ALL, results=None):
+    def test_member_bags(self, bag, want=ALL, results=None):
         out = results
         if not out:
             out = ValidationResults(bag.name, want)
@@ -230,10 +230,10 @@ class MultibagValidator(ValidatorBase):
             out._err(t, False)
             return out
 
-        gmemf = os.path.join(mdir, "group-members.txt")
+        mbemf = os.path.join(mdir, "member-bags.tsv")
         t = self._issue("3.0-1", "Multibag tag directory must contain a "+
-                        "group-members.txt file")
-        out._err(t, os.path.isfile(gmemf))
+                        "member-bags.tsv file")
+        out._err(t, os.path.isfile(mbemf))
         if t.failed():
             return out
 
@@ -243,11 +243,11 @@ class MultibagValidator(ValidatorBase):
         found = set()
         foundme = False
         last = None
-        with open(gmemf) as fd:
+        with open(mbemf) as fd:
             i = 0
             for line in fd:
                 i += 1
-                parts = line.strip().split()
+                parts = [f.strip() for f in line.strip().split('\t')]
                 last = parts[0]
                 if last == bag.name:
                     foundme = True
@@ -255,15 +255,13 @@ class MultibagValidator(ValidatorBase):
                     replicated.append(i)
                 else:
                     found.add(last)
-                if len(parts) > 2:
-                    badfmt.append(i)
-                if len(parts) > 1:
+                if len(parts) > 1 and len(parts[1]) > 0:
                     url = urlparse(parts[1])
                     if not url.scheme or url.netloc:
                         badurl.append(i)
 
-        t = self._issue("3.1-1", "group-members.txt lines must match "+
-                        "format, BAGNAME [URL]")
+        t = self._issue("3.1-1", "member-bags.tsv lines must match "+
+                        "format, BAGNAME[\tURL][\t...]")
         comm = None
         if badfmt:
             s = (len(badfmt) > 1 and "s") or ""
@@ -273,7 +271,7 @@ class MultibagValidator(ValidatorBase):
             comm = "line{0} {1}".format(s, ", ".join([str(b) for b in badfmt]))
         out._err(t, len(badfmt) == 0, comm)
 
-        t = self._issue("3.1-2", "group-members.txt: URL field must be an "+
+        t = self._issue("3.1-2", "member-bags.txt: URL field must be an "+
                         "absolute URL")
         comm = None
         if badurl:
@@ -284,15 +282,15 @@ class MultibagValidator(ValidatorBase):
             comm = "line{0} {1}".format(s, ", ".join([str(b) for b in badurl]))
         out._err(t, len(badurl) == 0, comm)
 
-        t = self._issue("3.1-3", "group-members.txt must list current bag name")
+        t = self._issue("3.1-3", "member-bags.tsv must list current bag name")
         out._err(t, foundme)
 
         if ishead:
-            t = self._issue("3.1-4", "group-members.txt: Head bag must be "+
+            t = self._issue("3.1-4", "member-bags.tsv: Head bag must be "+
                             "listed last")
             out._err(t, last == bag.name)
 
-        t = self._issue("3.1-5", "group-members.txt: a bag name should only be "+
+        t = self._issue("3.1-5", "member-bags.tsv: a bag name should only be "+
                         "listed once")
         comm = None
         if len(replicated) > 0:
@@ -302,11 +300,10 @@ class MultibagValidator(ValidatorBase):
                 replicated = replicated[:4]
             comm= "line{0} {1}".format(s,", ".join([str(b) for b in replicated]))
         out._warn(t, len(replicated) == 0, comm)
-            
 
         return out
 
-    def test_group_directory(self, bag, want=ALL, results=None, ishead=False):
+    def test_file_lookup(self, bag, want=ALL, results=None, ishead=False):
         out = results
         if not out:
             out = ValidationResults(bag.name, want)
@@ -325,10 +322,10 @@ class MultibagValidator(ValidatorBase):
             out._err(t, False)
             return out
 
-        gdirf = os.path.join(mdir, "group-directory.txt")
+        flirf = os.path.join(mdir, "file-lookup.tsv")
         t = self._issue("3.0-2", "Multibag tag directory must contain a "+
-                        "group-directory.txt file")
-        out._err(t, os.path.isfile(gdirf))
+                        "file-lookup.tsv file")
+        out._err(t, os.path.isfile(flirf))
         if t.failed():
             return out
 
@@ -336,11 +333,11 @@ class MultibagValidator(ValidatorBase):
         replicated = []
         missing = []
         paths = set()
-        with open(gdirf) as fd:
+        with open(flirf) as fd:
             i = 0
             for line in fd:
                 i += 1
-                parts = line.strip().split()
+                parts = line.strip().split('\t')
                 if parts[0] in paths:
                     replicated.append(i)
                 else:
@@ -352,8 +349,8 @@ class MultibagValidator(ValidatorBase):
                    not os.path.isfile(os.path.join(bag.dir, parts[0])):
                     missing.append(i)
 
-        t = self._issue("3.2-1", "group-directory.txt lines must match format, "+
-                        "FILEPATH BAGNAME")
+        t = self._issue("3.2-1", "file-lookup.tsv lines must match format, "+
+                        "FILEPATH\\tBAGNAME")
         comm = None
         if len(badfmt) > 0:
             s = (len(badfmt) > 1 and "s") or ""
@@ -363,7 +360,7 @@ class MultibagValidator(ValidatorBase):
             comm= "line{0} {1}".format(s,", ".join([str(b) for b in badfmt]))
         out._err(t, len(badfmt) == 0, comm)
 
-        t = self._issue("3.2-2", "group-directory.txt: file path for current "+
+        t = self._issue("3.2-2", "file-lookup.tsv: file path for current "+
                         "bag must exist as a file")
         comm = None
         if len(missing) > 0:
@@ -374,7 +371,7 @@ class MultibagValidator(ValidatorBase):
             comm= "line{0} {1}".format(s,", ".join([str(b) for b in missing]))
         out._err(t, len(missing) == 0, comm)
 
-        t = self._issue("3.2-3", "group-directory.txt: a file path must be "+
+        t = self._issue("3.2-3", "file-lookup.tsv: a file path must be "+
                         "listed only once")
         comm = None
         if len(replicated) > 0:
@@ -396,11 +393,11 @@ class MultibagValidator(ValidatorBase):
                     missing.append(path)
         
         t = self._issue("3.2-4", "all payload file should "+
-                        "be listed in the group-directory.txt file")
+                        "be listed in the file-lookup.tsv file")
         comm = None
         if len(missing) > 0:
             s = (len(missing) > 1 and "s") or ""
-            comm = [ "{0} payload file{1} missing from group-directory.txt"
+            comm = [ "{0} payload file{1} missing from file-lookup.tsv"
                      .format(len(missing), s) ]
             comm += missing
         out._rec(t, len(missing) == 0)

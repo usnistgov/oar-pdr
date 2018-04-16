@@ -31,7 +31,7 @@ class NISTBagValidator(ValidatorBase):
     parts (excluding Multibag and basic BagIt compliance; see 
     NISTAIPValidator)
     """
-    profile = ("NIST", "0.2")
+    profile = ("NIST", "0.3")
     namere = re.compile("^(\w+).mbag(\d+)_(\d+)-(\d+)$")
     
     def __init__(self, config=None):
@@ -64,7 +64,8 @@ class NISTBagValidator(ValidatorBase):
         out._warn(t, nm)
 
         if nm:
-            t = self._issue("2-2", "Bag name should include version 'mbag{0}'")
+            t = self._issue("2-2", "Bag name should include version 'mbag{0}'"
+                                   .format(self.profile[1]))
             vers = self.profile[1].split('.')
             out._warn(t, nm.group(2) == vers[0] and nm.group(3) == vers[1])
 

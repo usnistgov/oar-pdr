@@ -884,19 +884,19 @@ class TestBuilder(test.TestCase):
         for df in datafiles:
             self.bag.add_data_file(df, os.path.join(datadir, df))
 
-        gmtag = os.path.join(self.bag.bagdir,"multibag", "group-members.txt")
-        gdtag = os.path.join(self.bag.bagdir,"multibag", "group-directory.txt")
+        mbtag = os.path.join(self.bag.bagdir,"multibag", "member-bags.tsv")
+        fltag = os.path.join(self.bag.bagdir,"multibag", "file-lookup.tsv")
                              
-        self.assertTrue(not os.path.exists(gmtag))
-        self.assertTrue(not os.path.exists(gdtag))
+        self.assertTrue(not os.path.exists(mbtag))
+        self.assertTrue(not os.path.exists(fltag))
 
         # pdb.set_trace()
         self.bag.write_mbag_files()
 
-        self.assertTrue(os.path.exists(gmtag))
-        self.assertTrue(os.path.exists(gdtag))
+        self.assertTrue(os.path.exists(mbtag))
+        self.assertTrue(os.path.exists(fltag))
 
-        with open(gmtag) as fd:
+        with open(mbtag) as fd:
             lines = fd.readlines()
         self.assertEqual(lines, [self.bag.bagname+'\n'])
 
@@ -905,16 +905,16 @@ class TestBuilder(test.TestCase):
                   [os.path.join("metadata", d, "nerdm.json") for d in datafiles]
         
         # FIX: component order is significant!
-        # with open(gdtag) as fd:
+        # with open(fltag) as fd:
         #    i = 0;
         #    for line in fd:
         #        self.assertEqual(line.strip(), members[i]+' '+self.bag.bagname)
         #        i += 1
         #
-        with open(gdtag) as fd:
+        with open(fltag) as fd:
             lines = set([line.strip() for line in fd])
         for member in members:
-            self.assertIn(member+' '+self.bag.bagname, lines)
+            self.assertIn(member+'\t'+self.bag.bagname, lines)
 
     def test_write_bagit_ver(self):
         self.bag.cfg['bagit_version'] = "0.98"
@@ -943,7 +943,7 @@ class TestBuilder(test.TestCase):
                       "National Institute of Standards and Technology\n",
                       lines)
         self.assertIn("Contact-Email: datasupport@nist.gov\n", lines)
-        self.assertIn("Multibag-Version: 0.2\n", lines)
+        self.assertIn("Multibag-Version: 0.3\n", lines)
         self.assertEqual(len([l for l in lines
                                 if "Organization-Address: " in l]), 2)
 
@@ -974,7 +974,7 @@ class TestBuilder(test.TestCase):
                       "National Institute of Standards and Technology\n",
                       lines)
         self.assertIn("Contact-Email: datasupport@nist.gov\n", lines)
-        self.assertIn("Multibag-Version: 0.2\n", lines)
+        self.assertIn("Multibag-Version: 0.3\n", lines)
         self.assertEqual(len([l for l in lines
                                 if "Organization-Address: " in l]), 2)
         self.assertEqual(len([l for l in lines
@@ -1004,7 +1004,7 @@ class TestBuilder(test.TestCase):
                       "National Institute of Standards and Technology\n",
                       lines)
         self.assertIn("Contact-Email: datasupport@nist.gov\n", lines)
-        self.assertIn("Multibag-Version: 0.2\n", lines)
+        self.assertIn("Multibag-Version: 0.3\n", lines)
         self.assertEqual(len([l for l in lines
                                 if "Organization-Address: " in l]), 2)
         self.assertIn("Internal-Sender-Identifier: "+self.bag.bagname+'\n',
