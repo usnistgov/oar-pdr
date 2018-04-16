@@ -31,14 +31,14 @@ class TestMultibagValidator(test.TestCase):
 
     def setUp(self):
         self.tf = Tempfiles()
-        self.bagdir = self.tf.track("XXXX.mbag0_2-0")
+        self.bagdir = self.tf.track("XXXX.mbag0_3-0")
         shutil.copytree(bagdir, self.bagdir)
         
         self.bag = bag.NISTBag(self.bagdir)
-        mbtagf = os.path.join(self.bag.multibag_dir, "group-members.txt")
+        mbtagf = os.path.join(self.bag.multibag_dir, "member-bags.tsv")
         with open(mbtagf, 'w') as fd:
             print(self.bag.name, file=fd)
-        mbtagf = os.path.join(self.bag.multibag_dir, "group-directory.txt")
+        mbtagf = os.path.join(self.bag.multibag_dir, "file-lookup.tsv")
         nmre = re.compile(r'samplebag')
         with open(mbtagf) as fd:
             lines = fd.readlines()

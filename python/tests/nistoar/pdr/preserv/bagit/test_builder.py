@@ -943,7 +943,7 @@ class TestBuilder(test.TestCase):
                       "National Institute of Standards and Technology\n",
                       lines)
         self.assertIn("Contact-Email: datasupport@nist.gov\n", lines)
-        self.assertIn("Multibag-Version: 0.2\n", lines)
+        self.assertIn("Multibag-Version: 0.3\n", lines)
         self.assertEqual(len([l for l in lines
                                 if "Organization-Address: " in l]), 2)
 
@@ -974,7 +974,7 @@ class TestBuilder(test.TestCase):
                       "National Institute of Standards and Technology\n",
                       lines)
         self.assertIn("Contact-Email: datasupport@nist.gov\n", lines)
-        self.assertIn("Multibag-Version: 0.2\n", lines)
+        self.assertIn("Multibag-Version: 0.3\n", lines)
         self.assertEqual(len([l for l in lines
                                 if "Organization-Address: " in l]), 2)
         self.assertEqual(len([l for l in lines
@@ -1004,7 +1004,7 @@ class TestBuilder(test.TestCase):
                       "National Institute of Standards and Technology\n",
                       lines)
         self.assertIn("Contact-Email: datasupport@nist.gov\n", lines)
-        self.assertIn("Multibag-Version: 0.2\n", lines)
+        self.assertIn("Multibag-Version: 0.3\n", lines)
         self.assertEqual(len([l for l in lines
                                 if "Organization-Address: " in l]), 2)
         self.assertIn("Internal-Sender-Identifier: "+self.bag.bagname+'\n',
