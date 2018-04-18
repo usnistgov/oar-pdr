@@ -983,8 +983,9 @@ class BagBuilder(PreservationSystem):
         initdata['Bag-Group-Identifier'] = nerdm.get('ediid') or self.ediid
         initdata['Internal-Sender-Identifier'] = self.bagname
 
-        if nerdm.get('description'):
-            initdata['External-Description'] = nerdm['description']
+        desc = [p for p in nerdm.get('description', []) if len(p.strip()) > 0]
+        if desc:
+            initdata['External-Description'] = desc
         else:
             initdata['External-Description'] = \
 "This collection contains data for the NIST data resource entitled, {0}". \
@@ -992,7 +993,7 @@ format(nerdm['title'])
 
         initdata['External-Identifier'] = [self.id]
         if nerdm.get('doi'):
-            initdata['External-Identifier'].append(nerdm['doi'])
+            initdata['External-Identifier'].append("doi:"+nerdm['doi'])
 
         # Calculate the payload Oxum
         oxum = self._measure_oxum(self._bag._datadir)
