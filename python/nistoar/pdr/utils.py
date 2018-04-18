@@ -2,7 +2,7 @@
 Utility functions useful across the pdr package
 """
 from collections import OrderedDict, Mapping
-import hashlib, json, re, shutil, os
+import hashlib, json, re, shutil, os, time
 
 from .exceptions import (NERDError, PODError, StateException)
 
@@ -150,5 +150,7 @@ def rmtree(rootdir, retries=1):
         except OSError as ex:
             if retries <= 0:
                 raise
+            # wait a little for NFS to catch up
+            time.sleep(0.25)
             rmtree(root, retries=retries-1)
     
