@@ -1,6 +1,7 @@
 import os, sys, pdb, json, subprocess
 import unittest as test
 
+from nistoar.testing import *
 import nistoar.pdr.utils as utils
 
 testdir = os.path.dirname(os.path.abspath(__file__))
@@ -67,8 +68,62 @@ class TestChecksum(test.TestCase):
                                " ".join(cmd))
         return out.split()[0]
 
+class TestRmtree(test.TestCase):
 
+    def setUp(self):
+        self.tf = Tempfiles()
 
+    def tearDown(self):
+        self.tf.clean()
+
+    def touch(self, parent, files):
+        if not isinstance(files, (list, tuple)):
+            files = [ files ]
+        if isinstance(parent, (list, tuple)):
+            parent = os.path.join(*parent)
+
+        for f in files:
+            with open(os.path.join(parent, f), 'w') as fd:
+                fd.write("goober!")
+
+    def test_rmtree(self):
+        root = self.tf.mkdir("root")
+        os.makedirs(os.path.join(root, "one/two/three"))
+        os.makedirs(os.path.join(root, "one/four"))
+        self.touch([root, "one/four"], "foo bar chew".split())
+        self.touch([root, "one"], "hank snow".split())
+
+        self.assertTrue(os.path.exists(os.path.join(root, "one/two/three")))
+        self.assertTrue(os.path.exists(os.path.join(root, "one/four/chew")))
+
+        top = os.path.join(root,"one")
+        self.assertTrue(os.path.exists(root))
+        self.assertTrue(os.path.exists(top))
+        utils.rmtree(top)
+        self.assertTrue(os.path.exists(root))
+        self.assertFalse(os.path.exists(top))
+
+    def test_rmmtdir(self):
+        root = self.tf.mkdir("root")
+        top = os.path.join(root,"one")
+        os.mkdir(top)
+        self.assertTrue(os.path.exists(root))
+        self.assertTrue(os.path.exists(top))
+        utils.rmtree(top)
+        self.assertTrue(os.path.exists(root))
+        self.assertFalse(os.path.exists(top))
+
+    def test_rmfile(self):
+        root = self.tf.mkdir("root")
+        self.touch(root, "one")
+
+        top = os.path.join(root, "one")
+        self.assertTrue(os.path.exists(root))
+        self.assertTrue(os.path.exists(top))
+        utils.rmtree(top)
+        self.assertTrue(os.path.exists(root))
+        self.assertFalse(os.path.exists(top))
+        
 
 if __name__ == '__main__':
     test.main()
