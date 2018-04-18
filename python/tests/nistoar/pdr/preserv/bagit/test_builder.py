@@ -1073,6 +1073,87 @@ class TestBuilder(test.TestCase):
         self.assertIn("More information:", lines[17])
         self.assertIn("https://doi.org/10.18434/", lines[18])
             
+    def test_ensure_baginfo(self):
+        # prep the test bag
+        self.bag.ensure_bagdir()
+        with self.assertRaises(bldr.BagProfileError):
+            self.bag.write_about_file()
+        
+        with open(os.path.join(datadir, "_nerdm.json")) as fd:
+            mdata = json.load(fd)
+        # see if we deal with blank paragraphs
+        mdata['description'].extend(["  ", "(blank paragraph above)"])
+        self.bag.add_res_nerd(mdata)
+        with self.assertRaises(bldr.BagProfileError):
+            self.bag.write_about_file()
+        
+        podfile = os.path.join(datadir, "_pod.json")
+        with open(podfile) as fd:
+            poddata = json.load(fd)
+        self.bag.add_ds_pod(poddata, convert=False)
+
+        # create the bag-info.txt file
+        self.bag.ensure_baginfo(True)
+
+        baginfof = os.path.join(self.bag.bagdir,"bag-info.txt")
+        self.assertTrue(os.path.exists(baginfof))
+
+        # check the bag-info contents
+        # pdb.set_trace()
+        bidata = {}
+        fmtre = re.compile("^[\w\-]+\s*:\s*(\S.*$)")
+        cntre = re.compile("^\s+")
+        spre = re.compile("\s+")
+        i = 0
+        param = None
+        with open(baginfof) as fd:
+            for line in fd:
+                i += 1
+                if cntre.match(line):
+                    if not param:
+                        self.fail("bag-info.txt format error at line "+str(i)+
+                                  ": expected param name on first line")
+                    else:
+                        bidata[param][-1] += ' ' + line.strip()
+                    continue
+
+                param = spre.split(line, 1)[0].rstrip(':')
+                if param not in bidata:
+                    bidata[param] = []
+                m = fmtre.search(line)
+                if m:
+                    bidata[param].append(m.group(1))
+                else:
+                    self.fail("bag-info.txt format error at line "+str(i))
+
+        self.assertIn("External-Description", bidata)
+        self.assertIn("Bagging-Date", bidata)
+        self.assertIn("Bag-Group-Identifier", bidata)
+        self.assertIn("Internal-Sender-Identifier", bidata)
+        self.assertIn("Bag-Size", bidata)
+        self.assertIn("Payload-Oxum", bidata)
+        self.assertIn("Source-Organization", bidata)
+        self.assertIn("Organization-Address", bidata)
+        self.assertIn("Contact-Name", bidata)
+        self.assertIn("Contact-Email", bidata)
+        self.assertIn("NIST-BagIt-Version", bidata)
+        self.assertIn("Contact-Name", bidata)
+
+        self.assertTrue(len([v for v in bidata['External-Identifier']
+                               if v.startswith('ark:')]) > 0,
+                        "Missing ARK ID in External-Identifier")
+        # DOI only appears in bag-info if it is in the nerdm record
+        self.assertTrue(len([v for v in bidata['External-Identifier']
+                               if v.startswith('doi:')]) > 0,
+                        "Missing DOI ID in External-Identifier")
+        
+        empty = []
+        for param in bidata:
+            if not bidata[param] or any([v.strip()=="" for v in bidata[param]]):
+                empty.append(param)
+        if len(empty) > 0:
+            self.fail("Empty bag-info values found for "+str(empty))
+
 
 if __name__ == '__main__':
     test.main()

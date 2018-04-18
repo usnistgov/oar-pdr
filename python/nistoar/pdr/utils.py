@@ -2,7 +2,7 @@
 Utility functions useful across the pdr package
 """
 from collections import OrderedDict, Mapping
-import hashlib, json, re
+import hashlib, json, re, shutil, os, time
 
 from .exceptions import (NERDError, PODError, StateException)
 
@@ -133,3 +133,24 @@ def checksum_of(filepath):
             sum.update(buf)
     return sum.hexdigest()
 
+def rmtree(rootdir, retries=1):
+    """
+    an implementation of rmtree that is intended to work on NSF-mounted 
+    directories where shutil.rmtree can often fail.
+    """
+    if not os.path.exists(rootdir):
+        return
+    if not os.path.isdir(rootdir):
+        os.remove(rootdir)
+        return
+    
+    for root,subdirs,files in os.walk(rootdir, topdown=False):
+        try:
+            shutil.rmtree(root)
+        except OSError as ex:
+            if retries <= 0:
+                raise
+            # wait a little for NFS to catch up
+            time.sleep(0.25)
+            rmtree(root, retries=retries-1)
+    
