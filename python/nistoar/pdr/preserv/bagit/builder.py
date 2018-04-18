@@ -993,7 +993,7 @@ format(nerdm['title'])
 
         initdata['External-Identifier'] = [self.id]
         if nerdm.get('doi'):
-            initdata['External-Identifier'].append(nerdm['doi'])
+            initdata['External-Identifier'].append("doi:"+nerdm['doi'])
 
         # Calculate the payload Oxum
         oxum = self._measure_oxum(self._bag._datadir)
