@@ -691,6 +691,8 @@ class PreservationBagger(SIPBagger):
             for iss in issues:
                 if iss.type == iss.ERROR:
                     log.error(str(iss))
+                    for comm in iss.comments():
+                        log.error(comm)
                 elif iss.type == iss.WARN:
                     log.warn(str(iss))
                 else:
