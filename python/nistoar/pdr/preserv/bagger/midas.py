@@ -15,7 +15,7 @@ from abc import ABCMeta, abstractmethod, abstractproperty
 from .base import SIPBagger, moddate_of, checksum_of, read_nerd, read_pod
 from .base import sys as _sys
 from ..bagit.builder import BagBuilder, NERDMD_FILENAME, FILEMD_FILENAME
-from ... import def_merge_etcdir
+from ... import def_merge_etcdir, utils
 from .. import (SIPDirectoryError, SIPDirectoryNotFound, AIPValidationError,
                 ConfigurationException, StateException, PODError)
 from nistoar.nerdm.merge import MergerFactory
@@ -585,7 +585,7 @@ class PreservationBagger(SIPBagger):
             log.warn("Removing previous version of preservation bag, %s",
                      self.bagbldr.bagname)
             if os.path.isdir(self.bagdir):
-                shutil.rmtree(self.bagdir)
+                utils.rmtree(self.bagdir)
             else:
                 shutil.remove(self.bagdir)
         shutil.copytree(mdbagger.bagdir, self.bagdir)
