@@ -36,17 +36,19 @@ class TestNotice(test.TestCase):
         self.assertEqual(notice.type, d['type'])
         self.assertEqual(notice.title, d['title'])
         self.assertEqual(notice.description, d['description'])
+        self.assertTrue(notice.doformat)
         self.assertEqual(notice.origin, d['origin'])
         self.assertEqual(notice.issued, d['issued'])
         self.assertEqual(notice.metadata, d['metadata'])
 
-        notice = notify.Notice(d['type'], d['title'], d['description'], 
-                               color=d['metadata']['color'],
+        notice = notify.Notice(d['type'], d['title'], d['description'],
+                               formatted=True, color=d['metadata']['color'],
                                excitation=d['metadata']['excitation'])
         
         self.assertEqual(notice.type, d['type'])
         self.assertEqual(notice.title, d['title'])
         self.assertEqual(notice.description, d['description'])
+        self.assertFalse(notice.doformat)
         self.assertIsNone(notice.origin)
         self.assertTrue(isinstance(notice.issued, str))
         self.assertGreater(len(notice.issued), 0)
