@@ -306,10 +306,17 @@ class ThreadedPreservationService(PreservationService):
 
                 # alert a human!
                 if self._hdlr.notifier:
+                    fmtd = False
+                    if isinstance(ex, PreservationException):
+                        msg = [ex.summary] + [ex.errors]
+                        fmtd = True
+                    else:
+                        msg = str(ex)
                     self._hdlr.notifier.alert("preserve.failure",
                                               origin=self._hdlr.name,
                       summary="Preservation failed for SIP="+self._hdlr._sipid,
-                                              desc=str(ex), id=self._hdlr._sipid)
+                                              desc=msg, formatted=fmtd,
+                                              id=self._hdlr._sipid)
 
     def _launch_handler(self, handler, timeout=None):
         """

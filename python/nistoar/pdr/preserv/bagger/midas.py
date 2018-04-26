@@ -690,17 +690,15 @@ class PreservationBagger(SIPBagger):
             log.warn("Bag Validation issues detected for id="+self.name)
             for iss in issues:
                 if iss.type == iss.ERROR:
-                    log.error(str(iss))
-                    for comm in iss.comments:
-                        log.error(comm)
+                    log.error(iss.description)
                 elif iss.type == iss.WARN:
-                    log.warn(str(iss))
+                    log.warn(iss.description)
                 else:
-                    log.info(str(iss))
+                    log.info(iss.description)
 
             if raiseon:
                 raise AIPValidationError("Bag Validation errors detected",
-                                         errors=[str(i) for i in issues])
+                                         errors=[i.description for i in issues])
 
         else:
             log.info("%s: bag validation completed without issues",

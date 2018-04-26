@@ -46,6 +46,22 @@ class PreservationException(PDRException):
         if errors:
             self.errors.extend(errors)
 
+    @property
+    def description(self):
+        """
+        a longer explanation of the error or errors that occurred.  This is
+        potentially multi-line (i.e. has embedded newlines) text constructed 
+        from the list of errors attached to this exception.  If there are no
+        errors, this is equivalent to str(self).  The last line will not 
+        end in a newline character.
+        """
+        out = str(self)
+        if len(self.errors) > 0:
+            out += ":\n  * "
+            out += "\n  * ".join(self.errors)
+        return out
+        
+
 class AIPValidationError(PreservationException):
     """
     An indication that the an Archive Information Package (AIP) (usually,

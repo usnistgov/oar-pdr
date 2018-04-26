@@ -401,7 +401,7 @@ class NotificationService(object):
             raise ValueError(msg)
 
     def notify(self, target, type, summary, desc=None, origin=None,
-               issued=None, **metadata):
+               issued=None, formatted=False, **metadata):
         """
         send a notification to a target with a given name.  This calls 
         distribute() internally
@@ -419,17 +419,23 @@ class NotificationService(object):
         :param issued str:  a formatted string for the timestamp when the 
                             notification condition was created.  If None,
                             the current time will be used.
+        :param formatted bool:  If False, the description is unformatted for 
+                            line width; in this case, the description may 
+                            get formatted for certain outputs like an email.
+                            (See above discussion about the description.)
+                            If True, the description has been pre-formatted
+                            (or otherwise should not be formatted) for display.
         :param metadata dict:  a dictionary of additional metadata to attach 
                             to the notification.  All property values must be 
                             convertable to a string via str().
         """
         if metadata is None:
             metadata = {}
-        self.distribute(target,
-                        Notice(type, summary, desc, origin, issued, **metadata))
+        self.distribute(target, Notice(type, summary, desc, origin, issued, 
+                                       formatted, **metadata))
 
     def alert(self, type, summary, desc=None, origin=None, issued=None,
-              **metadata):
+              formatted=False, **metadata):
         """
         send a notification to all targets that configured as subscribing 
         to those of the given type.  If the type is not recognized or has 
@@ -446,13 +452,19 @@ class NotificationService(object):
         :param issued str:  a formatted string for the timestamp when the 
                             notification condition was created.  If None,
                             the current time will be used.
+        :param formatted bool:  If False, the description is unformatted for 
+                            line width; in this case, the description may 
+                            get formatted for certain outputs like an email.
+                            (See above discussion about the description.)
+                            If True, the description has been pre-formatted
+                            (or otherwise should not be formatted) for display.
         :param metadata dict:  a dictionary of additional metadata to attach 
                             to the notification.  All property values must be 
                             convertable to a string via str().
         """
         if type in self._subscribers:
             self.notify(self._subscribers[type], type, summary, desc, origin,
-                        issued, **metadata)
+                        issued, formatted, **metadata)
 
     def archive(self, notice, name):
         """
