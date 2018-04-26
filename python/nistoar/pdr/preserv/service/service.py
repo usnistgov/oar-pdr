@@ -308,7 +308,7 @@ class ThreadedPreservationService(PreservationService):
                 if self._hdlr.notifier:
                     fmtd = False
                     if isinstance(ex, PreservationException):
-                        msg = [ex.summary] + [ex.errors]
+                        msg = [str(ex)] + [ex.errors]
                         fmtd = True
                     else:
                         msg = str(ex)
