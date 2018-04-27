@@ -2,7 +2,7 @@
 Utility functions useful across the pdr package
 """
 from collections import OrderedDict, Mapping
-import hashlib, json, re, shutil, os, time
+import hashlib, json, re, shutil, os, time, subprocess
 
 from .exceptions import (NERDError, PODError, StateException)
 
@@ -133,7 +133,19 @@ def checksum_of(filepath):
             sum.update(buf)
     return sum.hexdigest()
 
-def rmtree(rootdir, retries=1):
+def rmtree_sys(rootdir):
+    """
+    an implementation of rmtree that is intended to work on NSF-mounted 
+    directories where shutil.rmtree can often fail.
+    """
+    if '*' in rootdir or '?' in rootdir:
+        raise ValueError("No wildcards allowed in rootdir")
+    if not os.path.exists(rootdir):
+        return
+    cmd = "rm -r ".split() + [rootdir]
+    subprocess.check_call(cmd)
+
+def rmtree_retry(rootdir, retries=1):
     """
     an implementation of rmtree that is intended to work on NSF-mounted 
     directories where shutil.rmtree can often fail.
@@ -154,3 +166,4 @@ def rmtree(rootdir, retries=1):
             time.sleep(0.25)
             rmtree(root, retries=retries-1)
     
+rmtree = rmtree_sys
