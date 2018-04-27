@@ -146,8 +146,12 @@ class BagBuilder(PreservationSystem):
         jqlib = self.cfg.get('jq_lib', def_jq_libdir)
         self.pod2nrd = PODds2Res(jqlib)
 
-        if os.path.exists(self.bagdir):
-            self.ensure_bagdir() # this initializes some data like self._bag
+# Not sure why this was added originally, but it causes problems to create
+# the bag directory and log in the constructor, and breaks assumptions of
+# ensure_bagdir().
+# 
+#        if os.path.exists(self.bagdir):
+#            self.ensure_bagdir() # this initializes some data like self._bag
 
     def _merge_def_config(self, config):
         if not def_etc_dir:
@@ -296,7 +300,7 @@ class BagBuilder(PreservationSystem):
         fmt = self.cfg.get('bag_log_format', DEF_BAGLOG_FORMAT)
         self._loghdlr.setFormatter(logging.Formatter(fmt))
         self.log.addHandler(self._loghdlr)
-        
+
     def _unset_logfile(self):
         if hasattr(self, '_loghdlr') and self._loghdlr:
             self.log.removeHandler(self._loghdlr)
@@ -785,6 +789,8 @@ class BagBuilder(PreservationSystem):
         metdadata has been written out; if it hasn't, a BagProfileError is 
         raised.  
         """
+        if not self._bag:
+            self.ensure_bagdir()
         nerdresf = self._bag.nerd_file_for("")
         podf = self._bag.pod_file()
         if not os.path.exists(podf):
