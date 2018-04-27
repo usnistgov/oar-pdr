@@ -166,4 +166,4 @@ def rmtree_retry(rootdir, retries=1):
             time.sleep(0.25)
             rmtree(root, retries=retries-1)
     
-rmtree = rmtree_sys
+rmtree = rmtree_retry
