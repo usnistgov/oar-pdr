@@ -69,7 +69,7 @@ set -x
 scripts/setversion.sh
 [ -n "$PACKAGE_NAME" ] || PACKAGE_NAME=`cat VERSION | awk '{print $1}'`
 version=`cat VERSION | awk '{print $2}'`
-vers4fn=`echo $version | sed -re 's#[/\s]+#_#g'`
+vers4fn=`echo $version | sed -re 's#[/ ]+#_#g'`
 
 # build the components
 installdir=$BUILD_DIR/pdr
