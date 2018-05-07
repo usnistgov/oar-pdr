@@ -1,0 +1,108 @@
+{
+  "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
+  "project": {
+    "name": "pdr-landingpage"
+  },
+  "apps": [
+    {
+      "root": "src",
+      "outDir": "dist/browser",
+      "assets": [
+        "assets",
+        "search.png"
+      ],
+      "index": "index.html",
+      "main": "main.ts",
+      "polyfills": "polyfills.ts",
+      "test": "test.ts",
+      "tsconfig": "tsconfig.app.json",
+      "testTsconfig": "tsconfig.spec.json",
+      "prefix": "app",
+      "styles": [
+        "styles.scss",       
+        "../node_modules/bootstrap/dist/css/bootstrap.min.css",
+        "../node_modules/primeng/resources/primeng.css",
+        "./styles/ultima-ng/layout/css/layout-indigo.css",
+        "./styles/ultima-ng/theme/theme-indigo.css",
+        "./styles/font-awesome/css/font-awesome.min.css",
+        "./styles/main.css"
+         ],
+      "scripts": [
+        "../node_modules/lodash/lodash.min.js",
+        "../node_modules/jspdf/dist/jspdf.min.js",
+        "../node_modules/primeui/primeui-ng-all.min.js",
+        "../node_modules/bootstrap/dist/js/bootstrap.min.js"
+      ],
+      "environmentSource": "environments/environment.ts",
+      "environments": {
+        "dev": "environments/environment.ts",
+        "prod": "environments/environment.prod.ts"
+      }
+    },
+    {
+      "name":"pdr-landingpage",
+      "root": "src",
+      "outDir": "dist/server",
+      "platform": "server",
+      "assets": [
+        "assets",
+        "search.png"
+      ],
+      "index": "index.html",
+      "main": "main.server.ts",
+      "polyfills": "polyfills.ts",
+      "test": "test.ts",
+      "tsconfig": "tsconfig.server.json",
+      "testTsconfig": "tsconfig.spec.json",
+      "prefix": "app",
+      "styles": [
+        "styles.scss",       
+        "../node_modules/bootstrap/dist/css/bootstrap.min.css",
+        "../node_modules/primeng/resources/primeng.css",
+        "./styles/ultima-ng/layout/css/layout-indigo.css",
+        "./styles/ultima-ng/theme/theme-indigo.css",
+        "./styles/font-awesome/css/font-awesome.min.css",
+        "./styles/main.css"
+       ],
+      "scripts": [
+        "../node_modules/lodash/lodash.min.js",
+        "../node_modules/jspdf/dist/jspdf.min.js",
+        "../node_modules/primeui/primeui-ng-all.min.js",
+        "../node_modules/bootstrap/dist/js/bootstrap.min.js"
+      ],
+      "environmentSource": "environments/environment.ts",
+      "environments": {
+        "dev": "environments/environment.ts",
+        "prod": "environments/environment.prod.ts"
+      }
+    }
+  ],
+  "e2e": {
+    "protractor": {
+      "config": "./protractor.conf.js"
+    }
+  },
+  "lint": [
+    {
+      "project": "src/tsconfig.app.json",
+      "exclude": "**/node_modules/**"
+    },
+    {
+      "project": "src/tsconfig.spec.json",
+      "exclude": "**/node_modules/**"
+    },
+    {
+      "project": "e2e/tsconfig.e2e.json",
+      "exclude": "**/node_modules/**"
+    }
+  ],
+  "test": {
+    "karma": {
+      "config": "./karma.conf.js"
+    }
+  },
+  "defaults": {
+    "styleExt": "css",
+    "component": {}
+  }
+}
