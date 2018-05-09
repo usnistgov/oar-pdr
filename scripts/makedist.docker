@@ -7,4 +7,8 @@ export CODEDIR=`(cd $execdir/.. > /dev/null 2>&1; pwd)`
 export DOCKERDIR=$CODEDIR/docker
 
 $DOCKERDIR/dockbuild.sh
+
+echo "Run makedist.angular for oar-pdr"
+exec $DOCKERDIR/makedist.angular "$@"
+echo "Run makedist for oar-pdr"
 exec $DOCKERDIR/makedist "$@"
