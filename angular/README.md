@@ -42,6 +42,7 @@ Run `ng generate component component-name` to generate a new component. You can 
 
 ## Build
 npm install
+
 npm run build:universal
 
 npm run serve:universal
