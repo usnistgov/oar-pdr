@@ -23,13 +23,6 @@ git clone https://github.com/usnistgove/oar-pdr
 # change directory to repo
 cd angular
 
-# Use yarn to install the dependencies
-yarn
-
-# start the server
-ng serve
-
-# navigate with your browser to http://localhost:4200/
 ```
 ### Libraries 
  - [bootstrap](https://github.com/twbs/bootstrap) - The most popular HTML, CSS, and JavaScript framework for developing responsive, mobile first projects on the web.
@@ -41,11 +34,16 @@ ng serve
 Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive/pipe/service/class/module`.
 
 ## Build
+```bash
 npm install
 
 npm run build:universal
 
 npm run serve:universal
+
+
+# navigate with your browser to http://localhost:4200/
+```
 ## Running unit tests
 
 npm run test
