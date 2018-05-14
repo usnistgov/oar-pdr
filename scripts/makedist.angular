@@ -126,9 +126,9 @@ for dist in $build_dist; do
              package-lock.json not found
     fi
 
-    # create the distribution file
-    echo '+' '(cd' $builddir/prod '&&' \
+    # # create the distribution file
+    echo '+' '(cd' $builddir '&&' \
              "zip -qr $DIST_DIR/${distname}.zip *)"
-    (cd $builddir/prod && zip -qr $DIST_DIR/${distname}.zip *)
-
+    (cd $builddir && zip -qr $DIST_DIR/${distname}.zip *)
+    
 done

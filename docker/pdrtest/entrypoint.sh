@@ -41,6 +41,7 @@ cmd=$1
 case "$1" in
     makedist)
         shift
+        scripts/makedist.angular "$@"
         scripts/makedist "$@"
         ;;
     testall)
