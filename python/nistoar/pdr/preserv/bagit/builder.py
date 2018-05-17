@@ -56,6 +56,7 @@ DATAFILE_TYPE = NERDPUB_PRE + ":DataFile"
 DOWNLOADABLEFILE_TYPE = NERDPUB_PRE + ":DownloadableFile"
 SUBCOLL_TYPE = NERDPUB_PRE + ":Subcollection"
 DISTSERV = "https://data.nist.gov/od/ds/"
+DEF_MERGE_CONV = "dev"
 
 class BagBuilder(PreservationSystem):
     """
@@ -74,6 +75,12 @@ class BagBuilder(PreservationSystem):
     :prop jq_lib       str:  the full path to the JQ transform library 
                               directory; if not set, the directory is 
                               searched for in a few typical places.
+    :prop merge_etc    str:  the full path to directory containing the NERDm
+                              merger annotated schemas;  if not set, the 
+                              directory is searched for in a few typical places.
+    :prop merge_convention str ("dev"): the merge convention name to 
+                                 use to merge annotation data into the primary
+                                 NERDm metadata.
     :prop validate_id bool (True):  If True, an identifier provided to the 
                               constructor will be checked for transcription
                               error.
@@ -486,7 +493,7 @@ class BagBuilder(PreservationSystem):
 
             destpath = os.path.dirname(destpath)
             
-    def add_metadata_for_file(self, destpath, mdata, disttype="DataFile"):
+    def add_metadata_for_file(self, destpath, mdata, disttype=None):
         """
         write metadata for the component at the given destination path to the 
         proper location under the metadata directory.
@@ -496,7 +503,7 @@ class BagBuilder(PreservationSystem):
 
         :param destpath str:  the path to the data file that metadata is being
                               provided for
-        :param mdata   dict:  a Mapping object containing the metadat to 
+        :param mdata   dict:  a Mapping object containing the metadata to 
                               associate with the file.  This will be merged 
                               with default data.  
         :param disttype str:  the default file distribution type to assign to 
@@ -506,6 +513,19 @@ class BagBuilder(PreservationSystem):
         """
         if not isinstance(mdata, Mapping):
             raise NERDTypeError("dict", type(mdata), "NERDm Component")
+
+        if not disttype:
+            # get the disttype by consulting the metadata itself
+            if '@type' in mdata:
+                pfx = re.compile(r'^[^:]*:')
+                ftypes = [p for p in [pfx.sub('', t) for t in mdata['@type']]
+                            if p in self._file_types]
+                if len(ftypes) > 0:
+                    disttype = ftypes[0]
+        if not disttype:
+            # if a recognized file distribution type is not set in the metadata,
+            # default to DataFile
+            disttype = "DataFile"
 
         md = self._create_init_filemd_for(destpath, disttype=disttype)
         md.update(mdata)
@@ -585,7 +605,7 @@ class BagBuilder(PreservationSystem):
         or subcollection with the given collection path.
 
         :param destpath str:  the path to the data file relative to the 
-                              dataset's root.
+                              dataset's root. (Caution: not the bag's root.)
         """
         return os.path.join(self.bagdir, "metadata", destpath,
                             FILEANNOT_FILENAME)
@@ -767,6 +787,7 @@ class BagBuilder(PreservationSystem):
         # Make sure all remaining components have metadata
         if finalcfg.get('ensure_component_metadata', True):
             self.ensure_comp_metadata(examine=True)
+        self.ensure_merged_annotations()
 
         # Now trim empty metadata folders
         if trim:
@@ -1441,7 +1462,8 @@ format(nerdm['title'])
                               True, the checksum will be calculated to ensure
                               the value in the metadata file is correct.
         """
-        self.ensure_merged_annotations()
+        # the checksum should not be part of annotations (?).
+        # self.ensure_merged_annotations()
         manfile = os.path.join(self.bagdir, "manifest-sha256.txt")
         try:
           with open(manfile, 'w') as fd:
@@ -1477,5 +1499,27 @@ format(nerdm['title'])
         """
         ensure that the annotations have been merged primary NERDm metadata.
         """
-        pass
+        # this implementation assumes that merging can be applied multiple
+        # times and give the same result.  (It would be better to determine
+        # if the annotation's already been applied and not repeat it, for
+        # performance reasons.)
+
+        mergeconv = self.cfg.get('merge_convention', DEF_MERGE_CONV)
+
+        # update the resource-level metadata
+        if os.path.exists(self.annot_file_for("")):
+            self.record("Updating resource-level metadata to merge "+
+                        "annotations...")
+            nerd = self._bag.nerd_metadata_for("", mergeconv)
+            self.add_res_nerd(nerd, False)
+
+        # update the file metadata
+        for dfile in self._bag.iter_data_components():
+            if os.path.exists(self.annot_file_for(dfile)):
+                nerd = self._bag.nerd_metadata_for(dfile, mergeconv)
+                self.add_metadata_for_file(dfile, nerd)
+        
+
+        
+        
 
