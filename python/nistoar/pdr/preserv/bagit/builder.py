@@ -56,7 +56,7 @@ DATAFILE_TYPE = NERDPUB_PRE + ":DataFile"
 DOWNLOADABLEFILE_TYPE = NERDPUB_PRE + ":DownloadableFile"
 SUBCOLL_TYPE = NERDPUB_PRE + ":Subcollection"
 DISTSERV = "https://data.nist.gov/od/ds/"
-DEF_MERGE_CONV = "dev"
+DEF_MERGE_CONV = "midas0"
 
 class BagBuilder(PreservationSystem):
     """

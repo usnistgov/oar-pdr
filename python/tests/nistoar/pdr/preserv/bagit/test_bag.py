@@ -84,6 +84,7 @@ class TestNISTBag(test.TestCase):
         self.assertNotIn('foo', nerd)
         self.assertTrue(nerd['title'].startswith("OptSortSph: Sorting "))
         self.assertEqual(nerd['ediid'], "3A1EE2F169DD3B8CE0531A570681DB5D1491")
+        self.assertEqual(nerd['@type'], ["nrdp:PublicDataResource"])
 
         nerd = self.bag.nerd_metadata_for("", True)
         self.assertIn('authors', nerd)
@@ -94,6 +95,8 @@ class TestNISTBag(test.TestCase):
         self.assertEqual(nerd['authors'][0]['givenName'], "Kevin")
         self.assertEqual(nerd['authors'][1]['givenName'], "Jianming")
         self.assertEqual(len(nerd['authors']), 2)
+        self.assertEqual(nerd['@type'],
+                         ["nrdp:DataPublication", "nrdp:PublicDataResource"])
 
         nerd = self.bag.nerd_metadata_for("trial1.json")
         self.assertNotIn("previewURL", nerd)
@@ -139,6 +142,7 @@ class TestNISTBag(test.TestCase):
         self.assertNotIn('authors', nerd)
         self.assertTrue(nerd['title'].startswith("OptSortSph: Sorting "))
         self.assertEqual(nerd['ediid'], "3A1EE2F169DD3B8CE0531A570681DB5D1491")
+        self.assertEqual(nerd['@type'], ["nrdp:PublicDataResource"])
         trial1 = [c for c in nerd['components']
                     if 'filepath' in c and c['filepath'] == "trial1.json"][0]
         self.assertNotIn('previewURL', trial1)
@@ -152,6 +156,8 @@ class TestNISTBag(test.TestCase):
         self.assertEqual(nerd['authors'][0]['givenName'], "Kevin")
         self.assertEqual(nerd['authors'][1]['givenName'], "Jianming")
         self.assertEqual(len(nerd['authors']), 2)
+        self.assertEqual(nerd['@type'],
+                         ["nrdp:DataPublication", "nrdp:PublicDataResource"])
 
         trial1 = [c for c in nerd['components']
                     if 'filepath' in c and c['filepath'] == "trial1.json"][0]

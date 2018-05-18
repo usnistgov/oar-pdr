@@ -27,7 +27,8 @@ DEF_MBAG_VERSION = "0.3"
 DEF_MIDAS_POD_FILE = "_pod.json"
 SUPPORTED_CHECKSUM_ALGS = [ "sha256" ]
 DEF_CHECKSUM_ALG = "sha256"
-DEF_MERGE_CONV = "dev"
+DEF_MERGE_CONV = "initdef"  # For merging MIDAS-generated metadata with
+                            # initial defaults
 
 def _midadid_to_dirname(midasid, log=None):
     out = midasid
