@@ -10,7 +10,7 @@ PACKAGE_DIR=`(cd $execdir/.. > /dev/null 2>&1; pwd)`
 echo 'This is the package dir'
 echo $PACKAGE_DIR
 DIST_DIR=$PACKAGE_DIR/angular/dist
-builddir=$PACKAGE_DIR/angular/dist
+builddir=$PACKAGE_DIR/dist
 
 # Update this list with the names of the individual component names
 # 
