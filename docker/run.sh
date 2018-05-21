@@ -55,7 +55,12 @@ while [ "$1" != "" ]; do
     shift
 done
 
-echo '+' docker run $ti --rm -v $codedir:/dev/oar-pdr $distvol oar-pdr/pdrtest $cmd "${args[@]}"
-echo ' #### Run oar pdr angular ###'
-exec docker run $ti --rm -v $codedir:/dev/oar-pdr $distvol oar-pdr/pdrtest $cmd "${args[@]}"
-exec docker run $ti --rm -v $codedir:/dev/oar-pdr $distvol oar-pdr/pdrangular $cmd "${args[@]}"
+#echo '+' docker run $ti --rm -v $codedir:/dev/oar-pdr $distvol oar-pdr/pdrtest $cmd "${args[@]}"
+if [[ $args = *"pdr"* ]]; then
+  echo ' #### Build oar-pdr/python ###' 
+  exec docker run $ti --rm -v $codedir:/dev/oar-pdr $distvol oar-pdr/pdrtest $cmd "${args[@]}"
+fi
+if [[ $args = *"pdr-lps"* ]]; then
+  echo ' #### Build oar-pdr/angular ###'
+  exec docker run $ti --rm -v $codedir:/dev/oar-pdr $distvol oar-pdr/pdrangular $cmd "${args[@]}"
+fi

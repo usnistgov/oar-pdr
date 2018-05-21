@@ -40,7 +40,7 @@ if { echo " $BUILD_IMAGES " | grep -qs " pdrtest "; }; then
     echo '+ ' docker build $BUILD_OPTS -t $PACKAGE_NAME/pdrtest pdrtest | logit
     docker build $BUILD_OPTS -t $PACKAGE_NAME/pdrtest pdrtest 2>&1 | logit
 fi
-# if { echo " $BUILD_IMAGES " | grep -qs " pdrangular "; }; then
-    # echo '+ ####' docker build $BUILD_OPTS -t $PACKAGE_NAME/pdrangular pdrangular | logit
+if { echo " $BUILD_IMAGES " | grep -qs " pdrangular "; }; then
+    echo '+ ####' docker build $BUILD_OPTS -t $PACKAGE_NAME/pdrangular pdrangular 
     docker build $BUILD_OPTS -t $PACKAGE_NAME/pdrangular pdrangular 2>&1
-# fi
+fi
