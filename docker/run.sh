@@ -7,7 +7,7 @@ codedir=`(cd $execdir/.. > /dev/null 2>&1; pwd)`
 
 set -e
 
-(docker images | grep -qs oar-pdr/pdrtest) || {
+(docker images | grep -qs oar-pdr/pdrtest | grep -qs oar-pdr/pdrangular ) || {
     echo "${prog}: Docker image mdtests not found; building now..."
     echo '+' $execdir/dockbuild.sh -q
     $execdir/dockbuild.sh -q || {
@@ -56,4 +56,6 @@ while [ "$1" != "" ]; do
 done
 
 echo '+' docker run $ti --rm -v $codedir:/dev/oar-pdr $distvol oar-pdr/pdrtest $cmd "${args[@]}"
+echo ' #### Run oar pdr angular ###'
 exec docker run $ti --rm -v $codedir:/dev/oar-pdr $distvol oar-pdr/pdrtest $cmd "${args[@]}"
+exec docker run $ti --rm -v $codedir:/dev/oar-pdr $distvol oar-pdr/pdrangular $cmd "${args[@]}"

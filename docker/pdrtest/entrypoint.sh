@@ -32,7 +32,7 @@ function launch_test_preserver {
     sudo service nginx start
 }
 
-function exitopwith {
+function exitopwith { 
     echo $2 > $1.exit
     exit $2
 }
@@ -41,7 +41,6 @@ cmd=$1
 case "$1" in
     makedist)
         shift
-        scripts/makedist.angular "$@"
         scripts/makedist "$@"
         ;;
     testall)

@@ -18,7 +18,7 @@ set -e
 ## containers to be built.  List them in dependency order (where a latter one
 ## depends the former ones).  
 #
-DOCKER_IMAGE_DIRS="pymongo jq ejsonschema pdrtest"
+DOCKER_IMAGE_DIRS="pymongo jq ejsonschema pdrtest pdrangular"
 
 . $codedir/oar-build/_dockbuild.sh
 
@@ -33,9 +33,14 @@ setup_build
 
 log_intro   # record start of build into log
 
-$codedir/oar-metadata/docker/dockbuild.sh $BUILD_IMAGES
+#*** not needed for the angular app commenting for testing
+ $codedir/oar-metadata/docker/dockbuild.sh $BUILD_IMAGES
 
 if { echo " $BUILD_IMAGES " | grep -qs " pdrtest "; }; then
     echo '+ ' docker build $BUILD_OPTS -t $PACKAGE_NAME/pdrtest pdrtest | logit
     docker build $BUILD_OPTS -t $PACKAGE_NAME/pdrtest pdrtest 2>&1 | logit
 fi
+# if { echo " $BUILD_IMAGES " | grep -qs " pdrangular "; }; then
+    # echo '+ ####' docker build $BUILD_OPTS -t $PACKAGE_NAME/pdrangular pdrangular | logit
+    docker build $BUILD_OPTS -t $PACKAGE_NAME/pdrangular pdrangular 2>&1
+# fi
