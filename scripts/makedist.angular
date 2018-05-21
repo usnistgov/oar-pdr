@@ -9,8 +9,8 @@ execdir=`dirname $0`
 PACKAGE_DIR=`(cd $execdir/.. > /dev/null 2>&1; pwd)`
 echo 'This is the package dir'
 echo $PACKAGE_DIR
-DIST_DIR=$PACKAGE_DIR/angular/dist
-builddir=$PACKAGE_DIR/dist
+DIST_DIR=$PACKAGE_DIR/dist
+builddir=$PACKAGE_DIR/angular/dist
 
 # Update this list with the names of the individual component names
 # 
@@ -64,7 +64,7 @@ mkdir -p $DIST_DIR $builddir
 
 
 
-echo 'Test Angular code path:'+ $PACKAGE_DIR/angular
+echo 'Angular code path:'+ $PACKAGE_DIR/angular
 
 cd $PACKAGE_DIR/angular
 
@@ -99,5 +99,5 @@ npm $npmpfx install
     # # create the distribution file
     echo '+' '(cd' $builddir '&&' \
              "zip -qr $DIST_DIR.zip *)"
-    (cd $builddir && zip -qr $DIST_DIR.zip *)
-
+    (cd $builddir && zip -qr $DIST_DIR/$DISTNAMES.zip *)
+    
