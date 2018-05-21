@@ -179,6 +179,49 @@ class TestPrePubMetadataService(test.TestCase):
                                 "Bad conversion of URL: "+comp['downloadURL'])
         self.assertEquals(dlcount, 6)
 
+    def test_make_nerdm_record_withannots(self):
+        metadir = os.path.join(self.bagdir, 'metadata')
+        self.assertFalse(os.path.exists(self.bagdir))
+
+        bagger = self.srv.prepare_metadata_bag(self.midasid)
+        bagdir = bagger.bagdir
+        self.assertEqual(bagdir, self.bagdir)
+        self.assertTrue(os.path.exists(bagdir))
+
+        data = self.srv.make_nerdm_record(bagdir)
+        self.assertNotIn("authors", data)
+        trial1 = [c for c in data['components']
+                    if 'filepath' in c and c['filepath'] == "trial1.json"][0]
+        self.assertNotIn('previewURL', trial1)
+        ediid = data['ediid']
+        
+        # copy in some annotation files
+        otherbag = os.path.join(datadir, "metadatabag")
+        annotpath = os.path.join("metadata", "annot.json")
+        self.assertTrue(os.path.exists(os.path.join(otherbag, annotpath)))
+        shutil.copyfile(os.path.join(otherbag, annotpath),
+                        os.path.join(self.bagdir, annotpath))
+        self.assertTrue(os.path.exists(os.path.join(self.bagdir, annotpath)))
+        annotpath = os.path.join("metadata", "trial1.json", "annot.json")
+        self.assertTrue(os.path.exists(os.path.join(otherbag, annotpath)))
+        shutil.copyfile(os.path.join(otherbag, annotpath),
+                        os.path.join(self.bagdir, annotpath))
+        self.assertTrue(os.path.exists(os.path.join(self.bagdir, annotpath)))
+
+        data = self.srv.make_nerdm_record(bagdir)
+        
+        self.assertIn("ediid", data)
+        self.assertIn("components", data)
+        self.assertIn("inventory", data)
+        self.assertIn("authors", data)
+        self.assertEqual(data['ediid'], ediid)
+        self.assertEqual(data['foo'], "bar")
+
+        self.assertEqual(len(data['components']), 8)
+        trial1 = [c for c in data['components']
+                    if 'filepath' in c and c['filepath'] == "trial1.json"][0]
+        self.assertIn('previewURL', trial1)
+        self.assertTrue(trial1['previewURL'].endswith("trial1.json/preview"))
         
         
     def test_resolve_id(self):

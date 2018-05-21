@@ -1154,6 +1154,74 @@ class TestBuilder(test.TestCase):
         if len(empty) > 0:
             self.fail("Empty bag-info values found for "+str(empty))
 
+    def test_ensure_merged_annotations(self):
+        podfile = os.path.join(datadir, "_pod.json")
+        with open(podfile) as fd:
+            poddata = json.load(fd)
+        self.bag.add_ds_pod(poddata, convert=True)
+
+        annotsrc = os.path.join(datadir, "..", "metadatabag", "metadata")
+        annotfile = os.path.join(annotsrc, "annot.json")
+        with open(annotfile) as fd:
+            annot = json.load(fd)
+        self.bag.add_annotation_for("", annot)
+
+        nerdfile = os.path.join(self.bag.bagdir, "metadata", "nerdm.json")
+        with open(nerdfile) as fd:
+            nerd = json.load(fd)
+        self.assertNotIn("authors", nerd)
+        self.assertNotIn("foo", nerd)
+        self.assertIn("ediid", nerd)
+        self.assertTrue(nerd["title"].startswith("OptSortSph: Sorting "))
+        ediid = nerd['ediid']
+
+        self.bag.ensure_merged_annotations()
+
+        with open(nerdfile) as fd:
+            nerd = json.load(fd)
+        self.assertIn("authors", nerd)
+        self.assertIn("foo", nerd)
+        self.assertTrue(nerd["title"].startswith("OptSortSph: Sorting "))
+        self.assertEqual(nerd["foo"], "bar")
+        self.assertEqual(nerd['authors'][0]['givenName'], "Kevin")
+        self.assertEqual(nerd['authors'][1]['givenName'], "Jianming")
+        self.assertEqual(len(nerd['authors']), 2)
+        self.assertEqual(nerd['ediid'], ediid)
+
+        annotfile = os.path.join(annotsrc, "trial1.json", "annot.json")
+        with open(annotfile) as fd:
+            annot = json.load(fd)
+        self.bag.add_annotation_for("trial3", annot)
+
+        dnerdfile = os.path.join(self.bag.bagdir, "metadata", "trial3",
+                                 "nerdm.json")
+        with open(dnerdfile) as fd:
+            nerd = json.load(fd)
+        self.assertNotIn('previewURL', nerd)
+        self.assertNotIn('title', nerd)
+            
+        self.bag.ensure_merged_annotations()
+
+        # note: this tests that running ensure_merged_annotations() twice 
+        # does not change the results
+        with open(nerdfile) as fd:
+            nerd = json.load(fd)
+        self.assertIn("authors", nerd)
+        self.assertIn("foo", nerd)
+        self.assertTrue(nerd["title"].startswith("OptSortSph: Sorting "))
+        self.assertEqual(nerd["foo"], "bar")
+        self.assertEqual(nerd['authors'][0]['givenName'], "Kevin")
+        self.assertEqual(nerd['authors'][1]['givenName'], "Jianming")
+        self.assertEqual(len(nerd['authors']), 2)
+        self.assertEqual(nerd['ediid'], ediid)
+
+        with open(dnerdfile) as fd:
+            nerd = json.load(fd)
+        self.assertIn('previewURL', nerd)
+        self.assertTrue(nerd['previewURL'].endswith("trial1.json/preview"))
+        self.assertEqual(nerd['title'], "a better title")
+        
+        
 
 if __name__ == '__main__':
     test.main()

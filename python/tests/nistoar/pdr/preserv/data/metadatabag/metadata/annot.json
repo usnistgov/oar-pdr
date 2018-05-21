@@ -1,0 +1,29 @@
+{
+    "@type": [ "nrdp:DataPublication", "nrdp:PublicDataResource" ],
+    "authors": [
+        {
+            "fn": "Kevin R. Gurney",
+            "givenName": "Kevin",
+            "middleName": "R.",
+            "familyName": "Gurney",
+            "affiliation": [{
+                "@type": [ "org:Organization" ],
+                "title": "Arizona State University",
+                "@id": "sdporg:AZ-SU"
+            }]
+        },
+        {
+            "fn": "Jianming Liang",
+            "givenName": "Jianming",
+            "familyName": "Liang",
+            "affiliation": [{
+                "@type": [ "org:Organization" ],
+                "title": "Arizona State University",
+                "@id": "sdporg:AZ-SU"
+            }]
+        }
+    ],
+    "title": "A much better title",
+    "ediid": "Ha ha!",
+    "foo": "bar"
+}
