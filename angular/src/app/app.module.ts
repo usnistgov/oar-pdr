@@ -7,7 +7,7 @@ import { AppComponent } from './app.component';
 import { PLATFORM_ID, APP_ID, Inject } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { AppRoutingModule } from './app-routing.module';
-import { LandingAboutComponent } from './landingabout/landingabout.component';
+import { LandingAboutComponent } from './landingAbout/landingAbout.component';
 
 import { CUSTOM_ELEMENTS_SCHEMA,NO_ERRORS_SCHEMA } from '@angular/core';
 import { CommonModule } from '@angular/common';

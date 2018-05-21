@@ -1,18 +1,20 @@
 #! /bin/bash
 #
 # makedist:  build the package and make the distribution
-#
+# #
 set -e
 prog=`basename $0`
 execdir=`dirname $0`
 [ "$execdir" = "" -o "$execdir" = "." ] && execdir=$PWD
 PACKAGE_DIR=`(cd $execdir/.. > /dev/null 2>&1; pwd)`
-DIST_DIR=$PACKAGE_DIR/dist
-builddir=$PACKAGE_DIR/dist
+echo 'This is the package dir'
+echo $PACKAGE_DIR
+DIST_DIR=$PACKAGE_DIR/angular/dist
+builddir=$PACKAGE_DIR/angular/dist
 
 # Update this list with the names of the individual component names
 # 
-DISTNAMES="sdp pdr-lps"
+DISTNAMES="pdr-lps"
 
 # handle command line options
 build_dist=
@@ -59,51 +61,19 @@ done
 true ${DIST_DIR:=$SOURCE_DIR/dist}
 DIST_DIR=`realpath $DIST_DIR`
 mkdir -p $DIST_DIR $builddir
-cd $PACKAGE_DIR
 
-# Use a CACHE_DIR to set up a share node_modules directory.  When building
-# many different versions of the software, this can speed up the builds by
-# not requiring the software to be downloaded every time.
-#
-[ -z "$CACHE_DIR" ] || {
-    CACHE_DIR=`realpath $CACHE_DIR`
-    if [ -e "node_modules" ]; then
-        if [ -L "node_modules" ]; then
-            { sharednmd=`readlink node_modules` && \
-              sharednmd=`realpath $sharednmd`; } || true
-            [ -n "$sharednmd" -a "$sharednmd" == "$CACHE_DIR/node_modules" ] || {
-                echo ${prog}: node_modules already "established;" \
-                     "ignoring --cache-dir"
-            }
-        else
-            echo ${prog}: node_modules already "established;" \
-                 "ignoring --cache-dir"
-        fi
-    else
-        # make ./node_modules a link to the shared one.
-        mkdir -p $CACHE_DIR/node_modules
-        ln -s $CACHE_DIR/node_modules node_modules
-    fi
-}
 
-# set the current version.  This will inject the version into the code, if 
-# needed.
-#
-echo '+' $execdir/setversion.sh
-$execdir/setversion.sh
-[ -n "$PACKAGE_NAME" ] || PACKAGE_NAME=`cat VERSION | awk '{print $1}'`
-version=`cat VERSION | awk '{print $2}'`
-vers4fn=`echo $version | sed -re 's#[/\s]+#_#g'`
+
+echo 'Test Angular code path:'+ $PACKAGE_DIR/angular
+
+cd $PACKAGE_DIR/angular
+
 
 # install required modules
 npmvers=`npm --version`
 echo '+' npm install
 npm $npmpfx install
 
-for dist in $build_dist; do
-    distname="${dist}-$vers4fn"
-    angproj=$dist
-    [ "$angproj" != "pdr-lps" ] || angproj=pdr
 
     echo '#########################'
     echo '#'
@@ -115,20 +85,19 @@ for dist in $build_dist; do
     echo '+' "npm run build:universal "
     npm run build:universal
 
-    # create the dependency file
-    if [ -f "$PACKAGE_DIR/package-lock.json" ]; then
-        echo '+' $execdir/record_deps.py $dist $version package-lock.json \
-                 $npmvers \> $DIST_DIR/${distname}_dep.json
-        $execdir/record_deps.py $dist $version package-lock.json $npmvers \
-                                > $DIST_DIR/${distname}_dep.json
-    else
-        echo ${prog}: WARNING: Unable to create dependency file for ${dist}: \
-             package-lock.json not found
-    fi
+    # # create the dependency file
+    # if [ -f "$PACKAGE_DIR/package-lock.json" ]; then
+    #     echo '+' $execdir/record_deps.py $dist $version package-lock.json \
+    #              $npmvers \> $DIST_DIR/${distname}_dep.json
+    #     $execdir/record_deps.py $dist $version package-lock.json $npmvers \
+    #                             > $DIST_DIR/${distname}_dep.json
+    # else
+    #     echo ${prog}: WARNING: Unable to create dependency file for ${dist}: \
+    #          package-lock.json not found
+    # fi
 
     # # create the distribution file
     echo '+' '(cd' $builddir '&&' \
-             "zip -qr $DIST_DIR/${distname}.zip *)"
-    (cd $builddir && zip -qr $DIST_DIR/${distname}.zip *)
-    
-done
+             "zip -qr $DIST_DIR.zip *)"
+    (cd $builddir && zip -qr $DIST_DIR.zip *)
+

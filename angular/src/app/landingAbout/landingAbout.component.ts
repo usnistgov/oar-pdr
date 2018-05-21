@@ -2,10 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { DatePipe } from '@angular/common';
 // import { FormBuilder, FormGroup } from '@angular/forms';
 
-
-
 @Component({
-  selector: 'landing-to-do',
+  selector: 'landing-about',
   templateUrl: './landingAbout.component.html',
   styleUrls: ['./landingAbout.component.css']
 })

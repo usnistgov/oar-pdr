@@ -2,7 +2,7 @@ import { NgModule }             from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 
 //import { AboutComponent }   from './about/About.component';
-import { LandingAboutComponent } from './landingabout/landingabout.component';
+import { LandingAboutComponent } from './landingAbout/landingAbout.component';
 import { LandingComponent } from './landing/landing.component';
 import { NoidComponent } from './landing/noid.component';
 import { NerdmComponent } from './landing/nerdm.component';
