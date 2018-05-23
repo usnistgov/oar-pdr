@@ -12,7 +12,7 @@
           <br><span class="font10">Path: <b>{{fileDetails["filepath"]}}</b></span>
           <span *ngIf="fileDetails['downloadURL']" class="font8"> <br>Type:<b>{{fileDetails["mediaType"]}}</b></span>
           <span class="font8"><br>Size:
-             <span *ngIf="fileDetails['size']" >{{fileDetails["size"]}}  bytes</span>
+             <span *ngIf="fileDetails['size']" >{{ formatBytes(fileDetails["size"]) }}</span>
              <span *ngIf="!fileDetails['size']" >Not specified</span>
 
          </span>

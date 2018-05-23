@@ -11,7 +11,7 @@
 
 # The parent should be an ancestor image of the operational container
 # 
-FROM node:8.9
+FROM node:8.9.4
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends zip wget ca-certificates git

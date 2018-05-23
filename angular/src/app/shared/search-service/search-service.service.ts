@@ -1,29 +1,31 @@
 import { Injectable } from '@angular/core';
-import { Http, Response,URLSearchParams,RequestOptions, Headers } from '@angular/http';
+// import { Http, Response,URLSearchParams,RequestOptions, Headers } from '@angular/http';
+import { HttpClientModule, HttpClient } from '@angular/common/http'; 
 import { Observable } from 'rxjs/Observable';
 import 'rxjs/add/operator/map';
 import 'rxjs/add/operator/catch';
 import 'rxjs/add/observable/throw';
 import * as _ from 'lodash';
-// import { Config } from '../';
-//import { environment } from '../../environment';
-
+import { AppConfig } from '../config-service/config.service';
 /**
  * This class provides the Search service with methods to search for records from tha rmm.
  */
 @Injectable()
 export class SearchService {
-  //private RestAPIURL: string = Config.API;
-  private rmmApi : string = "http://localhost:8082/rmm/"; // environment.RMMAPI;
+  
+  private rmmApi : string = ""; // environment.RMMAPI;
   private metaApi : string = "";// environment.METAPI;
-  private landingBackend : string = "http://localhost:8082/rmm/";// environment.LANDING;
-  private serviceApi : string;
+  private landingBackend : string = "";// environment.LANDING;
+  private serviceApi : string = "";
   /**
    * Creates a new SearchService with the injected Http.
    * @param {Http} http - The injected Http.
    * @constructor
    */
-  constructor(private http: Http) {
+  constructor(private http: HttpClient, private appConfig : AppConfig) {
+    this.rmmApi = this.appConfig.getConfig().RMMAPI;
+    this.metaApi = this.appConfig.getConfig().METAPI;
+    this.landingBackend = this.appConfig.getConfig().LANDING;
   }
   /**
    * Returns an Observable for the HTTP GET request for the JSON resource.
@@ -33,7 +35,7 @@ export class SearchService {
 
     searchValue = '@id=' + searchValue;
     return this.http.get(this.rmmApi+'records?' + searchValue)
-      .map((res: Response) => res.json().ResultData)
+      .map((res: Response) => res)
       .catch((error: any) => Observable.throw(error.json()));
   }
 
@@ -48,29 +50,9 @@ export class SearchService {
       this.landingBackend = this.landingBackend+'records?@id=';
     else if(_.includes(this.landingBackend,'rmm'))
       this.landingBackend = this.landingBackend+'records/'; 
-
-      //console.log(this.landingBackend+ searchValue);
-      // let myHeaders = new Headers();
-      // myHeaders.append("Access-Control-Allow-Origin", '*');   
-
-  //     this.http.get("http://localhost:8082/rmm/records/3A1EE2F169DD3B8CE0531A570681DB5D1491")
-  //   .map(res => res.json())
-  //   .subscribe(data => {
-  //     console.log("Test here::");
-  //     console.log(JSON.stringify(data));
-  // }, error =>{console.log("This subscribe method error:"+error) });
-
-  //     this.http.get("http://localhost:8082/rmm/records/3A1EE2F169DD3B8CE0531A570681DB5D1491")
-  //     .toPromise()
-  //     .then(data => {
-  //       console.log( "TEST  data :: "+data);
-  //     }).catch(( error ) => {
-  //       console.log("Error reading data :"+error);
-  //     }); 
-
     return this.http.get(this.landingBackend+ searchValue)
-      .map((res: Response)  => res.json())
-      .catch((error: any) => Observable.throw(error.json()));
+       .map((res: Response) => res)
+       .catch((error: any) => Observable.throw(error));
   }
 
   /**
@@ -80,7 +62,7 @@ export class SearchService {
   searchRMMAny(searchValue:string): Observable<string[]> {
     
     return this.http.get(this.rmmApi+'records?' + searchValue)
-      .map((res: Response) => res.json().ResultData)
+      .map((res: Response) => res)
       .catch((error: any) => Observable.throw(error.json()));
   }
 }

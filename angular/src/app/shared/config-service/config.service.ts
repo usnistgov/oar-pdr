@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Http,Response } from '@angular/http';
+// import { Http,Response } from '@angular/http';
 import { HttpClient } from '@angular/common/http'; 
 import { Observable } from 'rxjs/Observable';
 import * as data_json   from '../../../assets/environment.json';

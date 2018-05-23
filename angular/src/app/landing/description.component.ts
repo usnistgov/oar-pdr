@@ -12,7 +12,9 @@ import { TreeModule,TreeNode, Tree, MenuItem } from 'primeng/primeng';
           <h3 id="description" name="desscription"><b>Description</b></h3>
           <i *ngIf="loginuser" style="float:right" class="faa faa-edit"></i>
                 <div contenteditable="true" id="recordDescription" class="well welldesc">
-                    {{ record["description"] }}
+                <p  *ngFor="let topic of record['description']; let i =index">
+                {{ record["description"][i] }}
+                </p>
                 </div>
 
             <div *ngIf="checkTopics()">
