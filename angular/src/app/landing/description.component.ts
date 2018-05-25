@@ -33,37 +33,11 @@ import { TreeModule,TreeNode, Tree, MenuItem } from 'primeng/primeng';
                 <i *ngIf="loginuser" style="float:right" class="faa faa-edit"></i>
             </div>
             <br>
-            <div *ngIf="checkReferences()">
-             <h3 id="reference" name="reference"><b>References:</b></h3>
-                <span *ngIf="isDocumentedBy"> 
-                    This data is discussed in :
-                    <span style="padding-left:2.75em" *ngFor="let refs of record['references']">
-                        <span *ngIf="refs['refType'] == 'IsDocumentedBy'">
-                            <br> <i class="faa faa-external-link">
-                                 <a href={{refs.location}} target="blank">{{ refs.label }}</a>
-                                 </i>
-                        </span>
-                        <i *ngIf="loginuser" style="float:right" class="faa faa-edit"></i>
-                    </span>
-                    <br>
-                </span>
-                <span *ngIf="isReferencedBy"> 
-                    This data is referenced in :
-                    <span style="padding-left:2.75em" *ngFor="let refs of record['references']">
-                        <span *ngIf="refs['refType'] == 'IsReferencedBy'">
-                            <br> <i class="faa faa-external-link">
-                            <a href={{refs.location}} target="blank">{{ refs.location }}</a>
-                            </i>
-                        </span>
-                    </span>
-                    <i *ngIf="loginuser" style="float:right" class="faa faa-edit"></i>
-                </span>
-            </div>
+            
             <div>
-            <br>
-             <h3><b>Access To Data:</b></h3>
+             <h3><b>Access To Data</b></h3>
              <span *ngIf="record['accessLevel'] === 'public'"><i class="faa faa-globe"></i> 
-                This data is public. 
+                These data are public . 
              </span>
              <span *ngIf="record['accessLevel'] === 'restricted public'"><i class="faa faa-lock"></i> 
                 This data has access restrictions. 
@@ -80,7 +54,7 @@ import { TreeModule,TreeNode, Tree, MenuItem } from 'primeng/primeng';
                     </i><br>
                 </span>
              </span>
-             <br>
+            
             
             </div> 
             <div *ngIf="files.length != 0">           
@@ -110,6 +84,33 @@ import { TreeModule,TreeNode, Tree, MenuItem } from 'primeng/primeng';
                         </div>
                     </div>
                 </div>
+            </div>
+
+            <div *ngIf="checkReferences()">
+             <h3 id="reference" name="reference"><b>References:</b></h3>
+                <span *ngIf="isDocumentedBy"> 
+                    This data is discussed in :
+                    <span style="padding-left:2.75em" *ngFor="let refs of record['references']">
+                        <span *ngIf="refs['refType'] == 'IsDocumentedBy'">
+                            <br> <i class="faa faa-external-link">
+                                 <a href={{refs.location}} target="blank">{{ refs.label }}</a>
+                                 </i>
+                        </span>
+                        <i *ngIf="loginuser" style="float:right" class="faa faa-edit"></i>
+                    </span>
+                    <br>
+                </span>
+                <span *ngIf="isReferencedBy"> 
+                    This data is referenced in :
+                    <span style="padding-left:2.75em" *ngFor="let refs of record['references']">
+                        <span *ngIf="refs['refType'] == 'IsReferencedBy'">
+                            <br> <i class="faa faa-external-link">
+                            <a href={{refs.location}} target="blank">{{ refs.location }}</a>
+                            </i>
+                        </span>
+                    </span>
+                    <i *ngIf="loginuser" style="float:right" class="faa faa-edit"></i>
+                </span>
             </div>
         <!--/div-->
      <!--/div-->

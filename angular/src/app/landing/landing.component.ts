@@ -146,11 +146,12 @@ export class LandingComponent implements OnInit {
       itemsMenu.push(filesItem);
     itemsMenu.push(metaItem);
 
-    this.leftmenu = [{
-      label: 'Table of Contents',
-      items: itemsMenu
-    }
-  ];
+    return itemsMenu;
+    // this.leftmenu = [{
+    //   label: 'Table of Contents',
+    //   items: itemsMenu
+    // }
+    // ];
 }
 
 viewmetadata(){
@@ -178,9 +179,7 @@ updateRightMenu(){
     this.serviceApi = this.landing+this.record['ediid'];
   this.distdownload = this.distApi+"ds/zip?id="+this.record['@id'];
       
-  var itemsMenu: any[] = [];
-  var homepage = this.createMenuItem("Visit Home Page",  "faa faa-external-link", '',this.record['landingPage']);
-  var download = this.createMenuItem("Download all data","faa faa-file-archive-o", '', this.distdownload);
+  var itemsMenu: MenuItem[] = [];
   var metadata = this.createMenuItem("Export JSON", "faa faa-file-o",'',this.serviceApi);
     
       
@@ -191,19 +190,40 @@ updateRightMenu(){
         
   var resourcesByAuthor = this.createMenuItem ('Resources by Authors',"faa faa-external-link","",this.sdpLink+"/#/search?q=authors.familyName="+authlist+"&key=&queryAdvSearch=yes");
   var similarRes = this.createMenuItem ("Similar Resources", "faa faa-external-link", "",this.sdpLink+"/#/search?q=keyword="+this.record['keyword']+"&key=&queryAdvSearch=yes");                
-  var license = this.createMenuItem("License Statement",  "faa faa-external-link","",this.record['license'] ) ;
-  var citation = this.createMenuItem('Cite this resource', "faa faa-angle-double-right",(event)=>{ this.getCitation(); this.showDialog(); },'');
+  var license = this.createMenuItem("Fair Use Statement",  "faa faa-external-link","",this.record['license'] ) ;
+  var citation = this.createMenuItem('Citation', "faa faa-angle-double-right",(event)=>{ this.getCitation(); this.showDialog(); },'');
 
 
-    itemsMenu.push(homepage);
-    if (this.files.length != 0) 
-      itemsMenu.push(download);
+    
     itemsMenu.push(metadata);   
 
-  this.rightmenu = [{ label: 'Access ', items: itemsMenu },
+    var descItem = this.createMenuItem ("Description","faa faa-bars",(event)=>{
+      this.metadata = false; this.similarResources =false;
+    },"");
+
+    var refItem = this.createMenuItem ("References","faa faa-bars",(event)=>{
+      this.metadata = false; this.similarResources =false;
+
+    },'');
+
+    var filesItem = this.createMenuItem("Files","faa faa-bars", (event)=>{
+      this.metadata = false;
+      this.similarResources =false;
+    },'');
+
+    var metaItem = this.createMenuItem("Metadata","faa faa-bars",(event)=>{
+      this.metadata = true; this.similarResources =false;},''); 
+    var itemsMenu2:MenuItem[] = [];
+      itemsMenu2.push(descItem);
+    //if(this.checkReferences())
+      itemsMenu2.push(refItem);
+    if(this.files.length !== 0)
+      itemsMenu2.push(filesItem);
+    itemsMenu2.push(metaItem);
+    this.rightmenu = [ { label: 'Go To ..', items: itemsMenu2},
+      { label: 'Access ', items: itemsMenu },
       { label: 'Use',   items: [ citation, license ] },
       { label: 'Find',   items: [ similarRes, resourcesByAuthor ]}];
-  
   }
 
   getCitation(){
