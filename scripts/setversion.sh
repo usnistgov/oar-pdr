@@ -2,7 +2,10 @@
 #
 # setversion.sh:  build all docker images in this directory
 #
-# Usage: setversion.sh
+# Usage: setversion.sh [version]
+#
+# If version is provided as an argument, this string will be set as the
+# current version.
 #
 # This script can be edited to customize it for its package.
 #
@@ -19,8 +22,9 @@ set -e
 # PACKAGE_NAME=oar-build
 
 . $PACKAGE_DIR/oar-build/_setversion.sh
+version=$1
 
-version=$(determine_version)
+[ -n "$version" ] || version=$(determine_version)
 
 # write the package name and version to file called VERSION
 # don't overwrite VERSION if this is not a cloned repo
