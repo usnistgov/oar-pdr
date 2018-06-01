@@ -137,9 +137,9 @@ npm run build:universal
 
 # create the dependency file
 if [ -f "$SOURCE_DIR/package-lock.json" ]; then
-    echo '+' $execdir/record_deps.py $DISTNAMES $version package-lock.json \
+    echo '+' $execdir/record_npm_deps.py $DISTNAMES $version package-lock.json \
              $npmvers \> $DIST_DIR/${DISTNAMES}-${vers4fn}_dep.json
-    $execdir/record_deps.py $DISTNAMES $version package-lock.json \
+    $execdir/record_npm_deps.py $DISTNAMES $version package-lock.json \
                             $npmvers > $DIST_DIR/${DISTNAMES}-${vers4fn}_dep.json
 else
     echo ${prog}: WARNING: Unable to create dependency file for ${dist}: \

@@ -133,7 +133,7 @@ if [ -n "$PYTHONPATH" ]; then
 else
     export PYTHONPATH=$installdir/lib/python
 fi
-$execdir/record_deps.py ${DISTNAMES[0]} $version \
+$execdir/record_python_deps.py ${DISTNAMES[0]} $version \
                         > $DIST_DIR/${DISTNAMES[0]}-${vers4fn}_dep.json
 
 
