@@ -1,6 +1,6 @@
 ##########################################
 #
-# Build container for component: angular test
+# Build container for angular components
 #
 # The purpose of this Docker container is produce a distribution
 # bundle that can be added into the deployment container.  This
@@ -44,10 +44,8 @@ RUN grep -Pqs ":$devuid:\d+:" /etc/passwd || \
     useradd -m --comment "OAR Developer" --shell /bin/bash \
             --gid $devuid --uid $devuid $devuser
 
-RUN echo '** Here is the entrypoint file'
 COPY entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod a+rx /usr/local/bin/entrypoint.sh
-
 
 VOLUME /dev/oar-pdr
 VOLUME /app/dist
@@ -55,11 +53,8 @@ VOLUME /app/dist
 RUN mkdir -p /dev/oar-pdr /app && chmod a+rwx /app
 WORKDIR /dev/oar-pdr
 
-
+ENV CODEDIR /dev/oar-pdr
+ENV DOCKERDIR /dev/oar-pdr/docker
 ENV DEVUID $devuid
-RUN echo 'npm version'
-RUN npm --version
-RUN npm install -g npm@latest
-RUN npm --version
 
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]

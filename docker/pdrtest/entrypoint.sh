@@ -41,7 +41,7 @@ cmd=$1
 case "$1" in
     makedist)
         shift
-        scripts/makedist "$@"
+        scripts/makedist.python "$@"
         ;;
     testall)
         install || {
@@ -49,7 +49,7 @@ case "$1" in
             exitopwith testall 2
         }
         shift
-        scripts/testall "$@" && stat=$?
+        scripts/testall.python "$@" && stat=$?
         echo Launching/testing the metadata server via nginx...
         launch_test_mdserv
         
@@ -95,7 +95,7 @@ case "$1" in
             exitopwith testall 3
         }
 
-        echo All tests passed
+        echo All python tests passed
         ;;
     install)
         install

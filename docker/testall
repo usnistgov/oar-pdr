@@ -1,9 +1,19 @@
 #! /bin/bash
 #
+# docker/testall -- execute all tests available in this repo via the docker 
+#                   containers defined in the docker directory.
+#
+# Usage: docker/testall [python|angular]
+#
+# where:
+#   python             run only the python-based tests
+#   angular            run only the angular-based tests
+#
+#
 prog=`basename $0`
 execdir=`dirname $0`
 [ "$execdir" = "" -o "$execdir" = "." ] && execdir=$PWD
 export CODEDIR=`(cd $execdir/.. > /dev/null 2>&1; pwd)`
 export DOCKERDIR=$execdir
 
-exec $DOCKERDIR/run.sh testall
+exec $DOCKERDIR/run.sh test "$@"
