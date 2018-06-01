@@ -15,13 +15,17 @@ function usage {
 $prog - build and optionally test the software in this repo via docker
 
 SYNOPSIS
-  $prog [-d|--docker-build] [--dist-dir DIR] [CMD ...] [python|angular] 
+  $prog [-d|--docker-build] [--dist-dir DIR] [CMD ...] 
+        [DISTNAME|python|angular ...] 
         
 
-ARGS
-  python    apply remaining commands to just the python components
-  angular   apply remaining commands to just the angular components
+ARGS:
+  python    apply commands to just the python distributions
+  angular   apply commands to just the angular distributions
 
+DISTNAMES:  pdr-lps, pdr-publish
+
+CMDs:
   build     build the software
   test      build the software and run the unit tests
   install   just install the prerequisites (use with shell)
@@ -55,6 +59,8 @@ dodockbuild=
 cmds=
 comptypes=
 args=()
+pyargs=()
+angargs=()
 while [ "$1" != "" ]; do
     case "$1" in
         -d|--docker-build)
@@ -85,16 +91,20 @@ while [ "$1" != "" ]; do
         python|angular)
             comptypes="$comptypes $1"
             ;;
+        pdr-lps)
+            wordin angular $comptypes || comptypes="$comptypes angular"
+            angargs=(${args[@]} $1)
+            ;;
+        pdr-publish)
+            wordin python $comptypes || comptypes="$comptypes python"
+            pyargs=(${pyargs[@]} $1)
+            ;;
         build|install|test|shell)
             cmds="$cmds $1"
             ;;
         *)
-            if [ -z "$cmds" ]; then
-                echo "${prog}: unsupported command:" $1
-                false
-            else
-                args=(${args[@]} $1)
-            fi
+            echo Unsupported command: $1
+            false
             ;;
     esac
     shift
@@ -147,17 +157,18 @@ if wordin angular $comptypes; then
     if [ "$docmds" == "build" ]; then
         # build only
         echo '+' docker run --rm $volopt $distvol oar-pdr/pdrangular build \
-                       "${args[@]}"
-        docker run --rm $volopt $distvol oar-pdr/pdrangular build "${args[@]}"
+                       "${args[@]}" "${angargs[@]}"
+        docker run --rm $volopt $distvol oar-pdr/pdrangular build \
+                       "${args[@]}" "${angargs[@]}"
     elif [ -n "$docmds" ]; then
         echo '+' docker run --rm $volopt $distvol oar-pdr/angtest $docmds \
-                       "${args[@]}"
+                       "${args[@]}" "${angargs[@]}"
         if wordin shell $docmds; then
             exec docker run -ti --rm $volopt $distvol oar-pdr/angtest $docmds\
-                        $args
+                       "${args[@]}" "${angargs[@]}"
         else
             docker run --rm $volopt $distvol oar-pdr/angtest $docmds \
-                   $args
+                   "${args[@]}" "${angargs[@]}"
         fi
     fi
 fi
@@ -168,14 +179,18 @@ if wordin python $comptypes; then
     
     if wordin build $cmds; then
         # build = makedist
-        echo '+' docker run --rm $volopt $distvol oar-pdr/pdrtest makedist $args
-        docker run $ti --rm $volopt $distvol oar-pdr/pdrtest makedist $args
+        echo '+' docker run --rm $volopt $distvol oar-pdr/pdrtest makedist \
+                        "${args[@]}"  "${pyargs[@]}"
+        docker run $ti --rm $volopt $distvol oar-pdr/pdrtest makedist \
+               "${args[@]}"  "${pyargs[@]}"
     fi
 
     if wordin test $cmds; then
         # test = testall
-        echo '+' docker run --rm $volopt $distvol oar-pdr/pdrtest testall $args
-        docker run $ti --rm $volopt $distvol oar-pdr/pdrtest testall $args
+        echo '+' docker run --rm $volopt $distvol oar-pdr/pdrtest testall \
+                        "${args[@]}"  "${pyargs[@]}"
+        docker run $ti --rm $volopt $distvol oar-pdr/pdrtest testall \
+               "${args[@]}"  "${pyargs[@]}"
     fi
 
     if wordin shell $cmds; then
@@ -183,8 +198,10 @@ if wordin python $comptypes; then
         if wordin install $cmds; then
             cmd="installshell"
         fi
-        echo '+' docker run -ti --rm $volopt $distvol oar-pdr/pdrtest $cmd $args
-        exec docker run -ti --rm $volopt $distvol oar-pdr/pdrtest $cmd $args
+        echo '+' docker run -ti --rm $volopt $distvol oar-pdr/pdrtest $cmd \
+                        "${args[@]}"  "${pyargs[@]}"
+        exec docker run -ti --rm $volopt $distvol oar-pdr/pdrtest $cmd \
+                        "${args[@]}"  "${pyargs[@]}"
     fi
 fi
 

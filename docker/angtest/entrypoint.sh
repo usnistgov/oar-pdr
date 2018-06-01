@@ -23,11 +23,11 @@ args=
 cmds=
 while [ "$1" != "" ]; do
     case "$1" in
-        -*)
-            args="$args $1"
+        build|test|shell)
+            cmds="$cmds $1"
             ;;
         *)
-            cmds="$cmds $1"
+            args="$args $1"
             ;;
     esac
     shift
