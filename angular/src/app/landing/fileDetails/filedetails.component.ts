@@ -15,6 +15,7 @@ export class FileDetailsComponent {
        window.open(this.fileDetails["downloadURL"]);
        //alert("download here");
    }
+   
     /**
    * Function to display bytes in appropriate format.
    **/ 

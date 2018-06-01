@@ -101,3 +101,4 @@ npm $npmpfx install
              "zip -qr $DIST_DIR.zip *)"
     (cd $builddir && zip -qr $DIST_DIR/$DISTNAMES.zip *)
     
+    npm run serve:universal

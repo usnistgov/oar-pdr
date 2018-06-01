@@ -9,7 +9,7 @@ import { HttpClientModule, HttpClient } from '@angular/common/http';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 //import { Ng2StickyModule } from 'ng2-sticky';
 import { Collaspe } from './landing/collapseDirective/collapse.directive';
-import { ButtonModule, DropdownModule, AccordionModule, TreeModule,PanelMenuModule,MenuItem, TreeNode, AutoCompleteModule,
+import { ButtonModule, DropdownModule, AccordionModule, PanelMenuModule,MenuItem,AutoCompleteModule,
           MessagesModule, MultiSelectModule, DataTableModule, DataListModule,ContextMenuModule,
           MenuModule,OverlayPanelModule, FieldsetModule, PanelModule ,DialogModule } from 'primeng/primeng';
 import { AppComponent } from './app.component';
@@ -29,6 +29,8 @@ import { SharedModule } from './shared/shared.module';
 import { SearchService } from './shared/search-service/index';
 import { CommonVarService } from './shared/common-var/index';
 import { AppConfig } from './shared/config-service/config.service';
+import {TreeTableModule} from 'primeng/treetable';
+
 
 const appInitializerFn = (appConfig: AppConfig) => {
   return () => {
@@ -53,9 +55,11 @@ const appInitializerFn = (appConfig: AppConfig) => {
     
     HttpClientModule,
     CommonModule, SharedModule, AccordionModule,AutoCompleteModule,MessagesModule,MultiSelectModule,
-    DropdownModule,DataTableModule, DataListModule,TreeModule, PanelMenuModule,DialogModule,
+    DropdownModule,DataTableModule, DataListModule, PanelMenuModule,DialogModule,
     ContextMenuModule,MenuModule,OverlayPanelModule, FieldsetModule, PanelModule,BrowserAnimationsModule, 
-    FormsModule, ButtonModule,NgbModule.forRoot()
+    FormsModule, ButtonModule,
+    TreeTableModule,
+    NgbModule.forRoot()
   ],
   exports: [Collaspe],
   providers: [ Title, SearchService,SearchResolve, CommonVarService 

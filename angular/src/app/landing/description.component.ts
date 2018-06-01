@@ -1,7 +1,12 @@
 import { Component, Input,ChangeDetectorRef } from '@angular/core';
 import { LandingComponent } from './landing.component';
-import { TreeModule,TreeNode, Tree, MenuItem } from 'primeng/primeng';
+import { MenuItem } from 'primeng/primeng';
+import {TreeTableModule} from 'primeng/treetable';
+import {TreeNode} from 'primeng/api';
 
+
+import { HttpClient } from '@angular/common/http';
+import { Injectable } from '@angular/core';
 @Component({
   moduleId: module.id,
   styleUrls: ['landing.component.css'],
@@ -35,7 +40,7 @@ import { TreeModule,TreeNode, Tree, MenuItem } from 'primeng/primeng';
             <br>
             
             <div>
-             <h3><b>Access To Data</b></h3>
+             <h3><b>Data Access</b></h3>
              <span *ngIf="record['accessLevel'] === 'public'"><i class="faa faa-globe"></i> 
                 These data are public . 
              </span>
@@ -63,11 +68,9 @@ import { TreeModule,TreeNode, Tree, MenuItem } from 'primeng/primeng';
                 </h3> <i *ngIf="loginuser" style="float:right" class="faa faa-edit"></i>
                 <div class="ui-g">
                     <div class="ui-g-6 ui-md-6 ui-lg-6 ui-sm-12">
-                        <p-tree [value]="files" selectionMode="single" [(selection)]="selectedFile" (onNodeSelect)="nodeSelect($event)">
-                            <ng-template let-node  pTemplate="default">
-                                <span>{{node.label}}</span>
-                            </ng-template>
-                        </p-tree>
+                        <p-treeTable [value]="files">
+                            <p-column field="name" header="Label"></p-column>
+                        </p-treeTable>
                     </div>
                     <div class="ui-g-6 ui-md-6 ui-lg-6 ui-sm-12">
                         <div ng2-sticky>
@@ -85,7 +88,7 @@ import { TreeModule,TreeNode, Tree, MenuItem } from 'primeng/primeng';
                     </div>
                 </div>
             </div>
-
+          
             <div *ngIf="checkReferences()">
              <h3 id="reference" name="reference"><b>References:</b></h3>
                 <span *ngIf="isDocumentedBy"> 
@@ -120,7 +123,7 @@ import { TreeModule,TreeNode, Tree, MenuItem } from 'primeng/primeng';
 export class DescriptionComponent {
 
  @Input() record: any[];
- @Input() files: any[];
+ @Input() files: TreeNode[];
  @Input() distdownload: string;
  @Input() editContent: boolean;
  @Input() loginuser: boolean;
@@ -220,6 +223,14 @@ checkReferences(){
 
  ngOnInit(){
     this.cdr.detectChanges();
+    
+
+    console.log("Test in desc 1: "+JSON.stringify(this.files[0].data));
+    this.files  = this.files[0].data;
+    //console.log("Test in desc 2: "+this.files);
+    // this.http.get<any>('assets/testdata.json')
+    //   .toPromise()
+    //   .then(res => <TreeNode[]>res.data).then(files => this.files = files);;
  }
  ngOnChanges(){
     this.checkAccesspages();
@@ -227,6 +238,8 @@ checkReferences(){
  editDecription(){
 
  }
- constructor(private cdr: ChangeDetectorRef) {}
+ constructor(private cdr: ChangeDetectorRef, private http: HttpClient) {}
 
+
+    
 }

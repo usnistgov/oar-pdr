@@ -5,7 +5,7 @@ import { FormBuilder, FormGroup } from '@angular/forms';
 import { BrowserModule ,Title} from '@angular/platform-browser';
 import { ActivatedRoute }     from '@angular/router';
 import { Message } from 'primeng/components/common/api';
-import { TreeModule,TreeNode, Tree, MenuItem,OverlayPanelModule,
+import {  MenuItem,OverlayPanelModule,
          FieldsetModule,PanelModule,ContextMenuModule,
          MenuModule, DialogModule,SelectItem } from 'primeng/primeng';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
@@ -22,7 +22,8 @@ import { AppConfig } from '../shared/config-service/config.service';
 
 declare var Ultima: any;
 // declare var jQuery: any;
-
+import {TreeTableModule} from 'primeng/treetable';
+import {TreeNode} from 'primeng/api';
 @Component({
   selector: 'app-landing',
   templateUrl: './landing.component.html',
@@ -93,7 +94,9 @@ export class LandingComponent implements OnInit {
     //this.record = rmmdata[0];
     this.type = this.record['@type'];
     this.titleService.setTitle(this.record['title']);
-    this.createDataHierarchy();
+    // this.testfunc();
+    this.createNewDataHierarchy();
+    //console.log(this.arrangeIntoTree(this.record['components']));
     if(this.record['doi'] !== undefined && this.record['doi'] !== "" )
       this.isDOI = true;
     //if(this.record['contactPoint'].hasEmail !== undefined && this.record['contactPoint'].hasEmail !== "")
@@ -153,7 +156,60 @@ export class LandingComponent implements OnInit {
     // }
     // ];
 }
+testfunc(){
+ var testdata = {"data":
+    [  
+        {  
+            "data":{  
+                "name":"Documents",
+                "size":"75kb",
+                "type":"Folder"
+            },
+            "children":[
+                {  
+                    "data":{  
+                        "name":"Work",
+                        "size":"55kb",
+                        "type":"Folder"
+                    },
+                    "children":[  
+                        {  
+                            "data":{  
+                                "name":"Expenses.doc",
+                                "size":"30kb",
+                                "type":"Document"
+                            }
+                        },
+                        {  
+                            "data":{  
+                                "name":"Resume.doc",
+                                "size":"25kb",
+                                "type":"Resume"
+                            }
+                        }
+                    ]
+                },
+                {  
+                    "data":{  
+                        "name":"Home",
+                        "size":"20kb",
+                        "type":"Folder"
+                    },
+                    "children":[  
+                        {  
+                            "data":{  
+                                "name":"Invoices",
+                                "size":"20kb",
+                                "type":"Text"
+                            }
+                        }
+                    ]
+                }
+            ]
+        }]}
 
+ //this.files=JSON.parse(JSON.stringify(testdata)); 
+}
 viewmetadata(){
   this.metadata = true; this.similarResources =false;
 }
@@ -193,8 +249,10 @@ updateRightMenu(){
   var license = this.createMenuItem("Fair Use Statement",  "faa faa-external-link","",this.record['license'] ) ;
   var citation = this.createMenuItem('Citation', "faa faa-angle-double-right",(event)=>{ this.getCitation(); this.showDialog(); },'');
 
+  var metaItem = this.createMenuItem("View","faa faa-bars",(event)=>{
+    this.metadata = true; this.similarResources =false;},''); 
 
-    
+    itemsMenu.push(metaItem);
     itemsMenu.push(metadata);   
 
     var descItem = this.createMenuItem ("Description","faa faa-bars",(event)=>{
@@ -206,22 +264,21 @@ updateRightMenu(){
 
     },'');
 
-    var filesItem = this.createMenuItem("Files","faa faa-bars", (event)=>{
+    var filesItem = this.createMenuItem("Data Access","faa faa-bars", (event)=>{
       this.metadata = false;
       this.similarResources =false;
     },'');
 
-    var metaItem = this.createMenuItem("Metadata","faa faa-bars",(event)=>{
-      this.metadata = true; this.similarResources =false;},''); 
+    
     var itemsMenu2:MenuItem[] = [];
       itemsMenu2.push(descItem);
     //if(this.checkReferences())
       itemsMenu2.push(refItem);
     if(this.files.length !== 0)
       itemsMenu2.push(filesItem);
-    itemsMenu2.push(metaItem);
+    
     this.rightmenu = [ { label: 'Go To ..', items: itemsMenu2},
-      { label: 'Access ', items: itemsMenu },
+      { label: 'Record Details', items: itemsMenu },
       { label: 'Use',   items: [ citation, license ] },
       { label: 'Find',   items: [ similarRes, resourcesByAuthor ]}];
   }
@@ -343,6 +400,110 @@ updateRightMenu(){
     endFileNode.collapsedIcon =  "faa fa-folder";
     return endFileNode;
   }
+
+
+  createNewDataHierarchy(){
+   
+    // if (this.record['dataHierarchy'] == null )
+    //   return;
+   
+   
+    // for(let fields of this.record['dataHierarchy']){
+    //   var testdata = {};
+    //   console.log("fields:"+JSON.stringify(fields));
+    //   if( fields.filepath != null) {
+    //     if(fields.children != null)
+    //     this.files.push( this.createNewChildrenTree(fields.children,fields.filepath));
+    //     else{
+    //     testdata["data"] = this.createNewFileNode(fields.filepath);
+    //     this.files.push(testdata);
+    //     }
+    //   }
+    // }
+    var testdata = {}
+    testdata["data"] = this.arrangeIntoTree(this.record['components']);
+    console.log("Testdata:"+JSON.stringify(testdata));
+    this.files.push(testdata);
+    console.log("Files:"+JSON.stringify(this.files));
+  }
+
+  createNewChildrenTree(children:any[], filepath:string){
+    let testObj:TreeNode = {};
+    testObj= this.createTreeObj(filepath.split("/")[filepath.split("/").length-1],filepath);
+    testObj.children=[];
+    for(let child of children){
+      let fname = child.filepath.split("/")[child.filepath.split("/").length-1];
+      if( child.filepath != null) {
+        if(child.children != null)
+          testObj.children.push(this.createNewChildrenTree(child.children,
+            child.filepath));
+        else
+          testObj.children.push(this.createNewFileNode(fname));
+      }
+    }
+    return testObj;
+  }
+  createNewTreeObj(label :string, data:any){
+    let testObj : TreeNode = {};
+    testObj = {};
+    testObj["label"] = label;
+    testObj["data"] = data;
+    return testObj;
+  }
+  
+  createNewFileNode(label :string){
+    let endFileNode:TreeNode = {};
+    endFileNode["label"] = label;
+    return endFileNode;
+  }
+
+
+  /////This is to create a tree structure::
+  private arrangeIntoTree(paths) {
+    const tree = [];
+    // This example uses the underscore.js library.
+    var i = 0;
+    paths.forEach((path) => {
+      if(i == 0) console.log("First ele");
+     else{
+      console.log(i+"."+path.filepath);
+      path.filepath = "/"+path.filepath;
+    const pathParts = path.filepath.split('/');
+    pathParts.shift(); // Remove first blank element from the parts array.
+    
+    let currentLevel = tree; // initialize currentLevel to root
+    
+    pathParts.forEach((part) => {
+    
+    // check to see if the path already exists.
+    const existingPath = currentLevel.filter(level => level.data.name === part);
+     
+    if (existingPath.length > 0) {
+    // The path to this item was already in the tree, so don't add it again.
+    // Set the current level to this path's children
+    currentLevel = existingPath[0].children;
+    } else {
+    // const newPart = {
+    // name: part,
+    // children: []
+    // };
+    
+    const newPart = {
+      data : {
+        name : part
+      },children: []
+    };
+    currentLevel.push(newPart);
+    currentLevel = newPart.children;
+    }
+    });
+  }
+  i= i+1;
+    });
+    
+    //console.log("Return tree"+ JSON.stringify(tree));
+    return tree;
+    }
 
   clicked = false;
   expandClick(){
