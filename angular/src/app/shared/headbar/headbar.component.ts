@@ -3,8 +3,9 @@ import { Location } from '@angular/common';
 import { TreeModule,TreeNode, Tree, OverlayPanelModule,
   FieldsetModule,PanelModule,ContextMenuModule,
   MenuModule,MenuItem } from 'primeng/primeng';
-
-  import { CommonVarService } from "../common-var/index";  
+import { CommonVarService } from "../common-var/index";
+import { CartService } from '../../datacart/cart.service';
+import { CartEntity } from '../../datacart/cart.entity';
 // import { environment } from '../../environment';
 
 /**
@@ -30,11 +31,16 @@ export class HeadbarComponent {
   SDPAPI : string = "environment.SDPAPI";
   landingService : string = "environment.LANDING";
   internalBadge: boolean = false;
+  cartEntities: CartEntity[];
   topmenu: MenuItem[];
   loginuser = false;
+  cartLength : number;
 
-  constructor( private el: ElementRef, private commonVar : CommonVarService) {
+  constructor( private el: ElementRef, private commonVar : CommonVarService, private cartService: CartService) {
     this.createTopMenu();
+    this.cartService.watchStorage().subscribe(value => {
+      this.cartLength = value;
+    });
   }
   
   checkinternal() {
@@ -49,8 +55,26 @@ export class HeadbarComponent {
       {label:"Search"},
       {label:"Login"}  ];
   }
-  
-  login(){
+
+  getDataCartList () {
+    this.cartService.getAllCartEntities().then(function (result) {
+    this.cartEntities = result;
+    this.cartLength = this.cartEntities.length;
+    return this.cartLength;
+    }.bind(this), function (err) {
+      alert("something went wrong while fetching the products");
+    });
+    return null;
+  }
+
+
+  updateCartStatus()
+  {
+    this.cartService.updateCartDisplayStatus(true);
+  }
+
+
+    login(){
     //alert(this.loginuser);
     // this.commonVar.setLogin(!this.loginuser);
     this.commonVar.userConfig(!this.loginuser);

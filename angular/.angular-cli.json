@@ -30,6 +30,7 @@
       "scripts": [
         "../node_modules/lodash/lodash.min.js",
         "../node_modules/jspdf/dist/jspdf.min.js",
+        "../node_modules/file-saver/FileSaver.min.js",
         "../node_modules/primeui/primeui-ng-all.min.js",
         "../node_modules/bootstrap/dist/js/bootstrap.min.js"
       ],
@@ -67,6 +68,7 @@
       "scripts": [
         "../node_modules/lodash/lodash.min.js",
         "../node_modules/jspdf/dist/jspdf.min.js",
+        "../node_modules/file-saver/FileSaver.min.js",
         "../node_modules/primeui/primeui-ng-all.min.js",
         "../node_modules/bootstrap/dist/js/bootstrap.min.js"
       ],

@@ -1,6 +1,8 @@
 import { Component, Input,ChangeDetectorRef } from '@angular/core';
 import { LandingComponent } from './landing.component';
 import { TreeModule,TreeNode, Tree, MenuItem } from 'primeng/primeng';
+import { CartService} from '../datacart/cart.service';
+import { Data} from '../datacart/data';
 
 @Component({
   moduleId: module.id,
@@ -86,6 +88,10 @@ import { TreeModule,TreeNode, Tree, MenuItem } from 'primeng/primeng';
             <div *ngIf="files.length != 0">           
                 <h3 id="files" name="files"><b>Files</b>
                    <a href="{{distdownload}}" class="faa faa-file-archive-o" title="Download All Files" ></a>
+                    <a href="javascript:;" (click)="addFilesToCart()" class="faa faa-cart-plus " title="Add All files to datacart" ></a>
+                    <span [hidden] ="!addAllFileSpinner">
+                        <p-progressSpinner [style]="{width: '20px', height: '20px',top:'10%'}" ></p-progressSpinner>
+                     </span>
                 </h3> <i *ngIf="loginuser" style="float:right" class="faa faa-edit"></i>
                 <div class="ui-g">
                     <div class="ui-g-6 ui-md-6 ui-lg-6 ui-sm-12">
@@ -98,7 +104,7 @@ import { TreeModule,TreeNode, Tree, MenuItem } from 'primeng/primeng';
                     <div class="ui-g-6 ui-md-6 ui-lg-6 ui-sm-12">
                         <div ng2-sticky>
                             <div *ngIf="isFileDetails">
-                                <filedetails-resources [fileDetails]="fileDetails"></filedetails-resources>
+                                <filedetails-resources [fileDetails]="fileDetails" [record]="record"></filedetails-resources>
                             </div>
                             <div *ngIf="!isFileDetails">
                                 <div class="fileinfocard ">
@@ -124,6 +130,7 @@ export class DescriptionComponent {
  @Input() editContent: boolean;
  @Input() loginuser: boolean;
 
+ addAllFileSpinner:boolean = false;
  fileDetails:string = '';
  isFileDetails: boolean = false;
  isReference: boolean = false;
@@ -166,6 +173,34 @@ checkReferences(){
       }
  }
 
+ addFilesToCart() {
+
+    let data: Data;
+    let compValue: any;
+    this.cartService.updateAllFilesSpinnerStatus(true);
+    for (let comp of this.record["components"]) {
+        if (typeof comp["downloadURL"] != "undefined") {
+            data = {
+                'resId': this.record["@id"],
+                'resTitle': this.record["title"],
+                'id': comp["title"],
+                'fileName': comp["title"],
+                'filePath': comp["filepath"],
+                'fileSize': comp["size"],
+                'downloadURL': comp["downloadURL"],
+                'fileFormat': comp["mediaType"],
+                'downloadedStatus': null,
+                'resFilePath': ''
+                };
+                this.cartService.addDataToCart(data);
+                data = null;
+            }
+        }
+
+        setTimeout(() => {
+            this.cartService.updateAllFilesSpinnerStatus(false);
+        }, 3000);
+}
 
  checkKeywords(){
     if(Array.isArray(this.record['keyword']) ){
@@ -226,6 +261,10 @@ checkReferences(){
  editDecription(){
 
  }
- constructor(private cdr: ChangeDetectorRef) {}
 
+ constructor(private cartService: CartService,private cdr: ChangeDetectorRef) {
+     this.cartService.watchAddAllFilesCart().subscribe(value => {
+     this.addAllFileSpinner = value;
+     });
+ }
 }

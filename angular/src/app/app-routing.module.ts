@@ -8,6 +8,7 @@ import { NoidComponent } from './landing/noid.component';
 import { NerdmComponent } from './landing/nerdm.component';
 import { SearchResolve } from './landing/search-service.resolve';
 import { ErrorComponent, UserErrorComponent } from './landing/error.component';
+import { DatacartComponent} from './datacart/datacart.component';
 
 const routes: Routes = [
   { path: '', redirectTo: '/aboutlanding', pathMatch: 'full' },
@@ -49,6 +50,14 @@ const routes: Routes = [
       path: '',
       component: NerdmComponent
     }
+  ]
+},{
+  path: 'datacart',
+  children: [
+      {
+        path: '',
+        component: DatacartComponent
+      }
   ]
 },{
   path: 'error/:id',
