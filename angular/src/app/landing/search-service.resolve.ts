@@ -33,10 +33,7 @@ export class SearchResolve implements Resolve<any> {
   constructor(private searchService: SearchService) {}
   
   resolve(route: ActivatedRouteSnapshot) {
-    return this.searchService.searchById(route.params['id'])
-    .catch(( error ) => {
-      return Observable.throw('data not available at this time'+error);
-    });;
+    return this.searchService.searchById(route.params['id']);
   }
 }
 

@@ -30,7 +30,7 @@ import { SearchService } from './shared/search-service/index';
 import { CommonVarService } from './shared/common-var/index';
 import { AppConfig } from './shared/config-service/config.service';
 import {TreeTableModule} from 'primeng/treetable';
-
+import { Ng2StickyModule } from 'ng2-sticky';
 
 const appInitializerFn = (appConfig: AppConfig) => {
   return () => {
@@ -59,6 +59,7 @@ const appInitializerFn = (appConfig: AppConfig) => {
     ContextMenuModule,MenuModule,OverlayPanelModule, FieldsetModule, PanelModule,BrowserAnimationsModule, 
     FormsModule, ButtonModule,
     TreeTableModule,
+    Ng2StickyModule,
     NgbModule.forRoot()
   ],
   exports: [Collaspe],

@@ -5,20 +5,19 @@ import { FormBuilder, FormGroup } from '@angular/forms';
 import { BrowserModule ,Title} from '@angular/platform-browser';
 import { ActivatedRoute }     from '@angular/router';
 import { Message } from 'primeng/components/common/api';
-import {  MenuItem,OverlayPanelModule,
+import { MenuItem,OverlayPanelModule,
          FieldsetModule,PanelModule,ContextMenuModule,
          MenuModule, DialogModule,SelectItem } from 'primeng/primeng';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import * as _ from 'lodash';
 import 'rxjs/add/operator/map';
 import { Subscription } from 'rxjs/Subscription';
-
 import { Collaspe } from './collapseDirective/collapse.directive';
 import { environment } from '../../environments/environment';
 import { SearchResolve } from "./search-service.resolve";
-//import * as jsPDF  from 'jspdf';
 import { CommonVarService } from "../shared/common-var/index";
 import { AppConfig } from '../shared/config-service/config.service';
+//import * as jsPDF  from 'jspdf';
 
 declare var Ultima: any;
 // declare var jQuery: any;
@@ -74,13 +73,12 @@ export class LandingComponent implements OnInit {
    *
    */
   constructor(private route: ActivatedRoute, private el: ElementRef, 
-              private titleService: Title, private appConfig : AppConfig) 
-              {
-                  this.rmmApi = this.appConfig.getConfig().RMMAPI;
-                  this.distApi = this.appConfig.getConfig().DISAPI;
-                  this.landing = this.appConfig.getConfig().LANDING;
-
-               }
+    private titleService: Title, private appConfig : AppConfig) 
+    {
+      this.rmmApi = this.appConfig.getConfig().RMMAPI;
+      this.distApi = this.appConfig.getConfig().DISAPI;
+      this.landing = this.appConfig.getConfig().LANDING;
+    }
 
    /**
    * If Search is successful populate list of keywords themes and authors
@@ -94,7 +92,6 @@ export class LandingComponent implements OnInit {
     //this.record = rmmdata[0];
     this.type = this.record['@type'];
     this.titleService.setTitle(this.record['title']);
-    // this.testfunc();
     this.createNewDataHierarchy();
     //console.log(this.arrangeIntoTree(this.record['components']));
     if(this.record['doi'] !== undefined && this.record['doi'] !== "" )
@@ -106,7 +103,7 @@ export class LandingComponent implements OnInit {
         this.isId = false;
         return;
     }
-      this.updateLeftMenu();
+      //this.updateLeftMenu();
       this.updateRightMenu();
   }
 
@@ -150,66 +147,8 @@ export class LandingComponent implements OnInit {
     itemsMenu.push(metaItem);
 
     return itemsMenu;
-    // this.leftmenu = [{
-    //   label: 'Table of Contents',
-    //   items: itemsMenu
-    // }
-    // ];
 }
-testfunc(){
- var testdata = {"data":
-    [  
-        {  
-            "data":{  
-                "name":"Documents",
-                "size":"75kb",
-                "type":"Folder"
-            },
-            "children":[
-                {  
-                    "data":{  
-                        "name":"Work",
-                        "size":"55kb",
-                        "type":"Folder"
-                    },
-                    "children":[  
-                        {  
-                            "data":{  
-                                "name":"Expenses.doc",
-                                "size":"30kb",
-                                "type":"Document"
-                            }
-                        },
-                        {  
-                            "data":{  
-                                "name":"Resume.doc",
-                                "size":"25kb",
-                                "type":"Resume"
-                            }
-                        }
-                    ]
-                },
-                {  
-                    "data":{  
-                        "name":"Home",
-                        "size":"20kb",
-                        "type":"Folder"
-                    },
-                    "children":[  
-                        {  
-                            "data":{  
-                                "name":"Invoices",
-                                "size":"20kb",
-                                "type":"Text"
-                            }
-                        }
-                    ]
-                }
-            ]
-        }]}
 
- //this.files=JSON.parse(JSON.stringify(testdata)); 
-}
 viewmetadata(){
   this.metadata = true; this.similarResources =false;
 }
@@ -287,37 +226,32 @@ updateRightMenu(){
     this.citeString = "";
     let date =  new Date(); 
 
-                    if(this.record['authors'] !==  null && this.record['authors'] !==  undefined){
-
-                        for(let author of this.record['authors']) { 
-                         if(author.familyName !== null && author.familyName !== undefined) 
-                            this.citeString += author.familyName +' ';
-                         if(author.givenName !== null && author.givenName !== undefined) 
-                            this.citeString +=  author.givenName+' ';
-                         if(author.middleName !== null && author.middleName !== undefined) 
-                            this.citeString += author.middleName;
-                         
-                        }
-                    } 
-                    else if(this.record['contactPoint']) {
-                        if(this.record['contactPoint'].fn !== null && this.record['contactPoint'].fn !== undefined)
-                        this.citeString += this.record['contactPoint'].fn;
-                    }
-
-                    if(this.record['issued'] !==  null && this.record['issued'] !==  undefined){
-      
-                      this.citeString += " ("+ _.split(this.record['issued'],"-")[0]+") ";
-                    }
-                    if(this.citeString !== "") this.citeString +=", ";
-                    if(this.record['title']!== null && this.record['title']!== undefined )
-                        this.citeString += this.record['title'] +", ";
-                    if(this.record['publisher']){
-                      if(this.record['publisher'].name !== null && this.record['publisher'].name !== undefined)
-                      this.citeString += this.record['publisher'].name;
-                    }
-                    if(this.isDOI)   this.citeString += ", "+ this.record['doi'];
-                    
-                    this.citeString += " (Accessed: "+ date.getFullYear()+"-"+(date.getMonth()+1)+"-"+date.getDate()+")";
+    if(this.record['authors'] !==  null && this.record['authors'] !==  undefined){
+      for(let author of this.record['authors']) { 
+       if(author.familyName !== null && author.familyName !== undefined) 
+        this.citeString += author.familyName +' ';
+        if(author.givenName !== null && author.givenName !== undefined) 
+          this.citeString +=  author.givenName+' ';
+        if(author.middleName !== null && author.middleName !== undefined) 
+          this.citeString += author.middleName;
+      }
+    } 
+    else if(this.record['contactPoint']) {
+      if(this.record['contactPoint'].fn !== null && this.record['contactPoint'].fn !== undefined)
+         this.citeString += this.record['contactPoint'].fn;
+      }
+      if(this.record['issued'] !==  null && this.record['issued'] !==  undefined){
+        this.citeString += " ("+ _.split(this.record['issued'],"-")[0]+") ";
+      }
+      if(this.citeString !== "") this.citeString +=", ";
+      if(this.record['title']!== null && this.record['title']!== undefined )
+          this.citeString += this.record['title'] +", ";
+      if(this.record['publisher']){
+        if(this.record['publisher'].name !== null && this.record['publisher'].name !== undefined)
+             this.citeString += this.record['publisher'].name;
+        }
+      if(this.isDOI)   this.citeString += ", "+ this.record['doi'];
+      this.citeString += " (Accessed: "+ date.getFullYear()+"-"+(date.getMonth()+1)+"-"+date.getDate()+")";
   }
 
   /**
@@ -329,8 +263,10 @@ updateRightMenu(){
       this.files =[];
       this.route.data.map(data => data.searchService )
       .subscribe((res)=>{
+        console.log("Test results:"+JSON.stringify(res));
         this.onSuccess(res);
     }, error =>{
+      console.log("There is an error in searchservice.");
       this.onError(" There is an error");
     });
     
@@ -406,8 +342,6 @@ updateRightMenu(){
    
     // if (this.record['dataHierarchy'] == null )
     //   return;
-   
-   
     // for(let fields of this.record['dataHierarchy']){
     //   var testdata = {};
     //   console.log("fields:"+JSON.stringify(fields));
