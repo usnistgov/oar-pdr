@@ -321,7 +321,7 @@ class Handler(object):
             else:
                 log.info("SIP preservation request in progress asynchronously: "+
                          sipid)
-                self.set_response(202, "SIP "+out.message)
+                self.set_response(202, "SIP "+out['message'])
 
             out = json.dumps(out)
 
