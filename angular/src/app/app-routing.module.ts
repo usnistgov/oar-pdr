@@ -12,7 +12,7 @@ import { ErrorComponent, UserErrorComponent } from './landing/error.component';
 const routes: Routes = [
   { path: '', redirectTo: '/aboutlanding', pathMatch: 'full' },
   { path: 'aboutlanding', component: LandingAboutComponent },
- {path: 'id/:id',
+ {path: ':id',
    children: [
    {
      path: '',
@@ -22,7 +22,7 @@ const routes: Routes = [
      }
    }
  ]}, {
-  path: 'id/ark:/88434/:id',
+  path: 'ark:/88434/:id',
   children: [
     {
       path: '',
@@ -33,7 +33,7 @@ const routes: Routes = [
     }
   ]
 },{
-  path: 'id',
+  path: '',
   children: [
     {
       path: '',
