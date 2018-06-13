@@ -72,6 +72,8 @@ export class DatacartComponent implements OnInit, OnDestroy {
   maximum: number = 100000;
   displayFiles:any = [];
   index:any = {};
+  selectedNode: TreeNode[] = [];
+  selectedFileCount: number = 0;
   private distApi : string = environment.DISTAPI;
   //private distApi:string = "http://localhost:8083/oar-dist-service";
 
@@ -153,6 +155,7 @@ export class DatacartComponent implements OnInit, OnDestroy {
           this.cartEntities = result;
           console.log("hello" + JSON.stringify(this.cartEntities));
           this.createDataCartHierarchy();
+          this.dataFiles[0].expanded = true;
       }.bind(this), function (err) {
           alert("something went wrong while fetching the products");
       });
@@ -161,13 +164,25 @@ export class DatacartComponent implements OnInit, OnDestroy {
 
   }
 
+  dataFileCount() {
+      this.selectedFileCount = 0;
+      console.log("selected data length" + this.selectedData.length)
+      for (let selData of this.selectedData) {
+          if (selData.data['filePath'] != null) {
+              if (selData.data['filePath'].split(".").length > 1) {
+                  this.selectedFileCount++;
+              }
+          }
+      }
+  }
+
   updateCartEntries(row:any,downloadedStatus:any) {
         console.log("id" + JSON.stringify(row.data));
         this.cartService.updateCartItemDownloadStatus(row.data['id'],downloadedStatus);
         this.cartService.getAllCartEntities().then(function (result) {
             //console.log("result" + result.length);
             this.cartEntities = result;
-            this.createDataCartHierarchy();
+                this.createDataCartHierarchy();
 
         }.bind(this), function (err) {
             alert("something went wrong while fetching the products");
@@ -188,7 +203,6 @@ export class DatacartComponent implements OnInit, OnDestroy {
     return this.http.get(this.distApi + "/cart?" , {responseType: 'blob', params: params});
   }
 
-
     /**
      * Removes all cartInstances that are bound to the productId given.
      **/
@@ -207,6 +221,8 @@ export class DatacartComponent implements OnInit, OnDestroy {
 
         this.getDataCartList();
         this.createDataCartHierarchy();
+        console.log("selected node remove" + JSON.stringify(this.selectedNode) );
+        this.dataFiles[0].expanded = true;
         this.cartService.setCartLength(this.dataFiles.length);
         this.selectedData.length = 0;
     }
@@ -224,6 +240,8 @@ export class DatacartComponent implements OnInit, OnDestroy {
             this.cartEntities = result;
             console.log("cart entities inside datacartlist" + JSON.stringify(this.cartEntities));
             this.createDataCartHierarchy();
+            console.log("selectednode" + this.selectedNode);
+            this.dataFiles[0].expanded = true;
         }.bind(this), function (err) {
             alert("something went wrong while fetching the products");
         });
