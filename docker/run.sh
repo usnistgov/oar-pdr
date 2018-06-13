@@ -8,6 +8,9 @@ prog=`basename $0`
 execdir=`dirname $0`
 [ "$execdir" = "" -o "$execdir" = "." ] && execdir=$PWD
 codedir=`(cd $execdir/.. > /dev/null 2>&1; pwd)`
+os=`uname`
+SED_RE_OPT=r
+[ "$os" != "Darwin" ] || SED_RE_OPT=E
 
 function usage {
     cat <<EOF
@@ -149,7 +152,7 @@ fi
 # angular, open the shell in the angular test contatiner (angtest).
 # 
 if wordin angular $comptypes; then
-    docmds=`echo $cmds | sed -re 's/shell//' -e 's/install//' -e 's/^ +$//'`
+    docmds=`echo $cmds | sed -${SED_RE_OPT}e 's/shell//' -e 's/install//' -e 's/^ +$//'`
     if { wordin shell $cmds && [ "$comptypes" == "angular" ]; }; then
         docmds="$docmds shell"
     fi
