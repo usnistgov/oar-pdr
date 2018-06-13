@@ -104,12 +104,17 @@
   background-color:#E7F0F6;
   font-family: 'Sans-Serif';
   word-wrap: break-word;
+  font-size: 0.9em;
+}
+
+:host /deep/ .ui-widget-header{
+  border: 0px;
+  background-color: #ccc;
 }
 
 :host /deep/ .ui-widget-content{
   border: 0px;
 }
-
 :host /deep/ .ui-menu{
   padding: 0;
 }

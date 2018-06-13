@@ -10,7 +10,7 @@ execdir=`dirname $0`
 codedir=`(cd $execdir/.. > /dev/null 2>&1; pwd)`
 os=`uname`
 SED_RE_OPT=r
-[ "os" != "Darwin" ] || SED_RE_OPT=E
+[ "$os" != "Darwin" ] || SED_RE_OPT=E
 
 function usage {
     cat <<EOF
