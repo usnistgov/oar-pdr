@@ -16,6 +16,7 @@
             "main": "src/main.ts",
             "tsConfig": "src/tsconfig.app.json",
             "polyfills": "src/polyfills.ts",
+            "preserveSymlinks": true,
             "assets": [
               {
                 "glob": "favicon.ico",
@@ -71,21 +72,6 @@
           "configurations": {
             "production": {
               "browserTarget": "pdr-landingpage:build:production"
-            }
-          }
-        },
-        "udk": {
-          "builder": "udk:udk-builder",
-          "options": {
-            "main": "src/main.server.ts",
-            "browserTarget": "pdr-landingpage:build",
-            "serverTarget": "pdr-landingpage:server"
-          },
-          "configurations": {
-            "production": {
-              "browserTarget": "pdr-landingpage:build:production",
-              "serverTarget": "pdr-landingpage:server:production",
-              "verbose": true
             }
           }
         },
