@@ -1,5 +1,7 @@
 // These are important and needed before anything else
 import 'zone.js/dist/zone-node';
+
+import 'zone.js/dist/long-stack-trace-zone';
 import 'reflect-metadata';
 
 import { enableProdMode } from '@angular/core';
@@ -10,6 +12,7 @@ import { join } from 'path';
 // Faster server renders w/ Prod mode (dev mode never needed)
 enableProdMode();
 
+global['Event'] = null;
 // Express server
 const app = express();
 

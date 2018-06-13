@@ -9,9 +9,10 @@ import { HttpClientModule, HttpClient } from '@angular/common/http';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 //import { Ng2StickyModule } from 'ng2-sticky';
 import { Collaspe } from './landing/collapseDirective/collapse.directive';
-import { ButtonModule, DropdownModule, AccordionModule, PanelMenuModule,MenuItem,AutoCompleteModule,
-          MessagesModule, MultiSelectModule, DataTableModule, DataListModule,ContextMenuModule,
-          MenuModule,OverlayPanelModule, FieldsetModule, PanelModule ,DialogModule } from 'primeng/primeng';
+import { ButtonModule, DropdownModule, AccordionModule, PanelMenuModule,MenuItem,
+         AutoCompleteModule, MessagesModule, MultiSelectModule, DataTableModule, 
+         DataListModule,ContextMenuModule, MenuModule,OverlayPanelModule, 
+         FieldsetModule, PanelModule ,DialogModule } from 'primeng/primeng';
 import { AppComponent } from './app.component';
 import { AppRoutingModule } from './app-routing.module';
 import { LandingComponent } from './landing/landing.component';
@@ -54,7 +55,9 @@ const appInitializerFn = (appConfig: AppConfig) => {
     AppRoutingModule,
     
     HttpClientModule,
-    CommonModule, SharedModule, AccordionModule,AutoCompleteModule,MessagesModule,MultiSelectModule,
+    CommonModule, SharedModule, AccordionModule,AutoCompleteModule,MessagesModule,
+
+    MultiSelectModule,
     DropdownModule,DataTableModule, DataListModule, PanelMenuModule,DialogModule,
     ContextMenuModule,MenuModule,OverlayPanelModule, FieldsetModule, PanelModule,BrowserAnimationsModule, 
     FormsModule, ButtonModule,

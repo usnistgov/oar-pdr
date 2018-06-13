@@ -8,6 +8,8 @@ import { Message } from 'primeng/components/common/api';
 import { MenuItem,OverlayPanelModule,
          FieldsetModule,PanelModule,ContextMenuModule,
          MenuModule, DialogModule,SelectItem } from 'primeng/primeng';
+import { TreeTableModule } from 'primeng/treetable';
+import { TreeNode } from 'primeng/api';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import * as _ from 'lodash';
 import 'rxjs/add/operator/map';
@@ -21,8 +23,7 @@ import { AppConfig } from '../shared/config-service/config.service';
 
 declare var Ultima: any;
 // declare var jQuery: any;
-import {TreeTableModule} from 'primeng/treetable';
-import {TreeNode} from 'primeng/api';
+
 @Component({
   selector: 'app-landing',
   templateUrl: './landing.component.html',
@@ -68,13 +69,17 @@ export class LandingComponent implements OnInit {
     isResultAvailable: boolean = true;
     isId : boolean = true;
     displayContact: boolean = false; 
+    isBrowser: boolean = false;
   /**
    * Creates an instance of the SearchPanel
    *
    */
   constructor(private route: ActivatedRoute, private el: ElementRef, 
-    private titleService: Title, private appConfig : AppConfig) 
+    private titleService: Title, private appConfig : AppConfig,
+    @Inject(PLATFORM_ID) private platformId) 
     {
+      this.isBrowser = isPlatformBrowser(platformId);
+      // console.log("PLatform::"+this.isBrowser +":: ID ::"+PLATFORM_ID);
       this.rmmApi = this.appConfig.getConfig().RMMAPI;
       this.distApi = this.appConfig.getConfig().DISAPI;
       this.landing = this.appConfig.getConfig().LANDING;
@@ -263,7 +268,7 @@ updateRightMenu(){
       this.files =[];
       this.route.data.map(data => data.searchService )
       .subscribe((res)=>{
-        console.log("Test results:"+JSON.stringify(res));
+        // console.log("Test results:"+JSON.stringify(res));
         this.onSuccess(res);
     }, error =>{
       console.log("There is an error in searchservice.");
@@ -356,9 +361,8 @@ updateRightMenu(){
     // }
     var testdata = {}
     testdata["data"] = this.arrangeIntoTree(this.record['components']);
-    console.log("Testdata:"+JSON.stringify(testdata));
     this.files.push(testdata);
-    console.log("Files:"+JSON.stringify(this.files));
+    //console.log("Files:"+JSON.stringify(this.files));
   }
 
   createNewChildrenTree(children:any[], filepath:string){
@@ -400,7 +404,7 @@ updateRightMenu(){
     paths.forEach((path) => {
       if(i == 0) console.log("First ele");
      else{
-      console.log(i+"."+path.filepath);
+      // console.log(i+"."+path.filepath);
       path.filepath = "/"+path.filepath;
     const pathParts = path.filepath.split('/');
     pathParts.shift(); // Remove first blank element from the parts array.

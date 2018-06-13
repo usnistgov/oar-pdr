@@ -1,12 +1,11 @@
-import { Component, Input,ChangeDetectorRef } from '@angular/core';
+import { Component, Input,ChangeDetectorRef ,Inject, Injectable,PLATFORM_ID} from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
+import { HttpClient } from '@angular/common/http';
 import { LandingComponent } from './landing.component';
 import { MenuItem } from 'primeng/primeng';
-import {TreeTableModule} from 'primeng/treetable';
-import {TreeNode} from 'primeng/api';
+import { TreeTableModule} from 'primeng/treetable';
+import { TreeNode} from 'primeng/api';
 
-
-import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
 @Component({
   moduleId: module.id,
   styleUrls: ['landing.component.css'],
@@ -68,12 +67,28 @@ import { Injectable } from '@angular/core';
                 </h3> <i *ngIf="loginuser" style="float:right" class="faa faa-edit"></i>
                 <div class="ui-g">
                     <div class="ui-g-6 ui-md-6 ui-lg-6 ui-sm-12">
-                        <p-treeTable [value]="files">
-                            <p-column field="name" header="Label"></p-column>
-                        </p-treeTable>
+                    <p-treeTable [value]="files">
+                    <ng-template pTemplate="header">
+                        <tr>
+                            <th>Name</th>
+                            <th>Size</th>
+                            <th>Type</th>
+                        </tr>
+                    </ng-template>
+                    <ng-template pTemplate="body" let-rowNode let-rowData="rowData">
+                        <tr>
+                            <td>
+                                <p-treeTableToggler [rowNode]="rowNode"></p-treeTableToggler>
+                                {{rowData.name}}
+                            </td>
+                            <td></td>
+                            <td></td>
+                        </tr>            
+                    </ng-template>
+                </p-treeTable>
                     </div>
                     <div class="ui-g-6 ui-md-6 ui-lg-6 ui-sm-12">
-                        <div ng2-sticky>
+                        <div *ngIf="isBrowser" ng2-sticky>
                             <div *ngIf="isFileDetails">
                                 <filedetails-resources [fileDetails]="fileDetails"></filedetails-resources>
                             </div>
@@ -223,14 +238,13 @@ checkReferences(){
 
  ngOnInit(){
     this.cdr.detectChanges();
-    
-
-    console.log("Test in desc 1: "+JSON.stringify(this.files[0].data));
+    console.log("Test 1:"+JSON.stringify(this.files));
     this.files  = this.files[0].data;
-    //console.log("Test in desc 2: "+this.files);
-    // this.http.get<any>('assets/testdata.json')
-    //   .toPromise()
-    //   .then(res => <TreeNode[]>res.data).then(files => this.files = files);;
+    console.log("Test 2:"+JSON.stringify(this.files));
+    // this.http.get('assets/testdata.json')
+    // .toPromise()
+    // .then(res => this.files= <TreeNode[]> res["data"]);
+    // console.log("Test 2:"+this.files);
  }
  ngOnChanges(){
     this.checkAccesspages();
@@ -238,8 +252,8 @@ checkReferences(){
  editDecription(){
 
  }
- constructor(private cdr: ChangeDetectorRef, private http: HttpClient) {}
-
-
+ constructor(private cdr: ChangeDetectorRef, private http: HttpClient) {
+        
     
+    } 
 }

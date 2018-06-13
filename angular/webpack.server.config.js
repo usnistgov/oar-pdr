@@ -12,8 +12,11 @@ module.exports = {
     path: path.join(__dirname, 'dist'),
     filename: '[name].js'
   },
+ 
   module: {
-    rules: [{ test: /\.ts$/, loader: 'ts-loader' }]
+    rules: [
+        { test: /\.(ts|js)$/, loader: 'regexp-replace-loader', options: { match: { pattern: '\\[(Mouse|Keyboard)Event\\]', flags: 'g' }, replaceWith: '[]', } },
+        { test: /\.ts$/, loader: 'ts-loader' }]
   },
   plugins: [
     // Temporary Fix for issue: https://github.com/angular/angular/issues/11580
