@@ -50,7 +50,6 @@ const appInitializerFn = (appConfig: AppConfig) => {
     FormsModule,
     ReactiveFormsModule,
     AppRoutingModule,
-    
     HttpClientModule,
     CommonModule, SharedModule, AccordionModule,AutoCompleteModule,MessagesModule,MultiSelectModule,
     DropdownModule,DataTableModule, DataListModule,TreeModule, PanelMenuModule,DialogModule,

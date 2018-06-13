@@ -73,13 +73,11 @@ export class LandingComponent implements OnInit {
    *
    */
   constructor(private route: ActivatedRoute, private el: ElementRef, 
-              private titleService: Title, private appConfig : AppConfig) 
-              {
-                  this.rmmApi = this.appConfig.getConfig().RMMAPI;
-                  this.distApi = this.appConfig.getConfig().DISAPI;
-                  this.landing = this.appConfig.getConfig().LANDING;
-
-               }
+              private titleService: Title, private appConfig : AppConfig) {
+    this.rmmApi = this.appConfig.getConfig().RMMAPI;
+    this.distApi = this.appConfig.getConfig().DISAPI;
+    this.landing = this.appConfig.getConfig().LANDING;
+  }
 
    /**
    * If Search is successful populate list of keywords themes and authors
@@ -209,38 +207,30 @@ updateRightMenu(){
   getCitation(){
     this.citeString = "";
     let date =  new Date(); 
-
-                    if(this.record['authors'] !==  null && this.record['authors'] !==  undefined){
-
-                        for(let author of this.record['authors']) { 
-                         if(author.familyName !== null && author.familyName !== undefined) 
-                            this.citeString += author.familyName +' ';
-                         if(author.givenName !== null && author.givenName !== undefined) 
-                            this.citeString +=  author.givenName+' ';
-                         if(author.middleName !== null && author.middleName !== undefined) 
-                            this.citeString += author.middleName;
-                         
-                        }
-                    } 
-                    else if(this.record['contactPoint']) {
-                        if(this.record['contactPoint'].fn !== null && this.record['contactPoint'].fn !== undefined)
-                        this.citeString += this.record['contactPoint'].fn;
-                    }
-
-                    if(this.record['issued'] !==  null && this.record['issued'] !==  undefined){
-      
-                      this.citeString += " ("+ _.split(this.record['issued'],"-")[0]+") ";
-                    }
-                    if(this.citeString !== "") this.citeString +=", ";
-                    if(this.record['title']!== null && this.record['title']!== undefined )
-                        this.citeString += this.record['title'] +", ";
-                    if(this.record['publisher']){
-                      if(this.record['publisher'].name !== null && this.record['publisher'].name !== undefined)
-                      this.citeString += this.record['publisher'].name;
-                    }
-                    if(this.isDOI)   this.citeString += ", "+ this.record['doi'];
-                    
-                    this.citeString += " (Accessed: "+ date.getFullYear()+"-"+(date.getMonth()+1)+"-"+date.getDate()+")";
+      if(this.record['authors'] !==  null && this.record['authors'] !==  undefined){
+        for(let author of this.record['authors']) { 
+          if(author.familyName !== null && author.familyName !== undefined) 
+            this.citeString += author.familyName +' ';
+          if(author.givenName !== null && author.givenName !== undefined) 
+            this.citeString +=  author.givenName+' ';
+          if(author.middleName !== null && author.middleName !== undefined) 
+            this.citeString += author.middleName;
+        }
+      } else if(this.record['contactPoint']) {
+          if(this.record['contactPoint'].fn !== null && this.record['contactPoint'].fn !== undefined)
+            this.citeString += this.record['contactPoint'].fn;
+      }
+      if(this.record['issued'] !==  null && this.record['issued'] !==  undefined){
+        this.citeString += " ("+ _.split(this.record['issued'],"-")[0]+") ";}
+      if(this.citeString !== "") this.citeString +=", ";
+      if(this.record['title']!== null && this.record['title']!== undefined )
+        this.citeString += this.record['title'] +", ";
+      if(this.record['publisher']){
+        if(this.record['publisher'].name !== null && this.record['publisher'].name !== undefined)
+          this.citeString += this.record['publisher'].name;
+      }
+      if(this.isDOI)   this.citeString += ", "+ this.record['doi'];
+      this.citeString += " (Accessed: "+ date.getFullYear()+"-"+(date.getMonth()+1)+"-"+date.getDate()+")";
   }
 
   /**
@@ -248,14 +238,16 @@ updateRightMenu(){
    */
   ngOnInit() {
 
-     var paramid = this.route.snapshot.paramMap.get('id');
-      this.files =[];
-      this.route.data.map(data => data.searchService )
-      .subscribe((res)=>{
-        this.onSuccess(res);
-    }, error =>{
-      this.onError(" There is an error");
-    });
+    var paramid = this.route.snapshot.paramMap.get('id');
+    this.files =[];
+    this.route.data.map(data => data.searchService )
+    .subscribe((res)=>{
+      // console.log("Test results:"+JSON.stringify(res));
+      this.onSuccess(res);
+  }, error =>{
+    console.log("There is an error in searchservice.");
+    this.onError(" There is an error");
+  });
     
   }
 
