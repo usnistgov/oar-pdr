@@ -31,7 +31,7 @@ export class ErrorComponent {
     }
   ngAfterViewInit(){
 
-   //window.history.replaceState( {} , '#/error/', '/error/');
+   
   }
 }
 

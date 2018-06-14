@@ -1,5 +1,5 @@
 {
-  "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
+  "$schema": "./node_modules/@angular-devkit/core/src/workspace/workspace-schema.json",
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
@@ -46,7 +46,7 @@
           "configurations": {
             "production": {
               "optimization": true,
-              "outputHashing": "none",
+              "outputHashing": "all",
               "sourceMap": false,
               "extractCss": true,
               "namedChunks": false,
@@ -71,21 +71,6 @@
           "configurations": {
             "production": {
               "browserTarget": "pdr-landingpage:build:production"
-            }
-          }
-        },
-        "udk": {
-          "builder": "udk:udk-builder",
-          "options": {
-            "main": "src/main.server.ts",
-            "browserTarget": "pdr-landingpage:build",
-            "serverTarget": "pdr-landingpage:server"
-          },
-          "configurations": {
-            "production": {
-              "browserTarget": "pdr-landingpage:build:production",
-              "serverTarget": "pdr-landingpage:server:production",
-              "verbose": true
             }
           }
         },
@@ -147,11 +132,18 @@
           "builder": "@angular-devkit/build-angular:server",
           "options": {
             "outputPath": "dist/server",
-            "main": "src/app/ngmodule.ts",
+            "main": "src/main.server.ts",
             "tsConfig": "src/tsconfig.server.json"
           },
           "configurations": {
-            "production": {}
+            "production": {
+              "fileReplacements": [
+                {
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.prod.ts"
+                }
+              ]
+            }
           }
         }
       }
@@ -160,6 +152,8 @@
       "root": "",
       "sourceRoot": "",
       "projectType": "application",
+      "cli": {
+      },
       "architect": {
         "e2e": {
           "builder": "@angular-devkit/build-angular:protractor",
@@ -182,14 +176,33 @@
       }
     }
   },
+  "cli": {},
   "defaultProject": "pdr-landingpage",
   "schematics": {
     "@schematics/angular:component": {
       "prefix": "app",
-      "styleext": "css"
+      "styleext": "css",
+      "spec": false,
+      "inlineStyle": true,
+      "inlineTemplate": true,
     },
     "@schematics/angular:directive": {
       "prefix": "app"
+    },
+    "@schematics/angular:class": {
+      "spec": false
+    },
+    "@schematics/angular:guard": {
+      "spec": false
+    },
+    "@schematics/angular:module": {
+      "spec": false
+    },
+    "@schematics/angular:pipe": {
+      "spec": false
+    },
+    "@schematics/angular:service": {
+      "spec": false
     }
   }
 }

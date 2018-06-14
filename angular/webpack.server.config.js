@@ -2,7 +2,7 @@ const path = require('path');
 const webpack = require('webpack');
 
 module.exports = {
-  entry: { server: './server.ts' },
+  entry: { server: './server.ts', prerender: './prerender.ts' },
   resolve: { extensions: ['.js', '.ts'] },
   target: 'node',
   mode: 'none',
@@ -16,7 +16,14 @@ module.exports = {
   module: {
     rules: [
         { test: /\.(ts|js)$/, loader: 'regexp-replace-loader', options: { match: { pattern: '\\[(Mouse|Keyboard)Event\\]', flags: 'g' }, replaceWith: '[]', } },
-        { test: /\.ts$/, loader: 'ts-loader' }]
+        { test: /\.ts$/, loader: 'ts-loader' },
+        {
+          // Mark files inside `@angular/core` as using SystemJS style dynamic imports.
+          // Removing this will cause deprecation warnings to appear.
+          test: /(\\|\/)@angular(\\|\/)core(\\|\/).+\.js$/,
+          parser: { system: true },
+        }
+      ]
   },
   plugins: [
     // Temporary Fix for issue: https://github.com/angular/angular/issues/11580
@@ -33,3 +40,5 @@ module.exports = {
     )
   ]
 };
+
+  

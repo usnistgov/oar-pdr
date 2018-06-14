@@ -10,9 +10,9 @@ import { SearchResolve } from './landing/search-service.resolve';
 import { ErrorComponent, UserErrorComponent } from './landing/error.component';
 
 const routes: Routes = [
-  { path: '', redirectTo: '/aboutlanding', pathMatch: 'full' },
-  { path: 'aboutlanding', component: LandingAboutComponent },
- {path: 'id/:id',
+  { path: '', redirectTo: '/about', pathMatch: 'full' },
+  { path: 'about', component: LandingAboutComponent },
+ {path: 'od/id/:id',
    children: [
    {
      path: '',
@@ -22,7 +22,7 @@ const routes: Routes = [
      }
    }
  ]}, {
-  path: 'id/ark:/88434/:id',
+  path: 'od/id/ark:/88434/:id',
   children: [
     {
       path: '',
@@ -33,7 +33,7 @@ const routes: Routes = [
     }
   ]
 },{
-  path: 'id',
+  path: 'od/id',
   children: [
     {
       path: '',
@@ -43,7 +43,7 @@ const routes: Routes = [
   ]
 }
 ,{
-  path: 'nerdm',
+  path: 'od/id/nerdm',
   children: [
     {
       path: '',
@@ -51,7 +51,7 @@ const routes: Routes = [
     }
   ]
 },{
-  path: 'error/:id',
+  path: 'od/id/error/:id',
   children: [
     {
       path: '',
@@ -60,7 +60,7 @@ const routes: Routes = [
   ]
 }
 ,{
-  path: 'usererror/:id',
+  path: 'od/id/usererror/:id',
   children: [
     {
       path: '',
