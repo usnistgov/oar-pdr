@@ -268,7 +268,7 @@ class TestBuilder(test.TestCase):
             "@id": "cmps/"+path,
             "@type": [ "nrdp:DataFile", "nrdp:DownloadableFile", "dcat:Distribution" ],
             "filepath": path,
-            "_extensionSchemas": [ "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile" ]
+            "_extensionSchemas": [ "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/DataFile" ]
         }
         mdf = os.path.join(self.bag.bagdir, "metadata", path, "nerdm.json")
         self.assertFalse(os.path.exists(mdf))
@@ -312,7 +312,7 @@ class TestBuilder(test.TestCase):
             "@type": [ "nrdp:DataFile", "nrdp:DownloadableFile", "dcat:Distribution" ],
             "filepath": path,
             "downloadURL": "https://data.nist.gov/od/ds/gooberid/trial%201/1%25gold/iron%2Bwine.dat",
-            "_extensionSchemas": [ "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile" ]
+            "_extensionSchemas": [ "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/DataFile" ]
         }
         mdf = os.path.join(self.bag.bagdir, "metadata", path, "nerdm.json")
         self.assertFalse(os.path.exists(mdf))
@@ -328,7 +328,7 @@ class TestBuilder(test.TestCase):
             "@id": "cmps/"+path,
             "@type": [ "nrdp:ChecksumFile", "nrdp:DownloadableFile", "dcat:Distribution" ],
             "filepath": path,
-            "_extensionSchemas": [ "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/ChecksumFile" ]
+            "_extensionSchemas": [ "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/ChecksumFile" ]
         }
         mdf = os.path.join(self.bag.bagdir, "metadata", path, "nerdm.json")
         self.assertFalse(os.path.exists(mdf))
@@ -376,7 +376,7 @@ class TestBuilder(test.TestCase):
             "@id": "cmps/"+path,
             "@type": [ "nrdp:DataFile", "nrdp:DownloadableFile", "dcat:Distribution" ],
             "filepath": path,
-            "_extensionSchemas": [ "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile" ],
+            "_extensionSchemas": [ "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/DataFile" ],
             "size": 69,
             "mediaType": "application/json",
             "checksum": {
@@ -397,7 +397,7 @@ class TestBuilder(test.TestCase):
             "@id": "cmps/"+path,
             "@type": [ "nrdp:Subcollection" ],
             "filepath": path,
-            "_extensionSchemas": [ "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/Subcollection" ]
+            "_extensionSchemas": [ "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/Subcollection" ]
         }
         mdf = os.path.join(self.bag.bagdir, "metadata", path, "nerdm.json")
         self.assertFalse(os.path.exists(mdf))
@@ -427,7 +427,7 @@ class TestBuilder(test.TestCase):
             "@id": "cmps/"+path,
             "@type": [ "nrdp:DataFile", "nrdp:DownloadableFile", "dcat:Distribution" ],
             "filepath": path,
-            "_extensionSchemas": [ "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile" ],
+            "_extensionSchemas": [ "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/DataFile" ],
             "size": 69,
             "mediaType": "application/json",
             "checksum": {
@@ -455,7 +455,7 @@ class TestBuilder(test.TestCase):
             "@id": "cmps/"+path,
             "@type": [ "nrdp:DataFile", "nrdp:DownloadableFile", "dcat:Distribution" ],
             "filepath": path,
-            "_extensionSchemas": [ "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile" ]
+            "_extensionSchemas": [ "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/DataFile" ]
         }
         with open(bagmdpath) as fd:
             data = json.load(fd)
