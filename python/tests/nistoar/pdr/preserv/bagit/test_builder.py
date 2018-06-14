@@ -265,6 +265,8 @@ class TestBuilder(test.TestCase):
     def test_init_filemd_for(self):
         path = os.path.join("trial1","gold","file.dat")
         need = {
+            "_schema": "https://data.nist.gov/od/dm/nerdm-schema/v0.2#/definitions/Component",
+            "@context": "https://data.nist.gov/od/dm/nerdm-pub-context.jsonld",
             "@id": "cmps/"+path,
             "@type": [ "nrdp:DataFile", "nrdp:DownloadableFile", "dcat:Distribution" ],
             "filepath": path,
@@ -308,6 +310,8 @@ class TestBuilder(test.TestCase):
         epath = "trial%201/1%25gold/iron%2Bwine.dat"
         self.bag._ediid = "gooberid"
         need = {
+            "_schema": "https://data.nist.gov/od/dm/nerdm-schema/v0.2#/definitions/Component",
+            "@context": "https://data.nist.gov/od/dm/nerdm-pub-context.jsonld",
             "@id": "cmps/"+epath,
             "@type": [ "nrdp:DataFile", "nrdp:DownloadableFile", "dcat:Distribution" ],
             "filepath": path,
@@ -325,6 +329,8 @@ class TestBuilder(test.TestCase):
     def test_init_filemd_for_checksumfile(self):
         path = os.path.join("trial1","gold","file.dat")
         need = {
+            "_schema": "https://data.nist.gov/od/dm/nerdm-schema/v0.2#/definitions/Component",
+            "@context": "https://data.nist.gov/od/dm/nerdm-pub-context.jsonld",
             "@id": "cmps/"+path,
             "@type": [ "nrdp:ChecksumFile", "nrdp:DownloadableFile", "dcat:Distribution" ],
             "filepath": path,
@@ -373,6 +379,8 @@ class TestBuilder(test.TestCase):
     def test_examine(self):
         path = os.path.join("trial1","gold","trial1.json")
         need = {
+            "_schema": "https://data.nist.gov/od/dm/nerdm-schema/v0.2#/definitions/Component",
+            "@context": "https://data.nist.gov/od/dm/nerdm-pub-context.jsonld",
             "@id": "cmps/"+path,
             "@type": [ "nrdp:DataFile", "nrdp:DownloadableFile", "dcat:Distribution" ],
             "filepath": path,
@@ -394,6 +402,8 @@ class TestBuilder(test.TestCase):
         path = os.path.join("trial1","gold")
         md = self.bag.init_collmd_for(path)
         need = {
+            "_schema": "https://data.nist.gov/od/dm/nerdm-schema/v0.2#/definitions/Component",
+            "@context": "https://data.nist.gov/od/dm/nerdm-pub-context.jsonld",
             "@id": "cmps/"+path,
             "@type": [ "nrdp:Subcollection" ],
             "filepath": path,
@@ -424,6 +434,8 @@ class TestBuilder(test.TestCase):
         self.assertTrue( os.path.exists(bagmdpath) )
 
         need = {
+            "_schema": "https://data.nist.gov/od/dm/nerdm-schema/v0.2#/definitions/Component",
+            "@context": "https://data.nist.gov/od/dm/nerdm-pub-context.jsonld",
             "@id": "cmps/"+path,
             "@type": [ "nrdp:DataFile", "nrdp:DownloadableFile", "dcat:Distribution" ],
             "filepath": path,
@@ -452,6 +464,8 @@ class TestBuilder(test.TestCase):
         self.assertTrue( os.path.exists(bagmdpath) )
 
         need = {
+            "_schema": "https://data.nist.gov/od/dm/nerdm-schema/v0.2#/definitions/Component",
+            "@context": "https://data.nist.gov/od/dm/nerdm-pub-context.jsonld",
             "@id": "cmps/"+path,
             "@type": [ "nrdp:DataFile", "nrdp:DownloadableFile", "dcat:Distribution" ],
             "filepath": path,

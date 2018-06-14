@@ -55,6 +55,7 @@ NERDPUB_DEF = NERDMPUB_SCH_ID + "/definitions/"
 DATAFILE_TYPE = NERDPUB_PRE + ":DataFile"
 DOWNLOADABLEFILE_TYPE = NERDPUB_PRE + ":DownloadableFile"
 SUBCOLL_TYPE = NERDPUB_PRE + ":Subcollection"
+NERDM_CONTEXT = "https://data.nist.gov/od/dm/nerdm-pub-context.jsonld"
 DISTSERV = "https://data.nist.gov/od/ds/"
 DEF_MERGE_CONV = "midas0"
 
@@ -728,6 +729,8 @@ class BagBuilder(PreservationSystem):
         if disttype not in self._file_types:
             raise ValueError("Unsupported file distribution type: "+disttype)
         out = {
+            "_schema": NERD_DEF + "Component",
+            "@context": NERDM_CONTEXT,
             "@id": "cmps/" + urlencode(destpath),
             "@type": deepcopy(self._file_types[disttype][0]),
             "filepath": destpath,
@@ -751,6 +754,8 @@ class BagBuilder(PreservationSystem):
 
     def _create_init_collmd_for(self, destpath):
         out = {
+            "_schema": NERD_DEF + "Component",
+            "@context": NERDM_CONTEXT,
             "@id": "cmps/" + urlencode(destpath),
             "@type": [ ":".join([NERDPUB_PRE, "Subcollection"]) ],
             "filepath": destpath,

@@ -435,6 +435,8 @@ class NISTBagValidator(ValidatorBase):
                          "@type=nrdp:DataFile.")
         ct = self._issue("4.1-4-2d", "A data directory's NERDm data must be "+
                          "of @type=nrdp:Subcollection.")
+        kt = self._issue("4.1-4-2e", "_schema and @context fields recommended "+
+                         "for inclusion in component NERDm data file")
         for root, subdirs, files in os.walk(datadir):
             for f in files:
                 path = os.path.join(root[len(datadir):], f)
@@ -453,6 +455,13 @@ class NISTBagValidator(ValidatorBase):
                 if not ok:
                     comm = [path + ": " + str(data['@type'])]
                 out._err(ft, ok, comm)
+
+                comm = None
+                ok = ('_schema' in data or '$schema' in data) and \
+                     '@context' in data;
+                if not ok:
+                    comm = ["filepath: " +path]
+                out._rec(kt, ok, comm)
 
                 if self._validatemd:
                     flav = self._get_mdval_flavor(data)
@@ -505,7 +514,7 @@ class NISTBagValidator(ValidatorBase):
     def _check_comp_legal(self, nerdmf, path, res):
         vt = self._issue("4.1-4-2a", "A data file directory must " +
                          "contain a legal NERDm metadata file.")
-        pt = self._issue("4.1-4-2e", "A data component's NERDm data must have "+
+        pt = self._issue("4.1-4-2f", "A data component's NERDm data must have "+
                          "a correct filepath property")
         try:
             with open(nerdmf) as fd:

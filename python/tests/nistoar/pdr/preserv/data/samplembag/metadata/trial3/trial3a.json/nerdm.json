@@ -1,4 +1,6 @@
 {
+    "_schema": "https://data.nist.gov/od/dm/nerdm-schema/v0.2#/definitions/Component",
+    "@context": "https://data.nist.gov/od/dm/nerdm-pub-context.jsonld",
     "filepath": "trial3/trial3a.json",
     "checksum": {
         "hash": "7b58010c841b7748a48a7ac6366258d5b5a8d23d756951b6059c0e80daad516b",

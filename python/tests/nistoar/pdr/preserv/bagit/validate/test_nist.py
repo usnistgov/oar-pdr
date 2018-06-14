@@ -297,7 +297,7 @@ class TestMultibagValidator(test.TestCase):
         errs = self.valid8.test_nerdm_validity(self.bag)
         self.assertEqual(len(errs.failed()), 1, "# of errors != 1: [\n  " +
                          "\n  ".join([str(e) for e in errs.failed()]) + "\n]")
-        self.assertEqual(errs.failed()[0].label, "4.1-4-2e")
+        self.assertEqual(errs.failed()[0].label, "4.1-4-2f")
         
         # give data file wrong @type
         data = OrderedDict(gooddata)
@@ -334,7 +334,7 @@ class TestMultibagValidator(test.TestCase):
         self.assertEqual(len(errs.failed()), 4, "# of errors != 4: [\n  " +
                          "\n  ".join([str(e) for e in errs.failed()]) + "\n]")
         self.assertEqual(errs.failed()[0].label, "4.1-4-2c")
-        self.assertEqual(errs.failed()[1].label, "4.1-4-2e")
+        self.assertEqual(errs.failed()[1].label, "4.1-4-2f")
         self.assertEqual(errs.failed()[2].label, "4.1-4-2d")
         self.assertEqual(errs.failed()[3].label, "4.1-4-2b")
 

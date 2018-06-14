@@ -221,6 +221,11 @@ class NISTBag(PreservationSystem):
             elif NERDMD_FILENAME in files:
                 comp = self.read_nerd(os.path.join(root, NERDMD_FILENAME))
 
+                # remove properties that support standalone use/validation
+                for key in "_schema $schema @context".split():
+                    if key in comp:
+                        del comp[key]
+
                 if merge_annots:
                     annotfile = os.path.join(root,ANNOTS_FILENAME)
                     if os.path.exists(annotfile):
