@@ -127,6 +127,11 @@ class TestNISTBag(test.TestCase):
         self.assertEqual(data['inventory'][0]['childCount'], 4)
         self.assertEqual(data['inventory'][0]['descCount'], 5)
 
+        for comp in data['components']:
+            self.assertNotIn("_schema", comp)
+            self.assertNotIn("$schema", comp)
+            self.assertNotIn("@context", comp)
+
         # FIX: order is significant!
         #
         # self.assertEqual(data['dataHierarchy'], baghier)
