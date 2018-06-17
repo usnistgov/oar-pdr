@@ -11,24 +11,29 @@
             </div>
         </div>
         <p-treeTable selectionMode="checkbox" [value]="dataFiles" (onNodeSelect) = "dataFileCount()" (onNodeUnselect) = "dataFileCount()" [(selection)]="selectedData" [style]="{'margin-top':'10px','overflow-y': 'scroll'}">
-            <p-column styleClass="col-button" [style]="{'width':'30px'}">
-                <ng-template let-file="rowData" pTemplate="body">
-                    <button type="button" *ngIf = "file.data.downloadedStatus === 'downloaded' && file.data.resTitle.indexOf('.') > 0 " style="margin-left:-55px" class="small-button" pButton icon="faa faa-check"></button>
-                    <button type="button" *ngIf = "file.data.downloadedStatus === 'downloading' && file.data.resTitle.indexOf('.') > 0 " style="margin-left:-60px" class="small-button-yellow" pButton icon="faa faa-check"></button>
+            <ng-template pTemplate="header">
+                <tr>
+                    <th>Title</th>
+                    <th>Status</th>
+                    <th>Size</th>
+                </tr>
+            </ng-template>
+                <ng-template let-rowNode let-rowData="rowData" pTemplate="body">
+                    <tr>
+                        <td>
+                            <p-treeTableToggler [rowNode]="rowNode"></p-treeTableToggler>
+                            <button type="button" *ngIf = "rowData.downloadedStatus === 'downloaded' && rowData.resTitle.indexOf('.') > 0 " style="margin-left:-20px" class="small-button" pButton icon="faa faa-check"></button>
+                            <button type="button" *ngIf = "rowData.downloadedStatus === 'downloading' && rowData.resTitle.indexOf('.') > 0 "  class="small-button-yellow" pButton icon="faa faa-check"></button>
+                            <p-treeTableCheckbox [value]="rowNode"></p-treeTableCheckbox>
+                            <a href="{{rowData.downloadURL}}" target="_blank" *ngIf = "rowData.resTitle.indexOf('.') > 0">{{rowData.resTitle}}</a>
+                            <span *ngIf = "rowData.resTitle.indexOf('.') < 0">{{rowData.resTitle}}</span>
+                        </td>
+                        <td>
+                            <span *ngIf = "rowData.resTitle.indexOf('.') > 0">{{rowData.downloadedStatus}}</span>
+                        </td>
+                    </tr>
                 </ng-template>
-            </p-column>
-            <p-column field="resTitle" [style]="{'width':'200px','white-space':'normal'}" header="Name">
-                <ng-template let-file="rowData" pTemplate="body">
-                    <a href="{{file.data.downloadURL}}" target="_blank" *ngIf = "file.data.resTitle.indexOf('.') > 0">{{file.data.resTitle}}</a>
-                    <span *ngIf = "file.data.resTitle.indexOf('.') < 0">{{file.data.resTitle}}</span>
-                </ng-template>
-            </p-column>
-            <p-column field="downloadedStatus" [style]="{'width':'50px'}" header="Status">
-                <ng-template let-file="rowData" pTemplate="body">
-                    <span *ngIf = "file.data.resTitle.indexOf('.') > 0">{{file.data.downloadedStatus}}</span>
-                </ng-template>
-            </p-column>
-            <p-column field="size" [style]="{'width':'50px'}" header="Size"></p-column>
+
         </p-treeTable>
     </div>
 </div>

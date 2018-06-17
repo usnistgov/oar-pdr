@@ -32,6 +32,7 @@
               "src/styles.scss",
               "node_modules/bootstrap/dist/css/bootstrap.min.css",
               "node_modules/primeng/resources/primeng.css",
+              "node_modules/primeicons/primeicons.css",
               "src/styles/ultima-ng/layout/css/layout-indigo.css",
               "src/styles/ultima-ng/theme/theme-indigo.css",
               "src/styles/font-awesome/css/font-awesome.min.css",
@@ -41,7 +42,9 @@
               "node_modules/lodash/lodash.min.js",
               "node_modules/jspdf/dist/jspdf.min.js",
               "node_modules/primeui/primeui-ng-all.min.js",
-              "node_modules/bootstrap/dist/js/bootstrap.min.js"
+              "node_modules/bootstrap/dist/js/bootstrap.min.js",
+              "node_modules/primeng/primeng.js"
+
             ]
           },
           "configurations": {
