@@ -402,7 +402,7 @@ updateRightMenu(){
     // This example uses the underscore.js library.
     var i = 0;
     paths.forEach((path) => {
-      if(i == 0) console.log("First ele");
+      if(i == 0) console.log("");
      else{
       // console.log(i+"."+path.filepath);
       path.filepath = "/"+path.filepath;
@@ -421,11 +421,8 @@ updateRightMenu(){
     // Set the current level to this path's children
     currentLevel = existingPath[0].children;
     } else {
-    // const newPart = {
-    // name: part,
-    // children: []
-    // };
-    
+  
+
     const newPart = {
       data : {
         name : part

@@ -1,13 +1,11 @@
-import { BrowserModule,Title,DomSanitizer } from '@angular/platform-browser';
+import { BrowserModule,BrowserTransferStateModule,Title,DomSanitizer } from '@angular/platform-browser';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { NgModule,APP_INITIALIZER, PLATFORM_ID, APP_ID, Inject,
          CUSTOM_ELEMENTS_SCHEMA,NO_ERRORS_SCHEMA } from '@angular/core';
 import { isPlatformBrowser,CommonModule } from '@angular/common';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { HttpClientModule, HttpClient } from '@angular/common/http'; 
-
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
-//import { Ng2StickyModule } from 'ng2-sticky';
 import { Collaspe } from './landing/collapseDirective/collapse.directive';
 import { ButtonModule, DropdownModule, AccordionModule, PanelMenuModule,MenuItem,
          AutoCompleteModule, MessagesModule, MultiSelectModule, DataTableModule, 
@@ -30,8 +28,9 @@ import { SharedModule } from './shared/shared.module';
 import { SearchService } from './shared/search-service/index';
 import { CommonVarService } from './shared/common-var/index';
 import { AppConfig } from './shared/config-service/config.service';
-import {TreeTableModule} from 'primeng/treetable';
+import { TreeTableModule } from 'primeng/treetable';
 import { Ng2StickyModule } from 'ng2-sticky';
+
 
 const appInitializerFn = (appConfig: AppConfig) => {
   return () => {
@@ -50,13 +49,12 @@ const appInitializerFn = (appConfig: AppConfig) => {
   imports: [
     //BrowserModule,
     BrowserModule.withServerTransition({ appId: 'PDR-LandingPage' }),
+    BrowserTransferStateModule,
     FormsModule,
     ReactiveFormsModule,
     AppRoutingModule,
-    
     HttpClientModule,
     CommonModule, SharedModule, AccordionModule,AutoCompleteModule,MessagesModule,
-
     MultiSelectModule,
     DropdownModule,DataTableModule, DataListModule, PanelMenuModule,DialogModule,
     ContextMenuModule,MenuModule,OverlayPanelModule, FieldsetModule, PanelModule,BrowserAnimationsModule, 

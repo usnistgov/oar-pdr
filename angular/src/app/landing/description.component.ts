@@ -238,9 +238,10 @@ checkReferences(){
 
  ngOnInit(){
     this.cdr.detectChanges();
-    console.log("Test 1:"+JSON.stringify(this.files));
+    //console.log("Test 1:"+JSON.stringify(this.files));
     this.files  = this.files[0].data;
-    console.log("Test 2:"+JSON.stringify(this.files));
+    
+    //console.log("Test 2:"+JSON.stringify(this.files));
     // this.http.get('assets/testdata.json')
     // .toPromise()
     // .then(res => this.files= <TreeNode[]> res["data"]);
