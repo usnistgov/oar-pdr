@@ -242,11 +242,12 @@ updateRightMenu(){
     this.files =[];
     this.route.data.map(data => data.searchService )
     .subscribe((res)=>{
-      // console.log("Test results:"+JSON.stringify(res));
+      console.log("Test results:"+JSON.stringify(res));
       this.onSuccess(res);
   }, error =>{
     console.log("There is an error in searchservice.");
     this.onError(" There is an error");
+
   });
     
   }

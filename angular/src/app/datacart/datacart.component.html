@@ -10,7 +10,7 @@
                 {{item.key}}-<p-progressSpinner *ngIf ="item.value === true" [style]="{width: '12px', height: '12px'}" ></p-progressSpinner><i class="faa faa-check" *ngIf ="item.value !== true"></i>
             </div>
         </div>
-        <p-treeTable selectionMode="checkbox" [value]="dataFiles" (onNodeSelect) = "dataFileCount()" (onNodeUnselect) = "dataFileCount()" [(selection)]="selectedData" [style]="{'margin-top':'10px','overflow-y': 'scroll'}">
+        <p-treeTable selectionMode="checkbox" [value]="dataFiles" (onNodeSelect) = "dataFileCount()" (onNodeUnselect) = "dataFileCount()" [paginator]="true" [(selection)]="selectedData" [style]="{'margin-top':'10px','overflow-y': 'scroll'}">
             <ng-template pTemplate="header">
                 <tr>
                     <th>Title</th>
@@ -33,6 +33,13 @@
                         </td>
                     </tr>
                 </ng-template>
+            <ng-template pTemplate="emptymessage" let-columns>
+                <tr>
+                    <td align="center" colspan="3">
+                        No records found
+                    </td>
+                </tr>
+            </ng-template>
 
         </p-treeTable>
     </div>
