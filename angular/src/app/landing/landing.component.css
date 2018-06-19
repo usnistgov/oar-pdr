@@ -26,7 +26,7 @@
   color:#707070; 
   font-size: 14;
 }
-
+/* 
 :host /deep/ .ui-tree {
   padding: 0.625em 1em/2;
   font-weight:bold;
@@ -51,11 +51,10 @@
 
 
 :host /deep/ .ui-tree .ui-tree-container {
-  /*background-color: #f399f3;*/
-  /*width: 250px;*/
+
   position: relative;
   float: left;
-}
+} */
 
 
 :host /deep/ .leftMenuStyle > .ui-menu  .ui-menu-list li.ui-widget-header{

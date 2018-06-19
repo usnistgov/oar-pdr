@@ -71,8 +71,6 @@ import { TreeNode} from 'primeng/api';
                     <ng-template pTemplate="header">
                         <tr>
                             <th>Name</th>
-                            <th>Size</th>
-                            <th>Type</th>
                         </tr>
                     </ng-template>
                     <ng-template pTemplate="body" let-rowNode let-rowData="rowData">
@@ -81,8 +79,6 @@ import { TreeNode} from 'primeng/api';
                                 <p-treeTableToggler [rowNode]="rowNode"></p-treeTableToggler>
                                 {{rowData.name}}
                             </td>
-                            <td></td>
-                            <td></td>
                         </tr>            
                     </ng-template>
                 </p-treeTable>
@@ -239,13 +235,12 @@ checkReferences(){
  ngOnInit(){
     this.cdr.detectChanges();
     //console.log("Test 1:"+JSON.stringify(this.files));
-    this.files  = this.files[0].data;
-    
-    //console.log("Test 2:"+JSON.stringify(this.files));
+    this.files  =<TreeNode[]>this.files[0].data;
+    // console.log("Test 2:"+JSON.stringify(this.files));
     // this.http.get('assets/testdata.json')
     // .toPromise()
     // .then(res => this.files= <TreeNode[]> res["data"]);
-    // console.log("Test 2:"+this.files);
+    // console.log("Test 2:"+JSON.stringify(this.files));
  }
  ngOnChanges(){
     this.checkAccesspages();

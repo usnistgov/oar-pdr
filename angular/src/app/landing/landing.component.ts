@@ -3,7 +3,7 @@ import { Component, OnInit, OnDestroy, AfterViewInit, ElementRef,
 import { DatePipe,CommonModule,isPlatformBrowser } from '@angular/common';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { BrowserModule ,Title} from '@angular/platform-browser';
-import { ActivatedRoute }     from '@angular/router';
+import { ActivatedRoute, Router, NavigationEnd }     from '@angular/router';
 import { Message } from 'primeng/components/common/api';
 import { MenuItem,OverlayPanelModule,
          FieldsetModule,PanelModule,ContextMenuModule,
@@ -70,12 +70,14 @@ export class LandingComponent implements OnInit {
     isId : boolean = true;
     displayContact: boolean = false; 
     isBrowser: boolean = false;
+    private fragment: string;
+    private sectionScroll: string;
   /**
    * Creates an instance of the SearchPanel
    *
    */
   constructor(private route: ActivatedRoute, private el: ElementRef, 
-    private titleService: Title, private appConfig : AppConfig,
+    private titleService: Title, private appConfig : AppConfig,private router: Router,
     @Inject(PLATFORM_ID) private platformId) 
     {
       this.isBrowser = isPlatformBrowser(platformId);
@@ -83,6 +85,8 @@ export class LandingComponent implements OnInit {
       this.rmmApi = this.appConfig.getConfig().RMMAPI;
       this.distApi = this.appConfig.getConfig().DISAPI;
       this.landing = this.appConfig.getConfig().LANDING;
+
+      
     }
 
    /**
@@ -90,6 +94,7 @@ export class LandingComponent implements OnInit {
    */
   onSuccess(searchResults:any[]) {
     
+  
     if(searchResults["ResultCount"] === undefined || searchResults["ResultCount"] !== 1)
       this.record = searchResults;
     else if(searchResults["ResultCount"] !== undefined && searchResults["ResultCount"] === 1)
@@ -264,8 +269,17 @@ updateRightMenu(){
    */
   ngOnInit() {
 
+
      var paramid = this.route.snapshot.paramMap.get('id');
       this.files =[];
+      this.route.fragment.subscribe(fragment => { this.fragment = fragment; });
+      this.router.events.subscribe((evt) => {
+        if (!(evt instanceof NavigationEnd)) {
+          return;
+        }
+        this.doScroll();
+        this.sectionScroll= null;
+      });
       this.route.data.map(data => data.searchService )
       .subscribe((res)=>{
         // console.log("Test results:"+JSON.stringify(res));
@@ -281,7 +295,33 @@ updateRightMenu(){
     //this._routeParamsSubscription.unsubscribe();
   }
 
-  ngAfterViewInit(){}
+  ngAfterViewInit(): void {
+   
+  }
+
+  gototest(){
+    this.router.navigate( ['/od/id', this.record.ediid ], {fragment: 'test'});
+  }
+  
+  internalRoute(page,dst){
+    console.log("TEST 1");
+    this.sectionScroll=dst;
+    this.router.navigate([page], {fragment: dst});
+}
+
+doScroll() {
+  console.log("TEST 2");
+  if (!this.sectionScroll) {
+    return;
+  }
+  try {
+    var elements = document.getElementById(this.sectionScroll);
+    elements.scrollIntoView();
+  }
+  finally{
+    this.sectionScroll = null;
+  }
+} 
 
   //This is to check if empty
   isEmptyObject(obj) {

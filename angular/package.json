@@ -14,7 +14,8 @@
     "generate:prerender": "cd dist && node prerender",
     "webpack:server": "webpack --config webpack.server.config.js --progress --colors",
     "serve:prerender": "cd dist/browser && http-server",
-    "serve:ssr": "node --preserve-symlinks dist/server"
+    "serve:ssr": "node  dist/server",
+    "postinstall": "npm i find-up prepend-file && node scripts/postinstall.js"
   },
   "private": true,
   "dependencies": {
@@ -28,7 +29,7 @@
     "@angular/platform-browser-dynamic": "^6.0.4",
     "@angular/router": "^6.0.4",
     "@angular/service-worker": "^6.0.4",
-    "@ng-bootstrap/ng-bootstrap": "^2.1.1",
+    "@ng-bootstrap/ng-bootstrap": "^2.0.0",
     "@nguniversal/express-engine": "^6.0.0",
     "@nguniversal/module-map-ngfactory-loader": "^6.0.0",
     "angular-hot-loader": "^0.9.14",
@@ -37,6 +38,7 @@
     "chart.js": "2.1.3",
     "core-js": "^2.5.5",
     "d3": "^4.10.0",
+    "find-up": "^3.0.0",
     "font-awesome": "^4.7.0",
     "fullcalendar": "^3.1.0",
     "global": "^4.3.2",
@@ -53,6 +55,7 @@
     "ng2-utils": "^0.6.1",
     "npm": "^6.1.0",
     "popper.js": "^1.14.3",
+    "prepend-file": "^1.3.1",
     "primeicons": "^1.0.0-beta.8",
     "primeng": "^6.0.0-rc.1",
     "regexp-replace-loader": "^1.0.1",

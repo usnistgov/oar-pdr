@@ -13,10 +13,11 @@
       top.location = self.location;
     }
   </script> -->
+
   
   <div class="ui-grid ui-grid-responsive ui-grid-pad center">
     <div class="card landingcard">
-  
+   <a id="test"></a>
   <div *ngIf="record?.length == 0 || isId === false">
       <div class="ui-g">
          <div class="ui-g-10 ui-md-10 ui-lg-10 ui-sm-12" style="padding-left: 1%">
@@ -57,7 +58,7 @@
                           </div>
                       </div>
                       <br>
-                      <div class="" *ngIf="record.contactPoint">
+                      <div class="" *ngIf="record.contactPoint" >
                           Contact:
                           <strong>
                               <a *ngIf="isEmail" href="{{record.contactPoint.hasEmail}}" target="_top">
@@ -85,7 +86,7 @@
                               </div>
                           </div>
                       </div>
-                      <div>
+                      <div *appShellRender>
                           <span *ngIf="isId">Identifier: </span>
                           <span *ngIf="isDOI" ><i>  <a href="http://doi.org/{{record.doi.split(':')[1]}}">{{record.doi}}</a></i></span>
                           <span  *ngIf="!isDOI"><i> <a href="{{pdrApi}}{{record['@id']}}">{{record["@id"]}}</a></i> </span>
@@ -110,7 +111,7 @@
                   </div>
               </div>
               <div class="ui-g">
-                  <div class="ui-g-12 ui-md-12 ui-lg-12 ui-sm-12">
+                  <div *appShellNoRender class="ui-g-12 ui-md-12 ui-lg-12 ui-sm-12">
                       <div *ngIf="metadata != true && similarResources != true ">
                           <description-resources [record]="record" [files]="files" [distdownload]="distdownload" ></description-resources>
                       </div>
@@ -132,7 +133,7 @@
               </div>
           </div>
           <div class="ui-g-2 ui-md-2 ui-lg-2 ui-sm-12">
-              <div class="ui-g" *ngIf="isBrowser" ng2-sticky>
+              <div class="ui-g"  *ngIf="isBrowser" ng2-sticky>
                   <div class="ui-g-12 ui-md-12 ui-lg-12 ui-sm-12">
                      <div class="visible-lg-block visible-md-block ">
                           <p-menu  class="rightMenuStyle" [model]="rightmenu"></p-menu>
@@ -141,6 +142,9 @@
               </div>
               
             </div>
+            <a (click)="internalRoute('/od/id/3A1EE2F169DD3B8CE0531A570681DB5D1491','test')">Info</a>
+            <!-- <button (click)="gototest()">Go to anchor</button> -->
+            <!-- <a [routerLink]="['/od/id/{{record['@id']}}']" fragment="Test">Jump to 'Test' anchor </a> -->
       </div>
    </div>
   </div>

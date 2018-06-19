@@ -30,7 +30,8 @@ import { CommonVarService } from './shared/common-var/index';
 import { AppConfig } from './shared/config-service/config.service';
 import { TreeTableModule } from 'primeng/treetable';
 import { Ng2StickyModule } from 'ng2-sticky';
-
+import { AppShellNoRenderDirective } from './directives/app-shell-no-render.directive';
+import { AppShellRenderDirective } from './directives/app-shell-render.directive';
 
 const appInitializerFn = (appConfig: AppConfig) => {
   return () => {
@@ -42,9 +43,12 @@ const appInitializerFn = (appConfig: AppConfig) => {
     AppComponent,
     LandingAboutComponent,
     LandingComponent,
-    Collaspe,MetadataComponent,FileDetailsComponent,
-    DescriptionComponent,  KeyValuePipe, MetadataView, NoidComponent,NerdmComponent,
-    ErrorComponent,UserErrorComponent 
+    MetadataComponent,FileDetailsComponent,DescriptionComponent, 
+    KeyValuePipe, MetadataView, NoidComponent,NerdmComponent,
+    ErrorComponent,UserErrorComponent,
+    Collaspe,
+    AppShellNoRenderDirective,
+    AppShellRenderDirective 
   ],
   imports: [
     //BrowserModule,
@@ -55,10 +59,9 @@ const appInitializerFn = (appConfig: AppConfig) => {
     AppRoutingModule,
     HttpClientModule,
     CommonModule, SharedModule, AccordionModule,AutoCompleteModule,MessagesModule,
-    MultiSelectModule,
-    DropdownModule,DataTableModule, DataListModule, PanelMenuModule,DialogModule,
-    ContextMenuModule,MenuModule,OverlayPanelModule, FieldsetModule, PanelModule,BrowserAnimationsModule, 
-    FormsModule, ButtonModule,
+    MultiSelectModule,DropdownModule,DataTableModule, DataListModule, PanelMenuModule,
+    DialogModule,ContextMenuModule,MenuModule,OverlayPanelModule, FieldsetModule, 
+    PanelModule,BrowserAnimationsModule, FormsModule, ButtonModule,
     TreeTableModule,
     Ng2StickyModule,
     NgbModule.forRoot()

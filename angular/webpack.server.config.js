@@ -1,8 +1,8 @@
 const path = require('path');
 const webpack = require('webpack');
 
-const uglifyJsPlugin = require('uglifyjs-webpack-plugin');
-var mangle = true;
+// const uglifyJsPlugin = require('uglifyjs-webpack-plugin');
+// var mangle = true;
 
 module.exports = {
   entry: { server: './server.ts', prerender: './prerender.ts' },
