@@ -42,9 +42,7 @@
               "node_modules/lodash/lodash.min.js",
               "node_modules/jspdf/dist/jspdf.min.js",
               "node_modules/primeui/primeui-ng-all.min.js",
-              "node_modules/bootstrap/dist/js/bootstrap.min.js",
-              "node_modules/primeng/primeng.js"
-
+              "node_modules/bootstrap/dist/js/bootstrap.min.js"
             ]
           },
           "configurations": {

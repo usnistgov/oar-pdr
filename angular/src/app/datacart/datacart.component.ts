@@ -161,6 +161,7 @@ export class DatacartComponent implements OnInit, OnDestroy {
       });
 
       this.selectedData.length = 0;
+      this.dataFileCount();
 
   }
 
@@ -174,6 +175,19 @@ export class DatacartComponent implements OnInit, OnDestroy {
               }
           }
       }
+
+      if (this.selectedFileCount > 0) {
+          var element = <HTMLInputElement> document.getElementById("download");
+          element.disabled = false;
+          element = <HTMLInputElement> document.getElementById("removeData");
+          element.disabled = false;
+      } else {
+          var element = <HTMLInputElement> document.getElementById("download");
+          element.disabled = true;
+          element = <HTMLInputElement> document.getElementById("removeData");
+          element.disabled = true;
+      }
+
   }
 
   updateCartEntries(row:any,downloadedStatus:any) {
@@ -221,10 +235,15 @@ export class DatacartComponent implements OnInit, OnDestroy {
 
         this.getDataCartList();
         this.createDataCartHierarchy();
-        console.log("selected node remove" + JSON.stringify(this.selectedNode) );
-        this.dataFiles[0].expanded = true;
-        this.cartService.setCartLength(this.dataFiles.length);
+        /**
+        if (this.cartEntities.length > 0) {
+            this.dataFiles[0].expanded = true;
+        }
+        **/
+        this.cartService.setCartLength(this.cartEntities.length);
         this.selectedData.length = 0;
+        this.dataFileCount();
+
     }
 
     /**
@@ -238,14 +257,16 @@ export class DatacartComponent implements OnInit, OnDestroy {
         this.cartService.getAllCartEntities().then(function (result) {
             //console.log("result" + result.length);
             this.cartEntities = result;
-            console.log("cart entities inside datacartlist" + JSON.stringify(this.cartEntities));
             this.createDataCartHierarchy();
-            console.log("selectednode" + this.selectedNode);
-            this.dataFiles[0].expanded = true;
+            if (this.cartEntities.length > 0) {
+                this.dataFiles[0].expanded = true;
+            }
+            this.cartService.setCartLength(this.cartEntities.length);
+
         }.bind(this), function (err) {
             alert("something went wrong while fetching the products");
         });
-        this.cartService.setCartLength(this.dataFiles.length);
+        console.log("cart length" + this.cartEntities.length)
     }
 
   /**
@@ -289,6 +310,14 @@ export class DatacartComponent implements OnInit, OnDestroy {
     console.log("test" + this.cartEntities.length);
     this.createDataCartHierarchy();
     this.display = true;
+      if (this.cartEntities.length > 0) {
+          var element = <HTMLInputElement> document.getElementById("downloadStatus");
+          element.disabled = false;
+      } else {
+          var element = <HTMLInputElement> document.getElementById("downloadStatus");
+          element.disabled = true;
+      }
+
   }
 
 
