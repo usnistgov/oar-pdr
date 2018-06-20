@@ -66,20 +66,30 @@ import { TreeNode} from 'primeng/api';
                    <a href="{{distdownload}}" class="faa faa-file-archive-o" title="Download All Files" ></a>
                 </h3> <i *ngIf="loginuser" style="float:right" class="faa faa-edit"></i>
                 <div class="ui-g">
-                    <div class="ui-g-6 ui-md-6 ui-lg-6 ui-sm-12">
-                    <p-treeTable [value]="files">
+                    <div class="ui-g-12 ui-md-12 ui-lg-12 ui-sm-12">
+                    <p-treeTable [value]="files" [resizableColumns]="true" selectionMode="single" [(selection)]="selectedNode">
                     <ng-template pTemplate="header">
                         <tr>
-                            <th>Name</th>
+                            <th ttResizableColumn style="width:500px">Name</th>
+                            <th>Mediatype</th>
+                            <th>Download</th>
                         </tr>
                     </ng-template>
                     <ng-template pTemplate="body" let-rowNode let-rowData="rowData">
-                        <tr>
+                        <tr [ttSelectableRow]="rowNode">
                             <td>
                                 <p-treeTableToggler [rowNode]="rowNode"></p-treeTableToggler>
                                 {{rowData.name}}
                             </td>
+                            <td>{{rowData.mediatype}}</td>
+                            <td><a href="{{rowData.downloadUrl}}"><i class="faa faa-download" aria-hidden="true"></i></a></td>
                         </tr>            
+                    </ng-template>
+                    <ng-template pTemplate="summary">
+                         <div style="text-align: left">
+                         Selected File Info: 
+                         <span style="font-weight: normal">{{selectedNode ? selectedNode.data.name + ' - ' + selectedNode.data.size + ' - ' + selectedNode.data.mediatype : 'none'}}</span>
+                         </div>
                     </ng-template>
                 </p-treeTable>
                     </div>
@@ -149,7 +159,7 @@ export class DescriptionComponent {
  accessTitles : string[] =[];
  isReferencedBy : boolean = false;
  isDocumentedBy : boolean = false;
- 
+ selectedNodes: TreeNode[];
 
  nodeSelect(event) {
     var test = this.getComponentDetails(this.record["components"],event.node.data);

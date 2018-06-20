@@ -273,13 +273,7 @@ updateRightMenu(){
      var paramid = this.route.snapshot.paramMap.get('id');
       this.files =[];
       this.route.fragment.subscribe(fragment => { this.fragment = fragment; });
-      this.router.events.subscribe((evt) => {
-        if (!(evt instanceof NavigationEnd)) {
-          return;
-        }
-        this.doScroll();
-        this.sectionScroll= null;
-      });
+      
       this.route.data.map(data => data.searchService )
       .subscribe((res)=>{
         // console.log("Test results:"+JSON.stringify(res));
@@ -299,29 +293,7 @@ updateRightMenu(){
    
   }
 
-  gototest(){
-    this.router.navigate( ['/od/id', this.record.ediid ], {fragment: 'test'});
-  }
   
-  internalRoute(page,dst){
-    console.log("TEST 1");
-    this.sectionScroll=dst;
-    this.router.navigate([page], {fragment: dst});
-}
-
-doScroll() {
-  console.log("TEST 2");
-  if (!this.sectionScroll) {
-    return;
-  }
-  try {
-    var elements = document.getElementById(this.sectionScroll);
-    elements.scrollIntoView();
-  }
-  finally{
-    this.sectionScroll = null;
-  }
-} 
 
   //This is to check if empty
   isEmptyObject(obj) {
@@ -405,35 +377,35 @@ doScroll() {
     //console.log("Files:"+JSON.stringify(this.files));
   }
 
-  createNewChildrenTree(children:any[], filepath:string){
-    let testObj:TreeNode = {};
-    testObj= this.createTreeObj(filepath.split("/")[filepath.split("/").length-1],filepath);
-    testObj.children=[];
-    for(let child of children){
-      let fname = child.filepath.split("/")[child.filepath.split("/").length-1];
-      if( child.filepath != null) {
-        if(child.children != null)
-          testObj.children.push(this.createNewChildrenTree(child.children,
-            child.filepath));
-        else
-          testObj.children.push(this.createNewFileNode(fname));
-      }
-    }
-    return testObj;
-  }
-  createNewTreeObj(label :string, data:any){
-    let testObj : TreeNode = {};
-    testObj = {};
-    testObj["label"] = label;
-    testObj["data"] = data;
-    return testObj;
-  }
+  // createNewChildrenTree(children:any[], filepath:string){
+  //   let testObj:TreeNode = {};
+  //   testObj= this.createTreeObj(filepath.split("/")[filepath.split("/").length-1],filepath);
+  //   testObj.children=[];
+  //   for(let child of children){
+  //     let fname = child.filepath.split("/")[child.filepath.split("/").length-1];
+  //     if( child.filepath != null) {
+  //       if(child.children != null)
+  //         testObj.children.push(this.createNewChildrenTree(child.children,
+  //           child.filepath));
+  //       else
+  //         testObj.children.push(this.createNewFileNode(fname));
+  //     }
+  //   }
+  //   return testObj;
+  // }
+  // createNewTreeObj(label :string, data:any){
+  //   let testObj : TreeNode = {};
+  //   testObj = {};
+  //   testObj["label"] = label;
+  //   testObj["data"] = data;
+  //   return testObj;
+  // }
   
-  createNewFileNode(label :string){
-    let endFileNode:TreeNode = {};
-    endFileNode["label"] = label;
-    return endFileNode;
-  }
+  // createNewFileNode(label :string){
+  //   let endFileNode:TreeNode = {};
+  //   endFileNode["label"] = label;
+  //   return endFileNode;
+  // }
 
 
   /////This is to create a tree structure::
@@ -441,44 +413,45 @@ doScroll() {
     const tree = [];
     // This example uses the underscore.js library.
     var i = 0;
+    // console.log(paths);
     paths.forEach((path) => {
-      if(i == 0) console.log("");
-     else{
-      // console.log(i+"."+path.filepath);
-      path.filepath = "/"+path.filepath;
-    const pathParts = path.filepath.split('/');
-    pathParts.shift(); // Remove first blank element from the parts array.
-    
-    let currentLevel = tree; // initialize currentLevel to root
-    
-    pathParts.forEach((part) => {
-    
-    // check to see if the path already exists.
-    const existingPath = currentLevel.filter(level => level.data.name === part);
-     
-    if (existingPath.length > 0) {
-    // The path to this item was already in the tree, so don't add it again.
-    // Set the current level to this path's children
-    currentLevel = existingPath[0].children;
-    } else {
-  
-
-    const newPart = {
-      data : {
-        name : part
-      },children: []
-    };
-    currentLevel.push(newPart);
-    currentLevel = newPart.children;
-    }
-    });
+      
+      if(i != 0) 
+      {
+        // console.log("path :"+JSON.stringify(path));
+        path.filepath = "/"+path.filepath;
+        const pathParts = path.filepath.split('/');
+        pathParts.shift(); // Remove first blank element from the parts array.
+        let currentLevel = tree; // initialize currentLevel to root
+        pathParts.forEach((part) => {
+         
+          // check to see if the path already exists.
+          const existingPath = currentLevel.filter(level => level.data.name === part);
+          
+          if (existingPath.length > 0) {
+            // The path to this item was already in the tree, so don't add it again.
+            // Set the current level to this path's children
+            currentLevel = existingPath[0].children;
+          } else {
+           
+            const newPart = {
+              data : {
+                name : part,
+                mediatype: path.mediaType,
+                size: path.size,
+                downloadUrl: path.downloadURL
+              },children: []
+            };
+            currentLevel.push(newPart);
+            currentLevel = newPart.children;
+          }
+        });
+      }
+      i= i+1;
+   });
+   //console.log("Return tree"+ JSON.stringify(tree));
+   return tree;
   }
-  i= i+1;
-    });
-    
-    //console.log("Return tree"+ JSON.stringify(tree));
-    return tree;
-    }
 
   clicked = false;
   expandClick(){
