@@ -45,11 +45,12 @@ export class SearchService {
   }
 
   searchById(searchValue:string){
-    
     if (_.includes(this.landingBackend,'rmm') && _.includes(searchValue,'ark'))
       this.landingBackend = this.landingBackend+'records?@id=';
     else if(_.includes(this.landingBackend,'rmm'))
       this.landingBackend = this.landingBackend+'records/'; 
+
+    console.log("Test RMM service call: "+this.landingBackend);
     return this.http.get(this.landingBackend+ searchValue);
   }
 

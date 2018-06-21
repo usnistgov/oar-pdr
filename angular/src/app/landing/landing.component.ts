@@ -5,10 +5,11 @@ import { FormBuilder, FormGroup } from '@angular/forms';
 import { BrowserModule ,Title} from '@angular/platform-browser';
 import { ActivatedRoute, Router, NavigationEnd }     from '@angular/router';
 import { Message } from 'primeng/components/common/api';
-import { MenuItem,OverlayPanelModule,
-         FieldsetModule,PanelModule,ContextMenuModule,
-         MenuModule, DialogModule,SelectItem } from 'primeng/primeng';
+import { OverlayPanelModule,FieldsetModule,PanelModule,ContextMenuModule,
+         DialogModule,SelectItem } from 'primeng/primeng';
+import { MenuModule } from 'primeng/menu';
 import { TreeTableModule } from 'primeng/treetable';
+ import { MenuItem } from 'primeng/api';
 import { TreeNode } from 'primeng/api';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import * as _ from 'lodash';
@@ -85,8 +86,6 @@ export class LandingComponent implements OnInit {
       this.rmmApi = this.appConfig.getConfig().RMMAPI;
       this.distApi = this.appConfig.getConfig().DISAPI;
       this.landing = this.appConfig.getConfig().LANDING;
-
-      
     }
 
    /**
@@ -356,57 +355,12 @@ updateRightMenu(){
 
 
   createNewDataHierarchy(){
-   
-    // if (this.record['dataHierarchy'] == null )
-    //   return;
-    // for(let fields of this.record['dataHierarchy']){
-    //   var testdata = {};
-    //   console.log("fields:"+JSON.stringify(fields));
-    //   if( fields.filepath != null) {
-    //     if(fields.children != null)
-    //     this.files.push( this.createNewChildrenTree(fields.children,fields.filepath));
-    //     else{
-    //     testdata["data"] = this.createNewFileNode(fields.filepath);
-    //     this.files.push(testdata);
-    //     }
-    //   }
-    // }
     var testdata = {}
     testdata["data"] = this.arrangeIntoTree(this.record['components']);
     this.files.push(testdata);
-    //console.log("Files:"+JSON.stringify(this.files));
   }
 
-  // createNewChildrenTree(children:any[], filepath:string){
-  //   let testObj:TreeNode = {};
-  //   testObj= this.createTreeObj(filepath.split("/")[filepath.split("/").length-1],filepath);
-  //   testObj.children=[];
-  //   for(let child of children){
-  //     let fname = child.filepath.split("/")[child.filepath.split("/").length-1];
-  //     if( child.filepath != null) {
-  //       if(child.children != null)
-  //         testObj.children.push(this.createNewChildrenTree(child.children,
-  //           child.filepath));
-  //       else
-  //         testObj.children.push(this.createNewFileNode(fname));
-  //     }
-  //   }
-  //   return testObj;
-  // }
-  // createNewTreeObj(label :string, data:any){
-  //   let testObj : TreeNode = {};
-  //   testObj = {};
-  //   testObj["label"] = label;
-  //   testObj["data"] = data;
-  //   return testObj;
-  // }
   
-  // createNewFileNode(label :string){
-  //   let endFileNode:TreeNode = {};
-  //   endFileNode["label"] = label;
-  //   return endFileNode;
-  // }
-
 
   /////This is to create a tree structure::
   private arrangeIntoTree(paths) {

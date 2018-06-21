@@ -2,7 +2,6 @@ import { Component, Input,ChangeDetectorRef ,Inject, Injectable,PLATFORM_ID} fro
 import { isPlatformBrowser } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { LandingComponent } from './landing.component';
-import { MenuItem } from 'primeng/primeng';
 import { TreeTableModule} from 'primeng/treetable';
 import { TreeNode} from 'primeng/api';
 
@@ -11,15 +10,15 @@ import { TreeNode} from 'primeng/api';
   styleUrls: ['landing.component.css'],
   selector: 'description-resources',
   template: `
-          <!--div class="ui-g">
-          <div class = "ui-g-12 ui-md-12 ui-lg-12 ui-sm-12"-->
-          <h3 id="description" name="desscription"><b>Description</b></h3>
+        <!--div class="ui-g">
+        <div class = "ui-g-12 ui-md-12 ui-lg-12 ui-sm-12"-->
+        <h3 id="description" name="desscription"><b>Description</b></h3>
           <i *ngIf="loginuser" style="float:right" class="faa faa-edit"></i>
-                <div contenteditable="true" id="recordDescription" class="well welldesc">
-                <p  *ngFor="let topic of record['description']; let i =index">
-                {{ record["description"][i] }}
-                </p>
-                </div>
+          <div contenteditable="true" id="recordDescription" class="well welldesc">
+            <p  *ngFor="let topic of record['description']; let i =index">
+              {{ record["description"][i] }}
+            </p>
+        </div>
 
             <div *ngIf="checkTopics()">
             <strong contenteditable="{{editContent}}" >Research Topics:</strong>
@@ -61,13 +60,20 @@ import { TreeNode} from 'primeng/api';
             
             
             </div> 
-            <div *ngIf="files.length != 0">           
-                <h3 id="files" name="files"><b>Files</b>
-                   <a href="{{distdownload}}" class="faa faa-file-archive-o" title="Download All Files" ></a>
-                </h3> <i *ngIf="loginuser" style="float:right" class="faa faa-edit"></i>
+            <div *ngIf="files.length != 0">        
+                <h4 id="files" name="files"><b></b>
+                   
+                </h4> <i *ngIf="loginuser" style="float:right" class="faa faa-edit"></i>
                 <div class="ui-g">
                     <div class="ui-g-12 ui-md-12 ui-lg-12 ui-sm-12">
                     <p-treeTable [value]="files" [resizableColumns]="true" selectionMode="single" [(selection)]="selectedNode">
+                    <ng-template pTemplate="caption">
+                        <div style="text-align:left">
+                        <span style="margin-left: .25em; vertical-align: middle">Files</span>
+                        <span style="vertical-align: middle; float: right">
+                            <a href="{{distdownload}}" class="faa faa-file-archive-o" style="color:white;" title="Download All Files" ></a></span>   
+                         </div>
+                    </ng-template>
                     <ng-template pTemplate="header">
                         <tr>
                             <th ttResizableColumn style="width:500px">Name</th>
@@ -93,8 +99,8 @@ import { TreeNode} from 'primeng/api';
                     </ng-template>
                 </p-treeTable>
                     </div>
-                    <div class="ui-g-6 ui-md-6 ui-lg-6 ui-sm-12">
-                        <div *ngIf="isBrowser" ng2-sticky>
+                    <!-- div class="ui-g-6 ui-md-6 ui-lg-6 ui-sm-12">
+                        <div>
                             <div *ngIf="isFileDetails">
                                 <filedetails-resources [fileDetails]="fileDetails"></filedetails-resources>
                             </div>
@@ -106,10 +112,10 @@ import { TreeNode} from 'primeng/api';
                                 </div>         
                             </div>
                         </div>
-                    </div>
+                    </div -->
                 </div>
             </div>
-          
+            <br>
             <div *ngIf="checkReferences()">
              <h3 id="reference" name="reference"><b>References:</b></h3>
                 <span *ngIf="isDocumentedBy"> 
@@ -259,7 +265,5 @@ checkReferences(){
 
  }
  constructor(private cdr: ChangeDetectorRef, private http: HttpClient) {
-        
-    
-    } 
+ } 
 }

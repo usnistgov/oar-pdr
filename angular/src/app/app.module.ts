@@ -7,10 +7,11 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { HttpClientModule, HttpClient } from '@angular/common/http'; 
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { Collaspe } from './landing/collapseDirective/collapse.directive';
-import { ButtonModule, DropdownModule, AccordionModule, PanelMenuModule,MenuItem,
+import { ButtonModule, DropdownModule, AccordionModule, PanelMenuModule,
          AutoCompleteModule, MessagesModule, MultiSelectModule, DataTableModule, 
-         DataListModule,ContextMenuModule, MenuModule,OverlayPanelModule, 
+         DataListModule,ContextMenuModule,OverlayPanelModule, 
          FieldsetModule, PanelModule ,DialogModule } from 'primeng/primeng';
+import { MenuModule } from 'primeng/menu';
 import { AppComponent } from './app.component';
 import { AppRoutingModule } from './app-routing.module';
 import { LandingComponent } from './landing/landing.component';
@@ -29,7 +30,6 @@ import { SearchService } from './shared/search-service/index';
 import { CommonVarService } from './shared/common-var/index';
 import { AppConfig } from './shared/config-service/config.service';
 import { TreeTableModule } from 'primeng/treetable';
-import { Ng2StickyModule } from 'ng2-sticky';
 import { AppShellNoRenderDirective } from './directives/app-shell-no-render.directive';
 import { AppShellRenderDirective } from './directives/app-shell-render.directive';
 
@@ -46,7 +46,7 @@ const appInitializerFn = (appConfig: AppConfig) => {
     MetadataComponent,FileDetailsComponent,DescriptionComponent, 
     KeyValuePipe, MetadataView, NoidComponent,NerdmComponent,
     ErrorComponent,UserErrorComponent,
-    Collaspe,
+    Collaspe,  
     AppShellNoRenderDirective,
     AppShellRenderDirective 
   ],
@@ -60,10 +60,9 @@ const appInitializerFn = (appConfig: AppConfig) => {
     HttpClientModule,
     CommonModule, SharedModule, AccordionModule,AutoCompleteModule,MessagesModule,
     MultiSelectModule,DropdownModule,DataTableModule, DataListModule, PanelMenuModule,
-    DialogModule,ContextMenuModule,MenuModule,OverlayPanelModule, FieldsetModule, 
+    DialogModule,ContextMenuModule,MenuModule, OverlayPanelModule, FieldsetModule, 
     PanelModule,BrowserAnimationsModule, FormsModule, ButtonModule,
     TreeTableModule,
-    Ng2StickyModule,
     NgbModule.forRoot()
   ],
   exports: [Collaspe],

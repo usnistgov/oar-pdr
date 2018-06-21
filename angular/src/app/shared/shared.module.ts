@@ -9,7 +9,7 @@ import { CommonVarService } from './common-var/index';
  
 import { InputTextModule, DropdownModule, ButtonModule, SplitButtonModule, MenubarModule,
  PanelModule, DataTableModule, DialogModule, AutoCompleteModule, MultiSelectModule,
- PaginatorModule, CalendarModule, TabViewModule,MenuModule,MenuItem } from 'primeng/primeng';
+ PaginatorModule, CalendarModule, TabViewModule,MenuModule } from 'primeng/primeng';
 
 
 /**

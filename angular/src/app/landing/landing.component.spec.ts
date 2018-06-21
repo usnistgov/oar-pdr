@@ -11,7 +11,7 @@
 // import {DescriptionComponent} from './description.component';
 // import { MetadataComponent } from './metadata/metadata.component';
 // import { FileDetailsComponent } from './fileDetails/filedetails.component';
-// // import { Ng2StickyModule } from 'ng2-sticky';
+
 // import { FormsModule } from '@angular/forms';
 // import { CUSTOM_ELEMENTS_SCHEMA,NO_ERRORS_SCHEMA } from '@angular/core';
 // import { HttpModule } from '@angular/http';

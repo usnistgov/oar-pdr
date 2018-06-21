@@ -1,11 +1,10 @@
 import { Component, OnInit, AfterViewInit, ElementRef } from '@angular/core';
 import { Location } from '@angular/common';
 import { TreeModule,TreeNode, Tree, OverlayPanelModule,
-  FieldsetModule,PanelModule,ContextMenuModule,
-  MenuModule,MenuItem } from 'primeng/primeng';
-
+  FieldsetModule,PanelModule,ContextMenuModule } from 'primeng/primeng';
+  import {MenuModule} from 'primeng/menu';
   import { CommonVarService } from "../common-var/index";  
-// import { environment } from '../../environment';
+  import { AppConfig } from '../config-service/config.service';
 
 /**
  * This class represents the headbar component.
@@ -27,14 +26,16 @@ export class HeadbarComponent {
   layoutMode: string = 'horizontal';
   darkMenu: boolean = false;
   profileMode: string = 'inline';
-  SDPAPI : string = "environment.SDPAPI";
-  landingService : string = "environment.LANDING";
+  SDPAPI : string ;
+  landingService : string ;
   internalBadge: boolean = false;
-  topmenu: MenuItem[];
-  loginuser = false;
 
-  constructor( private el: ElementRef, private commonVar : CommonVarService) {
-    this.createTopMenu();
+
+  constructor( private el: ElementRef, private commonVar : CommonVarService,private appConfig : AppConfig,) {
+    
+    this.SDPAPI = this.appConfig.getConfig().SDPAPI;
+    this.landingService = this.appConfig.getConfig().LANDING;
+  
   }
   
   checkinternal() {
@@ -43,21 +44,4 @@ export class HeadbarComponent {
     return this.internalBadge;
   }
 
-  createTopMenu(){
-    this.topmenu = [
-      {label:"About"},
-      {label:"Search"},
-      {label:"Login"}  ];
-  }
-  
-  login(){
-    //alert(this.loginuser);
-    // this.commonVar.setLogin(!this.loginuser);
-    this.commonVar.userConfig(!this.loginuser);
-    //this.loginuser = this.commonVar.getLogin();
-    this.commonVar.userObservable.subscribe(value => {
-      this.loginuser = value;
-      console.log(this.loginuser);
-    })
-  }
 }

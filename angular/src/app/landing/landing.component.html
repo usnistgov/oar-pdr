@@ -16,8 +16,7 @@
 
   
   <div class="ui-grid ui-grid-responsive ui-grid-pad center">
-    <div class="card landingcard">
-   <a id="test"></a>
+  <div class="card landingcard">
   <div *ngIf="record?.length == 0 || isId === false">
       <div class="ui-g">
          <div class="ui-g-10 ui-md-10 ui-lg-10 ui-sm-12" style="padding-left: 1%">
@@ -37,6 +36,10 @@
                           <b *ngSwitchCase="'nrdp:PublicDataResource'">Public Data Resource</b>
                           <b *ngSwitchDefault></b>
                       </span><br>
+                      <div  *ngIf="record.length !== 0" class="ui-sm-1 visible-xs-block visible-sm-block ">
+                            <button style="float: right" type="button" pButton icon="faa faa-list" (click)="menu3.toggle($event)"></button>
+                             <p-menu #menu3 class="rightMenuStylePop" popup="popup" [model]="rightmenu"></p-menu>
+                        </div>
                       <span class="title" style="text-align: left; vertical-align: top; ">
                           <h2>{{record.title}}</h2>
                       </span>
@@ -105,10 +108,7 @@
                           <span class="" *ngIf="record.modified"> Last modified: <strong>{{record.modified}}</strong></span>
                       </div>
                   </div>
-                  <div  *ngIf="record.length !== 0" class="ui-sm-1 visible-xs-block visible-sm-block ">
-                      <button type="button" pButton icon="faa faa-list" (click)="menu3.toggle($event)"></button>
-                       <p-menu #menu3 class="rightMenuStyle" popup="popup" [model]="rightmenu"></p-menu>
-                  </div>
+                 
               </div>
               <div class="ui-g">
                   <div *appShellNoRender class="ui-g-12 ui-md-12 ui-lg-12 ui-sm-12">
@@ -133,19 +133,15 @@
               </div>
           </div>
           <div class="ui-g-2 ui-md-2 ui-lg-2 ui-sm-12">
-              <div class="ui-g"  *ngIf="isBrowser" ng2-sticky>
+              <div class="ui-g" style=" position: fixed;">
                   <div class="ui-g-12 ui-md-12 ui-lg-12 ui-sm-12">
                      <div class="visible-lg-block visible-md-block ">
                           <p-menu  class="rightMenuStyle" [model]="rightmenu"></p-menu>
                      </div>
                   </div>
               </div>
-              
-            </div>
-            <a (click)="internalRoute('/od/id/3A1EE2F169DD3B8CE0531A570681DB5D1491','test')">Info</a>
-            <!-- <button (click)="gototest()">Go to anchor</button> -->
-            <!-- <a [routerLink]="['/od/id/{{record['@id']}}']" fragment="Test">Jump to 'Test' anchor </a> -->
-      </div>
+           </div>
+        </div>
    </div>
   </div>
 </div>
