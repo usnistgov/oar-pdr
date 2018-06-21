@@ -235,11 +235,11 @@ export class DatacartComponent implements OnInit, OnDestroy {
 
         this.getDataCartList();
         this.createDataCartHierarchy();
-        /**
+
         if (this.cartEntities.length > 0) {
             this.dataFiles[0].expanded = true;
         }
-        **/
+
         this.cartService.setCartLength(this.cartEntities.length);
         this.selectedData.length = 0;
         this.dataFileCount();
