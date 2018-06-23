@@ -1,18 +1,12 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<svg width="345px" height="46px" viewBox="0 0 345 46" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-    <!-- Generator: sketchtool 39 (31667) - http://www.bohemiancoding.com/sketch -->
-    <title>EEBCA5E5-F8F5-4E17-A4D5-F06CE98FC49B</title>
-    <desc>Created with sketchtool.</desc>
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="345px" height="33px" viewBox="0 0 345 33" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 46.1 (44463) - http://www.bohemiancoding.com/sketch -->
+    <title>views</title>
+    <desc>Created with Sketch.</desc>
     <defs></defs>
-    <g id="Ultima-Dashboard" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-        <g id="Desktop-HD-Dark-Menu" transform="translate(-719.000000, -262.000000)" fill="#F1B606">
-            <g id="Content" transform="translate(359.000000, 153.000000)">
-                <g id="Row-1">
-                    <g id="View" transform="translate(360.000000, 0.000000)">
-                        <polygon id="View---Graph" points="0.0225219727 129.140258 39.1920873 109.854896 77.4552702 134.566356 120.848201 120.835141 141.875431 145.036112 179.398352 133.321645 188.534038 124.02885 208.614239 136.532685 237.707011 118.504853 253.976992 146.969354 292.626879 116.510163 323.970427 147.954094 344.981873 127.825769 344.981873 154.961608 0.0225219727 154.961608"></polygon>
-                    </g>
-                </g>
-            </g>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="views" fill-rule="nonzero" fill="#F1B606">
+            <polygon id="View---Graph" points="0.0225219727 7.140258 37.1365543 23.036112 70.6658776 23.036112 110.447735 2.02885 138.129311 21.9781904 165.185783 21.9781904 185.758949 7.140258 208.468073 10.4679124 234.523782 0.702249592 260.211299 17.3955882 291.240206 0.702249592 323.970427 25.954094 344.981873 5.825769 344.981873 32.961608 0.0225219727 32.961608"></polygon>
         </g>
     </g>
 </svg>

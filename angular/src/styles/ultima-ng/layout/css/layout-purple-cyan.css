@@ -156,10 +156,12 @@
   -moz-box-shadow: 0 19px 38px rgba(0, 0, 0, 0.3), 0 15px 12px rgba(0, 0, 0, 0.22);
   box-shadow: 0 19px 38px rgba(0, 0, 0, 0.3), 0 15px 12px rgba(0, 0, 0, 0.22); }
 
-.ui-g.form-group > div {
-  padding: 1em; }
-.ui-g.form-group-m > div {
-  padding: 1em; }
+.ui-g {
+  -ms-flex-wrap: wrap; }
+  .ui-g.form-group > div {
+    padding: 1em; }
+  .ui-g.form-group-m > div {
+    padding: 1em; }
 
 /* Ripple */
 /* Ripple Effect Style like Google Material Buttons Effect*/
@@ -212,55 +214,53 @@
     opacity: 0;
     transform: scale(2.5); } }
 .splash-screen {
+  width: 100%;
+  min-height: 100%;
   background-color: #3F51B5;
-  height: 100%; }
-  .splash-screen .splash-container {
-    padding-top: 250px;
-    width: 250px;
-    margin: 0 auto;
-    text-align: center; }
-  .splash-screen .logo {
-    display: inline-block;
-    vertical-align: middle;
-    width: 200px;
-    height: 30px;
-    background: url("../images/logo2x.png") top left no-repeat;
-    background-size: 200px 30px; }
-  .splash-screen .load-bar {
-    position: relative;
-    margin-top: 20px;
-    width: 100%;
-    height: 6px;
-    background-color: #ffffff; }
-  .splash-screen .bar {
-    content: "";
-    display: inline;
-    position: absolute;
-    width: 0;
-    height: 100%;
-    left: 50%;
-    text-align: center; }
-  .splash-screen .bar:nth-child(1) {
-    background-color: #E91E63;
-    animation: loading 3s linear infinite; }
-  .splash-screen .bar:nth-child(2) {
-    background-color: #8BC34A;
-    animation: loading 3s linear 1s infinite; }
-  .splash-screen .bar:nth-child(3) {
-    background-color: #FFC107;
-    animation: loading 3s linear 2s infinite; }
-@keyframes loading {
-  from {
-    left: 50%;
-    width: 0;
-    z-index: 100; }
-  33.3333% {
-    left: 0;
-    width: 100%;
-    z-index: 10; }
-  to {
-    left: 0;
-    width: 100%; } }
+  position: absolute; }
+
+.splash-loader-container {
+  text-align: center;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  margin-left: -32px;
+  margin-top: -32px; }
+
+.splash-loader {
+  animation: rotator 1.4s linear infinite; }
+
+@keyframes rotator {
+  0% {
+    transform: rotate(0deg); }
+  100% {
+    transform: rotate(270deg); } }
+.splash-path {
+  stroke-dasharray: 187;
+  stroke-dashoffset: 0;
+  transform-origin: center;
+  animation: dash 1.4s ease-in-out infinite, colors 5.6s ease-in-out infinite; }
+
+@keyframes colors {
+  0% {
+    stroke: #4285F4; }
+  25% {
+    stroke: #DE3E35; }
+  50% {
+    stroke: #F7C223; }
+  75% {
+    stroke: #1B9A59; }
+  100% {
+    stroke: #4285F4; } }
+@keyframes dash {
+  0% {
+    stroke-dashoffset: 187; }
+  50% {
+    stroke-dashoffset: 46.75;
+    transform: rotate(135deg); }
+  100% {
+    stroke-dashoffset: 187;
+    transform: rotate(450deg); } }
 .dashboard .overview {
   padding: 0 !important;
   min-height: 140px;
@@ -522,10 +522,6 @@
   .login-panel .ui-button.secondary:focus {
     outline: 0 none;
     background-color: #08e3ff; }
-  .login-panel .ui-inputtext:focus {
-    border-width: 0 0 2px 0;
-    border-color: #673AB7;
-    padding-bottom: 0px; }
 
 .login-footer {
   position: absolute;
@@ -913,7 +909,7 @@ body {
   padding: 0;
   margin: 0;
   background-color: #f7f7f7;
-  height: 100%; }
+  min-height: 100%; }
   body a {
     text-decoration: none; }
 
@@ -1026,10 +1022,10 @@ body {
       -webkit-transition: all 0.3s;
       transition: all 0.3s; }
       .layout-container .topbar .topbar-right #topbar-menu-button i, .layout-container .topbar .topbar-right #rightpanel-menu-button i {
-        -moz-transition: color 0.5s;
-        -o-transition: color 0.5s;
-        -webkit-transition: color 0.5s;
-        transition: color 0.5s;
+        -moz-transition: color 0.3s;
+        -o-transition: color 0.3s;
+        -webkit-transition: color 0.3s;
+        transition: color 0.3s;
         font-size: 36px; }
     .layout-container .topbar .topbar-right #rightpanel-menu-button {
       display: block; }
@@ -1040,24 +1036,22 @@ body {
       top: -10px;
       font-size: 16px;
       background-color: transparent;
-      border-width: 0 0 1px 0;
-      padding: 2px 2px 1px 2px;
-      border-color: #ffffff;
+      background-image: linear-gradient(to bottom, #ffffff, #ffffff), linear-gradient(to bottom, #ae94dd, #ae94dd);
+      border-width: 0;
+      padding: 2px;
       color: #ffffff; }
       .layout-container .topbar .topbar-right .topbar-items .search-item input:focus {
-        outline: 0 none;
-        border-bottom-width: 2px; }
+        outline: 0 none; }
     .layout-container .topbar .topbar-right .topbar-items .search-item input:focus ~ label {
       top: -5px;
-      font-size: 12px;
-      color: #673AB7; }
+      font-size: 12px; }
     .layout-container .topbar .topbar-right .topbar-items .search-item input.ui-state-filled ~ label {
       display: none; }
     .layout-container .topbar .topbar-right .topbar-items .search-item label {
       color: #ffffff;
       top: 8px; }
 .layout-container .layout-menu {
-  overflow: auto;
+  overflow: visible;
   position: fixed;
   width: 250px;
   z-index: 99;
@@ -1071,21 +1065,21 @@ body {
   -o-transition: margin-left 0.3s;
   -webkit-transition: margin-left 0.3s;
   transition: margin-left 0.3s; }
-  .layout-container .layout-menu > .nano > .nano-content.menu-scroll-content {
-    display: block;
-    height: 100%;
-    position: relative;
-    overflow: scroll;
-    overflow-x: hidden; }
-  .layout-container .layout-menu > .nano > .nano-content ul.ultima-menu.ultima-main-menu {
-    margin-top: 16px;
-    padding-bottom: 120px; }
-  .layout-container .layout-menu > .nano .nano-pane {
-    background: transparent; }
-    .layout-container .layout-menu > .nano .nano-pane .nano-slider {
+  .layout-container .layout-menu .ui-scrollpanel {
+    background: transparent;
+    border-radius: 0;
+    border: none; }
+    .layout-container .layout-menu .ui-scrollpanel .ui-scrollpanel-bar {
       background-color: #aaaaaa;
       opacity: 0.3;
       filter: alpha(opacity=30); }
+    .layout-container .layout-menu .ui-scrollpanel .ui-scrollpanel-hidden {
+      display: block;
+      visibility: hidden; }
+    .layout-container .layout-menu .ui-scrollpanel .ui-scrollpanel-content {
+      overflow-x: hidden; }
+    .layout-container .layout-menu .ui-scrollpanel .layout-menu {
+      padding-bottom: 120px; }
   .layout-container .layout-menu .profile {
     box-sizing: border-box;
     padding-top: 2em;
@@ -1137,6 +1131,9 @@ body {
         color: #ffffff; }
     .layout-container .layout-menu.layout-menu-dark .profile-menu {
       border-bottom: 1px solid #545454; }
+    .layout-container .layout-menu.layout-menu-dark .ui-scrollpanel .ui-scrollpanel-wrapper .ui-scrollpanel-content {
+      border-radius: 0;
+      border: none; }
     .layout-container .layout-menu.layout-menu-dark ul.ultima-menu li a {
       color: #ffffff; }
       .layout-container .layout-menu.layout-menu-dark ul.ultima-menu li a i {
@@ -1161,7 +1158,7 @@ body {
           color: #212121; }
   .layout-container .layout-menu .menuitem-badge {
     position: absolute;
-    right: 2em;
+    right: 3.5em;
     top: .75em;
     display: inline-block;
     width: 1em;
@@ -1234,21 +1231,73 @@ body {
     -ms-transform: rotate(180deg);
     transform: rotate(180deg); }
 .layout-container .layout-main {
-  padding: 96px 16px 16px 16px;
+  padding: 75px 0 0 0;
   -moz-transition: margin-left 0.3s;
   -o-transition: margin-left 0.3s;
   -webkit-transition: margin-left 0.3s;
   transition: margin-left 0.3s; }
+  .layout-container .layout-main .layout-content {
+    padding: 16px; }
 .layout-container .layout-mask {
   display: none; }
+.layout-container .layout-breadcrumb {
+  background-color: #ffffff;
+  box-shadow: inset 0 -2px 4px 0 rgba(0, 0, 0, 0.14);
+  -webkit-box-shadow: inset 0 -2px 4px 0 rgba(0, 0, 0, 0.14);
+  -moz-box-shadow: inset 0 -2px 4px 0 rgba(0, 0, 0, 0.14);
+  min-height: 42px; }
+  .layout-container .layout-breadcrumb:before, .layout-container .layout-breadcrumb:after {
+    content: "";
+    display: table; }
+  .layout-container .layout-breadcrumb:after {
+    clear: both; }
+  .layout-container .layout-breadcrumb ul {
+    margin: 8px 0 0 0;
+    padding: 0 0 0 20px;
+    list-style: none;
+    color: #757575;
+    display: inline-block; }
+    .layout-container .layout-breadcrumb ul li {
+      display: inline-block;
+      vertical-align: top;
+      color: #757575; }
+      .layout-container .layout-breadcrumb ul li:nth-child(even) {
+        font-size: 20px; }
+      .layout-container .layout-breadcrumb ul li:first-child(even) {
+        color: #673AB7; }
+      .layout-container .layout-breadcrumb ul li a {
+        color: #757575; }
+  .layout-container .layout-breadcrumb .layout-breadcrumb-options {
+    float: right;
+    padding: 0px 20px 0 0;
+    height: 100%; }
+    .layout-container .layout-breadcrumb .layout-breadcrumb-options a {
+      color: #757575;
+      display: inline-block;
+      width: 42px;
+      height: 42px;
+      line-height: 42px;
+      text-align: center;
+      -moz-transition: background-color 0.3s;
+      -o-transition: background-color 0.3s;
+      -webkit-transition: background-color 0.3s;
+      transition: background-color 0.3s; }
+      .layout-container .layout-breadcrumb .layout-breadcrumb-options a:hover {
+        background-color: #e8e8e8; }
+      .layout-container .layout-breadcrumb .layout-breadcrumb-options a i {
+        line-height: inherit; }
 .layout-container .ultima-menu {
   margin: 0;
   padding: 0;
-  list-style: none; }
+  list-style: none;
+  width: 268px; }
+  .layout-container .ultima-menu.ultima-main-menu {
+    margin-top: 16px;
+    padding-bottom: 120px; }
   .layout-container .ultima-menu li a {
     font-size: 1em;
     display: block;
-    padding: .5em 1em;
+    padding: .5em 2.5em .5em 1em;
     color: #212121;
     width: 100%;
     box-sizing: border-box;
@@ -1303,7 +1352,7 @@ body {
     list-style: none;
     overflow: hidden; }
     .layout-container .ultima-menu li ul li a {
-      padding: .5em 1em .5em 2em; }
+      padding: .5em 2.5em .5em 2em; }
       .layout-container .ultima-menu li ul li a > span {
         font-size: 15px; }
       .layout-container .ultima-menu li ul li a i:first-child {
@@ -1340,10 +1389,11 @@ body {
       display: inline-block; }
 .layout-container .layout-rightpanel {
   position: fixed;
-  top: 64px;
+  top: 75px;
   height: 100%;
   right: -240px;
   width: 240px;
+  z-index: 100;
   background-color: #ffffff;
   -webkit-box-sizing: border-box;
   -moz-box-sizing: border-box;
@@ -1358,21 +1408,19 @@ body {
   .layout-container .layout-rightpanel.layout-rightpanel-active {
     right: 0;
     -webkit-transition-timing-function: cubic-bezier(0.86, 0, 0.07, 1);
-    transition-timing-function: cubic-bezier(0.86, 0, 0.07, 1);
-    z-index: 10; }
+    transition-timing-function: cubic-bezier(0.86, 0, 0.07, 1); }
   .layout-container .layout-rightpanel .layout-rightpanel-content {
-    padding: 14px; }
-  .layout-container .layout-rightpanel .nano .right-panel-scroll-content {
-    display: block;
-    height: 100%;
-    position: relative; }
-    .layout-container .layout-rightpanel .nano .right-panel-scroll-content .layout-rightpanel-content {
-      padding-bottom: 120px; }
-  .layout-container .layout-rightpanel .nano > .nano-pane {
-    background: transparent; }
-    .layout-container .layout-rightpanel .nano > .nano-pane > .nano-slider {
-      background: #aaa;
-      opacity: .3; }
+    padding: 14px;
+    padding-bottom: 120px; }
+  .layout-container .layout-rightpanel .ui-scrollpanel {
+    border-radius: 0;
+    border: none; }
+    .layout-container .layout-rightpanel .ui-scrollpanel .ui-scrollpanel-hidden {
+      display: block;
+      visibility: hidden; }
+    .layout-container .layout-rightpanel .ui-scrollpanel .layout-rightpanel-wrapper {
+      width: 258px;
+      padding-right: 18px; }
 
 .ajax-loader {
   font-size: 2em;
@@ -1428,9 +1476,9 @@ body {
         -webkit-box-shadow: 0 6px 20px 0 rgba(0, 0, 0, 0.19), 0 8px 17px 0 rgba(0, 0, 0, 0.2);
         -moz-box-shadow: 0 6px 20px 0 rgba(0, 0, 0, 0.19), 0 8px 17px 0 rgba(0, 0, 0, 0.2);
         box-shadow: 0 6px 20px 0 rgba(0, 0, 0, 0.19), 0 8px 17px 0 rgba(0, 0, 0, 0.2);
-        -webkit-animation-duration: .5s;
-        -moz-animation-duration: .5s;
-        animation-duration: .5s; }
+        -webkit-animation-duration: 0.3s;
+        -moz-animation-duration: 0.3s;
+        animation-duration: 0.3s; }
       .layout-container .topbar-items > li.active-top-menu > ul {
         display: block; }
       .layout-container .topbar-items > li .topbar-message img {
@@ -1474,77 +1522,74 @@ body {
     box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.26);
     -webkit-box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.26);
     -moz-box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.26); }
-    .layout-container.menu-layout-horizontal .layout-menu > .nano {
-      overflow: visible; }
-      .layout-container.menu-layout-horizontal .layout-menu > .nano .nano-content.menu-scroll-content {
-        display: inherit;
-        height: auto;
-        position: static;
-        overflow: visible;
-        overflow-x: visible; }
-      .layout-container.menu-layout-horizontal .layout-menu > .nano .nano-content ul.ultima-menu.ultima-main-menu {
-        margin-top: 0px;
-        padding-bottom: 0px; }
-      .layout-container.menu-layout-horizontal .layout-menu > .nano .nano-pane {
-        display: none !important; }
-    .layout-container.menu-layout-horizontal .layout-menu ul.ultima-menu.ultima-main-menu {
-      margin-top: 0; }
-    .layout-container.menu-layout-horizontal .layout-menu ul.ultima-menu > li {
-      float: left;
-      position: relative; }
-      .layout-container.menu-layout-horizontal .layout-menu ul.ultima-menu > li > a {
-        color: #ffffff; }
-        .layout-container.menu-layout-horizontal .layout-menu ul.ultima-menu > li > a i {
+    .layout-container.menu-layout-horizontal .layout-menu .ui-scrollpanel {
+      overflow: visible;
+      border: none; }
+      .layout-container.menu-layout-horizontal .layout-menu .ui-scrollpanel .ui-scrollpanel-wrapper {
+        overflow: visible; }
+        .layout-container.menu-layout-horizontal .layout-menu .ui-scrollpanel .ui-scrollpanel-wrapper .ui-scrollpanel-content {
+          overflow: visible; }
+    .layout-container.menu-layout-horizontal .layout-menu ul.ultima-menu {
+      width: 100%; }
+      .layout-container.menu-layout-horizontal .layout-menu ul.ultima-menu.ultima-main-menu {
+        margin-top: 0;
+        padding-bottom: 0; }
+      .layout-container.menu-layout-horizontal .layout-menu ul.ultima-menu > li {
+        float: left;
+        position: relative; }
+        .layout-container.menu-layout-horizontal .layout-menu ul.ultima-menu > li > a {
+          padding: .5em 1em;
           color: #ffffff; }
-        .layout-container.menu-layout-horizontal .layout-menu ul.ultima-menu > li > a:hover {
-          background-color: #e8e8e8;
-          color: #212121; }
-          .layout-container.menu-layout-horizontal .layout-menu ul.ultima-menu > li > a:hover i {
+          .layout-container.menu-layout-horizontal .layout-menu ul.ultima-menu > li > a i {
+            color: #ffffff; }
+          .layout-container.menu-layout-horizontal .layout-menu ul.ultima-menu > li > a:hover {
+            background-color: #e8e8e8;
             color: #212121; }
-        .layout-container.menu-layout-horizontal .layout-menu ul.ultima-menu > li > a.active-menuitem-routerlink {
-          color: #00BCD4; }
-          .layout-container.menu-layout-horizontal .layout-menu ul.ultima-menu > li > a.active-menuitem-routerlink > i {
-            color: #00BCD4; }
-          .layout-container.menu-layout-horizontal .layout-menu ul.ultima-menu > li > a.active-menuitem-routerlink:hover {
-            color: #212121; }
-            .layout-container.menu-layout-horizontal .layout-menu ul.ultima-menu > li > a.active-menuitem-routerlink:hover i {
+            .layout-container.menu-layout-horizontal .layout-menu ul.ultima-menu > li > a:hover i {
               color: #212121; }
-      .layout-container.menu-layout-horizontal .layout-menu ul.ultima-menu > li > ul {
-        z-index: 100;
-        position: absolute;
-        top: 41px;
-        left: 0px;
-        width: 250px;
-        background-color: #ffffff;
-        -webkit-box-shadow: 0 6px 20px 0 rgba(0, 0, 0, 0.19), 0 8px 17px 0 rgba(0, 0, 0, 0.2);
-        -moz-box-shadow: 0 6px 20px 0 rgba(0, 0, 0, 0.19), 0 8px 17px 0 rgba(0, 0, 0, 0.2);
-        box-shadow: 0 6px 20px 0 rgba(0, 0, 0, 0.19), 0 8px 17px 0 rgba(0, 0, 0, 0.2); }
-        .layout-container.menu-layout-horizontal .layout-menu ul.ultima-menu > li > ul li a {
-          padding: 10px 16px; }
-        .layout-container.menu-layout-horizontal .layout-menu ul.ultima-menu > li > ul li ul {
-          position: static; }
-          .layout-container.menu-layout-horizontal .layout-menu ul.ultima-menu > li > ul li ul li a {
-            padding-left: 32px; }
-          .layout-container.menu-layout-horizontal .layout-menu ul.ultima-menu > li > ul li ul ul li a {
-            padding-left: 48px; }
-          .layout-container.menu-layout-horizontal .layout-menu ul.ultima-menu > li > ul li ul ul ul li a {
-            padding-left: 64px; }
-          .layout-container.menu-layout-horizontal .layout-menu ul.ultima-menu > li > ul li ul ul ul ul li a {
-            padding-left: 80px; }
-          .layout-container.menu-layout-horizontal .layout-menu ul.ultima-menu > li > ul li ul ul ul ul ul li a {
-            padding-left: 96px; }
-        .layout-container.menu-layout-horizontal .layout-menu ul.ultima-menu > li > ul li.active-menuitem > a {
-          color: #673AB7;
-          background-color: #e8e8e8; }
-        .layout-container.menu-layout-horizontal .layout-menu ul.ultima-menu > li > ul li.active-menuitem > ul {
+          .layout-container.menu-layout-horizontal .layout-menu ul.ultima-menu > li > a.active-menuitem-routerlink {
+            color: #00BCD4; }
+            .layout-container.menu-layout-horizontal .layout-menu ul.ultima-menu > li > a.active-menuitem-routerlink > i {
+              color: #00BCD4; }
+            .layout-container.menu-layout-horizontal .layout-menu ul.ultima-menu > li > a.active-menuitem-routerlink:hover {
+              color: #212121; }
+              .layout-container.menu-layout-horizontal .layout-menu ul.ultima-menu > li > a.active-menuitem-routerlink:hover i {
+                color: #212121; }
+        .layout-container.menu-layout-horizontal .layout-menu ul.ultima-menu > li > ul {
+          position: absolute;
+          top: 41px;
+          left: 0px;
+          width: 250px;
+          background-color: #ffffff;
+          -webkit-box-shadow: 0 6px 20px 0 rgba(0, 0, 0, 0.19), 0 8px 17px 0 rgba(0, 0, 0, 0.2);
+          -moz-box-shadow: 0 6px 20px 0 rgba(0, 0, 0, 0.19), 0 8px 17px 0 rgba(0, 0, 0, 0.2);
+          box-shadow: 0 6px 20px 0 rgba(0, 0, 0, 0.19), 0 8px 17px 0 rgba(0, 0, 0, 0.2); }
+          .layout-container.menu-layout-horizontal .layout-menu ul.ultima-menu > li > ul li a {
+            padding: 10px 16px; }
+          .layout-container.menu-layout-horizontal .layout-menu ul.ultima-menu > li > ul li ul {
+            position: static; }
+            .layout-container.menu-layout-horizontal .layout-menu ul.ultima-menu > li > ul li ul li a {
+              padding-left: 32px; }
+            .layout-container.menu-layout-horizontal .layout-menu ul.ultima-menu > li > ul li ul ul li a {
+              padding-left: 48px; }
+            .layout-container.menu-layout-horizontal .layout-menu ul.ultima-menu > li > ul li ul ul ul li a {
+              padding-left: 64px; }
+            .layout-container.menu-layout-horizontal .layout-menu ul.ultima-menu > li > ul li ul ul ul ul li a {
+              padding-left: 80px; }
+            .layout-container.menu-layout-horizontal .layout-menu ul.ultima-menu > li > ul li ul ul ul ul ul li a {
+              padding-left: 96px; }
+          .layout-container.menu-layout-horizontal .layout-menu ul.ultima-menu > li > ul li.active-menuitem > a {
+            color: #673AB7;
+            background-color: #e8e8e8; }
+          .layout-container.menu-layout-horizontal .layout-menu ul.ultima-menu > li > ul li.active-menuitem > ul {
+            display: block; }
+        .layout-container.menu-layout-horizontal .layout-menu ul.ultima-menu > li.active-menuitem > a {
+          color: #ffffff;
+          background-color: #00BCD4; }
+          .layout-container.menu-layout-horizontal .layout-menu ul.ultima-menu > li.active-menuitem > a i {
+            color: #ffffff; }
+        .layout-container.menu-layout-horizontal .layout-menu ul.ultima-menu > li.active-menuitem > ul {
           display: block; }
-      .layout-container.menu-layout-horizontal .layout-menu ul.ultima-menu > li.active-menuitem > a {
-        color: #ffffff;
-        background-color: #00BCD4; }
-        .layout-container.menu-layout-horizontal .layout-menu ul.ultima-menu > li.active-menuitem > a i {
-          color: #ffffff; }
-      .layout-container.menu-layout-horizontal .layout-menu ul.ultima-menu > li.active-menuitem > ul {
-        display: block; }
     .layout-container.menu-layout-horizontal .layout-menu.layout-menu-dark {
       background-color: #424242; }
       .layout-container.menu-layout-horizontal .layout-menu.layout-menu-dark ul.ultima-menu li a {
@@ -1574,7 +1619,7 @@ body {
       background-color: #ffffff;
       color: #212121; }
   .layout-container.menu-layout-horizontal .layout-main {
-    padding-top: 140px;
+    padding-top: 116px;
     margin-left: 0px; }
   .layout-container.menu-layout-horizontal .layout-mask {
     display: none; }
@@ -1593,15 +1638,8 @@ body {
     overflow: visible;
     z-index: 100;
     top: 0; }
-    .layout-container.menu-layout-slim .layout-menu .nano {
-      overflow: visible; }
-      .layout-container.menu-layout-slim .layout-menu .nano .nano-content {
-        overflow: visible;
-        margin-right: 0px !important; }
-      .layout-container.menu-layout-slim .layout-menu .nano .nano-pane {
-        display: none !important; }
     .layout-container.menu-layout-slim .layout-menu .profile {
-      width: 100%;
+      width: calc(100% - 18px);
       height: 74px;
       padding-top: 15px; }
       .layout-container.menu-layout-slim .layout-menu .profile > a .profile-image {
@@ -1609,8 +1647,18 @@ body {
         height: 45px; }
       .layout-container.menu-layout-slim .layout-menu .profile > a .profile-name, .layout-container.menu-layout-slim .layout-menu .profile > a i {
         display: none; }
+    .layout-container.menu-layout-slim .layout-menu .ui-scrollpanel {
+      border: none;
+      border-radius: 0; }
+      .layout-container.menu-layout-slim .layout-menu .ui-scrollpanel .ui-scrollpanel-wrapper {
+        overflow: visible; }
+        .layout-container.menu-layout-slim .layout-menu .ui-scrollpanel .ui-scrollpanel-wrapper .ui-scrollpanel-content {
+          overflow: visible; }
+      .layout-container.menu-layout-slim .layout-menu .ui-scrollpanel .ui-scrollpanel-bar {
+        display: none; }
     .layout-container.menu-layout-slim .layout-menu .ultima-menu {
-      padding: 0; }
+      padding: 0;
+      width: calc(100% - 18px); }
       .layout-container.menu-layout-slim .layout-menu .ultima-menu > li {
         position: relative; }
         .layout-container.menu-layout-slim .layout-menu .ultima-menu > li > a {
@@ -1636,6 +1684,7 @@ body {
           -webkit-box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.26);
           -moz-box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.26); }
           .layout-container.menu-layout-slim .layout-menu .ultima-menu > li > ul li a {
+            padding: .5em 1em .5em 2em;
             padding-left: 16px; }
           .layout-container.menu-layout-slim .layout-menu .ultima-menu > li > ul li ul li a {
             padding-left: 32px; }
@@ -1688,14 +1737,14 @@ body {
     top: 75px;
     right: 15px;
     width: 275px;
-    -webkit-animation-duration: .5s;
-    -moz-animation-duration: .5s;
-    animation-duration: .5s;
     display: none;
     background-color: #ffffff;
     -webkit-box-shadow: 0 6px 20px 0 rgba(0, 0, 0, 0.19), 0 8px 17px 0 rgba(0, 0, 0, 0.2);
     -moz-box-shadow: 0 6px 20px 0 rgba(0, 0, 0, 0.19), 0 8px 17px 0 rgba(0, 0, 0, 0.2);
     box-shadow: 0 6px 20px 0 rgba(0, 0, 0, 0.19), 0 8px 17px 0 rgba(0, 0, 0, 0.2);
+    -webkit-animation-duration: 0.3s;
+    -moz-animation-duration: 0.3s;
+    animation-duration: 0.3s;
     list-style-type: none;
     margin: 0;
     padding: 0; }
@@ -1741,6 +1790,8 @@ body {
       display: block; }
       .layout-container .topbar .topbar-right .topbar-items > li.active-top-menu > ul li a {
         padding-left: 32px; }
+    .layout-container .topbar .topbar-right .topbar-items > li.search-item input {
+      background-image: linear-gradient(to bottom, #673AB7, #673AB7), linear-gradient(to bottom, #b3a5cb, #b3a5cb); }
     .layout-container .topbar .topbar-right .topbar-items > li.search-item {
       text-align: center;
       width: 100%;
@@ -1757,7 +1808,6 @@ body {
         border-color: #bdbdbd;
         color: #212121; }
         .layout-container .topbar .topbar-right .topbar-items > li.search-item input:focus {
-          margin-bottom: -1px;
           border-color: #bdbdbd; }
       .layout-container .topbar .topbar-right .topbar-items > li.search-item input:focus ~ label,
       .layout-container .topbar .topbar-right .topbar-items > li.search-item input.ui-state-filled ~ label {
@@ -1783,9 +1833,23 @@ body {
       display: inline-block; }
     .layout-container .topbar .topbar-right .topbar-items.topbar-items-visible {
       display: block; } }
-@media (max-width: 399px) {
+@media (max-width: 385px) {
   .layout-container .topbar .topbar-right #topbar-menu-button {
-    right: 15px; } }
+    position: absolute;
+    height: 1.5em;
+    right: 24px;
+    top: 1.375em; }
+    .layout-container .topbar .topbar-right #topbar-menu-button i {
+      font-size: 1.5em; }
+  .layout-container .topbar .topbar-right #rightpanel-menu-button {
+    position: absolute;
+    height: 1.5em;
+    right: 8px;
+    top: 1.375em; }
+    .layout-container .topbar .topbar-right #rightpanel-menu-button i {
+      font-size: 1.5em; }
+  .layout-container .topbar .topbar-right #menu-button {
+    margin-right: 0; } }
 body .layout-wrapper.layout-compact {
   font-size: 14px;
   line-height: 18px; }
@@ -1793,6 +1857,8 @@ body .layout-wrapper.layout-compact {
     font-size: 18px; }
   body .layout-wrapper.layout-compact .layout-container .ultima-menu li ul li a span {
     font-size: 14px; }
+  body .layout-wrapper.layout-compact .layout-container .layout-breadcrumb ul li {
+    vertical-align: middle; }
   body .layout-wrapper.layout-compact .ui-radiobutton .ui-radiobutton-box {
     width: 18px;
     height: 18px; }
@@ -1805,4 +1871,4 @@ body .layout-wrapper.layout-compact {
     .layout-wrapper.layout-compact .layout-container.menu-layout-horizontal .layout-menu ul.ultima-menu > li > ul li span {
       font-size: 14px; }
   .layout-wrapper.layout-compact .layout-container.menu-layout-horizontal .layout-main {
-    padding-top: 130px; } }
+    padding-top: 110px; } }

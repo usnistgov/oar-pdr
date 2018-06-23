@@ -9,19 +9,19 @@ body {
         background-color: #ffffff;
         font-size: $contentFontSize;
         border: 1px solid $dividerColor;
-        
-        .fa {
+
+        .pi {
             color: #757575;
         }
     }
-    
+
     .ui-widget-header {
         background-color: $primaryColor;
         color: #ffffff;
         font-size: $headerFontSize;
         border: 1px solid $primaryColor;
-        
-        .fa {
+
+        .pi {
             color: #ffffff;
         }
     }
@@ -41,9 +41,9 @@ body {
     .ui-state-active, .ui-state-highlight {
         background-color: $accentColor;
         color: $accentTextColor;
-        
-        .fa {
-            color: #ffffff;
+
+        .pi {
+            color: $accentTextColor;
         }
     }
 
@@ -79,12 +79,12 @@ body {
         background-color: #58575c;
         opacity: .8;
     }
-    
+
     .ui-shadow {
 
     }
-    
+
     a {
-        
+
     }
 }
