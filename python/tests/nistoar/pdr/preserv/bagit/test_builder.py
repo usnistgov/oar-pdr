@@ -1060,6 +1060,9 @@ class TestBuilder(test.TestCase):
         podfile = os.path.join(datadir, "_pod.json")
         with open(podfile) as fd:
             poddata = json.load(fd)
+
+        # Make sure we can handle unicode data
+        poddata['description'] += u" at \u03bb = 20cm."
         self.bag.add_ds_pod(poddata, convert=False)
 
         aboutfile = os.path.join(self.bag.bagdir,"about.txt")
