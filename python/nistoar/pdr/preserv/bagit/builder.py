@@ -833,11 +833,12 @@ class BagBuilder(PreservationSystem):
                                  mf + ": " + str(ex), cause=ex)
 
         try:
+            ec = 'utf-8'
             with open(os.path.join(self.bagdir, "about.txt"), 'w') as fd:
                 print("This data package contain NIST Public Data\n", file=fd)
 
                 # title
-                print(textwrap.fill(podm['title'], 79), file=fd)
+                print(textwrap.fill(podm['title'].encode(ec), 79), file=fd)
 
                 # authors, if available
                 if 'authors' in nerdm:
@@ -870,12 +871,13 @@ class BagBuilder(PreservationSystem):
                             aus = auths[0] + " and " + auths[1]
                         else:
                             aus = " ".join(auths[:-1]) + ", and " + auths[-1]
-                        print( re.sub(r'=', ' ', textwrap.fill(aus)), file=fd )
+                        print( re.sub(r'=', ' ', textwrap.fill(aus.encode(ec))),
+                               file=fd )
 
                         i=1
                         for affil in affils:
-                           print(textwrap.fill("[{0}] {1}".format(i, affil)),
-                                 file=fd)
+                           print(textwrap.fill("[{0}] {1}".format(i, affil)
+                                                          .encode(ec)), file=fd)
 
                 # identifier(s)
                 if nerdm.get('doi'):
@@ -891,24 +893,26 @@ class BagBuilder(PreservationSystem):
                     cp = nerdm['contactPoint']
                     if cp.get('fn') and cp.get('hasEmail'):
                         aus = re.sub('^mailto:\s*', '', cp['hasEmail'])
-                        print("Contact: {0} ({1})".format(cp['fn'], aus),
-                              file=fd)
+                        print("Contact: {0} ({1})".format(cp['fn'], aus)
+                                                  .encode(ec), file=fd)
                     else:
                         print("Contact: {0}".format(cp.get('fn') or
                                                     cp.get('hasEmail')),
                               file=fd)
                     if 'postalAddress' in cp:
                         for line in cp['postalAddress']:
-                            print("         {0}".format(line.strip()), file=fd)
+                            print("         {0}".format(line.strip()).encode(ec),
+                                  file=fd)
                     if 'phoneNumber' in cp:
                         print("         Phone: {0}".format(
-                                                      cp['phoneNumber'].strip()),
+                                          cp['phoneNumber'].strip()).encode(ec),
                               file=fd)
                     fd.write("\n")
 
                 # description
                 if podm.get('description'):
-                    print( textwrap.fill(podm['description']), file=fd )
+                    print( textwrap.fill(podm['description'].encode(ec)),
+                           file=fd )
                     fd.write("\n")
 
                 # landing page
@@ -916,7 +920,8 @@ class BagBuilder(PreservationSystem):
                     print("More information:\nhttps://doi.org/" +
                           nerdm.get('doi'), file=fd)
                 elif nerdm.get('landingPage'):
-                    print("More information:\n" + nerdm.get('landingPage'),
+                    print("More information:\n" +
+                          nerdm.get('landingPage').encode(ec),
                           file=fd)
                 
         except OSError, ex:
@@ -1122,7 +1127,7 @@ format(nerdm['title'])
                    not isinstance(vals, Sequence):
                     vals = [vals]
                 for val in vals:
-                    out = "{0}: {1}".format(name, val)
+                    out = "{0}: {1}".format(name, val.encode('utf-8'))
                     if len(out) > 79:
                         out = textwrap.fill(out, 79, subsequent_indent=' ')
                     print(out, file=fd)
