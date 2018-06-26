@@ -948,6 +948,9 @@ class TestBuilder(test.TestCase):
         infofile = os.path.join(self.bag.bagdir,"bag-info.txt")
         self.assertFalse(os.path.exists(infofile))
 
+        # Make sure we can handle unicode data
+        data['Description'] = u"The data is at \u03bb = 20cm."
+        
         self.bag.write_baginfo_data(data, overwrite=True)
 
         self.assertTrue(os.path.exists(infofile))
@@ -1060,6 +1063,9 @@ class TestBuilder(test.TestCase):
         podfile = os.path.join(datadir, "_pod.json")
         with open(podfile) as fd:
             poddata = json.load(fd)
+
+        # Make sure we can handle unicode data
+        poddata['description'] += u" at \u03bb = 20cm."
         self.bag.add_ds_pod(poddata, convert=False)
 
         aboutfile = os.path.join(self.bag.bagdir,"about.txt")
