@@ -3,13 +3,13 @@ import { Component, OnInit, OnDestroy, AfterViewInit, ElementRef,
 import { DatePipe,CommonModule,isPlatformBrowser } from '@angular/common';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { BrowserModule ,Title} from '@angular/platform-browser';
-import { ActivatedRoute, Router, NavigationEnd }     from '@angular/router';
+import { ActivatedRoute, Router, NavigationEnd } from '@angular/router';
 import { Message } from 'primeng/components/common/api';
 import { OverlayPanelModule,FieldsetModule,PanelModule,ContextMenuModule,
          DialogModule,SelectItem } from 'primeng/primeng';
 import { MenuModule } from 'primeng/menu';
 import { TreeTableModule } from 'primeng/treetable';
- import { MenuItem } from 'primeng/api';
+import { MenuItem } from 'primeng/api';
 import { TreeNode } from 'primeng/api';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import * as _ from 'lodash';
@@ -21,7 +21,6 @@ import { SearchResolve } from "./search-service.resolve";
 import { CommonVarService } from "../shared/common-var/index";
 import { AppConfig } from '../shared/config-service/config.service';
 //import * as jsPDF  from 'jspdf';
-
 declare var Ultima: any;
 // declare var jQuery: any;
 
@@ -86,34 +85,43 @@ export class LandingComponent implements OnInit {
       this.rmmApi = this.appConfig.getConfig().RMMAPI;
       this.distApi = this.appConfig.getConfig().DISAPI;
       this.landing = this.appConfig.getConfig().LANDING;
+      router.events.subscribe(s => {
+        if (s instanceof NavigationEnd) {
+          const tree = router.parseUrl(router.url);
+          if (tree.fragment) {
+           //alert("Test Fragment :"+tree.fragment)
+            const element = document.querySelector("#" + tree.fragment);
+            
+            if (element) { 
+              //alert("Test here:"+element)
+              element.scrollIntoView(true); 
+             }
+          }
+        }
+      });
     }
 
    /**
    * If Search is successful populate list of keywords themes and authors
    */
   onSuccess(searchResults:any[]) {
-    
-  
     if(searchResults["ResultCount"] === undefined || searchResults["ResultCount"] !== 1)
       this.record = searchResults;
     else if(searchResults["ResultCount"] !== undefined && searchResults["ResultCount"] === 1)
       this.record = searchResults["ResultData"][0];
-    //this.record = rmmdata[0];
     this.type = this.record['@type'];
     this.titleService.setTitle(this.record['title']);
     this.createNewDataHierarchy();
-    //console.log(this.arrangeIntoTree(this.record['components']));
     if(this.record['doi'] !== undefined && this.record['doi'] !== "" )
       this.isDOI = true;
-    //if(this.record['contactPoint'].hasEmail !== undefined && this.record['contactPoint'].hasEmail !== "")
     if( "hasEmail" in this.record['contactPoint'])  
      this.isEmail = true;
     if(this.record["@id"] === undefined || this.record["@id"] === "" ){
         this.isId = false;
         return;
     }
-      //this.updateLeftMenu();
-      this.updateRightMenu();
+    //this.updateLeftMenu();
+    this.updateRightMenu();
   }
 
   /**
@@ -133,6 +141,7 @@ export class LandingComponent implements OnInit {
     var itemsMenu: MenuItem[] = [];
     var descItem = this.createMenuItem ("Description",'',(event)=>{
       this.metadata = false; this.similarResources =false;
+      
     },'');
 
     var refItem = this.createMenuItem ("References",'',(event)=>{
@@ -184,48 +193,41 @@ updateRightMenu(){
   this.distdownload = this.distApi+"ds/zip?id="+this.record['@id'];
       
   var itemsMenu: MenuItem[] = [];
-  var metadata = this.createMenuItem("Export JSON", "faa faa-file-o",'',this.serviceApi);
-    
-      
+  var metadata = this.createMenuItem("Export JSON", "faa faa-file-o",'',this.serviceApi);   
   let authlist = "";
   if (this.record['authors']) {    
       for(let auth of this.record['authors']) authlist = authlist+auth.familyName+",";
   }
-        
+  
   var resourcesByAuthor = this.createMenuItem ('Resources by Authors',"faa faa-external-link","",this.sdpLink+"/#/search?q=authors.familyName="+authlist+"&key=&queryAdvSearch=yes");
   var similarRes = this.createMenuItem ("Similar Resources", "faa faa-external-link", "",this.sdpLink+"/#/search?q=keyword="+this.record['keyword']+"&key=&queryAdvSearch=yes");                
   var license = this.createMenuItem("Fair Use Statement",  "faa faa-external-link","",this.record['license'] ) ;
   var citation = this.createMenuItem('Citation', "faa faa-angle-double-right",(event)=>{ this.getCitation(); this.showDialog(); },'');
-
   var metaItem = this.createMenuItem("View","faa faa-bars",(event)=>{
     this.metadata = true; this.similarResources =false;},''); 
-
     itemsMenu.push(metaItem);
     itemsMenu.push(metadata);   
+  var descItem = this.createMenuItem ("Description","faa faa-bars",(event)=>{
+    this.metadata = false; this.similarResources =false;
+    this.router.navigate(['/od/id/', this.record.ediid],{fragment:'description'});
+   },"");
 
-    var descItem = this.createMenuItem ("Description","faa faa-bars",(event)=>{
-      this.metadata = false; this.similarResources =false;
-    },"");
-
-    var refItem = this.createMenuItem ("References","faa faa-bars",(event)=>{
-      this.metadata = false; this.similarResources =false;
-
+  var refItem = this.createMenuItem ("References","faa faa-bars",(event)=>{
+    this.metadata = false; this.similarResources =false;
+    this.router.navigate(['/od/id/', this.record.ediid],{fragment:'reference'});
     },'');
 
-    var filesItem = this.createMenuItem("Data Access","faa faa-bars", (event)=>{
-      this.metadata = false;
-      this.similarResources =false;
+  var filesItem = this.createMenuItem("Data Access","faa faa-bars", (event)=>{
+    this.metadata = false;
+    this.similarResources =false;
+    this.router.navigate(['/od/id/', this.record.ediid],{fragment:'dataAccess'});
     },'');
-
-    
-    var itemsMenu2:MenuItem[] = [];
+  var itemsMenu2:MenuItem[] = [];
       itemsMenu2.push(descItem);
-    //if(this.checkReferences())
       itemsMenu2.push(refItem);
-    if(this.files.length !== 0)
+  if(this.files.length !== 0)
       itemsMenu2.push(filesItem);
-    
-    this.rightmenu = [ { label: 'Go To ..', items: itemsMenu2},
+  this.rightmenu = [ { label: 'Go To ..', items: itemsMenu2},
       { label: 'Record Details', items: itemsMenu },
       { label: 'Use',   items: [ citation, license ] },
       { label: 'Find',   items: [ similarRes, resourcesByAuthor ]}];
@@ -267,15 +269,12 @@ updateRightMenu(){
    * Get the params OnInit
    */
   ngOnInit() {
-
-
      var paramid = this.route.snapshot.paramMap.get('id');
       this.files =[];
       this.route.fragment.subscribe(fragment => { this.fragment = fragment; });
       
       this.route.data.map(data => data.searchService )
       .subscribe((res)=>{
-        // console.log("Test results:"+JSON.stringify(res));
         this.onSuccess(res);
     }, error =>{
       console.log("There is an error in searchservice.");
@@ -283,16 +282,6 @@ updateRightMenu(){
     });
     
   }
-
-  ngOnDestroy() {
-    //this._routeParamsSubscription.unsubscribe();
-  }
-
-  ngAfterViewInit(): void {
-   
-  }
-
-  
 
   //This is to check if empty
   isEmptyObject(obj) {
@@ -352,42 +341,31 @@ updateRightMenu(){
     endFileNode.collapsedIcon =  "faa fa-folder";
     return endFileNode;
   }
-
-
   createNewDataHierarchy(){
     var testdata = {}
     testdata["data"] = this.arrangeIntoTree(this.record['components']);
     this.files.push(testdata);
   }
-
-  
-
-  /////This is to create a tree structure::
+  //This is to create a tree structure
   private arrangeIntoTree(paths) {
     const tree = [];
     // This example uses the underscore.js library.
     var i = 0;
-    // console.log(paths);
     paths.forEach((path) => {
-      
       if(i != 0) 
       {
-        // console.log("path :"+JSON.stringify(path));
         path.filepath = "/"+path.filepath;
         const pathParts = path.filepath.split('/');
         pathParts.shift(); // Remove first blank element from the parts array.
         let currentLevel = tree; // initialize currentLevel to root
-        pathParts.forEach((part) => {
-         
+        pathParts.forEach((part) => { 
           // check to see if the path already exists.
           const existingPath = currentLevel.filter(level => level.data.name === part);
-          
           if (existingPath.length > 0) {
             // The path to this item was already in the tree, so don't add it again.
             // Set the current level to this path's children
             currentLevel = existingPath[0].children;
           } else {
-           
             const newPart = {
               data : {
                 name : part,

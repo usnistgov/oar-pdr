@@ -38,7 +38,7 @@ import { TreeNode} from 'primeng/api';
             <br>
             
             <div>
-             <h3><b>Data Access</b></h3>
+             <h3 id="dataAccess"><b>Data Access</b></h3>
              <span *ngIf="record['accessLevel'] === 'public'"><i class="faa faa-globe"></i> 
                 These data are public . 
              </span>
@@ -117,7 +117,7 @@ import { TreeNode} from 'primeng/api';
             </div>
             <br>
             <div *ngIf="checkReferences()">
-             <h3 id="reference" name="reference"><b>References:</b></h3>
+             <h3 id="reference" name="reference"><b>References</b></h3>
                 <span *ngIf="isDocumentedBy"> 
                     This data is discussed in :
                     <span style="padding-left:2.75em" *ngFor="let refs of record['references']">
