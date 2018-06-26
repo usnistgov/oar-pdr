@@ -1127,7 +1127,7 @@ format(nerdm['title'])
                    not isinstance(vals, Sequence):
                     vals = [vals]
                 for val in vals:
-                    out = "{0}: {1}".format(name, val)
+                    out = "{0}: {1}".format(name, val.encode('utf-8'))
                     if len(out) > 79:
                         out = textwrap.fill(out, 79, subsequent_indent=' ')
                     print(out, file=fd)

@@ -948,6 +948,9 @@ class TestBuilder(test.TestCase):
         infofile = os.path.join(self.bag.bagdir,"bag-info.txt")
         self.assertFalse(os.path.exists(infofile))
 
+        # Make sure we can handle unicode data
+        data['Description'] = u"The data is at \u03bb = 20cm."
+        
         self.bag.write_baginfo_data(data, overwrite=True)
 
         self.assertTrue(os.path.exists(infofile))
