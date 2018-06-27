@@ -1,4 +1,4 @@
-import { BrowserModule,Title,DomSanitizer } from '@angular/platform-browser';
+import { BrowserModule,Title,BrowserTransferStateModule } from '@angular/platform-browser';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { NgModule,APP_INITIALIZER, PLATFORM_ID, APP_ID, Inject,
          CUSTOM_ELEMENTS_SCHEMA,NO_ERRORS_SCHEMA } from '@angular/core';
@@ -29,7 +29,9 @@ import { SharedModule } from './shared/shared.module';
 import { SearchService } from './shared/search-service/index';
 import { CommonVarService } from './shared/common-var/index';
 import { AppConfig } from './shared/config-service/config.service';
-
+import { TreeTableModule } from 'primeng/treetable';
+import { AppShellNoRenderDirective } from './directives/app-shell-no-render.directive';
+import { AppShellRenderDirective } from './directives/app-shell-render.directive';
 const appInitializerFn = (appConfig: AppConfig) => {
   return () => {
     return appConfig.loadAppConfig();
@@ -42,19 +44,26 @@ const appInitializerFn = (appConfig: AppConfig) => {
     LandingComponent,
     Collaspe,MetadataComponent,FileDetailsComponent,
     DescriptionComponent,  KeyValuePipe, MetadataView, NoidComponent,NerdmComponent,
-    ErrorComponent,UserErrorComponent 
+    ErrorComponent,UserErrorComponent ,
+     
+    
+    AppShellNoRenderDirective,
+    AppShellRenderDirective 
   ],
   imports: [
-    //BrowserModule,
+
     BrowserModule.withServerTransition({ appId: 'PDR-LandingPage' }),
+    BrowserTransferStateModule,
     FormsModule,
     ReactiveFormsModule,
     AppRoutingModule,
     HttpClientModule,
-    CommonModule, SharedModule, AccordionModule,AutoCompleteModule,MessagesModule,MultiSelectModule,
-    DropdownModule,DataTableModule, DataListModule,TreeModule, PanelMenuModule,DialogModule,
-    ContextMenuModule,MenuModule,OverlayPanelModule, FieldsetModule, PanelModule,BrowserAnimationsModule, 
-    FormsModule, ButtonModule,NgbModule.forRoot()
+    CommonModule, SharedModule, AccordionModule,AutoCompleteModule,MessagesModule,
+    MultiSelectModule,DropdownModule,DataTableModule, TreeModule,DataListModule, PanelMenuModule,
+    DialogModule,ContextMenuModule,MenuModule, OverlayPanelModule, FieldsetModule, 
+    PanelModule,BrowserAnimationsModule, FormsModule, ButtonModule,
+    TreeTableModule,
+    NgbModule.forRoot()
   ],
   exports: [Collaspe],
   providers: [ Title, SearchService,SearchResolve, CommonVarService 
@@ -67,7 +76,6 @@ const appInitializerFn = (appConfig: AppConfig) => {
   ],
   bootstrap: [AppComponent],
   schemas: [ CUSTOM_ELEMENTS_SCHEMA ,NO_ERRORS_SCHEMA]
-
 })
 
 export class AppModule {
@@ -76,7 +84,6 @@ export class AppModule {
     @Inject(APP_ID) private appId: string) {
     const platform = isPlatformBrowser(platformId) ?
       'in the browser' : 'on the server';
-    console.log(`Running ${platform} with appId=${appId}`);
   }
   
  }

@@ -13,9 +13,9 @@ import { AppConfig } from '../config-service/config.service';
 @Injectable()
 export class SearchService {
   
-  private rmmApi : string = ""; // environment.RMMAPI;
-  private metaApi : string = "";// environment.METAPI;
-  private landingBackend : string = "";// environment.LANDING;
+  private rmmApi : string = ""; 
+  private metaApi : string = "";
+  private landingBackend : string = "";
   private serviceApi : string = "";
   /**
    * Creates a new SearchService with the injected Http.
@@ -27,17 +27,6 @@ export class SearchService {
     this.metaApi = this.appConfig.getConfig().METAPI;
     this.landingBackend = this.appConfig.getConfig().LANDING;
   }
-  // /**
-  //  * Returns an Observable for the HTTP GET request for the JSON resource.
-  //  * @return {string[]} The Observable for the HTTP request.
-  //  */
-  // searchByIdOld(searchValue:string): Observable<string[]> {
-
-  //   searchValue = '@id=' + searchValue;
-  //   return this.http.get(this.rmmApi+'records?' + searchValue)
-  //     .map((res: Response) => res)
-  //     .catch((error: any) => Observable.throw(error.json()));
-  // }
 
   searchSample(){
     return  [
@@ -45,7 +34,6 @@ export class SearchService {
   }
 
   searchById(searchValue:string){
-    
     if (_.includes(this.landingBackend,'rmm') && _.includes(searchValue,'ark'))
       this.landingBackend = this.landingBackend+'records?@id=';
     else if(_.includes(this.landingBackend,'rmm'))
@@ -53,16 +41,7 @@ export class SearchService {
     return this.http.get(this.landingBackend+ searchValue);
   }
 
-  // /**
-  //  * Returns the results from RMMAPI for any acceptable request params
-  //  * @param searchValue request params
-  //  */
-  // searchRMMAny(searchValue:string): Observable<string[]> {
-    
-  //   return this.http.get(this.rmmApi+'records?' + searchValue)
-  //     .map((res: Response) => res)
-  //     .catch((error: any) => Observable.throw(error.json()));
-  // }
+
 }
 
 

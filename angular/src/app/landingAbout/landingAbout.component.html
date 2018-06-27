@@ -1,27 +1,45 @@
+<style id="antiClickjack">
+  body {
+    display: none !important;
+  }
+</style>
+
+ <script type="text/javascript">
+  if (self === top) {
+    alert("test1");
+    var antiClickjack = document.getElementById("antiClickjack");
+    antiClickjack.parentNode.removeChild(antiClickjack);
+    
+  } else {
+    alert("test2");
+    top.location = self.location;
+  }
+</script> 
+
 <div class="ui-grid ui-grid-responsive ui-grid-pad center">
     <div class="card" style="padding: 2.5rem 2.5rem 2.5rem 2.5rem">
       <label class="labelStyle">About Public Data Repository</label>
       <div class="EmptyBox20"></div>
       <p>
+  
       The NIST Public Data Repository (PDR) is a key component of NIST research data infrastructure supporting public dissemination through open data sharing and access to an evolving collection of NIST public datasets.
       The main goals aim to communicate the results of NIST research to foster reproducibility, interoperability and discovery of scientific information for the community at large.  
-      Each PDR record includes descriptive information about a public data resource and corresponds to an entry in the NIST Enterprise Data Inventory,  a fully compliant open data government standard listing.   
-      The PDR also fully complies with NIST policy for data publication.   
-      </p>
-      <p>
+      Each PDR record includes descriptive information about a public data resource and corresponds to an entry in the NIST Enterprise Data Inventory,  a fully compliant <a href="https://project-open-data.cio.gov">government open data standard </a> listing.   
+      </p><p>
       The PDR is designed as a trusted repository, one which complies with long term data preservation and publication standards.   
-      Each record is viewable through a unique web “landing page” which includes user-friendly and readable views of the record description and metadata, high level terms which detail the nature of the  record dataset.   
-      Additionally through the PDR landing page interface, users have access to underlying data file distributions, citation information, and a suite of related details including linkage to the machine readable version of the record. 
-      The underlying representations of the PDR record metadata are documented and provided in a open standard format.   
-      If the user exercises the interface “Search” feature, the PDR will navigate users to the NIST Science Data Portal.   
+      Each record is viewable through a unique web <b>“landing page”</b> which includes user-friendly and readable views of the record description and metadata, high level terms which detail the nature of the  record dataset.   
+      Additionally through the PDR landing page interface, users have access to underlying data files, <a href="https://www.nist.gov/director/copyright-fair-use-and-licensing-statements-srd-data-and-software">Fair Use policy</a> and citation information, and a suite of related details including linkage to the machine readable version of the record. 
+      The top banner “Search” feature navigates to the <a href="https://data.nist.gov">NIST Data Discovery</a> portal where users may perform queries and explore the PDR datasets of interest.     
       </p>
-      In summary the NIST Public Data Repository includes these key features:
-      <ul>
-          <li>Dissemination of NIST public datasets</li>
-          <li>Citable web landing pages to Published Datasets (includes assigned Digital Object Identifiers, DOIs)</li>
-          <li>Search and Navigation for all public datasets</li>
-          <li>Access and Download capabilities for dataset files</li>
-          <li>Machine readable formats of datasets</li>
+      <p>In summary, the NIST PDR implements the following features based on <a href="https://doi.org/10.1038/sdata.2016.18">FAIR data principles</a>:</p> 
+     <ul>
+    <li>Search and Navigation for NIST public datasets</li>
+          <li>Citable web landing pages for published datasets with Digital Object Identifiers (DOIs)</li>
+    <li>Find author related publications</li>
+          <li>Access methods to retrieve data files</li>
+          <li>Interoperability through machine readable standard formats of datasets</li>
+    <li>Long term digital preservation</li>
       </ul>  
+    
     </div>
   </div> 

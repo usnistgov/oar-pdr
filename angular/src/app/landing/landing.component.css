@@ -51,31 +51,34 @@
 
 
 :host /deep/ .ui-tree .ui-tree-container {
-  /*background-color: #f399f3;*/
-  /*width: 250px;*/
   position: relative;
   float: left;
 }
 
 
-:host /deep/ .leftMenuStyle > .ui-menu  .ui-menu-list li.ui-widget-header{
+:host /deep/ .leftMenuStyle > .ui-menu .ui-submenu-header{
   background-color: #B4B0B0;
   font-weight: bold;
-  /*font-family: 'Franklin Gothic Urw Cond';*/
-  font-family: Sans-Serif;
+  /* font-family: 'Sans-Serif'; */
   padding: 2%;
   padding-left: 5%;
-}
-:host /deep/ .leftMenuStyle > .ui-menu .ui-menu-list li.ui-menuitem .ui-menuitem-link{
-  line-height: 0;
-  min-height: 1.5em;
-  /*font-family: 'Franklin Gothic Urw Cond';*/
-  font-family: 'Roboto';
-  background-color: #e8e7e7;
-  word-wrap: break-word;
-  /*padding: 5%; */
+  font-size: 16px;
 }
 
+:host /deep/ .leftMenuStyle > .ui-menu .ui-menu-list li.ui-menuitem {
+  line-height: 0;
+  min-height: 1.5em;
+  /* font-family: 'Sans-Serif'; */
+  background-color: #e8e7e7;
+  word-wrap: break-word;
+  padding: 5%;
+  font-size: 14px;
+}
+:host /deep/ .leftMenuStyle > .ui-menu .ui-menuitem-link{
+  /* font-family: 'Sans-Serif'; */
+  font-size: 14px;
+  padding: 0 0 0 .625em;
+}
 :host /deep/ .leftMenuStyle > .ui-menu .ui-menu-list li.ui-menuitem .ui-menuitem-link:hover {
   background-color: #ffffff;
   color: #000000; }
@@ -85,9 +88,9 @@
   background-color: #B8D4E6;
   padding: 2%;
   padding-left: 5%;
-  font-family: 'Sans-Serif';
+  /* font-family: 'Sans-Serif'; */
   font-weight: bold;
-  width: 10em;
+  font-size: 16px;
 }
 
 :host /deep/ .rightMenuStyle > .ui-menu  .ui-menuitem-link{
@@ -96,26 +99,22 @@
   background-color: #e7f0f6;
   word-wrap: break-word;
   padding: 0.2em;
-  width: 10em;
-  font-family: 'Sans-Serif';
+  /* font-family: 'Sans-Serif'; */
   font-size: 14px;
-  /* word-wrap: break-word; */
-  /*font-family: 'Franklin Gothic Medium';*/
-  /*font-style: italic; font-size: 10pt;*/
+}
+
+:host /deep/ .rightMenuStylePop  > .ui-menu {
+  position: absolute;
+  width: 12em;
+  word-wrap: break-word;
+  /* font-family: 'Sans-Serif'; */
 
 }
 
-/* :host /deep/ .rightMenuStyle > .ui-menu .ui-menu-list li.ui-menuitem{
-  background-color:#E7F0F6;
-  font-family: 'Sans-Serif';
-  word-wrap: break-word;
-  font-size: 0.9em;
-} */
-
-/* :host /deep/ .ui-widget-header{
-  border: 0px;
-  background-color: #ccc;
-} */
+:host /deep/ .rightMenuStyle > .ui-menu  .ui-menuitem-link:hover {
+  background-color: #ffffff;
+  color: #000000;
+}
 
 :host /deep/ .ui-widget-content{
   border: 0px;
@@ -132,6 +131,7 @@
   background-color:#006495;
   text-align: left;
   color: white;
+  padding: 10px;
 }
 :host /deep/ citationDialog > button.ui-button-icon-only{  
   border-radius: 50%;
