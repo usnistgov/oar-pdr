@@ -168,7 +168,7 @@ class MultibagValidator(ValidatorBase):
                 parts = [p.strip() for p in val.split(',')]
                 if len(parts) > 2:
                     badfmt.append(val)
-                selfdeprecating = selfdeprecating or val == headver or \
+                selfdeprecating = selfdeprecating or parts[0] == headver or \
                                   (len(parts) > 1 and parts[1] == bag.name)
 
             t = self._issue("2-Head-Deprecates",
