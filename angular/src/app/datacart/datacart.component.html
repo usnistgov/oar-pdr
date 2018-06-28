@@ -4,38 +4,45 @@
             <label style="font-size: xx-large;float: left;display: block;"><i class="faa faa-shopping-cart faa-lg"></i> Data Cart</label>
         </div>
     </div>
-    <div style="padding-left: 1%;padding-bottom:10%;background-color: #EFFEFF">
-        <div class="ui-g">
+    <div style="padding-left: 1%;padding-bottom:10%;background-color: #FFFFFF">
+        <div class="ui-g" style="padding-left: -1%;">
             <div class="ui-g-12 ui-md-12" >
-                <div style="height: 20px"></div>
-                <button type="button" id="download" (click)="downloadZIP()" pButton type="submit" class="btn btn-primary" disabled><i class="faa faa-download faa-1x icon-white" style="color: #fff;"></i> Download selected <span class="badge badge-notify" >{{selectedFileCount}}</span></button>
-                &nbsp;<button type="button" id="removeData" (click)="removeByDataId()" style="background-color: red;" class="btn btn-primary" disabled pButton type="submit"><i class="faa faa-trash faa-1x icon-white" style="color: #fff;"></i> Remove selected <span class="badge badge-notify">{{selectedFileCount}}</span></button>
-                &nbsp;<button type="button" id="downloadStatus" (click)="removeByDownloadStatus()" style="background-color: red;" class="btn btn-primary" disabled pButton type="submit"><i class="faa faa-minus-circle faa-1x icon-white" style="color: #fff;"></i> Remove downloaded</button>
-                <div style="height: 20px"></div>
+                <div class="ui-g-12 ui-md-2" >
+                    <button type="button" id="download" (click)="downloadZIP()" pButton type="submit" class="searchButton" disabled><i class="faa faa-download faa-1x icon-white" style="color: #fff;"></i> Download selected <span class="badge badge-notify" >{{selectedFileCount}}</span></button>
+                </div>
+                <div class="ui-g-12 ui-md-2" >
+                    <button type="button" id="removeData" (click)="removeByDataId()" style="background-color: red;" class="searchButton" disabled pButton type="submit"><i class="faa faa-trash faa-1x icon-white" style="color: #fff;"></i> Remove selected <span class="badge badge-notify">{{selectedFileCount}}</span></button>
+                </div>
+                <div class="ui-g-12 ui-md-2" >
+                    <button type="button" id="downloadStatus" (click)="removeByDownloadStatus()" style="background-color: red;" class="searchButton" disabled pButton type="submit"><i class="faa faa-minus-circle faa-1x icon-white" style="color: #fff;"></i> Remove downloaded</button>
+                </div>
+                    <div style="height: 20px"></div>
             </div>
             <div class="ui-g-2 ui-md-2" *ngFor="let item of displayFiles  ">
-                {{item.key}}-<p-progressSpinner *ngIf ="item.value === true" [style]="{width: '12px', height: '12px'}" ></p-progressSpinner><i class="faa faa-check" *ngIf ="item.value !== true"></i>
+                {{item.key}} <p-progressSpinner *ngIf ="item.value === true" [style]="{width: '12px', height: '12px'}" ></p-progressSpinner><i class="faa faa-check" *ngIf ="item.value !== true"></i>
             </div>
         </div>
-        <p-treeTable selectionMode="checkbox" [value]="dataFiles" (onNodeSelect) = "dataFileCount()" (onNodeUnselect) = "dataFileCount()" [(selection)]="selectedData" [scrollable]="true" scrollHeight="600px" [style]="{'width':'70%','background-color':'#FFFFFF','color':'#000000'}">
+        <p-treeTable selectionMode="checkbox" [value]="dataFiles" (onNodeSelect) = "dataFileCount()" (onNodeUnselect) = "dataFileCount()" [(selection)]="selectedData" [scrollable]="true" scrollHeight="600px" [style]="{'margin-left':'1%','width':'70%','background-color':'#606164','color':'#000'}">
             <ng-template pTemplate="header">
                 <tr>
-                    <th style="color: #000;width: 65%;"> Title</th>
-                    <th style="color: #000;">Status</th>
-                    <th style="color: #000;">Size</th>
+                    <th style="color: #FFFFFF; background-color:#606164; width: 65%;"> Title</th>
+                    <th style="color: #FFFFFF; background-color:#606164;">Status</th>
+                    <th style="color: #FFFFFF; background-color:#606164;">Size</th>
                 </tr>
             </ng-template>
-                <ng-template let-rowNode let-rowData="rowData" pTemplate="body">
+                <ng-template let-rowNode let-rowData="rowData"  let-i="rowIndex" pTemplate="body">
                     <tr>
                         <td width="65%">
                             <p-treeTableToggler [rowNode]="rowNode"></p-treeTableToggler>
-                            <button type="button" *ngIf = "rowData.downloadedStatus === 'downloaded' && rowData.resTitle.indexOf('.') > 0 " style="margin-left:-20px;margin-top: 5px" class="small-button" pButton icon="faa faa-check"></button>
-                            <button type="button" *ngIf = "rowData.downloadedStatus === 'downloading' && rowData.resTitle.indexOf('.') > 0 "  class="small-button-yellow" pButton icon="faa faa-check"></button>
                             &nbsp;<p-treeTableCheckbox [value]="rowNode"></p-treeTableCheckbox>
-                            &nbsp;<a href="{{rowData.downloadURL}}" target="_blank" *ngIf = "rowData.resTitle.indexOf('.') > 0">{{rowData.resTitle}}</a>
-                            <span *ngIf = "rowData.resTitle.indexOf('.') < 0">{{rowData.resTitle}}</span>
+                            &nbsp;<a href="{{rowData.downloadURL}}" target="_blank" *ngIf="rowData.id== null" >{{rowData.resTitle}}</a>
+                            &nbsp;<a href="{{rowData.downloadURL}}" target="_blank" *ngIf = "rowData.resTitle.indexOf('.') > 0 "> {{rowData.resTitle}}</a>
+                            <span *ngIf = "rowData.resTitle.indexOf('.') < 0 && rowData.id!= null"> {{rowData.resTitle}}</span>
                         </td>
                         <td>
+                            &nbsp;
+                            <button type="button" *ngIf = "rowData.downloadedStatus === 'downloaded' && rowData.resTitle.indexOf('.') > 0 " style="margin-left:-20px;margin-top: 5px" class="small-button" pButton icon="faa faa-check"></button>
+                            <button type="button" *ngIf = "rowData.downloadedStatus === 'downloading' && rowData.resTitle.indexOf('.') > 0 "  class="small-button-yellow" pButton icon="faa faa-check"></button> &nbsp;
                             <span *ngIf = "rowData.resTitle.indexOf('.') > 0">{{rowData.downloadedStatus}}</span>
                         </td>
                         <td>

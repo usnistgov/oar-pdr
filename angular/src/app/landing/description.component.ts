@@ -13,12 +13,11 @@ import { Data} from '../datacart/data';
           <div class = "ui-g-12 ui-md-12 ui-lg-12 ui-sm-12"-->
           <h3 id="description" name="desscription"><b>Description</b></h3>
           <i *ngIf="loginuser" style="float:right" class="faa faa-edit"></i>
-                <div contenteditable="true" id="recordDescription" class="well welldesc">
-                <p  *ngFor="let topic of record['description']; let i =index">
+            <div contenteditable="true" id="recordDescription" class="well welldesc">
+              <p  *ngFor="let topic of record['description']; let i =index">
                 {{ record["description"][i] }}
-                </p>
-                </div>
-
+             </p>
+            </div>
             <div *ngIf="checkTopics()">
             <strong contenteditable="{{editContent}}" >Research Topics:</strong>
             <span  *ngFor="let topic of record['topic']; let i =index">
@@ -36,7 +35,7 @@ import { Data} from '../datacart/data';
             </div>
             <br>
             <div *ngIf="checkReferences()">
-             <h3 id="reference" name="reference"><b>References:</b></h3>
+             <h3 id="reference" name="reference"><b>References</b></h3>
                 <span *ngIf="isDocumentedBy"> 
                     This data is discussed in :
                     <span style="padding-left:2.75em" *ngFor="let refs of record['references']">
@@ -63,7 +62,7 @@ import { Data} from '../datacart/data';
             </div>
             <div>
             <br>
-             <h3><b>Access To Data:</b></h3>
+             <h3 id="dataAccess"><b>Access To Data</b></h3>
              <span *ngIf="record['accessLevel'] === 'public'"><i class="faa faa-globe"></i> 
                 This data is public. 
              </span>

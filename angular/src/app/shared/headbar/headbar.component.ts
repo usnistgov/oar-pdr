@@ -6,7 +6,7 @@ import { TreeModule,TreeNode, Tree, OverlayPanelModule,
 import { CommonVarService } from "../common-var/index";
 import { CartService } from '../../datacart/cart.service';
 import { CartEntity } from '../../datacart/cart.entity';
-// import { environment } from '../../environment';
+import { AppConfig } from '../config-service/config.service';
 
 /**
  * This class represents the headbar component.
@@ -28,16 +28,17 @@ export class HeadbarComponent {
   layoutMode: string = 'horizontal';
   darkMenu: boolean = false;
   profileMode: string = 'inline';
-  SDPAPI : string = "environment.SDPAPI";
-  landingService : string = "environment.LANDING";
+  SDPAPI : string = "";
+  landingService : string = "";
   internalBadge: boolean = false;
   cartEntities: CartEntity[];
   topmenu: MenuItem[];
   loginuser = false;
   cartLength : number;
 
-  constructor( private el: ElementRef, private commonVar : CommonVarService, private cartService: CartService) {
-    this.createTopMenu();
+  constructor( private el: ElementRef, private commonVar : CommonVarService, private cartService: CartService,private appConfig : AppConfig) {
+      this.SDPAPI = this.appConfig.getConfig().SDPAPI;
+      this.landingService = this.appConfig.getConfig().LANDING;
     this.cartService.watchStorage().subscribe(value => {
       this.cartLength = value;
     });
@@ -47,13 +48,6 @@ export class HeadbarComponent {
     if(!this.landingService.includes('rmm'))
       this.internalBadge = true;
     return this.internalBadge;
-  }
-
-  createTopMenu(){
-    this.topmenu = [
-      {label:"About"},
-      {label:"Search"},
-      {label:"Login"}  ];
   }
 
   getDataCartList () {
@@ -67,21 +61,9 @@ export class HeadbarComponent {
     return null;
   }
 
-
   updateCartStatus()
   {
     this.cartService.updateCartDisplayStatus(true);
   }
 
-
-    login(){
-    //alert(this.loginuser);
-    // this.commonVar.setLogin(!this.loginuser);
-    this.commonVar.userConfig(!this.loginuser);
-    //this.loginuser = this.commonVar.getLogin();
-    this.commonVar.userObservable.subscribe(value => {
-      this.loginuser = value;
-      console.log(this.loginuser);
-    })
-  }
 }

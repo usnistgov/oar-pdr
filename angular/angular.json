@@ -1,5 +1,5 @@
 {
-  "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
+  "$schema": "./node_modules/@angular-devkit/core/src/workspace/workspace-schema.json",
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
@@ -42,13 +42,14 @@
               "node_modules/lodash/lodash.min.js",
               "node_modules/jspdf/dist/jspdf.min.js",
               "node_modules/primeui/primeui-ng-all.min.js",
-              "node_modules/bootstrap/dist/js/bootstrap.min.js"
+              "node_modules/bootstrap/dist/js/bootstrap.min.js",
+              "node_modules/primeng/primeng.js"
             ]
           },
           "configurations": {
             "production": {
               "optimization": true,
-              "outputHashing": "none",
+              "outputHashing": "all",
               "sourceMap": false,
               "extractCss": true,
               "namedChunks": false,
@@ -89,11 +90,13 @@
             "karmaConfig": "./karma.conf.js",
             "polyfills": "src/polyfills.ts",
             "tsConfig": "src/tsconfig.spec.json",
+            "preserveSymlinks": true,
             "scripts": [
               "node_modules/lodash/lodash.min.js",
               "node_modules/jspdf/dist/jspdf.min.js",
               "node_modules/primeui/primeui-ng-all.min.js",
-              "node_modules/bootstrap/dist/js/bootstrap.min.js"
+              "node_modules/bootstrap/dist/js/bootstrap.min.js",
+              "node_modules/primeng/primeng.js"
             ],
             "styles": [
               "src/styles.scss",
@@ -101,6 +104,7 @@
               "node_modules/primeng/resources/primeng.min.css",
               "src/styles/ultima-ng/layout/css/layout-indigo.css",
               "src/styles/ultima-ng/theme/theme-indigo.css",
+              "node_modules/primeicons/primeicons.css",
               "src/styles/font-awesome/css/font-awesome.min.css",
               "src/styles/main.css"
             ],
@@ -134,11 +138,18 @@
           "builder": "@angular-devkit/build-angular:server",
           "options": {
             "outputPath": "dist/server",
-            "main": "src/app/ngmodule.ts",
+            "main": "src/main.server.ts",
             "tsConfig": "src/tsconfig.server.json"
           },
           "configurations": {
-            "production": {}
+            "production": {
+              "fileReplacements": [
+                {
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.prod.ts"
+                }
+              ]
+            }
           }
         }
       }
@@ -147,6 +158,8 @@
       "root": "",
       "sourceRoot": "",
       "projectType": "application",
+      "cli": {
+      },
       "architect": {
         "e2e": {
           "builder": "@angular-devkit/build-angular:protractor",
@@ -169,14 +182,33 @@
       }
     }
   },
+  "cli": {},
   "defaultProject": "pdr-landingpage",
   "schematics": {
     "@schematics/angular:component": {
       "prefix": "app",
-      "styleext": "css"
+      "styleext": "css",
+      "spec": false,
+      "inlineStyle": true,
+      "inlineTemplate": true
     },
     "@schematics/angular:directive": {
       "prefix": "app"
+    },
+    "@schematics/angular:class": {
+      "spec": false
+    },
+    "@schematics/angular:guard": {
+      "spec": false
+    },
+    "@schematics/angular:module": {
+      "spec": false
+    },
+    "@schematics/angular:pipe": {
+      "spec": false
+    },
+    "@schematics/angular:service": {
+      "spec": false
     }
   }
 }

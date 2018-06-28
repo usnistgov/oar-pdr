@@ -1,3 +1,4 @@
+
 import { Injectable } from '@angular/core';
 import { Resolve, ActivatedRouteSnapshot } from '@angular/router';
 import { SearchService } from '../shared/search-service/index';
@@ -7,33 +8,48 @@ import { Router } from '@angular/router';
 import * as _ from 'lodash';
 import { Console } from '@angular/core/src/console';
 import 'rxjs/add/observable/of';
+import {first, tap} from 'rxjs/operators';
+import {of} from 'rxjs/observable/of';
+import {PLATFORM_ID, Inject} from '@angular/core';
+import {isPlatformServer} from '@angular/common';
+import {makeStateKey, TransferState} from '@angular/platform-browser';
+
 @Injectable()
 export class SearchResolve implements Resolve<any> {
    
-  // constructor(private searchService: SearchService, private rtr: Router ) {}
-  
-  // resolve(route: ActivatedRouteSnapshot, rstate: RouterStateSnapshot): Observable<any> {
-  //   let searchId = route.params['id'];
-  //   if (_.includes(rstate.url,'ark')) 
-  //      searchId = rstate.url.split('/id/').pop();
-  //   return this.searchService.searchById(searchId).catch((err: Response, caught: Observable<any[]>) => {
-  //     if (err !== undefined) {
-  //       if(err.status >= 500){
-  //         this.rtr.navigate(["/error", searchId]);
-  //       }
-  //       if(err.status >= 400 && err.status < 500 ){
-  //          this.rtr.navigate(["/usererror", searchId]); 
-  //       }
-  //     }
-  //     return Observable.throw(caught);
-  //   });
-  // }
-
+  constructor(private searchService: SearchService,
+              @Inject(PLATFORM_ID) private platformId,
+              private transferState:TransferState) {}
+ 
   /** Working below **/
-  constructor(private searchService: SearchService) {}
+  //  constructor(private searchService: SearchService) {}
   
-  resolve(route: ActivatedRouteSnapshot) {
-    return this.searchService.searchById(route.params['id']);
+  // resolve(route: ActivatedRouteSnapshot) {
+  //   return this.searchService.searchById(route.params['id']);
+  // }
+  resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<any> {
+
+    const recordid = route.params['id'];
+    const recordid_KEY = makeStateKey<any>('record-' + recordid);
+
+    if (this.transferState.hasKey(recordid_KEY)) {
+        console.log("1. Is it here @@@");
+        const record = this.transferState.get<any>(recordid_KEY, null);
+        this.transferState.remove(recordid_KEY);
+        return of(record);
+    }
+    else {
+        return this.searchService.searchById(recordid)
+            .pipe(
+                tap(course => {
+                    if (isPlatformServer(this.platformId)) {
+                      console.log("2 . Is it here @@@:"+this.platformId);
+                        this.transferState.set(recordid_KEY, course);
+                    }
+
+                })
+            );
+    }
   }
 }
 

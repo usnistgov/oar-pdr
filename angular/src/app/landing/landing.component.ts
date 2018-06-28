@@ -3,7 +3,7 @@ import { Component, OnInit, OnDestroy, AfterViewInit, ElementRef,
 import { DatePipe,CommonModule,isPlatformBrowser } from '@angular/common';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { BrowserModule ,Title} from '@angular/platform-browser';
-import { ActivatedRoute }     from '@angular/router';
+import { ActivatedRoute, Router, NavigationEnd } from '@angular/router';
 import { Message } from 'primeng/components/common/api';
 import { TreeModule,TreeNode, Tree, MenuItem,OverlayPanelModule,
          FieldsetModule,PanelModule,ContextMenuModule,
@@ -73,10 +73,24 @@ export class LandingComponent implements OnInit {
    *
    */
   constructor(private route: ActivatedRoute, private el: ElementRef, 
-              private titleService: Title, private appConfig : AppConfig) {
+              private titleService: Title, private appConfig : AppConfig,private router: Router) {
     this.rmmApi = this.appConfig.getConfig().RMMAPI;
     this.distApi = this.appConfig.getConfig().DISAPI;
     this.landing = this.appConfig.getConfig().LANDING;
+    router.events.subscribe(s => {
+      if (s instanceof NavigationEnd) {
+        const tree = router.parseUrl(router.url);
+        if (tree.fragment) {
+         //alert("Test Fragment :"+tree.fragment)
+          const element = document.querySelector("#" + tree.fragment);
+          
+          if (element) { 
+            //alert("Test here:"+element)
+            element.scrollIntoView(true); 
+           }
+        }
+      }
+    });
   }
 
    /**
@@ -122,16 +136,19 @@ export class LandingComponent implements OnInit {
     var itemsMenu: MenuItem[] = [];
     var descItem = this.createMenuItem ("Description",'',(event)=>{
       this.metadata = false; this.similarResources =false;
+      this.router.navigate(['/od/id/', this.record.ediid],{fragment:'description'});
     },'');
 
     var refItem = this.createMenuItem ("References",'',(event)=>{
       this.metadata = false; this.similarResources =false;
+      this.router.navigate(['/od/id/', this.record.ediid],{fragment:'reference'});
 
     },'');
 
-    var filesItem = this.createMenuItem("Files",'', (event)=>{
+    var filesItem = this.createMenuItem("Data Access",'', (event)=>{
       this.metadata = false;
       this.similarResources =false;
+      this.router.navigate(['/od/id/', this.record.ediid],{fragment:'dataAccess'});
     },'');
 
     var metaItem = this.createMenuItem("Metadata",'',(event)=>{
@@ -242,7 +259,7 @@ updateRightMenu(){
     this.files =[];
     this.route.data.map(data => data.searchService )
     .subscribe((res)=>{
-      console.log("Test results:"+JSON.stringify(res));
+      // console.log("Test results:"+JSON.stringify(res));
       this.onSuccess(res);
   }, error =>{
     console.log("There is an error in searchservice.");
