@@ -31,7 +31,7 @@ class TestMultibagValidator(test.TestCase):
 
     def setUp(self):
         self.tf = Tempfiles()
-        self.bagdir = self.tf.track("XXXX.mbag0_3-0")
+        self.bagdir = self.tf.track("XXXX.1_0.mbag0_4-0")
         shutil.copytree(bagdir, self.bagdir)
         
         self.bag = bag.NISTBag(self.bagdir)
@@ -81,15 +81,20 @@ class TestMultibagValidator(test.TestCase):
         self.assertTrue(has_error(errs, "2-2"))
         
     def test_name_patterns(self):
-        self.assertIsNotNone(self.valid8.namere.match("XXXX.mbag0_2-0"))
-        self.assertIsNotNone(self.valid8.namere.match("XXXX.mbag1_0-10"))
-        self.assertIsNotNone(self.valid8.namere.match("XXXX.mbag13_40-103"))
+        self.assertIsNotNone(self.valid8.namere02.match("XXXX.mbag0_2-0"))
+        self.assertIsNotNone(self.valid8.namere02.match("XXXX.mbag1_0-10"))
+        self.assertIsNotNone(self.valid8.namere02.match("XXXX.mbag13_40-103"))
 
-        self.assertIsNone(self.valid8.namere.match("XXXX.mbag0_2-"))
-        self.assertIsNone(self.valid8.namere.match("XXXX.mbag0.2-3"))
-        self.assertIsNone(self.valid8.namere.match("XXXX.mbag"))
-        self.assertIsNone(self.valid8.namere.match("samplebag"))
+        self.assertIsNone(self.valid8.namere02.match("XXXX.mbag0_2-"))
+        self.assertIsNone(self.valid8.namere02.match("XXXX.mbag0.2-3"))
+        self.assertIsNone(self.valid8.namere02.match("XXXX.mbag"))
+        self.assertIsNone(self.valid8.namere02.match("samplebag"))
 
+        self.assertIsNotNone(self.valid8.namere04.match("XXXX.1_0.mbag0_2-0"))
+        self.assertIsNotNone(self.valid8.namere04.match("XXXX.1_2_3.mbag1_0-10"))
+        self.assertIsNotNone(self.valid8.namere04.match("XXXX.21_12.mbag13_40-103"))
+
+        
     def test_test_bagit_mdels(self):
         errs = self.valid8.test_bagit_mdels(self.bag)
         self.assertEqual(errs.failed(), [],

@@ -31,13 +31,14 @@ class NISTBagValidator(ValidatorBase):
     parts (excluding Multibag and basic BagIt compliance; see 
     NISTAIPValidator)
     """
-    profile = ("NIST", "0.3")
-    namere = re.compile("^(\w+).mbag(\d+)_(\d+)-(\d+)$")
+    namere02 = re.compile("^(\w+).mbag(\d+)_(\d+)-(\d+)$")
+    namere04 = re.compile("^(\w+).(\d+(_\d+)*).mbag(\d+)_(\d+)-(\d+)$")
     
-    def __init__(self, config=None):
+    def __init__(self, config=None, profver="0.4"):
         super(NISTBagValidator, self).__init__(config)
         self._validatemd = self.cfg.get('validate_metadata', True)
         self.mdval = None
+        self.profile = ("NIST", profver)
         if self._validatemd:
             schemadir = self.cfg.get('nerdm_schema_dir', pdr.def_schema_dir)
             if not schemadir:
@@ -59,15 +60,22 @@ class NISTBagValidator(ValidatorBase):
         if not out:
             out = ValidationResults(bag.name, want)
 
-        t = self._issue("2-0", "Bag names should match format DSID.mbagMM_NN-SS")
-        nm = self.namere.match(bag.name)
+        pver = self.profile[1].split('.')
+        if pver > (0, 3):
+            t = self._issue("2-0",
+                         "Bag names should match format DSID.DM_DN.mbagMM_NN-SS")
+            nm = self.namere04.match(bag.name)
+        else:
+            t = self._issue("2-0",
+                            "Bag names should match format DSID.mbagMM_NN-SS")               nm = self.namere02.match(bag.name)
+            
         out._warn(t, nm)
 
-        if nm:
+        if nm02:
             t = self._issue("2-2", "Bag name should include version 'mbag{0}'"
                                    .format(self.profile[1]))
             vers = self.profile[1].split('.')
-            out._warn(t, nm.group(2) == vers[0] and nm.group(3) == vers[1])
+            out._warn(t, nm02.group(3) == vers[0] and nm02.group(4) == vers[1])
 
         return out
 

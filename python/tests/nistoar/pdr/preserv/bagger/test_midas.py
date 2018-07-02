@@ -507,8 +507,8 @@ class TestPreservationBagger(test.TestCase):
                     'Contact-Email': ["datasupport@nist.gov"],
                     'Organization-Address': [
                         "100 Bureau Dr., Gaithersburg, MD 20899"],
-                    'NIST-BagIt-Version': "0.3",
-                    'Multibag-Version': "0.3"
+                    'NIST-BagIt-Version': "0.4",
+                    'Multibag-Version': "0.4"
                 }
             }
         }
@@ -531,7 +531,7 @@ class TestPreservationBagger(test.TestCase):
         self.assertIsNotNone(self.bagr.bagbldr)
         self.assertTrue(os.path.exists(self.bagparent))
 
-        bagdir = os.path.join(self.bagparent, self.midasid+".mbag0_3-0")
+        bagdir = os.path.join(self.bagparent, self.midasid+".1_0.mbag0_4-0")
         self.assertEqual(self.bagr.bagdir, bagdir)
 
     def test_find_pod_file(self):
@@ -541,8 +541,8 @@ class TestPreservationBagger(test.TestCase):
 
     def test_form_bag_name(self):
         self.bagr.cfg['mbag_version'] = "1.2"
-        bagname = self.bagr.form_bag_name("goober", 3)
-        self.assertEqual(bagname, "goober.mbag1_2-3")
+        bagname = self.bagr.form_bag_name("goober", 3, "1.0.1")
+        self.assertEqual(bagname, "goober.1_0_1.mbag1_2-3")
 
     def test_ensure_metadata_preparation(self):
         self.bagr.ensure_metadata_preparation()

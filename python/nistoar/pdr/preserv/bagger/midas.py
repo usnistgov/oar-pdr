@@ -23,7 +23,7 @@ from nistoar.nerdm.merge import MergerFactory
 # _sys = PreservationSystem()
 log = logging.getLogger(_sys.system_abbrev).getChild(_sys.subsystem_abbrev)
 
-DEF_MBAG_VERSION = "0.3"
+DEF_MBAG_VERSION = "0.4"
 DEF_MIDAS_POD_FILE = "_pod.json"
 SUPPORTED_CHECKSUM_ALGS = [ "sha256" ]
 DEF_CHECKSUM_ALG = "sha256"
@@ -625,14 +625,15 @@ class PreservationBagger(SIPBagger):
         if not nodata:
             self.add_data_files()
 
-    def form_bag_name(self, dsid, bagseq=0):
+    def form_bag_name(self, dsid, bagseq=0, dsver="1.0"):
         """
         return the name to use for the working bag directory
         """
-        fmt = self.cfg.get('bag_name_format', "{0}.mbag{1}-{2}")
+        fmt = self.cfg.get('bag_name_format', "{0}.{1}.mbag{2}-{3}")
         bver = self.cfg.get('mbag_version', DEF_MBAG_VERSION)
         bver = re.sub(r'\.', '_', bver)
-        return fmt.format(dsid, bver, bagseq)
+        dsver = re.sub(r'\.', '_', dsver)
+        return fmt.format(dsid, dsver, bver, bagseq)
 
     def add_data_files(self):
         """
