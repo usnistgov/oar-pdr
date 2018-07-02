@@ -12,7 +12,7 @@
           <span [hidden] ="!addFileSpinner" style="float:right;">
             <p-progressSpinner [style]="{width: '20px', height: '20px', float: 'right'}" ></p-progressSpinner>
           </span>
-          <a style="position:relative" *ngIf="this.fileDetails['downloadURL'] != null" href="javascript:void(0)" (click)='addtoCart(record["@id"], record["title"], fileDetails["title"], fileDetails["title"],fileDetails["filepath"],fileDetails["filepath"],fileDetails["size"],fileDetails["downloadURL"], fileDetails["mediaType"],"resource",null)' class="faa faa-cart-plus faa-lg" title="Add this file to Data cart" ></a>
+          <a style="position:relative" *ngIf="this.fileDetails['downloadURL'] != null" href="javascript:void(0)" (click)='addtoCart(record["ediid"], record["title"], fileDetails["title"], fileDetails["title"],fileDetails["filepath"],fileDetails["filepath"],fileDetails["size"],fileDetails["downloadURL"], fileDetails["mediaType"],"resource",null)' class="faa faa-cart-plus faa-lg" title="Add this file to Data cart" ></a>
           <h4><span *ngIf="fileDetails['title']"> {{ fileDetails["title"]}} </span></h4>
           <br><span class="font10">Path: <b>{{fileDetails["filepath"]}}</b></span>
           <span *ngIf="fileDetails['downloadURL']" class="font8"> <br>Type:<b>{{fileDetails["mediaType"]}}</b></span>

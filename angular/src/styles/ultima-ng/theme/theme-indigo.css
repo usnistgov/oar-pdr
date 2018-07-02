@@ -29654,7 +29654,7 @@ body .ui-treetable .ui-treetable-summary {
 body .ui-treetable .ui-treetable-thead > tr > th,
 body .ui-treetable .ui-treetable-tbody > tr > td,
 body .ui-treetable .ui-treetable-tfoot > tr > td {
-  padding: 0.625em 1em; }
+  padding: 0.25em 1em; }
 body .ui-treetable .ui-treetable-thead > tr > th,
 body .ui-treetable .ui-treetable-tfoot > tr > td {
   font-weight: 400;

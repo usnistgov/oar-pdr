@@ -74,7 +74,9 @@ export class DatacartComponent implements OnInit, OnDestroy {
   index:any = {};
   selectedNode: TreeNode[] = [];
   selectedFileCount: number = 0;
-  private distApi : string = environment.DISTAPI;
+  selectedParentIndex:number = 0;
+
+    private distApi : string = environment.DISTAPI;
   //private distApi:string = "http://localhost:8083/oar-dist-service";
 
 
@@ -108,6 +110,12 @@ export class DatacartComponent implements OnInit, OnDestroy {
     let params = new HttpParams();
     let folderName: string;
     this.showSpinner = true;
+      var i:number;
+      for ( i=0; i < this.dataFiles.length;i++) {
+          if (this.dataFiles[i].expanded == true) {
+              this.selectedParentIndex = i;
+          }
+      }
     for (let selData of this.selectedData) {
       if (selData.data['filePath'] != null) {
         if (selData.data['filePath'].split(".").length > 1) {
@@ -155,7 +163,9 @@ export class DatacartComponent implements OnInit, OnDestroy {
           this.cartEntities = result;
           console.log("hello" + JSON.stringify(this.cartEntities));
           this.createDataCartHierarchy();
-          this.dataFiles[0].expanded = true;
+          if (this.cartEntities.length > 0) {
+              this.dataFiles[this.selectedParentIndex].expanded = true;
+          }
       }.bind(this), function (err) {
           alert("something went wrong while fetching the products");
       });
@@ -224,6 +234,12 @@ export class DatacartComponent implements OnInit, OnDestroy {
 
         let dataId: any;
         // convert the map to an array
+        var i:number;
+        for ( i=0; i < this.dataFiles.length;i++) {
+            if (this.dataFiles[i].expanded == true) {
+                this.selectedParentIndex = i;
+            }
+        }
         for (let selData of this.selectedData) {
             dataId = selData.data['id'];
             // Filter out all cartEntities with given productId,  finally the new stuff from es6 can be used.
@@ -237,7 +253,7 @@ export class DatacartComponent implements OnInit, OnDestroy {
         this.createDataCartHierarchy();
 
         if (this.cartEntities.length > 0) {
-            this.dataFiles[0].expanded = true;
+            this.dataFiles[this.selectedParentIndex].expanded = true;
         }
 
         this.cartService.setCartLength(this.cartEntities.length);
@@ -253,13 +269,19 @@ export class DatacartComponent implements OnInit, OnDestroy {
 
         let dataId: any;
         // convert the map to an array
+        var i:number;
+        for ( i=0; i < this.dataFiles.length;i++) {
+            if (this.dataFiles[i].expanded == true) {
+                this.selectedParentIndex = i;
+            }
+        }
         this.cartService.removeDownloadStatus();
         this.cartService.getAllCartEntities().then(function (result) {
             //console.log("result" + result.length);
             this.cartEntities = result;
             this.createDataCartHierarchy();
             if (this.cartEntities.length > 0) {
-                this.dataFiles[0].expanded = true;
+                this.dataFiles[this.selectedParentIndex].expanded = true;
             }
             this.cartService.setCartLength(this.cartEntities.length);
 

@@ -4,8 +4,8 @@
             <label style="font-size: xx-large;float: left;display: block;"><i class="faa faa-shopping-cart faa-lg"></i> Data Cart</label>
         </div>
     </div>
-    <div style="padding-left: 1%;padding-bottom:10%;background-color: #FFFFFF">
-        <div class="ui-g" style="padding-left: -1%;">
+    <div style="padding-left: 1%;padding-bottom:10%;background-color: #FFFFFF;">
+        <div class="ui-g" style="padding-left: -1%;border-bottom:.5px solid #e6e6e6;width: 100%;">
             <div class="ui-g-12 ui-md-12" >
                 <div class="ui-g-12 ui-md-2" >
                     <button type="button" id="download" (click)="downloadZIP()" pButton type="submit" class="searchButton" disabled><i class="faa faa-download faa-1x icon-white" style="color: #fff;"></i> Download selected <span class="badge badge-notify" >{{selectedFileCount}}</span></button>
@@ -19,25 +19,24 @@
                     <div style="height: 20px"></div>
             </div>
             <div class="ui-g-2 ui-md-2" *ngFor="let item of displayFiles  ">
-                {{item.key}} <p-progressSpinner *ngIf ="item.value === true" [style]="{width: '12px', height: '12px'}" ></p-progressSpinner><i class="faa faa-check" *ngIf ="item.value !== true"></i>
+                &nbsp;&nbsp;{{item.key}} <p-progressSpinner *ngIf ="item.value === true" [style]="{width: '12px', height: '12px'}" ></p-progressSpinner><i class="faa faa-check" *ngIf ="item.value !== true"></i>
             </div>
         </div>
-        <p-treeTable selectionMode="checkbox" [value]="dataFiles" (onNodeSelect) = "dataFileCount()" (onNodeUnselect) = "dataFileCount()" [(selection)]="selectedData" [scrollable]="true" scrollHeight="600px" [style]="{'margin-left':'1%','width':'70%','background-color':'#606164','color':'#000'}">
+        <p-treeTable selectionMode="checkbox" [value]="dataFiles" (onNodeSelect) = "dataFileCount()" (onNodeUnselect) = "dataFileCount()" [(selection)]="selectedData" [scrollable]="true" scrollHeight="600px" [style]="{'margin-left':'1%','margin-top':'1%','width':'70%','background-color':'#606164','color':'#000'}">
             <ng-template pTemplate="header">
                 <tr>
-                    <th style="color: #FFFFFF; background-color:#606164; width: 65%;"> Title</th>
+                    <th style="color: #FFFFFF; background-color:#606164; width: 75%;"> Title</th>
                     <th style="color: #FFFFFF; background-color:#606164;">Status</th>
                     <th style="color: #FFFFFF; background-color:#606164;">Size</th>
                 </tr>
             </ng-template>
                 <ng-template let-rowNode let-rowData="rowData"  let-i="rowIndex" pTemplate="body">
                     <tr>
-                        <td width="65%">
+                        <td width="75%">
                             <p-treeTableToggler [rowNode]="rowNode"></p-treeTableToggler>
                             &nbsp;<p-treeTableCheckbox [value]="rowNode"></p-treeTableCheckbox>
-                            &nbsp;<a href="{{rowData.downloadURL}}" target="_blank" *ngIf="rowData.id== null" >{{rowData.resTitle}}</a>
                             &nbsp;<a href="{{rowData.downloadURL}}" target="_blank" *ngIf = "rowData.resTitle.indexOf('.') > 0 "> {{rowData.resTitle}}</a>
-                            <span *ngIf = "rowData.resTitle.indexOf('.') < 0 && rowData.id!= null"> {{rowData.resTitle}}</span>
+                            <span *ngIf = "rowData.resTitle.indexOf('.') < 0 "> {{rowData.resTitle}}</span>
                         </td>
                         <td>
                             &nbsp;

@@ -91,6 +91,10 @@ import { Data} from '../datacart/data';
                     <span [hidden] ="!addAllFileSpinner">
                         <p-progressSpinner [style]="{width: '20px', height: '20px',top:'10%'}" ></p-progressSpinner>
                      </span>
+                    <span [hidden] ="!addFileStatus" style="zoom: 75%">
+                        <i class="pi pi-check" style="zoom: 75%"></i>
+                        Done
+                     </span>
                 </h3> <i *ngIf="loginuser" style="float:right" class="faa faa-edit"></i>
                 <div class="ui-g">
                     <div class="ui-g-6 ui-md-6 ui-lg-6 ui-sm-12">
@@ -140,6 +144,7 @@ export class DescriptionComponent {
  accessTitles : string[] =[];
  isReferencedBy : boolean = false;
  isDocumentedBy : boolean = false;
+ addFileStatus:boolean = false;
  
 
  nodeSelect(event) {
@@ -199,6 +204,9 @@ checkReferences(){
         setTimeout(() => {
             this.cartService.updateAllFilesSpinnerStatus(false);
         }, 3000);
+         setTimeout(() => {
+             this.addFileStatus = true;
+         }, 3000);
 }
 
  checkKeywords(){
