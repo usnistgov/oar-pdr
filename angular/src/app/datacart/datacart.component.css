@@ -1,0 +1,271 @@
+:host /deep/ .ui-widget-content {
+  border: 0px;
+}
+
+.style-horizontal {
+  border: 0;
+  height: 1px;
+  background: #333;
+  background-image: linear-gradient(to right, #ccc, #333, #ccc);
+}
+
+.background-white
+{
+  background-color:#ffffff;
+}
+
+.white
+{
+  color:#ffffff;
+}
+
+.title
+{
+  color:#1471AE;
+  font-size: 20px;
+}
+
+.recordType{
+  font-family: Arial, Helvetica, sans-serif;
+  color:#707070;
+  font-size: 14;
+}
+
+:host /deep/ .ui-tree {
+  padding: 0.625em 1em/2;
+  font-weight:bold;
+  font-size: small;
+}
+
+
+:host /deep/ .ui-treenode-label{
+  font-style: italic;
+  color: #1471AE;
+
+}
+:host /deep/ .ui-treenode{
+  background-color:#ffffff;
+  word-wrap: break-word;
+}
+
+
+:host /deep/ .ui-tree .ui-treenode-children{
+  background-color:#ffffff;
+}
+
+
+:host /deep/ .ui-tree .ui-tree-container {
+  /*background-color: #f399f3;*/
+  /*width: 250px;*/
+  position: relative;
+  float: left;
+}
+
+
+
+/*:host /deep/ .ui-menuitem{
+  font-style: italic;
+
+}*/
+
+/*:host /deep/ .ui-menu{
+  background-color: #004e8e;
+}*/
+
+/*:host /deep/ .rightMenuStyle >.ui-menu  {
+  font-style: italic;
+  background-color: #e1dcdc;
+}*/
+
+
+
+:host /deep/ .leftMenuStyle > .ui-menu  .ui-menu-list li.ui-widget-header{
+  background-color: #B4B0B0;
+  font-weight: bold;
+  /*font-family: 'Franklin Gothic Urw Cond';*/
+  font-family: Sans-Serif;
+  padding: 2%;
+  padding-left: 5%;
+}
+:host /deep/ .leftMenuStyle > .ui-menu .ui-menu-list li.ui-menuitem .ui-menuitem-link{
+  line-height: 0;
+  min-height: 1.5em;
+  /*font-family: 'Franklin Gothic Urw Cond';*/
+  font-family: 'Roboto';
+  background-color: #e8e7e7;
+  word-wrap: break-word;
+  /*padding: 5%; */
+}
+
+:host /deep/ .leftMenuStyle > .ui-menu .ui-menu-list li.ui-menuitem .ui-menuitem-link:hover {
+  background-color: #ffffff;
+  color: #000000; }
+
+
+:host /deep/ .rightMenuStyle > .ui-menu  .ui-menu-list li.ui-widget-header{
+  background-color: #B8D4E6;
+  padding: 2%;
+  padding-left: 5%;
+  font-family: 'Roboto';
+  font-weight: bold;
+}
+
+:host /deep/ .rightMenuStyle > .ui-menu .ui-menu-list li.ui-menuitem .ui-menuitem-link{
+  line-height: 0;
+  min-height: 0;
+  padding: 2px;
+  font-family: 'Roboto';
+  padding-left: 5%;
+  /*font-family: 'Franklin Gothic Medium';*/
+  /*font-style: italic; font-size: 10pt;*/
+
+}
+
+:host /deep/ .rightMenuStyle > .ui-menu .ui-menu-list li.ui-menuitem{
+  background-color:#E7F0F6;
+  font-family: 'Sans-Serif';
+  word-wrap: break-word;
+}
+
+/* Description section */
+.welldesc{
+  background-color:#006495;
+  text-align: left;
+  color: white;
+}
+:host /deep/ citationDialog > button.ui-button-icon-only{
+  border-radius: 50%;
+  width: 1.5em;
+  height: 1.5em;
+}
+
+.fileinfosection{
+  background-color:#F3F3F3;
+  padding: 2.5rem 2.5rem 2.5rem 2.5rem;
+}
+
+.fileinfocard{
+  padding: 0 2.5rem 2.5rem 2.5rem;
+}
+.landingcard{
+  padding: 2.5rem 2.5rem 2.5rem 2.5rem;
+}
+.citeString{
+  font-family:  Franklin Gothic Urw;
+  font-style:italic;
+  color:#484646;
+  font-size: 12;
+}
+.copyCite{
+  position:relative;
+  float:right;
+}
+
+.ui-button.small-button {
+  font-size:.5em;
+  background-color: green;
+  margin-bottom: 1em;
+}
+
+:host /deep/ .ui-progress-spinner-svg {
+  top:50%;
+}
+
+:host /deep/ p-dialog .ui-dialog {
+  background-color: #ebffff;
+}
+
+:host /deep/ .ui-dialog .ui-dialog-titlebar{
+  background-color: #232F3E;
+  color: #fff;
+}
+
+:host /deep/ .ui-treetable .ui-treetable-row td {
+  border:1px solid #bdbdbd;
+}
+
+:host /deep/ .ui-treetable thead tr th {
+  border:1px solid #bdbdbd;
+  background-color: lightgrey;
+}
+
+:host /deep/ .ui-chkbox .ui-chkbox-box {
+  width: 1.2em;
+  height: 1.2em;
+}
+
+:host /deep/ .faa-cart-plus:before {
+  color: green;
+}
+
+:host /deep/ .ui-widget-content {
+  font-size: .95em ;
+}
+
+.badge-notify{
+  background-color: gray;
+  position:relative;
+  color: #fff;
+}
+
+:host /deep/ .ui-button, body .ui-datepicker-buttonpane button {
+  padding:.4em;
+}
+
+:host /deep/ .ui-treetable thead th, .ui-treetable tbody td, .ui-treetable tfoot td {
+  white-space: normal;
+}
+
+:host /deep/ .ui-state-active, body .ui-state-highlight {
+  background-color: #FFFFFF;
+}
+
+:host /deep/ .ui-tree .ui-treenode-label.ui-state-highlight, body ui-tree .ui-treenode-label.ui-state-hover {
+  font-weight: 700;
+  color: #000;
+}
+
+:host /deep/ .ui-menu .ui-menu-list li.ui-widget-header {
+  color: #000;
+  background-color: #B8D4E6;
+  font-family: 'Roboto';
+  font-weight: bold;
+}
+
+:host /deep/ .ui-paginator .ui-paginator-pages a.ui-state-active {
+  background-color: #03A9F4;
+}
+
+:host /deep/ .ui-datatable .ui-datatable-data tr.ui-datatable-even.ui-state-highlight {
+  background-color: #03A9F4;
+}
+
+:host /deep/ .ui-datatable .ui-datatable-data tr.ui-datatable-odd.ui-state-highlight {
+  background-color: #03A9F4;
+}
+
+:host /deep/ .ui-treetable tbody .ui-treetable-row.ui-state-highlight {
+  background-color: #03A9F4;
+}
+
+
+.searchButton{
+  background-color:#0872B9;
+  width: 100%;
+  height: 42px;
+  font-weight: 900;
+  font-size: 18px;
+  border-radius: 0px;
+  /*
+  border-radius-topright: 5px;
+  border-radius-bottomright: 5px;
+  -moz-border-radius-topright: 5px;
+  -moz-border-radius-bottomright: 5px;
+  -webkit-border-bottom-right-radius: 5px;
+  -webkit-border-top-right-radius: 5px;
+  */
+}
+
+.searchButton:hover{
+  background-color:#1F5593;
+}

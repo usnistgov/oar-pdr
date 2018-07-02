@@ -1,5 +1,7 @@
 import { Component, Input } from '@angular/core';
-import {LandingComponent} from '../landing.component'; 
+import {LandingComponent} from '../landing.component';
+import { CartService} from '../../datacart/cart.service';
+import { Data} from '../../datacart/data';
 
 @Component({
    moduleId: module.id,  
@@ -10,6 +12,15 @@ import {LandingComponent} from '../landing.component';
 
 export class FileDetailsComponent {
    @Input() fileDetails: any[];
+   @Input() record: any[];
+   addFileSpinner: boolean = false;
+
+
+   constructor(private cartService : CartService ) {
+       this.cartService.watchAddFileCart().subscribe(value => {
+       this.addFileSpinner = value;
+        });
+   }
 
    download(){
        window.open(this.fileDetails["downloadURL"]);
@@ -26,7 +37,15 @@ export class FileDetailsComponent {
          f=Math.floor(Math.log(bytes)/Math.log(base));
         return (bytes/Math.pow(base,f)).toFixed(d)+" "+e[f]
     }
-   addtoCart(){
-      alert("Coming soon");
-   }
+
+    addtoCart(resId:string,resTitle:string,resFilePath:string,id:string,fileName:string,filePath:string,fileSize:number,downloadURL:string,fileFormat:string,dataset:string,downloadedStatus:boolean){
+        this.cartService.updateFileSpinnerStatus(true);
+        let data : Data;
+        data = {'resId':resId,'resTitle':resTitle,'resFilePath':'resFilePath','id':id,'fileName':fileName,'filePath':filePath,'fileSize':fileSize,'downloadURL':downloadURL,'fileFormat':fileFormat,'downloadedStatus':downloadedStatus
+        };
+        this.cartService.addDataToCart(data);
+        setTimeout(()=> {
+            this.cartService.updateFileSpinnerStatus(false);
+        }, 3000);
+    }
  }

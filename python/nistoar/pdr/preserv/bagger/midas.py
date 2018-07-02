@@ -25,8 +25,10 @@ log = logging.getLogger(_sys.system_abbrev).getChild(_sys.subsystem_abbrev)
 
 DEF_MBAG_VERSION = "0.3"
 DEF_MIDAS_POD_FILE = "_pod.json"
-SUPPORTED_CHECKSUM_ALGS = [ "sha256" ];
+SUPPORTED_CHECKSUM_ALGS = [ "sha256" ]
 DEF_CHECKSUM_ALG = "sha256"
+DEF_MERGE_CONV = "initdef"  # For merging MIDAS-generated metadata with
+                            # initial defaults
 
 def _midadid_to_dirname(midasid, log=None):
     out = midasid
@@ -65,7 +67,7 @@ class MIDASMetadataBagger(SIPBagger):
     :prop update_by_checksum_size_lim int (0):  a size limit in bytes for which 
                                  files less than this will be checked to see 
                                  if it has changed (not yet implemented).
-    :prop conponent_merge_convention str ("dev"): the merge convention name to 
+    :prop component_merge_convention str ("dev"): the merge convention name to 
                                  use to merge MIDAS-provided component metadata
                                  with the PDR's initial component metadata.
     :prop relative_to_indir bool (False):  If True, the output bag directory 
@@ -292,10 +294,13 @@ class MIDASMetadataBagger(SIPBagger):
                     log.info("Extending file metadata for %s", destpath)
         
         if update:
+            # generate some default metadata for the file
             init = self.bagbldr.init_filemd_for(destpath, examine=inpath,
                                                 disttype=disttype)
             if nerd:
-                conv = self.cfg.get('component_merge_convention', 'dev')
+                # merge with the data passed to this method (e.g. as
+                # generated from the POD record.
+                conv = self.cfg.get('component_merge_convention', DEF_MERGE_CONV)
                 merger = self._merger_for(conv, "DataFile")
                 nerd = merger.merge(nerd, init)
             else:
