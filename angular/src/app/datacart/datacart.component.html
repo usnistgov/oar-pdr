@@ -8,13 +8,13 @@
         <div class="ui-g" style="padding-left: -1%;border-bottom:.5px solid #e6e6e6;width: 100%;">
             <div class="ui-g-12 ui-md-12" >
                 <div class="ui-g-12 ui-md-2" >
-                    <button type="button" id="download" (click)="downloadZIP()" pButton type="submit" class="searchButton" disabled><i class="faa faa-download faa-1x icon-white" style="color: #fff;"></i> Download selected <span class="badge badge-notify" >{{selectedFileCount}}</span></button>
+                    <button type="button" id="download" (click)="downloadZIP()" pButton type="submit" class="searchButton" ><i class="faa faa-download faa-1x icon-white" style="color: #fff;"></i> Download selected <span class="badge badge-notify" >{{selectedFileCount}}</span></button>
                 </div>
                 <div class="ui-g-12 ui-md-2" >
-                    <button type="button" id="removeData" (click)="removeByDataId()" style="background-color: red;" class="searchButton" disabled pButton type="submit"><i class="faa faa-trash faa-1x icon-white" style="color: #fff;"></i> Remove selected <span class="badge badge-notify">{{selectedFileCount}}</span></button>
+                    <button type="button" id="removeData" (click)="removeByDataId()" style="background-color: red;" class="searchButton"  pButton type="submit"><i class="faa faa-trash faa-1x icon-white" style="color: #fff;"></i> Remove selected <span class="badge badge-notify">{{selectedFileCount}}</span></button>
                 </div>
                 <div class="ui-g-12 ui-md-2" >
-                    <button type="button" id="downloadStatus" (click)="removeByDownloadStatus()" style="background-color: red;" class="searchButton" disabled pButton type="submit"><i class="faa faa-minus-circle faa-1x icon-white" style="color: #fff;"></i> Remove downloaded</button>
+                    <button type="button" id="downloadStatus" (click)="removeByDownloadStatus()" style="background-color: red;" class="searchButton"  pButton type="submit"><i class="faa faa-minus-circle faa-1x icon-white" style="color: #fff;"></i> Remove downloaded</button>
                 </div>
                     <div style="height: 20px"></div>
             </div>

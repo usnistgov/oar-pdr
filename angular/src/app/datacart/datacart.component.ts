@@ -187,15 +187,15 @@ export class DatacartComponent implements OnInit, OnDestroy {
       }
 
       if (this.selectedFileCount > 0) {
-          var element = <HTMLInputElement> document.getElementById("download");
-          element.disabled = false;
-          element = <HTMLInputElement> document.getElementById("removeData");
-          element.disabled = false;
+         // var element = <HTMLInputElement> document.getElementById("download");
+         // element.disabled = false;
+         // element = <HTMLInputElement> document.getElementById("removeData");
+         // element.disabled = false;
       } else {
-          var element = <HTMLInputElement> document.getElementById("download");
-          element.disabled = true;
-          element = <HTMLInputElement> document.getElementById("removeData");
-          element.disabled = true;
+          //var element = <HTMLInputElement> document.getElementById("download");
+          //element.disabled = true;
+          //element = <HTMLInputElement> document.getElementById("removeData");
+          //element.disabled = true;
       }
 
   }
@@ -333,11 +333,11 @@ export class DatacartComponent implements OnInit, OnDestroy {
     this.createDataCartHierarchy();
     this.display = true;
       if (this.cartEntities.length > 0) {
-          var element = <HTMLInputElement> document.getElementById("downloadStatus");
-          element.disabled = false;
+         // var element = <HTMLInputElement> document.getElementById("downloadStatus");
+         // element.disabled = false;
       } else {
-          var element = <HTMLInputElement> document.getElementById("downloadStatus");
-          element.disabled = true;
+          //var element = <HTMLInputElement> document.getElementById("downloadStatus");
+          //element.disabled = true;
       }
 
   }
