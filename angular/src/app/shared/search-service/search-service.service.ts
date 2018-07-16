@@ -23,9 +23,9 @@ export class SearchService {
    * @constructor
    */
   constructor(private http: HttpClient, private appConfig : AppConfig) {
-    this.rmmApi = this.appConfig.getConfig().RMMAPI;
-    this.metaApi = this.appConfig.getConfig().METAPI;
-    this.landingBackend = this.appConfig.getConfig().LANDING;
+    this.rmmApi = this.appConfig.getRMMapi();
+    this.metaApi = this.appConfig.getMetaApi();
+    this.landingBackend = this.appConfig.getLandingBackend();
   }
 
   searchSample(){

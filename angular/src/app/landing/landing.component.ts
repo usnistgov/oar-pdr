@@ -74,9 +74,11 @@ export class LandingComponent implements OnInit {
    */
   constructor(private route: ActivatedRoute, private el: ElementRef, 
               private titleService: Title, private appConfig : AppConfig,private router: Router) {
-    this.rmmApi = this.appConfig.getConfig().RMMAPI;
-    this.distApi = this.appConfig.getConfig().DISAPI;
-    this.landing = this.appConfig.getConfig().LANDING;
+    
+    this.rmmApi = this.appConfig.getRMMapi();
+    this.distApi = this.appConfig.getDistApi();
+    this.landing = this.appConfig.getLandingBackend();
+
     router.events.subscribe(s => {
       if (s instanceof NavigationEnd) {
         const tree = router.parseUrl(router.url);

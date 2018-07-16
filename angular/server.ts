@@ -8,6 +8,7 @@ import {provideModuleMap} from '@nguniversal/module-map-ngfactory-loader';
 import * as express from 'express';
 import {join} from 'path';
 
+
 global['Event'] = null;
 // Faster server renders w/ Prod mode (dev mode never needed)
 enableProdMode();
@@ -18,6 +19,9 @@ const app = express();
 const PORT = process.env.PORT || 4000;
 const DIST_FOLDER = join(process.cwd(), 'dist');
 
+console.log("All the environment variables ***::"+ process.env);
+console.log("PORT::"+ process.env.PORT);
+console.log("PORT::"+ process.env.MYVAR);
 // * NOTE :: leave this as require() since this file is built Dynamically from webpack
 const {AppServerModuleNgFactory, LAZY_MODULE_MAP} = require('./dist/server/main');
 

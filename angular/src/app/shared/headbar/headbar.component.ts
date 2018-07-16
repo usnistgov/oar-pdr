@@ -32,8 +32,8 @@ export class HeadbarComponent {
   loginuser = false;
 
   constructor( private el: ElementRef, private appConfig : AppConfig) {
-    this.SDPAPI = this.appConfig.getConfig().SDPAPI;
-    this.landingService = this.appConfig.getConfig().LANDING;
+    this.SDPAPI = this.appConfig.getSDPApi();
+    this.landingService = this.appConfig.getLandingBackend();
   }
   
   checkinternal() {
