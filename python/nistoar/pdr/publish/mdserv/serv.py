@@ -167,7 +167,7 @@ class PrePubMetadataService(PublishSystem):
                             'download_base_url' is set (see above).  
         """
         bag = NISTBag(bagdir)
-        out = bag.nerdm_record()
+        out = bag.nerdm_record(merge_annots=True)
 
         if not baseurl:
             baseurl = self.cfg.get('download_base_url')

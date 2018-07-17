@@ -5,9 +5,14 @@
           <span class="textstyle1 fDetailsfFont">
             <span *ngIf="fileDetails['downloadURL']"> File </span>
             <span *ngIf="!fileDetails['downloadURL']"> Subcollection</span>
+              <a *ngIf="fileDetails['downloadURL']" href="{{this.fileDetails['downloadURL']}}" class="faa faa-download faa-lg" title="Download File" ></a>
+
           </span>
           <!-- <button pButton style="position:relative; float:right;" class="ui-button-success" type="button" (click)="download()" label="Download"></button> -->
-          <a *ngIf="fileDetails['downloadURL']" style="position:relative; float:right;"  href="{{this.fileDetails['downloadURL']}}" class="faa faa-download faa-lg" title="Download File" ></a>
+          <span [hidden] ="!addFileSpinner" style="float:right;">
+            <p-progressSpinner [style]="{width: '20px', height: '20px', float: 'right'}" ></p-progressSpinner>
+          </span>
+          <a style="position:relative" *ngIf="this.fileDetails['downloadURL'] != null" href="javascript:void(0)" (click)='addtoCart(record["ediid"], record["title"], fileDetails["title"], fileDetails["title"],fileDetails["filepath"],fileDetails["filepath"],fileDetails["size"],fileDetails["downloadURL"], fileDetails["mediaType"],"resource",null)' class="faa faa-cart-plus faa-lg" title="Add this file to Data cart" ></a>
           <h4><span *ngIf="fileDetails['title']"> {{ fileDetails["title"]}} </span></h4>
           <br><span class="font10">Path: <b>{{fileDetails["filepath"]}}</b></span>
           <span *ngIf="fileDetails['downloadURL']" class="font8"> <br>Type:<b>{{fileDetails["mediaType"]}}</b></span>

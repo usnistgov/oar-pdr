@@ -1,0 +1,61 @@
+<div >
+    <div class="ui-g" style="width: 100%;background-color: #153971;color: #FFFFFF">
+        <div class="ui-g-12" style="padding:1.5em;">
+            <label style="font-size: xx-large;float: left;display: block;"><i class="faa faa-shopping-cart faa-lg"></i> Data Cart</label>
+        </div>
+    </div>
+    <div style="padding-left: 1%;padding-bottom:10%;background-color: #FFFFFF;">
+        <div class="ui-g" style="padding-left: -1%;border-bottom:.5px solid #e6e6e6;width: 100%;">
+            <div class="ui-g-12 ui-md-12" >
+                <div class="ui-g-12 ui-md-2" >
+                    <button type="button" id="download" (click)="downloadZIP()" pButton type="submit" class="searchButton" ><i class="faa faa-download faa-1x icon-white" style="color: #fff;"></i> Download selected <span class="badge badge-notify" >{{selectedFileCount}}</span></button>
+                </div>
+                <div class="ui-g-12 ui-md-2" >
+                    <button type="button" id="removeData" (click)="removeByDataId()" style="background-color: red;" class="searchButton"  pButton type="submit"><i class="faa faa-trash faa-1x icon-white" style="color: #fff;"></i> Remove selected <span class="badge badge-notify">{{selectedFileCount}}</span></button>
+                </div>
+                <div class="ui-g-12 ui-md-2" >
+                    <button type="button" id="downloadStatus" (click)="removeByDownloadStatus()" style="background-color: red;" class="searchButton"  pButton type="submit"><i class="faa faa-minus-circle faa-1x icon-white" style="color: #fff;"></i> Remove downloaded</button>
+                </div>
+                    <div style="height: 20px"></div>
+            </div>
+            <div class="ui-g-2 ui-md-2" *ngFor="let item of displayFiles  ">
+                &nbsp;&nbsp;{{item.key}} <p-progressSpinner *ngIf ="item.value === true" [style]="{width: '12px', height: '12px'}" ></p-progressSpinner><i class="faa faa-check" *ngIf ="item.value !== true"></i>
+            </div>
+        </div>
+        <p-treeTable selectionMode="checkbox" [value]="dataFiles" (onNodeSelect) = "dataFileCount()" (onNodeUnselect) = "dataFileCount()" [(selection)]="selectedData" [scrollable]="true" scrollHeight="600px" [style]="{'margin-left':'1%','margin-top':'1%','width':'70%','background-color':'#606164','color':'#000'}">
+            <ng-template pTemplate="header">
+                <tr>
+                    <th style="color: #FFFFFF; background-color:#606164; width: 75%;"> Title</th>
+                    <th style="color: #FFFFFF; background-color:#606164;">Status</th>
+                    <th style="color: #FFFFFF; background-color:#606164;">Size</th>
+                </tr>
+            </ng-template>
+                <ng-template let-rowNode let-rowData="rowData"  let-i="rowIndex" pTemplate="body">
+                    <tr>
+                        <td width="75%">
+                            <p-treeTableToggler [rowNode]="rowNode"></p-treeTableToggler>
+                            &nbsp;<p-treeTableCheckbox [value]="rowNode"></p-treeTableCheckbox>
+                            &nbsp;<a href="{{rowData.downloadURL}}" target="_blank" *ngIf = "rowData.resTitle.indexOf('.') > 0 "> {{rowData.resTitle}}</a>
+                            <span *ngIf = "rowData.resTitle.indexOf('.') < 0 "> {{rowData.resTitle}}</span>
+                        </td>
+                        <td>
+                            &nbsp;
+                            <button type="button" *ngIf = "rowData.downloadedStatus === 'downloaded' && rowData.resTitle.indexOf('.') > 0 " style="margin-left:-20px;margin-top: 5px" class="small-button" pButton icon="faa faa-check"></button>
+                            <button type="button" *ngIf = "rowData.downloadedStatus === 'downloading' && rowData.resTitle.indexOf('.') > 0 "  class="small-button-yellow" pButton icon="faa faa-check"></button> &nbsp;
+                            <span *ngIf = "rowData.resTitle.indexOf('.') > 0">{{rowData.downloadedStatus}}</span>
+                        </td>
+                        <td>
+                            <span>{{rowData.size}}</span>
+                        </td>
+                    </tr>
+                </ng-template>
+            <ng-template pTemplate="emptymessage">
+                <tr>
+                    <td align="center" colspan="3">
+                        No records found
+                    </td>
+                </tr>
+            </ng-template>
+        </p-treeTable>
+    </div>
+</div>

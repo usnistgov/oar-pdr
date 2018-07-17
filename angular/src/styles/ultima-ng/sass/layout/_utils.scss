@@ -6,7 +6,7 @@
 }
 
 *[hidden] {
-    display: none; 
+    display: none;
 }
 
 .card {
@@ -16,31 +16,31 @@
     padding: 1em;
     margin-bottom: 1em;
     box-sizing: border-box;
-    
+
     &.card-w-title {
         padding-bottom: 2em;
     }
-    
+
     h1 {
         font-size: 1.5em;
         font-weight: 400;
         margin: 1em 0;
-        
+
         &:first-child {
             margin-top: .667em;
         }
     }
-    
+
     h2 {
         font-size: 1.375em;
         font-weight: 400;
     }
-    
+
     h3 {
         font-size: 1.250em;
         font-weight: 400;
     }
-    
+
     h4 {
         font-size: 1.125em;
         font-weight: 400;
@@ -49,7 +49,7 @@
 
 .nopad {
     padding: 0;
-    
+
     .ui-panel-content {
         padding: 0;
     }
@@ -132,7 +132,7 @@
     -webkit-animation-name: fadeInDown;
     animation-name: fadeInDown;
  }
- 
+
  .fadeOutUp {
      -webkit-animation-name: fadeOutUp;
      animation-name: fadeOutUp;
@@ -159,15 +159,17 @@
 }
 
 .ui-g {
+    -ms-flex-wrap: wrap;
+
     &.form-group {
         > div {
-            padding: 1em;
+            padding: $formGroupPadding;
         }
     }
-    
+
     &.form-group-m {
         > div {
-            padding: 1em;
+            padding: $formGroupPadding;
         }
     }
 }
