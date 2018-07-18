@@ -22,7 +22,8 @@ export class AppConfig {
         this.landingbackend = process.env.LANDING || this.appConfig.LANDING;
         this.metaapi = process.env.METAPI || this.appConfig.METAPI;
         this.sdpapi  = process.env.SDPAPI || this.appConfig.SDPAPI;
-        console.log("rmmapi::"+ process.env.RMMAPI);
+        console.log("rmmapi::"+ process.env.RMMAPI + " :: set rmmapi ::"+ this.rmmapi);
+        console.log("Landing::"+ process.env.LANDING + " :: set  landing ::"+this.landingbackend);
         
     }
     public getJSON(): Observable<any> {
