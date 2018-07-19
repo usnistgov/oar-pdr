@@ -1,8 +1,8 @@
 {
-    "RMMAPI":  "http://oardev.nist.gov/rmm/",
-    "SDPAPI":  "http://oardev.nist.gov/sdp/",
-    "PDRAPI":  "http://localhost:5555/#/id/",
+    "RMMAPI":  "http://localhost/rmm/",
+    "SDPAPI":  "http://localhost/sdp/",
+    "PDRAPI":  "http://localhost/od/id/",
     "DISTAPI": "http://localhost/disturl/",
     "METAPI":  "http://localhost/metaurl/",
-    "LANDING": "http://oardev.nist.gov/rmm/"
+    "LANDING": "http://localhost/rmm/"
 }
