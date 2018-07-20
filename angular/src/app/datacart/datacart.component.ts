@@ -76,7 +76,7 @@ export class DatacartComponent implements OnInit, OnDestroy {
   selectedFileCount: number = 0;
   selectedParentIndex:number = 0;
 
-    private distApi : string = environment.DISTAPI;
+  private distApi : string = environment.DISTAPI;
   //private distApi:string = "http://localhost:8083/oar-dist-service";
 
 
@@ -104,6 +104,9 @@ export class DatacartComponent implements OnInit, OnDestroy {
     });
   }
 
+  /**
+   *  download zip file
+   */
   downloadZIP() {
     let downloadURL: string[];
     let fileName: string[];
@@ -158,22 +161,23 @@ export class DatacartComponent implements OnInit, OnDestroy {
       }
 
       this.cartService.getAllCartEntities().then(function (result) {
-          //console.log("result" + result.length);
-
           this.cartEntities = result;
-          console.log("hello" + JSON.stringify(this.cartEntities));
           this.createDataCartHierarchy();
           if (this.cartEntities.length > 0) {
               this.dataFiles[this.selectedParentIndex].expanded = true;
           }
       }.bind(this), function (err) {
-          alert("something went wrong while fetching the products");
+          alert("something went wrong while creating the zip file");
       });
 
       this.selectedData.length = 0;
       this.dataFileCount();
 
   }
+
+  /**
+   * count the selected files
+   */
 
   dataFileCount() {
       this.selectedFileCount = 0;
@@ -200,6 +204,9 @@ export class DatacartComponent implements OnInit, OnDestroy {
 
   }
 
+  /**
+   * Update cart entries
+   */
   updateCartEntries(row:any,downloadedStatus:any) {
         console.log("id" + JSON.stringify(row.data));
         this.cartService.updateCartItemDownloadStatus(row.data['id'],downloadedStatus);
@@ -214,85 +221,90 @@ export class DatacartComponent implements OnInit, OnDestroy {
 
     }
 
+  /**
+   * display spinner
+   */
   showLoadingSpinner() {
     this.showSpinner = true;
   }
 
+  /**
+   * hide spinner
+   */
   hideLoadingSpinner() {
     this.showSpinner = false;
   }
 
+  /**
+   * download file
+   */
   downloadFile(params): Observable<Blob> {
     //let options = new RequestOptions({responseType: ResponseContentType.Blob});
     return this.http.get(this.distApi + "/cart?" , {responseType: 'blob', params: params});
   }
 
-    /**
-     * Removes all cartInstances that are bound to the productId given.
-     **/
-    removeByDataId() {
+  /**
+   * Removes all cart Instances that are bound to the given id.
+   **/
+  removeByDataId() {
 
-        let dataId: any;
-        // convert the map to an array
-        var i:number;
-        for ( i=0; i < this.dataFiles.length;i++) {
-            if (this.dataFiles[i].expanded == true) {
-                this.selectedParentIndex = i;
-            }
-        }
-        for (let selData of this.selectedData) {
-            dataId = selData.data['id'];
-            // Filter out all cartEntities with given productId,  finally the new stuff from es6 can be used.
-            this.cartEntities = this.cartEntities.filter(entry => entry.data.id != dataId);
-
+      let dataId: any;
+      // convert the map to an array
+      var i:number;
+      for ( i=0; i < this.dataFiles.length;i++) {
+          if (this.dataFiles[i].expanded == true) {
+              this.selectedParentIndex = i;
+          }
+      }
+      for (let selData of this.selectedData) {
+          dataId = selData.data['id'];
+          // Filter out all cartEntities with given productId,  finally the new stuff from es6 can be used.
+          this.cartEntities = this.cartEntities.filter(entry => entry.data.id != dataId);
             //save to localStorage
-            this.cartService.saveListOfCartEntities(this.cartEntities);
-        }
+          this.cartService.saveListOfCartEntities(this.cartEntities);
+      }
 
-        this.getDataCartList();
-        this.createDataCartHierarchy();
+      this.getDataCartList();
+      this.createDataCartHierarchy();
 
-        if (this.cartEntities.length > 0) {
-            this.dataFiles[this.selectedParentIndex].expanded = true;
-        }
+      if (this.cartEntities.length > 0) {
+          this.dataFiles[this.selectedParentIndex].expanded = true;
+      }
 
-        this.cartService.setCartLength(this.cartEntities.length);
-        this.selectedData.length = 0;
-        this.dataFileCount();
+      this.cartService.setCartLength(this.cartEntities.length);
+      this.selectedData.length = 0;
+      this.dataFileCount();
 
-    }
+  }
 
-    /**
-     * Removes all cartInstances that are bound to the productId given.
-     **/
-    removeByDownloadStatus() {
+  /**
+   * Removes all cart Instances that are bound to the download status.
+   **/
+  removeByDownloadStatus() {
 
-        let dataId: any;
-        // convert the map to an array
-        var i:number;
-        for ( i=0; i < this.dataFiles.length;i++) {
-            if (this.dataFiles[i].expanded == true) {
-                this.selectedParentIndex = i;
-            }
-        }
-        this.cartService.removeDownloadStatus();
-        this.cartService.getAllCartEntities().then(function (result) {
-            //console.log("result" + result.length);
-            this.cartEntities = result;
-            this.createDataCartHierarchy();
-            if (this.cartEntities.length > 0) {
-                this.dataFiles[this.selectedParentIndex].expanded = true;
-            }
-            this.cartService.setCartLength(this.cartEntities.length);
-
+      let dataId: any;
+      // convert the map to an array
+      var i:number;
+      for ( i=0; i < this.dataFiles.length;i++) {
+          if (this.dataFiles[i].expanded == true) {
+              this.selectedParentIndex = i;
+          }
+      }
+      this.cartService.removeDownloadStatus();
+      this.cartService.getAllCartEntities().then(function (result) {
+          this.cartEntities = result;
+          this.createDataCartHierarchy();
+          if (this.cartEntities.length > 0) {
+              this.dataFiles[this.selectedParentIndex].expanded = true;
+          }
+          this.cartService.setCartLength(this.cartEntities.length);
         }.bind(this), function (err) {
-            alert("something went wrong while fetching the products");
+            alert("something went wrong while removing item");
         });
-        console.log("cart length" + this.cartEntities.length)
     }
 
   /**
-   * Removes all cartInstances that are bound to the productId given.
+   * clears the item download status
    **/
   clearDownloadStatus() {
 
@@ -309,8 +321,9 @@ export class DatacartComponent implements OnInit, OnDestroy {
     });
     this.cartService.setCartLength(this.dataFiles.length);
   }
+
   /**
-   * Removes all cartInstances that are bound to the productId given.
+   * Removes all cart Instances that are bound to the given id.
    **/
   removeItem(row:any) {
 
@@ -346,19 +359,19 @@ export class DatacartComponent implements OnInit, OnDestroy {
   ngOnDestroy() {
   }
 
+  /**
+   * Create Data hierarchy for the tree
+   */
   createDataCartHierarchy() {
 
-        console.log("cart ent" + JSON.stringify(this.cartEntities));
+      let arrayList = this.cartEntities.reduce(function (result, current) {
+          result[current.data.resTitle] = result[current.data.resTitle] || [];
+          result[current.data.resTitle].push(current);
+          return result;
+          }, {});
 
-        let arrayList = this.cartEntities.reduce(function (result, current) {
-            result[current.data.resTitle] = result[current.data.resTitle] || [];
-            result[current.data.resTitle].push(current);
-            return result;
-        }, {});
-        //console.log("list" + JSON.stringify(arrayList));
         this.dataFiles = [];
-        //let arrayList = this.cartEntities;
-        //console.log("arraylist" + JSON.stringify(arrayList));
+
         let parentObj: TreeNode = {};
         for (var key in arrayList) {
             let resId = key;
@@ -379,8 +392,6 @@ export class DatacartComponent implements OnInit, OnDestroy {
                         let folderExists:boolean = false;
                         let folder = null;
                         for (let path in fpath) {
-                            //let array = JSON.stringify(parent);
-                            //console.log("path" + fpath[path]);
                             child2 = this.createDataCartChildrenTree(fpath[path],fields.data.id,resId,key,fields.data.downloadURL,fields.data.filePath,fields.data.downloadedStatus);
                             parent.children.push(child2);
                             parent = child2;
@@ -388,37 +399,17 @@ export class DatacartComponent implements OnInit, OnDestroy {
                     }
                 }
 
-                console.log("final output" + JSON.stringify(parentObj));
-
-                /*
-                let tmp:any ={};
-                parentObj.children.forEach((o) => {
-                  const path = o.data.filePath;
-                  if (tmp[path]) {
-                    tmp[path].children = tmp[path].children || [];// in case no children property or array exists
-                    tmp[path].children.push(...o.children);
-                  } else {
-                    tmp[path] = o;
-                  }
-
-                });
-
-        */
-
-                //this.walkData(parentObj[0], parentObj,0);
-
-                //let values = Object.keys(tmp).map(key => tmp[key]);
-                //parentObj.children = values;
                 this.walkData(parentObj, parentObj, 0);
-                //parentObj = tmp;
                 this.dataFiles.push(parentObj);
                 this.index = {};
-                //this.dataFiles.push(parentObj);
             }
         }
     }
 
-    walkData(inputArray, parent, level){
+  /**
+   * Create the hierarchy for the tree
+   */
+  walkData(inputArray, parent, level){
         level = level || '';
         if (inputArray.children) {
             let copy = inputArray.children.filter((item) => { return true});
@@ -433,7 +424,6 @@ export class DatacartComponent implements OnInit, OnDestroy {
             if (!(key in this.index)) {
                 this.index[key] = inputArray;
             } else {
-                //debugger;
                 inputArray.children.forEach((item) => {
                     this.index[key].children.push(item);
                 })
@@ -455,6 +445,9 @@ export class DatacartComponent implements OnInit, OnDestroy {
         }
     }
 
+    /**
+     * Create data hierarchy for children
+     */
     createDataCartChildrenTree(path: string,id:string,resId:string,resTitle:string,downloadURL:string,resFilePath:string,downloadedStatus:string){
         let child1:TreeNode = {};
         child1 = {

@@ -55,7 +55,9 @@ export class CartService {
     return this.displayCartSub.asObservable();
   }
 
-
+  /**
+   * Initialize cart
+   * **/
   initCart () {
 
     // if we dont have  any cart history, create a empty cart
@@ -67,6 +69,9 @@ export class CartService {
     }
   }
 
+  /**
+   * Save cart entries
+   * **/
   saveListOfCartEntities(listOfCartEntries : CartEntity[]) {
     // reduce all the entities to a map
     let cartMap = listOfCartEntries.reduce(function(map, cartEntry, i) {
@@ -82,8 +87,7 @@ export class CartService {
   }
 
   /**
-   * Returns all the products in the cart form the local storage
-   *
+   * Returns all the items in the cart from the local storage
    **/
   getAllCartEntities()  {
     // get the cart
@@ -104,8 +108,7 @@ export class CartService {
   }
 
   /**
-   * Returns all the products in the cart form the local storage
-   *
+   * Update cart item download status
    **/
   updateCartItemDownloadStatus(id:string, status:any)  {
     // get the cart
@@ -140,8 +143,7 @@ export class CartService {
   }
 
   /**
-   * Returns all the products in the cart form the local storage
-   *
+   * Update cart download status
    **/
   updateCartDownloadStatus(status:boolean)  {
     // get the cart
@@ -172,8 +174,7 @@ export class CartService {
   }
 
   /**
-   * Returns all the products in the cart form the local storage
-   *
+   * Remove cart items with download status
    **/
   removeDownloadStatus()  {
     // get the cart
@@ -220,13 +221,15 @@ export class CartService {
 
   }
 
+  /**
+   * Set the number of cart items
+   **/
   setCartLength(value: number) {
     this.storageSub.next(value);
-    console.log("cart size inside method" + this.storageSub.getValue());
   }
+
   /**
    * Will persist the product to local storage
-   *
    **/
   addDataToCart(data: Data) : void {
     // product id , quantity
@@ -266,22 +269,34 @@ export class CartService {
 
   }
 
+
+  /**
+   * Update File spinner status
+   **/
   updateFileSpinnerStatus(addFileSpinner:boolean)
   {
     this.addCartSpinnerSub.next(addFileSpinner);
   }
 
+  /**
+   * Update All File spinner status
+   **/
   updateAllFilesSpinnerStatus(addAllFilesSpinner:boolean)
   {
     this.addAllCartSpinnerSub.next(addAllFilesSpinner);
   }
 
+  /**
+   * Update cart display status
+   **/
+
   updateCartDisplayStatus(displayCart:boolean)
   {
     this.displayCartSub.next(displayCart);
   }
-/**
-   * Retrive the cart from local storage
+
+  /**
+   * Retrieve the cart from local storage
    **/
   private getCart() {
 
@@ -290,6 +305,7 @@ export class CartService {
     return JSON.parse(cartAsString);
 
   }
+
   /**
    * Persists the cart to local storage
    **/
