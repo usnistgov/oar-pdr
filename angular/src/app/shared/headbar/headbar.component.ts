@@ -1,8 +1,8 @@
-import { Component, OnInit, AfterViewInit, ElementRef } from '@angular/core';
-import { Location } from '@angular/common';
-import { TreeModule,TreeNode, Tree, OverlayPanelModule,
-  FieldsetModule,PanelModule,ContextMenuModule,
-  MenuModule,MenuItem } from 'primeng/primeng';
+import { Component, ElementRef } from '@angular/core';
+// import { Location } from '@angular/common';
+// import { TreeModule,TreeNode, Tree, OverlayPanelModule,
+//   FieldsetModule,PanelModule,ContextMenuModule,
+//   MenuModule,MenuItem } from 'primeng/primeng';
 import { AppConfig } from '../config-service/config.service';
 
 /**
@@ -28,7 +28,7 @@ export class HeadbarComponent {
   SDPAPI : string = "";
   landingService : string = "";
   internalBadge: boolean = false;
-  topmenu: MenuItem[];
+ 
   loginuser = false;
 
   constructor( private el: ElementRef, private appConfig : AppConfig) {

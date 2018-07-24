@@ -1,17 +1,16 @@
-import { BrowserModule,Title,BrowserTransferStateModule } from '@angular/platform-browser';
+import { Title,Meta } from '@angular/platform-browser';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { NgModule,APP_INITIALIZER, PLATFORM_ID, APP_ID, Inject,
          CUSTOM_ELEMENTS_SCHEMA,NO_ERRORS_SCHEMA } from '@angular/core';
 import { isPlatformBrowser,CommonModule } from '@angular/common';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { HttpClientModule, HttpClient } from '@angular/common/http'; 
-
+import { HttpClientModule } from '@angular/common/http'; 
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 //import { Ng2StickyModule } from 'ng2-sticky';
 import { Collaspe } from './landing/collapseDirective/collapse.directive';
-import { ButtonModule, DropdownModule, AccordionModule, TreeModule,PanelMenuModule,MenuItem, TreeNode, AutoCompleteModule,
-          MessagesModule, MultiSelectModule, DataTableModule, DataListModule,ContextMenuModule,
-          MenuModule,OverlayPanelModule, FieldsetModule, PanelModule ,DialogModule } from 'primeng/primeng';
+import {  TreeModule, FieldsetModule } from 'primeng/primeng';
+import { MenuModule } from 'primeng/menu';
+import { TreeTableModule } from 'primeng/treetable';
 import { AppComponent } from './app.component';
 import { AppRoutingModule } from './app-routing.module';
 import { LandingComponent } from './landing/landing.component';
@@ -29,7 +28,6 @@ import { SharedModule } from './shared/shared.module';
 import { SearchService } from './shared/search-service/index';
 import { CommonVarService } from './shared/common-var/index';
 import { AppConfig } from './shared/config-service/config.service';
-import { TreeTableModule } from 'primeng/treetable';
 import { AppShellNoRenderDirective } from './directives/app-shell-no-render.directive';
 import { AppShellRenderDirective } from './directives/app-shell-render.directive';
 const appInitializerFn = (appConfig: AppConfig) => {
@@ -44,29 +42,22 @@ const appInitializerFn = (appConfig: AppConfig) => {
     LandingComponent,
     Collaspe,MetadataComponent,FileDetailsComponent,
     DescriptionComponent,  KeyValuePipe, MetadataView, NoidComponent,NerdmComponent,
-    ErrorComponent,UserErrorComponent ,
-     
-    
+    ErrorComponent,UserErrorComponent,
     AppShellNoRenderDirective,
     AppShellRenderDirective 
   ],
   imports: [
-
-    BrowserModule.withServerTransition({ appId: 'PDR-LandingPage' }),
-    BrowserTransferStateModule,
     FormsModule,
     ReactiveFormsModule,
     AppRoutingModule,
     HttpClientModule,
-    CommonModule, SharedModule, AccordionModule,AutoCompleteModule,MessagesModule,
-    MultiSelectModule,DropdownModule,DataTableModule, TreeModule,DataListModule, PanelMenuModule,
-    DialogModule,ContextMenuModule,MenuModule, OverlayPanelModule, FieldsetModule, 
-    PanelModule,BrowserAnimationsModule, FormsModule, ButtonModule,
+    CommonModule, SharedModule, TreeModule,MenuModule, FieldsetModule, 
+    BrowserAnimationsModule, FormsModule,
     TreeTableModule,
     NgbModule.forRoot()
   ],
   exports: [Collaspe],
-  providers: [ Title, SearchService,SearchResolve, CommonVarService 
+  providers: [ Title, Meta, SearchService,SearchResolve, CommonVarService 
     , AppConfig, {
       provide: APP_INITIALIZER,
       useFactory: appInitializerFn,
@@ -74,7 +65,7 @@ const appInitializerFn = (appConfig: AppConfig) => {
       deps: [AppConfig]
     }  
   ],
-  bootstrap: [AppComponent],
+
   schemas: [ CUSTOM_ELEMENTS_SCHEMA ,NO_ERRORS_SCHEMA]
 })
 
@@ -85,7 +76,6 @@ export class AppModule {
     const platform = isPlatformBrowser(platformId) ?
       'in the browser' : 'on the server';
   }
-  
  }
 
 

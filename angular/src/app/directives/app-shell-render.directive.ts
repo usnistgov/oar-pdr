@@ -1,3 +1,6 @@
+/**
+ * Render only on server side
+ */
 import {Directive, Inject, OnInit, PLATFORM_ID, TemplateRef, ViewContainerRef} from '@angular/core';
 import {isPlatformServer} from '@angular/common';
 

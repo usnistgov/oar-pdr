@@ -10,6 +10,7 @@ import {join} from 'path';
 
 
 global['Event'] = null;
+global['document'] = null;
 // Faster server renders w/ Prod mode (dev mode never needed)
 enableProdMode();
 
@@ -21,7 +22,7 @@ const DIST_FOLDER = join(process.cwd(), 'dist');
 
 console.log("All the environment variables ***::"+ process.env);
 console.log("PORT::"+ process.env.PORT);
-console.log("PORT::"+ process.env.MYVAR);
+
 // * NOTE :: leave this as require() since this file is built Dynamically from webpack
 const {AppServerModuleNgFactory, LAZY_MODULE_MAP} = require('./dist/server/main');
 

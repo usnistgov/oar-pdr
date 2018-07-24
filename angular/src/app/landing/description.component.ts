@@ -1,6 +1,6 @@
 import { Component, Input,ChangeDetectorRef } from '@angular/core';
 import { LandingComponent } from './landing.component';
-import { TreeModule,TreeNode, Tree, MenuItem } from 'primeng/primeng';
+// import { TreeModule,TreeNode, Tree} from 'primeng/primeng';
 
 @Component({
   moduleId: module.id,
@@ -88,14 +88,14 @@ import { TreeModule,TreeNode, Tree, MenuItem } from 'primeng/primeng';
                 </h3> <i *ngIf="loginuser" style="float:right" class="faa faa-edit"></i>
                 <div class="ui-g">
                     <div class="ui-g-6 ui-md-6 ui-lg-6 ui-sm-12">
-                        <p-tree [value]="files" selectionMode="single" [(selection)]="selectedFile" (onNodeSelect)="nodeSelect($event)">
+                        <!--p-tree [value]="files" selectionMode="single" [(selection)]="selectedFile" (onNodeSelect)="nodeSelect($event)">
                             <ng-template let-node  pTemplate="default">
                                 <span>{{node.label}}</span>
                             </ng-template>
-                        </p-tree>
+                        </p-tree -->
                     </div>
                     <div class="ui-g-6 ui-md-6 ui-lg-6 ui-sm-12">
-                        <div ng2-sticky>
+                        <div>
                             <div *ngIf="isFileDetails">
                                 <filedetails-resources [fileDetails]="fileDetails"></filedetails-resources>
                             </div>
@@ -126,7 +126,7 @@ export class DescriptionComponent {
  fileDetails:string = '';
  isFileDetails: boolean = false;
  isReference: boolean = false;
- selectedFile: TreeNode;
+// selectedFile: TreeNode;
  isAccessPage : boolean = false;
  accessPages: Map <string, string> = new Map();
  accessUrls : string[] =[];

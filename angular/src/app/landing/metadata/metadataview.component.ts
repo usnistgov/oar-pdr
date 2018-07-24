@@ -1,18 +1,11 @@
 import {Component, Input} from '@angular/core';
 import { FieldsetModule } from 'primeng/primeng';
-import {AccordionModule} from 'primeng/primeng';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 @Component ({
   selector: 'fieldset-view',
   moduleId: module.id,
   styleUrls: ['metadataview.component.css'],
   template: `
-    <!-- p-accordion [multiple]="true">
-        <p-accordionTab header="{{node.key}}" *ngFor="let node of (entry | keyvalues)" [selected]="true">
-          <fieldset-view  *ngIf="isArray(node.value) || isObject(node.value)" [entry]="node.value"></fieldset-view>
-           <span *ngIf="!isArray(node.value) &&  !isObject(node.value)">{{ node.value }} </span>
-        </p-accordionTab>
-    </p-accordion -->
     <div *ngFor="let node of (entry | keyvalues)" >
       <div *ngIf="!isArrayOrObject(node.value)" class="ui-g break-long-words" style="padding:0;">
         <div class="ui-g-2 ui-md-3 ui-lg-2 ui-sm-3" style="padding:0;">
