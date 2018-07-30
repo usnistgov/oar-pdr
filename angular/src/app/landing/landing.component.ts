@@ -1,5 +1,5 @@
 import { Component, OnInit, OnDestroy, AfterViewInit, ElementRef,
-         ViewChildren,Inject, PLATFORM_ID } from '@angular/core';
+         ViewChildren} from '@angular/core';
 import { DatePipe,CommonModule,isPlatformBrowser } from '@angular/common';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { BrowserModule ,Title, Meta} from '@angular/platform-browser';
@@ -72,7 +72,8 @@ export class LandingComponent implements OnInit {
    *
    */
   constructor(private route: ActivatedRoute, private el: ElementRef, 
-              private titleService: Title, private appConfig : AppConfig, private router: Router) {
+              private titleService: Title, private appConfig : AppConfig, private router: Router
+              ) {
     
     this.rmmApi = this.appConfig.getRMMapi();
     this.distApi = this.appConfig.getDistApi();
@@ -261,14 +262,14 @@ viewmetadata(){
 
     var paramid = this.route.snapshot.paramMap.get('id');
     this.files =[];
-    this.route.data.map(data => data.searchService )
-    .subscribe((res)=>{
-      this.onSuccess(res);
-    }, error =>{
-    console.log("There is an error in searchservice.");
-    this.onError(" There is an error");
-
-  });
+    
+      this.route.data.map(data => data.searchService )
+       .subscribe((res)=>{
+         this.onSuccess(res);
+       }, error =>{
+       console.log("There is an error in searchservice.");
+       this.onError(" There is an error");
+       });
     
   }
 

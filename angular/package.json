@@ -29,6 +29,7 @@
     "@angular/router": "^6.0.4",
     "@angular/service-worker": "^6.0.4",
     "@ng-bootstrap/ng-bootstrap": "^2.0.0",
+    "@nguniversal/common": "^6.0.0",
     "@nguniversal/express-engine": "^6.0.0",
     "@nguniversal/module-map-ngfactory-loader": "^6.0.0",
     "angular-hot-loader": "^0.9.14",

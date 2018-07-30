@@ -6,11 +6,14 @@ import { AppModule } from './app.module';
 
 import { AppComponent } from './app.component';
 
+import {TransferHttpCacheModule} from '@nguniversal/common';
+
 @NgModule({
     imports: [
         AppModule,
         BrowserModule.withServerTransition({ appId: 'PDR-LandingPage' }),
-        BrowserTransferStateModule
+        
+        TransferHttpCacheModule
     ],
     bootstrap: [AppComponent]
 })

@@ -30,6 +30,7 @@ import { CommonVarService } from './shared/common-var/index';
 import { AppConfig } from './shared/config-service/config.service';
 import { AppShellNoRenderDirective } from './directives/app-shell-no-render.directive';
 import { AppShellRenderDirective } from './directives/app-shell-render.directive';
+
 const appInitializerFn = (appConfig: AppConfig) => {
   return () => {
     return appConfig.loadAppConfig();
