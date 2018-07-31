@@ -1,25 +1,13 @@
-import { Component, OnInit, OnDestroy, AfterViewInit, ElementRef,
-         ViewChildren} from '@angular/core';
-import { DatePipe,CommonModule,isPlatformBrowser } from '@angular/common';
-import { FormBuilder, FormGroup } from '@angular/forms';
-import { BrowserModule ,Title, Meta} from '@angular/platform-browser';
+import { Component, OnInit, ElementRef } from '@angular/core';
+import { Title, Meta} from '@angular/platform-browser';
 import { ActivatedRoute, Router, NavigationEnd } from '@angular/router';
-// import { Message } from 'primeng/components/common/api';
-import { TreeModule,TreeNode, Tree } from 'primeng/primeng';
-// import { MenuModule } from 'primeng/menu';
-// import { MenuItem } from 'primeng/api';
-// import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
+import { TreeNode } from 'primeng/primeng';
+import { MenuItem } from 'primeng/api';
 import * as _ from 'lodash';
 import 'rxjs/add/operator/map';
 import { Subscription } from 'rxjs/Subscription';
-import { Collaspe } from './collapseDirective/collapse.directive';
 import { environment } from '../../environments/environment';
-import { SearchResolve } from "./search-service.resolve";
-//import * as jsPDF  from 'jspdf';
 import { AppConfig } from '../shared/config-service/config.service';
-
-declare var Ultima: any;
-// declare var jQuery: any;
 
 @Component({
   selector: 'app-landing',
@@ -38,8 +26,8 @@ export class LandingComponent implements OnInit {
     record:any = [];
     keyword:string;
     findId: string;
-    // leftmenu: MenuItem[];
-    // rightmenu: MenuItem[];
+    leftmenu: MenuItem[];
+    rightmenu: MenuItem[];
     similarResources: boolean = false;
     similarResourcesResults: any[]=[];
     selectedFile: TreeNode;
@@ -83,11 +71,9 @@ export class LandingComponent implements OnInit {
       if (s instanceof NavigationEnd) {
         const tree = router.parseUrl(router.url);
         if (tree.fragment) {
-         //alert("Test Fragment :"+tree.fragment)
           const element = document.querySelector("#" + tree.fragment);
           
           if (element) { 
-            //alert("Test here:"+element)
             element.scrollIntoView(true); 
            }
         }
@@ -104,24 +90,20 @@ export class LandingComponent implements OnInit {
       this.record = searchResults;
     else if(searchResults["ResultCount"] !== undefined && searchResults["ResultCount"] === 1)
       this.record = searchResults["ResultData"][0];
-    //this.record = rmmdata[0];
     this.type = this.record['@type'];
     this.titleService.setTitle(this.record['title']);
-    // this.meta.updateTag({
-    //   "testdescription": this.record['description']
-    // });
+    // this.meta.addTag({ "testdescription": this.record['description'] });
     this.createDataHierarchy();
     if(this.record['doi'] !== undefined && this.record['doi'] !== "" )
       this.isDOI = true;
-    //if(this.record['contactPoint'].hasEmail !== undefined && this.record['contactPoint'].hasEmail !== "")
     if( "hasEmail" in this.record['contactPoint'])  
      this.isEmail = true;
     if(this.record["@id"] === undefined || this.record["@id"] === "" ){
         this.isId = false;
         return;
     }
-      // this.updateLeftMenu();
-      // this.updateRightMenu();
+    this.updateLeftMenu();
+    this.updateRightMenu();
   }
 
   /**
@@ -134,97 +116,97 @@ export class LandingComponent implements OnInit {
     //this.msgs.push({severity:'error', summary:this.errorMsg + ':', detail:this.status + ' - ' + this.exception});
   }
 
-//   /**
-//    * Update Leftside menu on landing page
-//    */
-//   updateLeftMenu(){
-//     var itemsMenu: MenuItem[] = [];
-//     var descItem = this.createMenuItem ("Description",'',(event)=>{
-//       this.metadata = false; this.similarResources =false;
-//       this.router.navigate(['/od/id/', this.record.ediid],{fragment:'description'});
-//     },'');
+  /**
+   * Update Leftside menu on landing page
+   */
+  updateLeftMenu(){
+    var itemsMenu: MenuItem[] = [];
+    var descItem = this.createMenuItem ("Description",'',(event)=>{
+      this.metadata = false; this.similarResources =false;
+      this.router.navigate(['/od/id/', this.record.ediid],{fragment:'description'});
+    },'');
 
-//     var refItem = this.createMenuItem ("References",'',(event)=>{
-//       this.metadata = false; this.similarResources =false;
-//       this.router.navigate(['/od/id/', this.record.ediid],{fragment:'reference'});
+    var refItem = this.createMenuItem ("References",'',(event)=>{
+      this.metadata = false; this.similarResources =false;
+      this.router.navigate(['/od/id/', this.record.ediid],{fragment:'reference'});
 
-//     },'');
+    },'');
 
-//     var filesItem = this.createMenuItem("Data Access",'', (event)=>{
-//       this.metadata = false;
-//       this.similarResources =false;
-//       this.router.navigate(['/od/id/', this.record.ediid],{fragment:'dataAccess'});
-//     },'');
+    var filesItem = this.createMenuItem("Data Access",'', (event)=>{
+      this.metadata = false;
+      this.similarResources =false;
+      this.router.navigate(['/od/id/', this.record.ediid],{fragment:'dataAccess'});
+    },'');
 
-//     var metaItem = this.createMenuItem("Metadata",'',(event)=>{
-//       this.metadata = true; this.similarResources =false;},'');
+    var metaItem = this.createMenuItem("Metadata",'',(event)=>{
+      this.metadata = true; this.similarResources =false;},'');
 
-//     itemsMenu.push(descItem);
-//     if(this.checkReferences())
-//       itemsMenu.push(refItem);
-//     if(this.files.length !== 0)
-//       itemsMenu.push(filesItem);
-//     itemsMenu.push(metaItem);
+    itemsMenu.push(descItem);
+    if(this.checkReferences())
+      itemsMenu.push(refItem);
+    if(this.files.length !== 0)
+      itemsMenu.push(filesItem);
+    itemsMenu.push(metaItem);
 
-//     this.leftmenu = [{
-//       label: 'Table of Contents',
-//       items: itemsMenu
-//     }
-//   ];
-// }
+    this.leftmenu = [{
+      label: 'Table of Contents',
+      items: itemsMenu
+    }
+  ];
+}
 
 viewmetadata(){
   this.metadata = true; this.similarResources =false;
 }
 
-// createMenuItem(label :string, icon:string, command: any, url : string ){
-//   let testItem : any = {};
-//     testItem.label = label;
-//     testItem.icon = icon;
-//   if(command !== '')
-//       testItem.command = command;
-//   if(url !== '')
-//       testItem.url = url;
-//   return testItem;
-// }
+createMenuItem(label :string, icon:string, command: any, url : string ){
+  let testItem : any = {};
+    testItem.label = label;
+    testItem.icon = icon;
+  if(command !== '')
+      testItem.command = command;
+  if(url !== '')
+      testItem.url = url;
+  return testItem;
+}
 
-// /**
-//  * Update right side panel on landing page
-//  */
-// updateRightMenu(){
+/**
+ * Update right side panel on landing page
+ */
+updateRightMenu(){
       
-//   this.serviceApi = this.landing+"records?@id="+this.record['@id']; 
-//   if(!_.includes(this.landing, "rmm"))
-//     this.serviceApi = this.landing+this.record['ediid'];
-//   this.distdownload = this.distApi+"ds/zip?id="+this.record['@id'];
+  this.serviceApi = this.landing+"records?@id="+this.record['@id']; 
+  if(!_.includes(this.landing, "rmm"))
+    this.serviceApi = this.landing+this.record['ediid'];
+  this.distdownload = this.distApi+"ds/zip?id="+this.record['@id'];
       
-//   var itemsMenu: any[] = [];
-//   var homepage = this.createMenuItem("Visit Home Page",  "faa faa-external-link", '',this.record['landingPage']);
-//   var download = this.createMenuItem("Download all data","faa faa-file-archive-o", '', this.distdownload);
-//   var metadata = this.createMenuItem("Export JSON", "faa faa-file-o",'',this.serviceApi);
+  var itemsMenu: any[] = [];
+  var homepage = this.createMenuItem("Visit Home Page",  "faa faa-external-link", '',this.record['landingPage']);
+  var download = this.createMenuItem("Download all data","faa faa-file-archive-o", '', this.distdownload);
+  var metadata = this.createMenuItem("Export JSON", "faa faa-file-o",'',this.serviceApi);
     
       
-//   let authlist = "";
-//   if (this.record['authors']) {    
-//       for(let auth of this.record['authors']) authlist = authlist+auth.familyName+",";
-//   }
+  let authlist = "";
+  if (this.record['authors']) {    
+      for(let auth of this.record['authors']) authlist = authlist+auth.familyName+",";
+  }
         
-//   var resourcesByAuthor = this.createMenuItem ('Resources by Authors',"faa faa-external-link","",this.sdpLink+"/#/search?q=authors.familyName="+authlist+"&key=&queryAdvSearch=yes");
-//   var similarRes = this.createMenuItem ("Similar Resources", "faa faa-external-link", "",this.sdpLink+"/#/search?q=keyword="+this.record['keyword']+"&key=&queryAdvSearch=yes");                
-//   var license = this.createMenuItem("License Statement",  "faa faa-external-link","",this.record['license'] ) ;
-//   var citation = this.createMenuItem('Cite this resource', "faa faa-angle-double-right",(event)=>{ this.getCitation(); this.showDialog(); },'');
+  var resourcesByAuthor = this.createMenuItem ('Resources by Authors',"faa faa-external-link","",this.sdpLink+"/#/search?q=authors.familyName="+authlist+"&key=&queryAdvSearch=yes");
+  var similarRes = this.createMenuItem ("Similar Resources", "faa faa-external-link", "",this.sdpLink+"/#/search?q=keyword="+this.record['keyword']+"&key=&queryAdvSearch=yes");                
+  var license = this.createMenuItem("License Statement",  "faa faa-external-link","",this.record['license'] ) ;
+  var citation = this.createMenuItem('Cite this resource', "faa faa-angle-double-right",(event)=>{ this.getCitation(); this.showDialog(); },'');
 
 
-//     itemsMenu.push(homepage);
-//     if (this.files.length != 0) 
-//       itemsMenu.push(download);
-//     itemsMenu.push(metadata);   
+    itemsMenu.push(homepage);
+    if (this.files.length != 0) 
+      itemsMenu.push(download);
+    itemsMenu.push(metadata);   
 
-//   this.rightmenu = [{ label: 'Access ', items: itemsMenu },
-//       { label: 'Use',   items: [ citation, license ] },
-//       { label: 'Find',   items: [ similarRes, resourcesByAuthor ]}];
+  this.rightmenu = [{ label: 'Access ', items: itemsMenu },
+      { label: 'Use',   items: [ citation, license ] },
+      { label: 'Find',   items: [ similarRes, resourcesByAuthor ]}];
   
-//   }
+  }
 
   getCitation(){
     this.citeString = "";
@@ -271,10 +253,6 @@ viewmetadata(){
        this.onError(" There is an error");
        });
     
-  }
-
-  ngOnDestroy() {
-    //this._routeParamsSubscription.unsubscribe();
   }
 
   ngAfterViewInit(){}

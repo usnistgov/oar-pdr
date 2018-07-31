@@ -1,11 +1,9 @@
 import { Injectable } from '@angular/core';
-// import { Http, Response,URLSearchParams,RequestOptions, Headers } from '@angular/http';
 import { HttpClientModule, HttpClient } from '@angular/common/http'; 
 import { Observable } from 'rxjs/Observable';
 import 'rxjs/add/operator/map';
 import 'rxjs/add/operator/catch';
 import 'rxjs/add/observable/throw';
-import * as _ from 'lodash';
 import { AppConfig } from '../config-service/config.service';
 /**
  * This class provides the Search service with methods to search for records from tha rmm.
@@ -36,7 +34,7 @@ export class SearchService {
     }
 
    testdata(): Observable<any> {
-    return this.http.get("http://localhost:4000/assets/sampledata.json");
+    return this.http.get("http://localhost:4200/assets/sampledata.json");
    } 
   // searchById(searchValue:string){
   //   if (_.includes(this.landingBackend,'rmm') && _.includes(searchValue,'ark'))
@@ -45,8 +43,6 @@ export class SearchService {
   //     this.landingBackend = this.landingBackend+'records/'; 
   //   return this.http.get(this.landingBackend+ searchValue);
   // }
-
-
 }
 
 

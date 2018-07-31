@@ -8,7 +8,7 @@ import { HttpClientModule } from '@angular/common/http';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 //import { Ng2StickyModule } from 'ng2-sticky';
 import { Collaspe } from './landing/collapseDirective/collapse.directive';
-import {  TreeModule, FieldsetModule } from 'primeng/primeng';
+import { TreeModule, FieldsetModule, DialogModule } from 'primeng/primeng';
 import { MenuModule } from 'primeng/menu';
 import { TreeTableModule } from 'primeng/treetable';
 import { AppComponent } from './app.component';
@@ -36,25 +36,21 @@ const appInitializerFn = (appConfig: AppConfig) => {
     return appConfig.loadAppConfig();
   };
 };
+
 @NgModule({
   declarations: [
     AppComponent,
-    LandingAboutComponent,
-    LandingComponent,
-    Collaspe,MetadataComponent,FileDetailsComponent,
-    DescriptionComponent,  KeyValuePipe, MetadataView, NoidComponent,NerdmComponent,
+    LandingAboutComponent, LandingComponent,
+    Collaspe,MetadataComponent,FileDetailsComponent, DescriptionComponent,  
+    KeyValuePipe, MetadataView, NoidComponent,NerdmComponent,
     ErrorComponent,UserErrorComponent,
-    AppShellNoRenderDirective,
-    AppShellRenderDirective 
+    AppShellNoRenderDirective, AppShellRenderDirective 
   ],
   imports: [
-    FormsModule,
-    ReactiveFormsModule,
-    AppRoutingModule,
-    HttpClientModule,
-    CommonModule, SharedModule, TreeModule,MenuModule, FieldsetModule, 
-    BrowserAnimationsModule, FormsModule,
-    TreeTableModule,
+    FormsModule, ReactiveFormsModule,
+    AppRoutingModule, HttpClientModule,
+    CommonModule, SharedModule, BrowserAnimationsModule, FormsModule,
+    TreeTableModule, TreeModule,MenuModule, FieldsetModule,DialogModule,
     NgbModule.forRoot()
   ],
   exports: [Collaspe],
@@ -66,7 +62,6 @@ const appInitializerFn = (appConfig: AppConfig) => {
       deps: [AppConfig]
     }  
   ],
-
   schemas: [ CUSTOM_ELEMENTS_SCHEMA ,NO_ERRORS_SCHEMA]
 })
 

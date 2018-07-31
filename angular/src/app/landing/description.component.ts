@@ -1,15 +1,11 @@
 import { Component, Input,ChangeDetectorRef } from '@angular/core';
-import { LandingComponent } from './landing.component';
-// import { TreeModule,TreeNode, Tree} from 'primeng/primeng';
 
 @Component({
   moduleId: module.id,
   styleUrls: ['landing.component.css'],
   selector: 'description-resources',
   template: `
-          <!--div class="ui-g">
-          <div class = "ui-g-12 ui-md-12 ui-lg-12 ui-sm-12"-->
-          <h3 id="description" name="desscription"><b>Description</b></h3>
+        <h3 id="description" name="desscription"><b>Description</b></h3>
           <i *ngIf="loginuser" style="float:right" class="faa faa-edit"></i>
             <div contenteditable="true" id="recordDescription" class="well welldesc">
               <p  *ngFor="let topic of record['description']; let i =index">
@@ -88,11 +84,11 @@ import { LandingComponent } from './landing.component';
                 </h3> <i *ngIf="loginuser" style="float:right" class="faa faa-edit"></i>
                 <div class="ui-g">
                     <div class="ui-g-6 ui-md-6 ui-lg-6 ui-sm-12">
-                        <!--p-tree [value]="files" selectionMode="single" [(selection)]="selectedFile" (onNodeSelect)="nodeSelect($event)">
+                        <p-tree [value]="files" selectionMode="single" [(selection)]="selectedFile" (onNodeSelect)="nodeSelect($event)">
                             <ng-template let-node  pTemplate="default">
                                 <span>{{node.label}}</span>
                             </ng-template>
-                        </p-tree -->
+                        </p-tree>
                     </div>
                     <div class="ui-g-6 ui-md-6 ui-lg-6 ui-sm-12">
                         <div>
@@ -110,8 +106,6 @@ import { LandingComponent } from './landing.component';
                     </div>
                 </div>
             </div>
-        <!--/div-->
-     <!--/div-->
   `
 })
 
