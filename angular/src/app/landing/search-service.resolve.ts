@@ -39,7 +39,8 @@ export class SearchResolve implements Resolve<any> {
         return of(record);
     }
     else {
-        return this.searchService.testdata() 
+        // return this.searchService.testdata() 
+        return this.searchService.searchById(recordid)
             .pipe(
                 tap(record => {
                     if (isPlatformServer(this.platformId)) {

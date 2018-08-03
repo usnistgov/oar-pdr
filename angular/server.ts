@@ -17,7 +17,7 @@ const app = express();
 const PORT = process.env.PORT || 4000;
 const DIST_FOLDER = join(process.cwd(), 'dist');
 
-console.log("All the environment variables ***::"+ process.env);
+console.log("All the environment variables ***::"+ process.env.RMMAPI);
 console.log("PORT::"+ process.env.PORT);
 // * NOTE :: leave this as require() since this file is built Dynamically from webpack
 const {AppServerModuleNgFactory, LAZY_MODULE_MAP} = require('./dist/server/main');

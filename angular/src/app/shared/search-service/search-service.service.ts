@@ -5,6 +5,7 @@ import 'rxjs/add/operator/map';
 import 'rxjs/add/operator/catch';
 import 'rxjs/add/observable/throw';
 import { AppConfig } from '../config-service/config.service';
+import * as _ from 'lodash';
 /**
  * This class provides the Search service with methods to search for records from tha rmm.
  */
@@ -24,6 +25,7 @@ export class SearchService {
     this.rmmApi = this.appConfig.getRMMapi();
     this.metaApi = this.appConfig.getMetaApi();
     this.landingBackend = this.appConfig.getLandingBackend();
+    this.serviceApi = this.rmmApi;
   }
 
   searchSample(){
@@ -34,15 +36,18 @@ export class SearchService {
     }
 
    testdata(): Observable<any> {
-    return this.http.get("http://localhost:4200/assets/sampledata.json");
+    //"http://localhost:4200/assets/sampledata.json"
+    console.log("Test service here:"+this.serviceApi);
+    return this.http.get(this.serviceApi);
+    
    } 
-  // searchById(searchValue:string){
-  //   if (_.includes(this.landingBackend,'rmm') && _.includes(searchValue,'ark'))
-  //     this.landingBackend = this.landingBackend+'records?@id=';
-  //   else if(_.includes(this.landingBackend,'rmm'))
-  //     this.landingBackend = this.landingBackend+'records/'; 
-  //   return this.http.get(this.landingBackend+ searchValue);
-  // }
+  searchById(searchValue:string){
+    if (_.includes(this.landingBackend,'rmm') && _.includes(searchValue,'ark'))
+      this.landingBackend = this.landingBackend+'records?@id=';
+    else if(_.includes(this.landingBackend,'rmm'))
+      this.landingBackend = this.landingBackend+'records/'; 
+    return this.http.get(this.landingBackend+ searchValue);
+  }
 }
 
 
