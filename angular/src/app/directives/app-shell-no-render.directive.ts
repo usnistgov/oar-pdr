@@ -1,6 +1,8 @@
+/**
+ * Render on client side only
+ */
 import {Directive, Inject, OnInit, PLATFORM_ID, TemplateRef, ViewContainerRef} from '@angular/core';
 import {isPlatformServer} from '@angular/common';
-
 
 @Directive({
     selector: '[appShellNoRender]'

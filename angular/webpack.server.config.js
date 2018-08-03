@@ -6,7 +6,7 @@ const webpack = require('webpack');
 
 module.exports = {
   entry: { server: './server.ts', prerender: './prerender.ts' },
-  resolve: { extensions: ['.js', '.ts'] },
+  resolve: { extensions: ['.js', '.ts'], modules: [path.join(__dirname, "node_modules")] },
   target: 'node',
   mode: 'none',
   // this makes sure we include node_modules and other 3rd party libraries

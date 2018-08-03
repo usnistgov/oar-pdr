@@ -1,27 +1,13 @@
-import { Component, OnInit, OnDestroy, AfterViewInit, ElementRef,
-         ViewChildren,Inject, PLATFORM_ID } from '@angular/core';
-import { DatePipe,CommonModule,isPlatformBrowser } from '@angular/common';
-import { FormBuilder, FormGroup } from '@angular/forms';
-import { BrowserModule ,Title} from '@angular/platform-browser';
+import { Component, OnInit, ElementRef } from '@angular/core';
+import { Title, Meta} from '@angular/platform-browser';
 import { ActivatedRoute, Router, NavigationEnd } from '@angular/router';
-import { Message } from 'primeng/components/common/api';
-import { TreeModule,TreeNode, Tree, MenuItem,OverlayPanelModule,
-         FieldsetModule,PanelModule,ContextMenuModule,
-         MenuModule, DialogModule,SelectItem } from 'primeng/primeng';
-import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
+import { TreeNode } from 'primeng/primeng';
+import { MenuItem } from 'primeng/api';
 import * as _ from 'lodash';
 import 'rxjs/add/operator/map';
 import { Subscription } from 'rxjs/Subscription';
-
-import { Collaspe } from './collapseDirective/collapse.directive';
 import { environment } from '../../environments/environment';
-import { SearchResolve } from "./search-service.resolve";
-//import * as jsPDF  from 'jspdf';
-import { CommonVarService } from "../shared/common-var/index";
 import { AppConfig } from '../shared/config-service/config.service';
-
-declare var Ultima: any;
-// declare var jQuery: any;
 
 @Component({
   selector: 'app-landing',
@@ -32,7 +18,7 @@ export class LandingComponent implements OnInit {
     layoutCompact: boolean = true;
     layoutMode: string = 'horizontal';
     profileMode: string = 'inline';
-    msgs: Message[] = [];
+    // msgs: Message[] = [];
     exception : string;
     errorMsg: string;
     status: string;
@@ -68,12 +54,14 @@ export class LandingComponent implements OnInit {
     isResultAvailable: boolean = true;
     isId : boolean = true;
     displayContact: boolean = false; 
+    private meta: Meta;
   /**
    * Creates an instance of the SearchPanel
    *
    */
   constructor(private route: ActivatedRoute, private el: ElementRef, 
-              private titleService: Title, private appConfig : AppConfig,private router: Router) {
+              private titleService: Title, private appConfig : AppConfig, private router: Router
+              ) {
     
     this.rmmApi = this.appConfig.getRMMapi();
     this.distApi = this.appConfig.getDistApi();
@@ -83,11 +71,9 @@ export class LandingComponent implements OnInit {
       if (s instanceof NavigationEnd) {
         const tree = router.parseUrl(router.url);
         if (tree.fragment) {
-         //alert("Test Fragment :"+tree.fragment)
           const element = document.querySelector("#" + tree.fragment);
           
           if (element) { 
-            //alert("Test here:"+element)
             element.scrollIntoView(true); 
            }
         }
@@ -104,21 +90,20 @@ export class LandingComponent implements OnInit {
       this.record = searchResults;
     else if(searchResults["ResultCount"] !== undefined && searchResults["ResultCount"] === 1)
       this.record = searchResults["ResultData"][0];
-    //this.record = rmmdata[0];
     this.type = this.record['@type'];
     this.titleService.setTitle(this.record['title']);
+    // this.meta.addTag({ "testdescription": this.record['description'] });
     this.createDataHierarchy();
     if(this.record['doi'] !== undefined && this.record['doi'] !== "" )
       this.isDOI = true;
-    //if(this.record['contactPoint'].hasEmail !== undefined && this.record['contactPoint'].hasEmail !== "")
     if( "hasEmail" in this.record['contactPoint'])  
      this.isEmail = true;
     if(this.record["@id"] === undefined || this.record["@id"] === "" ){
         this.isId = false;
         return;
     }
-      this.updateLeftMenu();
-      this.updateRightMenu();
+    this.updateLeftMenu();
+    this.updateRightMenu();
   }
 
   /**
@@ -128,7 +113,7 @@ export class LandingComponent implements OnInit {
     this.exception = (<any>error).ex;
     this.errorMsg = (<any>error).message;
     this.status = (<any>error).httpStatus;
-    this.msgs.push({severity:'error', summary:this.errorMsg + ':', detail:this.status + ' - ' + this.exception});
+    //this.msgs.push({severity:'error', summary:this.errorMsg + ':', detail:this.status + ' - ' + this.exception});
   }
 
   /**
@@ -259,20 +244,15 @@ updateRightMenu(){
 
     var paramid = this.route.snapshot.paramMap.get('id');
     this.files =[];
-    this.route.data.map(data => data.searchService )
-    .subscribe((res)=>{
-      // console.log("Test results:"+JSON.stringify(res));
-      this.onSuccess(res);
-  }, error =>{
-    console.log("There is an error in searchservice.");
-    this.onError(" There is an error");
-
-  });
     
-  }
-
-  ngOnDestroy() {
-    //this._routeParamsSubscription.unsubscribe();
+      this.route.data.map(data => data.searchService )
+       .subscribe((res)=>{
+         this.onSuccess(res);
+       }, error =>{
+       console.log("There is an error in searchservice.");
+       this.onError(" There is an error");
+       });
+    
   }
 
   ngAfterViewInit(){}
