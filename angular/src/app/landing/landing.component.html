@@ -36,7 +36,7 @@
                           <b *ngSwitchDefault></b>
                       </span>
                       <div  *ngIf="record.length !== 0" class="ui-sm-1 visible-xs-block visible-sm-block ">
-                        <button style="float: right" type="button" pButton icon="faa faa-list" (click)="menu3.toggle($event)"></button>
+                        <button style="float: right" type="button" pButton icon="faa faa-list" class="ui-button ui-button-icon-only" (click)="menu3.toggle($event)"></button>
                          <p-menu #menu3 class="rightMenuStylePop" popup="popup" [model]="rightmenu"></p-menu>
                     </div>
                       <br>

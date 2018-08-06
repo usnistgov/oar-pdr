@@ -12,7 +12,7 @@ import { Collaspe } from './landing/collapseDirective/collapse.directive';
 import { TreeModule, FieldsetModule, DialogModule } from 'primeng/primeng';
 import { MenuModule } from 'primeng/menu';
 import { TreeTableModule } from 'primeng/treetable';
-
+import { ButtonModule } from 'primeng/button';
 import { AppComponent } from './app.component';
 import { AppRoutingModule } from './app-routing.module';
 import { LandingComponent } from './landing/landing.component';
@@ -46,7 +46,7 @@ const appInitializerFn = (appConfig: AppConfig) => {
 @NgModule({
   declarations: [
     AppComponent,
-    LandingAboutComponent, LandingComponent,
+    LandingAboutComponent, LandingComponent,DatacartComponent,
     Collaspe,MetadataComponent,FileDetailsComponent, DescriptionComponent,  
     KeyValuePipe, MetadataView, NoidComponent,NerdmComponent,
     ErrorComponent,UserErrorComponent,
@@ -57,6 +57,7 @@ const appInitializerFn = (appConfig: AppConfig) => {
     AppRoutingModule, HttpClientModule,
     CommonModule, SharedModule, BrowserAnimationsModule, FormsModule,
     TreeTableModule, TreeModule,MenuModule, FieldsetModule,DialogModule,
+    ButtonModule,
     NgbModule.forRoot()
   ],
   exports: [Collaspe],

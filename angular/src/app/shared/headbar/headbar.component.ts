@@ -29,12 +29,12 @@ export class HeadbarComponent {
   internalBadge: boolean = false;
 
   cartEntities: CartEntity[];
-  topmenu: MenuItem[];
+  
 
   loginuser = false;
   cartLength : number;
 
-  constructor( private el: ElementRef, private commonVar : CommonVarService, private cartService: CartService, private appConfig : AppConfig) {
+  constructor( private el: ElementRef,  private cartService: CartService, private appConfig : AppConfig) {
     this.SDPAPI = this.appConfig.getSDPApi();
     this.landingService = this.appConfig.getLandingBackend();
       this.cartService.watchStorage().subscribe(value => {
