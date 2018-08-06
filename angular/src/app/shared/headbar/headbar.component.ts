@@ -1,8 +1,7 @@
+
+import { CartService } from '../../datacart/cart.service';
+import { CartEntity } from '../../datacart/cart.entity';
 import { Component, ElementRef } from '@angular/core';
-// import { Location } from '@angular/common';
-// import { TreeModule,TreeNode, Tree, OverlayPanelModule,
-//   FieldsetModule,PanelModule,ContextMenuModule,
-//   MenuModule,MenuItem } from 'primeng/primeng';
 import { AppConfig } from '../config-service/config.service';
 
 /**
@@ -28,12 +27,19 @@ export class HeadbarComponent {
   SDPAPI : string = "";
   landingService : string = "";
   internalBadge: boolean = false;
- 
-  loginuser = false;
 
-  constructor( private el: ElementRef, private appConfig : AppConfig) {
+  cartEntities: CartEntity[];
+  topmenu: MenuItem[];
+
+  loginuser = false;
+  cartLength : number;
+
+  constructor( private el: ElementRef, private commonVar : CommonVarService, private cartService: CartService, private appConfig : AppConfig) {
     this.SDPAPI = this.appConfig.getSDPApi();
     this.landingService = this.appConfig.getLandingBackend();
+      this.cartService.watchStorage().subscribe(value => {
+          this.cartLength = value;
+      });
   }
   
   checkinternal() {
@@ -41,4 +47,21 @@ export class HeadbarComponent {
       this.internalBadge = true;
     return this.internalBadge;
   }
+
+  getDataCartList () {
+    this.cartService.getAllCartEntities().then(function (result) {
+    this.cartEntities = result;
+    this.cartLength = this.cartEntities.length;
+    return this.cartLength;
+    }.bind(this), function (err) {
+      alert("something went wrong while fetching the products");
+    });
+    return null;
+  }
+
+  updateCartStatus()
+  {
+    this.cartService.updateCartDisplayStatus(true);
+  }
+
 }

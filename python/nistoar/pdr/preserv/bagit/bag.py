@@ -15,18 +15,20 @@ from ....nerdm.convert import ComponentCounter, HierarchyBuilder
 POD_FILENAME = "pod.json"
 NERDMD_FILENAME = "nerdm.json"
 ANNOTS_FILENAME = "annot.json"
-DEFAULT_MERGE_CONVENTION = "dev"
+DEFAULT_MERGE_CONVENTION = "midas0"
 
 JQLIB = def_jq_libdir
+MERGECONF = def_merge_etcdir
 
 class NISTBag(PreservationSystem):
     """
     an interface for reading data in a NIST-compliant BagIt bag.
     """
 
-    # NOTE: this is an incomplete implementation 
+    # NOTE: this is an incomplete implementation
+    # (what's missing?)
 
-    def __init__(self, rootdir, merge_annots=False):
+    def __init__(self, rootdir, merge_annots=False, merge_conf_dir=None):
         if not os.path.isdir(rootdir):
             raise StateException("Bag directory does not exist as a directory: "+
                                  rootdir, sys=self)
@@ -40,6 +42,13 @@ class NISTBag(PreservationSystem):
         self._mbagdir = None
 
         self._mergeannots = merge_annots
+
+        # this is the directory containing schemas annotated with merging
+        # directives
+        self._mergeconf = merge_conf_dir
+        if not self._mergeconf:
+            self._mergeconf = MERGECONF
+        self._mergerfact = None
 
     @property
     def dir(self):
@@ -149,21 +158,31 @@ class NISTBag(PreservationSystem):
 
         if merge_annots is None:
             merge_annots = self._mergeannots
+            
         annotfile = os.path.join(os.path.dirname(nerdfile), ANNOTS_FILENAME)
         if merge_annots and os.path.exists(annotfile):
             if merge_annots is True:
                 merge_annots = DEFAULT_MERGE_CONVENTION
-            compmerger = MergerFactory.make_merger(merge_annots, 'Component')
-            
+
+            merge_type = "Component"
+            if filepath == "":
+                merge_type = "Resource"
+
+            compmerger = self._make_merger(merge_annots, merge_type)
             if isinstance(merge_annots, Merger):
                 compmerger = merge_annots
             else:
-                compmerger = MergerFactory.make_merger(merge_annots, 'Component')
+                compmerger = self._make_merger(merge_annots, merge_type)
 
             annots = self.read_nerd(annotfile)
-            comp = compmerger.merge(comp, annots)
+            out = compmerger.merge(out, annots)
 
         return out
+
+    def _make_merger(self, stratconvname, typename):
+        if not self._mergerfact:
+            self._mergerfact = MergerFactory(MERGECONF)
+        return self._mergerfact.make_merger(stratconvname, typename)
 
     def nerdm_record(self, merge_annots=None):
         """
@@ -183,7 +202,7 @@ class NISTBag(PreservationSystem):
             merge_annots = DEFAULT_MERGE_CONVENTION
         compmerger = None
         if merge_annots:
-            compmerger = MergerFactory.make_merger(merge_annots, 'Component')
+            compmerger = self._make_merger(merge_annots, 'Component')
 
         out = None
         for root, subdirs, files in os.walk(self._metadir):
@@ -196,8 +215,7 @@ class NISTBag(PreservationSystem):
                     annotfile = os.path.join(root,ANNOTS_FILENAME)
                     if os.path.exists(annotfile):
                         annots = self.read_nerd(annotfile)
-                        merger = MergerFactory.make_merger(merger_annots,
-                                                           'Resource')
+                        merger = self._make_merger(merge_annots, 'Resource')
                         out = merger.merge(out, annots)
 
             elif NERDMD_FILENAME in files:
@@ -357,6 +375,22 @@ class NISTBag(PreservationSystem):
             for f in files:
                 # if f.startswith('.'):
                 #     continue
+                yield os.path.join(reldir, f)
+
+    def iter_data_components(self):
+        """
+        iterate through components that have entries in the metadata directory,
+        returning the filepath for those components
+
+        :return generator:  
+        """
+        for dir, subdirs, files in os.walk(self.metadata_dir):
+            reldir = dir[len(self.metadata_dir)+1:]
+            for f in subdirs:
+                # if f.startswith('.'):
+                #     continue
+                if f.startswith('_'):
+                    continue
                 yield os.path.join(reldir, f)
 
     def iter_fetch_records(self):
