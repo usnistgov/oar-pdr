@@ -1,17 +1,15 @@
 import { Component, Input,ChangeDetectorRef } from '@angular/core';
-import { LandingComponent } from './landing.component';
 import { TreeModule,TreeNode, Tree, MenuItem } from 'primeng/primeng';
 import { CartService} from '../datacart/cart.service';
 import { Data} from '../datacart/data';
+
 
 @Component({
   moduleId: module.id,
   styleUrls: ['landing.component.css'],
   selector: 'description-resources',
   template: `
-          <!--div class="ui-g">
-          <div class = "ui-g-12 ui-md-12 ui-lg-12 ui-sm-12"-->
-          <h3 id="description" name="desscription"><b>Description</b></h3>
+        <h3 id="description" name="desscription"><b>Description</b></h3>
           <i *ngIf="loginuser" style="float:right" class="faa faa-edit"></i>
             <div contenteditable="true" id="recordDescription" class="well welldesc">
               <p  *ngFor="let topic of record['description']; let i =index">
@@ -105,7 +103,7 @@ import { Data} from '../datacart/data';
                         </p-tree>
                     </div>
                     <div class="ui-g-6 ui-md-6 ui-lg-6 ui-sm-12">
-                        <div ng2-sticky>
+                        <div>
                             <div *ngIf="isFileDetails">
                                 <filedetails-resources [fileDetails]="fileDetails" [record]="record"></filedetails-resources>
                             </div>
@@ -120,8 +118,6 @@ import { Data} from '../datacart/data';
                     </div>
                 </div>
             </div>
-        <!--/div-->
-     <!--/div-->
   `
 })
 
@@ -137,7 +133,7 @@ export class DescriptionComponent {
  fileDetails:string = '';
  isFileDetails: boolean = false;
  isReference: boolean = false;
- selectedFile: TreeNode;
+// selectedFile: TreeNode;
  isAccessPage : boolean = false;
  accessPages: Map <string, string> = new Map();
  accessUrls : string[] =[];

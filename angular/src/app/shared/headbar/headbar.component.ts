@@ -1,11 +1,7 @@
-import { Component, OnInit, AfterViewInit, ElementRef } from '@angular/core';
-import { Location } from '@angular/common';
-import { TreeModule,TreeNode, Tree, OverlayPanelModule,
-  FieldsetModule,PanelModule,ContextMenuModule,
-  MenuModule,MenuItem } from 'primeng/primeng';
-import { CommonVarService } from "../common-var/index";
+
 import { CartService } from '../../datacart/cart.service';
 import { CartEntity } from '../../datacart/cart.entity';
+import { Component, ElementRef } from '@angular/core';
 import { AppConfig } from '../config-service/config.service';
 
 /**
@@ -31,8 +27,10 @@ export class HeadbarComponent {
   SDPAPI : string = "";
   landingService : string = "";
   internalBadge: boolean = false;
+
   cartEntities: CartEntity[];
   topmenu: MenuItem[];
+
   loginuser = false;
   cartLength : number;
 

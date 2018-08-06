@@ -5,11 +5,10 @@ import { RouterModule } from '@angular/router';
 import { SearchService } from './search-service/index';
 import { FootbarComponent } from './footbar/index';
 import { HeadbarComponent } from './headbar/index';
-import { CommonVarService } from './common-var/index';
- 
-import { InputTextModule, DropdownModule, ButtonModule, SplitButtonModule, MenubarModule,
- PanelModule, DataTableModule, DialogModule, AutoCompleteModule, MultiSelectModule,
- PaginatorModule, CalendarModule, TabViewModule,MenuModule,MenuItem } from 'primeng/primeng';
+
+// import { InputTextModule, DropdownModule, ButtonModule, SplitButtonModule, MenubarModule,
+//  PanelModule, DataTableModule, DialogModule, AutoCompleteModule, MultiSelectModule,
+//  PaginatorModule, CalendarModule, TabViewModule,MenuModule } from 'primeng/primeng';
 
 
 /**
@@ -17,9 +16,7 @@ import { InputTextModule, DropdownModule, ButtonModule, SplitButtonModule, Menub
  */
 
 @NgModule({
-  imports: [CommonModule, RouterModule,InputTextModule,DropdownModule,ButtonModule,
-    SplitButtonModule,MenubarModule,PanelModule,DataTableModule,AutoCompleteModule,
-    MultiSelectModule,PaginatorModule,DialogModule,CalendarModule,MenuModule],
+  imports: [CommonModule, RouterModule],
   declarations: [ HeadbarComponent, FootbarComponent],
   exports: [ HeadbarComponent, FootbarComponent,
     CommonModule, FormsModule, RouterModule]

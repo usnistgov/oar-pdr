@@ -17,18 +17,17 @@ export class AppConfig {
     constructor(private http: HttpClient) { }
     loadAppConfig() {
         this.appConfig = <any>data_json;
+        console.log(" this test process api ::"+ process.env.RMMAPI);
         this.rmmapi = process.env.RMMAPI || this.appConfig.RMMAPI;
         this.distapi =  process.env.DISTAPI || this.appConfig.DISTAPI;
         this.landingbackend = process.env.LANDING || this.appConfig.LANDING;
         this.metaapi = process.env.METAPI || this.appConfig.METAPI;
         this.sdpapi  = process.env.SDPAPI || this.appConfig.SDPAPI;
-        console.log("rmmapi::"+ process.env.RMMAPI + " :: set rmmapi ::"+ this.rmmapi);
-        console.log("Landing::"+ process.env.LANDING + " :: set  landing ::"+this.landingbackend);
-        
+        console.log(" this.rmmapi :"+ this.rmmapi)
     }
-    public getJSON(): Observable<any> {
-        return this.http.get("../../../assets/environment.json")
-    }
+    // public getJSON(): Observable<any> {
+    //     return this.http.get("../../../assets/environment.json")
+    // }
 //   constructor(private http: Http) { }
 //   loadAppConfig() {
 //     return this.http.get('http://localhost:4200/assets/environment.json')
