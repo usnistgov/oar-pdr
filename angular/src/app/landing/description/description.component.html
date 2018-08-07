@@ -50,10 +50,11 @@
                       
                       <div class="ui-g">
                           <div class="ui-g-12 ui-md-12 ui-lg-12 ui-sm-12">
-                          <p-treeTable [value]="files" [resizableColumns]="true" selectionMode="single" [(selection)]="selectedNode">
+                          <p-treeTable [value]="files" [columns]="cols" selectionMode="single" [(selection)]="selectedNode" [scrollable]="true" scrollHeight="200px"  [resizableColumns]="true">
+                                
                           <ng-template pTemplate="caption">
                               <div style="text-align:left">
-                                <span style="margin-left: .25em; vertical-align: middle">Files</span>
+                                <span style="margin-left: .25em; vertical-align: middle; color: white">Files</span>
                                 <span style="vertical-align: middle; float: right">
                                   <a href="{{distdownload}}" class="faa faa-file-archive-o" style="color:white;" title="Download All Files" ></a>
                                 </span>   
@@ -67,14 +68,26 @@
                                 </span> 
                               </div>
                           </ng-template>
-                          <ng-template pTemplate="header">
+                          <!-- <ng-template pTemplate="header">
                               <tr>
                                   <th ttResizableColumn style="width:500px">Name</th>
-                                  <th>Mediatype</th>
-                                  <th>Download</th>
+                                  <th ttResizableColumn>Mediatype</th>
+                                  <th ttResizableColumn>Download</th>
                               </tr>
-                          </ng-template>
-                          <ng-template pTemplate="body" let-rowNode let-rowData="rowData">
+                          </ng-template> -->
+                          <ng-template pTemplate="colgroup" let-columns>
+                                <colgroup>
+                                    <col *ngFor="let col of columns"  [style.width]="col.width">
+                                </colgroup>
+                            </ng-template>
+                          <ng-template pTemplate="header" let-columns>
+                                <tr>
+                                    <th *ngFor="let col of columns"  ttResizableColumn>
+                                       {{col.header}} 
+                                    </th>
+                                </tr>
+                            </ng-template>
+                          <ng-template pTemplate="body" let-rowNode let-rowData="rowData" let-columns="columns">
                               <tr [ttSelectableRow]="rowNode">
                                   <td>
                                       <p-treeTableToggler [rowNode]="rowNode"></p-treeTableToggler>
@@ -90,11 +103,13 @@
                               </tr>            
                           </ng-template>
                           <ng-template pTemplate="summary">
-                               <div style="text-align: left">
-                               Selected File Info: 
-                            
+                               <div style="text-align: left; color: white;">
+                               Selected File Details: <br>
+                                
                                <span style="font-weight: normal">
-                                   {{selectedNode ? selectedNode.data.name + ' - ' + selectedNode.data.size + ' - ' + selectedNode.data.mediatype : 'none'}}
+                                  File Name:  {{selectedNode ? selectedNode.data.name : 'none'}}
+                                 <br> File Size: {{ selectedNode ? selectedNode.data.size : none}} 
+                                 <br> File type: {{ selectedNode ? selectedNode.data.mediatype : 'none'}} 
                                </span>
                                </div>
                           </ng-template>

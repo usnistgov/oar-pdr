@@ -32,6 +32,7 @@ export class DescriptionComponent {
  isDocumentedBy : boolean = false;
  selectedNodes: TreeNode[];
  addFileStatus:boolean = false;
+ cols: any[];
 
 nodeSelect(event) {
     var test = this.getComponentDetails(this.record["components"],event.node.data);
@@ -118,6 +119,11 @@ checkReferences(){
  ngOnInit(){
     this.cdr.detectChanges();
     this.files  =<TreeNode[]>this.files[0].data;
+    this.cols = [
+        { field: 'name', header: 'Name', width: '70%' },
+        { field: 'mediatype', header: 'MediaType', width: '20%' },
+        { field: 'download', header: 'Download', width: '10%' },
+    ];
  }
  ngOnChanges(){
     this.checkAccesspages();

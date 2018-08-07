@@ -82,11 +82,13 @@
 
 :host /deep/ .rightMenuStyle > .ui-menu .ui-submenu-header{
   /* background-color: #B8D4E6; */
-  background-color:rgb(65, 68, 69);
+  /* background-color:rgb(65, 68, 69); */
+  background-color: #1471AE;
   padding: 2%;
   padding-left: 5%;
   font-family: 'Sans-Serif';
   font-weight: bold;
+  color: white;
  
 }
 
@@ -149,7 +151,9 @@
 
 :host /deep/ .ui-widget-header{
   /* border: 0px; */
-  background-color:#336B87;
+  /* background-color:#336B87; */
+  background-color: #1D72AC;
+   color: black;
 }
 
 /* :host /deep/ .ui-widget-content{
@@ -161,12 +165,12 @@
 }
 
 :host /deep/ .ui-state-active, :host /deep/ .ui-state-highlight{
-  background-color: #E7F0F6;
+  background-color: #707070;
 }
 /* Description section */
 .welldesc{
-  /* background-color:#006495; */
-  background-color:#90AFC5;
+  background-color:#006495;
+  /* background-color:#90AFC5; */
   text-align: left;
   color: white;
 }
