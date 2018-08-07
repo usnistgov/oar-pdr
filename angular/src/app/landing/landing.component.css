@@ -26,7 +26,7 @@
   color:#707070; 
   font-size: 14;
 }
-
+/* 
 :host /deep/ .ui-tree {
   padding: 0.625em 1em/2;
   font-weight:bold;
@@ -51,64 +51,70 @@
 
 
 :host /deep/ .ui-tree .ui-tree-container {
+
   position: relative;
   float: left;
-}
+} */
 
-
-:host /deep/ .leftMenuStyle > .ui-menu .ui-submenu-header{
+/* 
+:host /deep/ .leftMenuStyle > .ui-menu  .ui-menu-list li.ui-widget-header{
   background-color: #B4B0B0;
   font-weight: bold;
-  /* font-family: 'Sans-Serif'; */
+  
+  font-family: Sans-Serif;
   padding: 2%;
   padding-left: 5%;
-  font-size: 16px;
 }
-
-:host /deep/ .leftMenuStyle > .ui-menu .ui-menu-list li.ui-menuitem {
+:host /deep/ .leftMenuStyle > .ui-menu .ui-menu-list li.ui-menuitem .ui-menuitem-link{
   line-height: 0;
   min-height: 1.5em;
-  /* font-family: 'Sans-Serif'; */
+ 
+  font-family: 'Roboto';
   background-color: #e8e7e7;
   word-wrap: break-word;
-  padding: 5%;
-  font-size: 14px;
+ 
 }
-:host /deep/ .leftMenuStyle > .ui-menu .ui-menuitem-link{
-  /* font-family: 'Sans-Serif'; */
-  font-size: 14px;
-  padding: 0 0 0 .625em;
-}
+
 :host /deep/ .leftMenuStyle > .ui-menu .ui-menu-list li.ui-menuitem .ui-menuitem-link:hover {
   background-color: #ffffff;
-  color: #000000; }
+  color: #000000; } */
 
 
 :host /deep/ .rightMenuStyle > .ui-menu .ui-submenu-header{
-  background-color: #B8D4E6;
+  /* background-color: #B8D4E6; */
+  background-color:rgb(65, 68, 69);
   padding: 2%;
   padding-left: 5%;
-  /* font-family: 'Sans-Serif'; */
+  font-family: 'Sans-Serif';
   font-weight: bold;
-  font-size: 16px;
+ 
 }
 
-:host /deep/ .rightMenuStyle > .ui-menu  .ui-menuitem-link{
+
+
+:host /deep/ .rightMenuStyle > .ui-menu  .ui-menuitem-link  .ui-state-hover{
   line-height: 1em;
   min-height: 1em;
   background-color: #e7f0f6;
   word-wrap: break-word;
-  padding: 0.2em;
-  /* font-family: 'Sans-Serif'; */
+  font-family: 'Sans-Serif';
   font-size: 14px;
 }
-
-:host /deep/ .rightMenuStylePop  > .ui-menu {
-  position: absolute;
-  width: 12em;
+:host /deep/ .rightMenuStyle > .ui-menu  .ui-menuitem{
+  line-height: 1em;
+  min-height: 1em;
+  background-color:  #e7f0f6;
   word-wrap: break-word;
-  /* font-family: 'Sans-Serif'; */
-
+  font-family: 'Sans-Serif';
+  font-size: 14px;
+  padding: 0;
+ 
+}
+:host /deep/ .rightMenuStyle > .ui-menu .ui-menuitem-link{
+  padding: 0.5em 0.2em 0.5em 0.5em;
+}
+:host /deep/ .rightMenuStyle > .ui-menu{
+  width: 100%;
 }
 
 :host /deep/ .rightMenuStyle > .ui-menu  .ui-menuitem-link:hover {
@@ -116,11 +122,42 @@
   color: #000000;
 }
 
-:host /deep/ .ui-widget-content{
-  border: 0px;
+:host /deep/ .rightMenuStylePop  > .ui-menu {
+  position: absolute;
+  width: 12em;
+  word-wrap: break-word;
+  font-family: 'Sans-Serif';
+  
 }
+:host /deep/ .rightMenuStylePop > .ui-menu .ui-menuitem-link{
+  padding: 0.5em 0.2em 0.5em 0.5em;
+  font-size: 14px;
+}
+
+:host /deep/ .rightMenuStylePop > .ui-menu .ui-submenu-header{
+  padding: 0.5em 0.2em 0.5em 0.5em;
+  font-size: 14px;
+}
+
+
+/* :host /deep/ .rightMenuStyle > .ui-menu .ui-menu-list li.ui-menuitem{
+  background-color:#E7F0F6;
+  font-family: 'Sans-Serif';
+  word-wrap: break-word;
+  font-size: 0.9em;
+} */
+
+:host /deep/ .ui-widget-header{
+  /* border: 0px; */
+  background-color:#336B87;
+}
+
+/* :host /deep/ .ui-widget-content{
+  border: 1px;
+} */
 :host /deep/ .ui-menu{
   padding: 0;
+  border:0;
 }
 
 :host /deep/ .ui-state-active, :host /deep/ .ui-state-highlight{
@@ -128,10 +165,10 @@
 }
 /* Description section */
 .welldesc{
-  background-color:#006495;
+  /* background-color:#006495; */
+  background-color:#90AFC5;
   text-align: left;
   color: white;
-  padding: 10px;
 }
 :host /deep/ citationDialog > button.ui-button-icon-only{  
   border-radius: 50%;

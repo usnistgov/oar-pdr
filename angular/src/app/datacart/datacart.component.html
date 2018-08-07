@@ -34,7 +34,7 @@
             </ng-template>
                 <ng-template let-rowNode let-rowData="rowData"  let-i="rowIndex" pTemplate="body">
                     <tr style="background: #FFFFFF">
-                        <td width="75%">
+                        <td >
                             <p-treeTableToggler [rowNode]="rowNode"></p-treeTableToggler>
                             &nbsp;<p-treeTableCheckbox [value]="rowNode"></p-treeTableCheckbox>
                             &nbsp;<a href="{{rowData.downloadURL}}" target="_blank" *ngIf = "rowData.resTitle.indexOf('.') > 0 "> {{rowData.resTitle}}</a>

@@ -93,7 +93,8 @@ export class LandingComponent implements OnInit {
     this.type = this.record['@type'];
     this.titleService.setTitle(this.record['title']);
     // this.meta.addTag({ "testdescription": this.record['description'] });
-    this.createDataHierarchy();
+    //this.createDataHierarchy();
+    this.createNewDataHierarchy();
     if(this.record['doi'] !== undefined && this.record['doi'] !== "" )
       this.isDOI = true;
     if( "hasEmail" in this.record['contactPoint'])  
@@ -102,8 +103,9 @@ export class LandingComponent implements OnInit {
         this.isId = false;
         return;
     }
-    this.updateLeftMenu();
-    this.updateRightMenu();
+    this.updateMenu();
+    //this.updateLeftMenu();
+    //this.updateRightMenu();
   }
 
   /**
@@ -116,44 +118,44 @@ export class LandingComponent implements OnInit {
     //this.msgs.push({severity:'error', summary:this.errorMsg + ':', detail:this.status + ' - ' + this.exception});
   }
 
-  /**
-   * Update Leftside menu on landing page
-   */
-  updateLeftMenu(){
-    var itemsMenu: MenuItem[] = [];
-    var descItem = this.createMenuItem ("Description",'',(event)=>{
-      this.metadata = false; this.similarResources =false;
-      this.router.navigate(['/od/id/', this.record.ediid],{fragment:'description'});
-    },'');
+//   /**
+//    * Update Leftside menu on landing page
+//    */
+//   updateLeftMenu(){
+//     var itemsMenu: MenuItem[] = [];
+//     var descItem = this.createMenuItem ("Description",'',(event)=>{
+//       this.metadata = false; this.similarResources =false;
+//       this.router.navigate(['/od/id/', this.record.ediid],{fragment:'description'});
+//     },'');
 
-    var refItem = this.createMenuItem ("References",'',(event)=>{
-      this.metadata = false; this.similarResources =false;
-      this.router.navigate(['/od/id/', this.record.ediid],{fragment:'reference'});
+//     var refItem = this.createMenuItem ("References",'',(event)=>{
+//       this.metadata = false; this.similarResources =false;
+//       this.router.navigate(['/od/id/', this.record.ediid],{fragment:'reference'});
 
-    },'');
+//     },'');
 
-    var filesItem = this.createMenuItem("Data Access",'', (event)=>{
-      this.metadata = false;
-      this.similarResources =false;
-      this.router.navigate(['/od/id/', this.record.ediid],{fragment:'dataAccess'});
-    },'');
+//     var filesItem = this.createMenuItem("Data Access",'', (event)=>{
+//       this.metadata = false;
+//       this.similarResources =false;
+//       this.router.navigate(['/od/id/', this.record.ediid],{fragment:'dataAccess'});
+//     },'');
 
-    var metaItem = this.createMenuItem("Metadata",'',(event)=>{
-      this.metadata = true; this.similarResources =false;},'');
+//     var metaItem = this.createMenuItem("Metadata",'',(event)=>{
+//       this.metadata = true; this.similarResources =false;},'');
 
-    itemsMenu.push(descItem);
-    if(this.checkReferences())
-      itemsMenu.push(refItem);
-    if(this.files.length !== 0)
-      itemsMenu.push(filesItem);
-    itemsMenu.push(metaItem);
+//     itemsMenu.push(descItem);
+//     if(this.checkReferences())
+//       itemsMenu.push(refItem);
+//     if(this.files.length !== 0)
+//       itemsMenu.push(filesItem);
+//     itemsMenu.push(metaItem);
 
-    this.leftmenu = [{
-      label: 'Table of Contents',
-      items: itemsMenu
-    }
-  ];
-}
+//     this.leftmenu = [{
+//       label: 'Table of Contents',
+//       items: itemsMenu
+//     }
+//   ];
+// }
 
 viewmetadata(){
   this.metadata = true; this.similarResources =false;
@@ -170,42 +172,93 @@ createMenuItem(label :string, icon:string, command: any, url : string ){
   return testItem;
 }
 
+// /**
+//  * Update right side panel on landing page
+//  */
+// updateRightMenu(){
+      
+//   this.serviceApi = this.landing+"records?@id="+this.record['@id']; 
+//   if(!_.includes(this.landing, "rmm"))
+//     this.serviceApi = this.landing+this.record['ediid'];
+//   this.distdownload = this.distApi+"ds/zip?id="+this.record['@id'];
+      
+//   var itemsMenu: any[] = [];
+//   var homepage = this.createMenuItem("Visit Home Page",  "faa faa-external-link", '',this.record['landingPage']);
+//   var download = this.createMenuItem("Download all data","faa faa-file-archive-o", '', this.distdownload);
+//   var metadata = this.createMenuItem("Export JSON", "faa faa-file-o",'',this.serviceApi);
+    
+      
+//   let authlist = "";
+//   if (this.record['authors']) {    
+//       for(let auth of this.record['authors']) authlist = authlist+auth.familyName+",";
+//   }
+        
+//   var resourcesByAuthor = this.createMenuItem ('Resources by Authors',"faa faa-external-link","",this.sdpLink+"/#/search?q=authors.familyName="+authlist+"&key=&queryAdvSearch=yes");
+//   var similarRes = this.createMenuItem ("Similar Resources", "faa faa-external-link", "",this.sdpLink+"/#/search?q=keyword="+this.record['keyword']+"&key=&queryAdvSearch=yes");                
+//   var license = this.createMenuItem("License Statement",  "faa faa-external-link","",this.record['license'] ) ;
+//   var citation = this.createMenuItem('Cite this resource', "faa faa-angle-double-right",(event)=>{ this.getCitation(); this.showDialog(); },'');
+
+
+//     itemsMenu.push(homepage);
+//     if (this.files.length != 0) 
+//       itemsMenu.push(download);
+//     itemsMenu.push(metadata);   
+
+//   this.rightmenu = [{ label: 'Access ', items: itemsMenu },
+//       { label: 'Use',   items: [ citation, license ] },
+//       { label: 'Find',   items: [ similarRes, resourcesByAuthor ]}];
+  
+//   }
+
 /**
  * Update right side panel on landing page
  */
-updateRightMenu(){
+updateMenu(){
       
   this.serviceApi = this.landing+"records?@id="+this.record['@id']; 
   if(!_.includes(this.landing, "rmm"))
     this.serviceApi = this.landing+this.record['ediid'];
   this.distdownload = this.distApi+"ds/zip?id="+this.record['@id'];
       
-  var itemsMenu: any[] = [];
-  var homepage = this.createMenuItem("Visit Home Page",  "faa faa-external-link", '',this.record['landingPage']);
-  var download = this.createMenuItem("Download all data","faa faa-file-archive-o", '', this.distdownload);
-  var metadata = this.createMenuItem("Export JSON", "faa faa-file-o",'',this.serviceApi);
-    
-      
+  var itemsMenu: MenuItem[] = [];
+  var metadata = this.createMenuItem("Export JSON", "faa faa-file-o",'',this.serviceApi);   
   let authlist = "";
   if (this.record['authors']) {    
       for(let auth of this.record['authors']) authlist = authlist+auth.familyName+",";
   }
-        
-  var resourcesByAuthor = this.createMenuItem ('Resources by Authors',"faa faa-external-link","",this.sdpLink+"/#/search?q=authors.familyName="+authlist+"&key=&queryAdvSearch=yes");
+  
+  var resourcesByAuthor = this.createMenuItem ('Resources Authors',"faa faa-external-link","",this.sdpLink+"/#/search?q=authors.familyName="+authlist+"&key=&queryAdvSearch=yes");
   var similarRes = this.createMenuItem ("Similar Resources", "faa faa-external-link", "",this.sdpLink+"/#/search?q=keyword="+this.record['keyword']+"&key=&queryAdvSearch=yes");                
-  var license = this.createMenuItem("License Statement",  "faa faa-external-link","",this.record['license'] ) ;
-  var citation = this.createMenuItem('Cite this resource', "faa faa-angle-double-right",(event)=>{ this.getCitation(); this.showDialog(); },'');
-
-
-    itemsMenu.push(homepage);
-    if (this.files.length != 0) 
-      itemsMenu.push(download);
+  var license = this.createMenuItem("Fair Use Statement",  "faa faa-external-link","",this.record['license'] ) ;
+  var citation = this.createMenuItem('Citation', "faa faa-angle-double-right",(event)=>{ this.getCitation(); this.showDialog(); },'');
+  var metaItem = this.createMenuItem("View","faa faa-bars",(event)=>{
+    this.metadata = true; this.similarResources =false;},''); 
+    itemsMenu.push(metaItem);
     itemsMenu.push(metadata);   
+  var descItem = this.createMenuItem ("Description","faa faa-bars",(event)=>{
+    this.metadata = false; this.similarResources =false;
+    this.router.navigate(['/od/id/', this.record.ediid],{fragment:'description'});
+   },"");
 
-  this.rightmenu = [{ label: 'Access ', items: itemsMenu },
+  var refItem = this.createMenuItem ("References","faa faa-bars",(event)=>{
+    this.metadata = false; this.similarResources =false;
+    this.router.navigate(['/od/id/', this.record.ediid],{fragment:'reference'});
+    },'');
+
+  var filesItem = this.createMenuItem("Data Access","faa faa-bars", (event)=>{
+    this.metadata = false;
+    this.similarResources =false;
+    this.router.navigate(['/od/id/', this.record.ediid],{fragment:'dataAccess'});
+    },'');
+  var itemsMenu2:MenuItem[] = [];
+      itemsMenu2.push(descItem);
+      itemsMenu2.push(refItem);
+  if(this.files.length !== 0)
+      itemsMenu2.push(filesItem);
+  this.rightmenu = [ { label: 'Go To ..', items: itemsMenu2},
+      { label: 'Record Details', items: itemsMenu },
       { label: 'Use',   items: [ citation, license ] },
       { label: 'Find',   items: [ similarRes, resourcesByAuthor ]}];
-  
   }
 
   getCitation(){
@@ -262,58 +315,102 @@ updateRightMenu(){
     return (Object.keys(obj).length === 0);
   }
 
-  createDataHierarchy(){
-    if (this.record['dataHierarchy'] == null )
-      return;
-    for(let fields of this.record['dataHierarchy']){
-      if( fields.filepath != null) {
-        if(fields.children != null)
-          this.files.push(this.createChildrenTree(fields.children,
-            fields.filepath));
-        else
-          this.files.push(this.createFileNode(fields.filepath,
-            fields.filepath));
-      }
-    }
-  }
+  // createDataHierarchy(){
+  //   if (this.record['dataHierarchy'] == null )
+  //     return;
+  //   for(let fields of this.record['dataHierarchy']){
+  //     if( fields.filepath != null) {
+  //       if(fields.children != null)
+  //         this.files.push(this.createChildrenTree(fields.children,
+  //           fields.filepath));
+  //       else
+  //         this.files.push(this.createFileNode(fields.filepath,
+  //           fields.filepath));
+  //     }
+  //   }
+  // }
 
-  createChildrenTree(children:any[], filepath:string){
-    let testObj:TreeNode = {};
-    testObj= this.createTreeObj(filepath.split("/")[filepath.split("/").length-1],filepath);
-    testObj.children=[];
-    for(let child of children){
-      let fname = child.filepath.split("/")[child.filepath.split("/").length-1];
-      if( child.filepath != null) {
-        if(child.children != null)
-          testObj.children.push(this.createChildrenTree(child.children,
-            child.filepath));
-        else
-          testObj.children.push(this.createFileNode(fname,
-            child.filepath));
-      }
-    }
-    return testObj;
-  }
+  // createChildrenTree(children:any[], filepath:string){
+  //   let testObj:TreeNode = {};
+  //   testObj= this.createTreeObj(filepath.split("/")[filepath.split("/").length-1],filepath);
+  //   testObj.children=[];
+  //   for(let child of children){
+  //     let fname = child.filepath.split("/")[child.filepath.split("/").length-1];
+  //     if( child.filepath != null) {
+  //       if(child.children != null)
+  //         testObj.children.push(this.createChildrenTree(child.children,
+  //           child.filepath));
+  //       else
+  //         testObj.children.push(this.createFileNode(fname,
+  //           child.filepath));
+  //     }
+  //   }
+  //   return testObj;
+  // }
 
-  createTreeObj(label :string, data:string){
-    let testObj : TreeNode = {};
-    testObj = {};
-    testObj.label = label;
-    testObj.data = data;
-    if(label == "Files")
-      testObj.expanded = true;
-    testObj.expandedIcon = "faa faa-folder-open";
-    testObj.collapsedIcon =  "faa faa-folder";
-    return testObj;
+  // createTreeObj(label :string, data:string){
+  //   let testObj : TreeNode = {};
+  //   testObj = {};
+  //   testObj.label = label;
+  //   testObj.data = data;
+  //   if(label == "Files")
+  //     testObj.expanded = true;
+  //   testObj.expandedIcon = "faa faa-folder-open";
+  //   testObj.collapsedIcon =  "faa faa-folder";
+  //   return testObj;
+  // }
+  // createFileNode(label :string, data:string){
+  //   let endFileNode:TreeNode = {};
+  //   endFileNode.label = label;
+  //   endFileNode.data = data;
+  //   endFileNode.icon = "faa faa-file-o";
+  //   endFileNode.expandedIcon = "faa faa-folder-open";
+  //   endFileNode.collapsedIcon =  "faa fa-folder";
+  //   return endFileNode;
+  // }
+
+  createNewDataHierarchy(){
+    var testdata = {}
+    testdata["data"] = this.arrangeIntoTree(this.record['components']);
+    this.files.push(testdata);
   }
-  createFileNode(label :string, data:string){
-    let endFileNode:TreeNode = {};
-    endFileNode.label = label;
-    endFileNode.data = data;
-    endFileNode.icon = "faa faa-file-o";
-    endFileNode.expandedIcon = "faa faa-folder-open";
-    endFileNode.collapsedIcon =  "faa fa-folder";
-    return endFileNode;
+  //This is to create a tree structure
+  private arrangeIntoTree(paths) {
+    const tree = [];
+    // This example uses the underscore.js library.
+    var i = 0;
+    paths.forEach((path) => {
+      if(i != 0) 
+      {
+        path.filepath = "/"+path.filepath;
+        const pathParts = path.filepath.split('/');
+        pathParts.shift(); // Remove first blank element from the parts array.
+        let currentLevel = tree; // initialize currentLevel to root
+        pathParts.forEach((part) => { 
+          // check to see if the path already exists.
+          const existingPath = currentLevel.filter(level => level.data.name === part);
+          if (existingPath.length > 0) {
+            // The path to this item was already in the tree, so don't add it again.
+            // Set the current level to this path's children
+            currentLevel = existingPath[0].children;
+          } else {
+            const newPart = {
+              data : {
+                name : part,
+                mediatype: path.mediaType,
+                size: path.size,
+                downloadUrl: path.downloadURL
+              },children: []
+            };
+            currentLevel.push(newPart);
+            currentLevel = newPart.children;
+          }
+        });
+      }
+      i= i+1;
+   });
+   //console.log("Return tree"+ JSON.stringify(tree));
+   return tree;
   }
 
   clicked = false;
