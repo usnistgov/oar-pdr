@@ -3,7 +3,7 @@ This distrib submodule provides a client interface to the part of the PDR
 Distribution Service that provides access to preservation bags. 
 """
 import os
-from .client import RESTServiceClient
+from .client import RESTServiceClient, DistribTransferError
 
 class BagDistribClient(object):
     """
@@ -28,10 +28,15 @@ class BagDistribClient(object):
         information package (AIP) with the given id
 
         :param str aipid:   the identifier for the desired AIP
-        :param ServiceClient svcclient:  the generic client to the REST service
+        :param svcclient:   if str, it is the URL to the Distribution 
+                            service endpoint; otherwise, it can be an 
+                            an instance of generic client to the REST service
+        :type svcclient:    ServiceClient or str 
         """
         if not aipid:
             raise ValueError("BagClient: aipid must be non-empty str")
+        if not isinstance(svcclient, RESTServiceClient):
+            svcclient = RESTServiceClient(str(svcclient))
         self.id = aipid
         self.svc = svcclient
         self.op = "/".join([self.id, "_bags"])
@@ -46,6 +51,19 @@ class BagDistribClient(object):
     def list_all(self):
         """
         return a list of all available bags for our AIP
+        :rtype: list of str giving the available bag names
+        """
+        return [f['name'] for f in self.describe_all()]
+
+    def describe_all(self):
+        """
+        return a list of descriptions of available bags for our AIP.  Each 
+        item in the list is a dictionary containing the following properties:
+        :prop str name:  the name of the bag
+        :prop str size:  the size of the serialized bag file in bytes
+        :prop str hash:  the checksum hash of the file
+        :prop str hashtype:  the algorithm used to calculate the hash (e.g. 
+                         'sha256')
         """
         return self.svc.get_json(self.op)
 
@@ -55,12 +73,21 @@ class BagDistribClient(object):
         :param str version:   the desired version.  If not provided, the 
                               list will be for the latest version.
         """
+        return [f['name'] for f in self.describe_for_version(version)]
+
+    def describe_for_version(self, version=None):
+        """
+        return a list of descriptions of all bags available for a given version 
+        of the AIP
+        :param str version:   the desired version.  If not provided, the 
+                              list will be for the latest version.
+        """
         if not version:
             version = "latest"
         rurl = "/".join([self.op,"_v",version])
         return self.svc.get_json(rurl)
 
-    def head_for_version(self, version=None):
+    def describe_head_for_version(self, version=None):
         """
         return a list of the available head bags for a given version of the AIP.
         Each head bag in the returned list represents a different serialized 
@@ -74,6 +101,17 @@ class BagDistribClient(object):
         rurl = "/".join([self.op,"_v",version,"head"])
         return self.svc.get_json(rurl)
 
+    def head_for_version(self, version=None):
+        """
+        return a list of the available head bags for a given version of the AIP.
+        Each head bag in the returned list represents a different serialized 
+        form or format of the head bag's contents.  
+
+        :param str version:   the desired version.  If not provided, the 
+                              name for the latest version will be returned.
+        """
+        return [f['name'] for f in self.describe_head_for_version(version)]
+    
     def stream_bag(self, bagname):
         """
         return an open file-like object for reading the serialized bag with 

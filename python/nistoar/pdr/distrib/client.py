@@ -216,3 +216,19 @@ class DistribResourceNotFound(DistribClientError):
                                                  http_reason, message, cause)
 
 
+class DistribTransferError(PDRException):
+    """
+    an exception indicating an error occurred while downloading a file from 
+    the distribution service.  It is usually not known if this is due a problem
+    in the client or the server.  This error can be raised if the downloaded
+    file appears to be corrupted.  
+    """
+    def __init__(self, resource, message=None, cause=None):
+        if not message:
+            message = "Problem detected in transfering " + resource + \
+                      " from distribution service"
+        super(PDRException, self).__init__(message, cause)
+        self.resource = resource
+
+
+

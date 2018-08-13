@@ -1,5 +1,5 @@
 from __future__ import print_function
-import json, os, cgi, sys, re
+import json, os, cgi, sys, re, hashlib
 from wsgiref.headers import Headers
 
 try:
@@ -16,6 +16,19 @@ archdir = os.path.join(testdir, 'data')
     
 bagvnmre = re.compile("^(\w+)\.(\d+\w*)\.mbag(\d+_\d+)-(\\d+)\.(\w+)$")
 bagnmre = re.compile("^(\w+)\.mbag(\d+_\d+)-(\\d+)\.(\w+)$")
+
+def checksum_of(filepath):
+    """
+    return the checksum for the given file
+    """
+    bfsz = 10240000   # 10 MB buffer
+    sum = hashlib.sha256()
+    with open(filepath) as fd:
+        while True:
+            buf = fd.read(bfsz)
+            if not buf: break
+            sum.update(buf)
+    return sum.hexdigest()
 
 def version_of(bagname):
     m = bagvnmre.search(bagname)
@@ -37,7 +50,7 @@ class SimArchive(object):
         self._aips = {}
         self.loadinfo()
 
-    def add_file(self, filename):
+    def add_file(self, filename, size, hash):
         m = bagvnmre.search(filename)
         if m:
             aid = m.group(1)
@@ -58,12 +71,14 @@ class SimArchive(object):
             if aid not in self._aips:
                 self._aips[aid] = {}
             if vers not in self._aips[aid]:
-                self._aips[aid][vers] = set()
-            self._aips[aid][vers].add(filename)
+                self._aips[aid][vers] = {}
+            self._aips[aid][vers][filename] = (size, hash)
         
     def loadinfo(self):
         for f in os.listdir(self.dir):
-            self.add_file(f)
+            hash = checksum_of(os.path.join(self.dir, f))
+            size = os.stat(os.path.join(self.dir, f)).st_size
+            self.add_file(f, size, hash)
 
     @property
     def aipids(self):
@@ -75,12 +90,17 @@ class SimArchive(object):
         return sorted([k for k in self._aips[aid].keys()])
 
     def list_bags(self, aid):
-        out = set()
+        out = list()
         if aid not in self._aips:
-            return list(out)
+            return list()
         for v in self._aips[aid]:
-            out.update(self._aips[aid][v])
-        return sorted(out, key=seq_of)
+            for f in self._aips[aid][v]:
+                out.append(self._mkfilerec(f, aid, v, self._aips[aid][v][f]))
+        return sorted(out, key=lambda f: seq_of(f['name']))
+
+    def _mkfilerec(self, filename, id, version, info):
+        return {'name': filename, 'size': info[0], 'id': id, 'version': version,
+                'hash': info[1], 'hashtype': 'sha256'}
 
     def list_for_version(self, aid, vers=None):
         if aid not in self._aips:
@@ -90,14 +110,15 @@ class SimArchive(object):
         if vers == 'latest':
             vers = sorted(self.versions_for(aid), key=lambda v: v.split('.'))[-1]
 
-        out = set()
+        out = list()
         if aid not in self._aips:
-            return list(out)
+            return out
         if vers not in self._aips[aid]:
-            return list(out)
+            return out
 
-        out.update(self._aips[aid][vers])
-        return sorted(out, key=seq_of)
+        for f in self._aips[aid][vers]:
+            out.append(self._mkfilerec(f, aid, vers, self._aips[aid][vers][f]))
+        return sorted(out, key=lambda f: seq_of(f['name']))
 
     def head_for(self, aid, vers=None):
         if aid not in self._aips:

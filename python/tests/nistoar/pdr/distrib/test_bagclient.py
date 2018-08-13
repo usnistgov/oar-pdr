@@ -128,7 +128,7 @@ class TestBagDistribClient(test.TestCase):
         self.assertEqual(cli.head_for_version('1'), ["pdr1010.mbag0_3-2.zip"])
         
         with self.assertRaises(client.DistribResourceNotFound):
-            cli.list_for_version('2')
+            cli.head_for_version('2')
 
         cli = bagclient.BagDistribClient("pdr2210", self.svc)
         self.assertEqual(cli.head_for_version('3.1.3'),
@@ -137,6 +137,20 @@ class TestBagDistribClient(test.TestCase):
         cli = bagclient.BagDistribClient("goob", self.svc)
         with self.assertRaises(client.DistribResourceNotFound):
             cli.head_for_version('1')
+
+    def test_describe_head_for_version(self):
+        cli = bagclient.BagDistribClient("pdr1010", self.svc)
+        self.assertEqual(cli.describe_head_for_version('1'),
+                         [{'name': "pdr1010.mbag0_3-2.zip", 'size': 375,
+                           'hashtype': 'sha256', 'id': 'pdr1010', 'version': '1',
+   'hash': 'c35f2b8ec2a4b462c77c6c60548f9a61dc1c043ddb4ba11b388312240c1c78e0' }])
+        
+        with self.assertRaises(client.DistribResourceNotFound):
+            cli.describe_head_for_version('2')
+
+        cli = bagclient.BagDistribClient("goob", self.svc)
+        with self.assertRaises(client.DistribResourceNotFound):
+            cli.describe_head_for_version('1')
 
     def test_stream_bag(self):
         out = os.path.join(tmpdir(), "bag.zip")
