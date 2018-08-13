@@ -67,7 +67,8 @@ class NISTBagValidator(ValidatorBase):
             nm = self.namere04.match(bag.name)
         else:
             t = self._issue("2-0",
-                            "Bag names should match format DSID.mbagMM_NN-SS")               nm = self.namere02.match(bag.name)
+                            "Bag names should match format DSID.mbagMM_NN-SS")
+            nm = self.namere02.match(bag.name)
             
         out._warn(t, nm)
 
