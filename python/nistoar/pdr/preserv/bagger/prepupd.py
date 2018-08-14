@@ -9,12 +9,12 @@ from collections import OrderedDict
 from zipfile import ZipFile
 
 from .base import sys as _sys
-from .. import (ConfigurationException, StateException)
+from .. import (ConfigurationException, StateException, CorruptedBagError)
 from ...describe import rmm
-from ...distrib import (BagDistribClient, RESTServiceClient,DistribTransferError,
-                        DistribResourceNotFound, DistribServiceException)
+from ... import distrib
 from ...exceptions import IDNotFound
-from ...utils import checksum_of
+from ... import utils
+from ..bagit.builder import BagBuilder
 
 log = logging.getLogger(_sys.system_abbrev).getChild(_sys.subsystem_abbrev)
 
@@ -57,7 +57,7 @@ class HeadBagCacher(object):
         :rtype: str giving the path to the cached, serialized head bag or 
                 None if no such bag exists.  
         """
-        bagcli = BagDistribClient(aipid, self.distsvc)
+        bagcli = distrib.BagDistribClient(aipid, self.distsvc)
 
         hinfo = None
         if version and version != 'latest':
@@ -70,7 +70,7 @@ class HeadBagCacher(object):
             # map id,version to bagfile using the remote service
             try:
                 hinfo = bagcli.describe_head_for_version(version)[0]
-            except DistribResourceNotFound as ex:
+            except distrib.DistribResourceNotFound as ex:
                 return None
 
             # cache the info locally
@@ -91,22 +91,22 @@ class HeadBagCacher(object):
         """
         Make sure the cached bag described by bag metadata was transfered
         correctly by checking it checksum.  
-        :raise DistribTransferError: if an error was detected.
+        :raise CorruptedBagError: if an error was detected.
         """
         bagfile = os.path.join(self.cachedir, baginfo['name'])
         try:
-            if checksum_of(bagfile) != baginfo['hash']:
+            if utils.checksum_of(bagfile) != baginfo['hash']:
                 if purge_on_error:
                     # bag file looks corrupted; purge it from the cache
                     self._clear_from_cache(bagfile, baginfo)
                     
-                raise DistribTransferError(bagfile, bagfile+": checksum failure")
+                raise CorruptedBagError(bagfile, bagfile+": checksum failure")
         except OSError as ex:
             if purge_on_error:
                 self._clear_from_cache(bagfile, baginfo)
                 
-            raise DistribTransferError(bagfile, "Failure reading bag file: " +
-                                       bagfile + ": " + str(ex), cause=ex)
+            raise CorruptedBagError(bagfile, "Failure reading bag file: " +
+                                    bagfile + ": " + str(ex), cause=ex)
 
     def _clear_from_cache(self, bagfile, baginfo=None):
         if os.path.exists(bagfile):
@@ -161,13 +161,14 @@ class UpdatePrepService(object):
         self.distsvc = distrib.RESTServiceClient(scfg.get('service_endpoint'))
         scfg = self.cfg.get('metadata_service', {})
         self.mdsvc  = rmm.MetadataClient(scfg.get('service_endpoint'))
+        self.cacher = HeadBagCacher(self.distsvc, self.sercache)
 
-    def prepperFor(self, aipid, version=None):
+    def prepper_for(self, aipid, version=None):
         """
         return an UpdatePrepper instance for the given dataset identifier
         """
-        return UpdatePrepper(aipid, self.cfg, self.sercache, self.workdir,
-                             self.distsvc, self.mdsvc, version)
+        return UpdatePrepper(aipid, self.cfg, self.workdir, self.cacher,
+                             self.mdsvc, version)
 
 class UpdatePrepper(object):
     """
@@ -176,18 +177,20 @@ class UpdatePrepper(object):
     system.  
     """
 
-    def __init__(self, aipid, config, rocache_dir, update_dir,
-                 distclient, pubmdclient, version=None):
+    def __init__(self, aipid, config, update_dir, headcacher,
+                 pubmdclient, version=None):
         """
-        create the prepper for the given dataset identifier
+        create the prepper for the given dataset identifier.  
+
+        This is not intended to be instantiated directly by the user; use
+        the UpdatePrepService.prepper_for() factory method. 
         """
-        self.rocache = rocache_dir
-        self.upddir = update_dir
         self.aipid = aipid
+        self.upddir = update_dir
+        self.cacher = headcacher
         self.version = version
-        self.bagcli = BagDistribClient(aipid, distclient)
         self.mdcli = pubmdclient
-        self.mdcache = os.path.join(self.rocache, "_nerd")
+        self.mdcache = os.path.join(self.cacher.cachedir, "_nerd")
         if not os.path.exists(self.mdcache):
             os.mkdir(self.mdcache)
         if not os.path.isdir(self.mdcache):
@@ -201,7 +204,7 @@ class UpdatePrepper(object):
         """
         try:
             return self.cacher.cache_headbag(self.aipid, self.version)
-        except DistribTransferError as ex:
+        except CorruptedBagError as ex:
             # try again (now that the cache is clean)
             return self.cacher.cache_headbag(self.aipid, self.version)
 

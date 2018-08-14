@@ -3,7 +3,7 @@ This distrib submodule provides a client interface to the part of the PDR
 Distribution Service that provides access to preservation bags. 
 """
 import os
-from .client import RESTServiceClient, DistribTransferError
+from .client import RESTServiceClient
 
 class BagDistribClient(object):
     """
@@ -35,7 +35,7 @@ class BagDistribClient(object):
         """
         if not aipid:
             raise ValueError("BagClient: aipid must be non-empty str")
-        if not isinstance(svcclient, RESTServiceClient):
+        if isinstance(svcclient, (str, unicode)):
             svcclient = RESTServiceClient(str(svcclient))
         self.id = aipid
         self.svc = svcclient

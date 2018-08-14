@@ -32,6 +32,7 @@ class RESTServiceClient(object):
             relurl = '/'+relurl
         hdrs = { "Accept": "application/json" }
 
+        resp = None
         try:
             resp = requests.get(self.base+relurl, headers=hdrs)
 
@@ -52,14 +53,17 @@ class RESTServiceClient(object):
 
             return resp.json()
         except ValueError as ex:
-            if resp.text and ("<body" in resp.text or "<BODY" in resp.text):
+            if resp and resp.text and \
+               ("<body" in resp.text or "<BODY" in resp.text):
                 raise DistribServerError(relurl,
                                          message="HTML returned where JSON "+
-                                        "expected (is service URL correct?)")
+                                         "expected (is service URL correct?)",
+                                         cause=ex)
             else:
                 raise DistribServerError(relurl,
                                          message="Unable to parse response as "+
-                                        "JSON (is service URL correct?)")
+                                         "JSON (is service URL correct?)",
+                                         cause=ex)
         except requests.RequestException as ex:
             raise DistribServerError(relurl,
                                      message="Trouble connecting to distribution"
@@ -204,20 +208,6 @@ class DistribResourceNotFound(DistribClientError):
         super(DistribClientError, self).__init__("distribution", resource, 404, 
                                                  http_reason, message, cause)
 
-
-class DistribTransferError(PDRException):
-    """
-    an exception indicating an error occurred while downloading a file from 
-    the distribution service.  It is usually not known if this is due a problem
-    in the client or the server.  This error can be raised if the downloaded
-    file appears to be corrupted.  
-    """
-    def __init__(self, resource, message=None, cause=None):
-        if not message:
-            message = "Problem detected in transfering " + resource + \
-                      " from distribution service"
-        super(PDRException, self).__init__(message, cause)
-        self.resource = resource
 
 
 

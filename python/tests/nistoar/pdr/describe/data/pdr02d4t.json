@@ -1,4 +1,5 @@
 {
+    "_schema": "https://data.nist.gov/od/dm/nerdm-schema/v0.2#",
     "@type": [ "nrd:SRD", "nrdp:DataPublication", "nrdp:PublicDataResource" ],
     "@id": "ark:/88434/pdr02d4t",
     "abbrev": [ "SRD#13" ],

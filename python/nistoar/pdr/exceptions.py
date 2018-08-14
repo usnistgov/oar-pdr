@@ -244,7 +244,7 @@ class IDNotFound(PDRException):
     def __init__(self, id, message=None, cause=None):
         if not message:
             if id:
-                message = "{0}: Identifier not recognized"
+                message = "{0}: Identifier not recognized".format(id)
             else:
                 message = "Requested unrecognized identifier"
             if cause:

@@ -4,5 +4,5 @@ data items via the web.
 """
 from .client import (RESTServiceClient, DistribResourceNotFound,
                      DistribServiceException, DistribServerError,
-                     DistribClientError, DistribTransferError)
+                     DistribClientError)
 from .bagclient import BagDistribClient

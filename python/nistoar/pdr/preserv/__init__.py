@@ -69,3 +69,17 @@ class AIPValidationError(PreservationException):
     """
     pass
 
+class CorruptedBagError(PDRException):
+    """
+    an exception indicating that a preservation bag appears to be corrupted
+    or otherwise does not contain expected content.  This can include problems
+    transfering the bag via a service.
+    """
+    def __init__(self, bagname=None, message=None, cause=None):
+        if not message:
+            message = "Unexpected content detected in bag"
+            if bagname:
+                message += ", " + bagname
+        super(PDRException, self).__init__(message, cause)
+        self.resource = bagname
+
