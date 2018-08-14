@@ -17,13 +17,13 @@ export class AppConfig {
     constructor(private http: HttpClient) { }
     loadAppConfig() {
         this.appConfig = <any>data_json;
-        console.log(" this test process api ::"+ process.env.RMMAPI);
+        // console.log(" this test process api ::"+ process.env.RMMAPI);
         this.rmmapi = process.env.RMMAPI || this.appConfig.RMMAPI;
         this.distapi =  process.env.DISTAPI || this.appConfig.DISTAPI;
         this.landingbackend = process.env.LANDING || this.appConfig.LANDING;
         this.metaapi = process.env.METAPI || this.appConfig.METAPI;
         this.sdpapi  = process.env.SDPAPI || this.appConfig.SDPAPI;
-        console.log(" this.rmmapi :"+ this.rmmapi)
+        // console.log(" this.rmmapi :"+ this.rmmapi)
     }
     // public getJSON(): Observable<any> {
     //     return this.http.get("../../../assets/environment.json")

@@ -1,7 +1,5 @@
 import { NgModule }             from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-
-//import { AboutComponent }   from './about/About.component';
 import { LandingAboutComponent } from './landingAbout/landingAbout.component';
 import { LandingComponent } from './landing/landing.component';
 import { NoidComponent } from './landing/noid.component';
@@ -9,7 +7,7 @@ import { NerdmComponent } from './landing/nerdm.component';
 import { SearchResolve } from './landing/search-service.resolve';
 import { ErrorComponent, UserErrorComponent } from './landing/error.component';
 import { DatacartComponent} from './datacart/datacart.component';
-import { TableDemoComponent } from './landing/expandableTable/table-demo';
+
 
 const routes: Routes = [
   { path: '', redirectTo: '/about', pathMatch: 'full' },
@@ -82,15 +80,8 @@ const routes: Routes = [
       component: UserErrorComponent
     }
   ]
-},
-{
-  path: 'tabledemo',
-  children: [
-    {
-      path: '',
-      component: TableDemoComponent
-    }]
 }
+
 ];
 
 @NgModule({

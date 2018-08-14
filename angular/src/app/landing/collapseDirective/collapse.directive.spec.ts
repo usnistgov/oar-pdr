@@ -36,7 +36,7 @@ describe('Collaspe Directive', () => {
   it('should have collapsed elements', () => {
     iEle.triggerEventHandler('mouseclick', null); 
     fixture.detectChanges();
-    console.log(divEle.nativeElement +" ::: "+ iEle);
+    // console.log(divEle.nativeElement +" ::: "+ iEle);
     expect(divEle.nativeElement.style.backgroundColor).toBe(''); 
   });
 

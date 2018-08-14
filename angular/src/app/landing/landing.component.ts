@@ -404,7 +404,8 @@ updateMenu(){
                 name : part,
                 mediatype: path.mediaType,
                 size: path.size,
-                downloadUrl: path.downloadURL
+                downloadUrl: path.downloadURL,
+                description: path.description 
               },children: []
             };
             currentLevel.push(newPart);

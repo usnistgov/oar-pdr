@@ -26,7 +26,7 @@
                   
                   <div>
                    <h3 id="dataAccess"><b>Data Access</b></h3>
-                   <span style="margin-left:0.5em" *ngIf="record['accessLevel'] === 'public'"><i class="faa faa-globe"></i> 
+                   <span style="margin-left:0em" *ngIf="record['accessLevel'] === 'public'"><i class="faa faa-globe"></i> 
                       These data are public. 
                    </span>
                    <span *ngIf="record['accessLevel'] === 'restricted public'"><i class="faa faa-lock"></i> 
@@ -47,13 +47,14 @@
                    </span>
                   </div> 
                   <div *ngIf="files.length != 0">        
-                      
-                      <div class="ui-g">
-                          <div class="ui-g-12 ui-md-12 ui-lg-12 ui-sm-12">
-                            <span>Files: </span>   <span>
-                                    <a href="{{distdownload}}" class="faa faa-file-archive-o" style="color:blue;" title="Download All Files" ></a>
-                                  </span>
-                                  <a href="javascript:;" (click)="addFilesToCart()" class="faa faa-cart-plus " style="color:blue;" title="Add All files to datacart" ></a>
+                      <br>
+                      <!-- <div class="ui-g">
+                          <div style="padding: 0" class="ui-g-12 ui-md-12 ui-lg-12 ui-sm-12"> -->
+                            <span><b>Files</b> </span>   
+                            <span>
+                                <a href="{{distdownload}}" class="faa faa-file-archive-o" style="color:#1E6BA1; margin-left:0.5em; " title="Download All Files" ></a>
+                            </span>
+                                <a href="javascript:;" (click)="addFilesToCart()" class="faa faa-cart-plus " style="margin-left:0.5em; color:#1E6BA1;" title="Add All files to datacart" ></a>
                                 
                           <p-treeTable [value]="files" [columns]="cols" selectionMode="single" [(selection)]="selectedNode" [scrollable]="true"   [resizableColumns]="true">
                                 
@@ -70,35 +71,38 @@
                                     </th>
                                 </tr>
                             </ng-template>
-                          <ng-template pTemplate="body" let-rowNode let-rowData="rowData" let-columns="columns">
-                              <tr [ttSelectableRow]="rowNode"  [pRowToggler]="rowData" (click)="onNodeSelect($event, rowData)">
+                          <ng-template pTemplate="body" let-rowNode let-rowData="rowData"  let-columns="columns">
+                              <tr [ttSelectableRow]="rowNode"> 
+                                   <!-- (click)="onNodeSelect($event, rowData)" -->
                                   <td>
-                                      <!-- <p-treeTableToggler [rowNode]="rowNode"></p-treeTableToggler> -->
-                                      <a href="#" [pRowToggler]="rowData">
-                                            <i [ngClass]="expanded ? 'pi pi-chevron-down' : 'pi pi-chevron-right'"></i>
-                                        </a>
+                                      <p-treeTableToggler [rowNode]="rowNode"></p-treeTableToggler>
                                       {{rowData.name}}
                                   </td>
                                   
                                   <td>{{rowData.mediatype}}</td>
-                                  <td><a href="{{rowData.downloadUrl}}"><i class="faa faa-download" aria-hidden="true"></i></a>
+                                  <td>{{rowData.size}}</td>
+
+                                  <td>
+                                    <span *ngIf=" rowData.downloadUrl ">
+                                    <a href="{{rowData.downloadUrl}}"><i class="faa faa-download" aria-hidden="true"></i></a>
                                     <span [hidden] ="!addFileSpinner" style="float:right;">
                                         <p-progressSpinner [style]="{width: '20px', height: '20px', float: 'right'}" ></p-progressSpinner>
                                     </span>
                                     <a style="position:relative; margin-left:0.5em;"  class="faa faa-cart-plus " (click)="addtoCart(rowData.name, rowData.size, rowData.mediatype, rowData.downloadUrl)" ></a>                                
-                                  </td>
+                                   </span> 
+                                </td>
                               </tr>            
                           </ng-template>
+                         
                           <ng-template pTemplate="summary">
                                <div style="text-align: left; color: white;">
-                               Selected File:  {{selectedNode ? selectedNode.data.name : 'none'}}
-                               <br> 
-                               <span style="font-size: 12px ">
-                                  File Size: {{ selectedNode ? selectedNode.data.size : none}} 
-                                </span> <span style="font-size: 12px; margin-left: 1em;">
-                                  File type: {{ selectedNode ? selectedNode.data.mediatype : 'none'}} 
+                                    File: {{selectedNode ? selectedNode.data.name : 'none'}}
+                               <br><span style="font-size: 12px;  ">
+                                  Size: {{ selectedNode ? selectedNode.data.size : 'Not Available'}} 
+                                </span> <span style="font-size: 12px; ">
+                                  Type: {{ selectedNode ? selectedNode.data.mediatype : 'Not Available'}} 
                                 </span>
-                                <br><span>Description: </span>
+                                <br><span style="font-size: 14px; ">Description: {{ selectedNode ? selectedNode.data.description : 'Not Available'}} </span>
                                </div>
                           </ng-template>
                       </p-treeTable>
@@ -117,8 +121,8 @@
                                   </div>
                               </div>
                           </div -->
-                      </div>
-                  </div>
+                      <!-- </div>
+                  </div> -->
                   <br>
                   <div *ngIf="checkReferences()">
                    <h3 id="reference" name="reference"><b>References</b></h3>

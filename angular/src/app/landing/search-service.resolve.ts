@@ -47,7 +47,7 @@ export class SearchResolve implements Resolve<any> {
                         
                       console.log("2 . Is it here @@@:"+this.platformId);
                         this.transferState.set(recordid_KEY, record);
-                       console.log(this.transferState.toJson()); 
+                    //    console.log(this.transferState.toJson()); 
                     }
                 })
             );

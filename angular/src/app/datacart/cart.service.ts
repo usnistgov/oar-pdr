@@ -97,7 +97,7 @@ export class CartService {
     // convert the map to an array
     for (let key in myCartMap) {
       let value = myCartMap[key];
-      console.log("value" + JSON.stringify(value.data.resId));
+      // console.log("value" + JSON.stringify(value.data.resId));
       cartEntities.push(value);
     }
 

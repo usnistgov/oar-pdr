@@ -83,7 +83,7 @@
 :host /deep/ .rightMenuStyle > .ui-menu .ui-submenu-header{
   /* background-color: #B8D4E6; */
   /* background-color:rgb(65, 68, 69); */
-  background-color: #1471AE;
+  background-color:#2C8034;
   padding: 2%;
   padding-left: 5%;
   font-family: sans-serif;
@@ -105,9 +105,10 @@
 :host /deep/ .rightMenuStyle > .ui-menu  .ui-menuitem{
   line-height: 1em;
   min-height: 1em;
-  background-color:  #e7f0f6;
+  /* background-color:  #e7f0f6; */
+  background-color: #F0FAF1;
   word-wrap: break-word;
-  font-family: 'Sans-Serif';
+  font-family: sans-serif;
   font-size: 14px;
   padding: 0;
 }
@@ -130,7 +131,7 @@
   position: absolute;
   width: 12em;
   word-wrap: break-word;
-  font-family: 'Sans-Serif';
+  font-family: sans-serif;
   
 }
 :host /deep/ .rightMenuStylePop > .ui-menu .ui-menuitem-link{
@@ -153,20 +154,21 @@
 :host /deep/ .ui-widget-header{
   border: 0px;
   /* background-color:#336B87; */
-  background-color: #1D72AC;
-   color: black;
+   /* background-color: #1D72AC; */
+   color:white;
+   background-color: #b0b5b7;
 }
 
-/* :host /deep/ .ui-widget-content{
-  border: 1px;
-} */
+:host /deep/ .ui-widget-content{
+  border: 0px;
+}
 :host /deep/ .ui-menu{
   padding: 0;
   border:0;
 }
 
 :host /deep/ .ui-state-active, :host /deep/ .ui-state-highlight{
-  background-color: #707070;
+  background-color: #b0b5b7;
 }
 /* Description section */
 .welldesc{
@@ -184,10 +186,18 @@
 }
 
 :host /deep/ .ui-treetable-resizable .ui-treetable-thead > tr > th{
-  background-color: grey;
+  background-color: #1E6BA1;
   /* border-color: coral; */
+  
+  border: 0;
 }
 
+:host /deep/ .ui-treetable-tbody{
+  background-color: #E4F2FC;
+  font-family: sans-serif;
+  font-size: 14px;
+
+}
 .fileinfosection{
   background-color:#F3F3F3; 
   padding: 2.5rem 2.5rem 2.5rem 2.5rem;
@@ -210,3 +220,8 @@
   position:relative;
   float:right;
 }
+
+/* :host /deep/ a{
+  font-family: sans-serif;
+  font-size: 14px;
+} */

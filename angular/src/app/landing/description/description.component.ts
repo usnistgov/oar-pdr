@@ -122,10 +122,10 @@ checkReferences(){
  ngOnInit(){
     this.cdr.detectChanges();
     this.files  =<TreeNode[]>this.files[0].data;
-    
     this.cols = [
-        { field: 'name', header: 'Name', width: '70%' },
+        { field: 'name', header: 'Name', width: '60%' },
         { field: 'mediatype', header: 'MediaType', width: '20%' },
+        { field: 'size', header: 'Size', width: '10%' },
         { field: 'download', header: 'Download', width: '10%' },
     ];
  }
