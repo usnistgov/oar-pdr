@@ -50,31 +50,14 @@
                       
                       <div class="ui-g">
                           <div class="ui-g-12 ui-md-12 ui-lg-12 ui-sm-12">
-                          <p-treeTable [value]="files" [columns]="cols" selectionMode="single" [(selection)]="selectedNode" [scrollable]="true" scrollHeight="200px"  [resizableColumns]="true">
+                            <span>Files: </span>   <span>
+                                    <a href="{{distdownload}}" class="faa faa-file-archive-o" style="color:blue;" title="Download All Files" ></a>
+                                  </span>
+                                  <a href="javascript:;" (click)="addFilesToCart()" class="faa faa-cart-plus " style="color:blue;" title="Add All files to datacart" ></a>
                                 
-                          <ng-template pTemplate="caption">
-                              <div style="text-align:left">
-                                <span style="margin-left: .25em; vertical-align: middle; color: white">Files</span>
-                                <span style="vertical-align: middle; float: right">
-                                  <a href="{{distdownload}}" class="faa faa-file-archive-o" style="color:white;" title="Download All Files" ></a>
-                                </span>   
-                                <a href="javascript:;" (click)="addFilesToCart()" class="faa faa-cart-plus " style="color:white;" title="Add All files to datacart" ></a>
-                                <span [hidden] ="!addAllFileSpinner">
-                                    <p-progressSpinner [style]="{width: '20px', height: '20px',top:'10%'}" ></p-progressSpinner>
-                                </span>
-                                <span [hidden] ="!addFileStatus" style="zoom: 75%">
-                                    <i class="pi pi-check" style="zoom: 75%"></i>
-                                    Done
-                                </span> 
-                              </div>
-                          </ng-template>
-                          <!-- <ng-template pTemplate="header">
-                              <tr>
-                                  <th ttResizableColumn style="width:500px">Name</th>
-                                  <th ttResizableColumn>Mediatype</th>
-                                  <th ttResizableColumn>Download</th>
-                              </tr>
-                          </ng-template> -->
+                          <p-treeTable [value]="files" [columns]="cols" selectionMode="single" [(selection)]="selectedNode" [scrollable]="true"   [resizableColumns]="true">
+                                
+                          
                           <ng-template pTemplate="colgroup" let-columns>
                                 <colgroup>
                                     <col *ngFor="let col of columns"  [style.width]="col.width">
@@ -88,11 +71,15 @@
                                 </tr>
                             </ng-template>
                           <ng-template pTemplate="body" let-rowNode let-rowData="rowData" let-columns="columns">
-                              <tr [ttSelectableRow]="rowNode">
+                              <tr [ttSelectableRow]="rowNode"  [pRowToggler]="rowData" (click)="onNodeSelect($event, rowData)">
                                   <td>
-                                      <p-treeTableToggler [rowNode]="rowNode"></p-treeTableToggler>
+                                      <!-- <p-treeTableToggler [rowNode]="rowNode"></p-treeTableToggler> -->
+                                      <a href="#" [pRowToggler]="rowData">
+                                            <i [ngClass]="expanded ? 'pi pi-chevron-down' : 'pi pi-chevron-right'"></i>
+                                        </a>
                                       {{rowData.name}}
                                   </td>
+                                  
                                   <td>{{rowData.mediatype}}</td>
                                   <td><a href="{{rowData.downloadUrl}}"><i class="faa faa-download" aria-hidden="true"></i></a>
                                     <span [hidden] ="!addFileSpinner" style="float:right;">
@@ -104,13 +91,14 @@
                           </ng-template>
                           <ng-template pTemplate="summary">
                                <div style="text-align: left; color: white;">
-                               Selected File Details: <br>
-                                
-                               <span style="font-weight: normal">
-                                  File Name:  {{selectedNode ? selectedNode.data.name : 'none'}}
-                                 <br> File Size: {{ selectedNode ? selectedNode.data.size : none}} 
-                                 <br> File type: {{ selectedNode ? selectedNode.data.mediatype : 'none'}} 
-                               </span>
+                               Selected File:  {{selectedNode ? selectedNode.data.name : 'none'}}
+                               <br> 
+                               <span style="font-size: 12px ">
+                                  File Size: {{ selectedNode ? selectedNode.data.size : none}} 
+                                </span> <span style="font-size: 12px; margin-left: 1em;">
+                                  File type: {{ selectedNode ? selectedNode.data.mediatype : 'none'}} 
+                                </span>
+                                <br><span>Description: </span>
                                </div>
                           </ng-template>
                       </p-treeTable>

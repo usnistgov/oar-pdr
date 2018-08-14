@@ -9,6 +9,7 @@ import { NerdmComponent } from './landing/nerdm.component';
 import { SearchResolve } from './landing/search-service.resolve';
 import { ErrorComponent, UserErrorComponent } from './landing/error.component';
 import { DatacartComponent} from './datacart/datacart.component';
+import { TableDemoComponent } from './landing/expandableTable/table-demo';
 
 const routes: Routes = [
   { path: '', redirectTo: '/about', pathMatch: 'full' },
@@ -81,6 +82,14 @@ const routes: Routes = [
       component: UserErrorComponent
     }
   ]
+},
+{
+  path: 'tabledemo',
+  children: [
+    {
+      path: '',
+      component: TableDemoComponent
+    }]
 }
 ];
 

@@ -32,6 +32,10 @@ import { DatacartComponent} from './datacart/datacart.component';
 import { CartService } from "./datacart/cart.service";
 import { AppShellNoRenderDirective } from './directives/app-shell-no-render.directive';
 import { AppShellRenderDirective } from './directives/app-shell-render.directive';
+//To test the datatable
+import { TableDemoComponent } from './landing/expandableTable/table-demo'; 
+import { Ng2TableModule } from 'ng2-expanding-table';
+
 
 const appInitializerFn = (appConfig: AppConfig) => {
   return () => {
@@ -42,13 +46,14 @@ const appInitializerFn = (appConfig: AppConfig) => {
 @NgModule({
   declarations: [
     AppComponent,
-    LandingAboutComponent, LandingComponent,DatacartComponent,
+    LandingAboutComponent, LandingComponent,DatacartComponent,TableDemoComponent,
     Collaspe,MetadataComponent,FileDetailsComponent, DescriptionComponent,  
     KeyValuePipe, MetadataView, NoidComponent,NerdmComponent,
     ErrorComponent,UserErrorComponent,
     AppShellNoRenderDirective, AppShellRenderDirective 
   ],
   imports: [
+    Ng2TableModule,
     FormsModule, ReactiveFormsModule,
     AppRoutingModule, HttpClientModule,
     CommonModule, SharedModule, BrowserAnimationsModule, FormsModule,

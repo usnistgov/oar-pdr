@@ -86,13 +86,12 @@
   background-color: #1471AE;
   padding: 2%;
   padding-left: 5%;
-  font-family: 'Sans-Serif';
+  font-family: sans-serif;
+  font-size: 16px;
   font-weight: bold;
   color: white;
  
 }
-
-
 
 :host /deep/ .rightMenuStyle > .ui-menu  .ui-menuitem-link  .ui-state-hover{
   line-height: 1em;
@@ -102,6 +101,7 @@
   font-family: 'Sans-Serif';
   font-size: 14px;
 }
+
 :host /deep/ .rightMenuStyle > .ui-menu  .ui-menuitem{
   line-height: 1em;
   min-height: 1em;
@@ -110,10 +110,12 @@
   font-family: 'Sans-Serif';
   font-size: 14px;
   padding: 0;
- 
 }
+
 :host /deep/ .rightMenuStyle > .ui-menu .ui-menuitem-link{
   padding: 0.5em 0.2em 0.5em 0.5em;
+  font-family:  sans-serif;
+  font-size: 14px;
 }
 :host /deep/ .rightMenuStyle > .ui-menu{
   width: 100%;
@@ -141,7 +143,6 @@
   font-size: 14px;
 }
 
-
 /* :host /deep/ .rightMenuStyle > .ui-menu .ui-menu-list li.ui-menuitem{
   background-color:#E7F0F6;
   font-family: 'Sans-Serif';
@@ -150,7 +151,7 @@
 } */
 
 :host /deep/ .ui-widget-header{
-  /* border: 0px; */
+  border: 0px;
   /* background-color:#336B87; */
   background-color: #1D72AC;
    color: black;
@@ -169,15 +170,22 @@
 }
 /* Description section */
 .welldesc{
-  background-color:#006495;
+  /* background-color:#006495; */
   /* background-color:#90AFC5; */
+  background-color: #b0b5b7;
   text-align: left;
   color: white;
+  padding: 1;
 }
 :host /deep/ citationDialog > button.ui-button-icon-only{  
   border-radius: 50%;
   width: 1.5em;
   height: 1.5em;
+}
+
+:host /deep/ .ui-treetable-resizable .ui-treetable-thead > tr > th{
+  background-color: grey;
+  /* border-color: coral; */
 }
 
 .fileinfosection{

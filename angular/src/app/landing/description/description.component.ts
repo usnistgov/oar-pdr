@@ -33,22 +33,25 @@ export class DescriptionComponent {
  selectedNodes: TreeNode[];
  addFileStatus:boolean = false;
  cols: any[];
+ onNodeSelect(event, sdata){
+     alert("Node select ::"+sdata.name);
+ }
+// nodeSelect(event) {
+//     var test = this.getComponentDetails(this.record["components"],event.node.data);
+//     let i =0;
+//     this.fileDetails = '';
+//     for(let t of test){
+//         this.isFileDetails = true;
+//         this.fileDetails = t;
+//     }
+//     alert("TEST");
+// }
 
-nodeSelect(event) {
-    var test = this.getComponentDetails(this.record["components"],event.node.data);
-    let i =0;
-    this.fileDetails = '';
-    for(let t of test){
-        this.isFileDetails = true;
-        this.fileDetails = t;
-    }
-}
-
-getComponentDetails(data,filepath) {
-  return data.filter(
-      function(data){return data.filepath == filepath }
-  );
-}
+// getComponentDetails(data,filepath) {
+//   return data.filter(
+//       function(data){return data.filepath == filepath }
+//   );
+// }
 
 keys() : Array<string> {
     return Object.keys(this.fileDetails);
@@ -119,6 +122,7 @@ checkReferences(){
  ngOnInit(){
     this.cdr.detectChanges();
     this.files  =<TreeNode[]>this.files[0].data;
+    
     this.cols = [
         { field: 'name', header: 'Name', width: '70%' },
         { field: 'mediatype', header: 'MediaType', width: '20%' },

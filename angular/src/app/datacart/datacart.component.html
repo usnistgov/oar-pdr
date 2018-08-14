@@ -1,40 +1,38 @@
-<div >
-    <div class="ui-g" style="width: 100%;background-color: #153971;color: #FFFFFF">
+
+    <!-- <div class="ui-g" style="width: 100%;background-color: #153971;color: #FFFFFF">
         <div class="ui-g-12" style="padding:1.5em;">
             <label style="float: left;display: block;"><i class="faa faa-shopping-cart "></i> Data Cart</label>
         </div>
-    </div>
-    <div style="padding-left: 1%;padding-bottom:10%;background-color: #FFFFFF;">
+    </div> -->
+    <!-- <div style="padding-left: 1%;padding-bottom:10%;background-color: #FFFFFF;"> -->
         <div class="ui-g" style="padding-left: -1%;border-bottom:.5px solid #e6e6e6;width: 100%;">
             <div class="ui-g-12 ui-md-12" >
                 <div class="ui-g-12 ui-md-2" >
-             
-
                     <button type="button" id="download" (click)="downloadZIP()" pButton type="submit" class="searchButton" ><i class="faa faa-download faa-1x icon-white" style="color: #fff;"></i> Download selected <span class="badge badge-notify" >{{selectedFileCount}}</span></button>
                 </div>
                 <div class="ui-g-12 ui-md-2" >
                     <button type="button" id="removeData" (click)="removeByDataId()" style="background-color: red;" class="searchButton"  pButton type="submit"><i class="faa faa-trash faa-1x icon-white" style="color: #fff;"></i> Remove selected <span class="badge badge-notify">{{selectedFileCount}}</span></button>
                 </div>
                 <div class="ui-g-12 ui-md-2" >
-                    <button type="button" id="downloadStatus" (click)="removeByDownloadStatus()" style="background-color: red;" class="searchButton"  pButton type="submit"><i class="faa faa-minus-circle faa-1x icon-white" style="color: #fff;"></i> Remove downloaded</button>
+                    <button type="button" id="downloadStatus" (click)="removeByDownloadStatus()" style="background-color:  #C07F2C;" class="searchButton"  pButton type="submit"><i class="faa faa-minus-circle faa-1x icon-white" style="color: #fff;"></i> Remove downloaded</button>
                 </div>
-                    <div style="height: 20px"></div>
+                <div style="height: 20px"></div>
             </div>
             <div class="ui-g-2 ui-md-2" *ngFor="let item of displayFiles  ">
                 &nbsp;&nbsp;{{item.key}} <p-progressSpinner *ngIf ="item.value === true" [style]="{width: '12px', height: '12px'}" ></p-progressSpinner><i class="faa faa-check" *ngIf ="item.value !== true"></i>
             </div>
         </div>
-        <p-treeTable selectionMode="checkbox" [value]="dataFiles" (onNodeSelect) = "dataFileCount()" (onNodeUnselect) = "dataFileCount()" [(selection)]="selectedData" [scrollable]="true" scrollHeight="600px" [style]="{'margin-left':'1%','margin-top':'1%','width':'70%','background-color':'#606164','color':'#000'}">
+        <p-treeTable selectionMode="checkbox" [value]="dataFiles" (onNodeSelect) = "dataFileCount()" (onNodeUnselect) = "dataFileCount()" [(selection)]="selectedData" [scrollable]="true" scrollHeight="600px" [style]="{ 'padding':'3%', 'color':'#000'}">
             <ng-template pTemplate="header">
                 <tr>
-                    <th style=" background-color: dimgray "> Title</th>
+                    <th style=" background-color: dimgray; width:75%; "> Title</th>
                     <th style=" background-color: dimgray ">Status</th>
                     <th style=" background-color: dimgray">Size</th>
                 </tr>
             </ng-template>
                 <ng-template let-rowNode let-rowData="rowData"  let-i="rowIndex" pTemplate="body">
                     <tr style="background: #FFFFFF">
-                        <td >
+                        <td  style=" width:75%; ">
                             <p-treeTableToggler [rowNode]="rowNode"></p-treeTableToggler>
                             &nbsp;<p-treeTableCheckbox [value]="rowNode"></p-treeTableCheckbox>
                             &nbsp;<a href="{{rowData.downloadURL}}" target="_blank" *ngIf = "rowData.resTitle.indexOf('.') > 0 "> {{rowData.resTitle}}</a>
@@ -59,5 +57,4 @@
                 </tr>
             </ng-template>
         </p-treeTable>
-    </div>
-</div>
+    <!-- </div> -->

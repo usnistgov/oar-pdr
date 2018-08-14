@@ -382,16 +382,21 @@ updateMenu(){
     paths.forEach((path) => {
       if(i != 0) 
       {
+        //confirm about the filepath location for hierarchy
+       // console.log(path.filepath);
         path.filepath = "/"+path.filepath;
+       //path.filepath = "/"+path['@id'];
         const pathParts = path.filepath.split('/');
         pathParts.shift(); // Remove first blank element from the parts array.
         let currentLevel = tree; // initialize currentLevel to root
         pathParts.forEach((part) => { 
           // check to see if the path already exists.
           const existingPath = currentLevel.filter(level => level.data.name === part);
+          
           if (existingPath.length > 0) {
             // The path to this item was already in the tree, so don't add it again.
             // Set the current level to this path's children
+           
             currentLevel = existingPath[0].children;
           } else {
             const newPart = {
