@@ -188,7 +188,7 @@ class SimDistribHandler(object):
         if not path:
             try:
                 out = json.dumps(self.arch.aipids) + '\n'
-            except Exception, ex:
+            except Exception as ex:
                 return self.send_error(500, "Internal error")
 
             self.set_response(200, "AIP Identifiers")

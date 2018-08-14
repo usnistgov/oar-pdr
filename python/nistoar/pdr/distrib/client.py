@@ -7,7 +7,7 @@ import os, sys, shutil, logging, json
 import urllib
 import requests
 
-from ..exceptions import PDRException
+from ..exceptions import PDRException, PDRServiceException, PDRServerError
 
 class RESTServiceClient(object):
     """
@@ -139,19 +139,17 @@ class RESTServiceClient(object):
             if resp is not None:
                 resp.close()
 
-class DistribServiceException(PDRException):
+class DistribServiceException(PDRServiceException):
     """
     an exception indicating a problem using the distribution service.
     """
 
     def __init__(self, message, resource=None, http_code=None, http_reason=None, 
                  cause=None):
-        super(DistribServiceException, self).__init__(message, cause=cause)
-        self.status = http_code
-        self.reason = http_reason
-        self.resource = resource
+        super(DistribServiceException, self).__init__("distribution",
+                                resource, http_code, http_status, message, cause)
 
-class DistribServerError(DistribServiceException):
+class DistribServerError(PDRServerError):
     """
     an exception indicating an error occurred on the server-side while 
     trying to access the distribution service.  
@@ -164,21 +162,11 @@ class DistribServerError(DistribServiceException):
 
     def __init__(self, resource=None, http_code=None, http_reason=None, 
                  message=None, cause=None):
-        if not message:
-            message = "server-side distribution error occurred"
-            if resource:
-                message += " while retrieving " + resource
-            if http_code or http_reason:
-                message += ":"
-                if http_code:
-                    message += " "+str(http_code) 
-                if http_reason:
-                    message += " "+str(http_reason) 
-          
-        super(DistribServerError, self).__init__(message, resource, http_code, 
-                                                 http_reason, cause)
+        super(DistribServerError, self).__init__("distribution", resource,
+                                         http_code, http_reason, message, cause)
+                                                 
 
-class DistribClientError(DistribServiceException):
+class DistribClientError(PDRServiceException):
     """
     an exception indicating an error occurred on the client-side while 
     trying to access the distribution service.  
@@ -197,8 +185,9 @@ class DistribClientError(DistribServiceException):
                 message += " while processing " + resource
             message += ": {0} {1}".format(http_code, http_reason)
           
-        super(DistribClientError, self).__init__(message, resource, http_code, 
-                                                 http_reason, cause)
+        super(DistribClientError, self).__init__("distribution", resource,
+                                          http_code, http_reason, message, cause)
+                                                 
 
 class DistribResourceNotFound(DistribClientError):
     """
@@ -212,7 +201,7 @@ class DistribResourceNotFound(DistribClientError):
             if resource:
                 message += ": "+resource
         
-        super(DistribClientError, self).__init__(resource, 404, 
+        super(DistribClientError, self).__init__("distribution", resource, 404, 
                                                  http_reason, message, cause)
 
 
