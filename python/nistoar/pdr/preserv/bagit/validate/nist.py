@@ -61,22 +61,25 @@ class NISTBagValidator(ValidatorBase):
             out = ValidationResults(bag.name, want)
 
         pver = self.profile[1].split('.')
-        if pver > (0, 3):
+        if pver > [0, 3]:
             t = self._issue("2-0",
                          "Bag names should match format DSID.DM_DN.mbagMM_NN-SS")
             nm = self.namere04.match(bag.name)
+            pverpos = (4, 5)
         else:
             t = self._issue("2-0",
                             "Bag names should match format DSID.mbagMM_NN-SS")
             nm = self.namere02.match(bag.name)
+            pverpos = (2, 3)
             
         out._warn(t, nm)
 
-        if nm02:
-            t = self._issue("2-2", "Bag name should include version 'mbag{0}'"
-                                   .format(self.profile[1]))
-            vers = self.profile[1].split('.')
-            out._warn(t, nm02.group(3) == vers[0] and nm02.group(4) == vers[1])
+        if nm:
+            t = self._issue("2-2",
+                         "Bag name should include profile version 'mbag{0}_{1}'"
+                            .format(*pver))
+            out._warn(t, nm.group(pverpos[0]) == pver[0] and
+                         nm.group(pverpos[1]) == pver[1])
 
         return out
 

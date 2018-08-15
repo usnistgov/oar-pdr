@@ -74,7 +74,7 @@ class TestMultibagValidator(test.TestCase):
                          "\n  ".join([str(e) for e in errs.failed()]) + "\n]")
         self.assertTrue(has_error(errs, "2-0"))
         
-        badbag = val.NISTBag(self.tf.mkdir("XXXX.mbag1_0-10"))
+        badbag = val.NISTBag(self.tf.mkdir("XXXX.3_5_2.mbag1_0-10"))
         errs = self.valid8.test_name(badbag)
         self.assertEqual(len(errs.failed()), 1, "Unexpected # of errors: [\n  " +
                          "\n  ".join([str(e) for e in errs.failed()]) + "\n]")
