@@ -84,7 +84,8 @@ class TestArchive(test.TestCase):
     def test_ctor(self):
         self.assertIn("pdr1010", self.arch._aips)
         self.assertIn("pdr2210", self.arch._aips)
-        self.assertEqual(len(self.arch._aips), 2)
+        self.assertIn("1491", self.arch._aips)
+        self.assertEqual(len(self.arch._aips), 3)
                 
         self.assertIn("1", self.arch._aips['pdr1010'])
         self.assertEqual(len(self.arch._aips['pdr1010']), 1)
@@ -93,6 +94,8 @@ class TestArchive(test.TestCase):
         self.assertIn("2", self.arch._aips['pdr2210'])
         self.assertIn("3.1.3", self.arch._aips['pdr2210'])
         self.assertEqual(len(self.arch._aips['pdr2210']), 3)
+        self.assertIn("1.0", self.arch._aips['1491'])
+        self.assertEqual(len(self.arch._aips['1491']), 1)
 
         self.assertIn("pdr1010.mbag0_3-1.zip", self.arch._aips['pdr1010']['1'])
         self.assertIn("pdr1010.mbag0_3-2.zip", self.arch._aips['pdr1010']['1'])
@@ -108,8 +111,13 @@ class TestArchive(test.TestCase):
                       self.arch._aips['pdr2210']['3.1.3'])
         self.assertEqual(len(self.arch._aips['pdr2210']['1.0']), 1)
 
+        self.assertIn("1491.1_0.mbag0_4-0.zip",
+                      self.arch._aips['1491']['1.0'])
+        self.assertEqual(len(self.arch._aips['1491']['1.0']), 1)
+        
+
     def test_aipids(self):
-        self.assertEqual(self.arch.aipids, ['pdr1010', 'pdr2210'])
+        self.assertEqual(self.arch.aipids, ['1491', 'pdr1010', 'pdr2210'])
 
     def test_versions_for(self):
         self.assertEqual(self.arch.versions_for('pdr1010'), ['1'])
@@ -189,7 +197,7 @@ class TestSimService(test.TestCase):
         resp = requests.get(baseurl)
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(resp.reason, "AIP Identifiers")
-        self.assertEqual(resp.json(), ["pdr1010", "pdr2210"])
+        self.assertEqual(resp.json(), ["1491", "pdr1010", "pdr2210"])
 
     def test_list_all(self):
         resp = requests.get(baseurl+"/pdr1010")

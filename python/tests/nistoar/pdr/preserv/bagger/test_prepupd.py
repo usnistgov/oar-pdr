@@ -95,7 +95,9 @@ class SimDistClient(object):
             os.system(cmd)
         finally:
             os.chdir(oldwd)
+        out = checksum_of(dest)
         shutil.copy(dest, os.path.join(cachedir, "ABCDEFG.2.mbag0_4-4.zip"))
+        return out
                     
 
 class TestSimServices(test.TestCase):
@@ -119,11 +121,10 @@ class TestSimServices(test.TestCase):
         self.assertIn("@id", data)
 
     def test_distrib(self):
-        SimDistClient.fill_cache(self.cachedir)
+        hash = SimDistClient.fill_cache(self.cachedir)
         cli = SimDistClient(self.cachedir)
 
         data = cli.get_json("ABCDEFG/_bags/_v/latest/head")
-        hash = "508f64b57d0eff316a5064965c5ee536562a318c42a22e9f03ececfdb4694358"
         self.assertEqual(data, [{"id": "ABCDEFG", "hashtype": "sha256",
                                  "name": "ABCDEFG.2.mbag0_4-4.zip",
                                  "version": "2", "size": 9715,
@@ -152,7 +153,6 @@ class TestUpdatePrepService(test.TestCase):
         self.workdir = self.tf.mkdir("mdserv")
         self.headcache = self.tf.mkdir("headcache")
         self.config = {
-            "working_dir": self.workdir,
             "headbag_cache": self.headcache,
             "dist_service": {
                 "service_endpoint": "http://dummy/ds"
@@ -168,7 +168,6 @@ class TestUpdatePrepService(test.TestCase):
 
     def test_ctor(self):
         self.assertTrue(self.prepsvc.cfg)
-        self.assertEqual(self.prepsvc.workdir, self.config['working_dir'])
         self.assertEqual(self.prepsvc.sercache, self.config['headbag_cache'])
 
         with self.assertRaises(prepupd.ConfigurationException):
@@ -178,7 +177,6 @@ class TestUpdatePrepService(test.TestCase):
     def test_prepper_for(self):
         prepper = self.prepsvc.prepper_for("ABCDEFG", "2.0")
         self.assertEqual(prepper.cacher.cachedir, self.config['headbag_cache'])
-        self.assertEqual(prepper.upddir, self.config['working_dir'])
         self.assertEqual(prepper.aipid, "ABCDEFG")
 
         nerdcache = os.path.join(self.config['headbag_cache'],"_nerd")
@@ -202,7 +200,7 @@ class TestUpdatePrepper(test.TestCase):
         self.config = {
             "working_dir": self.workdir,
             "headbag_cache": self.headcache,
-            "dist_service": {
+            "distrib_service": {
                 "service_endpoint": "http://dummy/ds"
             },
             "metadata_service": {
@@ -219,7 +217,6 @@ class TestUpdatePrepper(test.TestCase):
 
     def test_ctor(self):
         self.assertEqual(self.prepr.aipid, "ABCDEFG")
-        self.assertEqual(self.prepr.upddir, self.workdir)
         self.assertIsNone(self.prepr.version)
 
     def test_cache_headbag(self):
@@ -280,12 +277,12 @@ class TestUpdatePrepper(test.TestCase):
 
         self.assertTrue(os.path.isfile(os.path.join(root,"metadata","nerdm.json")))
 
-    def test_create_from_headbag(self):
+    def test_create_new_update(self):
         headbag = os.path.join(self.bagsdir, "ABCDEFG.1.mbag0_4-2.zip")
         root = os.path.join(self.workdir, "ABCDEFG")
         self.assertTrue(not os.path.exists(root))
 
-        self.prepr.create_new_update()
+        self.assertTrue(self.prepr.create_new_update(root))
         self.assertTrue(os.path.isdir(root))
 
         contents = [f for f in os.listdir(root)]
@@ -294,8 +291,9 @@ class TestUpdatePrepper(test.TestCase):
         self.assertNotIn("manifest-sha256.txt", contents)
         self.assertNotIn("bag-info.txt", contents)
 
-        os.remove(headbag)
-        self.prepr.create_new_update()
+        # test using headbag from local cache
+        os.remove(headbag) # prevents retrieving headbag via dist service
+        self.assertTrue(self.prepr.create_new_update(root))
         self.assertTrue(os.path.isdir(root))
 
         contents = [f for f in os.listdir(root)]
@@ -303,6 +301,16 @@ class TestUpdatePrepper(test.TestCase):
         self.assertIn("data", contents)
         self.assertNotIn("manifest-sha256.txt", contents)
         self.assertNotIn("bag-info.txt", contents)
+
+    def test_no_create_new_update(self):
+        root = os.path.join(self.workdir, "goober")
+        self.assertTrue(not os.path.exists(root))
+
+        self.prepr = self.prepsvc.prepper_for("goober")
+        self.prepr.mdcli = self.mdcli
+
+        self.assertFalse(self.prepr.create_new_update(root))
+        self.assertTrue(not os.path.isdir(root))
 
         
 

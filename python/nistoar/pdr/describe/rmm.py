@@ -7,7 +7,7 @@ from collections import OrderedDict
 
 import requests
 
-from ..exceptions import PDRServiceException, PDRServerError
+from ..exceptions import PDRServiceException, PDRServerError, IDNotFound
 
 class MetadataClient(object):
     """

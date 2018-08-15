@@ -135,6 +135,9 @@ class NISTBag(PreservationSystem):
     def nerd_file_for(self, destpath):
         return os.path.join(self._metadir, destpath, NERDMD_FILENAME)
 
+    def annotations_file_for(self, destpath):
+        return os.path.join(self._metadir, destpath, ANNOTS_FILENAME)
+
     def nerd_metadata_for(self, filepath, merge_annots=None):
         """
         return the component metadata for a given path to a component.

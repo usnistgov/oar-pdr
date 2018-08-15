@@ -12,7 +12,7 @@ except ImportError:
     uwsgi=uwsgi_mod()
 
 testdir = os.path.join(os.path.dirname(os.path.abspath(__file__)))
-archdir = os.path.join(testdir, 'data')
+def_archdir = os.path.join(testdir, 'data')
     
 bagvnmre = re.compile("^(\w+)\.(\d+\w*)\.mbag(\d+_\d+)-(\\d+)\.(\w+)$")
 bagnmre = re.compile("^(\w+)\.mbag(\d+_\d+)-(\\d+)\.(\w+)$")
@@ -185,6 +185,10 @@ class SimDistribHandler(object):
         vers = None
         path = path.strip('/')
         print("processing "+path)
+
+        # refresh the archive
+        self.arch.loadinfo()
+        
         if not path:
             try:
                 out = json.dumps(self.arch.aipids) + '\n'
@@ -311,5 +315,5 @@ class SimDistribHandler(object):
                 buf = fd.read(5000000)
         
             
-            
+archdir = uwsgi.opt.get("archive_dir", def_archdir)
 application = SimDistrib(archdir)

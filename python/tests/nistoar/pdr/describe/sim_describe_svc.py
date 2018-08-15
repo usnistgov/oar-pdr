@@ -4,7 +4,7 @@ from collections import OrderedDict
 from wsgiref.headers import Headers
 
 testdir = os.path.dirname(os.path.abspath(__file__))
-archdir = os.path.join(testdir, 'data')
+def_archdir = os.path.join(testdir, 'data')
 
 try:
     import uwsgi
@@ -96,6 +96,7 @@ class SimRMMHandler(object):
             if path.startswith("ark:/88434/"):
                 id = path[len("ark:/88434/"):]
             else:
+                self.arch.loadlu()
                 id = self.arch.ediid_to_id(path)
 
         if id:
@@ -122,4 +123,5 @@ class SimRMMHandler(object):
         return [ json.dumps(data, indent=2) + "\n" ]
             
             
+archdir = uwsgi.opt.get("archive_dir", def_archdir)
 application = SimRMM(archdir)

@@ -7,10 +7,11 @@ import os, logging, re, json
 from collections import Mapping
 
 from .. import PublishSystem
-from ...exceptions import ConfigurationException, StateException, SIPDirectoryNotFound
-from ...preserv.bagger import MIDASMetadataBagger
+from ...exceptions import (ConfigurationException, StateException,
+                           SIPDirectoryNotFound, IDNotFound)
+from ...preserv.bagger import MIDASMetadataBagger, UpdatePrepService
 from ...preserv.bagit import NISTBag
-from ...utils import build_mime_type_map
+from ...utils import build_mime_type_map, read_nerd
 from ....id import PDRMinter
 
 log = logging.getLogger(PublishSystem().subsystem_abbrev)
@@ -117,6 +118,11 @@ class PrePubMetadataService(PublishSystem):
             mimefiles = [mimefiles]
         self.mimetypes = build_mime_type_map(mimefiles)
 
+        # this service helps pull in information about previously published
+        # versions.  
+        self.prepsvc = UpdatePrepService(self.cfg)
+        
+
     def _create_minter(self, parentdir):
         cfg = self.cfg.get('id_minter', {})
         out = PDRMinter(parentdir, cfg)
@@ -124,9 +130,42 @@ class PrePubMetadataService(PublishSystem):
             self.log.warn("Creating new ID minter")
         return out
 
-    def prepare_metadata_bag(self, id):
+    def prepare_metadata_bag(self, id, bagger=None, prepper=None):
         """
         Bag up the metadata from data provided by MIDAS for a given MIDAS ID.  
+
+        :param str id:       the MIDAS identifier for the SIP
+        :param MIDASMetadataBagger bagger:  an MIDASMetadataBagger instance to
+                             use to prepare the bag.  If not provided, one will
+                             be instantiated based on the current configurartion
+        :param UpdatePrepper prepper:  an UpdatePrepper instance to use to 
+                             initial the bag in the case where the dataset has
+                             been published previously.
+        """
+        if not prepper:
+            prepper = self.prepsvc.prepper_for(id)
+
+        if not bagger:
+            # this will raise an SIPDirectoryNotFound if there is no
+            # submission data from MIDAS
+            bagger = self.open_bagger(id)
+            
+        if not os.path.exists(bagger.bagdir):
+            # This submission has not be accessed via the PDR before; if this 
+            # dataset has been previously been published, we need to initialize
+            # the metadata bag from the last head bag (or at least the last
+            # published NERDm record).
+            if prepper.create_new_update(bagger.bagdir):
+                self.log.info("metadata initialized from previous publication")
+
+        # update the metadata bag with the latest data from MIDAS
+        bagger.ensure_preparation()
+        return bagger
+
+    def open_bagger(self, id):
+        """
+        create a MIDASMetadataBagger instance used to create/update the 
+        metadata bag.
         """
         cfg = self.cfg.get('bagger', {})
         if not os.path.exists(self.workdir):
@@ -134,10 +173,11 @@ class PrePubMetadataService(PublishSystem):
         elif not os.path.isdir(self.workdir):
             raise StateException("Working directory path not a directory: " +
                                  self.workdir)
+
         bagger = MIDASMetadataBagger(id, self.workdir, self.reviewdir,
                                      self.uploaddir, cfg, self._minter)
-        bagger.ensure_preparation()
         return bagger
+        
 
     def make_nerdm_record(self, bagdir, datafiles=None, baseurl=None):
         """
@@ -196,7 +236,26 @@ class PrePubMetadataService(PublishSystem):
         return a full NERDm resource record corresponding to the given 
         MIDAS ID.  
         """
-        bagger = self.prepare_metadata_bag(id)
+        # this handles preparation for a dataset that has been published before.
+        prepper = self.prepsvc.prepper_for(id)
+
+        try:
+            
+            bagger = self.open_bagger(id)
+            
+        except SIPDirectoryNotFound as ex:
+            # there is no input data from midas; fall-back to a previously
+            # published record, if available
+            nerdmfile = prepper.cache_nerdm_rec()
+            if nerdmfile:
+                return read_nerd(nerdmfile)
+
+            # Not previously published
+            raise IDNotFound(id, "No data found for identifier: "+id)
+
+        # There is a MIDAS submission in progress; create/update the 
+        # metadata bag.
+        bagger = self.prepare_metadata_bag(id, bagger, prepper)
         return self.make_nerdm_record(bagger.bagdir, bagger.datafiles)
 
     def locate_data_file(self, id, filepath):

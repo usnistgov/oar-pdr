@@ -15,6 +15,7 @@ from ... import distrib
 from ...exceptions import IDNotFound
 from ... import utils
 from ..bagit.builder import BagBuilder
+from ..bagit.bag import NISTBag
 
 log = logging.getLogger(_sys.system_abbrev).getChild(_sys.subsystem_abbrev)
 
@@ -135,29 +136,20 @@ class HeadBagCacher(object):
             return OrderedDict()
         with open(hif) as fd:
             return json.load(fd, object_pairs_hook=OrderedDict)
-
-    
             
 
 class UpdatePrepService(object):
     """
     a factory class that creates UpdatePrepper instances
     """
-    def __init__(self, config, workdir=None):
+    def __init__(self, config):
         self.cfg = config
 
-        if not workdir:
-            workdir = self.cfg.get('working_dir')
-        self.workdir = workdir
-        if not self.workdir:
-            raise ConfigurationException("UpdatePrepService: Missing property: "+
-                                         "working_dir")
-        
         self.sercache = self.cfg.get('headbag_cache')
         if not self.sercache:
             raise ConfigurationException("UpdatePrepService: Missing property: "+
                                          "headbag_cache")
-        scfg = self.cfg.get('dist_service', {})
+        scfg = self.cfg.get('distrib_service', {})
         self.distsvc = distrib.RESTServiceClient(scfg.get('service_endpoint'))
         scfg = self.cfg.get('metadata_service', {})
         self.mdsvc  = rmm.MetadataClient(scfg.get('service_endpoint'))
@@ -167,8 +159,8 @@ class UpdatePrepService(object):
         """
         return an UpdatePrepper instance for the given dataset identifier
         """
-        return UpdatePrepper(aipid, self.cfg, self.workdir, self.cacher,
-                             self.mdsvc, version)
+        return UpdatePrepper(aipid, self.cfg, self.cacher, self.mdsvc, version)
+
 
 class UpdatePrepper(object):
     """
@@ -177,8 +169,7 @@ class UpdatePrepper(object):
     system.  
     """
 
-    def __init__(self, aipid, config, update_dir, headcacher,
-                 pubmdclient, version=None):
+    def __init__(self, aipid, config, headcacher, pubmdclient, version=None):
         """
         create the prepper for the given dataset identifier.  
 
@@ -186,7 +177,6 @@ class UpdatePrepper(object):
         the UpdatePrepService.prepper_for() factory method. 
         """
         self.aipid = aipid
-        self.upddir = update_dir
         self.cacher = headcacher
         self.version = version
         self.mdcli = pubmdclient
@@ -255,14 +245,17 @@ class UpdatePrepper(object):
             raise StateException("Don't know how to unpack serialized bag: "+
                                  os.path.basename(bagfile))
 
-    def create_new_update(self):
+    def create_new_update(self, destbag):
         """
         create an updatable metadata bag for the purposes of creating a new 
         version of the dataset.   If this dataset has been through the 
         preservation service before, it will be built form the latest headbag;
         otherwise, it will be created from its latest public NERDm record.  
+
+        :param str destbag:  the full path to the root directory of the metadata 
+                             bag to create
         """
-        mdbag = os.path.join(self.upddir, self.aipid)
+        mdbag = destbag
         if os.path.exists(mdbag):
             log.warning("Removing existing metadata bag for id="+self.aipid+
                         "\n   (may indicate earlier failure)")
@@ -273,16 +266,17 @@ class UpdatePrepper(object):
             fmt = "Preparing update based on previous head preservation bag (%s)"
             log.info(fmt, os.path.basename(latest_headbag)) 
             self.create_from_headbag(latest_headbag, mdbag)
-            return
+            return True
 
         latest_nerd = self.cache_nerdm_rec()
         if latest_nerd:
             log.info("No previous bag available; preparing based on existing " +
                      "published NERDm record")
             self.create_from_nerdm(latest_headbag, mdbag)
-            return
+            return True
 
         log.info("ID not published previously; will start afresh")
+        return False
 
 
     def create_from_headbag(self, headbag, mdbag):
@@ -324,6 +318,9 @@ class UpdatePrepper(object):
             if os.path.exists(file):
                 os.remove(file)
 
+        # finally set the version to a value appropriate for an update in
+        # progress
+        self.update_version_for_edit(mdbag)
 
     def create_from_nerdm(self, nerdfile, mdbag):
         """
@@ -350,7 +347,29 @@ class UpdatePrepper(object):
         bldr = BagBuilder(parent, bagname, {}, nerd['@id'], logger=log)
         bldr.add_res_nerd(nerd, savefilemd=True)
 
-    
+        # update the version appropriate for edit mode
+        self.update_version_for_edit(bldr.bagdir)
+
+    def update_version_for_edit(self, bagdir):
+        """
+        update the version metadatum to something appropriate for edit mode.
+        This will get updated according to policy as needed later.
+        """
+        bag = NISTBag(bagdir)
+        mdata = bag.nerd_metadata_for('', merge_annots=True)
+        edit_vers = self.make_edit_version(mdata.get('version', "1.0.0"))
+
+        annotf = bag.annotations_file_for('')
+        if os.path.exists(annotf):
+            mdata = utils.read_nerd(annotf)
+        else:
+            mdata = OrderedDict()
+        mdata['version'] = edit_vers
+        utils.write_json(mdata, annotf)
+        
+    def make_edit_version(self, prev_vers):
+        return prev_vers + "+ (in edit)"
+        
 
         
                              
