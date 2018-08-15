@@ -62,10 +62,10 @@
                           </div>
                       </div>
                       <br>
-                      <div class="" *ngIf="record.contactPoint">
+                      <div  class="contactPoint" *ngIf="record.contactPoint">
                           Contact:
                           <strong>
-                              <a *ngIf="isEmail" href="{{record.contactPoint.hasEmail}}" target="_top">
+                              <a class="font14" *ngIf="isEmail" href="{{record.contactPoint.hasEmail}}" target="_top">
                                   {{record.contactPoint.fn}}</a>
                               <span *ngIf="!isEmail">{{record.contactPoint.fn}}</span>
                           </strong>..
@@ -77,11 +77,11 @@
                                       <span>{{record.contactPoint.fn}}</span>
                                   </span>
                                   <br><strong>Email:</strong>
-                                  <span class="" *ngIf="isEmail">
+                                  <span class="font14" *ngIf="isEmail">
                                       <a *ngIf="isEmail" href="{{record.contactPoint.hasEmail}}" target="_top">
                                        {{record.contactPoint.hasEmail.split(":")[1]}}</a>
                                   </span>
-                                  <div class="" *ngIf="record.contactPoint.address">
+                                  <div class="font14" *ngIf="record.contactPoint.address">
                                       <span><b>Address:</b></span>
                                        <div *ngFor="let address of record.contactPoint.address">
                                           {{address}}
@@ -91,9 +91,9 @@
                           </div>
                       </div>
                       <div>
-                          <span *ngIf="isId">Identifier: </span>
-                          <span *ngIf="isDOI" ><i>  <a href="http://doi.org/{{record.doi.split(':')[1]}}">{{record.doi}}</a></i></span>
-                          <span  *ngIf="!isDOI"><i> <a href="{{pdrApi}}{{record['@id']}}">{{record["@id"]}}</a></i> </span>
+                          <span  *ngIf="isId">Identifier: </span>
+                          <span *ngIf="isDOI" ><i>  <a  class="font14" href="http://doi.org/{{record.doi.split(':')[1]}}">{{record.doi}}</a></i></span>
+                          <span  *ngIf="!isDOI"><i> <a class="font14" href="{{pdrApi}}{{record['@id']}}">{{record["@id"]}}</a></i> </span>
                           <span *ngIf="checkReferences()"><br>
                           <span>Described in article: </span>
                               <small *ngFor="let refs of record['references']; let i =index">
@@ -105,8 +105,8 @@
                                   </span>
                               </small>
                           </span><br>
-                          <span class="" *ngIf="record.issued">  First Released: <strong>{{record.issued}}</strong></span>
-                          <span class="" *ngIf="record.modified"> Last modified: <strong>{{record.modified}}</strong></span>
+                          <span  *ngIf="record.issued">  First Released: <strong class="font14">{{record.issued}}</strong></span>
+                          <span  *ngIf="record.modified"> Last modified: <strong class="font14">{{record.modified}}</strong></span>
                       </div>
                   </div>
                   <!-- <div  *ngIf="record.length !== 0" class="ui-sm-1 visible-xs-block visible-sm-block ">

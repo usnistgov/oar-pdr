@@ -107,3 +107,8 @@
 .searchButton:hover{
   background-color:#1F5593;
 }
+
+:host /deep/ .ui-widget-header{
+  background-color: #FFFFFF;
+  border: 0;
+}

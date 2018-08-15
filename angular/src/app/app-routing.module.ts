@@ -8,7 +8,6 @@ import { SearchResolve } from './landing/search-service.resolve';
 import { ErrorComponent, UserErrorComponent } from './landing/error.component';
 import { DatacartComponent} from './datacart/datacart.component';
 
-
 const routes: Routes = [
   { path: '', redirectTo: '/about', pathMatch: 'full' },
   { path: 'about',  children: [
@@ -81,7 +80,6 @@ const routes: Routes = [
     }
   ]
 }
-
 ];
 
 @NgModule({

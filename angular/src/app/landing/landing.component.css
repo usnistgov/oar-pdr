@@ -221,7 +221,11 @@
   float:right;
 }
 
-/* :host /deep/ a{
+.font14 {
   font-family: sans-serif;
   font-size: 14px;
-} */
+}
+
+.contactPoint{
+  font-family: sans-serif;
+}
