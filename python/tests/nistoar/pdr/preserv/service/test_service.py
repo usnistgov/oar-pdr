@@ -168,23 +168,6 @@ class TestThreadedPreservationService(test.TestCase):
     def test_launch_async(self):
         hndlr = self.svc._make_handler(self.midasid, 'midas')
         self.assertEqual(hndlr.state, status.FORGOTTEN)
-        (stat, thrd) = self.svc._launch_handler(hndlr, 0)
-
-        self.assertEqual(stat['state'], status.SUCCESSFUL)
-        try:
-            self.assertFalse(thrd.is_alive())
-        except Exception:
-            thrd.join()
-            raise
-        self.assertEqual(hndlr.state, status.SUCCESSFUL)
-        self.assertTrue(os.path.exists(os.path.join(self.store,
-                                             self.midasid+".1_0.mbag0_4-0.zip")))
-        self.assertTrue(os.path.exists(os.path.join(self.store,
-                                      self.midasid+".1_0.mbag0_4-0.zip.sha256")))
-        
-    def test_launch_async(self):
-        hndlr = self.svc._make_handler(self.midasid, 'midas')
-        self.assertEqual(hndlr.state, status.FORGOTTEN)
         self.assertTrue(hndlr.isready())
         self.assertEqual(hndlr.state, status.READY)
         (stat, thrd) = self.svc._launch_handler(hndlr, 0)
