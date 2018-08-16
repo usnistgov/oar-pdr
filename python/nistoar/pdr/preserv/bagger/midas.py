@@ -11,10 +11,12 @@ The implementations use the BagBuilder class to populate the output bag.
 """
 import os, errno, logging, re, json, shutil
 from abc import ABCMeta, abstractmethod, abstractproperty
+from collections import OrderedDict
 
 from .base import SIPBagger, moddate_of, checksum_of, read_nerd, read_pod
 from .base import sys as _sys
 from ..bagit.builder import BagBuilder, NERDMD_FILENAME, FILEMD_FILENAME
+from ..bagit import NISTBag
 from ... import def_merge_etcdir, utils
 from .. import (SIPDirectoryError, SIPDirectoryNotFound, AIPValidationError,
                 ConfigurationException, StateException, PODError)
@@ -684,12 +686,81 @@ class PreservationBagger(SIPBagger):
         if finalcfg.get('ensure_component_metadata') is None:
             finalcfg['ensure_component_metadata'] = False
 
+        self.finalize_version()
+
         self.bagbldr.finalize_bag(finalcfg)
         if finalcfg.get('validate', True):
             # this will raise an exception if any issues are found
             self._validate(finalcfg.get('validator', {}))
 
         return self.bagbldr.bagdir
+
+    def finalize_version(self):
+        """
+        update the NERDm version metadatum to reflect the changes set by this
+        SIP.  If this SIP represents the initial submission for a dataset, the
+        version is set to "1.0.0"; if it represents an update to a previously 
+        published dataset, the version will be incremented based on the 
+        contents included in the SIP and PDR policy.
+        """
+        bag = NISTBag(self.bagbldr.bagdir)
+        newver = self.determine_updated_version(bag=bag)
+        
+        annotf = bag.annotations_file_for('')
+        if os.path.exists(annotf):
+            mdata = utils.read_nerd(annotf)
+        else:
+            mdata = OrderedDict()
+        mdata['version'] = newver
+        utils.write_json(mdata, annotf)
+
+    def determine_updated_version(self, mdrec=None, bag=None):
+        """
+        determine the proper policy-specified version for this SIP based on
+        the given NERD metadata record for the SIP and the current contents 
+        of the AIP bag.  
+
+        :param dict mdrec:  the NERDm metadata for the entire dataset to consider
+                            when determining the new version;  if not provided,
+                            the current stored NERDm data will be read in.
+        :param NISTBag bag: the NISTBag instance for the bag to examine; if 
+                            not provided, the current pending AIP bag will be 
+                            examined.
+        """
+        if not bag:
+            bag = NISTBag(self.bagbldr.bagdir)
+        if not mdrec:
+            mdrec = bag.nerdm_record(True)
+        
+        oldver = mdrec.get('version', "1.0.0")
+        ineditre = re.compile(r'^(\d+(.\d+)*)\+ \(.*\)')
+        matched = ineditre.search(oldver)
+        if matched:
+            # the version is marked as "in edit", indicating that this
+            # is an update to a previously published version.
+            oldver = matched.group(1)
+            ver = [int(f) for f in oldver.split('.')]
+            for i in range(len(ver), 3):
+                ver.append(0)
+
+            # if there are files under the data directory, consider this a
+            # data update, which increments the second field.
+            for dir, subdirs, files in os.walk(bag.data_dir):
+                if len(files) > 0:
+                    # found a file
+                    ver[1] += 1
+                    ver[2] = 0
+                    return ".".join([str(v) for v in ver])
+
+            # otherwise, this is a metadata update, which increments the
+            # third field.
+            ver[2] += 1
+            return ".".join([str(v) for v in ver])
+
+        # otherwise, this looks like a first-time SIP submission; take the
+        # version string as is.
+        return oldver
+            
 
     def _validate(self, config):
         """

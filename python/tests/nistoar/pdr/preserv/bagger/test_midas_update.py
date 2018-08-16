@@ -214,6 +214,7 @@ class TestPreservationUpdateBagger(test.TestCase):
             data = bag.nerd_metadata_for('', True)
             self.assertIn("ediid", data)
             self.assertIn("pdr_status", data)  # previous version used!
+            self.assertEqual(data["version"], "1.0.0+ (in edit)")
 
             self.assertTrue(os.path.exists(cached))
 

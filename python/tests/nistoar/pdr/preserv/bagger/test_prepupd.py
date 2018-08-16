@@ -8,6 +8,7 @@ from nistoar.pdr.preserv.bagger import prepupd
 from nistoar.pdr.exceptions import IDNotFound
 from nistoar.pdr.utils import checksum_of
 from nistoar.pdr.distrib import DistribResourceNotFound
+from nistoar.pdr.preserv.bagit import NISTBag
 
 bagsrcdir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data")
 mdsrcdir = os.path.join(os.path.dirname(os.path.dirname(bagsrcdir)), "describe", "data")
@@ -261,6 +262,10 @@ class TestUpdatePrepper(test.TestCase):
         self.assertNotIn("manifest-sha256.txt", contents)
         self.assertNotIn("bag-info.txt", contents)
 
+        bag = NISTBag(root)
+        mdata = bag.nerdm_record(True)
+        self.assertEquals(mdata['version'], "1.0.0+ (in edit)")
+
     def test_create_from_nerdm(self):
         headbag = os.path.join(self.nerddir, "ABCDEFG.json")
         root = os.path.join(self.tf.mkdir("update"), "goober")
@@ -301,6 +306,11 @@ class TestUpdatePrepper(test.TestCase):
         self.assertIn("data", contents)
         self.assertNotIn("manifest-sha256.txt", contents)
         self.assertNotIn("bag-info.txt", contents)
+
+        bag = NISTBag(root)
+        mdata = bag.nerdm_record(True)
+        self.assertEquals(mdata['version'], "1.0.0+ (in edit)")
+
 
     def test_no_create_new_update(self):
         root = os.path.join(self.workdir, "goober")

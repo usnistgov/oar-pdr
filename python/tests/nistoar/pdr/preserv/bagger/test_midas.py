@@ -14,6 +14,7 @@ from copy import deepcopy
 
 from nistoar.testing import *
 import nistoar.pdr.preserv.bagit.builder as bldr
+from nistoar.pdr.preserv.bagit import NISTBag
 import nistoar.pdr.preserv.bagger.midas as midas
 import nistoar.pdr.exceptions as exceptions
 from nistoar.pdr.preserv import AIPValidationError
@@ -665,6 +666,41 @@ class TestPreservationBagger(test.TestCase):
                                             "multibag", "file-lookup.tsv")))
         self.assertTrue(os.path.isfile(os.path.join(self.bagr.bagdir,
                                                    "about.txt")))
+
+    def test_determine_updated_version(self):
+        self.bagr.prepare(nodata=False)
+        bag = NISTBag(self.bagr.bagdir)
+        mdrec = bag.nerdm_record(True)
+
+        self.assertNotIn('version', mdrec)
+        newver = self.bagr.determine_updated_version(mdrec, bag)
+        self.assertEqual(newver, "1.0.0")
+        newver = self.bagr.determine_updated_version(mdrec)
+        self.assertEqual(newver, "1.0.0")
+        newver = self.bagr.determine_updated_version()
+        self.assertEqual(newver, "1.0.0")
+
+        mdrec['version'] = "9.0"
+        newver = self.bagr.determine_updated_version(mdrec)
+        self.assertEqual(newver, "9.0")
+
+        mdrec['version'] = "1.0.5+ (in edit)"
+        newver = self.bagr.determine_updated_version(mdrec)
+        self.assertEqual(newver, "1.1.0")
+
+    def test_determine_updated_version_minor(self):
+        self.bagr.prepare(nodata=True)
+        bag = NISTBag(self.bagr.bagdir)
+        mdrec = bag.nerdm_record(True)
+
+        mdrec['version'] = "1.0.5+ (in edit)"
+        newver = self.bagr.determine_updated_version(mdrec)
+        self.assertEqual(newver, "1.0.6")
+        
+        
+
+        
+        
         
 
 if __name__ == '__main__':
