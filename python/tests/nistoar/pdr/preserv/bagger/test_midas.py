@@ -1,3 +1,9 @@
+# These unit tests test the nistoar.pdr.preserv.bagger.midas module.  These tests
+# do not include support for updating previously published datasets (via use of 
+# the UpdatePrepService class).  Because testing support for updates require 
+# simulated RMM and distribution services to be running, they have been 
+# seperated out into test_midas_update.py.
+#
 import os, sys, pdb, shutil, logging, json
 from cStringIO import StringIO
 from io import BytesIO
@@ -534,6 +540,8 @@ class TestPreservationBagger(test.TestCase):
 
         bagdir = os.path.join(self.bagparent, self.midasid+".1_0.mbag0_4-0")
         self.assertEqual(self.bagr.bagdir, bagdir)
+
+        self.assertIsNone(self.srv.prepsvc)  # update support turned off
 
     def test_find_pod_file(self):
         podfile = self.bagr.find_pod_file()

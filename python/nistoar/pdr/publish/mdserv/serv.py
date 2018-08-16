@@ -144,14 +144,14 @@ class PrePubMetadataService(PublishSystem):
                              initial the bag in the case where the dataset has
                              been published previously.
         """
-        if not prepper:
-            prepper = self.prepsvc.prepper_for(id, log=self.log)
-
         if not bagger:
             # this will raise an SIPDirectoryNotFound if there is no
             # submission data from MIDAS
             bagger = self.open_bagger(id)
             
+        if not prepper and self.prepsvc:
+            prepper = self.prepsvc.prepper_for(id, log=self.log)
+
         if prepper and not os.path.exists(bagger.bagdir):
             # This submission has not be accessed via the PDR before; if this 
             # dataset has been previously been published, we need to initialize
