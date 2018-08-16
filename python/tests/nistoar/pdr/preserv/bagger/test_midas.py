@@ -541,7 +541,7 @@ class TestPreservationBagger(test.TestCase):
         bagdir = os.path.join(self.bagparent, self.midasid+".1_0.mbag0_4-0")
         self.assertEqual(self.bagr.bagdir, bagdir)
 
-        self.assertIsNone(self.srv.prepsvc)  # update support turned off
+        self.assertIsNone(self.bagr.prepsvc)  # update support turned off
 
     def test_find_pod_file(self):
         podfile = self.bagr.find_pod_file()

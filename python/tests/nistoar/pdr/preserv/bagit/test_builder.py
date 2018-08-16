@@ -70,9 +70,12 @@ class TestBuilder(test.TestCase):
         self.assertIsNone(self.bag.ediid)
 
         baginfo = self.bag.cfg['init_bag_info']
-        self.assertEqual(baginfo['NIST-BagIt-Version'], 'X.3')
-        self.assertEqual(baginfo['Contact-Email'], ["datasupport@nist.gov"],
-                         "Failed to load default config params")
+        try:
+            self.assertEqual(baginfo['NIST-BagIt-Version'], 'X.3')
+            self.assertEqual(baginfo['Contact-Email'], ["datasupport@nist.gov"],
+                             "Failed to load default config params")
+        except KeyError as ex:
+            self.fail("Failed to load default config params: missing params")
 
     def test_download_url(self):
         self.assertEqual(self.bag._download_url('goob',

@@ -350,7 +350,7 @@ class UpdatePrepper(object):
             raise ValueError("Cached NERDm record not found: " + nerdfile)
 
         nerd = utils.read_nerd(nerdfile)
-        bldr = BagBuilder(parent, bagname, {}, nerd['@id'], logger=log)
+        bldr = BagBuilder(parent, bagname, {}, nerd['@id'], logger=deflog)
         bldr.add_res_nerd(nerd, savefilemd=True)
 
         # update the version appropriate for edit mode

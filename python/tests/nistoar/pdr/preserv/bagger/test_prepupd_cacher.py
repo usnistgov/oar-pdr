@@ -4,6 +4,7 @@ import unittest as test
 
 from nistoar.testing import *
 from nistoar.pdr.preserv.bagger import prepupd
+from nistoar.pdr import distrib
 
 pdrdir = os.path.dirname(os.path.dirname(os.path.dirname(
             os.path.abspath(__file__))))
@@ -65,7 +66,7 @@ class TestHeadBagCacher(test.TestCase):
             shutil.rmtree(self.cachedir)
         os.mkdir(self.cachedir)
 
-        self.distribsvc = prepupd.RESTServiceClient(baseurl)
+        self.distribsvc = distrib.RESTServiceClient(baseurl)
         self.cacher = prepupd.HeadBagCacher(self.distribsvc, self.cachedir)
         self.infodir = os.path.join(self.cachedir, "_info")
 
@@ -135,12 +136,12 @@ class TestHeadBagCacher(test.TestCase):
         self.assertTrue(os.path.exists(hbfile))
 
         info["hash"] = "c35f"
-        with self.assertRaises(prepupd.DistribTransferError):
+        with self.assertRaises(prepupd.CorruptedBagError):
             self.cacher.confirm_bagfile(info, False)
         self.assertTrue(os.path.exists(hbfile))
 
         # check that the file gets removed when purge_on_error=True
-        with self.assertRaises(prepupd.DistribTransferError):
+        with self.assertRaises(prepupd.CorruptedBagError):
             self.cacher.confirm_bagfile(info, True)
         self.assertTrue(not os.path.exists(hbfile))
 
@@ -154,7 +155,7 @@ class TestHeadBagCacher(test.TestCase):
         self.assertIn("1", data)
         
         # now check that the info gets purged, too.
-        with self.assertRaises(prepupd.DistribTransferError):
+        with self.assertRaises(prepupd.CorruptedBagError):
             self.cacher.confirm_bagfile(info, True)
         self.assertTrue(not os.path.exists(hbfile))
         with open(os.path.join(self.infodir, "pdr1010")) as fd:
@@ -198,7 +199,7 @@ class TestHeadBagCacher(test.TestCase):
             fd.write("x")
 
         self.assertTrue(os.path.exists(hbfile))
-        with self.assertRaises(prepupd.DistribTransferError):
+        with self.assertRaises(prepupd.CorruptedBagError):
             self.cacher.cache_headbag("pdr2210")
         self.assertTrue(not os.path.exists(hbfile))
         info = self.cacher._recall_head_info("pdr2210")
