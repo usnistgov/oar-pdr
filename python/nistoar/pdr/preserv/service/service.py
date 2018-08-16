@@ -7,7 +7,7 @@ import os, logging, threading, time, errno
 
 from detach import Detach
 
-from ...exceptions import (PDRException, StateException,
+from ...exceptions import (PDRException, StateException, IDNotFound,
                            ConfigurationException, SIPDirectoryNotFound)
 from ....id import PDRMinter
 from . import status
@@ -163,13 +163,13 @@ class PreservationService(object):
             if hdlr.state == status.FORGOTTEN or hdlr.state == status.NOT_READY:
                 hdlr.isready()
             return hdlr.status
-        except SIPDirectoryNotFound, ex:
+        except (IDNotFound, SIPDirectoryNotFound) as ex:
             out = { "id": sipid,
                     "state": status.NOT_FOUND,
                     "message": status.user_message[status.NOT_FOUND],
                     "history": [] }
             return out
-        except Exception, ex:
+        except Exception as ex:
             log.exception("Failed to create a handler for siptype=%s, "+
                           "sipid=%s while checking status", sipid, siptype)
             out = { "id": sipid,
