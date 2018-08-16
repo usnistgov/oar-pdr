@@ -118,9 +118,11 @@ class PrePubMetadataService(PublishSystem):
             mimefiles = [mimefiles]
         self.mimetypes = build_mime_type_map(mimefiles)
 
-        # this service helps pull in information about previously published
-        # versions.  
-        self.prepsvc = UpdatePrepService(self.cfg)
+        self.prepsvc = None
+        if 'headbag_cache' in self.cfg:
+            # this service helps pull in information about previously published
+            # versions.  
+            self.prepsvc = UpdatePrepService(self.cfg)
         
 
     def _create_minter(self, parentdir):
@@ -143,14 +145,14 @@ class PrePubMetadataService(PublishSystem):
                              been published previously.
         """
         if not prepper:
-            prepper = self.prepsvc.prepper_for(id)
+            prepper = self.prepsvc.prepper_for(id, log=self.log)
 
         if not bagger:
             # this will raise an SIPDirectoryNotFound if there is no
             # submission data from MIDAS
             bagger = self.open_bagger(id)
             
-        if not os.path.exists(bagger.bagdir):
+        if prepper and not os.path.exists(bagger.bagdir):
             # This submission has not be accessed via the PDR before; if this 
             # dataset has been previously been published, we need to initialize
             # the metadata bag from the last head bag (or at least the last
@@ -237,7 +239,9 @@ class PrePubMetadataService(PublishSystem):
         MIDAS ID.  
         """
         # this handles preparation for a dataset that has been published before.
-        prepper = self.prepsvc.prepper_for(id)
+        prepper = None
+        if self.prepsvc:
+            prepper = self.prepsvc.prepper_for(id, log=self.log)
 
         try:
             
@@ -246,9 +250,10 @@ class PrePubMetadataService(PublishSystem):
         except SIPDirectoryNotFound as ex:
             # there is no input data from midas; fall-back to a previously
             # published record, if available
-            nerdmfile = prepper.cache_nerdm_rec()
-            if nerdmfile:
-                return read_nerd(nerdmfile)
+            if prepper:
+                nerdmfile = prepper.cache_nerdm_rec()
+                if nerdmfile:
+                    return read_nerd(nerdmfile)
 
             # Not previously published
             raise IDNotFound(id, "No data found for identifier: "+id)

@@ -10,6 +10,7 @@ from nistoar.testing import *
 import nistoar.pdr.preserv.bagit.builder as bldr
 import nistoar.pdr.preserv.bagger.midas as midas
 import nistoar.pdr.exceptions as exceptions
+from nistoar.pdr.preserv import AIPValidationError
 
 # datadir = nistoar/preserv/data
 datadir = os.path.join( os.path.dirname(os.path.dirname(__file__)), "data" )
@@ -586,7 +587,11 @@ class TestPreservationBagger(test.TestCase):
                                              "data", "trial3", "trial3a.json")))
         
     def test_make_bag(self):
-        self.bagr.make_bag()
+        try:
+            self.bagr.make_bag()
+        except AIPValidationError as ex:
+            self.fail(ex.description)
+            
         self.assertTrue(os.path.exists(self.bagr.bagdir),
                         "Output bag dir not created")
         self.assertTrue(os.path.exists(os.path.join(self.bagr.bagdir, "data")))

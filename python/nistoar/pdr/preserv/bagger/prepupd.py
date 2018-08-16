@@ -17,7 +17,7 @@ from ... import utils
 from ..bagit.builder import BagBuilder
 from ..bagit.bag import NISTBag
 
-log = logging.getLogger(_sys.system_abbrev).getChild(_sys.subsystem_abbrev)
+deflog = logging.getLogger(_sys.system_abbrev).getChild(_sys.subsystem_abbrev)
 
 class HeadBagCacher(object):
     """
@@ -155,11 +155,12 @@ class UpdatePrepService(object):
         self.mdsvc  = rmm.MetadataClient(scfg.get('service_endpoint'))
         self.cacher = HeadBagCacher(self.distsvc, self.sercache)
 
-    def prepper_for(self, aipid, version=None):
+    def prepper_for(self, aipid, version=None, log=None):
         """
         return an UpdatePrepper instance for the given dataset identifier
         """
-        return UpdatePrepper(aipid, self.cfg, self.cacher, self.mdsvc, version)
+        return UpdatePrepper(aipid, self.cfg, self.cacher, self.mdsvc,
+                             version, log)
 
 
 class UpdatePrepper(object):
@@ -169,7 +170,8 @@ class UpdatePrepper(object):
     system.  
     """
 
-    def __init__(self, aipid, config, headcacher, pubmdclient, version=None):
+    def __init__(self, aipid, config, headcacher, pubmdclient,
+                 version=None, log=None):
         """
         create the prepper for the given dataset identifier.  
 
@@ -185,6 +187,10 @@ class UpdatePrepper(object):
             os.mkdir(self.mdcache)
         if not os.path.isdir(self.mdcache):
             raise StateException("UpdatePrepper: not a directory: "+self.mdcache)
+
+        if not log:
+            log = deflog.getChild(self.aipid[:8]+'...')
+        self.log = log
 
     def cache_headbag(self):
         """
@@ -257,25 +263,25 @@ class UpdatePrepper(object):
         """
         mdbag = destbag
         if os.path.exists(mdbag):
-            log.warning("Removing existing metadata bag for id="+self.aipid+
-                        "\n   (may indicate earlier failure)")
+            self.log.warning("Removing existing metadata bag for id="+self.aipid+
+                             "\n   (may indicate earlier failure)")
             shutil.rmtree(mdbag)
 
         latest_headbag = self.cache_headbag()
         if latest_headbag:
             fmt = "Preparing update based on previous head preservation bag (%s)"
-            log.info(fmt, os.path.basename(latest_headbag)) 
+            self.log.info(fmt, os.path.basename(latest_headbag)) 
             self.create_from_headbag(latest_headbag, mdbag)
             return True
 
         latest_nerd = self.cache_nerdm_rec()
         if latest_nerd:
-            log.info("No previous bag available; preparing based on existing " +
-                     "published NERDm record")
+            self.log.info("No previous bag available; preparing based on " +
+                          "existing published NERDm record")
             self.create_from_nerdm(latest_headbag, mdbag)
             return True
 
-        log.info("ID not published previously; will start afresh")
+        self.log.info("ID not published previously; will start afresh")
         return False
 
 

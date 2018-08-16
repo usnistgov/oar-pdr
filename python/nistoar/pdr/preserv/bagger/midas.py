@@ -18,6 +18,7 @@ from ..bagit.builder import BagBuilder, NERDMD_FILENAME, FILEMD_FILENAME
 from ... import def_merge_etcdir, utils
 from .. import (SIPDirectoryError, SIPDirectoryNotFound, AIPValidationError,
                 ConfigurationException, StateException, PODError)
+from .prepupd import UpdatePrepService
 from nistoar.nerdm.merge import MergerFactory
 
 # _sys = PreservationSystem()
@@ -43,12 +44,9 @@ def _midadid_to_dirname(midasid, log=None):
 class MIDASMetadataBagger(SIPBagger):
     """
     This class will migrate metadata provided by MIDAS into a working bag
+    that only contains metadata and generated ancillary data.  This data 
+    should be sufficient for generating a working landing page.
     
-    application by re-organizing its contents into a working bag
-
-    Note that user-provided datafiles are added to the output directory as a 
-    hard link.  That is, no bytes are copied.  Metadata data files are copied.
-
     This class can take a configuration dictionary on construction; the 
     following parameters are supported:
     :prop bag_builder dict ({}): a set of parameters to pass to the BagBuilder
@@ -146,6 +144,11 @@ class MIDASMetadataBagger(SIPBagger):
         self.hardlinkdata = self.cfg.get('hard_link_data', True)
         self.inpodfile = None
         self.resmd = None
+
+        # this will contain a mapping of files that currently appear in the
+        # MIDAS submission area; the keys are filepath values (in the NERDm
+        # sense--i.e. relative to the dataset root), and values are the full
+        # path to its location on disk.
         self.datafiles = None
 
         self.ensure_bag_parent_dir()
@@ -313,6 +316,8 @@ class MIDASMetadataBagger(SIPBagger):
 
     def ensure_subcoll_metadata(self):
         if not self.datafiles:
+            # this updates self.datafiles to include all files that are
+            # currently available in the MIDAS submission area.  
             self.ensure_data_files(nodata=True)
 
         colls = set()
@@ -462,9 +467,15 @@ class PreservationBagger(SIPBagger):
     This class finalizes the bagging of data provided by MIDAS into the final 
     bag for preservation.  
 
-    This class uses the MIDASMetadataBagger to update the NERDm metadata to 
-    latest copies of the files provided through MIDAS.  It then builds the 
-    final bag, including the data files and all required ancillary files.  
+    This class uses the MIDASMetadataBagger to create/update the initial bag 
+    containing the NERDm metadata and ancillary data to reflect the latest 
+    copies of the files provided through MIDAS.  This class then completes
+    the bag by including the data files and all remaining, required ancillary 
+    files.  
+
+    Note that, when possible, user-provided datafiles are added to the output 
+    directory as a hard link: that is, no bytes are copied.  Metadata data files 
+    are copied.
 
     This class takes a configuration dictionary on construction; the 
     following parameters are supported:
@@ -553,11 +564,17 @@ class PreservationBagger(SIPBagger):
             self.bagparent = os.path.join(self.indir, self.bagparent)
         self.ensure_bag_parent_dir()
 
+        self.siplog = log.getChild(self.name[:8]+'...')
         self.bagbldr = BagBuilder(self.bagparent,
                                   self.form_bag_name(self.name),
                                   self.cfg.get('bag_builder', {}),
-                                  minter=minter,
-                                  logger=log.getChild(self.name[:8]+'...'))
+                                  minter=minter, logger=self.siplog)
+
+        self.prepsvc = None
+        if 'headbag_cache' in self.cfg:
+            # support for updates requires access to the distribution and
+            # rmm services
+            self.prepsvc = UpdatePrepService(self.cfg)
         
 
     @property
@@ -574,11 +591,21 @@ class PreservationBagger(SIPBagger):
         This uses the MIDASMetadataBagger class to convert the MIDA POD data 
         into NERDm and to extract metadata from the uploaded files.  
         """
-
         # start by bagging up the metadata.  If this was done before (prior to
         # final preservation time), the previous metadata bag will be updated.
         mdbagger = MIDASMetadataBagger(self.name, self.mddir, self.reviewdir,
                                        config=self.cfg, minter=self.minter)
+
+        if self.prepsvc:
+            prepper = self.prepsvc.prepper_for(self.name, log=self.siplog)
+            if not os.path.exists(mdbagger.bagdir):
+                # This submission has not be accessed via the PDR before; if 
+                # this dataset has been previously been published, we need to 
+                # initialize the metadata bag from the last head bag (or at 
+                # least the last published NERDm record).
+                if prepper.create_new_update(mdbagger.bagdir):
+                    log.info("metadata initialized from previous publication")
+
         mdbagger.prepare(nodata=True)
         self.datafiles = mdbagger.datafiles
 
