@@ -13,6 +13,7 @@ from collections import OrderedDict
 from copy import deepcopy
 
 from nistoar.testing import *
+from nistoar.pdr import utils
 import nistoar.pdr.preserv.bagit.builder as bldr
 from nistoar.pdr.preserv.bagit import NISTBag
 import nistoar.pdr.preserv.bagger.midas as midas
@@ -697,6 +698,21 @@ class TestPreservationBagger(test.TestCase):
         newver = self.bagr.determine_updated_version(mdrec)
         self.assertEqual(newver, "1.0.6")
         
+    def test_finalize_version(self):
+        self.bagr.prepare(nodata=True)
+
+        bag = NISTBag(self.bagr.bagdir)
+        mdrec = bag.nerdm_record(True)
+        self.assertNotIn('version', mdrec)
+
+        self.bagr.finalize_version()
+        mdrec = bag.nerdm_record(True)
+        self.assertEqual(mdrec['version'], "1.0.0")
+
+        annotf = os.path.join(bag.metadata_dir, "annot.json")
+        data = utils.read_nerd(annotf)
+        self.assertEqual(data['version'], "1.0.0")
+
         
 
         
