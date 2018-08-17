@@ -160,6 +160,58 @@ class NISTBagValidator(ValidatorBase):
             out._err(t, val[-1] == self.profile[1])
 
         return out
+
+    def test_dataset_version(self, bag, want=ALL, results=None):
+        """
+        Test that the version is of an acceptable form
+        """
+        out = results
+        if not out:
+            out = ValidationResults(bag.name, want)
+        mdfile = os.path.join(bag.metadata_dir, "nerdm.json")
+        version = None
+
+        try:
+            # if this fails, don't bother reporting it as another test
+            # will
+            with open(mdfile) as fd:
+                data = json.load(fd)
+
+            version = data.get('version')
+            
+        except Exception as ex:
+            pass
+
+        if version:
+            t = self._issue("4.2-1", "version should be of form N.N.N...")
+            comm = None
+            if not re.match(r'^\d+(.\d+)*$', version):
+                comm = [ "Offending version found in NERDm record: " +
+                         str(version) ]
+            out._warn(t, not comm, comm)
+        
+        data = bag.get_baginfo()
+
+        if 'Multibag-Head-Version' in data:
+            mbver = data['Multibag-Head-Version'][-1]
+
+            t = self._issue("4.2-2",
+                    "Multibag-Head-Version info tag should be of form N.N.N...")
+            comm = None
+            if not re.match(r'^\d+(.\d+)*$', mbver):
+                comm = [ "Offending version found in NERDm record: " +
+                         str(version) ]
+            out._warn(t, not comm, comm)
+
+            if version:
+                t = self._issue("4.2-3",
+                    "Multibag-Head-Version info tag should match NERDm version")
+                comm = None
+                if version != mbver:
+                    comm = [ "{0} != {1}".format(mbver, version) ]
+                out._warn(t, not comm, comm)
+
+        return out
         
     def test_nist_md(self, bag, want=ALL, results=None):
         """
