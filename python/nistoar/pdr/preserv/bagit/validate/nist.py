@@ -131,7 +131,7 @@ class NISTBagValidator(ValidatorBase):
 
         return out;
 
-    def test_version(self, bag, want=ALL, results=None):
+    def test_profile_version(self, bag, want=ALL, results=None):
         """
         test that the bag-info.txt file includes the NIST BagIt Profile version
         """

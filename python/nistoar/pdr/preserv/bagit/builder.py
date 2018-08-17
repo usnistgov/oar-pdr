@@ -161,6 +161,24 @@ class BagBuilder(PreservationSystem):
 #        if os.path.exists(self.bagdir):
 #            self.ensure_bagdir() # this initializes some data like self._bag
 
+    def rename_bag(self, name):
+        """
+        rename the bag to the given name.  Note that finalize_bag() will need
+        to be (re-)called after calling this method.
+        """
+        if name == self._name:
+            return
+
+        newdir = os.path.join(self._pdir, name)
+        if os.path.exists(self._bagdir):
+            os.rename(self._bagdir, newdir)
+
+        self._name = name
+        self._bagdir = newdir
+
+        if self._bag:
+            self._bag = NISTBag(self._bagdir)
+
     def _merge_def_config(self, config):
         if not def_etc_dir:
             self.log.warning("BagBuilder: Can't load default config: " +
@@ -807,7 +825,14 @@ class BagBuilder(PreservationSystem):
         self.write_bagit_ver()
         self.ensure_baginfo()
 
+        # this file was used to assist when this bag is an update on an
+        # earlier version.  We no longer need it, so get rid of it.
+        deprecinfof = os.path.join(self.bagdir,"multibag","deprecated-info.txt")
+        if os.path.exists(deprecinfof):
+            os.remove(deprecinfof)
+
         self.log.error("Implementation of Bag finalization is not complete!")
+        self.log.info("Bag does not include PREMIS and ORE files")
 
     def write_about_file(self):
         """
@@ -1036,11 +1061,11 @@ format(nerdm['title'])
         oxum = self._measure_oxum(self._bag._datadir)
         initdata['Payload-Oxum'] = "{0}.{1}".format(oxum[0], oxum[1])
 
-        # right now, all bags are multibags, version 1
-        initdata['Multibag-Head-Version'] = "1"
+        # update the multibag version, deprecation
+        self.update_head_version(initdata, nerdm.get("version", "1"))
 
         # write everything except Bag-Size
-        self.write_baginfo_data(initdata, overwrite)
+        self.write_baginfo_data(initdata, overwrite=overwrite)
 
         # calculate and write the size of the bag 
         oxum = self._measure_oxum(self.bagdir)
@@ -1052,6 +1077,39 @@ format(nerdm['title'])
         }
         self.write_baginfo_data(szdata, overwrite=False)
 
+    def update_head_version(self, baginfo, version):
+        """
+        update the given bag info metadata with values for 
+        'Multibag-Head-Version' and possibly 'Multibag-Head-Deprecates'
+        """
+        baginfo['Multibag-Head-Version'] = version
+
+        # if there is a multibag/deprecated-info.txt, extract the
+        # 'Multibag-Head-Deprecates' values
+        #
+        multibagdir = baginfo.get('Multibag-Tag-Directory', 'multibag')
+        if isinstance(multibagdir, list):
+            multibagdir = (len(multibagdir) >0 and multibagdir[-1]) or 'multibag'
+        depinfof = os.path.join(self._bag.dir,multibagdir, "deprecated-info.txt")
+        
+        if os.path.exists(depinfof):
+            # indicates that this is an update to a previous version of the
+            # dataset.  Add deprecation information.
+            
+            depinfo = self._bag.get_baginfo(depinfof)
+
+            if 'Multibag-Head-Deprecates' not in baginfo:
+                baginfo['Multibag-Head-Deprecates'] = []
+
+            # add the previous head version
+            baginfo['Multibag-Head-Deprecates'].extend(
+                depinfo.get('Multibag-Head-Version', ["1"]) )
+
+            # add in all the previous deprecated versions
+            for val in depinfo.get('Multibag-Head-Deprecates', []):
+                if val not in baginfo['Multibag-Head-Deprecates']:
+                    baginfo['Multibag-Head-Deprecates'].append( val )
+                
     def _measure_oxum(self, rootdir):
         size = 0
         count = 0
@@ -1079,7 +1137,7 @@ format(nerdm['title'])
             nbytes = nbytes[:-1]    
         return "{0} {1}B".format(nbytes, pref)
 
-    def write_baginfo_data(self, data, overwrite=False):
+    def write_baginfo_data(self, data, altfile=None, overwrite=False):
         """
         write out specific data to the bag-info.txt file.  Normally, this will
         append the provided data to the file.  Name-value pairs that already 
@@ -1112,15 +1170,16 @@ format(nerdm['title'])
         if not self._bag:
             self.ensure_bagdir()
         if not overwrite:
-            data = upd_info(self._bag.get_baginfo(), data)
-        self._write_baginfo_data(data, overwrite)
+            data = upd_info(self._bag.get_baginfo(altfile), data)
+        self._write_baginfo_data(data, altfile, overwrite)
 
-    def _write_baginfo_data(self, data, overwrite=False):
+    def _write_baginfo_data(self, data, infofile=None, overwrite=False):
         mode = 'w'
         if not overwrite:
             mode = 'a'
 
-        infofile = os.path.join(self.bagdir, "bag-info.txt")
+        if not infofile:
+            infofile = os.path.join(self.bagdir, "bag-info.txt")
         with open(infofile, mode) as fd:
             for name, vals in data.items():
                 if isinstance(vals, (str, unicode)) or \

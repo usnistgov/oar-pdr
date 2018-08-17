@@ -266,6 +266,11 @@ class TestUpdatePrepper(test.TestCase):
         mdata = bag.nerdm_record(True)
         self.assertEquals(mdata['version'], "1.0.0+ (in edit)")
 
+        depinfof = os.path.join(bag.dir, "multibag", "deprecated-info.txt")
+        self.assertTrue(os.path.isfile(depinfof))
+        info = bag.get_baginfo(depinfof)
+        self.assertEquals(info['Multibag-Head-Version'], ["1.0"])
+
     def test_create_from_nerdm(self):
         headbag = os.path.join(self.nerddir, "ABCDEFG.json")
         root = os.path.join(self.tf.mkdir("update"), "goober")
@@ -282,6 +287,9 @@ class TestUpdatePrepper(test.TestCase):
 
         self.assertTrue(os.path.isfile(os.path.join(root,"metadata","nerdm.json")))
 
+        depinfof = os.path.join(root, "multibag", "deprecated-info.txt")
+        self.assertTrue(not os.path.isfile(depinfof))
+        
     def test_create_new_update(self):
         headbag = os.path.join(self.bagsdir, "ABCDEFG.1.mbag0_4-2.zip")
         root = os.path.join(self.workdir, "ABCDEFG")

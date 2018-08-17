@@ -624,7 +624,7 @@ class PreservationBagger(SIPBagger):
                 shutil.remove(self.bagdir)
         shutil.copytree(mdbagger.bagdir, self.bagdir)
         
-        # by ensuring the output preservation bag directory, we set up loggning
+        # by ensuring the output preservation bag directory, we set up logging
         self.bagbldr.ensure_bagdir()
         self.bagbldr.log.info("Preparing final bag for preservation as %s",
                               os.path.basename(self.bagdir))
@@ -657,6 +657,10 @@ class PreservationBagger(SIPBagger):
     def form_bag_name(self, dsid, bagseq=0, dsver="1.0"):
         """
         return the name to use for the working bag directory
+
+        :param str  dsid:   the AIP identifier for the dataset
+        :param int  bagseq: the multibag sequence number to assign (default: 0)
+        :param str  dsver:  the dataset's release version string.  (default: 1.0)
         """
         fmt = self.cfg.get('bag_name_format', "{0}.{1}.mbag{2}-{3}")
         bver = self.cfg.get('mbag_version', DEF_MBAG_VERSION)
@@ -686,9 +690,16 @@ class PreservationBagger(SIPBagger):
         if finalcfg.get('ensure_component_metadata') is None:
             finalcfg['ensure_component_metadata'] = False
 
-        self.finalize_version()
+        ver = self.finalize_version()
 
+        # rename the bag for a proper version and sequence number
+        seq = self._determine_seq()
+        self.bagbldr.rename_bag(self.form_bag_name(self.name, seq, ver))
+
+        # write final bag metadata and support files
         self.bagbldr.finalize_bag(finalcfg)
+
+        # make sure we've got valid NIST preservation bag!
         if finalcfg.get('validate', True):
             # this will raise an exception if any issues are found
             self._validate(finalcfg.get('validator', {}))
@@ -713,6 +724,20 @@ class PreservationBagger(SIPBagger):
             mdata = OrderedDict()
         mdata['version'] = newver
         utils.write_json(mdata, annotf)
+
+        return newver
+
+    def _determine_seq(self):
+        depinfof = os.path.join(self.bagdir,"multibag","deprecated-info.txt")
+        if not os.path.exists(depinfof):
+            return 0
+        
+        info = self.bagbldr._bag.get_baginfo(depinfof)
+        m = re.search(r'-(\d+)$',
+                      info.get('Internal-Sender-Identifier', [''])[-1])
+        if m:
+            return int(m.group(1))+1
+        return 0
 
     def determine_updated_version(self, mdrec=None, bag=None):
         """

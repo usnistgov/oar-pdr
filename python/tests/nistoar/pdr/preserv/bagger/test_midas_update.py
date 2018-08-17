@@ -13,6 +13,7 @@ from collections import OrderedDict
 from copy import deepcopy
 
 from nistoar.testing import *
+from nistoar.pdr import utils
 import nistoar.pdr.preserv.bagit.builder as bldr
 from nistoar.pdr.preserv.bagit.bag import NISTBag
 import nistoar.pdr.preserv.bagger.midas as midas
@@ -218,6 +219,9 @@ class TestPreservationUpdateBagger(test.TestCase):
 
             self.assertTrue(os.path.exists(cached))
 
+            depinfof = os.path.join(bag.dir, "multibag", "deprecated-info.txt")
+            self.assertTrue(os.path.exists(depinfof))
+
         finally:
             if os.path.exists(destzip):
                 os.remove(destzip)
@@ -225,8 +229,69 @@ class TestPreservationUpdateBagger(test.TestCase):
                 os.remove(cached)
         
 
+    def test_finalize_version(self):
+        srczip = os.path.join(distarchive, "1491.1_0.mbag0_4-0.zip")
+        destzip = os.path.join(distarchive, self.midasid+".1_0.mbag0_4-0.zip")
+        cached = os.path.join(self.pubcache, os.path.basename(destzip))
 
+        try:
+            shutil.copyfile(srczip, destzip)
 
+            self.bagr.prepare(nodata=True)
+
+            bag = NISTBag(self.bagr.bagdir)
+            mdrec = bag.nerdm_record(True)
+            self.assertEqual(mdrec['version'], "1.0.0+ (in edit)")
+
+            self.bagr.finalize_version()
+            mdrec = bag.nerdm_record(True)
+            self.assertEqual(mdrec['version'], "1.0.1")
+
+            annotf = os.path.join(bag.metadata_dir, "annot.json")
+            data = utils.read_nerd(annotf)
+            self.assertEqual(data['version'], "1.0.1")
+
+        finally:
+            if os.path.exists(destzip):
+                os.remove(destzip)
+            if os.path.exists(cached):
+                os.remove(cached)
+
+    def test_make_updated_bag(self):
+        srczip = os.path.join(distarchive, "1491.1_0.mbag0_4-0.zip")
+        destzip = os.path.join(distarchive, self.midasid+".1_0.mbag0_4-0.zip")
+        cached = os.path.join(self.pubcache, os.path.basename(destzip))
+
+        try:
+            shutil.copyfile(srczip, destzip)
+
+            try:
+                self.bagr.make_bag()
+            except AIPValidationError as ex:
+                self.fail(ex.description)
+
+            self.assertEqual(self.bagr.bagbldr.bagname,
+                             self.midasid+".1_1_0.mbag0_4-1")
+            self.assertEqual(os.path.basename(self.bagr.bagdir),
+                             self.bagr.bagbldr.bagname)
+            self.assertTrue(os.path.isdir(self.bagr.bagdir))
+                
+            bag = NISTBag(self.bagr.bagdir)
+            info = bag.get_baginfo()
+
+            self.assertEqual(info['Multibag-Head-Version'], ["1.1.0"])
+            self.assertEqual(info['Multibag-Head-Deprecates'], ["1"])
+
+            self.assertEqual(bag.nerdm_record().get('version'), "1.1.0")
+
+            depinfof = os.path.join(bag.dir, "multibag", "deprecated-info.txt")
+            self.assertTrue(not os.path.exists(depinfof))
+            
+        finally:
+            if os.path.exists(destzip):
+                os.remove(destzip)
+            if os.path.exists(cached):
+                os.remove(cached)
         
 
 if __name__ == '__main__':

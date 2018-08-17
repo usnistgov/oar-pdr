@@ -98,10 +98,10 @@ class TestMIDASSIPHandler(test.TestCase):
         # pdb.set_trace()
         self.sip.bagit()
         self.assertTrue(os.path.exists(os.path.join(self.store, 
-                                            self.midasid+".1_0.mbag0_4-0.zip")))
+                                          self.midasid+".1_0_0.mbag0_4-0.zip")))
 
         csumfile = os.path.join(self.store,
-                                self.midasid+".1_0.mbag0_4-0.zip.sha256")
+                                self.midasid+".1_0_0.mbag0_4-0.zip.sha256")
         self.assertTrue(os.path.exists(csumfile))
         with open(csumfile) as fd:
             csum = fd.read().strip()
@@ -110,7 +110,7 @@ class TestMIDASSIPHandler(test.TestCase):
         self.assertIn('bagfiles', self.sip.status)
         self.assertEqual(len(self.sip.status['bagfiles']), 1)
         self.assertEqual(self.sip.status['bagfiles'][0]['name'], 
-                                              self.midasid+".1_0.mbag0_4-0.zip")
+                                            self.midasid+".1_0_0.mbag0_4-0.zip")
         self.assertEqual(self.sip.status['bagfiles'][0]['sha256'], csum)
 
         # check for checksum files in review dir
@@ -124,10 +124,11 @@ class TestMIDASSIPHandler(test.TestCase):
         self.assertTrue(self.sip._is_preserved())
 
         # if there is no longer a cached status file, ensure that we notice
-        # when there is bag in the store dir
+        # when there is a bag in the store dir
         os.remove(os.path.join(self.statusdir, self.midasid+'.json'))
         self.sip = sip.MIDASSIPHandler(self.midasid, self.config)
         stat = self.sip.status
+        self.sip._is_preserved()
         self.assertEqual(stat['state'], status.SUCCESSFUL)
         self.assertIn('orgotten', stat['message'])
 

@@ -57,7 +57,7 @@ class TestMultibagValidator(test.TestCase):
 
     def test_all_test_methods(self):
         expect = ["test_"+m for m in
-          "name bagit_mdels version nist_md metadata_dir pod nerdm metadata_tree nerdm_validity".split()]
+          "name bagit_mdels profile_version nist_md metadata_dir pod nerdm metadata_tree nerdm_validity".split()]
         expect.sort()
         meths = self.valid8.all_test_methods()
         meths.sort()
@@ -131,8 +131,8 @@ class TestMultibagValidator(test.TestCase):
                          "\n  ".join([str(e) for e in errs.failed()]) + "\n]")
         self.assertTrue(has_error(errs, "3-1-1-1"))
 
-    def test_test_version(self):
-        errs = self.valid8.test_version(self.bag)
+    def test_test_profile_version(self):
+        errs = self.valid8.test_profile_version(self.bag)
         self.assertEqual(errs.failed(), [],
                       "False Positives: "+ str([str(e) for e in errs.failed()]))
 
@@ -145,7 +145,7 @@ class TestMultibagValidator(test.TestCase):
                 if not line.startswith('NIST-BagIt-Version:'):
                     fd.write(line)
 
-        errs = self.valid8.test_version(self.bag)
+        errs = self.valid8.test_profile_version(self.bag)
         self.assertEqual(len(errs.failed()), 1, "Unexpected # of errors: [\n  " +
                          "\n  ".join([str(e) for e in errs.failed()]) + "\n]")
         self.assertTrue(has_error(errs, "3-3-1"))

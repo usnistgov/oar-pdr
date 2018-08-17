@@ -513,10 +513,13 @@ class MIDASSIPHandler(SIPHandler):
 
     def _is_preserved(self):
         """
-        return True if some version of this SIP has been preserved (i.e. sent successfully through
-        the Preservation Service).  This look for as definitive evidence of success (i.e. existence
-        in long-term storage) as possible.
+        return True if some version of this SIP has been preserved (i.e. sent 
+        successfully through the Preservation Service).  This look for as 
+        definitive evidence of success (i.e. existence in long-term storage) 
+        as possible.
         """
-        bagname = self.bagger.form_bag_name(self.bagger.name)
-        return len([f for f in os.listdir(self.storedir) if f.startswith(bagname)]) > 0
+        # look for files in the serialized bag store with names that start
+        # with the SIP identifier
+        return len([f for f in os.listdir(self.storedir)
+                      if f.startswith(self.bagger.name+'.')]) > 0
     

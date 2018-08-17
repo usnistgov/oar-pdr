@@ -77,6 +77,36 @@ class TestBuilder(test.TestCase):
         except KeyError as ex:
             self.fail("Failed to load default config params: missing params")
 
+    def test_rename_bag(self):
+        bagdir = os.path.join(self.tf.root, "testbag")
+        self.assertEqual(self.bag.bagname, "testbag")
+        self.assertEqual(self.bag.bagdir, bagdir)
+        self.assertTrue(not os.path.exists(self.bag.bagdir))
+        self.assertIsNone(self.bag._bag)
+
+        self.bag.rename_bag("goobbag")
+        bagdir = os.path.join(self.tf.root, "goobbag")
+        self.assertEqual(self.bag.bagname, "goobbag")
+        self.assertEqual(self.bag.bagdir, bagdir)
+        self.assertTrue(not os.path.exists(bagdir))
+        self.assertIsNone(self.bag._bag)
+
+        self.bag.ensure_bagdir()
+        self.assertTrue(os.path.exists(bagdir))
+        self.assertEqual(self.bag.bagname, "goobbag")
+        self.assertEqual(self.bag.bagdir, bagdir)
+        self.assertIsNotNone(self.bag._bag)
+        self.assertEqual(self.bag._bag.dir, bagdir)
+
+        self.bag.rename_bag("foobag")
+        self.assertEqual(self.bag.bagname, "foobag")
+        self.assertTrue(not os.path.exists(bagdir))
+        bagdir = os.path.join(self.tf.root, "foobag")
+        self.assertTrue(os.path.exists(bagdir))
+        self.assertEqual(self.bag.bagdir, bagdir)
+        self.assertIsNotNone(self.bag._bag)
+        self.assertEqual(self.bag._bag.dir, bagdir)
+        
     def test_download_url(self):
         self.assertEqual(self.bag._download_url('goob',
                                                 os.path.join("foo", "bar.json")),
@@ -963,7 +993,7 @@ class TestBuilder(test.TestCase):
                       "National Institute of Standards and Technology\n",
                       lines)
         self.assertIn("Contact-Email: datasupport@nist.gov\n", lines)
-        self.assertIn("Multibag-Version: 0.3\n", lines)
+        self.assertIn("Multibag-Version: 0.4\n", lines)
         self.assertEqual(len([l for l in lines
                                 if "Organization-Address: " in l]), 2)
 
@@ -994,7 +1024,7 @@ class TestBuilder(test.TestCase):
                       "National Institute of Standards and Technology\n",
                       lines)
         self.assertIn("Contact-Email: datasupport@nist.gov\n", lines)
-        self.assertIn("Multibag-Version: 0.3\n", lines)
+        self.assertIn("Multibag-Version: 0.4\n", lines)
         self.assertEqual(len([l for l in lines
                                 if "Organization-Address: " in l]), 2)
         self.assertEqual(len([l for l in lines
@@ -1243,7 +1273,50 @@ class TestBuilder(test.TestCase):
         self.assertIn('previewURL', nerd)
         self.assertTrue(nerd['previewURL'].endswith("trial1.json/preview"))
         self.assertEqual(nerd['title'], "a better title")
+
+    def test_update_head_version(self):
+        self.bag.ensure_bagdir()
+        binfo = {
+            'Multibag-Tag-Directory': ["multibag"],
+            'Multibag-Version': ["0.4"]
+        }
+
+        self.bag.update_head_version(binfo, "1.0.0")
+        self.assertEqual(binfo['Multibag-Head-Version'], "1.0.0")
+        self.assertEqual(binfo['Multibag-Version'], ["0.4"])
+        self.assertEqual(binfo['Multibag-Tag-Directory'], ["multibag"])
+        self.assertNotIn('Multibag-Head-Deprecates', binfo)
         
+        mbdir = os.path.join(self.bag.bagdir, 'multibag')
+        if not os.path.exists(mbdir):
+            os.mkdir(mbdir)
+        depinfo = {
+            'Multibag-Tag-Directory': ["multibag"],
+            'Multibag-Version': ["0.3"]
+        }
+        depinfof = os.path.join(mbdir, "deprecated-info.txt")
+        self.bag.write_baginfo_data(depinfo, depinfof, overwrite=True)
+
+        self.bag.update_head_version(binfo, "9.2-78")
+        self.assertEqual(binfo['Multibag-Head-Version'], "9.2-78")
+        self.assertEqual(binfo['Multibag-Head-Deprecates'], ["1"])
+        self.assertEqual(binfo['Multibag-Version'], ["0.4"])
+        self.assertEqual(binfo['Multibag-Tag-Directory'], ["multibag"])
+        
+        depinfo.update({
+            'Multibag-Head-Version': ["8.5.1"],
+            'Multibag-Head-Deprecates': ["1", "2.1.1"]
+        })
+        self.bag.write_baginfo_data(depinfo, depinfof, overwrite=True)
+
+        self.bag.update_head_version(binfo, "12.1.9.2-78")
+        self.assertEqual(binfo['Multibag-Head-Version'], "12.1.9.2-78")
+        self.assertEqual(binfo['Multibag-Head-Deprecates'],
+                         ["1", "8.5.1", "2.1.1"])
+        self.assertEqual(binfo['Multibag-Version'], ["0.4"])
+        self.assertEqual(binfo['Multibag-Tag-Directory'], ["multibag"])
+            
+
         
 
 if __name__ == '__main__':

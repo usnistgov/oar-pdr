@@ -713,7 +713,7 @@ class TestPreservationBagger(test.TestCase):
         data = utils.read_nerd(annotf)
         self.assertEqual(data['version'], "1.0.0")
 
-        
+            
 
         
         

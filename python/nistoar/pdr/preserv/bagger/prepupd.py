@@ -313,8 +313,15 @@ class UpdatePrepper(object):
             # serialized bag file
             self._unpack_bag_as(headbag, mdbag)
 
+        # save the the bag-info.txt as deprecated-info.txt for later use
+        mbdir = os.path.join(mdbag, "multibag")
+        if not os.path.isdir(mbdir):
+            os.mkdir(mbdir)
+        shutil.copyfile(os.path.join(mdbag,"bag-info.txt"),
+                        os.path.join(mbdir,"deprecated-info.txt"))
+
         # now remove certain bits that will get updated later
-        datadir = os.path.join(mdbag,"data")
+        datadir = os.path.join(mdbag, "data")
         if os.path.exists(datadir):
             shutil.rmtree(datadir)
         os.mkdir(datadir)
