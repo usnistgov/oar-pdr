@@ -160,9 +160,9 @@ class TestThreadedPreservationService(test.TestCase):
 
         self.assertEqual(stat['state'], status.SUCCESSFUL)
         self.assertTrue(os.path.exists(os.path.join(self.store,
-                                             self.midasid+".1_0.mbag0_4-0.zip")))
+                                           self.midasid+".1_0_0.mbag0_4-0.zip")))
         self.assertTrue(os.path.exists(os.path.join(self.store,
-                                      self.midasid+".1_0.mbag0_4-0.zip.sha256")))
+                                    self.midasid+".1_0_0.mbag0_4-0.zip.sha256")))
         self.assertEqual(hndlr.state, status.SUCCESSFUL)
         
     def test_launch_async(self):
@@ -178,9 +178,9 @@ class TestThreadedPreservationService(test.TestCase):
             thrd.join()
         self.assertEqual(hndlr.state, status.SUCCESSFUL)
         self.assertTrue(os.path.exists(os.path.join(self.store,
-                                             self.midasid+".1_0.mbag0_4-0.zip")))
+                                           self.midasid+".1_0_0.mbag0_4-0.zip")))
         self.assertTrue(os.path.exists(os.path.join(self.store,
-                                      self.midasid+".1_0.mbag0_4-0.zip.sha256")))
+                                    self.midasid+".1_0_0.mbag0_4-0.zip.sha256")))
 
     def test_preserve(self):
         self.assertFalse(os.path.exists(os.path.join(self.narch,"archive.txt")))
