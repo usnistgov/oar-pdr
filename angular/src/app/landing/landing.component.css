@@ -155,8 +155,8 @@
   border: 0px;
   /* background-color:#336B87; */
    /* background-color: #1D72AC; */
-   color:white;
-   background-color: #b0b5b7;
+   color: black;
+   background-color: #f1f1f1;
 }
 
 :host /deep/ .ui-widget-content{
@@ -168,15 +168,16 @@
 }
 
 :host /deep/ .ui-state-active, :host /deep/ .ui-state-highlight{
-  background-color: #b0b5b7;
+  background-color: #F3F3F3;
+  color: black;
+  font-family: sans-serif;
 }
 /* Description section */
 .welldesc{
-  /* background-color:#006495; */
-  /* background-color:#90AFC5; */
-  background-color: #b0b5b7;
+
+  background-color: #F3F3F3;
   text-align: left;
-  color: white;
+  color: black;
   padding: 1;
 }
 :host /deep/ citationDialog > button.ui-button-icon-only{  
@@ -188,7 +189,7 @@
 :host /deep/ .ui-treetable-resizable .ui-treetable-thead > tr > th{
   background-color: #1E6BA1;
   /* border-color: coral; */
-  
+  color: white;
   border: 0;
 }
 
@@ -196,8 +197,23 @@
   background-color: #E4F2FC;
   font-family: sans-serif;
   font-size: 14px;
-
 }
+
+:host /deep/ .ui-treetable thead tr{
+  border-bottom: 0;
+}
+
+:host /deep/ .ui-treetable thead tr th .ui-column-resizer{
+  color: white;
+}
+
+:host /deep/ .ui-treetable .ui-treetable-tbody > tr > td{
+  border-bottom: #8c8c8c  1px solid;
+  
+}
+
+
+/* .ui-treetable .ui-treetable-thead > tr > th, .ui-treetable .ui-treetable-tbody > tr > td, .ui-treetable .ui-treetable-tfoot > tr > td */
 .fileinfosection{
   background-color:#F3F3F3; 
   padding: 2.5rem 2.5rem 2.5rem 2.5rem;
@@ -228,4 +244,57 @@
 
 .contactPoint{
   font-family: sans-serif;
+}
+.contactcard{
+  box-shadow:  0 1px 3px 0 rgba(0, 0, 0, 0), 0 1px 1px 0 rgba(0, 0, 0, 0), 0 2px 1px -1px rgba(0, 0, 0, 0);
+  -webkit-box-shadow:0;
+}
+
+/** Metadata and File details related styles **/
+.textstyle1
+{
+  font-family:  sans-serif;
+  color: grey;
+  font-size: 12;
+}
+
+.fDetailsfFont{
+  font-family:  sans-serif;
+  color: grey;
+  font-size: 12px;
+}
+
+.font8{
+  font-size:8pt;
+  word-wrap: break-word;
+}
+.font10{
+  font-size:10pt;
+  word-wrap: break-word;
+}
+
+.filedesc{
+  background-color:green;
+  text-align: left;
+  color: white;
+  word-wrap: break-word;
+  font-family: sans-serif;
+  font-size: 12px;
+  padding: 1rem 1rem 1rem 1rem; 
+}
+
+.filesection{
+  background-color:#F3F3F3;
+  /* padding: 2.5rem 2.5rem 2.5rem 2.5rem; */
+  /* padding: 1rem 1rem 1rem 1rem;  */
+  text-align: left;
+}
+
+.filecard{
+  padding: 0em;
+  text-align: left;
+}
+
+:host /deep/ .faa-cart-plus:before {
+  color: green;
 }

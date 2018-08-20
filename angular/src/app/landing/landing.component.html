@@ -72,7 +72,7 @@
                           <i style="cursor: pointer;" class="faa" [ngClass]="{'faa-plus-square-o': !clickContact, 'faa-minus-square-o': clickContact}"
                           aria-hidden="true" (click)="closeContent = !closeContent; clickContact=expandContact();"></i>
                           <div [collapse]="!closeContent">
-                              <div class="card">
+                              <div class="card contactcard">
                                   <span class="" *ngIf="record.contactPoint.fn">
                                       <span>{{record.contactPoint.fn}}</span>
                                   </span>

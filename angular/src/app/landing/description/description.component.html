@@ -1,5 +1,5 @@
 
-                <h3 id="description" name="desscription"><b>Description</b></h3>
+                <h3 id="description" name="desscription"><b>Description</b></h3><br> 
                 <!-- <i *ngIf="loginuser" style="float:right" class="faa faa-edit"></i> -->
                 <div contenteditable="true" id="recordDescription" class="well welldesc">
                   <p  *ngFor="let topic of record['description']; let i =index">
@@ -25,7 +25,7 @@
                   <br>
                   
                   <div>
-                   <h3 id="dataAccess"><b>Data Access</b></h3>
+                   <h3 id="dataAccess"><b>Data Access</b></h3><br> 
                    <span style="margin-left:0em" *ngIf="record['accessLevel'] === 'public'"><i class="faa faa-globe"></i> 
                       These data are public. 
                    </span>
@@ -95,40 +95,41 @@
                           </ng-template>
                          
                           <ng-template pTemplate="summary">
-                               <div style="text-align: left; color: white;">
-                                    File: <span style="color: gray">{{selectedNode ? selectedNode.data.name : 'none'}}</span>
-                               <br><span style="font-size: 12px;  ">
-                                  Size: <span style="color: gray">{{ selectedNode ? selectedNode.data.size : 'Not Available'}} </span> 
-                                </span> <span style="font-size: 12px; ">
-                                  Type: <span style="color: gray">{{ selectedNode ? selectedNode.data.mediatype : 'Not Available'}} </span>
-                                </span>
-                                <br><span class="font14">Description: 
-                                        <span style="color: gray">{{ selectedNode ? selectedNode.data.description : 'Not Available'}} </span>
-                                    </span>
-                               </div>
+                                <div class="filecard">
+                                    <div class="ui-g filesection">
+                                        <div class="ui-g-12 ui-md-12 ui-lg-12 ui-sm-10">
+                                            <span>
+                                            <span class="textstyle1">File </span><br>
+                                            <span class="font14">{{selectedNode ? selectedNode.data.name : 'none'}}</span>
+                                            </span>
+                                            <!-- <span class="font10">Path: <b></b></span> -->
+                                            <span class="font8"> <br><b>Type:</b>
+                                                <span class="textstyle1">{{ selectedNode ? selectedNode.data.mediatype : 'Not Available'}} </span>
+                                            </span>
+                                            <span class="font8" style="margin-left: 2.5rem">Size: 
+                                                <span class="textstyle1">{{ selectedNode ? selectedNode.data.size : 'Not Specified'}} </span>
+                                            </span>
+                                        <!-- </div>
+                                        <div class="ui-g-12 ui-md-12 ui-lg-12 ui-sm-12"> -->
+                                           <br><span class="font10"><b>Description:</b> </span>
+                                           <div class="well filedesc" >
+                                                {{ selectedNode ? selectedNode.data.description : 'Not Available'}} 
+                                            </div>
+                                        <!-- <span class="font10"><b>Topic Keyword:</b></span> -->
+                                  <!-- <br> -->
+                                  <!-- <span class="font10"><b>Collection Metadata:</b></span> -->
+                                </div>
+                              </div>
+                            </div>
+                               
                           </ng-template>
                       </p-treeTable>
                           </div>
-                          <!-- div class="ui-g-6 ui-md-6 ui-lg-6 ui-sm-12">
-                              <div>
-                                  <div *ngIf="isFileDetails">
-                                      <filedetails-resources [fileDetails]="fileDetails"></filedetails-resources>
-                                  </div>
-                                  <div *ngIf="!isFileDetails">
-                                      <div class="fileinfocard ">
-                                          <div class="ui-g fileinfosection">
-                                              <span>Click on the file name to view details.</span>   
-                                          </div>
-                                      </div>         
-                                  </div>
-                              </div>
-                          </div -->
-                      <!-- </div>
-                  </div> -->
+                         
                   <br>
                   <div *ngIf="checkReferences()">
-                   <h3 id="reference" name="reference"><b>References</b></h3>
-                      <span class="references" style="margin-left:0.5em" *ngIf="isDocumentedBy"> 
+                   <h3 id="reference" name="reference"><b>References</b></h3><br> 
+                      <span class="font14" style="margin-left:0.5em" *ngIf="isDocumentedBy"> 
                           This data is discussed in :
                           <span style="padding-left:2.75em" *ngFor="let refs of record['references']">
                               <span  *ngIf="refs['refType'] == 'IsDocumentedBy'">
@@ -140,12 +141,12 @@
                           </span>
                           <br>
                       </span>
-                      <span class="references" style="margin-left:0.5em"  *ngIf="isReferencedBy"> 
+                      <span class="references"  *ngIf="isReferencedBy"> 
                           This data is referenced in :
                           <span  *ngFor="let refs of record['references']">
                               <span  *ngIf="refs['refType'] == 'IsReferencedBy'">
                                   <br> <i style="margin-left:0.5em" class="faa faa-external-link">
-                                  <a class="references" style="margin-left:0.5em" href={{refs.location}} target="blank">{{ refs.location }}</a>
+                                  <a class="font14" style="margin-left:0.5em" href={{refs.location}} target="blank">{{ refs.location }}</a>
                                   </i>
                               </span>
                           </span>

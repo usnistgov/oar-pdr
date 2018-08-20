@@ -235,17 +235,18 @@ updateMenu(){
     this.metadata = true; this.similarResources =false;},''); 
     itemsMenu.push(metaItem);
     itemsMenu.push(metadata);   
-  var descItem = this.createMenuItem ("Description","faa faa-bars",(event)=>{
+
+  var descItem = this.createMenuItem ("Description","faa faa-arrow-circle-right",(event)=>{
     this.metadata = false; this.similarResources =false;
     this.router.navigate(['/od/id/', this.record.ediid],{fragment:'description'});
    },"");
 
-  var refItem = this.createMenuItem ("References","faa faa-bars",(event)=>{
+  var refItem = this.createMenuItem ("References","faa faa-arrow-circle-right ",(event)=>{
     this.metadata = false; this.similarResources =false;
     this.router.navigate(['/od/id/', this.record.ediid],{fragment:'reference'});
     },'');
 
-  var filesItem = this.createMenuItem("Data Access","faa faa-bars", (event)=>{
+  var filesItem = this.createMenuItem("Data Access","faa faa-arrow-circle-right", (event)=>{
     this.metadata = false;
     this.similarResources =false;
     this.router.navigate(['/od/id/', this.record.ediid],{fragment:'dataAccess'});
