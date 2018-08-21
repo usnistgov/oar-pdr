@@ -47,7 +47,7 @@ const routes: Routes = [
   ]
 }
 ,{
-  path: 'od/id/nerdm',
+  path: 'nerdm',
   children: [
     {
       path: '',

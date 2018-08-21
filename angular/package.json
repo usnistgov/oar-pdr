@@ -7,14 +7,16 @@
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build",
-    "lint": "ng lint pdr-landingpage",
+    "lint": "tslint ./src/**/*.ts -t verbose",
     "build:client-and-server-bundles": "ng build --prod && ng run pdr-landingpage:server:production",
     "build:prerender": "npm run build:client-and-server-bundles && npm run webpack:server && npm run generate:prerender",
     "build:universal": "npm run build:client-and-server-bundles && npm run webpack:server",
     "generate:prerender": "cd dist && node prerender",
     "webpack:server": "webpack --config webpack.server.config.js --progress --colors",
     "serve:prerender": "cd dist/browser && http-server",
-    "serve:universal": "node  dist/server"
+    "serve:universal": "node  dist/server",
+    "test": "ng test",
+    "e2e": "ng e2e"
   },
   "private": true,
   "dependencies": {
@@ -51,7 +53,7 @@
     "moment": "^2.22.1",
     "nanoscroller": "0.8.7",
     "ng-bootstrap": "^1.6.3",
-    "ng-mock-e2e": "^0.1.3",
+    "ng-mock-e2e": "^0.1.4",
     "ng2-expanding-table": "^1.5.2",
     "ng2-utils": "^0.6.1",
     "npm": "^6.1.0",

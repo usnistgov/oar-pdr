@@ -3,7 +3,7 @@ import {browser, element, by, By, $, $$, ExpectedConditions, protractor} from 'p
 describe('Noid Page', function() {
   
   beforeEach(async () => {
-    return await browser.get('/id');
+    return await browser.get('/od/id');
   });
 
   it('should display title page', async() => {

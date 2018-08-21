@@ -7,7 +7,7 @@ import { Component } from '@angular/core';
   
   template: `
     <div class="ui-grid ui-grid-responsive ui-grid-pad center">
-    <div class="card" style="padding: 2.5rem 2.5rem 2.5rem 2.5rem">
+    <div class="" style="padding: 2.5rem 2.5rem 2.5rem 2.5rem">
       <label style="font-size: xx-large;float: left;display: block;">NERDm details</label>
       <div class="EmptyBox20"></div>
       <p>
