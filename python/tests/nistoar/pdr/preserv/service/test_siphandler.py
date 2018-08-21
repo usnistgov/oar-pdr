@@ -64,6 +64,11 @@ class TestMIDASSIPHandler(test.TestCase):
             "ingester": {
                 "data_dir":  os.path.join(self.workdir, "ingest"),
                 "submit": "none"
+            },
+            "multibag": {
+                "max_headbag_size": 2000000,
+#                "max_headbag_size": 100,
+                "max_bag_size": 200000000
             }
         }
         
@@ -95,7 +100,6 @@ class TestMIDASSIPHandler(test.TestCase):
 
     def test_bagit(self):
         self.assertEqual(self.sip.state, status.FORGOTTEN)
-        # pdb.set_trace()
         self.sip.bagit()
         self.assertTrue(os.path.exists(os.path.join(self.store, 
                                           self.midasid+".1_0_0.mbag0_4-0.zip")))

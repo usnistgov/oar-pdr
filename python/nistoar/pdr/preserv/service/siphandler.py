@@ -10,6 +10,8 @@ from copy import deepcopy
 
 from ..bagit.serialize import DefaultSerializer
 from ..bagit.bag import NISTBag
+from ..bagit.validate import NISTAIPValidator
+from ..bagit.multibag import MultibagSplitter
 from ..bagger.base import checksum_of
 from ..bagger.midas import PreservationBagger
 from .. import (ConfigurationException, StateException, PODError)
@@ -177,25 +179,41 @@ class SIPHandler(object):
                                 If not provided a default serialization 
                                 will be applied (as given in the configuration).
         """
-        #TODO:  splitting large submissions
+        srcbags = [ bagdir ]
+
+        # split the bag if it exceed size limits
+        mbcfg = self.cfg.get('multibag', {})
+        maxhbsz = mbcfg.get('max_headbag_size', mbcfg.get('max_bag_size'))
+        if maxhbsz:
+            mbspltr = MultibagSplitter(bagdir, mbcfg)
+
+            # check the size of the source bag and split it if it exceeds
+            # limits.  
+            srcbags = mbspltr.check_and_split(os.path.dirname(bagdir))
+
+            # TODO: Run NIST validator on output files
 
         self._status.data['user']['bagfiles'] = []
-        file1 = self._ser.serialize(bagdir, destdir, format)
-        for file in [file1]:
-            csumfile = file + ".sha256"
-            csum = checksum_of(file)
+        outfiles = []
+        for bagd in srcbags:
+            bagfile = self._ser.serialize(bagd, destdir, format)
+            outfiles.append(bagfile)
+
+            csumfile = bagfile + ".sha256"
+            csum = checksum_of(bagfile)
             with open(csumfile, 'w') as fd:
                 fd.write(csum)
                 fd.write('\n')
+            outfiles.append(csumfile)
 
             # write the checksum to our status object
             self._status.data['user']['bagfiles'].append({
-                'name': os.path.basename(file),
+                'name': os.path.basename(bagfile),
                 'sha256': csum
             })
 
         self._status.cache()
-        return [file1, csumfile]
+        return outfiles
 
     def _is_ingested(self):
         """
@@ -307,7 +325,7 @@ class MIDASSIPHandler(SIPHandler):
             if not workdir:
               raise ConfigurationException("Missing needed config property: "+
                                            "working_dir")
-            self.stagedir = os.path.join(workdir, self.mdbagdir)
+            self.mdbagdir = os.path.join(workdir, self.mdbagdir)
             if not os.path.exists(self.mdbagdir):
                 os.mkdir(self.mdbagdir)
         if not os.path.exists(self.mdbagdir):
@@ -398,7 +416,7 @@ class MIDASSIPHandler(SIPHandler):
         self._status.record_progress("Collecting metadata and files")
         bagdir = self.bagger.make_bag()
 
-        # zip it up 
+        # zip it up; this may split the bag into multibags
         self._status.record_progress("Serializing")
         savefiles = self._serialize(bagdir, self.stagedir, serialtype)
 

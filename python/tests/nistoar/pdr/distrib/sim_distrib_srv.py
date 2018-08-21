@@ -75,6 +75,7 @@ class SimArchive(object):
             self._aips[aid][vers][filename] = (size, hash)
         
     def loadinfo(self):
+        self._aips = {}
         for f in os.listdir(self.dir):
             hash = checksum_of(os.path.join(self.dir, f))
             size = os.stat(os.path.join(self.dir, f)).st_size
