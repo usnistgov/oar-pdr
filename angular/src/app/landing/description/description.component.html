@@ -5,9 +5,9 @@
                   <p  *ngFor="let topic of record['description']; let i =index">
                     {{ record["description"][i] }}
                   </p>
-              </div>
+                </div>
       
-                  <div *ngIf="checkTopics()">
+                <div *ngIf="checkTopics()">
                   <strong contenteditable="{{editContent}}" >Research Topics:</strong>
                   <span class="font14"  *ngFor="let topic of record['topic']; let i =index">
                       {{ topic.tag }}
@@ -56,7 +56,7 @@
                             </span>
                                 <a href="javascript:;" (click)="addFilesToCart()" class="faa faa-cart-plus " style="margin-left:0.5em; color:#1E6BA1;" title="Add All files to datacart" ></a>
                                 
-                          <p-treeTable [value]="files" [columns]="cols" selectionMode="single" [(selection)]="selectedNode" [scrollable]="true"   [resizableColumns]="true">
+                          <p-treeTable [value]="files" [columns]="cols" selectionMode="single"  [(selection)]="selectedNode" [scrollable]="true"  scrollHeight="200px"  [resizableColumns]="true">
                                 
                           
                           <ng-template pTemplate="colgroup" let-columns>
@@ -99,7 +99,7 @@
                                     <div class="ui-g filesection">
                                         <div class="ui-g-12 ui-md-12 ui-lg-12 ui-sm-10">
                                             <span>
-                                            <span class="textstyle1">File </span><br>
+                                            <span class="textstyle1">Selected File </span><br>
                                             <span class="font14">{{selectedNode ? selectedNode.data.name : 'none'}}</span>
                                             </span>
                                             <!-- <span class="font10">Path: <b></b></span> -->

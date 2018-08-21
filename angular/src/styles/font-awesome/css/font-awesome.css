@@ -2335,3 +2335,7 @@
   overflow: visible;
   clip: auto;
 }
+
+.faa-arrow-alt-circle-right:before {
+  content: "\f35a";
+}

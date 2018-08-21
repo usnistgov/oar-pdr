@@ -32,6 +32,8 @@ export class DescriptionComponent {
  isDocumentedBy : boolean = false;
  selectedNodes: TreeNode[];
  addFileStatus:boolean = false;
+ selectedNode : TreeNode;
+
  cols: any[];
  onNodeSelect(event, sdata){
      alert("Node select ::"+sdata.name);
@@ -128,6 +130,7 @@ checkReferences(){
         { field: 'size', header: 'Size', width: '10%' },
         { field: 'download', header: 'Download', width: '10%' },
     ];
+    this.selectedNode = this.files[0];
  }
  ngOnChanges(){
     this.checkAccesspages();

@@ -4,8 +4,9 @@ import { DebugElement } from '@angular/core';
 import { By } from '@angular/platform-browser';
 
 import { HeadbarComponent } from './headbar.component';
-import { CommonVarService } from '../common-var/common-var.service';
-
+import { HttpClientModule, HttpClient } from '@angular/common/http';
+import { CartService } from '../../datacart/cart.service';
+import { AppConfig } from '../config-service/config.service';
 
   describe('AppComponent', () => {
     let component: HeadbarComponent;
@@ -13,9 +14,9 @@ import { CommonVarService } from '../common-var/common-var.service';
 
     beforeEach(async(() => {
       TestBed.configureTestingModule({
-        declarations: [HeadbarComponent]
-        ,providers:[ CommonVarService]
-        ,imports:[ RouterTestingModule ]
+        declarations: [ HeadbarComponent ]
+        ,providers:[  AppConfig, CartService]
+        ,imports:[ HttpClientModule, RouterTestingModule ]
       })
         .compileComponents();
     }));
@@ -25,5 +26,11 @@ import { CommonVarService } from '../common-var/common-var.service';
       component = fixture.componentInstance;
       fixture.detectChanges();
     });
+
+    // it('should create the Headbar', async(() => {
+    //     const fixture = TestBed.createComponent(HeadbarComponent);
+    //     const app = fixture.debugElement.componentInstance;
+    //     expect(app).toBeTruthy();
+    //   }));
   });
 
