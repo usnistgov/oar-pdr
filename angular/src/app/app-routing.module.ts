@@ -63,7 +63,7 @@ const routes: Routes = [
       }
   ]
 },{
-  path: 'od/id/error/:id',
+  path: 'error/:id',
   children: [
     {
       path: '',
@@ -72,7 +72,7 @@ const routes: Routes = [
   ]
 }
 ,{
-  path: 'od/id/usererror/:id',
+  path: 'usererror/:id',
   children: [
     {
       path: '',

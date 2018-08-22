@@ -127,8 +127,8 @@ checkReferences(){
     this.cols = [
         { field: 'name', header: 'Name', width: '60%' },
         { field: 'mediatype', header: 'MediaType', width: '20%' },
-        { field: 'size', header: 'Size', width: '10%' },
-        { field: 'download', header: 'Download', width: '10%' },
+        { field: 'size', header: 'Size', width: '8%' },
+        { field: 'download', header: 'Download', width: '12%' },
     ];
     this.selectedNode = this.files[0];
  }

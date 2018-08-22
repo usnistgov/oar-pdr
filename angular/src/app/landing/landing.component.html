@@ -48,9 +48,9 @@
                           <span *ngFor="let author of record.authors; let i = index">
                               {{ author.fn}}<span *ngIf="i < record.authors.length-1 ">,</span>
                           </span>
-                          <i style="cursor: pointer;" class ="faa" [ngClass]="{'faa-plus-square-o': !clickAuthors, 'faa-minus-square-o': clickAuthors}" aria-hidden="true" (click)="isCollapsedContent = !isCollapsedContent; clickAuthors = expandClick();"></i>
+                          <i style="cursor: pointer; margin-left: 0.5rem;" class ="faa" [ngClass]="{'faa-plus-square-o': !clickAuthors, 'faa-minus-square-o': clickAuthors}" aria-hidden="true" (click)="isCollapsedContent = !isCollapsedContent; clickAuthors = expandClick();"></i>
                       </div>
-                      <div [collapse]="!isCollapsedContent" class="card card-block card-header">
+                      <div [collapse]="!isCollapsedContent" class="card card-block card-header customcard">
                           <div class="" *ngIf="record.authors">
                               <span><b>Authors:</b></span>
                               <div *ngFor="let author of record.authors; let i = index">
@@ -72,7 +72,7 @@
                           <i style="cursor: pointer;" class="faa" [ngClass]="{'faa-plus-square-o': !clickContact, 'faa-minus-square-o': clickContact}"
                           aria-hidden="true" (click)="closeContent = !closeContent; clickContact=expandContact();"></i>
                           <div [collapse]="!closeContent">
-                              <div class="card contactcard">
+                              <div class="card customcard">
                                   <span class="" *ngIf="record.contactPoint.fn">
                                       <span>{{record.contactPoint.fn}}</span>
                                   </span>
@@ -100,7 +100,7 @@
                                  
                                   <span style="padding-left:2.75em" *ngIf="refs.refType == 'IsDocumentedBy'">
                                       <br><i class="faa faa-external-link">
-                                      <a href={{refs.location}} target="blank" >{{ refs.label }}</a></i>
+                                      <a class="font14" href={{refs.location}} target="blank" >{{ refs.label }}</a></i>
                                   <span *ngIf="i < record.references.length-1 ">,</span>
                                   </span>
                               </small>
@@ -116,7 +116,7 @@
                           <span class="" *ngIf="record.issued" style="padding-right: 10pt;">  Released: <strong>{{record.issued}}</strong></span>
                           <span class="" *ngIf="record.modified" style="padding-right: 10pt;"> Last modified: <strong>{{record.modified}}</strong></span>
                       </div>
-                      <div class="card" [collapse]="!closeHistory">
+                      <div class="card customcard" [collapse]="!closeHistory">
                           <b>Version History:</b>
                           <span *ngFor="let release of record.versionHistory">
                              <br> <b [innerHTML]="renderRelVer(release, record.version)"></b> &nbsp;&nbsp;

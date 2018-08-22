@@ -33,6 +33,7 @@ import { CartService } from "./datacart/cart.service";
 import { AppShellNoRenderDirective } from './directives/app-shell-no-render.directive';
 import { AppShellRenderDirective } from './directives/app-shell-render.directive';
 
+
 const appInitializerFn = (appConfig: AppConfig) => {
   return () => {
     return appConfig.loadAppConfig();
@@ -45,7 +46,7 @@ const appInitializerFn = (appConfig: AppConfig) => {
     LandingAboutComponent, LandingComponent,DatacartComponent,
     Collaspe,MetadataComponent,FileDetailsComponent, DescriptionComponent,  
     KeyValuePipe, MetadataView, NoidComponent,NerdmComponent,
-    ErrorComponent,UserErrorComponent,
+    ErrorComponent,UserErrorComponent, 
     AppShellNoRenderDirective, AppShellRenderDirective 
   ],
   imports: [

@@ -211,6 +211,9 @@
   border-bottom: #8c8c8c  1px solid;
   
 }
+:host /deep/  .ui-treetable thead tr th .ui-sortable-column-icon {
+  color: white;
+}
 
 
 /* .ui-treetable .ui-treetable-thead > tr > th, .ui-treetable .ui-treetable-tbody > tr > td, .ui-treetable .ui-treetable-tfoot > tr > td */
@@ -227,7 +230,7 @@
   margin-bottom: 0rem;
 }
 .citeString{
-  font-family:  Franklin Gothic Urw;
+  font-family:  sans-serif;
   font-style:italic;
   color:#484646; 
   font-size: 12;
@@ -245,7 +248,7 @@
 .contactPoint{
   font-family: sans-serif;
 }
-.contactcard{
+.customcard{
   box-shadow:  0 1px 3px 0 rgba(0, 0, 0, 0), 0 1px 1px 0 rgba(0, 0, 0, 0), 0 2px 1px -1px rgba(0, 0, 0, 0);
   -webkit-box-shadow:0;
 }
@@ -297,4 +300,8 @@
 
 :host /deep/ .faa-cart-plus:before {
   color: green;
+}
+:host /deep/ reflinks > a {
+  
+  font-family: sans-serif;
 }

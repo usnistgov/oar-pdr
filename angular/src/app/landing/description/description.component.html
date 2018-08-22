@@ -1,14 +1,13 @@
-
-                <h3 id="description" name="desscription"><b>Description</b></h3><br> 
-                <!-- <i *ngIf="loginuser" style="float:right" class="faa faa-edit"></i> -->
-                <div contenteditable="true" id="recordDescription" class="well welldesc">
-                  <p  *ngFor="let topic of record['description']; let i =index">
-                    {{ record["description"][i] }}
-                  </p>
-                </div>
+<h3 id="description" name="desscription"><b>Description</b></h3><br> 
+<!-- <i *ngIf="loginuser" style="float:right" class="faa faa-edit"></i> -->
+<div contenteditable="true" id="recordDescription" class="well welldesc">
+    <p  *ngFor="let topic of record['description']; let i =index">
+        {{ record["description"][i] }}
+    </p>
+</div>
       
-                <div *ngIf="checkTopics()">
-                  <strong contenteditable="{{editContent}}" >Research Topics:</strong>
+<div *ngIf="checkTopics()">
+    <strong contenteditable="{{editContent}}" >Research Topics:</strong>
                   <span class="font14"  *ngFor="let topic of record['topic']; let i =index">
                       {{ topic.tag }}
                       <span *ngIf="i < record['topic'].length-1 ">,</span>
@@ -56,18 +55,17 @@
                             </span>
                                 <a href="javascript:;" (click)="addFilesToCart()" class="faa faa-cart-plus " style="margin-left:0.5em; color:#1E6BA1;" title="Add All files to datacart" ></a>
                                 
-                          <p-treeTable [value]="files" [columns]="cols" selectionMode="single"  [(selection)]="selectedNode" [scrollable]="true"  scrollHeight="200px"  [resizableColumns]="true">
-                                
-                          
+                          <p-treeTable [value]="files" [columns]="cols" selectionMode="single"  [(selection)]="selectedNode" [scrollable]="true"  scrollHeight="200px"  [resizableColumns]="true" sortField="name" >
                           <ng-template pTemplate="colgroup" let-columns>
                                 <colgroup>
                                     <col *ngFor="let col of columns"  [style.width]="col.width">
                                 </colgroup>
                             </ng-template>
-                          <ng-template pTemplate="header" let-columns>
+                          <ng-template pTemplate="header" let-columns >
                                 <tr>
-                                    <th *ngFor="let col of columns"  ttResizableColumn>
+                                    <th *ngFor="let col of columns"  ttResizableColumn [ttSortableColumn]="col.field">
                                        {{col.header}} 
+                                       <p-treeTableSortIcon [field]="col.field"></p-treeTableSortIcon>
                                     </th>
                                 </tr>
                             </ng-template>
@@ -141,13 +139,13 @@
                           </span>
                           <br>
                       </span>
-                      <span class="references"  *ngIf="isReferencedBy"> 
-                          This data is referenced in :
-                          <span  *ngFor="let refs of record['references']">
-                              <span  *ngIf="refs['refType'] == 'IsReferencedBy'">
-                                  <br> <i style="margin-left:0.5em" class="faa faa-external-link">
-                                  <a class="font14" style="margin-left:0.5em" href={{refs.location}} target="blank">{{ refs.location }}</a>
-                                  </i>
+                      <span class="font14"  *ngIf="isReferencedBy"> 
+                          This data is referenced in : <br>
+                          <span class="reflinks" *ngFor="let refs of record['references']">
+                              <span *ngIf="refs['refType'] == 'IsReferencedBy'">
+                                <i class="faa faa-external-link"> </i>
+                                <a class="font14" href={{refs.location}} target="blank"> {{ refs.location }}></a>
+                               
                               </span>
                           </span>
                       </span>
