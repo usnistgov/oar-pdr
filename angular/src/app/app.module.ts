@@ -7,10 +7,11 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { HttpClientModule } from '@angular/common/http'; 
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { Collaspe } from './landing/collapseDirective/collapse.directive';
-import { TreeModule, FieldsetModule, DialogModule } from 'primeng/primeng';
+import { TreeModule, FieldsetModule, DialogModule, OverlayPanelModule } from 'primeng/primeng';
 import { MenuModule } from 'primeng/menu';
 import { TreeTableModule } from 'primeng/treetable';
 import { ButtonModule } from 'primeng/button';
+
 import { AppComponent } from './app.component';
 import { AppRoutingModule } from './app-routing.module';
 import { LandingComponent } from './landing/landing.component';
@@ -33,7 +34,9 @@ import { CartService } from "./datacart/cart.service";
 import { AppShellNoRenderDirective } from './directives/app-shell-no-render.directive';
 import { AppShellRenderDirective } from './directives/app-shell-render.directive';
 
-
+/**
+ * Initialize the configs for backend services
+ */
 const appInitializerFn = (appConfig: AppConfig) => {
   return () => {
     return appConfig.loadAppConfig();
@@ -54,7 +57,7 @@ const appInitializerFn = (appConfig: AppConfig) => {
     FormsModule, ReactiveFormsModule,
     AppRoutingModule, HttpClientModule,
     CommonModule, SharedModule, BrowserAnimationsModule, FormsModule,
-    TreeTableModule, TreeModule,MenuModule, FieldsetModule,DialogModule,
+    TreeTableModule, TreeModule,MenuModule, FieldsetModule,DialogModule,OverlayPanelModule,
     ButtonModule,
     NgbModule.forRoot()
   ],

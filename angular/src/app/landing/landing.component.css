@@ -194,7 +194,7 @@
 }
 
 :host /deep/ .ui-treetable-tbody{
-  background-color: #E4F2FC;
+  /* background-color: #E4F2FC; */
   font-family: sans-serif;
   font-size: 14px;
 }

@@ -1,10 +1,12 @@
+
 <h3 id="description" name="desscription"><b>Description</b></h3><br> 
-<!-- <i *ngIf="loginuser" style="float:right" class="faa faa-edit"></i> -->
 <div contenteditable="true" id="recordDescription" class="well welldesc">
     <p  *ngFor="let topic of record['description']; let i =index">
         {{ record["description"][i] }}
     </p>
 </div>
+
+
       
 <div *ngIf="checkTopics()">
     <strong contenteditable="{{editContent}}" >Research Topics:</strong>
@@ -47,15 +49,16 @@
                   </div> 
                   <div *ngIf="files.length != 0">        
                       <br>
-                      <!-- <div class="ui-g">
-                          <div style="padding: 0" class="ui-g-12 ui-md-12 ui-lg-12 ui-sm-12"> -->
-                            <span><b>Files</b> </span>   
+                           <span><b>Files</b> </span>   
                             <span>
-                                <a href="{{distdownload}}" class="faa faa-file-archive-o" style="color:#1E6BA1; margin-left:0.5em; " title="Download All Files" ></a>
+                                <a href="{{distdownload}}" class="faa faa-file-archive-o" 
+                                style="color:#1E6BA1; margin-left:0.5em; " title="Download All Files" ></a>
                             </span>
-                                <a href="javascript:;" (click)="addFilesToCart()" class="faa faa-cart-plus " style="margin-left:0.5em; color:#1E6BA1;" title="Add All files to datacart" ></a>
-                                
-                          <p-treeTable [value]="files" [columns]="cols" selectionMode="single"  [(selection)]="selectedNode" [scrollable]="true"  scrollHeight="200px"  [resizableColumns]="true" sortField="name" >
+                                <a href="javascript:;" (click)="addFilesToCart()" class="faa faa-cart-plus "
+                                 style="margin-left:0.5em; color:#1E6BA1;" title="Add All files to datacart" ></a>
+                                 <span class="font8" style="margin-left:0.5em; color:gray;">Click on the file/row in the table below to view more details.</span>
+                                 <span class="font10" style="margin-left:0.5em; color:gray; float: right"> Total No. files: {{ files.length }} </span> 
+                          <p-treeTable [value]="files" [columns]="cols" selectionMode="single"    [resizableColumns]="true" sortField="name" >
                           <ng-template pTemplate="colgroup" let-columns>
                                 <colgroup>
                                     <col *ngFor="let col of columns"  [style.width]="col.width">
@@ -70,11 +73,12 @@
                                 </tr>
                             </ng-template>
                           <ng-template pTemplate="body" let-rowNode let-rowData="rowData"  let-columns="columns">
-                              <tr [ttSelectableRow]="rowNode"> 
-                                   <!-- (click)="onNodeSelect($event, rowData)" -->
+                              <tr [ttSelectableRow]="rowNode" (click)="openDetails($event,rowNode,op3)" #dt> 
+                                  
                                   <td>
                                       <p-treeTableToggler [rowNode]="rowNode"></p-treeTableToggler>
-                                      {{rowData.name}}
+                                     <a (click)="openDetails($event,rowNode,op3)"> {{rowData.name}} </a>
+                                      
                                   </td>
                                   
                                   <td>{{rowData.mediatype}}</td>
@@ -92,7 +96,7 @@
                               </tr>            
                           </ng-template>
                          
-                          <ng-template pTemplate="summary">
+                          <!-- <ng-template pTemplate="summary">
                                 <div class="filecard">
                                     <div class="ui-g filesection">
                                         <div class="ui-g-12 ui-md-12 ui-lg-12 ui-sm-10">
@@ -100,27 +104,24 @@
                                             <span class="textstyle1">Selected File </span><br>
                                             <span class="font14">{{selectedNode ? selectedNode.data.name : 'none'}}</span>
                                             </span>
-                                            <!-- <span class="font10">Path: <b></b></span> -->
+                                           
                                             <span class="font8"> <br><b>Type:</b>
                                                 <span class="textstyle1">{{ selectedNode ? selectedNode.data.mediatype : 'Not Available'}} </span>
                                             </span>
                                             <span class="font8" style="margin-left: 2.5rem">Size: 
                                                 <span class="textstyle1">{{ selectedNode ? selectedNode.data.size : 'Not Specified'}} </span>
                                             </span>
-                                        <!-- </div>
-                                        <div class="ui-g-12 ui-md-12 ui-lg-12 ui-sm-12"> -->
+                                      
                                            <br><span class="font10"><b>Description:</b> </span>
                                            <div class="well filedesc" >
                                                 {{ selectedNode ? selectedNode.data.description : 'Not Available'}} 
                                             </div>
-                                        <!-- <span class="font10"><b>Topic Keyword:</b></span> -->
-                                  <!-- <br> -->
-                                  <!-- <span class="font10"><b>Collection Metadata:</b></span> -->
+                                        
                                 </div>
                               </div>
                             </div>
                                
-                          </ng-template>
+                          </ng-template> -->
                       </p-treeTable>
                           </div>
                          
@@ -150,3 +151,31 @@
                           </span>
                       </span>
                   </div>
+                  <p-overlayPanel #op3 [appendTo]="dt" [showCloseIcon]="true">
+                        <span *ngIf="selectedNode">                      
+                            <div class="filecard">
+                                    <div class="ui-g filesection">
+                                        <div class="ui-g-12 ui-md-12 ui-lg-12 ui-sm-10">
+                                            <span>
+                                            <span class="textstyle1">Selected File </span><br>
+                                            <span class="font14">{{selectedNode ? selectedNode.data.name : 'none'}}</span>
+                                            </span>
+                                           
+                                            <span class="font8"> <br><b>Type:</b>
+                                                <span class="textstyle1">{{ selectedNode ? selectedNode.data.mediatype : 'Not Available'}} </span>
+                                            </span>
+                                            <span class="font8" style="margin-left: 2.5rem">Size: 
+                                                <span class="textstyle1">{{ selectedNode ? selectedNode.data.size : 'Not Specified'}} </span>
+                                            </span>
+                                      
+                                           <br><span class="font10"><b>Description:</b> </span>
+                                           <div class="well filedesc" >
+                                                {{ selectedNode ? selectedNode.data.description : 'Not Available'}} 
+                                            </div>                                        
+                                </div>
+                              </div>
+                            </div>  
+                            <!-- <span class="font14">{{selectedNode ? selectedNode.name : 'none'}}</span> -->
+                        </span>
+                
+                  </p-overlayPanel>

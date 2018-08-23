@@ -232,12 +232,14 @@ export class CartService {
    * Will persist the product to local storage
    **/
   addDataToCart(data: Data) : void {
+    
     // product id , quantity
     let cartMap = this.getCart();
 
     // if we dont have  any cart history, create a empty cart
     if (!this._storage.getItem('cart')) {
       let emptyMap: { [key: string]: number; } = {};
+
       this.setCart(emptyMap);
       let cartMap = this.getCart();
       // if not, set default value

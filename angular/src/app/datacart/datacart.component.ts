@@ -134,11 +134,15 @@ export class DatacartComponent implements OnInit, OnDestroy {
         }
       }
     }
+
+    // if(params.keys.length !== 0){
       var randomnumber = Math.floor(Math.random() * (this.maximum - this.minimum + 1)) + this.minimum;
 
       var downloadFileName = "download" + randomnumber + ".zip";
       this["showDownloadFileSpinner"+randomnumber] = true;
       this.displayFiles.push({key: downloadFileName, value: this["showDownloadFileSpinner"+randomnumber]});
+      
+
       this.downloadFile(params).subscribe(blob => {
           saveAs(blob, downloadFileName);
           this.showSpinner = false;
@@ -149,12 +153,12 @@ export class DatacartComponent implements OnInit, OnDestroy {
               }
           },1000);
       });
-
+    
       for (let selData of this.selectedData) {
           if (selData.data['filePath'] != null) {
               if (selData.data['filePath'].split(".").length > 1) {
-                  console.log("resId" + selData.data['resId']);
-                  console.log("filepath" + selData.data['filePath'])
+                  console.log("resId ::: " + selData.data['resId']);
+                  console.log("filepath :::" + selData.data['filePath'])
                   this.cartService.updateCartItemDownloadStatus(selData.data['id'],'downloaded');
               }
           }
@@ -172,7 +176,7 @@ export class DatacartComponent implements OnInit, OnDestroy {
 
       this.selectedData.length = 0;
       this.dataFileCount();
-
+    // }
   }
 
   /**
@@ -383,7 +387,7 @@ export class DatacartComponent implements OnInit, OnDestroy {
                 };
                 parentObj.children = [];
                 for (let fields of arrayList[key]) {
-                    //console.log("file path" + fields.data.filePath);
+                   
                     let fpath = fields.data.filePath.split("/");
                     if (fpath.length > 0) {
                         let child2: TreeNode = {};
@@ -392,9 +396,13 @@ export class DatacartComponent implements OnInit, OnDestroy {
                         let folderExists:boolean = false;
                         let folder = null;
                         for (let path in fpath) {
+                            //console.log("##$%$%$ path path:" +fpath[path]);
+                            /// Added this code to avoid the issue of extra file layers in the datacart
+                            if(fpath[path] !== ""){
                             child2 = this.createDataCartChildrenTree(fpath[path],fields.data.id,resId,key,fields.data.downloadURL,fields.data.filePath,fields.data.downloadedStatus);
                             parent.children.push(child2);
-                            parent = child2;
+                            
+                            parent = child2;}
                         }
                     }
                 }
@@ -460,7 +468,9 @@ export class DatacartComponent implements OnInit, OnDestroy {
                 'resFilePath' : resFilePath,
                 'downloadedStatus' : downloadedStatus
             }
+            
         };
+       
         child1.children = [];
         return child1;
     }

@@ -3,6 +3,9 @@ import { HttpClient } from '@angular/common/http';
 import { TreeNode} from 'primeng/api';
 import { CartService} from '../../datacart/cart.service';
 import { Data} from '../../datacart/data';
+import {OverlayPanelModule} from 'primeng/overlaypanel';
+import { OverlayPanel} from 'primeng/overlaypanel';
+import {DialogModule} from 'primeng/dialog';
 
 @Component({
   moduleId: module.id,
@@ -120,7 +123,13 @@ checkReferences(){
     this.accessUrls = Array.from(this.accessPages.values());
  }
  
-
+ openDetails(event,selectedNode: TreeNode, overlaypanel: OverlayPanel) {
+    //this.selectedNode = selectedNode;
+    var node = JSON.parse(JSON.stringify(selectedNode));
+    this.selectedNode = node.node;
+    console.log(this.selectedNode.data.name);
+    overlaypanel.toggle(event);
+}
  ngOnInit(){
     this.cdr.detectChanges();
     this.files  =<TreeNode[]>this.files[0].data;
@@ -206,6 +215,13 @@ addtoCart(fileName:string,fileSize:number,fileFormat:string,
      this.cartService.watchAddAllFilesCart().subscribe(value => {
      this.addAllFileSpinner = value;
      });
+ }
+
+ display: boolean = false;
+
+ showDialog(selectedNode: TreeNode) {
+     this.selectedNode = selectedNode;
+     this.display = true;
  }
 
  
