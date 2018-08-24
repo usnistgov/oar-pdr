@@ -73,7 +73,7 @@
                                 </tr>
                             </ng-template>
                           <ng-template pTemplate="body" let-rowNode let-rowData="rowData"  let-columns="columns">
-                              <tr [ttSelectableRow]="rowNode" (click)="openDetails($event,rowNode,op3)" #dt> 
+                              <tr [ttSelectableRow]="rowNode" (click)="openDetails($event,rowNode,op3)"> 
                                   
                                   <td>
                                       <p-treeTableToggler [rowNode]="rowNode"></p-treeTableToggler>
@@ -151,7 +151,7 @@
                           </span>
                       </span>
                   </div>
-                  <p-overlayPanel #op3 [appendTo]="dt" [showCloseIcon]="true">
+                  <p-overlayPanel #op3  [showCloseIcon]="true">
                         <span *ngIf="selectedNode">                      
                             <div class="filecard">
                                     <div class="ui-g filesection">
