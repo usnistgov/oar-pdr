@@ -27,6 +27,13 @@ git submodule update --init
 
 See oar-metadata/README.md for a list of its prerequisites.
 
+In addition or oar-metadata, this package has the following
+third-party packages as prerequisites:
+
+* multibag v0.4 or later
+* bagit v1.6.X
+* fs v2.X.X
+
 As an alternative to explicitly installing prerequisites to run
 the tests, the `docker` directory contains scripts for building a
 Docker container with these installed.  Running the `docker/run.sh`
