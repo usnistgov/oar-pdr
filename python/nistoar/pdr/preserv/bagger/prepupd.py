@@ -326,7 +326,7 @@ class UpdatePrepper(object):
             shutil.rmtree(datadir)
         os.mkdir(datadir)
 
-        for file in "bag-info.txt manifest-sha256.txt tagmanifest-sha256.txt".split():
+        for file in "bagit.txt bag-info.txt manifest-sha256.txt tagmanifest-sha256.txt".split():
             file = os.path.join(mdbag, file)
             if os.path.exists(file):
                 os.remove(file)

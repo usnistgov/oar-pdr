@@ -264,8 +264,8 @@ class TestMultibagSIPHandler(test.TestCase):
 
             with open(os.path.join(bagdir,"multibag","member-bags.tsv")) as fd:
                 members = [l.strip().split('\t')[0] for l in fd.readlines()]
-            self.assertEqual(members, [self.midasid+".1_0.mbag0_4-0",
-                                       self.midasid+".1_1_0.mbag0_4-1" ])
+            self.assertEqual(members, [ self.midasid+".1_0.mbag0_4-0",
+                                        self.midasid+".1_1_0.mbag0_4-1" ])
             
         finally:
             if os.path.exists(destzip):

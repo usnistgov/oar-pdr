@@ -1,7 +1,7 @@
 """
 Tools for building a NIST Preservation bags
 """
-from __future__ import print_function
+from __future__ import print_function, absolute_import
 import os, errno, logging, re, json, pkg_resources, textwrap, datetime
 import pynoid as noid
 from shutil import copy as filecopy, rmtree
@@ -22,6 +22,8 @@ from ...config import load_from_file, merge_config
 from .bag import NISTBag
 from .exceptions import BadBagRequest
 from .validate.nist import NISTAIPValidator
+
+from multibag import open_headbag
 
 NORM=15  # Log Level for recording normal activity
 logging.addLevelName(NORM, "NORMAL")
@@ -816,13 +818,13 @@ class BagBuilder(PreservationSystem):
         if trim:
             self.trim_metadata_folders()
 
+        self.ensure_bagit_ver()
         self.write_data_manifest(finalcfg.get('confirm_checksums', False))
         self.write_mbag_files()
         # write_ore_file
         # write_pidmapping_file
         self.write_about_file()
         # write_premis_file
-        self.write_bagit_ver()
         self.ensure_baginfo()
 
         # this file was used to assist when this bag is an update on an
@@ -953,6 +955,12 @@ class BagBuilder(PreservationSystem):
             raise BagWriteError("Problem writing about.txt file: " + str(ex),
                                 cause=ex)
 
+    def ensure_bagit_ver(self):
+        """
+        ensure that the bag's bagit.txt file exists
+        """
+        if not os.path.exists(os.path.join(self.bagdir, "bagit.txt")):
+            self.write_bagit_ver()
 
     def write_bagit_ver(self):
         """
@@ -969,65 +977,44 @@ class BagBuilder(PreservationSystem):
         except OSError, ex:
             raise BagWriteError("Error writing bagit.txt: "+str(ex), cause=ex)
 
-    def write_mbag_files(self):
+    def write_mbag_files(self, overwrite=False):
         """
-        write out tag files for the MultiBag BagIt profile assuming a single 
-        bagfile.
+        write out tag files for the MultiBag BagIt profile.  
         """
-        if not self._bag:
-            self.ensure_bagdir()
+        self.ensure_bagit_ver()
 
-        if not self._mbtagdir:
-            # get the desired name of the multibag tag directory; first
-            # check a value already written to the bag-info.txt file; if
-            # not there, get it from the configuration (default: 'multibag')
-            self._mbtagdir = self._bag.get_baginfo() \
-                                      .get('Multibag-Tag-Directory',
-                                           self.cfg.get('multibag-tag-dir',
-                                                        'multibag'))
-            
-        tagdir = os.path.join(self.bagdir, self._mbtagdir)
-        if not os.path.exists(tagdir):
-            try:
-                os.makedirs(tagdir)
-            except OSError, ex:
-                raise BagWriteError("Failed create Multibag tag directory: "+
-                                    tagdir + ": " + str(e), cause=ex)
+        # Use the head bag interface provided by the external multibag package
+        # Note that previously saved data (i.e. cached from previously
+        # published version) will be retained.
+        hbag = open_headbag(self.bagdir)
 
-        baseurl = self.cfg.get('bag-download-url')
-        if baseurl and not baseurl.endswith('/'):
-            baseurl += '/'
+        # append the bag we're building to the member bag list and save
+        url = self.cfg.get('bag-download-url')
+        if url:
+            if not url.endswith('/'):
+                url += '/'
+            url += self.bagname
+        hbag.add_member_bag(self.bagname, url)
+        hbag.save_member_bags()
 
-        # write the member-bags.tsv file
-        tagfile = os.path.join(tagdir, "member-bags.tsv")
-        try:
-            with open(tagfile, 'w') as fd:
-                fd.write(self.bagname)
-                if baseurl:
-                    fd.write('\t'+baseurl+self.bagname)
-                fd.write('\n')
-
-            # write the file-lookup.tsv file
-            tagfile = os.path.join(tagdir, "file-lookup.tsv")
-            fmt = "{0}\t{1}\n"
-            with open(tagfile, 'w') as fd:
-                for bf in self._bag.iter_data_files():
-                    fd.write(fmt.format(os.path.join("data", bf), self.bagname))
-
-                fd.write(fmt.format(os.path.join("metadata", "pod.json"),
-                                    self.bagname))
-                fd.write(fmt.format(os.path.join("metadata", "nerdm.json"),
-                                    self.bagname))
-
-                for bf in self._bag.iter_data_files():
-                    nerdf = os.path.join("metadata", bf, "nerdm.json")
-                    if os.path.exists(os.path.join(self.bagdir, nerdf)):
-                        fd.write(fmt.format(nerdf, self.bagname))
-
-        except OSError, ex:
-            raise BagWriteError("Failed to write tag file: "+tagfile+
-                                ": "+str(e), cause=ex)
-
+        # update the file lookup with the contents of this new bag
+        for dir, sdirs, files in os.walk(self._bag.data_dir):
+            dir = dir[len(self.bagdir)+1:]
+            for f in files:
+                f = os.path.join(dir, f)
+                f = "/".join(f.split(os.sep))
+                hbag.add_file_lookup(f, self.bagname)
+        for dir, sdirs, files in os.walk(self._bag.metadata_dir):
+            dir = dir[len(self.bagdir)+1:]
+            for f in files:
+                f = os.path.join(dir, f)
+                f = "/".join(f.split(os.sep))
+                hbag.add_file_lookup(f, self.bagname)
+        for f in "preserv.log ore.txt premis.xml".split():
+            if hbag.exists(f):
+                hbag.add_file_lookup(f, self.bagname)
+        hbag.save_file_lookup()
+        
     def ensure_baginfo(self, overwrite=False):
         """
         ensure that a complete bag-info.txt file is written out to the bag.

@@ -925,6 +925,11 @@ class TestBuilder(test.TestCase):
             self.assertIn(prop, data)
 
     def test_write_mbag_files(self):
+        podfile = os.path.join(datadir, "_pod.json")
+        self.bag.add_ds_pod(podfile, convert=True, savefilemd=False)
+        self.assertTrue(os.path.exists(self.bag.pod_file()))
+        self.assertTrue(os.path.exists(self.bag.nerdm_file_for('')))
+
         manfile = os.path.join(self.bag.bagdir, "manifest-sha256.txt")
         datafiles = [ "trial1.json", "trial2.json", 
                       os.path.join("trial3", "trial3a.json") ]
