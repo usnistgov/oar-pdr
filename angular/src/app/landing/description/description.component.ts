@@ -37,6 +37,7 @@ export class DescriptionComponent {
  addFileStatus:boolean = false;
  selectedNode : TreeNode;
  cols: any[];
+ fileNode: TreeNode;
  
 //  onNodeSelect(event, sdata){
 //      alert("Node select ::"+sdata.name);
@@ -123,11 +124,9 @@ checkReferences(){
     this.accessUrls = Array.from(this.accessPages.values());
  }
  
- openDetails(event,selectedNode: TreeNode, overlaypanel: OverlayPanel) {
-    //this.selectedNode = selectedNode;
-    var node = JSON.parse(JSON.stringify(selectedNode));
-    this.selectedNode = node.node;
-    console.log("TEST Here:"+this.selectedNode.data.name);
+ openDetails(event,fileNode: TreeNode, overlaypanel: OverlayPanel) {
+    //console.log(JSON.stringify(fileNode));
+    this.fileNode = fileNode;
     overlaypanel.toggle(event);
 }
  ngOnInit(){
@@ -139,7 +138,7 @@ checkReferences(){
         { field: 'size', header: 'Size', width: '8%' },
         { field: 'download', header: 'Download', width: '12%' },
     ];
-    this.selectedNode = this.files[0];
+    //this.selectedNode = this.files[0];
  }
  ngOnChanges(){
     this.checkAccesspages();
@@ -219,10 +218,10 @@ addtoCart(fileName:string,fileSize:number,fileFormat:string,
 
  display: boolean = false;
 
- showDialog(selectedNode: TreeNode) {
-     this.selectedNode = selectedNode;
-     this.display = true;
- }
+//  showDialog(selectedNode: TreeNode) {
+//      this.selectedNode = selectedNode;
+//      this.display = true;
+//  }
 
  
 }

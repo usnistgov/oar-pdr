@@ -316,25 +316,45 @@ updateMenu(){
     const tree = [];
     // This example uses the underscore.js library.
     var i = 0;
-    
+    var tempfiletest = "";
     paths.forEach((path) => { 
+      // console.log(path['@type']);
+      
+      if(path['@type'].includes("nrdp:Subcollection")){
+        // console.log("TESt:"+path.filepath);
+        tempfiletest = path.filepath;
+      } 
       if(i != 0 && path.filepath) 
       {
-         path.filepath = "/"+path.filepath;
-       
+        if(!path.filepath.startsWith("/"))
+          path.filepath = "/"+path.filepath;
         const pathParts = path.filepath.split('/');
         pathParts.shift(); // Remove first blank element from the parts array.
         let currentLevel = tree; // initialize currentLevel to root
         pathParts.forEach((part) => { 
-          // check to see if the path already exists.
-          const existingPath = currentLevel.filter(level => level.data.name === part);
           
-          if (existingPath.length > 0) {
-            // The path to this item was already in the tree, so don't add it again.
-            // Set the current level to this path's children
-           
-            currentLevel = existingPath[0].children;
-          } else {
+        // check to see if the path already exists.
+        const existingPath = currentLevel.filter(level => level.data.name === part);
+        if (existingPath.length > 0) {
+          
+          // The path to this item was already in the tree, so don't add it again.
+          // Set the current level to this path's children  
+          currentLevel = existingPath[0].children;
+        } else {
+            
+            if(part.match(tempfiletest)){
+              const newPart = {
+                data : {
+                  name : part,
+                  mediatype: "",
+                  size: "",
+                  downloadUrl: "",
+                  description: "" 
+                },children: []
+              };
+              currentLevel.push(newPart);
+              currentLevel = newPart.children;
+            }else{
             const newPart = {
               data : {
                 name : part,
@@ -346,7 +366,7 @@ updateMenu(){
             };
             currentLevel.push(newPart);
             currentLevel = newPart.children;
-          }
+          }}
         });
       }
       i= i+1;

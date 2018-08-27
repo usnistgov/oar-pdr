@@ -57,7 +57,7 @@
                                 <a href="javascript:;" (click)="addFilesToCart()" class="faa faa-cart-plus "
                                  style="margin-left:0.5em; color:#1E6BA1;" title="Add All files to datacart" ></a>
                                  <span class="font8" style="margin-left:0.5em; color:gray;">Click on the file/row in the table below to view more details.</span>
-                                 <span class="font10" style="margin-left:0.5em; color:gray; float: right"> Total No. files: {{ files.length }} </span> 
+                                 <span class="font10" style="margin-left:0.5em; color:gray; float: right"> Total No. files: {{ record['components'].length }} </span> 
                           <p-treeTable [value]="files" [columns]="cols" selectionMode="single"    [resizableColumns]="true" sortField="name" >
                           <ng-template pTemplate="colgroup" let-columns>
                                 <colgroup>
@@ -73,11 +73,11 @@
                                 </tr>
                             </ng-template>
                           <ng-template pTemplate="body" let-rowNode let-rowData="rowData"  let-columns="columns">
-                              <tr [ttSelectableRow]="rowNode" (click)="openDetails($event,rowNode,op3)"> 
+                              <tr [ttSelectableRow]="rowNode" (click)="openDetails($event,rowData,op3)"> 
                                   
                                   <td>
                                       <p-treeTableToggler [rowNode]="rowNode"></p-treeTableToggler>
-                                     <a (click)="openDetails($event,rowNode,op3)"> {{rowData.name}} </a>
+                                     <a (click)="openDetails($event,rowData,op3)"> {{rowData.name}} </a>
                                       
                                   </td>
                                   
@@ -152,25 +152,25 @@
                       </span>
                   </div>
                   <p-overlayPanel #op3  [showCloseIcon]="true">
-                        <span *ngIf="selectedNode">                      
+                        <span >                      
                             <div class="filecard">
                                     <div class="ui-g filesection">
                                         <div class="ui-g-12 ui-md-12 ui-lg-12 ui-sm-10">
                                             <span>
                                             <span class="textstyle1">Selected File </span><br>
-                                            <span class="font14">{{selectedNode ? selectedNode.data.name : 'none'}}</span>
+                                            <span class="font14">{{ fileNode ? fileNode.name : '' }}</span>
                                             </span>
                                            
                                             <span class="font8"> <br><b>Type:</b>
-                                                <span class="textstyle1">{{ selectedNode ? selectedNode.data.mediatype : 'Not Available'}} </span>
+                                                <span class="textstyle1">{{ fileNode ? fileNode.mediatype : 'Not Available'}} </span>
                                             </span>
                                             <span class="font8" style="margin-left: 2.5rem">Size: 
-                                                <span class="textstyle1">{{ selectedNode ? selectedNode.data.size : 'Not Specified'}} </span>
+                                                <span class="textstyle1">{{ fileNode ? fileNode.size : 'Not Specified'}} </span>
                                             </span>
                                       
                                            <br><span class="font10"><b>Description:</b> </span>
                                            <div class="well filedesc" >
-                                                {{ selectedNode ? selectedNode.data.description : 'Not Available'}} 
+                                                {{ selectedNode ? fileNode.description : 'Not Available'}} 
                                             </div>                                        
                                 </div>
                               </div>
