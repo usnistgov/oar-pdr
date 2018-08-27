@@ -8,7 +8,7 @@ import 'rxjs/add/operator/map';
 import { Subscription } from 'rxjs/Subscription';
 import { environment } from '../../environments/environment';
 import { AppConfig } from '../shared/config-service/config.service';
-import { ResComponents, DataHierarchy } from "./datacomponents.component";
+// import { ResComponents, DataHierarchy } from "./datacomponents.component";
 
 interface reference {
   refType? : string,
@@ -117,9 +117,6 @@ export class LandingComponent implements OnInit {
    * Creates an instance of the SearchPanel
    *
    */
-
-
-   
   constructor(private route: ActivatedRoute, private el: ElementRef, 
               private titleService: Title, private appConfig : AppConfig, private router: Router
               ) {
@@ -154,7 +151,7 @@ export class LandingComponent implements OnInit {
     this.type = this.record['@type'];
     this.titleService.setTitle(this.record['title']);
     // this.meta.addTag({ "testdescription": this.record['description'] });
-    let dh = new ResComponents(this.record['components']).dataHierarchy();
+    //let dh = new ResComponents(this.record['components']).dataHierarchy();
     this.createNewDataHierarchy();
     if(this.record['doi'] !== undefined && this.record['doi'] !== "" )
       this.isDOI = true;
@@ -173,12 +170,12 @@ export class LandingComponent implements OnInit {
   /**
    * If search is unsuccessful push the error message
    */
-  onError(error:any) {
-    this.exception = (<any>error).ex;
-    this.errorMsg = (<any>error).message;
-    this.status = (<any>error).httpStatus;
-    //this.msgs.push({severity:'error', summary:this.errorMsg + ':', detail:this.status + ' - ' + this.exception});
-  }
+onError(error:any) {
+  this.exception = (<any>error).ex;
+  this.errorMsg = (<any>error).message;
+  this.status = (<any>error).httpStatus;
+  //this.msgs.push({severity:'error', summary:this.errorMsg + ':', detail:this.status + ' - ' + this.exception});
+}
 
 
 viewmetadata(){

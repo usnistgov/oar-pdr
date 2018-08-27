@@ -36,11 +36,11 @@ export class DescriptionComponent {
  selectedNodes: TreeNode[];
  addFileStatus:boolean = false;
  selectedNode : TreeNode;
-
  cols: any[];
- onNodeSelect(event, sdata){
-     alert("Node select ::"+sdata.name);
- }
+ 
+//  onNodeSelect(event, sdata){
+//      alert("Node select ::"+sdata.name);
+//  }
 // nodeSelect(event) {
 //     var test = this.getComponentDetails(this.record["components"],event.node.data);
 //     let i =0;
@@ -127,7 +127,7 @@ checkReferences(){
     //this.selectedNode = selectedNode;
     var node = JSON.parse(JSON.stringify(selectedNode));
     this.selectedNode = node.node;
-    console.log(this.selectedNode.data.name);
+    console.log("TEST Here:"+this.selectedNode.data.name);
     overlaypanel.toggle(event);
 }
  ngOnInit(){
