@@ -92,7 +92,7 @@
                       </div>
                       <div>
                           <span  *ngIf="isId">Identifier: </span>
-                          <span *ngIf="isDOI" ><i>  <a  class="font14" href="http://doi.org/{{record.doi.split(':')[1]}}">{{record.doi}}</a></i></span>
+                          <span *ngIf="isDOI" ><i>  <a  class="font14" href="https://doi.org/{{record.doi.split(':')[1]}}">{{record.doi}}</a></i></span>
                           <span  *ngIf="!isDOI"><i> <a class="font14" href="{{pdrApi}}{{record['@id']}}">{{record["@id"]}}</a></i> </span>
                           <span *ngIf="checkReferences()"><br>
                           <span>Described in article: </span>

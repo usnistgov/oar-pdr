@@ -355,6 +355,48 @@ updateMenu(){
    return tree;
   }
 
+  visibleHistory = false;
+  expandHistory() {
+    this.visibleHistory = ! this.visibleHistory;
+    return this.visibleHistory;
+  }
+   /**
+   * create an HTML rendering of a version string for a NERDm VersionRelease.  
+   * If there is information available for linking to version's home page, a 
+   * link is returned.  Otherwise, just the version is returned (prepended 
+   * with a "v").
+   */
+  renderRelVer(relinfo, thisversion) {
+      if (thisversion == relinfo.version)
+          return "v"+relinfo.version;
+      return this.renderRelAsLink(relinfo, "v"+relinfo.version);
+  }
+   renderRelAsLink(relinfo, linktext) {
+      let out : string = linktext;
+      if (relinfo.location) 
+          out = '<a href="'+relinfo.location+'">'+linktext+'</a>';
+      else if (relinfo.refid) {
+          if (relinfo.refid.startsWith("doi:"))
+              out = '<a href="https://doi.org/'+relinfo.refid.substring(4)+'">'+linktext+'</a>';
+          else if (relinfo.refid.startsWith("ark:/88434/"))
+              out = '<a href="https://data.nist.gov/od/id/'+relinfo.refid+'">'+linktext+'</a>';
+      }
+      return out;
+  }
+   /**
+   * return a rendering of a release's ID.  If possible, the ID will be 
+   * rendered as a link.  If there is no ID, a link with the text "View..." 
+   * is returned. 
+   */
+  renderRelId(relinfo, thisversion) {
+      if (thisversion == relinfo.version)
+          return "this version";
+       let id : string = "View...";
+      if (relinfo.refid) id = relinfo.refid;
+      return this.renderRelAsLink(relinfo, id);
+  }
+
+
   clicked = false;
   expandClick(){
     this.clicked = !this.clicked;
