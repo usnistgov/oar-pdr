@@ -152,8 +152,7 @@
                       </span>
                   </div>
                   <p-overlayPanel #op3  [showCloseIcon]="true">
-                        <span >                      
-                            <div class="filecard">
+                            <div *ngIf="isNodeSelected" class="filecard">
                                     <div class="ui-g filesection">
                                         <div class="ui-g-12 ui-md-12 ui-lg-12 ui-sm-10">
                                             <span>
@@ -175,7 +174,5 @@
                                 </div>
                               </div>
                             </div>  
-                            <!-- <span class="font14">{{selectedNode ? selectedNode.name : 'none'}}</span> -->
-                        </span>
-                
+                    
                   </p-overlayPanel>

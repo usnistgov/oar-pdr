@@ -6,6 +6,7 @@ import { Data} from '../../datacart/data';
 import {OverlayPanelModule} from 'primeng/overlaypanel';
 import { OverlayPanel} from 'primeng/overlaypanel';
 import {DialogModule} from 'primeng/dialog';
+import { CommonModule } from "@angular/common";
 
 @Component({
   moduleId: module.id,
@@ -124,8 +125,10 @@ checkReferences(){
     this.accessUrls = Array.from(this.accessPages.values());
  }
  
+ isNodeSelected: boolean = false;
  openDetails(event,fileNode: TreeNode, overlaypanel: OverlayPanel) {
     //console.log(JSON.stringify(fileNode));
+    this.isNodeSelected = true;
     this.fileNode = fileNode;
     overlaypanel.toggle(event);
 }
@@ -139,6 +142,12 @@ checkReferences(){
         { field: 'download', header: 'Download', width: '12%' },
     ];
     //this.selectedNode = this.files[0];
+    this.fileNode = {"data":{
+        "name":"",
+        "size":"",
+        "mediatype":"",
+        "description":""
+    }}
  }
  ngOnChanges(){
     this.checkAccesspages();
