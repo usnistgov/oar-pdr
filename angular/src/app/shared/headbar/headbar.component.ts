@@ -1,4 +1,3 @@
-
 import { CartService } from '../../datacart/cart.service';
 import { CartEntity } from '../../datacart/cart.entity';
 import { Component, ElementRef } from '@angular/core';
@@ -7,9 +6,7 @@ import { AppConfig } from '../config-service/config.service';
 /**
  * This class represents the headbar component.
  */
-
 declare var Ultima: any;
-
 
 @Component({
   moduleId: module.id,
@@ -27,10 +24,7 @@ export class HeadbarComponent {
   SDPAPI : string = "";
   landingService : string = "";
   internalBadge: boolean = false;
-
   cartEntities: CartEntity[];
-  
-
   loginuser = false;
   cartLength : number;
 

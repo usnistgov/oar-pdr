@@ -6,173 +6,129 @@
     </p>
 </div>
 
-
-      
 <div *ngIf="checkTopics()">
     <strong contenteditable="{{editContent}}" >Research Topics:</strong>
-                  <span class="font14"  *ngFor="let topic of record['topic']; let i =index">
-                      {{ topic.tag }}
-                      <span *ngIf="i < record['topic'].length-1 ">,</span>
-                  </span>
+    <span class="font14"  *ngFor="let topic of record['topic']; let i =index">
+        {{ topic.tag }}
+        <span *ngIf="i < record['topic'].length-1 ">,</span>
+    </span>
+</div>
+<div *ngIf="checkKeywords()">
+    <b>Subject Keywords:</b>
+    <span class="font14" contenteditable="true"  *ngFor="let keyword of record['keyword']; let i =index">
+        {{ keyword }}<span *ngIf="i < record['keyword'].length-1 ">,</span>
+    </span> 
+</div>
+<br>
                   
-                  </div>
-                  <div *ngIf="checkKeywords()">
-                      <b>Subject Keywords:</b>
-                      <span class="font14" contenteditable="true"  *ngFor="let keyword of record['keyword']; let i =index">
-                          {{ keyword }}<span *ngIf="i < record['keyword'].length-1 ">,</span>
-                      </span> 
-                      
-                  </div>
-                  <br>
-                  
-                  <div>
-                   <h3 id="dataAccess"><b>Data Access</b></h3><br> 
-                   <span style="margin-left:0em" *ngIf="record['accessLevel'] === 'public'"><i class="faa faa-globe"></i> 
-                      These data are public. 
-                   </span>
-                   <span *ngIf="record['accessLevel'] === 'restricted public'"><i class="faa faa-lock"></i> 
-                      This data has access restrictions. 
-                   </span>   
-                   <br>
-                   <span *ngIf="record['rights']"> 
-                      The access rights are {{ record.rights }} 
-                      <br>
-                   </span>
-                   
-                   <span style="margin-left:0em" *ngIf="isAccessPage">Data is available via the following locations: 
-                   <br>   
-                      <span style="padding-left:2.75em" *ngFor="let title of accessTitles; let i =index">
-                          <i class="faa faa-external-link"> <a href="{{accessUrls[i]}}">{{title}}</a> 
-                          </i><br>
-                      </span>
-                   </span>
-                  </div> 
-                  <div *ngIf="files.length != 0">        
-                      <br>
-                           <span><b>Files</b> </span>   
-                            <span>
-                                <a href="{{distdownload}}" class="faa faa-file-archive-o" 
-                                style="color:#1E6BA1; margin-left:0.5em; " title="Download All Files" ></a>
+<div>
+    <h3 id="dataAccess"><b>Data Access</b></h3><br> 
+    <span style="margin-left:0em" *ngIf="record['accessLevel'] === 'public'">
+        <i class="faa faa-globe"></i> These data are public. 
+    </span>
+    <span *ngIf="record['accessLevel'] === 'restricted public'">
+        <i class="faa faa-lock"></i>This data has access restrictions. 
+    </span>   
+    <br>
+    <span *ngIf="record['rights']"> 
+        The access rights are {{ record.rights }} <br>
+    </span>
+    <span style="margin-left:0em" *ngIf="isAccessPage">
+        Data is available via the following locations: 
+        <br>   
+        <span style="padding-left:2.75em" *ngFor="let title of accessTitles; let i =index">
+            <i class="faa faa-external-link"> <a href="{{accessUrls[i]}}">{{title}}</a></i><br>
+        </span>
+    </span>
+</div> 
+<div *ngIf="files.length != 0">        
+    <br>
+    <span><b>Files</b> </span>   
+    <span>
+        <a href="{{distdownload}}" class="faa faa-file-archive-o" style="color:#1E6BA1; margin-left:0.5em; " title="Download All Files" ></a>
+    </span>
+    <a href="javascript:;" (click)="addFilesToCart()" class="faa faa-cart-plus " style="margin-left:0.5em; color:#1E6BA1;" title="Add All files to datacart" ></a>
+    <span class="font8" style="margin-left:0.5em; color:gray;">Click on the file/row in the table below to view more details.</span>
+    <span class="font10" style="margin-left:0.5em; color:gray; float: right"> Total No. files: {{ record['components'].length }} </span> 
+    <p-treeTable [value]="files" [columns]="cols" selectionMode="single"    [resizableColumns]="true" sortField="name" >
+    <ng-template pTemplate="colgroup" let-columns>
+        <colgroup>
+            <col *ngFor="let col of columns"  [style.width]="col.width">
+        </colgroup>
+    </ng-template>
+    <ng-template pTemplate="header" let-columns >
+        <tr>
+            <th *ngFor="let col of columns"  ttResizableColumn [ttSortableColumn]="col.field">
+                {{col.header}} 
+                <p-treeTableSortIcon [field]="col.field"></p-treeTableSortIcon>
+            </th>
+        </tr>
+        </ng-template>
+            <ng-template pTemplate="body" let-rowNode let-rowData="rowData"  let-columns="columns">
+               <tr [ttSelectableRow]="rowNode" (click)="openDetails($event,rowData,op3)"> 
+                   <td><p-treeTableToggler [rowNode]="rowNode"></p-treeTableToggler>
+                        <a (click)="openDetails($event,rowData,op3)"> {{rowData.name}} </a>
+                    </td>
+                    <td>{{rowData.mediatype}}</td>
+                    <td>{{rowData.size}}</td>
+                    <td>
+                        <span *ngIf=" rowData.downloadUrl ">
+                            <a href="{{rowData.downloadUrl}}"><i class="faa faa-download" aria-hidden="true"></i></a>
+                            <span [hidden] ="!addFileSpinner" style="float:right;">
+                            <p-progressSpinner [style]="{width: '20px', height: '20px', float: 'right'}" ></p-progressSpinner>
                             </span>
-                                <a href="javascript:;" (click)="addFilesToCart()" class="faa faa-cart-plus "
-                                 style="margin-left:0.5em; color:#1E6BA1;" title="Add All files to datacart" ></a>
-                                 <span class="font8" style="margin-left:0.5em; color:gray;">Click on the file/row in the table below to view more details.</span>
-                                 <span class="font10" style="margin-left:0.5em; color:gray; float: right"> Total No. files: {{ record['components'].length }} </span> 
-                          <p-treeTable [value]="files" [columns]="cols" selectionMode="single"    [resizableColumns]="true" sortField="name" >
-                          <ng-template pTemplate="colgroup" let-columns>
-                                <colgroup>
-                                    <col *ngFor="let col of columns"  [style.width]="col.width">
-                                </colgroup>
-                            </ng-template>
-                          <ng-template pTemplate="header" let-columns >
-                                <tr>
-                                    <th *ngFor="let col of columns"  ttResizableColumn [ttSortableColumn]="col.field">
-                                       {{col.header}} 
-                                       <p-treeTableSortIcon [field]="col.field"></p-treeTableSortIcon>
-                                    </th>
-                                </tr>
-                            </ng-template>
-                          <ng-template pTemplate="body" let-rowNode let-rowData="rowData"  let-columns="columns">
-                              <tr [ttSelectableRow]="rowNode" (click)="openDetails($event,rowData,op3)"> 
-                                  
-                                  <td>
-                                      <p-treeTableToggler [rowNode]="rowNode"></p-treeTableToggler>
-                                     <a (click)="openDetails($event,rowData,op3)"> {{rowData.name}} </a>
-                                      
-                                  </td>
-                                  
-                                  <td>{{rowData.mediatype}}</td>
-                                  <td>{{rowData.size}}</td>
-
-                                  <td>
-                                    <span *ngIf=" rowData.downloadUrl ">
-                                    <a href="{{rowData.downloadUrl}}"><i class="faa faa-download" aria-hidden="true"></i></a>
-                                    <span [hidden] ="!addFileSpinner" style="float:right;">
-                                        <p-progressSpinner [style]="{width: '20px', height: '20px', float: 'right'}" ></p-progressSpinner>
-                                    </span>
-                                    <a style="position:relative; margin-left:0.5em;"  class="faa faa-cart-plus " (click)="addtoCart(rowData.name, rowData.size, rowData.mediatype, rowData.downloadUrl)" ></a>                                
-                                   </span> 
-                                </td>
-                              </tr>            
-                          </ng-template>
+                            <a style="position:relative; margin-left:0.5em;"  class="faa faa-cart-plus " (click)="addtoCart(rowData.name, rowData.size, rowData.mediatype, rowData.downloadUrl)" ></a>                                
+                        </span> 
+                    </td>
+                </tr>            
+            </ng-template>
+        </p-treeTable>
+    </div>
                          
-                          <!-- <ng-template pTemplate="summary">
-                                <div class="filecard">
-                                    <div class="ui-g filesection">
-                                        <div class="ui-g-12 ui-md-12 ui-lg-12 ui-sm-10">
-                                            <span>
-                                            <span class="textstyle1">Selected File </span><br>
-                                            <span class="font14">{{selectedNode ? selectedNode.data.name : 'none'}}</span>
-                                            </span>
-                                           
-                                            <span class="font8"> <br><b>Type:</b>
-                                                <span class="textstyle1">{{ selectedNode ? selectedNode.data.mediatype : 'Not Available'}} </span>
-                                            </span>
-                                            <span class="font8" style="margin-left: 2.5rem">Size: 
-                                                <span class="textstyle1">{{ selectedNode ? selectedNode.data.size : 'Not Specified'}} </span>
-                                            </span>
-                                      
-                                           <br><span class="font10"><b>Description:</b> </span>
-                                           <div class="well filedesc" >
-                                                {{ selectedNode ? selectedNode.data.description : 'Not Available'}} 
-                                            </div>
-                                        
-                                </div>
-                              </div>
-                            </div>
-                               
-                          </ng-template> -->
-                      </p-treeTable>
-                          </div>
-                         
-                  <br>
-                  <div *ngIf="checkReferences()">
-                   <h3 id="reference" name="reference"><b>References</b></h3><br> 
-                      <span class="font14" style="margin-left:0.5em" *ngIf="isDocumentedBy"> 
-                          This data is discussed in :
-                          <span style="padding-left:2.75em" *ngFor="let refs of record['references']">
-                              <span  *ngIf="refs['refType'] == 'IsDocumentedBy'">
-                                  <br> <i class="faa faa-external-link">
-                                       <a class="references" href={{refs.location}} target="blank">{{ refs.label }}</a>
-                                       </i>
-                              </span>
-                              <br>
-                          </span>
-                          <br>
-                      </span>
-                      <span class="font14"  *ngIf="isReferencedBy"> 
-                          This data is referenced in : <br>
-                          <span class="reflinks" *ngFor="let refs of record['references']">
-                              <span *ngIf="refs['refType'] == 'IsReferencedBy'">
-                                <i class="faa faa-external-link"> </i>
-                                <a class="font14" href={{refs.location}} target="blank"> {{ refs.location }}></a>
-                              </span>
-                              <br>
-                          </span>
-                      </span>
-                  </div>
-                  <p-overlayPanel #op3  [showCloseIcon]="true">
-                            <div *ngIf="isNodeSelected" class="filecard">
-                                    <div class="ui-g filesection">
-                                        <div class="ui-g-12 ui-md-12 ui-lg-12 ui-sm-10">
-                                            <span>
-                                            <span class="textstyle1">Selected File </span><br>
-                                            <span class="font14">{{ fileNode ? fileNode.name : '' }}</span>
-                                            </span>
-                                           
-                                            <span class="font8"> <br><b>Type:</b>
-                                                <span class="textstyle1">{{ fileNode ? fileNode.mediatype : 'Not Available'}} </span>
-                                            </span>
-                                            <span class="font8" style="margin-left: 2.5rem">Size: 
-                                                <span class="textstyle1">{{ fileNode ? fileNode.size : 'Not Specified'}} </span>
-                                            </span>
-                                      
-                                           <br><span class="font10"><b>Description:</b> </span>
-                                           <div class="well filedesc" >
-                                                {{ selectedNode ? fileNode.description : 'Not Available'}} 
-                                            </div>                                        
-                                </div>
-                              </div>
-                            </div>  
-                    
-                  </p-overlayPanel>
+    <br>
+    <div *ngIf="checkReferences()">
+        <h3 id="reference" name="reference"><b>References</b></h3><br> 
+        <span class="font14" style="margin-left:0.5em" *ngIf="isDocumentedBy"> 
+            This data is discussed in :
+            <span style="padding-left:2.75em" *ngFor="let refs of record['references']">
+                <span  *ngIf="refs['refType'] == 'IsDocumentedBy'">
+                    <br> <i class="faa faa-external-link"><a class="references" href={{refs.location}} target="blank">{{ refs.label }}</a></i>
+                </span>
+                <br>
+            </span>
+            <br>
+        </span>
+        <span class="font14"  *ngIf="isReferencedBy"> 
+            This data is referenced in : <br>
+            <span class="reflinks" *ngFor="let refs of record['references']">
+                <span *ngIf="refs['refType'] == 'IsReferencedBy'">
+                    <i class="faa faa-external-link"> </i>
+                    <a class="font14" href={{refs.location}} target="blank"> {{ refs.location }}></a>
+                </span>
+                <br>
+            </span>
+        </span>
+    </div>
+    <p-overlayPanel #op3  [showCloseIcon]="true">
+        <div *ngIf="isNodeSelected" class="filecard">
+            <div class="ui-g filesection">
+                <div class="ui-g-12 ui-md-12 ui-lg-12 ui-sm-10">
+                    <span>
+                        <span class="textstyle1">Selected File </span><br>
+                        <span class="font14">{{ fileNode ? fileNode.name : '' }}</span>
+                    </span>
+                    <span class="font8">
+                        <br><b>Type:</b>
+                        <span class="textstyle1">{{ fileNode ? fileNode.mediatype : 'Not Available'}} </span>
+                    </span>
+                    <span class="font8" style="margin-left: 2.5rem">Size: 
+                        <span class="textstyle1">{{ fileNode ? fileNode.size : 'Not Specified'}} </span>
+                    </span>
+                    <br><span class="font10"><b>Description:</b> </span>
+                    <div class="well filedesc" >
+                        {{ selectedNode ? fileNode.description : 'Not Available'}} 
+                    </div>                                        
+                </div>
+            </div>
+        </div>  
+    </p-overlayPanel>

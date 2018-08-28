@@ -6,11 +6,6 @@ import { SearchService } from './search-service/index';
 import { FootbarComponent } from './footbar/index';
 import { HeadbarComponent } from './headbar/index';
 
-// import { InputTextModule, DropdownModule, ButtonModule, SplitButtonModule, MenubarModule,
-//  PanelModule, DataTableModule, DialogModule, AutoCompleteModule, MultiSelectModule,
-//  PaginatorModule, CalendarModule, TabViewModule,MenuModule } from 'primeng/primeng';
-
-
 /**
  * Do not specify providers for modules that might be imported by a lazy loaded module.
  */
