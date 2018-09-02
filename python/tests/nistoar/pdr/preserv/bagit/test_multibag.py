@@ -73,9 +73,9 @@ def mkbag(dsdir):
 
     # set the Bag-Size
     sz = du(dsdir)
-    line = "Bag-Size: {0}\n".format(sz)
+    line = "Bag-Size: {0} B\n".format(sz)
     sz += len(line)
-    line = "Bag-Size: {0}\n".format(sz)
+    line = "Bag-Size: {0} B\n".format(sz)
     with open(os.path.join(dsdir, "bag-info.txt"), "a") as fd:
         fd.write(line)
 
@@ -172,7 +172,7 @@ class TestMultibagSplitter(test.TestCase):
         }
         self.spltr = multibag.MultibagSplitter(self.bagdir, cfg)
 
-        self.assertFalse( self.spltr.check() )
+        self.assertTrue( self.spltr.check() )
 
         cfg = {
             "max_bag_size": 10000
@@ -180,6 +180,11 @@ class TestMultibagSplitter(test.TestCase):
         self.spltr = multibag.MultibagSplitter(self.bagdir, cfg)
 
         self.assertTrue( self.spltr.check() )
+
+        cfg = { }
+        self.spltr = multibag.MultibagSplitter(self.bagdir, cfg)
+
+        self.assertFalse( self.spltr.check() )
 
     def test_split(self):
         cfg = {

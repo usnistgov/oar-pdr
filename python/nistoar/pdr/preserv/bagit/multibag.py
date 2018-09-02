@@ -9,6 +9,7 @@ from functools import cmp_to_key
 import multibag
 
 from .. import ConfigurationException, StateException, AIPValidationError
+from ... import utils
 from .bag import NISTBag
 
 class MultibagSplitter(object):
@@ -101,21 +102,43 @@ class MultibagSplitter(object):
             raise ConfigurationException("Properties not interpretable as " +
                                          "integers: " + ", ".join(prob))
 
-    def check(self):
+    def check(self, log=None):
         """
         determine if the size of the source bag warrants being split.  The
         bag size is taken from from the Bag-Size info.  
 
         :return boolean:  True if the source bag will be split by split()
         """
-        if self._szoor(self.maxsz) and self._szoor(self.trgsz):
+        if self._szoor(self.maxsz) and self._szoor(self.maxhbsz) and \
+           self._szoor(self.trgsz):
+            if log:
+                log.debug("multibag thresholds prevent splitting: "+
+                          "head bag size=%d max size=%d target size=%d",
+                          self.maxhbsz, self.maxsz, self.trgsz)
             return False
         srcbag = NISTBag(self.srcdir)
         try:
-            sz = int(srcbag.get_baginfo().get('Bag-Size', [-1])[-1])
+            sz = srcbag.get_baginfo().get('Bag-Oxum')
+            if sz:
+                sz = int(sz[-1].split('.')[0])
         except ValueError as e:
+            sz = None
+            if log:
+                val = srcbag.get_baginfo().get('Bag-Oxum','')
+                if val: val = ": "+val[-1]
+                log.warning("'Bag-Oxum' not set as expected in %s%s",
+                            os.path.basename(self.srcdir), val)
             sz = -1
-        if sz > self.maxhbsz:
+
+        if not sz:
+            if log:
+                log.debug("Bag-Oxum value not found in bag-info; calculating...")
+            sz = utils.measure_dir_size(self.srcdir)[0]
+
+        if log:
+            log.debug("Base bag size: %d bytes", sz)
+            
+        if sz > self.maxhbsz or sz > self.maxsz:
             return True
 
         return False
@@ -123,7 +146,7 @@ class MultibagSplitter(object):
     def _szoor(self, sz):
         return sz <= 0
 
-    def split(self, destdir):
+    def split(self, destdir, log=None):
         """
         split the source bag into one or more multibags written to a given 
         directory
@@ -143,6 +166,8 @@ class MultibagSplitter(object):
                 self.srcdir = os.path.join(os.path.dirname(origsrc),
                                            "_" + os.path.basename(origsrc))
                 try:
+                    if os.path.isdir(self.srcdir):
+                        shutil.rmtree(self.srcdir)
                     os.rename(origsrc, self.srcdir)
                 except:
                     self.srcdir = origsrc
@@ -150,9 +175,30 @@ class MultibagSplitter(object):
             else:
                 nameiter.sn += 1
 
+        oldsplre = re.compile(nameiter.base+r'\d+$')
+        needclean = []
+        for b in os.listdir(destdir):
+            bp = os.path.join(destdir, b)
+            if not oldsplre.match(b) or bp == self.srcdir:
+                continue
+            needclean.append(bp)
+        if needclean:
+            if log:
+                if len(needclean) > 1:
+                    log.warning("Removing %d previously existing multibags",
+                                len(needclean))
+                else:
+                    log.warning("Removing previously existing multibag: %s",
+                                os.path.basename(needclean[0]))
+            for mb in needclean:
+                if log:
+                    log.debug("Removing %s...", mb)
+                shutil.rmtree(mb)
+
         try:
             spltr = OARSplitter(self.maxsz, self.trgsz, self.maxhbsz)
-            out = spltr.split(self.srcdir, destdir, nameiter)
+            out = spltr.split(self.srcdir, destdir, nameiter, ['Bag-Oxum'],
+                              logger=log)
         except:
             # error occurred: restore the original name to the source bag
             if os.path.exists(origsrc):
@@ -240,14 +286,16 @@ class MultibagSplitter(object):
                               trunc=True)
         mkr.update_info("1.0")
 
-    def check_and_split(self, destdir):
+    def check_and_split(self, destdir, log=None):
         """
         First check the input source bag to see if it should be split; if so,
         use split() to carry out the split.  Otherwise, call 
         make_single_multibag() to update the source bag's metadata.
         """
-        if self.check():
-            return self.split(destdir)
+        if self.check(log):
+            if log:
+                log.info("Input bag will be split")
+            return self.split(destdir, log=log)
         
         if self.cfg.get('convert_small', False):
             self.make_single_multibag()
