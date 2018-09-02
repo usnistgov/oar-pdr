@@ -79,7 +79,7 @@ class MIDASMetadataBagger(SIPBagger):
     """
 
     def __init__(self, midasid, workdir, reviewdir, uploaddir=None, config={},
-                 minter=None):
+                 minter=None, sipdirname=None):
         """
         Create an SIPBagger to operate on data provided by MIDAS
 
@@ -93,13 +93,19 @@ class MIDASMetadataBagger(SIPBagger):
                                datasets not yet in the review state.
         :param config   dict:  a dictionary providing configuration parameters
         :param minter IDMinter: a minter to use for minting new identifiers.
+        :param sipdirname str: a relative directory name to look for that 
+                               represents the SIP's directory.  If not provided,
+                               the directory is determined based on the provided
+                               MIDAS ID.  
         """
         self.name = midasid
         self.state = 'upload'
         self._indirs = []
 
         # ensure we have at least one readable input directory
-        indirname = _midadid_to_dirname(midasid, log)
+        indirname = sipdirname
+        if not indirname:
+            indirname = _midadid_to_dirname(midasid, log)
 
         for dir in (reviewdir, uploaddir):
             if not dir:
@@ -515,7 +521,7 @@ class PreservationBagger(SIPBagger):
     """
 
     def __init__(self, midasid, bagparent, reviewdir, mddir,
-                 config=None, minter=None):
+                 config=None, minter=None, sipdirname=None):
         """
         Create an SIPBagger to operate on data provided by MIDAS.
 
@@ -530,14 +536,21 @@ class PreservationBagger(SIPBagger):
                                the landing page.
         :param config   dict:  a dictionary providing configuration parameters
         :param minter IDMinter: a minter to use for minting new identifiers.
+        :param sipdirname str: a relative directory name to look for that 
+                               represents the SIP's directory.  If not provided,
+                               the directory is determined based on the provided
+                               MIDAS ID.  
         """
         self.name = midasid
         self.mddir = mddir
         self.minter = minter
         self.reviewdir = reviewdir
 
-        self.indir = os.path.join(self.reviewdir,
-                                  _midadid_to_dirname(midasid, log))
+        indirname = sipdirname
+        if not indirname:
+            indirname = _midadid_to_dirname(midasid, log)
+        self.indir = os.path.join(self.reviewdir, indirname)
+
         if not os.path.exists(self.indir):
             raise SIPDirectoryNotFound(self.indir)
 
@@ -564,6 +577,7 @@ class PreservationBagger(SIPBagger):
 
         if self.cfg.get('relative_to_indir'):
             self.bagparent = os.path.join(self.indir, self.bagparent)
+                
         self.ensure_bag_parent_dir()
 
         self.siplog = log.getChild(self.name[:8]+'...')
@@ -595,8 +609,11 @@ class PreservationBagger(SIPBagger):
         """
         # start by bagging up the metadata.  If this was done before (prior to
         # final preservation time), the previous metadata bag will be updated.
-        mdbagger = MIDASMetadataBagger(self.name, self.mddir, self.reviewdir,
-                                       config=self.cfg, minter=self.minter)
+        parent = os.path.dirname(self.indir)
+        sipdir = os.path.basename(self.indir)
+        mdbagger = MIDASMetadataBagger(self.name, self.mddir, parent,
+                                       config=self.cfg, minter=self.minter,
+                                       sipdirname=sipdir)
 
         if self.prepsvc:
             prepper = self.prepsvc.prepper_for(self.name, log=self.siplog)
@@ -676,14 +693,28 @@ class PreservationBagger(SIPBagger):
             self.bagbldr.add_data_file(dfile, srcpath, True, False)
 
     
-    def make_bag(self):
+    def make_bag(self, lock=True):
         """
         convert the input SIP into a bag ready for preservation.  More 
         specifically, the result will be a bag directory with finalized 
         content, ready for serialization.  
 
+        :param lock bool:   if True (default), acquire a lock before making
+                            the preservation bag.
         :return str:  the path to the finalized bag directory
         """
+        if lock:
+            self.ensure_filelock()
+            with self.lock:
+                return self._make_bag_impl()
+
+        else:
+            return self._make_bag_impl()
+    
+    def _make_bag_impl(self):
+        # this is intended to be called from make_bag(), with or with out
+        # lock on the output bag.
+        
         self.prepare(nodata=False)
 
         finalcfg = self.cfg.get('bag_builder', {}).get('finalize', {})
@@ -694,7 +725,13 @@ class PreservationBagger(SIPBagger):
 
         # rename the bag for a proper version and sequence number
         seq = self._determine_seq()
-        self.bagbldr.rename_bag(self.form_bag_name(self.name, seq, ver))
+        newname = self.form_bag_name(self.name, seq, ver)
+        newdir = os.path.join(self.bagbldr._pdir, newname)
+        if os.path.isdir(newdir):
+            log.warn("Removing previously existing output bag, "+newname)
+            shutil.rmtree(newdir)
+            
+        self.bagbldr.rename_bag(newname)
 
         # write final bag metadata and support files
         self.bagbldr.finalize_bag(finalcfg)

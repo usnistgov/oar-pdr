@@ -1059,7 +1059,7 @@ class TestBuilder(test.TestCase):
                       "National Institute of Standards and Technology\n",
                       lines)
         self.assertIn("Contact-Email: datasupport@nist.gov\n", lines)
-        self.assertIn("Multibag-Version: 0.3\n", lines)
+        self.assertIn("Multibag-Version: 0.4\n", lines)
         self.assertEqual(len([l for l in lines
                                 if "Organization-Address: " in l]), 2)
         self.assertIn("Internal-Sender-Identifier: "+self.bag.bagname+'\n',
@@ -1075,6 +1075,13 @@ class TestBuilder(test.TestCase):
         oxum = [int(n) for n in oxum[0].split(': ')[1].split('.')]
         self.assertEqual(oxum[1], 2)
         self.assertEqual(oxum[0], 2*datafilesz)
+
+        oxum = [l for l in lines if "Bag-Oxum: " in l]
+        self.assertEqual(len(oxum), 1)
+        oxum = [int(n) for n in oxum[0].split(': ')[1].split('.')]
+        self.assertEqual(oxum[1], 14)
+        self.assertEqual(oxum[0], 12594)
+
         bagsz = [l for l in lines if "Bag-Size: " in l]
         self.assertEqual(len(bagsz), 1)
         bagsz = bagsz[0]
@@ -1130,8 +1137,9 @@ class TestBuilder(test.TestCase):
         self.assertIn("Software to", lines[14])
         self.assertIn("More information:", lines[17])
         self.assertIn("https://doi.org/10.18434/", lines[18])
+
             
-    def test_ensure_baginfo(self):
+    def test_ensure_baginfo_fmt(self):
         # prep the test bag
         self.bag.ensure_bagdir()
         with self.assertRaises(bldr.BagProfileError):

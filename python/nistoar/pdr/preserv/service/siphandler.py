@@ -3,7 +3,8 @@ This module provides an abstract interface turning a Submission Information
 Package (SIP) into an Archive Information Package (BagIt bags).  It also 
 includes implementations for different known SIPs
 """
-import os, re, shutil, logging
+from __future__ import print_function
+import os, sys, re, shutil, logging
 from abc import ABCMeta, abstractmethod, abstractproperty
 from collections import OrderedDict
 from copy import deepcopy
@@ -185,13 +186,17 @@ class SIPHandler(object):
         mbcfg = self.cfg.get('multibag', {})
         maxhbsz = mbcfg.get('max_headbag_size', mbcfg.get('max_bag_size'))
         if maxhbsz:
+            log.info("Considering multibagging (max size: %d)", maxhbsz)
             mbspltr = MultibagSplitter(bagdir, mbcfg)
 
             # check the size of the source bag and split it if it exceeds
             # limits.  
-            srcbags = mbspltr.check_and_split(os.path.dirname(bagdir))
+            srcbags = mbspltr.check_and_split(os.path.dirname(bagdir), log)
 
             # TODO: Run NIST validator on output files
+        elif not mbcfg:
+            log.warning("multibag splitting not configured")
+            
 
         self._status.data['user']['bagfiles'] = []
         outfiles = []
@@ -258,7 +263,7 @@ class MIDASSIPHandler(SIPHandler):
     name = "MIDAS-SIP"
 
     def __init__(self, sipid, config, minter=None, serializer=None,
-                 notifier=None):
+                 notifier=None, sipdirname=None):
         """
         Configure the handler to process a specific SIP with a given 
         identifier.  The SIP identifier (together with the type of the 
@@ -278,6 +283,10 @@ class MIDASSIPHandler(SIPHandler):
                              will be used.
         :param notifier NotificationService: the service for pushing alerts
                              to real people.
+        :param sipdirname str: a relative directory name to look for that 
+                               represents the SIP's directory.  If not provided,
+                               the directory is determined based on the provided
+                               MIDAS ID.  
         """
         super(MIDASSIPHandler, self).__init__(sipid, config, minter, serializer,
                                               notifier)
@@ -286,18 +295,21 @@ class MIDASSIPHandler(SIPHandler):
         if workdir and not os.path.exists(workdir):
             os.mkdir(workdir)
 
+        self.cleanparent = False
         isrel = self.cfg.get('bagger',{}).get('relative_to_indir')
         bagparent = self.cfg.get('bagparent_dir')
         if not bagparent:
+            self.cleanparent = True  # we will feel free to delete stuff from
+                                     #   the bagparent
             bagparent = "_preserv"
+            if not isrel:
+                bagparent = sipid + bagparent
         if not os.path.isabs(bagparent):
             if not isrel:
                 if not workdir:
                     raise ConfigurationException("Missing needed config "+
                                                  "property: workdir_dir")
                 bagparent = os.path.join(workdir, bagparent)
-                if not os.path.exists(bagparent):
-                    os.mkdir(bagparent)
 
         self.stagedir = self.cfg.get('staging_dir')
         if not self.stagedir:
@@ -334,7 +346,7 @@ class MIDASSIPHandler(SIPHandler):
         
         self.bagger = PreservationBagger(sipid, bagparent, self.sipparent,
                                          self.mdbagdir, config.get('bagger'),
-                                         self._minter)
+                                         self._minter, sipdirname)
 
         if self.state == status.FORGOTTEN and self._is_preserved():
             self.set_state(status.SUCCESSFUL, 
@@ -411,6 +423,14 @@ class MIDASSIPHandler(SIPHandler):
             raise StateException("{0}: SIP is not ready: {1}".
                                  format(self._sipid, self._status.message),
                                  sys=_sys)
+
+        # If a previous attempt to preserve went wrong, it's possible it's
+        # remnants remain on disk.  If so, we should clean out the directory
+        # before trying again.
+        if self.cleanparent and os.path.isdir(self.bagger.bagparent):
+            log.warning("Cleaning out previous bagging artifacts (%s)",
+                        self.bagger.bagparent)
+            shutil.rmtree(self.bagger.bagparent)
 
         # Create the bag
         self._status.record_progress("Collecting metadata and files")
@@ -528,6 +548,8 @@ class MIDASSIPHandler(SIPHandler):
             except Exception, ex:
                 log.error("Trouble cleaning up serialized bag in staging dir: "+
                           "\n  %s\nReason: %s", f, str(ex))
+
+        log.info("Completed preservation of SIP %s", self.bagger.name)
 
     def _is_preserved(self):
         """

@@ -94,20 +94,33 @@ class SIPBagger(PreservationSystem):
         """
         raise NotImplemented
 
+    def ensure_filelock(self):
+        """
+        if necessary, create a file lock object that can be used to prevent 
+        multiple processes from trying to bag the same SIP simultaneously.
+        The lock object is saved to self.lock.  
+        """
+        if not self.lock:
+            lockfile = self.bagdir + ".lock"
+            self.ensure_bag_parent_dir()
+            self.lock = filelock.FileLock(lockfile)
+
     def prepare(self, nodata=False, lock=True):
         """
         initialize the output working bag directory by calling 
         ensure_preparation().  This operation is wrapped in the acquisition
-        of a file lock.
+        of a file lock to prevent multiple processes from 
+
+        :param nodata bool: if True, do not copy (or link) data files to the
+                            output directory.
+        :param lock bool:   if True (default), acquire a lock before executing
+                            the preparation.
         """
         if lock:
-            if not self.lock:
-                self.ensure_bag_parent_dir()
-                lockfile = self.bagdir + ".lock"
-                self.lock = filelock.FileLock(lockfile)
-            
+            self.ensure_filelock()
             with self.lock:
                 self.ensure_preparation(nodata)
+
         else:
             self.ensure_preparation(nodata)
 

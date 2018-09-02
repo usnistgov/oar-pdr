@@ -13,7 +13,7 @@ from .. import (SIPDirectoryError, SIPDirectoryNotFound,
                 ConfigurationException, StateException, PODError)
 from .exceptions import BagProfileError, BagWriteError
 from .. import PreservationSystem, read_nerd, read_pod, write_json
-from ...utils import build_mime_type_map, checksum_of
+from ...utils import build_mime_type_map, checksum_of, measure_dir_size
 from ....nerdm.exceptions import (NERDError, NERDTypeError)
 from ....nerdm.convert import PODds2Res
 from ....id import PDRMinter
@@ -1058,10 +1058,12 @@ format(nerdm['title'])
         oxum = self._measure_oxum(self.bagdir)
         size = self._format_bytes(oxum[0])
         oxum[0] += len("Bag-Size: {0} ".format(size))
+        oxum[0] += len("Bag-Oxum: {0}.{1} ".format(oxum[0], oxum[1]))
         size = self._format_bytes(oxum[0])
-        szdata = {
-            'Bag-Size': size
-        }
+        szdata = OrderedDict([
+            ('Bag-Oxum', "{0}.{1}".format(*oxum)),
+            ('Bag-Size', size),
+        ])
         self.write_baginfo_data(szdata, overwrite=False)
 
     def update_head_version(self, baginfo, version):
@@ -1098,13 +1100,7 @@ format(nerdm['title'])
                     baginfo['Multibag-Head-Deprecates'].append( val )
                 
     def _measure_oxum(self, rootdir):
-        size = 0
-        count = 0
-        for root, subdirs, files in os.walk(rootdir):
-            count += len(files)
-            for f in files:
-                size += os.stat(os.path.join(root,f)).st_size
-        return [size, count]
+        return measure_dir_size(rootdir)
 
     def _format_bytes(self, nbytes):
         prefs = ["", "k", "M", "G", "T"]
