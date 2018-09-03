@@ -44,6 +44,8 @@ class BagDistribClient(object):
     def list_versions(self):
         """
         return a list of all available versions for our AIP
+
+        This accesses the following resource from the service: <base>/<aipid>/_v
         """
         rurl = "/".join([self.op,"_v"])
         return self.svc.get_json(rurl)
@@ -79,6 +81,10 @@ class BagDistribClient(object):
         """
         return a list of descriptions of all bags available for a given version 
         of the AIP
+
+        This accesses the following resource from the service: 
+        <base>/<aipid>/_v/<version>
+
         :param str version:   the desired version.  If not provided, the 
                               list will be for the latest version.
         """
@@ -92,6 +98,9 @@ class BagDistribClient(object):
         return a list of the available head bags for a given version of the AIP.
         Each head bag in the returned list represents a different serialized 
         form or format of the head bag's contents.  
+
+        This accesses the following resource from the service: 
+        <base>/<aipid>/_v/<version>/head
 
         :param str version:   the desired version.  If not provided, the 
                               name for the latest version will be returned.
@@ -117,6 +126,9 @@ class BagDistribClient(object):
         return an open file-like object for reading the serialized bag with 
         the given name.
 
+        This accesses the following resource from the service: 
+        <base>/<aipid>/<bagfilename>
+
         :param str bagname:  the name of the bag as given by any of the listing
                              methods in this client.  
         """
@@ -127,6 +139,13 @@ class BagDistribClient(object):
         """
         save the serialized bag to a specified output directory.  The output 
         filename will match the given bagname
+
+        This accesses the following resource from the service: 
+        <base>/<aipid>/<bagfilename>
+
+        :param str bagname:  the name of the bag as given by any of the listing
+                             methods in this client.  
+        :param dir str:  the directory to save the serialized bag to
         """
         rurl = "/".join([self.op, bagname])
         self.svc.retrieve_file(rurl, os.path.join(outdir, bagname))
