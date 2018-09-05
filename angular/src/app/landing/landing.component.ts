@@ -216,7 +216,10 @@ updateMenu(){
   var license = this.createMenuItem("Fair Use Statement",  "faa faa-external-link","",this.record['license'] ) ;
   var citation = this.createMenuItem('Citation', "faa faa-angle-double-right",(event)=>{ this.getCitation(); this.showDialog(); },'');
   var metaItem = this.createMenuItem("View Metadata","faa faa-bars",(event)=>{
-    this.metadata = true; this.similarResources =false;},''); 
+    this.metadata = true;
+    this.similarResources =false;
+    this.router.navigate(['/od/id/', this.record.ediid],{fragment:'metadata'});
+  },'');
     itemsMenu.push(metaItem);
     itemsMenu.push(metadata);   
 
