@@ -50,3 +50,5 @@ distribute-*.tar.gz
 
 #angular
 */node_modules
+*/.idea**
+
