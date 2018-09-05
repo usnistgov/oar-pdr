@@ -127,11 +127,14 @@ checkReferences(){
  
  isNodeSelected: boolean = false;
  openDetails(event,fileNode: TreeNode, overlaypanel: OverlayPanel) {
-    //console.log(JSON.stringify(fileNode));
+    // console.log(JSON.stringify(fileNode));
     this.isNodeSelected = true;
     this.fileNode = fileNode;
-    overlaypanel.toggle(event);
-}
+    overlaypanel.hide();
+     setTimeout(() => {
+         overlaypanel.show(event);
+     },100);
+ }
  ngOnInit(){
     this.cdr.detectChanges();
     this.files  =<TreeNode[]>this.files[0].data;
