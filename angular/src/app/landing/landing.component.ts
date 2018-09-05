@@ -251,20 +251,22 @@ updateMenu(){
     this.citeString = "";
     let date =  new Date(); 
       if(this.record['authors'] !==  null && this.record['authors'] !==  undefined){
-        for(let author of this.record['authors']) { 
-          if(author.familyName !== null && author.familyName !== undefined) 
-            this.citeString += author.familyName +' ';
-          if(author.givenName !== null && author.givenName !== undefined) 
-            this.citeString +=  author.givenName+' ';
-          if(author.middleName !== null && author.middleName !== undefined) 
-            this.citeString += author.middleName+', ' ;
-        }
+         for( let i=0; i < this.record['authors'].length; i++){
+             let author = this.record['authors'][i];
+             if(author.familyName !== null && author.familyName !== undefined)
+                 this.citeString += author.familyName +' ';
+             if(author.middleName !== null && author.middleName !== undefined)
+                 this.citeString += author.middleName+' ' ;
+             if(author.givenName !== null && author.givenName !== undefined)
+                 this.citeString +=  author.givenName+', ';
+         }
+
       } else if(this.record['contactPoint']) {
           if(this.record['contactPoint'].fn !== null && this.record['contactPoint'].fn !== undefined)
             this.citeString += this.record['contactPoint'].fn;
       }
       if(this.record['issued'] !==  null && this.record['issued'] !==  undefined){
-        this.citeString += " ("+ _.split(this.record['issued'],"-")[0]+") ";}
+        this.citeString += " ("+ _.split(this.record['issued'],"-")[0]+")";}
       if(this.citeString !== "") this.citeString +=", ";
       if(this.record['title']!== null && this.record['title']!== undefined )
         this.citeString += this.record['title'] +", ";
@@ -273,7 +275,7 @@ updateMenu(){
           this.citeString += this.record['publisher'].name;
       }
       if(this.isDOI)   this.citeString += ", "+ this.record['doi'];
-      this.citeString += " (Accessed: "+ date.getFullYear()+"-"+(date.getMonth()+1)+"-"+date.getDate()+")";
+      this.citeString += " (Accessed "+ date.getFullYear()+"-"+(date.getMonth()+1)+"-"+date.getDate()+")";
   }
 
   /**
