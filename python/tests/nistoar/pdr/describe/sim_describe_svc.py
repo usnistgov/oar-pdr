@@ -23,10 +23,10 @@ class SimArchive(object):
     def loadlu(self):
         for rec in [f for f in os.listdir(self.dir) if f.endswith(".json")]:
             try:
-                with open(os.path.join(self.dir,f)) as fd:
+                with open(os.path.join(self.dir,rec)) as fd:
                     data = json.load(fd, object_pairs_hook=OrderedDict)
                 if "ediid" in data:
-                    self.lu[data["ediid"]] = f[:-1*len(".json")]
+                    self.lu[data["ediid"]] = rec[:-1*len(".json")]
             except:
                 pass
     def ediid_to_id(self, ediid):
