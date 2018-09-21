@@ -70,7 +70,7 @@ class HeadBagCacher(object):
         if not hinfo:
             # map id,version to bagfile using the remote service
             try:
-                hinfo = bagcli.describe_head_for_version(version)[0]
+                hinfo = bagcli.describe_head_for_version(version)
             except distrib.DistribResourceNotFound as ex:
                 return None
 

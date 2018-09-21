@@ -58,7 +58,7 @@ class SimDistClient(object):
 
     def get_json(self, relurl):
         parts = relurl.split("/")
-        if len(parts) != 5 or parts[-1] != "head":
+        if len(parts) != 5 or parts[-1] != "_head":
             raise RuntimeError("Unexpected call to simulated distrib service: "+
                                relurl)
         out = { "hashtype": "sha256", "id": parts[0] }
@@ -75,7 +75,7 @@ class SimDistClient(object):
         
         out.update({'name': name, 'version': ver, 'size': os.stat(loc).st_size,
                     'hash': checksum_of(loc) })
-        return [out]
+        return out
         
 
     def retrieve_file(self, relurl, filepath):
@@ -125,17 +125,17 @@ class TestSimServices(test.TestCase):
         hash = SimDistClient.fill_cache(self.cachedir)
         cli = SimDistClient(self.cachedir)
 
-        data = cli.get_json("ABCDEFG/_bags/_v/latest/head")
-        self.assertEqual(data, [{"id": "ABCDEFG", "hashtype": "sha256",
-                                 "name": "ABCDEFG.2.mbag0_4-4.zip",
-                                 "version": "2", "size": 9715,
-                                 "hash": hash }])
+        data = cli.get_json("ABCDEFG/_aip/_v/latest/_head")
+        self.assertEqual(data, {"id": "ABCDEFG", "hashtype": "sha256",
+                                "name": "ABCDEFG.2.mbag0_4-4.zip",
+                                "version": "2", "size": 9715,
+                                "hash": hash })
 
-        data = cli.get_json("ABCDEFG/_bags/_v/1/head")
-        self.assertEqual(data, [{"id": "ABCDEFG", "hashtype": "sha256",
-                                 "name": "ABCDEFG.1.mbag0_4-2.zip",
-                                 "version": "1", "size": 9715,
-                                 "hash": hash}])
+        data = cli.get_json("ABCDEFG/_aip/_v/1/_head")
+        self.assertEqual(data, {"id": "ABCDEFG", "hashtype": "sha256",
+                                "name": "ABCDEFG.1.mbag0_4-2.zip",
+                                "version": "1", "size": 9715,
+                                "hash": hash})
 
         dest = os.path.join(self.cachedir, "local")
         os.mkdir(dest)

@@ -78,16 +78,16 @@ class TestRESTServiceClient(test.TestCase):
         self.cli = dcli.RESTServiceClient(self.base)
 
     def test_get_json(self):
-        data = self.cli.get_json("pdr1010/_bags/_v")
+        data = self.cli.get_json("pdr1010/_aip/_v")
         self.assertEqual(data, ["1"])
 
         with self.assertRaises(dcli.DistribResourceNotFound):
-            self.cli.get_json("goob/_bags/_v")
+            self.cli.get_json("goob/_aip/_v")
 
     def test_get_stream(self):
         out = os.path.join(tmpdir(), "bag.zip")
 
-        wd = self.cli.get_stream("/pdr1010/_bags/pdr1010.mbag0_3-2.zip")
+        wd = self.cli.get_stream("/_aip/pdr1010.mbag0_3-2.zip")
         with open(out, "wb") as fd:
             buf = wd.read(5000000)
             while buf:
@@ -101,13 +101,13 @@ class TestRESTServiceClient(test.TestCase):
         self.assertEqual(refcs, dlcs)
 
         with self.assertRaises(dcli.DistribResourceNotFound):
-            wd = self.cli.get_stream("/pdr1010/_bags/goob.zip")
+            wd = self.cli.get_stream("/_aip/goob.zip")
             wd.close()
                 
     def test_retrieve_file(self):
         out = os.path.join(tmpdir(), "bag.zip")
 
-        wd = self.cli.retrieve_file("/pdr1010/_bags/pdr1010.mbag0_3-2.zip",out)
+        wd = self.cli.retrieve_file("/_aip/pdr1010.mbag0_3-2.zip",out)
 
         self.assertTrue(os.path.isfile(out))
         dlcs = checksum_of(out)
@@ -115,7 +115,7 @@ class TestRESTServiceClient(test.TestCase):
         self.assertEqual(refcs, dlcs)
                 
         with self.assertRaises(dcli.DistribResourceNotFound):
-            self.cli.retrieve_file("/pdr1010/_bags/goob.zip", out)
+            self.cli.retrieve_file("/_aip/goob.zip", out)
         
 
 

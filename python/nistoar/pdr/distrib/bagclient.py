@@ -39,7 +39,7 @@ class BagDistribClient(object):
             svcclient = RESTServiceClient(str(svcclient))
         self.id = aipid
         self.svc = svcclient
-        self.op = "/".join([self.id, "_bags"])
+        self.op = "/".join([self.id, "_aip"])
 
     def list_versions(self):
         """
@@ -95,31 +95,27 @@ class BagDistribClient(object):
 
     def describe_head_for_version(self, version=None):
         """
-        return a list of the available head bags for a given version of the AIP.
-        Each head bag in the returned list represents a different serialized 
-        form or format of the head bag's contents.  
+        return a description of the head bag for a given version of the AIP.
 
         This accesses the following resource from the service: 
-        <base>/<aipid>/_v/<version>/head
+        <base>/<aipid>/_aip/_v/<version>/_head
 
         :param str version:   the desired version.  If not provided, the 
                               name for the latest version will be returned.
         """
         if not version:
             version = "latest"
-        rurl = "/".join([self.op,"_v",version,"head"])
+        rurl = "/".join([self.op,"_v",version,"_head"])
         return self.svc.get_json(rurl)
 
     def head_for_version(self, version=None):
         """
-        return a list of the available head bags for a given version of the AIP.
-        Each head bag in the returned list represents a different serialized 
-        form or format of the head bag's contents.  
+        return the name of the head bag for a given version of the AIP.
 
         :param str version:   the desired version.  If not provided, the 
                               name for the latest version will be returned.
         """
-        return [f['name'] for f in self.describe_head_for_version(version)]
+        return self.describe_head_for_version(version)['name']
     
     def stream_bag(self, bagname):
         """
@@ -127,12 +123,12 @@ class BagDistribClient(object):
         the given name.
 
         This accesses the following resource from the service: 
-        <base>/<aipid>/<bagfilename>
+        <base>/_aip/<bagfilename>
 
         :param str bagname:  the name of the bag as given by any of the listing
                              methods in this client.  
         """
-        rurl = "/".join([self.op, bagname])
+        rurl = "/".join(["_aip", bagname])
         return self.svc.get_stream(rurl)
 
     def save_bag(self, bagname, outdir):
@@ -141,12 +137,12 @@ class BagDistribClient(object):
         filename will match the given bagname
 
         This accesses the following resource from the service: 
-        <base>/<aipid>/<bagfilename>
+        <base>/_aip/<bagfilename>
 
         :param str bagname:  the name of the bag as given by any of the listing
                              methods in this client.  
         :param dir str:  the directory to save the serialized bag to
         """
-        rurl = "/".join([self.op, bagname])
+        rurl = "/".join(["_aip", bagname])
         self.svc.retrieve_file(rurl, os.path.join(outdir, bagname))
 

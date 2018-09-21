@@ -123,12 +123,15 @@ class SimArchive(object):
 
     def head_for(self, aid, vers=None):
         if aid not in self._aips:
-            return []
+            return None
         if not vers:
             vers = 'latest'
         if vers == 'latest':
             vers = sorted(self.versions_for(aid), key=lambda v: v.split('.'))[-1]
-        return self.list_for_version(aid, vers)[-1:]
+        out = self.list_for_version(aid, vers)
+        if len(out) == 0:
+            return None
+        return out[-1]
         
 
 class SimDistrib(object):
@@ -201,6 +204,18 @@ class SimDistribHandler(object):
             self.end_headers()
             return [out]
 
+        elif path.startswith("_aip/"):
+            # requesting a bag file
+            path = path[len("_aip/"):].strip('/')
+            filepath = os.path.join(self.arch.dir, path)
+            if os.path.isfile(filepath):
+                self.set_response(200, "Bag file found")
+                self.add_header('Content-Type', "application/zip")
+                self.end_headers()
+                return self.iter_file(filepath)
+            else:
+                return self.send_error(404, "bag file does not exist")
+
         elif '/' in path:
             parts = path.split('/', 1)
             aid = parts[0]
@@ -214,6 +229,7 @@ class SimDistribHandler(object):
         else: 
             return self.send_error(404, "resource does not exist")
 
+        # path-info is now captured as aid and path
         if aid not in self.arch._aips:
             return self.send_error(404, "resource does not exist")
         
@@ -223,7 +239,7 @@ class SimDistribHandler(object):
             self.end_headers()
             return ['["'+aid+'"]']
         
-        elif path == "_bags":
+        elif path == "_aip":
             try:
                 out = json.dumps(self.arch.list_bags(aid)) + '\n'
             except Exception, ex:
@@ -234,7 +250,25 @@ class SimDistribHandler(object):
             self.end_headers()
             return [out]
 
-        elif path == "_bags/_v":
+        elif path == "_aip/_head":
+            try:
+                out = self.arch.head_for(aid)
+                if out:
+                    out = json.dumps(out) + '\n'
+            except Exception, ex:
+                print("Failed to create JSON output for head bag, aid={0}: {2}"
+                      .format(aid, vers, str(ex)))
+                return self.send_error(500, "Internal error")
+
+            if out:
+                self.set_response(200, "Head bags for ID/vers")
+                self.add_header('Content-Type', 'application/json')
+                self.end_headers()
+                return [out]
+            else:
+                return self.send_error(404, "resource does not exist")
+
+        elif path == "_aip/_v":
             try:
                 out = json.dumps(self.arch.versions_for(aid)) + '\n'
             except Exception, ex:
@@ -245,19 +279,8 @@ class SimDistribHandler(object):
             self.end_headers()
             return [out]
             
-        elif path.startswith("_bags/_v/"):
-            path = path[len("_bags/_v/"):]
-
-        elif path.startswith("_bags/"):
-            path = path[len("_bags/"):].strip('/')
-            filepath = os.path.join(self.arch.dir, path)
-            if os.path.isfile(filepath):
-                self.set_response(200, "Bag file found")
-                self.add_header('Content-Type', "application/zip")
-                self.end_headers()
-                return self.iter_file(filepath)
-            else:
-                return self.send_error(404, "bag file does not exist")
+        elif path.startswith("_aip/_v/"):
+            path = path[len("_aip/_v/"):]
 
         else:
             return self.send_error(404, "resource does not exist")
@@ -278,6 +301,8 @@ class SimDistribHandler(object):
                 if out:
                     out = json.dumps(out) + '\n'
             except Exception, ex:
+                print("Failed to create JSON list for aid={0} vers={1}: {2}"
+                      .format(aid, vers, str(ex)))
                 return self.send_error(500, "Internal error")
 
             if out:
@@ -288,12 +313,14 @@ class SimDistribHandler(object):
             else:
                 return self.send_error(404, "resource does not exist")
 
-        elif vers and path == "head":
+        elif vers and path == "_head":
             try:
                 out = self.arch.head_for(aid, vers)
                 if out:
                     out = json.dumps(out) + '\n'
             except Exception, ex:
+                print("Failed create JSON output for aid={0} vers={1}: {2}"
+                      .format(aid, vers, str(ex)))
                 return self.send_error(500, "Internal error")
 
             if out:
