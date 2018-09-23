@@ -139,13 +139,15 @@ class TestPrePubMetadataService(test.TestCase):
             'review_dir':      self.revdir,
             'upload_dir':      self.upldir,
             'id_registry_dir': self.workdir,
-            'headbag_cache':   self.pubcache,
-            'distrib_service': {
-                'service_endpoint': "http://localhost:9091/"
-            },
-            'metadata_service': {
-                'service_endpoint': "http://localhost:9092/"
-            },
+            'bagger': {
+                'headbag_cache':   self.pubcache,
+                'distrib_service': {
+                    'service_endpoint': "http://localhost:9091/"
+                },
+                'metadata_service': {
+                    'service_endpoint': "http://localhost:9092/"
+                },
+            }
         }
         self.srv = serv.PrePubMetadataService(self.config)
         self.bagdir = os.path.join(self.bagparent, self.midasid)

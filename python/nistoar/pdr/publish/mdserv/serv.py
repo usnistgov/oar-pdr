@@ -119,10 +119,11 @@ class PrePubMetadataService(PublishSystem):
         self.mimetypes = build_mime_type_map(mimefiles)
 
         self.prepsvc = None
-        if 'headbag_cache' in self.cfg:
+        bgrcfg = self.cfg.get('bagger')
+        if bgrcfg and 'headbag_cache' in bgrcfg:
             # this service helps pull in information about previously published
             # versions.  
-            self.prepsvc = UpdatePrepService(self.cfg)
+            self.prepsvc = UpdatePrepService(bgrcfg)
         
 
     def _create_minter(self, parentdir):
