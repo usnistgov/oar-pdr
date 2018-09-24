@@ -5,7 +5,7 @@ import { Component, Input, Pipe,PipeTransform } from '@angular/core';
 @Component({
   selector: 'metadata-detail',
   template: `
-    <div class="ui-g">
+    <div class="ui-g" #metadata id="metadata">
      <div class = "ui-g-12 ui-md-12 ui-lg-12 ui-sm-12" >
        <h3 id="metadata" name="metadata"><b>Metadata</b></h3>
         <span style="">

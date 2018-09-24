@@ -71,6 +71,12 @@
                           </strong>..
                           <i style="cursor: pointer;" class="faa" [ngClass]="{'faa-plus-square-o': !clickContact, 'faa-minus-square-o': clickContact}"
                           aria-hidden="true" (click)="closeContent = !closeContent; clickContact=expandContact();"></i>
+
+                          <a [(href)]="record.landingPage" target="_blank" style="margin-left:50%">
+                              <button  pButton
+                                      type="button" style="background-color: #277E2F;font-weight: bold;" icon="faa faa-external-link" label="Visit Home Page"></button>
+                          </a>
+
                           <div [collapse]="!closeContent">
                               <div class="card customcard">
                                   <span class="" *ngIf="record.contactPoint.fn">
@@ -147,14 +153,14 @@
                       </div>
                   </div>
                   <div *ngIf="record.length !== 0">
-                      <p-dialog  class="citationDialog" [closable]="false" [(visible)]="display" modal="modal" width="350" height="350" responsive="true" #citeDialog>
+                      <p-dialog  class="citationDialog" [closable]="false" [(visible)]="display" modal="modal" width="600" height="350" responsive="true" #citeDialog>
                           <p-header> Citation
                               <button style="position:relative; float:right; width: 1.5em; height: 1.5em; background-color:#1E6BA1; " type="button" pButton icon="faa faa-close" (click)="closeDialog()"></button>
                           </p-header>
                           <span>Copy the recommended text to cite this resource:</span> <br><br>
                           <p contenteditable="false" style="font-size: 14px;" >{{ citeString }}</p>
                           <br>
-                          <a href="https://www.nist.gov/director/licensing">See also NIST Citation Recommendations</a>
+                          <a target="citationsRecommendation" href="https://www.nist.gov/director/copyright-fair-use-and-licensing-statements-srd-data-and-software#citations">See also NIST Citation Recommendations</a>
                       </p-dialog>
                   </div>
               </div>
