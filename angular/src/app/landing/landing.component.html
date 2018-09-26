@@ -72,7 +72,7 @@
                           <i style="cursor: pointer;" class="faa" [ngClass]="{'faa-plus-square-o': !clickContact, 'faa-minus-square-o': clickContact}"
                           aria-hidden="true" (click)="closeContent = !closeContent; clickContact=expandContact();"></i>
 
-                          <a [(href)]="record.landingPage" target="_blank" style="margin-left:50%">
+                          <a [(href)]="record.landingPage" target="_blank" style="margin-left:50%; float: right;">
                               <button  pButton
                                       type="button" style="background-color: #277E2F;font-weight: bold;" icon="faa faa-external-link" label="Visit Home Page"></button>
                           </a>
@@ -146,7 +146,7 @@
               <div class="ui-g">
                   <div class="ui-g-12 ui-md-12 ui-lg-12 ui-sm-12">
                       <div *ngIf="metadata != true && similarResources != true ">
-                          <description-resources [record]="record" [files]="files" [distdownload]="distdownload" ></description-resources>
+                          <description-resources [record]="record" [files]="files" [distdownload]="distdownload" [isInternal]="isInternal" ></description-resources>
                       </div>
                       <div *ngIf="metadata == true && similarResources != true ">
                           <metadata-detail [record]="record" [serviceApi]="serviceApi" ></metadata-detail>
