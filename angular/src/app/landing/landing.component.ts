@@ -143,11 +143,16 @@ export class LandingComponent implements OnInit {
    * If Search is successful populate list of keywords themes and authors
    */
   onSuccess(searchResults:any[]) {
-    
+    console.log(searchResults);
     if(searchResults["ResultCount"] === undefined || searchResults["ResultCount"] !== 1)
       this.record = searchResults;
     else if(searchResults["ResultCount"] !== undefined && searchResults["ResultCount"] === 1)
       this.record = searchResults["ResultData"][0];
+
+      if(this.record["@id"] === undefined || this.record["@id"] === "" ){
+        this.isId = false;
+        return;
+    }  
     this.type = this.record['@type'];
     this.titleService.setTitle(this.record['title']);
     // this.meta.addTag({ "testdescription": this.record['description'] });
@@ -158,10 +163,7 @@ export class LandingComponent implements OnInit {
     if( "hasEmail" in this.record['contactPoint'])  
      this.isEmail = true;
      this.assessNewer();
-    if(this.record["@id"] === undefined || this.record["@id"] === "" ){
-        this.isId = false;
-        return;
-    }
+    
     this.updateMenu();
     //this.updateLeftMenu();
     //this.updateRightMenu();
@@ -257,11 +259,13 @@ updateMenu(){
          for( let i=0; i < this.record['authors'].length; i++){
              let author = this.record['authors'][i];
              if(author.familyName !== null && author.familyName !== undefined)
-                 this.citeString += author.familyName +' ';
-             if(author.middleName !== null && author.middleName !== undefined)
-                 this.citeString += author.middleName+' ' ;
+                 this.citeString += author.familyName +', ';
              if(author.givenName !== null && author.givenName !== undefined)
-                 this.citeString +=  author.givenName+', ';
+                 this.citeString +=  author.givenName+' ';
+             if(author.middleName !== null && author.middleName !== undefined)
+                 this.citeString += author.middleName;
+             if( i != this.record['authors'].length-1 )    
+                  this.citeString +=', ' ;
          }
 
       } else if(this.record['contactPoint']) {
@@ -322,13 +326,14 @@ updateMenu(){
     // This example uses the underscore.js library.
     var i = 0;
     var tempfiletest = "";
+    console.log("TEST ::"+paths);
     paths.forEach((path) => { 
-      // console.log(path['@type']);
+      // console.log(path['@type'][0]);
       
-      if(path['@type'].includes("nrdp:Subcollection")){
-        // console.log("TESt:"+path.filepath);
-        tempfiletest = path.filepath;
-      } 
+      // if(path['@type'].includes("nrdp:Subcollection")){
+      //   // console.log("TESt:"+path.filepath);
+      //   tempfiletest = path.filepath;
+      // } 
       if(i != 0 && path.filepath) 
       {
         if(!path.filepath.startsWith("/"))
@@ -347,31 +352,34 @@ updateMenu(){
           currentLevel = existingPath[0].children;
         } else {
             
-            if(part.match(tempfiletest)){
-              const newPart = {
-                data : {
-                  name : part,
-                  mediatype: "",
-                  size: "",
-                  downloadUrl: "",
-                  description: "" 
-                },children: []
-              };
-              currentLevel.push(newPart);
-              currentLevel = newPart.children;
-            }else{
+            // if(part.match(tempfiletest)){
+            //   const newPart = {
+            //     data : {
+            //       name : part,
+            //       mediatype: "",
+            //       size: "",
+            //       downloadUrl: "",
+            //       description: "" 
+            //     },children: []
+            //   };
+            //   currentLevel.push(newPart);
+            //   currentLevel = newPart.children;
+            // }else{
+            //console.log("DU::"+path.downloadURL);
             const newPart = {
               data : {
                 name : part,
                 mediatype: path.mediaType,
                 size: path.size,
                 downloadUrl: path.downloadURL,
-                description: path.description 
+                description: path.description,
+                filetype: path['@type'][0] 
               },children: []
             };
             currentLevel.push(newPart);
             currentLevel = newPart.children;
-          }}
+          // }
+        }
         });
       }
       i= i+1;

@@ -138,18 +138,20 @@ checkReferences(){
  ngOnInit(){
     this.cdr.detectChanges();
     this.files  =<TreeNode[]>this.files[0].data;
+    //console.log(this.files);
     this.cols = [
         { field: 'name', header: 'Name', width: '60%' },
-        { field: 'mediatype', header: 'MediaType', width: '20%' },
-        { field: 'size', header: 'Size', width: '8%' },
-        { field: 'download', header: 'Download', width: '12%' },
+        { field: 'mediatype', header: 'MediaType', width: '15%' },
+        { field: 'size', header: 'Size', width: '12%' },
+        { field: 'download', header: 'Download', width: '10%' },
     ];
     //this.selectedNode = this.files[0];
     this.fileNode = {"data":{
         "name":"",
         "size":"",
         "mediatype":"",
-        "description":""
+        "description":"",
+        "filetype":""
     }}
  }
  ngOnChanges(){
@@ -177,18 +179,18 @@ checkReferences(){
                 'fileFormat': comp["mediaType"],
                 'downloadedStatus': null,
                 'resFilePath': ''
-                };
-                this.cartService.addDataToCart(data);
-                data = null;
-            }
+            };
+            this.cartService.addDataToCart(data);
+            data = null;
         }
+    }
 
-        setTimeout(() => {
-            this.cartService.updateAllFilesSpinnerStatus(false);
-        }, 3000);
-         setTimeout(() => {
-             this.addFileStatus = true;
-         }, 3000);
+    setTimeout(() => {
+        this.cartService.updateAllFilesSpinnerStatus(false);
+    }, 3000);
+    setTimeout(() => {
+         this.addFileStatus = true;
+    }, 3000);
 }
 //record["ediid"], record["title"], fileDetails["title"], fileDetails["title"],
 //fileDetails["filepath"],fileDetails["filepath"],fileDetails["size"],
@@ -234,6 +236,16 @@ addtoCart(fileName:string,fileSize:number,fileFormat:string,
 //      this.selectedNode = selectedNode;
 //      this.display = true;
 //  }
-
+ /**
+   * Function to display bytes in appropriate format.
+   **/ 
+  formatBytes(bytes,numAfterDecimal){
+    if(0==bytes)return"0 Bytes";
+    var base=1000,
+    d=numAfterDecimal||2,
+     e=["Bytes","kB","MB","GB","TB","PB","EB","ZB","YB"],
+     f=Math.floor(Math.log(bytes)/Math.log(base));
+    return (bytes/Math.pow(base,f)).toFixed(d)+" "+e[f]
+}
  
 }
