@@ -208,6 +208,9 @@ class NISTBag(PreservationSystem):
             compmerger = self._make_merger(merge_annots, 'Component')
 
         out = None
+        if not os.path.isdir(self._metadir):
+            raise BadBagRequest(self.name +
+                                ": Bag does not contain NERDm metadata")
         for root, subdirs, files in os.walk(self._metadir):
             if root == self._metadir:
                 out = self.nerd_metadata_for("")
