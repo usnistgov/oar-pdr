@@ -9,7 +9,8 @@ from collections import OrderedDict
 from zipfile import ZipFile
 
 from .base import sys as _sys
-from .. import (ConfigurationException, StateException, CorruptedBagError)
+from .. import (ConfigurationException, StateException, CorruptedBagError,
+                NERDError)
 from ...describe import rmm
 from ... import distrib
 from ...exceptions import IDNotFound
@@ -357,6 +358,8 @@ class UpdatePrepper(object):
             raise ValueError("Cached NERDm record not found: " + nerdfile)
 
         nerd = utils.read_nerd(nerdfile)
+        if not '@id' in nerd:
+            raise NERDError("Missing @id from NERD rec, "+nerdfile)
         bldr = BagBuilder(parent, bagname, {}, nerd['@id'], logger=deflog)
         bldr.add_res_nerd(nerd, savefilemd=True)
 

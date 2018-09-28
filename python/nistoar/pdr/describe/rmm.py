@@ -64,7 +64,16 @@ class MetadataClient(object):
                                message="Unexpected response from server: {0} {1}"
                                         .format(resp.status_code, resp.reason))
 
-            return resp.json()
+            # This gets around an incorrect implementation of the RMM service
+            out = resp.json()
+            if "Message" in out and "ResultData" not in out:
+                if "No record available" in out['Message']:
+                    # RMM should have responded with 404!
+                    raise IDNotFound(id)
+                raise RMMServerError(id, message="Unexpected response: "+
+                                     out['Message'])
+                
+            return out
         except ValueError as ex:
             if resp.text and ("<body" in resp.text or "<BODY" in resp.text):
                 raise RMMServerError(id,
