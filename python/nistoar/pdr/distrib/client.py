@@ -65,9 +65,8 @@ class RESTServiceClient(object):
                                          "JSON (is service URL correct?)",
                                          cause=ex)
         except requests.RequestException as ex:
-            raise DistribServerError(relurl,
-                                     message="Trouble connecting to distribution"
-                                     +" service: "+ str(ex), cause=ex)
+            raise DistribServerError(relurl, ex.response.status_code,
+                                     ex.response.error, cause=ex)
         
     def get_stream(self, relurl):
         """

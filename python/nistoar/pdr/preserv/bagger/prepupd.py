@@ -278,7 +278,7 @@ class UpdatePrepper(object):
         if latest_nerd:
             self.log.info("No previous bag available; preparing based on " +
                           "existing published NERDm record")
-            self.create_from_nerdm(latest_headbag, mdbag)
+            self.create_from_nerdm(latest_nerd, mdbag)
             return True
 
         self.log.info("ID not published previously; will start afresh")
