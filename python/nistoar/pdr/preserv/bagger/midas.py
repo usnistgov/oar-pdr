@@ -15,6 +15,7 @@ from collections import OrderedDict
 
 from .base import SIPBagger, moddate_of, checksum_of, read_nerd, read_pod
 from .base import sys as _sys
+from . import utils as bagutils
 from ..bagit.builder import BagBuilder, NERDMD_FILENAME, FILEMD_FILENAME
 from ..bagit import NISTBag
 from ... import def_merge_etcdir, utils
@@ -26,7 +27,7 @@ from nistoar.nerdm.merge import MergerFactory
 # _sys = PreservationSystem()
 log = logging.getLogger(_sys.system_abbrev).getChild(_sys.subsystem_abbrev)
 
-DEF_MBAG_VERSION = "0.4"
+DEF_MBAG_VERSION = bagutils.DEF_MBAG_VERSION
 DEF_MIDAS_POD_FILE = "_pod.json"
 SUPPORTED_CHECKSUM_ALGS = [ "sha256" ]
 DEF_CHECKSUM_ALG = "sha256"
@@ -673,17 +674,17 @@ class PreservationBagger(SIPBagger):
 
     def form_bag_name(self, dsid, bagseq=0, dsver="1.0"):
         """
-        return the name to use for the working bag directory
+        return the name to use for the working bag directory.  According to the
+        NIST BagIt Profile, preservation bag names will follow the format
+        AIPID.AIPVER.mbagMBVER-SEQ
 
         :param str  dsid:   the AIP identifier for the dataset
         :param int  bagseq: the multibag sequence number to assign (default: 0)
         :param str  dsver:  the dataset's release version string.  (default: 1.0)
         """
-        fmt = self.cfg.get('bag_name_format', "{0}.{1}.mbag{2}-{3}")
+        fmt = self.cfg.get('bag_name_format')
         bver = self.cfg.get('mbag_version', DEF_MBAG_VERSION)
-        bver = re.sub(r'\.', '_', bver)
-        dsver = re.sub(r'\.', '_', dsver)
-        return fmt.format(dsid, dsver, bver, bagseq)
+        return bagutils.form_bag_name(dsid, bagseq, dsver, bver, namefmt=fmt)
 
     def add_data_files(self):
         """
