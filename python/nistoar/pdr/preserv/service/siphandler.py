@@ -436,6 +436,21 @@ class MIDASSIPHandler(SIPHandler):
         self._status.record_progress("Collecting metadata and files")
         bagdir = self.bagger.make_bag()
 
+        # Stage the full NERDm record for ingest into the RMM
+        if self._ingester:
+            try:
+                bag = NISTBag(self.bagger.bagdir)
+                self._ingester.stage(bag.nerdm_record(), self.bagger.name)
+            except Exception as ex:
+                msg = "Failure staging NERDm record for " + self.bagger.name + \
+                      " for ingest: " + str(ex)
+                log.exception(msg)
+                # send an alert email to interested subscribers
+                if self.notifier:
+                    self.notifier.alert("preserve.failure", origin=self.name,
+                                  summary="Ingest failed for "+self.bagger.name,
+                                        desc=msg, id=self.bagger.name)
+
         # zip it up; this may split the bag into multibags
         self._status.record_progress("Serializing")
         savefiles = self._serialize(bagdir, self.stagedir, serialtype)
@@ -461,21 +476,6 @@ class MIDASSIPHandler(SIPHandler):
                     os.remove(f)
 
             raise PreservationException(msg, [str(ex)])
-
-        # Stage the full NERDm record for ingest into the RMM
-        if self._ingester:
-            try:
-                bag = NISTBag(self.bagger.bagdir)
-                self._ingester.stage(bag.nerdm_record(), self.bagger.name)
-            except Exception as ex:
-                msg = "Failure staging NERDm record for " + self.bagger.name + \
-                      " for ingest: " + str(ex)
-                log.exception(msg)
-                # send an alert email to interested subscribers
-                if self.notifier:
-                    self.notifier.alert("preserve.failure", origin=self.name,
-                                  summary="Ingest failed for "+self.bagger.name,
-                                        desc=msg, id=self.bagger.name)
 
         # Now write copies of the checksum files to the review SIP dir.
         # MIDAS will scoop these up and save them in its database.
