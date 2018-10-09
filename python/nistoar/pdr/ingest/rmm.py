@@ -149,6 +149,12 @@ class IngestClient(object):
             self.log.warn("submit config value not recognized: %s",
                           self.submit_mode)
 
+    @property
+    def endpoint(self):
+        """
+        The service endpoint URL
+        """
+        return self._endpt
 
     def stage(self, record, name=None):
         """

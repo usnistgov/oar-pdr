@@ -529,6 +529,7 @@ class MIDASSIPHandler(SIPHandler):
                 msg = "Failed to ingest record with name=" + \
                       self.bagger.name + "into RMM: " + str(ex)
                 log.exception(msg)
+                log.info("Ingest service endpoint: "+self._ingester.endpoint)
 
                 if self.notifier:
                     self.notifier.alert("ingest.failure", origin=self.name,
