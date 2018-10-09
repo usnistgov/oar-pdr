@@ -64,8 +64,11 @@ def submit_for_ingest(record, endpoint, name=None,
             raise IngestServerError(message="Unable to parse response as JSON "+
                                     "(is service URL correct?)")
     except requests.RequestException as ex:
-        raise IngestServerError(message="Trouble connecting to ingest service: "+
-                                str(ex), cause=ex)
+        msg = "Trouble connecting to ingest service"
+        if ex.request:
+            msg += " via " + ex.request.url
+        msg += ": "+ str(ex)
+        raise IngestServerError(message=msg, cause=ex)
     
 def get_endpoint(config):
     """
