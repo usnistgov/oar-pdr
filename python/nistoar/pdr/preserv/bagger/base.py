@@ -125,6 +125,26 @@ class SIPBagger(PreservationSystem):
             self.ensure_preparation(nodata)
 
 
+class PreservationStateError(StateException):
+    """
+    an exception that indicates the assumed state of an SIPs ingest and 
+    preservation does not match its actual state.
+
+    A key place this is used is when a bagger's caller requests either 
+    the creation of a new AIP or an update to an existing AIP when the 
+    AIPS does or does not (respectively) already exist.  
+    """
+    def __init__(self, message, aipexists=None):
+        """
+        :param bool aipexists:  true if the AIP already exists, false if it 
+                                doesn't.  If this is set, it should be assumed 
+                                thrower was set to assume the opposite.  
+                                Set to None (default) if this fact is not 
+                                relevent.
+        """
+        super(message)
+        self.aipsexists = aipexists
+
 
 
 

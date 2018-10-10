@@ -486,6 +486,16 @@ class PreservationBagger(SIPBagger):
     directory as a hard link: that is, no bytes are copied.  Metadata data files 
     are copied.
 
+    Note that this bagger can be set explicitly in a AIP creation mode or an 
+    update mode via the asupdate parameter to the constructor.  When one of 
+    these modes is set, the repository will be queried to see if the dataset 
+    with the same AIP identifier already exists; this state must agree with the 
+    set mode, else an exception is thrown.  This parameter is provided to ensure 
+    the state assumed by the caller--namely, whether the dataset already exists--
+    is in sync with the state of the repository.  If the mode is not set by the 
+    caller, the mode is determined implicitly by whether the AIP already exists 
+    in the repository.
+
     This class takes a configuration dictionary on construction; the 
     following parameters are supported:
     :prop bag_builder dict ({}): a set of parameters to pass to the BagBuilder
@@ -522,7 +532,7 @@ class PreservationBagger(SIPBagger):
     """
 
     def __init__(self, midasid, bagparent, reviewdir, mddir,
-                 config=None, minter=None, sipdirname=None):
+                 config=None, minter=None, asupdate=None, sipdirname=None):
         """
         Create an SIPBagger to operate on data provided by MIDAS.
 
@@ -537,6 +547,15 @@ class PreservationBagger(SIPBagger):
                                the landing page.
         :param config   dict:  a dictionary providing configuration parameters
         :param minter IDMinter: a minter to use for minting new identifiers.
+        :param asupdate bool:  if set to true, the caller believes this bagger 
+                               should be creating an update to an existing AIP;
+                               if false, the caller believes this is a new AIP.
+                               If this believe does not correspond with the 
+                               actual contents of the repository, an exception 
+                               is raised when the attempt to process the SIP is 
+                               made.  If None (default), no check is done; if 
+                               an AIP already exists in the repository, this 
+                               bagger creates an update.  
         :param sipdirname str: a relative directory name to look for that 
                                represents the SIP's directory.  If not provided,
                                the directory is determined based on the provided
@@ -546,6 +565,7 @@ class PreservationBagger(SIPBagger):
         self.mddir = mddir
         self.minter = minter
         self.reviewdir = reviewdir
+        self.asupdate = asupdate   # can be None
 
         indirname = sipdirname
         if not indirname:
@@ -601,6 +621,15 @@ class PreservationBagger(SIPBagger):
         """
         return self.bagbldr.bagdir
 
+    def was_previously_preserved(self):
+        """
+        return true if an SIP with the same identifier was previously 
+        preserved by checking for a corresponding AIP.  If this was found to 
+        be true, then this current bagger instance must represent an update to 
+        that AIP.  
+        """
+        
+
     def ensure_metadata_preparation(self):
         """
         prepare the NERDm metadata.  
@@ -618,6 +647,20 @@ class PreservationBagger(SIPBagger):
 
         if self.prepsvc:
             prepper = self.prepsvc.prepper_for(self.name, log=self.siplog)
+
+            # if asupdate is set (to true or false), check for the existance 
+            # of the target AIP:
+            if self.asupdate is not None:
+                if prepper.aips_exists() != bool(self.asupdate):
+                    # actual state does not match caller's expected state
+                    if self.asupdate:
+                        msg = self.name + \
+                              ": AIP with this ID does not exist in repository"
+                    else:
+                        msg = self.name + \
+                              ": AIP with this ID already exists in repository"
+                    raise PreservationStateException(msg, ! self.asupdate)
+
             if not os.path.exists(mdbagger.bagdir):
                 # This submission has not be accessed via the PDR before; if 
                 # this dataset has been previously been published, we need to 

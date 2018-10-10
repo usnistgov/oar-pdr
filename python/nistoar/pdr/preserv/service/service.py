@@ -105,7 +105,7 @@ class PreservationService(object):
             raise ConfigurationException("No support configured for SIP type: "+
                                          siptype)
         
-        hdlr = self._make_handler(sipid, siptype)
+        hdlr = self._make_handler(sipid, siptype, asupdate=False)
         if hdlr.state == status.FORGOTTEN:
             # lay claim to this SIP by updating the state
             hdlr._status.reset()
@@ -227,7 +227,7 @@ class PreservationService(object):
         raise NotImplemented()
         
 
-    def _make_handler(self, sipid, siptype=None):
+    def _make_handler(self, sipid, siptype=None, asupdate=False):
         """
         create an SIPHandler of the given type for the given ID.
         """
@@ -301,8 +301,17 @@ class ThreadedPreservationService(PreservationService):
                 time.sleep(0)
                 self._hdlr.bagit(self._stype, self._dest, self._params)
             except Exception, ex:
+                if isinstance(ex, PreservationStateException):
+                    log.exception("Incorrect state for client's request: "+
+                                  str(ex))
+                    if ex.aipexists:
+                        reason = "requested initial preservation of existing AIP"
+                    else:
+                        reason = "requested update to non-existing AIP"
+                    self._hdlr.set_state(status.CONFLICT, reason)
+                else:
+                    self._hdlr.set_state(status.FAILED, "Unexpected failure")
                 log.exception("Bagging failure: %s", str(ex))
-                self._hdlr.set_state(status.FAILED, "Unexpected failure")
 
                 # alert a human!
                 if self._hdlr.notifier:

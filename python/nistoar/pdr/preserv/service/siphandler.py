@@ -46,7 +46,7 @@ class SIPHandler(object):
     __metaclass__ = ABCMeta
 
     def __init__(self, sipid, config, minter=None, serializer=None,
-                 notifier=None):
+                 notifier=None, asupdate=False):
         """
         Configure the handler to process a specific SIP with a given 
         identifier.  The SIP identifier (together with the type of the 
@@ -66,6 +66,8 @@ class SIPHandler(object):
                              will be used.
         :param notifier NotificationService: the service for pushing alerts
                              to real people.
+        :param asupdate bool:  Create this handler assuming this preservation 
+                             request is an update to an existing AIP.
         """
         self._sipid = sipid
         self.cfg = deepcopy(config)
@@ -73,6 +75,7 @@ class SIPHandler(object):
         if not serializer:
             serializer = DefaultSerializer()
         self._ser = serializer
+        self._asupdate = asupdate
 
         self.workdir = self.cfg['working_dir']
         assert self.workdir
@@ -117,7 +120,7 @@ class SIPHandler(object):
         return self._status.state in ok
 
     @abstractmethod
-    def bagit(self, serialtype=None, destdir=None, params=None):
+    def bagit(self, serialtype=None, destdir=None, asupdate=None, params=None):
         """
         create an AIP in the form of serialized BagIt bags from the 
         identified SIP.  The name of the serialized bag files are 
@@ -134,6 +137,16 @@ class SIPHandler(object):
         :param destdir str:     the path to a directory where the serialized
                                 bag(s) will be written.  If not provided the
                                 configured directory will be used.  
+        :param asupdate bool:   if true, the client is expecting this to be an
+                                update to a previously published AIP; the handler
+                                should fail if a previously published version 
+                                cannot be found.  If false, the client is 
+                                expecting that this request calls for the premeire
+                                publication of the SIP; the handler should fail
+                                if the ID was previously published.  If None,
+                                client has no expectation, and processing proceeds
+                                based on what information the handler can dicern
+                                from the repository.
         :param params dict:     SIP-specific parameters to apply to the 
                                 creation of the AIP.  These can over-ride 
                                 SIP-default behavior as set by the 
@@ -263,7 +276,7 @@ class MIDASSIPHandler(SIPHandler):
     name = "MIDAS-SIP"
 
     def __init__(self, sipid, config, minter=None, serializer=None,
-                 notifier=None, sipdirname=None):
+                 notifier=None, asupdate=False, sipdirname=None):
         """
         Configure the handler to process a specific SIP with a given 
         identifier.  The SIP identifier (together with the type of the 
@@ -283,13 +296,15 @@ class MIDASSIPHandler(SIPHandler):
                              will be used.
         :param notifier NotificationService: the service for pushing alerts
                              to real people.
+        :param asupdate bool:  Create this handler assuming this preservation 
+                             request is an update to an existing AIP.
         :param sipdirname str: a relative directory name to look for that 
                                represents the SIP's directory.  If not provided,
                                the directory is determined based on the provided
                                MIDAS ID.  
         """
         super(MIDASSIPHandler, self).__init__(sipid, config, minter, serializer,
-                                              notifier)
+                                              notifier, asupdate)
 
         workdir = self.cfg.get('working_dir')
         if workdir and not os.path.exists(workdir):
@@ -346,7 +361,7 @@ class MIDASSIPHandler(SIPHandler):
         
         self.bagger = PreservationBagger(sipid, bagparent, self.sipparent,
                                          self.mdbagdir, config.get('bagger'),
-                                         self._minter, sipdirname)
+                                         self._minter, self._asupdate, sipdirname)
 
         if self.state == status.FORGOTTEN and self._is_preserved():
             self.set_state(status.SUCCESSFUL, 

@@ -256,6 +256,10 @@ class Handler(object):
                 log.info("SIP update request completed synchronously: "+
                          sipid)
                 self.set_response(201, "SIP update completed successfully")
+            elif out['state'] == status.CONFLICT:
+                log.error(stat['message'])
+                out['state'] = status.FAILED
+                self.set_response(409, out['message'])
             elif out['state'] == status.FAILED:
                 log.error(stat['message'])
                 self.set_response(500, "SIP update failed: " +
@@ -298,7 +302,7 @@ class Handler(object):
             self.send_error(404, "SIP Type not supported")
             return ["{}"]
 
-    def preserve_sip(self, sipid):
+    def preserve_sip(self, sipid, asupdate):
         out = {}
         try: 
             out = self._svc.preserve(sipid, 'midas')
