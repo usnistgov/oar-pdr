@@ -250,6 +250,10 @@ class TestThreadedPreservationService(test.TestCase):
         hndlr._status.reset()
         stat = self.svc.status(self.midasid)
         self.assertEqual(stat['state'], status.PENDING)
+
+        with self.assertRaises(serv.RerequestException):
+            self.svc.preserve(self.midasid, 'midas', 2)
+        hndlr.set_state(status.READY)
         
         try:
             self.svc.preserve(self.midasid, 'midas', 2)

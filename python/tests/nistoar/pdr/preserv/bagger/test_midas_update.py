@@ -20,7 +20,7 @@ import nistoar.pdr.preserv.bagger.midas as midas
 import nistoar.pdr.exceptions as exceptions
 from nistoar.pdr.preserv import AIPValidationError
 
-# datadir = nistoar/preserv/data
+# datadir = nistoar/pdr/preserv/data
 testdir = os.path.dirname(os.path.abspath(__file__))
 datadir = os.path.join(os.path.dirname(testdir), 'data')
 pdrmoddir = os.path.dirname(os.path.dirname(testdir))
@@ -147,12 +147,14 @@ class TestPreservationUpdateBagger(test.TestCase):
                     'Multibag-Version': "0.4"
                 }
             },
-            'headbag_cache':   self.pubcache,
-            'distrib_service': {
-                'service_endpoint': "http://localhost:9091/"
-            },
-            'metadata_service': {
-                'service_endpoint': "http://localhost:9092/"
+            'repo_access': {
+                'headbag_cache':   self.pubcache,
+                'distrib_service': {
+                    'service_endpoint': "http://localhost:9091/"
+                },
+                'metadata_service': {
+                    'service_endpoint': "http://localhost:9092/"
+                }
             }
         }
         
@@ -199,6 +201,20 @@ class TestPreservationUpdateBagger(test.TestCase):
                         "Datafiles copied prematurely")
         
 
+    def test_ensure_metadata_preparation_ensureupdate(self):
+        # test that we can catch a request for an update to an AIP
+        # that doesn't exist yet.
+
+        self.bagr = midas.PreservationBagger(self.midasid, '_preserv',
+                                             self.revdir, self.mddir,
+                                             self.bagr.cfg, asupdate=True)
+
+        try:
+            self.bagr.ensure_metadata_preparation()
+            self.fail("Failed to prevent to ensure previous publication")
+        except midas.PreservationStateException as ex:
+            self.assertTrue(not ex.aipexists)
+        
     def test_ensure_metadata_preparation_withupdate(self):
         # test resolving an identifier for a dataset being updated (after
         # an initial publication)
@@ -227,6 +243,36 @@ class TestPreservationUpdateBagger(test.TestCase):
                 os.remove(destzip)
             if os.path.exists(cached):
                 os.remove(cached)
+        
+
+    def test_ensure_metadata_preparation_requireupdate(self):
+        # test resolving an identifier for a dataset being updated (after
+        # an initial publication)
+        srczip = os.path.join(distarchive, "1491.1_0.mbag0_4-0.zip")
+        destzip = os.path.join(distarchive, self.midasid+".1_0.mbag0_4-0.zip")
+        cached = os.path.join(self.pubcache, os.path.basename(destzip))
+
+        self.bagr = midas.PreservationBagger(self.midasid, '_preserv',
+                                             self.revdir, self.mddir,
+                                             self.bagr.cfg, asupdate=False)
+
+        try:
+            # put a record in the RMM to signal the AIP's existence
+            shutil.copy(os.path.join(datadir, self.midasid+".json"),
+                        mdarchive)
+            shutil.copyfile(srczip, destzip)
+            self.bagr.ensure_metadata_preparation()
+            self.fail("Failed to prevent represerving without update")
+        except midas.PreservationStateException as ex:
+            self.assertTrue(ex.aipexists)
+        finally:
+            if os.path.exists(destzip):
+                os.remove(destzip)
+            if os.path.exists(cached):
+                os.remove(cached)
+            rec = os.path.join(mdarchive, self.midasid+".json")
+            if os.path.exists(rec):
+                os.remove(rec)
         
 
     def test_finalize_version(self):

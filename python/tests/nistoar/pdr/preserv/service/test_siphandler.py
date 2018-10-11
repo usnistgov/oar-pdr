@@ -71,7 +71,7 @@ class TestMIDASSIPHandler(test.TestCase):
                 "max_bag_size": 200000000
             }
         }
-        
+
         self.sip = sip.MIDASSIPHandler(self.midasid, self.config)
 
     def tearDown(self):
@@ -83,6 +83,25 @@ class TestMIDASSIPHandler(test.TestCase):
         self.assertTrue(os.path.exists(self.workdir))
         self.assertTrue(os.path.exists(self.stagedir))
         self.assertTrue(os.path.exists(self.mdserv))
+
+        self.assertTrue(isinstance(self.sip.status, dict))
+        self.assertEqual(self.sip.state, status.FORGOTTEN)
+
+        self.assertIsNone(self.sip.bagger.asupdate)
+
+    def test_ctor_asupdate(self):
+        self.sip = sip.MIDASSIPHandler(self.midasid, self.config,
+                                       asupdate=True)
+        self.assertTrue(self.sip.bagger)
+        self.assertEqual(self.sip.bagger.asupdate, True)
+
+        self.assertTrue(isinstance(self.sip.status, dict))
+        self.assertEqual(self.sip.state, status.FORGOTTEN)
+
+        self.sip = sip.MIDASSIPHandler(self.midasid, self.config,
+                                       asupdate=False)
+        self.assertTrue(self.sip.bagger)
+        self.assertEqual(self.sip.bagger.asupdate, False)
 
         self.assertTrue(isinstance(self.sip.status, dict))
         self.assertEqual(self.sip.state, status.FORGOTTEN)

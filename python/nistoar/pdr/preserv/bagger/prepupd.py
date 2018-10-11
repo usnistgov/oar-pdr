@@ -228,7 +228,7 @@ class UpdatePrepper(object):
         return true if a previously ingested AIP with the current ID exists in 
         the repository.  
         """
-        return cache_nerdm_rec() is not None
+        return self.cache_nerdm_rec() is not None
         
     def _unpack_bag_as(self, bagfile, destbag):
         if bagfile.endswith('.zip'):

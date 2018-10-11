@@ -234,6 +234,9 @@ class TestUpdatePrepper(test.TestCase):
         self.assertEqual(self.prepr.cache_nerdm_rec(), cached)
         self.assertTrue(os.path.exists(cached))
 
+    def test_aip_exists(self):
+        self.assertTrue(self.prepr.aip_exists())
+
     def test_unpack_bag_as(self):
         root = self.tf.track("goober")
         self.assertTrue(not os.path.exists(root))

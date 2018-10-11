@@ -46,7 +46,7 @@ class SIPHandler(object):
     __metaclass__ = ABCMeta
 
     def __init__(self, sipid, config, minter=None, serializer=None,
-                 notifier=None, asupdate=False):
+                 notifier=None, asupdate=None):
         """
         Configure the handler to process a specific SIP with a given 
         identifier.  The SIP identifier (together with the type of the 
@@ -95,8 +95,9 @@ class SIPHandler(object):
         if not os.path.exists(stcfg['cachedir']):
             os.mkdir(stcfg['cachedir'])
 
-        # The initial state will be FORGOTTEN unless another handler has
-        # already started.
+        # If this is a first time preservation request, the initial state
+        # will be FORGOTTEN unless another handler has already started.
+        # If this is an update, the state should be SUCCESSFUL.
         self._status = status.SIPStatus(self._sipid, stcfg)
 
         # set the notification service we can send alerts to
@@ -117,10 +118,12 @@ class SIPHandler(object):
         ok = [status.FORGOTTEN, status.PENDING, status.READY, status.NOT_READY]
         if _inprogress:
             ok.append(status.IN_PROGRESS)
+        if self._asupdate:
+            ok.append(status.SUCCESSFUL)
         return self._status.state in ok
 
     @abstractmethod
-    def bagit(self, serialtype=None, destdir=None, asupdate=None, params=None):
+    def bagit(self, serialtype=None, destdir=None, params=None):
         """
         create an AIP in the form of serialized BagIt bags from the 
         identified SIP.  The name of the serialized bag files are 
@@ -137,16 +140,6 @@ class SIPHandler(object):
         :param destdir str:     the path to a directory where the serialized
                                 bag(s) will be written.  If not provided the
                                 configured directory will be used.  
-        :param asupdate bool:   if true, the client is expecting this to be an
-                                update to a previously published AIP; the handler
-                                should fail if a previously published version 
-                                cannot be found.  If false, the client is 
-                                expecting that this request calls for the premeire
-                                publication of the SIP; the handler should fail
-                                if the ID was previously published.  If None,
-                                client has no expectation, and processing proceeds
-                                based on what information the handler can dicern
-                                from the repository.
         :param params dict:     SIP-specific parameters to apply to the 
                                 creation of the AIP.  These can over-ride 
                                 SIP-default behavior as set by the 
@@ -276,7 +269,7 @@ class MIDASSIPHandler(SIPHandler):
     name = "MIDAS-SIP"
 
     def __init__(self, sipid, config, minter=None, serializer=None,
-                 notifier=None, asupdate=False, sipdirname=None):
+                 notifier=None, asupdate=None, sipdirname=None):
         """
         Configure the handler to process a specific SIP with a given 
         identifier.  The SIP identifier (together with the type of the 
@@ -377,13 +370,6 @@ class MIDASSIPHandler(SIPHandler):
         do a quick check of the input SIP to determine if it can be 
         processed into an AIP.  If it is not ready, return False.
 
-        Implementations should first call this inherited version which ensures 
-        that the current status is either FORGOTTEN, PENDING, or READY.  False
-        is returned if this is not true, and the child implementation should not 
-        proceed.  The child implementation should then do a quick check that the
-        input data exists and appears to be in a state ready for preservation.  
-        It should finally set the _ready field to True.
-
         :return bool:  True if the requested SIP appears to be ready for 
                        preservation; False, otherwise.
         """
@@ -447,7 +433,7 @@ class MIDASSIPHandler(SIPHandler):
                         self.bagger.bagparent)
             shutil.rmtree(self.bagger.bagparent)
 
-        # Create the bag
+        # Create the bag.  Note: make_bag() can raise exceptions
         self._status.record_progress("Collecting metadata and files")
         bagdir = self.bagger.make_bag()
 

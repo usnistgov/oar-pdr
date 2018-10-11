@@ -20,7 +20,8 @@ from ..bagit.builder import BagBuilder, NERDMD_FILENAME, FILEMD_FILENAME
 from ..bagit import NISTBag
 from ... import def_merge_etcdir, utils
 from .. import (SIPDirectoryError, SIPDirectoryNotFound, AIPValidationError,
-                ConfigurationException, StateException, PODError)
+                ConfigurationException, StateException, PODError,
+                PreservationStateException)
 from .prepupd import UpdatePrepService
 from nistoar.nerdm.merge import MergerFactory
 
@@ -608,10 +609,10 @@ class PreservationBagger(SIPBagger):
                                   minter=minter, logger=self.siplog)
 
         self.prepsvc = None
-        if 'headbag_cache' in self.cfg:
+        if 'repo_access' in self.cfg:
             # support for updates requires access to the distribution and
             # rmm services
-            self.prepsvc = UpdatePrepService(self.cfg)
+            self.prepsvc = UpdatePrepService(self.cfg['repo_access'])
         
 
     @property
@@ -651,7 +652,7 @@ class PreservationBagger(SIPBagger):
             # if asupdate is set (to true or false), check for the existance 
             # of the target AIP:
             if self.asupdate is not None:
-                if prepper.aips_exists() != bool(self.asupdate):
+                if prepper.aip_exists() != bool(self.asupdate):
                     # actual state does not match caller's expected state
                     if self.asupdate:
                         msg = self.name + \
@@ -659,7 +660,7 @@ class PreservationBagger(SIPBagger):
                     else:
                         msg = self.name + \
                               ": AIP with this ID already exists in repository"
-                    raise PreservationStateException(msg, ! self.asupdate)
+                    raise PreservationStateException(msg, not self.asupdate)
 
             if not os.path.exists(mdbagger.bagdir):
                 # This submission has not be accessed via the PDR before; if 
