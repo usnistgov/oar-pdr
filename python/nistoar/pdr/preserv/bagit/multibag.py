@@ -201,9 +201,10 @@ class MultibagSplitter(object):
                               logger=log)
         except:
             # error occurred: restore the original name to the source bag
-            if os.path.exists(origsrc):
-                shutil.rmtree(origsrc)
-            os.rename(self.srcdir, origsrc)
+            if origsrc != self.srcdir:
+                if os.path.exists(origsrc):
+                    shutil.rmtree(origsrc)
+                    os.rename(self.srcdir, origsrc)
             raise
 
         if self.cfg.get('verify_complete', True):
