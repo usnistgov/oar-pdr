@@ -278,17 +278,35 @@ class Handler(object):
 
         except RerequestException, ex:
             log.warn("Rerequest of SIP update detected: "+sipid)
+            out =  {
+                "id": sipid,
+                "state": status.IN_PROGRESS,
+                "message": str(ex),
+                "history": []
+            }
             self.set_response(403, "Preservation update for SIP was already "+
                               "requested (current status: "+ex.state+")")
             
         except PreservationStateException as ex:
             log.warn("Wrong AIP state for client request: "+str(ex))
+            out =  {
+                "id": sipid,
+                "state": status.CONFLICT,
+                "message": str(ex),
+                "history": []
+            }
             self.set_response(409, "Already preserved (need to request update "+
                                    "via PATCH?)")
 
         except Exception as ex:
             log.exception("preservation request failure for sip=%s: %s",
                           sipid, str(ex))
+            out =  {
+                "id": sipid,
+                "state": status.FAILED,
+                "message": "internal server error",
+                "history": []
+            }
             self.set_response(500, "Internal server error")
             
         self.add_header('Content-Type', 'application/json')
