@@ -29,8 +29,12 @@ export class SearchResolve implements Resolve<any> {
   //   return this.searchService.(route.params['id']);
   // }
   resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<any> {
-
-    const recordid = route.params['id'];
+    var recordid = route.params['id'];
+    //console.log(state.url.toString().split("/id/").pop());
+    if(state.url.toString().includes("ark")){
+      recordid =  state.url.toString().split("/id/").pop();
+    }
+   
     const recordid_KEY = makeStateKey<any>('record-' + recordid);
     
     if (this.transferState.hasKey(recordid_KEY)) {

@@ -186,6 +186,13 @@
   height: 1.5em;
 }
 
+:host /deep/  .ui-dialog .ui-dialog-titlebar{
+  background-color: #f1f1f1;
+  color: #212121;
+  font-family: sans-serif;
+  font-size: 16px;
+}
+
 :host /deep/ .ui-treetable-resizable .ui-treetable-thead > tr > th{
   background-color: #1E6BA1;
   /* border-color: coral; */

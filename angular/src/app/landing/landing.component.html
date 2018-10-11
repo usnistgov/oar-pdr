@@ -28,7 +28,7 @@
       <div class="ui-g">
           <div class="ui-g-10 ui-md-10 ui-lg-10 ui-sm-12">
               <div class="ui-g">
-                  <div class="ui-g-12 ui-md-12 ui-lg-12 ui-sm-11">
+                  <div class="ui-g-12 ui-md-12 ui-lg-12 ui-sm-12">
                       <span class="recordType" [ngSwitch]="record['@type'][0]">
                           <b *ngSwitchCase="'nrd:SRD'">Standard Reference Data</b>
                           <b *ngSwitchCase="'nrdp:DataPublication'">Data Publication</b>
@@ -72,11 +72,12 @@
                           <i style="cursor: pointer;" class="faa" [ngClass]="{'faa-plus-square-o': !clickContact, 'faa-minus-square-o': clickContact}"
                           aria-hidden="true" (click)="closeContent = !closeContent; clickContact=expandContact();"></i>
 
-                          <a [(href)]="record.landingPage" target="_blank" style="margin-left:50%; float: right;">
-                              <button  pButton
-                                      type="button" style="background-color: #277E2F;font-weight: bold;" icon="faa faa-external-link" label="Visit Home Page"></button>
-                          </a>
-
+                          <span *ngIf="record.landingPage">
+                                <a [(href)]="record.landingPage" target="_blank" style="margin-left:50%; float: right;">
+                                    <button  pButton type="button" style="background-color:#1371AE;font-weight: bold;" icon="faa faa-external-link" label="Visit Home Page"></button>
+                                </a>
+                          </span>
+                          
                           <div [collapse]="!closeContent">
                               <div class="card customcard">
                                   <span class="" *ngIf="record.contactPoint.fn">
@@ -148,7 +149,7 @@
               <div class="ui-g">
                   <div class="ui-g-12 ui-md-12 ui-lg-12 ui-sm-12">
                       <div *ngIf="metadata != true && similarResources != true ">
-                          <description-resources [record]="record" [files]="files" [distdownload]="distdownload" [isInternal]="isInternal" ></description-resources>
+                          <description-resources [record]="record" [files]="files" [distdownload]="distdownload" [isInternal]="isInternal" [filescount]="filescount" ></description-resources>
                       </div>
                       <div *ngIf="metadata == true && similarResources != true ">
                           <metadata-detail [record]="record" [serviceApi]="serviceApi" ></metadata-detail>

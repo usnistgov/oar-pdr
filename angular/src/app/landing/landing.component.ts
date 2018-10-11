@@ -261,7 +261,7 @@ updateMenu(){
              if(author.familyName !== null && author.familyName !== undefined)
                  this.citeString += author.familyName +', ';
              if(author.givenName !== null && author.givenName !== undefined)
-                 this.citeString +=  author.givenName+' ';
+                 this.citeString +=  author.givenName;
              if(author.middleName !== null && author.middleName !== undefined)
                  this.citeString += author.middleName;
              if( i != this.record['authors'].length-1 )    
@@ -289,10 +289,9 @@ updateMenu(){
    * Get the params OnInit
    */
   ngOnInit() {
-
+    console.log("test:"+paramid);
     var paramid = this.route.snapshot.paramMap.get('id');
     this.files =[];
-    
       this.route.data.map(data => data.searchService )
        .subscribe((res)=>{
          this.onSuccess(res);
@@ -310,7 +309,7 @@ updateMenu(){
     return (Object.keys(obj).length === 0);
   }
 
-
+  filescount : number = 0;
   createNewDataHierarchy(){
     var testdata = {}
     // console.log(dnode);
@@ -334,17 +333,20 @@ updateMenu(){
       //   // console.log("TESt:"+path.filepath);
       //   tempfiletest = path.filepath;
       // } 
-      if(i != 0 && path.filepath) 
+      console.log("path:"+path.filepath);
+      if(path.filepath && !path['@type'].includes('nrd:Hidden')) 
       {
         if(!path.filepath.startsWith("/"))
           path.filepath = "/"+path.filepath;
         const pathParts = path.filepath.split('/');
         pathParts.shift(); // Remove first blank element from the parts array.
         let currentLevel = tree; // initialize currentLevel to root
+        
         pathParts.forEach((part) => { 
           
         // check to see if the path already exists.
         const existingPath = currentLevel.filter(level => level.data.name === part);
+   
         if (existingPath.length > 0) {
           
           // The path to this item was already in the tree, so don't add it again.
@@ -366,6 +368,7 @@ updateMenu(){
             //   currentLevel = newPart.children;
             // }else{
             //console.log("DU::"+path.downloadURL);
+
             const newPart = {
               data : {
                 name : part,
@@ -376,10 +379,12 @@ updateMenu(){
                 filetype: path['@type'][0] 
               },children: []
             };
+           
             currentLevel.push(newPart);
             currentLevel = newPart.children;
           // }
         }
+        this.filescount = this.filescount+1;
         });
       }
       i= i+1;

@@ -21,7 +21,7 @@ export class DescriptionComponent {
  @Input() files: TreeNode[];
  @Input() distdownload: string;
  @Input() editContent: boolean;
- @Input() loginuser: boolean;
+ @Input() filescount: number;
 
  addAllFileSpinner:boolean = false;
  fileDetails:string = '';
@@ -40,6 +40,7 @@ export class DescriptionComponent {
  cols: any[];
  fileNode: TreeNode;
  
+
 //  onNodeSelect(event, sdata){
 //      alert("Node select ::"+sdata.name);
 //  }
@@ -138,6 +139,7 @@ checkReferences(){
  ngOnInit(){
     this.cdr.detectChanges();
     this.files  =<TreeNode[]>this.files[0].data;
+    
     //console.log(this.files);
     this.cols = [
         { field: 'name', header: 'Name', width: '60%' },
