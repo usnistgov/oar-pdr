@@ -58,47 +58,46 @@
             <col *ngFor="let col of columns"  [style.width]="col.width">
         </colgroup>
     </ng-template>
-    <ng-template pTemplate="header" let-columns >
-        <tr>
+        <ng-template pTemplate="header" let-columns >
+          <tr>
             <th *ngFor="let col of columns"  ttResizableColumn>
                 {{col.header}} 
                 <!--<p-treeTableSortIcon [field]="col.field"></p-treeTableSortIcon>-->
             </th>
-        </tr>
+          </tr>
         </ng-template>
-            <ng-template pTemplate="body" let-rowNode let-rowData="rowData"  let-columns="columns">
-               <tr [ttSelectableRow]="rowNode" (click)="openDetails($event,rowData,op3)">
-                   <td><p-treeTableToggler [rowNode]="rowNode"></p-treeTableToggler>
-                        <a (click)="openDetails($event,rowData,op3)"> {{rowData.name}} </a>
-                    </td>
-                    <td>{{rowData.mediatype}}</td>
-                    <td>{{rowData.size}}</td>
-                    <td>
-                        <span *ngIf=" rowData.downloadUrl ">
-                            <a href="{{rowData.downloadUrl}}"><i class="faa faa-download" aria-hidden="true"></i></a>
-                            <span [hidden] ="!addFileSpinner" style="float:right;">
-                            <p-progressSpinner [style]="{width: '20px', height: '20px', float: 'right'}" ></p-progressSpinner>
-                            </span>
-                            <!-- <a style="position:relative; margin-left:0.5em;"  class="faa faa-cart-plus " (click)="addtoCart(rowData.name, rowData.size, rowData.mediatype, rowData.downloadUrl)" ></a>                                 -->
-                        </span> 
-                    </td>
-                </tr>            
-            </ng-template>
-        </p-treeTable>
-    </div>
+        <ng-template pTemplate="body" let-rowNode let-rowData="rowData"  let-columns="columns">
+            <tr [ttSelectableRow]="rowNode" (click)="openDetails($event,rowData,op3)">
+                <td><p-treeTableToggler [rowNode]="rowNode"></p-treeTableToggler>
+                    <a (click)="openDetails($event,rowData,op3)"> {{rowData.name}} </a>
+                </td>
+                <td>{{rowData.mediatype}}</td>
+                <td><span *ngIf="rowData.size">{{formatBytes(rowData.size)}}</span></td>
+                <td>
+                    <span *ngIf=" rowData.downloadUrl ">
+                        <a href="{{rowData.downloadUrl}}"><i class="faa faa-download" aria-hidden="true"></i></a>
+                        <span [hidden] ="!addFileSpinner" style="float:right;">
+                         <p-progressSpinner [style]="{width: '20px', height: '20px', float: 'right'}" ></p-progressSpinner>
+                        </span> <!-- <a style="position:relative; margin-left:0.5em;"  class="faa faa-cart-plus " (click)="addtoCart(rowData.name, rowData.size, rowData.mediatype, rowData.downloadUrl)" ></a>                                 -->
+                    </span> 
+                </td>
+            </tr>            
+        </ng-template>
+    </p-treeTable>
+</div>
                          
-    <br>
-    <div *ngIf="checkReferences()">
-        <h3 id="reference" name="reference"><b>References</b></h3><br> 
+<br>
+<div *ngIf="checkReferences()">
+    <h3 id="reference" name="reference"><b>References</b></h3><br> 
         <span class="font14" style="margin-left:0.5em" *ngIf="isDocumentedBy"> 
             This data is discussed in :
-            <span style="padding-left:2.75em" *ngFor="let refs of record['references']">
-                <span  *ngIf="refs['refType'] == 'IsDocumentedBy'">
+        <span style="padding-left:2.75em" *ngFor="let refs of record['references']">
+        <span  *ngIf="refs['refType'] == 'IsDocumentedBy'">
                     <br> <i class="faa faa-external-link"><a class="references" href={{refs.location}} target="blank">{{ refs.label }}</a></i>
-                </span>
-                <br>
-            </span>
-            <br>
+        </span>
+        <br>
+        </span>
+        <br>
         </span>
         <span class="font14"  *ngIf="isReferencedBy"> 
             This data is referenced in : <br>
@@ -115,20 +114,25 @@
         <div *ngIf="isNodeSelected" class="filecard">
             <div class="ui-g filesection">
                 <div class="ui-g-12 ui-md-12 ui-lg-12 ui-sm-10">
-                    <span>
-                        <span class="textstyle1">Selected File </span><br>
-                        <span class="font14">{{ fileNode ? fileNode.name : '' }}</span>
+                    <span class="font8" style="color:grey" >
+                        <span *ngIf="fileNode.filetype == 'nrdp:DataFile' ">Selected File</span>
+                        <span *ngIf="fileNode.filetype == 'nrdp:Subcollection'">Selected SubCollection </span>
+                        <br>
                     </span>
-                    <span class="font8">
+                    <span class="font14">{{ fileNode ? fileNode.name : '' }}</span>
+                    <span *ngIf="fileNode.filetype == 'nrdp:DataFile' " class="font8">
                         <br><b>Type:</b>
-                        <span class="textstyle1">{{ fileNode.mediatype ? fileNode.mediatype : 'Not Available'}} </span>
+                        <span style="margin-left:0.5em;" class="textstyle1">{{ fileNode.mediatype ? fileNode.mediatype : 'Not Available'}} </span>
                     </span>
-                    <span class="font8" style="margin-left: 2.5rem">Size: 
-                        <span class="textstyle1">{{ fileNode.size ? fileNode.size : 'Not Specified'}} </span>
+                    <span *ngIf="fileNode.filetype == 'nrdp:DataFile' " class="font8" style="margin-left: 2.5rem">Size: 
+                        <span *ngIf="fileNode.size" class="textstyle1">{{ formatBytes(fileNode.size) }} </span>
+                        <span *ngIf="!fileNode.size" class="textstyle1"><i>Not Available</i></span>
                     </span>
                     <br><span class="font10"><b>Description:</b> </span>
+
                     <div class="well filedesc" >
-                        {{ fileNode.description ? fileNode.description : 'Not Available'}}
+                        <span *ngIf="!fileNode.mediatype"><i>No Description Available</i></span>
+                        <span *ngIf="fileNode.mediatype">{{ fileNode.description }} </span>
                     </div>                                        
                 </div>
             </div>

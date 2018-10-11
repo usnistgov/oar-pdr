@@ -4,6 +4,7 @@ import { Resolve, ActivatedRouteSnapshot } from '@angular/router';
 import { SearchService } from '../shared/search-service/index';
 import { RouterStateSnapshot } from '@angular/router/src/router_state';
 import { Observable } from 'rxjs/Observable';
+// import { catchError } from 'rxjs/operators';
 import { Router } from '@angular/router';
 import * as _ from 'lodash';
 import { Console } from '@angular/core/src/console';
@@ -13,13 +14,13 @@ import {of} from 'rxjs/observable/of';
 import {PLATFORM_ID, Inject} from '@angular/core';
 import {isPlatformServer} from '@angular/common';
 import {makeStateKey, TransferState} from '@angular/platform-browser';
-
+import { _throw } from 'rxjs/observable/throw';
 @Injectable()
 export class SearchResolve implements Resolve<any> {
    
   constructor(private searchService: SearchService,
               @Inject(PLATFORM_ID) private platformId,
-              private transferState:TransferState) {}
+              private transferState:TransferState, private rtr: Router) {}
  
   /** Working below **/
   //  constructor(private searchService: SearchService) {}
@@ -41,7 +42,21 @@ export class SearchResolve implements Resolve<any> {
     else {
         // return this.searchService.testdata() 
         return this.searchService.searchById(recordid)
+        .catch((err: Response, caught: Observable<any[]>) => {
+            if (err !== undefined) {
+              console.log("ERROR STATUS :::"+err.status);
+              if(err.status >= 500){
+                this.rtr.navigate(["/error", recordid]);
+              }
+              if(err.status >= 400 && err.status < 500 ){
+                 this.rtr.navigate(["/usererror", recordid]); 
+              }
+              //return Observable.throw('The Web server (running the Web site) is currently unable to handle the request.');
+            }
+            return Observable.throw(caught);
+          })
             .pipe(
+               
                 tap(record => {
                     if (isPlatformServer(this.platformId)) {
                         

@@ -24,7 +24,7 @@
          </div>
       </div>
   </div>
-   <div *ngIf="record.length !== 0" >
+   <div *ngIf="record.length !== 0 && isId === true" >
       <div class="ui-g">
           <div class="ui-g-10 ui-md-10 ui-lg-10 ui-sm-12">
               <div class="ui-g">
@@ -127,7 +127,9 @@
                           <span *ngFor="let release of record.versionHistory">
                              <br> <b [innerHTML]="renderRelVer(release, record.version)"></b> &nbsp;&nbsp;
                              <span *ngIf="release.issued">Released: {{release.issued}}</span>
-                             <span *ngIf="release.location || release.refid"> &nbsp;&nbsp; <i [innerHTML]="renderRelId(release, record.version)"></i> </span>
+                             <span *ngIf="release.location || release.refid"> &nbsp;&nbsp; 
+                                 <i [innerHTML]="renderRelId(release, record.version)"></i> 
+                            </span>
                              <span *ngIf="release.description"> <br> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                                <i>{{release.description}}</i>
                              </span>
@@ -155,7 +157,7 @@
                   <div *ngIf="record.length !== 0">
                       <p-dialog  class="citationDialog" [closable]="false" [(visible)]="display" modal="modal" width="600" height="350" responsive="true" #citeDialog>
                           <p-header> Citation
-                              <button style="position:relative; float:right; width: 1.5em; height: 1.5em; background-color:#1E6BA1; " type="button" pButton icon="faa faa-close" (click)="closeDialog()"></button>
+                              <button style="position:relative; float:right; background-color:#1E6BA1; " type="button" pButton icon="faa faa-close" (click)="closeDialog()"></button>
                           </p-header>
                           <span>Copy the recommended text to cite this resource:</span> <br><br>
                           <p contenteditable="false" style="font-size: 14px;" >{{ citeString }}</p>
