@@ -14,7 +14,7 @@ import nistoar.pdr.preserv.bagit.builder as bldr
 from nistoar.pdr.preserv.bagit.bag import NISTBag
 from nistoar.pdr.preserv import AIPValidationError
 
-# datadir = nistoar/preserv/data
+# datadir = nistoar/pdr/preserv/data
 datadir = os.path.join( os.path.dirname(os.path.dirname(__file__)), "data" )
 
 testdir = os.path.dirname(os.path.abspath(__file__))
@@ -143,12 +143,14 @@ class TestMultibagSIPHandler(test.TestCase):
         with open(os.path.join(datadir, "bagger_conf.yml")) as fd:
             baggercfg = yaml.load(fd)
         baggercfg.update({
-            'headbag_cache':   self.pubcache,
-            'distrib_service': {
-                'service_endpoint': "http://localhost:9091/"
-            },
-            'metadata_service': {
-                'service_endpoint': "http://localhost:9092/"
+            'repo_access': {
+                'headbag_cache':   self.pubcache,
+                'distrib_service': {
+                    'service_endpoint': "http://localhost:9091/"
+                },
+                'metadata_service': {
+                    'service_endpoint': "http://localhost:9092/"
+                }
             }
         })            
             
@@ -184,7 +186,9 @@ class TestMultibagSIPHandler(test.TestCase):
         self.sip = sip.MIDASSIPHandler(self.midasid, self.config)
 
         self.assertEqual(self.sip.state, status.FORGOTTEN)
+
         self.sip.bagit()
+
         self.assertTrue(os.path.exists(os.path.join(self.store, 
                                           self.midasid+".1_0_0.mbag0_4-0.zip")))
         self.assertTrue(not os.path.exists(os.path.join(self.store, 
@@ -253,14 +257,14 @@ class TestMultibagSIPHandler(test.TestCase):
             # check contents of revision
             bagdir = os.path.join(self.store, self.midasid+".1_1_0.mbag0_4-1")
             unzip(bagdir+".zip")
-            datadir = os.path.join(bagdir, "data")
-            self.assertTrue(os.path.isdir(datadir))
-            self.assertGreater(len(os.listdir(datadir)), 1)
-            datadir = os.path.join(bagdir, "metadata")
-            self.assertTrue(os.path.isdir(datadir))
-            self.assertTrue(os.path.isfile(os.path.join(datadir,"pod.json")))
-            self.assertTrue(os.path.isfile(os.path.join(datadir,"nerdm.json")))
-            self.assertGreater(len(os.listdir(datadir)), 2)
+            bdatadir = os.path.join(bagdir, "data")
+            self.assertTrue(os.path.isdir(bdatadir))
+            self.assertGreater(len(os.listdir(bdatadir)), 1)
+            bdatadir = os.path.join(bagdir, "metadata")
+            self.assertTrue(os.path.isdir(bdatadir))
+            self.assertTrue(os.path.isfile(os.path.join(bdatadir,"pod.json")))
+            self.assertTrue(os.path.isfile(os.path.join(bdatadir,"nerdm.json")))
+            self.assertGreater(len(os.listdir(bdatadir)), 2)
 
             with open(os.path.join(bagdir,"multibag","member-bags.tsv")) as fd:
                 members = [l.strip().split('\t')[0] for l in fd.readlines()]
@@ -321,14 +325,14 @@ class TestMultibagSIPHandler(test.TestCase):
             # check contents of revision
             bagdir = os.path.join(self.store, self.midasid+".1_0_1.mbag0_4-1")
             unzip(bagdir+".zip")
-            datadir = os.path.join(bagdir, "data")
-            self.assertTrue(os.path.isdir(datadir))
-            self.assertEqual(len(os.listdir(datadir)), 0)
-            datadir = os.path.join(bagdir, "metadata")
-            self.assertTrue(os.path.isdir(datadir))
-            self.assertTrue(os.path.isfile(os.path.join(datadir,"pod.json")))
-            self.assertTrue(os.path.isfile(os.path.join(datadir,"nerdm.json")))
-            self.assertGreater(len(os.listdir(datadir)), 2)
+            bdatadir = os.path.join(bagdir, "data")
+            self.assertTrue(os.path.isdir(bdatadir))
+            self.assertEqual(len(os.listdir(bdatadir)), 0)
+            bdatadir = os.path.join(bagdir, "metadata")
+            self.assertTrue(os.path.isdir(bdatadir))
+            self.assertTrue(os.path.isfile(os.path.join(bdatadir,"pod.json")))
+            self.assertTrue(os.path.isfile(os.path.join(bdatadir,"nerdm.json")))
+            self.assertGreater(len(os.listdir(bdatadir)), 2)
             
             
         finally:
