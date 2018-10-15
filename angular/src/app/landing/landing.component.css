@@ -313,7 +313,7 @@
   font-family: sans-serif;
 }
 :host /deep/ .ui-overlaypanel .ui-overlaypanel-close {
-  background-color:firebrick;
+  background-color: #1E6BA1;
   border-radius: 50%;
   transition: background-color 0.3s;
   right: -8px;
@@ -323,3 +323,4 @@
   line-height: 1.2em;
   text-align: center;
 }
+

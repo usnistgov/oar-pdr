@@ -458,6 +458,8 @@ updateMenu(){
   public setTitle( newTitle: string) {
     this.titleService.setTitle( newTitle );
   }
+
+ 
   
   checkReferences(){
     if(Array.isArray(this.record['references']) ){

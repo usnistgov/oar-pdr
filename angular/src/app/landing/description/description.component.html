@@ -26,7 +26,7 @@
     <span style="margin-left:0em" *ngIf="record['accessLevel'] === 'public'">
         <i class="faa faa-globe"></i> These data are public. 
     </span>
-    <span  *ngIf="record.landingPage && record['landingPage'].indexOf('/od/id') === -1 ">
+    <span  *ngIf="record['landingPage'] && record['landingPage'].indexOf('/od/id') === -1 ">
         For more information visit 
          <a href="record.landingPage">home page</a>.
     </span>    
@@ -72,7 +72,7 @@
           </tr>
         </ng-template>
         <ng-template pTemplate="body" let-rowNode let-rowData="rowData"  let-columns="columns">
-            <tr [ttSelectableRow]="rowNode" (click)="openDetails($event,rowData,op3)">
+            <tr [ttSelectableRow]="rowNode">
                 <td><p-treeTableToggler [rowNode]="rowNode"></p-treeTableToggler>
                     <a (click)="openDetails($event,rowData,op3)"> {{rowData.name}} </a>
                 </td>
