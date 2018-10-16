@@ -1,5 +1,10 @@
-import { Component, Input } from '@angular/core';
+
 import { ActivatedRoute }     from '@angular/router';
+import {Component,Input, Inject, OnInit, Optional, PLATFORM_ID} from '@angular/core';
+import {isPlatformBrowser} from '@angular/common';
+import {RESPONSE} from '@nguniversal/express-engine/tokens';
+import {Response} from 'express';
+
 @Component({
   moduleId: module.id,
   styleUrls: ['landing.component.css'],
@@ -22,11 +27,13 @@ import { ActivatedRoute }     from '@angular/router';
 
 export class ErrorComponent {
     searchid:string;
+    @Optional() @Inject(RESPONSE) private response: Response;
 
     constructor(private route: ActivatedRoute){
     }
     ngOnInit(){
         this.searchid = this.route.snapshot.paramMap.get('id');
+
     }
   ngAfterViewInit(){
   }
@@ -51,14 +58,20 @@ export class ErrorComponent {
   })
   
   export class UserErrorComponent {
+    @Optional() @Inject(RESPONSE) private response: Response;
       searchid:string;
       errorcode: string;
-      constructor(private route: ActivatedRoute){
+      constructor(private route: ActivatedRoute
+     ){
   
       }
       ngOnInit(){
           this.searchid = this.route.snapshot.paramMap.get('id');
           this.errorcode = this.route.snapshot.paramMap.get('errorcode');
+          console.log(this.errorcode);
+          if (this.errorcode == "404") {
+            this.response.status(404);
+          }
       }
     ngAfterViewInit(){
   
