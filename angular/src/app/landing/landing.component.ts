@@ -8,6 +8,7 @@ import 'rxjs/add/operator/map';
 import { Subscription } from 'rxjs/Subscription';
 import { environment } from '../../environments/environment';
 import { AppConfig } from '../shared/config-service/config.service';
+import { ErrorComponent } from './error.component';
 // import { ResComponents, DataHierarchy } from "./datacomponents.component";
 
 interface reference {
@@ -281,7 +282,10 @@ updateMenu(){
         if(this.record['publisher'].name !== null && this.record['publisher'].name !== undefined)
           this.citeString += this.record['publisher'].name;
       }
-      if(this.isDOI)   this.citeString += ", "+ this.record['doi'];
+      if(this.isDOI) {
+        var doistring= "https://doi.org/"+_.split(this.record['doi'],':')[1];
+        this.citeString += ", "+doistring  ;
+      } 
       this.citeString += " (Accessed "+ date.getFullYear()+"-"+(date.getMonth()+1)+"-"+date.getDate()+")";
   }
 
@@ -296,8 +300,9 @@ updateMenu(){
        .subscribe((res)=>{
          this.onSuccess(res);
        }, error =>{
-       console.log("There is an error in searchservice.");
-       this.onError(" There is an error");
+          console.log("There is an error in searchservice.");
+          this.onError(" There is an error");
+          throw new ErrorComponent(this.route);
        });
     
   }

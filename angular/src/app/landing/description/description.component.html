@@ -26,19 +26,19 @@
     <span style="margin-left:0em" *ngIf="record['accessLevel'] === 'public'">
         <i class="faa faa-globe"></i> These data are public. 
     </span>
-    <span  *ngIf="record['landingPage'] && record['landingPage'].indexOf('/od/id') === -1 ">
-        For more information visit 
-         <a href="record.landingPage">home page</a>.
-    </span>    
+      
     <span *ngIf="record['accessLevel'] === 'restricted public'">
         <i class="faa faa-lock"></i>This data has access restrictions. 
     </span>   
-    <br>
     <span *ngIf="record['rights']"> 
-        The access rights are {{ record.rights }} <br>
+       <br> The access rights are {{ record.rights }} <br>
     </span>
+    <span  *ngIf="record['landingPage'] && record['landingPage'].indexOf('/od/id') === -1 ">
+        For more information visit the
+         <a href="record.landingPage">home page</a>.
+    </span> 
     <span style="margin-left:0em" *ngIf="isAccessPage">
-        Data is available via the following locations: 
+        <br>Data is available via the following locations: 
         <br>   
         <span style="padding-left:2.00em" *ngFor="let title of accessTitles; let i =index">
             <i class="faa faa-external-link"> <span style="margin-left:0.3em;"> <a href="{{accessUrls[i]}}">{{title}}</a></span>
