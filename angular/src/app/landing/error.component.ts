@@ -27,6 +27,7 @@ import {Response} from 'express';
 
 export class ErrorComponent {
     searchid:string;
+    errorcode: string;
     @Optional() @Inject(RESPONSE) private response: Response;
 
     constructor(private route: ActivatedRoute){
