@@ -9,4 +9,7 @@ before_install:
   - cd docker && bash ./dockbuild.sh
 
 script:
-  - bash ./testall
+  - echo '#####' BUILDING AND RUNNING PYTHON TESTS && echo
+  - bash ./testall python
+  - echo && echo '#####' BUILDING (only) ANGULAR && echo
+  - bash ./makedist angular
