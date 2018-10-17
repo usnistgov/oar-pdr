@@ -119,6 +119,7 @@ class TestMIDASSIPHandler(test.TestCase):
 
     def test_bagit(self):
         self.assertEqual(self.sip.state, status.FORGOTTEN)
+        self.assertEqual(len(os.listdir(self.sip.stagedir)), 0)
         self.sip.bagit()
         self.assertTrue(os.path.exists(os.path.join(self.store, 
                                           self.midasid+".1_0_0.mbag0_4-0.zip")))
@@ -139,6 +140,11 @@ class TestMIDASSIPHandler(test.TestCase):
         # check for checksum files in review dir
         cf = os.path.join(self.revdir, "1491/_preserv", self.midasid+"_0.sha256")
         self.assertTrue(os.path.exists(cf), "Does not exist: "+cf)
+
+        # head bag still in staging area?
+        staged = os.listdir(self.sip.stagedir)
+        self.assertEqual(len(staged), 1)
+        self.assertTrue(os.path.basename(staged[0]).endswith("-0.zip"))
         
     def test_is_preserved(self):
         self.assertEqual(self.sip.state, status.FORGOTTEN)

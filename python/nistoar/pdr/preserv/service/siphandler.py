@@ -13,6 +13,7 @@ from ..bagit.serialize import DefaultSerializer
 from ..bagit.bag import NISTBag
 from ..bagit.validate import NISTAIPValidator
 from ..bagit.multibag import MultibagSplitter
+from ..bagger import utils as bagutils
 from ..bagger.base import checksum_of
 from ..bagger.midas import PreservationBagger
 from .. import (ConfigurationException, StateException, PODError)
@@ -544,12 +545,22 @@ class MIDASSIPHandler(SIPHandler):
                                 id=self.bagger.name)
 
         # clean up staging area
-        for f in savefiles:
-            try:
-                os.remove(f)
-            except Exception, ex:
-                log.error("Trouble cleaning up serialized bag in staging dir: "+
-                          "\n  %s\nReason: %s", f, str(ex))
+        if self.cfg.get('clean_bag_staging', True):
+            headbag = None
+            if not self.cfg.get('clean_headbag_staging', False):
+                bags = [b for b in [os.path.basename(f) for f in savefiles]
+                          if bagutils.is_legal_bag_name(b) and
+                             not b.endswith('sha256')]
+                if len(bags):
+                    headbag = '/' + bagutils.find_latest_head_bag(bags)
+            for f in savefiles:
+                if f.endswith(headbag):
+                    continue
+                try:
+                    os.remove(f)
+                except Exception, ex:
+                    log.error("Trouble cleaning up serialized bag in staging "+
+                          "dir:\n  %s\nReason: %s", f, str(ex))
 
         log.info("Completed preservation of SIP %s", self.bagger.name)
 
