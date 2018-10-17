@@ -268,6 +268,36 @@ class TestBuilder(test.TestCase):
                       os.path.join(self.bag.bagdir,"metadata",path,"annot.json"))
         self.assertEquals(self.bag.annot_file_for(""),
                       os.path.join(self.bag.bagdir,"metadata","annot.json"))
+
+    def test_update_annot_for_res(self):
+        md = { "title": "We Are The Champions!", "version":  "2.0"}
+        self.bag.update_annot_for('', md)
+        annotf = self.bag.annot_file_for('')
+        with open(annotf) as fd:
+            nmd = json.load(fd)
+        self.assertEqual(nmd['title'], md['title'])
+        self.assertEqual(nmd['version'], md['version'])
+        
+        self.bag.update_annot_for('', { 'version': "2.1"})
+        with open(annotf) as fd:
+            nmd = json.load(fd)
+        self.assertEqual(nmd['title'], md['title'])
+        self.assertEqual(nmd['version'], '2.1')
+        
+    def test_update_annot_for_file(self):
+        md = { "title": "We Are The Champions!", "version":  "2.0"}
+        self.bag.update_annot_for('foo/bar/chu.csv', md)
+        annotf = self.bag.annot_file_for('foo/bar/chu.csv')
+        with open(annotf) as fd:
+            nmd = json.load(fd)
+        self.assertEqual(nmd['title'], md['title'])
+        self.assertEqual(nmd['version'], md['version'])
+        
+        self.bag.update_annot_for('foo/bar/chu.csv', { 'version': "2.1"})
+        with open(annotf) as fd:
+            nmd = json.load(fd)
+        self.assertEqual(nmd['title'], md['title'])
+        self.assertEqual(nmd['version'], '2.1')
         
     def test_add_metadata_for_coll(self):
         path = os.path.join("trial1","gold")

@@ -220,6 +220,11 @@ class MIDASMetadataBagger(SIPBagger):
         else:
             self.resmd = read_nerd(outnerd)
 
+        # ensure an initial version
+        if 'version' not in self.resmd:
+            self.resmd['version'] = "1.0.0"
+            self.bagbldr.update_annot_for('', {'version': self.resmd["version"]})
+
     def data_file_inventory(self):
         """
         get a list of the data files available to be part of this dataset.

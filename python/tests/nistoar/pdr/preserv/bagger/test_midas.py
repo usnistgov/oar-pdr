@@ -127,6 +127,7 @@ class TestMIDASMetadataBaggerMixed(test.TestCase):
         del src['components']
         del src['inventory']
         del src['dataHierarchy']
+        del src['version']
         self.assertEqual(data, src)
         self.assertEqual(data.keys(), src.keys())  # same order
 
@@ -672,8 +673,16 @@ class TestPreservationBagger(test.TestCase):
         self.bagr.prepare(nodata=False)
         bag = NISTBag(self.bagr.bagdir)
         mdrec = bag.nerdm_record(True)
+        self.assertEqual(mdrec['version'], '1.0.0')  # set as the default
 
-        self.assertNotIn('version', mdrec)
+        del mdrec['version']
+        newver = self.bagr.determine_updated_version(mdrec, bag)
+        self.assertEqual(newver, "1.0.0")
+        newver = self.bagr.determine_updated_version(mdrec)
+        self.assertEqual(newver, "1.0.0")
+        newver = self.bagr.determine_updated_version()
+        self.assertEqual(newver, "1.0.0")
+
         newver = self.bagr.determine_updated_version(mdrec, bag)
         self.assertEqual(newver, "1.0.0")
         newver = self.bagr.determine_updated_version(mdrec)
@@ -703,7 +712,7 @@ class TestPreservationBagger(test.TestCase):
 
         bag = NISTBag(self.bagr.bagdir)
         mdrec = bag.nerdm_record(True)
-        self.assertNotIn('version', mdrec)
+        self.assertEqual(mdrec['version'], "1.0.0")
 
         self.bagr.finalize_version()
         mdrec = bag.nerdm_record(True)
@@ -712,6 +721,17 @@ class TestPreservationBagger(test.TestCase):
         annotf = os.path.join(bag.metadata_dir, "annot.json")
         data = utils.read_nerd(annotf)
         self.assertEqual(data['version'], "1.0.0")
+
+        self.bagr.bagbldr.update_annot_for('', {'version': "1.0.0+ (in edit)"})
+        data = utils.read_nerd(annotf)
+        self.assertEqual(data['version'], "1.0.0+ (in edit)")
+
+        self.bagr.finalize_version()
+        data = utils.read_nerd(annotf)
+        self.assertEqual(data['version'], "1.0.1")
+
+        mdrec = bag.nerdm_record(True)
+        self.assertEqual(mdrec['version'], "1.0.1")
 
             
 

@@ -631,6 +631,30 @@ class BagBuilder(PreservationSystem):
         return os.path.join(self.bagdir, "metadata", destpath,
                             FILEANNOT_FILENAME)
 
+    def update_annot_for(self, destpath, mdata):
+        """
+        merge (via update) the given metadata into the annotation data for a 
+        given destination path in the bag.  The properties in the input data
+        will override that found in the annotation file (using dict.update()).
+
+        :param destpath str:  the path to the data file relative to the 
+                              dataset's root. (Caution: not the bag's root.)
+                              An empty string refers to the resource-level 
+                              metadata.  
+        :param mdata dict:    the metadata to merge in.  
+        """
+        if not mdata:
+            return
+        self.ensure_metadata_dirs(destpath)
+        annotf = self.annot_file_for(destpath)
+        if self.bagdir and os.path.exists(annotf):
+            amdata = read_nerd(annotf)
+        else:
+            amdata = {}
+        amdata.update(mdata)
+        write_json(amdata, annotf)
+            
+
     def init_filemd_for(self, destpath, write=False, examine=None,
                         disttype="DataFile"):
         """
