@@ -544,6 +544,12 @@ class MIDASSIPHandler(SIPHandler):
                            summary="New MIDAS SIP preserved: "+self.bagger.name,
                                 id=self.bagger.name)
 
+        # remove the metadata bag directory so that that an attempt to update
+        # will force a rebuild based on the published version
+        mdbag = os.path.join(self.mdbagdir, self.bagger.name)
+        if os.path.isdir(mdbag):
+            shutil.rmtree(mdbag)
+
         # clean up staging area
         if self.cfg.get('clean_bag_staging', True):
             headbag = None

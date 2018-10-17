@@ -145,6 +145,11 @@ class TestMIDASSIPHandler(test.TestCase):
         staged = os.listdir(self.sip.stagedir)
         self.assertEqual(len(staged), 1)
         self.assertTrue(os.path.basename(staged[0]).endswith("-0.zip"))
+
+        # has the metadata bag been cleaned up?
+        mdbagdir = os.path.join(self.sip.mdbagdir, self.midasid)
+        self.assertFalse( os.path.exists(mdbagdir),
+                          "Failed to clean up metadata bag directory: "+mdbagdir)
         
     def test_is_preserved(self):
         self.assertEqual(self.sip.state, status.FORGOTTEN)
