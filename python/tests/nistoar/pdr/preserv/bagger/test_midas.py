@@ -31,9 +31,10 @@ def setUpModule():
 #                        level=logging.INFO)
     rootlog = logging.getLogger()
     loghdlr = logging.FileHandler(os.path.join(tmpdir(),"test_builder.log"))
-    loghdlr.setLevel(logging.INFO)
+    loghdlr.setLevel(logging.DEBUG)
     loghdlr.setFormatter(logging.Formatter(bldr.DEF_BAGLOG_FORMAT))
     rootlog.addHandler(loghdlr)
+    rootlog.setLevel(logging.DEBUG)
 
 def tearDownModule():
     global loghdlr
@@ -136,7 +137,7 @@ class TestMIDASMetadataBaggerMixed(test.TestCase):
         self.assertEqual(data['@id'], "ark:/88434/mds00hw91v")
         self.assertEqual(data['doi'], "doi:10.18434/T4SW26")
         self.assertEqual(len(data['components']), 4)
-        self.assertEqual(data['components'][3]['@type'][0], 'nrd:Hidden')
+        self.assertEqual(data['components'][0]['@type'][0], 'nrd:Hidden')
         self.assertIsInstance(data['@context'], list)
         self.assertEqual(len(data['@context']), 2)
         self.assertEqual(data['@context'][1]['@base'], data['@id'])

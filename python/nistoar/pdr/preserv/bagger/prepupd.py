@@ -381,6 +381,7 @@ class UpdatePrepper(object):
         bag = NISTBag(bagdir)
         mdata = bag.nerd_metadata_for('', merge_annots=True)
         edit_vers = self.make_edit_version(mdata.get('version', "1.0.0"))
+        self.log.debug('Setting edit version to "%s"', edit_vers)
 
         annotf = bag.annotations_file_for('')
         if os.path.exists(annotf):

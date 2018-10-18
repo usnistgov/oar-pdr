@@ -217,10 +217,9 @@ class MIDASMetadataBagger(SIPBagger):
             # part of the data set but don't exist in the input directories.
             # These could be files available via external URLs or files preserved
             # as part of a previous version.  
-            self.resmd = self.bagbldr.add_ds_pod(self.inpodfile, convert=True,
-                                                 savefilemd=True)
-        else:
-            self.resmd = read_nerd(outnerd)
+            self.bagbldr.add_ds_pod(self.inpodfile, convert=True,
+                                    savefilemd=True)
+        self.resmd = NISTBag(self.bagbldr.bagdir).nerdm_record(True)
 
         # ensure an initial version
         if 'version' not in self.resmd:
@@ -807,6 +806,7 @@ class PreservationBagger(SIPBagger):
         """
         bag = NISTBag(self.bagbldr.bagdir)
         newver = self.determine_updated_version(bag=bag)
+        self.siplog.debug('Setting final version to "%s"', newver)
         
         annotf = bag.annotations_file_for('')
         if os.path.exists(annotf):
