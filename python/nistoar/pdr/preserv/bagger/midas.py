@@ -37,6 +37,11 @@ DEF_CHECKSUM_ALG = "sha256"
 DEF_MERGE_CONV = "initdef"  # For merging MIDAS-generated metadata with
                             # initial defaults
 
+# type of update (see determine_update_version())
+_NO_UPDATE    = 0
+_MDATA_UPDATE = 1
+_DATA_UPDATE  = 2
+
 def _midadid_to_dirname(midasid, log=None):
     out = midasid
     if len(midasid) > 32:
@@ -796,7 +801,7 @@ class PreservationBagger(SIPBagger):
 
         return self.bagbldr.bagdir
 
-    def finalize_version(self):
+    def finalize_version(self, update_reason=None):
         """
         update the NERDm version metadatum to reflect the changes set by this
         SIP.  If this SIP represents the initial submission for a dataset, the
@@ -805,16 +810,40 @@ class PreservationBagger(SIPBagger):
         contents included in the SIP and PDR policy.
         """
         bag = NISTBag(self.bagbldr.bagdir)
-        newver = self.determine_updated_version(bag=bag)
+        mdata = bag.nerdm_record(True)
+        (newver, uptype) = self._determine_updated_version(mdata, bag)
         self.siplog.debug('Setting final version to "%s"', newver)
         
         annotf = bag.annotations_file_for('')
         if os.path.exists(annotf):
-            mdata = utils.read_nerd(annotf)
+            adata = utils.read_nerd(annotf)
         else:
-            mdata = OrderedDict()
-        mdata['version'] = newver
-        utils.write_json(mdata, annotf)
+            adata = OrderedDict()
+        adata['version'] = newver
+        verhist = mdata.get('versionHistory', [])
+
+        if uptype != _NO_UPDATE and newver != mdata['version'] and \
+           ('issued' in mdata or 'modified' in mdata) and \
+           not any([h['version'] == newver for h in verhist]):
+            issued = ('modified' in mdata and mdata['modified']) or \
+                     mdata['issued']
+            verhist.append(OrderedDict([
+                ('version', newver),
+                ('issued', issued),
+                ('@id', mdata['@id']),
+                ('location', 'https://data.nist.gov/od/id/'+mdata['@id'])
+            ]))
+            if update_reason is None:
+                if uptype == _MDATA_UPDATE:
+                    update_reason = 'metadata update'
+                elif uptype == _DATA_UPDATE:
+                    update_reason = 'data update'
+                else:
+                    update_reason = ''
+            verhist[-1]['description'] = update_reason
+            adata['versionHistory'] = verhist
+        
+        utils.write_json(adata, annotf)
 
         return newver
 
@@ -843,6 +872,9 @@ class PreservationBagger(SIPBagger):
                             not provided, the current pending AIP bag will be 
                             examined.
         """
+        return self._determine_updated_version(mdrec, bag)[0]
+
+    def _determine_updated_version(self, mdrec=None, bag=None):
         if not bag:
             bag = NISTBag(self.bagbldr.bagdir)
         if not mdrec:
@@ -866,16 +898,16 @@ class PreservationBagger(SIPBagger):
                     # found a file
                     ver[1] += 1
                     ver[2] = 0
-                    return ".".join([str(v) for v in ver])
+                    return (".".join([str(v) for v in ver]), _DATA_UPDATE)
 
             # otherwise, this is a metadata update, which increments the
             # third field.
             ver[2] += 1
-            return ".".join([str(v) for v in ver])
+            return (".".join([str(v) for v in ver]), _MDATA_UPDATE)
 
         # otherwise, this looks like a first-time SIP submission; take the
         # version string as is.
-        return oldver
+        return (oldver, _NO_UPDATE)
             
 
     def _validate(self, config):

@@ -332,6 +332,15 @@ class TestPreservationUpdateBagger(test.TestCase):
 
             depinfof = os.path.join(bag.dir, "multibag", "deprecated-info.txt")
             self.assertTrue(not os.path.exists(depinfof))
+
+            mdata = bag.nerdm_record()
+            self.assertEqual(mdata['version'], "1.1.0")
+            self.assertIn('versionHistory', mdata)
+            hist = mdata['versionHistory']
+            self.assertEqual(hist[-1]['version'], "1.1.0")
+            self.assertEqual(hist[-1]['description'], "data update")
+            self.assertEqual(hist[0]['version'], "1.0.0")
+            self.assertEqual(len(hist), 2)
             
         finally:
             if os.path.exists(destzip):

@@ -380,16 +380,33 @@ class UpdatePrepper(object):
         """
         bag = NISTBag(bagdir)
         mdata = bag.nerd_metadata_for('', merge_annots=True)
-        edit_vers = self.make_edit_version(mdata.get('version', "1.0.0"))
+        oldvers = mdata.get('version', "1.0.0")
+        verhist = mdata.get('versionHistory', [])
+        edit_vers = self.make_edit_version(oldvers)
         self.log.debug('Setting edit version to "%s"', edit_vers)
 
         annotf = bag.annotations_file_for('')
         if os.path.exists(annotf):
-            mdata = utils.read_nerd(annotf)
+            adata = utils.read_nerd(annotf)
         else:
-            mdata = OrderedDict()
-        mdata['version'] = edit_vers
-        utils.write_json(mdata, annotf)
+            adata = OrderedDict()
+        adata['version'] = edit_vers
+
+        if oldvers != edit_vers and ('issued' in mdata or 'modified' in mdata) \
+           and not any([h['version'] == oldvers] for h in verhist):
+            issued = ('modified' in mdata and mdata['modified']) or \
+                     mdata['issued']
+            verhist.append(OrderedDict([
+                ('version', oldvers),
+                ('issued', issued),
+                ('@id', mdata['@id']),
+                ('location', 'https://data.nist.gov/od/id/'+mdata['@id'])
+            ]))
+            if oldvers == "1.0.0" or oldvers == "1.0" or oldvers == "1":
+                verhist[-1]['description'] = 'initial release'
+            adata['versionHistory'] = verhist
+        
+        utils.write_json(adata, annotf)
         
     def make_edit_version(self, prev_vers):
         return prev_vers + "+ (in edit)"

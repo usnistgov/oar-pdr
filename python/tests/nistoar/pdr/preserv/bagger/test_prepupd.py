@@ -277,6 +277,11 @@ class TestUpdatePrepper(test.TestCase):
         bag = NISTBag(root)
         mdata = bag.nerdm_record(True)
         self.assertEquals(mdata['version'], "1.0.0+ (in edit)")
+        self.assertIn('versionHistory', mdata)
+        self.assertEquals(len(mdata['versionHistory']), 1)
+        self.assertEquals(mdata['versionHistory'][0]['version'], "1.0.0")
+        self.assertEquals(mdata['versionHistory'][0]['@id'], mdata["@id"])
+        self.assertIn('issued', mdata['versionHistory'][0])
 
         depinfof = os.path.join(bag.dir, "multibag", "deprecated-info.txt")
         self.assertTrue(os.path.isfile(depinfof))

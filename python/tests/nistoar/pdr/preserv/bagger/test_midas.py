@@ -730,10 +730,14 @@ class TestPreservationBagger(test.TestCase):
         self.bagr.finalize_version()
         data = utils.read_nerd(annotf)
         self.assertEqual(data['version'], "1.0.1")
+        self.assertIn('versionHistory', data)
 
         mdrec = bag.nerdm_record(True)
         self.assertEqual(mdrec['version'], "1.0.1")
-
+        self.assertIn('versionHistory', mdrec)
+        hist = mdrec['versionHistory']
+        self.assertEqual(hist[-1]['version'], "1.0.1")
+        self.assertEqual(hist[-1]['description'], "metadata update")
             
 
         
