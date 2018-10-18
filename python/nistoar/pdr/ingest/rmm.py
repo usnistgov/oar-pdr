@@ -259,9 +259,12 @@ class IngestClient(object):
                 raise
 
             # success; send file to millionaire acres
+            dest = os.path.join(self._successdir, os.path.basename(recfile))
+            if os.path.isfile(dest):
+                os.remove(dest)
             shutil.move(recfile, self._successdir)
             
-        except OSError as ex:
+        except (OSError, shutil.Error) as ex:
             # problem moving file
             if recfile.startswith(self._inprogdir):
                 state = ("in-progress", "success")
@@ -278,7 +281,7 @@ class IngestClient(object):
                                .format(recfile, str(ex)))
             try:
                 shutil.move(recfile, self._faildir)
-            except OSError as e:
+            except (OSError, IOError, shutil.Error) as e:
                 msg = "Problem moving file from {0} to {1}: {3}" \
                       .format(recfile, self._faildir, str(e))
                 self.log.exception(msg)
