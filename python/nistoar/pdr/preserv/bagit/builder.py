@@ -130,7 +130,7 @@ class BagBuilder(PreservationSystem):
         if not logger:
             logger = log
         self.log = logger
-        self.log.setLevel(NORM)
+        # self.log.setLevel(NORM)
         
         if not config:
             config = {}
@@ -324,7 +324,7 @@ class BagBuilder(PreservationSystem):
             self._unset_logfile()
         filepath = os.path.join(self.bagdir, self.logname)
         self._loghdlr = logging.FileHandler(filepath)
-        # self._loghdlr.setLevel(NORM)
+        self._loghdlr.setLevel(NORM)
         fmt = self.cfg.get('bag_log_format', DEF_BAGLOG_FORMAT)
         self._loghdlr.setFormatter(logging.Formatter(fmt))
         self.log.addHandler(self._loghdlr)
