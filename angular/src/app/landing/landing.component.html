@@ -63,7 +63,7 @@
                   </div>  
               </div>  
               <div class="ui-g">     
-                  <div  class="ui-g-8 ui-md-8 ui-lg-8 ui-sm-8 contactPoint" *ngIf="record.contactPoint">
+                  <div  class="ui-g-8 ui-md-8 ui-lg-8 ui-sm-12 contactPoint" *ngIf="record.contactPoint">
                           Contact:
                           <strong>
                               <a class="font14" *ngIf="isEmail" href="{{record.contactPoint.hasEmail}}" target="_top">
@@ -73,11 +73,9 @@
                           <i style="cursor: pointer;" class="faa" [ngClass]="{'faa-plus-square-o': !clickContact, 'faa-minus-square-o': clickContact}"
                           aria-hidden="true" (click)="closeContent = !closeContent; clickContact=expandContact();"></i>
                           <div [collapse]="!closeContent" class="card customcard">
-                            
                                   <span class="" *ngIf="record.contactPoint.fn">
                                       <span>{{record.contactPoint.fn}}</span>
                                   </span>
-                                  
                                   <span class="font14" *ngIf="isEmail">
                                         <br><strong>Email:</strong>
                                       <a *ngIf="isEmail" href="{{record.contactPoint.hasEmail}}" target="_top">
@@ -88,8 +86,7 @@
                                        <div *ngFor="let address of record.contactPoint.address">
                                           {{address}}
                                        </div>
-                                    </div>
-                             
+                                  </div>
                           </div>
                           <br>
                           <span  *ngIf="isId">Identifier: </span>
@@ -129,16 +126,16 @@
                           </span>
                     </div>
                     <p style="margin-top: 10px;" *ngIf="newer.location">
-                            <b>There is a more recent release of this resource available: &nbsp;&nbsp;
-                            <a href="{{newer.location}}">{{newer.label}}</a></b>
-                         </p>
+                        <b>There is a more recent release of this resource available: &nbsp;&nbsp;
+                        <a href="{{newer.location}}">{{newer.label}}</a></b>
+                    </p>
                   </div>
-                  <div class="ui-g-4 ui-md-4 ui-lg-4 ui-sm-4">
+                  <div class="ui-g-4 ui-md-4 ui-lg-4 ui-sm-12">
                         <span *ngIf="record.landingPage">
-                                <a [(href)]="record.landingPage" target="_blank" style="margin-left:50%; float: right;">
-                                    <button  pButton type="button" class="homePageLink" icon="faa faa-external-link" label="Visit Home Page"></button>
-                                </a>
-                          </span>
+                            <a [(href)]="record.landingPage" target="_blank" style="float: right;">
+                                <button  pButton type="button" class="homePageLink" icon="faa faa-external-link" label="Visit Home Page"></button>
+                            </a>
+                        </span>
                   </div>
               </div>
               <div class="ui-g">
