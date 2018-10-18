@@ -141,9 +141,14 @@ class TestBagDistribClient(test.TestCase):
     def test_describe_head_for_version(self):
         cli = bagclient.BagDistribClient("pdr1010", self.svc)
         self.assertEqual(cli.describe_head_for_version('1'),
-                         {'name': "pdr1010.mbag0_3-2.zip", 'size': 375,
-                          'hashtype': 'sha256', 'id': 'pdr1010', 'version': '1',
-   'hash': 'c35f2b8ec2a4b462c77c6c60548f9a61dc1c043ddb4ba11b388312240c1c78e0' })
+                         {'name': 'pdr1010.mbag0_3-2.zip', 'aipid': 'pdr1010', 
+                          'contentLength': 375, 'sinceVersion': '1',
+                          'contentType': "application/zip",
+                          "serialization": "zip",
+                          'checksum': {'algorithm':"sha256",
+     'hash': 'c35f2b8ec2a4b462c77c6c60548f9a61dc1c043ddb4ba11b388312240c1c78e0'},
+                          'multibagSequence' : 2, "multibagProfileVersion" :"0.3"
+                       })
         
         with self.assertRaises(client.DistribResourceNotFound):
             cli.describe_head_for_version('2')

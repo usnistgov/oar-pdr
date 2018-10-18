@@ -128,14 +128,17 @@ class TestHeadBagCacher(test.TestCase):
         hbfile = os.path.join(self.cachedir, "pdr1010.mbag0_3-2.zip")
         self.assertTrue(os.path.exists(hbfile))
         
-        info = {"id": "pdr1010", "name": "pdr1010.mbag0_3-2.zip",
-                "version": "1", "hashtype": "sha256",
-      "hash": "c35f2b8ec2a4b462c77c6c60548f9a61dc1c043ddb4ba11b388312240c1c78e0"}
-
+        info = {"aipid": "pdr1010", "name": "pdr1010.mbag0_3-2.zip",
+                "sinceVersion": "1", 'checksum': {'algorithm': "sha256",
+    "hash": "c35f2b8ec2a4b462c77c6c60548f9a61dc1c043ddb4ba11b388312240c1c78e0"},
+                "multibagProfileVersion" : "0.3", "contentLength": 375,
+                "serialization": "zip", "contentType": "application/zip", 
+                "multibagSequence": 2}
+                
         self.cacher.confirm_bagfile(info)
         self.assertTrue(os.path.exists(hbfile))
 
-        info["hash"] = "c35f"
+        info["checksum"]["hash"] = "c35f"
         with self.assertRaises(prepupd.CorruptedBagError):
             self.cacher.confirm_bagfile(info, False)
         self.assertTrue(os.path.exists(hbfile))

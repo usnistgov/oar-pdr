@@ -43,6 +43,14 @@ def seq_of(bagname):
     if m:
         return int(m.group(3))
     return -1
+def mbprof_of(bagname):
+    m = bagvnmre.search(bagname)
+    if m:
+        return re.sub(r'_', '.', m.group(3))
+    m = bagnmre.search(bagname)
+    if m:
+        return re.sub(r'_', '.', m.group(2))
+    return ""
 
 class SimArchive(object):
     def __init__(self, archdir):
@@ -100,8 +108,12 @@ class SimArchive(object):
         return sorted(out, key=lambda f: seq_of(f['name']))
 
     def _mkfilerec(self, filename, id, version, info):
-        return {'name': filename, 'size': info[0], 'id': id, 'version': version,
-                'hash': info[1], 'hashtype': 'sha256'}
+        return {'name': filename, 'contentLength': info[0], 'aipid': id,
+                'sinceVersion': version, 'contentType': "application/zip",
+                'multibagProfileVersion': mbprof_of(filename),
+                'multibagSequence': seq_of(filename), "serialization": "zip",
+                'checksum': { 'hash': info[1], 'algorithm': 'sha256'} }
+                
 
     def list_for_version(self, aid, vers=None):
         if aid not in self._aips:

@@ -134,9 +134,14 @@ class TestArchive(test.TestCase):
                          ["pdr2210.1_0.mbag0_3-0.zip", "pdr2210.2.mbag0_3-1.zip",
                           "pdr2210.3_1_3.mbag0_3-4.zip"])
         self.assertEqual(self.arch.list_bags('pdr1010')[0],
-                         {'name': 'pdr1010.mbag0_3-1.zip', 'hashtype': 'sha256',
-                          'size': 375, 'id': 'pdr1010', 'version': '1',
-    'hash': '9e70295bd074a121d720e2721ab405d7003e46086912cd92f012748c8cc3d6ad' })
+                         {'name': 'pdr1010.mbag0_3-1.zip', 'aipid': 'pdr1010', 
+                          'contentLength': 375, 'sinceVersion': '1',
+                          'contentType': "application/zip",
+                          "serialization": "zip",
+                          'checksum': {'algorithm':"sha256",
+     'hash': '9e70295bd074a121d720e2721ab405d7003e46086912cd92f012748c8cc3d6ad'},
+                          'multibagSequence' : 1, "multibagProfileVersion" :"0.3"
+                       })
 
     def test_list_for_version(self):
         self.assertEqual([f['name'] for f in
@@ -218,9 +223,14 @@ class TestSimService(test.TestCase):
         self.assertEqual([f['name'] for f in resp.json()], 
                          ["pdr1010.mbag0_3-1.zip", "pdr1010.mbag0_3-2.zip"])
         self.assertEqual(resp.json()[0],
-                         {'name': 'pdr1010.mbag0_3-1.zip', 'hashtype': 'sha256',
-                          'size': 375, 'id': 'pdr1010', 'version': '1',
-    'hash': '9e70295bd074a121d720e2721ab405d7003e46086912cd92f012748c8cc3d6ad' })
+                         {'name': 'pdr1010.mbag0_3-1.zip', 'aipid': 'pdr1010',
+                          'contentLength': 375, 'sinceVersion': '1', 
+                          'contentType': "application/zip",
+                          "serialization": "zip",
+                          'checksum': {'algorithm':"sha256",
+    'hash': '9e70295bd074a121d720e2721ab405d7003e46086912cd92f012748c8cc3d6ad'},
+                          'multibagSequence' : 1, "multibagProfileVersion" :"0.3"
+                      })
 
         resp = requests.get(baseurl+"/pdr2210/_aip")
         self.assertEqual(resp.status_code, 200)

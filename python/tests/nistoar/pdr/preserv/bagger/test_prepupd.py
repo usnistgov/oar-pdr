@@ -61,20 +61,23 @@ class SimDistClient(object):
         if len(parts) != 5 or parts[-1] != "_head":
             raise RuntimeError("Unexpected call to simulated distrib service: "+
                                relurl)
-        out = { "hashtype": "sha256", "id": parts[0] }
+        out = { "checksum": {"algorithm": "sha256"}, "aipid": parts[0],
+                "contentType": "application/zip", "serialization": "zip",
+                "multibagProfileVersion": "0.4" }
 
         ver = parts[3]
         if ver == "latest":
             ver = "2"
-        seq = (int(ver) > 1 and "4") or "2"
+        seq = (int(ver) > 1 and 4) or 2
 
         name = "{0}.{1}.mbag0_4-{2}.zip".format(parts[0], ver, seq)
         loc = os.path.join(self.dir, name)
         if not os.path.exists(loc):
             raise DistribResourceNotFound(loc)
         
-        out.update({'name': name, 'version': ver, 'size': os.stat(loc).st_size,
-                    'hash': checksum_of(loc) })
+        out.update({'name': name, 'sinceVersion': ver, "multibagSequence": seq,
+                    'contentLength': os.stat(loc).st_size })
+        out['checksum'].update({ 'hash': checksum_of(loc) })
         return out
         
 
@@ -126,16 +129,22 @@ class TestSimServices(test.TestCase):
         cli = SimDistClient(self.cachedir)
 
         data = cli.get_json("ABCDEFG/_aip/_v/latest/_head")
-        self.assertEqual(data, {"id": "ABCDEFG", "hashtype": "sha256",
+        self.assertEqual(data, {"aipid": "ABCDEFG", "sinceVersion": "2", 
+                                "contentLength": 9715, "multibagSequence" : 4,
+                                "multibagProfileVersion" : "0.4",
+                                "contentType": "application/zip",
+                                "serialization": "zip",
                                 "name": "ABCDEFG.2.mbag0_4-4.zip",
-                                "version": "2", "size": 9715,
-                                "hash": hash })
+                                "checksum": {"algorithm":"sha256","hash": hash}})
 
         data = cli.get_json("ABCDEFG/_aip/_v/1/_head")
-        self.assertEqual(data, {"id": "ABCDEFG", "hashtype": "sha256",
+        self.assertEqual(data, {"aipid": "ABCDEFG", "sinceVersion": "1", 
+                                "contentLength": 9715, "multibagSequence" : 2,
+                                "multibagProfileVersion" : "0.4",
+                                "contentType": "application/zip",
+                                "serialization": "zip",
                                 "name": "ABCDEFG.1.mbag0_4-2.zip",
-                                "version": "1", "size": 9715,
-                                "hash": hash})
+                                "checksum": {"algorithm":"sha256","hash": hash}})
 
         dest = os.path.join(self.cachedir, "local")
         os.mkdir(dest)

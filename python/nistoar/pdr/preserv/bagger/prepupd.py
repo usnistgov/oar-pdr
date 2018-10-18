@@ -77,7 +77,7 @@ class HeadBagCacher(object):
 
             # cache the info locally
             if not version or version == 'latest':
-                version = hinfo['version']
+                version = hinfo['sinceVersion']
             self._cache_head_info(aipid, version, hinfo)
 
         # look for bag in cache; if not there, fetch a copy
@@ -97,7 +97,7 @@ class HeadBagCacher(object):
         """
         bagfile = os.path.join(self.cachedir, baginfo['name'])
         try:
-            if utils.checksum_of(bagfile) != baginfo['hash']:
+            if utils.checksum_of(bagfile) != baginfo['checksum']['hash']:
                 if purge_on_error:
                     # bag file looks corrupted; purge it from the cache
                     self._clear_from_cache(bagfile, baginfo)
@@ -114,10 +114,10 @@ class HeadBagCacher(object):
         if os.path.exists(bagfile):
             os.remove(bagfile)
         if baginfo:
-            info = self._recall_head_info(baginfo['id'])
-            if baginfo['version'] in info:
-                del info[baginfo['version']]
-                self._save_head_info(baginfo['id'], info)
+            info = self._recall_head_info(baginfo['aipid'])
+            if baginfo['sinceVersion'] in info:
+                del info[baginfo['sinceVersion']]
+                self._save_head_info(baginfo['aipid'], info)
 
     def _cache_head_info(self, aipid, version, info):
         out = self._recall_head_info(aipid)
