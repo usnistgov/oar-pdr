@@ -1,4 +1,3 @@
-
 <h3 id="description" name="desscription"><b>Description</b></h3><br> 
 <div contenteditable="true" id="recordDescription" class="well welldesc">
     <p  *ngFor="let topic of record['description']; let i =index">
@@ -28,13 +27,13 @@
     </span>
       
     <span *ngIf="record['accessLevel'] === 'restricted public'">
-        <i class="faa faa-lock"></i>This data has access restrictions. 
+        <i class="faa faa-lock"></i> This data has access restrictions. 
     </span>   
     <span *ngIf="record['rights']"> 
        <br> The access rights are {{ record.rights }} <br>
     </span>
     <span  *ngIf="record['landingPage'] && record['landingPage'].indexOf('/od/id') === -1 ">
-        For more information visit the
+        For more information, please visit the
          <a href="record.landingPage">home page</a>.
     </span> 
     <span style="margin-left:0em" *ngIf="isAccessPage">
@@ -111,13 +110,13 @@
             <span *ngIf="refs['refType'] == 'IsReferencedBy'">
                 <br> 
                 <i class="faa faa-external-link"> </i>
-                <a style="margin-left:0.3em;" href={{refs.location}} target="blank"> {{ refs.location }}></a>
+                <a style="margin-left:0.3em;" href={{refs.location}} target="blank"> {{ refs.location }}</a>
             </span>
             
         </span>
     </span>
 </div>
-    <p-overlayPanel #op3 [dismissable]="true"  [showCloseIcon]="true" [style]="{'width':'400px'}" [appendTo]="'body'">
+    <p-overlayPanel class="fileDialog" #op3 [dismissable]="true"  [showCloseIcon]="true" [style]="{'width':'400px'}" [appendTo]="'body'">
         <div *ngIf="isNodeSelected" class="filecard">
             <div class="ui-g filesection">
                 <div class="ui-g-12 ui-md-12 ui-lg-12 ui-sm-10">

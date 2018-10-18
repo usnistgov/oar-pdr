@@ -50,7 +50,7 @@ export class SearchResolve implements Resolve<any> {
             if (err !== undefined) {
               console.log("ERROR STATUS :::"+err.status);
               if(err.status >= 500){
-                this.rtr.navigate(["/error", recordid,{ errorcode : err.status}]);
+                this.rtr.navigate(["/usererror", recordid,{ errorcode : err.status}]);
               }
               if(err.status >= 400 && err.status < 500 ){
                  this.rtr.navigate(["/usererror", recordid, { errorcode : err.status}]); 

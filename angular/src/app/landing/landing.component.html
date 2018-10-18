@@ -38,9 +38,8 @@
                       <div  *ngIf="record.length !== 0" class="ui-sm-1 visible-xs-block visible-sm-block ">
                         <button style="float: right" type="button" pButton icon="faa faa-list" class="ui-button ui-button-icon-only" (click)="menu3.toggle($event)"></button>
                          <p-menu #menu3 class="rightMenuStylePop" popup="popup" [model]="rightmenu"></p-menu>
-                    </div>
+                      </div>
                       <br>
-                      
                       <span class="title" style="text-align: left; vertical-align: top; ">
                           <h2>{{record.title}}</h2>
                       </span>
@@ -61,8 +60,10 @@
                               </div>
                           </div>
                       </div>
-                      <br>
-                      <div  class="contactPoint" *ngIf="record.contactPoint">
+                  </div>  
+              </div>  
+              <div class="ui-g">     
+                  <div  class="ui-g-8 ui-md-8 ui-lg-8 ui-sm-8 contactPoint" *ngIf="record.contactPoint">
                           Contact:
                           <strong>
                               <a class="font14" *ngIf="isEmail" href="{{record.contactPoint.hasEmail}}" target="_top">
@@ -71,20 +72,14 @@
                           </strong>..
                           <i style="cursor: pointer;" class="faa" [ngClass]="{'faa-plus-square-o': !clickContact, 'faa-minus-square-o': clickContact}"
                           aria-hidden="true" (click)="closeContent = !closeContent; clickContact=expandContact();"></i>
-
-                          <span *ngIf="record.landingPage">
-                                <a [(href)]="record.landingPage" target="_blank" style="margin-left:50%; float: right;">
-                                    <button  pButton type="button" style="background-color:#1371AE;font-weight: bold;" icon="faa faa-external-link" label="Visit Home Page"></button>
-                                </a>
-                          </span>
-                          
-                          <div [collapse]="!closeContent">
-                              <div class="card customcard">
+                          <div [collapse]="!closeContent" class="card customcard">
+                            
                                   <span class="" *ngIf="record.contactPoint.fn">
                                       <span>{{record.contactPoint.fn}}</span>
                                   </span>
-                                  <br><strong>Email:</strong>
+                                  
                                   <span class="font14" *ngIf="isEmail">
+                                        <br><strong>Email:</strong>
                                       <a *ngIf="isEmail" href="{{record.contactPoint.hasEmail}}" target="_top">
                                        {{record.contactPoint.hasEmail.split(":")[1]}}</a>
                                   </span>
@@ -92,12 +87,11 @@
                                       <span><b>Address:</b></span>
                                        <div *ngFor="let address of record.contactPoint.address">
                                           {{address}}
-                                      </div>
-                                  </div>
-                              </div>
+                                       </div>
+                                    </div>
+                             
                           </div>
-                      </div>
-                      <div>
+                          <br>
                           <span  *ngIf="isId">Identifier: </span>
                           <span *ngIf="isDOI" ><i>  <a  class="font14" href="https://doi.org/{{record.doi.split(':')[1]}}">{{record.doi}}</a></i></span>
                           <span  *ngIf="!isDOI"><i> <a class="font14" href="{{pdrApi}}{{record['@id']}}">{{record["@id"]}}</a></i> </span>
@@ -112,8 +106,6 @@
                                   </span>
                               </small>
                           </span><br>
-                          <!-- <span  *ngIf="record.issued">  First Released: <strong class="font14">{{record.issued}}</strong></span>
-                          <span  *ngIf="record.modified"> Last modified: <strong class="font14">{{record.modified}}</strong></span> -->
                           <span class="" *ngIf="record.version"> Version: <strong>{{record.version}}</strong></span>
                           <span class="" *ngIf="record.versionHistory" style="padding-right: 15pt;">...
                           <i style="cursor: pointer;" class ="faa" aria-hidden="true"
@@ -122,8 +114,8 @@
                           </span>
                           <span class="" *ngIf="record.issued" style="padding-right: 10pt;">  Released: <strong>{{record.issued}}</strong></span>
                           <span class="" *ngIf="record.modified" style="padding-right: 10pt;"> Last modified: <strong>{{record.modified}}</strong></span>
-                      </div>
-                      <div class="card customcard" [collapse]="!closeHistory">
+                    
+                    <div class="card customcard" [collapse]="!closeHistory">
                           <b>Version History:</b>
                           <span *ngFor="let release of record.versionHistory">
                              <br> <b [innerHTML]="renderRelVer(release, record.version)"></b> &nbsp;&nbsp;
@@ -135,16 +127,19 @@
                                <i>{{release.description}}</i>
                              </span>
                           </span>
-                        </div>
-                        <p style="margin-top: 10px;" *ngIf="newer.location">
+                    </div>
+                    <p style="margin-top: 10px;" *ngIf="newer.location">
                             <b>There is a more recent release of this resource available: &nbsp;&nbsp;
                             <a href="{{newer.location}}">{{newer.label}}</a></b>
                          </p>
                   </div>
-                  <!-- <div  *ngIf="record.length !== 0" class="ui-sm-1 visible-xs-block visible-sm-block ">
-                      <button type="button" pButton icon="faa faa-list" (click)="menu3.toggle($event)"></button>
-                       <p-menu #menu3 class="rightMenuStyle" popup="popup" [model]="rightmenu"></p-menu>
-                  </div> -->
+                  <div class="ui-g-4 ui-md-4 ui-lg-4 ui-sm-4">
+                        <span *ngIf="record.landingPage">
+                                <a [(href)]="record.landingPage" target="_blank" style="margin-left:50%; float: right;">
+                                    <button  pButton type="button" class="homePageLink" icon="faa faa-external-link" label="Visit Home Page"></button>
+                                </a>
+                          </span>
+                  </div>
               </div>
               <div class="ui-g">
                   <div class="ui-g-12 ui-md-12 ui-lg-12 ui-sm-12">

@@ -8,7 +8,7 @@ import 'rxjs/add/operator/map';
 import { Subscription } from 'rxjs/Subscription';
 import { environment } from '../../environments/environment';
 import { AppConfig } from '../shared/config-service/config.service';
-import { ErrorComponent } from './error.component';
+// import { ErrorComponent } from './error.component';
 // import { ResComponents, DataHierarchy } from "./datacomponents.component";
 
 interface reference {
@@ -144,7 +144,7 @@ export class LandingComponent implements OnInit {
    * If Search is successful populate list of keywords themes and authors
    */
   onSuccess(searchResults:any[]) {
-    console.log(searchResults);
+    // console.log(searchResults);
     if(searchResults["ResultCount"] === undefined || searchResults["ResultCount"] !== 1)
       this.record = searchResults;
     else if(searchResults["ResultCount"] !== undefined && searchResults["ResultCount"] === 1)
@@ -293,7 +293,7 @@ updateMenu(){
    * Get the params OnInit
    */
   ngOnInit() {
-    console.log("test:"+paramid);
+    // console.log("test:"+paramid);
     var paramid = this.route.snapshot.paramMap.get('id');
     this.files =[];
       this.route.data.map(data => data.searchService )
@@ -302,7 +302,7 @@ updateMenu(){
        }, error =>{
           console.log("There is an error in searchservice.");
           this.onError(" There is an error");
-          throw new ErrorComponent(this.route);
+          // throw new ErrorComponent(this.route);
        });
     
   }
@@ -330,15 +330,15 @@ updateMenu(){
     // This example uses the underscore.js library.
     var i = 0;
     var tempfiletest = "";
-    console.log("TEST ::"+paths);
+   
     paths.forEach((path) => { 
-      // console.log(path['@type'][0]);
+     
       
       // if(path['@type'].includes("nrdp:Subcollection")){
-      //   // console.log("TESt:"+path.filepath);
+      
       //   tempfiletest = path.filepath;
       // } 
-      console.log("path:"+path.filepath);
+     
       if(path.filepath && !path['@type'].includes('nrd:Hidden')) 
       {
         if(!path.filepath.startsWith("/"))
@@ -372,7 +372,7 @@ updateMenu(){
             //   currentLevel.push(newPart);
             //   currentLevel = newPart.children;
             // }else{
-            //console.log("DU::"+path.downloadURL);
+      
 
             const newPart = {
               data : {

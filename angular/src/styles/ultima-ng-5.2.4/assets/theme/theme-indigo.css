@@ -30617,7 +30617,7 @@ body .ui-overlaypanel.ui-shadow {
   -moz-box-shadow: 0 10px 20px rgba(0, 0, 0, 0.19), 0 6px 6px rgba(0, 0, 0, 0.23);
   box-shadow: 0 10px 20px rgba(0, 0, 0, 0.19), 0 6px 6px rgba(0, 0, 0, 0.23); }
 body .ui-overlaypanel .ui-overlaypanel-close {
-  background-color: #E91E63;
+  background-color: #1E6BA1;
   -moz-border-radius: 50%;
   -webkit-border-radius: 50%;
   border-radius: 50%;
@@ -30638,7 +30638,7 @@ body .ui-overlaypanel .ui-overlaypanel-close {
     color: #ffffff;
     line-height: inherit; }
   body .ui-overlaypanel .ui-overlaypanel-close:hover {
-    background-color: #ad1457; }
+    background-color :#1371AE; }
 body .ui-tooltip {
   opacity: 0.9;
   filter: alpha(opacity=90); }

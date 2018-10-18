@@ -258,6 +258,9 @@
 .customcard{
   box-shadow:  0 1px 3px 0 rgba(0, 0, 0, 0), 0 1px 1px 0 rgba(0, 0, 0, 0), 0 2px 1px -1px rgba(0, 0, 0, 0);
   -webkit-box-shadow:0;
+  margin-bottom: 0em;
+  padding: 1%;
+
 }
 
 /** Metadata and File details related styles **/
@@ -312,7 +315,7 @@
   
   font-family: sans-serif;
 }
-:host /deep/ .ui-overlaypanel .ui-overlaypanel-close {
+/* :host /deep/ fileDialog > .ui-overlaypanel .ui-overlaypanel-close {
   background-color: #1E6BA1;
   border-radius: 50%;
   transition: background-color 0.3s;
@@ -322,5 +325,16 @@
   height: 1.2em;
   line-height: 1.2em;
   text-align: center;
-}
+} */
+/* :host /deep/  a > .ui-overlaypanel .ui-overlaypanel-close{
+  background-color: #1E6BA1;
+} */
 
+.homePageLink{
+  background-color:#1371AE;
+  font-weight: bold;
+   font-size: 10pt
+}
+:host >>> .ui-overlaypanel .ui-overlaypanel-close{
+  background-color: #1E6BA1;
+}
