@@ -352,10 +352,13 @@ class MIDASSIPHandler(SIPHandler):
         if not os.path.exists(self.mdbagdir):
             raise StateException("Metadata directory does not exist as a " +
                                  "directory: " + self.mdbagdir)
-        
+
+        bgrcfg = config.get('bagger', {})
+        if 'repo_access' not in bgrcfg and 'repo_access' in config:
+            bgrcfg['repo_access'] = config['repo_access']
         self.bagger = PreservationBagger(sipid, bagparent, self.sipparent,
-                                         self.mdbagdir, config.get('bagger'),
-                                         self._minter, self._asupdate, sipdirname)
+                                         self.mdbagdir, bgrcfg, self._minter, 
+                                         self._asupdate, sipdirname)
 
         if self.state == status.FORGOTTEN and self._is_preserved():
             self.set_state(status.SUCCESSFUL, 
@@ -547,8 +550,12 @@ class MIDASSIPHandler(SIPHandler):
         # remove the metadata bag directory so that that an attempt to update
         # will force a rebuild based on the published version
         mdbag = os.path.join(self.mdbagdir, self.bagger.name)
+        log.debug("ensuring the removal metadata bag directory: %s", mdbag)
         if os.path.isdir(mdbag):
+            log.debug("removing metadata bag directory...")
             shutil.rmtree(mdbag)
+            if os.path.isfile(self.mdbagdir+".lock"):
+                os.remove(self.mdbagdir+".lock")
 
         # clean up staging area
         if self.cfg.get('clean_bag_staging', True):

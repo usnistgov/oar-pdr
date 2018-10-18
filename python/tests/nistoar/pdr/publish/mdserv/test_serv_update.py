@@ -139,7 +139,7 @@ class TestPrePubMetadataService(test.TestCase):
             'review_dir':      self.revdir,
             'upload_dir':      self.upldir,
             'id_registry_dir': self.workdir,
-            'bagger': {
+            'repo_access': {
                 'headbag_cache':   self.pubcache,
                 'distrib_service': {
                     'service_endpoint': "http://localhost:9091/"

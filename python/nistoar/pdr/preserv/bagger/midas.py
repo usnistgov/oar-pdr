@@ -26,7 +26,9 @@ from .prepupd import UpdatePrepService
 from nistoar.nerdm.merge import MergerFactory
 
 # _sys = PreservationSystem()
-log = logging.getLogger(_sys.system_abbrev).getChild(_sys.subsystem_abbrev)
+log = logging.getLogger(_sys.system_abbrev)   \
+             .getChild(_sys.subsystem_abbrev) \
+             .getChild("midas") 
 
 DEF_MBAG_VERSION = bagutils.DEF_MBAG_VERSION
 DEF_MIDAS_POD_FILE = "_pod.json"
@@ -618,6 +620,8 @@ class PreservationBagger(SIPBagger):
             # support for updates requires access to the distribution and
             # rmm services
             self.prepsvc = UpdatePrepService(self.cfg['repo_access'])
+        else:
+            log.warning("repo_access not configured; can't support updates!")
         
 
     @property

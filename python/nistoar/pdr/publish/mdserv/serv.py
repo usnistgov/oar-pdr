@@ -119,12 +119,13 @@ class PrePubMetadataService(PublishSystem):
         self.mimetypes = build_mime_type_map(mimefiles)
 
         self.prepsvc = None
-        bgrcfg = self.cfg.get('bagger')
-        if bgrcfg and 'headbag_cache' in bgrcfg:
+        if 'repo_access' in self.cfg:
             # this service helps pull in information about previously published
             # versions.  
-            self.prepsvc = UpdatePrepService(bgrcfg)
-        
+            self.prepsvc = UpdatePrepService(self.cfg['repo_access'])
+        else:
+            self.log.warning("repo_access not configured; can't support "+
+                             "updates!")
 
     def _create_minter(self, parentdir):
         cfg = self.cfg.get('id_minter', {})

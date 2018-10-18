@@ -39,9 +39,9 @@ from ...notify import NotificationService
 from ..bagger.prepupd import UpdatePrepService
 
 from .. import PreservationException, sys as _sys
-log = logging.getLogger(_sys.system_abbrev).getChild(_sys.subsystem_abbrev)
-
-
+log = logging.getLogger(_sys.system_abbrev)   \
+             .getChild(_sys.subsystem_abbrev) \
+             .getChild('service')
 
 class PreservationService(object):
     """
@@ -112,6 +112,8 @@ class PreservationService(object):
         self._prepsvc = None
         if 'repo_access' in self.cfg:
             self._prepsvc = UpdatePrepService(self.cfg['repo_access'])
+        else:
+            log.warning("repo_access not configured; can't support updates!")
 
     def preserve(self, sipid, siptype=None, timeout=None):
         """
