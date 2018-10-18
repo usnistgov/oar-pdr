@@ -532,7 +532,7 @@ class MIDASSIPHandler(SIPHandler):
                 log.info("Submitted NERDm record to RMM")
             except Exception as ex:
                 msg = "Failed to ingest record with name=" + \
-                      self.bagger.name + "into RMM: " + str(ex)
+                      self.bagger.name + " into RMM: " + str(ex)
                 log.exception(msg)
                 log.info("Ingest service endpoint: "+self._ingester.endpoint)
 
@@ -554,8 +554,8 @@ class MIDASSIPHandler(SIPHandler):
         if os.path.isdir(mdbag):
             log.debug("removing metadata bag directory...")
             shutil.rmtree(mdbag)
-            if os.path.isfile(self.mdbagdir+".lock"):
-                os.remove(self.mdbagdir+".lock")
+            if os.path.isfile(mdbag+".lock"):
+                os.remove(mdbag+".lock")
 
         # clean up staging area
         if self.cfg.get('clean_bag_staging', True):
