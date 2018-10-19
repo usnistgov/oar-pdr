@@ -526,10 +526,16 @@ updateMenu(){
     if (this.record['version'] && this.record['versionHistory']) {
         let history = this.record['versionHistory'];
         history.sort(compare_histories);
+        
+        var thisversion = this.record['version'];
+        var p = thisversion.indexOf('+');    // presence indicates this is an update
+        if (p >= 0) thisversion = thisversion.substring(0, p)   // strip off +...
+        
         if (compare_histories(history[history.length-1],
-                              { version: this.record['version'], 
+                              { version: thisversion,
                                 issued: this.record['modified']  }) > 0)
         {
+            // this version is older than the latest one in the history
             this.newer = history[history.length-1];
             if (! this.newer['refid']) this.newer['refid'] = this.newer['@id'];
             this.newer['label'] = this.newer['version'];
