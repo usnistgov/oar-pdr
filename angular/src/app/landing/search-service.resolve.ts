@@ -29,8 +29,12 @@ export class SearchResolve implements Resolve<any> {
   //   return this.searchService.(route.params['id']);
   // }
   resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<any> {
-
-    const recordid = route.params['id'];
+    var recordid = route.params['id'];
+    //console.log(state.url.toString().split("/id/").pop());
+    if(state.url.toString().includes("ark")){
+      recordid =  state.url.toString().split("/id/").pop();
+    }
+   
     const recordid_KEY = makeStateKey<any>('record-' + recordid);
     
     if (this.transferState.hasKey(recordid_KEY)) {
@@ -46,10 +50,10 @@ export class SearchResolve implements Resolve<any> {
             if (err !== undefined) {
               console.log("ERROR STATUS :::"+err.status);
               if(err.status >= 500){
-                this.rtr.navigate(["/error", recordid]);
+                this.rtr.navigate(["/usererror", recordid,{ errorcode : err.status}]);
               }
               if(err.status >= 400 && err.status < 500 ){
-                 this.rtr.navigate(["/usererror", recordid]); 
+                 this.rtr.navigate(["/usererror", recordid, { errorcode : err.status}]); 
               }
               //return Observable.throw('The Web server (running the Web site) is currently unable to handle the request.');
             }

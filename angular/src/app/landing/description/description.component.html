@@ -1,4 +1,3 @@
-
 <h3 id="description" name="desscription"><b>Description</b></h3><br> 
 <div contenteditable="true" id="recordDescription" class="well welldesc">
     <p  *ngFor="let topic of record['description']; let i =index">
@@ -21,23 +20,28 @@
 </div>
 <br>
                   
-<div>
+<div class="font14">
     <h3 id="dataAccess"><b>Data Access</b></h3><br> 
     <span style="margin-left:0em" *ngIf="record['accessLevel'] === 'public'">
         <i class="faa faa-globe"></i> These data are public. 
     </span>
+      
     <span *ngIf="record['accessLevel'] === 'restricted public'">
-        <i class="faa faa-lock"></i>This data has access restrictions. 
+        <i class="faa faa-lock"></i> This data has access restrictions. 
     </span>   
-    <br>
     <span *ngIf="record['rights']"> 
-        The access rights are {{ record.rights }} <br>
+       <br> The access rights are {{ record.rights }} <br>
     </span>
+    <span  *ngIf="record['landingPage'] && record['landingPage'].indexOf('/od/id') === -1 ">
+        For more information, please visit the
+         <a href="record.landingPage">home page</a>.
+    </span> 
     <span style="margin-left:0em" *ngIf="isAccessPage">
-        Data is available via the following locations: 
+        <br>Data is available via the following locations: 
         <br>   
-        <span style="padding-left:2.75em" *ngFor="let title of accessTitles; let i =index">
-            <i class="faa faa-external-link"> <a href="{{accessUrls[i]}}">{{title}}</a></i><br>
+        <span style="padding-left:2.00em" *ngFor="let title of accessTitles; let i =index">
+            <i class="faa faa-external-link"> <span style="margin-left:0.3em;"> <a href="{{accessUrls[i]}}">{{title}}</a></span>
+               </i><br>
         </span>
     </span>
 </div> 
@@ -51,7 +55,7 @@
     </span>
     <!-- <a href="javascript:;" (click)="addFilesToCart()" class="faa faa-cart-plus " style="margin-left:0.5em; color:#1E6BA1;" title="Add All files to datacart" ></a> -->
     <span class="font8" style="margin-left:0.5em; color:gray;">Click on the file/row in the table below to view more details.</span>
-    <span class="font10" style="margin-left:0.5em; color:gray; float: right"> Total No. files: {{ record['components'].length }} </span> 
+    <span class="font10" style="margin-left:0.5em; color:gray; float: right"> Total No. files: {{ filescount }} </span> 
     <p-treeTable [value]="files" [columns]="cols" selectionMode="single"    [resizableColumns]="true" sortField="name" >
     <ng-template pTemplate="colgroup" let-columns>
         <colgroup>
@@ -67,7 +71,7 @@
           </tr>
         </ng-template>
         <ng-template pTemplate="body" let-rowNode let-rowData="rowData"  let-columns="columns">
-            <tr [ttSelectableRow]="rowNode" (click)="openDetails($event,rowData,op3)">
+            <tr [ttSelectableRow]="rowNode">
                 <td><p-treeTableToggler [rowNode]="rowNode"></p-treeTableToggler>
                     <a (click)="openDetails($event,rowData,op3)"> {{rowData.name}} </a>
                 </td>
@@ -88,34 +92,37 @@
                          
 <br>
 <div *ngIf="checkReferences()">
-    <h3 id="reference" name="reference"><b>References</b></h3><br> 
-        <span class="font14" style="margin-left:0.5em" *ngIf="isDocumentedBy"> 
-            This data is discussed in :
-        <span style="padding-left:2.75em" *ngFor="let refs of record['references']">
-        <span  *ngIf="refs['refType'] == 'IsDocumentedBy'">
-                    <br> <i class="faa faa-external-link"><a class="references" href={{refs.location}} target="blank">{{ refs.label }}</a></i>
-        </span>
-        <br>
-        </span>
-        <br>
-        </span>
-        <span class="font14"  *ngIf="isReferencedBy"> 
-            This data is referenced in : <br>
-            <span class="reflinks" *ngFor="let refs of record['references']">
-                <span *ngIf="refs['refType'] == 'IsReferencedBy'">
-                    <i class="faa faa-external-link"> </i>
-                    <a class="font14" href={{refs.location}} target="blank"> {{ refs.location }}></a>
-                </span>
+    <h3 id="reference" name="reference"><b>References</b></h3>
+    <span class="font14"  *ngIf="isDocumentedBy"> 
+        This data is discussed in :
+        <span  *ngFor="let refs of record['references']">
+            <span  *ngIf="refs['refType'] == 'IsDocumentedBy'">
                 <br>
+                <i class="faa faa-external-link">
+                    <a style="margin-left:0.3em;" href={{refs.location}} target="blank">{{ refs.label }}</a>
+                </i>
             </span>
         </span>
-    </div>
-    <p-overlayPanel #op3 [dismissable]="true"  [showCloseIcon]="true" [style]="{'width':'400px'}" [appendTo]="'body'">
+    </span>
+    <span class="font14"  *ngIf="isReferencedBy"> 
+        This data is referenced in : 
+        <span class="reflinks" *ngFor="let refs of record['references']">
+            <span *ngIf="refs['refType'] == 'IsReferencedBy'">
+                <br> 
+                <i class="faa faa-external-link"> </i>
+                <a style="margin-left:0.3em;" href={{refs.location}} target="blank"> {{ refs.location }}</a>
+            </span>
+            
+        </span>
+    </span>
+</div>
+    <p-overlayPanel class="fileDialog" #op3 [dismissable]="true"  [showCloseIcon]="true" [style]="{'width':'400px'}" [appendTo]="'body'">
         <div *ngIf="isNodeSelected" class="filecard">
             <div class="ui-g filesection">
                 <div class="ui-g-12 ui-md-12 ui-lg-12 ui-sm-10">
                     <span class="font8" style="color:grey" >
                         <span *ngIf="fileNode.filetype == 'nrdp:DataFile' ">Selected File</span>
+                        <span *ngIf="fileNode.filetype == 'nrdp:ChecksumFile' ">Selected Checksum File</span>
                         <span *ngIf="fileNode.filetype == 'nrdp:Subcollection'">Selected SubCollection </span>
                         <br>
                     </span>
@@ -129,10 +136,9 @@
                         <span *ngIf="!fileNode.size" class="textstyle1"><i>Not Available</i></span>
                     </span>
                     <br><span class="font10"><b>Description:</b> </span>
-
                     <div class="well filedesc" >
-                        <span *ngIf="!fileNode.mediatype"><i>No Description Available</i></span>
-                        <span *ngIf="fileNode.mediatype">{{ fileNode.description }} </span>
+                        <span *ngIf="!fileNode.description"><i>No Description Available</i></span>
+                        <span *ngIf="fileNode.description">{{ fileNode.description }} </span>
                     </div>                                        
                 </div>
             </div>

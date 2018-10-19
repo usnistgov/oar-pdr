@@ -17,13 +17,12 @@ import { AppRoutingModule } from './app-routing.module';
 import { LandingComponent } from './landing/landing.component';
 import { DescriptionComponent } from './landing/description/description.component';
 import { MetadataComponent } from './landing/metadata/metadata.component';
-import { FileDetailsComponent } from './landing/fileDetails/filedetails.component';
 import { LandingAboutComponent } from './landingAbout/landingAbout.component';
 import { KeyValuePipe } from './landing/keyvalue.pipe';
 import { MetadataView } from './landing/metadata/metadataview.component';
 import { NoidComponent } from './landing/noid.component';
 import { NerdmComponent } from './landing/nerdm.component';
-import { ErrorComponent,UserErrorComponent } from './landing/error.component';
+import { ErrorComponent, UserErrorComponent } from './landing/error.component';
 import { SearchResolve } from './landing/search-service.resolve';
 import { SharedModule } from './shared/shared.module';
 import { SearchService } from './shared/search-service/index';
@@ -47,13 +46,13 @@ const appInitializerFn = (appConfig: AppConfig) => {
   declarations: [
     AppComponent,
     LandingAboutComponent, LandingComponent,DatacartComponent,
-    Collaspe,MetadataComponent,FileDetailsComponent, DescriptionComponent,  
+    Collaspe,MetadataComponent, DescriptionComponent,  
     KeyValuePipe, MetadataView, NoidComponent,NerdmComponent,
     ErrorComponent,UserErrorComponent, 
     AppShellNoRenderDirective, AppShellRenderDirective 
   ],
   imports: [
-    
+   
     FormsModule, ReactiveFormsModule,
     AppRoutingModule, HttpClientModule,
     CommonModule, SharedModule, BrowserAnimationsModule, FormsModule,TooltipModule,

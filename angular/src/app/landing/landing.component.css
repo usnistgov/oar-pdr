@@ -139,6 +139,36 @@
   font-size: 14px;
 }
 
+:host /deep/ .rightMenuStylePop > .ui-menu  .ui-menuitem{
+  line-height: 1em;
+  min-height: 1em;
+  /* background-color:  #e7f0f6; */
+  background-color: #F0FAF1;
+  word-wrap: break-word;
+  font-family: sans-serif;
+  font-size: 14px;
+  padding: 0;
+}
+
+:host /deep/ .rightMenuStylePop > .ui-menu  .ui-menuitem-link  .ui-state-hover{
+  line-height: 1em;
+  min-height: 1em;
+  background-color: #e7f0f6;
+  word-wrap: break-word;
+  font-family: 'Sans-Serif';
+  font-size: 14px;
+}
+:host /deep/ .rightMenuStylePop > .ui-menu .ui-submenu-header {
+  background-color:#2C8034;
+  padding: 2%;
+  padding-left: 5%;
+  font-family: sans-serif;
+  font-size: 16px;
+  font-weight: bold;
+  color: white;
+ 
+}
+
 :host /deep/ .rightMenuStylePop > .ui-menu .ui-submenu-header{
   padding: 0.5em 0.2em 0.5em 0.5em;
   font-size: 14px;
@@ -184,6 +214,13 @@
   border-radius: 50%;
   width: 1.5em;
   height: 1.5em;
+}
+
+:host /deep/  .ui-dialog .ui-dialog-titlebar{
+  background-color: #f1f1f1;
+  color: #212121;
+  font-family: sans-serif;
+  font-size: 16px;
 }
 
 :host /deep/ .ui-treetable-resizable .ui-treetable-thead > tr > th{
@@ -251,6 +288,9 @@
 .customcard{
   box-shadow:  0 1px 3px 0 rgba(0, 0, 0, 0), 0 1px 1px 0 rgba(0, 0, 0, 0), 0 2px 1px -1px rgba(0, 0, 0, 0);
   -webkit-box-shadow:0;
+  margin-bottom: 0em;
+  padding: 1%;
+
 }
 
 /** Metadata and File details related styles **/
@@ -294,7 +334,7 @@
 }
 
 .filecard{
-  padding: 0em;
+  padding: 0.5em;
   text-align: left;
 }
 
@@ -305,8 +345,8 @@
   
   font-family: sans-serif;
 }
-:host /deep/ .ui-overlaypanel .ui-overlaypanel-close {
-  background-color:firebrick;
+/* :host /deep/ fileDialog > .ui-overlaypanel .ui-overlaypanel-close {
+  background-color: #1E6BA1;
   border-radius: 50%;
   transition: background-color 0.3s;
   right: -8px;
@@ -315,4 +355,17 @@
   height: 1.2em;
   line-height: 1.2em;
   text-align: center;
+} */
+/* :host /deep/  a > .ui-overlaypanel .ui-overlaypanel-close{
+  background-color: #1E6BA1;
+} */
+
+
+.homePageLink{
+  background-color:#1371AE;
+  font-weight: bold;
+   font-size: 10pt
+}
+:host >>> .ui-overlaypanel .ui-overlaypanel-close{
+  background-color: #1E6BA1;
 }
