@@ -29,21 +29,22 @@ function compare_versions(a: string, b: string) : number {
       }
   }
   aflds = aflds.map(toint);
-  aflds = bflds.map(toint);
-   let i :number = 0;
+  bflds = bflds.map(toint);
+  let i :number = 0;
   let out : number = 0;
   for (i=0; i < aflds.length && i < bflds.length; i++) {
       if (typeof aflds[i] === "number") {
           if (typeof bflds[i] === "number") {
               out = <number>aflds[i] - <number>bflds[i];
-              if (out == 0) continue;
+              if (out != 0) return out;
           }
           else 
               return +1;
       }
       else if (typeof bflds[i] === "number") 
           return -1;
-      return a.localeCompare(b);
+      else
+          return a.localeCompare(b);
   }
   return out;
 }
