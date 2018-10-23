@@ -140,10 +140,10 @@
               </div>
               <div class="ui-g">
                   <div class="ui-g-12 ui-md-12 ui-lg-12 ui-sm-12">
-                      <div *ngIf="metadata != true && similarResources != true ">
+                      <div [hidden]="metadata">
                           <description-resources [record]="record" [files]="files" [distdownload]="distdownload" [isInternal]="isInternal" [filescount]="filescount" ></description-resources>
                       </div>
-                      <div *ngIf="metadata == true && similarResources != true ">
+                      <div [hidden]="!metadata">
                           <metadata-detail [record]="record" [serviceApi]="serviceApi" ></metadata-detail>
                       </div>
                   </div>
@@ -153,7 +153,6 @@
                               <button style="position:relative; float:right; background-color:#1E6BA1; " type="button" pButton icon="faa faa-close" (click)="closeDialog()"></button>
                           </p-header>
                           <span>Copy the recommended text to cite this resource:</span> <br><br>
-                          
                           <p contenteditable="false" style="font-size: 14px;" >{{ citeString }}</p>
                           <br>
                           <a target="citationsRecommendation" href="https://www.nist.gov/director/copyright-fair-use-and-licensing-statements-srd-data-and-software#citations">See also NIST Citation Recommendations</a>

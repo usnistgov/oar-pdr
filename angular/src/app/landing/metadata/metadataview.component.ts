@@ -1,6 +1,4 @@
 import {Component, Input} from '@angular/core';
-import { FieldsetModule } from 'primeng/primeng';
-import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 @Component ({
   selector: 'fieldset-view',
   moduleId: module.id,
@@ -10,7 +8,6 @@ import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
       <div *ngIf="!isArrayOrObject(node.value)" class="ui-g break-long-words" style="padding:0;">
         <div class="ui-g-2 ui-md-3 ui-lg-2 ui-sm-3" style="padding:0;">
           <span style="color:#1471AE; word-wrap: break-word;">{{ifIntegerThenitem(node.key)}}</span>
-          <!--span *ngIf="isInteger(node.key)" style="color:grey; word-wrap: break-word;">{{ifIntegerThenitem(node.key)}}</span-->
         </div>
         <div class="ui-g-10 ui-md-9 ui-lg-10 ui-sm-9" style="padding:0;">
           <span class="font10"> {{node.value}}</span>
@@ -28,8 +25,7 @@ import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 })
 export class MetadataView {
   @Input() entry:any[];
-  // [ngClass]="{'customlegend': isInteger(node.key), 'notcustomlegend':!isInteger(node.key) }"
-
+  
   isArray(obj : any ) {
     return Array.isArray(obj);
   }
@@ -65,4 +61,5 @@ export class MetadataView {
       return value;
     }
   }
+  
 }

@@ -1,7 +1,5 @@
 import { Component, Input, Pipe,PipeTransform } from '@angular/core';
 
-
-
 @Component({
   selector: 'metadata-detail',
   template: `
@@ -11,7 +9,7 @@ import { Component, Input, Pipe,PipeTransform } from '@angular/core';
         <span style="">
           For more information about the metadata click on <a href="./nerdm">NERDm</a> documentation. 
         </span>
-        <button style="position:relative; float:right;" type="button" pButton icon="faa faa-file-code-o"
+        <button style="position:relative; float:right; background-color: #1371AE;" type="button" pButton icon="faa faa-file-code-o"
                 title="Get Metadata in JSON format." label="json" (click)="onjson()"></button>
         <br>
         <span style="font-size:8pt;color:grey;" >* item[number] indicates an array not a key name</span>

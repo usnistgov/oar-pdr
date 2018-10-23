@@ -32,7 +32,7 @@ import { DatacartComponent} from './datacart/datacart.component';
 import { CartService } from "./datacart/cart.service";
 import { AppShellNoRenderDirective } from './directives/app-shell-no-render.directive';
 import { AppShellRenderDirective } from './directives/app-shell-render.directive';
-
+import { FragmentPolyfillModule } from "./fragment-polyfill.module";
 /**
  * Initialize the configs for backend services
  */
@@ -52,7 +52,9 @@ const appInitializerFn = (appConfig: AppConfig) => {
     AppShellNoRenderDirective, AppShellRenderDirective 
   ],
   imports: [
-   
+    FragmentPolyfillModule.forRoot({
+      smooth: true
+  }),
     FormsModule, ReactiveFormsModule,
     AppRoutingModule, HttpClientModule,
     CommonModule, SharedModule, BrowserAnimationsModule, FormsModule,TooltipModule,
