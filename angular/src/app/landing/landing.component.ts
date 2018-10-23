@@ -8,8 +8,8 @@ import 'rxjs/add/operator/map';
 import { Subscription } from 'rxjs/Subscription';
 import { environment } from '../../environments/environment';
 import { AppConfig } from '../shared/config-service/config.service';
-// import { ErrorComponent } from './error.component';
-// import { ResComponents, DataHierarchy } from "./datacomponents.component";
+import {  PLATFORM_ID, APP_ID, Inject } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 
 interface reference {
   refType? : string,
@@ -120,24 +120,14 @@ export class LandingComponent implements OnInit {
    */
   constructor(private route: ActivatedRoute, private el: ElementRef, 
               private titleService: Title, private appConfig : AppConfig, private router: Router
-              ) {
+              ,@Inject(PLATFORM_ID) private platformId: Object,
+              @Inject(APP_ID) private appId: string) {
     
     this.rmmApi = this.appConfig.getRMMapi();
     this.distApi = this.appConfig.getDistApi();
     this.landing = this.appConfig.getLandingBackend();
 
-    router.events.subscribe(s => {
-      if (s instanceof NavigationEnd) {
-        const tree = router.parseUrl(router.url);
-        if (tree.fragment) {
-          const element = document.querySelector("#" + tree.fragment);
-          
-          if (element) { 
-            element.scrollIntoView(true); 
-           }
-        }
-      }
-    });
+  
   }
 
    /**
@@ -229,17 +219,20 @@ updateMenu(){
   var descItem = this.createMenuItem ("Description","faa faa-arrow-circle-right",(event)=>{
     this.metadata = false; this.similarResources =false;
     this.router.navigate(['/od/id/', this.record.ediid],{fragment:'description'});
+    this.gotoSelection(); 
    },"");
 
   var refItem = this.createMenuItem ("References","faa faa-arrow-circle-right ",(event)=>{
     this.metadata = false; this.similarResources =false;
     this.router.navigate(['/od/id/', this.record.ediid],{fragment:'reference'});
+    this.gotoSelection(); 
     },'');
 
   var filesItem = this.createMenuItem("Data Access","faa faa-arrow-circle-right", (event)=>{
     this.metadata = false;
     this.similarResources =false;
     this.router.navigate(['/od/id/', this.record.ediid],{fragment:'dataAccess'});
+    this.gotoSelection(); 
     },'');
   var itemsMenu2:MenuItem[] = [];
       itemsMenu2.push(descItem);
@@ -294,7 +287,8 @@ updateMenu(){
    */
   ngOnInit() {
     // console.log("test:"+paramid);
-    var paramid = this.route.snapshot.paramMap.get('id');
+    this.searchValue = this.route.snapshot.paramMap.get('id');
+    console.log(this.searchValue);
     this.files =[];
       this.route.data.map(data => data.searchService )
        .subscribe((res)=>{
@@ -304,10 +298,30 @@ updateMenu(){
           this.onError(" There is an error");
           // throw new ErrorComponent(this.route);
        });
-    
   }
 
-  ngAfterViewInit(){}
+  gotoSelection(){
+    this.router.events.subscribe(s => {
+      if (s instanceof NavigationEnd) {
+        const tree = this.router.parseUrl(this.router.url);
+        if (tree.fragment) {
+          const element = document.querySelector("#" + tree.fragment);
+         console.log("Element"+tree.fragment);
+          if (element) { 
+            //element.scrollIntoView(true); 
+            element.scrollIntoView({behavior: "instant", block: "start", inline: "start"});
+           }
+        }
+      }
+    });
+  }
+
+  ngAfterViewInit(){
+    this.gotoSelection();
+    if (this.record != null && isPlatformBrowser(this.platformId) )  {
+      window.history.replaceState( {} , 'pdr/od/id/', '/od/id/'+this.searchValue );
+    }
+  }
 
   //This is to check if empty
   isEmptyObject(obj) {
