@@ -183,6 +183,7 @@ createMenuItem(label :string, icon:string, command: any, url : string ){
       testItem.command = command;
   if(url !== '')
       testItem.url = url;
+      testItem.target ="_blank";
   return testItem;
 }
 
