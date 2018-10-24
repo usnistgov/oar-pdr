@@ -183,6 +183,7 @@ createMenuItem(label :string, icon:string, command: any, url : string ){
       testItem.command = command;
   if(url !== '')
       testItem.url = url;
+      testItem.target ="_blank";
   return testItem;
 }
 
@@ -236,9 +237,10 @@ updateMenu(){
     },'');
   var itemsMenu2:MenuItem[] = [];
       itemsMenu2.push(descItem);
-      if(this.files.length !== 0)
+      if(this.files.length !== 0 || (this.record['landingPage'] && this.record['landingPage'].indexOf('/od/id') === -1 ))
         itemsMenu2.push(filesItem);
-      itemsMenu2.push(refItem);
+      if(this.record['references'])
+        itemsMenu2.push(refItem);
  
   this.rightmenu = [ { label: 'Go To ..', items: itemsMenu2},
       { label: 'Record Details', items: itemsMenu },
@@ -333,9 +335,10 @@ updateMenu(){
     var testdata = {}
     // console.log(dnode);
     // console.log(this.record['components']);
+    if(this.record['components'] != null){
     testdata["data"] = this.arrangeIntoTree(this.record['components']);
    
-    this.files.push(testdata);
+    this.files.push(testdata);}
   }
   //This is to create a tree structure
   private arrangeIntoTree(paths) {
@@ -344,7 +347,7 @@ updateMenu(){
     // This example uses the underscore.js library.
     var i = 0;
     var tempfiletest = "";
-   
+    
     paths.forEach((path) => { 
      
       

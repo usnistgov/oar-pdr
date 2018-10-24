@@ -34,7 +34,7 @@
     </span>
     <span  *ngIf="record['landingPage'] && record['landingPage'].indexOf('/od/id') === -1 ">
         For more information, please visit the
-         <a href="record.landingPage">home page</a>.
+         <a target="_blank" href="{{ record['landingPage'] }}">home page</a>.
     </span> 
     <span style="margin-left:0em" *ngIf="isAccessPage">
         <br>Data is available via the following locations: 
@@ -45,7 +45,7 @@
         </span>
     </span>
 </div> 
-<div *ngIf="files.length != 0">        
+<div *ngIf="files.length  > 0">        
     <br>
     <span><b>Files</b> </span>   
     
@@ -70,7 +70,7 @@
             </th>
           </tr>
         </ng-template>
-        <ng-template pTemplate="body" let-rowNode let-rowData="rowData"  let-columns="columns">
+        <ng-template  pTemplate="body" let-rowNode let-rowData="rowData"  let-columns="columns">
             <tr [ttSelectableRow]="rowNode">
                 <td><p-treeTableToggler [rowNode]="rowNode"></p-treeTableToggler>
                     <a (click)="openDetails($event,rowData,op3)"> {{rowData.name}} </a>
@@ -119,7 +119,7 @@
     <p-overlayPanel class="fileDialog" #op3 [dismissable]="true"  [showCloseIcon]="true" [style]="{'width':'400px'}" [appendTo]="'body'">
         <div *ngIf="isNodeSelected" class="filecard">
             <div class="ui-g filesection">
-                <div class="ui-g-12 ui-md-12 ui-lg-12 ui-sm-10">
+                <div *ngIf="fileNode" class="ui-g-12 ui-md-12 ui-lg-12 ui-sm-10">
                     <span class="font8" style="color:grey" >
                         <span *ngIf="fileNode.filetype == 'nrdp:DataFile' ">Selected File</span>
                         <span *ngIf="fileNode.filetype == 'nrdp:ChecksumFile' ">Selected Checksum File</span>
