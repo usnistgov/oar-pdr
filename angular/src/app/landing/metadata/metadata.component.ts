@@ -3,9 +3,9 @@ import { Component, Input, Pipe,PipeTransform } from '@angular/core';
 @Component({
   selector: 'metadata-detail',
   template: `
-    <div class="ui-g" #metadata id="metadata">
-     <div class = "ui-g-12 ui-md-12 ui-lg-12 ui-sm-12" >
-       <h3 id="metadata" name="metadata"><b>Metadata</b></h3>
+    <div class="ui-g">
+     <div [hidden]="!metadata" class = "ui-g-12 ui-md-12 ui-lg-12 ui-sm-12" >
+       <h3><b>Metadata</b></h3>
         <span style="">
           For more information about the metadata click on <a href="./nerdm">NERDm</a> documentation. 
         </span>
@@ -24,7 +24,7 @@ export class MetadataComponent {
   
   @Input() record: any[];
   @Input() serviceApi : string;
-   
+  @Input() metadata : boolean;
   ngOnInit() {
       delete this.record["_id"];
   }

@@ -140,12 +140,8 @@
               </div>
               <div class="ui-g">
                   <div class="ui-g-12 ui-md-12 ui-lg-12 ui-sm-12">
-                      <div [hidden]="metadata">
-                          <description-resources [record]="record" [files]="files" [distdownload]="distdownload" [isInternal]="isInternal" [filescount]="filescount" ></description-resources>
-                      </div>
-                      <div [hidden]="!metadata">
-                          <metadata-detail [record]="record" [serviceApi]="serviceApi" ></metadata-detail>
-                      </div>
+                     <description-resources  [record]="record" [files]="files" [distdownload]="distdownload" [isInternal]="isInternal" [filescount]="filescount" [metadata]="metadata" ></description-resources> 
+                     <metadata-detail  [record]="record" [serviceApi]="serviceApi" [metadata]="metadata"  ></metadata-detail>    
                   </div>
                   <div *ngIf="record.length !== 0">
                       <p-dialog  class="citationDialog" [closable]="false" [(visible)]="display" modal="modal" width="550" height="330" responsive="true" #citeDialog>

@@ -114,6 +114,7 @@ export class LandingComponent implements OnInit {
     displayContact: boolean = false; 
     private meta: Meta;
     private newer : reference = {};  
+    navigationSubscription : any;
   /**
    * Creates an instance of the SearchPanel
    *
@@ -126,8 +127,6 @@ export class LandingComponent implements OnInit {
     this.rmmApi = this.appConfig.getRMMapi();
     this.distApi = this.appConfig.getDistApi();
     this.landing = this.appConfig.getLandingBackend();
-
-  
   }
 
    /**
@@ -213,6 +212,7 @@ updateMenu(){
     this.metadata = true;
     this.similarResources =false;
     this.router.navigate(['/od/id/', this.record.ediid],{fragment:'metadata'});
+    this.gotoSelection(); 
   },'');
     itemsMenu.push(metaItem);
     itemsMenu.push(metadata);   
@@ -310,15 +310,17 @@ updateMenu(){
           const element = document.querySelector("#" + tree.fragment);
          console.log("Element"+tree.fragment);
           if (element) { 
-            //element.scrollIntoView(true); 
-            element.scrollIntoView({behavior: "instant", block: "start", inline: "start"});
-           }
+            //element.scrollIntoView(); 
+            setTimeout(() => {
+            element.scrollIntoView({behavior: "smooth", block: "start", inline: "nearest"});
+           }, 1);
         }
       }
-    });
+    }});
   }
 
   ngAfterViewInit(){
+    console.log("after view init");
     this.gotoSelection();
     if (this.record != null && isPlatformBrowser(this.platformId) )  {
       window.history.replaceState( {} , 'pdr/od/id/', '/od/id/'+this.searchValue );

@@ -22,6 +22,7 @@ export class DescriptionComponent {
  @Input() distdownload: string;
  @Input() editContent: boolean;
  @Input() filescount: number;
+ @Input() metadata: boolean;
 
  addAllFileSpinner:boolean = false;
  fileDetails:string = '';
@@ -157,9 +158,7 @@ checkReferences(){
  ngOnChanges(){
     this.checkAccesspages();
  }
- editDecription(){
 
- }
  //Datacart related code
  addFilesToCart() {
 

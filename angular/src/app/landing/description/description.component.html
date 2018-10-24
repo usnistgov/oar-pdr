@@ -1,4 +1,7 @@
-<h3 id="description" name="desscription"><b>Description</b></h3><br> 
+<div id="description">
+
+ <div [hidden]="metadata">
+<h3  name="desscription"><b>Description</b></h3><br> 
 <div contenteditable="true" id="recordDescription" class="well welldesc">
     <p  *ngFor="let topic of record['description']; let i =index">
         {{ record["description"][i] }}
@@ -19,9 +22,12 @@
     </span> 
 </div>
 <br>
+</div>
+</div>
                   
-<div class="font14">
-    <h3 id="dataAccess"><b>Data Access</b></h3><br> 
+<div id="dataAccess"> 
+    <div class="font14" [hidden]="metadata">
+    <h3><b>Data Access</b></h3><br> 
     <span style="margin-left:0em" *ngIf="record['accessLevel'] === 'public'">
         <i class="faa faa-globe"></i> These data are public. 
     </span>
@@ -44,7 +50,7 @@
                </i><br>
         </span>
     </span>
-</div> 
+
 <div *ngIf="files.length  > 0">        
     <br>
     <span><b>Files</b> </span>   
@@ -89,10 +95,15 @@
         </ng-template>
     </p-treeTable>
 </div>
-                         
+       
+</div> 
+</div>
+
+<div id="reference"> 
+<div [hidden]="metadata">
 <br>
 <div *ngIf="checkReferences()">
-    <h3 id="reference" name="reference"><b>References</b></h3>
+    <h3 ><b>References</b></h3>
     <span class="font14"  *ngIf="isDocumentedBy"> 
         This data is discussed in :
         <span  *ngFor="let refs of record['references']">
@@ -116,7 +127,9 @@
         </span>
     </span>
 </div>
-    <p-overlayPanel class="fileDialog" #op3 [dismissable]="true"  [showCloseIcon]="true" [style]="{'width':'400px'}" [appendTo]="'body'">
+</div> 
+</div>
+<p-overlayPanel class="fileDialog" #op3 [dismissable]="true"  [showCloseIcon]="true" [style]="{'width':'400px'}" [appendTo]="'body'">
         <div *ngIf="isNodeSelected" class="filecard">
             <div class="ui-g filesection">
                 <div *ngIf="fileNode" class="ui-g-12 ui-md-12 ui-lg-12 ui-sm-10">
