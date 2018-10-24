@@ -236,9 +236,10 @@ updateMenu(){
     },'');
   var itemsMenu2:MenuItem[] = [];
       itemsMenu2.push(descItem);
-      if(this.files.length !== 0)
+      if(this.files.length !== 0 || (this.record['landingPage'] && this.record['landingPage'].indexOf('/od/id') === -1 ))
         itemsMenu2.push(filesItem);
-      itemsMenu2.push(refItem);
+      if(this.record['references'])
+        itemsMenu2.push(refItem);
  
   this.rightmenu = [ { label: 'Go To ..', items: itemsMenu2},
       { label: 'Record Details', items: itemsMenu },
