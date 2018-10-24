@@ -1,6 +1,5 @@
 <div id="description">
-
- <div [hidden]="metadata">
+<div [hidden]="metadata">
 <h3  name="desscription"><b>Description</b></h3><br> 
 <div contenteditable="true" id="recordDescription" class="well welldesc">
     <p  *ngFor="let topic of record['description']; let i =index">
@@ -56,7 +55,6 @@
     <span><b>Files</b> </span>   
     
     <span>
-            <!-- pTooltip="'Download All Files' coming soon!" tooltipPosition="bottom" tooltipStyleClass="customToolTip" -->
         <a  class="faa faa-file-archive-o" style="color:grey; margin-left:0.5em; " title="Download All Files" ></a>
     </span>
     <!-- <a href="javascript:;" (click)="addFilesToCart()" class="faa faa-cart-plus " style="margin-left:0.5em; color:#1E6BA1;" title="Add All files to datacart" ></a> -->
@@ -94,8 +92,7 @@
             </tr>            
         </ng-template>
     </p-treeTable>
-</div>
-       
+</div>   
 </div> 
 </div>
 

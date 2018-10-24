@@ -145,7 +145,7 @@ export class LandingComponent implements OnInit {
     }  
     this.type = this.record['@type'];
     this.titleService.setTitle(this.record['title']);
-    // this.meta.addTag({ "testdescription": this.record['description'] });
+    //this.meta.addTag({ "testdescription": this.record['description'] });
     //let dh = new ResComponents(this.record['components']).dataHierarchy();
     this.createNewDataHierarchy();
     if(this.record['doi'] !== undefined && this.record['doi'] !== "" )
@@ -155,8 +155,7 @@ export class LandingComponent implements OnInit {
      this.assessNewer();
     
     this.updateMenu();
-    //this.updateLeftMenu();
-    //this.updateRightMenu();
+
   }
 
   /**
@@ -288,9 +287,9 @@ updateMenu(){
    * Get the params OnInit
    */
   ngOnInit() {
-    // console.log("test:"+paramid);
+  
     this.searchValue = this.route.snapshot.paramMap.get('id');
-    console.log(this.searchValue);
+   
     this.files =[];
       this.route.data.map(data => data.searchService )
        .subscribe((res)=>{
@@ -308,7 +307,6 @@ updateMenu(){
         const tree = this.router.parseUrl(this.router.url);
         if (tree.fragment) {
           const element = document.querySelector("#" + tree.fragment);
-         console.log("Element"+tree.fragment);
           if (element) { 
             //element.scrollIntoView(); 
             setTimeout(() => {
@@ -320,7 +318,6 @@ updateMenu(){
   }
 
   ngAfterViewInit(){
-    console.log("after view init");
     this.gotoSelection();
     if (this.record != null && isPlatformBrowser(this.platformId) )  {
       window.history.replaceState( {} , 'pdr/od/id/', '/od/id/'+this.searchValue );
@@ -335,12 +332,10 @@ updateMenu(){
   filescount : number = 0;
   createNewDataHierarchy(){
     var testdata = {}
-    // console.log(dnode);
-    // console.log(this.record['components']);
     if(this.record['components'] != null){
-    testdata["data"] = this.arrangeIntoTree(this.record['components']);
-   
-    this.files.push(testdata);}
+      testdata["data"] = this.arrangeIntoTree(this.record['components']);
+      this.files.push(testdata);
+    }
   }
   //This is to create a tree structure
   private arrangeIntoTree(paths) {
@@ -413,7 +408,6 @@ updateMenu(){
       }
       i= i+1;
    });
-   //console.log("Return tree"+ JSON.stringify(tree));
    return tree;
   }
 

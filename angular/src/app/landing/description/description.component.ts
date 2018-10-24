@@ -1,12 +1,8 @@
-import { Component, Input,ChangeDetectorRef ,Inject, Injectable,PLATFORM_ID} from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { Component, Input,ChangeDetectorRef } from '@angular/core';
 import { TreeNode} from 'primeng/api';
 import { CartService} from '../../datacart/cart.service';
 import { Data} from '../../datacart/data';
-import {OverlayPanelModule} from 'primeng/overlaypanel';
 import { OverlayPanel} from 'primeng/overlaypanel';
-import {DialogModule} from 'primeng/dialog';
-import { CommonModule } from "@angular/common";
 
 @Component({
   moduleId: module.id,
@@ -40,27 +36,6 @@ export class DescriptionComponent {
  selectedNode : TreeNode;
  cols: any[];
  fileNode: TreeNode;
- 
-
-//  onNodeSelect(event, sdata){
-//      alert("Node select ::"+sdata.name);
-//  }
-// nodeSelect(event) {
-//     var test = this.getComponentDetails(this.record["components"],event.node.data);
-//     let i =0;
-//     this.fileDetails = '';
-//     for(let t of test){
-//         this.isFileDetails = true;
-//         this.fileDetails = t;
-//     }
-//     alert("TEST");
-// }
-
-// getComponentDetails(data,filepath) {
-//   return data.filter(
-//       function(data){return data.filepath == filepath }
-//   );
-// }
 
 keys() : Array<string> {
     return Object.keys(this.fileDetails);
@@ -230,11 +205,6 @@ addtoCart(fileName:string,fileSize:number,fileFormat:string,
  }
 
  display: boolean = false;
-
-//  showDialog(selectedNode: TreeNode) {
-//      this.selectedNode = selectedNode;
-//      this.display = true;
-//  }
  /**
    * Function to display bytes in appropriate format.
    **/ 
@@ -245,6 +215,6 @@ addtoCart(fileName:string,fileSize:number,fileFormat:string,
      e=["Bytes","kB","MB","GB","TB","PB","EB","ZB","YB"],
      f=Math.floor(Math.log(bytes)/Math.log(base));
     return (bytes/Math.pow(base,f)).toFixed(d)+" "+e[f]
-}
+    }
  
 }
