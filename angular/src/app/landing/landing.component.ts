@@ -333,9 +333,10 @@ updateMenu(){
     var testdata = {}
     // console.log(dnode);
     // console.log(this.record['components']);
+    if(this.record['components'] != null){
     testdata["data"] = this.arrangeIntoTree(this.record['components']);
    
-    this.files.push(testdata);
+    this.files.push(testdata);}
   }
   //This is to create a tree structure
   private arrangeIntoTree(paths) {
@@ -344,7 +345,7 @@ updateMenu(){
     // This example uses the underscore.js library.
     var i = 0;
     var tempfiletest = "";
-   
+    
     paths.forEach((path) => { 
      
       
