@@ -237,6 +237,9 @@ updateMenu(){
       { label: 'Find',   items: [ similarRes, resourcesByAuthor ]}];
 }
 
+/**
+ * Function creates Citation string to be displayed by using metadata in the record
+ */
  getCitation(){
     this.citeString = "";
     let date =  new Date(); 
@@ -532,6 +535,6 @@ updateMenu(){
             }
         }
     }
-}
+ }
 
 }
