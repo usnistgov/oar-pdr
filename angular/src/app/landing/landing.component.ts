@@ -6,7 +6,6 @@ import { MenuItem } from 'primeng/api';
 import * as _ from 'lodash';
 import 'rxjs/add/operator/map';
 import { Subscription } from 'rxjs/Subscription';
-import { environment } from '../../environments/environment';
 import { AppConfig } from '../shared/config-service/config.service';
 import {  PLATFORM_ID, APP_ID, Inject } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
@@ -99,14 +98,14 @@ export class LandingComponent implements OnInit {
     distdownload: string = '';
     serviceApi: string = '';
     metadata: boolean = false;
-    pdrApi : string = "environment.PDRAPI";
     private _routeParamsSubscription: Subscription;
     private files: TreeNode[] = [];
     private fileHierarchy : TreeNode;
-    private rmmApi : string = environment.RMMAPI;
-    private distApi : string = environment.DISTAPI;
-    private landing : string = environment.LANDING;
-    private sdpLink : string = environment.SDPAPI;
+    private rmmApi : string = '';
+    private distApi : string = '';
+    private landing : string = '';
+    private sdpLink : string = '';
+    pdrApi : string = '';
     private displayIdentifier :string;
     private dataHierarchy: any[]=[];
     isResultAvailable: boolean = true;
@@ -127,6 +126,7 @@ export class LandingComponent implements OnInit {
     this.rmmApi = this.appConfig.getRMMapi();
     this.distApi = this.appConfig.getDistApi();
     this.landing = this.appConfig.getLandingBackend();
+    this.pdrApi = this.appConfig.getPDRApi();
   }
 
    /**
@@ -168,7 +168,6 @@ onError(error:any) {
   //this.msgs.push({severity:'error', summary:this.errorMsg + ':', detail:this.status + ' - ' + this.exception});
 }
 
-
 viewmetadata(){
   this.metadata = true; this.similarResources =false;
 }
@@ -203,51 +202,44 @@ updateMenu(){
       for(let auth of this.record['authors']) authlist = authlist+auth.familyName+",";
   }
   
-  var resourcesByAuthor = this.createMenuItem ('Resources by Authors',"faa faa-external-link","",this.sdpLink+"/#/search?q=authors.familyName="+authlist+"&key=&queryAdvSearch=yes");
-  var similarRes = this.createMenuItem ("Similar Resources", "faa faa-external-link", "",this.sdpLink+"/#/search?q=keyword="+this.record['keyword']+"&key=&queryAdvSearch=yes");                
+  var resourcesByAuthor = this.createMenuItem ('Resources by Authors',"faa faa-external-link","",
+                                   this.sdpLink+"/#/search?q=authors.familyName="+authlist+"&key=&queryAdvSearch=yes");
+  var similarRes = this.createMenuItem ("Similar Resources", "faa faa-external-link", "",
+                              this.sdpLink+"/#/search?q=keyword="+this.record['keyword']+"&key=&queryAdvSearch=yes");                
   var license = this.createMenuItem("Fair Use Statement",  "faa faa-external-link","",this.record['license'] ) ;
-  var citation = this.createMenuItem('Citation', "faa faa-angle-double-right",(event)=>{ this.getCitation(); this.showDialog(); },'');
-  var metaItem = this.createMenuItem("View Metadata","faa faa-bars",(event)=>{
-    this.metadata = true;
-    this.similarResources =false;
-    this.router.navigate(['/od/id/', this.record.ediid],{fragment:'metadata'});
-    this.gotoSelection(); 
-  },'');
-    itemsMenu.push(metaItem);
-    itemsMenu.push(metadata);   
+  var citation = this.createMenuItem('Citation', "faa faa-angle-double-right",
+                          (event)=>{ this.getCitation(); this.showDialog(); },'');
+  var metaItem = this.createMenuItem("View Metadata","faa faa-bars",
+                          (event)=>{ this.goToSelection(true, false, 'metadata'); },'');
+  itemsMenu.push(metaItem);
+  itemsMenu.push(metadata);   
 
-  var descItem = this.createMenuItem ("Description","faa faa-arrow-circle-right",(event)=>{
-    this.metadata = false; this.similarResources =false;
-    this.router.navigate(['/od/id/', this.record.ediid],{fragment:'description'});
-    this.gotoSelection(); 
-   },"");
+  var descItem = this.createMenuItem ("Description","faa faa-arrow-circle-right",
+                            (event)=>{ this.goToSelection(false, false, 'description'); },"");
 
-  var refItem = this.createMenuItem ("References","faa faa-arrow-circle-right ",(event)=>{
-    this.metadata = false; this.similarResources =false;
-    this.router.navigate(['/od/id/', this.record.ediid],{fragment:'reference'});
-    this.gotoSelection(); 
-    },'');
+  var refItem = this.createMenuItem ("References","faa faa-arrow-circle-right ",
+                            (event)=>{ this.goToSelection(false,false, 'reference'); },'');
 
-  var filesItem = this.createMenuItem("Data Access","faa faa-arrow-circle-right", (event)=>{
-    this.metadata = false;
-    this.similarResources =false;
-    this.router.navigate(['/od/id/', this.record.ediid],{fragment:'dataAccess'});
-    this.gotoSelection(); 
-    },'');
+  var filesItem = this.createMenuItem("Data Access","faa faa-arrow-circle-right", 
+                            (event)=>{ this.goToSelection(false,false,'dataAccess');  },'');
+
   var itemsMenu2:MenuItem[] = [];
       itemsMenu2.push(descItem);
-      if(this.files.length !== 0 || (this.record['landingPage'] && this.record['landingPage'].indexOf('/od/id') === -1 ))
+  if(this.files.length !== 0 || (this.record['landingPage'] && this.record['landingPage'].indexOf('/od/id') === -1 ))
         itemsMenu2.push(filesItem);
-      if(this.record['references'])
+  if(this.record['references'])
         itemsMenu2.push(refItem);
  
   this.rightmenu = [ { label: 'Go To ..', items: itemsMenu2},
       { label: 'Record Details', items: itemsMenu },
       { label: 'Use',   items: [ citation, license ] },
       { label: 'Find',   items: [ similarRes, resourcesByAuthor ]}];
-  }
+}
 
-  getCitation(){
+/**
+ * Function creates Citation string to be displayed by using metadata in the record
+ */
+ getCitation(){
     this.citeString = "";
     let date =  new Date(); 
       if(this.record['authors'] !==  null && this.record['authors'] !==  undefined){
@@ -300,8 +292,16 @@ updateMenu(){
           // throw new ErrorComponent(this.route);
        });
   }
+  goToSelection(isMetadata: boolean, isSimilarResources: boolean, sectionId : string){
+    this.metadata = isMetadata; this.similarResources =isSimilarResources;
+     if(window.location.href.includes("ark"))
+      this.router.navigate(['/od/id/ark:/88434/'+this.searchValue],{fragment:sectionId});
+     else
+      this.router.navigate(['/od/id/', this.record.ediid],{fragment:sectionId});
+      this.useFragment();
+  }
 
-  gotoSelection(){
+  useFragment(){
     this.router.events.subscribe(s => {
       if (s instanceof NavigationEnd) {
         const tree = this.router.parseUrl(this.router.url);
@@ -318,8 +318,12 @@ updateMenu(){
   }
 
   ngAfterViewInit(){
-    this.gotoSelection();
+    this.useFragment();
+    var recordid ;
     if (this.record != null && isPlatformBrowser(this.platformId) )  {
+      recordid = this.searchValue;
+      if(window.location.href.includes("ark"))
+        recordid = "ark:/88434/"+this.searchValue;
       window.history.replaceState( {} , '', '/od/id/'+this.searchValue );
     }
   }
@@ -347,12 +351,6 @@ updateMenu(){
     
     paths.forEach((path) => { 
      
-      
-      // if(path['@type'].includes("nrdp:Subcollection")){
-      
-      //   tempfiletest = path.filepath;
-      // } 
-     
       if(path.filepath && !path['@type'].includes('nrd:Hidden')) 
       {
         if(!path.filepath.startsWith("/"))
@@ -372,22 +370,7 @@ updateMenu(){
           // Set the current level to this path's children  
           currentLevel = existingPath[0].children;
         } else {
-            
-            // if(part.match(tempfiletest)){
-            //   const newPart = {
-            //     data : {
-            //       name : part,
-            //       mediatype: "",
-            //       size: "",
-            //       downloadUrl: "",
-            //       description: "" 
-            //     },children: []
-            //   };
-            //   currentLevel.push(newPart);
-            //   currentLevel = newPart.children;
-            // }else{
-      
-
+          
             const newPart = {
               data : {
                 name : part,
@@ -477,8 +460,6 @@ updateMenu(){
     this.titleService.setTitle( newTitle );
   }
 
- 
-  
   checkReferences(){
     if(Array.isArray(this.record['references']) ){
       for(let ref of this.record['references'] ){
@@ -553,6 +534,6 @@ updateMenu(){
             }
         }
     }
-}
+ }
 
 }

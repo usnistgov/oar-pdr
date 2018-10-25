@@ -12,6 +12,7 @@ export class AppConfig {
     private metaapi;
     private landingbackend;
     private sdpapi;
+    private pdrapi;
 
     constructor(private http: HttpClient) { }
     loadAppConfig() {
@@ -21,6 +22,7 @@ export class AppConfig {
         this.landingbackend = process.env.LANDING || this.appConfig.LANDING;
         this.metaapi = process.env.METAPI || this.appConfig.METAPI;
         this.sdpapi  = process.env.SDPAPI || this.appConfig.SDPAPI;
+        this.pdrapi =  process.env.PDRAPI || this.appConfig.PDRAPI;
     }
 
     getConfig() {
@@ -41,7 +43,9 @@ export class AppConfig {
     getSDPApi(){
         return this.sdpapi;
     }
-
+    getPDRApi(){
+        return this.pdrapi;
+    }
 
      // public getJSON(): Observable<any> {
     //     return this.http.get("../../../assets/environment.json")
