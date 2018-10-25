@@ -119,7 +119,6 @@ def build_mime_type_map(filelist):
         update_mimetypes_from_file(out, file)
     return out
 
-
 def checksum_of(filepath):
     """
     return the checksum for the given file
@@ -132,6 +131,26 @@ def checksum_of(filepath):
             if not buf: break
             sum.update(buf)
     return sum.hexdigest()
+
+def measure_dir_size(dirpath):
+    """
+    return a pair of numbers representing, in order, the totaled size (in bytes)
+    of all files below the directory and the total number of files.  
+
+    Note that the byte count does not include the capacity taken up by directory
+    entries and thus is not an accurate measure of the space the directory takes
+    up on disk.
+
+    :param str dirpath:  the path to the directory of interest
+    :rtype:  list containing 2 ints
+    """
+    size = 0
+    count = 0
+    for root, subdirs, files in os.walk(dirpath):
+        count += len(files)
+        for f in files:
+            size += os.stat(os.path.join(root,f)).st_size
+    return [size, count]
 
 def rmtree_sys(rootdir):
     """

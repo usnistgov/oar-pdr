@@ -64,8 +64,11 @@ def submit_for_ingest(record, endpoint, name=None,
             raise IngestServerError(message="Unable to parse response as JSON "+
                                     "(is service URL correct?)")
     except requests.RequestException as ex:
-        raise IngestServerError(message="Trouble connecting to ingest service: "+
-                                str(ex), cause=ex)
+        msg = "Trouble connecting to ingest service"
+        if ex.request:
+            msg += " via " + ex.request.url
+        msg += ": "+ str(ex)
+        raise IngestServerError(message=msg, cause=ex)
     
 def get_endpoint(config):
     """
@@ -149,6 +152,12 @@ class IngestClient(object):
             self.log.warn("submit config value not recognized: %s",
                           self.submit_mode)
 
+    @property
+    def endpoint(self):
+        """
+        The service endpoint URL
+        """
+        return self._endpt
 
     def stage(self, record, name=None):
         """
@@ -250,9 +259,12 @@ class IngestClient(object):
                 raise
 
             # success; send file to millionaire acres
+            dest = os.path.join(self._successdir, os.path.basename(recfile))
+            if os.path.isfile(dest):
+                os.remove(dest)
             shutil.move(recfile, self._successdir)
             
-        except OSError as ex:
+        except (OSError, shutil.Error) as ex:
             # problem moving file
             if recfile.startswith(self._inprogdir):
                 state = ("in-progress", "success")
@@ -269,7 +281,7 @@ class IngestClient(object):
                                .format(recfile, str(ex)))
             try:
                 shutil.move(recfile, self._faildir)
-            except OSError as e:
+            except (OSError, IOError, shutil.Error) as e:
                 msg = "Problem moving file from {0} to {1}: {3}" \
                       .format(recfile, self._faildir, str(e))
                 self.log.exception(msg)

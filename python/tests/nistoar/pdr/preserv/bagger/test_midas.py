@@ -1,3 +1,9 @@
+# These unit tests test the nistoar.pdr.preserv.bagger.midas module.  These tests
+# do not include support for updating previously published datasets (via use of 
+# the UpdatePrepService class).  Because testing support for updates require 
+# simulated RMM and distribution services to be running, they have been 
+# seperated out into test_midas_update.py.
+#
 import os, sys, pdb, shutil, logging, json
 from cStringIO import StringIO
 from io import BytesIO
@@ -7,9 +13,12 @@ from collections import OrderedDict
 from copy import deepcopy
 
 from nistoar.testing import *
+from nistoar.pdr import utils
 import nistoar.pdr.preserv.bagit.builder as bldr
+from nistoar.pdr.preserv.bagit import NISTBag
 import nistoar.pdr.preserv.bagger.midas as midas
 import nistoar.pdr.exceptions as exceptions
+from nistoar.pdr.preserv import AIPValidationError
 
 # datadir = nistoar/preserv/data
 datadir = os.path.join( os.path.dirname(os.path.dirname(__file__)), "data" )
@@ -22,9 +31,10 @@ def setUpModule():
 #                        level=logging.INFO)
     rootlog = logging.getLogger()
     loghdlr = logging.FileHandler(os.path.join(tmpdir(),"test_builder.log"))
-    loghdlr.setLevel(logging.INFO)
+    loghdlr.setLevel(logging.DEBUG)
     loghdlr.setFormatter(logging.Formatter(bldr.DEF_BAGLOG_FORMAT))
     rootlog.addHandler(loghdlr)
+    rootlog.setLevel(logging.DEBUG)
 
 def tearDownModule():
     global loghdlr
@@ -118,6 +128,7 @@ class TestMIDASMetadataBaggerMixed(test.TestCase):
         del src['components']
         del src['inventory']
         del src['dataHierarchy']
+        del src['version']
         self.assertEqual(data, src)
         self.assertEqual(data.keys(), src.keys())  # same order
 
@@ -126,7 +137,7 @@ class TestMIDASMetadataBaggerMixed(test.TestCase):
         self.assertEqual(data['@id'], "ark:/88434/mds00hw91v")
         self.assertEqual(data['doi'], "doi:10.18434/T4SW26")
         self.assertEqual(len(data['components']), 4)
-        self.assertEqual(data['components'][3]['@type'][0], 'nrd:Hidden')
+        self.assertEqual(data['components'][0]['@type'][0], 'nrd:Hidden')
         self.assertIsInstance(data['@context'], list)
         self.assertEqual(len(data['@context']), 2)
         self.assertEqual(data['@context'][1]['@base'], data['@id'])
@@ -507,8 +518,8 @@ class TestPreservationBagger(test.TestCase):
                     'Contact-Email': ["datasupport@nist.gov"],
                     'Organization-Address': [
                         "100 Bureau Dr., Gaithersburg, MD 20899"],
-                    'NIST-BagIt-Version': "0.3",
-                    'Multibag-Version': "0.3"
+                    'NIST-BagIt-Version': "0.4",
+                    'Multibag-Version': "0.4"
                 }
             }
         }
@@ -531,8 +542,10 @@ class TestPreservationBagger(test.TestCase):
         self.assertIsNotNone(self.bagr.bagbldr)
         self.assertTrue(os.path.exists(self.bagparent))
 
-        bagdir = os.path.join(self.bagparent, self.midasid+".mbag0_3-0")
+        bagdir = os.path.join(self.bagparent, self.midasid+".1_0.mbag0_4-0")
         self.assertEqual(self.bagr.bagdir, bagdir)
+
+        self.assertIsNone(self.bagr.prepsvc)  # update support turned off
 
     def test_find_pod_file(self):
         podfile = self.bagr.find_pod_file()
@@ -541,8 +554,8 @@ class TestPreservationBagger(test.TestCase):
 
     def test_form_bag_name(self):
         self.bagr.cfg['mbag_version'] = "1.2"
-        bagname = self.bagr.form_bag_name("goober", 3)
-        self.assertEqual(bagname, "goober.mbag1_2-3")
+        bagname = self.bagr.form_bag_name("goober", 3, "1.0.1")
+        self.assertEqual(bagname, "goober.1_0_1.mbag1_2-3")
 
     def test_ensure_metadata_preparation(self):
         self.bagr.ensure_metadata_preparation()
@@ -586,7 +599,11 @@ class TestPreservationBagger(test.TestCase):
                                              "data", "trial3", "trial3a.json")))
         
     def test_make_bag(self):
-        self.bagr.make_bag()
+        try:
+            self.bagr.make_bag()
+        except AIPValidationError as ex:
+            self.fail(ex.description)
+            
         self.assertTrue(os.path.exists(self.bagr.bagdir),
                         "Output bag dir not created")
         self.assertTrue(os.path.exists(os.path.join(self.bagr.bagdir, "data")))
@@ -652,6 +669,79 @@ class TestPreservationBagger(test.TestCase):
                                             "multibag", "file-lookup.tsv")))
         self.assertTrue(os.path.isfile(os.path.join(self.bagr.bagdir,
                                                    "about.txt")))
+
+    def test_determine_updated_version(self):
+        self.bagr.prepare(nodata=False)
+        bag = NISTBag(self.bagr.bagdir)
+        mdrec = bag.nerdm_record(True)
+        self.assertEqual(mdrec['version'], '1.0.0')  # set as the default
+
+        del mdrec['version']
+        newver = self.bagr.determine_updated_version(mdrec, bag)
+        self.assertEqual(newver, "1.0.0")
+        newver = self.bagr.determine_updated_version(mdrec)
+        self.assertEqual(newver, "1.0.0")
+        newver = self.bagr.determine_updated_version()
+        self.assertEqual(newver, "1.0.0")
+
+        newver = self.bagr.determine_updated_version(mdrec, bag)
+        self.assertEqual(newver, "1.0.0")
+        newver = self.bagr.determine_updated_version(mdrec)
+        self.assertEqual(newver, "1.0.0")
+        newver = self.bagr.determine_updated_version()
+        self.assertEqual(newver, "1.0.0")
+
+        mdrec['version'] = "9.0"
+        newver = self.bagr.determine_updated_version(mdrec)
+        self.assertEqual(newver, "9.0")
+
+        mdrec['version'] = "1.0.5+ (in edit)"
+        newver = self.bagr.determine_updated_version(mdrec)
+        self.assertEqual(newver, "1.1.0")
+
+    def test_determine_updated_version_minor(self):
+        self.bagr.prepare(nodata=True)
+        bag = NISTBag(self.bagr.bagdir)
+        mdrec = bag.nerdm_record(True)
+
+        mdrec['version'] = "1.0.5+ (in edit)"
+        newver = self.bagr.determine_updated_version(mdrec)
+        self.assertEqual(newver, "1.0.6")
+        
+    def test_finalize_version(self):
+        self.bagr.prepare(nodata=True)
+
+        bag = NISTBag(self.bagr.bagdir)
+        mdrec = bag.nerdm_record(True)
+        self.assertEqual(mdrec['version'], "1.0.0")
+
+        self.bagr.finalize_version()
+        mdrec = bag.nerdm_record(True)
+        self.assertEqual(mdrec['version'], "1.0.0")
+
+        annotf = os.path.join(bag.metadata_dir, "annot.json")
+        data = utils.read_nerd(annotf)
+        self.assertEqual(data['version'], "1.0.0")
+
+        self.bagr.bagbldr.update_annot_for('', {'version': "1.0.0+ (in edit)"})
+        data = utils.read_nerd(annotf)
+        self.assertEqual(data['version'], "1.0.0+ (in edit)")
+
+        self.bagr.finalize_version()
+        data = utils.read_nerd(annotf)
+        self.assertEqual(data['version'], "1.0.1")
+        self.assertIn('versionHistory', data)
+
+        mdrec = bag.nerdm_record(True)
+        self.assertEqual(mdrec['version'], "1.0.1")
+        self.assertIn('versionHistory', mdrec)
+        hist = mdrec['versionHistory']
+        self.assertEqual(hist[-1]['version'], "1.0.1")
+        self.assertEqual(hist[-1]['description'], "metadata update")
+            
+
+        
+        
         
 
 if __name__ == '__main__':

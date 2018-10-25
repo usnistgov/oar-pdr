@@ -14,6 +14,16 @@ FROM oar-metadata/ejsonschema
 RUN apt-get update && apt-get install -y python-yaml nginx curl wget less sudo \
                                          uwsgi uwsgi-plugin-python zip \
                                          p7zip-full git
+RUN pip install --upgrade setuptools
+RUN pip install 'bagit>=1.6.3,<2.0' 'fs>=2.0.21'
+
+# install multibag from source
+RUN curl -L -o multibag-py.zip \
+    https://github.com/usnistgov/multibag-py/archive/master.zip && \
+    unzip -oq multibag-py.zip && \
+    cd multibag-py-master &&     \
+    python setup.py install
+
 ENV GOSU_VERSION 1.10
 RUN set -ex; \
     arch="$(dpkg --print-architecture | awk -F- '{ print $NF }')"; \

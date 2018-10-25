@@ -384,7 +384,7 @@ class TestApp(test.TestCase):
         self.assertGreater(len([l for l in self.resp if "Content-Type:" in l]),0)
         data = json.loads(body[0])
         self.assertEqual(data['id'], self.midasid)
-        self.assertEqual(data['state'], "in progress")
+        self.assertEqual(data['state'], "successful")
 
         self.resp = []
         req = {
@@ -415,7 +415,7 @@ class TestApp(test.TestCase):
         self.assertGreater(len([l for l in self.resp if "Content-Type:" in l]),0)
         data = json.loads(body[0])
         self.assertEqual(data['id'], self.midasid)
-        self.assertEqual(data['state'], "in progress")
+        self.assertEqual(data['state'], "successful")
 
     def test_auth(self):
 

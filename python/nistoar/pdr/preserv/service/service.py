@@ -1,5 +1,27 @@
 """
 This module provides the business logic for the Preservation Service.
+
+The 
+:class:`service.PreservationService <nistoar.pdr.preserv.service.PreservationService>`
+provides the main API for creating preservation packages (AIPs).  It can be, 
+in principle, be called from a command-line program, a web service, etc.  The 
+preservation process can take a bit of time for large submissions; consequently,
+the :class:`~nistoar.pdr.preserv.service.PreservationService` has built-in 
+support for asynchronous processing.  
+
+(Currently, the only working implementation of the 
+:class:`~service.PreservationService` interface is the 
+:class:`~service.ThreadedPreservationService`, which implements asynchronous 
+execution via python threads.)
+
+Asynchronous processing is by delegating the work to an 
+:class:`~siphandler.SIPHandler`.  An implementation of this class understands
+a particular SIP type; e.g. :class:`~siphandler.MIDASSIPHandler` understands 
+SIPs created by the MIDAS application.  An SIP handler typically delegates 
+the creation a preservation (AIP) bag to a "bagger" class (see
+:mod:`nistoar.preserv.bagger`).  Once the base bag (a single bag directory) is 
+created, the SIP handler may serialize it, deliver it long term storage, and
+submit the metadata to the PDR metadata database.  
 """
 from copy import deepcopy
 from abc import ABCMeta, abstractmethod, abstractproperty
@@ -7,17 +29,19 @@ import os, logging, threading, time, errno
 
 from detach import Detach
 
-from ...exceptions import (PDRException, StateException,
-                           ConfigurationException, SIPDirectoryNotFound)
+from .. import (PDRException, StateException, IDNotFound, 
+                ConfigurationException, SIPDirectoryNotFound,
+                PreservationStateException)
 from ....id import PDRMinter
 from . import status
 from . import siphandler as hndlr
 from ...notify import NotificationService
+from ..bagger.prepupd import UpdatePrepService
 
 from .. import PreservationException, sys as _sys
-log = logging.getLogger(_sys.system_abbrev).getChild(_sys.subsystem_abbrev)
-
-
+log = logging.getLogger(_sys.system_abbrev)   \
+             .getChild(_sys.subsystem_abbrev) \
+             .getChild('service')
 
 class PreservationService(object):
     """
@@ -80,6 +104,17 @@ class PreservationService(object):
         for tp in self.siptypes:
             self.status("_noid", tp)
 
+        # setup a service used to prepare for updates to existing AIPs
+        # If the 'repo_access' config parameter, the service is not able to
+        # check if the input SIP represents a dataset that has been published
+        # before (and thus is an update) nor can submit an update as a
+        # multibag addendum/errata.  
+        self._prepsvc = None
+        if 'repo_access' in self.cfg:
+            self._prepsvc = UpdatePrepService(self.cfg['repo_access'])
+        else:
+            log.warning("repo_access not configured; can't support updates!")
+
     def preserve(self, sipid, siptype=None, timeout=None):
         """
         request that an SIP with a given ID is preserved into long-term 
@@ -104,13 +139,32 @@ class PreservationService(object):
         if siptype not in self.siptypes:
             raise ConfigurationException("No support configured for SIP type: "+
                                          siptype)
-        
-        hdlr = self._make_handler(sipid, siptype)
+
+        # create a Handler object that will be launched asynchronously
+        try:
+            hdlr = self._make_handler(sipid, siptype, asupdate=False)
+        except (IDNotFound, SIPDirectoryNotFound) as ex:
+            return self._not_found_state(sipid, siptype)
+        except Exception as ex:
+            return self._internal_error_state(sipid, siptype)
+
+        # check for the existence of an AIP corresponding to the input SIP ID:
+        # if one exists, fail because the user should have called update()
+        if self._prepsvc:
+            if self._prepsvc.prepper_for(sipid, log=log).aip_exists():
+                hdlr.set_state(status.CONFLICT,
+                               "requested initial preservation of existing AIP")
+                msg = "AIP with ID already exists (need to request update?) :"
+                raise PreservationStateException(msg + sipid, True)
+
+        # React to the current state. This state reflects the state prior to
+        # the current request.  Make sure it is in a state that allows the
+        # current request to proceed.
         if hdlr.state == status.FORGOTTEN:
-            # lay claim to this SIP by updating the state
+            # lay claim to this SIP by updating the state (to PENDING)
             hdlr._status.reset()
 
-        elif hdlr.state == status.FAILED:
+        elif hdlr.state == status.FAILED or hdlr.state == status.CONFLICT:
             # restarting a previously failed attempt
             log.warn("%s: Retrying previously failed preservation attempt",
                      sipid)
@@ -118,22 +172,104 @@ class PreservationService(object):
             hdlr._status.reset()
 
         elif hdlr.state == status.SUCCESSFUL:
+            # shouldn't happen now that we are independently checking the
+            # existence of the AIP above
             log.warn("%s: Non-update request for previously preserved SIP",
                      sipid)
             raise RerequestException(hdlr.state,
                             "initial preservation already completed for "+sipid)
 
-        elif hdlr.state == status.IN_PROGRESS:
+        elif hdlr.state == status.IN_PROGRESS or hdlr.state == status.PENDING:
             log.warn("%s: requested preservation is already in progress", sipid)
             raise RerequestException(hdlr.state,
                                      "preservation already underway for "+sipid)
 
+        # A final check for readiness:  this call allows the handler to carry
+        # out additional SIP-type-specific checks of the SIP's state.
         if not hdlr.isready():
             raise PreservationException("Requested SIP cannot be preserved: " +
                                         hdlr.status.message)
-            
+
+        # we're good to go; launch the handler asynchronously
         return self._launch_handler(hdlr, timeout)[0]
 
+    def update(self, sipid, siptype=None, timeout=None):
+        """
+        request that an updating SIP with a given ID is preserved into long-term 
+        storage and ingested into the target repository.  The SIP-ID implies 
+        a location to look for data associated with that ID.  Returned 
+        is a dictionary containing information information about the status
+        of the request, including, upon successful completion, a list of the 
+        Bag files created and their checksums. 
+
+        :param sipid   str:  the ID for the dataset to be preserved.  
+        :param siptype str:  the name of the type of SIP the ID refers to.
+                             If not provided, a default is assumed, based on 
+                             the configuration.  
+        :param timeout int:  The maximum number of seconds to wait for the 
+                             preservation process to complete before returning
+                             with an interim status dictionary.  (The
+                             preservation process will continue in another 
+                             thread.)
+        :return dict:  a dictionary wiht metadata describing the status of 
+                       preservation effort.
+        """
+        if siptype not in self.siptypes:
+            raise ConfigurationException("No support configured for SIP type: "+
+                                         siptype)
+
+        # create a Handler object that will be launched asynchronously
+        try:
+            hdlr = self._make_handler(sipid, siptype, asupdate=True)
+        except (IDNotFound, SIPDirectoryNotFound) as ex:
+            return self._not_found_state(sipid, siptype)
+        except Exception as ex:
+            return self._internal_error_state(sipid, siptype)
+
+        # check for the existence of an AIP corresponding to the input SIP ID:
+        # if one does not exists, fail because the user should have called
+        # preserve()
+        if self._prepsvc:
+            if not self._prepsvc.prepper_for(sipid, log=log).aip_exists():
+                hdlr.set_state(status.CONFLICT,
+                               "requested update to non-existing AIP")
+                msg = "AIP with ID does not exist (unable to update): "
+                raise PreservationStateException(msg + sipid, False)
+        
+        # React to the current state. This state reflects the state prior to
+        # the current request.  Make sure it is in a state that allows the
+        # current request to proceed.
+        if hdlr.state == status.FORGOTTEN or hdlr.state == status.READY:
+            # lay claim to this SIP by updating the state (to PENDING)
+            hdlr._status.reset()
+
+        elif hdlr.state == status.FAILED or hdlr.state == status.CONFLICT:
+            # restarting a previously failed attempt
+            log.warn("%s: Retrying previously failed preservation attempt",
+                     sipid)
+            # FIX: did it fail previously on an update?
+            hdlr._status.reset()
+
+        elif hdlr.state == status.SUCCESSFUL:
+            log.info("%s: Update request for previously preserved SIP",
+                     sipid)
+            hdlr._status.reset()
+
+        elif hdlr.state == status.IN_PROGRESS or hdlr.state == status.PENDING:
+            log.warn("%s: preservation is already in progress", sipid)
+            raise RerequestException(hdlr.state,
+                                     "preservation already underway for "+sipid)
+
+        # A final check for readiness:  this call allows the handler to carry
+        # out additional SIP-type-specific checks of the SIP's state.
+        if not hdlr.isready():
+            raise PreservationException("Requested SIP cannot be preserved: " +
+                                        hdlr.status.message)
+
+        # we're good to go; launch the handler asynchronously
+        return self._launch_handler(hdlr, timeout)[0]
+
+        
     @abstractmethod
     def _launch_handler(self, handler, timeout=None):
         """
@@ -163,21 +299,29 @@ class PreservationService(object):
             if hdlr.state == status.FORGOTTEN or hdlr.state == status.NOT_READY:
                 hdlr.isready()
             return hdlr.status
-        except SIPDirectoryNotFound, ex:
-            out = { "id": sipid,
-                    "state": status.NOT_FOUND,
-                    "message": status.user_message[status.NOT_FOUND],
-                    "history": [] }
-            return out
-        except Exception, ex:
-            log.exception("Failed to create a handler for siptype=%s, "+
-                          "sipid=%s while checking status", sipid, siptype)
-            out = { "id": sipid,
-                    "state": status.NOT_READY,
-                    "message":
-                         "Internal Error: Unable to get status as siptype={0}".format(siptype),
-                    "history": [] }
-            return out
+        except (IDNotFound, SIPDirectoryNotFound) as ex:
+            return self._not_found_state(sipid, siptype)
+        except Exception as ex:
+            return self._internal_error_state(sipid, siptype)
+
+    def _not_found_state(self, sipid, siptype):
+        return {
+            "id": sipid,
+            "state": status.NOT_FOUND,
+            "message": status.user_message[status.NOT_FOUND],
+            "history": []
+        }
+
+    def _internal_error_state(self, sipid, siptype):
+        log.exception("Failed to create a handler for siptype=%s, "+
+                      "sipid=%s while checking status", sipid, siptype)
+        return {
+            "id": sipid,
+            "state": status.NOT_READY,
+            "message": "Internal Error: Unable to get status as siptype={0}" \
+                       .format(siptype),
+            "history": []
+        }
 
     def requests(self, siptype=None):
         """
@@ -202,32 +346,8 @@ class PreservationService(object):
 
         return out
 
-    @abstractmethod
-    def update(self, sipid, siptype=None, timeout=None):
-        """
-        request that an updating SIP with a given ID is preserved into long-term 
-        storage and ingested into the target repository.  The SIP-ID implies 
-        a location to look for data associated with that ID.  Returned 
-        is a dictionary containing information information about the status
-        of the request, including, upon successful completion, a list of the 
-        Bag files created and their checksums. 
 
-        :param sipid   str:  the ID for the dataset to be preserved.  
-        :param siptype str:  the name of the type of SIP the ID refers to.
-                             If not provided, a default is assumed, based on 
-                             the configuration.  
-        :param timeout int:  The maximum number of seconds to wait for the 
-                             preservation process to complete before returning
-                             with an interim status dictionary.  (The
-                             preservation process will continue in another 
-                             thread.)
-        :return dict:  a dictionary wiht metadata describing the status of 
-                       preservation effort.
-        """
-        raise NotImplemented()
-        
-
-    def _make_handler(self, sipid, siptype=None):
+    def _make_handler(self, sipid, siptype=None, asupdate=False):
         """
         create an SIPHandler of the given type for the given ID.
         """
@@ -269,6 +389,8 @@ class PreservationService(object):
         if 'mdbag_dir' not in pcfg:
             pcfg['mdbag_dir'] = cfg4type.get('mdserv',{}).get('working_dir',
                                         os.path.join(self.workdir, 'mdserv'))
+        if 'repo_access' not in pcfg and 'repo_access' in self.cfg:
+            pcfg['repo_access'] = deepcopy(self.cfg['repo_access'])
 
         return pcfg
 
@@ -301,8 +423,17 @@ class ThreadedPreservationService(PreservationService):
                 time.sleep(0)
                 self._hdlr.bagit(self._stype, self._dest, self._params)
             except Exception, ex:
+                if isinstance(ex, PreservationStateException):
+                    log.exception("Incorrect state for client's request: "+
+                                  str(ex))
+                    if ex.aipexists:
+                        reason = "requested initial preservation of existing AIP"
+                    else:
+                        reason = "requested update to non-existing AIP"
+                    self._hdlr.set_state(status.CONFLICT, reason)
+                else:
+                    self._hdlr.set_state(status.FAILED, "Unexpected failure")
                 log.exception("Bagging failure: %s", str(ex))
-                self._hdlr.set_state(status.FAILED, "Unexpected failure")
 
                 # alert a human!
                 if self._hdlr.notifier:
@@ -360,43 +491,6 @@ class ThreadedPreservationService(PreservationService):
                         "Failed to launch preservation due to internal error")
 
         return (handler.status, t)
-
-    def update(self, sipid, siptype=None, timeout=None):
-        # Unimplemented: simulating asynchronous response
-        
-        if siptype not in self.siptypes:
-            raise ConfigurationException("No support configured for SIP type: "+
-                                         siptype)
-        
-        hdlr = self._make_handler(sipid, siptype)
-        if hdlr.state == status.FORGOTTEN or hdlr.state == status.READY:
-            # lay claim to this SIP by updating the state
-            hdlr._status.reset()
-
-        elif hdlr.state == status.FAILED:
-            # restarting a previously failed attempt
-            log.warn("%s: Retrying previously failed preservation attempt",
-                     sipid)
-            # FIX: did it fail previously on an update?
-            hdlr._status.reset()
-
-        elif hdlr.state == status.SUCCESSFUL:
-            log.info("%s: Update request for previously preserved SIP",
-                     sipid)
-            hdlr._status.reset()
-
-        elif hdlr.state == status.IN_PROGRESS:
-            log.warn("%s: preservation is already in progress", sipid)
-            raise RerequestException(hdlr.state,
-                                     "preservation already underway for "+sipid)
-
-        if not hdlr.isready():
-            raise PreservationException("Requested SIP cannot be preserved: " +
-                                        hdlr.status.message)
-
-        log.warn("Update is unimplemented! (Pretending to work asynchronously)")
-        hdlr.set_state(status.IN_PROGRESS)
-        return hdlr.status
 
 
 # NOT WORKING (use ThreadedPreservationService)
@@ -470,7 +564,17 @@ class MultiprocPreservationService(PreservationService):
                 try:
                     handler.bagit('zip', self.storedir)
                 except Exception, e:
-                    log.exception("Preservation handler failed: %s", str(e))
+                    if isinstance(ex, PreservationStateException):
+                        log.exception("Incorrect state for client's request: "+
+                                      str(ex))
+                        if ex.aipexists:
+                            reason = "requested initial preservation of " + \
+                                     "existing AIP"
+                        else:
+                            reason = "requested update to non-existing AIP"
+                        self._hdlr.set_state(status.CONFLICT, reason)
+                    else:
+                        log.exception("Preservation handler failed: %s", str(e))
 
                     # alert a human!
                     if self._hdlr.notifier:
@@ -493,9 +597,6 @@ class MultiprocPreservationService(PreservationService):
                 log.exception("Unexpected failure while monitoring "+
                               "preservation process: %s", str(e))
                 return (handler.status, cpid)
-
-    def update(self, sipid, siptype=None, timeout=None):
-        raise NotImplemented()
 
 class RerequestException(PreservationException):
     """

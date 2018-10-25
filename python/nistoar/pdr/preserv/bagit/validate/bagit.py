@@ -263,7 +263,7 @@ class BagItValidator(ValidatorBase):
         out = results
 
         badlines = []
-        fmtre = re.compile("^[\w\-]+\s*:\s*\S.*$")
+        fmtre = re.compile("^[\w\-]+\s*:(\s*\S.*)?$")
         cntre = re.compile("^\s+")
         i = 0
         with open(baginfof) as fd:

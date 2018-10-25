@@ -160,27 +160,10 @@ class TestThreadedPreservationService(test.TestCase):
 
         self.assertEqual(stat['state'], status.SUCCESSFUL)
         self.assertTrue(os.path.exists(os.path.join(self.store,
-                                                self.midasid+".mbag0_3-0.zip")))
+                                           self.midasid+".1_0_0.mbag0_4-0.zip")))
         self.assertTrue(os.path.exists(os.path.join(self.store,
-                                         self.midasid+".mbag0_3-0.zip.sha256")))
+                                    self.midasid+".1_0_0.mbag0_4-0.zip.sha256")))
         self.assertEqual(hndlr.state, status.SUCCESSFUL)
-        
-    def test_launch_async(self):
-        hndlr = self.svc._make_handler(self.midasid, 'midas')
-        self.assertEqual(hndlr.state, status.FORGOTTEN)
-        (stat, thrd) = self.svc._launch_handler(hndlr, 0)
-
-        self.assertEqual(stat['state'], status.SUCCESSFUL)
-        try:
-            self.assertFalse(thrd.is_alive())
-        except Exception:
-            thrd.join()
-            raise
-        self.assertEqual(hndlr.state, status.SUCCESSFUL)
-        self.assertTrue(os.path.exists(os.path.join(self.store,
-                                                self.midasid+".mbag0_3-0.zip")))
-        self.assertTrue(os.path.exists(os.path.join(self.store,
-                                         self.midasid+".mbag0_3-0.zip.sha256")))
         
     def test_launch_async(self):
         hndlr = self.svc._make_handler(self.midasid, 'midas')
@@ -195,9 +178,9 @@ class TestThreadedPreservationService(test.TestCase):
             thrd.join()
         self.assertEqual(hndlr.state, status.SUCCESSFUL)
         self.assertTrue(os.path.exists(os.path.join(self.store,
-                                                self.midasid+".mbag0_3-0.zip")))
+                                           self.midasid+".1_0_0.mbag0_4-0.zip")))
         self.assertTrue(os.path.exists(os.path.join(self.store,
-                                         self.midasid+".mbag0_3-0.zip.sha256")))
+                                    self.midasid+".1_0_0.mbag0_4-0.zip.sha256")))
 
     def test_preserve(self):
         self.assertFalse(os.path.exists(os.path.join(self.narch,"archive.txt")))
@@ -267,6 +250,10 @@ class TestThreadedPreservationService(test.TestCase):
         hndlr._status.reset()
         stat = self.svc.status(self.midasid)
         self.assertEqual(stat['state'], status.PENDING)
+
+        with self.assertRaises(serv.RerequestException):
+            self.svc.preserve(self.midasid, 'midas', 2)
+        hndlr.set_state(status.READY)
         
         try:
             self.svc.preserve(self.midasid, 'midas', 2)
@@ -397,9 +384,9 @@ class TestMultiprocPreservationService(test.TestCase):
 # 
 #         self.assertEqual(hndlr.state, status.SUCCESSFUL)
 #         self.assertTrue(os.path.exists(os.path.join(self.store,
-#                                                 self.midasid+".mbag0_3-0.zip")))
+#                                            self.midasid+".1_0.mbag0_4-0.zip")))
 #         self.assertTrue(os.path.exists(os.path.join(self.store,
-#                                          self.midasid+".mbag0_3-0.zip.sha256")))
+#                                     self.midasid+".1_0.mbag0_4-0.zip.sha256")))
         
 
 

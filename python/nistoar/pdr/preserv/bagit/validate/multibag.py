@@ -15,7 +15,7 @@ class MultibagValidator(ValidatorBase):
     In particular, this validator tests whether a given bag can be consider
     part of a multibag aggregation.  
     """
-    profile = ("Multibag", "0.3")
+    profile = ("Multibag", "0.4")
 
     def __init__(self, config=None):
         super(MultibagValidator, self).__init__(config)
@@ -39,8 +39,8 @@ class MultibagValidator(ValidatorBase):
         out._warn(t, len(data["Multibag-Version"]) == 1)
 
         t = self._issue("2-Version-val",
-                      "Multibag-Version must be set to '0.3'")
-        out._err(t, data["Multibag-Version"][-1] == "0.3")
+            "Multibag-Version must be set to a recognized version ('0.3', '0.4'")
+        out._err(t, data["Multibag-Version"][-1] in ["0.3", "0.4"])
         
         return out
 
@@ -168,7 +168,7 @@ class MultibagValidator(ValidatorBase):
                 parts = [p.strip() for p in val.split(',')]
                 if len(parts) > 2:
                     badfmt.append(val)
-                selfdeprecating = selfdeprecating or val == headver or \
+                selfdeprecating = selfdeprecating or parts[0] == headver or \
                                   (len(parts) > 1 and parts[1] == bag.name)
 
             t = self._issue("2-Head-Deprecates",

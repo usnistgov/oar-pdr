@@ -1,4 +1,10 @@
-import os, sys, pdb, shutil, logging, json
+# These unit tests test the nistoar.pdr.publish.mdserv.serv module.  These tests
+# do not include support for accessing metadata that represent an update to a 
+# previously published dataset (via use of the UpdatePrepService class).  
+# Because testing support for updates require simulated RMM and distribution 
+# services to be running, they have been seperated out into test_serv_update.py.
+#
+import os, sys, pdb, shutil, logging, json, time, signal
 from cStringIO import StringIO
 from io import BytesIO
 import warnings as warn
@@ -12,6 +18,7 @@ from nistoar.pdr import def_jq_libdir
 import nistoar.pdr.preserv.bagit.builder as bldr
 import nistoar.pdr.publish.mdserv.serv as serv
 import nistoar.pdr.exceptions as exceptions
+from nistoar.pdr.utils import read_nerd, write_json
 
 testdir = os.path.dirname(os.path.abspath(__file__))
 testdatadir = os.path.join(testdir, 'data')
@@ -22,6 +29,10 @@ jqlibdir = def_jq_libdir
 schemadir = os.path.join(os.path.dirname(jqlibdir), "model")
 if not os.path.exists(schemadir) and os.environ.get('OAR_HOME'):
     schemadir = os.path.join(os.environ['OAR_HOME'], "etc", "schemas")
+basedir = os.path.dirname(os.path.dirname(os.path.dirname(
+                                                 os.path.dirname(pdrmoddir))))
+distarchdir = os.path.join(pdrmoddir, "distrib", "data")
+descarchdir = os.path.join(pdrmoddir, "describe", "data")
 
 loghdlr = None
 rootlog = None
@@ -43,6 +54,7 @@ def tearDownModule():
         loghdlr = None
     rmtmpdir()
 
+
 class TestPrePubMetadataService(test.TestCase):
 
     testsip = os.path.join(datadir, "midassip")
@@ -54,13 +66,15 @@ class TestPrePubMetadataService(test.TestCase):
         self.bagparent = self.workdir
         self.upldir = os.path.join(self.testsip, "upload")
         self.revdir = os.path.join(self.testsip, "review")
-        config = {
+        self.pubcache = self.tf.mkdir("headcache")
+        
+        self.config = {
             'working_dir':     self.workdir,
             'review_dir':      self.revdir,
             'upload_dir':      self.upldir,
             'id_registry_dir': self.workdir
         }
-        self.srv = serv.PrePubMetadataService(config)
+        self.srv = serv.PrePubMetadataService(self.config)
         self.bagdir = os.path.join(self.bagparent, self.midasid)
 
     def tearDown(self):
@@ -73,6 +87,8 @@ class TestPrePubMetadataService(test.TestCase):
         self.assertEquals(self.srv.reviewdir, self.revdir)
         self.assertEquals(os.path.dirname(self.srv._minter.registry.store),
                           self.workdir)
+
+        self.assertIsNone(self.srv.prepsvc)  # update support turned off
 
     def test_prepare_metadata_bag(self):
         metadir = os.path.join(self.bagdir, 'metadata')
@@ -229,6 +245,12 @@ class TestPrePubMetadataService(test.TestCase):
         self.assertFalse(os.path.exists(self.bagdir))
 
         mdata = self.srv.resolve_id(self.midasid)
+        self.assertIn("ediid", mdata)
+
+        # just for testing purposes, a pdr_status property will appear
+        # in the record if this dataset is an update to a previous
+        # release.  
+        self.assertNotIn("pdr_status", mdata)  
 
         loader = ejs.SchemaLoader.from_directory(schemadir)
         val = ejs.ExtValidator(loader, ejsprefix='_')
@@ -238,7 +260,7 @@ class TestPrePubMetadataService(test.TestCase):
         data = self.srv.resolve_id(self.midasid)
         self.assertEqual(data, mdata)
 
-        with self.assertRaises(serv.SIPDirectoryNotFound):
+        with self.assertRaises(serv.IDNotFound):
             self.srv.resolve_id("asldkfjsdalfk")
 
     def test_locate_data_file(self):
@@ -259,6 +281,7 @@ class TestPrePubMetadataService(test.TestCase):
         self.assertEquals(len(loc), 2)
         self.assertIsNone(loc[0])
         self.assertIsNone(loc[1])
+
 
         
         

@@ -12,7 +12,7 @@ _PRESSUBSYSABBREV = "Pub"
 
 class PublishSystem(PDRSystem):
     """
-    a mixin providing static information about the Preservation system
+    a mixin providing static information about the publishing system
     """
     @property
     def system_name(self): return _PRESSYSNAME

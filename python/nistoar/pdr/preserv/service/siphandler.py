@@ -3,13 +3,17 @@ This module provides an abstract interface turning a Submission Information
 Package (SIP) into an Archive Information Package (BagIt bags).  It also 
 includes implementations for different known SIPs
 """
-import os, re, shutil, logging
+from __future__ import print_function
+import os, sys, re, shutil, logging
 from abc import ABCMeta, abstractmethod, abstractproperty
 from collections import OrderedDict
 from copy import deepcopy
 
 from ..bagit.serialize import DefaultSerializer
 from ..bagit.bag import NISTBag
+from ..bagit.validate import NISTAIPValidator
+from ..bagit.multibag import MultibagSplitter
+from ..bagger import utils as bagutils
 from ..bagger.base import checksum_of
 from ..bagger.midas import PreservationBagger
 from .. import (ConfigurationException, StateException, PODError)
@@ -43,7 +47,7 @@ class SIPHandler(object):
     __metaclass__ = ABCMeta
 
     def __init__(self, sipid, config, minter=None, serializer=None,
-                 notifier=None):
+                 notifier=None, asupdate=None):
         """
         Configure the handler to process a specific SIP with a given 
         identifier.  The SIP identifier (together with the type of the 
@@ -63,6 +67,8 @@ class SIPHandler(object):
                              will be used.
         :param notifier NotificationService: the service for pushing alerts
                              to real people.
+        :param asupdate bool:  Create this handler assuming this preservation 
+                             request is an update to an existing AIP.
         """
         self._sipid = sipid
         self.cfg = deepcopy(config)
@@ -70,6 +76,7 @@ class SIPHandler(object):
         if not serializer:
             serializer = DefaultSerializer()
         self._ser = serializer
+        self._asupdate = asupdate
 
         self.workdir = self.cfg['working_dir']
         assert self.workdir
@@ -89,8 +96,9 @@ class SIPHandler(object):
         if not os.path.exists(stcfg['cachedir']):
             os.mkdir(stcfg['cachedir'])
 
-        # The initial state will be FORGOTTEN unless another handler has
-        # already started.
+        # If this is a first time preservation request, the initial state
+        # will be FORGOTTEN unless another handler has already started.
+        # If this is an update, the state should be SUCCESSFUL.
         self._status = status.SIPStatus(self._sipid, stcfg)
 
         # set the notification service we can send alerts to
@@ -111,6 +119,8 @@ class SIPHandler(object):
         ok = [status.FORGOTTEN, status.PENDING, status.READY, status.NOT_READY]
         if _inprogress:
             ok.append(status.IN_PROGRESS)
+        if self._asupdate:
+            ok.append(status.SUCCESSFUL)
         return self._status.state in ok
 
     @abstractmethod
@@ -177,25 +187,45 @@ class SIPHandler(object):
                                 If not provided a default serialization 
                                 will be applied (as given in the configuration).
         """
-        #TODO:  splitting large submissions
+        srcbags = [ bagdir ]
+
+        # split the bag if it exceed size limits
+        mbcfg = self.cfg.get('multibag', {})
+        maxhbsz = mbcfg.get('max_headbag_size', mbcfg.get('max_bag_size'))
+        if maxhbsz:
+            log.info("Considering multibagging (max size: %d)", maxhbsz)
+            mbspltr = MultibagSplitter(bagdir, mbcfg)
+
+            # check the size of the source bag and split it if it exceeds
+            # limits.  
+            srcbags = mbspltr.check_and_split(os.path.dirname(bagdir), log)
+
+            # TODO: Run NIST validator on output files
+        elif not mbcfg:
+            log.warning("multibag splitting not configured")
+            
 
         self._status.data['user']['bagfiles'] = []
-        file1 = self._ser.serialize(bagdir, destdir, format)
-        for file in [file1]:
-            csumfile = file + ".sha256"
-            csum = checksum_of(file)
+        outfiles = []
+        for bagd in srcbags:
+            bagfile = self._ser.serialize(bagd, destdir, format)
+            outfiles.append(bagfile)
+
+            csumfile = bagfile + ".sha256"
+            csum = checksum_of(bagfile)
             with open(csumfile, 'w') as fd:
                 fd.write(csum)
                 fd.write('\n')
+            outfiles.append(csumfile)
 
             # write the checksum to our status object
             self._status.data['user']['bagfiles'].append({
-                'name': os.path.basename(file),
+                'name': os.path.basename(bagfile),
                 'sha256': csum
             })
 
         self._status.cache()
-        return [file1, csumfile]
+        return outfiles
 
     def _is_ingested(self):
         """
@@ -240,7 +270,7 @@ class MIDASSIPHandler(SIPHandler):
     name = "MIDAS-SIP"
 
     def __init__(self, sipid, config, minter=None, serializer=None,
-                 notifier=None):
+                 notifier=None, asupdate=None, sipdirname=None):
         """
         Configure the handler to process a specific SIP with a given 
         identifier.  The SIP identifier (together with the type of the 
@@ -260,26 +290,35 @@ class MIDASSIPHandler(SIPHandler):
                              will be used.
         :param notifier NotificationService: the service for pushing alerts
                              to real people.
+        :param asupdate bool:  Create this handler assuming this preservation 
+                             request is an update to an existing AIP.
+        :param sipdirname str: a relative directory name to look for that 
+                               represents the SIP's directory.  If not provided,
+                               the directory is determined based on the provided
+                               MIDAS ID.  
         """
         super(MIDASSIPHandler, self).__init__(sipid, config, minter, serializer,
-                                              notifier)
+                                              notifier, asupdate)
 
         workdir = self.cfg.get('working_dir')
         if workdir and not os.path.exists(workdir):
             os.mkdir(workdir)
 
+        self.cleanparent = False
         isrel = self.cfg.get('bagger',{}).get('relative_to_indir')
         bagparent = self.cfg.get('bagparent_dir')
         if not bagparent:
+            self.cleanparent = True  # we will feel free to delete stuff from
+                                     #   the bagparent
             bagparent = "_preserv"
+            if not isrel:
+                bagparent = sipid + bagparent
         if not os.path.isabs(bagparent):
             if not isrel:
                 if not workdir:
                     raise ConfigurationException("Missing needed config "+
                                                  "property: workdir_dir")
                 bagparent = os.path.join(workdir, bagparent)
-                if not os.path.exists(bagparent):
-                    os.mkdir(bagparent)
 
         self.stagedir = self.cfg.get('staging_dir')
         if not self.stagedir:
@@ -307,16 +346,19 @@ class MIDASSIPHandler(SIPHandler):
             if not workdir:
               raise ConfigurationException("Missing needed config property: "+
                                            "working_dir")
-            self.stagedir = os.path.join(workdir, self.mdbagdir)
+            self.mdbagdir = os.path.join(workdir, self.mdbagdir)
             if not os.path.exists(self.mdbagdir):
                 os.mkdir(self.mdbagdir)
         if not os.path.exists(self.mdbagdir):
             raise StateException("Metadata directory does not exist as a " +
                                  "directory: " + self.mdbagdir)
-        
+
+        bgrcfg = config.get('bagger', {})
+        if 'repo_access' not in bgrcfg and 'repo_access' in config:
+            bgrcfg['repo_access'] = config['repo_access']
         self.bagger = PreservationBagger(sipid, bagparent, self.sipparent,
-                                         self.mdbagdir, config.get('bagger'),
-                                         self._minter)
+                                         self.mdbagdir, bgrcfg, self._minter, 
+                                         self._asupdate, sipdirname)
 
         if self.state == status.FORGOTTEN and self._is_preserved():
             self.set_state(status.SUCCESSFUL, 
@@ -331,13 +373,6 @@ class MIDASSIPHandler(SIPHandler):
         """
         do a quick check of the input SIP to determine if it can be 
         processed into an AIP.  If it is not ready, return False.
-
-        Implementations should first call this inherited version which ensures 
-        that the current status is either FORGOTTEN, PENDING, or READY.  False
-        is returned if this is not true, and the child implementation should not 
-        proceed.  The child implementation should then do a quick check that the
-        input data exists and appears to be in a state ready for preservation.  
-        It should finally set the _ready field to True.
 
         :return bool:  True if the requested SIP appears to be ready for 
                        preservation; False, otherwise.
@@ -394,11 +429,34 @@ class MIDASSIPHandler(SIPHandler):
                                  format(self._sipid, self._status.message),
                                  sys=_sys)
 
-        # Create the bag
+        # If a previous attempt to preserve went wrong, it's possible it's
+        # remnants remain on disk.  If so, we should clean out the directory
+        # before trying again.
+        if self.cleanparent and os.path.isdir(self.bagger.bagparent):
+            log.warning("Cleaning out previous bagging artifacts (%s)",
+                        self.bagger.bagparent)
+            shutil.rmtree(self.bagger.bagparent)
+
+        # Create the bag.  Note: make_bag() can raise exceptions
         self._status.record_progress("Collecting metadata and files")
         bagdir = self.bagger.make_bag()
 
-        # zip it up 
+        # Stage the full NERDm record for ingest into the RMM
+        if self._ingester:
+            try:
+                bag = NISTBag(self.bagger.bagdir)
+                self._ingester.stage(bag.nerdm_record(), self.bagger.name)
+            except Exception as ex:
+                msg = "Failure staging NERDm record for " + self.bagger.name + \
+                      " for ingest: " + str(ex)
+                log.exception(msg)
+                # send an alert email to interested subscribers
+                if self.notifier:
+                    self.notifier.alert("preserve.failure", origin=self.name,
+                                  summary="Ingest failed for "+self.bagger.name,
+                                        desc=msg, id=self.bagger.name)
+
+        # zip it up; this may split the bag into multibags
         self._status.record_progress("Serializing")
         savefiles = self._serialize(bagdir, self.stagedir, serialtype)
 
@@ -423,21 +481,6 @@ class MIDASSIPHandler(SIPHandler):
                     os.remove(f)
 
             raise PreservationException(msg, [str(ex)])
-
-        # Stage the full NERDm record for ingest into the RMM
-        if self._ingester:
-            try:
-                bag = NISTBag(self.bagger.bagdir)
-                self._ingester.stage(bag.nerdm_record(), self.bagger.name)
-            except Exception as ex:
-                msg = "Failure staging NERDm record for " + self.bagger.name + \
-                      " for ingest: " + str(ex)
-                log.exception(msg)
-                # send an alert email to interested subscribers
-                if self.notifier:
-                    self.notifier.alert("preserve.failure", origin=self.name,
-                                  summary="Ingest failed for "+self.bagger.name,
-                                        desc=msg, id=self.bagger.name)
 
         # Now write copies of the checksum files to the review SIP dir.
         # MIDAS will scoop these up and save them in its database.
@@ -489,8 +532,9 @@ class MIDASSIPHandler(SIPHandler):
                 log.info("Submitted NERDm record to RMM")
             except Exception as ex:
                 msg = "Failed to ingest record with name=" + \
-                      self.bagger.name + "into RMM: " + str(ex)
+                      self.bagger.name + " into RMM: " + str(ex)
                 log.exception(msg)
+                log.info("Ingest service endpoint: "+self._ingester.endpoint)
 
                 if self.notifier:
                     self.notifier.alert("ingest.failure", origin=self.name,
@@ -503,20 +547,45 @@ class MIDASSIPHandler(SIPHandler):
                            summary="New MIDAS SIP preserved: "+self.bagger.name,
                                 id=self.bagger.name)
 
+        # remove the metadata bag directory so that that an attempt to update
+        # will force a rebuild based on the published version
+        mdbag = os.path.join(self.mdbagdir, self.bagger.name)
+        log.debug("ensuring the removal metadata bag directory: %s", mdbag)
+        if os.path.isdir(mdbag):
+            log.debug("removing metadata bag directory...")
+            shutil.rmtree(mdbag)
+            if os.path.isfile(mdbag+".lock"):
+                os.remove(mdbag+".lock")
+
         # clean up staging area
-        for f in savefiles:
-            try:
-                os.remove(f)
-            except Exception, ex:
-                log.error("Trouble cleaning up serialized bag in staging dir: "+
-                          "\n  %s\nReason: %s", f, str(ex))
+        if self.cfg.get('clean_bag_staging', True):
+            headbag = None
+            if not self.cfg.get('clean_headbag_staging', False):
+                bags = [b for b in [os.path.basename(f) for f in savefiles]
+                          if bagutils.is_legal_bag_name(b) and
+                             not b.endswith('sha256')]
+                if len(bags):
+                    headbag = '/' + bagutils.find_latest_head_bag(bags)
+            for f in savefiles:
+                if f.endswith(headbag):
+                    continue
+                try:
+                    os.remove(f)
+                except Exception, ex:
+                    log.error("Trouble cleaning up serialized bag in staging "+
+                          "dir:\n  %s\nReason: %s", f, str(ex))
+
+        log.info("Completed preservation of SIP %s", self.bagger.name)
 
     def _is_preserved(self):
         """
-        return True if some version of this SIP has been preserved (i.e. sent successfully through
-        the Preservation Service).  This look for as definitive evidence of success (i.e. existence
-        in long-term storage) as possible.
+        return True if some version of this SIP has been preserved (i.e. sent 
+        successfully through the Preservation Service).  This look for as 
+        definitive evidence of success (i.e. existence in long-term storage) 
+        as possible.
         """
-        bagname = self.bagger.form_bag_name(self.bagger.name)
-        return len([f for f in os.listdir(self.storedir) if f.startswith(bagname)]) > 0
+        # look for files in the serialized bag store with names that start
+        # with the SIP identifier
+        return len([f for f in os.listdir(self.storedir)
+                      if f.startswith(self.bagger.name+'.')]) > 0
     

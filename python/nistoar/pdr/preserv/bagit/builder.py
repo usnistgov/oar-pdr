@@ -1,7 +1,7 @@
 """
 Tools for building a NIST Preservation bags
 """
-from __future__ import print_function
+from __future__ import print_function, absolute_import
 import os, errno, logging, re, json, pkg_resources, textwrap, datetime
 import pynoid as noid
 from shutil import copy as filecopy, rmtree
@@ -13,7 +13,7 @@ from .. import (SIPDirectoryError, SIPDirectoryNotFound,
                 ConfigurationException, StateException, PODError)
 from .exceptions import BagProfileError, BagWriteError
 from .. import PreservationSystem, read_nerd, read_pod, write_json
-from ...utils import build_mime_type_map, checksum_of
+from ...utils import build_mime_type_map, checksum_of, measure_dir_size
 from ....nerdm.exceptions import (NERDError, NERDTypeError)
 from ....nerdm.convert import PODds2Res
 from ....id import PDRMinter
@@ -22,6 +22,8 @@ from ...config import load_from_file, merge_config
 from .bag import NISTBag
 from .exceptions import BadBagRequest
 from .validate.nist import NISTAIPValidator
+
+from multibag import open_headbag
 
 NORM=15  # Log Level for recording normal activity
 logging.addLevelName(NORM, "NORMAL")
@@ -46,7 +48,7 @@ NERD_PRE = "nrd"
 NERDPUB_PRE = "nrdp"
 NERDM_SCH_ID_BASE = "https://data.nist.gov/od/dm/nerdm-schema/"
 NERDMPUB_SCH_ID_BASE = "https://data.nist.gov/od/dm/nerdm-schema/pub/"
-NERDM_SCH_VER = "v0.1"
+NERDM_SCH_VER = "v0.2"
 NERDMPUB_SCH_VER = NERDM_SCH_VER
 NERDM_SCH_ID = NERDM_SCH_ID_BASE + NERDM_SCH_VER + "#"
 NERDMPUB_SCH_ID = NERDMPUB_SCH_ID_BASE + NERDMPUB_SCH_VER + "#"
@@ -55,6 +57,7 @@ NERDPUB_DEF = NERDMPUB_SCH_ID + "/definitions/"
 DATAFILE_TYPE = NERDPUB_PRE + ":DataFile"
 DOWNLOADABLEFILE_TYPE = NERDPUB_PRE + ":DownloadableFile"
 SUBCOLL_TYPE = NERDPUB_PRE + ":Subcollection"
+NERDM_CONTEXT = "https://data.nist.gov/od/dm/nerdm-pub-context.jsonld"
 DISTSERV = "https://data.nist.gov/od/ds/"
 DEF_MERGE_CONV = "midas0"
 
@@ -127,7 +130,7 @@ class BagBuilder(PreservationSystem):
         if not logger:
             logger = log
         self.log = logger
-        self.log.setLevel(NORM)
+        # self.log.setLevel(NORM)
         
         if not config:
             config = {}
@@ -159,6 +162,24 @@ class BagBuilder(PreservationSystem):
 # 
 #        if os.path.exists(self.bagdir):
 #            self.ensure_bagdir() # this initializes some data like self._bag
+
+    def rename_bag(self, name):
+        """
+        rename the bag to the given name.  Note that finalize_bag() will need
+        to be (re-)called after calling this method.
+        """
+        if name == self._name:
+            return
+
+        newdir = os.path.join(self._pdir, name)
+        if os.path.exists(self._bagdir):
+            os.rename(self._bagdir, newdir)
+
+        self._name = name
+        self._bagdir = newdir
+
+        if self._bag:
+            self._bag = NISTBag(self._bagdir)
 
     def _merge_def_config(self, config):
         if not def_etc_dir:
@@ -303,7 +324,7 @@ class BagBuilder(PreservationSystem):
             self._unset_logfile()
         filepath = os.path.join(self.bagdir, self.logname)
         self._loghdlr = logging.FileHandler(filepath)
-        # self._loghdlr.setLevel(NORM)
+        self._loghdlr.setLevel(NORM)
         fmt = self.cfg.get('bag_log_format', DEF_BAGLOG_FORMAT)
         self._loghdlr.setFormatter(logging.Formatter(fmt))
         self.log.addHandler(self._loghdlr)
@@ -610,6 +631,30 @@ class BagBuilder(PreservationSystem):
         return os.path.join(self.bagdir, "metadata", destpath,
                             FILEANNOT_FILENAME)
 
+    def update_annot_for(self, destpath, mdata):
+        """
+        merge (via update) the given metadata into the annotation data for a 
+        given destination path in the bag.  The properties in the input data
+        will override that found in the annotation file (using dict.update()).
+
+        :param destpath str:  the path to the data file relative to the 
+                              dataset's root. (Caution: not the bag's root.)
+                              An empty string refers to the resource-level 
+                              metadata.  
+        :param mdata dict:    the metadata to merge in.  
+        """
+        if not mdata:
+            return
+        self.ensure_metadata_dirs(destpath)
+        annotf = self.annot_file_for(destpath)
+        if self.bagdir and os.path.exists(annotf):
+            amdata = read_nerd(annotf)
+        else:
+            amdata = {}
+        amdata.update(mdata)
+        write_json(amdata, annotf)
+            
+
     def init_filemd_for(self, destpath, write=False, examine=None,
                         disttype="DataFile"):
         """
@@ -728,6 +773,8 @@ class BagBuilder(PreservationSystem):
         if disttype not in self._file_types:
             raise ValueError("Unsupported file distribution type: "+disttype)
         out = {
+            "_schema": NERD_DEF + "Component",
+            "@context": NERDM_CONTEXT,
             "@id": "cmps/" + urlencode(destpath),
             "@type": deepcopy(self._file_types[disttype][0]),
             "filepath": destpath,
@@ -751,6 +798,8 @@ class BagBuilder(PreservationSystem):
 
     def _create_init_collmd_for(self, destpath):
         out = {
+            "_schema": NERD_DEF + "Component",
+            "@context": NERDM_CONTEXT,
             "@id": "cmps/" + urlencode(destpath),
             "@type": [ ":".join([NERDPUB_PRE, "Subcollection"]) ],
             "filepath": destpath,
@@ -793,16 +842,23 @@ class BagBuilder(PreservationSystem):
         if trim:
             self.trim_metadata_folders()
 
+        self.ensure_bagit_ver()
         self.write_data_manifest(finalcfg.get('confirm_checksums', False))
         self.write_mbag_files()
         # write_ore_file
         # write_pidmapping_file
         self.write_about_file()
         # write_premis_file
-        self.write_bagit_ver()
         self.ensure_baginfo()
 
+        # this file was used to assist when this bag is an update on an
+        # earlier version.  We no longer need it, so get rid of it.
+        deprecinfof = os.path.join(self.bagdir,"multibag","deprecated-info.txt")
+        if os.path.exists(deprecinfof):
+            os.remove(deprecinfof)
+
         self.log.error("Implementation of Bag finalization is not complete!")
+        self.log.info("Bag does not include PREMIS and ORE files")
 
     def write_about_file(self):
         """
@@ -828,11 +884,12 @@ class BagBuilder(PreservationSystem):
                                  mf + ": " + str(ex), cause=ex)
 
         try:
+            ec = 'utf-8'
             with open(os.path.join(self.bagdir, "about.txt"), 'w') as fd:
                 print("This data package contain NIST Public Data\n", file=fd)
 
                 # title
-                print(textwrap.fill(podm['title'], 79), file=fd)
+                print(textwrap.fill(podm['title'].encode(ec), 79), file=fd)
 
                 # authors, if available
                 if 'authors' in nerdm:
@@ -865,12 +922,13 @@ class BagBuilder(PreservationSystem):
                             aus = auths[0] + " and " + auths[1]
                         else:
                             aus = " ".join(auths[:-1]) + ", and " + auths[-1]
-                        print( re.sub(r'=', ' ', textwrap.fill(aus)), file=fd )
+                        print( re.sub(r'=', ' ', textwrap.fill(aus.encode(ec))),
+                               file=fd )
 
                         i=1
                         for affil in affils:
-                           print(textwrap.fill("[{0}] {1}".format(i, affil)),
-                                 file=fd)
+                           print(textwrap.fill("[{0}] {1}".format(i, affil)
+                                                          .encode(ec)), file=fd)
 
                 # identifier(s)
                 if nerdm.get('doi'):
@@ -886,24 +944,26 @@ class BagBuilder(PreservationSystem):
                     cp = nerdm['contactPoint']
                     if cp.get('fn') and cp.get('hasEmail'):
                         aus = re.sub('^mailto:\s*', '', cp['hasEmail'])
-                        print("Contact: {0} ({1})".format(cp['fn'], aus),
-                              file=fd)
+                        print("Contact: {0} ({1})".format(cp['fn'], aus)
+                                                  .encode(ec), file=fd)
                     else:
                         print("Contact: {0}".format(cp.get('fn') or
                                                     cp.get('hasEmail')),
                               file=fd)
                     if 'postalAddress' in cp:
                         for line in cp['postalAddress']:
-                            print("         {0}".format(line.strip()), file=fd)
+                            print("         {0}".format(line.strip()).encode(ec),
+                                  file=fd)
                     if 'phoneNumber' in cp:
                         print("         Phone: {0}".format(
-                                                      cp['phoneNumber'].strip()),
+                                          cp['phoneNumber'].strip()).encode(ec),
                               file=fd)
                     fd.write("\n")
 
                 # description
                 if podm.get('description'):
-                    print( textwrap.fill(podm['description']), file=fd )
+                    print( textwrap.fill(podm['description'].encode(ec)),
+                           file=fd )
                     fd.write("\n")
 
                 # landing page
@@ -911,13 +971,20 @@ class BagBuilder(PreservationSystem):
                     print("More information:\nhttps://doi.org/" +
                           nerdm.get('doi'), file=fd)
                 elif nerdm.get('landingPage'):
-                    print("More information:\n" + nerdm.get('landingPage'),
+                    print("More information:\n" +
+                          nerdm.get('landingPage').encode(ec),
                           file=fd)
                 
         except OSError, ex:
             raise BagWriteError("Problem writing about.txt file: " + str(ex),
                                 cause=ex)
 
+    def ensure_bagit_ver(self):
+        """
+        ensure that the bag's bagit.txt file exists
+        """
+        if not os.path.exists(os.path.join(self.bagdir, "bagit.txt")):
+            self.write_bagit_ver()
 
     def write_bagit_ver(self):
         """
@@ -934,65 +1001,44 @@ class BagBuilder(PreservationSystem):
         except OSError, ex:
             raise BagWriteError("Error writing bagit.txt: "+str(ex), cause=ex)
 
-    def write_mbag_files(self):
+    def write_mbag_files(self, overwrite=False):
         """
-        write out tag files for the MultiBag BagIt profile assuming a single 
-        bagfile.
+        write out tag files for the MultiBag BagIt profile.  
         """
-        if not self._bag:
-            self.ensure_bagdir()
+        self.ensure_bagit_ver()
 
-        if not self._mbtagdir:
-            # get the desired name of the multibag tag directory; first
-            # check a value already written to the bag-info.txt file; if
-            # not there, get it from the configuration (default: 'multibag')
-            self._mbtagdir = self._bag.get_baginfo() \
-                                      .get('Multibag-Tag-Directory',
-                                           self.cfg.get('multibag-tag-dir',
-                                                        'multibag'))
-            
-        tagdir = os.path.join(self.bagdir, self._mbtagdir)
-        if not os.path.exists(tagdir):
-            try:
-                os.makedirs(tagdir)
-            except OSError, ex:
-                raise BagWriteError("Failed create Multibag tag directory: "+
-                                    tagdir + ": " + str(e), cause=ex)
+        # Use the head bag interface provided by the external multibag package
+        # Note that previously saved data (i.e. cached from previously
+        # published version) will be retained.
+        hbag = open_headbag(self.bagdir)
 
-        baseurl = self.cfg.get('bag-download-url')
-        if baseurl and not baseurl.endswith('/'):
-            baseurl += '/'
+        # append the bag we're building to the member bag list and save
+        url = self.cfg.get('bag-download-url')
+        if url:
+            if not url.endswith('/'):
+                url += '/'
+            url += self.bagname
+        hbag.add_member_bag(self.bagname, url)
+        hbag.save_member_bags()
 
-        # write the member-bags.tsv file
-        tagfile = os.path.join(tagdir, "member-bags.tsv")
-        try:
-            with open(tagfile, 'w') as fd:
-                fd.write(self.bagname)
-                if baseurl:
-                    fd.write('\t'+baseurl+self.bagname)
-                fd.write('\n')
-
-            # write the file-lookup.tsv file
-            tagfile = os.path.join(tagdir, "file-lookup.tsv")
-            fmt = "{0}\t{1}\n"
-            with open(tagfile, 'w') as fd:
-                for bf in self._bag.iter_data_files():
-                    fd.write(fmt.format(os.path.join("data", bf), self.bagname))
-
-                fd.write(fmt.format(os.path.join("metadata", "pod.json"),
-                                    self.bagname))
-                fd.write(fmt.format(os.path.join("metadata", "nerdm.json"),
-                                    self.bagname))
-
-                for bf in self._bag.iter_data_files():
-                    nerdf = os.path.join("metadata", bf, "nerdm.json")
-                    if os.path.exists(os.path.join(self.bagdir, nerdf)):
-                        fd.write(fmt.format(nerdf, self.bagname))
-
-        except OSError, ex:
-            raise BagWriteError("Failed to write tag file: "+tagfile+
-                                ": "+str(e), cause=ex)
-
+        # update the file lookup with the contents of this new bag
+        for dir, sdirs, files in os.walk(self._bag.data_dir):
+            dir = dir[len(self.bagdir)+1:]
+            for f in files:
+                f = os.path.join(dir, f)
+                f = "/".join(f.split(os.sep))
+                hbag.add_file_lookup(f, self.bagname)
+        for dir, sdirs, files in os.walk(self._bag.metadata_dir):
+            dir = dir[len(self.bagdir)+1:]
+            for f in files:
+                f = os.path.join(dir, f)
+                f = "/".join(f.split(os.sep))
+                hbag.add_file_lookup(f, self.bagname)
+        for f in "preserv.log ore.txt premis.xml".split():
+            if hbag.exists(f):
+                hbag.add_file_lookup(f, self.bagname)
+        hbag.save_file_lookup()
+        
     def ensure_baginfo(self, overwrite=False):
         """
         ensure that a complete bag-info.txt file is written out to the bag.
@@ -1026,30 +1072,59 @@ format(nerdm['title'])
         oxum = self._measure_oxum(self._bag._datadir)
         initdata['Payload-Oxum'] = "{0}.{1}".format(oxum[0], oxum[1])
 
-        # right now, all bags are multibags, version 1
-        initdata['Multibag-Head-Version'] = "1"
+        # update the multibag version, deprecation
+        self.update_head_version(initdata, nerdm.get("version", "1"))
 
         # write everything except Bag-Size
-        self.write_baginfo_data(initdata, overwrite)
+        self.write_baginfo_data(initdata, overwrite=overwrite)
 
         # calculate and write the size of the bag 
         oxum = self._measure_oxum(self.bagdir)
         size = self._format_bytes(oxum[0])
         oxum[0] += len("Bag-Size: {0} ".format(size))
+        oxum[0] += len("Bag-Oxum: {0}.{1} ".format(oxum[0], oxum[1]))
         size = self._format_bytes(oxum[0])
-        szdata = {
-            'Bag-Size': size
-        }
+        szdata = OrderedDict([
+            ('Bag-Oxum', "{0}.{1}".format(*oxum)),
+            ('Bag-Size', size),
+        ])
         self.write_baginfo_data(szdata, overwrite=False)
 
+    def update_head_version(self, baginfo, version):
+        """
+        update the given bag info metadata with values for 
+        'Multibag-Head-Version' and possibly 'Multibag-Head-Deprecates'
+        """
+        baginfo['Multibag-Head-Version'] = version
+
+        # if there is a multibag/deprecated-info.txt, extract the
+        # 'Multibag-Head-Deprecates' values
+        #
+        multibagdir = baginfo.get('Multibag-Tag-Directory', 'multibag')
+        if isinstance(multibagdir, list):
+            multibagdir = (len(multibagdir) >0 and multibagdir[-1]) or 'multibag'
+        depinfof = os.path.join(self._bag.dir,multibagdir, "deprecated-info.txt")
+        
+        if os.path.exists(depinfof):
+            # indicates that this is an update to a previous version of the
+            # dataset.  Add deprecation information.
+            
+            depinfo = self._bag.get_baginfo(depinfof)
+
+            if 'Multibag-Head-Deprecates' not in baginfo:
+                baginfo['Multibag-Head-Deprecates'] = []
+
+            # add the previous head version
+            baginfo['Multibag-Head-Deprecates'].extend(
+                depinfo.get('Multibag-Head-Version', ["1"]) )
+
+            # add in all the previous deprecated versions
+            for val in depinfo.get('Multibag-Head-Deprecates', []):
+                if val not in baginfo['Multibag-Head-Deprecates']:
+                    baginfo['Multibag-Head-Deprecates'].append( val )
+                
     def _measure_oxum(self, rootdir):
-        size = 0
-        count = 0
-        for root, subdirs, files in os.walk(rootdir):
-            count += len(files)
-            for f in files:
-                size += os.stat(os.path.join(root,f)).st_size
-        return [size, count]
+        return measure_dir_size(rootdir)
 
     def _format_bytes(self, nbytes):
         prefs = ["", "k", "M", "G", "T"]
@@ -1069,7 +1144,7 @@ format(nerdm['title'])
             nbytes = nbytes[:-1]    
         return "{0} {1}B".format(nbytes, pref)
 
-    def write_baginfo_data(self, data, overwrite=False):
+    def write_baginfo_data(self, data, altfile=None, overwrite=False):
         """
         write out specific data to the bag-info.txt file.  Normally, this will
         append the provided data to the file.  Name-value pairs that already 
@@ -1102,22 +1177,23 @@ format(nerdm['title'])
         if not self._bag:
             self.ensure_bagdir()
         if not overwrite:
-            data = upd_info(self._bag.get_baginfo(), data)
-        self._write_baginfo_data(data, overwrite)
+            data = upd_info(self._bag.get_baginfo(altfile), data)
+        self._write_baginfo_data(data, altfile, overwrite)
 
-    def _write_baginfo_data(self, data, overwrite=False):
+    def _write_baginfo_data(self, data, infofile=None, overwrite=False):
         mode = 'w'
         if not overwrite:
             mode = 'a'
 
-        infofile = os.path.join(self.bagdir, "bag-info.txt")
+        if not infofile:
+            infofile = os.path.join(self.bagdir, "bag-info.txt")
         with open(infofile, mode) as fd:
             for name, vals in data.items():
                 if isinstance(vals, (str, unicode)) or \
                    not isinstance(vals, Sequence):
                     vals = [vals]
                 for val in vals:
-                    out = "{0}: {1}".format(name, val)
+                    out = "{0}: {1}".format(name, val.encode('utf-8'))
                     if len(out) > 79:
                         out = textwrap.fill(out, 79, subsequent_indent=' ')
                     print(out, file=fd)
