@@ -6,7 +6,6 @@ import { MenuItem } from 'primeng/api';
 import * as _ from 'lodash';
 import 'rxjs/add/operator/map';
 import { Subscription } from 'rxjs/Subscription';
-import { environment } from '../../environments/environment';
 import { AppConfig } from '../shared/config-service/config.service';
 import {  PLATFORM_ID, APP_ID, Inject } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
@@ -99,14 +98,14 @@ export class LandingComponent implements OnInit {
     distdownload: string = '';
     serviceApi: string = '';
     metadata: boolean = false;
-    pdrApi : string = environment.PDRAPI;
     private _routeParamsSubscription: Subscription;
     private files: TreeNode[] = [];
     private fileHierarchy : TreeNode;
-    private rmmApi : string = environment.RMMAPI;
-    private distApi : string = environment.DISTAPI;
-    private landing : string = environment.LANDING;
-    private sdpLink : string = environment.SDPAPI;
+    private rmmApi : string = '';
+    private distApi : string = '';
+    private landing : string = '';
+    private sdpLink : string = '';
+    pdrApi : string = '';
     private displayIdentifier :string;
     private dataHierarchy: any[]=[];
     isResultAvailable: boolean = true;
@@ -127,6 +126,7 @@ export class LandingComponent implements OnInit {
     this.rmmApi = this.appConfig.getRMMapi();
     this.distApi = this.appConfig.getDistApi();
     this.landing = this.appConfig.getLandingBackend();
+    this.pdrApi = this.appConfig.getPDRApi();
   }
 
    /**
@@ -167,7 +167,6 @@ onError(error:any) {
   this.status = (<any>error).httpStatus;
   //this.msgs.push({severity:'error', summary:this.errorMsg + ':', detail:this.status + ' - ' + this.exception});
 }
-
 
 viewmetadata(){
   this.metadata = true; this.similarResources =false;
