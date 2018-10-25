@@ -320,7 +320,7 @@ updateMenu(){
   ngAfterViewInit(){
     this.gotoSelection();
     if (this.record != null && isPlatformBrowser(this.platformId) )  {
-      window.history.replaceState( {} , 'pdr/od/id/', '/od/id/'+this.searchValue );
+      window.history.replaceState( {} , '', '/od/id/'+this.searchValue );
     }
   }
 
