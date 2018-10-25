@@ -320,6 +320,8 @@ updateMenu(){
   ngAfterViewInit(){
     this.gotoSelection();
     if (this.record != null && isPlatformBrowser(this.platformId) )  {
+      if(window.location.href.includes("ark"))
+        this.searchValue = "ark:/88434/"+this.searchValue;
       window.history.replaceState( {} , 'pdr/od/id/', '/od/id/'+this.searchValue );
     }
   }
@@ -347,7 +349,6 @@ updateMenu(){
     
     paths.forEach((path) => { 
      
-      
       // if(path['@type'].includes("nrdp:Subcollection")){
       
       //   tempfiletest = path.filepath;

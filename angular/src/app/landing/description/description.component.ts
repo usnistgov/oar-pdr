@@ -205,16 +205,27 @@ addtoCart(fileName:string,fileSize:number,fileFormat:string,
  }
 
  display: boolean = false;
- /**
-   * Function to display bytes in appropriate format.
-   **/ 
-  formatBytes(bytes,numAfterDecimal){
-    if(0==bytes)return"0 Bytes";
-    var base=1000,
-    d=numAfterDecimal||2,
-     e=["Bytes","kB","MB","GB","TB","PB","EB","ZB","YB"],
-     f=Math.floor(Math.log(bytes)/Math.log(base));
-    return (bytes/Math.pow(base,f)).toFixed(d)+" "+e[f]
-    }
+
+
+    /**
+    * Function to display bytes in appropriate format.
+    **/ 
+   formatBytes(bytes, numAfterDecimal) {
+     if (0==bytes) return"0 Bytes";
+     
+     var base = 1000,
+        e=["Bytes","kB","MB","GB","TB","PB","EB","ZB","YB"],
+        d = numAfterDecimal||1,
+        f = Math.floor(Math.log(bytes)/Math.log(base));
+        
+      var v = bytes/Math.pow(base,f);
+      if (f == 0)
+           // less than 1 kiloByte
+        d = 0;
+      else if (numAfterDecimal == null && v < 10.0)
+        d = 2;
+
+      return v.toFixed(d)+" "+e[f];
+   }
  
 }
