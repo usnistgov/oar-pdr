@@ -26,58 +26,6 @@
   color:#707070; 
   font-size: 14;
 }
-/* 
-:host /deep/ .ui-tree {
-  padding: 0.625em 1em/2;
-  font-weight:bold;
-  font-size: small;
-}
-
-
-:host /deep/ .ui-treenode-label{
-  font-style: italic;
-  color: #1471AE;
-
-}
-:host /deep/ .ui-treenode{
-  background-color:#ffffff;
-  word-wrap: break-word;
-}
-
-
-:host /deep/ .ui-tree .ui-treenode-children{
-  background-color:#ffffff;
-}
-
-
-:host /deep/ .ui-tree .ui-tree-container {
-
-  position: relative;
-  float: left;
-} */
-
-/* 
-:host /deep/ .leftMenuStyle > .ui-menu  .ui-menu-list li.ui-widget-header{
-  background-color: #B4B0B0;
-  font-weight: bold;
-  
-  font-family: Sans-Serif;
-  padding: 2%;
-  padding-left: 5%;
-}
-:host /deep/ .leftMenuStyle > .ui-menu .ui-menu-list li.ui-menuitem .ui-menuitem-link{
-  line-height: 0;
-  min-height: 1.5em;
- 
-  font-family: 'Roboto';
-  background-color: #e8e7e7;
-  word-wrap: break-word;
- 
-}
-
-:host /deep/ .leftMenuStyle > .ui-menu .ui-menu-list li.ui-menuitem .ui-menuitem-link:hover {
-  background-color: #ffffff;
-  color: #000000; } */
 
 
 :host /deep/ .rightMenuStyle > .ui-menu .ui-submenu-header{
