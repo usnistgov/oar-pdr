@@ -5,6 +5,7 @@ import unittest as test
 from collections import OrderedDict
 
 from nistoar.testing import *
+from nistoar.pdr import utils
 import nistoar.pdr.preserv.bagit.validate.nist as val
 import nistoar.pdr.preserv.bagit.bag as bag
 import nistoar.pdr.preserv.bagit.exceptions as bagex
@@ -31,7 +32,7 @@ class TestMultibagValidator(test.TestCase):
 
     def setUp(self):
         self.tf = Tempfiles()
-        self.bagdir = self.tf.track("XXXX.mbag0_3-0")
+        self.bagdir = self.tf.track("XXXX.1_0.mbag0_4-0")
         shutil.copytree(bagdir, self.bagdir)
         
         self.bag = bag.NISTBag(self.bagdir)
@@ -57,7 +58,7 @@ class TestMultibagValidator(test.TestCase):
 
     def test_all_test_methods(self):
         expect = ["test_"+m for m in
-          "name bagit_mdels version nist_md metadata_dir pod nerdm metadata_tree nerdm_validity".split()]
+          "name bagit_mdels profile_version dataset_version nist_md metadata_dir pod nerdm metadata_tree nerdm_validity".split()]
         expect.sort()
         meths = self.valid8.all_test_methods()
         meths.sort()
@@ -74,22 +75,27 @@ class TestMultibagValidator(test.TestCase):
                          "\n  ".join([str(e) for e in errs.failed()]) + "\n]")
         self.assertTrue(has_error(errs, "2-0"))
         
-        badbag = val.NISTBag(self.tf.mkdir("XXXX.mbag1_0-10"))
+        badbag = val.NISTBag(self.tf.mkdir("XXXX.3_5_2.mbag1_0-10"))
         errs = self.valid8.test_name(badbag)
         self.assertEqual(len(errs.failed()), 1, "Unexpected # of errors: [\n  " +
                          "\n  ".join([str(e) for e in errs.failed()]) + "\n]")
         self.assertTrue(has_error(errs, "2-2"))
         
     def test_name_patterns(self):
-        self.assertIsNotNone(self.valid8.namere.match("XXXX.mbag0_2-0"))
-        self.assertIsNotNone(self.valid8.namere.match("XXXX.mbag1_0-10"))
-        self.assertIsNotNone(self.valid8.namere.match("XXXX.mbag13_40-103"))
+        self.assertIsNotNone(self.valid8.namere02.match("XXXX.mbag0_2-0"))
+        self.assertIsNotNone(self.valid8.namere02.match("XXXX.mbag1_0-10"))
+        self.assertIsNotNone(self.valid8.namere02.match("XXXX.mbag13_40-103"))
 
-        self.assertIsNone(self.valid8.namere.match("XXXX.mbag0_2-"))
-        self.assertIsNone(self.valid8.namere.match("XXXX.mbag0.2-3"))
-        self.assertIsNone(self.valid8.namere.match("XXXX.mbag"))
-        self.assertIsNone(self.valid8.namere.match("samplebag"))
+        self.assertIsNone(self.valid8.namere02.match("XXXX.mbag0_2-"))
+        self.assertIsNone(self.valid8.namere02.match("XXXX.mbag0.2-3"))
+        self.assertIsNone(self.valid8.namere02.match("XXXX.mbag"))
+        self.assertIsNone(self.valid8.namere02.match("samplebag"))
 
+        self.assertIsNotNone(self.valid8.namere04.match("XXXX.1_0.mbag0_2-0"))
+        self.assertIsNotNone(self.valid8.namere04.match("XXXX.1_2_3.mbag1_0-10"))
+        self.assertIsNotNone(self.valid8.namere04.match("XXXX.21_12.mbag13_40-103"))
+
+        
     def test_test_bagit_mdels(self):
         errs = self.valid8.test_bagit_mdels(self.bag)
         self.assertEqual(errs.failed(), [],
@@ -126,8 +132,81 @@ class TestMultibagValidator(test.TestCase):
                          "\n  ".join([str(e) for e in errs.failed()]) + "\n]")
         self.assertTrue(has_error(errs, "3-1-1-1"))
 
-    def test_test_version(self):
-        errs = self.valid8.test_version(self.bag)
+    def test_test_dataset_version(self):
+        errs = self.valid8.test_dataset_version(self.bag)
+        self.assertEqual(errs.failed(), [],
+                      "False Positives: "+ str([str(e) for e in errs.failed()]))
+
+        nerdm = self.bag.nerd_metadata_for('', merge_annots=False)
+        nerdm['version'] = "1.0.3"
+        utils.write_json(nerdm, self.bag.nerd_file_for(''))
+
+        errs = self.valid8.test_dataset_version(self.bag)
+        self.assertEqual(len(errs.failed()), 1, "Unexpected # of errors: [\n  " +
+                         "\n  ".join([str(e) for e in errs.failed()]) + "\n]")
+        self.assertTrue(has_error(errs, "4.2-3"))
+        self.assertTrue(not has_error(errs, "4.2-1"))
+
+        nerdm['version'] = "4.3.5.9.1"
+        utils.write_json(nerdm, self.bag.nerd_file_for(''))
+
+        errs = self.valid8.test_dataset_version(self.bag)
+        self.assertEqual(len(errs.failed()), 1, "Unexpected # of errors: [\n  " +
+                         "\n  ".join([str(e) for e in errs.failed()]) + "\n]")
+        self.assertTrue(has_error(errs, "4.2-3"))
+        self.assertTrue(not has_error(errs, "4.2-1"))
+
+        nerdm['version'] = "4"
+        utils.write_json(nerdm, self.bag.nerd_file_for(''))
+
+        errs = self.valid8.test_dataset_version(self.bag)
+        self.assertEqual(len(errs.failed()), 1, "Unexpected # of errors: [\n  " +
+                         "\n  ".join([str(e) for e in errs.failed()]) + "\n]")
+        self.assertTrue(has_error(errs, "4.2-3"))
+        self.assertTrue(not has_error(errs, "4.2-1"))
+
+        nerdm['version'] = "1.0.0+ (in edit)"
+        utils.write_json(nerdm, self.bag.nerd_file_for(''))
+
+        errs = self.valid8.test_dataset_version(self.bag)
+        self.assertEqual(len(errs.failed()), 2, "Unexpected # of errors: [\n  " +
+                         "\n  ".join([str(e) for e in errs.failed()]) + "\n]")
+        self.assertTrue(has_error(errs, "4.2-1"))
+        self.assertTrue(has_error(errs, "4.2-3"))
+
+        nerdm['version'] = "1.0"
+        utils.write_json(nerdm, self.bag.nerd_file_for(''))
+
+        bif = os.path.join(self.bag.dir, "bag-info.txt")
+        with open(bif) as fd:
+            bilines = fd.readlines()
+
+        with open(bif, 'w') as fd:
+            for line in bilines:
+                if not line.startswith('Multibag-Head-Version:'):
+                    fd.write(line)
+            fd.write("Multibag-Head-Version: 1.0.3\n")
+
+        errs = self.valid8.test_dataset_version(self.bag)
+        self.assertEqual(len(errs.failed()), 1, "Unexpected # of errors: [\n  " +
+                         "\n  ".join([str(e) for e in errs.failed()]) + "\n]")
+        self.assertTrue(has_error(errs, "4.2-3"))
+
+        with open(bif, 'w') as fd:
+            for line in bilines:
+                if not line.startswith('Multibag-Head-Version:'):
+                    fd.write(line)
+            fd.write("Multibag-Head-Version: 1.0+ (in edit)\n")
+
+        errs = self.valid8.test_dataset_version(self.bag)
+        self.assertEqual(len(errs.failed()), 2, "Unexpected # of errors: [\n  " +
+                         "\n  ".join([str(e) for e in errs.failed()]) + "\n]")
+        self.assertTrue(has_error(errs, "4.2-2"))
+        self.assertTrue(has_error(errs, "4.2-3"))
+        
+
+    def test_test_profile_version(self):
+        errs = self.valid8.test_profile_version(self.bag)
         self.assertEqual(errs.failed(), [],
                       "False Positives: "+ str([str(e) for e in errs.failed()]))
 
@@ -140,7 +219,7 @@ class TestMultibagValidator(test.TestCase):
                 if not line.startswith('NIST-BagIt-Version:'):
                     fd.write(line)
 
-        errs = self.valid8.test_version(self.bag)
+        errs = self.valid8.test_profile_version(self.bag)
         self.assertEqual(len(errs.failed()), 1, "Unexpected # of errors: [\n  " +
                          "\n  ".join([str(e) for e in errs.failed()]) + "\n]")
         self.assertTrue(has_error(errs, "3-3-1"))

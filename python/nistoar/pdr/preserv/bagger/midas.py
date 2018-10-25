@@ -11,24 +11,36 @@ The implementations use the BagBuilder class to populate the output bag.
 """
 import os, errno, logging, re, json, shutil
 from abc import ABCMeta, abstractmethod, abstractproperty
+from collections import OrderedDict
 
 from .base import SIPBagger, moddate_of, checksum_of, read_nerd, read_pod
 from .base import sys as _sys
+from . import utils as bagutils
 from ..bagit.builder import BagBuilder, NERDMD_FILENAME, FILEMD_FILENAME
+from ..bagit import NISTBag
 from ... import def_merge_etcdir, utils
 from .. import (SIPDirectoryError, SIPDirectoryNotFound, AIPValidationError,
-                ConfigurationException, StateException, PODError)
+                ConfigurationException, StateException, PODError,
+                PreservationStateException)
+from .prepupd import UpdatePrepService
 from nistoar.nerdm.merge import MergerFactory
 
 # _sys = PreservationSystem()
-log = logging.getLogger(_sys.system_abbrev).getChild(_sys.subsystem_abbrev)
+log = logging.getLogger(_sys.system_abbrev)   \
+             .getChild(_sys.subsystem_abbrev) \
+             .getChild("midas") 
 
-DEF_MBAG_VERSION = "0.3"
+DEF_MBAG_VERSION = bagutils.DEF_MBAG_VERSION
 DEF_MIDAS_POD_FILE = "_pod.json"
 SUPPORTED_CHECKSUM_ALGS = [ "sha256" ]
 DEF_CHECKSUM_ALG = "sha256"
 DEF_MERGE_CONV = "initdef"  # For merging MIDAS-generated metadata with
                             # initial defaults
+
+# type of update (see determine_update_version())
+_NO_UPDATE    = 0
+_MDATA_UPDATE = 1
+_DATA_UPDATE  = 2
 
 def _midadid_to_dirname(midasid, log=None):
     out = midasid
@@ -43,12 +55,9 @@ def _midadid_to_dirname(midasid, log=None):
 class MIDASMetadataBagger(SIPBagger):
     """
     This class will migrate metadata provided by MIDAS into a working bag
+    that only contains metadata and generated ancillary data.  This data 
+    should be sufficient for generating a working landing page.
     
-    application by re-organizing its contents into a working bag
-
-    Note that user-provided datafiles are added to the output directory as a 
-    hard link.  That is, no bytes are copied.  Metadata data files are copied.
-
     This class can take a configuration dictionary on construction; the 
     following parameters are supported:
     :prop bag_builder dict ({}): a set of parameters to pass to the BagBuilder
@@ -79,7 +88,7 @@ class MIDASMetadataBagger(SIPBagger):
     """
 
     def __init__(self, midasid, workdir, reviewdir, uploaddir=None, config={},
-                 minter=None):
+                 minter=None, sipdirname=None):
         """
         Create an SIPBagger to operate on data provided by MIDAS
 
@@ -93,13 +102,19 @@ class MIDASMetadataBagger(SIPBagger):
                                datasets not yet in the review state.
         :param config   dict:  a dictionary providing configuration parameters
         :param minter IDMinter: a minter to use for minting new identifiers.
+        :param sipdirname str: a relative directory name to look for that 
+                               represents the SIP's directory.  If not provided,
+                               the directory is determined based on the provided
+                               MIDAS ID.  
         """
         self.name = midasid
         self.state = 'upload'
         self._indirs = []
 
         # ensure we have at least one readable input directory
-        indirname = _midadid_to_dirname(midasid, log)
+        indirname = sipdirname
+        if not indirname:
+            indirname = _midadid_to_dirname(midasid, log)
 
         for dir in (reviewdir, uploaddir):
             if not dir:
@@ -146,6 +161,11 @@ class MIDASMetadataBagger(SIPBagger):
         self.hardlinkdata = self.cfg.get('hard_link_data', True)
         self.inpodfile = None
         self.resmd = None
+
+        # this will contain a mapping of files that currently appear in the
+        # MIDAS submission area; the keys are filepath values (in the NERDm
+        # sense--i.e. relative to the dataset root), and values are the full
+        # path to its location on disk.
         self.datafiles = None
 
         self.ensure_bag_parent_dir()
@@ -202,10 +222,14 @@ class MIDASMetadataBagger(SIPBagger):
             # part of the data set but don't exist in the input directories.
             # These could be files available via external URLs or files preserved
             # as part of a previous version.  
-            self.resmd = self.bagbldr.add_ds_pod(self.inpodfile, convert=True,
-                                                 savefilemd=True)
-        else:
-            self.resmd = read_nerd(outnerd)
+            self.bagbldr.add_ds_pod(self.inpodfile, convert=True,
+                                    savefilemd=True)
+        self.resmd = NISTBag(self.bagbldr.bagdir).nerdm_record(True)
+
+        # ensure an initial version
+        if 'version' not in self.resmd:
+            self.resmd['version'] = "1.0.0"
+            self.bagbldr.update_annot_for('', {'version': self.resmd["version"]})
 
     def data_file_inventory(self):
         """
@@ -313,6 +337,8 @@ class MIDASMetadataBagger(SIPBagger):
 
     def ensure_subcoll_metadata(self):
         if not self.datafiles:
+            # this updates self.datafiles to include all files that are
+            # currently available in the MIDAS submission area.  
             self.ensure_data_files(nodata=True)
 
         colls = set()
@@ -462,9 +488,25 @@ class PreservationBagger(SIPBagger):
     This class finalizes the bagging of data provided by MIDAS into the final 
     bag for preservation.  
 
-    This class uses the MIDASMetadataBagger to update the NERDm metadata to 
-    latest copies of the files provided through MIDAS.  It then builds the 
-    final bag, including the data files and all required ancillary files.  
+    This class uses the MIDASMetadataBagger to create/update the initial bag 
+    containing the NERDm metadata and ancillary data to reflect the latest 
+    copies of the files provided through MIDAS.  This class then completes
+    the bag by including the data files and all remaining, required ancillary 
+    files.  
+
+    Note that, when possible, user-provided datafiles are added to the output 
+    directory as a hard link: that is, no bytes are copied.  Metadata data files 
+    are copied.
+
+    Note that this bagger can be set explicitly in a AIP creation mode or an 
+    update mode via the asupdate parameter to the constructor.  When one of 
+    these modes is set, the repository will be queried to see if the dataset 
+    with the same AIP identifier already exists; this state must agree with the 
+    set mode, else an exception is thrown.  This parameter is provided to ensure 
+    the state assumed by the caller--namely, whether the dataset already exists--
+    is in sync with the state of the repository.  If the mode is not set by the 
+    caller, the mode is determined implicitly by whether the AIP already exists 
+    in the repository.
 
     This class takes a configuration dictionary on construction; the 
     following parameters are supported:
@@ -502,7 +544,7 @@ class PreservationBagger(SIPBagger):
     """
 
     def __init__(self, midasid, bagparent, reviewdir, mddir,
-                 config=None, minter=None):
+                 config=None, minter=None, asupdate=None, sipdirname=None):
         """
         Create an SIPBagger to operate on data provided by MIDAS.
 
@@ -517,14 +559,31 @@ class PreservationBagger(SIPBagger):
                                the landing page.
         :param config   dict:  a dictionary providing configuration parameters
         :param minter IDMinter: a minter to use for minting new identifiers.
+        :param asupdate bool:  if set to true, the caller believes this bagger 
+                               should be creating an update to an existing AIP;
+                               if false, the caller believes this is a new AIP.
+                               If this believe does not correspond with the 
+                               actual contents of the repository, an exception 
+                               is raised when the attempt to process the SIP is 
+                               made.  If None (default), no check is done; if 
+                               an AIP already exists in the repository, this 
+                               bagger creates an update.  
+        :param sipdirname str: a relative directory name to look for that 
+                               represents the SIP's directory.  If not provided,
+                               the directory is determined based on the provided
+                               MIDAS ID.  
         """
         self.name = midasid
         self.mddir = mddir
         self.minter = minter
         self.reviewdir = reviewdir
+        self.asupdate = asupdate   # can be None
 
-        self.indir = os.path.join(self.reviewdir,
-                                  _midadid_to_dirname(midasid, log))
+        indirname = sipdirname
+        if not indirname:
+            indirname = _midadid_to_dirname(midasid, log)
+        self.indir = os.path.join(self.reviewdir, indirname)
+
         if not os.path.exists(self.indir):
             raise SIPDirectoryNotFound(self.indir)
 
@@ -551,13 +610,22 @@ class PreservationBagger(SIPBagger):
 
         if self.cfg.get('relative_to_indir'):
             self.bagparent = os.path.join(self.indir, self.bagparent)
+                
         self.ensure_bag_parent_dir()
 
+        self.siplog = log.getChild(self.name[:8]+'...')
         self.bagbldr = BagBuilder(self.bagparent,
                                   self.form_bag_name(self.name),
                                   self.cfg.get('bag_builder', {}),
-                                  minter=minter,
-                                  logger=log.getChild(self.name[:8]+'...'))
+                                  minter=minter, logger=self.siplog)
+
+        self.prepsvc = None
+        if 'repo_access' in self.cfg:
+            # support for updates requires access to the distribution and
+            # rmm services
+            self.prepsvc = UpdatePrepService(self.cfg['repo_access'])
+        else:
+            log.warning("repo_access not configured; can't support updates!")
         
 
     @property
@@ -567,6 +635,15 @@ class PreservationBagger(SIPBagger):
         """
         return self.bagbldr.bagdir
 
+    def was_previously_preserved(self):
+        """
+        return true if an SIP with the same identifier was previously 
+        preserved by checking for a corresponding AIP.  If this was found to 
+        be true, then this current bagger instance must represent an update to 
+        that AIP.  
+        """
+        
+
     def ensure_metadata_preparation(self):
         """
         prepare the NERDm metadata.  
@@ -574,11 +651,38 @@ class PreservationBagger(SIPBagger):
         This uses the MIDASMetadataBagger class to convert the MIDA POD data 
         into NERDm and to extract metadata from the uploaded files.  
         """
-
         # start by bagging up the metadata.  If this was done before (prior to
         # final preservation time), the previous metadata bag will be updated.
-        mdbagger = MIDASMetadataBagger(self.name, self.mddir, self.reviewdir,
-                                       config=self.cfg, minter=self.minter)
+        parent = os.path.dirname(self.indir)
+        sipdir = os.path.basename(self.indir)
+        mdbagger = MIDASMetadataBagger(self.name, self.mddir, parent,
+                                       config=self.cfg, minter=self.minter,
+                                       sipdirname=sipdir)
+
+        if self.prepsvc:
+            prepper = self.prepsvc.prepper_for(self.name, log=self.siplog)
+
+            # if asupdate is set (to true or false), check for the existance 
+            # of the target AIP:
+            if self.asupdate is not None:
+                if prepper.aip_exists() != bool(self.asupdate):
+                    # actual state does not match caller's expected state
+                    if self.asupdate:
+                        msg = self.name + \
+                              ": AIP with this ID does not exist in repository"
+                    else:
+                        msg = self.name + \
+                              ": AIP with this ID already exists in repository"
+                    raise PreservationStateException(msg, not self.asupdate)
+
+            if not os.path.exists(mdbagger.bagdir):
+                # This submission has not be accessed via the PDR before; if 
+                # this dataset has been previously been published, we need to 
+                # initialize the metadata bag from the last head bag (or at 
+                # least the last published NERDm record).
+                if prepper.create_new_update(mdbagger.bagdir):
+                    log.info("metadata initialized from previous publication")
+
         mdbagger.prepare(nodata=True)
         self.datafiles = mdbagger.datafiles
 
@@ -595,7 +699,7 @@ class PreservationBagger(SIPBagger):
                 shutil.remove(self.bagdir)
         shutil.copytree(mdbagger.bagdir, self.bagdir)
         
-        # by ensuring the output preservation bag directory, we set up loggning
+        # by ensuring the output preservation bag directory, we set up logging
         self.bagbldr.ensure_bagdir()
         self.bagbldr.log.info("Preparing final bag for preservation as %s",
                               os.path.basename(self.bagdir))
@@ -625,14 +729,19 @@ class PreservationBagger(SIPBagger):
         if not nodata:
             self.add_data_files()
 
-    def form_bag_name(self, dsid, bagseq=0):
+    def form_bag_name(self, dsid, bagseq=0, dsver="1.0"):
         """
-        return the name to use for the working bag directory
+        return the name to use for the working bag directory.  According to the
+        NIST BagIt Profile, preservation bag names will follow the format
+        AIPID.AIPVER.mbagMBVER-SEQ
+
+        :param str  dsid:   the AIP identifier for the dataset
+        :param int  bagseq: the multibag sequence number to assign (default: 0)
+        :param str  dsver:  the dataset's release version string.  (default: 1.0)
         """
-        fmt = self.cfg.get('bag_name_format', "{0}.mbag{1}-{2}")
+        fmt = self.cfg.get('bag_name_format')
         bver = self.cfg.get('mbag_version', DEF_MBAG_VERSION)
-        bver = re.sub(r'\.', '_', bver)
-        return fmt.format(dsid, bver, bagseq)
+        return bagutils.form_bag_name(dsid, bagseq, dsver, bver, namefmt=fmt)
 
     def add_data_files(self):
         """
@@ -642,26 +751,164 @@ class PreservationBagger(SIPBagger):
             self.bagbldr.add_data_file(dfile, srcpath, True, False)
 
     
-    def make_bag(self):
+    def make_bag(self, lock=True):
         """
         convert the input SIP into a bag ready for preservation.  More 
         specifically, the result will be a bag directory with finalized 
         content, ready for serialization.  
 
+        :param lock bool:   if True (default), acquire a lock before making
+                            the preservation bag.
         :return str:  the path to the finalized bag directory
         """
+        if lock:
+            self.ensure_filelock()
+            with self.lock:
+                return self._make_bag_impl()
+
+        else:
+            return self._make_bag_impl()
+    
+    def _make_bag_impl(self):
+        # this is intended to be called from make_bag(), with or with out
+        # lock on the output bag.
+        
         self.prepare(nodata=False)
 
         finalcfg = self.cfg.get('bag_builder', {}).get('finalize', {})
         if finalcfg.get('ensure_component_metadata') is None:
             finalcfg['ensure_component_metadata'] = False
 
+        ver = self.finalize_version()
+
+        # rename the bag for a proper version and sequence number
+        seq = self._determine_seq()
+        newname = self.form_bag_name(self.name, seq, ver)
+        newdir = os.path.join(self.bagbldr._pdir, newname)
+        if os.path.isdir(newdir):
+            log.warn("Removing previously existing output bag, "+newname)
+            shutil.rmtree(newdir)
+            
+        self.bagbldr.rename_bag(newname)
+
+        # write final bag metadata and support files
         self.bagbldr.finalize_bag(finalcfg)
+
+        # make sure we've got valid NIST preservation bag!
         if finalcfg.get('validate', True):
             # this will raise an exception if any issues are found
             self._validate(finalcfg.get('validator', {}))
 
         return self.bagbldr.bagdir
+
+    def finalize_version(self, update_reason=None):
+        """
+        update the NERDm version metadatum to reflect the changes set by this
+        SIP.  If this SIP represents the initial submission for a dataset, the
+        version is set to "1.0.0"; if it represents an update to a previously 
+        published dataset, the version will be incremented based on the 
+        contents included in the SIP and PDR policy.
+        """
+        bag = NISTBag(self.bagbldr.bagdir)
+        mdata = bag.nerdm_record(True)
+        (newver, uptype) = self._determine_updated_version(mdata, bag)
+        self.siplog.debug('Setting final version to "%s"', newver)
+        
+        annotf = bag.annotations_file_for('')
+        if os.path.exists(annotf):
+            adata = utils.read_nerd(annotf)
+        else:
+            adata = OrderedDict()
+        adata['version'] = newver
+        verhist = mdata.get('versionHistory', [])
+
+        if uptype != _NO_UPDATE and newver != mdata['version'] and \
+           ('issued' in mdata or 'modified' in mdata) and \
+           not any([h['version'] == newver for h in verhist]):
+            issued = ('modified' in mdata and mdata['modified']) or \
+                     mdata['issued']
+            verhist.append(OrderedDict([
+                ('version', newver),
+                ('issued', issued),
+                ('@id', mdata['@id']),
+                ('location', 'https://data.nist.gov/od/id/'+mdata['@id'])
+            ]))
+            if update_reason is None:
+                if uptype == _MDATA_UPDATE:
+                    update_reason = 'metadata update'
+                elif uptype == _DATA_UPDATE:
+                    update_reason = 'data update'
+                else:
+                    update_reason = ''
+            verhist[-1]['description'] = update_reason
+            adata['versionHistory'] = verhist
+        
+        utils.write_json(adata, annotf)
+
+        return newver
+
+    def _determine_seq(self):
+        depinfof = os.path.join(self.bagdir,"multibag","deprecated-info.txt")
+        if not os.path.exists(depinfof):
+            return 0
+        
+        info = self.bagbldr._bag.get_baginfo(depinfof)
+        m = re.search(r'-(\d+)$',
+                      info.get('Internal-Sender-Identifier', [''])[-1])
+        if m:
+            return int(m.group(1))+1
+        return 0
+
+    def determine_updated_version(self, mdrec=None, bag=None):
+        """
+        determine the proper policy-specified version for this SIP based on
+        the given NERD metadata record for the SIP and the current contents 
+        of the AIP bag.  
+
+        :param dict mdrec:  the NERDm metadata for the entire dataset to consider
+                            when determining the new version;  if not provided,
+                            the current stored NERDm data will be read in.
+        :param NISTBag bag: the NISTBag instance for the bag to examine; if 
+                            not provided, the current pending AIP bag will be 
+                            examined.
+        """
+        return self._determine_updated_version(mdrec, bag)[0]
+
+    def _determine_updated_version(self, mdrec=None, bag=None):
+        if not bag:
+            bag = NISTBag(self.bagbldr.bagdir)
+        if not mdrec:
+            mdrec = bag.nerdm_record(True)
+        
+        oldver = mdrec.get('version', "1.0.0")
+        ineditre = re.compile(r'^(\d+(.\d+)*)\+ \(.*\)')
+        matched = ineditre.search(oldver)
+        if matched:
+            # the version is marked as "in edit", indicating that this
+            # is an update to a previously published version.
+            oldver = matched.group(1)
+            ver = [int(f) for f in oldver.split('.')]
+            for i in range(len(ver), 3):
+                ver.append(0)
+
+            # if there are files under the data directory, consider this a
+            # data update, which increments the second field.
+            for dir, subdirs, files in os.walk(bag.data_dir):
+                if len(files) > 0:
+                    # found a file
+                    ver[1] += 1
+                    ver[2] = 0
+                    return (".".join([str(v) for v in ver]), _DATA_UPDATE)
+
+            # otherwise, this is a metadata update, which increments the
+            # third field.
+            ver[2] += 1
+            return (".".join([str(v) for v in ver]), _MDATA_UPDATE)
+
+        # otherwise, this looks like a first-time SIP submission; take the
+        # version string as is.
+        return (oldver, _NO_UPDATE)
+            
 
     def _validate(self, config):
         """

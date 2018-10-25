@@ -9,7 +9,7 @@ import os, sys, logging, json, re
 from wsgiref.headers import Headers
 
 from .. import PublishSystem
-from .serv import (PrePubMetadataService, SIPDirectoryNotFound,
+from .serv import (PrePubMetadataService, SIPDirectoryNotFound, IDNotFound,
                    ConfigurationException, StateException)
 
 log = logging.getLogger(PublishSystem().subsystem_abbrev).getChild("mdserv")
@@ -111,11 +111,14 @@ class Handler(object):
         
         try:
             mdata = self._svc.resolve_id(dsid)
-        except SIPDirectoryNotFound, ex:
-            #TODO: consider sending a 301
+        except IDNotFound as ex:
             self.send_error(404,"Dataset with ID={0} not available".format(dsid))
             return []
-        except Exception, ex:
+        except SIPDirectoryNotFound as ex:
+            # shouldn't happen
+            self.send_error(404,"Dataset with ID={0} not available".format(dsid))
+            return []
+        except Exception as ex:
             log.exception("Internal error: "+str(ex))
             self.send_error(500, "Internal error")
             return []
@@ -130,11 +133,14 @@ class Handler(object):
 
         try:
             loc, mtype = self._svc.locate_data_file(id, filepath)
-        except SIPDirectoryNotFound, ex:
-            #TODO: consider sending a 301
+        except IDNotFound as ex:
             self.send_error(404,"Dataset with ID={0} not available".format(id))
             return []
-        except Exception, ex:
+        except SIPDirectoryNotFound as ex:
+            # shouldn't happen
+            self.send_error(404,"Dataset with ID={0} not available".format(id))
+            return []
+        except Exception as ex:
             log.exception("Internal error: "+str(ex))
             self.send_error(500, "Internal error")
             return []

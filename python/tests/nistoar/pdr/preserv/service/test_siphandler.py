@@ -64,9 +64,14 @@ class TestMIDASSIPHandler(test.TestCase):
             "ingester": {
                 "data_dir":  os.path.join(self.workdir, "ingest"),
                 "submit": "none"
+            },
+            "multibag": {
+                "max_headbag_size": 2000000,
+#                "max_headbag_size": 100,
+                "max_bag_size": 200000000
             }
         }
-        
+
         self.sip = sip.MIDASSIPHandler(self.midasid, self.config)
 
     def tearDown(self):
@@ -78,6 +83,25 @@ class TestMIDASSIPHandler(test.TestCase):
         self.assertTrue(os.path.exists(self.workdir))
         self.assertTrue(os.path.exists(self.stagedir))
         self.assertTrue(os.path.exists(self.mdserv))
+
+        self.assertTrue(isinstance(self.sip.status, dict))
+        self.assertEqual(self.sip.state, status.FORGOTTEN)
+
+        self.assertIsNone(self.sip.bagger.asupdate)
+
+    def test_ctor_asupdate(self):
+        self.sip = sip.MIDASSIPHandler(self.midasid, self.config,
+                                       asupdate=True)
+        self.assertTrue(self.sip.bagger)
+        self.assertEqual(self.sip.bagger.asupdate, True)
+
+        self.assertTrue(isinstance(self.sip.status, dict))
+        self.assertEqual(self.sip.state, status.FORGOTTEN)
+
+        self.sip = sip.MIDASSIPHandler(self.midasid, self.config,
+                                       asupdate=False)
+        self.assertTrue(self.sip.bagger)
+        self.assertEqual(self.sip.bagger.asupdate, False)
 
         self.assertTrue(isinstance(self.sip.status, dict))
         self.assertEqual(self.sip.state, status.FORGOTTEN)
@@ -95,12 +119,13 @@ class TestMIDASSIPHandler(test.TestCase):
 
     def test_bagit(self):
         self.assertEqual(self.sip.state, status.FORGOTTEN)
-        # pdb.set_trace()
+        self.assertEqual(len(os.listdir(self.sip.stagedir)), 0)
         self.sip.bagit()
         self.assertTrue(os.path.exists(os.path.join(self.store, 
-                                                self.midasid+".mbag0_3-0.zip")))
+                                          self.midasid+".1_0_0.mbag0_4-0.zip")))
 
-        csumfile = os.path.join(self.store, self.midasid+".mbag0_3-0.zip.sha256")
+        csumfile = os.path.join(self.store,
+                                self.midasid+".1_0_0.mbag0_4-0.zip.sha256")
         self.assertTrue(os.path.exists(csumfile))
         with open(csumfile) as fd:
             csum = fd.read().strip()
@@ -109,12 +134,22 @@ class TestMIDASSIPHandler(test.TestCase):
         self.assertIn('bagfiles', self.sip.status)
         self.assertEqual(len(self.sip.status['bagfiles']), 1)
         self.assertEqual(self.sip.status['bagfiles'][0]['name'], 
-                                                self.midasid+".mbag0_3-0.zip")
+                                            self.midasid+".1_0_0.mbag0_4-0.zip")
         self.assertEqual(self.sip.status['bagfiles'][0]['sha256'], csum)
 
         # check for checksum files in review dir
         cf = os.path.join(self.revdir, "1491/_preserv", self.midasid+"_0.sha256")
         self.assertTrue(os.path.exists(cf), "Does not exist: "+cf)
+
+        # head bag still in staging area?
+        staged = os.listdir(self.sip.stagedir)
+        self.assertEqual(len(staged), 1)
+        self.assertTrue(os.path.basename(staged[0]).endswith("-0.zip"))
+
+        # has the metadata bag been cleaned up?
+        mdbagdir = os.path.join(self.sip.mdbagdir, self.midasid)
+        self.assertFalse( os.path.exists(mdbagdir),
+                          "Failed to clean up metadata bag directory: "+mdbagdir)
         
     def test_is_preserved(self):
         self.assertEqual(self.sip.state, status.FORGOTTEN)
@@ -123,10 +158,11 @@ class TestMIDASSIPHandler(test.TestCase):
         self.assertTrue(self.sip._is_preserved())
 
         # if there is no longer a cached status file, ensure that we notice
-        # when there is bag in the store dir
+        # when there is a bag in the store dir
         os.remove(os.path.join(self.statusdir, self.midasid+'.json'))
         self.sip = sip.MIDASSIPHandler(self.midasid, self.config)
         stat = self.sip.status
+        self.sip._is_preserved()
         self.assertEqual(stat['state'], status.SUCCESSFUL)
         self.assertIn('orgotten', stat['message'])
 

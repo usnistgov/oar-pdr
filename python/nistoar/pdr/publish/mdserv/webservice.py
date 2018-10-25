@@ -1,11 +1,13 @@
 """
-A web service front-end to the PrePubMetadataService.
+A web service front-end to the PrePubMetadataService.  This implementation 
+extends the python-built-in BaseHTTPServer class for running a stand-alone 
+server.
 """
 import os, sys, threading, logging, json
 from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
 
 from .. import PublishSystem
-from .serv import (PrePubMetadataService, SIPDirectoryNotFound,
+from .serv import (PrePubMetadataService, SIPDirectoryNotFound, IDNotFound,
                    ConfigurationException, StateException)
 
 log = logging.getLogger(PublishSystem().subsystem_abbrev).getChild("webserver")
@@ -53,14 +55,19 @@ class PrePubMetadataRequestHandler(BaseHTTPRequestHandler):
 
         try:
             mdata = self.server.mdsvc.resolve_id(id)
-        except SIPDirectoryNotFound, ex:
-            #TODO: consider sending a 301
+        except IDNotFound as ex:
             self.code = 404
             self.send_error(self.code,
                             "Dataset with ID={0} not available".format(id))
             self.end_headers()
             return
-        except Exception, ex:
+        except SIPDirectoryNotFound, ex:
+            self.code = 404
+            self.send_error(self.code,
+                            "Dataset with ID={0} not available".format(id))
+            self.end_headers()
+            return
+        except Exception as ex:
             log.exception("Internal error: "+str(ex))
             self.code = 500
             self.send_error(self.code, "Internal error: "+ str(ex))

@@ -70,10 +70,43 @@ class TestBuilder(test.TestCase):
         self.assertIsNone(self.bag.ediid)
 
         baginfo = self.bag.cfg['init_bag_info']
-        self.assertEqual(baginfo['NIST-BagIt-Version'], 'X.3')
-        self.assertEqual(baginfo['Contact-Email'], ["datasupport@nist.gov"],
-                         "Failed to load default config params")
+        try:
+            self.assertEqual(baginfo['NIST-BagIt-Version'], 'X.3')
+            self.assertEqual(baginfo['Contact-Email'], ["datasupport@nist.gov"],
+                             "Failed to load default config params")
+        except KeyError as ex:
+            self.fail("Failed to load default config params: missing params")
 
+    def test_rename_bag(self):
+        bagdir = os.path.join(self.tf.root, "testbag")
+        self.assertEqual(self.bag.bagname, "testbag")
+        self.assertEqual(self.bag.bagdir, bagdir)
+        self.assertTrue(not os.path.exists(self.bag.bagdir))
+        self.assertIsNone(self.bag._bag)
+
+        self.bag.rename_bag("goobbag")
+        bagdir = os.path.join(self.tf.root, "goobbag")
+        self.assertEqual(self.bag.bagname, "goobbag")
+        self.assertEqual(self.bag.bagdir, bagdir)
+        self.assertTrue(not os.path.exists(bagdir))
+        self.assertIsNone(self.bag._bag)
+
+        self.bag.ensure_bagdir()
+        self.assertTrue(os.path.exists(bagdir))
+        self.assertEqual(self.bag.bagname, "goobbag")
+        self.assertEqual(self.bag.bagdir, bagdir)
+        self.assertIsNotNone(self.bag._bag)
+        self.assertEqual(self.bag._bag.dir, bagdir)
+
+        self.bag.rename_bag("foobag")
+        self.assertEqual(self.bag.bagname, "foobag")
+        self.assertTrue(not os.path.exists(bagdir))
+        bagdir = os.path.join(self.tf.root, "foobag")
+        self.assertTrue(os.path.exists(bagdir))
+        self.assertEqual(self.bag.bagdir, bagdir)
+        self.assertIsNotNone(self.bag._bag)
+        self.assertEqual(self.bag._bag.dir, bagdir)
+        
     def test_download_url(self):
         self.assertEqual(self.bag._download_url('goob',
                                                 os.path.join("foo", "bar.json")),
@@ -235,6 +268,36 @@ class TestBuilder(test.TestCase):
                       os.path.join(self.bag.bagdir,"metadata",path,"annot.json"))
         self.assertEquals(self.bag.annot_file_for(""),
                       os.path.join(self.bag.bagdir,"metadata","annot.json"))
+
+    def test_update_annot_for_res(self):
+        md = { "title": "We Are The Champions!", "version":  "2.0"}
+        self.bag.update_annot_for('', md)
+        annotf = self.bag.annot_file_for('')
+        with open(annotf) as fd:
+            nmd = json.load(fd)
+        self.assertEqual(nmd['title'], md['title'])
+        self.assertEqual(nmd['version'], md['version'])
+        
+        self.bag.update_annot_for('', { 'version': "2.1"})
+        with open(annotf) as fd:
+            nmd = json.load(fd)
+        self.assertEqual(nmd['title'], md['title'])
+        self.assertEqual(nmd['version'], '2.1')
+        
+    def test_update_annot_for_file(self):
+        md = { "title": "We Are The Champions!", "version":  "2.0"}
+        self.bag.update_annot_for('foo/bar/chu.csv', md)
+        annotf = self.bag.annot_file_for('foo/bar/chu.csv')
+        with open(annotf) as fd:
+            nmd = json.load(fd)
+        self.assertEqual(nmd['title'], md['title'])
+        self.assertEqual(nmd['version'], md['version'])
+        
+        self.bag.update_annot_for('foo/bar/chu.csv', { 'version': "2.1"})
+        with open(annotf) as fd:
+            nmd = json.load(fd)
+        self.assertEqual(nmd['title'], md['title'])
+        self.assertEqual(nmd['version'], '2.1')
         
     def test_add_metadata_for_coll(self):
         path = os.path.join("trial1","gold")
@@ -892,6 +955,11 @@ class TestBuilder(test.TestCase):
             self.assertIn(prop, data)
 
     def test_write_mbag_files(self):
+        podfile = os.path.join(datadir, "_pod.json")
+        self.bag.add_ds_pod(podfile, convert=True, savefilemd=False)
+        self.assertTrue(os.path.exists(self.bag.pod_file()))
+        self.assertTrue(os.path.exists(self.bag.nerdm_file_for('')))
+
         manfile = os.path.join(self.bag.bagdir, "manifest-sha256.txt")
         datafiles = [ "trial1.json", "trial2.json", 
                       os.path.join("trial3", "trial3a.json") ]
@@ -960,7 +1028,7 @@ class TestBuilder(test.TestCase):
                       "National Institute of Standards and Technology\n",
                       lines)
         self.assertIn("Contact-Email: datasupport@nist.gov\n", lines)
-        self.assertIn("Multibag-Version: 0.3\n", lines)
+        self.assertIn("Multibag-Version: 0.4\n", lines)
         self.assertEqual(len([l for l in lines
                                 if "Organization-Address: " in l]), 2)
 
@@ -991,7 +1059,7 @@ class TestBuilder(test.TestCase):
                       "National Institute of Standards and Technology\n",
                       lines)
         self.assertIn("Contact-Email: datasupport@nist.gov\n", lines)
-        self.assertIn("Multibag-Version: 0.3\n", lines)
+        self.assertIn("Multibag-Version: 0.4\n", lines)
         self.assertEqual(len([l for l in lines
                                 if "Organization-Address: " in l]), 2)
         self.assertEqual(len([l for l in lines
@@ -1021,7 +1089,7 @@ class TestBuilder(test.TestCase):
                       "National Institute of Standards and Technology\n",
                       lines)
         self.assertIn("Contact-Email: datasupport@nist.gov\n", lines)
-        self.assertIn("Multibag-Version: 0.3\n", lines)
+        self.assertIn("Multibag-Version: 0.4\n", lines)
         self.assertEqual(len([l for l in lines
                                 if "Organization-Address: " in l]), 2)
         self.assertIn("Internal-Sender-Identifier: "+self.bag.bagname+'\n',
@@ -1037,6 +1105,13 @@ class TestBuilder(test.TestCase):
         oxum = [int(n) for n in oxum[0].split(': ')[1].split('.')]
         self.assertEqual(oxum[1], 2)
         self.assertEqual(oxum[0], 2*datafilesz)
+
+        oxum = [l for l in lines if "Bag-Oxum: " in l]
+        self.assertEqual(len(oxum), 1)
+        oxum = [int(n) for n in oxum[0].split(': ')[1].split('.')]
+        self.assertEqual(oxum[1], 14)
+        self.assertEqual(oxum[0], 12594)
+
         bagsz = [l for l in lines if "Bag-Size: " in l]
         self.assertEqual(len(bagsz), 1)
         bagsz = bagsz[0]
@@ -1092,8 +1167,9 @@ class TestBuilder(test.TestCase):
         self.assertIn("Software to", lines[14])
         self.assertIn("More information:", lines[17])
         self.assertIn("https://doi.org/10.18434/", lines[18])
+
             
-    def test_ensure_baginfo(self):
+    def test_ensure_baginfo_fmt(self):
         # prep the test bag
         self.bag.ensure_bagdir()
         with self.assertRaises(bldr.BagProfileError):
@@ -1240,7 +1316,50 @@ class TestBuilder(test.TestCase):
         self.assertIn('previewURL', nerd)
         self.assertTrue(nerd['previewURL'].endswith("trial1.json/preview"))
         self.assertEqual(nerd['title'], "a better title")
+
+    def test_update_head_version(self):
+        self.bag.ensure_bagdir()
+        binfo = {
+            'Multibag-Tag-Directory': ["multibag"],
+            'Multibag-Version': ["0.4"]
+        }
+
+        self.bag.update_head_version(binfo, "1.0.0")
+        self.assertEqual(binfo['Multibag-Head-Version'], "1.0.0")
+        self.assertEqual(binfo['Multibag-Version'], ["0.4"])
+        self.assertEqual(binfo['Multibag-Tag-Directory'], ["multibag"])
+        self.assertNotIn('Multibag-Head-Deprecates', binfo)
         
+        mbdir = os.path.join(self.bag.bagdir, 'multibag')
+        if not os.path.exists(mbdir):
+            os.mkdir(mbdir)
+        depinfo = {
+            'Multibag-Tag-Directory': ["multibag"],
+            'Multibag-Version': ["0.3"]
+        }
+        depinfof = os.path.join(mbdir, "deprecated-info.txt")
+        self.bag.write_baginfo_data(depinfo, depinfof, overwrite=True)
+
+        self.bag.update_head_version(binfo, "9.2-78")
+        self.assertEqual(binfo['Multibag-Head-Version'], "9.2-78")
+        self.assertEqual(binfo['Multibag-Head-Deprecates'], ["1"])
+        self.assertEqual(binfo['Multibag-Version'], ["0.4"])
+        self.assertEqual(binfo['Multibag-Tag-Directory'], ["multibag"])
+        
+        depinfo.update({
+            'Multibag-Head-Version': ["8.5.1"],
+            'Multibag-Head-Deprecates': ["1", "2.1.1"]
+        })
+        self.bag.write_baginfo_data(depinfo, depinfof, overwrite=True)
+
+        self.bag.update_head_version(binfo, "12.1.9.2-78")
+        self.assertEqual(binfo['Multibag-Head-Version'], "12.1.9.2-78")
+        self.assertEqual(binfo['Multibag-Head-Deprecates'],
+                         ["1", "8.5.1", "2.1.1"])
+        self.assertEqual(binfo['Multibag-Version'], ["0.4"])
+        self.assertEqual(binfo['Multibag-Tag-Directory'], ["multibag"])
+            
+
         
 
 if __name__ == '__main__':

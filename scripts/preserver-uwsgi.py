@@ -58,7 +58,9 @@ This script also pays attention to the following environment variables:
    OAR_CONFIG_ENV      The application/component name for the configuration; 
                           this is only used if OAR_CONFIG_SERVICE is used.
 """
+from __future__ import print_function
 import os, sys, shutil, copy, logging
+from collections import Mapping
 import uwsgi
 try:
     import nistoar
@@ -100,7 +102,7 @@ def update_if_test_mode(config):
                                os.path.abspath(__file__))), "python", "tests", 
                                "nistoar", "pdr", "preserv", "data", "midassip")
         revdir = os.path.join(workdir, "review")
-        print >> sys.stderr, "copying review data"
+        print("copying review data", file=sys.stderr)
         if os.path.isdir(revdir):
             shutil.rmtree(revdir)
         shutil.copytree(os.path.join(datadir,'review'), revdir)
@@ -113,7 +115,7 @@ def update_if_test_mode(config):
         os.mkdir(storedir)
 
     out = copy.deepcopy(config)
-    out.update( {
+    update_cfg(out, {
         'working_dir':       workdir,
         'id_registry_dir':   workdir,
         'store_dir':         os.path.join(workdir, 'store'),
@@ -139,10 +141,21 @@ def update_if_test_mode(config):
                 }
             }
         },
-        'test_mode': True
+        'test_mode': True,
+        'test_data_dir': datadir
     } )
 
     return out
+
+def update_cfg(base, upd):
+    for key in upd:
+        if key in base and isinstance(upd[key], Mapping) and \
+           isinstance(base.get(key), Mapping):
+            base[key] = update_cfg(base[key], upd[key])
+        else:
+            base[key] = upd[key]
+    return base
+            
 
 def clean_working_dir(workdir):
     for item in os.listdir(workdir):
@@ -190,7 +203,7 @@ if cfg.get('test_mode'):
               .get('working_dir')
     if mdwd:
         if os.path.exists(mdwd):
-            clean_working_dir(mdcfg.get('working_dir'))
+            clean_working_dir(mdwd)
         else:
             os.mkdir(mdwd)
 

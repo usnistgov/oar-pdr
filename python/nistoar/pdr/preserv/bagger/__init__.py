@@ -9,4 +9,4 @@ understands how to bag up data provided by MIDAS.
 """
 
 from midas import MIDASMetadataBagger
-
+from prepupd import UpdatePrepService

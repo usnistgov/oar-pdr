@@ -87,8 +87,10 @@ def configure_log(logfile=None, level=None, format=None, config=None,
     :param format str:   the formatting string to configure the logfile with
     :param config dict:  a configuration dictionary to draw logging configuration
                          values from.  
-    :param addstderr bool:  If True, send ERROR and more severe messages to 
-                         the standard error stream (default: False).
+    :param addstderr bool or str:  If True, send ERROR and more severe messages 
+                         to the standard error stream (default: False).  If 
+                         provided as a str, it is the formatting string for 
+                         messages sent to standard error.
     """
     if not config:
         config = {}
@@ -119,9 +121,11 @@ def configure_log(logfile=None, level=None, format=None, config=None,
     rootlogger.setLevel(logging.DEBUG)
 
     if addstderr:
+        if not isinstance(addstderr, (str, unicode)):
+            addstderr = format
         handler = logging.StreamHandler(sys.stderr)
         handler.setLevel(logging.ERROR)
-        handler.setFormatter(logging.Formatter(format))
+        handler.setFormatter(logging.Formatter(addstderr))
         rootlogger.addHandler(handler)
         rootlogger.error("FYI: Writing log messages to %s",logfile)
         
