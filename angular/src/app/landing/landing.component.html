@@ -1,0 +1,173 @@
+<style id="antiClickjack">
+    body {
+      display: none !important;
+    }
+  </style>
+  <script type="text/javascript">
+    if (self === top) {
+      var antiClickjack = document.getElementById("antiClickjack");
+      if(antiClickjack !== null && antiClickjack !== undefined)
+          antiClickjack.parentNode.removeChild(antiClickjack);
+          
+    } else {
+      top.location = self.location;
+    }
+  </script>
+  
+  <div class="ui-grid ui-grid-responsive ui-grid-pad center">
+  <div class="card landingcard">
+  <div *ngIf="record?.length == 0 || isId === false">
+      <div class="ui-g">
+         <div class="ui-g-10 ui-md-10 ui-lg-10 ui-sm-12" style="padding-left: 1%">
+              <b>No Landing page available</b>
+              <p>The requested record id {{ searchValue }}  does not match with any records in the system</p>
+         </div>
+      </div>
+  </div>
+   <div *ngIf="record.length !== 0 && isId === true" >
+      <div class="ui-g">
+          <div class="ui-g-10 ui-md-10 ui-lg-10 ui-sm-12">
+              <div class="ui-g">
+                  <div class="ui-g-12 ui-md-12 ui-lg-12 ui-sm-12">
+                      <span class="recordType" [ngSwitch]="record['@type'][0]">
+                          <b *ngSwitchCase="'nrd:SRD'">Standard Reference Data</b>
+                          <b *ngSwitchCase="'nrdp:DataPublication'">Data Publication</b>
+                          <b *ngSwitchCase="'nrdp:PublicDataResource'">Public Data Resource</b>
+                          <b *ngSwitchDefault></b>
+                      </span>
+                      <div  *ngIf="record.length !== 0" class="ui-sm-1 visible-xs-block visible-sm-block ">
+                        <button style="float: right" type="button" pButton icon="faa faa-list" class="ui-button ui-button-icon-only" (click)="menu3.toggle($event)"></button>
+                         <p-menu #menu3 class="rightMenuStylePop" popup="popup" [model]="rightmenu"></p-menu>
+                      </div>
+                      <br>
+                      <span class="title" style="text-align: left; vertical-align: top; ">
+                          <h2>{{record.title}}</h2>
+                      </span>
+                      <div class="" *ngIf="record.authors">
+                          <span *ngFor="let author of record.authors; let i = index">
+                              {{ author.fn}}<span *ngIf="i < record.authors.length-1 ">,</span>
+                          </span>
+                          <i style="cursor: pointer; margin-left: 0.5rem;" class ="faa" [ngClass]="{'faa-plus-square-o': !clickAuthors, 'faa-minus-square-o': clickAuthors}" aria-hidden="true" (click)="isCollapsedContent = !isCollapsedContent; clickAuthors = expandClick();"></i>
+                      </div>
+                      <div [collapse]="!isCollapsedContent" class="card card-block card-header customcard">
+                          <div class="" *ngIf="record.authors">
+                              <span><b>Authors:</b></span>
+                              <div *ngFor="let author of record.authors; let i = index">
+                                  <span>{{ author.fn}}</span>,
+                                  <span *ngFor="let aff of author.affiliation">
+                                       <br>{{aff.title}}
+                                  </span>
+                              </div>
+                          </div>
+                      </div>
+                  </div>  
+              </div>  
+              <div class="ui-g">     
+                  <div  class="ui-g-8 ui-md-8 ui-lg-8 ui-sm-12 contactPoint" *ngIf="record.contactPoint">
+                          Contact:
+                          <strong>
+                              <a class="font14" *ngIf="isEmail" href="{{record.contactPoint.hasEmail}}" target="_top">
+                                  {{record.contactPoint.fn}}</a>
+                              <span *ngIf="!isEmail">{{record.contactPoint.fn}}</span>
+                          </strong>..
+                          <i style="cursor: pointer;" class="faa" [ngClass]="{'faa-plus-square-o': !clickContact, 'faa-minus-square-o': clickContact}"
+                          aria-hidden="true" (click)="closeContent = !closeContent; clickContact=expandContact();"></i>
+                          <div [collapse]="!closeContent" class="card customcard">
+                                  <span class="" *ngIf="record.contactPoint.fn">
+                                      <span>{{record.contactPoint.fn}}</span>
+                                  </span>
+                                  <span class="font14" *ngIf="isEmail">
+                                        <br><strong>Email:</strong>
+                                      <a *ngIf="isEmail" href="{{record.contactPoint.hasEmail}}" target="_top">
+                                       {{record.contactPoint.hasEmail.split(":")[1]}}</a>
+                                  </span>
+                                  <div class="font14" *ngIf="record.contactPoint.address">
+                                      <span><b>Address:</b></span>
+                                       <div *ngFor="let address of record.contactPoint.address">
+                                          {{address}}
+                                       </div>
+                                  </div>
+                          </div>
+                          <br>
+                          <span  *ngIf="isId">Identifier: </span>
+                          <span *ngIf="isDOI" ><i>  <a  class="font14" href="https://doi.org/{{record.doi.split(':')[1]}}">{{record.doi}}</a></i></span>
+                          <span  *ngIf="!isDOI"><i> <a class="font14" href="{{ pdrApi }}{{record['@id']}}">{{record["@id"]}}</a></i> </span>
+                          <span *ngIf="checkReferences()"><br>
+                          <span>Described in article: </span>
+                              <small *ngFor="let refs of record['references']; let i =index">
+                                 
+                                  <span style="padding-left:2.75em" *ngIf="refs.refType == 'IsDocumentedBy'">
+                                      <br><i class="faa faa-external-link">
+                                      <a class="font14" href={{refs.location}} target="blank" >{{ refs.label }}</a></i>
+                                  <span *ngIf="i < record.references.length-1 ">,</span>
+                                  </span>
+                              </small>
+                          </span><br>
+                          <span class="" *ngIf="record.version"> Version: <strong>{{record.version}}</strong></span>
+                          <span class="" *ngIf="record.versionHistory" style="padding-right: 15pt;">...
+                          <i style="cursor: pointer;" class ="faa" aria-hidden="true"
+                             [ngClass]="{'faa-plus-square-o': !clickHistory, 'faa-minus-square-o': clickHistory}"
+                             (click)="closeHistory = !closeHistory; clickHistory = expandHistory();"></i>     
+                          </span>
+                          <span class="" *ngIf="record.issued" style="padding-right: 10pt;">  Released: <strong>{{record.issued}}</strong></span>
+                          <span class="" *ngIf="record.modified" style="padding-right: 10pt;"> Last modified: <strong>{{record.modified}}</strong></span>
+                    
+                    <div class="card customcard" [collapse]="!closeHistory">
+                          <b>Version History:</b>
+                          <span *ngFor="let release of record.versionHistory">
+                             <br> <b [innerHTML]="renderRelVer(release, record.version)"></b> &nbsp;&nbsp;
+                             <span *ngIf="release.issued">Released: {{release.issued}}</span>
+                             <span *ngIf="release.location || release.refid"> &nbsp;&nbsp; 
+                                 <i [innerHTML]="renderRelId(release, record.version)"></i> 
+                            </span>
+                             <span *ngIf="release.description"> <br> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                               <i>{{release.description}}</i>
+                             </span>
+                          </span>
+                    </div>
+                    <p style="margin-top: 10px;" *ngIf="newer.location">
+                        <b>There is a more recent release of this resource available: &nbsp;&nbsp;
+                        <a href="{{newer.location}}">{{newer.label}}</a></b>
+                    </p>
+                  </div>
+                  <div class="ui-g-4 ui-md-4 ui-lg-4 ui-sm-12">
+                        <span *ngIf="record.landingPage">
+                            <a [(href)]="record.landingPage" target="_blank" style="float: right;">
+                                <button  pButton type="button" class="homePageLink" icon="faa faa-external-link" label="Visit Home Page"></button>
+                            </a>
+                        </span>
+                  </div>
+              </div>
+              <div class="ui-g">
+                  <div class="ui-g-12 ui-md-12 ui-lg-12 ui-sm-12">
+                     <description-resources  [record]="record" [files]="files" [distdownload]="distdownload" [isInternal]="isInternal" [filescount]="filescount" [metadata]="metadata" ></description-resources> 
+                     <metadata-detail  [record]="record" [serviceApi]="serviceApi" [metadata]="metadata"  ></metadata-detail>    
+                  </div>
+                  <div *ngIf="record.length !== 0">
+                      <p-dialog  class="citationDialog" [closable]="false" [(visible)]="display" modal="modal" width="550" height="330" responsive="true" #citeDialog>
+                          <p-header> Citation
+                              <button style="position:relative; float:right; background-color:#1E6BA1; " type="button" pButton icon="faa faa-close" (click)="closeDialog()"></button>
+                          </p-header>
+                          <span><b>Copy the recommended text to cite this resource </b></span> <br><br>
+                          <p contenteditable="false" style="font-size: 14px;" >{{ citeString }}</p>
+                         
+                          <br>
+                          <a target="citationsRecommendation" href="https://www.nist.gov/director/copyright-fair-use-and-licensing-statements-srd-data-and-software#citations">See also NIST Citation Recommendations</a>
+                      </p-dialog>
+                  </div>
+              </div>
+          </div>
+          
+          <div class="ui-g-2 ui-md-2 ui-lg-2 ui-sm-12">
+            <div class="ui-g"  style="position:sticky; top:0; ">
+                <div class="ui-g-12 ui-md-12 ui-lg-12 ui-sm-12">
+                   <div class="visible-lg-block visible-md-block ">
+                        <p-menu  class="rightMenuStyle" [model]="rightmenu"></p-menu>
+                   </div>
+                </div>
+            </div>
+         </div>
+      </div>
+   </div>
+  </div>
+</div>

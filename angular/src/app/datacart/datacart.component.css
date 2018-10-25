@@ -1,0 +1,114 @@
+
+.ui-button.small-button {
+  font-size:.5em;
+  background-color: green;
+  margin-bottom: 1em;
+}
+
+:host /deep/ .ui-progress-spinner-svg {
+  top:50%;
+}
+
+:host /deep/ p-dialog .ui-dialog {
+  background-color: #ebffff;
+}
+
+:host /deep/ .ui-dialog .ui-dialog-titlebar{
+  background-color: #232F3E;
+  color: #fff;
+}
+
+:host /deep/ .ui-treetable .ui-treetable-row td {
+  border:1px solid #bdbdbd;
+}
+
+:host /deep/ .ui-treetable thead tr th {
+  border:1px solid #bdbdbd;
+  background-color: lightgrey;
+}
+
+:host /deep/ .ui-chkbox .ui-chkbox-box {
+  width: 1.2em;
+  height: 1.2em;
+}
+
+:host /deep/ .faa-cart-plus:before {
+  color: green;
+}
+
+:host /deep/ .ui-widget-content {
+  font-size: .95em ;
+}
+
+.badge-notify{
+  background-color: gray;
+  position:relative;
+  color: #fff;
+}
+
+:host /deep/ .ui-button, body .ui-datepicker-buttonpane button {
+  padding:.4em;
+}
+
+:host /deep/ .ui-treetable thead th, .ui-treetable tbody td, .ui-treetable tfoot td {
+  white-space: normal;
+}
+
+:host /deep/ .ui-state-active, body .ui-state-highlight {
+  background-color: #FFFFFF;
+}
+
+:host /deep/ .ui-tree .ui-treenode-label.ui-state-highlight, body ui-tree .ui-treenode-label.ui-state-hover {
+  font-weight: 700;
+  color: #000;
+}
+
+:host /deep/ .ui-menu .ui-menu-list li.ui-widget-header {
+  color: #000;
+  background-color: #B8D4E6;
+  font-family: 'Roboto';
+  font-weight: bold;
+}
+
+:host /deep/ .ui-paginator .ui-paginator-pages a.ui-state-active {
+  background-color: #03A9F4;
+}
+
+:host /deep/ .ui-datatable .ui-datatable-data tr.ui-datatable-even.ui-state-highlight {
+  background-color: #03A9F4;
+}
+
+:host /deep/ .ui-datatable .ui-datatable-data tr.ui-datatable-odd.ui-state-highlight {
+  background-color: #03A9F4;
+}
+
+:host /deep/ .ui-treetable tbody .ui-treetable-row.ui-state-highlight {
+  background-color: #03A9F4;
+}
+
+
+.searchButton{
+  background-color:#0872B9;
+  width: 100%;
+  height: 50px;
+  font-weight: 700;
+  font-size: 14px;
+  border-radius: 0px;
+  /*
+  border-radius-topright: 5px;
+  border-radius-bottomright: 5px;
+  -moz-border-radius-topright: 5px;
+  -moz-border-radius-bottomright: 5px;
+  -webkit-border-bottom-right-radius: 5px;
+  -webkit-border-top-right-radius: 5px;
+  */
+}
+
+.searchButton:hover{
+  background-color:#1F5593;
+}
+
+:host /deep/ .ui-widget-header{
+  background-color: #FFFFFF;
+  border: 0;
+}

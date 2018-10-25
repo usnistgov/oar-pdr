@@ -1,3 +1,14 @@
+##########################################
+#
+# Build/test container for python components 
+#
+# The purpose of this Docker container is produce a distribution
+# bundle that can be added into the deployment container.  This
+# container should build the code in an environment that sufficiently
+# matches the target operational environment. 
+#
+##########################################
+
 FROM oar-metadata/ejsonschema
 
 RUN apt-get update && apt-get install -y python-yaml nginx curl wget less sudo \

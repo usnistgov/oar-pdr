@@ -1,0 +1,535 @@
+Reset
+html,
+body,
+div {
+  border: 0;
+  margin: 0;
+  padding: 0;
+}
+
+.sdp-page{
+    padding:10rem 0px;
+}
+
+@@ -1,431 +0,0 @@
+@charset "UTF-8";
+/* CSS Document */
+
+
+/*html { text-rendering: optimizeLegibility !important; -webkit-font-smoothing: antialiased !important;}*/
+
+body{height:100%; width:100%;}
+
+
+/* CORE LAYOUT STANDART STYLES ********************************************************************************************************** */
+
+a, div, span, input, textarea, li, strong, button{ outline:none; text-decoration:none;
+  /* this removes gray outline from ios safari a tags */-webkit-tap-highlight-color: rgba(0,0,0,0);
+  /* this removes action panels from ios safari a tags */-webkit-tap-highlight-color: rgba(0,0,0,0); -webkit-touch-callout: none;}
+img{ border:none; border:0px;}
+
+h1, h2, h3, h4, h5, h6{ margin:0px !important;}
+.ClearBoth{clear:both;}
+.CursPointer{ cursor:pointer;}
+
+/*visibilities according to the platform*/
+.ShowOnMobile{ display:none;}
+.ShowOnDesktop{ display:inherit;}
+.FloatNoneOnMobile{}
+
+.show{display:block !important;}
+.hide{display:none !important;}
+
+/* make auto of element width and/or height attribute on mobile devices with media queries */
+.WidAutoOnMobile{}
+.HeiAutoOnMobile{}
+
+/* for responsive mode - if you want any ContainerX element has a responsive fluid abilities with media queries you must add this class to your element*/
+.Responsive{}
+.Responsive50{}
+.Responsive100{}
+
+/* Text Decoration */
+.Underline{ text-decoration:underline;}
+
+/* Making Unselectable Contents */
+.Unselectable {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+/* for on iphone safari inputs shadow problem */
+input[type="text"], input[type="password"], textarea{ -webkit-appearance: none; -moz-appearance: none; appearance: none;}
+
+/* Display */
+.DispBlock{ display:block;}
+.DispTable{ display:table; vertical-align:middle;}
+.DispTableCell{ display:table-cell; vertical-align:middle;}
+.DispNone{ display:none;}
+.DispInlBlock{display:inline-block;}
+
+/* Position */
+.PosFixed{position:fixed;}
+.PosAbsolute{position:absolute;}
+.PosRelative{ position:relative;}
+.PosStatic{position:static;}
+
+/* Floating */
+.Fleft{ float:left;}
+.Fright{ float:right;}
+.Fnone{ float:none !important;}
+
+/* Overflows */
+.OvHidden{ overflow:hidden;}
+.OvScroll{ overflow:scroll;}
+.OvAuto{ overflow:auto;}
+.OvVisible{ overflow:visible;}
+.OvXScroll{ overflow-x:scroll;}
+.OvYScroll{ overflow-y:scroll;}
+.OvXHidden{ overflow-x:hidden;}
+.OvYHidden{ overflow-y:hidden;}
+
+/* Empty Boxes */
+.EmptyBox5{ display:block; width:100%; height:5px; overflow:hidden;}
+.EmptyBox10{ display:block; width:100%; height:10px; overflow:hidden;}
+.EmptyBox20{ display:block; width:100%; height:20px; overflow:hidden;}
+.EmptyBox30{ display:block; width:100%; height:30px; overflow:hidden;}
+.EmptyBox40{ display:block; width:100%; height:40px; overflow:hidden;}
+.EmptyBox50{ display:block; width:100%; height:50px; overflow:hidden;}
+.EmptyBox60{ display:block; width:100%; height:60px; overflow:hidden;}
+.EmptyBox70{ display:block; width:100%; height:70px; overflow:hidden;}
+.EmptyBox80{ display:block; width:100%; height:80px; overflow:hidden;}
+.EmptyBox90{ display:block; width:100%; height:90px; overflow:hidden;}
+.EmptyBox100{ display:block; width:100%; height:100px; overflow:hidden;}
+.EmptyBox110{ display:block; width:100%; height:100px; overflow:hidden;}
+.EmptyBox120{ display:block; width:100%; height:100px; overflow:hidden;}
+.EmptyBox130{ display:block; width:100%; height:100px; overflow:hidden;}
+.EmptyBox140{ display:block; width:100%; height:100px; overflow:hidden;}
+.EmptyBox150{ display: block; width: 100%; height:150px; overflow:hidden;}
+
+/* Opacity */
+.Opac100{ opacity:1; -webkit-opacity:1; -moz-opacity:1;}
+.Opac95{ opacity:0.95; -webkit-opacity:0.95; -moz-opacity:0.95;}
+.Opac90{ opacity:0.9; -webkit-opacity:0.9; -moz-opacity:0.9;}
+.Opac80{ opacity:0.8; -webkit-opacity:0.8; -moz-opacity:0.8;}
+.Opac70{ opacity:0.7; -webkit-opacity:0.7; -moz-opacity:0.7;}
+.Opac60{ opacity:0.6; -webkit-opacity:0.6; -moz-opacity:0.6;}
+.Opac50{ opacity:0.5; -webkit-opacity:0.5; -moz-opacity:0.5;}
+.Opac40{ opacity:0.4; -webkit-opacity:0.4; -moz-opacity:0.4;}
+.Opac30{ opacity:0.3; -webkit-opacity:0.3; -moz-opacity:0.3;}
+.Opac20{ opacity:0.2; -webkit-opacity:0.2; -moz-opacity:0.2;}
+.Opac10{ opacity:0.1; -webkit-opacity:0.1; -moz-opacity:0.1;}
+.OpacZero{ opacity:0; -webkit-opacity:0; -moz-opacity:0;}
+
+/* Border Radius */
+.BordRad3{ border-radius:3px; -webkit-border-radius:3px; -moz-border-radius:3px;}
+.BordRad4{ border-radius:4px; -webkit-border-radius:4px; -moz-border-radius:4px;}
+.BordRad5{ border-radius:5px; -webkit-border-radius:5px; -moz-border-radius:5px;}
+.BordRad10{ border-radius:10px; -webkit-border-radius:10px; -moz-border-radius:10px;}
+.BordRad15{ border-radius:15px; -webkit-border-radius:15px; -moz-border-radius:15px;}
+.BordRadHalf{ border-radius:50%; -webkit-border-radius:50%; -moz-border-radius:50%;}
+
+.BordRight{ border-right:solid 1px transparent; box-sizing:border-box; -webkit-box-sizing:border-box; -moz-box-sizing:border-box;}
+.BordLeft{ border-left:solid 1px transparent; box-sizing:border-box; -webkit-box-sizing:border-box; -moz-box-sizing:border-box;}
+.BordTop{ border-top:solid 1px transparent; box-sizing:border-box; -webkit-box-sizing:border-box; -moz-box-sizing:border-box;}
+.BordBottom{ border-top:solid 1px transparent; box-sizing:border-box; -webkit-box-sizing:border-box; -moz-box-sizing:border-box;}
+.BordAll{ border:solid 1px transparent; box-sizing:border-box; -webkit-box-sizing:border-box; -moz-box-sizing:border-box;}
+
+/* Width */
+.Wid100{ width:100%;}
+.Wid90{ width:90%;}
+.Wid80{ width:80%;}
+.Wid70{ width:70%;}
+.Wid60{ width:60%;}
+.Wid50{ width:50%;}
+.Wid45{ width:45%;}
+.Wid40{ width:40%;}
+.Wid30{ width:30%;}
+
+/* Width Special Values */
+.Wid33{ width:33.3%;}
+.Wid25{ width:25%;}
+.Wid20{ width:20%;}
+.Wid10{ width:10%;}
+
+.MaxWid500{max-width:500px;}
+
+/* Height */
+.Hei100{ height:100%;}
+.Hei90{ height:90%;}
+.Hei80{ height:80%;}
+.Hei70{ height:70%;}
+.Hei60{ height:60%;}
+.Hei40{ height:40%;}
+.Hei50{ height:50%;}
+.Hei30{ height:30%;}
+.Hei20{ height:20%;}
+.Hei10{ height:10%;}
+
+/* Margins */
+.MarTopPerc5{ margin-top:5%;}
+.MarTopPerc10{ margin-top:10%;}
+.MarTopPerc20{ margin-top:20%;}
+.MarTopPerc30{ margin-top:30%;}
+.MarTopPerc40{ margin-top:40%;}
+.MarTopPerc50{ margin-top:50%;}
+
+.MarAuto{ margin-left:auto; margin-right:auto;}
+
+.MarTop5{ margin-top:5px;}
+.MarTop10{ margin-top:10px;}
+.MarTop20{ margin-top:20px;}
+.MarTop30{ margin-top:30px;}
+.MarTop40{ margin-top:40px;}
+.MarTop50{ margin-top:50px;}
+
+.MarTopQuarter{ margin-top:25%;}
+.MarTopHalf{ margin-top:50%;}
+
+.MarBot10{ margin-bottom:10px;}
+.MarRight10{ margin-right:10px;}
+.MarRight20{ margin-right:20px;}
+
+
+/* Paddings */
+.NoPadding{padding:0px !important;}
+.PaddingTopPercent10{ padding-top: 10%;}
+
+/* Containers */
+.Container100{ width:100%; float:left;}
+.Container96{ width:96%; float:left;}
+.Container90{ width:90%; float:left;}
+.Container85{ width:85%; float:left;}
+.Container80{ width:80%; float:left;}
+.Container75{ width:75%; float:left;}
+.Container70{ width:70%; float:left;}
+.Container66{ width:66.66%; float:left;}
+.Container60{ width:60%; float:left;}
+.Container50{ width:50%; float:left;}
+.Container40{ width:40%; float:left;}
+.Container33{ width:33.33%; float:left;}
+.Container30{ width:30%; float:left;}
+.Container25{ width:25%; float:left;}
+.Container20{ width:20%; float:left;}
+.Container10{ width:10%; float:left;}
+.Container5{ width:5%; float:left;}
+
+.ContainerIndent{display:block; margin:0px auto; padding:10px;}
+
+/* Text Aligns */
+.TexAlCenter{ text-align:center;}
+.TexAlLeft{ text-align:left;}
+.TexAlRight{ text-align:right !important;}
+
+/* Padding With Transparent Border*/
+.PadWithBorder1{ border:solid 1px transparent;}
+.PadWithBorder2{ border:solid 2px transparent;}
+.PadWithBorder3{ border:solid 3px transparent;}
+.PadWithBorder4{ border:solid 4px transparent;}
+.PadWithBorder5{ border:solid 5px transparent;}
+.PadWithBorder10{ border:solid 10px transparent;}
+
+/* Box Sizing */
+.BoxSizeContent{ box-sizing:content-box; -webkit-box-sizing:content-box; -moz-box-sizing:content-box;}
+.BoxSizeBorder{ box-sizing:border-box; -webkit-box-sizing:border-box; -moz-box-sizing:border-box;}
+
+/* Font Sizes */
+.Fs9{font-size:9px !important;}
+.Fs10{font-size:10px !important;}
+.Fs11{font-size:11px !important;}
+.Fs12{font-size:12px !important;}
+.Fs13{font-size:13px !important;}
+.Fs14{font-size:14px !important;}
+.Fs15{font-size:15px !important;}
+.Fs16{font-size:16px !important;}
+.Fs17{font-size:17px !important;}
+.Fs18{font-size:18px !important;}
+.Fs19{font-size:19px !important;}
+.Fs20{font-size:20px !important;}
+.Fs21{font-size:21px !important;}
+.Fs22{font-size:22px !important;}
+.Fs23{font-size:23px !important;}
+.Fs24{font-size:24px !important;}
+.Fs25{font-size:25px !important;}
+.Fs26{font-size:26px !important;}
+.Fs27{font-size:27px !important;}
+.Fs28{font-size:28px !important;}
+.Fs29{font-size:29px !important;}
+.Fs30{font-size:30px !important;}
+.Fs40{font-size:40px !important;}
+.Fs50{font-size:50px !important;}
+.Fs60{font-size:60px !important;}
+.Fs100{font-size:100px !important;}
+.Fs130{font-size:130px !important;}
+
+/* Font Type */
+.FontBold{ font-weight:bold;}
+.FontLight{ font-weight:lighter;}
+.FontNormal{ font-weight:normal;}
+
+/* Animated */
+.Animated03{-webkit-transition: all 0.3s ease; -moz-transition: all 0.3s ease; -ms-transition: all 0.3s ease; -o-transition: all 0.3s ease; transition: all 0.3s ease;}
+.Animated05{-webkit-transition: all 0.5s ease; -moz-transition: all 0.5s ease; -ms-transition: all 0.5s ease; -o-transition: all 0.5s ease; transition: all 0.5s ease;}
+.Animated1{-webkit-transition: all 1s ease; -moz-transition: all 1s ease; -ms-transition: all 1s ease; -o-transition: all 1s ease; transition: all 1s ease;}
+
+/******************************************************************************************************************************** */
+
+/* MEDIA QUERIES FOR CORE LAYOUT **************************************************************************************************************** */
+
+/* Large desktop */
+@media (min-width: 960px){
+  /*visibilities according to the platform*/
+  .ShowOnMobile{display:none; opacity:0;}
+  .ShowOnDesktop{display:inherit; opacity:1;}
+}
+
+@media (min-width: 960px) and (max-width:1200px){
+  /* responsive support */
+  .Responsive{width:33.3%; float:left; margin-left:0px !important; margin-right:0px !important;}
+  .Responsive50{width:50%; float:left; margin-left:0px !important; margin-right:0px !important;}
+  .Responsive100{width:100%; float:left; margin-left:0px !important; margin-right:0px !important;}
+
+  /* make auto of element width attribute on mobile devices with media queries */
+  .WidAutoOnMobile{width:auto !important;}
+  .HeiAutoOnMobile{height:auto !important; min-height:50px !important;}
+}
+
+/* Portrait tablet to landscape and desktop */
+@media (min-width: 640px) and (max-width: 960px) {
+  /*visibilities according to the platform*/
+  .ShowOnMobile{display:inherit; opacity:1;}
+  .ShowOnDesktop{display:none; opacity:0;}
+  .FloatNoneOnMobile{float:none !important;}
+
+  /* responsive support */
+  .Responsive{width:50%; float:left; margin-left:0px !important; margin-right:0px !important;}
+  .Responsive50{width:100%; float:left; margin-left:0px !important; margin-right:0px !important;}
+  .Responsive100{width:100%; float:left; margin-left:0px !important; margin-right:0px !important;}
+
+  .ContainerIndent{padding:5px;}
+
+  /* make auto of element width attribute on mobile devices with media queries */
+  .WidAutoOnMobile{width:auto !important;}
+  .HeiAutoOnMobile{height:auto !important; min-height:50px !important;}
+
+  /* font size resetting for responsive modes */
+  .Fs14{font-size:13px !important;}
+  .Fs15{font-size:14px !important;}
+  .Fs16{font-size:15px !important;}
+  .Fs17{font-size:16px !important;}
+  .Fs18{font-size:16px !important;}
+  .Fs19{font-size:16px !important;}
+  .Fs20{font-size:18px !important;}
+  .Fs21{font-size:18px !important;}
+  .Fs22{font-size:20px !important;}
+  .Fs23{font-size:20px !important;}
+  .Fs24{font-size:22px !important;}
+  .Fs25{font-size:22px !important;}
+  .Fs26{font-size:24px !important;}
+  .Fs27{font-size:24px !important;}
+  .Fs28{font-size:26px !important;}
+  .Fs29{font-size:26px !important;}
+  .Fs30{font-size:28px !important;}
+  .Fs40{font-size:30px !important;}
+  .Fs50{font-size:35px !important;}
+  .Fs60{font-size:40px !important;}
+  .Fs100{font-size:60px !important;}
+  .Fs130{font-size:70px !important;}
+}
+
+
+/* Landscape phone to portrait tablet */
+@media (min-width:480px) and (max-width: 640px) {
+  /*visibilities according to the platform*/
+  .ShowOnMobile{display:inherit; opacity:1;}
+  .ShowOnDesktop{display:none; opacity:0;}
+  .FloatNoneOnMobile{float:none !important;}
+
+  /* responsive support */
+  .Responsive{width:100%; float:left; margin-left:0px !important; margin-right:0px !important;}
+  .Responsive50{width:100%; float:left; margin-left:0px !important; margin-right:0px !important;}
+  .Responsive100{width:100%; float:left; margin-left:0px !important; margin-right:0px !important;}
+
+  .ContainerIndent{padding:5px;}
+
+  /* make auto of element width attribute on mobile devices with media queries */
+  .WidAutoOnMobile{width:auto !important;}
+  .HeiAutoOnMobile{height:auto !important; min-height:50px !important;}
+
+  /* font size resetting for responsive modes */
+  .Fs12{font-size:12px !important;}
+  .Fs13{font-size:12px !important;}
+  .Fs14{font-size:13px !important;}
+  .Fs15{font-size:13px !important;}
+  .Fs16{font-size:13px !important;}
+  .Fs17{font-size:14px !important;}
+  .Fs18{font-size:15px !important;}
+  .Fs19{font-size:17px !important;}
+  .Fs20{font-size:17px !important;}
+  .Fs21{font-size:18px !important;}
+  .Fs22{font-size:18px !important;}
+  .Fs23{font-size:20px !important;}
+  .Fs24{font-size:21px !important;}
+  .Fs25{font-size:22px !important;}
+  .Fs26{font-size:23px !important;}
+  .Fs27{font-size:23px !important;}
+  .Fs28{font-size:25px !important;}
+  .Fs29{font-size:25px !important;}
+  .Fs30{font-size:26px !important;}
+  .Fs40{font-size:30px !important;}
+  .Fs50{font-size:32px !important;}
+  .Fs60{font-size:35px !important;}
+  .Fs100{font-size:40px !important;}
+  .Fs130{font-size:50px !important;}
+}
+
+
+/* Portrait phones and down */
+@media (max-width: 480px) {
+  /*visibilities according to the platform*/
+  .ShowOnMobile{display:inherit; opacity:1;}
+  .ShowOnDesktop{display:none; opacity:0;}
+  .FloatNoneOnMobile{float:none !important;}
+
+  /* responsive support */
+  .Responsive{width:100%; float:left; margin-left:0px !important; margin-right:0px !important;}
+  .Responsive50{width:100%; float:left; margin-left:0px !important; margin-right:0px !important;}
+  .Responsive100{width:100%; float:left; margin-left:0px !important; margin-right:0px !important;}
+
+  .ContainerIndent{padding:5px;}
+
+  /* make auto of element width attribute on mobile devices with media queries */
+  .WidAutoOnMobile{width:auto !important;}
+  .HeiAutoOnMobile{height:auto !important;}
+
+  /* font size resetting for responsive modes */
+  .Fs12{font-size:12px !important;}
+  .Fs13{font-size:12px !important;}
+  .Fs14{font-size:13px !important;}
+  .Fs15{font-size:13px !important;}
+  .Fs16{font-size:13px !important;}
+  .Fs17{font-size:14px !important;}
+  .Fs18{font-size:15px !important;}
+  .Fs19{font-size:17px !important;}
+  .Fs20{font-size:17px !important;}
+  .Fs21{font-size:18px !important;}
+  .Fs22{font-size:18px !important;}
+  .Fs23{font-size:20px !important;}
+  .Fs24{font-size:21px !important;}
+  .Fs25{font-size:22px !important;}
+  .Fs26{font-size:23px !important;}
+  .Fs27{font-size:23px !important;}
+  .Fs28{font-size:25px !important;}
+  .Fs29{font-size:25px !important;}
+  .Fs30{font-size:25px !important;}
+  .Fs40{font-size:28px !important;}
+  .Fs50{font-size:30px !important;}
+  .Fs60{font-size:32px !important;}
+  .Fs100{font-size:35px !important;}
+  .Fs130{font-size:40px !important;}
+}
+
+/* clearfix for Container */
+.Container:before,.Container:after {
+  content: "";
+  display: table;
+  border-collapse: collapse;
+}
+
+.Container:after {
+  clear: both;
+}
+
+.header__inner {
+  /*background-color: white;*/
+  background: white;
+  color: black;
+}
+
+.header__logo {
+  display: inline-block;
+}
+
+.header__logo-link {
+  display: block;
+}
+
+.header__logo a img {
+  width: 289px;
+}
+
+img {
+  border: 0;
+  max-width: 100%;
+  height: auto;
+}
+
+.divHeight30
+{
+  height: 35px;
+}
+
+.divColorBlack
+{
+  color: #000000;
+}
+
+.marTop20
+{
+  margin-top: 20px;
+}
+
+.textTopCenter
+{
+  color: white;font-size: 38.4px;font-family: 'Lato',Arial,sans-serif;margin-top: 20px;margin-left:40%;
+}
+
+.homeTitle
+{
+  font-size: 30.0px;font-family: 'Lato',Arial,sans-serif;
+}
+
+.homeSubTitle
+{
+  font-size: 20.0px;font-family: 'Lato',Arial,sans-serif;
+}
+
+.background-black
+{
+  background-color: #000000;
+}
+
+.glyphicon
+{
+  color: #1471AE;
+}
+
+
+/* enable absolute positioning */
+.inner-addon {
+  position: relative;
+}
+
+/* style icon */
+.inner-addon .glyphicon {
+  position: absolute;
+  padding: 10px;
+  pointer-events: none;
+  font-size: 25px;
+}
+
+/* align icon */
+.left-addon .glyphicon  { left:  0px;}
+.right-addon .glyphicon { right: 0px;}
+
+/* add padding  */
+.left-addon input  { padding-left:  30px; }
+.right-addon input { padding-right: 30px; }
+
+.hideLabel {
+  display: none;
+}

@@ -1,0 +1,29 @@
+.card {
+    margin-bottom: 0em;
+    box-shadow: none;
+  }
+  
+  a {
+    font-family: sans-serif;
+  }
+
+  body .ui-widget-content {
+    border: 0px;
+  }
+  
+  body .ui-state-active, body .ui-state-highlight {
+    background-color: #FFFFFF;
+  }
+  
+  .ui-tree .ui-treenode-label.ui-state-highlight, body ui-tree .ui-treenode-label.ui-state-hover {
+    font-weight: 700;
+    color: #000;
+  }
+  
+  .ui-menu .ui-menu-list li.ui-widget-header {
+    color: #000;
+    background-color: #B8D4E6;
+    font-family: 'Roboto';
+    font-weight: bold;
+  }
+  
