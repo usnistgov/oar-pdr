@@ -37,7 +37,7 @@ export class DescriptionComponent {
  cols: any[];
  fileNode: TreeNode;
  display: boolean = false;
- 
+
     /* Function to Return Keys object properties */
     keys() : Array<string> {
         return Object.keys(this.fileDetails);
@@ -119,7 +119,8 @@ export class DescriptionComponent {
     * Function to display bytes in appropriate format.
     **/ 
     formatBytes(bytes, numAfterDecimal) {
-        if (0==bytes) return"0 Bytes" 
+        if (0==bytes) return"0 Bytes" ;
+        if (1 ==bytes) return"1 Byte" ;
         var base = 1000,
             e=["Bytes","kB","MB","GB","TB","PB","EB","ZB","YB"],
             d = numAfterDecimal||1,
