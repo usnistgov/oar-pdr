@@ -28,21 +28,22 @@ function compare_versions(a: string, b: string) : number {
       }
   }
   aflds = aflds.map(toint);
-  aflds = bflds.map(toint);
-   let i :number = 0;
+  bflds = bflds.map(toint);
+  let i :number = 0;
   let out : number = 0;
   for (i=0; i < aflds.length && i < bflds.length; i++) {
       if (typeof aflds[i] === "number") {
           if (typeof bflds[i] === "number") {
               out = <number>aflds[i] - <number>bflds[i];
-              if (out == 0) continue;
+              if (out != 0) return out;
           }
           else 
               return +1;
       }
       else if (typeof bflds[i] === "number") 
           return -1;
-      return a.localeCompare(b);
+      else
+          return a.localeCompare(b);
   }
   return out;
 }
@@ -519,10 +520,16 @@ updateMenu(){
     if (this.record['version'] && this.record['versionHistory']) {
         let history = this.record['versionHistory'];
         history.sort(compare_histories);
+        
+        var thisversion = this.record['version'];
+        var p = thisversion.indexOf('+');    // presence indicates this is an update
+        if (p >= 0) thisversion = thisversion.substring(0, p)   // strip off +...
+        
         if (compare_histories(history[history.length-1],
-                              { version: this.record['version'], 
+                              { version: thisversion,
                                 issued: this.record['modified']  }) > 0)
         {
+            // this version is older than the latest one in the history
             this.newer = history[history.length-1];
             if (! this.newer['refid']) this.newer['refid'] = this.newer['@id'];
             this.newer['label'] = this.newer['version'];
