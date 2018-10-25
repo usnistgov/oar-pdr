@@ -324,7 +324,7 @@ updateMenu(){
       recordid = this.searchValue;
       if(window.location.href.includes("ark"))
         recordid = "ark:/88434/"+this.searchValue;
-      window.history.replaceState( {} , 'pdr/od/id/', '/od/id/'+recordid );
+      window.history.replaceState( {} , '', '/od/id/'+this.searchValue );
     }
   }
 
