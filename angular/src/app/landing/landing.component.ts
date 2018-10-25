@@ -114,6 +114,7 @@ export class LandingComponent implements OnInit {
     displayContact: boolean = false; 
     private meta: Meta;
     private newer : reference = {};  
+    navigationSubscription : any;
   /**
    * Creates an instance of the SearchPanel
    *
@@ -126,8 +127,6 @@ export class LandingComponent implements OnInit {
     this.rmmApi = this.appConfig.getRMMapi();
     this.distApi = this.appConfig.getDistApi();
     this.landing = this.appConfig.getLandingBackend();
-
-  
   }
 
    /**
@@ -146,7 +145,7 @@ export class LandingComponent implements OnInit {
     }  
     this.type = this.record['@type'];
     this.titleService.setTitle(this.record['title']);
-    // this.meta.addTag({ "testdescription": this.record['description'] });
+    //this.meta.addTag({ "testdescription": this.record['description'] });
     //let dh = new ResComponents(this.record['components']).dataHierarchy();
     this.createNewDataHierarchy();
     if(this.record['doi'] !== undefined && this.record['doi'] !== "" )
@@ -156,8 +155,7 @@ export class LandingComponent implements OnInit {
      this.assessNewer();
     
     this.updateMenu();
-    //this.updateLeftMenu();
-    //this.updateRightMenu();
+
   }
 
   /**
@@ -213,6 +211,7 @@ updateMenu(){
     this.metadata = true;
     this.similarResources =false;
     this.router.navigate(['/od/id/', this.record.ediid],{fragment:'metadata'});
+    this.gotoSelection(); 
   },'');
     itemsMenu.push(metaItem);
     itemsMenu.push(metadata);   
@@ -288,9 +287,9 @@ updateMenu(){
    * Get the params OnInit
    */
   ngOnInit() {
-    // console.log("test:"+paramid);
+  
     this.searchValue = this.route.snapshot.paramMap.get('id');
-    console.log(this.searchValue);
+   
     this.files =[];
       this.route.data.map(data => data.searchService )
        .subscribe((res)=>{
@@ -308,14 +307,14 @@ updateMenu(){
         const tree = this.router.parseUrl(this.router.url);
         if (tree.fragment) {
           const element = document.querySelector("#" + tree.fragment);
-         console.log("Element"+tree.fragment);
           if (element) { 
-            //element.scrollIntoView(true); 
-            element.scrollIntoView({behavior: "instant", block: "start", inline: "start"});
-           }
+            //element.scrollIntoView(); 
+            setTimeout(() => {
+            element.scrollIntoView({behavior: "smooth", block: "start", inline: "nearest"});
+           }, 1);
         }
       }
-    });
+    }});
   }
 
   ngAfterViewInit(){
@@ -333,12 +332,10 @@ updateMenu(){
   filescount : number = 0;
   createNewDataHierarchy(){
     var testdata = {}
-    // console.log(dnode);
-    // console.log(this.record['components']);
     if(this.record['components'] != null){
-    testdata["data"] = this.arrangeIntoTree(this.record['components']);
-   
-    this.files.push(testdata);}
+      testdata["data"] = this.arrangeIntoTree(this.record['components']);
+      this.files.push(testdata);
+    }
   }
   //This is to create a tree structure
   private arrangeIntoTree(paths) {
@@ -411,7 +408,6 @@ updateMenu(){
       }
       i= i+1;
    });
-   //console.log("Return tree"+ JSON.stringify(tree));
    return tree;
   }
 
