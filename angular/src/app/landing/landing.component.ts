@@ -99,7 +99,7 @@ export class LandingComponent implements OnInit {
     distdownload: string = '';
     serviceApi: string = '';
     metadata: boolean = false;
-    pdrApi : string = "environment.PDRAPI";
+    pdrApi : string = environment.PDRAPI;
     private _routeParamsSubscription: Subscription;
     private files: TreeNode[] = [];
     private fileHierarchy : TreeNode;
