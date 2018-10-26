@@ -88,6 +88,11 @@ case "$1" in
              > stat_out.txt; \
              python -c 'import sys, json; fd = open("stat_out.txt"); data = json.load(fd); sys.exit(0 if data["state"]=="successful" else 16)' || \
              stat=$?; 
+        
+        curl -X GOOB -H 'X-HTTP-Method-Override: GET'  http://localhost:8080/preserve/midas/3A1EE2F169DD3B8CE0531A570681DB5D1491 \
+             > stat_out.txt; \
+             python -c 'import sys, json; fd = open("stat_out.txt"); data = json.load(fd); sys.exit(0 if data["state"]=="successful" else 17)' || \
+             stat=$?; 
         set +x
         
         [ "$stat" != "0" ] && {

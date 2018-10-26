@@ -371,10 +371,11 @@ class TestApp(test.TestCase):
         self.assertGreater(len(self.resp), 0)
         self.assertIn("403", self.resp[0])
 
-    def test_good_patch(self):
+    def test_patch_override(self):
         req = {
             'PATH_INFO': '/midas/'+self.midasid+'/',
-            'REQUEST_METHOD': 'PATCH'
+            'REQUEST_METHOD': 'POST',
+            'HTTP_X_HTTP_METHOD_OVERRIDE': 'PATCH'
         }
 
         body = self.svc(req, self.start)
@@ -389,7 +390,8 @@ class TestApp(test.TestCase):
         self.resp = []
         req = {
             'PATH_INFO': '/midas/',
-            'REQUEST_METHOD': 'GET'
+            'REQUEST_METHOD': 'GOOB',
+            'HTTP_X_HTTP_METHOD_OVERRIDE': 'GET'
         }
 
         body = self.svc(req, self.start)
