@@ -86,6 +86,11 @@ class Handler(object):
         self._start(stat, self._hdr.items())
 
     def handle(self):
+        # This accommadates MIDAS whose HTTP client api is unable to
+        # submit against some standard methods.  
+        if self._env.get('HTTP_X_HTTP_METHOD_OVERRIDE'):
+            self._meth = self._env.get('HTTP_X_HTTP_METHOD_OVERRIDE')
+
         meth_handler = 'do_'+self._meth
 
         path = self._env.get('PATH_INFO', '/').strip('/')
