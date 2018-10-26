@@ -267,13 +267,13 @@ class Handler(object):
                          sipid)
                 self.set_response(202, "SIP update completed successfully")
             elif out['state'] == status.CONFLICT:
-                log.error(stat['message'])
+                log.error(out['message'])
                 out['state'] = status.FAILED
                 self.set_response(409, out['message'])
             elif out['state'] == status.FAILED:
-                log.error(stat['message'])
+                log.error(out['message'])
                 self.set_response(500, "SIP update failed: " +
-                                  stat['message'])
+                                  out['message'])
             else:
                 log.info("SIP update request in progress asynchronously: " +
                          sipid)
@@ -356,7 +356,7 @@ class Handler(object):
                          sipid)
                 self.set_response(201, "SIP preservation completed successfully")
             elif out['state'] == status.CONFLICT:
-                log.error(stat['message'])
+                log.error(out['message'])
                 out['state'] = status.FAILED
                 self.set_response(409, out['message'])
             elif out['state'] == status.FAILED:
