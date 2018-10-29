@@ -328,6 +328,8 @@ class BagBuilder(PreservationSystem):
         fmt = self.cfg.get('bag_log_format', DEF_BAGLOG_FORMAT)
         self._loghdlr.setFormatter(logging.Formatter(fmt))
         self.log.addHandler(self._loghdlr)
+        if not self.log.isEnabledFor(NORM):
+            self.log.setLevel(NORM)
 
     def _unset_logfile(self):
         if hasattr(self, '_loghdlr') and self._loghdlr:

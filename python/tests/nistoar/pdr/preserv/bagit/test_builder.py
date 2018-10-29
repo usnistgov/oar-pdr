@@ -25,7 +25,7 @@ def setUpModule():
 #                        level=logging.INFO)
     rootlog = logging.getLogger()
     loghdlr = logging.FileHandler(os.path.join(tmpdir(),"test_builder.log"))
-    loghdlr.setLevel(logging.INFO)
+    loghdlr.setLevel(logging.DEBUG)
     loghdlr.setFormatter(logging.Formatter(bldr.DEF_BAGLOG_FORMAT))
     rootlog.addHandler(loghdlr)
 
