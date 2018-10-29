@@ -11,6 +11,7 @@ from zipfile import ZipFile
 from .base import sys as _sys
 from .. import (ConfigurationException, StateException, CorruptedBagError,
                 NERDError)
+from . import utils as bagutils
 from ...describe import rmm
 from ... import distrib
 from ...exceptions import IDNotFound
@@ -339,6 +340,17 @@ class UpdatePrepper(object):
             if os.path.exists(file):
                 os.remove(file)
 
+        # update the metadata to the latest NERDm schema version
+        # (this assumes forward compatibility).
+        bag = NISTBag(mdbag)
+        nerdm = bagutils.update_nerdm_schema(bag.nerdm_record())
+        if not nerdm.get('@id'):
+            raise StateException("Bag {0}: missing @id"
+                                 .format(os.path.basename(mdbag)))
+        bag = BagBuilder(parent, os.path.basename(mdbag), {}, nerdm.get('@id'),
+                         logger=deflog)
+        bag.add_res_nerd(nerdm, savefilemd=True)
+
         # finally set the version to a value appropriate for an update in
         # progress
         self.update_version_for_edit(mdbag)
@@ -367,6 +379,11 @@ class UpdatePrepper(object):
         nerd = utils.read_nerd(nerdfile)
         if not '@id' in nerd:
             raise NERDError("Missing @id from NERD rec, "+nerdfile)
+
+        # update the schema version to the latest supported version
+        # (this assumes forward compatibility).
+        bagutils.update_nerdm_schema(nerd)
+        
         bldr = BagBuilder(parent, bagname, {}, nerd['@id'], logger=deflog)
         bldr.add_res_nerd(nerd, savefilemd=True)
 

@@ -10,7 +10,10 @@ gov.nist.oar.bags.preservation.bags package provided by the oar-dist-service
 repository).  
 """
 import os, re
-from collections import Sequence
+from collections import Sequence, Mapping
+from urlparse import urlparse
+
+from ..bagit.builder import NERDM_SCH_ID_BASE, NERDM_SCH_VER, NERDMPUB_SCH_VER
 
 DEF_MBAG_VERSION = "0.4"
 DEF_NIST_PROF_VERSION = "0.4"
@@ -400,3 +403,117 @@ def select_version(bagnames, version):
         version = version[:len(version)-2]
 
     return out
+
+_nrdpat = re.compile(r"^("+NERDM_SCH_ID_BASE+"\S+/)v\d[\w\.]*((#.*)?)$")
+def _schuripatfor(uribase):
+    return re.compile(r"^("+uribase+")v\d[\w\.]*((#.*)?)$")
+
+def update_nerdm_schema(nerdmd, version=None, byext={}):
+    """
+    update the given NERDm record to the latest (or specified) version
+    of the NERDm schemas.  This will update the "_schema" property of the 
+    given JSON record to reflect the requested schema.  In addition, all 
+    "_extensionSchemas" properties will found and references to any version
+    of a NERDm schema will be updated to requested version.  
+
+    :param dict  nerdmd:  the NERDm record
+    :param str  version:  the default version to update to.  This value typically
+                          starts with the character, "v".  All schemas not 
+                          referenced by the byext parameter will be set to this
+                          version.  If not provided, the version will be the 
+                          latest supported version as specified by 
+                          nistoar.pdr.preserv.bagit.builder.NERDM_SCH_VER.
+    :param dict   byext:  a dictionary in which provides versions on a per-
+                          extension schema basis.  The keys represent extension 
+                          schemas given either by the extension field in the 
+                          standard NERDm schema URI or the entire base URL
+                          for the extension schema up to the verison field.  
+                          Each value gives the version of the extension schema
+                          that that schema should be updated to.  An empty string
+                          for the key represents the core schema, and an empty
+                          string for the value means that the version for that
+                          extension should not be changed.
+    """
+    # detect the metatag character and do an initial sanity check on the input
+    # metadata record
+    if "_schema" in nerdmd:
+        mtc = "_"
+    elif "$schema" in nerdmd:
+        mtc = "$"
+    else:
+        raise ValueError("No _scheme metatag found (is this a NERDm record?)")
+        
+    defver = version
+    if not version:
+        defver = NERDM_SCH_VER
+
+    # prep the byext map
+    if not byext:
+        byext = {}
+    else:
+        byext = dict(byext)
+    if not version and "pub" not in byext:
+        byext["pub"] = NERDMPUB_SCH_VER
+    if "" not in byext:
+        byext[""] = defver
+
+    matchrs = {}
+    for ext in byext:
+        uribase = ext
+        parsed = urlparse(ext)
+        if not parsed.scheme:
+            uribase = NERDM_SCH_ID_BASE+ext
+            if ext:
+                uribase += "/"
+        matchrs[ _schuripatfor(uribase) ] = byext[ext]
+
+    # update the core schema
+    updated = _upd_schema_ver(nerdmd[mtc+"schema"], matchrs, defver)
+    if updated:
+        nerdmd[mtc+"schema"] = updated
+    _upd_schema_ver_on_node(nerdmd, mtc+"extensionSchemas", matchrs, defver)
+
+    return nerdmd
+
+def _upd_schema_ver_on_node(node, schprop, byext, defver):
+    # node - a JSON node to examine
+    # schprop - the property, e.g. "_extensionSchemas" or "_schema" to examime
+    # byext - uri-re to new version map
+    # defurire - defurire to check in lieu of a match in byext
+    # defver - default version to update URIs matching defurire
+    if schprop in node:
+        if isinstance(node[schprop], (list, tuple)):
+            for i in range(len(node[schprop])):
+                updated = _upd_schema_ver(node[schprop][i], byext, defver)
+                if updated:
+                    node[schprop][i] = updated
+        else:
+            updated = _upd_schema_ver(node[schprop], byext, defver)
+            if updated:
+                node[schprop] = updated
+
+    for prop in node:
+        if isinstance(node[prop], Mapping):
+            _upd_schema_ver_on_node(node[prop], schprop, byext, defver)
+        elif isinstance(node[prop], (list, tuple)):
+            _upd_schema_ver_on_array(node[prop], schprop, byext, defver)
+
+def _upd_schema_ver_on_array(array, schprop, byext, defver):
+    for el in array:
+        if isinstance(el, Mapping):
+            _upd_schema_ver_on_node(el, schprop, byext, defver)
+        elif isinstance(el, (list, tuple)):
+            _upd_schema_ver_on_array(el, schprop, byext, defver)
+
+def _upd_schema_ver(schuri, byext, defver):
+    for r in byext:
+        match = r.search(schuri)
+        if match:
+            if byext[r]:
+                return match.group(1)+byext[r]+match.group(2)
+            else:
+                return None
+    match = _nrdpat.match(schuri)
+    if match and defver:
+        return match.group(1)+defver+match.group(2)
+    return None

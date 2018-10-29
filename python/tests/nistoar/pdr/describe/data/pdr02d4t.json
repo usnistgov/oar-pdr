@@ -1,5 +1,5 @@
 {
-    "_schema": "https://data.nist.gov/od/dm/nerdm-schema/v0.2#",
+    "_schema": "https://data.nist.gov/od/dm/nerdm-schema/v0.1#",
     "@type": [ "nrd:SRD", "nrdp:DataPublication", "nrdp:PublicDataResource" ],
     "@id": "ark:/88434/pdr02d4t",
     "abbrev": [ "SRD#13" ],
@@ -95,7 +95,7 @@
             "label": "JPCRD Monograph: NIST-JANAF Thermochemical Tables, Pt. 1 (AL-C",
             "location": "http://kinetics.nist.gov/janaf/pdf/JANAF-FourthEd-1998-1Vol1-Intro.pdf",
             "_extensionSchemas": [
-                "https://www.nist.gov/od/dm/nerdm-schema/v0.1#/definitions/DCiteDocumentReference"
+                "https://data.nist.gov/od/dm/nerdm-schema/v0.1#/definitions/DCiteDocumentReference"
             ]
         },
         {
@@ -105,7 +105,7 @@
             "label": "JPCRD Monograph: NIST-JANAF Thermochemical Tables, Pt. 2 (Cr-Zr)",
             "location": "http://kinetics.nist.gov/janaf/pdf/JANAF-FourthEd-1998-1Vol2-Intro.pdf",
             "_extensionSchemas": [
-                "https://www.nist.gov/od/dm/nerdm-schema/v0.1#/definitions/DCiteDocumentReference"
+                "https://data.nist.gov/od/dm/nerdm-schema/v0.1#/definitions/DCiteDocumentReference"
             ]
         }
     ],
@@ -113,7 +113,7 @@
         {
             "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
             "_extensionSchemas": [
-                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
             ],
             "@id": "#cmp/srd13_B-113.json",
             "filepath": "srd13_B-113.json",
@@ -126,7 +126,7 @@
         {
             "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
             "_extensionSchemas": [
-                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
             ],
 
             "@id": "#cmp/srd13_janaf.species.json",
@@ -139,7 +139,7 @@
         {
             "@type": [ "nrdp:Subcollection" ],
             "_extensionSchemas": [
-                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/Subcollection"
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/Subcollection"
             ],
             "@id": "#cmp/cryolite",
             "filepath": "cryolite",
@@ -148,7 +148,7 @@
         {
             "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
             "_extensionSchemas": [
-                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
             ],
             "@id": "#cmp/cryolite/srd13_Al-052.json",
             "filepath": "cryolite/srd13_Al-052.json",
@@ -161,7 +161,7 @@
         {
             "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
             "_extensionSchemas": [
-                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
             ],
             "@id": "#cmp/cryolite/srd13_Al-053.json",
             "filepath": "cryolite/srd13_Al-053.json",
@@ -174,7 +174,7 @@
         {
             "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
             "_extensionSchemas": [
-                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
             ],
             "@id": "#cmp/cryolite/srd13_Al-054.json",
             "filepath": "cryolite/srd13_Al-054.json",
@@ -187,7 +187,7 @@
         {
             "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
             "_extensionSchemas": [
-                "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
             ],
             "@id": "#cmp/cryolite/srd13_Al-055.json",
             "filepath": "cryolite/srd13_Al-055.json",

@@ -1,5 +1,6 @@
 import os, sys, pdb, shutil, logging, json
 import unittest as test
+from copy import deepcopy
 
 from nistoar.testing import *
 from nistoar.pdr.preserv.bagger import utils as bagut
@@ -398,6 +399,176 @@ class TestBagUtils(test.TestCase):
         self.assertEqual(bagut.select_version(names, "1.3"),
                          names[0:2]+names[3:4]+names[5:8])
 
+    def test_schuripat(self):
+        self.assertTrue(
+   bagut._nrdpat.match("https://data.nist.gov/od/dm/nerdm-schema/pub/v1.0#Res") )
+        self.assertTrue(
+   bagut._nrdpat.match("https://data.nist.gov/od/dm/nerdm-schema/goob/v0.2") )
+        self.assertTrue(
+   bagut._nrdpat.match("https://data.nist.gov/od/dm/nerdm-schema/foo/bar/v0.2#"))
+
+        self.assertFalse(
+   bagut._nrdpat.match("https://www.nist.gov/od/id/nerdm-schema/blue/v0.2#"))
+        self.assertFalse(
+   bagut._nrdpat.match("https://data.nist.gov/od/dm/nerdm-schema/v0.2#Res"))
+
+        pat = bagut._schuripatfor(bagut.NERDM_SCH_ID_BASE)
+        self.assertTrue(
+            pat.match("https://data.nist.gov/od/dm/nerdm-schema/v0.3#pub"))
+        pat = bagut._schuripatfor(bagut.NERDM_SCH_ID_BASE+"pub/")
+        self.assertTrue(
+            pat.match("https://data.nist.gov/od/dm/nerdm-schema/pub/v0.3#pub"))
+        self.assertFalse(
+            pat.match("https://data.nist.gov/od/dm/nerdm-schema/goob/v0.3#pub"))
+        
+    def test_upd_schema_ver(self):
+        defver = "1.0"
+        byext = {}
+        self.assertEqual(
+            bagut._upd_schema_ver(
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.3#Res",
+                byext, defver),
+            "https://data.nist.gov/od/dm/nerdm-schema/pub/1.0#Res"
+        )
+        
+        byext = {
+            bagut._schuripatfor("http://example.com/anext/"): "v0.1",
+            bagut._schuripatfor(bagut.NERDM_SCH_ID_BASE+"pub/"):   "v1.2",
+            bagut._schuripatfor(bagut.NERDM_SCH_ID_BASE):          "v2.2"
+        }
+
+        self.assertEqual(
+            bagut._upd_schema_ver(
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.3#Res",
+                byext, defver),
+            "https://data.nist.gov/od/dm/nerdm-schema/pub/v1.2#Res"
+        )
+        self.assertEqual(
+            bagut._upd_schema_ver(
+                "https://data.nist.gov/od/dm/nerdm-schema/v0.3",
+                byext, defver),
+            "https://data.nist.gov/od/dm/nerdm-schema/v2.2"
+        )
+        self.assertEqual(
+            bagut._upd_schema_ver("http://example.com/anext/v88#goob",
+                                  byext, defver),
+            "http://example.com/anext/v0.1#goob"
+        )
+        self.assertEqual(
+            bagut._upd_schema_ver(
+                "https://data.nist.gov/od/dm/nerdm-schema/blue/v0.3#Res",
+                byext, defver),
+            "https://data.nist.gov/od/dm/nerdm-schema/blue/1.0#Res"
+        )
+
+    def test_upd_schema_ver_on_node(self):
+        defver = "1.0"
+        byext = {
+            bagut._schuripatfor("http://example.com/anext/"): "v0.1",
+            bagut._schuripatfor(bagut.NERDM_SCH_ID_BASE+"pub/"):   "v1.2",
+            bagut._schuripatfor(bagut.NERDM_SCH_ID_BASE):          "v2.2"
+        }
+
+        data = {
+            "goob": "https://data.nist.gov/od/dm/nerdm-schema/v0.3",
+            "foo": {
+                "goob": [ "http://example.com/anext/v88#goob",
+                          "http://goober.com/foop/v99#big" ],
+                "blah": "snooze"
+            },
+            "bar": {
+                "hank": "aaron",
+                "tex": {
+                    "goob": "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.3#Contact",
+                    "blah": "blah"
+                },
+                "goob": []
+            }
+        }
+
+        bagut._upd_schema_ver_on_node(data, "goob", byext, "1.0")
+        self.assertEqual(data['goob'], 
+                         "https://data.nist.gov/od/dm/nerdm-schema/v2.2")
+        self.assertEqual(data['foo']['goob'], 
+                         [ "http://example.com/anext/v0.1#goob",
+                           "http://goober.com/foop/v99#big" ])
+        self.assertEqual(data['bar']['tex']['goob'], 
+                     "https://data.nist.gov/od/dm/nerdm-schema/pub/v1.2#Contact")
+        self.assertEqual(data['bar']['goob'], [])
+
+        bagut._upd_schema_ver_on_node(data, "goob", {}, "1.0")
+        self.assertEqual(data['goob'], 
+                         "https://data.nist.gov/od/dm/nerdm-schema/v2.2")
+        self.assertEqual(data['foo']['goob'], 
+                         [ "http://example.com/anext/v0.1#goob",
+                           "http://goober.com/foop/v99#big" ])
+        self.assertEqual(data['bar']['tex']['goob'], 
+                     "https://data.nist.gov/od/dm/nerdm-schema/pub/1.0#Contact")
+        self.assertEqual(data['bar']['goob'], [])
+
+    def test_update_nerdm_schema(self):
+        defver = "1.0"
+        byext = {
+            "http://example.com/anext/": "v0.1",
+            "pub":  "v1.2",
+            "":     "v2.2"
+        }
+
+        data = {
+            "$schema": "https://data.nist.gov/od/dm/nerdm-schema/v0.3",
+            "foo": {
+                "$extensionSchemas": [ "http://example.com/anext/v88#goob",
+                          "http://goober.com/foop/v99#big" ],
+                "blah": "snooze"
+            },
+            "bar": {
+                "hank": "aaron",
+                "tex": {
+                    "$extensionSchemas": "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.3#Contact",
+                    "blah": "blah"
+                },
+                "$extensionSchemas": []
+            }
+        }
+
+        bagut.update_nerdm_schema(data, "1.0", byext)
+        self.assertEqual(data['$schema'], 
+                         "https://data.nist.gov/od/dm/nerdm-schema/v2.2")
+        self.assertEqual(data['foo']['$extensionSchemas'], 
+                         [ "http://example.com/anext/v0.1#goob",
+                           "http://goober.com/foop/v99#big" ])
+        self.assertEqual(data['bar']['tex']['$extensionSchemas'], 
+                     "https://data.nist.gov/od/dm/nerdm-schema/pub/v1.2#Contact")
+        self.assertEqual(data['bar']['$extensionSchemas'], [])
+        
+        data = {
+            "_schema": "https://data.nist.gov/od/dm/nerdm-schema/v0.3",
+            "foo": {
+                "_extensionSchemas": [ "http://example.com/anext/v88#goob",
+                          "http://goober.com/foop/v99#big" ],
+                "blah": "snooze"
+            },
+            "bar": {
+                "hank": "aaron",
+                "tex": {
+                    "_extensionSchemas": "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.3#Contact",
+                    "blah": "blah"
+                },
+                "_extensionSchemas": []
+            }
+        }
+        bagut.update_nerdm_schema(data)
+        self.assertEqual(data['_schema'], 
+                         "https://data.nist.gov/od/dm/nerdm-schema/v0.2")
+        self.assertEqual(data['foo']['_extensionSchemas'], 
+                         [ "http://example.com/anext/v88#goob",
+                           "http://goober.com/foop/v99#big" ])
+        self.assertEqual(data['bar']['tex']['_extensionSchemas'], 
+                     "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#Contact")
+        self.assertEqual(data['bar']['_extensionSchemas'], [])
+        
+
+                    
                          
 if __name__ == '__main__':
     test.main()

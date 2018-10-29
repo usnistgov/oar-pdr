@@ -9,6 +9,7 @@ from nistoar.pdr.exceptions import IDNotFound
 from nistoar.pdr.utils import checksum_of
 from nistoar.pdr.distrib import DistribResourceNotFound
 from nistoar.pdr.preserv.bagit import NISTBag
+from nistoar.pdr.utils import read_nerd
 
 bagsrcdir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data")
 mdsrcdir = os.path.join(os.path.dirname(os.path.dirname(bagsrcdir)), "describe", "data")
@@ -293,6 +294,7 @@ class TestUpdatePrepper(test.TestCase):
         root = os.path.join(self.tf.mkdir("update"), "goober")
         self.assertTrue(not os.path.exists(root))
 
+        pdb.set_trace()
         self.prepr.create_from_nerdm(headbag, root)
         self.assertTrue(os.path.isdir(root))
 
@@ -302,8 +304,17 @@ class TestUpdatePrepper(test.TestCase):
         self.assertNotIn("manifest-sha256.txt", contents)
         self.assertNotIn("bag-info.txt", contents)
 
-        self.assertTrue(os.path.isfile(os.path.join(root,"metadata","nerdm.json")))
+        nfile = os.path.join(root,"metadata","nerdm.json")
+        self.assertTrue(os.path.isfile(nfile))
 
+        md = read_nerd(nfile)
+        self.assertEqual(md["_schema"],
+                         "https://data.nist.gov/od/dm/nerdm-schema/v0.2#")
+        self.assertEqual(md["references"][0]["_extensionSchemas"][0],
+                         "https://data.nist.gov/od/dm/nerdm-schema/v0.2#/definitions/DCiteDocumentReference")
+        self.assertEqual(md["references"][1]["_extensionSchemas"][0],
+                         "https://data.nist.gov/od/dm/nerdm-schema/v0.2#/definitions/DCiteDocumentReference")
+        
         depinfof = os.path.join(root, "multibag", "deprecated-info.txt")
         self.assertTrue(not os.path.isfile(depinfof))
         
