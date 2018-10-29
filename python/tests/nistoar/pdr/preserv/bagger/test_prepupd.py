@@ -294,7 +294,6 @@ class TestUpdatePrepper(test.TestCase):
         root = os.path.join(self.tf.mkdir("update"), "goober")
         self.assertTrue(not os.path.exists(root))
 
-        pdb.set_trace()
         self.prepr.create_from_nerdm(headbag, root)
         self.assertTrue(os.path.isdir(root))
 
