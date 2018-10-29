@@ -471,11 +471,11 @@ class TestBagUtils(test.TestCase):
 
         data = {
             "goob": "https://data.nist.gov/od/dm/nerdm-schema/v0.3",
-            "foo": {
+            "foo": [{
                 "goob": [ "http://example.com/anext/v88#goob",
                           "http://goober.com/foop/v99#big" ],
                 "blah": "snooze"
-            },
+            }],
             "bar": {
                 "hank": "aaron",
                 "tex": {
@@ -489,7 +489,7 @@ class TestBagUtils(test.TestCase):
         bagut._upd_schema_ver_on_node(data, "goob", byext, "1.0")
         self.assertEqual(data['goob'], 
                          "https://data.nist.gov/od/dm/nerdm-schema/v2.2")
-        self.assertEqual(data['foo']['goob'], 
+        self.assertEqual(data['foo'][0]['goob'], 
                          [ "http://example.com/anext/v0.1#goob",
                            "http://goober.com/foop/v99#big" ])
         self.assertEqual(data['bar']['tex']['goob'], 
@@ -499,7 +499,7 @@ class TestBagUtils(test.TestCase):
         bagut._upd_schema_ver_on_node(data, "goob", {}, "1.0")
         self.assertEqual(data['goob'], 
                          "https://data.nist.gov/od/dm/nerdm-schema/v2.2")
-        self.assertEqual(data['foo']['goob'], 
+        self.assertEqual(data['foo'][0]['goob'], 
                          [ "http://example.com/anext/v0.1#goob",
                            "http://goober.com/foop/v99#big" ])
         self.assertEqual(data['bar']['tex']['goob'], 
