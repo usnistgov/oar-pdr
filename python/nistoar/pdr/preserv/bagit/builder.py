@@ -292,7 +292,7 @@ class BagBuilder(PreservationSystem):
     def ensure_bagdir(self):
         """
         ensure that the working bag directory exists with the proper name
-        an that we can write to it.  
+        and that we can write to it.  
         """
         didit = False
         if not os.path.exists(self.bagdir):
@@ -862,11 +862,18 @@ class BagBuilder(PreservationSystem):
         self.log.error("Implementation of Bag finalization is not complete!")
         self.log.info("Bag does not include PREMIS and ORE files")
 
-    def write_about_file(self):
+    def write_about_file(self, merge_annots=False):
         """
         Write out the about.txt file.  This requires that the resource-level
         metdadata has been written out; if it hasn't, a BagProfileError is 
-        raised.  
+        raised.  The metadata annotations should be merged as well (i.e. via
+        ensure_merged_annotations()); however, if they have not yet been, 
+        the merge_annots parameter can be set to True.
+
+        :param merge_annots bool:  if True, base the about file contents on 
+                                   metadata that includes annotations merged 
+                                   in.  (Setting to True, does not permanently
+                                   merge annotations.)  Default: False.
         """
         if not self._bag:
             self.ensure_bagdir()
@@ -878,7 +885,7 @@ class BagBuilder(PreservationSystem):
             raise BagProfileError("Missing POD metadata file; is this bag complete?")
         try:
             mf = nerdresf
-            nerdm = self._bag.nerd_metadata_for("")
+            nerdm = self._bag.nerd_metadata_for("", merge_annots)
             mf = podf
             podm = self._bag.read_pod(mf)
         except OSError, ex:
@@ -1041,7 +1048,7 @@ class BagBuilder(PreservationSystem):
                 hbag.add_file_lookup(f, self.bagname)
         hbag.save_file_lookup()
         
-    def ensure_baginfo(self, overwrite=False):
+    def ensure_baginfo(self, overwrite=False, merge_annots=False):
         """
         ensure that a complete bag-info.txt file is written out to the bag.
         Any data that has already been written out will remain, and any missing
@@ -1053,7 +1060,7 @@ class BagBuilder(PreservationSystem):
         initdata = self.cfg.get('init_bag_info', OrderedDict())
 
         # add items based on bag's contents
-        nerdm = self._bag.nerd_metadata_for("")
+        nerdm = self._bag.nerd_metadata_for("", merge_annots)
         initdata['Bagging-Date'] = datetime.date.today().isoformat()
         initdata['Bag-Group-Identifier'] = nerdm.get('ediid') or self.ediid
         initdata['Internal-Sender-Identifier'] = self.bagname
@@ -1280,7 +1287,7 @@ format(nerdm['title'])
                 # we'll merge the new examination with the previous:
                 # except 'checksum', previous data will over-ride new 
                 if os.path.exists(mdfile):
-                    oldmd = self._bag.nerd_metadata_for(dfile)
+                    oldmd = self._bag.nerd_metadata_for(dfile, True)
                 else:
                     oldmd = OrderedDict()
 

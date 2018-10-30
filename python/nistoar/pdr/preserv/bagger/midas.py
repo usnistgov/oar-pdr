@@ -13,7 +13,7 @@ import os, errno, logging, re, json, shutil
 from abc import ABCMeta, abstractmethod, abstractproperty
 from collections import OrderedDict
 
-from .base import SIPBagger, moddate_of, checksum_of, read_nerd, read_pod
+from .base import SIPBagger, moddate_of, checksum_of, read_pod
 from .base import sys as _sys
 from . import utils as bagutils
 from ..bagit.builder import BagBuilder, NERDMD_FILENAME, FILEMD_FILENAME
@@ -36,6 +36,7 @@ SUPPORTED_CHECKSUM_ALGS = [ "sha256" ]
 DEF_CHECKSUM_ALG = "sha256"
 DEF_MERGE_CONV = "initdef"  # For merging MIDAS-generated metadata with
                             # initial defaults
+UNSYNCED_FILE = "_unsynced"
 
 # type of update (see determine_update_version())
 _NO_UPDATE    = 0
@@ -222,8 +223,10 @@ class MIDASMetadataBagger(SIPBagger):
             # part of the data set but don't exist in the input directories.
             # These could be files available via external URLs or files preserved
             # as part of a previous version.  
-            self.bagbldr.add_ds_pod(self.inpodfile, convert=True,
-                                    savefilemd=True)
+            podnerd = self.bagbldr.add_ds_pod(self.inpodfile, convert=True,
+                                              savefilemd=True)
+            self._mark_comps_unsynced(podnerd.get('components',[]))
+            
         self.resmd = NISTBag(self.bagbldr.bagdir).nerdm_record(True)
 
         # ensure an initial version
@@ -231,6 +234,41 @@ class MIDASMetadataBagger(SIPBagger):
             self.resmd['version'] = "1.0.0"
             self.bagbldr.update_annot_for('', {'version': self.resmd["version"]})
 
+    def _mark_filepath_unsynced(self, filepath):
+        self.bagbldr.ensure_bagdir()
+        mdir = os.path.dirname(self.bagbldr._bag.nerd_file_for(filepath))
+        if os.path.join(mdir):
+            semaphore = os.path.join(mdir, UNSYNCED_FILE)
+            if not os.path.exists(semaphore):
+                # create 0-length the file
+                with open(semaphore, 'a') as fd:
+                    pass
+                
+    def _mark_filepath_synced(self, filepath):
+        self.bagbldr.ensure_bagdir()
+        mdir = os.path.dirname(self.bagbldr._bag.nerd_file_for(filepath))
+        if os.path.join(mdir):
+            semaphore = os.path.join(mdir, UNSYNCED_FILE)
+            if os.path.exists(semaphore):
+                os.remove(semaphore)
+                
+    def _mark_comps_unsynced(self, comps):
+        for c in comps:
+            if 'filepath' in c:
+                self._mark_filepath_unsynced(c['filepath'])
+
+    def _clear_all_unsynced_marks(self):
+        if not self.bagbldr.bagdir:
+            return
+        mdir = os.path.join(self.bagbldr.bagdir, "metadata")
+        if not os.path.exists(mdir):
+            return
+        for base, subdirs, files in os.walk(mdir):
+            if UNSYNCED_FILE in files:
+                semaphore = os.path.join(base, UNSYNCED_FILE)
+                if os.path.exists(semaphore):
+                    os.remove(semaphore)
+        
     def data_file_inventory(self):
         """
         get a list of the data files available to be part of this dataset.
@@ -293,6 +331,11 @@ class MIDASMetadataBagger(SIPBagger):
         if not os.path.exists(nerdfile):
             update = True
             log.info("Initializing metadata for datafile, %s", destpath)
+        elif os.path.exists(os.path.join(os.path.dirname(nerdfile),
+                            UNSYNCED_FILE)):
+            # we marked this earlier that an update is recommended
+            update = True
+            log.debug("datafile, %s, requires update to metadata", destpath)
         elif moddate_of(inpath) > moddate_of(nerdfile):
             # data file is newer; update its metadata
             update = True
@@ -316,21 +359,27 @@ class MIDASMetadataBagger(SIPBagger):
                 if missing:
                     update = True
                     log.info("Extending file metadata for %s", destpath)
+
+        if not nerd:
+            # no matching data provided with the resource-level metadata;
+            # create some basic default metadata
+            nerd = self.bagbldr.init_filemd_for(destpath, examine=False,
+                                                disttype=disttype)
+        self.bagbldr.add_metadata_for_file(destpath, nerd, disttype=disttype)
         
         if update:
-            # generate some default metadata for the file
-            init = self.bagbldr.init_filemd_for(destpath, examine=inpath,
-                                                disttype=disttype)
-            if nerd:
-                # merge with the data passed to this method (e.g. as
-                # generated from the POD record.
-                conv = self.cfg.get('component_merge_convention', DEF_MERGE_CONV)
-                merger = self._merger_for(conv, "DataFile")
-                nerd = merger.merge(nerd, init)
-            else:
-                nerd = init
+            # generate addition metadata by examinig the file
+            amdata = self.bagbldr.init_filemd_for(destpath, examine=inpath,
+                                                  disttype=disttype)
 
-            self.bagbldr.add_metadata_for_file(destpath, nerd, disttype=disttype)
+            # we will save this metadata as annotations; clean out the data
+            # that will overlap with the essential defaults
+            for prop in "_schema @context @id filepath downloadURL".split():
+                if prop in nerd and prop in amdata:
+                    del amdata[prop]
+
+            self.bagbldr.update_annot_for(destpath, amdata)
+            self._mark_filepath_synced(destpath)
 
     def _merger_for(self, convention, objtype):
         return self._merger_factory.make_merger(convention, objtype)
@@ -398,7 +447,7 @@ class MIDASMetadataBagger(SIPBagger):
                 if filepath not in self.datafiles and \
                    filepath not in fdists:
                     # found a component with this filepath, but is it a datafile?
-                    mdata = read_nerd(os.path.join(dir,NERDMD_FILENAME))
+                    mdata = self.bagbldr._bag.nerd_metadata_for(filepath, True)
                     comptypes = mdata.get("@type", [])
                     if any([":DownloadableFile" in t for t in comptypes]):
                         # yes, it is a data file
@@ -438,8 +487,7 @@ class MIDASMetadataBagger(SIPBagger):
         # they do not match, the valid metadata flag for the checksum file
         # will be set to false.
         for df in self.datafiles:
-            csnerdf = self.bagbldr.nerdm_file_for(df)
-            csnerd = read_nerd(csnerdf)
+            csnerd = self.bagbldr._bag.nerd_metadata_for(df, True)
             if any([":ChecksumFile" in t for t in csnerd.get("@type",[])]):
                 dfpath = self.datafiles[df]
                 try:
@@ -453,16 +501,14 @@ class MIDASMetadataBagger(SIPBagger):
                 # this data file is a checksum file
                 described = csnerd.get("describes","cmps/")[5:]
                 if described in self.datafiles:
-                    nerdf = self.bagbldr.nerdm_file_for(described)
-                    nerd = read_nerd(nerdf)
+                    nerd = self.bagbldr._bag.nerd_metadata_for(described, True)
 
-                    if nerd.get('checksum',{}).get('hash','') == cs:
-                        log.debug(df+": hash value looks valid")
-                        csnerd['valid'] = True
-                    else:
+                    valid = nerd.get('checksum',{}).get('hash','') == cs
+                    if not valid:
                         log.warn(df+": hash value in file looks invalid")
-                        csnerd['valid'] = False
-                    self.bagbldr._write_json(csnerd, csnerdf)
+                    else:
+                        log.debug(df+": hash value looks valid")
+                    self.bagbldr.update_annot_for(df, {'valid': bool(valid) })
 
     def pod_file_distribs(self):
         """
@@ -614,9 +660,12 @@ class PreservationBagger(SIPBagger):
         self.ensure_bag_parent_dir()
 
         self.siplog = log.getChild(self.name[:8]+'...')
+        bldcfg = self.cfg.get('bag_builder', {})
+        if 'ensure_component_metadata' not in bldcfg:
+            # default True can mess with annotations
+            bldcfg['ensure_component_metadata'] = False  
         self.bagbldr = BagBuilder(self.bagparent,
-                                  self.form_bag_name(self.name),
-                                  self.cfg.get('bag_builder', {}),
+                                  self.form_bag_name(self.name), bldcfg,
                                   minter=minter, logger=self.siplog)
 
         self.prepsvc = None
@@ -685,6 +734,7 @@ class PreservationBagger(SIPBagger):
 
         mdbagger.prepare(nodata=True)
         self.datafiles = mdbagger.datafiles
+        mdbagger._clear_all_unsynced_marks()
 
         # copy the contents of the metadata bag into the final preservation bag
         if os.path.exists(self.bagdir):

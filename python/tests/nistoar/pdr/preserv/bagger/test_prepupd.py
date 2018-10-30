@@ -131,7 +131,7 @@ class TestSimServices(test.TestCase):
 
         data = cli.get_json("ABCDEFG/_aip/_v/latest/_head")
         self.assertEqual(data, {"aipid": "ABCDEFG", "sinceVersion": "2", 
-                                "contentLength": 9715, "multibagSequence" : 4,
+                                "contentLength": 10075, "multibagSequence" : 4,
                                 "multibagProfileVersion" : "0.4",
                                 "contentType": "application/zip",
                                 "serialization": "zip",
@@ -140,7 +140,7 @@ class TestSimServices(test.TestCase):
 
         data = cli.get_json("ABCDEFG/_aip/_v/1/_head")
         self.assertEqual(data, {"aipid": "ABCDEFG", "sinceVersion": "1", 
-                                "contentLength": 9715, "multibagSequence" : 2,
+                                "contentLength": 10075, "multibagSequence" : 2,
                                 "multibagProfileVersion" : "0.4",
                                 "contentType": "application/zip",
                                 "serialization": "zip",

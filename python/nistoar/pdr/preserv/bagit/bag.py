@@ -187,6 +187,19 @@ class NISTBag(PreservationSystem):
             self._mergerfact = MergerFactory(MERGECONF)
         return self._mergerfact.make_merger(stratconvname, typename)
 
+    def annotations_metadata_for(self, filepath):
+        """
+        return the component metadata saved as annotations for a given path to 
+        a component.
+        """
+        annotfile = self.annotations_file_for(filepath)
+        if not os.path.exists(os.path.dirname(annotfile)):
+            raise ComponentNotFound("Component not found: " + filepath, 
+                                    os.path.basename(self._name))
+        if not os.path.exists(annotfile):
+            return OrderedDict()
+        return self.read_nerd(annotfile)
+
     def nerdm_record(self, merge_annots=None):
         """
         return a full NERDm resource record for the data in this bag.

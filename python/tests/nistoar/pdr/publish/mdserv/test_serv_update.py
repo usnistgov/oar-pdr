@@ -121,6 +121,18 @@ def stopServices():
     except:
         pass
 
+def to_dict(odict):
+    out = dict(odict)
+    for prop in out:
+        if isinstance(out[prop], OrderedDict):
+            out[prop] = to_dict(out[prop])
+        if isinstance(out[prop], (list, tuple)):
+            for i in range(len(out[prop])):
+                if isinstance(out[prop][i], OrderedDict):
+                    out[prop][i] = to_dict(out[prop][i])
+    return out
+
+
 class TestPrePubMetadataService(test.TestCase):
 
     testsip = os.path.join(datadir, "midassip")
@@ -183,7 +195,7 @@ class TestPrePubMetadataService(test.TestCase):
 
         # resolve_id() needs to be indepodent
         data = self.srv.resolve_id(self.midasid)
-        self.assertEqual(data, mdata)
+        self.assertEqual(to_dict(data), to_dict(mdata))
 
         with self.assertRaises(serv.IDNotFound):
             self.srv.resolve_id("asldkfjsdalfk")
