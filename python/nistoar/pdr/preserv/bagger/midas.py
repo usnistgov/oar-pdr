@@ -13,7 +13,7 @@ import os, errno, logging, re, json, shutil
 from abc import ABCMeta, abstractmethod, abstractproperty
 from collections import OrderedDict
 
-from .base import SIPBagger, moddate_of, checksum_of, read_nerd, read_pod
+from .base import SIPBagger, moddate_of, checksum_of, read_pod
 from .base import sys as _sys
 from . import utils as bagutils
 from ..bagit.builder import BagBuilder, NERDMD_FILENAME, FILEMD_FILENAME
@@ -316,21 +316,26 @@ class MIDASMetadataBagger(SIPBagger):
                 if missing:
                     update = True
                     log.info("Extending file metadata for %s", destpath)
+
+        if not nerd:
+            # no matching data provided with the resource-level metadata;
+            # create some basic default metadata
+            nerd = self.bagbldr.init_filemd_for(destpath, examine=False,
+                                                disttype=disttype)
+        self.bagbldr.add_metadata_for_file(destpath, nerd, disttype=disttype)
         
         if update:
-            # generate some default metadata for the file
-            init = self.bagbldr.init_filemd_for(destpath, examine=inpath,
-                                                disttype=disttype)
-            if nerd:
-                # merge with the data passed to this method (e.g. as
-                # generated from the POD record.
-                conv = self.cfg.get('component_merge_convention', DEF_MERGE_CONV)
-                merger = self._merger_for(conv, "DataFile")
-                nerd = merger.merge(nerd, init)
-            else:
-                nerd = init
+            # generate addition metadata by examinig the file
+            amdata = self.bagbldr.init_filemd_for(destpath, examine=inpath,
+                                                  disttype=disttype)
 
-            self.bagbldr.add_metadata_for_file(destpath, nerd, disttype=disttype)
+            # we will save this metadata as annotations; clean out the data
+            # that will overlap with the essential defaults
+            for prop in "_schema @context @id filepath downloadURL".split():
+                if prop in nerd and prop in amdata:
+                    del amdata[prop]
+
+            self.bagbldr.update_annot_for(destpath, amdata)
 
     def _merger_for(self, convention, objtype):
         return self._merger_factory.make_merger(convention, objtype)
@@ -398,7 +403,7 @@ class MIDASMetadataBagger(SIPBagger):
                 if filepath not in self.datafiles and \
                    filepath not in fdists:
                     # found a component with this filepath, but is it a datafile?
-                    mdata = read_nerd(os.path.join(dir,NERDMD_FILENAME))
+                    mdata = self.bagbldr._bag.nerd_metadata_for(filepath, True)
                     comptypes = mdata.get("@type", [])
                     if any([":DownloadableFile" in t for t in comptypes]):
                         # yes, it is a data file
@@ -438,8 +443,7 @@ class MIDASMetadataBagger(SIPBagger):
         # they do not match, the valid metadata flag for the checksum file
         # will be set to false.
         for df in self.datafiles:
-            csnerdf = self.bagbldr.nerdm_file_for(df)
-            csnerd = read_nerd(csnerdf)
+            csnerd = self.bagbldr._bag.nerd_metadata_for(df, True)
             if any([":ChecksumFile" in t for t in csnerd.get("@type",[])]):
                 dfpath = self.datafiles[df]
                 try:
@@ -453,16 +457,14 @@ class MIDASMetadataBagger(SIPBagger):
                 # this data file is a checksum file
                 described = csnerd.get("describes","cmps/")[5:]
                 if described in self.datafiles:
-                    nerdf = self.bagbldr.nerdm_file_for(described)
-                    nerd = read_nerd(nerdf)
+                    nerd = self.bagbldr._bag.nerd_metadata_for(described, True)
 
-                    if nerd.get('checksum',{}).get('hash','') == cs:
-                        log.debug(df+": hash value looks valid")
-                        csnerd['valid'] = True
-                    else:
+                    valid = nerd.get('checksum',{}).get('hash','') == cs
+                    if not valid:
                         log.warn(df+": hash value in file looks invalid")
-                        csnerd['valid'] = False
-                    self.bagbldr._write_json(csnerd, csnerdf)
+                    else:
+                        log.debug(df+": hash value looks valid")
+                    self.bagbldr.update_annot_for(df, {'valid': bool(valid) })
 
     def pod_file_distribs(self):
         """
@@ -614,9 +616,12 @@ class PreservationBagger(SIPBagger):
         self.ensure_bag_parent_dir()
 
         self.siplog = log.getChild(self.name[:8]+'...')
+        bldcfg = self.cfg.get('bag_builder', {})
+        if 'ensure_component_metadata' not in bldcfg:
+            # default True can mess with annotations
+            bldcfg['ensure_component_metadata'] = False  
         self.bagbldr = BagBuilder(self.bagparent,
-                                  self.form_bag_name(self.name),
-                                  self.cfg.get('bag_builder', {}),
+                                  self.form_bag_name(self.name), bldcfg,
                                   minter=minter, logger=self.siplog)
 
         self.prepsvc = None

@@ -54,12 +54,27 @@ def tearDownModule():
         loghdlr = None
     rmtmpdir()
 
+def to_dict(odict):
+    out = dict(odict)
+    for prop in out:
+        if isinstance(out[prop], OrderedDict):
+            out[prop] = to_dict(out[prop])
+        if isinstance(out[prop], (list, tuple)):
+            for i in range(len(out[prop])):
+                if isinstance(out[prop][i], OrderedDict):
+                    out[prop][i] = to_dict(out[prop][i])
+    return out
 
 class TestPrePubMetadataService(test.TestCase):
 
     testsip = os.path.join(datadir, "midassip")
     midasid = '3A1EE2F169DD3B8CE0531A570681DB5D1491'
 
+    def assertEqualOD(self, od1, od2, message=None):
+        d1 = to_dict(od1)
+        d2 = to_dict(od2)
+        self.assertEqual(d1, od2, message)
+    
     def setUp(self):
         self.tf = Tempfiles()
         self.workdir = self.tf.mkdir("mdserv")
@@ -258,7 +273,7 @@ class TestPrePubMetadataService(test.TestCase):
 
         # resolve_id() needs to be indepodent
         data = self.srv.resolve_id(self.midasid)
-        self.assertEqual(data, mdata)
+        self.assertEqualOD(data, mdata)
 
         with self.assertRaises(serv.IDNotFound):
             self.srv.resolve_id("asldkfjsdalfk")

@@ -44,6 +44,18 @@ def tearDownModule():
         loghdlr = None
     rmtmpdir()
 
+def to_dict(odict):
+    out = dict(odict)
+    for prop in out:
+        if isinstance(out[prop], OrderedDict):
+            out[prop] = to_dict(out[prop])
+        if isinstance(out[prop], (list, tuple)):
+            for i in range(len(out[prop])):
+                if isinstance(out[prop][i], OrderedDict):
+                    out[prop][i] = to_dict(out[prop][i])
+    return out
+
+
 class TestMIDASMetadataBaggerMixed(test.TestCase):
 
     testsip = os.path.join(datadir, "midassip")
@@ -117,7 +129,7 @@ class TestMIDASMetadataBaggerMixed(test.TestCase):
         self.assertEqual(data.keys(), src.keys())  # confirms same order
 
         self.assertIsNotNone(self.bagr.resmd)
-        data = midas.read_nerd(os.path.join(metadir, "nerdm.json"))
+        data = self.bagr.bagbldr._bag.nerd_metadata_for("", True)
 
         # should contain only non-file components:
         self.assertEqual(len(data['components']), 1)
@@ -128,8 +140,7 @@ class TestMIDASMetadataBaggerMixed(test.TestCase):
         del src['components']
         del src['inventory']
         del src['dataHierarchy']
-        del src['version']
-        self.assertEqual(data, src)
+        self.assertEqual(to_dict(data), to_dict(src))
         self.assertEqual(data.keys(), src.keys())  # same order
 
         # spot check some key NERDm properties
@@ -185,8 +196,10 @@ class TestMIDASMetadataBaggerMixed(test.TestCase):
         mdfile = os.path.join(self.bagdir, 'metadata', destpath, "nerdm.json")
         self.assertTrue(os.path.exists(self.bagdir))
         self.assertTrue(os.path.exists(mdfile))
+        mdfile = os.path.join(self.bagdir, 'metadata', destpath, "annot.json")
+        self.assertTrue(os.path.exists(mdfile))
 
-        data = midas.read_nerd(mdfile)
+        data = self.bagr.bagbldr._bag.nerd_metadata_for(destpath, True)
         self.assertEqual(data['size'], 70)
         self.assertTrue(data['checksum']['hash'])
         self.assertEqual(data['downloadURL'], dlurl)
@@ -206,7 +219,7 @@ class TestMIDASMetadataBaggerMixed(test.TestCase):
         self.assertTrue(os.path.exists(self.bagdir))
         self.assertTrue(os.path.exists(mdfile))
 
-        data = midas.read_nerd(mdfile)
+        data = self.bagr.bagbldr._bag.nerd_metadata_for(destpath, True)
         self.assertEqual(data['@type'][0], "nrdp:ChecksumFile")
         self.assertEqual(data['@type'][1], "nrdp:DownloadableFile")
         self.assertEqual(data['@type'][2], "dcat:Distribution")
@@ -240,7 +253,7 @@ class TestMIDASMetadataBaggerMixed(test.TestCase):
         self.assertTrue(os.path.exists(self.bagdir))
         self.assertTrue(os.path.exists(mdfile))
 
-        data = midas.read_nerd(mdfile)
+        data = self.bagr.bagbldr._bag.nerd_metadata_for(destpath, True)
         self.assertEqual(data['size'], 70)
         self.assertTrue(data['checksum']['hash'])
         self.assertEqual(data['checksum']['algorithm'],
@@ -260,7 +273,7 @@ class TestMIDASMetadataBaggerMixed(test.TestCase):
         self.assertTrue(os.path.exists(self.bagdir))
         self.assertTrue(os.path.exists(mdfile))
 
-        data = midas.read_nerd(mdfile)
+        data = self.bagr.bagbldr._bag.nerd_metadata_for(destpath, True)
         self.assertEqual(data['size'], 69)
         self.assertTrue(data['checksum']['hash'])
         self.assertEqual(data['checksum']['algorithm'],
@@ -321,9 +334,10 @@ class TestMIDASMetadataBaggerMixed(test.TestCase):
         valid = []
         invalid = []
         for df in self.bagr.datafiles:
-            nerdf = os.path.join(self.bagr.bagdir,"metadata",df,"nerdm.json")
-            with open(nerdf) as fd:
-                nerd = json.load(fd)
+            nerd = self.bagr.bagbldr._bag.nerd_metadata_for(df, True)
+#            nerdf = os.path.join(self.bagr.bagdir,"metadata",df,"nerdm.json")
+#            with open(nerdf) as fd:
+#                nerd = json.load(fd)
             if not any([":ChecksumFile" in t for t in nerd.get('@type',[])]):
                 continue
             if 'valid' in nerd and nerd['valid'] is True:
@@ -346,7 +360,7 @@ class TestMIDASMetadataBaggerMixed(test.TestCase):
         mdfile = os.path.join(metadir, "trial3", "nerdm.json")
         self.assertTrue(os.path.exists(mdfile))
 
-        mdata = midas.read_nerd(mdfile)
+        mdata = self.bagr.bagbldr._bag.nerd_metadata_for("trial3", True)
         self.assertEqual(mdata['filepath'], "trial3")
         self.assertIn("nrdp:Subcollection", mdata['@type'])
 
@@ -371,7 +385,7 @@ class TestMIDASMetadataBaggerMixed(test.TestCase):
         mdfile = os.path.join(metadir, "trial3", "nerdm.json")
         self.assertTrue(os.path.exists(mdfile))
 
-        mdata = midas.read_nerd(mdfile)
+        mdata = self.bagr.bagbldr._bag.nerd_metadata_for("trial3", True)
         self.assertEqual(mdata['filepath'], "trial3")
         self.assertIn("nrdp:Subcollection", mdata['@type'])
         

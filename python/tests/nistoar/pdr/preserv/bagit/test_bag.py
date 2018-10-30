@@ -63,6 +63,32 @@ class TestNISTBag(test.TestCase):
         self.assertEqual(self.bag.nerd_file_for("trial3/trial3a.json"),
                          os.path.join(bagdir, "metadata", "trial3", 
                                       "trial3a.json", "nerdm.json"))
+
+    def test_annotations_file_for(self):
+        self.assertEqual(self.bag.annotations_file_for(""),
+                         os.path.join(bagdir, "metadata", "annot.json"))
+        self.assertEqual(self.bag.annotations_file_for("trial1.json"),
+                         os.path.join(bagdir, "metadata", "trial1.json",
+                                      "annot.json"))
+        self.assertEqual(self.bag.annotations_file_for("trial2.json"),
+                         os.path.join(bagdir, "metadata", "trial2.json",
+                                      "annot.json"))
+        self.assertEqual(self.bag.annotations_file_for("trial3"),
+                         os.path.join(bagdir, "metadata", "trial3",
+                                      "annot.json"))
+        self.assertEqual(self.bag.annotations_file_for("trial3/trial3a.json"),
+                         os.path.join(bagdir, "metadata", "trial3", 
+                                      "trial3a.json", "annot.json"))
+
+    def test_annotations_metadata_for(self):
+        data = self.bag.annotations_metadata_for("")
+        self.assertEqual(len(data), 0)  # empty
+        data = self.bag.annotations_metadata_for("trial1.json")
+        self.assertEqual(len(data), 0)  # empty
+        data = self.bag.annotations_metadata_for("trial2.json")
+        self.assertIn("size", data)
+        self.assertIn("checksum", data)
+        self.assertNotIn("title", data)
         
     def test_nerd_metadata_for(self):
         data = self.bag.nerd_metadata_for("")
