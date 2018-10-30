@@ -36,6 +36,7 @@ SUPPORTED_CHECKSUM_ALGS = [ "sha256" ]
 DEF_CHECKSUM_ALG = "sha256"
 DEF_MERGE_CONV = "initdef"  # For merging MIDAS-generated metadata with
                             # initial defaults
+UNSYNCED_FILE = "_unsynced"
 
 # type of update (see determine_update_version())
 _NO_UPDATE    = 0
@@ -222,8 +223,10 @@ class MIDASMetadataBagger(SIPBagger):
             # part of the data set but don't exist in the input directories.
             # These could be files available via external URLs or files preserved
             # as part of a previous version.  
-            self.bagbldr.add_ds_pod(self.inpodfile, convert=True,
-                                    savefilemd=True)
+            podnerd = self.bagbldr.add_ds_pod(self.inpodfile, convert=True,
+                                              savefilemd=True)
+            self._mark_comps_unsynced(podnerd.get('components',[]))
+            
         self.resmd = NISTBag(self.bagbldr.bagdir).nerdm_record(True)
 
         # ensure an initial version
@@ -231,6 +234,41 @@ class MIDASMetadataBagger(SIPBagger):
             self.resmd['version'] = "1.0.0"
             self.bagbldr.update_annot_for('', {'version': self.resmd["version"]})
 
+    def _mark_filepath_unsynced(self, filepath):
+        self.bagbldr.ensure_bagdir()
+        mdir = os.path.dirname(self.bagbldr._bag.nerd_file_for(filepath))
+        if os.path.join(mdir):
+            semaphore = os.path.join(mdir, UNSYNCED_FILE)
+            if not os.path.exists(semaphore):
+                # create 0-length the file
+                with open(semaphore, 'a') as fd:
+                    pass
+                
+    def _mark_filepath_synced(self, filepath):
+        self.bagbldr.ensure_bagdir()
+        mdir = os.path.dirname(self.bagbldr._bag.nerd_file_for(filepath))
+        if os.path.join(mdir):
+            semaphore = os.path.join(mdir, UNSYNCED_FILE)
+            if os.path.exists(semaphore):
+                os.remove(semaphore)
+                
+    def _mark_comps_unsynced(self, comps):
+        for c in comps:
+            if 'filepath' in c:
+                self._mark_filepath_unsynced(c['filepath'])
+
+    def _clear_all_unsynced_marks(self):
+        if not self.bagbldr.bagdir:
+            return
+        mdir = os.path.join(self.bagbldr.bagdir, "metadata")
+        if not os.path.exists(mdir):
+            return
+        for base, subdirs, files in os.walk(mdir):
+            if UNSYNCED_FILE in files:
+                semaphore = os.path.join(base, UNSYNCED_FILE)
+                if os.path.exists(semaphore):
+                    os.remove(semaphore)
+        
     def data_file_inventory(self):
         """
         get a list of the data files available to be part of this dataset.
@@ -293,6 +331,11 @@ class MIDASMetadataBagger(SIPBagger):
         if not os.path.exists(nerdfile):
             update = True
             log.info("Initializing metadata for datafile, %s", destpath)
+        elif os.path.exists(os.path.join(os.path.dirname(nerdfile),
+                            UNSYNCED_FILE)):
+            # we marked this earlier that an update is recommended
+            update = True
+            log.debug("datafile, %s, requires update to metadata", destpath)
         elif moddate_of(inpath) > moddate_of(nerdfile):
             # data file is newer; update its metadata
             update = True
@@ -336,6 +379,7 @@ class MIDASMetadataBagger(SIPBagger):
                     del amdata[prop]
 
             self.bagbldr.update_annot_for(destpath, amdata)
+            self._mark_filepath_synced(destpath)
 
     def _merger_for(self, convention, objtype):
         return self._merger_factory.make_merger(convention, objtype)
@@ -690,6 +734,7 @@ class PreservationBagger(SIPBagger):
 
         mdbagger.prepare(nodata=True)
         self.datafiles = mdbagger.datafiles
+        mdbagger._clear_all_unsynced_marks()
 
         # copy the contents of the metadata bag into the final preservation bag
         if os.path.exists(self.bagdir):

@@ -111,7 +111,6 @@ class TestMIDASMetadataBaggerMixed(test.TestCase):
     def test_ensure_res_metadata(self):
         self.assertFalse(os.path.exists(self.bagdir))
         self.assertIsNone(self.bagr.inpodfile)
-        
         self.bagr.ensure_res_metadata()
         
         self.assertTrue(os.path.exists(self.bagdir))
@@ -191,6 +190,7 @@ class TestMIDASMetadataBaggerMixed(test.TestCase):
         destpath = os.path.join("trial3", "trial3a.json")
         dlurl = "https://data.nist.gov/od/ds/gurn/"+destpath
         dfile = os.path.join(self.upldir, self.midasid[32:], destpath)
+        pdb.set_trace()
         self.bagr.ensure_file_metadata(dfile, destpath)
 
         mdfile = os.path.join(self.bagdir, 'metadata', destpath, "nerdm.json")
