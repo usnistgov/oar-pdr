@@ -12,7 +12,7 @@ from urllib import quote as urlencode
 
 from .. import PreservationSystem
 from .. import ConfigurationException, StateException, PODError
-from .exceptions import BagProfileError, BagWriteError
+from .exceptions import BagProfileError, BagWriteError, BadBagRequest
 from ....nerdm.exceptions import (NERDError, NERDTypeError)
 from ....nerdm.convert import PODds2Res
 from ....id import PDRMinter, NIST_ARK_NAAN
@@ -407,37 +407,12 @@ class BagBuilder(PreservationSystem):
 
         while collpath != "":
             if not os.path.exists(self.bag.nerd_file_for(collpath)):
-                self.define_component(collpath, "Subcollection")
+                self._define_file_comp_md(collpath, "Subcollection")
             collpath = os.path.dirname(collpath)
 
 
 
     
-    def update_metadata_for(self, filepath, mdata, comptype=None):
-        """
-        update the metadata for the given component of resource.  
-        Resource- level metadata can be updated by providing an empty
-        string as the component filepath.  The given meta data will be 
-        merged with the currently saved metadata.  If there is no metadata
-        yet saved for the filepath, the given metadata will be merged 
-        with default metadata.
-
-        :param str filepath:   the filepath to the component to update.  An
-                               empty string ("") updates the resource-level
-                               metadata.  If the filepath begins with a '@id:',
-                               it will be treated as the relative identifier
-                               for the component.
-        :param dict mdata:     the new metadata to merge in
-        :param str comptype:   the distribution type to assume for the 
-                               component (with the default being "DataFile").  
-                               If the component exists and is not of this type,
-                               an exception will be raised; if it does not 
-                               exist, default metadata based on this type will
-                               be created.  
-        """
-        self.ensure_bag_structure()
-        pass
-
     def define_component(self, destpath, comptype, message=None):
         """
         ensure the definition of a component: if the specified component does 
@@ -446,6 +421,12 @@ class BagBuilder(PreservationSystem):
 
         To later update this component, use update_component_metadata(); to 
         override the current metadata, use replace_component_metadata().  
+
+        When destpath is a hierarchical filepath, this method, as a side effect, 
+        will also define all of the anscestor Subcollection components as well,
+        if they do not already exist.  This method will also check to make 
+        sure that the parent component, if it exists, is of type Subcollection
+        before creating the new component.  
 
         Note that method cannot be used to set resource-level metadata.
 
@@ -478,25 +459,63 @@ class BagBuilder(PreservationSystem):
         if destpath.startswith("@id:"):
             return self._define_nonfile_comp_md(destpath, comptype, message)
         else:
-            return self._define_file_comp_md(destpath, comptype, message)
+            parent = os.path.dirname(destpath)
+            while parent != '':
+                if self.bag.comp_exists(parent):
+                    if not self.bag.is_subcoll(parent):
+                        raise BadBagRequest("Attempt to define file component "+
+                                            "below non-Subcollection anscestor")
+                    break
+                parent = os.path.dirname(parent)
 
-    def _define_file_comp_md(self, destpath, comptype, message=None):
+            out = self._define_file_comp_md(destpath, comptype, message)
+            self.ensure_ansc_collmd(destpath)
+            return out
+
+    def _define_file_comp_md(self, destpath, comptype, msg=None):
         if os.path.exists(self.bag.nerd_file_for(destpath)):
             md = self.bag.nerd_metadata_for(destpath, True)
             if not metadata_matches_type(comptype):
                 raise StateException("Existing component not a "+comptype+
-                                     ": "+str(mg.get('@type',[])))
+                                     ": "+str(md.get('@type',[])))
         else:
-            if message is None:
-                message = "Initializing new component with default metadata: "+\
-                          destpath
+            if msg is None:
+                msg = "Initializing new %s component with default metadata: %s" \
+                          % (comptype, destpath)
             md = self._create_init_md_for(destpath, comptype)
-            self._replace_file_metadata(destpath, md, message)
+            self._replace_file_metadata(destpath, md, msg)
 
         return md
 
-    def replace_comp_metadata(self, destpath, mdata, message=None):
+    def _define_nonfile_comp_md(self, compid, comptype, msg=None):
+        if compid.startswith("@id:"):
+            compid = compid[len("@id:"):]
+        rmd, comps, found = self._fetch_nonfile_comp(compid, comptype)
+                
+        if found < 0:
+            if msg is None:
+                msg = "Initializing new %s component with default metadata: %s" \
+                          % (comptype, compid)
+            if msg:
+                self.record(msg)
+            md = self._create_init_md_for("@id:"+compid, comptype)
+            comps.append(md)
+            self.ensure_bag_structure()
+            self._write_resmd(rmd)
+
+        return comps[-1]
+
+    def replace_metadata_for(self, destpath, mdata, message=None):
         """
+        Set the given metadata for the component with the given filepath or 
+        identifier (for non-file components), overwriting any metadata that 
+        may be there already.  This method cannot be used to set/replace the 
+        resource-level metadata: a destpath="" will raise an exception
+
+        Some care should be taken when using this method to set metadata as 
+        no checks are made on the validity of this metadata; thus, it is easy
+        to create a bag that is invalid against the NIST profile.  
+
         :param  str destpath: the component's filepath (when comptype is 
                               DataFile, Subcollection, or similar downloadable
                               type) or relative identifier (for other types).
@@ -507,7 +526,11 @@ class BagBuilder(PreservationSystem):
                               message, provide an empty string. 
         :return dict:  the metadata for the component
         """
+        if not destpath:
+            raise BadBagRequest("Cannot set resource metadata with "+
+                                "replace_metadata_for()")
         self.ensure_bagdir()
+
         if destpath.startswith("@id:cmps/"):
             # file-based
             destpath = destpath[len("@id:cmps/"):]
@@ -548,17 +571,8 @@ class BagBuilder(PreservationSystem):
         comps = []
         found = -1
         if self._has_resmd():
-            try:
-                rmd = self.bag.nerd_metadata_for("")
-                if 'components' in rmd:
-                    comps = rmd['components']
-                    for i in range(len(comps)):
-                        if '@id' in comps[i] and comps[i]['@id'] == compid:
-                            found = i
-                            break
-            except Exception as ex:
-                raise NERDError("Trouble interpreting existing JSON metadata " +
-                                "for id="+compid+": "+str(ex))
+            rmd = self.bag.nerd_metadata_for("")
+            comps, found = self._find_nonfile_comp_by_id(rmd, compid)
         else:
             rmd = {'components': comps}    
 
@@ -586,11 +600,47 @@ class BagBuilder(PreservationSystem):
         except Exception as ex:
             raise BagWriteError("Failed to write metadata for comp id="+compid+
                                 str(ex))
-
         return mdata
 
-        
+    def _find_nonfile_comp_by_id(self, resmd, compid):
+        # this finds non-file components; returns the component list and
+        # the index of the component with a matching ID
+        comps = []
+        found = -1 
+        try:
+            if 'components' in resmd:
+                comps = resmd['components']
+                for i in range(len(comps)):
+                    if '@id' in comps[i] and comps[i]['@id'] == compid:
+                        found = i
+                        break
+        except Exception as ex:
+            raise NERDError("Trouble interpreting existing JSON metadata " +
+                            "for id="+compid+": "+str(ex))
+        return (comps, found)
 
+    def _fetch_nonfile_comp(self, compid, comptype=None):
+        # this finds a non-file component with a matcthing ID, returning
+        # the base resource metadata node, the components list, and the
+        # index of the matching component.
+        comps = []
+        found = -1
+        if self._has_resmd():
+            rmd = self.bag.nerd_metadata_for("")
+            comps, found = self._find_nonfile_comp_by_id(rmd, compid)
+            if comptype and found >= 0 and comps[found] and \
+               not metadata_matches_type(comps[found], comptype):
+                raise StateException("Existing component not a "+comptype+
+                                     ": "+str(comps[found].get('@type',[])))
+        else:
+            rmd = { "components": comps }
+
+        return (rmd, comps, found)
+
+    def _has_nonfile_comp(self, compid):
+        rmd, comps, found = self._fetch_nonfile_comp(compid)
+        return found > -1
+    
     def _create_init_md_for(self, destpath, comptype):
         if destpath == "":
             return self._create_defmd_fn['Resource']()
@@ -610,7 +660,96 @@ class BagBuilder(PreservationSystem):
         raise BagWriteError("Unrecognized component type: "+comptype)
 
 
-    
+    def update_metadata_for(self, filepath, mdata, comptype=None, message=None):
+        """
+        update the metadata for the given component of resource.  
+        Resource-level metadata can be updated by providing an empty
+        string as the component filepath.  The given meta data will be 
+        merged with the currently saved metadata.  If there are no metadata
+        yet saved for the filepath, the given metadata will be merged 
+        with default metadata.
+
+        When the metadata is merged, note that whole array values will be 
+        replaced with corresponding arrays from the input metadata; the 
+        arrays are not combined in any way.
+
+        :param str filepath:   the filepath to the component to update.  An
+                               empty string ("") updates the resource-level
+                               metadata.  If the filepath begins with a '@id:',
+                               it will be treated as the relative identifier
+                               for the component.
+        :param dict   mdata:   the new metadata to merge in
+        :param str comptype:   the distribution type to assume for the 
+                               component (with the default being "DataFile").  
+                               If the component exists and is not of this type,
+                               an exception will be raised; if it does not 
+                               exist, default metadata based on this type will
+                               be created.  
+        :param str message:   message to record in the bag's log when committing
+                              this definition.  A value of None (default) causes 
+                              a default message to be recorded.  To suppress a 
+                              message, provide an empty string. 
+        """
+        self.ensure_bag_structure()
+        if destpath.startswith("@id:cmps/"):
+            # file-based
+            destpath = destpath[len("@id:cmps/"):]
+
+        if destpath.startswith("@id:"):
+            # non-file-based component
+            return self._update_nonfile_metadata(destpath, mdata, comptype,
+                                                 message)
+        else:
+            return self._update_file_metadata(destpath, mdata, comptype, message)
+
+            
+    def _update_nonfile_metadata(self, compid, mdata, comptype, msg=None):
+        if compid.startswith("@id:"):
+            compid = compid[len("@id:"):]
+        self._ensure_bag_structure()
+
+        rmd, comps, found = self._fetch_nonfile_comp(compid, comptype)
+        if found < 0:
+            # not found; get default data
+            if msg is None:
+                msg = "Creating new non-file component: id="+compid
+            md = self._create_init_md_for("@id:"+compid, comptype)
+            comps.append(md)
+            found = -1
+        elif msg is None:
+            msg = "Updating non-file component: id="+compid
+
+        if msg:
+            self.record(msg)
+        comps[found] = self._update_md(comps[found], mdata)
+        self._write_resmd(rmd)
+
+        return comps[found]
+
+    def _update_file_metadata(self, destpath, mdata, comptype, msg=None):
+        # NEED TO DEAL WITH destpath=""
+        
+        if os.path.exists(self.bag.nerd_file_for(destpath)):
+            orig = self.bag.nerd_metadata_for(destpath)
+            if comptype and '@type' in orig and \
+               not metadata_matches_type(orig, comptype):
+                raise StateException("Existing component not a "+comptype+
+                                     ": "+str(orig.get('@type',[])))
+            if msg is None:
+                msg = "Updating %s component metadata: %s" % (comptype, destpath)
+        else:
+            orig = self._create_init_metadata(destpath, comptype)
+            if msg is None:
+                msg = "Creating new %s component: %s" % (comptype, destpath)
+            
+        mdata = self._update_md(orig, mdata)
+        self._replace_file_metadata(destpath, mdata, msg)
+        return mdata
+
+    def _update_md(self, orig, updates):
+        # update the values of orig with the values in updates
+        # this uses the same algorithm as used to merge config data
+        return merge_config(updates, orig)
 
 
     def record(self, msg, *args, **kwargs):

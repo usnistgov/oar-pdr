@@ -216,6 +216,11 @@ class TestBuilder2(test.TestCase):
         self.assertFalse(os.path.exists(os.path.join(self.bag.bagdir,
                                                      "metadata",path)))
 
+        md = read_nerd(os.path.join(self.bag.bagdir,
+                                    "metadata","trial1","nerdm.json"))
+        self.assertEqual(md['filepath'], "trial1")
+        self.assertIn("nrdp:Subcollection", md['@type'])
+
         # is indepotent
         self.bag.ensure_ansc_collmd(path)
         self.assertFalse(os.path.exists(os.path.join(self.bag.bagdir,
@@ -292,9 +297,9 @@ class TestBuilder2(test.TestCase):
         with self.assertRaises(ValueError):
             self.bag._create_init_md_for("@id:foo/bar", "DataFile")
 
-    def test_replace_comp_metadata_file(self):
+    def test_replace_metadata_for_file(self):
         input = { "foo": "bar", "hank": "herb" }
-        md = self.bag.replace_comp_metadata("readme.txt", input)
+        md = self.bag.replace_metadata_for("readme.txt", input)
         for p in md:
             self.assertIn(p, md)
 
@@ -305,7 +310,7 @@ class TestBuilder2(test.TestCase):
         self.assertEqual(len(md), 2)
                          
         input = { "bar": "foo", "herb": "hank" }
-        md = self.bag.replace_comp_metadata("@id:cmps/readme.txt", input)
+        md = self.bag.replace_metadata_for("@id:cmps/readme.txt", input)
         for p in md:
             self.assertIn(p, md)
         self.assertNotIn("foo", md)
@@ -316,10 +321,13 @@ class TestBuilder2(test.TestCase):
         self.assertEqual(md['bar'], 'foo')
         self.assertEqual(md['herb'], 'hank')
         self.assertEqual(len(md), 2)
+
+        with self.assertRaises(bldr.BadBagRequest):
+            self.bag.replace_metadata_for("", input)
                          
-    def test_replace_comp_metadata_nonfile(self):
+    def test_replace_metadata_for_nonfile(self):
         input = { "foo": "bar", "hank": "herb" }
-        md = self.bag.replace_comp_metadata("@id:#readme", input)
+        md = self.bag.replace_metadata_for("@id:#readme", input)
         for p in md:
             self.assertIn(p, md)
         self.assertEqual(md['@id'], "#readme")
@@ -335,7 +343,7 @@ class TestBuilder2(test.TestCase):
         self.assertEqual(len(md), 3)
                          
         input = { "bar": "foo", "herb": "hank" }
-        md = self.bag.replace_comp_metadata("@id:#readme", input)
+        md = self.bag.replace_metadata_for("@id:#readme", input)
         for p in md:
             self.assertIn(p, md)
         self.assertNotIn("foo", md)
@@ -351,7 +359,7 @@ class TestBuilder2(test.TestCase):
         self.assertEqual(md['herb'], 'hank')
         self.assertEqual(len(md), 3)
                          
-        md = self.bag.replace_comp_metadata("@id:#goob", input)
+        md = self.bag.replace_metadata_for("@id:#goob", input)
         written = read_nerd(self.bag.bag.nerd_file_for(""))
         self.assertEqual(len(written), 1)
         comps = written['components']
@@ -372,8 +380,94 @@ class TestBuilder2(test.TestCase):
         self.assertIn('_extensionSchemas', md)
         self.assertEqual(md['@type'][0], "nrdp:DataFile")
         self.assertEqual(md['filepath'], "readme.txt")
+
+        with open(os.path.join(self.bag.bagdir, "preserv.log")) as fd:
+            lines = [l for l in fd]
+        self.assertIn("i did it!", lines[-1])
+        
+        md = self.bag.define_component("trial", "Subcollection")
+        
+        written = read_nerd(self.bag.bag.nerd_file_for("trial"))
+        self.assertEqual(written, md)
+        self.assertEqual(md['@id'], "cmps/trial")
+        self.assertIn('_schema', md)
+        self.assertIn('_extensionSchemas', md)
+        self.assertEqual(md['@type'][0], "nrdp:Subcollection")
+        self.assertEqual(md['filepath'], "trial")
+        
+        with open(os.path.join(self.bag.bagdir, "preserv.log")) as fd:
+            lines = [l for l in fd]
+        self.assertIn("new", lines[-1])
+
+    def test_define_component_subfile(self):
+        self.assertFalse(os.path.exists(os.path.join(self.bag.bagdir,
+                                                     "metadata","trial")))
+        md = self.bag.define_component("trial/readme.txt", "DataFile")
+        self.assertEqual(md['filepath'], 'trial/readme.txt')
+        self.assertTrue(os.path.exists(os.path.join(self.bag.bagdir,
+                                       "metadata/trial/readme.txt/nerdm.json")))
+        self.assertTrue(self.bag.bag.is_subcoll("trial"))
+
+        with self.assertRaises(bldr.BadBagRequest):
+            self.bag.define_component("trial/readme.txt/foo/bar",
+                                      "Subcollection")
+
+    def test_define_component_nonfile(self):
+        resnerdf = os.path.join(self.bag.bagdir, "metadata","nerdm.json")
+        self.assertFalse(os.path.exists(resnerdf))
+        md = self.bag.define_component("@id:#doi", "nrd:Hidden")
+
+        resmd = bldr.read_nerd(resnerdf)
+        comps = resmd['components']
+        self.assertEqual(len(comps), 1)
+        self.assertEqual(comps[-1]['@id'], "#doi")
+
+        md = self.bag.define_component("@id:#doi", "nrd:Hidden")
+
+        resmd = bldr.read_nerd(resnerdf)
+        comps = resmd['components']
+        self.assertEqual(len(comps), 1)
+        self.assertEqual(comps[-1]['@id'], "#doi")
+
+        md = self.bag.define_component("@id:#gurn", "nrdg:Goober")
+
+        resmd = bldr.read_nerd(resnerdf)
+        comps = resmd['components']
+        self.assertEqual(len(comps), 2)
+        self.assertEqual(comps[-1]['@id'], "#gurn")
+
+        with self.assertRaises(bldr.StateException):
+            self.bag.define_component("@id:#doi", "nrd:Goober")
+
+    def test_update_md(self):
+        md = {}
+        self.bag._update_md(md, {"foo": "bar"})
+        self.assertEquals(md, {"foo": "bar"})
+
+        self.bag._update_md(md, {"hank": "herb"})
+        self.assertEquals(md, {"foo": "bar", "hank": "herb"})
+
+        self.bag._update_md(md, {"hank": "aaron"})
+        self.assertEquals(md, {"foo": "bar", "hank": "aaron"})
+
+        self.bag._update_md(md, {"hank": ["herb", "aaron"]})
+        self.assertEquals(md, {"foo": "bar", "hank": ["herb", "aaron"]})
+
+        self.bag._update_md(md, {"hank": {"herb": "aaron"}})
+        self.assertEquals(md, {"foo": "bar", "hank": {"herb": "aaron"}})
+
+        self.bag._update_md(md, {"hank": {"a": "b"}})
+        self.assertEquals(md, {"foo": "bar",
+                               "hank": {"herb": "aaron", "a": "b"}})
+
+        self.bag._update_md(md, {"hank": {"a": "c"}})
+        self.assertEquals(md, {"foo": "bar",
+                               "hank": {"herb": "aaron", "a": "c"}})
+
         
         
+
+
     def test_matches_type(self):
         types = ["nrdp:DataFile", "Downloadable", "dcat:Distribution"]
         self.assertTrue(bldr.matches_type(types, "DataFile"))
