@@ -128,6 +128,7 @@ export class LandingComponent implements OnInit {
     this.distApi = this.appConfig.getDistApi();
     this.landing = this.appConfig.getLandingBackend();
     this.pdrApi = this.appConfig.getPDRApi();
+    this.sdpLink = this.appConfig.getSDPApi();
   }
 
    /**
@@ -206,7 +207,7 @@ updateMenu(){
   var resourcesByAuthor = this.createMenuItem ('Resources by Authors',"faa faa-external-link","",
                                    this.sdpLink+"/#/search?q=authors.familyName="+authlist+"&key=&queryAdvSearch=yes");
   var similarRes = this.createMenuItem ("Similar Resources", "faa faa-external-link", "",
-                              this.sdpLink+"/#/search?q=keyword="+this.record['keyword']+"&key=&queryAdvSearch=yes");                
+                              this.sdpLink+"/#/search?q="+this.record['keyword']+"&key=&queryAdvSearch=yes");                
   var license = this.createMenuItem("Fair Use Statement",  "faa faa-external-link","",this.record['license'] ) ;
   var citation = this.createMenuItem('Citation', "faa faa-angle-double-right",
                           (event)=>{ this.getCitation(); this.showDialog(); },'');
