@@ -23,7 +23,7 @@ import { MetadataView } from './landing/metadata/metadataview.component';
 import { NoidComponent } from './landing/noid.component';
 import { NerdmComponent } from './landing/nerdm.component';
 import { ErrorComponent, UserErrorComponent } from './landing/error.component';
-import { SearchResolve } from './landing/search-service.resolve';
+// import { SearchResolve } from './landing/search-service.resolve';
 import { SharedModule } from './shared/shared.module';
 import { SearchService } from './shared/search-service/index';
 import { CommonVarService } from './shared/common-var/index';
@@ -38,6 +38,7 @@ import { FragmentPolyfillModule } from "./fragment-polyfill.module";
  */
 const appInitializerFn = (appConfig: AppConfig) => {
   return () => {
+    console.log("**** CAlling APP Initialization ***");
     return appConfig.loadAppConfig();
   };
 };
@@ -63,7 +64,7 @@ const appInitializerFn = (appConfig: AppConfig) => {
     NgbModule.forRoot()
   ],
   exports: [Collaspe],
-  providers: [ Title, Meta, SearchService,SearchResolve, CommonVarService,  CartService 
+  providers: [ Title, Meta, SearchService, CommonVarService,  CartService 
     , AppConfig, {
       provide: APP_INITIALIZER,
       useFactory: appInitializerFn,

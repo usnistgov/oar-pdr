@@ -9,6 +9,19 @@ import { Subscription } from 'rxjs/Subscription';
 import { AppConfig } from '../shared/config-service/config.service';
 import {  PLATFORM_ID, APP_ID, Inject } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
+import { SearchService } from '../shared/search-service/index';
+
+import { ActivatedRouteSnapshot } from '@angular/router';
+import { RouterStateSnapshot } from '@angular/router/src/router_state';
+import { Observable } from 'rxjs/Observable';
+
+import 'rxjs/add/observable/of';
+import {first, tap} from 'rxjs/operators';
+import {of} from 'rxjs/observable/of';
+
+import {isPlatformServer} from '@angular/common';
+import {makeStateKey, TransferState} from '@angular/platform-browser';
+import { _throw } from 'rxjs/observable/throw';
 
 interface reference {
   refType? : string,
@@ -120,11 +133,15 @@ export class LandingComponent implements OnInit {
    *
    */
   constructor(private route: ActivatedRoute, private el: ElementRef, 
-              private titleService: Title, private appConfig : AppConfig, private router: Router
+              private titleService: Title, private appConfig : AppConfig, 
+              private router: Router
               ,@Inject(PLATFORM_ID) private platformId: Object,
-              @Inject(APP_ID) private appId: string) {
+              @Inject(APP_ID) private appId: string,
+              private searchService: SearchService,
+              private transferState:TransferState) {
     
     this.rmmApi = this.appConfig.getRMMapi();
+    console.log("RMM API "+ this.rmmApi);
     this.distApi = this.appConfig.getDistApi();
     this.landing = this.appConfig.getLandingBackend();
     this.pdrApi = this.appConfig.getPDRApi();
@@ -134,7 +151,7 @@ export class LandingComponent implements OnInit {
    /**
    * If Search is successful populate list of keywords themes and authors
    */
-  onSuccess(searchResults:any[]) {
+  onSuccess(searchResults:any) {
     // console.log(searchResults);
     if(searchResults["ResultCount"] === undefined || searchResults["ResultCount"] !== 1)
       this.record = searchResults;
@@ -277,22 +294,76 @@ updateMenu(){
       this.citeString += " (Accessed "+ date.getFullYear()+"-"+(date.getMonth()+1)+"-"+date.getDate()+")";
   }
 
+  getData() : Observable<any>{
+    console.log("In this getdata ::");
+    var recordid = this.searchValue;
+    const recordid_KEY = makeStateKey<any>('record-' + recordid);
+    
+      if (this.transferState.hasKey(recordid_KEY)) {
+          console.log("1. Is it here @@@");
+          const record = this.transferState.get<any>(recordid_KEY, null);
+          this.transferState.remove(recordid_KEY);
+          return of(record);
+      }
+      else {
+
+          return this.searchService.searchById(recordid)
+          .catch((err: Response, caught: Observable<any[]>) => {
+              if (err !== undefined) {
+                console.log("ERROR STATUS :::"+err.status);
+                if(err.status >= 500){
+                  this.router.navigate(["/usererror", recordid,{ errorcode : err.status}]);
+                }
+                if(err.status >= 400 && err.status < 500 ){
+                  this.router.navigate(["/usererror", recordid, { errorcode : err.status}]); 
+                }
+                //return Observable.throw('The Web server (running the Web site) is currently unable to handle the request.');
+              }
+              return Observable.throw(caught);
+            })
+              .pipe(
+                 
+                  tap(record => {
+                      if (isPlatformServer(this.platformId)) {
+                          
+                        console.log("2 . Is it here @@@:"+this.platformId);
+                          this.transferState.set(recordid_KEY, record);
+                      //    console.log(this.transferState.toJson()); 
+                      }
+                  })
+              );
+      }
+  }
   /**
    * Get the params OnInit
    */
   ngOnInit() {
   
     this.searchValue = this.route.snapshot.paramMap.get('id');
-   
+    if(this.route.url.toString().includes("ark")){
+      this.searchValue =  this.route.url.toString().split("/id/").pop();
+    }
+    
     this.files =[];
-      this.route.data.map(data => data.searchService )
-       .subscribe((res)=>{
+
+
+      //  this.route.data.map(data => data.searchService )
+      //  .subscribe((res)=>{
+      //    this.onSuccess(res);
+      //  }, error =>{
+      //     console.log("There is an error in searchservice.");
+      //     this.onError(" There is an error");
+      //     // throw new ErrorComponent(this.route);
+      //  });
+     this.getData()
+      .subscribe((res)=>{
          this.onSuccess(res);
        }, error =>{
           console.log("There is an error in searchservice.");
           this.onError(" There is an error");
           // throw new ErrorComponent(this.route);
-       });
+       }); 
+     
   }
   goToSelection(isMetadata: boolean, isSimilarResources: boolean, sectionId : string){
     this.metadata = isMetadata; this.similarResources =isSimilarResources;

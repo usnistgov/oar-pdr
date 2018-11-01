@@ -27,6 +27,7 @@ export class SearchService {
     this.metaApi = this.appConfig.getMetaApi();
     this.landingBackend = this.appConfig.getLandingBackend();
     this.serviceApi = this.rmmApi;
+    console.log("this.rmmApi in service :"+this.rmmApi);
   }
 
   searchSample(){
