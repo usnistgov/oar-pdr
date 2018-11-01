@@ -440,6 +440,7 @@ class MIDASSIPHandler(SIPHandler):
         # Create the bag.  Note: make_bag() can raise exceptions
         self._status.record_progress("Collecting metadata and files")
         bagdir = self.bagger.make_bag()
+        self.bagger.bagbldr._unset_logfile()  # disengage the internal log
 
         # Stage the full NERDm record for ingest into the RMM
         if self._ingester:
