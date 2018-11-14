@@ -464,7 +464,89 @@ class TestBuilder2(test.TestCase):
         self.assertEquals(md, {"foo": "bar",
                                "hank": {"herb": "aaron", "a": "c"}})
 
+    def test_update_metadata_for_file(self):
+        md = self.bag.define_component("trial/readme.txt", "DataFile")
+        self.assertEqual(md['filepath'], "trial/readme.txt")
+        self.assertNotIn("foo", md)
+
+        md = self.bag.update_metadata_for("trial/readme.txt",
+                                          {"foo": "bar", "goob": "gurn"})
+        self.assertEqual(md['filepath'], "trial/readme.txt")
+        self.assertEqual(md['foo'],  "bar")
+        self.assertEqual(md['goob'], "gurn")
+        self.assertNotIn("hank", md)
+
+        md = self.bag.update_metadata_for("trial/readme.txt",
+                                          {"foo": "gurn", "goob": "bar"})
+        self.assertEqual(md['filepath'], "trial/readme.txt")
+        self.assertEqual(md['foo'],  "gurn")
+        self.assertEqual(md['goob'], "bar")
+        self.assertNotIn("hand", md)
         
+        md = self.bag.update_metadata_for("trial/readme.txt",
+                                          {"hand": "eye"})
+        self.assertEqual(md['filepath'], "trial/readme.txt")
+        self.assertEqual(md['foo'],  "gurn")
+        self.assertEqual(md['goob'], "bar")
+        self.assertEqual(md['hand'], "eye")
+        
+        written = read_nerd(self.bag.bag.nerd_file_for("trial/readme.txt"))
+        self.assertEqual(md, written)
+
+        md = self.bag.update_metadata_for("@id:cmps/trial/readme.txt",
+                                          {"hand": "ear"}, "DataFile")
+        self.assertEqual(md['hand'], "ear")
+        written = read_nerd(self.bag.bag.nerd_file_for("trial/readme.txt"))
+        self.assertEqual(md, written)
+
+        with self.assertRaises(bldr.StateException):
+            self.bag.update_metadata_for("trial/readme.txt",
+                                         {"hand": "ear"}, "ChecksumFile")
+
+    def test_update_metadata_for_nonfile(self):
+        md = self.bag.define_component("@id:#readme.txt", "grn:Goober")
+        self.assertEqual(md['@id'], "#readme.txt")
+        self.assertNotIn("foo", md)
+
+        md = self.bag.update_metadata_for("@id:#readme.txt",
+                                          {"foo": "bar", "goob": "gurn"})
+        self.assertEqual(md['@id'], "#readme.txt")
+        self.assertEqual(md['foo'],  "bar")
+        self.assertEqual(md['goob'], "gurn")
+        self.assertNotIn("hank", md)
+
+        md = self.bag.update_metadata_for("@id:#readme.txt",
+                                          {"foo": "gurn", "goob": "bar"})
+        self.assertEqual(md['@id'], "#readme.txt")
+        self.assertEqual(md['foo'],  "gurn")
+        self.assertEqual(md['goob'], "bar")
+        self.assertNotIn("hand", md)
+        
+        md = self.bag.update_metadata_for("@id:#readme.txt", {"hand": "eye"})
+        self.assertEqual(md['@id'], "#readme.txt")
+        self.assertEqual(md['foo'],  "gurn")
+        self.assertEqual(md['goob'], "bar")
+        self.assertEqual(md['hand'], "eye")
+        
+        written = read_nerd(self.bag.bag.nerd_file_for(""))
+        self.assertEqual(len(written), 1)
+        comps = written['components']
+        self.assertEqual(len(comps), 1)
+        written = comps[0]
+        self.assertEqual(md, written)
+
+    def test_update_metadata_for_resource(self):
+        md = self.bag.define_component("", "Resource")
+        self.assertNotIn("foo", md)
+
+        md = self.bag.update_metadata_for("", {"foo": "bar", "goob": "gurn"})
+        self.assertEqual(md['foo'],  "bar")
+        self.assertEqual(md['goob'], "gurn")
+        self.assertNotIn("hank", md)
+
+        written = read_nerd(self.bag.bag.nerd_file_for(""))
+        self.assertEqual(md, written)
+
         
 
 

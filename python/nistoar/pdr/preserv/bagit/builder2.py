@@ -660,11 +660,11 @@ class BagBuilder(PreservationSystem):
         raise BagWriteError("Unrecognized component type: "+comptype)
 
 
-    def update_metadata_for(self, filepath, mdata, comptype=None, message=None):
+    def update_metadata_for(self, destpath, mdata, comptype=None, message=None):
         """
         update the metadata for the given component of resource.  
         Resource-level metadata can be updated by providing an empty
-        string as the component filepath.  The given meta data will be 
+        string as the component filepath.  The given metadata will be 
         merged with the currently saved metadata.  If there are no metadata
         yet saved for the filepath, the given metadata will be merged 
         with default metadata.
@@ -706,7 +706,7 @@ class BagBuilder(PreservationSystem):
     def _update_nonfile_metadata(self, compid, mdata, comptype, msg=None):
         if compid.startswith("@id:"):
             compid = compid[len("@id:"):]
-        self._ensure_bag_structure()
+        self.ensure_bag_structure()
 
         rmd, comps, found = self._fetch_nonfile_comp(compid, comptype)
         if found < 0:
@@ -727,7 +727,6 @@ class BagBuilder(PreservationSystem):
         return comps[found]
 
     def _update_file_metadata(self, destpath, mdata, comptype, msg=None):
-        # NEED TO DEAL WITH destpath=""
         
         if os.path.exists(self.bag.nerd_file_for(destpath)):
             orig = self.bag.nerd_metadata_for(destpath)
@@ -736,12 +735,12 @@ class BagBuilder(PreservationSystem):
                 raise StateException("Existing component not a "+comptype+
                                      ": "+str(orig.get('@type',[])))
             if msg is None:
-                msg = "Updating %s component metadata: %s" % (comptype, destpath)
+                msg = "Updating %s metadata: %s" % (comptype, destpath)
         else:
-            orig = self._create_init_metadata(destpath, comptype)
+            orig = self._create_init_md_for(destpath, comptype)
             if msg is None:
-                msg = "Creating new %s component: %s" % (comptype, destpath)
-            
+                msg = "Creating new %s: %s" % (comptype, destpath)
+
         mdata = self._update_md(orig, mdata)
         self._replace_file_metadata(destpath, mdata, msg)
         return mdata
