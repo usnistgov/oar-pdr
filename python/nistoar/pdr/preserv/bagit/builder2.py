@@ -539,7 +539,10 @@ class BagBuilder(PreservationSystem):
         else:
             return self._replace_file_metadata(destpath, mdata, message)
 
-    def _replace_file_metadata(self, destpath, mdata, msg=None):
+    def _replace_file_metadata(self, destpath, mdata, msg=None, outfile=None):
+        if not outfile:
+            outfile = self.bag.nerd_file_for(destpath)
+            
         if msg is None:
             if os.path.exists(self.bag.nerd_file_for(destpath)):
                 msg = "Over-writing metadata for component: filepath="+destpath
@@ -549,7 +552,7 @@ class BagBuilder(PreservationSystem):
         try:
             self.ensure_metadata_dirs(destpath)
             self.record(msg)
-            self._write_json(mdata, self.bag.nerd_file_for(destpath))
+            self._write_json(mdata, outfile)
             self.ensure_ansc_collmd(destpath)
         except Exception, ex:
             self.log.exception("Trouble saving metadata for %s: %s",
@@ -558,7 +561,10 @@ class BagBuilder(PreservationSystem):
 
         return mdata
         
-    def _replace_nonfile_metadata(self, compid, mdata, msg=None):
+    def _replace_nonfile_metadata(self, compid, mdata, msg=None, outfile=None):
+        if not outfile:
+            outfile = self.bag.nerd_file_for("")
+
         if compid.startswith("@id:"):
             compid = compid[len("@id:"):]
         if not compid:
@@ -570,15 +576,15 @@ class BagBuilder(PreservationSystem):
         # look for a non-file component with the same identifier
         comps = []
         found = -1
-        if self._has_resmd():
-            rmd = self.bag.nerd_metadata_for("")
+        if os.path.exists(outfile):
+            rmd = read_nerd(outfile)
             comps, found = self._find_nonfile_comp_by_id(rmd, compid)
         else:
             rmd = {'components': comps}    
 
         try:
             mdata = deepcopy(mdata)
-            if '@id' not in compid:
+            if '@id' not in mdata:
                 mdata['@id'] = compid
             if found >= 0:
                 # replace the previously save metadata with the current ID
@@ -596,7 +602,7 @@ class BagBuilder(PreservationSystem):
                     self.record(msg)
                 comps.append(mdata)
 
-            self._write_resmd(rmd)
+            self._write_resmd(rmd, outfile)
         except Exception as ex:
             raise BagWriteError("Failed to write metadata for comp id="+compid+
                                 str(ex))
@@ -742,6 +748,7 @@ class BagBuilder(PreservationSystem):
                 msg = "Creating new %s: %s" % (comptype, destpath)
 
         mdata = self._update_md(orig, mdata)
+        out = self.bag.nerd_file_for(destpath)
         self._replace_file_metadata(destpath, mdata, msg)
         return mdata
 
@@ -750,6 +757,159 @@ class BagBuilder(PreservationSystem):
         # this uses the same algorithm as used to merge config data
         return merge_config(updates, orig)
 
+    def replace_annotations_for(self, destpath, mdata, message=None):
+        """
+        set the given metadata as the annotation metadata for a component of 
+        the given path or identifier, overwriting any metadata that may already 
+        be there.  Annotation metadata is NERDm metadata that is saved separately
+        from the normal metadata and not merged in until the bag is finalized 
+        (see class docuemtation for more information).  
+
+        Some care should be taken when using this method to set metadata as 
+        no checks are made on the validity of this metadata; thus, it is easy
+        to create a bag that is invalid against the NIST profile.  
+
+        :param  str destpath: the component's filepath (when comptype is 
+                              DataFile, Subcollection, or similar downloadable
+                              type) or relative identifier (for other types).
+        :param dict mdata:    the metadata to write
+        :param  str message:  message to record in the bag's log when committing
+                              this definition.  A value of None (default) causes 
+                              a default message to be recorded.  To suppress a 
+                              message, provide an empty string. 
+        :return dict:  the metadata for the component
+        """
+        if not destpath:
+            raise BadBagRequest("Cannot set resource metadata with "+
+                                "replace_metadata_for()")
+        self.ensure_bagdir()
+
+        if destpath.startswith("@id:cmps/"):
+            # file-based
+            destpath = destpath[len("@id:cmps/"):]
+
+        msg = message
+        if destpath.startswith("@id:"):
+            out = self.bag.annotations_file_for("")
+            if msg is None:
+                if os.path.exists(out):
+                    msg = "Over-writing annotations for component: id="+destpath
+                else:
+                    msg = "Setting annotations for component: id="+destpath
+            return self._replace_nonfile_metadata(destpath, mdata, message, out)
+
+        else:
+            out = self.bag.annotations_file_for(destpath)
+            if msg is None:
+                if os.path.exists(out):
+                    msg = "Over-writing annotations for component: filepath="+destpath
+                else:
+                    msg = "Setting annotations for component: filepath="+destpath
+            return self._replace_file_metadata(destpath, mdata, message, out)
+
+        
+    def update_annotations_for(self, destpath, mdata, comptype=None,
+                               message=None):
+        """
+        update the annotation metadata for the given component of resource.  
+        Annotation metadata is NERDm metadata that is saved separately
+        from the normal metadata and not merged in until the bag is finalized 
+        (see class docuemtation for more information).  
+
+        Resource-level metadata can be updated by providing an empty string as 
+        the component filepath.  The given metadata will be merged with the 
+        currently saved annotations.  Note that if destination component does 
+        not exist, it will be defined with the minimal default metadata.
+
+        Note that when the given metadata are merged with existing annotations, 
+        note that whole array values will be replaced with corresponding arrays 
+        from the input metadata; the arrays are not combined in any way.
+
+        :param str filepath:   the filepath to the component to update.  An
+                               empty string ("") updates the resource-level
+                               metadata.  If the filepath begins with a '@id:',
+                               it will be treated as the relative identifier
+                               for the component.
+        :param dict   mdata:   the new metadata to merge in
+        :param str comptype:   the distribution type to assume for the 
+                               component (with the default being "DataFile").  
+                               If the component exists and is not of this type,
+                               an exception will be raised; if it does not 
+                               exist, default metadata based on this type will
+                               be created.  
+        :param str message:   message to record in the bag's log when committing
+                              this definition.  A value of None (default) causes 
+                              a default message to be recorded.  To suppress a 
+                              message, provide an empty string. 
+        """
+        self.ensure_bag_structure()
+        if destpath.startswith("@id:cmps/"):
+            # file-based
+            destpath = destpath[len("@id:cmps/"):]
+
+        if destpath.startswith("@id:"):
+            # non-file-based component
+            return self._update_nonfile_annotations(destpath, mdata, comptype,
+                                                    message)
+        else:
+            return self._update_file_annotations(destpath, mdata, comptype,
+                                                 message)
+
+    def _update_file_annotations(self, destpath, mdata, comptype, message=None):
+        if not os.path.exists(self.bag.nerd_file_for(destpath)):
+            if not comptype:
+                comptype = (destpath and "DataFile") or "Resource"
+            self.define_component(destpath, comptype)
+        elif comptype:
+            orig = self.bag.nerd_metadata_for(destpath)
+            if '@type' in orig and not metadata_matches_type(orig, comptype):
+                raise StateException("Existing component not a "+comptype+
+                                     ": "+str(orig.get('@type',[])))
+        self.ensure_bag_structure()
+
+        afile = self.bag.annotations_file_for(destpath)
+        if os.path.exists(afile):
+            if message is None:
+                message = "Updating annoations for " + destpath
+            orig = read_nerd(afile)
+            mdata = self._update_md(orig, mdata)
+        else:
+            if message is None:
+                message = "Adding annotations for " + destpath
+        return self._replace_file_metadata(destpath, mdata, message, afile)
+
+    def _update_nonfile_annotations(self, compid, mdata,comptype,message=None):
+        if compid.startswith("@id:"):
+            compid = compid[len("@id:"):]
+        self.ensure_bag_structure()
+
+        rmd, comps, found = self._fetch_nonfile_comp(compid, comptype)
+        if found < 0:
+            if not comptype:
+                raise ValueError("No comptype value given; "+
+                                 "unable to initialize component, id="+compid)
+            self.define_component("@id:"+compid, comptype)
+            found = len(comps)
+
+        afile = self.bag.annotations_file_for("")
+        comps = []
+        found = -1
+        if os.path.exists(afile):
+            armd = read_nerd(afile)
+            comps, found = self._find_nonfile_comp_by_id(armd, compid)
+        else:
+            armd = { 'components': comps }
+
+        if found < 0:
+            comps.append({'@id': compid})
+        
+        comps[found] = self._update_md(comps[found], mdata)
+        self._write_resmd(armd, afile)
+
+        return comps[found]
+
+            
+        
 
     def record(self, msg, *args, **kwargs):
         """
@@ -861,9 +1021,11 @@ class BagBuilder(PreservationSystem):
         indent = self.cfg.get('json_indent', 4)
         write_json(jsdata, destfile, indent)
 
-    def _write_resmd(self, resmd):
+    def _write_resmd(self, resmd, destfile=None):
         # Coming: control the order that JSON properties are written
-        self._write_json(resmd, self.bag.nerd_file_for(""))
+        if not destfile:
+            destfile = self.bag.nerd_file_for("")
+        self._write_json(resmd, destfile)
 
 
 def metadata_matches_type(mdata, nodetype):

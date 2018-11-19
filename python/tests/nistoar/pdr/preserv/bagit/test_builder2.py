@@ -147,6 +147,19 @@ class TestBuilder2(test.TestCase):
             self.bag._fix_id("ark:/goober/foo")
         
 
+    def test_assign_id(self):
+        self.assertIsNone(self.bag.id)
+        with self.assertRaises(ValueError):
+            self.bag.assign_id(None)
+        with self.assertRaises(ValueError):
+            self.bag.assign_id("")
+
+        self.bag.assign_id("edi00hw91c")
+        self.assertEqual(self.bag.id, "ark:/88434/edi00hw91c")
+
+        resmd = read_nerd(self.bag.bag.nerd_file_for(""))
+        self.assertEqual(resmd['@id'], "ark:/88434/edi00hw91c")
+
     def test_ensure_bagdir(self):
         self.assertTrue(not os.path.exists(self.bag.bagdir))
         self.assertFalse(self.bag._loghdlr)
@@ -328,7 +341,7 @@ class TestBuilder2(test.TestCase):
     def test_replace_metadata_for_nonfile(self):
         input = { "foo": "bar", "hank": "herb" }
         md = self.bag.replace_metadata_for("@id:#readme", input)
-        for p in md:
+        for p in input:
             self.assertIn(p, md)
         self.assertEqual(md['@id'], "#readme")
 
@@ -344,7 +357,7 @@ class TestBuilder2(test.TestCase):
                          
         input = { "bar": "foo", "herb": "hank" }
         md = self.bag.replace_metadata_for("@id:#readme", input)
-        for p in md:
+        for p in input:
             self.assertIn(p, md)
         self.assertNotIn("foo", md)
         self.assertNotIn("hank", md)
@@ -438,6 +451,9 @@ class TestBuilder2(test.TestCase):
 
         with self.assertRaises(bldr.StateException):
             self.bag.define_component("@id:#doi", "nrd:Goober")
+
+        with self.assertRaises(ValueError):
+            self.bag.define_component("@id:#res", "Resource")
 
     def test_update_md(self):
         md = {}
@@ -547,6 +563,216 @@ class TestBuilder2(test.TestCase):
         written = read_nerd(self.bag.bag.nerd_file_for(""))
         self.assertEqual(md, written)
 
+    def test_replace_annotation_for_file(self):
+        input = { "foo": "bar", "hank": "herb" }
+        md = self.bag.replace_annotations_for("readme.txt", input)
+        for p in md:
+            self.assertIn(p, md)
+
+        written = read_nerd(self.bag.bag.annotations_file_for("readme.txt"))
+        self.assertEqual(written, md)
+        self.assertEqual(md['foo'], 'bar')
+        self.assertEqual(md['hank'], 'herb')
+        self.assertEqual(len(md), 2)
+                         
+        md = self.bag.define_component("readme.txt", "DataFile")
+        self.assertNotIn('foo', md)
+        self.assertNotIn('hank', md)
+        written = read_nerd(self.bag.bag.annotations_file_for("readme.txt"))
+        self.assertEqual(written['foo'], 'bar')
+        self.assertEqual(written['hank'], 'herb')
+
+        input = { "bar": "foo", "herb": "hank" }
+        md = self.bag.replace_annotations_for("@id:cmps/readme.txt", input)
+        for p in md:
+            self.assertIn(p, md)
+        self.assertNotIn("foo", md)
+        self.assertNotIn("hank", md)
+
+        written = read_nerd(self.bag.bag.annotations_file_for("readme.txt"))
+        self.assertEqual(written, md)
+        self.assertEqual(md['bar'], 'foo')
+        self.assertEqual(md['herb'], 'hank')
+        self.assertEqual(len(md), 2)
+
+        with self.assertRaises(bldr.BadBagRequest):
+            self.bag.replace_annotations_for("", input)
+
+    def test_replace_annotations_for_nonfile(self):
+        input = { "foo": "bar", "hank": "herb" }
+        md = self.bag.replace_annotations_for("@id:#readme", input)
+        for p in input:
+            self.assertIn(p, md)
+        self.assertEqual(md['@id'], "#readme")
+
+        written = read_nerd(self.bag.bag.annotations_file_for(""))
+        self.assertEqual(len(written), 1)
+        comps = written['components']
+        self.assertEqual(len(comps), 1)
+        written = comps[0]
+        self.assertEqual(written, md)
+        self.assertEqual(md['foo'], 'bar')
+        self.assertEqual(md['hank'], 'herb')
+        self.assertEqual(len(md), 3)
+                         
+        input = { "bar": "foo", "herb": "hank" }
+        md = self.bag.replace_annotations_for("@id:#readme", input)
+        for p in input:
+            self.assertIn(p, md)
+        self.assertNotIn("foo", md)
+        self.assertNotIn("hank", md)
+
+        written = read_nerd(self.bag.bag.annotations_file_for(""))
+        self.assertEqual(len(written), 1)
+        comps = written['components']
+        self.assertEqual(len(comps), 1)
+        written = comps[0]
+        self.assertEqual(written, md)
+        self.assertEqual(md['bar'], 'foo')
+        self.assertEqual(md['herb'], 'hank')
+        self.assertEqual(len(md), 3)
+                         
+        md = self.bag.replace_annotations_for("@id:#goob", input)
+        written = read_nerd(self.bag.bag.annotations_file_for(""))
+        self.assertEqual(len(written), 1)
+        comps = written['components']
+        self.assertEqual(len(comps), 2)
+        written = comps[1]
+        self.assertEquals(md['@id'], "#goob")
+        self.assertEqual(md['bar'], 'foo')
+        self.assertEqual(md['herb'], 'hank')
+        self.assertEqual(len(md), 3)
+
+
+    def test_update_annotations_for_file(self):
+        md = self.bag.update_annotations_for("trial/readme.txt",
+                                             {"foo": "bar", "goob": "gurn"})
+        self.assertEqual(md['foo'],  "bar")
+        self.assertEqual(md['goob'], "gurn")
+        self.assertNotIn("hank", md)
+        self.assertNotIn("filepath", md)
+        self.assertEqual(len(md), 2)
+
+        # demonstrate that default metadata have been created for this comp
+        # and that it is unaffected by the annotations
+        md = self.bag.bag.nerd_metadata_for("trial/readme.txt",
+                                            merge_annots=False)
+        self.assertEqual(md['filepath'], "trial/readme.txt")
+        self.assertNotIn("foo", md)
+        self.assertNotIn("goob", md)
+        md = self.bag.update_metadata_for("trial/readme.txt", {'goob':"garb"},
+                                          "DataFile")
+        self.assertEqual(md['filepath'], "trial/readme.txt")
+        self.assertNotIn("foo", md)
+        self.assertEqual(md['goob'], "garb")
+        md = self.bag.bag.annotations_metadata_for("trial/readme.txt")
+        self.assertEqual(md['foo'],  "bar")
+        self.assertEqual(md['goob'], "gurn")
+        self.assertNotIn("hank", md)
+        self.assertNotIn("filepath", md)
+        self.assertEqual(len(md), 2)
+        md = self.bag.bag.nerd_metadata_for("trial/readme.txt",
+                                            merge_annots=True)
+        self.assertEqual(md['filepath'], "trial/readme.txt")
+        self.assertEqual(md['foo'],  "bar")
+        self.assertEqual(md['goob'], "gurn")
+        
+        # more updates
+        md = self.bag.update_annotations_for("trial/readme.txt",
+                                          {"foo": "gurn", "goob": "bar"})
+        self.assertEqual(md['foo'],  "gurn")
+        self.assertEqual(md['goob'], "bar")
+        self.assertNotIn("hand", md)
+        
+        md = self.bag.update_annotations_for("trial/readme.txt",
+                                          {"hand": "eye"})
+        self.assertEqual(md['foo'],  "gurn")
+        self.assertEqual(md['goob'], "bar")
+        self.assertEqual(md['hand'], "eye")
+        
+        written= read_nerd(self.bag.bag.annotations_file_for("trial/readme.txt"))
+        self.assertEqual(md, written)
+
+        md = self.bag.update_annotations_for("@id:cmps/trial/readme.txt",
+                                             {"hand": "ear"}, "DataFile")
+        self.assertEqual(md['hand'], "ear")
+        written= read_nerd(self.bag.bag.annotations_file_for("trial/readme.txt"))
+        self.assertEqual(md, written)
+
+        with self.assertRaises(bldr.StateException):
+            self.bag.update_annotations_for("trial/readme.txt",
+                                            {"hand": "ear"}, "ChecksumFile")
+
+    def test_update_annotations_for_nonfile(self):
+        md = self.bag.update_annotations_for("@id:#readme.txt",
+                                             {"foo": "bar", "goob": "gurn"},
+                                             "nrd:Hidden")
+        self.assertEqual(md['foo'],  "bar")
+        self.assertEqual(md['goob'], "gurn")
+        self.assertNotIn("hank", md)
+        self.assertNotIn("@type", md)
+        self.assertEqual(len(md), 3)
+
+        # demonstrate that default metadata have been created for this comp
+        # and that it is unaffected by the annotations
+        md = self.bag.bag.nerd_metadata_for("", merge_annots=False)
+        self.assertEquals(len(md.get('components',[])), 1)
+        md = md['components'][-1]
+        self.assertEqual(md['@type'], ["nrd:Hidden"])
+        self.assertNotIn("foo", md)
+        self.assertNotIn("goob", md)
+        md = self.bag.bag.annotations_metadata_for("")
+        self.assertEquals(len(md.get('components',[])), 1)
+        md = md['components'][-1]
+        self.assertEqual(md['foo'],  "bar")
+        self.assertEqual(md['goob'], "gurn")
+        self.assertEqual(len(md), 3)
+        md = self.bag.bag.nerd_metadata_for("", merge_annots=True)
+        self.assertEquals(len(md.get('components',[])), 1)
+        md = md['components'][-1]
+        self.assertEqual(md['@type'], ["nrd:Hidden"])
+        self.assertEqual(md['foo'],  "bar")
+        self.assertEqual(md['goob'], "gurn")
+
+        md = self.bag.update_annotations_for("@id:#readme.txt",
+                                             {"foo": "gurn", "goob": "bar"})
+        self.assertEqual(md['foo'],  "gurn")
+        self.assertEqual(md['goob'], "bar")
+        self.assertNotIn("hand", md)
+        
+        md = self.bag.update_annotations_for("@id:#readme.txt", {"hand": "eye"})
+        self.assertEqual(md['foo'],  "gurn")
+        self.assertEqual(md['goob'], "bar")
+        self.assertEqual(md['hand'], "eye")
+        
+        written = read_nerd(self.bag.bag.annotations_file_for(""))
+        self.assertEqual(len(written), 1)
+        comps = written['components']
+        self.assertEqual(len(comps), 1)
+        written = comps[0]
+        self.assertEqual(md, written)
+
+    def test_update_metadata_for_resource(self):
+        md = self.bag.update_annotations_for("", {"foo": "bar", "goob": "gurn"})
+        self.assertEqual(md['foo'],  "bar")
+        self.assertEqual(md['goob'], "gurn")
+        self.assertNotIn("hank", md)
+
+        written = read_nerd(self.bag.bag.annotations_file_for(""))
+        self.assertEqual(md, written)
+
+        md = read_nerd(self.bag.bag.nerd_file_for(""))
+        self.assertNotIn("foo", md)
+        self.assertNotIn("goob", md)
+        self.assertNotIn("hank", md)
+        md = self.bag.update_metadata_for("", {"goob": "garb"})
+        md = self.bag.bag.nerd_metadata_for("", merge_annots=False)
+        self.assertNotIn("foo", md)
+        self.assertNotIn("hank", md)
+        self.assertEqual(md['goob'], "garb")
+        md = self.bag.bag.nerd_metadata_for("", merge_annots=True)
+        self.assertEqual(md['foo'],  "bar")
+        self.assertEqual(md['goob'], "gurn")
         
 
 
