@@ -214,6 +214,34 @@ class TestBuilder2(test.TestCase):
         with self.assertRaises(ValueError):
             self.bag.ensure_metadata_dirs("foo/../../bar")
 
+    def test_ensure_datafile_dirs(self):
+        ddir = os.path.join("trial1","gold")
+        path = os.path.join(ddir,"file.dat")
+        self.bag.ensure_datafile_dirs(path)
+
+        self.assertTrue(os.path.exists(self.bag.bagdir))
+        self.assertTrue(os.path.exists(os.path.join(self.bag.bagdir,"data")))
+        self.assertTrue(os.path.exists(os.path.join(self.bag.bagdir,"metadata")))
+        self.assertTrue(os.path.exists(os.path.join(self.bag.bagdir,"metadata")))
+        
+        self.assertTrue(os.path.exists(os.path.join(self.bag.bagdir,
+                                                    "data",ddir)))
+        self.assertTrue(os.path.exists(os.path.join(self.bag.bagdir,
+                                                    "metadata",path)))
+
+        # is indepotent
+        self.bag.ensure_datafile_dirs(path)
+        self.assertTrue(os.path.exists(os.path.join(self.bag.bagdir,
+                                                    "data",ddir)))
+        self.assertTrue(os.path.exists(os.path.join(self.bag.bagdir,
+                                                    "metadata",path)))
+
+        # test illegal paths
+        with self.assertRaises(Exception):
+            self.bag.ensure_datafile_dirs("/foo/bar")
+        with self.assertRaises(Exception):
+            self.bag.ensure_datafile_dirs("foo/../../bar")
+
     def test_ensure_ansc_collmd(self):
         path = os.path.join("trial1","gold")
         self.bag.ensure_ansc_collmd(path)
@@ -335,8 +363,12 @@ class TestBuilder2(test.TestCase):
         self.assertEqual(md['herb'], 'hank')
         self.assertEqual(len(md), 2)
 
-        with self.assertRaises(bldr.BadBagRequest):
-            self.bag.replace_metadata_for("", input)
+        md = self.bag.replace_metadata_for("", input)
+        written = read_nerd(self.bag.bag.nerd_file_for(""))
+        self.assertEqual(md, written)
+        self.assertEqual(md['bar'], 'foo')
+        self.assertEqual(md['herb'], 'hank')
+        self.assertEqual(len(md), 2)
                          
     def test_replace_metadata_for_nonfile(self):
         input = { "foo": "bar", "hank": "herb" }
@@ -454,6 +486,100 @@ class TestBuilder2(test.TestCase):
 
         with self.assertRaises(ValueError):
             self.bag.define_component("@id:#res", "Resource")
+
+    def test_remove_file_component(self):
+        path = os.path.join("trial1","gold","trial1.json")
+        bagfilepath = os.path.join(self.bag.bagdir, 'data',path)
+        bagmdpath = os.path.join(self.bag.bagdir, 'metadata',path,"nerdm.json")
+        self.assertFalse( os.path.exists(bagfilepath) )
+        self.assertFalse( os.path.exists(bagmdpath) )
+        self.assertFalse( os.path.exists(os.path.dirname(bagmdpath)) )
+        self.assertFalse( os.path.exists(os.path.dirname(bagfilepath)) )
+
+        # add and remove data and metadata
+        self.bag.add_data_file(path, os.path.join(datadir,"trial1.json"))
+        self.assertTrue( os.path.exists(bagfilepath) )
+        self.assertTrue( os.path.exists(bagmdpath) )
+
+        self.assertTrue(self.bag.remove_component(path))
+        self.assertFalse( os.path.exists(bagfilepath) )
+        self.assertFalse( os.path.exists(bagmdpath) )
+        self.assertFalse( os.path.exists(os.path.dirname(bagmdpath)) )
+        self.assertTrue( os.path.exists(os.path.dirname(bagfilepath)) )
+
+        # add and remove just metadata
+        self.bag.register_data_file(path, os.path.join(datadir,"trial1.json"))
+        self.assertFalse( os.path.exists(bagfilepath) )
+        self.assertTrue( os.path.exists(bagmdpath) )
+
+        self.assertTrue(self.bag.remove_component(path))
+        self.assertFalse( os.path.exists(bagfilepath) )
+        self.assertFalse( os.path.exists(bagmdpath) )
+        self.assertFalse( os.path.exists(os.path.dirname(bagmdpath)) )
+        self.assertTrue( os.path.exists(os.path.dirname(bagfilepath)) )
+
+        # just a data file exists
+        self.assertFalse( os.path.exists(os.path.join(self.bag.bagdir,
+                                                      "data", "trial1.json")) )
+        filecopy(os.path.join(datadir,"trial1.json"),
+                 os.path.join(self.bag.bagdir, "data", "trial1.json"))
+        self.assertTrue( os.path.exists(os.path.join(self.bag.bagdir,
+                                                      "data", "trial1.json")) )
+        self.assertTrue(self.bag.remove_component("trial1.json"))
+        self.assertFalse( os.path.exists(os.path.join(self.bag.bagdir,
+                                                      "data", "trial1.json")) )
+
+    def test_remove_nonfile_component(self):
+        self.bag.define_component("@id:goober", "nrd:Goober")
+        self.bag.define_component("@id:#readme.txt", "nrd:Hidden")
+        md = self.bag.bag.nerd_metadata_for("")
+        self.assertIn("components", md)
+        self.assertEqual(len(md['components']), 2)
+
+        self.assertTrue( self.bag.remove_component("@id:goober") )
+        md = self.bag.bag.nerd_metadata_for("")
+        self.assertIn("components", md)
+        self.assertEqual(len(md['components']), 1)
+
+        self.assertTrue( self.bag.remove_component("@id:#readme.txt") )
+        md = self.bag.bag.nerd_metadata_for("")
+        self.assertIn("components", md)
+        self.assertEqual(len(md['components']), 0)
+        
+    def test_remove_file_component_trim(self):
+        gold = os.path.join("trial1","gold")
+        golddir = os.path.join(self.bag.bagdir, "data", gold)
+        t1path = os.path.join(gold, "trial1.json")
+        t2path = os.path.join("trial1","trial2.json")
+        t1bagfilepath = os.path.join(self.bag.bagdir, 'data',t1path)
+        t1bagmdpath = os.path.join(self.bag.bagdir, 'metadata',
+                                   t1path,"nerdm.json")
+        t2bagfilepath = os.path.join(self.bag.bagdir, 'data',t2path)
+        t2bagmdpath = os.path.join(self.bag.bagdir, 'metadata',
+                                   t2path,"nerdm.json")
+        self.assertFalse( os.path.exists(t1bagfilepath) )
+        self.assertFalse( os.path.exists(t1bagmdpath) )
+        self.assertFalse( os.path.exists(os.path.dirname(t1bagmdpath)) )
+        self.assertFalse( os.path.exists(os.path.dirname(t1bagfilepath)) )
+
+        self.bag.add_data_file(t1path, os.path.join(datadir,"trial1.json"))
+        self.bag.add_data_file(t2path, os.path.join(datadir,"trial2.json"))
+        self.assertTrue( os.path.exists(t1bagfilepath) )
+        self.assertTrue( os.path.exists(t1bagmdpath) )
+        self.assertTrue( os.path.exists(t2bagfilepath) )
+        self.assertTrue( os.path.exists(t2bagmdpath) )
+
+        self.assertTrue(self.bag.remove_component(t1path, True))
+
+        self.assertFalse( os.path.exists(t1bagfilepath) )
+        self.assertFalse( os.path.exists(t1bagmdpath) )
+        self.assertFalse( os.path.exists(os.path.dirname(t1bagmdpath)) )
+        self.assertFalse( os.path.exists(os.path.dirname(t1bagfilepath)) )
+        self.assertFalse( os.path.exists(os.path.dirname(os.path.dirname(t1bagmdpath))) )
+
+        self.assertFalse( os.path.exists( golddir ) )
+        self.assertTrue( os.path.exists(t2bagfilepath) )
+        self.assertTrue( os.path.exists(t2bagmdpath) )
 
     def test_update_md(self):
         md = {}
@@ -594,9 +720,6 @@ class TestBuilder2(test.TestCase):
         self.assertEqual(md['bar'], 'foo')
         self.assertEqual(md['herb'], 'hank')
         self.assertEqual(len(md), 2)
-
-        with self.assertRaises(bldr.BadBagRequest):
-            self.bag.replace_annotations_for("", input)
 
     def test_replace_annotations_for_nonfile(self):
         input = { "foo": "bar", "hank": "herb" }
@@ -774,7 +897,745 @@ class TestBuilder2(test.TestCase):
         self.assertEqual(md['foo'],  "bar")
         self.assertEqual(md['goob'], "gurn")
         
+    def test_rename_bag(self):
+        bagdir = os.path.join(self.tf.root, "testbag")
+        self.assertEqual(self.bag.bagname, "testbag")
+        self.assertEqual(self.bag.bagdir, bagdir)
+        self.assertTrue(not os.path.exists(self.bag.bagdir))
+        self.assertIsNone(self.bag._bag)
 
+        self.bag.rename_bag("goobbag")
+        bagdir = os.path.join(self.tf.root, "goobbag")
+        self.assertEqual(self.bag.bagname, "goobbag")
+        self.assertEqual(self.bag.bagdir, bagdir)
+        self.assertTrue(not os.path.exists(bagdir))
+        self.assertIsNone(self.bag._bag)
+
+        self.bag.ensure_bagdir()
+        self.assertTrue(os.path.exists(bagdir))
+        self.assertEqual(self.bag.bagname, "goobbag")
+        self.assertEqual(self.bag.bagdir, bagdir)
+        self.assertIsNotNone(self.bag._bag)
+        self.assertEqual(self.bag._bag.dir, bagdir)
+
+        self.bag.rename_bag("foobag")
+        self.assertEqual(self.bag.bagname, "foobag")
+        self.assertTrue(not os.path.exists(bagdir))
+        bagdir = os.path.join(self.tf.root, "foobag")
+        self.assertTrue(os.path.exists(bagdir))
+        self.assertEqual(self.bag.bagdir, bagdir)
+        self.assertIsNotNone(self.bag._bag)
+        self.assertEqual(self.bag._bag.dir, bagdir)
+
+    def test_determine_file_comp_type(self):
+        self.assertEquals(self.bag._determine_file_comp_type("goob.txt"),
+                          "DataFile")
+        self.assertEquals(self.bag._determine_file_comp_type("goob.txt.sha256"),
+                          "ChecksumFile")
+        self.assertEquals(self.bag._determine_file_comp_type("goob.txt.sha512"),
+                          "ChecksumFile")
+        self.assertEquals(self.bag._determine_file_comp_type("goob.txt.md5"),
+                          "ChecksumFile")
+        self.assertEquals(self.bag._determine_file_comp_type("goob.txt.sha"),
+                          "DataFile")
+
+    def test_describe_data_file(self):
+        srcfile = os.path.join(datadir, "trial1.json")
+
+        md = self.bag.describe_data_file(srcfile, "goob/trial1.json")
+        self.assertEqual(md['filepath'], "goob/trial1.json")
+        self.assertEqual(md['@id'], "cmps/goob/trial1.json")
+        self.assertEqual(md['mediaType'], "application/json")
+        self.assertEqual(md['size'], 69)
+        self.assertIn("nrdp:DataFile", md['@type'])
+        self.assertEqual(md['checksum'], {"algorithm": {'@type': 'Thing',
+                                                        "tag": "sha256" },
+    "hash": "d155d99281ace123351a311084cd8e34edda6a9afcddd76eb039bad479595ec9"})
+
+        md = self.bag.describe_data_file(srcfile, "goob/trial1.json", False)
+        self.assertEqual(md['filepath'], "goob/trial1.json")
+        self.assertEqual(md['@id'], "cmps/goob/trial1.json")
+        self.assertEqual(md['mediaType'], "application/json")
+        self.assertEqual(md['size'], 69)
+        self.assertIn("nrdp:DataFile", md['@type'])
+        self.assertNotIn("checksum", md)
+
+        md = self.bag.describe_data_file(srcfile, "goob/trial1.json",
+                                         False, "ChecksumFile")
+        self.assertEqual(md['filepath'], "goob/trial1.json")
+        self.assertEqual(md['@id'], "cmps/goob/trial1.json")
+        self.assertEqual(md['mediaType'], "application/json")
+        self.assertEqual(md['size'], 69)
+        self.assertNotIn("nrdp:DataFile", md['@type'])
+        self.assertIn("nrdp:ChecksumFile", md['@type'])
+        self.assertNotIn("checksum", md)
+
+        md = self.bag.describe_data_file(srcfile)
+        self.assertEqual(md['filepath'], "trial1.json")
+        self.assertEqual(md['@id'], "cmps/trial1.json")
+        self.assertEqual(md['mediaType'], "application/json")
+        self.assertEqual(md['size'], 69)
+        self.assertIn("nrdp:DataFile", md['@type'])
+        self.assertEqual(md['checksum'], {"algorithm": {'@type': 'Thing',
+                                                        "tag": "sha256" },
+    "hash": "d155d99281ace123351a311084cd8e34edda6a9afcddd76eb039bad479595ec9"})
+
+    def test_register_data_file(self):
+        srcfile = os.path.join(datadir, "trial1.json")
+        mddir = os.path.join(self.bag.bagdir, "metadata")
+        mdfile = os.path.join(mddir, "goob", "trial1.json", "nerdm.json")
+        self.assertTrue(not os.path.exists(mdfile))
+        self.assertTrue(not os.path.exists(mddir))
+
+        md = self.bag.register_data_file("goob/trial1.json", srcfile)
+        self.assertEqual(md['filepath'], "goob/trial1.json")
+        self.assertEqual(md['@id'], "cmps/goob/trial1.json")
+        self.assertEqual(md['mediaType'], "application/json")
+        self.assertEqual(md['size'], 69)
+        self.assertIn("nrdp:DataFile", md['@type'])
+        self.assertEqual(md['checksum'], {"algorithm": {'@type': 'Thing',
+                                                        "tag": "sha256" },
+    "hash": "d155d99281ace123351a311084cd8e34edda6a9afcddd76eb039bad479595ec9"})
+
+        self.assertTrue(os.path.exists(mddir))
+        self.assertTrue(os.path.exists(mdfile))
+        md = read_nerd(mdfile)
+        self.assertEqual(md['filepath'], "goob/trial1.json")
+        self.assertEqual(md['@id'], "cmps/goob/trial1.json")
+        self.assertEqual(md['mediaType'], "application/json")
+        self.assertEqual(md['size'], 69)
+        self.assertIn("nrdp:DataFile", md['@type'])
+        self.assertEqual(md['checksum'], {"algorithm": {'@type': 'Thing',
+                                                        "tag": "sha256" },
+    "hash": "d155d99281ace123351a311084cd8e34edda6a9afcddd76eb039bad479595ec9"})
+
+        md = self.bag.register_data_file("goob/trial2.json")
+        self.assertEqual(md['filepath'], "goob/trial2.json")
+        self.assertEqual(md['@id'], "cmps/goob/trial2.json")
+        self.assertEqual(md['mediaType'], "application/json")
+
+    def test_add_data_file(self):
+        srcfile = os.path.join(datadir, "trial1.json")
+        ddir = os.path.join(self.bag.bagdir, "data")
+        mdir = os.path.join(self.bag.bagdir, "metadata")
+        self.assertTrue(not os.path.exists(ddir))
+        self.assertTrue(not os.path.exists(mdir))
+
+        self.bag.add_data_file("goob/trial1.json", srcfile, False)
+        self.assertTrue(os.path.exists(ddir))
+        self.assertTrue(not os.path.exists(os.path.join(mdir,
+                                                 "goob/trial1.json/nerdm.json")))
+        self.assertTrue(os.path.isfile(os.path.join(ddir, "goob/trial1.json")))
+
+        self.bag.add_data_file("gurn/trial1.json", srcfile)
+        self.assertTrue(os.path.exists(ddir))
+        self.assertTrue(os.path.isdir(os.path.join(mdir,"gurn/trial1.json")))
+        self.assertTrue(os.path.isfile(os.path.join(mdir,
+                                                 "gurn/trial1.json/nerdm.json")))
+        self.assertTrue(os.path.isfile(os.path.join(mdir,"gurn/nerdm.json")))
+        self.assertTrue(os.path.isfile(os.path.join(ddir,"gurn/trial1.json")))
+
+        md = self.bag.bag.nerd_metadata_for("gurn/trial1.json")
+        self.assertEqual(md['filepath'], "gurn/trial1.json")
+        self.assertEqual(md['@id'], "cmps/gurn/trial1.json")
+        self.assertEqual(md['mediaType'], "application/json")
+        self.assertEqual(md['size'], 69)
+
+        md = self.bag.bag.nerd_metadata_for("gurn")
+        self.assertEqual(md['filepath'], "gurn")
+        self.assertEqual(md['@id'], "cmps/gurn")
+                        
+    def test_update_ediid(self):
+        self.assertIsNone(self.bag.ediid)
+        self.bag.ediid = "9999"
+        self.assertIsNone(self.bag.bag)
+        self.assertFalse(os.path.exists(os.path.join(self.bag.bagdir,"metadata")))
+        
+        with open(os.path.join(datadir, "_nerdm.json")) as fd:
+            mdata = json.load(fd)
+        self.bag.add_res_nerd(mdata)
+        self.assertIsNotNone(self.bag.ediid)
+        self.assertIsNotNone(self.bag.bag)
+
+        destpath = "foo/bar.json"
+        dlurl = "https://data.nist.gov/od/ds/"+self.bag.ediid+'/'+destpath
+        self.bag.register_data_file(destpath)
+        with open(self.bag.bag.nerd_file_for(destpath)) as fd:
+            mdata = json.load(fd)
+        self.assertTrue(mdata['downloadURL'], dlurl)
+
+        self.bag.ediid = "gurn"
+
+        with open(self.bag.bag.nerd_file_for("")) as fd:
+            mdata = json.load(fd)
+        self.assertEqual(mdata['ediid'], 'gurn')
+        dlurl = "https://data.nist.gov/od/ds/gurn/"+destpath
+        with open(self.bag.bag.nerd_file_for(destpath)) as fd:
+            mdata = json.load(fd)
+        self.assertEqual(mdata['downloadURL'], dlurl)
+
+    def test_add_res_nerd(self):
+        self.assertIsNone(self.bag.ediid)
+        with open(os.path.join(datadir, "_nerdm.json")) as fd:
+            mdata = json.load(fd)
+
+        self.bag.add_res_nerd(mdata)
+        self.assertEqual(self.bag.ediid, mdata['ediid'])
+        ddir = os.path.join(self.bag.bagdir,"data")
+        mdir = os.path.join(self.bag.bagdir,"metadata")
+        nerdfile = os.path.join(mdir,"nerdm.json")
+        self.assertTrue(os.path.isdir(ddir))
+        self.assertTrue(os.path.isdir(mdir))
+        self.assertTrue(os.path.exists(nerdfile))
+#        self.assertTrue(os.path.exists(os.path.join(ddir,
+#                                "1491_optSortSphEvaluated20160701.cdf")))
+        self.assertTrue(os.path.exists(os.path.join(mdir,
+                          "1491_optSortSphEvaluated20160701.cdf","nerdm.json")))
+#        self.assertTrue(os.path.exists(os.path.join(ddir,
+#                                "1491_optSortSphEvaluated20160701.cdf.sha256")))
+        self.assertTrue(os.path.exists(os.path.join(mdir,
+                    "1491_optSortSphEvaluated20160701.cdf.sha256","nerdm.json")))
+        self.assertEqual(len([f for f in os.listdir(mdir)
+                                if not f.startswith('.') and
+                                   not f.endswith('.json')]), 6)
+        
+        with open(nerdfile) as fd:
+            data = json.load(fd)
+        self.assertEqual(data['ediid'], '3A1EE2F169DD3B8CE0531A570681DB5D1491')
+        self.assertEqual(len(data['components']), 1)
+        self.assertNotIn('inventory', data)
+        self.assertNotIn('dataHierarchy', data)
+
+        with open(os.path.join(mdir,
+                  "1491_optSortSphEvaluated20160701.cdf","nerdm.json")) as fd:
+            data = json.load(fd)
+        self.assertEqual(data['filepath'],"1491_optSortSphEvaluated20160701.cdf")
+            
+    def test_add_ds_pod(self):
+        self.assertIsNone(self.bag.ediid)
+        podfile = os.path.join(datadir, "_pod.json")
+        with open(podfile) as fd:
+            poddata = json.load(fd)
+        self.bag.add_ds_pod(poddata, convert=False)
+        self.assertTrue(os.path.exists(self.bag.bag.pod_file()))
+        self.assertIsNone(self.bag.ediid)
+        with open(self.bag.bag.pod_file()) as fd:
+            data = json.load(fd)
+        self.assertEqual(data, poddata)
+        self.assertFalse(os.path.exists(self.bag.bag.nerd_file_for("")))
+        self.assertFalse(os.path.exists(self.bag.bag.nerd_file_for("trial1.json")))
+        self.assertFalse(os.path.exists(self.bag.bag.nerd_file_for("trial3/trial3a.json")))
+
+    def test_add_ds_pod_convert(self):
+        self.assertIsNone(self.bag.ediid)
+        podfile = os.path.join(datadir, "_pod.json")
+        with open(podfile) as fd:
+            poddata = json.load(fd)
+        self.bag.add_ds_pod(poddata, convert=True, savefilemd=False)
+        self.assertTrue(os.path.exists(self.bag.bag.pod_file()))
+        self.assertEqual(self.bag.ediid, poddata['identifier'])
+
+        nerdfile = self.bag.bag.nerd_file_for("")
+        self.assertTrue(os.path.exists(nerdfile))
+        with open(nerdfile) as fd:
+            data = json.load(fd)
+        self.assertEqual(data['modified'], poddata['modified'])
+        # self.assertEqual(data['@id'], "ark:/88434/mds00hw91v")
+        self.assertNotIn('@id', data)
+        self.assertFalse(os.path.exists(self.bag.bag.nerd_file_for("trial1.json")))
+        self.assertFalse(os.path.exists(self.bag.bag.nerd_file_for("trial3/trial3a.json")))
+
+    def test_add_ds_pod_filemd(self):
+        podfile = os.path.join(datadir, "_pod.json")
+        with open(podfile) as fd:
+            poddata = json.load(fd)
+        #pdb.set_trace()
+        self.bag.add_ds_pod(poddata, convert=True, savefilemd=True)
+        self.assertTrue(os.path.exists(self.bag.bag.pod_file()))
+
+        nerdfile = self.bag.bag.nerd_file_for("")
+        self.assertTrue(os.path.exists(nerdfile))
+        with open(nerdfile) as fd:
+            data = json.load(fd)
+        self.assertEqual(data['modified'], poddata['modified'])
+#        self.assertEqual(data['@id'], "ark:/88434/mds00hw91v")
+        self.assertNotIn('@id', data)
+        self.assertTrue(os.path.exists(self.bag.bag.nerd_file_for("trial1.json")))
+        self.assertTrue(os.path.exists(self.bag.bag.nerd_file_for("trial3/trial3a.json")))
+        nerdfile = self.bag.bag.nerd_file_for("trial3/trial3a.json")
+        with open(nerdfile) as fd:
+            data = json.load(fd)
+        self.assertEquals(data['filepath'], "trial3/trial3a.json")
+        self.assertEquals(data['@id'], "cmps/trial3/trial3a.json")
+
+    def test_trim_metadata_folders(self):
+        manfile = os.path.join(self.bag.bagdir, "manifest-sha256.txt")
+        datafiles = [ "trial1.json", "trial2.json", 
+                      os.path.join("trial3", "trial3a.json") ]
+        for df in datafiles:
+            self.bag.add_data_file(df, os.path.join(datadir, df))
+        metadir = os.path.join(self.bag.bagdir,"metadata")
+        t3dir = os.path.join(metadir,"trial3")
+
+        empties = [ os.path.join(t3dir,"cal","volt"),
+                    os.path.join(t3dir,"cal","temp"),
+                    os.path.join(metadir,"trial1.json","special") ]
+        for d in empties:
+            os.makedirs(d)
+
+        for d in empties:
+            self.assertTrue(os.path.isdir(d))
+
+        self.bag.trim_metadata_folders()
+
+        for d in empties:
+            self.assertTrue(not os.path.exists(d))
+        self.assertTrue(not os.path.exists(os.path.join(t3dir,"cal")))
+        
+    def test_trim_data_folders(self):
+        manfile = os.path.join(self.bag.bagdir, "manifest-sha256.txt")
+        datafiles = [ "trial1.json", "trial2.json", 
+                      os.path.join("trial3", "trial3a.json") ]
+        bdatadir = os.path.join(self.bag.bagdir,"data")
+        metadir = os.path.join(self.bag.bagdir,"metadata")
+        t3dir = os.path.join(bdatadir,"trial3")
+        for df in datafiles:
+            self.bag.add_data_file(df, os.path.join(datadir, df))
+
+        # create some empty data directories
+        empties = [ os.path.join("trial3","cal","volt"),
+                    os.path.join("trial3","cal","temp") ]
+        for d in empties:
+            os.makedirs(os.path.join(bdatadir, d))
+        os.makedirs(os.path.join(metadir,"cal","volt"))
+        
+        # remove a data file so we are left with just its metadata
+        t2mdir = os.path.join(metadir, "trial2.json")
+        os.remove(os.path.join(bdatadir, "trial2.json"))
+        os.remove(os.path.join(bdatadir, "trial3", "trial3a.json"))
+
+        for d in empties:
+            self.assertTrue(os.path.isdir(os.path.join(bdatadir, d)))
+        for df in datafiles:
+            self.assertTrue(os.path.isdir(os.path.join(metadir,df)))
+
+        self.bag.trim_data_folders(False)
+
+        for d in empties:
+            self.assertTrue(not os.path.exists(os.path.join(bdatadir, d)))
+            self.assertTrue(not os.path.exists(os.path.join(metadir, d)))
+        self.assertTrue(not os.path.exists(os.path.join(t3dir,"cal")))
+
+        for df in datafiles:
+            self.assertTrue(os.path.isdir(os.path.join(metadir,df)))
+        self.assertTrue(os.path.isdir(os.path.join(metadir,"trial2.json")))
+        self.assertTrue(os.path.exists(os.path.join(metadir,
+                                                    "trial3","trial3a.json")))
+
+        # try again with rmmeta=True
+        for d in empties:
+            d = os.path.join(bdatadir, d)
+            if not os.path.exists(d):
+                os.makedirs(d)
+
+        self.bag.trim_data_folders(True)
+        
+        for d in empties:
+            self.assertTrue(not os.path.exists(os.path.join(bdatadir, d)))
+            self.assertTrue(not os.path.exists(os.path.join(metadir, d)))
+        self.assertTrue(not os.path.exists(os.path.join(t3dir,"cal")))
+
+        self.assertTrue(os.path.isdir(os.path.join(metadir,"trial1.json")))
+        self.assertTrue(os.path.isdir(os.path.join(metadir,"trial2.json")))
+        self.assertTrue(not os.path.exists(os.path.join(bdatadir, "trial3")))
+        self.assertTrue(not os.path.exists(os.path.join(metadir, "trial3")))
+
+    def test_ensure_comp_metadata(self):
+        manfile = os.path.join(self.bag.bagdir, "manifest-sha256.txt")
+        datafiles = [ "trial1.json", "trial2.json" ]
+        nomd_datafile = os.path.join("trial3", "trial3a.json") 
+        bdatadir = os.path.join(self.bag.bagdir,"data")
+        metadir = os.path.join(self.bag.bagdir,"metadata")
+        t3dir = os.path.join(bdatadir,"trial3")
+        for df in datafiles:
+            self.bag.add_data_file(df, os.path.join(datadir, df))
+        self.bag.add_data_file(nomd_datafile,
+                               os.path.join(datadir, nomd_datafile),
+                               register=False)
+        self.bag.update_metadata_for("trial2.json", {"size": 5})
+
+        for df in datafiles + [nomd_datafile]:
+            self.assertTrue( os.path.isfile(os.path.join(bdatadir, df)) )
+        for df in datafiles:
+            self.assertTrue( os.path.isfile(os.path.join(metadir, df,
+                                                         "nerdm.json")) )
+        self.assertFalse( os.path.exists(os.path.join(metadir, nomd_datafile,
+                                                      "nerdm.json")) )
+
+        self.bag.ensure_comp_metadata()
+
+        for df in datafiles:
+            mdfile = os.path.join(metadir, df, "nerdm.json")
+            self.assertTrue( os.path.isfile(mdfile) )
+
+        # check to see that the size for trial2.json was not updated
+        data = read_nerd(mdfile)
+        self.assertEqual(data['size'], 5)
+        
+        mdfile = os.path.join(metadir, nomd_datafile, "nerdm.json")
+        self.assertTrue( os.path.isfile(mdfile) )
+
+        # check that if the checksum is missing, it will get filled in.
+        data = read_nerd(mdfile)
+        for prop in "@id @type filepath mediaType checksum size".split():
+            self.assertIn(prop, data)
+        del data['checksum']
+
+        self.bag.ensure_comp_metadata()
+        data = read_nerd(mdfile)
+        self.assertIn("checksum", data)
+
+        # now try it with updstats=True
+        self.bag.ensure_comp_metadata(True)
+
+        mdfile = os.path.join(metadir, "trial2.json", "nerdm.json")
+        data = read_nerd(mdfile)
+        self.assertNotEqual(data['size'], 5)
+
+    def test_ensure_bagit_ver(self):
+        self.assertTrue(not os.path.exists( self.bag.bagdir ))
+        self.bag.ensure_bagit_ver()
+        bagitf = os.path.join(self.bag.bagdir, "bagit.txt") 
+        self.assertTrue(os.path.exists(bagitf))
+            
+        with open(bagitf) as fd:
+            lines = fd.readlines()
+
+        self.assertTrue(any([r for r in lines if "BagIt_Version:"]))
+        self.assertTrue(any([r for r in lines if "Tag-File-Character-Encoding:"]))
+
+    def test_write_data_manifest(self):
+        manfile = os.path.join(self.bag.bagdir, "manifest-sha256.txt")
+        datafiles = [ "trial1.json", "trial2.json", 
+                      os.path.join("trial3", "trial3a.json") ]
+        for df in datafiles:
+            self.bag.add_data_file(df, os.path.join(datadir, df))
+
+        self.bag.write_data_manifest(False)
+        self.assertTrue(os.path.exists(manfile))
+        c = 0
+        fc = {}
+        with open(manfile) as fd:
+            for line in fd:
+                c += 1
+                parts = line.strip().split(' ', 1)
+                self.assertEqual(len(parts), 2,
+                                 "Bad manifest file syntax, line %d: %s" %
+                                 (c, line.rstrip()))
+                self.assertTrue(parts[1].startswith('data/'),
+                                "Incorrect path name: "+parts[1])
+                self.assertIn(parts[1][5:], datafiles)
+                dfp = os.path.join(self.bag.bagdir, parts[1])
+                self.assertTrue(os.path.exists(dfp),
+                                "Datafile not found: "+parts[1])
+                self.assertEqual(parts[0], bldr.checksum_of(dfp))
+        self.assertEqual(c, len(datafiles))
+
+        self.bag.write_data_manifest(True)
+        self.assertTrue(os.path.exists(manfile))
+        c = 0
+        fc = {}
+        with open(manfile) as fd:
+            for line in fd:
+                c += 1
+                parts = line.strip().split(' ', 1)
+                self.assertEqual(len(parts), 2,
+                                 "Bad manifest file syntax, line %d: %s" %
+                                 (c, line.rstrip()))
+                self.assertTrue(parts[1].startswith('data/'),
+                                "Incorrect path name: "+parts[1])
+                self.assertIn(parts[1][5:], datafiles)
+                dfp = os.path.join(self.bag.bagdir, parts[1])
+                self.assertTrue(os.path.exists(dfp),
+                                "Datafile not found: "+parts[1])
+                self.assertEqual(parts[0], bldr.checksum_of(dfp))
+        self.assertEqual(c, len(datafiles))
+
+    def test_write_baginfo_data(self):
+        data = self.bag.cfg['init_bag_info']
+        infofile = os.path.join(self.bag.bagdir,"bag-info.txt")
+        self.assertFalse(os.path.exists(infofile))
+
+        # Make sure we can handle unicode data
+        data['Description'] = u"The data is at \u03bb = 20cm."
+        
+        self.bag.write_baginfo_data(data, overwrite=True)
+
+        self.assertTrue(os.path.exists(infofile))
+        with open(infofile) as fd:
+            lines = fd.readlines()
+        self.assertIn("Source-Organization: "+
+                      "National Institute of Standards and Technology\n",
+                      lines)
+        self.assertIn("Contact-Email: datasupport@nist.gov\n", lines)
+        self.assertIn("Multibag-Version: 0.4\n", lines)
+        self.assertEqual(len([l for l in lines
+                                if "Organization-Address: " in l]), 2)
+
+        data = OrderedDict([
+            ("Goober-Name", "Gurn Cranston"),
+            ("Foo", "Bar")
+        ])
+        self.bag.write_baginfo_data(data, overwrite=True)
+
+        self.assertTrue(os.path.exists(infofile))
+        with open(infofile) as fd:
+            lines = fd.readlines()
+        self.assertEqual(len(lines), 2)
+        self.assertEqual(lines[0], "Goober-Name: Gurn Cranston\n")
+        self.assertEqual(lines[1], "Foo: Bar\n")
+
+        data = self.bag.cfg['init_bag_info']
+        data['Foo'] = "Bang"
+        self.bag.write_baginfo_data(data, overwrite=False)
+
+        with open(infofile) as fd:
+            lines = fd.readlines()
+        self.assertIn("Goober-Name: Gurn Cranston\n", lines)
+        self.assertIn("Foo: Bar\n", lines)
+        self.assertEqual(lines[0], "Goober-Name: Gurn Cranston\n")
+        self.assertEqual(lines[1], "Foo: Bar\n")
+        self.assertIn("Source-Organization: "+
+                      "National Institute of Standards and Technology\n",
+                      lines)
+        self.assertIn("Contact-Email: datasupport@nist.gov\n", lines)
+        self.assertIn("Multibag-Version: 0.4\n", lines)
+        self.assertEqual(len([l for l in lines
+                                if "Organization-Address: " in l]), 2)
+        self.assertEqual(len([l for l in lines
+                                if "Foo: " in l]), 2)
+
+    def test_update_head_version(self):
+        self.bag.ensure_bagdir()
+        binfo = {
+            'Multibag-Tag-Directory': ["multibag"],
+            'Multibag-Version': ["0.4"]
+        }
+
+        self.bag.update_head_version(binfo, "1.0.0")
+        self.assertEqual(binfo['Multibag-Head-Version'], "1.0.0")
+        self.assertEqual(binfo['Multibag-Version'], ["0.4"])
+        self.assertEqual(binfo['Multibag-Tag-Directory'], ["multibag"])
+        self.assertNotIn('Multibag-Head-Deprecates', binfo)
+        
+        mbdir = os.path.join(self.bag.bagdir, 'multibag')
+        if not os.path.exists(mbdir):
+            os.mkdir(mbdir)
+        depinfo = {
+            'Multibag-Tag-Directory': ["multibag"],
+            'Multibag-Version': ["0.3"]
+        }
+        depinfof = os.path.join(mbdir, "deprecated-info.txt")
+        self.bag.write_baginfo_data(depinfo, depinfof, overwrite=True)
+
+        self.bag.update_head_version(binfo, "9.2-78")
+        self.assertEqual(binfo['Multibag-Head-Version'], "9.2-78")
+        self.assertEqual(binfo['Multibag-Head-Deprecates'], ["1"])
+        self.assertEqual(binfo['Multibag-Version'], ["0.4"])
+        self.assertEqual(binfo['Multibag-Tag-Directory'], ["multibag"])
+        
+        depinfo.update({
+            'Multibag-Head-Version': ["8.5.1"],
+            'Multibag-Head-Deprecates': ["1", "2.1.1"]
+        })
+        self.bag.write_baginfo_data(depinfo, depinfof, overwrite=True)
+
+        self.bag.update_head_version(binfo, "12.1.9.2-78")
+        self.assertEqual(binfo['Multibag-Head-Version'], "12.1.9.2-78")
+        self.assertEqual(binfo['Multibag-Head-Deprecates'],
+                         ["1", "8.5.1", "2.1.1"])
+        self.assertEqual(binfo['Multibag-Version'], ["0.4"])
+        self.assertEqual(binfo['Multibag-Tag-Directory'], ["multibag"])
+            
+    def test_ensure_baginfo(self):
+        path = os.path.join("trial1","gold","trial1.json")
+        datafile = os.path.join(datadir,"trial1.json")
+        datafilesz = os.stat(datafile).st_size
+        podfile = os.path.join(datadir, "_pod.json")
+
+        with self.assertRaises(bldr.BagProfileError):
+            self.bag.ensure_baginfo()
+        self.bag.update_metadata_for("", {})
+        with self.assertRaises(bldr.BagProfileError):
+            self.bag.ensure_baginfo()
+
+        self.bag.assign_id("mds00kkd13")
+        self.bag.add_data_file(path, datafile)
+        path = os.path.join("trial1","trial2.json")
+        self.bag.add_data_file(path, datafile)
+        with open(podfile) as fd:
+            pod = json.load(fd)
+        self.bag.add_ds_pod(pod, convert=True)
+
+        self.bag.ensure_baginfo()
+
+        infofile = os.path.join(self.bag.bagdir, "bag-info.txt")
+        self.assertTrue(os.path.exists(infofile))
+        with open(infofile) as fd:
+            lines = fd.readlines()
+
+        self.assertIn("Source-Organization: "+
+                      "National Institute of Standards and Technology\n",
+                      lines)
+        self.assertIn("Contact-Email: datasupport@nist.gov\n", lines)
+        self.assertIn("Multibag-Version: 0.4\n", lines)
+        self.assertEqual(len([l for l in lines
+                                if "Organization-Address: " in l]), 2)
+        self.assertIn("Internal-Sender-Identifier: "+self.bag.bagname+'\n',
+                      lines)
+        self.assertEqual(len([l for l in lines
+                                if "External-Identifier: " in l]), 2)
+        wrapping = [l for l in lines if ':' not in l]
+        self.assertEqual(len(wrapping), 1)
+        self.assertEqual(len([l for l in wrapping if l.startswith(' ')]), 1)
+
+        oxum = [l for l in lines if "Payload-Oxum: " in l]
+        self.assertEqual(len(oxum), 1)
+        oxum = [int(n) for n in oxum[0].split(': ')[1].split('.')]
+        self.assertEqual(oxum[1], 2)
+        self.assertEqual(oxum[0], 2*datafilesz)
+
+        oxum = [l for l in lines if "Bag-Oxum: " in l]
+        self.assertEqual(len(oxum), 1)
+        oxum = [int(n) for n in oxum[0].split(': ')[1].split('.')]
+        self.assertEqual(oxum[1], 14)
+        self.assertEqual(oxum[0], 12385)  # this will change if logging changes
+
+        bagsz = [l for l in lines if "Bag-Size: " in l]
+        self.assertEqual(len(bagsz), 1)
+        bagsz = bagsz[0]
+        self.assertIn("kB", bagsz)
+
+    def test_format_bytes(self):
+        self.assertEqual(self.bag._format_bytes(108), "108 B")
+        self.assertEqual(self.bag._format_bytes(34569), "34.57 kB")
+        self.assertEqual(self.bag._format_bytes(9834569), "9.835 MB")
+        self.assertEqual(self.bag._format_bytes(19834569), "19.83 MB")
+        self.assertEqual(self.bag._format_bytes(14419834569), "14.42 GB")
+
+    def test_write_about(self):
+        self.bag.ensure_bagdir()
+        with self.assertRaises(bldr.BagProfileError):
+            self.bag.write_about_file()
+        
+        with open(os.path.join(datadir, "_nerdm.json")) as fd:
+            mdata = json.load(fd)
+        self.bag.add_res_nerd(mdata)
+        with self.assertRaises(bldr.BagProfileError):
+            self.bag.write_about_file()
+        
+        podfile = os.path.join(datadir, "_pod.json")
+        with open(podfile) as fd:
+            poddata = json.load(fd)
+
+        # Make sure we can handle unicode data
+        poddata['description'] += u" at \u03bb = 20cm."
+        self.bag.add_ds_pod(poddata, convert=False)
+
+        aboutfile = os.path.join(self.bag.bagdir,"about.txt")
+        self.assertTrue( not os.path.exists(aboutfile) )
+        self.bag.write_about_file()
+        self.assertTrue( os.path.exists(aboutfile) )
+
+        with open(aboutfile) as fd:
+            lines = fd.readlines()
+
+        # pdb.set_trace()
+        self.assertIn("NIST Public Data", lines[0])
+        self.assertIn("OptSortSph:", lines[2])
+        self.assertIn("Zachary Levine [1] and John J. Curry [1]", lines[4])
+        self.assertIn("[1] National ", lines[5])
+        self.assertIn("Identifier: doi:10.18434/", lines[6])
+        self.assertIn("(ark:/88434/", lines[6])
+        self.assertIn("Contact: Zachary ", lines[8])
+        self.assertIn(" (zachary.levine@nist.gov)", lines[8])
+        self.assertIn("         100 Bureau ", lines[9])
+        self.assertIn("         Mail Stop", lines[10])
+        self.assertIn("         Gaithersburg, ", lines[11])
+        self.assertIn("         Phone: 1-301-975-", lines[12])
+        self.assertIn("Software to", lines[14])
+        self.assertIn("More information:", lines[17])
+        self.assertIn("https://doi.org/10.18434/", lines[18])
+
+    def test_write_mbag_files(self):
+        podfile = os.path.join(datadir, "_pod.json")
+        self.bag.add_ds_pod(podfile, convert=True, savefilemd=False)
+        self.assertTrue(os.path.exists(self.bag.bag.pod_file()))
+        self.assertTrue(os.path.exists(self.bag.bag.nerd_file_for('')))
+
+        manfile = os.path.join(self.bag.bagdir, "manifest-sha256.txt")
+        datafiles = [ "trial1.json", "trial2.json", 
+                      os.path.join("trial3", "trial3a.json") ]
+        for df in datafiles:
+            self.bag.add_data_file(df, os.path.join(datadir, df))
+
+        mbtag = os.path.join(self.bag.bagdir,"multibag", "member-bags.tsv")
+        fltag = os.path.join(self.bag.bagdir,"multibag", "file-lookup.tsv")
+                             
+        self.assertTrue(not os.path.exists(mbtag))
+        self.assertTrue(not os.path.exists(fltag))
+
+        # pdb.set_trace()
+        self.bag.write_mbag_files()
+
+        self.assertTrue(os.path.exists(mbtag))
+        self.assertTrue(os.path.exists(fltag))
+
+        with open(mbtag) as fd:
+            lines = fd.readlines()
+        self.assertEqual(lines, [self.bag.bagname+'\n'])
+
+        members = [os.path.join("data", d) for d in datafiles] + \
+                  ["metadata/pod.json", "metadata/nerdm.json"] + \
+                  [os.path.join("metadata", d, "nerdm.json") for d in datafiles]
+        
+        # FIX: component order is significant!
+        # with open(fltag) as fd:
+        #    i = 0;
+        #    for line in fd:
+        #        self.assertEqual(line.strip(), members[i]+' '+self.bag.bagname)
+        #        i += 1
+        #
+        with open(fltag) as fd:
+            lines = set([line.strip() for line in fd])
+        for member in members:
+            self.assertIn(member+'\t'+self.bag.bagname, lines)
+
+            
+    def test_finalize_validate(self):
+        path = os.path.join("trial1","gold","trial1.json")
+        datafile = os.path.join(datadir,"trial1.json")
+        datafilesz = os.stat(datafile).st_size
+        podfile = os.path.join(datadir, "_pod.json")
+
+        self.bag.assign_id("mds00kkd13")
+        self.bag.add_data_file(path, datafile)
+        path = os.path.join("trial1","trial2.json")
+        self.bag.add_data_file(path, datafile)
+        with open(podfile) as fd:
+            pod = json.load(fd)
+        self.bag.add_ds_pod(pod, convert=True, savefilemd=False)
+
+        self.bag.finalize_bag(stop_logging=True)
+        pdb.set_trace()
+        self.bag.validate()
+
+        self.assertTrue(os.path.isfile(os.path.join(self.bag.bagdir, "bagit.txt")))
+        self.assertTrue(os.path.isfile(os.path.join(self.bag.bagdir, "bag-info.txt")))
+        self.assertTrue(os.path.isfile(os.path.join(self.bag.bagdir, "about.txt")))
+        self.assertTrue(os.path.isdir(os.path.join(self.bag.bagdir, "multibag")))
+        
+        
 
     def test_matches_type(self):
         types = ["nrdp:DataFile", "Downloadable", "dcat:Distribution"]
@@ -794,6 +1655,73 @@ class TestBuilder2(test.TestCase):
         
         mdata = {"type": ["nrdp:DataFile", "Downloadable", "dcat:Distribution"]}
         self.assertTrue(not bldr.metadata_matches_type(mdata, "DataFile"))
+
+    def test_ensure_merged_annotations(self):
+        podfile = os.path.join(datadir, "_pod.json")
+        with open(podfile) as fd:
+            poddata = json.load(fd)
+        self.bag.add_ds_pod(poddata, convert=True)
+
+        annotsrc = os.path.join(datadir, "..", "metadatabag", "metadata")
+        annotfile = os.path.join(annotsrc, "annot.json")
+        with open(annotfile) as fd:
+            annot = json.load(fd)
+        self.bag.replace_annotations_for("", annot)
+
+        nerdfile = os.path.join(self.bag.bagdir, "metadata", "nerdm.json")
+        with open(nerdfile) as fd:
+            nerd = json.load(fd)
+        self.assertNotIn("authors", nerd)
+        self.assertNotIn("foo", nerd)
+        self.assertIn("ediid", nerd)
+        self.assertTrue(nerd["title"].startswith("OptSortSph: Sorting "))
+        ediid = nerd['ediid']
+
+        self.bag.ensure_merged_annotations()
+
+        with open(nerdfile) as fd:
+            nerd = json.load(fd)
+        self.assertIn("authors", nerd)
+        self.assertIn("foo", nerd)
+        self.assertTrue(nerd["title"].startswith("OptSortSph: Sorting "))
+        self.assertEqual(nerd["foo"], "bar")
+        self.assertEqual(nerd['authors'][0]['givenName'], "Kevin")
+        self.assertEqual(nerd['authors'][1]['givenName'], "Jianming")
+        self.assertEqual(len(nerd['authors']), 2)
+        self.assertEqual(nerd['ediid'], ediid)
+
+        annotfile = os.path.join(annotsrc, "trial1.json", "annot.json")
+        with open(annotfile) as fd:
+            annot = json.load(fd)
+        self.bag.replace_annotations_for("trial3", annot)
+
+        dnerdfile = os.path.join(self.bag.bagdir, "metadata", "trial3",
+                                 "nerdm.json")
+        with open(dnerdfile) as fd:
+            nerd = json.load(fd)
+        self.assertNotIn('previewURL', nerd)
+        self.assertNotIn('title', nerd)
+            
+        self.bag.ensure_merged_annotations()
+
+        # note: this tests that running ensure_merged_annotations() twice 
+        # does not change the results
+        with open(nerdfile) as fd:
+            nerd = json.load(fd)
+        self.assertIn("authors", nerd)
+        self.assertIn("foo", nerd)
+        self.assertTrue(nerd["title"].startswith("OptSortSph: Sorting "))
+        self.assertEqual(nerd["foo"], "bar")
+        self.assertEqual(nerd['authors'][0]['givenName'], "Kevin")
+        self.assertEqual(nerd['authors'][1]['givenName'], "Jianming")
+        self.assertEqual(len(nerd['authors']), 2)
+        self.assertEqual(nerd['ediid'], ediid)
+
+        with open(dnerdfile) as fd:
+            nerd = json.load(fd)
+        self.assertIn('previewURL', nerd)
+        self.assertTrue(nerd['previewURL'].endswith("trial1.json/preview"))
+        self.assertEqual(nerd['title'], "a better title")
 
 
 
