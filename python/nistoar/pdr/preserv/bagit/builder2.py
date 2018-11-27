@@ -105,8 +105,7 @@ class BagBuilder(PreservationSystem):
 
     nistprofile = "0.4"
 
-    def __init__(self, parentdir, bagname, config=None, id=None, minter=None,
-                 logger=None):
+    def __init__(self, parentdir, bagname, config=None, id=None, logger=None):
         """
         create the Builder to build a bag with a given name
 
@@ -837,7 +836,7 @@ class BagBuilder(PreservationSystem):
                 "@type": [ comptype ]
             }
 
-        raise BagWriteError("Unrecognized component type: "+comptype)
+        raise BagWriteError("Unrecognized component type: "+str(comptype))
 
 
     def update_metadata_for(self, destpath, mdata, comptype=None, message=None):
@@ -874,6 +873,9 @@ class BagBuilder(PreservationSystem):
         if destpath.startswith("@id:cmps/"):
             # file-based
             destpath = destpath[len("@id:cmps/"):]
+
+        if not comptype and '@type' in mdata:
+            comptype = self._determine_comp_type(mdata)
 
         if destpath.startswith("@id:"):
             # non-file-based component
@@ -1255,6 +1257,22 @@ class BagBuilder(PreservationSystem):
         if ext in ["sha256", "sha512", "md5"]:
             return "ChecksumFile"
         return "DataFile"
+
+    def _determine_comp_type(self, mdata):
+        # this tries to figure out the comptype from the given metadata
+        if '@type' in mdata:
+            if any([':DataFile' in t for t in mdata['@type']]):
+                return "DataFile"
+            elif any([':ChecksumFile' in t for t in mdata['@type']]):
+                return "ChecksumFile"
+            elif any([':Subcollection' in t for t in mdata['@type']]):
+                return "Subcollection"
+            elif any([':PublicDataResource' in t for t in mdata['@type']]):
+                return "Resource"
+            else:
+                return mdata['@type'][0]
+        return None
+            
 
     def get_file_specs(self, datafile, checksum=True):
         """
