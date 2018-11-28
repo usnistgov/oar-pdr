@@ -159,6 +159,8 @@ class TestBuilder2(test.TestCase):
 
         resmd = read_nerd(self.bag.bag.nerd_file_for(""))
         self.assertEqual(resmd['@id'], "ark:/88434/edi00hw91c")
+        self.assertTrue(isinstance(resmd['@context'], list))
+        self.assertEqual(resmd['@context'][1]['@base'], "ark:/88434/edi00hw91c")
 
     def test_ensure_bagdir(self):
         self.assertTrue(not os.path.exists(self.bag.bagdir))
@@ -1509,7 +1511,7 @@ class TestBuilder2(test.TestCase):
         self.assertEqual(len(oxum), 1)
         oxum = [int(n) for n in oxum[0].split(': ')[1].split('.')]
         self.assertEqual(oxum[1], 14)
-        self.assertEqual(oxum[0], 12385)  # this will change if logging changes
+        self.assertEqual(oxum[0], 12441)  # this will change if logging changes
 
         bagsz = [l for l in lines if "Bag-Size: " in l]
         self.assertEqual(len(bagsz), 1)
@@ -1627,7 +1629,6 @@ class TestBuilder2(test.TestCase):
         self.bag.add_ds_pod(pod, convert=True, savefilemd=False)
 
         self.bag.finalize_bag(stop_logging=True)
-        pdb.set_trace()
         self.bag.validate()
 
         self.assertTrue(os.path.isfile(os.path.join(self.bag.bagdir, "bagit.txt")))

@@ -309,8 +309,16 @@ class BagBuilder(PreservationSystem):
         self._id = self._fix_id(id)  # may raise validity concerns
 
         self.ensure_bag_structure()
-        self.update_metadata_for("", {"@id": self._id},
-                                 message="setting resource ID: "+self._id)
+        md = self.update_metadata_for("", {"@id": self._id},
+                                      message="setting resource ID: "+self._id)
+        if '@context' in md:
+            if not isinstance(md['@context'], list):
+                md['@context'] = [ md['@context'], { "@base": self._id } ]
+            elif len(md['@context']) < 2:
+                md['@context'].append({"@base": self._id})
+            else:
+                md['@context'][1]['@base'] = self._id
+            self.update_metadata_for("", {"@context": md['@context']})
 
         # no other metadata conventions requiring consistency with the ID 
         # is currently supported.
@@ -564,7 +572,7 @@ class BagBuilder(PreservationSystem):
     def _define_file_comp_md(self, destpath, comptype, msg=None):
         if os.path.exists(self.bag.nerd_file_for(destpath)):
             md = self.bag.nerd_metadata_for(destpath, True)
-            if not metadata_matches_type(comptype):
+            if not metadata_matches_type(md, comptype):
                 raise StateException("Existing component not a "+comptype+
                                      ": "+str(md.get('@type',[])))
         else:
@@ -2105,12 +2113,12 @@ format(nerdm['title'])
             ("_schema", NERD_DEF + "Component"),
             ("@context", NERDM_CONTEXT),
             ("@id", "cmps/" + urlencode(destpath)),
-            ("@type", deepcopy(self._comp_types["DataFile"][0])),
-            ("filepath", destpath)
+            ("@type", deepcopy(self._comp_types["DataFile"][0]))
         ])
+        out["_extensionSchemas"] = deepcopy(self._comp_types["DataFile"][1])
+        out["filepath"] = destpath
         if self.ediid:
             out['downloadURL'] = self._download_url(self.ediid, destpath)
-        out["_extensionSchemas"] = deepcopy(self._comp_types["DataFile"][1])
         return out
 
     def _create_def_chksum_md(self, destpath):
