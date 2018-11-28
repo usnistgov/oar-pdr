@@ -216,7 +216,7 @@ class MIDASMetadataBagger(SIPBagger):
     def _mark_filepath_unsynced(self, filepath):
         self.bagbldr.ensure_bagdir()
         mdir = os.path.dirname(self.bagbldr.bag.nerd_file_for(filepath))
-        if os.path.join(mdir):
+        if os.path.isdir(mdir):
             semaphore = os.path.join(mdir, UNSYNCED_FILE)
             if not os.path.exists(semaphore):
                 # create 0-length the file
@@ -226,7 +226,7 @@ class MIDASMetadataBagger(SIPBagger):
     def _mark_filepath_synced(self, filepath):
         self.bagbldr.ensure_bagdir()
         mdir = os.path.dirname(self.bagbldr.bag.nerd_file_for(filepath))
-        if os.path.join(mdir):
+        if os.path.isdir(mdir):
             semaphore = os.path.join(mdir, UNSYNCED_FILE)
             if os.path.exists(semaphore):
                 os.remove(semaphore)
@@ -312,9 +312,9 @@ class MIDASMetadataBagger(SIPBagger):
                             output directory.  In this implementation, the 
                             default is True.
         """
-        updateres = self.ensure_base_bag()
-        self.ensure_res_metadata(updateres)
-        self.ensure_data_files(nodata)
+        updateneeded = self.ensure_base_bag()
+        self.ensure_res_metadata(updateneeded)
+        self.ensure_data_files(nodata, updateneeded)
         self.ensure_subcoll_metadata()
 
     def ensure_base_bag(self):
@@ -346,7 +346,7 @@ class MIDASMetadataBagger(SIPBagger):
                 log.info("Working bag initialized with metadata from previous "+
                          "publication.")
 
-        else:
+        if not os.path.exists(self.bagdir):
             self.bagbldr.ensure_bag_structure()
             self.bagbldr.assign_id( self._mint_id(self.name) )
 
@@ -389,9 +389,22 @@ class MIDASMetadataBagger(SIPBagger):
                                               savefilemd=False)
             for cmp in podnerd.get('components', []):
                 if cmp.get('filepath'):
+                    # Before we update the metadata file, let's check to see
+                    # if the previous one is older than the input file it
+                    # describes
+                    fileupdated = False
+                    srcpath = self.find_source_file_for(cmp['filepath'])
+                    if srcpath:
+                        nf = self.bagbldr.bag.nerd_file_for(cmp['filepath'])
+                        if not os.path.exists(nf) or \
+                           moddate_of(srcpath) > moddate_of(nf):
+                            fileupdated = False
+                    
                     # FIX: what if someone tries to change a file to a
                     # subcollection or vice versa?
                     self.bagbldr.update_metadata_for(cmp['filepath'], cmp)
+                    if fileupdated:
+                        self._mark_filepath_unsynced(cmp['filepath'])
 
             # Now delete distributions that are no longer in the resource
             def has_cmp_with_path(comps, path):
@@ -419,11 +432,18 @@ class MIDASMetadataBagger(SIPBagger):
         self.datafiles = self.registered_files()
 
 
-    def ensure_data_files(self, nodata=True):
+    def ensure_data_files(self, nodata=True, force=False):
         """
         ensure that all data files have up-to-date descriptions and are
         (if nodata=False) copied into the bag.  Only process files that 
         are described in the POD/NERDm record.  
+
+        :param bool nodata:  if True (default), don't copy the actual data files 
+                             to the output bag.  False will copy the files.
+        :param bool force:   if False (default), the data files will be examined
+                             for additional metadata only if the source data 
+                             file is newer than the corresponding metadata file 
+                             in the output bag.  
         """
         if not self.resmd:
             # We need to have processed the POD file to know which
@@ -431,9 +451,11 @@ class MIDASMetadataBagger(SIPBagger):
             self.ensure_res_metadata()
 
         for destpath, srcpath in self.datafiles.items():
-            dfmd = self.bagbldr.bag.nerd_metadata_for(destpath)
-            force = 'size' not in dfmd or 'checksum' not in dfmd
-            self.ensure_file_metadata(srcpath, destpath, force)
+            fforce = force
+            if not fforce:
+                dfmd = self.bagbldr.bag.nerd_metadata_for(destpath)
+                fforce = 'size' not in dfmd or 'checksum' not in dfmd
+            self.ensure_file_metadata(srcpath, destpath, fforce)
 
             if not nodata:
                 self.bagbldr.add_data_file(destpath, srcpath, False,
@@ -716,6 +738,21 @@ class PreservationBagger(SIPBagger):
         mdbagger = MIDASMetadataBagger(self.name, self.mddir, parent,
                                        config=self.cfg, minter=self._minter,
                                        sipdirname=sipdir)
+
+        if self.asupdate is not None and mdbagger.prepsvc:
+            prepper = mdbagger.prepsvc.prepper_for(self.name, log=self.siplog)
+
+            # if asupdate is set (to true or false), check for the existance 
+            # of the target AIP:
+            if prepper.aip_exists() != bool(self.asupdate):
+                # actual state does not match caller's expected state
+                if self.asupdate:
+                    msg = self.name + \
+                          ": AIP with this ID does not exist in repository"
+                else:
+                    msg = self.name + \
+                          ": AIP with this ID already exists in repository"
+                raise PreservationStateException(msg, not self.asupdate)
 
         mdbagger.prepare(nodata=True)
         self.datafiles = mdbagger.datafiles

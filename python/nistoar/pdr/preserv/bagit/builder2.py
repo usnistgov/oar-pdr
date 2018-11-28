@@ -1361,7 +1361,7 @@ class BagBuilder(PreservationSystem):
                 elif SUBCOLL_TYPE in tps:
                     comptype = "Subcollection"
                 elif CHECKSUMFILE_TYPE in tps:
-                    comptype = "Checksum"
+                    comptype = "ChecksumFile"
                 elif DOWNLOADABLEFILE_TYPE in tps:
                     comptype = ""
                 if comptype is not None:
@@ -1492,12 +1492,6 @@ class BagBuilder(PreservationSystem):
         # write_pidmapping_file
         self.write_about_file()
         # write_premis_file
-
-        # this file was used to assist when this bag is an update on an
-        # earlier version.  We no longer need it, so get rid of it.
-        deprecinfof = os.path.join(self.bagdir,"multibag","deprecated-info.txt")
-        if os.path.exists(deprecinfof):
-            os.remove(deprecinfof)
 
         self.log.error("Implementation of Bag finalization is not complete!")
         self.log.info("Bag does not include PREMIS and ORE files")
@@ -1802,6 +1796,10 @@ format(nerdm['title'])
                 if val not in baginfo['Multibag-Head-Deprecates']:
                     baginfo['Multibag-Head-Deprecates'].append( val )
                 
+            # this file was used to assist when this bag is an update on an
+            # earlier version.  We no longer need it, so get rid of it.
+            os.remove(depinfof)
+
     def _measure_oxum(self, rootdir):
         return measure_dir_size(rootdir)
 

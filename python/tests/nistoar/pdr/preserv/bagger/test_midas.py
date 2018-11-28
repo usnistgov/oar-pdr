@@ -146,7 +146,7 @@ class TestMIDASMetadataBaggerMixed(test.TestCase):
         data = self.bagr.resmd
         self.assertEqual(data['@id'], "ark:/88434/mds00hw91v")
         self.assertEqual(data['doi'], "doi:10.18434/T4SW26")
-        self.assertEqual(len(data['components']), 4)
+        self.assertEqual(len(data['components']), 7)
         self.assertEqual(data['components'][0]['@type'][0], 'nrd:Hidden')
         self.assertIsInstance(data['@context'], list)
         self.assertEqual(len(data['@context']), 2)
@@ -180,7 +180,7 @@ class TestMIDASMetadataBaggerMixed(test.TestCase):
         files = self.bagr.pod_file_distribs()
         self.assertIn('trial1.json', files)
         self.assertIn('trial2.json', files)
-        self.assertEqual(len(files), 3) # {trial1,trial2,sim}.json + access_comp
+        self.assertEqual(len(files), 6) # {trial1,trial2,sim}.json + access_comp
 
     def test_ensure_file_metadata(self):
         self.assertFalse(os.path.exists(self.bagdir))
@@ -199,7 +199,7 @@ class TestMIDASMetadataBaggerMixed(test.TestCase):
         self.assertTrue(os.path.exists(mdfile))
 
         data = self.bagr.bagbldr._bag.nerd_metadata_for(destpath, True)
-        self.assertEqual(data['size'], 70)
+        self.assertEqual(data['size'], 69)
         self.assertTrue(data['checksum']['hash'])
         self.assertEqual(data['downloadURL'], dlurl)
         self.assertNotIn('description', data)
@@ -253,7 +253,7 @@ class TestMIDASMetadataBaggerMixed(test.TestCase):
         self.assertTrue(os.path.exists(mdfile))
 
         data = self.bagr.bagbldr._bag.nerd_metadata_for(destpath, True)
-        self.assertEqual(data['size'], 70)
+        self.assertEqual(data['size'], 69)
         self.assertTrue(data['checksum']['hash'])
         self.assertEqual(data['checksum']['algorithm'],
                          { "@type": "Thing", "tag": "sha256" })
