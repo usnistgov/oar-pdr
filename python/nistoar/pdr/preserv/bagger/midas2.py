@@ -247,11 +247,28 @@ class MIDASMetadataBagger(SIPBagger):
                 semaphore = os.path.join(base, UNSYNCED_FILE)
                 if os.path.exists(semaphore):
                     os.remove(semaphore)
+
+    def registered_files(self):
+        out = OrderedDict()
+        if not self.resmd:
+            return out
         
-    def data_file_inventory(self):
+        for comp in self.resmd.get('components', []):
+            if 'filepath' not in comp or \
+               any([":Subcollection" in t for t in comp.get('@type',[])]):
+                continue
+            srcpath = self.find_source_file_for(comp['filepath'])
+            if srcpath:
+                out[comp['filepath']] = srcpath
+
+        return out
+
+    def available_files(self):
         """
-        get a list of the data files available to be part of this dataset.
-        This will include any accompanying hash files.
+        get a list of the data files available in the SIP input directories
+        (including hash files).  Some may not be currently part of the 
+        collection; such files must be listed as distributions in the 
+        POD record.
 
         :return dict: a mapping of logical filepaths relative to the dataset 
                       root to full paths to the input data file for all data
@@ -389,7 +406,7 @@ class MIDASMetadataBagger(SIPBagger):
                    cmp.get('filepath') and \
                    not has_cmp_with_path(podnerd.get('components', []),
                                          cmp['filepath']):
-                    self.bagbldr.remove_component(cmp['filepath'])
+                    self.bagbldr.remove_component(cmp['filepath'], True)
 
         self.resmd = self.bagbldr.bag.nerdm_record(True)
 
@@ -399,48 +416,63 @@ class MIDASMetadataBagger(SIPBagger):
             self.bagbldr.update_annotations_for('',
                                             {'version': self.resmd["version"]})
 
+        self.datafiles = self.registered_files()
+
 
     def ensure_data_files(self, nodata=True):
         """
-        ensure that all data files are described in the output bag as well as
-        (if nodata=False) copied over.  
+        ensure that all data files have up-to-date descriptions and are
+        (if nodata=False) copied into the bag.  Only process files that 
+        are described in the POD/NERDm record.  
         """
-        self.bagbldr.ensure_bag_structure()
+        if not self.resmd:
+            # We need to have processed the POD file to know which
+            # data files from the SIP directory to process
+            self.ensure_res_metadata()
 
-        # get the list of data files found in the input directories
-        self.datafiles = self.data_file_inventory()
-
-        # add all the files from the input area
-        for destpath, inpath in self.datafiles.items():
-            self.ensure_file_metadata(inpath, destpath)
+        for destpath, srcpath in self.datafiles.items():
+            dfmd = self.bagbldr.bag.nerd_metadata_for(destpath)
+            force = 'size' not in dfmd or 'checksum' not in dfmd
+            self.ensure_file_metadata(srcpath, destpath, force)
 
             if not nodata:
-                self.bagbldr.add_data_file(destpath, inpath, False,
+                self.bagbldr.add_data_file(destpath, srcpath, False,
                                            self.hardlinkdata)
 
         self._check_checksum_files()
+        self.resmd = self.bagbldr.bag.nerdm_record(True)
+
+    def find_source_file_for(self, filepath):
+        """
+        return the location in the SIP of the source data file corresponding 
+        to the given filepath (representing its target location in the output
+        bag).  None is returned if the filepath cannot be found in any of the
+        SIP locations.
+        """
+        for sipdir in reversed(self._indirs):
+            srcpath = os.path.join(sipdir, filepath)
+            if os.path.isfile(srcpath):
+                return srcpath
+        return None
 
     def ensure_subcoll_metadata(self):
         if not self.datafiles:
-            # this updates self.datafiles to include all files that are
-            # currently available in the MIDAS submission area.  
-            self.ensure_data_files(nodata=True)
+            self.ensure_res_metadata()
 
         colls = set()
         for filepath in self.datafiles:
             collpath = os.path.dirname(filepath)
             if collpath and collpath not in colls:
-                collnerd = self.bagbldr.nerdm_file_for(collpath)
-                filenerd = self.bagbldr.nerdm_file_for(filepath)
+                collnerd = self.bagbldr.bag.nerd_file_for(collpath)
+                filenerd = self.bagbldr.bag.nerd_file_for(filepath)
                 if not os.path.exists(collnerd) or \
                    (os.path.exists(filenerd) and 
                     moddate_of(collnerd) < moddate_of(filenerd)):
                       log.debug("Adding metadata for collection: %s", collpath)
                       self.bagbldr.define_component(collpath, "Subcollection")
-                      self.bagbldr.init_collmd_for(collpath, write=True)
                       colls.add(collpath)
         
-    def ensure_file_metadata(self, inpath, destpath):
+    def ensure_file_metadata(self, inpath, destpath, force=False):
         """
         examine the given file and update the file metadata if necessary.
 
@@ -462,8 +494,8 @@ class MIDASMetadataBagger(SIPBagger):
         if not os.path.exists(nerdfile):
             update = True
             log.info("Initializing metadata for datafile, %s", destpath)
-        elif os.path.exists(os.path.join(os.path.dirname(nerdfile),
-                            UNSYNCED_FILE)):
+        elif force or os.path.exists(os.path.join(os.path.dirname(nerdfile),
+                                                  UNSYNCED_FILE)):
             # we marked this earlier that an update is recommended
             update = True
             log.debug("datafile, %s, requires update to metadata", destpath)
@@ -489,30 +521,38 @@ class MIDASMetadataBagger(SIPBagger):
         # stored in the metadata for the datafile it is associated with.  If
         # they do not match, the valid metadata flag for the checksum file
         # will be set to false.
-        for df in self.datafiles:
-            csnerd = self.bagbldr._bag.nerd_metadata_for(df, True)
-            if any([":ChecksumFile" in t for t in csnerd.get("@type",[])]):
-                dfpath = self.datafiles[df]
+        for comp in self.resmd.get('components', []):
+            if 'filepath' not in comp or \
+               not any([":ChecksumFile" in t for t in comp.get('@type',[])]):
+                continue
+
+            srcpath = self.find_source_file_for(comp['filepath'])
+            if srcpath:
+                # read the checksum stored in the file
                 try:
-                    with open(dfpath) as fd:
+                    with open(srcpath) as fd:
                         cs = fd.readline().split()[0]
                 except Exception as ex:
-                    log.warn(df+": unexpected contents in checksum file (%s)" % \
+                    log.warn(comp['filepath']+
+                             ": unexpected contents in checksum file (%s)" % 
                              str(ex))
-                    continue
+                    cs = False   # this will be flagged invalid
 
                 # this data file is a checksum file
-                described = csnerd.get("describes","cmps/")[5:]
-                if described in self.datafiles:
-                    nerd = self.bagbldr._bag.nerd_metadata_for(described, True)
+                described = os.path.splitext(comp['filepath'])[0]   # default
+                described = comp.get("describes","cmps/"+described)[5:]
+                if os.path.isfile(self.bagbldr.bag.nerd_file_for(described)):
+                    nerd = self.bagbldr.bag.nerd_metadata_for(described, True)
 
                     valid = nerd.get('checksum',{}).get('hash','') == cs
                     if not valid:
-                        log.warn(df+": hash value in file looks invalid")
+                        log.warn(nerd['filepath']+
+                                 ": hash value in file looks invalid")
                     else:
-                        log.debug(df+": hash value looks valid")
-                    self.bagbldr.update_annotations_for(df,
-                                                        {'valid': bool(valid) })
+                        log.debug(nerd['filepath']+": hash value looks valid")
+                    self.bagbldr.update_metadata_for(comp['filepath'],
+                                                     {'valid': bool(valid) })
+
 
 
         
