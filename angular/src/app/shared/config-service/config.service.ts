@@ -28,7 +28,7 @@ constructor(private http: HttpClient, @Inject(PLATFORM_ID)
 loadAppConfig() {
     if(isPlatformBrowser(this.platformId)){
         console.log(" ****** HERE : in browser ::"+this.envVariables+" bsfshfsjd "+location.pathname +" ::"+location.host);
-        if(!location.host.includes("localhost:")) 
+        if(location.host.includes(".nist.gov")) 
             this.envVariables = "/pdr"+this.envVariables;
         this.confCall =  this.http.get(this.envVariables) 
                         .toPromise()
