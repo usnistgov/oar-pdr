@@ -5,6 +5,7 @@ import * as process from 'process';
 import {  PLATFORM_ID, Inject } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { config } from 'rxjs';
+import { Location } from '@angular/common';
 export interface Config {
     RMMAPI: string ;
     DISTAPI: string;
@@ -22,23 +23,24 @@ private envVariables = "/assets/environment.json";
 private confValues={} as Config;
 
 constructor(private http: HttpClient, @Inject(PLATFORM_ID) 
-            private platformId: Object) { }
+            private platformId: Object, location: Location) { }
   
 loadAppConfig() {
     if(isPlatformBrowser(this.platformId)){
-        console.log(" ****** HERE : in browser ::"+this.envVariables);
-        this.confCall =  this.http.get(this.envVariables,  {responseType: 'text'}) 
+        console.log(" ****** HERE : in browser ::"+this.envVariables+" bsfshfsjd "+location.pathname +" ::"+location.host);
+        if(!location.host.includes("localhost:")) 
+            this.envVariables = "/pdr"+this.envVariables;
+        this.confCall =  this.http.get(this.envVariables) 
                         .toPromise()
                         .then(
                             resp =>{
-                                //resp as Config;
-                                var respValues = JSON.parse(resp);
-                                this.confValues.RMMAPI =  respValues['RMMAPI'];
-                                this.confValues.DISTAPI = respValues['DISTAPI'];
-                                this.confValues.LANDING = respValues['LANDING'];
-                                this.confValues.METAPI =  respValues['METAPI'];
-                                this.confValues.SDPAPI =  respValues['SDPAPI'];
-                                this.confValues.PDRAPI =   respValues['PDRAPI'];
+                                resp as Config;
+                                this.confValues.RMMAPI =  resp['RMMAPI'];
+                                this.confValues.DISTAPI = resp['DISTAPI'];
+                                this.confValues.LANDING = resp['LANDING'];
+                                this.confValues.METAPI =  resp['METAPI'];
+                                this.confValues.SDPAPI =  resp['SDPAPI'];
+                                this.confValues.PDRAPI =   resp['PDRAPI'];
                                 console.log("In Browser read environment variables: "+ JSON.stringify(this.confValues));
                             },
                             err => {
