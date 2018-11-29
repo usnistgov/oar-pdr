@@ -18,6 +18,8 @@ export class AppConfig {
 private appConfig;
 private confCall;
 private envVariables = "/assets/environment.json";
+private envVariables2 = "./assets/environment.json";
+
 private confValues={} as Config;
 
 constructor(private http: HttpClient, @Inject(PLATFORM_ID) 
@@ -50,7 +52,7 @@ loadAppConfig() {
             }
         );
 
-        this.confCall =  this.http.get(this.envVariables) 
+        this.confCall =  this.http.get(this.envVariables2) 
                         .toPromise()
                         .then(
                             resp =>{
