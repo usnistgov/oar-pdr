@@ -36,7 +36,7 @@ loadAppConfig() {
                 console.log(" %%%%%%% TEST 1  in promise then"+ JSON.stringify(resp));
             },
             err => {
-                console.log("%%%%%%% ERROR IN CONFIG :"+err);
+                console.log("%%%%%%% ERROR IN CONFIG :"+JSON.stringify(err));
             }
         );
 
@@ -48,7 +48,7 @@ loadAppConfig() {
                 console.log(" $$$$$$$ TEST 1  in promise then"+ JSON.stringify(resp));
             },
             err => {
-                console.log(" $$$$$$$ ERROR IN CONFIG :"+err);
+                console.log(" $$$$$$$ ERROR IN CONFIG :"+JSON.stringify(err));
             }
         );
 
@@ -67,7 +67,7 @@ loadAppConfig() {
                                 console.log(" ****** In Browser 1: "+ JSON.stringify(this.confValues));
                             },
                             err => {
-                                console.log("ERROR IN CONFIG :"+err);
+                                console.log("ERROR IN CONFIG :"+JSON.stringify(err));
                             }
                         );
                         console.log(" ****** In Browser 2: "+ JSON.stringify(this.confValues));
