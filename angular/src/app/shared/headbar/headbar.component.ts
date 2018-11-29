@@ -29,8 +29,8 @@ export class HeadbarComponent {
   cartLength : number;
 
   constructor( private el: ElementRef,  private cartService: CartService, private appConfig : AppConfig) {
-    this.SDPAPI = this.appConfig.getSDPApi();
-    this.landingService = this.appConfig.getLandingBackend();
+    this.SDPAPI = this.appConfig.getConfig().SDPAPI;
+    this.landingService = this.appConfig.getConfig().LANDING;
       this.cartService.watchStorage().subscribe(value => {
           this.cartLength = value;
       });

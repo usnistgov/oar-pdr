@@ -14,7 +14,7 @@ import { Observable } from 'rxjs/Observable';
 import {ProgressSpinnerModule, DialogModule} from 'primeng/primeng';
 import * as _ from 'lodash';
 import * as __ from 'underscore';
-import { environment } from '../../environments/environment';
+// import { environment } from '../../environments/environment';
 
 
 declare var Ultima: any;
@@ -76,7 +76,7 @@ export class DatacartComponent implements OnInit, OnDestroy {
   selectedFileCount: number = 0;
   selectedParentIndex:number = 0;
 
-  private distApi : string = environment.DISTAPI;
+  private distApi : string = "";
   //private distApi:string = "http://localhost:8083/oar-dist-service";
 
 

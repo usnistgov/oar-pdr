@@ -6,9 +6,17 @@ import { MenuItem } from 'primeng/api';
 import * as _ from 'lodash';
 import 'rxjs/add/operator/map';
 import { Subscription } from 'rxjs/Subscription';
-import { AppConfig } from '../shared/config-service/config.service';
-import {  PLATFORM_ID, APP_ID, Inject } from '@angular/core';
+import { AppConfig, Config } from '../shared/config-service/config.service';
+import { PLATFORM_ID, APP_ID, Inject } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
+import { SearchService } from '../shared/search-service/index';
+import { Observable } from 'rxjs/Observable';
+import 'rxjs/add/observable/of';
+import { first, tap} from 'rxjs/operators';
+import { of } from 'rxjs/observable/of';
+import { isPlatformServer } from '@angular/common';
+import { makeStateKey, TransferState } from '@angular/platform-browser';
+import { _throw } from 'rxjs/observable/throw';
 
 interface reference {
   refType? : string,
@@ -16,6 +24,7 @@ interface reference {
   label? : string,
   location? : string
 }
+
 function compare_versions(a: string, b: string) : number {
   let aflds : any[] = a.split(".");
   let bflds : any[] = b.split(".");
@@ -67,11 +76,13 @@ function compare_histories(a, b) {
       out = compare_versions(a.version, b.version);
   return out;
 }
+
 @Component({
   selector: 'app-landing',
   templateUrl: './landing.component.html',
   styleUrls: ['./landing.component.css']
 })
+
 export class LandingComponent implements OnInit {
     layoutCompact: boolean = true;
     layoutMode: string = 'horizontal';
@@ -99,42 +110,29 @@ export class LandingComponent implements OnInit {
     distdownload: string = '';
     serviceApi: string = '';
     metadata: boolean = false;
-    private _routeParamsSubscription: Subscription;
     private files: TreeNode[] = [];
-    private fileHierarchy : TreeNode;
-    private rmmApi : string = '';
-    private distApi : string = '';
-    private landing : string = '';
-    private sdpLink : string = '';
     pdrApi : string = '';
-    private displayIdentifier :string;
-    private dataHierarchy: any[]=[];
     isResultAvailable: boolean = true;
     isId : boolean = true;
     displayContact: boolean = false; 
     private meta: Meta;
     private newer : reference = {};  
     navigationSubscription : any;
+    confValues : Config;
   /**
    * Creates an instance of the SearchPanel
    *
    */
-  constructor(private route: ActivatedRoute, private el: ElementRef, 
-              private titleService: Title, private appConfig : AppConfig, private router: Router
-              ,@Inject(PLATFORM_ID) private platformId: Object,
-              @Inject(APP_ID) private appId: string) {
-    
-    this.rmmApi = this.appConfig.getRMMapi();
-    this.distApi = this.appConfig.getDistApi();
-    this.landing = this.appConfig.getLandingBackend();
-    this.pdrApi = this.appConfig.getPDRApi();
-    this.sdpLink = this.appConfig.getSDPApi();
-  }
-
+  constructor(private route: ActivatedRoute, private el: ElementRef, private titleService: Title,
+              private appConfig : AppConfig, private router: Router,@Inject(PLATFORM_ID) private platformId: Object,
+              @Inject(APP_ID) private appId: string, private searchService: SearchService,
+              private transferState:TransferState) {
+                this.confValues = this.appConfig.getConfig();             
+              }
    /**
    * If Search is successful populate list of keywords themes and authors
    */
-  onSuccess(searchResults:any[]) {
+  onSuccess(searchResults:any) {
     // console.log(searchResults);
     if(searchResults["ResultCount"] === undefined || searchResults["ResultCount"] !== 1)
       this.record = searchResults;
@@ -147,17 +145,13 @@ export class LandingComponent implements OnInit {
     }  
     this.type = this.record['@type'];
     this.titleService.setTitle(this.record['title']);
-    //this.meta.addTag({ "testdescription": this.record['description'] });
-    //let dh = new ResComponents(this.record['components']).dataHierarchy();
     this.createNewDataHierarchy();
     if(this.record['doi'] !== undefined && this.record['doi'] !== "" )
       this.isDOI = true;
     if( "hasEmail" in this.record['contactPoint'])  
      this.isEmail = true;
      this.assessNewer();
-    
     this.updateMenu();
-
   }
 
   /**
@@ -186,16 +180,15 @@ createMenuItem(label :string, icon:string, command: any, url : string ){
   return testItem;
 }
 
-
 /**
  * Update menu on landing page
  */
 updateMenu(){
       
-  this.serviceApi = this.landing+"records?@id="+this.record['@id']; 
-  if(!_.includes(this.landing, "rmm"))
-    this.serviceApi = this.landing+this.record['ediid'];
-  this.distdownload = this.distApi+"ds/zip?id="+this.record['@id'];
+  this.serviceApi = this.confValues.LANDING+"records?@id="+this.record['@id']; 
+  if(!_.includes(this.confValues.LANDING, "rmm"))
+    this.serviceApi = this.confValues.LANDING+this.record['ediid'];
+  this.distdownload = this.confValues.DISTAPI+"ds/zip?id="+this.record['@id'];
       
   var itemsMenu: MenuItem[] = [];
   var metadata = this.createMenuItem("Export JSON", "faa faa-file-o",'',this.serviceApi);   
@@ -205,9 +198,9 @@ updateMenu(){
   }
   
   var resourcesByAuthor = this.createMenuItem ('Resources by Authors',"faa faa-external-link","",
-                                   this.sdpLink+"/#/search?q=authors.familyName="+authlist+"&key=&queryAdvSearch=yes");
+                            this.confValues.SDPAPI+"/#/search?q=authors.familyName="+authlist+"&key=&queryAdvSearch=yes");
   var similarRes = this.createMenuItem ("Similar Resources", "faa faa-external-link", "",
-                              this.sdpLink+"/#/search?q="+this.record['keyword']+"&key=&queryAdvSearch=yes");                
+                      this.confValues.SDPAPI+"/#/search?q="+this.record['keyword']+"&key=&queryAdvSearch=yes");                
   var license = this.createMenuItem("Fair Use Statement",  "faa faa-external-link","",this.record['license'] ) ;
   var citation = this.createMenuItem('Citation', "faa faa-angle-double-right",
                           (event)=>{ this.getCitation(); this.showDialog(); },'');
@@ -276,31 +269,14 @@ updateMenu(){
       } 
       this.citeString += " (Accessed "+ date.getFullYear()+"-"+(date.getMonth()+1)+"-"+date.getDate()+")";
   }
-
-  /**
-   * Get the params OnInit
-   */
-  ngOnInit() {
-  
-    this.searchValue = this.route.snapshot.paramMap.get('id');
-   
-    this.files =[];
-      this.route.data.map(data => data.searchService )
-       .subscribe((res)=>{
-         this.onSuccess(res);
-       }, error =>{
-          console.log("There is an error in searchservice.");
-          this.onError(" There is an error");
-          // throw new ErrorComponent(this.route);
-       });
-  }
   goToSelection(isMetadata: boolean, isSimilarResources: boolean, sectionId : string){
     this.metadata = isMetadata; this.similarResources =isSimilarResources;
-     if(window.location.href.includes("ark"))
-      this.router.navigate(['/od/id/ark:/88434/'+this.searchValue],{fragment:sectionId});
-     else
-      this.router.navigate(['/od/id/', this.record.ediid],{fragment:sectionId});
-      this.useFragment();
+    //  if(window.location.href.includes("ark"))
+    //   this.router.navigate(['/od/id/ark:/88434/'+this.searchValue],{fragment:sectionId});
+    //  else
+    //   this.router.navigate(['/od/id/', this.record.ediid],{fragment:sectionId});
+    this.router.navigate(['/od/id/', this.searchValue],{fragment:sectionId});  
+    this.useFragment();
   }
 
   useFragment(){
@@ -318,14 +294,80 @@ updateMenu(){
       }
     }});
   }
+  getData() : Observable<any>{
+    var recordid = this.searchValue;
+    const recordid_KEY = makeStateKey<any>('record-' + recordid);
+    
+      if (this.transferState.hasKey(recordid_KEY)) {
+          console.log("1. Is it here @@@");
+          const record = this.transferState.get<any>(recordid_KEY, null);
+          this.transferState.remove(recordid_KEY);
+          return of(record);
+      }
+      else {
+          return this.searchService.searchById(recordid)
+          .catch((err: Response, caught: Observable<any[]>) => {
+              if (err !== undefined) {
+                console.log("ERROR STATUS :::"+err.status);
+                if(err.status >= 500){
+                  this.router.navigate(["/usererror", recordid,{ errorcode : err.status}]);
+                }
+                if(err.status >= 400 && err.status < 500 ){
+                  this.router.navigate(["/usererror", recordid, { errorcode : err.status}]); 
+                }
+                //return Observable.throw('The Web server (running the Web site) is currently unable to handle the request.');
+              }
+              return Observable.throw(caught);
+            }) 
+            .pipe(
+                  tap(record => {
+                      if (isPlatformServer(this.platformId)) {
+                          
+                        console.log("2 . Is it here @@@:"+this.platformId);
+                          this.transferState.set(recordid_KEY, record);
+                      //    console.log(this.transferState.toJson()); 
+                      }
+                  })
+              );
+      }
+  }
+  /**
+   * Get the params OnInit
+   */
+  ngOnInit() {
+    this.searchValue = this.route.snapshot.paramMap.get('id');
+    if(this.router.url.includes("ark"))
+      this.searchValue =  this.router.url.split("/id/").pop();
+    this.files =[];
+    
+    this.getData()
+          .subscribe((res)=>{
+            this.onSuccess(res);
+          }, error =>{
+            console.log("There is an error in searchservice.");
+            this.onError(" There is an error");
+            // throw new ErrorComponent(this.route);
+          }); 
+     //  this.route.data.map(data => data.searchService )
+      //  .subscribe((res)=>{
+      //    this.onSuccess(res);
+      //  }, error =>{
+      //     console.log("There is an error in searchservice.");
+      //     this.onError(" There is an error");
+      //     // throw new ErrorComponent(this.route);
+      //  });
+  }
+  
 
   ngAfterViewInit(){
     this.useFragment();
     var recordid ;
     if (this.record != null && isPlatformBrowser(this.platformId) )  {
-      recordid = this.searchValue;
-      if(window.location.href.includes("ark"))
-        recordid = "ark:/88434/"+this.searchValue;
+      // recordid = this.searchValue;
+      // // recordid = "ark:/88434/"+this.searchValue;
+      // if(this.searchValue.includes("ark"))
+      // window.history.replaceState( {} , '', '/od/id/'+this.searchValue );
+      // else
       window.history.replaceState( {} , '', '/od/id/'+this.searchValue );
     }
   }
