@@ -184,7 +184,12 @@ class BagBuilder(PreservationSystem):
                                      self._bagdir)
             self.ensure_bagdir()  # inits self.bag
 
-        if id:
+        if self.bag and os.path.exists(self.bag.nerd_file_for("")):
+            resmd = self.bag.nerd_metadata_for("")
+            if resmd.get('@id'):
+                self._id = resmd['@id']
+
+        if id and id != self._id:
             if self.bag and os.path.exists(self.bag.metadata_dir):
                 self.assign_id(id, keep_conv=True)
             else:
@@ -1339,7 +1344,7 @@ class BagBuilder(PreservationSystem):
         # deeper extraction not yet supported.
         pass
 
-    def add_res_nerd(self, mdata, savefilemd=True):
+    def add_res_nerd(self, mdata, savefilemd=True, message=None):
         """
         write out the resource-level NERDm data into the bag.  
 
@@ -1349,11 +1354,19 @@ class BagBuilder(PreservationSystem):
                                    Subcollection metadata will be split off and 
                                    saved in the appropriate locations for 
                                    file metadata.
+        :param message     str:  a message to record for the whole operation; this
+                                   will suppress messages for updating individual
+                                   file metadata (when savefilemd=True) as well as
+                                   the resource-level metadata. 
         """
         self.ensure_bag_structure()
         mdata = deepcopy(mdata)
 
-        self.record("Adding resourse-level metadata")
+        msg = message
+        if msg is None:
+            msg = "Adding resourse-level metadata"
+        if msg:
+            self.record(msg)
         
         # validate type
         if mdata.get("_schema") != NERDM_SCH_ID:
@@ -1364,6 +1377,9 @@ class BagBuilder(PreservationSystem):
                 self.log.warning("provided NERDm data does not look like a "+
                                  "Resource record")
         
+        msg = None
+        if message is not None:
+            msg = ""
         if "components" in mdata:
             components = mdata['components']
             if not isinstance(components, list):
@@ -1391,11 +1407,17 @@ class BagBuilder(PreservationSystem):
                         self.log.warning(msg)
                     else:
                         if savefilemd:
-                            # ensure we have default metadata filled out
-                            cmpmd = self._create_init_md_for(
-                                components[i]['filepath'], comptype)
-                            cmpmd = self._update_md(cmpmd, components[i])
-                            self.replace_metadata_for(cmpmd['filepath'], cmpmd)
+                            # update instead of replace (this sets defaults
+                            # internally)
+                            #
+                            # # ensure we have default metadata filled out
+                            # cmpmd = self._create_init_md_for(
+                            #    components[i]['filepath'], comptype)
+                            # cmpmd = self._update_md(cmpmd, components[i])
+                            # self.replace_metadata_for(cmpmd['filepath'], cmpmd)
+                            #
+                            self.update_metadata_for(components[i]['filepath'],
+                                                     components[i], comptype, msg)
                         components.pop(i)
 
         if 'inventory' in mdata:
