@@ -316,6 +316,7 @@ class MIDASMetadataBagger(SIPBagger):
         self.ensure_res_metadata(updateneeded)
         self.ensure_data_files(nodata, updateneeded)
         self.ensure_subcoll_metadata()
+        self.resmd = self.bagbldr.bag.nerdm_record(True)
 
     def ensure_base_bag(self):
         """
@@ -462,7 +463,6 @@ class MIDASMetadataBagger(SIPBagger):
                                            self.hardlinkdata)
 
         self._check_checksum_files()
-        self.resmd = self.bagbldr.bag.nerdm_record(True)
 
     def find_source_file_for(self, filepath):
         """
@@ -533,8 +533,23 @@ class MIDASMetadataBagger(SIPBagger):
 
         if update:
             md = self.bagbldr.describe_data_file(inpath, destpath, True)
-            self.bagbldr.update_metadata_for(destpath, md)
+            md = self.bagbldr.update_metadata_for(destpath, md)
             self._mark_filepath_synced(destpath)
+
+            # update self.resmd; this is cheaper than recreating it from scratch
+            # with nerdm_record()
+            if self.resmd:
+                cmps = self.resmd.get('components',[])
+                for i in range(len(cmps)):
+                    if md['@id'] == cmps[i]['@id']:
+                        cmps[i] = md
+                        break
+                if i >= len(cmps):
+                    if len(cmps) == 0:
+                        self.resmd['components'] = [md]
+                    else:
+                        self.resmd['components'].append(md)
+                        
             
 
     def _check_checksum_files(self):
@@ -572,8 +587,9 @@ class MIDASMetadataBagger(SIPBagger):
                                  ": hash value in file looks invalid")
                     else:
                         log.debug(nerd['filepath']+": hash value looks valid")
+                    comp['valid'] = bool(valid)
                     self.bagbldr.update_metadata_for(comp['filepath'],
-                                                     {'valid': bool(valid) })
+                                                     {'valid': comp['valid']})
 
 
 
@@ -800,6 +816,7 @@ class PreservationBagger(SIPBagger):
         self.ensure_metadata_preparation()
         if not nodata:
             self.add_data_files()
+        
 
     def form_bag_name(self, dsid, bagseq=0, dsver="1.0"):
         """
