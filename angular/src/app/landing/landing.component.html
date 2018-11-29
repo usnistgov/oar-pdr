@@ -35,7 +35,7 @@
                           <b *ngSwitchCase="'nrdp:PublicDataResource'">Public Data Resource</b>
                           <b *ngSwitchDefault></b>
                       </span>
-                      <div  *ngIf="record.length !== 0" class="ui-sm-1 visible-xs-block visible-sm-block ">
+                      <div  *ngIf="record.length !== 0" class="ui-sm-1 d-none d-sm-block d-md-none ">
                         <button style="float: right" type="button" pButton icon="faa faa-list" class="ui-button ui-button-icon-only" (click)="menu3.toggle($event)"></button>
                          <p-menu #menu3 class="rightMenuStylePop" popup="popup" [model]="rightmenu"></p-menu>
                       </div>
@@ -72,7 +72,7 @@
                           </strong>..
                           <i style="cursor: pointer;" class="faa" [ngClass]="{'faa-plus-square-o': !clickContact, 'faa-minus-square-o': clickContact}"
                           aria-hidden="true" (click)="closeContent = !closeContent; clickContact=expandContact();"></i>
-                          <div [collapse]="!closeContent" class="card customcard">
+                          <div [collapse]="!closeContent" class="card card-body bg-faded">
                                   <span class="" *ngIf="record.contactPoint.fn">
                                       <span>{{record.contactPoint.fn}}</span>
                                   </span>
@@ -161,7 +161,7 @@
           <div class="ui-g-2 ui-md-2 ui-lg-2 ui-sm-12">
             <div class="ui-g"  style="position:sticky; top:0; ">
                 <div class="ui-g-12 ui-md-12 ui-lg-12 ui-sm-12">
-                   <div class="visible-lg-block visible-md-block ">
+                   <div class="d-none d-md-block d-lg-block d-xl-block ">
                         <p-menu  class="rightMenuStyle" [model]="rightmenu"></p-menu>
                    </div>
                 </div>

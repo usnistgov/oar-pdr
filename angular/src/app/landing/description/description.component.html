@@ -1,7 +1,7 @@
 <div id="description">
 <div [hidden]="metadata">
 <h3  name="desscription"><b>Description</b></h3><br> 
-<div contenteditable="true" id="recordDescription" class="well welldesc">
+<div contenteditable="true" id="recordDescription" class="card card-body bg-light">
     <p  *ngFor="let topic of record['description']; let i =index">
         {{ record["description"][i] }}
     </p>
