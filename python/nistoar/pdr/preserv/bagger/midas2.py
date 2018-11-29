@@ -490,7 +490,7 @@ class MIDASMetadataBagger(SIPBagger):
                 if not os.path.exists(collnerd) or \
                    (os.path.exists(filenerd) and 
                     moddate_of(collnerd) < moddate_of(filenerd)):
-                      log.debug("Adding metadata for collection: %s", collpath)
+                      log.debug("Ensuring metadata for collection: %s", collpath)
                       self.bagbldr.define_component(collpath, "Subcollection")
                       colls.add(collpath)
         

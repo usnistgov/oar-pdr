@@ -336,7 +336,7 @@ class BagBuilder(PreservationSystem):
                 md['@context'].append({"@base": self._id})
             else:
                 md['@context'][1]['@base'] = self._id
-            self.update_metadata_for("", {"@context": md['@context']})
+            self.update_metadata_for("", {"@context": md['@context']}, message="")
 
         # no other metadata conventions requiring consistency with the ID 
         # is currently supported.
@@ -1079,7 +1079,8 @@ class BagBuilder(PreservationSystem):
             mdata = self._update_md(orig, mdata)
         else:
             if message is None:
-                message = "Adding annotations for " + destpath
+                message = "Adding annotations for " + \
+                          (destpath or "the resource-level")
         return self._replace_file_metadata(destpath, mdata, message, afile)
 
     def _update_nonfile_annotations(self, compid, mdata,comptype,message=None):
@@ -1156,23 +1157,19 @@ class BagBuilder(PreservationSystem):
                                 % (destpath, srcpath))
         self.ensure_datafile_dirs(destpath)
 
-        if message is None:
-            if os.path.exists(os.path.join(self.bag.data_dir, destpath)):
-                message = "Replacing file, " + destpath
-            else:
-                message = "Adding file, " + destpath
-            if register:
-                message += ", and setting its metadata"
-        if message:
-            self.record(message)
+        action = "Added"
+        if os.path.exists(os.path.join(self.bag.data_dir, destpath)):
+            action = "Replaced"
 
         # insert the file into the data directory...
         outfile = os.path.join(self.bag.data_dir, destpath)
         if hardlink:
             # ... as a hard link (faster, saves disk space)
             try:
+                if os.path.exists(outfile):
+                    os.remove(outfile)
                 os.link(srcpath, outfile)
-                self.record("Added data file at "+destpath)
+                self.record("%s data file at %s" % (action, destpath))
             except OSError, ex:
                 msg = "Unable to create link for data file ("+ destpath + \
                       "): "+ str(ex)
@@ -1186,7 +1183,7 @@ class BagBuilder(PreservationSystem):
             # ... by copying source (hard link is not possible or desired)
             try:
                 filecopy(srcpath, outfile)
-                self.record("Added data file at "+destpath)
+                self.record("%s data file at %s" % (action, destpath))
             except Exception, ex:
                 msg = "Unable to copy data file (" + srcpath + \
                       ") into bag (" + outfile + "): " + str(ex)
@@ -1195,7 +1192,8 @@ class BagBuilder(PreservationSystem):
 
         # Now set its metadata
         if register:
-            self.register_data_file(destpath, srcpath, True, comptype, "")
+            self.register_data_file(destpath, srcpath, True, comptype,
+                                    "...and updated its metadata.")
 
     def register_data_file(self, destpath, srcpath=None, examine=True,
                            comptype=None, message=None):
