@@ -28,8 +28,16 @@ constructor(private http: HttpClient, @Inject(PLATFORM_ID)
 loadAppConfig() {
     if(isPlatformBrowser(this.platformId)){
         console.log(" ****** HERE : in browser ::"+this.envVariables+" bsfshfsjd "+location.pathname +" ::"+location.host);
+        /**
+         * This check is added to avoid errors reading environment variables on server side
+         * when docker deployment is used. 
+         * Since nginx proxy adds additional context path, http.get
+         * does not get proper url for environment by using just relative path so added /pdr 
+         * here.
+         */
         if(!location.host.includes("localhost:")) 
             this.envVariables = "/pdr"+this.envVariables;
+        
         this.confCall =  this.http.get(this.envVariables) 
                         .toPromise()
                         .then(
