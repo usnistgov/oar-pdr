@@ -9,6 +9,8 @@ import { Subscription } from 'rxjs/Subscription';
 import { AppConfig } from '../shared/config-service/config.service';
 import {  PLATFORM_ID, APP_ID, Inject } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
+import { CartService } from '../datacart/cart.service';
+import { CommonVarService } from '../shared/common-var'
 
 interface reference {
   refType? : string,
@@ -122,7 +124,9 @@ export class LandingComponent implements OnInit {
   constructor(private route: ActivatedRoute, private el: ElementRef, 
               private titleService: Title, private appConfig : AppConfig, private router: Router
               ,@Inject(PLATFORM_ID) private platformId: Object,
-              @Inject(APP_ID) private appId: string) {
+              @Inject(APP_ID) private appId: string,
+              private cartService: CartService,
+              private commonVarService: CommonVarService) {
     
     this.rmmApi = this.appConfig.getRMMapi();
     this.distApi = this.appConfig.getDistApi();
@@ -135,7 +139,6 @@ export class LandingComponent implements OnInit {
    * If Search is successful populate list of keywords themes and authors
    */
   onSuccess(searchResults:any[]) {
-    // console.log(searchResults);
     if(searchResults["ResultCount"] === undefined || searchResults["ResultCount"] !== 1)
       this.record = searchResults;
     else if(searchResults["ResultCount"] !== undefined && searchResults["ResultCount"] === 1)
@@ -145,6 +148,7 @@ export class LandingComponent implements OnInit {
         this.isId = false;
         return;
     }  
+
     this.type = this.record['@type'];
     this.titleService.setTitle(this.record['title']);
     //this.meta.addTag({ "testdescription": this.record['description'] });
@@ -281,9 +285,8 @@ updateMenu(){
    * Get the params OnInit
    */
   ngOnInit() {
-  
     this.searchValue = this.route.snapshot.paramMap.get('id');
-   
+    this.commonVarService.setEdiit(this.searchValue);
     this.files =[];
       this.route.data.map(data => data.searchService )
        .subscribe((res)=>{
@@ -294,6 +297,7 @@ updateMenu(){
           // throw new ErrorComponent(this.route);
        });
   }
+
   goToSelection(isMetadata: boolean, isSimilarResources: boolean, sectionId : string){
     this.metadata = isMetadata; this.similarResources =isSimilarResources;
      if(window.location.href.includes("ark"))
@@ -345,7 +349,6 @@ updateMenu(){
   }
   //This is to create a tree structure
   private arrangeIntoTree(paths) {
-    
     const tree = [];
     // This example uses the underscore.js library.
     var i = 0;
@@ -372,7 +375,6 @@ updateMenu(){
           // Set the current level to this path's children  
           currentLevel = existingPath[0].children;
         } else {
-          
             const newPart = {
               data : {
                 name : part,
@@ -380,10 +382,12 @@ updateMenu(){
                 size: path.size,
                 downloadUrl: path.downloadURL,
                 description: path.description,
-                filetype: path['@type'][0] 
+                filetype: path['@type'][0],
+                resId: path["@id"].replace(/^.*[\\\/]/, ''),
+                isSelected: false
               },children: []
             };
-           
+            
             currentLevel.push(newPart);
             currentLevel = newPart.children;
           // }

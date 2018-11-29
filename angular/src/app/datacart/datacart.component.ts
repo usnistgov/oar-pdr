@@ -15,7 +15,8 @@ import {ProgressSpinnerModule, DialogModule} from 'primeng/primeng';
 import * as _ from 'lodash';
 import * as __ from 'underscore';
 import { environment } from '../../environments/environment';
-
+import { DownloadData } from './downloadData';
+import { CommonVarService } from '../shared/common-var'
 
 declare var Ultima: any;
 declare var saveAs: any;
@@ -75,6 +76,7 @@ export class DatacartComponent implements OnInit, OnDestroy {
   selectedNode: TreeNode[] = [];
   selectedFileCount: number = 0;
   selectedParentIndex:number = 0;
+  ediid:any;
 
   private distApi : string = environment.DISTAPI;
   //private distApi:string = "http://localhost:8083/oar-dist-service";
@@ -84,10 +86,13 @@ export class DatacartComponent implements OnInit, OnDestroy {
    * Creates an instance of the SearchPanel
    *
    */
-  constructor(private http: HttpClient, private cartService: CartService) {
+  constructor(private http: HttpClient, 
+    private cartService: CartService,
+    private commonVarService:CommonVarService) {
     this.getDataCartList();
     this.display = true;
-
+    // console.log("this.cartEntities:");
+    // console.log(this.cartEntities); 
   }
 
   /**
@@ -96,9 +101,8 @@ export class DatacartComponent implements OnInit, OnDestroy {
 
   getDataCartList() {
     this.cartService.getAllCartEntities().then(function (result) {
-      //console.log("result" + result.length);
       this.cartEntities = result;
-      console.log("cart entities inside datacartlist" + JSON.stringify(this.cartEntities));
+    //   console.log("cart entities inside datacartlist" + JSON.stringify(this.cartEntities));
     }.bind(this), function (err) {
       alert("something went wrong while fetching the products");
     });
@@ -113,24 +117,34 @@ export class DatacartComponent implements OnInit, OnDestroy {
     let params = new HttpParams();
     let folderName: string;
     this.showSpinner = true;
-      var i:number;
-      for ( i=0; i < this.dataFiles.length;i++) {
-          if (this.dataFiles[i].expanded == true) {
-              this.selectedParentIndex = i;
-          }
-      }
+    let downloadData: DownloadData[] = [];
+    var i:number;
+    for ( i=0; i < this.dataFiles.length;i++) {
+        if (this.dataFiles[i].expanded == true) {
+            this.selectedParentIndex = i;
+        }
+    }
+
+console.log("this.dataFiles:");
+console.log(this.dataFiles);
+
+    for (let selData of this.selectedData) {
+    if (selData.data['filePath'] != null) {
+        if (selData.data['filePath'].split(".").length > 1) {
+        downloadData.push({"filePath":this.ediid+'/'+selData.data['filePath'], 'downloadUrl':selData.data['downloadURL']});
+        }
+    }
+    }
     for (let selData of this.selectedData) {
       if (selData.data['filePath'] != null) {
         if (selData.data['filePath'].split(".").length > 1) {
-          console.log("resId" + selData.data['resId']);
-          console.log("filepath" + selData.data['filePath'])
           //folderName = selData.data['resId'].split("/")[2] + "-" + selData.data['resTitle'].substring(0, 20);
           params = params.append('folderName', folderName);
           params = params.append('downloadURL', selData.data['downloadURL']);
-          params = params.append('fileName', selData.data['id'] + selData.data['fileName']);
+          params = params.append('fileName', selData.data['resId'] + selData.data['fileName']);
           params = params.append('filePath', selData.data['filePath']);
           params = params.append('resFilePath', selData.data['resFilePath']);
-          this.cartService.updateCartItemDownloadStatus(selData.data['id'],true);
+          this.cartService.updateCartItemDownloadStatus(selData.data['resId'],true);
         }
       }
     }
@@ -142,8 +156,7 @@ export class DatacartComponent implements OnInit, OnDestroy {
       this["showDownloadFileSpinner"+randomnumber] = true;
       this.displayFiles.push({key: downloadFileName, value: this["showDownloadFileSpinner"+randomnumber]});
       
-
-      this.downloadFile(params).subscribe(blob => {
+      this.downloadFile(this.distApi + "/cart?", params).subscribe(blob => {
           saveAs(blob, downloadFileName);
           this.showSpinner = false;
           this["showDownloadFileSpinner"+randomnumber] = false;
@@ -157,9 +170,7 @@ export class DatacartComponent implements OnInit, OnDestroy {
       for (let selData of this.selectedData) {
           if (selData.data['filePath'] != null) {
               if (selData.data['filePath'].split(".").length > 1) {
-                  console.log("resId ::: " + selData.data['resId']);
-                  console.log("filepath :::" + selData.data['filePath'])
-                  this.cartService.updateCartItemDownloadStatus(selData.data['id'],'downloaded');
+                  this.cartService.updateCartItemDownloadStatus(selData.data['resId'],'downloaded');
               }
           }
       }
@@ -185,7 +196,6 @@ export class DatacartComponent implements OnInit, OnDestroy {
 
   dataFileCount() {
       this.selectedFileCount = 0;
-      console.log("selected data length" + this.selectedData.length)
       for (let selData of this.selectedData) {
           if (selData.data['filePath'] != null) {
               if (selData.data['filePath'].split(".").length > 1) {
@@ -212,10 +222,9 @@ export class DatacartComponent implements OnInit, OnDestroy {
    * Update cart entries
    */
   updateCartEntries(row:any,downloadedStatus:any) {
-        console.log("id" + JSON.stringify(row.data));
-        this.cartService.updateCartItemDownloadStatus(row.data['id'],downloadedStatus);
+        // console.log("id" + JSON.stringify(row.data));
+        this.cartService.updateCartItemDownloadStatus(row.data['resId'],downloadedStatus);
         this.cartService.getAllCartEntities().then(function (result) {
-            //console.log("result" + result.length);
             this.cartEntities = result;
                 this.createDataCartHierarchy();
 
@@ -242,9 +251,10 @@ export class DatacartComponent implements OnInit, OnDestroy {
   /**
    * download file
    */
-  downloadFile(params): Observable<Blob> {
+  downloadFile(url, params): Observable<Blob> {
     //let options = new RequestOptions({responseType: ResponseContentType.Blob});
-    return this.http.get(this.distApi + "/cart?" , {responseType: 'blob', params: params});
+    // return this.http.get(this.distApi + "/cart?" , {responseType: 'blob', params: params});
+    return this.http.get(url, {responseType: 'blob', params: params});
   }
 
   /**
@@ -261,13 +271,12 @@ export class DatacartComponent implements OnInit, OnDestroy {
           }
       }
       for (let selData of this.selectedData) {
-          dataId = selData.data['id'];
+          dataId = selData.data['resId'];
           // Filter out all cartEntities with given productId,  finally the new stuff from es6 can be used.
-          this.cartEntities = this.cartEntities.filter(entry => entry.data.id != dataId);
+          this.cartEntities = this.cartEntities.filter(entry => entry.data.resId != dataId);
             //save to localStorage
           this.cartService.saveListOfCartEntities(this.cartEntities);
       }
-
       this.getDataCartList();
       this.createDataCartHierarchy();
 
@@ -318,7 +327,7 @@ export class DatacartComponent implements OnInit, OnDestroy {
     this.cartService.getAllCartEntities().then(function (result) {
       //console.log("result" + result.length);
       this.cartEntities = result;
-      console.log("cart entities inside datacartlist" + JSON.stringify(this.cartEntities));
+    //   console.log("cart entities inside datacartlist" + JSON.stringify(this.cartEntities));
       this.createDataCartHierarchy();
     }.bind(this), function (err) {
       alert("something went wrong while fetching the products");
@@ -346,7 +355,7 @@ export class DatacartComponent implements OnInit, OnDestroy {
    * Get the params OnInit
    */
   ngOnInit() {
-    console.log("test" + this.cartEntities.length);
+    this.ediid = this.commonVarService.getEdiid();
     this.createDataCartHierarchy();
     this.display = true;
       if (this.cartEntities.length > 0) {
@@ -356,7 +365,6 @@ export class DatacartComponent implements OnInit, OnDestroy {
           //var element = <HTMLInputElement> document.getElementById("downloadStatus");
           //element.disabled = true;
       }
-
   }
 
 
@@ -367,27 +375,29 @@ export class DatacartComponent implements OnInit, OnDestroy {
    * Create Data hierarchy for the tree
    */
   createDataCartHierarchy() {
-
-      let arrayList = this.cartEntities.reduce(function (result, current) {
-          result[current.data.resTitle] = result[current.data.resTitle] || [];
-          result[current.data.resTitle].push(current);
-          return result;
-          }, {});
+    let arrayList = this.cartEntities.reduce(function (result, current) {
+        result[current.data.resTitle] = result[current.data.resTitle] || [];
+        result[current.data.resTitle].push(current);
+        return result;
+        }, {});
 
         this.dataFiles = [];
-
         let parentObj: TreeNode = {};
         for (var key in arrayList) {
-            let resId = key;
+            // let resId = key;
+
             if (arrayList.hasOwnProperty(key)) {
                 parentObj = {
                     data: {
                         'resTitle': key,
                     }
                 };
+
                 parentObj.children = [];
                 for (let fields of arrayList[key]) {
-                   
+
+                    let resId = fields.data.resId;
+
                     let fpath = fields.data.filePath.split("/");
                     if (fpath.length > 0) {
                         let child2: TreeNode = {};
@@ -396,24 +406,23 @@ export class DatacartComponent implements OnInit, OnDestroy {
                         let folderExists:boolean = false;
                         let folder = null;
                         for (let path in fpath) {
-                            //console.log("##$%$%$ path path:" +fpath[path]);
+                            // console.log("##$%$%$ path path:" +fpath[path]);
                             /// Added this code to avoid the issue of extra file layers in the datacart
                             if(fpath[path] !== ""){
                             child2 = this.createDataCartChildrenTree(fpath[path],fields.data.id,resId,key,fields.data.downloadURL,fields.data.filePath,fields.data.downloadedStatus);
                             parent.children.push(child2);
-                            
+
                             parent = child2;}
                         }
                     }
                 }
-
                 this.walkData(parentObj, parentObj, 0);
                 this.dataFiles.push(parentObj);
                 this.index = {};
             }
         }
     }
-
+  
   /**
    * Create the hierarchy for the tree
    */
@@ -440,7 +449,7 @@ export class DatacartComponent implements OnInit, OnDestroy {
                 parent.children.forEach((item) => {
                     if (!found &&
                         item.data.filePath === inputArray.data.filePath &&
-                        item.data.id === inputArray.data.id
+                        item.data.resId === inputArray.data.resId
                     ){
                         found = true;
                     }

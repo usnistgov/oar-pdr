@@ -42,7 +42,6 @@ export class SearchService {
     return this.http.get(this.serviceApi);
   } 
   searchById(searchValue:string){
- 
     if (_.includes(this.landingBackend,'rmm') && _.includes(searchValue,'ark'))
       this.landingBackend = this.landingBackend+'records?@id=';
     else if(_.includes(this.landingBackend,'rmm'))

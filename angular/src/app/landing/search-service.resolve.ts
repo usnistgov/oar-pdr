@@ -30,13 +30,14 @@ export class SearchResolve implements Resolve<any> {
   // }
   resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<any> {
     var recordid = route.params['id'];
+
     //console.log(state.url.toString().split("/id/").pop());
     if(state.url.toString().includes("ark")){
       recordid =  state.url.toString().split("/id/").pop();
     }
    
     const recordid_KEY = makeStateKey<any>('record-' + recordid);
-    
+
     if (this.transferState.hasKey(recordid_KEY)) {
         console.log("1. Is it here @@@");
         const record = this.transferState.get<any>(recordid_KEY, null);
