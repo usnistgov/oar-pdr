@@ -101,6 +101,24 @@ class BagBuilder(PreservationSystem):
                               data
     :prop ensure_nerdm_type_on_add bool (True):  if True, make sure that the 
                          resource metadata has a recognized value for "_schema".
+    :prop distrib_service_baseurl str (https://data.nist.gov/od/ds):  the base
+                         URL to use for creating downloadURL property values.
+    :prop require_ark_id bool (True):  if True, builder will ensure the resource
+                         identifier is set with an ARK identifier (in assign_id())
+    :prop extra_tag_dirs list of str (None): a list of other bag tag directories 
+                         to create (besides "metadata" and "multibag").
+    :prop finalize dict:  a set of properties to configure the finalize_bag()
+                              function.  See the finalize_bag() documentation 
+                              for the specific properties supported.
+    :prop bagit_version str ("1.0"): the version of bagit to claim compliance with
+    :prop bagit_encoding str ("UTF-8"):  the text encoding to claim was used to
+                              write tag metadata.
+    :prop init_bag_info dict:  a set of bag-info properties and values that should 
+                              always be included in the bag-info.txt file.
+    :prop bag-download-url str:  the base URL to use to record the URL for retrieving
+                              the bag from the Distribution Service.  
+    :prop validator dict:     a set of properties for configuring the bag validation;
+                              see nistoar.pdr.preserv.bagit.validate for details.
     """
 
     nistprofile = "0.4"
@@ -1460,11 +1478,20 @@ class BagBuilder(PreservationSystem):
         behavior of the bag finalization.  If not provided, the configuration 
         property 'finalize' provided at construction will control finalization.
         The following finalize sub-properties will be recognized:
-          :param 'ensure_component_metadata' bool (True):   if True, this will ensure 
+          :prop 'ensure_component_metadata' bool (True):   if True, this will ensure 
                     that all data files and subcollections have been examined 
                     and had metadata extracted.  
-          :param 'trim_folders' bool (False):  if True, remove all empty data directories
+          :prop 'trim_folders' bool (False):  if True, remove all empty data 
+                    directories
+          :prop 'confirm_checksums' bool (False):  if True, double check that 
+                    recorded checksums are correct (by checksumming the data files)
 
+        :param dict finalcfg:      the 'finalize' configuration properties
+        :param bool stop_logging:  turn off logging to the bag-internal log file; 
+                                   this is useful when finalize_bag() is the last 
+                                   call made to this builder.  When True, any 
+                                   subsequent updates made with this instance will 
+                                   not get recorded in that log.  
         :return list:  a list of errors encountered while trying to complete
                        the bag.  An empty list indicates that the bag is complete
                        and ready to preserved.  
@@ -1715,7 +1742,7 @@ class BagBuilder(PreservationSystem):
         if not self._bag:
             self.ensure_bagdir()
 
-        initdata = self.cfg.get('init_bag_info', OrderedDict())
+        initdata = deepcopy(self.cfg.get('init_bag_info', OrderedDict()))
 
         # add items based on bag's contents
         try:
