@@ -1395,7 +1395,8 @@ class BagBuilder(PreservationSystem):
 
         defmd = self._create_init_md_for("", "Resource")
         mdata = self._update_md(defmd, mdata)
-        self.replace_metadata_for("", mdata, message="")
+        # self.replace_metadata_for("", mdata, message="")
+        self.update_metadata_for("", mdata, "Resource", message="")
 
     def add_ds_pod(self, pod, convert=True, savefilemd=True):
         """
@@ -2197,6 +2198,9 @@ def metadata_matches_type(mdata, nodetype):
     return matches_type(types, nodetype)
 
 def matches_type(types, nodetype):
+    if nodetype == "Resource":
+        nodetype = "PublicDataResource"
+
     if ':' not in nodetype:
         basere = re.compile(r'^[^:]*:')
         types = [basere.sub('', t) for t in types]
