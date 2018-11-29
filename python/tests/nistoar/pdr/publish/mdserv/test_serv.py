@@ -143,11 +143,11 @@ class TestPrePubMetadataService(test.TestCase):
         self.assertIn("components", data)
         self.assertIn("inventory", data)
 
-        self.assertEqual(len(data['components']), 8)
+        self.assertEqual(len(data['components']), 7)
         self.assertEqual(data['inventory'][0]['forCollection'], "")
         self.assertEqual(len(data['inventory']), 2)
-        self.assertEqual(data['inventory'][0]['childCount'], 6)
-        self.assertEqual(data['inventory'][0]['descCount'], 8)
+        self.assertEqual(data['inventory'][0]['childCount'], 5)
+        self.assertEqual(data['inventory'][0]['descCount'], 7)
 
         comps = data['components']
         dlcount = 0
@@ -158,7 +158,7 @@ class TestPrePubMetadataService(test.TestCase):
                     continue
                 self.assertTrue(comp['downloadURL'].startswith('https://data.nist.gov/od/ds/3A1EE2F169DD3B8CE0531A570681DB5D1491/'),
                                 "{0} does not start with https://data.nist.gov/od/ds/3A1EE2F169DD3B8CE0531A570681DB5D1491/".format(comp['downloadURL']))
-        self.assertEquals(dlcount, 6)
+        self.assertEquals(dlcount, 5)
         
     def test_make_nerdm_record_cvt_dlurls(self):
         metadir = os.path.join(self.bagdir, 'metadata')
@@ -176,11 +176,11 @@ class TestPrePubMetadataService(test.TestCase):
         self.assertIn("components", data)
         self.assertIn("inventory", data)
 
-        self.assertEqual(len(data['components']), 8)
+        self.assertEqual(len(data['components']), 7)
         self.assertEqual(data['inventory'][0]['forCollection'], "")
         self.assertEqual(len(data['inventory']), 2)
-        self.assertEqual(data['inventory'][0]['childCount'], 6)
-        self.assertEqual(data['inventory'][0]['descCount'], 8)
+        self.assertEqual(data['inventory'][0]['childCount'], 5)
+        self.assertEqual(data['inventory'][0]['descCount'], 7)
         
         comps = data['components']
         dlcount = 0
@@ -191,7 +191,7 @@ class TestPrePubMetadataService(test.TestCase):
                     continue
                 self.assertTrue(comp['downloadURL'].startswith('https://mdserv.nist.gov/'+self.midasid+'/'),
                                 "Bad conversion of URL: "+comp['downloadURL'])
-        self.assertEquals(dlcount, 6)
+        self.assertEquals(dlcount, 5)
 
         datafiles = { "trial1.json": "blah/blah/trial1.json" }
         data = self.srv.make_nerdm_record(bagdir, datafiles, 
@@ -208,7 +208,7 @@ class TestPrePubMetadataService(test.TestCase):
                 else:
                     self.assertFalse(comp['downloadURL'].startswith('https://mdserv.nist.gov/'+self.midasid+'/'),
                                 "Bad conversion of URL: "+comp['downloadURL'])
-        self.assertEquals(dlcount, 6)
+        self.assertEquals(dlcount, 5)
 
     def test_make_nerdm_record_withannots(self):
         metadir = os.path.join(self.bagdir, 'metadata')
@@ -248,7 +248,7 @@ class TestPrePubMetadataService(test.TestCase):
         self.assertEqual(data['ediid'], ediid)
         self.assertEqual(data['foo'], "bar")
 
-        self.assertEqual(len(data['components']), 8)
+        self.assertEqual(len(data['components']), 7)
         trial1 = [c for c in data['components']
                     if 'filepath' in c and c['filepath'] == "trial1.json"][0]
         self.assertIn('previewURL', trial1)

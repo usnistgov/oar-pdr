@@ -124,8 +124,8 @@ class PrePubMetadataService(PublishSystem):
             # versions.  
             self.prepsvc = UpdatePrepService(self.cfg['repo_access'])
         else:
-            self.log.warning("repo_access not configured; can't support "+
-                             "updates!")
+            self.log.info("repo_access not configured; no access to published "+
+                          "records.")
 
     def _create_minter(self, parentdir):
         cfg = self.cfg.get('id_minter', {})
@@ -134,7 +134,7 @@ class PrePubMetadataService(PublishSystem):
             self.log.warn("Creating new ID minter")
         return out
 
-    def prepare_metadata_bag(self, id, bagger=None, prepper=None):
+    def prepare_metadata_bag(self, id, bagger=None):
         """
         Bag up the metadata from data provided by MIDAS for a given MIDAS ID.  
 
@@ -151,17 +151,6 @@ class PrePubMetadataService(PublishSystem):
             # submission data from MIDAS
             bagger = self.open_bagger(id)
             
-        if not prepper and self.prepsvc:
-            prepper = self.prepsvc.prepper_for(id, log=self.log)
-
-        if prepper and not os.path.exists(bagger.bagdir):
-            # This submission has not be accessed via the PDR before; if this 
-            # dataset has been previously been published, we need to initialize
-            # the metadata bag from the last head bag (or at least the last
-            # published NERDm record).
-            if prepper.create_new_update(bagger.bagdir):
-                self.log.info("metadata initialized from previous publication")
-
         # update the metadata bag with the latest data from MIDAS
         bagger.ensure_preparation()
         return bagger
@@ -172,6 +161,8 @@ class PrePubMetadataService(PublishSystem):
         metadata bag.
         """
         cfg = self.cfg.get('bagger', {})
+        if 'repo_access' not in cfg and 'repo_access' in self.cfg:
+            cfg['repo_access'] = self.cfg['repo_access']
         if not os.path.exists(self.workdir):
             os.mkdir(workdir)
         elif not os.path.isdir(self.workdir):
@@ -242,8 +233,6 @@ class PrePubMetadataService(PublishSystem):
         """
         # this handles preparation for a dataset that has been published before.
         prepper = None
-        if self.prepsvc:
-            prepper = self.prepsvc.prepper_for(id, log=self.log)
 
         try:
             
@@ -252,7 +241,8 @@ class PrePubMetadataService(PublishSystem):
         except SIPDirectoryNotFound as ex:
             # there is no input data from midas; fall-back to a previously
             # published record, if available
-            if prepper:
+            if self.prepsvc:
+                prepper = self.prepsvc.prepper_for(id, log=self.log)
                 nerdmfile = prepper.cache_nerdm_rec()
                 if nerdmfile:
                     return read_nerd(nerdmfile)
@@ -262,7 +252,7 @@ class PrePubMetadataService(PublishSystem):
 
         # There is a MIDAS submission in progress; create/update the 
         # metadata bag.
-        bagger = self.prepare_metadata_bag(id, bagger, prepper)
+        bagger = self.prepare_metadata_bag(id, bagger)
         return self.make_nerdm_record(bagger.bagdir, bagger.datafiles)
 
     def locate_data_file(self, id, filepath):
