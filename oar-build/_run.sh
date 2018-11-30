@@ -23,7 +23,7 @@ LOGPATH=$PWD/$LOGFILE
 . $OAR_BUILD_DIR/_logging.sh
 
 function set_interactive {
-    shcmds=:`echo $SHELL_COMMANDS | sed -re 's/ +/:/'`:
+    shcmds=:`echo $SHELL_COMMANDS | perl -pe 's/ +/:/'`:
     cmd=$1
     [ -z "$cmd" ] && cmd=build
 

@@ -15,7 +15,7 @@ function get_reponame {
         if [ -f "$PACKAGE_DIR/VERSION" ]; then
             awk '{print $1}' "$PACKAGE_DIR/VERSION"
         else
-            basename $PACKAGE_DIR | sed -re '/^oar-[^\-]+-/ s/-[^\-]+$//'
+            basename $PACKAGE_DIR | perl -pe 's/-[^\-]+$// if /^oar-[^\-]+-/'
         fi
     else
         echo ${prog}: Not a git repository; unable to determine package name
@@ -28,7 +28,7 @@ function get_branchname {
         branch=`git rev-parse --abbrev-ref HEAD`
         echo $branch
     elif (basename "$PACKAGE_DIR" | grep -sqP '^oar-[^\-]+-'); then
-        basename "$PACKAGE_DIR" | sed -re 's/^.*-//'
+        basename "$PACKAGE_DIR" | perl -pe 's/^.*-//'
     else
         echo "(unknown)"
     fi
