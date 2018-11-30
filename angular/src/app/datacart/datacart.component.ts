@@ -15,7 +15,7 @@ import {ProgressSpinnerModule, DialogModule} from 'primeng/primeng';
 import * as _ from 'lodash';
 import * as __ from 'underscore';
 import { environment } from '../../environments/environment';
-import { DownloadData } from './downloadData';
+// import { DownloadData } from './downloadData';
 import { CommonVarService } from '../shared/common-var'
 
 declare var Ultima: any;
@@ -117,7 +117,7 @@ export class DatacartComponent implements OnInit, OnDestroy {
     let params = new HttpParams();
     let folderName: string;
     this.showSpinner = true;
-    let downloadData: DownloadData[] = [];
+    // let downloadData: DownloadData[] = [];
     var i:number;
     for ( i=0; i < this.dataFiles.length;i++) {
         if (this.dataFiles[i].expanded == true) {
@@ -128,13 +128,13 @@ export class DatacartComponent implements OnInit, OnDestroy {
 console.log("this.dataFiles:");
 console.log(this.dataFiles);
 
-    for (let selData of this.selectedData) {
-    if (selData.data['filePath'] != null) {
-        if (selData.data['filePath'].split(".").length > 1) {
-        downloadData.push({"filePath":this.ediid+'/'+selData.data['filePath'], 'downloadUrl':selData.data['downloadURL']});
-        }
-    }
-    }
+    // for (let selData of this.selectedData) {
+    //     if (selData.data['filePath'] != null) {
+    //         if (selData.data['filePath'].split(".").length > 1) {
+    //         downloadData.push({"filePath":this.ediid+'/'+selData.data['filePath'], 'downloadUrl':selData.data['downloadURL']});
+    //         }
+    //     }
+    // }
     for (let selData of this.selectedData) {
       if (selData.data['filePath'] != null) {
         if (selData.data['filePath'].split(".").length > 1) {

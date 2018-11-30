@@ -4,7 +4,6 @@ import { CartService} from '../../datacart/cart.service';
 import { Data} from '../../datacart/data';
 import { OverlayPanel} from 'primeng/overlaypanel';
 import { stringify } from '@angular/compiler/src/util';
-import { DownloadService } from '../../shared/download-service/download-service.service';
 
 @Component({
   moduleId: module.id,
@@ -248,8 +247,7 @@ export class DescriptionComponent {
     }
 
     constructor(private cartService: CartService,
-            private cdr: ChangeDetectorRef,
-            private downloadService: DownloadService) {
+            private cdr: ChangeDetectorRef) {
         this.cartService.watchAddAllFilesCart().subscribe(value => {
         this.addAllFileSpinner = value;
         });
