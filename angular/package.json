@@ -84,7 +84,7 @@
     "@types/browser-sync": "^0.0.41",
     "@types/cors": "^2.8.3",
     "@types/express": "^4.16.0",
-    "@types/jasmine": "~2.8.6",
+    "@types/jasmine": "2.8.5",
     "@types/jasminewd2": "~2.0.3",
     "@types/jspdf": "^1.1.31",
     "@types/lodash": "^4.14.107",
