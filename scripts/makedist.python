@@ -29,6 +29,23 @@ set -e
 prog=`basename $0`
 execdir=`dirname $0`
 [ "$execdir" = "" -o "$execdir" = "." ] && execdir=$PWD
+
+# this is needed because realpath is not on macs
+function realpath {
+    if [ -d "$1" ]; then
+        (cd $1 && pwd)
+    elif [ -f "$1" ]; then
+        file=`basename $1`
+        parent=`dirname $1`
+        realdir=`(cd $parent && pwd)`
+        echo "$realdir/$file"
+    elif [[ $1 = /* ]]; then
+        echo $1
+    else
+        echo "$PWD/${1#./}"
+    fi
+}
+
 execdir=`realpath $execdir`
 PACKAGE_DIR=`dirname $execdir`
 SOURCE_DIR=$PACKAGE_DIR/python
