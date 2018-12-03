@@ -133,7 +133,7 @@ cd $SOURCE_DIR
 [ -n "$PACKAGE_NAME" ] || PACKAGE_NAME=`cat $PACKAGE_DIR/VERSION | awk '{print $1}'`
 version=$VERSION
 [ -n "$version" ] || version=`cat $PACKAGE_DIR/VERSION | awk '{print $2}'`
-vers4fn=`echo $version | sed -re 's#[/ ]+#_#g'`
+vers4fn=`echo $version | perl -pe 's#[/ \t]+#_#g'`
 
 # install required modules
 nodemodarg=
