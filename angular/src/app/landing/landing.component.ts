@@ -286,16 +286,19 @@ updateMenu(){
    */
   ngOnInit() {
     this.searchValue = this.route.snapshot.paramMap.get('id');
-    this.commonVarService.setEdiit(this.searchValue);
+    this.commonVarService.setEdiid(this.searchValue);
     this.files =[];
-      this.route.data.map(data => data.searchService )
-       .subscribe((res)=>{
-         this.onSuccess(res);
-       }, error =>{
-          console.log("There is an error in searchservice.");
-          this.onError(" There is an error");
-          // throw new ErrorComponent(this.route);
-       });
+    this.route.data.map(data => data.searchService )
+      .subscribe((res)=>{
+        this.onSuccess(res);
+      }, error =>{
+        console.log("There is an error in searchservice.");
+        this.onError(" There is an error");
+        // throw new ErrorComponent(this.route);
+      });
+
+    console.log("this.files: ");
+    console.log(this.files);
   }
 
   goToSelection(isMetadata: boolean, isSimilarResources: boolean, sectionId : string){
@@ -360,39 +363,39 @@ updateMenu(){
       {
         if(!path.filepath.startsWith("/"))
           path.filepath = "/"+path.filepath;
+
         const pathParts = path.filepath.split('/');
         pathParts.shift(); // Remove first blank element from the parts array.
         let currentLevel = tree; // initialize currentLevel to root
         
         pathParts.forEach((part) => { 
-          
-        // check to see if the path already exists.
-        const existingPath = currentLevel.filter(level => level.data.name === part);
-   
-        if (existingPath.length > 0) {
-          
-          // The path to this item was already in the tree, so don't add it again.
-          // Set the current level to this path's children  
-          currentLevel = existingPath[0].children;
-        } else {
-            const newPart = {
-              data : {
-                name : part,
-                mediatype: path.mediaType,
-                size: path.size,
-                downloadUrl: path.downloadURL,
-                description: path.description,
-                filetype: path['@type'][0],
-                resId: path["@id"].replace(/^.*[\\\/]/, ''),
-                isSelected: false
-              },children: []
-            };
+          // check to see if the path already exists.
+          const existingPath = currentLevel.filter(level => level.data.name === part);
+          if (existingPath.length > 0) {
             
-            currentLevel.push(newPart);
-            currentLevel = newPart.children;
-          // }
-        }
-        this.filescount = this.filescount+1;
+            // The path to this item was already in the tree, so don't add it again.
+            // Set the current level to this path's children  
+            currentLevel = existingPath[0].children;
+          } else {
+              const newPart = {
+                data : {
+                  name : part,
+                  mediatype: path.mediaType,
+                  size: path.size,
+                  downloadUrl: path.downloadURL,
+                  description: path.description,
+                  filetype: path['@type'][0],
+                  resId: path["@id"].replace(/^.*[\\\/]/, ''),
+                  fullPath: path.filepath,
+                  isSelected: false
+                },children: []
+              };
+              
+              currentLevel.push(newPart);
+              currentLevel = newPart.children;
+            // }
+          }
+          this.filescount = this.filescount+1;
         });
       }
       i= i+1;

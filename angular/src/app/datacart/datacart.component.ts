@@ -96,12 +96,35 @@ export class DatacartComponent implements OnInit, OnDestroy {
   }
 
   /**
+   * Get the params OnInit
+   */
+  ngOnInit() {
+    this.ediid = this.commonVarService.getEdiid();
+    this.createDataCartHierarchy();
+    this.display = true;
+      if (this.cartEntities.length > 0) {
+         // var element = <HTMLInputElement> document.getElementById("downloadStatus");
+         // element.disabled = false;
+      } else {
+          //var element = <HTMLInputElement> document.getElementById("downloadStatus");
+          //element.disabled = true;
+      }
+  }
+
+
+  ngOnDestroy() {
+  }
+
+  /**
    * If Search is successful populate list of keywords themes and authors
    */
 
   getDataCartList() {
     this.cartService.getAllCartEntities().then(function (result) {
       this.cartEntities = result;
+      console.log("this.cartEntities:");
+      console.log(this.cartEntities);
+      
     //   console.log("cart entities inside datacartlist" + JSON.stringify(this.cartEntities));
     }.bind(this), function (err) {
       alert("something went wrong while fetching the products");
@@ -118,6 +141,7 @@ export class DatacartComponent implements OnInit, OnDestroy {
     let folderName: string;
     this.showSpinner = true;
     let downloadData: DownloadData[] = [];
+    let existItem: any;
     var i:number;
     for ( i=0; i < this.dataFiles.length;i++) {
         if (this.dataFiles[i].expanded == true) {
@@ -125,16 +149,19 @@ export class DatacartComponent implements OnInit, OnDestroy {
         }
     }
 
-console.log("this.dataFiles:");
-console.log(this.dataFiles);
-
     for (let selData of this.selectedData) {
-    if (selData.data['filePath'] != null) {
-        if (selData.data['filePath'].split(".").length > 1) {
-        downloadData.push({"filePath":this.ediid+'/'+selData.data['filePath'], 'downloadUrl':selData.data['downloadURL']});
+        if (selData.data['resFilePath'] != null && selData.data['resFilePath'] != undefined) {
+            if (selData.data['resFilePath'].split(".").length > 1) {
+                existItem = downloadData.filter(item => item.filePath === this.ediid+selData.data['resFilePath'] 
+                    && item.downloadUrl === selData.data['downloadURL']);
+
+                if (existItem.length == 0) {
+                    downloadData.push({"filePath":this.ediid+selData.data['resFilePath'], 'downloadUrl':selData.data['downloadURL']});
+                }
+            }
         }
     }
-    }
+
     for (let selData of this.selectedData) {
       if (selData.data['filePath'] != null) {
         if (selData.data['filePath'].split(".").length > 1) {
@@ -349,26 +376,6 @@ console.log(this.dataFiles);
     this.createDataCartHierarchy();
     //console.log("datafiles" + this.dataFiles.length);
 
-  }
-
-  /**
-   * Get the params OnInit
-   */
-  ngOnInit() {
-    this.ediid = this.commonVarService.getEdiid();
-    this.createDataCartHierarchy();
-    this.display = true;
-      if (this.cartEntities.length > 0) {
-         // var element = <HTMLInputElement> document.getElementById("downloadStatus");
-         // element.disabled = false;
-      } else {
-          //var element = <HTMLInputElement> document.getElementById("downloadStatus");
-          //element.disabled = true;
-      }
-  }
-
-
-  ngOnDestroy() {
   }
 
   /**

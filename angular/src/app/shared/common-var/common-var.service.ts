@@ -24,7 +24,7 @@ export class CommonVarService {
         this.userObservable.next(val);
       }  
     
-  setEdiit(ediid:string) {
+  setEdiid(ediid:string) {
     this._storage.setItem("ediid", ediid);
   }
 

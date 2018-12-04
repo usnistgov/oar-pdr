@@ -49,21 +49,27 @@
                </i><br>
         </span>
     </span>
-
+    
 <div *ngIf="files.length  > 0">        
     <br>
     <span><b>Files </b> </span>   
-    <span>
+    <!-- <span>
         <a  class="faa faa-file-archive-o" style="color:grey; margin-left:0.5em; " title="Download All Files" ></a>
+    </span> -->
+    <span (click)="downloadAllConfirm('Download All Files', 'This will download all files. Continue?', 'downloadAllConfirm')">
+        <i *ngIf="!allDownloaded" class="faa faa-download" style="color: #1E6BA1;cursor: pointer;" aria-hidden="true" data-toggle="tooltip" title="All files direct download"></i>
+        <i *ngIf="allDownloaded" class="faa faa-download" style="color: goldenrod;cursor: pointer;" aria-hidden="true" data-toggle="tooltip" title="All files direct download"></i>
     </span>
 
+    <p-confirmDialog key='downloadAllConfirm'></p-confirmDialog>
+
     <span *ngIf="!allSelected">
-    <a href="javascript:;" (click)="addFilesToCart()" class="faa faa-cart-plus " style="margin-left:0.5em; color:#1E6BA1;cursor: pointer;" title="Add All files to datacart" data-toggle="tooltip"></a></span>
+    <a href="javascript:;" (click)="addFilesToCart(files)" class="faa faa-cart-plus " style="margin-left:0.5em; color:#1E6BA1;cursor: pointer;" title="Add All files to datacart" data-toggle="tooltip"></a></span>
     <span *ngIf="allSelected">
-        <a href="javascript:;" (click)="removeFilesFromCart()" class="faa faa-shopping-cart" style="margin-left:0.5em; color:red;cursor: pointer;" title="Remove All files from datacart" data-toggle="tooltip"></a></span>
+        <a href="javascript:;" (click)="removeFilesFromCart(files)" class="faa faa-shopping-cart" style="margin-left:0.5em; color:red;cursor: pointer;" title="Remove All files from datacart" data-toggle="tooltip"></a></span>
         <span class="font8" style="margin-left:0.5em; color:gray;">Click on the file/row in the table below to view more details.</span>
     <span class="font10" style="margin-left:0.5em; color:gray; float: right"> Total No. files: {{ filescount }} </span> 
-    <p-treeTable [value]="files" [columns]="cols" selectionMode="single"    [resizableColumns]="true" sortField="name" >
+    <p-treeTable [value]="files" [columns]="cols" selectionMode="single"  [resizableColumns]="true" sortField="name" >
     <ng-template pTemplate="colgroup" let-columns>
         <colgroup>
             <col *ngFor="let col of columns"  [style.width]="col.width">
@@ -86,30 +92,20 @@
                 <td><span *ngIf="rowData.size">{{formatBytes(rowData.size)}}</span></td>
                 <td>
                     <span *ngIf=" rowData.downloadUrl ">
-                        <span>
-                            <a href="{{rowData.downloadUrl}}"><i class="faa faa-download" aria-hidden="true" data-toggle="tooltip" title="Direct download"></i></a>
-                        </span>
+                        <span *ngIf = "rowData.downloadedStatus == null" (click)="downloadFile(rowData)"><i class="faa faa-download" style="color: #1E6BA1;cursor: pointer;" aria-hidden="true" data-toggle="tooltip" title="Direct download"></i></span>
+                        <span *ngIf = "rowData.downloadedStatus === 'downloaded'" (click)="downloadFile(rowData)"><i class="faa faa-download" style="color:goldenrod; cursor: pointer;" aria-hidden="true" data-toggle="tooltip" title="Direct download"></i></span>
 
-                        <span [hidden] ="!addFileSpinner" style="float:right;">
+                        <span *ngIf="rowData.downloadedStatus === 'downloading'" style="float:right;">
                          <p-progressSpinner [style]="{width: '20px', height: '20px', float: 'right'}" ></p-progressSpinner>
                         </span> 
-
-                        <!-- <span><a style="position:relative; margin-left:0.5em;"  class="faa faa-cart-plus " (click)="addtoCart(rowData)" ></a>
-                        </span>              -->
-                        <span>
-                            <!-- <i *ngIf = "rowData.downloadedStatus === 'downloaded'" style="margin-left:-20px;margin-top: 5px" class="small-button" pButton icon="faa faa-check"></i>
-                            <i *ngIf = "rowData.downloadedStatus === 'downloading'"  class="small-button-yellow" pButton icon="faa faa-check"></i> &nbsp; -->
-
-                            <!-- <button type="button" *ngIf = "rowData.downloadedStatus === 'downloaded'" style="margin-left:-20px;margin-top: 5px" class="small-button" pButton icon="faa faa-check"></button>
-                            <button type="button" *ngIf = "rowData.downloadedStatus === 'downloading'"  class="small-button-yellow" pButton icon="faa faa-check"></button> &nbsp; -->
-                        </span>
+                        <span style="margin-left: 0.5em">{{rowData.downloadedStatus}}</span>  
+                        <span *ngIf = "rowData.downloadedStatus == 'downloaded'" (click)="resetDownloadStatus(rowData)"> <i class="faa faa-recycle" style="color: #1E6BA1;cursor: pointer; margin-left: 0.5em" aria-hidden="true" data-toggle="tooltip" title="Reset download status"></i></span>  
                     </span> 
                 </td>
                 <td>
                     <span>
                         <span *ngIf="!rowData.isSelected"><a style="position:relative;margin-left:0.5em;cursor:pointer;"  class="faa faa-cart-plus " (click)="addtoCart(rowData)" data-toggle="tooltip" title="Add to cart"></a>
                         </span>     
-                        <!-- <span *ngIf="rowData.isSelected" style="white-space: pre;"> -</span> -->
                         <span *ngIf="rowData.isSelected"><a style="position:relative;margin-left:0.5em;cursor:pointer;color:red" class="faa faa-shopping-cart " (click)="removeCart(rowData, rowData.resId)" data-toggle="tooltip" title="Remove from cart"></a>
                         </span> 
                         <span *ngIf="rowData.isSelected" style="margin-left: 0.5em">Added</span>

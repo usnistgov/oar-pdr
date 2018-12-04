@@ -33,6 +33,10 @@ import { CartService } from "./datacart/cart.service";
 import { AppShellNoRenderDirective } from './directives/app-shell-no-render.directive';
 import { AppShellRenderDirective } from './directives/app-shell-render.directive';
 import { FragmentPolyfillModule } from "./fragment-polyfill.module";
+import { DownloadService } from "./shared/download-service/download-service.service";
+import {ProgressSpinnerModule} from 'primeng/progressspinner';
+import { ConfirmDialogModule, SelectItem, DropdownModule, ConfirmationService,Message } from 'primeng/primeng';
+
 /**
  * Initialize the configs for backend services
  */
@@ -59,12 +63,21 @@ const appInitializerFn = (appConfig: AppConfig) => {
     AppRoutingModule, HttpClientModule,
     CommonModule, SharedModule, BrowserAnimationsModule, FormsModule,TooltipModule,
     TreeTableModule, TreeModule,MenuModule, FieldsetModule,DialogModule,OverlayPanelModule,
-    ButtonModule,
+    ButtonModule,ProgressSpinnerModule,ConfirmDialogModule,
     NgbModule.forRoot()
   ],
   exports: [Collaspe],
-  providers: [ Title, Meta, SearchService,SearchResolve, CommonVarService,  CartService 
-    , AppConfig, {
+  providers: [ 
+    Title, 
+    Meta, 
+    SearchService,
+    SearchResolve, 
+    CommonVarService,  
+    CartService, 
+    AppConfig,
+    DownloadService,
+    ConfirmationService,
+    {
       provide: APP_INITIALIZER,
       useFactory: appInitializerFn,
       multi: true,

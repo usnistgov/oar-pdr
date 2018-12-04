@@ -5,47 +5,58 @@ import { Data} from '../../datacart/data';
 import { OverlayPanel} from 'primeng/overlaypanel';
 import { stringify } from '@angular/compiler/src/util';
 import { DownloadService } from '../../shared/download-service/download-service.service';
+import { SelectItem, DropdownModule, ConfirmationService,Message } from 'primeng/primeng';
 
 @Component({
   moduleId: module.id,
   styleUrls: ['../landing.component.css'],
   selector: 'description-resources',
-  templateUrl: `description.component.html`
+  templateUrl: `description.component.html`,
+  providers: [ConfirmationService]
 })
 
 export class DescriptionComponent {
 
- @Input() record: any[];
- @Input() files: TreeNode[];
- @Input() distdownload: string;
- @Input() editContent: boolean;
- @Input() filescount: number;
- @Input() metadata: boolean;
+    @Input() record: any[];
+    @Input() files: TreeNode[];
+    @Input() distdownload: string;
+    @Input() editContent: boolean;
+    @Input() filescount: number;
+    @Input() metadata: boolean;
 
- addAllFileSpinner:boolean = false;
- fileDetails:string = '';
- isFileDetails: boolean = false;
- isReference: boolean = false;
- selectedFile: TreeNode;
- isAccessPage : boolean = false;
- accessPages: Map <string, string> = new Map();
- accessUrls : string[] =[];
- accessTitles : string[] =[];
- isReferencedBy : boolean = false;
- isDocumentedBy : boolean = false;
- selectedNodes: TreeNode[];
- addFileStatus:boolean = false;
- selectedNode : TreeNode;
- cols: any[];
- fileNode: TreeNode;
- display: boolean = false;
- cartMap: any[];
- allSelected: boolean = false;
- addFileSpinner: boolean = false;
+    addAllFileSpinner:boolean = false;
+    fileDetails:string = '';
+    isFileDetails: boolean = false;
+    isReference: boolean = false;
+    selectedFile: TreeNode;
+    isAccessPage : boolean = false;
+    accessPages: Map <string, string> = new Map();
+    accessUrls : string[] =[];
+    accessTitles : string[] =[];
+    isReferencedBy : boolean = false;
+    isDocumentedBy : boolean = false;
+    selectedNodes: TreeNode[];
+    addFileStatus:boolean = false;
+    selectedNode : TreeNode;
+    cols: any[];
+    fileNode: TreeNode;
+    display: boolean = false;
+    cartMap: any[];
+    allSelected: boolean = false;
+    allDownloaded: boolean = false;
 
     /* Function to Return Keys object properties */
     keys() : Array<string> {
         return Object.keys(this.fileDetails);
+    }
+
+    constructor(private cartService: CartService,
+        private cdr: ChangeDetectorRef,
+        private downloadService: DownloadService,
+        private confirmationService: ConfirmationService) {
+            this.cartService.watchAddAllFilesCart().subscribe(value => {
+            this.addAllFileSpinner = value;
+        });
     }
 
     /**
@@ -164,22 +175,27 @@ export class DescriptionComponent {
         this.fileNode = {"data":{ "name":"", "size":"", "mediatype":"", "description":"", "filetype":"" }};
 
         this.cartMap = this.cartService.getCart();
-        this.updateCartStatus();
+        this.updateCartStatus(this.files);
+        this.updateDownloadStatus(this.files);
     }
  
     ngOnChanges(){
        this.checkAccesspages();
     }
 
-    updateCartStatus(){
-        for (let comp of this.files) {
-            comp.data.isSelected = this.selected(comp.data.resId);
+    updateCartStatus(files: any){
+        for (let comp of files) {
+            if(comp.children.length > 0){
+                this.updateCartStatus(comp.children);
+            }else{
+                comp.data.isSelected = this.selected(comp.data.resId);
+            }
         }   
-        this.checkIfAllSelected();     
+        this.checkIfAllSelected(this.files);     
     }
 
 //     //Datacart related code
-    addFilesToCart() {
+    addFilesToCart(files: any) {
         let data: Data;
         let compValue: any;
         this.cartService.updateAllFilesSpinnerStatus(true);
@@ -203,8 +219,12 @@ export class DescriptionComponent {
         //     }
         // }
 
-        for (let comp of this.files) {
+        for (let comp of files) {
+            if(comp.children.length > 0){
+                this.addFilesToCart(comp.children);
+            }else{
                 this.addtoCart(comp.data);
+            }
         }
 
         setTimeout(() => {
@@ -215,51 +235,64 @@ export class DescriptionComponent {
         }, 3000);
     }
 
-    removeFilesFromCart(){
-        for (let comp of this.files) {
-            this.addtoCart(comp.data);
-            this.cartService.removeResId(comp.data.resId);
-            comp.data.isSelected = false;
+    removeFilesFromCart(files: any){
+        for (let comp of files) {
+            if(comp.children.length > 0){
+                this.removeFilesFromCart(comp.children);
+            }else{
+                this.addtoCart(comp.data);
+                this.cartService.removeResId(comp.data.resId);
+                comp.data.isSelected = false;
+            }
         }
-        this.checkIfAllSelected();
+        this.checkIfAllSelected(this.files);
     }
 
     addtoCart(rowData:any){
-            this.cartService.updateFileSpinnerStatus(true);
-            let data : Data;
-            data = {'resId':rowData.resId,
-                    'resTitle':this.record['title'],
-                    'resFilePath':'resFilePath',
-                    'id':rowData.name,
-                    'fileName':rowData.name,
-                    'filePath':rowData.name,
-                    'fileSize':rowData.size,
-                    'downloadURL':rowData.downloadUrl,
-                    'fileFormat':rowData.mediatype,
-                    'downloadedStatus': null };
+        this.cartService.updateFileSpinnerStatus(true);
+        let data : Data;
+        data = {'resId':rowData.resId,
+                'resTitle':this.record['title'],
+                'resFilePath':rowData.fullPath,
+                'id':rowData.name,
+                'fileName':rowData.name,
+                'filePath':rowData.fullPath,
+                'fileSize':rowData.size,
+                'downloadURL':rowData.downloadUrl,
+                'fileFormat':rowData.mediatype,
+                'downloadedStatus': null };
 
-            this.cartService.addDataToCart(data);
-            rowData.isSelected = this.selected(rowData.resId);
-            this.checkIfAllSelected();
+        this.cartService.addDataToCart(data);
+        rowData.isSelected = this.selected(rowData.resId);
+        this.checkIfAllSelected(this.files);
 
-            setTimeout(()=> {
-                this.cartService.updateFileSpinnerStatus(false);
-            }, 3000);
+        setTimeout(()=> {
+            this.cartService.updateFileSpinnerStatus(false);
+        }, 3000);
     }
 
-    constructor(private cartService: CartService,
-            private cdr: ChangeDetectorRef,
-            private downloadService: DownloadService) {
-        this.cartService.watchAddAllFilesCart().subscribe(value => {
-        this.addAllFileSpinner = value;
-        });
-    }
-
-    checkIfAllSelected(){
+    checkIfAllSelected(files: any){
         this.allSelected = true;
-        for (let comp of this.files) {
-            if(!comp.data.isSelected){
-                this.allSelected = false;
+        for (let comp of files) {
+            if(comp.children.length > 0){
+                this.checkIfAllSelected(comp.children);
+            }else{
+                if(!comp.data.isSelected){
+                    this.allSelected = false;
+                }
+            }
+        }   
+    }
+
+    updateDownloadStatus(files: any){
+        this.allDownloaded = true;
+        for (let comp of files) {
+            if(comp.children.length > 0){
+                this.updateDownloadStatus(comp.children);
+            }else{
+                if(comp.data.downloadedStatus != 'downloaded'){
+                    this.allDownloaded = false;
+                }
             }
         }   
     }
@@ -280,7 +313,7 @@ export class DescriptionComponent {
         this.cartService.updateFileSpinnerStatus(true);
         this.cartService.removeResId(resId);
         rowData.isSelected = this.selected(resId);
-        this.checkIfAllSelected();
+        this.checkIfAllSelected(this.files);
 
         setTimeout(()=> {
             this.cartService.updateFileSpinnerStatus(false);
@@ -289,5 +322,49 @@ export class DescriptionComponent {
 
     setDownloadStatus(rowData:any){
         rowData.downloadedStatus = 'downloaded';
+    }
+
+    downloadFile(rowData:any){
+        let filename = decodeURI(rowData.downloadUrl).replace(/^.*[\\\/]/, '');
+        rowData.downloadedStatus = 'downloading';
+        this.cartService.updateFileSpinnerStatus(true);
+
+        this.downloadService.getFile(rowData.downloadUrl).subscribe(blob => {
+            this.downloadService.saveToFileSystem(blob, filename);
+            rowData.downloadedStatus = 'downloaded';
+            this.cartService.updateFileSpinnerStatus(false);
+            this.updateDownloadStatus(this.files);
+            },
+            error => console.log('Error downloading the file.')
+        )
+    }
+
+    downloadAllFile(files:any){
+        for (let comp of files) {
+            if(comp.children.length > 0){
+                this.downloadAllFile(comp.children);
+            }else{
+                if(comp.data.downloadUrl){
+                    this.downloadFile(comp.data);
+                }
+            }
+        }   
+    }
+
+    downloadAllConfirm(header:string, massage:string, key:string) {
+        this.confirmationService.confirm({
+          message: massage,
+          header: header,
+          key: key,
+          accept: () => {
+            this.downloadAllFile(this.files);
+          },
+          reject: () => {
+          }
+        });
+    }
+
+    resetDownloadStatus(rowData){
+        rowData.downloadedStatus = null;
     }
 }
