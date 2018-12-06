@@ -24,13 +24,13 @@
         },
         {
             "description": "Simulation of experiment",
-            "downloadURL": "https://s3.amazonaws.com/nist-midas/1491/sim.json",
+            "downloadURL": "https://s3.amazonaws.com/nist-midas/1491/sim%2B%2B.json",
             "mediaType": "application/json",
             "title": "JSON version of the Mathematica notebook"
             
         },
         {
-            "accessURL": "http://doi.org/10.18434/T4SW26",
+            "accessURL": "https://doi.org/10.18434/T4SW26",
             "description": "Software to predict the optical sorting of particles in a standing-wave laser interference field",
             "format": "Digital Object Identifier, a persistent identifier",
             "mediaType": "application/zip",
@@ -58,7 +58,7 @@
         "name": "National Institute of Standards and Technology"
     },
     "references": [
-        "https://dx.doi.org/10.1364/OE.24.014100"
+        "https://doi.org/10.1364/OE.24.014100"
     ],
     "theme": [
         "Optical physics"

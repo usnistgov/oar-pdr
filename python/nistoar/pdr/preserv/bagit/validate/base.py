@@ -298,11 +298,37 @@ class ValidationIssue(object):
         """
         return not self.passed()
 
-    def __str__(self):
+    @property
+    def summary(self):
+        """
+        a one-line description of the issue that was tested.  
+        """
         status = (self.passed() and "PASSED") or type_labels[self._type].upper()
-        out = "{0}: {1} {2} {3}: {4}".format(status, self.profile, 
-                                             self.profile_version,
-                                             self.label, self.specification)
+        out = "{0}: {1} {2} {3}".format(status, self.profile, 
+                                        self.profile_version, self.label)
+        if self.specification:
+            out += ": {0}".format(self.specification)
+        return out
+
+    @property
+    def description(self):
+        """
+        a potentially lengthier description of the issue that was tested.  
+        It starts with the summary and follows with the attached comments 
+        providing more details.  Each comment is delimited with a newline; 
+        A newline is not added to the end of the last comment.
+        """
+        out = self.summary
+        if self._comm:
+            comms = self._comm
+            if not isinstance(comms, (list, tuple)):
+                comms = [comms]
+            out += "\n  "
+            out += "\n  ".join(comms)
+        return out
+
+    def __str__(self):
+        out = self.summary
         if self._comm and self._comm[0]:
             out += " ({0})".format(self._comm[0])
         return out

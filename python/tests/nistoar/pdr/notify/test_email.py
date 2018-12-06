@@ -140,6 +140,21 @@ class TestEmailTarget(test.TestCase):
         self.assertEqual(body[13], "platform: unittest")
         self.assertEqual(body[14], "excitation: False")
         
+    def test_format_body_no_format(self):
+        d = notice_data
+        note = Notice(d['type'], d['title'], d['description'], d['origin'],
+                      d['issued'], formatted=True, platform="unittest")
+        body = self.target.format_body(note).split("\n")
+        self.assertEqual(body[0], "Attention: OAR PDR Operators")
+        self.assertEqual(body[1], "Notification Type: FAILURE")
+        self.assertEqual(body[2], "Origin: Preservation")
+        self.assertEqual(body[4], "data is devoid of science")
+        self.assertEqual(body[6], "The data is dull and uninteresting.  Pure noise is less tedious than this data.  It reads like 'Smoke on the Water' but without the changing notes.")
+        self.assertEqual(body[8], "This data should not be saved")
+
+        self.assertTrue(body[10].startswith("Issued: "))
+        self.assertEqual(body[11], "platform: unittest")
+        
     def test_make_message(self):
         hdr = self.target._make_message("Done!", "Yahoo!").split('\n')
         self.assertIn('From: "PDR Notification System" <oardist@nist.gov>', hdr)

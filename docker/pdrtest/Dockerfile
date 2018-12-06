@@ -1,8 +1,29 @@
+##########################################
+#
+# Build/test container for python components 
+#
+# The purpose of this Docker container is produce a distribution
+# bundle that can be added into the deployment container.  This
+# container should build the code in an environment that sufficiently
+# matches the target operational environment. 
+#
+##########################################
+
 FROM oar-metadata/ejsonschema
 
 RUN apt-get update && apt-get install -y python-yaml nginx curl wget less sudo \
                                          uwsgi uwsgi-plugin-python zip \
                                          p7zip-full git
+RUN pip install --upgrade setuptools
+RUN pip install 'bagit>=1.6.3,<2.0' 'fs>=2.0.21'
+
+# install multibag from source
+RUN curl -L -o multibag-py.zip \
+    https://github.com/usnistgov/multibag-py/archive/master.zip && \
+    unzip -oq multibag-py.zip && \
+    cd multibag-py-master &&     \
+    python setup.py install
+
 ENV GOSU_VERSION 1.10
 RUN set -ex; \
     arch="$(dpkg --print-architecture | awk -F- '{ print $NF }')"; \
@@ -11,7 +32,7 @@ RUN set -ex; \
     wget -O /usr/local/bin/gosu.asc \
 "https://github.com/tianon/gosu/releases/download/$GOSU_VERSION/gosu-$arch.asc";\
     export GNUPGHOME="$(mktemp -d)"; \
-    gpg --keyserver ha.pool.sks-keyservers.net \
+    gpg --keyserver hkp://ha.pool.sks-keyservers.net:80 \
          --recv-keys B42F6819007F00F88E364FD4036A9C25BF357DD4; \
     gpg --batch --verify /usr/local/bin/gosu.asc /usr/local/bin/gosu; \
     rm -r "$GNUPGHOME" /usr/local/bin/gosu.asc; \

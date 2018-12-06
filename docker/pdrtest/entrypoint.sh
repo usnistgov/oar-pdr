@@ -15,7 +15,7 @@ function launch_test_mdserv {
     workdir=$PWD/_ppmdserver-test-$$
     [ ! -e "$workdir" ] || rm -r $workdir
     mkdir -p $workdir
-    uwsgi --daemonize $workdir/uwsgi.log --plugin python --uwsgi-socket :9090 --wsgi-file scripts/ppmdserver-uwsgi.py --pidfile $OAR_HOME/var/mdserv.pid --set-ph oar_testmode_workdir=$workdir
+    uwsgi --daemonize $workdir/uwsgi.log --plugin python --enable-threads --uwsgi-socket :9090 --wsgi-file scripts/ppmdserver-uwsgi.py --pidfile $OAR_HOME/var/mdserv.pid --set-ph oar_testmode_workdir=$workdir
     echo starting nginx...
     sudo service nginx start
 }
@@ -32,7 +32,7 @@ function launch_test_preserver {
     sudo service nginx start
 }
 
-function exitopwith {
+function exitopwith { 
     echo $2 > $1.exit
     exit $2
 }
@@ -41,7 +41,7 @@ cmd=$1
 case "$1" in
     makedist)
         shift
-        scripts/makedist "$@"
+        scripts/makedist.python "$@"
         ;;
     testall)
         install || {
@@ -49,7 +49,7 @@ case "$1" in
             exitopwith testall 2
         }
         shift
-        scripts/testall "$@" && stat=$?
+        scripts/testall.python "$@" && stat=$?
         echo Launching/testing the metadata server via nginx...
         launch_test_mdserv
         
@@ -61,7 +61,7 @@ case "$1" in
         
         curl http://localhost:8080/midas/3A1EE2F169DD3B8CE0531A570681DB5D1491/trial1.json \
              > mdserv_out.txt && \
-            python -c 'import sys, json; fd = open("mdserv_out.txt"); data = json.load(fd); sys.exit(0 if data["name"]=="tx1" else 21)' || \
+            python -c 'import sys, json; fd = open("mdserv_out.txt"); data = json.load(fd); sys.exit(0 if data["name"]=="tx1" else 12)' || \
             stat=$?
         set +x
 
@@ -71,22 +71,27 @@ case "$1" in
         set -x
         curl http://localhost:8080/preserve/ \
              > stat_out.txt; \
-             python -c 'import sys, json; fd = open("stat_out.txt"); data = json.load(fd); sys.exit(0 if data==["midas"] else 11)' || \
+             python -c 'import sys, json; fd = open("stat_out.txt"); data = json.load(fd); sys.exit(0 if data==["midas"] else 13)' || \
              stat=$?
         
         curl http://localhost:8080/preserve/midas/3A1EE2F169DD3B8CE0531A570681DB5D1491 \
              > stat_out.txt; \
-             python -c 'import sys, json; fd = open("stat_out.txt"); data = json.load(fd); sys.exit(0 if data["state"]=="ready" else 11)' || \
+             python -c 'import sys, json; fd = open("stat_out.txt"); data = json.load(fd); sys.exit(0 if data["state"]=="ready" else 14)' || \
              stat=$?
         
         curl http://localhost:8080/preserve/midas/goober \
              > stat_out.txt; \
-             python -c 'import sys, json; fd = open("stat_out.txt"); data = json.load(fd); sys.exit(0 if data["state"]=="not found" else 11)' || \
+             python -c 'import sys, json; fd = open("stat_out.txt"); data = json.load(fd); sys.exit(0 if data["state"]=="not found" else 15)' || \
              stat=$?; 
         
         curl -X PUT http://localhost:8080/preserve/midas/3A1EE2F169DD3B8CE0531A570681DB5D1491 \
              > stat_out.txt; \
-             python -c 'import sys, json; fd = open("stat_out.txt"); data = json.load(fd); sys.exit(0 if data["state"]=="successful" else 11)' || \
+             python -c 'import sys, json; fd = open("stat_out.txt"); data = json.load(fd); sys.exit(0 if data["state"]=="successful" else 16)' || \
+             stat=$?; 
+        
+        curl -X GOOB -H 'X-HTTP-Method-Override: GET'  http://localhost:8080/preserve/midas/3A1EE2F169DD3B8CE0531A570681DB5D1491 \
+             > stat_out.txt; \
+             python -c 'import sys, json; fd = open("stat_out.txt"); data = json.load(fd); sys.exit(0 if data["state"]=="successful" else 17)' || \
              stat=$?; 
         set +x
         
@@ -95,7 +100,7 @@ case "$1" in
             exitopwith testall 3
         }
 
-        echo All tests passed
+        echo All python tests passed
         ;;
     install)
         install

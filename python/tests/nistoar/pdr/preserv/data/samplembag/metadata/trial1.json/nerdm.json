@@ -1,4 +1,6 @@
 {
+    "_schema": "https://data.nist.gov/od/dm/nerdm-schema/v0.2#/definitions/Component",
+    "@context": "https://data.nist.gov/od/dm/nerdm-pub-context.jsonld",
     "description": "First trial of experiment",
     "filepath": "trial1.json",
     "checksum": {

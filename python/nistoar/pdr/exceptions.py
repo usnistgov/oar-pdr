@@ -61,11 +61,6 @@ class PDRException(Exception, SourceSystemMixin):
         :param sys SystemInfo:  a SystemInfo instance that can provide 
                             information as to the cause of the 
         """
-        self.cause = cause
-        if not sys or not isinstance(sys, SystemInfoMixin):
-            sys = PDRSystem()
-        SourceSystemMixin.__init__(self, sys)
-
         if not msg:
             if cause:
                 msg = str(cause)
@@ -73,6 +68,11 @@ class PDRException(Exception, SourceSystemMixin):
                 msg = "Unknown {0} System Error".format(self.subsystem_abbrev)
         Exception.__init__(self, msg)
         self.cause = cause
+
+        if not sys or not isinstance(sys, SystemInfoMixin):
+            sys = PDRSystem()
+        SourceSystemMixin.__init__(self, sys)
+
 
 class ConfigurationException(PDRException):
     """
@@ -182,4 +182,74 @@ class SIPDirectoryNotFound(SIPDirectoryError):
         """
         prob = "directory not found"
         super(SIPDirectoryNotFound, self).__init__(dir, prob, cause, msg, sys)
+
+
+class PDRServiceException(PDRException):
+    """
+    an exception indicating a problem using a PDR service.
+    """
+
+    def __init__(self, service_name, resource=None, http_code=None,
+                 http_status=None, message=None, cause=None, sys=None):
+        if not message:
+            if resource:
+                message = "Trouble accessing {0} from the {1} service". \
+                          format(resource, service_name)
+            else:
+                message = "Problem accessing the {0} service". \
+                          format(service_name)
+            if http_code or http_status:
+                message += ":"
+                if http_code:
+                    message += " "+str(http_code)
+                if http_status:
+                    message += " "+str(http_status)
+            elif cause:
+                message += ": "+str(cause)
+                
+        super(PDRServiceException, self).__init__(message, cause, sys)
+        self.service = service_name
+        self.resource = resource
+        self.code = http_code
+        self.status = http_status
+                                        
+class PDRServerError(PDRServiceException):
+    """
+    an exception indicating a problem using a PDR service.
+    """
+
+    def __init__(self, service_name, resource=None, http_code=None,
+                 http_status=None, message=None, cause=None, sys=None):
+        if not message:
+            if resource:
+                message = "Server-side error occurred while accessing " + \
+                          resource + " from the " + service_name + " service"
+            else:
+                message = "Server-side error occurred while accessing the " + \
+                          service_name + " service"
+            if http_code or http_status:
+                message += ":"
+                if http_code:
+                    message += " "+str(http_code)
+                if http_status:
+                    message += " "+str(http_status)
+            elif cause:
+                message += ": "+str(cause)
+        super(PDRServerError, self).__init__(service_name, resource, http_code,
+                                             http_status, message, cause, sys)
+
+class IDNotFound(PDRException):
+    """
+    An error indicating a request for an identifier that is not recognized 
+    as existing in the PDR system.
+    """
+    def __init__(self, id, message=None, cause=None):
+        if not message:
+            if id:
+                message = "{0}: Identifier not recognized".format(id)
+            else:
+                message = "Requested unrecognized identifier"
+            if cause:
+                message += " "+str(ex)
+        super(IDNotFound, self).__init__(message, cause)
 

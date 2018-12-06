@@ -1,0 +1,10 @@
+{
+    "size": 69,
+    "checksum": {
+        "hash": "d5eed5092f409bce7e88d057eb98b376534b372f9f6b7c14e57744b259c65d35",
+        "algorithm": {
+            "tag": "sha256",
+            "@type": "Thing"
+        }
+    }
+}

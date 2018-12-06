@@ -1,0 +1,156 @@
+#! /bin/bash
+#
+# makedist.angular:  build the package's angular-based distributions
+#
+# This script is designed to run without any arguments: this will build
+# all of the angular distributions.  Restricting the build to specific
+# distributions can be done by listing the names of the desired distributions
+# on the command line.
+#
+# There is currently only one python distribution: pdr-lps
+#
+# SYNOPSIS
+#    makedist.angular [OPTIONS] [DISTNAME ...]
+#
+# OPTIONS
+#    -l, --list               list the names of the supported distributions and
+#                             exit without building.
+#    --dist-dir=DIR           The output directory to write the distribution
+#                             products into.
+#    -d DIR, --source-dir=DIR  the directory containing the python source code
+#                             (default: ./angular)
+#    -c DIR, --cache-dir=DIR  directory for holding intermediate or cache-able
+#                             products; if provided, the node_modules cache will
+#                             be located and used from here.  This can be shared
+#                             with other similar packages to avoid redundant 
+#                             re-building of nodejs dependency modules
+#    -v VER, --version=VER    assign VER as the VERSION for this product
+#    
+# #
+set -e
+prog=`basename $0`
+execdir=`dirname $0`
+[ "$execdir" = "" -o "$execdir" = "." ] && execdir=$PWD
+execdir=`realpath $execdir`
+PACKAGE_DIR=`dirname $execdir`
+DIST_DIR=$PACKAGE_DIR/dist
+SOURCE_DIR=$PACKAGE_DIR/angular
+BUILD_DIR=$SOURCE_DIR/dist
+
+# Update this list with the names of the individual component names
+# 
+DISTNAMES="pdr-lps"
+
+# handle command line options
+build_dist=
+while [ "$1" != "" ]; do 
+  case "$1" in
+    --list|-l)
+        echo "Available distributions: $DISTNAMES"
+        exit 0
+        ;;
+    --dist-dir=*)
+        DIST_DIR=`echo $1 | sed -e 's/[^=]*=//'`
+        ;;
+    --dist-dir)
+        shift
+        DIST_DIR=$1
+        ;;
+    --source-dir=*|--dir=*)
+        PACKAGE_DIR=`echo $1 | sed -e 's/[^=]*=//'`
+        ;;
+    -d|--dir|--source-dir)
+        shift
+        PACKAGE_DIR=$1
+        ;;
+    --cache-dir=*)
+        CACHE_DIR=`echo $1 | sed -e 's/[^=]*=//'`
+        ;;
+    -c|--cache-dir)
+        shift
+        CACHE_DIR=$1
+        ;;
+    -v|--version)
+        shift
+        VERSION=$1
+        ;;
+    --version=*)
+        VERSION=`echo $1 | sed -e 's/[^=]*=//'`
+        ;;
+    -*)
+        echo "$prog: unsupported option:" $1
+        false
+        ;;
+    $DISTNAMES)
+        # assuming just one distribution
+        true
+        ;;
+    *)
+        echo "${prog}: ${1}: unrecognized distribution name"
+        false
+        ;;
+  esac
+  shift
+done
+[ -n "$build_dist" ] || build_dist=$DISTNAMES
+
+# true ${DIST_DIR:=$SOURCE_DIR/dist}
+DIST_DIR=`realpath $DIST_DIR`
+mkdir -p $DIST_DIR $BUILD_DIR
+
+
+
+echo Angular code path: $SOURCE_DIR
+cd $SOURCE_DIR
+
+# set the current version.  This will inject the version into the code, if 
+# needed.
+#
+# don't reset the version unnecessarily as it may have been done by makedist
+# 
+[ -z "$VERSION" -a -f "$PACKAGE_DIR/VERSION" ] || {
+    echo '+' $execdir/setversion.sh $VERSION
+    $execdir/setversion.sh $VERSION
+}
+
+[ -n "$PACKAGE_NAME" ] || PACKAGE_NAME=`cat $PACKAGE_DIR/VERSION | awk '{print $1}'`
+version=$VERSION
+[ -n "$version" ] || version=`cat $PACKAGE_DIR/VERSION | awk '{print $2}'`
+vers4fn=`echo $version | sed -re 's#[/ ]+#_#g'`
+
+# install required modules
+nodemodarg=
+[ -z "$CACHE_DIR" ] || nodemodearg="--prefix $CACHE_DIR"
+npmvers=`npm --version`
+echo '+' npm install $nodemodarg
+npm $npmpfx install $nodemodarg
+
+echo '#########################'
+echo '#'
+echo "# Building $DISTNAMES"...
+echo '#'
+echo '#########################'
+
+# build the component
+echo '+' "npm run build:universal "
+npm run build:universal
+
+# create the dependency file
+if [ -f "$SOURCE_DIR/package-lock.json" ]; then
+    echo '+' $execdir/record_npm_deps.py $DISTNAMES $version package-lock.json \
+             $npmvers \> $DIST_DIR/${DISTNAMES}-${vers4fn}_dep.json
+    $execdir/record_npm_deps.py $DISTNAMES $version package-lock.json \
+                            $npmvers > $DIST_DIR/${DISTNAMES}-${vers4fn}_dep.json
+else
+    echo ${prog}: WARNING: Unable to create dependency file for ${dist}: \
+         package-lock.json not found
+fi
+
+# # create the distribution file
+echo '+' '(cd' $BUILD_DIR '&&' \
+         "zip -qr $DIST_DIR/${DISTNAMES}-${vers4fn}.zip *)"
+(cd $BUILD_DIR && zip -qr $DIST_DIR/${DISTNAMES}-${vers4fn}.zip *)
+    
+set +x
+echo Created distribution in dist directory: 
+echo $DISTNAMES-${vers4fn}.zip

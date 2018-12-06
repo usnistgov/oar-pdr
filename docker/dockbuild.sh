@@ -1,8 +1,11 @@
 #! /bin/bash
 #
-# buildall.sh:  build all docker images in this directory
+# dockbuild.sh:  build all docker images in this directory
 #
-# Usage: buildall.sh
+# Usage: dockbuild.sh [-h|--help] [-l LOGFILE] [-q] [image_dir ...]
+#
+# where an image_dir can be one of,
+#    pymongo jq ejsonschema pdrtest pdrangular angtest
 #
 prog=`basename $0`
 execdir=`dirname $0`
@@ -10,15 +13,16 @@ execdir=`dirname $0`
 codedir=`(cd $execdir/.. > /dev/null 2>&1; pwd)`
 set -e
 
-## These are set by default via _run.sh; if necessary, uncomment and customize
+## These are set by default via _dockbuild.sh; if necessary, uncomment and
+## customize:
 #
-# PACKAGE_NAME=oar-build
+PACKAGE_NAME=oar-pdr
 # 
 ## list the names of the image directories (each containing a Dockerfile) for
 ## containers to be built.  List them in dependency order (where a latter one
 ## depends the former ones).  
 #
-DOCKER_IMAGE_DIRS="pymongo jq ejsonschema pdrtest"
+DOCKER_IMAGE_DIRS="pymongo jq ejsonschema pdrtest pdrangular angtest"
 
 . $codedir/oar-build/_dockbuild.sh
 
@@ -36,6 +40,14 @@ log_intro   # record start of build into log
 $codedir/oar-metadata/docker/dockbuild.sh $BUILD_IMAGES
 
 if { echo " $BUILD_IMAGES " | grep -qs " pdrtest "; }; then
-    echo '+ ' docker build $BUILD_OPTS -t $PACKAGE_NAME/pdrtest pdrtest | logit
+    echo '+' docker build $BUILD_OPTS -t $PACKAGE_NAME/pdrtest pdrtest | logit
     docker build $BUILD_OPTS -t $PACKAGE_NAME/pdrtest pdrtest 2>&1 | logit
+fi
+if { echo " $BUILD_IMAGES " | grep -qs " pdrangular "; }; then
+    echo '+' docker build $BUILD_OPTS -t $PACKAGE_NAME/pdrangular pdrangular
+    docker build $BUILD_OPTS -t $PACKAGE_NAME/pdrangular pdrangular 2>&1
+fi
+if { echo " $BUILD_IMAGES " | grep -qs " angtest "; }; then
+    echo '+' docker build $BUILD_OPTS -t $PACKAGE_NAME/angtest angtest
+    docker build $BUILD_OPTS -t $PACKAGE_NAME/angtest angtest 2>&1
 fi

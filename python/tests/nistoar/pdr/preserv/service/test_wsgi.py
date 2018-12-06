@@ -371,10 +371,11 @@ class TestApp(test.TestCase):
         self.assertGreater(len(self.resp), 0)
         self.assertIn("403", self.resp[0])
 
-    def test_good_patch(self):
+    def test_patch_override(self):
         req = {
             'PATH_INFO': '/midas/'+self.midasid+'/',
-            'REQUEST_METHOD': 'PATCH'
+            'REQUEST_METHOD': 'POST',
+            'HTTP_X_HTTP_METHOD_OVERRIDE': 'PATCH'
         }
 
         body = self.svc(req, self.start)
@@ -384,12 +385,13 @@ class TestApp(test.TestCase):
         self.assertGreater(len([l for l in self.resp if "Content-Type:" in l]),0)
         data = json.loads(body[0])
         self.assertEqual(data['id'], self.midasid)
-        self.assertEqual(data['state'], "in progress")
+        self.assertEqual(data['state'], "successful")
 
         self.resp = []
         req = {
             'PATH_INFO': '/midas/',
-            'REQUEST_METHOD': 'GET'
+            'REQUEST_METHOD': 'GOOB',
+            'HTTP_X_HTTP_METHOD_OVERRIDE': 'GET'
         }
 
         body = self.svc(req, self.start)
@@ -415,7 +417,7 @@ class TestApp(test.TestCase):
         self.assertGreater(len([l for l in self.resp if "Content-Type:" in l]),0)
         data = json.loads(body[0])
         self.assertEqual(data['id'], self.midasid)
-        self.assertEqual(data['state'], "in progress")
+        self.assertEqual(data['state'], "successful")
 
     def test_auth(self):
 

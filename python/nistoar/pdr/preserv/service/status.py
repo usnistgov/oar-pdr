@@ -16,10 +16,11 @@ PENDING     = "pending"
 IN_PROGRESS = "in progress"
 SUCCESSFUL  = "successful"
 FAILED      = "failed"
+CONFLICT    = "conflict"     # wrong state
 FORGOTTEN   = "forgotten"
 
 states = [ NOT_FOUND, READY, NOT_READY, PENDING, 
-           IN_PROGRESS, SUCCESSFUL, FAILED, FORGOTTEN ]
+           IN_PROGRESS, SUCCESSFUL, FAILED, FORGOTTEN, CONFLICT ]
 
 user_message = {
     NOT_FOUND:   "Data not found for given identifier",
@@ -29,7 +30,8 @@ user_message = {
     IN_PROGRESS: "Preservation processing in progress",
     SUCCESSFUL:  "Data was successfully preserved",
     FAILED:      "Data preservation failed due to internal errors",
-    FORGOTTEN:   "Preservation history is no longer available"
+    FORGOTTEN:   "Preservation history is no longer available",
+    CONFLICT:    "Incorrect state for preservation request"
 }
 
 LOCK_WRITE = fcntl.LOCK_EX

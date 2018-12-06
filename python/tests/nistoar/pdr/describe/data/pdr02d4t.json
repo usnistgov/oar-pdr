@@ -1,0 +1,201 @@
+{
+    "_schema": "https://data.nist.gov/od/dm/nerdm-schema/v0.1#",
+    "@type": [ "nrd:SRD", "nrdp:DataPublication", "nrdp:PublicDataResource" ],
+    "@id": "ark:/88434/pdr02d4t",
+    "abbrev": [ "SRD#13" ],
+    "authors": [
+        {
+            "fn": "M.W. Chase, Jr.",
+            "givenName": "M.",
+            "middleName": "W.",
+            "familyName": "Chase",
+            "affiliation": [{
+                "@type": [ "org:Organization" ],
+                "title": "National Institute of Standards and Technology (NIST)",
+                "@id": "sdporg:NIST"
+            }],
+            "proxyFor": "sdpperson:Chase-MW"
+        },
+        {
+            "fn": "C.A. Davies",
+            "givenName": "C.",
+            "middleName": "A.",
+            "familyName": "Davies",
+            "affiliation": [{
+                "@type": [ "org:Organization" ],
+                "title": "National Institute of Standards and Technology (NIST)",
+                "@id": "sdporg:NIST"
+            }],
+            "proxyFor": "sdpperson:Davies-CA"
+        },
+        {
+            "fn": "J.R. Downey, Jr.",
+            "givenName": "J.",
+            "middleName": "R.",
+            "familyName": "Downey",
+            "affiliation": [{
+                "@type": [ "org:Organization" ],
+                "title": "National Institute of Standards and Technology (NIST)",
+                "@id": "sdporg:NIST"
+            }],
+            "proxyFor": "sdpperson:Downey-JR"
+        },
+        {
+            "fn": "D.J. Frurip",
+            "givenName": "D.",
+            "middleName": "J.",
+            "familyName": "Frurip",
+            "affiliation": [{
+                "@type": [ "org:Organization" ],
+                "title": "National Institute of Standards and Technology (NIST)",
+                "@id": "sdporg:NIST"
+            }],
+            "proxyFor": "sdpperson:Frurip-DJ"
+        },
+        {
+            "fn": "R.A. McDonald",
+            "givenName": "R.",
+            "familyName": "McDonald",
+            "affiliation": [{
+                "@type": [ "org:Organization" ],
+                "title": "National Institute of Standards and Technology (NIST)",
+                "@id": "sdporg:NIST"
+            }],
+            "proxyFor": "sdpperson:McDonald-RA"
+        },
+        {
+            "fn": "A.N. Syverud",
+            "givenName": "A.",
+            "middleName": "N.",
+            "familyName": "Syverud",
+            "affiliation": [{
+                "@type": [ "org:Organization" ],
+                "title": "National Institute of Standards and Technology (NIST)",
+                "@id": "sdporg:NIST"
+            }],
+            "proxyFor": "sdpperson:Syverud-AN"
+        }        
+    ],
+    "contactPoint": {
+        "postalAddress": [
+            "Standard Reference Data Program",
+            "National Institute of Standards and Technology",
+            "Gaithersburg, MD 20899"
+        ]
+    },
+    "ediid": "ABCDEFG",
+    "description": [
+        "We have more to say."
+    ],
+    "references": [
+        {
+            "@type": "deo:BibliographicReference",
+            "@id": "#ref/JANAF-FourthEd-1998-1Vol1-Intro.pdf",
+            "refType": "IsDocumentedBy",
+            "label": "JPCRD Monograph: NIST-JANAF Thermochemical Tables, Pt. 1 (AL-C",
+            "location": "http://kinetics.nist.gov/janaf/pdf/JANAF-FourthEd-1998-1Vol1-Intro.pdf",
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/v0.1#/definitions/DCiteDocumentReference"
+            ]
+        },
+        {
+            "@type": "deo:BibliographicReference",
+            "@id": "#ref/JANAF-FourthEd-1998-1Vol2-Intro.pdf",
+            "refType": "IsDocumentedBy",
+            "label": "JPCRD Monograph: NIST-JANAF Thermochemical Tables, Pt. 2 (Cr-Zr)",
+            "location": "http://kinetics.nist.gov/janaf/pdf/JANAF-FourthEd-1998-1Vol2-Intro.pdf",
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/v0.1#/definitions/DCiteDocumentReference"
+            ]
+        }
+    ],
+    "components": [
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "@id": "#cmp/srd13_B-113.json",
+            "filepath": "srd13_B-113.json",
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_B-113.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "description": "Boric Acid",
+            "title": "B-113"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+
+            "@id": "#cmp/srd13_janaf.species.json",
+            "filepath": "srd13_janaf.species.json",
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_janaf.species.json",
+            "mediaType": "application/json",
+            "description": "An index file containing metadata for each of the species, including chemical name, data file name, CAS Number (Chemical Abstracts Registry Number), molecular formula (in Hill-sorted order), and state (or phase).",
+            "title": "JANAF Species Index"
+        },
+        {
+            "@type": [ "nrdp:Subcollection" ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/Subcollection"
+            ],
+            "@id": "#cmp/cryolite",
+            "filepath": "cryolite",
+            "title": "Cryolite"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "@id": "#cmp/cryolite/srd13_Al-052.json",
+            "filepath": "cryolite/srd13_Al-052.json",
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Al-052.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "description": "Cryolite, Alpha",
+            "title": "Al-052"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "@id": "#cmp/cryolite/srd13_Al-053.json",
+            "filepath": "cryolite/srd13_Al-053.json",
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Al-053.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "description": "Cryolite, Beta",
+            "title": "Al-053"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "@id": "#cmp/cryolite/srd13_Al-054.json",
+            "filepath": "cryolite/srd13_Al-054.json",
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Al-054.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "description": "Cryolite",
+            "title": "Al-054"
+        },
+        {
+            "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+            ],
+            "@id": "#cmp/cryolite/srd13_Al-055.json",
+            "filepath": "cryolite/srd13_Al-055.json",
+            "downloadURL": "http://www.nist.gov/srd/srd_data/srd13_Al-055.json",
+            "mediaType": "application/json",
+            "describedBy": "http://www.nist.gov/srd/srd_data/srd13_janaf-data-defs.json",
+            "description": "Cryolite",
+            "title": "Al-055"
+        }
+    ]
+}

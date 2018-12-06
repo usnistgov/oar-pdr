@@ -278,7 +278,9 @@ class EmailTarget(NotificationTarget):
             if not isinstance(desc, list):
                 desc = [desc]
             for d in desc:
-                out.write(textwrap.fill(d, 80))
+                if notice.doformat:
+                    d = textwrap.fill(d, 80)
+                out.write(d)
                 out.write('\n\n')
 
         out.write("Issued: {0}\n".format(notice.issued))

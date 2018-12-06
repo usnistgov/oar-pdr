@@ -1,8 +1,8 @@
 {
     "@context": "https://data.nist.gov/od/dm/nerdm-pub-context.jsonld",
-    "_schema": "https://data.nist.gov/od/dm/nerdm-schema/v0.1#",
+    "_schema": "https://data.nist.gov/od/dm/nerdm-schema/v0.2#",
     "_extensionSchemas": [
-        "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/PublishedDataResource"
+        "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/PublishedDataResource"
     ],
     "@type": [
         "nrdp:PublishedDataResource"
@@ -56,9 +56,9 @@
         {
             "@type": "deo:BibliographicReference",
             "refType": "IsReferencedBy",
-            "location": "https://dx.doi.org/10.1364/OE.24.014100",
+            "location": "https://doi.org/10.1364/OE.24.014100",
             "_extensionSchemas": [
-                "https://data.nist.gov/od/dm/nerdm-schema/v0.1#/definitions/DCiteDocumentReference"
+                "https://data.nist.gov/od/dm/nerdm-schema/v0.2#/definitions/DCiteDocumentReference"
             ]
         }
     ],
@@ -76,7 +76,7 @@
                 "dcat:Distribution"
             ],
             "_extensionSchemas": [
-                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/DataFile"
             ]
         },
         {
@@ -89,11 +89,11 @@
                 "dcat:Distribution"
             ],
             "_extensionSchemas": [
-                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/DataFile"
             ]
         },
         {
-            "accessURL": "http://doi.org/10.18434/T4SW26",
+            "accessURL": "https://doi.org/10.18434/T4SW26",
             "mediaType": "application/zip",
             "title": "DOI access for OptSortSph: Sorting Spherical Dielectric Particles in a Standing-Wave Interference Field",
             "description": "Software to predict the optical sorting of particles in a standing-wave laser interference field",
@@ -113,7 +113,7 @@
                 "dcat:Distribution"
             ],
             "_extensionSchemas": [
-                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/DataFile"
             ]
         },
         {
@@ -126,7 +126,7 @@
                 "dcat:Distribution"
             ],
             "_extensionSchemas": [
-                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/DataFile"
             ]
         },
         {
@@ -139,7 +139,7 @@
                 "dcat:Distribution"
             ],
             "_extensionSchemas": [
-                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/DataFile"
             ]
         },
         {
@@ -152,7 +152,7 @@
                 "dcat:Distribution"
             ],
             "_extensionSchemas": [
-                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/DataFile"
             ]
         }
     ],

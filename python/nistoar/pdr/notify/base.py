@@ -99,7 +99,7 @@ class Notice(object):
     """
 
     def __init__(self, type, title, desc=None, origin=None, issued=None, 
-                 **mdata):
+                 formatted=False, **mdata):
         """
         create the Notice with metadata.  The extra keywords can be arbitrary 
         data that can be added to the out-going message.  
@@ -109,20 +109,38 @@ class Notice(object):
         mechanisms may keep the content short and opt to include only minimal 
         information.
 
+        The notice description can either be a string or a list of strings.  
+        In the latter case, each element will be treated as a separate 
+        paragraph when rendering it in a particular channel (like an email).
+        That channel may apply special formatting to each element for display
+        purposes, such as inserting newline characters to ensure lines that do
+        not exceeed a particular width--unless, that is, if formatted=True.  
+        This says that special formatting has already been applied and further 
+        formatting would corrupt it; thus, formatted=True turns off downstream
+        formatting.  
+
         :param type str:   a label indicating the type or severity of the 
                            notification.
         :param title str:  a brief title or subject for the notification
         :parma desc str or list of str:  a longer description of the 
-                           reason for the notification.
+                           reason for the notification.  (See also above 
+                           discussion about description.)
         :param origin str: the name of the software component that is issuing 
                            the notification.
         :param issued str: a formatted date/time string to include; if not 
                            provided, one will be set from the current time.
+        :param formatted bool:  If False, the description is unformatted for 
+                           line width; in this case, the description may 
+                           get formatted for certain outputs like an email.
+                           (See above discussion about the description.)
+                           If True, the description has been pre-formatted
+                           (or otherwise should not be formatted) for display.
         :param mdata dict: arbitrary metadata to (optionally) include
         """
         self.type = type
         self.title = title
         self.description = desc
+        self.doformat = not formatted
         self.origin = origin
         if not issued:
             issued = self.now()

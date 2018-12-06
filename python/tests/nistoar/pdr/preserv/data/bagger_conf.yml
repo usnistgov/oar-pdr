@@ -6,10 +6,10 @@ bag_builder:
     Contact-Name: "NIST Data Support Team"
     Contact-Email: ["datasupport@nist.gov"]
     Organization-Address: ["100 Bureau Dr., Gaithersburg, MD 20899"]
-    NIST-BagIt-Version: "0.2"
+    NIST-BagIt-Version: "0.4"
     NIST-POD-Metadata: "metadata/pod.json"
     NIST-NERDm-Metadata: "metadata/nerdm.json"
-    Multibag-Version: "0.2"
+    Multibag-Version: "0.4"
     Multibag-Tag-Directory: "multibag"
   finalize:
     trim_folders: true

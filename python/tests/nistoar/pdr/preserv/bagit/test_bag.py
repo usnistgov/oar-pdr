@@ -13,6 +13,7 @@ import nistoar.pdr.exceptions as exceptions
 # datadir = nistoar/pdr/preserv/data
 datadir = os.path.join( os.path.dirname(os.path.dirname(__file__)), "data" )
 bagdir = os.path.join(datadir, "samplembag")
+metabagdir = os.path.join(datadir, "metadatabag")
 
 baghier = [
     {
@@ -62,17 +63,76 @@ class TestNISTBag(test.TestCase):
         self.assertEqual(self.bag.nerd_file_for("trial3/trial3a.json"),
                          os.path.join(bagdir, "metadata", "trial3", 
                                       "trial3a.json", "nerdm.json"))
+
+    def test_annotations_file_for(self):
+        self.assertEqual(self.bag.annotations_file_for(""),
+                         os.path.join(bagdir, "metadata", "annot.json"))
+        self.assertEqual(self.bag.annotations_file_for("trial1.json"),
+                         os.path.join(bagdir, "metadata", "trial1.json",
+                                      "annot.json"))
+        self.assertEqual(self.bag.annotations_file_for("trial2.json"),
+                         os.path.join(bagdir, "metadata", "trial2.json",
+                                      "annot.json"))
+        self.assertEqual(self.bag.annotations_file_for("trial3"),
+                         os.path.join(bagdir, "metadata", "trial3",
+                                      "annot.json"))
+        self.assertEqual(self.bag.annotations_file_for("trial3/trial3a.json"),
+                         os.path.join(bagdir, "metadata", "trial3", 
+                                      "trial3a.json", "annot.json"))
+
+    def test_annotations_metadata_for(self):
+        data = self.bag.annotations_metadata_for("")
+        self.assertEqual(len(data), 0)  # empty
+        data = self.bag.annotations_metadata_for("trial1.json")
+        self.assertEqual(len(data), 0)  # empty
+        data = self.bag.annotations_metadata_for("trial2.json")
+        self.assertIn("size", data)
+        self.assertIn("checksum", data)
+        self.assertNotIn("title", data)
         
     def test_nerd_metadata_for(self):
         data = self.bag.nerd_metadata_for("")
         self.assertIn("ediid", data)
         self.assertIn("components", data)
         self.assertNotIn("inventory", data)
+        self.assertNotIn("foo", data)
+        self.assertNotIn("authors", data)
 
         data = self.bag.nerd_metadata_for("trial3/trial3a.json")
         self.assertIn("@type", data)
         self.assertIn("nrdp:DataFile", data['@type'])
 
+    def test_nerd_metadata_for_withannots(self):
+        self.bag = bag.NISTBag(metabagdir)
+
+        nerd = self.bag.nerd_metadata_for("")
+        self.assertNotIn('authors', nerd)
+        self.assertNotIn('foo', nerd)
+        self.assertTrue(nerd['title'].startswith("OptSortSph: Sorting "))
+        self.assertEqual(nerd['ediid'], "3A1EE2F169DD3B8CE0531A570681DB5D1491")
+        self.assertEqual(nerd['@type'], ["nrdp:PublicDataResource"])
+
+        nerd = self.bag.nerd_metadata_for("", True)
+        self.assertIn('authors', nerd)
+        self.assertTrue(nerd['title'].startswith("OptSortSph: Sorting "))
+        self.assertEqual(nerd['ediid'], "3A1EE2F169DD3B8CE0531A570681DB5D1491")
+        self.assertIn('foo', nerd)
+        self.assertIn(nerd['foo'], "bar")
+        self.assertEqual(nerd['authors'][0]['givenName'], "Kevin")
+        self.assertEqual(nerd['authors'][1]['givenName'], "Jianming")
+        self.assertEqual(len(nerd['authors']), 2)
+        self.assertEqual(nerd['@type'],
+                         ["nrdp:DataPublication", "nrdp:PublicDataResource"])
+
+        nerd = self.bag.nerd_metadata_for("trial1.json")
+        self.assertNotIn("previewURL", nerd)
+        self.assertTrue(nerd['title'].startswith("JSON version of"))
+        
+        nerd = self.bag.nerd_metadata_for("trial1.json", True)
+        self.assertIn("previewURL", nerd)
+        self.assertTrue(nerd['title'].startswith("JSON version of"))
+        self.assertTrue(nerd['previewURL'].endswith("trial1.json/preview"))
+        
     def test_nerdm_component(self):
         data = self.bag.nerd_metadata_for('trial3/trial3a.json')
         self.assertEqual(data['filepath'], 'trial3/trial3a.json')
@@ -93,6 +153,11 @@ class TestNISTBag(test.TestCase):
         self.assertEqual(data['inventory'][0]['childCount'], 4)
         self.assertEqual(data['inventory'][0]['descCount'], 5)
 
+        for comp in data['components']:
+            self.assertNotIn("_schema", comp)
+            self.assertNotIn("$schema", comp)
+            self.assertNotIn("@context", comp)
+
         # FIX: order is significant!
         #
         # self.assertEqual(data['dataHierarchy'], baghier)
@@ -100,6 +165,35 @@ class TestNISTBag(test.TestCase):
         self.assertEqual(len(data['dataHierarchy']), len(baghier))
         for comp in data['dataHierarchy']:
             self.assertIn(comp, baghier)
+
+    def test_nerdm_record_withannots(self):
+        self.bag = bag.NISTBag(metabagdir)
+        nerd = self.bag.nerdm_record()
+
+        self.assertNotIn('authors', nerd)
+        self.assertTrue(nerd['title'].startswith("OptSortSph: Sorting "))
+        self.assertEqual(nerd['ediid'], "3A1EE2F169DD3B8CE0531A570681DB5D1491")
+        self.assertEqual(nerd['@type'], ["nrdp:PublicDataResource"])
+        trial1 = [c for c in nerd['components']
+                    if 'filepath' in c and c['filepath'] == "trial1.json"][0]
+        self.assertNotIn('previewURL', trial1)
+
+        nerd = self.bag.nerdm_record(True)
+
+        self.assertIn('authors', nerd)
+        self.assertTrue(nerd['title'].startswith("OptSortSph: Sorting "))
+        self.assertEqual(nerd['ediid'], "3A1EE2F169DD3B8CE0531A570681DB5D1491")
+
+        self.assertEqual(nerd['authors'][0]['givenName'], "Kevin")
+        self.assertEqual(nerd['authors'][1]['givenName'], "Jianming")
+        self.assertEqual(len(nerd['authors']), 2)
+        self.assertEqual(nerd['@type'],
+                         ["nrdp:DataPublication", "nrdp:PublicDataResource"])
+
+        trial1 = [c for c in nerd['components']
+                    if 'filepath' in c and c['filepath'] == "trial1.json"][0]
+        self.assertIn('previewURL', trial1)
+        self.assertTrue(trial1['previewURL'].endswith("trial1.json/preview"))
 
     def test_comp_exists(self):
         self.assertTrue( self.bag.comp_exists("trial1.json") )
@@ -140,6 +234,21 @@ class TestNISTBag(test.TestCase):
         with self.assertRaises(bag.BadBagRequest):
             self.bag.subcoll_children("trial4")
 
+    def test_iter_data_files(self):
+        datafiles = list(self.bag.iter_data_files())
+        self.assertIn("trial1.json", datafiles)
+        self.assertIn("trial2.json", datafiles)
+        self.assertIn("trial3/trial3a.json", datafiles)
+        self.assertEqual(len(datafiles), 3)
+        
+    def test_iter_data_components(self):
+        datafiles = list(self.bag.iter_data_components())
+        self.assertIn("trial1.json", datafiles)
+        self.assertIn("trial2.json", datafiles)
+        self.assertIn("trial3", datafiles)
+        self.assertIn("trial3/trial3a.json", datafiles)
+        self.assertEqual(len(datafiles), 4)
+        
     def test_iter_fetch_records(self):
         fdata = [t for t in self.bag.iter_fetch_records()]
         self.assertEqual(len(fdata), 3)
@@ -189,7 +298,7 @@ class TestNISTBag(test.TestCase):
 
     def test_is_headbag(self):
         self.assertTrue(self.bag.is_headbag())
-                         
+
                          
 
 if __name__ == '__main__':

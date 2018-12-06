@@ -1,0 +1,19 @@
+#! /bin/bash
+#
+# testall:  run all package tests
+#
+set -e
+prog=`basename $0`
+execdir=`dirname $0`
+[ "$execdir" = "" -o "$execdir" = "." ] && execdir=$PWD
+PACKAGE_DIR=`(cd $execdir/.. > /dev/null 2>&1; pwd)`
+
+[ -f ${PACKAGE_DIR}/VERSION ] || {
+    echo '+' $PACKAGE_DIR/scripts/setversion.sh
+    $PACKAGE_DIR/scripts/setversion.sh
+}
+set -x
+cd $PACKAGE_DIR/angular
+npm test
+
+# TODO:  include e2e tests

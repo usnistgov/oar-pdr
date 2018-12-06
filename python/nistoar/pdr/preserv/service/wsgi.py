@@ -10,7 +10,7 @@ import os, sys, logging, json, cgi, re
 from wsgiref.headers import Headers
 
 from .service import (ThreadedPreservationService, RerequestException,
-                      ConfigurationException)
+                      ConfigurationException, PreservationStateException)
 from . import status
 from .. import PreservationSystem
 
@@ -86,6 +86,11 @@ class Handler(object):
         self._start(stat, self._hdr.items())
 
     def handle(self):
+        # This accommadates MIDAS whose HTTP client api is unable to
+        # submit against some standard methods.  
+        if self._env.get('HTTP_X_HTTP_METHOD_OVERRIDE'):
+            self._meth = self._env.get('HTTP_X_HTTP_METHOD_OVERRIDE')
+
         meth_handler = 'do_'+self._meth
 
         path = self._env.get('PATH_INFO', '/').strip('/')
@@ -245,21 +250,30 @@ class Handler(object):
             return ["{}"]
 
     def update_sip(self, sipid):
-
+        out = {}
         try: 
             out = self._svc.update(sipid, 'midas')
         
+            # FYI: detecting success or failure is handled through the
+            # returned status object because the preservation service will
+            # launch the job asynchronously.  Fast failures resulting from
+            # checks that can be done syncronously result in exceptions (see
+            # below).  
             if out['state'] == status.NOT_FOUND:
                 log.warn("Requested SIP ID not found: "+sipid)
                 self.set_response(404, "SIP not found (or is not ready)")
             elif out['state'] == status.SUCCESSFUL:
                 log.info("SIP update request completed synchronously: "+
                          sipid)
-                self.set_response(201, "SIP update completed successfully")
+                self.set_response(202, "SIP update completed successfully")
+            elif out['state'] == status.CONFLICT:
+                log.error(out['message'])
+                out['state'] = status.FAILED
+                self.set_response(409, out['message'])
             elif out['state'] == status.FAILED:
-                log.error(stat['message'])
+                log.error(out['message'])
                 self.set_response(500, "SIP update failed: " +
-                                  stat['message'])
+                                  out['message'])
             else:
                 log.info("SIP update request in progress asynchronously: " +
                          sipid)
@@ -269,8 +283,30 @@ class Handler(object):
 
         except RerequestException, ex:
             log.warn("Rerequest of SIP update detected: "+sipid)
+            out =  {
+                "id": sipid,
+                "state": status.IN_PROGRESS,
+                "message": str(ex),
+                "history": []
+            }
             self.set_response(403, "Preservation update for SIP was already "+
                               "requested (current status: "+ex.state+")")
+            
+        except PreservationStateException as ex:
+            log.warn("Wrong AIP state for client request: "+str(ex))
+            out =  {
+                "id": sipid,
+                "state": status.CONFLICT,
+                "message": str(ex),
+                "history": []
+            }
+            self.set_response(409, "Already preserved (need to request update "+
+                                   "via PATCH?)")
+
+        except Exception as ex:
+            log.exception("preservation request failure for sip=%s: %s",
+                          sipid, str(ex))
+            self.set_response(500, "Internal server error")
             
         self.add_header('Content-Type', 'application/json')
         self.end_headers()
@@ -302,7 +338,12 @@ class Handler(object):
         out = {}
         try: 
             out = self._svc.preserve(sipid, 'midas')
-        
+
+            # FYI: detecting success or failure is handled through the
+            # returned status object because the preservation service will
+            # launch the job asynchronously.  Fast failures resulting from
+            # checks that can be done syncronously result in exceptions (see
+            # below).  
             if out['state'] == status.NOT_FOUND:
                 log.warn("Requested SIP ID not found: "+sipid)
                 self.set_response(404, "SIP not found")
@@ -314,6 +355,10 @@ class Handler(object):
                 log.info("SIP preservation request completed synchronously: "+
                          sipid)
                 self.set_response(201, "SIP preservation completed successfully")
+            elif out['state'] == status.CONFLICT:
+                log.error(out['message'])
+                out['state'] = status.FAILED
+                self.set_response(409, out['message'])
             elif out['state'] == status.FAILED:
                 log.error(out['message'])
                 self.set_response(500, "SIP preservation failed: " +
@@ -321,16 +366,33 @@ class Handler(object):
             else:
                 log.info("SIP preservation request in progress asynchronously: "+
                          sipid)
-                self.set_response(202, "SIP "+out.message)
+                self.set_response(202, "SIP "+out['message'])
 
             out = json.dumps(out)
 
-        except RerequestException, ex:
+        except RerequestException as ex:
             log.warn("Rerequest of SIP detected: "+sipid)
+            out =  {
+                "id": sipid,
+                "state": status.IN_PROGRESS,
+                "message": str(ex),
+                "history": []
+            }
             self.set_response(403, "Preservation for SIP was already requested "+
                               "(current status: "+ex.state+")")
 
-        except Exception, ex:
+        except PreservationStateException as ex:
+            log.warn("Wrong AIP state for client request: "+str(ex))
+            out =  {
+                "id": sipid,
+                "state": status.CONFLICT,
+                "message": str(ex),
+                "history": []
+            }
+            self.set_response(409, "Already preserved (need to request update "+
+                                   "via PATCH?)")
+
+        except Exception as ex:
             log.exception("preservation request failure for sip=%s: %s",
                           sipid, str(ex))
             self.set_response(500, "Internal server error")

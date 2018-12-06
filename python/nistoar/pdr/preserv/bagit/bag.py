@@ -15,18 +15,20 @@ from ....nerdm.convert import ComponentCounter, HierarchyBuilder
 POD_FILENAME = "pod.json"
 NERDMD_FILENAME = "nerdm.json"
 ANNOTS_FILENAME = "annot.json"
-DEFAULT_MERGE_CONVENTION = "dev"
+DEFAULT_MERGE_CONVENTION = "midas0"
 
 JQLIB = def_jq_libdir
+MERGECONF = def_merge_etcdir
 
 class NISTBag(PreservationSystem):
     """
     an interface for reading data in a NIST-compliant BagIt bag.
     """
 
-    # NOTE: this is an incomplete implementation 
+    # NOTE: this is an incomplete implementation
+    # (what's missing?)
 
-    def __init__(self, rootdir, merge_annots=False):
+    def __init__(self, rootdir, merge_annots=False, merge_conf_dir=None):
         if not os.path.isdir(rootdir):
             raise StateException("Bag directory does not exist as a directory: "+
                                  rootdir, sys=self)
@@ -40,6 +42,13 @@ class NISTBag(PreservationSystem):
         self._mbagdir = None
 
         self._mergeannots = merge_annots
+
+        # this is the directory containing schemas annotated with merging
+        # directives
+        self._mergeconf = merge_conf_dir
+        if not self._mergeconf:
+            self._mergeconf = MERGECONF
+        self._mergerfact = None
 
     @property
     def dir(self):
@@ -126,6 +135,9 @@ class NISTBag(PreservationSystem):
     def nerd_file_for(self, destpath):
         return os.path.join(self._metadir, destpath, NERDMD_FILENAME)
 
+    def annotations_file_for(self, destpath):
+        return os.path.join(self._metadir, destpath, ANNOTS_FILENAME)
+
     def nerd_metadata_for(self, filepath, merge_annots=None):
         """
         return the component metadata for a given path to a component.
@@ -149,21 +161,44 @@ class NISTBag(PreservationSystem):
 
         if merge_annots is None:
             merge_annots = self._mergeannots
+            
         annotfile = os.path.join(os.path.dirname(nerdfile), ANNOTS_FILENAME)
         if merge_annots and os.path.exists(annotfile):
             if merge_annots is True:
                 merge_annots = DEFAULT_MERGE_CONVENTION
-            compmerger = MergerFactory.make_merger(merge_annots, 'Component')
-            
+
+            merge_type = "Component"
+            if filepath == "":
+                merge_type = "Resource"
+
+            compmerger = self._make_merger(merge_annots, merge_type)
             if isinstance(merge_annots, Merger):
                 compmerger = merge_annots
             else:
-                compmerger = MergerFactory.make_merger(merge_annots, 'Component')
+                compmerger = self._make_merger(merge_annots, merge_type)
 
             annots = self.read_nerd(annotfile)
-            comp = compmerger.merge(comp, annots)
+            out = compmerger.merge(out, annots)
 
         return out
+
+    def _make_merger(self, stratconvname, typename):
+        if not self._mergerfact:
+            self._mergerfact = MergerFactory(MERGECONF)
+        return self._mergerfact.make_merger(stratconvname, typename)
+
+    def annotations_metadata_for(self, filepath):
+        """
+        return the component metadata saved as annotations for a given path to 
+        a component.
+        """
+        annotfile = self.annotations_file_for(filepath)
+        if not os.path.exists(os.path.dirname(annotfile)):
+            raise ComponentNotFound("Component not found: " + filepath, 
+                                    os.path.basename(self._name))
+        if not os.path.exists(annotfile):
+            return OrderedDict()
+        return self.read_nerd(annotfile)
 
     def nerdm_record(self, merge_annots=None):
         """
@@ -183,9 +218,12 @@ class NISTBag(PreservationSystem):
             merge_annots = DEFAULT_MERGE_CONVENTION
         compmerger = None
         if merge_annots:
-            compmerger = MergerFactory.make_merger(merge_annots, 'Component')
+            compmerger = self._make_merger(merge_annots, 'Component')
 
         out = None
+        if not os.path.isdir(self._metadir):
+            raise BadBagRequest(self.name +
+                                ": Bag does not contain NERDm metadata")
         for root, subdirs, files in os.walk(self._metadir):
             if root == self._metadir:
                 out = self.nerd_metadata_for("")
@@ -196,12 +234,16 @@ class NISTBag(PreservationSystem):
                     annotfile = os.path.join(root,ANNOTS_FILENAME)
                     if os.path.exists(annotfile):
                         annots = self.read_nerd(annotfile)
-                        merger = MergerFactory.make_merger(merger_annots,
-                                                           'Resource')
+                        merger = self._make_merger(merge_annots, 'Resource')
                         out = merger.merge(out, annots)
 
             elif NERDMD_FILENAME in files:
                 comp = self.read_nerd(os.path.join(root, NERDMD_FILENAME))
+
+                # remove properties that support standalone use/validation
+                for key in "_schema $schema @context".split():
+                    if key in comp:
+                        del comp[key]
 
                 if merge_annots:
                     annotfile = os.path.join(root,ANNOTS_FILENAME)
@@ -357,6 +399,22 @@ class NISTBag(PreservationSystem):
             for f in files:
                 # if f.startswith('.'):
                 #     continue
+                yield os.path.join(reldir, f)
+
+    def iter_data_components(self):
+        """
+        iterate through components that have entries in the metadata directory,
+        returning the filepath for those components
+
+        :return generator:  
+        """
+        for dir, subdirs, files in os.walk(self.metadata_dir):
+            reldir = dir[len(self.metadata_dir)+1:]
+            for f in subdirs:
+                # if f.startswith('.'):
+                #     continue
+                if f.startswith('_'):
+                    continue
                 yield os.path.join(reldir, f)
 
     def iter_fetch_records(self):

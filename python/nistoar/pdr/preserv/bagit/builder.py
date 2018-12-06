@@ -1,18 +1,19 @@
 """
 Tools for building a NIST Preservation bags
 """
-from __future__ import print_function
+from __future__ import print_function, absolute_import
 import os, errno, logging, re, json, pkg_resources, textwrap, datetime
 import pynoid as noid
 from shutil import copy as filecopy, rmtree
 from copy import deepcopy
 from collections import Mapping, Sequence, OrderedDict
+from urllib import quote as urlencode
 
 from .. import (SIPDirectoryError, SIPDirectoryNotFound, 
                 ConfigurationException, StateException, PODError)
 from .exceptions import BagProfileError, BagWriteError
 from .. import PreservationSystem, read_nerd, read_pod, write_json
-from ...utils import build_mime_type_map, checksum_of
+from ...utils import build_mime_type_map, checksum_of, measure_dir_size
 from ....nerdm.exceptions import (NERDError, NERDTypeError)
 from ....nerdm.convert import PODds2Res
 from ....id import PDRMinter
@@ -21,6 +22,8 @@ from ...config import load_from_file, merge_config
 from .bag import NISTBag
 from .exceptions import BadBagRequest
 from .validate.nist import NISTAIPValidator
+
+from multibag import open_headbag
 
 NORM=15  # Log Level for recording normal activity
 logging.addLevelName(NORM, "NORMAL")
@@ -45,15 +48,18 @@ NERD_PRE = "nrd"
 NERDPUB_PRE = "nrdp"
 NERDM_SCH_ID_BASE = "https://data.nist.gov/od/dm/nerdm-schema/"
 NERDMPUB_SCH_ID_BASE = "https://data.nist.gov/od/dm/nerdm-schema/pub/"
-NERDM_SCH_VER = "v0.1"
+NERDM_SCH_VER = "v0.2"
 NERDMPUB_SCH_VER = NERDM_SCH_VER
 NERDM_SCH_ID = NERDM_SCH_ID_BASE + NERDM_SCH_VER + "#"
 NERDMPUB_SCH_ID = NERDMPUB_SCH_ID_BASE + NERDMPUB_SCH_VER + "#"
 NERD_DEF = NERDM_SCH_ID + "/definitions/"
 NERDPUB_DEF = NERDMPUB_SCH_ID + "/definitions/"
 DATAFILE_TYPE = NERDPUB_PRE + ":DataFile"
+DOWNLOADABLEFILE_TYPE = NERDPUB_PRE + ":DownloadableFile"
 SUBCOLL_TYPE = NERDPUB_PRE + ":Subcollection"
+NERDM_CONTEXT = "https://data.nist.gov/od/dm/nerdm-pub-context.jsonld"
 DISTSERV = "https://data.nist.gov/od/ds/"
+DEF_MERGE_CONV = "midas0"
 
 class BagBuilder(PreservationSystem):
     """
@@ -72,6 +78,12 @@ class BagBuilder(PreservationSystem):
     :prop jq_lib       str:  the full path to the JQ transform library 
                               directory; if not set, the directory is 
                               searched for in a few typical places.
+    :prop merge_etc    str:  the full path to directory containing the NERDm
+                              merger annotated schemas;  if not set, the 
+                              directory is searched for in a few typical places.
+    :prop merge_convention str ("dev"): the merge convention name to 
+                                 use to merge annotation data into the primary
+                                 NERDm metadata.
     :prop validate_id bool (True):  If True, an identifier provided to the 
                               constructor will be checked for transcription
                               error.
@@ -118,7 +130,7 @@ class BagBuilder(PreservationSystem):
         if not logger:
             logger = log
         self.log = logger
-        self.log.setLevel(NORM)
+        # self.log.setLevel(NORM)
         
         if not config:
             config = {}
@@ -144,8 +156,30 @@ class BagBuilder(PreservationSystem):
         jqlib = self.cfg.get('jq_lib', def_jq_libdir)
         self.pod2nrd = PODds2Res(jqlib)
 
-        if os.path.exists(self.bagdir):
-            self.ensure_bagdir() # this initializes some data like self._bag
+# Not sure why this was added originally, but it causes problems to create
+# the bag directory and log in the constructor, and breaks assumptions of
+# ensure_bagdir().
+# 
+#        if os.path.exists(self.bagdir):
+#            self.ensure_bagdir() # this initializes some data like self._bag
+
+    def rename_bag(self, name):
+        """
+        rename the bag to the given name.  Note that finalize_bag() will need
+        to be (re-)called after calling this method.
+        """
+        if name == self._name:
+            return
+
+        newdir = os.path.join(self._pdir, name)
+        if os.path.exists(self._bagdir):
+            os.rename(self._bagdir, newdir)
+
+        self._name = name
+        self._bagdir = newdir
+
+        if self._bag:
+            self._bag = NISTBag(self._bagdir)
 
     def _merge_def_config(self, config):
         if not def_etc_dir:
@@ -253,12 +287,12 @@ class BagBuilder(PreservationSystem):
 
     def _download_url(self, ediid, destpath):
         path = "/".join(destpath.split(os.sep))
-        return self._distbase + ediid + '/' + path
+        return self._distbase + ediid + '/' + urlencode(path)
 
     def ensure_bagdir(self):
         """
         ensure that the working bag directory exists with the proper name
-        an that we can write to it.  
+        and that we can write to it.  
         """
         didit = False
         if not os.path.exists(self.bagdir):
@@ -290,11 +324,13 @@ class BagBuilder(PreservationSystem):
             self._unset_logfile()
         filepath = os.path.join(self.bagdir, self.logname)
         self._loghdlr = logging.FileHandler(filepath)
-        # self._loghdlr.setLevel(NORM)
+        self._loghdlr.setLevel(NORM)
         fmt = self.cfg.get('bag_log_format', DEF_BAGLOG_FORMAT)
         self._loghdlr.setFormatter(logging.Formatter(fmt))
         self.log.addHandler(self._loghdlr)
-        
+        if not self.log.isEnabledFor(NORM):
+            self.log.setLevel(NORM)
+
     def _unset_logfile(self):
         if hasattr(self, '_loghdlr') and self._loghdlr:
             self.log.removeHandler(self._loghdlr)
@@ -480,30 +516,56 @@ class BagBuilder(PreservationSystem):
 
             destpath = os.path.dirname(destpath)
             
-    def add_metadata_for_file(self, destpath, mdata):
+    def add_metadata_for_file(self, destpath, mdata, disttype=None):
         """
         write metadata for the component at the given destination path to the 
         proper location under the metadata directory.
 
         This implementation will provide default values for key values that 
         are missing.
+
+        :param destpath str:  the path to the data file that metadata is being
+                              provided for
+        :param mdata   dict:  a Mapping object containing the metadata to 
+                              associate with the file.  This will be merged 
+                              with default data.  
+        :param disttype str:  the default file distribution type to assign to 
+                              the file (with the default default being 
+                              "DataFile"); if examine is True, the type may 
+                              change based on inspection of the file.  
         """
         if not isinstance(mdata, Mapping):
             raise NERDTypeError("dict", type(mdata), "NERDm Component")
 
-        md = self._create_init_filemd_for(destpath)
-        md.update(mdata)
-        
-        try:
-            if not isinstance(md['@type'], list):
-                raise NERDTypeError('list', str(mdata['@type']), '@type')
+        if not disttype:
+            # get the disttype by consulting the metadata itself
+            if '@type' in mdata:
+                pfx = re.compile(r'^[^:]*:')
+                ftypes = [p for p in [pfx.sub('', t) for t in mdata['@type']]
+                            if p in self._file_types]
+                if len(ftypes) > 0:
+                    disttype = ftypes[0]
+        if not disttype:
+            # if a recognized file distribution type is not set in the metadata,
+            # default to DataFile
+            disttype = "DataFile"
 
-            if DATAFILE_TYPE not in md['@type']:
-                md['@type'].append(DATAFILE_TYPE)
-                    
-        except TypeError, ex:
-            raise NERDTypeError(msg="Unknown DataFile property type error",
-                                cause=ex)
+        md = self._create_init_filemd_for(destpath, disttype=disttype)
+        md.update(mdata)
+
+# We now have other types of files (e.g. ChecksumFile); do not ensure
+# DataFile type
+#
+#        try:
+#            if not isinstance(md['@type'], list):
+#                raise NERDTypeError('list', str(mdata['@type']), '@type')
+#
+#            if DATAFILE_TYPE not in md['@type']:
+#                md['@type'].append(DATAFILE_TYPE)
+#                    
+#        except TypeError, ex:
+#            raise NERDTypeError(msg="Unknown DataFile property type error",
+#                                cause=ex)
 
         try:
             self.ensure_metadata_dirs(destpath)
@@ -566,12 +628,37 @@ class BagBuilder(PreservationSystem):
         or subcollection with the given collection path.
 
         :param destpath str:  the path to the data file relative to the 
-                              dataset's root.
+                              dataset's root. (Caution: not the bag's root.)
         """
         return os.path.join(self.bagdir, "metadata", destpath,
                             FILEANNOT_FILENAME)
 
-    def init_filemd_for(self, destpath, write=False, examine=None):
+    def update_annot_for(self, destpath, mdata):
+        """
+        merge (via update) the given metadata into the annotation data for a 
+        given destination path in the bag.  The properties in the input data
+        will override that found in the annotation file (using dict.update()).
+
+        :param destpath str:  the path to the data file relative to the 
+                              dataset's root. (Caution: not the bag's root.)
+                              An empty string refers to the resource-level 
+                              metadata.  
+        :param mdata dict:    the metadata to merge in.  
+        """
+        if not mdata:
+            return
+        self.ensure_metadata_dirs(destpath)
+        annotf = self.annot_file_for(destpath)
+        if self.bagdir and os.path.exists(annotf):
+            amdata = read_nerd(annotf)
+        else:
+            amdata = {}
+        amdata.update(mdata)
+        write_json(amdata, annotf)
+            
+
+    def init_filemd_for(self, destpath, write=False, examine=None,
+                        disttype="DataFile"):
         """
         create some initial file metadata for a file at a given path.
 
@@ -586,9 +673,13 @@ class BagBuilder(PreservationSystem):
                               If it otherwise evaluates to True, the copy 
                               previously copied to the output bag will be 
                               examined.
+        :param disttype str:  the default file distribution type to assign to 
+                              the file (with the default default being 
+                              "DataFile"); if examine is True, the type may 
+                              change based on inspection of the file.  
         """
         self.record("Initializing metadata for file %s", destpath)
-        mdata = self._create_init_filemd_for(destpath)
+        mdata = self._create_init_filemd_for(destpath, disttype=disttype)
         if examine:
             if isinstance(examine, (str, unicode)):
                 datafile = examine
@@ -664,21 +755,54 @@ class BagBuilder(PreservationSystem):
         mdata['mediaType'] = self._mimetypes.get(os.path.splitext(dfile)[1][1:],
                                                  'application/octet-stream')
 
-    def _create_init_filemd_for(self, destpath):
+    _file_types = {
+        "DataFile": [
+            [ ":".join([NERDPUB_PRE, "DataFile"]),
+              ":".join([NERDPUB_PRE, "DownloadableFile"]),
+              "dcat:Distribution" ],
+            [ NERDPUB_DEF + "DataFile" ]
+        ],
+        "ChecksumFile": [
+            [ ":".join([NERDPUB_PRE, "ChecksumFile"]),
+              ":".join([NERDPUB_PRE, "DownloadableFile"]),
+              "dcat:Distribution" ],
+            [ NERDPUB_DEF + "ChecksumFile" ]
+        ]
+    }
+    _checksum_alg_names = { "sha256": "SHA-256" }
+
+    def _create_init_filemd_for(self, destpath, disttype="DataFile"):
+        if disttype not in self._file_types:
+            raise ValueError("Unsupported file distribution type: "+disttype)
         out = {
-            "@id": "cmps/" + destpath,
-            "@type": [ ":".join([NERDPUB_PRE, "DataFile"]),
-                       "dcat:Distribution" ],
+            "_schema": NERD_DEF + "Component",
+            "@context": NERDM_CONTEXT,
+            "@id": "cmps/" + urlencode(destpath),
+            "@type": deepcopy(self._file_types[disttype][0]),
             "filepath": destpath,
-            "_extensionSchemas": [ NERDPUB_DEF + "DataFile" ]
         }
         if self.ediid:
             out['downloadURL'] = self._download_url(self.ediid, destpath)
+
+        if disttype == 'ChecksumFile':
+            fname = os.path.splitext(destpath)
+            if fname[1] and fname[1][1:] in self._checksum_alg_names:
+                out['algorithm'] = { "@type": "Thing", "tag": fname[1][1:] }
+                out['describes'] = "cmps/" + fname[0]
+                out['description'] = "checksum value for " + \
+                                     os.path.basename(fname[0])
+                out['description'] = self._checksum_alg_names[fname[1][1:]] + \
+                                     ' ' + out['description']
+
+        out["_extensionSchemas"] =  deepcopy(self._file_types[disttype][1])
+
         return out
 
     def _create_init_collmd_for(self, destpath):
         out = {
-            "@id": "cmps/" + destpath,
+            "_schema": NERD_DEF + "Component",
+            "@context": NERDM_CONTEXT,
+            "@id": "cmps/" + urlencode(destpath),
             "@type": [ ":".join([NERDPUB_PRE, "Subcollection"]) ],
             "filepath": destpath,
             "_extensionSchemas": [ NERDPUB_DEF + "Subcollection" ]
@@ -714,28 +838,45 @@ class BagBuilder(PreservationSystem):
         # Make sure all remaining components have metadata
         if finalcfg.get('ensure_component_metadata', True):
             self.ensure_comp_metadata(examine=True)
+        self.ensure_merged_annotations()
 
         # Now trim empty metadata folders
         if trim:
             self.trim_metadata_folders()
 
+        self.ensure_bagit_ver()
         self.write_data_manifest(finalcfg.get('confirm_checksums', False))
         self.write_mbag_files()
         # write_ore_file
         # write_pidmapping_file
         self.write_about_file()
         # write_premis_file
-        self.write_bagit_ver()
         self.ensure_baginfo()
 
-        self.log.error("Implementation of Bag finalization is not complete!")
+        # this file was used to assist when this bag is an update on an
+        # earlier version.  We no longer need it, so get rid of it.
+        deprecinfof = os.path.join(self.bagdir,"multibag","deprecated-info.txt")
+        if os.path.exists(deprecinfof):
+            os.remove(deprecinfof)
 
-    def write_about_file(self):
+        self.log.error("Implementation of Bag finalization is not complete!")
+        self.log.info("Bag does not include PREMIS and ORE files")
+
+    def write_about_file(self, merge_annots=False):
         """
         Write out the about.txt file.  This requires that the resource-level
         metdadata has been written out; if it hasn't, a BagProfileError is 
-        raised.  
+        raised.  The metadata annotations should be merged as well (i.e. via
+        ensure_merged_annotations()); however, if they have not yet been, 
+        the merge_annots parameter can be set to True.
+
+        :param merge_annots bool:  if True, base the about file contents on 
+                                   metadata that includes annotations merged 
+                                   in.  (Setting to True, does not permanently
+                                   merge annotations.)  Default: False.
         """
+        if not self._bag:
+            self.ensure_bagdir()
         nerdresf = self._bag.nerd_file_for("")
         podf = self._bag.pod_file()
         if not os.path.exists(podf):
@@ -744,7 +885,7 @@ class BagBuilder(PreservationSystem):
             raise BagProfileError("Missing POD metadata file; is this bag complete?")
         try:
             mf = nerdresf
-            nerdm = self._bag.nerd_metadata_for("")
+            nerdm = self._bag.nerd_metadata_for("", merge_annots)
             mf = podf
             podm = self._bag.read_pod(mf)
         except OSError, ex:
@@ -752,11 +893,12 @@ class BagBuilder(PreservationSystem):
                                  mf + ": " + str(ex), cause=ex)
 
         try:
+            ec = 'utf-8'
             with open(os.path.join(self.bagdir, "about.txt"), 'w') as fd:
                 print("This data package contain NIST Public Data\n", file=fd)
 
                 # title
-                print(textwrap.fill(podm['title'], 79), file=fd)
+                print(textwrap.fill(podm['title'].encode(ec), 79), file=fd)
 
                 # authors, if available
                 if 'authors' in nerdm:
@@ -789,12 +931,13 @@ class BagBuilder(PreservationSystem):
                             aus = auths[0] + " and " + auths[1]
                         else:
                             aus = " ".join(auths[:-1]) + ", and " + auths[-1]
-                        print( re.sub(r'=', ' ', textwrap.fill(aus)), file=fd )
+                        print( re.sub(r'=', ' ', textwrap.fill(aus.encode(ec))),
+                               file=fd )
 
                         i=1
                         for affil in affils:
-                           print(textwrap.fill("[{0}] {1}".format(i, affil)),
-                                 file=fd)
+                           print(textwrap.fill("[{0}] {1}".format(i, affil)
+                                                          .encode(ec)), file=fd)
 
                 # identifier(s)
                 if nerdm.get('doi'):
@@ -810,38 +953,47 @@ class BagBuilder(PreservationSystem):
                     cp = nerdm['contactPoint']
                     if cp.get('fn') and cp.get('hasEmail'):
                         aus = re.sub('^mailto:\s*', '', cp['hasEmail'])
-                        print("Contact: {0} ({1})".format(cp['fn'], aus),
-                              file=fd)
+                        print("Contact: {0} ({1})".format(cp['fn'], aus)
+                                                  .encode(ec), file=fd)
                     else:
                         print("Contact: {0}".format(cp.get('fn') or
                                                     cp.get('hasEmail')),
                               file=fd)
                     if 'postalAddress' in cp:
                         for line in cp['postalAddress']:
-                            print("         {0}".format(line.strip()), file=fd)
+                            print("         {0}".format(line.strip()).encode(ec),
+                                  file=fd)
                     if 'phoneNumber' in cp:
                         print("         Phone: {0}".format(
-                                                      cp['phoneNumber'].strip()),
+                                          cp['phoneNumber'].strip()).encode(ec),
                               file=fd)
                     fd.write("\n")
 
                 # description
                 if podm.get('description'):
-                    print( textwrap.fill(podm['description']), file=fd )
+                    print( textwrap.fill(podm['description'].encode(ec)),
+                           file=fd )
                     fd.write("\n")
 
                 # landing page
                 if nerdm.get('doi'):
-                    print("More information:\nhttps://dx.doi.org/" +
+                    print("More information:\nhttps://doi.org/" +
                           nerdm.get('doi'), file=fd)
                 elif nerdm.get('landingPage'):
-                    print("More information:\n" + nerdm.get('landingPage'),
+                    print("More information:\n" +
+                          nerdm.get('landingPage').encode(ec),
                           file=fd)
                 
         except OSError, ex:
             raise BagWriteError("Problem writing about.txt file: " + str(ex),
                                 cause=ex)
 
+    def ensure_bagit_ver(self):
+        """
+        ensure that the bag's bagit.txt file exists
+        """
+        if not os.path.exists(os.path.join(self.bagdir, "bagit.txt")):
+            self.write_bagit_ver()
 
     def write_bagit_ver(self):
         """
@@ -858,66 +1010,45 @@ class BagBuilder(PreservationSystem):
         except OSError, ex:
             raise BagWriteError("Error writing bagit.txt: "+str(ex), cause=ex)
 
-    def write_mbag_files(self):
+    def write_mbag_files(self, overwrite=False):
         """
-        write out tag files for the MultiBag BagIt profile assuming a single 
-        bagfile.
+        write out tag files for the MultiBag BagIt profile.  
         """
-        if not self._bag:
-            self.ensure_bagdir()
+        self.ensure_bagit_ver()
 
-        if not self._mbtagdir:
-            # get the desired name of the multibag tag directory; first
-            # check a value already written to the bag-info.txt file; if
-            # not there, get it from the configuration (default: 'multibag')
-            self._mbtagdir = self._bag.get_baginfo() \
-                                      .get('Multibag-Tag-Directory',
-                                           self.cfg.get('multibag-tag-dir',
-                                                        'multibag'))
-            
-        tagdir = os.path.join(self.bagdir, self._mbtagdir)
-        if not os.path.exists(tagdir):
-            try:
-                os.makedirs(tagdir)
-            except OSError, ex:
-                raise BagWriteError("Failed create Multibag tag directory: "+
-                                    tagdir + ": " + str(e), cause=ex)
+        # Use the head bag interface provided by the external multibag package
+        # Note that previously saved data (i.e. cached from previously
+        # published version) will be retained.
+        hbag = open_headbag(self.bagdir)
 
-        baseurl = self.cfg.get('bag-download-url')
-        if baseurl and not baseurl.endswith('/'):
-            baseurl += '/'
+        # append the bag we're building to the member bag list and save
+        url = self.cfg.get('bag-download-url')
+        if url:
+            if not url.endswith('/'):
+                url += '/'
+            url += self.bagname
+        hbag.add_member_bag(self.bagname, url)
+        hbag.save_member_bags()
 
-        # write the group-members.txt file
-        tagfile = os.path.join(tagdir, "group-members.txt")
-        try:
-            with open(tagfile, 'w') as fd:
-                fd.write(self.bagname)
-                if baseurl:
-                    fd.write(' '+baseurl+self.bagname)
-                fd.write('\n')
-
-            # write the group-directory.txt file
-            tagfile = os.path.join(tagdir, "group-directory.txt")
-            with open(tagfile, 'w') as fd:
-                for bf in self._bag.iter_data_files():
-                    print(os.path.join("data", bf), self.bagname, file=fd)
-
-                print(os.path.join("metadata", "pod.json"),
-                      self.bagname, file=fd)
-                print(os.path.join("metadata", "nerdm.json"),
-                      self.bagname, file=fd)
-
-                for bf in self._bag.iter_data_files():
-                    nerdf = os.path.join("metadata", bf, "nerdm.json")
-                    if os.path.exists(os.path.join(self.bagdir, nerdf)):
-                        print(nerdf, self.bagname, file=fd)
-
-
-        except OSError, ex:
-            raise BagWriteError("Failed to write tag file: "+tagfile+
-                                ": "+str(e), cause=ex)
-
-    def ensure_baginfo(self, overwrite=False):
+        # update the file lookup with the contents of this new bag
+        for dir, sdirs, files in os.walk(self._bag.data_dir):
+            dir = dir[len(self.bagdir)+1:]
+            for f in files:
+                f = os.path.join(dir, f)
+                f = "/".join(f.split(os.sep))
+                hbag.add_file_lookup(f, self.bagname)
+        for dir, sdirs, files in os.walk(self._bag.metadata_dir):
+            dir = dir[len(self.bagdir)+1:]
+            for f in files:
+                f = os.path.join(dir, f)
+                f = "/".join(f.split(os.sep))
+                hbag.add_file_lookup(f, self.bagname)
+        for f in "preserv.log ore.txt premis.xml".split():
+            if hbag.exists(f):
+                hbag.add_file_lookup(f, self.bagname)
+        hbag.save_file_lookup()
+        
+    def ensure_baginfo(self, overwrite=False, merge_annots=False):
         """
         ensure that a complete bag-info.txt file is written out to the bag.
         Any data that has already been written out will remain, and any missing
@@ -929,13 +1060,14 @@ class BagBuilder(PreservationSystem):
         initdata = self.cfg.get('init_bag_info', OrderedDict())
 
         # add items based on bag's contents
-        nerdm = self._bag.nerd_metadata_for("")
+        nerdm = self._bag.nerd_metadata_for("", merge_annots)
         initdata['Bagging-Date'] = datetime.date.today().isoformat()
         initdata['Bag-Group-Identifier'] = nerdm.get('ediid') or self.ediid
         initdata['Internal-Sender-Identifier'] = self.bagname
 
-        if nerdm.get('description'):
-            initdata['External-Description'] = nerdm['description']
+        desc = [p for p in nerdm.get('description', []) if len(p.strip()) > 0]
+        if desc:
+            initdata['External-Description'] = desc
         else:
             initdata['External-Description'] = \
 "This collection contains data for the NIST data resource entitled, {0}". \
@@ -943,36 +1075,65 @@ format(nerdm['title'])
 
         initdata['External-Identifier'] = [self.id]
         if nerdm.get('doi'):
-            initdata['External-Identifier'].append(nerdm['doi'])
+            initdata['External-Identifier'].append("doi:"+nerdm['doi'])
 
         # Calculate the payload Oxum
         oxum = self._measure_oxum(self._bag._datadir)
         initdata['Payload-Oxum'] = "{0}.{1}".format(oxum[0], oxum[1])
 
-        # right now, all bags are multibags, version 1
-        initdata['Multibag-Head-Version'] = "1"
+        # update the multibag version, deprecation
+        self.update_head_version(initdata, nerdm.get("version", "1"))
 
         # write everything except Bag-Size
-        self.write_baginfo_data(initdata, overwrite)
+        self.write_baginfo_data(initdata, overwrite=overwrite)
 
         # calculate and write the size of the bag 
         oxum = self._measure_oxum(self.bagdir)
         size = self._format_bytes(oxum[0])
         oxum[0] += len("Bag-Size: {0} ".format(size))
+        oxum[0] += len("Bag-Oxum: {0}.{1} ".format(oxum[0], oxum[1]))
         size = self._format_bytes(oxum[0])
-        szdata = {
-            'Bag-Size': size
-        }
+        szdata = OrderedDict([
+            ('Bag-Oxum', "{0}.{1}".format(*oxum)),
+            ('Bag-Size', size),
+        ])
         self.write_baginfo_data(szdata, overwrite=False)
 
+    def update_head_version(self, baginfo, version):
+        """
+        update the given bag info metadata with values for 
+        'Multibag-Head-Version' and possibly 'Multibag-Head-Deprecates'
+        """
+        baginfo['Multibag-Head-Version'] = version
+
+        # if there is a multibag/deprecated-info.txt, extract the
+        # 'Multibag-Head-Deprecates' values
+        #
+        multibagdir = baginfo.get('Multibag-Tag-Directory', 'multibag')
+        if isinstance(multibagdir, list):
+            multibagdir = (len(multibagdir) >0 and multibagdir[-1]) or 'multibag'
+        depinfof = os.path.join(self._bag.dir,multibagdir, "deprecated-info.txt")
+        
+        if os.path.exists(depinfof):
+            # indicates that this is an update to a previous version of the
+            # dataset.  Add deprecation information.
+            
+            depinfo = self._bag.get_baginfo(depinfof)
+
+            if 'Multibag-Head-Deprecates' not in baginfo:
+                baginfo['Multibag-Head-Deprecates'] = []
+
+            # add the previous head version
+            baginfo['Multibag-Head-Deprecates'].extend(
+                depinfo.get('Multibag-Head-Version', ["1"]) )
+
+            # add in all the previous deprecated versions
+            for val in depinfo.get('Multibag-Head-Deprecates', []):
+                if val not in baginfo['Multibag-Head-Deprecates']:
+                    baginfo['Multibag-Head-Deprecates'].append( val )
+                
     def _measure_oxum(self, rootdir):
-        size = 0
-        count = 0
-        for root, subdirs, files in os.walk(rootdir):
-            count += len(files)
-            for f in files:
-                size += os.stat(os.path.join(root,f)).st_size
-        return [size, count]
+        return measure_dir_size(rootdir)
 
     def _format_bytes(self, nbytes):
         prefs = ["", "k", "M", "G", "T"]
@@ -992,7 +1153,7 @@ format(nerdm['title'])
             nbytes = nbytes[:-1]    
         return "{0} {1}B".format(nbytes, pref)
 
-    def write_baginfo_data(self, data, overwrite=False):
+    def write_baginfo_data(self, data, altfile=None, overwrite=False):
         """
         write out specific data to the bag-info.txt file.  Normally, this will
         append the provided data to the file.  Name-value pairs that already 
@@ -1025,22 +1186,23 @@ format(nerdm['title'])
         if not self._bag:
             self.ensure_bagdir()
         if not overwrite:
-            data = upd_info(self._bag.get_baginfo(), data)
-        self._write_baginfo_data(data, overwrite)
+            data = upd_info(self._bag.get_baginfo(altfile), data)
+        self._write_baginfo_data(data, altfile, overwrite)
 
-    def _write_baginfo_data(self, data, overwrite=False):
+    def _write_baginfo_data(self, data, infofile=None, overwrite=False):
         mode = 'w'
         if not overwrite:
             mode = 'a'
 
-        infofile = os.path.join(self.bagdir, "bag-info.txt")
+        if not infofile:
+            infofile = os.path.join(self.bagdir, "bag-info.txt")
         with open(infofile, mode) as fd:
             for name, vals in data.items():
                 if isinstance(vals, (str, unicode)) or \
                    not isinstance(vals, Sequence):
                     vals = [vals]
                 for val in vals:
-                    out = "{0}: {1}".format(name, val)
+                    out = "{0}: {1}".format(name, val.encode('utf-8'))
                     if len(out) > 79:
                         out = textwrap.fill(out, 79, subsequent_indent=' ')
                     print(out, file=fd)
@@ -1125,7 +1287,7 @@ format(nerdm['title'])
                 # we'll merge the new examination with the previous:
                 # except 'checksum', previous data will over-ride new 
                 if os.path.exists(mdfile):
-                    oldmd = self._bag.nerd_metadata_for(dfile)
+                    oldmd = self._bag.nerd_metadata_for(dfile, True)
                 else:
                     oldmd = OrderedDict()
 
@@ -1213,7 +1375,8 @@ format(nerdm['title'])
                 raise NERDTypeError("list", str(type(mdata['components'])),
                                     'components')
             for i in range(len(components)-1, -1, -1):
-                if DATAFILE_TYPE in components[i].get('@type',[]):
+                tps = components[i].get('@type',[])
+                if DOWNLOADABLEFILE_TYPE in tps or DATAFILE_TYPE in tps:
                     if savefilemd and 'filepath' not in components[i]:
                         msg = "DataFile missing 'filepath' property"
                         if '@id' in components[i]:
@@ -1384,7 +1547,8 @@ format(nerdm['title'])
                               True, the checksum will be calculated to ensure
                               the value in the metadata file is correct.
         """
-        self.ensure_merged_annotations()
+        # the checksum should not be part of annotations (?).
+        # self.ensure_merged_annotations()
         manfile = os.path.join(self.bagdir, "manifest-sha256.txt")
         try:
           with open(manfile, 'w') as fd:
@@ -1420,5 +1584,27 @@ format(nerdm['title'])
         """
         ensure that the annotations have been merged primary NERDm metadata.
         """
-        pass
+        # this implementation assumes that merging can be applied multiple
+        # times and give the same result.  (It would be better to determine
+        # if the annotation's already been applied and not repeat it, for
+        # performance reasons.)
+
+        mergeconv = self.cfg.get('merge_convention', DEF_MERGE_CONV)
+
+        # update the resource-level metadata
+        if os.path.exists(self.annot_file_for("")):
+            self.record("Updating resource-level metadata to merge "+
+                        "annotations...")
+            nerd = self._bag.nerd_metadata_for("", mergeconv)
+            self.add_res_nerd(nerd, False)
+
+        # update the file metadata
+        for dfile in self._bag.iter_data_components():
+            if os.path.exists(self.annot_file_for(dfile)):
+                nerd = self._bag.nerd_metadata_for(dfile, mergeconv)
+                self.add_metadata_for_file(dfile, nerd)
+        
+
+        
+        
 

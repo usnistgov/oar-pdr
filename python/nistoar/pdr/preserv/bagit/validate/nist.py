@@ -31,13 +31,14 @@ class NISTBagValidator(ValidatorBase):
     parts (excluding Multibag and basic BagIt compliance; see 
     NISTAIPValidator)
     """
-    profile = ("NIST", "0.2")
-    namere = re.compile("^(\w+).mbag(\d+)_(\d+)-(\d+)$")
+    namere02 = re.compile("^(\w+).mbag(\d+)_(\d+)-(\d+)$")
+    namere04 = re.compile("^(\w+).(\d+(_\d+)*).mbag(\d+)_(\d+)-(\d+)$")
     
-    def __init__(self, config=None):
+    def __init__(self, config=None, profver="0.4"):
         super(NISTBagValidator, self).__init__(config)
         self._validatemd = self.cfg.get('validate_metadata', True)
         self.mdval = None
+        self.profile = ("NIST", profver)
         if self._validatemd:
             schemadir = self.cfg.get('nerdm_schema_dir', pdr.def_schema_dir)
             if not schemadir:
@@ -59,14 +60,26 @@ class NISTBagValidator(ValidatorBase):
         if not out:
             out = ValidationResults(bag.name, want)
 
-        t = self._issue("2-0", "Bag names should match format DSID.mbagMM_NN-SS")
-        nm = self.namere.match(bag.name)
+        pver = self.profile[1].split('.')
+        if pver > [0, 3]:
+            t = self._issue("2-0",
+                         "Bag names should match format DSID.DM_DN.mbagMM_NN-SS")
+            nm = self.namere04.match(bag.name)
+            pverpos = (4, 5)
+        else:
+            t = self._issue("2-0",
+                            "Bag names should match format DSID.mbagMM_NN-SS")
+            nm = self.namere02.match(bag.name)
+            pverpos = (2, 3)
+            
         out._warn(t, nm)
 
         if nm:
-            t = self._issue("2-2", "Bag name should include version 'mbag{0}'")
-            vers = self.profile[1].split('.')
-            out._warn(t, nm.group(2) == vers[0] and nm.group(3) == vers[1])
+            t = self._issue("2-2",
+                         "Bag name should include profile version 'mbag{0}_{1}'"
+                            .format(*pver))
+            out._warn(t, nm.group(pverpos[0]) == pver[0] and
+                         nm.group(pverpos[1]) == pver[1])
 
         return out
 
@@ -118,7 +131,7 @@ class NISTBagValidator(ValidatorBase):
 
         return out;
 
-    def test_version(self, bag, want=ALL, results=None):
+    def test_profile_version(self, bag, want=ALL, results=None):
         """
         test that the bag-info.txt file includes the NIST BagIt Profile version
         """
@@ -145,6 +158,58 @@ class NISTBagValidator(ValidatorBase):
                             "'NIST-BagIt-Version' value must be set to {0}"
                             .format(self.profile[1]))
             out._err(t, val[-1] == self.profile[1])
+
+        return out
+
+    def test_dataset_version(self, bag, want=ALL, results=None):
+        """
+        Test that the version is of an acceptable form
+        """
+        out = results
+        if not out:
+            out = ValidationResults(bag.name, want)
+        mdfile = os.path.join(bag.metadata_dir, "nerdm.json")
+        version = None
+
+        try:
+            # if this fails, don't bother reporting it as another test
+            # will
+            with open(mdfile) as fd:
+                data = json.load(fd)
+
+            version = data.get('version')
+            
+        except Exception as ex:
+            pass
+
+        if version:
+            t = self._issue("4.2-1", "version should be of form N.N.N...")
+            comm = None
+            if not re.match(r'^\d+(.\d+)*$', version):
+                comm = [ "Offending version found in NERDm record: " +
+                         str(version) ]
+            out._warn(t, not comm, comm)
+        
+        data = bag.get_baginfo()
+
+        if 'Multibag-Head-Version' in data:
+            mbver = data['Multibag-Head-Version'][-1]
+
+            t = self._issue("4.2-2",
+                    "Multibag-Head-Version info tag should be of form N.N.N...")
+            comm = None
+            if not re.match(r'^\d+(.\d+)*$', mbver):
+                comm = [ "Offending version found in NERDm record: " +
+                         str(version) ]
+            out._warn(t, not comm, comm)
+
+            if version:
+                t = self._issue("4.2-3",
+                    "Multibag-Head-Version info tag should match NERDm version")
+                comm = None
+                if version != mbver:
+                    comm = [ "{0} != {1}".format(mbver, version) ]
+                out._warn(t, not comm, comm)
 
         return out
         
@@ -434,6 +499,8 @@ class NISTBagValidator(ValidatorBase):
                          "@type=nrdp:DataFile.")
         ct = self._issue("4.1-4-2d", "A data directory's NERDm data must be "+
                          "of @type=nrdp:Subcollection.")
+        kt = self._issue("4.1-4-2e", "_schema and @context fields recommended "+
+                         "for inclusion in component NERDm data file")
         for root, subdirs, files in os.walk(datadir):
             for f in files:
                 path = os.path.join(root[len(datadir):], f)
@@ -446,10 +513,19 @@ class NISTBagValidator(ValidatorBase):
                     continue
 
                 comm = None
-                ok = '@type' in data and "nrdp:DataFile" in data['@type']
+                ok = '@type' in data and \
+                     ("nrdp:DataFile" in data['@type'] or \
+                      "nrdp:ChecksumFile" in data['@type'])
                 if not ok:
                     comm = [path + ": " + str(data['@type'])]
                 out._err(ft, ok, comm)
+
+                comm = None
+                ok = ('_schema' in data or '$schema' in data) and \
+                     '@context' in data;
+                if not ok:
+                    comm = ["filepath: " +path]
+                out._rec(kt, ok, comm)
 
                 if self._validatemd:
                     flav = self._get_mdval_flavor(data)
@@ -502,7 +578,7 @@ class NISTBagValidator(ValidatorBase):
     def _check_comp_legal(self, nerdmf, path, res):
         vt = self._issue("4.1-4-2a", "A data file directory must " +
                          "contain a legal NERDm metadata file.")
-        pt = self._issue("4.1-4-2e", "A data component's NERDm data must have "+
+        pt = self._issue("4.1-4-2f", "A data component's NERDm data must have "+
                          "a correct filepath property")
         try:
             with open(nerdmf) as fd:

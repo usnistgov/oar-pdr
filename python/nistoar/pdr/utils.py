@@ -2,7 +2,7 @@
 Utility functions useful across the pdr package
 """
 from collections import OrderedDict, Mapping
-import hashlib, json, re
+import hashlib, json, re, shutil, os, time, subprocess
 
 from .exceptions import (NERDError, PODError, StateException)
 
@@ -119,7 +119,6 @@ def build_mime_type_map(filelist):
         update_mimetypes_from_file(out, file)
     return out
 
-
 def checksum_of(filepath):
     """
     return the checksum for the given file
@@ -133,3 +132,57 @@ def checksum_of(filepath):
             sum.update(buf)
     return sum.hexdigest()
 
+def measure_dir_size(dirpath):
+    """
+    return a pair of numbers representing, in order, the totaled size (in bytes)
+    of all files below the directory and the total number of files.  
+
+    Note that the byte count does not include the capacity taken up by directory
+    entries and thus is not an accurate measure of the space the directory takes
+    up on disk.
+
+    :param str dirpath:  the path to the directory of interest
+    :rtype:  list containing 2 ints
+    """
+    size = 0
+    count = 0
+    for root, subdirs, files in os.walk(dirpath):
+        count += len(files)
+        for f in files:
+            size += os.stat(os.path.join(root,f)).st_size
+    return [size, count]
+
+def rmtree_sys(rootdir):
+    """
+    an implementation of rmtree that is intended to work on NSF-mounted 
+    directories where shutil.rmtree can often fail.
+    """
+    if '*' in rootdir or '?' in rootdir:
+        raise ValueError("No wildcards allowed in rootdir")
+    if not os.path.exists(rootdir):
+        return
+    cmd = "rm -r ".split() + [rootdir]
+    subprocess.check_call(cmd)
+
+def rmtree_retry(rootdir, retries=1):
+    """
+    an implementation of rmtree that is intended to work on NSF-mounted 
+    directories where shutil.rmtree can often fail.
+    """
+    if not os.path.exists(rootdir):
+        return
+    if not os.path.isdir(rootdir):
+        os.remove(rootdir)
+        return
+    
+    for root,subdirs,files in os.walk(rootdir, topdown=False):
+        try:
+            shutil.rmtree(root)
+        except OSError as ex:
+            if retries <= 0:
+                raise
+            # wait a little for NFS to catch up
+            time.sleep(0.25)
+            rmtree(root, retries=retries-1)
+    
+rmtree = rmtree_retry

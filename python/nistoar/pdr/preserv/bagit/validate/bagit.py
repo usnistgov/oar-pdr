@@ -105,7 +105,8 @@ class BagItValidator(ValidatorBase):
             out._err(t, len(manifests) > 0)
             if t.failed():
                 return out
-        
+
+        delimre = re.compile(r'[ \t]+')
         for mfile in manifests:
             alg = manire.match(mfile).group(1)
             csfunc = None
@@ -119,7 +120,7 @@ class BagItValidator(ValidatorBase):
                 i = 0
                 for line in fd:
                     i += 1
-                    parts = line.split()
+                    parts = delimre.split(line.rstrip('\n'), 1)
                     if len(parts) != 2:
                         badlines.append(i)
                         continue
@@ -262,7 +263,7 @@ class BagItValidator(ValidatorBase):
         out = results
 
         badlines = []
-        fmtre = re.compile("^[\w\-]+\s*:\s*\S.*$")
+        fmtre = re.compile("^[\w\-]+\s*:(\s*\S.*)?$")
         cntre = re.compile("^\s+")
         i = 0
         with open(baginfof) as fd:

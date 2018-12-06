@@ -2,22 +2,52 @@
 #
 # makedist:  build the package's distributions
 #
-# This package only provides one distribution: pdr-nerdm
+# This script is designed to run without any arguments: this will build
+# all of the available distributions.  Restricting the build to specific
+# distributions can be done by listing the names of the desired distributions
+# on the command line.
+#
+# There are currently two distributions: pdr-publish, pdr-lps
+#
+# SYNOPSIS
+#    makedist.angular [OPTIONS] [DISTNAME ...]
+#
+# OPTIONS
+#    -l, --list               list the names of the supported distributions and
+#                             exit without building.
+#    --dist-dir=DIR           The output directory to write the distribution
+#                             products into.
+#    -d DIR, --source-dir=DIR  the directory containing the python source code
+#                             (default: .)
+#    -c DIR, --cache-dir=DIR  directory for holding intermediate or cache-able
+#                             products; if provided, the node_modules cache will
+#                             be located and used from here.  This can be shared
+#                             with other similar packages to avoid redundant 
+#                             re-building of nodejs dependency modules
+#    -v VER, --version=VER    assign VER as the VERSION for this product
+#    
 #
 set -e
 prog=`basename $0`
 execdir=`dirname $0`
 [ "$execdir" = "" -o "$execdir" = "." ] && execdir=$PWD
-PACKAGE_DIR=`(cd $execdir/.. > /dev/null 2>&1; pwd)`
-SOURCE_DIR=$PACKAGE_DIR
+execdir=`realpath $execdir`
+PACKAGE_DIR=`dirname $execdir`
+VERSION=
 
 # Update this list with the names of the individual component names
 # 
-DISTNAMES=(pdr)
+DISTNAMES="pdr-publish pdr-lps"
+angular_dists=":pdr-lps:"
+python_dists=":pdr-publish:"
 
 # handle command line options
 while [ "$1" != "" ]; do 
   case "$1" in
+    --list|-l)
+        echo "Available distributions: $DISTNAMES"
+        exit 0
+        ;;
     --dist-dir=*)
         DIST_DIR=`echo $1 | sed -e 's/[^=]*=//'`
         ;;
@@ -45,56 +75,53 @@ while [ "$1" != "" ]; do
         echo "$prog: unsupported option:" $1
         false
         ;;
-    pdr)
-        # assuming just one distribution
-        true
-        ;;
     *)
-        echo "${prog}: ${1}: unrecognized distribution name"
-        false
+        (echo :${DISTNAMES}: | sed -e 's/ /:/g' | grep -qs :${1}:) || {
+            echo "${prog}: ${1}: unrecognized distribution name"
+            echo "${prog}: recognized names:" $DISTNAMES
+            false
+        }
+        build_dist="$build_dist $1"
         ;;
   esac
   shift
 done
-
-true ${DIST_DIR:=$SOURCE_DIR/dist}
-BUILD_DIR=$SOURCE_DIR/dist
-mkdir -p $BUILD_DIR $DIST_DIR
+[ -n "$build_dist" ] || build_dist=$DISTNAMES
+echo '#' Building $build_dist
 
 # set the current version.  This will inject the version into the code, if 
 # needed.
 #
 set -x
 (cd oar-metadata; scripts/setversion.sh)
-scripts/setversion.sh
+scripts/setversion.sh $VERSION
+set +x
 [ -n "$PACKAGE_NAME" ] || PACKAGE_NAME=`cat VERSION | awk '{print $1}'`
 version=`cat VERSION | awk '{print $2}'`
-vers4fn=`echo $version | sed -re 's#[/\s]+#_#g'`
+vers4fn=`echo $version | sed -re 's#[/ ]+#_#g'`
 
-# build the components
-installdir=$BUILD_DIR/pdr
-set -x
-mkdir -p $installdir
-scripts/install.sh --install-dir=$installdir
+build_py=
+build_ang=
+for dist in $build_dist; do
+    if (echo $angular_dists | grep -qs :${dist}:); then
+        build_ang="$build_ang $dist"
+    else
+        build_py="$build_py $dist"
+    fi
+done
 
-# ENTER COMMANDS for creating the dependency file(s)
-#
-# A dependency file should be called DISTNAME-${version}_dep.json
-mkdir -p $DIST_DIR
-if [ -n "$PYTHONPATH" ]; then
-    export PYTHONPATH=$installdir/lib/python:$PYTHONPATH
-else
-    export PYTHONPATH=$installdir/lib/python
-fi
-$execdir/record_deps.py ${DISTNAMES[0]} $version \
-                        > $DIST_DIR/${DISTNAMES[0]}-${vers4fn}_dep.json
-
-
-# Bundle the distribution
-(cd $BUILD_DIR && zip -qr $DIST_DIR/${DISTNAMES[0]}-${vers4fn}.zip pdr)
-
-set +x
-echo Created distribution in dist directory: 
-echo ${DISTNAMES[0]}-${vers4fn}.zip
-
-
+args=
+[ -z "$CACHE_DIR" ] || args="$args --cache-dir=`realpath $CACHE_DIR`"
+[ -z "$DIST_DIR" ] || args="$args --dist-dir=`realpath $DIST_DIR`"
+[ -z "$build_ang" ] || {
+    sargs=
+    [ -z "$SOURCE_DIR" ] || sargs="--source-dir=$SOURCE_DIR/angular"
+    echo '+' makedist.angular $sargs $args $build_ang
+    $execdir/makedist.angular $sargs $args $build_ang
+}
+[ -z "$build_py" ] || {
+    sargs=
+    [ -z "$SOURCE_DIR" ] || sargs="--source-dir=$SOURCE_DIR/python"
+    echo '+' makedist.python $sargs $args $build_py
+    $execdir/makedist.python $sargs $args $build_py
+}

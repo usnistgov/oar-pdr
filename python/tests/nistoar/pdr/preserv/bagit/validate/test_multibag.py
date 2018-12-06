@@ -31,10 +31,10 @@ class TestMultibagValidator(test.TestCase):
         shutil.copytree(bagdir, self.bagdir)
         
         self.bag = bag.NISTBag(self.bagdir)
-        mbtagf = os.path.join(self.bag.multibag_dir, "group-members.txt")
+        mbtagf = os.path.join(self.bag.multibag_dir, "member-bags.tsv")
         with open(mbtagf, 'w') as fd:
             print(self.bag.name, file=fd)
-        mbtagf = os.path.join(self.bag.multibag_dir, "group-directory.txt")
+        mbtagf = os.path.join(self.bag.multibag_dir, "file-lookup.tsv")
         nmre = re.compile(r'samplebag')
         with open(mbtagf) as fd:
             lines = fd.readlines()
@@ -49,7 +49,7 @@ class TestMultibagValidator(test.TestCase):
 
     def test_all_test_methods(self):
         expect = ["test_"+m for m in
-          "version reference tag_directory head_version head_deprecates baginfo_recs group_members group_directory".split()]
+          "version reference tag_directory head_version head_deprecates baginfo_recs member_bags file_lookup".split()]
         expect.sort()
         meths = self.valid8.all_test_methods()
         meths.sort()
@@ -270,72 +270,71 @@ class TestMultibagValidator(test.TestCase):
                          "\n  ".join([str(e) for e in errs.failed()]) + "\n]")
         self.assertTrue(has_error(errs, "2-2"))
 
-    def test_test_group_members(self):
-        errs = self.valid8.test_group_members(self.bag)
+    def test_test_member_bags(self):
+        errs = self.valid8.test_member_bags(self.bag)
         self.assertEqual(errs.failed(), [],
                      "False Positives: "+ str([str(e) for e in errs.failed()]))
 
-        gmf = os.path.join(self.bag.multibag_dir, "group-members.txt")
-        with open(gmf, 'a') as fd:
+        mbf = os.path.join(self.bag.multibag_dir, "member-bags.tsv")
+        with open(mbf, 'a') as fd:
             print(self.bag.name, file=fd)
+            print("goober_bag\tbag.zip", file=fd)
+            print("goober_ bag\tbag.zip", file=fd)
             print("goober_bag bag.zip", file=fd)
             print("goober_bag bag.zip", file=fd)
-            print("goober_bag bag.zip", file=fd)
-            print("goober_bag bag.zip", file=fd)
-            print("gurn_bag bag.zip foobar", file=fd)
+            print("gurn_bag\tbag.zip\tfoobar", file=fd)
 
-        errs = self.valid8.test_group_members(self.bag)
-        self.assertEqual(len(errs.failed()), 4, "Unexpected # of errors: [\n  " +
+        errs = self.valid8.test_member_bags(self.bag)
+        self.assertEqual(len(errs.failed()), 3, "Unexpected # of errors: [\n  " +
                          "\n  ".join([str(e) for e in errs.failed()]) + "\n]")
-        self.assertTrue(has_error(errs, "3.1-1"))
         self.assertTrue(has_error(errs, "3.1-2"))
         self.assertTrue(has_error(errs, "3.1-4"))
         self.assertTrue(has_error(errs, "3.1-5"))
 
-        os.remove(gmf)
-        errs = self.valid8.test_group_members(self.bag)
+        os.remove(mbf)
+        errs = self.valid8.test_member_bags(self.bag)
         self.assertEqual(len(errs.failed()), 1, "Unexpected # of errors: [\n  " +
                          "\n  ".join([str(e) for e in errs.failed()]) + "\n]")
         self.assertTrue(has_error(errs, "3.0-1"))
         
-        with open(gmf, 'w') as fd:
+        with open(mbf, 'w') as fd:
             print("goober_bag", file=fd)
-        errs = self.valid8.test_group_members(self.bag)
+        errs = self.valid8.test_member_bags(self.bag)
         self.assertEqual(len(errs.failed()), 2, "Unexpected # of errors: [\n  " +
                          "\n  ".join([str(e) for e in errs.failed()]) + "\n]")
         self.assertTrue(has_error(errs, "3.1-3"))
         self.assertTrue(has_error(errs, "3.1-4"))
 
-    def test_test_group_directory(self):
-        errs = self.valid8.test_group_directory(self.bag)
+    def test_test_file_lookup(self):
+        errs = self.valid8.test_file_lookup(self.bag)
         self.assertEqual(errs.failed(), [],
                      "False Positives: "+ str([str(e) for e in errs.failed()]))
 
-        gdf = os.path.join(self.bag.multibag_dir, "group-directory.txt")
-        with open(gdf, 'a') as fd:
-            print("data/goober.dat {0}".format(self.bag.name), file=fd)
-            print("data/goober.dat otherbag", file=fd)
+        flf = os.path.join(self.bag.multibag_dir, "file-lookup.tsv")
+        with open(flf, 'a') as fd:
+            print("data/goober.dat\t{0}".format(self.bag.name), file=fd)
+            print("data/goober.dat\totherbag", file=fd)
             print("gurn.json", file=fd)
-            print("gurn.json booger bonnet", file=fd)
-            print("data/trial1.json otherbag", file=fd)
+            print("gurn.json\tbooger\tbonnet", file=fd)
+            print("data/trial1.json\totherbag", file=fd)
 
-        errs = self.valid8.test_group_directory(self.bag)
+        errs = self.valid8.test_file_lookup(self.bag)
         self.assertEqual(len(errs.failed()), 3, "Unexpected # of errors: [\n  " +
                          "\n  ".join([str(e) for e in errs.failed()]) + "\n]")
         self.assertTrue(has_error(errs, "3.2-1"))
         self.assertTrue(has_error(errs, "3.2-2"))
         self.assertTrue(has_error(errs, "3.2-3"))
 
-        with open(gdf, 'w') as fd:
-            print("data/trial1.json {0}".format(self.bag.name), file=fd)
+        with open(flf, 'w') as fd:
+            print("data/trial1.json\t{0}".format(self.bag.name), file=fd)
 
-        errs = self.valid8.test_group_directory(self.bag)
+        errs = self.valid8.test_file_lookup(self.bag)
         self.assertEqual(len(errs.failed()), 1, "Unexpected # of errors: [\n  " +
                          "\n  ".join([str(e) for e in errs.failed()]) + "\n]")
         self.assertTrue(has_error(errs, "3.2-4"))
 
-        os.remove(gdf)
-        errs = self.valid8.test_group_directory(self.bag)
+        os.remove(flf)
+        errs = self.valid8.test_file_lookup(self.bag)
         self.assertEqual(len(errs.failed()), 1, "Unexpected # of errors: [\n  " +
                          "\n  ".join([str(e) for e in errs.failed()]) + "\n]")
         self.assertTrue(has_error(errs, "3.0-2"))
@@ -346,15 +345,15 @@ class TestMultibagValidator(test.TestCase):
                        "False Positives: "+ str([str(e) for e in errs.failed()]))
 
         # Mess up bag to see if tests are getting run
-        os.remove(os.path.join(self.bag.multibag_dir, "group-members.txt"))
+        os.remove(os.path.join(self.bag.multibag_dir, "member-bags.tsv"))
 
         bif = os.path.join(self.bag.dir, "bag-info.txt")
         with open(bif, 'a') as fd:
             print("Multibag-Head-Version: 1.2", file=fd)
 
-        bif = os.path.join(self.bag.multibag_dir, "group-directory.txt")
+        bif = os.path.join(self.bag.multibag_dir, "file-lookup.tsv")
         with open(bif, 'a') as fd:
-            print("data/trial1.json anotherbag", file=fd)
+            print("data/trial1.json\tanotherbag", file=fd)
 
         errs = self.valid8.validate(self.bag)
         self.assertEqual(len(errs.failed()), 3, "Unexpected # of errors: [\n  " +

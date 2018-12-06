@@ -1,4 +1,10 @@
-import os, sys, pdb, shutil, logging, json
+# These unit tests test the nistoar.pdr.publish.mdserv.serv module.  These tests
+# do not include support for accessing metadata that represent an update to a 
+# previously published dataset (via use of the UpdatePrepService class).  
+# Because testing support for updates require simulated RMM and distribution 
+# services to be running, they have been seperated out into test_serv_update.py.
+#
+import os, sys, pdb, shutil, logging, json, time, signal
 from cStringIO import StringIO
 from io import BytesIO
 import warnings as warn
@@ -12,6 +18,7 @@ from nistoar.pdr import def_jq_libdir
 import nistoar.pdr.preserv.bagit.builder as bldr
 import nistoar.pdr.publish.mdserv.serv as serv
 import nistoar.pdr.exceptions as exceptions
+from nistoar.pdr.utils import read_nerd, write_json
 
 testdir = os.path.dirname(os.path.abspath(__file__))
 testdatadir = os.path.join(testdir, 'data')
@@ -22,6 +29,10 @@ jqlibdir = def_jq_libdir
 schemadir = os.path.join(os.path.dirname(jqlibdir), "model")
 if not os.path.exists(schemadir) and os.environ.get('OAR_HOME'):
     schemadir = os.path.join(os.environ['OAR_HOME'], "etc", "schemas")
+basedir = os.path.dirname(os.path.dirname(os.path.dirname(
+                                                 os.path.dirname(pdrmoddir))))
+distarchdir = os.path.join(pdrmoddir, "distrib", "data")
+descarchdir = os.path.join(pdrmoddir, "describe", "data")
 
 loghdlr = None
 rootlog = None
@@ -43,24 +54,42 @@ def tearDownModule():
         loghdlr = None
     rmtmpdir()
 
+def to_dict(odict):
+    out = dict(odict)
+    for prop in out:
+        if isinstance(out[prop], OrderedDict):
+            out[prop] = to_dict(out[prop])
+        if isinstance(out[prop], (list, tuple)):
+            for i in range(len(out[prop])):
+                if isinstance(out[prop][i], OrderedDict):
+                    out[prop][i] = to_dict(out[prop][i])
+    return out
+
 class TestPrePubMetadataService(test.TestCase):
 
     testsip = os.path.join(datadir, "midassip")
     midasid = '3A1EE2F169DD3B8CE0531A570681DB5D1491'
 
+    def assertEqualOD(self, od1, od2, message=None):
+        d1 = to_dict(od1)
+        d2 = to_dict(od2)
+        self.assertEqual(d1, od2, message)
+    
     def setUp(self):
         self.tf = Tempfiles()
         self.workdir = self.tf.mkdir("mdserv")
         self.bagparent = self.workdir
         self.upldir = os.path.join(self.testsip, "upload")
         self.revdir = os.path.join(self.testsip, "review")
-        config = {
+        self.pubcache = self.tf.mkdir("headcache")
+        
+        self.config = {
             'working_dir':     self.workdir,
             'review_dir':      self.revdir,
             'upload_dir':      self.upldir,
             'id_registry_dir': self.workdir
         }
-        self.srv = serv.PrePubMetadataService(config)
+        self.srv = serv.PrePubMetadataService(self.config)
         self.bagdir = os.path.join(self.bagparent, self.midasid)
 
     def tearDown(self):
@@ -73,6 +102,8 @@ class TestPrePubMetadataService(test.TestCase):
         self.assertEquals(self.srv.reviewdir, self.revdir)
         self.assertEquals(os.path.dirname(self.srv._minter.registry.store),
                           self.workdir)
+
+        self.assertIsNone(self.srv.prepsvc)  # update support turned off
 
     def test_prepare_metadata_bag(self):
         metadir = os.path.join(self.bagdir, 'metadata')
@@ -112,11 +143,11 @@ class TestPrePubMetadataService(test.TestCase):
         self.assertIn("components", data)
         self.assertIn("inventory", data)
 
-        self.assertEqual(len(data['components']), 6)
+        self.assertEqual(len(data['components']), 8)
         self.assertEqual(data['inventory'][0]['forCollection'], "")
         self.assertEqual(len(data['inventory']), 2)
-        self.assertEqual(data['inventory'][0]['childCount'], 5)
-        self.assertEqual(data['inventory'][0]['descCount'], 6)
+        self.assertEqual(data['inventory'][0]['childCount'], 6)
+        self.assertEqual(data['inventory'][0]['descCount'], 8)
 
         comps = data['components']
         dlcount = 0
@@ -127,7 +158,7 @@ class TestPrePubMetadataService(test.TestCase):
                     continue
                 self.assertTrue(comp['downloadURL'].startswith('https://data.nist.gov/od/ds/3A1EE2F169DD3B8CE0531A570681DB5D1491/'),
                                 "{0} does not start with https://data.nist.gov/od/ds/3A1EE2F169DD3B8CE0531A570681DB5D1491/".format(comp['downloadURL']))
-        self.assertEquals(dlcount, 4)
+        self.assertEquals(dlcount, 6)
         
     def test_make_nerdm_record_cvt_dlurls(self):
         metadir = os.path.join(self.bagdir, 'metadata')
@@ -145,11 +176,11 @@ class TestPrePubMetadataService(test.TestCase):
         self.assertIn("components", data)
         self.assertIn("inventory", data)
 
-        self.assertEqual(len(data['components']), 6)
+        self.assertEqual(len(data['components']), 8)
         self.assertEqual(data['inventory'][0]['forCollection'], "")
         self.assertEqual(len(data['inventory']), 2)
-        self.assertEqual(data['inventory'][0]['childCount'], 5)
-        self.assertEqual(data['inventory'][0]['descCount'], 6)
+        self.assertEqual(data['inventory'][0]['childCount'], 6)
+        self.assertEqual(data['inventory'][0]['descCount'], 8)
         
         comps = data['components']
         dlcount = 0
@@ -160,7 +191,7 @@ class TestPrePubMetadataService(test.TestCase):
                     continue
                 self.assertTrue(comp['downloadURL'].startswith('https://mdserv.nist.gov/'+self.midasid+'/'),
                                 "Bad conversion of URL: "+comp['downloadURL'])
-        self.assertEquals(dlcount, 4)
+        self.assertEquals(dlcount, 6)
 
         datafiles = { "trial1.json": "blah/blah/trial1.json" }
         data = self.srv.make_nerdm_record(bagdir, datafiles, 
@@ -177,8 +208,51 @@ class TestPrePubMetadataService(test.TestCase):
                 else:
                     self.assertFalse(comp['downloadURL'].startswith('https://mdserv.nist.gov/'+self.midasid+'/'),
                                 "Bad conversion of URL: "+comp['downloadURL'])
-        self.assertEquals(dlcount, 4)
+        self.assertEquals(dlcount, 6)
 
+    def test_make_nerdm_record_withannots(self):
+        metadir = os.path.join(self.bagdir, 'metadata')
+        self.assertFalse(os.path.exists(self.bagdir))
+
+        bagger = self.srv.prepare_metadata_bag(self.midasid)
+        bagdir = bagger.bagdir
+        self.assertEqual(bagdir, self.bagdir)
+        self.assertTrue(os.path.exists(bagdir))
+
+        data = self.srv.make_nerdm_record(bagdir)
+        self.assertNotIn("authors", data)
+        trial1 = [c for c in data['components']
+                    if 'filepath' in c and c['filepath'] == "trial1.json"][0]
+        self.assertNotIn('previewURL', trial1)
+        ediid = data['ediid']
+        
+        # copy in some annotation files
+        otherbag = os.path.join(datadir, "metadatabag")
+        annotpath = os.path.join("metadata", "annot.json")
+        self.assertTrue(os.path.exists(os.path.join(otherbag, annotpath)))
+        shutil.copyfile(os.path.join(otherbag, annotpath),
+                        os.path.join(self.bagdir, annotpath))
+        self.assertTrue(os.path.exists(os.path.join(self.bagdir, annotpath)))
+        annotpath = os.path.join("metadata", "trial1.json", "annot.json")
+        self.assertTrue(os.path.exists(os.path.join(otherbag, annotpath)))
+        shutil.copyfile(os.path.join(otherbag, annotpath),
+                        os.path.join(self.bagdir, annotpath))
+        self.assertTrue(os.path.exists(os.path.join(self.bagdir, annotpath)))
+
+        data = self.srv.make_nerdm_record(bagdir)
+        
+        self.assertIn("ediid", data)
+        self.assertIn("components", data)
+        self.assertIn("inventory", data)
+        self.assertIn("authors", data)
+        self.assertEqual(data['ediid'], ediid)
+        self.assertEqual(data['foo'], "bar")
+
+        self.assertEqual(len(data['components']), 8)
+        trial1 = [c for c in data['components']
+                    if 'filepath' in c and c['filepath'] == "trial1.json"][0]
+        self.assertIn('previewURL', trial1)
+        self.assertTrue(trial1['previewURL'].endswith("trial1.json/preview"))
         
         
     def test_resolve_id(self):
@@ -186,6 +260,12 @@ class TestPrePubMetadataService(test.TestCase):
         self.assertFalse(os.path.exists(self.bagdir))
 
         mdata = self.srv.resolve_id(self.midasid)
+        self.assertIn("ediid", mdata)
+
+        # just for testing purposes, a pdr_status property will appear
+        # in the record if this dataset is an update to a previous
+        # release.  
+        self.assertNotIn("pdr_status", mdata)  
 
         loader = ejs.SchemaLoader.from_directory(schemadir)
         val = ejs.ExtValidator(loader, ejsprefix='_')
@@ -193,9 +273,9 @@ class TestPrePubMetadataService(test.TestCase):
 
         # resolve_id() needs to be indepodent
         data = self.srv.resolve_id(self.midasid)
-        self.assertEqual(data, mdata)
+        self.assertEqualOD(data, mdata)
 
-        with self.assertRaises(serv.SIPDirectoryNotFound):
+        with self.assertRaises(serv.IDNotFound):
             self.srv.resolve_id("asldkfjsdalfk")
 
     def test_locate_data_file(self):
@@ -216,6 +296,7 @@ class TestPrePubMetadataService(test.TestCase):
         self.assertEquals(len(loc), 2)
         self.assertIsNone(loc[0])
         self.assertIsNone(loc[1])
+
 
         
         

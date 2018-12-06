@@ -1,0 +1,38 @@
+<style id="antiClickjack">
+  body {
+    display: none !important;
+  }
+</style>
+<script type="text/javascript">
+  if (self === top) {
+    var antiClickjack = document.getElementById("antiClickjack");
+    antiClickjack.parentNode.removeChild(antiClickjack);
+  } else {
+    top.location = self.location;
+  }
+</script>
+
+<div [ngClass]="{'layout-wrapper':true,'layout-compact':layoutCompact}">
+<div [ngClass]="{'layout-container':false,'menu-layout-static':(layoutMode=='static'||layoutMode=='horizontal'),
+              'menu-layout-overlay':(layoutMode=='overlay'),'menu-layout-horizontal':(layoutMode=='horizontal')}">
+  <div class="topbar clearfix header-background">
+    <div class="header-div">
+      <a href="/" title="National Institute of Standards and Technology" class="header__logo-link" rel="home">
+        <img class="Fleft" srcset="./assets/images/nist-pdr-rev.png" alt="National Institute of Standards and Technology"
+          title="National Institute of Standards and Technology" >
+      </a>
+      <!--<img class="Fleft" srcset="./assets/images/beta-pdr.png"> -->
+      <span class="badge" style="background-color:#8f3919">1.1.0-beta</span>
+      <span *ngIf="checkinternal()" class="badge" style="background-color:darkcyan">Review Version</span>
+      <div align="right" class="header-links">
+        <a href="/pdr/about" target="_blank"><span class="textlinks"><b>About</b></span></a> | 
+        <a href="{{ SDPAPI }}" target="_blank"><span class="textlinks"><b>Search</b></span></a>
+          <!-- | <a href="/datacart" target="_blank" (click) = "updateCartStatus()" ><span class="textlinks"><b>Cart </b></span>
+                <i class="faa faa-shopping-cart faa-2x icon-white" style="color: #fff;"></i>
+                <span class="badge badge-notify" >{{cartLength}}</span></a> -->
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+  
