@@ -6,6 +6,13 @@ import { OverlayPanel} from 'primeng/overlaypanel';
 import { stringify } from '@angular/compiler/src/util';
 import { DownloadService } from '../../shared/download-service/download-service.service';
 import { SelectItem, DropdownModule, ConfirmationService,Message } from 'primeng/primeng';
+import { DownloadData } from '../../datacart/downloadData';
+import { CommonVarService } from '../../shared/common-var';
+import { environment } from '../../../environments/environment';
+import { HttpClientModule, HttpClient, HttpHeaders, HttpRequest, HttpEventType, HttpResponse, HttpEvent } from '@angular/common/http'; 
+
+
+declare var saveAs: any;
 
 @Component({
   moduleId: module.id,
@@ -44,6 +51,14 @@ export class DescriptionComponent {
     cartMap: any[];
     allSelected: boolean = false;
     allDownloaded: boolean = false;
+    ediid:any;
+    displayDownloadFile: boolean = false;
+    downloadFileName: any;
+    downloadStatus: any = null;
+    totalFiles: any;
+    downloadProgress: number = 0;
+
+    private distApi : string = environment.DISTAPI;
 
     /* Function to Return Keys object properties */
     keys() : Array<string> {
@@ -53,10 +68,81 @@ export class DescriptionComponent {
     constructor(private cartService: CartService,
         private cdr: ChangeDetectorRef,
         private downloadService: DownloadService,
+        private commonVarService:CommonVarService,
+        private http: HttpClient,
         private confirmationService: ConfirmationService) {
             this.cartService.watchAddAllFilesCart().subscribe(value => {
             this.addAllFileSpinner = value;
         });
+    }
+    
+    ngOnInit(){
+        // this.cartService.clearTheCart();
+        // this.cdr.detectChanges();
+        if(this.files.length != 0)
+            this.files  =<TreeNode[]>this.files[0].data;
+        this.cols = [
+            { field: 'name', header: 'Name', width: '40%' },
+            { field: 'description', header: 'Description', width: '22%' },
+            { field: 'mediatype', header: 'MediaType', width: '10%' },
+            { field: 'size', header: 'Size', width: '8%' },
+            { field: 'download', header: 'Download', width: '10%' },
+            { field: 'cart', header: 'Cart', width: '10%' },];
+    
+        this.fileNode = {"data":{ "name":"", "size":"", "mediatype":"", "description":"", "filetype":"" }};
+
+        this.cartMap = this.cartService.getCart();
+        this.updateDownloadStatusFromCart();
+
+        this.updateCartStatus(this.files);
+        this.updateDownloadStatus(this.files);
+        this.ediid = this.commonVarService.getEdiid();
+
+        this.totalFiles = 0;
+        this.getTotalFiles(this.files);
+
+        console.log("this.files:");
+        console.log(this.files);
+    }
+
+    /**
+     * Function to sync the download status from data cart.
+     */
+    updateDownloadStatusFromCart(){
+        for (let key in this.cartMap) {
+            let value = this.cartMap[key];
+            if(value.data.downloadedStatus != undefined){
+                this.setFilesDownloadStatus(this.files, value.data.resId, value.data.downloadedStatus);
+            }
+        }
+    }
+
+    /**
+     * Function to get total number of files.
+     */
+    getTotalFiles(files){
+        for (let comp of files) {
+            if(comp.children.length > 0){
+                this.getTotalFiles(comp.children);
+            }else{
+                this.totalFiles = this.totalFiles + 1;
+            }
+        }        
+    }
+
+    /**
+     * Function to set files download status.
+     */
+    setFilesDownloadStatus(files, resId, downloadedStatus){
+        for (let comp of files) {
+            if(comp.children.length > 0){
+                this.setFilesDownloadStatus(comp.children, resId, downloadedStatus);
+            }else{
+                if(comp.data.resId == resId){
+                    comp.data.downloadedStatus = downloadedStatus;
+                }
+            }
+        }
     }
 
     /**
@@ -159,25 +245,6 @@ export class DescriptionComponent {
             overlaypanel.show(event);
         },100);
     }
-    
-    ngOnInit(){
-        // this.cartService.clearTheCart();
-        // this.cdr.detectChanges();
-        if(this.files.length != 0)
-            this.files  =<TreeNode[]>this.files[0].data;
-        this.cols = [
-            { field: 'name', header: 'Name', width: '50%' },
-            { field: 'mediatype', header: 'MediaType', width: '15%' },
-            { field: 'size', header: 'Size', width: '12%' },
-            { field: 'download', header: 'Download', width: '12%' },
-            { field: 'cart', header: 'Cart', width: '10%' },];
-    
-        this.fileNode = {"data":{ "name":"", "size":"", "mediatype":"", "description":"", "filetype":"" }};
-
-        this.cartMap = this.cartService.getCart();
-        this.updateCartStatus(this.files);
-        this.updateDownloadStatus(this.files);
-    }
  
     ngOnChanges(){
        this.checkAccesspages();
@@ -188,7 +255,7 @@ export class DescriptionComponent {
             if(comp.children.length > 0){
                 this.updateCartStatus(comp.children);
             }else{
-                comp.data.isSelected = this.selected(comp.data.resId);
+                comp.data.isSelected = this.isInDataCart(comp.data.resId);
             }
         }   
         this.checkIfAllSelected(this.files);     
@@ -263,7 +330,7 @@ export class DescriptionComponent {
                 'downloadedStatus': null };
 
         this.cartService.addDataToCart(data);
-        rowData.isSelected = this.selected(rowData.resId);
+        rowData.isSelected = this.isInDataCart(rowData.resId);
         this.checkIfAllSelected(this.files);
 
         setTimeout(()=> {
@@ -297,7 +364,10 @@ export class DescriptionComponent {
         }   
     }
 
-    selected(resId:string){
+    /**
+    * Function to check if resId is in the data cart.
+    **/ 
+    isInDataCart(resId:string){
         this.cartMap = this.cartService.getCart();
 
         for (let key in this.cartMap) {
@@ -309,10 +379,13 @@ export class DescriptionComponent {
         return false;
     }
 
+    /**
+    * Function to remove a resId from the data cart.
+    **/ 
     removeCart(rowData:any, resId: string){
         this.cartService.updateFileSpinnerStatus(true);
         this.cartService.removeResId(resId);
-        rowData.isSelected = this.selected(resId);
+        rowData.isSelected = this.isInDataCart(resId);
         this.checkIfAllSelected(this.files);
 
         setTimeout(()=> {
@@ -320,33 +393,140 @@ export class DescriptionComponent {
         }, 3000);
     }
 
-    setDownloadStatus(rowData:any){
-        rowData.downloadedStatus = 'downloaded';
-    }
-
+    /**
+    * Function to download a single file based on download url.
+    **/ 
     downloadFile(rowData:any){
         let filename = decodeURI(rowData.downloadUrl).replace(/^.*[\\\/]/, '');
         rowData.downloadedStatus = 'downloading';
-        this.cartService.updateFileSpinnerStatus(true);
+        rowData.downloadProgress = 0;
 
-        this.downloadService.getFile(rowData.downloadUrl).subscribe(blob => {
-            this.downloadService.saveToFileSystem(blob, filename);
-            rowData.downloadedStatus = 'downloaded';
-            this.cartService.updateFileSpinnerStatus(false);
-            this.updateDownloadStatus(this.files);
-            },
-            error => console.log('Error downloading the file.')
-        )
+        const req = new HttpRequest('GET', rowData.downloadUrl, {
+            reportProgress: true, responseType: 'blob'
+          });
+
+        rowData.downloadInstance = this.http.request(req).subscribe(event => {
+            switch (event.type) {
+                case HttpEventType.Response:
+                    rowData.downloadedStatus = 'downloaded';
+                    this.downloadService.saveToFileSystem(event.body, filename);
+                    console.log('downloaded.');
+                    break;
+                case HttpEventType.DownloadProgress:
+                    rowData.downloadProgress = Math.round(100*event.loaded / event.total);
+                    break;
+            }
+        });
+
+        // this.cartService.updateFileSpinnerStatus(true);
+
+        // this.downloadService.getFile(rowData.downloadUrl, '').subscribe(blob => {
+        //     this.downloadService.saveToFileSystem(blob, filename);
+        //     rowData.downloadedStatus = 'downloaded';
+        //     this.cartService.updateCartItemDownloadStatus(rowData.resId,'downloaded');
+        //     this.cartService.updateFileSpinnerStatus(false);
+        //     this.updateDownloadStatus(this.files);
+        //     },
+        //     error => console.log('Error downloading the file.')
+        // )
     }
 
-    downloadAllFile(files:any){
+    cancelDownload(rowData:any){
+        rowData.downloadInstance.unsubscribe();
+        rowData.downloadInstance = null;
+        rowData.downloadProgress = 0;
+        rowData.downloadStatus = null;
+        rowData.downloadedStatus = null;
+    }
+
+    /**
+    * Function to download all files based on download url.
+    **/ 
+    downloadAllFilesFromUrl(files:any){
         for (let comp of files) {
             if(comp.children.length > 0){
-                this.downloadAllFile(comp.children);
+                this.downloadAllFilesFromUrl(comp.children);
             }else{
                 if(comp.data.downloadUrl){
                     this.downloadFile(comp.data);
                 }
+            }
+        }   
+    }
+
+
+    downloadInstance: any;
+    /**
+    * Function to download all files from API call.
+    **/ 
+    downloadAllFilesFromAPI(){
+        let existItem: any;
+        let downloadData: DownloadData[] = [];
+
+        for (let selData of this.files) {
+            if (selData.data['resFilePath'] != null && selData.data['resFilePath'] != undefined) {
+                if (selData.data['resFilePath'].split(".").length > 1) {
+                    existItem = downloadData.filter(item => item.filePath === this.ediid+selData.data['resFilePath'] 
+                        && item.downloadUrl === selData.data['downloadURL']);
+    
+                    if (existItem.length == 0) {
+                        downloadData.push({"filePath":this.ediid+selData.data['resFilePath'], 'downloadUrl':selData.data['downloadURL']});
+                    }
+                }
+            }
+        }       
+
+        var randomnumber = Math.floor(Math.random() * (this.commonVarService.getRandomMaximum() - this.commonVarService.getRandomMinimum() + 1)) + this.commonVarService.getRandomMinimum();
+
+        this.downloadFileName = "download" + randomnumber + ".zip";
+        this.displayDownloadFile = true;
+        this.downloadStatus = 'downloading';
+        
+        // this.downloadService.postFile(this.distApi + "downloadall", JSON.stringify(downloadData)).subscribe(blob => {
+        //     this.downloadService.saveToFileSystem(blob, this.downloadFileName);
+        //     console.log('All downloaded.');
+        //     this.downloadStatus = 'downloaded';
+        //     this.setAllDownloaded(this.files);
+        //     this.allDownloaded = true;
+        // });
+
+        //https://s3.amazonaws.com/nist-midas/1894/data.zip
+        //https://s3.amazonaws.com/nist-midas/1858/20170213_PowderPlate1_SingleLine.zip
+
+        const req = new HttpRequest('GET', 'https://s3.amazonaws.com/nist-midas/1858/RawCameraData.zip', {
+            reportProgress: true, responseType: 'blob'
+          });
+
+        this.downloadInstance = this.http.request(req).subscribe(event => {
+            switch (event.type) {
+                case HttpEventType.Response:
+                    this.downloadStatus = 'downloaded';
+                    this.downloadProgress = 0;
+                    this.downloadService.saveToFileSystem(event.body, this.downloadFileName);
+                    break;
+                case HttpEventType.DownloadProgress:
+                    this.downloadProgress = Math.round(100*event.loaded / event.total);
+                    break;
+            }
+        });
+    }
+
+    cancelDownloadAll(){
+        this.downloadInstance.unsubscribe();
+        this.downloadInstance = null;
+        this.downloadProgress = 0;
+        this.downloadStatus = null;
+        this.displayDownloadFile = false;
+    }
+
+    setAllDownloaded(files:any){
+        for (let comp of files) {
+            if(comp.children.length > 0){
+                this.setAllDownloaded(comp.children);
+            }else{
+                comp.data.downloadedStatus = 'downloaded';
+                this.cartService.updateCartItemDownloadStatus(comp.data.resId,'downloaded');
+                this.cartService.updateFileSpinnerStatus(false);
             }
         }   
     }
@@ -357,7 +537,8 @@ export class DescriptionComponent {
           header: header,
           key: key,
           accept: () => {
-            this.downloadAllFile(this.files);
+            this.downloadStatus = null;
+            this.downloadAllFilesFromAPI();
           },
           reject: () => {
           }
@@ -366,5 +547,11 @@ export class DescriptionComponent {
 
     resetDownloadStatus(rowData){
         rowData.downloadedStatus = null;
+        rowData.downloadProgress = 0;
+        this.cartService.updateCartItemDownloadStatus(rowData.resId,null);
+    }
+
+    isFile(rowData){
+        return rowData.name.match(/\./g) == null? false : true; 
     }
 }

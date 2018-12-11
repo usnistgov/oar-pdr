@@ -1,6 +1,6 @@
 import {Component, OnInit, OnDestroy, AfterViewInit, ElementRef, ViewChildren, Input} from '@angular/core';
 //import {Headers, RequestOptions, Response, ResponseContentType, URLSearchParams} from '@angular/common/http';
-import { HttpClientModule, HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClientModule, HttpClient, HttpParams, HttpRequest, HttpEventType } from '@angular/common/http';
 import { Http, HttpModule } from '@angular/http';
 import 'rxjs/add/operator/map';
 import { Subscription } from 'rxjs/Subscription';
@@ -17,6 +17,7 @@ import * as __ from 'underscore';
 import { environment } from '../../environments/environment';
 import { DownloadData } from './downloadData';
 import { CommonVarService } from '../shared/common-var'
+import { DownloadService } from '../shared/download-service/download-service.service';
 
 declare var Ultima: any;
 declare var saveAs: any;
@@ -77,6 +78,10 @@ export class DatacartComponent implements OnInit, OnDestroy {
   selectedFileCount: number = 0;
   selectedParentIndex:number = 0;
   ediid:any;
+  downloadInstance: any;
+  downloadStatus: any;
+  downloadProgress: any;
+  displayDownloadFile: boolean = true;
 
   private distApi : string = environment.DISTAPI;
   //private distApi:string = "http://localhost:8083/oar-dist-service";
@@ -88,6 +93,7 @@ export class DatacartComponent implements OnInit, OnDestroy {
    */
   constructor(private http: HttpClient, 
     private cartService: CartService,
+    private downloadService: DownloadService,
     private commonVarService:CommonVarService) {
     this.getDataCartList();
     this.display = true;
@@ -162,60 +168,118 @@ export class DatacartComponent implements OnInit, OnDestroy {
         }
     }
 
-    for (let selData of this.selectedData) {
-      if (selData.data['filePath'] != null) {
-        if (selData.data['filePath'].split(".").length > 1) {
-          //folderName = selData.data['resId'].split("/")[2] + "-" + selData.data['resTitle'].substring(0, 20);
-          params = params.append('folderName', folderName);
-          params = params.append('downloadURL', selData.data['downloadURL']);
-          params = params.append('fileName', selData.data['resId'] + selData.data['fileName']);
-          params = params.append('filePath', selData.data['filePath']);
-          params = params.append('resFilePath', selData.data['resFilePath']);
-          this.cartService.updateCartItemDownloadStatus(selData.data['resId'],true);
-        }
-      }
-    }
+    // for (let selData of this.selectedData) {
+    //   if (selData.data['filePath'] != null) {
+    //     if (selData.data['filePath'].split(".").length > 1) {
+    //       //folderName = selData.data['resId'].split("/")[2] + "-" + selData.data['resTitle'].substring(0, 20);
+    //       params = params.append('folderName', folderName);
+    //       params = params.append('downloadURL', selData.data['downloadURL']);
+    //       params = params.append('fileName', selData.data['resId'] + selData.data['fileName']);
+    //       params = params.append('filePath', selData.data['filePath']);
+    //       params = params.append('resFilePath', selData.data['resFilePath']);
+    //       this.cartService.updateCartItemDownloadStatus(selData.data['resId'],true);
+    //     }
+    //   }
+    // }
+
 
     // if(params.keys.length !== 0){
-      var randomnumber = Math.floor(Math.random() * (this.maximum - this.minimum + 1)) + this.minimum;
+    var randomnumber = Math.floor(Math.random() * (this.maximum - this.minimum + 1)) + this.minimum;
 
-      var downloadFileName = "download" + randomnumber + ".zip";
-      this["showDownloadFileSpinner"+randomnumber] = true;
-      this.displayFiles.push({key: downloadFileName, value: this["showDownloadFileSpinner"+randomnumber]});
-      
-      this.downloadFile(this.distApi + "/cart?", params).subscribe(blob => {
-          saveAs(blob, downloadFileName);
-          this.showSpinner = false;
-          this["showDownloadFileSpinner"+randomnumber] = false;
-          this.displayFiles.forEach(function(item) {
-              if (item.key === downloadFileName) {
-                  item.value = this["showDownloadFileSpinner"+randomnumber];
-              }
-          },1000);
-      });
-    
-      for (let selData of this.selectedData) {
-          if (selData.data['filePath'] != null) {
-              if (selData.data['filePath'].split(".").length > 1) {
-                  this.cartService.updateCartItemDownloadStatus(selData.data['resId'],'downloaded');
-              }
-          }
-      }
+    var downloadFileName = "download" + randomnumber + ".zip";
+    this["showDownloadFileSpinner"+randomnumber] = true;
+    this.displayFiles.push({key: downloadFileName, value: this["showDownloadFileSpinner"+randomnumber]});
 
-      this.cartService.getAllCartEntities().then(function (result) {
-          this.cartEntities = result;
-          this.createDataCartHierarchy();
-          if (this.cartEntities.length > 0) {
-              this.dataFiles[this.selectedParentIndex].expanded = true;
-          }
-      }.bind(this), function (err) {
-          alert("something went wrong while creating the zip file");
-      });
+    const req = new HttpRequest('GET', 'https://s3.amazonaws.com/nist-midas/1858/RawCameraData.zip', {
+    reportProgress: true, responseType: 'blob'
+    });
 
-      this.selectedData.length = 0;
-      this.dataFileCount();
+    this.downloadStatus = 'downloading';
+    this.downloadInstance = this.http.request(req).subscribe(event => {
+        switch (event.type) {
+            case HttpEventType.Response:
+                this.downloadStatus = 'downloaded';
+                this.downloadProgress = 0;
+                this.downloadService.saveToFileSystem(event.body, downloadFileName);
+                this.showSpinner = false;
+                this["showDownloadFileSpinner"+randomnumber] = false;
+                this.displayFiles.forEach(function(item) {
+                    if (item.key === downloadFileName) {
+                        item.value = this["showDownloadFileSpinner"+randomnumber];
+                    }
+                },1000);
+
+                for (let selData of this.selectedData) {
+                    if (selData.data['filePath'] != null) {
+                        //   if (selData.data['filePath'].split(".").length > 1) {
+                        if (selData.data.children == undefined) {
+                              this.cartService.updateCartItemDownloadStatus(selData.data['resId'],'downloaded');
+                        }
+                      }
+                  }
+            
+                  this.cartService.getAllCartEntities().then(function (result) {
+                      this.cartEntities = result;
+                      this.createDataCartHierarchy();
+                      if (this.cartEntities.length > 0) {
+                          this.dataFiles[this.selectedParentIndex].expanded = true;
+                      }
+                  }.bind(this), function (err) {
+                      alert("something went wrong while creating the zip file");
+                  });
+            
+                  this.selectedData.length = 0;
+                  this.dataFileCount();
+
+                break;
+            case HttpEventType.DownloadProgress:
+                this.downloadProgress = Math.round(100*event.loaded / event.total);
+                break;
+        }
+    });
+    //   this.downloadService.postFile(this.distApi + "downloadall", JSON.stringify(downloadData)).subscribe(blob => {
+    //     this.downloadService.saveToFileSystem(blob, downloadFileName);
+    //       this.showSpinner = false;
+    //       this["showDownloadFileSpinner"+randomnumber] = false;
+    //       this.displayFiles.forEach(function(item) {
+    //           if (item.key === downloadFileName) {
+    //               item.value = this["showDownloadFileSpinner"+randomnumber];
+    //           }
+    //       },1000);
+    //   });
+
+    //   for (let selData of this.selectedData) {
+    //     if (selData.data['filePath'] != null) {
+    //         //   if (selData.data['filePath'].split(".").length > 1) {
+    //         if (selData.data.children == undefined) {
+    //               this.cartService.updateCartItemDownloadStatus(selData.data['resId'],'downloaded');
+    //         }
+    //       }
+    //   }
+
+    //   this.cartService.getAllCartEntities().then(function (result) {
+    //       this.cartEntities = result;
+    //       this.createDataCartHierarchy();
+    //       if (this.cartEntities.length > 0) {
+    //           this.dataFiles[this.selectedParentIndex].expanded = true;
+    //       }
+    //   }.bind(this), function (err) {
+    //       alert("something went wrong while creating the zip file");
+    //   });
+
+    //   this.selectedData.length = 0;
+    //   this.dataFileCount();
     // }
   }
+
+  cancelDownload(key){
+    this.downloadInstance.unsubscribe();
+    this.downloadInstance = null;
+    this.downloadProgress = 0;
+    this.downloadStatus = null;
+    this.showSpinner = false;
+    this.displayFiles = this.displayFiles.filter(obj => obj.key != key);
+}
 
   /**
    * count the selected files
@@ -273,15 +337,6 @@ export class DatacartComponent implements OnInit, OnDestroy {
    */
   hideLoadingSpinner() {
     this.showSpinner = false;
-  }
-
-  /**
-   * download file
-   */
-  downloadFile(url, params): Observable<Blob> {
-    //let options = new RequestOptions({responseType: ResponseContentType.Blob});
-    // return this.http.get(this.distApi + "/cart?" , {responseType: 'blob', params: params});
-    return this.http.get(url, {responseType: 'blob', params: params});
   }
 
   /**

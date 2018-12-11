@@ -333,6 +333,9 @@ export class CartService {
    **/
   getCart() {
     let cartAsString = this._storage.getItem('cart');
+    // console.log("cartAsString:");
+    // console.log(cartAsString);
+
     return JSON.parse(cartAsString);
     }
 

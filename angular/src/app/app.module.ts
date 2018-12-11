@@ -36,6 +36,7 @@ import { FragmentPolyfillModule } from "./fragment-polyfill.module";
 import { DownloadService } from "./shared/download-service/download-service.service";
 import {ProgressSpinnerModule} from 'primeng/progressspinner';
 import { ConfirmDialogModule, SelectItem, DropdownModule, ConfirmationService,Message } from 'primeng/primeng';
+import {ProgressBarModule} from 'primeng/progressbar';
 
 /**
  * Initialize the configs for backend services
@@ -63,7 +64,7 @@ const appInitializerFn = (appConfig: AppConfig) => {
     AppRoutingModule, HttpClientModule,
     CommonModule, SharedModule, BrowserAnimationsModule, FormsModule,TooltipModule,
     TreeTableModule, TreeModule,MenuModule, FieldsetModule,DialogModule,OverlayPanelModule,
-    ButtonModule,ProgressSpinnerModule,ConfirmDialogModule,
+    ButtonModule,ProgressSpinnerModule,ConfirmDialogModule,ProgressBarModule,
     NgbModule.forRoot()
   ],
   exports: [Collaspe],

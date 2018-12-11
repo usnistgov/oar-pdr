@@ -296,9 +296,6 @@ updateMenu(){
         this.onError(" There is an error");
         // throw new ErrorComponent(this.route);
       });
-
-    console.log("this.files: ");
-    console.log(this.files);
   }
 
   goToSelection(isMetadata: boolean, isSimilarResources: boolean, sectionId : string){
@@ -387,7 +384,9 @@ updateMenu(){
                   filetype: path['@type'][0],
                   resId: path["@id"].replace(/^.*[\\\/]/, ''),
                   fullPath: path.filepath,
-                  isSelected: false
+                  isSelected: false,
+                  downloadProgress: 0,
+                  downloadInstance: null
                 },children: []
               };
               

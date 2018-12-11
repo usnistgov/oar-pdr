@@ -62,22 +62,41 @@
     </span>
 
     <p-confirmDialog key='downloadAllConfirm'></p-confirmDialog>
-
     <span *ngIf="!allSelected">
     <a href="javascript:;" (click)="addFilesToCart(files)" class="faa faa-cart-plus " style="margin-left:0.5em; color:#1E6BA1;cursor: pointer;" title="Add All files to datacart" data-toggle="tooltip"></a></span>
     <span *ngIf="allSelected">
         <a href="javascript:;" (click)="removeFilesFromCart(files)" class="faa faa-shopping-cart" style="margin-left:0.5em; color:red;cursor: pointer;" title="Remove All files from datacart" data-toggle="tooltip"></a></span>
         <span class="font8" style="margin-left:0.5em; color:gray;">Click on the file/row in the table below to view more details.</span>
-    <span class="font10" style="margin-left:0.5em; color:gray; float: right"> Total No. files: {{ filescount }} </span> 
+    <span class="font10" style="margin-left:0.5em; color:gray; float: right"> Total No. files: {{ totalFiles }} </span> 
+
+    <div class="ui-g" style="padding-left: 2%; width: 100%; display:flex;">
+        <div style="padding-left: 2%; flex: 0 0 auto;" *ngIf="displayDownloadFile">
+              {{downloadFileName}} 
+            <p-progressSpinner *ngIf ="downloadStatus == 'downloading'" [style]="{width: '12px', height: '12px'}" ></p-progressSpinner>
+            <span style="display:inline;" *ngIf ="downloadStatus == 'downloading'">
+                {{downloadProgress}}%
+            </span>
+            <i class="faa faa-check" *ngIf ="downloadStatus == 'downloaded'"></i>
+        </div>
+        <div style="padding-left: 2%; padding-top: 8px;width: 200px;flex: 0 0 auto;" *ngIf="displayDownloadFile">
+            <span *ngIf ="downloadStatus == 'downloading'">
+                <p-progressBar [value]="downloadProgress" showValue="true"></p-progressBar>
+            </span>
+        </div>
+        <div style="padding-left:5px; flex: 0 0 auto;" *ngIf="downloadStatus == 'downloading'">
+            <span (click)="cancelDownloadAll()" style="cursor: pointer;"><i class="faa faa-remove"></i></span>
+        </div>
+    </div>
+
     <p-treeTable [value]="files" [columns]="cols" selectionMode="single"  [resizableColumns]="true" sortField="name" >
-    <ng-template pTemplate="colgroup" let-columns>
+    <!-- <ng-template pTemplate="colgroup" let-columns>
         <colgroup>
             <col *ngFor="let col of columns"  [style.width]="col.width">
         </colgroup>
-    </ng-template>
+    </ng-template> -->
         <ng-template pTemplate="header" let-columns >
           <tr>
-            <th *ngFor="let col of columns"  ttResizableColumn>
+            <th *ngFor="let col of columns" [style.width]="col.width" ttResizableColumn>
                 {{col.header}} 
                 <!--<p-treeTableSortIcon [field]="col.field"></p-treeTableSortIcon>-->
             </th>
@@ -88,22 +107,29 @@
                 <td><p-treeTableToggler [rowNode]="rowNode"></p-treeTableToggler>
                     <a (click)="openDetails($event,rowData,op3) " style="cursor: pointer;" data-toggle="tooltip" title="Click for more details"> {{rowData.name}} </a>
                 </td>
+                <td *ngIf='!rowData.showDescription' ><a (click)='rowData.showDescription=true' style="cursor: pointer;">{{rowData.description == undefined ? '' : rowData.description.length &lt; 40 ? rowData.description : rowData.description.substring(0, 40)+'...'}}</a></td>
+                <td *ngIf='rowData.showDescription'><a (click)='rowData.showDescription=false' style="cursor: pointer;">{{rowData.description}}</a></td>
                 <td>{{rowData.mediatype}}</td>
                 <td><span *ngIf="rowData.size">{{formatBytes(rowData.size)}}</span></td>
                 <td>
                     <span *ngIf=" rowData.downloadUrl ">
                         <span *ngIf = "rowData.downloadedStatus == null" (click)="downloadFile(rowData)"><i class="faa faa-download" style="color: #1E6BA1;cursor: pointer;" aria-hidden="true" data-toggle="tooltip" title="Direct download"></i></span>
                         <span *ngIf = "rowData.downloadedStatus === 'downloaded'" (click)="downloadFile(rowData)"><i class="faa faa-download" style="color:goldenrod; cursor: pointer;" aria-hidden="true" data-toggle="tooltip" title="Direct download"></i></span>
-
-                        <span *ngIf="rowData.downloadedStatus === 'downloading'" style="float:right;">
-                         <p-progressSpinner [style]="{width: '20px', height: '20px', float: 'right'}" ></p-progressSpinner>
-                        </span> 
-                        <span style="margin-left: 0.5em">{{rowData.downloadedStatus}}</span>  
-                        <span *ngIf = "rowData.downloadedStatus == 'downloaded'" (click)="resetDownloadStatus(rowData)"> <i class="faa faa-recycle" style="color: #1E6BA1;cursor: pointer; margin-left: 0.5em" aria-hidden="true" data-toggle="tooltip" title="Reset download status"></i></span>  
+                        <div *ngIf="rowData.downloadedStatus === 'downloading'" style="padding-left: 2%; display:flex;">
+                            <div style="margin-left: 0.5em; flex: 0 0 auto;">{{rowData.downloadProgress}}%</div> 
+                            <div style="margin-left: 0.5em;flex: 0 0 auto; width: 50px;padding-top: 8px">
+                                <p-progressBar [value]="rowData.downloadProgress" showValue="true" [style]="{height: '10px'}"></p-progressBar>
+                            </div>
+                            <div style="padding-left:5px; flex: 0 0 auto;">
+                                <span (click)="cancelDownload(rowData)" style="cursor: pointer;"><i class="faa faa-remove"></i></span>
+                            </div>
+                        </div>
+                        <span *ngIf="rowData.downloadedStatus === 'downloaded'" style="margin-left: 0.5em">{{rowData.downloadedStatus}}</span> 
+                        <span *ngIf = "rowData.downloadedStatus == 'downloaded'" (click)="resetDownloadStatus(rowData)"> <i class="faa faa-undo" style="color: #1E6BA1;cursor: pointer; margin-left: 0.5em" aria-hidden="true" data-toggle="tooltip" title="Reset download status"></i></span>  
                     </span> 
                 </td>
                 <td>
-                    <span>
+                    <span *ngIf = "isFile(rowData)">
                         <span *ngIf="!rowData.isSelected"><a style="position:relative;margin-left:0.5em;cursor:pointer;"  class="faa faa-cart-plus " (click)="addtoCart(rowData)" data-toggle="tooltip" title="Add to cart"></a>
                         </span>     
                         <span *ngIf="rowData.isSelected"><a style="position:relative;margin-left:0.5em;cursor:pointer;color:red" class="faa faa-shopping-cart " (click)="removeCart(rowData, rowData.resId)" data-toggle="tooltip" title="Remove from cart"></a>
@@ -159,11 +185,14 @@
                         <br>
                     </span>
                     <span class="font14">{{ fileNode ? fileNode.name : '' }}</span>
-                    <span *ngIf="fileNode.filetype == 'nrdp:DataFile' " class="font8">
+                    <!-- <span *ngIf="fileNode.filetype == 'nrdp:DataFile' " class="font8"> -->
+                    <span class="font8" style="color:grey" >
                         <br><b>Type:</b>
                         <span style="margin-left:0.5em;" class="textstyle1">{{ fileNode.mediatype ? fileNode.mediatype : 'Not Available'}} </span>
                     </span>
-                    <span *ngIf="fileNode.filetype == 'nrdp:DataFile' " class="font8" style="margin-left: 2.5rem">Size: 
+                    <!-- <span *ngIf="fileNode.filetype == 'nrdp:DataFile' " class="font8" style="margin-left: 2.5rem"> -->
+                    <span class="font8" style="margin-left: 2.5rem" >
+                        Size: 
                         <span *ngIf="fileNode.size" class="textstyle1">{{ formatBytes(fileNode.size) }} </span>
                         <span *ngIf="!fileNode.size" class="textstyle1"><i>Not Available</i></span>
                     </span>
