@@ -89,6 +89,12 @@ done
 [ -n "$build_dist" ] || build_dist=$DISTNAMES
 echo '#' Building $build_dist
 
+# make sure the oar-metadata submodule has been initialized
+#
+[ -d "oar-metadata/scripts" ] || {
+    git submodule init && git submodule update
+}
+
 # set the current version.  This will inject the version into the code, if 
 # needed.
 #
