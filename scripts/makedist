@@ -92,7 +92,10 @@ echo '#' Building $build_dist
 # make sure the oar-metadata submodule has been initialized
 #
 [ -d "oar-metadata/scripts" ] || {
-    git submodule init && git submodule update
+    set -x
+    git submodule init
+    git submodule update
+    set +x
 }
 
 # set the current version.  This will inject the version into the code, if 
