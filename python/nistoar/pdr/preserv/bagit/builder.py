@@ -2,6 +2,7 @@
 Tools for building a NIST Preservation bags
 """
 from __future__ import print_function, absolute_import
+from __future__ import print_function, absolute_import
 import os, errno, logging, re, json, pkg_resources, textwrap, datetime
 import pynoid as noid
 from shutil import copy as filecopy, rmtree
@@ -9,13 +10,16 @@ from copy import deepcopy
 from collections import Mapping, Sequence, OrderedDict
 from urllib import quote as urlencode
 
-from .. import (SIPDirectoryError, SIPDirectoryNotFound, 
-                ConfigurationException, StateException, PODError)
-from .exceptions import BagProfileError, BagWriteError
-from .. import PreservationSystem, read_nerd, read_pod, write_json
-from ...utils import build_mime_type_map, checksum_of, measure_dir_size
+from .. import PreservationSystem
+from .. import ConfigurationException, StateException, PODError
+from .exceptions import (BagProfileError, BagWriteError, BadBagRequest,
+                         ComponentNotFound)
 from ....nerdm.exceptions import (NERDError, NERDTypeError)
 from ....nerdm.convert import PODds2Res
+from ....id import PDRMinter, NIST_ARK_NAAN
+from ...utils import (build_mime_type_map, checksum_of, measure_dir_size,
+                      read_nerd, read_pod, write_json)
+
 from ....id import PDRMinter
 from ... import def_jq_libdir, def_etc_dir
 from ...config import load_from_file, merge_config
@@ -30,8 +34,6 @@ logging.addLevelName(NORM, "NORMAL")
 log = logging.getLogger(__name__)
 
 DEF_BAGLOG_FORMAT = "%(asctime)s %(levelname)s: %(message)s"
-
-DEF_MBAG_VERSION = "0.2"
 
 POD_FILENAME = "pod.json"
 NERDMD_FILENAME = "nerdm.json"
@@ -55,11 +57,14 @@ NERDMPUB_SCH_ID = NERDMPUB_SCH_ID_BASE + NERDMPUB_SCH_VER + "#"
 NERD_DEF = NERDM_SCH_ID + "/definitions/"
 NERDPUB_DEF = NERDMPUB_SCH_ID + "/definitions/"
 DATAFILE_TYPE = NERDPUB_PRE + ":DataFile"
+CHECKSUMFILE_TYPE = NERDPUB_PRE + ":ChecksumFile"
 DOWNLOADABLEFILE_TYPE = NERDPUB_PRE + ":DownloadableFile"
 SUBCOLL_TYPE = NERDPUB_PRE + ":Subcollection"
 NERDM_CONTEXT = "https://data.nist.gov/od/dm/nerdm-pub-context.jsonld"
 DISTSERV = "https://data.nist.gov/od/ds/"
 DEF_MERGE_CONV = "midas0"
+
+ARK_NAAN = NIST_ARK_NAAN
 
 class BagBuilder(PreservationSystem):
     """
@@ -96,10 +101,29 @@ class BagBuilder(PreservationSystem):
                               data
     :prop ensure_nerdm_type_on_add bool (True):  if True, make sure that the 
                          resource metadata has a recognized value for "_schema".
+    :prop distrib_service_baseurl str (https://data.nist.gov/od/ds):  the base
+                         URL to use for creating downloadURL property values.
+    :prop require_ark_id bool (True):  if True, builder will ensure the resource
+                         identifier is set with an ARK identifier (in assign_id())
+    :prop extra_tag_dirs list of str (None): a list of other bag tag directories 
+                         to create (besides "metadata" and "multibag").
+    :prop finalize dict:  a set of properties to configure the finalize_bag()
+                              function.  See the finalize_bag() documentation 
+                              for the specific properties supported.
+    :prop bagit_version str ("1.0"): the version of bagit to claim compliance with
+    :prop bagit_encoding str ("UTF-8"):  the text encoding to claim was used to
+                              write tag metadata.
+    :prop init_bag_info dict:  a set of bag-info properties and values that should 
+                              always be included in the bag-info.txt file.
+    :prop bag-download-url str:  the base URL to use to record the URL for retrieving
+                              the bag from the Distribution Service.  
+    :prop validator dict:     a set of properties for configuring the bag validation;
+                              see nistoar.pdr.preserv.bagit.validate for details.
     """
 
-    def __init__(self, parentdir, bagname, config=None, id=None, minter=None,
-                 logger=None):
+    nistprofile = "0.4"
+
+    def __init__(self, parentdir, bagname, config=None, id=None, logger=None):
         """
         create the Builder to build a bag with a given name
 
@@ -111,8 +135,6 @@ class BagBuilder(PreservationSystem):
         :param id      str:    the ARK identifier to assign to this record.  If 
                                  None, one will be minted automatically when it
                                  is needed.  
-        :param minter IDMinter: an IDMinter to use to mint a new identifier to 
-                                 assign to this dataset.  
         :param logger Logger:  a Logger object to send messages to.  This will 
                                  used to send messages to a preservation log
                                  inside the bag.  
@@ -124,44 +146,236 @@ class BagBuilder(PreservationSystem):
         self._name = bagname
         self._pdir = parentdir
         self._bagdir = os.path.join(self._pdir, self._name)
-        self._mbagver = DEF_MBAG_VERSION
         self._bag = None
 
         if not logger:
             logger = log
         self.log = logger
-        # self.log.setLevel(NORM)
         
         if not config:
             config = {}
         self.cfg = self._merge_def_config(config)
-        
-        self._id = self._fix_id(id)
+
+        self._id = None   # set below
         self._ediid = None
         self._logname = self.cfg.get('log_filename', 'preserv.log')
         self._loghdlr = None
         self._mimetypes = None
-        self._mbtagdir = None
         self._distbase = self.cfg.get('distrib_service_baseurl', DISTSERV)
         if not self._distbase.endswith('/'):
             self._distbase += '/'
 
-        if not minter:
-            cfg = self.cfg.get('id_minter', {})
-            minter = PDRMinter(self._pdir, cfg)
-            if not os.path.exists(minter.registry.store):
-                self.log.warning("Creating new ID minter for bag, "+self._name)
-        self._minter = minter
-        
         jqlib = self.cfg.get('jq_lib', def_jq_libdir)
         self.pod2nrd = PODds2Res(jqlib)
 
-# Not sure why this was added originally, but it causes problems to create
-# the bag directory and log in the constructor, and breaks assumptions of
-# ensure_bagdir().
-# 
-#        if os.path.exists(self.bagdir):
-#            self.ensure_bagdir() # this initializes some data like self._bag
+        self._create_defmd_fn = {
+            "Resource": self._create_def_res_md,
+            "Subcollection": self._create_def_subcoll_md,
+            "ChecksumFile": self._create_def_chksum_md,
+            "DataFile": self._create_def_datafile_md
+        }
+
+        # Note: The bag on disk is not changed in any way (including the
+        # creation of the bag directory) in this constructor
+
+        if os.path.exists(self._bagdir):
+            if not os.path.isdir(self._bagdir):
+                raise StateException("BagBuilder: bag root is not a directory "+
+                                     self._bagdir)
+            self.ensure_bagdir()  # inits self.bag
+
+        if self.bag and os.path.exists(self.bag.nerd_file_for("")):
+            resmd = self.bag.nerd_metadata_for("")
+            if resmd.get('@id'):
+                self._id = resmd['@id']
+
+        if id and id != self._id:
+            if self.bag and os.path.exists(self.bag.metadata_dir):
+                self.assign_id(id, keep_conv=True)
+            else:
+                # delay saving id to metadata
+                self._id = self._fix_id(id)
+
+    def __del__(self):
+        self._unset_logfile()
+
+    def _merge_def_config(self, config):
+        if not def_etc_dir:
+            self.log.warning("BagBuilder: Can't load default config: " +
+                             "can't find etc directory")
+            return config
+        defconffile = os.path.join(def_etc_dir, "nist_bagger_conf.yml")
+        if not os.path.exists(defconffile):
+            self.log.warning("BagBuilder: default config file not found: " +
+                             defconffile)
+            return config
+
+        defconf = load_from_file(defconffile)
+        return merge_config(config, defconf)
+
+    def _set_logfile(self):
+        if self._loghdlr:
+            self._unset_logfile()
+        filepath = os.path.join(self.bagdir, self.logname)
+        self._loghdlr = logging.FileHandler(filepath)
+        self._loghdlr.setLevel(NORM)
+        fmt = self.cfg.get('bag_log_format', DEF_BAGLOG_FORMAT)
+        self._loghdlr.setFormatter(logging.Formatter(fmt))
+        self.log.addHandler(self._loghdlr)
+        if not self.log.isEnabledFor(NORM):
+            self.log.setLevel(NORM)
+
+    def _unset_logfile(self):
+        if hasattr(self, '_loghdlr') and self._loghdlr:
+            self.log.removeHandler(self._loghdlr)
+            self._loghdlr.close()
+            self._loghdlr = None
+
+    @property
+    def bagname(self):
+        return self._name
+
+    @property
+    def bagdir(self):
+        return self._bagdir
+
+    @property
+    def logname(self):
+        return self._logname
+
+    @property
+    def bag(self):
+        """
+        a Bag instance providing read-only access to the contents so far of 
+        the bag being built.  If None, not enough of the bag has been built 
+        to create the view.  
+        """
+        return self._bag
+
+    @property
+    def id(self):
+        """
+        the identifier for the resource being stored in the bag.  If None, an 
+        identifier has not yet been assigned to it.
+        """
+        return self._id
+
+    @property
+    def ediid(self):
+        return self._ediid
+
+    @ediid.setter
+    def ediid(self, val):
+        if val:
+            self.record("Setting ediid: " + val)
+        elif self._ediid:
+            self.record("Unsetting ediid")
+        self._ediid = val
+        self._upd_ediid(val)
+        if self._ediid:
+            self._upd_downloadurl(self._ediid)
+
+    def _upd_ediid(self, ediid):
+        # this updates the ediid metadatum in the resource nerdm.json
+        if self.bag:
+            mdfile = self.bag.nerd_file_for("")
+            if os.path.exists(mdfile):
+                mdata = read_nerd(mdfile)
+                if mdata.get('ediid') != ediid:
+                    if ediid:
+                        mdata['ediid'] = ediid
+                    elif 'ediid' in mdata:
+                        del mdata['ediid']
+                    self._write_json(mdata, mdfile)
+
+    def _upd_downloadurl(self, ediid):
+        mdtree = os.path.join(self.bagdir, 'metadata')
+        if os.path.exists(mdtree):
+            for dir, subdirs, files in os.walk(mdtree):
+                if FILEMD_FILENAME in files:
+                    mdfile = os.path.join(dir, FILEMD_FILENAME)
+                    mdata = read_nerd(mdfile)
+                    if (DATAFILE_TYPE in mdata.get("@type", []) or \
+                        DOWNLOADABLEFILE_TYPE in mdata.get("@type", [])) and \
+                       mdata.get('filepath') and             \
+                       mdata.get("downloadURL", self._distbase)    \
+                            .startswith(self._distbase):
+                        if ediid:
+                            mdata["downloadURL"] = \
+                               self._download_url(ediid, mdata['filepath'])
+                                    
+                        else:
+                            del mdata["downloadURL"]
+                        self._write_json(mdata, mdfile)
+
+    def _download_url(self, ediid, destpath):
+        path = "/".join(destpath.split(os.sep))
+        return self._distbase + ediid + '/' + urlencode(path)
+
+    def assign_id(self, id, keep_conv=False):
+        """
+        set or update the primary (ARK) identifier for the resource stored in 
+        this bag.  Checks are done on the identifier for valid; if the 
+        'validate_id' config parameter is set to True, the identifier is 
+        is required to comply with "noid" ARK conventions.
+        :param str id:  the new identifier.  This can either be a full ark
+                        identifier or just the identifier path (with the base
+                        URI being assumed).  The actual value assigned will be 
+                        a full ARK identifier.
+        :param bool keep_conv:  if True, update the existing metadata to 
+                        maintain conventions related to the identifier.  
+                        (Currently, no such conventions are supported, so this 
+                        parameter has no effect; default: False).
+        """
+        if not id:
+            raise ValueError("BagBuilder.assign_id(): id is empty or None")
+        self._id = self._fix_id(id)  # may raise validity concerns
+
+        self.ensure_bag_structure()
+        md = self.update_metadata_for("", {"@id": self._id},
+                                      message="setting resource ID: "+self._id)
+        if '@context' in md:
+            if not isinstance(md['@context'], list):
+                md['@context'] = [ md['@context'], { "@base": self._id } ]
+            elif len(md['@context']) < 2:
+                md['@context'].append({"@base": self._id})
+            else:
+                md['@context'][1]['@base'] = self._id
+            self.update_metadata_for("", {"@context": md['@context']}, message="")
+
+        # no other metadata conventions requiring consistency with the ID 
+        # is currently supported.
+        
+    def _fix_id(self, id):
+        if id is None:
+            return None
+        
+        if self.cfg.get('require_ark_id', True):
+            if re.search(r"^/?\d+/", id):
+                # id starts with authority number
+                id = "ark:/" + id.lstrip('/')
+            elif re.search(r"^A[Rr][Kk]:", id):
+                id = "ark" + id[3:]
+            elif not id.startswith('ark:'):
+                # id is just the base path; authority number is needed
+                naan = self.cfg.get('id_minter',{}).get('naan', ARK_NAAN)
+                id = "ark:/" + naan + "/" + id.lstrip('/')
+
+        if id.startswith("ark:"):
+            if not re.match(r"^ark:/\d+/\w", id):
+                raise ValueError("Invalid ARK identifier provided: "+id)
+            if self.cfg.get('validate_id', True):
+                try:
+                    noid.validate(id)
+                except noid.ValidationError as ex:
+                    raise ValueError("Invalid ARK identifier provided: "+
+                                     str(ex))
+        return id
+
+    def _has_resmd(self):
+        if not self.bag:
+            return False
+        return os.path.exists(self.bag.nerd_file_for(""))
 
     def rename_bag(self, name):
         """
@@ -180,114 +394,6 @@ class BagBuilder(PreservationSystem):
 
         if self._bag:
             self._bag = NISTBag(self._bagdir)
-
-    def _merge_def_config(self, config):
-        if not def_etc_dir:
-            self.log.warning("BagBuilder: Can't load default config: " +
-                             "can't find etc directory")
-            return config
-        defconffile = os.path.join(def_etc_dir, "nist_bagger_conf.yml")
-        if not os.path.exists(defconffile):
-            self.log.warning("BagBuilder: default config file not found: " +
-                             defconffile)
-            return config
-
-        defconf = load_from_file(defconffile)
-        return merge_config(config, defconf)
-
-    def _fix_id(self, id):
-        if id is None:
-            return None
-        if re.search(r"^/?\d+", id):
-            id = "ark:/" + id.lstrip('/')
-        elif re.search(r"^A[Rr][Kk]:", id):
-            id = "ark" + id[3:]
-
-        if not re.match(r"^ark:/\d+/\w", id):
-            raise ValueError("Invalid ARK identifier provided: "+id)
-        if self.cfg.get('validate_id', True) and not noid.validate(id):
-            raise ValueError("Invalid ARK identifier provided (bad check char): "
-                             +id)
-            
-        return id
-
-    def _mint_id(self, ediid):
-        seedkey = self.cfg.get('id_minter', {}).get('ediid_data_key', 'ediid')
-        return self._minter.mint({ seedkey: ediid })
-
-    @property
-    def bagname(self):
-        return self._name
-
-    @property
-    def bagdir(self):
-        return self._bagdir
-
-    @property
-    def multibag_version(self):
-        """
-        the version of the NIST BagIt Profile that this builder is set to 
-        build to.  
-        """
-        return self._mbagver
-
-    @property
-    def logname(self):
-        return self._logname
-
-    @property
-    def id(self):
-        return self._id
-
-    @property
-    def ediid(self):
-        return self._ediid
-
-    @ediid.setter
-    def ediid(self, val):
-        if val:
-            self.record("Setting ediid: " + val)
-        elif self._ediid:
-            self.record("Unsetting ediid")
-        self._ediid = val
-        self._upd_ediid(val)
-        self._upd_downloadurl(val)
-
-    def _upd_ediid(self, ediid):
-        # this updates the ediid metadatum in the resource nerdm.json
-        mdfile = self.nerdm_file_for("")
-        if os.path.exists(mdfile):
-            mdata = read_nerd(mdfile)
-            if mdata.get('ediid') != ediid:
-                if ediid:
-                    mdata['ediid'] = ediid
-                elif 'ediid' in mdata:
-                    del mdata['ediid']
-                self._write_json(mdata, mdfile)
-
-    def _upd_downloadurl(self, ediid):
-        mdtree = os.path.join(self.bagdir, 'metadata')
-        dftype = ":".join([NERDPUB_PRE, "DataFile"])
-        if os.path.exists(mdtree):
-            for dir, subdirs, files in os.walk(mdtree):
-                if FILEMD_FILENAME in files:
-                    mdfile = os.path.join(dir, FILEMD_FILENAME)
-                    mdata = read_nerd(mdfile)
-                    if dftype in mdata.get("@type", []) and  \
-                       mdata.get('filepath') and             \
-                       mdata.get("downloadURL", self._distbase)    \
-                            .startswith(self._distbase):
-                        if ediid:
-                            mdata["downloadURL"] = \
-                               self._download_url(self.ediid, mdata['filepath'])
-                                    
-                        else:
-                            del mdata["downloadURL"]
-                        self._write_json(mdata, mdfile)
-
-    def _download_url(self, ediid, destpath):
-        path = "/".join(destpath.split(os.sep))
-        return self._distbase + ediid + '/' + urlencode(path)
 
     def ensure_bagdir(self):
         """
@@ -315,28 +421,11 @@ class BagBuilder(PreservationSystem):
         if os.path.exists(self._bag.nerd_file_for("")):
             # load the resource-level metadata that's already there
             md = self._bag.nerd_metadata_for("")
-            self._id = md.get('@id')
-            self._ediid = md.get('ediid')
+            if not self._id:
+                self._id = md.get('@id')
+            if not self._ediid:
+                self._ediid = md.get('ediid')
         
-
-    def _set_logfile(self):
-        if self._loghdlr:
-            self._unset_logfile()
-        filepath = os.path.join(self.bagdir, self.logname)
-        self._loghdlr = logging.FileHandler(filepath)
-        self._loghdlr.setLevel(NORM)
-        fmt = self.cfg.get('bag_log_format', DEF_BAGLOG_FORMAT)
-        self._loghdlr.setFormatter(logging.Formatter(fmt))
-        self.log.addHandler(self._loghdlr)
-        if not self.log.isEnabledFor(NORM):
-            self.log.setLevel(NORM)
-
-    def _unset_logfile(self):
-        if hasattr(self, '_loghdlr') and self._loghdlr:
-            self.log.removeHandler(self._loghdlr)
-            self._loghdlr.close()
-            self._loghdlr = None
-
     def ensure_bag_structure(self):
         """
         make sure that the working bag contains the basic directory structure--
@@ -351,6 +440,43 @@ class BagBuilder(PreservationSystem):
             dir = os.path.join(self.bagdir, dir)
             if not os.path.exists(dir):
                 os.mkdir(dir)
+
+    def _extend_file_list(self, filelist, param):
+        extras = self.cfg.get(param)
+        if extras:
+            if isinstance(extras, (str, unicode)):
+                extras = [ extras ]
+            if hasattr(extras, '__iter__'):
+                bad = [f for f in extras if not isinstance(f, (str, unicode))]
+                if bad:
+                    self.log.warning("Ignoring entries in config param, "+param+
+                                     ", with non-string type: " + str(bad))
+                    extras = [f for f in extras if isinstance(f, (str, unicode))]
+                filelist.extend(extras)
+            else:
+                self.log.warning("Ignoring config param, 'extra_tag_dirs': " +
+                                 "wrong value type: " + str(extras))
+
+    def ensure_metadata_dirs(self, destpath):
+        destpath = os.path.normpath(destpath)
+        if os.path.isabs(destpath):
+            raise ValueError("data path cannot be absolute: "+destpath)
+        if destpath.startswith(".."+os.sep):
+            raise ValueError("data path cannot contain ..: "+destpath)
+
+        self._ensure_metadata_dirs(destpath)
+        
+    def _ensure_metadata_dirs(self, destpath):
+        self.ensure_bag_structure()
+        path = os.path.join(self.bagdir, "metadata", destpath)
+        try:
+            if not os.path.exists(path):
+                os.makedirs(path)
+        except Exception, ex:
+            pdir = os.path.join(os.path.basename(self.bagdir),
+                                "metadata", destpath)
+            raise BagWriteError("Failed to create directory tree ({0}): {1}"
+                                .format(str(ex), pdir), cause=ex, sys=self)
 
     def ensure_ansc_collmd(self, destpath):
         """
@@ -370,32 +496,9 @@ class BagBuilder(PreservationSystem):
         self._ensure_metadata_dirs(collpath)
 
         while collpath != "":
-            if not os.path.exists(self.nerdm_file_for(collpath)):
-                self.init_collmd_for(collpath, write=True, examine=False)
+            if not os.path.exists(self.bag.nerd_file_for(collpath)):
+                self._define_file_comp_md(collpath, "Subcollection")
             collpath = os.path.dirname(collpath)
-
-    def _ensure_metadata_dirs(self, destpath):
-
-        self.ensure_bag_structure()
-        path = os.path.join(self.bagdir, "metadata", destpath)
-        try:
-            if not os.path.exists(path):
-                os.makedirs(path)
-        except Exception, ex:
-            pdir = os.path.join(os.path.basename(self.bagdir),
-                                "metadata", destpath)
-            raise BagWriteError("Failed to create directory tree ({0}): {1}"
-                                .format(str(ex), pdir), cause=ex, sys=self)
-
-    def ensure_metadata_dirs(self, destpath):
-        destpath = os.path.normpath(destpath)
-        if os.path.isabs(destpath):
-            raise ValueError("data path cannot be absolute: "+destpath)
-        if destpath.startswith(".."+os.sep):
-            raise ValueError("data path cannot contain ..: "+destpath)
-
-        self._ensure_metadata_dirs(destpath)
-        
 
     def ensure_datafile_dirs(self, destpath):
         """
@@ -427,34 +530,617 @@ class BagBuilder(PreservationSystem):
 
         self.ensure_metadata_dirs(destpath)
         
-    def _extend_file_list(self, filelist, param):
-        extras = self.cfg.get(param)
-        if extras:
-            if isinstance(extras, (str, unicode)):
-                extras = [ extras ]
-            if hasattr(extras, '__iter__'):
-                bad = [f for f in extras if not isinstance(f, (str, unicode))]
-                if bad:
-                    self.log.warning("Ignoring entries in config param, "+param+
-                                     ", with non-string type: " + str(bad))
-                    extras = [f for f in extras if isinstance(f, (str, unicode))]
-                filelist.extend(extras)
-            else:
-                self.log.warning("Ignoring config param, 'extra_tag_dirs': " +
-                                 "wrong value type: " + str(extras))
 
-    def add_data_file(self, destpath, srcpath=None, hardlink=False, initmd=True):
+
+    
+    def define_component(self, destpath, comptype, message=None):
         """
-        add a data file to the bag.  This creates directories representing it in 
-        both the data and metadata directories.  If a srcpath is provided, the 
-        file will actually be copied into the data directory.  If the file is 
-        provided and initmd is True, the metadata for the file will be 
-        initialized and placed in the metadata directory.  
+        ensure the definition of a component: if the specified component does 
+        not exist, create its metadata entry with default metadata; if it does 
+        exist, make sure it has the specified type.
+
+        To later update this component, use update_component_metadata(); to 
+        override the current metadata, use replace_component_metadata().  
+
+        When destpath is a hierarchical filepath, this method, as a side effect, 
+        will also define all of the anscestor Subcollection components as well,
+        if they do not already exist.  This method will also check to make 
+        sure that the parent component, if it exists, is of type Subcollection
+        before creating the new component.  
+
+        Note that method cannot be used to set resource-level metadata.
+
+        :param str destpath:  the component's filepath (when comptype is 
+                              DataFile, Subcollection, or similar downloadable
+                              type) or relative identifier (for other types).
+        :param str comptype:  the type of component to define; this will control
+                              default metadata that is created.  Recognized 
+                              values include ["DataFile", "Subcollection",
+                              "ChecksumFile"].
+        :param str message:   message to record in the bag's log when committing
+                              this definition.  A value of None (default) causes 
+                              a default message to be recorded.  To suppress a 
+                              message, provide an empty string. 
+        :return dict:  the metadata for the component
+        """
+        if destpath.startswith("@id:"):
+            if comptype == "Resource":
+                raise ValueError("Resource: not a component type")
+            if comptype in ["DataFile", "ChecksumFile", "Subcollection"]:
+                if not destpath.startswith("@id:cmps/"):
+                    raise ValueError("incorrect identifier form for " + 
+                                     comptype + " component: " + destpath)
+                destpath = destpath[len("@id:cmps/"):]
+        elif comptype not in self._comp_types:
+            raise ValueError(comptype+": not a supported component type (" +
+                             str(self._comp_types))
+
+        self.ensure_bagdir()
+        if destpath.startswith("@id:"):
+            return self._define_nonfile_comp_md(destpath, comptype, message)
+        else:
+            parent = os.path.dirname(destpath)
+            while parent != '':
+                if self.bag.comp_exists(parent):
+                    if not self.bag.is_subcoll(parent):
+                        raise BadBagRequest("Attempt to define file component "+
+                                            "below non-Subcollection anscestor")
+                    break
+                parent = os.path.dirname(parent)
+
+            out = self._define_file_comp_md(destpath, comptype, message)
+            self.ensure_ansc_collmd(destpath)
+            return out
+
+    def _define_file_comp_md(self, destpath, comptype, msg=None):
+        if os.path.exists(self.bag.nerd_file_for(destpath)):
+            md = self.bag.nerd_metadata_for(destpath, True)
+            if not metadata_matches_type(md, comptype):
+                raise StateException("Existing component not a "+comptype+
+                                     ": "+str(md.get('@type',[])))
+        else:
+            if msg is None:
+                msg = "Initializing new %s component with default metadata: %s" \
+                          % (comptype, destpath)
+            md = self._create_init_md_for(destpath, comptype)
+            self._replace_file_metadata(destpath, md, msg)
+
+        return md
+
+    def _define_nonfile_comp_md(self, compid, comptype, msg=None):
+        if compid.startswith("@id:"):
+            compid = compid[len("@id:"):]
+        rmd, comps, found = self._fetch_nonfile_comp(compid, comptype)
+                
+        if found < 0:
+            if msg is None:
+                msg = "Initializing new %s component with default metadata: %s" \
+                          % (comptype, compid)
+            if msg:
+                self.record(msg)
+            md = self._create_init_md_for("@id:"+compid, comptype)
+            comps.append(md)
+            self.ensure_bag_structure()
+            self._write_resmd(rmd)
+
+        return comps[-1]
+
+    def remove_component(self, destpath, trimcolls=False):
+        """
+        remove a data file or subcollection and all its associated metadata 
+        from the bag.  
+
+        Note that it is not an error to attempt to remove a component that 
+        does not actually exist in the bag; rather, a warning is written to 
+        the log.  
+
+        :param destpath  str:  the root-collection-relative path to the data
+                               file
+        :parm trimcolls bool:  If True, remove any ancestor subcollections that
+                               become empty as a result of the removal.
+        :return bool:  True if anything was found and removed.  
+        """
+        if destpath.startswith("@id:cmps/"):
+            destpath = destpath[len("@id:cmps/"):]
+        if not destpath:
+            raise ValueError("Empty destpath argument (not allowed to remove "
+                             "root collection)")
+        self.ensure_bag_structure()
+
+        if destpath.startswith("@id:"):
+            return self._remove_nonfile_component(destpath)
+        else:
+            return self._remove_file_component(destpath, trimcolls)
+
+    def _remove_file_component(self, destpath, trimcolls=False):
+        # this removes subcollection components as well
+        removed = False
+
+        # First look for metadata
+        target = os.path.join(self.bag.metadata_dir, destpath)
+        if os.path.isdir(target):
+            removed = True
+            rmtree(target)
+        elif os.path.exists(target):
+            raise BadBagRequest("Request path does not look like a data "+
+                                "component (it's a file in the metadata tree): "+
+                                destpath, bagname=self.bagname, sys=self)
+
+        # remove the data file if it exists
+        target = os.path.join(self.bag.data_dir, destpath)
+        if os.path.isfile(target):
+            removed = True
+            os.remove(target)
+        elif os.path.isdir(target):
+            removed = True
+            rmtree(target)
+
+        if destpath and trimcolls:
+            destpath = os.path.dirname(destpath)
+
+            # is this collection empty?
+            if destpath and len(self.bag.subcoll_children(destpath)) == 0:
+                if self.remove_component(destpath, trimcolls):
+                    removed = True
+
+        if not removed:
+            self.log.warning("Data component requested for removal does not exist in bag: %s",
+                             destpath)
+
+        return removed
+
+    def _remove_nonfile_component(self, compid):
+        if compid.startswith("@id:"):
+            compid = compid[len("@id:"):]
+        rmd, comps, found = self._fetch_nonfile_comp(compid)
+
+        removed = False
+        if found >= 0:
+            self.record("Removing non-file component, id="+compid)
+            del comps[found]
+            removed = True
+            self.replace_metadata_for("", rmd, "")
+
+        return removed
+
+    def replace_metadata_for(self, destpath, mdata, message=None):
+        """
+        Set the given metadata for the component with the given filepath or 
+        identifier (for non-file components), overwriting any metadata that 
+        may be there already.  Resource-level metadata can be set by providing
+        an empty string ("") as the destination path
+
+        Some care should be taken when using this method to set metadata as 
+        no checks are made on the validity of this metadata, nor is any merging 
+        with defaults done; the given metadata simply replaces any metadata 
+        already there.  Thus, it is easy to create a bag that is invalid 
+        against the NIST profile.  Instead, clients should prefer methods like
+        register_data_file(), update_metadata_for(), and define_component().
+
+        :param  str destpath: the component's filepath (when comptype is 
+                              DataFile, Subcollection, or similar downloadable
+                              type) or relative identifier (for other types).
+        :param dict mdata:    the metadata to write
+        :param  str message:  message to record in the bag's log when committing
+                              this definition.  A value of None (default) causes 
+                              a default message to be recorded.  To suppress a 
+                              message, provide an empty string. 
+        :return dict:  the metadata for the component
+        """
+        if destpath is None:
+            raise ValueError("replace_metadata_for: destpath cannont be None")
+        self.ensure_bagdir()
+
+        if destpath.startswith("@id:cmps/"):
+            # file-based
+            destpath = destpath[len("@id:cmps/"):]
+        if destpath.startswith("@id:"):
+            return self._replace_nonfile_metadata(destpath, mdata, message)
+        else:
+            return self._replace_file_metadata(destpath, mdata, message)
+
+    def _replace_file_metadata(self, destpath, mdata, msg=None, outfile=None):
+        if not outfile:
+            outfile = self.bag.nerd_file_for(destpath)
+            
+        if msg is None:
+            msg = "Setting "
+            if os.path.exists(self.bag.nerd_file_for(destpath)):
+                msg = "Over-writing "
+            if destpath:
+                msg += "component metadata: filepath="+destpath
+            else:
+                msg += "resource-level metadata"
+
+        try:
+            self.ensure_metadata_dirs(destpath)
+            if msg:
+                self.record(msg)
+            self._write_json(mdata, outfile)
+            self.ensure_ansc_collmd(destpath)
+        except Exception, ex:
+            self.log.exception("Trouble saving metadata for %s: %s",
+                               destpath, str(ex))
+            raise
+
+        return mdata
+        
+    def _replace_nonfile_metadata(self, compid, mdata, msg=None, outfile=None):
+        if not outfile:
+            outfile = self.bag.nerd_file_for("")
+
+        if compid.startswith("@id:"):
+            compid = compid[len("@id:"):]
+        if not compid:
+            raise BagWriteError("Empty component id provided when writing "+
+                                "metadata")    
+
+        self.ensure_bag_structure()
+
+        # look for a non-file component with the same identifier
+        comps = []
+        found = -1
+        if os.path.exists(outfile):
+            rmd = read_nerd(outfile)
+            comps, found = self._find_nonfile_comp_by_id(rmd, compid)
+        else:
+            rmd = {'components': comps}    
+
+        try:
+            mdata = deepcopy(mdata)
+            if '@id' not in mdata:
+                mdata['@id'] = compid
+            if found >= 0:
+                # replace the previously save metadata with the current ID
+                if msg is None:
+                    msg = "Over-writing metadata for component: id="+compid
+                if msg:
+                    self.record(msg)
+                comps[found] = mdata
+
+            else:
+                # add a new component
+                if msg is None:
+                    msg = "Setting metadata for new component: id="+compid
+                if msg:
+                    self.record(msg)
+                comps.append(mdata)
+
+            self._write_resmd(rmd, outfile)
+        except Exception as ex:
+            raise BagWriteError("Failed to write metadata for comp id="+compid+
+                                str(ex))
+        return mdata
+
+    def _find_nonfile_comp_by_id(self, resmd, compid):
+        # this finds non-file components; returns the component list and
+        # the index of the component with a matching ID
+        comps = []
+        found = -1 
+        try:
+            if 'components' in resmd:
+                comps = resmd['components']
+                for i in range(len(comps)):
+                    if '@id' in comps[i] and comps[i]['@id'] == compid:
+                        found = i
+                        break
+        except Exception as ex:
+            raise NERDError("Trouble interpreting existing JSON metadata " +
+                            "for id="+compid+": "+str(ex))
+        return (comps, found)
+
+    def _fetch_nonfile_comp(self, compid, comptype=None):
+        # this finds a non-file component with a matcthing ID, returning
+        # the base resource metadata node, the components list, and the
+        # index of the matching component.
+        comps = []
+        found = -1
+        if self._has_resmd():
+            rmd = self.bag.nerd_metadata_for("")
+            comps, found = self._find_nonfile_comp_by_id(rmd, compid)
+            if comptype and found >= 0 and comps[found] and \
+               not metadata_matches_type(comps[found], comptype):
+                raise StateException("Existing component not a "+comptype+
+                                     ": "+str(comps[found].get('@type',[])))
+        else:
+            rmd = { "components": comps }
+
+        return (rmd, comps, found)
+
+    def _has_nonfile_comp(self, compid):
+        rmd, comps, found = self._fetch_nonfile_comp(compid)
+        return found > -1
+    
+    def _create_init_md_for(self, destpath, comptype):
+        if destpath == "":
+            return self._create_defmd_fn['Resource']()
+        elif comptype in self._create_defmd_fn:
+            return self._create_defmd_fn[comptype](destpath)
+
+        if destpath.startswith("@id:") and ':' in comptype:
+            # handle an arbitrary non-file component.  comptype must
+            # have namespace prefix included
+            return {
+                "_schema": NERD_DEF + "Component",
+                "@context": NERDM_CONTEXT,
+                "@id": destpath[len("@id:"):],
+                "@type": [ comptype ]
+            }
+
+        raise BagWriteError("Unrecognized component type: "+str(comptype))
+
+
+    def update_metadata_for(self, destpath, mdata, comptype=None, message=None):
+        """
+        update the metadata for the given component of resource.  
+        Resource-level metadata can be updated by providing an empty
+        string as the component filepath.  The given metadata will be 
+        merged with the currently saved metadata.  If there are no metadata
+        yet saved for the filepath, the given metadata will be merged 
+        with default metadata.
+
+        When the metadata is merged, note that whole array values will be 
+        replaced with corresponding arrays from the input metadata; the 
+        arrays are not combined in any way.
+
+        :param str filepath:   the filepath to the component to update.  An
+                               empty string ("") updates the resource-level
+                               metadata.  If the filepath begins with a '@id:',
+                               it will be treated as the relative identifier
+                               for the component.
+        :param dict   mdata:   the new metadata to merge in
+        :param str comptype:   the distribution type to assume for the 
+                               component (with the default being "DataFile").  
+                               If the component exists and is not of this type,
+                               an exception will be raised; if it does not 
+                               exist, default metadata based on this type will
+                               be created.  
+        :param str message:   message to record in the bag's log when committing
+                              this definition.  A value of None (default) causes 
+                              a default message to be recorded.  To suppress a 
+                              message, provide an empty string. 
+        """
+        self.ensure_bag_structure()
+        if destpath.startswith("@id:cmps/"):
+            # file-based
+            destpath = destpath[len("@id:cmps/"):]
+
+        if not comptype and '@type' in mdata:
+            comptype = self._determine_comp_type(mdata)
+
+        if destpath.startswith("@id:"):
+            # non-file-based component
+            return self._update_nonfile_metadata(destpath, mdata, comptype,
+                                                 message)
+        else:
+            return self._update_file_metadata(destpath, mdata, comptype, message)
+
+            
+    def _update_nonfile_metadata(self, compid, mdata, comptype, msg=None):
+        if compid.startswith("@id:"):
+            compid = compid[len("@id:"):]
+        self.ensure_bag_structure()
+
+        rmd, comps, found = self._fetch_nonfile_comp(compid, comptype)
+        if found < 0:
+            # not found; get default data
+            if msg is None:
+                msg = "Creating new non-file component: id="+compid
+            md = self._create_init_md_for("@id:"+compid, comptype)
+            comps.append(md)
+            found = -1
+        elif msg is None:
+            msg = "Updating non-file component: id="+compid
+
+        if msg:
+            self.record(msg)
+        comps[found] = self._update_md(comps[found], mdata)
+        self._write_resmd(rmd)
+
+        return comps[found]
+
+    def _update_file_metadata(self, destpath, mdata, comptype, msg=None):
+        
+        if os.path.exists(self.bag.nerd_file_for(destpath)):
+            orig = self.bag.nerd_metadata_for(destpath)
+            if comptype and '@type' in orig and \
+               not metadata_matches_type(orig, comptype):
+                raise StateException("Existing component not a "+comptype+
+                                     ": "+str(orig.get('@type',[])))
+            if msg is None:
+                msg = "Updating %s metadata: %s" % (comptype, destpath)
+        else:
+            orig = self._create_init_md_for(destpath, comptype)
+            if msg is None:
+                if not destpath:
+                    msg = "Creating new resource-level metadata"
+                else:
+                    msg = "Creating new %s: %s" % (comptype, destpath)
+
+        mdata = self._update_md(orig, mdata)
+        out = self.bag.nerd_file_for(destpath)
+        self._replace_file_metadata(destpath, mdata, msg)
+        return mdata
+
+    def _update_md(self, orig, updates):
+        # update the values of orig with the values in updates
+        # this uses the same algorithm as used to merge config data
+        return merge_config(updates, orig)
+
+    def replace_annotations_for(self, destpath, mdata, message=None):
+        """
+        set the given metadata as the annotation metadata for a component of 
+        the given path or identifier, overwriting any metadata that may already 
+        be there.  Annotation metadata is NERDm metadata that is saved separately
+        from the normal metadata and not merged in until the bag is finalized 
+        (see class docuemtation for more information).  
+
+        Some care should be taken when using this method to set metadata as 
+        no checks are made on the validity of this metadata; thus, it is easy
+        to create a bag that is invalid against the NIST profile.  
+
+        :param  str destpath: the component's filepath (when comptype is 
+                              DataFile, Subcollection, or similar downloadable
+                              type) or relative identifier (for other types).
+        :param dict mdata:    the metadata to write
+        :param  str message:  message to record in the bag's log when committing
+                              this definition.  A value of None (default) causes 
+                              a default message to be recorded.  To suppress a 
+                              message, provide an empty string. 
+        :return dict:  the metadata for the component
+        """
+        if destpath is None:
+            raise ValueError("replace_annotations_for: destpath cannont be None")
+        self.ensure_bagdir()
+
+        if destpath.startswith("@id:cmps/"):
+            # file-based
+            destpath = destpath[len("@id:cmps/"):]
+
+        msg = message
+        if destpath.startswith("@id:"):
+            out = self.bag.annotations_file_for("")
+            if msg is None:
+                if os.path.exists(out):
+                    msg = "Over-writing annotations for component: id="+destpath
+                else:
+                    msg = "Setting annotations for component: id="+destpath
+            return self._replace_nonfile_metadata(destpath, mdata, message, out)
+
+        else:
+            out = self.bag.annotations_file_for(destpath)
+            if msg is None:
+                if os.path.exists(out):
+                    msg = "Over-writing annotations for component: filepath="+destpath
+                else:
+                    msg = "Setting annotations for component: filepath="+destpath
+            return self._replace_file_metadata(destpath, mdata, message, out)
+
+        
+    def update_annotations_for(self, destpath, mdata, comptype=None,
+                               message=None):
+        """
+        update the annotation metadata for the given component of resource.  
+        Annotation metadata is NERDm metadata that is saved separately
+        from the normal metadata and not merged in until the bag is finalized 
+        (see class docuemtation for more information).  
+
+        Resource-level metadata can be updated by providing an empty string as 
+        the component filepath.  The given metadata will be merged with the 
+        currently saved annotations.  Note that if destination component does 
+        not exist, it will be defined with the minimal default metadata.
+
+        Note that when the given metadata are merged with existing annotations, 
+        note that whole array values will be replaced with corresponding arrays 
+        from the input metadata; the arrays are not combined in any way.
+
+        :param str filepath:   the filepath to the component to update.  An
+                               empty string ("") updates the resource-level
+                               metadata.  If the filepath begins with a '@id:',
+                               it will be treated as the relative identifier
+                               for the component.
+        :param dict   mdata:   the new metadata to merge in
+        :param str comptype:   the distribution type to assume for the 
+                               component (with the default being "DataFile").  
+                               If the component exists and is not of this type,
+                               an exception will be raised; if it does not 
+                               exist, default metadata based on this type will
+                               be created.  
+        :param str message:   message to record in the bag's log when committing
+                              this definition.  A value of None (default) causes 
+                              a default message to be recorded.  To suppress a 
+                              message, provide an empty string. 
+        """
+        self.ensure_bag_structure()
+        if destpath.startswith("@id:cmps/"):
+            # file-based
+            destpath = destpath[len("@id:cmps/"):]
+
+        if destpath.startswith("@id:"):
+            # non-file-based component
+            return self._update_nonfile_annotations(destpath, mdata, comptype,
+                                                    message)
+        else:
+            return self._update_file_annotations(destpath, mdata, comptype,
+                                                 message)
+
+    def _update_file_annotations(self, destpath, mdata, comptype, message=None):
+        if not os.path.exists(self.bag.nerd_file_for(destpath)):
+            if not comptype:
+                comptype = (destpath and "DataFile") or "Resource"
+            self.define_component(destpath, comptype)
+        elif comptype:
+            orig = self.bag.nerd_metadata_for(destpath)
+            if '@type' in orig and not metadata_matches_type(orig, comptype):
+                raise StateException("Existing component not a "+comptype+
+                                     ": "+str(orig.get('@type',[])))
+        self.ensure_bag_structure()
+
+        afile = self.bag.annotations_file_for(destpath)
+        if os.path.exists(afile):
+            if message is None:
+                message = "Updating annoations for " + destpath
+            orig = read_nerd(afile)
+            mdata = self._update_md(orig, mdata)
+        else:
+            if message is None:
+                message = "Adding annotations for " + \
+                          (destpath or "the resource-level")
+        return self._replace_file_metadata(destpath, mdata, message, afile)
+
+    def _update_nonfile_annotations(self, compid, mdata,comptype,message=None):
+        if compid.startswith("@id:"):
+            compid = compid[len("@id:"):]
+        self.ensure_bag_structure()
+
+        rmd, comps, found = self._fetch_nonfile_comp(compid, comptype)
+        if found < 0:
+            if not comptype:
+                raise ValueError("No comptype value given; "+
+                                 "unable to initialize component, id="+compid)
+            self.define_component("@id:"+compid, comptype)
+            found = len(comps)
+
+        afile = self.bag.annotations_file_for("")
+        comps = []
+        found = -1
+        if os.path.exists(afile):
+            armd = read_nerd(afile)
+            comps, found = self._find_nonfile_comp_by_id(armd, compid)
+        else:
+            armd = { 'components': comps }
+
+        if found < 0:
+            comps.append({'@id': compid})
+        
+        comps[found] = self._update_md(comps[found], mdata)
+        self._write_resmd(armd, afile)
+
+        return comps[found]
+
+    def add_data_file(self, destpath, srcpath, register=True, hardlink=False,
+                      message=None, comptype=None):
+        """
+        add a data file into the bag at the given destination path.  Metadata
+        will be created for the file unless the register parameter is False.  
+        If a file already exists or is otherwise already registered for that 
+        destination, the file and associated will be over-written.  
+
+        Metadata is created for the file using the register_data_file() method,
+        and by default the file will be examined for extractable metadata.  
+        If one wants to avoid having the file examined, register should be set
+        to False and register_data_file() should be called separately with 
+        examine=False.  
 
         :param destpath str:   the desired path for the file relative to the 
                                root of the dataset.
         :param scrpath str:    the path to an existing file to copy into the 
                                bag's data directory.
+        :param register bool:  If True, create and add metadata for the file.
+                               If False, set only minimal metadata (via 
+                               define_component()).  
+                               Set this to False if the metadata was or will
+                               be set separately (e.g. via register_data_file()).
         :param hardlink bool:  If True, attempt to create a hard link to the 
                                file instead of copying it.  For this to be 
                                successful, the bag directory and the srcpath
@@ -462,292 +1148,191 @@ class BagBuilder(PreservationSystem):
                                will be attempted if linking fails if the 
                                configuration option 'copy_on_link_failure' is
                                not false.
-        :param initmd bool:    If True and a file is provided, the file will 
-                               be examined and extraction of metadata will be 
-                               attempted.  Resulting metadata will be written 
-                               into the metadata directory. 
+        :param  str message:  message to record in the bag's log when registering
+                              the file.  A value of None (default) causes 
+                              a default message to be recorded.  To suppress a 
+                              message, provide an empty string. 
+        :param str comptype:   the distribution type to assume for the 
+                               component.  If not specified, the type will be
+                               discerned by examining the file (defaulting 
+                               to "DataFile").  
         """
+        if not os.path.exists(srcpath):
+            raise BagWriteError("Unable add data file at %s: file not found: %s"
+                                % (destpath, srcpath))
         self.ensure_datafile_dirs(destpath)
-        outfile = os.path.join(self.bagdir, 'data', destpath)
 
-        msg = "Adding file, " + destpath
-        if initmd:
-            msg += ", and intializing metadata"
-        self.record(msg)
+        action = "Added"
+        if os.path.exists(os.path.join(self.bag.data_dir, destpath)):
+            action = "Replaced"
+
+        # insert the file into the data directory...
+        outfile = os.path.join(self.bag.data_dir, destpath)
+        if hardlink:
+            # ... as a hard link (faster, saves disk space)
+            try:
+                if os.path.exists(outfile):
+                    os.remove(outfile)
+                os.link(srcpath, outfile)
+                self.record("%s data file at %s" % (action, destpath))
+            except OSError, ex:
+                msg = "Unable to create link for data file ("+ destpath + \
+                      "): "+ str(ex)
+                if self.cfg.get('copy_on_link_failure', True):
+                    hardlink = False
+                    self.log.warning(msg)
+                else:
+                    self.log.exception(msg, exc_info=True)
+                    raise BagWriteError(msg, sys=self)
+        if not hardlink:
+            # ... by copying source (hard link is not possible or desired)
+            try:
+                filecopy(srcpath, outfile)
+                self.record("%s data file at %s" % (action, destpath))
+            except Exception, ex:
+                msg = "Unable to copy data file (" + srcpath + \
+                      ") into bag (" + outfile + "): " + str(ex)
+                self.log.exception(msg, exc_info=True)
+                raise BagWriteError(msg, cause=ex, sys=self)
+
+        # Now set its metadata
+        if register:
+            self.register_data_file(destpath, srcpath, True, comptype,
+                                    "...and updated its metadata.")
+
+    def register_data_file(self, destpath, srcpath=None, examine=True,
+                           comptype=None, message=None):
+        """
+        create and install metadata into the bag for the given file to be 
+        added at the given destination path.  The file itself is not actually 
+        inserted into the bag (see add_data_file()).  
+
+        :param str destpath:   the desired path for the file relative to the 
+                               root of the dataset.
+        :param str scrpath:    the path to an existing file that is being 
+                               registered.  If not provided, only minimal 
+                               metadata will be registered for the file
+                               (via define_component()).
+        :param bool examine:   If True, examine the file for extractable 
+                               metadata.  This includes the checksum.  
+        :param  str message:  message to record in the bag's log when registering
+                              the file.  A value of None (default) causes 
+                              a default message to be recorded.  To suppress a 
+                              message, provide an empty string. 
+        :param str comptype:   the distribution type to assume for the 
+                               component.  If not specified, the type will be
+                               discerned by examining the file (defaulting 
+                               to "DataFile").  
+        """
+        # determine the component type
+        if not comptype:
+            comptype = self._determine_file_comp_type(srcpath or destpath)
 
         if srcpath:
-            if hardlink:
-                try:
-                    os.link(srcpath, outfile)
-                    self.record("Added data file at "+destpath)
-                except OSError, ex:
-                    msg = "Unable to create link for data file ("+ destpath + \
-                          "): "+ str(ex)
-                    if self.cfg.get('copy_on_link_failure', True):
-                        hardlink = False
-                        self.log.warning(msg)
-                    else:
-                        self.log.exception(msg, exc_info=True)
-                        raise BagWriteError(msg, sys=self)
-            if not hardlink:
-                try:
-                    filecopy(srcpath, outfile)
-                    self.record("Added data file at "+destpath)
-                except Exception, ex:
-                    msg = "Unable to copy data file (" + srcpath + \
-                          ") into bag (" + outfile + "): " + str(ex)
-                    self.log.exception(msg, exc_info=True)
-                    raise BagWriteError(msg, cause=ex, sys=self)
-    
-        if initmd:
-            self.init_filemd_for(destpath, write=True, examine=srcpath)
-
-    def ensure_colls_for(self, destpath):
-        """
-        ensure that all enclosing collections for the component at destpath
-        have had their metadata initialized.  
-        """
-        destpath = os.path.dirname(destpath)
-        metadir = os.path.join(self.bagdir, "metadata")
-        while destpath != "":
-            mdfile = self.nerdm_file_for(destpath)
-            if not os.path.exists(mdfile):
-                self.init_collmd_for(destpath, write=True)
-
-            destpath = os.path.dirname(destpath)
-            
-    def add_metadata_for_file(self, destpath, mdata, disttype=None):
-        """
-        write metadata for the component at the given destination path to the 
-        proper location under the metadata directory.
-
-        This implementation will provide default values for key values that 
-        are missing.
-
-        :param destpath str:  the path to the data file that metadata is being
-                              provided for
-        :param mdata   dict:  a Mapping object containing the metadata to 
-                              associate with the file.  This will be merged 
-                              with default data.  
-        :param disttype str:  the default file distribution type to assign to 
-                              the file (with the default default being 
-                              "DataFile"); if examine is True, the type may 
-                              change based on inspection of the file.  
-        """
-        if not isinstance(mdata, Mapping):
-            raise NERDTypeError("dict", type(mdata), "NERDm Component")
-
-        if not disttype:
-            # get the disttype by consulting the metadata itself
-            if '@type' in mdata:
-                pfx = re.compile(r'^[^:]*:')
-                ftypes = [p for p in [pfx.sub('', t) for t in mdata['@type']]
-                            if p in self._file_types]
-                if len(ftypes) > 0:
-                    disttype = ftypes[0]
-        if not disttype:
-            # if a recognized file distribution type is not set in the metadata,
-            # default to DataFile
-            disttype = "DataFile"
-
-        md = self._create_init_filemd_for(destpath, disttype=disttype)
-        md.update(mdata)
-
-# We now have other types of files (e.g. ChecksumFile); do not ensure
-# DataFile type
-#
-#        try:
-#            if not isinstance(md['@type'], list):
-#                raise NERDTypeError('list', str(mdata['@type']), '@type')
-#
-#            if DATAFILE_TYPE not in md['@type']:
-#                md['@type'].append(DATAFILE_TYPE)
-#                    
-#        except TypeError, ex:
-#            raise NERDTypeError(msg="Unknown DataFile property type error",
-#                                cause=ex)
-
-        try:
-            self.ensure_metadata_dirs(destpath)
-            self.record("Adding file metadata for %s", destpath)
-            self._write_json(md, self.nerdm_file_for(destpath))
-        except Exception, ex:
-            self.log.exception("Trouble adding metadata: %s", str(ex))
-            raise
-
-    def add_metadata_for_coll(self, destpath, mdata):
-        """
-        write metadata for the component at the given destination path to the 
-        proper location under the metadata directory.
-        """
-        if not isinstance(mdata, Mapping):
-            raise NERDTypeError("dict", type(mdata), "NERDm Component")
-        
-        md = self._create_init_collmd_for(destpath)
-        md.update(mdata)
-        
-        try:
-            if not isinstance(md['@type'], list):
-                raise NERDTypeError('list', str(md['@type']), '@type')
-
-            if SUBCOLL_TYPE not in md['@type']:
-                md['@type'].append(SUBCOLL_TYPE)
-                    
-        except TypeError, ex:
-            raise NERDTypeError(msg="Unknown DataFile property type error",
-                                cause=ex)
-
-        try:
-            self.ensure_metadata_dirs(destpath)
-            self.record("Adding collection metadata for %s", destpath)
-            self._write_json(md, self.nerdm_file_for(destpath))
-        except Exception, ex:
-            self.log.exception("Trouble adding metadata: "+str(ex))
-            raise
-
-    def pod_file(self):
-        """
-        return the path to the output POD dataset metadata file
-        """
-        return os.path.join(self.bagdir, "metadata", POD_FILENAME)
-
-    def nerdm_file_for(self, destpath):
-        """
-        return the path to NERDm metadata file that corresponds to a data file
-        or subcollection with the given collection path.
-
-        :param destpath str:  the path to the data file relative to the 
-                              dataset's root.  An empty value indicates the 
-                              NERDm resource-level file.  
-        """
-        return os.path.join(self.bagdir, "metadata", destpath, FILEMD_FILENAME)
-
-    def annot_file_for(self, destpath):
-        """
-        return the path to NERDm metadata file that corresponds to a data file
-        or subcollection with the given collection path.
-
-        :param destpath str:  the path to the data file relative to the 
-                              dataset's root. (Caution: not the bag's root.)
-        """
-        return os.path.join(self.bagdir, "metadata", destpath,
-                            FILEANNOT_FILENAME)
-
-    def update_annot_for(self, destpath, mdata):
-        """
-        merge (via update) the given metadata into the annotation data for a 
-        given destination path in the bag.  The properties in the input data
-        will override that found in the annotation file (using dict.update()).
-
-        :param destpath str:  the path to the data file relative to the 
-                              dataset's root. (Caution: not the bag's root.)
-                              An empty string refers to the resource-level 
-                              metadata.  
-        :param mdata dict:    the metadata to merge in.  
-        """
-        if not mdata:
-            return
-        self.ensure_metadata_dirs(destpath)
-        annotf = self.annot_file_for(destpath)
-        if self.bagdir and os.path.exists(annotf):
-            amdata = read_nerd(annotf)
+            mdata = self.describe_data_file(srcpath, destpath, examine, comptype)
         else:
-            amdata = {}
-        amdata.update(mdata)
-        write_json(amdata, annotf)
+            mdata = self.define_component(destpath, comptype)
+            self._add_mediatype(destpath, mdata)
+            self.replace_metadata_for(destpath, mdata,'')
+
+        if message is None:
+            message = "adding file metadata for "+destpath
+        return self.replace_metadata_for(destpath, mdata, message)
+
+    def describe_data_file(self, srcpath, destpath=None, examine=True,
+                           comptype=None):
+        """
+        examine the given file and return a metadata description of it.  
+
+        :param str srcpath:    the full path to the file to examine
+        :param str destpath:   the expected destination path under the bag's 
+                               data subdirectory; this value will be set as the 
+                               'filepath' property.  If None, the source file's
+                               base filename will be used.
+        :param bool examine:   if False, restrict the examination to determining,
+                               the size and format (based on file extension 
+                               only) of the file; do not calculate the checksum
+                               nor evaluate the contents of the file.
+                               A value of True may engage a variety of 
+                               configured content evaluators and metadata
+                               extractors.  
+        :param str comptype:   the distribution type to assume for the 
+                               component.  If not specified, the type will be
+                               discerned by examining the file (defaulting 
+                               to "DataFile").  
+        """
+        if not destpath:
+            destpath = os.path.basename(srcpath)
+        
+        # determine the component type
+        if not comptype:
+            comptype = self._determine_file_comp_type(srcpath)
+            
+        mdata = self._create_init_md_for(destpath, comptype)
+
+        try:
+            self._add_file_specs(srcpath, mdata)
+            if examine:
+                self._add_checksum(srcpath, mdata)
+                self._add_extracted_metadata(srcpath, mdata)
+        except OSError as ex:
+            raise BagWriteError("Unable to examine data file for metadata: "+
+                                str(ex), cause=ex)
+
+        return mdata
+
+    def _determine_file_comp_type(self, filename):
+        ext = os.path.splitext(filename)[1][1:]
+        if ext in ["sha256", "sha512", "md5"]:
+            return "ChecksumFile"
+        return "DataFile"
+
+    def _determine_comp_type(self, mdata):
+        # this tries to figure out the comptype from the given metadata
+        if '@type' in mdata:
+            if any([':DataFile' in t for t in mdata['@type']]):
+                return "DataFile"
+            elif any([':ChecksumFile' in t for t in mdata['@type']]):
+                return "ChecksumFile"
+            elif any([':Subcollection' in t for t in mdata['@type']]):
+                return "Subcollection"
+            elif any([':PublicDataResource' in t for t in mdata['@type']]):
+                return "Resource"
+            else:
+                return mdata['@type'][0]
+        return None
             
 
-    def init_filemd_for(self, destpath, write=False, examine=None,
-                        disttype="DataFile"):
+    def get_file_specs(self, datafile, checksum=True):
         """
-        create some initial file metadata for a file at a given path.
+        return the OS file stats metadata in the NERDm model.  This includes the 
+        properties 'size', 'mediaType' (based on the file extension), and 
+        checksum (when checksum=True).
 
-        :param destpath str:  the path to the data file relative to the 
-                              dataset's root.
-        :param write   bool:  if True, write the metadata into its proper 
-                              location in the bag.  This will overwrite 
-                              any existing (non-annotation) metadata.  
-        :param examine str or bool:  if a str, it is taken to be the path 
-                              to a copy of the source data file to examine 
-                              to surmise and extract additional metadata.
-                              If it otherwise evaluates to True, the copy 
-                              previously copied to the output bag will be 
-                              examined.
-        :param disttype str:  the default file distribution type to assign to 
-                              the file (with the default default being 
-                              "DataFile"); if examine is True, the type may 
-                              change based on inspection of the file.  
+        :param str datafile:  the path to a file to be inspected for metadata
+        :param bool checksum: if True, calculate the file's checksum; otherwise,
+                              do not include the checksum.
         """
-        self.record("Initializing metadata for file %s", destpath)
-        mdata = self._create_init_filemd_for(destpath, disttype=disttype)
-        if examine:
-            if isinstance(examine, (str, unicode)):
-                datafile = examine
-            else:
-                datafile = os.path.join(self.bagdir, "data", destpath)
-                
-            self._add_mediatype(datafile, mdata, {})
-            if os.path.exists(datafile):
-                self._add_extracted_metadata(datafile, mdata,
-                                             self.cfg.get('file_md_extract'))
-            else:
-                log.warning("Unable to examine data file: doesn't exist (yet): "+
-                            destpath)
-        if write:
-            self.add_metadata_for_file(destpath, mdata)
-            self.ensure_ansc_collmd(destpath)
+        out = OrderedDict()
+        self._add_file_specs(datafile, out)
+        if checksum:
+            self._add_checksum(datafile, out)
+        return out
 
-        return mdata
+    def _add_file_specs(self, datafile, mdata):
+        # guess the media type base on the file extension
+        self._add_mediatype(datafile, mdata)
+        if os.path.exists(datafile):
+            self._add_osfile_metadata(datafile, mdata)
 
-    def init_collmd_for(self, destpath, write=False, examine=False):
-        """
-        create some initial subcollection metadata for a folder at a given path.
-
-        :param destpath str:  the path to the folder relative to the 
-                              dataset's root.
-        :param write   bool:  if True, write the metadata into its proper 
-                              location in the bag.  This will overwrite 
-                              any existing (non-annotation) metadata.  
-        :param examine bool:  if True, examine all files below the collection
-                              to extract additional metadata.
-        """
-        self.record("Initializing metadata for subcollection %s", destpath)
-        mdata = self._create_init_collmd_for(destpath)
-        if examine:
-            colldir = os.path.join(self.bagdir, "data", destpath)
-
-            # FIX
-            # if os.path.exist(datafile):
-            #    self._add_extracted_metadata(datafile, mdata,
-            #                                 self.cfg.get('file_md_extract'))
-            # else:
-            #     log.warning("Unable to examine data file: doesn't exist yet: " +
-            #                 destpath)
-        if write:
-            if destpath:
-                self.add_metadata_for_coll(destpath, mdata)
-            else:
-                self.log.error("Cannot put subcollection metadata in the root "+
-                               "collection; will skip writing")
-
-        return mdata
-
-    def _write_json(self, jsdata, destfile):
-        indent = self.cfg.get('json_indent', 4)
-        write_json(jsdata, destfile, indent)
-
-    def _add_extracted_metadata(self, dfile, mdata, config):
-        self._add_osfile_metadata(dfile, mdata, config)
-        self._add_checksum(dfile, mdata, config)
-
-    def _add_osfile_metadata(self, dfile, mdata, config):
+    def _add_osfile_metadata(self, dfile, mdata, config=None):
         mdata['size'] = os.stat(dfile).st_size
-    def _add_checksum(self, dfile, mdata, config):
+    def _add_checksum(self, dfile, mdata, config=None):
         mdata['checksum'] = {
             'algorithm': { '@type': "Thing", 'tag': 'sha256' },
             'hash': checksum_of(dfile)
         }
-    def _add_mediatype(self, dfile, mdata, config):
+    def _add_mediatype(self, dfile, mdata, config=None):
         if not self._mimetypes:
             mtfile = pkg_resources.resource_filename('nistoar.pdr',
                                                      'data/mime.types')
@@ -755,61 +1340,156 @@ class BagBuilder(PreservationSystem):
         mdata['mediaType'] = self._mimetypes.get(os.path.splitext(dfile)[1][1:],
                                                  'application/octet-stream')
 
-    _file_types = {
-        "DataFile": [
-            [ ":".join([NERDPUB_PRE, "DataFile"]),
-              ":".join([NERDPUB_PRE, "DownloadableFile"]),
-              "dcat:Distribution" ],
-            [ NERDPUB_DEF + "DataFile" ]
-        ],
-        "ChecksumFile": [
-            [ ":".join([NERDPUB_PRE, "ChecksumFile"]),
-              ":".join([NERDPUB_PRE, "DownloadableFile"]),
-              "dcat:Distribution" ],
-            [ NERDPUB_DEF + "ChecksumFile" ]
-        ]
-    }
-    _checksum_alg_names = { "sha256": "SHA-256" }
+    def _add_extracted_metadata(self, datafile, mdata, config=None):
+        # deeper extraction not yet supported.
+        pass
 
-    def _create_init_filemd_for(self, destpath, disttype="DataFile"):
-        if disttype not in self._file_types:
-            raise ValueError("Unsupported file distribution type: "+disttype)
-        out = {
-            "_schema": NERD_DEF + "Component",
-            "@context": NERDM_CONTEXT,
-            "@id": "cmps/" + urlencode(destpath),
-            "@type": deepcopy(self._file_types[disttype][0]),
-            "filepath": destpath,
-        }
-        if self.ediid:
-            out['downloadURL'] = self._download_url(self.ediid, destpath)
+    def add_res_nerd(self, mdata, savefilemd=True, message=None):
+        """
+        write out the resource-level NERDm data into the bag.  
 
-        if disttype == 'ChecksumFile':
-            fname = os.path.splitext(destpath)
-            if fname[1] and fname[1][1:] in self._checksum_alg_names:
-                out['algorithm'] = { "@type": "Thing", "tag": fname[1][1:] }
-                out['describes'] = "cmps/" + fname[0]
-                out['description'] = "checksum value for " + \
-                                     os.path.basename(fname[0])
-                out['description'] = self._checksum_alg_names[fname[1][1:]] + \
-                                     ' ' + out['description']
+        :param mdata      dict:  the JSON object containing the NERDm Resource 
+                                   metadata
+        :param savefilemd bool:  if True (default), any DataFile or 
+                                   Subcollection metadata will be split off and 
+                                   saved in the appropriate locations for 
+                                   file metadata.
+        :param message     str:  a message to record for the whole operation; this
+                                   will suppress messages for updating individual
+                                   file metadata (when savefilemd=True) as well as
+                                   the resource-level metadata. 
+        """
+        self.ensure_bag_structure()
+        mdata = deepcopy(mdata)
 
-        out["_extensionSchemas"] =  deepcopy(self._file_types[disttype][1])
+        msg = message
+        if msg is None:
+            msg = "Adding resourse-level metadata"
+        if msg:
+            self.record(msg)
+        
+        # validate type
+        if mdata.get("_schema") != NERDM_SCH_ID:
+            if self.cfg.get('ensure_nerdm_type_on_add', True):
+                raise NERDError("Not a NERDm Resource Record; wrong schema id: "+
+                                str(mdata.get("_schema")))
+            else:
+                self.log.warning("provided NERDm data does not look like a "+
+                                 "Resource record")
+        
+        msg = None
+        if message is not None:
+            msg = ""
+        if "components" in mdata:
+            components = mdata['components']
+            if not isinstance(components, list):
+                raise NERDTypeError("list", str(type(mdata['components'])),
+                                    'components')
+            for i in range(len(components)-1, -1, -1):
+                tps = components[i].get('@type',[])
+                comptype = None
+                if DATAFILE_TYPE in tps:
+                    comptype = "DataFile"
+                elif SUBCOLL_TYPE in tps:
+                    comptype = "Subcollection"
+                elif CHECKSUMFILE_TYPE in tps:
+                    comptype = "ChecksumFile"
+                elif DOWNLOADABLEFILE_TYPE in tps:
+                    comptype = ""
+                if comptype is not None:
+                    if savefilemd and 'filepath' not in components[i] and \
+                       components[i].get('@id','').startswith("cmps/"):
+                        components[i]['filepath'] = components[i]['@id'][5:]
+                    if savefilemd and 'filepath' not in components[i]:
+                        msg = "File component missing 'filepath' property"
+                        if '@id' in components[i]:
+                            msg += " ({0})".format(components[i]['@id'])
+                        self.log.warning(msg)
+                    else:
+                        if savefilemd:
+                            # update instead of replace (this sets defaults
+                            # internally)
+                            #
+                            # # ensure we have default metadata filled out
+                            # cmpmd = self._create_init_md_for(
+                            #    components[i]['filepath'], comptype)
+                            # cmpmd = self._update_md(cmpmd, components[i])
+                            # self.replace_metadata_for(cmpmd['filepath'], cmpmd)
+                            #
+                            self.update_metadata_for(components[i]['filepath'],
+                                                     components[i], comptype, msg)
+                        components.pop(i)
 
-        return out
+        if 'inventory' in mdata:
+            # we'll recalculate the inventory at the end; for now, get rid of it.
+            del mdata['inventory']
+        if 'dataHierarchy' in mdata:
+            # we'll recalculate the dataHierarchy at the end; for now, get rid
+            # of it.
+            del mdata['dataHierarchy']
+        if 'ediid' in mdata:
+            # this will trigger updates to DataFile components
+            self.ediid = mdata['ediid']
 
-    def _create_init_collmd_for(self, destpath):
-        out = {
-            "_schema": NERD_DEF + "Component",
-            "@context": NERDM_CONTEXT,
-            "@id": "cmps/" + urlencode(destpath),
-            "@type": [ ":".join([NERDPUB_PRE, "Subcollection"]) ],
-            "filepath": destpath,
-            "_extensionSchemas": [ NERDPUB_DEF + "Subcollection" ]
-        }
-        return out
-    
-    def finalize_bag(self, finalcfg=None):
+        defmd = self._create_init_md_for("", "Resource")
+        mdata = self._update_md(defmd, mdata)
+        # self.replace_metadata_for("", mdata, message="")
+        self.update_metadata_for("", mdata, "Resource", message="")
+
+    def add_ds_pod(self, pod, convert=True, savefilemd=True):
+        """
+        add the dataset-level POD data to the bag.  This will also, by default, 
+        be converted to NERD metadata and added as well.  
+
+        :param pod str or dict:  the POD Dataset metadata; if a str, the value
+                             is the full pathname to a file containing the JSON
+                             data; if it is a dictionary, it is the parsed JSON 
+                             metadata.
+        :param convert bool: if True, in addition to writing the POD file, it 
+                             will be converted to NERDm data and written out 
+                             as well.
+        :param savefilemd bool:  if True (default) and convert=True, any DataFile
+                             or Subcollection metadata will be split off and 
+                             saved in the appropriate locations for file 
+                             metadata.
+
+        :return dict:  the NERDm-converted metadata or None if convert=False
+        """
+        if not isinstance(pod, (str, unicode, Mapping)):
+            raise NERDTypeError("dict", type(pod), "POD Dataset")
+        self.ensure_bag_structure()
+
+        if self.log.isEnabledFor(logging.INFO):
+            msg = "Adding POD data"
+            if convert:
+                msg += " and converting to NERDm"
+            self.log.info(msg)
+
+        outfile = os.path.join(self.bagdir, "metadata", POD_FILENAME)
+        pdata = None
+        if not isinstance(pod, Mapping):
+            if convert:
+                pdata = read_pod(pod)
+            filecopy(pod, outfile)
+        else:
+            pdata = pod
+            self._write_json(pdata, outfile)
+
+        nerd = None
+        if convert:
+            useid = self.id
+            if useid is None:
+                useid = ""
+                
+            nerd = self.pod2nrd.convert_data(pdata, useid)
+            if not useid and '@id' in nerd:
+                self.log.warning("ARK identifier not set for resource")
+                del nerd['@id']
+            self.add_res_nerd(nerd, savefilemd)
+        return nerd
+
+
+    def finalize_bag(self, finalcfg=None, stop_logging=False):
         """
         Assume that all needed data and minimal metadata have been added to the
         bag and fill out the remaining bag components to complete the bag.
@@ -818,11 +1498,20 @@ class BagBuilder(PreservationSystem):
         behavior of the bag finalization.  If not provided, the configuration 
         property 'finalize' provided at construction will control finalization.
         The following finalize sub-properties will be recognized:
-          :param 'ensure_component_metadata' bool (True):   if True, this will ensure 
+          :prop 'ensure_component_metadata' bool (True):   if True, this will ensure 
                     that all data files and subcollections have been examined 
                     and had metadata extracted.  
-          :param 'trim_folders' bool (False):  if True, remove all empty data directories
+          :prop 'trim_folders' bool (False):  if True, remove all empty data 
+                    directories
+          :prop 'confirm_checksums' bool (False):  if True, double check that 
+                    recorded checksums are correct (by checksumming the data files)
 
+        :param dict finalcfg:      the 'finalize' configuration properties
+        :param bool stop_logging:  turn off logging to the bag-internal log file; 
+                                   this is useful when finalize_bag() is the last 
+                                   call made to this builder.  When True, any 
+                                   subsequent updates made with this instance will 
+                                   not get recorded in that log.  
         :return list:  a list of errors encountered while trying to complete
                        the bag.  An empty list indicates that the bag is complete
                        and ready to preserved.  
@@ -837,7 +1526,7 @@ class BagBuilder(PreservationSystem):
 
         # Make sure all remaining components have metadata
         if finalcfg.get('ensure_component_metadata', True):
-            self.ensure_comp_metadata(examine=True)
+            self.ensure_comp_metadata(updstats=True, extract=False)
         self.ensure_merged_annotations()
 
         # Now trim empty metadata folders
@@ -851,17 +1540,427 @@ class BagBuilder(PreservationSystem):
         # write_pidmapping_file
         self.write_about_file()
         # write_premis_file
-        self.ensure_baginfo()
-
-        # this file was used to assist when this bag is an update on an
-        # earlier version.  We no longer need it, so get rid of it.
-        deprecinfof = os.path.join(self.bagdir,"multibag","deprecated-info.txt")
-        if os.path.exists(deprecinfof):
-            os.remove(deprecinfof)
 
         self.log.error("Implementation of Bag finalization is not complete!")
         self.log.info("Bag does not include PREMIS and ORE files")
+        self.ensure_baginfo()
 
+        if stop_logging:
+            self._unset_logfile()
+            
+
+
+    def trim_data_folders(self, rmmeta=False):
+        """
+        look through the data directory for empty subdirectories and remove 
+        them.  This will also eliminate the corresponding metadata folders 
+        unless (1) they contain metadata files, AND (2) rmmeta is False.
+
+        :param rmmeta bool:  If False, only purge a corresponding metadata 
+                             directory if it contains no metadata.  If True,
+                             any metadata for components that do not exist
+                             under data nor in the fetch.txt will be removed. 
+        """
+        # ascend the data directory from leaves to root, looking for empty
+        # directories
+        droot = os.path.join(self.bagdir, "data")
+        mroot = os.path.join(self.bagdir, "metadata")
+        for ddir, subdirs, files in os.walk(droot, topdown=False):
+            if ddir == droot:
+                # don't delete the root "data" directory
+                continue
+            subdirs = [d for d in subdirs
+                         if os.path.exists(os.path.join(ddir, d))]
+            if len(files) == 0 and len(subdirs) == 0:
+                # the data directory is empty
+                try:
+                    os.rmdir(ddir)
+
+                    # check the contents of the corresponding metadata dir
+                    mdir = os.path.join(mroot, ddir[len(droot)+1:])
+                    if os.path.exists(mdir):
+                        if os.path.isdir(mdir):
+                            # is there anything in the metadata directory?
+                            mcont = [os.path.join(mdir, d)
+                                     for d in os.listdir(mdir)]
+
+                            # rm metadata directory if it's empty or rmmeta=True
+                            if len(mcont) == 0 or rmmeta:
+                                rmtree(mdir)
+
+                        else:
+                            self.log.error("NIST bag profile error: not a " +
+                                           "directory: " +
+                                  os.path.join("metadata", ddir[len(droot)+1:]))
+                except OSError, ex:
+                    self.log.exception("Failed to remove empty data dir: " +
+                                       ddir + ": " + str(ex))
+                    
+    def trim_metadata_folders(self):
+        """
+        look for empty directories in the metadata tree and remove them.  
+        """
+        mroot = os.path.join(self.bagdir, "metadata")
+        for mdir, subdirs, files in os.walk(mroot, topdown=False):
+            subdirs = [d for d in subdirs
+                         if os.path.exists(os.path.join(mdir, d))]
+            if len(files) == 0 and len(subdirs) == 0:
+                # the metadata directory is empty
+                try:
+                    os.rmdir(mdir)
+                except OSError, ex:
+                    self.log.exception("Failed to remove empty metadata dir: " +
+                                       mdir + ": " + str(ex))
+
+    def ensure_comp_metadata(self, updstats=False, extract=False):
+        """
+        iterate through all the data files found under the data directory
+        and ensure there is metadata describing them.  
+
+        :param bool updstats: if True, re-examine each file for for its 
+                              file specs metadata (i.e. size, type, checksum).
+                              If False, this metadata will only be set if 
+                              is not already set.
+        :param bool extract:  if True, examine the file and extract metadata
+                              from its contents.  If False, no metadata is 
+                              extracted.  
+        """
+        if not self.bag:
+            self.ensure_bagdir()
+        for dfile in self.bag.iter_data_files():
+            mdfile = self.bag.nerd_file_for(dfile)
+            dfpath = os.path.join(self.bag.data_dir, dfile)
+            if not os.path.exists(mdfile):
+                # no metadata found; start from scratch
+                comptype = self._determine_file_comp_type(dfile)
+                self.register_data_file(dfile, dfpath, extract, comptype)
+                if not extract:
+                    # register does not do checksum when examine=False;
+                    # get it now
+                    md = OrderedDict()
+                    self._add_checksum(dfpath, md)
+                    self.update_metadata_for(dfile, md,
+                                         message="Updating checksum for "+dfile)
+
+            else:
+                updcstats = updstats
+                md = self.bag.nerd_metadata_for(dfile)
+                if 'size' not in md or 'mediaType' not in md or \
+                   'checksum' not in md:
+                    updcstats = True
+                md = None
+                if updcstats:
+                    md = self.get_file_specs(dfpath, True)
+
+                if extract:
+                    if not md:
+                        md = OrderedDict()
+                    self._add_extracted_metadata(dfpath, md)
+
+                if md:
+                    self.update_metadata_for(dfile, md)
+                self.ensure_ansc_collmd(dfile)
+
+    def ensure_merged_annotations(self):
+        """
+        ensure that the annotations have been merged into the primary 
+        NERDm metadata.
+        """
+        # this implementation assumes that merging can be applied multiple
+        # times and give the same result.  (It would be better to determine
+        # if the annotation's already been applied and not repeat it, for
+        # performance reasons.)
+
+        mergeconv = self.cfg.get('merge_convention', DEF_MERGE_CONV)
+        self.record("Merging in annotations into all metdata")
+
+        # update the resource-level metadata
+        if os.path.exists(self.bag.annotations_file_for("")):
+            nerd = self.bag.nerd_metadata_for("", mergeconv)
+            self.replace_metadata_for("", nerd, message="")
+
+        # update the file metadata
+        for dfile in self._bag.iter_data_components():
+            if os.path.exists(self.bag.annotations_file_for(dfile)):
+                nerd = self.bag.nerd_metadata_for(dfile, mergeconv)
+                self.replace_metadata_for(dfile, nerd, message="")
+        
+    def ensure_bagit_ver(self):
+        """
+        ensure that the bag's bagit.txt file exists
+        """
+        if not os.path.exists(os.path.join(self.bagdir, "bagit.txt")):
+            self.write_bagit_ver()
+
+    def write_bagit_ver(self):
+        """
+        write the bagit.txt file
+        """
+        self.ensure_bagdir()
+        ver = self.cfg.get('bagit_version', "0.97")
+        enc = self.cfg.get('bagit_encoding', "UTF-8")
+
+        try: 
+            with open(os.path.join(self.bagdir, 'bagit.txt'), 'w') as fd:
+                print("BagIt-Version: "+ver, file=fd)
+                print("Tag-File-Character-Encoding: "+enc, file=fd)
+        except OSError, ex:
+            raise BagWriteError("Error writing bagit.txt: "+str(ex), cause=ex)
+
+    def write_data_manifest(self, confirm=False):
+        """
+        Write the manifest-<algorithm>.txt file based on the data files that 
+        are currently in the data directory.  Each datafile must have a 
+        corresponding metadata file that contains the correct checksum.  
+
+        :param confirm bool:  if False (default), the checksum found in the
+                              data file's metadata will be assumed to be 
+                              correct and added to the manifest file.  If 
+                              True, the checksum will be calculated to ensure
+                              the value in the metadata file is correct.
+        """
+        # the checksum should not be part of annotations (?).
+        # self.ensure_merged_annotations()
+        manfile = os.path.join(self.bagdir, "manifest-sha256.txt")
+        try:
+          with open(manfile, 'w') as fd:
+            for datapath in self.bag.iter_data_files():
+                md = self.bag.nerd_metadata_for(datapath, merge_annots=False)
+                checksum = md.get('checksum')
+                if not checksum or 'hash' not in checksum:
+                    raise BagProfileError("Missing checksum for datafile: "+
+                                          datapath)
+                algo = checksum.get('algorithm', {}).get('tag')
+                if algo != 'sha256':
+                    raise BagProfileError("Unexpected checksum algorithm found: "+
+                                          str(algo))
+                checksum = checksum['hash']
+                if confirm:
+                    if checksum_of(self._bag._full_dpath(datapath)) != checksum:
+                        raise BagProfileError("Checksum failure for "+datapath)
+
+                self._record_manifest_checksum(fd, checksum,
+                                               os.path.join('data', datapath))
+
+        except Exception, e:
+            if os.path.exists(manfile):
+                os.remove(manfile)
+            raise
+
+    def _record_manifest_checksum(self, fd, checksum, filepath):
+        fd.write(checksum)
+        fd.write(' ')
+        fd.write(filepath)
+        fd.write('\n')        
+                       
+    def ensure_baginfo(self, overwrite=False, merge_annots=False):
+        """
+        ensure that a complete bag-info.txt file is written out to the bag.
+        Any data that has already been written out will remain, and any missing
+        default information will be added.
+        """
+        if not self._bag:
+            self.ensure_bagdir()
+
+        initdata = deepcopy(self.cfg.get('init_bag_info', OrderedDict()))
+
+        # add items based on bag's contents
+        try:
+            nerdm = self._bag.nerd_metadata_for("", merge_annots)
+        except ComponentNotFound as ex:
+            raise BagProfileError("No resource metadata set! Can't set bag "+
+                                  "metadata")
+        if not nerdm.get('@id'):
+            raise BagProfileError("Resource identifier not set! Can't set bag "+
+                                  "metadata")
+        initdata['Bagging-Date'] = datetime.date.today().isoformat()
+        initdata['Bag-Group-Identifier'] = nerdm.get('ediid') or self.ediid
+        initdata['Internal-Sender-Identifier'] = self.bagname
+
+        desc = [p for p in nerdm.get('description', []) if len(p.strip()) > 0]
+        if desc:
+            initdata['External-Description'] = desc
+        else:
+            initdata['External-Description'] = \
+"This collection contains data for the NIST data resource entitled, {0}". \
+format(nerdm['title'])
+
+        initdata['External-Identifier'] = [self.id]
+        if nerdm.get('doi'):
+            initdata['External-Identifier'].append("doi:"+nerdm['doi'])
+
+        # Calculate the payload Oxum
+        oxum = self._measure_oxum(self._bag._datadir)
+        initdata['Payload-Oxum'] = "{0}.{1}".format(oxum[0], oxum[1])
+
+        # update the multibag version, deprecation
+        self.update_head_version(initdata, nerdm.get("version", "1"))
+
+        # write everything except Bag-Size
+        self.write_baginfo_data(initdata, overwrite=overwrite)
+
+        # calculate and write the size of the bag 
+        oxum = self._measure_oxum(self.bagdir)
+        size = self._format_bytes(oxum[0])
+        oxum[0] += len("Bag-Size: {0} ".format(size))
+        oxum[0] += len("Bag-Oxum: {0}.{1} ".format(oxum[0], oxum[1]))
+        size = self._format_bytes(oxum[0])
+        szdata = OrderedDict([
+            ('Bag-Oxum', "{0}.{1}".format(*oxum)),
+            ('Bag-Size', size),
+        ])
+        self.write_baginfo_data(szdata, overwrite=False)
+
+    def update_head_version(self, baginfo, version):
+        """
+        update the given bag info metadata with values for 
+        'Multibag-Head-Version' and possibly 'Multibag-Head-Deprecates'
+        """
+        baginfo['Multibag-Head-Version'] = version
+
+        # if there is a multibag/deprecated-info.txt, extract the
+        # 'Multibag-Head-Deprecates' values
+        #
+        multibagdir = baginfo.get('Multibag-Tag-Directory', 'multibag')
+        if isinstance(multibagdir, list):
+            multibagdir = (len(multibagdir) >0 and multibagdir[-1]) or 'multibag'
+        depinfof = os.path.join(self._bag.dir,multibagdir, "deprecated-info.txt")
+        
+        if os.path.exists(depinfof):
+            # indicates that this is an update to a previous version of the
+            # dataset.  Add deprecation information.
+            
+            depinfo = self._bag.get_baginfo(depinfof)
+
+            if 'Multibag-Head-Deprecates' not in baginfo:
+                baginfo['Multibag-Head-Deprecates'] = []
+
+            # add the previous head version
+            baginfo['Multibag-Head-Deprecates'].extend(
+                depinfo.get('Multibag-Head-Version', ["1"]) )
+
+            # add in all the previous deprecated versions
+            for val in depinfo.get('Multibag-Head-Deprecates', []):
+                if val not in baginfo['Multibag-Head-Deprecates']:
+                    baginfo['Multibag-Head-Deprecates'].append( val )
+                
+            # this file was used to assist when this bag is an update on an
+            # earlier version.  We no longer need it, so get rid of it.
+            os.remove(depinfof)
+
+    def _measure_oxum(self, rootdir):
+        return measure_dir_size(rootdir)
+
+    def _format_bytes(self, nbytes):
+        prefs = ["", "k", "M", "G", "T"]
+        ordr = 0
+        while nbytes >= 1000.0 and ordr < 4:
+            nbytes /= 1000.0
+            ordr += 1
+        pref = prefs[ordr]
+        ordr = 0
+        while nbytes >= 10.0:
+            nbytes /= 10.0
+            ordr += 1
+        nbytes = str(round(nbytes, 3) * 10**ordr)
+        if '.' in nbytes:
+            nbytes = re.sub(r"0+$", "", nbytes)
+        if nbytes.endswith('.'):
+            nbytes = nbytes[:-1]    
+        return "{0} {1}B".format(nbytes, pref)
+
+    def write_baginfo_data(self, data, altfile=None, overwrite=False):
+        """
+        write out specific data to the bag-info.txt file.  Normally, this will
+        append the provided data to the file.  Name-value pairs that already 
+        exist in the file will not be overwritten.
+
+        :param data dict:  a dictionary (preferably, an OrderedDict) containing
+                           the data to add.  
+        :param overwrite bool:  if True, any previously written data will be 
+                           cleared before writing the new data.  
+        """
+        if not isinstance(data, Mapping):
+            raise TypeError("write_baginfo_data(): Not a dictionary-like " +
+                            "object: "+type(data))
+
+        def upd_info(currdata, newdata):
+            out = OrderedDict()
+            for name, vals in newdata.items():
+                out[name] = []
+                if isinstance(vals, (str, unicode)) or \
+                   not isinstance(vals, Sequence):
+                    vals = [vals]
+                if name in currdata:
+                    for val in vals:
+                        if val not in currdata[name]:
+                            out[name].append(val)
+                else:
+                    out[name] = vals
+            return out
+
+        if not self._bag:
+            self.ensure_bagdir()
+        if not overwrite:
+            data = upd_info(self._bag.get_baginfo(altfile), data)
+        self._write_baginfo_data(data, altfile, overwrite)
+
+    def _write_baginfo_data(self, data, infofile=None, overwrite=False):
+        mode = 'w'
+        if not overwrite:
+            mode = 'a'
+
+        if not infofile:
+            infofile = os.path.join(self.bagdir, "bag-info.txt")
+        with open(infofile, mode) as fd:
+            for name, vals in data.items():
+                if isinstance(vals, (str, unicode)) or \
+                   not isinstance(vals, Sequence):
+                    vals = [vals]
+                for val in vals:
+                    out = "{0}: {1}".format(name, val.encode('utf-8'))
+                    if len(out) > 79:
+                        out = textwrap.fill(out, 79, subsequent_indent=' ')
+                    print(out, file=fd)
+
+    def write_mbag_files(self, overwrite=False):
+        """
+        write out tag files for the MultiBag BagIt profile.  
+        """
+        self.ensure_bagit_ver()
+
+        # Use the head bag interface provided by the external multibag package
+        # Note that previously saved data (i.e. cached from previously
+        # published version) will be retained.
+        hbag = open_headbag(self.bagdir)
+
+        # append the bag we're building to the member bag list and save
+        url = self.cfg.get('bag-download-url')
+        if url:
+            if not url.endswith('/'):
+                url += '/'
+            url += self.bagname
+        hbag.add_member_bag(self.bagname, url)
+        hbag.save_member_bags()
+
+        # update the file lookup with the contents of this new bag
+        for dir, sdirs, files in os.walk(self._bag.data_dir):
+            dir = dir[len(self.bagdir)+1:]
+            for f in files:
+                f = os.path.join(dir, f)
+                f = "/".join(f.split(os.sep))
+                hbag.add_file_lookup(f, self.bagname)
+        for dir, sdirs, files in os.walk(self._bag.metadata_dir):
+            dir = dir[len(self.bagdir)+1:]
+            for f in files:
+                f = os.path.join(dir, f)
+                f = "/".join(f.split(os.sep))
+                hbag.add_file_lookup(f, self.bagname)
+        for f in "preserv.log ore.txt premis.xml".split():
+            if hbag.exists(f):
+                hbag.add_file_lookup(f, self.bagname)
+        hbag.save_file_lookup()
+        
     def write_about_file(self, merge_annots=False):
         """
         Write out the about.txt file.  This requires that the resource-level
@@ -988,327 +2087,7 @@ class BagBuilder(PreservationSystem):
             raise BagWriteError("Problem writing about.txt file: " + str(ex),
                                 cause=ex)
 
-    def ensure_bagit_ver(self):
-        """
-        ensure that the bag's bagit.txt file exists
-        """
-        if not os.path.exists(os.path.join(self.bagdir, "bagit.txt")):
-            self.write_bagit_ver()
-
-    def write_bagit_ver(self):
-        """
-        write the bagit.txt file
-        """
-        self.ensure_bagdir()
-        ver = self.cfg.get('bagit_version', "0.97")
-        enc = self.cfg.get('bagit_encoding', "UTF-8")
-
-        try: 
-            with open(os.path.join(self.bagdir, 'bagit.txt'), 'w') as fd:
-                print("BagIt-Version: "+ver, file=fd)
-                print("Tag-File-Character-Encoding: "+enc, file=fd)
-        except OSError, ex:
-            raise BagWriteError("Error writing bagit.txt: "+str(ex), cause=ex)
-
-    def write_mbag_files(self, overwrite=False):
-        """
-        write out tag files for the MultiBag BagIt profile.  
-        """
-        self.ensure_bagit_ver()
-
-        # Use the head bag interface provided by the external multibag package
-        # Note that previously saved data (i.e. cached from previously
-        # published version) will be retained.
-        hbag = open_headbag(self.bagdir)
-
-        # append the bag we're building to the member bag list and save
-        url = self.cfg.get('bag-download-url')
-        if url:
-            if not url.endswith('/'):
-                url += '/'
-            url += self.bagname
-        hbag.add_member_bag(self.bagname, url)
-        hbag.save_member_bags()
-
-        # update the file lookup with the contents of this new bag
-        for dir, sdirs, files in os.walk(self._bag.data_dir):
-            dir = dir[len(self.bagdir)+1:]
-            for f in files:
-                f = os.path.join(dir, f)
-                f = "/".join(f.split(os.sep))
-                hbag.add_file_lookup(f, self.bagname)
-        for dir, sdirs, files in os.walk(self._bag.metadata_dir):
-            dir = dir[len(self.bagdir)+1:]
-            for f in files:
-                f = os.path.join(dir, f)
-                f = "/".join(f.split(os.sep))
-                hbag.add_file_lookup(f, self.bagname)
-        for f in "preserv.log ore.txt premis.xml".split():
-            if hbag.exists(f):
-                hbag.add_file_lookup(f, self.bagname)
-        hbag.save_file_lookup()
-        
-    def ensure_baginfo(self, overwrite=False, merge_annots=False):
-        """
-        ensure that a complete bag-info.txt file is written out to the bag.
-        Any data that has already been written out will remain, and any missing
-        default information will be added.
-        """
-        if not self._bag:
-            self.ensure_bagdir()
-
-        initdata = self.cfg.get('init_bag_info', OrderedDict())
-
-        # add items based on bag's contents
-        nerdm = self._bag.nerd_metadata_for("", merge_annots)
-        initdata['Bagging-Date'] = datetime.date.today().isoformat()
-        initdata['Bag-Group-Identifier'] = nerdm.get('ediid') or self.ediid
-        initdata['Internal-Sender-Identifier'] = self.bagname
-
-        desc = [p for p in nerdm.get('description', []) if len(p.strip()) > 0]
-        if desc:
-            initdata['External-Description'] = desc
-        else:
-            initdata['External-Description'] = \
-"This collection contains data for the NIST data resource entitled, {0}". \
-format(nerdm['title'])
-
-        initdata['External-Identifier'] = [self.id]
-        if nerdm.get('doi'):
-            initdata['External-Identifier'].append("doi:"+nerdm['doi'])
-
-        # Calculate the payload Oxum
-        oxum = self._measure_oxum(self._bag._datadir)
-        initdata['Payload-Oxum'] = "{0}.{1}".format(oxum[0], oxum[1])
-
-        # update the multibag version, deprecation
-        self.update_head_version(initdata, nerdm.get("version", "1"))
-
-        # write everything except Bag-Size
-        self.write_baginfo_data(initdata, overwrite=overwrite)
-
-        # calculate and write the size of the bag 
-        oxum = self._measure_oxum(self.bagdir)
-        size = self._format_bytes(oxum[0])
-        oxum[0] += len("Bag-Size: {0} ".format(size))
-        oxum[0] += len("Bag-Oxum: {0}.{1} ".format(oxum[0], oxum[1]))
-        size = self._format_bytes(oxum[0])
-        szdata = OrderedDict([
-            ('Bag-Oxum', "{0}.{1}".format(*oxum)),
-            ('Bag-Size', size),
-        ])
-        self.write_baginfo_data(szdata, overwrite=False)
-
-    def update_head_version(self, baginfo, version):
-        """
-        update the given bag info metadata with values for 
-        'Multibag-Head-Version' and possibly 'Multibag-Head-Deprecates'
-        """
-        baginfo['Multibag-Head-Version'] = version
-
-        # if there is a multibag/deprecated-info.txt, extract the
-        # 'Multibag-Head-Deprecates' values
-        #
-        multibagdir = baginfo.get('Multibag-Tag-Directory', 'multibag')
-        if isinstance(multibagdir, list):
-            multibagdir = (len(multibagdir) >0 and multibagdir[-1]) or 'multibag'
-        depinfof = os.path.join(self._bag.dir,multibagdir, "deprecated-info.txt")
-        
-        if os.path.exists(depinfof):
-            # indicates that this is an update to a previous version of the
-            # dataset.  Add deprecation information.
-            
-            depinfo = self._bag.get_baginfo(depinfof)
-
-            if 'Multibag-Head-Deprecates' not in baginfo:
-                baginfo['Multibag-Head-Deprecates'] = []
-
-            # add the previous head version
-            baginfo['Multibag-Head-Deprecates'].extend(
-                depinfo.get('Multibag-Head-Version', ["1"]) )
-
-            # add in all the previous deprecated versions
-            for val in depinfo.get('Multibag-Head-Deprecates', []):
-                if val not in baginfo['Multibag-Head-Deprecates']:
-                    baginfo['Multibag-Head-Deprecates'].append( val )
-                
-    def _measure_oxum(self, rootdir):
-        return measure_dir_size(rootdir)
-
-    def _format_bytes(self, nbytes):
-        prefs = ["", "k", "M", "G", "T"]
-        ordr = 0
-        while nbytes >= 1000.0 and ordr < 4:
-            nbytes /= 1000.0
-            ordr += 1
-        pref = prefs[ordr]
-        ordr = 0
-        while nbytes >= 10.0:
-            nbytes /= 10.0
-            ordr += 1
-        nbytes = str(round(nbytes, 3) * 10**ordr)
-        if '.' in nbytes:
-            nbytes = re.sub(r"0+$", "", nbytes)
-        if nbytes.endswith('.'):
-            nbytes = nbytes[:-1]    
-        return "{0} {1}B".format(nbytes, pref)
-
-    def write_baginfo_data(self, data, altfile=None, overwrite=False):
-        """
-        write out specific data to the bag-info.txt file.  Normally, this will
-        append the provided data to the file.  Name-value pairs that already 
-        exist in the file will not be overwritten.
-
-        :param data dict:  a dictionary (preferably, an OrderedDict) containing
-                           the data to add.  
-        :param overwrite bool:  if True, any previously written data will be 
-                           cleared before writing the new data.  
-        """
-        if not isinstance(data, Mapping):
-            raise TypeError("write_baginfo_data(): Not a dictionary-like " +
-                            "object: "+type(data))
-
-        def upd_info(currdata, newdata):
-            out = OrderedDict()
-            for name, vals in newdata.items():
-                out[name] = []
-                if isinstance(vals, (str, unicode)) or \
-                   not isinstance(vals, Sequence):
-                    vals = [vals]
-                if name in currdata:
-                    for val in vals:
-                        if val not in currdata[name]:
-                            out[name].append(val)
-                else:
-                    out[name] = vals
-            return out
-
-        if not self._bag:
-            self.ensure_bagdir()
-        if not overwrite:
-            data = upd_info(self._bag.get_baginfo(altfile), data)
-        self._write_baginfo_data(data, altfile, overwrite)
-
-    def _write_baginfo_data(self, data, infofile=None, overwrite=False):
-        mode = 'w'
-        if not overwrite:
-            mode = 'a'
-
-        if not infofile:
-            infofile = os.path.join(self.bagdir, "bag-info.txt")
-        with open(infofile, mode) as fd:
-            for name, vals in data.items():
-                if isinstance(vals, (str, unicode)) or \
-                   not isinstance(vals, Sequence):
-                    vals = [vals]
-                for val in vals:
-                    out = "{0}: {1}".format(name, val.encode('utf-8'))
-                    if len(out) > 79:
-                        out = textwrap.fill(out, 79, subsequent_indent=' ')
-                    print(out, file=fd)
-
-    def trim_data_folders(self, rmmeta=False):
-        """
-        look through the data directory for empty subdirectories and remove 
-        them.  This will also eliminate the corresponding metadata folders 
-        unless (1) they contain metadata files, AND (2) rmmeta is False.
-
-        :param rmmeta bool:  If False, only purge a corresponding metadata 
-                             directory if it contains no metadata.  If True,
-                             any metadata for components that do not exist
-                             under data nor in the fetch.txt will be removed. 
-        """
-        # ascend the data directory from leaves to root, looking for empty
-        # directories
-        droot = os.path.join(self.bagdir, "data")
-        mroot = os.path.join(self.bagdir, "metadata")
-        for ddir, subdirs, files in os.walk(droot, topdown=False):
-            if ddir == droot:
-                # don't delete the root "data" directory
-                continue
-            subdirs = [d for d in subdirs
-                         if os.path.exists(os.path.join(ddir, d))]
-            if len(files) == 0 and len(subdirs) == 0:
-                # the data directory is empty
-                try:
-                    os.rmdir(ddir)
-
-                    # check the contents of the corresponding metadata dir
-                    mdir = os.path.join(mroot, ddir[len(droot)+1:])
-                    if os.path.exists(mdir):
-                        if os.path.isdir(mdir):
-                            # is there anything in the metadata directory?
-                            mcont = [os.path.join(mdir, d)
-                                     for d in os.listdir(mdir)]
-
-                            # rm metadata directory if it's empty or rmmeta=True
-                            if len(mcont) == 0 or rmmeta:
-                                rmtree(mdir)
-
-                        else:
-                            self.log.error("NIST bag profile error: not a " +
-                                           "directory: " +
-                                  os.path.join("metadata", ddir[len(droot)+1:]))
-                except OSError, ex:
-                    self.log.exception("Failed to remove empty data dir: " +
-                                       ddir + ": " + str(ex))
-                    
-    def trim_metadata_folders(self):
-        """
-        look for empty directories in the metadata tree and remove them.  
-        """
-        mroot = os.path.join(self.bagdir, "metadata")
-        for mdir, subdirs, files in os.walk(mroot, topdown=False):
-            subdirs = [d for d in subdirs
-                         if os.path.exists(os.path.join(mdir, d))]
-            if len(files) == 0 and len(subdirs) == 0:
-                # the metadata directory is empty
-                try:
-                    os.rmdir(mdir)
-                except OSError, ex:
-                    self.log.exception("Failed to remove empty metadata dir: " +
-                                       mdir + ": " + str(ex))
-
-
-    def ensure_comp_metadata(self, examine=True):
-        """
-        iterate through all the data files found under the data directory
-        and ensure there is metadata describing them.  
-
-        :param examine bool:  if true, actually examine the files to extract
-                              additional metadata (e.g. size, checksum, type, 
-                              etc.)
-        """
-        if not self._bag:
-            self.ensure_bagdir()
-        for dfile in self._bag.iter_data_files():
-            mdfile = self._bag.nerd_file_for(dfile)
-            if examine or not os.path.exists(mdfile):
-                # we'll merge the new examination with the previous:
-                # except 'checksum', previous data will over-ride new 
-                if os.path.exists(mdfile):
-                    oldmd = self._bag.nerd_metadata_for(dfile, True)
-                else:
-                    oldmd = OrderedDict()
-
-                # generate metadata
-                md = self.init_filemd_for(dfile, write=False, examine=examine)
-
-                # merge it with the previous metadata
-                cksm = md.get('checksum')
-                sz = md.get('size')
-                md.update(oldmd)
-                override = {}
-                if cksm:
-                    override['checksum'] = cksm
-                if sz:
-                    override['size'] = sz
-                md.update(override)
-
-                # write it out
-                self.add_metadata_for_file(dfile, md)
-                self.ensure_ansc_collmd(dfile)
-
+    
 
     def __del__(self):
         self._unset_logfile()
@@ -1339,272 +2118,138 @@ format(nerdm['title'])
 
     def record(self, msg, *args, **kwargs):
         """
-        record a message indicating a relevent change made to this bag to 
-        go into this bag's log file.  
+        record a message in the bag's preservation log indicating a relevent 
+        change made to this bag.
         """
         self.log.log(NORM, msg, *args, **kwargs)
 
-    def add_res_nerd(self, mdata, savefilemd=True):
-        """
-        write out the resource-level NERDm data into the bag.  
+    _comp_types = {
+        "DataFile": [
+            [ ":".join([NERDPUB_PRE, "DataFile"]),
+              ":".join([NERDPUB_PRE, "DownloadableFile"]),
+              "dcat:Distribution" ],
+            [ NERDPUB_DEF + "DataFile" ]
+        ],
+        "ChecksumFile": [
+            [ ":".join([NERDPUB_PRE, "ChecksumFile"]),
+              ":".join([NERDPUB_PRE, "DownloadableFile"]),
+              "dcat:Distribution" ],
+            [ NERDPUB_DEF + "ChecksumFile" ]
+        ],
+        "Subcollection": [
+            [ ":".join([NERDPUB_PRE, "Subcollection"]) ],
+            [ NERDPUB_DEF + "Subcollection" ]
+        ],
+        "Resource": [
+            [ ":".join([NERDPUB_PRE, "PublicDataResource"]) ],
+            [ NERDPUB_DEF + "PublicDataResource" ]
+        ]
+    }
+    _checksum_alg_names = { "sha256": "SHA-256" }
 
-        :param mdata      dict:  the JSON object containing the NERDm Resource 
-                                   metadata
-        :param savefilemd bool:  if True (default), any DataFile or 
-                                   Subcollection metadata will be split off and 
-                                   saved in the appropriate locations for 
-                                   file metadata.
-        """
-        self.ensure_bag_structure()
-        mdata = deepcopy(mdata)
-
-        self.record("Adding resourse-level metadata")
-        
-        # validate type
-        if mdata.get("_schema") != NERDM_SCH_ID:
-            if self.cfg.get('ensure_nerdm_type_on_add', True):
-                raise NERDError("Not a NERDm Resource Record; wrong schema id: "+
-                                str(mdata.get("_schema")))
-            else:
-                self.log.warning("provided NERDm data does not look like a "+
-                                 "Resource record")
-        
-        if "components" in mdata:
-            components = mdata['components']
-            if not isinstance(components, list):
-                raise NERDTypeError("list", str(type(mdata['components'])),
-                                    'components')
-            for i in range(len(components)-1, -1, -1):
-                tps = components[i].get('@type',[])
-                if DOWNLOADABLEFILE_TYPE in tps or DATAFILE_TYPE in tps:
-                    if savefilemd and 'filepath' not in components[i]:
-                        msg = "DataFile missing 'filepath' property"
-                        if '@id' in components[i]:
-                            msg += " ({0})".format(components[i]['@id'])
-                        self.warning(msg)
-                    else:
-                        if savefilemd:
-                            self.add_metadata_for_file(components[i]['filepath'],
-                                                       components[i])
-                        components.pop(i)
-                            
-                elif SUBCOLL_TYPE in components[i].get('@type',[]):
-                    if savefilemd and 'filepath' not in components[i]:
-                        msg = "Subcollection missing 'filepath' property"
-                        if '@id' in components[i]:
-                            msg += " ({0})".format(components[i]['@id'])
-                        self.warning(msg)
-                    else:
-                        if savefilemd:
-                            self.add_metadata_for_coll(components[i]['filepath'],
-                                                       components[i])
-                        components.pop(i)
-
-        if 'inventory' in mdata:
-            # we'll recalculate the inventory at the end; for now, get rid of it.
-            del mdata['inventory']
-        if 'dataHierarchy' in mdata:
-            # we'll recalculate the dataHierarchy at the end; for now, get rid
-            # of it.
-            del mdata['dataHierarchy']
-        if 'ediid' in mdata:
-            # this will trigger updates to DataFile components
-            self.ediid = mdata['ediid']
-
-        self._write_json(mdata, self.nerdm_file_for(""))
-                                             
-
-    def add_ds_pod(self, pod, convert=True, savefilemd=True):
-        """
-        write out the dataset-level POD data into the bag.
-
-        :param pod str or dict:  the POD Dataset metadata; if a str, the value
-                             is the full pathname to a file containing the JSON
-                             data; if it is a dictionary, it is the parsed JSON 
-                             metadata.
-        :param convert bool: if True, in addition to writing the POD file, it 
-                             will be converted to NERDm data and written out 
-                             as well.
-        :param savefilemd bool:  if True (default) and convert=True, any DataFile
-                             or Subcollection metadata will be split off and 
-                             saved in the appropriate locations for file 
-                             metadata.
-
-        :return dict:  the NERDm-converted metadata or None if convert=False
-        """
-        if not isinstance(pod, (str, unicode, Mapping)):
-            raise NERDTypeError("dict", type(pod), "POD Dataset")
-        self.ensure_bag_structure()
-
-        if self.log.isEnabledFor(logging.INFO):
-            msg = "Adding POD data"
-            if convert:
-                msg += " and converting to NERDm"
-            self.log.info(msg)
-
-        outfile = os.path.join(self.bagdir, "metadata", POD_FILENAME)
-        pdata = None
-        if not isinstance(pod, Mapping):
-            if convert:
-                pdata = read_pod(pod)
-            filecopy(pod, outfile)
-        else:
-            pdata = pod
-            self._write_json(pdata, outfile)
-
-        nerd = None
-        if convert:
-            if not self._id:
-                self._id = self._mint_id(pdata.get('identifier'))
-                self.record("Assigning new identifier: " + self.id)
+    def _create_def_datafile_md(self, destpath):
+        if destpath.startswith("@id:"):
+            if not destpath.startswith("@id:cmps/"):
+                raise ValueError("incorrect identifier form for DataFile " +
+                                 "component: " + destpath)
+            destpath = destpath[len("@id:cmps/"):]
+        destpath = destpath.strip('/')
                 
-            nerd = self.pod2nrd.convert_data(pdata, self.id)
-            self.add_res_nerd(nerd, savefilemd)
-        return nerd
+        out = OrderedDict([
+            ("_schema", NERD_DEF + "Component"),
+            ("@context", NERDM_CONTEXT),
+            ("@id", "cmps/" + urlencode(destpath)),
+            ("@type", deepcopy(self._comp_types["DataFile"][0]))
+        ])
+        out["_extensionSchemas"] = deepcopy(self._comp_types["DataFile"][1])
+        out["filepath"] = destpath
+        if self.ediid:
+            out['downloadURL'] = self._download_url(self.ediid, destpath)
+        return out
 
-    def add_annotation_for(self, destpath, mdata):
-        """
-        add the given data as annotations to the metadata for the file or 
-        collection with the given path.  This metadata represents updates to 
-        the base level metadata.  This metadata will be merged in with the 
-        base level to create the final NERDm metadata (when finalize_bag() is 
-        called).  
+    def _create_def_chksum_md(self, destpath):
+        if destpath.startswith("@id:"):
+            if not destpath.startswith("@id:cmps/"):
+                raise ValueError("incorrect identifier form for ChecksumFile " +
+                                 "component: " + destpath)
+            destpath = destpath[len("@id:cmps/"):]
+                
+        out = OrderedDict([
+            ("_schema", NERD_DEF + "Component"),
+            ("@context", NERDM_CONTEXT),
+            ("@id", "cmps/" + urlencode(destpath)),
+            ("@type", deepcopy(self._comp_types["ChecksumFile"][0])),
+            ("filepath", destpath)
+        ])
+        if self.ediid:
+            out['downloadURL'] = self._download_url(self.ediid, destpath)
 
-        :param destpath str:   the desired path for the file relative to the 
-                               root of the dataset.  An empty string means that
-                               the annotation should be associated with the 
-                               resource-level metadata.
-        :param mdata Mapping:  a dictionary with the annotating metadata.
-        """
-        if not isinstance(mdata, Mapping):
-            raise NERDTypeError("dict", type(mdata), "Annotation data")
-        self.ensure_metadata_dirs(destpath)
-        self._write_json(mdata, self.annot_file_for(destpath))
+        fname = os.path.splitext(destpath)
+        if fname[1] and fname[1][1:] in self._checksum_alg_names:
+            out['algorithm'] = { "@type": "Thing", "tag": fname[1][1:] }
+            out['describes'] = "cmps/" + fname[0]
+            out['description'] = "checksum value for " + os.path.basename(fname[0])
+            out['description'] = self._checksum_alg_names[fname[1][1:]] + \
+                                 ' ' + out['description']
+
+        out["_extensionSchemas"] = deepcopy(self._comp_types["ChecksumFile"][1])
+        return out
+
+    def _create_def_subcoll_md(self, destpath):
+        if destpath.startswith("@id:"):
+            if not destpath.startswith("@id:cmps/"):
+                raise ValueError("incorrect identifier form for Subcollection " +
+                                 "component: " + destpath)
+            destpath = destpath[len("@id:cmps/"):]
+        destpath = destpath.strip('/')
+                
+        out = OrderedDict([
+            ("_schema", NERD_DEF + "Component"),
+            ("@context", NERDM_CONTEXT),
+            ("@id", "cmps/" + urlencode(destpath)),
+            ("@type", deepcopy(self._comp_types["Subcollection"][0])),
+            ("_extensionSchemas", deepcopy(self._comp_types["Subcollection"][1])),
+            ("filepath", destpath)
+        ])
+        return out
     
-    def remove_component(self, destpath, trimcolls=False):
-        """
-        remove a data file or subcollection and all its associated metadata 
-        from the bag.  
+    def _create_def_res_md(self, destpath="ignored"):
+        out = OrderedDict([
+            ("_schema", NERDM_SCH_ID),
+            ("@context", NERDM_CONTEXT),
+            ("@type", deepcopy(self._comp_types["Resource"][0])),
+            ("_extensionSchemas", deepcopy(self._comp_types["Resource"][1]))
+        ])
+        return out
+    
+    def _write_json(self, jsdata, destfile):
+        indent = self.cfg.get('json_indent', 4)
+        write_json(jsdata, destfile, indent)
 
-        Note that it is not an error to attempt to remove a component that 
-        does not actually exist in the bag; rather, a warning is written to 
-        the log.  
+    def _write_resmd(self, resmd, destfile=None):
+        # Coming: control the order that JSON properties are written
+        if not destfile:
+            destfile = self.bag.nerd_file_for("")
+        self._write_json(resmd, destfile)
 
-        :param destpath  str:  the root-collection-relative path to the data
-                               file
-        :parm trimcolls bool:  If True, remove any ancestor subcollections that
-                               become empty as a result of the removal.
-        :return bool:  True if anything was found and removed.  
-        """
-        removed = False
-        if not destpath:
-            raise ValueError("Empty destpath argument (not allowed to remove "
-                             "root collection)")
-        self.ensure_bag_structure()
-        
-        # First look for metadata
-        target = os.path.join(self.bagdir, "metadata", destpath)
-        if os.path.isdir(target):
-            removed = True
-            rmtree(target)
-        elif os.path.exists(target):
-            raise BadBagRequest("Request path does not look like a data "+
-                                "component (it's a file in the metadata tree): "+
-                                destpath, bagname=self.bagname, sys=self)
 
-        # remove the data file if it exists
-        target = os.path.join(self.bagdir, "data", destpath)
-        if os.path.isfile(target):
-            removed = True
-            os.remove(target)
-        elif os.path.isdir(target):
-            removed = True
-            rmtree(target)
+def metadata_matches_type(mdata, nodetype):
+    """
+    Return True if the given request type can be matched against any of the 
+    types assigned to given metadata.
+    """
+    if '@type' not in mdata:
+        return False
 
-        if destpath and trimcolls:
-            destpath = os.path.dirname(destpath)
+    types = mdata['@type']
+    return matches_type(types, nodetype)
 
-            # is this collection empty?
-            if destpath and len(self._bag.subcoll_children(destpath)) == 0:
-                if self.remove_component(destpath):
-                    removed = True
+def matches_type(types, nodetype):
+    if nodetype == "Resource":
+        nodetype = "PublicDataResource"
 
-        if not removed:
-            self.log.warning("Data component requested for removal does not exist in bag: %s",
-                             destpath)
+    if ':' not in nodetype:
+        basere = re.compile(r'^[^:]*:')
+        types = [basere.sub('', t) for t in types]
 
-        return removed
-
-    def write_data_manifest(self, confirm=False):
-        """
-        Write the manifest-<algorithm>.txt file based on the data files that 
-        are currently in the data directory.  Each datafile must have a 
-        corresponding metadata file that contains the correct checksum.  
-
-        :param confirm bool:  if False (default), the checksum found in the
-                              data file's metadata will be assumed to be 
-                              correct and added to the manifest file.  If 
-                              True, the checksum will be calculated to ensure
-                              the value in the metadata file is correct.
-        """
-        # the checksum should not be part of annotations (?).
-        # self.ensure_merged_annotations()
-        manfile = os.path.join(self.bagdir, "manifest-sha256.txt")
-        try:
-          with open(manfile, 'w') as fd:
-            for datapath in self._bag.iter_data_files():
-                md = self._bag.nerd_metadata_for(datapath, merge_annots=False)
-                checksum = md.get('checksum')
-                if not checksum or 'hash' not in checksum:
-                    raise BagProfileError("Missing checksum for datafile: "+
-                                          datapath)
-                algo = checksum.get('algorithm', {}).get('tag')
-                if algo != 'sha256':
-                    raise BagProfileError("Unexpected checksum algorithm found: "+
-                                          str(algo))
-                checksum = checksum['hash']
-                if confirm:
-                    if checksum_of(self._bag._full_dpath(datapath)) != checksum:
-                        raise BagProfileError("Checksum failure for "+datapath)
-
-                self._record_checksum(fd, checksum,os.path.join('data', datapath))
-
-        except Exception, e:
-            if os.path.exists(manfile):
-                os.remove(manfile)
-            raise
-
-    def _record_checksum(self, fd, checksum, filepath):
-        fd.write(checksum)
-        fd.write(' ')
-        fd.write(filepath)
-        fd.write('\n')        
-                       
-    def ensure_merged_annotations(self):
-        """
-        ensure that the annotations have been merged primary NERDm metadata.
-        """
-        # this implementation assumes that merging can be applied multiple
-        # times and give the same result.  (It would be better to determine
-        # if the annotation's already been applied and not repeat it, for
-        # performance reasons.)
-
-        mergeconv = self.cfg.get('merge_convention', DEF_MERGE_CONV)
-
-        # update the resource-level metadata
-        if os.path.exists(self.annot_file_for("")):
-            self.record("Updating resource-level metadata to merge "+
-                        "annotations...")
-            nerd = self._bag.nerd_metadata_for("", mergeconv)
-            self.add_res_nerd(nerd, False)
-
-        # update the file metadata
-        for dfile in self._bag.iter_data_components():
-            if os.path.exists(self.annot_file_for(dfile)):
-                nerd = self._bag.nerd_metadata_for(dfile, mergeconv)
-                self.add_metadata_for_file(dfile, nerd)
-        
-
-        
-        
-
+    return any([t == nodetype for t in types])

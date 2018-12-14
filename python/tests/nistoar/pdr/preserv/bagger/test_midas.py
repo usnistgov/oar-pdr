@@ -128,7 +128,7 @@ class TestMIDASMetadataBaggerMixed(test.TestCase):
         self.assertEqual(data.keys(), src.keys())  # confirms same order
 
         self.assertIsNotNone(self.bagr.resmd)
-        data = self.bagr.bagbldr._bag.nerd_metadata_for("", True)
+        data = self.bagr.bagbldr.bag.nerd_metadata_for("", True)
 
         # should contain only non-file components:
         self.assertEqual(len(data['components']), 1)
@@ -144,43 +144,74 @@ class TestMIDASMetadataBaggerMixed(test.TestCase):
 
         # spot check some key NERDm properties
         data = self.bagr.resmd
-        self.assertEqual(data['@id'], "ark:/88434/mds00hw91v")
+        self.assertNotIn('@id', data)
+        self.assertEqual(data['ediid'], self.midasid)
         self.assertEqual(data['doi'], "doi:10.18434/T4SW26")
-        self.assertEqual(len(data['components']), 4)
+        self.assertNotIn('foo', data)
+        self.assertEqual(len(data['components']), 7)
+        self.assertEqual(data['components'][0]['@type'][0], 'nrd:Hidden')
+        self.assertIsInstance(data['@context'], list)
+        self.assertEqual(len(data['@context']), 2)
+
+        # make sure file components were registered
+        self.assertTrue(os.path.isfile(
+            self.bagr.bagbldr.bag.nerd_file_for("trial1.json")))
+
+        # ensure indepodence, non-redundance
+        data = self.bagr.bagbldr.bag.nerd_metadata_for("")
+        data['foo'] = "bar"
+        data['doi'] = "doi:10.18434/FAKE"
+        utils.write_json(data, self.bagr.bagbldr.bag.nerd_file_for(""))
+        self.bagr.bagbldr.assign_id("ark:/88434/mds00hw91v")
+        self.bagr.ensure_res_metadata()
+        data = self.bagr.bagbldr.bag.nerd_metadata_for("")
+        self.assertEqual(data['@id'], "ark:/88434/mds00hw91v")
+        self.assertEqual(data['ediid'], self.midasid)
+        self.assertEqual(data['doi'], "doi:10.18434/FAKE")
+        self.assertEqual(data['foo'], "bar")
+        self.assertEqual(len(data['components']), 1)
         self.assertEqual(data['components'][0]['@type'][0], 'nrd:Hidden')
         self.assertIsInstance(data['@context'], list)
         self.assertEqual(len(data['@context']), 2)
         self.assertEqual(data['@context'][1]['@base'], data['@id'])
 
-    def test_data_file_inventory(self):
-        uplsip = os.path.join(self.upldir, self.midasid[32:])
-        revsip = os.path.join(self.revdir, self.midasid[32:])
+        self.bagr.ensure_res_metadata(force=True)
+        data = self.bagr.bagbldr.bag.nerd_metadata_for("")
+        self.assertEqual(data['@id'], "ark:/88434/mds00hw91v")
+        self.assertEqual(data['ediid'], self.midasid)
+        self.assertEqual(data['doi'], "doi:10.18434/T4SW26")
+        self.assertEqual(data['foo'], 'bar')
+        self.assertEqual(len(data['components']), 1)
+        self.assertEqual(data['components'][0]['@type'][0], 'nrd:Hidden')
+        self.assertIsInstance(data['@context'], list)
+        self.assertEqual(len(data['@context']), 2)
+        self.assertEqual(data['@context'][1]['@base'], data['@id'])
 
-        datafiles = self.bagr.data_file_inventory()
-        self.assertIsInstance(datafiles, dict)
-        self.assertEqual(len(datafiles), 5)
-        self.assertIn("trial1.json", datafiles)
-        self.assertIn("trial1.json.sha256", datafiles)
-        self.assertIn("trial2.json", datafiles)
-        self.assertIn("trial3/trial3a.json", datafiles)
-        self.assertIn("trial3/trial3a.json.sha256", datafiles)
-        self.assertEqual(datafiles["trial1.json"],
-                         os.path.join(revsip, "trial1.json"))
-        self.assertEqual(datafiles["trial2.json"],
-                         os.path.join(revsip, "trial2.json"))
-        # copy of trial3a.json in upload overrides
-        self.assertEqual(datafiles["trial3/trial3a.json"],
-                         os.path.join(uplsip, "trial3/trial3a.json"))
-
-    def test_data_file_distribs(self):
-        # pod has not been loaded yet
-        self.assertEqual(self.bagr.pod_file_distribs(), [])
-
+    def test_ensure_res_metadata_wremove(self):
+        self.assertFalse(os.path.exists(self.bagdir))
+        self.assertIsNone(self.bagr.inpodfile)
         self.bagr.ensure_res_metadata()
-        files = self.bagr.pod_file_distribs()
-        self.assertIn('trial1.json', files)
-        self.assertIn('trial2.json', files)
-        self.assertEqual(len(files), 3) # {trial1,trial2,sim}.json + access_comp
+
+        # make sure file components were registered
+        self.assertTrue(os.path.isfile(
+            self.bagr.bagbldr.bag.nerd_file_for("trial1.json")))
+
+        # add metadata for a data file that doesn't exist in the source dir
+        self.bagr.bagbldr.register_data_file(os.path.join("gold","trial5.json"),
+                                             os.path.join(self.revdir,
+                                                          self.midasid[32:],
+                                                          "trial1.json") )
+        self.assertTrue(os.path.isfile(
+            self.bagr.bagbldr.bag.nerd_file_for("gold/trial5.json")))
+
+        # now watch it get erased
+        self.bagr.ensure_res_metadata(force=True)
+        self.assertTrue(not os.path.exists(
+            self.bagr.bagbldr.bag.nerd_file_for("gold/trial5.json")))
+        self.assertTrue(not os.path.exists(
+            self.bagr.bagbldr.bag.nerd_file_for("gold")))
+        self.assertTrue(not os.path.exists(
+            os.path.dirname(self.bagr.bagbldr.bag.nerd_file_for("gold"))))
 
     def test_ensure_file_metadata(self):
         self.assertFalse(os.path.exists(self.bagdir))
@@ -196,10 +227,10 @@ class TestMIDASMetadataBaggerMixed(test.TestCase):
         self.assertTrue(os.path.exists(self.bagdir))
         self.assertTrue(os.path.exists(mdfile))
         mdfile = os.path.join(self.bagdir, 'metadata', destpath, "annot.json")
-        self.assertTrue(os.path.exists(mdfile))
+        self.assertTrue(not os.path.exists(mdfile))
 
-        data = self.bagr.bagbldr._bag.nerd_metadata_for(destpath, True)
-        self.assertEqual(data['size'], 70)
+        data = self.bagr.bagbldr.bag.nerd_metadata_for(destpath, True)
+        self.assertEqual(data['size'], 69)
         self.assertTrue(data['checksum']['hash'])
         self.assertEqual(data['downloadURL'], dlurl)
         self.assertNotIn('description', data)
@@ -212,13 +243,13 @@ class TestMIDASMetadataBaggerMixed(test.TestCase):
         destpath = os.path.join("trial3", "trial3a.json.sha256")
         dlurl = "https://data.nist.gov/od/ds/gurn/"+destpath
         dfile = os.path.join(self.revdir, self.midasid[32:], destpath)
-        self.bagr.ensure_file_metadata(dfile, destpath, disttype="ChecksumFile")
+        self.bagr.ensure_file_metadata(dfile, destpath)
 
         mdfile = os.path.join(self.bagdir, 'metadata', destpath, "nerdm.json")
         self.assertTrue(os.path.exists(self.bagdir))
         self.assertTrue(os.path.exists(mdfile))
 
-        data = self.bagr.bagbldr._bag.nerd_metadata_for(destpath, True)
+        data = self.bagr.bagbldr.bag.nerd_metadata_for(destpath, True)
         self.assertEqual(data['@type'][0], "nrdp:ChecksumFile")
         self.assertEqual(data['@type'][1], "nrdp:DownloadableFile")
         self.assertEqual(data['@type'][2], "dcat:Distribution")
@@ -232,97 +263,24 @@ class TestMIDASMetadataBaggerMixed(test.TestCase):
                          "cmps/"+os.path.splitext(destpath)[0])
         self.assertTrue(data['description'].startswith("SHA-256 checksum"))
 
-    def test_ensure_file_metadata_resmd(self):
-        # fix the config and recreate
-        self.bagr.cfg.setdefault('bag_builder', {})
-        self.bagr.cfg['bag_builder']['distrib_service_baseurl'] = \
-                        "https://testdata.nist.gov/od/ds"
-        self.bagr = midas.MIDASMetadataBagger(self.midasid, self.bagparent,
-                                              self.revdir, self.upldir,
-                                              self.bagr.cfg)
-        self.assertFalse(os.path.exists(self.bagdir))
-
-        self.bagr.ensure_res_metadata()
-
-        destpath = os.path.join("trial3", "trial3a.json")
-        dfile = os.path.join(self.upldir, self.midasid[32:], destpath)
-        self.bagr.ensure_file_metadata(dfile, destpath, self.bagr.resmd)
-
-        mdfile = os.path.join(self.bagdir, 'metadata', destpath, "nerdm.json")
-        self.assertTrue(os.path.exists(self.bagdir))
-        self.assertTrue(os.path.exists(mdfile))
-
-        data = self.bagr.bagbldr._bag.nerd_metadata_for(destpath, True)
-        self.assertEqual(data['size'], 70)
-        self.assertTrue(data['checksum']['hash'])
-        self.assertEqual(data['checksum']['algorithm'],
-                         { "@type": "Thing", "tag": "sha256" })
-        self.assertTrue(data['downloadURL'])
-        self.assertTrue(data['downloadURL'].startswith('https://testdata.nist.gov/'),
-                        "Unexpected downloadURL: "+ data['downloadURL'])
-
-        # trial3a.json has no matching distribution in _pod.json; thus, no desc
-        self.assertNotIn('description', data)
-
-        destpath = os.path.join("trial2.json")
-        dfile = os.path.join(self.revdir, self.midasid[32:], destpath)
-        self.bagr.ensure_file_metadata(dfile, destpath, self.bagr.resmd)
-
-        mdfile = os.path.join(self.bagdir, 'metadata', destpath, "nerdm.json")
-        self.assertTrue(os.path.exists(self.bagdir))
-        self.assertTrue(os.path.exists(mdfile))
-
-        data = self.bagr.bagbldr._bag.nerd_metadata_for(destpath, True)
-        self.assertEqual(data['size'], 69)
-        self.assertTrue(data['checksum']['hash'])
-        self.assertEqual(data['checksum']['algorithm'],
-                         { "@type": "Thing", "tag": "sha256" })
-        self.assertTrue(data['downloadURL'])
-        self.assertTrue(data['description'])
-
     def test_ensure_data_files(self):
-        metadir = os.path.join(self.bagdir, 'metadata')
-        self.assertFalse(os.path.exists(self.bagdir))
+        metadir = os.path.join(self.bagr.bagdir, 'metadata')
+        self.assertFalse(os.path.exists(self.bagr.bagdir))
         self.assertIsNone(self.bagr.datafiles)
 
         self.bagr.ensure_data_files()
         self.assertIsNotNone(self.bagr.datafiles)
-        self.assertEqual(len(self.bagr.datafiles), 5)
+        self.assertEqual(len(self.bagr.datafiles), 4)
         self.assertEqual(len([d for d in self.bagr.datafiles.keys()
-                                if d.endswith(".sha256")]), 2)
+                                if d.endswith(".sha256")]), 1)
 
         self.assertTrue(os.path.exists(metadir))
         for filepath in self.bagr.datafiles:
             self.assertTrue(os.path.exists(os.path.join(metadir, filepath,
                                                         "nerdm.json")))
-        
-    def test_ensure_data_files_wremove(self):
-        metadir = os.path.join(self.bagdir, 'metadata')
-        self.assertFalse(os.path.exists(self.bagdir))
-        self.assertIsNone(self.bagr.datafiles)
-
-        self.bagr.ensure_data_files()
-        self.assertIsNotNone(self.bagr.datafiles)
-
-        self.assertTrue(os.path.exists(metadir))
-        for filepath in self.bagr.datafiles:
-            self.assertTrue(os.path.exists(os.path.join(metadir, filepath,
-                                                        "nerdm.json")))
-
-        self.bagr.bagbldr.init_filemd_for( os.path.join("gold","trial5.json"),
-                                           write=True,
-                                           examine=os.path.join(self.revdir,
-                                                               self.midasid[32:],
-                                                                "trial1.json") )
-        t5path = os.path.join( metadir,"gold","trial5.json","nerdm.json")
-        self.assertTrue(os.path.exists(t5path))
-
-        self.bagr.ensure_data_files()
-        self.assertTrue(os.path.exists(metadir))
-        for filepath in self.bagr.datafiles:
-            self.assertTrue(os.path.exists(os.path.join(metadir, filepath,
-                                                        "nerdm.json")))
-        self.assertFalse(os.path.exists(t5path))
+            comp = self.bagr.bagbldr.bag.nerd_metadata_for(filepath)
+            self.assertIn('size', comp)
+            self.assertIn('checksum', comp)
         
     def test_check_checksum_files(self):
         metadir = os.path.join(self.bagdir, 'metadata')
@@ -332,21 +290,21 @@ class TestMIDASMetadataBaggerMixed(test.TestCase):
         self.bagr.ensure_data_files()
         valid = []
         invalid = []
-        for df in self.bagr.datafiles:
-            nerd = self.bagr.bagbldr._bag.nerd_metadata_for(df, True)
-#            nerdf = os.path.join(self.bagr.bagdir,"metadata",df,"nerdm.json")
-#            with open(nerdf) as fd:
-#                nerd = json.load(fd)
-            if not any([":ChecksumFile" in t for t in nerd.get('@type',[])]):
+        unknn = []
+        for comp in self.bagr.resmd.get('components',[]):
+            if not any([":ChecksumFile" in t for t in comp.get('@type',[])]):
                 continue
-            if 'valid' in nerd and nerd['valid'] is True:
-                valid.append(df)
+            if 'valid' not in comp:
+                unknn.append(comp['filepath'])
+            elif comp['valid'] is True:
+                valid.append(comp['filepath'])
             else:
-                invalid.append(df)
+                invalid.append(comp['filepath'])
 
-        self.assertEqual(len(valid) + len(invalid), 2)
-        self.assertIn("trial1.json.sha256", valid)
-        self.assertIn("trial3/trial3a.json.sha256", invalid)
+        self.assertEqual(len(unknn) + len(valid) + len(invalid), 1)
+        self.assertEqual(unknn, [])
+        self.assertEqual(valid, [])
+        self.assertEqual(invalid, ["trial3/trial3a.json.sha256"])
         
         
     def test_ensure_subcoll_metadata(self):
@@ -359,7 +317,7 @@ class TestMIDASMetadataBaggerMixed(test.TestCase):
         mdfile = os.path.join(metadir, "trial3", "nerdm.json")
         self.assertTrue(os.path.exists(mdfile))
 
-        mdata = self.bagr.bagbldr._bag.nerd_metadata_for("trial3", True)
+        mdata = self.bagr.bagbldr.bag.nerd_metadata_for("trial3", True)
         self.assertEqual(mdata['filepath'], "trial3")
         self.assertIn("nrdp:Subcollection", mdata['@type'])
 
@@ -384,7 +342,7 @@ class TestMIDASMetadataBaggerMixed(test.TestCase):
         mdfile = os.path.join(metadir, "trial3", "nerdm.json")
         self.assertTrue(os.path.exists(mdfile))
 
-        mdata = self.bagr.bagbldr._bag.nerd_metadata_for("trial3", True)
+        mdata = self.bagr.bagbldr.bag.nerd_metadata_for("trial3", True)
         self.assertEqual(mdata['filepath'], "trial3")
         self.assertIn("nrdp:Subcollection", mdata['@type'])
         
@@ -397,6 +355,51 @@ class TestMIDASMetadataBaggerMixed(test.TestCase):
         self.assertIsNotNone(self.bagr.datafiles)
         self.assertFalse(not os.path.exists(self.bagdir))
         
+    def test_registered_files(self):
+        uplsip = os.path.join(self.upldir, self.midasid[32:])
+        revsip = os.path.join(self.revdir, self.midasid[32:])
+
+        self.assertEquals(self.bagr.registered_files(), {})
+
+        self.bagr.ensure_res_metadata()
+
+        datafiles = self.bagr.registered_files()
+        self.assertIsInstance(datafiles, dict)
+        self.assertIn("trial1.json", datafiles)
+        self.assertNotIn("trial1.json.sha256", datafiles)
+        self.assertIn("trial2.json", datafiles)
+        self.assertIn("trial3/trial3a.json", datafiles)
+        self.assertIn("trial3/trial3a.json.sha256", datafiles)
+        self.assertEqual(datafiles["trial1.json"],
+                         os.path.join(revsip, "trial1.json"))
+        self.assertEqual(datafiles["trial2.json"],
+                         os.path.join(revsip, "trial2.json"))
+        # copy of trial3a.json in upload overrides
+        self.assertEqual(datafiles["trial3/trial3a.json"],
+                         os.path.join(uplsip, "trial3/trial3a.json"))
+        self.assertEqual(len(datafiles), 4)
+
+    def test_available_files(self):
+        uplsip = os.path.join(self.upldir, self.midasid[32:])
+        revsip = os.path.join(self.revdir, self.midasid[32:])
+
+        datafiles = self.bagr.available_files()
+        self.assertIsInstance(datafiles, dict)
+        self.assertEqual(len(datafiles), 5)
+        self.assertIn("trial1.json", datafiles)
+        self.assertIn("trial1.json.sha256", datafiles)
+        self.assertIn("trial2.json", datafiles)
+        self.assertIn("trial3/trial3a.json", datafiles)
+        self.assertIn("trial3/trial3a.json.sha256", datafiles)
+        self.assertEqual(datafiles["trial1.json"],
+                         os.path.join(revsip, "trial1.json"))
+        self.assertEqual(datafiles["trial2.json"],
+                         os.path.join(revsip, "trial2.json"))
+        # copy of trial3a.json in upload overrides
+        self.assertEqual(datafiles["trial3/trial3a.json"],
+                         os.path.join(uplsip, "trial3/trial3a.json"))
+        self.assertEqual(len(datafiles), 5)
+
 class TestMIDASMetadataBaggerReview(test.TestCase):
 
     testsip = os.path.join(datadir, "midassip")
@@ -431,10 +434,59 @@ class TestMIDASMetadataBaggerReview(test.TestCase):
         self.assertEquals(self.bagr.find_pod_file(),
                          os.path.join(self.revdir,self.midasid[32:],'_pod.json'))
 
-    def test_data_file_inventory(self):
+    def test_ensure_data_files(self):
+        metadir = os.path.join(self.bagr.bagdir, 'metadata')
+        self.assertFalse(os.path.exists(self.bagr.bagdir))
+        self.assertIsNone(self.bagr.datafiles)
+
+        self.bagr.ensure_data_files()
+        self.assertIsNotNone(self.bagr.datafiles)
+        self.assertEqual(len(self.bagr.datafiles), 5)
+        self.assertEqual(len([d for d in self.bagr.datafiles.keys()
+                                if d.endswith(".sha256")]), 2)
+
+        self.assertTrue(os.path.exists(metadir))
+        for filepath in self.bagr.datafiles:
+            self.assertTrue(os.path.exists(os.path.join(metadir, filepath,
+                                                        "nerdm.json")))
+            comp = self.bagr.bagbldr.bag.nerd_metadata_for(filepath)
+            self.assertIn('size', comp)
+            self.assertIn('checksum', comp)
+        
+    def test_check_checksum_files(self):
+        metadir = os.path.join(self.bagr.bagdir, 'metadata')
+        self.assertFalse(os.path.exists(self.bagr.bagdir))
+        self.assertIsNone(self.bagr.datafiles)
+
+        self.bagr.ensure_data_files()
+        valid = []
+        invalid = []
+        unknn = []
+        for comp in self.bagr.resmd.get('components',[]):
+            if not any([":ChecksumFile" in t for t in comp.get('@type',[])]):
+                continue
+            if 'valid' not in comp:
+                unknn.append(comp['filepath'])
+            elif comp['valid'] is True:
+                valid.append(comp['filepath'])
+            else:
+                invalid.append(comp['filepath'])
+
+        self.assertEqual(len(unknn) + len(valid) + len(invalid), 2)
+        self.assertEqual(unknn, [])
+        self.assertEqual(invalid, [])
+        self.assertIn("trial3/trial3a.json.sha256", valid)
+        self.assertIn("trial1.json.sha256", valid)
+        
+        
+    def test_registered_files(self):
         revsip = os.path.join(self.revdir, self.midasid[32:])
 
-        datafiles = self.bagr.data_file_inventory()
+        self.assertEquals(self.bagr.registered_files(), {})
+
+        self.bagr.ensure_res_metadata()
+
+        datafiles = self.bagr.registered_files()
         self.assertIsInstance(datafiles, dict)
         self.assertEqual(len(datafiles), 5)
         self.assertIn("trial1.json", datafiles)
@@ -442,14 +494,32 @@ class TestMIDASMetadataBaggerReview(test.TestCase):
         self.assertIn("trial2.json", datafiles)
         self.assertIn("trial3/trial3a.json", datafiles)
         self.assertIn("trial3/trial3a.json.sha256", datafiles)
-
-        # files are only found in the review area
         self.assertEqual(datafiles["trial1.json"],
                          os.path.join(revsip, "trial1.json"))
         self.assertEqual(datafiles["trial2.json"],
                          os.path.join(revsip, "trial2.json"))
         self.assertEqual(datafiles["trial3/trial3a.json"],
                          os.path.join(revsip, "trial3/trial3a.json"))
+        self.assertEqual(len(datafiles), 5)
+
+    def test_available_files(self):
+        revsip = os.path.join(self.revdir, self.midasid[32:])
+
+        datafiles = self.bagr.available_files()
+        self.assertIsInstance(datafiles, dict)
+        self.assertEqual(len(datafiles), 5)
+        self.assertIn("trial1.json", datafiles)
+        self.assertIn("trial1.json.sha256", datafiles)
+        self.assertIn("trial2.json", datafiles)
+        self.assertIn("trial3/trial3a.json", datafiles)
+        self.assertIn("trial3/trial3a.json.sha256", datafiles)
+        self.assertEqual(datafiles["trial1.json"],
+                         os.path.join(revsip, "trial1.json"))
+        self.assertEqual(datafiles["trial2.json"],
+                         os.path.join(revsip, "trial2.json"))
+        self.assertEqual(datafiles["trial3/trial3a.json"],
+                         os.path.join(revsip, "trial3/trial3a.json"))
+        self.assertEqual(len(datafiles), 5)
 
 
 class TestMIDASMetadataBaggerUpload(test.TestCase):
@@ -460,7 +530,7 @@ class TestMIDASMetadataBaggerUpload(test.TestCase):
     def setUp(self):
         self.tf = Tempfiles()
         self.bagparent = self.tf.mkdir("bagger")
-        self.upldir = os.path.join(self.testsip, "review")
+        self.upldir = os.path.join(self.testsip, "upload")
         self.bagr = midas.MIDASMetadataBagger(self.midasid, self.bagparent,
                                               None, self.upldir)
 
@@ -486,25 +556,84 @@ class TestMIDASMetadataBaggerUpload(test.TestCase):
         self.assertEquals(self.bagr.find_pod_file(),
                           os.path.join(self.upldir,self.midasid[32:],'_pod.json'))
 
-    def test_data_file_inventory(self):
+    def test_ensure_data_files(self):
+        metadir = os.path.join(self.bagr.bagdir, 'metadata')
+        self.assertFalse(os.path.exists(self.bagr.bagdir))
+        self.assertIsNone(self.bagr.datafiles)
+
+        self.bagr.ensure_data_files()
+        self.assertIsNotNone(self.bagr.datafiles)
+        self.assertEqual(len(self.bagr.datafiles), 1)
+        self.assertEqual(len([d for d in self.bagr.datafiles.keys()
+                                if d.endswith(".sha256")]), 0)
+
+        self.assertTrue(os.path.exists(metadir))
+        for filepath in self.bagr.datafiles:
+            self.assertTrue(os.path.exists(os.path.join(metadir, filepath,
+                                                        "nerdm.json")))
+            comp = self.bagr.bagbldr.bag.nerd_metadata_for(filepath)
+            self.assertIn('size', comp)
+            self.assertIn('checksum', comp)
+        
+    def test_check_checksum_files(self):
+        metadir = os.path.join(self.bagr.bagdir, 'metadata')
+        self.assertFalse(os.path.exists(self.bagr.bagdir))
+        self.assertIsNone(self.bagr.datafiles)
+
+        self.bagr.ensure_data_files()
+        valid = []
+        invalid = []
+        unknn = []
+        for comp in self.bagr.resmd.get('components',[]):
+            if not any([":ChecksumFile" in t for t in comp.get('@type',[])]):
+                continue
+            if 'valid' not in comp:
+                unknn.append(comp['filepath'])
+            elif comp['valid'] is True:
+                valid.append(comp['filepath'])
+            else:
+                invalid.append(comp['filepath'])
+
+        self.assertEqual(len(unknn) + len(valid) + len(invalid), 1)
+        self.assertEqual(unknn, ['trial3/trial3a.json.sha256'])
+        self.assertEqual(invalid, [])
+        self.assertEqual(valid, [])
+        
+        
+    def test_registered_files(self):
         uplsip = os.path.join(self.upldir, self.midasid[32:])
 
-        datafiles = self.bagr.data_file_inventory()
-        self.assertIsInstance(datafiles, dict)
-        self.assertEqual(len(datafiles), 5)
-        self.assertIn("trial1.json", datafiles)
-        self.assertIn("trial1.json.sha256", datafiles)
-        self.assertIn("trial2.json", datafiles)
-        self.assertIn("trial3/trial3a.json", datafiles)
-        self.assertIn("trial3/trial3a.json.sha256", datafiles)
+        self.assertEquals(self.bagr.registered_files(), {})
 
-        # files are only found in the upload area
-        self.assertEqual(datafiles["trial1.json"],
-                         os.path.join(uplsip, "trial1.json"))
-        self.assertEqual(datafiles["trial2.json"],
-                         os.path.join(uplsip, "trial2.json"))
+        self.bagr.ensure_res_metadata()
+
+        datafiles = self.bagr.registered_files()
+        self.assertIsInstance(datafiles, dict)
+        self.assertEqual(len(datafiles), 1)
+        self.assertNotIn("trial1.json", datafiles)
+        self.assertNotIn("trial1.json.sha256", datafiles)
+        self.assertNotIn("trial2.json", datafiles)
+        self.assertIn("trial3/trial3a.json", datafiles)
+        self.assertNotIn("trial3/trial3a.json.sha256", datafiles)
         self.assertEqual(datafiles["trial3/trial3a.json"],
                          os.path.join(uplsip, "trial3/trial3a.json"))
+        self.assertEqual(len(datafiles), 1)
+
+    def test_available_files(self):
+        uplsip = os.path.join(self.upldir, self.midasid[32:])
+
+        datafiles = self.bagr.available_files()
+        self.assertIsInstance(datafiles, dict)
+        self.assertEqual(len(datafiles), 1)
+        self.assertNotIn("trial1.json", datafiles)
+        self.assertNotIn("trial1.json.sha256", datafiles)
+        self.assertNotIn("trial2.json", datafiles)
+        self.assertIn("trial3/trial3a.json", datafiles)
+        self.assertNotIn("trial3/trial3a.json.sha256", datafiles)
+        self.assertEqual(datafiles["trial3/trial3a.json"],
+                         os.path.join(uplsip, "trial3/trial3a.json"))
+        self.assertEqual(len(datafiles), 1)
+
 
 class TestPreservationBagger(test.TestCase):
     
@@ -558,7 +687,7 @@ class TestPreservationBagger(test.TestCase):
         bagdir = os.path.join(self.bagparent, self.midasid+".1_0.mbag0_4-0")
         self.assertEqual(self.bagr.bagdir, bagdir)
 
-        self.assertIsNone(self.bagr.prepsvc)  # update support turned off
+
 
     def test_find_pod_file(self):
         podfile = self.bagr.find_pod_file()
@@ -736,7 +865,8 @@ class TestPreservationBagger(test.TestCase):
         data = utils.read_nerd(annotf)
         self.assertEqual(data['version'], "1.0.0")
 
-        self.bagr.bagbldr.update_annot_for('', {'version': "1.0.0+ (in edit)"})
+        self.bagr.bagbldr.update_annotations_for('',
+                                                 {'version': "1.0.0+ (in edit)"})
         data = utils.read_nerd(annotf)
         self.assertEqual(data['version'], "1.0.0+ (in edit)")
 
