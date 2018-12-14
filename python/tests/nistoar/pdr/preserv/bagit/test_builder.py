@@ -7,7 +7,7 @@ import unittest as test
 from collections import OrderedDict
 
 from nistoar.testing import *
-import nistoar.pdr.preserv.bagit.builder2 as bldr
+import nistoar.pdr.preserv.bagit.builder as bldr
 import nistoar.pdr.exceptions as exceptions
 from nistoar.pdr.utils import read_nerd
 

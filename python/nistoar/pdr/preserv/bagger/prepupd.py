@@ -17,7 +17,7 @@ from ...describe import rmm
 from ... import distrib
 from ...exceptions import IDNotFound
 from ... import utils
-from ..bagit.builder2 import BagBuilder
+from ..bagit.builder import BagBuilder
 from ..bagit.bag import NISTBag
 
 deflog = logging.getLogger(_sys.system_abbrev).getChild(_sys.subsystem_abbrev)

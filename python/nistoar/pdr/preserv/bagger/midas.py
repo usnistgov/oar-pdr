@@ -16,7 +16,7 @@ from collections import OrderedDict
 from .base import SIPBagger, moddate_of, checksum_of, read_pod
 from .base import sys as _sys
 from . import utils as bagutils
-from ..bagit.builder2 import BagBuilder, NERDMD_FILENAME, FILEMD_FILENAME
+from ..bagit.builder import BagBuilder, NERDMD_FILENAME, FILEMD_FILENAME
 from ..bagit import NISTBag
 from ....id import PDRMinter
 from ... import def_merge_etcdir, utils

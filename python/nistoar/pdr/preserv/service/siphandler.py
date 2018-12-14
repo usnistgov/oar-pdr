@@ -15,7 +15,7 @@ from ..bagit.validate import NISTAIPValidator
 from ..bagit.multibag import MultibagSplitter
 from ..bagger import utils as bagutils
 from ..bagger.base import checksum_of
-from ..bagger.midas2 import PreservationBagger
+from ..bagger.midas import PreservationBagger
 from .. import (ConfigurationException, StateException, PODError)
 from .. import PreservationException, sys as _sys
 from . import status

@@ -14,9 +14,9 @@ from copy import deepcopy
 
 from nistoar.testing import *
 from nistoar.pdr import utils
-import nistoar.pdr.preserv.bagit.builder2 as bldr
+import nistoar.pdr.preserv.bagit.builder as bldr
 from nistoar.pdr.preserv.bagit import NISTBag
-import nistoar.pdr.preserv.bagger.midas2 as midas
+import nistoar.pdr.preserv.bagger.midas as midas
 import nistoar.pdr.exceptions as exceptions
 from nistoar.pdr.preserv import AIPValidationError
 
