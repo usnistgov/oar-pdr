@@ -6,13 +6,13 @@
  **/
 export interface Data {
   id: any;
+  downloadURL: any;
   resId: any;
   resTitle: any;
   resFilePath:any;
   filePath: any;
   fileName: any;
   fileSize: any;
-  downloadURL: any;
-  downloadedStatus: any;
+  downloadStatus: any;
   fileFormat: any;
 }

@@ -62,9 +62,9 @@
                     </td>
                     <td>
                         &nbsp;
-                        <button type="button" *ngIf = "rowData.downloadedStatus === 'downloaded' && rowData.resTitle.indexOf('.') > 0 " style="margin-left:-20px;margin-top: 5px" class="small-button" pButton icon="faa faa-check"></button>
-                        <button type="button" *ngIf = "rowData.downloadedStatus === 'downloading' && rowData.resTitle.indexOf('.') > 0 "  class="small-button-yellow" pButton icon="faa faa-check"></button> &nbsp;
-                        <span *ngIf = "rowData.resTitle.indexOf('.') > 0">{{rowData.downloadedStatus}}</span>
+                        <button type="button" *ngIf = "rowData.downloadStatus === 'downloaded' && rowData.resTitle.indexOf('.') > 0 " style="margin-left:-20px;margin-top: 5px" class="small-button" pButton icon="faa faa-check"></button>
+                        <button type="button" *ngIf = "rowData.downloadStatus === 'downloading' && rowData.resTitle.indexOf('.') > 0 "  class="small-button-yellow" pButton icon="faa faa-check"></button> &nbsp;
+                        <span *ngIf = "rowData.resTitle.indexOf('.') > 0">{{rowData.downloadStatus}}</span>
                     </td>
                     <td>
                         <span>{{rowData.size}}</span>

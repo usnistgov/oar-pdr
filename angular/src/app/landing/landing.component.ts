@@ -342,6 +342,8 @@ updateMenu(){
   filescount : number = 0;
   createNewDataHierarchy(){
     var testdata = {}
+    // console.log("this.record: ");
+    // console.log(this.record);
     if(this.record['components'] != null){
       testdata["data"] = this.arrangeIntoTree(this.record['components']);
       this.files.push(testdata);
@@ -365,6 +367,9 @@ updateMenu(){
         pathParts.shift(); // Remove first blank element from the parts array.
         let currentLevel = tree; // initialize currentLevel to root
         
+        // console.log("path:");
+        // console.log(path);
+
         pathParts.forEach((part) => { 
           // check to see if the path already exists.
           const existingPath = currentLevel.filter(level => level.data.name === part);
@@ -376,17 +381,20 @@ updateMenu(){
           } else {
               const newPart = {
                 data : {
+                  id: i,
                   name : part,
                   mediatype: path.mediaType,
                   size: path.size,
-                  downloadUrl: path.downloadURL,
+                  downloadURL: path.downloadURL,
                   description: path.description,
                   filetype: path['@type'][0],
-                  resId: path["@id"].replace(/^.*[\\\/]/, ''),
+                  resId: path["filepath"].replace(/^.*[\\\/]/, ''),
+//                  resId: path["@id"].replace(/^.*[\\\/]/, ''),
                   fullPath: path.filepath,
                   isSelected: false,
                   downloadProgress: 0,
-                  downloadInstance: null
+                  downloadInstance: null,
+                  zipFile: null
                 },children: []
               };
               

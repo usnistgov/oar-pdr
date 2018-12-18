@@ -120,9 +120,9 @@ export class CartService {
       let value = myCartMap[key];
       if (value.data.resId == resId) {
         // console.log("resId in cart match update" + resId);
-        // console.log("status before" + JSON.stringify(value.data.downloadedStatus));
-        value.data.downloadedStatus = status;
-        // console.log("status after" + JSON.stringify(value.data.downloadedStatus));
+        // console.log("status before" + JSON.stringify(value.data.downloadStatus));
+        value.data.downloadStatus = status;
+        // console.log("status after" + JSON.stringify(value.data.downloadStatus));
       }
       // console.log("value" + JSON.stringify(value.data.resId));
       cartEntities.push(value);
@@ -154,7 +154,7 @@ export class CartService {
     for (let key in myCartMap) {
       let value = myCartMap[key];
         // console.log("status before" + JSON.stringify(value.data.downloadStatus));
-        value.data.downloadedStatus = status;
+        value.data.downloadStatus = status;
         // console.log("status after" + JSON.stringify(value.data.downloadStatus));
       // console.log("value" + JSON.stringify(value.data.resId));
       cartEntities.push(value);
@@ -185,7 +185,7 @@ export class CartService {
     for (let key in myCartMap) {
       let value = myCartMap[key];
       // console.log("status before" + JSON.stringify(value.data.downloadStatus));
-      if (value.data.downloadedStatus == null ) {
+      if (value.data.downloadStatus == null ) {
         // console.log("status after" + JSON.stringify(value.data.downloadStatus));
         // console.log("value" + JSON.stringify(value.data.resId));
         cartEntities.push(value);

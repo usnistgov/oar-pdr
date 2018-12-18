@@ -4,7 +4,11 @@
  * ( not to be confused by traditional oop interfaces, even if the goals are the same)
  *
  **/
-export interface DownloadData {
-    filePath: any;
-    downloadURL: any;
+export interface ZipData {
+    fileName: any;
+    downloadProgress: any;
+    downloadStatus: any;
+    downloadInstance: any;
+    bundle: any;
+    downloadUrl: any;
   }

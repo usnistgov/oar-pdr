@@ -288,7 +288,7 @@
 }
 
 :host /deep/ .faa-cart-plus:before {
-  color: green;
+  /* color: #1E6BA1; */
 }
 :host /deep/ reflinks > a {
   

@@ -108,15 +108,26 @@ export class DatacartComponent implements OnInit, OnDestroy {
     this.ediid = this.commonVarService.getEdiid();
     this.createDataCartHierarchy();
     this.display = true;
-      if (this.cartEntities.length > 0) {
-         // var element = <HTMLInputElement> document.getElementById("downloadStatus");
-         // element.disabled = false;
-      } else {
-          //var element = <HTMLInputElement> document.getElementById("downloadStatus");
-          //element.disabled = true;
-      }
+    this.expandAll(this.dataFiles, 0);
+
+    if (this.cartEntities.length > 0) {
+        // var element = <HTMLInputElement> document.getElementById("downloadStatus");
+        // element.disabled = false;
+    } else {
+        //var element = <HTMLInputElement> document.getElementById("downloadStatus");
+        //element.disabled = true;
+    }
   }
 
+  expandAll(dataFiles: any, level: any){
+    let currentLevel = level + 1;
+    for ( let i=0; i < dataFiles.length;i++) {
+        dataFiles[i].expanded = true;
+        if(dataFiles[i].children.length > 0 && currentLevel < 1){
+            this.expandAll(dataFiles[i].children, currentLevel);
+        }
+    }
+  }
 
   ngOnDestroy() {
   }
@@ -128,9 +139,6 @@ export class DatacartComponent implements OnInit, OnDestroy {
   getDataCartList() {
     this.cartService.getAllCartEntities().then(function (result) {
       this.cartEntities = result;
-      console.log("this.cartEntities:");
-      console.log(this.cartEntities);
-      
     //   console.log("cart entities inside datacartlist" + JSON.stringify(this.cartEntities));
     }.bind(this), function (err) {
       alert("something went wrong while fetching the products");
@@ -159,10 +167,10 @@ export class DatacartComponent implements OnInit, OnDestroy {
         if (selData.data['resFilePath'] != null && selData.data['resFilePath'] != undefined) {
             if (selData.data['resFilePath'].split(".").length > 1) {
                 existItem = downloadData.filter(item => item.filePath === this.ediid+selData.data['resFilePath'] 
-                    && item.downloadUrl === selData.data['downloadURL']);
+                    && item.downloadURL === selData.data['downloadURL']);
 
                 if (existItem.length == 0) {
-                    downloadData.push({"filePath":this.ediid+selData.data['resFilePath'], 'downloadUrl':selData.data['downloadURL']});
+                    downloadData.push({"filePath":this.ediid+selData.data['resFilePath'], 'downloadURL':selData.data['downloadURL']});
                 }
             }
         }
@@ -312,9 +320,9 @@ export class DatacartComponent implements OnInit, OnDestroy {
   /**
    * Update cart entries
    */
-  updateCartEntries(row:any,downloadedStatus:any) {
+  updateCartEntries(row:any,downloadStatus:any) {
         // console.log("id" + JSON.stringify(row.data));
-        this.cartService.updateCartItemDownloadStatus(row.data['resId'],downloadedStatus);
+        this.cartService.updateCartItemDownloadStatus(row.data['resId'],downloadStatus);
         this.cartService.getAllCartEntities().then(function (result) {
             this.cartEntities = result;
                 this.createDataCartHierarchy();
@@ -437,6 +445,9 @@ export class DatacartComponent implements OnInit, OnDestroy {
    * Create Data hierarchy for the tree
    */
   createDataCartHierarchy() {
+      console.log("this.cartEntities:");
+      console.log(this.cartEntities);
+
     let arrayList = this.cartEntities.reduce(function (result, current) {
         result[current.data.resTitle] = result[current.data.resTitle] || [];
         result[current.data.resTitle].push(current);
@@ -471,7 +482,7 @@ export class DatacartComponent implements OnInit, OnDestroy {
                             // console.log("##$%$%$ path path:" +fpath[path]);
                             /// Added this code to avoid the issue of extra file layers in the datacart
                             if(fpath[path] !== ""){
-                            child2 = this.createDataCartChildrenTree(fpath[path],fields.data.id,resId,key,fields.data.downloadURL,fields.data.filePath,fields.data.downloadedStatus);
+                            child2 = this.createDataCartChildrenTree(fpath[path],fields.data.id,resId,key,fields.data.downloadURL,fields.data.filePath,fields.data.downloadStatus);
                             parent.children.push(child2);
 
                             parent = child2;}
@@ -527,7 +538,7 @@ export class DatacartComponent implements OnInit, OnDestroy {
     /**
      * Create data hierarchy for children
      */
-    createDataCartChildrenTree(path: string,id:string,resId:string,resTitle:string,downloadURL:string,resFilePath:string,downloadedStatus:string){
+    createDataCartChildrenTree(path: string,id:string,resId:string,resTitle:string,downloadURL:string,resFilePath:string,downloadStatus:string){
         let child1:TreeNode = {};
         child1 = {
             data: {
@@ -537,7 +548,7 @@ export class DatacartComponent implements OnInit, OnDestroy {
                 'resTitle': path,
                 'downloadURL' : downloadURL,
                 'resFilePath' : resFilePath,
-                'downloadedStatus' : downloadedStatus
+                'downloadStatus' : downloadStatus
             }
             
         };
