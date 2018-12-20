@@ -346,6 +346,8 @@ updateMenu(){
     // console.log(this.record);
     if(this.record['components'] != null){
       testdata["data"] = this.arrangeIntoTree(this.record['components']);
+      console.log("testdata:");
+      console.log(testdata);
       this.files.push(testdata);
     }
   }
@@ -353,7 +355,7 @@ updateMenu(){
   private arrangeIntoTree(paths) {
     const tree = [];
     // This example uses the underscore.js library.
-    var i = 0;
+    var i = 1;
     var tempfiletest = "";
     
     paths.forEach((path) => { 
@@ -379,7 +381,8 @@ updateMenu(){
             // Set the current level to this path's children  
             currentLevel = existingPath[0].children;
           } else {
-              const newPart = {
+              let newPart = null;
+              newPart = {
                 data : {
                   id: i,
                   name : part,
@@ -389,15 +392,13 @@ updateMenu(){
                   description: path.description,
                   filetype: path['@type'][0],
                   resId: path["filepath"].replace(/^.*[\\\/]/, ''),
-//                  resId: path["@id"].replace(/^.*[\\\/]/, ''),
                   fullPath: path.filepath,
-                  isSelected: false,
                   downloadProgress: 0,
                   downloadInstance: null,
+                  isSelected: false,
                   zipFile: null
                 },children: []
               };
-              
               currentLevel.push(newPart);
               currentLevel = newPart.children;
             // }

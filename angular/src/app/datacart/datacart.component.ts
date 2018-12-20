@@ -132,6 +132,10 @@ export class DatacartComponent implements OnInit, OnDestroy {
   ngOnDestroy() {
   }
 
+  clearAll(){
+    this.cartService.clearTheCart();
+    this.updateCartEntries();
+  }
   /**
    * If Search is successful populate list of keywords themes and authors
    */
@@ -226,15 +230,16 @@ export class DatacartComponent implements OnInit, OnDestroy {
                       }
                   }
             
-                  this.cartService.getAllCartEntities().then(function (result) {
-                      this.cartEntities = result;
-                      this.createDataCartHierarchy();
-                      if (this.cartEntities.length > 0) {
-                          this.dataFiles[this.selectedParentIndex].expanded = true;
-                      }
-                  }.bind(this), function (err) {
-                      alert("something went wrong while creating the zip file");
-                  });
+                  this.updateCartEntries();
+                //   this.cartService.getAllCartEntities().then(function (result) {
+                //       this.cartEntities = result;
+                //       this.createDataCartHierarchy();
+                //       if (this.cartEntities.length > 0) {
+                //           this.dataFiles[this.selectedParentIndex].expanded = true;
+                //       }
+                //   }.bind(this), function (err) {
+                //       alert("something went wrong while creating the zip file");
+                //   });
             
                   this.selectedData.length = 0;
                   this.dataFileCount();
@@ -315,18 +320,18 @@ export class DatacartComponent implements OnInit, OnDestroy {
           //element.disabled = true;
       }
 
-  }
+    }
 
   /**
    * Update cart entries
    */
-  updateCartEntries(row:any,downloadStatus:any) {
+//   updateCartEntries(row:any,downloadStatus:any) {
+    updateCartEntries() {
         // console.log("id" + JSON.stringify(row.data));
-        this.cartService.updateCartItemDownloadStatus(row.data['resId'],downloadStatus);
+        // this.cartService.updateCartItemDownloadStatus(row.data['resId'],ownloadStatus);
         this.cartService.getAllCartEntities().then(function (result) {
             this.cartEntities = result;
-                this.createDataCartHierarchy();
-
+            this.createDataCartHierarchy();
         }.bind(this), function (err) {
             alert("something went wrong while fetching the products");
         });
@@ -394,16 +399,19 @@ export class DatacartComponent implements OnInit, OnDestroy {
           }
       }
       this.cartService.removeDownloadStatus();
-      this.cartService.getAllCartEntities().then(function (result) {
-          this.cartEntities = result;
-          this.createDataCartHierarchy();
-          if (this.cartEntities.length > 0) {
-              this.dataFiles[this.selectedParentIndex].expanded = true;
-          }
-          this.cartService.setCartLength(this.cartEntities.length);
-        }.bind(this), function (err) {
-            alert("something went wrong while removing item");
-        });
+      this.updateCartEntries();
+      this.cartService.setCartLength(this.cartEntities.length);
+
+    //   this.cartService.getAllCartEntities().then(function (result) {
+    //       this.cartEntities = result;
+    //       this.createDataCartHierarchy();
+    //       if (this.cartEntities.length > 0) {
+    //           this.dataFiles[this.selectedParentIndex].expanded = true;
+    //       }
+    //       this.cartService.setCartLength(this.cartEntities.length);
+    //     }.bind(this), function (err) {
+    //         alert("something went wrong while removing item");
+    //     });
     }
 
   /**
@@ -414,14 +422,15 @@ export class DatacartComponent implements OnInit, OnDestroy {
     let dataId: any;
     // convert the map to an array
     this.cartService.updateCartDownloadStatus(false);
-    this.cartService.getAllCartEntities().then(function (result) {
-      //console.log("result" + result.length);
-      this.cartEntities = result;
-    //   console.log("cart entities inside datacartlist" + JSON.stringify(this.cartEntities));
-      this.createDataCartHierarchy();
-    }.bind(this), function (err) {
-      alert("something went wrong while fetching the products");
-    });
+    this.updateCartEntries();
+    // this.cartService.getAllCartEntities().then(function (result) {
+    //   //console.log("result" + result.length);
+    //   this.cartEntities = result;
+    // //   console.log("cart entities inside datacartlist" + JSON.stringify(this.cartEntities));
+    //   this.createDataCartHierarchy();
+    // }.bind(this), function (err) {
+    //   alert("something went wrong while fetching the products");
+    // });
     this.cartService.setCartLength(this.dataFiles.length);
   }
 

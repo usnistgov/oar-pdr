@@ -11,6 +11,7 @@ import { ZipData } from '../../shared/download-service/zipData';
 import { CommonVarService } from '../../shared/common-var';
 import { environment } from '../../../environments/environment';
 import { HttpClientModule, HttpClient, HttpHeaders, HttpRequest, HttpEventType, HttpResponse, HttpEvent } from '@angular/common/http'; 
+import { TestBed } from '@angular/core/testing';
 
 
 declare var saveAs: any;
@@ -63,6 +64,8 @@ export class DescriptionComponent {
     cartLength : number;
     treeRoot = [];
     showZipFiles: boolean = false;
+    subscriptions: any = [];
+    allProcessed: boolean = false;
 
     private distApi : string = environment.DISTAPI;
 
@@ -83,11 +86,18 @@ export class DescriptionComponent {
             this.cartService.watchStorage().subscribe(value => {
                 this.cartLength = value;
             });
+            this.downloadService.watchDownloadProcessStatus().subscribe(value => {
+                this.allProcessed = value;
+            });
     }
     
     ngOnInit(){
         // this.cartService.clearTheCart();
         // this.cdr.detectChanges();
+
+        console.log("files:");
+        console.log(this.files);
+
         if(this.files.length != 0)
             this.files  =<TreeNode[]>this.files[0].data;
         this.cols = [
@@ -101,14 +111,15 @@ export class DescriptionComponent {
         this.cartMap = this.cartService.getCart();
         this.updateDownloadStatusFromCart();
 
-        this.updateCartStatus(this.files);
+        // this.updateCartStatus(this.files);
+        this.updateAllSelectStatus(this.files);
         this.updateDownloadStatus(this.files);
         this.ediid = this.commonVarService.getEdiid();
 
         this.totalFiles = 0;
         this.getTotalFiles(this.files);
 
-        this.expandAll(this.files, true);
+        this.expandToLevel(this.files, true, 1);
 
         const newPart = {
             data : {
@@ -121,21 +132,35 @@ export class DescriptionComponent {
               filetype: null,
               resId: "files",
               fullPath: "/",
-              isSelected: false,
               downloadProgress: 0,
               downloadInstance: null,
+              isSelected: false,
               zipFile: null
             },children: []
           };
           newPart.children = this.files;
           this.treeRoot.push(newPart);
+
+          console.log("files:");
+          console.log(this.files);
     }
 
-    expandAll(dataFiles: any, option: boolean){
-        for ( let i=0; i < dataFiles.length;i++) {
+    expandToLevel(dataFiles: any, option: boolean, targetLevel: any){
+        this.expandAll(dataFiles, option, 0, targetLevel)
+    }
+
+    expandAll(dataFiles: any, option: boolean, level: any, targetLevel: any){
+        let currentLevel = level + 1;
+        for ( let i=0; i < dataFiles.length; i++ ) {
             dataFiles[i].expanded = option;
-            if(dataFiles[i].children.length > 0){
-                this.expandAll(dataFiles[i].children, option);
+            if(targetLevel != null){
+                if(dataFiles[i].children.length > 0 && currentLevel < targetLevel){
+                    this.expandAll(dataFiles[i].children, option, currentLevel, targetLevel);
+                }
+            }else{
+                if(dataFiles[i].children.length > 0){
+                    this.expandAll(dataFiles[i].children, option, currentLevel, targetLevel);
+                }
             }
         }
         this.isExpanded = option;
@@ -290,21 +315,21 @@ export class DescriptionComponent {
        this.checkAccesspages();
     }
 
-    updateCartStatus(files: any){
-        for (let comp of files) {
-            if(comp.children.length > 0){
-                this.updateCartStatus(comp.children);
-            }else{
-                comp.data.isSelected = this.isInDataCart(comp.data.resId);
-            }
-        }   
-        this.updateAllSelectStatus(this.files);     
-    }
+    // updateCartStatus(files: any){
+    //     for (let comp of files) {
+    //         if(comp.children.length > 0){
+    //             this.updateCartStatus(comp.children);
+    //         }else{
+    //             comp.data.isSelected = this.isInDataCart(comp.data.resId);
+    //         }
+    //     }   
+    //     this.updateAllSelectStatus(this.files);     
+    // }
 
     addSubFilesToCart(rowData: any) {
         let data: Data;
         let compValue: any;
-        this.cartService.updateAllFilesSpinnerStatus(true);
+        // this.cartService.updateAllFilesSpinnerStatus(true);
 
         if(!this.isFile(rowData)){
             let subFiles: any = null;
@@ -324,15 +349,13 @@ export class DescriptionComponent {
 
         this.allSelected = true;
         this.updateAllSelectStatus(this.files);
-        console.log("this.allSelected:");
-        console.log(this.allSelected);
 
-        setTimeout(() => {
-            this.cartService.updateAllFilesSpinnerStatus(false);
-        }, 3000);
-        setTimeout(() => {
-            this.addFileStatus = true;
-        }, 3000);
+        // setTimeout(() => {
+        //     this.cartService.updateAllFilesSpinnerStatus(false);
+        // }, 3000);
+        // setTimeout(() => {
+        //     this.addFileStatus = true;
+        // }, 3000);
     }
 
     searchTree(element, id){
@@ -400,7 +423,7 @@ export class DescriptionComponent {
 
     removeFromNode(rowData:any){
         this.removeCart(rowData);
-        this.allSelected = true;
+        this.allSelected = false;
         this.updateAllSelectStatus(this.files);
     }
 
@@ -469,8 +492,7 @@ export class DescriptionComponent {
         for (let comp of files) {
             if(comp.children.length > 0){
                 comp.data.isSelected = this.updateAllSelectStatus(comp.children);
-                // console.log("comp.data.isSelected:");
-                // console.log(comp.data.isSelected);
+                allSelected = allSelected && comp.data.isSelected;
             }else{
                 if(!comp.data.isSelected){
                     this.allSelected = false;
@@ -478,9 +500,6 @@ export class DescriptionComponent {
                 }
             }
         }   
-
-        // console.log("Returning:");
-        // console.log(allSelected);
 
         return allSelected;
     }
@@ -628,6 +647,7 @@ export class DescriptionComponent {
             header: header,
             key: key,
             accept: () => {
+                this.cancelAllDownload = false;
                 this.downloadFromRoot();
             },
             reject: () => {
@@ -636,8 +656,7 @@ export class DescriptionComponent {
     }
 
     downloadFromRoot(){
-        // const tree = [];
-          this.downloadAllFilesFromAPI(this.treeRoot[0]);
+        this.downloadAllFilesFromAPI(this.treeRoot[0]);
     }
 
     getDownloadData(files: any){
@@ -660,28 +679,6 @@ export class DescriptionComponent {
         }        
     }
 
-    searchTreeByFullPath(element, fullPath){
-        if(element.data.fullPath == fullPath){
-             return element;
-        }else if (element.children.length > 0){
-             var i;
-             var result = null;
-             for(i=0; result == null && i < element.children.length; i++){
-                  result = this.searchTreeByFullPath(element.children[i], fullPath);
-             }
-             return result;
-        }
-        return null;
-   }
-
-   resetZipName(element){
-        if(element.data != undefined){
-            element.data.zipFile = null;
-        }
-        if (element.children.length > 0){
-            this.resetZipName(element.children);
-        } 
-    }
 
     /**
     * Function to download all files from API call.
@@ -690,18 +687,15 @@ export class DescriptionComponent {
         let existItem: any;
         let postMessage: any[] = [];
         this.downloadData = [];
-        this.zipData = null;
         this.zipData = [];
         this.displayDownloadFiles = true;
         this.cancelAllDownload = false;
-
-        console.log("Downloading from: ");
-        console.log(files);
+        this.downloadStatus = 'downloading';
 
         // Sending data to _bundle_plan and get back the plan
         this.getDownloadData(files.children);
-        console.log("downloadData:");
-        console.log(this.downloadData);
+        // console.log("downloadData:");
+        // console.log(this.downloadData);
 
         var randomnumber = Math.floor(Math.random() * (this.commonVarService.getRandomMaximum() - this.commonVarService.getRandomMinimum() + 1)) + this.commonVarService.getRandomMinimum();
 
@@ -751,51 +745,55 @@ export class DescriptionComponent {
 
         bundlePlan.push({"bundleName":"download4281_04.zip","includeFiles":tempData});
 
-        tempData = [];
-        tempData.push({filePath: "ECBCC1C1301D2ED9E04306570681B10735/aluminum/chloride/srd13_Al-018.json", downloadURL: "http://www.nist.gov/srd/srd_data/srd13_Al-018.json"});
-        tempData.push({filePath: "ECBCC1C1301D2ED9E04306570681B10735/aluminum/chloride/srd13_Al-019.json", downloadURL: "http://www.nist.gov/srd/srd_data/srd13_Al-019.json"});
+        // tempData = [];
+        // tempData.push({filePath: "ECBCC1C1301D2ED9E04306570681B10735/aluminum/chloride/srd13_Al-018.json", downloadURL: "http://www.nist.gov/srd/srd_data/srd13_Al-018.json"});
+        // tempData.push({filePath: "ECBCC1C1301D2ED9E04306570681B10735/aluminum/chloride/srd13_Al-019.json", downloadURL: "http://www.nist.gov/srd/srd_data/srd13_Al-019.json"});
 
-        bundlePlan.push({"bundleName":"download4281_05.zip","includeFiles":tempData});
+        // bundlePlan.push({"bundleName":"download4281_05.zip","includeFiles":tempData});
 
-        tempData = [];
-        tempData.push({filePath: "ECBCC1C1301D2ED9E04306570681B10735/aluminum/chloride/srd13_Al-020.json", downloadURL: "http://www.nist.gov/srd/srd_data/srd13_Al-020.json"});
-        tempData.push({filePath: "ECBCC1C1301D2ED9E04306570681B10735/aluminum/chloride/srd13_Al-021.json", downloadURL: "http://www.nist.gov/srd/srd_data/srd13_Al-021.json"});
+        // tempData = [];
+        // tempData.push({filePath: "ECBCC1C1301D2ED9E04306570681B10735/aluminum/chloride/srd13_Al-020.json", downloadURL: "http://www.nist.gov/srd/srd_data/srd13_Al-020.json"});
+        // tempData.push({filePath: "ECBCC1C1301D2ED9E04306570681B10735/aluminum/chloride/srd13_Al-021.json", downloadURL: "http://www.nist.gov/srd/srd_data/srd13_Al-021.json"});
 
-        bundlePlan.push({"bundleName":"download4281_06.zip","includeFiles":tempData}); 
+        // bundlePlan.push({"bundleName":"download4281_06.zip","includeFiles":tempData}); 
 
-        let tempUrl: any[] = ["https://s3.amazonaws.com/nist-midas/1858/20170213_PowderPlate2_Pad.zip", "https://s3.amazonaws.com/nist-midas/1858/RawCameraData.zip","https://s3.amazonaws.com/nist-midas/1858/RawCameraData.zip"];
+        let tempUrl: any[] = ["https://s3.amazonaws.com/nist-midas/1858/20170213_PowderPlate2_Pad.zip", "https://s3.amazonaws.com/nist-midas/1858/RawCameraData.zip","https://s3.amazonaws.com/nist-midas/1858/RawCameraData.zip","https://s3.amazonaws.com/nist-midas/1858/20170213_PowderPlate2_Pad.zip", "https://s3.amazonaws.com/nist-midas/1858/RawCameraData.zip","https://s3.amazonaws.com/nist-midas/1858/RawCameraData.zip","https://s3.amazonaws.com/nist-midas/1858/20170213_PowderPlate2_Pad.zip"];
         var i = 0;
 
         for(let bundle of bundlePlan){
-            this.zipData.push({"fileName":bundle.bundleName, "downloadProgress": 0, "downloadStatus":null, "downloadInstance": null, "bundle": bundle, "downloadUrl": tempUrl[i]});
+            this.zipData.push({"fileName":bundle.bundleName, "downloadProgress": 0, "downloadStatus":null, "downloadInstance": null, "bundle": bundle, "downloadUrl": tempUrl[i], "downloadErrorMessage":""});
             i++;
         }
+
+        console.log("this.zipData:");
+        console.log(this.zipData);
 
         // Associate zipData with files
         for(let zip of this.zipData){
             for(let includeFile of zip.bundle.includeFiles){
                 let fullPath = includeFile.filePath.substring(includeFile.filePath.indexOf('/'));
-                let treeNode = this.searchTreeByFullPath(this.treeRoot[0], fullPath);
+                let treeNode = this.downloadService.searchTreeByFullPath(this.treeRoot[0], fullPath);
                 if(treeNode != null){
                     treeNode.data.zipFile = zip.fileName;
                 }
             }
         }
 
-        console.log("this.files:");
-        console.log(this.files);
+        this.downloadService.downloadNextZip(this.zipData, this.treeRoot[0]);
 
         // Start downloading the first one, this will set the downloaded zip file to 1
-        this.downloadService.watchDownloadingNumber().subscribe(value => {
-            if(!this.cancelAllDownload){
-                this.downloadService.downloadNextZip(this.zipData);
-                files.data.downloadProgress = Math.round(100*this.getDownloadedNumber() / this.zipData.length);
-                if(this.downloadService.allDownloaded(this.zipData)){
-                    files.data.downloadStatus = 'downloaded';
-                    this.downloadStatus = 'downloaded';
+        this.subscriptions.push(this.downloadService.watchDownloadingNumber().subscribe(
+            value => {
+                if(!this.cancelAllDownload){
+                    this.downloadService.downloadNextZip(this.zipData, this.treeRoot[0]);
+                    files.data.downloadProgress = Math.round(100*this.getDownloadedNumber() / this.zipData.length);
+                    // if(this.downloadService.allDownloadFinished(this.zipData)){
+                    //     files.data.downloadStatus = 'downloaded';
+                    //     this.downloadStatus = 'downloaded';
+                    // }
                 }
             }
-        });
+        ));
     }
 
     getDownloadedNumber(){
@@ -824,10 +822,29 @@ export class DescriptionComponent {
             zip.downloadProgress = 0;
             zip.downloadStatus = null;
         }
+
+        for(let sub of this.subscriptions){
+            sub.unsubscribe();
+        }
+
+        this.downloadService.setDownloadingNumber(0);
+        this.zipData = [];
         this.downloadStatus = null;
         this.cancelAllDownload = true;
         this.displayDownloadFiles = false;
         this.resetZipName(this.treeRoot[0]);
+    }
+
+
+    resetZipName(element){
+        if(element.data != undefined){
+            element.data.zipFile = null;
+        }
+        if (element.children.length > 0){
+            for(let i=0; i < element.children.length; i++){
+                this.resetZipName(element.children[i]);
+            }
+        } 
     }
 
     /**

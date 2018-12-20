@@ -30668,8 +30668,8 @@ body .ui-progressbar {
     background-color: #95e6ff;
   }
   body .ui-progressbar .ui-progressbar-label {
-    color: #ffffff;
-    display: none !important;}
+    color: #000000;
+    display: none }
 body .ui-progressbar-indeterminate .ui-progressbar-value {
   background-color: inherit; }
   body .ui-progressbar-indeterminate .ui-progressbar-value::after {

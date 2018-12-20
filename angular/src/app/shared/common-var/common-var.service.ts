@@ -11,7 +11,7 @@ export class CommonVarService {
   private _storage = localStorage;
   private random_minimum: number = 1;
   private random_maximum: number = 100000;
-  private download_maximum: number = 1;
+  private download_maximum: number = 2;
 
   constructor() { }
   

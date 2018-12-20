@@ -10,6 +10,7 @@ declare var saveAs: any;
 @Injectable()
 export class DownloadService {
     zipFilesDownloadingSub= new BehaviorSubject<number>(0);
+    zipFilesProcessedSub= new BehaviorSubject<boolean>(false);
 
     constructor(
         private http: HttpClient,
@@ -37,6 +38,9 @@ export class DownloadService {
     //     error => console.log('Error downloading the file.'))
     // }
 
+    /**
+     * Save file
+     **/
     saveToFileSystem(data, filename) {
         var json = JSON.stringify(data);
         let blob = new Blob([data], {type: "octet/stream"});
@@ -52,7 +56,10 @@ export class DownloadService {
         a.remove();
     }
 
-    download(nextZip: ZipData, zipdata: ZipData[]){
+    /**
+     * Download zip
+     **/
+    download(nextZip: ZipData, zipdata: ZipData[], treeNode: any){
         const req = new HttpRequest('GET', nextZip.downloadUrl, {
             reportProgress: true, responseType: 'blob'
         });
@@ -76,35 +83,45 @@ export class DownloadService {
                         nextZip.downloadProgress = 0;
                         nextZip.downloadStatus = 'downloaded';
                         this.setDownloadingNumber(this.zipFilesDownloadingSub.getValue()-1);
+                        this.setDownloadStatus(nextZip, treeNode, "downloaded");
+                        this.setDownloadProcessStatus(this.allDownloadFinished(zipdata));
                         break;
                     case HttpEventType.DownloadProgress:
                         nextZip.downloadProgress = Math.round(100*event.loaded / event.total);
                         break;
                 }
+                
+            },
+            err => {
+                nextZip.downloadStatus = 'downloadError';
+                nextZip.downloadErrorMessage = err.message;
+                this.setDownloadingNumber(this.zipFilesDownloadingSub.getValue()-1);
+                console.log("Download err:");
+                console.log(err);
+                console.log("nextZip:");
+                console.log(nextZip);
             }
-            // err => {
-            //     this.downloadStatus == 'downloadError';
-            //     this.downloadErrorMessage = err.message;
-            //     this.cancelDownloadAll();
-            //     console.log("Download err:");
-            //     console.log(err);
-            //     console.log("downloadStatus:");
-            //     console.log(this.downloadStatus);
-            // }
         );
     }
 
-    downloadNextZip(zipData: ZipData[]){
+    /**
+     * Download next available zip in the queue
+     **/
+    downloadNextZip(zipData: ZipData[], treeNode: any){
         if(this.zipFilesDownloadingSub.getValue() < this.commonVarService.getDownloadMaximum()){
             let nextZip = this.getNextZipInQueue(zipData);
             if(nextZip != null){
-                this.download(nextZip, zipData);
+                this.download(nextZip, zipData, treeNode);
             }
         }
     }
 
+    /**
+     * Return next available zip in the queue
+     **/
     getNextZipInQueue(zipData: ZipData[]){
         let zipQueue = zipData.filter(item => item.downloadStatus == null);
+
         if(zipQueue.length > 0){
             return zipQueue[0];
         }else{
@@ -126,6 +143,36 @@ export class DownloadService {
         this.zipFilesDownloadingSub.next(value);
     }
 
+    /**
+    * Watch overall process status
+    **/
+    watchDownloadProcessStatus(): Observable<any> {
+        return this.zipFilesProcessedSub.asObservable();
+    }
+
+    /**
+     * Set overall process status
+     **/
+    setDownloadProcessStatus(value: boolean) {
+        this.zipFilesProcessedSub.next(value);
+    }
+
+    /**
+     * Set download status of given tree node
+     **/
+    setDownloadStatus(zip: any, treeNode: any, status: any){
+        for(let includeFile of zip.bundle.includeFiles){
+            let fullPath = includeFile.filePath.substring(includeFile.filePath.indexOf('/'));
+            let node = this.searchTreeByFullPath(treeNode, fullPath);
+            if(node != null){
+                node.data.downloadStatus = status;
+            }
+        }
+    }
+
+    /**
+     * Check if all zip files are downloaded
+     **/
     allDownloaded(zipData: any){
         for (let zip of zipData) {
             if(zip.downloadStatus != 'downloaded'){
@@ -134,4 +181,33 @@ export class DownloadService {
         }
         return true;
     }
+
+    /**
+     * Check if all doanload processes have finished
+     **/
+    allDownloadFinished(zipData: any){
+        for (let zip of zipData) {
+            if(zip.downloadStatus == null || zip.downloadStatus == 'downloading'){
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Search tree by given full path
+     **/
+    searchTreeByFullPath(element, fullPath){
+        if(element.data.fullPath == fullPath){
+             return element;
+        }else if (element.children.length > 0){
+             var i;
+             var result = null;
+             for(i=0; result == null && i < element.children.length; i++){
+                  result = this.searchTreeByFullPath(element.children[i], fullPath);
+             }
+             return result;
+        }
+        return null;
+   }
 }
