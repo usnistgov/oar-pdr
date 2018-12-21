@@ -110,6 +110,10 @@ export class DatacartComponent implements OnInit, OnDestroy {
     this.display = true;
     this.expandAll(this.dataFiles, 0);
 
+    console.log("this.dataFiles:");
+    console.log(this.dataFiles);
+
+
     if (this.cartEntities.length > 0) {
         // var element = <HTMLInputElement> document.getElementById("downloadStatus");
         // element.disabled = false;
@@ -463,6 +467,9 @@ export class DatacartComponent implements OnInit, OnDestroy {
         return result;
         }, {});
 
+        console.log("arrayList:");
+        console.log(arrayList);
+        
         this.dataFiles = [];
         let parentObj: TreeNode = {};
         for (var key in arrayList) {
@@ -491,10 +498,11 @@ export class DatacartComponent implements OnInit, OnDestroy {
                             // console.log("##$%$%$ path path:" +fpath[path]);
                             /// Added this code to avoid the issue of extra file layers in the datacart
                             if(fpath[path] !== ""){
-                            child2 = this.createDataCartChildrenTree(fpath[path],fields.data.id,resId,key,fields.data.downloadURL,fields.data.filePath,fields.data.downloadStatus);
-                            parent.children.push(child2);
+                                child2 = this.createDataCartChildrenTree(fpath[path],fields.data.cartId,resId,key,fields.data.downloadURL,fields.data.filePath,fields.data.downloadStatus);
+                                parent.children.push(child2);
 
-                            parent = child2;}
+                                parent = child2;
+                            }
                         }
                     }
                 }
@@ -547,12 +555,12 @@ export class DatacartComponent implements OnInit, OnDestroy {
     /**
      * Create data hierarchy for children
      */
-    createDataCartChildrenTree(path: string,id:string,resId:string,resTitle:string,downloadURL:string,resFilePath:string,downloadStatus:string){
+    createDataCartChildrenTree(path: string,cartId:string,resId:string,resTitle:string,downloadURL:string,resFilePath:string,downloadStatus:string){
         let child1:TreeNode = {};
         child1 = {
             data: {
                 'filePath': path,
-                'id' : id,
+                'cartId' : cartId,
                 'resId' : resId,
                 'resTitle': path,
                 'downloadURL' : downloadURL,

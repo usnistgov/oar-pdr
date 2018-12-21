@@ -86,17 +86,16 @@ export class DescriptionComponent {
             this.cartService.watchStorage().subscribe(value => {
                 this.cartLength = value;
             });
-            this.downloadService.watchDownloadProcessStatus().subscribe(value => {
-                this.allProcessed = value;
-            });
     }
-    
+
+    myLog(name:any, variable: any){
+        console.log(name);
+        console.log(variable);
+    }
+
     ngOnInit(){
         // this.cartService.clearTheCart();
         // this.cdr.detectChanges();
-
-        console.log("files:");
-        console.log(this.files);
 
         if(this.files.length != 0)
             this.files  =<TreeNode[]>this.files[0].data;
@@ -109,39 +108,45 @@ export class DescriptionComponent {
         this.fileNode = {"data":{ "name":"", "size":"", "mediatype":"", "description":"", "filetype":"" }};
 
         this.cartMap = this.cartService.getCart();
-        this.updateDownloadStatusFromCart();
-
-        // this.updateCartStatus(this.files);
-        this.updateAllSelectStatus(this.files);
-        this.updateDownloadStatus(this.files);
-        this.ediid = this.commonVarService.getEdiid();
-
-        this.totalFiles = 0;
-        this.getTotalFiles(this.files);
-
-        this.expandToLevel(this.files, true, 1);
 
         const newPart = {
             data : {
-              id: 0,
-              name : "files",
-              mediatype: "",
-              size: null,
-              downloadURL: null,
-              description: null,
-              filetype: null,
-              resId: "files",
-              fullPath: "/",
-              downloadProgress: 0,
-              downloadInstance: null,
-              isSelected: false,
-              zipFile: null
+                cartId: "/",
+                name : "files",
+                mediatype: "",
+                size: null,
+                downloadURL: null,
+                description: null,
+                filetype: null,
+                resId: "files",
+                fullPath: "/",
+                downloadProgress: 0,
+                downloadInstance: null,
+                isSelected: false,
+                zipFile: null
             },children: []
           };
           newPart.children = this.files;
           this.treeRoot.push(newPart);
 
-          console.log("files:");
+          this.updateStatusFromCart();
+
+          // this.updateCartStatus(this.files);
+          this.updateAllSelectStatus(this.files);
+          this.updateDownloadStatus(this.files);
+          this.ediid = this.commonVarService.getEdiid();
+  
+          this.totalFiles = 0;
+          this.getTotalFiles(this.files);
+  
+          this.expandToLevel(this.files, true, 1);
+
+          this.downloadService.watchDownloadProcessStatus().subscribe(
+            value => {
+                this.allProcessed = value;
+                this.updateDownloadStatus(this.files);
+            }
+        );
           console.log(this.files);
     }
 
@@ -173,11 +178,17 @@ export class DescriptionComponent {
     /**
      * Function to sync the download status from data cart.
      */
-    updateDownloadStatusFromCart(){
+    updateStatusFromCart(){
         for (let key in this.cartMap) {
             let value = this.cartMap[key];
             if(value.data.downloadStatus != undefined){
-                this.setFilesDownloadStatus(this.files, value.data.resId, value.data.downloadStatus);
+                this.setFilesDownloadStatus(this.files, value.data.cartId, value.data.downloadStatus);
+            }
+            if(value.data.cartId != undefined){           
+                let treeNode = this.searchTree(this.treeRoot[0], value.data.cartId);
+                if(treeNode != null){
+                    treeNode.data.isSelected = true;
+                }
             }
         }
     }
@@ -198,12 +209,12 @@ export class DescriptionComponent {
     /**
      * Function to set files download status.
      */
-    setFilesDownloadStatus(files, resId, downloadStatus){
+    setFilesDownloadStatus(files, cartId, downloadStatus){
         for (let comp of files) {
             if(comp.children.length > 0){
-                this.setFilesDownloadStatus(comp.children, resId, downloadStatus);
+                this.setFilesDownloadStatus(comp.children, cartId, downloadStatus);
             }else{
-                if(comp.data.resId == resId){
+                if(comp.data.cartId == cartId){
                     comp.data.downloadStatus = downloadStatus;
                 }
             }
@@ -320,7 +331,7 @@ export class DescriptionComponent {
     //         if(comp.children.length > 0){
     //             this.updateCartStatus(comp.children);
     //         }else{
-    //             comp.data.isSelected = this.isInDataCart(comp.data.resId);
+    //             comp.data.isSelected = this.isInDataCart(comp.data.cartId);
     //         }
     //     }   
     //     this.updateAllSelectStatus(this.files);     
@@ -334,7 +345,7 @@ export class DescriptionComponent {
         if(!this.isFile(rowData)){
             let subFiles: any = null;
             for (let comp of this.files) {
-                subFiles = this.searchTree(comp, rowData.id);
+                subFiles = this.searchTree(comp, rowData.cartId);
                 if(subFiles != null){
                     break;
                 }
@@ -358,14 +369,14 @@ export class DescriptionComponent {
         // }, 3000);
     }
 
-    searchTree(element, id){
-        if(element.data.id == id){
+    searchTree(element, cartId){
+        if(element.data.cartId == cartId){
              return element;
         }else if (element.children.length > 0){
              var i;
              var result = null;
              for(i=0; result == null && i < element.children.length; i++){
-                  result = this.searchTree(element.children[i], id);
+                  result = this.searchTree(element.children[i], cartId);
              }
              return result;
         }
@@ -376,15 +387,13 @@ export class DescriptionComponent {
        this.addFilesToCart(this.files);
        this.allSelected = true;
        this.updateAllSelectStatus(this.files);
-       console.log("this.allSelected:");
-       console.log(this.allSelected);
    }
 
 //     //Datacart related code
     addFilesToCart(files: any) {
         let data: Data;
         let compValue: any;
-        this.cartService.updateAllFilesSpinnerStatus(true);
+        // this.cartService.updateAllFilesSpinnerStatus(true);
 
         // for (let comp of this.record["components"]) {
         //     if (typeof comp["downloadURL"] != "undefined") {
@@ -413,12 +422,12 @@ export class DescriptionComponent {
             }
         }
 
-        setTimeout(() => {
-            this.cartService.updateAllFilesSpinnerStatus(false);
-        }, 3000);
-        setTimeout(() => {
-            this.addFileStatus = true;
-        }, 3000);
+        // setTimeout(() => {
+        //     this.cartService.updateAllFilesSpinnerStatus(false);
+        // }, 3000);
+        // setTimeout(() => {
+        //     this.addFileStatus = true;
+        // }, 3000);
     }
 
     removeFromNode(rowData:any){
@@ -431,7 +440,7 @@ export class DescriptionComponent {
         if(!this.isFile(rowData)){
             let subFiles: any = null;
             for (let comp of this.files) {
-                subFiles = this.searchTree(comp, rowData.id);
+                subFiles = this.searchTree(comp, rowData.cartId);
                 if(subFiles != null){
                     break;
                 }
@@ -441,7 +450,7 @@ export class DescriptionComponent {
                 rowData.isSelected = false; 
             }
         }else{
-            this.cartService.removeResId(rowData.resId);
+            this.cartService.removeCartId(rowData.cartId);
             rowData.isSelected = false;        
         }
     }
@@ -458,7 +467,7 @@ export class DescriptionComponent {
                 comp.data.isSelected = false;
                 this.removeFromCart(comp.children);
             }else{
-                this.cartService.removeResId(comp.data.resId);
+                this.cartService.removeCartId(comp.data.cartId);
                 comp.data.isSelected = false;
             }
         }
@@ -466,9 +475,10 @@ export class DescriptionComponent {
     }
 
     addtoCart(rowData:any){
-        this.cartService.updateFileSpinnerStatus(true);
+        // this.cartService.updateFileSpinnerStatus(true);
         let data : Data;
-        data = {'resId':rowData.resId,
+        data = {'cartId':rowData.cartId,
+                'resId':rowData.resId,
                 'resTitle':this.record['title'],
                 'resFilePath':rowData.fullPath,
                 'id':rowData.name,
@@ -480,11 +490,11 @@ export class DescriptionComponent {
                 'downloadStatus': null };
 
         this.cartService.addDataToCart(data);
-        rowData.isSelected = this.isInDataCart(rowData.resId);
+        rowData.isSelected = this.isInDataCart(rowData.cartId);
 
-        setTimeout(()=> {
-            this.cartService.updateFileSpinnerStatus(false);
-        }, 3000);
+        // setTimeout(()=> {
+        //     this.cartService.updateFileSpinnerStatus(false);
+        // }, 3000);
     }
 
     updateAllSelectStatus(files: any){
@@ -505,27 +515,34 @@ export class DescriptionComponent {
     }
 
     updateDownloadStatus(files: any){
-        this.allDownloaded = true;
+        var allDownloaded = true;
         for (let comp of files) {
             if(comp.children.length > 0){
-                this.updateDownloadStatus(comp.children);
+                var status = this.updateDownloadStatus(comp.children);
+                if(status){
+                    comp.data.downloadStatus = 'downloaded';
+                    this.cartService.updateCartItemDownloadStatus(comp.data.cartId,'downloaded');
+                }
+                allDownloaded = allDownloaded && status;
             }else{
                 if(comp.data.downloadStatus != 'downloaded'){
-                    this.allDownloaded = false;
+                    allDownloaded = false;
                 }
             }
         }   
+
+        return allDownloaded;
     }
 
     /**
-    * Function to check if resId is in the data cart.
+    * Function to check if cartId is in the data cart.
     **/ 
-    isInDataCart(resId:string){
+    isInDataCart(cartId:string){
         this.cartMap = this.cartService.getCart();
 
         for (let key in this.cartMap) {
             let value = this.cartMap[key];
-            if (value.data.resId == resId) {
+            if (value.data.cartId == cartId) {
                 return true;
             }
         }
@@ -533,12 +550,12 @@ export class DescriptionComponent {
     }
 
     /**
-    * Function to remove a resId from the data cart.
+    * Function to remove a cartId from the data cart.
     **/ 
-    // removeCart(rowData:any, resId: string){
+    // removeCart(rowData:any, cartId: string){
     //     this.cartService.updateFileSpinnerStatus(true);
-    //     this.cartService.removeResId(resId);
-    //     rowData.isSelected = this.isInDataCart(resId);
+    //     this.cartService.removeCartId(cartId);
+    //     rowData.isSelected = this.isInDataCart(cartId);
     //     this.checkIfAllSelected(this.files);
 
     //     setTimeout(()=> {
@@ -574,7 +591,7 @@ export class DescriptionComponent {
                 case HttpEventType.Response:
                     this.downloadService.saveToFileSystem(event.body, filename);
                     rowData.downloadStatus = 'downloaded';
-                    this.cartService.updateCartItemDownloadStatus(rowData.resId,'downloaded');
+                    this.cartService.updateCartItemDownloadStatus(rowData.cartId,'downloaded');
                     this.updateDownloadStatus(this.files);
                     break;
                 case HttpEventType.DownloadProgress:
@@ -588,7 +605,7 @@ export class DescriptionComponent {
     **/ 
     downloadFile(rowData:any){
         if(!this.isFile(rowData)){
-            this.downloadById(rowData.id);
+            this.downloadById(rowData.cartId);
         }else{
             this.downloadOneFile(rowData);
         };
@@ -599,7 +616,7 @@ export class DescriptionComponent {
         // this.downloadService.getFile(rowData.downloadURL, '').subscribe(blob => {
         //     this.downloadService.saveToFileSystem(blob, filename);
         //     rowData.downloadStatus = 'downloaded';
-        //     this.cartService.updateCartItemDownloadStatus(rowData.resId,'downloaded');
+        //     this.cartService.updateCartItemDownloadStatus(rowData.cartId,'downloaded');
         //     this.cartService.updateFileSpinnerStatus(false);
         //     this.updateDownloadStatus(this.files);
         //     },
@@ -691,21 +708,21 @@ export class DescriptionComponent {
         this.displayDownloadFiles = true;
         this.cancelAllDownload = false;
         this.downloadStatus = 'downloading';
+        this.downloadService.setDownloadProcessStatus(false);
 
         // Sending data to _bundle_plan and get back the plan
         this.getDownloadData(files.children);
-        // console.log("downloadData:");
-        // console.log(this.downloadData);
 
         var randomnumber = Math.floor(Math.random() * (this.commonVarService.getRandomMaximum() - this.commonVarService.getRandomMinimum() + 1)) + this.commonVarService.getRandomMinimum();
 
-        files.data.downloadFileName = "download" + randomnumber + ".zip";
+        var zipFileName = "download" + randomnumber;
+        files.data.downloadFileName = zipFileName + ".zip"
         files.data.downloadStatus = 'downloading';
 
         postMessage.push({"bundleName":files.data.downloadFileName, "includeFiles":this.downloadData});
 
-        console.log("postMessage:");
-        console.log(postMessage);
+        // console.log("postMessage:");
+        // console.log(postMessage);
 
         // now use postMessage to request a bundle plan
 
@@ -722,40 +739,22 @@ export class DescriptionComponent {
 
         let bundlePlan: any[] = [];
         let tempData: any[] = [];
-        tempData.push({filePath: "ECBCC1C1301D2ED9E04306570681B10735/aluminum/aluminum/srd13_Al-002.json", downloadURL: "http://www.nist.gov/srd/srd_data/srd13_Al-002.json"});
-        tempData.push({filePath: "ECBCC1C1301D2ED9E04306570681B10735/aluminum/aluminum/srd13_Al-003.json", downloadURL: "http://www.nist.gov/srd/srd_data/srd13_Al-003.json"});
 
-        bundlePlan.push({"bundleName":"download4281_01.zip","includeFiles":tempData});
-
+        tempData.push(this.downloadData[0]);
+        tempData.push(this.downloadData[1]);
+        bundlePlan.push({"bundleName":zipFileName + "01.zip","includeFiles":tempData});
         tempData = [];
-        tempData.push({filePath: "ECBCC1C1301D2ED9E04306570681B10735/aluminum/aluminum/srd13_Al-004.json", downloadURL: "http://www.nist.gov/srd/srd_data/srd13_Al-004.json"});
-        tempData.push({filePath: "ECBCC1C1301D2ED9E04306570681B10735/aluminum/aluminum/srd13_Al-005.json", downloadURL: "http://www.nist.gov/srd/srd_data/srd13_Al-005.json"});
-
-        bundlePlan.push({"bundleName":"download4281_02.zip","includeFiles":tempData});
-
+        tempData.push(this.downloadData[2]);
+        tempData.push(this.downloadData[3]);
+        bundlePlan.push({"bundleName":zipFileName + "02.zip","includeFiles":tempData});
         tempData = [];
-        tempData.push({filePath: "ECBCC1C1301D2ED9E04306570681B10735/aluminum/chloride/srd13_Al-014.json", downloadURL: "http://www.nist.gov/srd/srd_data/srd13_Al-014.json"});
-        tempData.push({filePath: "ECBCC1C1301D2ED9E04306570681B10735/aluminum/chloride/srd13_Al-015.json", downloadURL: "http://www.nist.gov/srd/srd_data/srd13_Al-015.json"});
-
-        bundlePlan.push({"bundleName":"download4281_03.zip","includeFiles":tempData});
-
+        tempData.push(this.downloadData[4]);
+        tempData.push(this.downloadData[5]);
+        bundlePlan.push({"bundleName":zipFileName + "03.zip","includeFiles":tempData});
         tempData = [];
-        tempData.push({filePath: "ECBCC1C1301D2ED9E04306570681B10735/aluminum/chloride/srd13_Al-016.json", downloadURL: "http://www.nist.gov/srd/srd_data/srd13_Al-016.json"});
-        tempData.push({filePath: "ECBCC1C1301D2ED9E04306570681B10735/aluminum/chloride/srd13_Al-017.json", downloadURL: "http://www.nist.gov/srd/srd_data/srd13_Al-017.json"});
-
-        bundlePlan.push({"bundleName":"download4281_04.zip","includeFiles":tempData});
-
-        // tempData = [];
-        // tempData.push({filePath: "ECBCC1C1301D2ED9E04306570681B10735/aluminum/chloride/srd13_Al-018.json", downloadURL: "http://www.nist.gov/srd/srd_data/srd13_Al-018.json"});
-        // tempData.push({filePath: "ECBCC1C1301D2ED9E04306570681B10735/aluminum/chloride/srd13_Al-019.json", downloadURL: "http://www.nist.gov/srd/srd_data/srd13_Al-019.json"});
-
-        // bundlePlan.push({"bundleName":"download4281_05.zip","includeFiles":tempData});
-
-        // tempData = [];
-        // tempData.push({filePath: "ECBCC1C1301D2ED9E04306570681B10735/aluminum/chloride/srd13_Al-020.json", downloadURL: "http://www.nist.gov/srd/srd_data/srd13_Al-020.json"});
-        // tempData.push({filePath: "ECBCC1C1301D2ED9E04306570681B10735/aluminum/chloride/srd13_Al-021.json", downloadURL: "http://www.nist.gov/srd/srd_data/srd13_Al-021.json"});
-
-        // bundlePlan.push({"bundleName":"download4281_06.zip","includeFiles":tempData}); 
+        tempData.push(this.downloadData[6]);
+        tempData.push(this.downloadData[7]);
+        bundlePlan.push({"bundleName":zipFileName + "04.zip","includeFiles":tempData});
 
         let tempUrl: any[] = ["https://s3.amazonaws.com/nist-midas/1858/20170213_PowderPlate2_Pad.zip", "https://s3.amazonaws.com/nist-midas/1858/RawCameraData.zip","https://s3.amazonaws.com/nist-midas/1858/RawCameraData.zip","https://s3.amazonaws.com/nist-midas/1858/20170213_PowderPlate2_Pad.zip", "https://s3.amazonaws.com/nist-midas/1858/RawCameraData.zip","https://s3.amazonaws.com/nist-midas/1858/RawCameraData.zip","https://s3.amazonaws.com/nist-midas/1858/20170213_PowderPlate2_Pad.zip"];
         var i = 0;
@@ -765,8 +764,8 @@ export class DescriptionComponent {
             i++;
         }
 
-        console.log("this.zipData:");
-        console.log(this.zipData);
+        // console.log("this.zipData:");
+        // console.log(this.zipData);
 
         // Associate zipData with files
         for(let zip of this.zipData){
@@ -792,6 +791,8 @@ export class DescriptionComponent {
                     //     this.downloadStatus = 'downloaded';
                     // }
                 }
+
+                this.updateDownloadStatus(this.files);
             }
         ));
     }
@@ -856,8 +857,8 @@ export class DescriptionComponent {
                 this.setAllDownloaded(comp.children);
             }else{
                 comp.data.downloadStatus = 'downloaded';
-                this.cartService.updateCartItemDownloadStatus(comp.data.resId,'downloaded');
-                this.cartService.updateFileSpinnerStatus(false);
+                this.cartService.updateCartItemDownloadStatus(comp.data.cartId,'downloaded');
+                // this.cartService.updateFileSpinnerStatus(false);
             }
         }   
     }
@@ -868,7 +869,7 @@ export class DescriptionComponent {
     resetDownloadStatus(rowData){
         rowData.downloadStatus = null;
         rowData.downloadProgress = 0;
-        this.cartService.updateCartItemDownloadStatus(rowData.resId,null);
+        this.cartService.updateCartItemDownloadStatus(rowData.cartId,null);
         this.allDownloaded = false;
     }
 

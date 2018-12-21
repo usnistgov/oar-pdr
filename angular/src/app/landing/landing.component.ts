@@ -127,7 +127,6 @@ export class LandingComponent implements OnInit {
               @Inject(APP_ID) private appId: string,
               private cartService: CartService,
               private commonVarService: CommonVarService) {
-    
     this.rmmApi = this.appConfig.getRMMapi();
     this.distApi = this.appConfig.getDistApi();
     this.landing = this.appConfig.getLandingBackend();
@@ -154,6 +153,8 @@ export class LandingComponent implements OnInit {
     //this.meta.addTag({ "testdescription": this.record['description'] });
     //let dh = new ResComponents(this.record['components']).dataHierarchy();
     this.createNewDataHierarchy();
+    console.log("this.files:");
+    console.log(this.files);
     if(this.record['doi'] !== undefined && this.record['doi'] !== "" )
       this.isDOI = true;
     if( "hasEmail" in this.record['contactPoint'])  
@@ -346,8 +347,6 @@ updateMenu(){
     // console.log(this.record);
     if(this.record['components'] != null){
       testdata["data"] = this.arrangeIntoTree(this.record['components']);
-      console.log("testdata:");
-      console.log(testdata);
       this.files.push(testdata);
     }
   }
@@ -384,7 +383,7 @@ updateMenu(){
               let newPart = null;
               newPart = {
                 data : {
-                  id: i,
+                  cartId: path.filepath,
                   name : part,
                   mediatype: path.mediaType,
                   size: path.size,
