@@ -153,8 +153,6 @@ export class LandingComponent implements OnInit {
     //this.meta.addTag({ "testdescription": this.record['description'] });
     //let dh = new ResComponents(this.record['components']).dataHierarchy();
     this.createNewDataHierarchy();
-    console.log("this.files:");
-    console.log(this.files);
     if(this.record['doi'] !== undefined && this.record['doi'] !== "" )
       this.isDOI = true;
     if( "hasEmail" in this.record['contactPoint'])  

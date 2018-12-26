@@ -147,7 +147,7 @@ export class DescriptionComponent {
                 this.updateDownloadStatus(this.files);
             }
         );
-          console.log(this.files);
+        //   console.log(this.files);
     }
 
     expandToLevel(dataFiles: any, option: boolean, targetLevel: any){

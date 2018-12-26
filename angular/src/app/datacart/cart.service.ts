@@ -115,8 +115,6 @@ export class CartService {
     // get the cart
     let myCartMap = this.getCart();
     let cartEntities : CartEntity[] = [];
-    console.log("myCartMap:");
-    console.log(myCartMap);
 
     // convert the map to an array
     for (let key in myCartMap) {
@@ -130,7 +128,7 @@ export class CartService {
       // console.log("value" + JSON.stringify(value.data.cartId));
       cartEntities.push(value);
     }
-    // console.log("cart" + JSON.stringify(cartEntities));
+
     let cartMap = cartEntities.reduce(function(map, cartEntry, i) {
       map[cartEntry.data.cartId] = cartEntry;
       return map;
@@ -227,7 +225,7 @@ export class CartService {
         cartEntities.push(value);
       }
     }
-    // console.log("cart" + JSON.stringify(cartEntities));
+    
     let cartMap = cartEntities.reduce(function(map, cartEntry, i) {
       map[cartEntry.data.cartId] = cartEntry;
       return map;
@@ -271,7 +269,6 @@ export class CartService {
    * Will persist the product to local storage
    **/
   addDataToCart(data: Data) : void {
-    console.log(data);
     // product id , quantity
     let cartMap = this.getCart();
     // if we dont have  any cart history, create a empty cart
@@ -337,8 +334,6 @@ export class CartService {
    **/
   getCart() {
     let cartAsString = this._storage.getItem('cart');
-    // console.log("cartAsString:");
-    // console.log(cartAsString);
 
     return JSON.parse(cartAsString);
     }

@@ -96,10 +96,6 @@ export class DownloadService {
                 nextZip.downloadStatus = 'downloadError';
                 nextZip.downloadErrorMessage = err.message;
                 this.setDownloadingNumber(this.zipFilesDownloadingSub.getValue()-1);
-                console.log("Download err:");
-                console.log(err);
-                console.log("nextZip:");
-                console.log(nextZip);
             }
         );
     }
