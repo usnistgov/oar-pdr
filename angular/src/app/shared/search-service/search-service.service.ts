@@ -6,6 +6,7 @@ import 'rxjs/add/operator/catch';
 import 'rxjs/add/observable/throw';
 import { AppConfig } from '../config-service/config.service';
 import * as _ from 'lodash';
+import { TestDataService } from '../../shared/testdata-service/testDataService';
 /**
  * This class provides the Search service with methods to search for records from tha rmm.
  */
@@ -22,7 +23,9 @@ export class SearchService {
    * @param {Http} http - The injected Http.
    * @constructor
    */
-  constructor(private http: HttpClient, private appConfig : AppConfig) {
+  constructor(private http: HttpClient,
+    private testDataService: TestDataService, 
+    private appConfig : AppConfig) {
     this.rmmApi = this.appConfig.getRMMapi();
     this.metaApi = this.appConfig.getMetaApi();
     this.landingBackend = this.appConfig.getLandingBackend();
@@ -46,7 +49,8 @@ export class SearchService {
       this.landingBackend = this.landingBackend+'records?@id=';
     else if(_.includes(this.landingBackend,'rmm'))
       this.landingBackend = this.landingBackend+'records/'; 
-    return this.http.get(this.landingBackend+ searchValue);
+    // return this.http.get(this.landingBackend+ searchValue);
+    return this.testDataService.getJSON();
   }
 }
 

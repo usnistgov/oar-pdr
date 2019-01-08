@@ -1,62 +1,149 @@
-<div class="ui-g-12 ui-md-6" style="align-content: right; padding-left: -1%; padding-right: 1em; margin-top: 1em; width: 100%;">
-    <!-- <div class="ui-g-6 ui-md-6"></div> -->
+<style id="antiClickjack">
+        body {
+          display: none !important;
+        }
+      </style>
+      <script type="text/javascript">
+        if (self === top) {
+          var antiClickjack = document.getElementById("antiClickjack");
+          if(antiClickjack !== null && antiClickjack !== undefined)
+              antiClickjack.parentNode.removeChild(antiClickjack);
+              
+        } else {
+          top.location = self.location;
+        }
+</script>
+
+
+<!-- <div class="ui-g-12 ui-md-6" style="align-content: right; padding-left: -1%; padding-right: 1em; margin-top: 1em; width: 100%;"> -->
+
+<div class="ui-g-12 ui-md-12" align="right" style="padding-left: -1%; padding-right: 1em; margin-top: 1em; width: 100%;">
     <span style="padding-right: 2%; float: right">
-        <button type="button" id="downloadStatus" (click)="clearAll()" pButton type="submit"  style="width:max-content; background-color:grey;" >
-            <i class="faa faa-minus-circle faa-1x icon-white" style="color: #fff;"></i>
-                Clear All
-        </button>
-    </span>
-    <span style="padding-right: 2%; float: right">
-            <button type="button" id="downloadStatus" (click)="removeByDownloadStatus()" pButton type="submit"  style="width:max-content; background-color:grey;" >
+            <button type="button" (click)="removeByDownloadStatus()" pButton type="submit"  style="width:max-content; background-color:grey;" >
                 <i class="faa faa-minus-circle faa-1x icon-white" style="color: #fff;"></i>
                     Remove downloaded
             </button>
     </span>
     <span style="padding-right: 2%; float: right">
-        <button type="button" id="removeData" (click)="removeByDataId()" pButton type="submit"  style="width:max-content; background-color:grey;" >
+        <button type="button" (click)="removeByDataId()" pButton type="submit"  style="width:max-content; background-color:grey;" [disabled]="selectedFileCount==0">
             <i class="faa faa-trash faa-1x icon-white" style="color: #fff;"></i>
                 Remove selected
             <span class="badge badge-notify">{{selectedFileCount}}</span>
         </button>
     </span>
-
     <span style="padding-right: 2%; float: right">
-        <button type="button" id="download" (click)="downloadZIP()" pButton type="submit"  style="width:max-content; background-color: #307F38;" >
+        <button type="button" (click)="downloadAllFilesFromAPI()" pButton type="submit"  style="width:max-content; background-color: #307F38;" [disabled]="selectedFileCount==0">
             <i class="faa faa-download faa-1x icon-white" style="color: #fff;"></i>
-                Download Selected 
+                Download Selected
                 <span class="badge badge-notify" >{{selectedFileCount}}</span>
         </button>
-    </span>        
+    </span>      
+    <span *ngIf="displayDownloadFiles && !allProcessed" style="padding-right: 2%; float: right">
+        <button type="button" (click)="cancelDownloadAll()" pButton type="submit"  style="width:max-content; background-color: #307F38;" >
+            <i class="faa faa-download faa-1x icon-white" style="color: #fff;"></i>
+                Cancel All Download 
+        </button>
+    </span> 
+    <span *ngIf="displayDownloadFiles && zipData.length>0" style="padding-right: 2%; float: right">
+        <button type="button" (click)="showZipFiles = !showZipFiles" pButton type="submit" style="width:max-content;background-color: #307F38; " >
+            <i class="faa faa-eye faa-1x icon-white" style="color: #fff;"></i>
+            <span *ngIf="showZipFiles"> Hide Zip</span>
+            <span *ngIf="!showZipFiles"> Show Zip</span>
+        </button>
+    </span> 
+    <!-- <span *ngIf="displayDownloadFiles"  style="display:inline;">
+        <span *ngIf="!downloadStatusExpanded">
+            <i (click)="downloadStatusExpanded = !downloadStatusExpanded" class="faa faa-arrow-circle-down faa-1x icon-white" style="cursor: pointer;color: rgb(0, 119, 255);" pTooltip="Expand Zip Display"></i>
+        </span>    
+        <span *ngIf="downloadStatusExpanded">
+                <i (click)="downloadStatusExpanded = !downloadStatusExpanded" class="faa faa-arrow-circle-up faa-1x icon-white" style="cursor: pointer;color: rgb(0, 119, 255);" pTooltip="Collapse Zip Display"></i>
+        </span>    
+    </span> -->
 </div>
 
-<div style="padding-left: 2%; width: 100%;display:flex;">
-    <div style="padding-left: 2%; flex: 0 0 auto;" *ngFor="let item of displayFiles  ">
-        <div style="padding-left: 2%; width: 100%; display:flex;">
-            <div style="padding-left: 2%; flex: 0 0 auto;">
+<!-- <div style="padding-left: 2%; width: 100%;display:flex;"> -->
+    <!-- <div style="padding-left: 2%; flex: 0 0 auto;" *ngFor="let item of displayFiles  "> -->
+        <!-- <div style="padding-left: 2%; width: 100%; display:flex;"> -->
+            <!-- <div style="padding-left: 2%; flex: 0 0 auto;">
                 <span style="display:inline;">{{item.key}}</span> 
                 <p-progressSpinner *ngIf ="item.value === true" [style]="{width: '12px', height: '12px'}" ></p-progressSpinner>
                 <i class="faa faa-check" *ngIf ="item.value !== true"></i>
                 <span style="display:inline;" *ngIf ="downloadStatus == 'downloading'">
                     {{downloadProgress}}%
                 </span>
-            </div>
-            <div style="padding-left: 2%; padding-top: 8px;width: 200px;flex: 0 0 auto;" *ngIf ="downloadStatus == 'downloading'">
+            </div> -->
+            <!-- <div style="padding-left: 2%; padding-top: 8px;width: 200px;flex: 0 0 auto;" *ngIf ="downloadStatus == 'downloading'">
                 <p-progressBar [value]="downloadProgress" showValue="true"></p-progressBar>
-            </div>
-            <div style="padding-left:5px; flex: 0 0 auto;" *ngIf="downloadStatus == 'downloading'">
+            </div> -->
+            <!-- <div style="padding-left:5px; flex: 0 0 auto;" *ngIf="downloadStatus == 'downloading'">
                 <span (click)="cancelDownload(item.key)" style="cursor: pointer;"><i class="faa faa-remove"></i></span>
-            </div>
-        </div>
+            </div> -->
+        <!-- </div> -->
+    <!-- </div> -->
+<!-- </div> -->
+
+<div>
+    <div align="left" *ngIf="displayDownloadFiles" style="margin-right: 3%; margin-left: 3%;">
+        <span *ngIf="!downloadStatusExpanded">
+            <i (click)="downloadStatusExpanded = !downloadStatusExpanded" class="faa faa-arrow-circle-down faa-1x icon-white" style="cursor: pointer;color: rgb(0, 119, 255);" pTooltip="Expand Zip Display"></i>
+        </span>    
+        <span *ngIf="downloadStatusExpanded">
+                <i (click)="downloadStatusExpanded = !downloadStatusExpanded" class="faa faa-arrow-circle-up faa-1x icon-white" style="cursor: pointer;color: rgb(0, 119, 255);" pTooltip="Collapse Zip Display"></i>
+        </span>    
     </div>
 </div>
 
+<div *ngIf="downloadStatusExpanded && displayDownloadFiles && zipData.length > 0" class="downloadStatusExpand">
+    <div *ngFor="let zip of zipData; let i =index" >
+        <div style="padding-left: 2%; width: 100%; display:flex;">
+                <span style="display:inline;">
+                        {{zip.fileName}} 
+                </span>
+                <div style="padding-left: .5em; display:flex;" *ngIf="zip.downloadStatus === 'downloading'">
+                    <div style="padding-left: .5em; flex: 0 0 auto;">
+                        <span style="display:inline;">    
+                            <p-progressSpinner [style]="{width: '12px', height: '12px'}" ></p-progressSpinner>
+                        </span>
+                    </div>
+                    <div style="padding-left: .5em; flex: 0 0 auto;">
+                        <span style="display:inline;font-size: 0.8em">
+                            {{zip.downloadProgress}}%
+                        </span>
+                    </div>
+                    <div style="padding-left: 2%; padding-top: 8px;width: 200px;flex: 0 0 auto;height: 2em;">
+                            <p-progressBar [value]="zip.downloadProgress" showValue="false"></p-progressBar>
+                    </div>
+                    <div style="padding-left:5px; flex: 0 0 auto;">
+                            <span (click)="cancelDownloadZip(zip)" style="cursor: pointer;"><i class="faa faa-remove"></i></span>
+                    </div>
+                </div>
+                <div style="padding-left: 2%; width: 200px;flex: 0 0 auto;" *ngIf="zip.downloadStatus === 'downloaded'">  
+                        <i class="faa faa-check"></i> Downloaded
+                </div>         
+                <div style="padding-left: 2%; width: 200px;flex: 0 0 auto;" *ngIf="zip.downloadStatus === 'cancelled'">  
+                        <i class="faa faa-remove"></i> Cancelled
+                </div>     
+                <div style="padding-left: 2%; flex: 0 0 auto;" *ngIf="zip.downloadStatus === 'downloadError'">  
+                        <span style="display:inline;font-size: 0.8em; color: red">
+                                {{zip.downloadErrorMessage}}
+                        </span>
+                </div>            
+            </div>
+    </div>
+</div>
+
+
+<div style="visibility: hidden">
+        Seems there is a bug with PrimeNg class="ui-g-12 ui-md-12" that have to add this hidden div to enable all buttons.
+</div>
+
 <div>
-    <p-treeTable selectionMode="checkbox" [value]="dataFiles" (onNodeSelect) = "dataFileCount()" (onNodeUnselect) = "dataFileCount()" [(selection)]="selectedData" [scrollable]="true" scrollHeight="600px" [style]="{ 'padding':'3%', 'color':'#000'}">
+    <p-treeTable selectionMode="checkbox" [value]="dataFiles" (onNodeSelect) = "dataFileCount()" (onNodeUnselect) = "dataFileCount()" [(selection)]="selectedData" [scrollable]="true" scrollHeight="600px" [style]="{ 'padding-left':'3%','padding-right':'3%','padding-bottom':'3%', 'color':'#000'}">
         <ng-template pTemplate="header">
             <tr>
-                <th style=" background-color: dimgray; width:75%; "> Title</th>
-                <th style=" background-color: dimgray ">Status</th>
-                <th style=" background-color: dimgray">Size</th>
+                <th style=" background-color: #1E6BA1;; width:75%; "> Title</th>
+                <th style=" background-color: #1E6BA1; ">Status</th>
+                <th style=" background-color: #1E6BA1;" ttResizableColumn>Size</th>
             </tr>
         </ng-template>
             <ng-template let-rowNode let-rowData="rowData"  let-i="rowIndex" pTemplate="body">
@@ -66,6 +153,7 @@
                         &nbsp;<p-treeTableCheckbox [value]="rowNode"></p-treeTableCheckbox>
                         &nbsp;<a href="{{rowData.downloadURL}}" target="_blank" *ngIf = "rowData.resTitle.indexOf('.') > 0 "> {{rowData.resTitle}}</a>
                         <span *ngIf = "rowData.resTitle.indexOf('.') < 0 "> {{rowData.resTitle}}</span>
+                        <span *ngIf="showZipFiles">   {{rowData.zipFile}}</span>
                     </td>
                     <td>
                         &nbsp;
@@ -87,3 +175,4 @@
         </ng-template>
     </p-treeTable>
 </div>
+

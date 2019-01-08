@@ -177,7 +177,7 @@ export class CartService {
   /**
    * Remove cart items with download status
    **/
-  removeDownloadStatus()  {
+  removeByDownloadStatus()  {
     // get the cart
     let myCartMap = this.getCart();
     let cartEntities : CartEntity[] = [];

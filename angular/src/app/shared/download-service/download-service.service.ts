@@ -3,7 +3,9 @@ import { HttpClientModule, HttpClient, HttpHeaders, HttpRequest, HttpEventType, 
 import {Observable } from 'rxjs';
 import {BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { CommonVarService } from '../../shared/common-var';
-import { ZipData } from '../../shared/download-service/zipData';
+import { ZipData } from './zipData';
+import { DownloadData } from './downloadData';
+import { TestDataService } from '../../shared/testdata-service/testDataService';
 
 declare var saveAs: any;
 
@@ -12,8 +14,12 @@ export class DownloadService {
     zipFilesDownloadingSub= new BehaviorSubject<number>(0);
     zipFilesProcessedSub= new BehaviorSubject<boolean>(false);
 
+    zipFilesDownloadingDataCardSub= new BehaviorSubject<number>(0);
+    zipFilesProcessedDataCardSub= new BehaviorSubject<boolean>(false);
+
     constructor(
         private http: HttpClient,
+        private testDataService: TestDataService, 
         private commonVarService:CommonVarService,
       ) { }
       
@@ -22,10 +28,14 @@ export class DownloadService {
         // return this.http.get(url, {responseType: 'arraybuffer'}).map(res => res);
     }
 
-    postFile(url, params): Observable<Blob>{
+    /**
+     * Calling end point 1 to get the bundle plan
+     **/
+    getBundlePlan(url, params): Observable<Blob>{
         // return this.http.post<Blob>(url, {responseType: 'blob', params: params});
         // for testing
-        return this.http.get('https://s3.amazonaws.com/nist-midas/1869/ddPCR%20Raw%20Data_Stein%20et%20al%20PLOSOne%202017.zip', {responseType: 'blob'});
+        // return this.http.get('https://s3.amazonaws.com/nist-midas/1869/ddPCR%20Raw%20Data_Stein%20et%20al%20PLOSOne%202017.zip', {responseType: 'blob'});
+        return this.testDataService.getBundlePlan();
         // return this.http.get(url, {responseType: 'arraybuffer'}).map(res => res);
     }
 
@@ -39,10 +49,20 @@ export class DownloadService {
     // }
 
     /**
+    * Calling end point 2 to get the bundle
+    **/
+   getBundle(url, params): Observable<any>{
+    // return this.http.post<Blob>(url, {responseType: 'blob', params: params});
+    // for testing
+    return this.testDataService.getBundle('https://s3.amazonaws.com/nist-midas/1858/20170213_PowderPlate2_Pad.zip', params);
+}
+
+
+    /**
      * Save file
      **/
     saveToFileSystem(data, filename) {
-        var json = JSON.stringify(data);
+        // var json = JSON.stringify(data);
         let blob = new Blob([data], {type: "octet/stream"});
         let blobUrl = window.URL.createObjectURL(blob);
 
@@ -59,32 +79,32 @@ export class DownloadService {
     /**
      * Download zip
      **/
-    download(nextZip: ZipData, zipdata: ZipData[], treeNode: any){
-        const req = new HttpRequest('GET', nextZip.downloadUrl, {
-            reportProgress: true, responseType: 'blob'
-        });
+    download(nextZip: ZipData, zipdata: ZipData[], treeNode: any, whichPage: any){
+        // const req = new HttpRequest('GET', nextZip.downloadUrl, {
+        //     reportProgress: true, responseType: 'blob'
+        // });
+
+        let sub = this.zipFilesDownloadingSub;
+        if(whichPage == "datacard"){
+            sub = this.zipFilesDownloadingDataCardSub;
+        }
 
         nextZip.downloadStatus = 'downloading';
 
-        this.setDownloadingNumber(this.zipFilesDownloadingSub.getValue()+1);
-        //     this.downloadService.postFile(this.distApi + "_bundle", JSON.stringify(zipdata.bundle)).subscribe(blob => {
-        //     this.downloadService.saveToFileSystem(blob, this.downloadFileName);
-        //     console.log('All downloaded.');
-        //     this.downloadStatus = 'downloaded';
-        //     this.setAllDownloaded(this.files);
-        //     this.allDownloaded = true;
-        // });  
+        this.setDownloadingNumber(sub.getValue()+1, whichPage);
+        //     nextZip.downloadInstance = this.downloadService.postFile(this.distApi + "_bundle", JSON.stringify(zipdata.bundle)).subscribe(event => {
 
-        nextZip.downloadInstance = this.http.request(req).subscribe(
-            event => {
+        // nextZip.downloadInstance = this.http.request(req).subscribe(
+        nextZip.downloadInstance = this.getBundle(nextZip.downloadUrl, nextZip.bundle).subscribe(
+                event => {
                 switch (event.type) {
                     case HttpEventType.Response:
                         this.saveToFileSystem(event.body, nextZip.fileName);
                         nextZip.downloadProgress = 0;
                         nextZip.downloadStatus = 'downloaded';
-                        this.setDownloadingNumber(this.zipFilesDownloadingSub.getValue()-1);
+                        this.setDownloadingNumber(this.zipFilesDownloadingSub.getValue()-1, whichPage);
+                        this.setDownloadProcessStatus(this.allDownloadFinished(zipdata), whichPage);
                         this.setDownloadStatus(nextZip, treeNode, "downloaded");
-                        this.setDownloadProcessStatus(this.allDownloadFinished(zipdata));
                         break;
                     case HttpEventType.DownloadProgress:
                         nextZip.downloadProgress = Math.round(100*event.loaded / event.total);
@@ -95,7 +115,7 @@ export class DownloadService {
             err => {
                 nextZip.downloadStatus = 'downloadError';
                 nextZip.downloadErrorMessage = err.message;
-                this.setDownloadingNumber(this.zipFilesDownloadingSub.getValue()-1);
+                this.setDownloadingNumber(this.zipFilesDownloadingSub.getValue()-1, whichPage);
             }
         );
     }
@@ -103,11 +123,16 @@ export class DownloadService {
     /**
      * Download next available zip in the queue
      **/
-    downloadNextZip(zipData: ZipData[], treeNode: any){
-        if(this.zipFilesDownloadingSub.getValue() < this.commonVarService.getDownloadMaximum()){
+    downloadNextZip(zipData: ZipData[], treeNode: any, whichPage: any){
+        let sub = this.zipFilesDownloadingSub;
+        if(whichPage == "datacard"){
+            sub = this.zipFilesDownloadingDataCardSub;
+        }
+
+        if(sub.getValue() < this.commonVarService.getDownloadMaximum()){
             let nextZip = this.getNextZipInQueue(zipData);
             if(nextZip != null){
-                this.download(nextZip, zipData, treeNode);
+                this.download(nextZip, zipData, treeNode, whichPage);
             }
         }
     }
@@ -125,32 +150,72 @@ export class DownloadService {
         }
     }
 
+    getDownloadData(files: any, downloadData: any){
+        let existItem: any;
+        for (let comp of files) {
+            if(comp.children.length > 0){
+                this.getDownloadData(comp.children, downloadData);
+            }else{
+                if (comp.data['filePath'] != null && comp.data['filePath'] != undefined) {
+                    if (comp.data['filePath'].split(".").length > 1) {
+                        existItem = downloadData.filter(item => item.filePath === comp.data['ediid']+comp.data['filePath'] 
+                            && item.downloadURL === comp.data['downloadURL']);
+        
+                        if (existItem.length == 0) {
+                            downloadData.push({"filePath": comp.data['ediid']+comp.data['filePath'], 'downloadURL':comp.data['downloadURL']});
+                        }
+                    }
+                }
+            }
+        }        
+    }
+
     /**
     * Set the number of downloading zip files
     **/
-    watchDownloadingNumber(): Observable<any> {
-        return this.zipFilesDownloadingSub.asObservable();
+    watchDownloadingNumber(whichPage: any): Observable<any> {
+        let sub = this.zipFilesDownloadingSub;
+        if(whichPage == "datacard"){
+            sub = this.zipFilesDownloadingDataCardSub;
+        }
+
+        return sub.asObservable();
     }
 
     /**
      * Set the number of downloading zip files
      **/
-    setDownloadingNumber(value: number) {
-        this.zipFilesDownloadingSub.next(value);
+    setDownloadingNumber(value: number, whichPage: any) {
+        let sub = this.zipFilesDownloadingSub;
+        if(whichPage == "datacard"){
+            sub = this.zipFilesDownloadingDataCardSub;
+        }
+
+        sub.next(value);
     }
 
     /**
     * Watch overall process status
     **/
-    watchDownloadProcessStatus(): Observable<any> {
-        return this.zipFilesProcessedSub.asObservable();
+    watchDownloadProcessStatus(whichPage: any): Observable<any> {
+        let sub = this.zipFilesProcessedSub;
+        if(whichPage == "datacard"){
+            sub = this.zipFilesProcessedDataCardSub;
+        }
+
+        return sub.asObservable();
     }
 
     /**
      * Set overall process status
      **/
-    setDownloadProcessStatus(value: boolean) {
-        this.zipFilesProcessedSub.next(value);
+    setDownloadProcessStatus(value: boolean, whichPage: any) {
+        let sub = this.zipFilesProcessedSub;
+        if(whichPage == "datacard"){
+            sub = this.zipFilesProcessedDataCardSub;
+        }
+
+        sub.next(value);
     }
 
     /**
@@ -158,8 +223,8 @@ export class DownloadService {
      **/
     setDownloadStatus(zip: any, treeNode: any, status: any){
         for(let includeFile of zip.bundle.includeFiles){
-            let fullPath = includeFile.filePath.substring(includeFile.filePath.indexOf('/'));
-            let node = this.searchTreeByFullPath(treeNode, fullPath);
+            let filePath = includeFile.filePath.substring(includeFile.filePath.indexOf('/'));
+            let node = this.searchTreeByfilePath(treeNode, filePath);
             if(node != null){
                 node.data.downloadStatus = status;
             }
@@ -193,17 +258,38 @@ export class DownloadService {
     /**
      * Search tree by given full path
      **/
-    searchTreeByFullPath(element, fullPath){
-        if(element.data.fullPath == fullPath){
+    searchTreeByfilePath(element, filePath){
+        if(element.data.filePath == filePath){
              return element;
         }else if (element.children.length > 0){
              var i;
              var result = null;
              for(i=0; result == null && i < element.children.length; i++){
-                  result = this.searchTreeByFullPath(element.children[i], fullPath);
+                  result = this.searchTreeByfilePath(element.children[i], filePath);
              }
              return result;
         }
         return null;
-   }
+    }
+
+    getDownloadedNumber(zipData: any){
+        let totalDownloadedZip: number = 0;
+        for (let zip of zipData) {
+            if(zip.downloadStatus == 'downloaded'){
+                totalDownloadedZip += 1;
+            }
+        }
+        return totalDownloadedZip;
+    }
+
+    resetZipName(element){
+        if(element.data != undefined){
+            element.data.zipFile = null;
+        }
+        if (element.children.length > 0){
+            for(let i=0; i < element.children.length; i++){
+                this.resetZipName(element.children[i]);
+            }
+        } 
+    }
 }

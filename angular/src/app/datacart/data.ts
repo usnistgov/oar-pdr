@@ -6,6 +6,7 @@
  **/
 export interface Data {
   cartId: any;
+  ediid: any;
   id: any;
   downloadURL: any;
   resId: any;

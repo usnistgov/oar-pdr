@@ -112,3 +112,37 @@
   background-color: #FFFFFF;
   border: 0;
 }
+
+.downloadStatusLimit{
+  height:5em; 
+  width: 94%;
+  overflow: auto; 
+  margin-bottom: 0.5em; 
+  background-color: rgb(193, 240, 255);
+  padding: 0.5em;
+  margin-left: 3%;
+  margin-right: 3%;
+}
+
+.downloadStatusExpand{
+  width: 94%;
+  margin-bottom: 0.5em; 
+  background-color: rgb(193, 240, 255);
+  padding: 0.5em;
+  margin-left: 3%;
+  margin-right: 3%;
+}
+
+#zipDownloadDisplay {
+  width: 94%;
+  height: 80px;
+  margin-left: 3%;
+  margin-right: 3%;
+  padding: 0.5em;
+  overflow: auto; 
+  background:  rgb(196, 221, 253);
+}
+
+#zipDownloadDisplay:hover {
+  height: 100%;
+}

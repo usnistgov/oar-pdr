@@ -318,3 +318,29 @@
 :host >>> .ui-overlaypanel .ui-overlaypanel-close{
   background-color: #1E6BA1;
 }
+
+.downloadStatusLimit{
+  /* height:5em;  */
+  height:0em; 
+  overflow: auto; 
+  margin-bottom: 1em; 
+  background-color: rgb(193, 240, 255);
+  padding: 0.5em;
+}
+
+.downloadStatusExpand{
+  margin-bottom: 1em; 
+  background-color: rgb(193, 240, 255);
+  padding: 0.5em;
+}
+
+.badge-notify{
+  background-color: green;
+  position:relative;
+  top: -10px;
+  left: -5px;
+  font-size: 9px;
+  height:15px;
+  width:15px;
+  padding:3px 3px 3px 3px ;
+}

@@ -37,6 +37,7 @@ import { DownloadService } from "./shared/download-service/download-service.serv
 import {ProgressSpinnerModule} from 'primeng/progressspinner';
 import { ConfirmDialogModule, SelectItem, DropdownModule, ConfirmationService,Message } from 'primeng/primeng';
 import {ProgressBarModule} from 'primeng/progressbar';
+import { TestDataService } from './shared/testdata-service/testDataService';
 
 /**
  * Initialize the configs for backend services
@@ -77,6 +78,7 @@ const appInitializerFn = (appConfig: AppConfig) => {
     CartService, 
     AppConfig,
     DownloadService,
+    TestDataService,
     ConfirmationService,
     {
       provide: APP_INITIALIZER,

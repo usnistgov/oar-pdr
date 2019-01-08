@@ -10,7 +10,8 @@ import { AppConfig } from '../shared/config-service/config.service';
 import {  PLATFORM_ID, APP_ID, Inject } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { CartService } from '../datacart/cart.service';
-import { CommonVarService } from '../shared/common-var'
+import { CommonVarService } from '../shared/common-var';
+import { TestDataService } from '../shared/testdata-service/testDataService';
 
 interface reference {
   refType? : string,
@@ -117,6 +118,7 @@ export class LandingComponent implements OnInit {
     private meta: Meta;
     private newer : reference = {};  
     navigationSubscription : any;
+    ediid:any;
   /**
    * Creates an instance of the SearchPanel
    *
@@ -126,6 +128,7 @@ export class LandingComponent implements OnInit {
               ,@Inject(PLATFORM_ID) private platformId: Object,
               @Inject(APP_ID) private appId: string,
               private cartService: CartService,
+              private testDataService: TestDataService,
               private commonVarService: CommonVarService) {
     this.rmmApi = this.appConfig.getRMMapi();
     this.distApi = this.appConfig.getDistApi();
@@ -138,10 +141,14 @@ export class LandingComponent implements OnInit {
    * If Search is successful populate list of keywords themes and authors
    */
   onSuccess(searchResults:any[]) {
+    console.log(searchResults);
     if(searchResults["ResultCount"] === undefined || searchResults["ResultCount"] !== 1)
       this.record = searchResults;
     else if(searchResults["ResultCount"] !== undefined && searchResults["ResultCount"] === 1)
       this.record = searchResults["ResultData"][0];
+
+      console.log("this.record:");
+      console.log(this.record);
 
       if(this.record["@id"] === undefined || this.record["@id"] === "" ){
         this.isId = false;
@@ -284,7 +291,9 @@ updateMenu(){
    * Get the params OnInit
    */
   ngOnInit() {
+    console.log("Landing init...");
     this.searchValue = this.route.snapshot.paramMap.get('id');
+    this.ediid = this.searchValue;
     this.commonVarService.setEdiid(this.searchValue);
     this.files =[];
     this.route.data.map(data => data.searchService )
@@ -382,6 +391,7 @@ updateMenu(){
               newPart = {
                 data : {
                   cartId: path.filepath,
+                  ediid: this.ediid,
                   name : part,
                   mediatype: path.mediaType,
                   size: path.size,
@@ -389,7 +399,7 @@ updateMenu(){
                   description: path.description,
                   filetype: path['@type'][0],
                   resId: path["filepath"].replace(/^.*[\\\/]/, ''),
-                  fullPath: path.filepath,
+                  filePath: path.filepath,
                   downloadProgress: 0,
                   downloadInstance: null,
                   isSelected: false,

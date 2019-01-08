@@ -66,13 +66,26 @@
 
             <p-confirmDialog key='downloadAllConfirm'></p-confirmDialog>
             <span *ngIf="!allSelected">
-            <a href="javascript:;" (click)="addAllFilesToCart(files)" class="faa faa-cart-plus " style="margin-left:0.5em; color:#1E6BA1;cursor: pointer;" title="Add All files to datacart" data-toggle="tooltip"></a></span>
+                <a href="javascript:;" (click)="addAllFilesToCart(files)" class="faa faa-cart-plus " style="margin-left:0.5em; color:#1E6BA1;cursor: pointer;" title="Add All files to datacart" data-toggle="tooltip">
+                    <span class="badge badge-notify">{{cartLength}}</span>
+                </a>
+            </span>
             <span *ngIf="allSelected">
-                <a href="javascript:;" (click)="removeFilesFromCart(files)" class="faa faa-shopping-cart" style="margin-left:0.5em; color:green;cursor: pointer;" title="Remove All files from datacart" data-toggle="tooltip"></a></span>
-            <span class="badge badge-notify" style="margin-left:0.5em;">{{cartLength}}</span>
+                <a href="javascript:;" (click)="removeFilesFromCart(files)" class="faa faa-shopping-cart" style="margin-left:0.5em; color:green;cursor: pointer;" title="Remove All files from datacart" data-toggle="tooltip">
+                    <span class = "badge badge-notify">{{cartLength}}</span>
+                </a>
+            </span>
+            <span *ngIf="displayDownloadFiles"  style="display:inline;">
+                <span *ngIf="!downloadStatusExpanded">
+                    <i (click)="downloadStatusExpanded = !downloadStatusExpanded" class="faa faa-arrow-circle-down faa-1x icon-white" style="cursor: pointer;color: rgb(0, 119, 255);" pTooltip="Expand Zip Display"></i>
+                </span>    
+                <span *ngIf="downloadStatusExpanded">
+                        <i (click)="downloadStatusExpanded = !downloadStatusExpanded" class="faa faa-arrow-circle-up faa-1x icon-white" style="cursor: pointer;color: rgb(0, 119, 255);" pTooltip="Collapse Zip Display"></i>
+                </span>    
+            </span>
             <span class="font8" style="margin-left:0.5em; color:gray;">Click on the file/row in the table below to view more details.</span>
             <span class="font10" style="margin-left:0.5em; color:gray; float: right"> Total No. files: {{ totalFiles }} </span> 
-            <button type="button" (click)="expandToLevel(files, !isExpanded, null)" style="width:12%; height:2em;font-size: .7em; background-color: #307F38; float: right; margin-top: 2px;margin-left: 5px;text-align: center;line-height: 1em;color:white;border-radius: 4px;" >
+            <button type="button" (click)="expandToLevel(files, !isExpanded, null)" style="width:8%; height:2em;font-size: .7em; background-color: #307F38; float: right; margin-top: 2px;margin-left: 5px;text-align: center;line-height: 1em;color:white;border-radius: 4px;" >
                 <span *ngIf="!isExpanded">Expand All</span>
                 <span *ngIf="isExpanded">Collapse All</span>
             </button>
@@ -86,9 +99,9 @@
                 </button>
             </span>
 
-
-            <div *ngIf="displayDownloadFiles" class="well welldesc" style="height:6.5em; overflow: auto; margin-bottom: 0.5em; background-color: rgb(235, 235, 235);padding: 0.5em;">
-                <div *ngFor="let zip of zipData; let i =index" style="width: 100%;">
+            <!-- <div *ngIf="displayDownloadFiles" [ngClass]="{'downloadStatusLimit': !downloadStatusExpanded, 'downloadStatusExpand': downloadStatusExpanded}"> -->
+            <div *ngIf="downloadStatusExpanded && displayDownloadFiles && zipData.length > 0" class="downloadStatusExpand">
+                    <div *ngFor="let zip of zipData; let i =index" style="width: 100%;">
                     <div class="ui-g" style="padding-left: 2%; width: 100%; display:flex;">
                             <span style="display:inline;">
                                     {{zip.fileName}} 
@@ -114,6 +127,9 @@
                             <div style="padding-left: 2%; width: 200px;flex: 0 0 auto;" *ngIf="zip.downloadStatus === 'downloaded'">  
                                     <i class="faa faa-check"></i> Downloaded
                             </div>            
+                            <div style="padding-left: 2%; width: 200px;flex: 0 0 auto;" *ngIf="zip.downloadStatus === 'cancelled'">  
+                                    <i class="faa faa-remove"></i> Cancelled
+                            </div>  
                             <div style="padding-left: 2%; flex: 0 0 auto;" *ngIf="zip.downloadStatus === 'downloadError'">  
                                     <span style="display:inline;font-size: 0.8em; color: red">
                                             {{zip.downloadErrorMessage}}

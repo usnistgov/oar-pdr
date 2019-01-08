@@ -3,10 +3,10 @@ import { TreeNode} from 'primeng/api';
 import { CartService} from '../../datacart/cart.service';
 import { Data} from '../../datacart/data';
 import { OverlayPanel} from 'primeng/overlaypanel';
-import { stringify } from '@angular/compiler/src/util';
+import { stringify, error } from '@angular/compiler/src/util';
 import { DownloadService } from '../../shared/download-service/download-service.service';
 import { SelectItem, DropdownModule, ConfirmationService,Message } from 'primeng/primeng';
-import { DownloadData } from '../../datacart/downloadData';
+import { DownloadData } from '../../shared/download-service/downloadData';
 import { ZipData } from '../../shared/download-service/zipData';
 import { CommonVarService } from '../../shared/common-var';
 import { environment } from '../../../environments/environment';
@@ -66,6 +66,7 @@ export class DescriptionComponent {
     showZipFiles: boolean = false;
     subscriptions: any = [];
     allProcessed: boolean = false;
+    downloadStatusExpanded: boolean = true;
 
     private distApi : string = environment.DISTAPI;
 
@@ -108,10 +109,12 @@ export class DescriptionComponent {
         this.fileNode = {"data":{ "name":"", "size":"", "mediatype":"", "description":"", "filetype":"" }};
 
         this.cartMap = this.cartService.getCart();
+        this.ediid = this.commonVarService.getEdiid();
 
         const newPart = {
             data : {
                 cartId: "/",
+                ediid: this.ediid,
                 name : "files",
                 mediatype: "",
                 size: null,
@@ -119,7 +122,7 @@ export class DescriptionComponent {
                 description: null,
                 filetype: null,
                 resId: "files",
-                fullPath: "/",
+                filePath: "/",
                 downloadProgress: 0,
                 downloadInstance: null,
                 isSelected: false,
@@ -134,20 +137,23 @@ export class DescriptionComponent {
           // this.updateCartStatus(this.files);
           this.updateAllSelectStatus(this.files);
           this.updateDownloadStatus(this.files);
-          this.ediid = this.commonVarService.getEdiid();
   
           this.totalFiles = 0;
           this.getTotalFiles(this.files);
   
           this.expandToLevel(this.files, true, 1);
 
-          this.downloadService.watchDownloadProcessStatus().subscribe(
+          this.downloadService.watchDownloadProcessStatus("landingPage").subscribe(
             value => {
                 this.allProcessed = value;
+                if(this.allProcessed){
+                    this.downloadStatus = "downloaded";
+                }
                 this.updateDownloadStatus(this.files);
             }
         );
-        //   console.log(this.files);
+          console.log("this.files:");
+          console.log(this.files);
     }
 
     expandToLevel(dataFiles: any, option: boolean, targetLevel: any){
@@ -476,14 +482,17 @@ export class DescriptionComponent {
 
     addtoCart(rowData:any){
         // this.cartService.updateFileSpinnerStatus(true);
+        console.log("rowData");
+        console.log(rowData);
         let data : Data;
         data = {'cartId':rowData.cartId,
+                'ediid' :this.ediid,
                 'resId':rowData.resId,
                 'resTitle':this.record['title'],
-                'resFilePath':rowData.fullPath,
+                'resFilePath':rowData.filePath,
                 'id':rowData.name,
                 'fileName':rowData.name,
-                'filePath':rowData.fullPath,
+                'filePath':rowData.filePath,
                 'fileSize':rowData.size,
                 'downloadURL':rowData.downloadURL,
                 'fileFormat':rowData.mediatype,
@@ -676,116 +685,121 @@ export class DescriptionComponent {
         this.downloadAllFilesFromAPI(this.treeRoot[0]);
     }
 
-    getDownloadData(files: any){
-        let existItem: any;
-        for (let comp of files) {
-            if(comp.children.length > 0){
-                this.getDownloadData(comp.children);
-            }else{
-                if (comp.data['fullPath'] != null && comp.data['fullPath'] != undefined) {
-                    if (comp.data['fullPath'].split(".").length > 1) {
-                        existItem = this.downloadData.filter(item => item.filePath === this.ediid+comp.data['fullPath'] 
-                            && item.downloadURL === comp.data['downloadURL']);
+    // getDownloadData(files: any){
+    //     let existItem: any;
+    //     for (let comp of files) {
+    //         if(comp.children.length > 0){
+    //             this.getDownloadData(comp.children);
+    //         }else{
+    //             if (comp.data['filePath'] != null && comp.data['filePath'] != undefined) {
+    //                 if (comp.data['filePath'].split(".").length > 1) {
+    //                     existItem = this.downloadData.filter(item => item.filePath === comp.data['ediid']+comp.data['filePath'] 
+    //                         && item.downloadURL === comp.data['downloadURL']);
         
-                        if (existItem.length == 0) {
-                            this.downloadData.push({"filePath":this.ediid+comp.data['fullPath'], 'downloadURL':comp.data['downloadURL']});
-                        }
-                    }
-                }
-            }
-        }        
-    }
+    //                     if (existItem.length == 0) {
+    //                         this.downloadData.push({"filePath":comp.data['ediid']+comp.data['filePath'], 'downloadURL':comp.data['downloadURL']});
+    //                     }
+    //                 }
+    //             }
+    //         }
+    //     }        
+    // }
 
 
     /**
     * Function to download all files from API call.
     **/ 
     downloadAllFilesFromAPI(files: any){
-        let existItem: any;
         let postMessage: any[] = [];
         this.downloadData = [];
         this.zipData = [];
         this.displayDownloadFiles = true;
         this.cancelAllDownload = false;
         this.downloadStatus = 'downloading';
-        this.downloadService.setDownloadProcessStatus(false);
+        this.downloadService.setDownloadProcessStatus(false, "landingPage");
 
         // Sending data to _bundle_plan and get back the plan
-        this.getDownloadData(files.children);
+        this.downloadService.getDownloadData(files.children, this.downloadData);
 
         var randomnumber = Math.floor(Math.random() * (this.commonVarService.getRandomMaximum() - this.commonVarService.getRandomMinimum() + 1)) + this.commonVarService.getRandomMinimum();
 
-        var zipFileName = "download" + randomnumber;
-        files.data.downloadFileName = zipFileName + ".zip"
+        var zipFileBaseName = "download" + randomnumber;
+        files.data.downloadFileName = zipFileBaseName + ".zip"
         files.data.downloadStatus = 'downloading';
 
         postMessage.push({"bundleName":files.data.downloadFileName, "includeFiles":this.downloadData});
 
-        // console.log("postMessage:");
-        // console.log(postMessage);
-
         // now use postMessage to request a bundle plan
 
-        // this.downloadService.postFile(this.distApi + "_bundle", JSON.stringify(postMessage)).subscribe(blob => {
-        //     this.downloadService.saveToFileSystem(blob, this.downloadFileName);
-        //     console.log('All downloaded.');
-        //     this.downloadStatus = 'downloaded';
-        //     this.setAllDownloaded(this.files);
-        //     this.allDownloaded = true;
-        // });
+        this.downloadService.getBundlePlan(this.distApi + "_bundle_plan", JSON.stringify(postMessage)).subscribe(
+            blob => {
+                // console.log("blob:");
+                // console.log(blob);
+                this.processBundle(blob, zipFileBaseName, files);
+            },
+            err => {
+                
+            }
+        );
 
         // Once get bundle plan back, put it into a zipData array and send post request one by one
         // sample return data:
+    }
 
-        let bundlePlan: any[] = [];
+    processBundle(res: any, zipFileBaseName, files: any){
+        let bundlePlan: any[] = res.bundleNameFilePathUrl;
+        let downloadUrl: any = this.distApi + res.postEach;
         let tempData: any[] = [];
 
-        tempData.push(this.downloadData[0]);
-        tempData.push(this.downloadData[1]);
-        bundlePlan.push({"bundleName":zipFileName + "01.zip","includeFiles":tempData});
-        tempData = [];
-        tempData.push(this.downloadData[2]);
-        tempData.push(this.downloadData[3]);
-        bundlePlan.push({"bundleName":zipFileName + "02.zip","includeFiles":tempData});
-        tempData = [];
-        tempData.push(this.downloadData[4]);
-        tempData.push(this.downloadData[5]);
-        bundlePlan.push({"bundleName":zipFileName + "03.zip","includeFiles":tempData});
-        tempData = [];
-        tempData.push(this.downloadData[6]);
-        tempData.push(this.downloadData[7]);
-        bundlePlan.push({"bundleName":zipFileName + "04.zip","includeFiles":tempData});
+        // Turn this on when back end is ready:
+        // bundlePlan = res;
 
-        let tempUrl: any[] = ["https://s3.amazonaws.com/nist-midas/1858/20170213_PowderPlate2_Pad.zip", "https://s3.amazonaws.com/nist-midas/1858/RawCameraData.zip","https://s3.amazonaws.com/nist-midas/1858/RawCameraData.zip","https://s3.amazonaws.com/nist-midas/1858/20170213_PowderPlate2_Pad.zip", "https://s3.amazonaws.com/nist-midas/1858/RawCameraData.zip","https://s3.amazonaws.com/nist-midas/1858/RawCameraData.zip","https://s3.amazonaws.com/nist-midas/1858/20170213_PowderPlate2_Pad.zip"];
+        // tempData.push(this.downloadData[0]);
+        // tempData.push(this.downloadData[1]);
+        // bundlePlan.push({"bundleName":zipFileBaseName + "01.zip","includeFiles":tempData});
+        // tempData = [];
+        // tempData.push(this.downloadData[2]);
+        // tempData.push(this.downloadData[3]);
+        // bundlePlan.push({"bundleName":zipFileBaseName + "02.zip","includeFiles":tempData});
+        // tempData = [];
+        // tempData.push(this.downloadData[4]);
+        // tempData.push(this.downloadData[5]);
+        // bundlePlan.push({"bundleName":zipFileBaseName + "03.zip","includeFiles":tempData});
+        // tempData = [];
+        // tempData.push(this.downloadData[6]);
+        // tempData.push(this.downloadData[7]);
+        // bundlePlan.push({"bundleName":zipFileBaseName + "04.zip","includeFiles":tempData});
+
+        // let tempUrl: any[] = ["https://s3.amazonaws.com/nist-midas/1858/20170213_PowderPlate2_Pad.zip", "https://s3.amazonaws.com/nist-midas/1858/RawCameraData.zip","https://s3.amazonaws.com/nist-midas/1858/RawCameraData.zip","https://s3.amazonaws.com/nist-midas/1858/20170213_PowderPlate2_Pad.zip", "https://s3.amazonaws.com/nist-midas/1858/RawCameraData.zip","https://s3.amazonaws.com/nist-midas/1858/RawCameraData.zip","https://s3.amazonaws.com/nist-midas/1858/20170213_PowderPlate2_Pad.zip"];
         var i = 0;
 
         for(let bundle of bundlePlan){
-            this.zipData.push({"fileName":bundle.bundleName, "downloadProgress": 0, "downloadStatus":null, "downloadInstance": null, "bundle": bundle, "downloadUrl": tempUrl[i], "downloadErrorMessage":""});
+            this.zipData.push({"fileName":bundle.bundleName, "downloadProgress": 0, "downloadStatus":null, "downloadInstance": null, "bundle": bundle, "downloadUrl": downloadUrl, "downloadErrorMessage":""});
             i++;
         }
 
-        // console.log("this.zipData:");
-        // console.log(this.zipData);
+        console.log("this.zipData:");
+        console.log(this.zipData);
 
         // Associate zipData with files
         for(let zip of this.zipData){
             for(let includeFile of zip.bundle.includeFiles){
-                let fullPath = includeFile.filePath.substring(includeFile.filePath.indexOf('/'));
-                let treeNode = this.downloadService.searchTreeByFullPath(this.treeRoot[0], fullPath);
+                let filePath = includeFile.filePath.substring(includeFile.filePath.indexOf('/'));
+                let treeNode = this.downloadService.searchTreeByfilePath(this.treeRoot[0], filePath);
                 if(treeNode != null){
                     treeNode.data.zipFile = zip.fileName;
                 }
             }
         }
 
-        this.downloadService.downloadNextZip(this.zipData, this.treeRoot[0]);
+        this.downloadService.downloadNextZip(this.zipData, this.treeRoot[0], "landingPage");
 
         // Start downloading the first one, this will set the downloaded zip file to 1
-        this.subscriptions.push(this.downloadService.watchDownloadingNumber().subscribe(
+        this.subscriptions.push(this.downloadService.watchDownloadingNumber("landingPage").subscribe(
             value => {
                 if(!this.cancelAllDownload){
-                    this.downloadService.downloadNextZip(this.zipData, this.treeRoot[0]);
-                    files.data.downloadProgress = Math.round(100*this.getDownloadedNumber() / this.zipData.length);
+                    this.downloadService.downloadNextZip(this.zipData, this.treeRoot[0], "landingPage");
+                    files.data.downloadProgress = Math.round(100*this.downloadService.getDownloadedNumber(this.zipData) / this.zipData.length);
                     // if(this.downloadService.allDownloadFinished(this.zipData)){
                     //     files.data.downloadStatus = 'downloaded';
                     //     this.downloadStatus = 'downloaded';
@@ -797,21 +811,21 @@ export class DescriptionComponent {
         ));
     }
 
-    getDownloadedNumber(){
-        let totalDownloadedZip: number = 0;
-        for (let zip of this.zipData) {
-            if(zip.downloadStatus == 'downloaded'){
-                totalDownloadedZip += 1;
-            }
-        }
-        return totalDownloadedZip;
-    }
+    // getDownloadedNumber(){
+    //     let totalDownloadedZip: number = 0;
+    //     for (let zip of this.zipData) {
+    //         if(zip.downloadStatus == 'downloaded'){
+    //             totalDownloadedZip += 1;
+    //         }
+    //     }
+    //     return totalDownloadedZip;
+    // }
 
     cancelDownloadZip(zip: any){
         zip.downloadInstance.unsubscribe();
         zip.downloadInstance = null;
         zip.downloadProgress = 0;
-        zip.downloadStatus = null;
+        zip.downloadStatus = "cancelled";
     }
 
     cancelDownloadAll(){
@@ -828,25 +842,25 @@ export class DescriptionComponent {
             sub.unsubscribe();
         }
 
-        this.downloadService.setDownloadingNumber(0);
+        this.downloadService.setDownloadingNumber(0, "landingPage");
         this.zipData = [];
         this.downloadStatus = null;
         this.cancelAllDownload = true;
         this.displayDownloadFiles = false;
-        this.resetZipName(this.treeRoot[0]);
+        this.downloadService.resetZipName(this.treeRoot[0]);
     }
 
 
-    resetZipName(element){
-        if(element.data != undefined){
-            element.data.zipFile = null;
-        }
-        if (element.children.length > 0){
-            for(let i=0; i < element.children.length; i++){
-                this.resetZipName(element.children[i]);
-            }
-        } 
-    }
+    // resetZipName(element){
+    //     if(element.data != undefined){
+    //         element.data.zipFile = null;
+    //     }
+    //     if (element.children.length > 0){
+    //         for(let i=0; i < element.children.length; i++){
+    //             this.resetZipName(element.children[i]);
+    //         }
+    //     } 
+    // }
 
     /**
     * Function to set the download status of all files to downloaded.
