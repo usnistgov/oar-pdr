@@ -137,6 +137,10 @@ export class CartService {
     // persist the map
     this.setCart(cartMap);
     this.getCart();
+
+    // console.log("cartEntities:");
+    // console.log(cartEntities);
+
     this.cartSize = cartEntities.length;
     // return the array
     return Promise.resolve(cartEntities);

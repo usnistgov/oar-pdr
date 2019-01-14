@@ -119,6 +119,7 @@ export class LandingComponent implements OnInit {
     private newer : reference = {};  
     navigationSubscription : any;
     ediid:any;
+
   /**
    * Creates an instance of the SearchPanel
    *
@@ -141,14 +142,10 @@ export class LandingComponent implements OnInit {
    * If Search is successful populate list of keywords themes and authors
    */
   onSuccess(searchResults:any[]) {
-    console.log(searchResults);
     if(searchResults["ResultCount"] === undefined || searchResults["ResultCount"] !== 1)
       this.record = searchResults;
     else if(searchResults["ResultCount"] !== undefined && searchResults["ResultCount"] === 1)
       this.record = searchResults["ResultData"][0];
-
-      console.log("this.record:");
-      console.log(this.record);
 
       if(this.record["@id"] === undefined || this.record["@id"] === "" ){
         this.isId = false;
@@ -291,7 +288,6 @@ updateMenu(){
    * Get the params OnInit
    */
   ngOnInit() {
-    console.log("Landing init...");
     this.searchValue = this.route.snapshot.paramMap.get('id');
     this.ediid = this.searchValue;
     this.commonVarService.setEdiid(this.searchValue);
@@ -311,6 +307,8 @@ updateMenu(){
      if(window.location.href.includes("ark"))
       this.router.navigate(['/od/id/ark:/88434/'+this.searchValue],{fragment:sectionId});
      else
+     console.log("sectionId:");
+     console.log(sectionId)
       this.router.navigate(['/od/id/', this.record.ediid],{fragment:sectionId});
       this.useFragment();
   }
@@ -387,27 +385,31 @@ updateMenu(){
             // Set the current level to this path's children  
             currentLevel = existingPath[0].children;
           } else {
-              let newPart = null;
-              newPart = {
-                data : {
-                  cartId: path.filepath,
-                  ediid: this.ediid,
-                  name : part,
-                  mediatype: path.mediaType,
-                  size: path.size,
-                  downloadURL: path.downloadURL,
-                  description: path.description,
-                  filetype: path['@type'][0],
-                  resId: path["filepath"].replace(/^.*[\\\/]/, ''),
-                  filePath: path.filepath,
-                  downloadProgress: 0,
-                  downloadInstance: null,
-                  isSelected: false,
-                  zipFile: null
-                },children: []
-              };
-              currentLevel.push(newPart);
-              currentLevel = newPart.children;
+            let tempId = path['@id'];
+            if(tempId == null || tempId == undefined)
+              tempId = path.filepath;
+
+            let newPart = null;
+            newPart = {
+              data : {
+                cartId: tempId,
+                ediid: this.ediid,
+                name : part,
+                mediatype: path.mediaType,
+                size: path.size,
+                downloadURL: path.downloadURL,
+                description: path.description,
+                filetype: path['@type'][0],
+                resId: path["filepath"].replace(/^.*[\\\/]/, ''),
+                filePath: path.filepath,
+                downloadProgress: 0,
+                downloadInstance: null,
+                isSelected: false,
+                zipFile: null
+              },children: []
+            };
+            currentLevel.push(newPart);
+            currentLevel = newPart.children;
             // }
           }
           this.filescount = this.filescount+1;

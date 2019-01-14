@@ -63,10 +63,17 @@ export class DescriptionComponent {
     cancelAllDownload: boolean = false;
     cartLength : number;
     treeRoot = [];
-    showZipFiles: boolean = false;
+    showZipFiles: boolean = true;
     subscriptions: any = [];
     allProcessed: boolean = false;
     downloadStatusExpanded: boolean = true;
+    bundlePlanStatus: any;
+    bundlePlanMessage: any[];
+    bundlePlanUnhandledFiles: any[] = null;
+    showUnhandledFiles: boolean = true;
+    showZipFilesNmaes: boolean = true;
+    showMessageBlock: boolean = false;
+    messageColor: any;
 
     private distApi : string = environment.DISTAPI;
 
@@ -87,11 +94,6 @@ export class DescriptionComponent {
             this.cartService.watchStorage().subscribe(value => {
                 this.cartLength = value;
             });
-    }
-
-    myLog(name:any, variable: any){
-        console.log(name);
-        console.log(variable);
     }
 
     ngOnInit(){
@@ -136,12 +138,12 @@ export class DescriptionComponent {
 
           // this.updateCartStatus(this.files);
           this.updateAllSelectStatus(this.files);
-          this.updateDownloadStatus(this.files);
+          this.downloadStatus = this.updateDownloadStatus(this.files)?"downloaded":null;
   
           this.totalFiles = 0;
           this.getTotalFiles(this.files);
   
-          this.expandToLevel(this.files, true, 1);
+          this.expandToLevel(this.files, true, 2);
 
           this.downloadService.watchDownloadProcessStatus("landingPage").subscribe(
             value => {
@@ -149,11 +151,11 @@ export class DescriptionComponent {
                 if(this.allProcessed){
                     this.downloadStatus = "downloaded";
                 }
-                this.updateDownloadStatus(this.files);
+                this.downloadStatus = this.updateDownloadStatus(this.files)?"downloaded":null;
             }
         );
-          console.log("this.files:");
-          console.log(this.files);
+        //   console.log("this.downloadStatus:");
+        //   console.log(this.downloadStatus);
     }
 
     expandToLevel(dataFiles: any, option: boolean, targetLevel: any){
@@ -197,6 +199,7 @@ export class DescriptionComponent {
                 }
             }
         }
+        // this.updateDownloadStatus(this.files);
     }
 
     /**
@@ -482,8 +485,6 @@ export class DescriptionComponent {
 
     addtoCart(rowData:any){
         // this.cartService.updateFileSpinnerStatus(true);
-        console.log("rowData");
-        console.log(rowData);
         let data : Data;
         data = {'cartId':rowData.cartId,
                 'ediid' :this.ediid,
@@ -494,9 +495,12 @@ export class DescriptionComponent {
                 'fileName':rowData.name,
                 'filePath':rowData.filePath,
                 'fileSize':rowData.size,
+                'filetype' :rowData.filetype,
                 'downloadURL':rowData.downloadURL,
-                'fileFormat':rowData.mediatype,
-                'downloadStatus': null };
+                'mediatype':rowData.mediatype,
+                'downloadStatus': null,
+                'description':rowData.description
+        };
 
         this.cartService.addDataToCart(data);
         rowData.isSelected = this.isInDataCart(rowData.cartId);
@@ -601,7 +605,7 @@ export class DescriptionComponent {
                     this.downloadService.saveToFileSystem(event.body, filename);
                     rowData.downloadStatus = 'downloaded';
                     this.cartService.updateCartItemDownloadStatus(rowData.cartId,'downloaded');
-                    this.updateDownloadStatus(this.files);
+                    this.downloadStatus = this.updateDownloadStatus(this.files)?"downloaded":null;
                     break;
                 case HttpEventType.DownloadProgress:
                     rowData.downloadProgress = Math.round(100*event.loaded / event.total);
@@ -730,15 +734,14 @@ export class DescriptionComponent {
         postMessage.push({"bundleName":files.data.downloadFileName, "includeFiles":this.downloadData});
 
         // now use postMessage to request a bundle plan
-
         this.downloadService.getBundlePlan(this.distApi + "_bundle_plan", JSON.stringify(postMessage)).subscribe(
             blob => {
-                // console.log("blob:");
-                // console.log(blob);
-                this.processBundle(blob, zipFileBaseName, files);
+                 this.processBundle(blob, zipFileBaseName, files);
             },
             err => {
-                
+                console.log(err);
+                this.bundlePlanMessage = err;
+                this.bundlePlanStatus = "error";
             }
         );
 
@@ -747,39 +750,19 @@ export class DescriptionComponent {
     }
 
     processBundle(res: any, zipFileBaseName, files: any){
+        this.bundlePlanStatus = res.status.toLowerCase( );
+        this.messageColor = this.getColor();
+        this.bundlePlanUnhandledFiles = res.notIncluded;
         let bundlePlan: any[] = res.bundleNameFilePathUrl;
         let downloadUrl: any = this.distApi + res.postEach;
+        this.bundlePlanMessage = res.messages;
         let tempData: any[] = [];
 
-        // Turn this on when back end is ready:
-        // bundlePlan = res;
-
-        // tempData.push(this.downloadData[0]);
-        // tempData.push(this.downloadData[1]);
-        // bundlePlan.push({"bundleName":zipFileBaseName + "01.zip","includeFiles":tempData});
-        // tempData = [];
-        // tempData.push(this.downloadData[2]);
-        // tempData.push(this.downloadData[3]);
-        // bundlePlan.push({"bundleName":zipFileBaseName + "02.zip","includeFiles":tempData});
-        // tempData = [];
-        // tempData.push(this.downloadData[4]);
-        // tempData.push(this.downloadData[5]);
-        // bundlePlan.push({"bundleName":zipFileBaseName + "03.zip","includeFiles":tempData});
-        // tempData = [];
-        // tempData.push(this.downloadData[6]);
-        // tempData.push(this.downloadData[7]);
-        // bundlePlan.push({"bundleName":zipFileBaseName + "04.zip","includeFiles":tempData});
-
-        // let tempUrl: any[] = ["https://s3.amazonaws.com/nist-midas/1858/20170213_PowderPlate2_Pad.zip", "https://s3.amazonaws.com/nist-midas/1858/RawCameraData.zip","https://s3.amazonaws.com/nist-midas/1858/RawCameraData.zip","https://s3.amazonaws.com/nist-midas/1858/20170213_PowderPlate2_Pad.zip", "https://s3.amazonaws.com/nist-midas/1858/RawCameraData.zip","https://s3.amazonaws.com/nist-midas/1858/RawCameraData.zip","https://s3.amazonaws.com/nist-midas/1858/20170213_PowderPlate2_Pad.zip"];
-        var i = 0;
+        console.log(this.bundlePlanUnhandledFiles);
 
         for(let bundle of bundlePlan){
             this.zipData.push({"fileName":bundle.bundleName, "downloadProgress": 0, "downloadStatus":null, "downloadInstance": null, "bundle": bundle, "downloadUrl": downloadUrl, "downloadErrorMessage":""});
-            i++;
         }
-
-        console.log("this.zipData:");
-        console.log(this.zipData);
 
         // Associate zipData with files
         for(let zip of this.zipData){
@@ -806,7 +789,7 @@ export class DescriptionComponent {
                     // }
                 }
 
-                this.updateDownloadStatus(this.files);
+                this.downloadStatus = this.updateDownloadStatus(this.files)?"downloaded":null;
             }
         ));
     }
@@ -848,6 +831,9 @@ export class DescriptionComponent {
         this.cancelAllDownload = true;
         this.displayDownloadFiles = false;
         this.downloadService.resetZipName(this.treeRoot[0]);
+        this.bundlePlanMessage = null;
+        this.bundlePlanStatus = null;
+        this.bundlePlanUnhandledFiles = null;
     }
 
 
@@ -892,5 +878,15 @@ export class DescriptionComponent {
     **/ 
     isFile(rowData: any){
         return rowData.name.match(/\./g) == null? false : true; 
+    }
+
+    getColor(){
+        if(this.bundlePlanStatus == 'warnings'){
+            return "darkorange";
+        }else if(this.bundlePlanStatus == 'error'){
+            return "red";
+        }else{
+            return "black";
+        }
     }
 }

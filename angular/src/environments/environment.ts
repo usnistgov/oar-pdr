@@ -10,7 +10,7 @@ export const environment = {
   RMMAPI: 'http://data.nist.gov/rmm/',
     SDPAPI:  'http://testdata.nist.gov/sdp/',
     PDRAPI:  'http://localhost:5555/#/id/',
-    DISTAPI: 'http://localhost/disturl/',
+    DISTAPI: 'http://data.nist.gov/od/ds/',
     METAPI:  'http://localhost/metaurl/',
     LANDING: 'http://data.nist.gov/rmm/'
 };

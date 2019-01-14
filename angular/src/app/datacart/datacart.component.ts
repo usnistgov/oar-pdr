@@ -19,6 +19,7 @@ import { DownloadData } from '../shared/download-service/downloadData';
 import { CommonVarService } from '../shared/common-var'
 import { DownloadService } from '../shared/download-service/download-service.service';
 import { ZipData } from '../shared/download-service/zipData';
+import { OverlayPanel} from 'primeng/overlaypanel';
 
 declare var Ultima: any;
 declare var saveAs: any;
@@ -89,9 +90,21 @@ export class DatacartComponent implements OnInit, OnDestroy {
     treeRoot = [];
     selectedTreeRoot = [];
     subscriptions: any = [];
-    showZipFiles: boolean = false;
+    showZipFiles: boolean = true;
+    showZipFilesNmaes: boolean = true;
     allProcessed: boolean = false;
     downloadStatusExpanded: boolean = true;
+    bundlePlanStatus: any;
+    bundlePlanMessage: any[];
+    unhandledFiles: any[];
+    bundlePlanUnhandledFiles: any[] = null;
+    showUnhandledFiles: boolean = true;
+    isVisible: boolean = true;
+    isExpanded: boolean = true;
+    showUnhandledFilesTable: boolean = true;
+    fileNode: TreeNode;
+    showMessageBlock: boolean = false;
+    messageColor: any;
 
     private distApi : string = environment.DISTAPI;
     //private distApi:string = "http://localhost:8083/oar-dist-service";
@@ -128,10 +141,11 @@ export class DatacartComponent implements OnInit, OnDestroy {
         newPart.children = this.dataFiles;
         this.treeRoot.push(newPart);
 
-        this.expandAll(this.dataFiles, 0);
+        this.fileNode = {"data":{ "resTitle":"", "size":"", "mediatype":"", "description":"", "filetype":"" }};
+        this.expandToLevel(this.dataFiles, true, 2);
 
-        // console.log("this.dataFiles:");
-        // console.log(this.dataFiles);
+        console.log("this.dataFiles:");
+        console.log(this.dataFiles);
 
         this.downloadService.watchDownloadProcessStatus("datacard").subscribe(
             value => {
@@ -149,22 +163,80 @@ export class DatacartComponent implements OnInit, OnDestroy {
         }
     }
 
-    expandAll(dataFiles: any, level: any){
+    showHideZipFiles(){
+        this.showZipFilesNmaes = !this.showZipFilesNmaes;
+    }
+
+    // expandAll(dataFiles: any, level: any){
+    //     let currentLevel = level + 1;
+    //     for ( let i=0; i < dataFiles.length;i++) {
+    //         dataFiles[i].expanded = true;
+    //         if(dataFiles[i].children.length > 0 && currentLevel < 1){
+    //             this.expandAll(dataFiles[i].children, currentLevel);
+    //         }
+    //     }
+
+    //     this.isVisible = false;
+    //     setTimeout(() => {
+    //         this.isVisible = true;
+    //     },0);
+    // }
+
+    expandToLevel(dataFiles: any, option: boolean, targetLevel: any){
+        this.expandAll(dataFiles, option, 0, targetLevel)
+    }
+
+    expandAll(dataFiles: any, option: boolean, level: any, targetLevel: any){
         let currentLevel = level + 1;
-        for ( let i=0; i < dataFiles.length;i++) {
-            dataFiles[i].expanded = true;
-            if(dataFiles[i].children.length > 0 && currentLevel < 1){
-                this.expandAll(dataFiles[i].children, currentLevel);
+        // console.log("dataFiles:");
+        // console.log(dataFiles);
+        // console.log("targetLevel:");
+        // console.log(targetLevel);
+        for ( let i=0; i < dataFiles.length; i++ ) {
+            dataFiles[i].expanded = option;
+            if(targetLevel != null){
+                // console.log("expandAll again0:");
+                if(dataFiles[i].children.length > 0 && currentLevel < targetLevel){
+                    // console.log("expandAll again:");
+                    this.expandAll(dataFiles[i].children, option, currentLevel, targetLevel);
+                }
+            }else{
+                // console.log("expandAll again1:");
+                if(dataFiles[i].children.length > 0){
+                    this.expandAll(dataFiles[i].children, option, currentLevel, targetLevel);
+                }
             }
         }
+        this.isExpanded = option;
+        this.isVisible = false;
+        setTimeout(() => {
+            this.isVisible = true;
+        },0);
     }
 
     ngOnDestroy() {
     }
 
     clearAll(){
+        var i:number;
+        for ( i=0; i < this.dataFiles.length;i++) {
+            if (this.dataFiles[i].expanded == true) {
+                this.selectedParentIndex = i;
+            }
+        }
         this.cartService.clearTheCart();
         this.updateCartEntries();
+        if (this.cartEntities.length > 0) {
+            this.dataFiles[this.selectedParentIndex].expanded = true;
+        }
+
+        setTimeout(() => {
+            this.expandToLevel(this.dataFiles, true, null);
+        },0);
+        this.isVisible = false;
+        setTimeout(() => {
+            this.isVisible = true;
+        },0);
     }
     /**
      * If Search is successful populate list of keywords themes and authors
@@ -183,7 +255,6 @@ export class DatacartComponent implements OnInit, OnDestroy {
         * Function to download all files from API call.
         **/ 
     downloadAllFilesFromAPI(){     
-        let existItem: any;
         let postMessage: any[] = [];
         this.downloadData = [];
         this.zipData = [];
@@ -214,9 +285,6 @@ export class DatacartComponent implements OnInit, OnDestroy {
 
         postMessage.push({"bundleName":files.data.downloadFileName, "includeFiles":this.downloadData});
 
-        console.log("postMessage:");
-        console.log(postMessage);
-
         this.downloadService.getBundlePlan(this.distApi + "_bundle_plan", JSON.stringify(postMessage)).subscribe(
             blob => {
                 // console.log("blob:");
@@ -230,31 +298,17 @@ export class DatacartComponent implements OnInit, OnDestroy {
     }
 
     processBundle(res: any, zipFileBaseName: any, files: any){
-
+        this.bundlePlanStatus = res.status.toLowerCase( );
+        this.messageColor = this.getColor();
+        this.bundlePlanUnhandledFiles = res.notIncluded;
+        this.bundlePlanMessage = res.messages;
         let bundlePlan: any[] = res.bundleNameFilePathUrl;
         let downloadUrl: any = this.distApi + res.postEach;
         let tempData: any[] = [];
 
-        // tempData.push({filePath: "ECBCC1C1301D2ED9E04306570681B10735/aluminum/aluminum/srd13_Al-002.json", downloadURL: "http://www.nist.gov/srd/srd_data/srd13_Al-002.json"});
-        // tempData.push({filePath: "ECBCC1C1301D2ED9E04306570681B10735/aluminum/aluminum/srd13_Al-003.json", downloadURL: "http://www.nist.gov/srd/srd_data/srd13_Al-003.json"});
-
-        // bundlePlan.push({"bundleName":"download4281_01.zip","includeFiles":tempData});
-
-        // tempData = [];
-        // tempData.push({filePath: "ECBCC1C1301D2ED9E04306570681B10735/aluminum/aluminum/srd13_Al-004.json", downloadURL: "http://www.nist.gov/srd/srd_data/srd13_Al-004.json"});
-        // tempData.push({filePath: "ECBCC1C1301D2ED9E04306570681B10735/aluminum/aluminum/srd13_Al-005.json", downloadURL: "http://www.nist.gov/srd/srd_data/srd13_Al-005.json"});
-
-        // bundlePlan.push({"bundleName":"download4281_02.zip","includeFiles":tempData});
-
-        var i = 0;
-
         for(let bundle of bundlePlan){
             this.zipData.push({"fileName":bundle.bundleName, "downloadProgress": 0, "downloadStatus":null, "downloadInstance": null, "bundle": bundle, "downloadUrl": downloadUrl, "downloadErrorMessage":""});
-            i++;
         }
-
-        console.log("this.zipData:");
-        console.log(this.zipData);
 
         // Associate zipData with files
         for(let zip of this.zipData){
@@ -300,152 +354,180 @@ export class DatacartComponent implements OnInit, OnDestroy {
             sub.unsubscribe();
         }
 
+        this.resetDownloadParams();
+    }
+
+    resetDownloadParams(){
         this.downloadService.setDownloadingNumber(0,"datacard");
         this.zipData = [];
         this.downloadStatus = null;
         this.cancelAllDownload = true;
         this.displayDownloadFiles = false;
         this.downloadService.resetZipName(this.treeRoot[0]);
+        this.bundlePlanMessage = null;
+        this.bundlePlanStatus = null;
+        this.bundlePlanUnhandledFiles = null;
     }
 
+    downloadOneFile(rowData: any){
+        let filename = decodeURI(rowData.downloadURL).replace(/^.*[\\\/]/, '');
+        rowData.downloadStatus = 'downloading';
+        rowData.downloadProgress = 0;
 
+        const req = new HttpRequest('GET', rowData.downloadURL, {
+            reportProgress: true, responseType: 'blob'
+        });
+
+        rowData.downloadInstance = this.http.request(req).subscribe(event => {
+            switch (event.type) {
+                case HttpEventType.Response:
+                    this.downloadService.saveToFileSystem(event.body, filename);
+                    rowData.downloadStatus = 'downloaded';
+                    this.cartService.updateCartItemDownloadStatus(rowData.cartId,'downloaded');
+                    break;
+                case HttpEventType.DownloadProgress:
+                    rowData.downloadProgress = Math.round(100*event.loaded / event.total);
+                    break;
+            }
+        })
+    }
     /**
      *  download zip file
      */
-    downloadZIP() {
-        let downloadURL: string[];
-        let fileName: string[];
-        let params = new HttpParams();
-        let folderName: string;
-        this.showSpinner = true;
-        let downloadData: DownloadData[] = [];
-        let existItem: any;
-        this.displayDownloadFiles = true;
-        var i:number;
+    // downloadZIP() {
+    //     let downloadURL: string[];
+    //     let fileName: string[];
+    //     let params = new HttpParams();
+    //     let folderName: string;
+    //     this.showSpinner = true;
+    //     let downloadData: DownloadData[] = [];
+    //     let existItem: any;
+    //     this.displayDownloadFiles = true;
+    //     var i:number;
 
-        for ( i=0; i < this.dataFiles.length;i++) {
-            if (this.dataFiles[i].expanded == true) {
-                this.selectedParentIndex = i;
-            }
-        }
+    //     for ( i=0; i < this.dataFiles.length;i++) {
+    //         if (this.dataFiles[i].expanded == true) {
+    //             this.selectedParentIndex = i;
+    //         }
+    //     }
 
-        for (let selData of this.selectedData) {
-            if (selData.data['resFilePath'] != null && selData.data['resFilePath'] != undefined) {
-                if (selData.data['resFilePath'].split(".").length > 1) {
-                    existItem = downloadData.filter(item => item.filePath === this.ediid+selData.data['resFilePath'] 
-                        && item.downloadURL === selData.data['downloadURL']);
+    //     for (let selData of this.selectedData) {
+    //         if (selData.data['resFilePath'] != null && selData.data['resFilePath'] != undefined) {
+    //             if (selData.data['resFilePath'].split(".").length > 1) {
+    //                 existItem = downloadData.filter(item => item.filePath === this.ediid+selData.data['resFilePath'] 
+    //                     && item.downloadURL === selData.data['downloadURL']);
 
-                    if (existItem.length == 0) {
-                        downloadData.push({"filePath":this.ediid+selData.data['resFilePath'], 'downloadURL':selData.data['downloadURL']});
-                    }
-                }
-            }
-        }
+    //                 if (existItem.length == 0) {
+    //                     downloadData.push({"filePath":this.ediid+selData.data['resFilePath'], 'downloadURL':selData.data['downloadURL']});
+    //                 }
+    //             }
+    //         }
+    //     }
 
-        // for (let selData of this.selectedData) {
-        //   if (selData.data['filePath'] != null) {
-        //     if (selData.data['filePath'].split(".").length > 1) {
-        //       //folderName = selData.data['resId'].split("/")[2] + "-" + selData.data['resTitle'].substring(0, 20);
-        //       params = params.append('folderName', folderName);
-        //       params = params.append('downloadURL', selData.data['downloadURL']);
-        //       params = params.append('fileName', selData.data['resId'] + selData.data['fileName']);
-        //       params = params.append('filePath', selData.data['filePath']);
-        //       params = params.append('resFilePath', selData.data['resFilePath']);
-        //       this.cartService.updateCartItemDownloadStatus(selData.data['resId'],true);
-        //     }
-        //   }
-        // }
+    //     // for (let selData of this.selectedData) {
+    //     //   if (selData.data['filePath'] != null) {
+    //     //     if (selData.data['filePath'].split(".").length > 1) {
+    //     //       //folderName = selData.data['resId'].split("/")[2] + "-" + selData.data['resTitle'].substring(0, 20);
+    //     //       params = params.append('folderName', folderName);
+    //     //       params = params.append('downloadURL', selData.data['downloadURL']);
+    //     //       params = params.append('fileName', selData.data['resId'] + selData.data['fileName']);
+    //     //       params = params.append('filePath', selData.data['filePath']);
+    //     //       params = params.append('resFilePath', selData.data['resFilePath']);
+    //     //       this.cartService.updateCartItemDownloadStatus(selData.data['resId'],true);
+    //     //     }
+    //     //   }
+    //     // }
 
 
-        // if(params.keys.length !== 0){
-        var randomnumber = Math.floor(Math.random() * (this.maximum - this.minimum + 1)) + this.minimum;
+    //     // if(params.keys.length !== 0){
+    //     var randomnumber = Math.floor(Math.random() * (this.maximum - this.minimum + 1)) + this.minimum;
 
-        var downloadFileName = "download" + randomnumber + ".zip";
-        this["showDownloadFileSpinner"+randomnumber] = true;
-        this.displayFiles.push({key: downloadFileName, value: this["showDownloadFileSpinner"+randomnumber]});
+    //     var downloadFileName = "download" + randomnumber + ".zip";
+    //     this["showDownloadFileSpinner"+randomnumber] = true;
+    //     this.displayFiles.push({key: downloadFileName, value: this["showDownloadFileSpinner"+randomnumber]});
 
-        const req = new HttpRequest('GET', 'https://s3.amazonaws.com/nist-midas/1858/RawCameraData.zip', {
-        reportProgress: true, responseType: 'blob'
-        });
+    //     const req = new HttpRequest('GET', 'https://s3.amazonaws.com/nist-midas/1858/RawCameraData.zip', {
+    //     reportProgress: true, responseType: 'blob'
+    //     });
 
-        this.downloadStatus = 'downloading';
-        this.downloadInstance = this.http.request(req).subscribe(event => {
-            switch (event.type) {
-                case HttpEventType.Response:
-                    this.downloadStatus = 'downloaded';
-                    this.downloadProgress = 0;
-                    this.downloadService.saveToFileSystem(event.body, downloadFileName);
-                    this.showSpinner = false;
-                    this["showDownloadFileSpinner"+randomnumber] = false;
-                    this.displayFiles.forEach(function(item) {
-                        if (item.key === downloadFileName) {
-                            item.value = this["showDownloadFileSpinner"+randomnumber];
-                        }
-                    },1000);
+    //     this.downloadStatus = 'downloading';
+    //     this.downloadInstance = this.http.request(req).subscribe(event => {
+    //         switch (event.type) {
+    //             case HttpEventType.Response:
+    //                 this.downloadStatus = 'downloaded';
+    //                 this.downloadProgress = 0;
+    //                 this.downloadService.saveToFileSystem(event.body, downloadFileName);
+    //                 this.showSpinner = false;
+    //                 this["showDownloadFileSpinner"+randomnumber] = false;
+    //                 this.displayFiles.forEach(function(item) {
+    //                     if (item.key === downloadFileName) {
+    //                         item.value = this["showDownloadFileSpinner"+randomnumber];
+    //                     }
+    //                 },1000);
 
-                    for (let selData of this.selectedData) {
-                        if (selData.data['filePath'] != null) {
-                            //   if (selData.data['filePath'].split(".").length > 1) {
-                            if (selData.data.children == undefined) {
-                                this.cartService.updateCartItemDownloadStatus(selData.data['resId'],'downloaded');
-                            }
-                        }
-                    }
+    //                 for (let selData of this.selectedData) {
+    //                     if (selData.data['filePath'] != null) {
+    //                         //   if (selData.data['filePath'].split(".").length > 1) {
+    //                         if (selData.data.children == undefined) {
+    //                             this.cartService.updateCartItemDownloadStatus(selData.data['resId'],'downloaded');
+    //                         }
+    //                     }
+    //                 }
                 
-                    this.updateCartEntries();
-                    //   this.cartService.getAllCartEntities().then(function (result) {
-                    //       this.cartEntities = result;
-                    //       this.createDataCartHierarchy();
-                    //       if (this.cartEntities.length > 0) {
-                    //           this.dataFiles[this.selectedParentIndex].expanded = true;
-                    //       }
-                    //   }.bind(this), function (err) {
-                    //       alert("something went wrong while creating the zip file");
-                    //   });
+    //                 this.updateCartEntries();
+    //                 //   this.cartService.getAllCartEntities().then(function (result) {
+    //                 //       this.cartEntities = result;
+    //                 //       this.createDataCartHierarchy();
+    //                 //       if (this.cartEntities.length > 0) {
+    //                 //           this.dataFiles[this.selectedParentIndex].expanded = true;
+    //                 //       }
+    //                 //   }.bind(this), function (err) {
+    //                 //       alert("something went wrong while creating the zip file");
+    //                 //   });
                 
-                    this.selectedData.length = 0;
-                    this.dataFileCount();
+    //                 this.selectedData.length = 0;
+    //                 this.dataFileCount();
 
-                    break;
-                case HttpEventType.DownloadProgress:
-                    this.downloadProgress = Math.round(100*event.loaded / event.total);
-                    break;
-            }
-        });
-        //   this.downloadService.postFile(this.distApi + "downloadall", JSON.stringify(downloadData)).subscribe(blob => {
-        //     this.downloadService.saveToFileSystem(blob, downloadFileName);
-        //       this.showSpinner = false;
-        //       this["showDownloadFileSpinner"+randomnumber] = false;
-        //       this.displayFiles.forEach(function(item) {
-        //           if (item.key === downloadFileName) {
-        //               item.value = this["showDownloadFileSpinner"+randomnumber];
-        //           }
-        //       },1000);
-        //   });
+    //                 break;
+    //             case HttpEventType.DownloadProgress:
+    //                 this.downloadProgress = Math.round(100*event.loaded / event.total);
+    //                 break;
+    //         }
+    //     });
+    //     //   this.downloadService.postFile(this.distApi + "downloadall", JSON.stringify(downloadData)).subscribe(blob => {
+    //     //     this.downloadService.saveToFileSystem(blob, downloadFileName);
+    //     //       this.showSpinner = false;
+    //     //       this["showDownloadFileSpinner"+randomnumber] = false;
+    //     //       this.displayFiles.forEach(function(item) {
+    //     //           if (item.key === downloadFileName) {
+    //     //               item.value = this["showDownloadFileSpinner"+randomnumber];
+    //     //           }
+    //     //       },1000);
+    //     //   });
 
-        //   for (let selData of this.selectedData) {
-        //     if (selData.data['filePath'] != null) {
-        //         //   if (selData.data['filePath'].split(".").length > 1) {
-        //         if (selData.data.children == undefined) {
-        //               this.cartService.updateCartItemDownloadStatus(selData.data['resId'],'downloaded');
-        //         }
-        //       }
-        //   }
+    //     //   for (let selData of this.selectedData) {
+    //     //     if (selData.data['filePath'] != null) {
+    //     //         //   if (selData.data['filePath'].split(".").length > 1) {
+    //     //         if (selData.data.children == undefined) {
+    //     //               this.cartService.updateCartItemDownloadStatus(selData.data['resId'],'downloaded');
+    //     //         }
+    //     //       }
+    //     //   }
 
-        //   this.cartService.getAllCartEntities().then(function (result) {
-        //       this.cartEntities = result;
-        //       this.createDataCartHierarchy();
-        //       if (this.cartEntities.length > 0) {
-        //           this.dataFiles[this.selectedParentIndex].expanded = true;
-        //       }
-        //   }.bind(this), function (err) {
-        //       alert("something went wrong while creating the zip file");
-        //   });
+    //     //   this.cartService.getAllCartEntities().then(function (result) {
+    //     //       this.cartEntities = result;
+    //     //       this.createDataCartHierarchy();
+    //     //       if (this.cartEntities.length > 0) {
+    //     //           this.dataFiles[this.selectedParentIndex].expanded = true;
+    //     //       }
+    //     //   }.bind(this), function (err) {
+    //     //       alert("something went wrong while creating the zip file");
+    //     //   });
 
-        //   this.selectedData.length = 0;
-        //   this.dataFileCount();
-        // }
-    }
+    //     //   this.selectedData.length = 0;
+    //     //   this.dataFileCount();
+    //     // }
+    // }
 
     cancelDownload(key){
         this.downloadInstance.unsubscribe();
@@ -461,6 +543,8 @@ export class DatacartComponent implements OnInit, OnDestroy {
      */
 
     dataFileCount() {
+        console.log("this.dataFiles:");
+        console.log(this.dataFiles);
         this.selectedFileCount = 0;
         for (let selData of this.selectedData) {
             if (selData.data['filePath'] != null) {
@@ -574,26 +658,26 @@ export class DatacartComponent implements OnInit, OnDestroy {
         //     }.bind(this), function (err) {
         //         alert("something went wrong while removing item");
         //     });
+    }
+
+    resetDatafileDownloadStatus(dataFiles: any, downloadStatus: any){
+        for ( let i=0; i < dataFiles.length; i++ ) {
+            if(dataFiles[i].children.length > 0){
+                // console.log("expandAll again:");
+                this.resetDatafileDownloadStatus(dataFiles[i].children, downloadStatus);
+            }else{
+                dataFiles[i].data.downloadStatus = downloadStatus;
+            }
         }
+    }
 
     /**
-     * clears the item download status
+     * clears all download status
      **/
     clearDownloadStatus() {
-
-        let dataId: any;
-        // convert the map to an array
-        this.cartService.updateCartDownloadStatus(false);
-        this.updateCartEntries();
-        // this.cartService.getAllCartEntities().then(function (result) {
-        //   //console.log("result" + result.length);
-        //   this.cartEntities = result;
-        // //   console.log("cart entities inside datacartlist" + JSON.stringify(this.cartEntities));
-        //   this.createDataCartHierarchy();
-        // }.bind(this), function (err) {
-        //   alert("something went wrong while fetching the products");
-        // });
-        this.cartService.setCartLength(this.dataFiles.length);
+        this.resetDownloadParams();
+        this.cartService.updateCartDownloadStatus(null);
+        this.resetDatafileDownloadStatus(this.dataFiles, null);
     }
 
     /**
@@ -616,17 +700,11 @@ export class DatacartComponent implements OnInit, OnDestroy {
      * Create Data hierarchy for the tree
      */
     createDataCartHierarchy() {
-        console.log("this.cartEntities:");
-        console.log(this.cartEntities);
-
         let arrayList = this.cartEntities.reduce(function (result, current) {
             result[current.data.resTitle] = result[current.data.resTitle] || [];
             result[current.data.resTitle].push(current);
             return result;
         }, {});
-
-        console.log("arrayList:");
-        console.log(arrayList);
         
         this.dataFiles = [];
         let parentObj: TreeNode = {};
@@ -636,7 +714,7 @@ export class DatacartComponent implements OnInit, OnDestroy {
             if (arrayList.hasOwnProperty(key)) {
                 parentObj = {
                     data: {
-                        'resTitle': key,
+                        'resTitle':key,
                     }
                 };
 
@@ -657,7 +735,18 @@ export class DatacartComponent implements OnInit, OnDestroy {
                             // console.log("##$%$%$ path path:" +fpath[path]);
                             /// Added this code to avoid the issue of extra file layers in the datacart
                             if(fpath[path] !== ""){
-                                child2 = this.createDataCartChildrenTree("/"+fpath[path],fields.data.cartId,resId,ediid,fpath[path],fields.data.downloadURL,fields.data.filePath,fields.data.downloadStatus);
+                                child2 = this.createDataCartChildrenTree(
+                                    "/"+fpath[path],
+                                    fields.data.cartId,
+                                    resId,ediid,
+                                    fpath[path],
+                                    fields.data.downloadURL,
+                                    fields.data.filePath,
+                                    fields.data.downloadStatus,
+                                    fields.data.mediatype,
+                                    fields.data.description,
+                                    fields.data.filetype
+                                );
                                 parent.children.push(child2);
 
                                 parent = child2;
@@ -714,7 +803,7 @@ export class DatacartComponent implements OnInit, OnDestroy {
     /**
      * Create data hierarchy for children
      */
-    createDataCartChildrenTree(path: string,cartId:string,resId:string,ediid:string,resTitle:string,downloadURL:string,resFilePath:string,downloadStatus:string){
+    createDataCartChildrenTree(path: string,cartId:string,resId:string,ediid:string,resTitle:string,downloadURL:string,resFilePath:string,downloadStatus:string,mediatype:string, description:string, filetype:string){
         let child1:TreeNode = {};
         child1 = {
             data: {
@@ -725,7 +814,10 @@ export class DatacartComponent implements OnInit, OnDestroy {
                 'resTitle': resTitle,
                 'downloadURL' : downloadURL,
                 'resFilePath' : resFilePath,
-                'downloadStatus' : downloadStatus
+                'downloadStatus' : downloadStatus,
+                'mediatype' : mediatype,
+                'description' : description,
+                'filetype' : filetype
             }
             
         };
@@ -739,5 +831,28 @@ export class DatacartComponent implements OnInit, OnDestroy {
         zip.downloadInstance = null;
         zip.downloadProgress = 0;
         zip.downloadStatus = "cancelled";
+    }
+
+    /*
+    * Set color for bundle plan return message 
+    */
+    getColor(){
+        if(this.bundlePlanStatus == 'warnings'){
+            return "darkorange";
+        }else if(this.bundlePlanStatus == 'error'){
+            return "red";
+        }else{
+            return "black";
+        }
+    }
+
+    isNodeSelected: boolean = false;
+    openDetails(event,fileNode: TreeNode, overlaypanel: OverlayPanel) {
+        this.isNodeSelected = true;
+        this.fileNode = fileNode;
+        overlaypanel.hide();
+        setTimeout(() => {
+            overlaypanel.show(event);
+        },100);
     }
 }

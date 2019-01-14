@@ -15,6 +15,8 @@ export interface Data {
   filePath: any;
   fileName: any;
   fileSize: any;
+  filetype: any;
   downloadStatus: any;
-  fileFormat: any;
+  mediatype: any;
+  description: any;
 }

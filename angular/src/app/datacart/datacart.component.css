@@ -126,7 +126,6 @@
 
 .downloadStatusExpand{
   width: 94%;
-  margin-bottom: 0.5em; 
   background-color: rgb(193, 240, 255);
   padding: 0.5em;
   margin-left: 3%;
@@ -145,4 +144,14 @@
 
 #zipDownloadDisplay:hover {
   height: 100%;
+}
+
+.filedesc{
+  background-color:#307F38;
+  text-align: left;
+  color: white;
+  word-wrap: break-word;
+  font-family: sans-serif;
+  font-size: 12px;
+  padding: 1rem 1rem 1rem 1rem; 
 }

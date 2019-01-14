@@ -1,10 +1,11 @@
 import { Injectable } from '@angular/core';
 import { HttpClientModule, HttpClient, HttpHeaders, HttpRequest, HttpEventType, HttpResponse } from '@angular/common/http'; 
-import {Observable } from 'rxjs';
-import {BehaviorSubject } from 'rxjs/BehaviorSubject';
+import { Observable } from 'rxjs';
+import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { CommonVarService } from '../../shared/common-var';
 import { ZipData } from './zipData';
 import { DownloadData } from './downloadData';
+import { CartService } from '../../datacart/cart.service';
 import { TestDataService } from '../../shared/testdata-service/testDataService';
 
 declare var saveAs: any;
@@ -19,6 +20,7 @@ export class DownloadService {
 
     constructor(
         private http: HttpClient,
+        private cartService: CartService,
         private testDataService: TestDataService, 
         private commonVarService:CommonVarService,
       ) { }
@@ -31,11 +33,14 @@ export class DownloadService {
     /**
      * Calling end point 1 to get the bundle plan
      **/
-    getBundlePlan(url, params): Observable<Blob>{
+    getBundlePlan(url, params): Observable<any>{
         // return this.http.post<Blob>(url, {responseType: 'blob', params: params});
         // for testing
         // return this.http.get('https://s3.amazonaws.com/nist-midas/1869/ddPCR%20Raw%20Data_Stein%20et%20al%20PLOSOne%202017.zip', {responseType: 'blob'});
-        return this.testDataService.getBundlePlan();
+
+        // return this.testDataService.getBundlePlan();
+        return this.http.post(url, {responseType: 'blob', params: params});
+        
         // return this.http.get(url, {responseType: 'arraybuffer'}).map(res => res);
     }
 
@@ -51,11 +56,13 @@ export class DownloadService {
     /**
     * Calling end point 2 to get the bundle
     **/
-   getBundle(url, params): Observable<any>{
-    // return this.http.post<Blob>(url, {responseType: 'blob', params: params});
-    // for testing
-    return this.testDataService.getBundle('https://s3.amazonaws.com/nist-midas/1858/20170213_PowderPlate2_Pad.zip', params);
-}
+    getBundle(url, params): Observable<any>{
+        // console.log("Bundle url: " + url);
+        // return this.http.post(url, {responseType: 'blob', params: params});
+        // return this.http.post<Blob>(url, {responseType: 'blob', params: params});
+        // for testing
+        return this.testDataService.getBundle('https://s3.amazonaws.com/nist-midas/1858/20170213_PowderPlate2_Pad.zip', params);
+    }
 
 
     /**
@@ -227,6 +234,7 @@ export class DownloadService {
             let node = this.searchTreeByfilePath(treeNode, filePath);
             if(node != null){
                 node.data.downloadStatus = status;
+                this.cartService.updateCartItemDownloadStatus(node.data['cartId'],status);
             }
         }
     }

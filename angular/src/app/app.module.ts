@@ -39,6 +39,9 @@ import { ConfirmDialogModule, SelectItem, DropdownModule, ConfirmationService,Me
 import {ProgressBarModule} from 'primeng/progressbar';
 import { TestDataService } from './shared/testdata-service/testDataService';
 
+// used to create fake backend
+import { fakeBackendProvider } from './_helpers/fakeBackendInterceptor';
+
 /**
  * Initialize the configs for backend services
  */
@@ -85,7 +88,9 @@ const appInitializerFn = (appConfig: AppConfig) => {
       useFactory: appInitializerFn,
       multi: true,
       deps: [AppConfig]
-    }  
+    },
+    // provider used to create fake backend
+    fakeBackendProvider  
   ],
   schemas: [ CUSTOM_ELEMENTS_SCHEMA ,NO_ERRORS_SCHEMA]
 })
