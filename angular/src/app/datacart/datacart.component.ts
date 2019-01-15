@@ -105,6 +105,7 @@ export class DatacartComponent implements OnInit, OnDestroy {
     fileNode: TreeNode;
     showMessageBlock: boolean = false;
     messageColor: any;
+    noFileDownloaded: boolean; // will be true if any item in data cart is downloaded
 
     private distApi : string = environment.DISTAPI;
     //private distApi:string = "http://localhost:8083/oar-dist-service";
@@ -144,13 +145,19 @@ export class DatacartComponent implements OnInit, OnDestroy {
         this.fileNode = {"data":{ "resTitle":"", "size":"", "mediatype":"", "description":"", "filetype":"" }};
         this.expandToLevel(this.dataFiles, true, 2);
 
-        console.log("this.dataFiles:");
-        console.log(this.dataFiles);
+        // console.log("this.dataFiles:");
+        // console.log(this.dataFiles);
 
         this.downloadService.watchDownloadProcessStatus("datacard").subscribe(
             value => {
                 this.allProcessed = value;
                 // this.updateDownloadStatus(this.files);
+            }
+        );
+
+        this.downloadService.watchAnyFileDownloaded().subscribe(
+            value => {
+                this.noFileDownloaded = !value;
             }
         );
 
@@ -384,6 +391,7 @@ export class DatacartComponent implements OnInit, OnDestroy {
                     this.downloadService.saveToFileSystem(event.body, filename);
                     rowData.downloadStatus = 'downloaded';
                     this.cartService.updateCartItemDownloadStatus(rowData.cartId,'downloaded');
+                    this.downloadService.setFileDownloadedFlag(true);
                     break;
                 case HttpEventType.DownloadProgress:
                     rowData.downloadProgress = Math.round(100*event.loaded / event.total);
@@ -635,19 +643,18 @@ export class DatacartComponent implements OnInit, OnDestroy {
      * Removes all cart Instances that are bound to the download status.
      **/
     removeByDownloadStatus() {
-
         let dataId: any;
         // convert the map to an array
-        var i:number;
-        for ( i=0; i < this.dataFiles.length;i++) {
-            if (this.dataFiles[i].expanded == true) {
-                this.selectedParentIndex = i;
-            }
-        }
         this.cartService.removeByDownloadStatus();
         this.updateCartEntries();
         this.cartService.setCartLength(this.cartEntities.length);
-
+        setTimeout(() => {
+            this.expandToLevel(this.dataFiles, true, null);
+        },0);
+        this.isVisible = false;
+        setTimeout(() => {
+            this.isVisible = true;
+        },0);
         //   this.cartService.getAllCartEntities().then(function (result) {
         //       this.cartEntities = result;
         //       this.createDataCartHierarchy();
@@ -678,6 +685,7 @@ export class DatacartComponent implements OnInit, OnDestroy {
         this.resetDownloadParams();
         this.cartService.updateCartDownloadStatus(null);
         this.resetDatafileDownloadStatus(this.dataFiles, null);
+        this.downloadService.setFileDownloadedFlag(false);
     }
 
     /**
@@ -706,6 +714,7 @@ export class DatacartComponent implements OnInit, OnDestroy {
             return result;
         }, {});
         
+        var noFileDownloadedFlag = true;
         this.dataFiles = [];
         let parentObj: TreeNode = {};
         for (var key in arrayList) {
@@ -732,6 +741,9 @@ export class DatacartComponent implements OnInit, OnDestroy {
                         let folderExists:boolean = false;
                         let folder = null;
                         for (let path in fpath) {
+                            if(fields.data.downloadStatus == "downloaded"){
+                                noFileDownloadedFlag = false;
+                            }
                             // console.log("##$%$%$ path path:" +fpath[path]);
                             /// Added this code to avoid the issue of extra file layers in the datacart
                             if(fpath[path] !== ""){
@@ -759,6 +771,7 @@ export class DatacartComponent implements OnInit, OnDestroy {
                 this.index = {};
             }
         }
+        this.downloadService.setFileDownloadedFlag(!noFileDownloadedFlag);
     }
 
     /**

@@ -307,8 +307,6 @@ updateMenu(){
      if(window.location.href.includes("ark"))
       this.router.navigate(['/od/id/ark:/88434/'+this.searchValue],{fragment:sectionId});
      else
-     console.log("sectionId:");
-     console.log(sectionId)
       this.router.navigate(['/od/id/', this.record.ediid],{fragment:sectionId});
       this.useFragment();
   }

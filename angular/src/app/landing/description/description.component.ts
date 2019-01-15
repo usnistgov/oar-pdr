@@ -74,6 +74,7 @@ export class DescriptionComponent {
     showZipFilesNmaes: boolean = true;
     showMessageBlock: boolean = false;
     messageColor: any;
+    noFileDownloaded: boolean; // will be true if any item in data cart is downloaded
 
     private distApi : string = environment.DISTAPI;
 
@@ -152,6 +153,11 @@ export class DescriptionComponent {
                     this.downloadStatus = "downloaded";
                 }
                 this.downloadStatus = this.updateDownloadStatus(this.files)?"downloaded":null;
+            }
+        );
+        this.downloadService.watchAnyFileDownloaded().subscribe(
+            value => {
+                this.noFileDownloaded = !value;
             }
         );
         //   console.log("this.downloadStatus:");
@@ -529,6 +535,7 @@ export class DescriptionComponent {
 
     updateDownloadStatus(files: any){
         var allDownloaded = true;
+        var noFileDownloadedFlag = true;
         for (let comp of files) {
             if(comp.children.length > 0){
                 var status = this.updateDownloadStatus(comp.children);
@@ -541,9 +548,13 @@ export class DescriptionComponent {
                 if(comp.data.downloadStatus != 'downloaded'){
                     allDownloaded = false;
                 }
+                if(comp.data.downloadStatus == 'downloaded' && comp.data.isSelected){
+                    noFileDownloadedFlag = true;
+                }
             }
         }   
 
+        this.downloadService.setFileDownloadedFlag(!noFileDownloadedFlag);
         return allDownloaded;
     }
 
@@ -606,6 +617,9 @@ export class DescriptionComponent {
                     rowData.downloadStatus = 'downloaded';
                     this.cartService.updateCartItemDownloadStatus(rowData.cartId,'downloaded');
                     this.downloadStatus = this.updateDownloadStatus(this.files)?"downloaded":null;
+                    if(rowData.isSelected){
+                        this.downloadService.setFileDownloadedFlag(true);
+                    }
                     break;
                 case HttpEventType.DownloadProgress:
                     rowData.downloadProgress = Math.round(100*event.loaded / event.total);
@@ -624,6 +638,9 @@ export class DescriptionComponent {
         };
 
         rowData.downloadStatus = 'downloaded';
+        if(rowData.isSelected){
+            this.downloadService.setFileDownloadedFlag(true);
+        }
         // this.cartService.updateFileSpinnerStatus(true);
 
         // this.downloadService.getFile(rowData.downloadURL, '').subscribe(blob => {

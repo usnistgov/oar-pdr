@@ -18,6 +18,8 @@ export class DownloadService {
     zipFilesDownloadingDataCardSub= new BehaviorSubject<number>(0);
     zipFilesProcessedDataCardSub= new BehaviorSubject<boolean>(false);
 
+    anyFileDownloadedFlagSub= new BehaviorSubject<boolean>(false);
+
     constructor(
         private http: HttpClient,
         private cartService: CartService,
@@ -299,5 +301,17 @@ export class DownloadService {
                 this.resetZipName(element.children[i]);
             }
         } 
+    }
+
+    /**
+     * Set general download flag
+     **/
+    setFileDownloadedFlag(value: boolean) {
+        let sub = this.anyFileDownloadedFlagSub;
+        sub.next(value);
+    }
+
+    watchAnyFileDownloaded(): Observable<any> {
+        return this.anyFileDownloadedFlagSub.asObservable();
     }
 }

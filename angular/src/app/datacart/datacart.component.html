@@ -200,7 +200,7 @@
                 <span class="badge badge-notify" >{{selectedFileCount}}</span>
         </button>
 
-        <button type="button" (click)="removeByDownloadStatus()" pButton type="submit"  style="margin-right:1em;width:max-content; background-color:grey;" >
+        <button type="button" (click)="removeByDownloadStatus()" pButton type="submit"  style="margin-right:1em;width:max-content; background-color:grey;" [disabled]="noFileDownloaded">
             <i class="faa faa-trash faa-1x icon-white" style="color: #fff;"></i>
                 Remove downloaded
         </button>
