@@ -314,4 +314,18 @@ export class DownloadService {
     watchAnyFileDownloaded(): Observable<any> {
         return this.anyFileDownloadedFlagSub.asObservable();
     }
+
+    getTotalDownloaded(dataFiles: any){
+        let totalDownloaded:number = 0;
+        for (let comp of dataFiles) {
+            if (comp.children.length > 0){
+                totalDownloaded = this.getTotalDownloaded(comp.children);
+            }else{
+                if(comp.data.downloadStatus == 'downloaded'){
+                    totalDownloaded += 1;
+                }
+            }
+        }
+        return totalDownloaded;
+    }
 }

@@ -194,21 +194,22 @@
 <div style="padding-left: 3%; padding-right: 3%; width: 100%;margin-bottom:0.5em;text-align: right;">
 <!-- <div style="padding-left: -1%; padding-right: 1em; margin-top: 1em; width: 100%;"> -->
 
-        <button type="button" (click)="downloadAllFilesFromAPI()" pButton type="submit"  style="margin-right:1em;width:max-content; background-color: #307F38;" [disabled]="selectedFileCount==0">
+        <button type="button" (click)="downloadAllFilesFromAPI()" pButton type="submit" [ngStyle]="{'margin-right':'1em','width':'max-content','background-color':getButtonColor()}" [disabled]="selectedFileCount==0">
             <i class="faa faa-download faa-1x icon-white" style="color: #fff;"></i>
                 Download Selected
-                <span class="badge badge-notify" >{{selectedFileCount}}</span>
+                <span class="badge badge-notify" [ngStyle]="{'background-color':'white','color':getButtonColor()}">{{selectedFileCount}}</span>
         </button>
 
         <button type="button" (click)="removeByDownloadStatus()" pButton type="submit"  style="margin-right:1em;width:max-content; background-color:grey;" [disabled]="noFileDownloaded">
             <i class="faa faa-trash faa-1x icon-white" style="color: #fff;"></i>
                 Remove downloaded
+            <span class="badge badge-notify" [ngStyle]="{'color':getDownloadedColor(), 'background-color':getDownloadedBkColor()}">{{totalDownloaded}}</span>
         </button>
 
         <button type="button" (click)="removeByDataId()" pButton type="submit"  style="width:max-content; background-color:grey;" [disabled]="selectedFileCount==0">
             <i class="faa faa-trash faa-1x icon-white" style="color: #fff;"></i>
                 Remove selected
-            <span class="badge badge-notify">{{selectedFileCount}}</span>
+            <span class="badge badge-notify" style="color:grey; background-color:white;">{{selectedFileCount}}</span>
         </button>
 
 

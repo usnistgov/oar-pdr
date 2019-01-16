@@ -106,6 +106,7 @@ export class DatacartComponent implements OnInit, OnDestroy {
     showMessageBlock: boolean = false;
     messageColor: any;
     noFileDownloaded: boolean; // will be true if any item in data cart is downloaded
+    totalDownloaded: number = 0;
 
     private distApi : string = environment.DISTAPI;
     //private distApi:string = "http://localhost:8083/oar-dist-service";
@@ -155,9 +156,14 @@ export class DatacartComponent implements OnInit, OnDestroy {
             }
         );
 
+        this.totalDownloaded = this.downloadService.getTotalDownloaded(this.dataFiles);
+
         this.downloadService.watchAnyFileDownloaded().subscribe(
             value => {
                 this.noFileDownloaded = !value;
+                if(value){
+                    this.totalDownloaded = this.downloadService.getTotalDownloaded(this.dataFiles);
+                }
             }
         );
 
@@ -716,6 +722,7 @@ export class DatacartComponent implements OnInit, OnDestroy {
         
         var noFileDownloadedFlag = true;
         this.dataFiles = [];
+        this.totalDownloaded = 0;
         let parentObj: TreeNode = {};
         for (var key in arrayList) {
             // let resId = key;
@@ -742,6 +749,7 @@ export class DatacartComponent implements OnInit, OnDestroy {
                         let folder = null;
                         for (let path in fpath) {
                             if(fields.data.downloadStatus == "downloaded"){
+                                this.totalDownloaded += 1;
                                 noFileDownloadedFlag = false;
                             }
                             // console.log("##$%$%$ path path:" +fpath[path]);
@@ -867,5 +875,35 @@ export class DatacartComponent implements OnInit, OnDestroy {
         setTimeout(() => {
             overlaypanel.show(event);
         },100);
+    }
+
+    getButtonColor(){
+        if(this.noFileDownloaded){
+            return "#1E6BA1";
+        }else{
+            return "#307F38";
+        }       
+    }
+
+    /*
+        Return text color for Remove Downloaded badge
+    */
+    getDownloadedColor(){
+        if(this.noFileDownloaded){
+            return "grey";
+        }else{
+            return "white";
+        }  
+    }
+
+    /*
+        Return background color for Remove Downloaded badge
+    */
+    getDownloadedBkColor(){
+        if(this.noFileDownloaded){
+            return "white";
+        }else{
+            return "green";
+        }  
     }
 }
