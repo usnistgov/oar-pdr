@@ -114,6 +114,7 @@ export class DownloadService {
                         this.setDownloadingNumber(this.zipFilesDownloadingSub.getValue()-1, whichPage);
                         this.setDownloadProcessStatus(this.allDownloadFinished(zipdata), whichPage);
                         this.setDownloadStatus(nextZip, treeNode, "downloaded");
+                        this.setFileDownloadedFlag(true);
                         break;
                     case HttpEventType.DownloadProgress:
                         nextZip.downloadProgress = Math.round(100*event.loaded / event.total);
