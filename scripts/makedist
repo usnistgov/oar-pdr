@@ -31,9 +31,24 @@ set -e
 prog=`basename $0`
 execdir=`dirname $0`
 [ "$execdir" = "" -o "$execdir" = "." ] && execdir=$PWD
-execdir=`realpath $execdir`
 PACKAGE_DIR=`dirname $execdir`
 VERSION=
+
+# this is needed because realpath is not on macs
+function realpath {
+    if [ -d "$1" ]; then
+        (cd $1 && pwd)
+    elif [ -f "$1" ]; then
+        file=`basename $1`
+        parent=`dirname $1`
+        realdir=`(cd $parent && pwd)`
+        echo "$realdir/$file"
+    elif [[ $1 = /* ]]; then
+        echo $1
+    else
+        echo "$PWD/${1#./}"
+    fi
+}
 
 # Update this list with the names of the individual component names
 # 
@@ -89,6 +104,15 @@ done
 [ -n "$build_dist" ] || build_dist=$DISTNAMES
 echo '#' Building $build_dist
 
+# make sure the oar-metadata submodule has been initialized
+#
+[ -d "oar-metadata/scripts" ] || {
+    set -x
+    git submodule init
+    git submodule update
+    set +x
+}
+
 # set the current version.  This will inject the version into the code, if 
 # needed.
 #
@@ -98,7 +122,7 @@ scripts/setversion.sh $VERSION
 set +x
 [ -n "$PACKAGE_NAME" ] || PACKAGE_NAME=`cat VERSION | awk '{print $1}'`
 version=`cat VERSION | awk '{print $2}'`
-vers4fn=`echo $version | sed -re 's#[/ ]+#_#g'`
+vers4fn=`echo $version | perl -pe 's#[/ ]+#_#g'`
 
 build_py=
 build_ang=

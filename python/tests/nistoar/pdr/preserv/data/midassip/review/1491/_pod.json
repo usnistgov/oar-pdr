@@ -17,10 +17,24 @@
             "title": "JSON version of the Mathematica notebook"
         },
         {
+            "downloadURL": "https://data.nist.gov/od/ds/3A1EE2F169DD3B8CE0531A570681DB5D1491/trial1.json.sha256",
+            "mediaType": "text/plain"
+        },
+        {
             "description": "Second trial of experiment",
             "downloadURL": "https://data.nist.gov/od/ds/3A1EE2F169DD3B8CE0531A570681DB5D1491/trial2.json",
             "mediaType": "application/json",
             "title": "JSON version of the Mathematica notebook"
+        },
+        {
+            "description": "Third trial of experiment",
+            "downloadURL": "https://data.nist.gov/od/ds/3A1EE2F169DD3B8CE0531A570681DB5D1491/trial3/trial3a.json",
+            "mediaType": "application/json",
+            "title": "JSON version of the Mathematica notebook"
+        },
+        {
+            "downloadURL": "https://data.nist.gov/od/ds/3A1EE2F169DD3B8CE0531A570681DB5D1491/trial3/trial3a.json.sha256",
+            "mediaType": "text/plain"
         },
         {
             "description": "Simulation of experiment",

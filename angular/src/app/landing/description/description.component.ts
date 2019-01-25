@@ -77,6 +77,7 @@ export class DescriptionComponent {
     noFileDownloaded: boolean; // will be true if any item in data cart is downloaded
 
     private distApi : string = environment.DISTAPI;
+    // private distApi : string = "";
 
     /* Function to Return Keys object properties */
     keys() : Array<string> {

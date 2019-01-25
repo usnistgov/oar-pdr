@@ -107,10 +107,10 @@ export class DatacartComponent implements OnInit, OnDestroy {
     messageColor: any;
     noFileDownloaded: boolean; // will be true if any item in data cart is downloaded
     totalDownloaded: number = 0;
+    // private distApi : string = "";
 
     private distApi : string = environment.DISTAPI;
     //private distApi:string = "http://localhost:8083/oar-dist-service";
-
 
     /**
      * Creates an instance of the SearchPanel

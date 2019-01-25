@@ -22,8 +22,8 @@ export class SearchResolve implements Resolve<any> {
               @Inject(PLATFORM_ID) private platformId,
               private transferState:TransferState, private rtr: Router) {}
  
-  /** Working below **/
-  //  constructor(private searchService: SearchService) {}
+//   /** Working below **/
+//   //  constructor(private searchService: SearchService) {}
   
   // resolve(route: ActivatedRouteSnapshot) {
   //   return this.searchService.(route.params['id']);
@@ -60,17 +60,51 @@ export class SearchResolve implements Resolve<any> {
             }
             return Observable.throw(caught);
           })
-            .pipe(
+            // .pipe(
+//   // resolve(route: ActivatedRouteSnapshot) {
+//   //   return this.searchService.(route.params['id']);
+//   // }
+//   resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<any> {
+//     var recordid = route.params['id'];
+//     if(state.url.toString().includes("ark")){
+//       recordid =  state.url.toString().split("/id/").pop();
+//     }
+   
+//     const recordid_KEY = makeStateKey<any>('record-' + recordid);
+    
+//     if (this.transferState.hasKey(recordid_KEY)) {
+//         console.log("1. Is it here @@@");
+//         const record = this.transferState.get<any>(recordid_KEY, null);
+//         this.transferState.remove(recordid_KEY);
+//         return of(record);
+//     }
+//     else {
+//         // return this.searchService.testdata() 
+//         return this.searchService.searchById(recordid)
+//         .catch((err: Response, caught: Observable<any[]>) => {
+//             if (err !== undefined) {
+//               console.log("ERROR STATUS :::"+err.status);
+//               if(err.status >= 500){
+//                 this.rtr.navigate(["/usererror", recordid,{ errorcode : err.status}]);
+//               }
+//               if(err.status >= 400 && err.status < 500 ){
+//                  this.rtr.navigate(["/usererror", recordid, { errorcode : err.status}]); 
+//               }
+//               //return Observable.throw('The Web server (running the Web site) is currently unable to handle the request.');
+//             }
+//             return Observable.throw(caught);
+//           })
+//             .pipe(
                
-                tap(record => {
-                    if (isPlatformServer(this.platformId)) {
+//                 tap(record => {
+//                     if (isPlatformServer(this.platformId)) {
                         
-                      console.log("2 . Is it here @@@:"+this.platformId);
-                        this.transferState.set(recordid_KEY, record);
-                    //    console.log(this.transferState.toJson()); 
-                    }
-                })
-            );
+//                       console.log("2 . Is it here @@@:"+this.platformId);
+//                         this.transferState.set(recordid_KEY, record);
+//                     //    console.log(this.transferState.toJson()); 
+//                     }
+//                 })
+//             );
     }
   }
 }

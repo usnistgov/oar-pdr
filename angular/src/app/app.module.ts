@@ -47,6 +47,7 @@ import { fakeBackendProvider } from './_helpers/fakeBackendInterceptor';
  */
 const appInitializerFn = (appConfig: AppConfig) => {
   return () => {
+    console.log("**** CAlling APP Initialization ***");
     return appConfig.loadAppConfig();
   };
 };
