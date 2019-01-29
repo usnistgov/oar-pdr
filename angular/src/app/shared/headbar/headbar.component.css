@@ -82,6 +82,7 @@ li a:hover {
 
 .badge-notify{
     background-color: green;
+    color: white;
     position:relative;
     top: -20px;
     left: -5px;

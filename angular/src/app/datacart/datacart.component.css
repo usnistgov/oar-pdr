@@ -41,9 +41,21 @@
 }
 
 .badge-notify{
-  background-color: gray;
+  background-color: green;
+  color: white;
   position:relative;
-  color: #fff;
+  top: -10px;
+  left: -5px;
+  font-size: 9px;
+  height:15px;
+  width:15px;
+  padding:3px 3px 3px 3px ;
+}
+
+.badge-pill{
+  height:15px;
+  width:15px;
+  padding:2px 3px 3px 3px ;
 }
 
 :host /deep/ .ui-button, body .ui-datepicker-buttonpane button {

@@ -6,5 +6,5 @@
     "PDRAPI":  "http://localhost/od/id/",
     "DISTAPI": "http://data.nist.gov/od/ds/",
     "METAPI":  "http://localhost/metaurl/",
-    "LANDING": "http://data.nist.gov/rmm/"
+    "LANDING": "http://testdata.nist.gov/rmm/"
 }

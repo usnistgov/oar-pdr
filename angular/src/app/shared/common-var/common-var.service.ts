@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Subject } from 'rxjs/Subject';
 import {Observable } from 'rxjs';
+import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 
 @Injectable()
 export class CommonVarService {
@@ -13,6 +14,8 @@ export class CommonVarService {
   private random_maximum: number = 100000;
   private download_maximum: number = 2;
 
+  processingSub = new BehaviorSubject<boolean>(false);
+  
   constructor() { }
   
     // setLogin(setlogin : boolean){
@@ -45,5 +48,19 @@ export class CommonVarService {
 
   getDownloadMaximum(){
     return this.download_maximum;
+  }
+
+    /**
+  * Watching processing flag
+  **/
+ watchProcessing(): Observable<any> {
+    return this.processingSub.asObservable();
+  }
+
+  /**
+   * Set processing flag
+   **/
+  setProcessing(value: boolean) {
+      this.processingSub.next(value);
   }
 }

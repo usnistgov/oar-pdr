@@ -123,6 +123,8 @@ export class LandingComponent implements OnInit {
     navigationSubscription : any;
     ediid:any;
     confValues : Config;
+    isProcessing: boolean = false;
+
   /**
    * Creates an instance of the SearchPanel
    *
@@ -142,6 +144,13 @@ export class LandingComponent implements OnInit {
    * Get the params OnInit
    */
   ngOnInit() {
+    this.commonVarService.setProcessing(true);
+    this.commonVarService.watchProcessing().subscribe(
+      value => {
+        this.isProcessing = value;
+      }
+    );
+
     this.searchValue = this.route.snapshot.paramMap.get('id');
     if(this.router.url.includes("ark"))
       this.searchValue =  this.router.url.split("/id/").pop();
@@ -154,6 +163,7 @@ export class LandingComponent implements OnInit {
       .subscribe((res)=>{
         this.onSuccess(res);
       }, error =>{
+        this.commonVarService.setProcessing(false);
         console.log("There is an error in searchservice.");
         this.onError(" There is an error");
         // throw new ErrorComponent(this.route);
@@ -208,6 +218,7 @@ export class LandingComponent implements OnInit {
 
       if(this.record["@id"] === undefined || this.record["@id"] === "" ){
         this.isId = false;
+        this.commonVarService.setProcessing(false);
         return;
     }  
 
@@ -220,6 +231,7 @@ export class LandingComponent implements OnInit {
      this.isEmail = true;
      this.assessNewer();
     this.updateMenu();
+    this.commonVarService.setProcessing(false);
   }
 
   /**

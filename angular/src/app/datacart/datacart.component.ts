@@ -144,7 +144,7 @@ export class DatacartComponent implements OnInit, OnDestroy {
         this.treeRoot.push(newPart);
 
         this.fileNode = {"data":{ "resTitle":"", "size":"", "mediatype":"", "description":"", "filetype":"" }};
-        this.expandToLevel(this.dataFiles, true, 2);
+        this.expandToLevel(this.dataFiles, true, 1);
 
         // console.log("this.dataFiles:");
         // console.log(this.dataFiles);
@@ -156,7 +156,7 @@ export class DatacartComponent implements OnInit, OnDestroy {
             }
         );
 
-        this.totalDownloaded = this.downloadService.getTotalDownloaded(this.dataFiles);
+        // this.totalDownloaded = this.downloadService.getTotalDownloaded(this.dataFiles);
 
         this.downloadService.watchAnyFileDownloaded().subscribe(
             value => {
@@ -543,13 +543,20 @@ export class DatacartComponent implements OnInit, OnDestroy {
     //     // }
     // }
 
-    cancelDownload(key){
-        this.downloadInstance.unsubscribe();
-        this.downloadInstance = null;
-        this.downloadProgress = 0;
-        this.downloadStatus = null;
-        this.showSpinner = false;
-        this.displayFiles = this.displayFiles.filter(obj => obj.key != key);
+    // cancelDownload(key){
+    //     this.downloadInstance.unsubscribe();
+    //     this.downloadInstance = null;
+    //     this.downloadProgress = 0;
+    //     this.downloadStatus = null;
+    //     this.showSpinner = false;
+    //     this.displayFiles = this.displayFiles.filter(obj => obj.key != key);
+    // }
+
+    cancelDownload(rowData:any){
+        rowData.downloadInstance.unsubscribe();
+        rowData.downloadInstance = null;
+        rowData.downloadProgress = 0;
+        rowData.downloadStatus = null;
     }
 
     /**
@@ -619,12 +626,12 @@ export class DatacartComponent implements OnInit, OnDestroy {
 
         let dataId: any;
         // convert the map to an array
-        var i:number;
-        for ( i=0; i < this.dataFiles.length;i++) {
-            if (this.dataFiles[i].expanded == true) {
-                this.selectedParentIndex = i;
-            }
-        }
+        // var i:number;
+        // for ( i=0; i < this.dataFiles.length;i++) {
+        //     if (this.dataFiles[i].expanded == true) {
+        //         this.selectedParentIndex = i;
+        //     }
+        // }
         for (let selData of this.selectedData) {
             dataId = selData.data['resId'];
             // Filter out all cartEntities with given productId,  finally the new stuff from es6 can be used.
@@ -635,14 +642,14 @@ export class DatacartComponent implements OnInit, OnDestroy {
         this.getDataCartList();
         this.createDataCartHierarchy();
 
-        if (this.cartEntities.length > 0) {
-            this.dataFiles[this.selectedParentIndex].expanded = true;
-        }
+        // if (this.cartEntities.length > 0) {
+        //     this.dataFiles[this.selectedParentIndex].expanded = true;
+        // }
 
         this.cartService.setCartLength(this.cartEntities.length);
         this.selectedData.length = 0;
         this.dataFileCount();
-
+        this.expandToLevel(this.dataFiles, true, 1);
     }
 
     /**

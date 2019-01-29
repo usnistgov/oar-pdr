@@ -91,7 +91,7 @@ const appInitializerFn = (appConfig: AppConfig) => {
       deps: [AppConfig]
     },
     // provider used to create fake backend
-    fakeBackendProvider  
+    // fakeBackendProvider  
   ],
   schemas: [ CUSTOM_ELEMENTS_SCHEMA ,NO_ERRORS_SCHEMA]
 })
