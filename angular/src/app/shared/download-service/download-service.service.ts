@@ -61,9 +61,9 @@ export class DownloadService {
     getBundle(url, params): Observable<any>{
         // console.log("Bundle url: " + url);
         // return this.http.post(url, {responseType: 'blob', params: params});
-        // return this.http.post<Blob>(url, {responseType: 'blob', params: params});
+        return this.http.post<Blob>(url, {responseType: 'blob', params: params});
         // for testing
-        return this.testDataService.getBundle('https://s3.amazonaws.com/nist-midas/1858/20170213_PowderPlate2_Pad.zip', params);
+        // return this.testDataService.getBundle('https://s3.amazonaws.com/nist-midas/1858/20170213_PowderPlate2_Pad.zip', params);
     }
 
 
