@@ -110,6 +110,7 @@ export class DatacartComponent implements OnInit, OnDestroy {
   messageColor: any;
   noFileDownloaded: boolean; // will be true if any item in data cart is downloaded
   totalDownloaded: number = 0;
+  dataArray: string[] = [];
   // private distApi : string = "";
 
   private distApi: string = environment.DISTAPI;
@@ -123,10 +124,16 @@ export class DatacartComponent implements OnInit, OnDestroy {
     private cartService: CartService,
     private downloadService: DownloadService,
     private commonVarService: CommonVarService) {
-    this.getDataCartList();
-    this.display = true;
-    // console.log("this.cartEntities:");
-    // console.log(this.cartEntities); 
+      console.log("Datacart starts...")
+      this.getDataCartList("Init");
+      this.display = true;
+      this.cartService.watchForceDatacartReload().subscribe(
+        value => {
+          if (value) {
+            this.getDataCartList("Init");
+          }
+        }
+      );
   }
 
   /**
@@ -134,23 +141,13 @@ export class DatacartComponent implements OnInit, OnDestroy {
    */
   ngOnInit() {
     this.ediid = this.commonVarService.getEdiid();
-    this.createDataCartHierarchy();
-    this.display = true;
-
-    // create root
-    const newPart = {
-      data: {
-        resTitle: "root"
-      }, children: []
-    };
-    newPart.children = this.dataFiles;
-    this.treeRoot.push(newPart);
-
-    this.fileNode = { "data": { "resTitle": "", "size": "", "mediatype": "", "description": "", "filetype": "" } };
-    this.expandToLevel(this.dataFiles, true, 1);
-
-    // console.log("this.dataFiles:");
-    // console.log(this.dataFiles);
+    this.cartService.watchCartEntitesReady().subscribe(
+      value => {
+        if (value) {
+          this.loadDatacart();
+        }
+      }
+    );
 
     this.downloadService.watchDownloadProcessStatus("datacard").subscribe(
       value => {
@@ -169,6 +166,38 @@ export class DatacartComponent implements OnInit, OnDestroy {
         }
       }
     );
+  }
+
+  /*
+  * Loaing datacart
+  */
+  loadDatacart(){
+    console.log("Loading datacart...");
+    this.selectedData = [];
+    this.createDataCartHierarchy();
+    this.display = true;
+
+    // create root
+    const newPart = {
+      data: {
+        resTitle: "root"
+      }, children: []
+    };
+    newPart.children = this.dataFiles;
+    this.treeRoot.push(newPart);
+
+    this.fileNode = { "data": { "resTitle": "", "size": "", "mediatype": "", "description": "", "filetype": "" } };
+    this.expandToLevel(this.dataFiles, true, 1);
+
+    // console.log("this.dataFiles:");
+    // console.log(this.dataFiles);
+
+    this.checkNode(this.dataFiles);
+
+    console.log("this.selectedData:");
+    console.log(this.selectedData);
+
+    this.dataFileCount();
 
     if (this.cartEntities.length > 0) {
       // var element = <HTMLInputElement> document.getElementById("downloadStatus");
@@ -178,6 +207,7 @@ export class DatacartComponent implements OnInit, OnDestroy {
       //element.disabled = true;
     }
   }
+
 
   showHideZipFiles() {
     this.showZipFilesNmaes = !this.showZipFilesNmaes;
@@ -258,9 +288,11 @@ export class DatacartComponent implements OnInit, OnDestroy {
    * If Search is successful populate list of keywords themes and authors
    */
 
-  getDataCartList() {
+  getDataCartList(state: string = '') {
     this.cartService.getAllCartEntities().then(function (result) {
       this.cartEntities = result;
+      if (state == 'Init')
+        this.cartService.setCartEntitesReady(true);
       //   console.log("cart entities inside datacartlist" + JSON.stringify(this.cartEntities));
     }.bind(this), function (err) {
       alert("something went wrong while fetching the products");
@@ -567,8 +599,6 @@ export class DatacartComponent implements OnInit, OnDestroy {
    */
 
   dataFileCount() {
-    console.log("this.dataFiles:");
-    console.log(this.dataFiles);
     this.selectedFileCount = 0;
     for (let selData of this.selectedData) {
       if (selData.data['filePath'] != null) {
@@ -725,6 +755,8 @@ export class DatacartComponent implements OnInit, OnDestroy {
    * Create Data hierarchy for the tree
    */
   createDataCartHierarchy() {
+    console.log("creating DataCartHierarchy this.cartEntities");
+    console.log(this.cartEntities);
     let arrayList = this.cartEntities.reduce(function (result, current) {
       result[current.data.resTitle] = result[current.data.resTitle] || [];
       result[current.data.resTitle].push(current);
@@ -735,9 +767,14 @@ export class DatacartComponent implements OnInit, OnDestroy {
     this.dataFiles = [];
     this.totalDownloaded = 0;
     let parentObj: TreeNode = {};
+
+    // console.log("this.cartEntities:");
+    // console.log(this.cartEntities);
+    // console.log("arrayList:");
+    // console.log(arrayList);
+
     for (var key in arrayList) {
       // let resId = key;
-
       if (arrayList.hasOwnProperty(key)) {
         parentObj = {
           data: {
@@ -776,17 +813,21 @@ export class DatacartComponent implements OnInit, OnDestroy {
                   fields.data.downloadStatus,
                   fields.data.mediatype,
                   fields.data.description,
-                  fields.data.filetype
+                  fields.data.filetype,
+                  fields.data.isSelected
                 );
                 parent.children.push(child2);
 
                 parent = child2;
               }
+              if (key == 'Measurement of the Behavior of Steel Beams under Localized Fire Exposure' && parent.parent != null)
+                this.selectedData.push(parent);
             }
           }
         }
         this.walkData(parentObj, parentObj, 0);
         this.dataFiles.push(parentObj);
+
         this.index = {};
       }
     }
@@ -835,7 +876,7 @@ export class DatacartComponent implements OnInit, OnDestroy {
   /**
    * Create data hierarchy for children
    */
-  createDataCartChildrenTree(path: string, cartId: string, resId: string, ediid: string, resTitle: string, downloadURL: string, resFilePath: string, downloadStatus: string, mediatype: string, description: string, filetype: string) {
+  createDataCartChildrenTree(path: string, cartId: string, resId: string, ediid: string, resTitle: string, downloadURL: string, resFilePath: string, downloadStatus: string, mediatype: string, description: string, filetype: string, isSelected: boolean) {
     let child1: TreeNode = {};
     child1 = {
       data: {
@@ -849,7 +890,8 @@ export class DatacartComponent implements OnInit, OnDestroy {
         'downloadStatus': downloadStatus,
         'mediatype': mediatype,
         'description': description,
-        'filetype': filetype
+        'filetype': filetype,
+        'isSelected': isSelected
       }
 
     };
@@ -915,6 +957,62 @@ export class DatacartComponent implements OnInit, OnDestroy {
       return "white";
     } else {
       return "green";
+    }
+  }
+
+  onNodeSelection(event: any, rowData: any, rowIndex: any) {
+    console.log("rowData");
+    console.log(rowData);
+    console.log("rowIndex");
+    console.log(rowIndex);
+
+    if (rowData.children) {
+      // for (let child of rowData.children)
+      // this.setSelected(child);
+    }
+  }
+
+  checkNode(nodes: TreeNode[]) {
+    for (let i = 0; i < nodes.length; i++) {
+      if (nodes[i].children.length > 0) {
+        for (let j = 0; j < nodes[i].children.length; j++) {
+          if (nodes[i].children[j].children.length == 0) {
+            if (nodes[i].children[j].data.isSelected) {
+              if (!this.selectedData.includes(nodes[i].children[j])) {
+                this.selectedData.push(nodes[i].children[j]);
+              }
+            }
+          }
+        }
+      } else {
+        if (nodes[i].data.isSelected) {
+          if (!this.selectedData.includes(nodes[i]))
+            this.selectedData.push(nodes[i]);
+        }
+      }
+      if (nodes[i].children.length == 0) {
+        return;
+      }
+
+      this.checkNode(nodes[i].children);
+      let count = nodes[i].children.length;
+      let c = 0;
+      for (let j = 0; j < nodes[i].children.length; j++) {
+        if (this.selectedData.includes(nodes[i].children[j])) {
+          c++;
+        }
+        if (nodes[i].children[j].partialSelected) nodes[i].partialSelected = true;
+      }
+      if (c == 0) { }
+      else if (c == count) {
+        nodes[i].partialSelected = false;
+        if (!this.selectedData.includes(nodes[i])) {
+          this.selectedData.push(nodes[i]);
+        }
+      }
+      else {
+        nodes[i].partialSelected = true;
+      }
     }
   }
 }

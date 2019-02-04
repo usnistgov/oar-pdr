@@ -38,6 +38,7 @@ import {ProgressSpinnerModule} from 'primeng/progressspinner';
 import { ConfirmDialogModule, SelectItem, DropdownModule, ConfirmationService,Message } from 'primeng/primeng';
 import {ProgressBarModule} from 'primeng/progressbar';
 import { TestDataService } from './shared/testdata-service/testDataService';
+// import {DynamicDialogModule} from 'primeng/dynamicdialog';
 
 // used to create fake backend
 import { fakeBackendProvider } from './_helpers/fakeBackendInterceptor';
@@ -59,7 +60,7 @@ const appInitializerFn = (appConfig: AppConfig) => {
     Collaspe,MetadataComponent, DescriptionComponent,  
     KeyValuePipe, MetadataView, NoidComponent,NerdmComponent,
     ErrorComponent,UserErrorComponent, 
-    AppShellNoRenderDirective, AppShellRenderDirective 
+    AppShellNoRenderDirective, AppShellRenderDirective
   ],
   imports: [
     FragmentPolyfillModule.forRoot({
@@ -91,7 +92,7 @@ const appInitializerFn = (appConfig: AppConfig) => {
       deps: [AppConfig]
     },
     // provider used to create fake backend
-    // fakeBackendProvider  
+    fakeBackendProvider
   ],
   schemas: [ CUSTOM_ELEMENTS_SCHEMA ,NO_ERRORS_SCHEMA]
 })

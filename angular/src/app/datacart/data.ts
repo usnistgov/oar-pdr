@@ -19,4 +19,5 @@ export interface Data {
   downloadStatus: any;
   mediatype: any;
   description: any;
+  isSelected : boolean;
 }

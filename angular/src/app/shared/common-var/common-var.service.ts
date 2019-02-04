@@ -1,12 +1,12 @@
 import { Injectable } from '@angular/core';
 import { Subject } from 'rxjs/Subject';
-import {Observable } from 'rxjs';
+import { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 
 @Injectable()
 export class CommonVarService {
 
-  private userlogin : boolean = false;
+  private userlogin: boolean = false;
   public userObservable = new Subject<boolean>();
   ediid: string = null;
   private _storage = localStorage;
@@ -15,52 +15,67 @@ export class CommonVarService {
   private download_maximum: number = 2;
 
   processingSub = new BehaviorSubject<boolean>(false);
-  
-  constructor() { }
-  
-    // setLogin(setlogin : boolean){
-    //     this.userlogin = setlogin;
-    // }
+  showDatacartSub = new BehaviorSubject<boolean>(false);
 
-    // getLogin(){
-    //     return this.userlogin;
-    // }
+  constructor() { }
+
+  // setLogin(setlogin : boolean){
+  //     this.userlogin = setlogin;
+  // }
+
+  // getLogin(){
+  //     return this.userlogin;
+  // }
 
   userConfig(val) {
     this.userObservable.next(val);
-  }  
-    
-  setEdiid(ediid:string) {
+  }
+
+  setEdiid(ediid: string) {
     this._storage.setItem("ediid", ediid);
   }
 
-  getEdiid(){
+  getEdiid() {
     return this._storage.getItem("ediid");
   }
 
-  getRandomMaximum(){
+  getRandomMaximum() {
     return this.random_maximum;
   }
 
-  getRandomMinimum(){
+  getRandomMinimum() {
     return this.random_minimum;
   }
 
-  getDownloadMaximum(){
+  getDownloadMaximum() {
     return this.download_maximum;
-  }
-
-    /**
-  * Watching processing flag
-  **/
- watchProcessing(): Observable<any> {
-    return this.processingSub.asObservable();
   }
 
   /**
    * Set processing flag
    **/
   setProcessing(value: boolean) {
-      this.processingSub.next(value);
+    this.processingSub.next(value);
+  }
+
+  /**
+  * Watching processing flag
+  **/
+  watchProcessing(): Observable<any> {
+    return this.processingSub.asObservable();
+  }
+
+  /**
+   * Set show-datacart flag
+   **/
+  setShowDatacart(value: boolean) {
+    this.showDatacartSub.next(value);
+  }
+
+  /**
+  * Watching show-datacart flag
+  **/
+  watchShowDatacart(): Observable<any> {
+    return this.showDatacartSub.asObservable();
   }
 }

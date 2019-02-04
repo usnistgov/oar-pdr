@@ -392,3 +392,8 @@
     stroke-dashoffset: -124px;
   }
 }
+
+::ng-deep p-dialog .ui-dialog {
+  overflow: scroll;
+  max-height: 100%;
+}

@@ -62,16 +62,16 @@
             </span>
 
             <p-confirmDialog key='downloadAllConfirm'></p-confirmDialog>
-            <span *ngIf="!allSelected">
-                <a href="javascript:;" (click)="addAllFilesToCart(files)" class="faa faa-cart-plus " style="margin-left:0.5em; color:#1E6BA1;cursor: pointer;" title="Add All files to datacart" data-toggle="tooltip">
+            <span *ngIf="!allSelected; else all_selected">
+                <a href="javascript:;" (click)="addAllFilesToCart(files, false)" class="faa faa-cart-plus " style="margin-left:0.5em; color:#1E6BA1;cursor: pointer;" title="Add All files to datacart" data-toggle="tooltip">
                     <span class="badge badge-pill badge-notify">{{cartLength}}</span>
                 </a>
             </span>
-            <span *ngIf="allSelected">
+            <ng-template #all_selected>
                 <a href="javascript:;" (click)="removeFilesFromCart(files)" class="faa faa-shopping-cart" style="margin-left:0.5em; color:green;cursor: pointer;" title="Remove All files from datacart" data-toggle="tooltip">
                     <span class = "badge badge-pill badge-notify">{{cartLength}}</span>
                 </a>
-            </span>
+            </ng-template>
             <span class="font8" style="margin-left:0.5em; color:gray;">Click on the file/row in the table below to view more details.</span>
             <span class="font10" style="margin-left:0.5em; color:gray; float: right"> Total No. files: {{ totalFiles }} </span> 
             <div *ngIf="bundlePlanStatus != 'success' && bundlePlanMessage" style="text-align: left;">
@@ -207,13 +207,13 @@
                                     </div>
                                 </div> 
                                 <div style="padding-left:10px; flex: 0 0 auto;">
-                                    <span *ngIf = "!rowData.isSelected" (click)="addSubFilesToCart(rowData)">
+                                    <span *ngIf = "!rowData.isIncart" (click)="addSubFilesToCart(rowData)">
                                             <i class="faa faa-cart-plus" style="color: #1E6BA1;cursor: pointer;" aria-hidden="true" data-toggle="tooltip" title="Add to cart"></i>
                                     </span>
-                                    <span *ngIf = "rowData.isSelected" (click)="removeFromNode(rowData)">
+                                    <span *ngIf = "rowData.isIncart" (click)="removeFromNode(rowData)">
                                             <i class="faa faa-cart-plus" style="color: green;cursor: pointer;" aria-hidden="true" data-toggle="tooltip" title="Remove from cart"></i>
                                     </span>
-                                    <span *ngIf="rowData.isSelected" style="margin-left: 0.5em;font-size: 0.5em">Added</span>
+                                    <span *ngIf="rowData.isIncart" style="margin-left: 0.5em;font-size: 0.5em">Added</span>
                                 </div>
                             </div>
                         </td>

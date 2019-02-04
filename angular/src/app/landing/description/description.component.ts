@@ -130,7 +130,7 @@ export class DescriptionComponent {
         filePath: "/",
         downloadProgress: 0,
         downloadInstance: null,
-        isSelected: false,
+        isIncart: false,
         zipFile: null
       }, children: []
     };
@@ -203,7 +203,7 @@ export class DescriptionComponent {
       if (value.data.cartId != undefined) {
         let treeNode = this.searchTree(this.treeRoot[0], value.data.cartId);
         if (treeNode != null) {
-          treeNode.data.isSelected = true;
+          treeNode.data.isIncart = true;
         }
       }
     }
@@ -342,18 +342,10 @@ export class DescriptionComponent {
     this.checkAccesspages();
   }
 
-  // updateCartStatus(files: any){
-  //     for (let comp of files) {
-  //         if(comp.children.length > 0){
-  //             this.updateCartStatus(comp.children);
-  //         }else{
-  //             comp.data.isSelected = this.isInDataCart(comp.data.cartId);
-  //         }
-  //     }   
-  //     this.updateAllSelectStatus(this.files);     
-  // }
-
-  addSubFilesToCart(rowData: any) {
+  /**
+  * Function to add whole subfolder files to data cart
+  **/
+  addSubFilesToCart(rowData: any, isSelected: boolean) {
     let data: Data;
     let compValue: any;
     // this.cartService.updateAllFilesSpinnerStatus(true);
@@ -367,11 +359,11 @@ export class DescriptionComponent {
         }
       }
       if (subFiles != null) {
-        this.addFilesToCart(subFiles.children);
-        rowData.isSelected = true;
+        this.addFilesToCart(subFiles.children, isSelected);
+        rowData.isIncart = true;
       }
     } else {
-      this.addtoCart(rowData);
+      this.addtoCart(rowData, isSelected);
     }
 
     this.allSelected = true;
@@ -385,6 +377,9 @@ export class DescriptionComponent {
     // }, 3000);
   }
 
+  /**
+  * Function to search the file tree for a given cartid.
+  **/
   searchTree(element, cartId) {
     if (element.data.cartId == cartId) {
       return element;
@@ -399,51 +394,92 @@ export class DescriptionComponent {
     return null;
   }
 
-  addAllFilesToCart() {
-    this.addFilesToCart(this.files);
+  /**
+  * Function to add all files to data cart.
+  **/
+  addAllFilesToCart(files: any, isSelected: boolean) {
+    this.addFilesToCart(files, isSelected).then(function (result) {
+      console.log("setForceDatacartReload");
+      this.cartService.setForceDatacartReload(true);
+    }.bind(this), function (err) {
+      alert("something went wrong while adding one file to data cart.");
+    });
+
     this.allSelected = true;
     this.updateAllSelectStatus(this.files);
+    console.log("Promise add all files to card...");
+    return Promise.resolve(files);
   }
 
-  //     //Datacart related code
-  addFilesToCart(files: any) {
+  /**
+  * Function to add given file tree to data cart.
+  **/
+  addFilesToCart(files: any, isSelected: boolean) {
     let data: Data;
     let compValue: any;
-    // this.cartService.updateAllFilesSpinnerStatus(true);
-
-    // for (let comp of this.record["components"]) {
-    //     if (typeof comp["downloadURL"] != "undefined") {
-    // data = {
-    //     'resId': comp["@resId"].replace(/^.*[\\\/]/, ''),
-    //     'resTitle': this.record["title"],
-    //     'id': this.record["title"],
-    //     'fileName': comp["title"],
-    //     'filePath': comp["filepath"],
-    //     'fileSize': comp["size"],
-    //     'downloadURL': comp["downloadURL"],
-    //     'fileFormat': comp["mediaType"],
-    //     'downloadStatus': null,
-    //     'resFilePath': ''
-    // };
-    // this.cartService.addDataToCart(data);
-    // data = null;
-    //     }
-    // }
-
+    let pendingRecursive = 1;
+    console.log("files");
+    console.log(files);
     for (let comp of files) {
       if (comp.children.length > 0) {
-        this.addFilesToCart(comp.children);
+        pendingRecursive++;
+        console.log("pendingRecursive");
+        console.log(pendingRecursive);
+        compValue += this.addFilesToCart(comp.children, isSelected);
       } else {
-        this.addtoCart(comp.data);
+        this.addtoCart(comp.data, isSelected).then(function (result) {
+          console.log("result1");
+          console.log(result);
+          compValue = 1;
+        }.bind(this), function (err) {
+          alert("something went wrong while adding one file to data cart.");
+        });
       }
     }
 
-    // setTimeout(() => {
-    //     this.cartService.updateAllFilesSpinnerStatus(false);
-    // }, 3000);
-    // setTimeout(() => {
-    //     this.addFileStatus = true;
-    // }, 3000);
+    if (--pendingRecursive == 0) {
+      console.log("pendingRecursive");
+      console.log(pendingRecursive);
+    }
+    //Now reload datacart
+    return Promise.resolve(compValue);
+  }
+
+  /**
+  * Function to add one file to data cart with pre-select option.
+  **/
+  addtoCart(rowData: any, isSelected: boolean) {
+    // this.cartService.updateFileSpinnerStatus(true);
+    let cartMap: any;
+    let data: Data;
+    data = {
+      'cartId': rowData.cartId,
+      'ediid': this.ediid,
+      'resId': rowData.resId,
+      'resTitle': this.record['title'],
+      'resFilePath': rowData.filePath,
+      'id': rowData.name,
+      'fileName': rowData.name,
+      'filePath': rowData.filePath,
+      'fileSize': rowData.size,
+      'filetype': rowData.filetype,
+      'downloadURL': rowData.downloadURL,
+      'mediatype': rowData.mediatype,
+      'downloadStatus': rowData.downloadStatus,
+      'description': rowData.description,
+      'isSelected': isSelected
+    };
+
+    this.cartService.addDataToCart(data).then(function (result) {
+      rowData.isIncart = true;
+      console.log("result0");
+      console.log(result);
+      cartMap = result;
+    }.bind(this), function (err) {
+      alert("something went wrong while fetching the products");
+    });
+    return Promise.resolve(cartMap);
+    // rowData.isSelected = this.cartService.isInDataCart(rowData.cartId);
   }
 
   removeFromNode(rowData: any) {
@@ -463,11 +499,11 @@ export class DescriptionComponent {
       }
       if (subFiles != null) {
         this.removeFilesFromCart(subFiles.children);
-        rowData.isSelected = false;
+        rowData.isIncart = false;
       }
     } else {
       this.cartService.removeCartId(rowData.cartId);
-      rowData.isSelected = false;
+      rowData.isIncart = false;
     }
   }
 
@@ -480,52 +516,24 @@ export class DescriptionComponent {
   removeFromCart(files: any) {
     for (let comp of files) {
       if (comp.children.length > 0) {
-        comp.data.isSelected = false;
+        comp.data.isIncart = false;
         this.removeFromCart(comp.children);
       } else {
         this.cartService.removeCartId(comp.data.cartId);
-        comp.data.isSelected = false;
+        comp.data.isIncart = false;
       }
     }
 
-  }
-
-  addtoCart(rowData: any) {
-    // this.cartService.updateFileSpinnerStatus(true);
-    let data: Data;
-    data = {
-      'cartId': rowData.cartId,
-      'ediid': this.ediid,
-      'resId': rowData.resId,
-      'resTitle': this.record['title'],
-      'resFilePath': rowData.filePath,
-      'id': rowData.name,
-      'fileName': rowData.name,
-      'filePath': rowData.filePath,
-      'fileSize': rowData.size,
-      'filetype': rowData.filetype,
-      'downloadURL': rowData.downloadURL,
-      'mediatype': rowData.mediatype,
-      'downloadStatus': rowData.downloadStatus,
-      'description': rowData.description
-    };
-
-    this.cartService.addDataToCart(data);
-    rowData.isSelected = this.isInDataCart(rowData.cartId);
-
-    // setTimeout(()=> {
-    //     this.cartService.updateFileSpinnerStatus(false);
-    // }, 3000);
   }
 
   updateAllSelectStatus(files: any) {
     var allSelected = true;
     for (let comp of files) {
       if (comp.children.length > 0) {
-        comp.data.isSelected = this.updateAllSelectStatus(comp.children);
-        allSelected = allSelected && comp.data.isSelected;
+        comp.data.isIncart = this.updateAllSelectStatus(comp.children);
+        allSelected = allSelected && comp.data.isIncart;
       } else {
-        if (!comp.data.isSelected) {
+        if (!comp.data.isIncart) {
           this.allSelected = false;
           allSelected = false;
         }
@@ -550,7 +558,7 @@ export class DescriptionComponent {
         if (comp.data.downloadStatus != 'downloaded') {
           allDownloaded = false;
         }
-        if (comp.data.downloadStatus == 'downloaded' && comp.data.isSelected) {
+        if (comp.data.downloadStatus == 'downloaded' && comp.data.isIncart) {
           noFileDownloadedFlag = true;
         }
       }
@@ -560,20 +568,6 @@ export class DescriptionComponent {
     return allDownloaded;
   }
 
-  /**
-  * Function to check if cartId is in the data cart.
-  **/
-  isInDataCart(cartId: string) {
-    this.cartMap = this.cartService.getCart();
-
-    for (let key in this.cartMap) {
-      let value = this.cartMap[key];
-      if (value.data.cartId == cartId) {
-        return true;
-      }
-    }
-    return false;
-  }
 
   /**
   * Function to remove a cartId from the data cart.
@@ -581,7 +575,7 @@ export class DescriptionComponent {
   // removeCart(rowData:any, cartId: string){
   //     this.cartService.updateFileSpinnerStatus(true);
   //     this.cartService.removeCartId(cartId);
-  //     rowData.isSelected = this.isInDataCart(cartId);
+  //     rowData.isIncart = this.isInDataCart(cartId);
   //     this.checkIfAllSelected(this.files);
 
   //     setTimeout(()=> {
@@ -619,7 +613,7 @@ export class DescriptionComponent {
           rowData.downloadStatus = 'downloaded';
           this.cartService.updateCartItemDownloadStatus(rowData.cartId, 'downloaded');
           this.downloadStatus = this.updateDownloadStatus(this.files) ? "downloaded" : null;
-          if (rowData.isSelected) {
+          if (rowData.isIncart) {
             this.downloadService.setFileDownloadedFlag(true);
           }
           break;
@@ -640,7 +634,7 @@ export class DescriptionComponent {
     };
 
     rowData.downloadStatus = 'downloaded';
-    if (rowData.isSelected) {
+    if (rowData.isIncart) {
       this.downloadService.setFileDownloadedFlag(true);
     }
     // this.cartService.updateFileSpinnerStatus(true);
@@ -698,6 +692,7 @@ export class DescriptionComponent {
       accept: () => {
         this.cancelAllDownload = false;
         this.downloadFromRoot();
+        // this.downloadAllFilesFromAPI(this.treeRoot[0]);
       },
       reject: () => {
       }
@@ -705,29 +700,14 @@ export class DescriptionComponent {
   }
 
   downloadFromRoot() {
-    this.downloadAllFilesFromAPI(this.treeRoot[0]);
+    // this.downloadAllFilesFromAPI(this.treeRoot[0]);
+    this.addAllFilesToCart(this.files, true).then(function (result) {
+      this.commonVarService.setShowDatacart(true);
+    }.bind(this), function (err) {
+      alert("something went wrong while adding all files to cart");
+    });
+
   }
-
-  // getDownloadData(files: any){
-  //     let existItem: any;
-  //     for (let comp of files) {
-  //         if(comp.children.length > 0){
-  //             this.getDownloadData(comp.children);
-  //         }else{
-  //             if (comp.data['filePath'] != null && comp.data['filePath'] != undefined) {
-  //                 if (comp.data['filePath'].split(".").length > 1) {
-  //                     existItem = this.downloadData.filter(item => item.filePath === comp.data['ediid']+comp.data['filePath'] 
-  //                         && item.downloadURL === comp.data['downloadURL']);
-
-  //                     if (existItem.length == 0) {
-  //                         this.downloadData.push({"filePath":comp.data['ediid']+comp.data['filePath'], 'downloadURL':comp.data['downloadURL']});
-  //                     }
-  //                 }
-  //             }
-  //         }
-  //     }        
-  // }
-
 
   /**
   * Function to download all files from API call.
