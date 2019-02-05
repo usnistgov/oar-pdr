@@ -273,6 +273,31 @@ export class CartService {
   /**
    * Will persist the product to local storage
    **/
+  deselectAll() {
+    if (!this._storage.getItem('cart')) {
+      let emptyMap: { [key: string]: number; } = {};
+
+      this.setCart(emptyMap);
+      let cartMap = this.getCart();
+
+      // save the map
+      this.setCart(cartMap);
+    }
+
+    let cartMap = this.getCart();
+    for (let key in cartMap) {
+      let value = cartMap[key];
+      value.data.isSelected = false;
+    }
+
+    // save the map
+    this.setCart(cartMap);
+    return Promise.resolve(cartMap);
+  }
+
+  /**
+   * Will persist the product to local storage
+   **/
   addDataToCart(data: Data) {
     // product id , quantity
     let cartMap = this.getCart();
@@ -292,14 +317,20 @@ export class CartService {
 
     cartMap = this.getCart();
 
-    // if the current key exists in the map , append value
-    if (cartMap[data.cartId] != undefined) {
-    } else {
-      // if not, set default value
-      cartMap[data.cartId] = {
-        'data': data,
-      }
+    // console.log("cartMap:");
+    // console.log(cartMap);
+    cartMap[data.cartId] = {
+      'data': data,
     }
+
+    // if the current key exists in the map , append value
+    // if (cartMap[data.cartId] != undefined) {
+    // } else {
+    //   // if not, set default value
+    //   cartMap[data.cartId] = {
+    //     'data': data,
+    //   }
+    // }
 
     // save the map
     this.setCart(cartMap);

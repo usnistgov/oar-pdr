@@ -13,6 +13,7 @@ import { environment } from '../../../environments/environment';
 import { HttpClientModule, HttpClient, HttpHeaders, HttpRequest, HttpEventType, HttpResponse, HttpEvent } from '@angular/common/http';
 import { TestBed } from '@angular/core/testing';
 import { AppConfig, Config } from '../../shared/config-service/config.service';
+import { THIS_EXPR } from '@angular/compiler/src/output/output_ast';
 
 declare var saveAs: any;
 
@@ -92,7 +93,7 @@ export class DescriptionComponent {
     private downloadService: DownloadService,
     private commonVarService: CommonVarService,
     private http: HttpClient,
-    private appConfig: AppConfig, 
+    private appConfig: AppConfig,
     private confirmationService: ConfirmationService) {
     this.cartService.watchAddAllFilesCart().subscribe(value => {
       this.addAllFileSpinner = value;
@@ -404,11 +405,15 @@ export class DescriptionComponent {
   * Function to add all files to data cart.
   **/
   addAllFilesToCart(files: any, isSelected: boolean) {
-    this.addFilesToCart(files, isSelected).then(function (result) {
-      console.log("setForceDatacartReload");
-      this.cartService.setForceDatacartReload(true);
+    this.cartService.deselectAll().then(function (result1: any) {
+      this.addFilesToCart(files, isSelected).then(function (result2:any) {
+        console.log("setForceDatacartReload");
+        this.cartService.setForceDatacartReload(true);
+      }.bind(this), function (err) {
+        alert("something went wrong while adding one file to data cart.");
+      });
     }.bind(this), function (err) {
-      alert("something went wrong while adding one file to data cart.");
+      alert("something went wrong while cleaning up data cart select flag.");
     });
 
     this.allSelected = true;
