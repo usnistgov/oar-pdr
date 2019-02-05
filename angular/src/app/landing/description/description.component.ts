@@ -12,7 +12,7 @@ import { CommonVarService } from '../../shared/common-var';
 import { environment } from '../../../environments/environment';
 import { HttpClientModule, HttpClient, HttpHeaders, HttpRequest, HttpEventType, HttpResponse, HttpEvent } from '@angular/common/http';
 import { TestBed } from '@angular/core/testing';
-import { Config } from '../../shared/config-service/config.service';
+import { AppConfig, Config } from '../../shared/config-service/config.service';
 
 declare var saveAs: any;
 
@@ -77,8 +77,9 @@ export class DescriptionComponent {
   showMessageBlock: boolean = false;
   messageColor: any;
   noFileDownloaded: boolean; // will be true if any item in data cart is downloaded
+  distApi: string;
 
-  private distApi: string = this.confValues.DISTAPI;
+  // private distApi: string = this.confValues.DISTAPI;
   // private distApi : string = "";
 
   /* Function to Return Keys object properties */
@@ -91,6 +92,7 @@ export class DescriptionComponent {
     private downloadService: DownloadService,
     private commonVarService: CommonVarService,
     private http: HttpClient,
+    private appConfig: AppConfig, 
     private confirmationService: ConfirmationService) {
     this.cartService.watchAddAllFilesCart().subscribe(value => {
       this.addAllFileSpinner = value;
@@ -98,12 +100,13 @@ export class DescriptionComponent {
     this.cartService.watchStorage().subscribe(value => {
       this.cartLength = value;
     });
+    this.confValues = this.appConfig.getConfig();
   }
 
   ngOnInit() {
     // this.cartService.clearTheCart();
     // this.cdr.detectChanges();
-
+    this.distApi = this.confValues.DISTAPI;
     console.log("this.distApi");
     console.log(this.distApi);
 
