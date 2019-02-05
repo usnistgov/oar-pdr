@@ -148,8 +148,6 @@ export class DatacartComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.downloadService.watchIsPopupFlag().subscribe(
       value => {
-        console.log("isPopup");
-        console.log(value);
         this.isPopup = value;
       }
     );
@@ -960,13 +958,19 @@ export class DatacartComponent implements OnInit, OnDestroy {
     }
   }
 
-  onNodeSelection(event: any, rowData: any, rowIndex: any) {
-    if (rowData.children) {
-      // for (let child of rowData.children)
-      // this.setSelected(child);
-    }
-  }
+  /*
+  * When a tree node is selected -- no longer needed
+  */
+  // onNodeSelection(event: any, rowData: any, rowIndex: any) {
+  //   if (rowData.children) {
+  //     // for (let child of rowData.children)
+  //     // this.setSelected(child);
+  //   }
+  // }
 
+  /*
+  * Pre-select tree nodes
+  */
   checkNode(nodes: TreeNode[]) {
     for (let i = 0; i < nodes.length; i++) {
       if (nodes[i].children.length > 0) {

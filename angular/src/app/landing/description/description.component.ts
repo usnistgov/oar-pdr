@@ -413,7 +413,6 @@ export class DescriptionComponent {
 
     this.allSelected = true;
     this.updateAllSelectStatus(this.files);
-    console.log("Promise add all files to card...");
     return Promise.resolve(files);
   }
 
