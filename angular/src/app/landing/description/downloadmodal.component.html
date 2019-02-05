@@ -1,0 +1,22 @@
+<ng-template #content let-modal>
+  <div class="modal-header">
+    <h4 class="modal-title" id="modal-basic-title">Download Manager</h4>
+    <button type="button" class="close" aria-label="Close" (click)="close()">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+  <div class="modal-body">
+    <data-cart></data-cart>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-outline-dark" (click)="close()">Exit</button>
+  </div>
+</ng-template>
+
+<!-- <button class="btn btn-lg btn-outline-primary" (click)="open(content)">Launch demo modal</button> -->
+<!-- <span (click)="open(content)"> -->
+    <!-- <i (click)="open()" class="faa faa-download" style="color: #1E6BA1;cursor: pointer;" aria-hidden="true" data-toggle="tooltip" title="All files direct download"></i> -->
+<!-- </span> -->
+<!-- <hr> -->
+
+<!-- <pre>{{closeResult}}</pre> -->

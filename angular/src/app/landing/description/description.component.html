@@ -53,6 +53,7 @@
         <div *ngIf="files.length  > 0">        
             <br>
             <span><b>Files </b> </span>   
+            <ngbd-modal-download-manager></ngbd-modal-download-manager>
             <span (click)="downloadAllConfirm('Download All Files', 'This will download all files. Continue?', 'downloadAllConfirm')">
                 <i *ngIf="downloadStatus == null" class="faa faa-download" style="color: #1E6BA1;cursor: pointer;" aria-hidden="true" data-toggle="tooltip" title="All files direct download"></i>
                 <i *ngIf="downloadStatus == 'downloaded'" class="faa faa-download" style="color: green;cursor: pointer;" aria-hidden="true" data-toggle="tooltip" title="All files direct download"></i>

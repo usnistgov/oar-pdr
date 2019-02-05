@@ -2,6 +2,7 @@ import { CartService } from '../../datacart/cart.service';
 import { CartEntity } from '../../datacart/cart.entity';
 import { Component, ElementRef } from '@angular/core';
 import { AppConfig } from '../config-service/config.service';
+import { DownloadService } from '../../shared/download-service/download-service.service';
 
 /**
  * This class represents the headbar component.
@@ -28,7 +29,11 @@ export class HeadbarComponent {
   loginuser = false;
   cartLength : number;
 
-  constructor( private el: ElementRef,  private cartService: CartService, private appConfig : AppConfig) {
+  constructor( 
+    private el: ElementRef,  
+    private cartService: CartService, 
+    private appConfig : AppConfig,
+    private downloadService: DownloadService) {
     this.SDPAPI = this.appConfig.getConfig().SDPAPI;
     this.landingService = this.appConfig.getConfig().LANDING;
       this.cartService.watchStorage().subscribe(value => {
@@ -55,6 +60,7 @@ export class HeadbarComponent {
 
   updateCartStatus()
   {
+    this.downloadService.setIsPopupFlag(false);
     this.cartService.updateCartDisplayStatus(true);
   }
 

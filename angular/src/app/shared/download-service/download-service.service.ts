@@ -20,6 +20,9 @@ export class DownloadService {
   zipFilesProcessedDataCardSub = new BehaviorSubject<boolean>(false);
 
   anyFileDownloadedFlagSub = new BehaviorSubject<boolean>(false);
+  fireDownloadAllFlagSub = new BehaviorSubject<boolean>(false);
+  // Determine if the download manager is a popup
+  isPopupSub = new BehaviorSubject<boolean>(false);
 
   constructor(
     private http: HttpClient,
@@ -317,12 +320,42 @@ export class DownloadService {
    * Set general download flag
    **/
   setFileDownloadedFlag(value: boolean) {
-    let sub = this.anyFileDownloadedFlagSub;
-    sub.next(value);
+    this.anyFileDownloadedFlagSub.next(value);
   }
 
+  /**
+   * Watch general download flag
+   **/
   watchAnyFileDownloaded(): Observable<any> {
     return this.anyFileDownloadedFlagSub.asObservable();
+  }
+
+  /**
+   * Set flag to fire download all function
+   **/
+  setFireDownloadAllFlag(value: boolean) {
+    this.fireDownloadAllFlagSub.next(value);
+  }
+
+  /**
+   * Watch fire download all flag
+   **/
+  watchFireDownloadAllFlag(): Observable<any> {
+    return this.fireDownloadAllFlagSub.asObservable();
+  }
+
+  /**
+   * Set the flag if download manager is a popup
+   **/
+  setIsPopupFlag(value: boolean) {
+    this.isPopupSub.next(value);
+  }
+
+  /**
+   * Watch popup flag
+   **/
+  watchIsPopupFlag(): Observable<any> {
+    return this.isPopupSub.asObservable();
   }
 
   getTotalDownloaded(dataFiles: any) {

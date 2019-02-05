@@ -14,48 +14,9 @@
   }
 </script>
 
-<!-- <p-table [value]="users">
-        <ng-template pTemplate="caption">
-            Users List
-              </ng-template>
-      <ng-template pTemplate="header">
-          <tr>
-              <th>id</th>
-              <th>name</th>
-              <th>Email</th>
-          </tr>
-      </ng-template>
-      <ng-template pTemplate="body" let-user>
-          <tr>
-              <td>{{user.id}}</td>
-              <td>{{user.name}}</td>
-              <td>{{user.email}}</td>
-          </tr>
-      </ng-template>
-    </p-table> -->
-
-<!-- <div style="padding-left: 2%; width: 100%;display:flex;"> -->
-<!-- <div style="padding-left: 2%; flex: 0 0 auto;" *ngFor="let item of displayFiles  "> -->
-<!-- <div style="padding-left: 2%; width: 100%; display:flex;"> -->
-<!-- <div style="padding-left: 2%; flex: 0 0 auto;">
-                <span style="display:inline;">{{item.key}}</span> 
-                <p-progressSpinner *ngIf ="item.value === true" [style]="{width: '12px', height: '12px'}" ></p-progressSpinner>
-                <i class="faa faa-check" *ngIf ="item.value !== true"></i>
-                <span style="display:inline;" *ngIf ="downloadStatus == 'downloading'">
-                    {{downloadProgress}}%
-                </span>
-            </div> -->
-<!-- <div style="padding-left: 2%; padding-top: 8px;width: 200px;flex: 0 0 auto;" *ngIf ="downloadStatus == 'downloading'">
-                <p-progressBar [value]="downloadProgress" showValue="true"></p-progressBar>
-            </div> -->
-<!-- <div style="padding-left:5px; flex: 0 0 auto;" *ngIf="downloadStatus == 'downloading'">
-                <span (click)="cancelDownload(item.key)" style="cursor: pointer;"><i class="faa faa-remove"></i></span>
-            </div> -->
-<!-- </div> -->
-<!-- </div> -->
-<!-- </div> -->
 
 <div style="width: 94%; margin-top: 2em; margin-left: 3%;">
+    <div *ngIf="!isPopup" class="title">Download Manager</div>
   <!-- <div *ngIf="bundlePlanStatus != 'success' && bundlePlanMessage" style="display: inline-block;">
             <div style="display: inline-block;">
                 <i class="faa faa-warning" [ngStyle]="{'color':getColor(), 'padding-right':'.5em'}"></i>
@@ -113,7 +74,7 @@
         Zip File Name
       </th>
       <th style="width: 50%;padding-left:.5em;">
-        <i *ngIf="!allProcessed" class="faa faa-recycle faa-1x icon-white" (click)="cancelDownloadAll()" style="cursor: pointer;color: rgb(255, 255, 255);padding-right:0.5em;"
+        <i *ngIf="!allProcessed" class="faa faa-remove faa-1x icon-white" (click)="cancelDownloadAll()" style="cursor: pointer;color: rgb(255, 255, 255);padding-right:0.5em;"
           pTooltip="Cancel Download"></i>
         Download Status
       </th>

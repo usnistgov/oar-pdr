@@ -38,9 +38,9 @@ import {ProgressSpinnerModule} from 'primeng/progressspinner';
 import { ConfirmDialogModule, SelectItem, DropdownModule, ConfirmationService,Message } from 'primeng/primeng';
 import {ProgressBarModule} from 'primeng/progressbar';
 import { TestDataService } from './shared/testdata-service/testDataService';
-// import { NgbdModalDownloadManager } from './landing/description/downloadmodal.component';
+import { NgbdModalDownloadManager } from './landing/description/downloadmodal.component';
 
-// import {DynamicDialogModule} from 'primeng/dynamicdialog';
+import {DynamicDialogModule} from 'primeng/dynamicdialog';
 
 // used to create fake backend
 import { fakeBackendProvider } from './_helpers/fakeBackendInterceptor';
@@ -62,7 +62,7 @@ const appInitializerFn = (appConfig: AppConfig) => {
     Collaspe,MetadataComponent, DescriptionComponent,  
     KeyValuePipe, MetadataView, NoidComponent,NerdmComponent,
     ErrorComponent,UserErrorComponent, 
-    AppShellNoRenderDirective, AppShellRenderDirective,
+    AppShellNoRenderDirective, AppShellRenderDirective,NgbdModalDownloadManager,
   ],
   imports: [
     FragmentPolyfillModule.forRoot({
@@ -76,6 +76,7 @@ const appInitializerFn = (appConfig: AppConfig) => {
     NgbModule.forRoot()
   ],
   exports: [Collaspe],
+  entryComponents: [NgbdModalDownloadManager],
   providers: [ 
     Title, 
     Meta, 

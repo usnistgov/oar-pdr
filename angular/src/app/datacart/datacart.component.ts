@@ -24,6 +24,8 @@ import { DownloadService } from '../shared/download-service/download-service.ser
 import { ZipData } from '../shared/download-service/zipData';
 import { OverlayPanel } from 'primeng/overlaypanel';
 import { AppConfig, Config } from '../shared/config-service/config.service';
+import { BootstrapOptions } from '@angular/core/src/application_ref';
+import { AsyncBooleanResultCallback } from 'async';
 
 declare var Ultima: any;
 declare var saveAs: any;
@@ -114,7 +116,7 @@ export class DatacartComponent implements OnInit, OnDestroy {
   dataArray: string[] = [];
   confValues: Config;
   distApi: string;
-  // private distApi : string = "";
+  isPopup: boolean = false;
 
   // private distApi: string = environment.DISTAPI;
   //private distApi:string = "http://localhost:8083/oar-dist-service";
@@ -128,7 +130,6 @@ export class DatacartComponent implements OnInit, OnDestroy {
     private downloadService: DownloadService,
     private appConfig: AppConfig, 
     private commonVarService: CommonVarService) {
-      console.log("Datacart starts...")
       this.getDataCartList("Init");
       this.display = true;
       this.confValues = this.appConfig.getConfig();
@@ -145,6 +146,13 @@ export class DatacartComponent implements OnInit, OnDestroy {
    * Get the params OnInit
    */
   ngOnInit() {
+    this.downloadService.watchIsPopupFlag().subscribe(
+      value => {
+        console.log("isPopup");
+        console.log(value);
+        this.isPopup = value;
+      }
+    );
     this.ediid = this.commonVarService.getEdiid();
     this.distApi = this.confValues.DISTAPI;
     this.cartService.watchCartEntitesReady().subscribe(
@@ -159,6 +167,15 @@ export class DatacartComponent implements OnInit, OnDestroy {
       value => {
         this.allProcessed = value;
         // this.updateDownloadStatus(this.files);
+      }
+    );
+
+    this.downloadService.watchFireDownloadAllFlag().subscribe(
+      value => {
+        if(value){
+          this.downloadAllFilesFromAPI();
+          this.downloadService.setFireDownloadAllFlag(false);
+        }
       }
     );
 
@@ -178,7 +195,6 @@ export class DatacartComponent implements OnInit, OnDestroy {
   * Loaing datacart
   */
   loadDatacart(){
-    console.log("Loading datacart...");
     this.selectedData = [];
     this.createDataCartHierarchy();
     this.display = true;
@@ -194,24 +210,16 @@ export class DatacartComponent implements OnInit, OnDestroy {
 
     this.fileNode = { "data": { "resTitle": "", "size": "", "mediatype": "", "description": "", "filetype": "" } };
     this.expandToLevel(this.dataFiles, true, 1);
-
-    // console.log("this.dataFiles:");
-    // console.log(this.dataFiles);
-
     this.checkNode(this.dataFiles);
-
-    console.log("this.selectedData:");
-    console.log(this.selectedData);
-
     this.dataFileCount();
 
-    if (this.cartEntities.length > 0) {
+    // if (this.cartEntities.length > 0) {
       // var element = <HTMLInputElement> document.getElementById("downloadStatus");
       // element.disabled = false;
-    } else {
+    // } else {
       //var element = <HTMLInputElement> document.getElementById("downloadStatus");
       //element.disabled = true;
-    }
+    // }
   }
 
 
@@ -240,20 +248,14 @@ export class DatacartComponent implements OnInit, OnDestroy {
 
   expandAll(dataFiles: any, option: boolean, level: any, targetLevel: any) {
     let currentLevel = level + 1;
-    // console.log("dataFiles:");
-    // console.log(dataFiles);
-    // console.log("targetLevel:");
-    // console.log(targetLevel);
+
     for (let i = 0; i < dataFiles.length; i++) {
       dataFiles[i].expanded = option;
       if (targetLevel != null) {
-        // console.log("expandAll again0:");
         if (dataFiles[i].children.length > 0 && currentLevel < targetLevel) {
-          // console.log("expandAll again:");
           this.expandAll(dataFiles[i].children, option, currentLevel, targetLevel);
         }
       } else {
-        // console.log("expandAll again1:");
         if (dataFiles[i].children.length > 0) {
           this.expandAll(dataFiles[i].children, option, currentLevel, targetLevel);
         }
@@ -299,7 +301,6 @@ export class DatacartComponent implements OnInit, OnDestroy {
       this.cartEntities = result;
       if (state == 'Init')
         this.cartService.setCartEntitesReady(true);
-      //   console.log("cart entities inside datacartlist" + JSON.stringify(this.cartEntities));
     }.bind(this), function (err) {
       alert("something went wrong while fetching the products");
     });
@@ -338,15 +339,19 @@ export class DatacartComponent implements OnInit, OnDestroy {
     files.data.downloadStatus = 'downloading';
 
     postMessage.push({ "bundleName": files.data.downloadFileName, "includeFiles": this.downloadData });
+    console.log("postMessage for bundle plan:");
+    console.log(postMessage);
 
     this.downloadService.getBundlePlan(this.distApi + "_bundle_plan", JSON.stringify(postMessage)).subscribe(
       blob => {
-        // console.log("blob:");
-        // console.log(blob);
+        console.log("Bundle plan return:");
+        console.log(blob);
         this.processBundle(blob, zipFileBaseName, files);
       },
       err => {
-
+        console.log(err);
+        this.bundlePlanMessage = err;
+        this.bundlePlanStatus = "error";
       }
     );
   }
@@ -722,7 +727,6 @@ export class DatacartComponent implements OnInit, OnDestroy {
   resetDatafileDownloadStatus(dataFiles: any, downloadStatus: any) {
     for (let i = 0; i < dataFiles.length; i++) {
       if (dataFiles[i].children.length > 0) {
-        // console.log("expandAll again:");
         this.resetDatafileDownloadStatus(dataFiles[i].children, downloadStatus);
       } else {
         dataFiles[i].data.downloadStatus = downloadStatus;
@@ -753,16 +757,12 @@ export class DatacartComponent implements OnInit, OnDestroy {
     this.cartService.saveListOfCartEntities(this.cartEntities);
     this.getDataCartList();
     this.createDataCartHierarchy();
-    //console.log("datafiles" + this.dataFiles.length);
-
   }
 
   /**
    * Create Data hierarchy for the tree
    */
   createDataCartHierarchy() {
-    console.log("creating DataCartHierarchy this.cartEntities");
-    console.log(this.cartEntities);
     let arrayList = this.cartEntities.reduce(function (result, current) {
       result[current.data.resTitle] = result[current.data.resTitle] || [];
       result[current.data.resTitle].push(current);
@@ -773,11 +773,6 @@ export class DatacartComponent implements OnInit, OnDestroy {
     this.dataFiles = [];
     this.totalDownloaded = 0;
     let parentObj: TreeNode = {};
-
-    // console.log("this.cartEntities:");
-    // console.log(this.cartEntities);
-    // console.log("arrayList:");
-    // console.log(arrayList);
 
     for (var key in arrayList) {
       // let resId = key;
@@ -806,7 +801,6 @@ export class DatacartComponent implements OnInit, OnDestroy {
                 this.totalDownloaded += 1;
                 noFileDownloadedFlag = false;
               }
-              // console.log("##$%$%$ path path:" +fpath[path]);
               /// Added this code to avoid the issue of extra file layers in the datacart
               if (fpath[path] !== "") {
                 child2 = this.createDataCartChildrenTree(
@@ -967,11 +961,6 @@ export class DatacartComponent implements OnInit, OnDestroy {
   }
 
   onNodeSelection(event: any, rowData: any, rowIndex: any) {
-    console.log("rowData");
-    console.log(rowData);
-    console.log("rowIndex");
-    console.log(rowIndex);
-
     if (rowData.children) {
       // for (let child of rowData.children)
       // this.setSelected(child);

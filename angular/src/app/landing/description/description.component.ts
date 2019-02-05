@@ -107,8 +107,7 @@ export class DescriptionComponent {
     // this.cartService.clearTheCart();
     // this.cdr.detectChanges();
     this.distApi = this.confValues.DISTAPI;
-    console.log("this.distApi");
-    console.log(this.distApi);
+    this.commonVarService.setShowDatacart(false);
 
     if (this.files.length != 0)
       this.files = <TreeNode[]>this.files[0].data;
@@ -424,29 +423,16 @@ export class DescriptionComponent {
   addFilesToCart(files: any, isSelected: boolean) {
     let data: Data;
     let compValue: any;
-    let pendingRecursive = 1;
-    console.log("files");
-    console.log(files);
     for (let comp of files) {
       if (comp.children.length > 0) {
-        pendingRecursive++;
-        console.log("pendingRecursive");
-        console.log(pendingRecursive);
         compValue += this.addFilesToCart(comp.children, isSelected);
       } else {
         this.addtoCart(comp.data, isSelected).then(function (result) {
-          console.log("result1");
-          console.log(result);
           compValue = 1;
         }.bind(this), function (err) {
           alert("something went wrong while adding one file to data cart.");
         });
       }
-    }
-
-    if (--pendingRecursive == 0) {
-      console.log("pendingRecursive");
-      console.log(pendingRecursive);
     }
     //Now reload datacart
     return Promise.resolve(compValue);
@@ -479,8 +465,6 @@ export class DescriptionComponent {
 
     this.cartService.addDataToCart(data).then(function (result) {
       rowData.isIncart = true;
-      console.log("result0");
-      console.log(result);
       cartMap = result;
     }.bind(this), function (err) {
       alert("something went wrong while fetching the products");
@@ -738,10 +722,13 @@ export class DescriptionComponent {
     files.data.downloadStatus = 'downloading';
 
     postMessage.push({ "bundleName": files.data.downloadFileName, "includeFiles": this.downloadData });
-
+    console.log("postMessage for bundle plan:");
+    console.log(postMessage);
     // now use postMessage to request a bundle plan
     this.downloadService.getBundlePlan(this.distApi + "_bundle_plan", JSON.stringify(postMessage)).subscribe(
       blob => {
+        console.log("Bundle plan return:");
+        console.log(blob);
         this.processBundle(blob, zipFileBaseName, files);
       },
       err => {
@@ -763,9 +750,6 @@ export class DescriptionComponent {
     let downloadUrl: any = this.distApi + res.postEach;
     this.bundlePlanMessage = res.messages;
     let tempData: any[] = [];
-
-    console.log("Bundle plan return:");
-    console.log(res);
 
     for (let bundle of bundlePlan) {
       this.zipData.push({ "fileName": bundle.bundleName, "downloadProgress": 0, "downloadStatus": null, "downloadInstance": null, "bundle": bundle, "downloadUrl": downloadUrl, "downloadErrorMessage": "" });
