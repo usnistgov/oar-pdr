@@ -21,7 +21,7 @@ import { isPlatformServer } from '@angular/common';
 import { makeStateKey, TransferState } from '@angular/platform-browser';
 import { _throw } from 'rxjs/observable/throw';
 // import {DialogService} from 'primeng/api';
-// import { DatacartComponent} from './datacart/datacart.component';
+import { DatacartComponent } from '../datacart/datacart.component';
 
 interface reference {
   refType?: string,
@@ -142,7 +142,6 @@ export class LandingComponent implements OnInit {
     this.confValues = this.appConfig.getConfig();
   }
 
-
   /**
    * Get the params OnInit
    */
@@ -155,12 +154,12 @@ export class LandingComponent implements OnInit {
     );
     this.commonVarService.watchShowDatacart().subscribe(
       value => {
-        // if (value) {
-        //   const ref = this.dialogService.open(DatacartComponent, {
-        //     header: 'Data cart',
-        //     width: '70%'
-        //   });
-        // }
+        if (value) {
+          // const ref = this.dialogService.open(DatacartComponent, {
+          //   header: 'Data cart',
+          //   width: '70%'
+          // });
+        }
         // this.displayDatacart = value;
       }
     );

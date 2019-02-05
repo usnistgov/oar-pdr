@@ -166,8 +166,8 @@
               </p-dialog>
             </div>
 
-            <div class="ui-g"> 
-              <p-dialog [closable]="false" [style]="{'position':'absolute'}" [(visible)]="displayDatacart" modal="modal" responsive="true" #datacartDialog>
+            <div class="ui-g">
+              <!-- <p-dialog [closable]="false" [style]="{'position':'absolute'}" [(visible)]="displayDatacart" modal="modal" responsive="true" #datacartDialog>
                 <p-header> Datacart
                 </p-header>
                 <data-cart></data-cart>
@@ -176,7 +176,12 @@
                     Exit
                   </button>
                 </p-footer>
-              </p-dialog>
+              </p-dialog> -->
+              <jw-modal id="custom-modal-1" style="display: none;">
+                <h1>A Custom Modal!</h1>
+                <p>Home page text: <input type="text" [(ngModel)]="bodyText" /></p>
+                <button (click)="closeModal('custom-modal-1');">Close</button>
+              </jw-modal>
             </div>
           </div>
         </div>

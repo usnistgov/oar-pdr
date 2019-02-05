@@ -12,7 +12,7 @@ import { CommonVarService } from '../../shared/common-var';
 import { environment } from '../../../environments/environment';
 import { HttpClientModule, HttpClient, HttpHeaders, HttpRequest, HttpEventType, HttpResponse, HttpEvent } from '@angular/common/http';
 import { TestBed } from '@angular/core/testing';
-
+import { AppConfig, Config } from '../../shared/config-service/config.service';
 
 declare var saveAs: any;
 
@@ -33,6 +33,7 @@ export class DescriptionComponent {
   @Input() editContent: boolean;
   @Input() filescount: number;
   @Input() metadata: boolean;
+  @Input() confValues: Config;
 
   addAllFileSpinner: boolean = false;
   fileDetails: string = '';
@@ -76,8 +77,9 @@ export class DescriptionComponent {
   showMessageBlock: boolean = false;
   messageColor: any;
   noFileDownloaded: boolean; // will be true if any item in data cart is downloaded
+  distApi: string;
 
-  private distApi: string = environment.DISTAPI;
+  // private distApi: string = this.confValues.DISTAPI;
   // private distApi : string = "";
 
   /* Function to Return Keys object properties */
@@ -90,18 +92,23 @@ export class DescriptionComponent {
     private downloadService: DownloadService,
     private commonVarService: CommonVarService,
     private http: HttpClient,
-    private confirmationService: ConfirmationService) {
+    private confirmationService: ConfirmationService,
+    private appConfig: AppConfig) {
     this.cartService.watchAddAllFilesCart().subscribe(value => {
       this.addAllFileSpinner = value;
     });
     this.cartService.watchStorage().subscribe(value => {
       this.cartLength = value;
     });
+    this.confValues = this.appConfig.getConfig();
   }
 
   ngOnInit() {
     // this.cartService.clearTheCart();
     // this.cdr.detectChanges();
+    this.distApi = this.confValues.DISTAPI;
+    console.log("this.distApi");
+    console.log(this.distApi);
 
     if (this.files.length != 0)
       this.files = <TreeNode[]>this.files[0].data;
@@ -757,7 +764,8 @@ export class DescriptionComponent {
     this.bundlePlanMessage = res.messages;
     let tempData: any[] = [];
 
-    console.log(this.bundlePlanUnhandledFiles);
+    console.log("Bundle plan return:");
+    console.log(res);
 
     for (let bundle of bundlePlan) {
       this.zipData.push({ "fileName": bundle.bundleName, "downloadProgress": 0, "downloadStatus": null, "downloadInstance": null, "bundle": bundle, "downloadUrl": downloadUrl, "downloadErrorMessage": "" });
