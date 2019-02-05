@@ -33,7 +33,6 @@ export class DescriptionComponent {
   @Input() editContent: boolean;
   @Input() filescount: number;
   @Input() metadata: boolean;
-  @Input() confValues: Config;
 
   addAllFileSpinner: boolean = false;
   fileDetails: string = '';
@@ -78,6 +77,7 @@ export class DescriptionComponent {
   messageColor: any;
   noFileDownloaded: boolean; // will be true if any item in data cart is downloaded
   distApi: string;
+  confValues: Config;
 
   // private distApi: string = this.confValues.DISTAPI;
   // private distApi : string = "";

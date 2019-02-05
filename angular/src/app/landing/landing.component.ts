@@ -22,6 +22,7 @@ import { makeStateKey, TransferState } from '@angular/platform-browser';
 import { _throw } from 'rxjs/observable/throw';
 // import {DialogService} from 'primeng/api';
 import { DatacartComponent } from '../datacart/datacart.component';
+import { NgbdModalDownloadManager } from './description/downloadmodal.component';
 
 interface reference {
   refType?: string,

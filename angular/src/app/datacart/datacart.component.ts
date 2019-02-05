@@ -23,6 +23,7 @@ import { CommonVarService } from '../shared/common-var'
 import { DownloadService } from '../shared/download-service/download-service.service';
 import { ZipData } from '../shared/download-service/zipData';
 import { OverlayPanel } from 'primeng/overlaypanel';
+import { AppConfig, Config } from '../shared/config-service/config.service';
 
 declare var Ultima: any;
 declare var saveAs: any;
@@ -111,9 +112,11 @@ export class DatacartComponent implements OnInit, OnDestroy {
   noFileDownloaded: boolean; // will be true if any item in data cart is downloaded
   totalDownloaded: number = 0;
   dataArray: string[] = [];
+  confValues: Config;
+  distApi: string;
   // private distApi : string = "";
 
-  private distApi: string = environment.DISTAPI;
+  // private distApi: string = environment.DISTAPI;
   //private distApi:string = "http://localhost:8083/oar-dist-service";
 
   /**
@@ -123,10 +126,12 @@ export class DatacartComponent implements OnInit, OnDestroy {
   constructor(private http: HttpClient,
     private cartService: CartService,
     private downloadService: DownloadService,
+    private appConfig: AppConfig, 
     private commonVarService: CommonVarService) {
       console.log("Datacart starts...")
       this.getDataCartList("Init");
       this.display = true;
+      this.confValues = this.appConfig.getConfig();
       this.cartService.watchForceDatacartReload().subscribe(
         value => {
           if (value) {
@@ -141,6 +146,7 @@ export class DatacartComponent implements OnInit, OnDestroy {
    */
   ngOnInit() {
     this.ediid = this.commonVarService.getEdiid();
+    this.distApi = this.confValues.DISTAPI;
     this.cartService.watchCartEntitesReady().subscribe(
       value => {
         if (value) {

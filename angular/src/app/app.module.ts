@@ -38,6 +38,7 @@ import {ProgressSpinnerModule} from 'primeng/progressspinner';
 import { ConfirmDialogModule, SelectItem, DropdownModule, ConfirmationService,Message } from 'primeng/primeng';
 import {ProgressBarModule} from 'primeng/progressbar';
 import { TestDataService } from './shared/testdata-service/testDataService';
+import { NgbdModalDownloadManager } from './landing/description/downloadmodal.component';
 
 // import {DynamicDialogModule} from 'primeng/dynamicdialog';
 
@@ -61,7 +62,7 @@ const appInitializerFn = (appConfig: AppConfig) => {
     Collaspe,MetadataComponent, DescriptionComponent,  
     KeyValuePipe, MetadataView, NoidComponent,NerdmComponent,
     ErrorComponent,UserErrorComponent, 
-    AppShellNoRenderDirective, AppShellRenderDirective, 
+    AppShellNoRenderDirective, AppShellRenderDirective,NgbdModalDownloadManager, 
   ],
   imports: [
     FragmentPolyfillModule.forRoot({

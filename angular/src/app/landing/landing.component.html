@@ -147,7 +147,7 @@
           <div class="ui-g">
             <div class="ui-g-12 ui-md-12 ui-lg-12 ui-sm-12">
               <description-resources [record]="record" [files]="files" [distdownload]="distdownload" [isInternal]="isInternal"
-                [filescount]="filescount" [metadata]="metadata" [confValues]="confValues"></description-resources>
+                [filescount]="filescount" [metadata]="metadata"></description-resources>
               <metadata-detail [record]="record" [serviceApi]="serviceApi" [metadata]="metadata"></metadata-detail>
               <!-- <data-cart></data-cart>   -->
             </div>
@@ -177,11 +177,7 @@
                   </button>
                 </p-footer>
               </p-dialog> -->
-              <jw-modal id="custom-modal-1" style="display: none;">
-                <h1>A Custom Modal!</h1>
-                <p>Home page text: <input type="text" [(ngModel)]="bodyText" /></p>
-                <button (click)="closeModal('custom-modal-1');">Close</button>
-              </jw-modal>
+              <ngbd-modal-download-manager></ngbd-modal-download-manager>
             </div>
           </div>
         </div>
