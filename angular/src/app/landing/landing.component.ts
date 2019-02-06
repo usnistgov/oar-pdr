@@ -224,6 +224,7 @@ export class LandingComponent implements OnInit {
   * If Search is successful populate list of keywords themes and authors
   */
   onSuccess(searchResults: any[]) {
+    // console.log("searchResults");
     // console.log(searchResults);
     if (searchResults["ResultCount"] === undefined || searchResults["ResultCount"] !== 1)
       this.record = searchResults;
@@ -501,7 +502,7 @@ export class LandingComponent implements OnInit {
                 name: part,
                 mediatype: path.mediaType,
                 size: path.size,
-                downloadUrl: path.downloadUrl,
+                downloadUrl: path.downloadURL,
                 description: path.description,
                 filetype: path['@type'][0],
                 resId: path["filepath"].replace(/^.*[\\\/]/, ''),
