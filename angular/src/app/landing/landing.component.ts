@@ -501,7 +501,7 @@ export class LandingComponent implements OnInit {
                 name: part,
                 mediatype: path.mediaType,
                 size: path.size,
-                downloadURL: path.downloadURL,
+                downloadUrl: path.downloadUrl,
                 description: path.description,
                 filetype: path['@type'][0],
                 resId: path["filepath"].replace(/^.*[\\\/]/, ''),

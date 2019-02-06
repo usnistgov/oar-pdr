@@ -130,7 +130,7 @@ export class DescriptionComponent {
         name: "files",
         mediatype: "",
         size: null,
-        downloadURL: null,
+        downloadUrl: null,
         description: null,
         filetype: null,
         resId: "files",
@@ -460,7 +460,7 @@ export class DescriptionComponent {
       'filePath': rowData.filePath,
       'fileSize': rowData.size,
       'filetype': rowData.filetype,
-      'downloadURL': rowData.downloadURL,
+      'downloadUrl': rowData.downloadUrl,
       'mediatype': rowData.mediatype,
       'downloadStatus': rowData.downloadStatus,
       'description': rowData.description,
@@ -593,11 +593,11 @@ export class DescriptionComponent {
   }
 
   downloadOneFile(rowData: any) {
-    let filename = decodeURI(rowData.downloadURL).replace(/^.*[\\\/]/, '');
+    let filename = decodeURI(rowData.downloadUrl).replace(/^.*[\\\/]/, '');
     rowData.downloadStatus = 'downloading';
     rowData.downloadProgress = 0;
 
-    const req = new HttpRequest('GET', rowData.downloadURL, {
+    const req = new HttpRequest('GET', rowData.downloadUrl, {
       reportProgress: true, responseType: 'blob'
     });
 
@@ -634,7 +634,7 @@ export class DescriptionComponent {
     }
     // this.cartService.updateFileSpinnerStatus(true);
 
-    // this.downloadService.getFile(rowData.downloadURL, '').subscribe(blob => {
+    // this.downloadService.getFile(rowData.downloadUrl, '').subscribe(blob => {
     //     this.downloadService.saveToFileSystem(blob, filename);
     //     rowData.downloadStatus = 'downloaded';
     //     this.cartService.updateCartItemDownloadStatus(rowData.cartId,'downloaded');
@@ -669,7 +669,7 @@ export class DescriptionComponent {
       if (comp.children.length > 0) {
         this.downloadAllFilesFromUrl(comp.children);
       } else {
-        if (comp.data.downloadURL) {
+        if (comp.data.downloadUrl) {
           this.downloadOneFile(comp.data);
         }
       }
@@ -708,7 +708,7 @@ export class DescriptionComponent {
   * Function to download all files from API call.
   **/
   downloadAllFilesFromAPI(files: any) {
-    let postMessage: any[] = [];
+    let postMessage: any;
     this.downloadData = [];
     this.zipData = [];
     this.displayDownloadFiles = true;
@@ -722,14 +722,14 @@ export class DescriptionComponent {
     var randomnumber = Math.floor(Math.random() * (this.commonVarService.getRandomMaximum() - this.commonVarService.getRandomMinimum() + 1)) + this.commonVarService.getRandomMinimum();
 
     var zipFileBaseName = "download" + randomnumber;
-    files.data.downloadFileName = zipFileBaseName + ".zip"
+    files.data.downloadFileName = zipFileBaseName;
     files.data.downloadStatus = 'downloading';
 
     postMessage.push({ "bundleName": files.data.downloadFileName, "includeFiles": this.downloadData });
     console.log("postMessage for bundle plan:");
     console.log(postMessage);
     // now use postMessage to request a bundle plan
-    this.downloadService.getBundlePlan(this.distApi + "_bundle_plan", JSON.stringify(postMessage)).subscribe(
+    this.downloadService.getBundlePlan(this.distApi + "_bundle_plan", JSON.stringify(postMessage[0])).subscribe(
       blob => {
         console.log("Bundle plan return:");
         console.log(blob);
@@ -751,7 +751,7 @@ export class DescriptionComponent {
     this.messageColor = this.getColor();
     this.bundlePlanUnhandledFiles = res.notIncluded;
     let bundlePlan: any[] = res.bundleNameFilePathUrl;
-    let downloadUrl: any = this.distApi + res.postEach;
+    let downloadUrl: any = this.distApi + res.postEachTo;
     this.bundlePlanMessage = res.messages;
     let tempData: any[] = [];
 

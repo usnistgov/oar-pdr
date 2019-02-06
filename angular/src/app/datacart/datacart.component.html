@@ -17,7 +17,7 @@
 
 <div style="width: 94%; margin-top: 2em; margin-left: 3%;">
     <div *ngIf="!isPopup" class="title">Download Manager</div>
-  <!-- <div *ngIf="bundlePlanStatus != 'success' && bundlePlanMessage" style="display: inline-block;">
+  <!-- <div *ngIf="bundlePlanStatus != 'complete' && bundlePlanMessage" style="display: inline-block;">
             <div style="display: inline-block;">
                 <i class="faa faa-warning" [ngStyle]="{'color':getColor(), 'padding-right':'.5em'}"></i>
             </div>
@@ -25,7 +25,7 @@
                 <span [ngStyle]="{'color':getColor(), 'padding-right':'.5em'}">{{msg}}</span>
             </div>
     </div> -->
-  <div *ngIf="bundlePlanStatus != 'success' && bundlePlanMessage" style="text-align: left;">
+  <div *ngIf="bundlePlanStatus != 'complete' && bundlePlanMessage" style="text-align: left;">
     <i class="faa faa-warning" [ngStyle]="{'color':messageColor, 'padding-right':'.5em'}"></i>
     <span [ngStyle]="{'color':getColor(), 'padding-right':'.5em'}">Http responsed with warning. </span>
     <span (click)="showMessageBlock = !showMessageBlock">
@@ -234,7 +234,7 @@
           <p-treeTableToggler [rowNode]="rowNode"></p-treeTableToggler>
           &nbsp;<p-treeTableCheckbox [value]="rowNode"></p-treeTableCheckbox>
           <!-- <span *ngIf = "rowData.resTitle.indexOf('.') > 0 "> {{rowData.resTitle}} </span> -->
-          <!-- &nbsp;<a href="{{rowData.downloadURL}}" target="_blank" *ngIf = "rowData.resTitle.indexOf('.') > 0 "> -->
+          <!-- &nbsp;<a href="{{rowData.downloadUrl}}" target="_blank" *ngIf = "rowData.resTitle.indexOf('.') > 0 "> -->
           <!-- </a> -->
           <span *ngIf="rowData.resTitle.indexOf('.') > 0">
             <a (click)="openDetails($event,rowData,op3) " style="cursor: pointer;" data-toggle="tooltip" title="Click for more details">

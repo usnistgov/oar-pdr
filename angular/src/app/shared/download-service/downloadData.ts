@@ -6,5 +6,5 @@
  **/
 export interface DownloadData {
     filePath: any;
-    downloadURL: any;
+    downloadUrl: any;
   }

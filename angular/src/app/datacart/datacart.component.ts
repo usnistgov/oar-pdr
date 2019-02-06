@@ -333,14 +333,14 @@ export class DatacartComponent implements OnInit, OnDestroy {
     var randomnumber = Math.floor(Math.random() * (this.commonVarService.getRandomMaximum() - this.commonVarService.getRandomMinimum() + 1)) + this.commonVarService.getRandomMinimum();
 
     var zipFileBaseName = "download" + randomnumber;
-    files.data.downloadFileName = zipFileBaseName + ".zip"
+    files.data.downloadFileName = zipFileBaseName;
     files.data.downloadStatus = 'downloading';
 
     postMessage.push({ "bundleName": files.data.downloadFileName, "includeFiles": this.downloadData });
     console.log("postMessage for bundle plan:");
     console.log(postMessage);
 
-    this.downloadService.getBundlePlan(this.distApi + "_bundle_plan", JSON.stringify(postMessage)).subscribe(
+    this.downloadService.getBundlePlan(this.distApi + "_bundle_plan", JSON.stringify(postMessage[0])).subscribe(
       blob => {
         console.log("Bundle plan return:");
         console.log(blob);
@@ -360,7 +360,7 @@ export class DatacartComponent implements OnInit, OnDestroy {
     this.bundlePlanUnhandledFiles = res.notIncluded;
     this.bundlePlanMessage = res.messages;
     let bundlePlan: any[] = res.bundleNameFilePathUrl;
-    let downloadUrl: any = this.distApi + res.postEach;
+    let downloadUrl: any = this.distApi + res.postEachTo;
     let tempData: any[] = [];
 
     for (let bundle of bundlePlan) {
@@ -427,11 +427,11 @@ export class DatacartComponent implements OnInit, OnDestroy {
   }
 
   downloadOneFile(rowData: any) {
-    let filename = decodeURI(rowData.downloadURL).replace(/^.*[\\\/]/, '');
+    let filename = decodeURI(rowData.downloadUrl).replace(/^.*[\\\/]/, '');
     rowData.downloadStatus = 'downloading';
     rowData.downloadProgress = 0;
 
-    const req = new HttpRequest('GET', rowData.downloadURL, {
+    const req = new HttpRequest('GET', rowData.downloadUrl, {
       reportProgress: true, responseType: 'blob'
     });
 
@@ -453,7 +453,7 @@ export class DatacartComponent implements OnInit, OnDestroy {
    *  download zip file
    */
   // downloadZIP() {
-  //     let downloadURL: string[];
+  //     let downloadUrl: string[];
   //     let fileName: string[];
   //     let params = new HttpParams();
   //     let folderName: string;
@@ -473,10 +473,10 @@ export class DatacartComponent implements OnInit, OnDestroy {
   //         if (selData.data['resFilePath'] != null && selData.data['resFilePath'] != undefined) {
   //             if (selData.data['resFilePath'].split(".").length > 1) {
   //                 existItem = downloadData.filter(item => item.filePath === this.ediid+selData.data['resFilePath'] 
-  //                     && item.downloadURL === selData.data['downloadURL']);
+  //                     && item.downloadUrl === selData.data['downloadUrl']);
 
   //                 if (existItem.length == 0) {
-  //                     downloadData.push({"filePath":this.ediid+selData.data['resFilePath'], 'downloadURL':selData.data['downloadURL']});
+  //                     downloadData.push({"filePath":this.ediid+selData.data['resFilePath'], 'downloadUrl':selData.data['downloadUrl']});
   //                 }
   //             }
   //         }
@@ -487,7 +487,7 @@ export class DatacartComponent implements OnInit, OnDestroy {
   //     //     if (selData.data['filePath'].split(".").length > 1) {
   //     //       //folderName = selData.data['resId'].split("/")[2] + "-" + selData.data['resTitle'].substring(0, 20);
   //     //       params = params.append('folderName', folderName);
-  //     //       params = params.append('downloadURL', selData.data['downloadURL']);
+  //     //       params = params.append('downloadUrl', selData.data['downloadUrl']);
   //     //       params = params.append('fileName', selData.data['resId'] + selData.data['fileName']);
   //     //       params = params.append('filePath', selData.data['filePath']);
   //     //       params = params.append('resFilePath', selData.data['resFilePath']);
@@ -806,7 +806,7 @@ export class DatacartComponent implements OnInit, OnDestroy {
                   fields.data.cartId,
                   resId, ediid,
                   fpath[path],
-                  fields.data.downloadURL,
+                  fields.data.downloadUrl,
                   fields.data.filePath,
                   fields.data.downloadStatus,
                   fields.data.mediatype,
@@ -874,7 +874,7 @@ export class DatacartComponent implements OnInit, OnDestroy {
   /**
    * Create data hierarchy for children
    */
-  createDataCartChildrenTree(path: string, cartId: string, resId: string, ediid: string, resTitle: string, downloadURL: string, resFilePath: string, downloadStatus: string, mediatype: string, description: string, filetype: string, isSelected: boolean) {
+  createDataCartChildrenTree(path: string, cartId: string, resId: string, ediid: string, resTitle: string, downloadUrl: string, resFilePath: string, downloadStatus: string, mediatype: string, description: string, filetype: string, isSelected: boolean) {
     let child1: TreeNode = {};
     child1 = {
       data: {
@@ -883,7 +883,7 @@ export class DatacartComponent implements OnInit, OnDestroy {
         'resId': resId,
         'ediid': ediid,
         'resTitle': resTitle,
-        'downloadURL': downloadURL,
+        'downloadUrl': downloadUrl,
         'resFilePath': resFilePath,
         'downloadStatus': downloadStatus,
         'mediatype': mediatype,

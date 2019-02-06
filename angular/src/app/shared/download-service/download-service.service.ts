@@ -39,33 +39,33 @@ export class DownloadService {
   /**
    * Calling end point 1 to get the bundle plan
    **/
-  getBundlePlan(url, params): Observable<any> {
-    // return this.http.post<Blob>(url, {responseType: 'blob', params: params});
-    // for testing
-    // return this.http.get('https://s3.amazonaws.com/nist-midas/1869/ddPCR%20Raw%20Data_Stein%20et%20al%20PLOSOne%202017.zip', {responseType: 'blob'});
+  getBundlePlan(url:string, body:any): Observable<any> {
+    const httpOptions = {
+      headers: new HttpHeaders({
+        'Content-Type':  'application/json'
+      })
+    };
 
-    // return this.testDataService.getBundlePlan();
-    return this.http.post(url, { responseType: 'blob', params: params });
-
-    // return this.http.get(url, {responseType: 'arraybuffer'}).map(res => res);
+    return this.http.post(url, body, httpOptions);
   }
-
-  // downloadFile(url){
-  //     let filename = decodeURI(url).replace(/^.*[\\\/]/, '');
-
-  //     this.getFile(url).subscribe(blob => {
-  //         this.saveToFileSystem(blob, filename);
-  //     },
-  //     error => console.log('Error downloading the file.'))
-  // }
 
   /**
   * Calling end point 2 to get the bundle
   **/
-  getBundle(url, params): Observable<any> {
+  getBundle(url, body): Observable<any> {
+    const httpOptions = {
+      headers: new HttpHeaders({
+        'Content-Type':  'application/json'
+      })
+    };
+    const req = new HttpRequest('POST', url, {
+      reportProgress: true, body: body, responseType: 'blob'
+    });
+
+    return this.http.request(req);
     // console.log("Bundle url: " + url);
     // return this.http.post(url, {responseType: 'blob', params: params});
-    return this.http.post<Blob>(url, {responseType: 'blob', params: params});
+    // return this.http.post<Blob>(url, {responseType: 'blob', params: params});
     // for testing
     // return this.testDataService.getBundle('https://s3.amazonaws.com/nist-midas/1858/20170213_PowderPlate2_Pad.zip', params);
   }
@@ -181,10 +181,10 @@ export class DownloadService {
         if (comp.data['filePath'] != null && comp.data['filePath'] != undefined) {
           if (comp.data['filePath'].split(".").length > 1) {
             existItem = downloadData.filter(item => item.filePath === comp.data['ediid'] + comp.data['filePath']
-              && item.downloadURL === comp.data['downloadURL']);
+              && item.downloadUrl === comp.data['downloadUrl']);
 
             if (existItem.length == 0) {
-              downloadData.push({ "filePath": comp.data['ediid'] + comp.data['filePath'], 'downloadURL': comp.data['downloadURL'] });
+              downloadData.push({ "filePath": comp.data['ediid'] + comp.data['filePath'], 'downloadUrl': comp.data['downloadUrl'] });
             }
           }
         }

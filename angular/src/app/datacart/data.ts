@@ -8,7 +8,7 @@ export interface Data {
   cartId: any;
   ediid: any;
   id: any;
-  downloadURL: any;
+  downloadUrl: any;
   resId: any;
   resTitle: any;
   resFilePath:any;
