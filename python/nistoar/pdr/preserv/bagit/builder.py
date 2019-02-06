@@ -3,7 +3,7 @@ Tools for building a NIST Preservation bags
 """
 from __future__ import print_function, absolute_import
 from __future__ import print_function, absolute_import
-import os, errno, logging, re, json, pkg_resources, textwrap, datetime
+import os, errno, logging, re, pkg_resources, textwrap, datetime
 import pynoid as noid
 from shutil import copy as filecopy, rmtree
 from copy import deepcopy
