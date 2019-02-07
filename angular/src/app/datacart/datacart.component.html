@@ -14,9 +14,25 @@
   }
 </script>
 
-
 <div style="width: 94%; margin-top: 2em; margin-left: 3%;">
-    <div *ngIf="!isPopup" class="title">Download Manager</div>
+    <table class="table">
+        <thead style="background-color:#1471AE; margin:0; color:white">
+          <tr>
+            <th scope="col">Task
+            </th>
+            <th scope="col">Status</th>
+            <th scope="col">message</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>{{currentTask}}</td>
+            <td>{{currentStatus}}</td>
+          </tr>
+        </tbody>
+      </table>
+      
+  <div *ngIf="!isPopup" class="title">Download Manager</div>
   <!-- <div *ngIf="bundlePlanStatus != 'complete' && bundlePlanMessage" style="display: inline-block;">
             <div style="display: inline-block;">
                 <i class="faa faa-warning" [ngStyle]="{'color':getColor(), 'padding-right':'.5em'}"></i>
@@ -115,89 +131,30 @@
     </tr>
   </table>
 </div>
-
-<!-- <div *ngIf="downloadStatusExpanded && displayDownloadFiles && zipData.length > 0" class="downloadStatusExpand">
-    <div *ngFor="let zip of zipData; let i =index" >
-        <div style="padding-left: 2%; width: 100%; display:flex;">
-                <span style="display:inline;">
-                        {{zip.fileName}} 
-                </span>
-                <div style="padding-left: .5em; display:flex;" *ngIf="zip.downloadStatus === 'downloading'">
-                    <div style="padding-left: .5em; flex: 0 0 auto;">
-                        <span style="display:inline;">    
-                            <p-progressSpinner [style]="{width: '12px', height: '12px'}" ></p-progressSpinner>
-                        </span>
-                    </div>
-                    <div style="padding-left: .5em; flex: 0 0 auto;">
-                        <span style="display:inline;font-size: 0.8em">
-                            {{zip.downloadProgress}}%
-                        </span>
-                    </div>
-                    <div style="padding-left: 2%; padding-top: 8px;width: 200px;flex: 0 0 auto;height: 2em;">
-                            <p-progressBar [value]="zip.downloadProgress" showValue="false"></p-progressBar>
-                    </div>
-                    <div style="padding-left:5px; flex: 0 0 auto;">
-                            <span (click)="cancelDownloadZip(zip)" style="cursor: pointer;"><i class="faa faa-remove"></i></span>
-                    </div>
-                </div>
-                <div style="padding-left: 2%; width: 200px;flex: 0 0 auto;" *ngIf="zip.downloadStatus === 'downloaded'">  
-                        <i class="faa faa-check"></i> Downloaded
-                </div>         
-                <div style="padding-left: 2%; width: 200px;flex: 0 0 auto;" *ngIf="zip.downloadStatus === 'cancelled'">  
-                        <i class="faa faa-remove"></i> Cancelled
-                </div>     
-                <div style="padding-left: 2%; flex: 0 0 auto;" *ngIf="zip.downloadStatus === 'downloadError'">  
-                        <span style="display:inline;font-size: 0.8em; color: red">
-                                {{zip.downloadErrorMessage}}
-                        </span>
-                </div>            
-            </div>
-    </div>
-</div> -->
-
-
-
-
-<!-- <div class="ui-g-12 ui-md-6" style="align-content: right; padding-left: -1%; padding-right: 1em; margin-top: 1em; width: 100%;"> -->
 <div style="padding-left: 3%; padding-right: 3%; width: 100%;margin-bottom:0.5em;text-align: right;">
-  <!-- <div style="padding-left: -1%; padding-right: 1em; margin-top: 1em; width: 100%;"> -->
-
   <button type="button" (click)="downloadAllFilesFromAPI()" pButton type="submit" [ngStyle]="{'margin-right':'1em','width':'max-content','background-color':getButtonColor()}"
     [disabled]="selectedFileCount==0">
     <i class="faa faa-download faa-1x icon-white" style="color: #fff;"></i>
     Download Selected
-    <span class="badge badge-pill" [ngStyle]="{'background-color':'white','color':getButtonColor()}">{{selectedFileCount}}</span>
+    <span class="w3-circle button-badge" [ngStyle]="{'color':getButtonColor()}">&nbsp;{{selectedFileCount}}&nbsp;</span>
   </button>
 
   <button type="button" (click)="removeByDownloadStatus()" pButton type="submit" style="margin-right:1em;width:max-content; background-color:grey;"
     [disabled]="noFileDownloaded">
     <i class="faa faa-trash faa-1x icon-white" style="color: #fff;"></i>
     Remove downloaded
-    <span class="badge badge-pill" [ngStyle]="{'color':getDownloadedColor(), 'background-color':getDownloadedBkColor()}">{{totalDownloaded}}</span>
+    <span class="w3-circle button-badge" [ngStyle]="{'color':getDownloadedColor(),'background-color':getDownloadedBkColor()}">&nbsp;{{totalDownloaded}}&nbsp;</span>
+    <!-- <span class="badge badge-pill" [ngStyle]="{'color':getDownloadedColor(), 'background-color':getDownloadedBkColor()}">{{totalDownloaded}}</span> -->
   </button>
 
   <button type="button" (click)="removeByDataId()" pButton type="submit" style="width:max-content; background-color:grey;"
     [disabled]="selectedFileCount==0">
     <i class="faa faa-trash faa-1x icon-white" style="color: #fff;"></i>
     Remove selected
-    <span class="badge badge-pill" style="color:grey; background-color:white;">{{selectedFileCount}}</span>
+    <span class="w3-circle button-badge" [ngStyle]="{'color':'grey'}">&nbsp;{{selectedFileCount}}&nbsp;</span>
+    <!-- <span class="badge badge-pill" style="color:grey; background-color:white;">{{selectedFileCount}}</span> -->
   </button>
-
-
-  <!-- <span *ngIf="displayDownloadFiles"  style="display:inline;">
-        <span *ngIf="!downloadStatusExpanded">
-            <i (click)="downloadStatusExpanded = !downloadStatusExpanded" class="faa faa-arrow-circle-down faa-1x icon-white" style="cursor: pointer;color: rgb(0, 119, 255);" pTooltip="Expand Zip Display"></i>
-        </span>    
-        <span *ngIf="downloadStatusExpanded">
-                <i (click)="downloadStatusExpanded = !downloadStatusExpanded" class="faa faa-arrow-circle-up faa-1x icon-white" style="cursor: pointer;color: rgb(0, 119, 255);" pTooltip="Collapse Zip Display"></i>
-        </span>    
-    </span> -->
 </div>
-<!-- 
-<div style="visibility: hidden">
-        Seems there is a bug with PrimeNg class="ui-g-12 ui-md-12" that have to add this hidden div to enable all buttons.
-</div> -->
-
 <div>
   <!-- <p-treeTable *ngIf="isVisible" [resizableColumns]="true" selectionMode="checkbox" [value]="dataFiles" (onNodeSelect) = "dataFileCount()" (onNodeUnselect) = "dataFileCount()" [(selection)]="selectedData" [scrollable]="true" scrollHeight="600px" [style]="{ 'padding-left':'3%','padding-right':'3%','padding-bottom':'3%', 'color':'#000'}"> -->
   <p-treeTable *ngIf="isVisible" [resizableColumns]="true" selectionMode="checkbox" [value]="dataFiles" (onNodeSelect)="dataFileCount()"

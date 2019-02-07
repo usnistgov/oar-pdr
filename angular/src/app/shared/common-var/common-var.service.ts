@@ -15,6 +15,7 @@ export class CommonVarService {
   private download_maximum: number = 2;
 
   processingSub = new BehaviorSubject<boolean>(false);
+  localProcessingSub = new BehaviorSubject<boolean>(false);
   showDatacartSub = new BehaviorSubject<boolean>(false);
 
   constructor() { }
@@ -63,6 +64,20 @@ export class CommonVarService {
   **/
   watchProcessing(): Observable<any> {
     return this.processingSub.asObservable();
+  }
+
+  /**
+   * Set processing flag
+   **/
+  setLocalProcessing(value: boolean) {
+    this.localProcessingSub.next(value);
+  }
+
+  /**
+  * Watching processing flag
+  **/
+  watchLocalProcessing(): Observable<any> {
+    return this.localProcessingSub.asObservable();
   }
 
   /**

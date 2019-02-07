@@ -37,52 +37,51 @@
   </div>
 </div>
 
-<!-- <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-  <div class="mr-auto order-0">
-    <a class="navbar-brand" href="/" title="National Institute of Standards and Technology" class="header__logo-link" rel="home">
-      <img class="Fleft" 
-        srcset="./assets/images/nist-pdr-small.png 780w,
-                ./assets/images/nist-pdr-rev.png 1920w" 
-        src="./assets/images/nist-pdr-rev.png"
-        alt="National Institute of Standards and Technology"
-        title="National Institute of Standards and Technology" >
-    <span class="badge navbar-brand" style="background-color:#8f3919; color:white">1.1.0-beta</span>
-  </a>
-  </div>
+<!-- <div class="bootstrap-iso">
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="mr-auto order-0">
+      <a class="navbar-brand" href="/" title="National Institute of Standards and Technology" class="header__logo-link"
+        rel="home">
+        <img class="Fleft" srcset="./assets/images/nist-pdr-small.png 780w,
+                ./assets/images/nist-pdr-rev.png 1920w"
+          src="./assets/images/nist-pdr-rev.png" alt="National Institute of Standards and Technology" title="National Institute of Standards and Technology">
+        <span class="badge navbar-brand" style="background-color:#8f3919; color:white">1.1.0-beta</span>
+      </a>
+    </div>
 
-  <button class="navbar-toggler" type="button"
-          (click)="toggleNavbar()">
-    <span class="navbar-toggler-icon"></span>
-  </button>
+    <button class="navbar-toggler" type="button" (click)="toggleNavbar()">
+      <span class="navbar-toggler-icon"></span>
+    </button>
 
 
-  <div class="collapse navbar-collapse"
-       [ngClass]="{ 'show': navbarOpen }">
-    <ul class="navbar-nav ml-auto">
-      <li class="nav-item" (click)="goHome()" style="cursor: pointer;">
-        <a class="nav-link" [routerLink]="['od/id/']" [queryParams]="{id: 'ediid'}">Home</a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" routerLink="pdr/about" target="_blank">About</a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" routerLink="{{ SDPAPI }}" target="_blank">Search</a>
-      </li>
-      <li ngbDropdown  class="nav-item dropdown" >
-        <a ngbDropdownToggle class="nav-link dropdown-toggle"  href="#" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-          Account
-        </a>
-        <div ngbDropdownMenu  class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-          <a class="dropdown-item" href="#">Sign in</a>
-          <a class="dropdown-item" href="#">User Admin</a>
-          <a class="dropdown-item" href="#">My Landing Pages</a>
-        </div>
-      </li>
-      <li class="nav-item">
-          <a routerLink="/datacart" target="_blank" (click) = "updateCartStatus()" ><span class="textlinks"><b>Cart </b></span>
+    <div class="collapse navbar-collapse" [ngClass]="{ 'show': navbarOpen }">
+      <ul class="navbar-nav ml-auto">
+        <li class="nav-item" (click)="goHome()" style="cursor: pointer;">
+          <a class="nav-link" [routerLink]="['od/id/']" [queryParams]="{id: 'ediid'}">Home</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" routerLink="pdr/about" target="_blank">About</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" routerLink="{{ SDPAPI }}" target="_blank">Search</a>
+        </li>
+        <li ngbDropdown class="nav-item dropdown">
+          <a ngbDropdownToggle class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown"
+            aria-haspopup="true" aria-expanded="false">
+            Account
+          </a>
+          <div ngbDropdownMenu class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+            <a class="dropdown-item" href="#">Sign in</a>
+            <a class="dropdown-item" href="#">User Admin</a>
+            <a class="dropdown-item" href="#">My Landing Pages</a>
+          </div>
+        </li>
+        <li class="nav-item">
+          <a routerLink="/datacart" target="_blank" (click)="updateCartStatus()"><span class="textlinks"><b>Cart </b></span>
             <i class="faa faa-shopping-cart faa-2x icon-white" style="color: #fff;"></i>
-            <span class="badge badge-pill badge-notify" >{{cartLength}}</span></a>
-      </li>
-    </ul>
-  </div>
-</nav> -->
+            <span class="badge badge-pill badge-notify">{{cartLength}}</span></a>
+        </li>
+      </ul>
+    </div>
+  </nav>
+</div> -->

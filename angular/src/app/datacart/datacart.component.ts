@@ -117,6 +117,8 @@ export class DatacartComponent implements OnInit, OnDestroy {
   confValues: Config;
   distApi: string;
   isPopup: boolean = false;
+  currentTask: string = '';
+  currentStatus: string = '';
 
   // private distApi: string = environment.DISTAPI;
   //private distApi:string = "http://localhost:8083/oar-dist-service";
@@ -193,6 +195,8 @@ export class DatacartComponent implements OnInit, OnDestroy {
   * Loaing datacart
   */
   loadDatacart(){
+    this.currentTask = "Loading Datacart";
+    this.currentStatus = "Loading...";
     this.selectedData = [];
     this.createDataCartHierarchy();
     this.display = true;
@@ -210,7 +214,7 @@ export class DatacartComponent implements OnInit, OnDestroy {
     this.expandToLevel(this.dataFiles, true, 1);
     this.checkNode(this.dataFiles);
     this.dataFileCount();
-
+    this.currentStatus = "Completed.";
     // if (this.cartEntities.length > 0) {
       // var element = <HTMLInputElement> document.getElementById("downloadStatus");
       // element.disabled = false;
@@ -315,7 +319,8 @@ export class DatacartComponent implements OnInit, OnDestroy {
     this.cancelAllDownload = false;
     this.downloadStatus = 'downloading';
     this.downloadService.setDownloadProcessStatus(false, "datacard");
-
+    this.currentTask = "Get bundle plan";
+    this.currentStatus = "Waiting for server response...";
     // create root
     const newPart = {
       data: {
@@ -344,6 +349,7 @@ export class DatacartComponent implements OnInit, OnDestroy {
       blob => {
         console.log("Bundle plan return:");
         console.log(blob);
+        this.currentStatus = "Bundle plan received.";
         this.processBundle(blob, zipFileBaseName, files);
       },
       err => {
@@ -355,6 +361,9 @@ export class DatacartComponent implements OnInit, OnDestroy {
   }
 
   processBundle(res: any, zipFileBaseName: any, files: any) {
+    this.currentTask = "Process Each Bundle";
+    this.currentStatus = "Processing...";
+
     this.bundlePlanStatus = res.status.toLowerCase();
     this.messageColor = this.getColor();
     this.bundlePlanUnhandledFiles = res.notIncluded;

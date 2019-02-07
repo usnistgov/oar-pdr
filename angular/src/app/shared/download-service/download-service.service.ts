@@ -58,11 +58,14 @@ export class DownloadService {
         'Content-Type':  'application/json'
       })
     };
-    const req = new HttpRequest('POST', url, {
-      reportProgress: true, body: body, responseType: 'blob'
-    });
 
-    return this.http.request(req);
+    return this.http.post(url, body, httpOptions);
+
+    // const req = new HttpRequest('POST', url, body, {
+    //   reportProgress: true, responseType: 'blob'
+    // });
+
+    // return this.http.request(req);
     // console.log("Bundle url: " + url);
     // return this.http.post(url, {responseType: 'blob', params: params});
     // return this.http.post<Blob>(url, {responseType: 'blob', params: params});
@@ -110,7 +113,7 @@ export class DownloadService {
     //     nextZip.downloadInstance = this.downloadService.postFile(this.distApi + "_bundle", JSON.stringify(zipdata.bundle)).subscribe(event => {
 
     // nextZip.downloadInstance = this.http.request(req).subscribe(
-    nextZip.downloadInstance = this.getBundle(nextZip.downloadUrl, nextZip.bundle).subscribe(
+    nextZip.downloadInstance = this.getBundle(nextZip.downloadUrl, JSON.stringify(nextZip.bundle)).subscribe(
       event => {
         // const blob = new Blob([event.body], { type: 'octet/stream' });
         // console.log("event.body");

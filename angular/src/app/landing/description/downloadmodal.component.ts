@@ -4,6 +4,7 @@ import { CommonVarService } from '../../shared/common-var';
 import { DatacartComponent } from '../../datacart/datacart.component';
 import { ViewChild, ElementRef } from '@angular/core';
 import { DownloadService } from '../../shared/download-service/download-service.service';
+import { CartService } from '../../datacart/cart.service';
 
 @Component({
   selector: 'ngbd-modal-download-manager',
@@ -17,6 +18,7 @@ export class NgbdModalDownloadManager implements OnInit {
   @ViewChild('content') contentRef: ElementRef;
 
   constructor(private modalService: NgbModal,
+    private cartService: CartService,
     public modal: NgbModal,
     public activeModal: NgbActiveModal,
     private downloadService: DownloadService,
@@ -52,6 +54,7 @@ export class NgbdModalDownloadManager implements OnInit {
   }
 
   close(){
+    this.cartService.setCurrentCart('cart');
     this.modalReference.close();
   }
 

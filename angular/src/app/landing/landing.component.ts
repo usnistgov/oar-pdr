@@ -128,6 +128,7 @@ export class LandingComponent implements OnInit {
   confValues: Config;
   isProcessing: boolean = false;
   displayDatacart: boolean = false;
+  isLocalProcessing: boolean = false;
 
   /**
    * Creates an instance of the SearchPanel
@@ -151,6 +152,11 @@ export class LandingComponent implements OnInit {
     this.commonVarService.watchProcessing().subscribe(
       value => {
         this.isProcessing = value;
+      }
+    );
+    this.commonVarService.watchLocalProcessing().subscribe(
+      value => {
+        this.isLocalProcessing = value;
       }
     );
     this.commonVarService.watchShowDatacart().subscribe(

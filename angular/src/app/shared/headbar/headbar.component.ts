@@ -62,6 +62,7 @@ export class HeadbarComponent {
   {
     this.downloadService.setIsPopupFlag(false);
     this.cartService.updateCartDisplayStatus(true);
+    this.cartService.setCurrentCart('cart');
   }
 
 }

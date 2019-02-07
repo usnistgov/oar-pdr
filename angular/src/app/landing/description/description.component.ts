@@ -60,7 +60,7 @@ export class DescriptionComponent {
   totalFiles: any;
   downloadData: DownloadData[];
   zipData: ZipData[] = [];
-  isExpanded: boolean = true;
+  isExpanded: boolean = false;
   visible: boolean = true;
   cancelAllDownload: boolean = false;
   cartLength: number;
@@ -79,6 +79,7 @@ export class DescriptionComponent {
   noFileDownloaded: boolean; // will be true if any item in data cart is downloaded
   distApi: string;
   confValues: Config;
+  isLocalProcessing: boolean;
 
   // private distApi: string = this.confValues.DISTAPI;
   // private distApi : string = "";
@@ -108,6 +109,9 @@ export class DescriptionComponent {
     // this.cartService.clearTheCart();
     // this.cdr.detectChanges();
     this.distApi = this.confValues.DISTAPI;
+    // console.log("this.distApi");
+    // console.log(this.distApi);
+
     this.commonVarService.setShowDatacart(false);
 
     if (this.files.length != 0)
@@ -147,13 +151,12 @@ export class DescriptionComponent {
     this.updateStatusFromCart();
 
     // this.updateCartStatus(this.files);
-    this.updateAllSelectStatus(this.files);
+    this.allSelected = this.updateAllSelectStatus(this.files);
+
     this.downloadStatus = this.updateDownloadStatus(this.files) ? "downloaded" : null;
 
     this.totalFiles = 0;
     this.getTotalFiles(this.files);
-
-    this.expandToLevel(this.files, true, 2);
 
     this.downloadService.watchDownloadProcessStatus("landingPage").subscribe(
       value => {
@@ -169,8 +172,9 @@ export class DescriptionComponent {
         this.noFileDownloaded = !value;
       }
     );
-    //   console.log("this.downloadStatus:");
-    //   console.log(this.downloadStatus);
+
+    console.log("this.files:");
+    console.log(this.files);
   }
 
   expandToLevel(dataFiles: any, option: boolean, targetLevel: any) {
@@ -402,22 +406,48 @@ export class DescriptionComponent {
   }
 
   /**
+  * Function to add/remove all files to/from data cart.
+  **/
+  cartProcess(files: any) {
+    this.isLocalProcessing = true;
+
+    setTimeout(() => {
+      if (this.allSelected) {
+        this.removeFilesFromCart(files).then(function (result1: any) {
+          this.isLocalProcessing = false;
+        }.bind(this), function (err) {
+          alert("something went wrong while removing file from data cart.");
+        });
+      }
+      else {
+        this.addAllFilesToCart(files, false).then(function (result1: any) {
+          this.isLocalProcessing = false;
+        }.bind(this), function (err) {
+          alert("something went wrong while adding file to data cart.");
+        });
+      }
+    }, 0);
+
+    setTimeout(() => {
+      this.isLocalProcessing = false;
+    }, 10000);
+  }
+
+  /**
   * Function to add all files to data cart.
   **/
   addAllFilesToCart(files: any, isSelected: boolean) {
     this.cartService.deselectAll().then(function (result1: any) {
-      this.addFilesToCart(files, isSelected).then(function (result2:any) {
-        console.log("setForceDatacartReload");
+      this.addFilesToCart(files, isSelected).then(function (result2: any) {
         this.cartService.setForceDatacartReload(true);
+        this.allSelected = true;
+        this.updateAllSelectStatus(this.files);
       }.bind(this), function (err) {
         alert("something went wrong while adding one file to data cart.");
       });
     }.bind(this), function (err) {
       alert("something went wrong while cleaning up data cart select flag.");
     });
-
-    this.allSelected = true;
-    this.updateAllSelectStatus(this.files);
     return Promise.resolve(files);
   }
 
@@ -506,6 +536,7 @@ export class DescriptionComponent {
     this.removeFromCart(files);
     this.allSelected = true;
     this.updateAllSelectStatus(this.files);
+    return Promise.resolve(files);
   }
 
   removeFromCart(files: any) {
@@ -534,7 +565,6 @@ export class DescriptionComponent {
         }
       }
     }
-
     return allSelected;
   }
 
@@ -685,8 +715,10 @@ export class DescriptionComponent {
       header: header,
       key: key,
       accept: () => {
-        this.cancelAllDownload = false;
-        this.downloadFromRoot();
+        setTimeout(() => {
+          this.cancelAllDownload = false;
+          this.downloadFromRoot();
+        }, 0);
         // this.downloadAllFilesFromAPI(this.treeRoot[0]);
       },
       reject: () => {
@@ -696,12 +728,20 @@ export class DescriptionComponent {
 
   downloadFromRoot() {
     // this.downloadAllFilesFromAPI(this.treeRoot[0]);
-    this.addAllFilesToCart(this.files, true).then(function (result) {
-      this.commonVarService.setShowDatacart(true);
-    }.bind(this), function (err) {
-      alert("something went wrong while adding all files to cart");
-    });
+    this.cartService.setCurrentCart('landing_popup');
+    this.commonVarService.setLocalProcessing(true);
+    setTimeout(() => {
+      this.addAllFilesToCart(this.files, true).then(function (result) {
+        this.commonVarService.setLocalProcessing(false);
+        this.commonVarService.setShowDatacart(true);
+      }.bind(this), function (err) {
+        alert("something went wrong while adding all files to cart");
+      });
+    }, 0);
 
+    setTimeout(() => {
+      this.commonVarService.setLocalProcessing(false);
+    }, 10000);
   }
 
   /**
@@ -883,5 +923,26 @@ export class DescriptionComponent {
     } else {
       return "black";
     }
+  }
+
+  getDownloadAllBtnColor() {
+    if (this.downloadStatus == null)
+      return '#1E6BA1';
+    else if (this.downloadStatus == 'downloaded')
+      return 'green';
+  }
+
+  getAddAllToDataCartBtnColor() {
+    if (this.allSelected)
+      return 'green';
+    else
+      return '#1E6BA1';
+  }
+
+  getCartProcessTooltip() {
+    if (this.allSelected)
+      return 'Remove all from cart';
+    else
+      return 'Add all to cart';
   }
 }

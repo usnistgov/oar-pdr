@@ -31,6 +31,7 @@ export class CartService {
   showAddAllCartSpinner: boolean = false;
   displayCart: boolean = false;
   private _storage = localStorage;
+  currentCart: string = 'cart';
 
   constructor(private http: HttpClient) {
     this.initCart();
@@ -60,7 +61,7 @@ export class CartService {
   initCart() {
 
     // if we dont have  any cart history, create a empty cart
-    if (!this._storage.getItem('cart')) {
+    if (!this._storage.getItem(this.currentCart)) {
 
       let emptyMap: { [key: string]: number; } = {};
       this.setCart(emptyMap);
@@ -274,7 +275,7 @@ export class CartService {
    * Will persist the product to local storage
    **/
   deselectAll() {
-    if (!this._storage.getItem('cart')) {
+    if (!this._storage.getItem(this.currentCart)) {
       let emptyMap: { [key: string]: number; } = {};
 
       this.setCart(emptyMap);
@@ -302,7 +303,7 @@ export class CartService {
     // product id , quantity
     let cartMap = this.getCart();
     // if we dont have  any cart history, create a empty cart
-    if (!this._storage.getItem('cart')) {
+    if (!this._storage.getItem(this.currentCart)) {
       let emptyMap: { [key: string]: number; } = {};
 
       this.setCart(emptyMap);
@@ -366,7 +367,7 @@ export class CartService {
    * Retrieve the cart from local storage
    **/
   getCart() {
-    let cartAsString = this._storage.getItem('cart');
+    let cartAsString = this._storage.getItem(this.currentCart);
 
     return JSON.parse(cartAsString);
   }
@@ -375,7 +376,7 @@ export class CartService {
    * Persists the cart to local storage
    **/
   private setCart(cartMap): void {
-    this._storage.setItem('cart', JSON.stringify(cartMap));
+    this._storage.setItem(this.currentCart, JSON.stringify(cartMap));
     //this.storageSub.next(true);
   }
 
@@ -421,5 +422,12 @@ export class CartService {
       }
     }
     return false;
+  }
+
+  /**
+  * Function to set current data cart.
+  **/
+  setCurrentCart(cart: string){
+    this.currentCart = cart;
   }
 }
