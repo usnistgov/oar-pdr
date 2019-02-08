@@ -119,6 +119,7 @@ export class DatacartComponent implements OnInit, OnDestroy {
   isPopup: boolean = false;
   currentTask: string = '';
   currentStatus: string = '';
+  showCurrentTask: boolean = false;
 
   // private distApi: string = environment.DISTAPI;
   //private distApi:string = "http://localhost:8083/oar-dist-service";
@@ -158,7 +159,11 @@ export class DatacartComponent implements OnInit, OnDestroy {
     this.cartService.watchCartEntitesReady().subscribe(
       value => {
         if (value) {
-          this.loadDatacart();
+          this.loadDatacart().then(function (result) {
+            this.showCurrentTask = false;
+          }.bind(this), function (err) {
+            alert("something went wrong while loading datacart.");
+          });
         }
       }
     );
@@ -166,6 +171,7 @@ export class DatacartComponent implements OnInit, OnDestroy {
     this.downloadService.watchDownloadProcessStatus("datacard").subscribe(
       value => {
         this.allProcessed = value;
+        this.showCurrentTask = false;
         // this.updateDownloadStatus(this.files);
       }
     );
@@ -195,6 +201,7 @@ export class DatacartComponent implements OnInit, OnDestroy {
   * Loaing datacart
   */
   loadDatacart(){
+    this.showCurrentTask = true;
     this.currentTask = "Loading Datacart";
     this.currentStatus = "Loading...";
     this.selectedData = [];
@@ -214,40 +221,26 @@ export class DatacartComponent implements OnInit, OnDestroy {
     this.expandToLevel(this.dataFiles, true, 1);
     this.checkNode(this.dataFiles);
     this.dataFileCount();
-    this.currentStatus = "Completed.";
-    // if (this.cartEntities.length > 0) {
-      // var element = <HTMLInputElement> document.getElementById("downloadStatus");
-      // element.disabled = false;
-    // } else {
-      //var element = <HTMLInputElement> document.getElementById("downloadStatus");
-      //element.disabled = true;
-    // }
+    return Promise.resolve(this.dataFiles);
   }
 
-
+  /*
+  * Taggle zip file display
+  */
   showHideZipFiles() {
     this.showZipFilesNmaes = !this.showZipFilesNmaes;
   }
 
-  // expandAll(dataFiles: any, level: any){
-  //     let currentLevel = level + 1;
-  //     for ( let i=0; i < dataFiles.length;i++) {
-  //         dataFiles[i].expanded = true;
-  //         if(dataFiles[i].children.length > 0 && currentLevel < 1){
-  //             this.expandAll(dataFiles[i].children, currentLevel);
-  //         }
-  //     }
-
-  //     this.isVisible = false;
-  //     setTimeout(() => {
-  //         this.isVisible = true;
-  //     },0);
-  // }
-
+  /*
+  * Expand the tree to a level
+  */
   expandToLevel(dataFiles: any, option: boolean, targetLevel: any) {
     this.expandAll(dataFiles, option, 0, targetLevel)
   }
 
+  /*
+  * Expand the tree to a level - detail
+  */
   expandAll(dataFiles: any, option: boolean, level: any, targetLevel: any) {
     let currentLevel = level + 1;
 
@@ -312,6 +305,7 @@ export class DatacartComponent implements OnInit, OnDestroy {
       * Function to download all files from API call.
       **/
   downloadAllFilesFromAPI() {
+    this.showCurrentTask = true;
     let postMessage: any[] = [];
     this.downloadData = [];
     this.zipData = [];
@@ -349,7 +343,7 @@ export class DatacartComponent implements OnInit, OnDestroy {
       blob => {
         console.log("Bundle plan return:");
         console.log(blob);
-        this.currentStatus = "Bundle plan received.";
+        this.showCurrentTask = false;
         this.processBundle(blob, zipFileBaseName, files);
       },
       err => {
@@ -361,6 +355,7 @@ export class DatacartComponent implements OnInit, OnDestroy {
   }
 
   processBundle(res: any, zipFileBaseName: any, files: any) {
+    this.showCurrentTask = true;
     this.currentTask = "Process Each Bundle";
     this.currentStatus = "Processing...";
 
@@ -392,16 +387,13 @@ export class DatacartComponent implements OnInit, OnDestroy {
     // Start downloading the first one, this will set the downloaded zip file to 1
     this.subscriptions.push(this.downloadService.watchDownloadingNumber("datacard").subscribe(
       value => {
-        if (!this.cancelAllDownload) {
-          this.downloadService.downloadNextZip(this.zipData, this.treeRoot[0], "datacard");
-          // files.data.downloadProgress = Math.round(100*this.downloadService.getDownloadedNumber(this.zipData) / this.zipData.length);
-          // if(this.downloadService.allDownloadFinished(this.zipData)){
-          //     files.data.downloadStatus = 'downloaded';
-          //     this.downloadStatus = 'downloaded';
-          // }
+        if(value > 0){
+          if (!this.cancelAllDownload) {
+            this.downloadService.downloadNextZip(this.zipData, this.treeRoot[0], "datacard");
+          }
+        }else{
+          this.showCurrentTask = false;
         }
-
-        // this.updateDownloadStatus(this.files);
       }
     ));
   }

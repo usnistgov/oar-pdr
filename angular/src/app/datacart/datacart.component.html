@@ -14,41 +14,40 @@
   }
 </script>
 
+<div *ngIf="showCurrentTask" style="width: 94%; margin-top: 2em; margin-left: 3%;">
+  <i class="faa faa-spinner faa-spin" style="color:#1E6BA1" aria-hidden="true"></i>
+  {{currentTask}} - {{currentStatus}}
+</div>
+
 <div style="width: 94%; margin-top: 2em; margin-left: 3%;">
+  <!-- <div class="col-md-12" style="line-height: 0.5">
     <table class="table">
-        <thead style="background-color:#1471AE; margin:0; color:white">
-          <tr>
-            <th scope="col">Task
-            </th>
-            <th scope="col">Status</th>
-            <th scope="col">message</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>{{currentTask}}</td>
-            <td>{{currentStatus}}</td>
-          </tr>
-        </tbody>
-      </table>
-      
+      <thead style="background-color:#1471AE; margin:0; color:white">
+        <tr>
+          <th scope="col">Task
+          </th>
+          <th scope="col">Status</th>
+          <th scope="col">message</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>{{currentTask}}</td>
+          <td>{{currentStatus}}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div> -->
+
   <div *ngIf="!isPopup" class="title">Download Manager</div>
-  <!-- <div *ngIf="bundlePlanStatus != 'complete' && bundlePlanMessage" style="display: inline-block;">
-            <div style="display: inline-block;">
-                <i class="faa faa-warning" [ngStyle]="{'color':getColor(), 'padding-right':'.5em'}"></i>
-            </div>
-            <div *ngFor="let msg of bundlePlanMessage; let i =index" style="display: inline-block;">
-                <span [ngStyle]="{'color':getColor(), 'padding-right':'.5em'}">{{msg}}</span>
-            </div>
-    </div> -->
   <div *ngIf="bundlePlanStatus != 'complete' && bundlePlanMessage" style="text-align: left;">
     <i class="faa faa-warning" [ngStyle]="{'color':messageColor, 'padding-right':'.5em'}"></i>
     <span [ngStyle]="{'color':getColor(), 'padding-right':'.5em'}">Http responsed with warning. </span>
     <span (click)="showMessageBlock = !showMessageBlock">
       <i *ngIf="!showMessageBlock" class="faa faa-arrow-circle-down" [ngStyle]="{'color':messageColor,'cursor':'pointer'}"
-        pTooltip="Show details"></i>
+        data-toggle="tooltip" title="Show details"></i>
       <i *ngIf="showMessageBlock" class="faa faa-arrow-circle-up faa-1x icon-white" [ngStyle]="{'color':messageColor,'cursor':'pointer'}"
-        pTooltip="Hide details"></i>
+        data-toggle="tooltip" title="Hide details"></i>
     </span>
   </div>
 </div>
@@ -57,13 +56,13 @@
     {{msg}}
   </li>
   <table *ngIf="bundlePlanUnhandledFiles" style="width: 100%;">
-    <tr style="background-color:darkorange; margin:0; color:white" pTooltip="Unhandled Files">
+    <tr style="background-color:darkorange; margin:0; color:white" data-toggle="tooltip" title="Unhandled Files">
       <th style="width: 30%;padding-left:.5em;">
         <span *ngIf="bundlePlanUnhandledFiles" (click)="showUnhandledFiles = !showUnhandledFiles">
           <i *ngIf="!showUnhandledFiles" class="faa faa-arrow-circle-down faa-1x icon-white" style="cursor: pointer;color: rgb(255, 255, 255);"
-            pTooltip="Expand All"></i>
+            data-toggle="tooltip" title="Expand All"></i>
           <i *ngIf="showUnhandledFiles" class="faa faa-arrow-circle-up faa-1x icon-white" style="cursor: pointer;color: rgb(255, 255, 255);"
-            pTooltip="Collapse All"></i>
+            data-toggle="tooltip" title="Collapse All"></i>
         </span>
         File Path
       </th>
@@ -79,19 +78,19 @@
 </div>
 <div style="width: 94%;margin-left: 3%;margin-right: 3%;margin-bottom:1em;">
   <table *ngIf="zipData.length > 0" style="width: 100%;">
-    <tr style="background-color:green; margin:0; color:white" pTooltip="Unhandled Files">
+    <tr style="background-color:green; margin:0; color:white" data-toggle="tooltip" title="Unhandled Files">
       <th style="width: 50%;padding-left:.5em;">
         <span (click)="showZipFiles = !showZipFiles">
           <i *ngIf="!showZipFiles" class="faa faa-arrow-circle-down faa-1x icon-white" style="cursor: pointer;color: rgb(255, 255, 255);"
-            pTooltip="Expand All"></i>
+            data-toggle="tooltip" title="Expand All"></i>
           <i *ngIf="showZipFiles" class="faa faa-arrow-circle-up faa-1x icon-white" style="cursor: pointer;color: rgb(255, 255, 255);"
-            pTooltip="Collapse All"></i>
+            data-toggle="tooltip" title="Collapse All"></i>
         </span>
         Zip File Name
       </th>
       <th style="width: 50%;padding-left:.5em;">
         <i *ngIf="!allProcessed" class="faa faa-remove faa-1x icon-white" (click)="cancelDownloadAll()" style="cursor: pointer;color: rgb(255, 255, 255);padding-right:0.5em;"
-          pTooltip="Cancel Download"></i>
+          data-toggle="tooltip" title="Cancel Download"></i>
         Download Status
       </th>
     </tr>
@@ -164,15 +163,15 @@
         <th style=" background-color: #1E6BA1; width:60%; color:white" ttResizableColumn>
           <span (click)="expandToLevel(dataFiles, !isExpanded, null)" style="padding-right:0.5em;">
             <i *ngIf="!isExpanded" class="faa faa-arrow-circle-down faa-1x icon-white" style="cursor: pointer;color: rgb(255, 255, 255);"
-              pTooltip="Expand All"></i>
+              data-toggle="tooltip" title="Expand All"></i>
             <i *ngIf="isExpanded" class="faa faa-arrow-circle-up faa-1x icon-white" style="cursor: pointer;color: rgb(255, 255, 255);"
-              pTooltip="Collapse All"></i>
+              data-toggle="tooltip" title="Collapse All"></i>
           </span>
           <span (click)="showZipFilesNmaes = !showZipFilesNmaes" style="padding-right:0.5em;" *ngIf="zipData.length>0">
             <i *ngIf="!showZipFilesNmaes" class="faa faa-eye faa-1x icon-white" style="cursor: pointer;color: rgb(255, 255, 255);"
-              pTooltip="Show Zip Files"></i>
+              data-toggle="tooltip" title="Show Zip Files"></i>
             <i *ngIf="showZipFilesNmaes" class="faa faa-eye-slash faa-1x icon-white" style="cursor: pointer;color: rgb(255, 255, 255);"
-              pTooltip="Hide Zip Files"></i>
+              data-toggle="tooltip" title="Hide Zip Files"></i>
           </span>
           Name
         </th>
@@ -180,7 +179,7 @@
         <th style=" background-color: #1E6BA1; color:white; width:10%;" ttResizableColumn>Size</th>
         <th style=" background-color: #1E6BA1; color:white; width:20%;" ttResizableColumn>
           <i class="faa faa-recycle faa-1x icon-white" (click)="clearDownloadStatus()" style="cursor: pointer;color: rgb(255, 255, 255);padding-right:0.5em;"
-            pTooltip="Reset Download Status"></i>
+            data-toggle="tooltip" title="Reset Download Status"></i>
           Download Status
         </th>
       </tr>
