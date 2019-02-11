@@ -7,7 +7,7 @@ import { Component, Input, Pipe,PipeTransform } from '@angular/core';
      <div [hidden]="!metadata" class = "ui-g-12 ui-md-12 ui-lg-12 ui-sm-12" >
        <h3><b>Metadata</b></h3>
         <span style="">
-          For more information about the metadata consult <a href="/od/dm/nerdm/">NERDm documentation</a>. 
+          For more information about the metadata consult the <a href="/od/dm/nerdm/">NERDm documentation</a>. 
         </span>
         <button style="position:relative; float:right; background-color: #1371AE;" type="button" pButton icon="faa faa-file-code-o"
                 title="Get Metadata in JSON format." label="json" (click)="onjson()"></button>
