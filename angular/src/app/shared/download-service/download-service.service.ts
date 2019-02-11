@@ -7,7 +7,7 @@ import { ZipData } from './zipData';
 import { DownloadData } from './downloadData';
 import { CartService } from '../../datacart/cart.service';
 import { TestDataService } from '../../shared/testdata-service/testDataService';
-import * as FileSaver from 'file-saver';
+import { FileSaverService } from 'ngx-filesaver';
 
 declare var saveAs: any;
 
@@ -27,6 +27,7 @@ export class DownloadService {
   constructor(
     private http: HttpClient,
     private cartService: CartService,
+    private _FileSaverService: FileSaverService,
     private testDataService: TestDataService,
     private commonVarService: CommonVarService,
   ) { }
@@ -61,14 +62,6 @@ export class DownloadService {
 
     return this.http.post(url, body, httpOptions);
 
-    // const req = new HttpRequest('POST', url, body, {
-    //   reportProgress: true, responseType: 'blob'
-    // });
-
-    // return this.http.request(req);
-    // console.log("Bundle url: " + url);
-    // return this.http.post(url, {responseType: 'blob', params: params});
-    // return this.http.post<Blob>(url, {responseType: 'blob', params: params});
     // for testing
     // return this.testDataService.getBundle('https://s3.amazonaws.com/nist-midas/1858/20170213_PowderPlate2_Pad.zip', params);
   }
@@ -124,6 +117,7 @@ export class DownloadService {
         switch (event.type) {
           case HttpEventType.Response:
             // this.saveToFileSystem(event.body, nextZip.fileName);
+            this._FileSaverService.save(<any>event.body, nextZip.fileName);
             nextZip.downloadProgress = 0;
             nextZip.downloadStatus = 'downloaded';
             this.setDownloadingNumber(this.zipFilesDownloadingSub.getValue() - 1, whichPage);
