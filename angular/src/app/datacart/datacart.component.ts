@@ -26,6 +26,7 @@ import { OverlayPanel } from 'primeng/overlaypanel';
 import { AppConfig, Config } from '../shared/config-service/config.service';
 import { BootstrapOptions } from '@angular/core/src/application_ref';
 import { AsyncBooleanResultCallback } from 'async';
+import { FileSaverService } from 'ngx-filesaver';
 
 declare var Ultima: any;
 declare var saveAs: any;
@@ -120,6 +121,7 @@ export class DatacartComponent implements OnInit, OnDestroy {
   currentTask: string = '';
   currentStatus: string = '';
   showCurrentTask: boolean = false;
+  showMessage: boolean = true;
 
   // private distApi: string = environment.DISTAPI;
   //private distApi:string = "http://localhost:8083/oar-dist-service";
@@ -132,6 +134,7 @@ export class DatacartComponent implements OnInit, OnDestroy {
     private cartService: CartService,
     private downloadService: DownloadService,
     private appConfig: AppConfig, 
+    private _FileSaverService: FileSaverService,
     private commonVarService: CommonVarService) {
       this.getDataCartList("Init");
       this.display = true;
@@ -202,7 +205,7 @@ export class DatacartComponent implements OnInit, OnDestroy {
   */
   loadDatacart(){
     this.showCurrentTask = true;
-    this.currentTask = "Loading Datacart";
+    this.currentTask = "Loading Datacart...";
     this.currentStatus = "Loading...";
     this.selectedData = [];
     this.createDataCartHierarchy();
@@ -302,8 +305,8 @@ export class DatacartComponent implements OnInit, OnDestroy {
   }
 
   /**
-      * Function to download all files from API call.
-      **/
+  * Function to download all files from API call.
+  **/
   downloadAllFilesFromAPI() {
     this.showCurrentTask = true;
     let postMessage: any[] = [];
@@ -313,7 +316,7 @@ export class DatacartComponent implements OnInit, OnDestroy {
     this.cancelAllDownload = false;
     this.downloadStatus = 'downloading';
     this.downloadService.setDownloadProcessStatus(false, "datacard");
-    this.currentTask = "Get bundle plan";
+    this.currentTask = "Waiting for bundle plan...";
     this.currentStatus = "Waiting for server response...";
     // create root
     const newPart = {
@@ -354,9 +357,12 @@ export class DatacartComponent implements OnInit, OnDestroy {
     );
   }
 
+  /**
+  * Process data returned from bundle_plan
+  **/
   processBundle(res: any, zipFileBaseName: any, files: any) {
     this.showCurrentTask = true;
-    this.currentTask = "Process Each Bundle";
+    this.currentTask = "Processing Each Bundle...";
     this.currentStatus = "Processing...";
 
     this.bundlePlanStatus = res.status.toLowerCase();
@@ -398,6 +404,19 @@ export class DatacartComponent implements OnInit, OnDestroy {
     ));
   }
 
+  /**
+  * Download one particular zip
+  **/
+  downloadOneZip(zip: ZipData){
+    if (zip.downloadInstance != null) {
+      zip.downloadInstance.unsubscribe();
+    }
+    this.downloadService.download(zip, this.zipData, this.treeRoot[0], "datacard");
+  }
+
+  /**
+  * Cancell all download instances
+  **/
   cancelDownloadAll() {
     for (let zip of this.zipData) {
       if (zip.downloadInstance != null) {
@@ -413,8 +432,13 @@ export class DatacartComponent implements OnInit, OnDestroy {
     }
 
     this.resetDownloadParams();
+    this.showCurrentTask = false;
+    this.showMessageBlock = false;
   }
 
+  /**
+  * Reset download params
+  **/
   resetDownloadParams() {
     this.downloadService.setDownloadingNumber(0, "datacard");
     this.zipData = [];
@@ -427,6 +451,9 @@ export class DatacartComponent implements OnInit, OnDestroy {
     this.bundlePlanUnhandledFiles = null;
   }
 
+  /**
+  * Download one particular file
+  **/
   downloadOneFile(rowData: any) {
     let filename = decodeURI(rowData.downloadUrl).replace(/^.*[\\\/]/, '');
     rowData.downloadStatus = 'downloading';
@@ -439,7 +466,7 @@ export class DatacartComponent implements OnInit, OnDestroy {
     rowData.downloadInstance = this.http.request(req).subscribe(event => {
       switch (event.type) {
         case HttpEventType.Response:
-          this.downloadService.saveToFileSystem(event.body, filename);
+          this._FileSaverService.save(<any>event.body, filename);
           rowData.downloadStatus = 'downloaded';
           this.cartService.updateCartItemDownloadStatus(rowData.cartId, 'downloaded');
           this.downloadService.setFileDownloadedFlag(true);
@@ -450,153 +477,10 @@ export class DatacartComponent implements OnInit, OnDestroy {
       }
     })
   }
+ 
   /**
-   *  download zip file
-   */
-  // downloadZIP() {
-  //     let downloadUrl: string[];
-  //     let fileName: string[];
-  //     let params = new HttpParams();
-  //     let folderName: string;
-  //     this.showSpinner = true;
-  //     let downloadData: DownloadData[] = [];
-  //     let existItem: any;
-  //     this.displayDownloadFiles = true;
-  //     var i:number;
-
-  //     for ( i=0; i < this.dataFiles.length;i++) {
-  //         if (this.dataFiles[i].expanded == true) {
-  //             this.selectedParentIndex = i;
-  //         }
-  //     }
-
-  //     for (let selData of this.selectedData) {
-  //         if (selData.data['resFilePath'] != null && selData.data['resFilePath'] != undefined) {
-  //             if (selData.data['resFilePath'].split(".").length > 1) {
-  //                 existItem = downloadData.filter(item => item.filePath === this.ediid+selData.data['resFilePath'] 
-  //                     && item.downloadUrl === selData.data['downloadUrl']);
-
-  //                 if (existItem.length == 0) {
-  //                     downloadData.push({"filePath":this.ediid+selData.data['resFilePath'], 'downloadUrl':selData.data['downloadUrl']});
-  //                 }
-  //             }
-  //         }
-  //     }
-
-  //     // for (let selData of this.selectedData) {
-  //     //   if (selData.data['filePath'] != null) {
-  //     //     if (selData.data['filePath'].split(".").length > 1) {
-  //     //       //folderName = selData.data['resId'].split("/")[2] + "-" + selData.data['resTitle'].substring(0, 20);
-  //     //       params = params.append('folderName', folderName);
-  //     //       params = params.append('downloadUrl', selData.data['downloadUrl']);
-  //     //       params = params.append('fileName', selData.data['resId'] + selData.data['fileName']);
-  //     //       params = params.append('filePath', selData.data['filePath']);
-  //     //       params = params.append('resFilePath', selData.data['resFilePath']);
-  //     //       this.cartService.updateCartItemDownloadStatus(selData.data['resId'],true);
-  //     //     }
-  //     //   }
-  //     // }
-
-
-  //     // if(params.keys.length !== 0){
-  //     var randomnumber = Math.floor(Math.random() * (this.maximum - this.minimum + 1)) + this.minimum;
-
-  //     var downloadFileName = "download" + randomnumber + ".zip";
-  //     this["showDownloadFileSpinner"+randomnumber] = true;
-  //     this.displayFiles.push({key: downloadFileName, value: this["showDownloadFileSpinner"+randomnumber]});
-
-  //     const req = new HttpRequest('GET', 'https://s3.amazonaws.com/nist-midas/1858/RawCameraData.zip', {
-  //     reportProgress: true, responseType: 'blob'
-  //     });
-
-  //     this.downloadStatus = 'downloading';
-  //     this.downloadInstance = this.http.request(req).subscribe(event => {
-  //         switch (event.type) {
-  //             case HttpEventType.Response:
-  //                 this.downloadStatus = 'downloaded';
-  //                 this.downloadProgress = 0;
-  //                 this.downloadService.saveToFileSystem(event.body, downloadFileName);
-  //                 this.showSpinner = false;
-  //                 this["showDownloadFileSpinner"+randomnumber] = false;
-  //                 this.displayFiles.forEach(function(item) {
-  //                     if (item.key === downloadFileName) {
-  //                         item.value = this["showDownloadFileSpinner"+randomnumber];
-  //                     }
-  //                 },1000);
-
-  //                 for (let selData of this.selectedData) {
-  //                     if (selData.data['filePath'] != null) {
-  //                         //   if (selData.data['filePath'].split(".").length > 1) {
-  //                         if (selData.data.children == undefined) {
-  //                             this.cartService.updateCartItemDownloadStatus(selData.data['resId'],'downloaded');
-  //                         }
-  //                     }
-  //                 }
-
-  //                 this.updateCartEntries();
-  //                 //   this.cartService.getAllCartEntities().then(function (result) {
-  //                 //       this.cartEntities = result;
-  //                 //       this.createDataCartHierarchy();
-  //                 //       if (this.cartEntities.length > 0) {
-  //                 //           this.dataFiles[this.selectedParentIndex].expanded = true;
-  //                 //       }
-  //                 //   }.bind(this), function (err) {
-  //                 //       alert("something went wrong while creating the zip file");
-  //                 //   });
-
-  //                 this.selectedData.length = 0;
-  //                 this.dataFileCount();
-
-  //                 break;
-  //             case HttpEventType.DownloadProgress:
-  //                 this.downloadProgress = Math.round(100*event.loaded / event.total);
-  //                 break;
-  //         }
-  //     });
-  //     //   this.downloadService.postFile(this.distApi + "downloadall", JSON.stringify(downloadData)).subscribe(blob => {
-  //     //     this.downloadService.saveToFileSystem(blob, downloadFileName);
-  //     //       this.showSpinner = false;
-  //     //       this["showDownloadFileSpinner"+randomnumber] = false;
-  //     //       this.displayFiles.forEach(function(item) {
-  //     //           if (item.key === downloadFileName) {
-  //     //               item.value = this["showDownloadFileSpinner"+randomnumber];
-  //     //           }
-  //     //       },1000);
-  //     //   });
-
-  //     //   for (let selData of this.selectedData) {
-  //     //     if (selData.data['filePath'] != null) {
-  //     //         //   if (selData.data['filePath'].split(".").length > 1) {
-  //     //         if (selData.data.children == undefined) {
-  //     //               this.cartService.updateCartItemDownloadStatus(selData.data['resId'],'downloaded');
-  //     //         }
-  //     //       }
-  //     //   }
-
-  //     //   this.cartService.getAllCartEntities().then(function (result) {
-  //     //       this.cartEntities = result;
-  //     //       this.createDataCartHierarchy();
-  //     //       if (this.cartEntities.length > 0) {
-  //     //           this.dataFiles[this.selectedParentIndex].expanded = true;
-  //     //       }
-  //     //   }.bind(this), function (err) {
-  //     //       alert("something went wrong while creating the zip file");
-  //     //   });
-
-  //     //   this.selectedData.length = 0;
-  //     //   this.dataFileCount();
-  //     // }
-  // }
-
-  // cancelDownload(key){
-  //     this.downloadInstance.unsubscribe();
-  //     this.downloadInstance = null;
-  //     this.downloadProgress = 0;
-  //     this.downloadStatus = null;
-  //     this.showSpinner = false;
-  //     this.displayFiles = this.displayFiles.filter(obj => obj.key != key);
-  // }
-
+  * Cancel one particular download instance
+  **/  
   cancelDownload(rowData: any) {
     rowData.downloadInstance.unsubscribe();
     rowData.downloadInstance = null;
@@ -605,9 +489,8 @@ export class DatacartComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * count the selected files
+   * Count the selected files
    */
-
   dataFileCount() {
     this.selectedFileCount = 0;
     for (let selData of this.selectedData) {
@@ -635,7 +518,6 @@ export class DatacartComponent implements OnInit, OnDestroy {
   /**
    * Update cart entries
    */
-  //   updateCartEntries(row:any,downloadStatus:any) {
   updateCartEntries() {
     // console.log("id" + JSON.stringify(row.data));
     // this.cartService.updateCartItemDownloadStatus(row.data['resId'],ownloadStatus);
@@ -645,21 +527,6 @@ export class DatacartComponent implements OnInit, OnDestroy {
     }.bind(this), function (err) {
       alert("something went wrong while fetching the products");
     });
-
-  }
-
-  /**
-   * display spinner
-   */
-  showLoadingSpinner() {
-    this.showSpinner = true;
-  }
-
-  /**
-   * hide spinner
-   */
-  hideLoadingSpinner() {
-    this.showSpinner = false;
   }
 
   /**
@@ -668,13 +535,6 @@ export class DatacartComponent implements OnInit, OnDestroy {
   removeByDataId() {
 
     let dataId: any;
-    // convert the map to an array
-    // var i:number;
-    // for ( i=0; i < this.dataFiles.length;i++) {
-    //     if (this.dataFiles[i].expanded == true) {
-    //         this.selectedParentIndex = i;
-    //     }
-    // }
     for (let selData of this.selectedData) {
       dataId = selData.data['resId'];
       // Filter out all cartEntities with given productId,  finally the new stuff from es6 can be used.
@@ -684,11 +544,6 @@ export class DatacartComponent implements OnInit, OnDestroy {
     }
     this.getDataCartList();
     this.createDataCartHierarchy();
-
-    // if (this.cartEntities.length > 0) {
-    //     this.dataFiles[this.selectedParentIndex].expanded = true;
-    // }
-
     this.cartService.setCartLength(this.cartEntities.length);
     this.selectedData.length = 0;
     this.dataFileCount();
@@ -929,6 +784,9 @@ export class DatacartComponent implements OnInit, OnDestroy {
     }, 100);
   }
 
+  /*
+      Return button color based on Downloaded status
+  */
   getButtonColor() {
     if (this.noFileDownloaded) {
       return "#1E6BA1";
@@ -958,16 +816,6 @@ export class DatacartComponent implements OnInit, OnDestroy {
       return "green";
     }
   }
-
-  /*
-  * When a tree node is selected -- no longer needed
-  */
-  // onNodeSelection(event: any, rowData: any, rowIndex: any) {
-  //   if (rowData.children) {
-  //     // for (let child of rowData.children)
-  //     // this.setSelected(child);
-  //   }
-  // }
 
   /*
   * Pre-select tree nodes

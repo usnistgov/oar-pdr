@@ -54,34 +54,17 @@ export class DownloadService {
   * Calling end point 2 to get the bundle
   **/
   getBundle(url, body): Observable<any> {
-    const httpOptions = {
-      headers: new HttpHeaders({
-        'Content-Type':  'application/json'
-      })
-    };
+    console.log("Get bundle - body:");
+    console.log(body);
 
-    return this.http.post(url, body, httpOptions);
+    const request = new HttpRequest(
+      "POST", url, body,
+      { headers: new HttpHeaders({'Content-Type':  'application/json','responseType': 'blob'}), reportProgress: true, responseType: 'blob' });
+
+    // return this.http.request(request);
 
     // for testing
-    // return this.testDataService.getBundle('https://s3.amazonaws.com/nist-midas/1858/20170213_PowderPlate2_Pad.zip', params);
-  }
-
-  /**
-   * Save file
-   **/
-  saveToFileSystem(data, filename) {
-    // var json = JSON.stringify(data);
-    let blob = new Blob([data], { type: "octet/stream" });
-    let blobUrl = window.URL.createObjectURL(blob);
-
-    let a = document.createElement('a');
-    document.body.appendChild(a);
-    a.setAttribute('style', 'display: none');
-    a.href = blobUrl;
-    a.download = filename;
-    a.click();
-    window.URL.revokeObjectURL(blobUrl);
-    a.remove();
+    return this.testDataService.getBundle('https://s3.amazonaws.com/nist-midas/1858/20170213_PowderPlate2_Pad.zip', body);
   }
 
   /**
@@ -101,22 +84,12 @@ export class DownloadService {
 
     this.setDownloadingNumber(sub.getValue() + 1, whichPage);
 
-    // this.testSave();
-
-    //     nextZip.downloadInstance = this.downloadService.postFile(this.distApi + "_bundle", JSON.stringify(zipdata.bundle)).subscribe(event => {
-
-    // nextZip.downloadInstance = this.http.request(req).subscribe(
     nextZip.downloadInstance = this.getBundle(nextZip.downloadUrl, JSON.stringify(nextZip.bundle)).subscribe(
       event => {
-        // const blob = new Blob([event.body], { type: 'octet/stream' });
-        // console.log("event.body");
-        // console.log(event.body);
-        // var data = event.data;
-        // FileSaver.saveAs(event, nextZip.fileName);
-
         switch (event.type) {
           case HttpEventType.Response:
             // this.saveToFileSystem(event.body, nextZip.fileName);
+            nextZip.downloadStatus = 'Writing data to destination';
             this._FileSaverService.save(<any>event.body, nextZip.fileName);
             nextZip.downloadProgress = 0;
             nextZip.downloadStatus = 'downloaded';
@@ -132,8 +105,9 @@ export class DownloadService {
 
       },
       err => {
-        nextZip.downloadStatus = 'downloadError';
+        nextZip.downloadStatus = 'Error';
         nextZip.downloadErrorMessage = err.message;
+        nextZip.downloadProgress = 0;
         this.setDownloadingNumber(this.zipFilesDownloadingSub.getValue() - 1, whichPage);
       }
     );
@@ -366,8 +340,6 @@ export class DownloadService {
         }
       }
     }
-    // console.log("totalDownloaded");
-    // console.log(totalDownloaded);
     return totalDownloaded;
   }
 }

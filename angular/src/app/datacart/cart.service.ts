@@ -250,7 +250,7 @@ export class CartService {
 
 
   clearTheCart() {
-    this._storage.clear();
+    this._storage.removeItem(this.currentCart);
     //this.storageSub.next(true);
   }
 

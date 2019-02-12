@@ -185,3 +185,9 @@
   color:#1471AE;
   font-size: 30px;
 }
+
+tr {
+  line-height: 25px;
+  min-height: 25px;
+  height: 25px;
+}

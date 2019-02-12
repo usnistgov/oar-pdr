@@ -14,6 +14,8 @@ import { HttpClientModule, HttpClient, HttpHeaders, HttpRequest, HttpEventType, 
 import { TestBed } from '@angular/core/testing';
 import { AppConfig, Config } from '../../shared/config-service/config.service';
 import { THIS_EXPR } from '@angular/compiler/src/output/output_ast';
+import { FileSaverService } from 'ngx-filesaver';
+import { v } from '@angular/core/src/render3';
 
 declare var saveAs: any;
 
@@ -95,12 +97,19 @@ export class DescriptionComponent {
     private commonVarService: CommonVarService,
     private http: HttpClient,
     private appConfig: AppConfig,
+    private _FileSaverService: FileSaverService,
     private confirmationService: ConfirmationService) {
     this.cartService.watchAddAllFilesCart().subscribe(value => {
       this.addAllFileSpinner = value;
     });
     this.cartService.watchStorage().subscribe(value => {
       this.cartLength = value;
+    });
+    this.commonVarService.watchForceLandingPageInit().subscribe(value => {
+      if (value) {
+        this.cartMap = this.cartService.getCart();
+        this.updateStatusFromCart();
+      }
     });
     this.confValues = this.appConfig.getConfig();
   }
@@ -203,9 +212,24 @@ export class DescriptionComponent {
   }
 
   /**
+   * Function to reset the download status and incart status.
+   */
+  resetStstus(files: any) {
+    for (let comp of files) {
+      if (comp.children.length > 0) {
+        this.resetStstus(comp.children);
+      } else {
+        comp.data.isIncart = false;
+        comp.data.downloadStatus = null;
+      }
+    }
+  }
+
+  /**
    * Function to sync the download status from data cart.
    */
   updateStatusFromCart() {
+    this.resetStstus(this.files);
     for (let key in this.cartMap) {
       let value = this.cartMap[key];
       if (value.data.downloadStatus != undefined) {
@@ -634,7 +658,7 @@ export class DescriptionComponent {
     rowData.downloadInstance = this.http.request(req).subscribe(event => {
       switch (event.type) {
         case HttpEventType.Response:
-          this.downloadService.saveToFileSystem(event.body, filename);
+          this._FileSaverService.save(<any>event.body, filename);
           rowData.downloadStatus = 'downloaded';
           this.cartService.updateCartItemDownloadStatus(rowData.cartId, 'downloaded');
           this.downloadStatus = this.updateDownloadStatus(this.files) ? "downloaded" : null;

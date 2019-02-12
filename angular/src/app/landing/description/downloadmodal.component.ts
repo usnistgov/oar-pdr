@@ -60,6 +60,7 @@ export class NgbdModalDownloadManager implements OnInit {
     this.cartService.getAllCartEntities();
     this.cartService.setCartLength(this.cartService.cartSize);
     this.modalReference.close();
+    this.commonVarService.setForceLandingPageInit(true);
   }
 
   // private getDismissReason(reason: any): string {

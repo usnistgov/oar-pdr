@@ -17,6 +17,7 @@ export class CommonVarService {
   processingSub = new BehaviorSubject<boolean>(false);
   localProcessingSub = new BehaviorSubject<boolean>(false);
   showDatacartSub = new BehaviorSubject<boolean>(false);
+  forceLandingPageInitSub = new BehaviorSubject<boolean>(false);
 
   constructor() { }
 
@@ -78,6 +79,20 @@ export class CommonVarService {
   **/
   watchLocalProcessing(): Observable<any> {
     return this.localProcessingSub.asObservable();
+  }
+
+  /**
+   * Set processing flag
+   **/
+  setForceLandingPageInit(value: boolean) {
+    this.forceLandingPageInitSub.next(value);
+  }
+
+  /**
+  * Watching processing flag
+  **/
+  watchForceLandingPageInit(): Observable<any> {
+    return this.forceLandingPageInitSub.asObservable();
   }
 
   /**
