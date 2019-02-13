@@ -83,9 +83,6 @@ export class DescriptionComponent {
   confValues: Config;
   isLocalProcessing: boolean;
 
-  // private distApi: string = this.confValues.DISTAPI;
-  // private distApi : string = "";
-
   /* Function to Return Keys object properties */
   keys(): Array<string> {
     return Object.keys(this.fileDetails);
@@ -115,12 +112,7 @@ export class DescriptionComponent {
   }
 
   ngOnInit() {
-    // this.cartService.clearTheCart();
-    // this.cdr.detectChanges();
     this.distApi = this.confValues.DISTAPI;
-    // console.log("this.distApi");
-    // console.log(this.distApi);
-
     this.commonVarService.setShowDatacart(false);
 
     if (this.files.length != 0)
@@ -156,14 +148,9 @@ export class DescriptionComponent {
     };
     newPart.children = this.files;
     this.treeRoot.push(newPart);
-
     this.updateStatusFromCart();
-
-    // this.updateCartStatus(this.files);
     this.allSelected = this.updateAllSelectStatus(this.files);
-
     this.downloadStatus = this.updateDownloadStatus(this.files) ? "downloaded" : null;
-
     this.totalFiles = 0;
     this.getTotalFiles(this.files);
 
@@ -181,15 +168,18 @@ export class DescriptionComponent {
         this.noFileDownloaded = !value;
       }
     );
-
-    console.log("this.files:");
-    console.log(this.files);
   }
 
+  /**
+   * Function to expand tree display to certain level
+   */
   expandToLevel(dataFiles: any, option: boolean, targetLevel: any) {
     this.expandAll(dataFiles, option, 0, targetLevel)
   }
 
+  /**
+   * Function to expand tree display to certain level - used by expandToLevel()
+   */
   expandAll(dataFiles: any, option: boolean, level: any, targetLevel: any) {
     let currentLevel = level + 1;
     for (let i = 0; i < dataFiles.length; i++) {
@@ -242,7 +232,6 @@ export class DescriptionComponent {
         }
       }
     }
-    // this.updateDownloadStatus(this.files);
   }
 
   /**
@@ -383,7 +372,6 @@ export class DescriptionComponent {
   addSubFilesToCart(rowData: any, isSelected: boolean) {
     let data: Data;
     let compValue: any;
-    // this.cartService.updateAllFilesSpinnerStatus(true);
 
     if (!this.isFile(rowData)) {
       let subFiles: any = null;
@@ -403,13 +391,6 @@ export class DescriptionComponent {
 
     this.allSelected = true;
     this.updateAllSelectStatus(this.files);
-
-    // setTimeout(() => {
-    //     this.cartService.updateAllFilesSpinnerStatus(false);
-    // }, 3000);
-    // setTimeout(() => {
-    //     this.addFileStatus = true;
-    // }, 3000);
   }
 
   /**
@@ -500,7 +481,6 @@ export class DescriptionComponent {
   * Function to add one file to data cart with pre-select option.
   **/
   addtoCart(rowData: any, isSelected: boolean) {
-    // this.cartService.updateFileSpinnerStatus(true);
     let cartMap: any;
     let data: Data;
     data = {
@@ -528,15 +508,20 @@ export class DescriptionComponent {
       alert("something went wrong while fetching the products");
     });
     return Promise.resolve(cartMap);
-    // rowData.isSelected = this.cartService.isInDataCart(rowData.cartId);
   }
 
+  /**
+  * Remove one node from cart and set flag
+  **/
   removeFromNode(rowData: any) {
     this.removeCart(rowData);
     this.allSelected = false;
     this.updateAllSelectStatus(this.files);
   }
 
+  /**
+  * Remove one node from cart - can be a file or sub-tree
+  **/
   removeCart(rowData: any) {
     if (!this.isFile(rowData)) {
       let subFiles: any = null;
@@ -556,6 +541,9 @@ export class DescriptionComponent {
     }
   }
 
+  /**
+  * Remove all files from cart and set flags
+  **/
   removeFilesFromCart(files: any) {
     this.removeFromCart(files);
     this.allSelected = true;
@@ -563,6 +551,9 @@ export class DescriptionComponent {
     return Promise.resolve(files);
   }
 
+  /**
+  * Remove all files from cart - used by removeFilesFromCart()
+  **/
   removeFromCart(files: any) {
     for (let comp of files) {
       if (comp.children.length > 0) {
@@ -576,6 +567,9 @@ export class DescriptionComponent {
 
   }
 
+  /**
+  * Check if all chirldren nodes were all selected
+  **/
   updateAllSelectStatus(files: any) {
     var allSelected = true;
     for (let comp of files) {
@@ -592,6 +586,9 @@ export class DescriptionComponent {
     return allSelected;
   }
 
+  /**
+  * Once a file was downloaded, we need to update it's parent's status as well
+  **/
   updateDownloadStatus(files: any) {
     var allDownloaded = true;
     var noFileDownloadedFlag = true;
@@ -617,21 +614,9 @@ export class DescriptionComponent {
     return allDownloaded;
   }
 
-
   /**
-  * Function to remove a cartId from the data cart.
+  * Downloaded one file by id
   **/
-  // removeCart(rowData:any, cartId: string){
-  //     this.cartService.updateFileSpinnerStatus(true);
-  //     this.cartService.removeCartId(cartId);
-  //     rowData.isIncart = this.isInDataCart(cartId);
-  //     this.checkIfAllSelected(this.files);
-
-  //     setTimeout(()=> {
-  //         this.cartService.updateFileSpinnerStatus(false);
-  //     }, 3000);
-  // }
-
   downloadById(id: any) {
     let subFiles: any = null;
     for (let comp of this.files) {
@@ -642,10 +627,12 @@ export class DescriptionComponent {
     }
     if (subFiles != null) {
       this.downloadAllFilesFromAPI(subFiles);
-      // subFiles.isSelected = true;
     }
   }
 
+  /**
+  * Downloaded one file
+  **/
   downloadOneFile(rowData: any) {
     let filename = decodeURI(rowData.downloadUrl).replace(/^.*[\\\/]/, '');
     rowData.downloadStatus = 'downloading';
@@ -659,12 +646,7 @@ export class DescriptionComponent {
       switch (event.type) {
         case HttpEventType.Response:
           this._FileSaverService.save(<any>event.body, filename);
-          rowData.downloadStatus = 'downloaded';
-          this.cartService.updateCartItemDownloadStatus(rowData.cartId, 'downloaded');
-          this.downloadStatus = this.updateDownloadStatus(this.files) ? "downloaded" : null;
-          if (rowData.isIncart) {
-            this.downloadService.setFileDownloadedFlag(true);
-          }
+          this.setFileDownloaded(rowData);
           break;
         case HttpEventType.DownloadProgress:
           rowData.downloadProgress = Math.round(100 * event.loaded / event.total);
@@ -672,6 +654,19 @@ export class DescriptionComponent {
       }
     })
   }
+
+  /**
+  * Function to set status when a file was downloaded
+  **/
+  setFileDownloaded(rowData: any) {
+    rowData.downloadStatus = 'downloaded';
+    this.cartService.updateCartItemDownloadStatus(rowData.cartId, 'downloaded');
+    this.downloadStatus = this.updateDownloadStatus(this.files) ? "downloaded" : null;
+    if (rowData.isIncart) {
+      this.downloadService.setFileDownloadedFlag(true);
+    }
+  }
+
   /**
   * Function to download a single file based on download url.
   **/
@@ -686,17 +681,6 @@ export class DescriptionComponent {
     if (rowData.isIncart) {
       this.downloadService.setFileDownloadedFlag(true);
     }
-    // this.cartService.updateFileSpinnerStatus(true);
-
-    // this.downloadService.getFile(rowData.downloadUrl, '').subscribe(blob => {
-    //     this.downloadService.saveToFileSystem(blob, filename);
-    //     rowData.downloadStatus = 'downloaded';
-    //     this.cartService.updateCartItemDownloadStatus(rowData.cartId,'downloaded');
-    //     this.cartService.updateFileSpinnerStatus(false);
-    //     this.updateDownloadStatus(this.files);
-    //     },
-    //     error => console.log('Error downloading the file.')
-    // )
   }
 
   /**
@@ -743,7 +727,6 @@ export class DescriptionComponent {
           this.cancelAllDownload = false;
           this.downloadFromRoot();
         }, 0);
-        // this.downloadAllFilesFromAPI(this.treeRoot[0]);
       },
       reject: () => {
       }
@@ -751,7 +734,6 @@ export class DescriptionComponent {
   }
 
   downloadFromRoot() {
-    // this.downloadAllFilesFromAPI(this.treeRoot[0]);
     this.cartService.setCurrentCart('landing_popup');
     this.commonVarService.setLocalProcessing(true);
     setTimeout(() => {
@@ -805,11 +787,11 @@ export class DescriptionComponent {
         this.bundlePlanStatus = "error";
       }
     );
-
-    // Once get bundle plan back, put it into a zipData array and send post request one by one
-    // sample return data:
   }
 
+  /**
+  * Process each bundle
+  **/
   processBundle(res: any, zipFileBaseName, files: any) {
     this.bundlePlanStatus = res.status.toLowerCase();
     this.messageColor = this.getColor();
@@ -853,16 +835,9 @@ export class DescriptionComponent {
     ));
   }
 
-  // getDownloadedNumber(){
-  //     let totalDownloadedZip: number = 0;
-  //     for (let zip of this.zipData) {
-  //         if(zip.downloadStatus == 'downloaded'){
-  //             totalDownloadedZip += 1;
-  //         }
-  //     }
-  //     return totalDownloadedZip;
-  // }
-
+  /**
+  * Cancel download certain zip file
+  **/
   cancelDownloadZip(zip: any) {
     zip.downloadInstance.unsubscribe();
     zip.downloadInstance = null;
@@ -870,6 +845,9 @@ export class DescriptionComponent {
     zip.downloadStatus = "cancelled";
   }
 
+  /**
+  * Cancel download all
+  **/
   cancelDownloadAll() {
     for (let zip of this.zipData) {
       if (zip.downloadInstance != null) {
@@ -894,18 +872,6 @@ export class DescriptionComponent {
     this.bundlePlanStatus = null;
     this.bundlePlanUnhandledFiles = null;
   }
-
-
-  // resetZipName(element){
-  //     if(element.data != undefined){
-  //         element.data.zipFile = null;
-  //     }
-  //     if (element.children.length > 0){
-  //         for(let i=0; i < element.children.length; i++){
-  //             this.resetZipName(element.children[i]);
-  //         }
-  //     } 
-  // }
 
   /**
   * Function to set the download status of all files to downloaded.
@@ -939,6 +905,9 @@ export class DescriptionComponent {
     return rowData.name.match(/\./g) == null ? false : true;
   }
 
+  /**
+  * Return color based on different bundlePlan response status
+  **/
   getColor() {
     if (this.bundlePlanStatus == 'warnings') {
       return "darkorange";
@@ -949,6 +918,9 @@ export class DescriptionComponent {
     }
   }
 
+  /**
+  * Return "download all" button color based on download status
+  **/
   getDownloadAllBtnColor() {
     if (this.downloadStatus == null)
       return '#1E6BA1';
@@ -956,6 +928,19 @@ export class DescriptionComponent {
       return 'green';
   }
 
+  /**
+  * Return "download" button color based on download status
+  **/
+  getDownloadBtnColor(rowData: any) {
+    if (rowData.downloadStatus == 'downloaded')
+      return 'green';
+
+    return '#1E6BA1';
+  }
+
+  /**
+  * Return "add all to datacart" button color based on select status
+  **/
   getAddAllToDataCartBtnColor() {
     if (this.allSelected)
       return 'green';
@@ -963,6 +948,9 @@ export class DescriptionComponent {
       return '#1E6BA1';
   }
 
+  /**
+  * Return tooltip text based on select status
+  **/
   getCartProcessTooltip() {
     if (this.allSelected)
       return 'Remove all from cart';
