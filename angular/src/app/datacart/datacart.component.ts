@@ -597,6 +597,7 @@ export class DatacartComponent implements OnInit, OnDestroy {
     this.resetDatafileDownloadStatus(this.dataFiles, null);
     this.downloadService.setFileDownloadedFlag(false);
     this.totalDownloaded = 0;
+    this.showMessageBlock = false;
   }
 
   /**

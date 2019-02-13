@@ -55,7 +55,7 @@
       <br>
       <span><b>Files </b> </span>
       <ngbd-modal-download-manager></ngbd-modal-download-manager>
-      <span class="faa-stack fa-lg"
+      <span class="faa-stack fa-lg icon-download"
         (click)="downloadAllConfirm('Download All Files', 'This will download all files. Continue?', 'downloadAllConfirm')"
         data-toggle="tooltip" title="Download all files"
         [ngStyle]="{'color':getDownloadAllBtnColor(),'cursor':'pointer'}">
@@ -68,7 +68,7 @@
 
       <p-confirmDialog key='downloadAllConfirm'></p-confirmDialog>
 
-      <span class="faa-stack fa-lg" (click)="cartProcess(files)"
+      <span class="faa-stack fa-lg icon-cart" (click)="cartProcess(files)"
         [ngStyle]="{'color':getAddAllToDataCartBtnColor(),'cursor':'pointer','margin-right':'1em'}"
         data-toggle="tooltip" [title]="getCartProcessTooltip()">
         <i class="faa faa-circle-thin faa-stack-2x" aria-hidden="true"></i>
@@ -122,9 +122,8 @@
         </table>
       </div>
 
-      <!-- <div *ngIf="displayDownloadFiles" [ngClass]="{'downloadStatusLimit': !downloadStatusExpanded, 'downloadStatusExpand': downloadStatusExpanded}"> -->
-      <div style="margin-bottom:1em;">
-        <table *ngIf="zipData.length > 0" style="width: 100%;">
+      <!-- <div style="margin-bottom:1em;" *ngIf="zipData.length > 0">
+        <table style="width: 100%;">
           <tr style="background-color:green; margin:0; color:white" data-toggle="tooltip" title="Unhandled Files">
             <th style="width: 50%;padding-left:.5em;">
               <span (click)="showZipFiles = !showZipFiles">
@@ -177,7 +176,7 @@
             </td>
           </tr>
         </table>
-      </div>
+      </div> -->
       <p-treeTable *ngIf="visible" [value]="files" [columns]="cols" selectionMode="single" [resizableColumns]="true"
         sortField="name">
         <!-- <ng-template pTemplate="colgroup" let-columns>
