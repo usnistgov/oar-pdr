@@ -391,7 +391,7 @@ export class DatacartComponent implements OnInit, OnDestroy {
     // Start downloading the first one, this will set the downloaded zip file to 1
     this.subscriptions.push(this.downloadService.watchDownloadingNumber("datacart").subscribe(
       value => {
-        if (value > 0) {
+        if (value >= 0) {
           if (!this.cancelAllDownload) {
             this.downloadService.downloadNextZip(this.zipData, this.treeRoot[0], "datacart");
           }

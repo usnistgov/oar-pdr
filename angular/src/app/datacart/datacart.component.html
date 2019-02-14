@@ -100,12 +100,12 @@
         Zip File Name
       </th>
       <th style="width: 50%;padding-left:.5em;">
+        Download Status
         <span *ngIf="!allProcessed" class="faa-stack fa-lg" style="cursor: pointer;" (click)="cancelDownloadAll()"
-          data-toggle="tooltip" title="Cancel Download">
-          <i class="faa faa-circle-thin faa-stack-1x" aria-hidden="true"></i>
+          data-toggle="tooltip" title="Cancel All Downloads">
+          <!-- <i class="faa faa-circle-thin faa-stack-1x" aria-hidden="true"></i> -->
           <i class="faa faa-remove faa-stack-1x" aria-hidden="true" style="color: rgb(255, 255, 255);"></i>
         </span>
-        Download Status
       </th>
     </tr>
     <tr *ngFor="let zip of zipData">
@@ -144,7 +144,7 @@
               {{zip.downloadErrorMessage}}
             </div>
           </ng-template>
-          <i class="faa faa-repeat"
+          <i *ngIf="zip.downloadStatus != null" class="faa faa-repeat"
             style="padding-left: 2%; display: inline; flex: 0 0 auto;font-size: 0.8em; color: #1E6BA1;"
             data-toggle="tooltip" title="Retry" (click)="downloadOneZip(zip)"></i>
         </ng-template>

@@ -84,8 +84,11 @@ export class DownloadService {
     }
 
     nextZip.downloadStatus = 'downloading';
-
+    console.log("Total # of current downloding");
+    console.log(sub.getValue());
     this.setDownloadingNumber(sub.getValue() + 1, whichPage);
+    console.log("Total # of current downloding");
+    console.log(sub.getValue());
 
     nextZip.downloadInstance = this.getBundle(nextZip.downloadUrl, JSON.stringify(nextZip.bundle)).subscribe(
       event => {
@@ -95,7 +98,9 @@ export class DownloadService {
             this._FileSaverService.save(<any>event.body, nextZip.fileName);
             nextZip.downloadProgress = 0;
             nextZip.downloadStatus = 'downloaded';
-            this.setDownloadingNumber(this.zipFilesDownloadingSub.getValue() - 1, whichPage);
+            this.setDownloadingNumber(sub.getValue() - 1, whichPage);
+            console.log("Total # of current downloding");
+            console.log(sub.getValue());
             this.setDownloadProcessStatus(this.allDownloadFinished(zipdata), whichPage);
             this.setDownloadStatus(nextZip, treeNode, "downloaded");
             this.setFileDownloadedFlag(true);
@@ -131,6 +136,9 @@ export class DownloadService {
       let nextZip = this.getNextZipInQueue(zipData);
       if (nextZip != null) {
         this.download(nextZip, zipData, treeNode, whichPage);
+      }
+      else{
+        this.setDownloadingNumber(-1, whichPage);
       }
     }
   }
