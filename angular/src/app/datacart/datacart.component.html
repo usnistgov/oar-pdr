@@ -14,22 +14,27 @@
   }
 </script>
 
-<div style="width: 94%; margin-top: 2em; margin-left: 3%;">
+<div style="width: 94%; margin-top: 2em; margin-left: 3%; ">
   <div *ngIf="!isPopup" class="title" style="margin-bottom: 0.5em;">Download Manager</div>
-  <div *ngIf="bundlePlanStatus != 'complete' && bundlePlanMessage" style="display: inline; text-align: left;">
-    <i class="faa faa-warning" [ngStyle]="{'color':messageColor, 'padding-right':'.5em'}"></i>
-    <span [ngStyle]="{'color':getColor(), 'padding-right':'.5em'}">Http responsed with warning. </span>
-    <span (click)="showMessageBlock = !showMessageBlock">
-      <i *ngIf="!showMessageBlock" class="faa faa-arrow-circle-down"
-        [ngStyle]="{'color':messageColor,'cursor':'pointer'}" data-toggle="tooltip" title="Show details"></i>
-      <i *ngIf="showMessageBlock" class="faa faa-arrow-circle-up faa-1x icon-white"
-        [ngStyle]="{'color':messageColor,'cursor':'pointer'}" data-toggle="tooltip" title="Hide details"></i>
-    </span>
-  </div>
-  <div *ngIf="showCurrentTask" style="display: inline; font-size: 9pt; float: right">
+  <div style="display: flex;justify-content: space-between;">
+    <div *ngIf="bundlePlanStatus != 'complete' && bundlePlanMessage" style="display: inline; text-align: left;">
+      <i class="faa faa-warning" [ngStyle]="{'color':messageColor, 'padding-right':'.5em'}"></i>
+      <span *ngIf="bundlePlanStatus == 'error';else no_error">Http responsed with error</span>
+      <ng-template #no_error>
+        <span [ngStyle]="{'color':getColor(), 'padding-right':'.5em'}">Http responsed with warning. </span>
+        <span (click)="showMessageBlock = !showMessageBlock">
+          <i *ngIf="!showMessageBlock" class="faa faa-arrow-circle-down"
+            [ngStyle]="{'color':messageColor,'cursor':'pointer'}" data-toggle="tooltip" title="Show details"></i>
+          <i *ngIf="showMessageBlock" class="faa faa-arrow-circle-up faa-1x icon-white"
+            [ngStyle]="{'color':messageColor,'cursor':'pointer'}" data-toggle="tooltip" title="Hide details"></i>
+        </span>
+      </ng-template>
+    </div>
+    <div *ngIf="showCurrentTask" style="display: inline; font-size: 9pt;">
       <i class="faa faa-spinner faa-spin" style="color:#1E6BA1" aria-hidden="true"></i>
       {{currentTask}}
     </div>
+  </div>
 </div>
 <div *ngIf="showMessageBlock" style="width: 94%;margin-left: 3%;margin-right: 3%;">
   <table style="width: 100%;margin-bottom: 0.5em;">
@@ -126,18 +131,22 @@
           </div>
         </div>
         <ng-template #not_downloading>
-          <div *ngIf="zip.downloadStatus != 'Error'; else download_error" style="padding-left: 2%; width: 200px; display:inline;">
+          <div *ngIf="zip.downloadStatus != 'Error'; else download_error"
+            style="padding-left: 2%; width: 200px; display:inline;">
             <i *ngIf="zip.downloadStatus === 'downloaded'" class="faa faa-check" style="margin-top: 8px;"></i>
             <i *ngIf="zip.downloadStatus === 'cancelled'" class="faa faa-remove" style="margin-top: 8px;"></i>
             {{zip.downloadStatus}}
           </div>
           <ng-template #download_error>
-              <div style="padding-left: 2%; display:inline;font-size: 0.8em; color: red">
-                  <i class="faa faa-warning" [ngStyle]="{'color':messageColor, 'padding-right':'.5em', 'margin-top':'8px'}"></i>
-                  {{zip.downloadErrorMessage}}
-              </div>
+            <div style="padding-left: 2%; display:inline;font-size: 0.8em; color: red">
+              <i class="faa faa-warning"
+                [ngStyle]="{'color':messageColor, 'padding-right':'.5em', 'margin-top':'8px'}"></i>
+              {{zip.downloadErrorMessage}}
+            </div>
           </ng-template>
-          <i class="faa faa-repeat" style="padding-left: 2%; display: inline; flex: 0 0 auto;font-size: 0.8em; color: #1E6BA1;" data-toggle="tooltip" title="Retry" (click)="downloadOneZip(zip)"></i>
+          <i class="faa faa-repeat"
+            style="padding-left: 2%; display: inline; flex: 0 0 auto;font-size: 0.8em; color: #1E6BA1;"
+            data-toggle="tooltip" title="Retry" (click)="downloadOneZip(zip)"></i>
         </ng-template>
       </td>
     </tr>

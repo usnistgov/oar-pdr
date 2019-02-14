@@ -16,8 +16,8 @@ export class DownloadService {
   zipFilesDownloadingSub = new BehaviorSubject<number>(0);
   zipFilesProcessedSub = new BehaviorSubject<boolean>(false);
 
-  zipFilesDownloadingDataCardSub = new BehaviorSubject<number>(0);
-  zipFilesProcessedDataCardSub = new BehaviorSubject<boolean>(false);
+  zipFilesDownloadingDataCartSub = new BehaviorSubject<number>(0);
+  zipFilesProcessedDataCartSub = new BehaviorSubject<boolean>(false);
 
   anyFileDownloadedFlagSub = new BehaviorSubject<boolean>(false);
   fireDownloadAllFlagSub = new BehaviorSubject<boolean>(false);
@@ -31,7 +31,7 @@ export class DownloadService {
     private _FileSaverService: FileSaverService,
     private testDataService: TestDataService,
     private commonVarService: CommonVarService
-  ) { 
+  ) {
     this.isLocalTesting = this.commonVarService.getLocalTestingFlag();
   }
 
@@ -57,17 +57,17 @@ export class DownloadService {
   * Calling end point 2 to get the bundle
   **/
   getBundle(url, body): Observable<any> {
-    console.log("Get bundle - body:");
-    console.log(body);
+    // console.log("Get bundle - body:");
+    // console.log(body);
 
     const request = new HttpRequest(
       "POST", url, body,
       { headers: new HttpHeaders({ 'Content-Type': 'application/json', 'responseType': 'blob' }), reportProgress: true, responseType: 'blob' });
 
-    if(!this.isLocalTesting)
-     return this.http.request(request);
+    if (!this.isLocalTesting)
+      return this.http.request(request);
     else
-     return this.testDataService.getBundle('https://s3.amazonaws.com/nist-midas/1858/20170213_PowderPlate2_Pad.zip', body);
+      return this.testDataService.getBundle('https://s3.amazonaws.com/nist-midas/1858/20170213_PowderPlate2_Pad.zip', body);
   }
 
   /**
@@ -79,8 +79,8 @@ export class DownloadService {
     // });
 
     let sub = this.zipFilesDownloadingSub;
-    if (whichPage == "datacard") {
-      sub = this.zipFilesDownloadingDataCardSub;
+    if (whichPage == "datacart") {
+      sub = this.zipFilesDownloadingDataCartSub;
     }
 
     nextZip.downloadStatus = 'downloading';
@@ -91,7 +91,6 @@ export class DownloadService {
       event => {
         switch (event.type) {
           case HttpEventType.Response:
-            // this.saveToFileSystem(event.body, nextZip.fileName);
             nextZip.downloadStatus = 'Writing data to destination';
             this._FileSaverService.save(<any>event.body, nextZip.fileName);
             nextZip.downloadProgress = 0;
@@ -102,10 +101,11 @@ export class DownloadService {
             this.setFileDownloadedFlag(true);
             break;
           case HttpEventType.DownloadProgress:
-            nextZip.downloadProgress = 0;
             if (event.total > 0) {
               nextZip.downloadProgress = Math.round(100 * event.loaded / event.total);
             }
+            break;
+          default:
             break;
         }
 
@@ -124,10 +124,9 @@ export class DownloadService {
    **/
   downloadNextZip(zipData: ZipData[], treeNode: any, whichPage: any) {
     let sub = this.zipFilesDownloadingSub;
-    if (whichPage == "datacard") {
-      sub = this.zipFilesDownloadingDataCardSub;
+    if (whichPage == "datacart") {
+      sub = this.zipFilesDownloadingDataCartSub;
     }
-
     if (sub.getValue() < this.commonVarService.getDownloadMaximum()) {
       let nextZip = this.getNextZipInQueue(zipData);
       if (nextZip != null) {
@@ -174,8 +173,8 @@ export class DownloadService {
   **/
   watchDownloadingNumber(whichPage: any): Observable<any> {
     let sub = this.zipFilesDownloadingSub;
-    if (whichPage == "datacard") {
-      sub = this.zipFilesDownloadingDataCardSub;
+    if (whichPage == "datacart") {
+      sub = this.zipFilesDownloadingDataCartSub;
     }
 
     return sub.asObservable();
@@ -186,8 +185,8 @@ export class DownloadService {
    **/
   setDownloadingNumber(value: number, whichPage: any) {
     let sub = this.zipFilesDownloadingSub;
-    if (whichPage == "datacard") {
-      sub = this.zipFilesDownloadingDataCardSub;
+    if (whichPage == "datacart") {
+      sub = this.zipFilesDownloadingDataCartSub;
     }
 
     sub.next(value);
@@ -198,8 +197,8 @@ export class DownloadService {
   **/
   watchDownloadProcessStatus(whichPage: any): Observable<any> {
     let sub = this.zipFilesProcessedSub;
-    if (whichPage == "datacard") {
-      sub = this.zipFilesProcessedDataCardSub;
+    if (whichPage == "datacart") {
+      sub = this.zipFilesProcessedDataCartSub;
     }
 
     return sub.asObservable();
@@ -210,8 +209,8 @@ export class DownloadService {
    **/
   setDownloadProcessStatus(value: boolean, whichPage: any) {
     let sub = this.zipFilesProcessedSub;
-    if (whichPage == "datacard") {
-      sub = this.zipFilesProcessedDataCardSub;
+    if (whichPage == "datacart") {
+      sub = this.zipFilesProcessedDataCartSub;
     }
 
     sub.next(value);

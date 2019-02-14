@@ -163,7 +163,6 @@ export class DatacartComponent implements OnInit, OnDestroy {
       value => {
         if (value) {
           this.loadDatacart().then(function (result) {
-            this.showCurrentTask = false;
           }.bind(this), function (err) {
             alert("something went wrong while loading datacart.");
           });
@@ -171,10 +170,9 @@ export class DatacartComponent implements OnInit, OnDestroy {
       }
     );
 
-    this.downloadService.watchDownloadProcessStatus("datacard").subscribe(
+    this.downloadService.watchDownloadProcessStatus("datacart").subscribe(
       value => {
         this.allProcessed = value;
-        this.showCurrentTask = false;
         // this.updateDownloadStatus(this.files);
       }
     );
@@ -204,7 +202,6 @@ export class DatacartComponent implements OnInit, OnDestroy {
   * Loaing datacart
   */
   loadDatacart() {
-    this.showCurrentTask = true;
     this.currentTask = "Loading Datacart...";
     this.currentStatus = "Loading...";
     this.selectedData = [];
@@ -315,9 +312,11 @@ export class DatacartComponent implements OnInit, OnDestroy {
     this.displayDownloadFiles = true;
     this.cancelAllDownload = false;
     this.downloadStatus = 'downloading';
-    this.downloadService.setDownloadProcessStatus(false, "datacard");
+    this.downloadService.setDownloadProcessStatus(false, "datacart");
     this.currentTask = "Waiting for bundle plan...";
     this.currentStatus = "Waiting for server response...";
+    this.downloadService.setDownloadingNumber(0, "datacart");
+
     // create root
     const newPart = {
       data: {
@@ -339,13 +338,13 @@ export class DatacartComponent implements OnInit, OnDestroy {
     files.data.downloadStatus = 'downloading';
 
     postMessage.push({ "bundleName": files.data.downloadFileName, "includeFiles": this.downloadData });
-    console.log("postMessage for bundle plan:");
-    console.log(postMessage);
+    // console.log("postMessage for bundle plan:");
+    // console.log(postMessage);
 
     this.downloadService.getBundlePlan(this.distApi + "_bundle_plan", JSON.stringify(postMessage[0])).subscribe(
       blob => {
-        console.log("Bundle plan return:");
-        console.log(blob);
+        // console.log("Bundle plan return:");
+        // console.log(blob);
         this.showCurrentTask = false;
         this.processBundle(blob, zipFileBaseName, files);
       },
@@ -361,7 +360,6 @@ export class DatacartComponent implements OnInit, OnDestroy {
   * Process data returned from bundle_plan
   **/
   processBundle(res: any, zipFileBaseName: any, files: any) {
-    this.showCurrentTask = true;
     this.currentTask = "Processing Each Bundle...";
     this.currentStatus = "Processing...";
 
@@ -388,17 +386,15 @@ export class DatacartComponent implements OnInit, OnDestroy {
       }
     }
 
-    this.downloadService.downloadNextZip(this.zipData, this.treeRoot[0], "datacard");
+    this.downloadService.downloadNextZip(this.zipData, this.treeRoot[0], "datacart");
 
     // Start downloading the first one, this will set the downloaded zip file to 1
-    this.subscriptions.push(this.downloadService.watchDownloadingNumber("datacard").subscribe(
+    this.subscriptions.push(this.downloadService.watchDownloadingNumber("datacart").subscribe(
       value => {
         if (value > 0) {
           if (!this.cancelAllDownload) {
-            this.downloadService.downloadNextZip(this.zipData, this.treeRoot[0], "datacard");
+            this.downloadService.downloadNextZip(this.zipData, this.treeRoot[0], "datacart");
           }
-        } else {
-          this.showCurrentTask = false;
         }
       }
     ));
@@ -411,7 +407,7 @@ export class DatacartComponent implements OnInit, OnDestroy {
     if (zip.downloadInstance != null) {
       zip.downloadInstance.unsubscribe();
     }
-    this.downloadService.download(zip, this.zipData, this.treeRoot[0], "datacard");
+    this.downloadService.download(zip, this.zipData, this.treeRoot[0], "datacart");
   }
 
   /**
@@ -440,7 +436,7 @@ export class DatacartComponent implements OnInit, OnDestroy {
   * Reset download params
   **/
   resetDownloadParams() {
-    this.downloadService.setDownloadingNumber(0, "datacard");
+    this.downloadService.setDownloadingNumber(0, "datacart");
     this.zipData = [];
     this.downloadStatus = null;
     this.cancelAllDownload = true;
@@ -505,27 +501,12 @@ export class DatacartComponent implements OnInit, OnDestroy {
         }
       }
     }
-
-    if (this.selectedFileCount > 0) {
-      // var element = <HTMLInputElement> document.getElementById("download");
-      // element.disabled = false;
-      // element = <HTMLInputElement> document.getElementById("removeData");
-      // element.disabled = false;
-    } else {
-      //var element = <HTMLInputElement> document.getElementById("download");
-      //element.disabled = true;
-      //element = <HTMLInputElement> document.getElementById("removeData");
-      //element.disabled = true;
-    }
-
   }
 
   /**
    * Update cart entries
    */
   updateCartEntries() {
-    // console.log("id" + JSON.stringify(row.data));
-    // this.cartService.updateCartItemDownloadStatus(row.data['resId'],ownloadStatus);
     this.cartService.getAllCartEntities().then(function (result) {
       this.cartEntities = result;
       this.createDataCartHierarchy();
