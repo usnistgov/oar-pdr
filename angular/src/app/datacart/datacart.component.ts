@@ -122,6 +122,7 @@ export class DatacartComponent implements OnInit, OnDestroy {
   currentStatus: string = '';
   showCurrentTask: boolean = false;
   showMessage: boolean = true;
+  broadcastMessage: string = '';
 
   // private distApi: string = environment.DISTAPI;
   //private distApi:string = "http://localhost:8083/oar-dist-service";
@@ -311,9 +312,10 @@ export class DatacartComponent implements OnInit, OnDestroy {
     this.zipData = [];
     this.displayDownloadFiles = true;
     this.cancelAllDownload = false;
+    this.bundlePlanMessage = null;
     this.downloadStatus = 'downloading';
     this.downloadService.setDownloadProcessStatus(false, "datacart");
-    this.currentTask = "Waiting for bundle plan...";
+    this.currentTask = "Getting bundle plan...";
     this.currentStatus = "Waiting for server response...";
     this.downloadService.setDownloadingNumber(0, "datacart");
 
@@ -349,9 +351,13 @@ export class DatacartComponent implements OnInit, OnDestroy {
         this.processBundle(blob, zipFileBaseName, files);
       },
       err => {
+        console.log("Http return err:");
         console.log(err);
         this.bundlePlanMessage = err;
         this.bundlePlanStatus = "error";
+        this.showCurrentTask = false;
+        this.messageColor = this.getColor();
+        this.broadcastMessage = 'Http responsed with error: ' + err.message;
       }
     );
   }
@@ -367,6 +373,10 @@ export class DatacartComponent implements OnInit, OnDestroy {
     this.messageColor = this.getColor();
     this.bundlePlanUnhandledFiles = res.notIncluded;
     this.bundlePlanMessage = res.messages;
+    if(this.bundlePlanMessage != null){
+      this.broadcastMessage = 'Http responsed with warning.'; 
+    }
+
     let bundlePlan: any[] = res.bundleNameFilePathUrl;
     let downloadUrl: any = this.distApi + res.postEachTo;
     let tempData: any[] = [];

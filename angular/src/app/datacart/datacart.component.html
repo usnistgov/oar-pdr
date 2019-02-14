@@ -19,9 +19,9 @@
   <div style="display: flex;justify-content: space-between;">
     <div *ngIf="bundlePlanStatus != 'complete' && bundlePlanMessage" style="display: inline; text-align: left;">
       <i class="faa faa-warning" [ngStyle]="{'color':messageColor, 'padding-right':'.5em'}"></i>
-      <span *ngIf="bundlePlanStatus == 'error';else no_error">Http responsed with error</span>
+      <span *ngIf="bundlePlanStatus == 'error';else no_error" [ngStyle]="{'color':messageColor}">{{broadcastMessage}}</span>
       <ng-template #no_error>
-        <span [ngStyle]="{'color':getColor(), 'padding-right':'.5em'}">Http responsed with warning. </span>
+        <span [ngStyle]="{'color':getColor(), 'padding-right':'.5em'}">{{broadcastMessage}}</span>
         <span (click)="showMessageBlock = !showMessageBlock">
           <i *ngIf="!showMessageBlock" class="faa faa-arrow-circle-down"
             [ngStyle]="{'color':messageColor,'cursor':'pointer'}" data-toggle="tooltip" title="Show details"></i>
