@@ -133,19 +133,19 @@ export class DatacartComponent implements OnInit, OnDestroy {
   constructor(private http: HttpClient,
     private cartService: CartService,
     private downloadService: DownloadService,
-    private appConfig: AppConfig, 
+    private appConfig: AppConfig,
     private _FileSaverService: FileSaverService,
     private commonVarService: CommonVarService) {
-      this.getDataCartList("Init");
-      this.display = true;
-      this.confValues = this.appConfig.getConfig();
-      this.cartService.watchForceDatacartReload().subscribe(
-        value => {
-          if (value) {
-            this.getDataCartList("Init");
-          }
+    this.getDataCartList("Init");
+    this.display = true;
+    this.confValues = this.appConfig.getConfig();
+    this.cartService.watchForceDatacartReload().subscribe(
+      value => {
+        if (value) {
+          this.getDataCartList("Init");
         }
-      );
+      }
+    );
   }
 
   /**
@@ -181,7 +181,7 @@ export class DatacartComponent implements OnInit, OnDestroy {
 
     this.downloadService.watchFireDownloadAllFlag().subscribe(
       value => {
-        if(value){
+        if (value) {
           this.downloadAllFilesFromAPI();
           this.downloadService.setFireDownloadAllFlag(false);
         }
@@ -203,7 +203,7 @@ export class DatacartComponent implements OnInit, OnDestroy {
   /*
   * Loaing datacart
   */
-  loadDatacart(){
+  loadDatacart() {
     this.showCurrentTask = true;
     this.currentTask = "Loading Datacart...";
     this.currentStatus = "Loading...";
@@ -393,11 +393,11 @@ export class DatacartComponent implements OnInit, OnDestroy {
     // Start downloading the first one, this will set the downloaded zip file to 1
     this.subscriptions.push(this.downloadService.watchDownloadingNumber("datacard").subscribe(
       value => {
-        if(value > 0){
+        if (value > 0) {
           if (!this.cancelAllDownload) {
             this.downloadService.downloadNextZip(this.zipData, this.treeRoot[0], "datacard");
           }
-        }else{
+        } else {
           this.showCurrentTask = false;
         }
       }
@@ -407,7 +407,7 @@ export class DatacartComponent implements OnInit, OnDestroy {
   /**
   * Download one particular zip
   **/
-  downloadOneZip(zip: ZipData){
+  downloadOneZip(zip: ZipData) {
     if (zip.downloadInstance != null) {
       zip.downloadInstance.unsubscribe();
     }
@@ -464,6 +464,8 @@ export class DatacartComponent implements OnInit, OnDestroy {
     });
 
     rowData.downloadInstance = this.http.request(req).subscribe(event => {
+      console.log("event");
+      console.log(event);
       switch (event.type) {
         case HttpEventType.Response:
           this._FileSaverService.save(<any>event.body, filename);
@@ -472,15 +474,18 @@ export class DatacartComponent implements OnInit, OnDestroy {
           this.downloadService.setFileDownloadedFlag(true);
           break;
         case HttpEventType.DownloadProgress:
-          rowData.downloadProgress = Math.round(100 * event.loaded / event.total);
+          rowData.downloadProgress = 0;
+          if (event.total > 0) {
+            rowData.downloadProgress = Math.round(100 * event.loaded / event.total);
+          }
           break;
       }
     })
   }
- 
+
   /**
   * Cancel one particular download instance
-  **/  
+  **/
   cancelDownload(rowData: any) {
     rowData.downloadInstance.unsubscribe();
     rowData.downloadInstance = null;
@@ -566,18 +571,11 @@ export class DatacartComponent implements OnInit, OnDestroy {
     setTimeout(() => {
       this.isVisible = true;
     }, 0);
-    //   this.cartService.getAllCartEntities().then(function (result) {
-    //       this.cartEntities = result;
-    //       this.createDataCartHierarchy();
-    //       if (this.cartEntities.length > 0) {
-    //           this.dataFiles[this.selectedParentIndex].expanded = true;
-    //       }
-    //       this.cartService.setCartLength(this.cartEntities.length);
-    //     }.bind(this), function (err) {
-    //         alert("something went wrong while removing item");
-    //     });
   }
 
+  /**
+   * Reset datafile download status
+   **/
   resetDatafileDownloadStatus(dataFiles: any, downloadStatus: any) {
     for (let i = 0; i < dataFiles.length; i++) {
       if (dataFiles[i].children.length > 0) {

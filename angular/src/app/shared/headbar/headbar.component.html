@@ -25,6 +25,7 @@
         <!--<img class="Fleft" srcset="./assets/images/beta-pdr.png"> -->
         <span class="badge" style="background-color:#8f3919">1.1.0-beta</span>
         <span *ngIf="checkinternal()" class="badge" style="background-color:darkcyan">Review Version</span>
+        <span *ngIf="isLocalTesting" style="color: red">You are running in local test mode</span>
         <div align="right" class="header-links">
           <a href="/pdr/about" target="_blank"><span class="textlinks"><b>About</b></span></a> |
           <a href="{{ SDPAPI }}" target="_blank"><span class="textlinks"><b>Search</b></span></a>

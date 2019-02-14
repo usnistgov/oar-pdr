@@ -74,10 +74,10 @@
     </tr>
     <tbody *ngIf="showUnhandledFiles">
       <tr *ngFor="let file of bundlePlanUnhandledFiles">
-        <td style="padding-left:.5em;border-bottom:1pt solid black;">{{file.filePath}}</td>
-        <td style="padding-left:.5em;border-bottom:1pt solid black;">{{file.downloadUrl}}
+        <td width="30%" style="padding-left:.5em;border-bottom:1pt solid black;">{{file.filePath}}</td>
+        <td width="30%" style="padding-left:.5em;border-bottom:1pt solid black;">{{file.downloadUrl}}
         </td>
-        <td style="padding-left:.5em;border-bottom:1pt solid black;">{{file.message}}</td>
+        <td width="40%" style="padding-left:.5em;border-bottom:1pt solid black;">{{file.message}}</td>
       </tr>
     </tbody>
   </table>

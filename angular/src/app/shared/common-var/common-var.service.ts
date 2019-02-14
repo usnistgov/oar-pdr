@@ -13,6 +13,7 @@ export class CommonVarService {
   private random_minimum: number = 1;
   private random_maximum: number = 100000;
   private download_maximum: number = 2;
+  private isLocalTesting: boolean = false;
 
   processingSub = new BehaviorSubject<boolean>(false);
   localProcessingSub = new BehaviorSubject<boolean>(false);
@@ -51,6 +52,13 @@ export class CommonVarService {
 
   getDownloadMaximum() {
     return this.download_maximum;
+  }
+
+  /**
+   * Get local testing flag
+   **/
+  getLocalTestingFlag() {
+    return this.isLocalTesting;
   }
 
   /**

@@ -23,14 +23,17 @@ export class DownloadService {
   fireDownloadAllFlagSub = new BehaviorSubject<boolean>(false);
   // Determine if the download manager is a popup
   isPopupSub = new BehaviorSubject<boolean>(false);
+  isLocalTesting: boolean = false;
 
   constructor(
     private http: HttpClient,
     private cartService: CartService,
     private _FileSaverService: FileSaverService,
     private testDataService: TestDataService,
-    private commonVarService: CommonVarService,
-  ) { }
+    private commonVarService: CommonVarService
+  ) { 
+    this.isLocalTesting = this.commonVarService.getLocalTestingFlag();
+  }
 
   getFile(url, params): Observable<Blob> {
     return this.http.get(url, { responseType: 'blob', params: params });
@@ -40,10 +43,10 @@ export class DownloadService {
   /**
    * Calling end point 1 to get the bundle plan
    **/
-  getBundlePlan(url:string, body:any): Observable<any> {
+  getBundlePlan(url: string, body: any): Observable<any> {
     const httpOptions = {
       headers: new HttpHeaders({
-        'Content-Type':  'application/json'
+        'Content-Type': 'application/json'
       })
     };
 
@@ -59,12 +62,12 @@ export class DownloadService {
 
     const request = new HttpRequest(
       "POST", url, body,
-      { headers: new HttpHeaders({'Content-Type':  'application/json','responseType': 'blob'}), reportProgress: true, responseType: 'blob' });
+      { headers: new HttpHeaders({ 'Content-Type': 'application/json', 'responseType': 'blob' }), reportProgress: true, responseType: 'blob' });
 
-    // return this.http.request(request);
-
-    // for testing
-    return this.testDataService.getBundle('https://s3.amazonaws.com/nist-midas/1858/20170213_PowderPlate2_Pad.zip', body);
+    if(!this.isLocalTesting)
+     return this.http.request(request);
+    else
+     return this.testDataService.getBundle('https://s3.amazonaws.com/nist-midas/1858/20170213_PowderPlate2_Pad.zip', body);
   }
 
   /**
@@ -99,7 +102,10 @@ export class DownloadService {
             this.setFileDownloadedFlag(true);
             break;
           case HttpEventType.DownloadProgress:
-            nextZip.downloadProgress = Math.round(100 * event.loaded / event.total);
+            nextZip.downloadProgress = 0;
+            if (event.total > 0) {
+              nextZip.downloadProgress = Math.round(100 * event.loaded / event.total);
+            }
             break;
         }
 
