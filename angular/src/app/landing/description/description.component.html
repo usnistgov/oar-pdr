@@ -250,7 +250,7 @@
                   </span>
                   <span *ngIf="rowData.isIncart" style="margin-left: 0.5em;font-size: 0.5em">Added</span>
                   <ng-template #not_in_cart>
-                    <span (click)="addSubFilesToCart(rowData)">
+                    <span (click)="addSubFilesToCartAndUpdate(rowData)">
                       <i class="faa faa-cart-plus" style="color: #1E6BA1;cursor: pointer;" aria-hidden="true"
                         data-toggle="tooltip" title="Add to cart"></i>
                     </span>

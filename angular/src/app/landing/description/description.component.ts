@@ -367,13 +367,21 @@ export class DescriptionComponent {
   }
 
   /**
+  * Function to add whole subfolder files to data cart then update status
+  **/
+  addSubFilesToCartAndUpdate(rowData: any, isSelected: boolean) {
+    this.addSubFilesToCart(rowData, isSelected).then(function (result: any) {
+      this.allSelected = this.updateAllSelectStatus(this.files);
+    }.bind(this), function (err) {
+      alert("something went wrong while adding file to data cart.");
+    });
+  }
+
+  /**
   * Function to add whole subfolder files to data cart
   **/
   addSubFilesToCart(rowData: any, isSelected: boolean) {
-    let data: Data;
-    let compValue: any;
-
-    if (!this.isFile(rowData)) {
+    if (!rowData.isLeaf) {
       let subFiles: any = null;
       for (let comp of this.files) {
         subFiles = this.searchTree(comp, rowData.cartId);
@@ -389,8 +397,7 @@ export class DescriptionComponent {
       this.addtoCart(rowData, isSelected);
     }
 
-    this.allSelected = true;
-    this.updateAllSelectStatus(this.files);
+    return Promise.resolve(rowData);
   }
 
   /**
@@ -445,8 +452,7 @@ export class DescriptionComponent {
     this.cartService.deselectAll().then(function (result1: any) {
       this.addFilesToCart(files, isSelected).then(function (result2: any) {
         this.cartService.setForceDatacartReload(true);
-        this.allSelected = true;
-        this.updateAllSelectStatus(this.files);
+        this.allSelected = this.updateAllSelectStatus(this.files);
       }.bind(this), function (err) {
         alert("something went wrong while adding one file to data cart.");
       });
@@ -515,8 +521,7 @@ export class DescriptionComponent {
   **/
   removeFromNode(rowData: any) {
     this.removeCart(rowData);
-    this.allSelected = false;
-    this.updateAllSelectStatus(this.files);
+    this.allSelected = this.updateAllSelectStatus(this.files);
   }
 
   /**
@@ -546,8 +551,7 @@ export class DescriptionComponent {
   **/
   removeFilesFromCart(files: any) {
     this.removeFromCart(files);
-    this.allSelected = true;
-    this.updateAllSelectStatus(this.files);
+    this.allSelected = this.updateAllSelectStatus(this.files);
     return Promise.resolve(files);
   }
 

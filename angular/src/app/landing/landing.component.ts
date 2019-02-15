@@ -246,6 +246,7 @@ export class LandingComponent implements OnInit {
     this.type = this.record['@type'];
     this.titleService.setTitle(this.record['title']);
     this.createNewDataHierarchy();
+    this.setLeafs(this.files[0].data);
     if (this.record['doi'] !== undefined && this.record['doi'] !== "")
       this.isDOI = true;
     if ("hasEmail" in this.record['contactPoint'])
@@ -253,6 +254,8 @@ export class LandingComponent implements OnInit {
     this.assessNewer();
     this.updateMenu();
     this.commonVarService.setProcessing(false);
+    console.log("this.files");
+    console.log(this.files);
   }
 
   /**
@@ -529,6 +532,20 @@ export class LandingComponent implements OnInit {
       i = i + 1;
     });
     return tree;
+  }
+
+  /**
+  * Set isLeaf to true for all leafs
+  */
+  setLeafs(files: any){
+    for (let comp of files) {
+      if (comp.children.length > 0) {
+        comp.data.isLeaf = false;
+        this.setLeafs(comp.children);
+      } else {
+        comp.data.isLeaf = true;
+      }
+    }   
   }
 
   visibleHistory = false;
