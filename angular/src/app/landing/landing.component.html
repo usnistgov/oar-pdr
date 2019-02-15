@@ -1,8 +1,8 @@
 <style id="antiClickjack">
   body {
-        display: none !important;
-    }
-    </style>
+    display: none !important;
+  }
+</style>
 <script type="text/javascript">
   if (self === top) {
     var antiClickjack = document.getElementById("antiClickjack");
@@ -16,14 +16,17 @@
 
 <div class="ui-grid ui-grid-responsive ui-grid-pad center">
   <div class="card landingcard">
-    <div *ngIf="isProcessing" class="app-loading">
-      <div class="logo"> Loading ...</div>
+    <!-- <div *ngIf="isProcessing" class="app-loading"> -->
+      <!-- <div class="logo"> Loading ...</div>
       <svg class="spinner" viewBox="25 25 50 50">
         <circle class="path" cx="50" cy="50" r="20" fill="none" stroke-width="2" stroke-miterlimit="10" style="color:blue" />
-      </svg>
-    </div>
+      </svg> -->
+      <ngx-spinner bdOpacity = 0.9 bdColor="white" size="medium" color="#78c5ff" type="ball-circus" fullScreen = "false">
+        <p style="font-size: 15px; color: black">Loading ...</p>
+      </ngx-spinner>
+    <!-- </div> -->
     <!-- <div id="overlay" *ngIf="isLocalProcessing"> -->
-        <div class="loading" *ngIf="isLocalProcessing"></div>
+    <div class="loading" *ngIf="isLocalProcessing"></div>
     <!-- </div> -->
     <div *ngIf="record?.length == 0 || isId === false">
       <div *ngIf="!isProcessing" class="ui-g">
@@ -45,8 +48,8 @@
                 <b *ngSwitchDefault></b>
               </span>
               <div *ngIf="record.length !== 0" class="ui-sm-1 d-none d-sm-block d-md-none ">
-                <button style="float: right" type="button" pButton icon="faa faa-list" class="ui-button ui-button-icon-only"
-                  (click)="menu3.toggle($event)"></button>
+                <button style="float: right" type="button" pButton icon="faa faa-list"
+                  class="ui-button ui-button-icon-only" (click)="menu3.toggle($event)"></button>
                 <p-menu #menu3 class="rightMenuStylePop" popup="popup" [model]="rightmenu"></p-menu>
               </div>
               <br>
@@ -57,8 +60,10 @@
                 <span *ngFor="let author of record.authors; let i = index">
                   {{ author.fn}}<span *ngIf="i < record.authors.length-1 ">,</span>
                 </span>
-                <i style="cursor: pointer; margin-left: 0.5rem;" class="faa" [ngClass]="{'faa-plus-square-o': !clickAuthors, 'faa-minus-square-o': clickAuthors}"
-                  aria-hidden="true" (click)="isCollapsedContent = !isCollapsedContent; clickAuthors = expandClick();"></i>
+                <i style="cursor: pointer; margin-left: 0.5rem;" class="faa"
+                  [ngClass]="{'faa-plus-square-o': !clickAuthors, 'faa-minus-square-o': clickAuthors}"
+                  aria-hidden="true"
+                  (click)="isCollapsedContent = !isCollapsedContent; clickAuthors = expandClick();"></i>
               </div>
               <div [collapse]="!isCollapsedContent" class="card card-block card-header customcard">
                 <div class="" *ngIf="record.authors">
@@ -81,8 +86,9 @@
                   {{record.contactPoint.fn}}</a>
                 <span *ngIf="!isEmail">{{record.contactPoint.fn}}</span>
               </strong>..
-              <i style="cursor: pointer;" class="faa" [ngClass]="{'faa-plus-square-o': !clickContact, 'faa-minus-square-o': clickContact}"
-                aria-hidden="true" (click)="closeContent = !closeContent; clickContact=expandContact();"></i>
+              <i style="cursor: pointer;" class="faa"
+                [ngClass]="{'faa-plus-square-o': !clickContact, 'faa-minus-square-o': clickContact}" aria-hidden="true"
+                (click)="closeContent = !closeContent; clickContact=expandContact();"></i>
               <div [collapse]="!closeContent" class="card card-body bg-faded">
                 <span class="" *ngIf="record.contactPoint.fn">
                   <span>{{record.contactPoint.fn}}</span>
@@ -101,8 +107,10 @@
               </div>
               <br>
               <span *ngIf="isId">Identifier: </span>
-              <span *ngIf="isDOI"><i> <a class="font14" href="https://doi.org/{{record.doi.split(':')[1]}}">{{record.doi}}</a></i></span>
-              <span *ngIf="!isDOI"><i> <a class="font14" href="{{ confValues.PDRAPI }}{{record['@id']}}">{{record["@id"]}}</a></i>
+              <span *ngIf="isDOI"><i> <a class="font14"
+                    href="https://doi.org/{{record.doi.split(':')[1]}}">{{record.doi}}</a></i></span>
+              <span *ngIf="!isDOI"><i> <a class="font14"
+                    href="{{ confValues.PDRAPI }}{{record['@id']}}">{{record["@id"]}}</a></i>
               </span>
               <span *ngIf="checkReferences()"><br>
                 <span>Described in article: </span>
@@ -116,11 +124,14 @@
               </span><br>
               <span class="" *ngIf="record.version"> Version: <strong>{{record.version}}</strong></span>
               <span class="" *ngIf="record.versionHistory" style="padding-right: 15pt;">...
-                <i style="cursor: pointer;" class="faa" aria-hidden="true" [ngClass]="{'faa-plus-square-o': !clickHistory, 'faa-minus-square-o': clickHistory}"
+                <i style="cursor: pointer;" class="faa" aria-hidden="true"
+                  [ngClass]="{'faa-plus-square-o': !clickHistory, 'faa-minus-square-o': clickHistory}"
                   (click)="closeHistory = !closeHistory; clickHistory = expandHistory();"></i>
               </span>
-              <span class="" *ngIf="record.issued" style="padding-right: 10pt;"> Released: <strong>{{record.issued}}</strong></span>
-              <span class="" *ngIf="record.modified" style="padding-right: 10pt;"> Last modified: <strong>{{record.modified}}</strong></span>
+              <span class="" *ngIf="record.issued" style="padding-right: 10pt;"> Released:
+                <strong>{{record.issued}}</strong></span>
+              <span class="" *ngIf="record.modified" style="padding-right: 10pt;"> Last modified:
+                <strong>{{record.modified}}</strong></span>
               <div class="card customcard" [collapse]="!closeHistory">
                 <b>Version History:</b>
                 <span *ngFor="let release of record.versionHistory">
@@ -142,15 +153,16 @@
             <div class="ui-g-4 ui-md-4 ui-lg-4 ui-sm-12">
               <span *ngIf="record.landingPage">
                 <a [(href)]="record.landingPage" target="_blank" style="float: right;">
-                  <button pButton type="button" class="homePageLink" icon="faa faa-external-link" label="Visit Home Page"></button>
+                  <button pButton type="button" class="homePageLink" icon="faa faa-external-link"
+                    label="Visit Home Page"></button>
                 </a>
               </span>
             </div>
           </div>
           <div class="ui-g">
             <div class="ui-g-12 ui-md-12 ui-lg-12 ui-sm-12">
-              <description-resources [record]="record" [files]="files" [distdownload]="distdownload" [isInternal]="isInternal"
-                [filescount]="filescount" [metadata]="metadata"></description-resources>
+              <description-resources [record]="record" [files]="files" [distdownload]="distdownload"
+                [isInternal]="isInternal" [filescount]="filescount" [metadata]="metadata"></description-resources>
               <metadata-detail [record]="record" [serviceApi]="serviceApi" [metadata]="metadata"></metadata-detail>
               <!-- <data-cart></data-cart>   -->
             </div>
@@ -158,13 +170,14 @@
               <p-dialog class="citationDialog" [closable]="false" [(visible)]="display" modal="modal" width="550"
                 height="330" responsive="true" #citeDialog>
                 <p-header> Citation
-                  <button style="position:relative; float:right; background-color:#1E6BA1; " type="button" pButton icon="faa faa-close"
-                    (click)="closeDialog()"></button>
+                  <button style="position:relative; float:right; background-color:#1E6BA1; " type="button" pButton
+                    icon="faa faa-close" (click)="closeDialog()"></button>
                 </p-header>
                 <span><b>Copy the recommended text to cite this resource </b></span> <br><br>
                 <p contenteditable="false" style="font-size: 14px;">{{ citeString }}</p>
                 <br>
-                <a target="citationsRecommendation" href="https://www.nist.gov/director/copyright-fair-use-and-licensing-statements-srd-data-and-software#citations">See
+                <a target="citationsRecommendation"
+                  href="https://www.nist.gov/director/copyright-fair-use-and-licensing-statements-srd-data-and-software#citations">See
                   also NIST Citation Recommendations</a>
               </p-dialog>
             </div>

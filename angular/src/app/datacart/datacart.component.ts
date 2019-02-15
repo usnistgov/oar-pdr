@@ -27,6 +27,7 @@ import { AppConfig, Config } from '../shared/config-service/config.service';
 import { BootstrapOptions } from '@angular/core/src/application_ref';
 import { AsyncBooleanResultCallback } from 'async';
 import { FileSaverService } from 'ngx-filesaver';
+import { NgxSpinnerService } from 'ngx-spinner';
 
 declare var Ultima: any;
 declare var saveAs: any;
@@ -136,7 +137,8 @@ export class DatacartComponent implements OnInit, OnDestroy {
     private downloadService: DownloadService,
     private appConfig: AppConfig,
     private _FileSaverService: FileSaverService,
-    private commonVarService: CommonVarService) {
+    private commonVarService: CommonVarService,
+    private mySpinner: NgxSpinnerService) {
     this.getDataCartList("Init");
     this.confValues = this.appConfig.getConfig();
     this.cartService.watchForceDatacartReload().subscribe(
@@ -146,12 +148,28 @@ export class DatacartComponent implements OnInit, OnDestroy {
         }
       }
     );
+    this.commonVarService.watchProcessing().subscribe(
+      value => {
+        console.log("Processing?");
+        console.log(value);
+        if (value)
+          this.mySpinner.show();
+        else
+          this.mySpinner.hide();
+
+        setTimeout(() => {
+          /** spinner ends after 10 seconds */
+          this.mySpinner.hide();
+        }, 10000);
+      }
+    );
   }
 
   /**
    * Get the params OnInit
    */
   ngOnInit() {
+    this.mySpinner.show();
     this.downloadService.watchIsPopupFlag().subscribe(
       value => {
         this.isPopup = value;
@@ -163,6 +181,7 @@ export class DatacartComponent implements OnInit, OnDestroy {
       value => {
         if (value) {
           this.loadDatacart().then(function (result) {
+            this.commonVarService.setProcessing(false);
             // console.log("this.dataFiles");
             // console.log(this.dataFiles);
 
@@ -308,6 +327,7 @@ export class DatacartComponent implements OnInit, OnDestroy {
   * Function to download all files from API call.
   **/
   downloadAllFilesFromAPI() {
+    this.mySpinner.show();
     this.showCurrentTask = true;
     let postMessage: any[] = [];
     this.downloadData = [];
@@ -350,6 +370,7 @@ export class DatacartComponent implements OnInit, OnDestroy {
         // console.log("Bundle plan return:");
         // console.log(blob);
         this.showCurrentTask = false;
+        this.mySpinner.hide();
         this.processBundle(blob, zipFileBaseName, files);
       },
       err => {
@@ -357,6 +378,7 @@ export class DatacartComponent implements OnInit, OnDestroy {
         console.log(err);
         this.bundlePlanMessage = err;
         this.bundlePlanStatus = "error";
+        this.mySpinner.hide();
         this.showCurrentTask = false;
         this.messageColor = this.getColor();
         this.broadcastMessage = 'Http responsed with error: ' + err.message;
@@ -440,6 +462,7 @@ export class DatacartComponent implements OnInit, OnDestroy {
     }
 
     this.resetDownloadParams();
+    this.mySpinner.hide();
     this.showCurrentTask = false;
     this.showMessageBlock = false;
   }
@@ -714,9 +737,9 @@ export class DatacartComponent implements OnInit, OnDestroy {
       });
     }
 
-    if(inputArray.children.length>0){
+    if (inputArray.children.length > 0) {
       inputArray.data.isLeaf = false;
-    }else{
+    } else {
       inputArray.data.isLeaf = true;
     }
 

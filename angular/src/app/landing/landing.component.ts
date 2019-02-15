@@ -22,6 +22,7 @@ import { makeStateKey, TransferState } from '@angular/platform-browser';
 import { _throw } from 'rxjs/observable/throw';
 // import {DialogService} from 'primeng/api';
 import { DatacartComponent } from '../datacart/datacart.component';
+import { NgxSpinnerService } from 'ngx-spinner';
 
 
 interface reference {
@@ -140,20 +141,35 @@ export class LandingComponent implements OnInit {
     @Inject(APP_ID) private appId: string,
     private transferState: TransferState,
     private searchService: SearchService,
-    private commonVarService: CommonVarService) {
+    private commonVarService: CommonVarService,
+    private mySpinner: NgxSpinnerService) {
     this.confValues = this.appConfig.getConfig();
+    this.commonVarService.watchProcessing().subscribe(
+      value => {
+        console.log("Processing?");
+        console.log(value);
+        if (value)
+          this.mySpinner.show();
+        else
+          this.mySpinner.hide();
+
+        setTimeout(() => {
+          /** spinner ends after 10 seconds */
+          this.mySpinner.hide();
+        }, 10000);
+
+        this.isProcessing = value;
+      }
+    );
   }
 
   /**
    * Get the params OnInit
    */
   ngOnInit() {
+    this.mySpinner.show();
     this.commonVarService.setProcessing(true);
-    this.commonVarService.watchProcessing().subscribe(
-      value => {
-        this.isProcessing = value;
-      }
-    );
+
     this.commonVarService.watchLocalProcessing().subscribe(
       value => {
         this.isLocalProcessing = value;
@@ -537,7 +553,7 @@ export class LandingComponent implements OnInit {
   /**
   * Set isLeaf to true for all leafs
   */
-  setLeafs(files: any){
+  setLeafs(files: any) {
     for (let comp of files) {
       if (comp.children.length > 0) {
         comp.data.isLeaf = false;
@@ -545,7 +561,7 @@ export class LandingComponent implements OnInit {
       } else {
         comp.data.isLeaf = true;
       }
-    }   
+    }
   }
 
   visibleHistory = false;

@@ -31,12 +31,16 @@
         </span>
       </ng-template>
     </div>
-    <div *ngIf="showCurrentTask" class="app-loading">
+    <ngx-spinner bdOpacity=0.9 bdColor="white" size="medium" color="#78c5ff" type="ball-circus" fullScreen="false">
+      <p style="font-size: 15px; color: black">{{currentTask}} ...</p>
+    </ngx-spinner>
+    <!-- <div *ngIf="showCurrentTask" class="app-loading">
       <div class="logo">{{currentTask}}</div>
       <svg class="spinner" viewBox="25 25 50 50">
-        <circle class="path" cx="50" cy="50" r="20" fill="none" stroke-width="2" stroke-miterlimit="10" style="color:blue" />
+        <circle class="path" cx="50" cy="50" r="20" fill="none" stroke-width="2" stroke-miterlimit="10"
+          style="color:blue" />
       </svg>
-    </div>
+    </div> -->
     <!-- <div *ngIf="showCurrentTask" style="display: inline; font-size: 9pt;">
       <i class="faa faa-spinner faa-spin" style="color:#1E6BA1" aria-hidden="true"></i>
       {{currentTask}}
@@ -125,14 +129,17 @@
               <p-progressSpinner [style]="{width: '12px', height: '12px'}"></p-progressSpinner>
             </span>
           </div>
-          <div style="padding-left: .5em; flex: 0 0 auto;">
+          <span style="display:inline;font-size: 0.8em">
+            {{zip.downloadStatus}}
+          </span>
+          <!-- <div style="padding-left: .5em; flex: 0 0 auto;">
             <span style="display:inline;font-size: 0.8em">
               {{zip.downloadProgress}}%
             </span>
           </div>
           <div style="padding-left: 2%; padding-top: 8px;width: 200px;flex: 0 0 auto;height: 2em;">
             <p-progressBar [value]="zip.downloadProgress" showValue="false"></p-progressBar>
-          </div>
+          </div> -->
           <div style="padding-left:5px; flex: 0 0 auto;">
             <span (click)="cancelDownloadZip(zip)" style="cursor: pointer;"><i class="faa faa-remove"></i></span>
           </div>
@@ -233,7 +240,8 @@
           <span *ngIf="!rowData.isLeaf">
             {{rowData.resTitle}}
           </span>
-          <span *ngIf="showZipFilesNmaes" style="color:grey;margin-left: 1em;font-style: italic;"> {{rowData.zipFile}}</span>
+          <span *ngIf="showZipFilesNmaes" style="color:grey;margin-left: 1em;font-style: italic;">
+            {{rowData.zipFile}}</span>
         </td>
         <td>
           <span>{{rowData.mediatype}}</span>
@@ -264,7 +272,7 @@
             </div>
             <div style="padding-left:5px; flex: 0 0 auto;">
               <span (click)="cancelDownload(rowData)" style="cursor: pointer;"><i class="faa faa-remove"></i></span>
-            </div> 
+            </div>
           </div>
 
           <!-- <button type="button" *ngIf = "rowData.downloadStatus === 'downloaded' && rowData.resTitle.indexOf('.') > 0 " style="margin-left:-20px;margin-top: 5px;padding-left:.5em;" class="small-button" pButton icon="faa faa-check"></button>
