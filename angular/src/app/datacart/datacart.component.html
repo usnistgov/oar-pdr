@@ -19,7 +19,8 @@
   <div style="display: flex;justify-content: space-between;">
     <div *ngIf="bundlePlanStatus != 'complete' && bundlePlanMessage" style="display: inline; text-align: left;">
       <i class="faa faa-warning" [ngStyle]="{'color':messageColor, 'padding-right':'.5em'}"></i>
-      <span *ngIf="bundlePlanStatus == 'error';else no_error" [ngStyle]="{'color':messageColor}">{{broadcastMessage}}</span>
+      <span *ngIf="bundlePlanStatus == 'error';else no_error"
+        [ngStyle]="{'color':messageColor}">{{broadcastMessage}}</span>
       <ng-template #no_error>
         <span [ngStyle]="{'color':getColor(), 'padding-right':'.5em'}">{{broadcastMessage}}</span>
         <span (click)="showMessageBlock = !showMessageBlock">
@@ -30,10 +31,16 @@
         </span>
       </ng-template>
     </div>
-    <div *ngIf="showCurrentTask" style="display: inline; font-size: 9pt;">
+    <div *ngIf="showCurrentTask" class="app-loading">
+      <div class="logo">{{currentTask}}</div>
+      <svg class="spinner" viewBox="25 25 50 50">
+        <circle class="path" cx="50" cy="50" r="20" fill="none" stroke-width="2" stroke-miterlimit="10" style="color:blue" />
+      </svg>
+    </div>
+    <!-- <div *ngIf="showCurrentTask" style="display: inline; font-size: 9pt;">
       <i class="faa faa-spinner faa-spin" style="color:#1E6BA1" aria-hidden="true"></i>
       {{currentTask}}
-    </div>
+    </div> -->
   </div>
 </div>
 <div *ngIf="showMessageBlock" style="width: 94%;margin-left: 3%;margin-right: 3%;">
@@ -218,15 +225,15 @@
           <!-- <span *ngIf = "rowData.resTitle.indexOf('.') > 0 "> {{rowData.resTitle}} </span> -->
           <!-- &nbsp;<a href="{{rowData.downloadUrl}}" target="_blank" *ngIf = "rowData.resTitle.indexOf('.') > 0 "> -->
           <!-- </a> -->
-          <span *ngIf="rowData.resTitle.indexOf('.') > 0">
-            <a (click)="openDetails($event,rowData,op3) " style="cursor: pointer;" data-toggle="tooltip"
+          <span *ngIf="rowData.isLeaf">
+            <a (click)="openDetails($event,rowData,op3) " style="color: #1E6BA1;cursor: pointer;" data-toggle="tooltip"
               title="Click for more details">
               {{rowData.resTitle}} </a>
           </span>
-          <span *ngIf="rowData.resTitle.indexOf('.') < 0">
+          <span *ngIf="!rowData.isLeaf">
             {{rowData.resTitle}}
           </span>
-          <span *ngIf="showZipFilesNmaes" style="color:rgb(13, 60, 121);margin-left: 1em;"> {{rowData.zipFile}}</span>
+          <span *ngIf="showZipFilesNmaes" style="color:grey;margin-left: 1em;font-style: italic;"> {{rowData.zipFile}}</span>
         </td>
         <td>
           <span>{{rowData.mediatype}}</span>
@@ -237,13 +244,18 @@
         <td>
           &nbsp;
           <!-- <span *ngIf = "rowData.resTitle.indexOf('.') > 0" (click)="downloadOneFile(rowData)"> -->
-          <span *ngIf="rowData.resTitle.indexOf('.') > 0" (click)="downloadOneFile(rowData)">
+          <!-- <a href="{{rowData.downloadUrl}}" download>
+            <i class="faa faa-download" [ngStyle]="{'color':getDownloadBtnColor(rowData)}" aria-hidden="true"
+              (click)="setFileDownloaded(rowData)"></i>
+          </a> -->
+
+          <span *ngIf="rowData.isLeaf" (click)="downloadOneFile(rowData)">
             <i *ngIf="rowData.downloadStatus == null" class="faa faa-download" style="color: #1E6BA1;cursor: pointer;"
               aria-hidden="true" data-toggle="tooltip" title="Direct download"></i>
             <i *ngIf="rowData.downloadStatus === 'downloaded'" class="faa faa-download"
               style="color:green; cursor: pointer;" aria-hidden="true" data-toggle="tooltip" title="Download again"></i>
           </span>
-          <div *ngIf="rowData.downloadStatus === 'downloading'" style="display:flex;">
+          <div *ngIf="showDownloadProgress && rowData.downloadStatus === 'downloading'" style="display:flex;">
             <span style="display:inline;font-size: 0.8em">
               {{rowData.downloadProgress}}%
             </span>
@@ -252,12 +264,13 @@
             </div>
             <div style="padding-left:5px; flex: 0 0 auto;">
               <span (click)="cancelDownload(rowData)" style="cursor: pointer;"><i class="faa faa-remove"></i></span>
-            </div>
+            </div> 
           </div>
+
           <!-- <button type="button" *ngIf = "rowData.downloadStatus === 'downloaded' && rowData.resTitle.indexOf('.') > 0 " style="margin-left:-20px;margin-top: 5px;padding-left:.5em;" class="small-button" pButton icon="faa faa-check"></button>
                         <button type="button" *ngIf = "rowData.downloadStatus === 'downloading' && rowData.resTitle.indexOf('.') > 0 "  class="small-button-yellow" pButton icon="faa faa-check"></button> &nbsp; -->
           <!-- <span *ngIf = "rowData.resTitle.indexOf('.') > 0 && rowData.downloadStatus != 'downloading'" style="padding-left:0.5em;">{{rowData.downloadStatus}}</span> -->
-          <span *ngIf="rowData.resTitle.indexOf('.') > 0 && rowData.downloadStatus != 'downloading'"
+          <span *ngIf="rowData.isLeaf && rowData.downloadStatus != 'downloading'"
             style="padding-left:0.5em;">{{rowData.downloadStatus}}</span>
         </td>
       </tr>

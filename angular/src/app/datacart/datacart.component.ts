@@ -78,7 +78,6 @@ export class DatacartComponent implements OnInit, OnDestroy {
   selectedData: TreeNode[] = [];
   dataFiles: TreeNode[] = [];
   childNode: TreeNode = {};
-  display: boolean = true;
   minimum: number = 1;
   maximum: number = 100000;
   displayFiles: any = [];
@@ -123,6 +122,7 @@ export class DatacartComponent implements OnInit, OnDestroy {
   showCurrentTask: boolean = false;
   showMessage: boolean = true;
   broadcastMessage: string = '';
+  showDownloadProgress: boolean = false;
 
   // private distApi: string = environment.DISTAPI;
   //private distApi:string = "http://localhost:8083/oar-dist-service";
@@ -138,7 +138,6 @@ export class DatacartComponent implements OnInit, OnDestroy {
     private _FileSaverService: FileSaverService,
     private commonVarService: CommonVarService) {
     this.getDataCartList("Init");
-    this.display = true;
     this.confValues = this.appConfig.getConfig();
     this.cartService.watchForceDatacartReload().subscribe(
       value => {
@@ -164,6 +163,9 @@ export class DatacartComponent implements OnInit, OnDestroy {
       value => {
         if (value) {
           this.loadDatacart().then(function (result) {
+            // console.log("this.dataFiles");
+            // console.log(this.dataFiles);
+
           }.bind(this), function (err) {
             alert("something went wrong while loading datacart.");
           });
@@ -207,7 +209,7 @@ export class DatacartComponent implements OnInit, OnDestroy {
     this.currentStatus = "Loading...";
     this.selectedData = [];
     this.createDataCartHierarchy();
-    this.display = true;
+    // this.display = true;
 
     // create root
     const newPart = {
@@ -373,8 +375,8 @@ export class DatacartComponent implements OnInit, OnDestroy {
     this.messageColor = this.getColor();
     this.bundlePlanUnhandledFiles = res.notIncluded;
     this.bundlePlanMessage = res.messages;
-    if(this.bundlePlanMessage != null){
-      this.broadcastMessage = 'Http responsed with warning.'; 
+    if (this.bundlePlanMessage != null) {
+      this.broadcastMessage = 'Http responsed with warning.';
     }
 
     let bundlePlan: any[] = res.bundleNameFilePathUrl;
@@ -461,32 +463,54 @@ export class DatacartComponent implements OnInit, OnDestroy {
   * Download one particular file
   **/
   downloadOneFile(rowData: any) {
-    let filename = decodeURI(rowData.downloadUrl).replace(/^.*[\\\/]/, '');
-    rowData.downloadStatus = 'downloading';
-    rowData.downloadProgress = 0;
+    console.log("rowData");
+    console.log(rowData);
+    if (rowData.downloadUrl != null && rowData.downloadUrl != undefined) {
+      let filename = decodeURI(rowData.downloadUrl).replace(/^.*[\\\/]/, '');
+      rowData.downloadStatus = 'downloading';
+      rowData.downloadProgress = 0;
 
-    const req = new HttpRequest('GET', rowData.downloadUrl, {
-      reportProgress: true, responseType: 'blob'
-    });
 
-    rowData.downloadInstance = this.http.request(req).subscribe(event => {
-      console.log("event");
-      console.log(event);
-      switch (event.type) {
-        case HttpEventType.Response:
-          this._FileSaverService.save(<any>event.body, filename);
-          rowData.downloadStatus = 'downloaded';
-          this.cartService.updateCartItemDownloadStatus(rowData.cartId, 'downloaded');
-          this.downloadService.setFileDownloadedFlag(true);
-          break;
-        case HttpEventType.DownloadProgress:
-          rowData.downloadProgress = 0;
-          if (event.total > 0) {
-            rowData.downloadProgress = Math.round(100 * event.loaded / event.total);
+      if (rowData.downloadUrl.length > 5 && rowData.downloadUrl.substring(0, 5).toLowerCase() == 'https') {
+        this.showDownloadProgress = true;
+
+        const req = new HttpRequest('GET', rowData.downloadUrl, {
+          reportProgress: true, responseType: 'blob'
+        });
+
+        rowData.downloadInstance = this.http.request(req).subscribe(event => {
+          switch (event.type) {
+            case HttpEventType.Response:
+              this._FileSaverService.save(<any>event.body, filename);
+              rowData.downloadStatus = 'downloaded';
+              this.cartService.updateCartItemDownloadStatus(rowData.cartId, 'downloaded');
+              this.downloadService.setFileDownloadedFlag(true);
+              break;
+            case HttpEventType.DownloadProgress:
+              rowData.downloadProgress = 0;
+              if (event.total > 0) {
+                rowData.downloadProgress = Math.round(100 * event.loaded / event.total);
+              }
+              break;
           }
-          break;
+        })
+      } else {
+        this.showDownloadProgress = false;
+        this.directDownloadFromUrl(rowData.downloadUrl, filename);
+        this.setFileDownloaded(rowData);
       }
-    })
+    }
+  }
+
+  directDownloadFromUrl(url: string, filename: string) {
+    let a = document.createElement('a');
+    document.body.appendChild(a);
+    a.setAttribute('style', 'display: none');
+    a.href = url;
+    a.download = filename;
+    a.click();
+    window.URL.revokeObjectURL(url);
+    a.remove();
   }
 
   /**
@@ -664,8 +688,6 @@ export class DatacartComponent implements OnInit, OnDestroy {
 
                 parent = child2;
               }
-              if (key == 'Measurement of the Behavior of Steel Beams under Localized Fire Exposure' && parent.parent != null)
-                this.selectedData.push(parent);
             }
           }
         }
@@ -691,6 +713,13 @@ export class DatacartComponent implements OnInit, OnDestroy {
         this.walkData(item, inputArray, level + '/' + path);
       });
     }
+
+    if(inputArray.children.length>0){
+      inputArray.data.isLeaf = false;
+    }else{
+      inputArray.data.isLeaf = true;
+    }
+
     if (inputArray.data && inputArray.data.filePath) {
       var key = level + inputArray.data.filePath;
       if (!(key in this.index)) {
@@ -853,4 +882,24 @@ export class DatacartComponent implements OnInit, OnDestroy {
       }
     }
   }
+
+  /**
+  * Return "download" button color based on download status
+  **/
+  getDownloadBtnColor(rowData: any) {
+    if (rowData.downloadStatus == 'downloaded')
+      return 'green';
+
+    return '#1E6BA1';
+  }
+
+  /**
+  * Function to set status when a file was downloaded
+  **/
+  setFileDownloaded(rowData: any) {
+    rowData.downloadStatus = 'downloaded';
+    this.cartService.updateCartItemDownloadStatus(rowData.cartId, 'downloaded');
+    this.downloadService.setFileDownloadedFlag(true);
+  }
 }
+
