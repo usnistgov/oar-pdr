@@ -39,7 +39,6 @@ import { ConfirmDialogModule, SelectItem, DropdownModule, ConfirmationService,Me
 import {ProgressBarModule} from 'primeng/progressbar';
 import { TestDataService } from './shared/testdata-service/testDataService';
 import { NgbdModalDownloadManager } from './landing/description/downloadmodal.component';
-import { NgxSpinnerModule } from 'ngx-spinner';
 
 // used to create fake backend
 import { fakeBackendProvider } from './_helpers/fakeBackendInterceptor';
@@ -71,7 +70,7 @@ const appInitializerFn = (appConfig: AppConfig) => {
     AppRoutingModule, HttpClientModule,
     CommonModule, SharedModule, BrowserAnimationsModule, FormsModule,TooltipModule,
     TreeTableModule, TreeModule,MenuModule, FieldsetModule,DialogModule,OverlayPanelModule,
-    ButtonModule,ProgressSpinnerModule,ConfirmDialogModule,ProgressBarModule,NgxSpinnerModule,
+    ButtonModule,ProgressSpinnerModule,ConfirmDialogModule,ProgressBarModule,
     NgbModule.forRoot()
   ],
   exports: [Collaspe],

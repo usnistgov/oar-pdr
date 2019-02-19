@@ -27,7 +27,6 @@ import { AppConfig, Config } from '../shared/config-service/config.service';
 import { BootstrapOptions } from '@angular/core/src/application_ref';
 import { AsyncBooleanResultCallback } from 'async';
 import { FileSaverService } from 'ngx-filesaver';
-import { NgxSpinnerService } from 'ngx-spinner';
 
 declare var Ultima: any;
 declare var saveAs: any;
@@ -124,6 +123,7 @@ export class DatacartComponent implements OnInit, OnDestroy {
   showMessage: boolean = true;
   broadcastMessage: string = '';
   showDownloadProgress: boolean = false;
+  isProcessing: boolean = false;
 
   // private distApi: string = environment.DISTAPI;
   //private distApi:string = "http://localhost:8083/oar-dist-service";
@@ -137,8 +137,7 @@ export class DatacartComponent implements OnInit, OnDestroy {
     private downloadService: DownloadService,
     private appConfig: AppConfig,
     private _FileSaverService: FileSaverService,
-    private commonVarService: CommonVarService,
-    private mySpinner: NgxSpinnerService) {
+    private commonVarService: CommonVarService) {
     this.getDataCartList("Init");
     this.confValues = this.appConfig.getConfig();
     this.cartService.watchForceDatacartReload().subscribe(
@@ -150,16 +149,11 @@ export class DatacartComponent implements OnInit, OnDestroy {
     );
     this.commonVarService.watchProcessing().subscribe(
       value => {
-        console.log("Processing?");
-        console.log(value);
-        if (value)
-          this.mySpinner.show();
-        else
-          this.mySpinner.hide();
+        this.isProcessing = value;
 
         setTimeout(() => {
           /** spinner ends after 10 seconds */
-          this.mySpinner.hide();
+          this.isProcessing = false;
         }, 10000);
       }
     );
@@ -169,7 +163,7 @@ export class DatacartComponent implements OnInit, OnDestroy {
    * Get the params OnInit
    */
   ngOnInit() {
-    this.mySpinner.show();
+    this.isProcessing = true;
     this.downloadService.watchIsPopupFlag().subscribe(
       value => {
         this.isPopup = value;
@@ -327,7 +321,7 @@ export class DatacartComponent implements OnInit, OnDestroy {
   * Function to download all files from API call.
   **/
   downloadAllFilesFromAPI() {
-    this.mySpinner.show();
+    this.isProcessing = true;
     this.showCurrentTask = true;
     let postMessage: any[] = [];
     this.downloadData = [];
@@ -370,7 +364,7 @@ export class DatacartComponent implements OnInit, OnDestroy {
         // console.log("Bundle plan return:");
         // console.log(blob);
         this.showCurrentTask = false;
-        this.mySpinner.hide();
+        this.isProcessing = false;
         this.processBundle(blob, zipFileBaseName, files);
       },
       err => {
@@ -378,7 +372,7 @@ export class DatacartComponent implements OnInit, OnDestroy {
         console.log(err);
         this.bundlePlanMessage = err;
         this.bundlePlanStatus = "error";
-        this.mySpinner.hide();
+        this.isProcessing = false;
         this.showCurrentTask = false;
         this.messageColor = this.getColor();
         this.broadcastMessage = 'Http responsed with error: ' + err.message;
@@ -462,7 +456,7 @@ export class DatacartComponent implements OnInit, OnDestroy {
     }
 
     this.resetDownloadParams();
-    this.mySpinner.hide();
+    this.isProcessing = false;
     this.showCurrentTask = false;
     this.showMessageBlock = false;
   }

@@ -411,8 +411,8 @@
   left: 0;
   bottom: 0;
   right: 0;
-  width: 50px;
-  height: 50px;
+  width: 100px;
+  height: 100px;
 }
 
 /* Transparent Overlay */
@@ -441,11 +441,11 @@
   content: '';
   display: block;
   font-size: 10px;
-  width: 50px;
-  height: 50px;
+  width: 100px;
+  height: 100px;
   margin-top: -0.5em;
 
-  border: 5px solid rgba(33, 150, 243, 1.0);
+  border: 2px solid rgba(33, 150, 243, 1.0);
   border-radius: 100%;
   border-bottom-color: transparent;
   -webkit-animation: spinner 1s linear 0s infinite;
@@ -524,4 +524,43 @@
 .icon-download, .icon-cart{
   position: relative;
   bottom: 7px;
+}
+
+.wrapper {
+  height: 100vh;
+  z-index: 999;
+}
+
+.loader_container {
+  position: fixed;
+  top: 30%;
+  left: 45%;
+}
+
+.loader_text {
+  position: relative;
+  text-align: center;
+  top: 85px;
+}
+
+.loader {
+  align-self: center;
+  border: 4px solid #f3f3f3;
+  /* Light grey */
+  border-top: 4px solid #3498db;
+  /* Blue */
+  border-radius: 100%;
+  width: 150px;
+  height: 150px;
+  animation: spin 2s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
 }

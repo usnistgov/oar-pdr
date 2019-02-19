@@ -19,6 +19,7 @@ export class CommonVarService {
   localProcessingSub = new BehaviorSubject<boolean>(false);
   showDatacartSub = new BehaviorSubject<boolean>(false);
   forceLandingPageInitSub = new BehaviorSubject<boolean>(false);
+  openDownloadModalSub = new BehaviorSubject<boolean>(false);
 
   constructor() { }
 
@@ -115,5 +116,19 @@ export class CommonVarService {
   **/
   watchShowDatacart(): Observable<any> {
     return this.showDatacartSub.asObservable();
+  }
+
+  /**
+   * Set show-datacart flag
+   **/
+  setOpenDownloadModal(value: boolean) {
+    this.openDownloadModalSub.next(value);
+  }
+
+  /**
+  * Watching show-datacart flag
+  **/
+  watchOpenDownloadModal(): Observable<boolean> {
+    return this.openDownloadModalSub.asObservable();
   }
 }

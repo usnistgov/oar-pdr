@@ -16,15 +16,20 @@
 
 <div class="ui-grid ui-grid-responsive ui-grid-pad center">
   <div class="card landingcard">
-    <!-- <div *ngIf="isProcessing" class="app-loading"> -->
-      <!-- <div class="logo"> Loading ...</div>
+    <!-- <div *ngIf="isProcessing" class="app-loading">
+      <div class="logo"> Loading ...</div>
       <svg class="spinner" viewBox="25 25 50 50">
-        <circle class="path" cx="50" cy="50" r="20" fill="none" stroke-width="2" stroke-miterlimit="10" style="color:blue" />
-      </svg> -->
-      <ngx-spinner bdOpacity = 0.9 bdColor="white" size="medium" color="#78c5ff" type="ball-circus" fullScreen = "false">
-        <p style="font-size: 15px; color: black">Loading ...</p>
-      </ngx-spinner>
-    <!-- </div> -->
+        <circle class="path" cx="50" cy="50" r="20" fill="none" stroke-width="2" stroke-miterlimit="10"
+          style="color:blue" />
+      </svg>
+    </div> -->
+    <div class="wrapper" *ngIf="isProcessing">
+      <div class="loader_container">
+        <div class="loader_text"> Loading ...</div>
+        <div class="loader"></div>
+      </div>
+    </div>
+
     <!-- <div id="overlay" *ngIf="isLocalProcessing"> -->
     <div class="loading" *ngIf="isLocalProcessing"></div>
     <!-- </div> -->

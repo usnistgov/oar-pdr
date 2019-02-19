@@ -23,7 +23,7 @@
     <br>
   </div>
 </div>
-
+ 
 <div id="dataAccess">
   <div class="font14" [hidden]="metadata">
     <h3><b>Data Access</b></h3><br>
@@ -222,7 +222,8 @@
               <div style="display: flex">
                 <div *ngIf="isFile(rowData);else space_holder">
                   <a href="{{rowData.downloadUrl}}" download>
-                    <i class="faa faa-download" [ngStyle]="{'color':getDownloadBtnColor(rowData)}" aria-hidden="true" (click)="setFileDownloaded(rowData)"></i>
+                    <i class="faa faa-download" [ngStyle]="{'color':getDownloadBtnColor(rowData)}" aria-hidden="true"
+                      (click)="setFileDownloaded(rowData)"></i>
                   </a>
                   <!-- <span *ngIf="rowData.downloadStatus == null" (click)="downloadFile(rowData)">
                     <i class="faa faa-download" style="color: #1E6BA1;cursor: pointer;" aria-hidden="true"

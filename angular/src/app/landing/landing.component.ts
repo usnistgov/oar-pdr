@@ -22,7 +22,6 @@ import { makeStateKey, TransferState } from '@angular/platform-browser';
 import { _throw } from 'rxjs/observable/throw';
 // import {DialogService} from 'primeng/api';
 import { DatacartComponent } from '../datacart/datacart.component';
-import { NgxSpinnerService } from 'ngx-spinner';
 
 
 interface reference {
@@ -141,24 +140,19 @@ export class LandingComponent implements OnInit {
     @Inject(APP_ID) private appId: string,
     private transferState: TransferState,
     private searchService: SearchService,
-    private commonVarService: CommonVarService,
-    private mySpinner: NgxSpinnerService) {
+    private commonVarService: CommonVarService) {
     this.confValues = this.appConfig.getConfig();
     this.commonVarService.watchProcessing().subscribe(
       value => {
         console.log("Processing?");
         console.log(value);
-        if (value)
-          this.mySpinner.show();
-        else
-          this.mySpinner.hide();
+        this.isProcessing = value;
 
         setTimeout(() => {
           /** spinner ends after 10 seconds */
-          this.mySpinner.hide();
+          this.isProcessing = false;
         }, 10000);
 
-        this.isProcessing = value;
       }
     );
   }
@@ -167,23 +161,12 @@ export class LandingComponent implements OnInit {
    * Get the params OnInit
    */
   ngOnInit() {
-    this.mySpinner.show();
+    this.isProcessing = true;
     this.commonVarService.setProcessing(true);
 
     this.commonVarService.watchLocalProcessing().subscribe(
       value => {
         this.isLocalProcessing = value;
-      }
-    );
-    this.commonVarService.watchShowDatacart().subscribe(
-      value => {
-        if (value) {
-          // const ref = this.dialogService.open(DatacartComponent, {
-          //   header: 'Data cart',
-          //   width: '70%'
-          // });
-        }
-        // this.displayDatacart = value;
       }
     );
 
@@ -204,43 +187,7 @@ export class LandingComponent implements OnInit {
         this.onError(" There is an error");
         // throw new ErrorComponent(this.route);
       });
-
-    // this.route.data.map(data => data.searchService )
-    //   .subscribe((res)=>{
-    //     this.onSuccess(res);
-    //   }, error =>{
-    //     console.log("There is an error in searchservice.");
-    //     this.onError(" There is an error");
-    //     // throw new ErrorComponent(this.route);
-    //   });
   }
-
-  /**
- * Get the params OnInit
- */
-  // ngOnInit() {
-  //   this.searchValue = this.route.snapshot.paramMap.get('id');
-  //   if(this.router.url.includes("ark"))
-  //     this.searchValue =  this.router.url.split("/id/").pop();
-  //   this.files =[];
-
-  //   this.getData()
-  //         .subscribe((res)=>{
-  //           this.onSuccess(res);
-  //         }, error =>{
-  //           console.log("There is an error in searchservice.");
-  //           this.onError(" There is an error");
-  //           // throw new ErrorComponent(this.route);
-  //         }); 
-  //    //  this.route.data.map(data => data.searchService )
-  //     //  .subscribe((res)=>{
-  //     //    this.onSuccess(res);
-  //     //  }, error =>{
-  //     //     console.log("There is an error in searchservice.");
-  //     //     this.onError(" There is an error");
-  //     //     // throw new ErrorComponent(this.route);
-  //     //  });
-  // }
 
   /**
   * If Search is successful populate list of keywords themes and authors

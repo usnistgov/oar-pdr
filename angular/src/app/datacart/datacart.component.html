@@ -31,9 +31,6 @@
         </span>
       </ng-template>
     </div>
-    <ngx-spinner bdOpacity=0.9 bdColor="white" size="medium" color="#78c5ff" type="ball-circus" fullScreen="false">
-      <p style="font-size: 15px; color: black">{{currentTask}} ...</p>
-    </ngx-spinner>
     <!-- <div *ngIf="showCurrentTask" class="app-loading">
       <div class="logo">{{currentTask}}</div>
       <svg class="spinner" viewBox="25 25 50 50">
@@ -41,10 +38,10 @@
           style="color:blue" />
       </svg>
     </div> -->
-    <!-- <div *ngIf="showCurrentTask" style="display: inline; font-size: 9pt;">
-      <i class="faa faa-spinner faa-spin" style="color:#1E6BA1" aria-hidden="true"></i>
+    <div *ngIf="showCurrentTask" style="display: inline; font-size: 9pt;">
+      <p-progressSpinner [style]="{width: '24px', height: '24px'}"></p-progressSpinner>
       {{currentTask}}
-    </div> -->
+    </div>
   </div>
 </div>
 <div *ngIf="showMessageBlock" style="width: 94%;margin-left: 3%;margin-right: 3%;">
