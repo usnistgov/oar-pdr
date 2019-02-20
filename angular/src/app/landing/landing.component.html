@@ -16,25 +16,11 @@
 
 <div class="ui-grid ui-grid-responsive ui-grid-pad center">
   <div class="card landingcard">
-    <!-- <div *ngIf="isProcessing" class="app-loading">
-      <div class="logo"> Loading ...</div>
-      <svg class="spinner" viewBox="25 25 50 50">
-        <circle class="path" cx="50" cy="50" r="20" fill="none" stroke-width="2" stroke-miterlimit="10"
-          style="color:blue" />
-      </svg>
-    </div> -->
-    <div class="wrapper" *ngIf="isProcessing">
-      <div class="loader_container">
-        <div class="loader_text"> Loading ...</div>
-        <div class="loader"></div>
-      </div>
-    </div>
-
     <!-- <div id="overlay" *ngIf="isLocalProcessing"> -->
     <div class="loading" *ngIf="isLocalProcessing"></div>
     <!-- </div> -->
     <div *ngIf="record?.length == 0 || isId === false">
-      <div *ngIf="!isProcessing" class="ui-g">
+      <div *ngIf="!isLoading" class="ui-g">
         <div class="ui-g-10 ui-md-10 ui-lg-10 ui-sm-12" style="padding-left: 1%">
           <b>No Landing page available</b>
           <p>The requested record id {{ searchValue }} does not match with any records in the system</p>

@@ -126,9 +126,9 @@ export class LandingComponent implements OnInit {
   navigationSubscription: any;
   ediid: any;
   confValues: Config;
-  isProcessing: boolean = false;
   displayDatacart: boolean = false;
   isLocalProcessing: boolean = false;
+  isLoading: boolean = true;
 
   /**
    * Creates an instance of the SearchPanel
@@ -142,26 +142,13 @@ export class LandingComponent implements OnInit {
     private searchService: SearchService,
     private commonVarService: CommonVarService) {
     this.confValues = this.appConfig.getConfig();
-    this.commonVarService.watchProcessing().subscribe(
-      value => {
-        console.log("Processing?");
-        console.log(value);
-        this.isProcessing = value;
-
-        setTimeout(() => {
-          /** spinner ends after 10 seconds */
-          this.isProcessing = false;
-        }, 10000);
-
-      }
-    );
   }
 
   /**
    * Get the params OnInit
    */
   ngOnInit() {
-    this.isProcessing = true;
+    console.log("Landing page init...");
     this.commonVarService.setProcessing(true);
 
     this.commonVarService.watchLocalProcessing().subscribe(
@@ -180,13 +167,38 @@ export class LandingComponent implements OnInit {
 
     this.getData()
       .subscribe((res) => {
-        this.onSuccess(res);
+        this.onSuccess(res).then(function (result) {
+          this.commonVarService.setLandingPageReady(true);
+          this.isLoading = false;
+        }.bind(this), function (err) {
+          alert("something went wrong while fetching the data.");
+        });
       }, error => {
         this.commonVarService.setProcessing(false);
         console.log("There is an error in searchservice.");
         this.onError(" There is an error");
         // throw new ErrorComponent(this.route);
       });
+  }
+
+  /*
+    Function after view init
+  */
+  ngAfterViewInit() {
+    this.useFragment();
+    var recordid;
+    if (this.record != null && isPlatformBrowser(this.platformId)) {
+      // recordid = this.searchValue;
+      // // recordid = "ark:/88434/"+this.searchValue;
+      // if(this.searchValue.includes("ark"))
+      // window.history.replaceState( {} , '', '/od/id/'+this.searchValue );
+      // else
+      window.history.replaceState({}, '', '/od/id/' + this.searchValue);
+    }
+    setTimeout(() => {
+      console.log("Landing page is ready.");
+      // this.commonVarService.setLandingPageReady(true);
+    });
   }
 
   /**
@@ -219,6 +231,7 @@ export class LandingComponent implements OnInit {
     this.commonVarService.setProcessing(false);
     console.log("this.files");
     console.log(this.files);
+    return Promise.resolve(this.files);
   }
 
   /**
@@ -400,21 +413,6 @@ export class LandingComponent implements OnInit {
             }
           })
         );
-    }
-  }
-
-
-
-  ngAfterViewInit() {
-    this.useFragment();
-    var recordid;
-    if (this.record != null && isPlatformBrowser(this.platformId)) {
-      // recordid = this.searchValue;
-      // // recordid = "ark:/88434/"+this.searchValue;
-      // if(this.searchValue.includes("ark"))
-      // window.history.replaceState( {} , '', '/od/id/'+this.searchValue );
-      // else
-      window.history.replaceState({}, '', '/od/id/' + this.searchValue);
     }
   }
 

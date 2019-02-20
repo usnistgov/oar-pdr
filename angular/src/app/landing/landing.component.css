@@ -526,7 +526,7 @@
   bottom: 7px;
 }
 
-.wrapper {
+.loader_wrapper {
   height: 100vh;
   z-index: 999;
 }

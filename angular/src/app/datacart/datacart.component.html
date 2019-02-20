@@ -14,8 +14,16 @@
   }
 </script>
 
+<div *ngIf="!isPopup" class="title" style="width: 94%; margin-top: 2em; margin-left: 3%; margin-bottom: 0.5em;">Download
+  Manager</div>
+<div style="width:100%; margin-bottom: 1em;" *ngIf="showCurrentTask">
+  <div style="text-align: center; margin: 0 auto; font-size: 14pt;">
+    <p-progressSpinner [style]="{'width': '25px', 'height': '25px', 'padding-right':'0.5em', 'padding-top': '0em'}">
+    </p-progressSpinner>
+    {{currentTask}}
+  </div>
+</div>
 <div style="width: 94%; margin-top: 2em; margin-left: 3%; ">
-  <div *ngIf="!isPopup" class="title" style="margin-bottom: 0.5em;">Download Manager</div>
   <div style="display: flex;justify-content: space-between;">
     <div *ngIf="bundlePlanStatus != 'complete' && bundlePlanMessage" style="display: inline; text-align: left;">
       <i class="faa faa-warning" [ngStyle]="{'color':messageColor, 'padding-right':'.5em'}"></i>
@@ -31,19 +39,9 @@
         </span>
       </ng-template>
     </div>
-    <!-- <div *ngIf="showCurrentTask" class="app-loading">
-      <div class="logo">{{currentTask}}</div>
-      <svg class="spinner" viewBox="25 25 50 50">
-        <circle class="path" cx="50" cy="50" r="20" fill="none" stroke-width="2" stroke-miterlimit="10"
-          style="color:blue" />
-      </svg>
-    </div> -->
-    <div *ngIf="showCurrentTask" style="display: inline; font-size: 9pt;">
-      <p-progressSpinner [style]="{width: '24px', height: '24px'}"></p-progressSpinner>
-      {{currentTask}}
-    </div>
   </div>
 </div>
+
 <div *ngIf="showMessageBlock" style="width: 94%;margin-left: 3%;margin-right: 3%;">
   <table style="width: 100%;margin-bottom: 0.5em;">
     <thead style="background-color:darkorange; margin:0; color:white">
@@ -126,7 +124,7 @@
               <p-progressSpinner [style]="{width: '12px', height: '12px'}"></p-progressSpinner>
             </span>
           </div>
-          <span style="display:inline;font-size: 0.8em">
+          <span style="display:inline;margin-left: 0.5em;">
             {{zip.downloadStatus}}
           </span>
           <!-- <div style="padding-left: .5em; flex: 0 0 auto;">

@@ -176,6 +176,7 @@ export class DatacartComponent implements OnInit, OnDestroy {
         if (value) {
           this.loadDatacart().then(function (result) {
             this.commonVarService.setProcessing(false);
+            this.commonVarService.setLandingPageReady(true);
             // console.log("this.dataFiles");
             // console.log(this.dataFiles);
 
