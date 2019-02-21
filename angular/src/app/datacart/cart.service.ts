@@ -73,12 +73,6 @@ export class CartService {
    * Save cart entries
    * **/
   saveListOfCartEntities(listOfCartEntries: CartEntity[]) {
-    // reduce all the entities to a map
-    // let cartMap = listOfCartEntries.reduce(function(map, cartEntry, i) {
-    //   map[cartEntry.data.id] = cartEntry;
-    //   return map;
-    // }, {});
-
     let cartMap = listOfCartEntries.reduce(function (map, cartEntry, i) {
       map[cartEntry.data.cartId] = cartEntry;
       return map;
@@ -101,7 +95,6 @@ export class CartService {
     // convert the map to an array
     for (let key in myCartMap) {
       let value = myCartMap[key];
-      // console.log("value" + JSON.stringify(value.data.cartId));
       cartEntities.push(value);
     }
     this.cartSize = cartEntities.length;
@@ -122,12 +115,8 @@ export class CartService {
     for (let key in myCartMap) {
       let value = myCartMap[key];
       if (value.data.cartId == cartId) {
-        // console.log("cartId in cart match update" + cartId);
-        // console.log("status before" + JSON.stringify(value.data.downloadStatus));
         value.data.downloadStatus = status;
-        // console.log("status after" + JSON.stringify(value.data.downloadStatus));
       }
-      // console.log("value" + JSON.stringify(value.data.cartId));
       cartEntities.push(value);
     }
 
@@ -139,9 +128,6 @@ export class CartService {
     // persist the map
     this.setCart(cartMap);
     this.getCart();
-
-    // console.log("cartEntities:");
-    // console.log(cartEntities);
 
     this.cartSize = cartEntities.length;
     // return the array
@@ -160,10 +146,7 @@ export class CartService {
     // convert the map to an array
     for (let key in myCartMap) {
       let value = myCartMap[key];
-      // console.log("status before" + JSON.stringify(value.data.downloadStatus));
       value.data.downloadStatus = status;
-      // console.log("status after" + JSON.stringify(value.data.downloadStatus));
-      // console.log("value" + JSON.stringify(value.data.cartId));
       cartEntities.push(value);
     }
     // console.log("cart" + JSON.stringify(cartEntities));
@@ -191,14 +174,10 @@ export class CartService {
     // convert the map to an array
     for (let key in myCartMap) {
       let value = myCartMap[key];
-      // console.log("status before" + JSON.stringify(value.data.downloadStatus));
       if (value.data.downloadStatus == null) {
-        // console.log("status after" + JSON.stringify(value.data.downloadStatus));
-        // console.log("value" + JSON.stringify(value.data.cartId));
         cartEntities.push(value);
       }
     }
-    // console.log("cart" + JSON.stringify(cartEntities));
     let cartMap = cartEntities.reduce(function (map, cartEntry, i) {
       map[cartEntry.data.cartId] = cartEntry;
       return map;
@@ -224,10 +203,7 @@ export class CartService {
     // convert the map to an array
     for (let key in myCartMap) {
       let value = myCartMap[key];
-      // console.log("status before" + JSON.stringify(value.data.downloadStatus));
       if (value.data.cartId != cartId) {
-        // console.log("status after" + JSON.stringify(value.data.downloadStatus));
-        // console.log("value" + JSON.stringify(value.data.cartId));
         cartEntities.push(value);
       }
     }
@@ -241,17 +217,11 @@ export class CartService {
     this.setCart(cartMap);
     let cart = this.getAllCartEntities();
     this.setCartLength(this.cartSize);
-    // this.getCart();
-    // this.cartSize = cartEntities.length;
-    // // return the array
-    // return Promise.resolve(cartEntities);
-
   }
 
 
   clearTheCart() {
     this._storage.removeItem(this.currentCart);
-    //this.storageSub.next(true);
   }
 
   /**
@@ -317,27 +287,14 @@ export class CartService {
     }
 
     cartMap = this.getCart();
-
-    // console.log("cartMap:");
-    // console.log(cartMap);
     cartMap[data.cartId] = {
       'data': data,
     }
-
-    // if the current key exists in the map , append value
-    // if (cartMap[data.cartId] != undefined) {
-    // } else {
-    //   // if not, set default value
-    //   cartMap[data.cartId] = {
-    //     'data': data,
-    //   }
-    // }
 
     // save the map
     this.setCart(cartMap);
     let cart = this.getAllCartEntities();
     this.setCartLength(this.cartSize);
-    //this.updateFileSpinnerStatus(false);
     return Promise.resolve(cartMap);
   }
 

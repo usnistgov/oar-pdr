@@ -68,15 +68,7 @@ export class ErrorComponent {
         this.errorcode = this.response.statusCode;
         this.response.statusMessage = "There is an user error!";
         console.log(this.errorcode);
-        //  this.searchid = this.route.snapshot.paramMap.get('id');
-        //  this.errorcode = parseInt( this.route.snapshot.paramMap.get('errorcode'));
-        //  console.log(this.errorcode);
-          // if (this.errorcode == "404") {
-          //   console.log("set response header : "+this.errorcode);
-          //   this.response.setHeader("test","test231");
-          //   this.response.status(404);
-          // }
-      }
+       }
     ngAfterViewInit(){
   
      //window.history.replaceState( {} , '#/error/', '/error/');

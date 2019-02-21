@@ -14,7 +14,7 @@
   }
 </script>
 
-<div *ngIf="!isPopup" class="title" style="width: 94%; margin-top: 2em; margin-left: 3%; margin-bottom: 0.5em;">Download
+<div *ngIf="!isPopup" class="title" style="width: 94%; margin-top: 1em; margin-left: 3%; margin-bottom: 0.5em;">Download
   Manager</div>
 <div style="width:100%; margin-bottom: 1em;" *ngIf="showCurrentTask">
   <div style="text-align: center; margin: 0 auto; font-size: 14pt;">
@@ -109,7 +109,6 @@
         Download Status
         <span *ngIf="!allProcessed" class="faa-stack fa-lg" style="cursor: pointer;" (click)="cancelDownloadAll()"
           data-toggle="tooltip" title="Cancel All Downloads">
-          <!-- <i class="faa faa-circle-thin faa-stack-1x" aria-hidden="true"></i> -->
           <i class="faa faa-remove faa-stack-1x" aria-hidden="true" style="color: rgb(255, 255, 255);"></i>
         </span>
       </th>
@@ -127,6 +126,7 @@
           <span style="display:inline;margin-left: 0.5em;">
             {{zip.downloadStatus}}
           </span>
+          <!-- Once backend can provide progress info, the following div can be activated -->
           <!-- <div style="padding-left: .5em; flex: 0 0 auto;">
             <span style="display:inline;font-size: 0.8em">
               {{zip.downloadProgress}}%
@@ -176,7 +176,6 @@
     Remove downloaded
     <span class="w3-circle button-badge"
       [ngStyle]="{'color':getDownloadedColor(),'background-color':getDownloadedBkColor()}">&nbsp;{{totalDownloaded}}&nbsp;</span>
-    <!-- <span class="badge badge-pill" [ngStyle]="{'color':getDownloadedColor(), 'background-color':getDownloadedBkColor()}">{{totalDownloaded}}</span> -->
   </button>
 
   <button type="button" (click)="removeByDataId()" pButton type="submit"
@@ -184,11 +183,9 @@
     <i class="faa faa-trash faa-1x icon-white" style="color: #fff;"></i>
     Remove selected
     <span class="w3-circle button-badge" [ngStyle]="{'color':'grey'}">&nbsp;{{selectedFileCount}}&nbsp;</span>
-    <!-- <span class="badge badge-pill" style="color:grey; background-color:white;">{{selectedFileCount}}</span> -->
   </button>
 </div>
 <div>
-  <!-- <p-treeTable *ngIf="isVisible" [resizableColumns]="true" selectionMode="checkbox" [value]="dataFiles" (onNodeSelect) = "dataFileCount()" (onNodeUnselect) = "dataFileCount()" [(selection)]="selectedData" [scrollable]="true" scrollHeight="600px" [style]="{ 'padding-left':'3%','padding-right':'3%','padding-bottom':'3%', 'color':'#000'}"> -->
   <p-treeTable *ngIf="isVisible" [resizableColumns]="true" selectionMode="checkbox" [value]="dataFiles"
     (onNodeSelect)="dataFileCount()" (onNodeUnselect)="dataFileCount()" [(selection)]="selectedData"
     [style]="{ 'padding-left':'3%','padding-right':'3%','padding-bottom':'3%', 'color':'black'}">
@@ -224,9 +221,6 @@
         <td style=" width:75%; ">
           <p-treeTableToggler [rowNode]="rowNode"></p-treeTableToggler>
           &nbsp;<p-treeTableCheckbox [value]="rowNode"></p-treeTableCheckbox>
-          <!-- <span *ngIf = "rowData.resTitle.indexOf('.') > 0 "> {{rowData.resTitle}} </span> -->
-          <!-- &nbsp;<a href="{{rowData.downloadUrl}}" target="_blank" *ngIf = "rowData.resTitle.indexOf('.') > 0 "> -->
-          <!-- </a> -->
           <span *ngIf="rowData.isLeaf">
             <a (click)="openDetails($event,rowData,op3) " style="color: #1E6BA1;cursor: pointer;" data-toggle="tooltip"
               title="Click for more details">
@@ -245,36 +239,30 @@
           <span>{{rowData.size}}</span>
         </td>
         <td>
-          &nbsp;
-          <!-- <span *ngIf = "rowData.resTitle.indexOf('.') > 0" (click)="downloadOneFile(rowData)"> -->
-          <!-- <a href="{{rowData.downloadUrl}}" download>
-            <i class="faa faa-download" [ngStyle]="{'color':getDownloadBtnColor(rowData)}" aria-hidden="true"
-              (click)="setFileDownloaded(rowData)"></i>
-          </a> -->
-
-          <span *ngIf="rowData.isLeaf" (click)="downloadOneFile(rowData)">
-            <i *ngIf="rowData.downloadStatus == null" class="faa faa-download" style="color: #1E6BA1;cursor: pointer;"
-              aria-hidden="true" data-toggle="tooltip" title="Direct download"></i>
-            <i *ngIf="rowData.downloadStatus === 'downloaded'" class="faa faa-download"
-              style="color:green; cursor: pointer;" aria-hidden="true" data-toggle="tooltip" title="Download again"></i>
-          </span>
-          <div *ngIf="showDownloadProgress && rowData.downloadStatus === 'downloading'" style="display:flex;">
-            <span style="display:inline;font-size: 0.8em">
+          <div style="display:flex;">
+            <div *ngIf="rowData.isLeaf" (click)="downloadOneFile(rowData)">
+              <i *ngIf="rowData.downloadStatus == null" class="faa faa-download" style="color: #1E6BA1;cursor: pointer;"
+                aria-hidden="true" data-toggle="tooltip" title="Direct download"></i>
+              <i *ngIf="rowData.downloadStatus === 'downloaded'" class="faa faa-download"
+                style="color:green; cursor: pointer;" aria-hidden="true" data-toggle="tooltip"
+                title="Download again"></i>
+            </div>
+            <div *ngIf="showDownloadProgress && rowData.downloadStatus === 'downloading'"
+              style="display:inline;font-size: 0.8em">
               {{rowData.downloadProgress}}%
-            </span>
-            <div style="flex: 0 0 auto; width: 80px;padding-top: 3px">
+            </div>
+            <div *ngIf="showDownloadProgress && rowData.downloadStatus === 'downloading'"
+              style="flex: 0 0 auto; width: 30px;padding-top: 8px; margin-left: 4px;">
               <p-progressBar [value]="rowData.downloadProgress" showValue="true"></p-progressBar>
             </div>
-            <div style="padding-left:5px; flex: 0 0 auto;">
-              <span (click)="cancelDownload(rowData)" style="cursor: pointer;"><i class="faa faa-remove"></i></span>
+            <div *ngIf="showDownloadProgress && rowData.downloadStatus === 'downloading'"
+              style="padding-left:5px; flex: 0 0 auto;">
+              <div (click)="cancelDownload(rowData)" style="cursor: pointer;"><i class="faa faa-remove"></i></div>
+            </div>
+            <div *ngIf="rowData.isLeaf && rowData.downloadStatus != 'downloading'" style="padding-left:0.5em;">
+              {{rowData.downloadStatus}}
             </div>
           </div>
-
-          <!-- <button type="button" *ngIf = "rowData.downloadStatus === 'downloaded' && rowData.resTitle.indexOf('.') > 0 " style="margin-left:-20px;margin-top: 5px;padding-left:.5em;" class="small-button" pButton icon="faa faa-check"></button>
-                        <button type="button" *ngIf = "rowData.downloadStatus === 'downloading' && rowData.resTitle.indexOf('.') > 0 "  class="small-button-yellow" pButton icon="faa faa-check"></button> &nbsp; -->
-          <!-- <span *ngIf = "rowData.resTitle.indexOf('.') > 0 && rowData.downloadStatus != 'downloading'" style="padding-left:0.5em;">{{rowData.downloadStatus}}</span> -->
-          <span *ngIf="rowData.isLeaf && rowData.downloadStatus != 'downloading'"
-            style="padding-left:0.5em;">{{rowData.downloadStatus}}</span>
         </td>
       </tr>
     </ng-template>
@@ -300,13 +288,11 @@
           <br>
         </span>
         <span class="font14">{{ fileNode ? fileNode.resTitle : '' }}</span>
-        <!-- <span *ngIf="fileNode.mediatype == 'nrdp:DataFile' " class="font8"> -->
         <span class="font8" style="color:grey">
           <br><b>Type:</b>
           <span style="margin-left:0.5em;" class="textstyle1">{{ fileNode.mediatype ? fileNode.mediatype : 'Not
             Available'}} </span>
         </span>
-        <!-- <span *ngIf="fileNode.mediatype == 'nrdp:DataFile' " class="font8" style="margin-left: 2.5rem"> -->
         <span class="font8" style="margin-left: 2.5rem">
           Size:
           <span *ngIf="fileNode.size" class="textstyle1">{{ formatBytes(fileNode.size) }} </span>

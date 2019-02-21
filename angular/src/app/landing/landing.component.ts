@@ -148,7 +148,6 @@ export class LandingComponent implements OnInit {
    * Get the params OnInit
    */
   ngOnInit() {
-    console.log("Landing page init...");
     this.commonVarService.setProcessing(true);
 
     this.commonVarService.watchLocalProcessing().subscribe(
@@ -195,10 +194,6 @@ export class LandingComponent implements OnInit {
       // else
       window.history.replaceState({}, '', '/od/id/' + this.searchValue);
     }
-    setTimeout(() => {
-      console.log("Landing page is ready.");
-      // this.commonVarService.setLandingPageReady(true);
-    });
   }
 
   /**
@@ -221,7 +216,9 @@ export class LandingComponent implements OnInit {
     this.type = this.record['@type'];
     this.titleService.setTitle(this.record['title']);
     this.createNewDataHierarchy();
-    this.setLeafs(this.files[0].data);
+    if (this.files.length > 0) {
+      this.setLeafs(this.files[0].data);
+    }
     if (this.record['doi'] !== undefined && this.record['doi'] !== "")
       this.isDOI = true;
     if ("hasEmail" in this.record['contactPoint'])
@@ -229,8 +226,6 @@ export class LandingComponent implements OnInit {
     this.assessNewer();
     this.updateMenu();
     this.commonVarService.setProcessing(false);
-    console.log("this.files");
-    console.log(this.files);
     return Promise.resolve(this.files);
   }
 
@@ -383,7 +378,6 @@ export class LandingComponent implements OnInit {
     const recordid_KEY = makeStateKey<any>('record-' + recordid);
 
     if (this.transferState.hasKey(recordid_KEY)) {
-      console.log("1. Is it here @@@");
       const record = this.transferState.get<any>(recordid_KEY, null);
       this.transferState.remove(recordid_KEY);
       return of(record);
@@ -406,10 +400,7 @@ export class LandingComponent implements OnInit {
         .pipe(
           tap(record => {
             if (isPlatformServer(this.platformId)) {
-
-              console.log("2 . Is it here @@@:" + this.platformId);
               this.transferState.set(recordid_KEY, record);
-              //    console.log(this.transferState.toJson()); 
             }
           })
         );

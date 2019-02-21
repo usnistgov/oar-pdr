@@ -124,9 +124,7 @@ export class DatacartComponent implements OnInit, OnDestroy {
   broadcastMessage: string = '';
   showDownloadProgress: boolean = false;
   isProcessing: boolean = false;
-
-  // private distApi: string = environment.DISTAPI;
-  //private distApi:string = "http://localhost:8083/oar-dist-service";
+  isNodeSelected: boolean = false;
 
   /**
    * Creates an instance of the SearchPanel
@@ -304,17 +302,17 @@ export class DatacartComponent implements OnInit, OnDestroy {
       this.isVisible = true;
     }, 0);
   }
-  /**
-   * If Search is successful populate list of keywords themes and authors
-   */
 
+  /**
+   * Function to get the datacart list.
+   */
   getDataCartList(state: string = '') {
     this.cartService.getAllCartEntities().then(function (result) {
       this.cartEntities = result;
       if (state == 'Init')
         this.cartService.setCartEntitesReady(true);
     }.bind(this), function (err) {
-      alert("something went wrong while fetching the products");
+      alert("something went wrong while fetching the datacart");
     });
   }
 
@@ -357,13 +355,8 @@ export class DatacartComponent implements OnInit, OnDestroy {
     files.data.downloadStatus = 'downloading';
 
     postMessage.push({ "bundleName": files.data.downloadFileName, "includeFiles": this.downloadData });
-    // console.log("postMessage for bundle plan:");
-    // console.log(postMessage);
-
     this.downloadService.getBundlePlan(this.distApi + "_bundle_plan", JSON.stringify(postMessage[0])).subscribe(
       blob => {
-        // console.log("Bundle plan return:");
-        // console.log(blob);
         this.showCurrentTask = false;
         this.isProcessing = false;
         this.processBundle(blob, zipFileBaseName, files);
@@ -481,18 +474,14 @@ export class DatacartComponent implements OnInit, OnDestroy {
   * Download one particular file
   **/
   downloadOneFile(rowData: any) {
-    console.log("rowData");
-    console.log(rowData);
     if (rowData.downloadUrl != null && rowData.downloadUrl != undefined) {
       let filename = decodeURI(rowData.downloadUrl).replace(/^.*[\\\/]/, '');
       rowData.downloadStatus = 'downloading';
       rowData.downloadProgress = 0;
-
-
-      if (rowData.downloadUrl.length > 5 && rowData.downloadUrl.substring(0, 5).toLowerCase() == 'https') {
+      let url = rowData.downloadUrl.replace('http:', 'https:');
+      // if (rowData.downloadUrl.length > 5 && rowData.downloadUrl.substring(0, 5).toLowerCase() == 'https') {
         this.showDownloadProgress = true;
-
-        const req = new HttpRequest('GET', rowData.downloadUrl, {
+        const req = new HttpRequest('GET', url, {
           reportProgress: true, responseType: 'blob'
         });
 
@@ -512,11 +501,11 @@ export class DatacartComponent implements OnInit, OnDestroy {
               break;
           }
         })
-      } else {
-        this.showDownloadProgress = false;
-        this.directDownloadFromUrl(rowData.downloadUrl, filename);
-        this.setFileDownloaded(rowData);
-      }
+      // } else {
+      //   this.showDownloadProgress = false;
+      //   this.directDownloadFromUrl(rowData.downloadUrl, filename);
+      //   this.setFileDownloaded(rowData);
+      // }
     }
   }
 
@@ -524,8 +513,9 @@ export class DatacartComponent implements OnInit, OnDestroy {
     let a = document.createElement('a');
     document.body.appendChild(a);
     a.setAttribute('style', 'display: none');
+    // a.setAttribute('download', filename);
     a.href = url;
-    a.download = filename;
+    // a.download = filename;
     a.click();
     window.URL.revokeObjectURL(url);
     a.remove();
@@ -811,7 +801,9 @@ export class DatacartComponent implements OnInit, OnDestroy {
     }
   }
 
-  isNodeSelected: boolean = false;
+  /*
+  * Popup file details
+  */
   openDetails(event, fileNode: TreeNode, overlaypanel: OverlayPanel) {
     this.isNodeSelected = true;
     this.fileNode = fileNode;

@@ -46,11 +46,6 @@ export class NgbdModalDownloadManager implements OnInit {
         }
       }
     );
-    // this.modalReference.result.then((result) => {
-    //   this.closeResult = `Closed with: ${result}`;
-    // }, (reason) => {
-    //   this.closeResult = `Dismissed ${this.getDismissReason(reason)}`;
-    // });
   }
 
   close(){
@@ -62,14 +57,4 @@ export class NgbdModalDownloadManager implements OnInit {
     this.modalReference.close();
     this.commonVarService.setForceLandingPageInit(true);
   }
-
-  // private getDismissReason(reason: any): string {
-  //   if (reason === ModalDismissReasons.ESC) {
-  //     return 'by pressing ESC';
-  //   } else if (reason === ModalDismissReasons.BACKDROP_CLICK) {
-  //     return 'backdrop';
-  //   } else {
-  //     return `with: ${reason}`;
-  //   }
-  // }
 }

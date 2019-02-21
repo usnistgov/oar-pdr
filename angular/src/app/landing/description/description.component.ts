@@ -82,6 +82,7 @@ export class DescriptionComponent {
   distApi: string;
   confValues: Config;
   isLocalProcessing: boolean;
+  showDownloadProgress: boolean = false;
 
   /* Function to Return Keys object properties */
   keys(): Array<string> {
@@ -640,9 +641,11 @@ export class DescriptionComponent {
   downloadOneFile(rowData: any) {
     let filename = decodeURI(rowData.downloadUrl).replace(/^.*[\\\/]/, '');
     rowData.downloadStatus = 'downloading';
+    this.showDownloadProgress = true;
     rowData.downloadProgress = 0;
+    let url = rowData.downloadUrl.replace('http:', 'https:');
 
-    const req = new HttpRequest('GET', rowData.downloadUrl, {
+    const req = new HttpRequest('GET', url, {
       reportProgress: true, responseType: 'blob'
     });
 
@@ -650,6 +653,7 @@ export class DescriptionComponent {
       switch (event.type) {
         case HttpEventType.Response:
           this._FileSaverService.save(<any>event.body, filename);
+          this.showDownloadProgress = false;
           this.setFileDownloaded(rowData);
           break;
         case HttpEventType.DownloadProgress:
@@ -776,13 +780,9 @@ export class DescriptionComponent {
     files.data.downloadStatus = 'downloading';
 
     postMessage.push({ "bundleName": files.data.downloadFileName, "includeFiles": this.downloadData });
-    console.log("postMessage for bundle plan:");
-    console.log(postMessage);
     // now use postMessage to request a bundle plan
     this.downloadService.getBundlePlan(this.distApi + "_bundle_plan", JSON.stringify(postMessage[0])).subscribe(
       blob => {
-        console.log("Bundle plan return:");
-        console.log(blob);
         this.processBundle(blob, zipFileBaseName, files);
       },
       err => {
@@ -828,10 +828,6 @@ export class DescriptionComponent {
         if (!this.cancelAllDownload) {
           this.downloadService.downloadNextZip(this.zipData, this.treeRoot[0], "landingPage");
           files.data.downloadProgress = Math.round(100 * this.downloadService.getDownloadedNumber(this.zipData) / this.zipData.length);
-          // if(this.downloadService.allDownloadFinished(this.zipData)){
-          //     files.data.downloadStatus = 'downloaded';
-          //     this.downloadStatus = 'downloaded';
-          // }
         }
 
         this.downloadStatus = this.updateDownloadStatus(this.files) ? "downloaded" : null;
@@ -887,7 +883,6 @@ export class DescriptionComponent {
       } else {
         comp.data.downloadStatus = 'downloaded';
         this.cartService.updateCartItemDownloadStatus(comp.data.cartId, 'downloaded');
-        // this.cartService.updateFileSpinnerStatus(false);
       }
     }
   }
