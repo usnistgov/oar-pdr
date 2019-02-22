@@ -54,6 +54,7 @@ export class NgbdModalDownloadManager implements OnInit {
     this.cartService.initCart();
     this.cartService.getAllCartEntities();
     this.cartService.setCartLength(this.cartService.cartSize);
+    this.downloadService.setIsPopupFlag(false);
     this.modalReference.close();
     this.commonVarService.setForceLandingPageInit(true);
   }

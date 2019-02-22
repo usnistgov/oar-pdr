@@ -107,6 +107,7 @@ export class DescriptionComponent {
       if (value) {
         this.cartMap = this.cartService.getCart();
         this.updateStatusFromCart();
+        this.allSelected = this.updateAllSelectStatus(this.files);
       }
     });
     this.confValues = this.appConfig.getConfig();

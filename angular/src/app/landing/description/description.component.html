@@ -75,7 +75,7 @@
         <i *ngIf="!isLocalProcessing; else show_spinner" class="faa faa-cart-plus faa-stack-1x" aria-hidden="true"></i>
         <ng-template #show_spinner><i class="faa faa-spinner faa-spin faa-stack-1x" style="color:#1E6BA1"
             aria-hidden="true"></i></ng-template>
-        <span class="w3-badge badge-notify" style="margin-right:0.5em;">{{cartLength}}</span>
+        <span class="w3-badge badge-notify" style="margin-right:0.5em;">&nbsp;{{cartLength}}&nbsp;</span>
       </span>
       <span class="font8" style="margin-left:0.5em; color:gray;">Click on the file/row in the table below to view
         more
@@ -150,7 +150,7 @@
           <tr [ttSelectableRow]="rowNode">
             <td>
               <p-treeTableToggler [rowNode]="rowNode"></p-treeTableToggler>
-              <a (click)="openDetails($event,rowData,op3) " style="cursor: pointer;" data-toggle="tooltip"
+              <a (click)="openDetails($event,rowData,op3) " style="color: #1E6BA1;cursor: pointer;" data-toggle="tooltip"
                 title="Click for more details">
                 {{rowData.name}} </a>
               <span *ngIf="showZipFilesNmaes" style="color:darkgreen; margin-left: 2em;">{{rowData.zipFile}}</span>
@@ -159,7 +159,8 @@
             <td><span *ngIf="rowData.size">{{formatBytes(rowData.size)}}</span></td>
             <td>
               <div style="display: flex" *ngIf="rowData.isLeaf;else space_holder">
-                <div *ngIf="rowData.downloadStatus != 'downloading'" (click)="downloadOneFile(rowData)">
+                <div *ngIf="rowData.downloadStatus != 'downloading'" (click)="downloadOneFile(rowData)" data-toggle="tooltip"
+                title="Direct download">
                   <i class="faa faa-download" [ngStyle]="{'color':getDownloadBtnColor(rowData)}" aria-hidden="true"
                     (click)="setFileDownloaded(rowData)"></i>
                 </div>

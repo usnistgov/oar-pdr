@@ -167,7 +167,7 @@ export class LandingComponent implements OnInit {
     this.getData()
       .subscribe((res) => {
         this.onSuccess(res).then(function (result) {
-          this.commonVarService.setLandingPageReady(true);
+          this.commonVarService.setContentReady(true);
           this.isLoading = false;
         }.bind(this), function (err) {
           alert("something went wrong while fetching the data.");

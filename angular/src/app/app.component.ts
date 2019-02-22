@@ -18,12 +18,10 @@ export class AppComponent implements AfterViewInit, OnInit {
 
   ngAfterViewInit() {
     setTimeout(() => {
-      this.commonVarService.watchLandingPageReady().subscribe(
+      this.commonVarService.watchContentReady().subscribe(
         value => {
-          if(value){
-            let element: HTMLElement = document.getElementById('loadspinner') as HTMLElement;
-            element.hidden = true;
-          }
+          let element: HTMLElement = document.getElementById('loadspinner') as HTMLElement;
+          element.hidden = value;
         }
       );
     });

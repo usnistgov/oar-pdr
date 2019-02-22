@@ -185,7 +185,7 @@
     <span class="w3-circle button-badge" [ngStyle]="{'color':'grey'}">&nbsp;{{selectedFileCount}}&nbsp;</span>
   </button>
 </div>
-<div>
+<div >
   <p-treeTable *ngIf="isVisible" [resizableColumns]="true" selectionMode="checkbox" [value]="dataFiles"
     (onNodeSelect)="dataFileCount()" (onNodeUnselect)="dataFileCount()" [(selection)]="selectedData"
     [style]="{ 'padding-left':'3%','padding-right':'3%','padding-bottom':'3%', 'color':'black'}">
@@ -277,7 +277,7 @@
 </div>
 
 <p-overlayPanel class="fileDialog" #op3 [dismissable]="true" [showCloseIcon]="true" [style]="{'display':'inline-block'}"
-  [appendTo]="'body'">
+appendToBody = true>
   <div *ngIf="isNodeSelected" class="filecard">
     <div class="ui-g filesection">
       <div *ngIf="fileNode" class="ui-g-12 ui-md-12 ui-lg-12 ui-sm-10">

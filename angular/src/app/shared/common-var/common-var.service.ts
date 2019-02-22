@@ -20,7 +20,7 @@ export class CommonVarService {
   showDatacartSub = new BehaviorSubject<boolean>(false);
   forceLandingPageInitSub = new BehaviorSubject<boolean>(false);
   openDownloadModalSub = new BehaviorSubject<boolean>(false);
-  landingReadySub = new BehaviorSubject<boolean>(false);
+  contentReadySub = new BehaviorSubject<boolean>(false);
 
   constructor() { }
 
@@ -136,14 +136,14 @@ export class CommonVarService {
   /**
    * Set landing page ready flag
    **/
-  setLandingPageReady(value: boolean) {
-    this.landingReadySub.next(value);
+  setContentReady(value: boolean) {
+    this.contentReadySub.next(value);
   }
 
   /**
   * Watching landing page ready flag
   **/
-  watchLandingPageReady(): Observable<boolean> {
-    return this.landingReadySub.asObservable();
+ watchContentReady(): Observable<boolean> {
+    return this.contentReadySub.asObservable();
   }
 }

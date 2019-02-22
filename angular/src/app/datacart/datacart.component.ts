@@ -161,6 +161,7 @@ export class DatacartComponent implements OnInit, OnDestroy {
    * Get the params OnInit
    */
   ngOnInit() {
+    this.commonVarService.setContentReady(false);
     this.isProcessing = true;
     this.downloadService.watchIsPopupFlag().subscribe(
       value => {
@@ -174,7 +175,7 @@ export class DatacartComponent implements OnInit, OnDestroy {
         if (value) {
           this.loadDatacart().then(function (result) {
             this.commonVarService.setProcessing(false);
-            this.commonVarService.setLandingPageReady(true);
+            this.commonVarService.setContentReady(true);
             // console.log("this.dataFiles");
             // console.log(this.dataFiles);
 
