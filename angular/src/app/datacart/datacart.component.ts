@@ -1,6 +1,7 @@
 import { Component, OnInit, OnDestroy, AfterViewInit, ElementRef, ViewChildren, Input } from '@angular/core';
 //import {Headers, RequestOptions, Response, ResponseContentType, URLSearchParams} from '@angular/common/http';
 import { HttpClientModule, HttpClient, HttpParams, HttpRequest, HttpEventType } from '@angular/common/http';
+import { ActivatedRoute } from '@angular/router';
 import { Http, HttpModule } from '@angular/http';
 import 'rxjs/add/operator/map';
 import { Subscription } from 'rxjs/Subscription';
@@ -116,7 +117,6 @@ export class DatacartComponent implements OnInit, OnDestroy {
   dataArray: string[] = [];
   confValues: Config;
   distApi: string;
-  isPopup: boolean = false;
   currentTask: string = '';
   currentStatus: string = '';
   showCurrentTask: boolean = false;
@@ -125,6 +125,9 @@ export class DatacartComponent implements OnInit, OnDestroy {
   showDownloadProgress: boolean = false;
   isProcessing: boolean = false;
   isNodeSelected: boolean = false;
+  getBundlePlanRef: any;
+  mode: any;
+  routerparams: any;
 
   /**
    * Creates an instance of the SearchPanel
@@ -135,24 +138,14 @@ export class DatacartComponent implements OnInit, OnDestroy {
     private downloadService: DownloadService,
     private appConfig: AppConfig,
     private _FileSaverService: FileSaverService,
-    private commonVarService: CommonVarService) {
-    this.getDataCartList("Init");
+    private commonVarService: CommonVarService,
+    private route: ActivatedRoute) {
     this.confValues = this.appConfig.getConfig();
     this.cartService.watchForceDatacartReload().subscribe(
       value => {
         if (value) {
           this.getDataCartList("Init");
         }
-      }
-    );
-    this.commonVarService.watchProcessing().subscribe(
-      value => {
-        this.isProcessing = value;
-
-        setTimeout(() => {
-          /** spinner ends after 10 seconds */
-          this.isProcessing = false;
-        }, 10000);
       }
     );
   }
@@ -163,28 +156,37 @@ export class DatacartComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.commonVarService.setContentReady(false);
     this.isProcessing = true;
-    this.downloadService.watchIsPopupFlag().subscribe(
-      value => {
-        this.isPopup = value;
-      }
-    );
     this.ediid = this.commonVarService.getEdiid();
     this.distApi = this.confValues.DISTAPI;
-    this.cartService.watchCartEntitesReady().subscribe(
-      value => {
-        if (value) {
-          this.loadDatacart().then(function (result) {
-            this.commonVarService.setProcessing(false);
-            this.commonVarService.setContentReady(true);
-            // console.log("this.dataFiles");
-            // console.log(this.dataFiles);
+    this.routerparams = this.route.params.subscribe(params => {
+      this.mode = params['mode'];
+    })
 
-          }.bind(this), function (err) {
-            alert("something went wrong while loading datacart.");
-          });
-        }
-      }
-    );
+    if (this.mode == 'popup') {
+      this.cartService.setCurrentCart('landing_popup');
+      this.commonVarService.setLocalProcessing(true);
+
+      this.loadDatacart().then(function (result) {
+        this.commonVarService.setContentReady(true);
+        this.downloadAllFilesFromAPI();
+        // console.log("this.dataFiles");
+        // console.log(this.dataFiles);
+
+      }.bind(this), function (err) {
+        alert("something went wrong while loading datacart.");
+      });
+
+    } else {
+      this.loadDatacart().then(function (result) {
+        this.commonVarService.setContentReady(true);
+        // console.log("this.dataFiles");
+        // console.log(this.dataFiles);
+
+      }.bind(this), function (err) {
+        alert("something went wrong while loading datacart.");
+      });
+
+    }
 
     this.downloadService.watchDownloadProcessStatus("datacart").subscribe(
       value => {
@@ -192,17 +194,6 @@ export class DatacartComponent implements OnInit, OnDestroy {
         // this.updateDownloadStatus(this.files);
       }
     );
-
-    this.downloadService.watchFireDownloadAllFlag().subscribe(
-      value => {
-        if (value) {
-          this.downloadAllFilesFromAPI();
-          this.downloadService.setFireDownloadAllFlag(false);
-        }
-      }
-    );
-
-    // this.totalDownloaded = this.downloadService.getTotalDownloaded(this.dataFiles);
 
     this.downloadService.watchAnyFileDownloaded().subscribe(
       value => {
@@ -221,22 +212,29 @@ export class DatacartComponent implements OnInit, OnDestroy {
     this.currentTask = "Loading Datacart...";
     this.currentStatus = "Loading...";
     this.selectedData = [];
-    this.createDataCartHierarchy();
-    // this.display = true;
+    this.getDataCartList("Init").then(function (result) {
+      this.createDataCartHierarchy();
 
-    // create root
-    const newPart = {
-      data: {
-        resTitle: "root"
-      }, children: []
-    };
-    newPart.children = this.dataFiles;
-    this.treeRoot.push(newPart);
+      // this.display = true;
 
-    this.fileNode = { "data": { "resTitle": "", "size": "", "mediatype": "", "description": "", "filetype": "" } };
-    this.expandToLevel(this.dataFiles, true, 1);
-    this.checkNode(this.dataFiles);
-    this.dataFileCount();
+      // create root
+      const newPart = {
+        data: {
+          resTitle: "root"
+        }, children: []
+      };
+      newPart.children = this.dataFiles;
+      this.treeRoot.push(newPart);
+
+      this.fileNode = { "data": { "resTitle": "", "size": "", "mediatype": "", "description": "", "filetype": "" } };
+      this.expandToLevel(this.dataFiles, true, 1);
+      console.log("this.dataFiles");
+      console.log(this.dataFiles);
+      this.checkNode(this.dataFiles);
+      this.dataFileCount();
+    }.bind(this), function (err) {
+      alert("something went wrong while fetching the datacart");
+    });
     return Promise.resolve(this.dataFiles);
   }
 
@@ -310,11 +308,10 @@ export class DatacartComponent implements OnInit, OnDestroy {
   getDataCartList(state: string = '') {
     this.cartService.getAllCartEntities().then(function (result) {
       this.cartEntities = result;
-      if (state == 'Init')
-        this.cartService.setCartEntitesReady(true);
     }.bind(this), function (err) {
       alert("something went wrong while fetching the datacart");
     });
+    return Promise.resolve(this.cartEntities);
   }
 
   /**
@@ -334,7 +331,8 @@ export class DatacartComponent implements OnInit, OnDestroy {
     this.currentTask = "Getting bundle plan...";
     this.currentStatus = "Waiting for server response...";
     this.downloadService.setDownloadingNumber(0, "datacart");
-
+    console.log("Show task...");
+    console.log(this.showCurrentTask);
     // create root
     const newPart = {
       data: {
@@ -356,23 +354,32 @@ export class DatacartComponent implements OnInit, OnDestroy {
     files.data.downloadStatus = 'downloading';
 
     postMessage.push({ "bundleName": files.data.downloadFileName, "includeFiles": this.downloadData });
-    this.downloadService.getBundlePlan(this.distApi + "_bundle_plan", JSON.stringify(postMessage[0])).subscribe(
+
+    console.log("Get bundle plan...");
+
+    this.getBundlePlanRef = this.downloadService.getBundlePlan(this.distApi + "_bundle_plan", JSON.stringify(postMessage[0])).subscribe(
       blob => {
         this.showCurrentTask = false;
         this.isProcessing = false;
         this.processBundle(blob, zipFileBaseName, files);
       },
       err => {
-        console.log("Http return err:");
+        console.log("Http return err000:");
         console.log(err);
         this.bundlePlanMessage = err;
         this.bundlePlanStatus = "error";
         this.isProcessing = false;
         this.showCurrentTask = false;
         this.messageColor = this.getColor();
-        this.broadcastMessage = 'Http responsed with error: ' + err.message;
+        this.broadcastMessage = 'Ooops! There was a problem getting the data you need. Please try again';
+        this.unsubscribeBundleplan();
       }
     );
+  }
+
+  unsubscribeBundleplan() {
+    this.getBundlePlanRef.unsubscribe();
+    this.getBundlePlanRef = null;
   }
 
   /**
@@ -481,27 +488,27 @@ export class DatacartComponent implements OnInit, OnDestroy {
       rowData.downloadProgress = 0;
       let url = rowData.downloadUrl.replace('http:', 'https:');
       // if (rowData.downloadUrl.length > 5 && rowData.downloadUrl.substring(0, 5).toLowerCase() == 'https') {
-        this.showDownloadProgress = true;
-        const req = new HttpRequest('GET', url, {
-          reportProgress: true, responseType: 'blob'
-        });
+      this.showDownloadProgress = true;
+      const req = new HttpRequest('GET', url, {
+        reportProgress: true, responseType: 'blob'
+      });
 
-        rowData.downloadInstance = this.http.request(req).subscribe(event => {
-          switch (event.type) {
-            case HttpEventType.Response:
-              this._FileSaverService.save(<any>event.body, filename);
-              rowData.downloadStatus = 'downloaded';
-              this.cartService.updateCartItemDownloadStatus(rowData.cartId, 'downloaded');
-              this.downloadService.setFileDownloadedFlag(true);
-              break;
-            case HttpEventType.DownloadProgress:
-              rowData.downloadProgress = 0;
-              if (event.total > 0) {
-                rowData.downloadProgress = Math.round(100 * event.loaded / event.total);
-              }
-              break;
-          }
-        })
+      rowData.downloadInstance = this.http.request(req).subscribe(event => {
+        switch (event.type) {
+          case HttpEventType.Response:
+            this._FileSaverService.save(<any>event.body, filename);
+            rowData.downloadStatus = 'downloaded';
+            this.cartService.updateCartItemDownloadStatus(rowData.cartId, 'downloaded');
+            this.downloadService.setFileDownloadedFlag(true);
+            break;
+          case HttpEventType.DownloadProgress:
+            rowData.downloadProgress = 0;
+            if (event.total > 0) {
+              rowData.downloadProgress = Math.round(100 * event.loaded / event.total);
+            }
+            break;
+        }
+      })
       // } else {
       //   this.showDownloadProgress = false;
       //   this.directDownloadFromUrl(rowData.downloadUrl, filename);
@@ -640,6 +647,8 @@ export class DatacartComponent implements OnInit, OnDestroy {
    * Create Data hierarchy for the tree
    */
   createDataCartHierarchy() {
+    console.log("this.cartEntities");
+    console.log(this.cartEntities);
     let arrayList = this.cartEntities.reduce(function (result, current) {
       result[current.data.resTitle] = result[current.data.resTitle] || [];
       result[current.data.resTitle].push(current);

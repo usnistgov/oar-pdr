@@ -55,7 +55,14 @@
       <br>
       <span><b>Files </b> </span>
       <ngbd-modal-download-manager></ngbd-modal-download-manager>
-      <span class="faa-stack fa-lg icon-download"
+      <a class="faa-stack fa-lg icon-download" (click)="downloadAllConfirm('Download All Files', 'This will download all files. Continue?', 'downloadAllConfirm')"
+      data-toggle="tooltip" title="Download all files"
+        [ngStyle]="{'color':getDownloadAllBtnColor(),'cursor':'pointer'}">
+        <i class="faa faa-circle-thin faa-stack-2x" aria-hidden="true"></i>
+        <i class="faa faa-download faa-stack-1x" aria-hidden="true"></i>
+      </a>
+      <a id="routeToDatacart" target="_blank" [routerLink]="['/datacart', 'popup']" style="display:none"></a>
+      <!-- <span class="faa-stack fa-lg icon-download"
         (click)="downloadAllConfirm('Download All Files', 'This will download all files. Continue?', 'downloadAllConfirm')"
         data-toggle="tooltip" title="Download all files"
         [ngStyle]="{'color':getDownloadAllBtnColor(),'cursor':'pointer'}">
@@ -64,7 +71,7 @@
       </span>
       <span *ngIf="downloadStatus == 'downloading'" style="display:inline;">
         <p-progressSpinner [style]="{width: '12px', height: '12px'}"></p-progressSpinner>
-      </span>
+      </span> -->
 
       <p-confirmDialog key='downloadAllConfirm'></p-confirmDialog>
 
@@ -75,7 +82,7 @@
         <i *ngIf="!isLocalProcessing; else show_spinner" class="faa faa-cart-plus faa-stack-1x" aria-hidden="true"></i>
         <ng-template #show_spinner><i class="faa faa-spinner faa-spin faa-stack-1x" style="color:#1E6BA1"
             aria-hidden="true"></i></ng-template>
-        <span class="w3-badge badge-notify" style="margin-right:0.5em;">&nbsp;{{cartLength}}&nbsp;</span>
+        <span class="w3-badge badge-notify" style="margin-right:0.5em;">{{cartLength}}</span>
       </span>
       <span class="font8" style="margin-left:0.5em; color:gray;">Click on the file/row in the table below to view
         more

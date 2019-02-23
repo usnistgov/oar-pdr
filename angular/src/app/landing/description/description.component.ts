@@ -16,6 +16,7 @@ import { AppConfig, Config } from '../../shared/config-service/config.service';
 import { THIS_EXPR } from '@angular/compiler/src/output/output_ast';
 import { FileSaverService } from 'ngx-filesaver';
 import { v } from '@angular/core/src/render3';
+import { Router } from '@angular/router';
 
 declare var saveAs: any;
 
@@ -96,7 +97,8 @@ export class DescriptionComponent {
     private http: HttpClient,
     private appConfig: AppConfig,
     private _FileSaverService: FileSaverService,
-    private confirmationService: ConfirmationService) {
+    private confirmationService: ConfirmationService,
+    public router: Router) {
     this.cartService.watchAddAllFilesCart().subscribe(value => {
       this.addAllFileSpinner = value;
     });
@@ -106,8 +108,8 @@ export class DescriptionComponent {
     this.commonVarService.watchForceLandingPageInit().subscribe(value => {
       if (value) {
         this.cartMap = this.cartService.getCart();
-        this.updateStatusFromCart();
         this.allSelected = this.updateAllSelectStatus(this.files);
+        this.cartLength = this.cartService.getCartSize();
       }
     });
     this.confValues = this.appConfig.getConfig();
@@ -115,7 +117,6 @@ export class DescriptionComponent {
 
   ngOnInit() {
     this.distApi = this.confValues.DISTAPI;
-    this.commonVarService.setShowDatacart(false);
 
     if (this.files.length != 0)
       this.files = <TreeNode[]>this.files[0].data;
@@ -215,6 +216,7 @@ export class DescriptionComponent {
         comp.data.downloadStatus = null;
       }
     }
+    return Promise.resolve(files);
   }
 
   /**
@@ -222,6 +224,7 @@ export class DescriptionComponent {
    */
   updateStatusFromCart() {
     this.resetStstus(this.files);
+
     for (let key in this.cartMap) {
       let value = this.cartMap[key];
       if (value.data.downloadStatus != undefined) {
@@ -234,6 +237,7 @@ export class DescriptionComponent {
         }
       }
     }
+    return Promise.resolve(this.files);
   }
 
   /**
@@ -392,11 +396,11 @@ export class DescriptionComponent {
         }
       }
       if (subFiles != null) {
-        this.addFilesToCart(subFiles.children, isSelected);
+        this.addFilesToCart(subFiles.children, isSelected, '');
         rowData.isIncart = true;
       }
     } else {
-      this.addtoCart(rowData, isSelected);
+      this.addtoCart(rowData, isSelected, '');
     }
 
     return Promise.resolve(rowData);
@@ -434,7 +438,7 @@ export class DescriptionComponent {
         });
       }
       else {
-        this.addAllFilesToCart(files, false).then(function (result1: any) {
+        this.addAllFilesToCart(files, false, '').then(function (result1: any) {
           this.isLocalProcessing = false;
         }.bind(this), function (err) {
           alert("something went wrong while adding file to data cart.");
@@ -450,11 +454,14 @@ export class DescriptionComponent {
   /**
   * Function to add all files to data cart.
   **/
-  addAllFilesToCart(files: any, isSelected: boolean) {
+  addAllFilesToCart(files: any, isSelected: boolean, mode: string) {
     this.cartService.deselectAll().then(function (result1: any) {
-      this.addFilesToCart(files, isSelected).then(function (result2: any) {
-        this.cartService.setForceDatacartReload(true);
-        this.allSelected = this.updateAllSelectStatus(this.files);
+      this.addFilesToCart(files, isSelected, mode).then(function (result2: any) {
+        // this.cartService.setForceDatacartReload(true);
+        // this.allSelected = this.updateAllSelectStatus(this.files);
+        if(mode == 'popup'){
+          this.allSelected = true;
+        }
       }.bind(this), function (err) {
         alert("something went wrong while adding one file to data cart.");
       });
@@ -467,14 +474,14 @@ export class DescriptionComponent {
   /**
   * Function to add given file tree to data cart.
   **/
-  addFilesToCart(files: any, isSelected: boolean) {
+  addFilesToCart(files: any, isSelected: boolean, mode: string) {
     let data: Data;
     let compValue: any;
     for (let comp of files) {
       if (comp.children.length > 0) {
-        compValue += this.addFilesToCart(comp.children, isSelected);
+        compValue += this.addFilesToCart(comp.children, isSelected, mode);
       } else {
-        this.addtoCart(comp.data, isSelected).then(function (result) {
+        this.addtoCart(comp.data, isSelected, mode).then(function (result) {
           compValue = 1;
         }.bind(this), function (err) {
           alert("something went wrong while adding one file to data cart.");
@@ -488,7 +495,7 @@ export class DescriptionComponent {
   /**
   * Function to add one file to data cart with pre-select option.
   **/
-  addtoCart(rowData: any, isSelected: boolean) {
+  addtoCart(rowData: any, isSelected: boolean, mode: string) {
     let cartMap: any;
     let data: Data;
     data = {
@@ -510,7 +517,8 @@ export class DescriptionComponent {
     };
 
     this.cartService.addDataToCart(data).then(function (result) {
-      rowData.isIncart = true;
+      if(mode != 'popup')
+        rowData.isIncart = true;
       cartMap = result;
     }.bind(this), function (err) {
       alert("something went wrong while fetching the products");
@@ -746,9 +754,16 @@ export class DescriptionComponent {
     this.cartService.setCurrentCart('landing_popup');
     this.commonVarService.setLocalProcessing(true);
     setTimeout(() => {
-      this.addAllFilesToCart(this.files, true).then(function (result) {
+      this.addAllFilesToCart(this.files, true, 'popup').then(function (result) {
         this.commonVarService.setLocalProcessing(false);
-        this.commonVarService.setShowDatacart(true);
+        let element: HTMLElement = document.getElementById('routeToDatacart') as HTMLElement;
+        element.click();
+        this.cartService.setCurrentCart('cart');
+        this.updateStatusFromCart().then(function (result: any) {
+          this.commonVarService.setForceLandingPageInit(true);
+        }.bind(this), function (err) {
+          alert("something went wrong while adding file to data cart.");
+        });
       }.bind(this), function (err) {
         alert("something went wrong while adding all files to cart");
       });

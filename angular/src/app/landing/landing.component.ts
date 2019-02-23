@@ -148,8 +148,6 @@ export class LandingComponent implements OnInit {
    * Get the params OnInit
    */
   ngOnInit() {
-    this.commonVarService.setProcessing(true);
-
     this.commonVarService.watchLocalProcessing().subscribe(
       value => {
         this.isLocalProcessing = value;
@@ -173,7 +171,6 @@ export class LandingComponent implements OnInit {
           alert("something went wrong while fetching the data.");
         });
       }, error => {
-        this.commonVarService.setProcessing(false);
         console.log("There is an error in searchservice.");
         this.onError(" There is an error");
         // throw new ErrorComponent(this.route);
@@ -209,7 +206,6 @@ export class LandingComponent implements OnInit {
 
     if (this.record["@id"] === undefined || this.record["@id"] === "") {
       this.isId = false;
-      this.commonVarService.setProcessing(false);
       return;
     }
 
@@ -225,7 +221,6 @@ export class LandingComponent implements OnInit {
       this.isEmail = true;
     this.assessNewer();
     this.updateMenu();
-    this.commonVarService.setProcessing(false);
     return Promise.resolve(this.files);
   }
 

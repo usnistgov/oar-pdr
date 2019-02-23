@@ -136,6 +136,23 @@ export class CartService {
   }
 
   /**
+   * Get cart size
+   **/
+  getCartSize() {
+    let myCartMap = this.getCart();
+    let cartEntities: CartEntity[] = [];
+
+    // convert the map to an array
+    for (let key in myCartMap) {
+      let value = myCartMap[key];
+      cartEntities.push(value);
+    }
+    this.cartSize = cartEntities.length
+    this.setCartLength(this.cartSize);
+    return this.cartSize;
+  }
+
+  /**
    * Update cart download status
    **/
   updateCartDownloadStatus(status: boolean) {
@@ -335,20 +352,6 @@ export class CartService {
   private setCart(cartMap): void {
     this._storage.setItem(this.currentCart, JSON.stringify(cartMap));
     //this.storageSub.next(true);
-  }
-
-  /**
-  * Update cart entites ready flag
-  **/
-  setCartEntitesReady(ready: boolean) {
-    this.cartEntitesReadySub.next(ready);
-  }
-
-  /**
-  * Watch update cart entites ready flag
-  **/
-  watchCartEntitesReady(): Observable<boolean> {
-    return this.cartEntitesReadySub.asObservable();
   }
 
   /**
