@@ -30,6 +30,7 @@ export class HeadbarComponent {
   loginuser = false;
   cartLength: number;
   isLocalTesting: boolean = false;
+  ediid: any;
 
   constructor(
     private el: ElementRef,
@@ -45,7 +46,11 @@ export class HeadbarComponent {
       });
   }
 
-  checkinternal() {
+  ngOnInit() {
+    this.ediid = this.commonVarService.getEdiid();
+  }
+  
+    checkinternal() {
     if (!this.landingService.includes('rmm'))
       this.internalBadge = true;
     return this.internalBadge;

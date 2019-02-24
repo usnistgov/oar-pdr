@@ -741,6 +741,7 @@ export class DescriptionComponent {
       key: key,
       accept: () => {
         setTimeout(() => {
+          window.open('/datacart/popup');
           this.cancelAllDownload = false;
           this.downloadFromRoot();
         }, 0);
@@ -751,13 +752,17 @@ export class DescriptionComponent {
   }
 
   downloadFromRoot() {
+    // window.open('/datacart/popup', '_blank');
+
     this.cartService.setCurrentCart('landing_popup');
     this.commonVarService.setLocalProcessing(true);
     setTimeout(() => {
       this.addAllFilesToCart(this.files, true, 'popup').then(function (result) {
         this.commonVarService.setLocalProcessing(false);
         let element: HTMLElement = document.getElementById('routeToDatacart') as HTMLElement;
-        element.click();
+        // element.click();
+
+        // this.datacartWin.location.href = '/datacart/popup';
         this.cartService.setCurrentCart('cart');
         this.updateStatusFromCart().then(function (result: any) {
           this.commonVarService.setForceLandingPageInit(true);
