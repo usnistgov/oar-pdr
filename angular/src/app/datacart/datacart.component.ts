@@ -328,7 +328,7 @@ export class DatacartComponent implements OnInit, OnDestroy {
     this.bundlePlanMessage = null;
     this.downloadStatus = 'downloading';
     this.downloadService.setDownloadProcessStatus(false, "datacart");
-    this.currentTask = "Getting bundle plan...";
+    this.currentTask = "Zipping files...";
     this.currentStatus = "Waiting for server response...";
     this.downloadService.setDownloadingNumber(0, "datacart");
     console.log("Show task...");
