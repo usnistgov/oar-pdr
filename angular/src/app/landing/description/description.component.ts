@@ -741,7 +741,7 @@ export class DescriptionComponent {
       key: key,
       accept: () => {
         setTimeout(() => {
-          window.open('/datacart/popup');
+          window.open('/datacart/popup', 'DownloadManager', 'height=880,width=1720,top=100,left=100');
           this.cancelAllDownload = false;
           this.downloadFromRoot();
         }, 0);
