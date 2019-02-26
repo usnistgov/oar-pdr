@@ -113,21 +113,22 @@
         </span>
       </th>
     </tr>
-    <tr *ngFor="let zip of zipData">
-      <td *ngIf="showZipFiles" style="padding-left:.5em;border-bottom:1pt solid black;">{{zip.fileName}}</td>
-      <td *ngIf="showZipFiles" style="padding-left:.5em;border-bottom:1pt solid black;">
-        <div style="padding-left: .5em; display:flex;"
-          *ngIf="zip.downloadStatus === 'downloading';else not_downloading">
-          <div style="padding-left: .5em; flex: 0 0 auto;">
-            <span style="display:inline;">
-              <p-progressSpinner [style]="{width: '12px', height: '12px'}"></p-progressSpinner>
+    <tbody *ngIf="showZipFiles">
+      <tr *ngFor="let zip of zipData">
+        <td style="padding-left:.5em;border-bottom:1pt solid black;">{{zip.fileName}}</td>
+        <td style="padding-left:.5em;border-bottom:1pt solid black;">
+          <div style="padding-left: .5em; display:flex;"
+            *ngIf="zip.downloadStatus === 'downloading';else not_downloading">
+            <div style="padding-left: .5em; flex: 0 0 auto;">
+              <span style="display:inline;">
+                <p-progressSpinner [style]="{width: '12px', height: '12px'}"></p-progressSpinner>
+              </span>
+            </div>
+            <span style="display:inline;margin-left: 0.5em;">
+              {{zip.downloadStatus}}
             </span>
-          </div>
-          <span style="display:inline;margin-left: 0.5em;">
-            {{zip.downloadStatus}}
-          </span>
-          <!-- Once backend can provide progress info, the following div can be activated -->
-          <!-- <div style="padding-left: .5em; flex: 0 0 auto;">
+            <!-- Once backend can provide progress info, the following div can be activated -->
+            <!-- <div style="padding-left: .5em; flex: 0 0 auto;">
             <span style="display:inline;font-size: 0.8em">
               {{zip.downloadProgress}}%
             </span>
@@ -135,30 +136,31 @@
           <div style="padding-left: 2%; padding-top: 8px;width: 200px;flex: 0 0 auto;height: 2em;">
             <p-progressBar [value]="zip.downloadProgress" showValue="false"></p-progressBar>
           </div> -->
-          <div style="padding-left:5px; flex: 0 0 auto;">
-            <span (click)="cancelDownloadZip(zip)" style="cursor: pointer;"><i class="faa faa-remove"></i></span>
-          </div>
-        </div>
-        <ng-template #not_downloading>
-          <div *ngIf="zip.downloadStatus != 'Error'; else download_error"
-            style="padding-left: 2%; width: 200px; display:inline;">
-            <i *ngIf="zip.downloadStatus === 'downloaded'" class="faa faa-check" style="margin-top: 8px;"></i>
-            <i *ngIf="zip.downloadStatus === 'cancelled'" class="faa faa-remove" style="margin-top: 8px;"></i>
-            {{zip.downloadStatus}}
-          </div>
-          <ng-template #download_error>
-            <div style="padding-left: 2%; display:inline;font-size: 0.8em; color: red">
-              <i class="faa faa-warning"
-                [ngStyle]="{'color':messageColor, 'padding-right':'.5em', 'margin-top':'8px'}"></i>
-              {{zip.downloadErrorMessage}}
+            <div style="padding-left:5px; flex: 0 0 auto;">
+              <span (click)="cancelDownloadZip(zip)" style="cursor: pointer;"><i class="faa faa-remove"></i></span>
             </div>
+          </div>
+          <ng-template #not_downloading>
+            <div *ngIf="zip.downloadStatus != 'Error'; else download_error"
+              style="padding-left: 2%; width: 200px; display:inline;">
+              <i *ngIf="zip.downloadStatus === 'downloaded'" class="faa faa-check" style="margin-top: 8px;"></i>
+              <i *ngIf="zip.downloadStatus === 'cancelled'" class="faa faa-remove" style="margin-top: 8px;"></i>
+              {{zip.downloadStatus}}
+            </div>
+            <ng-template #download_error>
+              <div style="padding-left: 2%; display:inline;font-size: 0.8em; color: red">
+                <i class="faa faa-warning"
+                  [ngStyle]="{'color':messageColor, 'padding-right':'.5em', 'margin-top':'8px'}"></i>
+                {{zip.downloadErrorMessage}}
+              </div>
+            </ng-template>
+            <i *ngIf="zip.downloadStatus != null" class="faa faa-repeat"
+              style="padding-left: 2%; display: inline; flex: 0 0 auto;font-size: 0.8em; color: #1E6BA1;"
+              data-toggle="tooltip" title="Retry" (click)="downloadOneZip(zip)"></i>
           </ng-template>
-          <i *ngIf="zip.downloadStatus != null" class="faa faa-repeat"
-            style="padding-left: 2%; display: inline; flex: 0 0 auto;font-size: 0.8em; color: #1E6BA1;"
-            data-toggle="tooltip" title="Retry" (click)="downloadOneZip(zip)"></i>
-        </ng-template>
-      </td>
-    </tr>
+        </td>
+      </tr>
+    </tbody>
   </table>
 </div>
 <div style="padding-left: 3%; padding-right: 3%; width: 100%;margin-bottom:0.5em;text-align: right;">
@@ -185,7 +187,7 @@
     <span class="w3-circle button-badge" [ngStyle]="{'color':'grey'}">&nbsp;{{selectedFileCount}}&nbsp;</span>
   </button>
 </div>
-<div >
+<div>
   <p-treeTable *ngIf="isVisible" [resizableColumns]="true" selectionMode="checkbox" [value]="dataFiles"
     (onNodeSelect)="dataFileCount()" (onNodeUnselect)="dataFileCount()" [(selection)]="selectedData"
     [style]="{ 'padding-left':'3%','padding-right':'3%','padding-bottom':'3%', 'color':'black'}">
@@ -277,7 +279,7 @@
 </div>
 
 <p-overlayPanel class="fileDialog" #op3 [dismissable]="true" [showCloseIcon]="true" [style]="{'display':'inline-block'}"
-appendToBody = true>
+  appendToBody=true>
   <div *ngIf="isNodeSelected" class="filecard">
     <div class="ui-g filesection">
       <div *ngIf="fileNode" class="ui-g-12 ui-md-12 ui-lg-12 ui-sm-10">
