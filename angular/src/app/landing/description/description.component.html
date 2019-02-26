@@ -169,12 +169,17 @@
             <td>
               <div style="display: flex;">
                 <div *ngIf="rowData.isLeaf;else space_holder">
-                  <div *ngIf="rowData.downloadStatus != 'downloading'" (click)="downloadOneFile(rowData)"
+                  <a *ngIf="rowData.downloadStatus != 'downloading'" href='{{rowData.downloadUrl}}' target='_blank'
                     data-toggle="tooltip" title="Direct download">
                     <i class="faa faa-download" [ngStyle]="{'color':getDownloadBtnColor(rowData)}" aria-hidden="true"
                       (click)="setFileDownloaded(rowData)"></i>
-                  </div>
-                  <span *ngIf="showDownloadProgress && rowData.downloadStatus === 'downloading'"
+                </a>
+                  <!-- <div *ngIf="rowData.downloadStatus != 'downloading'" (click)="downloadOneFile(rowData)"
+                  data-toggle="tooltip" title="Direct download">
+                  <i class="faa faa-download" [ngStyle]="{'color':getDownloadBtnColor(rowData)}" aria-hidden="true"
+                    (click)="setFileDownloaded(rowData)"></i>
+                </div> -->
+                  <!-- <span *ngIf="showDownloadProgress && rowData.downloadStatus === 'downloading'"
                     style="font-size: 0.8em;margin-left: 8px;">
                     {{rowData.downloadProgress}}%
                   </span>
@@ -186,7 +191,7 @@
                     style="padding-left:5px;">
                     <span (click)="cancelDownload(rowData)" style="cursor: pointer;"><i
                         class="faa faa-remove"></i></span>
-                  </div>
+                  </div> -->
                 </div>
                 <ng-template #space_holder>
                   <div style="padding-right: 0.4em;">&nbsp;&nbsp;</div>
