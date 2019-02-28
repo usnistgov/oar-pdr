@@ -30,6 +30,9 @@ export class AppComponent implements AfterViewInit, OnInit {
   ngOnInit() {
     this.element = document.getElementById('loadspinner') as HTMLElement;
     this.element.hidden = false;
+    setTimeout(() => {
+      this.element.hidden = true;
+    }, 15000);
   }
 
   ngAfterViewInit() {
@@ -38,6 +41,9 @@ export class AppComponent implements AfterViewInit, OnInit {
         value => {
           // let element: HTMLElement = document.getElementById('loadspinner') as HTMLElement;
           this.element.hidden = value;
+          setTimeout(() => {
+            this.element.hidden = true;
+          }, 10000);
         }
       );
     });

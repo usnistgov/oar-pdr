@@ -122,9 +122,9 @@ export class DescriptionComponent {
       this.files = <TreeNode[]>this.files[0].data;
     this.cols = [
       { field: 'name', header: 'Name', width: '60%' },
-      { field: 'mediatype', header: 'MediaType', width: '15%' },
-      { field: 'size', header: 'Size', width: '12%' },
-      { field: 'download', header: 'Download', width: '10%' }];
+      { field: 'mediatype', header: 'MediaType', width: '150px' },
+      { field: 'size', header: 'Size', width: '80px' },
+      { field: 'download', header: 'Download', width: '80px' }];
 
     this.fileNode = { "data": { "name": "", "size": "", "mediatype": "", "description": "", "filetype": "" } };
 

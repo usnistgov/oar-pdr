@@ -55,9 +55,6 @@ export class DownloadService {
   * Calling end point 2 to get the bundle
   **/
   getBundle(url, body): Observable<any> {
-    // console.log("Get bundle - body:");
-    // console.log(body);
-
     const request = new HttpRequest(
       "POST", url, body,
       { headers: new HttpHeaders({ 'Content-Type': 'application/json', 'responseType': 'blob' }), reportProgress: true, responseType: 'blob' });
@@ -156,11 +153,11 @@ export class DownloadService {
       } else {
         if (comp.data['filePath'] != null && comp.data['filePath'] != undefined) {
           if (comp.data['filePath'].split(".").length > 1) {
-            existItem = downloadData.filter(item => item.filePath === comp.data['ediid'] + comp.data['filePath']
+            existItem = downloadData.filter(item => item.filePath === comp.data['ediid'] + comp.data['resFilePath']
               && item.downloadUrl === comp.data['downloadUrl']);
 
             if (existItem.length == 0) {
-              downloadData.push({ "filePath": comp.data['ediid'] + comp.data['filePath'], 'downloadUrl': comp.data['downloadUrl'] });
+              downloadData.push({ "filePath": comp.data['ediid'] + comp.data['resFilePath'], 'downloadUrl': comp.data['downloadUrl'] });
             }
           }
         }

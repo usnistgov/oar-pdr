@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http'; 
+import { HttpClient, HttpHeaders } from '@angular/common/http'; 
 import { Observable } from 'rxjs/Observable';
 import 'rxjs/add/operator/map';
 import 'rxjs/add/operator/catch';
@@ -48,7 +48,7 @@ export class SearchService {
     else if(_.includes(this.landingBackend,'rmm')){
       backend = this.landingBackend+'records/'; 
     }
-    return this.http.get(backend + searchValue);
+    return this.http.get(backend + searchValue, { headers: new HttpHeaders({ timeout: '${10000}' }) });
   }
 }
 

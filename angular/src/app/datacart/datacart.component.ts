@@ -118,7 +118,6 @@ export class DatacartComponent implements OnInit, OnDestroy {
   confValues: Config;
   distApi: string;
   currentTask: string = '';
-  currentStatus: string = '';
   showCurrentTask: boolean = false;
   showMessage: boolean = true;
   broadcastMessage: string = '';
@@ -169,9 +168,6 @@ export class DatacartComponent implements OnInit, OnDestroy {
       this.loadDatacart().then(function (result) {
         this.commonVarService.setContentReady(true);
         this.downloadAllFilesFromAPI();
-        // console.log("this.dataFiles");
-        // console.log(this.dataFiles);
-
       }.bind(this), function (err) {
         alert("something went wrong while loading datacart.");
       });
@@ -179,9 +175,6 @@ export class DatacartComponent implements OnInit, OnDestroy {
     } else {
       this.loadDatacart().then(function (result) {
         this.commonVarService.setContentReady(true);
-        // console.log("this.dataFiles");
-        // console.log(this.dataFiles);
-
       }.bind(this), function (err) {
         alert("something went wrong while loading datacart.");
       });
@@ -210,7 +203,6 @@ export class DatacartComponent implements OnInit, OnDestroy {
   */
   loadDatacart() {
     this.currentTask = "Loading Datacart...";
-    this.currentStatus = "Loading...";
     this.selectedData = [];
     this.getDataCartList("Init").then(function (result) {
       this.createDataCartHierarchy();
@@ -228,8 +220,6 @@ export class DatacartComponent implements OnInit, OnDestroy {
 
       this.fileNode = { "data": { "resTitle": "", "size": "", "mediatype": "", "description": "", "filetype": "" } };
       this.expandToLevel(this.dataFiles, true, 1);
-      console.log("this.dataFiles");
-      console.log(this.dataFiles);
       this.checkNode(this.dataFiles);
       this.dataFileCount();
     }.bind(this), function (err) {
@@ -329,10 +319,7 @@ export class DatacartComponent implements OnInit, OnDestroy {
     this.downloadStatus = 'downloading';
     this.downloadService.setDownloadProcessStatus(false, "datacart");
     this.currentTask = "Zipping files...";
-    this.currentStatus = "Waiting for server response...";
     this.downloadService.setDownloadingNumber(0, "datacart");
-    console.log("Show task...");
-    console.log(this.showCurrentTask);
     // create root
     const newPart = {
       data: {
@@ -346,7 +333,6 @@ export class DatacartComponent implements OnInit, OnDestroy {
 
     // Sending data to _bundle_plan and get back the plan
     this.downloadService.getDownloadData(this.selectedData, this.downloadData);
-
     var randomnumber = Math.floor(Math.random() * (this.commonVarService.getRandomMaximum() - this.commonVarService.getRandomMinimum() + 1)) + this.commonVarService.getRandomMinimum();
 
     var zipFileBaseName = "download" + randomnumber;
@@ -354,8 +340,6 @@ export class DatacartComponent implements OnInit, OnDestroy {
     files.data.downloadStatus = 'downloading';
 
     postMessage.push({ "bundleName": files.data.downloadFileName, "includeFiles": this.downloadData });
-
-    console.log("Get bundle plan...");
 
     this.getBundlePlanRef = this.downloadService.getBundlePlan(this.distApi + "_bundle_plan", JSON.stringify(postMessage[0])).subscribe(
       blob => {
@@ -387,7 +371,6 @@ export class DatacartComponent implements OnInit, OnDestroy {
   **/
   processBundle(res: any, zipFileBaseName: any, files: any) {
     this.currentTask = "Processing Each Bundle...";
-    this.currentStatus = "Processing...";
 
     this.bundlePlanStatus = res.status.toLowerCase();
     this.messageColor = this.getColor();
@@ -399,6 +382,9 @@ export class DatacartComponent implements OnInit, OnDestroy {
 
     let bundlePlan: any[] = res.bundleNameFilePathUrl;
     let downloadUrl: any = this.distApi + res.postEachTo;
+    console.log("Bundle url:");
+    console.log(downloadUrl);
+    
     let tempData: any[] = [];
 
     for (let bundle of bundlePlan) {
@@ -647,8 +633,6 @@ export class DatacartComponent implements OnInit, OnDestroy {
    * Create Data hierarchy for the tree
    */
   createDataCartHierarchy() {
-    console.log("this.cartEntities");
-    console.log(this.cartEntities);
     let arrayList = this.cartEntities.reduce(function (result, current) {
       result[current.data.resTitle] = result[current.data.resTitle] || [];
       result[current.data.resTitle].push(current);

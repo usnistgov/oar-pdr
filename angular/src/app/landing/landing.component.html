@@ -23,7 +23,7 @@
       <div *ngIf="!isLoading" class="ui-g">
         <div class="ui-g-10 ui-md-10 ui-lg-10 ui-sm-12" style="padding-left: 1%">
           <b>No Landing page available</b>
-          <p>The requested record id {{ searchValue }} does not match with any records in the system</p>
+          <p>{{errorMsg}}</p>
         </div>
       </div>
     </div>

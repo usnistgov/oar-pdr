@@ -155,6 +155,8 @@ export class LandingComponent implements OnInit {
     );
 
     this.searchValue = this.route.snapshot.paramMap.get('id');
+    // this.errorMsg = 'The requested record id ' + this.searchValue + ' does not match with any records in the system';
+
     if (this.router.url.includes("ark"))
       this.searchValue = this.router.url.split("/id/").pop();
 
@@ -170,9 +172,12 @@ export class LandingComponent implements OnInit {
         }.bind(this), function (err) {
           alert("something went wrong while fetching the data.");
         });
-      }, error => {
+      }, (error) => {
         console.log("There is an error in searchservice.");
-        this.onError(" There is an error");
+        console.log(error);
+        this.errorMsg = error;
+        this.isLoading = false;
+        this.commonVarService.setContentReady(true);
         // throw new ErrorComponent(this.route);
       });
   }
@@ -197,8 +202,6 @@ export class LandingComponent implements OnInit {
   * If Search is successful populate list of keywords themes and authors
   */
   onSuccess(searchResults: any[]) {
-    // console.log("searchResults");
-    // console.log(searchResults);
     if (searchResults["ResultCount"] === undefined || searchResults["ResultCount"] !== 1)
       this.record = searchResults;
     else if (searchResults["ResultCount"] !== undefined && searchResults["ResultCount"] === 1)
@@ -234,6 +237,10 @@ export class LandingComponent implements OnInit {
     //this.msgs.push({severity:'error', summary:this.errorMsg + ':', detail:this.status + ' - ' + this.exception});
   }
 
+  turnSpinnerOff() {
+    setTimeout(() => { this.commonVarService.setContentReady(true); }, 0)
+  }
+
   viewmetadata() {
     this.metadata = true; this.similarResources = false;
   }
@@ -254,14 +261,13 @@ export class LandingComponent implements OnInit {
    * Update menu on landing page
    */
   updateMenu() {
-
     this.serviceApi = this.confValues.LANDING + "records?@id=" + this.record['@id'];
     if (!_.includes(this.confValues.LANDING, "rmm"))
       this.serviceApi = this.confValues.LANDING + this.record['ediid'];
     this.distdownload = this.confValues.DISTAPI + "ds/zip?id=" + this.record['@id'];
 
     var itemsMenu: MenuItem[] = [];
-    var metadata = this.createMenuItem("Export JSON", "faa faa-file-o", '', this.serviceApi);
+    var metadata = this.createMenuItem("Export JSON", "faa faa-file-o", (event) => { this.turnSpinnerOff(); }, this.serviceApi);
     let authlist = "";
     if (this.record['authors']) {
       for (let auth of this.record['authors']) authlist = authlist + auth.familyName + ",";
@@ -348,6 +354,7 @@ export class LandingComponent implements OnInit {
     //   this.router.navigate(['/od/id/ark:/88434/'+this.searchValue],{fragment:sectionId});
     //  else
     //   this.router.navigate(['/od/id/', this.record.ediid],{fragment:sectionId});
+    this.turnSpinnerOff();
     this.router.navigate(['/od/id/', this.searchValue], { fragment: sectionId });
     this.useFragment();
   }
@@ -382,11 +389,15 @@ export class LandingComponent implements OnInit {
         .catch((err: Response, caught: Observable<any[]>) => {
           if (err !== undefined) {
             console.log("ERROR STATUS :::" + err.status);
+            console.log(err);
             if (err.status >= 500) {
               this.router.navigate(["/usererror", recordid, { errorcode: err.status }]);
             }
             if (err.status >= 400 && err.status < 500) {
               this.router.navigate(["/usererror", recordid, { errorcode: err.status }]);
+            }
+            if (err.status == 0) {
+              return Observable.throw('The Web server (running the Web site) is currently unable to handle the request.');
             }
             //return Observable.throw('The Web server (running the Web site) is currently unable to handle the request.');
           }
@@ -410,8 +421,6 @@ export class LandingComponent implements OnInit {
   filescount: number = 0;
   createNewDataHierarchy() {
     var testdata = {}
-    // console.log("this.record: ");
-    // console.log(this.record);
     if (this.record['components'] != null) {
       testdata["data"] = this.arrangeIntoTree(this.record['components']);
       this.files.push(testdata);
@@ -425,7 +434,6 @@ export class LandingComponent implements OnInit {
     var tempfiletest = "";
 
     paths.forEach((path) => {
-
       if (path.filepath && !path['@type'].includes('nrd:Hidden')) {
         if (!path.filepath.startsWith("/"))
           path.filepath = "/" + path.filepath;
@@ -433,9 +441,6 @@ export class LandingComponent implements OnInit {
         const pathParts = path.filepath.split('/');
         pathParts.shift(); // Remove first blank element from the parts array.
         let currentLevel = tree; // initialize currentLevel to root
-
-        // console.log("path:");
-        // console.log(path);
 
         pathParts.forEach((part) => {
           // check to see if the path already exists.
