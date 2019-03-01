@@ -348,7 +348,7 @@ export class DatacartComponent implements OnInit, OnDestroy {
         this.processBundle(blob, zipFileBaseName, files);
       },
       err => {
-        console.log("Http return err000:");
+        console.log("Http return following error:");
         console.log(err);
         this.bundlePlanMessage = err;
         this.bundlePlanStatus = "error";
@@ -394,8 +394,8 @@ export class DatacartComponent implements OnInit, OnDestroy {
     // Associate zipData with files
     for (let zip of this.zipData) {
       for (let includeFile of zip.bundle.includeFiles) {
-        let filePath = includeFile.filePath.substring(includeFile.filePath.indexOf('/'));
-        let treeNode = this.downloadService.searchTreeByfilePath(this.treeRoot[0], filePath);
+        let resFilePath = includeFile.resFilePath.substring(includeFile.resFilePath.indexOf('/'));
+        let treeNode = this.downloadService.searchTreeByfilePath(this.treeRoot[0], resFilePath);
         if (treeNode != null) {
           treeNode.data.zipFile = zip.fileName;
         }
@@ -531,8 +531,10 @@ export class DatacartComponent implements OnInit, OnDestroy {
   dataFileCount() {
     this.selectedFileCount = 0;
     for (let selData of this.selectedData) {
-      if (selData.data['filePath'] != null) {
-        if (selData.data['filePath'].split(".").length > 1) {
+      console.log("selData");
+      console.log(selData);
+      if (selData.data['resFilePath'] != null) {
+        if (selData.data.isLeaf) {
           this.selectedFileCount++;
         }
       }

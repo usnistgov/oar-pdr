@@ -85,7 +85,7 @@
     </tr>
     <tbody *ngIf="showUnhandledFiles">
       <tr *ngFor="let file of bundlePlanUnhandledFiles">
-        <td width="30%" style="padding-left:.5em;border-bottom:1pt solid black;">{{file.filePath}}</td>
+        <td width="30%" style="padding-left:.5em;border-bottom:1pt solid black;">{{file.resFilePath}}</td>
         <td width="30%" style="padding-left:.5em;border-bottom:1pt solid black;">{{file.downloadUrl}}
         </td>
         <td width="40%" style="padding-left:.5em;border-bottom:1pt solid black;">{{file.message}}</td>
@@ -155,7 +155,7 @@
               </div>
             </ng-template>
             <i *ngIf="zip.downloadStatus != null" class="faa faa-repeat"
-              style="padding-left: 2%; display: inline; flex: 0 0 auto;font-size: 0.8em; color: #1E6BA1;"
+              style="padding-left: 2%; display: inline; flex: 0 0 auto;font-size: 0.8em; color: #1E6BA1; cursor: pointer;"
               data-toggle="tooltip" title="Retry" (click)="downloadOneZip(zip)"></i>
           </ng-template>
         </td>

@@ -105,6 +105,7 @@ export class DownloadService {
 
       },
       err => {
+        console.log(err);
         nextZip.downloadStatus = 'Error';
         nextZip.downloadErrorMessage = err.message;
         nextZip.downloadProgress = 0;
@@ -151,8 +152,8 @@ export class DownloadService {
       if (comp.children.length > 0) {
         this.getDownloadData(comp.children, downloadData);
       } else {
-        if (comp.data['filePath'] != null && comp.data['filePath'] != undefined) {
-          if (comp.data['filePath'].split(".").length > 1) {
+        if (comp.data['resFilePath'] != null && comp.data['resFilePath'] != undefined) {
+          if (comp.data['resFilePath'].split(".").length > 1) {
             existItem = downloadData.filter(item => item.filePath === comp.data['ediid'] + comp.data['resFilePath']
               && item.downloadUrl === comp.data['downloadUrl']);
 
@@ -218,8 +219,8 @@ export class DownloadService {
    **/
   setDownloadStatus(zip: any, treeNode: any, status: any) {
     for (let includeFile of zip.bundle.includeFiles) {
-      let filePath = includeFile.filePath.substring(includeFile.filePath.indexOf('/'));
-      let node = this.searchTreeByfilePath(treeNode, filePath);
+      let resFilePath = includeFile.resFilePath.substring(includeFile.resFilePath.indexOf('/'));
+      let node = this.searchTreeByfilePath(treeNode, resFilePath);
       if (node != null) {
         node.data.downloadStatus = status;
         this.cartService.updateCartItemDownloadStatus(node.data['cartId'], status);
@@ -254,14 +255,14 @@ export class DownloadService {
   /**
    * Search tree by given full path
    **/
-  searchTreeByfilePath(element, filePath) {
-    if (element.data.filePath == filePath) {
+  searchTreeByfilePath(element, resFilePath) {
+    if (element.data.resFilePath == resFilePath) {
       return element;
     } else if (element.children.length > 0) {
       var i;
       var result = null;
       for (i = 0; result == null && i < element.children.length; i++) {
-        result = this.searchTreeByfilePath(element.children[i], filePath);
+        result = this.searchTreeByfilePath(element.children[i], resFilePath);
       }
       return result;
     }

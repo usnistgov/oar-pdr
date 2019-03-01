@@ -387,6 +387,7 @@ export class LandingComponent implements OnInit {
     else {
       return this.searchService.searchById(recordid)
         .catch((err: Response, caught: Observable<any[]>) => {
+          console.log(err);
           if (err !== undefined) {
             console.log("ERROR STATUS :::" + err.status);
             console.log(err);
@@ -432,6 +433,9 @@ export class LandingComponent implements OnInit {
     // This example uses the underscore.js library.
     var i = 1;
     var tempfiletest = "";
+
+    console.log("paths");
+    console.log(paths);
 
     paths.forEach((path) => {
       if (path.filepath && !path['@type'].includes('nrd:Hidden')) {

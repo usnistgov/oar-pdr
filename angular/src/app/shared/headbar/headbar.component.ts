@@ -62,6 +62,7 @@ export class HeadbarComponent {
       this.cartLength = this.cartEntities.length;
       return this.cartLength;
     }.bind(this), function (err) {
+      console.log(err);
       alert("something went wrong while fetching the products");
     });
     return null;

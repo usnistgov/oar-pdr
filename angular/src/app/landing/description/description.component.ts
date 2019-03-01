@@ -752,17 +752,11 @@ export class DescriptionComponent {
   }
 
   downloadFromRoot() {
-    // window.open('/datacart/popup', '_blank');
-
     this.cartService.setCurrentCart('landing_popup');
     this.commonVarService.setLocalProcessing(true);
     setTimeout(() => {
       this.addAllFilesToCart(this.files, true, 'popup').then(function (result) {
         this.commonVarService.setLocalProcessing(false);
-        let element: HTMLElement = document.getElementById('routeToDatacart') as HTMLElement;
-        // element.click();
-
-        // this.datacartWin.location.href = '/datacart/popup';
         this.cartService.setCurrentCart('cart');
         this.updateStatusFromCart().then(function (result: any) {
           this.commonVarService.setForceLandingPageInit(true);
@@ -833,8 +827,8 @@ export class DescriptionComponent {
     // Associate zipData with files
     for (let zip of this.zipData) {
       for (let includeFile of zip.bundle.includeFiles) {
-        let filePath = includeFile.filePath.substring(includeFile.filePath.indexOf('/'));
-        let treeNode = this.downloadService.searchTreeByfilePath(this.treeRoot[0], filePath);
+        let resFilePath = includeFile.resFilePath.substring(includeFile.resFilePath.indexOf('/'));
+        let treeNode = this.downloadService.searchTreeByfilePath(this.treeRoot[0], resFilePath);
         if (treeNode != null) {
           treeNode.data.zipFile = zip.fileName;
         }

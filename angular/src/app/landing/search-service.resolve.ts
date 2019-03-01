@@ -48,6 +48,7 @@ export class SearchResolve implements Resolve<any> {
         // return this.searchService.testdata() 
         return this.searchService.searchById(recordid)
         .catch((err: Response, caught: Observable<any[]>) => {
+            console.log(err);
             if (err !== undefined) {
               console.log("ERROR STATUS :::"+err.status);
               if(err.status >= 500){
