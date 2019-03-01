@@ -219,7 +219,7 @@ export class DownloadService {
    **/
   setDownloadStatus(zip: any, treeNode: any, status: any) {
     for (let includeFile of zip.bundle.includeFiles) {
-      let resFilePath = includeFile.resFilePath.substring(includeFile.resFilePath.indexOf('/'));
+      let resFilePath = includeFile.filePath.substring(includeFile.filePath.indexOf('/'));
       let node = this.searchTreeByfilePath(treeNode, resFilePath);
       if (node != null) {
         node.data.downloadStatus = status;

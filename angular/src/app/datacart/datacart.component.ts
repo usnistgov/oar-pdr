@@ -394,7 +394,7 @@ export class DatacartComponent implements OnInit, OnDestroy {
     // Associate zipData with files
     for (let zip of this.zipData) {
       for (let includeFile of zip.bundle.includeFiles) {
-        let resFilePath = includeFile.resFilePath.substring(includeFile.resFilePath.indexOf('/'));
+        let resFilePath = includeFile.filePath.substring(includeFile.filePath.indexOf('/'));
         let treeNode = this.downloadService.searchTreeByfilePath(this.treeRoot[0], resFilePath);
         if (treeNode != null) {
           treeNode.data.zipFile = zip.fileName;
@@ -531,8 +531,6 @@ export class DatacartComponent implements OnInit, OnDestroy {
   dataFileCount() {
     this.selectedFileCount = 0;
     for (let selData of this.selectedData) {
-      console.log("selData");
-      console.log(selData);
       if (selData.data['resFilePath'] != null) {
         if (selData.data.isLeaf) {
           this.selectedFileCount++;

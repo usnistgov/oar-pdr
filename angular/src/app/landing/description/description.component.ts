@@ -827,7 +827,7 @@ export class DescriptionComponent {
     // Associate zipData with files
     for (let zip of this.zipData) {
       for (let includeFile of zip.bundle.includeFiles) {
-        let resFilePath = includeFile.resFilePath.substring(includeFile.resFilePath.indexOf('/'));
+        let resFilePath = includeFile.filePath.substring(includeFile.filePath.indexOf('/'));
         let treeNode = this.downloadService.searchTreeByfilePath(this.treeRoot[0], resFilePath);
         if (treeNode != null) {
           treeNode.data.zipFile = zip.fileName;
