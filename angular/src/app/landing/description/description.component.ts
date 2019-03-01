@@ -439,6 +439,8 @@ export class DescriptionComponent {
       }
       else {
         this.addAllFilesToCart(files, false, '').then(function (result1: any) {
+          this.updateStatusFromCart();
+          this.allSelected = this.updateAllSelectStatus(this.files);
           this.isLocalProcessing = false;
         }.bind(this), function (err) {
           alert("something went wrong while adding file to data cart.");
@@ -457,8 +459,8 @@ export class DescriptionComponent {
   addAllFilesToCart(files: any, isSelected: boolean, mode: string) {
     this.cartService.deselectAll().then(function (result1: any) {
       this.addFilesToCart(files, isSelected, mode).then(function (result2: any) {
-        // this.cartService.setForceDatacartReload(true);
-        // this.allSelected = this.updateAllSelectStatus(this.files);
+        this.cartService.setForceDatacartReload(true);
+        this.allSelected = this.updateAllSelectStatus(this.files);
         if(mode == 'popup'){
           this.allSelected = true;
         }
@@ -755,6 +757,7 @@ export class DescriptionComponent {
     this.cartService.setCurrentCart('landing_popup');
     this.commonVarService.setLocalProcessing(true);
     setTimeout(() => {
+      this.cartService.clearTheCart();
       this.addAllFilesToCart(this.files, true, 'popup').then(function (result) {
         this.commonVarService.setLocalProcessing(false);
         this.cartService.setCurrentCart('cart');

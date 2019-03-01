@@ -81,7 +81,9 @@ export class CartService {
     // persist the map
     this.setCart(cartMap);
     let cart = this.getAllCartEntities();
-    this.setCartLength(this.cartSize);
+    if (this.currentCart == 'cart') {
+      this.setCartLength(this.cartSize);
+    }
   }
 
   /**
@@ -148,7 +150,9 @@ export class CartService {
       cartEntities.push(value);
     }
     this.cartSize = cartEntities.length
-    this.setCartLength(this.cartSize);
+    if (this.currentCart == 'cart') {
+      this.setCartLength(this.cartSize);
+    }
     return this.cartSize;
   }
 
@@ -204,6 +208,9 @@ export class CartService {
     this.setCart(cartMap);
     this.getCart();
     this.cartSize = cartEntities.length;
+    if (this.currentCart == 'cart') {
+      this.setCartLength(this.cartSize);
+    }
     // return the array
     return Promise.resolve(cartEntities);
 
@@ -233,12 +240,23 @@ export class CartService {
     // persist the map
     this.setCart(cartMap);
     let cart = this.getAllCartEntities();
-    this.setCartLength(this.cartSize);
+    if (this.currentCart == 'cart') {
+      this.setCartLength(this.cartSize);
+    }
   }
 
-
+  /**
+   * Clear the current cart
+   **/
   clearTheCart() {
     this._storage.removeItem(this.currentCart);
+  }
+
+  /**
+   * Return the current cart
+   **/
+  getCurrentCartName() {
+    return this.currentCart;
   }
 
   /**
@@ -311,7 +329,9 @@ export class CartService {
     // save the map
     this.setCart(cartMap);
     let cart = this.getAllCartEntities();
-    this.setCartLength(this.cartSize);
+    if (this.currentCart == 'cart') {
+      this.setCartLength(this.cartSize);
+    }
     return Promise.resolve(cartMap);
   }
 
@@ -387,7 +407,7 @@ export class CartService {
   /**
   * Function to set current data cart.
   **/
-  setCurrentCart(cart: string){
+  setCurrentCart(cart: string) {
     this.currentCart = cart;
   }
 }

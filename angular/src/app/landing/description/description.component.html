@@ -167,24 +167,6 @@
                     <i class="faa faa-download" [ngStyle]="{'color':getDownloadBtnColor(rowData)}" aria-hidden="true"
                       (click)="setFileDownloaded(rowData)"></i>
                   </a>
-                  <!-- <div *ngIf="rowData.downloadStatus != 'downloading'" (click)="downloadOneFile(rowData)"
-                  data-toggle="tooltip" title="Direct download">
-                  <i class="faa faa-download" [ngStyle]="{'color':getDownloadBtnColor(rowData)}" aria-hidden="true"
-                    (click)="setFileDownloaded(rowData)"></i>
-                </div> -->
-                  <!-- <span *ngIf="showDownloadProgress && rowData.downloadStatus === 'downloading'"
-                    style="font-size: 0.8em;margin-left: 8px;">
-                    {{rowData.downloadProgress}}%
-                  </span>
-                  <div *ngIf="showDownloadProgress && rowData.downloadStatus === 'downloading'"
-                    style="width: 50px;padding-top: 8px; margin-left: 4px;">
-                    <p-progressBar [value]="rowData.downloadProgress" showValue="true"></p-progressBar>
-                  </div>
-                  <div *ngIf="showDownloadProgress && rowData.downloadStatus === 'downloading'"
-                    style="padding-left:5px;">
-                    <span (click)="cancelDownload(rowData)" style="cursor: pointer;"><i
-                        class="faa faa-remove"></i></span>
-                  </div> -->
                 </div>
                 <ng-template #space_holder>
                   <div style="padding-right: 0.4em;">&nbsp;&nbsp;</div>

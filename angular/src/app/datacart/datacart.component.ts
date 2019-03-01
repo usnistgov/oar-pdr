@@ -175,6 +175,7 @@ export class DatacartComponent implements OnInit, OnDestroy {
       });
 
     } else {
+      this.cartService.setCurrentCart('cart');
       this.loadDatacart().then(function (result) {
         this.commonVarService.setContentReady(true);
       }.bind(this), function (err) {
@@ -392,7 +393,7 @@ export class DatacartComponent implements OnInit, OnDestroy {
     let downloadUrl: any = this.distApi + res.postEachTo;
     console.log("Bundle url:");
     console.log(downloadUrl);
-    
+
     let tempData: any[] = [];
 
     for (let bundle of bundlePlan) {
@@ -493,6 +494,9 @@ export class DatacartComponent implements OnInit, OnDestroy {
             rowData.downloadStatus = 'downloaded';
             this.cartService.updateCartItemDownloadStatus(rowData.cartId, 'downloaded');
             this.downloadService.setFileDownloadedFlag(true);
+            let cartEntity = this.cartEntities.filter(entry => entry.data.cartId == rowData.cartId)[0];
+            let index = this.cartEntities.indexOf(cartEntity);
+            this.cartEntities[index].data.downloadStatus = 'downloaded';
             break;
           case HttpEventType.DownloadProgress:
             rowData.downloadProgress = 0;
@@ -575,8 +579,10 @@ export class DatacartComponent implements OnInit, OnDestroy {
     }
     this.getDataCartList();
     this.createDataCartHierarchy();
-    this.cartService.setCartLength(this.cartEntities.length);
-    this.selectedData.length = 0;
+    if (this.mode != 'popup') {
+      this.cartService.setCartLength(this.cartEntities.length);
+    }
+    this.selectedData = [];
     this.dataFileCount();
     this.expandToLevel(this.dataFiles, true, 1);
   }
@@ -585,10 +591,14 @@ export class DatacartComponent implements OnInit, OnDestroy {
    * Removes all cart Instances that are bound to the download status.
    **/
   removeByDownloadStatus() {
-    this.selectedData = null;
+    this.selectedData = [];
+    // for (let i = 0; i < this.cartEntities.length; i++) {
+    //   if(this.cartEntities[i].data.downloadStatus == 'downloaded'){
+    //     this.selectedData = this.selectedData.filter(entry => entry.data.cartId != this.cartEntities[i].data.cartId);
+    //   }
+    // }
     this.cartService.removeByDownloadStatus();
     this.updateCartEntries();
-    this.cartService.setCartLength(this.cartEntities.length);
     this.dataFileCount();
     setTimeout(() => {
       this.expandToLevel(this.dataFiles, true, 1);
@@ -726,6 +736,7 @@ export class DatacartComponent implements OnInit, OnDestroy {
     }
 
     if (inputArray.children.length > 0) {
+      inputArray.data.cartId = null;
       inputArray.data.isLeaf = false;
     } else {
       inputArray.data.isLeaf = true;
