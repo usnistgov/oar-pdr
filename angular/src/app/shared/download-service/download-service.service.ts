@@ -256,7 +256,7 @@ export class DownloadService {
    * Search tree by given full path
    **/
   searchTreeByfilePath(element, resFilePath) {
-    if (element.data.resFilePath == resFilePath) {
+    if (element.data.isLeaf && element.data.resFilePath == resFilePath) {
       return element;
     } else if (element.children.length > 0) {
       var i;

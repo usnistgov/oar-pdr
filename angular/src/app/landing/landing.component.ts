@@ -434,9 +434,6 @@ export class LandingComponent implements OnInit {
     var i = 1;
     var tempfiletest = "";
 
-    console.log("paths");
-    console.log(paths);
-
     paths.forEach((path) => {
       if (path.filepath && !path['@type'].includes('nrd:Hidden')) {
         if (!path.filepath.startsWith("/"))

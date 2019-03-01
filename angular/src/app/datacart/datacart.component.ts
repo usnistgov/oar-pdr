@@ -169,14 +169,18 @@ export class DatacartComponent implements OnInit, OnDestroy {
         this.commonVarService.setContentReady(true);
         this.downloadAllFilesFromAPI();
       }.bind(this), function (err) {
-        alert("something went wrong while loading datacart.");
+        console.log("Error while loading datacart:");
+        console.log(err);
+        // alert("something went wrong while loading datacart.");
       });
 
     } else {
       this.loadDatacart().then(function (result) {
         this.commonVarService.setContentReady(true);
       }.bind(this), function (err) {
-        alert("something went wrong while loading datacart.");
+        console.log("Error while loading datacart:");
+        console.log(err);
+        // alert("something went wrong while loading datacart.");
       });
 
     }
@@ -223,7 +227,9 @@ export class DatacartComponent implements OnInit, OnDestroy {
       this.checkNode(this.dataFiles);
       this.dataFileCount();
     }.bind(this), function (err) {
-      alert("something went wrong while fetching the datacart");
+      console.log("Error while loading datacart:");
+      console.log(err);
+      // alert("something went wrong while fetching the datacart");
     });
     return Promise.resolve(this.dataFiles);
   }
@@ -299,7 +305,9 @@ export class DatacartComponent implements OnInit, OnDestroy {
     this.cartService.getAllCartEntities().then(function (result) {
       this.cartEntities = result;
     }.bind(this), function (err) {
-      alert("something went wrong while fetching the datacart");
+      console.log("Error while getting datacart list:");
+      console.log(err);
+      // alert("something went wrong while fetching the datacart");
     });
     return Promise.resolve(this.cartEntities);
   }
@@ -390,7 +398,6 @@ export class DatacartComponent implements OnInit, OnDestroy {
     for (let bundle of bundlePlan) {
       this.zipData.push({ "fileName": bundle.bundleName, "downloadProgress": 0, "downloadStatus": null, "downloadInstance": null, "bundle": bundle, "downloadUrl": downloadUrl, "downloadErrorMessage": "" });
     }
-
     // Associate zipData with files
     for (let zip of this.zipData) {
       for (let includeFile of zip.bundle.includeFiles) {
@@ -547,7 +554,9 @@ export class DatacartComponent implements OnInit, OnDestroy {
       this.cartEntities = result;
       this.createDataCartHierarchy();
     }.bind(this), function (err) {
-      alert("something went wrong while fetching the products");
+      console.log("Error while updating cart entries:");
+      console.log(err);
+      // alert("something went wrong while fetching the products");
     });
   }
 
@@ -576,13 +585,13 @@ export class DatacartComponent implements OnInit, OnDestroy {
    * Removes all cart Instances that are bound to the download status.
    **/
   removeByDownloadStatus() {
-    let dataId: any;
-    // convert the map to an array
+    this.selectedData = null;
     this.cartService.removeByDownloadStatus();
     this.updateCartEntries();
     this.cartService.setCartLength(this.cartEntities.length);
+    this.dataFileCount();
     setTimeout(() => {
-      this.expandToLevel(this.dataFiles, true, null);
+      this.expandToLevel(this.dataFiles, true, 1);
     }, 0);
     this.isVisible = false;
     setTimeout(() => {
