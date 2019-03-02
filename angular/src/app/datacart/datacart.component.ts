@@ -317,6 +317,7 @@ export class DatacartComponent implements OnInit, OnDestroy {
   * Function to download all files from API call.
   **/
   downloadAllFilesFromAPI() {
+    this.clearDownloadStatus();
     this.isProcessing = true;
     this.showCurrentTask = true;
     let postMessage: any[] = [];
@@ -403,21 +404,24 @@ export class DatacartComponent implements OnInit, OnDestroy {
     for (let zip of this.zipData) {
       for (let includeFile of zip.bundle.includeFiles) {
         let resFilePath = includeFile.filePath.substring(includeFile.filePath.indexOf('/'));
-        let treeNode = this.downloadService.searchTreeByfilePath(this.treeRoot[0], resFilePath);
-        if (treeNode != null) {
-          treeNode.data.zipFile = zip.fileName;
+        for (let dataFile of this.dataFiles) {
+          let treeNode = this.downloadService.searchTreeByfilePath(dataFile, resFilePath);
+          if (treeNode != null) {
+            treeNode.data.zipFile = zip.fileName;
+            break; 
+          }
         }
       }
     }
 
-    this.downloadService.downloadNextZip(this.zipData, this.treeRoot[0], "datacart");
+    this.downloadService.downloadNextZip(this.zipData, this.dataFiles, "datacart");
 
     // Start downloading the first one, this will set the downloaded zip file to 1
     this.subscriptions.push(this.downloadService.watchDownloadingNumber("datacart").subscribe(
       value => {
         if (value >= 0) {
           if (!this.cancelAllDownload) {
-            this.downloadService.downloadNextZip(this.zipData, this.treeRoot[0], "datacart");
+            this.downloadService.downloadNextZip(this.zipData, this.dataFiles, "datacart");
           }
         }
       }
@@ -431,7 +435,7 @@ export class DatacartComponent implements OnInit, OnDestroy {
     if (zip.downloadInstance != null) {
       zip.downloadInstance.unsubscribe();
     }
-    this.downloadService.download(zip, this.zipData, this.treeRoot[0], "datacart");
+    this.downloadService.download(zip, this.zipData, this.dataFiles, "datacart");
   }
 
   /**
@@ -461,8 +465,8 @@ export class DatacartComponent implements OnInit, OnDestroy {
   * Reset download params
   **/
   resetDownloadParams() {
-    this.downloadService.setDownloadingNumber(0, "datacart");
     this.zipData = [];
+    this.downloadService.setDownloadingNumber(0, "datacart");
     this.downloadStatus = null;
     this.cancelAllDownload = true;
     this.displayDownloadFiles = false;
@@ -578,6 +582,8 @@ export class DatacartComponent implements OnInit, OnDestroy {
       this.cartService.saveListOfCartEntities(this.cartEntities);
     }
     this.getDataCartList();
+    console.log("this.cartEntities");
+    console.log(this.cartEntities);
     this.createDataCartHierarchy();
     if (this.mode != 'popup') {
       this.cartService.setCartLength(this.cartEntities.length);

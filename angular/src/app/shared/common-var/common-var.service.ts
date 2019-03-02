@@ -12,7 +12,6 @@ export class CommonVarService {
   private _storage = localStorage;
   private random_minimum: number = 1;
   private random_maximum: number = 100000;
-  private download_maximum: number = 2;
   private isLocalTesting: boolean = false;
 
   localProcessingSub = new BehaviorSubject<boolean>(false);
@@ -49,10 +48,6 @@ export class CommonVarService {
 
   getRandomMinimum() {
     return this.random_minimum;
-  }
-
-  getDownloadMaximum() {
-    return this.download_maximum;
   }
 
   /**

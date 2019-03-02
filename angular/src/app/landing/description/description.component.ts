@@ -631,22 +631,6 @@ export class DescriptionComponent {
   }
 
   /**
-  * Downloaded one file by id
-  **/
-  downloadById(id: any) {
-    let subFiles: any = null;
-    for (let comp of this.files) {
-      subFiles = this.searchTree(comp, id);
-      if (subFiles != null) {
-        break;
-      }
-    }
-    if (subFiles != null) {
-      this.downloadAllFilesFromAPI(subFiles);
-    }
-  }
-
-  /**
   * Downloaded one file
   **/
   downloadOneFile(rowData: any) {
@@ -681,22 +665,6 @@ export class DescriptionComponent {
     rowData.downloadStatus = 'downloaded';
     this.cartService.updateCartItemDownloadStatus(rowData.cartId, 'downloaded');
     this.downloadStatus = this.updateDownloadStatus(this.files) ? "downloaded" : null;
-    if (rowData.isIncart) {
-      this.downloadService.setFileDownloadedFlag(true);
-    }
-  }
-
-  /**
-  * Function to download a single file based on download url.
-  **/
-  downloadFile(rowData: any) {
-    if (!this.isFile(rowData)) {
-      this.downloadById(rowData.cartId);
-    } else {
-      this.downloadOneFile(rowData);
-    };
-
-    rowData.downloadStatus = 'downloaded';
     if (rowData.isIncart) {
       this.downloadService.setFileDownloadedFlag(true);
     }
@@ -774,83 +742,6 @@ export class DescriptionComponent {
     setTimeout(() => {
       this.commonVarService.setLocalProcessing(false);
     }, 10000);
-  }
-
-  /**
-  * Function to download all files from API call.
-  **/
-  downloadAllFilesFromAPI(files: any) {
-    let postMessage: any;
-    this.downloadData = [];
-    this.zipData = [];
-    this.displayDownloadFiles = true;
-    this.cancelAllDownload = false;
-    this.downloadStatus = 'downloading';
-    this.downloadService.setDownloadProcessStatus(false, "landingPage");
-
-    // Sending data to _bundle_plan and get back the plan
-    this.downloadService.getDownloadData(files.children, this.downloadData);
-
-    var randomnumber = Math.floor(Math.random() * (this.commonVarService.getRandomMaximum() - this.commonVarService.getRandomMinimum() + 1)) + this.commonVarService.getRandomMinimum();
-
-    var zipFileBaseName = "download" + randomnumber;
-    files.data.downloadFileName = zipFileBaseName;
-    files.data.downloadStatus = 'downloading';
-
-    postMessage.push({ "bundleName": files.data.downloadFileName, "includeFiles": this.downloadData });
-    // now use postMessage to request a bundle plan
-    this.downloadService.getBundlePlan(this.distApi + "_bundle_plan", JSON.stringify(postMessage[0])).subscribe(
-      blob => {
-        this.processBundle(blob, zipFileBaseName, files);
-      },
-      err => {
-        console.log(err);
-        this.bundlePlanMessage = err;
-        this.bundlePlanStatus = "error";
-      }
-    );
-  }
-
-  /**
-  * Process each bundle
-  **/
-  processBundle(res: any, zipFileBaseName, files: any) {
-    this.bundlePlanStatus = res.status.toLowerCase();
-    this.messageColor = this.getColor();
-    this.bundlePlanUnhandledFiles = res.notIncluded;
-    let bundlePlan: any[] = res.bundleNameFilePathUrl;
-    let downloadUrl: any = this.distApi + res.postEachTo;
-    this.bundlePlanMessage = res.messages;
-    let tempData: any[] = [];
-
-    for (let bundle of bundlePlan) {
-      this.zipData.push({ "fileName": bundle.bundleName, "downloadProgress": 0, "downloadStatus": null, "downloadInstance": null, "bundle": bundle, "downloadUrl": downloadUrl, "downloadErrorMessage": "" });
-    }
-
-    // Associate zipData with files
-    for (let zip of this.zipData) {
-      for (let includeFile of zip.bundle.includeFiles) {
-        let resFilePath = includeFile.filePath.substring(includeFile.filePath.indexOf('/'));
-        let treeNode = this.downloadService.searchTreeByfilePath(this.treeRoot[0], resFilePath);
-        if (treeNode != null) {
-          treeNode.data.zipFile = zip.fileName;
-        }
-      }
-    }
-
-    this.downloadService.downloadNextZip(this.zipData, this.treeRoot[0], "landingPage");
-
-    // Start downloading the first one, this will set the downloaded zip file to 1
-    this.subscriptions.push(this.downloadService.watchDownloadingNumber("landingPage").subscribe(
-      value => {
-        if (!this.cancelAllDownload) {
-          this.downloadService.downloadNextZip(this.zipData, this.treeRoot[0], "landingPage");
-          files.data.downloadProgress = Math.round(100 * this.downloadService.getDownloadedNumber(this.zipData) / this.zipData.length);
-        }
-
-        this.downloadStatus = this.updateDownloadStatus(this.files) ? "downloaded" : null;
-      }
-    ));
   }
 
   /**
