@@ -144,7 +144,7 @@
     "traceur": "^0.0.111",
     "ts-node": "~6.1.1",
     "tslint": "~5.10.0",
-    "typescript": "~2.7.2",
+    "typescript": "~2.8.4",
     "walk": "^2.3.13",
     "webpack-cli": "^3.0.0"
   }
