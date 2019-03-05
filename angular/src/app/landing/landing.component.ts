@@ -321,7 +321,7 @@ export class LandingComponent implements OnInit {
         if (author.givenName !== null && author.givenName !== undefined)
           this.citeString += author.givenName;
         if (author.middleName !== null && author.middleName !== undefined)
-          this.citeString += author.middleName;
+          this.citeString += ' ' + author.middleName;
         if (i != this.record['authors'].length - 1)
           this.citeString += ', ';
       }
@@ -496,7 +496,11 @@ export class LandingComponent implements OnInit {
         comp.data.isLeaf = false;
         this.setLeafs(comp.children);
       } else {
-        comp.data.isLeaf = true;
+        if (comp.data.filetype == 'nrdp:DataFile' || comp.data.filetype == 'nrdp:ChecksumFile') {
+          comp.data.isLeaf = true;
+        } else {
+          comp.data.isLeaf = false;
+        }
       }
     }
   }
