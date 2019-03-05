@@ -238,7 +238,7 @@
           <span>{{rowData.mediatype}}</span>
         </td>
         <td>
-          <span>{{rowData.size}}</span>
+          <span *ngIf="rowData.isLeaf">{{formatBytes(rowData.fileSize)}}</span>
         </td>
         <td>
           <div style="display:flex;">

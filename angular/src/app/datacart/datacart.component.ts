@@ -28,6 +28,7 @@ import { AppConfig, Config } from '../shared/config-service/config.service';
 import { BootstrapOptions } from '@angular/core/src/application_ref';
 import { AsyncBooleanResultCallback } from 'async';
 import { FileSaverService } from 'ngx-filesaver';
+import { CommonFunctionService } from '../shared/common-function/common-function.service';
 
 declare var Ultima: any;
 declare var saveAs: any;
@@ -138,6 +139,7 @@ export class DatacartComponent implements OnInit, OnDestroy {
     private appConfig: AppConfig,
     private _FileSaverService: FileSaverService,
     private commonVarService: CommonVarService,
+    private commonFunctionService: CommonFunctionService,
     private route: ActivatedRoute) {
     this.confValues = this.appConfig.getConfig();
     this.cartService.watchForceDatacartReload().subscribe(
@@ -408,7 +410,7 @@ export class DatacartComponent implements OnInit, OnDestroy {
           let treeNode = this.downloadService.searchTreeByfilePath(dataFile, resFilePath);
           if (treeNode != null) {
             treeNode.data.zipFile = zip.fileName;
-            break; 
+            break;
           }
         }
       }
@@ -582,8 +584,6 @@ export class DatacartComponent implements OnInit, OnDestroy {
       this.cartService.saveListOfCartEntities(this.cartEntities);
     }
     this.getDataCartList();
-    console.log("this.cartEntities");
-    console.log(this.cartEntities);
     this.createDataCartHierarchy();
     if (this.mode != 'popup') {
       this.cartService.setCartLength(this.cartEntities.length);
@@ -680,7 +680,6 @@ export class DatacartComponent implements OnInit, OnDestroy {
 
         parentObj.children = [];
         for (let fields of arrayList[key]) {
-
           let resId = fields.data.resId;
           let ediid = fields.data.ediid;
 
@@ -709,7 +708,8 @@ export class DatacartComponent implements OnInit, OnDestroy {
                   fields.data.mediatype,
                   fields.data.description,
                   fields.data.filetype,
-                  fields.data.isSelected
+                  fields.data.isSelected,
+                  fields.data.fileSize,
                 );
                 parent.children.push(child2);
 
@@ -777,7 +777,7 @@ export class DatacartComponent implements OnInit, OnDestroy {
   /**
    * Create data hierarchy for children
    */
-  createDataCartChildrenTree(path: string, cartId: string, resId: string, ediid: string, resTitle: string, downloadUrl: string, resFilePath: string, downloadStatus: string, mediatype: string, description: string, filetype: string, isSelected: boolean) {
+  createDataCartChildrenTree(path: string, cartId: string, resId: string, ediid: string, resTitle: string, downloadUrl: string, resFilePath: string, downloadStatus: string, mediatype: string, description: string, filetype: string, isSelected: boolean, fileSize: any) {
     let child1: TreeNode = {};
     child1 = {
       data: {
@@ -792,7 +792,8 @@ export class DatacartComponent implements OnInit, OnDestroy {
         'mediatype': mediatype,
         'description': description,
         'filetype': filetype,
-        'isSelected': isSelected
+        'isSelected': isSelected,
+        'fileSize': fileSize
       }
 
     };
@@ -930,6 +931,13 @@ export class DatacartComponent implements OnInit, OnDestroy {
     rowData.downloadStatus = 'downloaded';
     this.cartService.updateCartItemDownloadStatus(rowData.cartId, 'downloaded');
     this.downloadService.setFileDownloadedFlag(true);
+  }
+
+  /**
+  * Function to display bytes in appropriate format.
+  **/
+  formatBytes(bytes, numAfterDecimal) {
+    return this.commonFunctionService.formatBytes(bytes, numAfterDecimal);
   }
 }
 

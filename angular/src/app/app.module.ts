@@ -40,6 +40,7 @@ import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { ConfirmDialogModule, SelectItem, DropdownModule, ConfirmationService, Message } from 'primeng/primeng';
 import { ProgressBarModule } from 'primeng/progressbar';
 import { TestDataService } from './shared/testdata-service/testDataService';
+import { CommonFunctionService } from './shared/common-function/common-function.service';
 
 // used to create fake backend
 import { fakeBackendProvider } from './_helpers/fakeBackendInterceptor';
@@ -86,6 +87,7 @@ const appInitializerFn = (appConfig: AppConfig) => {
     DownloadService,
     TestDataService,
     ConfirmationService,
+    CommonFunctionService,
     {
       provide: APP_INITIALIZER,
       useFactory: appInitializerFn,

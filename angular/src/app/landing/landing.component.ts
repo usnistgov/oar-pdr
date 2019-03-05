@@ -167,6 +167,8 @@ export class LandingComponent implements OnInit {
     this.getData()
       .subscribe((res) => {
         this.onSuccess(res).then(function (result) {
+          console.log("this.files");
+          console.log(this.files);
           this.commonVarService.setContentReady(true);
           this.isLoading = false;
         }.bind(this), function (err) {

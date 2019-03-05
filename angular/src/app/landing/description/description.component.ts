@@ -17,6 +17,7 @@ import { THIS_EXPR } from '@angular/compiler/src/output/output_ast';
 import { FileSaverService } from 'ngx-filesaver';
 import { v } from '@angular/core/src/render3';
 import { Router } from '@angular/router';
+import { CommonFunctionService } from '../../shared/common-function/common-function.service';
 
 declare var saveAs: any;
 
@@ -98,6 +99,7 @@ export class DescriptionComponent {
     private appConfig: AppConfig,
     private _FileSaverService: FileSaverService,
     private confirmationService: ConfirmationService,
+    private commonFunctionService: CommonFunctionService,
     public router: Router) {
     this.cartService.watchAddAllFilesCart().subscribe(value => {
       this.addAllFileSpinner = value;
@@ -343,19 +345,7 @@ export class DescriptionComponent {
   * Function to display bytes in appropriate format.
   **/
   formatBytes(bytes, numAfterDecimal) {
-    if (0 == bytes) return "0 Bytes";
-    if (1 == bytes) return "1 Byte";
-    var base = 1000,
-      e = ["Bytes", "kB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"],
-      d = numAfterDecimal || 1,
-      f = Math.floor(Math.log(bytes) / Math.log(base));
-
-    var v = bytes / Math.pow(base, f);
-    if (f == 0) // less than 1 kiloByte
-      d = 0;
-    else if (numAfterDecimal == null && v < 10.0)
-      d = 2;
-    return v.toFixed(d) + " " + e[f];
+    return this.commonFunctionService.formatBytes(bytes, numAfterDecimal);
   }
 
   isNodeSelected: boolean = false;
@@ -461,7 +451,7 @@ export class DescriptionComponent {
       this.addFilesToCart(files, isSelected, mode).then(function (result2: any) {
         this.cartService.setForceDatacartReload(true);
         this.allSelected = this.updateAllSelectStatus(this.files);
-        if(mode == 'popup'){
+        if (mode == 'popup') {
           this.allSelected = true;
         }
       }.bind(this), function (err) {
@@ -519,7 +509,7 @@ export class DescriptionComponent {
     };
 
     this.cartService.addDataToCart(data).then(function (result) {
-      if(mode != 'popup')
+      if (mode != 'popup')
         rowData.isIncart = true;
       cartMap = result;
     }.bind(this), function (err) {
