@@ -1273,7 +1273,7 @@ class BagBuilder(PreservationSystem):
         try:
             self._add_file_specs(srcpath, mdata)
             if examine:
-                self._add_checksum(srcpath, mdata)
+                self._add_checksum(checksum_of(srcpath), mdata)
                 self._add_extracted_metadata(srcpath, mdata)
         except OSError as ex:
             raise BagWriteError("Unable to examine data file for metadata: "+
@@ -1316,7 +1316,7 @@ class BagBuilder(PreservationSystem):
         out = OrderedDict()
         self._add_file_specs(datafile, out)
         if checksum:
-            self._add_checksum(datafile, out)
+            self._add_checksum(checksum_of(datafile), out)
         return out
 
     def _add_file_specs(self, datafile, mdata):
@@ -1327,10 +1327,10 @@ class BagBuilder(PreservationSystem):
 
     def _add_osfile_metadata(self, dfile, mdata, config=None):
         mdata['size'] = os.stat(dfile).st_size
-    def _add_checksum(self, dfile, mdata, config=None):
+    def _add_checksum(self, hash, mdata, algorithm='sha256', config=None):
         mdata['checksum'] = {
-            'algorithm': { '@type': "Thing", 'tag': 'sha256' },
-            'hash': checksum_of(dfile)
+            'algorithm': { '@type': "Thing", 'tag': algorithm },
+            'hash': hash
         }
     def _add_mediatype(self, dfile, mdata, config=None):
         if not self._mimetypes:
@@ -1638,7 +1638,7 @@ class BagBuilder(PreservationSystem):
                     # register does not do checksum when examine=False;
                     # get it now
                     md = OrderedDict()
-                    self._add_checksum(dfpath, md)
+                    self._add_checksum(checksum_of(dfpath), md)
                     self.update_metadata_for(dfile, md,
                                          message="Updating checksum for "+dfile)
 

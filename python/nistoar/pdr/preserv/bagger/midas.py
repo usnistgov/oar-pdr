@@ -90,7 +90,7 @@ class MIDASMetadataBagger(SIPBagger):
     """
 
     def __init__(self, midasid, workdir, reviewdir, uploaddir=None, config={},
-                 minter=None, sipdirname=None):
+                 minter=None, sipdirname=None, asyncexamine=False):
         """
         Create an SIPBagger to operate on data provided by MIDAS
 
@@ -108,6 +108,12 @@ class MIDASMetadataBagger(SIPBagger):
                                represents the SIP's directory.  If not provided,
                                the directory is determined based on the provided
                                MIDAS ID.  
+        :param asyncexamine bool:  if True, examine and extract file metadata 
+                               asynchronously.  This will cause a separate 
+                               thread to be launch to do the extraction which,
+                               for large SIPs, can take a while.  This occurs,
+                               specifically, within ensure_data_files() 
+                               (which is called within ensure_preparation()).
         """
         self.name = midasid
         self.state = 'upload'
@@ -183,6 +189,10 @@ class MIDASMetadataBagger(SIPBagger):
             self.prepsvc = UpdatePrepService(self.cfg['repo_access'])
         else:
             log.warning("repo_access not configured; can't support updates!")
+
+        self.fileExaminer = None
+        if asyncexamine:
+            self.fileExaminer = _AsyncFileExaminer(self)
 
         self.ensure_bag_parent_dir()
 
@@ -462,7 +472,10 @@ class MIDASMetadataBagger(SIPBagger):
                 self.bagbldr.add_data_file(destpath, srcpath, False,
                                            self.hardlinkdata)
 
-        self._check_checksum_files()
+        if fileExaminer:
+            fileExaminer.launch()
+        else:
+            self._check_checksum_files()
 
     def find_source_file_for(self, filepath):
         """
@@ -532,9 +545,33 @@ class MIDASMetadataBagger(SIPBagger):
             pass
 
         if update:
-            md = self.bagbldr.describe_data_file(inpath, destpath, True)
+            md = self.bagbldr.describe_data_file(inpath, destpath, !fileExaminer)
+
+            if fileExaminer:
+                md["_status"] = "in progress"
+                
+                # the file examiner will calculate the file's checksum
+                # asynchronously; for now though, see if there is an associated
+                # checksum file provided by midas.  
+                # (TODO: don't hard-wire checksum algorithm)
+                csfile = inpath+".sha256"
+                if os.path.exists(csfile):
+                    try:
+                        with open(csfile) as fd:
+                            cs = fd.readline().split()[0]
+                        self.bagbldr._add_checksum(cs, md)
+                    except Exception as ex:
+                        log.warn(csfile +
+                                 ": trouble reading provided checksum file")
+
+            # now save the metadata 
             md = self.bagbldr.update_metadata_for(destpath, md)
-            self._mark_filepath_synced(destpath)
+            if fileExaminer:
+                # asyncronously examine the files for additional, extracted
+                # metadata (and checksum)
+                fileExaminer.add(inpath, destpath)
+            else:
+                self._mark_filepath_synced(destpath)
 
             # update self.resmd; this is cheaper than recreating it from scratch
             # with nerdm_record()
@@ -591,7 +628,58 @@ class MIDASMetadataBagger(SIPBagger):
                     self.bagbldr.update_metadata_for(comp['filepath'],
                                                      {'valid': comp['valid']})
 
+    class _AsyncFileExaminer():
+        """
+        a class for extracting metadata from files asynchronously.  The files 
+        to be examined should be added via the add() function.  When all 
+        desired files have been added, executing launch() will launch the 
+        examination in a separate thread. 
+        """
 
+        def __init__(self, bagger):
+            self.bagger = bagger
+            self.files = OrderedDict()
+            self.thread = None
+
+        def add(self, location, filepath):
+            self.files[filepath] = location
+
+        def launch(self):
+            if self.thread and self.thread.is_alive():
+                log.debug("File examiner thread is still running")
+                return
+            self.thread = self._Thread(self)
+            self.thread.start()
+
+        def examine_next(self):
+            location, filepath = self.files.popitem()
+            try:
+                md = self.bagger.bagbldr.bag.nerd_metadata_for(filepath)
+
+                # if the metadata has been set, determine the conponent type
+                ct = md.get('@type')
+                if ct:
+                    ct = re.sub(r'^[^:]*:', '', ct[0])
+            
+                md = self.bagger.bagbldr.describe_data_file(location, filepath,
+                                                            True, ct)
+                self.bagger.bagbldr.replace_metadata_for(filepath, md,
+                                "async metadata update for file, "+filepath)
+            except Exception as ex:
+                log.error("%s: Failed to extract file metadata: %s"
+                          % (location, str(ex))
+
+        class _Thread(threading.Thread):
+            def __init__(self, exmnr):
+                self.exif = exmnr
+            def run(self):
+                while self.exif.files:
+                    self.exif.examine_next()
+                
+        
+
+        
+        
 
         
 class PreservationBagger(SIPBagger):
