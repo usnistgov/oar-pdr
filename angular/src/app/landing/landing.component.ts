@@ -167,8 +167,6 @@ export class LandingComponent implements OnInit {
     this.getData()
       .subscribe((res) => {
         this.onSuccess(res).then(function (result) {
-          console.log("this.files");
-          console.log(this.files);
           this.commonVarService.setContentReady(true);
           this.isLoading = false;
         }.bind(this), function (err) {
@@ -352,10 +350,6 @@ export class LandingComponent implements OnInit {
 
   goToSelection(isMetadata: boolean, isSimilarResources: boolean, sectionId: string) {
     this.metadata = isMetadata; this.similarResources = isSimilarResources;
-    //  if(window.location.href.includes("ark"))
-    //   this.router.navigate(['/od/id/ark:/88434/'+this.searchValue],{fragment:sectionId});
-    //  else
-    //   this.router.navigate(['/od/id/', this.record.ediid],{fragment:sectionId});
     this.turnSpinnerOff();
     this.router.navigate(['/od/id/', this.searchValue], { fragment: sectionId });
     this.useFragment();

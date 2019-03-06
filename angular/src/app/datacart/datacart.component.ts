@@ -214,8 +214,6 @@ export class DatacartComponent implements OnInit, OnDestroy {
     this.getDataCartList("Init").then(function (result) {
       this.createDataCartHierarchy();
 
-      // this.display = true;
-
       // create root
       const newPart = {
         data: {
@@ -512,24 +510,7 @@ export class DatacartComponent implements OnInit, OnDestroy {
             break;
         }
       })
-      // } else {
-      //   this.showDownloadProgress = false;
-      //   this.directDownloadFromUrl(rowData.downloadUrl, filename);
-      //   this.setFileDownloaded(rowData);
-      // }
     }
-  }
-
-  directDownloadFromUrl(url: string, filename: string) {
-    let a = document.createElement('a');
-    document.body.appendChild(a);
-    a.setAttribute('style', 'display: none');
-    // a.setAttribute('download', filename);
-    a.href = url;
-    // a.download = filename;
-    a.click();
-    window.URL.revokeObjectURL(url);
-    a.remove();
   }
 
   /**
@@ -598,11 +579,6 @@ export class DatacartComponent implements OnInit, OnDestroy {
    **/
   removeByDownloadStatus() {
     this.selectedData = [];
-    // for (let i = 0; i < this.cartEntities.length; i++) {
-    //   if(this.cartEntities[i].data.downloadStatus == 'downloaded'){
-    //     this.selectedData = this.selectedData.filter(entry => entry.data.cartId != this.cartEntities[i].data.cartId);
-    //   }
-    // }
     this.cartService.removeByDownloadStatus();
     this.updateCartEntries();
     this.dataFileCount();
@@ -741,11 +717,11 @@ export class DatacartComponent implements OnInit, OnDestroy {
       });
     }
 
-    if (inputArray.children.length > 0) {
+    if ((inputArray.data.filetype == 'nrdp:DataFile' || inputArray.data.filetype == 'nrdp:ChecksumFile') && inputArray.children.length == 0) {
+      inputArray.data.isLeaf = true;
+    } else {
       inputArray.data.cartId = null;
       inputArray.data.isLeaf = false;
-    } else {
-      inputArray.data.isLeaf = true;
     }
 
     if (inputArray.data && inputArray.data.filePath) {

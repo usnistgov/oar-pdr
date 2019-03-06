@@ -215,7 +215,7 @@ export class DescriptionComponent {
         this.resetStstus(comp.children);
       } else {
         comp.data.isIncart = false;
-        comp.data.downloadStatus = null;
+        // comp.data.downloadStatus = null;
       }
     }
     return Promise.resolve(files);
@@ -431,6 +431,7 @@ export class DescriptionComponent {
         this.addAllFilesToCart(files, false, '').then(function (result1: any) {
           this.updateStatusFromCart();
           this.allSelected = this.updateAllSelectStatus(this.files);
+          this.downloadStatus = this.updateDownloadStatus(this.files) ? "downloaded" : null;
           this.isLocalProcessing = false;
         }.bind(this), function (err) {
           alert("something went wrong while adding file to data cart.");
@@ -480,7 +481,6 @@ export class DescriptionComponent {
         });
       }
     }
-    //Now reload datacart
     return Promise.resolve(compValue);
   }
 
@@ -530,7 +530,7 @@ export class DescriptionComponent {
   * Remove one node from cart - can be a file or sub-tree
   **/
   removeCart(rowData: any) {
-    if (!this.isFile(rowData)) {
+    if (!rowData.isLeaf) {
       let subFiles: any = null;
       for (let comp of this.files) {
         subFiles = this.searchTree(comp, rowData.cartId);
@@ -664,7 +664,7 @@ export class DescriptionComponent {
   * Function to cancel current download.
   **/
   cancelDownload(rowData: any) {
-    if (!this.isFile(rowData)) {
+    if (!rowData.isLeaf) {
       this.cancelDownloadAll();
       rowData.downloadProgress = 0;
       rowData.downloadStatus = null;
@@ -794,13 +794,6 @@ export class DescriptionComponent {
     rowData.downloadProgress = 0;
     this.cartService.updateCartItemDownloadStatus(rowData.cartId, null);
     this.allDownloaded = false;
-  }
-
-  /**
-  * Function to check if a node if leaf.
-  **/
-  isFile(rowData: any) {
-    return rowData.name.match(/\./g) == null ? false : true;
   }
 
   /**

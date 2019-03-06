@@ -11,6 +11,7 @@ export class CommonFunctionService {
 * Function to display bytes in appropriate format.
 **/
   formatBytes(bytes, numAfterDecimal) {
+    if(bytes == null || bytes == undefined) return '';
     if (0 == bytes) return "0 Bytes";
     if (1 == bytes) return "1 Byte";
     var base = 1000,
