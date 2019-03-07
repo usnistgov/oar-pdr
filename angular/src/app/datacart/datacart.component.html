@@ -193,7 +193,7 @@
     [style]="{ 'padding-left':'3%','padding-right':'3%','padding-bottom':'3%', 'color':'black'}">
     <ng-template pTemplate="header">
       <tr>
-        <th style=" background-color: #1E6BA1; width:60%; color:white" ttResizableColumn>
+        <th [ngStyle]="titleStyleHeader()" ttResizableColumn>
           <span (click)="expandToLevel(dataFiles, !isExpanded, null)" style="padding-right:0.5em;">
             <i *ngIf="!isExpanded" class="faa faa-arrow-circle-down faa-1x icon-white"
               style="cursor: pointer;color: rgb(255, 255, 255);" data-toggle="tooltip" title="Expand All"></i>
@@ -208,9 +208,9 @@
           </span>
           Name
         </th>
-        <th style=" background-color: #1E6BA1; color:white; width:10%;" ttResizableColumn>MediaType</th>
-        <th style=" background-color: #1E6BA1; color:white; width:10%;" ttResizableColumn>Size</th>
-        <th style=" background-color: #1E6BA1; color:white; width:20%;" ttResizableColumn>
+        <th [ngStyle]="typeStyleHeader()" ttResizableColumn>MediaType</th>
+        <th [ngStyle]="sizeStyleHeader()" ttResizableColumn>Size</th>
+        <th [ngStyle]="statusStyleHeader()" ttResizableColumn>
           <i class="faa faa-recycle faa-1x icon-white" (click)="clearDownloadStatus()"
             style="cursor: pointer;color: rgb(255, 255, 255);padding-right:0.5em;" data-toggle="tooltip"
             title="Reset Download Status"></i>
@@ -220,7 +220,7 @@
     </ng-template>
     <ng-template let-rowNode let-rowData="rowData" let-i="rowIndex" pTemplate="body">
       <tr style="background: #FFFFFF">
-        <td style=" width:75%; ">
+        <td [ngStyle]="titleStyle()">
           <p-treeTableToggler [rowNode]="rowNode"></p-treeTableToggler>
           &nbsp;<p-treeTableCheckbox [value]="rowNode"></p-treeTableCheckbox>
           <span *ngIf="rowData.isLeaf">
@@ -234,13 +234,13 @@
           <span *ngIf="showZipFilesNmaes" style="color:grey;margin-left: 1em;font-style: italic;">
             {{rowData.zipFile}}</span>
         </td>
-        <td>
+        <td [ngStyle]="typeStyle()">
           <span>{{rowData.mediatype}}</span>
         </td>
-        <td>
+        <td [ngStyle]="sizeStyle()">
           <span *ngIf="rowData.isLeaf">{{formatBytes(rowData.fileSize)}}</span>
         </td>
-        <td>
+        <td [ngStyle]="statusStyle()">
           <div style="display:flex;">
             <div *ngIf="rowData.isLeaf" (click)="downloadOneFile(rowData)">
               <i *ngIf="rowData.downloadStatus == null" class="faa faa-download" style="color: #1E6BA1;cursor: pointer;"

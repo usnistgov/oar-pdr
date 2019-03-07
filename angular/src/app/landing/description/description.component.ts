@@ -1,4 +1,4 @@
-import { Component, Input, ChangeDetectorRef } from '@angular/core';
+import { Component, Input, ChangeDetectorRef, NgZone } from '@angular/core';
 import { TreeNode } from 'primeng/api';
 import { CartService } from '../../datacart/cart.service';
 import { Data } from '../../datacart/data';
@@ -85,6 +85,9 @@ export class DescriptionComponent {
   confValues: Config;
   isLocalProcessing: boolean;
   showDownloadProgress: boolean = false;
+  mobWidth: number;
+  mobHeight: number;
+  fontSize: string;
 
   /* Function to Return Keys object properties */
   keys(): Array<string> {
@@ -100,7 +103,26 @@ export class DescriptionComponent {
     private _FileSaverService: FileSaverService,
     private confirmationService: ConfirmationService,
     private commonFunctionService: CommonFunctionService,
-    public router: Router) {
+    public router: Router,
+    ngZone: NgZone) {
+      this.cols = [
+        { field: 'name', header: 'Name', width: '60%' },
+        { field: 'mediatype', header: 'MediaType', width: 'auto' },
+        { field: 'size', header: 'Size', width: 'auto' },
+        { field: 'download', header: 'Download', width: 'auto' }];
+        
+      this.mobHeight = (window.innerHeight);
+      this.mobWidth = (window.innerWidth);
+      this.setWidth(this.mobWidth);
+  
+      window.onresize = (e) => {
+        ngZone.run(() => {
+          this.mobWidth = window.innerWidth;
+          this.mobHeight = window.innerHeight;
+          this.setWidth(this.mobWidth);
+        });
+    };
+
     this.cartService.watchAddAllFilesCart().subscribe(value => {
       this.addAllFileSpinner = value;
     });
@@ -122,11 +144,7 @@ export class DescriptionComponent {
 
     if (this.files.length != 0)
       this.files = <TreeNode[]>this.files[0].data;
-    this.cols = [
-      { field: 'name', header: 'Name', width: '60%' },
-      { field: 'mediatype', header: 'MediaType', width: '150px' },
-      { field: 'size', header: 'Size', width: '80px' },
-      { field: 'download', header: 'Download', width: '80px' }];
+
 
     this.fileNode = { "data": { "name": "", "size": "", "mediatype": "", "description": "", "filetype": "" } };
 
@@ -848,4 +866,63 @@ export class DescriptionComponent {
     else
       return 'Add all to cart';
   }
+
+  /*
+* Following functions set tree table style
+*/
+  titleStyleHeader() {
+    return { 'background-color': '#1E6BA1', 'width': this.cols[0].width, 'color': 'white', 'font-size': this.fontSize };
+  }
+
+  typeStyleHeader() {
+    return { 'background-color': '#1E6BA1', 'width': this.cols[1].width, 'color': 'white', 'font-size': this.fontSize };
+  }
+
+  sizeStyleHeader() {
+    return { 'background-color': '#1E6BA1', 'width': this.cols[2].width, 'color': 'white', 'font-size': this.fontSize };
+  }
+
+  statusStyleHeader() {
+    return { 'background-color': '#1E6BA1', 'width': this.cols[3].width, 'color': 'white', 'font-size': this.fontSize, 'white-space': 'nowrap' };
+  }
+
+  titleStyle() {
+    return { 'width': this.cols[0].width, 'font-size': this.fontSize };
+  }
+
+  typeStyle() {
+    return { 'width': this.cols[1].width, 'font-size': this.fontSize };
+  }
+
+  sizeStyle() {
+    return { 'width': this.cols[2].width, 'font-size': this.fontSize };
+  }
+
+  statusStyle() {
+    return { 'width': this.cols[3].width, 'font-size': this.fontSize };
+  }
+
+  setWidth(mobWidth: number) {
+    if (mobWidth > 1340) {
+      this.cols[0].width = '60%';
+      this.cols[1].width = '20%';
+      this.cols[2].width = '15%';
+      this.cols[3].width = '100px';
+      this.fontSize = '16px';
+    } else if (mobWidth > 780 && this.mobWidth <= 1340) {
+      this.cols[0].width = '60%';
+      this.cols[1].width = '170px';
+      this.cols[2].width = '100px';
+      this.cols[3].width = '100px';
+      this.fontSize = '14px';
+    }
+    else {
+      this.cols[0].width = '50%';
+      this.cols[1].width = '20%';
+      this.cols[2].width = '20%';
+      this.cols[3].width = '10%';
+      this.fontSize = '12px';
+    }
+  }
+
 }

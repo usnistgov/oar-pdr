@@ -128,7 +128,7 @@
         sortField="name">
         <ng-template pTemplate="header" let-columns>
           <tr>
-            <th *ngFor="let col of columns" [style.width]="col.width" ttResizableColumn>
+            <th *ngFor="let col of columns" [style.width]="col.width" [style.font-size]="fontSize" ttResizableColumn>
               <span *ngIf="col.header == 'Name'">
                 <span (click)="expandToLevel(files, !isExpanded, null)" style="padding-right:0.5em;">
                   <i *ngIf="!isExpanded" class="faa faa-arrow-circle-down faa-1x icon-white"
@@ -150,16 +150,16 @@
         </ng-template>
         <ng-template pTemplate="body" let-rowNode let-rowData="rowData" let-columns="columns">
           <tr [ttSelectableRow]="rowNode">
-            <td>
+            <td [ngStyle]="titleStyle()">
               <p-treeTableToggler [rowNode]="rowNode"></p-treeTableToggler>
               <a (click)="openDetails($event,rowData,op3) " style="color: #1E6BA1;cursor: pointer;"
                 data-toggle="tooltip" title="Click for more details">
                 {{rowData.name}} </a>
               <span *ngIf="showZipFilesNmaes" style="color:darkgreen; margin-left: 2em;">{{rowData.zipFile}}</span>
             </td>
-            <td>{{rowData.mediatype}}</td>
-            <td><span *ngIf="rowData.size">{{formatBytes(rowData.size)}}</span></td>
-            <td>
+            <td [ngStyle]="typeStyle()">{{rowData.mediatype}}</td>
+            <td [ngStyle]="sizeStyle()"><span *ngIf="rowData.size">{{formatBytes(rowData.size)}}</span></td>
+            <td [ngStyle]="statusStyle()">
               <div style="display: flex;">
                 <div *ngIf="rowData.isLeaf;else space_holder">
                   <a *ngIf="rowData.downloadStatus != 'downloading'" href='{{rowData.downloadUrl}}' target='_blank'

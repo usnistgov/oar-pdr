@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, AfterViewInit, ElementRef, ViewChildren, Input } from '@angular/core';
+import { Component, OnInit, OnDestroy, AfterViewInit, ElementRef, ViewChildren, Input, NgZone } from '@angular/core';
 //import {Headers, RequestOptions, Response, ResponseContentType, URLSearchParams} from '@angular/common/http';
 import { HttpClientModule, HttpClient, HttpParams, HttpRequest, HttpEventType } from '@angular/common/http';
 import { ActivatedRoute } from '@angular/router';
@@ -128,6 +128,13 @@ export class DatacartComponent implements OnInit, OnDestroy {
   getBundlePlanRef: any;
   mode: any;
   routerparams: any;
+  mobWidth: number;
+  mobHeight: number;
+  titleWidth: string;
+  typeWidth: string;
+  sizeWidth: string;
+  statusWidth: string;
+  fontSize:string;
 
   /**
    * Creates an instance of the SearchPanel
@@ -140,7 +147,20 @@ export class DatacartComponent implements OnInit, OnDestroy {
     private _FileSaverService: FileSaverService,
     private commonVarService: CommonVarService,
     private commonFunctionService: CommonFunctionService,
-    private route: ActivatedRoute) {
+    private route: ActivatedRoute,
+    ngZone: NgZone) {
+    this.mobHeight = (window.innerHeight);
+    this.mobWidth = (window.innerWidth);
+    this.setWidth(this.mobWidth);
+
+    window.onresize = (e) => {
+      ngZone.run(() => {
+        this.mobWidth = window.innerWidth;
+        this.mobHeight = window.innerHeight;
+        this.setWidth(this.mobWidth);
+      });
+    };
+
     this.confValues = this.appConfig.getConfig();
     this.cartService.watchForceDatacartReload().subscribe(
       value => {
@@ -203,6 +223,64 @@ export class DatacartComponent implements OnInit, OnDestroy {
         }
       }
     );
+  }
+
+  /*
+  * Following functions set tree table style
+  */
+  titleStyleHeader(){
+    return {'background-color': '#1E6BA1', 'width':this.titleWidth, 'color':'white', 'font-size':this.fontSize};
+  }
+
+  typeStyleHeader(){
+    return {'background-color': '#1E6BA1', 'width':this.typeWidth, 'color':'white', 'font-size':this.fontSize};
+  }
+
+  sizeStyleHeader(){
+    return {'background-color': '#1E6BA1', 'width':this.sizeWidth, 'color':'white', 'font-size':this.fontSize};
+  }
+
+  statusStyleHeader(){
+    return {'background-color': '#1E6BA1', 'width':this.statusWidth, 'color':'white', 'font-size':this.fontSize, 'white-space':'nowrap'};
+  }
+
+  titleStyle(){
+    return {'width':this.titleWidth, 'font-size':this.fontSize};
+  }
+
+  typeStyle(){
+    return {'width':this.typeWidth, 'font-size':this.fontSize};
+  }
+
+  sizeStyle(){
+    return {'width':this.sizeWidth, 'font-size':this.fontSize};
+  }
+
+  statusStyle(){
+    return {'width':this.statusWidth, 'font-size':this.fontSize};
+  }
+
+  setWidth(mobWidth:number){
+    if (mobWidth > 1340){
+      this.titleWidth = '60%';
+      this.typeWidth = 'auto';
+      this.sizeWidth = 'auto';
+      this.statusWidth = 'auto';
+      this.fontSize = '16px';
+    }else if(mobWidth > 780 && this.mobWidth <= 1340){
+      this.titleWidth = '60%';
+      this.typeWidth = '150px';
+      this.sizeWidth = '100px';
+      this.statusWidth = '100px';
+      this.fontSize = '14px';
+    }
+    else{
+      this.titleWidth = '50%';
+      this.typeWidth = '20%';
+      this.sizeWidth = '20%';
+      this.statusWidth = '10%';
+      this.fontSize = '12px';
+    }
   }
 
   /*
@@ -358,7 +436,11 @@ export class DatacartComponent implements OnInit, OnDestroy {
         this.processBundle(blob, zipFileBaseName, files);
       },
       err => {
-        console.log("Http return following error:");
+        console.log("Calling following end point returned error:");
+        console.log(this.distApi + "_bundle_plan");
+        console.log("Post message:");
+        console.log(JSON.stringify(postMessage[0]));
+        console.log("Error message:");
         console.log(err);
         this.bundlePlanMessage = err;
         this.bundlePlanStatus = "error";
@@ -509,7 +591,10 @@ export class DatacartComponent implements OnInit, OnDestroy {
             }
             break;
         }
-      })
+      },
+        err => {
+          console.log(err);
+        })
     }
   }
 
