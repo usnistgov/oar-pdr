@@ -719,7 +719,10 @@ export class DescriptionComponent {
       key: key,
       accept: () => {
         setTimeout(() => {
-          window.open('/datacart/popup', 'DownloadManager', 'height=880,width=1720,top=100,left=100');
+          let popupWidth: number = this.mobWidth * 0.8;
+          let left:number = this.mobWidth * 0.1;
+          let screenSize = 'height=880,width=' + popupWidth.toString() + ',top=100,left='+ left.toString();
+          window.open('/datacart/popup', 'DownloadManager', screenSize);
           this.cancelAllDownload = false;
           this.downloadFromRoot();
         }, 0);
