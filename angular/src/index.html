@@ -1,5 +1,6 @@
 <!doctype html>
 <html lang="en">
+
 <head>
   <meta charset="utf-8">
   <title>PDR Application</title>
@@ -8,9 +9,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="icon" type="image/x-icon" href="">
   <style type="text/css">
-    body, html {
+    body,
+    html {
       height: 100%;
     }
+
     .app-loading {
       position: relative;
       display: flex;
@@ -19,6 +22,7 @@
       justify-content: center;
       height: 100%;
     }
+
     .app-loading .spinner {
       height: 200px;
       width: 200px;
@@ -31,6 +35,7 @@
       right: 0;
       margin: auto;
     }
+
     .app-loading .spinner .path {
       stroke-dasharray: 1, 200;
       stroke-dashoffset: 0;
@@ -38,37 +43,77 @@
       stroke-linecap: round;
       stroke: #ddd;
     }
+
     @keyframes rotate {
       100% {
         transform: rotate(360deg);
       }
     }
+
     @keyframes dash {
       0% {
         stroke-dasharray: 1, 200;
         stroke-dashoffset: 0;
       }
+
       50% {
         stroke-dasharray: 89, 200;
         stroke-dashoffset: -35px;
       }
+
       100% {
         stroke-dasharray: 89, 200;
         stroke-dashoffset: -124px;
       }
     }
+
+    .loader_container {
+      position: fixed;
+      top: 30%;
+      left: 45%;
+    }
+
+    .loader_text {
+      position: relative;
+      text-align: center;
+      top: 80px;
+    }
+
+    .loader {
+      align-self: center;
+      border: 4px solid #f3f3f3;
+      /* Light grey */
+      border-top: 4px solid #3498db;
+      /* Blue */
+      border-radius: 100%;
+      width: 150px;
+      height: 150px;
+      animation: spin 2s linear infinite;
+    }
+
+    @keyframes spin {
+      0% {
+        transform: rotate(0deg);
+      }
+
+      100% {
+        transform: rotate(360deg);
+      }
+    }
   </style>
 </head>
+
 <body>
   <!-- <script src="assets/env.js"></script> -->
   <app-root>
-     <!-- loading layout replaced by app after startupp -->
-     <div class="app-loading">
+    <!-- loading layout replaced by app after startupp -->
+    <!-- <div class="app-loading">
       <div class="logo"> Loading ...</div>
       <svg class="spinner" viewBox="25 25 50 50">
         <circle class="path" cx="50" cy="50" r="20" fill="none" stroke-width="2" stroke-miterlimit="10"/>
       </svg>
-    </div>
-  </app-root>
+    </div> -->
+    </app-root>
 </body>
+
 </html>

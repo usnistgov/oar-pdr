@@ -33,7 +33,7 @@
 }
 
 :host /deep/ .faa-cart-plus:before {
-  color: green;
+  color: #1E6BA1;
 }
 
 :host /deep/ .ui-widget-content {
@@ -41,9 +41,33 @@
 }
 
 .badge-notify{
-  background-color: gray;
+  background-color: green;
+  color: white;
   position:relative;
-  color: #fff;
+  top: -10px;
+  left: -5px;
+  font-size: 9px;
+  height:15px;
+  width:15px;
+  padding:3px 3px 3px 3px ;
+}
+
+.badge-pill{
+  height:15px;
+  width:15px;
+  padding:2px 3px 3px 3px ;
+}
+
+.button-badge{
+  background-color: white;
+  position:relative;
+  top: 0px;
+  left: 0px;
+  font-size: 12px;
+  height:15px;
+  width:25px;
+  padding:3px 3px 3px 3px ;
+  border-radius: 100%;
 }
 
 :host /deep/ .ui-button, body .ui-datepicker-buttonpane button {
@@ -111,4 +135,63 @@
 :host /deep/ .ui-widget-header{
   background-color: #FFFFFF;
   border: 0;
+}
+
+.downloadStatusLimit{
+  height:5em; 
+  width: 94%;
+  overflow: auto; 
+  margin-bottom: 0.5em; 
+  background-color: rgb(193, 240, 255);
+  padding: 0.5em;
+  margin-left: 3%;
+  margin-right: 3%;
+}
+
+.downloadStatusExpand{
+  width: 94%;
+  background-color: rgb(193, 240, 255);
+  padding: 0.5em;
+  margin-left: 3%;
+  margin-right: 3%;
+}
+
+#zipDownloadDisplay {
+  width: 94%;
+  height: 80px;
+  margin-left: 3%;
+  margin-right: 3%;
+  padding: 0.5em;
+  overflow: auto; 
+  background:  rgb(196, 221, 253);
+}
+
+#zipDownloadDisplay:hover {
+  height: 100%;
+}
+
+.filedesc{
+  background-color:#307F38;
+  text-align: left;
+  color: white;
+  word-wrap: break-word;
+  font-family: sans-serif;
+  font-size: 12px;
+  padding: 1rem 1rem 1rem 1rem; 
+}
+
+.title
+{
+  color:#1471AE;
+  font-size: 30px;
+}
+
+tr {
+  line-height: 25px;
+  min-height: 25px;
+  height: 25px;
+}
+
+.fileDialog {
+  z-index: 999;
 }

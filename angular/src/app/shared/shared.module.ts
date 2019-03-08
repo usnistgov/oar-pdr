@@ -13,7 +13,7 @@ import { HeadbarComponent } from './headbar/index';
 @NgModule({
   imports: [CommonModule, RouterModule],
   declarations: [ HeadbarComponent, FootbarComponent],
-  exports: [ HeadbarComponent, FootbarComponent,
+  exports: [ HeadbarComponent, FootbarComponent, 
     CommonModule, FormsModule, RouterModule]
 })
 export class SharedModule {

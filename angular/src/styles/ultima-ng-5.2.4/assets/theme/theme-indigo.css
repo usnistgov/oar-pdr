@@ -30661,12 +30661,18 @@ body .jqplot-target {
 body .ui-progressbar {
   height: .5em;
   background-color: #9fa8da;
-  overflow: hidden;
+  /* overflow: hidden; */
   border: 0 none; }
   body .ui-progressbar .ui-progressbar-value {
-    height: .5em; }
+    height: 100%; 
+    background-color: #95e6ff;
+  }
   body .ui-progressbar .ui-progressbar-label {
-    color: #ffffff;
+    color: #000000;
+    font-size: .7em;
+    font-weight: 100;
+    padding-top: 0%;
+    align-content: center;
     display: none !important; }
 body .ui-progressbar-indeterminate .ui-progressbar-value {
   background-color: inherit; }
