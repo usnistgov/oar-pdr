@@ -107,9 +107,9 @@ export class DescriptionComponent {
     ngZone: NgZone) {
       this.cols = [
         { field: 'name', header: 'Name', width: '60%' },
-        { field: 'mediatype', header: 'MediaType', width: 'auto' },
+        { field: 'mediatype', header: 'Media Type', width: 'auto' },
         { field: 'size', header: 'Size', width: 'auto' },
-        { field: 'download', header: 'Download', width: 'auto' }];
+        { field: 'download', header: 'Status', width: 'auto' }];
         
       this.mobHeight = (window.innerHeight);
       this.mobWidth = (window.innerWidth);
