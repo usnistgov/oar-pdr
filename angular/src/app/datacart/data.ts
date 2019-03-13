@@ -5,14 +5,19 @@
  *
  **/
 export interface Data {
+  cartId: any;
+  ediid: any;
   id: any;
+  downloadUrl: any;
   resId: any;
   resTitle: any;
   resFilePath:any;
   filePath: any;
   fileName: any;
   fileSize: any;
-  downloadURL: any;
-  downloadedStatus: any;
-  fileFormat: any;
+  filetype: any;
+  downloadStatus: any;
+  mediatype: any;
+  description: any;
+  isSelected : boolean;
 }

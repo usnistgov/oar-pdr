@@ -17,6 +17,10 @@
     width: 286px;
 }
 
+.footer__logo {
+  margin-bottom: 1em;
+}
+
 field-items img
 {width:100%;}
 
@@ -155,13 +159,13 @@ span.ext {
     width: 12px;
 }
 
-span.ext {
+/* span.ext {
     background: url(https://www2.nist.gov/sites/all/modules/contrib/extlink/extlink_s.png) 2px center no-repeat;
     width: 10px;
     height: 10px;
     padding-right: 12px;
     text-decoration: none;
-}
+} */
 
 .element-invisible, .element-focusable, #navigation .block-menu .block__title, #navigation .block-menu-block .block__title {
     position: absolute !important;
@@ -276,14 +280,20 @@ ul, menu, dir {
 .social-btn i.faa-facebook:hover{
   background:#3a5897;
 }
-.social-btn i.faa-google-plus:hover{
-  background:#d2412f;
+.social-btn i.faa-linkedin:hover{
+  background:#04669A;
+}
+.social-btn i.faa-instagram:hover{
+  background:rgb(182, 1, 253);
 }
 .social-btn i.faa-twitter:hover{
   background:#49c9f2;
 }
 .social-btn i.faa-youtube:hover{
   background:#e52d27;
+}
+.social-btn i.faa-rss:hover{
+  background:#fd8f00;
 }
 
 .social-btn {
