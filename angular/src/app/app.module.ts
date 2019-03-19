@@ -41,9 +41,9 @@ import { ConfirmDialogModule, SelectItem, DropdownModule, ConfirmationService, M
 import { ProgressBarModule } from 'primeng/progressbar';
 import { TestDataService } from './shared/testdata-service/testDataService';
 import { CommonFunctionService } from './shared/common-function/common-function.service';
-import {enableProdMode} from '@angular/core';
-
+import { enableProdMode } from '@angular/core';
 enableProdMode();
+
 // used to create fake backend
 import { fakeBackendProvider } from './_helpers/fakeBackendInterceptor';
 

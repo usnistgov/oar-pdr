@@ -49,7 +49,7 @@ export class AppConfig {
                                     this.confValues.METAPI =  resp['METAPI'];
                                     this.confValues.SDPAPI =  resp['SDPAPI'];
                                     this.confValues.PDRAPI =   resp['PDRAPI'];
-                                    console.log(" *** In Browser read environment variables: "+ JSON.stringify(this.confValues));
+                                    // console.log(" *** In Browser read environment variables: "+ JSON.stringify(this.confValues));
                                 },
                                 err => {
                                     console.log("ERROR IN CONFIG :"+JSON.stringify(err));
@@ -65,7 +65,7 @@ export class AppConfig {
             this.confValues.METAPI = process.env.METAPI || this.appConfig.METAPI;
             this.confValues.SDPAPI   = process.env.SDPAPI || this.appConfig.SDPAPI;
             this.confValues.PDRAPI =  process.env.PDRAPI || this.appConfig.PDRAPI;
-            console.log(" ****** In server: "+ JSON.stringify(this.confValues));
+            // console.log(" ****** In server: "+ JSON.stringify(this.confValues));
         }    
     }
 

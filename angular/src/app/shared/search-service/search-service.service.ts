@@ -40,7 +40,7 @@ export class SearchService {
     //"http://localhost:4200/assets/sampledata.json"
     console.log("Test service here:"+this.landingBackend );
     return this.http.get(this.landingBackend );
-  } 
+  }
   searchById(searchValue:string){
     var backend: any;
     if (_.includes(this.landingBackend,'rmm') && _.includes(searchValue,'ark'))

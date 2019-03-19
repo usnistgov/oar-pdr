@@ -202,6 +202,7 @@ export class LandingComponent implements OnInit {
   * If Search is successful populate list of keywords themes and authors
   */
   onSuccess(searchResults: any[]) {
+    console.log(searchResults);
     if (searchResults["ResultCount"] === undefined || searchResults["ResultCount"] !== 1)
       this.record = searchResults;
     else if (searchResults["ResultCount"] !== undefined && searchResults["ResultCount"] === 1)
