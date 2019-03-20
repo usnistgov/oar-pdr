@@ -27,7 +27,7 @@ export class AppConfig {
     
     loadAppConfig() {
         if(isPlatformBrowser(this.platformId)){
-            console.log(" ****** HERE : in browser ::"+this.envVariables+" bsfshfsjd "+location.pathname +" ::"+location.host);
+            // console.log(" ****** HERE : in browser ::"+this.envVariables+" bsfshfsjd "+location.pathname +" ::"+location.host);
             /**
              * This check is added to avoid errors reading environment variables on server side
              * when docker deployment is used. 
@@ -49,7 +49,7 @@ export class AppConfig {
                                     this.confValues.METAPI =  resp['METAPI'];
                                     this.confValues.SDPAPI =  resp['SDPAPI'];
                                     this.confValues.PDRAPI =   resp['PDRAPI'];
-                                    console.log("In Browser read environment variables: "+ JSON.stringify(this.confValues));
+                                    console.log(" *** In Browser read environment variables: "+ JSON.stringify(this.confValues));
                                 },
                                 err => {
                                     console.log("ERROR IN CONFIG :"+JSON.stringify(err));

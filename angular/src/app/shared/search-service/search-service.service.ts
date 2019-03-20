@@ -47,7 +47,8 @@ export class SearchService {
       backend = this.landingBackend+'records?@id=';
     else if(_.includes(this.landingBackend,'rmm')){
       backend = this.landingBackend+'records/'; 
-    }
+    }else
+      backend =  this.landingBackend;
     return this.http.get(backend + searchValue, { headers: new HttpHeaders({ timeout: '${10000}' }) });
   }
 }
