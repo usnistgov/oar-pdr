@@ -17,7 +17,7 @@ import { Component, Input } from '@angular/core';
 export class NoidComponent {
   ngAfterViewInit(){
 
-    //window.history.replaceState( {} , '#/id/', '/od/id');
+    window.history.replaceState( {} , '', '/od/id');
   }
 }
 
