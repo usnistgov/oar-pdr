@@ -159,13 +159,13 @@ span.ext {
     width: 12px;
 }
 
-/* span.ext {
-    background: url(https://www2.nist.gov/sites/all/modules/contrib/extlink/extlink_s.png) 2px center no-repeat;
+span.ext {
+    background: url(https://www.nist.gov/sites/all/modules/contrib/extlink/extlink_s.png) 2px center no-repeat;
     width: 10px;
     height: 10px;
     padding-right: 12px;
     text-decoration: none;
-} */
+}
 
 .element-invisible, .element-focusable, #navigation .block-menu .block__title, #navigation .block-menu-block .block__title {
     position: absolute !important;

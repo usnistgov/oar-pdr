@@ -28,7 +28,8 @@
     <div *ngIf="bundlePlanStatus != 'complete' && bundlePlanMessage" style="display: inline; text-align: left;">
       <i class="faa faa-warning" [ngStyle]="{'color':messageColor, 'padding-right':'.5em'}"></i>
       <span *ngIf="bundlePlanStatus == 'error';else no_error"
-        [ngStyle]="{'color':messageColor}">{{broadcastMessage}}</span>
+        [ngStyle]="{'color':messageColor}">
+        Ooops! There was a problem getting the data you need. Please contact us at <a href="mailto:datasupport@nist.gov?subject=PDR: {{emailSubject}}&body={{emailBody}}">datasupport@nist.gov</a> to report the problem. If possible, include the string "PDR: Error getting bundle plan" in your email report.</span>
       <ng-template #no_error>
         <span [ngStyle]="{'color':getColor(), 'padding-right':'.5em'}">{{broadcastMessage}}</span>
         <span (click)="showMessageBlock = !showMessageBlock">
@@ -261,7 +262,7 @@
               style="padding-left:5px; flex: 0 0 auto;">
               <div (click)="cancelDownload(rowData)" style="cursor: pointer;"><i class="faa faa-remove"></i></div>
             </div>
-            <div *ngIf="rowData.isLeaf && rowData.downloadStatus != 'downloading'" style="padding-left:0.5em;">
+            <div id="downloadstatus" *ngIf="rowData.isLeaf && rowData.downloadStatus != 'downloading'" [ngStyle]="{'padding-left':'0.5em','color':getDownloadStatusStyle(rowData)}" data-toggle="tooltip" title="{{(rowData.message.status=='404')?'File not found.': 'Server error'}}">
               {{rowData.downloadStatus}}
             </div>
           </div>

@@ -134,7 +134,9 @@ export class DatacartComponent implements OnInit, OnDestroy {
   typeWidth: string;
   sizeWidth: string;
   statusWidth: string;
-  fontSize:string;
+  fontSize: string;
+  emailSubject: string;
+  emailBody: string;
 
   /**
    * Creates an instance of the SearchPanel
@@ -228,53 +230,53 @@ export class DatacartComponent implements OnInit, OnDestroy {
   /*
   * Following functions set tree table style
   */
-  titleStyleHeader(){
-    return {'background-color': '#1E6BA1', 'width':this.titleWidth, 'color':'white', 'font-size':this.fontSize};
+  titleStyleHeader() {
+    return { 'background-color': '#1E6BA1', 'width': this.titleWidth, 'color': 'white', 'font-size': this.fontSize };
   }
 
-  typeStyleHeader(){
-    return {'background-color': '#1E6BA1', 'width':this.typeWidth, 'color':'white', 'font-size':this.fontSize};
+  typeStyleHeader() {
+    return { 'background-color': '#1E6BA1', 'width': this.typeWidth, 'color': 'white', 'font-size': this.fontSize };
   }
 
-  sizeStyleHeader(){
-    return {'background-color': '#1E6BA1', 'width':this.sizeWidth, 'color':'white', 'font-size':this.fontSize};
+  sizeStyleHeader() {
+    return { 'background-color': '#1E6BA1', 'width': this.sizeWidth, 'color': 'white', 'font-size': this.fontSize };
   }
 
-  statusStyleHeader(){
-    return {'background-color': '#1E6BA1', 'width':this.statusWidth, 'color':'white', 'font-size':this.fontSize, 'white-space':'nowrap'};
+  statusStyleHeader() {
+    return { 'background-color': '#1E6BA1', 'width': this.statusWidth, 'color': 'white', 'font-size': this.fontSize, 'white-space': 'nowrap' };
   }
 
-  titleStyle(){
-    return {'width':this.titleWidth, 'font-size':this.fontSize};
+  titleStyle() {
+    return { 'width': this.titleWidth, 'font-size': this.fontSize };
   }
 
-  typeStyle(){
-    return {'width':this.typeWidth, 'font-size':this.fontSize};
+  typeStyle() {
+    return { 'width': this.typeWidth, 'font-size': this.fontSize };
   }
 
-  sizeStyle(){
-    return {'width':this.sizeWidth, 'font-size':this.fontSize};
+  sizeStyle() {
+    return { 'width': this.sizeWidth, 'font-size': this.fontSize };
   }
 
-  statusStyle(){
-    return {'width':this.statusWidth, 'font-size':this.fontSize};
+  statusStyle() {
+    return { 'width': this.statusWidth, 'font-size': this.fontSize };
   }
 
-  setWidth(mobWidth:number){
-    if (mobWidth > 1340){
+  setWidth(mobWidth: number) {
+    if (mobWidth > 1340) {
       this.titleWidth = '60%';
       this.typeWidth = 'auto';
       this.sizeWidth = 'auto';
       this.statusWidth = 'auto';
       this.fontSize = '16px';
-    }else if(mobWidth > 780 && this.mobWidth <= 1340){
+    } else if (mobWidth > 780 && this.mobWidth <= 1340) {
       this.titleWidth = '60%';
       this.typeWidth = '150px';
       this.sizeWidth = '100px';
       this.statusWidth = '100px';
       this.fontSize = '14px';
     }
-    else{
+    else {
       this.titleWidth = '50%';
       this.typeWidth = '20%';
       this.sizeWidth = '20%';
@@ -447,7 +449,8 @@ export class DatacartComponent implements OnInit, OnDestroy {
         this.isProcessing = false;
         this.showCurrentTask = false;
         this.messageColor = this.getColor();
-        this.broadcastMessage = 'Ooops! There was a problem getting the data you need. Please try again';
+        this.emailSubject = 'PDR: Error getting bundle plan';
+        this.emailBody = 'URL:' + this.distApi + '_bundle_plan; Post message:' + JSON.stringify(postMessage[0]);
         this.unsubscribeBundleplan();
       }
     );
@@ -594,6 +597,8 @@ export class DatacartComponent implements OnInit, OnDestroy {
       },
         err => {
           console.log(err);
+          rowData.downloadStatus = 'error';
+          rowData.message = err;
         })
     }
   }
@@ -771,6 +776,7 @@ export class DatacartComponent implements OnInit, OnDestroy {
                   fields.data.filetype,
                   fields.data.isSelected,
                   fields.data.fileSize,
+                  fields.data.message
                 );
                 parent.children.push(child2);
 
@@ -838,7 +844,7 @@ export class DatacartComponent implements OnInit, OnDestroy {
   /**
    * Create data hierarchy for children
    */
-  createDataCartChildrenTree(path: string, cartId: string, resId: string, ediid: string, resTitle: string, downloadUrl: string, resFilePath: string, downloadStatus: string, mediatype: string, description: string, filetype: string, isSelected: boolean, fileSize: any) {
+  createDataCartChildrenTree(path: string, cartId: string, resId: string, ediid: string, resTitle: string, downloadUrl: string, resFilePath: string, downloadStatus: string, mediatype: string, description: string, filetype: string, isSelected: boolean, fileSize: any, message: string) {
     let child1: TreeNode = {};
     child1 = {
       data: {
@@ -854,7 +860,8 @@ export class DatacartComponent implements OnInit, OnDestroy {
         'description': description,
         'filetype': filetype,
         'isSelected': isSelected,
-        'fileSize': fileSize
+        'fileSize': fileSize,
+        'message': message
       }
 
     };
@@ -999,6 +1006,18 @@ export class DatacartComponent implements OnInit, OnDestroy {
   **/
   formatBytes(bytes, numAfterDecimal) {
     return this.commonFunctionService.formatBytes(bytes, numAfterDecimal);
+  }
+
+  /**
+  * Function to set style for different download status
+  **/
+  getDownloadStatusStyle(rowData: any) {
+    let style: string = 'black';
+
+    if (rowData.downloadStatus == 'error') {
+      style = "red";
+    }
+    return style;
   }
 }
 
