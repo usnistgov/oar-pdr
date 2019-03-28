@@ -597,6 +597,8 @@ export class DatacartComponent implements OnInit, OnDestroy {
       },
         err => {
           console.log(err);
+          console.log('Download url:');
+          console.log(url);
           rowData.downloadStatus = 'error';
           rowData.message = err;
         })

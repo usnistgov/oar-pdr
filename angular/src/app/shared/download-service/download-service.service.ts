@@ -113,10 +113,12 @@ export class DownloadService {
       },
       err => {
         console.log(err);
+        console.log('Download details:');
+        console.log(nextZip);
         nextZip.downloadStatus = 'Error';
         nextZip.downloadErrorMessage = err.message;
         nextZip.downloadProgress = 0;
-        this.setDownloadingNumber(this.zipFilesDownloadingSub.getValue() - 1, whichPage);
+        this.setDownloadingNumber(sub.getValue() - 1, whichPage);
       }
     );
   }
