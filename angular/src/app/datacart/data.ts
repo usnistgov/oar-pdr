@@ -20,4 +20,5 @@ export interface Data {
   mediatype: any;
   description: any;
   isSelected : boolean;
+  message: string;
 }

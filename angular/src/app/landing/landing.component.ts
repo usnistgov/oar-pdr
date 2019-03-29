@@ -468,7 +468,8 @@ export class LandingComponent implements OnInit {
                 downloadProgress: 0,
                 downloadInstance: null,
                 isIncart: false,
-                zipFile: null
+                zipFile: null,
+                message: ''
               }, children: []
             };
             currentLevel.push(newPart);

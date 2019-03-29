@@ -166,7 +166,8 @@ export class DescriptionComponent {
         downloadProgress: 0,
         downloadInstance: null,
         isIncart: false,
-        zipFile: null
+        zipFile: null,
+        message: ''
       }, children: []
     };
     newPart.children = this.files;
@@ -523,7 +524,8 @@ export class DescriptionComponent {
       'mediatype': rowData.mediatype,
       'downloadStatus': rowData.downloadStatus,
       'description': rowData.description,
-      'isSelected': isSelected
+      'isSelected': isSelected,
+      'message': rowData.message
     };
 
     this.cartService.addDataToCart(data).then(function (result) {
