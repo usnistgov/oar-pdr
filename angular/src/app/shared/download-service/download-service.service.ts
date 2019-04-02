@@ -40,9 +40,11 @@ export class DownloadService {
     return this.download_maximum;
   }
 
+  /**
+  * Get file from a given url
+  **/
   getFile(url, params): Observable<Blob> {
     return this.http.get(url, { responseType: 'blob', params: params });
-    // return this.http.get(url, {responseType: 'arraybuffer'}).map(res => res);
   }
 
   /**
@@ -76,17 +78,13 @@ export class DownloadService {
    * Download zip
    **/
   download(nextZip: ZipData, zipdata: ZipData[], dataFiles: any, whichPage: any) {
-    // const req = new HttpRequest('GET', nextZip.downloadUrl, {
-    //     reportProgress: true, responseType: 'blob'
-    // });
-
     let sub = this.zipFilesDownloadingSub;
     if (whichPage == "datacart") {
       sub = this.zipFilesDownloadingDataCartSub;
     }
 
     nextZip.downloadStatus = 'downloading';
-    this.setDownloadingNumber(sub.getValue() + 1, whichPage);
+    this.increaseNumberOfDownloading(whichPage);
 
     nextZip.downloadInstance = this.getBundle(nextZip.downloadUrl, JSON.stringify(nextZip.bundle)).subscribe(
       event => {
@@ -96,7 +94,7 @@ export class DownloadService {
             this._FileSaverService.save(<any>event.body, nextZip.fileName);
             nextZip.downloadProgress = 0;
             nextZip.downloadStatus = 'downloaded';
-            this.setDownloadingNumber(sub.getValue() - 1, whichPage);
+            this.reduceNumberOfDownloading(whichPage);
             this.setDownloadProcessStatus(this.allDownloadFinished(zipdata), whichPage);
             this.setDownloadStatus(nextZip, dataFiles, "downloaded");
             this.setFileDownloadedFlag(true);
@@ -118,9 +116,37 @@ export class DownloadService {
         nextZip.downloadStatus = 'Error';
         nextZip.downloadErrorMessage = err.message;
         nextZip.downloadProgress = 0;
-        this.setDownloadingNumber(sub.getValue() - 1, whichPage);
+        this.reduceNumberOfDownloading(whichPage);
       }
     );
+  }
+
+  /**
+   * Reduce the number of current downloading by 1
+   **/
+  reduceNumberOfDownloading(whichPage: any){
+    let sub = this.zipFilesDownloadingSub;
+    if (whichPage == "datacart") {
+      sub = this.zipFilesDownloadingDataCartSub;
+    }
+
+    if (sub.getValue() >= 0){ 
+      this.setDownloadingNumber(sub.getValue() - 1, whichPage);
+    }
+  }
+
+  /**
+   * Increase the number of current downloading by 1
+   **/
+  increaseNumberOfDownloading(whichPage: any){
+    let sub = this.zipFilesDownloadingSub;
+    if (whichPage == "datacart") {
+      sub = this.zipFilesDownloadingDataCartSub;
+    }
+
+    if (sub.getValue() < this.getDownloadMaximum()){ 
+      this.setDownloadingNumber(sub.getValue() + 1, whichPage);
+    }
   }
 
   /**
@@ -135,9 +161,6 @@ export class DownloadService {
       let nextZip = this.getNextZipInQueue(zipData);
       if (nextZip != null) {
         this.download(nextZip, zipData, dataFiles, whichPage);
-      }
-      else{
-        // this.setDownloadingNumber(-1, whichPage);
       }
     }
   }
@@ -155,6 +178,9 @@ export class DownloadService {
     }
   }
 
+  /**
+   * Generate downloadData from a given file tree that will be used to create post message for bundle plan
+   **/
   getDownloadData(files: any, downloadData: any) {
     let existItem: any;
     for (let comp of files) {
@@ -281,6 +307,9 @@ export class DownloadService {
     return null;
   }
 
+  /**
+   * Return total downloaded zip files from a given zipData 
+   **/
   getDownloadedNumber(zipData: any) {
     let totalDownloadedZip: number = 0;
     for (let zip of zipData) {
@@ -291,6 +320,9 @@ export class DownloadService {
     return totalDownloadedZip;
   }
 
+  /**
+   * Reset element's zip files to null
+   **/
   resetZipName(element) {
     if (element.data != undefined) {
       element.data.zipFile = null;
@@ -316,6 +348,9 @@ export class DownloadService {
     return this.anyFileDownloadedFlagSub.asObservable();
   }
 
+  /**
+   * Return total number of downloaded files in a given dataFiles (tree)
+   **/
   getTotalDownloaded(dataFiles: any) {
     let totalDownloaded: number = 0;
     for (let comp of dataFiles) {
