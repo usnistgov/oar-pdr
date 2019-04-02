@@ -430,8 +430,8 @@ export class DatacartComponent implements OnInit, OnDestroy {
     files.data.downloadStatus = 'downloading';
 
     postMessage.push({ "bundleName": files.data.downloadFileName, "includeFiles": this.downloadData });
-    console.log('Bundle plan post message:');
-    console.log(JSON.stringify(postMessage[0]));
+    // console.log('Bundle plan post message:');
+    // console.log(JSON.stringify(postMessage[0]));
 
     this.getBundlePlanRef = this.downloadService.getBundlePlan(this.distApi + "_bundle_plan", JSON.stringify(postMessage[0])).subscribe(
       blob => {
@@ -879,7 +879,7 @@ export class DatacartComponent implements OnInit, OnDestroy {
     zip.downloadInstance = null;
     zip.downloadProgress = 0;
     zip.downloadStatus = "cancelled";
-    this.downloadService.reduceNumberOfDownloading("datacart");
+    this.downloadService.decreaseNumberOfDownloading("datacart");
   }
 
   /*

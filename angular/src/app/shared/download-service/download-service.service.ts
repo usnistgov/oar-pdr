@@ -94,7 +94,7 @@ export class DownloadService {
             this._FileSaverService.save(<any>event.body, nextZip.fileName);
             nextZip.downloadProgress = 0;
             nextZip.downloadStatus = 'downloaded';
-            this.reduceNumberOfDownloading(whichPage);
+            this.decreaseNumberOfDownloading(whichPage);
             this.setDownloadProcessStatus(this.allDownloadFinished(zipdata), whichPage);
             this.setDownloadStatus(nextZip, dataFiles, "downloaded");
             this.setFileDownloadedFlag(true);
@@ -116,15 +116,15 @@ export class DownloadService {
         nextZip.downloadStatus = 'Error';
         nextZip.downloadErrorMessage = err.message;
         nextZip.downloadProgress = 0;
-        this.reduceNumberOfDownloading(whichPage);
+        this.decreaseNumberOfDownloading(whichPage);
       }
     );
   }
 
   /**
-   * Reduce the number of current downloading by 1
+   * Decrease the number of current downloading by 1
    **/
-  reduceNumberOfDownloading(whichPage: any){
+  decreaseNumberOfDownloading(whichPage: any){
     let sub = this.zipFilesDownloadingSub;
     if (whichPage == "datacart") {
       sub = this.zipFilesDownloadingDataCartSub;
