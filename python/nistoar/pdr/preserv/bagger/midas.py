@@ -9,7 +9,7 @@ process for the preservation service.
 
 The implementations use the BagBuilder class to populate the output bag.   
 """
-import os, errno, logging, re, json, shutil
+import os, errno, logging, re, json, shutil, threading, time
 from abc import ABCMeta, abstractmethod, abstractproperty
 from collections import OrderedDict
 
@@ -192,7 +192,8 @@ class MIDASMetadataBagger(SIPBagger):
 
         self.fileExaminer = None
         if asyncexamine:
-            self.fileExaminer = _AsyncFileExaminer(self)
+            self.fileExaminer = self._AsyncFileExaminer(self)
+            self.fileExaminer_autolaunch = True
 
         self.ensure_bag_parent_dir()
 
@@ -472,8 +473,8 @@ class MIDASMetadataBagger(SIPBagger):
                 self.bagbldr.add_data_file(destpath, srcpath, False,
                                            self.hardlinkdata)
 
-        if fileExaminer:
-            fileExaminer.launch()
+        if self.fileExaminer and self.fileExaminer_autolaunch:
+            self.fileExaminer.launch()
         else:
             self._check_checksum_files()
 
@@ -545,9 +546,10 @@ class MIDASMetadataBagger(SIPBagger):
             pass
 
         if update:
-            md = self.bagbldr.describe_data_file(inpath, destpath, !fileExaminer)
+            md = self.bagbldr.describe_data_file(inpath, destpath,
+                                                 not self.fileExaminer)
 
-            if fileExaminer:
+            if self.fileExaminer:
                 md["_status"] = "in progress"
                 
                 # the file examiner will calculate the file's checksum
@@ -566,10 +568,10 @@ class MIDASMetadataBagger(SIPBagger):
 
             # now save the metadata 
             md = self.bagbldr.update_metadata_for(destpath, md)
-            if fileExaminer:
+            if self.fileExaminer:
                 # asyncronously examine the files for additional, extracted
                 # metadata (and checksum)
-                fileExaminer.add(inpath, destpath)
+                self.fileExaminer.add(inpath, destpath)
             else:
                 self._mark_filepath_synced(destpath)
 
@@ -639,7 +641,7 @@ class MIDASMetadataBagger(SIPBagger):
         def __init__(self, bagger):
             self.bagger = bagger
             self.files = OrderedDict()
-            self.thread = None
+            self.thread = self._Thread(self)
 
         def add(self, location, filepath):
             self.files[filepath] = location
@@ -648,11 +650,10 @@ class MIDASMetadataBagger(SIPBagger):
             if self.thread and self.thread.is_alive():
                 log.debug("File examiner thread is still running")
                 return
-            self.thread = self._Thread(self)
             self.thread.start()
 
         def examine_next(self):
-            location, filepath = self.files.popitem()
+            filepath, location = self.files.popitem()
             try:
                 md = self.bagger.bagbldr.bag.nerd_metadata_for(filepath)
 
@@ -667,12 +668,15 @@ class MIDASMetadataBagger(SIPBagger):
                                 "async metadata update for file, "+filepath)
             except Exception as ex:
                 log.error("%s: Failed to extract file metadata: %s"
-                          % (location, str(ex))
+                          % (location, str(ex)))
 
         class _Thread(threading.Thread):
             def __init__(self, exmnr):
+                super(MIDASMetadataBagger._AsyncFileExaminer._Thread, self). \
+                    __init__()
                 self.exif = exmnr
             def run(self):
+                # time.sleep(0.1)
                 while self.exif.files:
                     self.exif.examine_next()
                 
