@@ -545,7 +545,9 @@ class TestMIDASMetadataBaggerReview(test.TestCase):
         self.assertTrue(os.path.exists(self.bagdir))
         fmd = self.bagr.bagbldr.bag.nerd_metadata_for("trial1.json")
         self.assertIn('checksum', fmd) # because there's a .sha256 file
+        self.assertIn('_status', fmd)
         fmd = self.bagr.bagbldr.bag.nerd_metadata_for("trial2.json")
+        self.assertIn('_status', fmd)
         self.assertNotIn('checksum', fmd)
 
         # self.bagr.fileExaminer.thread.run()
@@ -553,6 +555,7 @@ class TestMIDASMetadataBaggerReview(test.TestCase):
         self.bagr.fileExaminer.thread.join()
         fmd = self.bagr.bagbldr.bag.nerd_metadata_for("trial2.json")
         self.assertIn('checksum', fmd)
+        self.assertNotIn('_status', fmd)
 
     def test_fileExaminer_autolaunch(self):
         # show that the async thread does its work with autolaunch

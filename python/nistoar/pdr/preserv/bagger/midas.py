@@ -641,16 +641,25 @@ class MIDASMetadataBagger(SIPBagger):
         def __init__(self, bagger):
             self.bagger = bagger
             self.files = OrderedDict()
-            self.thread = self._Thread(self)
+            self.thread = None
 
         def add(self, location, filepath):
             self.files[filepath] = location
 
-        def launch(self):
+        def _prep(self):
             if self.thread and self.thread.is_alive():
                 log.debug("File examiner thread is still running")
-                return
-            self.thread.start()
+                return False
+            self.thread = self._Thread(self)
+            return True
+
+        def launch(self):
+            if self._prep():
+                self.thread.start()
+
+        def run(self):
+            if self._prep():
+                self.thread.run()
 
         def examine_next(self):
             filepath, location = self.files.popitem()
