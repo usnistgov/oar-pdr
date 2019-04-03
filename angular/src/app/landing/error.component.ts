@@ -1,9 +1,9 @@
 
-import { ActivatedRoute }     from '@angular/router';
-import {Component,Input, Inject, OnInit, Optional, PLATFORM_ID} from '@angular/core';
-import {isPlatformBrowser} from '@angular/common';
-import {RESPONSE} from '@nguniversal/express-engine/tokens';
-import {Response} from 'express';
+import { ActivatedRoute } from '@angular/router';
+import { Component, Input, Inject, OnInit, Optional, PLATFORM_ID } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
+import { RESPONSE } from '@nguniversal/express-engine/tokens';
+import { Response } from 'express';
 
 @Component({
   moduleId: module.id,
@@ -25,26 +25,25 @@ import {Response} from 'express';
 })
 
 export class ErrorComponent {
-    searchid:string;
-    errorcode: string;
-    
+  searchid: string;
+  errorcode: string;
 
-    constructor(private route: ActivatedRoute, @Optional() @Inject(RESPONSE) private response: Response){
-    }
-    ngOnInit(){
-        this.searchid = this.route.snapshot.paramMap.get('id');
-        this.response.statusCode = 500;
-        this.response.statusMessage = "There is internal server error!"
-    }
-  ngAfterViewInit(){
+  constructor(private route: ActivatedRoute, @Optional() @Inject(RESPONSE) private response: Response) {
+  }
+  ngOnInit() {
+    this.searchid = this.route.snapshot.paramMap.get('id');
+    this.response.statusCode = 500;
+    this.response.statusMessage = "There is internal server error!"
+  }
+  ngAfterViewInit() {
   }
 }
 
 @Component({
-    moduleId: module.id,
-    // styleUrls: ['landing.component.css'],
-    selector: 'user-error',
-    template: `
+  moduleId: module.id,
+  // styleUrls: ['landing.component.css'],
+  selector: 'user-error',
+  template: `
     <div class="ui-g">
         <div class = "ui-g-12 ui-md-12 ui-lg-12 ui-sm-12">
           <h3 id="uerror" name="uerror"><b>Error</b></h3><br>   
@@ -55,30 +54,24 @@ export class ErrorComponent {
         </div>
      </div>
     `
-  })
-  
-  export class UserErrorComponent implements OnInit {
-      searchid:string;
-      public errorcode: number;
-      constructor(private route: ActivatedRoute, @Optional() @Inject(RESPONSE) private response: Response){
-  
-      }
-      ngOnInit(){
-        this.response.statusCode = 404;
-        this.errorcode = this.response.statusCode;
-        this.response.statusMessage = "There is an user error!";
-        console.log(this.errorcode);
-        //  this.searchid = this.route.snapshot.paramMap.get('id');
-        //  this.errorcode = parseInt( this.route.snapshot.paramMap.get('errorcode'));
-        //  console.log(this.errorcode);
-          // if (this.errorcode == "404") {
-          //   console.log("set response header : "+this.errorcode);
-          //   this.response.setHeader("test","test231");
-          //   this.response.status(404);
-          // }
-      }
-    ngAfterViewInit(){
-  
-     //window.history.replaceState( {} , '#/error/', '/error/');
+})
+
+export class UserErrorComponent implements OnInit {
+  searchid: string;
+  public errorcode: number;
+  constructor(private route: ActivatedRoute, @Optional() @Inject(RESPONSE) private response: Response) {
+
+  }
+  ngOnInit() {
+    if (this.response != null) {
+      this.response.statusCode = 404;
+      this.errorcode = this.response.statusCode;
+      this.response.statusMessage = "There is an user error!";
+      console.log(this.errorcode);
     }
   }
+  ngAfterViewInit() {
+
+    //window.history.replaceState( {} , '#/error/', '/error/');
+  }
+}
