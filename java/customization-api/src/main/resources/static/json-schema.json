@@ -1,0 +1,45 @@
+{
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "$extensionSchemas": ["https://www.nist.gov/od/dm/enhanced-json-schema/v0.1#"],
+    "id": "https://data.nist.gov/od/dm/nerdm-schema/v0.2#",
+    "rev": "wd1",
+    "title": "The JSON Schema for the NIST Extended Resource Data model (NERDm)",
+    "description": "A JSON Schema specfying the core NERDm classes",
+    "definitions": {
+
+        "Resource": {
+            "description": "a resource (e.g. data collection, service, website or tool) that can participate in a data-driven application",
+            "properties": {
+
+                "title": {
+                    "title": "Title",
+                    "description": "Human-readable, descriptive name of the resource",
+                    "notes": [
+                        "Acronyms should be avoided"
+                    ],
+                    "type": "string",
+                    "asOntology": {
+                        "@context": "profile-schema-onto.json",
+                        "prefLabel": "Title",
+                        "referenceProperty": "dc:title"
+                    }
+                },
+                "description": {
+                    "title": "Description",                    
+                    "description": "Human-readable description (e.g., an abstract) of the resource",
+                    "notes": [
+                        "Each element in the array should be considered a separate paragraph"
+                    ],
+                    "type": "array",
+                    "items": { "type": "string" },
+                    "minItems": 1,
+                    "asOntology": {
+                        "@context": "profile-schema-onto.json",
+                        "prefLabel": "Description",
+                        "referenceProperty": "dc:description"
+                    }
+                }
+            }
+         }
+      }
+ }
