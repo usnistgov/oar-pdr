@@ -7,6 +7,7 @@ import os, shutil, json, logging
 from abc import ABCMeta, abstractmethod, abstractproperty
 from collections import OrderedDict
 from zipfile import ZipFile
+from time import mktime
 
 from .base import sys as _sys
 from .. import (ConfigurationException, StateException, CorruptedBagError,
@@ -232,33 +233,56 @@ class UpdatePrepper(object):
         return self.cache_nerdm_rec() is not None
         
     def _unpack_bag_as(self, bagfile, destbag):
+        destdir = os.path.dirname(destbag)
+
         if bagfile.endswith('.zip'):
-            with ZipFile(bagfile, 'r') as zip:
-                contents = zip.namelist()
-                root = None
-                for name in contents:
-                    parts = name.split("/")
-                    root = parts[0]
-                    if root:
-                        break
-
-                if not root:
-                    raise StateException("Bag appears to be empty: "+bagfile)
-                destdir = os.path.dirname(destbag)
-                if not os.path.exists(destdir):
-                    raise StateException("Bag destination directory not found: "+
-                                         bagfile)
-                zip.extractall(destdir)
-
-            tmpname = os.path.join(destdir, root)
-            if not os.path.isdir(tmpname):
-                raise RuntimeException("Apparent bag unpack failure; root "+
-                                       "not created: "+tmpname)
-            os.rename(tmpname, destbag)
-
+            root = self._unpack_zip_into(bagfile, destdir)
         else:
             raise StateException("Don't know how to unpack serialized bag: "+
                                  os.path.basename(bagfile))
+
+        tmpname = os.path.join(destdir, root)
+        if not os.path.isdir(tmpname):
+            raise RuntimeException("Apparent bag unpack failure; root "+
+                                   "not created: "+tmpname)
+        os.rename(tmpname, destbag)
+        
+    def _unpack_zip_into(self, bagfile, destdir):
+        if not os.path.exists(destdir):
+            raise StateException("Bag destination directory not found: "+destdir)
+                                 
+        # this coder gratefully drew on the example by Jawaad Ahmad (jia103) at
+        # https://stackoverflow.com/questions/9813243/extract-files-from-zip-file-and-retain-mod-date-python-2-7-1-on-windows-7
+        # for restoring the content's original data-time stamps.
+
+        dirs = {}
+        with ZipFile(bagfile, 'r') as zip:
+            contents = zip.namelist()
+            root = None
+            for name in contents:
+                parts = name.split("/")
+                root = parts[0]
+                if root:
+                    break
+
+            if not root:
+                raise StateException("Bag appears to be empty: "+bagfile)
+
+            for entry in zip.infolist():
+                zip.extract(entry, destdir)
+                extracted = os.path.join(destdir, entry.filename)
+                date_time = mktime(entry.date_time + (0, 0, -1))
+
+                if os.path.isdir(extracted):
+                    dirs[extracted] = date_time
+                else:
+                    os.utime(extracted, (date_time, date_time))
+
+        for name in dirs:
+            os.utime(name, (dirs[name], dirs[name]))
+
+        return root
+
 
     def create_new_update(self, destbag):
         """
@@ -335,7 +359,7 @@ class UpdatePrepper(object):
             shutil.rmtree(datadir)
         os.mkdir(datadir)
 
-        for file in "bagit.txt bag-info.txt manifest-sha256.txt tagmanifest-sha256.txt".split():
+        for file in "bagit.txt bag-info.txt manifest-sha256.txt tagmanifest-sha256.txt about.txt".split():
             file = os.path.join(mdbag, file)
             if os.path.exists(file):
                 os.remove(file)

@@ -133,6 +133,11 @@ class TestPreservationUpdateBagger(test.TestCase):
         testsip = os.path.join(self.testsip, "review")
         self.revdir = os.path.join(self.workdir, "review")
         shutil.copytree(testsip, self.revdir)
+        now = time.time()
+        for base, dirs, files in os.walk(self.revdir):
+            for f in files+dirs:
+                os.utime(os.path.join(base,f), (now, now))
+        
         config = {
             'relative_to_indir': True,
             'bag_builder': {
@@ -169,6 +174,8 @@ class TestPreservationUpdateBagger(test.TestCase):
         self.tf.clean()
 
     def test_ctor(self):
+        # this test function is probably superfluous; prepsvc is no longer
+        # part of the PreservationBagger class
         self.assertEqual(self.bagr.name, self.midasid)
         self.assertEqual(self.bagr.indir, self.sipdir)
         self.assertEqual(self.bagr.mddir, self.mddir)
@@ -179,7 +186,7 @@ class TestPreservationUpdateBagger(test.TestCase):
         bagdir = os.path.join(self.bagparent, self.midasid+".1_0.mbag0_4-0")
         self.assertEqual(self.bagr.bagdir, bagdir)
 
-        self.assertIsNotNone(self.bagr.prepsvc)
+        # self.assertIsNotNone(self.bagr.prepsvc)
 
     def test_ensure_metadata_preparation(self):
         self.bagr.ensure_metadata_preparation()

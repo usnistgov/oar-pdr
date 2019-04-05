@@ -30668,7 +30668,7 @@ body .ui-progressbar {
   body .ui-progressbar .ui-progressbar-label {
     color: #ffffff;
     display: none !important; }
-body .ui-progressbar-indeterminate .ui-progressbar-value {
+body .-indeterminate .ui-progressbar-value {
   background-color: inherit; }
   body .ui-progressbar-indeterminate .ui-progressbar-value::after {
     background-color: #2f4050; }
