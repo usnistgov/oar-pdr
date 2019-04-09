@@ -930,4 +930,12 @@ export class DescriptionComponent {
     }
   }
 
+  /*
+  * Make sure the width of popup dialog is less than 500px or 80% of the window width
+  */
+  getDialogWidth(){
+    var w = window.innerWidth > 500? 500: window.innerWidth;
+    console.log(w);
+    return w+'px';
+  }
 }
