@@ -273,14 +273,14 @@ export class DatacartComponent implements OnInit, OnDestroy {
       this.titleWidth = '60%';
       this.typeWidth = '150px';
       this.sizeWidth = '100px';
-      this.statusWidth = '100px';
+      this.statusWidth = '150px';
       this.fontSize = '14px';
     }
     else {
-      this.titleWidth = '50%';
+      this.titleWidth = '40%';
       this.typeWidth = '20%';
       this.sizeWidth = '20%';
-      this.statusWidth = '10%';
+      this.statusWidth = '20%';
       this.fontSize = '12px';
     }
   }
@@ -1023,6 +1023,15 @@ export class DatacartComponent implements OnInit, OnDestroy {
       style = "red";
     }
     return style;
+  }
+
+/*
+* Make sure the width of popup dialog is less than 500px or 80% of the window width
+*/
+  getDialogWidth() {
+    var w = window.innerWidth > 500 ? 500 : window.innerWidth;
+    console.log(w);
+    return w + 'px';
   }
 }
 
