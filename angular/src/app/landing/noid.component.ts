@@ -1,7 +1,6 @@
 import { Component, Input } from '@angular/core';
 
 @Component({
-  moduleId: module.id,
   styleUrls: ['landing.component.css'],
   selector: 'noid-template',
   template: `

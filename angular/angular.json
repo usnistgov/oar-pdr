@@ -1,23 +1,26 @@
 {
-  "$schema": "./node_modules/@angular-devkit/core/src/workspace/workspace-schema.json",
+  "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "pdr-landingpage": {
+    "angular": {
       "root": "",
       "sourceRoot": "src",
       "projectType": "application",
+      "prefix": "app",
+      "schematics": {},
       "architect": {
         "build": {
           "builder": "@angular-devkit/build-angular:browser",
           "options": {
-            "outputPath": "dist/browser",
+            "outputPath": "dist/angular",
             "index": "src/index.html",
             "main": "src/main.ts",
-            "tsConfig": "src/tsconfig.app.json",
             "polyfills": "src/polyfills.ts",
-            "preserveSymlinks": true,
+            "tsConfig": "src/tsconfig.app.json",
             "assets": [
+              "src/favicon.ico",
+              "src/assets",
               {
                 "glob": "favicon.ico",
                 "input": "src",
@@ -27,14 +30,15 @@
                 "glob": "**/*",
                 "input": "src/assets",
                 "output": "/assets"
-              }],
+              }
+            ],
             "styles": [
-              "src/styles.scss",
+              "src/styles.css",
               "node_modules/bootstrap/dist/css/bootstrap.min.css",
-              "node_modules/primeng/resources/primeng.css",
-              "node_modules/primeicons/primeicons.css",
+              "node_modules/primeng/resources/primeng.min.css",
               "src/styles/ultima-ng-5.2.4/assets/layout/css/layout-indigo.css",
               "src/styles/ultima-ng-5.2.4/assets/theme/theme-indigo.css",
+              "node_modules/primeicons/primeicons.css",
               "src/styles/font-awesome/css/font-awesome.min.css",
               "src/styles/main.css"
             ],
@@ -48,6 +52,12 @@
           },
           "configurations": {
             "production": {
+              "fileReplacements": [
+                {
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.prod.ts"
+                }
+              ],
               "optimization": true,
               "outputHashing": "all",
               "sourceMap": false,
@@ -56,50 +66,36 @@
               "aot": true,
               "extractLicenses": true,
               "vendorChunk": false,
-              "buildOptimizer": true,
-              "fileReplacements": [
-                {
-                  "replace": "src/environments/environment.ts",
-                  "with": "src/environments/environment.prod.ts"
-                }
-              ]
+              "buildOptimizer": true
             }
           }
         },
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
           "options": {
-            "browserTarget": "pdr-landingpage:build"
+            "browserTarget": "angular:build"
           },
           "configurations": {
             "production": {
-              "browserTarget": "pdr-landingpage:build:production"
+              "browserTarget": "angular:build:production"
             }
           }
         },
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "browserTarget": "pdr-landingpage:build"
+            "browserTarget": "angular:build"
           }
         },
         "test": {
           "builder": "@angular-devkit/build-angular:karma",
           "options": {
             "main": "src/test.ts",
-            "karmaConfig": "./karma.conf.js",
             "polyfills": "src/polyfills.ts",
             "tsConfig": "src/tsconfig.spec.json",
-            "preserveSymlinks": true,
-            "scripts": [
-              "node_modules/lodash/lodash.min.js",
-              "node_modules/jspdf/dist/jspdf.min.js",
-              "node_modules/primeui/primeui-ng-all.min.js",
-              "node_modules/bootstrap/dist/js/bootstrap.min.js",
-              "node_modules/primeng/primeng.js"
-            ],
+            "karmaConfig": "src/karma.conf.js",
             "styles": [
-              "src/styles.scss",
+              "src/styles.css",
               "node_modules/bootstrap/dist/css/bootstrap.min.css",
               "node_modules/primeng/resources/primeng.min.css",
               "src/styles/ultima-ng-5.2.4/assets/layout/css/layout-indigo.css",
@@ -108,17 +104,16 @@
               "src/styles/font-awesome/css/font-awesome.min.css",
               "src/styles/main.css"
             ],
+            "scripts": [
+              "node_modules/lodash/lodash.min.js",
+              "node_modules/jspdf/dist/jspdf.min.js",
+              "node_modules/primeui/primeui-ng-all.min.js",
+              "node_modules/bootstrap/dist/js/bootstrap.min.js",
+              "node_modules/primeng/primeng.js"
+            ],
             "assets": [
-              {
-                "glob": "favicon.ico",
-                "input": "src/",
-                "output": "/"
-              },
-              {
-                "glob": "**/*",
-                "input": "src/assets",
-                "output": "/assets"
-              }
+              "src/favicon.ico",
+              "src/assets"
             ]
           }
         },
@@ -154,26 +149,26 @@
         }
       }
     },
-    "pdr-landingpage-e2e": {
-      "root": "",
-      "sourceRoot": "",
+    "angular-e2e": {
+      "root": "e2e/",
       "projectType": "application",
-      "cli": {
-      },
       "architect": {
         "e2e": {
           "builder": "@angular-devkit/build-angular:protractor",
           "options": {
-            "protractorConfig": "./protractor.conf.js",
-            "devServerTarget": "pdr-landingpage:serve"
+            "protractorConfig": "e2e/protractor.conf.js",
+            "devServerTarget": "angular:serve"
+          },
+          "configurations": {
+            "production": {
+              "devServerTarget": "angular:serve:production"
+            }
           }
         },
         "lint": {
           "builder": "@angular-devkit/build-angular:tslint",
           "options": {
-            "tsConfig": [
-              "e2e/tsconfig.e2e.json"
-            ],
+            "tsConfig": "e2e/tsconfig.e2e.json",
             "exclude": [
               "**/node_modules/**"
             ]
@@ -182,33 +177,5 @@
       }
     }
   },
-  "cli": {},
-  "defaultProject": "pdr-landingpage",
-  "schematics": {
-    "@schematics/angular:component": {
-      "prefix": "app",
-      "styleext": "css",
-      "spec": false,
-      "inlineStyle": true,
-      "inlineTemplate": true
-    },
-    "@schematics/angular:directive": {
-      "prefix": "app"
-    },
-    "@schematics/angular:class": {
-      "spec": false
-    },
-    "@schematics/angular:guard": {
-      "spec": false
-    },
-    "@schematics/angular:module": {
-      "spec": false
-    },
-    "@schematics/angular:pipe": {
-      "spec": false
-    },
-    "@schematics/angular:service": {
-      "spec": false
-    }
-  }
+  "defaultProject": "angular"
 }

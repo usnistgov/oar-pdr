@@ -27,9 +27,11 @@
   <div style="display: flex;justify-content: space-between;">
     <div *ngIf="bundlePlanStatus != 'complete' && bundlePlanMessage" style="display: inline; text-align: left;">
       <i class="faa faa-warning" [ngStyle]="{'color':messageColor, 'padding-right':'.5em'}"></i>
-      <span *ngIf="bundlePlanStatus == 'error';else no_error"
-        [ngStyle]="{'color':messageColor}">
-        Ooops! There was a problem getting the data you need. Please contact us at <a href="mailto:datasupport@nist.gov?subject=PDR: {{emailSubject}}&body={{emailBody}}">datasupport@nist.gov</a> to report the problem. If possible, include the string "PDR: Error getting bundle plan" in your email report.</span>
+      <span *ngIf="bundlePlanStatus == 'error';else no_error" [ngStyle]="{'color':messageColor}">
+        Ooops! There was a problem getting the data you need. Please contact us at <a
+          href="mailto:datasupport@nist.gov?subject=PDR: {{emailSubject}}&body={{emailBody}}">datasupport@nist.gov</a>
+        to report the problem. If possible, include the string "PDR: Error getting bundle plan" in your email
+        report.</span>
       <ng-template #no_error>
         <span [ngStyle]="{'color':getColor(), 'padding-right':'.5em'}">{{broadcastMessage}}</span>
         <span (click)="showMessageBlock = !showMessageBlock">
@@ -215,7 +217,7 @@
           <i class="faa faa-recycle faa-1x icon-white" (click)="clearDownloadStatus()"
             style="cursor: pointer;color: rgb(255, 255, 255);padding-right:0.5em;" data-toggle="tooltip"
             title="Reset Download Status"></i>
-          Status 
+          Status
         </th>
       </tr>
     </ng-template>
@@ -242,7 +244,8 @@
           <span *ngIf="rowData.isLeaf">{{formatBytes(rowData.fileSize)}}</span>
         </td>
         <td [ngStyle]="statusStyle()">
-          <div style="display:flex;">
+          <!-- use following block when server side allow cross origin requests -->
+          <!-- <div style="display:flex;">
             <div *ngIf="rowData.isLeaf" (click)="downloadOneFile(rowData)">
               <i *ngIf="rowData.downloadStatus == null" class="faa faa-download" style="color: #1E6BA1;cursor: pointer;"
                 aria-hidden="true" data-toggle="tooltip" title="Direct download"></i>
@@ -265,6 +268,20 @@
             <div id="downloadstatus" *ngIf="rowData.isLeaf && rowData.downloadStatus != 'downloading'" [ngStyle]="{'padding-left':'0.5em','color':getDownloadStatusStyle(rowData)}" data-toggle="tooltip" title="{{(rowData.message.status=='404')?'File not found.': 'Server error'}}">
               {{rowData.downloadStatus}}
             </div>
+          </div> -->
+
+          <div *ngIf="rowData.isLeaf;else space_holder" style="display:inline;">
+            <a *ngIf="rowData.downloadStatus != 'downloading'" href='{{rowData.downloadUrl}}' target='_blank'
+              download="download" data-toggle="tooltip" title="Direct download">
+              <i class="faa faa-download" [ngStyle]="{'color':getDownloadBtnColor(rowData)}" aria-hidden="true"
+                (click)="setFileDownloaded(rowData)"></i>
+            </a>
+          </div>
+          <ng-template #space_holder>
+            <div style="display:inline;padding-right: 0.4em;">&nbsp;&nbsp;</div>
+          </ng-template>
+          <div id="downloadstatus" *ngIf="rowData.isLeaf && rowData.downloadStatus != 'downloading'" style="display:inline;">
+            {{rowData.downloadStatus}}
           </div>
         </td>
       </tr>
@@ -279,9 +296,8 @@
   </p-treeTable>
 </div>
 
-<p-overlayPanel class="fileDialog" #op3 [dismissable]="true" [showCloseIcon]="true" [style]="{'display':'inline-block'}"
-  appendToBody=true>
-  <div *ngIf="isNodeSelected" class="filecard">
+<p-overlayPanel class="fileDialog" #op3 [dismissable]="true" [showCloseIcon]="true" [style]="{'display':'inline-block','position':'related','left':'50%','top':'80%'}" appendToBody=true>
+  <div *ngIf="isNodeSelected" class="filecard" [ngStyle]="{'max-width':getDialogWidth()}">
     <div class="ui-g filesection">
       <div *ngIf="fileNode" class="ui-g-12 ui-md-12 ui-lg-12 ui-sm-10">
         <span class="font8" style="color:grey">

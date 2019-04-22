@@ -1,55 +1,27 @@
-# Angular application for landing page service
-Angular 5.2.4+  built from scratch, using the angular-cli. 
+# Angular
 
+This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 6.2.4.
 
-### Prerequisites
+## Development server
 
- - [node](https://nodejs.org/en/download/) version 8.9.4 or higher.
- - [Get VS Code](https://code.visualstudio.com/download).
- - [Angular CLI](https://github.com/angular/angular-cli) version 1.6.8.
-
-
-### Building the app from scratch
-
-
-
-### Quick start
-
-```bash
-# clone the repo
-git clone https://github.com/usnistgove/oar-pdr
-
-# change directory to repo
-cd angular
-
-```
-
-## Build
-```bash
-npm install
-
-npm run build:universal
-
-npm run serve:universal
-
-# navigate with your browser to http://localhost:4200/
-```
-## Running unit tests
-
-npm run test
-
-## Running end-to-end tests
-
-npm run e2e-test
-
-## Further help
-
-### Libraries 
- - [bootstrap](https://github.com/twbs/bootstrap) - The most popular HTML, CSS, and JavaScript framework for developing responsive, mobile first projects on the web.
- - [ng-bootstrap](https://ng-bootstrap.github.io) - Angular powered Bootstrap
- - [font-awesome 5.x](https://github.com/FortAwesome/Font-Awesome) - Get vector icons and social logos on your website with Font Awesome, the web’s most popular icon set and toolkit.
+Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The app will automatically reload if you change any of the source files.
 
 ## Code scaffolding
 
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive/pipe/service/class/module`.
+Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
 
+## Build
+
+Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory. Use the `--prod` flag for a production build.
+
+## Running unit tests
+
+Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
+
+## Running end-to-end tests
+
+Run `ng e2e` to execute the end-to-end tests via [Protractor](http://www.protractortest.org/).
+
+## Further help
+
+To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI README](https://github.com/angular/angular-cli/blob/master/README.md).

@@ -1,7 +1,6 @@
 import {Component, Input} from '@angular/core';
 @Component ({
   selector: 'fieldset-view',
-  moduleId: module.id,
   styleUrls: ['metadataview.component.css'],
   template: `
     <div *ngFor="let node of (entry | keyvalues)" >

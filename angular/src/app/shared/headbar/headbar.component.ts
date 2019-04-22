@@ -11,7 +11,6 @@ import { CommonVarService } from '../../shared/common-var';
 declare var Ultima: any;
 
 @Component({
-  moduleId: module.id,
   selector: 'pdr-headbar',
   templateUrl: 'headbar.component.html',
   styleUrls: ['headbar.component.css']

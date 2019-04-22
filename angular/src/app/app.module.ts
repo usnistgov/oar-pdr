@@ -1,4 +1,4 @@
-import { Title, Meta } from '@angular/platform-browser';
+import { Title, Meta, BrowserModule } from '@angular/platform-browser';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import {
   NgModule, APP_INITIALIZER, PLATFORM_ID, APP_ID, Inject,
@@ -64,17 +64,25 @@ const appInitializerFn = (appConfig: AppConfig) => {
     Collaspe, MetadataComponent, DescriptionComponent,
     KeyValuePipe, MetadataView, NoidComponent, NerdmComponent,
     ErrorComponent, UserErrorComponent,
-    AppShellNoRenderDirective, AppShellRenderDirective,
+    AppShellNoRenderDirective, AppShellRenderDirective
   ],
   imports: [
+    BrowserModule,
     FragmentPolyfillModule.forRoot({
       smooth: true
     }),
     FormsModule, ReactiveFormsModule,
     AppRoutingModule, HttpClientModule,
-    CommonModule, SharedModule, BrowserAnimationsModule, FormsModule, TooltipModule,
-    TreeTableModule, TreeModule, MenuModule, FieldsetModule, DialogModule, OverlayPanelModule,
-    ButtonModule, ProgressSpinnerModule, ConfirmDialogModule, ProgressBarModule,
+    CommonModule, SharedModule, BrowserAnimationsModule, FormsModule,
+    TooltipModule,
+    TreeTableModule, 
+    TreeModule, 
+    MenuModule, 
+    FieldsetModule, 
+    DialogModule, 
+    OverlayPanelModule,
+    ButtonModule, 
+    ProgressSpinnerModule, ConfirmDialogModule, ProgressBarModule,
     NgbModule.forRoot()
   ],
   exports: [Collaspe],
@@ -88,7 +96,7 @@ const appInitializerFn = (appConfig: AppConfig) => {
     AppConfig,
     DownloadService,
     TestDataService,
-    ConfirmationService,
+    // ConfirmationService,
     CommonFunctionService,
     {
       provide: APP_INITIALIZER,
@@ -99,16 +107,6 @@ const appInitializerFn = (appConfig: AppConfig) => {
     // provider used to create fake backend
     // fakeBackendProvider
   ],
-  schemas: [CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA]
+  bootstrap: [AppComponent]
 })
-
-export class AppModule {
-  constructor(
-    @Inject(PLATFORM_ID) private platformId: Object,
-    @Inject(APP_ID) private appId: string) {
-    const platform = isPlatformBrowser(platformId) ?
-      'in the browser' : 'on the server';
-  }
-}
-
-
+export class AppModule { }
