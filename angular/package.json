@@ -72,6 +72,11 @@
   },
   "browser": {
     "fs": false,
-    "proc": false
+    "proc": false,
+    "http": false,
+    "path": false,
+    "net": false,
+    "zlib": false,
+    "stream": false
   }
 }
