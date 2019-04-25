@@ -16,9 +16,6 @@ execdir=`dirname $0`
 export CODEDIR=`(cd $execdir/.. > /dev/null 2>&1; pwd)`
 export DOCKERDIR=$execdir
 
-# Need to temporarily disable angular tests as they are not currently working
-#
-# exec $DOCKERDIR/run.sh test "$@"
-#
-exec $DOCKERDIR/run.sh test python
+echo '+' $DOCKERDIR/run.sh test "$@"
+exec $DOCKERDIR/run.sh test "$@"
 
