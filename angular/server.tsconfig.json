@@ -1,7 +1,7 @@
 {
   "compileOnSave": false,
   "compilerOptions": {
-    "outDir": "./dist/out-tsc",
+    "outDir": "./dist",
     "sourceMap": true,
     "declaration": false,
     "moduleResolution": "node",
@@ -15,5 +15,6 @@
       "es2017",
       "dom"
     ]
-  }
+  },
+  "include": ["server.ts", "prerender.ts"]
 }
