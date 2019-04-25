@@ -36,10 +36,13 @@
     "@nguniversal/common": "^7.0.2",
     "@nguniversal/express-engine": "^7.0.2",
     "@nguniversal/module-map-ngfactory-loader": "^7.0.2",
-    "bootstrap": "^4.1.2",
+    "bootstrap": "^4.3.1",
     "core-js": "^2.4.1",
     "express": "^4.15.2",
+    "file-saver": "^2.0.0",
+    "jquery": "1.9.1",
     "ngx-filesaver": "^2.2.0",
+    "popper.js": "^1.14.6",
     "primeicons": "^1.0.0-beta.9",
     "primeng": "^6.0.1",
     "reflect-metadata": "^0.1.10",
@@ -48,16 +51,18 @@
     "zone.js": "^0.8.26"
   },
   "devDependencies": {
-    "@angular-devkit/build-angular": "0.11.4",
+    "@angular-devkit/build-angular": "0.13.8",
     "@angular/cli": "7.1.4",
     "@angular/compiler-cli": "7.1.4",
     "@angular/language-service": "7.1.4",
+    "@types/file-saver": "^2.0.0",
     "@types/jasmine": "~2.8.6",
     "@types/jasminewd2": "~2.0.3",
     "@types/node": "^8.0.30",
+    "ajv": "^6.9.1",
     "codelyzer": "^4.0.2",
     "http-server": "^0.10.0",
-    "jasmine-core": "~3.1.0",
+    "jasmine-core": "~3.3.0",
     "jasmine-spec-reporter": "~4.2.1",
     "karma": "^3.1.4",
     "karma-chrome-launcher": "~2.2.0",
@@ -72,11 +77,6 @@
   },
   "browser": {
     "fs": false,
-    "proc": false,
-    "http": false,
-    "path": false,
-    "net": false,
-    "zlib": false,
-    "stream": false
+    "proc": false
   }
 }
