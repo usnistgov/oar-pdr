@@ -25,7 +25,6 @@ const { AppServerModuleNgFactory, LAZY_MODULE_MAP } = require('./server/main');
 app.engine('html', ngExpressEngine({
   bootstrap: AppServerModuleNgFactory,
   providers: [
-    cfgprovider,
     provideModuleMap(LAZY_MODULE_MAP)
   ]
 }));
