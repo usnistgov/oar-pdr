@@ -12,10 +12,11 @@
     "test": "ng test --browsers=ChromeHeadless",
     "lint": "ng lint oar-lps",
     "build:client-and-server-bundles": "ng build --prod && ng run oar-lps:server:production",
-    "build:prerender": "npm run build:client-and-server-bundles && npm run compile:server && npm run generate:prerender",
-    "build:ssr": "npm run build:client-and-server-bundles && npm run compile:server",
+    "build:prerender": "npm run build:client-and-server-bundles && npm run compile:server && npm run webpack:server && npm run generate:prerender",
+    "build:ssr": "npm run build:client-and-server-bundles && npm run compile:server && npm run webpack:server",
     "compile:server": "tsc -p server.tsconfig.json",
     "generate:prerender": "cd dist && node prerender",
+    "webpack:server": "webpack --config webpack.server.config.js --progress --colors",
     "serve:prerender": "cd dist/browser && http-server",
     "serve:ssr": "node dist/server"
   },
@@ -48,6 +49,7 @@
     "reflect-metadata": "^0.1.10",
     "rxjs": "6.3.3",
     "rxjs-compat": "6.3.3",
+    "webpack": "^4.12.2",
     "zone.js": "^0.8.26"
   },
   "devDependencies": {
@@ -60,6 +62,7 @@
     "@types/jasmine": "~2.8.6",
     "@types/jasminewd2": "~2.0.3",
     "@types/node": "^8.0.30",
+    "@types/webpack-env": "^1.13.0",
     "ajv": "^6.9.1",
     "codelyzer": "^4.0.2",
     "http-server": "^0.10.0",
@@ -72,9 +75,11 @@
     "karma-jasmine-html-reporter": "^1.4.0",
     "protractor": "~5.4.2",
     "pre-commit": "^1.2.2",
+    "regexp-replace-loader": "^1.0.1",
     "ts-loader": "^4.2.0",
     "tslint": "^5.7.0",
-    "typescript": "3.1.6"
+    "typescript": "3.1.6",
+    "webpack-cli": "^3.0.0"
   },
   "browser": {
     "fs": false,
