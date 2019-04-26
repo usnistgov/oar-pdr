@@ -38,10 +38,12 @@ export class CommonVarService {
   }
 
   setEdiid(ediid: string) {
-    this._storage.setItem("ediid", ediid);
+    if (this._storage)
+      this._storage.setItem("ediid", ediid);
   }
 
   getEdiid() {
+    if (! this._storage) return "(none)";
     return this._storage.getItem("ediid");
   }
 
