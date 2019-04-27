@@ -1,0 +1,25 @@
+<div [ngClass]="{ 'layout-wrapper': true, 'layout-compact': layoutCompact }">
+<div [ngClass]="{ 'layout-container': false,
+                  'menu-layout-static': (layoutMode=='static' || layoutMode=='horizontal'),
+                  'menu-layout-overlay': (layoutMode=='overlay'),
+                  'menu-layout-horizontal': (layoutMode=='horizontal') }">
+  <div class="topbar clearfix header-background">
+    <div class="header-div">
+      <a href="/" title="NIST Public Data Repository"
+         class="header__logo-link" rel="home">
+        <img class="Fleft" src="./assets/images/nist-pdr-rev.png"
+             alt="NIST Public Data Repository" title="NIST Public Data Repository" />
+      </a>
+
+      <span *ngIf="status" class="badge" id="appVersion" style="background-color:#8f3919">{{ appVersion }}</span>
+         &nbsp;&nbsp;
+      <span *ngIf="status" class="badge" id="appStatus" style="background-color:darkcyan">{{ status }}</span>
+      <div align="right" class="header-links">
+        <a href="/pdr/about" target="_blank"><span class="textlinks"><b>About</b></span></a> | 
+        <a href="{{ searchLink }}" target="_blank"><span class="textlinks"><b>Search</b></span></a>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+  

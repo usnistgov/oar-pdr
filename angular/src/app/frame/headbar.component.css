@@ -1,0 +1,63 @@
+
+
+.header__logo-link {
+    /* display: block; */
+}
+.background-black
+{
+    background-color: #000000;
+}
+.header-background {
+    background-color: #333333;
+}
+.header-div {
+    /*vertical-align: middle;*/
+    padding-top: 1%;
+    /*margin-bottom: 10px;*/
+    padding-bottom: 1%;
+    padding-left: 1%;
+    color: white;
+}
+
+.header-links {
+    margin-right: 0px;
+    margin-top: 0px;
+    color:white;
+    padding-right: 2%;
+}
+
+
+.textlinks {
+    color:white;
+}
+
+
+.badgesm {
+    font-size: 12px;
+    font-weight: bold;
+    color: #fff;
+    padding: 3px 7px; 
+    vertical-align: 50%;
+/*    margin-top: -3.0em;
+    margin-right: -2.0em; */
+    height:20px;
+    width:20px;
+    min-width: 10px;
+    z-index: 10;
+    line-height: 1;
+    text-align: center;
+    white-space: nowrap;
+    background-color: #777;
+    border-radius: 10px;
+}
+
+.badge-notify {
+    background-color: green;
+    position:relative;
+    top: -20px;
+    left: -5px;
+    font-size: 9px;
+    height:20px;
+    width:20px;
+    padding:5px 3px 3px 3px ;
+}
