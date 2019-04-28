@@ -7,16 +7,25 @@
     <div class="header-div">
       <a href="/" title="NIST Public Data Repository"
          class="header__logo-link" rel="home">
-        <img class="Fleft" src="./assets/images/nist-pdr-rev.png"
-             alt="NIST Public Data Repository" title="NIST Public Data Repository" />
+         <img class="Fleft top_bar" src="./assets/images/nist_logo_reverse.png"
+           alt="NIST Public Data Repository"
+           title="NIST Public Data Repository">
+         <span class="Fleft"
+           style="font-weight:bold;line-height: 16.5px;display: table-cell;vertical-align: text-top;color: #FFFFFF;font-size:14px;padding-left: 0.5em">PUBLIC
+           <br> DATA REPOSITORY </span>
       </a>
 
-      <span *ngIf="status" class="badge" id="appVersion" style="background-color:#8f3919">{{ appVersion }}</span>
+      <span *ngIf="appVersion" class="badge" id="appVersion" style="background-color:#f0f0f0; margin-left: 0.5em; color: black;">{{ appVersion }}</span>
          &nbsp;&nbsp;
       <span *ngIf="status" class="badge" id="appStatus" style="background-color:darkcyan">{{ status }}</span>
       <div align="right" class="header-links">
-        <a href="/pdr/about" target="_blank"><span class="textlinks"><b>About</b></span></a> | 
-        <a href="{{ searchLink }}" target="_blank"><span class="textlinks"><b>Search</b></span></a>
+        <a href="/about" target="_blank"><span class="textlinks"><b>About</b></span></a> | 
+        <a href="{{ searchLink }}" target="_blank"><span class="textlinks"><b>Search</b></span></a> |
+        <a [routerLink]="['/datacart', 'normal']" routerLinkActive="active" target="_blank"
+            (click)="updateCartStatus()"><span class="textlinks"><b>Cart </b></span>
+            <i class="faa faa-shopping-cart faa-1x icon-white" style="color: #fff;"></i>
+            <span class="w3-badge badge-pill badge-notify">&nbsp;{{cartLength}}&nbsp;</span></a>
+        
       </div>
     </div>
   </div>

@@ -1,5 +1,6 @@
 import { NgModule } from "@angular/core";
 import { CommonModule } from "@angular/common";
+import { RouterModule } from '@angular/router';
 import { HeadbarComponent } from "./headbar.component";
 import { FootbarComponent } from "./footbar.component";
 
@@ -13,7 +14,8 @@ import { FootbarComponent } from "./footbar.component";
         FootbarComponent
     ],
     imports: [
-        CommonModule       // provides template directives
+        CommonModule,       // provides template directives
+        RouterModule        // allow use of [routerLink]
     ],
     exports: [ HeadbarComponent, FootbarComponent ]
 })

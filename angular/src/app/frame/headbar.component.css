@@ -12,10 +12,10 @@
 }
 .header-div {
     /*vertical-align: middle;*/
-    padding-top: 1%;
+    padding-top: 0.7em;
     /*margin-bottom: 10px;*/
-    padding-bottom: 1%;
-    padding-left: 1%;
+    padding-bottom: 0.6em;
+    padding-left: 0.7em;
     color: white;
 }
 
@@ -53,11 +53,12 @@
 
 .badge-notify {
     background-color: green;
-    position:relative;
-    top: -20px;
+    color: white;
+    position: relative;
+    top: -10px;
     left: -5px;
     font-size: 9px;
-    height:20px;
-    width:20px;
-    padding:5px 3px 3px 3px ;
+    height: 20px;
+    width: 20px;
+    padding: 5px 3px 3px 3px ;
 }

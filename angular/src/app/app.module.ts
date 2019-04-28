@@ -1,12 +1,11 @@
 import { Title, Meta } from '@angular/platform-browser';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import {
-  NgModule, APP_INITIALIZER, PLATFORM_ID, APP_ID, Inject,
+  APP_INITIALIZER, PLATFORM_ID, APP_ID, Inject,
   CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA
 } from '@angular/core';
 import { isPlatformBrowser, CommonModule } from '@angular/common';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { HttpClientModule } from '@angular/common/http';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { Collaspe } from './landing/collapseDirective/collapse.directive';
 import { TreeModule, FieldsetModule, DialogModule, OverlayPanelModule } from 'primeng/primeng';
@@ -15,7 +14,6 @@ import { TreeTableModule } from 'primeng/treetable';
 import { ButtonModule } from 'primeng/button';
 import { TooltipModule } from 'primeng/tooltip';
 import { AppComponent } from './app.component';
-import { AppRoutingModule } from './app-routing.module';
 import { LandingComponent } from './landing/landing.component';
 import { DescriptionComponent } from './landing/description/description.component';
 import { MetadataComponent } from './landing/metadata/metadata.component';
@@ -43,6 +41,17 @@ import { TestDataService } from './shared/testdata-service/testDataService';
 import { CommonFunctionService } from './shared/common-function/common-function.service';
 import {enableProdMode} from '@angular/core';
 
+// future
+import { BrowserModule, BrowserTransferStateModule } from '@angular/platform-browser';
+import { NgModule } from '@angular/core';
+import { ErrorHandler } from '@angular/core';
+import { HttpClientModule } from '@angular/common/http';
+
+import { FrameModule } from './frame/frame.module';
+import { ConfigModule } from './config/config.module';
+import { AppRoutingModule } from './app-routing.module';
+
+
 enableProdMode();
 // used to create fake backend
 import { fakeBackendProvider } from './_helpers/fakeBackendInterceptor';
@@ -67,15 +76,19 @@ const appInitializerFn = (appConfig: AppConfig) => {
     AppShellNoRenderDirective, AppShellRenderDirective,
   ],
   imports: [
-    FragmentPolyfillModule.forRoot({
-      smooth: true
-    }),
-    FormsModule, ReactiveFormsModule,
-    AppRoutingModule, HttpClientModule,
-    CommonModule, SharedModule, BrowserAnimationsModule, FormsModule, TooltipModule,
-    TreeTableModule, TreeModule, MenuModule, FieldsetModule, DialogModule, OverlayPanelModule,
-    ButtonModule, ProgressSpinnerModule, ConfirmDialogModule, ProgressBarModule,
-    NgbModule.forRoot()
+      HttpClientModule,
+      ConfigModule,        // provider for AppConfig
+      FrameModule,
+      AppRoutingModule,
+
+      FragmentPolyfillModule.forRoot({
+          smooth: true
+      }),
+      FormsModule, ReactiveFormsModule,
+      CommonModule, SharedModule, BrowserAnimationsModule, FormsModule, TooltipModule,
+      TreeTableModule, TreeModule, MenuModule, FieldsetModule, DialogModule, OverlayPanelModule,
+      ButtonModule, ProgressSpinnerModule, ConfirmDialogModule, ProgressBarModule,
+      NgbModule.forRoot()
   ],
   exports: [Collaspe],
   providers: [

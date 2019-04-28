@@ -17,6 +17,10 @@
     width: 286px;
 }
 
+.footer__logo {
+  margin-bottom: 1em;
+}
+
 field-items img
 {width:100%;}
 
