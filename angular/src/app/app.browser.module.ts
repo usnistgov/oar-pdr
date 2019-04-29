@@ -1,6 +1,3 @@
-import { TransferHttpCacheModule } from '@nguniversal/common';
-
-// future
 import { NgModule } from '@angular/core';
 import { BrowserModule, BrowserTransferStateModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
@@ -10,10 +7,10 @@ import { AppComponent } from './app.component';
 
 @NgModule({
     imports: [
-        BrowserModule.withServerTransition({ appId: 'PDR-LandingPage' }),
+        BrowserModule.withServerTransition({ appId: 'PDR-LandingPageService' }),
         BrowserAnimationsModule,
         AppModule,
-        TransferHttpCacheModule
+        BrowserTransferStateModule
     ],
     bootstrap: [ AppComponent ]
 })

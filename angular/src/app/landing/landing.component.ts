@@ -3,6 +3,7 @@ import { Title, Meta } from '@angular/platform-browser';
 import { ActivatedRoute, Router, NavigationEnd } from '@angular/router';
 import { TreeNode } from 'primeng/primeng';
 import { MenuItem } from 'primeng/api';
+import { Observable, of } from 'rxjs';
 import * as _ from 'lodash';
 import 'rxjs/add/operator/map';
 import { Subscription } from 'rxjs/Subscription';
@@ -13,13 +14,10 @@ import { CartService } from '../datacart/cart.service';
 import { CommonVarService } from '../shared/common-var';
 import { TestDataService } from '../shared/testdata-service/testDataService';
 import { SearchService } from '../shared/search-service/index';
-import { Observable } from 'rxjs/Observable';
-import 'rxjs/add/observable/of';
 import { first, tap } from 'rxjs/operators';
-import { of } from 'rxjs/observable/of';
 import { isPlatformServer } from '@angular/common';
 import { makeStateKey, TransferState } from '@angular/platform-browser';
-import { _throw } from 'rxjs/observable/throw';
+//import { _throw } from 'rxjs/observable/throw';
 // import {DialogService} from 'primeng/api';
 import { DatacartComponent } from '../datacart/datacart.component';
 
@@ -373,20 +371,25 @@ export class LandingComponent implements OnInit {
   }
   getData(): Observable<any> {
     var recordid = this.searchValue;
-    const recordid_KEY = makeStateKey<any>('record-' + recordid);
+    const recordid_KEY = makeStateKey<string>('record-' + recordid);
 
     if (this.transferState.hasKey(recordid_KEY)) {
+      console.log("extracting data id="+recordid+" embedded in web page");
       const record = this.transferState.get<any>(recordid_KEY, null);
-      this.transferState.remove(recordid_KEY);
+      // this.transferState.remove(recordid_KEY);
       return of(record);
     }
     else {
+      console.warn("record data not found in transfer state");
       return this.searchService.searchById(recordid)
         .catch((err: Response, caught: Observable<any[]>) => {
-          console.log(err);
+          // console.log(err);
           if (err !== undefined) {
-            console.log("ERROR STATUS :::" + err.status);
-            console.log(err);
+            console.error("Failed to retrieve data for id="+recordid+"; error status=" + err.status);
+            if ("message" in err) console.error("Reason: "+(<any>err).message);
+            if ("url" in err) console.error("URL used: "+(<any>err).url);
+
+            // console.error(err);
             if (err.status >= 500) {
               this.router.navigate(["/usererror", recordid, { errorcode: err.status }]);
             }
@@ -394,9 +397,9 @@ export class LandingComponent implements OnInit {
               this.router.navigate(["/usererror", recordid, { errorcode: err.status }]);
             }
             if (err.status == 0) {
-              return Observable.throw('The Web server (running the Web site) is currently unable to handle the request.');
+              console.warn("Possible causes: Unable to trust site cert, CORS restrictions, ...");
+              return Observable.throw('Unknown error requesting data for id='+recordid);
             }
-            //return Observable.throw('The Web server (running the Web site) is currently unable to handle the request.');
           }
           return Observable.throw(caught);
         })

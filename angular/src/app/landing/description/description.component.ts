@@ -84,8 +84,8 @@ export class DescriptionComponent {
   confValues: Config;
   isLocalProcessing: boolean;
   showDownloadProgress: boolean = false;
-  mobWidth: number;
-  mobHeight: number;
+  mobWidth: number = 800;   // default value used in server context
+  mobHeight: number = 900;  // default value used in server context
   fontSize: string;
 
   /* Function to Return Keys object properties */
@@ -109,18 +109,20 @@ export class DescriptionComponent {
         { field: 'mediatype', header: 'Media Type', width: 'auto' },
         { field: 'size', header: 'Size', width: 'auto' },
         { field: 'download', header: 'Status', width: 'auto' }];
-        
-      this.mobHeight = (window.innerHeight);
-      this.mobWidth = (window.innerWidth);
-      this.setWidth(this.mobWidth);
+
+      if (typeof(window) !== 'undefined') {
+        this.mobHeight = (window.innerHeight);
+        this.mobWidth = (window.innerWidth);
+        this.setWidth(this.mobWidth);
   
-      window.onresize = (e) => {
-        ngZone.run(() => {
-          this.mobWidth = window.innerWidth;
-          this.mobHeight = window.innerHeight;
-          this.setWidth(this.mobWidth);
-        });
-    };
+        window.onresize = (e) => {
+          ngZone.run(() => {
+            this.mobWidth = window.innerWidth;
+            this.mobHeight = window.innerHeight;
+            this.setWidth(this.mobWidth);
+          });
+        };
+      }
 
     this.cartService.watchAddAllFilesCart().subscribe(value => {
       this.addAllFileSpinner = value;
