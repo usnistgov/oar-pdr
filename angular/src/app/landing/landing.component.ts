@@ -7,7 +7,7 @@ import { Observable, of } from 'rxjs';
 import * as _ from 'lodash';
 import 'rxjs/add/operator/map';
 import { Subscription } from 'rxjs/Subscription';
-import { AppConfig, Config } from '../shared/config-service/config.service';
+import { AppConfig } from '../config/config';
 import { PLATFORM_ID, APP_ID, Inject } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { CartService } from '../datacart/cart.service';
@@ -123,7 +123,6 @@ export class LandingComponent implements OnInit {
   private newer: reference = {};
   navigationSubscription: any;
   ediid: any;
-  confValues: Config;
   displayDatacart: boolean = false;
   isLocalProcessing: boolean = false;
   isLoading: boolean = true;
@@ -133,13 +132,13 @@ export class LandingComponent implements OnInit {
    *
    */
   constructor(private route: ActivatedRoute, private el: ElementRef,
-    private titleService: Title, private appConfig: AppConfig, private router: Router
-    , @Inject(PLATFORM_ID) private platformId: Object,
-    @Inject(APP_ID) private appId: string,
-    private transferState: TransferState,
-    private searchService: SearchService,
-    private commonVarService: CommonVarService) {
-    this.confValues = this.appConfig.getConfig();
+              private titleService: Title, private cfg : AppConfig, private router: Router,
+              @Inject(PLATFORM_ID) private platformId: Object,
+              @Inject(APP_ID) private appId: string,
+              private transferState: TransferState,
+              private searchService: SearchService,
+              private commonVarService: CommonVarService)
+  {
   }
 
   /**
@@ -259,10 +258,11 @@ export class LandingComponent implements OnInit {
    * Update menu on landing page
    */
   updateMenu() {
-    this.serviceApi = this.confValues.LANDING + "records?@id=" + this.record['@id'];
-    if (!_.includes(this.confValues.LANDING, "rmm"))
-      this.serviceApi = this.confValues.LANDING + this.record['ediid'];
-    this.distdownload = this.confValues.DISTAPI + "ds/zip?id=" + this.record['@id'];
+    let mdapi = this.cfg.get("mdAPI", "/unconfigured");
+    this.serviceApi = mdapi + "records?@id=" + this.record['@id'];
+    if (!_.includes(mdapi, "/rmm/"))
+      this.serviceApi = mdapi + this.record['ediid'];
+    this.distdownload = this.cfg.get("distService","/od/ds/") + "zip?id=" + this.record['@id'];
 
     var itemsMenu: MenuItem[] = [];
     var metadata = this.createMenuItem("Export JSON", "faa faa-file-o", (event) => { this.turnSpinnerOff(); }, this.serviceApi);
@@ -272,9 +272,9 @@ export class LandingComponent implements OnInit {
     }
 
     var resourcesByAuthor = this.createMenuItem('Resources by Authors', "faa faa-external-link", "",
-      this.confValues.SDPAPI + "/#/search?q=authors.familyName=" + authlist + "&key=&queryAdvSearch=yes");
+      this.cfg.get("locations.pdrSearch","/sdp/") + "/#/search?q=authors.familyName=" + authlist + "&key=&queryAdvSearch=yes");
     var similarRes = this.createMenuItem("Similar Resources", "faa faa-external-link", "",
-      this.confValues.SDPAPI + "/#/search?q=" + this.record['keyword'] + "&key=&queryAdvSearch=yes");
+      this.cfg.get("locations.pdrSearch","/sdp/") + "/#/search?q=" + this.record['keyword'] + "&key=&queryAdvSearch=yes");
     var license = this.createMenuItem("Fair Use Statement", "faa faa-external-link", "", this.record['license']);
     var citation = this.createMenuItem('Citation', "faa faa-angle-double-right",
       (event) => { this.getCitation(); this.showDialog(); }, '');

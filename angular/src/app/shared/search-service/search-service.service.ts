@@ -4,7 +4,7 @@ import { Observable } from 'rxjs/Observable';
 import 'rxjs/add/operator/map';
 import 'rxjs/add/operator/catch';
 import 'rxjs/add/observable/throw';
-import { AppConfig } from '../config-service/config.service';
+import { AppConfig } from '../../config/config';
 import * as _ from 'lodash';
 /**
  * This class provides the Search service with methods to search for records from tha rmm.
@@ -19,9 +19,10 @@ export class SearchService {
    * @param {Http} http - The injected Http.
    * @constructor
    */
-  constructor(private http: HttpClient,
-    private appConfig : AppConfig) {
-    this.landingBackend = this.appConfig.getConfig().LANDING;
+  constructor(private http: HttpClient, private cfg : AppConfig) {
+      this.landingBackend = cfg.get("mdAPI", "/unconfigured");
+      if (this.landingBackend == "/unconfigured")
+          throw new Error("Metadata service endpoint not configured!");
   }
 
   /**

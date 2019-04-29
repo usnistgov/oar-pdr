@@ -38,9 +38,14 @@ export interface WebLocations {
     distService?: string,
 
     /**
-     * the base URL for the metadata service
+     * the base URL for the (public) metadata service
      */
-    mdService?: string
+    mdService?: string,
+
+    /**
+     * the base URL for the landing page service
+     */
+    landingPageService?: string, 
 
     /**
      * the NERDm info page
@@ -132,6 +137,8 @@ export class AppConfig implements LPSConfig {
             this.locations.distService = this.locations.portalBase + "od/ds/";
         if (! this.locations.mdService)
             this.locations.mdService = this.locations.portalBase + "rmm/";
+        if (! this.locations.landingPageService)
+            this.locations.landingPageService = this.locations.portalBase + "od/id/";
         if (! this.locations.nerdmAbout)
             this.locations.nerdmAbout = this.locations.portalBase + "od/dm/aboutNerdm.html";
 

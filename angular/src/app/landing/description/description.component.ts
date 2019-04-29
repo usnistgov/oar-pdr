@@ -12,7 +12,7 @@ import { CommonVarService } from '../../shared/common-var';
 import { environment } from '../../../environments/environment';
 import { HttpClientModule, HttpClient, HttpHeaders, HttpRequest, HttpEventType, HttpResponse, HttpEvent } from '@angular/common/http';
 import { TestBed } from '@angular/core/testing';
-import { AppConfig, Config } from '../../shared/config-service/config.service';
+import { AppConfig } from '../../config/config';
 import { THIS_EXPR } from '@angular/compiler/src/output/output_ast';
 import { FileSaverService } from 'ngx-filesaver';
 import { Router } from '@angular/router';
@@ -81,7 +81,6 @@ export class DescriptionComponent {
   messageColor: any;
   noFileDownloaded: boolean; // will be true if any item in data cart is downloaded
   distApi: string;
-  confValues: Config;
   isLocalProcessing: boolean;
   showDownloadProgress: boolean = false;
   mobWidth: number = 800;   // default value used in server context
@@ -98,7 +97,7 @@ export class DescriptionComponent {
     private downloadService: DownloadService,
     private commonVarService: CommonVarService,
     private http: HttpClient,
-    private appConfig: AppConfig,
+    private cfg : AppConfig,
     private _FileSaverService: FileSaverService,
     private confirmationService: ConfirmationService,
     private commonFunctionService: CommonFunctionService,
@@ -137,11 +136,10 @@ export class DescriptionComponent {
         this.cartLength = this.cartService.getCartSize();
       }
     });
-    this.confValues = this.appConfig.getConfig();
   }
 
   ngOnInit() {
-    this.distApi = this.confValues.DISTAPI;
+    this.distApi = this.cfg.get("distService", "/od/ds/");
 
     if (this.files.length != 0)
       this.files = <TreeNode[]>this.files[0].data;

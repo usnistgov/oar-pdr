@@ -101,7 +101,7 @@
               <span *ngIf="isDOI"><i> <a class="font14"
                     href="https://doi.org/{{record.doi.split(':')[1]}}">{{record.doi}}</a></i></span>
               <span *ngIf="!isDOI"><i> <a class="font14"
-                    href="{{ confValues.PDRAPI }}{{record['@id']}}">{{record["@id"]}}</a></i>
+                    href="{{ cfg.get('landingPageService','/od/id/') }}{{record['@id']}}">{{record["@id"]}}</a></i>
               </span>
               <span *ngIf="checkReferences()"><br>
                 <span>Described in article: </span>
