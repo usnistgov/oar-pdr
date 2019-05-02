@@ -564,3 +564,7 @@
     transform: rotate(360deg);
   }
 }
+
+#title {
+  font-size: 1.5em;
+}

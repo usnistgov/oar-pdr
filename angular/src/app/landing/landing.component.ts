@@ -129,6 +129,13 @@ export class LandingComponent implements OnInit {
   displayDatacart: boolean = false;
   isLocalProcessing: boolean = false;
   isLoading: boolean = true;
+  buttonOpacity: number = 0;
+  borderStyle: string;
+  recordEditmode: boolean = false;
+  detailEditmode: boolean = false;
+  titleEditable: boolean = false;
+  authenticated: boolean = true;
+  originalValue: any;
 
   /**
    * Creates an instance of the SearchPanel
@@ -650,4 +657,49 @@ export class LandingComponent implements OnInit {
     }
   }
 
+  titleMouseover() {
+    // console.log("title Mouseover...");
+    if (!this.detailEditmode) {
+      this.buttonOpacity = 1;
+      this.borderStyle = "1px solid lightgrey";
+    }
+  }
+
+  titleMouseout() {
+    // console.log("title Mouseout...");
+    if (!this.detailEditmode) {
+      this.buttonOpacity = 0;
+      this.borderStyle = "0px solid lightgrey";
+    }
+  }
+
+  setRecordEditmode() {
+    this.recordEditmode = true;
+  }
+
+  cancelRecordEditmode() {
+    this.recordEditmode = false;
+  }
+
+  editTitle() {
+    // console.log("Editing title...");
+    this.originalValue = this.record.title;
+    this.detailEditmode = true;
+    this.titleEditable = true;
+  }
+
+  cancelEditedTitle(){
+    this.record.title = this.originalValue;
+    this.detailEditmode = false;
+    this.titleMouseout();
+  }
+
+  saveEditedTitle(){
+    this.originalValue = '';
+    this.detailEditmode = false;
+    this.titleMouseout();
+    /*
+      Send request to back end here
+    */
+  }
 }

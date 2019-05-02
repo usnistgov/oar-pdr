@@ -13,7 +13,26 @@
     top.location = self.location;
   }
 </script>
-
+<div *ngIf="authenticated" style="background-color: #153971;color: #FFFFFF;height: 4em;">
+  <button type="button" (click)="cancelRecordEditmode()" pButton type="submit"
+    style="float:right;margin:1em 1em .5em 0em;width:10%; height:2em; background-color:grey;color:white;padding-right: 1em;"
+    [disabled]="!recordEditmode">
+    <i class="faa faa-trash faa-1x icon-white" style="color: #fff;padding-left: .5em;padding-right: .5em;"></i>
+    Cancel
+  </button>
+  <button type="button" (click)="saveRecord()" pButton type="submit"
+    style="float:right;margin:1em 1em .5em 0em;width:10%; height:2em; background-color:green;color:white;padding-right: 1em;"
+    [disabled]="!recordEditmode">
+    <i class="faa faa-save faa-1x icon-white" style="color: #fff;padding-left: .5em;padding-right: .5em;"></i>
+    Save
+  </button>
+  <button type="button" (click)="setRecordEditmode()" pButton type="submit"
+    style="float:right;margin:1em 1em .5em 1em;width:10%; height:2em; background-color:green;color:white;padding-right: 1em;"
+    [disabled]="recordEditmode">
+    <i class="faa faa-pencil faa-1x icon-white" style="color: #fff;padding-left: .5em;padding-right: .5em;"></i>
+    Edit
+  </button>
+</div>
 <div class="ui-grid ui-grid-responsive ui-grid-pad center">
   <div class="card landingcard">
     <!-- <div id="overlay" *ngIf="isLocalProcessing"> -->
@@ -44,12 +63,40 @@
                 <p-menu #menu3 class="rightMenuStylePop" popup="popup" [model]="rightmenu"></p-menu>
               </div>
               <br>
-              <span class="title" style="text-align: left; vertical-align: top; ">
-                <h2>{{record.title}}</h2>
-              </span>
+              <div *ngIf="!recordEditmode">
+                <span class="title" style="text-align: left; vertical-align: top;">
+                  <h2>{{record.title}}</h2>
+                </span>
+              </div>
+              <div *ngIf="recordEditmode">
+                <span class="title" style="text-align: left; vertical-align: top;" (mouseover)="titleMouseover()"
+                  (mouseout)="titleMouseout()">
+                  <h2 *ngIf="!detailEditmode" style="display: inline-block;" contenteditable="false"
+                    [style.border]="borderStyle" (click)="editTitle()">{{record.title}}</h2>
+                  <button *ngIf="!detailEditmode" [style.opacity]="buttonOpacity" type="button" (click)="editTitle()"
+                    style="display: inline-block;height:2em;border-radius: 0 4px 4px 0;background-color:rgb(233, 233, 233);vertical-align:top;border-style: solid;border-color:lightgrey;border-width:1px 1px 1px 0px;">
+                    <i class="faa faa-pencil" style="cursor: pointer;color:grey; margin-top: 0em;" data-toggle="tooltip"
+                      title="Edit title"></i>
+                  </button>
+                  <h2 *ngIf="detailEditmode" style="display: inline-block;" [style.border]="borderStyle" #topicTitle contenteditable="true" [textContent]="record.title" (input)="record.title=topicTitle.innerText" (click)="editTitle()"></h2>
+                  <div *ngIf="detailEditmode"
+                    style="display: inline-block;vertical-align:top;border-style: solid;border-color:lightgrey;border-width:1px 1px 1px 0px;background-color:rgb(233, 233, 233);">
+                    <button [style.opacity]="buttonOpacity" type="button" (click)="saveEditedTitle()"
+                      style="display: inline-block;width:1.8em;height:1.8em;margin: 0.1em;">
+                      <i class="faa faa-check" style="cursor: pointer;color:grey; margin-top: 0em;"
+                        data-toggle="tooltip" title="Save edited title"></i>
+                    </button>
+                    <button [style.opacity]="buttonOpacity" type="button" (click)="cancelEditedTitle()"
+                      style="display: inline-block;width:1.8em;height:1.8em;margin: 0.1em;">
+                      <i class="faa faa-close" style="cursor: pointer;color:grey; margin-top: 0em;"
+                        data-toggle="tooltip" title="Cancel edited title"></i>
+                    </button>
+                  </div>
+                </span>
+              </div>
               <div class="" *ngIf="record.authors">
                 <span *ngFor="let author of record.authors; let i = index">
-                  {{ author.fn}}<span *ngIf="i < record.authors.length-1 ">,</span>
+                  {{ author.fn }}<span *ngIf="i < record.authors.length-1 ">,</span>
                 </span>
                 <i style="cursor: pointer; margin-left: 0.5rem;" class="faa"
                   [ngClass]="{'faa-plus-square-o': !clickAuthors, 'faa-minus-square-o': clickAuthors}"
