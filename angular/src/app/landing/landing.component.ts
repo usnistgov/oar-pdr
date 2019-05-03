@@ -20,6 +20,8 @@ import { of } from 'rxjs/observable/of';
 import { isPlatformServer } from '@angular/common';
 import { makeStateKey, TransferState } from '@angular/platform-browser';
 import { _throw } from 'rxjs/observable/throw';
+import { AuthService } from '../shared/auth-service/auth.service';
+import { trigger, state, style, animate, transition } from '@angular/animations';
 // import {DialogService} from 'primeng/api';
 import { DatacartComponent } from '../datacart/datacart.component';
 
@@ -86,7 +88,39 @@ function compare_histories(a, b) {
 @Component({
   selector: 'app-landing',
   templateUrl: './landing.component.html',
-  styleUrls: ['./landing.component.css']
+  styleUrls: ['./landing.component.css'],
+  animations: [
+    trigger('changeOpacity', [
+      state('initial', style({
+        opacity: '0'
+      })),
+      state('final', style({
+        opacity: '1'
+      })),
+      transition('initial=>final', animate('500ms')),
+      transition('final=>initial', animate('500ms'))
+    ]),
+    trigger('changeBorderWidth', [
+      state('initial', style({
+        border: "1px solid white"
+      })),
+      state('final', style({
+        border: "1px solid lightgrey"
+      })),
+      transition('initial=>final', animate('500ms')),
+      transition('final=>initial', animate('500ms'))
+    ]),
+    trigger('changeMode', [
+      state('initial', style({
+        height: "0em"
+      })),
+      state('final', style({
+        height: "3em"
+      })),
+      transition('initial=>final', animate('500ms')),
+      transition('final=>initial', animate('500ms'))
+    ]),
+  ]
 })
 
 export class LandingComponent implements OnInit {
@@ -134,20 +168,27 @@ export class LandingComponent implements OnInit {
   recordEditmode: boolean = false;
   detailEditmode: boolean = false;
   titleEditable: boolean = false;
-  authenticated: boolean = true;
+  isAuthenticated: boolean = false;
   originalValue: any;
+  currentState: string = 'initial';
+  currentMode: string = 'initial';
 
   /**
    * Creates an instance of the SearchPanel
    *
    */
-  constructor(private route: ActivatedRoute, private el: ElementRef,
-    private titleService: Title, private appConfig: AppConfig, private router: Router
-    , @Inject(PLATFORM_ID) private platformId: Object,
+  constructor(
+    private route: ActivatedRoute, 
+    private el: ElementRef,
+    private titleService: Title, 
+    private appConfig: AppConfig, 
+    private router: Router,
+    @Inject(PLATFORM_ID) private platformId: Object,
     @Inject(APP_ID) private appId: string,
     private transferState: TransferState,
     private searchService: SearchService,
-    private commonVarService: CommonVarService) {
+    private commonVarService: CommonVarService,
+    private authService: AuthService) {
     this.confValues = this.appConfig.getConfig();
   }
 
@@ -163,6 +204,17 @@ export class LandingComponent implements OnInit {
 
     this.searchValue = this.route.snapshot.paramMap.get('id');
     // this.errorMsg = 'The requested record id ' + this.searchValue + ' does not match with any records in the system';
+    
+    this.authService.watchAuthenticateStatus().subscribe(
+      value => {
+        this.isAuthenticated = value;
+        if(value){
+          this.currentMode = 'final';
+        }else{
+          this.currentMode = 'initial';
+        }
+      }
+    );
 
     if (this.router.url.includes("ark"))
       this.searchValue = this.router.url.split("/id/").pop();
@@ -662,6 +714,7 @@ export class LandingComponent implements OnInit {
     if (!this.detailEditmode) {
       this.buttonOpacity = 1;
       this.borderStyle = "1px solid lightgrey";
+      this.currentState = 'final';
     }
   }
 
@@ -670,15 +723,20 @@ export class LandingComponent implements OnInit {
     if (!this.detailEditmode) {
       this.buttonOpacity = 0;
       this.borderStyle = "0px solid lightgrey";
+      this.currentState = 'initial';
     }
   }
 
-  setRecordEditmode() {
-    this.recordEditmode = true;
+  setRecordEditmode(mode:any) {
+    this.recordEditmode = mode;
+    this.commonVarService.setEditMode(mode);
   }
 
-  cancelRecordEditmode() {
+  saveRecord(){
+    // Send save request to back end
+    // ...
     this.recordEditmode = false;
+    this.commonVarService.setEditMode(false);
   }
 
   editTitle() {
@@ -702,4 +760,5 @@ export class LandingComponent implements OnInit {
       Send request to back end here
     */
   }
+
 }

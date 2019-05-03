@@ -13,21 +13,21 @@
     top.location = self.location;
   }
 </script>
-<div *ngIf="authenticated" style="background-color: #153971;color: #FFFFFF;height: 4em;">
-  <button type="button" (click)="cancelRecordEditmode()" pButton type="submit"
-    style="float:right;margin:1em 1em .5em 0em;width:10%; height:2em; background-color:grey;color:white;padding-right: 1em;"
-    [disabled]="!recordEditmode">
+<div [@changeMode]=currentMode style="background-color: #153971;color: #FFFFFF;height: 3em;">
+  <button *ngIf="isAuthenticated" type="button" (click)="setRecordEditmode(false)" pButton type="submit"
+    style="float:right;margin:.5em 1em .5em 0em;width:150px; height:2em; background-color:grey;color:white;padding-right: 1em;"
+    [disabled]="!recordEditmode || detailEditmode">
     <i class="faa faa-trash faa-1x icon-white" style="color: #fff;padding-left: .5em;padding-right: .5em;"></i>
     Cancel
   </button>
-  <button type="button" (click)="saveRecord()" pButton type="submit"
-    style="float:right;margin:1em 1em .5em 0em;width:10%; height:2em; background-color:green;color:white;padding-right: 1em;"
-    [disabled]="!recordEditmode">
+  <button *ngIf="isAuthenticated" type="button" (click)="saveRecord()" pButton type="submit"
+    style="float:right;margin:.5em 1em .5em 0em;width:150px; height:2em; background-color:green;color:white;padding-right: 1em;"
+    [disabled]="!recordEditmode || detailEditmode">
     <i class="faa faa-save faa-1x icon-white" style="color: #fff;padding-left: .5em;padding-right: .5em;"></i>
     Save
   </button>
-  <button type="button" (click)="setRecordEditmode()" pButton type="submit"
-    style="float:right;margin:1em 1em .5em 1em;width:10%; height:2em; background-color:green;color:white;padding-right: 1em;"
+  <button *ngIf="isAuthenticated" type="button" (click)="setRecordEditmode(true)" pButton type="submit"
+    style="float:right;margin:.5em 1em .5em 1em;width:150px; height:2em; background-color:green;color:white;padding-right: 1em;"
     [disabled]="recordEditmode">
     <i class="faa faa-pencil faa-1x icon-white" style="color: #fff;padding-left: .5em;padding-right: .5em;"></i>
     Edit
@@ -71,14 +71,17 @@
               <div *ngIf="recordEditmode">
                 <span class="title" style="text-align: left; vertical-align: top;" (mouseover)="titleMouseover()"
                   (mouseout)="titleMouseout()">
-                  <h2 *ngIf="!detailEditmode" style="display: inline-block;" contenteditable="false"
-                    [style.border]="borderStyle" (click)="editTitle()">{{record.title}}</h2>
-                  <button *ngIf="!detailEditmode" [style.opacity]="buttonOpacity" type="button" (click)="editTitle()"
+                  <h2 [@changeBorderWidth]=currentState *ngIf="!detailEditmode" style="display: inline-block;padding-right: .5em" contenteditable="false"
+                    (click)="editTitle()">{{record.title}}</h2>
+
+                  <button [@changeOpacity]=currentState *ngIf="!detailEditmode" [style.opacity]="buttonOpacity" type="button" (click)="editTitle()"
                     style="display: inline-block;height:2em;border-radius: 0 4px 4px 0;background-color:rgb(233, 233, 233);vertical-align:top;border-style: solid;border-color:lightgrey;border-width:1px 1px 1px 0px;">
                     <i class="faa faa-pencil" style="cursor: pointer;color:grey; margin-top: 0em;" data-toggle="tooltip"
                       title="Edit title"></i>
                   </button>
-                  <h2 *ngIf="detailEditmode" style="display: inline-block;" [style.border]="borderStyle" #topicTitle contenteditable="true" [textContent]="record.title" (input)="record.title=topicTitle.innerText" (click)="editTitle()"></h2>
+                  <h2 *ngIf="detailEditmode" style="display: inline-block;" [style.border]="borderStyle" #topicTitle
+                    contenteditable="true" [textContent]="record.title" (input)="record.title=topicTitle.innerText"
+                    (click)="editTitle()"></h2>
                   <div *ngIf="detailEditmode"
                     style="display: inline-block;vertical-align:top;border-style: solid;border-color:lightgrey;border-width:1px 1px 1px 0px;background-color:rgb(233, 233, 233);">
                     <button [style.opacity]="buttonOpacity" type="button" (click)="saveEditedTitle()"

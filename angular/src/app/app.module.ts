@@ -46,6 +46,7 @@ import {enableProdMode} from '@angular/core';
 enableProdMode();
 // used to create fake backend
 import { fakeBackendProvider } from './_helpers/fakeBackendInterceptor';
+import { LoginComponent } from './login/login.component';
 
 /**
  * Initialize the configs for backend services
@@ -64,7 +65,7 @@ const appInitializerFn = (appConfig: AppConfig) => {
     Collaspe, MetadataComponent, DescriptionComponent,
     KeyValuePipe, MetadataView, NoidComponent, NerdmComponent,
     ErrorComponent, UserErrorComponent,
-    AppShellNoRenderDirective, AppShellRenderDirective,
+    AppShellNoRenderDirective, AppShellRenderDirective, LoginComponent
   ],
   imports: [
     FragmentPolyfillModule.forRoot({

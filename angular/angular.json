@@ -85,7 +85,8 @@
               "node_modules/bootstrap/dist/css/bootstrap.min.css",
               "node_modules/primeng/resources/primeng.css",
               "node_modules/primeicons/primeicons.css",
-              "src/styles/font-awesome/css/font-awesome.min.css"
+              "src/styles/font-awesome/css/font-awesome.min.css",
+              "styles.scss"
             ],
             "assets": [
               {
@@ -133,7 +134,7 @@
       }
     },
     "oar-lps-e2e": {
-      "root": "",
+      "root": "e2e",
       "projectType": "application",
       "cli": {},
       "schematics": {},
@@ -164,8 +165,8 @@
     },
     "@schematics/angular:component": {
       "spec": false,
-      "inlineStyle": true,
-      "inlineTemplate": true,
+      "inlineStyle": false,
+      "inlineTemplate": false,
       "prefix": "app",
       "styleext": "css"
     },

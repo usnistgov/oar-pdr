@@ -44,3 +44,7 @@ a:visited {
   // margin: 10px;
   // text-align: center;
 }
+
+.login-panel .ui-inputtext:focus {
+  border-width: 2px 2px 2px 2px;
+  border-color: #1471AE;}

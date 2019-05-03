@@ -19,9 +19,10 @@ export class CommonVarService {
   forceLandingPageInitSub = new BehaviorSubject<boolean>(false);
   openDownloadModalSub = new BehaviorSubject<boolean>(false);
   contentReadySub = new BehaviorSubject<boolean>(false);
+  editModeSub = new BehaviorSubject<boolean>(false);
 
   constructor() {
-    if (typeof(localStorage) !== 'undefined')
+    if (typeof (localStorage) !== 'undefined')
       this._storage = localStorage;
   }
 
@@ -43,7 +44,7 @@ export class CommonVarService {
   }
 
   getEdiid() {
-    if (! this._storage) return "(none)";
+    if (!this._storage) return "(none)";
     return this._storage.getItem("ediid");
   }
 
@@ -128,7 +129,21 @@ export class CommonVarService {
   /**
   * Watching landing page ready flag
   **/
- watchContentReady(): Observable<boolean> {
+  watchContentReady(): Observable<boolean> {
     return this.contentReadySub.asObservable();
+  }
+
+  /**
+ * Set landing page ready flag
+ **/
+  setEditMode(value: boolean) {
+    this.editModeSub.next(value);
+  }
+
+  /**
+  * Watching landing page ready flag
+  **/
+  watchEditMode(): Observable<boolean> {
+    return this.editModeSub.asObservable();
   }
 }

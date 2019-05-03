@@ -66,6 +66,8 @@
     "@types/jasminewd2": "~2.0.3",
     "@types/node": "^8.0.30",
     "@types/webpack-env": "^1.13.0",
+    "angular-mocks": "^1.6.10",
+    "ng-mock-e2e": "^0.1.4",
     "ajv": "^6.9.1",
     "codelyzer": "^4.0.2",
     "http-server": "^0.10.0",

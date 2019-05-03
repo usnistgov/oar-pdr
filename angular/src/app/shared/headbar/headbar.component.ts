@@ -2,9 +2,10 @@ import { CartService } from '../../datacart/cart.service';
 import { CartEntity } from '../../datacart/cart.entity';
 import { Component, ElementRef } from '@angular/core';
 import { AppConfig } from '../config-service/config.service';
-import { DownloadService } from '../../shared/download-service/download-service.service';
+import { AuthService } from '../../shared/auth-service/auth.service';
 import { CommonVarService } from '../../shared/common-var';
-
+import { ActivatedRoute, Router, NavigationEnd } from '@angular/router';
+import { CanActivate, ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
 /**
  * This class represents the headbar component.
  */
@@ -29,30 +30,44 @@ export class HeadbarComponent {
   cartEntities: CartEntity[];
   loginuser = false;
   cartLength: number;
-  isLocalTesting: boolean = false;
   ediid: any;
+  isAuthenticated: boolean = false;
+  navbarOpen: boolean = false;
+  isEditMode: boolean = false;
 
-  constructor(
-    private el: ElementRef,
+  constructor(private el: ElementRef,
     private cartService: CartService,
     private appConfig: AppConfig,
-    private downloadService: DownloadService,
-    private commonVarService: CommonVarService) {
-      this.SDPAPI = this.appConfig.getConfig().SDPAPI;
-      this.isLocalTesting = this.commonVarService.getLocalTestingFlag();
-      this.landingService = this.appConfig.getConfig().LANDING;
-      this.cartService.watchStorage().subscribe(value => {
-        this.cartLength = value;
-      });
+    private router: Router,
+    private commonVarService: CommonVarService,
+    private authService: AuthService) {
+    this.SDPAPI = this.appConfig.getConfig().SDPAPI;
+    this.landingService = this.appConfig.getConfig().LANDING;
+    this.cartService.watchStorage().subscribe(value => {
+      this.cartLength = value;
+    });
+    this.commonVarService.watchEditMode().subscribe(
+      value => {
+        this.isEditMode = value;
+      }
+    );
   }
 
   ngOnInit() {
     this.ediid = this.commonVarService.getEdiid();
+    this.authService.watchAuthenticateStatus().subscribe(
+      value => {
+        this.isAuthenticated = value;
+      }
+    );
   }
-  
-    checkinternal() {
+
+  checkinternal() {
     if (!this.landingService.includes('rmm'))
       this.internalBadge = true;
+
+    //For testing, always return true
+    this.internalBadge = true;
     return this.internalBadge;
   }
 
@@ -62,7 +77,6 @@ export class HeadbarComponent {
       this.cartLength = this.cartEntities.length;
       return this.cartLength;
     }.bind(this), function (err) {
-      console.log(err);
       alert("something went wrong while fetching the products");
     });
     return null;
@@ -70,7 +84,34 @@ export class HeadbarComponent {
 
   updateCartStatus() {
     this.cartService.updateCartDisplayStatus(true);
-    this.cartService.setCurrentCart('cart');
   }
 
+  goHome() {
+    this.router.navigate(['/od/id/', this.ediid], { fragment: '' });
+  }
+
+  logout() {
+    this.authService.setAuthenticateStatus(false);
+    this.goHome();
+  }
+
+  toggleNavbar() {
+    this.navbarOpen = !this.navbarOpen;
+  }
+
+  private isOpen = '';
+
+  toggled(event) {
+    if (event) {
+      console.log('is open');
+      this.isOpen = 'is open'
+    } else {
+      console.log('is closed');
+      this.isOpen = 'is closed'
+    }
+  }
+
+  login() {
+    this.router.navigate(['/login']);
+  }
 }
