@@ -74,6 +74,13 @@ export interface LPSConfig {
     mdAPI?: string;
 
     /**
+     * True if editing widgets should be made available in the landing page.
+     * This is intended to be true for the internal publishing version of the 
+     * landing page, and false for the external one.  The default will be false.
+     */
+    editEnabled?: boolean;
+
+    /**
      * a label to display (in the head bar) indicating the status of displayed interface.  
      *
      * This is usually populated in production contexts; example values
@@ -102,10 +109,11 @@ export interface LPSConfig {
  */
 export class AppConfig implements LPSConfig {
 
-    locations : WebLocations;
-    mdAPI     : string;
-    status    : string;
-    appVersion: string;
+    locations  : WebLocations;
+    mdAPI      : string;
+    editEnabled: boolean;
+    status     : string;
+    appVersion : string;
 
     /**
      * create an AppConfig directly from an LPSConfig object
@@ -143,6 +151,8 @@ export class AppConfig implements LPSConfig {
             this.locations.nerdmAbout = this.locations.portalBase + "od/dm/aboutNerdm.html";
 
         if (! this.mdAPI) this.mdAPI = this.locations.mdService;
+
+        if (typeof(this.editEnabled) === "undefined") this.editEnabled = false;
     }
 
     /**
