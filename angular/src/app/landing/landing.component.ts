@@ -129,6 +129,7 @@ export class LandingComponent implements OnInit {
   displayDatacart: boolean = false;
   isLocalProcessing: boolean = false;
   isLoading: boolean = true;
+  HomePageLink: boolean = false;
 
   /**
    * Creates an instance of the SearchPanel
@@ -206,6 +207,8 @@ export class LandingComponent implements OnInit {
       this.record = searchResults;
     else if (searchResults["ResultCount"] !== undefined && searchResults["ResultCount"] === 1)
       this.record = searchResults["ResultData"][0];
+
+    this.HomePageLink = this.displayHomePageLink();
 
     if (this.record["@id"] === undefined || this.record["@id"] === "") {
       this.isId = false;
@@ -650,4 +653,18 @@ export class LandingComponent implements OnInit {
     }
   }
 
+  /*
+  * Check if this record has a home page link that does not point to the landing page itself
+  */
+  displayHomePageLink(){
+    if(this.record.landingPage == null || this.record.landingPage == undefined){
+      return false;
+    }
+    var url = 'od/id/' + this.ediid;
+    if(this.record.landingPage.search(url) > -1){
+      return false;
+    }else{
+      return true;
+    }
+  }
 }
