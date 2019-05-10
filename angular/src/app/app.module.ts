@@ -42,6 +42,8 @@ import { ProgressBarModule } from 'primeng/progressbar';
 import { TestDataService } from './shared/testdata-service/testDataService';
 import { CommonFunctionService } from './shared/common-function/common-function.service';
 import {enableProdMode} from '@angular/core';
+import { ModalComponent } from './directives';
+import { ModalService } from './shared/modal-service';
 
 enableProdMode();
 // used to create fake backend
@@ -65,7 +67,7 @@ const appInitializerFn = (appConfig: AppConfig) => {
     Collaspe, MetadataComponent, DescriptionComponent,
     KeyValuePipe, MetadataView, NoidComponent, NerdmComponent,
     ErrorComponent, UserErrorComponent,
-    AppShellNoRenderDirective, AppShellRenderDirective, LoginComponent
+    AppShellNoRenderDirective, AppShellRenderDirective, LoginComponent, ModalComponent
   ],
   imports: [
     FragmentPolyfillModule.forRoot({
@@ -91,6 +93,7 @@ const appInitializerFn = (appConfig: AppConfig) => {
     TestDataService,
     ConfirmationService,
     CommonFunctionService,
+    ModalService,
     {
       provide: APP_INITIALIZER,
       useFactory: appInitializerFn,

@@ -1,6 +1,7 @@
 import { Component, AfterViewInit, OnInit } from '@angular/core';
 import { CommonVarService } from './shared/common-var';
 import { Router, NavigationStart, NavigationEnd, NavigationCancel, NavigationError } from '@angular/router';
+import './content/modal.less';
 
 @Component({
   selector: 'app-root',

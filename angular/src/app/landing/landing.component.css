@@ -568,3 +568,44 @@
 #title {
   font-size: 1.5em;
 }
+
+.edit_button {
+  width: 2.5em;
+  height: 2.5em;
+  border-radius: 0 4px 4px 0px;
+  background-color: rgb(233, 233, 233);
+  vertical-align: top;
+  border-style: solid;
+  border-color: lightgrey;
+  border-width: 1px 1px 1px 0px;
+}
+
+.edit_button2 {
+  display: inline-block;
+  width: 1.6em;
+  height: 1.6em;
+  border-radius: 0 4px 4px 0;
+  background-color:rgb(233, 233, 233);
+  vertical-align: top;
+  border-style: solid;
+  border-color: lightgrey;
+  border-width: 1px 1px 1px 0px;
+}
+
+.two_button_container {
+  vertical-align: top;
+  border-style: solid;
+  border-color: lightgrey;
+  border-width: 0px 1px 1px 1px;
+  background-color: rgb(233, 233, 233);
+}
+
+.two_button_container .two_buttons {
+  width:2.3em;
+  height:2.3em;
+  margin: 0.1em;
+}
+
+table, tr, td {
+  /* border: opx solid black; */
+}

@@ -29,7 +29,8 @@
               "node_modules/primeicons/primeicons.css",
               "node_modules/primeng/resources/themes/bootstrap/theme.css",
               "src/styles/font-awesome/css/font-awesome.min.css",
-              "src/styles/main.css"
+              "src/styles/main.css",
+              "src/app/content/modal.less"
             ],
             "scripts": [
 
@@ -86,7 +87,7 @@
               "node_modules/primeng/resources/primeng.css",
               "node_modules/primeicons/primeicons.css",
               "src/styles/font-awesome/css/font-awesome.min.css",
-              "styles.scss"
+              "src/styles.scss"
             ],
             "assets": [
               {

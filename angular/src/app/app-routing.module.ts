@@ -10,7 +10,7 @@ import { DatacartComponent } from './datacart/datacart.component';
 import { LoginComponent } from './login/login.component';
 
 const routes: Routes = [
-  { path: '', redirectTo: '/about', pathMatch: 'full' },
+  { path: '', redirectTo: 'pdr/about', pathMatch: 'full' },
 
   {
     path: 'pdr/about', children: [

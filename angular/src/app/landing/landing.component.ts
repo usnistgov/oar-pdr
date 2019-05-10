@@ -22,6 +22,7 @@ import { makeStateKey, TransferState } from '@angular/platform-browser';
 import { _throw } from 'rxjs/observable/throw';
 import { AuthService } from '../shared/auth-service/auth.service';
 import { trigger, state, style, animate, transition } from '@angular/animations';
+import { ModalService } from '../shared/modal-service';
 // import {DialogService} from 'primeng/api';
 import { DatacartComponent } from '../datacart/datacart.component';
 
@@ -100,7 +101,7 @@ function compare_histories(a, b) {
       transition('initial=>final', animate('500ms')),
       transition('final=>initial', animate('500ms'))
     ]),
-    trigger('changeBorderWidth', [
+    trigger('changeBorderColor', [
       state('initial', style({
         border: "1px solid white"
       })),
@@ -163,33 +164,62 @@ export class LandingComponent implements OnInit {
   displayDatacart: boolean = false;
   isLocalProcessing: boolean = false;
   isLoading: boolean = true;
-  buttonOpacity: number = 0;
-  borderStyle: string;
   recordEditmode: boolean = false;
-  detailEditmode: boolean = false;
+  contactDetailEditmode: boolean = false;
   titleEditable: boolean = false;
   isAuthenticated: boolean = false;
-  originalValue: any;
-  currentState: string = 'initial';
   currentMode: string = 'initial';
+  titleObj: any;
+  authorObj: any;
+  contactObj: any;
+  tempContactPoint: any;
+  tempAuthors: any;
 
   /**
    * Creates an instance of the SearchPanel
    *
    */
   constructor(
-    private route: ActivatedRoute, 
+    private route: ActivatedRoute,
     private el: ElementRef,
-    private titleService: Title, 
-    private appConfig: AppConfig, 
+    private titleService: Title,
+    private appConfig: AppConfig,
     private router: Router,
     @Inject(PLATFORM_ID) private platformId: Object,
     @Inject(APP_ID) private appId: string,
     private transferState: TransferState,
     private searchService: SearchService,
     private commonVarService: CommonVarService,
-    private authService: AuthService) {
+    private authService: AuthService,
+    private modalService: ModalService) {
     this.confValues = this.appConfig.getConfig();
+    this.titleObj = this.editingObjectInit();
+    this.authorObj = this.editingObjectInit();
+    this.contactObj = this.editingObjectInit();
+    this.tempContactPoint = {
+      "fn": "",
+      "email": "",
+      "address": [
+        ""
+      ]
+    };
+    this.tempAuthors = {"authors":[
+      {
+      "familyName": "",
+      "fn": "",
+      "givenName": "",
+      "middleName": "",
+      "affiliation": [
+        {
+          "@id": "",
+          "title": "",
+          "orcid": "",
+          "@type": [
+            ""
+          ]
+        }
+      ]
+    }]};
   }
 
   /**
@@ -204,13 +234,13 @@ export class LandingComponent implements OnInit {
 
     this.searchValue = this.route.snapshot.paramMap.get('id');
     // this.errorMsg = 'The requested record id ' + this.searchValue + ' does not match with any records in the system';
-    
+
     this.authService.watchAuthenticateStatus().subscribe(
       value => {
         this.isAuthenticated = value;
-        if(value){
+        if (value) {
           this.currentMode = 'final';
-        }else{
+        } else {
           this.currentMode = 'initial';
         }
       }
@@ -242,6 +272,21 @@ export class LandingComponent implements OnInit {
   }
 
   /*
+  *   Init object - edit buttons for animation purpose
+  */
+  editingObjectInit() {
+    var editingObject = {
+      "originalValue": '',
+      "detailEditmode": false,
+      "buttonOpacity": 0,
+      "borderStyle": "0px solid lightgrey",
+      "currentState": 'initial'
+    }
+
+    return editingObject;
+  }
+
+  /*
     Function after view init
   */
   ngAfterViewInit() {
@@ -270,6 +315,8 @@ export class LandingComponent implements OnInit {
       this.isId = false;
       return;
     }
+
+    console.log(this.record);
 
     this.type = this.record['@type'];
     this.titleService.setTitle(this.record['title']);
@@ -709,56 +756,194 @@ export class LandingComponent implements OnInit {
     }
   }
 
+  /*
+  *  When mouse over title
+  */
   titleMouseover() {
-    // console.log("title Mouseover...");
-    if (!this.detailEditmode) {
-      this.buttonOpacity = 1;
-      this.borderStyle = "1px solid lightgrey";
-      this.currentState = 'final';
+    if (!this.titleObj.detailEditmode) {
+      this.titleObj.buttonOpacity = 1;
+      this.titleObj.borderStyle = "1px solid lightgrey";
+      this.titleObj.currentState = 'final';
     }
   }
 
+  /*
+  *  When mouse leaves title
+  */
   titleMouseout() {
     // console.log("title Mouseout...");
-    if (!this.detailEditmode) {
-      this.buttonOpacity = 0;
-      this.borderStyle = "0px solid lightgrey";
-      this.currentState = 'initial';
+    if (!this.titleObj.detailEditmode) {
+      this.titleObj.buttonOpacity = 0;
+      this.titleObj.borderStyle = "0px solid lightgrey";
+      this.titleObj.currentState = 'initial';
     }
   }
 
-  setRecordEditmode(mode:any) {
+  /*
+  *  Set record level edit mode (for the edit button at top)
+  */
+  setRecordEditmode(mode: any) {
     this.recordEditmode = mode;
     this.commonVarService.setEditMode(mode);
   }
 
-  saveRecord(){
+  /*
+  *  Save record (for the save button at top)
+  */
+  saveRecord() {
     // Send save request to back end
     // ...
     this.recordEditmode = false;
     this.commonVarService.setEditMode(false);
   }
 
+  /*
+  *  Set edit mode for title
+  */
   editTitle() {
     // console.log("Editing title...");
-    this.originalValue = this.record.title;
-    this.detailEditmode = true;
+    this.titleObj.originalValue = this.record.title;
+    this.titleObj.detailEditmode = true;
     this.titleEditable = true;
   }
 
-  cancelEditedTitle(){
-    this.record.title = this.originalValue;
-    this.detailEditmode = false;
+  /*
+  *  Cancel edit mode for title
+  */
+  cancelEditedTitle() {
+    this.record.title = this.titleObj.originalValue;
+    this.titleObj.detailEditmode = false;
     this.titleMouseout();
   }
 
-  saveEditedTitle(){
-    this.originalValue = '';
-    this.detailEditmode = false;
+  /*
+  *  Save edited title
+  */
+  saveEditedTitle() {
+    this.titleObj.originalValue = '';
+    this.titleObj.detailEditmode = false;
     this.titleMouseout();
     /*
       Send request to back end here
     */
   }
 
+  /*
+  *  When mouse over contact
+  */
+  contactMouseover() {
+    if (this.recordEditmode) {
+      if (!this.contactObj.detailEditmode) {
+        this.contactObj.buttonOpacity = 1;
+        this.contactObj.borderStyle = "1px solid lightgrey";
+        this.contactObj.currentState = 'final';
+      }
+    }
+  }
+
+  /*
+  *  When mouse leaves contact
+  */
+  contactMouseout() {
+    if (this.recordEditmode) {
+      if (!this.contactObj.detailEditmode) {
+        this.contactObj.buttonOpacity = 0;
+        this.contactObj.borderStyle = "0px solid lightgrey";
+        this.contactObj.currentState = 'initial';
+      }
+    }
+  }
+
+  /*
+  *  Open contact pop up dialog
+  */
+  openContactModal(id: string) {
+    this.tempContactPoint = this.record.contactPoint;
+    console.log("this.tempContactPoint");
+    console.log(this.tempContactPoint);
+    this.modalService.open(id);
+  }
+
+  /*
+  *   Close pop up dialog by id
+  */
+  closeModal(id: string) {
+    this.modalService.close(id);
+  }
+
+  /* 
+  *   Save contact info when click on save button in pop up dialog
+  */
+  saveContactInfo() {
+    this.record.contactPoint = this.tempContactPoint;
+    // Send update to backend here
+    this.modalService.close('Contact-popup-dialog');
+  }
+
+  /*
+  * Add new contact address
+  */
+  addNewAddress() {
+    if (this.tempContactPoint.address == null || this.tempContactPoint.address == 'undefined') {
+      this.tempContactPoint.address = [""];
+    } else {
+      this.tempContactPoint.address.push("");
+    }
+  }
+
+  /*
+  * Delete contact address
+  */
+  deleteAddress(index: number) {
+    this.tempContactPoint.address = this.tempContactPoint.address.filter((val, i) => i != index);
+  }
+
+  /*
+  *  When mouse over authors
+  */
+  authorMouseover() {
+    if (this.recordEditmode) {
+      if (!this.authorObj.detailEditmode) {
+        this.authorObj.buttonOpacity = 1;
+        this.authorObj.borderStyle = "1px solid lightgrey";
+        this.authorObj.currentState = 'final';
+      }
+    }
+  }
+
+  /*
+  *  When mouse leaves authors
+  */
+  authorMouseout() {
+    if (this.recordEditmode) {
+      if (!this.authorObj.detailEditmode) {
+        this.authorObj.buttonOpacity = 0;
+        this.authorObj.borderStyle = "0px solid lightgrey";
+        this.authorObj.currentState = 'initial';
+      }
+    }
+  }
+
+  /*
+  *  Open author pop up dialog
+  */
+  openAuthorModal() {
+    this.tempAuthors.authors = this.record.authors;
+    console.log("this.tempAuthors");
+    console.log(this.tempAuthors);
+    this.modalService.open("Author-popup-dialog");
+  }
+
+  /* 
+  *   Save contact info when click on save button in pop up dialog
+  */
+ saveAuthorInfo() {
+  this.record.authors = this.tempAuthors.authors;
+  // Send update to backend here
+  this.modalService.close('Author-popup-dialog');
+}
+
+  trackByFn(index: any, item: any) {
+    return index;
+  }
 }

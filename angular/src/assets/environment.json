@@ -1,8 +1,8 @@
 {
     "RMMAPI":  "http://data.nist.gov/rmm/",
     "SDPAPI":  "http://data.nist.gov/sdp/",
-    "PDRAPI":  "http://localhost/od/id/",
+    "PDRAPI":  "http://data.nist.gov/od/id/",
     "DISTAPI": "http://data.nist.gov/od/ds/",
-    "METAPI":  "http://localhost/metaurl/",
+    "METAPI":  "http://data.nist.gov/metaurl/",
     "LANDING": "http://data.nist.gov/rmm/"
 }
