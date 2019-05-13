@@ -15,7 +15,6 @@ import { TestBed } from '@angular/core/testing';
 import { AppConfig, Config } from '../../shared/config-service/config.service';
 import { THIS_EXPR } from '@angular/compiler/src/output/output_ast';
 import { FileSaverService } from 'ngx-filesaver';
-import { v } from '@angular/core/src/render3';
 import { Router } from '@angular/router';
 import { CommonFunctionService } from '../../shared/common-function/common-function.service';
 

@@ -8,8 +8,7 @@ execdir=`dirname $0`
 [ "$execdir" = "" -o "$execdir" = "." ] && execdir=$PWD
 PACKAGE_DIR=`(cd $execdir/.. > /dev/null 2>&1; pwd)`
 
-# buildtypes="angular python"
-buildtypes="python"
+buildtypes="angular python"
 
 dotypes="$@"
 [ -n "$dotypes" ] || dotypes=$buildtypes

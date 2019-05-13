@@ -150,7 +150,7 @@ echo '#########################'
 
 # build the component
 echo '+' "npm run build:universal "
-npm run build:universal
+npm run build:ssr
 
 # create the dependency file
 if [ -f "$SOURCE_DIR/package-lock.json" ]; then
