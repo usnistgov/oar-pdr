@@ -31,7 +31,7 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 @Configuration
 @EnableSwagger2
-@ComponentScan({ "gov.nist.oar.rmm" })
+@ComponentScan({ "gov.nist.oar.custom" })
 /**
  * Swagger configuration class takes care of Initializing swagger to be used to
  * generate documentation for the code.
@@ -58,7 +58,7 @@ public class SwaggerConfig {
     public Docket api() {
 
 	return new Docket(DocumentationType.SWAGGER_2).select()
-		.apis(RequestHandlerSelectors.basePackage("gov.nist.oar.rmm")).paths(PathSelectors.any()).build()
+		.apis(RequestHandlerSelectors.basePackage("gov.nist.oar.custom")).paths(PathSelectors.any()).build()
 		.apiInfo(apiInfo());
     }
 
@@ -71,7 +71,7 @@ public class SwaggerConfig {
     private ApiInfo apiInfo() {
 
 	@SuppressWarnings("deprecation")
-	ApiInfo apiInfo = new ApiInfo("Customization api", "Description goes here ",
+	ApiInfo apiInfo = new ApiInfo("Landing page Customization api", "Description goes here ",
 		"Build-1.0.0", "This is a web service to update data", "",
 		"NIST Public license", "https://www.nist.gov/director/licensing");
 	return apiInfo;

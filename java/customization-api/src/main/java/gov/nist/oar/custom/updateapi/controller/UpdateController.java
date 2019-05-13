@@ -30,14 +30,20 @@ import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import gov.nist.oar.custom.updateapi.exceptions.CustomizationException;
+import gov.nist.oar.custom.updateapi.exceptions.ErrorInfo;
 import gov.nist.oar.custom.updateapi.repositories.UpdateRepository;
+
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
@@ -72,9 +78,9 @@ public class UpdateController {
     @RequestMapping(value = {
 	    "save/{ediid}" }, method = RequestMethod.POST)
     @ApiOperation(value = ".", nickname = "Save changes to server", notes = "Resource returns a boolean based on success or failure of the request.")
-    public void saveRecord(@PathVariable @Valid String ediid,  @Valid @RequestBody String params) throws IOException {
+    public Document saveRecord(@PathVariable @Valid String ediid,  @Valid @RequestBody String params) throws IOException {
 	logger.info("Send updated record to mdserver:"+ediid);
-	uRepo.save(ediid, params);
+	return uRepo.save(ediid, params);
 //	RestTemplate restTemplate = new RestTemplate();
 //	HttpHeaders headers = new HttpHeaders();
 //	headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
@@ -113,5 +119,20 @@ public class UpdateController {
     public Document editRecord(@PathVariable @Valid String ediid) {
 	logger.info("Access the record to be edited by ediid "+ediid);
 	return uRepo.edit(ediid);
+    }
+    
+    @ExceptionHandler(IOException.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ErrorInfo handleStreamingError(CustomizationException ex, HttpServletRequest req) {
+	logger.info("There is an error accessing data: " + req.getRequestURI() + "\n  " + ex.getMessage());
+	return new ErrorInfo(req.getRequestURI(), 500, "Internal Server Error", "POST");
+    }
+
+    @ExceptionHandler(RuntimeException.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+
+    public ErrorInfo handleStreamingError(RuntimeException ex, HttpServletRequest req) {
+	logger.error("Unexpected failure during request: " + req.getRequestURI() + "\n  " + ex.getMessage(), ex);
+	return new ErrorInfo(req.getRequestURI(), 500, "Unexpected Server Error");
     }
 }

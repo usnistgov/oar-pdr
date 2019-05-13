@@ -12,6 +12,7 @@
  */
 package gov.nist.oar.custom.updateapi.service;
 
+import java.util.Date;
 import java.util.Iterator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -146,8 +147,12 @@ public class DataOperations {
      * @return
      */
     public boolean updateDataInCache(String recordid, MongoCollection<Document> mcollection, Document update) {
-
+	Date now = new Date();
+	update.append("_updateDate", now);
 	Document tempUpdateOp = new Document("$set", update);
+	tempUpdateOp.remove("_id");
+	
+	//BasicDBObject timeNow = new BasicDBObject("date", now);
 	UpdateResult updates = mcollection.updateOne(Filters.eq("ediid", recordid), tempUpdateOp);
 	return updates != null;
     }

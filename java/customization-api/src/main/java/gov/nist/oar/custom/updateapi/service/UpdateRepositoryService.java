@@ -41,14 +41,14 @@ public class UpdateRepositoryService implements UpdateRepository {
 
     MongoCollection<Document> recordCollection;
     MongoCollection<Document> changesCollection;
-    DataOperations accessData;
+    DataOperations accessData = new DataOperations();
 
-    public UpdateRepositoryService() {
-	logger.info("Constructor in to set up mdserver, collections and mongo config.");
-	recordCollection = mconfig.getRecordCollection();
-	changesCollection = mconfig.getChangeCollection();
-	accessData = new DataOperations();
-    }
+//    public UpdateRepositoryService() {
+//	logger.info("Constructor in to set up mdserver, collections and mongo config.");
+//	recordCollection = mconfig.getRecordCollection();
+//	changesCollection = mconfig.getChangeCollection();
+//	accessData = new DataOperations();
+//    }
 
     /**
      * Update the input json changes by client in the cache mongo database.
@@ -67,9 +67,11 @@ public class UpdateRepositoryService implements UpdateRepository {
     private boolean processInputHelper(String params, String recordid) {
 	ProcessInputRequest req = new ProcessInputRequest();
 	if (req.validateInputParams(params)) {
-
+            
 	    // this.accessData.checkRecordInCache(recordid, recordCollection);
 	    Document update = Document.parse(params);
+	    update.remove("_id");
+	    update.append("ediid", recordid);
 	    return this.updateHelper(recordid, update);
 	    // return accessData.updateDataInCache(recordid, recordCollection,
 	    // update);
@@ -86,14 +88,18 @@ public class UpdateRepositoryService implements UpdateRepository {
      */
     private boolean updateHelper(String recordid, Document update) {
 
-	if (this.accessData.checkRecordInCache(recordid, recordCollection))
+	recordCollection = mconfig.getRecordCollection();
+	changesCollection = mconfig.getChangeCollection();
+	
+	if (!this.accessData.checkRecordInCache(recordid, recordCollection))
 	    this.accessData.putDataInCache(recordid, mdserver, recordCollection);
 
-	if (this.accessData.checkRecordInCache(recordid, changesCollection))
+	if (!this.accessData.checkRecordInCache(recordid, changesCollection))
 	    this.accessData.putDataInCacheOnlyChanges(update, changesCollection);
 
-	return accessData.updateDataInCache(recordid, recordCollection, update)
+	return  accessData.updateDataInCache(recordid, recordCollection, update) 
 		&& accessData.updateDataInCache(recordid, changesCollection, update);
+	
     }
 
    
@@ -102,6 +108,8 @@ public class UpdateRepositoryService implements UpdateRepository {
      */
     @Override
     public Document edit(String recordid) {
+	recordCollection = mconfig.getRecordCollection();
+	changesCollection = mconfig.getChangeCollection();
 	return accessData.getData(recordid, recordCollection, mdserver);
     }
 
@@ -110,9 +118,11 @@ public class UpdateRepositoryService implements UpdateRepository {
      */
     @Override
     public Document save(String recordid, String params) {
+	recordCollection = mconfig.getRecordCollection();
+	changesCollection = mconfig.getChangeCollection();
 	if (!(params.isEmpty() || params == null) && !processInputHelper(params, recordid))
 	    return null;
-	return accessData.getUpdatedData(recordid, recordCollection);
+	return accessData.getUpdatedData(recordid, changesCollection);
 
     }
 

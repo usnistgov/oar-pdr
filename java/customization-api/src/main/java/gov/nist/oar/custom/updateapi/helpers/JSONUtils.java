@@ -60,7 +60,7 @@ public final class JSONUtils {
     public static boolean validateInput(String jsonRequest) {
 	try {
 
-	    InputStream inputStream = JSONUtils.class.getClassLoader().getResourceAsStream("static/json-schema.json");
+	    InputStream inputStream = JSONUtils.class.getClassLoader().getResourceAsStream("static/json-customization-schema.json");
 	    String inputSchema = IOUtils.toString(inputStream);
 	    JSONObject rawSchema = new JSONObject(new JSONTokener(inputSchema));
 	    Schema schema = SchemaLoader.load(rawSchema);
@@ -71,6 +71,7 @@ public final class JSONUtils {
 	    return true;
 	} catch (Exception e) {
 	    logger.error("There is error validation input against JSON schema:" + e.getMessage());
+	    System.out.println("Exception validating with json schema:"+e.getMessage());
 	    return false;
 	}
     }
