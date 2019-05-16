@@ -68,8 +68,8 @@ public class UpdateController {
     @RequestMapping(value = {
 	    "update/{ediid}" }, method = RequestMethod.POST)
     @ApiOperation(value = ".", nickname = "Cache Record Changes", notes = "Resource returns a record if it is editable and user is authenticated.")
-    public boolean updateRecord(@PathVariable @Valid String ediid,
-	    @Valid @RequestBody String params) {
+    public Document updateRecord(@PathVariable @Valid String ediid,
+	    @Valid @RequestBody String params)  throws CustomizationException {
 	logger.info("Update the given record: "+ ediid);
 	return uRepo.update(params, ediid);
 	
@@ -78,7 +78,7 @@ public class UpdateController {
     @RequestMapping(value = {
 	    "save/{ediid}" }, method = RequestMethod.POST)
     @ApiOperation(value = ".", nickname = "Save changes to server", notes = "Resource returns a boolean based on success or failure of the request.")
-    public Document saveRecord(@PathVariable @Valid String ediid,  @Valid @RequestBody String params) throws IOException {
+    public Document saveRecord(@PathVariable @Valid String ediid,  @Valid @RequestBody String params) throws CustomizationException {
 	logger.info("Send updated record to mdserver:"+ediid);
 	return uRepo.save(ediid, params);
 //	RestTemplate restTemplate = new RestTemplate();

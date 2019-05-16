@@ -13,15 +13,17 @@
 package gov.nist.oar.custom.updateapi.exceptions;
 
 /**
+ * A base or generic exception for problems specific to customization api related errors
  * @author Deoyani Nandrekar-Heinis
  *
  */
 
-
-/**
- * a base or generic exception for problems specific to customization api related errors
- */
 public class CustomizationException extends Exception {
+
+    /**
+     * 
+     */
+    private static final long serialVersionUID = -3549633360117422044L;
 
     /**
      * Create an exception with an arbitrary message

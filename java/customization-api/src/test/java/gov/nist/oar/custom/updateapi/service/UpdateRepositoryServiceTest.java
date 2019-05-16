@@ -18,7 +18,10 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
 import com.mongodb.MongoClient;
+import com.mongodb.client.MongoCollection;
 import com.mongodb.util.FongoJSON;
+
+import gov.nist.oar.custom.updateapi.repositories.UpdateRepository;
 
 import java.io.File;
 import java.io.FileReader;
@@ -38,6 +41,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
@@ -45,69 +50,71 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
  * @author Deoyani Nandrekar-Heinis
  *
  */
-@RunWith(SpringJUnit4ClassRunner.class)
+//@RunWith(SpringJUnit4ClassRunner.class)
+
 public class UpdateRepositoryServiceTest {
     private Logger logger = LoggerFactory.getLogger(UpdateRepositoryServiceTest.class);
 
     @Rule
     public FongoRule fongoRule = new FongoRule();
-    DBCollection recordsCollection, changesCollection;
+    //DBCollection recordsCollection, changesCollection;
 
     @Before
     public void initIt() throws Exception {
+	
 
-	recordsCollection = fongoRule.getDB("TestDBtemp").getCollection("recordstest");
-	JSONParser parser = new JSONParser();
-	JSONArray a;
-	File file = new File(this.getClass().getClassLoader().getResource("record.json").getFile());
-	try {
-	    a = (JSONArray) parser.parse(new FileReader(file));
-	    for (Object o : a) {
-		// System.out.println(o.toString());
-		DBObject dbObject = (DBObject) com.mongodb.util.JSON.parse(o.toString());
-		recordsCollection.save(dbObject);
-	    }
-	} catch (IOException | ParseException e) {
-	    // TODO Auto-generated catch block
-	    e.printStackTrace();
-	}
-
-	/// Taxonomy collection;
-	changesCollection = fongoRule.getDB("TestDBtemp").getCollection("changestest");
-	parser = new JSONParser();
-
-	file = new File(this.getClass().getClassLoader().getResource("changes.json").getFile());
-	try {
-	    a = (JSONArray) parser.parse(new FileReader(file));
-	    for (Object o : a) {
-		// System.out.println(o.toString());
-		DBObject dbObject = (DBObject) com.mongodb.util.JSON.parse(o.toString());
-		changesCollection.save(dbObject);
-	    }
-	} catch (IOException | ParseException e) {
-	    // TODO Auto-generated catch block
-	    e.printStackTrace();
-	}
+//	recordsCollection = fongoRule.getDB("TestDBtemp").getCollection("recordstest");
+//	JSONParser parser = new JSONParser();
+//	JSONArray a;
+//	File file = new File(this.getClass().getClassLoader().getResource("record.json").getFile());
+//	try {
+//	    a = (JSONArray) parser.parse(new FileReader(file));
+//	    for (Object o : a) {
+//		// System.out.println(o.toString());
+//		DBObject dbObject = (DBObject) com.mongodb.util.JSON.parse(o.toString());
+//		recordsCollection.save(dbObject);
+//	    }
+//	} catch (IOException | ParseException e) {
+//	    // TODO Auto-generated catch block
+//	    e.printStackTrace();
+//	}
+//
+//	/// Taxonomy collection;
+//	changesCollection = fongoRule.getDB("TestDBtemp").getCollection("changestest");
+//	parser = new JSONParser();
+//
+//	file = new File(this.getClass().getClassLoader().getResource("changes.json").getFile());
+//	try {
+//	    a = (JSONArray) parser.parse(new FileReader(file));
+//	    for (Object o : a) {
+//		// System.out.println(o.toString());
+//		DBObject dbObject = (DBObject) com.mongodb.util.JSON.parse(o.toString());
+//		changesCollection.save(dbObject);
+//	    }
+//	} catch (IOException | ParseException e) {
+//	    // TODO Auto-generated catch block
+//	    e.printStackTrace();
+//	}
     }
 
-    // Functions to help test
-    private DBObject dbObject(Bson bson) {
-	if (bson == null) {
-	    return null;
-	}
-
-	// TODO Performance killer
-	return (DBObject) FongoJSON
-		.parse(bson.toBsonDocument(Document.class, MongoClient.getDefaultCodecRegistry()).toString());
-    }
-
-
-    
+//    // Functions to help test
+//    private DBObject dbObject(Bson bson) {
+//	if (bson == null) {
+//	    return null;
+//	}
+//
+//	// TODO Performance killer
+//	return (DBObject) FongoJSON
+//		.parse(bson.toBsonDocument(Document.class, MongoClient.getDefaultCodecRegistry()).toString());
+//    }
+//
     @Test
-  public void getData(){
-  
- 
-  }
+    public void getData() {
+
+	DataOperations accessData = new DataOperations();
+//	accessData.checkRecordInCache("", (MongoCollection<Document>) recordsCollection);
+
+    }
 }
 
 /// **

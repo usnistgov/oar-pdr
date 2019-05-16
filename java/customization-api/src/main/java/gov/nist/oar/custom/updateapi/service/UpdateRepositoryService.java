@@ -22,11 +22,13 @@ import org.springframework.stereotype.Service;
 import com.mongodb.client.MongoCollection;
 
 import gov.nist.oar.custom.updateapi.config.MongoConfig;
+import gov.nist.oar.custom.updateapi.exceptions.CustomizationException;
 import gov.nist.oar.custom.updateapi.repositories.UpdateRepository;
 
 /**
- * UpdateRepository is the service class which takes input from client to edit or update records in cache database.
- * The funtions are written to process 
+ * UpdateRepository is the service class which takes input from client to edit
+ * or update records in cache database. The funtions are written to process
+ * 
  * @author Deoyani Nandrekar-Heinis
  *
  */
@@ -43,23 +45,31 @@ public class UpdateRepositoryService implements UpdateRepository {
     MongoCollection<Document> changesCollection;
     DataOperations accessData = new DataOperations();
 
-//    public UpdateRepositoryService() {
-//	logger.info("Constructor in to set up mdserver, collections and mongo config.");
-//	recordCollection = mconfig.getRecordCollection();
-//	changesCollection = mconfig.getChangeCollection();
-//	accessData = new DataOperations();
-//    }
+    // public UpdateRepositoryService() {
+    // logger.info("Constructor in to set up mdserver, collections and mongo
+    // config.");
+    // recordCollection = mconfig.getRecordCollection();
+    // changesCollection = mconfig.getChangeCollection();
+    // accessData = new DataOperations();
+    // }
 
     /**
      * Update the input json changes by client in the cache mongo database.
+     * 
+     * @throws CustomizationException
      */
     @Override
-    public boolean update(String params, String recordid) {
-	return processInputHelper(params, recordid);
+    public Document update(String params, String recordid) throws CustomizationException {
+	if (processInputHelper(params, recordid))
+	    return accessData.getData(recordid, recordCollection, mdserver);
+	else
+	    throw new CustomizationException("Input Request could not processed successfully.");
     }
 
     /**
-     * Process input json, check against the json schema defined for the specific fields.
+     * Process input json, check against the json schema defined for the
+     * specific fields.
+     * 
      * @param params
      * @param recordid
      * @return
@@ -67,7 +77,7 @@ public class UpdateRepositoryService implements UpdateRepository {
     private boolean processInputHelper(String params, String recordid) {
 	ProcessInputRequest req = new ProcessInputRequest();
 	if (req.validateInputParams(params)) {
-            
+
 	    // this.accessData.checkRecordInCache(recordid, recordCollection);
 	    Document update = Document.parse(params);
 	    update.remove("_id");
@@ -80,8 +90,10 @@ public class UpdateRepositoryService implements UpdateRepository {
     }
 
     /**
-     * UpdateHelper takes input recordid and json input, this function checks if the record is there in cache
-     * If not it pulls record and puts in cache and then update the changes.
+     * UpdateHelper takes input recordid and json input, this function checks if
+     * the record is there in cache If not it pulls record and puts in cache and
+     * then update the changes.
+     * 
      * @param recordid
      * @param update
      * @return
@@ -90,19 +102,18 @@ public class UpdateRepositoryService implements UpdateRepository {
 
 	recordCollection = mconfig.getRecordCollection();
 	changesCollection = mconfig.getChangeCollection();
-	
+
 	if (!this.accessData.checkRecordInCache(recordid, recordCollection))
 	    this.accessData.putDataInCache(recordid, mdserver, recordCollection);
 
 	if (!this.accessData.checkRecordInCache(recordid, changesCollection))
 	    this.accessData.putDataInCacheOnlyChanges(update, changesCollection);
 
-	return  accessData.updateDataInCache(recordid, recordCollection, update) 
+	return accessData.updateDataInCache(recordid, recordCollection, update)
 		&& accessData.updateDataInCache(recordid, changesCollection, update);
-	
+
     }
 
-   
     /**
      * accessing records to edit in the front end.
      */
@@ -114,7 +125,8 @@ public class UpdateRepositoryService implements UpdateRepository {
     }
 
     /**
-     *  Save action can accept changes and save them or just return the updated data from cache.
+     * Save action can accept changes and save them or just return the updated
+     * data from cache.
      */
     @Override
     public Document save(String recordid, String params) {

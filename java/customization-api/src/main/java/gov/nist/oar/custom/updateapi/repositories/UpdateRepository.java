@@ -14,6 +14,8 @@ package gov.nist.oar.custom.updateapi.repositories;
 
 import org.bson.Document;
 
+import gov.nist.oar.custom.updateapi.exceptions.CustomizationException;
+
 /**
  * This is repository is defined to get input json for the record in mongodb, 
  * update cache or save final results by passing it to backend service.
@@ -21,7 +23,7 @@ import org.bson.Document;
  *
  */
 public interface UpdateRepository {
-    public boolean update(String param, String recordid);
+    public Document update(String param, String recordid)  throws CustomizationException;
     public Document edit(String recordid);
-    public Document save(String recordid, String params);
+    public Document save(String recordid, String params) throws CustomizationException;
 }
