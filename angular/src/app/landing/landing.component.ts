@@ -25,6 +25,7 @@ import { trigger, state, style, animate, transition } from '@angular/animations'
 import { ModalService } from '../shared/modal-service';
 // import {DialogService} from 'primeng/api';
 import { DatacartComponent } from '../datacart/datacart.component';
+import { Data } from '../datacart/data';
 
 
 interface reference {
@@ -203,23 +204,28 @@ export class LandingComponent implements OnInit {
         ""
       ]
     };
-    this.tempAuthors = {"authors":[
-      {
-      "familyName": "",
-      "fn": "",
-      "givenName": "",
-      "middleName": "",
-      "affiliation": [
+    this.tempAuthors = {
+      "authors": [
         {
-          "@id": "",
-          "title": "",
+          "familyName": "",
+          "fn": "",
+          "givenName": "",
+          "middleName": "",
+          "affiliation": [
+            {
+              "@id": "",
+              "title": "",
+              "@type": [
+                ""
+              ]
+            }
+          ],
           "orcid": "",
-          "@type": [
-            ""
-          ]
-        }
-      ]
-    }]};
+          "isCollapsed": false,
+          "fnLocked": false,
+          "dataChanged": false
+        }]
+    };
   }
 
   /**
@@ -569,7 +575,8 @@ export class LandingComponent implements OnInit {
                 downloadUrl: path.downloadURL,
                 description: path.description,
                 filetype: path['@type'][0],
-                resId: path["filepath"].replace(/^.*[\\\/]/, ''),
+                resId: tempId,
+                // resId: path["filepath"].replace(/^.*[\\\/]/, ''),
                 filePath: path.filepath,
                 downloadProgress: 0,
                 downloadInstance: null,
@@ -928,7 +935,13 @@ export class LandingComponent implements OnInit {
   *  Open author pop up dialog
   */
   openAuthorModal() {
-    this.tempAuthors.authors = this.record.authors;
+    this.tempAuthors.authors = JSON.parse(JSON.stringify(this.record.authors));
+    // this.tempAuthors.authors = this.record.authors;
+    for (var author in this.tempAuthors.authors) {
+      this.tempAuthors.authors[author].isCollapsed = false;
+      this.tempAuthors.authors[author].fnLocked = false;
+      this.tempAuthors.authors[author].originalIndex = author;
+    }
     console.log("this.tempAuthors");
     console.log(this.tempAuthors);
     this.modalService.open("Author-popup-dialog");
@@ -937,13 +950,155 @@ export class LandingComponent implements OnInit {
   /* 
   *   Save contact info when click on save button in pop up dialog
   */
- saveAuthorInfo() {
-  this.record.authors = this.tempAuthors.authors;
-  // Send update to backend here
-  this.modalService.close('Author-popup-dialog');
-}
+  saveAuthorInfo() {
+    this.record.authors = this.tempAuthors.authors;
+    // Send update to backend here
+    this.modalService.close('Author-popup-dialog');
+  }
 
-  trackByFn(index: any, item: any) {
+  /*
+  *   This function is used to track ngFor loop
+  */
+  trackByFn(index: any, author: any) {
     return index;
+  }
+
+  /*
+  *   Update full name when given name changed
+  */
+  onGivenNameChange(author: any, givenName: string) {
+    author.dataChanged = true;
+    if (!author.fnLocked) {
+      author.fn = givenName + " " + author.middleName + " " + author.familyName;
+    }
+  }
+
+  /*
+  *   Update full name when middle name changed
+  */
+  onMiddleNameChange(author: any, middleName: string) {
+    author.dataChanged = true;
+    if (!author.fnLocked) {
+      author.fn = author.givenName + " " + middleName + " " + author.familyName;
+    }
+  }
+
+  /*
+  *   Update full name when middle name changed
+  */
+  onFamilyNameChange(author: any, familyName: string) {
+    author.dataChanged = true;
+    if (!author.fnLocked) {
+      author.fn = author.givenName + " " + author.middleName + " " + familyName;
+    }
+  }
+
+  /*
+  *   Return header bar background color based on the data status
+  */
+  getHeaderBackgroundColor(author: any) {
+    if (author.dataChanged) {
+      return "green";
+    } else {
+      return "burlywood";
+    }
+  }
+
+  /*
+  *   Return header bar background color based on the data status
+  */
+  getHeaderForegroundColor(author: any) {
+    if (author.dataChanged) {
+      return "white";
+    } else {
+      return "black";
+    }
+  }
+
+  getTitleClass(author: any){
+    if(author.isCollapsed){
+      if(author.dataChanged){
+        return "faa faa-arrow-circle-down icon-white";
+      }else{
+        return "faa faa-arrow-circle-down";
+      }
+    }else{
+      if(author.dataChanged){
+        return "faa faa-arrow-circle-up icon-white";
+      }else{
+        return "faa faa-arrow-circle-up";
+      }     
+    }
+  }
+
+  getTitleImgClass(author){
+    if(author.dataChanged){
+      return "filter-white";
+    }else{
+      return "filter-black";
+    }
+  }
+
+  /*
+  *   Discard current changes to the author, reset to original value
+  */
+  resetAuthor(author: any, i: number) {
+    this.tempAuthors.authors[i] = JSON.parse(JSON.stringify(this.record.authors[this.tempAuthors.authors[i].originalIndex]));
+    author.dataChanged = false;
+    author.fnLocked = false;
+    author.isCollapsed = false;
+  }
+
+  /*
+  *   Move author up
+  */
+  moveAuthorUp(author: any, i: number) {
+    var tempAuth01 = JSON.parse(JSON.stringify(this.tempAuthors.authors[i - 1]));
+    var tempAuth02 = JSON.parse(JSON.stringify(this.tempAuthors.authors[i]));
+    this.tempAuthors.authors[i - 1] = JSON.parse(JSON.stringify(tempAuth02));
+    this.tempAuthors.authors[i] = JSON.parse(JSON.stringify(tempAuth01));
+    author.dataChanged = true;
+  }
+
+  /*
+  *   Move author down
+  */
+  moveAuthorDown(author: any, i: number) {
+    var tempAuth01 = JSON.parse(JSON.stringify(this.tempAuthors.authors[i + 1]));
+    var tempAuth02 = JSON.parse(JSON.stringify(this.tempAuthors.authors[i]));
+    this.tempAuthors.authors[i + 1] = JSON.parse(JSON.stringify(tempAuth02));
+    this.tempAuthors.authors[i] = JSON.parse(JSON.stringify(tempAuth01));
+    author.dataChanged = true;
+  }
+
+  /*
+  *   Remove author from the list
+  */
+  deleteAuthor(author: any) {
+    this.tempAuthors.authors = this.tempAuthors.authors.filter(obj => obj !== author);
+  }
+
+  /*
+  *   Add affiliation to an author
+  */
+  addAffiliation(i: number) {
+    var aff = {
+      "@id": "",
+      "title": "",
+      "@type": [
+        ""
+      ]
+    };
+
+    this.tempAuthors.authors[i].affiliation.push(aff);
+    this.tempAuthors.authors[i].dataChanged = true;
+  }
+
+  /*
+  *   Remove one affiliation from an author
+  */
+  deleteAffiliation(i: number, aff: any) {
+    this.tempAuthors.authors[i].affiliation = this.tempAuthors.authors[i].affiliation.filter(obj => obj !== aff);
+    this.tempAuthors.authors[i].dataChanged = true;
   }
 }

@@ -734,11 +734,18 @@ export class DatacartComponent implements OnInit, OnDestroy {
       return result;
     }, {});
 
+    console.log("arrayList");
+    console.log(JSON.stringify(arrayList));
+
     var noFileDownloadedFlag = true;
     this.dataFiles = [];
     this.totalDownloaded = 0;
     let parentObj: TreeNode = {};
+    
+    console.log("this.dataFiles1");
+    console.log(this.dataFiles);
 
+    var iii: number = 0;
     for (var key in arrayList) {
       // let resId = key;
       if (arrayList.hasOwnProperty(key)) {
@@ -752,7 +759,6 @@ export class DatacartComponent implements OnInit, OnDestroy {
         for (let fields of arrayList[key]) {
           let resId = fields.data.resId;
           let ediid = fields.data.ediid;
-
           let fpath = fields.data.filePath.split("/");
           if (fpath.length > 0) {
             let child2: TreeNode = {};
@@ -765,9 +771,13 @@ export class DatacartComponent implements OnInit, OnDestroy {
                 this.totalDownloaded += 1;
                 noFileDownloadedFlag = false;
               }
+              // if (iii == 151) {
+              //   console.log("fields");
+              //   console.log(fields);
+              // }
               /// Added this code to avoid the issue of extra file layers in the datacart
               if (fpath[path] !== "") {
-                child2 = this.createDataCartChildrenTree(
+                child2 = this.createDataCartChildrenTree(iii,
                   "/" + fpath[path],
                   fields.data.cartId,
                   resId, ediid,
@@ -782,14 +792,27 @@ export class DatacartComponent implements OnInit, OnDestroy {
                   fields.data.fileSize,
                   fields.data.message
                 );
+
                 parent.children.push(child2);
 
                 parent = child2;
+
+                // if (iii == 151) {
+                // console.log("parent");
+                // console.log(parent);
+                // }
+                iii = iii + 1;
               }
             }
           }
         }
         this.walkData(parentObj, parentObj, 0);
+
+        console.log("this.dataFiles2");
+        console.log(this.dataFiles);
+        console.log("parentObj");
+        console.log(parentObj);
+
         this.dataFiles.push(parentObj);
 
         this.index = {};
@@ -848,8 +871,12 @@ export class DatacartComponent implements OnInit, OnDestroy {
   /**
    * Create data hierarchy for children
    */
-  createDataCartChildrenTree(path: string, cartId: string, resId: string, ediid: string, resTitle: string, downloadUrl: string, resFilePath: string, downloadStatus: string, mediatype: string, description: string, filetype: string, isSelected: boolean, fileSize: any, message: string) {
+  createDataCartChildrenTree(iii: number, path: string, cartId: string, resId: string, ediid: string, resTitle: string, downloadUrl: string, resFilePath: string, downloadStatus: string, mediatype: string, description: string, filetype: string, isSelected: boolean, fileSize: any, message: string) {
     let child1: TreeNode = {};
+    // if (iii == 151) {
+    //   console.log("child1");
+    //   console.log(child1);
+    // }
     child1 = {
       data: {
         'filePath': path,
@@ -869,7 +896,10 @@ export class DatacartComponent implements OnInit, OnDestroy {
       }
 
     };
-
+    // if (iii == 151) {
+    //   console.log("child1");
+    //   console.log(child1);
+    // }
     child1.children = [];
     return child1;
   }
@@ -1025,9 +1055,9 @@ export class DatacartComponent implements OnInit, OnDestroy {
     return style;
   }
 
-/*
-* Make sure the width of popup dialog is less than 500px or 80% of the window width
-*/
+  /*
+  * Make sure the width of popup dialog is less than 500px or 80% of the window width
+  */
   getDialogWidth() {
     var w = window.innerWidth > 500 ? 500 : window.innerWidth;
     console.log(w);

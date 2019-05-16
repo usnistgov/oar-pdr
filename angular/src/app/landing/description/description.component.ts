@@ -492,6 +492,8 @@ export class DescriptionComponent {
       if (comp.children.length > 0) {
         compValue += this.addFilesToCart(comp.children, isSelected, mode);
       } else {
+        console.log("comp.data");
+        console.log(comp.data);
         this.addtoCart(comp.data, isSelected, mode).then(function (result) {
           compValue = 1;
         }.bind(this), function (err) {

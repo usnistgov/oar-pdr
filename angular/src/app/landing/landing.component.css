@@ -606,6 +606,10 @@
   margin: 0.1em;
 }
 
-table, tr, td {
-  /* border: opx solid black; */
+.filter-black{
+  filter: invert(0);
+}
+
+.filter-white{
+  filter: invert(1);
 }
