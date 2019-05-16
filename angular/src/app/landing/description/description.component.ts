@@ -160,7 +160,7 @@ export class DescriptionComponent {
         downloadUrl: null,
         description: null,
         filetype: null,
-        resId: "files",
+        resId: "/",
         filePath: "/",
         downloadProgress: 0,
         downloadInstance: null,
