@@ -67,20 +67,22 @@
 			<artifactId>org.everit.json.schema</artifactId>
 			<version>1.5.1</version>
 		</dependency>
-		<!-- https://mvnrepository.com/artifact/com.github.fakemongo/fongo -->
-		<dependency>
-			<groupId>com.github.fakemongo</groupId>
-			<artifactId>fongo</artifactId>
-			<version>2.2.0-RC2</version>
-			<scope>test</scope>
-		</dependency>
-
-<!-- https://mvnrepository.com/artifact/org.mongodb/mongo-java-driver -->
+		<!-- https://mvnrepository.com/artifact/org.powermock/powermock-module-junit4 -->
 <dependency>
-    <groupId>org.mongodb</groupId>
-    <artifactId>mongo-java-driver</artifactId>
-    <version>3.10.2</version>
+    <groupId>org.powermock</groupId>
+    <artifactId>powermock-module-junit4</artifactId>
+    <version>2.0.2</version>
+    <scope>test</scope>
 </dependency>
+
+<!-- https://mvnrepository.com/artifact/org.powermock/powermock-api-mockito2 -->
+<dependency>
+    <groupId>org.powermock</groupId>
+    <artifactId>powermock-api-mockito2</artifactId>
+    <version>2.0.2</version>
+    <scope>test</scope>
+</dependency>
+
 
 
 		<!-- https://mvnrepository.com/artifact/com.googlecode.json-simple/json-simple -->
@@ -90,13 +92,7 @@
 			<version>1.1.1</version>
 		</dependency>
 
-		<!-- https://mvnrepository.com/artifact/junit/junit -->
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<version>4.8</version>
-			<scope>test</scope>
-		</dependency>
+		
 
 
 	</dependencies>

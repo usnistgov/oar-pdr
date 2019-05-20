@@ -1,13 +1,4 @@
 {
-    "_id" : {
-        "timestamp" : 1521220572,
-        "machineIdentifier" : 3325465,
-        "processIdentifier" : 311,
-        "counter" : 8877727,
-        "time" : NumberLong(1521220572000),
-        "date" : NumberLong(1521220572000),
-        "timeSecond" : 1521220572
-    },
     "_schema" : "https://data.nist.gov/od/dm/nerdm-schema/v0.1#",
     "topic" : [ 
         {
@@ -20,7 +11,7 @@
         "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/PublicDataResource"
     ],
     "landingPage" : "http://ilthermo.boulder.nist.gov/index.html",
-    "title" : "New Title Update Test May 7",
+    "title" : "New Title Update Test May 14",
     "theme" : [ 
         "Reference data"
     ],
@@ -53,7 +44,7 @@
             "@base" : "ark:/88434/mds00xdk4z"
         }
     ],
-    "description" : "Old description",
+    "description" : "new description update tests",
     "language" : [ 
         "en"
     ],

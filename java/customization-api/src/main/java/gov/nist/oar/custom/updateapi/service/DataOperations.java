@@ -53,11 +53,8 @@ public class DataOperations {
 	    log.error("Input record id is not valid,, check input parameters.");
 	    throw new IllegalArgumentException("check input parameters.");
 	}
-
-	@SuppressWarnings("deprecation")
 	long count = mcollection.count(Filters.eq("ediid", recordid));
 	return count != 0;
-
     }
 
     /**
@@ -151,7 +148,6 @@ public class DataOperations {
 	update.append("_updateDate", now);
 	Document tempUpdateOp = new Document("$set", update);
 	tempUpdateOp.remove("_id");
-	
 	//BasicDBObject timeNow = new BasicDBObject("date", now);
 	UpdateResult updates = mcollection.updateOne(Filters.eq("ediid", recordid), tempUpdateOp);
 	return updates != null;

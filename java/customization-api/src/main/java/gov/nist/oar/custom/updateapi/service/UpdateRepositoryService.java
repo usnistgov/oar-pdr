@@ -27,10 +27,8 @@ import gov.nist.oar.custom.updateapi.repositories.UpdateRepository;
 
 /**
  * UpdateRepository is the service class which takes input from client to edit
- * or update records in cache database. The funtions are written to process
- * 
+ * or update records in cache database. The funtions are written to process 
  * @author Deoyani Nandrekar-Heinis
- *
  */
 @Service
 public class UpdateRepositoryService implements UpdateRepository {
@@ -45,13 +43,6 @@ public class UpdateRepositoryService implements UpdateRepository {
     MongoCollection<Document> changesCollection;
     DataOperations accessData = new DataOperations();
 
-    // public UpdateRepositoryService() {
-    // logger.info("Constructor in to set up mdserver, collections and mongo
-    // config.");
-    // recordCollection = mconfig.getRecordCollection();
-    // changesCollection = mconfig.getChangeCollection();
-    // accessData = new DataOperations();
-    // }
 
     /**
      * Update the input json changes by client in the cache mongo database.
