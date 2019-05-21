@@ -14,7 +14,7 @@ set a default value if one is not provided in the configuration
 
 An `AppConfig` instance is created via a `ConfigService` instance.  The
 [`ConfigService`](config.service.tst) class itself is abstract, and the
-various implementing sublcasses use different techniques for loading the
+various implementing subclasses use different techniques for loading the
 configuration data, depending on the runtime mode.  A factory function,
 `newConfigService()`, detects the current mode and instantiates the
 appropriate implementation class.  The different modes are intended to support
@@ -39,12 +39,12 @@ the following runtime scenarios:
        rending is working properly.  The application runs both on the server
        and (then) in the browser and is initiated via the command,
        <code>npm run serve:ssr</code>.  In this setup, the server gets its
-       configuration data from the `config` object hard-coded into
+       configuration data from the <code>config</code> object hard-coded into
        <code><a href="../../environments/environment.prod.ts">environments/environment.prod.ts</a></code>
        at build-time (i.e. before running, <code>npm run build:ssr</code>).  This
-       configuration data is delivered to browser-side app via
+       configuration data is delivered to the browser-side app via
        Angular's <code>TransferState</code> mechanism.
-       <p>
+       <br><br>
        Like with the previous scenario, the developer is free to edit
        the <code>environment.prod.ts</code> file (but not check it in); however,
        the developer might find using the <code>PDR_CONFIG_FILE</code>, described
@@ -58,7 +58,7 @@ the following runtime scenarios:
        will first retrieve the configuration from the config service
        and write it to a file on disk.  It sets the location of that
        file into the <code>PDR_CONFIG_FILE</code> environment variable.  This
-       will trigger the `ConfigService` factory function in the
+       will trigger the <code>ConfigService</code> factory function in the
        server-side app to instantiate a <code>ServerFileConfigService</code>
        instance, which loads the configuration from that file.  </dd>
 </dl>
