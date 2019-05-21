@@ -469,7 +469,7 @@ export class LandingComponent implements OnInit {
                 downloadUrl: path.downloadURL,
                 description: path.description,
                 filetype: path['@type'][0],
-                resId: path["filepath"].replace(/^.*[\\\/]/, ''),
+                resId: tempId,
                 filePath: path.filepath,
                 downloadProgress: 0,
                 downloadInstance: null,
