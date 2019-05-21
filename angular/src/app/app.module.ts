@@ -27,7 +27,6 @@ import { SearchResolve } from './landing/search-service.resolve';
 import { SharedModule } from './shared/shared.module';
 import { SearchService } from './shared/search-service/index';
 import { CommonVarService } from './shared/common-var/index';
-import { AppConfig } from './shared/config-service/config.service';
 import { DatacartComponent } from './datacart/datacart.component';
 import { CartService } from "./datacart/cart.service";
 import { AppShellNoRenderDirective } from './directives/app-shell-no-render.directive';
@@ -55,16 +54,6 @@ import { AppRoutingModule } from './app-routing.module';
 enableProdMode();
 // used to create fake backend
 import { fakeBackendProvider } from './_helpers/fakeBackendInterceptor';
-
-/**
- * Initialize the configs for backend services
- */
-const appInitializerFn = (appConfig: AppConfig) => {
-  return () => {
-    //console.log("**** CAlling APP Initialization ***");
-    return appConfig.loadAppConfig();
-  };
-};
 
 @NgModule({
   declarations: [
@@ -98,17 +87,10 @@ const appInitializerFn = (appConfig: AppConfig) => {
     SearchResolve,
     CommonVarService,
     CartService,
-    AppConfig,
     DownloadService,
     TestDataService,
     ConfirmationService,
-    CommonFunctionService,
-    {
-      provide: APP_INITIALIZER,
-      useFactory: appInitializerFn,
-      multi: true,
-      deps: [AppConfig]
-    },
+    CommonFunctionService
     // provider used to create fake backend
     // fakeBackendProvider
   ],
@@ -116,12 +98,6 @@ const appInitializerFn = (appConfig: AppConfig) => {
 })
 
 export class AppModule {
-  constructor(
-    @Inject(PLATFORM_ID) private platformId: Object,
-    @Inject(APP_ID) private appId: string) {
-    const platform = isPlatformBrowser(platformId) ?
-      'in the browser' : 'on the server';
-  }
 }
 
 
