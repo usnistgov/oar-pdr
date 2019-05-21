@@ -37,6 +37,7 @@ export class DescriptionComponent {
   @Input() editContent: boolean;
   @Input() filescount: number;
   @Input() metadata: boolean;
+  @Input() inBrowser : boolean;   // false if running server-side
 
   addAllFileSpinner: boolean = false;
   fileDetails: string = '';

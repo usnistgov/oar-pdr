@@ -127,6 +127,7 @@ export class LandingComponent implements OnInit {
   isLocalProcessing: boolean = false;
   isLoading: boolean = true;
   HomePageLink: boolean = false;
+  inBrowser : boolean = false;  
 
   /**
    * Creates an instance of the SearchPanel
@@ -140,6 +141,7 @@ export class LandingComponent implements OnInit {
               private searchService: SearchService,
               private commonVarService: CommonVarService)
   {
+    this.inBrowser = isPlatformBrowser(platformId);
   }
 
   /**
