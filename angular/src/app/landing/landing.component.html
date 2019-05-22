@@ -158,7 +158,8 @@
               <description-resources [record]="record" [files]="files" [distdownload]="distdownload"
                                      [isInternal]="isInternal" [filescount]="filescount" [inBrowser]="inBrowser"
                                      [metadata]="metadata"></description-resources>
-              <metadata-detail [record]="record" [serviceApi]="serviceApi" [metadata]="metadata"></metadata-detail>
+              <metadata-detail [record]="record" [serviceApi]="serviceApi" [inBrowser]="inBrowser"
+                               [metadata]="metadata"></metadata-detail>
               <!-- <data-cart></data-cart>   -->
             </div>
             <div *ngIf="record.length !== 0 && inBrowser">
