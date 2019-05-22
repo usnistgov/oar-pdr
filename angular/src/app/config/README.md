@@ -13,7 +13,7 @@ set a default value if one is not provided in the configuration
 (e.g. `cfg.get("location.distService", "/od/ds")`).
 
 An `AppConfig` instance is created via a `ConfigService` instance.  The
-[`ConfigService`](config.service.tst) class itself is abstract, and the
+[`ConfigService`](config.service.ts) class itself is abstract, and the
 various implementing subclasses use different techniques for loading the
 configuration data, depending on the runtime mode.  A factory function,
 `newConfigService()`, detects the current mode and instantiates the
