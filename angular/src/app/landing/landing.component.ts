@@ -175,6 +175,7 @@ export class LandingComponent implements OnInit {
   contactObj: any;
   tempContactPoint: any;
   tempAuthors: any;
+  isAuthorCollapsed: boolean = false;
 
   /**
    * Creates an instance of the SearchPanel
@@ -204,28 +205,7 @@ export class LandingComponent implements OnInit {
         ""
       ]
     };
-    this.tempAuthors = {
-      "authors": [
-        {
-          "familyName": "",
-          "fn": "",
-          "givenName": "",
-          "middleName": "",
-          "affiliation": [
-            {
-              "@id": "",
-              "title": "",
-              "@type": [
-                ""
-              ]
-            }
-          ],
-          "orcid": "",
-          "isCollapsed": false,
-          "fnLocked": false,
-          "dataChanged": false
-        }]
-    };
+    this.tempAuthors = this.getBlankAuthor();
   }
 
   /**
@@ -275,6 +255,11 @@ export class LandingComponent implements OnInit {
         this.commonVarService.setContentReady(true);
         // throw new ErrorComponent(this.route);
       });
+
+    //Show edit box if in edit mode
+    this.setTitleEditbox(false);
+    this.setContactEditbox(false);
+    this.setAuthorEditbox(false);
   }
 
   /*
@@ -764,13 +749,26 @@ export class LandingComponent implements OnInit {
   }
 
   /*
-  *  When mouse over title
+  *  When mouse over title - disabled for now in case we need it later
   */
   titleMouseover() {
-    if (!this.titleObj.detailEditmode) {
+    // if (!this.titleObj.detailEditmode) {
+    //   this.setTitleEditbox(true);
+    // }
+  }
+
+  /*
+  *  show/hide title edit box
+  */
+  setTitleEditbox(mode: boolean) {
+    if (mode) {
       this.titleObj.buttonOpacity = 1;
       this.titleObj.borderStyle = "1px solid lightgrey";
       this.titleObj.currentState = 'final';
+    } else {
+      this.titleObj.buttonOpacity = 0;
+      this.titleObj.borderStyle = "0px solid lightgrey";
+      this.titleObj.currentState = 'initial';
     }
   }
 
@@ -779,11 +777,9 @@ export class LandingComponent implements OnInit {
   */
   titleMouseout() {
     // console.log("title Mouseout...");
-    if (!this.titleObj.detailEditmode) {
-      this.titleObj.buttonOpacity = 0;
-      this.titleObj.borderStyle = "0px solid lightgrey";
-      this.titleObj.currentState = 'initial';
-    }
+    // if (!this.titleObj.detailEditmode) {
+    //   this.setTitleEditbox(false);
+    // }
   }
 
   /*
@@ -792,6 +788,9 @@ export class LandingComponent implements OnInit {
   setRecordEditmode(mode: any) {
     this.recordEditmode = mode;
     this.commonVarService.setEditMode(mode);
+    this.setTitleEditbox(mode);
+    this.setContactEditbox(mode);
+    this.setAuthorEditbox(mode);
   }
 
   /*
@@ -800,7 +799,7 @@ export class LandingComponent implements OnInit {
   saveRecord() {
     // Send save request to back end
     // ...
-    this.recordEditmode = false;
+    this.setRecordEditmode(false);
     this.commonVarService.setEditMode(false);
   }
 
@@ -836,38 +835,55 @@ export class LandingComponent implements OnInit {
   }
 
   /*
-  *  When mouse over contact
+  *  When mouse over contact - disabled but leave the code here just in case
   */
   contactMouseover() {
-    if (this.recordEditmode) {
-      if (!this.contactObj.detailEditmode) {
-        this.contactObj.buttonOpacity = 1;
-        this.contactObj.borderStyle = "1px solid lightgrey";
-        this.contactObj.currentState = 'final';
-      }
+    // if (this.recordEditmode) {
+    //   if (!this.contactObj.detailEditmode) {
+    //     this.setContactEditbox(true);
+    //   }
+    // }
+  }
+
+  /*
+  *  Display contact edit box
+  */
+  setContactEditbox(mode: boolean) {
+    if (mode) {
+      this.contactObj.buttonOpacity = 1;
+      this.contactObj.borderStyle = "1px solid lightgrey";
+      this.contactObj.currentState = 'final';
+    } else {
+      this.contactObj.buttonOpacity = 0;
+      this.contactObj.borderStyle = "0px solid lightgrey";
+      this.contactObj.currentState = 'initial';
     }
   }
 
   /*
-  *  When mouse leaves contact
+  *  When mouse leaves contact c
   */
   contactMouseout() {
-    if (this.recordEditmode) {
-      if (!this.contactObj.detailEditmode) {
-        this.contactObj.buttonOpacity = 0;
-        this.contactObj.borderStyle = "0px solid lightgrey";
-        this.contactObj.currentState = 'initial';
-      }
-    }
+    // if (this.recordEditmode) {
+    //   if (!this.contactObj.detailEditmode) {
+    //     this.setContactEditbox(false);
+    //   }
+    // }
   }
 
   /*
   *  Open contact pop up dialog
   */
   openContactModal(id: string) {
-    this.tempContactPoint = this.record.contactPoint;
-    console.log("this.tempContactPoint");
-    console.log(this.tempContactPoint);
+    if (this.record.contactPoint != null && this.record.contactPoint != undefined) {
+      this.tempContactPoint = JSON.parse(JSON.stringify(this.record.contactPoint));
+    } else {
+      this.tempContactPoint = this.getBlankContact();
+    }
+    
+    // strip off "mailto:"
+    this.tempContactPoint.hasEmail = this.tempContactPoint.hasEmail.split(":")[1];
+
     this.modalService.open(id);
   }
 
@@ -878,11 +894,33 @@ export class LandingComponent implements OnInit {
     this.modalService.close(id);
   }
 
+  /*
+  *   Determine if a given value is empty
+  */
+  emptyString(e: any) {
+    switch (e) {
+      case "":
+      case 0:
+      case "0":
+      case null:
+      case false:
+      case typeof this == "undefined":
+        return true;
+      default:
+        return false;
+    }
+  }
+
   /* 
   *   Save contact info when click on save button in pop up dialog
   */
   saveContactInfo() {
-    this.record.contactPoint = this.tempContactPoint;
+    // Add "mailto:" back
+    if(!this.emptyString(this.tempContactPoint.hasEmail)){
+      if(this.tempContactPoint.hasEmail.split(":")[0] != "mailto")
+        this.tempContactPoint.hasEmail = "mailto:" + this.tempContactPoint.hasEmail;
+    }
+    this.record.contactPoint = JSON.parse(JSON.stringify(this.tempContactPoint));
     // Send update to backend here
     this.modalService.close('Contact-popup-dialog');
   }
@@ -906,36 +944,51 @@ export class LandingComponent implements OnInit {
   }
 
   /*
-  *  When mouse over authors
+  *  When mouse over authors - disabled but leave the code here just in case
   */
   authorMouseover() {
-    if (this.recordEditmode) {
-      if (!this.authorObj.detailEditmode) {
-        this.authorObj.buttonOpacity = 1;
-        this.authorObj.borderStyle = "1px solid lightgrey";
-        this.authorObj.currentState = 'final';
-      }
+    // if (this.recordEditmode) {
+    //   if (!this.authorObj.detailEditmode) {
+    //     this.setAuthorEditbox(true);
+    //   }
+    // }
+  }
+
+  /*
+  *  show/hide authors edit box
+  */
+  setAuthorEditbox(mode: boolean) {
+    if (mode) {
+      this.authorObj.buttonOpacity = 1;
+      this.authorObj.borderStyle = "1px solid lightgrey";
+      this.authorObj.currentState = 'final';
+    } else {
+      this.authorObj.buttonOpacity = 0;
+      this.authorObj.borderStyle = "0px solid lightgrey";
+      this.authorObj.currentState = 'initial';
     }
   }
 
   /*
-  *  When mouse leaves authors
+  *  When mouse leaves authors - disabled but leave the code here just in case
   */
   authorMouseout() {
-    if (this.recordEditmode) {
-      if (!this.authorObj.detailEditmode) {
-        this.authorObj.buttonOpacity = 0;
-        this.authorObj.borderStyle = "0px solid lightgrey";
-        this.authorObj.currentState = 'initial';
-      }
-    }
+    // if (this.recordEditmode) {
+    //   if (!this.authorObj.detailEditmode) {
+    //     this.setAuthorEditbox(false);
+    //   }
+    // }
   }
 
   /*
   *  Open author pop up dialog
   */
   openAuthorModal() {
-    this.tempAuthors.authors = JSON.parse(JSON.stringify(this.record.authors));
+    if (this.record.authors != null && this.record.authors != undefined) {
+      this.tempAuthors.authors = JSON.parse(JSON.stringify(this.record.authors));
+    } else {
+      this.tempAuthors = this.getBlankAuthor();
+    }
     // this.tempAuthors.authors = this.record.authors;
     for (var author in this.tempAuthors.authors) {
       this.tempAuthors.authors[author].isCollapsed = false;
@@ -952,6 +1005,8 @@ export class LandingComponent implements OnInit {
   */
   saveAuthorInfo() {
     this.record.authors = this.tempAuthors.authors;
+    for (var author in this.record.authors)
+      this.record.authors[author].dataChanged = false;
     // Send update to backend here
     this.modalService.close('Author-popup-dialog');
   }
@@ -969,7 +1024,7 @@ export class LandingComponent implements OnInit {
   onGivenNameChange(author: any, givenName: string) {
     author.dataChanged = true;
     if (!author.fnLocked) {
-      author.fn = givenName + " " + author.middleName + " " + author.familyName;
+      author.fn = givenName + " " + (author.middleName == undefined ? " " : author.middleName + " ") + (author.familyName == undefined ? "" : author.familyName);
     }
   }
 
@@ -979,7 +1034,7 @@ export class LandingComponent implements OnInit {
   onMiddleNameChange(author: any, middleName: string) {
     author.dataChanged = true;
     if (!author.fnLocked) {
-      author.fn = author.givenName + " " + middleName + " " + author.familyName;
+      author.fn = (author.givenName == undefined ? " " : author.givenName + " ") + middleName + " " + (author.familyName == undefined ? "" : author.familyName);
     }
   }
 
@@ -989,10 +1044,19 @@ export class LandingComponent implements OnInit {
   onFamilyNameChange(author: any, familyName: string) {
     author.dataChanged = true;
     if (!author.fnLocked) {
-      author.fn = author.givenName + " " + author.middleName + " " + familyName;
+      author.fn = (author.givenName == undefined ? " " : author.givenName + " ") + (author.middleName == undefined ? " " : author.middleName + " ") + familyName;
     }
   }
 
+  /*
+  *   Lock full name when full name changed
+  */
+  onFullNameChange(author: any, familyName: string) {
+    author.dataChanged = true;
+    if (!author.fnLocked) {
+      author.fnLocked = true;
+    }
+  }
   /*
   *   Return header bar background color based on the data status
   */
@@ -1015,27 +1079,75 @@ export class LandingComponent implements OnInit {
     }
   }
 
-  getTitleClass(author: any){
-    if(author.isCollapsed){
-      if(author.dataChanged){
+  /*
+  *   Return icon class based on collapse status
+  */
+  getTitleClass(author: any) {
+    if (author.isCollapsed) {
+      if (author.dataChanged) {
         return "faa faa-arrow-circle-down icon-white";
-      }else{
+      } else {
         return "faa faa-arrow-circle-down";
       }
-    }else{
-      if(author.dataChanged){
+    } else {
+      if (author.dataChanged) {
         return "faa faa-arrow-circle-up icon-white";
-      }else{
+      } else {
         return "faa faa-arrow-circle-up";
-      }     
+      }
     }
   }
 
-  getTitleImgClass(author){
-    if(author.dataChanged){
+  /*
+  *   Set image color
+  */
+  getTitleImgClass(author) {
+    if (author.dataChanged) {
       return "filter-white";
-    }else{
+    } else {
       return "filter-black";
+    }
+  }
+
+  /*
+  *   Return a blank author
+  */
+  getBlankAuthor() {
+    return {
+      "authors": [
+        {
+          "familyName": "",
+          "fn": "",
+          "givenName": "",
+          "middleName": "",
+          "affiliation": [
+            {
+              "@id": "",
+              "title": "",
+              "dept": "",
+              "@type": [
+                ""
+              ]
+            }
+          ],
+          "orcid": "",
+          "isCollapsed": false,
+          "fnLocked": false,
+          "dataChanged": false
+        }]
+    };
+  }
+
+  /*
+  *   Return a blank contact point
+  */
+  getBlankContact(){
+    return {
+      "fn": "",
+      "hasEmail": "",
+      "address": [
+        ""
+      ]
     }
   }
 
@@ -1072,11 +1184,41 @@ export class LandingComponent implements OnInit {
   }
 
   /*
+  *   Add author
+  */
+  addAuthor() {
+    var newAuthor = this.getBlankAuthor();
+    this.tempAuthors.authors.push(newAuthor);
+  }
+
+  /*
   *   Remove author from the list
   */
   deleteAuthor(author: any) {
     this.tempAuthors.authors = this.tempAuthors.authors.filter(obj => obj !== author);
   }
+
+  /*
+  *   Return icon class based on collapse status (top level)
+  */
+  getAuthorClass() {
+    if (this.isAuthorCollapsed) {
+      return "faa faa-arrow-circle-down icon-white";
+    } else {
+      return "faa faa-arrow-circle-up icon-white";
+    }
+  }
+
+  /*
+  *   Show/hide author details
+  */
+  handleAuthorDisplay(){
+    this.isAuthorCollapsed = !this.isAuthorCollapsed;
+    for(var author in this.tempAuthors.authors){
+      this.tempAuthors.authors[author].isCollapsed = this.isAuthorCollapsed;
+    }
+  }
+
 
   /*
   *   Add affiliation to an author
@@ -1085,6 +1227,7 @@ export class LandingComponent implements OnInit {
     var aff = {
       "@id": "",
       "title": "",
+      "dept": "",
       "@type": [
         ""
       ]

@@ -69,8 +69,7 @@
                 </span>
               </div>
               <div *ngIf="recordEditmode">
-                <div style="text-align: left; vertical-align: top;" (mouseover)="titleMouseover()"
-                  (mouseout)="titleMouseout()">
+                <div style="text-align: left; vertical-align: top;">
                   <span class="title" style="display: inline-block;vertical-align: top;max-width:calc(100% - 5.5em);">
                     <h2 [@changeBorderColor]=titleObj.currentState *ngIf="!titleObj.detailEditmode"
                       style="display: inline-block;padding-right: .5em;" contenteditable="false" (click)="editTitle()">
@@ -101,94 +100,104 @@
                   </span>
                 </div>
               </div>
-              <div *ngIf="!record.authors && recordEditmode">
-                <span class="title" style="text-align: left; vertical-align: top;" (mouseover)="authorMouseover()"
-                  (mouseout)="authorMouseout()">
-                  <h3 [@changeBorderWidth]=currentState *ngIf="!authorObj.detailEditmode"
-                    style="display: inline-block;padding-right: .5em">
-                    Authors:</h3>
-                </span>
-              </div>
-              <div class="title" style="display: inline-block;width:100%;text-align: left; vertical-align: top;"
-                (mouseover)="authorMouseover()" (mouseout)="authorMouseout()">
-                <div [@changeBorderColor]=authorObj.currentState
-                  style="display: inline-block; padding-right: .5em; text-align: left; vertical-align: top;max-width:calc(100% - 4em);">
-                  <div class="" *ngIf="record.authors">
-                    <span *ngFor="let author of record.authors; let i = index">
-                      {{ author.fn }}<span *ngIf="i < record.authors.length-1 ">,</span>
-                    </span>
-                    <i style="cursor: pointer; margin-left: 0.5rem;" class="faa"
-                      [ngClass]="{'faa-plus-square-o': !clickAuthors, 'faa-minus-square-o': clickAuthors}"
-                      aria-hidden="true"
-                      (click)="isCollapsedContent = !isCollapsedContent; clickAuthors = expandClick();"></i>
-                  </div>
-                  <div [collapse]="!isCollapsedContent" class="card card-block card-header customcard">
-                    <div class="" *ngIf="record.authors">
-                      <span><b>Authors:</b></span>
-                      <div *ngFor="let author of record.authors; let i = index">
-                        <span>{{ author.fn}}</span>,
-                        <span *ngFor="let aff of author.affiliation">
-                          <br>{{aff.title}}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
+              <div *ngIf="!record.authors; else hasAuthors">
+                <div [@changeBorderColor]=authorObj.currentState *ngIf="recordEditmode"
+                  style="text-align: left; vertical-align: top;display: inline-block;padding-right: .5em;">
+                  Authors:
                 </div>
-                <button [@changeOpacity]=authorObj.currentState *ngIf="!authorObj.detailEditmode"
+                <button [@changeOpacity]=authorObj.currentState *ngIf="recordEditmode && !authorObj.detailEditmode"
                   [style.opacity]="authorObj.buttonOpacity" type="button" (click)="openAuthorModal()"
                   class="edit_button2">
                   <i class="faa faa-pencil" style="cursor: pointer;color:grey; margin-top: 0em;" data-toggle="tooltip"
                     title="Edit contact"></i>
                 </button>
               </div>
-            </div>
-          </div>
-          <div class="ui-g">
-            <div *ngIf="!record.contactPoint && recordEditmode">
-              <span class="title" style="text-align: left; vertical-align: top;" (mouseover)="contactMouseover()"
-                (mouseout)="contactMouseout()">
-                <h3 [@changeBorderWidth]=currentState *ngIf="!contactObj.detailEditmode"
-                  style="display: inline-block;padding-right: .5em">
-                  Contact:</h3>
-              </span>
-            </div>
-            <div class="ui-g-8 ui-md-8 ui-lg-8 ui-sm-12 contactPoint" *ngIf="record.contactPoint">
-              <div class="title" style="text-align: left; vertical-align: top;" (mouseover)="contactMouseover()"
-                (mouseout)="contactMouseout()">
-                <div [@changeBorderColor]=contactObj.currentState style="display: inline-block; padding-right: .5em">
-                  Contact:
-                  <strong>
-                    <a class="font14" *ngIf="isEmail" href="{{record.contactPoint.hasEmail}}" target="_top">
-                      {{record.contactPoint.fn}}</a>
-                    <span *ngIf="!isEmail">{{record.contactPoint.fn}}</span>
-                  </strong>..
-                  <i style="cursor: pointer;" class="faa"
-                    [ngClass]="{'faa-plus-square-o': !clickContact, 'faa-minus-square-o': clickContact}"
-                    aria-hidden="true" (click)="closeContent = !closeContent; clickContact=expandContact();"></i>
-                  <div [collapse]="!closeContent" class="card card-body bg-faded">
-                    <span class="" *ngIf="record.contactPoint.fn">
-                      <span>{{record.contactPoint.fn}}</span>
-                    </span>
-                    <span class="font14" *ngIf="isEmail">
-                      <br><strong>Email:</strong>
-                      <a *ngIf="isEmail" href="{{record.contactPoint.hasEmail}}" target="_top">
-                        {{record.contactPoint.hasEmail.split(":")[1]}}</a>
-                    </span>
-                    <div class="font14" *ngIf="record.contactPoint.address">
-                      <span><b>Address:</b></span>
-                      <div *ngFor="let address of record.contactPoint.address">
-                        {{address}}
+              <ng-template #hasAuthors>
+                <div style="display: inline-block;width:100%;text-align: left; vertical-align: top;">
+                  <div [@changeBorderColor]=authorObj.currentState
+                    style="display: inline-block; padding-right: .5em; text-align: left; vertical-align: top;max-width:calc(100% - 4em);">
+                    <div class="" *ngIf="record.authors">
+                      <span *ngFor="let author of record.authors; let i = index">
+                        {{ author.fn }}<span *ngIf="i < record.authors.length-1 ">,</span>
+                      </span>
+                      <i style="cursor: pointer; margin-left: 0.5rem;" class="faa"
+                        [ngClass]="{'faa-plus-square-o': !clickAuthors, 'faa-minus-square-o': clickAuthors}"
+                        aria-hidden="true"
+                        (click)="isCollapsedContent = !isCollapsedContent; clickAuthors = expandClick();"></i>
+                    </div>
+                    <div [collapse]="!isCollapsedContent" class="card card-block card-header customcard">
+                      <div class="" *ngIf="record.authors">
+                        <span><b>Authors:</b></span>
+                        <div *ngFor="let author of record.authors; let i = index">
+                          <span>{{ author.fn}}</span>,
+                          <span *ngFor="let aff of author.affiliation">
+                            <br>{{aff.title}}
+                          </span>
+                        </div>
                       </div>
                     </div>
                   </div>
+                  <button [@changeOpacity]=authorObj.currentState *ngIf="recordEditmode && !authorObj.detailEditmode"
+                    [style.opacity]="authorObj.buttonOpacity" type="button" (click)="openAuthorModal()"
+                    class="edit_button2">
+                    <i class="faa faa-pencil" style="cursor: pointer;color:grey; margin-top: 0em;" data-toggle="tooltip"
+                      title="Edit contact"></i>
+                  </button>
                 </div>
-                <button [@changeOpacity]=contactObj.currentState *ngIf="!contactObj.detailEditmode"
+              </ng-template>
+            </div>
+          </div>
+          <div class="ui-g">
+            <div class="ui-g-8 ui-md-8 ui-lg-8 ui-sm-12 contactPoint">
+              <div *ngIf="!record.contactPoint; else hasContacts">
+                <div [@changeBorderColor]=contactObj.currentState *ngIf="recordEditmode"
+                  style="text-align: left; vertical-align: top;display: inline-block;padding-right: .5em;">
+                  Contact:
+                </div>
+                <button [@changeOpacity]=contactObj.currentState *ngIf="recordEditmode && !contactObj.detailEditmode"
                   [style.opacity]="contactObj.buttonOpacity" type="button"
                   (click)="openContactModal('Contact-popup-dialog')" class="edit_button2">
                   <i class="faa faa-pencil" style="cursor: pointer;color:grey; margin-top: 0em;" data-toggle="tooltip"
                     title="Edit contact"></i>
                 </button>
               </div>
+              <ng-template #hasContacts>
+                <div style="text-align: left; vertical-align: top;" *ngIf="record.contactPoint">
+                  <div [@changeBorderColor]=contactObj.currentState style="display: inline-block; padding-right: .5em">
+                    Contact:
+                    <strong>
+                      <a class="font14" *ngIf="isEmail" href="{{record.contactPoint.hasEmail}}" target="_top">
+                        {{record.contactPoint.fn}}</a>
+                      <span *ngIf="!isEmail">{{record.contactPoint.fn}}</span>
+                    </strong>..
+                    <i style="cursor: pointer;" class="faa"
+                      [ngClass]="{'faa-plus-square-o': !clickContact, 'faa-minus-square-o': clickContact}"
+                      aria-hidden="true" (click)="closeContent = !closeContent; clickContact=expandContact();"></i>
+                    <div [collapse]="!closeContent" class="card card-body bg-faded">
+                      <span class="" *ngIf="record.contactPoint.fn">
+                        <span>{{record.contactPoint.fn}}</span>
+                      </span>
+                      <span class="font14" *ngIf="isEmail">
+                        <br><strong>Email:</strong>
+                        <a *ngIf="isEmail" href="{{record.contactPoint.hasEmail}}" target="_top">
+                          {{record.contactPoint.hasEmail.split(":")[1]}}</a>
+                      </span>
+                      <div class="font14" *ngIf="record.contactPoint.address">
+                        <span><b>Address:</b></span>
+                        <div *ngFor="let address of record.contactPoint.address">
+                          {{address}}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <button [@changeOpacity]=contactObj.currentState *ngIf="recordEditmode && !contactObj.detailEditmode"
+                    [style.opacity]="contactObj.buttonOpacity" type="button"
+                    (click)="openContactModal('Contact-popup-dialog')" class="edit_button2">
+                    <i class="faa faa-pencil" style="cursor: pointer;color:grey; margin-top: 0em;" data-toggle="tooltip"
+                      title="Edit contact"></i>
+                  </button>
+                </div>
+              </ng-template>
               <!-- <br> -->
               <span *ngIf="isId">Identifier: </span>
               <span *ngIf="isDOI"><i> <a class="font14"
@@ -301,7 +310,7 @@
   <div class="modal-forground">
     <div class="modal-body">
       <div style="background-color:#153971;height: 4em; color:white;text-align: center;padding-top: .5em">
-        <h2>Contact</h2>
+        <h2 style="color: white;">Contact</h2>
       </div>
       <div style="margin: 1em 2em 2em 2em;">
         <p>
@@ -311,12 +320,21 @@
           Email: <input type="text" [(ngModel)]="tempContactPoint.hasEmail" />
         </p>
         Address:
-        <i style="cursor: pointer;" class="faa faa-plus-square-o" aria-hidden="true" (click)="addNewAddress();"></i>
-        <div *ngFor="let addr of tempContactPoint.address; let i = index; trackBy: trackByFn">
-          <input type="text" [(ngModel)]="tempContactPoint.address[i]" placeholder="Enter new address here" />
-          <i style="cursor: pointer;" class="faa faa-close" aria-hidden="true" (click)="deleteAddress(i);"></i>
+        <div
+          style="width: 100%; overflow: hidden; border: 1px solid rgb(143, 143, 143); background-color: rgb(234, 249, 250)">
+          <div style="width: 97%; float: right; "
+            *ngFor="let addr of tempContactPoint.address; let i = index; trackBy: trackByFn">
+            <div style="display:inline-block; width: 100%;">
+              <span style="margin-right: .5em;">Line {{i+1}}:</span>
+              <input type="text" [(ngModel)]="tempContactPoint.address[i]" style="width: 85%;"
+                placeholder="Enter new address here" />
+              <i style="cursor: pointer; margin-left: .5em;" class="faa faa-trash" aria-hidden="true"
+                (click)="deleteAddress(i);" data-toggle="tooltip" title="Remove address line"></i>
+              <i style="cursor: pointer; margin-left: .5em;" class="faa faa-plus" *ngIf="i == tempContactPoint.address.length-1" (click)="addNewAddress()" data-toggle="tooltip" title="Add new address line"></i>
+            </div>
+          </div>
         </div>
-        <div style="align-items: right">
+        <div style="align-items: right; margin-top: 1em;">
           <button pButton class="button"
             style="float:right;margin:0em 1em 2em 1em;width:150px; height:2em; background-color:grey;color:white;padding-right: 1em;"
             (click)="closeModal('Contact-popup-dialog');">
@@ -339,22 +357,44 @@
 <modal id="Author-popup-dialog">
   <div class="modal-forground">
     <div class="modal-body">
-      <div style="background-color:#153971;height: 4em; color:white;text-align: center;padding-top: .5em">
-        <h2 style="display:inline-block">Author</h2>
-        <i class="faa faa-user-plus faa-2x" (click)="resetAuthor(author, i); author.dataChanged = false;"
-          style="cursor:pointer; margin: .2em .5em 0em .5em; color: white;" data-toggle="tooltip"
-          title="Add author"></i>
+      <div
+        style="width:100%; vertical-align: bottom;background-color:#153971;height: 4em; color:white;text-align: center;padding-top: .5em; ">
+        <div style="display: inline-block; width: 90%; height: 100%; overflow: hidden; margin: auto;">
+          <h2 style="display:inline-block; color: white;">Author</h2>
+          <i [ngClass]="getAuthorClass()" (click)="handleAuthorDisplay()" style="cursor:pointer;margin-left: .5em;"
+            data-toggle="tooltip" title="Expend/collapse author details"></i>
+          <div style="float: right; margin-right:.5em; margin-top: 1.5em;">
+            <i class="faa faa-user-plus faa-1x" (click)="addAuthor()" style="cursor:pointer; color: white;"
+              data-toggle="tooltip" title="Add author"></i>
+          </div>
+        </div>
       </div>
+      <!-- <div style="overflow:hidden; width: 100%; height: 3em;"> -->
+      <div style="overflow:hidden; width: 90%; margin: .5em auto 0em auto;">
+        <button pButton class="button"
+          style="float:right;width:150px; height:2em; background-color:grey;color:white;padding-right: 1em;"
+          (click)="closeModal('Author-popup-dialog');">
+          <i class="faa faa-trash faa-1x icon-white" style="color: #fff;padding-left: .5em;padding-right: .5em;"></i>
+          Cancel
+        </button>
+        <button pButton class="button"
+          style="float:right;margin-right: 1em;width:150px; height:2em; background-color:green;color:white;margin-right: 1em;padding-right: 1em;"
+          (click)="saveAuthorInfo();">
+          <i class="faa faa-save faa-1x icon-white" style="color: #fff;padding-left: .5em;padding-right: .5em;"></i>
+          Save
+        </button>
+      </div>
+      <!-- </div> -->
       <div style="text-align: center; width:100%;margin: 1em 0em 1em 0em;">
         <div *ngFor="let author of tempAuthors.authors; let i = index; trackBy: trackByFn"
           style="width: 100%;margin-bottom: .5em;">
           <table width="90%" align="center">
-            <tr style="text-align: center;" [style.background-color]="getHeaderBackgroundColor(author)" [style.color]="getHeaderForegroundColor(author)" >
+            <tr style="text-align: center;" [style.background-color]="getHeaderBackgroundColor(author)"
+              [style.color]="getHeaderForegroundColor(author)">
               <td colspan="2">
                 {{author.fn}}
                 <i [ngClass]="getTitleClass(author)" (click)="author.isCollapsed = !author.isCollapsed"
-                  style="cursor:pointer;" data-toggle="tooltip"
-                  title="Show/hide author details"></i>
+                  style="cursor:pointer;" data-toggle="tooltip" title="Show/hide author details"></i>
                 <i class="faa faa-trash" (click)="deleteAuthor(author)"
                   style="float:right; cursor:pointer; margin: .2em .5em 0em 0em" data-toggle="tooltip"
                   title="Remove this author"></i>
@@ -368,20 +408,6 @@
                   (click)="moveAuthorDown(author, i)"
                   style="float:left; width:.8em; cursor:pointer; margin: .2em 0em 0em .5em" data-toggle="tooltip"
                   title="Move author down" [ngClass]="getTitleImgClass(author)">
-              </td>
-            </tr>
-            <tr *ngIf="!author.isCollapsed">
-              <td width="15%" align="right">
-                Full Name: &nbsp;
-              </td>
-              <td align="left">
-                <input type="text" [(ngModel)]="author.fn"
-                  style="width: calc(100% - 2em);height:2em; margin-right: .5em;" />
-                <i *ngIf="!author.fnLocked" class="faa faa-unlock" (click)="author.fnLocked = !author.fnLocked"
-                  style="cursor:pointer;" data-toggle="tooltip"
-                  title="Prevent full name from updated automatically"></i>
-                <i *ngIf="author.fnLocked" class="faa faa-lock" (click)="author.fnLocked = !author.fnLocked"
-                  style="cursor:pointer;" data-toggle="tooltip" title="Allow full name been updated automatically"></i>
               </td>
             </tr>
             <tr *ngIf="!author.isCollapsed">
@@ -412,6 +438,21 @@
               </td>
             </tr>
             <tr *ngIf="!author.isCollapsed">
+              <td width="15%" align="right">
+                Name (as displayed) &nbsp;
+              </td>
+              <td align="left">
+                <input type="text" [(ngModel)]="author.fn"
+                  style="width: calc(100% - 2em);height:2em; margin-right: .5em;"
+                  (input)="onFullNameChange(author, $event.target.value)" />
+                <i *ngIf="!author.fnLocked" class="faa faa-unlock" (click)="author.fnLocked = !author.fnLocked"
+                  style="cursor:pointer;" data-toggle="tooltip"
+                  title="Prevent full name from updated automatically"></i>
+                <i *ngIf="author.fnLocked" class="faa faa-lock" (click)="author.fnLocked = !author.fnLocked"
+                  style="cursor:pointer;" data-toggle="tooltip" title="Allow full name been updated automatically"></i>
+              </td>
+            </tr>
+            <tr *ngIf="!author.isCollapsed">
               <td align="right">
                 ORCID: &nbsp;
               </td>
@@ -430,30 +471,39 @@
                   <i class="faa faa-plus faa-stack-1x faa-inverse"></i>
                 </span>
               </td>
-              <td style="vertical-align: top; border: 1px solid lightgrey;">
+              <td style="border: 1px solid lightgrey;">
                 <div *ngFor="let aff of author.affiliation; let j = index; trackBy: trackByFn"
-                  style="display:inline-block;width:100%;">
-                  <table width="100%">
-                    <tr>
-                      <td width="10%" align="right">Title: &nbsp;</td>
-                      <td><input type="text" [(ngModel)]="author.affiliation[j].title"
-                          style="width: 100%;height:2em;" />
-                      </td>
-                      <td>
-                        <i class="faa faa-trash" (click)="deleteAffiliation(i, aff)"
-                          style="display:inline-block;cursor: pointer;color:grey; margin-top: 0em;"
-                          data-toggle="tooltip" title="Delete affiliation"></i>
-                      </td>
-                    </tr>
-                  </table>
+                  style="width:100%; margin: 0em 0em .5em 0em;">
+                  <div style="overflow:hidden; width: 100%; background-color: rgb(248, 246, 237)">
+                    <div style="float: left; width: 95%; margin-left: .5em;">
+                      <table>
+                        <tr>
+                          <td width="10%" align="right">Organization Name:</td>
+                          <td><input type="text" [(ngModel)]="author.affiliation[j].title"
+                              style="width: 100%;height:2em;" />
+                          </td>
+                        </tr>
+                        <tr>
+                          <td width="10%" align="right" valign="center">Department/Division:</td>
+                          <td><input type="text" [(ngModel)]="author.affiliation[j].dept"
+                              style="width: 100%;height:2em;" />
+                          </td>
+                        </tr>
+                      </table>
+                    </div>
+                    <i class="faa faa-trash" (click)="deleteAffiliation(i, aff)"
+                      style="float: right;cursor: pointer;color:grey; margin: 1em .5em;" data-toggle="tooltip"
+                      title="Delete affiliation"></i>
+                  </div>
                 </div>
               </td>
             </tr>
           </table>
         </div>
       </div>
-
-      <div>
+      <hr>
+      <!-- <div style="overflow:hidden; width: 100%; height: 3em; background-color: rgb(0, 129, 180)"> -->
+      <div style="overflow:hidden; width: 90%; margin: 1em auto 1em auto;">
         <button pButton class="button"
           style="float:right;margin:0em 1em 2em 1em;width:150px; height:2em; background-color:grey;color:white;padding-right: 1em;"
           (click)="closeModal('Author-popup-dialog');">
@@ -467,9 +517,10 @@
           Save
         </button>
       </div>
-      <div style="clear:both"></div>
-
     </div>
+    <div style="clear:both"></div>
+
+    <!-- </div> -->
   </div>
   <div class="modal-background"></div>
 </modal>

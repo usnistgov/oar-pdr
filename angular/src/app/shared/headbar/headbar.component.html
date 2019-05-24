@@ -32,7 +32,6 @@
           Version</span>
         <span *ngIf="isLocalTesting" style="color: red">You are running in local test mode</span>
         <div *ngIf="isEditMode" align="right" class="header-links">
-          <span style="cursor: default;color:grey;" class="textlinks">Home | </span>
           <span style="cursor: default;color:grey;" class="textlinks">About | </span>
           <span style="cursor: default;color:grey;" class="textlinks">Search | </span>
           <span *ngIf="internalBadge && !isAuthenticated" style="cursor: default;color:grey;" class="textlinks">Sign in | </span>
@@ -42,7 +41,6 @@
             <span class="w3-badge badge-pill badge-notify">&nbsp;{{cartLength}}&nbsp;</span>
         </div>
         <div *ngIf="!isEditMode" align="right" class="header-links">
-            <span (click)="goHome()" style="cursor: pointer;" class="textlinks">Home</span> |
             <a [routerLink]="['/pdr/about']" routerLinkActive="active" target="_self"><span
                 class="textlinks">About</span></a> |
             <a href="{{ SDPAPI }}" target="_blank"><span class="textlinks">Search</span></a> |
