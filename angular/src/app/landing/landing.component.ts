@@ -175,6 +175,7 @@ export class LandingComponent implements OnInit {
   contactObj: any;
   tempContactPoint: any;
   tempAuthors: any;
+  tempAddress: string;
   isAuthorCollapsed: boolean = false;
 
   /**
@@ -880,9 +881,19 @@ export class LandingComponent implements OnInit {
     } else {
       this.tempContactPoint = this.getBlankContact();
     }
-    
+
     // strip off "mailto:"
     this.tempContactPoint.hasEmail = this.tempContactPoint.hasEmail.split(":")[1];
+    let i: number;
+    // Putting address lines together
+    if (this.tempContactPoint.address) {
+      this.tempAddress = this.tempContactPoint.address[0];
+      for (i = 1; i < this.tempContactPoint.address.length; i++) {
+         this.tempAddress = this.tempAddress + '\r\n' + this.tempContactPoint.address[i];
+      }
+    }
+    let  textArea = document.getElementById("address")  
+    textArea.style.height = (this.tempContactPoint.address.length * 30).toString() + 'px';;
 
     this.modalService.open(id);
   }
@@ -916,8 +927,8 @@ export class LandingComponent implements OnInit {
   */
   saveContactInfo() {
     // Add "mailto:" back
-    if(!this.emptyString(this.tempContactPoint.hasEmail)){
-      if(this.tempContactPoint.hasEmail.split(":")[0] != "mailto")
+    if (!this.emptyString(this.tempContactPoint.hasEmail)) {
+      if (this.tempContactPoint.hasEmail.split(":")[0] != "mailto")
         this.tempContactPoint.hasEmail = "mailto:" + this.tempContactPoint.hasEmail;
     }
     this.record.contactPoint = JSON.parse(JSON.stringify(this.tempContactPoint));
@@ -1141,7 +1152,7 @@ export class LandingComponent implements OnInit {
   /*
   *   Return a blank contact point
   */
-  getBlankContact(){
+  getBlankContact() {
     return {
       "fn": "",
       "hasEmail": "",
@@ -1212,9 +1223,9 @@ export class LandingComponent implements OnInit {
   /*
   *   Show/hide author details
   */
-  handleAuthorDisplay(){
+  handleAuthorDisplay() {
     this.isAuthorCollapsed = !this.isAuthorCollapsed;
-    for(var author in this.tempAuthors.authors){
+    for (var author in this.tempAuthors.authors) {
       this.tempAuthors.authors[author].isCollapsed = this.isAuthorCollapsed;
     }
   }
