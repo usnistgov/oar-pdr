@@ -37,6 +37,7 @@ export class DescriptionComponent {
   @Input() editContent: boolean;
   @Input() filescount: number;
   @Input() metadata: boolean;
+  @Input() recordEditmode: boolean;
 
   addAllFileSpinner: boolean = false;
   fileDetails: string = '';
@@ -87,6 +88,7 @@ export class DescriptionComponent {
   mobWidth: number;
   mobHeight: number;
   fontSize: string;
+  descriptionObj: any;
 
   /* Function to Return Keys object properties */
   keys(): Array<string> {
@@ -104,22 +106,22 @@ export class DescriptionComponent {
     private commonFunctionService: CommonFunctionService,
     public router: Router,
     ngZone: NgZone) {
-      this.cols = [
-        { field: 'name', header: 'Name', width: '60%' },
-        { field: 'mediatype', header: 'Media Type', width: 'auto' },
-        { field: 'size', header: 'Size', width: 'auto' },
-        { field: 'download', header: 'Status', width: 'auto' }];
-        
-      this.mobHeight = (window.innerHeight);
-      this.mobWidth = (window.innerWidth);
-      this.setWidth(this.mobWidth);
-  
-      window.onresize = (e) => {
-        ngZone.run(() => {
-          this.mobWidth = window.innerWidth;
-          this.mobHeight = window.innerHeight;
-          this.setWidth(this.mobWidth);
-        });
+    this.cols = [
+      { field: 'name', header: 'Name', width: '60%' },
+      { field: 'mediatype', header: 'Media Type', width: 'auto' },
+      { field: 'size', header: 'Size', width: 'auto' },
+      { field: 'download', header: 'Status', width: 'auto' }];
+
+    this.mobHeight = (window.innerHeight);
+    this.mobWidth = (window.innerWidth);
+    this.setWidth(this.mobWidth);
+
+    window.onresize = (e) => {
+      ngZone.run(() => {
+        this.mobWidth = window.innerWidth;
+        this.mobHeight = window.innerHeight;
+        this.setWidth(this.mobWidth);
+      });
     };
 
     this.cartService.watchAddAllFilesCart().subscribe(value => {
@@ -136,6 +138,7 @@ export class DescriptionComponent {
       }
     });
     this.confValues = this.appConfig.getConfig();
+    this.descriptionObj = this.editingObjectInit();
   }
 
   ngOnInit() {
@@ -191,6 +194,22 @@ export class DescriptionComponent {
         this.noFileDownloaded = !value;
       }
     );
+  }
+
+
+  /*
+  *   Init object - edit buttons for animation purpose
+  */
+  editingObjectInit() {
+    var editingObject = {
+      "originalValue": '',
+      "detailEditmode": false,
+      "buttonOpacity": 0,
+      "borderStyle": "0px solid lightgrey",
+      "currentState": 'initial'
+    }
+
+    return editingObject;
   }
 
   /**
@@ -723,8 +742,8 @@ export class DescriptionComponent {
       accept: () => {
         setTimeout(() => {
           let popupWidth: number = this.mobWidth * 0.8;
-          let left:number = this.mobWidth * 0.1;
-          let screenSize = 'height=880,width=' + popupWidth.toString() + ',top=100,left='+ left.toString();
+          let left: number = this.mobWidth * 0.1;
+          let screenSize = 'height=880,width=' + popupWidth.toString() + ',top=100,left=' + left.toString();
           window.open('/datacart/popup', 'DownloadManager', screenSize);
           this.cancelAllDownload = false;
           this.downloadFromRoot();
@@ -934,9 +953,9 @@ export class DescriptionComponent {
   /*
   * Make sure the width of popup dialog is less than 500px or 80% of the window width
   */
-  getDialogWidth(){
-    var w = window.innerWidth > 500? 500: window.innerWidth;
+  getDialogWidth() {
+    var w = window.innerWidth > 500 ? 500 : window.innerWidth;
     console.log(w);
-    return w+'px';
+    return w + 'px';
   }
 }

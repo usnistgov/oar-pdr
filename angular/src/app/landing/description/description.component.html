@@ -1,12 +1,31 @@
 <div id="description">
   <div [hidden]="metadata">
     <h3 name="desscription"><b>Description</b></h3><br>
-    <div contenteditable="false" id="recordDescription" class="card card-body bg-light">
-      <p *ngFor="let topic of record['description']; let i =index">
-        {{ record["description"][i] }}
-      </p>
+    <div *ngIf="!record.description; else hasDescription">
+      <div *ngIf="recordEditmode"
+        style="text-align: left; vertical-align: top;display: inline-block;padding-right: .5em; border: 1px solid lightgrey">
+        Add description:
+      </div>
+      <button *ngIf="recordEditmode && !descriptionObj.detailEditmode" type="button" (click)="openDescriptionModal()"
+        class="edit_button2">
+        <i class="faa faa-pencil" style="cursor: pointer;color:grey; margin-top: 0em;" data-toggle="tooltip"
+          title="Edit contact"></i>
+      </button>
     </div>
-
+    <ng-template #hasDescription>
+      <div style="display: inline-block; ">
+        <div contenteditable="false" id="recordDescription" class="card card-body bg-light" style="display: inline-block;width: 90%;">
+          <p *ngFor="let topic of record['description']; let i =index">
+            {{ record["description"][i] }}
+          </p>
+        </div>
+        <button *ngIf="recordEditmode && !descriptionObj.detailEditmode" type="button" (click)="openDescriptionModal()"
+          class="edit_button2" style="display: inline-block;width:2.5em;height:2.5em;">
+          <i class="faa faa-pencil" style="cursor: pointer;color:grey; margin-top: 0em;" data-toggle="tooltip"
+            title="Edit description"></i>
+        </button>
+      </div>
+    </ng-template>
     <div *ngIf="checkTopics()">
       <strong contenteditable="false">Research Topics:</strong>
       <span class="font14" *ngFor="let topic of record['topic']; let i =index">
@@ -222,7 +241,8 @@
     </div>
   </div>
 </div>
-<p-overlayPanel class="fileDialog" #op3 [dismissable]="true" [showCloseIcon]="true" [style]="{'display':'inline-block','position':'related','left':'50%','top':'80%'}" [appendTo]="'body'">
+<p-overlayPanel class="fileDialog" #op3 [dismissable]="true" [showCloseIcon]="true"
+  [style]="{'display':'inline-block','position':'related','left':'50%','top':'80%'}" [appendTo]="'body'">
   <div *ngIf="isNodeSelected" class="filecard" [ngStyle]="{'max-width':getDialogWidth()}">
     <div class="ui-g filesection">
       <div *ngIf="fileNode" class="ui-g-12 ui-md-12 ui-lg-12 ui-sm-10">

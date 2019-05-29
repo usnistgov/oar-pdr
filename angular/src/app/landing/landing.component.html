@@ -257,7 +257,7 @@
           <div class="ui-g">
             <div class="ui-g-12 ui-md-12 ui-lg-12 ui-sm-12">
               <description-resources [record]="record" [files]="files" [distdownload]="distdownload"
-                [isInternal]="isInternal" [filescount]="filescount" [metadata]="metadata"></description-resources>
+                [isInternal]="isInternal" [filescount]="filescount" [metadata]="metadata" [recordEditmode]="recordEditmode"></description-resources>
               <metadata-detail [record]="record" [serviceApi]="serviceApi" [metadata]="metadata"></metadata-detail>
               <!-- <data-cart></data-cart>   -->
             </div>
@@ -320,23 +320,9 @@
           Email: <input type="text" [(ngModel)]="tempContactPoint.hasEmail" />
         </p>
         Address:
-        <div
-          style="width: 100%; overflow: hidden; border: 1px solid rgb(143, 143, 143); background-color: rgb(234, 249, 250)">
-          <div style="width: 97%; float: right; "
-            *ngFor="let addr of tempContactPoint.address; let i = index; trackBy: trackByFn">
-            <div style="display:inline-block; width: 100%;">
-              <span style="margin-right: .5em;">Line {{i+1}}:</span>
-              <input type="text" [(ngModel)]="tempContactPoint.address[i]" style="width: 85%;"
-                placeholder="Enter new address here" />
-              <i style="cursor: pointer; margin-left: .5em;" class="faa faa-trash" aria-hidden="true"
-                (click)="deleteAddress(i);" data-toggle="tooltip" title="Remove address line"></i>
-              <i style="cursor: pointer; margin-left: .5em;" class="faa faa-plus" *ngIf="i == tempContactPoint.address.length-1" (click)="addNewAddress()" data-toggle="tooltip" title="Add new address line"></i>
-            </div>
-          </div>
+        <div>
+          <textarea id="address" style="width: 100%; padding: .5em .5em .5em 1.5em" (keyup)="autogrow($event)" [(ngModel)]='tempAddress'></textarea>
         </div>
-        <!-- <div>
-          <textarea id="address" style="width: 100%; padding: .5em .5em .5em .5em">{{tempAddress}}</textarea>
-        </div> -->
         <div style="align-items: right; margin-top: 1em;">
           <button pButton class="button"
             style="float:right;margin:0em 1em 2em 1em;width:150px; height:2em; background-color:grey;color:white;padding-right: 1em;"

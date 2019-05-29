@@ -889,13 +889,21 @@ export class LandingComponent implements OnInit {
     if (this.tempContactPoint.address) {
       this.tempAddress = this.tempContactPoint.address[0];
       for (i = 1; i < this.tempContactPoint.address.length; i++) {
-         this.tempAddress = this.tempAddress + '\r\n' + this.tempContactPoint.address[i];
+        this.tempAddress = this.tempAddress + '\r\n' + this.tempContactPoint.address[i];
       }
     }
-    let  textArea = document.getElementById("address")  
+    let textArea = document.getElementById("address");
     textArea.style.height = (this.tempContactPoint.address.length * 30).toString() + 'px';;
 
     this.modalService.open(id);
+  }
+
+  autogrow(e) {
+    let textArea = document.getElementById("address");
+
+    e.target.style.overflow = 'hidden';
+    e.target.style.height = '0px';
+    e.target.style.height = textArea.scrollHeight + 'px';
   }
 
   /*
@@ -931,27 +939,13 @@ export class LandingComponent implements OnInit {
       if (this.tempContactPoint.hasEmail.split(":")[0] != "mailto")
         this.tempContactPoint.hasEmail = "mailto:" + this.tempContactPoint.hasEmail;
     }
+
+    //Handle address
+    this.tempContactPoint.address = this.tempAddress.split('\n');
+
     this.record.contactPoint = JSON.parse(JSON.stringify(this.tempContactPoint));
-    // Send update to backend here
+    // Send update to backend here...
     this.modalService.close('Contact-popup-dialog');
-  }
-
-  /*
-  * Add new contact address
-  */
-  addNewAddress() {
-    if (this.tempContactPoint.address == null || this.tempContactPoint.address == 'undefined') {
-      this.tempContactPoint.address = [""];
-    } else {
-      this.tempContactPoint.address.push("");
-    }
-  }
-
-  /*
-  * Delete contact address
-  */
-  deleteAddress(index: number) {
-    this.tempContactPoint.address = this.tempContactPoint.address.filter((val, i) => i != index);
   }
 
   /*
