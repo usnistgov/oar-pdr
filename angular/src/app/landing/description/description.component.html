@@ -14,7 +14,7 @@
     </div>
     <ng-template #hasDescription>
       <div style="display: inline-block; ">
-        <div contenteditable="false" id="recordDescription" class="card card-body bg-light" style="display: inline-block;width: 90%;">
+        <div id="recordDescription" class="card card-body bg-light" style="display: inline-block;width: 90%;">
           <p *ngFor="let topic of record['description']; let i =index">
             {{ record["description"][i] }}
           </p>
@@ -26,13 +26,35 @@
         </button>
       </div>
     </ng-template>
-    <div *ngIf="checkTopics()">
-      <strong contenteditable="false">Research Topics:</strong>
-      <span class="font14" *ngFor="let topic of record['topic']; let i =index">
-        {{ topic.tag }}
-        <span *ngIf="i < record['topic'].length-1 ">,</span>
-      </span>
+    <div *ngIf="checkTopics(); else noTopic">
+      <div style="display: inline-block;width:100%;text-align: left; vertical-align: top;">
+        <div
+          style="display: inline-block; padding-right: .5em; text-align: left; vertical-align: top;max-width:calc(100% - 4em);"
+          [ngStyle]="getTopicBorder()">
+          <strong>Research Topics:</strong>
+          <span class="font14" *ngFor="let topic of record['topic']; let i =index">
+            {{ topic.tag }}
+            <span *ngIf="i < record['topic'].length-1 ">,</span>
+          </span>
+        </div>
+        <button *ngIf="recordEditmode && !topicObj.detailEditmode" type="button" (click)="openTopicModal()"
+          class="edit_button2">
+          <i class="faa faa-pencil" style="cursor: pointer;color:grey; margin-top: 0em;" data-toggle="tooltip"
+            title="Edit contact"></i>
+        </button>
+      </div>
     </div>
+    <ng-template #noTopic>
+      <div *ngIf="recordEditmode"
+        style="text-align: left; vertical-align: top;display: inline-block;padding-right: .5em; border: 1px solid lightgrey">
+        Add topics:
+      </div>
+      <button *ngIf="recordEditmode && !topicObj.detailEditmode" type="button" (click)="openTopicModal()"
+        class="edit_button2">
+        <i class="faa faa-pencil" style="cursor: pointer;color:grey; margin-top: 0em;" data-toggle="tooltip"
+          title="Edit contact"></i>
+      </button>
+    </ng-template>
     <div *ngIf="checkKeywords()">
       <b>Subject Keywords:</b>
       <span class="font14" contenteditable="false" *ngFor="let keyword of record['keyword']; let i =index">
@@ -272,3 +294,76 @@
     </div>
   </div>
 </p-overlayPanel>
+<modal id="Description-popup-dialog">
+  <div class="modal-forground">
+    <div class="modal-body">
+      <div style="background-color:#153971;height: 4em; color:white;text-align: center;padding-top: .5em">
+        <h2 style="color: white;">Description</h2>
+      </div>
+      <div style="margin: 1em 2em 2em 2em;">
+        <div tabindex="1" contenteditable [ceModel]="tempDecription" [ceDefault]="defaultText"
+          (ceChange)="tempDecription=$event" placeholder="defaultText"
+          style="border: 1px solid green !Important;padding: .5em;">
+        </div>
+        <div style="align-items: right; margin-top: 1em;">
+          <button pButton class="button"
+            style="float:right;margin:0em 1em 2em 1em;width:150px; height:2em; background-color:grey;color:white;padding-right: 1em;"
+            (click)="closeModal('Description-popup-dialog');">
+            <i class="faa faa-trash faa-1x icon-white" style="color: #fff;padding-left: .5em;padding-right: .5em;"></i>
+            Cancel
+          </button>
+          <button pButton class="button"
+            style="float:right;margin:0em 1em 2em 1em;width:150px; height:2em; background-color:green;color:white;padding-right: 1em;"
+            (click)="saveDescription();">
+            <i class="faa faa-save faa-1x icon-white" style="color: #fff;padding-left: .5em;padding-right: .5em;"></i>
+            Save
+          </button>
+        </div>
+        <div style="clear:both"></div>
+      </div>
+    </div>
+  </div>
+  <div class="modal-background"></div>
+</modal>
+<modal id="Topic-popup-dialog">
+  <div class="modal-forground">
+    <div class="modal-body">
+      <div style="background-color:#153971;height: 4em; color:white;text-align: center;padding-top: .5em">
+        <h2 style="color: white;">Topics</h2>
+      </div>
+      <div style="width:90%; margin: auto; border: 1px solid green;">
+        <table width="100%" align="center">
+          <tr *ngFor="let topic of tempTopics; let i = index; trackBy: trackByFn">
+            <td align="right" data-toggle="tooltip" title="Required field" width="20%">
+              <span style="margin-right: .5em;"> Topic:</span>
+            </td>
+            <td>
+              <input type="text" [(ngModel)]="topic.tag" style="height:2em;" />
+            </td>
+            <td width="50px">
+              <i class="faa faa-trash" (click)="deleteTopic(i, topic)"
+                style="float: right;cursor: pointer;color:grey; margin: 1em .5em;" data-toggle="tooltip"
+                title="Delete affiliation"></i>
+            </td>
+          </tr>
+        </table>
+        <div style="align-items: right; margin-top: 1em;">
+          <button pButton class="button"
+            style="float:right;margin:0em 1em 2em 1em;width:150px; height:2em; background-color:grey;color:white;padding-right: 1em;"
+            (click)="closeModal('Description-popup-dialog');">
+            <i class="faa faa-trash faa-1x icon-white" style="color: #fff;padding-left: .5em;padding-right: .5em;"></i>
+            Cancel
+          </button>
+          <button pButton class="button"
+            style="float:right;margin:0em 1em 2em 1em;width:150px; height:2em; background-color:green;color:white;padding-right: 1em;"
+            (click)="saveDescription();">
+            <i class="faa faa-save faa-1x icon-white" style="color: #fff;padding-left: .5em;padding-right: .5em;"></i>
+            Save
+          </button>
+        </div>
+      </div>
+      <div style="clear:both"></div>
+    </div>
+  </div>
+  <div class="modal-background"></div>
+</modal>

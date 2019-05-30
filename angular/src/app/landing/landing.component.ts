@@ -176,6 +176,7 @@ export class LandingComponent implements OnInit {
   tempContactPoint: any;
   tempAuthors: any;
   tempAddress: string;
+  tempDecription: string;
   isAuthorCollapsed: boolean = false;
 
   /**
@@ -989,6 +990,8 @@ export class LandingComponent implements OnInit {
   *  Open author pop up dialog
   */
   openAuthorModal() {
+    this.isAuthorCollapsed = false;
+
     if (this.record.authors != null && this.record.authors != undefined) {
       this.tempAuthors.authors = JSON.parse(JSON.stringify(this.record.authors));
     } else {
@@ -1237,8 +1240,12 @@ export class LandingComponent implements OnInit {
         ""
       ]
     };
+    if (!this.tempAuthors.authors[i].affiliation)
+      this.tempAuthors.authors[i].affiliation = [];
 
     this.tempAuthors.authors[i].affiliation.push(aff);
+    console.log(this.tempAuthors.authors[i].affiliation);
+
     this.tempAuthors.authors[i].dataChanged = true;
   }
 
@@ -1249,4 +1256,5 @@ export class LandingComponent implements OnInit {
     this.tempAuthors.authors[i].affiliation = this.tempAuthors.authors[i].affiliation.filter(obj => obj !== aff);
     this.tempAuthors.authors[i].dataChanged = true;
   }
+
 }

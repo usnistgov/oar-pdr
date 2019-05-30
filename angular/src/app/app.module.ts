@@ -49,6 +49,7 @@ enableProdMode();
 // used to create fake backend
 import { fakeBackendProvider } from './_helpers/fakeBackendInterceptor';
 import { LoginComponent } from './login/login.component';
+import { ContenteditableModel } from './directives/contenteditable-model.directive';
 
 /**
  * Initialize the configs for backend services
@@ -67,7 +68,7 @@ const appInitializerFn = (appConfig: AppConfig) => {
     Collaspe, MetadataComponent, DescriptionComponent,
     KeyValuePipe, MetadataView, NoidComponent, NerdmComponent,
     ErrorComponent, UserErrorComponent,
-    AppShellNoRenderDirective, AppShellRenderDirective, LoginComponent, ModalComponent
+    AppShellNoRenderDirective, AppShellRenderDirective, LoginComponent, ModalComponent, ContenteditableModel
   ],
   imports: [
     FragmentPolyfillModule.forRoot({

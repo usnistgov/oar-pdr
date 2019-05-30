@@ -17,6 +17,8 @@ import { THIS_EXPR } from '@angular/compiler/src/output/output_ast';
 import { FileSaverService } from 'ngx-filesaver';
 import { Router } from '@angular/router';
 import { CommonFunctionService } from '../../shared/common-function/common-function.service';
+import { ModalService } from '../../shared/modal-service';
+import { ContenteditableModel } from '../../directives/contenteditable-model.directive';
 
 declare var saveAs: any;
 
@@ -89,6 +91,10 @@ export class DescriptionComponent {
   mobHeight: number;
   fontSize: string;
   descriptionObj: any;
+  tempDecription: string;
+  topicObj: any;
+  tempTopics: string[];
+  defaultText: string = "Enter description here...";
 
   /* Function to Return Keys object properties */
   keys(): Array<string> {
@@ -104,6 +110,7 @@ export class DescriptionComponent {
     private _FileSaverService: FileSaverService,
     private confirmationService: ConfirmationService,
     private commonFunctionService: CommonFunctionService,
+    private modalService: ModalService,
     public router: Router,
     ngZone: NgZone) {
     this.cols = [
@@ -139,6 +146,7 @@ export class DescriptionComponent {
     });
     this.confValues = this.appConfig.getConfig();
     this.descriptionObj = this.editingObjectInit();
+    this.topicObj = this.editingObjectInit();
   }
 
   ngOnInit() {
@@ -957,5 +965,56 @@ export class DescriptionComponent {
     var w = window.innerWidth > 500 ? 500 : window.innerWidth;
     console.log(w);
     return w + 'px';
+  }
+
+  /*
+  *   Open description modal
+  */
+  openDescriptionModal() {
+    var i: number;
+
+    if (this.record['description'] != null && this.record['description'] != undefined) {
+      this.tempDecription = this.record['description'][0];
+      for (i = 1; i < this.record['description'].length; i++) {
+        this.tempDecription = this.tempDecription + '\r\n\r\n' + this.record['description'][i];
+      }
+    }
+
+    this.modalService.open("Description-popup-dialog");
+  }
+
+  /* 
+  *   Save contact info when click on save button in pop up dialog
+  */
+  saveDescription() {
+    var tempDescs = this.tempDecription.split(/\n\s*\n/).filter(desc => desc != '');
+    this.record['description'] = JSON.parse(JSON.stringify(tempDescs));
+
+    // Send update to backend here...
+    this.modalService.close('Description-popup-dialog');
+  }
+
+  /*
+  *   Open description modal
+  */
+  openTopicModal() {
+    if (this.record['topic'].length > 0) {
+      this.tempTopics = this.record['topic'];
+    }
+    this.modalService.open("Topic-popup-dialog");
+  }
+
+  getTopicBorder() {
+    if (this.recordEditmode)
+      return {'border': '1px solid lightgrey'};
+    else
+      return {'border': '0px solid lightgrey'};
+  }
+
+  /*
+  *   Close pop up dialog by id
+  */
+  closeModal(id: string) {
+    this.modalService.close(id);
   }
 }

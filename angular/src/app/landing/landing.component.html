@@ -116,7 +116,7 @@
                 <div style="display: inline-block;width:100%;text-align: left; vertical-align: top;">
                   <div [@changeBorderColor]=authorObj.currentState
                     style="display: inline-block; padding-right: .5em; text-align: left; vertical-align: top;max-width:calc(100% - 4em);">
-                    <div class="" *ngIf="record.authors">
+                    <div *ngIf="record.authors">
                       <span *ngFor="let author of record.authors; let i = index">
                         {{ author.fn }}<span *ngIf="i < record.authors.length-1 ">,</span>
                       </span>
@@ -257,7 +257,8 @@
           <div class="ui-g">
             <div class="ui-g-12 ui-md-12 ui-lg-12 ui-sm-12">
               <description-resources [record]="record" [files]="files" [distdownload]="distdownload"
-                [isInternal]="isInternal" [filescount]="filescount" [metadata]="metadata" [recordEditmode]="recordEditmode"></description-resources>
+                [isInternal]="isInternal" [filescount]="filescount" [metadata]="metadata"
+                [recordEditmode]="recordEditmode"></description-resources>
               <metadata-detail [record]="record" [serviceApi]="serviceApi" [metadata]="metadata"></metadata-detail>
               <!-- <data-cart></data-cart>   -->
             </div>
@@ -321,7 +322,9 @@
         </p>
         Address:
         <div>
-          <textarea id="address" style="width: 100%; padding: .5em .5em .5em 1.5em" (keyup)="autogrow($event)" [(ngModel)]='tempAddress'></textarea>
+          <textarea id="address" style="width: 100%; padding: .5em .5em .5em 1.5em; border: 1px solid lightgrey;"
+            (keyup)="autogrow($event)" [(ngModel)]='tempAddress'
+            placeholder="Organization&#x0a;Street address&#x0a;city, state zip"></textarea>
         </div>
         <div style="align-items: right; margin-top: 1em;">
           <button pButton class="button"
@@ -349,7 +352,7 @@
       <div
         style="width:100%; vertical-align: bottom;background-color:#153971;height: 4em; color:white;text-align: center;padding-top: .5em; ">
         <div style="display: inline-block; width: 90%; height: 100%; overflow: hidden; margin: auto;">
-          <h2 style="display:inline-block; color: white;">Author</h2>
+          <h2 style="display:inline-block; color: white;">Authors</h2>
           <i [ngClass]="getAuthorClass()" (click)="handleAuthorDisplay()" style="cursor:pointer;margin-left: .5em;"
             data-toggle="tooltip" title="Expend/collapse author details"></i>
           <div style="float: right; margin-right:.5em; margin-top: 1.5em;">
@@ -359,6 +362,14 @@
         </div>
       </div>
       <!-- <div style="overflow:hidden; width: 100%; height: 3em;"> -->
+      <div style="width: 90%; margin-left: 1em; margin-right: 1em;">
+        <div style="display: table;margin: 0.5em auto;width:fit-content;">
+          <span *ngFor="let author of tempAuthors.authors; let i = index">
+            {{ author.fn }}<span *ngIf="i < tempAuthors.authors.length-1 ">,</span>
+          </span>
+        </div>
+      </div>
+      <hr>
       <div style="overflow:hidden; width: 90%; margin: .5em auto 0em auto;">
         <button pButton class="button"
           style="float:right;width:150px; height:2em; background-color:grey;color:white;padding-right: 1em;"
@@ -400,8 +411,8 @@
               </td>
             </tr>
             <tr *ngIf="!author.isCollapsed">
-              <td align="right" data-toggle="tooltip" title="Required field">
-                <span style="color:red;">*</span> Given Name: &nbsp;
+              <td align="right" data-toggle="tooltip" title="Required field" width="20%">
+                <span style="margin-right: .5em;" data-toggle="tooltip" title="This field is required"><span style="color:red;">*</span> Given Name:</span>
               </td>
               <td>
                 <input type="text" [(ngModel)]="author.givenName" style="height:2em;"
@@ -410,7 +421,7 @@
             </tr>
             <tr *ngIf="!author.isCollapsed">
               <td align="right">
-                Middle Name: &nbsp;
+                <span style="margin-right: .5em;">Middle Name:</span>
               </td>
               <td>
                 <input type="text" [(ngModel)]="author.middleName" style="height:2em;"
@@ -419,7 +430,7 @@
             </tr>
             <tr *ngIf="!author.isCollapsed" data-toggle="tooltip" title="Required field">
               <td align="right">
-                <span style="color:red;">*</span> Family Name: &nbsp;
+                <span style="margin-right: .5em;" data-toggle="tooltip" title="This field is required"><span style="color:red;">*</span> Family Name:</span>
               </td>
               <td>
                 <input type="text" [(ngModel)]="author.familyName" style="height:2em;"
@@ -428,7 +439,7 @@
             </tr>
             <tr *ngIf="!author.isCollapsed">
               <td width="15%" align="right">
-                Name (as displayed) &nbsp;
+                <span style="margin-right: .5em;" data-toggle="tooltip" title="This field is required"><span style="color:red;">*</span> Name (as displayed)</span>
               </td>
               <td align="left">
                 <input type="text" [(ngModel)]="author.fn"
@@ -443,7 +454,7 @@
             </tr>
             <tr *ngIf="!author.isCollapsed">
               <td align="right">
-                ORCID: &nbsp;
+                <span style="margin-right: .5em;" data-toggle="tooltip" title="This field is recommended"><span style="color:green;">*</span> ORCID:</span>
               </td>
               <td>
                 <input type="text" [(ngModel)]="author.orcid"
@@ -454,7 +465,7 @@
             </tr>
             <tr *ngIf="!author.isCollapsed">
               <td align="right" style="vertical-align: top;">
-                Affiliations: &nbsp;
+                <span style="margin-right: .5em;" data-toggle="tooltip" title="This field is recommended"><span style="color:green;">*</span> Affiliations:</span>
                 <span class="faa-stack" (click)="addAffiliation(i);" data-toggle="tooltip" title="Add affiliation">
                   <i class="faa faa-circle faa-stack-2x" style="color:green;"></i>
                   <i class="faa faa-plus faa-stack-1x faa-inverse"></i>
