@@ -309,7 +309,7 @@ export class LandingComponent implements OnInit {
       return;
     }
 
-    console.log(this.record);
+    console.log("this.record", this.record);
 
     this.type = this.record['@type'];
     this.titleService.setTitle(this.record['title']);
@@ -521,6 +521,7 @@ export class LandingComponent implements OnInit {
       testdata["data"] = this.arrangeIntoTree(this.record['components']);
       this.files.push(testdata);
     }
+    console.log("this.files", this.files);
   }
   //This is to create a tree structure
   private arrangeIntoTree(paths) {

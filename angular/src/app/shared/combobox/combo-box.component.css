@@ -1,0 +1,43 @@
+.combo-container {
+  position: relative;
+  z-index: 9;
+  background: white;
+  width: 50%;
+  }
+  .input-control{
+  width: 165px;
+  border: 0;
+  }
+  .data-container {
+  position: absolute;
+  width: 196px;
+  background: white;
+  display: block;
+  border: 1px solid grey;
+  height: 200px;
+  width: 400px;
+  overflow-y: scroll;
+  top: 2em;
+  padding-left: .5em;
+  }
+  .data-list {
+  cursor: pointer;
+  margin-top: 2px;
+  margin-bottom: 2px;
+  }
+  .drop-down {
+  border: 1px solid grey;
+  width: 90%;
+  height: 2em;
+  }
+  .drop-down-button {
+  position: relative;
+  top:-2px;
+  border: 1px solid lightgrey;
+  height: 2em;
+  background: white;
+  padding-bottom: 10px;
+  }
+  .highlight{
+  background: grey;
+  }

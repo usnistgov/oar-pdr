@@ -19,6 +19,9 @@ import { Router } from '@angular/router';
 import { CommonFunctionService } from '../../shared/common-function/common-function.service';
 import { ModalService } from '../../shared/modal-service';
 import { ContenteditableModel } from '../../directives/contenteditable-model.directive';
+import { TaxonomyListService } from '../../shared/taxonomy-list';
+import { ComboBoxComponent } from '../../shared/combobox/combo-box.component';
+import { ComboBoxPipe } from '../../shared/combobox/combo-box.pipe';
 
 declare var saveAs: any;
 
@@ -93,8 +96,12 @@ export class DescriptionComponent {
   descriptionObj: any;
   tempDecription: string;
   topicObj: any;
-  tempTopics: string[];
+  tempTopics: any;
   defaultText: string = "Enter description here...";
+  taxonomyList: any[];
+  errorMsg: any;
+  taxonomyTree: TreeNode[] = [];
+  selectedData: TreeNode[] = [];
 
   /* Function to Return Keys object properties */
   keys(): Array<string> {
@@ -111,6 +118,7 @@ export class DescriptionComponent {
     private confirmationService: ConfirmationService,
     private commonFunctionService: CommonFunctionService,
     private modalService: ModalService,
+    private taxonomyListService: TaxonomyListService,
     public router: Router,
     ngZone: NgZone) {
     this.cols = [
@@ -161,6 +169,20 @@ export class DescriptionComponent {
     this.cartMap = this.cartService.getCart();
     this.ediid = this.commonVarService.getEdiid();
 
+    this.taxonomyListService.get(0).subscribe((result) => {
+      if (result != null && result != undefined)
+        this.buildTaxonomyTree(result);
+
+      this.taxonomyList = [];
+      for (var i = 0; i < result.length; i++) {
+        this.taxonomyList.push({ "taxonomy": result[i].label });
+      }
+    }, (error) => {
+      console.log("There is an error getting taxonomy list.");
+      console.log(error);
+      this.errorMsg = error;
+    });
+
     const newPart = {
       data: {
         cartId: "/",
@@ -204,6 +226,88 @@ export class DescriptionComponent {
     );
   }
 
+  /*
+  *   build taxonomy tree
+  */
+  buildTaxonomyTree(result: any) {
+    let allTaxonomy: any = result;
+    var tempTaxonomyTree = {}
+    if (result != null && result != undefined) {
+      tempTaxonomyTree["data"] = this.arrangeIntoTree(result);
+      this.taxonomyTree.push(tempTaxonomyTree);
+    }
+
+    this.taxonomyTree = <TreeNode[]>this.taxonomyTree[0].data;
+  }
+
+  private arrangeIntoTree(paths) {
+    const tree = [];
+    paths.forEach((path) => {
+      var fullpath: string;
+      if (path.parent != null && path.parent != undefined && path.parent != "")
+        fullpath = path.parent + ":" + path.label;
+      else
+        fullpath = path.label;
+
+      const pathParts = fullpath.split(':');
+      let currentLevel = tree; // initialize currentLevel to root
+
+      for (var j = 0; j < pathParts.length; j++) {
+        let tempId: string = '';
+        for (var k = 0; k < j + 1; k++) {
+          tempId = tempId + pathParts[k];
+          if (k < j) {
+            tempId = tempId + ":";
+          }
+        }
+
+        // check to see if the path already exists.
+        const existingPath = currentLevel.filter(level => level.data.treeId === tempId);
+        if (existingPath.length > 0) {
+          // The path to this item was already in the tree, so don't add it again.
+          // Set the current level to this path's children  
+          currentLevel = existingPath[0].children;
+        } else {
+          let newPart = null;
+          newPart = {
+            data: {
+              treeId: tempId,
+              ediid: this.ediid,
+              name: tempId,
+              resId: tempId,
+              filePath: tempId
+            }, children: []
+          };
+          currentLevel.push(newPart);
+          currentLevel = newPart.children;
+          // }
+        }
+
+        // if (existingPath.length > 0) {
+
+        //   // The path to this item was already in the tree, so don't add it again.
+        //   // Set the current level to this path's children  
+        //   currentLevel = existingPath[0].children;
+        // } else {
+        //   if (tempId == null || tempId == undefined)
+        //     tempId = path["_id"].counter;
+
+        //   let newPart = null;
+        //   newPart = {
+        //     data: {
+        //       treeId: tempId,
+        //       name: tempId.replace(' ','_')
+        //     },
+        //     children: []
+        //   };
+        //   currentLevel.push(newPart);
+        //   currentLevel = newPart.children;
+        //   // }
+        // }
+      };
+    });
+    return tree;
+  }
 
   /*
   *   Init object - edit buttons for animation purpose
@@ -998,17 +1102,38 @@ export class DescriptionComponent {
   *   Open description modal
   */
   openTopicModal() {
+    this.tempTopics = [];
     if (this.record['topic'].length > 0) {
-      this.tempTopics = this.record['topic'];
+      for (var i = 0; i < this.record['topic'].length; i++) {
+        this.tempTopics.push({ 'taxonomy': this.record['topic'][i].tag.split(":")[0], 'topic': this.record['topic'][i].tag.split(":")[1] });
+      }
     }
     this.modalService.open("Topic-popup-dialog");
   }
 
+  /*
+  *   Return topic border style
+  */
   getTopicBorder() {
     if (this.recordEditmode)
-      return {'border': '1px solid lightgrey'};
+      return { 'border': '1px solid lightgrey' };
     else
-      return {'border': '0px solid lightgrey'};
+      return { 'border': '0px solid lightgrey' };
+  }
+
+  /* 
+  *   Save contact info when click on save button in pop up dialog
+  */
+  saveTopic() {
+    var ltempTopics: any[] = [];
+    for (var i = 0; i < this.tempTopics.length; ++i) {
+      ltempTopics.push({ '@type': 'Concept', 'scheme': 'https://www.nist.gov/od/dm/nist-themes/v1.0', 'tag': this.tempTopics[i].taxonomy + ":" + this.tempTopics[i].topic })
+    }
+    console.log("ltempTopics", ltempTopics);
+    this.record['topic'] = JSON.parse(JSON.stringify(ltempTopics));
+
+    // Send update to backend here...
+    this.modalService.close('Topic-popup-dialog');
   }
 
   /*

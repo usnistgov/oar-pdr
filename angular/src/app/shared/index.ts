@@ -5,4 +5,5 @@ export * from './headbar/index';
 export * from './footbar/index';
 export * from './search-service/index';
 export * from './common-var/index';
+export * from './taxonomy-list/index';
 // export * from './config/env.config';

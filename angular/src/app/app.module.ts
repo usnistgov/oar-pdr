@@ -44,6 +44,9 @@ import { CommonFunctionService } from './shared/common-function/common-function.
 import {enableProdMode} from '@angular/core';
 import { ModalComponent } from './directives';
 import { ModalService } from './shared/modal-service';
+import { TaxonomyListService } from './shared/taxonomy-list'
+import { ComboBoxComponent } from './shared/combobox/combo-box.component';
+import { ComboBoxPipe } from './shared/combobox/combo-box.pipe';
 
 enableProdMode();
 // used to create fake backend
@@ -67,7 +70,7 @@ const appInitializerFn = (appConfig: AppConfig) => {
     LandingAboutComponent, LandingComponent, DatacartComponent,
     Collaspe, MetadataComponent, DescriptionComponent,
     KeyValuePipe, MetadataView, NoidComponent, NerdmComponent,
-    ErrorComponent, UserErrorComponent,
+    ErrorComponent, UserErrorComponent,ComboBoxComponent,ComboBoxPipe,
     AppShellNoRenderDirective, AppShellRenderDirective, LoginComponent, ModalComponent, ContenteditableModel
   ],
   imports: [
@@ -94,6 +97,7 @@ const appInitializerFn = (appConfig: AppConfig) => {
     TestDataService,
     ConfirmationService,
     CommonFunctionService,
+    TaxonomyListService,
     ModalService,
     {
       provide: APP_INITIALIZER,

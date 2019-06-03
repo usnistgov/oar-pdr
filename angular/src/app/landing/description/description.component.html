@@ -329,16 +329,25 @@
   <div class="modal-forground">
     <div class="modal-body">
       <div style="background-color:#153971;height: 4em; color:white;text-align: center;padding-top: .5em">
-        <h2 style="color: white;">Topics</h2>
+        <h2 style="color: white;">Research Topics</h2>
       </div>
-      <div style="width:90%; margin: auto; border: 1px solid green;">
+      <div style="width:90%; margin: auto;">
         <table width="100%" align="center">
-          <tr *ngFor="let topic of tempTopics; let i = index; trackBy: trackByFn">
-            <td align="right" data-toggle="tooltip" title="Required field" width="20%">
-              <span style="margin-right: .5em;"> Topic:</span>
+          <tr>
+            <td align="center" width="40%">
+              Taxonomy
+            </td>
+            <td colspan="2" align="center">
+              Topic
+            </td>
+          </tr>
+          <tr *ngFor="let topic of tempTopics; let i = index; trackBy: trackByFn" align="top">
+            <td>
+              <!-- <input type="text" [(ngModel)]="topic.taxonomy" style="height:2em;" /> -->
+              <combo-box [dataList]="taxonomyList" [columnName]="'taxonomy'" [(taxonomy)]="topic.taxonomy"></combo-box>
             </td>
             <td>
-              <input type="text" [(ngModel)]="topic.tag" style="height:2em;" />
+              <input type="text" [(ngModel)]="topic.topic" style="height:2em;" />
             </td>
             <td width="50px">
               <i class="faa faa-trash" (click)="deleteTopic(i, topic)"
@@ -350,19 +359,40 @@
         <div style="align-items: right; margin-top: 1em;">
           <button pButton class="button"
             style="float:right;margin:0em 1em 2em 1em;width:150px; height:2em; background-color:grey;color:white;padding-right: 1em;"
-            (click)="closeModal('Description-popup-dialog');">
+            (click)="closeModal('Topic-popup-dialog');">
             <i class="faa faa-trash faa-1x icon-white" style="color: #fff;padding-left: .5em;padding-right: .5em;"></i>
             Cancel
           </button>
           <button pButton class="button"
             style="float:right;margin:0em 1em 2em 1em;width:150px; height:2em; background-color:green;color:white;padding-right: 1em;"
-            (click)="saveDescription();">
+            (click)="saveTopic();">
             <i class="faa faa-save faa-1x icon-white" style="color: #fff;padding-left: .5em;padding-right: .5em;"></i>
             Save
           </button>
         </div>
       </div>
       <div style="clear:both"></div>
+      <div style="margin: .5em 1em .5em 1em">
+        <p-treeTable [value]="taxonomyTree" selectionMode="checkbox" [resizableColumns]="true"
+          [(selection)]="selectedData" (onNodeSelect)="dataFileCount()" (onNodeUnselect)="dataFileCount()">
+          <ng-template pTemplate="header">
+            <tr>
+              <th [style.font-size]="fontSize" ttResizableColumn>
+                Select research topics from the following:
+              </th>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="body" let-rowNode let-rowData="rowData" let-i="rowIndex">
+            <tr>
+              <td [ngStyle]="titleStyle()">
+                <p-treeTableToggler [rowNode]="rowNode"></p-treeTableToggler>
+                &nbsp;<p-treeTableCheckbox [value]="rowNode"></p-treeTableCheckbox>
+                {{rowData.name}}
+              </td>
+            </tr>
+          </ng-template>
+        </p-treeTable>
+      </div>
     </div>
   </div>
   <div class="modal-background"></div>
