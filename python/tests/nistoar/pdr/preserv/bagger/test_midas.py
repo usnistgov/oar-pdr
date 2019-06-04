@@ -214,6 +214,52 @@ class TestMIDASMetadataBaggerMixed(test.TestCase):
         self.assertTrue(not os.path.exists(
             os.path.dirname(self.bagr.bagbldr.bag.nerd_file_for("gold"))))
 
+    doiclientinfo = {
+        "app_name": "NIST Open Access for Research: oar-pdr",
+        "app_version": "testing",
+        "app_url": "http://github.com/usnistgov/oar-pdr/",
+        "email": "datasupport@nist.gov"
+    }
+
+    @test.skipIf("doi" not in os.environ.get("OAR_TEST_INCLUDE",""),
+                 "kindly skipping doi service checks")
+    def test_ensure_res_metadata_enhanced_refs(self):
+        self.assertFalse(os.path.exists(self.bagdir))
+        self.assertIsNone(self.bagr.inpodfile)
+
+        cfg = {
+            'enrich_refs': False,
+            'doi_resolver': {
+                'client_info': self.doiclientinfo
+            }
+        }
+        self.bagr = midas.MIDASMetadataBagger(self.midasid, self.bagparent,
+                                              self.revdir, self.upldir, cfg)
+        self.bagr.ensure_res_metadata()
+        self.assertEqual(len(self.bagr.resmd['references']), 1)
+        self.assertIn('doi.org', self.bagr.resmd['references'][0]['location'])
+        self.assertNotIn('citation', self.bagr.resmd['references'][0])
+
+        cfg['enrich_refs'] = True
+        self.bagr = midas.MIDASMetadataBagger(self.midasid, self.bagparent,
+                                              self.revdir, self.upldir, cfg)
+        self.bagr.ensure_res_metadata(True)
+        self.assertEqual(len(self.bagr.resmd['references']), 1)
+        self.assertIn('doi.org', self.bagr.resmd['references'][0]['location'])
+        self.assertIn('citation', self.bagr.resmd['references'][0])
+
+        rmd = self.bagr.bagbldr.bag.nerd_metadata_for('', False)
+        self.assertEqual(len(rmd['references']), 1)
+        self.assertIn('doi.org', rmd['references'][0]['location'])
+        self.assertNotIn('citation', rmd['references'][0])
+        
+        rmd = self.bagr.bagbldr.bag.annotations_metadata_for('')
+        self.assertEqual(len(rmd['references']), 1)
+        self.assertIn('doi.org', rmd['references'][0]['location'])
+        self.assertIn('citation', rmd['references'][0])
+        
+        
+
     def test_ensure_file_metadata(self):
         self.assertFalse(os.path.exists(self.bagdir))
         self.assertIsNone(self.bagr.bagbldr.ediid)

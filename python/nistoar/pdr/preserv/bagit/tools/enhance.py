@@ -287,10 +287,17 @@ class ReferenceEnhancer(object):
                 if key in self.refs:
                     if not override and 'citation' in self.refs[key]:
                         return False
+                    id = self.refs[key].get('@id')
                     self.refs[key].update(self.doir.to_reference(doi))
+                    if id:
+                        self.refs[key]['@id'] = id  # keep previous @id
 
                 else:
                     self.refs[key] = self.doir.to_reference(doi)
+                    if self.refs[key]['@id'].startswith("doi:"):
+                        self.refs[key]['@id'] = \
+                                          _altdoifmt.sub('https://doi.org/',
+                                                         self.refs[key]['@id'])
 
             except DOIResolutionException as ex:
                 if self.log:
@@ -354,7 +361,7 @@ def enhance_refs(bagbldr, as_annot=False, override=False, config=None):
     """
     return ReferenceEnhancer(config).enhance_refs(bagbldr, as_annot, override)
 
-def synchronize_enhanced_refs(self, bagbldr, override=False, config=None):
+def synchronize_enhanced_refs(bagbldr, override=False, config=None):
     """
     enhance the reference descriptions, saving the enhancements as annotations,
     using the unannotated references as a guide.  
