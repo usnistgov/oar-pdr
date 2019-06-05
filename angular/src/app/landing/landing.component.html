@@ -479,8 +479,10 @@
                       <table>
                         <tr>
                           <td width="10%" align="right">Organization Name:</td>
-                          <td><input type="text" [(ngModel)]="author.affiliation[j].title"
-                              style="width: 100%;height:2em;" />
+                          <td>
+                            <!-- <input type="text" [(ngModel)]="author.affiliation[j].title"
+                              style="width: 100%;height:2em;" /> -->
+                              <combo-box [dataList]="organizationList" [columnName]="'Organization'" [(taxonomy)]="author.affiliation[j].title"></combo-box>
                           </td>
                         </tr>
                         <tr>

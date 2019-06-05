@@ -96,12 +96,13 @@ export class DescriptionComponent {
   descriptionObj: any;
   tempDecription: string;
   topicObj: any;
-  tempTopics: any;
+  tempTopics: string[] = [];
   defaultText: string = "Enter description here...";
   taxonomyList: any[];
   errorMsg: any;
   taxonomyTree: TreeNode[] = [];
   selectedData: TreeNode[] = [];
+  isVisible: boolean = true;
 
   /* Function to Return Keys object properties */
   keys(): Array<string> {
@@ -238,6 +239,7 @@ export class DescriptionComponent {
     }
 
     this.taxonomyTree = <TreeNode[]>this.taxonomyTree[0].data;
+    // console.log("this.taxonomyTree", this.taxonomyTree);
   }
 
   private arrangeIntoTree(paths) {
@@ -255,7 +257,7 @@ export class DescriptionComponent {
       for (var j = 0; j < pathParts.length; j++) {
         let tempId: string = '';
         for (var k = 0; k < j + 1; k++) {
-          tempId = tempId + pathParts[k];
+          tempId = tempId + pathParts[k].replace(/ /g, "");
           if (k < j) {
             tempId = tempId + ":";
           }
@@ -272,38 +274,16 @@ export class DescriptionComponent {
           newPart = {
             data: {
               treeId: tempId,
-              ediid: this.ediid,
-              name: tempId,
-              resId: tempId,
-              filePath: tempId
-            }, children: []
+              name: pathParts[j].replace(/ /g, ""),
+              researchTopic: tempId,
+              bkcolor: 'white'
+            }, children: [],
+            expanded: false
           };
           currentLevel.push(newPart);
           currentLevel = newPart.children;
           // }
         }
-
-        // if (existingPath.length > 0) {
-
-        //   // The path to this item was already in the tree, so don't add it again.
-        //   // Set the current level to this path's children  
-        //   currentLevel = existingPath[0].children;
-        // } else {
-        //   if (tempId == null || tempId == undefined)
-        //     tempId = path["_id"].counter;
-
-        //   let newPart = null;
-        //   newPart = {
-        //     data: {
-        //       treeId: tempId,
-        //       name: tempId.replace(' ','_')
-        //     },
-        //     children: []
-        //   };
-        //   currentLevel.push(newPart);
-        //   currentLevel = newPart.children;
-        //   // }
-        // }
       };
     });
     return tree;
@@ -623,8 +603,6 @@ export class DescriptionComponent {
       if (comp.children.length > 0) {
         compValue += this.addFilesToCart(comp.children, isSelected, mode);
       } else {
-        console.log("comp.data");
-        console.log(comp.data);
         this.addtoCart(comp.data, isSelected, mode).then(function (result) {
           compValue = 1;
         }.bind(this), function (err) {
@@ -1105,9 +1083,10 @@ export class DescriptionComponent {
     this.tempTopics = [];
     if (this.record['topic'].length > 0) {
       for (var i = 0; i < this.record['topic'].length; i++) {
-        this.tempTopics.push({ 'taxonomy': this.record['topic'][i].tag.split(":")[0], 'topic': this.record['topic'][i].tag.split(":")[1] });
+        this.tempTopics.push(this.record['topic'][i].tag);
       }
     }
+    this.refreshTopicTree();
     this.modalService.open("Topic-popup-dialog");
   }
 
@@ -1125,12 +1104,15 @@ export class DescriptionComponent {
   *   Save contact info when click on save button in pop up dialog
   */
   saveTopic() {
-    var ltempTopics: any[] = [];
+    var strtempTopics: string = '';
+    var lTempTopics: any[] = [];
+
     for (var i = 0; i < this.tempTopics.length; ++i) {
-      ltempTopics.push({ '@type': 'Concept', 'scheme': 'https://www.nist.gov/od/dm/nist-themes/v1.0', 'tag': this.tempTopics[i].taxonomy + ":" + this.tempTopics[i].topic })
+      strtempTopics = strtempTopics + this.tempTopics[i];
+      lTempTopics.push({ '@type': 'Concept', 'scheme': 'https://www.nist.gov/od/dm/nist-themes/v1.0', 'tag': this.tempTopics[i] })
     }
-    console.log("ltempTopics", ltempTopics);
-    this.record['topic'] = JSON.parse(JSON.stringify(ltempTopics));
+
+    this.record['topic'] = JSON.parse(JSON.stringify(lTempTopics));
 
     // Send update to backend here...
     this.modalService.close('Topic-popup-dialog');
@@ -1141,5 +1123,149 @@ export class DescriptionComponent {
   */
   closeModal(id: string) {
     this.modalService.close(id);
+  }
+
+
+  /**
+   * Delete a topic
+   */
+  deleteTopic(index: number) {
+    this.expandTaxonomyTree(this.tempTopics[index], false);
+    this.tempTopics = this.tempTopics.filter(topic => topic != this.tempTopics[index]);
+    this.refreshTopicTree();
+  }
+
+  /**
+   * Update the topic list
+   */
+  updateTopics(rowNode: any) {
+    const existingTopic = this.tempTopics.filter(topic => topic == rowNode.node.data.researchTopic);
+    if (existingTopic.length == 0)
+      this.tempTopics.push(rowNode.node.data.researchTopic);
+  }
+
+  /*
+  *   Set text color if the given topic already exists
+  */
+  getTopicColor(rowNode: any) {
+    // console.log("this.tempTopics", this.tempTopics);
+    const existingTopic = this.tempTopics.filter(topic => topic == rowNode.node.data.researchTopic);
+    if (existingTopic.length > 0) {
+      return 'green';
+    } else {
+      return '#1E6BA1';
+    }
+  }
+
+  /*
+  *   Set cursor type
+  */
+  getTopicCursor(rowNode: any) {
+    const existingTopic = this.tempTopics.filter(topic0 => topic0 == rowNode.node.data.researchTopic);
+    if (existingTopic.length > 0)
+      return 'default';
+    else
+      return 'pointer';
+  }
+
+  expandTaxonomyTree(topic: string, option: boolean) {
+    this.openCollapseTree(this.taxonomyTree, false);
+    this.resetTreeBackColor(this.taxonomyTree);
+    var treeNode: TreeNode = null;
+    for (let i = 0; treeNode == null && i < this.taxonomyTree.length; i++) {
+      treeNode = this.searchTreenode(this.taxonomyTree[i], topic);
+    }
+    if (treeNode != null) {
+      if (option)
+        treeNode.data.bkcolor = 'lightyellow';
+      else
+        treeNode.data.bkcolor = 'white';
+    }
+    if (option) {
+      while (treeNode != null) {
+        if (treeNode.parent != null)
+          treeNode.parent.expanded = true;
+        treeNode = treeNode.parent;
+      }
+    }
+
+    this.isVisible = false;
+    setTimeout(() => {
+      this.isVisible = true;
+    }, 0);
+  }
+
+  /*
+  *   Refresh the taxonomy tree 
+  *   It will only expand those selected topics 
+  */
+  refreshTopicTree() {
+    // for (let i = 0; i < this.taxonomyTree.length; i++) {
+    //   if (this.tempTopics.indexOf(this.taxonomyTree[i].data.researchTopic) > -1) {
+    //     var j: number = 0;
+    //     var parentNode = this.taxonomyTree[i].parent;
+    //     while (parentNode != null) {
+    //       this.taxonomyTree[i].parent.expanded = true;
+    //       parentNode = parentNode.parent;
+    //       console.log("parentNode", parentNode);
+    //     }
+    //   }
+    // }
+
+    this.isVisible = false;
+    setTimeout(() => {
+      this.isVisible = true;
+    }, 0);
+  }
+
+  /*
+  *   Expand/collapse treenodes
+  */
+  openCollapseTree(tree: TreeNode[], option: boolean) {
+    for (let i = 0; i < tree.length; i++) {
+      tree[i].expanded = option;
+      if (tree[i].children.length > 0) {
+        this.openCollapseTree(tree[i].children, option);
+      }
+    }
+  }
+
+  /*
+  *   Expand/collapse treenodes
+  */
+  resetTreeBackColor(tree: TreeNode[]) {
+    for (let i = 0; i < tree.length; i++) {
+      tree[i].data.bkcolor = 'white';
+      if (tree[i].children.length > 0) {
+        this.resetTreeBackColor(tree[i].children);
+      }
+    }
+  }
+
+  /*
+  *   search treeNode
+  */
+  searchTreenode(tree: TreeNode, topic: string) {
+    if (tree.data.researchTopic == topic) {
+      return tree;
+    } else if (tree.children != null) {
+      var i;
+      var result = null;
+      for (i = 0; result == null && i < tree.children.length; i++) {
+        result = this.searchTreenode(tree.children[i], topic);
+      }
+      return result;
+    }
+    return null;
+  }
+
+  /*
+  *   Return row background color
+  */
+  rowBackColor(rowData: any) {
+    if (rowData == null || rowData == undefined)
+      return "white";
+    else
+      return rowData.bkcolor;
   }
 }

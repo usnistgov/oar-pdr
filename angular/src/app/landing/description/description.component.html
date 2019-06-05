@@ -331,26 +331,20 @@
       <div style="background-color:#153971;height: 4em; color:white;text-align: center;padding-top: .5em">
         <h2 style="color: white;">Research Topics</h2>
       </div>
-      <div style="width:90%; margin: auto;">
+      <div style="width:90%; margin: 1em auto 1em auto;">
         <table width="100%" align="center">
-          <tr>
-            <td align="center" width="40%">
-              Taxonomy
-            </td>
-            <td colspan="2" align="center">
-              Topic
-            </td>
-          </tr>
-          <tr *ngFor="let topic of tempTopics; let i = index; trackBy: trackByFn" align="top">
-            <td>
-              <!-- <input type="text" [(ngModel)]="topic.taxonomy" style="height:2em;" /> -->
+          <tr *ngFor="let topic of tempTopics; let i = index; trackBy: trackByFn" align="top"
+            style="border-bottom:1pt solid black;" height="20">
+            <!-- <td>
+              <input type="text" [(ngModel)]="topic.taxonomy" style="height:2em;" />
               <combo-box [dataList]="taxonomyList" [columnName]="'taxonomy'" [(taxonomy)]="topic.taxonomy"></combo-box>
-            </td>
+            </td> -->
             <td>
-              <input type="text" [(ngModel)]="topic.topic" style="height:2em;" />
+              <!-- <input type="text" [(ngModel)]="topic.topic" style="height:2em;" /> -->
+              <span (click)="expandTaxonomyTree(topic, true)" style="color: #1E6BA1; cursor: pointer;">{{topic}}</span>
             </td>
             <td width="50px">
-              <i class="faa faa-trash" (click)="deleteTopic(i, topic)"
+              <i class="faa faa-trash" (click)="deleteTopic(i)"
                 style="float: right;cursor: pointer;color:grey; margin: 1em .5em;" data-toggle="tooltip"
                 title="Delete affiliation"></i>
             </td>
@@ -372,9 +366,12 @@
         </div>
       </div>
       <div style="clear:both"></div>
-      <div style="margin: .5em 1em .5em 1em">
-        <p-treeTable [value]="taxonomyTree" selectionMode="checkbox" [resizableColumns]="true"
-          [(selection)]="selectedData" (onNodeSelect)="dataFileCount()" (onNodeUnselect)="dataFileCount()">
+      <div style="width:90%;margin: 0em auto 0em auto;">Select topic(s) from the following list (scroll down to see more):</div>
+      <div
+        style="width:90%; margin: .5em auto 2em auto; height: 50vh;; overflow: scroll; border: 1px solid lightgrey;">
+        
+        <!-- <p-treeTable [value]="taxonomyTree" selectionMode="checkbox" [resizableColumns]="true"
+          [(selection)]="selectedData" (onNodeSelect)="selectSearchTopic()" (onNodeUnselect)="selectSearchTopic()">
           <ng-template pTemplate="header">
             <tr>
               <th [style.font-size]="fontSize" ttResizableColumn>
@@ -391,8 +388,21 @@
               </td>
             </tr>
           </ng-template>
-        </p-treeTable>
+        </p-treeTable> -->
+        <div style="margin: .5em 1em .5em 1em;">
+          <p-treeTable *ngIf="isVisible" [value]="taxonomyTree">
+            <ng-template pTemplate="body" let-rowNode let-rowData="rowData">
+              <tr>
+                <td [ngStyle]="{'background-color': rowBackColor(rowData)}">
+                  <p-treeTableToggler [rowNode]="rowNode"></p-treeTableToggler>
+                  <span (click)="updateTopics(rowNode)" [ngStyle]="{'color': getTopicColor(rowNode), 'cursor': getTopicCursor(rowNode)}">{{rowData.name}}</span>
+                </td>
+              </tr>
+            </ng-template>
+          </p-treeTable>
+        </div>
       </div>
+      <div style="height: 1em;"></div>
     </div>
   </div>
   <div class="modal-background"></div>

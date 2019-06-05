@@ -178,6 +178,7 @@ export class LandingComponent implements OnInit {
   tempAddress: string;
   tempDecription: string;
   isAuthorCollapsed: boolean = false;
+  organizationList: string[] = ["National Institute of Standards and Technology"]
 
   /**
    * Creates an instance of the SearchPanel
@@ -309,7 +310,7 @@ export class LandingComponent implements OnInit {
       return;
     }
 
-    console.log("this.record", this.record);
+    // console.log("this.record", this.record);
 
     this.type = this.record['@type'];
     this.titleService.setTitle(this.record['title']);
@@ -521,7 +522,6 @@ export class LandingComponent implements OnInit {
       testdata["data"] = this.arrangeIntoTree(this.record['components']);
       this.files.push(testdata);
     }
-    console.log("this.files", this.files);
   }
   //This is to create a tree structure
   private arrangeIntoTree(paths) {
@@ -1004,8 +1004,6 @@ export class LandingComponent implements OnInit {
       this.tempAuthors.authors[author].fnLocked = false;
       this.tempAuthors.authors[author].originalIndex = author;
     }
-    console.log("this.tempAuthors");
-    console.log(this.tempAuthors);
     this.modalService.open("Author-popup-dialog");
   }
 
@@ -1245,8 +1243,6 @@ export class LandingComponent implements OnInit {
       this.tempAuthors.authors[i].affiliation = [];
 
     this.tempAuthors.authors[i].affiliation.push(aff);
-    console.log(this.tempAuthors.authors[i].affiliation);
-
     this.tempAuthors.authors[i].dataChanged = true;
   }
 

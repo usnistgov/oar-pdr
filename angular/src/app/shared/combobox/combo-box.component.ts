@@ -79,8 +79,6 @@ export class ComboBoxComponent implements OnInit {
   }
 
   ngOnInit() {
-    console.log("this.dataList");
-    console.log(this.dataList);
     this.reset();
   }
 
