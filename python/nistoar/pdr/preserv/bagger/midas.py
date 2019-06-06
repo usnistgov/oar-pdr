@@ -18,7 +18,7 @@ from .base import sys as _sys
 from . import utils as bagutils
 from ..bagit.builder import BagBuilder, NERDMD_FILENAME, FILEMD_FILENAME
 from ..bagit import NISTBag
-from ....id import PDRMinter
+from ....id import PDRMinter, NIST_ARK_NAAN
 from ... import def_merge_etcdir, utils
 from .. import (SIPDirectoryError, SIPDirectoryNotFound, AIPValidationError,
                 ConfigurationException, StateException, PODError,
@@ -46,7 +46,15 @@ _DATA_UPDATE  = 2
 
 def _midadid_to_dirname(midasid, log=None):
     out = midasid
+
+    if midasid.startswith("ark:/"+NIST_ARK_NAAN+"/"):
+        # new ARK-based MIDAS identifiers: chars. after shoulder is the
+        # record number and name of directory
+        out = re.sub(r'^ark:/\d+/(mds\d+\-)?', '', midasid)
+        return out
+    
     if len(midasid) > 32:
+        # Old UUID-based identifiers:
         # MIDAS drops the first 32 chars. of the ediid for the data
         # directory names
         out = midasid[32:]
@@ -141,13 +149,6 @@ class MIDASMetadataBagger(SIPBagger):
         
         super(MIDASMetadataBagger, self).__init__(workdir, config)
 
-        if not minter:
-            cfg = config.get('id_minter', {})
-            minter = PDRMinter(self.bagparent, cfg)
-            if not os.path.exists(minter.registry.store):
-                log.warning("Creating new ID minter for bag, "+self.name)
-        self._minter = minter
-
         # make sure the ID provided matches the one in the pod file
         podfile = self.find_pod_file()
         if podfile:
@@ -156,6 +157,9 @@ class MIDASMetadataBagger(SIPBagger):
             if pod.get('identifier') != midasid:
                 raise SIPDirectoryNotFound(msg="No matching SIP available",
                                            sys=self)
+
+        # If None, we'll create a ID minter if we need one (in self._mint_id)
+        self._minter = minter
 
         self.bagbldr = BagBuilder(self.bagparent, self.name,
                                   self.cfg.get('bag_builder', {}),
@@ -187,6 +191,12 @@ class MIDASMetadataBagger(SIPBagger):
         self.ensure_bag_parent_dir()
 
     def _mint_id(self, ediid):
+        if not self._minter:
+            cfg = self.cfg.get('id_minter', {})
+            self._minter = PDRMinter(self.bagparent, cfg)
+            if not os.path.exists(self._minter.registry.store):
+                log.warning("Creating new ID minter for bag, "+self.name)
+
         seedkey = self.cfg.get('id_minter', {}).get('ediid_data_key', 'ediid')
         return self._minter.mint({ seedkey: ediid })
 
@@ -349,7 +359,17 @@ class MIDASMetadataBagger(SIPBagger):
 
         if not os.path.exists(self.bagdir):
             self.bagbldr.ensure_bag_structure()
-            self.bagbldr.assign_id( self._mint_id(self.name) )
+
+            if self.name.startswith("ark:/"+NIST_ARK_NAAN+"/"):
+                # EDI ID is now a NIST ARK identifier; use it as our identifier
+                id = self.name
+            else:
+                # support deprecated 32+-character EDI ID: convert to ARK ID
+                log.warn("Minting ID for (deprecated) Non-ARK EDI-ID: "+
+                         self.name)
+                id = self._mint_id(self.name)
+
+            self.bagbldr.assign_id( id )
 
         return True
                 
