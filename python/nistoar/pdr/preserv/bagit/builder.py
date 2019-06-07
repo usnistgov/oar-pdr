@@ -364,11 +364,12 @@ class BagBuilder(PreservationSystem):
         if id.startswith("ark:"):
             if not re.match(r"^ark:/\d+/\w", id):
                 raise ValueError("Invalid ARK identifier provided: "+id)
+
             validate = self.cfg.get('validate_id', True)
             if isinstance(validate, str):
                 # assume that this is a RE of matching shoulders to validate
                 try:
-                    validate = bool( re.match(r'ark:/\d+/'+validate, id) )
+                    validate = bool( re.match(r'ark:/\d+/('+validate+')', id) )
                 except re.error as ex:
                     raise ConfigurationException("validate_id: Contains bad "
                                                  "regular expression value: " +

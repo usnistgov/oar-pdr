@@ -62,6 +62,15 @@ def _midadid_to_dirname(midasid, log=None):
         log.warn("Unexpected MIDAS ID (too short): "+midasid)
     return out
 
+def _midasid_to_bagname(midasid, log=None):
+    out = midasid
+
+    if midasid.startswith("ark:/"):
+        out = re.sub(r'/', '_', re.sub(r'^ark:/\d+/', '', midasid))
+
+    return out
+        
+
 class MIDASMetadataBagger(SIPBagger):
     """
     This class will migrate metadata provided by MIDAS into a working bag
@@ -117,7 +126,8 @@ class MIDASMetadataBagger(SIPBagger):
                                the directory is determined based on the provided
                                MIDAS ID.  
         """
-        self.name = midasid
+        self.midasid = midasid
+        self.name = _midasid_to_bagname(midasid)
         self.state = 'upload'
         self._indirs = []
 
@@ -360,14 +370,14 @@ class MIDASMetadataBagger(SIPBagger):
         if not os.path.exists(self.bagdir):
             self.bagbldr.ensure_bag_structure()
 
-            if self.name.startswith("ark:/"+NIST_ARK_NAAN+"/"):
+            if self.midasid.startswith("ark:/"+NIST_ARK_NAAN+"/"):
                 # EDI ID is now a NIST ARK identifier; use it as our identifier
-                id = self.name
+                id = self.midasid
             else:
                 # support deprecated 32+-character EDI ID: convert to ARK ID
                 log.warn("Minting ID for (deprecated) Non-ARK EDI-ID: "+
                          self.name)
-                id = self._mint_id(self.name)
+                id = self._mint_id(self.midasid)
 
             self.bagbldr.assign_id( id )
 
@@ -704,7 +714,8 @@ class PreservationBagger(SIPBagger):
                                the directory is determined based on the provided
                                MIDAS ID.  
         """
-        self.name = midasid
+        self.midasid = midasid
+        self.name = _midasid_to_bagname(midasid)
         self.mddir = mddir
         self.reviewdir = reviewdir
         self.asupdate = asupdate   # can be None
@@ -744,7 +755,10 @@ class PreservationBagger(SIPBagger):
                 
         self.ensure_bag_parent_dir()
 
-        self.siplog = log.getChild(self.name[:8]+'...')
+        logname = self.name
+        if self.name > 11:
+            longname = self.name[:8]+'...'
+        self.siplog = log.getChild(logname)
         bldcfg = self.cfg.get('bag_builder', {})
         if 'ensure_component_metadata' not in bldcfg:
             # default True can mess with annotations
@@ -771,7 +785,7 @@ class PreservationBagger(SIPBagger):
         # final preservation time), the previous metadata bag will be updated.
         parent = os.path.dirname(self.indir)
         sipdir = os.path.basename(self.indir)
-        mdbagger = MIDASMetadataBagger(self.name, self.mddir, parent,
+        mdbagger = MIDASMetadataBagger(self.midasid, self.mddir, parent,
                                        config=self.cfg, minter=self._minter,
                                        sipdirname=sipdir)
 
@@ -1048,7 +1062,7 @@ class PreservationBagger(SIPBagger):
             
         issues = res.failed(itp)
         if len(issues):
-            log.warn("Bag Validation issues detected for id="+self.name)
+            log.warn("Bag Validation issues detected for AIP id="+self.name)
             for iss in issues:
                 if iss.type == iss.ERROR:
                     log.error(iss.description)
