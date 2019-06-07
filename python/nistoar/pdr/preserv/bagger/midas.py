@@ -62,7 +62,7 @@ def _midadid_to_dirname(midasid, log=None):
         log.warn("Unexpected MIDAS ID (too short): "+midasid)
     return out
 
-def _midasid_to_bagname(midasid, log=None):
+def midasid_to_bagname(midasid, log=None):
     out = midasid
 
     if midasid.startswith("ark:/"):
@@ -127,7 +127,7 @@ class MIDASMetadataBagger(SIPBagger):
                                MIDAS ID.  
         """
         self.midasid = midasid
-        self.name = _midasid_to_bagname(midasid)
+        self.name = midasid_to_bagname(midasid)
         self.state = 'upload'
         self._indirs = []
 
@@ -371,7 +371,7 @@ class MIDASMetadataBagger(SIPBagger):
             self.bagbldr.ensure_bag_structure()
 
             if self.midasid.startswith("ark:/"+NIST_ARK_NAAN+"/"):
-                # EDI ID is now a NIST ARK identifier; use it as our identifier
+                # new-style EDI ID is a NIST ARK identifier; use it as our SIP id
                 id = self.midasid
             else:
                 # support deprecated 32+-character EDI ID: convert to ARK ID
@@ -715,7 +715,7 @@ class PreservationBagger(SIPBagger):
                                MIDAS ID.  
         """
         self.midasid = midasid
-        self.name = _midasid_to_bagname(midasid)
+        self.name = midasid_to_bagname(midasid)
         self.mddir = mddir
         self.reviewdir = reviewdir
         self.asupdate = asupdate   # can be None

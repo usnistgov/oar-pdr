@@ -9,10 +9,11 @@ from collections import Mapping
 from .. import PublishSystem
 from ...exceptions import (ConfigurationException, StateException,
                            SIPDirectoryNotFound, IDNotFound)
-from ...preserv.bagger import MIDASMetadataBagger, UpdatePrepService
+from ...preserv.bagger import (MIDASMetadataBagger, UpdatePrepService,
+                               midasid_to_bagname)
 from ...preserv.bagit import NISTBag
 from ...utils import build_mime_type_map, read_nerd
-from ....id import PDRMinter
+from ....id import PDRMinter, NIST_ARK_NAAN
 
 log = logging.getLogger(PublishSystem().subsystem_abbrev)
 
@@ -149,7 +150,7 @@ class PrePubMetadataService(PublishSystem):
         if not bagger:
             # this will raise an SIPDirectoryNotFound if there is no
             # submission data from MIDAS
-            bagger = self.open_bagger(id)
+            bagger = self.open_bagger(self.normalize_id(id))
             
         # update the metadata bag with the latest data from MIDAS
         bagger.ensure_preparation()
@@ -226,6 +227,24 @@ class PrePubMetadataService(PublishSystem):
 
         return out
 
+    def normalize_id(self, id):
+        """
+        if necesary, transform the given SIP identifier into a normalized 
+        form that will be be bassed to the bagger.  This allows requests 
+        to resolve_id() and locate_data_file() to accept several different 
+        forms.
+
+        Currently, recognized input SIP IDs include:
+          *  old-style, 32+-character MIDAS EDI identifiers
+          *  ARK identifiers -- these start with "ark:/"
+          *  Path-portion of an ARK identifer -- currently, an ID < 32 chars.
+             not starting with "ark:/" is assumed to be of this form.
+        """
+        if len(id) < 32 and not id.startswith("ark:/"):
+            naan = self.cfg.get('id_minter',{}).get('naan', NIST_ARK_NAAN)
+            id = "ark:/{}/{}".format(naan, id)
+        return id
+
     def resolve_id(self, id):
         """
         return a full NERDm resource record corresponding to the given 
@@ -236,13 +255,14 @@ class PrePubMetadataService(PublishSystem):
 
         try:
             
-            bagger = self.open_bagger(id)
+            bagger = self.open_bagger(self.normalize_id(id))
             
         except SIPDirectoryNotFound as ex:
             # there is no input data from midas; fall-back to a previously
             # published record, if available
             if self.prepsvc:
-                prepper = self.prepsvc.prepper_for(id, log=self.log)
+                prepper = self.prepsvc.prepper_for(midasid_to_bagname(id),
+                                                   log=self.log)
                 nerdmfile = prepper.cache_nerdm_rec()
                 if nerdmfile:
                     return read_nerd(nerdmfile)
