@@ -9,9 +9,9 @@ import { ErrorComponent, UserErrorComponent } from './landing/error.component';
 import { DatacartComponent} from './datacart/datacart.component';
 
 const routes: Routes = [
-  { path: '', redirectTo: '/about', pathMatch: 'full' },
+  { path: '', redirectTo: 'pdr/about', pathMatch: 'full' },
 
-  { path: 'about',  children: [
+  { path: 'pdr/about',  children: [
     {
       path: '',
      component: LandingAboutComponent
