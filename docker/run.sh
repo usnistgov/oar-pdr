@@ -117,6 +117,7 @@ comptypes=`echo $comptypes`
 cmds=`echo $cmds`
 [ -n "$comptypes" ] || comptypes="python angular"
 [ -n "$cmds" ] || cmds="build"
+echo "run.sh: Running docker commands [$cmds] on [$comptypes]"
 
 testopts="--cap-add SYS_ADMIN"
 volopt="-v ${codedir}:/dev/oar-pdr"
