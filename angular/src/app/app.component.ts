@@ -7,6 +7,14 @@ import { Router, NavigationStart, NavigationEnd, NavigationCancel, NavigationErr
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css']
 })
+export class AppComponent {
+  title = 'PDR Resource Landing Page';
+}
+
+/* 
+ * if SSR is working, this version, which enables a "loading" spinner,
+ * should not be necessary
+ *
 export class AppComponent implements AfterViewInit, OnInit {
   element: HTMLElement;
 
@@ -26,7 +34,7 @@ export class AppComponent implements AfterViewInit, OnInit {
 
   /**
    * Get the params OnInit
-   */
+   *
   ngOnInit() {
     this.element = document.getElementById('loadspinner') as HTMLElement;
     this.element.hidden = false;
@@ -48,5 +56,5 @@ export class AppComponent implements AfterViewInit, OnInit {
       );
     });
   }
-
 }
+*/

@@ -52,6 +52,7 @@
     </span>
 
     <div *ngIf="files.length  > 0">
+    <div *ngIf="inBrowser; else filesLoading">
       <div class="flex-container" style="margin-top: 2em;">
         <div style="flex: 0 0 110px; text-align: left; padding-bottom: 0em;">
           <span><b>Files </b> </span>
@@ -189,6 +190,15 @@
         </ng-template>
       </p-treeTable>
     </div>
+    <ng-template #filesLoading>
+      <div>
+        <b>Files </b>
+      </div>
+      <p>
+        <i>Loading file list...</i>
+      </p>
+    </ng-template>
+    </div>
   </div>
 </div>
 
@@ -222,9 +232,8 @@
     </div>
   </div>
 </div>
-<p-overlayPanel class="fileDialog" #op3 [dismissable]="true" [showCloseIcon]="true" [style]="{'display':'inline-block'}"
-  [appendTo]="'body'">
-  <div *ngIf="isNodeSelected" class="filecard">
+<p-overlayPanel class="fileDialog" #op3 [dismissable]="true" [showCloseIcon]="true" [style]="{'display':'inline-block','position':'related','left':'50%','top':'80%'}" [appendTo]="'body'">
+  <div *ngIf="isNodeSelected" class="filecard" [ngStyle]="{'max-width':getDialogWidth()}">
     <div class="ui-g filesection">
       <div *ngIf="fileNode" class="ui-g-12 ui-md-12 ui-lg-12 ui-sm-10">
         <span class="font8" style="color:grey">

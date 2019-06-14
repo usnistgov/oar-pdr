@@ -11,5 +11,7 @@ before_install:
 script:
   - echo && echo '#####' BUILDING AND RUNNING PYTHON TESTS && echo
   - bash ./testall python
-  - echo && echo '#####' BUILDING '(only)' ANGULAR && echo
+  - echo && echo '#####' BUILDING ANGULAR && echo
   - bash ./makedist angular
+  - echo && echo '#####' RUNNING ANGULAR TESTS && echo
+  - bash ./testall angular

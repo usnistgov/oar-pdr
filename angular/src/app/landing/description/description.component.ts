@@ -12,10 +12,9 @@ import { CommonVarService } from '../../shared/common-var';
 import { environment } from '../../../environments/environment';
 import { HttpClientModule, HttpClient, HttpHeaders, HttpRequest, HttpEventType, HttpResponse, HttpEvent } from '@angular/common/http';
 import { TestBed } from '@angular/core/testing';
-import { AppConfig, Config } from '../../shared/config-service/config.service';
+import { AppConfig } from '../../config/config';
 import { THIS_EXPR } from '@angular/compiler/src/output/output_ast';
 import { FileSaverService } from 'ngx-filesaver';
-import { v } from '@angular/core/src/render3';
 import { Router } from '@angular/router';
 import { CommonFunctionService } from '../../shared/common-function/common-function.service';
 
@@ -38,6 +37,7 @@ export class DescriptionComponent {
   @Input() editContent: boolean;
   @Input() filescount: number;
   @Input() metadata: boolean;
+  @Input() inBrowser : boolean;   // false if running server-side
 
   addAllFileSpinner: boolean = false;
   fileDetails: string = '';
@@ -82,11 +82,10 @@ export class DescriptionComponent {
   messageColor: any;
   noFileDownloaded: boolean; // will be true if any item in data cart is downloaded
   distApi: string;
-  confValues: Config;
   isLocalProcessing: boolean;
   showDownloadProgress: boolean = false;
-  mobWidth: number;
-  mobHeight: number;
+  mobWidth: number = 800;   // default value used in server context
+  mobHeight: number = 900;  // default value used in server context
   fontSize: string;
 
   /* Function to Return Keys object properties */
@@ -99,7 +98,7 @@ export class DescriptionComponent {
     private downloadService: DownloadService,
     private commonVarService: CommonVarService,
     private http: HttpClient,
-    private appConfig: AppConfig,
+    private cfg : AppConfig,
     private _FileSaverService: FileSaverService,
     private confirmationService: ConfirmationService,
     private commonFunctionService: CommonFunctionService,
@@ -110,18 +109,20 @@ export class DescriptionComponent {
         { field: 'mediatype', header: 'Media Type', width: 'auto' },
         { field: 'size', header: 'Size', width: 'auto' },
         { field: 'download', header: 'Status', width: 'auto' }];
-        
-      this.mobHeight = (window.innerHeight);
-      this.mobWidth = (window.innerWidth);
-      this.setWidth(this.mobWidth);
+
+      if (typeof(window) !== 'undefined') {
+        this.mobHeight = (window.innerHeight);
+        this.mobWidth = (window.innerWidth);
+        this.setWidth(this.mobWidth);
   
-      window.onresize = (e) => {
-        ngZone.run(() => {
-          this.mobWidth = window.innerWidth;
-          this.mobHeight = window.innerHeight;
-          this.setWidth(this.mobWidth);
-        });
-    };
+        window.onresize = (e) => {
+          ngZone.run(() => {
+            this.mobWidth = window.innerWidth;
+            this.mobHeight = window.innerHeight;
+            this.setWidth(this.mobWidth);
+          });
+        };
+      }
 
     this.cartService.watchAddAllFilesCart().subscribe(value => {
       this.addAllFileSpinner = value;
@@ -136,11 +137,10 @@ export class DescriptionComponent {
         this.cartLength = this.cartService.getCartSize();
       }
     });
-    this.confValues = this.appConfig.getConfig();
   }
 
   ngOnInit() {
-    this.distApi = this.confValues.DISTAPI;
+    this.distApi = this.cfg.get("distService", "/od/ds/");
 
     if (this.files.length != 0)
       this.files = <TreeNode[]>this.files[0].data;
@@ -161,7 +161,7 @@ export class DescriptionComponent {
         downloadUrl: null,
         description: null,
         filetype: null,
-        resId: "files",
+        resId: "/",
         filePath: "/",
         downloadProgress: 0,
         downloadInstance: null,
@@ -930,4 +930,12 @@ export class DescriptionComponent {
     }
   }
 
+  /*
+  * Make sure the width of popup dialog is less than 500px or 80% of the window width
+  */
+  getDialogWidth(){
+    var w = window.innerWidth > 500? 500: window.innerWidth;
+    console.log(w);
+    return w+'px';
+  }
 }

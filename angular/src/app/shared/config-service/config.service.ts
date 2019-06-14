@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http'; 
-import * as data_json   from '../../../assets/environment.json';
+// import * as data_json   from '../../../assets/environment.json';
 import * as process from 'process';
 import {  PLATFORM_ID, Inject } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
@@ -13,7 +13,9 @@ export interface Config {
     SDPAPI: string;
     PDRAPI: string;
     METAPI: string; 
- }
+}
+
+const data_json = require('../../../assets/environment.json');
 
 @Injectable()
 export class AppConfig {
