@@ -182,14 +182,14 @@ if wordin angular $comptypes; then
         docker run --rm $volopt "${dargs[@]}" oar-pdr/pdrangular build \
                        "${args[@]}" "${angargs[@]}"
     elif [ -n "$docmds" ]; then
-        echo '+' docker run --rm $volopt "${dargs[@]}" oar-pdr/angtest $docmds \
-                       "${args[@]}" "${angargs[@]}"
+        echo '+' docker run --rm $volopt "${dargs[@]}" --cap-add=SYS_ADMIN \
+                        oar-pdr/angtest $docmds "${args[@]}" "${angargs[@]}"
         if wordin shell $docmds; then
-            exec docker run -ti --rm $volopt "${dargs[@]}" oar-pdr/angtest \
-                        $docmds "${args[@]}" "${angargs[@]}"
+            exec docker run -ti --rm $volopt "${dargs[@]}" --cap-add=SYS_ADMIN \
+                        oar-pdr/angtest $docmds "${args[@]}" "${angargs[@]}"
         else
-            docker run --rm $volopt "${dargs[@]}" oar-pdr/angtest $docmds \
-                   "${args[@]}" "${angargs[@]}"
+            docker run --rm $volopt "${dargs[@]}" --cap-add=SYS_ADMIN \
+                   oar-pdr/angtest $docmds "${args[@]}" "${angargs[@]}"
         fi
     fi
 fi
