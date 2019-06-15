@@ -271,22 +271,25 @@ class BagBuilder(PreservationSystem):
         elif self._ediid:
             self.record("Unsetting ediid")
         self._ediid = val
-        self._upd_ediid(val)
-        if self._ediid:
-            self._upd_downloadurl(self._ediid)
+        old = self._upd_ediid(val)
+        if self._ediid and self._ediid != old:
+            self._upd_downloadurl(self._ediid, old)
 
     def _upd_ediid(self, ediid):
         # this updates the ediid metadatum in the resource nerdm.json
+        old = None
         if self.bag:
             mdfile = self.bag.nerd_file_for("")
             if os.path.exists(mdfile):
                 mdata = read_nerd(mdfile)
-                if mdata.get('ediid') != ediid:
+                old = mdata.get('ediid')
+                if old != ediid:
                     if ediid:
                         mdata['ediid'] = ediid
                     elif 'ediid' in mdata:
                         del mdata['ediid']
                     self._write_json(mdata, mdfile)
+        return old
 
     def _upd_downloadurl(self, ediid):
         mdtree = os.path.join(self.bagdir, 'metadata')
