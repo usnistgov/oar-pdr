@@ -273,7 +273,7 @@ class BagBuilder(PreservationSystem):
         self._ediid = val
         old = self._upd_ediid(val)
         if self._ediid and self._ediid != old:
-            self._upd_downloadurl(self._ediid, old)
+            self._upd_downloadurl(self._ediid)
 
     def _upd_ediid(self, ediid):
         # this updates the ediid metadatum in the resource nerdm.json

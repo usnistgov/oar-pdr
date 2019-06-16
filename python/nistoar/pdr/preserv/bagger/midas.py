@@ -874,7 +874,7 @@ class PreservationBagger(SIPBagger):
         mdbagger.prepare(nodata=True)
         self.datafiles = mdbagger.datafiles
         mdbagger._clear_all_unsynced_marks()
-        mdbagger._unset_logfile()
+        mdbagger.bagbldr._unset_logfile()
 
         # copy the contents of the metadata bag into the final preservation bag
         if os.path.exists(self.bagdir):
