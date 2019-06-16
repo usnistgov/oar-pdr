@@ -283,7 +283,7 @@ class BagBuilder(PreservationSystem):
             if os.path.exists(mdfile):
                 mdata = read_nerd(mdfile)
                 old = mdata.get('ediid')
-                if old != ediid:
+                if old and old != ediid:
                     if ediid:
                         mdata['ediid'] = ediid
                     elif 'ediid' in mdata:
