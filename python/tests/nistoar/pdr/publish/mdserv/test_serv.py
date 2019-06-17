@@ -16,6 +16,7 @@ import ejsonschema as ejs
 from nistoar.testing import *
 from nistoar.pdr import def_jq_libdir
 import nistoar.pdr.preserv.bagit.builder as bldr
+import nistoar.pdr.preserv.bagger.midas as midas
 import nistoar.pdr.publish.mdserv.serv as serv
 import nistoar.pdr.exceptions as exceptions
 from nistoar.pdr.utils import read_nerd, write_json
@@ -93,6 +94,8 @@ class TestPrePubMetadataService(test.TestCase):
         self.bagdir = os.path.join(self.bagparent, self.midasid)
 
     def tearDown(self):
+        if not midas.MIDASMetadataBagger._AsyncFileExaminer.wait_for_all():
+            raise RuntimeError("Trouble waiting for file examiner threads")
         self.srv = None
         self.tf.clean()
 

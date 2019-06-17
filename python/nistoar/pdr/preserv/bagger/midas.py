@@ -637,6 +637,7 @@ class MIDASMetadataBagger(SIPBagger):
         desired files have been added, executing launch() will launch the 
         examination in a separate thread. 
         """
+        threads = set()
 
         def __init__(self, bagger):
             self.bagger = bagger
@@ -647,11 +648,25 @@ class MIDASMetadataBagger(SIPBagger):
             self.files[filepath] = location
 
         def _prep(self):
-            if self.thread and self.thread.is_alive():
+            if self.running():
                 log.debug("File examiner thread is still running")
                 return False
+            self._unregister()
             self.thread = self._Thread(self)
+            self._register()
             return True
+
+        def _register(self):
+            self.threads.add(self.thread)
+        def _unregister(self):
+            if self.running() and self.thread in self.threads:
+                self.threads.remove(self.thread)
+            self.thread = None
+        def __del__(self):
+            self._unregister(self.thread)
+
+        def running(self):
+            return self.thread and self.thread.is_alive()
 
         def launch(self):
             if self._prep():
@@ -678,6 +693,27 @@ class MIDASMetadataBagger(SIPBagger):
             except Exception as ex:
                 log.error("%s: Failed to extract file metadata: %s"
                           % (location, str(ex)))
+
+        @classmethod
+        def wait_for_all(cls, timeout=10):
+            log.info("Waiting for file examiner threads to finish")
+            done = set(cls.threads)
+            for thrd in cls.threads:
+                try:
+                    thrd.join(timeout)
+                    if thrd.is_alive():
+                        log.warn("Thread waiting timed out: "+str(thrd))
+                    else:
+                        done.add(thrd)
+                except RuntimeError as ex:
+                    log.warn("Skipping wait for thread, "+str(thrd)+
+                             ", for deadlock danger")
+            for thrd in done:
+                try:
+                    cls.threads.remove(thrd)
+                except KeyError:
+                    pass
+            return len(cls.threads) == 0
 
         class _Thread(threading.Thread):
             def __init__(self, exmnr):

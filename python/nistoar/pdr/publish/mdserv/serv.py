@@ -170,7 +170,8 @@ class PrePubMetadataService(PublishSystem):
                                  self.workdir)
 
         bagger = MIDASMetadataBagger(id, self.workdir, self.reviewdir,
-                                     self.uploaddir, cfg, self._minter)
+                                     self.uploaddir, cfg, self._minter,
+                         asyncexamine=self.cfg.get('async_file_examine', True))
         return bagger
         
 

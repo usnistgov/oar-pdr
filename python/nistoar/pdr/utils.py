@@ -55,8 +55,15 @@ def read_json(jsonfile, nolock=False):
     with open(jsonfile) as fd:
         if fcntl and not nolock:
             fcntl.lockf(fd, fcntl.LOCK_SH)
-        return json.load(fd, object_pairs_hook=OrderedDict)
-    
+        data = fd.read()
+    if not data:
+        # this is an unfortunate hack multithreaded reading/writing
+        time.sleep(0.02)
+        with open(jsonfile) as fd:
+            if fcntl and not nolock:
+                fcntl.lockf(fd, fcntl.LOCK_SH)
+            data = fd.read()
+    return json.loads(data, object_pairs_hook=OrderedDict)
 
 def write_json(jsdata, destfile, indent=4, nolock=False):
     """
@@ -70,10 +77,14 @@ def write_json(jsdata, destfile, indent=4, nolock=False):
                            before writing to the file.  A True value writes the 
                            data without a lock
     """
+    import pdb
     try:
-        with open(destfile, 'w') as fd:
+        with open(destfile, 'a') as fd:
             if fcntl and not nolock:
                 fcntl.lockf(fd, fcntl.LOCK_EX)
+            else:
+                pdb.set_trace()
+            fd.truncate(0)
             json.dump(jsdata, fd, indent=indent, separators=(',', ': '))
             
     except Exception, ex:
