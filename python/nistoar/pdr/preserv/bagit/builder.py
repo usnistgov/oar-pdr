@@ -1431,8 +1431,11 @@ class BagBuilder(PreservationSystem):
             # of it.
             del mdata['dataHierarchy']
         if 'ediid' in mdata:
-            # this will trigger updates to DataFile components
-            self.ediid = mdata['ediid']
+            self._ediid = mdata['ediid']
+            #
+            ## this will trigger updates to DataFile components unless
+            ## self.ediid is not set or was already set to new value
+            #self.ediid = mdata['ediid']
 
         defmd = self._create_init_md_for("", "Resource")
         mdata = self._update_md(defmd, mdata)
