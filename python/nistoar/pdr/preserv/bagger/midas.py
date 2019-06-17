@@ -410,7 +410,7 @@ class MIDASMetadataBagger(SIPBagger):
                         nf = self.bagbldr.bag.nerd_file_for(cmp['filepath'])
                         if not os.path.exists(nf) or \
                            moddate_of(srcpath) > moddate_of(nf):
-                            fileupdated = False
+                            fileupdated = True
                     
                     # FIX: what if someone tries to change a file to a
                     # subcollection or vice versa?
