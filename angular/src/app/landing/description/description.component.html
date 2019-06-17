@@ -325,7 +325,7 @@
   </div>
   <div class="modal-background"></div>
 </modal>
-<modal id="Topic-popup-dialog">
+<!-- <modal id="Topic-popup-dialog">
   <div class="modal-forground">
     <div class="modal-body">
       <div style="background-color:#153971;height: 4em; color:white;text-align: center;padding-top: .5em">
@@ -335,12 +335,11 @@
         <table width="100%" align="center">
           <tr *ngFor="let topic of tempTopics; let i = index; trackBy: trackByFn" align="top"
             style="border-bottom:1pt solid black;" height="20">
-            <!-- <td>
+            <td>
               <input type="text" [(ngModel)]="topic.taxonomy" style="height:2em;" />
               <combo-box [dataList]="taxonomyList" [columnName]="'taxonomy'" [(taxonomy)]="topic.taxonomy"></combo-box>
-            </td> -->
+            </td> 
             <td>
-              <!-- <input type="text" [(ngModel)]="topic.topic" style="height:2em;" /> -->
               <span (click)="expandTaxonomyTree(topic, true)" style="color: #1E6BA1; cursor: pointer;">{{topic}}</span>
             </td>
             <td width="50px">
@@ -368,7 +367,7 @@
       <div style="clear:both"></div>
       <div style="width:90%;margin: 0em auto 0em auto;">Select topic(s) from the following list (scroll down to see more):</div>
       <div
-        style="width:90%; margin: .5em auto 2em auto; height: 50vh;; overflow: scroll; border: 1px solid lightgrey;">
+        style="width:90%; margin: .5em auto 2em auto; height: 50vh;; overflow: scroll; border: 1px solid lightgrey;"> -->
         
         <!-- <p-treeTable [value]="taxonomyTree" selectionMode="checkbox" [resizableColumns]="true"
           [(selection)]="selectedData" (onNodeSelect)="selectSearchTopic()" (onNodeUnselect)="selectSearchTopic()">
@@ -389,7 +388,7 @@
             </tr>
           </ng-template>
         </p-treeTable> -->
-        <div style="margin: .5em 1em .5em 1em;">
+        <!-- <div style="margin: .5em 1em .5em 1em;">
           <p-treeTable *ngIf="isVisible" [value]="taxonomyTree">
             <ng-template pTemplate="body" let-rowNode let-rowData="rowData">
               <tr>
@@ -406,4 +405,4 @@
     </div>
   </div>
   <div class="modal-background"></div>
-</modal>
+</modal> -->

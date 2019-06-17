@@ -53,6 +53,7 @@ enableProdMode();
 import { fakeBackendProvider } from './_helpers/fakeBackendInterceptor';
 import { LoginComponent } from './login/login.component';
 import { ContenteditableModel } from './directives/contenteditable-model.directive';
+import { SearchTopicsComponent } from './landing/search-topics/search-topics.component';
 
 /**
  * Initialize the configs for backend services
@@ -71,7 +72,7 @@ const appInitializerFn = (appConfig: AppConfig) => {
     Collaspe, MetadataComponent, DescriptionComponent,
     KeyValuePipe, MetadataView, NoidComponent, NerdmComponent,
     ErrorComponent, UserErrorComponent,ComboBoxComponent,ComboBoxPipe,
-    AppShellNoRenderDirective, AppShellRenderDirective, LoginComponent, ModalComponent, ContenteditableModel
+    AppShellNoRenderDirective, AppShellRenderDirective, LoginComponent, ModalComponent, ContenteditableModel, SearchTopicsComponent
   ],
   imports: [
     FragmentPolyfillModule.forRoot({
@@ -108,6 +109,7 @@ const appInitializerFn = (appConfig: AppConfig) => {
     // provider used to create fake backend
     // fakeBackendProvider
   ],
+  entryComponents: [SearchTopicsComponent],
   schemas: [CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA]
 })
 

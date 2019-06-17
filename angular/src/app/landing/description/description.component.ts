@@ -22,6 +22,8 @@ import { ContenteditableModel } from '../../directives/contenteditable-model.dir
 import { TaxonomyListService } from '../../shared/taxonomy-list';
 import { ComboBoxComponent } from '../../shared/combobox/combo-box.component';
 import { ComboBoxPipe } from '../../shared/combobox/combo-box.pipe';
+import { NgbModalOptions, NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { SearchTopicsComponent } from '../../landing/search-topics/search-topics.component';
 
 declare var saveAs: any;
 
@@ -120,6 +122,7 @@ export class DescriptionComponent {
     private commonFunctionService: CommonFunctionService,
     private modalService: ModalService,
     private taxonomyListService: TaxonomyListService,
+    private ngbModal: NgbModal,
     public router: Router,
     ngZone: NgZone) {
     this.cols = [
@@ -1081,14 +1084,30 @@ export class DescriptionComponent {
   */
   openTopicModal() {
     this.tempTopics = [];
-    if (this.record['topic'].length > 0) {
+    if (this.record['topic'] != null && this.record['topic'].length > 0) {
       for (var i = 0; i < this.record['topic'].length; i++) {
         this.tempTopics.push(this.record['topic'][i].tag);
       }
     }
-    this.refreshTopicTree();
-    this.modalService.open("Topic-popup-dialog");
+
+    let ngbModalOptions: NgbModalOptions = {
+      backdrop: 'static',
+      keyboard: false,
+      windowClass: "myCustomModalClass"
+    };
+    const modalRef = this.ngbModal.open(SearchTopicsComponent, ngbModalOptions);
+    modalRef.componentInstance.tempTopics = this.tempTopics;
+    modalRef.componentInstance.recordEditmode = this.recordEditmode;
+    modalRef.componentInstance.taxonomyTree = this.taxonomyTree;
+    modalRef.componentInstance.record = this.record;
+    modalRef.componentInstance.passEntry.subscribe((receivedEntry) => {
+      this.record = receivedEntry;
+    })
+
+    // this.refreshTopicTree();
+    // this.modalService.open("Topic-popup-dialog");
   }
+
 
   /*
   *   Return topic border style
@@ -1100,172 +1119,10 @@ export class DescriptionComponent {
       return { 'border': '0px solid lightgrey' };
   }
 
-  /* 
-  *   Save contact info when click on save button in pop up dialog
-  */
-  saveTopic() {
-    var strtempTopics: string = '';
-    var lTempTopics: any[] = [];
-
-    for (var i = 0; i < this.tempTopics.length; ++i) {
-      strtempTopics = strtempTopics + this.tempTopics[i];
-      lTempTopics.push({ '@type': 'Concept', 'scheme': 'https://www.nist.gov/od/dm/nist-themes/v1.0', 'tag': this.tempTopics[i] })
-    }
-
-    this.record['topic'] = JSON.parse(JSON.stringify(lTempTopics));
-
-    // Send update to backend here...
-    this.modalService.close('Topic-popup-dialog');
-  }
-
   /*
   *   Close pop up dialog by id
   */
   closeModal(id: string) {
     this.modalService.close(id);
-  }
-
-
-  /**
-   * Delete a topic
-   */
-  deleteTopic(index: number) {
-    this.expandTaxonomyTree(this.tempTopics[index], false);
-    this.tempTopics = this.tempTopics.filter(topic => topic != this.tempTopics[index]);
-    this.refreshTopicTree();
-  }
-
-  /**
-   * Update the topic list
-   */
-  updateTopics(rowNode: any) {
-    const existingTopic = this.tempTopics.filter(topic => topic == rowNode.node.data.researchTopic);
-    if (existingTopic.length == 0)
-      this.tempTopics.push(rowNode.node.data.researchTopic);
-  }
-
-  /*
-  *   Set text color if the given topic already exists
-  */
-  getTopicColor(rowNode: any) {
-    // console.log("this.tempTopics", this.tempTopics);
-    const existingTopic = this.tempTopics.filter(topic => topic == rowNode.node.data.researchTopic);
-    if (existingTopic.length > 0) {
-      return 'green';
-    } else {
-      return '#1E6BA1';
-    }
-  }
-
-  /*
-  *   Set cursor type
-  */
-  getTopicCursor(rowNode: any) {
-    const existingTopic = this.tempTopics.filter(topic0 => topic0 == rowNode.node.data.researchTopic);
-    if (existingTopic.length > 0)
-      return 'default';
-    else
-      return 'pointer';
-  }
-
-  expandTaxonomyTree(topic: string, option: boolean) {
-    this.openCollapseTree(this.taxonomyTree, false);
-    this.resetTreeBackColor(this.taxonomyTree);
-    var treeNode: TreeNode = null;
-    for (let i = 0; treeNode == null && i < this.taxonomyTree.length; i++) {
-      treeNode = this.searchTreenode(this.taxonomyTree[i], topic);
-    }
-    if (treeNode != null) {
-      if (option)
-        treeNode.data.bkcolor = 'lightyellow';
-      else
-        treeNode.data.bkcolor = 'white';
-    }
-    if (option) {
-      while (treeNode != null) {
-        if (treeNode.parent != null)
-          treeNode.parent.expanded = true;
-        treeNode = treeNode.parent;
-      }
-    }
-
-    this.isVisible = false;
-    setTimeout(() => {
-      this.isVisible = true;
-    }, 0);
-  }
-
-  /*
-  *   Refresh the taxonomy tree 
-  *   It will only expand those selected topics 
-  */
-  refreshTopicTree() {
-    // for (let i = 0; i < this.taxonomyTree.length; i++) {
-    //   if (this.tempTopics.indexOf(this.taxonomyTree[i].data.researchTopic) > -1) {
-    //     var j: number = 0;
-    //     var parentNode = this.taxonomyTree[i].parent;
-    //     while (parentNode != null) {
-    //       this.taxonomyTree[i].parent.expanded = true;
-    //       parentNode = parentNode.parent;
-    //       console.log("parentNode", parentNode);
-    //     }
-    //   }
-    // }
-
-    this.isVisible = false;
-    setTimeout(() => {
-      this.isVisible = true;
-    }, 0);
-  }
-
-  /*
-  *   Expand/collapse treenodes
-  */
-  openCollapseTree(tree: TreeNode[], option: boolean) {
-    for (let i = 0; i < tree.length; i++) {
-      tree[i].expanded = option;
-      if (tree[i].children.length > 0) {
-        this.openCollapseTree(tree[i].children, option);
-      }
-    }
-  }
-
-  /*
-  *   Expand/collapse treenodes
-  */
-  resetTreeBackColor(tree: TreeNode[]) {
-    for (let i = 0; i < tree.length; i++) {
-      tree[i].data.bkcolor = 'white';
-      if (tree[i].children.length > 0) {
-        this.resetTreeBackColor(tree[i].children);
-      }
-    }
-  }
-
-  /*
-  *   search treeNode
-  */
-  searchTreenode(tree: TreeNode, topic: string) {
-    if (tree.data.researchTopic == topic) {
-      return tree;
-    } else if (tree.children != null) {
-      var i;
-      var result = null;
-      for (i = 0; result == null && i < tree.children.length; i++) {
-        result = this.searchTreenode(tree.children[i], topic);
-      }
-      return result;
-    }
-    return null;
-  }
-
-  /*
-  *   Return row background color
-  */
-  rowBackColor(rowData: any) {
-    if (rowData == null || rowData == undefined)
-      return "white";
-    else
-      return rowData.bkcolor;
   }
 }
