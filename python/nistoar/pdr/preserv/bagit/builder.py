@@ -151,6 +151,7 @@ class BagBuilder(PreservationSystem):
         if not logger:
             logger = log
         self.log = logger
+        self.log.setLevel(NORM)
         
         if not config:
             config = {}
@@ -159,7 +160,7 @@ class BagBuilder(PreservationSystem):
         self._id = None   # set below
         self._ediid = None
         self._logname = self.cfg.get('log_filename', 'preserv.log')
-        self._loghdlr = None
+        self._log_handlers = {}
         self._mimetypes = None
         self._distbase = self.cfg.get('distrib_service_baseurl', DISTSERV)
         if not self._distbase.endswith('/'):
@@ -213,23 +214,101 @@ class BagBuilder(PreservationSystem):
         defconf = load_from_file(defconffile)
         return merge_config(config, defconf)
 
+    def logfile_is_connected(self, logfile=None):
+        # return True if the bagdir/preserv.log is currently attached to this
+        # builder
+        if not logfile:
+            logfile = self._logname
+        if not os.path.isabs(logfile):
+            logfile = os.path.join(self.bagdir, logfile)
+        for hdlr in self.log.handlers:
+            if self._handles_logfile(hdlr, logfile):
+                return True
+        return False
+
+    def _handles_logfile(self, handler, logfilepath):
+        # return True if the handler is set to write to a file with the given
+        # name
+        return hasattr(handler,'stream') and hasattr(handler.stream, 'name') \
+               and handler.stream.name == logfilepath
+
+    def _get_log_handler(self, logfilepath):
+        if logfilepath not in self._log_handlers:
+            self._log_handlers[logfilepath] = None
+
+        hdlr = self._log_handlers[logfilepath]
+        if not hdlr:
+            hdlr = logging.FileHandler(logfilepath)
+            fmt = self.cfg.get('bag_log_format', DEF_BAGLOG_FORMAT)
+            hdlr.setFormatter(logging.Formatter(fmt))
+            self._log_handlers[logfilepath] = hdlr
+
+        return hdlr
+
+    def connect_logfile(self, logfile=None, loglevel=NORM):
+        """
+        connect the bag's internal log file to this builder so that it can 
+        record what it's doing.  
+
+        :param str logfile:  the path to the log file to connect.  If the 
+                             path is relative, it is taken to be relative to 
+                             bag's top directory.  If None, the default 
+                             (configured) logfile name ("preserv.log") is 
+                             assumed.
+        """
+        if not logfile:
+            logfile = self._logname
+        if not os.path.isabs(logfile):
+            logfile = os.path.join(self.bagdir, logfile)
+        if self.logfile_is_connected(logfile):
+            return
+        hdlr = self._get_log_handler(logfile)
+        hdlr.setLevel(loglevel)
+        
+        self.log.addHandler(hdlr)
+
+    def disconnect_logfile(self, logfile=None):
+        """
+        disconnect the log file from this builder.  This ensures that the 
+        logfile is closed so that the bag can be savely removed, moved, etc.
+        It may be reconnected automatically when the builder is called to 
+        update the bag.  
+
+        :param str logfile:  the path to the log file to connect.  If the 
+                             path is relative, it is taken to be relative to 
+                             bag's top directory.  If None, all connected 
+                             logfiles will be disconnected.
+        """
+        if not logfile:
+            files = self._log_handlers.keys()
+            if not files:
+                logfile = os.path.join(self.bagdir, self._logname)
+                if logfile not in self._log_handlers:
+                    self._log_handlers[logfile] = None
+
+        if not files and isinstance(logfile, str):
+            if not os.path.isabs(logfile):
+                logfile = os.path.join(self.bagdir, logfile)
+            files = [ logfile ]
+
+        self.log.debug("Disconnecting BagBuilder from internal log")
+
+        for lf in files:
+            hdlrs = [h for h in self.log.handlers if self._handles_logfile(h,lf)]
+            for h in hdlrs:
+                self.log.removeHandler(h)
+                h.close()
+            self._log_handlers[lf] = None
+        
     def _set_logfile(self):
-        if self._loghdlr:
-            self._unset_logfile()
-        filepath = os.path.join(self.bagdir, self.logname)
-        self._loghdlr = logging.FileHandler(filepath)
-        self._loghdlr.setLevel(NORM)
-        fmt = self.cfg.get('bag_log_format', DEF_BAGLOG_FORMAT)
-        self._loghdlr.setFormatter(logging.Formatter(fmt))
-        self.log.addHandler(self._loghdlr)
-        if not self.log.isEnabledFor(NORM):
-            self.log.setLevel(NORM)
+        # for backward compatiblity
+        self.log.debug("Deprecated _set_logfile() called")
+        self.connect_logfile()
 
     def _unset_logfile(self):
-        if hasattr(self, '_loghdlr') and self._loghdlr:
-            self.log.removeHandler(self._loghdlr)
-            self._loghdlr.close()
-            self._loghdlr = None
+        # for backward compatiblity
+        self.disconnect_logfile()
+        self.log.debug("Deprecated _unset_logfile() called")
 
     @property
     def bagname(self):
@@ -416,12 +495,12 @@ class BagBuilder(PreservationSystem):
             raise BagWriteError("Insufficient permissions on bag directory: " +
                                 self.bagdir, sys=self)
 
-        if not self._loghdlr:
-            self._set_logfile()
+        self.connect_logfile()
         if didit:
             self.record("Created bag with name, %s", self.bagname)
         self._bag = NISTBag(self.bagdir)
-        if os.path.exists(self._bag.nerd_file_for("")):
+        if (not self._id or not self._ediid) and \
+           os.path.exists(self._bag.nerd_file_for("")):
             # load the resource-level metadata that's already there
             md = self._bag.nerd_metadata_for("")
             if not self._id:

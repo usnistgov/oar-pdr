@@ -56,7 +56,7 @@ class TestBuilder2(test.TestCase):
         self.tf.track("issued-ids.json")
 
     def tearDown(self):
-        self.bag._unset_logfile()
+        self.bag.disconnect_logfile()
         self.bag = None
         self.tf.clean()
 
@@ -64,7 +64,7 @@ class TestBuilder2(test.TestCase):
         self.assertEqual(self.bag.bagname, "testbag")
         self.assertEqual(self.bag.bagdir, os.path.join(self.tf.root, "testbag"))
         self.assertTrue(self.bag.log)
-        self.assertFalse(self.bag._loghdlr)
+        self.assertFalse(self.bag._log_handlers)
         self.assertEqual(self.bag.logname, "preserv.log")
         self.assertIsNone(self.bag.id)
         self.assertIsNone(self.bag.bag)
@@ -89,7 +89,7 @@ class TestBuilder2(test.TestCase):
         self.assertEqual(self.bag.bagname, "testbag")
         self.assertEqual(self.bag.bagdir, os.path.join(self.tf.root, "testbag"))
         self.assertTrue(self.bag.log)
-        self.assertTrue(self.bag._loghdlr)
+        self.assertTrue(self.bag.logfile_is_connected())
         self.assertEqual(self.bag.logname, "preserv.log")
         self.assertTrue(os.path.exists(os.path.join(self.bag.bagdir,
                                                     "preserv.log")))
@@ -106,7 +106,8 @@ class TestBuilder2(test.TestCase):
         self.assertEqual(self.bag.bagname, "testbag")
         self.assertEqual(self.bag.bagdir, os.path.join(self.tf.root, "testbag"))
         self.assertTrue(self.bag.log)
-        self.assertIsNone(self.bag._loghdlr)
+        self.assertFalse(self.bag.logfile_is_connected())
+        self.assertFalse(self.bag._log_handlers)
         self.assertEqual(self.bag.logname, "preserv.log")
         self.assertTrue(not os.path.exists(self.bag.bagdir))
         self.assertEqual(self.bag.id, "ark:/88434/edi00hw91c")
@@ -162,9 +163,31 @@ class TestBuilder2(test.TestCase):
         self.assertTrue(isinstance(resmd['@context'], list))
         self.assertEqual(resmd['@context'][1]['@base'], "ark:/88434/edi00hw91c")
 
+    def test_log_disconnect(self):
+        self.assertTrue(not self.bag.logfile_is_connected())
+        self.bag.ensure_bagdir()
+        self.assertTrue(self.bag.logfile_is_connected())
+
+        self.bag.disconnect_logfile()
+        self.assertTrue(not self.bag.logfile_is_connected())
+        self.bag.record("i did it!")
+        
+        with open(os.path.join(self.bag.bagdir, "preserv.log")) as fd:
+            lines = [l for l in fd]
+        self.assertNotIn("i did it!", lines[-1])
+
+        self.bag.ensure_bagdir()
+        self.bag.record("i did it!")
+        self.assertTrue(self.bag.logfile_is_connected())
+
+        with open(os.path.join(self.bag.bagdir, "preserv.log")) as fd:
+            lines = [l for l in fd]
+        self.assertIn("i did it!", lines[-1])
+
     def test_ensure_bagdir(self):
         self.assertTrue(not os.path.exists(self.bag.bagdir))
-        self.assertFalse(self.bag._loghdlr)
+        self.assertTrue(not self.bag.logfile_is_connected())
+        self.assertFalse(self.bag._log_handlers)
         self.assertIsNone(self.bag.bag)
         self.assertIsNone(self.bag.id)
 
@@ -174,6 +197,7 @@ class TestBuilder2(test.TestCase):
         self.assertEqual(self.bag.bag.dir, self.bag.bagdir)
         self.assertIsNone(self.bag.id)
         self.assertIsNone(self.bag.ediid)
+        self.assertTrue(self.bag.logfile_is_connected())
 
     def test_ensure_bag_structure(self):
         self.assertTrue(not os.path.exists(self.bag.bagdir))
