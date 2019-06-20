@@ -8,7 +8,7 @@ import { Router, NavigationStart, NavigationEnd, NavigationCancel, NavigationErr
   styleUrls: ['./app.component.css']
 })
 export class AppComponent {
-  title = 'app';
+  title = 'PDR Resource Landing Page';
 }
 
 /* 

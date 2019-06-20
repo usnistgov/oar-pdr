@@ -38,7 +38,8 @@
                 <b *ngSwitchCase="'nrdp:PublicDataResource'">Public Data Resource</b>
                 <b *ngSwitchDefault></b>
               </span>
-              <div *ngIf="record.length !== 0" class="ui-sm-1 d-none d-sm-block d-md-none ">
+              <div *ngIf="record.length !== 0 && inBrowser"
+                   class="ui-sm-1 d-none d-sm-block d-md-none ">
                 <button style="float: right" type="button" pButton icon="faa faa-list"
                   class="ui-button ui-button-icon-only" (click)="menu3.toggle($event)"></button>
                 <p-menu #menu3 class="rightMenuStylePop" popup="popup" [model]="rightmenu"></p-menu>
@@ -101,7 +102,7 @@
               <span *ngIf="isDOI"><i> <a class="font14"
                     href="https://doi.org/{{record.doi.split(':')[1]}}">{{record.doi}}</a></i></span>
               <span *ngIf="!isDOI"><i> <a class="font14"
-                    href="{{ confValues.PDRAPI }}{{record['@id']}}">{{record["@id"]}}</a></i>
+                    href="{{ cfg.get('landingPageService','/od/id/') }}{{record['@id']}}">{{record["@id"]}}</a></i>
               </span>
               <span *ngIf="checkReferences()"><br>
                 <span>Described in article: </span>
@@ -144,8 +145,10 @@
             <div class="ui-g-4 ui-md-4 ui-lg-4 ui-sm-12">
               <span *ngIf="HomePageLink">
                 <a [(href)]="record.landingPage" target="_blank" style="float: right;">
-                  <button pButton type="button" class="homePageLink" icon="faa faa-external-link"
-                    label="Visit Home Page"></button>
+                  <span *ngIf="inBrowser; else visitHomeOnServer">
+                    <button pButton type="button" class="homePageLink" icon="faa faa-external-link" label="Visit Home Page"></button>
+                  </span>
+                  <ng-template #visitHomeOnServer>Visit Home Page</ng-template>
                 </a>
               </span>
             </div>
@@ -153,11 +156,13 @@
           <div class="ui-g">
             <div class="ui-g-12 ui-md-12 ui-lg-12 ui-sm-12">
               <description-resources [record]="record" [files]="files" [distdownload]="distdownload"
-                [isInternal]="isInternal" [filescount]="filescount" [metadata]="metadata"></description-resources>
-              <metadata-detail [record]="record" [serviceApi]="serviceApi" [metadata]="metadata"></metadata-detail>
+                                     [isInternal]="isInternal" [filescount]="filescount" [inBrowser]="inBrowser"
+                                     [metadata]="metadata"></description-resources>
+              <metadata-detail [record]="record" [serviceApi]="serviceApi" [inBrowser]="inBrowser"
+                               [metadata]="metadata"></metadata-detail>
               <!-- <data-cart></data-cart>   -->
             </div>
-            <div *ngIf="record.length !== 0">
+            <div *ngIf="record.length !== 0 && inBrowser">
               <p-dialog class="citationDialog" [closable]="false" [(visible)]="display" modal="modal" width="550"
                 height="330" responsive="true" #citeDialog>
                 <p-header> Citation

@@ -4,7 +4,8 @@
 # simulated RMM and distribution services to be running, they have been 
 # seperated out into test_midas_update.py.
 #
-import os, sys, pdb, shutil, logging, json
+from __future__ import print_function
+import os, sys, pdb, shutil, logging, json, time
 from cStringIO import StringIO
 from io import BytesIO
 import warnings as warn
@@ -389,6 +390,8 @@ class TestMIDASMetadataBaggerMixed(test.TestCase):
         self.assertIn("nrdp:Subcollection", mdata['@type'])
         
     def test_ensure_preparation(self):
+        self.assertIsNone(self.bagr.fileExaminer)
+
         metadir = os.path.join(self.bagdir, 'metadata')
         self.assertFalse(os.path.exists(self.bagdir))
         self.assertIsNone(self.bagr.datafiles)
@@ -453,6 +456,7 @@ class TestMIDASMetadataBaggerReview(test.TestCase):
         self.revdir = os.path.join(self.testsip, "review")
         self.bagr = midas.MIDASMetadataBagger(self.midasid, self.bagparent,
                                               self.revdir)
+        self.bagdir = os.path.join(self.bagparent, self.midasid)
 
     def tearDown(self):
         self.bagr.bagbldr._unset_logfile()
@@ -471,6 +475,7 @@ class TestMIDASMetadataBaggerReview(test.TestCase):
         self.assertIsNone(self.bagr.datafiles)
 
         self.assertTrue(os.path.exists(self.bagparent))
+        self.assertIsNone(self.bagr.fileExaminer)
 
     def test_find_pod_file(self):
         self.assertEquals(self.bagr.find_pod_file(),
@@ -562,6 +567,70 @@ class TestMIDASMetadataBaggerReview(test.TestCase):
         self.assertEqual(datafiles["trial3/trial3a.json"],
                          os.path.join(revsip, "trial3/trial3a.json"))
         self.assertEqual(len(datafiles), 5)
+
+    def test_fileExaminer(self):
+        # turn on asyncexamine (but turn off autolaunch so that we can test
+        # more easily).  Show that the checksum is not calculated for
+        # trial2.json.  Start the asynchronous thread; after it is done,
+        # show that trial2.json now has a checksum.  
+        
+        self.bagr = midas.MIDASMetadataBagger(self.midasid, self.bagparent,
+                                              self.revdir, asyncexamine=True)
+        self.assertIsNotNone(self.bagr.fileExaminer)
+        self.bagr.fileExaminer_autolaunch = False
+
+        metadir = os.path.join(self.bagdir, 'metadata')
+        self.assertFalse(os.path.exists(self.bagdir))
+        self.assertIsNone(self.bagr.datafiles)
+
+        self.bagr.prepare()
+        self.assertTrue(os.path.exists(self.bagdir))
+        fmd = self.bagr.bagbldr.bag.nerd_metadata_for("trial1.json")
+        self.assertIn('checksum', fmd) # because there's a .sha256 file
+        self.assertIn('_status', fmd)
+        fmd = self.bagr.bagbldr.bag.nerd_metadata_for("trial2.json")
+        self.assertIn('_status', fmd)
+        self.assertNotIn('checksum', fmd)
+
+        # self.bagr.fileExaminer.thread.run()
+        self.bagr.fileExaminer.launch()
+        self.bagr.fileExaminer.thread.join()
+        fmd = self.bagr.bagbldr.bag.nerd_metadata_for("trial2.json")
+        self.assertIn('checksum', fmd)
+        self.assertNotIn('_status', fmd)
+
+    def test_fileExaminer_autolaunch(self):
+        # show that the async thread does its work with autolaunch
+        self.bagr = midas.MIDASMetadataBagger(self.midasid, self.bagparent,
+                                              self.revdir, asyncexamine=True)
+        self.assertIsNotNone(self.bagr.fileExaminer)
+        # self.bagr.fileExaminer_autolaunch = True
+
+        metadir = os.path.join(self.bagdir, 'metadata')
+        self.assertFalse(os.path.exists(self.bagdir))
+        self.assertIsNone(self.bagr.datafiles)
+
+        try:
+            self.bagr.prepare()
+        except Exception as ex:
+            self.bagr.fileExaminer.thread.join()
+            raise
+        self.assertTrue(os.path.exists(self.bagdir))
+        fmd = self.bagr.bagbldr.bag.nerd_metadata_for("trial1.json")
+        self.assertIn('checksum', fmd) # because there's a .sha256 file
+
+#        time.sleep(0.1)
+        if self.bagr.fileExaminer.thread.is_alive():
+            print("waiting for file examiner thread")
+            n = 20
+            while n > 0 and self.bagr.fileExaminer.thread.is_alive():
+                n -= 1
+                sleep(0.1)
+            if n == 0:
+                self.fail("file examiner is taking too long")    
+        fmd = self.bagr.bagbldr.bag.nerd_metadata_for("trial2.json")
+        self.assertIn('checksum', fmd)
+
 
 
 class TestMIDASMetadataBaggerUpload(test.TestCase):
@@ -675,6 +744,9 @@ class TestMIDASMetadataBaggerUpload(test.TestCase):
         self.assertEqual(datafiles["trial3/trial3a.json"],
                          os.path.join(uplsip, "trial3/trial3a.json"))
         self.assertEqual(len(datafiles), 1)
+
+
+
 
 
 class TestPreservationBagger(test.TestCase):

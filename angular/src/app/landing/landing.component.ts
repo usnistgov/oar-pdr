@@ -3,23 +3,21 @@ import { Title, Meta } from '@angular/platform-browser';
 import { ActivatedRoute, Router, NavigationEnd } from '@angular/router';
 import { TreeNode } from 'primeng/primeng';
 import { MenuItem } from 'primeng/api';
+import { Observable, of } from 'rxjs';
 import * as _ from 'lodash';
 import 'rxjs/add/operator/map';
 import { Subscription } from 'rxjs/Subscription';
-import { AppConfig, Config } from '../shared/config-service/config.service';
+import { AppConfig } from '../config/config';
 import { PLATFORM_ID, APP_ID, Inject } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { CartService } from '../datacart/cart.service';
 import { CommonVarService } from '../shared/common-var';
 import { TestDataService } from '../shared/testdata-service/testDataService';
 import { SearchService } from '../shared/search-service/index';
-import { Observable } from 'rxjs/Observable';
-import 'rxjs/add/observable/of';
 import { first, tap } from 'rxjs/operators';
-import { of } from 'rxjs/observable/of';
 import { isPlatformServer } from '@angular/common';
 import { makeStateKey, TransferState } from '@angular/platform-browser';
-import { _throw } from 'rxjs/observable/throw';
+//import { _throw } from 'rxjs/observable/throw';
 // import {DialogService} from 'primeng/api';
 import { DatacartComponent } from '../datacart/datacart.component';
 
@@ -125,24 +123,25 @@ export class LandingComponent implements OnInit {
   private newer: reference = {};
   navigationSubscription: any;
   ediid: any;
-  confValues: Config;
   displayDatacart: boolean = false;
   isLocalProcessing: boolean = false;
   isLoading: boolean = true;
   HomePageLink: boolean = false;
+  inBrowser : boolean = false;  
 
   /**
    * Creates an instance of the SearchPanel
    *
    */
   constructor(private route: ActivatedRoute, private el: ElementRef,
-    private titleService: Title, private appConfig: AppConfig, private router: Router
-    , @Inject(PLATFORM_ID) private platformId: Object,
-    @Inject(APP_ID) private appId: string,
-    private transferState: TransferState,
-    private searchService: SearchService,
-    private commonVarService: CommonVarService) {
-    this.confValues = this.appConfig.getConfig();
+              private titleService: Title, private cfg : AppConfig, private router: Router,
+              @Inject(PLATFORM_ID) private platformId: Object,
+              @Inject(APP_ID) private appId: string,
+              private transferState: TransferState,
+              private searchService: SearchService,
+              private commonVarService: CommonVarService)
+  {
+    this.inBrowser = isPlatformBrowser(platformId);
   }
 
   /**
@@ -264,10 +263,11 @@ export class LandingComponent implements OnInit {
    * Update menu on landing page
    */
   updateMenu() {
-    this.serviceApi = this.confValues.LANDING + "records?@id=" + this.record['@id'];
-    if (!_.includes(this.confValues.LANDING, "rmm"))
-      this.serviceApi = this.confValues.LANDING + this.record['ediid'];
-    this.distdownload = this.confValues.DISTAPI + "ds/zip?id=" + this.record['@id'];
+    let mdapi = this.cfg.get("mdAPI", "/unconfigured");
+    this.serviceApi = mdapi + "records?@id=" + this.record['@id'];
+    if (!_.includes(mdapi, "/rmm/"))
+      this.serviceApi = mdapi + this.record['ediid'];
+    this.distdownload = this.cfg.get("distService","/od/ds/") + "zip?id=" + this.record['@id'];
 
     var itemsMenu: MenuItem[] = [];
     var metadata = this.createMenuItem("Export JSON", "faa faa-file-o", (event) => { this.turnSpinnerOff(); }, this.serviceApi);
@@ -277,9 +277,9 @@ export class LandingComponent implements OnInit {
     }
 
     var resourcesByAuthor = this.createMenuItem('Resources by Authors', "faa faa-external-link", "",
-      this.confValues.SDPAPI + "/#/search?q=authors.familyName=" + authlist + "&key=&queryAdvSearch=yes");
+      this.cfg.get("locations.pdrSearch","/sdp/") + "/#/search?q=authors.familyName=" + authlist + "&key=&queryAdvSearch=yes");
     var similarRes = this.createMenuItem("Similar Resources", "faa faa-external-link", "",
-      this.confValues.SDPAPI + "/#/search?q=" + this.record['keyword'] + "&key=&queryAdvSearch=yes");
+      this.cfg.get("locations.pdrSearch","/sdp/") + "/#/search?q=" + this.record['keyword'] + "&key=&queryAdvSearch=yes");
     var license = this.createMenuItem("Fair Use Statement", "faa faa-external-link", "", this.record['license']);
     var citation = this.createMenuItem('Citation', "faa faa-angle-double-right",
       (event) => { this.getCitation(); this.showDialog(); }, '');
@@ -376,20 +376,25 @@ export class LandingComponent implements OnInit {
   }
   getData(): Observable<any> {
     var recordid = this.searchValue;
-    const recordid_KEY = makeStateKey<any>('record-' + recordid);
+    const recordid_KEY = makeStateKey<string>('record-' + recordid);
 
     if (this.transferState.hasKey(recordid_KEY)) {
+      console.log("extracting data id="+recordid+" embedded in web page");
       const record = this.transferState.get<any>(recordid_KEY, null);
-      this.transferState.remove(recordid_KEY);
+      // this.transferState.remove(recordid_KEY);
       return of(record);
     }
     else {
+      console.warn("record data not found in transfer state");
       return this.searchService.searchById(recordid)
         .catch((err: Response, caught: Observable<any[]>) => {
-          console.log(err);
+          // console.log(err);
           if (err !== undefined) {
-            console.log("ERROR STATUS :::" + err.status);
-            console.log(err);
+            console.error("Failed to retrieve data for id="+recordid+"; error status=" + err.status);
+            if ("message" in err) console.error("Reason: "+(<any>err).message);
+            if ("url" in err) console.error("URL used: "+(<any>err).url);
+
+            // console.error(err);
             if (err.status >= 500) {
               this.router.navigate(["/usererror", recordid, { errorcode: err.status }]);
             }
@@ -397,9 +402,9 @@ export class LandingComponent implements OnInit {
               this.router.navigate(["/usererror", recordid, { errorcode: err.status }]);
             }
             if (err.status == 0) {
-              return Observable.throw('The Web server (running the Web site) is currently unable to handle the request.');
+              console.warn("Possible causes: Unable to trust site cert, CORS restrictions, ...");
+              return Observable.throw('Unknown error requesting data for id='+recordid);
             }
-            //return Observable.throw('The Web server (running the Web site) is currently unable to handle the request.');
           }
           return Observable.throw(caught);
         })
@@ -668,3 +673,4 @@ export class LandingComponent implements OnInit {
     }
   }
 }
+
