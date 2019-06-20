@@ -119,6 +119,11 @@ class MIDASMetadataBagger(SIPBagger):
         self.state = 'upload'
         self._indirs = []
 
+        usenm = self.name
+        if len(usenm) > 11:
+            usenm = usenm[:4]+"..."+usenm[-4:]
+        self.log = log.getChild(usenm)
+        
         # ensure we have at least one readable input directory
         indirname = sipdirname
         if not indirname:
@@ -137,9 +142,9 @@ class MIDASMetadataBagger(SIPBagger):
                 self._indirs.append(indir)
                 if reviewdir and indir.startswith(reviewdir):
                     self.state = 'review'
-                log.debug("Found input dir: %s", indir)
+                self.log.debug("Found input dir: %s", indir)
             else:
-                log.debug("Candidate dir does not exist: %s", indir)    
+                self.log.debug("Candidate dir does not exist: %s", indir)    
 
         if not self._indirs:
             raise SIPDirectoryNotFound(msg="No input directories available",
@@ -151,7 +156,7 @@ class MIDASMetadataBagger(SIPBagger):
             cfg = config.get('id_minter', {})
             minter = PDRMinter(self.bagparent, cfg)
             if not os.path.exists(minter.registry.store):
-                log.warning("Creating new ID minter for bag, "+self.name)
+                self.log.warning("Creating new ID minter for bag, "+self.name)
         self._minter = minter
 
         # make sure the ID provided matches the one in the pod file
@@ -165,7 +170,7 @@ class MIDASMetadataBagger(SIPBagger):
 
         self.bagbldr = BagBuilder(self.bagparent, self.name,
                                   self.cfg.get('bag_builder', {}),
-                                  logger=log.getChild(self.name[:8]+'...'))
+                                  logger=self.log)
         mergeetc = self.cfg.get('merge_etc', def_merge_etcdir)
         if not mergeetc:
             raise StateException("Unable to locate the merge configuration "+
@@ -188,9 +193,10 @@ class MIDASMetadataBagger(SIPBagger):
             # rmm services
             self.prepsvc = UpdatePrepService(self.cfg['repo_access'])
         else:
-            log.warning("repo_access not configured; can't support updates!")
+            self.log.warning("repo_access not configured; can't support updates!")
 
         self.fileExaminer = None
+        self.fileExaminer_autolaunch = False
         if asyncexamine:
             self.fileExaminer = self._AsyncFileExaminer(self)
             self.fileExaminer_autolaunch = True
@@ -327,6 +333,9 @@ class MIDASMetadataBagger(SIPBagger):
         self.ensure_res_metadata(updateneeded)
         self.ensure_data_files(nodata, updateneeded)
         self.ensure_subcoll_metadata()
+        if self.fileExaminer and self.fileExaminer_autolaunch == "sync":
+            self.log.info("autolaunch=sync; running examiner syncronously")
+            self.fileExaminer.run()
         self.resmd = self.bagbldr.bag.nerdm_record(True)
 
     def ensure_base_bag(self):
@@ -345,17 +354,17 @@ class MIDASMetadataBagger(SIPBagger):
         
         if os.path.exists(self.bagdir):
             # We already have an established working bag
-            log.info("Refreshing previously established working bag")
+            self.log.info("Refreshing previously established working bag")
             return False
 
         elif self.prepsvc:
-            log.debug("Looking for previously published version of bag")
+            self.log.debug("Looking for previously published version of bag")
 
             prepper = self.prepsvc.prepper_for(self.name,
-                                               log=log.getChild("prepper"))
+                                               log=self.log.getChild("prepper"))
 
             if prepper.create_new_update(self.bagdir):
-                log.info("Working bag initialized with metadata from previous "+
+                self.log.info("Working bag initialized with metadata from previous "+
                          "publication.")
 
         if not os.path.exists(self.bagdir):
@@ -387,14 +396,14 @@ class MIDASMetadataBagger(SIPBagger):
             instamp = moddate_of(self.inpodfile)
             update = instamp > moddate_of(outpod)
             if update:
-                log.info("Detected change in POD file (by date); updating.")
+                self.log.info("Detected change in POD file (by date); updating.")
 
         if not update:
             # we'll double check with the checksum in case mod dates are
             # not accurate
             update = checksum_of(self.inpodfile) != checksum_of(outpod)
             if update:
-                log.info("Detected change in POD file (by checksum); updating.")
+                self.log.info("Detected change in POD file (by checksum); updating.")
 
         if update:
             podnerd = self.bagbldr.add_ds_pod(self.inpodfile, convert=True,
@@ -474,6 +483,7 @@ class MIDASMetadataBagger(SIPBagger):
                                            self.hardlinkdata)
 
         if self.fileExaminer and self.fileExaminer_autolaunch:
+            self.log.info("Launching file examiner thread")
             self.fileExaminer.launch()
         else:
             self._check_checksum_files()
@@ -504,7 +514,7 @@ class MIDASMetadataBagger(SIPBagger):
                 if not os.path.exists(collnerd) or \
                    (os.path.exists(filenerd) and 
                     moddate_of(collnerd) < moddate_of(filenerd)):
-                      log.debug("Ensuring metadata for collection: %s", collpath)
+                      self.log.debug("Ensuring metadata for collection: %s", collpath)
                       self.bagbldr.define_component(collpath, "Subcollection")
                       colls.add(collpath)
         
@@ -529,16 +539,16 @@ class MIDASMetadataBagger(SIPBagger):
         update = False
         if not os.path.exists(nerdfile):
             update = True
-            log.info("Initializing metadata for datafile, %s", destpath)
+            self.log.info("Initializing metadata for datafile, %s", destpath)
         elif force or os.path.exists(os.path.join(os.path.dirname(nerdfile),
                                                   UNSYNCED_FILE)):
             # we marked this earlier that an update is recommended
             update = True
-            log.debug("datafile, %s, requires update to metadata", destpath)
+            self.log.debug("datafile, %s, requires update to metadata", destpath)
         elif moddate_of(inpath) > moddate_of(nerdfile):
             # data file is newer; update its metadata
             update = True
-            log.info("Detected change in data file (by date); updating %s",
+            self.log.info("Detected change in data file (by date); updating %s",
                      destpath)
         elif os.stat(inpath).st_size \
              < self.cfg.get('update_by_checksum_size_lim', 0):
@@ -563,7 +573,7 @@ class MIDASMetadataBagger(SIPBagger):
                             cs = fd.readline().split()[0]
                         self.bagbldr._add_checksum(cs, md)
                     except Exception as ex:
-                        log.warn(csfile +
+                        self.log.warn(csfile +
                                  ": trouble reading provided checksum file")
 
             # now save the metadata 
@@ -609,7 +619,7 @@ class MIDASMetadataBagger(SIPBagger):
                     with open(srcpath) as fd:
                         cs = fd.readline().split()[0]
                 except Exception as ex:
-                    log.warn(comp['filepath']+
+                    self.log.warn(comp['filepath']+
                              ": unexpected contents in checksum file (%s)" % 
                              str(ex))
                     cs = False   # this will be flagged invalid
@@ -622,10 +632,10 @@ class MIDASMetadataBagger(SIPBagger):
 
                     valid = nerd.get('checksum',{}).get('hash','') == cs
                     if not valid:
-                        log.warn(nerd['filepath']+
+                        self.log.warn(nerd['filepath']+
                                  ": hash value in file looks invalid")
                     else:
-                        log.debug(nerd['filepath']+": hash value looks valid")
+                        self.log.debug(nerd['filepath']+": hash value looks valid")
                     comp['valid'] = bool(valid)
                     self.bagbldr.update_metadata_for(comp['filepath'],
                                                      {'valid': comp['valid']})
@@ -643,6 +653,7 @@ class MIDASMetadataBagger(SIPBagger):
             self.bagger = bagger
             self.files = OrderedDict()
             self.thread = None
+            self.stop_logging = False
 
         def add(self, location, filepath):
             self.files[filepath] = location
@@ -668,13 +679,19 @@ class MIDASMetadataBagger(SIPBagger):
         def running(self):
             return self.thread and self.thread.is_alive()
 
-        def launch(self):
+        def launch(self, stop_logging=False):
             if self._prep():
+                self.stop_logging = stop_logging
                 self.thread.start()
 
         def run(self):
             if self._prep():
+                self.stop_logging = False
                 self.thread.run()
+
+        def finish(self):
+            if self.stop_logging:
+                self.bagger.bagbldr.disconnect_logfile()
 
         def examine_next(self):
             filepath, location = self.files.popitem()
@@ -688,8 +705,12 @@ class MIDASMetadataBagger(SIPBagger):
             
                 md = self.bagger.bagbldr.describe_data_file(location, filepath,
                                                             True, ct)
+                if '_status' in md:
+                    del md['_status']
                 self.bagger.bagbldr.replace_metadata_for(filepath, md,
                                 "async metadata update for file, "+filepath)
+                self.bagger._mark_filepath_synced(filepath)
+
             except Exception as ex:
                 log.error("%s: Failed to extract file metadata: %s"
                           % (location, str(ex)))
@@ -724,10 +745,7 @@ class MIDASMetadataBagger(SIPBagger):
                 # time.sleep(0.1)
                 while self.exif.files:
                     self.exif.examine_next()
-                
-        
-
-        
+                self.exif.finish()
         
 
         
@@ -861,7 +879,10 @@ class PreservationBagger(SIPBagger):
                 
         self.ensure_bag_parent_dir()
 
-        self.siplog = log.getChild(self.name[:8]+'...')
+        usenm = self.name
+        if len(usenm) > 11:
+            usenm = usenm[:4]+"..."+usenm[-4:]
+        self.siplog = log.getChild(usenm)
         bldcfg = self.cfg.get('bag_builder', {})
         if 'ensure_component_metadata' not in bldcfg:
             # default True can mess with annotations
