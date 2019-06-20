@@ -93,6 +93,7 @@
     </span>
 
     <div *ngIf="files.length  > 0">
+    <div *ngIf="inBrowser; else filesLoading">
       <div class="flex-container" style="margin-top: 2em;">
         <div style="flex: 0 0 110px; text-align: left; padding-bottom: 0em;">
           <span><b>Files </b> </span>
@@ -229,6 +230,15 @@
           </tr>
         </ng-template>
       </p-treeTable>
+    </div>
+    <ng-template #filesLoading>
+      <div>
+        <b>Files </b>
+      </div>
+      <p>
+        <i>Loading file list...</i>
+      </p>
+    </ng-template>
     </div>
   </div>
 </div>

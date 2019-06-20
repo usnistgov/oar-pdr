@@ -26,6 +26,8 @@
               "src/styles.scss",
               "node_modules/bootstrap/dist/css/bootstrap.min.css",
               "node_modules/primeng/resources/primeng.css",
+              "src/styles/ultima-ng-5.2.4/assets/layout/css/layout-indigo.css",
+              "src/styles/ultima-ng-5.2.4/assets/theme/theme-indigo.css",
               "node_modules/primeicons/primeicons.css",
               "node_modules/primeng/resources/themes/bootstrap/theme.css",
               "src/styles/font-awesome/css/font-awesome.min.css",
@@ -85,6 +87,8 @@
               "src/styles/main.css",
               "node_modules/bootstrap/dist/css/bootstrap.min.css",
               "node_modules/primeng/resources/primeng.css",
+              "src/styles/ultima-ng-5.2.4/assets/layout/css/layout-indigo.css",
+              "src/styles/ultima-ng-5.2.4/assets/theme/theme-indigo.css",
               "node_modules/primeicons/primeicons.css",
               "src/styles/font-awesome/css/font-awesome.min.css",
               "src/styles.scss"

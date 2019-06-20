@@ -9,7 +9,7 @@ import './content/modal.less';
   styleUrls: ['./app.component.css']
 })
 export class AppComponent {
-  title = 'app';
+  title = 'PDR Resource Landing Page';
 }
 
 /* 

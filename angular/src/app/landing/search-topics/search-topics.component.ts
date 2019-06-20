@@ -24,7 +24,6 @@ export class SearchTopicsComponent implements OnInit {
   constructor(public activeModal: NgbActiveModal) { }
 
   ngOnInit() {
-    console.log("taxonomyTree", this.taxonomyTree);
     this.setTreeVisible(true);
   }
 
@@ -48,8 +47,6 @@ export class SearchTopicsComponent implements OnInit {
     // this.modalService.close('Topic-popup-dialog');
   }
 
-
-
   /**
    * Delete a topic
    */
@@ -65,7 +62,7 @@ export class SearchTopicsComponent implements OnInit {
    */
   updateTopics(rowNode: any) {
     const existingTopic = this.tempTopics.filter(topic => topic == rowNode.node.data.researchTopic);
-    if (existingTopic.length == 0)
+    if (existingTopic == undefined || existingTopic == null || existingTopic.length == 0)
       this.tempTopics.push(rowNode.node.data.researchTopic);
   }
 
@@ -75,10 +72,10 @@ export class SearchTopicsComponent implements OnInit {
   getTopicColor(rowNode: any) {
     // console.log("this.tempTopics", this.tempTopics);
     const existingTopic = this.tempTopics.filter(topic => topic == rowNode.node.data.researchTopic);
-    if (existingTopic.length > 0) {
-      return 'green';
-    } else {
+    if (existingTopic == undefined || existingTopic == null || existingTopic.length <= 0) {
       return '#1E6BA1';
+    } else {
+      return 'green';
     }
   }
 
@@ -87,10 +84,10 @@ export class SearchTopicsComponent implements OnInit {
   */
   getTopicCursor(rowNode: any) {
     const existingTopic = this.tempTopics.filter(topic0 => topic0 == rowNode.node.data.researchTopic);
-    if (existingTopic.length > 0)
-      return 'default';
-    else
+    if (existingTopic == undefined || existingTopic == null || existingTopic.length <= 0) 
       return 'pointer';
+    else
+      return 'default';
   }
 
   searchAndExpandTaxonomyTree(topic: string, option: boolean) {
@@ -153,11 +150,16 @@ export class SearchTopicsComponent implements OnInit {
   }
 
   setVisible(tree: TreeNode[], option: boolean, backgroundColor?: string) {
+    if(tree == undefined || tree == null) return;
+
     for (let i = 0; i < tree.length; i++) {
-      tree[i].data.visible = option;
-      if(backgroundColor != null)
-      tree[i].data.bkcolor = backgroundColor;
-      if (tree[i].children.length > 0) {
+      if(tree[i].data != null && tree[i].data != undefined){
+        tree[i].data.visible = option;
+        if(backgroundColor != null)
+        tree[i].data.bkcolor = backgroundColor;
+      }
+
+      if (tree[i].children != null && tree[i].children!=undefined && tree[i].children.length > 0) {
         this.setVisible(tree[i].children, option, backgroundColor);
       }
     }

@@ -13,7 +13,7 @@ declare var Ultima: any;
 
 @Component({
   moduleId: module.id,
-  selector: 'pdr-headbar',
+  selector: 'pdr-dep-headbar',
   templateUrl: 'headbar.component.html',
   styleUrls: ['headbar.component.css']
 })
@@ -41,13 +41,13 @@ export class HeadbarComponent {
     private router: Router,
     private commonVarService: CommonVarService,
     private authService: AuthService) {
-    this.SDPAPI = this.appConfig.getConfig().SDPAPI;
-    this.landingService = this.appConfig.getConfig().LANDING;
-    this.cartService.watchStorage().subscribe(value => {
+      this.SDPAPI = this.appConfig.getConfig().SDPAPI;
+      this.landingService = this.appConfig.getConfig().LANDING;
+      this.cartService.watchStorage().subscribe(value => {
       this.cartLength = value;
-    });
-    this.commonVarService.watchEditMode().subscribe(
-      value => {
+       });
+      this.commonVarService.watchEditMode().subscribe(
+        value => {
         this.isEditMode = value;
       }
     );
@@ -115,3 +115,4 @@ export class HeadbarComponent {
     this.router.navigate(['/login']);
   }
 }
+

@@ -12,7 +12,7 @@ import { CommonVarService } from '../../shared/common-var';
 import { environment } from '../../../environments/environment';
 import { HttpClientModule, HttpClient, HttpHeaders, HttpRequest, HttpEventType, HttpResponse, HttpEvent } from '@angular/common/http';
 import { TestBed } from '@angular/core/testing';
-import { AppConfig, Config } from '../../shared/config-service/config.service';
+import { AppConfig } from '../../config/config';
 import { THIS_EXPR } from '@angular/compiler/src/output/output_ast';
 import { FileSaverService } from 'ngx-filesaver';
 import { Router } from '@angular/router';
@@ -45,6 +45,7 @@ export class DescriptionComponent {
   @Input() filescount: number;
   @Input() metadata: boolean;
   @Input() recordEditmode: boolean;
+  @Input() inBrowser : boolean;   // false if running server-side
 
   addAllFileSpinner: boolean = false;
   fileDetails: string = '';
@@ -89,11 +90,10 @@ export class DescriptionComponent {
   messageColor: any;
   noFileDownloaded: boolean; // will be true if any item in data cart is downloaded
   distApi: string;
-  confValues: Config;
   isLocalProcessing: boolean;
   showDownloadProgress: boolean = false;
-  mobWidth: number;
-  mobHeight: number;
+  mobWidth: number = 800;   // default value used in server context
+  mobHeight: number = 900;  // default value used in server context
   fontSize: string;
   descriptionObj: any;
   tempDecription: string;
@@ -116,7 +116,7 @@ export class DescriptionComponent {
     private downloadService: DownloadService,
     private commonVarService: CommonVarService,
     private http: HttpClient,
-    private appConfig: AppConfig,
+    private cfg : AppConfig,
     private _FileSaverService: FileSaverService,
     private confirmationService: ConfirmationService,
     private commonFunctionService: CommonFunctionService,
@@ -125,23 +125,25 @@ export class DescriptionComponent {
     private ngbModal: NgbModal,
     public router: Router,
     ngZone: NgZone) {
-    this.cols = [
-      { field: 'name', header: 'Name', width: '60%' },
-      { field: 'mediatype', header: 'Media Type', width: 'auto' },
-      { field: 'size', header: 'Size', width: 'auto' },
-      { field: 'download', header: 'Status', width: 'auto' }];
+      this.cols = [
+        { field: 'name', header: 'Name', width: '60%' },
+        { field: 'mediatype', header: 'Media Type', width: 'auto' },
+        { field: 'size', header: 'Size', width: 'auto' },
+        { field: 'download', header: 'Status', width: 'auto' }];
 
-    this.mobHeight = (window.innerHeight);
-    this.mobWidth = (window.innerWidth);
-    this.setWidth(this.mobWidth);
-
-    window.onresize = (e) => {
-      ngZone.run(() => {
-        this.mobWidth = window.innerWidth;
-        this.mobHeight = window.innerHeight;
+      if (typeof(window) !== 'undefined') {
+        this.mobHeight = (window.innerHeight);
+        this.mobWidth = (window.innerWidth);
         this.setWidth(this.mobWidth);
-      });
-    };
+  
+        window.onresize = (e) => {
+          ngZone.run(() => {
+            this.mobWidth = window.innerWidth;
+            this.mobHeight = window.innerHeight;
+            this.setWidth(this.mobWidth);
+          });
+        };
+      }
 
     this.cartService.watchAddAllFilesCart().subscribe(value => {
       this.addAllFileSpinner = value;
@@ -156,13 +158,12 @@ export class DescriptionComponent {
         this.cartLength = this.cartService.getCartSize();
       }
     });
-    this.confValues = this.appConfig.getConfig();
     this.descriptionObj = this.editingObjectInit();
     this.topicObj = this.editingObjectInit();
   }
 
   ngOnInit() {
-    this.distApi = this.confValues.DISTAPI;
+    this.distApi = this.cfg.get("distService", "/od/ds/");
 
     if (this.files.length != 0)
       this.files = <TreeNode[]>this.files[0].data;
@@ -197,7 +198,7 @@ export class DescriptionComponent {
         downloadUrl: null,
         description: null,
         filetype: null,
-        resId: "files",
+        resId: "/",
         filePath: "/",
         downloadProgress: 0,
         downloadInstance: null,
@@ -242,7 +243,7 @@ export class DescriptionComponent {
     }
 
     this.taxonomyTree = <TreeNode[]>this.taxonomyTree[0].data;
-    // console.log("this.taxonomyTree", this.taxonomyTree);
+    console.log("this.taxonomyTree", this.taxonomyTree);
   }
 
   private arrangeIntoTree(paths) {
@@ -1095,6 +1096,7 @@ export class DescriptionComponent {
       keyboard: false,
       windowClass: "myCustomModalClass"
     };
+
     const modalRef = this.ngbModal.open(SearchTopicsComponent, ngbModalOptions);
     modalRef.componentInstance.tempTopics = this.tempTopics;
     modalRef.componentInstance.recordEditmode = this.recordEditmode;

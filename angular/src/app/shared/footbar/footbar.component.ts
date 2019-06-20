@@ -5,7 +5,7 @@ import { Component } from '@angular/core';
  */
 @Component({
   moduleId: module.id,
-  selector: 'pdr-footbar',
+  selector: 'pdr-dep-footbar',
   templateUrl: 'footbar.component.html',
   styleUrls: ['footbar.component.css']
 })

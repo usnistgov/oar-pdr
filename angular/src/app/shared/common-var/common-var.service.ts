@@ -39,13 +39,12 @@ export class CommonVarService {
   }
 
   setEdiid(ediid: string) {
-    if (this._storage)
-      this._storage.setItem("ediid", ediid);
+    this.ediid = ediid;
   }
 
   getEdiid() {
-    if (!this._storage) return "(none)";
-    return this._storage.getItem("ediid");
+    console.log("ediid", this.ediid);
+    return this.ediid;
   }
 
   getRandomMaximum() {

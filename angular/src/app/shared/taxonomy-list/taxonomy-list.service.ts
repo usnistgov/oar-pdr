@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import 'rxjs/operator/map';
 import 'rxjs/operator/catch';
-import { AppConfig, Config } from '../../shared/config-service/config.service';
+import { AppConfig } from '../../config/config';
 
 /**
  * This class provides the TaxonomyList service with methods to read taxonomies and add names.
@@ -12,8 +12,7 @@ import { AppConfig, Config } from '../../shared/config-service/config.service';
   providedIn: 'root'
 })
 export class TaxonomyListService {
-  confValues: Config;
-  private RMMAPIURL: string;
+  private landingBackend : string = "";
 
   /**
    * Creates a new TaxonomyListService with the injected Http.
@@ -21,9 +20,11 @@ export class TaxonomyListService {
    * @constructor
    */
   constructor(private http: HttpClient,
-    private appConfig: AppConfig) {
-    this.confValues = this.appConfig.getConfig();
-    this.RMMAPIURL = this.confValues.RMMAPI;
+    private cfg: AppConfig) {
+      this.landingBackend = cfg.get("mdAPI", "/unconfigured");
+      console.log("this.landingBackend", this.landingBackend);
+      if (this.landingBackend == "/unconfigured")
+          throw new Error("Metadata service endpoint not configured!");
   }
 
   /**
@@ -32,9 +33,9 @@ export class TaxonomyListService {
    */
   get(level: number): Observable<any> {
     if (level == 0)
-      return this.http.get(this.RMMAPIURL + 'taxonomy?');
+      return this.http.get(this.landingBackend + 'taxonomy?');
     else
-      return this.http.get(this.RMMAPIURL + 'taxonomy?level=' + level.toString());
+      return this.http.get(this.landingBackend + 'taxonomy?level=' + level.toString());
   }
 
   /**
