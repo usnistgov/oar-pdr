@@ -2,13 +2,30 @@
 Utility functions useful across the pdr package
 """
 from collections import OrderedDict, Mapping
-import hashlib, json, re, shutil, os, time, subprocess
+import hashlib, json, re, shutil, os, time, subprocess, logging
 try:
     import fcntl
 except ImportError:
     fcntl = None
 
 from .exceptions import (NERDError, PODError, StateException)
+
+log = logging.getLogger("pdr.utils")
+BLAB = logging.DEBUG - 1
+
+def blab(log, msg, *args, **kwargs):
+    """
+    log a verbose message. This uses a log level, BLAB, that is lower than 
+    DEBUG; in other words when a log's level is set to DEBUG, this message 
+    will not be displayed.  This is intended for messages that would appear 
+    voluminously if the level were set to BLAB. 
+
+    :param Logger log:  the Logger object to record to
+    :param str    msg:  the message to write
+    :param args:        treat msg as a template and insert these values
+    :param kwargs:      other arbitrary keywords to pass to log.log()
+    """
+    log.log(BLAB, msg, *args, **kwargs)
 
 def read_nerd(nerdfile):
     """
@@ -55,8 +72,19 @@ def read_json(jsonfile, nolock=False):
     with open(jsonfile) as fd:
         if fcntl and not nolock:
             fcntl.lockf(fd, fcntl.LOCK_SH)
-        return json.load(fd, object_pairs_hook=OrderedDict)
-    
+            blab(log, "Acquired shared lock for reading: "+jsonfile)
+        data = fd.read()
+    blab(log, "released SH")
+    if not data:
+        # this is an unfortunate hack multithreaded reading/writing
+        time.sleep(0.02)
+        with open(jsonfile) as fd:
+            if fcntl and not nolock:
+                fcntl.lockf(fd, fcntl.LOCK_SH)
+                blab(log, "(Re)Acquired shared lock for reading: "+jsonfile)
+            data = fd.read()
+        blab(log, "released SH")
+    return json.loads(data, object_pairs_hook=OrderedDict)
 
 def write_json(jsdata, destfile, indent=4, nolock=False):
     """
@@ -71,10 +99,13 @@ def write_json(jsdata, destfile, indent=4, nolock=False):
                            data without a lock
     """
     try:
-        with open(destfile, 'w') as fd:
+        with open(destfile, 'a') as fd:
             if fcntl and not nolock:
                 fcntl.lockf(fd, fcntl.LOCK_EX)
+                blab(log, "Acquired exclusive lock for writing: "+destfile)
+            fd.truncate(0)
             json.dump(jsdata, fd, indent=indent, separators=(',', ': '))
+        blab(log, "released EX")
             
     except Exception, ex:
         raise StateException("{0}: Failed to write JSON data to file: {1}"
