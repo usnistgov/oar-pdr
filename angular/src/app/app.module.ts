@@ -63,6 +63,9 @@ import { LoginComponent } from './login/login.component';
 import { ContenteditableModel } from './directives/contenteditable-model.directive';
 import { SearchTopicsComponent } from './landing/search-topics/search-topics.component';
 import { DataTableModule } from 'primeng/primeng';
+import { DescriptionPopupComponent } from './landing/description/description-popup/description-popup.component';
+import { AuthorPopupComponent } from './landing/author-popup/author-popup.component';
+import { ContactPopupComponent } from './landing/contact-popup/contact-popup.component';
 
 @NgModule({
   declarations: [
@@ -71,7 +74,7 @@ import { DataTableModule } from 'primeng/primeng';
     Collaspe, MetadataComponent, DescriptionComponent,
     KeyValuePipe, MetadataView, NoidComponent, NerdmComponent,
     ErrorComponent, UserErrorComponent,ComboBoxComponent,ComboBoxPipe,
-    AppShellNoRenderDirective, AppShellRenderDirective, LoginComponent, ModalComponent, ContenteditableModel, SearchTopicsComponent
+    AppShellNoRenderDirective, AppShellRenderDirective, LoginComponent, ModalComponent, ContenteditableModel, SearchTopicsComponent, DescriptionPopupComponent, AuthorPopupComponent, ContactPopupComponent
   ],
   imports: [
       HttpClientModule,
@@ -101,12 +104,16 @@ import { DataTableModule } from 'primeng/primeng';
     ConfirmationService,
     CommonFunctionService,
     TaxonomyListService,
-    ModalService
+    ModalService,
 
     // provider used to create fake backend
-    // fakeBackendProvider
+    fakeBackendProvider
   ],
-  entryComponents: [SearchTopicsComponent],
+  entryComponents: [
+    SearchTopicsComponent, 
+    DescriptionPopupComponent, 
+    AuthorPopupComponent,
+    ContactPopupComponent],
   schemas: [CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA]
 })
 

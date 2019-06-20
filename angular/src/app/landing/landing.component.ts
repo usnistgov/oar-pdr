@@ -6,13 +6,10 @@ import { MenuItem } from 'primeng/api';
 import { Observable, of } from 'rxjs';
 import * as _ from 'lodash';
 import 'rxjs/add/operator/map';
-import { Subscription } from 'rxjs/Subscription';
 import { AppConfig } from '../config/config';
 import { PLATFORM_ID, APP_ID, Inject } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
-import { CartService } from '../datacart/cart.service';
 import { CommonVarService } from '../shared/common-var';
-import { TestDataService } from '../shared/testdata-service/testDataService';
 import { SearchService } from '../shared/search-service/index';
 import { first, tap } from 'rxjs/operators';
 import { isPlatformServer } from '@angular/common';
@@ -20,10 +17,9 @@ import { makeStateKey, TransferState } from '@angular/platform-browser';
 import { AuthService } from '../shared/auth-service/auth.service';
 import { trigger, state, style, animate, transition } from '@angular/animations';
 import { ModalService } from '../shared/modal-service';
-//import { _throw } from 'rxjs/observable/throw';
-// import {DialogService} from 'primeng/api';
-import { DatacartComponent } from '../datacart/datacart.component';
-import { Data } from '../datacart/data';
+import { AuthorPopupComponent } from './author-popup/author-popup.component';
+import { NgbModalOptions, NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { ContactPopupComponent } from './contact-popup/contact-popup.component';
 
 
 interface reference {
@@ -171,10 +167,10 @@ export class LandingComponent implements OnInit {
   authorObj: any;
   contactObj: any;
   tempContactPoint: any;
-  tempAuthors: any;
-  tempAddress: string;
+  tempAuthors: any = {};
+  // tempAddress: string;
   tempDecription: string;
-  isAuthorCollapsed: boolean = false;
+  // isAuthorCollapsed: boolean = false;
   organizationList: string[] = ["National Institute of Standards and Technology"]
   HomePageLink: boolean = false;
   inBrowser: boolean = false;
@@ -195,6 +191,7 @@ export class LandingComponent implements OnInit {
     private searchService: SearchService,
     private commonVarService: CommonVarService,
     private authService: AuthService,
+    private ngbModal: NgbModal,
     private modalService: ModalService) {
     this.titleObj = this.editingObjectInit();
     this.authorObj = this.editingObjectInit();
@@ -207,7 +204,8 @@ export class LandingComponent implements OnInit {
         ""
       ]
     };
-    this.tempAuthors = this.getBlankAuthor();
+    var newAuthor = this.commonVarService.getBlankAuthor();
+    this.tempAuthors['authors'] = newAuthor;
   }
 
   /**
@@ -845,17 +843,6 @@ export class LandingComponent implements OnInit {
   }
 
   /*
-  *  When mouse over contact - disabled but leave the code here just in case
-  */
-  contactMouseover() {
-    // if (this.recordEditmode) {
-    //   if (!this.contactObj.detailEditmode) {
-    //     this.setContactEditbox(true);
-    //   }
-    // }
-  }
-
-  /*
   *  Display contact edit box
   */
   setContactEditbox(mode: boolean) {
@@ -871,101 +858,29 @@ export class LandingComponent implements OnInit {
   }
 
   /*
-  *  When mouse leaves contact c
-  */
-  contactMouseout() {
-    // if (this.recordEditmode) {
-    //   if (!this.contactObj.detailEditmode) {
-    //     this.setContactEditbox(false);
-    //   }
-    // }
-  }
-
-  /*
   *  Open contact pop up dialog
   */
   openContactModal(id: string) {
+    // let textArea = document.getElementById("address");
+    // textArea.style.height = (this.tempContactPoint.address.length * 30).toString() + 'px';;
     if (this.record.contactPoint != null && this.record.contactPoint != undefined) {
       this.tempContactPoint = JSON.parse(JSON.stringify(this.record.contactPoint));
     } else {
-      this.tempContactPoint = this.getBlankContact();
+      this.tempContactPoint = this.commonVarService.getBlankContact();
     }
 
-    // strip off "mailto:"
-    this.tempContactPoint.hasEmail = this.tempContactPoint.hasEmail.split(":")[1];
-    let i: number;
-    // Putting address lines together
-    if (this.tempContactPoint.address) {
-      this.tempAddress = this.tempContactPoint.address[0];
-      for (i = 1; i < this.tempContactPoint.address.length; i++) {
-        this.tempAddress = this.tempAddress + '\r\n' + this.tempContactPoint.address[i];
-      }
-    }
-    let textArea = document.getElementById("address");
-    textArea.style.height = (this.tempContactPoint.address.length * 30).toString() + 'px';;
+    let ngbModalOptions: NgbModalOptions = {
+      backdrop: 'static',
+      keyboard: false,
+      windowClass: "myCustomModalClass"
+    };
 
-    this.modalService.open(id);
-  }
+    const modalRef = this.ngbModal.open(ContactPopupComponent, ngbModalOptions);
+    modalRef.componentInstance.inputContactPoint = this.tempContactPoint;
 
-  autogrow(e) {
-    let textArea = document.getElementById("address");
-
-    e.target.style.overflow = 'hidden';
-    e.target.style.height = '0px';
-    e.target.style.height = textArea.scrollHeight + 'px';
-  }
-
-  /*
-  *   Close pop up dialog by id
-  */
-  closeModal(id: string) {
-    this.modalService.close(id);
-  }
-
-  /*
-  *   Determine if a given value is empty
-  */
-  emptyString(e: any) {
-    switch (e) {
-      case "":
-      case 0:
-      case "0":
-      case null:
-      case false:
-      case typeof this == "undefined":
-        return true;
-      default:
-        return false;
-    }
-  }
-
-  /* 
-  *   Save contact info when click on save button in pop up dialog
-  */
-  saveContactInfo() {
-    // Add "mailto:" back
-    if (!this.emptyString(this.tempContactPoint.hasEmail)) {
-      if (this.tempContactPoint.hasEmail.split(":")[0] != "mailto")
-        this.tempContactPoint.hasEmail = "mailto:" + this.tempContactPoint.hasEmail;
-    }
-
-    //Handle address
-    this.tempContactPoint.address = this.tempAddress.split('\n');
-
-    this.record.contactPoint = JSON.parse(JSON.stringify(this.tempContactPoint));
-    // Send update to backend here...
-    this.modalService.close('Contact-popup-dialog');
-  }
-
-  /*
-  *  When mouse over authors - disabled but leave the code here just in case
-  */
-  authorMouseover() {
-    // if (this.recordEditmode) {
-    //   if (!this.authorObj.detailEditmode) {
-    //     this.setAuthorEditbox(true);
-    //   }
-    // }
+    modalRef.componentInstance.returnContactPoint.subscribe((contactPoint) => {
+      this.record.contactPoint = JSON.parse(JSON.stringify(contactPoint));
+    })
   }
 
   /*
@@ -984,45 +899,36 @@ export class LandingComponent implements OnInit {
   }
 
   /*
-  *  When mouse leaves authors - disabled but leave the code here just in case
-  */
-  authorMouseout() {
-    // if (this.recordEditmode) {
-    //   if (!this.authorObj.detailEditmode) {
-    //     this.setAuthorEditbox(false);
-    //   }
-    // }
-  }
-
-  /*
-  *  Open author pop up dialog
+  *   Open Topic popup modal
   */
   openAuthorModal() {
-    this.isAuthorCollapsed = false;
-
     if (this.record.authors != null && this.record.authors != undefined) {
       this.tempAuthors.authors = JSON.parse(JSON.stringify(this.record.authors));
     } else {
-      this.tempAuthors = this.getBlankAuthor();
+      this.tempAuthors = JSON.parse('{"authors":[' + JSON.stringify(this.commonVarService.getBlankAuthor()) + "]}");
     }
+
     // this.tempAuthors.authors = this.record.authors;
     for (var author in this.tempAuthors.authors) {
       this.tempAuthors.authors[author].isCollapsed = false;
       this.tempAuthors.authors[author].fnLocked = false;
       this.tempAuthors.authors[author].originalIndex = author;
     }
-    this.modalService.open("Author-popup-dialog");
-  }
 
-  /* 
-  *   Save contact info when click on save button in pop up dialog
-  */
-  saveAuthorInfo() {
-    this.record.authors = this.tempAuthors.authors;
-    for (var author in this.record.authors)
-      this.record.authors[author].dataChanged = false;
-    // Send update to backend here
-    this.modalService.close('Author-popup-dialog');
+    let ngbModalOptions: NgbModalOptions = {
+      backdrop: 'static',
+      keyboard: false,
+      windowClass: "myCustomModalClass"
+    };
+
+    const modalRef = this.ngbModal.open(AuthorPopupComponent, ngbModalOptions);
+    modalRef.componentInstance.tempAuthors = this.tempAuthors;
+
+    modalRef.componentInstance.returnAuthors.subscribe((authors) => {
+      this.record.authors = authors.authors;
+      for (var author in this.record.authors)
+        this.record.authors[author].dataChanged = false;
+    })
   }
 
   /*
@@ -1030,235 +936,6 @@ export class LandingComponent implements OnInit {
   */
   trackByFn(index: any, author: any) {
     return index;
-  }
-
-  /*
-  *   Update full name when given name changed
-  */
-  onGivenNameChange(author: any, givenName: string) {
-    author.dataChanged = true;
-    if (!author.fnLocked) {
-      author.fn = givenName + " " + (author.middleName == undefined ? " " : author.middleName + " ") + (author.familyName == undefined ? "" : author.familyName);
-    }
-  }
-
-  /*
-  *   Update full name when middle name changed
-  */
-  onMiddleNameChange(author: any, middleName: string) {
-    author.dataChanged = true;
-    if (!author.fnLocked) {
-      author.fn = (author.givenName == undefined ? " " : author.givenName + " ") + middleName + " " + (author.familyName == undefined ? "" : author.familyName);
-    }
-  }
-
-  /*
-  *   Update full name when middle name changed
-  */
-  onFamilyNameChange(author: any, familyName: string) {
-    author.dataChanged = true;
-    if (!author.fnLocked) {
-      author.fn = (author.givenName == undefined ? " " : author.givenName + " ") + (author.middleName == undefined ? " " : author.middleName + " ") + familyName;
-    }
-  }
-
-  /*
-  *   Lock full name when full name changed
-  */
-  onFullNameChange(author: any, familyName: string) {
-    author.dataChanged = true;
-    if (!author.fnLocked) {
-      author.fnLocked = true;
-    }
-  }
-  /*
-  *   Return header bar background color based on the data status
-  */
-  getHeaderBackgroundColor(author: any) {
-    if (author.dataChanged) {
-      return "green";
-    } else {
-      return "burlywood";
-    }
-  }
-
-  /*
-  *   Return header bar background color based on the data status
-  */
-  getHeaderForegroundColor(author: any) {
-    if (author.dataChanged) {
-      return "white";
-    } else {
-      return "black";
-    }
-  }
-
-  /*
-  *   Return icon class based on collapse status
-  */
-  getTitleClass(author: any) {
-    if (author.isCollapsed) {
-      if (author.dataChanged) {
-        return "faa faa-arrow-circle-down icon-white";
-      } else {
-        return "faa faa-arrow-circle-down";
-      }
-    } else {
-      if (author.dataChanged) {
-        return "faa faa-arrow-circle-up icon-white";
-      } else {
-        return "faa faa-arrow-circle-up";
-      }
-    }
-  }
-
-  /*
-  *   Set image color
-  */
-  getTitleImgClass(author) {
-    if (author.dataChanged) {
-      return "filter-white";
-    } else {
-      return "filter-black";
-    }
-  }
-
-  /*
-  *   Return a blank author
-  */
-  getBlankAuthor() {
-    return {
-      "authors": [
-        {
-          "familyName": "",
-          "fn": "",
-          "givenName": "",
-          "middleName": "",
-          "affiliation": [
-            {
-              "@id": "",
-              "title": "",
-              "dept": "",
-              "@type": [
-                ""
-              ]
-            }
-          ],
-          "orcid": "",
-          "isCollapsed": false,
-          "fnLocked": false,
-          "dataChanged": false
-        }]
-    };
-  }
-
-  /*
-  *   Return a blank contact point
-  */
-  getBlankContact() {
-    return {
-      "fn": "",
-      "hasEmail": "",
-      "address": [
-        ""
-      ]
-    }
-  }
-
-  /*
-  *   Discard current changes to the author, reset to original value
-  */
-  resetAuthor(author: any, i: number) {
-    this.tempAuthors.authors[i] = JSON.parse(JSON.stringify(this.record.authors[this.tempAuthors.authors[i].originalIndex]));
-    author.dataChanged = false;
-    author.fnLocked = false;
-    author.isCollapsed = false;
-  }
-
-  /*
-  *   Move author up
-  */
-  moveAuthorUp(author: any, i: number) {
-    var tempAuth01 = JSON.parse(JSON.stringify(this.tempAuthors.authors[i - 1]));
-    var tempAuth02 = JSON.parse(JSON.stringify(this.tempAuthors.authors[i]));
-    this.tempAuthors.authors[i - 1] = JSON.parse(JSON.stringify(tempAuth02));
-    this.tempAuthors.authors[i] = JSON.parse(JSON.stringify(tempAuth01));
-    author.dataChanged = true;
-  }
-
-  /*
-  *   Move author down
-  */
-  moveAuthorDown(author: any, i: number) {
-    var tempAuth01 = JSON.parse(JSON.stringify(this.tempAuthors.authors[i + 1]));
-    var tempAuth02 = JSON.parse(JSON.stringify(this.tempAuthors.authors[i]));
-    this.tempAuthors.authors[i + 1] = JSON.parse(JSON.stringify(tempAuth02));
-    this.tempAuthors.authors[i] = JSON.parse(JSON.stringify(tempAuth01));
-    author.dataChanged = true;
-  }
-
-  /*
-  *   Add author
-  */
-  addAuthor() {
-    var newAuthor = this.getBlankAuthor();
-    this.tempAuthors.authors.push(newAuthor);
-  }
-
-  /*
-  *   Remove author from the list
-  */
-  deleteAuthor(author: any) {
-    this.tempAuthors.authors = this.tempAuthors.authors.filter(obj => obj !== author);
-  }
-
-  /*
-  *   Return icon class based on collapse status (top level)
-  */
-  getAuthorClass() {
-    if (this.isAuthorCollapsed) {
-      return "faa faa-arrow-circle-down icon-white";
-    } else {
-      return "faa faa-arrow-circle-up icon-white";
-    }
-  }
-
-  /*
-  *   Show/hide author details
-  */
-  handleAuthorDisplay() {
-    this.isAuthorCollapsed = !this.isAuthorCollapsed;
-    for (var author in this.tempAuthors.authors) {
-      this.tempAuthors.authors[author].isCollapsed = this.isAuthorCollapsed;
-    }
-  }
-
-
-  /*
-  *   Add affiliation to an author
-  */
-  addAffiliation(i: number) {
-    var aff = {
-      "@id": "",
-      "title": "",
-      "dept": "",
-      "@type": [
-        ""
-      ]
-    };
-    if (!this.tempAuthors.authors[i].affiliation)
-      this.tempAuthors.authors[i].affiliation = [];
-
-    this.tempAuthors.authors[i].affiliation.push(aff);
-    this.tempAuthors.authors[i].dataChanged = true;
-  }
-
-  /*
-  *   Remove one affiliation from an author
-  */
-  deleteAffiliation(i: number, aff: any) {
-    this.tempAuthors.authors[i].affiliation = this.tempAuthors.authors[i].affiliation.filter(obj => obj !== aff);
-    this.tempAuthors.authors[i].dataChanged = true;
   }
 
   /* 

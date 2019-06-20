@@ -24,6 +24,7 @@ import { ComboBoxComponent } from '../../shared/combobox/combo-box.component';
 import { ComboBoxPipe } from '../../shared/combobox/combo-box.pipe';
 import { NgbModalOptions, NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { SearchTopicsComponent } from '../../landing/search-topics/search-topics.component';
+import { DescriptionPopupComponent } from './description-popup/description-popup.component';
 
 declare var saveAs: any;
 
@@ -45,7 +46,7 @@ export class DescriptionComponent {
   @Input() filescount: number;
   @Input() metadata: boolean;
   @Input() recordEditmode: boolean;
-  @Input() inBrowser : boolean;   // false if running server-side
+  @Input() inBrowser: boolean;   // false if running server-side
 
   addAllFileSpinner: boolean = false;
   fileDetails: string = '';
@@ -96,7 +97,6 @@ export class DescriptionComponent {
   mobHeight: number = 900;  // default value used in server context
   fontSize: string;
   descriptionObj: any;
-  tempDecription: string;
   topicObj: any;
   tempTopics: string[] = [];
   defaultText: string = "Enter description here...";
@@ -116,7 +116,7 @@ export class DescriptionComponent {
     private downloadService: DownloadService,
     private commonVarService: CommonVarService,
     private http: HttpClient,
-    private cfg : AppConfig,
+    private cfg: AppConfig,
     private _FileSaverService: FileSaverService,
     private confirmationService: ConfirmationService,
     private commonFunctionService: CommonFunctionService,
@@ -125,25 +125,25 @@ export class DescriptionComponent {
     private ngbModal: NgbModal,
     public router: Router,
     ngZone: NgZone) {
-      this.cols = [
-        { field: 'name', header: 'Name', width: '60%' },
-        { field: 'mediatype', header: 'Media Type', width: 'auto' },
-        { field: 'size', header: 'Size', width: 'auto' },
-        { field: 'download', header: 'Status', width: 'auto' }];
+    this.cols = [
+      { field: 'name', header: 'Name', width: '60%' },
+      { field: 'mediatype', header: 'Media Type', width: 'auto' },
+      { field: 'size', header: 'Size', width: 'auto' },
+      { field: 'download', header: 'Status', width: 'auto' }];
 
-      if (typeof(window) !== 'undefined') {
-        this.mobHeight = (window.innerHeight);
-        this.mobWidth = (window.innerWidth);
-        this.setWidth(this.mobWidth);
-  
-        window.onresize = (e) => {
-          ngZone.run(() => {
-            this.mobWidth = window.innerWidth;
-            this.mobHeight = window.innerHeight;
-            this.setWidth(this.mobWidth);
-          });
-        };
-      }
+    if (typeof (window) !== 'undefined') {
+      this.mobHeight = (window.innerHeight);
+      this.mobWidth = (window.innerWidth);
+      this.setWidth(this.mobWidth);
+
+      window.onresize = (e) => {
+        ngZone.run(() => {
+          this.mobWidth = window.innerWidth;
+          this.mobHeight = window.innerHeight;
+          this.setWidth(this.mobWidth);
+        });
+      };
+    }
 
     this.cartService.watchAddAllFilesCart().subscribe(value => {
       this.addAllFileSpinner = value;
@@ -243,7 +243,6 @@ export class DescriptionComponent {
     }
 
     this.taxonomyTree = <TreeNode[]>this.taxonomyTree[0].data;
-    console.log("this.taxonomyTree", this.taxonomyTree);
   }
 
   private arrangeIntoTree(paths) {
@@ -1054,34 +1053,37 @@ export class DescriptionComponent {
   }
 
   /*
-  *   Open description modal
+  *   Open Description popup modal
   */
   openDescriptionModal() {
-    var i: number;
+    let i: number;
+    let tempDecription: string;
 
     if (this.record['description'] != null && this.record['description'] != undefined) {
-      this.tempDecription = this.record['description'][0];
+      tempDecription = this.record['description'][0];
       for (i = 1; i < this.record['description'].length; i++) {
-        this.tempDecription = this.tempDecription + '\r\n\r\n' + this.record['description'][i];
+        tempDecription = tempDecription + '\r\n\r\n' + this.record['description'][i];
       }
     }
+    console.log('tempDecription', tempDecription);
 
-    this.modalService.open("Description-popup-dialog");
-  }
+    let ngbModalOptions: NgbModalOptions = {
+      backdrop: 'static',
+      keyboard: false,
+      windowClass: "myCustomModalClass"
+    };
 
-  /* 
-  *   Save contact info when click on save button in pop up dialog
-  */
-  saveDescription() {
-    var tempDescs = this.tempDecription.split(/\n\s*\n/).filter(desc => desc != '');
-    this.record['description'] = JSON.parse(JSON.stringify(tempDescs));
+    const modalRef = this.ngbModal.open(DescriptionPopupComponent, ngbModalOptions);
+    modalRef.componentInstance.tempDecription = tempDecription;
 
-    // Send update to backend here...
-    this.modalService.close('Description-popup-dialog');
+    modalRef.componentInstance.returnDescription.subscribe((returnValue) => {
+      var tempDescs = returnValue.split(/\n\s*\n/).filter(desc => desc != '');
+      this.record['description'] = JSON.parse(JSON.stringify(tempDescs));
+    })
   }
 
   /*
-  *   Open description modal
+  *   Open Topic popup modal
   */
   openTopicModal() {
     this.tempTopics = [];
@@ -1101,9 +1103,16 @@ export class DescriptionComponent {
     modalRef.componentInstance.tempTopics = this.tempTopics;
     modalRef.componentInstance.recordEditmode = this.recordEditmode;
     modalRef.componentInstance.taxonomyTree = this.taxonomyTree;
-    modalRef.componentInstance.record = this.record;
-    modalRef.componentInstance.passEntry.subscribe((receivedEntry) => {
-      this.record = receivedEntry;
+    // modalRef.componentInstance.record = this.record;
+    modalRef.componentInstance.passEntry.subscribe((topics) => {
+      var strtempTopics: string = '';
+      var lTempTopics: any[] = [];
+
+      for (var i = 0; i < topics.length; ++i) {
+        strtempTopics = strtempTopics + topics[i];
+        lTempTopics.push({ '@type': 'Concept', 'scheme': 'https://www.nist.gov/od/dm/nist-themes/v1.0', 'tag': this.tempTopics[i] })
+      }
+      this.record['topic'] = JSON.parse(JSON.stringify(lTempTopics));
     })
 
     // this.refreshTopicTree();

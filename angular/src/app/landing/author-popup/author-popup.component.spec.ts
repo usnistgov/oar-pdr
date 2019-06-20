@@ -1,0 +1,70 @@
+import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { AuthorPopupComponent } from './author-popup.component';
+import { FormsModule } from '@angular/forms';
+import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
+import { NO_ERRORS_SCHEMA } from '@angular/core';
+import { CommonVarService } from '../../shared/common-var';
+
+describe('AuthorPopupComponent', () => {
+  let component: AuthorPopupComponent;
+  let fixture: ComponentFixture<AuthorPopupComponent>;
+  let newAuthor = {
+    "authors": [
+      {
+        "familyName": "Dow",
+        "fn": "John Dow",
+        "givenName": "John",
+        "middleName": "",
+        "affiliation": [
+          {
+            "@id": "",
+            "title": "",
+            "dept": "",
+            "@type": [
+              ""
+            ]
+          }
+        ],
+        "orcid": "",
+        "isCollapsed": false,
+        "fnLocked": false,
+        "dataChanged": false
+      }]
+  };
+
+  beforeEach(async(() => {
+    TestBed.configureTestingModule({
+      declarations: [ AuthorPopupComponent ],
+      imports: [FormsModule],
+      schemas: [NO_ERRORS_SCHEMA],
+      providers: [NgbActiveModal, CommonVarService]
+    })
+    .compileComponents();
+  }));
+
+  beforeEach(() => {
+    let tempAuthors = newAuthor;
+    console.log('tempAuthors', tempAuthors);
+    // tempAuthors.authors.push(newAuthor);
+
+    fixture = TestBed.createComponent(AuthorPopupComponent);
+    component = fixture.componentInstance;
+    component.tempAuthors = tempAuthors;
+    fixture.detectChanges();
+  });
+
+  it('Should create', () => {
+    expect(component).toBeTruthy();
+  });
+
+  it('Should have title: Authors', () => {
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('#title').innerText).toEqual('Authors');
+  });
+
+  it('Should have author John Dow', () => {
+    fixture.detectChanges();
+    console.log("span", fixture.nativeElement.querySelector('span'));
+    expect(fixture.nativeElement.querySelector('span').innerText).toEqual('John Dow');
+  });
+});

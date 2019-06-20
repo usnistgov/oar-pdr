@@ -22,7 +22,6 @@ export class TaxonomyListService {
   constructor(private http: HttpClient,
     private cfg: AppConfig) {
       this.landingBackend = cfg.get("mdAPI", "/unconfigured");
-      console.log("this.landingBackend", this.landingBackend);
       if (this.landingBackend == "/unconfigured")
           throw new Error("Metadata service endpoint not configured!");
   }

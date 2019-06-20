@@ -43,7 +43,6 @@ export class CommonVarService {
   }
 
   getEdiid() {
-    console.log("ediid", this.ediid);
     return this.ediid;
   }
 
@@ -144,5 +143,61 @@ export class CommonVarService {
   **/
   watchEditMode(): Observable<boolean> {
     return this.editModeSub.asObservable();
+  }
+
+  /*
+*   Return a blank author
+*/
+  getBlankAuthor() {
+    return {
+      "familyName": "",
+      "fn": "",
+      "givenName": "",
+      "middleName": "",
+      "affiliation": [
+        {
+          "@id": "",
+          "title": "",
+          "dept": "",
+          "@type": [
+            ""
+          ]
+        }
+      ],
+      "orcid": "",
+      "isCollapsed": false,
+      "fnLocked": false,
+      "dataChanged": false
+    };
+  }
+
+  /*
+  *   Determine if a given value is empty
+  */
+  emptyString(e: any) {
+    switch (e) {
+      case "":
+      case 0:
+      case "0":
+      case null:
+      case false:
+      case typeof this == "undefined":
+        return true;
+      default:
+        return false;
+    }
+  }
+
+  /*
+  *   Return a blank contact point
+  */
+  getBlankContact() {
+    return {
+      "fn": "",
+      "hasEmail": "",
+      "address": [
+        ""
+      ]
+    }
   }
 }

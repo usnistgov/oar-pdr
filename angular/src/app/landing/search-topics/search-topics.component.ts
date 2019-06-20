@@ -11,7 +11,6 @@ export class SearchTopicsComponent implements OnInit {
   @Input() tempTopics: string[];
   @Input() taxonomyTree: TreeNode[];
   @Input() recordEditmode: boolean;
-  @Input() record: any[];
   @Output() passEntry: EventEmitter<any> = new EventEmitter();
 
   isVisible: boolean = true;
@@ -31,18 +30,9 @@ export class SearchTopicsComponent implements OnInit {
   *   Save contact info when click on save button in pop up dialog
   */
   saveTopic() {
-    var strtempTopics: string = '';
-    var lTempTopics: any[] = [];
-
-    for (var i = 0; i < this.tempTopics.length; ++i) {
-      strtempTopics = strtempTopics + this.tempTopics[i];
-      lTempTopics.push({ '@type': 'Concept', 'scheme': 'https://www.nist.gov/od/dm/nist-themes/v1.0', 'tag': this.tempTopics[i] })
-    }
-    this.record['topic'] = JSON.parse(JSON.stringify(lTempTopics));
-
-    this.passEntry.emit(this.record);
-
+    this.passEntry.emit(this.tempTopics);
     this.activeModal.close('Close click')
+
     // Send update to backend here...
     // this.modalService.close('Topic-popup-dialog');
   }
