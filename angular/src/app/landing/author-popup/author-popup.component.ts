@@ -1,6 +1,7 @@
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { CommonVarService } from '../../shared/common-var';
+import { SearchService } from '../../shared/search-service/index';
 
 @Component({
   selector: 'app-author-popup',
@@ -13,16 +14,55 @@ export class AuthorPopupComponent implements OnInit {
 
   isAuthorCollapsed: boolean = false;
   originalAuthors: any;
+  errorMsg: any;
+  affiliationList: any[] = [];
+  organizationList: string[] = [];
 
-  constructor(public activeModal: NgbActiveModal, private commonVarService: CommonVarService) { }
+  constructor(
+    public activeModal: NgbActiveModal, 
+    private commonVarService: CommonVarService,
+    private searchService: SearchService) { }
 
   ngOnInit() {
-    console.log('this.tempAuthors', this.tempAuthors);
     if(this.tempAuthors != undefined)
       this.originalAuthors = JSON.parse(JSON.stringify(this.tempAuthors));
     else
       this.tempAuthors = {};
+
+    this.getAffiliationList();
   }
+
+
+  /*
+  *   Get a list of current affiliation
+  */
+  getAffiliationList(){
+    this.searchService.getAllRecords().subscribe((result) => {
+      for (var i = 0; i < result.ResultData.length; i++) {
+        if(result.ResultData[i].authors != undefined && result.ResultData[i].authors != null){
+          for(var j = 0; j < result.ResultData[i].authors.length; j++){
+            if(result.ResultData[i].authors[j].affiliation != undefined){
+              for(var k = 0; k < result.ResultData[i].authors[j].affiliation.length; k++){ 
+                if(result.ResultData[i].authors[j].affiliation[k].title != undefined){
+                  const existingAffiliation = this.affiliationList.filter(aff => aff.name === result.ResultData[i].authors[j].affiliation[k].title && aff.division === "");
+                  if(existingAffiliation.length == 0){
+                    this.affiliationList.push({"name":result.ResultData[i].authors[j].affiliation[k].title,"division":""})
+                    this.organizationList.push(result.ResultData[i].authors[j].affiliation[k].title);
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+      this.affiliationList.sort((a, b) => a.name.localeCompare(b.name));
+    }, (error) => {
+      console.log("There is an error getting records list.");
+      console.log(error);
+      this.errorMsg = error;
+    });
+  }
+
 
   /*
   *   Return icon class based on collapse status (top level)
@@ -148,7 +188,6 @@ export class AuthorPopupComponent implements OnInit {
   addAuthor() {
     var newAuthor = this.commonVarService.getBlankAuthor();
     this.tempAuthors.authors.push(newAuthor);
-    console.log('this.tempAuthors', this.tempAuthors);
   }
 
   /*
@@ -224,6 +263,13 @@ export class AuthorPopupComponent implements OnInit {
   */
   deleteAffiliation(i: number, aff: any) {
     this.tempAuthors.authors[i].affiliation = this.tempAuthors.authors[i].affiliation.filter(obj => obj !== aff);
+    this.tempAuthors.authors[i].dataChanged = true;
+  }
+
+  /*
+  *   When affiliation name changed
+  */
+  affiliationNameChanged(message: string, i:number) {
     this.tempAuthors.authors[i].dataChanged = true;
   }
 }

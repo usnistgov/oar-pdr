@@ -53,6 +53,11 @@ export class SearchService {
     console.log("Sending query: "+backend+searchValue);
     return this.http.get(backend + searchValue, { headers: new HttpHeaders({ timeout: '${10000}' }) });
   }
+
+  getAllRecords(): Observable<any> {
+    if(_.includes(this.landingBackend,'rmm'))
+      return this.http.get(this.landingBackend+'records?');
+  }
 }
 
 

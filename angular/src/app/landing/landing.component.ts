@@ -905,7 +905,8 @@ export class LandingComponent implements OnInit {
     if (this.record.authors != null && this.record.authors != undefined) {
       this.tempAuthors.authors = JSON.parse(JSON.stringify(this.record.authors));
     } else {
-      this.tempAuthors = JSON.parse('{"authors":[' + JSON.stringify(this.commonVarService.getBlankAuthor()) + "]}");
+      this.tempAuthors["authors"] = [];
+      this.tempAuthors["authors"].push(this.commonVarService.getBlankAuthor());
     }
 
     // this.tempAuthors.authors = this.record.authors;

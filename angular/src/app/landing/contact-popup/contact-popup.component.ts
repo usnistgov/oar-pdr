@@ -20,7 +20,6 @@ export class ContactPopupComponent implements OnInit {
     ) { }
 
   ngOnInit() {
-    console.log("inputContactPoint", this.inputContactPoint);
     if (this.inputContactPoint != null && this.inputContactPoint != undefined) {
       this.tempContactPoint = JSON.parse(JSON.stringify(this.inputContactPoint));
     } else {
@@ -39,7 +38,6 @@ export class ContactPopupComponent implements OnInit {
     }
 
     let textArea = document.getElementById("address");
-    console.log('this.tempContactPoint', this.tempContactPoint);
     if(this.tempContactPoint.address != undefined && this.tempContactPoint.address != null)
       textArea.style.height = (this.tempContactPoint.address.length * 30).toString() + 'px';;
   }

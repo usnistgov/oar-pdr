@@ -1,7 +1,12 @@
-import { Component, Input, Output, OnInit, EventEmitter } from '@angular/core'
+// This combo-box has few features: 
+// 1. Allows user to select data from a dropdown datalist
+// 2. Auto filter the dropdown list when user starts typing in the input box
+// 3. User can type in new value that is not in the dropdown list 
+
+import { Component, Input, Output, OnInit, EventEmitter, HostListener } from '@angular/core'
 import { ComboBoxPipe } from './combo-box.pipe';
-import {BrowserModule} from '@angular/platform-browser'
-import {FormsModule} from '@angular/forms'
+import { BrowserModule } from '@angular/platform-browser'
+import { FormsModule } from '@angular/forms'
 
 export enum KEY_CODE {
   UP_ARROW = 38,
@@ -16,63 +21,26 @@ export enum KEY_CODE {
 })
 export class ComboBoxComponent implements OnInit {
 
+  // Data list for the dropdown
   @Input()
   dataList: any[];
 
+  // Data list column to be used
   @Input()
   columnName: string;
 
+  // Data bind field
   @Input()
-  taxonomy: any;
+  controlField: any;
 
+  // Tell parent component that data has been changed
   @Output()
-  taxonomyChange:EventEmitter<string> = new EventEmitter();
+  controlFieldChange: EventEmitter<string> = new EventEmitter();
 
-  dummyDataList: string[];
+  dummyDataList: any[];
   showDropDown: boolean;
   counter: number;
-  
 
-  onFocusEventAction(): void {
-    this.counter = -1;
-  }
-
-  onBlurEventAction(): void {
-    if(this.counter > -1)this.taxonomy = this.dummyDataList[this.counter][this.columnName];
-    this.showDropDown = false;
-  }
-
-  onKeyDownAction(event: KeyboardEvent): void {
-    // console.log('event.keyCode',event.keyCode);   
-    this.showDropDown = true;
-    if (event.keyCode === KEY_CODE.UP_ARROW) {
-      this.counter = (this.counter === 0) ? this.counter : --this.counter;
-      this.checkHighlight(this.counter);
-      this.taxonomy = this.dataList[this.counter]["columnName"];
-    }
-
-    if (event.keyCode === KEY_CODE.DOWN_ARROW) {
-      this.counter = (this.counter === this.dataList.length - 1) ? this.counter : ++this.counter;
-      this.checkHighlight(this.counter);
-      this.taxonomy = this.dataList[this.counter]["columnName"];
-    }
-
-    this.taxonomyChange.emit(this.taxonomy);
-
-    // if(event.keyCode === KEY_CODE.TAB_KEY){
-    //   this.taxonomy = this.dataList[this.counter];
-    //   this.showDropDown = false;
-    // }
-  }
-
-  checkHighlight(currentItem): boolean {
-    if (this.counter === currentItem) return true;
-    else return false;
-  }
-
-  // onTabButtonAction(event: KeyboardEvent):void{
-  //   console.log('event.keyCode',event.keyCode);   
-  // }
 
   constructor(private ComboBoxPipe: ComboBoxPipe) {
     this.reset();
@@ -82,34 +50,107 @@ export class ComboBoxComponent implements OnInit {
     this.reset();
   }
 
+  /*
+  *   When text input box on focus, reset the dropdown item indicator
+  */
+  onFocusEventAction(): void {
+    this.counter = -1;
+  }
+
+  /*
+  *    When text input box on blur, set the value and hide the dropdown
+  */
+  onBlurEventAction(): void {
+    if (this.counter > -1) this.controlField = this.dummyDataList[this.counter][this.columnName];
+    this.showDropDown = false;
+  }
+
+  /*
+  *    Detect keyboard activity
+  */
+  onKeyDownAction(event: KeyboardEvent): void {
+    this.showDropDown = true;
+    if (event.keyCode === KEY_CODE.UP_ARROW) {
+      this.counter = (this.counter === 0) ? this.counter : --this.counter;
+      this.checkHighlight(this.counter);
+      this.controlField = this.dataList[this.counter]["columnName"];
+    }
+
+    if (event.keyCode === KEY_CODE.DOWN_ARROW) {
+      this.counter = (this.counter === this.dataList.length - 1) ? this.counter : ++this.counter;
+      this.checkHighlight(this.counter);
+      this.controlField = this.dataList[this.counter]["columnName"];
+    }
+
+    this.controlFieldChange.emit(this.controlField);
+
+    // if(event.keyCode === KEY_CODE.TAB_KEY){
+    //   this.controlField = this.dataList[this.counter];
+    //   this.showDropDown = false;
+    // }
+  }
+
+  /*
+  *   highlight current item
+  */
+  checkHighlight(currentItem): boolean {
+    if (this.counter === currentItem) return true;
+    else return false;
+  }
+
+  // onTabButtonAction(event: KeyboardEvent):void{
+  //   console.log('event.keyCode',event.keyCode);   
+  // }
+
+  /*
+  *   Toogle dropDown menu
+  */
   toogleDropDown(): void {
-    this.reset();
     this.showDropDown = !this.showDropDown;
   }
 
+  /*
+  *   Reset dropDown menu
+  */
   reset(): void {
     this.showDropDown = false;
     this.dummyDataList = this.dataList;
   }
 
+  /*
+  *   On text change
+  */
   textChange(value) {
-    console.log("value", value);
     this.dummyDataList = [];
     if (value.length > 0) {
       this.dummyDataList = this.ComboBoxPipe.transform(this.dataList, this.columnName, value);
-      console.log('this.dummyDataList',this.dummyDataList);
+      this.dummyDataList.sort((a, b) => a.name.localeCompare(b.name));
       if (this.dummyDataList) { this.showDropDown = true; }
     } else {
       this.reset();
     }
 
-    this.taxonomyChange.emit(value);
+    this.controlFieldChange.emit(value);
   }
 
+  /*
+  *   Update text box
+  */
   updateTextBox(valueSelected) {
-    console.log("valueSelected", valueSelected);
-    this.taxonomy = valueSelected;
-    this.taxonomyChange.emit(this.taxonomy);
+    this.controlField = valueSelected;
+    this.controlFieldChange.emit(this.controlField);
     this.showDropDown = false;
+  }
+
+  /*
+  *   Following two functions handle click outside dropdown
+  */
+  @HostListener('document:click', ['$event']) clickout(event) {
+    // Click outside of the menu was detected
+    this.showDropDown = false;
+  }
+
+  handleAsideClick(event: Event) {
+    event.stopPropagation(); // Stop the propagation to prevent reaching document
   }
 }
