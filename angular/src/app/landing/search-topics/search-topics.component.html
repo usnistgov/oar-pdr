@@ -5,12 +5,7 @@
   <table width="100%" align="center">
     <tr *ngFor="let topic of tempTopics; let i = index; trackBy: trackByFn" align="top"
       style="border-bottom:1pt solid black;" height="20">
-      <!-- <td>
-          <input type="text" [(ngModel)]="topic.taxonomy" style="height:2em;" />
-          <combo-box [dataList]="taxonomyList" [columnName]="'taxonomy'" [(taxonomy)]="topic.taxonomy"></combo-box>
-        </td> -->
       <td>
-        <!-- <input type="text" [(ngModel)]="topic.topic" style="height:2em;" /> -->
         <span (click)="searchAndExpandTaxonomyTree(topic, true)" style="color: #1E6BA1; cursor: pointer;">{{topic}}</span>
       </td>
       <td width="50px">
@@ -40,32 +35,13 @@
   <div style="display:inline-flex;text-align: left;width: 89%;">Select topic(s) from the following list (scroll down to see more):</div>
   <div
     style="display:inline-flex;width:10%; text-align: right; direction: rtl; font-size: 12px; color:#1E6BA1; cursor: pointer;margin-left: .5em;"
-    (click)="showAllTopics()">Show all</div>
+    (click)="showAllTopics()">Reset</div>
   <input type="text" style="height:35px;background-color: #E7FFFE;" [(ngModel)]="searchText" (input)="onSearchTextChange($event.target.value)" placeholder="Type here to search topics" />
 </div>
 <div style="clear:both"></div>
 
 <div #panel0
   style="width:90%; margin: 0em auto 2em auto; height: 50vh;; overflow-y: scroll; border: 1px solid lightgrey;">
-  <!-- <p-treeTable [value]="taxonomyTree" selectionMode="checkbox" [resizableColumns]="true"
-      [(selection)]="selectedData" (onNodeSelect)="selectSearchTopic()" (onNodeUnselect)="selectSearchTopic()">
-      <ng-template pTemplate="header">
-        <tr>
-          <th [style.font-size]="fontSize" ttResizableColumn>
-            Select research topics from the following:
-          </th>
-        </tr>
-      </ng-template>
-      <ng-template pTemplate="body" let-rowNode let-rowData="rowData" let-i="rowIndex">
-        <tr>
-          <td [ngStyle]="titleStyle()">
-            <p-treeTableToggler [rowNode]="rowNode"></p-treeTableToggler>
-            &nbsp;<p-treeTableCheckbox [value]="rowNode"></p-treeTableCheckbox>
-            {{rowData.name}}
-          </td>
-        </tr>
-      </ng-template>
-    </p-treeTable> -->
   <div style="margin: .5em 1em .5em 1em;">
     <p-treeTable *ngIf="isVisible" [value]="taxonomyTree">
       <ng-template pTemplate="body" let-rowNode let-rowData="rowData">

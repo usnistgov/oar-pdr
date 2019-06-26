@@ -3,6 +3,7 @@ import { AuthService } from '../shared/auth-service/auth.service'
 import { CommonVarService } from '../shared/common-var';
 import { Router } from '@angular/router';
 import { Location } from '@angular/common';
+import {ButtonModule} from 'primeng/button';
 
 @Component({
   selector: 'app-login',

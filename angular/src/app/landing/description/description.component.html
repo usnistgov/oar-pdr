@@ -30,9 +30,9 @@
       <div style="display: inline-block;width:100%;text-align: left; vertical-align: top;">
         <div
           style="display: inline-block; padding-right: .5em; text-align: left; vertical-align: top;max-width:calc(100% - 4em);"
-          [ngStyle]="getTopicBorder()">
+          [ngStyle]="getBorder()">
           <strong>Research Topics:</strong>
-          <span class="font14" *ngFor="let topic of record['topic']; let i =index">
+          <span class="font14 topics" *ngFor="let topic of record['topic']; let i =index">
             {{ topic.tag }}
             <span *ngIf="i < record['topic'].length-1 ">,</span>
           </span>
@@ -55,12 +55,34 @@
           title="Edit contact"></i>
       </button>
     </ng-template>
-    <div *ngIf="checkKeywords()">
-      <b>Subject Keywords:</b>
-      <span class="font14" contenteditable="false" *ngFor="let keyword of record['keyword']; let i =index">
-        {{ keyword }}<span *ngIf="i < record['keyword'].length-1 ">,</span>
-      </span>
+    <div *ngIf="checkKeywords(); else noKeyword">
+      <div style="display: inline-block;width:100%;text-align: left; vertical-align: top;">
+        <div
+          style="display: inline-block; padding-right: .5em; text-align: left; vertical-align: top;max-width:calc(100% - 4em);"
+          [ngStyle]="getBorder()">
+          <strong>Subject Keywords:</strong>
+          <span class="font14 keywords" contenteditable="false" *ngFor="let keyword of record['keyword']; let i =index">
+            {{ keyword }}<span *ngIf="i < record['keyword'].length-1 ">,</span>
+          </span>
+        </div>
+        <button *ngIf="recordEditmode && !keywordObj.detailEditmode" type="button" (click)="openKeywordModal()"
+          class="edit_button2">
+          <i class="faa faa-pencil" style="cursor: pointer;color:grey; margin-top: 0em;" data-toggle="tooltip"
+            title="Edit contact"></i>
+        </button>
+      </div>
     </div>
+    <ng-template #noKeyword>
+        <div *ngIf="recordEditmode"
+        style="text-align: left; vertical-align: top;display: inline-block;padding-right: .5em; border: 1px solid lightgrey">
+        Add subject keywords:
+      </div>
+      <button *ngIf="recordEditmode && !keywordObj.detailEditmode" type="button" (click)="openKeywordModal()"
+        class="edit_button2">
+        <i class="faa faa-pencil" style="cursor: pointer;color:grey; margin-top: 0em;" data-toggle="tooltip"
+          title="Edit contact"></i>
+      </button>
+    </ng-template>
     <br>
   </div>
 </div>
@@ -93,40 +115,40 @@
     </span>
 
     <div *ngIf="files.length  > 0">
-    <div *ngIf="inBrowser; else filesLoading">
-      <div class="flex-container" style="margin-top: 2em;">
-        <div style="flex: 0 0 110px; text-align: left; padding-bottom: 0em;">
-          <span><b>Files </b> </span>
-          <a class="faa-stack fa-lg icon-download"
-            (click)="downloadAllConfirm('Download All Files', 'This will download all files. Continue?', 'downloadAllConfirm')"
-            data-toggle="tooltip" title="Download all files"
-            [ngStyle]="{'color':getDownloadAllBtnColor(),'cursor':'pointer'}">
-            <i class="faa faa-circle-thin faa-stack-2x" aria-hidden="true"></i>
-            <i class="faa faa-download faa-stack-1x" aria-hidden="true"></i>
-          </a>
-          <a id="routeToDatacart" target="_blank" [routerLink]="['/datacart', 'popup']" style="display:none"></a>
-          <span class="faa-stack fa-lg icon-cart" (click)="cartProcess(files)"
-            [ngStyle]="{'color':getAddAllToDataCartBtnColor(),'cursor':'pointer','margin-right':'1em'}"
-            data-toggle="tooltip" [title]="getCartProcessTooltip()">
-            <i class="faa faa-circle-thin faa-stack-2x" aria-hidden="true"></i>
-            <i *ngIf="!isLocalProcessing; else show_spinner" class="faa faa-cart-plus faa-stack-1x"
-              aria-hidden="true"></i>
-            <ng-template #show_spinner><i class="faa faa-spinner faa-spin faa-stack-1x" style="color:#1E6BA1"
-                aria-hidden="true"></i></ng-template>
-            <span class="w3-badge badge-notify" style="margin-right:0.5em;">{{cartLength}}</span>
-          </span>
+      <div *ngIf="inBrowser; else filesLoading">
+        <div class="flex-container" style="margin-top: 2em;">
+          <div style="flex: 0 0 110px; text-align: left; padding-bottom: 0em;">
+            <span><b>Files </b> </span>
+            <a class="faa-stack fa-lg icon-download"
+              (click)="downloadAllConfirm('Download All Files', 'This will download all files. Continue?', 'downloadAllConfirm')"
+              data-toggle="tooltip" title="Download all files"
+              [ngStyle]="{'color':getDownloadAllBtnColor(),'cursor':'pointer'}">
+              <i class="faa faa-circle-thin faa-stack-2x" aria-hidden="true"></i>
+              <i class="faa faa-download faa-stack-1x" aria-hidden="true"></i>
+            </a>
+            <a id="routeToDatacart" target="_blank" [routerLink]="['/datacart', 'popup']" style="display:none"></a>
+            <span class="faa-stack fa-lg icon-cart addalltocart" (click)="cartProcess(files)"
+              [ngStyle]="{'color':getAddAllToDataCartBtnColor(),'cursor':'pointer','margin-right':'1em'}"
+              data-toggle="tooltip" [title]="getCartProcessTooltip()">
+              <i class="faa faa-circle-thin faa-stack-2x" aria-hidden="true"></i>
+              <i *ngIf="!isLocalProcessing; else show_spinner" class="faa faa-cart-plus faa-stack-1x"
+                aria-hidden="true"></i>
+              <ng-template #show_spinner><i class="faa faa-spinner faa-spin faa-stack-1x" style="color:#1E6BA1"
+                  aria-hidden="true"></i></ng-template>
+              <span class="w3-badge badge-notify" style="margin-right:0.5em;">{{cartLength}}</span>
+            </span>
+          </div>
+          <div style="flex-grow: 9; text-align: left; padding-top: 0.5em;">
+            <span class="font8" style="color:gray;">Click on the file/row in the table below to view more
+              details.</span>
+          </div>
+          <div class="font10" style="flex-grow: 2; text-align: right; color:gray; padding-top: 0.5em;">
+            Total No. files: {{ totalFiles }}
+          </div>
         </div>
-        <div style="flex-grow: 9; text-align: left; padding-top: 0.5em;">
-          <span class="font8" style="color:gray;">Click on the file/row in the table below to view more details.</span>
-        </div>
-        <div class="font10" style="flex-grow: 2; text-align: right; color:gray; padding-top: 0.5em;">
-          Total No. files: {{ totalFiles }}
-        </div>
-      </div>
 
-      <p-confirmDialog key='downloadAllConfirm'></p-confirmDialog>
-      <!-- <ngbd-modal-download-manager></ngbd-modal-download-manager> -->
-      <div *ngIf="bundlePlanStatus != 'success' && bundlePlanMessage" style="text-align: left;">
+        <p-confirmDialog key='downloadAllConfirm'></p-confirmDialog>
+        <!-- <div *ngIf="bundlePlanStatus != 'success' && bundlePlanMessage" style="text-align: left;">
         <i class="faa faa-warning" [ngStyle]="{'color':messageColor, 'padding-right':'.5em'}"></i>
         <span [ngStyle]="{'color':getColor(), 'padding-right':'.5em'}">Http responsed with warning. </span>
         <span (click)="showMessageBlock = !showMessageBlock">
@@ -164,81 +186,81 @@
             </td>
           </tr>
         </table>
-      </div>
+      </div> -->
 
-      <p-treeTable *ngIf="visible" [value]="files" [columns]="cols" selectionMode="single" [resizableColumns]="true"
-        sortField="name">
-        <ng-template pTemplate="header" let-columns>
-          <tr>
-            <th *ngFor="let col of columns" [style.width]="col.width" [style.font-size]="fontSize" ttResizableColumn>
-              <span *ngIf="col.header == 'Name'">
-                <span (click)="expandToLevel(files, !isExpanded, null)" style="padding-right:0.5em;">
-                  <i *ngIf="!isExpanded" class="faa faa-arrow-circle-down faa-1x icon-white"
-                    style="cursor: pointer;color: rgb(255, 255, 255);" data-toggle="tooltip" title="Expand All"></i>
-                  <i *ngIf="isExpanded" class="faa faa-arrow-circle-up faa-1x icon-white"
-                    style="cursor: pointer;color: rgb(255, 255, 255);" data-toggle="tooltip" title="Collapse All"></i>
-                </span>
-                <span (click)="showZipFilesNmaes = !showZipFilesNmaes" style="padding-right:0.5em;"
+        <p-treeTable *ngIf="visible" [value]="files" [columns]="cols" selectionMode="single" [resizableColumns]="true"
+          sortField="name">
+          <ng-template pTemplate="header" let-columns>
+            <tr>
+              <th *ngFor="let col of columns" [style.width]="col.width" [style.font-size]="fontSize" ttResizableColumn>
+                <span *ngIf="col.header == 'Name'">
+                  <span (click)="expandToLevel(files, !isExpanded, null)" style="padding-right:0.5em;">
+                    <i *ngIf="!isExpanded" class="faa faa-arrow-circle-down faa-1x icon-white"
+                      style="cursor: pointer;color: rgb(255, 255, 255);" data-toggle="tooltip" title="Expand All"></i>
+                    <i *ngIf="isExpanded" class="faa faa-arrow-circle-up faa-1x icon-white"
+                      style="cursor: pointer;color: rgb(255, 255, 255);" data-toggle="tooltip" title="Collapse All"></i>
+                  </span>
+                  <!-- <span (click)="showZipFilesNmaes = !showZipFilesNmaes" style="padding-right:0.5em;"
                   *ngIf="zipData.length>0">
                   <i *ngIf="!showZipFilesNmaes" class="faa faa-eye faa-1x icon-white"
                     style="cursor: pointer;color: rgb(255, 255, 255);" data-toggle="tooltip" title="Show Zip Files"></i>
                   <i *ngIf="showZipFilesNmaes" class="faa faa-eye-slash faa-1x icon-white"
                     style="cursor: pointer;color: rgb(255, 255, 255);" data-toggle="tooltip" title="Hide Zip Files"></i>
+                </span> -->
                 </span>
-              </span>
-              {{col.header}}
-            </th>
-          </tr>
-        </ng-template>
-        <ng-template pTemplate="body" let-rowNode let-rowData="rowData" let-columns="columns">
-          <tr [ttSelectableRow]="rowNode">
-            <td [ngStyle]="titleStyle()">
-              <p-treeTableToggler [rowNode]="rowNode"></p-treeTableToggler>
-              <a (click)="openDetails($event,rowData,op3) " style="color: #1E6BA1;cursor: pointer;"
-                data-toggle="tooltip" title="Click for more details">
-                {{rowData.name}} </a>
-              <span *ngIf="showZipFilesNmaes" style="color:darkgreen; margin-left: 2em;">{{rowData.zipFile}}</span>
-            </td>
-            <td [ngStyle]="typeStyle()">{{rowData.mediatype}}</td>
-            <td [ngStyle]="sizeStyle()"><span *ngIf="rowData.size">{{formatBytes(rowData.size)}}</span></td>
-            <td [ngStyle]="statusStyle()">
-              <div style="display: flex;">
-                <div *ngIf="rowData.isLeaf;else space_holder">
-                  <a *ngIf="rowData.downloadStatus != 'downloading'" href='{{rowData.downloadUrl}}' target='_blank'
-                    download="download" data-toggle="tooltip" title="Direct download">
-                    <i class="faa faa-download" [ngStyle]="{'color':getDownloadBtnColor(rowData)}" aria-hidden="true"
-                      (click)="setFileDownloaded(rowData)"></i>
-                  </a>
-                </div>
-                <ng-template #space_holder>
-                  <div style="padding-right: 0.4em;">&nbsp;&nbsp;</div>
-                </ng-template>
-                <div style="padding-left:10px;" *ngIf="rowData.isIncart;else not_in_cart"
-                  (click)="removeFromNode(rowData)">
-                  <i class="faa faa-cart-plus" style="color: green;cursor: pointer;" aria-hidden="true"
-                    data-toggle="tooltip" title="Remove from cart"></i>
-                </div>
-                <div *ngIf="rowData.isIncart" style="margin-left: 0.5em;font-size: 0.5em">Added</div>
-                <ng-template #not_in_cart>
-                  <div style="padding-left:10px;" (click)="addSubFilesToCartAndUpdate(rowData)">
-                    <i class="faa faa-cart-plus" style="color: #1E6BA1;cursor: pointer;" aria-hidden="true"
-                      data-toggle="tooltip" title="Add to cart"></i>
+                {{col.header}}
+              </th>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="body" let-rowNode let-rowData="rowData" let-columns="columns">
+            <tr [ttSelectableRow]="rowNode">
+              <td [ngStyle]="titleStyle()">
+                <p-treeTableToggler [rowNode]="rowNode"></p-treeTableToggler>
+                <a class="filename" (click)="openDetails($event,rowData,op3) " style="color: #1E6BA1;cursor: pointer;"
+                  data-toggle="tooltip" title="Click for more details">
+                  {{rowData.name}} </a>
+                <!-- <span *ngIf="showZipFilesNmaes" style="color:darkgreen; margin-left: 2em;">{{rowData.zipFile}}</span> -->
+              </td>
+              <td [ngStyle]="typeStyle()">{{rowData.mediatype}}</td>
+              <td [ngStyle]="sizeStyle()"><span *ngIf="rowData.size">{{formatBytes(rowData.size)}}</span></td>
+              <td [ngStyle]="statusStyle()">
+                <div style="display: flex;">
+                  <div *ngIf="rowData.isLeaf;else space_holder">
+                    <a *ngIf="rowData.downloadStatus != 'downloading'" href='{{rowData.downloadUrl}}' target='_blank'
+                      download="download" data-toggle="tooltip" title="Direct download">
+                      <i class="faa faa-download" [ngStyle]="{'color':getDownloadBtnColor(rowData)}" aria-hidden="true"
+                        (click)="setFileDownloaded(rowData)"></i>
+                    </a>
                   </div>
-                </ng-template>
-              </div>
-            </td>
-          </tr>
-        </ng-template>
-      </p-treeTable>
-    </div>
-    <ng-template #filesLoading>
-      <div>
-        <b>Files </b>
+                  <ng-template #space_holder>
+                    <div style="padding-right: 0.4em;">&nbsp;&nbsp;</div>
+                  </ng-template>
+                  <div style="padding-left:10px;" *ngIf="rowData.isIncart;else not_in_cart"
+                    (click)="removeFromNode(rowData)">
+                    <i class="faa faa-cart-plus" style="color: green;cursor: pointer;" aria-hidden="true"
+                      data-toggle="tooltip" title="Remove from cart"></i>
+                  </div>
+                  <div *ngIf="rowData.isIncart" style="margin-left: 0.5em;font-size: 0.5em">Added</div>
+                  <ng-template #not_in_cart>
+                    <div style="padding-left:10px;" (click)="addSubFilesToCartAndUpdate(rowData)">
+                      <i class="faa faa-cart-plus" style="color: #1E6BA1;cursor: pointer;" aria-hidden="true"
+                        data-toggle="tooltip" title="Add to cart"></i>
+                    </div>
+                  </ng-template>
+                </div>
+              </td>
+            </tr>
+          </ng-template>
+        </p-treeTable>
       </div>
-      <p>
-        <i>Loading file list...</i>
-      </p>
-    </ng-template>
+      <ng-template #filesLoading>
+        <div>
+          <b>Files </b>
+        </div>
+        <p>
+          <i>Loading file list...</i>
+        </p>
+      </ng-template>
     </div>
   </div>
 </div>

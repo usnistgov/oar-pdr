@@ -8,16 +8,23 @@ import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 })
 export class DescriptionPopupComponent implements OnInit {
   @Input() tempDecription: string;
+  @Input() title: string;
   @Output() returnDescription: EventEmitter<any> = new EventEmitter();
 
   constructor(public activeModal: NgbActiveModal) { }
 
   ngOnInit() {
-    console.log('tempDecription', this.tempDecription);
+    let textArea = document.getElementById("address");
   }
 
-  saveDescription(){
+  saveDescription() {
     this.returnDescription.emit(this.tempDecription);
-    this.activeModal.close('Close click')
+    window.scroll(0, 0);
+    this.activeModal.close('Close click');
+  }
+
+  cancelChange(){
+    window.scroll(0, 0);
+    this.activeModal.close('Close click');
   }
 }

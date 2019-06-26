@@ -1,0 +1,82 @@
+[
+  {
+    "data": [
+      {
+        "data": {
+          "cartId": "cmps/1868",
+          "ediid": "5BC2E596EDC621A9E0531A57068194921868",
+          "name": "1868",
+          "filetype": "nrdp:Subcollection",
+          "resId": "cmps/1868",
+          "filePath": "/1868",
+          "downloadProgress": 0,
+          "downloadInstance": null,
+          "isIncart": false,
+          "zipFile": null,
+          "message": "",
+          "isLeaf": false
+        },
+        "children": [
+          {
+            "data": {
+              "cartId": "cmps/1868/Intel-Edison-PS-master.zip",
+              "ediid": "5BC2E596EDC621A9E0531A57068194921868",
+              "name": "Intel-Edison-PS-master.zip",
+              "mediatype": "text/plain",
+              "downloadUrl": "https://s3.amazonaws.com/nist-midas/1868/Intel-Edison-PS-master.zip",
+              "filetype": "nrdp:DataFile",
+              "resId": "cmps/1868/Intel-Edison-PS-master.zip",
+              "filePath": "/1868/Intel-Edison-PS-master.zip",
+              "downloadProgress": 0,
+              "downloadInstance": null,
+              "isIncart": false,
+              "zipFile": null,
+              "message": "",
+              "isLeaf": true
+            },
+            "children": []
+          },
+          {
+            "data": {
+              "cartId": "cmps/1868/Intel-Edison-PS-master.zip.sha256",
+              "ediid": "5BC2E596EDC621A9E0531A57068194921868",
+              "name": "Intel-Edison-PS-master.zip.sha256",
+              "mediatype": "text/plain",
+              "downloadUrl": "https://s3.amazonaws.com/nist-midas/1868/Intel-Edison-PS-master.zip.sha256",
+              "filetype": "nrdp:DataFile",
+              "resId": "cmps/1868/Intel-Edison-PS-master.zip.sha256",
+              "filePath": "/1868/Intel-Edison-PS-master.zip.sha256",
+              "downloadProgress": 0,
+              "downloadInstance": null,
+              "isIncart": false,
+              "zipFile": null,
+              "message": "",
+              "isLeaf": true
+            },
+            "children": []
+          }
+        ]
+      },
+      {
+        "data": {
+          "cartId": "cmps/Intel-Edison-PS.git",
+          "ediid": "5BC2E596EDC621A9E0531A57068194921868",
+          "name": "Intel-Edison-PS.git",
+          "mediatype": "text/javascript",
+          "downloadUrl": "https://github.com/usnistgov/Intel-Edison-PS.git",
+          "description": "A software repository where operational computer code, utility scripts, and analysis code are stored.",
+          "filetype": "nrdp:DataFile",
+          "resId": "cmps/Intel-Edison-PS.git",
+          "filePath": "/Intel-Edison-PS.git",
+          "downloadProgress": 0,
+          "downloadInstance": null,
+          "isIncart": false,
+          "zipFile": null,
+          "message": "",
+          "isLeaf": true
+        },
+        "children": []
+      }
+    ]
+  }
+]

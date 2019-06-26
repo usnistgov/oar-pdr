@@ -157,7 +157,6 @@ export class SearchTopicsComponent implements OnInit {
 
   /*
   *   Refresh the taxonomy tree 
-  *   It will only expand those selected topics 
   */
   refreshTopicTree() {
     // for (let i = 0; i < this.taxonomyTree.length; i++) {
@@ -261,7 +260,7 @@ export class SearchTopicsComponent implements OnInit {
   setTreenodeVisible(tree: TreeNode, topic: string) {
     if (tree.data.researchTopic.toLowerCase().indexOf(topic.toLowerCase()) > -1) {
       if (tree != null) {
-        // tree.data.bkcolor = "#E7FFFE";
+        tree.data.bkcolor = "#E7FFFE";
         if (tree.parent == null) {
           tree.data.visible = true;
           this.setVisible(tree.children, true);

@@ -3,8 +3,6 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { SearchService } from './search-service/index';
-import { FootbarComponent as DepFootbarComponent } from './footbar/index';
-import { HeadbarComponent as DepHeadbarComponent } from './headbar/index';
 
 
 /**
@@ -13,9 +11,7 @@ import { HeadbarComponent as DepHeadbarComponent } from './headbar/index';
 
 @NgModule({
   imports: [CommonModule, RouterModule],
-  declarations: [ DepHeadbarComponent, DepFootbarComponent], 
-  exports: [ DepHeadbarComponent, DepFootbarComponent, 
-    CommonModule, FormsModule, RouterModule]
+  exports: [CommonModule, FormsModule, RouterModule]
 })
 export class SharedModule {
   static forRoot(): ModuleWithProviders {

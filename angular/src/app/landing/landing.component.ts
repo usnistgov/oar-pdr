@@ -188,7 +188,7 @@ export class LandingComponent implements OnInit {
     @Inject(PLATFORM_ID) private platformId: Object,
     @Inject(APP_ID) private appId: string,
     private transferState: TransferState,
-    private searchService: SearchService,
+    public searchService: SearchService,
     private commonVarService: CommonVarService,
     private authService: AuthService,
     private ngbModal: NgbModal,

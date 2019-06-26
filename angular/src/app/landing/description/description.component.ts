@@ -3,25 +3,18 @@ import { TreeNode } from 'primeng/api';
 import { CartService } from '../../datacart/cart.service';
 import { Data } from '../../datacart/data';
 import { OverlayPanel } from 'primeng/overlaypanel';
-import { stringify, error } from '@angular/compiler/src/util';
 import { DownloadService } from '../../shared/download-service/download-service.service';
 import { SelectItem, DropdownModule, ConfirmationService, Message } from 'primeng/primeng';
 import { DownloadData } from '../../shared/download-service/downloadData';
 import { ZipData } from '../../shared/download-service/zipData';
 import { CommonVarService } from '../../shared/common-var';
-import { environment } from '../../../environments/environment';
 import { HttpClientModule, HttpClient, HttpHeaders, HttpRequest, HttpEventType, HttpResponse, HttpEvent } from '@angular/common/http';
-import { TestBed } from '@angular/core/testing';
 import { AppConfig } from '../../config/config';
 import { THIS_EXPR } from '@angular/compiler/src/output/output_ast';
 import { FileSaverService } from 'ngx-filesaver';
 import { Router } from '@angular/router';
 import { CommonFunctionService } from '../../shared/common-function/common-function.service';
-import { ModalService } from '../../shared/modal-service';
-import { ContenteditableModel } from '../../directives/contenteditable-model.directive';
 import { TaxonomyListService } from '../../shared/taxonomy-list';
-import { ComboBoxComponent } from '../../shared/combobox/combo-box.component';
-import { ComboBoxPipe } from '../../shared/combobox/combo-box.pipe';
 import { NgbModalOptions, NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { SearchTopicsComponent } from '../../landing/search-topics/search-topics.component';
 import { DescriptionPopupComponent } from './description-popup/description-popup.component';
@@ -81,13 +74,6 @@ export class DescriptionComponent {
   showZipFiles: boolean = true;
   subscriptions: any = [];
   allProcessed: boolean = false;
-  downloadStatusExpanded: boolean = true;
-  bundlePlanStatus: any;
-  bundlePlanMessage: any[];
-  bundlePlanUnhandledFiles: any[] = null;
-  showUnhandledFiles: boolean = true;
-  showZipFilesNmaes: boolean = true;
-  showMessageBlock: boolean = false;
   messageColor: any;
   noFileDownloaded: boolean; // will be true if any item in data cart is downloaded
   distApi: string;
@@ -99,6 +85,7 @@ export class DescriptionComponent {
   descriptionObj: any;
   topicObj: any;
   tempTopics: string[] = [];
+  keywordObj: any;
   defaultText: string = "Enter description here...";
   taxonomyList: any[];
   errorMsg: any;
@@ -120,7 +107,6 @@ export class DescriptionComponent {
     private _FileSaverService: FileSaverService,
     private confirmationService: ConfirmationService,
     private commonFunctionService: CommonFunctionService,
-    private modalService: ModalService,
     private taxonomyListService: TaxonomyListService,
     private ngbModal: NgbModal,
     public router: Router,
@@ -160,11 +146,11 @@ export class DescriptionComponent {
     });
     this.descriptionObj = this.editingObjectInit();
     this.topicObj = this.editingObjectInit();
+    this.keywordObj = this.editingObjectInit();
   }
 
   ngOnInit() {
     this.distApi = this.cfg.get("distService", "/od/ds/");
-
     if (this.files.length != 0)
       this.files = <TreeNode[]>this.files[0].data;
 
@@ -796,18 +782,18 @@ export class DescriptionComponent {
   /**
   * Function to cancel current download.
   **/
-  cancelDownload(rowData: any) {
-    if (!rowData.isLeaf) {
-      this.cancelDownloadAll();
-      rowData.downloadProgress = 0;
-      rowData.downloadStatus = null;
-    } else {
-      rowData.downloadInstance.unsubscribe();
-      rowData.downloadInstance = null;
-      rowData.downloadProgress = 0;
-      rowData.downloadStatus = null;
-    }
-  }
+  // cancelDownload(rowData: any) {
+  //   if (!rowData.isLeaf) {
+  //     this.cancelDownloadAll();
+  //     rowData.downloadProgress = 0;
+  //     rowData.downloadStatus = null;
+  //   } else {
+  //     rowData.downloadInstance.unsubscribe();
+  //     rowData.downloadInstance = null;
+  //     rowData.downloadProgress = 0;
+  //     rowData.downloadStatus = null;
+  //   }
+  // }
 
   /**
   * Function to download all files based on download url.
@@ -873,40 +859,40 @@ export class DescriptionComponent {
   /**
   * Cancel download certain zip file
   **/
-  cancelDownloadZip(zip: any) {
-    zip.downloadInstance.unsubscribe();
-    zip.downloadInstance = null;
-    zip.downloadProgress = 0;
-    zip.downloadStatus = "cancelled";
-  }
+  // cancelDownloadZip(zip: any) {
+  //   zip.downloadInstance.unsubscribe();
+  //   zip.downloadInstance = null;
+  //   zip.downloadProgress = 0;
+  //   zip.downloadStatus = "cancelled";
+  // }
 
   /**
   * Cancel download all
   **/
-  cancelDownloadAll() {
-    for (let zip of this.zipData) {
-      if (zip.downloadInstance != null) {
-        zip.downloadInstance.unsubscribe();
-      }
-      zip.downloadInstance = null;
-      zip.downloadProgress = 0;
-      zip.downloadStatus = null;
-    }
+  // cancelDownloadAll() {
+  //   for (let zip of this.zipData) {
+  //     if (zip.downloadInstance != null) {
+  //       zip.downloadInstance.unsubscribe();
+  //     }
+  //     zip.downloadInstance = null;
+  //     zip.downloadProgress = 0;
+  //     zip.downloadStatus = null;
+  //   }
 
-    for (let sub of this.subscriptions) {
-      sub.unsubscribe();
-    }
+  //   for (let sub of this.subscriptions) {
+  //     sub.unsubscribe();
+  //   }
 
-    this.downloadService.setDownloadingNumber(0, "landingPage");
-    this.zipData = [];
-    this.downloadStatus = null;
-    this.cancelAllDownload = true;
-    this.displayDownloadFiles = false;
-    this.downloadService.resetZipName(this.treeRoot[0]);
-    this.bundlePlanMessage = null;
-    this.bundlePlanStatus = null;
-    this.bundlePlanUnhandledFiles = null;
-  }
+  //   this.downloadService.setDownloadingNumber(0, "landingPage");
+  //   this.zipData = [];
+  //   this.downloadStatus = null;
+  //   this.cancelAllDownload = true;
+  //   this.displayDownloadFiles = false;
+  //   this.downloadService.resetZipName(this.treeRoot[0]);
+  //   this.bundlePlanMessage = null;
+  //   this.bundlePlanStatus = null;
+  //   this.bundlePlanUnhandledFiles = null;
+  // }
 
   /**
   * Function to set the download status of all files to downloaded.
@@ -935,15 +921,15 @@ export class DescriptionComponent {
   /**
   * Return color based on different bundlePlan response status
   **/
-  getColor() {
-    if (this.bundlePlanStatus == 'warnings') {
-      return "darkorange";
-    } else if (this.bundlePlanStatus == 'error') {
-      return "red";
-    } else {
-      return "black";
-    }
-  }
+  // getColor() {
+  //   if (this.bundlePlanStatus == 'warnings') {
+  //     return "darkorange";
+  //   } else if (this.bundlePlanStatus == 'error') {
+  //     return "red";
+  //   } else {
+  //     return "black";
+  //   }
+  // }
 
   /**
   * Return "download all" button color based on download status
@@ -1065,6 +1051,36 @@ export class DescriptionComponent {
         tempDecription = tempDecription + '\r\n\r\n' + this.record['description'][i];
       }
     }
+
+    let ngbModalOptions: NgbModalOptions = {
+      backdrop: 'static',
+      keyboard: false,
+      windowClass: "myCustomModalClass"
+    };
+
+    const modalRef = this.ngbModal.open(DescriptionPopupComponent, ngbModalOptions);
+    modalRef.componentInstance.tempDecription = tempDecription;
+    modalRef.componentInstance.title = 'Description';
+
+    modalRef.componentInstance.returnDescription.subscribe((returnValue) => {
+      var tempDescs = returnValue.split(/\n\s*\n/).filter(desc => desc != '');
+      this.record['description'] = JSON.parse(JSON.stringify(tempDescs));
+    })
+  }
+
+  /*
+*   Open Description popup modal
+*/
+  openKeywordModal() {
+    let i: number;
+    let tempDecription: string = "";
+
+    if (this.checkKeywords()) {
+      tempDecription = this.record['keyword'][0];
+      for (i = 1; i < this.record['keyword'].length; i++) {
+        tempDecription = tempDecription + ',' + this.record['keyword'][i];
+      }
+    }
     console.log('tempDecription', tempDecription);
 
     let ngbModalOptions: NgbModalOptions = {
@@ -1075,11 +1091,13 @@ export class DescriptionComponent {
 
     const modalRef = this.ngbModal.open(DescriptionPopupComponent, ngbModalOptions);
     modalRef.componentInstance.tempDecription = tempDecription;
+    modalRef.componentInstance.title = 'Subject Keywords';
 
     modalRef.componentInstance.returnDescription.subscribe((returnValue) => {
-      var tempDescs = returnValue.split(/\n\s*\n/).filter(desc => desc != '');
-      this.record['description'] = JSON.parse(JSON.stringify(tempDescs));
-    })
+      let keywords: string[];
+      keywords = returnValue.split(',').filter(keyword => keyword != '');
+      this.record['keyword'] = keywords;
+    });
   }
 
   /*
@@ -1103,37 +1121,25 @@ export class DescriptionComponent {
     modalRef.componentInstance.tempTopics = this.tempTopics;
     modalRef.componentInstance.recordEditmode = this.recordEditmode;
     modalRef.componentInstance.taxonomyTree = this.taxonomyTree;
-    // modalRef.componentInstance.record = this.record;
     modalRef.componentInstance.passEntry.subscribe((topics) => {
       var strtempTopics: string = '';
       var lTempTopics: any[] = [];
 
       for (var i = 0; i < topics.length; ++i) {
         strtempTopics = strtempTopics + topics[i];
-        lTempTopics.push({ '@type': 'Concept', 'scheme': 'https://www.nist.gov/od/dm/nist-themes/v1.0', 'tag': this.tempTopics[i] })
+        lTempTopics.push({ '@type': 'Concept', 'scheme': 'https://www.nist.gov/od/dm/nist-themes/v1.0', 'tag': topics[i] })
       }
       this.record['topic'] = JSON.parse(JSON.stringify(lTempTopics));
     })
-
-    // this.refreshTopicTree();
-    // this.modalService.open("Topic-popup-dialog");
   }
 
-
   /*
-  *   Return topic border style
+  *   Return border style
   */
-  getTopicBorder() {
+  getBorder() {
     if (this.recordEditmode)
       return { 'border': '1px solid lightgrey' };
     else
       return { 'border': '0px solid lightgrey' };
-  }
-
-  /*
-  *   Close pop up dialog by id
-  */
-  closeModal(id: string) {
-    this.modalService.close(id);
   }
 }
