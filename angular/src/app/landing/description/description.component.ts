@@ -246,9 +246,10 @@ export class DescriptionComponent {
       for (var j = 0; j < pathParts.length; j++) {
         let tempId: string = '';
         for (var k = 0; k < j + 1; k++) {
-          tempId = tempId + pathParts[k].replace(/ /g, "");
+          tempId = tempId + pathParts[k];
+          // tempId = tempId + pathParts[k].replace(/ /g, "");
           if (k < j) {
-            tempId = tempId + ":";
+            tempId = tempId + ": ";
           }
         }
 
@@ -263,7 +264,8 @@ export class DescriptionComponent {
           newPart = {
             data: {
               treeId: tempId,
-              name: pathParts[j].replace(/ /g, ""),
+              name: pathParts[j],
+              // name: pathParts[j].replace(/ /g, ""),
               researchTopic: tempId,
               bkcolor: 'white'
             }, children: [],
@@ -275,6 +277,7 @@ export class DescriptionComponent {
         }
       };
     });
+    console.log("tree", tree);
     return tree;
   }
 

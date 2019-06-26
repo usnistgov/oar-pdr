@@ -1,6 +1,7 @@
 import { Component, OnInit, Input, EventEmitter, Output, ElementRef, ViewChild } from '@angular/core';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { TreeNode } from 'primeng/api';
+import { TemplateBindingParseResult } from '@angular/compiler';
 
 @Component({
   selector: 'app-search-topics',
@@ -123,7 +124,7 @@ export class SearchTopicsComponent implements OnInit {
     }, 0);
 
     setTimeout(() => {
-      this.panel0.nativeElement.scrollTop = index * 25;
+      this.panel0.nativeElement.scrollTop = index * 40;
     }, 1);
 
   }
