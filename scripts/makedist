@@ -52,9 +52,10 @@ function realpath {
 
 # Update this list with the names of the individual component names
 # 
-DISTNAMES="pdr-publish pdr-lps"
+DISTNAMES="pdr-publish pdr-lps pdr-customization"
 angular_dists=":pdr-lps:"
 python_dists=":pdr-publish:"
+java_dists=":pdr-customization:"
 
 # handle command line options
 while [ "$1" != "" ]; do 
@@ -126,11 +127,14 @@ vers4fn=`echo $version | perl -pe 's#[/ ]+#_#g'`
 
 build_py=
 build_ang=
+build_java=
 for dist in $build_dist; do
     if (echo $angular_dists | grep -qs :${dist}:); then
         build_ang="$build_ang $dist"
-    else
+    elif (echo $python_dists | grep -qs :${dist}:); then
         build_py="$build_py $dist"
+    elif (echo $java_dists | grep -qs :${dist}:); then
+        build_java="$build_java $dist" 
     fi
 done
 
@@ -148,4 +152,10 @@ args=
     [ -z "$SOURCE_DIR" ] || sargs="--source-dir=$SOURCE_DIR/python"
     echo '+' makedist.python $sargs $args $build_py
     $execdir/makedist.python $sargs $args $build_py
+}
+[ -z "$build_java" ] || {
+    sargs=
+    [ -z "$SOURCE_DIR" ] || sargs="--source-dir=$SOURCE_DIR/java/customization-api"
+    echo '+' makedist.javacode $sargs $args $build_py
+    $execdir/makedist.javacode $sargs $args $build_py
 }
