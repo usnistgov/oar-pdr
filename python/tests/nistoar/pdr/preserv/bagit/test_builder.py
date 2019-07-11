@@ -116,6 +116,7 @@ class TestBuilder2(test.TestCase):
         self.assertFalse(self.bag._has_resmd())
 
     def test_fix_id(self):
+        self.bag.cfg['validate_id'] = True
         self.assertIsNone(self.bag._fix_id(None))
         self.assertEqual(self.bag._fix_id("ARK:/88434/edi00hw91c"),
                          "ark:/88434/edi00hw91c")

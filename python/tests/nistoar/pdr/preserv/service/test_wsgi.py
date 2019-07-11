@@ -159,6 +159,30 @@ class TestApp(test.TestCase):
         self.assertIn('_bar', self.resp[0])
         self.resp = []
         
+        req = {
+            'PATH_INFO': '/midas/ark:/88888/goob/er',
+            'REQUEST_METHOD': 'GET'
+        }
+
+        body = self.svc(req, self.start)
+        self.assertGreater(len(self.resp), 0)
+        self.assertIn("400", self.resp[0])
+        self.assertIn('ark:/88888/goob/er', self.resp[0])
+        self.resp = []
+        
+
+    def test_accept_arkid(self):
+        req = {
+            'PATH_INFO': '/midas/ark:/88888/goob',
+            'REQUEST_METHOD': 'GET'
+        }
+
+        body = self.svc(req, self.start)
+        self.assertGreater(len(self.resp), 0)
+        self.assertIn("404", self.resp[0])
+        self.resp = []
+        
+        
     def test_ready(self):
         req = {
             'PATH_INFO': '/midas/'+self.midasid,
