@@ -66,8 +66,8 @@ def form_bag_name03(aipid, bagseq=0, mbver="0.3"):
     return form_bag_name(aipid, bagseq, "", mbver,
                          "{aipid}.mbag{mbver}-{bagseq}")
 
-BAGNAME04_RE = re.compile(r"^(\w+)\.(\d+(_\d+)*)\.mbag(\d+_\d+)-(\d+)(\..*)?$")
-BAGNAME02_RE = re.compile(r"^(\w+)\.mbag(\d+_\d+)-(\d+)(\..*)?$")
+BAGNAME04_RE = re.compile(r"^(\w[\w\-]*)\.(\d+(_\d+)*)\.mbag(\d+_\d+)-(\d+)(\..*)?$")
+BAGNAME02_RE = re.compile(r"^(\w[\w\-]*)\.mbag(\d+_\d+)-(\d+)(\..*)?$")
 BAGNAME_RE = BAGNAME04_RE
 
 def parse_bag_name(bagname, nistprof=None):
