@@ -154,7 +154,7 @@ class PreservationService(object):
             if self._prepsvc.prepper_for(sipid, log=log).aip_exists():
                 hdlr.set_state(status.CONFLICT,
                                "requested initial preservation of existing AIP")
-                msg = "AIP with ID already exists (need to request update?) :"
+                msg = "AIP with ID already exists (need to request update?): "
                 raise PreservationStateException(msg + sipid, True)
 
         # React to the current state. This state reflects the state prior to
