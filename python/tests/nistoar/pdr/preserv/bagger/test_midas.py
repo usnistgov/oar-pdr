@@ -138,8 +138,8 @@ class TestMIDASMetadataBaggerMixed(test.TestCase):
         src = deepcopy(self.bagr.resmd)
         del data['components']
         del src['components']
-        del src['inventory']
-        del src['dataHierarchy']
+        if 'inventory' in src: del src['inventory']
+        if 'dataHierarchy' in src: del src['dataHierarchy']
         self.assertEqual(to_dict(data), to_dict(src))
         self.assertEqual(data.keys(), src.keys())  # same order
 
@@ -629,7 +629,7 @@ class TestMIDASMetadataBaggerReview(test.TestCase):
             n = 20
             while n > 0 and self.bagr.fileExaminer.thread.is_alive():
                 n -= 1
-                sleep(0.1)
+                time.sleep(0.1)
             if n == 0:
                 self.fail("file examiner is taking too long")    
         fmd = self.bagr.bagbldr.bag.nerd_metadata_for("trial2.json")
