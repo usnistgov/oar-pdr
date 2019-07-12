@@ -150,6 +150,13 @@ class TestMIDASSIPHandler(test.TestCase):
         mdbagdir = os.path.join(self.sip.mdbagdir, self.midasid)
         self.assertFalse( os.path.exists(mdbagdir),
                           "Failed to clean up metadata bag directory: "+mdbagdir)
+
+        # has unserialized bags been cleaned up?
+        pd = os.path.join(self.revdir, "1491/_preserv")
+        bb = self.midasid+".1_0_0.mbag0_4-"
+        bfs = [f for f in os.listdir(pd) if f.startswith(bb)]
+        self.assertEqual(len(bfs), 0)
+        
         
     def test_is_preserved(self):
         self.assertEqual(self.sip.state, status.FORGOTTEN)
