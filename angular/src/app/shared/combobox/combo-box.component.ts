@@ -3,7 +3,7 @@
 // 2. Auto filter the dropdown list when user starts typing in the input box
 // 3. User can type in new value that is not in the dropdown list 
 
-import { Component, Input, Output, OnInit, EventEmitter, HostListener } from '@angular/core'
+import { Component, Input, Output, OnInit, EventEmitter, HostListener, SimpleChanges } from '@angular/core'
 import { ComboBoxPipe } from './combo-box.pipe';
 import { BrowserModule } from '@angular/platform-browser'
 import { FormsModule } from '@angular/forms'
@@ -48,6 +48,12 @@ export class ComboBoxComponent implements OnInit {
 
   ngOnInit() {
     this.reset();
+  }
+
+  ngOnChanges(changes: SimpleChanges){
+    if(changes.dataList){
+      this.dummyDataList = this.dataList;
+    }
   }
 
   /*
@@ -152,5 +158,13 @@ export class ComboBoxComponent implements OnInit {
 
   handleAsideClick(event: Event) {
     event.stopPropagation(); // Stop the propagation to prevent reaching document
+  }
+
+  arrowClass(){
+    if(this.showDropDown){
+      return "faa faa-angle-up";
+    } else{
+      return "faa faa-angle-down";
+    }
   }
 }

@@ -20,6 +20,7 @@ import { ModalService } from '../shared/modal-service';
 import { AuthorPopupComponent } from './author-popup/author-popup.component';
 import { NgbModalOptions, NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ContactPopupComponent } from './contact-popup/contact-popup.component';
+import { CustomizationServiceService } from '../shared/customization-service/customization-service.service';
 
 
 interface reference {
@@ -174,6 +175,7 @@ export class LandingComponent implements OnInit {
   organizationList: string[] = ["National Institute of Standards and Technology"]
   HomePageLink: boolean = false;
   inBrowser: boolean = false;
+  updateUrl: string;
 
   /**
    * Creates an instance of the SearchPanel
@@ -192,7 +194,8 @@ export class LandingComponent implements OnInit {
     private commonVarService: CommonVarService,
     private authService: AuthService,
     private ngbModal: NgbModal,
-    private modalService: ModalService) {
+    private modalService: ModalService,
+    private customizationServiceService: CustomizationServiceService) {
     this.titleObj = this.editingObjectInit();
     this.authorObj = this.editingObjectInit();
     this.contactObj = this.editingObjectInit();
@@ -238,6 +241,7 @@ export class LandingComponent implements OnInit {
     this.ediid = this.searchValue;
     this.commonVarService.setEdiid(this.searchValue);
     this.files = [];
+    this.updateUrl = this.cfg.get("distService", "/rmm/") + "update/" + this.ediid;
 
     this.getData()
       .subscribe((res) => {
@@ -834,12 +838,21 @@ export class LandingComponent implements OnInit {
   *  Save edited title
   */
   saveEditedTitle() {
+    let postMessage: any[] = [];
+
     this.titleObj.originalValue = '';
     this.titleObj.detailEditmode = false;
     this.titleMouseout();
-    /*
-      Send request to back end here
-    */
+    postMessage.push({ "title": this.record.title });
+
+    var updateUrl = this.cfg.get("distService", "/rmm/") + "update/" + this.ediid;
+    this.customizationServiceService.update(updateUrl, JSON.stringify(postMessage)).subscribe(
+      blob => {
+        console.log("blob:", blob);
+      },
+      err => {
+        console.log("Error when updating title:", err);
+      });
   }
 
   /*
@@ -879,7 +892,21 @@ export class LandingComponent implements OnInit {
     modalRef.componentInstance.inputContactPoint = this.tempContactPoint;
 
     modalRef.componentInstance.returnContactPoint.subscribe((contactPoint) => {
-      this.record.contactPoint = JSON.parse(JSON.stringify(contactPoint));
+      if (contactPoint) {
+        this.record.contactPoint = JSON.parse(JSON.stringify(contactPoint));
+
+        var postMessage: any = {};
+        postMessage["contactpoint"] = contactPoint;
+        console.log("postMessage", JSON.stringify(postMessage));
+
+        this.customizationServiceService.update(this.updateUrl, JSON.stringify(postMessage)).subscribe(
+          blob => {
+            console.log("blob:", blob);
+          },
+          err => {
+            console.log("Error when updating title:", err);
+          });
+      }
     })
   }
 
@@ -926,9 +953,23 @@ export class LandingComponent implements OnInit {
     modalRef.componentInstance.tempAuthors = this.tempAuthors;
 
     modalRef.componentInstance.returnAuthors.subscribe((authors) => {
-      this.record.authors = authors.authors;
-      for (var author in this.record.authors)
-        this.record.authors[author].dataChanged = false;
+      if (authors) {
+        this.record.authors = authors.authors;
+        for (var author in this.record.authors)
+          this.record.authors[author].dataChanged = false;
+
+          var postMessage: any = {};
+          postMessage["authors"] = authors.authors;
+          console.log("postMessage", JSON.stringify(postMessage));
+  
+          this.customizationServiceService.update(this.updateUrl, JSON.stringify(postMessage)).subscribe(
+            blob => {
+              console.log("blob:", blob);
+            },
+            err => {
+              console.log("Error when updating title:", err);
+            });
+      }
     })
   }
 

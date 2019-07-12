@@ -125,7 +125,7 @@
         <td style="border: 1px solid lightgrey;">
           <div *ngFor="let aff of author.affiliation; let j = index; trackBy: trackByFn"
             style="width:100%; margin: 0em 0em .5em 0em;">
-            <div style="overflow:hidden; width: 100%; background-color: rgb(248, 246, 237)">
+            <div style="width: 100%; background-color: rgb(248, 246, 237)">
               <div style="float: left; width: 95%; margin-left: .5em;">
                 <table>
                   <tr>
@@ -139,7 +139,7 @@
                   </tr>
                   <tr>
                     <td width="10%" align="right" valign="center">Department/Division:</td>
-                    <td><input type="text" [(ngModel)]="author.affiliation[j].division" style="width: 100%;height:2em;" />
+                    <td><input type="text" [(ngModel)]="author.affiliation[j].dept" style="width: 100%;height:2em;" (input)="onDeptChange(author, $event.target.value)"/>
                     </td>
                   </tr>
                 </table>

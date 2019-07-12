@@ -54,6 +54,7 @@ import { HttpClientModule } from '@angular/common/http';
 import { FrameModule } from './frame/frame.module';
 import { ConfigModule } from './config/config.module';
 import { AppRoutingModule } from './app-routing.module';
+import { CustomizationServiceService } from './shared/customization-service/customization-service.service';
 
 
 enableProdMode();
@@ -105,6 +106,7 @@ import { ContactPopupComponent } from './landing/contact-popup/contact-popup.com
     CommonFunctionService,
     TaxonomyListService,
     ModalService,
+    CustomizationServiceService,
 
     // provider used to create fake backend
     fakeBackendProvider

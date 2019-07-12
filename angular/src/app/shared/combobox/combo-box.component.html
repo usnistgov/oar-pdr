@@ -10,9 +10,9 @@
                 (blur)="onBlurEventAction()"
                 style="height: 2em; max-width:calc(100% - 1.8em); margin: 0; float: left;"
                 />
-        <button style="float:right;width:1.8em;margin-top: 2px;" class="drop-down-button" (click)="toogleDropDown()"><i class="faa faa-angle-down"></i></button>
+        <button style="float:right;width:1.8em;margin-top: 2px;" class="drop-down-button" (click)="toogleDropDown()"><i [ngClass]="arrowClass()"></i></button>
     </div>
-    <div class="data-container" *ngIf="showDropDown" style="text-align: left; height: 6em; width: 100%;">
-      <p style="padding-left: .5em;" *ngFor="let data of dummyDataList; let i = index" class="data-list" (click)="updateTextBox(data[columnName])" (mouseover)="counter=i;checkHighlight(i)" [ngClass]="{highlight:checkHighlight(i)}">{{data[columnName]}}</p>
+    <div class="data-container" *ngIf="showDropDown">
+      <div style="padding-left: .5em;" *ngFor="let data of dummyDataList; let i = index" class="data-list" (click)="updateTextBox(data[columnName])" (mouseover)="counter=i;checkHighlight(i)" [ngClass]="{highlight:checkHighlight(i)}">{{data[columnName]}}</div>
     </div>
   </div>

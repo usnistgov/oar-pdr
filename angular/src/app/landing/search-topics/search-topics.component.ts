@@ -2,6 +2,7 @@ import { Component, OnInit, Input, EventEmitter, Output, ElementRef, ViewChild }
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { TreeNode } from 'primeng/api';
 import { TemplateBindingParseResult } from '@angular/compiler';
+import { AppConfig } from '../../config/config';
 
 @Component({
   selector: 'app-search-topics',
@@ -21,7 +22,8 @@ export class SearchTopicsComponent implements OnInit {
   @ViewChild('panel', { read: ElementRef }) public panel: ElementRef<any>;
   @ViewChild('panel0', { read: ElementRef }) public panel0: ElementRef<any>;
 
-  constructor(public activeModal: NgbActiveModal) { }
+  constructor(
+    public activeModal: NgbActiveModal) { }
 
   ngOnInit() {
     this.setTreeVisible(true);
@@ -32,10 +34,7 @@ export class SearchTopicsComponent implements OnInit {
   */
   saveTopic() {
     this.passEntry.emit(this.tempTopics);
-    this.activeModal.close('Close click')
-
-    // Send update to backend here...
-    // this.modalService.close('Topic-popup-dialog');
+    this.activeModal.close('Close click');
   }
 
   /**
@@ -75,7 +74,7 @@ export class SearchTopicsComponent implements OnInit {
   */
   getTopicCursor(rowNode: any) {
     const existingTopic = this.tempTopics.filter(topic0 => topic0 == rowNode.node.data.researchTopic);
-    if (existingTopic == undefined || existingTopic == null || existingTopic.length <= 0) 
+    if (existingTopic == undefined || existingTopic == null || existingTopic.length <= 0)
       return 'pointer';
     else
       return 'default';
@@ -94,7 +93,7 @@ export class SearchTopicsComponent implements OnInit {
       treeNode = this.searchTreenode(this.taxonomyTree[i], topic);
     }
     if (treeNode != null) {
-      if(treeNode.parent != null)
+      if (treeNode.parent != null)
         this.setVisible(treeNode.parent.children, true);
 
       treeNode.data.visible = true;
@@ -141,16 +140,16 @@ export class SearchTopicsComponent implements OnInit {
   }
 
   setVisible(tree: TreeNode[], option: boolean, backgroundColor?: string) {
-    if(tree == undefined || tree == null) return;
+    if (tree == undefined || tree == null) return;
 
     for (let i = 0; i < tree.length; i++) {
-      if(tree[i].data != null && tree[i].data != undefined){
+      if (tree[i].data != null && tree[i].data != undefined) {
         tree[i].data.visible = option;
-        if(backgroundColor != null)
-        tree[i].data.bkcolor = backgroundColor;
+        if (backgroundColor != null)
+          tree[i].data.bkcolor = backgroundColor;
       }
 
-      if (tree[i].children != null && tree[i].children!=undefined && tree[i].children.length > 0) {
+      if (tree[i].children != null && tree[i].children != undefined && tree[i].children.length > 0) {
         this.setVisible(tree[i].children, option, backgroundColor);
       }
     }

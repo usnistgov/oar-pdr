@@ -105,6 +105,7 @@
                 <div [@changeBorderColor]=authorObj.currentState *ngIf="recordEditmode"
                   style="text-align: left; vertical-align: top;display: inline-block;padding-right: .5em;">
                   Authors:
+                  <HR>
                 </div>
                 <button [@changeOpacity]=authorObj.currentState *ngIf="recordEditmode && !authorObj.detailEditmode"
                   [style.opacity]="authorObj.buttonOpacity" type="button" (click)="openAuthorModal()"
@@ -130,10 +131,11 @@
                       <div class="" *ngIf="record.authors">
                         <span><b>Authors:</b></span>
                         <div *ngFor="let author of record.authors; let i = index">
-                          <span>{{ author.fn}}</span>,
-                          <span *ngFor="let aff of author.affiliation">
-                            <br>{{aff.title}}
-                          </span>
+                          <div>{{ author.fn}}</div>
+                          <div *ngFor="let aff of author.affiliation" style="padding-left: 1em;">
+                            <div>{{aff.title}}</div>
+                            <div>{{aff.dept}}</div>
+                          </div>
                         </div>
                       </div>
                     </div>

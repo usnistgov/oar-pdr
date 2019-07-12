@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
+import { Component, OnInit, Input, Output, EventEmitter, ChangeDetectorRef } from '@angular/core';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { CommonVarService } from '../../shared/common-var';
 import { SearchService } from '../../shared/search-service/index';
@@ -16,7 +16,7 @@ export class AuthorPopupComponent implements OnInit {
   originalAuthors: any;
   errorMsg: any;
   affiliationList: any[] = [];
-  organizationList: string[] = [];
+  // organizationList: string[] = [];
 
   constructor(
     public activeModal: NgbActiveModal, 
@@ -44,10 +44,10 @@ export class AuthorPopupComponent implements OnInit {
             if(result.ResultData[i].authors[j].affiliation != undefined){
               for(var k = 0; k < result.ResultData[i].authors[j].affiliation.length; k++){ 
                 if(result.ResultData[i].authors[j].affiliation[k].title != undefined){
-                  const existingAffiliation = this.affiliationList.filter(aff => aff.name === result.ResultData[i].authors[j].affiliation[k].title && aff.division === "");
+                  const existingAffiliation = this.affiliationList.filter(aff => aff.name === result.ResultData[i].authors[j].affiliation[k].title && aff.dept === "");
                   if(existingAffiliation.length == 0){
-                    this.affiliationList.push({"name":result.ResultData[i].authors[j].affiliation[k].title,"division":""})
-                    this.organizationList.push(result.ResultData[i].authors[j].affiliation[k].title);
+                    this.affiliationList.push({"name":result.ResultData[i].authors[j].affiliation[k].title,"dept":""})
+                    // this.organizationList.push(result.ResultData[i].authors[j].affiliation[k].title);
                   }
                 }
               }
@@ -56,13 +56,15 @@ export class AuthorPopupComponent implements OnInit {
         }
       }
       this.affiliationList.sort((a, b) => a.name.localeCompare(b.name));
+      //Put "National Institute of Standards and Technology" on top of the list
+      this.affiliationList = this.affiliationList.filter(entry => entry.name != "National Institute of Standards and Technology");
+      this.affiliationList.unshift({name:"National Institute of Standards and Technology",dept:""});
     }, (error) => {
-      console.log("There is an error getting records list.");
+      console.log("There was an error getting records list.");
       console.log(error);
       this.errorMsg = error;
     });
   }
-
 
   /*
   *   Return icon class based on collapse status (top level)
@@ -245,7 +247,7 @@ export class AuthorPopupComponent implements OnInit {
   addAffiliation(i: number) {
     var aff = {
       "@id": "",
-      "title": "",
+      "title": "National Institute of Standards and Technology",
       "dept": "",
       "@type": [
         ""
@@ -271,5 +273,12 @@ export class AuthorPopupComponent implements OnInit {
   */
   affiliationNameChanged(message: string, i:number) {
     this.tempAuthors.authors[i].dataChanged = true;
+  }
+
+  /*
+  *   When affiliation department/division changed
+  */
+  onDeptChange(author: any, dept: string){
+    author.dataChanged = true;
   }
 }

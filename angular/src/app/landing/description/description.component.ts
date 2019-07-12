@@ -18,6 +18,7 @@ import { TaxonomyListService } from '../../shared/taxonomy-list';
 import { NgbModalOptions, NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { SearchTopicsComponent } from '../../landing/search-topics/search-topics.component';
 import { DescriptionPopupComponent } from './description-popup/description-popup.component';
+import { CustomizationServiceService } from '../../shared/customization-service/customization-service.service';
 
 declare var saveAs: any;
 
@@ -92,6 +93,7 @@ export class DescriptionComponent {
   taxonomyTree: TreeNode[] = [];
   selectedData: TreeNode[] = [];
   isVisible: boolean = true;
+  updateUrl: string;
 
   /* Function to Return Keys object properties */
   keys(): Array<string> {
@@ -110,6 +112,7 @@ export class DescriptionComponent {
     private taxonomyListService: TaxonomyListService,
     private ngbModal: NgbModal,
     public router: Router,
+    private customizationServiceService: CustomizationServiceService,
     ngZone: NgZone) {
     this.cols = [
       { field: 'name', header: 'Name', width: '60%' },
@@ -159,6 +162,7 @@ export class DescriptionComponent {
 
     this.cartMap = this.cartService.getCart();
     this.ediid = this.commonVarService.getEdiid();
+    this.updateUrl = this.cfg.get("distService", "/rmm/") + "update/" + this.ediid;
 
     this.taxonomyListService.get(0).subscribe((result) => {
       if (result != null && result != undefined)
@@ -277,7 +281,6 @@ export class DescriptionComponent {
         }
       };
     });
-    console.log("tree", tree);
     return tree;
   }
 
@@ -1066,8 +1069,22 @@ export class DescriptionComponent {
     modalRef.componentInstance.title = 'Description';
 
     modalRef.componentInstance.returnDescription.subscribe((returnValue) => {
-      var tempDescs = returnValue.split(/\n\s*\n/).filter(desc => desc != '');
-      this.record['description'] = JSON.parse(JSON.stringify(tempDescs));
+      if (returnValue) {
+        var tempDescs = returnValue.split(/\n\s*\n/).filter(desc => desc != '');
+        this.record['description'] = JSON.parse(JSON.stringify(tempDescs));
+
+        var postMessage: any = {};
+        postMessage["description"] = tempDescs;
+        console.log("postMessage", JSON.stringify(postMessage));
+
+        this.customizationServiceService.update(this.updateUrl, JSON.stringify(postMessage)).subscribe(
+          blob => {
+            console.log("blob:", blob);
+          },
+          err => {
+            console.log("Error when updating description:", err);
+          });
+      }
     })
   }
 
@@ -1097,9 +1114,23 @@ export class DescriptionComponent {
     modalRef.componentInstance.title = 'Subject Keywords';
 
     modalRef.componentInstance.returnDescription.subscribe((returnValue) => {
-      let keywords: string[];
-      keywords = returnValue.split(',').filter(keyword => keyword != '');
-      this.record['keyword'] = keywords;
+      if (returnValue) {
+        let keywords: string[];
+        keywords = returnValue.split(',').filter(keyword => keyword != '');
+        this.record['keyword'] = keywords;
+
+        var postMessage: any = {};
+        postMessage["description"] = keywords;
+        console.log("postMessage", JSON.stringify(postMessage));
+
+        this.customizationServiceService.update(this.updateUrl, JSON.stringify(postMessage)).subscribe(
+          blob => {
+            console.log("blob:", blob);
+          },
+          err => {
+            console.log("Error when updating description:", err);
+          });
+      }
     });
   }
 
@@ -1125,14 +1156,30 @@ export class DescriptionComponent {
     modalRef.componentInstance.recordEditmode = this.recordEditmode;
     modalRef.componentInstance.taxonomyTree = this.taxonomyTree;
     modalRef.componentInstance.passEntry.subscribe((topics) => {
-      var strtempTopics: string = '';
-      var lTempTopics: any[] = [];
+      if (topics) {
+        var strtempTopics: string = '';
+        var tempTopicsForUpdate: any = [];
+        var lTempTopics: any[] = [];
 
-      for (var i = 0; i < topics.length; ++i) {
-        strtempTopics = strtempTopics + topics[i];
-        lTempTopics.push({ '@type': 'Concept', 'scheme': 'https://www.nist.gov/od/dm/nist-themes/v1.0', 'tag': topics[i] })
+        for (var i = 0; i < topics.length; ++i) {
+          strtempTopics = strtempTopics + topics[i];
+          lTempTopics.push({ '@type': 'Concept', 'scheme': 'https://www.nist.gov/od/dm/nist-themes/v1.0', 'tag': topics[i] });
+          tempTopicsForUpdate.push({ 'tag': topics[i] });
+        }
+        this.record['topic'] = JSON.parse(JSON.stringify(lTempTopics));
+
+        var postMessage: any = {};
+        postMessage["topic"] = tempTopicsForUpdate;
+        console.log("postMessage", JSON.stringify(postMessage));
+
+        this.customizationServiceService.update(this.updateUrl, JSON.stringify(postMessage)).subscribe(
+          blob => {
+            console.log("blob:", blob);
+          },
+          err => {
+            console.log("Error when updating title:", err);
+          });
       }
-      this.record['topic'] = JSON.parse(JSON.stringify(lTempTopics));
     })
   }
 
