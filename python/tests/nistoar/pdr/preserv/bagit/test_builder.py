@@ -116,6 +116,7 @@ class TestBuilder2(test.TestCase):
         self.assertFalse(self.bag._has_resmd())
 
     def test_fix_id(self):
+        self.bag.cfg['validate_id'] = True
         self.assertIsNone(self.bag._fix_id(None))
         self.assertEqual(self.bag._fix_id("ARK:/88434/edi00hw91c"),
                          "ark:/88434/edi00hw91c")
@@ -129,6 +130,8 @@ class TestBuilder2(test.TestCase):
             self.bag._fix_id("ark:/goober/foo")
         with self.assertRaises(ValueError):
             self.bag._fix_id("ark:/88434/edi00hw91d")
+        with self.assertRaises(ValueError):
+            self.bag._fix_id("ark:/88434/mds2-4193")
 
         self.cfg['validate_id'] = False
         self.bag = bldr.BagBuilder(self.tf.root, "testbag", self.cfg)
@@ -136,9 +139,27 @@ class TestBuilder2(test.TestCase):
                          "ark:/88434/edi00hw91c")
         self.assertEqual(self.bag._fix_id("ark:/88434/edi00hw91d"),
                          "ark:/88434/edi00hw91d")
+        self.assertEqual(self.bag._fix_id("ark:/88434/mds2-4193"),
+                         "ark:/88434/mds2-4193")
+        with self.assertRaises(ValueError):
+            self.bag._fix_id("ark:/goober/foo")
+
+        self.cfg['validate_id'] = r'(edi\d)|(mds[01])'
+        self.bag = bldr.BagBuilder(self.tf.root, "testbag", self.cfg)
+        with self.assertRaises(ValueError):
+            # validate this one
+            self.bag._fix_id("ark:/88434/edi00hw91d")
+
+        # don't validate this these
+        self.assertEqual(self.bag._fix_id("ark:/88434/pdr00hw91c"),
+                         "ark:/88434/pdr00hw91c")
+        self.assertEqual(self.bag._fix_id("ark:/88434/mds2-4193"),
+                         "ark:/88434/mds2-4193")
+
         with self.assertRaises(ValueError):
             self.bag._fix_id("ark:/goober/foo")
         
+        self.cfg['validate_id'] = r'(edi\d)|(mds[01])'
         self.cfg['require_ark_id'] = False
         self.bag = bldr.BagBuilder(self.tf.root, "testbag", self.cfg)
         self.assertEqual(self.bag._fix_id("edi00hw91c"), "edi00hw91c")

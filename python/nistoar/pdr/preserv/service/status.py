@@ -2,7 +2,7 @@
 This module provides tools for managing and retrieving the status of a 
 preservation efforts across multiple processes.  
 """
-import json, os, time, fcntl
+import json, os, time, fcntl, re
 from collections import OrderedDict
 from copy import deepcopy
 
@@ -193,7 +193,8 @@ class SIPStatus(object):
         if not config:
             config = {}
         cachedir = config.get('cachedir', '/tmp/sipstatus')
-        self._cachefile = os.path.join(cachedir, id + ".json")
+        fbase = re.sub(r'^ark:/\d+/', '', id)
+        self._cachefile = os.path.join(cachedir, fbase + ".json")
 
         if _data:
             self._data = deepcopy(_data)

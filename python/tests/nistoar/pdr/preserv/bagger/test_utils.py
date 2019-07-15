@@ -341,6 +341,9 @@ class TestBagUtils(test.TestCase):
         self.assertFalse(bagut.is_legal_bag_name("3812EF103.1_2_3.mbag.0_3-1.zip"))
         self.assertFalse(bagut.is_legal_bag_name("3812EF103.zip"))
 
+        # ark-id based
+        self.assertTrue(bagut.is_legal_bag_name("mds3-812.1_3.mbag0_4-14"))
+
     def test_multibag_version_of(self):
         self.assertEqual(bagut.multibag_version_of("mds3812.1_3.mbag0_4-14.tgz"), "0.4")
         self.assertEqual(bagut.multibag_version_of("mds3812.12_3_1_0.mbag0_2-14.tar.gz"),

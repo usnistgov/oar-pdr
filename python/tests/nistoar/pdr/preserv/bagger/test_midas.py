@@ -62,6 +62,7 @@ class TestMIDASMetadataBaggerMixed(test.TestCase):
     testsip = os.path.join(datadir, "midassip")
     midasid = '3A1EE2F169DD3B8CE0531A570681DB5D1491'
     wrongid = '333333333333333333333333333333331491'
+    arkid = "ark:/88434/mds2-1491"
 
     def setUp(self):
         self.tf = Tempfiles()
@@ -97,6 +98,47 @@ class TestMIDASMetadataBaggerMixed(test.TestCase):
         with self.assertRaises(midas.SIPDirectoryNotFound):
             self.bagr = midas.MIDASMetadataBagger(self.wrongid, self.bagparent,
                                                   self.revdir, self.upldir)
+
+    def test_ark_ediid(self):
+        indir = os.path.join(self.bagparent, os.path.basename(self.testsip))
+        shutil.copytree(self.testsip, indir)
+        self.upldir = os.path.join(indir, "upload")
+        self.revdir = os.path.join(indir, "review")
+
+        podf = os.path.join(self.upldir,"1491","_pod.json")
+        with open(podf) as fd:
+            pod = json.load(fd)
+        pod['identifier'] = self.arkid
+        with open(podf, 'w') as fd:
+            json.dump(pod, fd, indent=2)
+        podf = os.path.join(self.revdir,"1491","_pod.json")
+        with open(podf, 'w') as fd:
+            json.dump(pod, fd, indent=2)
+
+        cfg = { 'bag_builder': { 'validate_id': r'(pdr\d)|(mds[01])' } }
+        
+        self.bagr = midas.MIDASMetadataBagger(self.arkid, self.bagparent,
+                                              self.revdir, self.upldir,
+                                              config=cfg)
+        self.assertEqual(self.bagr.midasid, self.arkid)
+        self.assertEqual(self.bagr.name, self.arkid[11:])
+        self.assertEqual(self.bagr._indirs[0],
+                         os.path.join(self.revdir, self.arkid[16:]))
+        self.assertEqual(self.bagr._indirs[1],
+                         os.path.join(self.upldir, self.arkid[16:]))
+
+        self.assertEqual(os.path.basename(self.bagr.bagbldr.bagdir),
+                         self.arkid[11:])
+
+        self.bagr.ensure_base_bag()
+        self.assertEqual(self.bagr.bagbldr.id, self.arkid)
+        self.assertEqual(os.path.basename(self.bagr.bagbldr.bag.dir),
+                         self.arkid[11:])
+
+        self.bagr.ensure_res_metadata(True)
+        nerdm = self.bagr.bagbldr.bag.nerd_metadata_for('')
+        self.assertEqual(nerdm['ediid'], self.arkid)
+        self.assertEqual(nerdm['@id'], self.arkid)
 
     def test_find_pod_file(self):
         self.assertEqual(self.bagr.find_pod_file(),
@@ -757,6 +799,7 @@ class TestPreservationBagger(test.TestCase):
     
     testsip = os.path.join(datadir, "midassip")
     midasid = '3A1EE2F169DD3B8CE0531A570681DB5D1491'
+    arkid = "ark:/88434/mds2-1491"
 
     def setUp(self):
         self.tf = Tempfiles()
@@ -771,6 +814,7 @@ class TestPreservationBagger(test.TestCase):
         config = {
             'relative_to_indir': True,
             'bag_builder': {
+                'validate_id': r'(pdr\d)|(mds[01])',
                 'copy_on_link_failure': False,
                 'init_bag_info': {
                     'Source-Organization':
@@ -805,6 +849,33 @@ class TestPreservationBagger(test.TestCase):
         bagdir = os.path.join(self.bagparent, self.midasid+".1_0.mbag0_4-0")
         self.assertEqual(self.bagr.bagdir, bagdir)
 
+    def test_ark_ediid(self):
+        podf = os.path.join(self.sipdir,"_pod.json")
+        with open(podf) as fd:
+            pod = json.load(fd)
+        pod['identifier'] = self.arkid
+        with open(podf, 'w') as fd:
+            json.dump(pod, fd, indent=2)
+
+        bagname = self.arkid[11:]+".1_0.mbag0_4-0"
+
+        self.bagr = midas.PreservationBagger(self.arkid, '_preserv',
+                                             self.revdir, self.mddir,
+                                             self.bagr.cfg)
+        self.assertEqual(self.bagr.midasid, self.arkid)
+        self.assertEqual(self.bagr.name, self.arkid[11:])
+        self.assertEqual(self.bagr.indir,
+                         os.path.join(self.revdir, self.arkid[16:]))
+        self.assertEqual(os.path.basename(self.bagr.bagdir), bagname)
+        self.assertEqual(os.path.basename(self.bagr.bagbldr.bagdir), bagname)
+
+        self.bagr.ensure_metadata_preparation()
+        self.assertEqual(self.bagr.bagbldr.id, self.arkid)
+        self.assertEqual(os.path.basename(self.bagr.bagbldr.bag.dir), bagname)
+
+        nerdm = self.bagr.bagbldr.bag.nerd_metadata_for('')
+        self.assertEqual(nerdm['ediid'], self.arkid)
+        self.assertEqual(nerdm['@id'], self.arkid)
 
 
     def test_find_pod_file(self):

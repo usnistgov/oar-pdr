@@ -70,6 +70,7 @@ class TestPrePubMetadataService(test.TestCase):
 
     testsip = os.path.join(datadir, "midassip")
     midasid = '3A1EE2F169DD3B8CE0531A570681DB5D1491'
+    arkid = "ark:/88434/mds2-1491"
 
     def assertEqualOD(self, od1, od2, message=None):
         d1 = to_dict(od1)
@@ -107,6 +108,11 @@ class TestPrePubMetadataService(test.TestCase):
                           self.workdir)
 
         self.assertIsNone(self.srv.prepsvc)  # update support turned off
+
+    def test_normalize_id(self):
+        self.assertEqual(self.midasid, self.srv.normalize_id(self.midasid))
+        self.assertEqual(self.arkid, self.srv.normalize_id(self.arkid))
+        self.assertEqual(self.arkid, self.srv.normalize_id(self.arkid[11:]))
 
     def test_prepare_metadata_bag(self):
         metadir = os.path.join(self.bagdir, 'metadata')
@@ -282,6 +288,57 @@ class TestPrePubMetadataService(test.TestCase):
 
         with self.assertRaises(serv.IDNotFound):
             self.srv.resolve_id("asldkfjsdalfk")
+
+    def test_resolve_arkid(self):
+        indir = os.path.join(self.workdir, os.path.basename(self.testsip))
+        shutil.copytree(self.testsip, indir)
+        self.upldir = os.path.join(indir, "upload")
+        self.revdir = os.path.join(indir, "review")
+
+        podf = os.path.join(self.upldir,"1491","_pod.json")
+        with open(podf) as fd:
+            pod = json.load(fd)
+        pod['identifier'] = self.arkid
+        with open(podf, 'w') as fd:
+            json.dump(pod, fd, indent=2)
+        podf = os.path.join(self.revdir,"1491","_pod.json")
+        with open(podf, 'w') as fd:
+            json.dump(pod, fd, indent=2)
+
+        self.config = {
+            'working_dir':     self.workdir,
+            'review_dir':      self.revdir,
+            'upload_dir':      self.upldir,
+            'id_registry_dir': self.workdir,
+            'bagger': {
+                'bag_builder': { 'validate_id': r'(pdr\d)|(mds[01])' }
+            }
+        }
+        self.srv = serv.PrePubMetadataService(self.config)
+        self.bagdir = os.path.join(self.bagparent, self.arkid[11:])
+
+        metadir = os.path.join(self.bagdir, 'metadata')
+        self.assertFalse(os.path.exists(metadir))
+
+        mdata = self.srv.resolve_id(self.arkid)
+        self.assertIn("ediid", mdata)
+        self.assertEquals(mdata['ediid'], self.arkid)
+        self.assertEquals(mdata['@id'], self.arkid)
+
+        # just for testing purposes, a pdr_status property will appear
+        # in the record if this dataset is an update to a previous
+        # release.  
+        self.assertNotIn("pdr_status", mdata)  
+
+        loader = ejs.SchemaLoader.from_directory(schemadir)
+        val = ejs.ExtValidator(loader, ejsprefix='_')
+        val.validate(mdata, False, True)
+
+        # resolve_id() is not indepodent with async file examination turned on!
+        #
+        ## resolve_id() needs to be indepodent
+        #data = self.srv.resolve_id(self.arkid)
+        #self.assertEqualOD(data, mdata)
 
     def test_locate_data_file(self):
         loc = self.srv.locate_data_file(self.midasid, 'trial3/trial3a.json')
