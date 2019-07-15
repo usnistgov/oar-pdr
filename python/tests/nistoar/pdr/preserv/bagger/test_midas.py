@@ -138,8 +138,8 @@ class TestMIDASMetadataBaggerMixed(test.TestCase):
         src = deepcopy(self.bagr.resmd)
         del data['components']
         del src['components']
-        del src['inventory']
-        del src['dataHierarchy']
+        if 'inventory' in src: del src['inventory']
+        if 'dataHierarchy' in src: del src['dataHierarchy']
         self.assertEqual(to_dict(data), to_dict(src))
         self.assertEqual(data.keys(), src.keys())  # same order
 
@@ -213,6 +213,52 @@ class TestMIDASMetadataBaggerMixed(test.TestCase):
             self.bagr.bagbldr.bag.nerd_file_for("gold")))
         self.assertTrue(not os.path.exists(
             os.path.dirname(self.bagr.bagbldr.bag.nerd_file_for("gold"))))
+
+    doiclientinfo = {
+        "app_name": "NIST Open Access for Research: oar-pdr",
+        "app_version": "testing",
+        "app_url": "http://github.com/usnistgov/oar-pdr/",
+        "email": "datasupport@nist.gov"
+    }
+
+    @test.skipIf("doi" not in os.environ.get("OAR_TEST_INCLUDE",""),
+                 "kindly skipping doi service checks")
+    def test_ensure_res_metadata_enhanced_refs(self):
+        self.assertFalse(os.path.exists(self.bagdir))
+        self.assertIsNone(self.bagr.inpodfile)
+
+        cfg = {
+            'enrich_refs': False,
+            'doi_resolver': {
+                'client_info': self.doiclientinfo
+            }
+        }
+        self.bagr = midas.MIDASMetadataBagger(self.midasid, self.bagparent,
+                                              self.revdir, self.upldir, cfg)
+        self.bagr.ensure_res_metadata()
+        self.assertEqual(len(self.bagr.resmd['references']), 1)
+        self.assertIn('doi.org', self.bagr.resmd['references'][0]['location'])
+        self.assertNotIn('citation', self.bagr.resmd['references'][0])
+
+        cfg['enrich_refs'] = True
+        self.bagr = midas.MIDASMetadataBagger(self.midasid, self.bagparent,
+                                              self.revdir, self.upldir, cfg)
+        self.bagr.ensure_res_metadata(True)
+        self.assertEqual(len(self.bagr.resmd['references']), 1)
+        self.assertIn('doi.org', self.bagr.resmd['references'][0]['location'])
+        self.assertIn('citation', self.bagr.resmd['references'][0])
+
+        rmd = self.bagr.bagbldr.bag.nerd_metadata_for('', False)
+        self.assertEqual(len(rmd['references']), 1)
+        self.assertIn('doi.org', rmd['references'][0]['location'])
+        self.assertNotIn('citation', rmd['references'][0])
+        
+        rmd = self.bagr.bagbldr.bag.annotations_metadata_for('')
+        self.assertEqual(len(rmd['references']), 1)
+        self.assertIn('doi.org', rmd['references'][0]['location'])
+        self.assertIn('citation', rmd['references'][0])
+        
+        
 
     def test_ensure_file_metadata(self):
         self.assertFalse(os.path.exists(self.bagdir))
@@ -583,7 +629,7 @@ class TestMIDASMetadataBaggerReview(test.TestCase):
             n = 20
             while n > 0 and self.bagr.fileExaminer.thread.is_alive():
                 n -= 1
-                sleep(0.1)
+                time.sleep(0.1)
             if n == 0:
                 self.fail("file examiner is taking too long")    
         fmd = self.bagr.bagbldr.bag.nerd_metadata_for("trial2.json")
