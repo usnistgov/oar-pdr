@@ -10,6 +10,7 @@
     "start": "ng serve",
     "build": "ng build",
     "test": "ng test --browsers=ChromeHeadless",
+    "e2e": "ng e2e",
     "lint": "ng lint oar-lps",
     "build:client-and-server-bundles": "ng build --prod && ng run oar-lps:server:production",
     "build:prerender": "npm run build:client-and-server-bundles && npm run compile:server && npm run webpack:server && npm run generate:prerender",
@@ -38,6 +39,7 @@
     "@nguniversal/express-engine": "^7.0.2",
     "@nguniversal/module-map-ngfactory-loader": "^7.0.2",
     "bootstrap": "^4.3.1",
+    "classlist.js": "^1.1.20150312",
     "core-js": "^2.4.1",
     "express": "^4.15.2",
     "file-saver": "^2.0.0",
@@ -79,7 +81,8 @@
     "ts-loader": "^4.2.0",
     "tslint": "^5.7.0",
     "typescript": "3.1.6",
-    "webpack-cli": "^3.0.0"
+    "webpack-cli": "^3.0.0",
+    "ts-node": "~7.0.0"
   },
   "browser": {
     "fs": false,

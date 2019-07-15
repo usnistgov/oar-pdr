@@ -200,7 +200,8 @@ class NISTBag(PreservationSystem):
             return OrderedDict()
         return self.read_nerd(annotfile)
 
-    def nerdm_record(self, merge_annots=None):
+    def nerdm_record(self, merge_annots=None, incl_inventory=False,
+                     incl_hierarchy=False):
         """
         return a full NERDm resource record for the data in this bag.
 
@@ -211,6 +212,12 @@ class NISTBag(PreservationSystem):
                                    NERDm metadata; however, if this is not the 
                                    case, yet, one can merge on the fly while 
                                    creating the record.  
+        :param incl_inventory bool:  if true, add the 'inventory' property that 
+                                   provides counts of the different types of 
+                                   components.
+        :param incl_hierarchy bool:  if true, include a 'dataHierarchy' property
+                                   which provides a hierarchical description of
+                                   the hierarchy of data components (deprecated).
         """
         if merge_annots is None:
             merge_annots = self._mergeannots
@@ -253,9 +260,10 @@ class NISTBag(PreservationSystem):
 
                 out['components'].append(comp)
 
-        if 'inventory' not in out:
+        if incl_inventory and 'inventory' not in out:
             self.update_inventory_in(out)
-        self.update_hierarchy_in(out)
+        if incl_hierarchy:
+            self.update_hierarchy_in(out)
         
         return out
 

@@ -1040,7 +1040,10 @@ class BagBuilder(PreservationSystem):
                 raise StateException("Existing component not a "+comptype+
                                      ": "+str(orig.get('@type',[])))
             if msg is None:
-                msg = "Updating %s metadata: %s" % (comptype, destpath)
+                ct = comptype
+                if not ct and not destpath:
+                    ct = "resource-level"
+                msg = "Updating %s metadata: %s" % (ct, destpath)
         else:
             orig = self._create_init_md_for(destpath, comptype)
             if msg is None:

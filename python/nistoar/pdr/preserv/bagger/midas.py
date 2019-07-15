@@ -18,6 +18,7 @@ from .base import sys as _sys
 from . import utils as bagutils
 from ..bagit.builder import BagBuilder, NERDMD_FILENAME, FILEMD_FILENAME
 from ..bagit import NISTBag
+from ..bagit.tools import synchronize_enhanced_refs
 from ....id import PDRMinter, NIST_ARK_NAAN
 from ... import def_merge_etcdir, utils
 from .. import (SIPDirectoryError, SIPDirectoryNotFound, AIPValidationError,
@@ -472,6 +473,11 @@ class MIDASMetadataBagger(SIPBagger):
                                          cmp['filepath']):
                     self.bagbldr.remove_component(cmp['filepath'], True)
 
+            # enhance references (if desired)
+            if self.cfg.get('enrich_refs', False):
+                synchronize_enhanced_refs(self.bagbldr,
+                                          config=self.cfg.get('doi_resolver'))
+
         self.resmd = self.bagbldr.bag.nerdm_record(True)
 
         # ensure an initial version
@@ -628,8 +634,8 @@ class MIDASMetadataBagger(SIPBagger):
                         self.resmd['components'] = [md]
                     else:
                         self.resmd['components'].append(md)
-                        
-            
+
+
 
     def _check_checksum_files(self):
         # This file will look all of the files that have been identified as

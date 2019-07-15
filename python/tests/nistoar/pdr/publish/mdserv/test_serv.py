@@ -150,13 +150,13 @@ class TestPrePubMetadataService(test.TestCase):
         
         self.assertIn("ediid", data)
         self.assertIn("components", data)
-        self.assertIn("inventory", data)
+        self.assertNotIn("inventory", data)
 
         self.assertEqual(len(data['components']), 7)
-        self.assertEqual(data['inventory'][0]['forCollection'], "")
-        self.assertEqual(len(data['inventory']), 2)
-        self.assertEqual(data['inventory'][0]['childCount'], 5)
-        self.assertEqual(data['inventory'][0]['descCount'], 7)
+        # self.assertEqual(data['inventory'][0]['forCollection'], "")
+        # self.assertEqual(len(data['inventory']), 2)
+        # self.assertEqual(data['inventory'][0]['childCount'], 5)
+        # self.assertEqual(data['inventory'][0]['descCount'], 7)
 
         comps = data['components']
         dlcount = 0
@@ -183,13 +183,13 @@ class TestPrePubMetadataService(test.TestCase):
         
         self.assertIn("ediid", data)
         self.assertIn("components", data)
-        self.assertIn("inventory", data)
+        self.assertNotIn("inventory", data)
 
         self.assertEqual(len(data['components']), 7)
-        self.assertEqual(data['inventory'][0]['forCollection'], "")
-        self.assertEqual(len(data['inventory']), 2)
-        self.assertEqual(data['inventory'][0]['childCount'], 5)
-        self.assertEqual(data['inventory'][0]['descCount'], 7)
+        # self.assertEqual(data['inventory'][0]['forCollection'], "")
+        # self.assertEqual(len(data['inventory']), 2)
+        # self.assertEqual(data['inventory'][0]['childCount'], 5)
+        # self.assertEqual(data['inventory'][0]['descCount'], 7)
         
         comps = data['components']
         dlcount = 0
@@ -252,7 +252,7 @@ class TestPrePubMetadataService(test.TestCase):
         
         self.assertIn("ediid", data)
         self.assertIn("components", data)
-        self.assertIn("inventory", data)
+        self.assertNotIn("inventory", data)
         self.assertIn("authors", data)
         self.assertEqual(data['ediid'], ediid)
         self.assertEqual(data['foo'], "bar")
