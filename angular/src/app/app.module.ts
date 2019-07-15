@@ -49,6 +49,8 @@ import { HttpClientModule } from '@angular/common/http';
 import { FrameModule } from './frame/frame.module';
 import { ConfigModule } from './config/config.module';
 import { AppRoutingModule } from './app-routing.module';
+import {GoogleAnalyticsService} from "./shared/ga-service/google-analytics.service";
+import {GoogleAnalyticsServiceMock} from "./shared/ga-service/google-analytics.service.mock";
 
 
 enableProdMode();
@@ -90,7 +92,9 @@ import { fakeBackendProvider } from './_helpers/fakeBackendInterceptor';
     DownloadService,
     TestDataService,
     ConfirmationService,
-    CommonFunctionService
+    CommonFunctionService,
+    GoogleAnalyticsService,
+    GoogleAnalyticsServiceMock
     // provider used to create fake backend
     // fakeBackendProvider
   ],
@@ -98,6 +102,7 @@ import { fakeBackendProvider } from './_helpers/fakeBackendInterceptor';
 })
 
 export class AppModule {
+  constructor(protected _googleAnalyticsService: GoogleAnalyticsService) { } // We inject the service here to keep it alive whole time
 }
 
 

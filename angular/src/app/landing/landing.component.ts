@@ -6,21 +6,14 @@ import { MenuItem } from 'primeng/api';
 import { Observable, of } from 'rxjs';
 import * as _ from 'lodash';
 import 'rxjs/add/operator/map';
-import { Subscription } from 'rxjs/Subscription';
 import { AppConfig } from '../config/config';
 import { PLATFORM_ID, APP_ID, Inject } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
-import { CartService } from '../datacart/cart.service';
 import { CommonVarService } from '../shared/common-var';
-import { TestDataService } from '../shared/testdata-service/testDataService';
 import { SearchService } from '../shared/search-service/index';
-import { first, tap } from 'rxjs/operators';
+import { tap } from 'rxjs/operators';
 import { isPlatformServer } from '@angular/common';
 import { makeStateKey, TransferState } from '@angular/platform-browser';
-//import { _throw } from 'rxjs/observable/throw';
-// import {DialogService} from 'primeng/api';
-import { DatacartComponent } from '../datacart/datacart.component';
-
 
 interface reference {
   refType?: string,
