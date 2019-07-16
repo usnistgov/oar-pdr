@@ -5,13 +5,6 @@ declare var gas:Function;
 
 @Injectable()
 export class GoogleAnalyticsServiceMock {
-  constructor() {
-  }
-
-  /*
-  *   Append Google Analytics script to a page
-  */
-  public appendGaTrackingCode() {
-
+  constructor(router: Router) {
   }
 }
