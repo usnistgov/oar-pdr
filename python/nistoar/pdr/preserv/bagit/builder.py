@@ -448,7 +448,7 @@ class BagBuilder(PreservationSystem):
                 raise ValueError("Invalid ARK identifier provided: "+id)
 
             validate = self.cfg.get('validate_id', True)
-            if isinstance(validate, str):
+            if isinstance(validate, (unicode, str)):
                 # assume that this is a RE of matching shoulders to validate
                 try:
                     validate = bool( re.match(r'ark:/\d+/('+validate+')', id) )
@@ -2016,10 +2016,11 @@ format(nerdm['title'])
                    not isinstance(vals, Sequence):
                     vals = [vals]
                 for val in vals:
-                    out = "{0}: {1}".format(name, val.encode('utf-8'))
+                    # WARNING: when cvting to python3, careful with encoding
+                    out = u"{0}: {1}".format(name, val)
                     if len(out) > 79:
                         out = textwrap.fill(out, 79, subsequent_indent=' ')
-                    print(out, file=fd)
+                    print(out.encode('utf-8'), file=fd)
 
     def write_mbag_files(self, overwrite=False):
         """
