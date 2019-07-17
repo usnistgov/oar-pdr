@@ -155,8 +155,11 @@ spring:
 #        - alias: uaa
 #          metadata: http://localhost:8082/uaa/saml/metadata
 #          link-text: Cloud Foundry UAA SP
-        - alias: boot-sample-sp
-          metadata: http://localhost:8086/saml-sp-metadata.xml
+#        - alias: boot-sample-sp
+#          metadata: http://localhost:8086/saml-sp-metadata.xml
+#          linktext: Spring Security SAML SP
+        - alias: saml-sp
+          metadata: https://pn110559.nist.gov/saml-sp/saml/metadata
           linktext: Spring Security SAML SP
 #        - alias: spring-security-saml-local-sp
 #          metadata: http://localhost:8084/saml/metadata

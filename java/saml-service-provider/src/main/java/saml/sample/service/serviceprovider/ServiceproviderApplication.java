@@ -5,9 +5,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
 public class ServiceproviderApplication {
-
-	public static void main(String[] args) {
-		SpringApplication.run(ServiceproviderApplication.class, args);
-	}
-
+    public static void main(String[] args) {
+        SpringApplication.run(ServiceproviderApplication.class);
+    }
 }
