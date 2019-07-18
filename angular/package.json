@@ -7,8 +7,8 @@
   },
   "scripts": {
     "ng": "ng",
-    "start": "ng serve",
-    "build": "ng build",
+    "start": "ng serve --aot",
+    "build": "ng build --aot",
     "test": "ng test --browsers=ChromeHeadless",
     "e2e": "ng e2e",
     "lint": "ng lint oar-lps",

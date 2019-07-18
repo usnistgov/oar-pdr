@@ -59,7 +59,7 @@ describe('HeadbarComponent', () => {
 
         let aels = cmpel.querySelectorAll(".header-links a")
         expect(aels.length).toBeGreaterThan(1);
-        expect(aels[0].getAttribute('href')).toBe("/about");
+        expect(aels[0].getAttribute('href')).toBe("/pdr/about");
         expect(aels[1].getAttribute('href')).toBe("https://goob.nist.gov/search");
     });
 
