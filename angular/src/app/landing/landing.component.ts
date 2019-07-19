@@ -256,7 +256,7 @@ export class LandingComponent implements OnInit {
    * Update menu on landing page
    */
   updateMenu() {
-    let mdapi = this.cfg.get("mdAPI", "/unconfigured");
+    let mdapi = this.cfg.get("locations.mdService", "/unconfigured");
     this.serviceApi = mdapi + "records?@id=" + this.record['@id'];
     if (!_.includes(mdapi, "/rmm/"))
       this.serviceApi = mdapi + this.record['ediid'];
