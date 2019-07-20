@@ -225,6 +225,15 @@ class SIPHandler(object):
             })
 
         self._status.cache()
+
+        # remove the source bags
+        if self.cfg.get("cleanup_unserialized_bags", True):
+            for bagd in srcbags:
+                try:
+                    shutil.rmtree(bagd)
+                except Exception as ex:
+                    log.warn("Trouble removing unserialized bag: "+bagd)
+        
         return outfiles
 
     def _is_ingested(self):
@@ -527,6 +536,24 @@ class MIDASSIPHandler(SIPHandler):
                                     summary="checksum file write failure",
                                     desc=msg, id=self._sipid)
                 
+        # remove the metadata bag directory so that that an attempt to update
+        # will force a rebuild based on the published version
+        mdbag = os.path.join(self.mdbagdir, self.bagger.name)
+        log.debug("ensuring the removal metadata bag directory: %s", mdbag)
+        if os.path.isdir(mdbag):
+            log.debug("removing metadata bag directory...")
+            try:
+                shutil.rmtree(mdbag)
+            except Exception as ex:
+                log.error("Failed to clean up the metadata bag directory: "+
+                          mdbag + ": "+str(ex))
+            if os.path.isfile(mdbag+".lock"):
+                try:
+                    os.remove(mdbag+".lock")
+                except Exception as ex:
+                    log.warn("Failed to clean up the metadata bag lock file: "+
+                             mdbag + ".lock: "+str(ex))
+
         self.set_state(status.SUCCESSFUL)
 
         # submit NERDm record to ingest service
@@ -550,16 +577,6 @@ class MIDASSIPHandler(SIPHandler):
             self.notifier.alert("preserve.success", origin=self.name,
                            summary="New MIDAS SIP preserved: "+self.bagger.name,
                                 id=self.bagger.name)
-
-        # remove the metadata bag directory so that that an attempt to update
-        # will force a rebuild based on the published version
-        mdbag = os.path.join(self.mdbagdir, self.bagger.name)
-        log.debug("ensuring the removal metadata bag directory: %s", mdbag)
-        if os.path.isdir(mdbag):
-            log.debug("removing metadata bag directory...")
-            shutil.rmtree(mdbag)
-            if os.path.isfile(mdbag+".lock"):
-                os.remove(mdbag+".lock")
 
         # clean up staging area
         if self.cfg.get('clean_bag_staging', True):

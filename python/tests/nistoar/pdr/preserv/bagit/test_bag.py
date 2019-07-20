@@ -145,6 +145,21 @@ class TestNISTBag(test.TestCase):
         data = self.bag.nerdm_record()
         self.assertIn("ediid", data)
         self.assertIn("components", data)
+        self.assertNotIn("inventory", data)
+
+        self.assertEqual(len(data['components']), 5)
+
+        for comp in data['components']:
+            self.assertNotIn("_schema", comp)
+            self.assertNotIn("$schema", comp)
+            self.assertNotIn("@context", comp)
+
+        self.assertNotIn("dataHierarchy", data)
+        
+    def test_nerdm_record_inclextras(self):
+        data = self.bag.nerdm_record(None, True, True)
+        self.assertIn("ediid", data)
+        self.assertIn("components", data)
         self.assertIn("inventory", data)
 
         self.assertEqual(len(data['components']), 5)

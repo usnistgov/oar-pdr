@@ -69,6 +69,11 @@ class TestMultibagValidator(test.TestCase):
         self.assertEqual(errs.failed(), [],
                       "False Positives: "+ str([str(e) for e in errs.failed()]))
 
+        goodbag = val.NISTBag(self.tf.mkdir("mds0-17d9a.3_1_9.mbag0_4-12"))
+        errs = self.valid8.test_name(goodbag)
+        self.assertEqual(errs.failed(), [],
+                      "False Positives: "+ str([str(e) for e in errs.failed()]))
+
         badbag = val.NISTBag(self.tf.mkdir("goober"))
         errs = self.valid8.test_name(badbag)
         self.assertEqual(len(errs.failed()), 1, "Unexpected # of errors: [\n  " +

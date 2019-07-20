@@ -9,7 +9,7 @@ export class CommonVarService {
   private userlogin: boolean = false;
   public userObservable = new Subject<boolean>();
   ediid: string = null;
-  private _storage = localStorage;
+  private _storage = null;
   private random_minimum: number = 1;
   private random_maximum: number = 100000;
   private isLocalTesting: boolean = false;
@@ -20,7 +20,10 @@ export class CommonVarService {
   openDownloadModalSub = new BehaviorSubject<boolean>(false);
   contentReadySub = new BehaviorSubject<boolean>(false);
 
-  constructor() { }
+  constructor() {
+    if (typeof(localStorage) !== 'undefined')
+      this._storage = localStorage;
+  }
 
   // setLogin(setlogin : boolean){
   //     this.userlogin = setlogin;
@@ -35,10 +38,12 @@ export class CommonVarService {
   }
 
   setEdiid(ediid: string) {
-    this._storage.setItem("ediid", ediid);
+    if (this._storage)
+      this._storage.setItem("ediid", ediid);
   }
 
   getEdiid() {
+    if (! this._storage) return "(none)";
     return this._storage.getItem("ediid");
   }
 

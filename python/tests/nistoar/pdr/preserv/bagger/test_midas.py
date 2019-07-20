@@ -4,7 +4,8 @@
 # simulated RMM and distribution services to be running, they have been 
 # seperated out into test_midas_update.py.
 #
-import os, sys, pdb, shutil, logging, json
+from __future__ import print_function
+import os, sys, pdb, shutil, logging, json, time
 from cStringIO import StringIO
 from io import BytesIO
 import warnings as warn
@@ -61,6 +62,7 @@ class TestMIDASMetadataBaggerMixed(test.TestCase):
     testsip = os.path.join(datadir, "midassip")
     midasid = '3A1EE2F169DD3B8CE0531A570681DB5D1491'
     wrongid = '333333333333333333333333333333331491'
+    arkid = "ark:/88434/mds2-1491"
 
     def setUp(self):
         self.tf = Tempfiles()
@@ -96,6 +98,47 @@ class TestMIDASMetadataBaggerMixed(test.TestCase):
         with self.assertRaises(midas.SIPDirectoryNotFound):
             self.bagr = midas.MIDASMetadataBagger(self.wrongid, self.bagparent,
                                                   self.revdir, self.upldir)
+
+    def test_ark_ediid(self):
+        indir = os.path.join(self.bagparent, os.path.basename(self.testsip))
+        shutil.copytree(self.testsip, indir)
+        self.upldir = os.path.join(indir, "upload")
+        self.revdir = os.path.join(indir, "review")
+
+        podf = os.path.join(self.upldir,"1491","_pod.json")
+        with open(podf) as fd:
+            pod = json.load(fd)
+        pod['identifier'] = self.arkid
+        with open(podf, 'w') as fd:
+            json.dump(pod, fd, indent=2)
+        podf = os.path.join(self.revdir,"1491","_pod.json")
+        with open(podf, 'w') as fd:
+            json.dump(pod, fd, indent=2)
+
+        cfg = { 'bag_builder': { 'validate_id': r'(pdr\d)|(mds[01])' } }
+        
+        self.bagr = midas.MIDASMetadataBagger(self.arkid, self.bagparent,
+                                              self.revdir, self.upldir,
+                                              config=cfg)
+        self.assertEqual(self.bagr.midasid, self.arkid)
+        self.assertEqual(self.bagr.name, self.arkid[11:])
+        self.assertEqual(self.bagr._indirs[0],
+                         os.path.join(self.revdir, self.arkid[16:]))
+        self.assertEqual(self.bagr._indirs[1],
+                         os.path.join(self.upldir, self.arkid[16:]))
+
+        self.assertEqual(os.path.basename(self.bagr.bagbldr.bagdir),
+                         self.arkid[11:])
+
+        self.bagr.ensure_base_bag()
+        self.assertEqual(self.bagr.bagbldr.id, self.arkid)
+        self.assertEqual(os.path.basename(self.bagr.bagbldr.bag.dir),
+                         self.arkid[11:])
+
+        self.bagr.ensure_res_metadata(True)
+        nerdm = self.bagr.bagbldr.bag.nerd_metadata_for('')
+        self.assertEqual(nerdm['ediid'], self.arkid)
+        self.assertEqual(nerdm['@id'], self.arkid)
 
     def test_find_pod_file(self):
         self.assertEqual(self.bagr.find_pod_file(),
@@ -137,8 +180,8 @@ class TestMIDASMetadataBaggerMixed(test.TestCase):
         src = deepcopy(self.bagr.resmd)
         del data['components']
         del src['components']
-        del src['inventory']
-        del src['dataHierarchy']
+        if 'inventory' in src: del src['inventory']
+        if 'dataHierarchy' in src: del src['dataHierarchy']
         self.assertEqual(to_dict(data), to_dict(src))
         self.assertEqual(data.keys(), src.keys())  # same order
 
@@ -212,6 +255,52 @@ class TestMIDASMetadataBaggerMixed(test.TestCase):
             self.bagr.bagbldr.bag.nerd_file_for("gold")))
         self.assertTrue(not os.path.exists(
             os.path.dirname(self.bagr.bagbldr.bag.nerd_file_for("gold"))))
+
+    doiclientinfo = {
+        "app_name": "NIST Open Access for Research: oar-pdr",
+        "app_version": "testing",
+        "app_url": "http://github.com/usnistgov/oar-pdr/",
+        "email": "datasupport@nist.gov"
+    }
+
+    @test.skipIf("doi" not in os.environ.get("OAR_TEST_INCLUDE",""),
+                 "kindly skipping doi service checks")
+    def test_ensure_res_metadata_enhanced_refs(self):
+        self.assertFalse(os.path.exists(self.bagdir))
+        self.assertIsNone(self.bagr.inpodfile)
+
+        cfg = {
+            'enrich_refs': False,
+            'doi_resolver': {
+                'client_info': self.doiclientinfo
+            }
+        }
+        self.bagr = midas.MIDASMetadataBagger(self.midasid, self.bagparent,
+                                              self.revdir, self.upldir, cfg)
+        self.bagr.ensure_res_metadata()
+        self.assertEqual(len(self.bagr.resmd['references']), 1)
+        self.assertIn('doi.org', self.bagr.resmd['references'][0]['location'])
+        self.assertNotIn('citation', self.bagr.resmd['references'][0])
+
+        cfg['enrich_refs'] = True
+        self.bagr = midas.MIDASMetadataBagger(self.midasid, self.bagparent,
+                                              self.revdir, self.upldir, cfg)
+        self.bagr.ensure_res_metadata(True)
+        self.assertEqual(len(self.bagr.resmd['references']), 1)
+        self.assertIn('doi.org', self.bagr.resmd['references'][0]['location'])
+        self.assertIn('citation', self.bagr.resmd['references'][0])
+
+        rmd = self.bagr.bagbldr.bag.nerd_metadata_for('', False)
+        self.assertEqual(len(rmd['references']), 1)
+        self.assertIn('doi.org', rmd['references'][0]['location'])
+        self.assertNotIn('citation', rmd['references'][0])
+        
+        rmd = self.bagr.bagbldr.bag.annotations_metadata_for('')
+        self.assertEqual(len(rmd['references']), 1)
+        self.assertIn('doi.org', rmd['references'][0]['location'])
+        self.assertIn('citation', rmd['references'][0])
+        
+        
 
     def test_ensure_file_metadata(self):
         self.assertFalse(os.path.exists(self.bagdir))
@@ -347,6 +436,8 @@ class TestMIDASMetadataBaggerMixed(test.TestCase):
         self.assertIn("nrdp:Subcollection", mdata['@type'])
         
     def test_ensure_preparation(self):
+        self.assertIsNone(self.bagr.fileExaminer)
+
         metadir = os.path.join(self.bagdir, 'metadata')
         self.assertFalse(os.path.exists(self.bagdir))
         self.assertIsNone(self.bagr.datafiles)
@@ -411,6 +502,7 @@ class TestMIDASMetadataBaggerReview(test.TestCase):
         self.revdir = os.path.join(self.testsip, "review")
         self.bagr = midas.MIDASMetadataBagger(self.midasid, self.bagparent,
                                               self.revdir)
+        self.bagdir = os.path.join(self.bagparent, self.midasid)
 
     def tearDown(self):
         self.bagr.bagbldr._unset_logfile()
@@ -429,6 +521,7 @@ class TestMIDASMetadataBaggerReview(test.TestCase):
         self.assertIsNone(self.bagr.datafiles)
 
         self.assertTrue(os.path.exists(self.bagparent))
+        self.assertIsNone(self.bagr.fileExaminer)
 
     def test_find_pod_file(self):
         self.assertEquals(self.bagr.find_pod_file(),
@@ -520,6 +613,70 @@ class TestMIDASMetadataBaggerReview(test.TestCase):
         self.assertEqual(datafiles["trial3/trial3a.json"],
                          os.path.join(revsip, "trial3/trial3a.json"))
         self.assertEqual(len(datafiles), 5)
+
+    def test_fileExaminer(self):
+        # turn on asyncexamine (but turn off autolaunch so that we can test
+        # more easily).  Show that the checksum is not calculated for
+        # trial2.json.  Start the asynchronous thread; after it is done,
+        # show that trial2.json now has a checksum.  
+        
+        self.bagr = midas.MIDASMetadataBagger(self.midasid, self.bagparent,
+                                              self.revdir, asyncexamine=True)
+        self.assertIsNotNone(self.bagr.fileExaminer)
+        self.bagr.fileExaminer_autolaunch = False
+
+        metadir = os.path.join(self.bagdir, 'metadata')
+        self.assertFalse(os.path.exists(self.bagdir))
+        self.assertIsNone(self.bagr.datafiles)
+
+        self.bagr.prepare()
+        self.assertTrue(os.path.exists(self.bagdir))
+        fmd = self.bagr.bagbldr.bag.nerd_metadata_for("trial1.json")
+        self.assertIn('checksum', fmd) # because there's a .sha256 file
+        self.assertIn('_status', fmd)
+        fmd = self.bagr.bagbldr.bag.nerd_metadata_for("trial2.json")
+        self.assertIn('_status', fmd)
+        self.assertNotIn('checksum', fmd)
+
+        # self.bagr.fileExaminer.thread.run()
+        self.bagr.fileExaminer.launch()
+        self.bagr.fileExaminer.thread.join()
+        fmd = self.bagr.bagbldr.bag.nerd_metadata_for("trial2.json")
+        self.assertIn('checksum', fmd)
+        self.assertNotIn('_status', fmd)
+
+    def test_fileExaminer_autolaunch(self):
+        # show that the async thread does its work with autolaunch
+        self.bagr = midas.MIDASMetadataBagger(self.midasid, self.bagparent,
+                                              self.revdir, asyncexamine=True)
+        self.assertIsNotNone(self.bagr.fileExaminer)
+        # self.bagr.fileExaminer_autolaunch = True
+
+        metadir = os.path.join(self.bagdir, 'metadata')
+        self.assertFalse(os.path.exists(self.bagdir))
+        self.assertIsNone(self.bagr.datafiles)
+
+        try:
+            self.bagr.prepare()
+        except Exception as ex:
+            self.bagr.fileExaminer.thread.join()
+            raise
+        self.assertTrue(os.path.exists(self.bagdir))
+        fmd = self.bagr.bagbldr.bag.nerd_metadata_for("trial1.json")
+        self.assertIn('checksum', fmd) # because there's a .sha256 file
+
+#        time.sleep(0.1)
+        if self.bagr.fileExaminer.thread.is_alive():
+            print("waiting for file examiner thread")
+            n = 20
+            while n > 0 and self.bagr.fileExaminer.thread.is_alive():
+                n -= 1
+                time.sleep(0.1)
+            if n == 0:
+                self.fail("file examiner is taking too long")    
+        fmd = self.bagr.bagbldr.bag.nerd_metadata_for("trial2.json")
+        self.assertIn('checksum', fmd)
+
 
 
 class TestMIDASMetadataBaggerUpload(test.TestCase):
@@ -635,10 +792,14 @@ class TestMIDASMetadataBaggerUpload(test.TestCase):
         self.assertEqual(len(datafiles), 1)
 
 
+
+
+
 class TestPreservationBagger(test.TestCase):
     
     testsip = os.path.join(datadir, "midassip")
     midasid = '3A1EE2F169DD3B8CE0531A570681DB5D1491'
+    arkid = "ark:/88434/mds2-1491"
 
     def setUp(self):
         self.tf = Tempfiles()
@@ -653,6 +814,7 @@ class TestPreservationBagger(test.TestCase):
         config = {
             'relative_to_indir': True,
             'bag_builder': {
+                'validate_id': r'(pdr\d)|(mds[01])',
                 'copy_on_link_failure': False,
                 'init_bag_info': {
                     'Source-Organization':
@@ -687,6 +849,33 @@ class TestPreservationBagger(test.TestCase):
         bagdir = os.path.join(self.bagparent, self.midasid+".1_0.mbag0_4-0")
         self.assertEqual(self.bagr.bagdir, bagdir)
 
+    def test_ark_ediid(self):
+        podf = os.path.join(self.sipdir,"_pod.json")
+        with open(podf) as fd:
+            pod = json.load(fd)
+        pod['identifier'] = self.arkid
+        with open(podf, 'w') as fd:
+            json.dump(pod, fd, indent=2)
+
+        bagname = self.arkid[11:]+".1_0.mbag0_4-0"
+
+        self.bagr = midas.PreservationBagger(self.arkid, '_preserv',
+                                             self.revdir, self.mddir,
+                                             self.bagr.cfg)
+        self.assertEqual(self.bagr.midasid, self.arkid)
+        self.assertEqual(self.bagr.name, self.arkid[11:])
+        self.assertEqual(self.bagr.indir,
+                         os.path.join(self.revdir, self.arkid[16:]))
+        self.assertEqual(os.path.basename(self.bagr.bagdir), bagname)
+        self.assertEqual(os.path.basename(self.bagr.bagbldr.bagdir), bagname)
+
+        self.bagr.ensure_metadata_preparation()
+        self.assertEqual(self.bagr.bagbldr.id, self.arkid)
+        self.assertEqual(os.path.basename(self.bagr.bagbldr.bag.dir), bagname)
+
+        nerdm = self.bagr.bagbldr.bag.nerd_metadata_for('')
+        self.assertEqual(nerdm['ediid'], self.arkid)
+        self.assertEqual(nerdm['@id'], self.arkid)
 
 
     def test_find_pod_file(self):

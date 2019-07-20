@@ -15,8 +15,8 @@ import { CartService } from './cart.service';
 import { CartEntity } from './cart.entity';
 import { Observable } from 'rxjs/Observable';
 import { ProgressSpinnerModule, DialogModule } from 'primeng/primeng';
-import * as _ from 'lodash';
-import * as __ from 'underscore';
+// import * as _ from 'lodash';
+// import * as __ from 'underscore';
 import { environment } from '../../environments/environment';
 import { DownloadData } from '../shared/download-service/downloadData';
 
@@ -24,7 +24,7 @@ import { CommonVarService } from '../shared/common-var'
 import { DownloadService } from '../shared/download-service/download-service.service';
 import { ZipData } from '../shared/download-service/zipData';
 import { OverlayPanel } from 'primeng/overlaypanel';
-import { AppConfig, Config } from '../shared/config-service/config.service';
+import { AppConfig } from '../config/config';
 import { BootstrapOptions } from '@angular/core/src/application_ref';
 import { AsyncBooleanResultCallback } from 'async';
 import { FileSaverService } from 'ngx-filesaver';
@@ -116,7 +116,6 @@ export class DatacartComponent implements OnInit, OnDestroy {
   noFileDownloaded: boolean; // will be true if any item in data cart is downloaded
   totalDownloaded: number = 0;
   dataArray: string[] = [];
-  confValues: Config;
   distApi: string;
   currentTask: string = '';
   showCurrentTask: boolean = false;
@@ -145,7 +144,7 @@ export class DatacartComponent implements OnInit, OnDestroy {
   constructor(private http: HttpClient,
     private cartService: CartService,
     private downloadService: DownloadService,
-    private appConfig: AppConfig,
+    private cfg : AppConfig,
     private _FileSaverService: FileSaverService,
     private commonVarService: CommonVarService,
     private commonFunctionService: CommonFunctionService,
@@ -163,7 +162,6 @@ export class DatacartComponent implements OnInit, OnDestroy {
       });
     };
 
-    this.confValues = this.appConfig.getConfig();
     this.cartService.watchForceDatacartReload().subscribe(
       value => {
         if (value) {
@@ -180,7 +178,7 @@ export class DatacartComponent implements OnInit, OnDestroy {
     this.commonVarService.setContentReady(false);
     this.isProcessing = true;
     this.ediid = this.commonVarService.getEdiid();
-    this.distApi = this.confValues.DISTAPI;
+    this.distApi = this.cfg.get("distService", "/od/ds/");
     this.routerparams = this.route.params.subscribe(params => {
       this.mode = params['mode'];
     })
@@ -273,14 +271,14 @@ export class DatacartComponent implements OnInit, OnDestroy {
       this.titleWidth = '60%';
       this.typeWidth = '150px';
       this.sizeWidth = '100px';
-      this.statusWidth = '100px';
+      this.statusWidth = '150px';
       this.fontSize = '14px';
     }
     else {
-      this.titleWidth = '50%';
+      this.titleWidth = '40%';
       this.typeWidth = '20%';
       this.sizeWidth = '20%';
-      this.statusWidth = '10%';
+      this.statusWidth = '20%';
       this.fontSize = '12px';
     }
   }
@@ -430,6 +428,8 @@ export class DatacartComponent implements OnInit, OnDestroy {
     files.data.downloadStatus = 'downloading';
 
     postMessage.push({ "bundleName": files.data.downloadFileName, "includeFiles": this.downloadData });
+    // console.log('Bundle plan post message:');
+    // console.log(JSON.stringify(postMessage[0]));
 
     this.getBundlePlanRef = this.downloadService.getBundlePlan(this.distApi + "_bundle_plan", JSON.stringify(postMessage[0])).subscribe(
       blob => {
@@ -551,7 +551,7 @@ export class DatacartComponent implements OnInit, OnDestroy {
   **/
   resetDownloadParams() {
     this.zipData = [];
-    this.downloadService.setDownloadingNumber(0, "datacart");
+    this.downloadService.setDownloadingNumber(-1, "datacart");
     this.downloadStatus = null;
     this.cancelAllDownload = true;
     this.displayDownloadFiles = false;
@@ -877,6 +877,7 @@ export class DatacartComponent implements OnInit, OnDestroy {
     zip.downloadInstance = null;
     zip.downloadProgress = 0;
     zip.downloadStatus = "cancelled";
+    this.downloadService.decreaseNumberOfDownloading("datacart");
   }
 
   /*
@@ -1020,6 +1021,15 @@ export class DatacartComponent implements OnInit, OnDestroy {
       style = "red";
     }
     return style;
+  }
+
+/*
+* Make sure the width of popup dialog is less than 500px or 80% of the window width
+*/
+  getDialogWidth() {
+    var w = window.innerWidth > 500 ? 500 : window.innerWidth;
+    console.log(w);
+    return w + 'px';
   }
 }
 

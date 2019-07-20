@@ -26,14 +26,18 @@ export class CartService {
   displayCartSub = new BehaviorSubject<boolean>(false);
   cartEntitesReadySub = new BehaviorSubject<boolean>(false);
   forceDatacartReloadSub = new BehaviorSubject<boolean>(false);
-  cartSize: number;
+  cartSize: number = 0;
   showAddCartSpinner: boolean = false;
   showAddAllCartSpinner: boolean = false;
   displayCart: boolean = false;
-  private _storage = localStorage;
+  private _storage = null;
   currentCart: string = 'cart';
 
   constructor(private http: HttpClient) {
+    // localStorage will be undefined on the server
+    if (typeof(localStorage) !== 'undefined') 
+      this._storage = localStorage;
+
     this.initCart();
     this.getAllCartEntities();
     this.setCartLength(this.cartSize);
@@ -55,17 +59,25 @@ export class CartService {
     return this.displayCartSub.asObservable();
   }
 
+  private emptyMap() : { [key: string]: number; } {
+      return {};
+  }
+
   /**
    * Initialize cart
    * **/
   initCart() {
 
-    // if we dont have  any cart history, create a empty cart
-    if (!this._storage.getItem(this.currentCart)) {
+    if (this._storage) {
+      // only while running in the browser (otherwise,
+      // this._storage is null)
+          
+      // if we dont have  any cart history, create a empty cart
+      if (!this._storage.getItem(this.currentCart)) {
 
-      let emptyMap: { [key: string]: number; } = {};
-      this.setCart(emptyMap);
+        this.setCart(this.emptyMap());
 
+      }
     }
   }
 
@@ -249,6 +261,9 @@ export class CartService {
    * Clear the current cart
    **/
   clearTheCart() {
+    // if running on the server, cart is disabled.
+    if (! this._storage) return;
+      
     this._storage.removeItem(this.currentCart);
   }
 
@@ -280,10 +295,12 @@ export class CartService {
    * Will persist the product to local storage
    **/
   deselectAll() {
+    // if running on the server, cart is disabled.
+    if (! this._storage) return Promise.resolve(this.emptyMap());;
+      
     if (!this._storage.getItem(this.currentCart)) {
-      let emptyMap: { [key: string]: number; } = {};
 
-      this.setCart(emptyMap);
+      this.setCart(this.emptyMap());
       let cartMap = this.getCart();
 
       // save the map
@@ -305,13 +322,15 @@ export class CartService {
    * Will persist the product to local storage
    **/
   addDataToCart(data: Data) {
+    // if running on the server, cart is disabled.
+    if (! this._storage) return;
+      
     // product id , quantity
     let cartMap = this.getCart();
     // if we dont have  any cart history, create a empty cart
     if (!this._storage.getItem(this.currentCart)) {
-      let emptyMap: { [key: string]: number; } = {};
 
-      this.setCart(emptyMap);
+      this.setCart(this.emptyMap());
       let cartMap = this.getCart();
       // if not, set default value
       cartMap[data.cartId] = {
@@ -361,6 +380,9 @@ export class CartService {
    * Retrieve the cart from local storage
    **/
   getCart() {
+    if (! this._storage)
+      return this.emptyMap();
+      
     let cartAsString = this._storage.getItem(this.currentCart);
 
     return JSON.parse(cartAsString);
@@ -370,8 +392,11 @@ export class CartService {
    * Persists the cart to local storage
    **/
   private setCart(cartMap): void {
-    this._storage.setItem(this.currentCart, JSON.stringify(cartMap));
-    //this.storageSub.next(true);
+    if (this._storage) {      
+      this._storage.setItem(this.currentCart, JSON.stringify(cartMap));
+      //this.storageSub.next(true);
+    }
+    // otherwise, cart is disabled and input is ignored
   }
 
   /**

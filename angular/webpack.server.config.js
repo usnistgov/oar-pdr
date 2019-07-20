@@ -18,7 +18,7 @@ module.exports = {
  
   module: {
     rules: [
-        { test: /\.(ts|js)$/, loader: 'regexp-replace-loader', options: { match: { pattern: '\\[(Mouse|Keyboard)Event\\]', flags: 'g' }, replaceWith: '[]', } },
+        { test: /\.(ts|js)$/, loader: 'regexp-replace-loader', options: { match: { pattern: '\\[(Mouse|Keyboard)?Event\\]', flags: 'g' }, replaceWith: '[]', } },
         { test: /\.ts$/, loader: 'ts-loader' },
         {
           // Mark files inside `@angular/core` as using SystemJS style dynamic imports.
