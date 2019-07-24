@@ -306,8 +306,8 @@ class Handler(object):
                 "message": str(ex),
                 "history": []
             }
-            self.set_response(409, "Already preserved (need to request update "+
-                                   "via PATCH?)")
+            self.set_response(409, "Not previously preserved (need to issue "+
+                                   "PUT?)")
 
         except Exception as ex:
             log.exception("preservation request failure for sip=%s: %s",
