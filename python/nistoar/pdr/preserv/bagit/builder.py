@@ -89,9 +89,10 @@ class BagBuilder(PreservationSystem):
     :prop merge_convention str ("dev"): the merge convention name to 
                                  use to merge annotation data into the primary
                                  NERDm metadata.
-    :prop validate_id bool (True):  If True, an identifier provided to the 
+    :prop validate_id bool (False):  If True, an identifier provided to the 
                               constructor will be checked for transcription
-                              error.
+                              error (assuming the identifier contains a "check
+                              character")
     :prop copy_on_link_failure bool (True):  If True, then when moving datafiles 
                               to output bag via a hardlink, then the file 
                               will get copied if the linking fails.  
@@ -447,7 +448,7 @@ class BagBuilder(PreservationSystem):
             if not re.match(r"^ark:/\d+/\w", id):
                 raise ValueError("Invalid ARK identifier provided: "+id)
 
-            validate = self.cfg.get('validate_id', True)
+            validate = self.cfg.get('validate_id', False)
             if isinstance(validate, (unicode, str)):
                 # assume that this is a RE of matching shoulders to validate
                 try:
