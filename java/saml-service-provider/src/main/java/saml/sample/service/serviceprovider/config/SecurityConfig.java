@@ -12,6 +12,8 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
 import saml.sample.service.serviceprovider.config.JWTConfig.JWTAuthenticationFilter;
 import saml.sample.service.serviceprovider.config.JWTConfig.JWTAuthenticationProvider;
@@ -68,6 +70,16 @@ public class SecurityConfig {
         }
     }
 
+    @SuppressWarnings("deprecation")
+    @Configuration
+    @Order(3)
+    public class WebMvcConfigurer extends WebMvcConfigurerAdapter {
+	    @Override
+	    public void addCorsMappings(CorsRegistry registry) {
+	        registry.addMapping("/**").allowedOrigins("http://localhost:4200");
+	    }
+	}
+    
     /**
      * Saml security config
      */

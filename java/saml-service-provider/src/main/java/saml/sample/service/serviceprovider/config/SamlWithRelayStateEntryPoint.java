@@ -36,8 +36,8 @@ public class SamlWithRelayStateEntryPoint extends SAMLEntryPoint {
         // relay state param
 
 
-        //ssoProfileOptions.setRelayState("http://localhost:4200");
-        ssoProfileOptions.setRelayState("https://inet.nist.gov/");
+ssoProfileOptions.setRelayState("http://localhost:4200");
+//        ssoProfileOptions.setRelayState("https://inet.nist.gov/");
         return ssoProfileOptions;
     }
 

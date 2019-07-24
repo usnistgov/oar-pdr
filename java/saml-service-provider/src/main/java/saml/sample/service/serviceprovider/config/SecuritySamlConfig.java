@@ -16,6 +16,7 @@ import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.config.MethodInvokingFactoryBean;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
@@ -61,16 +62,26 @@ import org.springframework.security.web.authentication.logout.HttpStatusReturnin
 import org.springframework.security.web.authentication.logout.LogoutHandler;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
+import org.springframework.security.web.session.SessionManagementFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.filter.CorsFilter;
+
+
 
 import saml.sample.service.serviceprovider.service.SamlUserDetailsService;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Timer;
+
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * @author 
@@ -397,8 +408,9 @@ public class SecuritySamlConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
 
-        http
-                .exceptionHandling()
+    
+        http    .addFilterBefore(corsFilter(), SessionManagementFilter.class) 
+        	.exceptionHandling()
                 .authenticationEntryPoint(samlEntryPoint());
         http
                 .csrf()
@@ -417,7 +429,68 @@ public class SecuritySamlConfig extends WebSecurityConfigurerAdapter {
         http
                 .logout()
                 .logoutSuccessUrl("/");
+        
+//        http.cors();
+//        .configurationSource(new CorsConfigurationSource() {
+//
+//            @Override
+//            public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
+//                CorsConfiguration config = new CorsConfiguration();
+//                config.setAllowedHeaders(Collections.singletonList("*"));
+//                config.setAllowedMethods(Collections.singletonList("*"));
+//                config.addAllowedOrigin("http://localhost:4200");
+//                config.setAllowCredentials(true);
+//                return config;
+//            }
+//          });
+
     }
+    
+
+    @Bean
+    CORSFilter corsFilter() {
+	CORSFilter filter = new CORSFilter();
+        return filter;
+    }
+
+//    @Bean
+//    CorsFilter corsFilter() {
+//        CorsFilter filter = new CorsFilter();
+//        return filter;
+//    }
+//    
+//
+//    @Bean
+//    public CorsConfigurationSource corsConfigurationSource() {
+//        final CorsConfiguration configuration = new CorsConfiguration();
+//        configuration.setAllowedOrigins(ImmutableList.of("http://localhost:4200"));
+//        configuration.setAllowedMethods(ImmutableList.of("HEAD",
+//                "GET", "POST", "PUT", "DELETE", "PATCH"));
+//        // setAllowCredentials(true) is important, otherwise:
+//        // The value of the 'Access-Control-Allow-Origin' header in the response must not be the wildcard '*' when the request's credentials mode is 'include'.
+//        configuration.setAllowCredentials(true);
+//        // setAllowedHeaders is important! Without it, OPTIONS preflight request
+//        // will fail with 403 Invalid CORS request
+//        configuration.setAllowedHeaders(ImmutableList.of("Authorization", "Cache-Control", "Content-Type"));
+//        final UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+//        source.registerCorsConfiguration("/**", configuration);
+//        return source;
+//    }
+    
+//    @Bean
+//	public FilterRegistrationBean corsFilter() {
+//		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+//		CorsConfiguration config = new CorsConfiguration();
+//		config.setAllowCredentials(true);
+//		config.addAllowedOrigin("http://localhost:4200");
+//		config.addAllowedHeader("*");
+//		config.addAllowedMethod("*");
+//		source.registerCorsConfiguration("/**", config);
+//		FilterRegistrationBean bean = new FilterRegistrationBean(new CorsFilter(source));
+//		bean.setOrder(0);
+//		return bean;
+//	}
+
 
 //    @Override
 //    public void destroy() throws Exception {
