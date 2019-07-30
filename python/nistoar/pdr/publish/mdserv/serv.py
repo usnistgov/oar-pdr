@@ -278,6 +278,113 @@ class PrePubMetadataService(PublishSystem):
         bagger.fileExaminer.launch(stop_logging=True)
         return self.make_nerdm_record(bagger.bagdir, bagger.datafiles)
 
+    def patch_id(self, id, frag):
+        """
+        update the NERDm metadata for the SIP with a given dataset identifier
+        and return the full, updated record.  
+
+        This implementation will examine each property in the input dictionary
+        (frag) to ensure it is among those configured as updatable and its 
+        value is valid.  Values for properties that are not configured as 
+        updatable will be ignored.  Invalid values for updatable properties 
+        will be cause the whole request to be rejected and an exception is 
+        raised.  
+
+        :param id    str:   the ID for the record being updated.
+        :param frag dict:   a NERDm resource record fragment containing the 
+                              properties to update.  
+        :return dict:   the full, updated NERDm record
+        :raise IDNotFound:  if the dataset with the given ID is not currently 
+                              in an editable state.  
+        :raise InvalidRequest:  if any of the updatable data included in the 
+                              request is invalid.
+        """
+        try:
+
+            bagger = self.open_bagger(self.normalize_id(id));
+
+            # There is a MIDAS submission in progress; create the metadata bag 
+            # and capture any updates from MIDAS
+            bagger = self.prepare_metadata_bag(id, bagger)
+            bagger.fileExaminer.launch(stop_logging=False)
+
+            bagbldr = bagger.bldr
+
+        except SIPDirectoryNotFound as ex:
+
+            if self.cfg.get('update',{}).get('require_midas_sip', True) or \
+               not self.prepsvc:
+                # in principle, users need not edit data via MIDAS in order
+                # to edit via the PDR; this parameter requires it.  
+                raise IDNotFound('Dataset with ID is not currently editable');
+
+            bagname = midasid_to_bagname(id);
+            prepper = self.prepsvc.prepper_for(bagname, log=self.log)
+                                               
+            if not prepper.aip_exists():
+                raise IDNotFound('Dataset with ID not found.');
+
+            bagparent = self.cfg.get('working_dir')
+            if not bagparent or not os.path.is_dir(bagparent):
+                raise ConfigurationException(bagdir +
+                                             ": working dir not found")
+            bagdir = os.path.join(bagparent, bagname)
+            prepper.create_new_update(bagdir);
+
+            bagbldr = BagBuilder(bagparent, bagname,
+                              self.cfg.get('bagger', {}).get("bag_builder",{}));
+
+        # this will raise an InvalidRequest exception if something wrong is
+        # found with the input data
+        updates = self._filter_and_check_updates(frag);
+
+        outmsgs = []
+        msg = "User-generated metadata updates to path='{0}': {1}"
+        for destpath in updates:
+            bagbldr.update_annotations_for(destpath, updates[destpath],
+                    message=msg.format(destpath, str(updates[destpath].keys())))
+
+        return bagbldr.bag.nerm_record(True);
+
+    def _filter_and_check_updates(self, data):
+        # filter out properties that are not updatable; check the values of
+        # the remaining
+
+        updatable = self.cfg.get('update',{}).get('updatable_properties',[])
+
+        def _filter_prop(fromdata, todata, parent=''):
+            for key in fromdata:
+                pkey = parent;
+                if pkey:  pkey += "."
+                pkey += key
+
+                if pkey in updatable:
+                    todata[key] = fromdata[key]
+                elif isinstance(fromdata[key], Mapping):
+                    subdata = OrderedDict()
+                    filter_props(fromdata[key], subdata, pkey)
+                    if subdata:
+                        todata[key] = subdata
+
+        fltrd = OrderedDict()
+        _filter_props(data, fltrd)    # filter out properties you can't edit
+        _validate_update(fltrd)       # may raise InvalidRequest
+
+        # separate file-based components from main metadata; return parts
+        # by destination path.
+        out = OrderedDict()
+        if 'components' in fltrd:
+            for i in range(len(fltrd['components'])):
+                cmp = fltrd['components'][i]
+                if 'filepath' in cmp:
+                    out[cmp['filepath']] = cmp
+                    del fltrd['components'][i]
+            if len(fltrd['components']) <= 0:
+                del fltrd['components']
+        out[''] = fltrd
+        return out
+        
+                                           
     def locate_data_file(self, id, filepath):
         """
         return the location and recommended MIME-type for a data file associated

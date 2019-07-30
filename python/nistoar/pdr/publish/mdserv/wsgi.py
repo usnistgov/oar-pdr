@@ -23,6 +23,7 @@ class PrePubMetadaRequestApp(object):
     def __init__(self, config):
         self.base_path = config.get('base_path', DEF_BASE_PATH)
         self.mdsvc = PrePubMetadataService(config)
+        self.update_authkey = config.get("update_auth_key");
 
         self.filemap = {}
         for loc in ('review_dir', 'upload_dir'):
@@ -31,7 +32,8 @@ class PrePubMetadaRequestApp(object):
                 self.filemap[dir] = "/midasdata/"+loc
 
     def handle_request(self, env, start_resp):
-        handler = Handler(self.mdsvc, self.filemap, env, start_resp)
+        handler = Handler(self.mdsvc, self.filemap, env, start_resp,
+                          update_authkey)
         return handler.handle()
 
     def __call__(self, env, start_resp):
@@ -43,7 +45,7 @@ class Handler(object):
 
     badidre = re.compile(r"[<>\s]")
 
-    def __init__(self, service, filemap, wsgienv, start_resp):
+    def __init__(self, service, filemap, wsgienv, start_resp, auth=None):
         self._svc = service
         self._fmap = filemap
         self._env = wsgienv
@@ -52,6 +54,7 @@ class Handler(object):
         self._hdr = Headers([])
         self._code = 0
         self._msg = "unknown status"
+        self._authkey = auth
 
     def send_error(self, code, message):
         status = "{0} {1}".format(str(code), message)
@@ -186,4 +189,116 @@ class Handler(object):
         self.do_GET(path)
         return []
         
+    def authorize(self):
+        authhdr = self._env.get('HTTP_AUTHORIZATION', "")
+        parts = authhdr.split()
+        if self._authkey:
+            return len(parts) > 1 and parts[0] == "Bearer" and \
+                self._authkey == parts[1]
+        if authhdr:
+            log.warn("Authorization key provided, but none has been configured")
+        return authhdr == ""
 
+    def send_unauthorized(self):
+        self.set_response(401, "Not authorized")
+        self.add_header('WWW-Authenticate', 'Bearer')
+        self.end_headers()
+        return []
+
+    def send_methnotallowed(self):
+        self.set_response(405, meth + " not allowed")
+        self.add_header('WWW-Authenticate', 'Bearer')
+        self.add_header('Allow', 'GET')
+        self.end_headers()
+        return []
+
+    def do_PATCH(self, path):
+        """
+        update the NERDm metadata associated with a given identifier
+        """
+        if not self.authorized_for_update():
+            return self.send_unauthorized()
+
+        if not path:
+            self.code = 403
+            self.send_error(self.code, "No identifier given")
+            return ["Server ready\n"]
+
+        if path.startswith('/'):
+            path = path[1:]
+        parts = path.split('/')
+
+        if parts[0] == "ark:":
+            # support full ark identifiers
+            if len(parts) > 2 and parts[1] == NIST_ARK_NAAN:
+                dsid = parts[2]
+            else:
+                dsid = '/'.join(parts[:3])
+            filepath = "/".join(parts[3:])
+        else:
+            dsid = parts[0]
+            filepath = "/".join(parts[1:])
+            
+        if filepath:
+            self.send_methnotallowed();
+
+        self.update_metadata(self, dsid)
+
+    def update_metadata(self, dsid):
+        """
+        attempt to update the metadata for the identified record from the 
+        uploaded JSON.
+        """
+
+        # make sure we have the proper content-type; if not provided, assume
+        # input is JSON
+        if 'CONTENT_TYPE' in self._env and \
+           self._env['CONTENT_LENGTH'] != "application/json":
+            log.error("Client provided wrong content-type: "+
+                      self._env['CONTENT_LENGTH']);
+            return self.send_error(415, "Unsupported input format");
+            
+        try:
+            clen = int(self._env['CONTENT_LENGTH'])
+        except KeyError, ex:
+            log.exception("Content-Length not provided for input record")
+            return self.send_error(411, "Content-Length is required")
+        except ValueError, ex:
+            log.exception("Failed to parse input JSON record: "+str(e))
+            return self.send_error(400, "Content-Length is not an integer")
+
+        try:
+            bodyin = self._env['wsgi.input']
+            doc = bodyin.read(clen)
+            frag = json.loads(doc)
+        except Exception, ex:
+            log.exception("Failed to parse input JSON record: "+str(ex))
+            log.warn("Input document starts...\n{0}...\n...{1} ({2}/{3} chars)"
+                     .format(doc[:75], doc[-20:], len(doc), clen))
+            return self.send_error(400,
+                                   "Failed to load input record (bad format?): "+
+                                   str(ex))
+
+        try:
+            updated = self._svc.patch_id(dsid, frag)
+        except IDNotFound as ex:
+            self.send_error(404,"Dataset with ID={0} not available".format(dsid))
+            return []
+        except SIPDirectoryNotFound as ex:
+            # shouldn't happen
+            self.send_error(404,"Dataset with ID={0} not available".format(dsid))
+            return []
+        except InvalidRequest as ex:
+            # if input is invalid or includes metadata that cannot be updated
+            self.send_error(400,"Invalid input: "+str(ex));
+            return []
+        except Exception as ex:
+            log.exception("Internal error: "+str(ex))
+            self.send_error(500, "Internal error")
+            return []
+
+        self.set_response(200, "Updates accepted")
+        self.add_header('Content-Type', 'application/json')
+        self.end_headers()
+
+        return [ json.dumps(updated, indent=4, separators=(',', ': ')) ]
