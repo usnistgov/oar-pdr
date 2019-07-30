@@ -4,7 +4,7 @@ Package (SIP) into an Archive Information Package (BagIt bags).  It also
 includes implementations for different known SIPs
 """
 from __future__ import print_function
-import os, sys, re, shutil, logging
+import os, sys, re, shutil, logging, errno
 from abc import ABCMeta, abstractmethod, abstractproperty
 from collections import OrderedDict
 from copy import deepcopy
@@ -479,6 +479,11 @@ class MIDASSIPHandler(SIPHandler):
         errors = []
         try:
             for f in savefiles:
+                destfile = os.path.join(destdir, os.path.basename(f))
+                if os.path.exists(destfile) and \
+                   not self.cfg.get('allow_bag_overwrite', False):
+                    raise OSError(errno.EEXIST, os.strerror(errno.EEXIST),
+                                  destfile)
                 shutil.copy(f, destdir)
         except OSError, ex:
             log.error("Failed to copy preservation file: %s\n" +
