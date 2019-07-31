@@ -39,14 +39,14 @@
     </span>
     <span *ngIf="record['landingPage'] && record['landingPage'].indexOf('/od/id') === -1 ">
       For more information, please visit the
-      <a target="_blank" href="{{ record['landingPage'] }}">home page</a>.
+      <a target="_blank" href="{{ record['landingPage'] }}" (click)="gaService.gaTrackEvent('datasource', $event, 'Resource title: ' + record.title, record['landingPage'])">home page</a>.
     </span>
     <span style="margin-left:0em" *ngIf="isAccessPage">
       <br>Data is available via the following locations:
       <br>
       <span style="padding-left:2.00em" *ngFor="let title of accessTitles; let i =index">
         <i class="faa faa-external-link"> <span style="margin-left:0.3em;"> <a
-              href="{{accessUrls[i]}}">{{title}}</a></span>
+              href="{{accessUrls[i]}}" (click)="gaService.gaTrackEvent('datasource', $event,'Resource title: ' + record.title, accessUrls[i])">{{title}}</a></span>
         </i><br>
       </span>
     </span>
@@ -54,7 +54,7 @@
     <div *ngIf="files.length  > 0">
     <div *ngIf="inBrowser; else filesLoading">
       <div class="flex-container" style="margin-top: 2em;">
-        <div style="flex: 0 0 110px; text-align: left; padding-bottom: 0em;">
+        <div style="display: inline-block; flex: 0 0 110px; text-align: left; padding-bottom: 0em;">
           <span><b>Files </b> </span>
           <a class="faa-stack fa-lg icon-download"
             (click)="downloadAllConfirm('Download All Files', 'This will download all files. Continue?', 'downloadAllConfirm')"
@@ -75,10 +75,10 @@
             <span class="w3-badge badge-notify" style="margin-right:0.5em;">{{cartLength}}</span>
           </span>
         </div>
-        <div style="flex-grow: 9; text-align: left; padding-top: 0.5em;">
+        <div style="display: inline-block; text-align: left; padding-top: 0.5em;">
           <span class="font8" style="color:gray;">Click on the file/row in the table below to view more details.</span>
         </div>
-        <div class="font10" style="flex-grow: 2; text-align: right; color:gray; padding-top: 0.5em;">
+        <div class="font10" style="float: right; text-align: right; color:gray; padding-top: 0.5em;">
           Total No. files: {{ totalFiles }}
         </div>
       </div>
@@ -153,7 +153,7 @@
           <tr [ttSelectableRow]="rowNode">
             <td [ngStyle]="titleStyle()">
               <p-treeTableToggler [rowNode]="rowNode"></p-treeTableToggler>
-              <a (click)="openDetails($event,rowData,op3) " style="color: #1E6BA1;cursor: pointer;"
+              <a (click)="openDetails($event,rowData,op3) " style="color: #1471AE;cursor: pointer;"
                 data-toggle="tooltip" title="Click for more details">
                 {{rowData.name}} </a>
               <span *ngIf="showZipFilesNmaes" style="color:darkgreen; margin-left: 2em;">{{rowData.zipFile}}</span>
@@ -224,7 +224,7 @@
           <span *ngIf="refs['refType'] == 'IsReferencedBy'">
             <br>
             <i class="faa faa-external-link"> </i>
-            <a style="margin-left:0.3em;" href={{refs.location}} target="blank"> {{ refs.location }}</a>
+            <a style="margin-left:0.3em;" href={{refs.location}} target="blank" (click)="gaService.gaTrackEvent('outbound', $event, 'Resource title: '+record.title, refs.location)"> {{ refs.location }}</a>
           </span>
 
         </span>
