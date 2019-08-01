@@ -31,10 +31,11 @@ public class CORSFilter implements Filter {
 //        response.setHeader("Access-Control-Allow-Credentials", "true");
 //        response.setHeader("Access-Control-Max-Age", "180");
         // Access-Control-Allow-Origin
+        
         String origin = request.getHeader("Origin");
         response.setHeader("Access-Control-Allow-Origin", allowedOrigins.contains(origin) ? origin : "");
         response.setHeader("Vary", "Origin");
-
+  
         // Access-Control-Max-Age
         response.setHeader("Access-Control-Max-Age", "3600");
 

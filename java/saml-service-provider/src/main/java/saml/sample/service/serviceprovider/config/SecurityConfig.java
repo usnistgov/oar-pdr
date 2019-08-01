@@ -12,12 +12,13 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
 import saml.sample.service.serviceprovider.config.JWTConfig.JWTAuthenticationFilter;
 import saml.sample.service.serviceprovider.config.JWTConfig.JWTAuthenticationProvider;
-
+import javax.inject.Inject;
 /**
  * @author 
  */
@@ -33,21 +34,26 @@ public class SecurityConfig {
     public static class RestApiSecurityConfig extends WebSecurityConfigurerAdapter {
 
         private static final String apiMatcher = "/api/**";
-
+        @Inject
+        JWTAuthenticationFilter authenticationTokenFilter;
+        
+//        @Inject
+        JWTAuthenticationProvider authenticationProvider = new JWTAuthenticationProvider();
         @Override
         protected void configure(HttpSecurity http) throws Exception {
 
-            http.addFilterBefore(new JWTAuthenticationFilter(apiMatcher, super.authenticationManager()), UsernamePasswordAuthenticationFilter.class);
-
+            //http.addFilterBefore(new JWTAuthenticationFilter(apiMatcher, super.authenticationManager()), UsernamePasswordAuthenticationFilter.class);
+            http.addFilterBefore(authenticationTokenFilter, BasicAuthenticationFilter.class); 
+            http.authenticationProvider(authenticationProvider);
             http.antMatcher(apiMatcher).authorizeRequests()
                     .anyRequest()
                     .authenticated();
         }
 
-        @Override
-        protected void configure(AuthenticationManagerBuilder auth) {
-            auth.authenticationProvider(new JWTAuthenticationProvider());
-        }
+//        @Override
+//        protected void configure(AuthenticationManagerBuilder auth) {
+//            auth.authenticationProvider(new JWTAuthenticationProvider());
+//        }
     }
 
     /**
@@ -70,15 +76,15 @@ public class SecurityConfig {
         }
     }
 
-    @SuppressWarnings("deprecation")
-    @Configuration
-    @Order(3)
-    public class WebMvcConfigurer extends WebMvcConfigurerAdapter {
-	    @Override
-	    public void addCorsMappings(CorsRegistry registry) {
-	        registry.addMapping("/**").allowedOrigins("http://localhost:4200");
-	    }
-	}
+//    @SuppressWarnings("deprecation")
+//    @Configuration
+//    @Order(3)
+//    public class WebMvcConfigurer extends WebMvcConfigurerAdapter {
+//	    @Override
+//	    public void addCorsMappings(CorsRegistry registry) {
+//	        registry.addMapping("/**").allowedOrigins("http://localhost:4200");
+//	    }
+//	}
     
     /**
      * Saml security config

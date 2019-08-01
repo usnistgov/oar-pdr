@@ -431,18 +431,7 @@ public class SecuritySamlConfig extends WebSecurityConfigurerAdapter {
                 .logoutSuccessUrl("/");
         
 //        http.cors();
-//        .configurationSource(new CorsConfigurationSource() {
-//
-//            @Override
-//            public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
-//                CorsConfiguration config = new CorsConfiguration();
-//                config.setAllowedHeaders(Collections.singletonList("*"));
-//                config.setAllowedMethods(Collections.singletonList("*"));
-//                config.addAllowedOrigin("http://localhost:4200");
-//                config.setAllowCredentials(true);
-//                return config;
-//            }
-//          });
+
 
     }
     
@@ -453,43 +442,6 @@ public class SecuritySamlConfig extends WebSecurityConfigurerAdapter {
         return filter;
     }
 
-//    @Bean
-//    CorsFilter corsFilter() {
-//        CorsFilter filter = new CorsFilter();
-//        return filter;
-//    }
-//    
-//
-//    @Bean
-//    public CorsConfigurationSource corsConfigurationSource() {
-//        final CorsConfiguration configuration = new CorsConfiguration();
-//        configuration.setAllowedOrigins(ImmutableList.of("http://localhost:4200"));
-//        configuration.setAllowedMethods(ImmutableList.of("HEAD",
-//                "GET", "POST", "PUT", "DELETE", "PATCH"));
-//        // setAllowCredentials(true) is important, otherwise:
-//        // The value of the 'Access-Control-Allow-Origin' header in the response must not be the wildcard '*' when the request's credentials mode is 'include'.
-//        configuration.setAllowCredentials(true);
-//        // setAllowedHeaders is important! Without it, OPTIONS preflight request
-//        // will fail with 403 Invalid CORS request
-//        configuration.setAllowedHeaders(ImmutableList.of("Authorization", "Cache-Control", "Content-Type"));
-//        final UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-//        source.registerCorsConfiguration("/**", configuration);
-//        return source;
-//    }
-    
-//    @Bean
-//	public FilterRegistrationBean corsFilter() {
-//		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-//		CorsConfiguration config = new CorsConfiguration();
-//		config.setAllowCredentials(true);
-//		config.addAllowedOrigin("http://localhost:4200");
-//		config.addAllowedHeader("*");
-//		config.addAllowedMethod("*");
-//		source.registerCorsConfiguration("/**", config);
-//		FilterRegistrationBean bean = new FilterRegistrationBean(new CorsFilter(source));
-//		bean.setOrder(0);
-//		return bean;
-//	}
 
 
 //    @Override
