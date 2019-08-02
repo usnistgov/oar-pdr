@@ -147,7 +147,7 @@ if [ -z "$dodockbuild" ]; then
             docker_images_built oar-pdr/angtest || dodockbuild=1
         fi
         if wordin shell $cmds; then
-            docker_images_built oar-pdr/java/customization-api || dodockbuild=1
+            docker_images_built oar-pdr/customization-api || dodockbuild=1
         fi
     fi
 fi
@@ -223,17 +223,17 @@ if wordin java $comptypes; then
     
     if wordin build $cmds; then
         # build = makedist
-        echo '+' docker run --rm $volopt $distvol oar-pdr/java/customization-api makedist \
+        echo '+' docker run --rm $volopt $distvol oar-pdr/customization-api makedist \
                         "${args[@]}"  "${jargs[@]}"
-        docker run $ti --rm $volopt $distvol oar-pdr/java/customization-api makedist \
+        docker run $ti --rm $volopt $distvol oar-pdr/customization-api makedist \
                "${args[@]}"  "${jargs[@]}"
     fi
 
     if wordin test $cmds; then
         # test = testall
-        echo '+' docker run --rm $volopt $distvol oar-pdr/java/customization-api testall \
+        echo '+' docker run --rm $volopt $distvol oar-pdr/customization-api testall \
                         "${args[@]}"  "${jargs[@]}"
-        docker run $ti --rm $volopt $distvol oar-pdr/java/customization-api testall \
+        docker run $ti --rm $volopt $distvol oar-pdr/customization-api testall \
                "${args[@]}"  "${jargs[@]}"
     fi
 
@@ -242,9 +242,9 @@ if wordin java $comptypes; then
         if wordin install $cmds; then
             cmd="installshell"
         fi
-        echo '+' docker run -ti --rm $volopt $distvol oar-pdr/java/customization-api $cmd \
+        echo '+' docker run -ti --rm $volopt $distvol oar-pdr/customization-api $cmd \
                         "${args[@]}"  "${jargs[@]}"
-        exec docker run -ti --rm $volopt $distvol oar-pdr/java/customization-api $cmd \
+        exec docker run -ti --rm $volopt $distvol oar-pdr/customization-api $cmd \
                         "${args[@]}"  "${jargs[@]}"
     fi
 fi

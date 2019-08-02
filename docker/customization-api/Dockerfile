@@ -31,7 +31,7 @@ RUN grep -qs ":${devuid}:[[:digit:]]+:" /etc/passwd || \
             --gid $devuid --uid $devuid $devuser
 RUN mkdir /home/$devuser/.m2
 
-VOLUME /app/dev
+VOLUME /dev/oar-pdr
 VOLUME /app/dist
 COPY settings.xml /app/mvn-user-settings.xml
 COPY settings.xml /home/$devuser/.m2/settings.xml
@@ -40,7 +40,7 @@ RUN chown $devuser:$devuser /home/$devuser/.m2/settings.xml && \
 COPY entrypoint.sh /app/entrypoint.sh
 RUN chmod a+rx /app/entrypoint.sh
 
-WORKDIR /app/dev
+WORKDIR /dev/oar-pdr
 USER $devuser
 ENTRYPOINT [ "/app/entrypoint.sh" ]
 

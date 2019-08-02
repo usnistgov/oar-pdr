@@ -51,7 +51,7 @@ if { echo " $BUILD_IMAGES " | grep -qs " angtest "; }; then
     echo '+' docker build $BUILD_OPTS -t $PACKAGE_NAME/angtest angtest
     docker build $BUILD_OPTS -t $PACKAGE_NAME/angtest angtest 2>&1
 fi
-if { echo " $BUILD_IMAGES " | grep -qs " customization "; }; then
-    echo '+' docker build $BUILD_OPTS -t $PACKAGE_NAME/java/customization-api pdr-customization
-    docker build $BUILD_OPTS -t $PACKAGE_NAME/java/customization-api pdr-customization 2>&1
+if { echo " $BUILD_IMAGES " | grep -qs " customization-api "; }; then
+    echo '+' docker build $BUILD_OPTS -t $PACKAGE_NAME/customization-api pdr-customization
+    docker build $BUILD_OPTS -t $PACKAGE_NAME/customization-api pdr-customization 2>&1
 fi
