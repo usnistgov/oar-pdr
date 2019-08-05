@@ -34,7 +34,7 @@ BUILD_DIR=$SOURCE_DIR/dist
 targetdir=$PACKAGE_DIR-api/target
 # Update this list with the names of the individual component names
 # 
-DISTNAMES=pdr-customization
+DISTNAMES=customization-api
 cd $SOURCE_DIR
 # handle command line options
 MAKEDIST=

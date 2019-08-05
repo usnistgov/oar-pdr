@@ -52,10 +52,10 @@ function realpath {
 
 # Update this list with the names of the individual component names
 # 
-DISTNAMES="pdr-publish pdr-lps pdr-customization"
+DISTNAMES="pdr-publish pdr-lps customization-api"
 angular_dists=":pdr-lps:"
 python_dists=":pdr-publish:"
-java_dists=":pdr-customization:"
+java_dists=":customization-api:"
 
 # handle command line options
 while [ "$1" != "" ]; do 

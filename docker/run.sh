@@ -27,7 +27,7 @@ ARGS:
   angular   apply commands to just the angular distributions
   java      apply commands to just the java distributions
 
-DISTNAMES:  pdr-lps, pdr-publish, pdr-customization
+DISTNAMES:  pdr-lps, pdr-publish, customization-api
 
 CMDs:
   build     build the software
@@ -116,7 +116,7 @@ while [ "$1" != "" ]; do
             wordin python $comptypes || comptypes="$comptypes python"
             pyargs=(${pyargs[@]} $1)
             ;;
-        pdr-customization)
+        customization-api)
             wordin java $comptypes || comptypes="$comptypes java"
             jargs=(${jargs[@]} $1)
             ;;
