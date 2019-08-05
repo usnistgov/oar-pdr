@@ -13,6 +13,9 @@ export class CommonVarService {
   private random_minimum: number = 1;
   private random_maximum: number = 100000;
   private isLocalTesting: boolean = false;
+  userId: string;
+  loginURL: string = "https://pn110559.nist.gov/saml-sp/auth/token";
+  public _userid = "userid";
 
   localProcessingSub = new BehaviorSubject<boolean>(false);
   showDatacartSub = new BehaviorSubject<boolean>(false);
@@ -20,6 +23,7 @@ export class CommonVarService {
   openDownloadModalSub = new BehaviorSubject<boolean>(false);
   contentReadySub = new BehaviorSubject<boolean>(false);
   editModeSub = new BehaviorSubject<boolean>(false);
+  useridModeSub = new BehaviorSubject<string>('');
 
   constructor() {
     if (typeof (localStorage) !== 'undefined')
@@ -44,6 +48,14 @@ export class CommonVarService {
 
   getEdiid() {
     return this.ediid;
+  }
+
+  setLoginURL(loginURL: string){
+    this.loginURL = loginURL;
+  }
+
+  getLoginURL() {
+    return this.loginURL;
   }
 
   getRandomMaximum() {
@@ -143,6 +155,13 @@ export class CommonVarService {
   **/
   watchEditMode(): Observable<boolean> {
     return this.editModeSub.asObservable();
+  }
+
+  /**
+  * Watching landing page ready flag
+  **/
+  watchUserId(): Observable<string> {
+    return this.useridModeSub.asObservable();
   }
 
   /*

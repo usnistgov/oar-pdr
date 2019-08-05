@@ -1,4 +1,4 @@
-import { Component, OnInit, ElementRef } from '@angular/core';
+import { Component, OnInit, ElementRef, HostListener } from '@angular/core';
 import { Title, Meta } from '@angular/platform-browser';
 import { ActivatedRoute, Router, NavigationEnd } from '@angular/router';
 import { TreeNode } from 'primeng/primeng';
@@ -20,6 +20,7 @@ import { ModalService } from '../shared/modal-service';
 import { AuthorPopupComponent } from './author-popup/author-popup.component';
 import { NgbModalOptions, NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ContactPopupComponent } from './contact-popup/contact-popup.component';
+import { TitlePopupComponent } from './title-popup/title-popup.component';
 import { CustomizationServiceService } from '../shared/customization-service/customization-service.service';
 
 
@@ -109,7 +110,7 @@ function compare_histories(a, b) {
     ]),
     trigger('changeMode', [
       state('initial', style({
-        height: "0em"
+        height: "3em" // change to 0em for animation. Keep it here in case need it later
       })),
       state('final', style({
         height: "3em"
@@ -210,6 +211,21 @@ export class LandingComponent implements OnInit {
     var newAuthor = this.commonVarService.getBlankAuthor();
     this.tempAuthors['authors'] = newAuthor;
   }
+
+  /*
+  * Check if user is logged in.
+  */
+  loggedIn() {
+    return this.authService.loggedIn();
+  }
+
+  /*
+  * logg in
+  */
+  login() {
+    this.authService.setAuthenticateStatus(true);
+  }
+
 
   /**
    * Get the params OnInit
@@ -798,6 +814,9 @@ export class LandingComponent implements OnInit {
   *  Set record level edit mode (for the edit button at top)
   */
   setRecordEditmode(mode: any) {
+    if (!this.authService.loggedIn()) {
+      this.authService.login();
+    }
     this.recordEditmode = mode;
     this.commonVarService.setEditMode(mode);
     this.setTitleEditbox(mode);
@@ -818,11 +837,40 @@ export class LandingComponent implements OnInit {
   /*
   *  Set edit mode for title
   */
-  editTitle() {
-    // console.log("Editing title...");
-    this.titleObj.originalValue = this.record.title;
-    this.titleObj.detailEditmode = true;
-    this.titleEditable = true;
+  // editTitle() {
+  //   // console.log("Editing title...");
+  //   this.titleObj.originalValue = this.record.title;
+  //   this.titleObj.detailEditmode = true;
+  //   this.titleEditable = true;
+  // }
+
+  openTitleModal(){
+    let ngbModalOptions: NgbModalOptions = {
+      backdrop: 'static',
+      keyboard: false,
+      windowClass: "myCustomModalClass"
+    };
+
+    const modalRef = this.ngbModal.open(TitlePopupComponent, ngbModalOptions);
+    modalRef.componentInstance.inputTitle = this.record.title;
+
+    modalRef.componentInstance.returnTitle.subscribe((newTitle) => {
+      if (newTitle) {
+        this.record.title = newTitle;
+
+        var postMessage: any = {};
+        postMessage["title"] = newTitle;
+        console.log("postMessage", JSON.stringify(postMessage));
+
+        this.customizationServiceService.update(this.updateUrl, JSON.stringify(postMessage)).subscribe(
+          blob => {
+            console.log("blob:", blob);
+          },
+          err => {
+            console.log("Error when updating title:", err);
+          });
+      }
+    })
   }
 
   /*
@@ -837,23 +885,23 @@ export class LandingComponent implements OnInit {
   /*
   *  Save edited title
   */
-  saveEditedTitle() {
-    let postMessage: any[] = [];
+  // saveEditedTitle() {
+  //   let postMessage: any[] = [];
 
-    this.titleObj.originalValue = '';
-    this.titleObj.detailEditmode = false;
-    this.titleMouseout();
-    postMessage.push({ "title": this.record.title });
+  //   this.titleObj.originalValue = '';
+  //   this.titleObj.detailEditmode = false;
+  //   this.titleMouseout();
+  //   postMessage.push({ "title": this.record.title });
 
-    var updateUrl = this.cfg.get("distService", "/rmm/") + "update/" + this.ediid;
-    this.customizationServiceService.update(updateUrl, JSON.stringify(postMessage)).subscribe(
-      blob => {
-        console.log("blob:", blob);
-      },
-      err => {
-        console.log("Error when updating title:", err);
-      });
-  }
+  //   var updateUrl = this.cfg.get("distService", "/rmm/") + "update/" + this.ediid;
+  //   this.customizationServiceService.update(updateUrl, JSON.stringify(postMessage)).subscribe(
+  //     blob => {
+  //       console.log("blob:", blob);
+  //     },
+  //     err => {
+  //       console.log("Error when updating title:", err);
+  //     });
+  // }
 
   /*
   *  Display contact edit box
@@ -958,17 +1006,17 @@ export class LandingComponent implements OnInit {
         for (var author in this.record.authors)
           this.record.authors[author].dataChanged = false;
 
-          var postMessage: any = {};
-          postMessage["authors"] = authors.authors;
-          console.log("postMessage", JSON.stringify(postMessage));
-  
-          this.customizationServiceService.update(this.updateUrl, JSON.stringify(postMessage)).subscribe(
-            blob => {
-              console.log("blob:", blob);
-            },
-            err => {
-              console.log("Error when updating title:", err);
-            });
+        var postMessage: any = {};
+        postMessage["authors"] = authors.authors;
+        console.log("postMessage", JSON.stringify(postMessage));
+
+        this.customizationServiceService.update(this.updateUrl, JSON.stringify(postMessage)).subscribe(
+          blob => {
+            console.log("blob:", blob);
+          },
+          err => {
+            console.log("Error when updating title:", err);
+          });
       }
     })
   }
@@ -993,6 +1041,10 @@ export class LandingComponent implements OnInit {
     } else {
       return true;
     }
+  }
+
+  visitHomePage(url: string){
+    window.open(url, '_blank');
   }
 }
 

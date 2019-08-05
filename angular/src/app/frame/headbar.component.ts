@@ -37,7 +37,7 @@ export class HeadbarComponent {
   isAuthenticated: boolean = false;
   isEditMode: boolean = false;
   ediid: any;
-  cartEntities: CartEntity[] = [] as CartEntity[];  // is this needed here?
+  userId: string = '';
 
   constructor(
     private el: ElementRef,
@@ -57,17 +57,18 @@ export class HeadbarComponent {
       this.cartLength = value;
     });
 
-    this.authService.watchAuthenticateStatus().subscribe(
-      value => {
-        this.isAuthenticated = value;
-      }
-    );
-
     this.commonVarService.watchEditMode().subscribe(
       value => {
         this.isEditMode = value;
       }
     );
+
+    this.commonVarService.watchUserId().subscribe(
+      value => {
+        console.log('User ID:', value);
+        this.userId = value;
+      }
+    )
   }
 
   /*
@@ -75,6 +76,14 @@ export class HeadbarComponent {
   */
   ngOnInit() {
     this.cartLength = this.cartService.getCartSize();
+    this.userId = this.authService.getUserId();
+  }
+
+  /*
+  * Check if user is logged in.
+  */
+  loggedIn() {
+    return this.authService.loggedIn();
   }
 
   /**
@@ -91,21 +100,6 @@ export class HeadbarComponent {
   goHome() {
     this.ediid = this.commonVarService.getEdiid();
     this.router.navigate(['/od/id/', this.ediid], { fragment: '' });
-  }
-
-  /*
-  *   Open login window
-  */
-  login() {
-    this.router.navigate(['/login']);
-  }
-
-  /*
-  *   Logout
-  */
-  logout() {
-    this.authService.setAuthenticateStatus(false);
-    this.goHome();
   }
 
   /*

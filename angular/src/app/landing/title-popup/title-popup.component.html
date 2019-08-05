@@ -1,0 +1,24 @@
+<div style="background-color:#153971;height: 4em; color:white;text-align: center;padding-top: .5em">
+    <h2 style="color: white;">Title</h2>
+  </div>
+  <div style="margin: 1em 2em 2em 2em;">
+    <p>
+      <input type="text" [(ngModel)]="inputTitle" />
+    </p>
+
+    <div style="align-items: right; margin-top: 1em;">
+      <button pButton class="button"
+        style="float:right;margin:0em 1em 2em 1em;width:150px; height:2em; background-color:grey;color:white;padding-right: 1em;"
+        (click)="activeModal.close('Close click')">
+        <i class="faa faa-trash faa-1x icon-white" style="color: #fff;padding-left: .5em;padding-right: .5em;"></i>
+        Cancel
+      </button>
+      <button pButton class="button"
+        style="float:right;margin:0em 1em 2em 1em;width:150px; height:2em; background-color:green;color:white;padding-right: 1em;"
+        (click)="saveTitle();">
+        <i class="faa faa-save faa-1x icon-white" style="color: #fff;padding-left: .5em;padding-right: .5em;"></i>
+        Save
+      </button>
+    </div>
+    <div style="clear:both"></div>
+  </div>

@@ -4,6 +4,7 @@ import { Observable, of, throwError } from 'rxjs';
 import { delay, mergeMap, materialize, dematerialize } from 'rxjs/operators';
 import { TestDataService } from '../shared/testdata-service/testDataService';
 import { DownloadService } from '../shared/download-service/download-service.service';
+import { ApiToken } from "../shared/auth-service/ApiToken";
 
 @Injectable()
 export class FakeBackendInterceptor implements HttpInterceptor {
@@ -34,7 +35,15 @@ export class FakeBackendInterceptor implements HttpInterceptor {
         return of(new HttpResponse({ status: 200, body: sampleData }));
       }
 
-
+      // authenticate
+      if (request.url.endsWith('/saml-sp/auth/token') && request.method === 'GET') {
+        let body: ApiToken = {
+          userId: '1234',
+          token: 'fake-jwt-token'
+        };
+        window.alert('Click ok to login');
+        return of(new HttpResponse({ status: 200, body }));
+      }
       // get bundle
       // if (request.url.endsWith('/od/ds/_bundle') && request.method === 'POST') {
       //     // return new Observable(observer => {

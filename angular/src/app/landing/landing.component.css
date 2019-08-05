@@ -570,8 +570,7 @@
 }
 
 .edit_button {
-  width: 2.5em;
-  height: 2.5em;
+  width: 2em;
   border-radius: 0 4px 4px 0px;
   background-color: rgb(233, 233, 233);
   vertical-align: top;
@@ -613,3 +612,5 @@
 .filter-white{
   filter: invert(1);
 }
+
+

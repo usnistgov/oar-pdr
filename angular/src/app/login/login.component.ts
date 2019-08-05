@@ -14,6 +14,7 @@ export class LoginComponent implements OnInit {
   
   isAuthenticated:boolean = false;
   ediid: any;
+  loginUserData: any = {}
 
   constructor(private authService: AuthService,
               private router: Router,
@@ -30,9 +31,12 @@ export class LoginComponent implements OnInit {
     );
   }
 
-  login(){
-    this.authService.setAuthenticateStatus(true);
-    this.router.navigate(['/od/id/', this.ediid],{fragment:''});
+  // login(){
+  //   this.authService.setAuthenticateStatus(true);
+  //   this.router.navigate(['/od/id/', this.ediid],{fragment:''});
+  // }
+
+  login() {
   }
 
   cancel(){

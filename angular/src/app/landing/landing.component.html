@@ -1,32 +1,17 @@
-<style id="antiClickjack">
-  body {
-    display: none !important;
-  }
-</style>
-<script type="text/javascript">
-  if (self === top) {
-    var antiClickjack = document.getElementById("antiClickjack");
-    if (antiClickjack !== null && antiClickjack !== undefined)
-      antiClickjack.parentNode.removeChild(antiClickjack);
-
-  } else {
-    top.location = self.location;
-  }
-</script>
 <div [@changeMode]=currentMode style="background-color: #153971;color: #FFFFFF;height: 3em;">
-  <button *ngIf="isAuthenticated" type="button" (click)="setRecordEditmode(false)" pButton type="submit"
+  <button type="button" (click)="setRecordEditmode(false)" pButton type="submit"
     style="float:right;margin:.5em 1em .5em 0em;width:150px; height:2em; background-color:grey;color:white;padding-right: 1em;"
     [disabled]="!recordEditmode || titleObj.detailEditmode">
     <i class="faa faa-trash faa-1x icon-white" style="color: #fff;padding-left: .5em;padding-right: .5em;"></i>
     Cancel
   </button>
-  <button *ngIf="isAuthenticated" type="button" (click)="saveRecord()" pButton type="submit"
+  <button type="button" (click)="saveRecord()" pButton type="submit"
     style="float:right;margin:.5em 1em .5em 0em;width:150px; height:2em; background-color:green;color:white;padding-right: 1em;"
     [disabled]="!recordEditmode || titleObj.detailEditmode">
     <i class="faa faa-save faa-1x icon-white" style="color: #fff;padding-left: .5em;padding-right: .5em;"></i>
     Save
   </button>
-  <button *ngIf="isAuthenticated" type="button" (click)="setRecordEditmode(true)" pButton type="submit"
+  <button type="button" (click)="setRecordEditmode(true)" pButton type="submit"
     style="float:right;margin:.5em 1em .5em 1em;width:150px; height:2em; background-color:green;color:white;padding-right: 1em;"
     [disabled]="recordEditmode">
     <i class="faa faa-pencil faa-1x icon-white" style="color: #fff;padding-left: .5em;padding-right: .5em;"></i>
@@ -57,8 +42,7 @@
                 <b *ngSwitchCase="'nrdp:PublicDataResource'">Public Data Resource</b>
                 <b *ngSwitchDefault></b>
               </span>
-              <div *ngIf="record.length !== 0 && inBrowser"
-                   class="ui-sm-1 d-none d-sm-block d-md-none ">
+              <div *ngIf="record.length !== 0 && inBrowser" class="ui-sm-1 d-none d-sm-block d-md-none ">
                 <button style="float: right" type="button" pButton icon="faa faa-list"
                   class="ui-button ui-button-icon-only" (click)="menu3.toggle($event)"></button>
                 <p-menu #menu3 class="rightMenuStylePop" popup="popup" [model]="rightmenu"></p-menu>
@@ -70,42 +54,26 @@
                 </span>
               </div>
               <div *ngIf="recordEditmode">
-                <div style="text-align: left; vertical-align: top;">
-                  <span class="title" style="display: inline-block;vertical-align: top;max-width:calc(100% - 5.5em);">
-                    <h2 [@changeBorderColor]=titleObj.currentState *ngIf="!titleObj.detailEditmode"
-                      style="display: inline-block;padding-right: .5em;" contenteditable="false" (click)="editTitle()">
+                <div style="display: table-row;text-align: left; vertical-align: top;border: 1px solid red;">
+                  <div class="title" style="display: table-cell;vertical-align: top;max-width:calc(100% - 5.5em);">
+                    <h2 [@changeBorderColor]=titleObj.currentState style="padding-right: .5em;">
                       {{record.title}}</h2>
-                    <h2 *ngIf="titleObj.detailEditmode" style="display: inline-block;"
-                      [style.border]="titleObj.borderStyle" #topicTitle contenteditable="true"
-                      [textContent]="record.title" (input)="record.title=topicTitle.innerText" (click)="editTitle()">
-                    </h2>
-                  </span>
-                  <span style="display: inline-block;vertical-align: top;">
-                    <button class="edit_button" [@changeOpacity]=titleObj.currentState *ngIf="!titleObj.detailEditmode"
-                      [style.opacity]="titleObj.buttonOpacity" type="button" (click)="editTitle()">
-                      <i class="faa faa-pencil" style="cursor: pointer;color:grey; margin-top: 0em;"
+                  </div>
+                  <div class="edit_button" *ngIf="!titleObj.detailEditmode" (click)="openTitleModal()">
+                    <button *ngIf="!titleObj.detailEditmode" [style.opacity]="titleObj.buttonOpacity" type="button"
+                      (click)="openTitleModal()"
+                      style="height: 2.1em; border: 0px solid red;background-color: transparent;">
+                      <i class="faa faa-pencil"
+                        style="cursor: pointer;color:grey; padding-top: 4px; padding-left: 2px; font-size: 1em;"
                         data-toggle="tooltip" title="Edit title"></i>
                     </button>
-                    <div *ngIf="titleObj.detailEditmode" class="two_button_container">
-                      <button [style.opacity]="titleObj.buttonOpacity" type="button" (click)="saveEditedTitle()"
-                        class="two_buttons">
-                        <i class="faa faa-check" style="cursor: pointer;color:grey; margin-top: 0em;"
-                          data-toggle="tooltip" title="Save edited title"></i>
-                      </button>
-                      <button [style.opacity]="titleObj.buttonOpacity" type="button" (click)="cancelEditedTitle()"
-                        class="two_buttons">
-                        <i class="faa faa-close" style="cursor: pointer;color:grey; margin-top: 0em;"
-                          data-toggle="tooltip" title="Cancel edited title"></i>
-                      </button>
-                    </div>
-                  </span>
+                  </div>
                 </div>
               </div>
               <div *ngIf="!record.authors; else hasAuthors">
                 <div [@changeBorderColor]=authorObj.currentState *ngIf="recordEditmode"
                   style="text-align: left; vertical-align: top;display: inline-block;padding-right: .5em;">
                   Authors:
-                  <HR>
                 </div>
                 <button [@changeOpacity]=authorObj.currentState *ngIf="recordEditmode && !authorObj.detailEditmode"
                   [style.opacity]="authorObj.buttonOpacity" type="button" (click)="openAuthorModal()"
@@ -158,8 +126,8 @@
                   Contact:
                 </div>
                 <button [@changeOpacity]=contactObj.currentState *ngIf="recordEditmode && !contactObj.detailEditmode"
-                  [style.opacity]="contactObj.buttonOpacity" type="button"
-                  (click)="openContactModal()" class="edit_button2">
+                  [style.opacity]="contactObj.buttonOpacity" type="button" (click)="openContactModal()"
+                  class="edit_button2">
                   <i class="faa faa-pencil" style="cursor: pointer;color:grey; margin-top: 0em;" data-toggle="tooltip"
                     title="Edit contact"></i>
                 </button>
@@ -194,8 +162,8 @@
                     </div>
                   </div>
                   <button [@changeOpacity]=contactObj.currentState *ngIf="recordEditmode && !contactObj.detailEditmode"
-                    [style.opacity]="contactObj.buttonOpacity" type="button"
-                    (click)="openContactModal()" class="edit_button2">
+                    [style.opacity]="contactObj.buttonOpacity" type="button" (click)="openContactModal()"
+                    class="edit_button2">
                     <i class="faa faa-pencil" style="cursor: pointer;color:grey; margin-top: 0em;" data-toggle="tooltip"
                       title="Edit contact"></i>
                   </button>
@@ -250,12 +218,11 @@
 
             <div class="ui-g-4 ui-md-4 ui-lg-4 ui-sm-12">
               <span *ngIf="HomePageLink">
-                <a [(href)]="record.landingPage" target="_blank" style="float: right;">
                   <span *ngIf="inBrowser; else visitHomeOnServer">
-                    <button pButton type="button" class="homePageLink" icon="faa faa-external-link" label="Visit Home Page"></button>
+                    <button pButton class="homePageLink" icon="faa faa-external-link"
+                      label="Visit Home Page" style="padding: 0 1em 0 2em;height: 2.5em;" (click)="visitHomePage(record.landingPage)"></button>
                   </span>
                   <ng-template #visitHomeOnServer>Visit Home Page</ng-template>
-                </a>
               </span>
             </div>
           </div>
@@ -264,7 +231,8 @@
               <description-resources [record]="record" [files]="files" [distdownload]="distdownload"
                 [isInternal]="isInternal" [filescount]="filescount" [metadata]="metadata" [inBrowser]="inBrowser"
                 [recordEditmode]="recordEditmode"></description-resources>
-              <metadata-detail [record]="record" [serviceApi]="serviceApi" [inBrowser]="inBrowser" [metadata]="metadata"></metadata-detail>
+              <metadata-detail [record]="record" [serviceApi]="serviceApi" [inBrowser]="inBrowser"
+                [metadata]="metadata"></metadata-detail>
 
               <!-- <data-cart></data-cart>   -->
             </div>
