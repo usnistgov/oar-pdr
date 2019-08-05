@@ -22,7 +22,7 @@ PACKAGE_NAME=oar-pdr
 ## containers to be built.  List them in dependency order (where a latter one
 ## depends the former ones).  
 #
-DOCKER_IMAGE_DIRS="pymongo jq ejsonschema pdrtest pdrangular angtest customization"
+DOCKER_IMAGE_DIRS="pymongo jq ejsonschema pdrtest pdrangular angtest customization-api"
 
 . $codedir/oar-build/_dockbuild.sh
 
@@ -52,6 +52,6 @@ if { echo " $BUILD_IMAGES " | grep -qs " angtest "; }; then
     docker build $BUILD_OPTS -t $PACKAGE_NAME/angtest angtest 2>&1
 fi
 if { echo " $BUILD_IMAGES " | grep -qs " customization-api "; }; then
-    echo '+' docker build $BUILD_OPTS -t $PACKAGE_NAME/customization-api pdr-customization
-    docker build $BUILD_OPTS -t $PACKAGE_NAME/customization-api pdr-customization 2>&1
+    echo '+' docker build $BUILD_OPTS -t $PACKAGE_NAME/customization-api customization-api
+    docker build $BUILD_OPTS -t $PACKAGE_NAME/customization-api customization-api 2>&1
 fi
