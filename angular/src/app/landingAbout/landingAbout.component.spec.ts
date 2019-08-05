@@ -3,6 +3,7 @@ import { RouterTestingModule } from '@angular/router/testing';
 import { DebugElement } from '@angular/core';
 import { By } from '@angular/platform-browser';
 import { LandingAboutComponent } from './landingAbout.component';
+import { CommonVarService } from '../shared/common-var'
 
 
   describe('LandingAboutComponent', () => {
@@ -13,8 +14,9 @@ import { LandingAboutComponent } from './landingAbout.component';
 
     beforeEach(async(() => {
       TestBed.configureTestingModule({
-        declarations: [LandingAboutComponent]
-        , imports:[ RouterTestingModule ]
+          declarations: [LandingAboutComponent],
+          imports: [ RouterTestingModule ],
+          providers: [ CommonVarService ]
       })
         .compileComponents();
     }));

@@ -37,6 +37,9 @@ CMDs:
 
 OPTIONS
   -d        build the required docker containers first
+  -t TESTCL include the TESTCL class of tests when testing; as some classes
+            of tests are skipped by default, this parameter provides a means 
+            of turning them on.
 EOF
 }
 
@@ -63,9 +66,11 @@ dodockbuild=
 cmds=
 comptypes=
 args=()
+dargs=()
 pyargs=()
 angargs=()
 jargs=()
+testcl=()
 while [ "$1" != "" ]; do
     case "$1" in
         -d|--docker-build)
@@ -85,6 +90,13 @@ while [ "$1" != "" ]; do
             distdir=`(cd $distdir > /dev/null 2>&1; pwd)`
             distvol="-v ${distdir}:/app/dist"
             args=(${args[@]} "--dist-dir=/app/dist")
+            ;;
+        -t|--incl-tests)
+            shift
+            testcl=(${testcl[@]} $1)
+            ;;
+        --incl-tests=*)
+            testcl=(${testcl[@]} `echo $1 | sed -e 's/[^=]*=//'`)
             ;;
         -h|--help)
             usage
@@ -119,10 +131,16 @@ while [ "$1" != "" ]; do
     shift
 done
 
+[ -z "$distvol" ] || dargs=(${dargs[@]} "$distvol")
+[ -z "${testcl[@]}" ] || {
+    dargs=(${dargs[@]} --env OAR_TEST_INCLUDE=\"${testcl[@]}\")
+}
+
 comptypes=`echo $comptypes`
 cmds=`echo $cmds`
 [ -n "$comptypes" ] || comptypes="python angular"
 [ -n "$cmds" ] || cmds="build"
+echo "run.sh: Running docker commands [$cmds] on [$comptypes]"
 
 testopts="--cap-add SYS_ADMIN"
 volopt="-v ${codedir}:/dev/oar-pdr"
@@ -168,19 +186,19 @@ if wordin angular $comptypes; then
 
     if [ "$docmds" == "build" ]; then
         # build only
-        echo '+' docker run --rm $volopt $distvol oar-pdr/pdrangular build \
+        echo '+' docker run --rm $volopt "${dargs[@]}" oar-pdr/pdrangular build \
                        "${args[@]}" "${angargs[@]}"
-        docker run --rm $volopt $distvol oar-pdr/pdrangular build \
+        docker run --rm $volopt "${dargs[@]}" oar-pdr/pdrangular build \
                        "${args[@]}" "${angargs[@]}"
     elif [ -n "$docmds" ]; then
-        echo '+' docker run --rm $volopt $distvol oar-pdr/angtest $docmds \
-                       "${args[@]}" "${angargs[@]}"
+        echo '+' docker run --rm $volopt "${dargs[@]}" --cap-add=SYS_ADMIN \
+                        oar-pdr/angtest $docmds "${args[@]}" "${angargs[@]}"
         if wordin shell $docmds; then
-            exec docker run -ti --rm $volopt $distvol oar-pdr/angtest $docmds\
-                       "${args[@]}" "${angargs[@]}"
+            exec docker run -ti --rm $volopt "${dargs[@]}" --cap-add=SYS_ADMIN \
+                        oar-pdr/angtest $docmds "${args[@]}" "${angargs[@]}"
         else
-            docker run --rm $volopt $distvol oar-pdr/angtest $docmds \
-                   "${args[@]}" "${angargs[@]}"
+            docker run --rm $volopt "${dargs[@]}" --cap-add=SYS_ADMIN \
+                   oar-pdr/angtest $docmds "${args[@]}" "${angargs[@]}"
         fi
     fi
 fi
@@ -191,17 +209,17 @@ if wordin python $comptypes; then
     
     if wordin build $cmds; then
         # build = makedist
-        echo '+' docker run --rm $volopt $distvol oar-pdr/pdrtest makedist \
+        echo '+' docker run --rm $volopt "${dargs[@]}" oar-pdr/pdrtest makedist \
                         "${args[@]}"  "${pyargs[@]}"
-        docker run $ti --rm $volopt $distvol oar-pdr/pdrtest makedist \
+        docker run $ti --rm $volopt "${dargs[@]}" oar-pdr/pdrtest makedist \
                "${args[@]}"  "${pyargs[@]}"
     fi
 
     if wordin test $cmds; then
         # test = testall
-        echo '+' docker run --rm $volopt $distvol oar-pdr/pdrtest testall \
+        echo '+' docker run --rm $volopt "${dargs[@]}" oar-pdr/pdrtest testall \
                         "${args[@]}"  "${pyargs[@]}"
-        docker run $ti --rm $volopt $distvol oar-pdr/pdrtest testall \
+        docker run $ti --rm $volopt "${dargs[@]}" oar-pdr/pdrtest testall \
                "${args[@]}"  "${pyargs[@]}"
     fi
 
@@ -210,9 +228,9 @@ if wordin python $comptypes; then
         if wordin install $cmds; then
             cmd="installshell"
         fi
-        echo '+' docker run -ti --rm $volopt $distvol oar-pdr/pdrtest $cmd \
+        echo '+' docker run -ti --rm $volopt "${dargs[@]}" oar-pdr/pdrtest $cmd \
                         "${args[@]}"  "${pyargs[@]}"
-        exec docker run -ti --rm $volopt $distvol oar-pdr/pdrtest $cmd \
+        exec docker run -ti --rm $volopt "${dargs[@]}" oar-pdr/pdrtest $cmd \
                         "${args[@]}"  "${pyargs[@]}"
     fi
 fi

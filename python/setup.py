@@ -96,8 +96,8 @@ setup(name='nistoar',
                 'nistoar.pdr.publish.mdserv',
                 'nistoar.pdr.preserv', 'nistoar.pdr.preserv.bagger',
                 'nistoar.pdr.preserv.bagit', 'nistoar.pdr.preserv.service',
-                'nistoar.pdr.preserv.bagit.validate', 'nistoar.pdr.notify', 
-                'nistoar.testing'
+                'nistoar.pdr.preserv.bagit.validate', 'nistoar.pdr.notify',
+                'nistoar.pdr.preserv.bagit.tools', 'nistoar.testing'
             ],
       package_data={'nistoar.pdr': [ 'data/*' ]},
       cmdclass={'build': build}

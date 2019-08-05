@@ -207,6 +207,10 @@ class TestSIPStatus(test.TestCase):
         self.assertEqual(self.status.data, data)
         self.assertEquals(self.status._cachefile, "/tmp/sipstatus/ffff.json")
 
+    def test_arkid(self):
+        self.status = status.SIPStatus("ark:/88888/pdr0-1518")
+        self.assertEqual(self.status._cachefile, "/tmp/sipstatus/pdr0-1518.json")
+
     def test_str(self):
         self.status.update(status.PENDING, "starting soon")
         self.assertEqual(str(self.status), "ffff status: pending: starting soon")

@@ -8,5 +8,5 @@ create bags (via the BagBuilder class).  For example, the MIDASBagger
 understands how to bag up data provided by MIDAS.  
 """
 
-from midas import MIDASMetadataBagger
+from midas import MIDASMetadataBagger, midasid_to_bagname
 from prepupd import UpdatePrepService

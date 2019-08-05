@@ -156,8 +156,8 @@ class Handler(object):
             return [out]
 
         elif steps[0] == 'midas':
-            if len(steps) > 2:
-                path = '/'.join(steps[1:])
+            path = '/'.join(steps[1:])
+            if (len(steps) > 2 and steps[1] != "ark:") or len(steps) > 4:
                 self.send_error(400, "Unsupported SIP identifier: "+path)
                 return []
             elif len(steps) > 1:
@@ -167,7 +167,7 @@ class Handler(object):
                     self.send_error(400, "Unsupported SIP identifier: "+path)
                     return []
                 
-                return self.request_status(steps[1])
+                return self.request_status(path)
                 
             else:
                 return self.requests()
@@ -238,11 +238,17 @@ class Handler(object):
             return ['{}']
             
         elif steps[0] == 'midas':
-            if len(steps) > 2:
-                path = '/'.join(steps[1:])
+            path = '/'.join(steps[1:])
+            if (len(steps) > 2 and steps[1] != "ark:") or len(steps) > 4:
                 self.send_error(400, "Not a legal SIP ID: "+path)
             elif len(steps) > 1:
-                return self.update_sip(steps[1])
+                if steps[1].startswith("_") or steps[1].startswith(".") or \
+                   self.badidre.search(steps[1]):
+                    
+                    self.send_error(400, "Unsupported SIP identifier: "+path)
+                    return []
+                
+                return self.update_sip(path)
             else:
                 self.send_error(403, "PATCH not supported on this resource")
         else:
@@ -300,8 +306,8 @@ class Handler(object):
                 "message": str(ex),
                 "history": []
             }
-            self.set_response(409, "Already preserved (need to request update "+
-                                   "via PATCH?)")
+            self.set_response(409, "Not previously preserved (need to issue "+
+                                   "PUT?)")
 
         except Exception as ex:
             log.exception("preservation request failure for sip=%s: %s",
@@ -323,11 +329,17 @@ class Handler(object):
             return ['{}']
             
         elif steps[0] == 'midas':
-            if len(steps) > 2:
-                path = '/'.join(steps[1:])
+            path = '/'.join(steps[1:])
+            if (len(steps) > 2 and steps[1] != "ark:") or len(steps) > 4:
                 self.send_error(400, "Not a legal SIP ID: "+path)
             elif len(steps) > 1:
-                return self.preserve_sip(steps[1])
+                if steps[1].startswith("_") or steps[1].startswith(".") or \
+                   self.badidre.search(steps[1]):
+                    
+                    self.send_error(400, "Unsupported SIP identifier: "+path)
+                    return []
+                
+                return self.preserve_sip(path)
             else:
                 self.send_error(403, "PUT not supported on this resource")
         else:

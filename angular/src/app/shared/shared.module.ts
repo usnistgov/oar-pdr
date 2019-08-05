@@ -3,8 +3,6 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { SearchService } from './search-service/index';
-import { FootbarComponent } from './footbar/index';
-import { HeadbarComponent } from './headbar/index';
 
 /**
  * Do not specify providers for modules that might be imported by a lazy loaded module.
@@ -12,9 +10,7 @@ import { HeadbarComponent } from './headbar/index';
 
 @NgModule({
   imports: [CommonModule, RouterModule],
-  declarations: [ HeadbarComponent, FootbarComponent],
-  exports: [ HeadbarComponent, FootbarComponent, 
-    CommonModule, FormsModule, RouterModule]
+  exports: [ CommonModule, FormsModule, RouterModule]
 })
 export class SharedModule {
   static forRoot(): ModuleWithProviders {

@@ -1,7 +1,10 @@
 import { Component } from '@angular/core';
 
 /**
- * This class represents the footbar component.
+ * A Component that serves as the footer of the landing page.  
+ * 
+ * Features include:
+ * * Set as black bar at the bottom of the page
  */
 @Component({
   moduleId: module.id,
@@ -9,5 +12,4 @@ import { Component } from '@angular/core';
   templateUrl: 'footbar.component.html',
   styleUrls: ['footbar.component.css']
 })
-
-export class FootbarComponent {}
+export class FootbarComponent { }

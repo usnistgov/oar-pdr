@@ -1,5 +1,5 @@
 #footer {
-    background: #333333;
+    background: #000000;
     /*background-color: white;*/
     color: white;
     position: relative;
@@ -280,20 +280,14 @@ ul, menu, dir {
 .social-btn i.faa-facebook:hover{
   background:#3a5897;
 }
-.social-btn i.faa-linkedin:hover{
-  background:#04669A;
-}
-.social-btn i.faa-instagram:hover{
-  background:rgb(182, 1, 253);
+.social-btn i.faa-google-plus:hover{
+  background:#d2412f;
 }
 .social-btn i.faa-twitter:hover{
   background:#49c9f2;
 }
 .social-btn i.faa-youtube:hover{
   background:#e52d27;
-}
-.social-btn i.faa-rss:hover{
-  background:#fd8f00;
 }
 
 .social-btn {

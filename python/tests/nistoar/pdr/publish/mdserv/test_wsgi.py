@@ -62,6 +62,30 @@ class TestApp(test.TestCase):
         self.assertIn("404", self.resp[0])
         self.assertIn('asdifuiad', self.resp[0])
 
+    def test_ark_id(self):
+        req = {
+            'PATH_INFO': '/ark:/88434/mds4-29sd17',
+            'REQUEST_METHOD': 'GET'
+        }
+        body = self.svc(req, self.start)
+
+        self.assertGreater(len(self.resp), 0)
+        self.assertIn("404", self.resp[0])
+        self.assertIn('mds4-29sd17', self.resp[0])
+        self.assertNotIn('ark:/88434/mds4-29sd17', self.resp[0])
+
+    def test_foreign_ark_id(self):
+        req = {
+            'PATH_INFO': '/ark:/88888/mds4-29sd17',
+            'REQUEST_METHOD': 'GET'
+        }
+        body = self.svc(req, self.start)
+
+        self.assertGreater(len(self.resp), 0)
+        self.assertIn("404", self.resp[0])
+        self.assertIn('mds4-29sd17', self.resp[0])
+        self.assertIn('ark:/88888/mds4-29sd17', self.resp[0])
+
     def test_head_bad_id(self):
         req = {
             'PATH_INFO': '/asdifuiad',

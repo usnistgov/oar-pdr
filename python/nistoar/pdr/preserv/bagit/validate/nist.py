@@ -31,8 +31,8 @@ class NISTBagValidator(ValidatorBase):
     parts (excluding Multibag and basic BagIt compliance; see 
     NISTAIPValidator)
     """
-    namere02 = re.compile("^(\w+).mbag(\d+)_(\d+)-(\d+)$")
-    namere04 = re.compile("^(\w+).(\d+(_\d+)*).mbag(\d+)_(\d+)-(\d+)$")
+    namere02 = re.compile("^(\w[\w\-]*).mbag(\d+)_(\d+)-(\d+)$")
+    namere04 = re.compile("^(\w[\w\-]*).(\d+(_\d+)*).mbag(\d+)_(\d+)-(\d+)$")
     
     def __init__(self, config=None, profver="0.4"):
         super(NISTBagValidator, self).__init__(config)
