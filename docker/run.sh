@@ -105,7 +105,7 @@ while [ "$1" != "" ]; do
         -*)
             args=(${args[@]} $1)
             ;;
-        python|angular)
+        python|angular|java)
             comptypes="$comptypes $1"
             ;;
         pdr-lps)
