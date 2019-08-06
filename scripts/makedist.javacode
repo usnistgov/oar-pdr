@@ -31,7 +31,7 @@ PACKAGE_DIR=`dirname $execdir`
 DIST_DIR=$PACKAGE_DIR/dist
 SOURCE_DIR=$PACKAGE_DIR/java/customization-api
 BUILD_DIR=$SOURCE_DIR/dist
-targetdir=$PACKAGE_DIR-api/target
+targetdir=$PACKAGE_DIR/java/customization-api/target
 # Update this list with the names of the individual component names
 # 
 DISTNAMES=customization-api
