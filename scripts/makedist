@@ -156,6 +156,6 @@ args=
 [ -z "$build_java" ] || {
     sargs=
     [ -z "$SOURCE_DIR" ] || sargs="--source-dir=$SOURCE_DIR/java/customization-api"
-    echo '+' makedist.javacode $sargs $args $build_py
-    $execdir/makedist.javacode $sargs $args $build_py
+    echo '+' makedist.javacode $sargs $args $build_java
+    $execdir/makedist.javacode $sargs $args $build_java
 }
