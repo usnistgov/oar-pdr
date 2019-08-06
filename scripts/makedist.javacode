@@ -83,11 +83,15 @@ java_major_version=`echo $java_version | perl -pe 's/^[0-9]+\.// ; s/[\.\-\_].*/
 # needed.
 #
 $PACKAGE_DIR/scripts/setversion.sh 
+
+
 # [ -n "$PACKAGE_NAME" ] 
 export PACKAGE_NAME=`cat $PACKAGE_DIR/VERSION | awk '{print $1}'`
 version=`cat $PACKAGE_DIR/VERSION | awk '{print $2}'`
-vers4fn=`echo $version | perl -pe 's#[/\s]+#_#g'`
+vers4fn=`echo $version | perl -pe 's#\s$##;s#[/\s]+#_#g'`
 
+echo "---- Test version here 3 ----"
+echo "${vers4fn}"
 # ENTER BUILD COMMANDS HERE
 #
 # The build products should be written into the "dist" directory
