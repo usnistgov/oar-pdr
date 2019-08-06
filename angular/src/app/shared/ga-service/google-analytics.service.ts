@@ -5,8 +5,9 @@
 // So we don't need to fire gas() function here.
 
 import { Injectable } from '@angular/core';
-import {Router, NavigationEnd} from '@angular/router';
-declare var gas:Function; 
+import { Router, NavigationEnd } from '@angular/router';
+declare var gas: Function;
+declare var _initAutoTracker: Function;
 
 @Injectable()
 export class GoogleAnalyticsService {
@@ -21,4 +22,38 @@ export class GoogleAnalyticsService {
   //   })
   // }
 
+  // Tracking pageview
+  gaTrackPageview(url: string, title: string) {
+    setTimeout(() => {
+      gas('send', 'pageview', url, title);
+    }, 1000);
+  }
+
+  // Tracking events
+  gaTrackEvent(category: string, event?:any, label?: string, action?: string) {
+    if(action == undefined){
+      // menu item
+      if(event.item != undefined){
+        action = event.item.url;
+        label = event.item.label;
+      }else if(event.path != undefined){
+        for(var i = 0; i < event.path.length; i++){
+          if(event.path[i].href != undefined){
+            action = event.path[i].href;
+            label = event.path[i].innerText;
+            if(label == '' || label == undefined)
+              label = event.path[i].hostname;
+            break;
+          }
+        }
+      }else
+        action = 'URL not catched';
+    }
+    action = (action == undefined)?"":action;
+    label = (label == undefined)?"":label;
+
+    setTimeout(() => {
+      gas('send', 'event', category, action, label, 1);
+    }, 1000);
+  }
 }

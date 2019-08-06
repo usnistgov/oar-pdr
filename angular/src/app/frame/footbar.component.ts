@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { GoogleAnalyticsService } from '../shared/ga-service/google-analytics.service';
 
 /**
  * A Component that serves as the footer of the landing page.  
@@ -12,4 +13,7 @@ import { Component } from '@angular/core';
   templateUrl: 'footbar.component.html',
   styleUrls: ['footbar.component.css']
 })
-export class FootbarComponent { }
+export class FootbarComponent { 
+  constructor(public gaService: GoogleAnalyticsService){}
+
+}

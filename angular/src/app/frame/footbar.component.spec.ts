@@ -1,6 +1,8 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { FootbarComponent } from './footbar.component';
+import { GoogleAnalyticsService } from '../shared/ga-service/google-analytics.service';
+
 
 describe('FootbarComponent', () => {
     let component : FootbarComponent;
@@ -8,7 +10,8 @@ describe('FootbarComponent', () => {
 
     it('should contain expected content', () => {
         TestBed.configureTestingModule({
-            declarations: [ FootbarComponent ]
+            declarations: [ FootbarComponent ],
+            providers: [GoogleAnalyticsService]
         }).compileComponents();
 
         fixture = TestBed.createComponent(FootbarComponent);
