@@ -12,6 +12,7 @@ The implementations use the BagBuilder class to populate the output bag.
 import os, errno, logging, re, json, shutil, threading, time
 from abc import ABCMeta, abstractmethod, abstractproperty
 from collections import OrderedDict
+from copy import deepcopy
 
 from .base import SIPBagger, moddate_of, checksum_of, read_pod
 from .base import sys as _sys
@@ -25,6 +26,7 @@ from .. import (SIPDirectoryError, SIPDirectoryNotFound, AIPValidationError,
                 ConfigurationException, StateException, PODError,
                 PreservationStateException)
 from .prepupd import UpdatePrepService
+from .datachecker import DataChecker
 from nistoar.nerdm.merge import MergerFactory
 
 # _sys = PreservationSystem()
@@ -1084,6 +1086,9 @@ class PreservationBagger(SIPBagger):
         if finalcfg.get('validate', True):
             # this will raise an exception if any issues are found
             self._validate(finalcfg.get('validator', {}))
+        if finalcfg.get('check_data_files', True):
+            # this will raise an exception if any issues are found
+            self._check_data_files(finalcfg.get('data_checker', {}))
 
         return self.bagbldr.bagdir
 
@@ -1241,3 +1246,37 @@ class PreservationBagger(SIPBagger):
         else:
             log.info("%s: bag validation completed without issues",
                      self.bagbldr.bagname)
+
+    def _check_data_files(self, data_checker_config, viadistrib=True):
+        """
+        make sure all of the data files are accounted for.  The bag must 
+        either contain all of the data files listed in the nerdm components
+        or they must be available else where in the publishing pipeline:
+        the output storage dir (possibly still avaiting migration to the 
+        repository) or already published in the repository.
+        """
+        config = {
+            "repo_access": self.cfg.get('repo_access', {}),
+            "store_dir":  self.cfg.get('store_dir')
+        }
+        config.update( deepcopy(data_checker_config) )
+
+        chkr = DataChecker(self.bagbldr.bag, config,log.getChild("data_checker"))
+
+        missing = chkr.unindexed_files(viadistrib=viadistrib)
+        if len(missing) > 0:
+            log.error("master bag for id=%s is missing the following "+
+                      "files from the multibag file index:\n  %s",
+                      self.name, "\n  ".join(missing))
+            raise AIPValidationError("Bag data check failure: data files are " +
+                                     "missing from the multibag file index")
+
+        missing = chkr.unavailable_files(viadistrib=viadistrib)
+        if len(missing) > 0:
+            log.error("unable to locate the following files described " +
+                      "in master bag for id=%s:\n  %s",
+                      self.name, "\n  ".join(missing))
+            raise AIPValidationError("Bag data check failure: unable to locate "+
+                                     "some data files in any available bags")
+
+        

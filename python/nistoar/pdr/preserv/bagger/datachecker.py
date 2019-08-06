@@ -268,7 +268,7 @@ class DataChecker(object):
             return self.AVAIL_IN_REMOTE_BAG
         return self.AVAIL_NOT
 
-    def available(self, cmp, strict=False):
+    def available(self, cmp, strict=False, viadistrib=True):
         """
         return True if the specified data file is currently available somewhere.
         This function (using available_as()) will cycle through possible 
@@ -283,7 +283,7 @@ class DataChecker(object):
         *in this implementation with location (4), the remote bag's contents 
         are not examined; only the availability of that bag is checked.  
         """
-        return self.available_as(cmp, strict) is not self.AVAIL_NOT
+        return self.available_as(cmp, strict, viadistrib) is not self.AVAIL_NOT
                                         
     def containing_bag_available(self, cmp):
         """
@@ -345,13 +345,22 @@ class DataChecker(object):
                                mbagname, str(ex))
             
 
-    def unavailable_files(self):
+    def unavailable_files(self, strict=False, viadistrib=True):
         """
         return a list of the data file component filepaths that appear to 
         be unavailable via any means.  This is a check to make sure that all
         of the distributions listed in the NERDm record are either in the 
         present bag or otherwise previously preserved and available; in this
         case, the returned list will be empty.
+
+        :param bool strict:  if True, don't assume if remote bag containing the
+                             file is available that the file is actually in the
+                             bag.  Currently, this implementation will return
+                             False if the file is not available from any other
+                             source.  
+        :param bool viadistrib:  if True, check a file's availability only if
+                             its download URL points to the PDR's 
+                             distribution service. 
         """
         missing = []
         nerd = self.bag.nerdm_record(False)
@@ -359,28 +368,39 @@ class DataChecker(object):
             if "dcat:Distribution" not in cmp.get('@type',[]) or \
                'downloadURL' not in cmp:
                 continue
-            if not self.available(cmp):
+            if viadistrib and 'downloadURL' in cmp and \
+               not self.has_pdr_url(cmp['downloadURL']):
+                continue
+            if not self.available(cmp, strict, False):
                 missing.append(cmp.get('filepath') or cmp.get('downloadURL'))
 
         return missing
 
-    def all_files_available(self):
+    def all_files_available(self, strict=False, viadistrib=True):
         """
         return True if all of the data file components are available in some
         form.  This is a check to make sure that all
         of the distributions listed in the NERDm record are either in the 
         present bag or otherwise previously preserved and available; in this
         case, the returned list will be empty.
-        """
-        return len(self.unavailable_files()) == 0
 
-    def unindexed_files(self):
+        :param bool viadistrib:  if True, check only those files if its
+                                 downloadURL if the URL points to the PDR's 
+                                 distribution service. 
+        """
+        return len(self.unavailable_files(strict, viadistrib)) == 0
+
+    def unindexed_files(self, viadistrib=True):
         """
         return the data file component filepaths that are missing from the 
         mulitbag file lookup list.  This is a check to make sure that all
         of the distributions listed in the NERDm record are findable either in 
         the present bag or other member bags; in this case, the returned list 
         will be empty.
+
+        :param bool viadistrib:  if True, check only those files if its
+                                 downloadURL if the URL points to the PDR's 
+                                 distribution service. 
         """
         missing = []
         nerd = self.bag.nerdm_record(False)
@@ -388,25 +408,37 @@ class DataChecker(object):
             if "dcat:Distribution" not in cmp.get('@type',[]) or \
                'filepath' not in cmp:
                 continue
+            if viadistrib and 'downloadURL' in cmp and \
+               not self.has_pdr_url(cmp['downloadURL']):
+                continue
             if not self.bag_location(cmp):
                 missing.append(cmp.get('filepath') or cmp.get('downloadURL'))
 
         return missing
 
-    def all_files_indexed(self):
+    def all_files_indexed(self, viadistrib=True):
         """
         return True if all the data file components given in the NERDm metadata
         are included in the multibag file lookup list.  This is a check to make 
         sure that all of the distributions listed in the NERDm record are 
         findable either in the present bag or other member bags.
-        """
-        return len(self.unindexed_files()) == 0
 
-    def check_all_data_files(self):
+        :param bool viadistrib:  if True, check only those files if its
+                                 downloadURL if the URL points to the PDR's 
+                                 distribution service. 
+        """
+        return len(self.unindexed_files(viadistrib)) == 0
+
+    def check_all_data_files(self, strict=False, viadistrib=True):
         """
         return True if all the data files described in the NERDm metadata are
         findable and available.  This returns False if either 
         all_files_indexed() or all_files_available() return False.
+
+        :param bool viadistrib:  if True, check only those files if its
+                                 downloadURL if the URL points to the PDR's 
+                                 distribution service. 
         """
-        return self.all_files_indexed() and self.all_files_available()
+        return self.all_files_indexed(viadistrib) and \
+               self.all_files_available(strict, viadistrib)
 
