@@ -825,7 +825,8 @@ class TestPreservationBagger(test.TestCase):
                     'NIST-BagIt-Version': "0.4",
                     'Multibag-Version': "0.4"
                 }
-            }
+            },
+            'store_dir': '/tmp'
         }
         
         self.bagr = midas.PreservationBagger(self.midasid, '_preserv',

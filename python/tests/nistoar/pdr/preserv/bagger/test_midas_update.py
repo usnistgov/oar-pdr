@@ -160,7 +160,8 @@ class TestPreservationUpdateBagger(test.TestCase):
                 'metadata_service': {
                     'service_endpoint': "http://localhost:9092/"
                 }
-            }
+            },
+            'store_dir': distarchdir
         }
         
         self.bagr = midas.PreservationBagger(self.midasid, '_preserv',
