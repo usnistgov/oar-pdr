@@ -13,9 +13,9 @@ import { AppConfig } from '../../config/config';
 import { FileSaverService } from 'ngx-filesaver';
 import { Router } from '@angular/router';
 import { CommonFunctionService } from '../../shared/common-function/common-function.service';
+import { GoogleAnalyticsService } from '../../shared/ga-service/google-analytics.service';
 
-declare var saveAs: any;
-
+declare var _initAutoTracker: Function;
 
 @Component({
   moduleId: module.id,
@@ -33,7 +33,7 @@ export class DescriptionComponent {
   @Input() editContent: boolean;
   @Input() filescount: number;
   @Input() metadata: boolean;
-  @Input() inBrowser : boolean;   // false if running server-side
+  @Input() inBrowser: boolean;   // false if running server-side
 
   addAllFileSpinner: boolean = false;
   fileDetails: string = '';
@@ -94,31 +94,32 @@ export class DescriptionComponent {
     private downloadService: DownloadService,
     private commonVarService: CommonVarService,
     private http: HttpClient,
-    private cfg : AppConfig,
+    private cfg: AppConfig,
     private _FileSaverService: FileSaverService,
     private confirmationService: ConfirmationService,
     private commonFunctionService: CommonFunctionService,
+    private gaService: GoogleAnalyticsService,
     public router: Router,
     ngZone: NgZone) {
-      this.cols = [
-        { field: 'name', header: 'Name', width: '60%' },
-        { field: 'mediatype', header: 'Media Type', width: 'auto' },
-        { field: 'size', header: 'Size', width: 'auto' },
-        { field: 'download', header: 'Status', width: 'auto' }];
+    this.cols = [
+      { field: 'name', header: 'Name', width: '60%' },
+      { field: 'mediatype', header: 'Media Type', width: 'auto' },
+      { field: 'size', header: 'Size', width: 'auto' },
+      { field: 'download', header: 'Status', width: 'auto' }];
 
-      if (typeof(window) !== 'undefined') {
-        this.mobHeight = (window.innerHeight);
-        this.mobWidth = (window.innerWidth);
-        this.setWidth(this.mobWidth);
-  
-        window.onresize = (e) => {
-          ngZone.run(() => {
-            this.mobWidth = window.innerWidth;
-            this.mobHeight = window.innerHeight;
-            this.setWidth(this.mobWidth);
-          });
-        };
-      }
+    if (typeof (window) !== 'undefined') {
+      this.mobHeight = (window.innerHeight);
+      this.mobWidth = (window.innerWidth);
+      this.setWidth(this.mobWidth);
+
+      window.onresize = (e) => {
+        ngZone.run(() => {
+          this.mobWidth = window.innerWidth;
+          this.mobHeight = window.innerHeight;
+          this.setWidth(this.mobWidth);
+        });
+      };
+    }
 
     this.cartService.watchAddAllFilesCart().subscribe(value => {
       this.addAllFileSpinner = value;
@@ -668,12 +669,17 @@ export class DescriptionComponent {
   * Function to set status when a file was downloaded
   **/
   setFileDownloaded(rowData: any) {
+    // Google Analytics code to track download event
+    this.gaService.gaTrackEvent('download', undefined, 'Resource title: ' + this.record['title'], rowData.downloadUrl);
+
     rowData.downloadStatus = 'downloaded';
     this.cartService.updateCartItemDownloadStatus(rowData.cartId, 'downloaded');
     this.downloadStatus = this.updateDownloadStatus(this.files) ? "downloaded" : null;
     if (rowData.isIncart) {
       this.downloadService.setFileDownloadedFlag(true);
     }
+
+
   }
 
   /**
@@ -716,10 +722,14 @@ export class DescriptionComponent {
       header: header,
       key: key,
       accept: () => {
+        // Google Analytics tracking code
+        console.log("Tracking download all");
+        this.gaService.gaTrackEvent('download', undefined, 'all files', this.record['title']);
+
         setTimeout(() => {
           let popupWidth: number = this.mobWidth * 0.8;
-          let left:number = this.mobWidth * 0.1;
-          let screenSize = 'height=880,width=' + popupWidth.toString() + ',top=100,left='+ left.toString();
+          let left: number = this.mobWidth * 0.1;
+          let screenSize = 'height=880,width=' + popupWidth.toString() + ',top=100,left=' + left.toString();
           window.open('/datacart/popup', 'DownloadManager', screenSize);
           this.cancelAllDownload = false;
           this.downloadFromRoot();
@@ -730,6 +740,9 @@ export class DescriptionComponent {
     });
   }
 
+  /**
+  * Function to download all.
+  **/
   downloadFromRoot() {
     this.cartService.setCurrentCart('landing_popup');
     this.commonVarService.setLocalProcessing(true);
@@ -929,9 +942,9 @@ export class DescriptionComponent {
   /*
   * Make sure the width of popup dialog is less than 500px or 80% of the window width
   */
-  getDialogWidth(){
-    var w = window.innerWidth > 500? 500: window.innerWidth;
+  getDialogWidth() {
+    var w = window.innerWidth > 500 ? 500 : window.innerWidth;
     console.log(w);
-    return w+'px';
+    return w + 'px';
   }
 }

@@ -4,7 +4,7 @@ Package (SIP) into an Archive Information Package (BagIt bags).  It also
 includes implementations for different known SIPs
 """
 from __future__ import print_function
-import os, sys, re, shutil, logging
+import os, sys, re, shutil, logging, errno
 from abc import ABCMeta, abstractmethod, abstractproperty
 from collections import OrderedDict
 from copy import deepcopy
@@ -363,8 +363,13 @@ class MIDASSIPHandler(SIPHandler):
                                  "directory: " + self.mdbagdir)
 
         bgrcfg = config.get('bagger', {})
+        if 'store_dir' not in bgrcfg and 'store_dir' in config:
+            bgrcfg['store_dir'] = config['store_dir']
         if 'repo_access' not in bgrcfg and 'repo_access' in config:
             bgrcfg['repo_access'] = config['repo_access']
+            if 'store_dir' not in bgrcfg['repo_access'] and 'store_dir' in bgrcfg:
+                bgrcfg['repo_access']['store_dir'] = bgrcfg['store_dir']
+            
         self.bagger = PreservationBagger(sipid, bagparent, self.sipparent,
                                          self.mdbagdir, bgrcfg, self._minter, 
                                          self._asupdate, sipdirname)
@@ -479,6 +484,11 @@ class MIDASSIPHandler(SIPHandler):
         errors = []
         try:
             for f in savefiles:
+                destfile = os.path.join(destdir, os.path.basename(f))
+                if os.path.exists(destfile) and \
+                   not self.cfg.get('allow_bag_overwrite', False):
+                    raise OSError(errno.EEXIST, os.strerror(errno.EEXIST),
+                                  destfile)
                 shutil.copy(f, destdir)
         except OSError, ex:
             log.error("Failed to copy preservation file: %s\n" +
