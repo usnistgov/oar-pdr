@@ -68,7 +68,8 @@ class TestArchive(test.TestCase):
     def test_ctor(self):
         self.assertEqual(self.arch.dir, datadir)
         self.assertEqual(self.arch.lu, {"ABCDEFG": "pdr02d4t",
-                                        "ark:/88434/pdr2210": "pdr2210"})
+                                        "ark:/88434/pdr2210": "pdr2210",
+                                        "pdr2210": "pdr2210"})
 
     def test_ediid_to_id(self):
         self.assertEqual(self.arch.ediid_to_id("ABCDEFG"), "pdr02d4t")

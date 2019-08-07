@@ -246,6 +246,31 @@ class TestPrePubMetadataService(test.TestCase):
             if os.path.exists(rmmrec):
                 os.remove(rmmrec)
             time.sleep(0.2)  # wait for metadata thread to finish
+
+    def test_resolve_id_usestore(self):
+        # test resolving an identifier for a dataset being updated (after
+        # an initial publication)
+        midasid = "pdr2210"
+        self.revdir = self.tf.mkdir("review")
+        self.config['review_dir'] = self.revdir
+        self.srv = serv.PrePubMetadataService(self.config)
+        self.bagdir = os.path.join(self.bagparent, midasid)
+        
+        os.mkdir(os.path.join(self.revdir, "pdr2210"))
+        shutil.copyfile(os.path.join(datadir, "pdr2210_pod.json"),
+                        os.path.join(self.revdir,"pdr2210","_pod.json"))
+        
+        cached = os.path.join(self.pubcache, "pdr2210.3_1_3.mbag0_3-5.zip")
+
+        data = self.srv.resolve_id(midasid)
+        self.assertIn("ediid", data)
+        self.assertEqual(data['version'], "3.1.3+ (in edit)")
+
+        self.assertTrue(not os.path.exists(cached))
+        self.assertTrue(os.path.isdir(self.bagdir))
+        self.assertTrue(os.path.isdir(os.path.join(self.bagdir,"multibag")))
+        
+
         
 
 
