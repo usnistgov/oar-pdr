@@ -363,10 +363,10 @@ class MIDASSIPHandler(SIPHandler):
                                  "directory: " + self.mdbagdir)
 
         bgrcfg = config.get('bagger', {})
-        if 'repo_access' not in bgrcfg and 'repo_access' in config:
-            bgrcfg['repo_access'] = config['repo_access']
         if 'store_dir' not in bgrcfg and 'store_dir' in config:
             bgrcfg['store_dir'] = config['store_dir']
+        if 'repo_access' not in bgrcfg and 'repo_access' in config:
+            bgrcfg['repo_access'] = config['repo_access']
             if 'store_dir' not in bgrcfg['repo_access']:
                 bgrcfg['repo_access']['store_dir'] = config['store_dir']
             

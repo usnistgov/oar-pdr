@@ -242,7 +242,7 @@ class UpdatePrepper(object):
         if len(foraip) == 0:
             return None
 
-        return bagutils.find_latest_head_bag(foraip)
+        return os.path.join(self.storedir, bagutils.find_latest_head_bag(foraip))
 
     def aip_exists(self):
         """

@@ -13,6 +13,7 @@ from nistoar.pdr.utils import read_nerd
 
 bagsrcdir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data")
 mdsrcdir = os.path.join(os.path.dirname(os.path.dirname(bagsrcdir)), "describe", "data")
+storedir = os.path.join(os.path.dirname(os.path.dirname(mdsrcdir)), "distrib", "data")
 
 loghdlr = None
 rootlog = None
@@ -51,6 +52,8 @@ class SimRMMClient(object):
                         os.path.join(cachedir, "ABCDEFG.json"))
         shutil.copyfile(os.path.join(mdsrcdir, "pdr02d4t.json"),
                         os.path.join(cachedir, "pdr02d4t.json"))
+        shutil.copyfile(os.path.join(mdsrcdir, "pdr2210.json"),
+                        os.path.join(cachedir, "pdr2210.json"))
 
 class SimDistClient(object):
 
@@ -199,6 +202,7 @@ class TestUpdatePrepper(test.TestCase):
     def setUp(self):
         self.tf = Tempfiles()
         self.workdir = self.tf.mkdir("mdserv")
+        self.storedir = self.tf.mkdir("store")
         self.headcache = self.tf.mkdir("headcache")
         self.bagsdir = self.tf.mkdir("bags")
         self.nerddir = self.tf.mkdir("nerds")
@@ -210,6 +214,7 @@ class TestUpdatePrepper(test.TestCase):
 
         self.config = {
             "working_dir": self.workdir,
+            "store_dir": self.storedir,
             "headbag_cache": self.headcache,
             "distrib_service": {
                 "service_endpoint": "http://dummy/ds"
@@ -318,10 +323,28 @@ class TestUpdatePrepper(test.TestCase):
         self.assertTrue(not os.path.isfile(depinfof))
         
     def test_create_new_update(self):
-        headbag = os.path.join(self.bagsdir, "ABCDEFG.1.mbag0_4-2.zip")
+        headbag = os.path.join(self.bagsdir, "ABCDEFG.2.mbag0_4-4.zip")
+        cached = os.path.join(self.headcache, "ABCDEFG.2.mbag0_4-4.zip")
         root = os.path.join(self.workdir, "ABCDEFG")
         self.assertTrue(not os.path.exists(root))
+        self.assertTrue(not os.path.exists(cached))
 
+        self.assertTrue(self.prepr.create_new_update(root))
+        self.assertTrue(os.path.isdir(root))
+        self.assertTrue(os.path.exists(cached))
+
+        contents = [f for f in os.listdir(root)]
+        self.assertIn("metadata", contents)
+        self.assertIn("data", contents)
+        self.assertNotIn("manifest-sha256.txt", contents)
+        self.assertNotIn("bag-info.txt", contents)
+        self.assertIn("multibag", contents)
+
+        # test using headbag made from nerdm record
+        shutil.rmtree(root)  # reset
+        os.remove(headbag)   # prevents retrieving headbag via dist service
+        os.remove(cached)    # prevents using cached version
+        self.assertTrue(not os.path.isdir(root))
         self.assertTrue(self.prepr.create_new_update(root))
         self.assertTrue(os.path.isdir(root))
 
@@ -330,17 +353,7 @@ class TestUpdatePrepper(test.TestCase):
         self.assertIn("data", contents)
         self.assertNotIn("manifest-sha256.txt", contents)
         self.assertNotIn("bag-info.txt", contents)
-
-        # test using headbag from local cache
-        os.remove(headbag) # prevents retrieving headbag via dist service
-        self.assertTrue(self.prepr.create_new_update(root))
-        self.assertTrue(os.path.isdir(root))
-
-        contents = [f for f in os.listdir(root)]
-        self.assertIn("metadata", contents)
-        self.assertIn("data", contents)
-        self.assertNotIn("manifest-sha256.txt", contents)
-        self.assertNotIn("bag-info.txt", contents)
+        self.assertNotIn("multibag", contents)
 
         bag = NISTBag(root)
         mdata = bag.nerdm_record(True)
@@ -357,7 +370,51 @@ class TestUpdatePrepper(test.TestCase):
         self.assertFalse(self.prepr.create_new_update(root))
         self.assertTrue(not os.path.isdir(root))
 
-        
+    def test_find_bag_in_store(self):
+        sf12_7 = os.path.join(self.storedir, "ABCDEFG.12_7.mbag0_3-2.zip")
+
+        # The way we will test if the file was retreive from the
+        # store dir is by making that copy an empty file
+        with open(sf12_7,'w') as fd:
+            pass
+
+        sf12_8 = os.path.join(self.storedir, "ABCDEFG.12_8.mbag0_3-4.zip")
+        with open(sf12_8,'w') as fd:
+            pass
+        sf12_8 = os.path.join(self.storedir, "ABCDEFG.12_8.mbag0_3-5.zip")
+        with open(sf12_8,'w') as fd:
+            pass
+        sf0 = os.path.join(self.storedir, "ABCDEFG.mbag0_3-5.zip")
+        with open(sf0,'w') as fd:
+            pass
+
+        self.assertEqual(self.prepr.find_bag_in_store("12.7"), sf12_7)
+        self.assertEqual(self.prepr.find_bag_in_store("12.8"), sf12_8)
+        self.assertEqual(self.prepr.find_bag_in_store("0"), sf0)
+
+    def test_create_new_update_fromstore(self):
+        shutil.copy(os.path.join(storedir, "pdr2210.3_1_3.mbag0_3-5.zip"),
+                    self.storedir)
+        cachedbag = os.path.join(self.headcache, "pdr2210.3_1_3.mbag0_3-5.zip")
+
+        self.prepr = self.prepsvc.prepper_for("pdr2210")
+        self.prepr.mdcli = self.mdcli
+        self.prepr.cacher.distsvc = self.distcli
+
+        root = os.path.join(self.workdir, "pdr2210")
+        self.assertTrue(not os.path.exists(cachedbag))
+        self.assertTrue(not os.path.exists(root))
+
+        self.assertTrue(self.prepr.create_new_update(root))
+        self.assertTrue(os.path.isdir(root))
+
+        # these demonstrates that it came from the stored version
+        self.assertTrue(os.path.isdir(os.path.join(root,"multibag")))
+        self.assertTrue(not os.path.isfile(cachedbag))
+
+        bag = NISTBag(root)
+        mdata = bag.nerdm_record(True)
+        self.assertEquals(mdata['version'], "3.1.3+ (in edit)")
 
         
                               
