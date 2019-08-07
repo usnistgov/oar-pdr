@@ -150,6 +150,7 @@ class TestPrePubMetadataService(test.TestCase):
             'working_dir':     self.workdir,
             'review_dir':      self.revdir,
             'upload_dir':      self.upldir,
+            'store_dir':       distarchdir,
             'id_registry_dir': self.workdir,
             'repo_access': {
                 'headbag_cache':   self.pubcache,
@@ -224,9 +225,12 @@ class TestPrePubMetadataService(test.TestCase):
         srczip = os.path.join(distarchive, "1491.1_0.mbag0_4-0.zip")
         destzip = os.path.join(distarchive, self.midasid+".1_0.mbag0_4-0.zip")
         cached = os.path.join(self.pubcache, os.path.basename(destzip))
+        rmmrec = os.path.join(mdarchive, self.midasid+".json")
 
         try:
             shutil.copyfile(srczip, destzip)
+            shutil.copy(os.path.join(datadir, self.midasid+".json"),
+                        mdarchive)
 
             data = self.srv.resolve_id(self.midasid)
             self.assertIn("ediid", data)
@@ -239,6 +243,9 @@ class TestPrePubMetadataService(test.TestCase):
                 os.remove(destzip)
             if os.path.exists(cached):
                 os.remove(cached)
+            if os.path.exists(rmmrec):
+                os.remove(rmmrec)
+            time.sleep(0.2)  # wait for metadata thread to finish
         
 
 

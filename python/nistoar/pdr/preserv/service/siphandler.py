@@ -367,8 +367,8 @@ class MIDASSIPHandler(SIPHandler):
             bgrcfg['store_dir'] = config['store_dir']
         if 'repo_access' not in bgrcfg and 'repo_access' in config:
             bgrcfg['repo_access'] = config['repo_access']
-            if 'store_dir' not in bgrcfg['repo_access']:
-                bgrcfg['repo_access']['store_dir'] = config['store_dir']
+            if 'store_dir' not in bgrcfg['repo_access'] and 'store_dir' in bgrcfg:
+                bgrcfg['repo_access']['store_dir'] = bgrcfg['store_dir']
             
         self.bagger = PreservationBagger(sipid, bagparent, self.sipparent,
                                          self.mdbagdir, bgrcfg, self._minter, 
