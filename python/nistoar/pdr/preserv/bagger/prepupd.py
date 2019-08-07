@@ -237,7 +237,8 @@ class UpdatePrepper(object):
             return None
 
         foraip = [f for f in os.listdir(self.storedir)
-                    if f.startswith(self.aipid+'.')   ]
+                    if f.startswith(self.aipid+'.') and
+                       not f.endswith('.sha256')        ]
         foraip = bagutils.select_version(foraip, version)
         if len(foraip) == 0:
             return None

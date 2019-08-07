@@ -381,6 +381,9 @@ class TestUpdatePrepper(test.TestCase):
         sf12_8 = os.path.join(self.storedir, "ABCDEFG.12_8.mbag0_3-4.zip")
         with open(sf12_8,'w') as fd:
             pass
+        sf12_8 = os.path.join(self.storedir, "ABCDEFG.12_8.mbag0_3-5.zip.sha256")
+        with open(sf12_8,'w') as fd:
+            pass
         sf12_8 = os.path.join(self.storedir, "ABCDEFG.12_8.mbag0_3-5.zip")
         with open(sf12_8,'w') as fd:
             pass
@@ -395,6 +398,10 @@ class TestUpdatePrepper(test.TestCase):
     def test_create_new_update_fromstore(self):
         shutil.copy(os.path.join(storedir, "pdr2210.3_1_3.mbag0_3-5.zip"),
                     self.storedir)
+        with open(os.path.join(self.storedir,
+                               "pdr2210.3_1_3.mbag0_3-5.zip.sha256"),'w') as fd:
+            pass
+    
         cachedbag = os.path.join(self.headcache, "pdr2210.3_1_3.mbag0_3-5.zip")
 
         self.prepr = self.prepsvc.prepper_for("pdr2210")
