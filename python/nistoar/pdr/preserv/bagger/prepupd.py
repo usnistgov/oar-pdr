@@ -371,8 +371,8 @@ class UpdatePrepper(object):
         if not nerdm.get('@id'):
             raise StateException("Bag {0}: missing @id"
                                  .format(os.path.basename(mdbag)))
-        bag = BagBuilder(parent, os.path.basename(mdbag), {}, nerdm.get('@id'),
-                         logger=deflog)
+        bag = BagBuilder(parent, os.path.basename(mdbag), {'validate_id': False},
+                         nerdm.get('@id'), logger=deflog)
         bag.add_res_nerd(nerdm, savefilemd=True)
 
         # finally set the version to a value appropriate for an update in
@@ -408,7 +408,8 @@ class UpdatePrepper(object):
         # (this assumes forward compatibility).
         bagutils.update_nerdm_schema(nerd)
         
-        bldr = BagBuilder(parent, bagname, {}, nerd['@id'], logger=deflog)
+        bldr = BagBuilder(parent, bagname, {'validate_id': False},
+                          nerd['@id'], logger=deflog)
         bldr.add_res_nerd(nerd, savefilemd=True)
 
         # update the version appropriate for edit mode

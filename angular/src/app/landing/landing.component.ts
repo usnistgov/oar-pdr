@@ -11,7 +11,7 @@ import { PLATFORM_ID, APP_ID, Inject } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { CommonVarService } from '../shared/common-var';
 import { SearchService } from '../shared/search-service/index';
-import { first, tap } from 'rxjs/operators';
+import { tap } from 'rxjs/operators';
 import { isPlatformServer } from '@angular/common';
 import { makeStateKey, TransferState } from '@angular/platform-browser';
 import { AuthService } from '../shared/auth-service/auth.service';
@@ -22,7 +22,9 @@ import { NgbModalOptions, NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ContactPopupComponent } from './contact-popup/contact-popup.component';
 import { TitlePopupComponent } from './title-popup/title-popup.component';
 import { CustomizationServiceService } from '../shared/customization-service/customization-service.service';
+import { GoogleAnalyticsService } from '../shared/ga-service/google-analytics.service';
 
+declare var _initAutoTracker: Function;
 
 interface reference {
   refType?: string,
@@ -193,6 +195,7 @@ export class LandingComponent implements OnInit {
     private transferState: TransferState,
     public searchService: SearchService,
     private commonVarService: CommonVarService,
+    private gaService: GoogleAnalyticsService,
     private authService: AuthService,
     private ngbModal: NgbModal,
     private modalService: ModalService,
@@ -380,7 +383,7 @@ export class LandingComponent implements OnInit {
    * Update menu on landing page
    */
   updateMenu() {
-    let mdapi = this.cfg.get("mdAPI", "/unconfigured");
+    let mdapi = this.cfg.get("locations.mdService", "/unconfigured");
     this.serviceApi = mdapi + "records?@id=" + this.record['@id'];
     if (!_.includes(mdapi, "/rmm/"))
       this.serviceApi = mdapi + this.record['ediid'];
@@ -389,6 +392,7 @@ export class LandingComponent implements OnInit {
     var itemsMenu: MenuItem[] = [];
     var metadata = this.createMenuItem("Export JSON", "faa faa-file-o", (event) => { this.turnSpinnerOff(); }, this.serviceApi);
     let authlist = "";
+
     if (this.record['authors']) {
       for (let auth of this.record['authors']) authlist = authlist + auth.familyName + ",";
     }
@@ -397,11 +401,11 @@ export class LandingComponent implements OnInit {
       this.cfg.get("locations.pdrSearch", "/sdp/") + "/#/search?q=authors.familyName=" + authlist + "&key=&queryAdvSearch=yes");
     var similarRes = this.createMenuItem("Similar Resources", "faa faa-external-link", "",
       this.cfg.get("locations.pdrSearch", "/sdp/") + "/#/search?q=" + this.record['keyword'] + "&key=&queryAdvSearch=yes");
-    var license = this.createMenuItem("Fair Use Statement", "faa faa-external-link", "", this.record['license']);
+    var license = this.createMenuItem("Fair Use Statement", "faa faa-external-link", (event) => { this.gaService.gaTrackEvent('outbound', event, this.record['title']), this.record['license'] }, this.record['license']);
     var citation = this.createMenuItem('Citation', "faa faa-angle-double-right",
       (event) => { this.getCitation(); this.showDialog(); }, '');
     var metaItem = this.createMenuItem("View Metadata", "faa faa-bars",
-      (event) => { this.goToSelection(true, false, 'metadata'); }, '');
+      (event) => { this.goToSelection(true, false, 'metadata'); this.gaService.gaTrackPageview('/od/id/'+this.searchValue+'#metadata', this.record['title'])}, '');
     itemsMenu.push(metaItem);
     itemsMenu.push(metadata);
 
@@ -1043,7 +1047,8 @@ export class LandingComponent implements OnInit {
     }
   }
 
-  visitHomePage(url: string){
+  visitHomePage(url: string, event, title){
+    this.gaService.gaTrackEvent('datasource', event, title, url);
     window.open(url, '_blank');
   }
 }

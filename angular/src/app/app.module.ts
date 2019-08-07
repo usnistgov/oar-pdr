@@ -55,6 +55,8 @@ import { FrameModule } from './frame/frame.module';
 import { ConfigModule } from './config/config.module';
 import { AppRoutingModule } from './app-routing.module';
 import { CustomizationServiceService } from './shared/customization-service/customization-service.service';
+import {GoogleAnalyticsService} from "./shared/ga-service/google-analytics.service";
+import {GoogleAnalyticsServiceMock} from "./shared/ga-service/google-analytics.service.mock";
 
 
 enableProdMode();
@@ -109,6 +111,8 @@ import { TitlePopupComponent } from './landing/title-popup/title-popup.component
     ModalService,
     CustomizationServiceService,
 
+    GoogleAnalyticsService,
+    GoogleAnalyticsServiceMock,
     // provider used to create fake backend
     fakeBackendProvider
   ],
@@ -122,6 +126,7 @@ import { TitlePopupComponent } from './landing/title-popup/title-popup.component
 })
 
 export class AppModule {
+  constructor(protected _googleAnalyticsService: GoogleAnalyticsService) { } // We inject the service here to keep it alive whole time
 }
 
 

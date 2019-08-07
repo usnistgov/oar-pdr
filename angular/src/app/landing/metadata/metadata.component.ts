@@ -1,4 +1,5 @@
 import { Component, Input, Pipe,PipeTransform } from '@angular/core';
+import { GoogleAnalyticsService } from '../../shared/ga-service/google-analytics.service';
 
 @Component({
   selector: 'metadata-detail',
@@ -8,7 +9,7 @@ import { Component, Input, Pipe,PipeTransform } from '@angular/core';
        <div [hidden]="!metadata" class = "ui-g-12 ui-md-12 ui-lg-12 ui-sm-12" >
          <h3><b>Metadata</b></h3>
           <span style="">
-            For more information about the metadata, consult the <a href="/od/dm/nerdm/">NERDm documentation</a>. 
+            For more information about the metadata, consult the <a href="/od/dm/nerdm/" (click)="gaService.gaTrackEvent('outbound', undefined, 'Resource title: ' + record.title, '/od/dm/nerdm/')">NERDm documentation</a>. 
           </span>
           <button style="position:relative; float:right; background-color: #1371AE;" type="button" pButton icon="faa faa-file-code-o"
                     title="Get Metadata in JSON format." label="json" (click)="onjson()"></button>
@@ -28,6 +29,11 @@ export class MetadataComponent {
   @Input() serviceApi : string;
   @Input() metadata : boolean;
   @Input() inBrowser : boolean;
+
+  constructor(private gaService: GoogleAnalyticsService){
+
+  }
+
   ngOnInit() {
       delete this.record["_id"];
   }
@@ -53,6 +59,7 @@ export class MetadataComponent {
   }
 
   onjson(){
+    this.gaService.gaTrackEvent('download', undefined, this.record['title'], this.serviceApi);
     //alert(this.serviceApi);
     window.open(this.serviceApi);
   }

@@ -2,6 +2,7 @@ import os, pdb, sys, logging, yaml
 import unittest as test
 
 from nistoar.testing import *
+from nistoar.pdr.preserv import PreservationException
 from nistoar.pdr.preserv.service import siphandler as sip
 from nistoar.pdr.preserv.service import status
 
@@ -150,6 +151,43 @@ class TestMIDASSIPHandler(test.TestCase):
         mdbagdir = os.path.join(self.sip.mdbagdir, self.midasid)
         self.assertFalse( os.path.exists(mdbagdir),
                           "Failed to clean up metadata bag directory: "+mdbagdir)
+
+        # has unserialized bags been cleaned up?
+        pd = os.path.join(self.revdir, "1491/_preserv")
+        bb = self.midasid+".1_0_0.mbag0_4-"
+        bfs = [f for f in os.listdir(pd) if f.startswith(bb)]
+        self.assertEqual(len(bfs), 0)
+        
+
+    def test_bagit_nooverwrite(self):
+        self.assertEqual(self.sip.state, status.FORGOTTEN)
+        self.assertEqual(len(os.listdir(self.sip.stagedir)), 0)
+        destfile = os.path.join(self.store, self.midasid+".1_0_0.mbag0_4-0.zip")
+        self.assertTrue(not os.path.exists(destfile))
+        with open(destfile, 'w') as fd:
+            fd.write("\n");
+        
+        try:
+            self.sip.bagit()
+            self.fail("Failed to catch overwrite error")
+        except PreservationException as ex:
+            self.assertEqual(len(ex.errors), 1)
+            self.assertEqual(ex.errors[0],
+                             "[Errno 17] File exists: '{}'".format(destfile))
+            
+    def test_bagit_allowoverwrite(self):
+        self.sip.cfg['allow_bag_overwrite'] = True;
+        self.assertEqual(self.sip.state, status.FORGOTTEN)
+        self.assertEqual(len(os.listdir(self.sip.stagedir)), 0)
+        destfile = os.path.join(self.store, self.midasid+".1_0_0.mbag0_4-0.zip")
+        self.assertTrue(not os.path.exists(destfile))
+        with open(destfile, 'w') as fd:
+            fd.write("\n");
+        self.assertEqual(os.stat(destfile).st_size, 1)
+        
+        self.sip.bagit()
+        self.assertGreater(os.stat(destfile).st_size, 1)
+            
         
     def test_is_preserved(self):
         self.assertEqual(self.sip.state, status.FORGOTTEN)

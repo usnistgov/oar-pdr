@@ -49,7 +49,7 @@ case "$1" in
             exitopwith testall 2
         }
         shift
-        scripts/testall.python "$@" && stat=$?
+        scripts/testall.python "$@"; stat=$?
         echo Launching/testing the metadata server via nginx...
         launch_test_mdserv
         

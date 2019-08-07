@@ -17,7 +17,7 @@
 
 .title
 {
-  color:#1471AE;
+  /* color:#1471AE; */
   font-size: 20px;
 }
 
@@ -553,6 +553,17 @@
   width: 150px;
   height: 150px;
   animation: spin 2s linear infinite;
+}
+
+a:link {
+  color: #1471AE;
+  background-color: transparent;
+  text-decoration: none;
+}
+a:visited {
+  color: #551A8B;
+  background-color: transparent;
+  text-decoration: none;
 }
 
 @keyframes spin {

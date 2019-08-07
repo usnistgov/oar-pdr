@@ -73,7 +73,7 @@
       </div>
     </div>
     <ng-template #noKeyword>
-        <div *ngIf="recordEditmode"
+      <div *ngIf="recordEditmode"
         style="text-align: left; vertical-align: top;display: inline-block;padding-right: .5em; border: 1px solid lightgrey">
         Add subject keywords:
       </div>
@@ -102,14 +102,16 @@
     </span>
     <span *ngIf="record['landingPage'] && record['landingPage'].indexOf('/od/id') === -1 ">
       For more information, please visit the
-      <a target="_blank" href="{{ record['landingPage'] }}">home page</a>.
+      <a target="_blank" href="{{ record['landingPage'] }}"
+        (click)="gaService.gaTrackEvent('homepage', $event, 'Resource title: ' + record.title, record['landingPage'])">home
+        page</a>.
     </span>
     <span style="margin-left:0em" *ngIf="isAccessPage">
       <br>Data is available via the following locations:
       <br>
       <span style="padding-left:2.00em" *ngFor="let title of accessTitles; let i =index">
-        <i class="faa faa-external-link"> <span style="margin-left:0.3em;"> <a
-              href="{{accessUrls[i]}}">{{title}}</a></span>
+        <i class="faa faa-external-link"> <span style="margin-left:0.3em;"> <a href="{{accessUrls[i]}}"
+              (click)="gaService.gaTrackEvent('homepage', $event,'Resource title: ' + record.title, accessUrls[i])">{{title}}</a></span>
         </i><br>
       </span>
     </span>
@@ -216,10 +218,10 @@
             <tr [ttSelectableRow]="rowNode">
               <td [ngStyle]="titleStyle()">
                 <p-treeTableToggler [rowNode]="rowNode"></p-treeTableToggler>
-                <a class="filename" (click)="openDetails($event,rowData,op3) " style="color: #1E6BA1;cursor: pointer;"
+                <a (click)="openDetails($event,rowData,op3) " style="color: #1471AE;cursor: pointer;"
                   data-toggle="tooltip" title="Click for more details">
                   {{rowData.name}} </a>
-                <!-- <span *ngIf="showZipFilesNmaes" style="color:darkgreen; margin-left: 2em;">{{rowData.zipFile}}</span> -->
+                <span *ngIf="showZipFilesNmaes" style="color:darkgreen; margin-left: 2em;">{{rowData.zipFile}}</span>
               </td>
               <td [ngStyle]="typeStyle()">{{rowData.mediatype}}</td>
               <td [ngStyle]="sizeStyle()"><span *ngIf="rowData.size">{{formatBytes(rowData.size)}}</span></td>
@@ -287,7 +289,9 @@
           <span *ngIf="refs['refType'] == 'IsReferencedBy'">
             <br>
             <i class="faa faa-external-link"> </i>
-            <a style="margin-left:0.3em;" href={{refs.location}} target="blank"> {{ refs.location }}</a>
+            <a style="margin-left:0.3em;" href={{refs.location}} target="blank"
+              (click)="gaService.gaTrackEvent('outbound', $event, 'Resource title: '+record.title, refs.location)">
+              {{ refs.location }}</a>
           </span>
 
         </span>

@@ -11,6 +11,7 @@ from wsgiref.headers import Headers
 from .. import PublishSystem
 from .serv import (PrePubMetadataService, SIPDirectoryNotFound, IDNotFound,
                    ConfigurationException, StateException)
+from ....id import NIST_ARK_NAAN
 
 log = logging.getLogger(PublishSystem().subsystem_abbrev).getChild("mdserv")
 
@@ -97,11 +98,21 @@ class Handler(object):
         if path.startswith('/'):
             path = path[1:]
         parts = path.split('/')
-        dsid = parts[0]
+
+        if parts[0] == "ark:":
+            # support full ark identifiers
+            if len(parts) > 2 and parts[1] == NIST_ARK_NAAN:
+                dsid = parts[2]
+            else:
+                dsid = '/'.join(parts[:3])
+            filepath = "/".join(parts[3:])
+        else:
+            dsid = parts[0]
+            filepath = "/".join(parts[1:])
+            
         if self.badidre.search(dsid):
             self.send_error(400, "Unsupported SIP identifier: "+dsid)
             return []
-        filepath = "/".join(parts[1:])
 
         if filepath:
             return self.get_datafile(dsid, filepath)

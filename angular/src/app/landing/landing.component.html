@@ -42,7 +42,8 @@
                 <b *ngSwitchCase="'nrdp:PublicDataResource'">Public Data Resource</b>
                 <b *ngSwitchDefault></b>
               </span>
-              <div *ngIf="record.length !== 0 && inBrowser" class="ui-sm-1 d-none d-sm-block d-md-none ">
+              <div *ngIf="record.length !== 0 && inBrowser"
+                   class="ui-sm-1 d-none d-block d-sm-block d-md-none ">
                 <button style="float: right" type="button" pButton icon="faa faa-list"
                   class="ui-button ui-button-icon-only" (click)="menu3.toggle($event)"></button>
                 <p-menu #menu3 class="rightMenuStylePop" popup="popup" [model]="rightmenu"></p-menu>
@@ -137,8 +138,8 @@
                   <div [@changeBorderColor]=contactObj.currentState style="display: inline-block; padding-right: .5em">
                     Contact:
                     <strong>
-                      <a class="font14" *ngIf="isEmail" href="{{record.contactPoint.hasEmail}}" target="_top">
-                        {{record.contactPoint.fn}}</a>
+                        <a class="font14" *ngIf="isEmail" href="{{record.contactPoint.hasEmail}}" target="_top" (click)="gaService.gaTrackEvent('Email', $event, 'Resource title: ' + record.title, record.contactPoint.hasEmail)">
+                            {{record.contactPoint.fn}}</a>
                       <span *ngIf="!isEmail">{{record.contactPoint.fn}}</span>
                     </strong>..
                     <i style="cursor: pointer;" class="faa"
@@ -150,8 +151,8 @@
                       </span>
                       <span class="font14" *ngIf="isEmail">
                         <br><strong>Email:</strong>
-                        <a *ngIf="isEmail" href="{{record.contactPoint.hasEmail}}" target="_top">
-                          {{record.contactPoint.hasEmail.split(":")[1]}}</a>
+                        <a *ngIf="isEmail" href="{{record.contactPoint.hasEmail}}" target="_top" (click)="gaService.gaTrackEvent('Email', $event, 'Resource title: ' + record.title, record.contactPoint.hasEmail)">
+                            {{record.contactPoint.hasEmail.split(":")[1]}}</a>
                       </span>
                       <div class="font14" *ngIf="record.contactPoint.address">
                         <span><b>Address:</b></span>
@@ -172,16 +173,16 @@
               <!-- <br> -->
               <span *ngIf="isId">Identifier: </span>
               <span *ngIf="isDOI"><i> <a class="font14"
-                    href="https://doi.org/{{record.doi.split(':')[1]}}">{{record.doi}}</a></i></span>
+                    href="https://doi.org/{{record.doi.split(':')[1]}}" (click)="gaService.gaTrackEvent('outbound', $event, 'Resource title: ' + record.title, 'https://doi.org/'+record.doi.split(':')[1])">{{record.doi}}</a></i></span>
               <span *ngIf="!isDOI"><i> <a class="font14"
-                    href="{{ cfg.get('landingPageService','/od/id/') }}{{record['@id']}}">{{record["@id"]}}</a></i>
+                    href="{{ cfg.get('landingPageService','/od/id/') }}{{record['@id']}}" (click)="gaService.gaTrackEvent('outbound', $event, 'Resource title: ' + record.title, cfg.get('landingPageService','/od/id/')+record['@id'])">{{record["@id"]}}</a></i>
               </span>
               <span *ngIf="checkReferences()"><br>
                 <span>Described in article: </span>
                 <small *ngFor="let refs of record['references']; let i =index">
                   <span style="padding-left:2.75em" *ngIf="refs.refType == 'IsDocumentedBy'">
                     <br><i class="faa faa-external-link">
-                      <a class="font14" href={{refs.location}} target="blank">{{ refs.label }}</a></i>
+                      <a class="font14" href={{refs.location}} target="blank" (click)="gaService.gaTrackEvent('outbound', $event, 'Resource title: ' + record.title, refs.location)">{{ refs.label }}</a></i>
                     <span *ngIf="i < record.references.length-1 ">,</span>
                   </span>
                 </small>
@@ -211,7 +212,7 @@
               </div>
               <p style="margin-top: 10px;" *ngIf="newer.location">
                 <b>There is a more recent release of this resource available: &nbsp;&nbsp;
-                  <a href="{{newer.location}}">{{newer.label}}</a></b>
+                  <a href="{{newer.location}}" (click)="gaService.gaTrackEvent('outbound', $event, 'Resource title: ' + record.title, newer.label)">{{newer.label}}</a></b>
               </p>
             </div>
 
@@ -219,8 +220,8 @@
             <div class="ui-g-4 ui-md-4 ui-lg-4 ui-sm-12">
               <span *ngIf="HomePageLink">
                   <span *ngIf="inBrowser; else visitHomeOnServer">
-                    <button pButton class="homePageLink" icon="faa faa-external-link"
-                      label="Visit Home Page" style="padding: 0 1em 0 2em;height: 2.5em;" (click)="visitHomePage(record.landingPage)"></button>
+                    <button pButton type="button" class="homePageLink" icon="faa faa-external-link"
+                      label="Visit Home Page" style="padding: 0 1em 0 2em;height: 2.5em;" (click)="visitHomePage(record.landingPage, $event, 'Resource title: '+record.title)"></button>
                   </span>
                   <ng-template #visitHomeOnServer>Visit Home Page</ng-template>
               </span>
@@ -247,7 +248,7 @@
                 <p contenteditable="false" style="font-size: 14px;">{{ citeString }}</p>
                 <br>
                 <a target="citationsRecommendation"
-                  href="https://www.nist.gov/director/copyright-fair-use-and-licensing-statements-srd-data-and-software#citations">See
+                  href="https://www.nist.gov/director/copyright-fair-use-and-licensing-statements-srd-data-and-software#citations" (click)="gaService.gaTrackEvent('outbound', $event, 'Resource title: ' + record.title)">See
                   also NIST Citation Recommendations</a>
               </p-dialog>
             </div>

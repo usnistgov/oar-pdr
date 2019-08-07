@@ -4,13 +4,12 @@ import { CartService } from '../../datacart/cart.service';
 import { Data } from '../../datacart/data';
 import { OverlayPanel } from 'primeng/overlaypanel';
 import { DownloadService } from '../../shared/download-service/download-service.service';
-import { SelectItem, DropdownModule, ConfirmationService, Message } from 'primeng/primeng';
+import { ConfirmationService } from 'primeng/primeng';
 import { DownloadData } from '../../shared/download-service/downloadData';
 import { ZipData } from '../../shared/download-service/zipData';
 import { CommonVarService } from '../../shared/common-var';
-import { HttpClientModule, HttpClient, HttpHeaders, HttpRequest, HttpEventType, HttpResponse, HttpEvent } from '@angular/common/http';
+import { HttpClient, HttpRequest, HttpEventType } from '@angular/common/http';
 import { AppConfig } from '../../config/config';
-import { THIS_EXPR } from '@angular/compiler/src/output/output_ast';
 import { FileSaverService } from 'ngx-filesaver';
 import { Router } from '@angular/router';
 import { CommonFunctionService } from '../../shared/common-function/common-function.service';
@@ -19,9 +18,9 @@ import { NgbModalOptions, NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { SearchTopicsComponent } from '../../landing/search-topics/search-topics.component';
 import { DescriptionPopupComponent } from './description-popup/description-popup.component';
 import { CustomizationServiceService } from '../../shared/customization-service/customization-service.service';
+import { GoogleAnalyticsService } from '../../shared/ga-service/google-analytics.service';
 
-declare var saveAs: any;
-
+declare var _initAutoTracker: Function;
 
 @Component({
   moduleId: module.id,
@@ -111,6 +110,7 @@ export class DescriptionComponent {
     private commonFunctionService: CommonFunctionService,
     private taxonomyListService: TaxonomyListService,
     private ngbModal: NgbModal,
+    private gaService: GoogleAnalyticsService,
     public router: Router,
     private customizationServiceService: CustomizationServiceService,
     ngZone: NgZone) {
@@ -777,12 +777,17 @@ export class DescriptionComponent {
   * Function to set status when a file was downloaded
   **/
   setFileDownloaded(rowData: any) {
+    // Google Analytics code to track download event
+    this.gaService.gaTrackEvent('download', undefined, 'Resource title: ' + this.record['title'], rowData.downloadUrl);
+
     rowData.downloadStatus = 'downloaded';
     this.cartService.updateCartItemDownloadStatus(rowData.cartId, 'downloaded');
     this.downloadStatus = this.updateDownloadStatus(this.files) ? "downloaded" : null;
     if (rowData.isIncart) {
       this.downloadService.setFileDownloadedFlag(true);
     }
+
+
   }
 
   /**
@@ -825,6 +830,10 @@ export class DescriptionComponent {
       header: header,
       key: key,
       accept: () => {
+        // Google Analytics tracking code
+        console.log("Tracking download all");
+        this.gaService.gaTrackEvent('download', undefined, 'all files', this.record['title']);
+
         setTimeout(() => {
           let popupWidth: number = this.mobWidth * 0.8;
           let left: number = this.mobWidth * 0.1;
@@ -839,6 +848,9 @@ export class DescriptionComponent {
     });
   }
 
+  /**
+  * Function to download all.
+  **/
   downloadFromRoot() {
     this.cartService.setCurrentCart('landing_popup');
     this.commonVarService.setLocalProcessing(true);
