@@ -1,0 +1,156 @@
+{
+  "@context": [
+    "https://data.nist.gov/od/dm/nerdm-pub-context.jsonld", 
+    {
+      "@base": "ark:/88434/edi00hw91c"
+    }
+  ], 
+  "_schema": "https://data.nist.gov/od/dm/nerdm-schema/v0.1#", 
+  "_extensionSchemas": [
+    "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/PublicDataResource"
+  ], 
+  "@type": [
+    "nrdp:PublicDataResource"
+  ], 
+  "@id": "ark:/88434/edi00hw91c", 
+  "doi": "doi:10.18434/T4SW26", 
+  "title": "OptSortSph: Sorting Spherical Dielectric Particles in a Standing-Wave Interference Field",
+  "version": "3.1.3",
+  "contactPoint": {
+    "fn": "Zachary Levine", 
+    "hasEmail": "mailto:zachary.levine@nist.gov"
+  }, 
+  "modified": "2016-07-01", 
+  "ediid": "ark:/88434/pdr2210", 
+  "landingPage": "https://www.nist.gov/nvl/project-index-optical-method-sorting-nanoparticles-size", 
+  "description": [
+    "Software to predict the optical sorting of particles in a standing-wave laser interference field"
+  ], 
+  "keyword": [
+    "optical sorting", 
+    "laser interference field", 
+    "nanoparticles", 
+    "convection of fluid"
+  ], 
+  "theme": [
+    "Optical physics"
+  ], 
+  "topic": [], 
+  "references": [
+    {
+      "@type": "deo:BibliographicReference", 
+      "@id": "#ref:10.1364/OE.24.014100", 
+      "refType": "IsReferencedBy", 
+      "location": "https://doi.org/10.1364/OE.24.014100", 
+      "_extensionSchemas": [
+        "https://data.nist.gov/od/dm/nerdm-schema/v0.1#/definitions/DCiteDocumentReference"
+      ]
+    }
+  ], 
+  "accessLevel": "public", 
+  "license": "http://www.nist.gov/open/license.cfm", 
+  "components": [
+    {
+      "accessURL": "https://doi.org/10.18434/T4SW26", 
+      "description": "Software to predict the optical sorting of particles in a standing-wave laser interference field", 
+      "format": "Digital Object Identifier, a persistent identifier", 
+      "mediaType": "application/zip", 
+      "title": "DOI access for OptSortSph: Sorting Spherical Dielectric Particles in a Standing-Wave Interference Field", 
+      "@type": [
+        "nrd:Hidden", 
+        "dcat:Distribution"
+      ], 
+      "@id": "#doi:10.18434/T4SW26"
+    }, 
+    {
+      "description": "First trial of experiment", 
+      "filepath": "trial1.json", 
+      "checksum": {
+        "hash": "d155d99281ace123351a311084cd8e34edda6a9afcddd76eb039bad479595ec9", 
+        "algorithm": {
+          "tag": "sha256", 
+          "@type": "Thing"
+        }
+      }, 
+      "title": "JSON version of the Mathematica notebook", 
+      "mediaType": "application/json", 
+      "downloadURL": "https://data.nist.gov/od/ds/pdr2210/trial1.json", 
+      "size": 69, 
+      "@id": "cmps/trial1.json", 
+      "@type": [
+        "nrdp:DataFile", 
+        "dcat:Distribution"
+      ], 
+      "_extensionSchemas": [
+        "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+      ]
+    }, 
+    {
+      "description": "Second trial of experiment", 
+      "filepath": "trial2.json", 
+      "checksum": {
+        "hash": "d5eed5092f409bce7e88d057eb98b376534b372f9f6b7c14e57744b259c65d35", 
+        "algorithm": {
+          "tag": "sha256", 
+          "@type": "Thing"
+        }
+      }, 
+      "title": "JSON version of the Mathematica notebook", 
+      "mediaType": "application/json", 
+      "downloadURL": "https://data.nist.gov/od/ds/pdr2210/trial2.json", 
+      "size": 69, 
+      "@id": "cmps/trial2.json", 
+      "@type": [
+        "nrdp:DataFile", 
+        "dcat:Distribution"
+      ], 
+      "_extensionSchemas": [
+        "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+      ]
+    }, 
+    {
+      "filepath": "trial3", 
+      "@id": "cmps/trial3", 
+      "@type": [
+        "nrdp:Subcollection"
+      ], 
+      "_extensionSchemas": [
+        "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/Subcollection"
+      ]
+    }, 
+    {
+      "filepath": "trial3/trial3a.json", 
+      "checksum": {
+        "hash": "7b58010c841b7748a48a7ac6366258d5b5a8d23d756951b6059c0e80daad516b", 
+        "algorithm": {
+          "tag": "sha256", 
+          "@type": "Thing"
+        }
+      }, 
+      "mediaType": "application/json", 
+      "downloadURL": "https://data.nist.gov/od/ds/pdr2210/trial3/trial3a.json", 
+      "size": 70, 
+      "@id": "cmps/trial3/trial3a.json", 
+      "@type": [
+        "nrdp:DataFile", 
+        "dcat:Distribution"
+      ], 
+      "_extensionSchemas": [
+        "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+      ]
+    }
+  ], 
+  "publisher": {
+    "@type": "org:Organization", 
+    "name": "National Institute of Standards and Technology"
+  }, 
+  "language": [
+    "en"
+  ], 
+  "bureauCode": [
+    "006:55"
+  ], 
+  "programCode": [
+    "006:045"
+  ]
+}

@@ -825,7 +825,8 @@ class TestPreservationBagger(test.TestCase):
                     'NIST-BagIt-Version': "0.4",
                     'Multibag-Version': "0.4"
                 }
-            }
+            },
+            'store_dir': '/tmp'
         }
         
         self.bagr = midas.PreservationBagger(self.midasid, '_preserv',
@@ -1000,6 +1001,12 @@ class TestPreservationBagger(test.TestCase):
                                             "multibag", "file-lookup.tsv")))
         self.assertTrue(os.path.isfile(os.path.join(self.bagr.bagdir,
                                                    "about.txt")))
+
+        # make sure we could've found missing files
+        self.bagr._check_data_files(self.bagr.cfg.get('data_checker',{}))
+        with self.assertRaises(AIPValidationError):
+            self.bagr._check_data_files(self.bagr.cfg.get('data_checker',{}),
+                                        viadistrib=False)
 
     def test_determine_updated_version(self):
         self.bagr.prepare(nodata=False)
