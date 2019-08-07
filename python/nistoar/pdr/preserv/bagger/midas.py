@@ -901,7 +901,6 @@ class PreservationBagger(SIPBagger):
            not self.cfg.get('store_dir'):
             raise ConfigurationException("PreservationBagger: store_dir " +
                                          "config param needed")
-            
 
         # do a sanity check on the bag parent directory
         if not self.cfg.get('relative_to_indir', False):

@@ -152,7 +152,7 @@ class UpdatePrepService(object):
         if not self.sercache:
             raise ConfigurationException("UpdatePrepService: Missing property: "+
                                          "headbag_cache")
-        self.stagedir = self.cfg.get('store_dir')
+        self.storedir = self.cfg.get('store_dir')
         scfg = self.cfg.get('distrib_service', {})
         self.distsvc = distrib.RESTServiceClient(scfg.get('service_endpoint'))
         scfg = self.cfg.get('metadata_service', {})
