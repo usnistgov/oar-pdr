@@ -401,6 +401,12 @@ class TestBagUtils(test.TestCase):
                          ["mds3812.1_4.mbag0_4-20.tgz"])
         self.assertEqual(bagut.select_version(names, "1.3"),
                          names[0:2]+names[3:4]+names[5:8])
+        self.assertEqual(bagut.select_version(names, ""),
+                         ["mds3812.mbag0_4-4.tgz"])
+        self.assertEqual(bagut.select_version(names, "0"),
+                         ["mds3812.mbag0_4-4.tgz"])
+        self.assertEqual(bagut.select_version(names, "1"),
+                         ["mds3812.mbag0_4-4.tgz"])
 
     def test_schuripat(self):
         self.assertTrue(
