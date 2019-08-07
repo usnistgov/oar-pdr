@@ -73,6 +73,7 @@ export class AuthService {
     this.setToken(apiToken.token).then((result) => {
       this.setUserId(apiToken.userId).then((res) => {
         this.setUserId(apiToken.userId);
+        this.commonVarService.setUserId(apiToken.userId);
       })
     })
   }

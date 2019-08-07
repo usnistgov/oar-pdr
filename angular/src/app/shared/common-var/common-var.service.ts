@@ -50,7 +50,7 @@ export class CommonVarService {
     return this.ediid;
   }
 
-  setLoginURL(loginURL: string){
+  setLoginURL(loginURL: string) {
     this.loginURL = loginURL;
   }
 
@@ -157,8 +157,16 @@ export class CommonVarService {
     return this.editModeSub.asObservable();
   }
 
+
   /**
-  * Watching landing page ready flag
+   * Set user ID
+   **/
+  setUserId(value: string) {
+    this.useridModeSub.next(value);
+  }
+
+  /**
+  * Watching User ID
   **/
   watchUserId(): Observable<string> {
     return this.useridModeSub.asObservable();
