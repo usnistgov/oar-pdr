@@ -46,6 +46,7 @@ def setUpModule():
     loghdlr.setFormatter(logging.Formatter(bldr.DEF_BAGLOG_FORMAT))
     rootlog.addHandler(loghdlr)
     startServices()
+    time.sleep(0.2)
 
 def tearDownModule():
     global loghdlr

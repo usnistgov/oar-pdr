@@ -29,6 +29,7 @@ def startService(authmeth=None):
     cmd = cmd.format(os.path.join(tdir,"simsrv.log"), srvport,
                      os.path.join(basedir, wpy), pidfile)
     os.system(cmd)
+    time.sleep(0.2)
 
 def stopService(authmeth=None):
     tdir = tmpdir()
