@@ -140,6 +140,13 @@ export class DescriptionComponent {
     this.cartService.watchStorage().subscribe(value => {
       this.cartLength = value;
     });
+    this.commonVarService.watchRefreshTree().subscribe(value => {
+      this.visible = false;
+      setTimeout(() => {
+        this.visible = true;
+      }, 0);
+    });
+
     this.commonVarService.watchForceLandingPageInit().subscribe(value => {
       if (value) {
         this.cartMap = this.cartService.getCart();
@@ -154,11 +161,11 @@ export class DescriptionComponent {
 
   ngOnInit() {
     this.distApi = this.cfg.get("distService", "/od/ds/");
-    if (this.files.length != 0)
-      this.files = <TreeNode[]>this.files[0].data;
+    // if (this.files.length != 0)
+    //   this.files = <TreeNode[]>this.files[0].data;
 
 
-    this.fileNode = { "data": { "name": "", "size": "", "mediatype": "", "description": "", "filetype": "" } };
+    // this.fileNode = { "data": { "name": "", "size": "", "mediatype": "", "description": "", "filetype": "" } };
 
     this.cartMap = this.cartService.getCart();
     this.ediid = this.commonVarService.getEdiid();
@@ -177,6 +184,62 @@ export class DescriptionComponent {
       console.log(error);
       this.errorMsg = error;
     });
+
+    // const newPart = {
+    //   data: {
+    //     cartId: "/",
+    //     ediid: this.ediid,
+    //     name: "files",
+    //     mediatype: "",
+    //     size: null,
+    //     downloadUrl: null,
+    //     description: null,
+    //     filetype: null,
+    //     resId: "/",
+    //     filePath: "/",
+    //     downloadProgress: 0,
+    //     downloadInstance: null,
+    //     isIncart: false,
+    //     zipFile: null,
+    //     message: ''
+    //   }, children: []
+    // };
+    // newPart.children = this.files;
+    // this.treeRoot.push(newPart);
+    // this.updateStatusFromCart();
+    // this.allSelected = this.updateAllSelectStatus(this.files);
+    // this.downloadStatus = this.updateDownloadStatus(this.files) ? "downloaded" : null;
+    // this.totalFiles = 0;
+    // this.getTotalFiles(this.files);
+
+    // this.buildTree();
+    this.downloadService.watchDownloadProcessStatus("landingPage").subscribe(
+      value => {
+        this.allProcessed = value;
+        if (this.allProcessed) {
+          this.downloadStatus = "downloaded";
+        }
+        this.downloadStatus = this.updateDownloadStatus(this.files) ? "downloaded" : null;
+      }
+    );
+    this.downloadService.watchAnyFileDownloaded().subscribe(
+      value => {
+        this.noFileDownloaded = !value;
+      }
+    );
+  }
+
+
+  ngOnChanges() {
+    this.checkAccesspages();
+    this.buildTree();
+  }
+
+  buildTree(){
+    if (this.files.length != 0)
+      this.files = <TreeNode[]>this.files[0].data;
+
+    this.fileNode = { "data": { "name": "", "size": "", "mediatype": "", "description": "", "filetype": "" } };
 
     const newPart = {
       data: {
@@ -205,20 +268,6 @@ export class DescriptionComponent {
     this.totalFiles = 0;
     this.getTotalFiles(this.files);
 
-    this.downloadService.watchDownloadProcessStatus("landingPage").subscribe(
-      value => {
-        this.allProcessed = value;
-        if (this.allProcessed) {
-          this.downloadStatus = "downloaded";
-        }
-        this.downloadStatus = this.updateDownloadStatus(this.files) ? "downloaded" : null;
-      }
-    );
-    this.downloadService.watchAnyFileDownloaded().subscribe(
-      value => {
-        this.noFileDownloaded = !value;
-      }
-    );
   }
 
   /*
@@ -480,10 +529,6 @@ export class DescriptionComponent {
     setTimeout(() => {
       overlaypanel.show(event);
     }, 100);
-  }
-
-  ngOnChanges() {
-    this.checkAccesspages();
   }
 
   /**

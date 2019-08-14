@@ -23,6 +23,7 @@ import { ContactPopupComponent } from './contact-popup/contact-popup.component';
 import { TitlePopupComponent } from './title-popup/title-popup.component';
 import { CustomizationServiceService } from '../shared/customization-service/customization-service.service';
 import { GoogleAnalyticsService } from '../shared/ga-service/google-analytics.service';
+import { HttpHeaders, HttpClient, HttpErrorResponse } from '@angular/common/http';
 
 declare var _initAutoTracker: Function;
 
@@ -179,6 +180,7 @@ export class LandingComponent implements OnInit {
   HomePageLink: boolean = false;
   inBrowser: boolean = false;
   updateUrl: string;
+  isVisible: boolean;
 
   /**
    * Creates an instance of the SearchPanel
@@ -199,7 +201,8 @@ export class LandingComponent implements OnInit {
     private authService: AuthService,
     private ngbModal: NgbModal,
     private modalService: ModalService,
-    private customizationServiceService: CustomizationServiceService) {
+    private customizationServiceService: CustomizationServiceService,
+    private http: HttpClient) {
     this.titleObj = this.editingObjectInit();
     this.authorObj = this.editingObjectInit();
     this.contactObj = this.editingObjectInit();
@@ -213,6 +216,18 @@ export class LandingComponent implements OnInit {
     };
     var newAuthor = this.commonVarService.getBlankAuthor();
     this.tempAuthors['authors'] = newAuthor;
+    this.searchValue = this.route.snapshot.paramMap.get('id');
+
+    this.authService.watchAuthenticateStatus().subscribe(value => {
+      this.files = [];
+      if (value) {
+        this.loadPubData();
+      } else {
+        this.loadPubData();
+      }
+      //Refresh the file tree
+      this.commonVarService.setRefreshTree(true);
+    });
   }
 
   /*
@@ -240,7 +255,6 @@ export class LandingComponent implements OnInit {
       }
     );
 
-    this.searchValue = this.route.snapshot.paramMap.get('id');
     // this.errorMsg = 'The requested record id ' + this.searchValue + ' does not match with any records in the system';
 
     this.authService.watchAuthenticateStatus().subscribe(
@@ -262,6 +276,16 @@ export class LandingComponent implements OnInit {
     this.files = [];
     this.updateUrl = this.cfg.get("distService", "/rmm/") + "update/" + this.ediid;
 
+
+
+    //Show edit box if in edit mode
+    this.setTitleEditbox(false);
+    this.setContactEditbox(false);
+    this.setAuthorEditbox(false);
+  }
+
+  loadPubData() {
+    console.log("Loading pub data...");
     this.getData()
       .subscribe((res) => {
         this.onSuccess(res).then(function (result) {
@@ -278,11 +302,85 @@ export class LandingComponent implements OnInit {
         this.commonVarService.setContentReady(true);
         // throw new ErrorComponent(this.route);
       });
+  }
 
-    //Show edit box if in edit mode
-    this.setTitleEditbox(false);
-    this.setContactEditbox(false);
-    this.setAuthorEditbox(false);
+  loadIntData() {
+    return this.getIntData()
+      .subscribe((res) => {
+        if (res != undefined && res != null) {
+          this.onSuccess(res).then(function (result) {
+            this.commonVarService.setContentReady(true);
+          }.bind(this), function (err) {
+            alert("something went wrong while fetching the data.");
+          });
+        } else {
+          this.loadPubData();
+        }
+      }, (error) => {
+        console.log("There is an error in searchservice.");
+        console.log(error);
+        this.errorMsg = error;
+        this.isLoading = false;
+        this.commonVarService.setContentReady(true);
+        // throw new ErrorComponent(this.route);
+        this.loadPubData();
+      });
+  }
+
+  getIntData(): Observable<any> {
+    const apiToken = localStorage.getItem("apiToken");
+
+    //Need to append ediid to the base API URL
+    return this.http.get(this.authService.getBaseApiUrl(), {
+      headers: {
+        "Authorization": "Bearer " + this.authService.getToken(),
+        "userId": this.authService.getUserId()
+      }
+    });
+  }
+
+  getData(): Observable<any> {
+    var recordid = this.searchValue;
+    const recordid_KEY = makeStateKey<string>('record-' + recordid);
+
+    if (this.transferState.hasKey(recordid_KEY)) {
+      console.log("extracting data id=" + recordid + " embedded in web page");
+      const record = this.transferState.get<any>(recordid_KEY, null);
+      // this.transferState.remove(recordid_KEY);
+      return of(record);
+    }
+    else {
+      console.warn("record data not found in transfer state");
+      return this.searchService.searchById(recordid)
+        .catch((err: Response, caught: Observable<any[]>) => {
+          // console.log(err);
+          if (err !== undefined) {
+            console.error("Failed to retrieve data for id=" + recordid + "; error status=" + err.status);
+            if ("message" in err) console.error("Reason: " + (<any>err).message);
+            if ("url" in err) console.error("URL used: " + (<any>err).url);
+
+            // console.error(err);
+            if (err.status >= 500) {
+              this.router.navigate(["/usererror", recordid, { errorcode: err.status }]);
+            }
+            if (err.status >= 400 && err.status < 500) {
+              this.router.navigate(["/usererror", recordid, { errorcode: err.status }]);
+            }
+            if (err.status == 0) {
+              console.warn("Possible causes: Unable to trust site cert, CORS restrictions, ...");
+              return Observable.throw('Unknown error requesting data for id=' + recordid);
+            }
+          }
+          return Observable.throw(caught);
+        })
+        .pipe(
+          tap(record => {
+            if (isPlatformServer(this.platformId)) {
+              this.transferState.set(recordid_KEY, record);
+            }
+          })
+        );
+    }
   }
 
   /*
@@ -346,6 +444,7 @@ export class LandingComponent implements OnInit {
       this.isEmail = true;
     this.assessNewer();
     this.updateMenu();
+
     return Promise.resolve(this.files);
   }
 
@@ -405,7 +504,7 @@ export class LandingComponent implements OnInit {
     var citation = this.createMenuItem('Citation', "faa faa-angle-double-right",
       (event) => { this.getCitation(); this.showDialog(); }, '');
     var metaItem = this.createMenuItem("View Metadata", "faa faa-bars",
-      (event) => { this.goToSelection(true, false, 'metadata'); this.gaService.gaTrackPageview('/od/id/'+this.searchValue+'#metadata', this.record['title'])}, '');
+      (event) => { this.goToSelection(true, false, 'metadata'); this.gaService.gaTrackPageview('/od/id/' + this.searchValue + '#metadata', this.record['title']) }, '');
     itemsMenu.push(metaItem);
     itemsMenu.push(metadata);
 
@@ -495,49 +594,7 @@ export class LandingComponent implements OnInit {
       }
     });
   }
-  getData(): Observable<any> {
-    var recordid = this.searchValue;
-    const recordid_KEY = makeStateKey<string>('record-' + recordid);
 
-    if (this.transferState.hasKey(recordid_KEY)) {
-      console.log("extracting data id=" + recordid + " embedded in web page");
-      const record = this.transferState.get<any>(recordid_KEY, null);
-      // this.transferState.remove(recordid_KEY);
-      return of(record);
-    }
-    else {
-      console.warn("record data not found in transfer state");
-      return this.searchService.searchById(recordid)
-        .catch((err: Response, caught: Observable<any[]>) => {
-          // console.log(err);
-          if (err !== undefined) {
-            console.error("Failed to retrieve data for id=" + recordid + "; error status=" + err.status);
-            if ("message" in err) console.error("Reason: " + (<any>err).message);
-            if ("url" in err) console.error("URL used: " + (<any>err).url);
-
-            // console.error(err);
-            if (err.status >= 500) {
-              this.router.navigate(["/usererror", recordid, { errorcode: err.status }]);
-            }
-            if (err.status >= 400 && err.status < 500) {
-              this.router.navigate(["/usererror", recordid, { errorcode: err.status }]);
-            }
-            if (err.status == 0) {
-              console.warn("Possible causes: Unable to trust site cert, CORS restrictions, ...");
-              return Observable.throw('Unknown error requesting data for id=' + recordid);
-            }
-          }
-          return Observable.throw(caught);
-        })
-        .pipe(
-          tap(record => {
-            if (isPlatformServer(this.platformId)) {
-              this.transferState.set(recordid_KEY, record);
-            }
-          })
-        );
-    }
-  }
 
   //This is to check if empty
   isEmptyObject(obj) {
@@ -848,7 +905,7 @@ export class LandingComponent implements OnInit {
   //   this.titleEditable = true;
   // }
 
-  openTitleModal(){
+  openTitleModal() {
     let ngbModalOptions: NgbModalOptions = {
       backdrop: 'static',
       keyboard: false,
@@ -1047,7 +1104,7 @@ export class LandingComponent implements OnInit {
     }
   }
 
-  visitHomePage(url: string, event, title){
+  visitHomePage(url: string, event, title) {
     this.gaService.gaTrackEvent('datasource', event, title, url);
     window.open(url, '_blank');
   }

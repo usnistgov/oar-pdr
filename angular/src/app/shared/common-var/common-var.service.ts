@@ -24,6 +24,7 @@ export class CommonVarService {
   contentReadySub = new BehaviorSubject<boolean>(false);
   editModeSub = new BehaviorSubject<boolean>(false);
   useridModeSub = new BehaviorSubject<string>('');
+  refreshTreeSub = new BehaviorSubject<boolean>(false);
 
   constructor() {
     if (typeof (localStorage) !== 'undefined')
@@ -85,6 +86,20 @@ export class CommonVarService {
   **/
   watchLocalProcessing(): Observable<any> {
     return this.localProcessingSub.asObservable();
+  }
+
+  /**
+   * Set processing flag
+   **/
+  setRefreshTree(value: boolean) {
+    this.refreshTreeSub.next(value);
+  }
+
+  /**
+  * Watching processing flag
+  **/
+  watchRefreshTree(): Observable<any> {
+    return this.refreshTreeSub.asObservable();
   }
 
   /**
@@ -161,14 +176,14 @@ export class CommonVarService {
   /**
    * Set user ID
    **/
-  setUserId(value: string) {
+  setUserIdMode(value: string) {
     this.useridModeSub.next(value);
   }
 
   /**
   * Watching User ID
   **/
-  watchUserId(): Observable<string> {
+  watchUserIdMode(): Observable<string> {
     return this.useridModeSub.asObservable();
   }
 

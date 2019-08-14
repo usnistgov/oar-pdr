@@ -17,6 +17,7 @@ export class FakeBackendInterceptor implements HttpInterceptor {
     // array in local storage for registered users
 
     const sampleData: any = require('../../assets/sample2.json');
+    const sampleRecord: any = require('../../assets/sampleRecord2.json');
     const bundlePlanRes: any = require('../../assets/bundle-sample.json');
 
     // let httpRequest: any[] = [
@@ -44,6 +45,12 @@ export class FakeBackendInterceptor implements HttpInterceptor {
         window.alert('Click ok to login');
         return of(new HttpResponse({ status: 200, body }));
       }
+
+      if (request.url.endsWith('/saml-sp/api/mycontroller') && request.method === 'GET') {
+        console.log("Interceptor returning sample record...");
+        return of(new HttpResponse({ status: 200, body: undefined }));
+      }
+
       // get bundle
       // if (request.url.endsWith('/od/ds/_bundle') && request.method === 'POST') {
       //     // return new Observable(observer => {

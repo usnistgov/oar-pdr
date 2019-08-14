@@ -15,6 +15,8 @@ export class AuthService {
   _userid = this.commonVarService._userid;
   ediid: string;
   authToken: string;
+  baseApiUrl: string = "https://pn110559.nist.gov/saml-sp/api/mycontroller";
+
 
   httpOptions = {
     headers: new HttpHeaders({ 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': 'https://pn110559.nist.gov' }),
@@ -73,7 +75,8 @@ export class AuthService {
     this.setToken(apiToken.token).then((result) => {
       this.setUserId(apiToken.userId).then((res) => {
         this.setUserId(apiToken.userId);
-        this.commonVarService.setUserId(apiToken.userId);
+        this.commonVarService.setUserIdMode(apiToken.userId);
+        this.setAuthenticateStatus(true);
       })
     })
   }
@@ -110,6 +113,7 @@ export class AuthService {
   logoutUser() {
     this.removeToken(); 
     this.removeUserId();
+    this.setAuthenticateStatus(false);
     this.router.navigate(['/od/id/', this.commonVarService.getEdiid()], { fragment: '' });
   }
 
@@ -160,5 +164,16 @@ export class AuthService {
    */
   loggedIn() {
     return !!this.getToken();
+  }
+
+  /*
+   * Return JWT name
+   */
+  getJWTName() {
+    return this._tokenName;
+  }
+
+  getBaseApiUrl(){
+    return this.baseApiUrl;
   }
 }
