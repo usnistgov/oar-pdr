@@ -36,6 +36,7 @@ import com.mongodb.client.MongoDatabase;
 @Configuration
 @ConfigurationProperties
 @EnableAutoConfiguration
+
 /**
  * MongoDB configuration, reading all the conf details from application.yml
  * 
@@ -55,26 +56,45 @@ public class MongoConfig {
     List servers = new ArrayList();
     List credentials = new ArrayList();
 
-    @Value("${dbcollections.records}")
+    
+//    @Value("${oar.mdserver}")
+//    private String mdserver;
+//    @Value("${dbcollections.records}")
+//    private String record ="record";
+//    @Value("${dbcollections.changes}")
+//    private String changes = "change";
+//    @Value("${oar.mongodb.port}")
+//    private int port =27017;
+//    @Value("${oar.mongodb.host}")
+//    private String host ="localhost";
+//    @Value("${oar.mongodb.database.name}")
+//    private String dbname ="UpdateDB";
+//    @Value("${oar.mongodb.readwrite.user}")
+//    private String user ="oarrw";
+//    @Value("${oar.mongodb.readwrite.password}")
+//    private String password="ght#68";
+
+    @Value("${oar.mdserver}")
+    private String mdserver;
+    @Value("${oar.dbcollections.records}")
     private String record;
-    @Value("${dbcollections.changes}")
+    @Value("${oar.dbcollections.changes}")
     private String changes;
     @Value("${oar.mongodb.port}")
     private int port;
     @Value("${oar.mongodb.host}")
     private String host;
     @Value("${oar.mongodb.database.name}")
-    private String dbname;
+    private String dbname ;
     @Value("${oar.mongodb.readwrite.user}")
     private String user;
     @Value("${oar.mongodb.readwrite.password}")
     private String password;
-
     @PostConstruct
     public void initIt() throws Exception {
 
 	mongoClient = (MongoClient) this.mongo();
-	log.info("########## " + dbname + " ########");
+	log.info("########## " + dbname + " ########"+mdserver);
 
 	this.setMongodb(this.dbname);
 	this.setRecordCollection(this.record);

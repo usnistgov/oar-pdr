@@ -30,6 +30,7 @@ import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -63,12 +64,14 @@ public class UpdateController {
 
     @Autowired
     private UpdateRepository uRepo;
-
+    
+ 
     @RequestMapping(value = {
 	    "update/{ediid}" }, method = RequestMethod.POST)
     @ApiOperation(value = ".", nickname = "Cache Record Changes", notes = "Resource returns a record if it is editable and user is authenticated.")
     public Document updateRecord(@PathVariable @Valid String ediid,
 	    @Valid @RequestBody String params)  throws CustomizationException {
+
 	logger.info("Update the given record: "+ ediid);
 	return uRepo.update(params, ediid);
 	
