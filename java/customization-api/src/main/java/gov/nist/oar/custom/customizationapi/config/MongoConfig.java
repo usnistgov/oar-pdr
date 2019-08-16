@@ -74,21 +74,21 @@ public class MongoConfig {
 //    @Value("${oar.mongodb.readwrite.password}")
 //    private String password="ght#68";
 
-    @Value("${oar.mdserver}")
+    @Value("${oar.mdserver:testserver}")
     private String mdserver;
-    @Value("${oar.dbcollections.records}")
+    @Value("${oar.dbcollections.records: records}")
     private String record;
-    @Value("${oar.dbcollections.changes}")
+    @Value("${oar.dbcollections.changes: changes}")
     private String changes;
-    @Value("${oar.mongodb.port}")
+    @Value("${oar.mongodb.port:3333}")
     private int port;
-    @Value("${oar.mongodb.host}")
+    @Value("${oar.mongodb.host:localhost}")
     private String host;
-    @Value("${oar.mongodb.database.name}")
+    @Value("${oar.mongodb.database.name:UpdateDB}")
     private String dbname ;
-    @Value("${oar.mongodb.readwrite.user}")
+    @Value("${oar.mongodb.readwrite.user:testuser}")
     private String user;
-    @Value("${oar.mongodb.readwrite.password}")
+    @Value("${oar.mongodb.readwrite.password:testpassword}")
     private String password;
     @PostConstruct
     public void initIt() throws Exception {

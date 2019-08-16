@@ -37,7 +37,7 @@ public class UpdateRepositoryService implements UpdateRepository {
     @Autowired
     MongoConfig mconfig;
    
-    @Value("${oar.mdserver}")
+    @Value("${oar.mdserver:}")
     private String mdserver;
 
     MongoCollection<Document> recordCollection;
