@@ -77,6 +77,9 @@ export class HeadbarComponent {
   ngOnInit() {
     this.cartLength = this.cartService.getCartSize();
     this.userId = this.authService.getUserId();
+    // if(this.loggedIn()){
+    //   this.authService.setAuthenticateStatus(true);
+    // }
   }
 
   /*

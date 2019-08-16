@@ -18,6 +18,9 @@
     Edit
   </button>
 </div>
+<div *ngIf="loggedIn() && !saveDataLoaded && hasSavedData" style="background-color: burlywood; text-align: right;height:2em; padding-right: 1em; padding-top: .3em;">
+  <span style="color: red; padding-right: 1em;">You have edited data.</span> <span style="color: #1471AE; cursor: pointer;" (click)="loadSavedData()">Click here to load edited data.</span>
+</div>
 <div class="ui-grid ui-grid-responsive ui-grid-pad center">
   <div class="card landingcard">
     <!-- <div id="overlay" *ngIf="isLocalProcessing"> -->
@@ -60,7 +63,7 @@
                     <h2 [@changeBorderColor]=titleObj.currentState style="padding-right: .5em;">
                       {{record.title}}</h2>
                   </div>
-                  <div class="edit_button" *ngIf="!titleObj.detailEditmode" (click)="openTitleModal()">
+                  <div class="edit_button" *ngIf="!titleObj.detailEditmode">
                     <button *ngIf="!titleObj.detailEditmode" [style.opacity]="titleObj.buttonOpacity" type="button"
                       (click)="openTitleModal()"
                       style="height: 2.1em; border: 0px solid red;background-color: transparent;">

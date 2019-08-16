@@ -48,6 +48,11 @@ export class FakeBackendInterceptor implements HttpInterceptor {
 
       if (request.url.endsWith('/saml-sp/api/mycontroller') && request.method === 'GET') {
         console.log("Interceptor returning sample record...");
+        return of(new HttpResponse({ status: 200, body: sampleRecord }));
+      }
+
+      if (request.url.indexOf('data.nist.gov/rmm/update/') > -1 && request.method === 'POST') {
+        console.log("Record updated...");
         return of(new HttpResponse({ status: 200, body: undefined }));
       }
 

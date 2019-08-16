@@ -16,6 +16,7 @@ export class CommonVarService {
   userId: string;
   loginURL: string = "https://pn110559.nist.gov/saml-sp/auth/token";
   public _userid = "userid";
+  private customizationUpdateApi: string = "https://data.nist.gov/rmm/update/";
 
   localProcessingSub = new BehaviorSubject<boolean>(false);
   showDatacartSub = new BehaviorSubject<boolean>(false);
@@ -31,14 +32,6 @@ export class CommonVarService {
       this._storage = localStorage;
   }
 
-  // setLogin(setlogin : boolean){
-  //     this.userlogin = setlogin;
-  // }
-
-  // getLogin(){
-  //     return this.userlogin;
-  // }
-
   userConfig(val) {
     this.userObservable.next(val);
   }
@@ -49,6 +42,10 @@ export class CommonVarService {
 
   getEdiid() {
     return this.ediid;
+  }
+
+  getCustomizationUpdateApi(){
+    return this.customizationUpdateApi;
   }
 
   setLoginURL(loginURL: string) {

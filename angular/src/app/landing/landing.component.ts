@@ -23,7 +23,8 @@ import { ContactPopupComponent } from './contact-popup/contact-popup.component';
 import { TitlePopupComponent } from './title-popup/title-popup.component';
 import { CustomizationServiceService } from '../shared/customization-service/customization-service.service';
 import { GoogleAnalyticsService } from '../shared/ga-service/google-analytics.service';
-import { HttpHeaders, HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
+import { DescriptionPopupComponent } from './description/description-popup/description-popup.component';
 
 declare var _initAutoTracker: Function;
 
@@ -179,8 +180,10 @@ export class LandingComponent implements OnInit {
   organizationList: string[] = ["National Institute of Standards and Technology"]
   HomePageLink: boolean = false;
   inBrowser: boolean = false;
-  updateUrl: string;
+  // updateUrl: string;
   isVisible: boolean;
+  hasSavedData: boolean = false;
+  saveDataLoaded: boolean = false;
 
   /**
    * Creates an instance of the SearchPanel
@@ -219,14 +222,14 @@ export class LandingComponent implements OnInit {
     this.searchValue = this.route.snapshot.paramMap.get('id');
 
     this.authService.watchAuthenticateStatus().subscribe(value => {
-      this.files = [];
       if (value) {
-        this.loadPubData();
-      } else {
-        this.loadPubData();
+        if(this.ediid != undefined)
+          this.customizationServiceService.checkRecordEditStatus(this.ediid);
       }
-      //Refresh the file tree
-      this.commonVarService.setRefreshTree(true);
+    });
+
+    this.customizationServiceService.watchRecordEdited().subscribe(value => {
+      this.hasSavedData = value;
     });
   }
 
@@ -237,46 +240,11 @@ export class LandingComponent implements OnInit {
     return this.authService.loggedIn();
   }
 
-  /*
-  * logg in
-  */
-  login() {
-    this.authService.setAuthenticateStatus(true);
-  }
-
-
   /**
    * Get the params OnInit
    */
   ngOnInit() {
-    this.commonVarService.watchLocalProcessing().subscribe(
-      value => {
-        this.isLocalProcessing = value;
-      }
-    );
-
-    // this.errorMsg = 'The requested record id ' + this.searchValue + ' does not match with any records in the system';
-
-    this.authService.watchAuthenticateStatus().subscribe(
-      value => {
-        this.isAuthenticated = value;
-        if (value) {
-          this.currentMode = 'final';
-        } else {
-          this.currentMode = 'initial';
-        }
-      }
-    );
-
-    if (this.router.url.includes("ark"))
-      this.searchValue = this.router.url.split("/id/").pop();
-
-    this.ediid = this.searchValue;
-    this.commonVarService.setEdiid(this.searchValue);
-    this.files = [];
-    this.updateUrl = this.cfg.get("distService", "/rmm/") + "update/" + this.ediid;
-
-
+    this.loadPubData();
 
     //Show edit box if in edit mode
     this.setTitleEditbox(false);
@@ -284,13 +252,25 @@ export class LandingComponent implements OnInit {
     this.setAuthorEditbox(false);
   }
 
+  dataInit() {
+    if (this.router.url.includes("ark"))
+      this.searchValue = this.router.url.split("/id/").pop();
+
+    this.ediid = this.searchValue;
+    this.customizationServiceService.checkRecordEditStatus(this.ediid);
+
+    this.commonVarService.setEdiid(this.searchValue);
+    this.files = [];
+  }
+
   loadPubData() {
-    console.log("Loading pub data...");
+    this.dataInit();
     this.getData()
       .subscribe((res) => {
         this.onSuccess(res).then(function (result) {
           this.commonVarService.setContentReady(true);
           this.isLoading = false;
+          this.saveDataLoaded = false;
         }.bind(this), function (err) {
           alert("something went wrong while fetching the data.");
         });
@@ -304,12 +284,15 @@ export class LandingComponent implements OnInit {
       });
   }
 
-  loadIntData() {
-    return this.getIntData()
+  loadSavedData() {
+    this.dataInit();
+    return this.customizationServiceService.getSavedData()
       .subscribe((res) => {
         if (res != undefined && res != null) {
           this.onSuccess(res).then(function (result) {
             this.commonVarService.setContentReady(true);
+            this.saveDataLoaded = true;
+            this.commonVarService.setRefreshTree(true);
           }.bind(this), function (err) {
             alert("something went wrong while fetching the data.");
           });
@@ -325,18 +308,6 @@ export class LandingComponent implements OnInit {
         // throw new ErrorComponent(this.route);
         this.loadPubData();
       });
-  }
-
-  getIntData(): Observable<any> {
-    const apiToken = localStorage.getItem("apiToken");
-
-    //Need to append ediid to the base API URL
-    return this.http.get(this.authService.getBaseApiUrl(), {
-      headers: {
-        "Authorization": "Bearer " + this.authService.getToken(),
-        "userId": this.authService.getUserId()
-      }
-    });
   }
 
   getData(): Observable<any> {
@@ -445,6 +416,8 @@ export class LandingComponent implements OnInit {
     this.assessNewer();
     this.updateMenu();
 
+    if (this.files.length != 0)
+    this.files = <TreeNode[]>this.files[0].data;
     return Promise.resolve(this.files);
   }
 
@@ -875,7 +848,7 @@ export class LandingComponent implements OnInit {
   *  Set record level edit mode (for the edit button at top)
   */
   setRecordEditmode(mode: any) {
-    if (!this.authService.loggedIn()) {
+    if (mode && !this.authService.loggedIn()) {
       this.authService.login();
     }
     this.recordEditmode = mode;
@@ -897,13 +870,8 @@ export class LandingComponent implements OnInit {
 
   /*
   *  Set edit mode for title
+  *  We are re-using DescriptionPopupComponent because the functionality is the same
   */
-  // editTitle() {
-  //   // console.log("Editing title...");
-  //   this.titleObj.originalValue = this.record.title;
-  //   this.titleObj.detailEditmode = true;
-  //   this.titleEditable = true;
-  // }
 
   openTitleModal() {
     let ngbModalOptions: NgbModalOptions = {
@@ -912,10 +880,11 @@ export class LandingComponent implements OnInit {
       windowClass: "myCustomModalClass"
     };
 
-    const modalRef = this.ngbModal.open(TitlePopupComponent, ngbModalOptions);
-    modalRef.componentInstance.inputTitle = this.record.title;
+    const modalRef = this.ngbModal.open(DescriptionPopupComponent, ngbModalOptions);
+    modalRef.componentInstance.tempDecription = this.record.title;
+    modalRef.componentInstance.title = 'Title';
 
-    modalRef.componentInstance.returnTitle.subscribe((newTitle) => {
+    modalRef.componentInstance.returnDescription.subscribe((newTitle) => {
       if (newTitle) {
         this.record.title = newTitle;
 
@@ -923,13 +892,7 @@ export class LandingComponent implements OnInit {
         postMessage["title"] = newTitle;
         console.log("postMessage", JSON.stringify(postMessage));
 
-        this.customizationServiceService.update(this.updateUrl, JSON.stringify(postMessage)).subscribe(
-          blob => {
-            console.log("blob:", blob);
-          },
-          err => {
-            console.log("Error when updating title:", err);
-          });
+        this.customizationServiceService.update(this.ediid, "title", JSON.stringify(postMessage));
       }
     })
   }
@@ -942,27 +905,6 @@ export class LandingComponent implements OnInit {
     this.titleObj.detailEditmode = false;
     this.titleMouseout();
   }
-
-  /*
-  *  Save edited title
-  */
-  // saveEditedTitle() {
-  //   let postMessage: any[] = [];
-
-  //   this.titleObj.originalValue = '';
-  //   this.titleObj.detailEditmode = false;
-  //   this.titleMouseout();
-  //   postMessage.push({ "title": this.record.title });
-
-  //   var updateUrl = this.cfg.get("distService", "/rmm/") + "update/" + this.ediid;
-  //   this.customizationServiceService.update(updateUrl, JSON.stringify(postMessage)).subscribe(
-  //     blob => {
-  //       console.log("blob:", blob);
-  //     },
-  //     err => {
-  //       console.log("Error when updating title:", err);
-  //     });
-  // }
 
   /*
   *  Display contact edit box
@@ -1008,13 +950,7 @@ export class LandingComponent implements OnInit {
         postMessage["contactpoint"] = contactPoint;
         console.log("postMessage", JSON.stringify(postMessage));
 
-        this.customizationServiceService.update(this.updateUrl, JSON.stringify(postMessage)).subscribe(
-          blob => {
-            console.log("blob:", blob);
-          },
-          err => {
-            console.log("Error when updating title:", err);
-          });
+        this.customizationServiceService.update(this.ediid, "contactpoint", JSON.stringify(postMessage));
       }
     })
   }
@@ -1071,13 +1007,7 @@ export class LandingComponent implements OnInit {
         postMessage["authors"] = authors.authors;
         console.log("postMessage", JSON.stringify(postMessage));
 
-        this.customizationServiceService.update(this.updateUrl, JSON.stringify(postMessage)).subscribe(
-          blob => {
-            console.log("blob:", blob);
-          },
-          err => {
-            console.log("Error when updating title:", err);
-          });
+        this.customizationServiceService.update(this.ediid, "authors", JSON.stringify(postMessage));
       }
     })
   }

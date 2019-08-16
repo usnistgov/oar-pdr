@@ -235,10 +235,9 @@ export class DescriptionComponent {
     this.buildTree();
   }
 
-  buildTree(){
-    if (this.files.length != 0)
-      this.files = <TreeNode[]>this.files[0].data;
-
+  buildTree() {
+    // if (this.files.length != 0)
+    //   this.files = <TreeNode[]>this.files[0].data;
     this.fileNode = { "data": { "name": "", "size": "", "mediatype": "", "description": "", "filetype": "" } };
 
     const newPart = {
@@ -876,7 +875,6 @@ export class DescriptionComponent {
       key: key,
       accept: () => {
         // Google Analytics tracking code
-        console.log("Tracking download all");
         this.gaService.gaTrackEvent('download', undefined, 'all files', this.record['title']);
 
         setTimeout(() => {
@@ -1134,19 +1132,13 @@ export class DescriptionComponent {
         postMessage["description"] = tempDescs;
         console.log("postMessage", JSON.stringify(postMessage));
 
-        this.customizationServiceService.update(this.updateUrl, JSON.stringify(postMessage)).subscribe(
-          blob => {
-            console.log("blob:", blob);
-          },
-          err => {
-            console.log("Error when updating description:", err);
-          });
+        this.customizationServiceService.update(this.ediid, "description", JSON.stringify(postMessage));
       }
     })
   }
 
   /*
-*   Open Description popup modal
+*   Open Keyword popup modal - re-use description popup modal
 */
   openKeywordModal() {
     let i: number;
@@ -1177,16 +1169,10 @@ export class DescriptionComponent {
         this.record['keyword'] = keywords;
 
         var postMessage: any = {};
-        postMessage["description"] = keywords;
+        postMessage["keyword"] = keywords;
         console.log("postMessage", JSON.stringify(postMessage));
 
-        this.customizationServiceService.update(this.updateUrl, JSON.stringify(postMessage)).subscribe(
-          blob => {
-            console.log("blob:", blob);
-          },
-          err => {
-            console.log("Error when updating description:", err);
-          });
+        this.customizationServiceService.update(this.ediid, "keyword", JSON.stringify(postMessage));;
       }
     });
   }
@@ -1229,13 +1215,7 @@ export class DescriptionComponent {
         postMessage["topic"] = tempTopicsForUpdate;
         console.log("postMessage", JSON.stringify(postMessage));
 
-        this.customizationServiceService.update(this.updateUrl, JSON.stringify(postMessage)).subscribe(
-          blob => {
-            console.log("blob:", blob);
-          },
-          err => {
-            console.log("Error when updating title:", err);
-          });
+        this.customizationServiceService.update(this.ediid, "topic", JSON.stringify(postMessage));
       }
     })
   }
