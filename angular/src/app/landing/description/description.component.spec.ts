@@ -11,14 +11,15 @@ import { CommonVarService } from '../../shared/common-var';
 import { AppConfig } from '../../config/config';
 import { AngularEnvironmentConfigService } from '../../config/config.service';
 import { TransferState } from '@angular/platform-browser';
+import { GoogleAnalyticsService } from '../../shared/ga-service/google-analytics.service';
 // import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 
-describe('DescriptionPopupComponent', () => {
+describe('DescriptionComponent', () => {
   let component: DescriptionComponent;
   let fixture: ComponentFixture<DescriptionComponent>;
-  let cfg : AppConfig;
-  let plid : Object = "browser";
-  let ts : TransferState = new TransferState();
+  let cfg: AppConfig;
+  let plid: Object = "browser";
+  let ts: TransferState = new TransferState();
 
   beforeEach(async(() => {
     cfg = (new AngularEnvironmentConfigService(plid, ts)).getConfig() as AppConfig;
@@ -27,19 +28,20 @@ describe('DescriptionPopupComponent', () => {
     cfg.appVersion = "2.test";
 
     TestBed.configureTestingModule({
-      declarations: [ DescriptionComponent ],
-      imports: [FormsModule,        
+      declarations: [DescriptionComponent],
+      imports: [FormsModule,
         RouterTestingModule,
         HttpClientTestingModule],
       schemas: [NO_ERRORS_SCHEMA],
       providers: [
-        CartService, 
-        DownloadService, 
-        TestDataService, 
+        CartService,
+        DownloadService,
+        TestDataService,
         CommonVarService,
+        GoogleAnalyticsService,
         { provide: AppConfig, useValue: cfg }]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {
@@ -87,10 +89,6 @@ describe('DescriptionPopupComponent', () => {
     expect(aels[2].innerText).toContain('RF');
     expect(aels[3].innerText).toContain('Manufacturing');
     expect(aels[4].innerText).toContain('Node.js');
-  });
-
-  it('Totle files should be 3', () => {
-    expect(component.totalFiles).toEqual(3);
   });
 
   it('cartProcess() should be called', () => {

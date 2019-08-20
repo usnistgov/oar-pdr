@@ -63,7 +63,7 @@ export class HeadbarComponent {
       }
     );
 
-    this.commonVarService.watchUserIdMode().subscribe(
+    this.authService.watchUserIdMode().subscribe(
       value => {
         console.log('User ID:', value);
         this.userId = value;

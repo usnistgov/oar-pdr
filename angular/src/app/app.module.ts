@@ -69,7 +69,6 @@ import { DataTableModule } from 'primeng/primeng';
 import { DescriptionPopupComponent } from './landing/description/description-popup/description-popup.component';
 import { AuthorPopupComponent } from './landing/author-popup/author-popup.component';
 import { ContactPopupComponent } from './landing/contact-popup/contact-popup.component';
-import { TitlePopupComponent } from './landing/title-popup/title-popup.component';
 
 @NgModule({
   declarations: [
@@ -78,7 +77,7 @@ import { TitlePopupComponent } from './landing/title-popup/title-popup.component
     Collaspe, MetadataComponent, DescriptionComponent,
     KeyValuePipe, MetadataView, NoidComponent, NerdmComponent,
     ErrorComponent, UserErrorComponent,ComboBoxComponent,ComboBoxPipe,
-    AppShellNoRenderDirective, AppShellRenderDirective, LoginComponent, ModalComponent, ContenteditableModel, SearchTopicsComponent, DescriptionPopupComponent, AuthorPopupComponent, ContactPopupComponent, TitlePopupComponent
+    AppShellNoRenderDirective, AppShellRenderDirective, LoginComponent, ModalComponent, ContenteditableModel, SearchTopicsComponent, DescriptionPopupComponent, AuthorPopupComponent, ContactPopupComponent
   ],
   imports: [
       HttpClientModule,
@@ -120,8 +119,7 @@ import { TitlePopupComponent } from './landing/title-popup/title-popup.component
     SearchTopicsComponent, 
     DescriptionPopupComponent, 
     AuthorPopupComponent,
-    ContactPopupComponent,
-    TitlePopupComponent],
+    ContactPopupComponent],
   schemas: [CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA]
 })
 

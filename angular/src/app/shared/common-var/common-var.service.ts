@@ -13,9 +13,8 @@ export class CommonVarService {
   private random_minimum: number = 1;
   private random_maximum: number = 100000;
   private isLocalTesting: boolean = false;
-  userId: string;
   loginURL: string = "https://pn110559.nist.gov/saml-sp/auth/token";
-  public _userid = "userid";
+
   private customizationUpdateApi: string = "https://data.nist.gov/rmm/update/";
 
   localProcessingSub = new BehaviorSubject<boolean>(false);
@@ -24,7 +23,6 @@ export class CommonVarService {
   openDownloadModalSub = new BehaviorSubject<boolean>(false);
   contentReadySub = new BehaviorSubject<boolean>(false);
   editModeSub = new BehaviorSubject<boolean>(false);
-  useridModeSub = new BehaviorSubject<string>('');
   refreshTreeSub = new BehaviorSubject<boolean>(false);
 
   constructor() {
@@ -169,24 +167,9 @@ export class CommonVarService {
     return this.editModeSub.asObservable();
   }
 
-
-  /**
-   * Set user ID
-   **/
-  setUserIdMode(value: string) {
-    this.useridModeSub.next(value);
-  }
-
-  /**
-  * Watching User ID
-  **/
-  watchUserIdMode(): Observable<string> {
-    return this.useridModeSub.asObservable();
-  }
-
   /*
-*   Return a blank author
-*/
+   *   Return a blank author
+   */
   getBlankAuthor() {
     return {
       "familyName": "",

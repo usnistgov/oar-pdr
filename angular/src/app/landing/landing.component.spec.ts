@@ -23,6 +23,7 @@ import { CommonVarService } from '../shared/common-var';
 import { ModalService } from '../shared/modal-service';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { of } from 'rxjs';
+import { GoogleAnalyticsService } from '../shared/ga-service/google-analytics.service';
 
   describe('Landing Component', () => {
     let component: LandingComponent;
@@ -46,7 +47,7 @@ import { of } from 'rxjs';
       imports:[ MenuModule,DialogModule, FormsModule, TreeModule,FieldsetModule, HttpModule ,RouterTestingModule, HttpClientTestingModule, BrowserAnimationsModule],
       schemas: [ CUSTOM_ELEMENTS_SCHEMA ,NO_ERRORS_SCHEMA],
       providers: [
-        SearchService, 
+        SearchService, GoogleAnalyticsService,
         TransferState, CommonVarService, ModalService,
         { provide: AppConfig, useValue: cfg }]
       })

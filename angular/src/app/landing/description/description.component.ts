@@ -768,7 +768,7 @@ export class DescriptionComponent {
     var allDownloaded = true;
     var noFileDownloadedFlag = true;
     for (let comp of files) {
-      if (comp.children.length > 0) {
+      if (comp.children != undefined && comp.children.length > 0) {
         var status = this.updateDownloadStatus(comp.children);
         if (status) {
           comp.data.downloadStatus = 'downloaded';

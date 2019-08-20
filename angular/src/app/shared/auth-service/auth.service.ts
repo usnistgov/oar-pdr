@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, OnInit } from '@angular/core';
 import { HttpHeaders, HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
@@ -9,14 +9,15 @@ import { ApiToken } from "./ApiToken";
 @Injectable({
   providedIn: 'root'
 })
-export class AuthService {
+export class AuthService implements OnInit {
   authenticatedSub = new BehaviorSubject<boolean>(false);
   _tokenName = "authToken";
-  _userid = this.commonVarService._userid;
+  userId: string;
+  userIdFieldName = "userid";
   ediid: string;
   authToken: string;
   baseApiUrl: string = "https://pn110559.nist.gov/saml-sp/api/mycontroller";
-
+  useridModeSub = new BehaviorSubject<string>('');
 
   httpOptions = {
     headers: new HttpHeaders({ 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': 'https://pn110559.nist.gov' }),
@@ -27,6 +28,10 @@ export class AuthService {
     private http: HttpClient,
     private commonVarService: CommonVarService,
     private router: Router) {
+
+  }
+
+  ngOnInit() {
     this.ediid = this.commonVarService.getEdiid();
   }
 
@@ -75,7 +80,7 @@ export class AuthService {
     this.setToken(apiToken.token).then((result) => {
       this.setUserId(apiToken.userId).then((res) => {
         this.setUserId(apiToken.userId);
-        this.commonVarService.setUserIdMode(apiToken.userId);
+        this.setUserIdMode(apiToken.userId);
         this.setAuthenticateStatus(true);
       })
     })
@@ -111,7 +116,7 @@ export class AuthService {
    * Logout user, reload pdr landing page
    */
   logoutUser() {
-    this.removeToken(); 
+    this.removeToken();
     this.removeUserId();
     this.setAuthenticateStatus(false);
     this.router.navigate(['/od/id/', this.commonVarService.getEdiid()], { fragment: '' });
@@ -138,25 +143,25 @@ export class AuthService {
     localStorage.removeItem(this._tokenName);
   }
 
-    /*
-   * Get stored token
-   */
+  /*
+ * Get stored token
+ */
   setUserId(userid: any) {
-    return Promise.resolve(localStorage.setItem(this._userid, userid));
+    return Promise.resolve(localStorage.setItem(this.userIdFieldName, userid));
   }
 
   /*
    * Get stored token
    */
   getUserId() {
-    return localStorage.getItem(this._userid)
+    return localStorage.getItem(this.userIdFieldName)
   }
 
   /*
    * Remove stored token
    */
   removeUserId() {
-    localStorage.removeItem(this._userid);
+    localStorage.removeItem(this.userIdFieldName);
   }
 
   /*
@@ -173,7 +178,22 @@ export class AuthService {
     return this._tokenName;
   }
 
-  getBaseApiUrl(){
+  getBaseApiUrl() {
     return this.baseApiUrl;
+  }
+
+
+  /**
+   * Set user ID
+   **/
+  setUserIdMode(value: string) {
+    this.useridModeSub.next(value);
+  }
+
+  /**
+  * Watching User ID
+  **/
+  watchUserIdMode(): Observable<string> {
+    return this.useridModeSub.asObservable();
   }
 }

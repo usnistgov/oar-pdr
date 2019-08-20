@@ -20,7 +20,6 @@ import { ModalService } from '../shared/modal-service';
 import { AuthorPopupComponent } from './author-popup/author-popup.component';
 import { NgbModalOptions, NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ContactPopupComponent } from './contact-popup/contact-popup.component';
-import { TitlePopupComponent } from './title-popup/title-popup.component';
 import { CustomizationServiceService } from '../shared/customization-service/customization-service.service';
 import { GoogleAnalyticsService } from '../shared/ga-service/google-analytics.service';
 import { HttpClient } from '@angular/common/http';
@@ -135,6 +134,7 @@ export class LandingComponent implements OnInit {
   status: string;
   searchValue: string;
   record: any = [];
+  originalRecord: any = [];
   keyword: string;
   findId: string;
   leftmenu: MenuItem[];
@@ -271,6 +271,8 @@ export class LandingComponent implements OnInit {
           this.commonVarService.setContentReady(true);
           this.isLoading = false;
           this.saveDataLoaded = false;
+          // Make a copy of original pub data (for undo purpose)
+          this.originalRecord = JSON.parse(JSON.stringify(this.record));
         }.bind(this), function (err) {
           alert("something went wrong while fetching the data.");
         });
