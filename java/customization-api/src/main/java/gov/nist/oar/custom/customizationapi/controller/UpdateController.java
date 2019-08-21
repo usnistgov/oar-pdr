@@ -16,7 +16,7 @@ import java.io.IOException;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
-
+import org.springframework.web.client.RestClientException;
 //import org.apache.http.HttpEntity;
 //import org.apache.http.HttpResponse;
 //import org.apache.http.NameValuePair;
@@ -67,7 +67,7 @@ public class UpdateController {
     
  
     @RequestMapping(value = {
-	    "update/{ediid}" }, method = RequestMethod.POST)
+	    "update/{ediid}" }, method = RequestMethod.POST, headers = "accept=application/json", produces = "application/json")
     @ApiOperation(value = ".", nickname = "Cache Record Changes", notes = "Resource returns a record if it is editable and user is authenticated.")
     public Document updateRecord(@PathVariable @Valid String ediid,
 	    @Valid @RequestBody String params)  throws CustomizationException {
@@ -78,7 +78,7 @@ public class UpdateController {
     }
 
     @RequestMapping(value = {
-	    "save/{ediid}" }, method = RequestMethod.POST)
+	    "save/{ediid}" }, method = RequestMethod.POST, headers = "accept=application/json", produces = "application/json")
     @ApiOperation(value = ".", nickname = "Save changes to server", notes = "Resource returns a boolean based on success or failure of the request.")
     public Document saveRecord(@PathVariable @Valid String ediid,  @Valid @RequestBody String params) throws CustomizationException {
 	logger.info("Send updated record to mdserver:"+ediid);
@@ -116,9 +116,9 @@ public class UpdateController {
     }
 
     @RequestMapping(value = {
-	    "edit/{ediid}" }, method = RequestMethod.GET)
+	    "edit/{ediid}" }, method = RequestMethod.GET, produces = "application/json")
     @ApiOperation(value = ".", nickname = "Access editable Record", notes = "Resource returns a record if it is editable and user is authenticated.")
-    public Document editRecord(@PathVariable @Valid String ediid) {
+    public Document editRecord(@PathVariable @Valid String ediid) throws CustomizationException {
 	logger.info("Access the record to be edited by ediid "+ediid);
 	return uRepo.edit(ediid);
     }
@@ -136,5 +136,12 @@ public class UpdateController {
     public ErrorInfo handleStreamingError(RuntimeException ex, HttpServletRequest req) {
 	logger.error("Unexpected failure during request: " + req.getRequestURI() + "\n  " + ex.getMessage(), ex);
 	return new ErrorInfo(req.getRequestURI(), 500, "Unexpected Server Error");
+    }
+    
+    @ExceptionHandler(RestClientException.class)
+    @ResponseStatus(HttpStatus.BAD_GATEWAY)
+    public ErrorInfo handleRestClientError(RuntimeException ex, HttpServletRequest req) {
+	logger.error("Unexpected failure during request: " + req.getRequestURI() + "\n  " + ex.getMessage(), ex);
+	return new ErrorInfo(req.getRequestURI(), 502, "Can not connect to backend server");
     }
 }

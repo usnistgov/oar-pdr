@@ -110,7 +110,7 @@ public class UpdateRepositoryService implements UpdateRepository {
      * accessing records to edit in the front end.
      */
     @Override
-    public Document edit(String recordid) {
+    public Document edit(String recordid) throws CustomizationException{
 	recordCollection = mconfig.getRecordCollection();
 	changesCollection = mconfig.getChangeCollection();
 	return accessData.getData(recordid, recordCollection, mdserver);

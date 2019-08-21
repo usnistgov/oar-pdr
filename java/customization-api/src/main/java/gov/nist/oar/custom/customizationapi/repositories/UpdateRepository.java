@@ -24,6 +24,6 @@ import gov.nist.oar.custom.customizationapi.exceptions.CustomizationException;
  */
 public interface UpdateRepository {
     public Document update(String param, String recordid)  throws CustomizationException;
-    public Document edit(String recordid);
+    public Document edit(String recordid) throws CustomizationException;
     public Document save(String recordid, String params) throws CustomizationException;
 }

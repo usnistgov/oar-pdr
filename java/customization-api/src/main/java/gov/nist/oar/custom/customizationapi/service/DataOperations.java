@@ -63,11 +63,15 @@ public class DataOperations {
      * @param recordid
      * @return
      */
-    public Document getData(String recordid, MongoCollection<Document> mcollection, String mdserver) {
+    public Document getData(String recordid, MongoCollection<Document> mcollection, String mdserver) throws ResourceNotFoundException {
+	try {
 	if (checkRecordInCache(recordid, mcollection))
 	    return mcollection.find(Filters.eq("ediid", recordid)).first();
 	else
 	    return this.getDataFromServer(recordid, mdserver);
+	}catch(Exception exp) {
+	    throw new ResourceNotFoundException("There are errors accessing data and resources requested not found."+exp.getMessage());
+	}	
     }
 
     public Document getUpdatedData(String recordid, MongoCollection<Document> mcollection) {
@@ -104,11 +108,12 @@ public class DataOperations {
     };
 
     /**
-     * 
+     * Connects to backed metadata server to get the data
      * @param recordid
      * @return
      */
     public Document getDataFromServer(String recordid, String mdserver) {
+	
 	RestTemplate restTemplate = new RestTemplate();
 	return restTemplate.getForObject(mdserver + recordid, Document.class);
     }
@@ -138,9 +143,9 @@ public class DataOperations {
     }
 
     /**
-     * 
-     * @param recordid
-     * @param update
+     * To update the record in the cached database
+     * @param recordid an ediid of the record
+     * @param update json to update
      * @return
      */
     public boolean updateDataInCache(String recordid, MongoCollection<Document> mcollection, Document update) {

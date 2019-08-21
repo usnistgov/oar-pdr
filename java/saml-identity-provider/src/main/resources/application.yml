@@ -19,21 +19,21 @@ spring:
         read-timeout: 8000
         connect-timeout: 4000
       identity-provider:
-        entity-id: spring.security.saml.idp.id
-        alias: boot-sample-idp
-        sign-metadata: true
-        sign-assertions: true
-        want-requests-signed: true
-        signing-algorithm: RSA_SHA256
-        digest-method: SHA256
+        entity-id: com:deoyani:spring:sp
+#        alias: boot-sample-idp
+        sign-metadata: false
+        sign-assertions: false
+        want-requests-signed: false
+#        signing-algorithm: RSA_SHA256
+#        digest-method: SHA256
         single-logout-enabled: true
 #        encrypt-assertions: true
 #        key-encryption-algorithm: http://www.w3.org/2001/04/xmlenc#rsa-1_5
 #        data-encryption-algorithm: http://www.w3.org/2001/04/xmlenc#aes256-cbc
         name-ids:
-          - urn:oasis:names:tc:SAML:2.0:nameid-format:persistent
+#          - urn:oasis:names:tc:SAML:2.0:nameid-format:persistent
           - urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress
-          - urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified
+#          - urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified
 
         keys:
           active:
@@ -158,8 +158,9 @@ spring:
 #        - alias: boot-sample-sp
 #          metadata: http://localhost:8086/saml-sp-metadata.xml
 #          linktext: Spring Security SAML SP
-        - alias: saml-sp
-          metadata: https://pn110559.nist.gov/saml-sp/saml/metadata
+        - 
+#          alias: saml-sp
+          metadata: http://localhost:8086/spring_saml_metadata.xml
           linktext: Spring Security SAML SP
 #        - alias: spring-security-saml-local-sp
 #          metadata: http://localhost:8084/saml/metadata
