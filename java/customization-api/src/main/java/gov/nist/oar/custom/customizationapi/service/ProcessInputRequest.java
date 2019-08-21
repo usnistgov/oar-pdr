@@ -33,6 +33,7 @@ public class ProcessInputRequest {
 //    }
 
     public boolean validateInputParams(String json) {
+	logger.info("Validating input parameteres in the ProcessInputRequest class.");
 	// Add the json schema validation
 	if (JSONUtils.isJSONValid(json))
 	    return JSONUtils.validateInput(json);
@@ -42,7 +43,7 @@ public class ProcessInputRequest {
 
     // Validate input json
     public void validate() {
-	logger.info("validate input json againts given properties");
+	logger.info("Validate input json againts given properties");
     }
 
 }
