@@ -482,6 +482,7 @@ class MIDASSIPHandler(SIPHandler):
         self._status.record_progress("Delivering preservation artifacts")
         log.debug("writing files to %s", destdir)
         errors = []
+        saved = []
         try:
             for f in savefiles:
                 destfile = os.path.join(destdir, os.path.basename(f))
@@ -490,6 +491,7 @@ class MIDASSIPHandler(SIPHandler):
                     raise OSError(errno.EEXIST, os.strerror(errno.EEXIST),
                                   destfile)
                 shutil.copy(f, destdir)
+                saved.append(f)
         except OSError, ex:
             log.error("Failed to copy preservation file: %s\n" +
                       "  to long-term storage: %s", f, destdir)
@@ -498,10 +500,11 @@ class MIDASSIPHandler(SIPHandler):
             msg = "Failed to copy preservation files to long-term storage"
             self.set_state(status.FAILED, msg)
 
-            for f in savefiles:
-                f = os.path.join(destdir, os.path.basename(f))
-                if os.path.exists(f):
-                    os.remove(f)
+            for f in saved:
+                fp = os.path.join(destdir, os.path.basename(f))
+                if os.path.exists(fp):
+                    log.warn("Removing %s from long-term storage", f)
+                    os.remove(fp)
 
             raise PreservationException(msg, [str(ex)])
 
