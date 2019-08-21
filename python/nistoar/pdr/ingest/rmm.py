@@ -2,7 +2,7 @@
 Module providing client-side support for the RMM ingest service.  
 """
 import os, sys, shutil, logging, requests
-from collections import Mapping, Sequence
+from collections import Mapping, Sequence, OrderedDict
 
 from ..exceptions import (StateException, ConfigurationException, PDRException,
                           NERDError)
@@ -363,7 +363,29 @@ class IngestClient(object):
 
         return { "succeeded": [], "failed": [], "skipped": staged }
 
-                
+    def find_named(self, name):
+        """
+        return the paths to cached records with the given name.  The result is 
+        returned as a dictionary that maps states under which the record is found 
+        ("succeeded", "failed", "staged", and "in_progress") to a file path for 
+        the cached record.  Because a record with a given name can be ingested 
+        multiple times, versions may exist under multiple states (such as 
+        "succeeded" from the first ingest, and "staged" for the subsequent ingest).
+        """
+        bases = OrderedDict([
+            ("succeeded", self._successdir),
+            ("in_progress", self._inprogdir),
+            ("staged", self._stagedir),
+            ("failed", self._faildir)
+        ])
+
+        out = OrderedDict()
+        for state in bases:
+            path = os.path.join(bases[state], name+".json")
+            if os.path.exists(path):
+                out[state] = path
+
+        return out
 
 
 class IngestServiceException(PDRException):
