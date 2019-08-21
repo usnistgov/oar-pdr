@@ -401,6 +401,38 @@ class TestBagUtils(test.TestCase):
                          ["mds3812.1_4.mbag0_4-20.tgz"])
         self.assertEqual(bagut.select_version(names, "1.3"),
                          names[0:2]+names[3:4]+names[5:8])
+        self.assertEqual(bagut.select_version(names, ""),
+                         ["mds3812.mbag0_4-4.tgz"])
+        self.assertEqual(bagut.select_version(names, "0"),
+                         ["mds3812.mbag0_4-4.tgz"])
+        self.assertEqual(bagut.select_version(names, "1"),
+                         ["mds3812.mbag0_4-4.tgz"])
+
+    def test_select_version_newpat(self):
+        names = [
+            "mds2-3812.1_3.mbag0_4-10.tgz",
+            "mds2-3812.1_3.mbag0_2-8.tgz", 
+            "mds2-3812.2_0.mbag0_4-18.tgz",
+            "mds2-3812.1_3.mbag0_4-14.7z", 
+            "mds2-3812.mbag0_4-4.tgz",  
+            "mds2-3812.1_3.mbag1_0-16.tgz",
+            "mds2-3812.1_3.mbag0_4-14.zip",
+            "mds2-3812.1_3.mbag0_4-14.tgz", 
+            "mds2-3812.1_4.mbag0_4-20.tgz" 
+        ];
+
+        self.assertEqual(bagut.select_version(names, "2.0"),
+                         ["mds2-3812.2_0.mbag0_4-18.tgz"])
+        self.assertEqual(bagut.select_version(names, "1.4"),
+                         ["mds2-3812.1_4.mbag0_4-20.tgz"])
+        self.assertEqual(bagut.select_version(names, "1.3"),
+                         names[0:2]+names[3:4]+names[5:8])
+        self.assertEqual(bagut.select_version(names, ""),
+                         ["mds2-3812.mbag0_4-4.tgz"])
+        self.assertEqual(bagut.select_version(names, "0"),
+                         ["mds2-3812.mbag0_4-4.tgz"])
+        self.assertEqual(bagut.select_version(names, "1"),
+                         ["mds2-3812.mbag0_4-4.tgz"])
 
     def test_schuripat(self):
         self.assertTrue(

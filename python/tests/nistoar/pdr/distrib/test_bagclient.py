@@ -25,7 +25,7 @@ def startService(authmeth=None):
           "--wsgi-file {2} --pidfile {3}"
     cmd = cmd.format(os.path.join(tdir,"simsrv.log"), srvport,
                      os.path.join(basedir, wpy), pidfile)
-    os.system(cmd)
+    return os.system(cmd) == 0
 
 def stopService(authmeth=None):
     tdir = tmpdir()
@@ -47,7 +47,8 @@ def setUpModule():
     loghdlr = logging.FileHandler(os.path.join(tmpdir(),"test_simsrv.log"))
     loghdlr.setLevel(logging.DEBUG)
     rootlog.addHandler(loghdlr)
-    startService()
+    if not startService():
+        raise RuntimeError("Failed to start the mock service")
 
 def tearDownModule():
     global loghdlr
@@ -95,8 +96,8 @@ class TestBagDistribClient(test.TestCase):
 
         cli = bagclient.BagDistribClient("pdr2210", self.svc)
         self.assertEqual(cli.list_all(),
-                         ["pdr2210.1_0.mbag0_3-0.zip", "pdr2210.2.mbag0_3-1.zip",
-                          "pdr2210.3_1_3.mbag0_3-4.zip"])
+                     ["pdr2210.1_0.mbag0_3-0.zip", "pdr2210.1_0.mbag0_3-1.zip", 
+                      "pdr2210.2.mbag0_3-2.zip", "pdr2210.3_1_3.mbag0_3-5.zip"])
 
         with self.assertRaises(client.DistribResourceNotFound):
             cli = bagclient.BagDistribClient("goob", self.svc)
@@ -121,7 +122,7 @@ class TestBagDistribClient(test.TestCase):
 
         cli = bagclient.BagDistribClient("pdr2210", self.svc)
         self.assertEqual(cli.list_for_version('3.1.3'),
-                         ["pdr2210.3_1_3.mbag0_3-4.zip"])
+                         ["pdr2210.3_1_3.mbag0_3-5.zip"])
 
     def test_head_for_version(self):
         cli = bagclient.BagDistribClient("pdr1010", self.svc)
@@ -132,7 +133,7 @@ class TestBagDistribClient(test.TestCase):
 
         cli = bagclient.BagDistribClient("pdr2210", self.svc)
         self.assertEqual(cli.head_for_version('3.1.3'),
-                         "pdr2210.3_1_3.mbag0_3-4.zip")
+                         "pdr2210.3_1_3.mbag0_3-5.zip")
         
         cli = bagclient.BagDistribClient("goob", self.svc)
         with self.assertRaises(client.DistribResourceNotFound):
