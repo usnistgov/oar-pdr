@@ -1,4 +1,4 @@
-import os, pdb, sys, logging, yaml
+import os, pdb, sys, logging, yaml, stat
 import unittest as test
 
 from nistoar.testing import *
@@ -147,6 +147,11 @@ class TestMIDASSIPHandler(test.TestCase):
         self.assertEqual(len(staged), 1)
         self.assertTrue(os.path.basename(staged[0]).endswith("-0.zip"))
 
+        # we don't have a nerdm staging area, so we shouldn't a cached nerdm file
+        # under staging area
+        staged = os.path.join(self.stagedir,'_nerd',self.midasid+".json")
+        self.assertFalse(os.path.exists(staged))
+
         # has the metadata bag been cleaned up?
         mdbagdir = os.path.join(self.sip.mdbagdir, self.midasid)
         self.assertFalse( os.path.exists(mdbagdir),
@@ -157,7 +162,62 @@ class TestMIDASSIPHandler(test.TestCase):
         bb = self.midasid+".1_0_0.mbag0_4-"
         bfs = [f for f in os.listdir(pd) if f.startswith(bb)]
         self.assertEqual(len(bfs), 0)
-        
+
+    def test_bagit_withnerdstaging(self):
+        mdcache = os.path.join(self.stagedir, "_nerd")
+        if not os.path.exists(mdcache):
+            os.mkdir(mdcache)
+
+        self.assertEqual(self.sip.state, status.FORGOTTEN)
+        self.assertEqual(len(os.listdir(self.sip.stagedir)), 1)
+        self.sip.bagit()
+        self.assertTrue(os.path.exists(os.path.join(self.store, 
+                                          self.midasid+".1_0_0.mbag0_4-0.zip")))
+
+        # do we have a cached nerdm file under staging area?
+        staged = os.path.join(self.stagedir,'_nerd',self.midasid+".json")
+        self.assertTrue(os.path.exists(staged))
+
+    def test_bagit_nerdstagingfail(self):
+        mdcache = os.path.join(self.stagedir, "_nerd")
+        if not os.path.exists(mdcache):
+            os.mkdir(mdcache)
+        staged = os.path.join(self.stagedir,'_nerd',self.midasid+".json")
+        with open(staged, 'w') as fd:
+            pass
+
+        self.assertEqual(self.sip.state, status.FORGOTTEN)
+        self.assertEqual(len(os.listdir(self.sip.stagedir)), 1)
+        try:
+            os.chmod(staged, stat.S_IREAD)
+            os.chmod(mdcache, stat.S_IREAD|stat.S_IXUSR)
+            with self.assertRaises(OSError):
+                self.sip.bagit()
+        finally:
+            os.chmod(mdcache, stat.S_IREAD|stat.S_IWRITE|stat.S_IXUSR)
+            os.chmod(staged, stat.S_IREAD|stat.S_IWRITE|stat.S_IROTH|stat.S_IWOTH)
+                     
+
+    def test_bagit_nerdstagingclean(self):
+        mdcache = os.path.join(self.stagedir, "_nerd")
+        if not os.path.exists(mdcache):
+            os.mkdir(mdcache)
+        staged = os.path.join(mdcache, self.midasid+".json")
+        with open(staged, 'w') as fd:
+            pass
+        self.assertTrue(os.path.exists(staged))
+
+        self.assertEqual(self.sip.state, status.FORGOTTEN)
+        self.assertEqual(len(os.listdir(self.sip.stagedir)), 1)
+        try:
+            os.chmod(staged, stat.S_IREAD)
+            self.sip.bagit()
+
+            # do we have a cached nerdm file under staging area?
+            self.assertFalse(os.path.exists(staged))
+        finally:
+            if os.path.exists(staged):
+                os.chmod(staged,stat.S_IREAD|stat.S_IWRITE|stat.S_IROTH|stat.S_IWOTH)
 
     def test_bagit_nooverwrite(self):
         self.assertEqual(self.sip.state, status.FORGOTTEN)

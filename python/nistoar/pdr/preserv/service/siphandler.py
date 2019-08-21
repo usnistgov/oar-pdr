@@ -20,6 +20,7 @@ from .. import (ConfigurationException, StateException, PODError)
 from .. import PreservationException, sys as _sys
 from . import status
 from ...ingest.rmm import IngestClient
+from ...utils import write_json
 
 log = logging.getLogger(_sys.system_abbrev).getChild(_sys.subsystem_abbrev)
 
@@ -460,10 +461,11 @@ class MIDASSIPHandler(SIPHandler):
                 self.bagger.bagbldr._unset_logfile() # disengage the internal log
 
         # Stage the full NERDm record for ingest into the RMM
+        bag = NISTBag(self.bagger.bagdir)
+        nerdm = bag.nerdm_record()
         if self._ingester:
             try:
-                bag = NISTBag(self.bagger.bagdir)
-                self._ingester.stage(bag.nerdm_record(), self.bagger.name)
+                self._ingester.stage(nerdm, self.bagger.name)
             except Exception as ex:
                 msg = "Failure staging NERDm record for " + self.bagger.name + \
                       " for ingest: " + str(ex)
@@ -566,6 +568,18 @@ class MIDASSIPHandler(SIPHandler):
                 except Exception as ex:
                     log.warn("Failed to clean up the metadata bag lock file: "+
                              mdbag + ".lock: "+str(ex))
+
+        # cache the latest nerdm record under the staging directory
+        try:
+            mdcache = os.path.join(self.stagedir, '_nerd')
+            staged = os.path.join(mdcache, self.bagger.name+".json")
+            if os.path.isdir(mdcache):
+                write_json(nerdm, staged)
+        except Exception as ex:
+            log.error("Failed to cache the new NERDm record: "+str(ex))
+            if os.path.exists(staged):
+                # remove the old record as it is now out of date
+                os.remove(staged)
 
         self.set_state(status.SUCCESSFUL)
 
