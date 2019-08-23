@@ -32,11 +32,11 @@
               "node_modules/primeng/resources/themes/bootstrap/theme.css",
               "src/styles/font-awesome/css/font-awesome.min.css",
               "src/styles/main.css",
-              "src/app/content/modal.less"
+              "src/app/content/modal.less",
+              "./node_modules/ngx-toastr/toastr.css",
+              "./node_modules/ngx-toastr/toastr-old.css"
             ],
-            "scripts": [
-
-            ]
+            "scripts": []
           },
           "configurations": {
             "production": {
@@ -109,7 +109,7 @@
         },
         "lint": {
           "builder": "@angular-devkit/build-angular:tslint",
-          "options": {            
+          "options": {
             "tsConfig": [
               "src/tsconfig.app.json"
             ],

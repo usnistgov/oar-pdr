@@ -30,7 +30,7 @@ export class FakeBackendInterceptor implements HttpInterceptor {
       // if (request.url.endsWith('/od/ds/_bundle_plan') && request.method === 'POST') {
       //   return of(new HttpResponse({ status: 200, body: JSON.parse(bundlePlanRes) }));
       // }
-
+      console.log("request.url", request.url);
       // For e2e test
       if (request.url.endsWith('/rmm/records/SAMPLE123456') && request.method === 'GET') {
         return of(new HttpResponse({ status: 200, body: sampleData }));
@@ -46,13 +46,23 @@ export class FakeBackendInterceptor implements HttpInterceptor {
         return of(new HttpResponse({ status: 200, body }));
       }
 
-      if (request.url.endsWith('/saml-sp/api/mycontroller') && request.method === 'GET') {
+      if (request.url.indexOf('/customization/draft') > -1 && request.method === 'GET') {
         console.log("Interceptor returning sample record...");
         return of(new HttpResponse({ status: 200, body: sampleRecord }));
       }
 
-      if (request.url.indexOf('data.nist.gov/rmm/update/') > -1 && request.method === 'POST') {
+      if (request.url.indexOf('/customization/draft') > -1 && request.method === 'PATCH') {
         console.log("Record updated...");
+        return of(new HttpResponse({ status: 200, body: undefined }));
+      }
+
+      if (request.url.indexOf('/customization/draft') > -1 && request.method === 'DELETE') {
+        console.log("Record deleted...");
+        return of(new HttpResponse({ status: 200, body: undefined }));
+      }
+
+      if (request.url.indexOf('/customization/savedrec') > -1 && request.method === 'PUT') {
+        console.log("Record saved...");
         return of(new HttpResponse({ status: 200, body: undefined }));
       }
 

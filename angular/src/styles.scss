@@ -56,3 +56,35 @@ h2 {
 .myCustomModalClass .modal-dialog {
   max-width: 90%;
 }
+
+.dialogHeader {
+  background-color:#153971;
+  height: 4em; 
+  color:white;
+  text-align: center;
+  padding-top: .5em;
+}
+
+.toast-bootstrap-compatibility-fix {
+  opacity:1;
+}
+
+.toast {
+  font-size: initial !important;
+  border: initial !important;
+  backdrop-filter: blur(0) !important;
+}
+.toast-success {
+  background-color: green !important;
+  color: white !important;
+  padding: 0 1em 0 1em;
+}
+.toast-error {
+  background-color: #BD362F !important;
+}
+.toast-info {
+  background-color: #2F96B4 !important;
+}
+.toast-warning {
+  background-color: #F89406 !important;
+}

@@ -19,6 +19,7 @@ import { SearchTopicsComponent } from '../../landing/search-topics/search-topics
 import { DescriptionPopupComponent } from './description-popup/description-popup.component';
 import { CustomizationServiceService } from '../../shared/customization-service/customization-service.service';
 import { GoogleAnalyticsService } from '../../shared/ga-service/google-analytics.service';
+import { NotificationService } from '../../shared/notification-service/notification.service';
 
 declare var _initAutoTracker: Function;
 
@@ -33,6 +34,7 @@ declare var _initAutoTracker: Function;
 export class DescriptionComponent {
 
   @Input() record: any[];
+  @Input() originalRecord: any[];
   @Input() files: TreeNode[];
   @Input() distdownload: string;
   @Input() editContent: boolean;
@@ -93,6 +95,7 @@ export class DescriptionComponent {
   selectedData: TreeNode[] = [];
   isVisible: boolean = true;
   updateUrl: string;
+  editingStatus: any = {};
 
   /* Function to Return Keys object properties */
   keys(): Array<string> {
@@ -113,6 +116,7 @@ export class DescriptionComponent {
     private gaService: GoogleAnalyticsService,
     public router: Router,
     private customizationServiceService: CustomizationServiceService,
+    private notificationService: NotificationService,
     ngZone: NgZone) {
     this.cols = [
       { field: 'name', header: 'Name', width: '60%' },
@@ -161,11 +165,6 @@ export class DescriptionComponent {
 
   ngOnInit() {
     this.distApi = this.cfg.get("distService", "/od/ds/");
-    // if (this.files.length != 0)
-    //   this.files = <TreeNode[]>this.files[0].data;
-
-
-    // this.fileNode = { "data": { "name": "", "size": "", "mediatype": "", "description": "", "filetype": "" } };
 
     this.cartMap = this.cartService.getCart();
     this.ediid = this.commonVarService.getEdiid();
@@ -185,34 +184,6 @@ export class DescriptionComponent {
       this.errorMsg = error;
     });
 
-    // const newPart = {
-    //   data: {
-    //     cartId: "/",
-    //     ediid: this.ediid,
-    //     name: "files",
-    //     mediatype: "",
-    //     size: null,
-    //     downloadUrl: null,
-    //     description: null,
-    //     filetype: null,
-    //     resId: "/",
-    //     filePath: "/",
-    //     downloadProgress: 0,
-    //     downloadInstance: null,
-    //     isIncart: false,
-    //     zipFile: null,
-    //     message: ''
-    //   }, children: []
-    // };
-    // newPart.children = this.files;
-    // this.treeRoot.push(newPart);
-    // this.updateStatusFromCart();
-    // this.allSelected = this.updateAllSelectStatus(this.files);
-    // this.downloadStatus = this.updateDownloadStatus(this.files) ? "downloaded" : null;
-    // this.totalFiles = 0;
-    // this.getTotalFiles(this.files);
-
-    // this.buildTree();
     this.downloadService.watchDownloadProcessStatus("landingPage").subscribe(
       value => {
         this.allProcessed = value;
@@ -1132,7 +1103,15 @@ export class DescriptionComponent {
         postMessage["description"] = tempDescs;
         console.log("postMessage", JSON.stringify(postMessage));
 
-        this.customizationServiceService.update(this.ediid, "description", JSON.stringify(postMessage));
+        this.customizationServiceService.update(this.ediid, JSON.stringify(postMessage)).subscribe(
+          result => {
+            this.editingStatus["description"] = true; 
+            this.notificationService.showSuccessWithTimeout("Description updated", "", 3000);
+            console.log("this.editingStatus", this.editingStatus);
+          },
+          err => {
+            console.log("Error when updating description:", err);
+          });
       }
     })
   }
@@ -1172,7 +1151,15 @@ export class DescriptionComponent {
         postMessage["keyword"] = keywords;
         console.log("postMessage", JSON.stringify(postMessage));
 
-        this.customizationServiceService.update(this.ediid, "keyword", JSON.stringify(postMessage));;
+        this.customizationServiceService.update(this.ediid, JSON.stringify(postMessage)).subscribe(
+          result => {
+            this.editingStatus["keywords"] = true; 
+            this.notificationService.showSuccessWithTimeout("Keywords updated", "", 3000);
+            console.log("this.editingStatus", this.editingStatus);
+          },
+          err => {
+            console.log("Error when updating keywords:", err);
+          });
       }
     });
   }
@@ -1215,7 +1202,16 @@ export class DescriptionComponent {
         postMessage["topic"] = tempTopicsForUpdate;
         console.log("postMessage", JSON.stringify(postMessage));
 
-        this.customizationServiceService.update(this.ediid, "topic", JSON.stringify(postMessage));
+        this.customizationServiceService.update(this.ediid, JSON.stringify(postMessage)).subscribe(
+          result => {
+            console.log("Update result:", result);
+            this.editingStatus["topics"] = true; 
+            this.notificationService.showSuccessWithTimeout("Topics updated", "", 3000);
+            console.log("this.editingStatus", this.editingStatus);
+          },
+          err => {
+            console.log("Error when updating topic:", err);
+          });
       }
     })
   }

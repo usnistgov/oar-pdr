@@ -17,6 +17,7 @@ export class AuthService implements OnInit {
   ediid: string;
   authToken: string;
   baseApiUrl: string = "https://pn110559.nist.gov/saml-sp/api/mycontroller";
+  loginURL: string = "https://pn110559.nist.gov/saml-sp/auth/token";
   useridModeSub = new BehaviorSubject<string>('');
 
   httpOptions = {
@@ -53,7 +54,7 @@ export class AuthService implements OnInit {
   *  Send http login request
   */
   loginUser() {
-    return this.http.get(this.commonVarService.getLoginURL(), this.httpOptions);
+    return this.http.get(this.loginURL, this.httpOptions);
   }
 
   /*
@@ -114,12 +115,16 @@ export class AuthService implements OnInit {
 
   /*
    * Logout user, reload pdr landing page
+   * If refresh set to true, reload the page
    */
-  logoutUser() {
+  logoutUser(noRefresh?: boolean) {
     this.removeToken();
     this.removeUserId();
     this.setAuthenticateStatus(false);
-    this.router.navigate(['/od/id/', this.commonVarService.getEdiid()], { fragment: '' });
+    if(!noRefresh || noRefresh == undefined){
+      console.log("Refresh page...");
+      this.router.navigate(['/od/id/', this.commonVarService.getEdiid()], { fragment: '' });
+    }
   }
 
   /*

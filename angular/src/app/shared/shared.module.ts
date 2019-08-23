@@ -10,7 +10,8 @@ import { SearchService } from './search-service/index';
 
 @NgModule({
   imports: [CommonModule, RouterModule],
-  exports: [CommonModule, FormsModule, RouterModule]
+  exports: [CommonModule, FormsModule, RouterModule],
+  declarations: []
 })
 export class SharedModule {
   static forRoot(): ModuleWithProviders {

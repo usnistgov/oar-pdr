@@ -11,9 +11,11 @@ import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 export class CustomizationServiceService {
 
   recordEditedSub = new BehaviorSubject<boolean>(false);
+  private customizationUpdateApi: string = "http://localhost:8085/customization/draft/";
+  private customizationSaveApi: string = "http://localhost:8085/customization/savedrec/";
 
   constructor(
-    private http: HttpClient, 
+    private http: HttpClient,
     private commonVarService: CommonVarService,
     private authService: AuthService) { }
 
@@ -34,28 +36,53 @@ export class CustomizationServiceService {
   /*
   *   Update one field in publication. New value is in post body.
   */
-  update(recordid: string, field: string, body: any) {
+  update(recordid: string, body: any): Observable<any> {
     const httpOptions = {
       headers: {
-        "Authorization": "Bearer "+ this.authService.getToken(),
+        "Authorization": "Bearer " + this.authService.getToken(),
         "userId": this.authService.getUserId()
       }
     };
-    var url = this.commonVarService.getCustomizationUpdateApi() + recordid;
-    this.http.post(url, body, httpOptions).subscribe(
-      result => {
-        console.log("Update result:", result);
-      },
-      err => {
-        console.log("Error when updating " + field + ":", err);
-      });
+    var url = this.customizationUpdateApi + recordid;
+    return this.http.patch(url, body, httpOptions);
   }
 
-  getSavedData(): Observable<any> {
+  /*
+   *   Save the whole record. The data will be pushed to mdserver
+   */
+  saveRecord(recordid: string, body: any): Observable<any> {
+    const httpOptions = {
+      headers: {
+        "Authorization": "Bearer " + this.authService.getToken(),
+        "userId": this.authService.getUserId()
+      }
+    };
+    var url = this.customizationSaveApi + recordid;
+    return this.http.put(url, body, httpOptions);
+  }
+
+  /*
+*   Update one field in publication. New value is in post body.
+*/
+  delete(recordid: string): Observable<any> {
+    const httpOptions = {
+      headers: {
+        "Authorization": "Bearer " + this.authService.getToken(),
+        "userId": this.authService.getUserId()
+      }
+    };
+    var url = this.customizationUpdateApi + recordid;
+    return this.http.delete(url, httpOptions);
+  }
+
+  /*
+   *  Get saved data. If no saved data, backend return null
+   */
+  getSavedData(recordid: string): Observable<any> {
     const apiToken = localStorage.getItem("apiToken");
 
     //Need to append ediid to the base API URL
-    return this.http.get(this.authService.getBaseApiUrl(), {
+    return this.http.get(this.customizationUpdateApi + recordid, {
       headers: {
         "Authorization": "Bearer " + this.authService.getToken(),
         "userId": this.authService.getUserId()
@@ -66,9 +93,10 @@ export class CustomizationServiceService {
   /*
   *   Check if there is a edited record
   */
-  checkRecordEditStatus(recordid: string){
+  checkRecordEditStatus(recordid: string) {
     var _this = this;
-    this.getSavedData().subscribe((res) => {
+    this.getSavedData(recordid).subscribe((res) => {
+      // console.log("Saved data", res);
       if (res != undefined && res != null) {
         _this.setRecordEdited(true);
       } else {

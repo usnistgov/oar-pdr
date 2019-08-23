@@ -7,7 +7,6 @@ import { NerdmComponent } from './landing/nerdm.component';
 // import { SearchResolve } from './landing/search-service.resolve';
 import { ErrorComponent, UserErrorComponent } from './landing/error.component';
 import { DatacartComponent } from './datacart/datacart.component';
-import { LoginComponent } from './login/login.component';
 
 const routes: Routes = [
   { path: '', redirectTo: 'pdr/about', pathMatch: 'full' },
@@ -17,13 +16,6 @@ const routes: Routes = [
       {
         path: '',
         component: LandingAboutComponent
-      }]
-  },
-  {
-    path: 'login', children: [
-      {
-        path: '',
-        component: LoginComponent
       }]
   },
   {

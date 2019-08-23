@@ -24,6 +24,8 @@ import { CustomizationServiceService } from '../shared/customization-service/cus
 import { GoogleAnalyticsService } from '../shared/ga-service/google-analytics.service';
 import { HttpClient } from '@angular/common/http';
 import { DescriptionPopupComponent } from './description/description-popup/description-popup.component';
+import { ConfirmationDialogService } from '../shared/confirmation-dialog/confirmation-dialog.service';
+import { NotificationService } from '../shared/notification-service/notification.service';
 
 declare var _initAutoTracker: Function;
 
@@ -184,6 +186,7 @@ export class LandingComponent implements OnInit {
   isVisible: boolean;
   hasSavedData: boolean = false;
   saveDataLoaded: boolean = false;
+  editingStatus: any = {};
 
   /**
    * Creates an instance of the SearchPanel
@@ -205,7 +208,9 @@ export class LandingComponent implements OnInit {
     private ngbModal: NgbModal,
     private modalService: ModalService,
     private customizationServiceService: CustomizationServiceService,
-    private http: HttpClient) {
+    private http: HttpClient,
+    private confirmationDialogService: ConfirmationDialogService,
+    private notificationService: NotificationService) {
     this.titleObj = this.editingObjectInit();
     this.authorObj = this.editingObjectInit();
     this.contactObj = this.editingObjectInit();
@@ -223,7 +228,7 @@ export class LandingComponent implements OnInit {
 
     this.authService.watchAuthenticateStatus().subscribe(value => {
       if (value) {
-        if(this.ediid != undefined)
+        if (this.ediid != undefined)
           this.customizationServiceService.checkRecordEditStatus(this.ediid);
       }
     });
@@ -288,7 +293,7 @@ export class LandingComponent implements OnInit {
 
   loadSavedData() {
     this.dataInit();
-    return this.customizationServiceService.getSavedData()
+    return this.customizationServiceService.getSavedData(this.ediid)
       .subscribe((res) => {
         if (res != undefined && res != null) {
           this.onSuccess(res).then(function (result) {
@@ -419,7 +424,7 @@ export class LandingComponent implements OnInit {
     this.updateMenu();
 
     if (this.files.length != 0)
-    this.files = <TreeNode[]>this.files[0].data;
+      this.files = <TreeNode[]>this.files[0].data;
     return Promise.resolve(this.files);
   }
 
@@ -849,25 +854,22 @@ export class LandingComponent implements OnInit {
   /*
   *  Set record level edit mode (for the edit button at top)
   */
-  setRecordEditmode(mode: any) {
+  setRecordEditmode(mode: boolean) {
+    this.recordEditmode = mode;
+    console.log("mode", mode);
     if (mode && !this.authService.loggedIn()) {
       this.authService.login();
+    }
+    if (mode) {
+      this.loadPubData();
+    } else {
+      this.loadSavedData();
     }
     this.recordEditmode = mode;
     this.commonVarService.setEditMode(mode);
     this.setTitleEditbox(mode);
     this.setContactEditbox(mode);
     this.setAuthorEditbox(mode);
-  }
-
-  /*
-  *  Save record (for the save button at top)
-  */
-  saveRecord() {
-    // Send save request to back end
-    // ...
-    this.setRecordEditmode(false);
-    this.commonVarService.setEditMode(false);
   }
 
   /*
@@ -894,7 +896,15 @@ export class LandingComponent implements OnInit {
         postMessage["title"] = newTitle;
         console.log("postMessage", JSON.stringify(postMessage));
 
-        this.customizationServiceService.update(this.ediid, "title", JSON.stringify(postMessage));
+        this.customizationServiceService.update(this.ediid, JSON.stringify(postMessage)).subscribe(
+          result => {
+            this.editingStatus["title"] = true;
+            this.notificationService.showSuccessWithTimeout("Title updated", "", 3000);
+            console.log("this.editingStatus", this.editingStatus);
+          },
+          err => {
+            console.log("Error when updating title:", err);
+          });
       }
     })
   }
@@ -952,7 +962,15 @@ export class LandingComponent implements OnInit {
         postMessage["contactpoint"] = contactPoint;
         console.log("postMessage", JSON.stringify(postMessage));
 
-        this.customizationServiceService.update(this.ediid, "contactpoint", JSON.stringify(postMessage));
+        this.customizationServiceService.update(this.ediid, JSON.stringify(postMessage)).subscribe(
+          result => {
+            this.editingStatus["contact"] = true;
+            this.notificationService.showSuccessWithTimeout("Contact updated", "", 3000);
+            console.log("this.editingStatus", this.editingStatus);
+          },
+          err => {
+            console.log("Error when updating contactpoint:", err);
+          });
       }
     })
   }
@@ -1009,7 +1027,16 @@ export class LandingComponent implements OnInit {
         postMessage["authors"] = authors.authors;
         console.log("postMessage", JSON.stringify(postMessage));
 
-        this.customizationServiceService.update(this.ediid, "authors", JSON.stringify(postMessage));
+        this.customizationServiceService.update(this.ediid, JSON.stringify(postMessage)).subscribe(
+          result => {
+            console.log("Authors updated");
+            this.editingStatus["authors"] = true;
+            this.notificationService.showSuccessWithTimeout("Authors updated", "", 3000);
+            console.log("this.editingStatus", this.editingStatus);
+          },
+          err => {
+            console.log("Error when updating authors:", err);
+          });
       }
     })
   }
@@ -1039,6 +1066,51 @@ export class LandingComponent implements OnInit {
   visitHomePage(url: string, event, title) {
     this.gaService.gaTrackEvent('datasource', event, title, url);
     window.open(url, '_blank');
+  }
+
+
+  /*
+  *  Save record (for the save button at top)
+  */
+  saveRecord() {
+    // Send save request to back end
+    this.customizationServiceService.saveRecord(this.ediid, "").subscribe(
+      (res)=>{
+        console.log("Record saved");
+      },
+      (err)=>{
+        console.log("Save record error:", err);
+      }
+    );
+    this.setRecordEditmode(false);
+    this.commonVarService.setEditMode(false);
+    this.authService.logoutUser();
+  }
+
+  /*
+   *  Cancel the whole edited record
+   */
+  cancelRecord() {
+    console.log("cancelling...");
+    this.confirmationDialogService.confirm('Edited data will be lost', 'Do you really want to cancel?')
+      .then((confirmed) => {
+        if (confirmed) {
+          this.customizationServiceService.delete(this.ediid).subscribe(
+            (res) => {
+              //display notification here
+            },
+            (error) => {
+              console.log("There is an error in searchservice.");
+              console.log(error);
+              this.errorMsg = error;
+            }
+          );
+          this.setRecordEditmode(false);
+          this.authService.logoutUser();
+          // window.open('/od/id/'+this.searchValue, '_self');
+        }
+      })
+      .catch(() => console.log('User dismissed the dialog (e.g., by using ESC, clicking the cross icon, or clicking outside the dialog)'));
   }
 }
 

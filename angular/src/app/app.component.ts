@@ -2,6 +2,7 @@ import { Component, AfterViewInit, OnInit } from '@angular/core';
 import { CommonVarService } from './shared/common-var';
 import { Router, NavigationStart, NavigationEnd, NavigationCancel, NavigationError } from '@angular/router';
 import './content/modal.less';
+import { AuthService } from './shared/auth-service/auth.service';
 
 @Component({
   selector: 'app-root',
@@ -10,6 +11,13 @@ import './content/modal.less';
 })
 export class AppComponent {
   title = 'PDR Resource Landing Page';
+
+  constructor(private authService : AuthService){}
+
+  ngOnInit() {
+    if(this.authService.loggedIn())
+      this.authService.logoutUser(true);
+  }
 }
 
 /* 

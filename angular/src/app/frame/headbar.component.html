@@ -25,10 +25,6 @@
             [ngStyle]="{'cursor': getCursor(),'color':getMenuTextColor()}"><b>About</b></span> |
           <span (click)="openSearchPage()"
             [ngStyle]="{'cursor': getCursor(),'color':getMenuTextColor()}"><b>Search</b></span> |
-          <span *ngIf="editEnabled && !loggedIn()"><a role="button" (click)="authService.login()" target="_self"><span
-                [ngStyle]="{'cursor': 'pointer','color':getMenuTextColor()}"><b>Sign in</b></span></a> | </span>
-          <span *ngIf="editEnabled && loggedIn()"><a role="button" (click)="authService.logoutUser()"><span
-                [ngStyle]="{'cursor': getCursor(),'color':getMenuTextColor()}"><b>Sign out</b></span></a> | </span>
           <a *ngIf="!isEditMode; else editMode" [routerLink]="['/datacart', 'normal']" routerLinkActive="active"
             target="_blank" (click)="updateCartStatus()"><span
               [ngStyle]="{'cursor': getCursor(),'color':getMenuTextColor()}" style="color: #fff;"

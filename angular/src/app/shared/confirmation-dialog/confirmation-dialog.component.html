@@ -1,0 +1,10 @@
+<div class="modal-header dialogHeader">
+  <h4 class="modal-title">{{ title }}</h4>
+</div>
+<div class="modal-body">
+  {{ message }}
+</div>
+<div class="modal-footer">
+  <button type="button" pButton type="submit" style="width:400px;" (click)="accept()">{{ btnOkText }}</button>
+  <button type="button" pButton type="submit" style="width:400px;" (click)="decline()">{{ btnCancelText }}</button>
+</div>

@@ -13,9 +13,6 @@ export class CommonVarService {
   private random_minimum: number = 1;
   private random_maximum: number = 100000;
   private isLocalTesting: boolean = false;
-  loginURL: string = "https://pn110559.nist.gov/saml-sp/auth/token";
-
-  private customizationUpdateApi: string = "https://data.nist.gov/rmm/update/";
 
   localProcessingSub = new BehaviorSubject<boolean>(false);
   showDatacartSub = new BehaviorSubject<boolean>(false);
@@ -40,18 +37,6 @@ export class CommonVarService {
 
   getEdiid() {
     return this.ediid;
-  }
-
-  getCustomizationUpdateApi(){
-    return this.customizationUpdateApi;
-  }
-
-  setLoginURL(loginURL: string) {
-    this.loginURL = loginURL;
-  }
-
-  getLoginURL() {
-    return this.loginURL;
   }
 
   getRandomMaximum() {
