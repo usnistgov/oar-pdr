@@ -28,6 +28,7 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.Projections;
 import com.mongodb.client.model.changestream.ChangeStreamDocument;
+import com.mongodb.client.result.DeleteResult;
 import com.mongodb.client.result.UpdateResult;
 
 /**
@@ -146,7 +147,7 @@ public class DataOperations {
      * To update the record in the cached database
      * @param recordid an ediid of the record
      * @param update json to update
-     * @return
+     * @return Return true if data is updated successfully.
      */
     public boolean updateDataInCache(String recordid, MongoCollection<Document> mcollection, Document update) {
 	Date now = new Date();
@@ -156,5 +157,23 @@ public class DataOperations {
 	//BasicDBObject timeNow = new BasicDBObject("date", now);
 	UpdateResult updates = mcollection.updateOne(Filters.eq("ediid", recordid), tempUpdateOp);
 	return updates != null;
+    }
+    
+    /**
+     * Find the record of given id in the collection and remove.
+     * @param recordid Unique record identifier
+     * @param mcollection MongoDB Collection
+     * @return true if the record is deleted successfully.
+     */
+    public boolean deleteRecordInCache(String recordid, MongoCollection<Document> mcollection) {
+	Document d = mcollection.find(Filters.eq("ediid", recordid)).first();
+	
+	DeleteResult result = mcollection.deleteOne(d);
+	if (result.getDeletedCount() == 1) {
+		return true;
+	} else {
+		return false;
+	}
+
     }
 }

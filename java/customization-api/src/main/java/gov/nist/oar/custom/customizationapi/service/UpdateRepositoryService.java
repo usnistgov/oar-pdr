@@ -130,4 +130,13 @@ public class UpdateRepositoryService implements UpdateRepository {
 
     }
 
+    @Override
+    public Document delete(String recordid) throws CustomizationException {
+	recordCollection = mconfig.getRecordCollection();
+	changesCollection = mconfig.getChangeCollection();
+	accessData.deleteRecordInCache(recordid, recordCollection);
+	accessData.deleteRecordInCache(recordid, changesCollection);
+	return accessData.getDataFromServer(recordid, mdserver);
+    }
+
 }
