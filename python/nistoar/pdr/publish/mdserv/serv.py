@@ -4,16 +4,18 @@ landing page service.  It uses an SIPBagger to create the NERDm metadata from
 POD metadata provided by MIDAS and assembles it into an exportable form.  
 """
 import os, logging, re, json
-from collections import Mapping
+from collections import Mapping, OrderedDict
 
 from .. import PublishSystem
 from ...exceptions import (ConfigurationException, StateException,
-                           SIPDirectoryNotFound, IDNotFound)
+                           SIPDirectoryNotFound, IDNotFound, PDRServiceException)
 from ...preserv.bagger import (MIDASMetadataBagger, UpdatePrepService,
                                midasid_to_bagname)
-from ...preserv.bagit import NISTBag
+from ...preserv.bagit import NISTBag, DEF_MERGE_CONV
 from ...utils import build_mime_type_map, read_nerd
 from ....id import PDRMinter, NIST_ARK_NAAN
+from ....nerdm import validate_nerdm
+from .... import pdr
 
 log = logging.getLogger(PublishSystem().subsystem_abbrev)
 
@@ -127,6 +129,9 @@ class PrePubMetadataService(PublishSystem):
         else:
             self.log.info("repo_access not configured; no access to published "+
                           "records.")
+
+        # used for validating during updates (via patch_id())
+        self._schemadir = None
 
     def _create_minter(self, parentdir):
         cfg = self.cfg.get('id_minter', {})
@@ -308,7 +313,7 @@ class PrePubMetadataService(PublishSystem):
             bagger = self.prepare_metadata_bag(id, bagger)
             bagger.fileExaminer.launch(stop_logging=False)
 
-            bagbldr = bagger.bldr
+            bagbldr = bagger.bagbldr
 
         except SIPDirectoryNotFound as ex:
 
@@ -336,7 +341,7 @@ class PrePubMetadataService(PublishSystem):
 
         # this will raise an InvalidRequest exception if something wrong is
         # found with the input data
-        updates = self._filter_and_check_updates(frag);
+        updates = self._filter_and_check_updates(frag, bagbldr);
 
         outmsgs = []
         msg = "User-generated metadata updates to path='{0}': {1}"
@@ -344,45 +349,139 @@ class PrePubMetadataService(PublishSystem):
             bagbldr.update_annotations_for(destpath, updates[destpath],
                     message=msg.format(destpath, str(updates[destpath].keys())))
 
-        return bagbldr.bag.nerm_record(True);
+        mergeconv = bagbldr.cfg.get('merge_convention', DEF_MERGE_CONV)
+        return bagbldr.bag.nerdm_record(mergeconv);
 
-    def _filter_and_check_updates(self, data):
+    def _filter_and_check_updates(self, data, bldr):
         # filter out properties that are not updatable; check the values of
-        # the remaining
+        # the remaining.  The returned value is a dictionary mapping filepath
+        # values to the associated metadata for that component; the empty string
+        # key maps to the resource-level metadata (which can include none-filepath
+        # components.
 
         updatable = self.cfg.get('update',{}).get('updatable_properties',[])
+        mergeconv = bldr.cfg.get('merge_convention', DEF_MERGE_CONV)
 
-        def _filter_prop(fromdata, todata, parent=''):
-            for key in fromdata:
-                pkey = parent;
-                if pkey:  pkey += "."
-                pkey += key
+        def _filter_props(fromdata, todata, parent=''):
+            # fromdata and todata are either Mapping objects or lists
+            if isinstance(fromdata, list):
+                # parent should end with '[]'
+                for el in fromdata:
+                    if parent in updatable:
+                        todata.append(el)
+                        continue
+                    elif isinstance(el, list):
+                        if not any([e.startswith(parent+'[]') for e in updatable]):
+                            continue
+                        subdata = []
+                        _filter_props(el, subdata, parent+'[]')
+                        if subdata:
+                            todata.append(subdata)
+                    elif isinstance(el, Mapping):
+                        subdata = OrderedDict()
+                        _filter_props(el, subdata, parent)
+                        if subdata:
+                            todata.append(subdata)
+                        
+            elif isinstance(fromdata, Mapping):
+                for key in fromdata:
+                    pkey = parent;
+                    if pkey:  pkey += "."
+                    pkey += key
 
-                if pkey in updatable:
-                    todata[key] = fromdata[key]
-                elif isinstance(fromdata[key], Mapping):
-                    subdata = OrderedDict()
-                    filter_props(fromdata[key], subdata, pkey)
-                    if subdata:
-                        todata[key] = subdata
+                    if pkey in updatable:
+                        todata[key] = fromdata[key]
+
+                    elif isinstance(fromdata[key], list):
+                        if not any([e.startswith(pkey+'[]') for e in updatable]):
+                            continue
+                        subdata = []
+                        _filter_props(fromdata[key], subdata, pkey+'[]')
+                        if subdata:
+                            todata[key] = subdata
+
+                    elif isinstance(fromdata[key], Mapping):
+                        if not any([e.startswith(pkey+'.') for e in updatable]):
+                            continue
+                        subdata = OrderedDict()
+                        _filter_props(fromdata[key], subdata, pkey)
+                        if subdata:
+                            todata[key] = subdata
+
+                if pkey!='' and '@id' in fromdata and todata and '@id' not in todata:
+                    todata['@id'] = fromdata['@id']
 
         fltrd = OrderedDict()
         _filter_props(data, fltrd)    # filter out properties you can't edit
-        _validate_update(fltrd)       # may raise InvalidRequest
+        oldnerdm = bldr.bag.nerdm_record(mergeconv)
+        self._validate_update(fltrd, oldnerdm, bldr)  # may raise InvalidRequest
 
         # separate file-based components from main metadata; return parts
-        # by destination path.
+        # by destination path.  Every component is now guaranteed to have an
+        # '@id' property
         out = OrderedDict()
         if 'components' in fltrd:
-            for i in range(len(fltrd['components'])):
+            for i in range(len(fltrd['components'])-1, -1, -1):
                 cmp = fltrd['components'][i]
-                if 'filepath' in cmp:
-                    out[cmp['filepath']] = cmp
+                oldcmp = self._item_with_id(oldnerdm['components'], cmp['@id'])
+                if 'filepath' in oldcmp:
+                    del cmp['@id']  # don't update the ID
+                    out[oldcmp['filepath']] = cmp
                     del fltrd['components'][i]
             if len(fltrd['components']) <= 0:
                 del fltrd['components']
         out[''] = fltrd
         return out
+
+    def _item_with_id(self, array, id):
+        out = [e for e in array if e['@id'] == id]
+        return (len(out) > 0 and out[0]) or None
+
+    def _validate_update(self, updata, nerdm, bagbldr):
+        # make sure the update produces valid NERDm.  This is done primarily by
+        # merging the update with the current metadata and validating the results.
+        # Other checks may be encapsulated in this function.  If any of the checks
+        # fail, this function will raise a InvalidRequest exception
+
+        if 'components' in updata and 'components' not in nerdm:
+            del updata['components']
+        if 'components' in updata:
+            cmps = updata['components']
+
+            # make sure the component updates correspond to components already
+            # defined (as specified by the component's identifier); eliminate
+            # those that do not.  
+            for i in range(len(cmps)-1, -1, -1):
+                if '@id' not in cmps[i] or \
+                   not self._item_with_id(nerdm['components'], cmps[i]['@id']):
+                    del cmps[i]
+            if len(cmps) == 0:
+                del updata['components']
+
+        mergeconv = bagbldr.cfg.get('merge_convention', DEF_MERGE_CONV)
+        merger = bagbldr.bag._make_merger(mergeconv, "Resource")
+
+        # nerdm = bagbldr.bag.nerdm_record(mergeconv)
+        updated = merger.merge(nerdm, updata)
+
+        errs = self._validate_nerdm(updated, bagbldr.cfg.get('validator', {}))
+        if len(errs) > 0:
+            raise InvalidRequest("Update makes record invalid", errs)
+
+        return updated
+
+    def _validate_nerdm(self, nerdm, valcfg):
+        if not self._schemadir:
+            self._schemadir = valcfg.get('nerdm_schema_dir', pdr.def_schema_dir)
+            if not self._schemadir:
+                raise ConfigurationException("Need to set "+
+                                            "bag_builder.validator.nerdm_schema_dir")
+            if not os.path.isdir(self._schemadir):
+                raise ConfigurationException("nerdm_schema_dir directory does not "+
+                                             "exist as a directory: " +
+                                             self._schemadir)
+
+        return [str(e) for e in validate_nerdm(nerdm, self._schemadir)]
         
                                            
     def locate_data_file(self, id, filepath):
@@ -413,3 +512,21 @@ class PrePubMetadataService(PublishSystem):
         return (loc, mt)
         
         
+class InvalidRequest(PDRServiceException):
+    """
+    An invalid request was made of the metadata service.  
+    """
+
+    def __init__(self, message, reasons=[]):
+        """
+        create the exception
+
+        :param str message:  the message summarizing what makes the request invalid
+        :param reasons:  a list of the specific reasons why the request is invalid
+        :type reasons: array of str
+        """
+        super(InvalidRequest, self).__init__("Metadata Service", http_code=400,
+                                             message=message, sys=PublishSystem)
+        self.reasons = reasons
+
+
