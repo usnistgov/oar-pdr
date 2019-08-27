@@ -14,6 +14,9 @@ import { SearchService } from '../shared/search-service/index';
 import { tap } from 'rxjs/operators';
 import { isPlatformServer } from '@angular/common';
 import { makeStateKey, TransferState } from '@angular/platform-browser';
+import { GoogleAnalyticsService } from '../shared/ga-service/google-analytics.service';
+
+declare var _initAutoTracker: Function;
 
 interface reference {
   refType?: string,
@@ -120,20 +123,20 @@ export class LandingComponent implements OnInit {
   isLocalProcessing: boolean = false;
   isLoading: boolean = true;
   HomePageLink: boolean = false;
-  inBrowser : boolean = false;  
+  inBrowser: boolean = false;
 
   /**
    * Creates an instance of the SearchPanel
    *
    */
   constructor(private route: ActivatedRoute, private el: ElementRef,
-              private titleService: Title, private cfg : AppConfig, private router: Router,
-              @Inject(PLATFORM_ID) private platformId: Object,
-              @Inject(APP_ID) private appId: string,
-              private transferState: TransferState,
-              private searchService: SearchService,
-              private commonVarService: CommonVarService)
-  {
+    private titleService: Title, private cfg: AppConfig, private router: Router,
+    @Inject(PLATFORM_ID) private platformId: Object,
+    @Inject(APP_ID) private appId: string,
+    private transferState: TransferState,
+    private searchService: SearchService,
+    private commonVarService: CommonVarService,
+    private gaService: GoogleAnalyticsService) {
     this.inBrowser = isPlatformBrowser(platformId);
   }
 
@@ -260,24 +263,25 @@ export class LandingComponent implements OnInit {
     this.serviceApi = mdapi + "records?@id=" + this.record['@id'];
     if (!_.includes(mdapi, "/rmm/"))
       this.serviceApi = mdapi + this.record['ediid'];
-    this.distdownload = this.cfg.get("distService","/od/ds/") + "zip?id=" + this.record['@id'];
+    this.distdownload = this.cfg.get("distService", "/od/ds/") + "zip?id=" + this.record['@id'];
 
     var itemsMenu: MenuItem[] = [];
     var metadata = this.createMenuItem("Export JSON", "faa faa-file-o", (event) => { this.turnSpinnerOff(); }, this.serviceApi);
     let authlist = "";
+
     if (this.record['authors']) {
       for (let auth of this.record['authors']) authlist = authlist + auth.familyName + ",";
     }
 
     var resourcesByAuthor = this.createMenuItem('Resources by Authors', "faa faa-external-link", "",
-      this.cfg.get("locations.pdrSearch","/sdp/") + "/#/search?q=authors.familyName=" + authlist + "&key=&queryAdvSearch=yes");
+      this.cfg.get("locations.pdrSearch", "/sdp/") + "/#/search?q=authors.familyName=" + authlist + "&key=&queryAdvSearch=yes");
     var similarRes = this.createMenuItem("Similar Resources", "faa faa-external-link", "",
-      this.cfg.get("locations.pdrSearch","/sdp/") + "/#/search?q=" + this.record['keyword'] + "&key=&queryAdvSearch=yes");
-    var license = this.createMenuItem("Fair Use Statement", "faa faa-external-link", "", this.record['license']);
+      this.cfg.get("locations.pdrSearch", "/sdp/") + "/#/search?q=" + this.record['keyword'] + "&key=&queryAdvSearch=yes");
+    var license = this.createMenuItem("Fair Use Statement", "faa faa-external-link", (event) => { this.gaService.gaTrackEvent('outbound', event, this.record['title']), this.record['license'] }, this.record['license']);
     var citation = this.createMenuItem('Citation', "faa faa-angle-double-right",
       (event) => { this.getCitation(); this.showDialog(); }, '');
     var metaItem = this.createMenuItem("View Metadata", "faa faa-bars",
-      (event) => { this.goToSelection(true, false, 'metadata'); }, '');
+      (event) => { this.goToSelection(true, false, 'metadata'); this.gaService.gaTrackPageview('/od/id/'+this.searchValue+'#metadata', this.record['title'])}, '');
     itemsMenu.push(metaItem);
     itemsMenu.push(metadata);
 
@@ -372,7 +376,7 @@ export class LandingComponent implements OnInit {
     const recordid_KEY = makeStateKey<string>('record-' + recordid);
 
     if (this.transferState.hasKey(recordid_KEY)) {
-      console.log("extracting data id="+recordid+" embedded in web page");
+      console.log("extracting data id=" + recordid + " embedded in web page");
       const record = this.transferState.get<any>(recordid_KEY, null);
       // this.transferState.remove(recordid_KEY);
       return of(record);
@@ -383,9 +387,9 @@ export class LandingComponent implements OnInit {
         .catch((err: Response, caught: Observable<any[]>) => {
           // console.log(err);
           if (err !== undefined) {
-            console.error("Failed to retrieve data for id="+recordid+"; error status=" + err.status);
-            if ("message" in err) console.error("Reason: "+(<any>err).message);
-            if ("url" in err) console.error("URL used: "+(<any>err).url);
+            console.error("Failed to retrieve data for id=" + recordid + "; error status=" + err.status);
+            if ("message" in err) console.error("Reason: " + (<any>err).message);
+            if ("url" in err) console.error("URL used: " + (<any>err).url);
 
             // console.error(err);
             if (err.status >= 500) {
@@ -396,7 +400,7 @@ export class LandingComponent implements OnInit {
             }
             if (err.status == 0) {
               console.warn("Possible causes: Unable to trust site cert, CORS restrictions, ...");
-              return Observable.throw('Unknown error requesting data for id='+recordid);
+              return Observable.throw('Unknown error requesting data for id=' + recordid);
             }
           }
           return Observable.throw(caught);
@@ -654,14 +658,14 @@ export class LandingComponent implements OnInit {
   /*
   * Check if this record has a home page link that does not point to the landing page itself
   */
-  displayHomePageLink(){
-    if(this.record.landingPage == null || this.record.landingPage == undefined){
+  displayHomePageLink() {
+    if (this.record.landingPage == null || this.record.landingPage == undefined) {
       return false;
     }
     var url = 'od/id/' + this.ediid;
-    if(this.record.landingPage.search(url) > -1){
+    if (this.record.landingPage.search(url) > -1) {
       return false;
-    }else{
+    } else {
       return true;
     }
   }

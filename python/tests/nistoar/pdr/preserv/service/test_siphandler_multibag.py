@@ -222,9 +222,12 @@ class TestMultibagSIPHandler(test.TestCase):
         srczip = os.path.join(distarchdir, "1491.1_0.mbag0_4-0.zip")
         destzip = os.path.join(distarchive, self.midasid+".1_0.mbag0_4-0.zip")
         cached = os.path.join(self.pubcache, os.path.basename(destzip))
+        rmmrec = os.path.join(mdarchive, self.midasid+".json")
 
         try:
             shutil.copyfile(srczip, destzip)
+            shutil.copy(os.path.join(datadir, self.midasid+".json"),
+                        mdarchive)
 
             try:
                 self.sip.bagit()
@@ -276,6 +279,8 @@ class TestMultibagSIPHandler(test.TestCase):
                 os.remove(destzip)
             if os.path.exists(cached):
                 os.remove(cached)
+            if os.path.exists(rmmrec):
+                os.remove(rmmrec)
         
 
 
@@ -290,9 +295,11 @@ class TestMultibagSIPHandler(test.TestCase):
         srczip = os.path.join(distarchdir, "1491.1_0.mbag0_4-0.zip")
         destzip = os.path.join(distarchive, self.midasid+".1_0.mbag0_4-0.zip")
         cached = os.path.join(self.pubcache, os.path.basename(destzip))
+        rmmrec = os.path.join(mdarchive, self.midasid+".json")
 
         try:
             shutil.copyfile(srczip, destzip)
+            shutil.copyfile(os.path.join(datadir, self.midasid+".json"), rmmrec)
 
             try:
                 self.sip.bagit()
@@ -340,6 +347,8 @@ class TestMultibagSIPHandler(test.TestCase):
                 os.remove(destzip)
             if os.path.exists(cached):
                 os.remove(cached)
+            if os.path.exists(rmmrec):
+                os.remove(rmmrec)
         
 
 

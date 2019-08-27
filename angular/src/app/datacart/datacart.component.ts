@@ -29,6 +29,7 @@ import { BootstrapOptions } from '@angular/core/src/application_ref';
 import { AsyncBooleanResultCallback } from 'async';
 import { FileSaverService } from 'ngx-filesaver';
 import { CommonFunctionService } from '../shared/common-function/common-function.service';
+import { GoogleAnalyticsService } from '../shared/ga-service/google-analytics.service';
 
 declare var Ultima: any;
 declare var saveAs: any;
@@ -144,11 +145,12 @@ export class DatacartComponent implements OnInit, OnDestroy {
   constructor(private http: HttpClient,
     private cartService: CartService,
     private downloadService: DownloadService,
-    private cfg : AppConfig,
+    private cfg: AppConfig,
     private _FileSaverService: FileSaverService,
     private commonVarService: CommonVarService,
     private commonFunctionService: CommonFunctionService,
     private route: ActivatedRoute,
+    private gaService: GoogleAnalyticsService,
     ngZone: NgZone) {
     this.mobHeight = (window.innerHeight);
     this.mobWidth = (window.innerWidth);
@@ -395,6 +397,8 @@ export class DatacartComponent implements OnInit, OnDestroy {
   * Function to download all files from API call.
   **/
   downloadAllFilesFromAPI() {
+    this.gaService.gaTrackEvent('download', undefined, 'all files', this.ediid);
+
     this.clearDownloadStatus();
     this.isProcessing = true;
     this.showCurrentTask = true;
@@ -999,6 +1003,9 @@ export class DatacartComponent implements OnInit, OnDestroy {
   * Function to set status when a file was downloaded
   **/
   setFileDownloaded(rowData: any) {
+    // Google Analytics code to track download event
+    this.gaService.gaTrackEvent('download', undefined, rowData.ediid, rowData.downloadUrl);
+
     rowData.downloadStatus = 'downloaded';
     this.cartService.updateCartItemDownloadStatus(rowData.cartId, 'downloaded');
     this.downloadService.setFileDownloadedFlag(true);
@@ -1023,9 +1030,9 @@ export class DatacartComponent implements OnInit, OnDestroy {
     return style;
   }
 
-/*
-* Make sure the width of popup dialog is less than 500px or 80% of the window width
-*/
+  /*
+  * Make sure the width of popup dialog is less than 500px or 80% of the window width
+  */
   getDialogWidth() {
     var w = window.innerWidth > 500 ? 500 : window.innerWidth;
     console.log(w);

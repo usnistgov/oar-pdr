@@ -1,21 +1,3 @@
-<style id="antiClickjack">
-  body {
-    display: none !important;
-  }
-</style>
-
-<script type="text/javascript">
-  if (self === top) {
-    alert("test1");
-    var antiClickjack = document.getElementById("antiClickjack");
-    antiClickjack.parentNode.removeChild(antiClickjack);
-
-  } else {
-    alert("test2");
-    top.location = self.location;
-  }
-</script>
-
 <div class="ui-grid ui-grid-responsive ui-grid-pad center" style="min-height:61vh;">
   <div class="" style="padding: 2.5rem 2.5rem 2.5rem 2.5rem">
     <label class="labelStyle">About Public Data Repository</label>
