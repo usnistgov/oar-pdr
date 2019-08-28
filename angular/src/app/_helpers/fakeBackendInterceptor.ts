@@ -30,7 +30,7 @@ export class FakeBackendInterceptor implements HttpInterceptor {
       // if (request.url.endsWith('/od/ds/_bundle_plan') && request.method === 'POST') {
       //   return of(new HttpResponse({ status: 200, body: JSON.parse(bundlePlanRes) }));
       // }
-      console.log("request.url", request.url);
+      // console.log("request.url", request.url);
       // For e2e test
       if (request.url.endsWith('/rmm/records/SAMPLE123456') && request.method === 'GET') {
         return of(new HttpResponse({ status: 200, body: sampleData }));

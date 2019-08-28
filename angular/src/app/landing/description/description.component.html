@@ -1,88 +1,90 @@
 <div id="description">
   <div [hidden]="metadata">
     <h3 name="desscription"><b>Description</b></h3><br>
-    <div *ngIf="!record.description; else hasDescription">
-      <div *ngIf="recordEditmode"
-        style="text-align: left; vertical-align: top;display: inline-block;padding-right: .5em; border: 1px solid lightgrey">
-        Add description:
-      </div>
-      <button *ngIf="recordEditmode && !descriptionObj.detailEditmode" type="button" (click)="openDescriptionModal()"
-        class="edit_button2">
-        <i class="faa faa-pencil" style="cursor: pointer;color:grey; margin-top: 0em;" data-toggle="tooltip"
-          title="Edit contact"></i>
-      </button>
-    </div>
-    <ng-template #hasDescription>
-      <div style="display: inline-block; ">
-        <div id="recordDescription" class="card card-body bg-light" style="display: inline-block;width: 90%;">
-          <p *ngFor="let topic of record['description']; let i =index">
-            {{ record["description"][i] }}
-          </p>
+    <div style="display: table">
+      <div class="editable_container">
+        <div class="editable_field" *ngIf="!record.description; else hasDescription">
+          <div *ngIf="recordEditmode" style="max-width:calc(100% - 4em);"
+            [ngStyle]="{'border':getBorderStyle('topic'),'padding-right': '0.5em'}">
+            Add description:
+          </div>
         </div>
-        <button *ngIf="recordEditmode && !descriptionObj.detailEditmode" type="button" (click)="openDescriptionModal()"
-          class="edit_button2" style="display: inline-block;width:2.5em;height:2.5em;">
-          <i class="faa faa-pencil" style="cursor: pointer;color:grey; margin-top: 0em;" data-toggle="tooltip"
-            title="Edit description"></i>
+        <ng-template #hasDescription>
+          <div id="recordDescription" class="card card-body bg-light editable_field" style="max-width:calc(100% - 4em);"
+            [ngStyle]="{'border':getBorderStyle('description'),'padding-right': '0.5em'}">
+            <p *ngFor="let desc of record['description']; let i =index">
+              {{ record["description"][i] }}
+            </p>
+          </div>
+        </ng-template>
+        <button class="edit_button" *ngIf="recordEditmode" type="button" (click)="openDescriptionModal()">
+          <i class="faa faa-pencil icon_enabled" data-toggle="tooltip" title="Edit description"></i>
         </button>
-      </div>
-    </ng-template>
-    <div *ngIf="checkTopics(); else noTopic">
-      <div style="display: inline-block;width:100%;text-align: left; vertical-align: top;">
-        <div
-          style="display: inline-block; padding-right: .5em; text-align: left; vertical-align: top;max-width:calc(100% - 4em);"
-          [ngStyle]="getBorder()">
-          <strong>Research Topics:</strong>
-          <span class="font14 topics" *ngFor="let topic of record['topic']; let i =index">
-            {{ topic.tag }}
-            <span *ngIf="i < record['topic'].length-1 ">,</span>
-          </span>
-        </div>
-        <button *ngIf="recordEditmode && !topicObj.detailEditmode" type="button" (click)="openTopicModal()"
-          class="edit_button2">
-          <i class="faa faa-pencil" style="cursor: pointer;color:grey; margin-top: 0em;" data-toggle="tooltip"
-            title="Edit contact"></i>
+        <button class="undo_button" *ngIf="recordEditmode" type="button" [disabled]="!fieldObject.description.edited"
+          (click)="undoEditing('description')">
+          <i class="faa faa-undo"
+            [ngClass]="{'icon_enabled': fieldObject.description.edited, 'icon_disabled':!fieldObject.description.edited }"
+            data-toggle="tooltip" title="Undo description"></i>
         </button>
       </div>
     </div>
-    <ng-template #noTopic>
-      <div *ngIf="recordEditmode"
-        style="text-align: left; vertical-align: top;display: inline-block;padding-right: .5em; border: 1px solid lightgrey">
-        Add topics:
-      </div>
-      <button *ngIf="recordEditmode && !topicObj.detailEditmode" type="button" (click)="openTopicModal()"
-        class="edit_button2">
-        <i class="faa faa-pencil" style="cursor: pointer;color:grey; margin-top: 0em;" data-toggle="tooltip"
-          title="Edit contact"></i>
-      </button>
-    </ng-template>
-    <div *ngIf="checkKeywords(); else noKeyword">
-      <div style="display: inline-block;width:100%;text-align: left; vertical-align: top;">
-        <div
-          style="display: inline-block; padding-right: .5em; text-align: left; vertical-align: top;max-width:calc(100% - 4em);"
-          [ngStyle]="getBorder()">
-          <strong>Subject Keywords:</strong>
-          <span class="font14 keywords" contenteditable="false" *ngFor="let keyword of record['keyword']; let i =index">
-            {{ keyword }}<span *ngIf="i < record['keyword'].length-1 ">,</span>
-          </span>
+    <div style="display: table">
+      <div class="editable_container">
+        <div class="editable_field" *ngIf="!checkTopics(); else hasTopic">
+          <div *ngIf="recordEditmode" [ngStyle]="{'border':getBorderStyle('topic'),'padding-right': '0.5em'}">
+            Add topics:
+          </div>
         </div>
-        <button *ngIf="recordEditmode && !keywordObj.detailEditmode" type="button" (click)="openKeywordModal()"
-          class="edit_button2">
-          <i class="faa faa-pencil" style="cursor: pointer;color:grey; margin-top: 0em;" data-toggle="tooltip"
-            title="Edit contact"></i>
+        <ng-template #hasTopic>
+          <div class="editable_field" style="max-width:calc(100% - 4em);"
+            [ngStyle]="{'border':getBorderStyle('topic'),'padding-right': '0.5em'}">
+            <strong>Research Topics:</strong>
+            <span class="font14 topics" *ngFor="let topic of record['topic']; let i =index">
+              {{ topic.tag }}
+              <span *ngIf="i < record['topic'].length-1 ">,</span>
+            </span>
+          </div>
+        </ng-template>
+        <button class="edit_button" *ngIf="recordEditmode" type="button" (click)="openTopicModal()">
+          <i class="faa faa-pencil icon_enabled" data-toggle="tooltip" title="Edit topic"></i>
+        </button>
+        <button class="undo_button" *ngIf="recordEditmode" type="button" [disabled]="!fieldObject.topic.edited"
+          (click)="undoEditing('topic')">
+          <i class="faa faa-undo"
+            [ngClass]="{'icon_enabled': fieldObject.topic.edited, 'icon_disabled':!fieldObject.topic.edited }"
+            data-toggle="tooltip" title="Undo topic"></i>
         </button>
       </div>
     </div>
-    <ng-template #noKeyword>
-      <div *ngIf="recordEditmode"
-        style="text-align: left; vertical-align: top;display: inline-block;padding-right: .5em; border: 1px solid lightgrey">
-        Add subject keywords:
+    <div style="display: table">
+      <div class="editable_container">
+        <div *ngIf="!checkKeywords(); else hasKeyword">
+          <div class="editable_field" *ngIf="recordEditmode"
+            [ngStyle]="{'border':getBorderStyle('keyword'),'padding-right': '0.5em'}">
+            Add subject keywords:
+          </div>
+        </div>
+        <ng-template #hasKeyword>
+          <div class="editable_field" style="max-width:calc(100% - 4em);"
+            [ngStyle]="{'border':getBorderStyle('keyword'),'padding-right': '0.5em'}">
+            <strong>Subject Keywords:</strong>
+            <span class="font14 keywords" contenteditable="false"
+              *ngFor="let keyword of record['keyword']; let i =index">
+              {{ keyword }}<span *ngIf="i < record['keyword'].length-1 ">,</span>
+            </span>
+          </div>
+        </ng-template>
+        <button class="edit_button" *ngIf="recordEditmode" type="button" (click)="openKeywordModal()">
+          <i class="faa faa-pencil icon_enabled" data-toggle="tooltip" title="Edit keyword"></i>
+        </button>
+        <button class="undo_button" *ngIf="recordEditmode" type="button" [disabled]="!fieldObject.keyword.edited"
+          (click)="undoEditing('keyword')">
+          <i class="faa faa-undo"
+            [ngClass]="{'icon_enabled': fieldObject.keyword.edited, 'icon_disabled':!fieldObject.keyword.edited }"
+            data-toggle="tooltip" title="Undo keyword"></i>
+        </button>
       </div>
-      <button *ngIf="recordEditmode && !keywordObj.detailEditmode" type="button" (click)="openKeywordModal()"
-        class="edit_button2">
-        <i class="faa faa-pencil" style="cursor: pointer;color:grey; margin-top: 0em;" data-toggle="tooltip"
-          title="Edit contact"></i>
-      </button>
-    </ng-template>
+    </div>
     <br>
   </div>
 </div>

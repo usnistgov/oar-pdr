@@ -13,7 +13,6 @@ export class NotificationService {
   }
 
   showSuccessWithTimeout(message, title, timespan){
-    console.log("Showing notification...");
     this.toastr.success(message, title ,{
       timeOut : timespan
     })

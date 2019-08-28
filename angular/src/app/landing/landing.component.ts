@@ -171,9 +171,6 @@ export class LandingComponent implements OnInit {
   titleEditable: boolean = false;
   isAuthenticated: boolean = false;
   currentMode: string = 'initial';
-  titleObj: any;
-  authorObj: any;
-  contactObj: any;
   tempContactPoint: any;
   tempAuthors: any = {};
   // tempAddress: string;
@@ -186,7 +183,7 @@ export class LandingComponent implements OnInit {
   isVisible: boolean;
   hasSavedData: boolean = false;
   saveDataLoaded: boolean = false;
-  editingStatus: any = {};
+  fieldObject: any = {};
 
   /**
    * Creates an instance of the SearchPanel
@@ -211,9 +208,12 @@ export class LandingComponent implements OnInit {
     private http: HttpClient,
     private confirmationDialogService: ConfirmationDialogService,
     private notificationService: NotificationService) {
-    this.titleObj = this.editingObjectInit();
-    this.authorObj = this.editingObjectInit();
-    this.contactObj = this.editingObjectInit();
+    this.fieldObject['title'] = {};
+    this.fieldObject['authors'] = {};
+    this.fieldObject['contactPoint'] = {};
+    this.fieldObject['description'] = {};
+    this.fieldObject['topic'] = {};
+    this.fieldObject['keyword'] = {};
     this.inBrowser = isPlatformBrowser(platformId);
     this.tempContactPoint = {
       "fn": "",
@@ -250,14 +250,13 @@ export class LandingComponent implements OnInit {
    */
   ngOnInit() {
     this.loadPubData();
-
-    //Show edit box if in edit mode
-    this.setTitleEditbox(false);
-    this.setContactEditbox(false);
-    this.setAuthorEditbox(false);
   }
 
   dataInit() {
+    for (var field in this.fieldObject) {
+      this.fieldObject[field] = this.editingObjectInit();
+    }
+    console.log('this.fieldObject', this.fieldObject);
     if (this.router.url.includes("ark"))
       this.searchValue = this.router.url.split("/id/").pop();
 
@@ -366,11 +365,8 @@ export class LandingComponent implements OnInit {
   */
   editingObjectInit() {
     var editingObject = {
-      "originalValue": '',
       "detailEditmode": false,
-      "buttonOpacity": 0,
-      "borderStyle": "0px solid lightgrey",
-      "currentState": 'initial'
+      "edited": false
     }
 
     return editingObject;
@@ -827,21 +823,6 @@ export class LandingComponent implements OnInit {
   }
 
   /*
-  *  show/hide title edit box
-  */
-  setTitleEditbox(mode: boolean) {
-    if (mode) {
-      this.titleObj.buttonOpacity = 1;
-      this.titleObj.borderStyle = "1px solid lightgrey";
-      this.titleObj.currentState = 'final';
-    } else {
-      this.titleObj.buttonOpacity = 0;
-      this.titleObj.borderStyle = "0px solid lightgrey";
-      this.titleObj.currentState = 'initial';
-    }
-  }
-
-  /*
   *  When mouse leaves title
   */
   titleMouseout() {
@@ -856,7 +837,6 @@ export class LandingComponent implements OnInit {
   */
   setRecordEditmode(mode: boolean) {
     this.recordEditmode = mode;
-    console.log("mode", mode);
     if (mode && !this.authService.loggedIn()) {
       this.authService.login();
     }
@@ -867,9 +847,6 @@ export class LandingComponent implements OnInit {
     }
     this.recordEditmode = mode;
     this.commonVarService.setEditMode(mode);
-    this.setTitleEditbox(mode);
-    this.setContactEditbox(mode);
-    this.setAuthorEditbox(mode);
   }
 
   /*
@@ -898,9 +875,9 @@ export class LandingComponent implements OnInit {
 
         this.customizationServiceService.update(this.ediid, JSON.stringify(postMessage)).subscribe(
           result => {
-            this.editingStatus["title"] = true;
+            this.fieldObject.title["edited"] = true;
             this.notificationService.showSuccessWithTimeout("Title updated", "", 3000);
-            console.log("this.editingStatus", this.editingStatus);
+            console.log("this.fieldObject", this.fieldObject);
           },
           err => {
             console.log("Error when updating title:", err);
@@ -913,24 +890,9 @@ export class LandingComponent implements OnInit {
   *  Cancel edit mode for title
   */
   cancelEditedTitle() {
-    this.record.title = this.titleObj.originalValue;
-    this.titleObj.detailEditmode = false;
+    this.record.title = this.fieldObject.title.originalValue;
+    this.fieldObject.title.detailEditmode = false;
     this.titleMouseout();
-  }
-
-  /*
-  *  Display contact edit box
-  */
-  setContactEditbox(mode: boolean) {
-    if (mode) {
-      this.contactObj.buttonOpacity = 1;
-      this.contactObj.borderStyle = "1px solid lightgrey";
-      this.contactObj.currentState = 'final';
-    } else {
-      this.contactObj.buttonOpacity = 0;
-      this.contactObj.borderStyle = "0px solid lightgrey";
-      this.contactObj.currentState = 'initial';
-    }
   }
 
   /*
@@ -964,30 +926,15 @@ export class LandingComponent implements OnInit {
 
         this.customizationServiceService.update(this.ediid, JSON.stringify(postMessage)).subscribe(
           result => {
-            this.editingStatus["contact"] = true;
+            this.fieldObject.contactPoint["edited"] = true;
             this.notificationService.showSuccessWithTimeout("Contact updated", "", 3000);
-            console.log("this.editingStatus", this.editingStatus);
+            console.log("this.fieldObject", this.fieldObject);
           },
           err => {
             console.log("Error when updating contactpoint:", err);
           });
       }
     })
-  }
-
-  /*
-  *  show/hide authors edit box
-  */
-  setAuthorEditbox(mode: boolean) {
-    if (mode) {
-      this.authorObj.buttonOpacity = 1;
-      this.authorObj.borderStyle = "1px solid lightgrey";
-      this.authorObj.currentState = 'final';
-    } else {
-      this.authorObj.buttonOpacity = 0;
-      this.authorObj.borderStyle = "0px solid lightgrey";
-      this.authorObj.currentState = 'initial';
-    }
   }
 
   /*
@@ -1030,9 +977,9 @@ export class LandingComponent implements OnInit {
         this.customizationServiceService.update(this.ediid, JSON.stringify(postMessage)).subscribe(
           result => {
             console.log("Authors updated");
-            this.editingStatus["authors"] = true;
+            this.fieldObject.authors["edited"] = true;
             this.notificationService.showSuccessWithTimeout("Authors updated", "", 3000);
-            console.log("this.editingStatus", this.editingStatus);
+            console.log("this.fieldObject", this.fieldObject);
           },
           err => {
             console.log("Error when updating authors:", err);
@@ -1075,42 +1022,98 @@ export class LandingComponent implements OnInit {
   saveRecord() {
     // Send save request to back end
     this.customizationServiceService.saveRecord(this.ediid, "").subscribe(
-      (res)=>{
+      (res) => {
         console.log("Record saved");
       },
-      (err)=>{
+      (err) => {
         console.log("Save record error:", err);
       }
     );
     this.setRecordEditmode(false);
     this.commonVarService.setEditMode(false);
-    this.authService.logoutUser();
   }
 
   /*
    *  Cancel the whole edited record
    */
   cancelRecord() {
-    console.log("cancelling...");
     this.confirmationDialogService.confirm('Edited data will be lost', 'Do you really want to cancel?')
       .then((confirmed) => {
         if (confirmed) {
           this.customizationServiceService.delete(this.ediid).subscribe(
             (res) => {
-              //display notification here
+              this.notificationService.showSuccessWithTimeout("All changes have been cancelled.", "", 3000);
+              this.setRecordEditmode(false);
+              // window.open('/od/id/'+this.searchValue, '_self');
             },
             (error) => {
-              console.log("There is an error in searchservice.");
+              console.log("There is an error in customizationServiceService.delete.");
               console.log(error);
               this.errorMsg = error;
             }
           );
-          this.setRecordEditmode(false);
-          this.authService.logoutUser();
-          // window.open('/od/id/'+this.searchValue, '_self');
         }
       })
       .catch(() => console.log('User dismissed the dialog (e.g., by using ESC, clicking the cross icon, or clicking outside the dialog)'));
+  }
+
+  /*
+   *  Return border style based on edit status. This is to set the border of the edit field.
+   */
+
+  getBorderStyle(field: string) {
+    if (this.recordEditmode) {
+      if (this.fieldObject[field].edited) {
+        return '2px solid green';
+      } else {
+        return '1px solid lightgrey';
+      }
+    } else {
+      return '0px solid white';
+    }
+  }
+
+  /*
+   *  Undo editing. If no more field was edited, delete the record in staging area.
+   */
+  undoEditing(field: string) {
+    if (this.originalRecord[field] == undefined)
+      delete this.record[field];
+    else
+      this.record[field] = JSON.parse(JSON.stringify(this.originalRecord[field]));
+
+    var noMoreEdited = true;
+    for (var fld in this.fieldObject) {
+      if (field != fld && this.fieldObject[fld].edited) {
+        noMoreEdited = false;
+        break;
+      }
+    }
+
+    if (noMoreEdited) {
+      this.customizationServiceService.delete(this.ediid).subscribe(
+        (res) => {
+          this.fieldObject[field].edited = false;
+          this.notificationService.showSuccessWithTimeout(field + ": edit cancelled. No more edited field.", "", 3000);
+        },
+        (error) => {
+          console.log("There is an error in customizationServiceService.delete.");
+          console.log(error);
+          this.errorMsg = error;
+        }
+      );
+    } else {
+      this.customizationServiceService.update(this.ediid, JSON.stringify(this.record[field])).subscribe(
+        result => {
+          this.fieldObject[field].edited = false;
+          this.notificationService.showSuccessWithTimeout(field + ": edit cancelled.", "", 3000);
+          console.log("this.fieldObject", this.fieldObject);
+        },
+        err => {
+          this.notificationService.showSuccessWithTimeout("Error when updating database: " + err, "", 3000);
+          console.log("Error when updating authors:", err);
+        });
+    }
   }
 }
 

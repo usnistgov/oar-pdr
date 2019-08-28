@@ -42,6 +42,7 @@ export class DescriptionComponent {
   @Input() metadata: boolean;
   @Input() recordEditmode: boolean;
   @Input() inBrowser: boolean;   // false if running server-side
+  @Input() fieldObject: any;
 
   addAllFileSpinner: boolean = false;
   fileDetails: string = '';
@@ -164,6 +165,7 @@ export class DescriptionComponent {
   }
 
   ngOnInit() {
+    console.log("fieldObject", this.fieldObject);
     this.distApi = this.cfg.get("distService", "/od/ds/");
 
     this.cartMap = this.cartService.getCart();
@@ -1105,7 +1107,7 @@ export class DescriptionComponent {
 
         this.customizationServiceService.update(this.ediid, JSON.stringify(postMessage)).subscribe(
           result => {
-            this.editingStatus["description"] = true; 
+            this.fieldObject.description["edited"] = true;
             this.notificationService.showSuccessWithTimeout("Description updated", "", 3000);
             console.log("this.editingStatus", this.editingStatus);
           },
@@ -1153,8 +1155,8 @@ export class DescriptionComponent {
 
         this.customizationServiceService.update(this.ediid, JSON.stringify(postMessage)).subscribe(
           result => {
-            this.editingStatus["keywords"] = true; 
-            this.notificationService.showSuccessWithTimeout("Keywords updated", "", 3000);
+            this.fieldObject.keyword["edited"] = true;
+            this.notificationService.showSuccessWithTimeout("Keyword updated", "", 3000);
             console.log("this.editingStatus", this.editingStatus);
           },
           err => {
@@ -1204,9 +1206,8 @@ export class DescriptionComponent {
 
         this.customizationServiceService.update(this.ediid, JSON.stringify(postMessage)).subscribe(
           result => {
-            console.log("Update result:", result);
-            this.editingStatus["topics"] = true; 
-            this.notificationService.showSuccessWithTimeout("Topics updated", "", 3000);
+            this.fieldObject.topic["edited"] = true;
+            this.notificationService.showSuccessWithTimeout("Topic updated", "", 3000);
             console.log("this.editingStatus", this.editingStatus);
           },
           err => {
@@ -1217,12 +1218,61 @@ export class DescriptionComponent {
   }
 
   /*
-  *   Return border style
-  */
-  getBorder() {
-    if (this.recordEditmode)
-      return { 'border': '1px solid lightgrey' };
+   *  Undo editing
+   */
+  undoEditing(field: string) {
+    if (this.originalRecord[field] == undefined)
+      delete this.record[field];
     else
-      return { 'border': '0px solid lightgrey' };
+      this.record[field] = JSON.parse(JSON.stringify(this.originalRecord[field]));
+
+    var noMoreEdited = false;
+    for (var field in this.fieldObject) {
+      if (this.fieldObject[field].edited) {
+        noMoreEdited = true;
+        break;
+      }
+    }
+
+    if (noMoreEdited) {
+      this.customizationServiceService.delete(this.ediid).subscribe(
+        (res) => {
+          this.fieldObject[field].edited = false;
+          this.notificationService.showSuccessWithTimeout(field + ": edit cancelled.", "", 3000);
+        },
+        (error) => {
+          console.log("There is an error in customizationServiceService.delete.");
+          console.log(error);
+          this.errorMsg = error;
+        }
+      );
+    } else {
+      this.customizationServiceService.update(this.ediid, JSON.stringify(this.record[field])).subscribe(
+        result => {
+          this.fieldObject[field].edited = false;
+          this.notificationService.showSuccessWithTimeout(field + ": edit cancelled.", "", 3000);
+          console.log("this.fieldObject", this.fieldObject);
+        },
+        err => {
+          this.notificationService.showSuccessWithTimeout("Error when updating database: " + err, "", 3000);
+          console.log("Error when updating authors:", err);
+        });
+    }
+  }
+
+  /*
+   *  Return border style based on edit status. This is to set the border of the edit field.
+   */
+
+  getBorderStyle(field: string) {
+    if (this.recordEditmode) {
+      if (this.fieldObject[field].edited) {
+        return '2px solid green';
+      } else {
+        return '1px solid lightgrey';
+      }
+    } else {
+      return '0px solid white';
+    }
   }
 }

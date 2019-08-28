@@ -581,7 +581,20 @@ a:visited {
 }
 
 .edit_button {
-  width: 2em;
+  display: table-cell;
+  width: 1.65em;
+  height: 1.65em;
+  background-color: rgb(233, 233, 233);
+  vertical-align: top;
+  border-style: solid;
+  border-color: lightgrey;
+  border-width: 1px 1px 1px 0px;
+}
+
+.undo_button {
+  display: table-cell;
+  width: 1.65em;
+  height: 1.65em;
   border-radius: 0 4px 4px 0px;
   background-color: rgb(233, 233, 233);
   vertical-align: top;
@@ -590,31 +603,18 @@ a:visited {
   border-width: 1px 1px 1px 0px;
 }
 
-.edit_button2 {
-  display: inline-block;
-  width: 1.6em;
-  height: 1.6em;
-  border-radius: 0 4px 4px 0;
-  background-color:rgb(233, 233, 233);
-  vertical-align: top;
-  border-style: solid;
-  border-color: lightgrey;
-  border-width: 1px 1px 1px 0px;
-}
+.icon_enabled { 
+  cursor: pointer;
+  color: black;
+  padding: auto;
+  font-size: 1em;
+ }
 
-.two_button_container {
-  vertical-align: top;
-  border-style: solid;
-  border-color: lightgrey;
-  border-width: 0px 1px 1px 1px;
-  background-color: rgb(233, 233, 233);
-}
-
-.two_button_container .two_buttons {
-  width:2.3em;
-  height:2.3em;
-  margin: 0.1em;
-}
+ .icon_disabled { 
+  color: rgb(200, 200, 200);
+  padding: auto;
+  font-size: 1em;
+ }
 
 .filter-black{
   filter: invert(0);
@@ -622,4 +622,36 @@ a:visited {
 
 .filter-white{
   filter: invert(1);
+}
+
+.top_message {
+  height: 2em; 
+  font-size: 12px; 
+  float:right; 
+  margin-right: 3em;
+}
+
+.border_green {
+  border: 2px solid green;
+}
+
+.border_grey {
+  border: 1px solid lightgrey;
+}
+
+.border_clear {
+  border: 0px solid green;
+}
+
+.editable_container {
+  display: table-row;
+  text-align: left; 
+  vertical-align: top;
+}
+
+.editable_field {
+  display: table-cell; 
+  /* padding-right: .5em;  */
+  text-align: left; 
+  vertical-align: top;
 }

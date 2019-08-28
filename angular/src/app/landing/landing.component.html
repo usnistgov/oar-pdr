@@ -1,32 +1,31 @@
 <div [@changeMode]=currentMode style="background-color: #153971;color: #FFFFFF;height: 3em;">
   <button type="button" (click)="cancelRecord()" pButton type="submit"
-    style="float:right;margin:.5em 1em .5em 0em;width:150px; height:2em; background-color:green;color:white;padding-right: 1em;"
-    [disabled]="!recordEditmode || titleObj.detailEditmode">
+    style="float:right;margin:.5em 0em .5em 0em;width:150px; height:2em; background-color:green;color:white;padding-right: 1em;"
+    [disabled]="!recordEditmode || fieldObject.title.detailEditmode">
     <i class="faa faa-trash faa-1x icon-white" style="color: #fff;padding-left: .5em;padding-right: .5em;"></i>
     Cancel
   </button>
   <button type="button" (click)="saveRecord()" pButton type="submit"
     style="float:right;margin:.5em 1em .5em 0em;width:150px; height:2em; background-color:green;color:white;padding-right: 1em;"
-    [disabled]="!recordEditmode || titleObj.detailEditmode">
+    [disabled]="!recordEditmode || fieldObject.title.detailEditmode">
     <i class="faa faa-save faa-1x icon-white" style="color: #fff;padding-left: .5em;padding-right: .5em;"></i>
     Save
   </button>
-  <button type="button" (click)="setRecordEditmode(!recordEditmode)" pButton type="submit"
+  <button type="button" (click)="setRecordEditmode(true)" pButton type="submit"
     style="float:right;margin:.5em 1em .5em 1em;width:150px; height:2em; background-color:green;color:white;padding-right: 1em;"
     [disabled]="recordEditmode">
     <i class="faa faa-pencil faa-1x icon-white" style="color: #fff;padding-left: .5em;padding-right: .5em;"></i>
     Edit
   </button>
 </div>
-<div *ngIf="loggedIn() && !saveDataLoaded && hasSavedData"
-  style="background-color: burlywood; text-align: right;height:2em; padding-right: 1em; padding-top: .3em;">
-  <span style="color: red; padding-right: 1em;">This record was edited on: </span> <span
-    style="color: #1471AE; cursor: pointer;">{{record.modified}}</span>
+<div class="top_message" *ngIf="!loggedIn()">To see previously edited data or edit current data, click on Edit button.
 </div>
-<div class="ui-grid ui-grid-responsive ui-grid-pad center">
-  <div class="card landingcard">
+<div class="top_message" *ngIf="loggedIn() && record.modified != undefined">This record was edited on:
+  {{record.modified}}</div>
+<div class="ui-grid ui-grid-responsive ui-grid-pad center" style="border: 0px solid white;">
+  <div class="card landingcard" style="border: 0px solid white;">
     <!-- <div id="overlay" *ngIf="isLocalProcessing"> -->
-    <div class="loading" *ngIf="isLocalProcessing"></div>
+    <!-- <div class="loading" *ngIf="isLocalProcessing"></div> -->
     <!-- </div> -->
     <div *ngIf="record?.length == 0 || isId === false">
       <div *ngIf="!isLoading" class="ui-g">
@@ -53,100 +52,159 @@
                 <p-menu #menu3 class="rightMenuStylePop" popup="popup" [model]="rightmenu"></p-menu>
               </div>
               <br>
-              <div *ngIf="!recordEditmode">
-                <span class="title" style="text-align: left; vertical-align: top;">
-                  <h2>{{record.title}}</h2>
-                </span>
-              </div>
-              <div *ngIf="recordEditmode">
-                <div style="display: table-row;text-align: left; vertical-align: top;border: 1px solid red;">
-                  <div class="title" style="display: table-cell;vertical-align: top;max-width:calc(100% - 5.5em);">
-                    <h2 [@changeBorderColor]=titleObj.currentState style="padding-right: .5em;">
-                      {{record.title}}</h2>
+              <div style="display: table">
+                <div class="editable_container">
+                  <div class="editable_field" *ngIf="!record.title; else hasTitle">
+                    <span class="title">
+                      <h2 [ngStyle]="{'border':getBorderStyle('title'),'padding-right': '0.5em'}">{{record.title}}</h2>
+                    </span>
                   </div>
-                  <div class="edit_button" *ngIf="!titleObj.detailEditmode">
-                    <button *ngIf="!titleObj.detailEditmode" [style.opacity]="titleObj.buttonOpacity" type="button"
-                      (click)="openTitleModal()"
-                      style="height: 2.1em; border: 0px solid red;background-color: transparent;">
-                      <i class="faa faa-pencil"
-                        style="cursor: pointer;color:grey; padding-top: 4px; padding-left: 2px; font-size: 1em;"
-                        data-toggle="tooltip" title="Edit title"></i>
-                    </button>
-                    <button *ngIf="!titleObj.detailEditmode && editingStatus['title']" [style.opacity]="titleObj.buttonOpacity" type="button"
-                      (click)="undoTitle()"
-                      style="height: 2.1em; border: 0px solid red;background-color: transparent;">
-                      <i class="faa faa-pencil"
-                        style="cursor: pointer;color:grey; padding-top: 4px; padding-left: 2px; font-size: 1em;"
-                        data-toggle="tooltip" title="Undo title"></i>
-                    </button>
-                  </div>
-                </div>
-              </div>
-              <div *ngIf="!record.authors; else hasAuthors">
-                <div [@changeBorderColor]=authorObj.currentState *ngIf="recordEditmode"
-                  style="text-align: left; vertical-align: top;display: inline-block;padding-right: .5em;">
-                  Authors:
-                </div>
-                <button [@changeOpacity]=authorObj.currentState *ngIf="recordEditmode && !authorObj.detailEditmode"
-                  [style.opacity]="authorObj.buttonOpacity" type="button" (click)="openAuthorModal()"
-                  class="edit_button2">
-                  <i class="faa faa-pencil" style="cursor: pointer;color:grey; margin-top: 0em;" data-toggle="tooltip"
-                    title="Edit contact"></i>
-                </button>
-              </div>
-              <ng-template #hasAuthors>
-                <div style="display: inline-block;width:100%;text-align: left; vertical-align: top;">
-                  <div [@changeBorderColor]=authorObj.currentState
-                    style="display: inline-block; padding-right: .5em; text-align: left; vertical-align: top;max-width:calc(100% - 4em);">
-                    <div *ngIf="record.authors">
-                      <span *ngFor="let author of record.authors; let i = index">
-                        {{ author.fn }}<span *ngIf="i < record.authors.length-1 ">,</span>
-                      </span>
-                      <i style="cursor: pointer; margin-left: 0.5rem;" class="faa"
-                        [ngClass]="{'faa-plus-square-o': !clickAuthors, 'faa-minus-square-o': clickAuthors}"
-                        aria-hidden="true"
-                        (click)="isCollapsedContent = !isCollapsedContent; clickAuthors = expandClick();"></i>
+                  <ng-template #hasTitle>
+                    <div class="title editable_field">
+                      <h2 [ngStyle]="{'border':getBorderStyle('title'),'padding-right': '0.5em'}">
+                        {{record.title}}</h2>
                     </div>
-                    <div [collapse]="!isCollapsedContent" class="card card-block card-header customcard">
-                      <div class="" *ngIf="record.authors">
-                        <span><b>Authors:</b></span>
-                        <div *ngFor="let author of record.authors; let i = index">
-                          <div>{{ author.fn}}</div>
-                          <div *ngFor="let aff of author.affiliation" style="padding-left: 1em;">
-                            <div>{{aff.title}}</div>
-                            <div>{{aff.dept}}</div>
+                  </ng-template>
+                  <button class="edit_button" *ngIf="recordEditmode" type="button" (click)="openTitleModal()">
+                    <i class="faa faa-pencil icon_enabled" data-toggle="tooltip" title="Edit title"></i>
+                  </button>
+                  <button class="undo_button" *ngIf="recordEditmode" type="button"
+                    [disabled]="!fieldObject.title.edited" (click)="undoEditing('title')">
+                    <i class="faa faa-undo"
+                      [ngClass]="{'icon_enabled': fieldObject.title.edited, 'icon_disabled':!fieldObject.title.edited }"
+                      data-toggle="tooltip" title="Undo title"></i>
+                  </button>
+                </div>
+              </div>
+              <div style="display: table">
+                <div class="editable_container">
+                  <div class="editable_field" *ngIf="!record.authors; else hasAuthors">
+                    <div class="editable_field" *ngIf="recordEditmode"
+                      [ngClass]="{'border_clear': !recordEditmode, 'border_grey': recordEditmode && !fieldObject.authors.edited, 'border_green': recordEditmode && fieldObject.authors.edited}">
+                      Authors:
+                    </div>
+                  </div>
+                  <ng-template #hasAuthors>
+                    <div class="editable_container">
+                      <div class="editable_field" style="max-width:calc(100% - 4em);"
+                        [ngClass]="{'border_clear': !recordEditmode, 'border_grey': recordEditmode && !fieldObject.authors.edited, 'border_green': recordEditmode && fieldObject.authors.edited}">
+                        <div *ngIf="record.authors">
+                          <span *ngFor="let author of record.authors; let i = index">
+                            {{ author.fn }}<span *ngIf="i < record.authors.length-1 ">,</span>
+                          </span>
+                          <i style="cursor: pointer; margin-left: 0.5rem;" class="faa"
+                            [ngClass]="{'faa-plus-square-o': !clickAuthors, 'faa-minus-square-o': clickAuthors}"
+                            aria-hidden="true"
+                            (click)="isCollapsedContent = !isCollapsedContent; clickAuthors = expandClick();"></i>
+                        </div>
+                        <div [collapse]="!isCollapsedContent" class="card card-block card-header customcard">
+                          <div class="" *ngIf="record.authors">
+                            <span><b>Authors:</b></span>
+                            <div *ngFor="let author of record.authors; let i = index">
+                              <div>{{ author.fn}}</div>
+                              <div *ngFor="let aff of author.affiliation" style="padding-left: 1em;">
+                                <div>{{aff.title}}</div>
+                                <div>{{aff.dept}}</div>
+                              </div>
+                            </div>
                           </div>
                         </div>
                       </div>
                     </div>
+                  </ng-template>
+                  <div class="editable_field">
+                    <button class="edit_button" *ngIf="recordEditmode" type="button" (click)="openAuthorModal()">
+                      <i class="faa faa-pencil icon_enabled" data-toggle="tooltip" title="Edit authors"></i>
+                    </button>
+                    <button class="undo_button" *ngIf="recordEditmode" type="button"
+                      [disabled]="!fieldObject.authors.edited" (click)="undoEditing('authors')">
+                      <i class="faa faa-undo"
+                        [ngClass]="{'icon_enabled': fieldObject.authors.edited, 'icon_disabled':!fieldObject.authors.edited }"
+                        data-toggle="tooltip" title="Undo authors"></i>
+                    </button>
                   </div>
-                  <button [@changeOpacity]=authorObj.currentState *ngIf="recordEditmode && !authorObj.detailEditmode"
-                    [style.opacity]="authorObj.buttonOpacity" type="button" (click)="openAuthorModal()"
-                    class="edit_button2">
-                    <i class="faa faa-pencil" style="cursor: pointer;color:grey; margin-top: 0em;" data-toggle="tooltip"
-                      title="Edit contact"></i>
+                </div>
+              </div>
+              <div style="display: table">
+                <div class="editable_container">
+                  <div class="editable_field" *ngIf="!record.contactPoint; else hasContacts">
+                    <div *ngIf="recordEditmode"
+                      style="text-align: left; vertical-align: top;display: inline-block;padding-right: .5em;"
+                      [ngStyle]="{'border':getBorderStyle('contactPoint')}">
+                      Contact:
+                    </div>
+                  </div>
+                  <ng-template #hasContacts>
+                    <div class="editable_field" style="text-align: left; vertical-align: top;"
+                      *ngIf="record.contactPoint">
+                      <div style="display: inline-block; padding-right: .5em"
+                        [ngStyle]="{'border':getBorderStyle('contactPoint')}">
+                        Contact:
+                        <strong>
+                          <a class="font14" *ngIf="isEmail" href="{{record.contactPoint.hasEmail}}" target="_top"
+                            (click)="gaService.gaTrackEvent('Email', $event, 'Resource title: ' + record.title, record.contactPoint.hasEmail)">
+                            {{record.contactPoint.fn}}</a>
+                          <span *ngIf="!isEmail">{{record.contactPoint.fn}}</span>
+                        </strong>..
+                        <i style="cursor: pointer;" class="faa"
+                          [ngClass]="{'faa-plus-square-o': !clickContact, 'faa-minus-square-o': clickContact}"
+                          aria-hidden="true" (click)="closeContent = !closeContent; clickContact=expandContact();"></i>
+                        <div [collapse]="!closeContent" class="card card-body bg-faded">
+                          <span class="" *ngIf="record.contactPoint.fn">
+                            <span>{{record.contactPoint.fn}}</span>
+                          </span>
+                          <span class="font14" *ngIf="isEmail">
+                            <br><strong>Email:</strong>
+                            <a *ngIf="isEmail" href="{{record.contactPoint.hasEmail}}" target="_top"
+                              (click)="gaService.gaTrackEvent('Email', $event, 'Resource title: ' + record.title, record.contactPoint.hasEmail)">
+                              {{record.contactPoint.hasEmail.split(":")[1]}}</a>
+                          </span>
+                          <div class="font14" *ngIf="record.contactPoint.address">
+                            <span><b>Address:</b></span>
+                            <div *ngFor="let address of record.contactPoint.address">
+                              {{address}}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </ng-template>
+                  <button class="edit_button" *ngIf="recordEditmode" type="button" (click)="openContactModal()">
+                    <i class="faa faa-pencil icon_enabled" data-toggle="tooltip" title="Edit contactPoint"></i>
+                  </button>
+                  <button class="undo_button" *ngIf="recordEditmode" type="button"
+                    [disabled]="!fieldObject.contactPoint.edited" (click)="undoEditing('contactPoint')">
+                    <i class="faa faa-undo"
+                      [ngClass]="{'icon_enabled': fieldObject.contactPoint.edited, 'icon_disabled':!fieldObject.contactPoint.edited }"
+                      data-toggle="tooltip" title="Undo contactPoint"></i>
                   </button>
                 </div>
-              </ng-template>
+              </div>
             </div>
           </div>
+
           <div class="ui-g">
             <div class="ui-g-8 ui-md-8 ui-lg-8 ui-sm-12 contactPoint">
-              <div *ngIf="!record.contactPoint; else hasContacts">
-                <div [@changeBorderColor]=contactObj.currentState *ngIf="recordEditmode"
-                  style="text-align: left; vertical-align: top;display: inline-block;padding-right: .5em;">
+              <!-- <div *ngIf="!record.contactPoint; else hasContacts">
+                <div *ngIf="recordEditmode"
+                  style="text-align: left; vertical-align: top;display: inline-block;padding-right: .5em;"
+                  [ngStyle]="{'border':getBorderStyle('contactPoint')}">
                   Contact:
                 </div>
-                <button [@changeOpacity]=contactObj.currentState *ngIf="recordEditmode && !contactObj.detailEditmode"
-                  [style.opacity]="contactObj.buttonOpacity" type="button" (click)="openContactModal()"
-                  class="edit_button2">
-                  <i class="faa faa-pencil" style="cursor: pointer;color:grey; margin-top: 0em;" data-toggle="tooltip"
-                    title="Edit contact"></i>
+                <button class="edit_button" *ngIf="recordEditmode" type="button" (click)="openContactModal()">
+                  <i class="faa faa-pencil icon_enabled" data-toggle="tooltip" title="Edit contactPoint"></i>
                 </button>
-              </div>
-              <ng-template #hasContacts>
+                <button class="undo_button" *ngIf="recordEditmode" type="button"
+                  [disabled]="!fieldObject.contactPoint.edited" (click)="undoEditing('contactPoint')">
+                  <i class="faa faa-undo"
+                    [ngClass]="{'icon_enabled': fieldObject.contactPoint.edited, 'icon_disabled':!fieldObject.contactPoint.edited }"
+                    data-toggle="tooltip" title="Undo contactPoint"></i>
+                </button>
+              </div> -->
+              <!-- <ng-template #hasContacts>
                 <div style="text-align: left; vertical-align: top;" *ngIf="record.contactPoint">
-                  <div [@changeBorderColor]=contactObj.currentState style="display: inline-block; padding-right: .5em">
+                  <div style="display: inline-block; padding-right: .5em"
+                    [ngStyle]="{'border':getBorderStyle('contactPoint')}">
                     Contact:
                     <strong>
                       <a class="font14" *ngIf="isEmail" href="{{record.contactPoint.hasEmail}}" target="_top"
@@ -175,14 +233,17 @@
                       </div>
                     </div>
                   </div>
-                  <button [@changeOpacity]=contactObj.currentState *ngIf="recordEditmode && !contactObj.detailEditmode"
-                    [style.opacity]="contactObj.buttonOpacity" type="button" (click)="openContactModal()"
-                    class="edit_button2">
-                    <i class="faa faa-pencil" style="cursor: pointer;color:grey; margin-top: 0em;" data-toggle="tooltip"
-                      title="Edit contact"></i>
+                  <button class="edit_button2" *ngIf="recordEditmode" type="button" (click)="openContactModal()">
+                    <i class="faa faa-pencil icon_enabled" data-toggle="tooltip" title="Edit contactPoint"></i>
+                  </button>
+                  <button class="undo_button" *ngIf="recordEditmode" type="button"
+                    [disabled]="!fieldObject.contactPoint.edited" (click)="undoEditing('contactPoint')">
+                    <i class="faa faa-undo"
+                      [ngClass]="{'icon_enabled': fieldObject.contactPoint.edited, 'icon_disabled':!fieldObject.contactPoint.edited }"
+                      data-toggle="tooltip" title="Undo contactPoint"></i>
                   </button>
                 </div>
-              </ng-template>
+              </ng-template> -->
               <!-- <br> -->
               <span *ngIf="isId">Identifier: </span>
               <span *ngIf="isDOI"><i> <a class="font14" href="https://doi.org/{{record.doi.split(':')[1]}}"
@@ -248,11 +309,10 @@
             <div class="ui-g-12 ui-md-12 ui-lg-12 ui-sm-12">
               <description-resources [record]="record" [originalRecord]="originalRecord" [files]="files"
                 [distdownload]="distdownload" [isInternal]="isInternal" [filescount]="filescount" [metadata]="metadata"
-                [inBrowser]="inBrowser" [recordEditmode]="recordEditmode"></description-resources>
+                [inBrowser]="inBrowser" [recordEditmode]="recordEditmode" [fieldObject]="fieldObject"></description-resources>
               <metadata-detail [record]="record" [serviceApi]="serviceApi" [inBrowser]="inBrowser"
-                [metadata]="metadata"></metadata-detail>
-
-              <!-- <data-cart></data-cart>   -->
+                [metadata]="metadata">
+              </metadata-detail>
             </div>
             <div *ngIf="record.length !== 0 && inBrowser">
               <p-dialog class="citationDialog" [closable]="false" [(visible)]="display" modal="modal" width="550"
