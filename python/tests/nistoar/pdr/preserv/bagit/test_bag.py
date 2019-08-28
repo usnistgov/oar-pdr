@@ -48,6 +48,12 @@ class TestNISTBag(test.TestCase):
         self.assertEqual(self.bag.pod_file(),
                          os.path.join(bagdir, "metadata", "pod.json"))
 
+    def test_pod_record(self):
+        pod = self.bag.pod_record()
+        self.assertNotEqual(len(pod), 0)  # not empty
+        self.assertEqual(pod["@type"], "dcat:Dataset")
+        self.assertIn("identifier", pod)
+
     def test_nerd_file_for(self):
         self.assertEqual(self.bag.nerd_file_for(""),
                          os.path.join(bagdir, "metadata", "nerdm.json"))

@@ -396,6 +396,15 @@ class NISTBag(PreservationSystem):
     def read_pod(self, podfile):
         return read_pod(podfile)
 
+    def pod_record(self):
+        """
+        return the POD record data currently saved in the bag
+        """
+        pf = self.pod_file()
+        if not os.path.exists(pf):
+            return {}
+        return self.read_pod(pf)
+
     def iter_data_files(self):
         """
         iterate through the data files available under the data directory.

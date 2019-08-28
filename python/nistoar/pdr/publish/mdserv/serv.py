@@ -350,8 +350,12 @@ class PrePubMetadataService(PublishSystem):
         outmsgs = []
         msg = "User-generated metadata updates to path='{0}': {1}"
         for destpath in updates:
-            bagbldr.update_annotations_for(destpath, updates[destpath],
-                    message=msg.format(destpath, str(updates[destpath].keys())))
+            if destpath is not None:
+                bagbldr.update_annotations_for(destpath, updates[destpath],
+                        message=msg.format(destpath, str(updates[destpath].keys())))
+
+        # save an updated POD and send it to MIDAS
+        self.update_pod(updates[None])
 
         mergeconv = bagbldr.cfg.get('merge_convention', DEF_MERGE_CONV)
         return bagbldr.bag.nerdm_record(mergeconv);
@@ -514,6 +518,65 @@ class PrePubMetadataService(PublishSystem):
             mt = self.mimetypes.get(os.path.splitext(loc)[1][1:],
                                     'application/octet-stream')
         return (loc, mt)
+
+    def update_pod(self, nerdm, bagbldr):
+        """
+        create a POD record from the given NERDm record and determine if a 
+        change has been made.  If so, save it to the metadata bag and submit 
+        it to MIDAS.  
+
+        :param Mapping nerdm:  The updated NERDm Resource record from which to 
+                               get the POD data
+        :param BagBuilder bagbldr:  A BagBuilder instance that should be used 
+                               to save the POD 
+        """
+        # sanity check the input NERDm record
+        
+        # create the updated POD
+        newpod = self._nerd2pod.convert_data(nerdm)
+        pod4midas = self._pod4midas(newpod)
+
+        # compare it to the currently saved POD record
+        oldpod = self._pod4midas(bagbldr.bag.pod_record())
+        if newpod.get('_committed', True) and pod4midas == oldpod:
+            # nothing's changed
+            self.log.debug("No change requiring update to POD detected")
+            return
+
+        # attempt to commit it to MIDAS.  If it fails, we'll try to get it
+        # next time.
+        if not self._submit_to_midas(pod4midas):
+            newpod['_committed'] = False
+
+        # save the updated POD to our bag
+        bagbldr.add_ds_pod(newpod, convert=False)
+
+    def _submit_to_midas(self, pod):
+        # send the POD record to MIDAS via its API
+
+        # if not self._midascl:
+        #     raise StateException("No MIDAS service available")
+
+        midasid = pod.get('identifier')
+        if not midasid:
+            self.log.error("_submit_to_midas(): POD is missing identifier prop!")
+            raise ValueError("POD record is missing required 'identifier' field")
+
+        # try:
+        #     self._midascl.put(midasid, pod)
+        # except Exception as ex:
+        #     self.log.error("Failed to commit POD to MIDAS for ediid=%s", midasid)
+        #     self.log.exception(ex)
+        #     return False
+                           
+        return True
+
+        
+        
+        
+        
+        
+        
         
         
 class InvalidRequest(PDRServiceException):
