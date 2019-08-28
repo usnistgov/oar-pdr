@@ -6,7 +6,7 @@ import re, logging
 from collections import OrderedDict, Mapping
 
 from nistoar.nerdm.convert import DOIResolver
-from nistoar.doi import is_DOI
+from nistoar.doi import is_DOI, DOIResolutionException
 
 class AuthorFetcher(object):
     """
@@ -146,7 +146,7 @@ class ReferenceEnhancer(object):
         update of references.  
         """
         refs = bagbldr.bag.nerd_metadata_for('', as_annot).get("references")
-        return self.ForResource(self.doir, refs)
+        return self.ForResource(self.doir, refs, self.log)
 
     def enhance_refs(self, bagbldr, as_annot=False, override=False):
         """
@@ -245,12 +245,13 @@ class ReferenceEnhancer(object):
         metadata. 
         """
 
-        def __init__(self, doi_resolver, baserefs):
+        def __init__(self, doi_resolver, baserefs, logger=None):
             """
             wrap and operate on a given list of 
             """
             self.doir = doi_resolver
             self.refs = self._index_refs(baserefs)
+            self.log = logger
 
         def _index_refs(self, reflist):
             # create a mapping of URL locations to reference node for 
