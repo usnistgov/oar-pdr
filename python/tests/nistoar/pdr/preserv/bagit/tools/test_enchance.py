@@ -192,7 +192,7 @@ class TestEnrichReferences(test.TestCase):
         # add a new DOI to the references list
         doid = "10.1126/science.169.3946.635"
         doiu = "https://doi.org/"+doid
-        enh.merge_enhanced_ref("doi:"+doid)
+        self.assertTrue(enh.merge_enhanced_ref("doi:"+doid))
         self.assertEqual(len(enh.refs), 2)
         self.assertIn(doiu, enh.refs)
         self.assertEqual(enh.refs.keys()[1], doiu)
@@ -203,7 +203,7 @@ class TestEnrichReferences(test.TestCase):
         # test effectiveness of override, and of updates
         del enh.refs[doiu]['title']
         enh.refs[doiu]['description'] = "The Real Story"
-        enh.merge_enhanced_ref("doi:"+doid, False)
+        self.assertFalse(enh.merge_enhanced_ref("doi:"+doid, False))
         self.assertIn('citation', enh.refs[doiu])
         self.assertNotIn('title', enh.refs[doiu])
         self.assertIn('description', enh.refs[doiu])
@@ -215,14 +215,14 @@ class TestEnrichReferences(test.TestCase):
         # test alternate forms of DOI
         del enh.refs[doiu]['citation']
         del enh.refs[doiu]['title']
-        enh.merge_enhanced_ref("http://dx.doi.org/"+doid, False)
+        self.assertTrue(enh.merge_enhanced_ref("http://dx.doi.org/"+doid, False))
         self.assertIn('citation', enh.refs[doiu])
         self.assertIn('title', enh.refs[doiu])
         self.assertEqual(enh.refs[doiu]['description'], "The Real Story")
 
         del enh.refs[doiu]['citation']
         del enh.refs[doiu]['title']
-        enh.merge_enhanced_ref("https://doi.org/"+doid, False)
+        self.assertTrue(enh.merge_enhanced_ref("https://doi.org/"+doid, False))
         self.assertIn('citation', enh.refs[doiu])
         self.assertIn('title', enh.refs[doiu])
         self.assertEqual(enh.refs[doiu]['description'], "The Real Story")
@@ -232,11 +232,15 @@ class TestEnrichReferences(test.TestCase):
         doiu = "https://doi.org/10.1364/OE.24.014100"
         self.assertNotIn('title', enh.refs[doiu])
         self.assertNotIn('citation', enh.refs[doiu])
-        enh.merge_enhanced_ref("doi:"+doid, False)
+        self.assertTrue(enh.merge_enhanced_ref("doi:"+doid, False))
         self.assertIn('citation', enh.refs[doiu])
         self.assertIn('title', enh.refs[doiu])
         self.assertIn('optical sorting', enh.refs[doiu]['title'])
         self.assertNotIn('description', enh.refs[doiu])
+
+        # test failure mode
+        self.assertFalse(enh.merge_enhanced_ref("doi:88888/baddoi", False))
+        
 
     @test.skipIf("doi" not in os.environ.get("OAR_TEST_INCLUDE",""),
                  "kindly skipping doi service checks")
