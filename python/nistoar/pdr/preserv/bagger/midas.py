@@ -478,7 +478,8 @@ class MIDASMetadataBagger(SIPBagger):
             # enhance references (if desired)
             if self.cfg.get('enrich_refs', False):
                 synchronize_enhanced_refs(self.bagbldr,
-                                          config=self.cfg.get('doi_resolver'))
+                                          config=self.cfg.get('doi_resolver'),
+                                          log=self.log)
 
         self.resmd = self.bagbldr.bag.nerdm_record(True)
 

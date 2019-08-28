@@ -162,6 +162,8 @@ class ReferenceEnhancer(object):
         :param bool      override:  If False, do not enhance a record that 
                                     already appears to be enhanced.  
         """
+        if self.log:
+            self.log.debug("Enhancing any DOI references found")
         enh = self.enhancer_for(bagbldr, as_annot)
         enh.enhance_existing(override)
 
@@ -197,6 +199,8 @@ class ReferenceEnhancer(object):
         :param bool      override:  If False, do not enhance a record that 
                                     already appears to be enhanced.  
         """
+        if self.log:
+            self.log.debug("Enhancing any DOI references found")
         enh = self.enhancer_for(bagbldr, True)
         urefs = bagbldr.bag.nerd_metadata_for('', False)
         urefs = urefs.get('references', [])
@@ -362,7 +366,7 @@ def enhance_refs(bagbldr, as_annot=False, override=False, config=None):
     """
     return ReferenceEnhancer(config).enhance_refs(bagbldr, as_annot, override)
 
-def synchronize_enhanced_refs(bagbldr, override=False, config=None):
+def synchronize_enhanced_refs(bagbldr, override=False, config=None, log=None):
     """
     enhance the reference descriptions, saving the enhancements as annotations,
     using the unannotated references as a guide.  
@@ -387,10 +391,14 @@ def synchronize_enhanced_refs(bagbldr, override=False, config=None):
                                 whose metadata should be updated
     :param bool      override:  If False, do not enhance a record that 
                                 already appears to be enhanced.  
-    :param dict      config:    the configuration to use; the properties 
+    :param dict        config:  the configuration to use; the properties 
                                 supported are the ones supported by the 
                                 ReferenceEnhancer class (and the DOIResolver 
                                 class).  If None, default values will be used. 
+    :param Logger         log:  A logger to use for messages reporting on 
+                                resolution activity.  If not provided, no 
+                                messages will be logged.
     """
-    return ReferenceEnhancer(config).synchronize_annotated_refs(bagbldr,override)
+    return ReferenceEnhancer(config, log=log) \
+                                  .synchronize_annotated_refs(bagbldr,override)
 
