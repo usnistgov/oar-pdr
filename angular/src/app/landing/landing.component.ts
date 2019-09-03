@@ -26,6 +26,7 @@ import { HttpClient } from '@angular/common/http';
 import { DescriptionPopupComponent } from './description/description-popup/description-popup.component';
 import { ConfirmationDialogService } from '../shared/confirmation-dialog/confirmation-dialog.service';
 import { NotificationService } from '../shared/notification-service/notification.service';
+import { ApiToken } from "../shared/auth-service/ApiToken";
 
 declare var _initAutoTracker: Function;
 
@@ -256,7 +257,6 @@ export class LandingComponent implements OnInit {
     for (var field in this.fieldObject) {
       this.fieldObject[field] = this.editingObjectInit();
     }
-    console.log('this.fieldObject', this.fieldObject);
     if (this.router.url.includes("ark"))
       this.searchValue = this.router.url.split("/id/").pop();
 
@@ -299,6 +299,7 @@ export class LandingComponent implements OnInit {
             this.commonVarService.setContentReady(true);
             this.saveDataLoaded = true;
             this.commonVarService.setRefreshTree(true);
+            this.checkDataChanges();
           }.bind(this), function (err) {
             alert("something went wrong while fetching the data.");
           });
@@ -836,17 +837,43 @@ export class LandingComponent implements OnInit {
   *  Set record level edit mode (for the edit button at top)
   */
   setRecordEditmode(mode: boolean) {
+    console.log("Setting record edit mode...");
     this.recordEditmode = mode;
     if (mode && !this.authService.loggedIn()) {
-      this.authService.login();
+      this.authService.loginUser()
+        .subscribe(
+          res => {
+            this.authService.handleTokenSuccess(res as ApiToken);
+            if (mode) {
+              console.log("loading saved record...");
+              this.loadSavedData();
+            } else {
+              console.log("loading mdserver record...");
+              this.loadPubData();
+            }
+            this.recordEditmode = mode;
+            this.commonVarService.setEditMode(mode);
+          },
+          err => {
+            this.authService.handleTokenError(err);
+          }
+        )
     }
-    if (mode) {
-      this.loadPubData();
-    } else {
-      this.loadSavedData();
+
+  }
+
+  /*
+   *  Set record level edit mode (for the edit button at top)
+   */
+  checkDataChanges() {
+    if (this.record != undefined && this.originalRecord != undefined) {
+      this.fieldObject.title.edited = (this.record.title != this.originalRecord.title);
+      this.fieldObject.authors.edited = (JSON.stringify(this.record.authors) != JSON.stringify(this.originalRecord.authors));
+      this.fieldObject.contactPoint.edited = (JSON.stringify(this.record.contactPoint) != JSON.stringify(this.originalRecord.contactPoint));
+      this.fieldObject.description.edited = (JSON.stringify(this.record.description) != JSON.stringify(this.originalRecord.description));
+      this.fieldObject.topic.edited = (JSON.stringify(this.record.topic) != JSON.stringify(this.originalRecord.topic));
+      this.fieldObject.keyword.edited = (JSON.stringify(this.record.keyword) != JSON.stringify(this.originalRecord.keyword));
     }
-    this.recordEditmode = mode;
-    this.commonVarService.setEditMode(mode);
   }
 
   /*
@@ -871,13 +898,12 @@ export class LandingComponent implements OnInit {
 
         var postMessage: any = {};
         postMessage["title"] = newTitle;
-        console.log("postMessage", JSON.stringify(postMessage));
+        // console.log("postMessage", JSON.stringify(postMessage));
 
         this.customizationServiceService.update(this.ediid, JSON.stringify(postMessage)).subscribe(
           result => {
-            this.fieldObject.title["edited"] = true;
+            this.fieldObject.title["edited"] = (JSON.stringify(this.record.contactPoint) != JSON.stringify(this.originalRecord.contactPoint));
             this.notificationService.showSuccessWithTimeout("Title updated", "", 3000);
-            console.log("this.fieldObject", this.fieldObject);
           },
           err => {
             console.log("Error when updating title:", err);
@@ -926,7 +952,7 @@ export class LandingComponent implements OnInit {
 
         this.customizationServiceService.update(this.ediid, JSON.stringify(postMessage)).subscribe(
           result => {
-            this.fieldObject.contactPoint["edited"] = true;
+            this.fieldObject.contactPoint["edited"] = (JSON.stringify(this.record.contactPoint) != JSON.stringify(this.originalRecord.contactPoint));
             this.notificationService.showSuccessWithTimeout("Contact updated", "", 3000);
             console.log("this.fieldObject", this.fieldObject);
           },
@@ -977,7 +1003,7 @@ export class LandingComponent implements OnInit {
         this.customizationServiceService.update(this.ediid, JSON.stringify(postMessage)).subscribe(
           result => {
             console.log("Authors updated");
-            this.fieldObject.authors["edited"] = true;
+            this.fieldObject.authors["edited"] = (JSON.stringify(this.record.authors) != JSON.stringify(this.originalRecord.authors));
             this.notificationService.showSuccessWithTimeout("Authors updated", "", 3000);
             console.log("this.fieldObject", this.fieldObject);
           },
@@ -1031,20 +1057,21 @@ export class LandingComponent implements OnInit {
     );
     this.setRecordEditmode(false);
     this.commonVarService.setEditMode(false);
+    window.open('/od/id/' + this.searchValue, '_self');
   }
 
   /*
    *  Cancel the whole edited record
    */
   cancelRecord() {
-    this.confirmationDialogService.confirm('Edited data will be lost', 'Do you really want to cancel?')
+    this.confirmationDialogService.confirm('Edited data will be lost', 'Do you want to erase changes?')
       .then((confirmed) => {
         if (confirmed) {
           this.customizationServiceService.delete(this.ediid).subscribe(
             (res) => {
-              this.notificationService.showSuccessWithTimeout("All changes have been cancelled.", "", 3000);
+              this.notificationService.showSuccessWithTimeout("All changes have been erased.", "", 3000);
               this.setRecordEditmode(false);
-              // window.open('/od/id/'+this.searchValue, '_self');
+              window.open('/od/id/' + this.searchValue, '_self');
             },
             (error) => {
               console.log("There is an error in customizationServiceService.delete.");
@@ -1058,18 +1085,19 @@ export class LandingComponent implements OnInit {
   }
 
   /*
-   *  Return border style based on edit status. This is to set the border of the edit field.
+   *  Return field style based on edit status. 
+   *  This is to set the border and background color of the edit field.
    */
 
-  getBorderStyle(field: string) {
+  getFieldStyle(field: string) {
     if (this.recordEditmode) {
-      if (this.fieldObject[field].edited) {
-        return '2px solid green';
+      if (JSON.stringify(this.record[field]) != JSON.stringify(this.originalRecord[field])) {
+        return { 'border': '1px solid lightgrey', 'background-color': '#FCF9CD' };
       } else {
-        return '1px solid lightgrey';
+        return { 'border': '1px solid lightgrey', 'background-color': 'white' };
       }
     } else {
-      return '0px solid white';
+      return { 'border': '0px solid white', 'background-color': 'white' };
     }
   }
 

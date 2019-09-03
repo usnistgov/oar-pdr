@@ -165,7 +165,6 @@ export class DescriptionComponent {
   }
 
   ngOnInit() {
-    console.log("fieldObject", this.fieldObject);
     this.distApi = this.cfg.get("distService", "/od/ds/");
 
     this.cartMap = this.cartService.getCart();
@@ -1097,9 +1096,13 @@ export class DescriptionComponent {
     modalRef.componentInstance.title = 'Description';
 
     modalRef.componentInstance.returnDescription.subscribe((returnValue) => {
-      if (returnValue) {
+      if (returnValue != undefined && returnValue != null) {
         var tempDescs = returnValue.split(/\n\s*\n/).filter(desc => desc != '');
-        this.record['description'] = JSON.parse(JSON.stringify(tempDescs));
+        if(returnValue == ''){
+          delete this.record['description'];
+        }else{ 
+          this.record['description'] = JSON.parse(JSON.stringify(tempDescs));
+        }
 
         var postMessage: any = {};
         postMessage["description"] = tempDescs;
@@ -1107,9 +1110,9 @@ export class DescriptionComponent {
 
         this.customizationServiceService.update(this.ediid, JSON.stringify(postMessage)).subscribe(
           result => {
-            this.fieldObject.description["edited"] = true;
+            this.fieldObject.description["edited"] = (JSON.stringify(this.record['description']) != JSON.stringify(this.originalRecord['description']));
             this.notificationService.showSuccessWithTimeout("Description updated", "", 3000);
-            console.log("this.editingStatus", this.editingStatus);
+            console.log("datachanged", this.dataChanged('description'));
           },
           err => {
             console.log("Error when updating description:", err);
@@ -1155,7 +1158,7 @@ export class DescriptionComponent {
 
         this.customizationServiceService.update(this.ediid, JSON.stringify(postMessage)).subscribe(
           result => {
-            this.fieldObject.keyword["edited"] = true;
+            this.fieldObject.keyword["edited"] = (JSON.stringify(this.record['keyword']) != JSON.stringify(this.originalRecord['keyword']));
             this.notificationService.showSuccessWithTimeout("Keyword updated", "", 3000);
             console.log("this.editingStatus", this.editingStatus);
           },
@@ -1206,7 +1209,7 @@ export class DescriptionComponent {
 
         this.customizationServiceService.update(this.ediid, JSON.stringify(postMessage)).subscribe(
           result => {
-            this.fieldObject.topic["edited"] = true;
+            this.fieldObject.topic["edited"] = (JSON.stringify(this.record['topic']) != JSON.stringify(this.originalRecord['topic']));
             this.notificationService.showSuccessWithTimeout("Topic updated", "", 3000);
             console.log("this.editingStatus", this.editingStatus);
           },
@@ -1226,10 +1229,10 @@ export class DescriptionComponent {
     else
       this.record[field] = JSON.parse(JSON.stringify(this.originalRecord[field]));
 
-    var noMoreEdited = false;
-    for (var field in this.fieldObject) {
-      if (this.fieldObject[field].edited) {
-        noMoreEdited = true;
+    var noMoreEdited = true;
+    for (var fld in this.fieldObject) {
+      if (field != fld && this.fieldObject[fld].edited) {
+        noMoreEdited = false;
         break;
       }
     }
@@ -1238,7 +1241,7 @@ export class DescriptionComponent {
       this.customizationServiceService.delete(this.ediid).subscribe(
         (res) => {
           this.fieldObject[field].edited = false;
-          this.notificationService.showSuccessWithTimeout(field + ": edit cancelled.", "", 3000);
+          this.notificationService.showSuccessWithTimeout(field + ": edit cancelled. No more edited field.", "", 3000);
         },
         (error) => {
           console.log("There is an error in customizationServiceService.delete.");
@@ -1261,18 +1264,31 @@ export class DescriptionComponent {
   }
 
   /*
-   *  Return border style based on edit status. This is to set the border of the edit field.
+   *  Return field style based on edit status. 
+   *  This is to set the border and background color of the edit field.
    */
+  getFieldStyle(field: string) {
 
-  getBorderStyle(field: string) {
-    if (this.recordEditmode) {
+    if (field == 'description') {
       if (this.fieldObject[field].edited) {
-        return '2px solid green';
-      } else {
-        return '1px solid lightgrey';
+        return { 'background-color': '#FCF9CD' };
+      }else{
+        return { 'background-color': 'rgb(247, 249, 250)' };
       }
     } else {
-      return '0px solid white';
+      if (this.recordEditmode) {
+        if (this.fieldObject[field].edited) {
+          return { 'border': '1px solid lightgrey', 'background-color': '#FCF9CD' };
+        } else {
+          return { 'border': '1px solid lightgrey', 'background-color': 'white' };
+        }
+      } else {
+        return { 'border': '0px solid white', 'background-color': 'white' };
+      }
     }
+  }
+
+  dataChanged(field: string){
+    return JSON.stringify(this.record[field]) != JSON.stringify(this.originalRecord[field]);
   }
 }

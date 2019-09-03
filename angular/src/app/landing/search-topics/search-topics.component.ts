@@ -65,7 +65,7 @@ export class SearchTopicsComponent implements OnInit {
     if (existingTopic == undefined || existingTopic == null || existingTopic.length <= 0) {
       return '#1E6BA1';
     } else {
-      return 'green';
+      return 'lightgrey';
     }
   }
 

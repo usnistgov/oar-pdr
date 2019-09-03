@@ -9,18 +9,22 @@ export class NotificationService {
   constructor(private toastr: ToastrService) { }
 
   showSuccess(message, title){
-  	this.toastr.success(message, title)
+  	this.toastr.success(message, title, {
+      positionClass: 'toast-bottom-left' 
+   })
   }
 
   showSuccessWithTimeout(message, title, timespan){
-    this.toastr.success(message, title ,{
-      timeOut : timespan
+    this.toastr.info(message, title ,{
+      timeOut : timespan,
+      positionClass: 'toast-bottom-left'
     })
   }
 
   showHTMLMessage(message, title){
     this.toastr.success(message, title, {
-      enableHtml : true
+      enableHtml : true,
+      positionClass: 'toast-bottom-left'
     })
   }
 }

@@ -3,6 +3,7 @@ import { CommonVarService } from './shared/common-var';
 import { Router, NavigationStart, NavigationEnd, NavigationCancel, NavigationError } from '@angular/router';
 import './content/modal.less';
 import { AuthService } from './shared/auth-service/auth.service';
+import { GoogleAnalyticsService } from './shared/ga-service/google-analytics.service'
 
 @Component({
   selector: 'app-root',
@@ -12,11 +13,17 @@ import { AuthService } from './shared/auth-service/auth.service';
 export class AppComponent {
   title = 'PDR Resource Landing Page';
 
-  constructor(private authService : AuthService){}
+  constructor(
+    private authService : AuthService,
+    private gaService: GoogleAnalyticsService
+    ){}
 
   ngOnInit() {
+    // for testing purpose, logout user everytime the app starts
     if(this.authService.loggedIn())
       this.authService.logoutUser(true);
+
+      this.gaService.appendGaTrackingCode();
   }
 }
 

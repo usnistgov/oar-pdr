@@ -24,6 +24,7 @@ import { ModalService } from '../shared/modal-service';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { of } from 'rxjs';
 import { GoogleAnalyticsService } from '../shared/ga-service/google-analytics.service';
+import { ToastrModule } from 'ngx-toastr';
 
   describe('Landing Component', () => {
     let component: LandingComponent;
@@ -44,7 +45,8 @@ import { GoogleAnalyticsService } from '../shared/ga-service/google-analytics.se
       declarations: [ LandingComponent, Collaspe,DescriptionComponent,
                       MetadataComponent
                     ],
-      imports:[ MenuModule,DialogModule, FormsModule, TreeModule,FieldsetModule, HttpModule ,RouterTestingModule, HttpClientTestingModule, BrowserAnimationsModule],
+      imports:[ MenuModule,DialogModule, FormsModule, TreeModule,FieldsetModule, HttpModule ,RouterTestingModule, HttpClientTestingModule, BrowserAnimationsModule,
+      ToastrModule.forRoot()],
       schemas: [ CUSTOM_ELEMENTS_SCHEMA ,NO_ERRORS_SCHEMA],
       providers: [
         SearchService, GoogleAnalyticsService,
