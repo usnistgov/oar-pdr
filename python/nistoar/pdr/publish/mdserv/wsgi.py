@@ -7,6 +7,7 @@ a framework-based implementation if any further capabilities are needed.
 """
 import os, sys, logging, json, re
 from wsgiref.headers import Headers
+from cgi import parse_qs, escape as escape_qp
 
 from .. import PublishSystem
 from .serv import (PrePubMetadataService, SIPDirectoryNotFound, IDNotFound,
@@ -19,6 +20,31 @@ log = logging.getLogger(PublishSystem().subsystem_abbrev).getChild("mdserv")
 DEF_BASE_PATH = "/"
 
 class PrePubMetadaRequestApp(object):
+    """
+    A WSGI-compliant service app for serving per-publication (draft) NERDm 
+    metadata currently being editing by MIDAS and the PDR through a web service
+    interface.  This interface sits in front of a PrePubMetadataService instance.
+
+    Endpoints:
+    GET /{dsid} -- return the NERDm metadata for record with the EDI-ID, dsid
+    GET/HEAD /{dsid}/_perm/{perm}/{userid} -- return nothing with status=200 if the 
+        user identified by userid has the permission having the label, perm, on 
+        the record with the EDI-ID, dsid.  If the user does not have permission,
+        the status will be 404.  
+    GET /{dsid}/{filepath} -- return the pre-publication version of the file 
+        identified by filepath within the dataset with the EDI-ID, dsid.
+    GET /{dsid}/_perm/{perm} -- return a listing of userids for users that have 
+        the permission perm on on the dataset with the EDI-ID, dsid.
+    GET /{dsid}/_perm/{perm}?user={userid} -- return a listing of userids matching
+        the search constraint that have the permission perm on on the dataset with 
+        the EDI-ID, dsid.  Currently, this will essentially return ["{userid}"] if
+        that user has permission, and an empty list, if not.  
+    GET /{dsid}/_perm -- return a JSON object summarizing the publically viewable 
+        permissions set on dataset with EDI-ID, dsid; currently, this only returns
+        {"read": "all"}.  
+    GET /{dsid}/_perm?action={perm}&user={userid} - return the permissions matching 
+        the given constraints on the dataset with EDI-ID, dsid.  
+    """
 
     def __init__(self, config):
         self.base_path = config.get('base_path', DEF_BASE_PATH)
@@ -33,7 +59,7 @@ class PrePubMetadaRequestApp(object):
 
     def handle_request(self, env, start_resp):
         handler = Handler(self.mdsvc, self.filemap, env, start_resp,
-                          update_authkey)
+                          self.update_authkey)
         return handler.handle()
 
     def __call__(self, env, start_resp):
@@ -45,7 +71,7 @@ class Handler(object):
 
     badidre = re.compile(r"[<>\s]")
 
-    def __init__(self, service, filemap, wsgienv, start_resp, auth=None):
+    def __init__(self, service, filemap, wsgienv, start_resp, auth=None, mdcl=None):
         self._svc = service
         self._fmap = filemap
         self._env = wsgienv
@@ -55,10 +81,17 @@ class Handler(object):
         self._code = 0
         self._msg = "unknown status"
         self._authkey = auth
+        self._midascl = mdcl
 
     def send_error(self, code, message):
         status = "{0} {1}".format(str(code), message)
         self._start(status, [], sys.exc_info())
+        return []
+
+    def send_ok(self, message="OK"):
+        status = "{0} {1}".format(str(code), message)
+        self._start(status, [], None)
+        return []
 
     def add_header(self, name, value):
         # Caution: HTTP does not support Unicode characters (see
@@ -118,7 +151,25 @@ class Handler(object):
             return []
 
         if filepath:
-            return self.get_datafile(dsid, filepath)
+            if filepath.startswith("_perm"):
+                if not self.authorized_for_update():
+                    return self.send_unauthorized()
+                perm = filepath.split('/', 2)
+                if perm[0] != "_perm":
+                    return self.send_error(404, "meta-resource for id={0} not found"
+                                           .format(dsid))
+                if len(perm) < 3:
+                    perm += [None, None]
+
+                if self._env.get('QUERY_STRING'):
+                    query = parse_qs(self._env.get('QUERY_STRING', ""))
+                    return self.query_permissions(dsid, query, perm[1])
+
+                return self.test_permission(dsid, perm[1], perm[2])
+
+            else:
+                return self.get_datafile(dsid, filepath)
+
         return self.get_metadata(dsid)
 
     def get_metadata(self, dsid):
@@ -183,13 +234,83 @@ class Handler(object):
         with open(loc, 'rb') as fd:
             buf = fd.read(5000000)
             yield buf
+
+    def test_permission(self, dsid, action, user=None):
+        def answer(data):
+            self.set_response(200, "OK")
+            self.add_header('Content-Type', 'application/json')
+            self.end_headers()
+            return [ json.dumps(data, indent=4, separators=(',', ': ')) ]
+
+        if not action:
+            return answer({"read": "all"})
         
+        if action not in ["update", "read"]:
+            return self.send_error(404, "Unrecognized permission action: "+action)
+
+        if action == "read":
+            if not user:
+                return answer(["all"])
+            return self.send_error(200, "User has read permission")
+
+        if action == "update":
+            if not user:
+                return self.send_error(400, "Query required for resource")
+            if user == "all":
+                return self.send_error(404,
+                                       "Update permission is not available for all")
+            if self._update_authorized_for(dsid, user):
+                return self.send_error(200, "User has update permission")
+            return self.send_error(404, "User does not have update permission")
+
+        return self.send_error(404, "Permission not recognized")
+
+    def _update_authorized_for(self, dsid, user):
+        if self._midascl:
+            return self._midascl.authorized(user, dsid)
+        return True
+
+    def query_permissions(self, dsid, query, action=None):
+        def answer(data):
+            self.set_response(200, "Query executed")
+            self.add_header('Content-Type', 'application/json')
+            self.end_headers()
+            return [ json.dumps(data, indent=4, separators=(',', ': ')) ]
+
+        if action and action not in ["read", "update"]:
+            return self.send_error(404, "Permission not recognized")
+
+        if action:
+            query['action'] = [action]
+        elif not query.get('action'):
+            query['action'] = ["read"]
+            if query['user']:
+                query['action'].append("update")
+        if not query.get("user"):
+            query['user'] = ["all"]
+
+        out = {}
+        if 'read' in query.get('action',[]):
+            out['read'] = query['user']
+        if 'update' in query.get('action',[]):
+            out['update'] = []
+            for user in query['user']:
+                if user == "all":
+                    continue
+                user = escape_qp(user)
+                if self._update_authorized_for(dsid, user):
+                    out['update'].append(user)
+
+        if action:
+            return answer(out[action])
+        return answer(out)
+
     def do_HEAD(self, path):
 
         self.do_GET(path)
         return []
         
-    def authorize(self):
+    def authorized_for_update(self):
         authhdr = self._env.get('HTTP_AUTHORIZATION', "")
         parts = authhdr.split()
         if self._authkey:
