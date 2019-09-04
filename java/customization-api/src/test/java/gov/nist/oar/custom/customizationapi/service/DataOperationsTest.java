@@ -22,6 +22,7 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.powermock.api.mockito.PowerMockito;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
@@ -40,6 +41,8 @@ import com.mongodb.client.MongoDatabase;
 import gov.nist.oar.custom.customizationapi.service.DataOperations;
 
 /**
+ * This class contains unit tests for different methods/functions available in DataOperations class
+ * This class deals with checking and updating records in the cache and send final updates to backend server
  * @author Deoyani Nandrekar-Heinis
  *
  */
@@ -70,6 +73,8 @@ public class DataOperationsTest {
        when(mockClient.getDatabase("UpdateDB")).thenReturn(mockDB);
        when(mockDB.getCollection("record")).thenReturn(mockCollection);
        when(mockDB.getCollection("change")).thenReturn(mockChangeCollection);
+       ReflectionTestUtils.setField(mockDataOperations, "mdserver", "https://testdata.nist.gov/rmm/records/");
+
        String recorddata = new String ( Files.readAllBytes( 
 	       Paths.get(
 		       this.getClass().getClassLoader().getResource("record.json").getFile())));
@@ -86,7 +91,7 @@ public class DataOperationsTest {
        updatedRecord = Document.parse(updateddata);
         
       MockitoAnnotations.initMocks(this);
-      when(mockDataOperations.getData(recordid, mockCollection, mdserver)).thenReturn(recordDoc);
+      when(mockDataOperations.getData(recordid, mockCollection)).thenReturn(recordDoc);
       when(mockDataOperations.getUpdatedData(recordid, mockCollection)).thenReturn(updatedRecord); 
       when(mockDataOperations.getUpdatedData(recordid, mockChangeCollection)).thenReturn(change); 
       when(mockDataOperations.checkRecordInCache(recordid, mockCollection)).thenReturn(true);
@@ -96,7 +101,7 @@ public class DataOperationsTest {
     
     @Test
     public void testGetData(){
-	Document d = mockDataOperations.getData(recordid, mockCollection, mdserver);
+	Document d = mockDataOperations.getData(recordid, mockCollection);
 	assertNotNull(d);
         assertEquals("New Title Update Test May 7", d.get("title"));
     }
@@ -118,7 +123,7 @@ public class DataOperationsTest {
     
     @Test
     public void testUpdatedDataInCache(){
-	mockDataOperations.putDataInCache(recordid, mdserver, mockCollection);
+	mockDataOperations.putDataInCache(recordid, mockCollection);
 	Document updatedRecord = mockDataOperations.getUpdatedData(recordid, mockCollection);
 	assertNotNull(updatedRecord);
 	assertEquals("New Title Update Test May 14", updatedRecord.get("title"));

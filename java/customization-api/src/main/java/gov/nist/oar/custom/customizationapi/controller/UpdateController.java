@@ -92,6 +92,32 @@ public class UpdateController {
 
     }
 
+    /***
+     * Access the record from service
+     * @param ediid Unique  record identifier
+     * @return
+     * @throws CustomizationException
+     */
+    @RequestMapping(value = { "draft/{ediid}" }, method = RequestMethod.GET, produces = "application/json")
+    @ApiOperation(value = ".", nickname = "Access editable Record", notes = "Resource returns a record if it is editable and user is authenticated.")
+    public Document editRecord(@PathVariable @Valid String ediid) throws CustomizationException {
+	logger.info("Access the record to be edited by ediid " + ediid);
+	return uRepo.edit(ediid);
+    }
+
+    /**
+     * Delete the resource from staging area
+     * @param ediid Unique  record identifier
+     * @return JSON document original format
+     * @throws CustomizationException
+     */
+    @RequestMapping(value = { "draft/{ediid}" }, method = RequestMethod.DELETE, produces = "application/json")
+    @ApiOperation(value = ".", nickname = "Delete the Record from drafts", notes = "This will allow user to delete all the changes made in the record in draft mode, original published record will remain as it is.")
+    public boolean deleteRecord(@PathVariable @Valid String ediid) throws CustomizationException {
+	logger.info("Delete the record from stagging given by ediid " + ediid);
+	return uRepo.delete(ediid);
+    }
+    
     /**
      * Finalize changes made in the record and send it back to bakend metadata server to merge and 
      * send for review.
@@ -137,32 +163,6 @@ public class UpdateController {
 //	    }
 //	}
 
-    }
-
-    /***
-     * Access the record from service
-     * @param ediid Unique  record identifier
-     * @return
-     * @throws CustomizationException
-     */
-    @RequestMapping(value = { "draft/{ediid}" }, method = RequestMethod.GET, produces = "application/json")
-    @ApiOperation(value = ".", nickname = "Access editable Record", notes = "Resource returns a record if it is editable and user is authenticated.")
-    public Document editRecord(@PathVariable @Valid String ediid) throws CustomizationException {
-	logger.info("Access the record to be edited by ediid " + ediid);
-	return uRepo.edit(ediid);
-    }
-
-    /**
-     * Delete the resource from staging area
-     * @param ediid Unique  record identifier
-     * @return JSON document original format
-     * @throws CustomizationException
-     */
-    @RequestMapping(value = { "draft/{ediid}" }, method = RequestMethod.DELETE, produces = "application/json")
-    @ApiOperation(value = ".", nickname = "Access editable Record", notes = "Resource returns a record if it is editable and user is authenticated.")
-    public Document deleteRecord(@PathVariable @Valid String ediid) throws CustomizationException {
-	logger.info("Access the record to be edited by ediid " + ediid);
-	return uRepo.delete(ediid);
     }
 
     @ExceptionHandler(IOException.class)

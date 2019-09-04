@@ -27,23 +27,27 @@ import gov.nist.oar.custom.customizationapi.repositories.UpdateRepository;
 
 /**
  * UpdateRepository is the service class which takes input from client to edit
- * or update records in cache database. The funtions are written to process 
+ * or update records in cache database. The funtions are written to process
+ * 
  * @author Deoyani Nandrekar-Heinis
  */
 @Service
 public class UpdateRepositoryService implements UpdateRepository {
 
     private Logger logger = LoggerFactory.getLogger(UpdateRepositoryService.class);
+
     @Autowired
     MongoConfig mconfig;
-   
-    @Value("${oar.mdserver:}")
-    private String mdserver;
 
+//    @Value("${oar.mdserver:}")
+//    private String mdserver;
+    
     MongoCollection<Document> recordCollection;
     MongoCollection<Document> changesCollection;
-    DataOperations accessData = new DataOperations();
-
+    
+    @Autowired
+    DataOperations accessData;
+    
 
     /**
      * Update the input json changes by client in the cache mongo database.
@@ -52,15 +56,16 @@ public class UpdateRepositoryService implements UpdateRepository {
      */
     @Override
     public Document update(String params, String recordid) throws CustomizationException {
+	recordCollection = mconfig.getRecordCollection();
 	if (processInputHelper(params, recordid))
-	    return accessData.getData(recordid, recordCollection, mdserver);
+	    return accessData.getData(recordid, recordCollection);
 	else
 	    throw new CustomizationException("Input Request could not processed successfully.");
     }
 
     /**
-     * Process input json, check against the json schema defined for the
-     * specific fields.
+     * Process input json, check against the json schema defined for the specific
+     * fields.
      * 
      * @param params
      * @param recordid
@@ -82,9 +87,9 @@ public class UpdateRepositoryService implements UpdateRepository {
     }
 
     /**
-     * UpdateHelper takes input recordid and json input, this function checks if
-     * the record is there in cache If not it pulls record and puts in cache and
-     * then update the changes.
+     * UpdateHelper takes input recordid and json input, this function checks if the
+     * record is there in cache If not it pulls record and puts in cache and then
+     * update the changes.
      * 
      * @param recordid
      * @param update
@@ -96,29 +101,29 @@ public class UpdateRepositoryService implements UpdateRepository {
 	changesCollection = mconfig.getChangeCollection();
 
 	if (!this.accessData.checkRecordInCache(recordid, recordCollection))
-	    this.accessData.putDataInCache(recordid, mdserver, recordCollection);
+	    this.accessData.putDataInCache(recordid, recordCollection);
 
 	if (!this.accessData.checkRecordInCache(recordid, changesCollection))
 	    this.accessData.putDataInCacheOnlyChanges(update, changesCollection);
 
 	return accessData.updateDataInCache(recordid, recordCollection, update)
 		&& accessData.updateDataInCache(recordid, changesCollection, update);
-
     }
 
     /**
      * accessing records to edit in the front end.
      */
     @Override
-    public Document edit(String recordid) throws CustomizationException{
+    public Document edit(String recordid) throws CustomizationException {
+
 	recordCollection = mconfig.getRecordCollection();
 	changesCollection = mconfig.getChangeCollection();
-	return accessData.getData(recordid, recordCollection, mdserver);
+	return accessData.getData(recordid, recordCollection);
     }
 
     /**
-     * Save action can accept changes and save them or just return the updated
-     * data from cache.
+     * Save action can accept changes and save them or just return the updated data
+     * from cache.
      */
     @Override
     public Document save(String recordid, String params) {
@@ -131,12 +136,13 @@ public class UpdateRepositoryService implements UpdateRepository {
     }
 
     @Override
-    public Document delete(String recordid) throws CustomizationException {
+    public boolean delete(String recordid) throws CustomizationException {
 	recordCollection = mconfig.getRecordCollection();
 	changesCollection = mconfig.getChangeCollection();
-	accessData.deleteRecordInCache(recordid, recordCollection);
-	accessData.deleteRecordInCache(recordid, changesCollection);
-	return accessData.getDataFromServer(recordid, mdserver);
+	
+	
+	return accessData.deleteRecordInCache(recordid, recordCollection) &&
+		accessData.deleteRecordInCache(recordid, changesCollection);
     }
 
 }

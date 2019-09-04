@@ -53,6 +53,7 @@ public class MongoConfig {
     private MongoDatabase mongoDb;
     private MongoCollection<Document> recordsCollection;
     private MongoCollection<Document> changesCollection;
+    private String metadataServerUrl = "";
     List servers = new ArrayList();
     List credentials = new ArrayList();
 
@@ -82,6 +83,7 @@ public class MongoConfig {
 	this.setMongodb(this.dbname);
 	this.setRecordCollection(this.record);
 	this.setChangeCollection(this.changes);
+	this.setMetadataServer(this.mdserver);
 
     }
 
@@ -136,6 +138,13 @@ public class MongoConfig {
 	changesCollection = mongoDb.getCollection(change);
     }
     
+    
+    public String getMetadataServer() {
+	return this.metadataServerUrl;
+    }
+    private void  setMetadataServer(String mserver) {
+	this.metadataServerUrl = mserver;
+    }
     /**
      * MongoClient 
      * @return

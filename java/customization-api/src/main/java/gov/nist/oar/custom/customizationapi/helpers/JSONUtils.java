@@ -63,7 +63,12 @@ public final class JSONUtils {
 	    InputStream inputStream = JSONUtils.class.getClassLoader().getResourceAsStream("static/json-customization-schema.json");
 	    String inputSchema = IOUtils.toString(inputStream);
 	    JSONObject rawSchema = new JSONObject(new JSONTokener(inputSchema));
-	    Schema schema = SchemaLoader.load(rawSchema);
+	    
+	    Schema schema = SchemaLoader.builder().schemaJson(rawSchema)
+			//.httpClient(SchemaLoaderClient(context))
+			.build().load().build();
+	    
+	    //Schema schema = SchemaLoader.load(rawSchema);
 	    schema.validate(new JSONObject(jsonRequest)); // throws a
 							  // ValidationException
 							  // if this object is

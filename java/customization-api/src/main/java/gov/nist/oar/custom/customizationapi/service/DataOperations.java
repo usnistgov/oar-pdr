@@ -20,6 +20,9 @@ import java.util.regex.Pattern;
 import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
 import com.mongodb.Block;
@@ -38,8 +41,15 @@ import com.mongodb.client.result.UpdateResult;
  * @author Deoyani Nandrekar-Heinis
  *
  */
+@Component
 public class DataOperations {
     private static final Logger log = LoggerFactory.getLogger(DataOperations.class);
+    
+ 
+    @Value("${oar.mdserver:}")
+    private String mdserver;
+
+    
 
     /**
      * Check whether record exists in updated database
@@ -57,19 +67,32 @@ public class DataOperations {
 	long count = mcollection.count(Filters.eq("ediid", recordid));
 	return count != 0;
     }
+    
+//    public Document getData(String recordid, MongoCollection<Document> mcollection) {
+//	
+//	try {
+//	if (checkRecordInCache(recordid, mcollection))
+//	    return mcollection.find(Filters.eq("ediid", recordid)).first();
+//	else
+//	    return this.getDataFromServer(recordid);
+//	}catch(Exception exp) {
+//	    throw new ResourceNotFoundException("There are errors accessing data and resources requested not found."+exp.getMessage());
+//	}
+////	return new Document();
+//    }
 
     /**
-     * Get data for give recordid
-     * 
-     * @param recordid
-     * @return
-     */
-    public Document getData(String recordid, MongoCollection<Document> mcollection, String mdserver) throws ResourceNotFoundException {
+//     * Get data for give recordid
+//     * 
+//     * @param recordid
+//     * @return
+//     */
+    public Document getData(String recordid, MongoCollection<Document> mcollection) throws ResourceNotFoundException {
 	try {
 	if (checkRecordInCache(recordid, mcollection))
 	    return mcollection.find(Filters.eq("ediid", recordid)).first();
 	else
-	    return this.getDataFromServer(recordid, mdserver);
+	    return this.getDataFromServer(recordid);
 	}catch(Exception exp) {
 	    throw new ResourceNotFoundException("There are errors accessing data and resources requested not found."+exp.getMessage());
 	}	
@@ -113,7 +136,7 @@ public class DataOperations {
      * @param recordid
      * @return
      */
-    public Document getDataFromServer(String recordid, String mdserver) {
+    public Document getDataFromServer(String recordid) {
 	
 	RestTemplate restTemplate = new RestTemplate();
 	return restTemplate.getForObject(mdserver + recordid, Document.class);
@@ -127,8 +150,9 @@ public class DataOperations {
      * @param mdserver
      * @param mcollection
      */
-    public void putDataInCache(String recordid, String mdserver, MongoCollection<Document> mcollection) {
-	Document doc = getDataFromServer(recordid, mdserver);
+    public void putDataInCache(String recordid, MongoCollection<Document> mcollection) {
+	Document doc = getDataFromServer(recordid);
+	doc.remove("_id");
 	mcollection.insertOne(doc);
     }
 
@@ -156,7 +180,8 @@ public class DataOperations {
 	tempUpdateOp.remove("_id");
 	//BasicDBObject timeNow = new BasicDBObject("date", now);
 	UpdateResult updates = mcollection.updateOne(Filters.eq("ediid", recordid), tempUpdateOp);
-	return updates != null;
+	//return updates != null;
+	return true;
     }
     
     /**
