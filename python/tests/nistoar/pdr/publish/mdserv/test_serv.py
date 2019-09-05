@@ -2,7 +2,11 @@
 # do not include support for accessing metadata that represent an update to a 
 # previously published dataset (via use of the UpdatePrepService class).  
 # Because testing support for updates require simulated RMM and distribution 
-# services to be running, they have been seperated out into test_serv_update.py.
+# services to be running, they have been separated out into test_serv_update.py.
+#
+# These test also do not include testing of the user update interface via
+# patch_id() and the pushing of affected POD data to MIDAS.  This is covered 
+# in test_serv_userupdate.py
 #
 import os, sys, pdb, shutil, logging, json, time, signal
 from cStringIO import StringIO

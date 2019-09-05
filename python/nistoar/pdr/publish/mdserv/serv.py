@@ -3,7 +3,7 @@ This module manages the preparation of the metadata needed by pre-publication
 landing page service.  It uses an SIPBagger to create the NERDm metadata from 
 POD metadata provided by MIDAS and assembles it into an exportable form.  
 """
-import os, logging, re, json
+import os, logging, re, json, copy
 from collections import Mapping, OrderedDict
 
 from .. import PublishSystem
@@ -15,7 +15,9 @@ from ...preserv.bagit import NISTBag, DEF_MERGE_CONV
 from ...utils import build_mime_type_map, read_nerd
 from ....id import PDRMinter, NIST_ARK_NAAN
 from ....nerdm import validate_nerdm
+from ....nerdm.convert import Res2PODds
 from .... import pdr
+from . import midasclient as midas
 
 log = logging.getLogger(PublishSystem().subsystem_abbrev)
 
@@ -132,6 +134,15 @@ class PrePubMetadataService(PublishSystem):
 
         # used for validating during updates (via patch_id())
         self._schemadir = None
+
+        # used to convert NERDm to POD
+        self._nerd2pod = Res2PODds(pdr.def_jq_libdir, logger=self.log)
+
+        self._midascl = None
+        if self.cfg.get('update_to_midas', self.cfg.get('midas_service')):
+            # set up the client if have the config data to do it unless
+            # 'update_to_midas' is False
+            self._midascl = midas.MIDASClient(self.cfg.get('midas_service', {}))
 
     def _create_minter(self, parentdir):
         cfg = self.cfg.get('id_minter', {})
@@ -545,39 +556,37 @@ class PrePubMetadataService(PublishSystem):
 
         # attempt to commit it to MIDAS.  If it fails, we'll try to get it
         # next time.
-        if not self._submit_to_midas(pod4midas):
+        if self._midascl and not self._submit_to_midas(pod4midas):
             newpod['_committed'] = False
 
         # save the updated POD to our bag
         bagbldr.add_ds_pod(newpod, convert=False)
 
+    def _pod4midas(self, pod):
+        pod = copy.deepcopy(pod)
+        del pod['identifier']
+        return pod
+
     def _submit_to_midas(self, pod):
         # send the POD record to MIDAS via its API
 
-        # if not self._midascl:
-        #     raise StateException("No MIDAS service available")
+        if not self._midascl:
+            raise StateException("No MIDAS service available")
 
         midasid = pod.get('identifier')
         if not midasid:
             self.log.error("_submit_to_midas(): POD is missing identifier prop!")
             raise ValueError("POD record is missing required 'identifier' field")
 
-        # try:
-        #     self._midascl.put(midasid, pod)
-        # except Exception as ex:
-        #     self.log.error("Failed to commit POD to MIDAS for ediid=%s", midasid)
-        #     self.log.exception(ex)
-        #     return False
+        try:
+            self._midascl.put(pod, midasid)
+        except Exception as ex:
+            self.log.error("Failed to commit POD to MIDAS for ediid=%s", midasid)
+            self.log.exception(ex)
+            return False
                            
         return True
 
-        
-        
-        
-        
-        
-        
-        
         
 class InvalidRequest(PDRServiceException):
     """

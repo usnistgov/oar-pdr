@@ -27,6 +27,11 @@ class PrePubMetadaRequestApp(object):
 
     Endpoints:
     GET /{dsid} -- return the NERDm metadata for record with the EDI-ID, dsid
+    HEAD /{dsid} -- determine the existence of a pre-publication record with the 
+        EDI-ID, dsid: the status is 200 if the record is available; 404, 
+        otherwise.
+    PATCH /{dsid} -- update the NERDm metadata for the record with the EDI-ID, 
+        dsid, with the data provided in the input JSON document.
     GET/HEAD /{dsid}/_perm/{perm}/{userid} -- return nothing with status=200 if the 
         user identified by userid has the permission having the label, perm, on 
         the record with the EDI-ID, dsid.  If the user does not have permission,
