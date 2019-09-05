@@ -43,7 +43,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import gov.nist.oar.custom.customizationapi.exceptions.CustomizationException;
 import gov.nist.oar.custom.customizationapi.exceptions.ErrorInfo;
+import gov.nist.oar.custom.customizationapi.exceptions.InvalidInputException;
 import gov.nist.oar.custom.customizationapi.repositories.UpdateRepository;
+import gov.nist.oar.custom.customizationapi.service.ResourceNotFoundException;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
@@ -80,12 +82,13 @@ public class UpdateController {
      * @param params subset of metadata modified in JSON format
      * @return Updated record in JSON format
      * @throws CustomizationException
+     * @throws InvalidInputException 
      */
     @RequestMapping(value = {
 	    "draft/{ediid}" }, method = RequestMethod.PATCH, headers = "accept=application/json", produces = "application/json")
     @ApiOperation(value = ".", nickname = "Cache Record Changes", notes = "Resource returns a record if it is editable and user is authenticated.")
     public Document updateRecord(@PathVariable @Valid String ediid, @Valid @RequestBody String params)
-	    throws CustomizationException {
+	    throws CustomizationException, InvalidInputException {
 
 	logger.info("Update the given record: " + ediid);
 	return uRepo.update(params, ediid);
@@ -125,12 +128,13 @@ public class UpdateController {
      * @param params Modified fields in JSON 
      * @return Updated JSON record
      * @throws CustomizationException
+     * @throws InvalidInputException 
      */
     @RequestMapping(value = {
 	    "savedrecord/{ediid}" }, method = RequestMethod.PUT, headers = "accept=application/json", produces = "application/json")
     @ApiOperation(value = ".", nickname = "Save changes to server", notes = "Resource returns a boolean based on success or failure of the request.")
     public Document saveRecord(@PathVariable @Valid String ediid, @Valid @RequestBody String params)
-	    throws CustomizationException {
+	    throws CustomizationException, InvalidInputException {
 	logger.info("Send updated record to mdserver:" + ediid);
 	return uRepo.save(ediid, params);
 //	RestTemplate restTemplate = new RestTemplate();
@@ -163,6 +167,20 @@ public class UpdateController {
 //	    }
 //	}
 
+    }
+    
+    @ExceptionHandler(ResourceNotFoundException.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ErrorInfo handleStreamingError(ResourceNotFoundException ex, HttpServletRequest req) {
+	logger.info("There is an error accessing requested record : " + req.getRequestURI() + "\n  " + ex.getMessage());
+	return new ErrorInfo(req.getRequestURI(), 404, "Resource Not Found", req.getMethod());
+    }
+    
+    @ExceptionHandler(InvalidInputException.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ErrorInfo handleStreamingError(InvalidInputException ex, HttpServletRequest req) {
+	logger.info("There is an error processing input data: " + req.getRequestURI() + "\n  " + ex.getMessage());
+	return new ErrorInfo(req.getRequestURI(), 400, "Invalid input error", "PATCH");
     }
 
     @ExceptionHandler(IOException.class)

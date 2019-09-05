@@ -25,6 +25,7 @@ import com.mongodb.client.model.Filters;
 
 import gov.nist.oar.custom.customizationapi.config.MongoConfig;
 import gov.nist.oar.custom.customizationapi.exceptions.CustomizationException;
+import gov.nist.oar.custom.customizationapi.exceptions.InvalidInputException;
 import gov.nist.oar.custom.customizationapi.repositories.UpdateRepository;
 
 import static org.junit.Assert.*;
@@ -154,7 +155,7 @@ public class UpdateRepositoryServiceTest {
     }
 
     @Test
-    public void updateRecordTest() throws CustomizationException, IOException {
+    public void updateRecordTest() throws CustomizationException, IOException, ResourceNotFoundException, InvalidInputException {
 
 	changedata = new String(
 		Files.readAllBytes(Paths.get(this.getClass().getClassLoader().getResource("changes.json").getFile())));
@@ -175,7 +176,7 @@ public class UpdateRepositoryServiceTest {
     }
 
     @Test
-    public void saveRecordTest() throws IOException {
+    public void saveRecordTest() throws IOException, InvalidInputException {
 	changedata = new String(
 		Files.readAllBytes(Paths.get(this.getClass().getClassLoader().getResource("changes.json").getFile())));
 	Document change = Document.parse(changedata);

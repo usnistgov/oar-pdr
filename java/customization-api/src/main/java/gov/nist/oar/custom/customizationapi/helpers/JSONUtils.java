@@ -25,6 +25,8 @@ import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import gov.nist.oar.custom.customizationapi.exceptions.InvalidInputException;
+
 /**
  * JSONUtils class provides some static functions to parse and validate json
  * data.
@@ -45,30 +47,28 @@ public final class JSONUtils {
      * 
      * @param jsonInString
      * @return boolean
+     * @throws IOException 
      */
-    public static boolean isJSONValid(String jsonInString) {
+    public static boolean isJSONValid(String jsonInString) throws InvalidInputException {
 	try {
 	    final ObjectMapper mapper = new ObjectMapper();
 	    mapper.readTree(jsonInString);
 	    return true;
 	} catch (IOException e) {
-	    logger.error("There is an error validating json:" + e.getMessage());
-	    return false;
+	    logger.error("Input String is not valid JSON:" + e.getMessage());
+	    throw new InvalidInputException("Input string is not Valid JSON");
 	}
     }
 
-    public static boolean validateInput(String jsonRequest) {
+    public static boolean validateInput(String jsonRequest) throws InvalidInputException {
 	try {
 
 	    InputStream inputStream = JSONUtils.class.getClassLoader().getResourceAsStream("static/json-customization-schema.json");
 	    String inputSchema = IOUtils.toString(inputStream);
 	    JSONObject rawSchema = new JSONObject(new JSONTokener(inputSchema));
-	    
-	    Schema schema = SchemaLoader.builder().schemaJson(rawSchema)
-			//.httpClient(SchemaLoaderClient(context))
-			.build().load().build();
-	    
-	    //Schema schema = SchemaLoader.load(rawSchema);
+
+	    Schema schema = SchemaLoader.load(rawSchema);
+
 	    schema.validate(new JSONObject(jsonRequest)); // throws a
 							  // ValidationException
 							  // if this object is
@@ -77,7 +77,7 @@ public final class JSONUtils {
 	} catch (Exception e) {
 	    logger.error("There is error validation input against JSON schema:" + e.getMessage());
 	    System.out.println("Exception validating with json schema:"+e.getMessage());
-	    return false;
+	    throw new InvalidInputException("Exception validating input JSON against customization service schema");
 	}
     }
 }

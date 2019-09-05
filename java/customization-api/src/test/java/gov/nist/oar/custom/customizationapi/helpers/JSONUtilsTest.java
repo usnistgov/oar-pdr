@@ -16,7 +16,13 @@ package gov.nist.oar.custom.customizationapi.helpers;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
+
+import com.fasterxml.jackson.databind.JsonMappingException;
+
+import gov.nist.oar.custom.customizationapi.exceptions.InvalidInputException;
 
 /**
  * Test JSONUtils class which checks valid JSON and also validates input against given JSON schema.
@@ -24,27 +30,36 @@ import org.junit.Test;
  *
  */
 
+
 public class JSONUtilsTest {
 
+
+    @Rule
+    public final ExpectedException exception = ExpectedException.none();
+
     @Test
-    public void isJSONValidTest() {
+    public void isJSONValidTest() throws InvalidInputException {
 	String testJson = "{\"title\" : \"New Title Update\",\"description\": \"new description update\"}";
+
 	assertTrue(JSONUtils.isJSONValid(testJson));
 	testJson = "{\"title\" : \"New Title Update\",description: \"new description update\"}";
+	exception.expect(InvalidInputException.class);
 	assertFalse(JSONUtils.isJSONValid(testJson));
     }
 
     @Test
-    public void isValidateInput() {
+    public void isValidateInput() throws InvalidInputException {
 	String testJSON = "{\"title\" : \"New Title Update\",\"description\": \"new description update\"}";
+	exception.expect(InvalidInputException.class);
 	assertFalse(JSONUtils.validateInput(testJSON));
 	
 
 	testJSON = "{\"title\" : \"New Title Update\",\"description\": [\"new description update\"]}";
 	assertTrue(JSONUtils.validateInput(testJSON));
-	// testJson = "{\"jnsfhshdjsjk\" : \"New Title Update\",\"description\":
-	// \"new description update\"}";
+//	testJSON = "{\"jnsfhshdjsjk\" : \"New Title Update\",\"description\": \"new description update\"}";
+//	assertFalse(JSONUtils.validateInput(testJSON));
 	testJSON = "{\"jnsfhshdjsjk\"}";
+	exception.expect(InvalidInputException.class);
 	assertFalse(JSONUtils.validateInput(testJSON));
 	
     }

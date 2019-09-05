@@ -15,6 +15,7 @@ package gov.nist.oar.custom.customizationapi.repositories;
 import org.bson.Document;
 
 import gov.nist.oar.custom.customizationapi.exceptions.CustomizationException;
+import gov.nist.oar.custom.customizationapi.exceptions.InvalidInputException;
 
 /**
  * This is repository is defined to get input json for the record in mongodb, 
@@ -23,8 +24,8 @@ import gov.nist.oar.custom.customizationapi.exceptions.CustomizationException;
  *
  */
 public interface UpdateRepository {
-    public Document update(String param, String recordid)  throws CustomizationException;
+    public Document update(String param, String recordid)  throws CustomizationException, InvalidInputException;
     public Document edit(String recordid) throws CustomizationException;
-    public Document save(String recordid, String params) throws CustomizationException;
+    public Document save(String recordid, String params) throws CustomizationException, InvalidInputException;
     public boolean delete(String recordid) throws CustomizationException;
 }

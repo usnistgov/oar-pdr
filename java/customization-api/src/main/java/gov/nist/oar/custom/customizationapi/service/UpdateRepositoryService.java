@@ -12,6 +12,8 @@
  */
 package gov.nist.oar.custom.customizationapi.service;
 
+import java.io.IOException;
+
 import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,6 +25,8 @@ import com.mongodb.client.MongoCollection;
 
 import gov.nist.oar.custom.customizationapi.config.MongoConfig;
 import gov.nist.oar.custom.customizationapi.exceptions.CustomizationException;
+import gov.nist.oar.custom.customizationapi.exceptions.InvalidInputException;
+import gov.nist.oar.custom.customizationapi.helpers.JSONUtils;
 import gov.nist.oar.custom.customizationapi.repositories.UpdateRepository;
 
 /**
@@ -39,51 +43,54 @@ public class UpdateRepositoryService implements UpdateRepository {
     @Autowired
     MongoConfig mconfig;
 
-//    @Value("${oar.mdserver:}")
-//    private String mdserver;
-    
-    MongoCollection<Document> recordCollection;
-    MongoCollection<Document> changesCollection;
-    
     @Autowired
     DataOperations accessData;
-    
 
     /**
-     * Update the input json changes by client in the cache mongo database.
+     * Update record in backend database with changes provided in the form of JSON input.
+     * Backend database is for caching changes before publishing it to backend metadata server.
      * 
      * @throws CustomizationException
+     * @throws InvalidInputException
+     * @throws ResourceNotFoundException
      */
     @Override
-    public Document update(String params, String recordid) throws CustomizationException {
-	recordCollection = mconfig.getRecordCollection();
-	if (processInputHelper(params, recordid))
-	    return accessData.getData(recordid, recordCollection);
-	else
-	    throw new CustomizationException("Input Request could not processed successfully.");
+    public Document update(String params, String recordid) throws InvalidInputException, ResourceNotFoundException,
+    CustomizationException{
+	
+	processInputHelper(params, recordid);
+	return accessData.getData(recordid, mconfig.getRecordCollection());
+	
     }
 
     /**
-     * Process input json, check against the json schema defined for the specific
-     * fields.
-     * 
+     * Check the inputed values which are of JSON format, check if JSON is valid and passes the schema.
+     * Valid input is processed and patched in the backed database.
      * @param params
      * @param recordid
-     * @return
+     * @return bolean
+     * @throws InvalidInputException
      */
-    private boolean processInputHelper(String params, String recordid) {
-	ProcessInputRequest req = new ProcessInputRequest();
-	if (req.validateInputParams(params)) {
+    private boolean processInputHelper(String params, String recordid) throws InvalidInputException {
+//	ProcessInputRequest req = new ProcessInputRequest();
+//	if (req.validateInputParams(params)) {
+	// validate json
+
+	JSONUtils.isJSONValid(params);
+	// Validate schema against json-customization schema
+	if (JSONUtils.validateInput(params)) {
 
 	    // this.accessData.checkRecordInCache(recordid, recordCollection);
 	    Document update = Document.parse(params);
 	    update.remove("_id");
 	    update.append("ediid", recordid);
 	    return this.updateHelper(recordid, update);
-	    // return accessData.updateDataInCache(recordid, recordCollection,
-	    // update);
 	} else
 	    return false;
+
+	// return accessData.updateDataInCache(recordid, recordCollection,
+	// update);
+
     }
 
     /**
@@ -97,17 +104,15 @@ public class UpdateRepositoryService implements UpdateRepository {
      */
     private boolean updateHelper(String recordid, Document update) {
 
-	recordCollection = mconfig.getRecordCollection();
-	changesCollection = mconfig.getChangeCollection();
 
-	if (!this.accessData.checkRecordInCache(recordid, recordCollection))
-	    this.accessData.putDataInCache(recordid, recordCollection);
+	if (!this.accessData.checkRecordInCache(recordid, mconfig.getRecordCollection()))
+	    this.accessData.putDataInCache(recordid, mconfig.getRecordCollection());
 
-	if (!this.accessData.checkRecordInCache(recordid, changesCollection))
-	    this.accessData.putDataInCacheOnlyChanges(update, changesCollection);
+	if (!this.accessData.checkRecordInCache(recordid, mconfig.getChangeCollection()))
+	    this.accessData.putDataInCacheOnlyChanges(update, mconfig.getChangeCollection());
 
-	return accessData.updateDataInCache(recordid, recordCollection, update)
-		&& accessData.updateDataInCache(recordid, changesCollection, update);
+	return accessData.updateDataInCache(recordid, mconfig.getRecordCollection(), update)
+		&& accessData.updateDataInCache(recordid, mconfig.getChangeCollection(), update);
     }
 
     /**
@@ -115,34 +120,30 @@ public class UpdateRepositoryService implements UpdateRepository {
      */
     @Override
     public Document edit(String recordid) throws CustomizationException {
-
-	recordCollection = mconfig.getRecordCollection();
-	changesCollection = mconfig.getChangeCollection();
-	return accessData.getData(recordid, recordCollection);
+	return accessData.getData(recordid, mconfig.getRecordCollection());
     }
 
     /**
      * Save action can accept changes and save them or just return the updated data
      * from cache.
+     * 
+     * @throws InvalidInputException
      */
     @Override
-    public Document save(String recordid, String params) {
-	recordCollection = mconfig.getRecordCollection();
-	changesCollection = mconfig.getChangeCollection();
+    public Document save(String recordid, String params) throws InvalidInputException {
+
 	if (!(params.isEmpty() || params == null) && !processInputHelper(params, recordid))
 	    return null;
-	return accessData.getUpdatedData(recordid, changesCollection);
+//	accessData.deleteRecordInCache(recordid, mconfig.getChangeCollection());
+	return accessData.getUpdatedData(recordid, mconfig.getChangeCollection());
 
     }
 
     @Override
     public boolean delete(String recordid) throws CustomizationException {
-	recordCollection = mconfig.getRecordCollection();
-	changesCollection = mconfig.getChangeCollection();
-	
-	
-	return accessData.deleteRecordInCache(recordid, recordCollection) &&
-		accessData.deleteRecordInCache(recordid, changesCollection);
+
+	return accessData.deleteRecordInCache(recordid, mconfig.getRecordCollection())
+		&& accessData.deleteRecordInCache(recordid, mconfig.getChangeCollection());
     }
 
 }

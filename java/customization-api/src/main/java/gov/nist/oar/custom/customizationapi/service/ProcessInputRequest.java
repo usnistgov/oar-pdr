@@ -12,38 +12,31 @@
  */
 package gov.nist.oar.custom.customizationapi.service;
 
+import java.io.IOException;
 import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import gov.nist.oar.custom.customizationapi.exceptions.InvalidInputException;
 import gov.nist.oar.custom.customizationapi.helpers.JSONUtils;
 
 /**
+ * Validate input parameters to check if its valid json and passes schema test.
  * @author Deoyani Nandrekar-Heinis
  *
  */
 public class ProcessInputRequest {
     private Logger logger = LoggerFactory.getLogger(ProcessInputRequest.class);
 
-//    // Check the input json data and validate
-//    public void parseInputParams(Map<String, String> params) {
-//
-//	logger.info("In parseInputParams");
-//    }
-
-    public boolean validateInputParams(String json) {
+    public boolean validateInputParams(String json) throws IOException, InvalidInputException {
 	logger.info("Validating input parameteres in the ProcessInputRequest class.");
-	// Add the json schema validation
-	if (JSONUtils.isJSONValid(json))
-	    return JSONUtils.validateInput(json);
-	else
-	    return false;
+	// validate json
+	JSONUtils.isJSONValid(json);
+	//Validate schema against json-customization schema
+	return JSONUtils.validateInput(json);
+	
     }
 
-    // Validate input json
-    public void validate() {
-	logger.info("Validate input json againts given properties");
-    }
-
+   
 }

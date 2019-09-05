@@ -164,6 +164,7 @@ public class DataOperations {
      * @param mcollection
      */
     public void putDataInCacheOnlyChanges(Document update, MongoCollection<Document> mcollection) {
+	update.remove("_id");
 	mcollection.insertOne(update);
     }
 
