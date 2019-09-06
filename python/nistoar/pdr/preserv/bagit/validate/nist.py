@@ -20,7 +20,7 @@ DEF_NERDM_RESOURCE_SCHEMA = DEF_BASE_NERDM_SCHEMA + "/definitions/Resource"
 DEF_PUB_NERDM_SCHEMA = "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.1#"
 DEF_NERDM_DATAFILE_SCHEMA = DEF_PUB_NERDM_SCHEMA + "/definitions/DataFile"
 DEF_NERDM_SUBCOLL_SCHEMA = DEF_PUB_NERDM_SCHEMA + "/definitions/Subcollection"
-DEF_BASE_POD_SCHEMA = "http://data.nist.gov/od/dm/pod-schema/v1.1#"
+DEF_BASE_POD_SCHEMA = "https://data.nist.gov/od/dm/pod-schema/v1.1#"
 DEF_POD_DATASET_SCHEMA = DEF_BASE_POD_SCHEMA + "/definitions/Dataset"
 
 
