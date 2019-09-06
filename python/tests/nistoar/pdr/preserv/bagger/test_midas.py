@@ -638,7 +638,7 @@ class TestMIDASMetadataBaggerReview(test.TestCase):
         self.assertIn('_status', fmd)
         self.assertNotIn('checksum', fmd)
 
-        # self.bagr.fileExaminer.thread.run()
+        # self.bagr.fileExaminer.run()
         self.bagr.fileExaminer.launch()
         self.bagr.fileExaminer.thread.join()
         fmd = self.bagr.bagbldr.bag.nerd_metadata_for("trial2.json")

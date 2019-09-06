@@ -68,7 +68,7 @@ class TestMIDASClient(test.TestCase):
                         os.path.join(svcarch, "pdr2210.json"))
         self.cfg = {
             "service_endpoint": baseurl,
-            "update_auth_key": "secret"
+            "auth_key": "secret"
         }
 
     def test_ctor(self):

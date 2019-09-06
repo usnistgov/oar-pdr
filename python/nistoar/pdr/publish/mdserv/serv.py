@@ -328,6 +328,7 @@ class PrePubMetadataService(PublishSystem):
             # and capture any updates from MIDAS
             bagger = self.prepare_metadata_bag(id, bagger)
             bagger.fileExaminer.launch(stop_logging=False)
+            # bagger.fileExaminer.run()  # sync for testing
 
             bagbldr = bagger.bagbldr
 

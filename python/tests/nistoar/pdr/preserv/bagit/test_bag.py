@@ -120,7 +120,11 @@ class TestNISTBag(test.TestCase):
 
         nerd = self.bag.nerd_metadata_for("", True)
         self.assertIn('authors', nerd)
-        self.assertTrue(nerd['title'].startswith("OptSortSph: Sorting "))
+
+        # new default merge policy; title can be overridden!
+        #
+        # self.assertTrue(nerd['title'].startswith("OptSortSph: Sorting "))
+        self.assertEqual(nerd['title'], "A much better title")
         self.assertEqual(nerd['ediid'], "3A1EE2F169DD3B8CE0531A570681DB5D1491")
         self.assertIn('foo', nerd)
         self.assertIn(nerd['foo'], "bar")
@@ -136,7 +140,10 @@ class TestNISTBag(test.TestCase):
         
         nerd = self.bag.nerd_metadata_for("trial1.json", True)
         self.assertIn("previewURL", nerd)
-        self.assertTrue(nerd['title'].startswith("JSON version of"))
+        # new default merge policy; title can be overridden!
+        #
+        # self.assertTrue(nerd['title'].startswith("JSON version of"))
+        self.assertEqual(nerd['title'], "a better title")
         self.assertTrue(nerd['previewURL'].endswith("trial1.json/preview"))
         
     def test_nerdm_component(self):
@@ -202,7 +209,10 @@ class TestNISTBag(test.TestCase):
         nerd = self.bag.nerdm_record(True)
 
         self.assertIn('authors', nerd)
-        self.assertTrue(nerd['title'].startswith("OptSortSph: Sorting "))
+        # new default merge policy; title can be overridden!
+        #
+        # self.assertTrue(nerd['title'].startswith("OptSortSph: Sorting "))
+        self.assertEqual(nerd['title'], "A much better title")
         self.assertEqual(nerd['ediid'], "3A1EE2F169DD3B8CE0531A570681DB5D1491")
 
         self.assertEqual(nerd['authors'][0]['givenName'], "Kevin")

@@ -1729,7 +1729,10 @@ class TestBuilder2(test.TestCase):
             nerd = json.load(fd)
         self.assertIn("authors", nerd)
         self.assertIn("foo", nerd)
-        self.assertTrue(nerd["title"].startswith("OptSortSph: Sorting "))
+        # new default merge policy; title can be overridden!
+        #
+        # self.assertTrue(nerd['title'].startswith("OptSortSph: Sorting "))
+        self.assertEqual(nerd['title'], "A much better title")
         self.assertEqual(nerd["foo"], "bar")
         self.assertEqual(nerd['authors'][0]['givenName'], "Kevin")
         self.assertEqual(nerd['authors'][1]['givenName'], "Jianming")
@@ -1756,7 +1759,10 @@ class TestBuilder2(test.TestCase):
             nerd = json.load(fd)
         self.assertIn("authors", nerd)
         self.assertIn("foo", nerd)
-        self.assertTrue(nerd["title"].startswith("OptSortSph: Sorting "))
+        # new default merge policy; title can be overridden!
+        #
+        # self.assertTrue(nerd['title'].startswith("OptSortSph: Sorting "))
+        self.assertEqual(nerd['title'], "A much better title")
         self.assertEqual(nerd["foo"], "bar")
         self.assertEqual(nerd['authors'][0]['givenName'], "Kevin")
         self.assertEqual(nerd['authors'][1]['givenName'], "Jianming")
