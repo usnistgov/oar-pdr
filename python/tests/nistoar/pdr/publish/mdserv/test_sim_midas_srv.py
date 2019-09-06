@@ -41,6 +41,8 @@ def stopService(archdir, authmeth=None):
 loghdlr = None
 rootlog = None
 def setUpModule():
+    global loghdlr
+    global rootlog
     ensure_tmpdir()
     tdir = tmpdir()
     svcarch = os.path.join(tdir, "simarch")
@@ -57,7 +59,7 @@ def tearDownModule():
     global loghdlr
     if loghdlr:
         if rootlog:
-            rootlog.removeLog(loghdlr)
+            rootlog.removeHandler(loghdlr)
         loghdlr = None
     svcarch = os.path.join(tmpdir(), "simarch")
     stopService(svcarch)
