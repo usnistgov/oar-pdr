@@ -43,6 +43,8 @@ descarchdir = os.path.join(pdrmoddir, "describe", "data")
 loghdlr = None
 rootlog = None
 def setUpModule():
+    global loghdlr
+    global rootlog
     ensure_tmpdir()
 #    logging.basicConfig(filename=os.path.join(tmpdir(),"test_builder.log"),
 #                        level=logging.INFO)
@@ -56,7 +58,7 @@ def tearDownModule():
     global loghdlr
     if loghdlr:
         if rootlog:
-            rootlog.removeLog(loghdlr)
+            rootlog.removeHandler(loghdlr)
         loghdlr = None
     rmtmpdir()
 
@@ -475,9 +477,11 @@ class TestPrePubMetadataService(test.TestCase):
         self.assertEqual(mdata['aka'], ["PDR"])
         self.assertEqual(mdata['title'], "Tacos!")
         self.assertNotEqual(mdata['description'], ["Every Tuesday!"])
-        self.assertEqual(mdata['components'][1]['filepath'], "trial1.json")
-        self.assertEqual(mdata['components'][1]['mediaType'], "text/json-x")
-        self.assertNotEqual(mdata['components'][2]['mediaType'], "text/json-x")
+        for cmp in mdata['components']:
+            if cmp.get('filepath') == 'trial1.json':
+                self.assertEqual(cmp['mediaType'], "text/json-x")
+            elif 'mediaType' in cmp:
+                self.assertNotEqual(cmp['mediaType'], "text/json-x")
         self.assertFalse(any([c['mediaType'] == "goober"
                               for c in mdata['components'] if 'mediaType' in c]))
         self.assertFalse(any([c['mediaType'] == "text/gibberish"
