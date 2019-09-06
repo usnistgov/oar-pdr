@@ -745,7 +745,7 @@ class MIDASMetadataBagger(SIPBagger):
                                                             True, ct)
                 if '_status' in md:
                     del md['_status']
-                self.bagger.bagbldr.replace_metadata_for(filepath, md,
+                self.bagger.bagbldr.update_metadata_for(filepath, md,
                                 "async metadata update for file, "+filepath)
                 self.bagger._mark_filepath_synced(filepath)
 

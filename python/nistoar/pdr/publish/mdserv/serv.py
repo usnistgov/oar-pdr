@@ -139,10 +139,11 @@ class PrePubMetadataService(PublishSystem):
         self._nerd2pod = Res2PODds(pdr.def_jq_libdir, logger=self.log)
 
         self._midascl = None
-        if self.cfg.get('update_to_midas', self.cfg.get('midas_service')):
+        ucfg = self.cfg.get('update', {})
+        if ucfg.get('update_to_midas', ucfg.get('midas_service')):
             # set up the client if have the config data to do it unless
             # 'update_to_midas' is False
-            self._midascl = midas.MIDASClient(self.cfg.get('midas_service', {}))
+            self._midascl = midas.MIDASClient(ucfg.get('midas_service', {}))
 
     def _create_minter(self, parentdir):
         cfg = self.cfg.get('id_minter', {})
@@ -366,7 +367,7 @@ class PrePubMetadataService(PublishSystem):
                         message=msg.format(destpath, str(updates[destpath].keys())))
 
         # save an updated POD and send it to MIDAS
-        self.update_pod(updates[None])
+        self.update_pod(updates[None], bagbldr)
 
         mergeconv = bagbldr.cfg.get('merge_convention', DEF_MERGE_CONV)
         return bagbldr.bag.nerdm_record(mergeconv);
@@ -433,7 +434,7 @@ class PrePubMetadataService(PublishSystem):
         fltrd = OrderedDict()
         _filter_props(data, fltrd)    # filter out properties you can't edit
         oldnerdm = bldr.bag.nerdm_record(mergeconv)
-        self._validate_update(fltrd, oldnerdm, bldr)  # may raise InvalidRequest
+        newnerdm = self._validate_update(fltrd, oldnerdm, bldr)  # may raise InvalidRequest
 
         # separate file-based components from main metadata; return parts
         # by destination path.  Every component is now guaranteed to have an
@@ -450,6 +451,7 @@ class PrePubMetadataService(PublishSystem):
             if len(fltrd['components']) <= 0:
                 del fltrd['components']
         out[''] = fltrd
+        out[None] = newnerdm
         return out
 
     def _item_with_id(self, array, id):
@@ -564,7 +566,8 @@ class PrePubMetadataService(PublishSystem):
 
     def _pod4midas(self, pod):
         pod = copy.deepcopy(pod)
-        del pod['identifier']
+        # del pod['...']
+        
         return pod
 
     def _submit_to_midas(self, pod):
@@ -579,7 +582,7 @@ class PrePubMetadataService(PublishSystem):
             raise ValueError("POD record is missing required 'identifier' field")
 
         try:
-            self._midascl.put(pod, midasid)
+            self._midascl.put_pod(pod, midasid)
         except Exception as ex:
             self.log.error("Failed to commit POD to MIDAS for ediid=%s", midasid)
             self.log.exception(ex)
