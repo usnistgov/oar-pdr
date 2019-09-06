@@ -744,9 +744,12 @@ class MIDASMetadataBagger(SIPBagger):
                 md = self.bagger.bagbldr.describe_data_file(location, filepath,
                                                             True, ct)
                 if '_status' in md:
+                    md['_status'] = "updated"
+                md = self.bagger.bagbldr.update_metadata_for(filepath, md, ct,
+                                   "async metadata update for file, "+filepath)
+                if '_status' in md:
                     del md['_status']
-                self.bagger.bagbldr.update_metadata_for(filepath, md,
-                                "async metadata update for file, "+filepath)
+                    self.bagger.bagbldr.replace_metadata_for(filepath, md, '')
                 self.bagger._mark_filepath_synced(filepath)
 
             except Exception as ex:
