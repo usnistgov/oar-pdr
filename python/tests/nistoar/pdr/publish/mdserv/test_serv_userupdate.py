@@ -302,7 +302,7 @@ class TestPrePubMetadataServiceMidas(test.TestCase):
                 'updatable_properties': [ 'title', 'components[].goob' ],
                 'midas_service': {
                     'service_endpoint': baseurl,
-                    'update_auth_key': 'secret'
+                    'auth_key': 'svcsecret'
                 }
             }
         }

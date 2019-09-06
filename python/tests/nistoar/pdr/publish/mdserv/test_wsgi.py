@@ -45,7 +45,9 @@ class TestApp(test.TestCase):
             'review_dir':      self.revdir,
             'upload_dir':      self.upldir,
             'id_registry_dir': self.bagparent,
-            'update_auth_key': "secret"
+            'update': {
+                'update_auth_key': "secret"
+            }
         }
         self.bagdir = os.path.join(self.bagparent, self.midasid)
 

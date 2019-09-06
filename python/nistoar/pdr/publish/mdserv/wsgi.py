@@ -54,7 +54,6 @@ class PrePubMetadaRequestApp(object):
     def __init__(self, config):
         self.base_path = config.get('base_path', DEF_BASE_PATH)
         self.mdsvc = PrePubMetadataService(config)
-        self.update_authkey = config.get("update_auth_key");
 
         self.filemap = {}
         for loc in ('review_dir', 'upload_dir'):
@@ -62,9 +61,19 @@ class PrePubMetadaRequestApp(object):
             if dir:
                 self.filemap[dir] = "/midasdata/"+loc
 
+        ucfg = config.get('update', {})
+        self.update_authkey = ucfg.get("update_auth_key");
+
+        # set up client to MIDAS API service that will give us update authorization
+        self._midascl = None
+        if ucfg.get('update_to_midas', ucfg.get('midas_service')):
+            # set up the client if have the config data to do it unless
+            # 'update_to_midas' is False
+            self._midascl = midas.MIDASClient(ucfg.get('midas_service', {}))
+
     def handle_request(self, env, start_resp):
         handler = Handler(self.mdsvc, self.filemap, env, start_resp,
-                          self.update_authkey)
+                          self.update_authkey, self._midascl)
         return handler.handle()
 
     def __call__(self, env, start_resp):

@@ -33,7 +33,7 @@ class MIDASClient(object):
         self.baseurl = baseurl
         if not self.baseurl.endswith('/'):
             self.baseurl += '/'
-        self._authkey = self.cfg.get('update_auth_key')
+        self._authkey = self.cfg.get('auth_key')
 
     def _get_json(self, relurl, resp):
         try:
