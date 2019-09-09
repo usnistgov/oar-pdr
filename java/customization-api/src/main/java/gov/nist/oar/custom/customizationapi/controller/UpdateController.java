@@ -17,15 +17,7 @@ import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import org.springframework.web.client.RestClientException;
-//import org.apache.http.HttpEntity;
-//import org.apache.http.HttpResponse;
-//import org.apache.http.NameValuePair;
-//import org.apache.http.client.ClientProtocolException;
-//import org.apache.http.client.HttpClient;
-//import org.apache.http.client.entity.UrlEncodedFormEntity;
-//import org.apache.http.client.methods.HttpPost;
-//import org.apache.http.impl.client.HttpClients;
-//import org.apache.http.message.BasicNameValuePair;
+
 import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -134,50 +126,22 @@ public class UpdateController {
 	    "savedrecord/{ediid}" }, method = RequestMethod.PUT, headers = "accept=application/json", produces = "application/json")
     @ApiOperation(value = ".", nickname = "Save changes to server", notes = "Resource returns a boolean based on success or failure of the request.")
     public Document saveRecord(@PathVariable @Valid String ediid, @Valid @RequestBody String params)
-	    throws CustomizationException, InvalidInputException {
-	logger.info("Send updated record to mdserver:" + ediid);
+	    throws CustomizationException, InvalidInputException,ResourceNotFoundException {
+	logger.info("Send updated record to backend metadata server:" + ediid);
 	return uRepo.save(ediid, params);
-//	RestTemplate restTemplate = new RestTemplate();
-//	HttpHeaders headers = new HttpHeaders();
-//	headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-//
-//	MultiValueMap<String, String> map= new LinkedMultiValueMap<String, String>();
-//	map.add("email", "first.last@example.com");
-//
-//	HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<MultiValueMap<String, String>>(map, headers);
-//
-//	ResponseEntity<String> response = restTemplate.postForEntity( "", request , String.class );
 
-//	HttpClient httpclient = HttpClients.createDefault();
-//	HttpPost httppost = new HttpPost("server");
-//
-//	// Request parameters and other properties.
-//	List<NameValuePair> params = new ArrayList<NameValuePair>(2);
-//	params.add(new BasicNameValuePair("Authorization", "12345"));
-//	params.add(new BasicNameValuePair("Content-type", "application/json"));
-//	httppost.setEntity(new UrlEncodedFormEntity(params, "UTF-8"));
-//
-//	//Execute and get the response.
-//	HttpResponse response = httpclient.execute(httppost);
-//	HttpEntity entity = response.getEntity();
-//
-//	if (entity != null) {
-//	    try (InputStream instream = entity.getContent()) {
-//	        // do something useful
-//	    }
-//	}
 
     }
     
     @ExceptionHandler(ResourceNotFoundException.class)
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorInfo handleStreamingError(ResourceNotFoundException ex, HttpServletRequest req) {
 	logger.info("There is an error accessing requested record : " + req.getRequestURI() + "\n  " + ex.getMessage());
 	return new ErrorInfo(req.getRequestURI(), 404, "Resource Not Found", req.getMethod());
     }
     
     @ExceptionHandler(InvalidInputException.class)
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorInfo handleStreamingError(InvalidInputException ex, HttpServletRequest req) {
 	logger.info("There is an error processing input data: " + req.getRequestURI() + "\n  " + ex.getMessage());
 	return new ErrorInfo(req.getRequestURI(), 400, "Invalid input error", "PATCH");

@@ -16,6 +16,7 @@ import org.bson.Document;
 
 import gov.nist.oar.custom.customizationapi.exceptions.CustomizationException;
 import gov.nist.oar.custom.customizationapi.exceptions.InvalidInputException;
+import gov.nist.oar.custom.customizationapi.service.ResourceNotFoundException;
 
 /**
  * This is repository is defined to get input json for the record in mongodb, 

@@ -12,16 +12,17 @@
  */
 package gov.nist.oar.custom.customizationapi.service;
 
-import java.io.IOException;
-
 import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
-import com.mongodb.client.MongoCollection;
+import com.mongodb.MongoException;
 
 import gov.nist.oar.custom.customizationapi.config.MongoConfig;
 import gov.nist.oar.custom.customizationapi.exceptions.CustomizationException;
@@ -31,7 +32,7 @@ import gov.nist.oar.custom.customizationapi.repositories.UpdateRepository;
 
 /**
  * UpdateRepository is the service class which takes input from client to edit
- * or update records in cache database. The funtions are written to process
+ * or update records in cache database. The functions are written to process
  * 
  * @author Deoyani Nandrekar-Heinis
  */
@@ -44,52 +45,52 @@ public class UpdateRepositoryService implements UpdateRepository {
     MongoConfig mconfig;
 
     @Autowired
-    DataOperations accessData;
+    DatabaseOperations accessData;
 
     /**
-     * Update record in backend database with changes provided in the form of JSON input.
-     * Backend database is for caching changes before publishing it to backend metadata server.
+     * Update record in backend database with changes provided in the form of JSON
+     * input. Backend database is for caching changes before publishing it to
+     * backend metadata server.
      * 
      * @throws CustomizationException
      * @throws InvalidInputException
      * @throws ResourceNotFoundException
      */
     @Override
-    public Document update(String params, String recordid) throws InvalidInputException, ResourceNotFoundException,
-    CustomizationException{
-	
+    public Document update(String params, String recordid)
+	    throws InvalidInputException, ResourceNotFoundException, CustomizationException {
+	logger.info("Update: operation to save draft called.");
 	processInputHelper(params, recordid);
 	return accessData.getData(recordid, mconfig.getRecordCollection());
-	
     }
 
     /**
-     * Check the inputed values which are of JSON format, check if JSON is valid and passes the schema.
-     * Valid input is processed and patched in the backed database.
+     * Check the inputed values which are of JSON format, check if JSON is valid and
+     * passes the schema. Valid input is processed and patched in the backed
+     * database.
+     * 
      * @param params
      * @param recordid
      * @return bolean
      * @throws InvalidInputException
      */
     private boolean processInputHelper(String params, String recordid) throws InvalidInputException {
-//	ProcessInputRequest req = new ProcessInputRequest();
-//	if (req.validateInputParams(params)) {
-	// validate json
+	try {
 
-	JSONUtils.isJSONValid(params);
-	// Validate schema against json-customization schema
-	if (JSONUtils.validateInput(params)) {
+	    // Validate JSON and Validate schema against json-customization schema
+	    JSONUtils.validateInput(params);
 
 	    // this.accessData.checkRecordInCache(recordid, recordCollection);
 	    Document update = Document.parse(params);
 	    update.remove("_id");
 	    update.append("ediid", recordid);
 	    return this.updateHelper(recordid, update);
-	} else
-	    return false;
 
-	// return accessData.updateDataInCache(recordid, recordCollection,
-	// update);
+	} catch (InvalidInputException iexp) {
+	    logger.error("Error while Processing input json data: " + iexp.getMessage());
+	    throw new InvalidInputException("Error while processing input JSON data:" + iexp.getMessage());
+
+	}
 
     }
 
@@ -103,7 +104,6 @@ public class UpdateRepositoryService implements UpdateRepository {
      * @return
      */
     private boolean updateHelper(String recordid, Document update) {
-
 
 	if (!this.accessData.checkRecordInCache(recordid, mconfig.getRecordCollection()))
 	    this.accessData.putDataInCache(recordid, mconfig.getRecordCollection());
@@ -120,6 +120,7 @@ public class UpdateRepositoryService implements UpdateRepository {
      */
     @Override
     public Document edit(String recordid) throws CustomizationException {
+	logger.info("get data operation in service called.");
 	return accessData.getData(recordid, mconfig.getRecordCollection());
     }
 
@@ -128,20 +129,60 @@ public class UpdateRepositoryService implements UpdateRepository {
      * from cache.
      * 
      * @throws InvalidInputException
+     * @throws CustomizationException
      */
     @Override
-    public Document save(String recordid, String params) throws InvalidInputException {
+    public Document save(String recordid, String params) throws InvalidInputException, CustomizationException {
 
-	if (!(params.isEmpty() || params == null) && !processInputHelper(params, recordid))
-	    return null;
-//	accessData.deleteRecordInCache(recordid, mconfig.getChangeCollection());
-	return accessData.getUpdatedData(recordid, mconfig.getChangeCollection());
+	logger.info("save and send finalized draft to backend service.");
+	Document update = null;
+	try {
+
+	    if (JSONUtils.isJSONValid(params) && !(params.isEmpty() || params == null)) {
+		// If input is not empty process it first.
+		processInputHelper(params, recordid);
+	    }
+
+	    // if record exists
+	    if (accessData.checkRecordInCache(recordid, mconfig.getChangeCollection())) {
+		// send data to mdserver
+
+		RestTemplate restTemplate = new RestTemplate();
+		Document d = accessData.getData(recordid, mconfig.getChangeCollection());
+		HttpHeaders headers = new HttpHeaders();
+		HttpEntity<Document> requestUpdate = new HttpEntity<>(d, headers);
+		update = (Document) restTemplate.patchForObject(mconfig.getMetadataServer(), requestUpdate,
+			Document.class);
+	    }
+
+	    // on successful return delete record from DB
+	    if (update != null && update.size() != 0) {
+		accessData.deleteRecordInCache(recordid, mconfig.getChangeCollection());
+		accessData.deleteRecordInCache(recordid, mconfig.getRecordCollection());
+
+		return update;
+
+	    } else {
+		throw new CustomizationException("The data can not be updated successfully in the backend server.");
+	    }
+	} catch (InvalidInputException ex) {
+
+	    logger.error("Error while finalizing changes.InvalidInputException:" + ex.getMessage());
+	    throw new InvalidInputException("Error while finalizing changes. " + ex.getMessage());
+
+	} catch (MongoException ex) {
+	    logger.error("There is an error in save operation while accessing/updating data from backend database."
+		    + ex.getMessage());
+	    throw new CustomizationException("There is an error accessing/updating data from backend database.");
+
+	}
 
     }
 
     @Override
     public boolean delete(String recordid) throws CustomizationException {
 
+	logger.info("delete operation in service called.");
 	return accessData.deleteRecordInCache(recordid, mconfig.getRecordCollection())
 		&& accessData.deleteRecordInCache(recordid, mconfig.getChangeCollection());
     }

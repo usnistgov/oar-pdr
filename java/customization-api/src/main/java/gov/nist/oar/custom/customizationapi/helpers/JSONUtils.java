@@ -18,6 +18,7 @@ import java.io.InputStream;
 import org.apache.commons.io.IOUtils;
 import org.everit.json.schema.Schema;
 import org.everit.json.schema.loader.SchemaLoader;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 import org.slf4j.Logger;
@@ -51,18 +52,24 @@ public final class JSONUtils {
      */
     public static boolean isJSONValid(String jsonInString) throws InvalidInputException {
 	try {
-	    final ObjectMapper mapper = new ObjectMapper();
-	    mapper.readTree(jsonInString);
+	    
+	    JSONObject jObject = new JSONObject(jsonInString);
+	    if(jObject.length() == 0)
+		return false;
+//	    final ObjectMapper mapper = new ObjectMapper();
+//	    mapper.readTree(jsonInString);
+	 
 	    return true;
-	} catch (IOException e) {
+	} catch (JSONException e) {
 	    logger.error("Input String is not valid JSON:" + e.getMessage());
-	    throw new InvalidInputException("Input string is not Valid JSON");
+	    throw new InvalidInputException("Input string is not Valid JSON"+e.getMessage());
 	}
     }
 
     public static boolean validateInput(String jsonRequest) throws InvalidInputException {
 	try {
 
+	    isJSONValid(jsonRequest);
 	    InputStream inputStream = JSONUtils.class.getClassLoader().getResourceAsStream("static/json-customization-schema.json");
 	    String inputSchema = IOUtils.toString(inputStream);
 	    JSONObject rawSchema = new JSONObject(new JSONTokener(inputSchema));
@@ -74,7 +81,20 @@ public final class JSONUtils {
 							  // if this object is
 							  // invalid
 	    return true;
-	} catch (Exception e) {
+	}
+	catch (JSONException e) {
+	    logger.error("Input String is not valid JSON:" + e.getMessage());
+	    throw new InvalidInputException("Input string is not Valid JSON"+ e.getMessage());
+	}
+
+        catch (IOException e) {
+
+	    logger.error("There is error validation input against JSON schema:" + e.getMessage());
+	    System.out.println("Exception validating with json schema:"+e.getMessage());
+	    throw new InvalidInputException("Exception validating input JSON against customization service schema");
+
+	}
+	catch (Exception e) {
 	    logger.error("There is error validation input against JSON schema:" + e.getMessage());
 	    System.out.println("Exception validating with json schema:"+e.getMessage());
 	    throw new InvalidInputException("Exception validating input JSON against customization service schema");

@@ -38,7 +38,8 @@ import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 
-import gov.nist.oar.custom.customizationapi.service.DataOperations;
+import gov.nist.oar.custom.customizationapi.exceptions.CustomizationException;
+import gov.nist.oar.custom.customizationapi.service.DatabaseOperations;
 
 /**
  * This class contains unit tests for different methods/functions available in DataOperations class
@@ -61,15 +62,15 @@ public class DataOperationsTest {
     private MongoDatabase mockDB;
     
     private String mdserver ="http://testdata.nist.gov/rmm/records/";
-    private static DataOperations mockDataOperations;
+    private static DatabaseOperations mockDataOperations;
     private static Document change;
     private static Document updatedRecord;
     private static String recordid ="FDB5909746815200E043065706813E54137";
 
 
     @Before
-    public void initMocks() throws IOException {
-	mockDataOperations = mock(DataOperations.class);
+    public void initMocks() throws IOException, ResourceNotFoundException, CustomizationException {
+	mockDataOperations = mock(DatabaseOperations.class);
        when(mockClient.getDatabase("UpdateDB")).thenReturn(mockDB);
        when(mockDB.getCollection("record")).thenReturn(mockCollection);
        when(mockDB.getCollection("change")).thenReturn(mockChangeCollection);
@@ -100,7 +101,7 @@ public class DataOperationsTest {
     }
     
     @Test
-    public void testGetData(){
+    public void testGetData() throws ResourceNotFoundException, CustomizationException{
 	Document d = mockDataOperations.getData(recordid, mockCollection);
 	assertNotNull(d);
         assertEquals("New Title Update Test May 7", d.get("title"));
