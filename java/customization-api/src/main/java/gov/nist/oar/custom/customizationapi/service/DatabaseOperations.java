@@ -32,6 +32,7 @@ import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.Projections;
+import com.mongodb.client.model.UpdateOptions;
 import com.mongodb.client.model.changestream.ChangeStreamDocument;
 import com.mongodb.client.result.DeleteResult;
 import com.mongodb.client.result.UpdateResult;
@@ -51,6 +52,7 @@ public class DatabaseOperations {
 
     @Value("${oar.mdserver:}")
     private String mdserver;
+
 //
 //    @Autowired
 //    private BackendServerOperations backendService;
@@ -145,8 +147,6 @@ public class DatabaseOperations {
 	}
     };
 
-  
-
     /**
      * This function gets record from mdserver and inserts in the record collection
      * in MongoDB cache database
@@ -194,11 +194,16 @@ public class DatabaseOperations {
 	try {
 	    Date now = new Date();
 	    update.append("_updateDate", now);
+
+	    if (update.containsKey("_id"))
+		update.remove("_id");
+
 	    Document tempUpdateOp = new Document("$set", update);
-	    tempUpdateOp.remove("_id");
-	    // BasicDBObject timeNow = new BasicDBObject("date", now);
-	    UpdateResult updates = mcollection.updateOne(Filters.eq("ediid", recordid), tempUpdateOp);
-	    // return updates != null;
+	    if (tempUpdateOp.containsKey("_id"))
+		tempUpdateOp.remove("_id");
+
+	    mcollection.updateOne(Filters.eq("ediid", recordid), tempUpdateOp, new UpdateOptions().upsert(true));
+
 	    return true;
 	} catch (MongoException ex) {
 	    log.error("Error while update data in cache db" + ex.getMessage());
@@ -229,11 +234,11 @@ public class DatabaseOperations {
 	}
 
     }
+
     public Document getDataFromServer(String recordid) {
 
-  	RestTemplate restTemplate = new RestTemplate();
-  	return restTemplate.getForObject(mdserver + recordid, Document.class);
-      }
-      
-      
+	RestTemplate restTemplate = new RestTemplate();
+	return restTemplate.getForObject(mdserver + recordid, Document.class);
+    }
+
 }
