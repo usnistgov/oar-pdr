@@ -53,9 +53,6 @@ public class DatabaseOperations {
     @Value("${oar.mdserver:}")
     private String mdserver;
 
-//
-//    @Autowired
-//    private BackendServerOperations backendService;
     /**
      * It first checks whether recordid provided is of proper format and allowed to
      * be used to search in the database. It uses find method to search database.
@@ -89,10 +86,13 @@ public class DatabaseOperations {
     public Document getData(String recordid, MongoCollection<Document> mcollection)
 	    throws ResourceNotFoundException, CustomizationException {
 	try {
-	    if (checkRecordInCache(recordid, mcollection))
-		return mcollection.find(Filters.eq("ediid", recordid)).first();
-	    else
-		return getDataFromServer(recordid);
+	    
+	    return checkRecordInCache(recordid, mcollection) ? 
+		    mcollection.find(Filters.eq("ediid", recordid)).first():getDataFromServer(recordid);
+//	    if (checkRecordInCache(recordid, mcollection))
+//		return mcollection.find(Filters.eq("ediid", recordid)).first();
+//	    else
+//		return getDataFromServer(recordid);
 	} catch (IllegalArgumentException | MongoException exp) {
 	    log.error("There is an error getting record with given record id. " + exp.getMessage());
 	    throw new CustomizationException("There is an error accessing this record." + exp.getMessage());
@@ -223,11 +223,9 @@ public class DatabaseOperations {
 	    Document d = mcollection.find(Filters.eq("ediid", recordid)).first();
 
 	    DeleteResult result = mcollection.deleteOne(d);
-	    if (result.getDeletedCount() == 1) {
-		return true;
-	    } else {
-		return false;
-	    }
+	    
+	    return result.getDeletedCount() == 1 ? true : false;
+
 	} catch (MongoException ex) {
 	    log.error("Error deleting data in cache db" + ex.getMessage());
 	    throw new MongoException("Error while deleteing data in cache db." + ex.getMessage());

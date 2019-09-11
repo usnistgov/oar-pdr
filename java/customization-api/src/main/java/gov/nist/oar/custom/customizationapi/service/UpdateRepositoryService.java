@@ -23,6 +23,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import com.mongodb.MongoException;
+import com.mongodb.client.MongoCollection;
 
 import gov.nist.oar.custom.customizationapi.config.MongoConfig;
 import gov.nist.oar.custom.customizationapi.exceptions.CustomizationException;
@@ -80,7 +81,6 @@ public class UpdateRepositoryService implements UpdateRepository {
 	    // Validate JSON and Validate schema against json-customization schema
 	    JSONUtils.validateInput(params);
 
-	    // this.accessData.checkRecordInCache(recordid, recordCollection);
 	    Document update = Document.parse(params);
 	    update.remove("_id");
 	    update.append("ediid", recordid);
@@ -143,23 +143,19 @@ public class UpdateRepositoryService implements UpdateRepository {
 		processInputHelper(params, recordid);
 	    }
 
-	    // if record exists
+	    // if record exists send changes to mdserver
 	    if (accessData.checkRecordInCache(recordid, mconfig.getChangeCollection())) {
-		// send data to mdserver
+		
+		// Document d = accessData.getData(recordid, mconfig.getChangeCollection());
+		BackendServerOperations bkOperations = new BackendServerOperations(mconfig.getMetadataServer(), mconfig.getMDSecret());
+		update = bkOperations.sendChangesToServer(recordid, accessData.getData(recordid, mconfig.getChangeCollection()));
 
-		RestTemplate restTemplate = new RestTemplate();
-		Document d = accessData.getData(recordid, mconfig.getChangeCollection());
-		HttpHeaders headers = new HttpHeaders();
-		HttpEntity<Document> requestUpdate = new HttpEntity<>(d, headers);
-		update = (Document) restTemplate.patchForObject(mconfig.getMetadataServer(), requestUpdate,
-			Document.class);
 	    }
 
 	    // on successful return delete record from DB
 	    if (update != null && update.size() != 0) {
-		accessData.deleteRecordInCache(recordid, mconfig.getChangeCollection());
-		accessData.deleteRecordInCache(recordid, mconfig.getRecordCollection());
-
+		this.delete(recordid);
+		
 		return update;
 
 	    } else {
@@ -183,7 +179,7 @@ public class UpdateRepositoryService implements UpdateRepository {
     public boolean delete(String recordid) throws CustomizationException {
 
 	logger.info("delete operation in service called.");
-	return accessData.deleteRecordInCache(recordid, mconfig.getRecordCollection())
+	return accessData.deleteRecordInCache(recordid, mconfig.getRecordCollection()) 
 		&& accessData.deleteRecordInCache(recordid, mconfig.getChangeCollection());
     }
 

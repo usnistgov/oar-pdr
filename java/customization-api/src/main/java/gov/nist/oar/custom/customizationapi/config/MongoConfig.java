@@ -54,9 +54,6 @@ public class MongoConfig {
     private MongoCollection<Document> recordsCollection;
     private MongoCollection<Document> changesCollection;
     private String metadataServerUrl = "";
-    List servers = new ArrayList();
-    List credentials = new ArrayList();
-
 
     @Value("${oar.mdserver:testserver}")
     private String mdserver;
@@ -69,16 +66,19 @@ public class MongoConfig {
     @Value("${oar.mongodb.host:localhost}")
     private String host;
     @Value("${oar.mongodb.database.name:UpdateDB}")
-    private String dbname ;
+    private String dbname;
     @Value("${oar.mongodb.readwrite.user:testuser}")
     private String user;
     @Value("${oar.mongodb.readwrite.password:testpassword}")
     private String password;
+    @Value("${oar.mdserver.secret:secret}")
+    private String mdserversecret;
+
     @PostConstruct
     public void initIt() throws Exception {
 
 	mongoClient = (MongoClient) this.mongo();
-	log.info("########## " + dbname + " ########"+mdserver);
+	log.info("########## " + dbname + " ########" + mdserver);
 
 	this.setMongodb(this.dbname);
 	this.setRecordCollection(this.record);
@@ -137,16 +137,25 @@ public class MongoConfig {
     private void setChangeCollection(String change) {
 	changesCollection = mongoDb.getCollection(change);
     }
-    
-    
+
     public String getMetadataServer() {
 	return this.metadataServerUrl;
     }
-    private void  setMetadataServer(String mserver) {
+
+    private void setMetadataServer(String mserver) {
 	this.metadataServerUrl = mserver;
     }
+
+    public String getMDSecret() {
+	return this.mdserversecret;
+    }
+
+    List servers = new ArrayList();
+    List credentials = new ArrayList();
+
     /**
-     * MongoClient 
+     * MongoClient
+     * 
      * @return
      * @throws Exception
      */

@@ -20,7 +20,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-import com.fasterxml.jackson.databind.JsonMappingException;
 
 import gov.nist.oar.custom.customizationapi.exceptions.InvalidInputException;
 
@@ -43,6 +42,8 @@ public class JSONUtilsTest {
 
 	assertTrue(JSONUtils.isJSONValid(testJson));
 	testJson = "{\"title\" : \"New Title Update\",description: \"new description update\"}";
+	assertTrue(JSONUtils.isJSONValid(testJson));
+	testJson = "{\"jnsfhshdjsjk\"}";
 	exception.expect(InvalidInputException.class);
 	assertFalse(JSONUtils.isJSONValid(testJson));
     }
