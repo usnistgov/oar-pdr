@@ -65,7 +65,7 @@ public class BackendServerOperations {
 	HttpHeaders headers = new HttpHeaders();
 	headers.add("Authorization", "Bearer "+this.mdsecret);
 	HttpEntity<Document> requestUpdate = new HttpEntity<>(doc, headers);
-	Document updatedDoc = (Document) restTemplate.patchForObject(mdserver, requestUpdate,
+	Document updatedDoc = (Document) restTemplate.patchForObject(mdserver+recordid, requestUpdate,
 		Document.class);
 	
 	return updatedDoc;
