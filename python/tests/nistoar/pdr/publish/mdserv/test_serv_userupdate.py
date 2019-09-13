@@ -153,15 +153,19 @@ class TestPrePubMetadataServiceUpdates(test.TestCase):
         bagdir = os.path.join(self.config['working_dir'], self.midasid)
         nerdm = self.srv.resolve_id(self.midasid)
 
-        bbldr = bagit.builder.BagBuilder(self.config['working_dir'],
-                                         self.midasid, {})
-        nerdm['title'] = "Goober!"
-        self.srv.update_pod(nerdm, bbldr)
+        try: 
+            bbldr = bagit.builder.BagBuilder(self.config['working_dir'],
+                                             self.midasid, {})
+            nerdm['title'] = "Goober!"
+            self.srv.update_pod(nerdm, bbldr)
 
-        self.assertEqual(bbldr.bag.pod_record()['title'], "Goober!")
+            self.assertEqual(bbldr.bag.pod_record()['title'], "Goober!")
+        finally:
+            bbldr.disconnect_logfile()
 
     def test_validate_update(self):
-        nerdm = self.srv.resolve_id(self.midasid)
+      nerdm = self.srv.resolve_id(self.midasid)
+      try:
         bbldr = bagit.builder.BagBuilder(self.config['working_dir'],
                                          self.midasid, {})
 
@@ -192,12 +196,10 @@ class TestPrePubMetadataServiceUpdates(test.TestCase):
 
         with self.assertRaises(serv.InvalidRequest):
             self.srv._validate_update({'title': 3}, nerdm, bbldr)
+      finally:
+        bbldr.disconnect_logfile()
 
     def test_filter_and_check_updates(self):
-        self.srv.resolve_id(self.midasid)
-        bbldr = bagit.builder.BagBuilder(self.config['working_dir'],
-                                         self.midasid, {})
-
         updata = {
             'title': "Goober!",
             'custom': 'data',
@@ -211,7 +213,13 @@ class TestPrePubMetadataServiceUpdates(test.TestCase):
             ]
         }
 
-        updated = self.srv._filter_and_check_updates(updata, bbldr)
+        self.srv.resolve_id(self.midasid)
+        try:
+            bbldr = bagit.builder.BagBuilder(self.config['working_dir'],
+                                             self.midasid, {})
+            updated = self.srv._filter_and_check_updates(updata, bbldr)
+        finally:
+            bbldr.disconnect_logfile()
         self.assertIn('', updated)
         self.assertIn('trial1.json', updated)
         self.assertEqual(updated['']['title'], "Goober!")
@@ -355,7 +363,7 @@ class TestPrePubMetadataServiceMidas(test.TestCase):
         self.assertEqual(midaspod['title'], 'Goober!')
         for dist in midaspod['distribution']:
             self.assertNotIn('goob', dist)
-        
+
 
 if __name__ == '__main__':
     test.main()

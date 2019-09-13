@@ -3,7 +3,7 @@ import unittest as test
 from nistoar.testing import *
 from nistoar.pdr import def_jq_libdir
 
-import nistoar.pdr.publish.mdserv.config as config
+import nistoar.pdr.config as config
 import nistoar.pdr.publish.mdserv.wsgi as wsgi
 
 datadir = os.path.join(
@@ -289,6 +289,17 @@ class TestApp(test.TestCase):
         self.assertIn("200", self.resp[0])
         self.assertEqual(json.loads(body[0]),
                          {"update": ["me", "you"],"read": ["me", "you"]})
+        
+    def test_preserv_log(self):
+        import re
+        from nistoar.pdr.utils import checksum_of
+        testpdrdir = re.sub(r'nistoar/pdr/.*$','nistoar/pdr', __file__)
+        preservelog = os.path.join(testpdrdir,
+                                   "preserv/data/samplembag/preserv.log")
+        sum = '3370af43681254b7f44cdcdad8b7dcd40a8c90317630c288e71b2caf84cf685f'
+        self.assertEqual(checksum_of(preservelog), sum)
+        # self.fail("I dunno")
+                         
 
 
 if __name__ == '__main__':

@@ -395,6 +395,8 @@ class TestPrePubMetadataService(test.TestCase):
             updated = self.srv._validate_update(upd, bag.bag.nerdm_record(True), bag)
         except serv.InvalidRequest as ex:
             self.fail("invalid result:\n  " + "\n  ".join(ex.reasons))
+        finally:
+            bag.disconnect_logfile()
 
         self.assertIn("aka", updated)
         self.assertIn("goob", updated)
@@ -405,10 +407,11 @@ class TestPrePubMetadataService(test.TestCase):
         self.assertEqual(updated['title'], "Tacos!")
 
     def test_filter_and_check_updates(self):
-        self.srv.cfg['update'] = {
-            'updatable_properties': [ "aka", "title", "components[].mediaType" ]
-        }
-        
+      self.srv.cfg['update'] = {
+          'updatable_properties': [ "aka", "title", "components[].mediaType" ]
+      }
+
+      try:
         bag = bldr.BagBuilder(datadir, "samplembag", {})
         upd = {
             "goob": "gurn", "aka": ["PDR"],
@@ -424,18 +427,20 @@ class TestPrePubMetadataService(test.TestCase):
         }
 
         data = self.srv._filter_and_check_updates(upd, bag)
-        self.assertIn('', data)
-        self.assertEqual(data['']['aka'], ['PDR'])
-        self.assertEqual(data['']['title'], "Tacos!")
-        self.assertNotIn('goob', data[''])
-        self.assertNotIn('@type', data[''])
-        self.assertNotIn('_extensionsSchemas', data[''])
-        self.assertEqual(len(data['']), 2)
-        self.assertIn(None, data)
-        self.assertEqual(len(data), 3)
-        self.assertIn('trial1.json', data)
-        self.assertEqual(data['trial1.json']['mediaType'], "text/json-x")
-        self.assertNotIn('@id', data['trial1.json'])
+      finally:
+        bag.disconnect_logfile()
+      self.assertIn('', data)
+      self.assertEqual(data['']['aka'], ['PDR'])
+      self.assertEqual(data['']['title'], "Tacos!")
+      self.assertNotIn('goob', data[''])
+      self.assertNotIn('@type', data[''])
+      self.assertNotIn('_extensionsSchemas', data[''])
+      self.assertEqual(len(data['']), 2)
+      self.assertIn(None, data)
+      self.assertEqual(len(data), 3)
+      self.assertIn('trial1.json', data)
+      self.assertEqual(data['trial1.json']['mediaType'], "text/json-x")
+      self.assertNotIn('@id', data['trial1.json'])
 
     def test_patch_id(self):
         self.srv.cfg['update'] = {
@@ -486,6 +491,7 @@ class TestPrePubMetadataService(test.TestCase):
                               for c in mdata['components'] if 'mediaType' in c]))
         self.assertFalse(any([c['mediaType'] == "text/gibberish"
                               for c in mdata['components'] if 'mediaType' in c]))
+                         
         
 
 if __name__ == '__main__':
