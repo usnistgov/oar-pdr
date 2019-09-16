@@ -1,4 +1,5 @@
 import os, sys, pdb, shutil, logging, json
+from StringIO import StringIO
 import unittest as test
 from nistoar.testing import *
 from nistoar.pdr import def_jq_libdir
@@ -46,7 +47,8 @@ class TestApp(test.TestCase):
             'upload_dir':      self.upldir,
             'id_registry_dir': self.bagparent,
             'update': {
-                'update_auth_key': "secret"
+                'update_auth_key': "secret",
+                'updatable_properties': ['title']
             }
         }
         self.bagdir = os.path.join(self.bagparent, self.midasid)
@@ -299,7 +301,78 @@ class TestApp(test.TestCase):
         sum = '3370af43681254b7f44cdcdad8b7dcd40a8c90317630c288e71b2caf84cf685f'
         self.assertEqual(checksum_of(preservelog), sum)
         # self.fail("I dunno")
-                         
+
+    def test_patch_bad_id(self):
+        input = '{ "title": "Goober" }'
+        winput = StringIO(input)
+        req = {
+            'PATH_INFO': '/asdifuiad',
+            'REQUEST_METHOD': 'PATCH',
+            'HTTP_AUTHORIZATION': 'Bearer secret',
+            'CONTENT_LENGTH': 64,
+            'wsgi.input': winput
+        }
+        body = self.svc(req, self.start)
+
+        self.assertGreater(len(self.resp), 0)
+        self.assertIn("404", self.resp[0])
+        self.assertIn('asdifuiad', self.resp[0])
+
+    def test_patch_ark_id(self):
+        input = '{ "title": "Goober" }'
+        winput = StringIO(input)
+        req = {
+            'PATH_INFO': '/ark:/88434/mds4-29sd17',
+            'REQUEST_METHOD': 'PATCH',
+            'HTTP_AUTHORIZATION': 'Bearer secret',
+            'CONTENT_LENGTH': 64,
+            'wsgi.input': winput
+        }
+        body = self.svc(req, self.start)
+
+        self.assertGreater(len(self.resp), 0)
+        self.assertIn("404", self.resp[0])
+        self.assertIn('mds4-29sd17', self.resp[0])
+        self.assertNotIn('ark:/88434/mds4-29sd17', self.resp[0])
+
+    def test_patch_unauthorized(self):
+        input = '{ "title": "Goober" }'
+        winput = StringIO(input)
+        req = {
+            'PATH_INFO': 'mds4-29sd17',
+            'REQUEST_METHOD': 'PATCH',
+            'HTTP_AUTHORIZATION': 'Bearer goober',
+            'CONTENT_LENGTH': 64,
+            'wsgi.input': winput
+        }
+        body = self.svc(req, self.start)
+
+        self.assertGreater(len(self.resp), 0)
+        self.assertIn("401", self.resp[0])
+        self.assertNotIn('mds4-29sd17', self.resp[0])
+
+    def test_patch_good_id(self):
+        input = '{ "title": "Goober" }'
+        winput = StringIO(input)
+        req = {
+            'PATH_INFO': '/3A1EE2F169DD3B8CE0531A570681DB5D1491',
+            'REQUEST_METHOD': 'PATCH',
+            'HTTP_AUTHORIZATION': 'Bearer secret',
+            'CONTENT_LENGTH': 21,
+            'wsgi.input': winput
+        }
+        pdb.set_trace()
+        body = self.svc(req, self.start)
+
+        self.assertGreater(len(self.resp), 0)
+        self.assertIn("200", self.resp[0])
+        self.assertGreater(len(body), 0)
+        self.assertGreater(len([l for l in self.resp if "Content-Type:" in l]),0)
+        data = json.loads(body[0])
+        self.assertEqual(data['ediid'], '3A1EE2F169DD3B8CE0531A570681DB5D1491')
+        self.assertEqual(data['title'], 'Goober')
+        self.assertEqual(len(data['components']), 7)
+        
 
 
 if __name__ == '__main__':

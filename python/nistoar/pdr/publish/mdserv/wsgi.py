@@ -377,7 +377,7 @@ class Handler(object):
         if filepath:
             self.send_methnotallowed();
 
-        self.update_metadata(self, dsid)
+        return self.update_metadata(dsid)
 
     def update_metadata(self, dsid):
         """
@@ -402,14 +402,16 @@ class Handler(object):
             log.exception("Failed to parse input JSON record: "+str(e))
             return self.send_error(400, "Content-Length is not an integer")
 
+        doc = None
         try:
             bodyin = self._env['wsgi.input']
             doc = bodyin.read(clen)
             frag = json.loads(doc)
         except Exception, ex:
             log.exception("Failed to parse input JSON record: "+str(ex))
-            log.warn("Input document starts...\n{0}...\n...{1} ({2}/{3} chars)"
-                     .format(doc[:75], doc[-20:], len(doc), clen))
+            if doc is not None:
+              log.warn("Input document starts...\n{0}...\n...{1} ({2}/{3} chars)"
+                       .format(doc[:75], doc[-20:], len(doc), clen))
             return self.send_error(400,
                                    "Failed to load input record (bad format?): "+
                                    str(ex))
