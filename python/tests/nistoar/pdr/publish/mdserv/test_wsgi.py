@@ -359,9 +359,9 @@ class TestApp(test.TestCase):
             'REQUEST_METHOD': 'PATCH',
             'HTTP_AUTHORIZATION': 'Bearer secret',
             'CONTENT_LENGTH': 21,
+            'CONTENT_TYPE': 'application/json',
             'wsgi.input': winput
         }
-        pdb.set_trace()
         body = self.svc(req, self.start)
 
         self.assertGreater(len(self.resp), 0)
@@ -373,6 +373,21 @@ class TestApp(test.TestCase):
         self.assertEqual(data['title'], 'Goober')
         self.assertEqual(len(data['components']), 7)
         
+    def test_patch_bad_content_type(self):
+        input = '{ "title": "Goober" }'
+        winput = StringIO(input)
+        req = {
+            'PATH_INFO': '/3A1EE2F169DD3B8CE0531A570681DB5D1491',
+            'REQUEST_METHOD': 'PATCH',
+            'HTTP_AUTHORIZATION': 'Bearer secret',
+            'CONTENT_LENGTH': 21,
+            'CONTENT_TYPE': 'application/junk',
+            'wsgi.input': winput
+        }
+        body = self.svc(req, self.start)
+        self.assertIn("415", self.resp[0])
+        self.assertNotIn('mds4-29sd17', self.resp[0])
+
 
 
 if __name__ == '__main__':

@@ -388,9 +388,9 @@ class Handler(object):
         # make sure we have the proper content-type; if not provided, assume
         # input is JSON
         if 'CONTENT_TYPE' in self._env and \
-           self._env['CONTENT_LENGTH'] != "application/json":
+           self._env['CONTENT_TYPE'] != "application/json":
             log.error("Client provided wrong content-type: "+
-                      self._env['CONTENT_LENGTH']);
+                      self._env['CONTENT_TYPE']);
             return self.send_error(415, "Unsupported input format");
             
         try:
