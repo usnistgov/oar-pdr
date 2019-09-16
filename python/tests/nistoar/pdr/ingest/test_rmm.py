@@ -1,6 +1,7 @@
-import os, pdb, sys, json, requests, logging, time, re
+import os, pdb, sys, json, requests, logging, time, re, shutil
 import unittest as test
 from copy import deepcopy
+from collections import Mapping
 
 from nistoar.testing import *
 from nistoar.pdr.ingest import rmm
@@ -317,6 +318,38 @@ class TestIngestClient(test.TestCase):
         self.assertFalse(os.path.exists(os.path.join(self.stagedir, "bru.json")))
         self.assertTrue(os.path.exists(os.path.join(self.faildir,"bro.json")))
         self.assertTrue(os.path.exists(os.path.join(self.faildir,"bru.json")))
+
+    def test_find_named(self):
+        sfile = os.path.join(self.stagedir, "bru.json")
+        rec = getrec()
+        self.cl.stage(rec, 'bru')
+        self.assertTrue(os.path.exists(sfile))
+        self.assertEqual(self.cl.staged_names(), ["bru"])
+
+        found = self.cl.find_named("bru")
+        self.assertTrue(isinstance(found, Mapping))
+        self.assertEqual(len(found), 1)
+        self.assertIn('staged', found)
+        self.assertEqual(found['staged'], sfile)
+
+        shutil.copy(sfile, os.path.join(self.successdir, "bru.json"))
+        found = self.cl.find_named("bru")
+        self.assertEqual(len(found), 2)
+        self.assertIn('staged', found)
+        self.assertIn('succeeded', found)
+        self.assertEqual(found['staged'], sfile)
+        self.assertEqual(found['succeeded'],
+                         os.path.join(self.successdir, "bru.json"))
+
+        shutil.copy(sfile, os.path.join(self.faildir, "bru.json"))
+        found = self.cl.find_named("bru")
+        self.assertEqual(len(found), 3)
+        self.assertIn('staged', found)
+        self.assertIn('failed', found)
+        self.assertIn('succeeded', found)
+        self.assertEqual(found['staged'], sfile)
+        self.assertEqual(found['failed'], os.path.join(self.faildir, "bru.json"))
+
 
 
 if __name__ == '__main__':

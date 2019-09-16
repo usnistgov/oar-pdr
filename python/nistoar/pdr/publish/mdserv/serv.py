@@ -162,8 +162,12 @@ class PrePubMetadataService(PublishSystem):
         metadata bag.
         """
         cfg = self.cfg.get('bagger', {})
+        if 'store_dir' not in cfg and 'store_dir' in self.cfg:
+            cfg['store_dir'] = self.cfg['store_dir']
         if 'repo_access' not in cfg and 'repo_access' in self.cfg:
             cfg['repo_access'] = self.cfg['repo_access']
+            if 'store_dir' not in cfg['repo_access'] and 'store_dir' in cfg:
+                cfg['repo_access']['store_dir'] = cfg['store_dir']
         if not os.path.exists(self.workdir):
             os.mkdir(workdir)
         elif not os.path.isdir(self.workdir):
