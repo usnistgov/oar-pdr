@@ -4,6 +4,7 @@ import { Router, NavigationStart, NavigationEnd, NavigationCancel, NavigationErr
 import './content/modal.less';
 import { AuthService } from './shared/auth-service/auth.service';
 import { GoogleAnalyticsService } from './shared/ga-service/google-analytics.service'
+import { AppConfig } from './config/config';
 
 @Component({
   selector: 'app-root',
@@ -15,10 +16,13 @@ export class AppComponent {
 
   constructor(
     private authService : AuthService,
-    private gaService: GoogleAnalyticsService
+    private gaService: GoogleAnalyticsService,
+    private cfg: AppConfig,
     ){}
 
   ngOnInit() {
+    let mdapi = this.cfg.get("locations.mdService", "/unconfigured");
+    console.log("mdapi:", mdapi);
     // for testing purpose, logout user everytime the app starts
     if(this.authService.loggedIn())
       this.authService.logoutUser(true);

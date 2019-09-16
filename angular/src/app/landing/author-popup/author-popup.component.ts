@@ -9,8 +9,9 @@ import { SearchService } from '../../shared/search-service/index';
   styleUrls: ['./author-popup.component.css']
 })
 export class AuthorPopupComponent implements OnInit {
-  @Input() tempAuthors: any;
-  @Output() returnAuthors: EventEmitter<any> = new EventEmitter();
+  @Input() inputValue: any;
+  @Input() title: string;
+  @Output() returnValue: EventEmitter<any> = new EventEmitter();
 
   isAuthorCollapsed: boolean = false;
   originalAuthors: any;
@@ -19,15 +20,19 @@ export class AuthorPopupComponent implements OnInit {
   // organizationList: string[] = [];
 
   constructor(
-    public activeModal: NgbActiveModal, 
+    public activeModal: NgbActiveModal,
     private commonVarService: CommonVarService,
-    private searchService: SearchService) { }
+    private searchService: SearchService) { 
+
+    }
 
   ngOnInit() {
-    if(this.tempAuthors != undefined)
-      this.originalAuthors = JSON.parse(JSON.stringify(this.tempAuthors));
+    console.log('inputValue:', this.inputValue);
+    console.log('title:', this.title);
+    if (this.inputValue != undefined)
+      this.originalAuthors = JSON.parse(JSON.stringify(this.inputValue));
     else
-      this.tempAuthors = {};
+      this.inputValue = {};
 
     this.getAffiliationList();
   }
@@ -36,17 +41,17 @@ export class AuthorPopupComponent implements OnInit {
   /*
   *   Get a list of current affiliation
   */
-  getAffiliationList(){
+  getAffiliationList() {
     this.searchService.getAllRecords().subscribe((result) => {
       for (var i = 0; i < result.ResultData.length; i++) {
-        if(result.ResultData[i].authors != undefined && result.ResultData[i].authors != null){
-          for(var j = 0; j < result.ResultData[i].authors.length; j++){
-            if(result.ResultData[i].authors[j].affiliation != undefined){
-              for(var k = 0; k < result.ResultData[i].authors[j].affiliation.length; k++){ 
-                if(result.ResultData[i].authors[j].affiliation[k].title != undefined){
+        if (result.ResultData[i].authors != undefined && result.ResultData[i].authors != null) {
+          for (var j = 0; j < result.ResultData[i].authors.length; j++) {
+            if (result.ResultData[i].authors[j].affiliation != undefined) {
+              for (var k = 0; k < result.ResultData[i].authors[j].affiliation.length; k++) {
+                if (result.ResultData[i].authors[j].affiliation[k].title != undefined) {
                   const existingAffiliation = this.affiliationList.filter(aff => aff.name === result.ResultData[i].authors[j].affiliation[k].title && aff.dept === "");
-                  if(existingAffiliation.length == 0){
-                    this.affiliationList.push({"name":result.ResultData[i].authors[j].affiliation[k].title,"dept":""})
+                  if (existingAffiliation.length == 0) {
+                    this.affiliationList.push({ "name": result.ResultData[i].authors[j].affiliation[k].title, "dept": "" })
                     // this.organizationList.push(result.ResultData[i].authors[j].affiliation[k].title);
                   }
                 }
@@ -58,7 +63,7 @@ export class AuthorPopupComponent implements OnInit {
       this.affiliationList.sort((a, b) => a.name.localeCompare(b.name));
       //Put "National Institute of Standards and Technology" on top of the list
       this.affiliationList = this.affiliationList.filter(entry => entry.name != "National Institute of Standards and Technology");
-      this.affiliationList.unshift({name:"National Institute of Standards and Technology",dept:""});
+      this.affiliationList.unshift({ name: "National Institute of Standards and Technology", dept: "" });
     }, (error) => {
       console.log("There was an error getting records list.");
       console.log(error);
@@ -81,7 +86,7 @@ export class AuthorPopupComponent implements OnInit {
   *   Save author info and close popup dialog
   */
   saveAuthorInfo() {
-    this.returnAuthors.emit(this.tempAuthors);
+    this.returnValue.emit(this.inputValue);
     this.activeModal.close('Close click')
   }
 
@@ -189,27 +194,32 @@ export class AuthorPopupComponent implements OnInit {
   */
   addAuthor() {
     var newAuthor = this.commonVarService.getBlankAuthor();
-    this.tempAuthors.authors.push(newAuthor);
+    this.inputValue.authors.push(newAuthor);
   }
 
   /*
   *   Discard current changes to the author, reset to original value
   */
   resetAuthor(author: any, i: number) {
-    this.tempAuthors.authors[i] = JSON.parse(JSON.stringify(this.originalAuthors.authors[this.tempAuthors.authors[i].originalIndex]));
-    author.dataChanged = false;
-    author.fnLocked = false;
-    author.isCollapsed = false;
+    if (i > this.originalAuthors.authors.length-1) {
+      this.deleteAuthor(author);
+    } else {
+      this.inputValue.authors[i] = JSON.parse(JSON.stringify(this.originalAuthors.authors[this.inputValue.authors[i].originalIndex]));
+      author.dataChanged = false;
+      author.fnLocked = false;
+      author.isCollapsed = false;
+    }
+
   }
 
   /*
   *   Move author up
   */
   moveAuthorUp(author: any, i: number) {
-    var tempAuth01 = JSON.parse(JSON.stringify(this.tempAuthors.authors[i - 1]));
-    var tempAuth02 = JSON.parse(JSON.stringify(this.tempAuthors.authors[i]));
-    this.tempAuthors.authors[i - 1] = JSON.parse(JSON.stringify(tempAuth02));
-    this.tempAuthors.authors[i] = JSON.parse(JSON.stringify(tempAuth01));
+    var tempAuth01 = JSON.parse(JSON.stringify(this.inputValue.authors[i - 1]));
+    var tempAuth02 = JSON.parse(JSON.stringify(this.inputValue.authors[i]));
+    this.inputValue.authors[i - 1] = JSON.parse(JSON.stringify(tempAuth02));
+    this.inputValue.authors[i] = JSON.parse(JSON.stringify(tempAuth01));
     author.dataChanged = true;
   }
 
@@ -217,10 +227,10 @@ export class AuthorPopupComponent implements OnInit {
   *   Move author down
   */
   moveAuthorDown(author: any, i: number) {
-    var tempAuth01 = JSON.parse(JSON.stringify(this.tempAuthors.authors[i + 1]));
-    var tempAuth02 = JSON.parse(JSON.stringify(this.tempAuthors.authors[i]));
-    this.tempAuthors.authors[i + 1] = JSON.parse(JSON.stringify(tempAuth02));
-    this.tempAuthors.authors[i] = JSON.parse(JSON.stringify(tempAuth01));
+    var tempAuth01 = JSON.parse(JSON.stringify(this.inputValue.authors[i + 1]));
+    var tempAuth02 = JSON.parse(JSON.stringify(this.inputValue.authors[i]));
+    this.inputValue.authors[i + 1] = JSON.parse(JSON.stringify(tempAuth02));
+    this.inputValue.authors[i] = JSON.parse(JSON.stringify(tempAuth01));
     author.dataChanged = true;
   }
 
@@ -228,7 +238,7 @@ export class AuthorPopupComponent implements OnInit {
   *   Remove author from the list
   */
   deleteAuthor(author: any) {
-    this.tempAuthors.authors = this.tempAuthors.authors.filter(obj => obj !== author);
+    this.inputValue.authors = this.inputValue.authors.filter(obj => obj !== author);
   }
 
   /*
@@ -236,8 +246,8 @@ export class AuthorPopupComponent implements OnInit {
   */
   handleAuthorDisplay() {
     this.isAuthorCollapsed = !this.isAuthorCollapsed;
-    for (var author in this.tempAuthors.authors) {
-      this.tempAuthors.authors[author].isCollapsed = this.isAuthorCollapsed;
+    for (var author in this.inputValue.authors) {
+      this.inputValue.authors[author].isCollapsed = this.isAuthorCollapsed;
     }
   }
 
@@ -253,32 +263,32 @@ export class AuthorPopupComponent implements OnInit {
         ""
       ]
     };
-    if (!this.tempAuthors.authors[i].affiliation)
-      this.tempAuthors.authors[i].affiliation = [];
+    if (!this.inputValue.authors[i].affiliation)
+      this.inputValue.authors[i].affiliation = [];
 
-    this.tempAuthors.authors[i].affiliation.push(aff);
-    this.tempAuthors.authors[i].dataChanged = true;
+    this.inputValue.authors[i].affiliation.push(aff);
+    this.inputValue.authors[i].dataChanged = true;
   }
 
   /*
   *   Remove one affiliation from an author
   */
   deleteAffiliation(i: number, aff: any) {
-    this.tempAuthors.authors[i].affiliation = this.tempAuthors.authors[i].affiliation.filter(obj => obj !== aff);
-    this.tempAuthors.authors[i].dataChanged = true;
+    this.inputValue.authors[i].affiliation = this.inputValue.authors[i].affiliation.filter(obj => obj !== aff);
+    this.inputValue.authors[i].dataChanged = true;
   }
 
   /*
   *   When affiliation name changed
   */
-  affiliationNameChanged(message: string, i:number) {
-    this.tempAuthors.authors[i].dataChanged = true;
+  affiliationNameChanged(message: string, i: number) {
+    this.inputValue.authors[i].dataChanged = true;
   }
 
   /*
   *   When affiliation department/division changed
   */
-  onDeptChange(author: any, dept: string){
+  onDeptChange(author: any, dept: string) {
     author.dataChanged = true;
   }
 }

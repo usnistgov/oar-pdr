@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpRequest, HttpResponse, HttpHandler, HttpEvent, HttpInterceptor, HTTP_INTERCEPTORS } from '@angular/common/http';
+import { HttpClient, HttpRequest, HttpResponse, HttpHandler, HttpEvent, HttpInterceptor, HTTP_INTERCEPTORS, HttpErrorResponse } from '@angular/common/http';
 import { Observable, of, throwError } from 'rxjs';
 import { delay, mergeMap, materialize, dematerialize } from 'rxjs/operators';
 import { TestDataService } from '../shared/testdata-service/testDataService';
@@ -46,25 +46,26 @@ export class FakeBackendInterceptor implements HttpInterceptor {
         return of(new HttpResponse({ status: 200, body }));
       }
 
-      if (request.url.indexOf('/customization/draft') > -1 && request.method === 'GET') {
-        console.log("Interceptor returning sample record...");
-        return of(new HttpResponse({ status: 200, body: sampleRecord }));
-      }
+      // if (request.url.indexOf('/customization/draft') > -1 && request.method === 'GET') {
+      //   console.log("Interceptor returning sample record...");
+      //   return of(new HttpResponse({ status: 200, body: sampleRecord }));
+      // }
 
-      if (request.url.indexOf('/customization/draft') > -1 && request.method === 'PATCH') {
-        console.log("Record updated...");
-        return of(new HttpResponse({ status: 200, body: undefined }));
-      }
+      // if (request.url.indexOf('/customization/draft') > -1 && request.method === 'PATCH') {
+      //   console.log("Record updated...");
+      //   return of(new HttpResponse({ status: 200, body: undefined }));
+      //   // return Observable.throw('Username or password is incorrect');
+      // }
 
-      if (request.url.indexOf('/customization/draft') > -1 && request.method === 'DELETE') {
-        console.log("Record deleted...");
-        return of(new HttpResponse({ status: 200, body: undefined }));
-      }
+      // if (request.url.indexOf('/customization/draft') > -1 && request.method === 'DELETE') {
+      //   console.log("Record deleted...");
+      //   return of(new HttpResponse({ status: 200, body: undefined }));
+      // }
 
-      if (request.url.indexOf('/customization/savedrec') > -1 && request.method === 'PUT') {
-        console.log("Record saved...");
-        return of(new HttpResponse({ status: 200, body: undefined }));
-      }
+      // if (request.url.indexOf('/customization/savedrec') > -1 && request.method === 'PUT') {
+      //   console.log("Record saved...");
+      //   return of(new HttpResponse({ status: 200, body: undefined }));
+      // }
 
       // get bundle
       // if (request.url.endsWith('/od/ds/_bundle') && request.method === 'POST') {

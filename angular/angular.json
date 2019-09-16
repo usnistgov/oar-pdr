@@ -32,9 +32,7 @@
               "node_modules/primeng/resources/themes/bootstrap/theme.css",
               "src/styles/font-awesome/css/font-awesome.min.css",
               "src/styles/main.css",
-              "src/app/content/modal.less",
-              "./node_modules/ngx-toastr/toastr.css",
-              "./node_modules/ngx-toastr/toastr-old.css"
+              "src/app/content/modal.less"
             ],
             "scripts": []
           },

@@ -20,6 +20,7 @@ import { ModalService } from '../shared/modal-service';
 import { AuthorPopupComponent } from './author-popup/author-popup.component';
 import { NgbModalOptions, NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ContactPopupComponent } from './contact-popup/contact-popup.component';
+import { SearchTopicsComponent } from '../landing/search-topics/search-topics.component';
 import { CustomizationServiceService } from '../shared/customization-service/customization-service.service';
 import { GoogleAnalyticsService } from '../shared/ga-service/google-analytics.service';
 import { HttpClient } from '@angular/common/http';
@@ -27,6 +28,7 @@ import { DescriptionPopupComponent } from './description/description-popup/descr
 import { ConfirmationDialogService } from '../shared/confirmation-dialog/confirmation-dialog.service';
 import { NotificationService } from '../shared/notification-service/notification.service';
 import { ApiToken } from "../shared/auth-service/ApiToken";
+import { TaxonomyListService } from '../shared/taxonomy-list';
 
 declare var _initAutoTracker: Function;
 
@@ -134,6 +136,7 @@ export class LandingComponent implements OnInit {
   // msgs: Message[] = [];
   exception: string;
   errorMsg: string;
+  displayError: boolean = false;
   status: string;
   searchValue: string;
   record: any = [];
@@ -168,7 +171,6 @@ export class LandingComponent implements OnInit {
   isLocalProcessing: boolean = false;
   isLoading: boolean = true;
   recordEditmode: boolean = false;
-  contactDetailEditmode: boolean = false;
   titleEditable: boolean = false;
   isAuthenticated: boolean = false;
   currentMode: string = 'initial';
@@ -176,6 +178,7 @@ export class LandingComponent implements OnInit {
   tempAuthors: any = {};
   // tempAddress: string;
   tempDecription: string;
+  tempInput: any = {};
   // isAuthorCollapsed: boolean = false;
   organizationList: string[] = ["National Institute of Standards and Technology"]
   HomePageLink: boolean = false;
@@ -185,6 +188,9 @@ export class LandingComponent implements OnInit {
   hasSavedData: boolean = false;
   saveDataLoaded: boolean = false;
   fieldObject: any = {};
+  taxonomyTree: TreeNode[] = [];
+  taxonomyList: any[];
+  editEnabled: any;
 
   /**
    * Creates an instance of the SearchPanel
@@ -208,7 +214,8 @@ export class LandingComponent implements OnInit {
     private customizationServiceService: CustomizationServiceService,
     private http: HttpClient,
     private confirmationDialogService: ConfirmationDialogService,
-    private notificationService: NotificationService) {
+    private notificationService: NotificationService,
+    private taxonomyListService: TaxonomyListService) {
     this.fieldObject['title'] = {};
     this.fieldObject['authors'] = {};
     this.fieldObject['contactPoint'] = {};
@@ -227,16 +234,11 @@ export class LandingComponent implements OnInit {
     this.tempAuthors['authors'] = newAuthor;
     this.searchValue = this.route.snapshot.paramMap.get('id');
 
-    this.authService.watchAuthenticateStatus().subscribe(value => {
-      if (value) {
-        if (this.ediid != undefined)
-          this.customizationServiceService.checkRecordEditStatus(this.ediid);
-      }
-    });
-
     this.customizationServiceService.watchRecordEdited().subscribe(value => {
       this.hasSavedData = value;
     });
+
+    this.editEnabled = cfg.get("editEnabled", "");
   }
 
   /*
@@ -250,7 +252,88 @@ export class LandingComponent implements OnInit {
    * Get the params OnInit
    */
   ngOnInit() {
+
+    this.taxonomyListService.get(0).subscribe((result) => {
+      if (result != null && result != undefined)
+        this.buildTaxonomyTree(result);
+
+      this.taxonomyList = [];
+      for (var i = 0; i < result.length; i++) {
+        this.taxonomyList.push({ "taxonomy": result[i].label });
+      }
+    }, (err) => {
+      console.log("There is an error getting taxonomy list.");
+      console.log(err);
+      this.errorMsg = err;
+      this.displayError = true;
+    });
+
     this.loadPubData();
+  }
+
+
+  /*
+  *   build taxonomy tree
+  */
+  buildTaxonomyTree(result: any) {
+    let allTaxonomy: any = result;
+    var tempTaxonomyTree = {}
+    if (result != null && result != undefined) {
+      tempTaxonomyTree["data"] = this.arrangeIntoTaxonomyTree(result);
+      this.taxonomyTree.push(tempTaxonomyTree);
+    }
+
+    this.taxonomyTree = <TreeNode[]>this.taxonomyTree[0].data;
+  }
+
+
+  private arrangeIntoTaxonomyTree(paths) {
+    const tree = [];
+    paths.forEach((path) => {
+      var fullpath: string;
+      if (path.parent != null && path.parent != undefined && path.parent != "")
+        fullpath = path.parent + ":" + path.label;
+      else
+        fullpath = path.label;
+
+      const pathParts = fullpath.split(':');
+      let currentLevel = tree; // initialize currentLevel to root
+
+      for (var j = 0; j < pathParts.length; j++) {
+        let tempId: string = '';
+        for (var k = 0; k < j + 1; k++) {
+          tempId = tempId + pathParts[k];
+          // tempId = tempId + pathParts[k].replace(/ /g, "");
+          if (k < j) {
+            tempId = tempId + ": ";
+          }
+        }
+
+        // check to see if the path already exists.
+        const existingPath = currentLevel.filter(level => level.data.treeId === tempId);
+        if (existingPath.length > 0) {
+          // The path to this item was already in the tree, so don't add it again.
+          // Set the current level to this path's children  
+          currentLevel = existingPath[0].children;
+        } else {
+          let newPart = null;
+          newPart = {
+            data: {
+              treeId: tempId,
+              name: pathParts[j],
+              // name: pathParts[j].replace(/ /g, ""),
+              researchTopic: tempId,
+              bkcolor: 'white'
+            }, children: [],
+            expanded: false
+          };
+          currentLevel.push(newPart);
+          currentLevel = newPart.children;
+          // }
+        }
+      };
+    });
+    return tree;
   }
 
   dataInit() {
@@ -261,38 +344,38 @@ export class LandingComponent implements OnInit {
       this.searchValue = this.router.url.split("/id/").pop();
 
     this.ediid = this.searchValue;
-    this.customizationServiceService.checkRecordEditStatus(this.ediid);
 
     this.commonVarService.setEdiid(this.searchValue);
     this.files = [];
   }
 
+  /*
+   *  Load pub data. 
+   *  It loads from mdAPI.
+   */
   loadPubData() {
     this.dataInit();
     this.getData()
       .subscribe((res) => {
         this.onSuccess(res).then(function (result) {
-          this.commonVarService.setContentReady(true);
-          this.isLoading = false;
           this.saveDataLoaded = false;
           // Make a copy of original pub data (for undo purpose)
           this.originalRecord = JSON.parse(JSON.stringify(this.record));
         }.bind(this), function (err) {
           alert("something went wrong while fetching the data.");
         });
-      }, (error) => {
+      }, (err) => {
         console.log("There is an error in searchservice.");
-        console.log(error);
-        this.errorMsg = error;
-        this.isLoading = false;
-        this.commonVarService.setContentReady(true);
+        console.log(err);
+        this.errorMsg = err;
+        this.displayError = true;
         // throw new ErrorComponent(this.route);
       });
   }
 
-  loadSavedData() {
+  loadDraftData() {
     this.dataInit();
-    return this.customizationServiceService.getSavedData(this.ediid)
+    return this.customizationServiceService.getDraftData(this.ediid)
       .subscribe((res) => {
         if (res != undefined && res != null) {
           this.onSuccess(res).then(function (result) {
@@ -306,12 +389,11 @@ export class LandingComponent implements OnInit {
         } else {
           this.loadPubData();
         }
-      }, (error) => {
-        console.log("There is an error in searchservice.");
-        console.log(error);
-        this.errorMsg = error;
-        this.isLoading = false;
-        this.commonVarService.setContentReady(true);
+      }, (err) => {
+        console.log("There is an error grtting saved data.");
+        console.log(err);
+        this.errorMsg = err;
+        this.displayError = true;
         // throw new ErrorComponent(this.route);
         this.loadPubData();
       });
@@ -837,7 +919,6 @@ export class LandingComponent implements OnInit {
   *  Set record level edit mode (for the edit button at top)
   */
   setRecordEditmode(mode: boolean) {
-    console.log("Setting record edit mode...");
     this.recordEditmode = mode;
     if (mode && !this.authService.loggedIn()) {
       this.authService.loginUser()
@@ -846,7 +927,7 @@ export class LandingComponent implements OnInit {
             this.authService.handleTokenSuccess(res as ApiToken);
             if (mode) {
               console.log("loading saved record...");
-              this.loadSavedData();
+              this.loadDraftData();
             } else {
               console.log("loading mdserver record...");
               this.loadPubData();
@@ -855,6 +936,8 @@ export class LandingComponent implements OnInit {
             this.commonVarService.setEditMode(mode);
           },
           err => {
+            this.errorMsg = err;
+            this.displayError = true;
             this.authService.handleTokenError(err);
           }
         )
@@ -867,49 +950,21 @@ export class LandingComponent implements OnInit {
    */
   checkDataChanges() {
     if (this.record != undefined && this.originalRecord != undefined) {
-      this.fieldObject.title.edited = (this.record.title != this.originalRecord.title);
-      this.fieldObject.authors.edited = (JSON.stringify(this.record.authors) != JSON.stringify(this.originalRecord.authors));
-      this.fieldObject.contactPoint.edited = (JSON.stringify(this.record.contactPoint) != JSON.stringify(this.originalRecord.contactPoint));
-      this.fieldObject.description.edited = (JSON.stringify(this.record.description) != JSON.stringify(this.originalRecord.description));
-      this.fieldObject.topic.edited = (JSON.stringify(this.record.topic) != JSON.stringify(this.originalRecord.topic));
-      this.fieldObject.keyword.edited = (JSON.stringify(this.record.keyword) != JSON.stringify(this.originalRecord.keyword));
+      this.fieldObject.title.edited = this.dataEdited('title');
+      this.fieldObject.authors.edited = this.dataEdited('authors');
+      this.fieldObject.contactPoint.edited = this.dataEdited('contactPoint');
+      this.fieldObject.description.edited = this.dataEdited('description');
+      this.fieldObject.topic.edited = this.dataEdited('topic');
+      this.fieldObject.keyword.edited = this.dataEdited('keyword');
     }
   }
 
-  /*
-  *  Set edit mode for title
-  *  We are re-using DescriptionPopupComponent because the functionality is the same
-  */
-
-  openTitleModal() {
-    let ngbModalOptions: NgbModalOptions = {
-      backdrop: 'static',
-      keyboard: false,
-      windowClass: "myCustomModalClass"
-    };
-
-    const modalRef = this.ngbModal.open(DescriptionPopupComponent, ngbModalOptions);
-    modalRef.componentInstance.tempDecription = this.record.title;
-    modalRef.componentInstance.title = 'Title';
-
-    modalRef.componentInstance.returnDescription.subscribe((newTitle) => {
-      if (newTitle) {
-        this.record.title = newTitle;
-
-        var postMessage: any = {};
-        postMessage["title"] = newTitle;
-        // console.log("postMessage", JSON.stringify(postMessage));
-
-        this.customizationServiceService.update(this.ediid, JSON.stringify(postMessage)).subscribe(
-          result => {
-            this.fieldObject.title["edited"] = (JSON.stringify(this.record.contactPoint) != JSON.stringify(this.originalRecord.contactPoint));
-            this.notificationService.showSuccessWithTimeout("Title updated", "", 3000);
-          },
-          err => {
-            console.log("Error when updating title:", err);
-          });
-      }
-    })
+  dataEdited(field: any) {
+    if ((this.record[field] == undefined || this.record[field] == "") && (this.originalRecord[field] == undefined || this.originalRecord[field] == "")) {
+      return false;
+    } else {
+      return JSON.stringify(this.record[field]) != JSON.stringify(this.originalRecord[field]);
+    }
   }
 
   /*
@@ -922,16 +977,12 @@ export class LandingComponent implements OnInit {
   }
 
   /*
-  *  Open contact pop up dialog
+  *   Open popup modal
   */
-  openContactModal(id: string) {
-    // let textArea = document.getElementById("address");
-    // textArea.style.height = (this.tempContactPoint.address.length * 30).toString() + 'px';;
-    if (this.record.contactPoint != null && this.record.contactPoint != undefined) {
-      this.tempContactPoint = JSON.parse(JSON.stringify(this.record.contactPoint));
-    } else {
-      this.tempContactPoint = this.commonVarService.getBlankContact();
-    }
+  openModal(fieldName: string) {
+    console.log("Opening modal...", fieldName);
+    let i: number;
+    let tempDecription: string = "";
 
     let ngbModalOptions: NgbModalOptions = {
       backdrop: 'static',
@@ -939,76 +990,99 @@ export class LandingComponent implements OnInit {
       windowClass: "myCustomModalClass"
     };
 
-    const modalRef = this.ngbModal.open(ContactPopupComponent, ngbModalOptions);
-    modalRef.componentInstance.inputContactPoint = this.tempContactPoint;
+    this.tempInput[fieldName] = this.commonVarService.getBlankField(fieldName);
 
-    modalRef.componentInstance.returnContactPoint.subscribe((contactPoint) => {
-      if (contactPoint) {
-        this.record.contactPoint = JSON.parse(JSON.stringify(contactPoint));
+    switch (fieldName) {
+      case "description":
+        // Description need special handling
+        tempDecription = this.record['description'][0];
+        for (i = 1; i < this.record['description'].length; i++) {
+          tempDecription = tempDecription + '\r\n\r\n' + this.record['description'][i];
+        }
+        this.tempInput[fieldName] = tempDecription;
+        break;
+      case "authors":
+        for (var author in this.tempInput.authors) {
+          this.tempInput.authors[author].isCollapsed = false;
+          this.tempInput.authors[author].fnLocked = false;
+          this.tempInput.authors[author].originalIndex = author;
+          this.tempInput.authors[author].dataChanged = false;
+        }
+        break;
+      case "keyword":
+        if (this.customizationServiceService.checkKeywords(this.record)) {
+          tempDecription = this.record['keyword'][0];
+          for (i = 1; i < this.record['keyword'].length; i++) {
+            tempDecription = tempDecription + ',' + this.record['keyword'][i];
+          }
+        }
+        this.tempInput[fieldName] = tempDecription;
+        break;
+      case "topic":
+        var tempTopics = [];
+        if (this.record['topic'] != null && this.record['topic'].length > 0) {
+          for (i = 0; i < this.record['topic'].length; i++) {
+            tempTopics.push(this.record['topic'][i].tag);
+          }
+        }
+        this.tempInput[fieldName] = tempTopics;
+        break;
+      default:
+        if (this.record[fieldName] != undefined && this.record[fieldName] != "") {
+          this.tempInput[fieldName] = JSON.parse(JSON.stringify(this.record[fieldName]));
+        } else {
+          this.tempInput[fieldName] = [];
+          this.tempInput[fieldName].push(this.commonVarService.getBlankField(fieldName));
+        }
+    }
+    console.log("this.tempInput", this.tempInput);
+
+    const modalRef = this.ngbModal.open(
+      (fieldName == 'authors' ? AuthorPopupComponent : (fieldName == 'title' ? DescriptionPopupComponent : (fieldName == 'contactPoint' ? ContactPopupComponent : (fieldName == 'topic' ? SearchTopicsComponent : DescriptionPopupComponent)))),
+      ngbModalOptions
+    );
+
+    modalRef.componentInstance.inputValue = this.tempInput;
+    modalRef.componentInstance['title'] = fieldName;
+    if (fieldName == 'topic')
+      modalRef.componentInstance.taxonomyTree = this.taxonomyTree;
+
+    modalRef.componentInstance.returnValue.subscribe((returnValue) => {
+      if (returnValue) {
+        switch (fieldName) {
+          case "description":
+            var tempDescs = returnValue[fieldName].split(/\n\s*\n/).filter(desc => desc != '');
+            console.log('tempDescs', tempDescs);
+            returnValue[fieldName] = JSON.parse(JSON.stringify(tempDescs));
+            break;
+          case "keyword":
+            var tempDescs = returnValue[fieldName].split(',').filter(keyword => keyword != '');
+            returnValue[fieldName] = JSON.parse(JSON.stringify(tempDescs));
+            break;
+          case "topic":
+            var strtempTopics: string = '';
+            var tempTopicsForUpdate: any = [];
+            var lTempTopics: any[] = [];
+
+            for (var i = 0; i < returnValue["topic"].length; ++i) {
+              strtempTopics = strtempTopics + returnValue["topic"][i];
+              lTempTopics.push({ '@type': 'Concept', 'scheme': 'https://www.nist.gov/od/dm/nist-themes/v1.0', 'tag': returnValue["topic"][i] });
+            }
+            returnValue["topic"] = JSON.parse(JSON.stringify(lTempTopics));
+            break;
+        }
 
         var postMessage: any = {};
-        postMessage["contactpoint"] = contactPoint;
+        postMessage[fieldName] = returnValue[fieldName];
         console.log("postMessage", JSON.stringify(postMessage));
 
         this.customizationServiceService.update(this.ediid, JSON.stringify(postMessage)).subscribe(
           result => {
-            this.fieldObject.contactPoint["edited"] = (JSON.stringify(this.record.contactPoint) != JSON.stringify(this.originalRecord.contactPoint));
-            this.notificationService.showSuccessWithTimeout("Contact updated", "", 3000);
-            console.log("this.fieldObject", this.fieldObject);
+            this.record[fieldName] = JSON.parse(JSON.stringify(returnValue[fieldName]));
+            this.onUpdateSuccess(fieldName);
           },
           err => {
-            console.log("Error when updating contactpoint:", err);
-          });
-      }
-    })
-  }
-
-  /*
-  *   Open Topic popup modal
-  */
-  openAuthorModal() {
-    if (this.record.authors != null && this.record.authors != undefined) {
-      this.tempAuthors.authors = JSON.parse(JSON.stringify(this.record.authors));
-    } else {
-      this.tempAuthors["authors"] = [];
-      this.tempAuthors["authors"].push(this.commonVarService.getBlankAuthor());
-    }
-
-    // this.tempAuthors.authors = this.record.authors;
-    for (var author in this.tempAuthors.authors) {
-      this.tempAuthors.authors[author].isCollapsed = false;
-      this.tempAuthors.authors[author].fnLocked = false;
-      this.tempAuthors.authors[author].originalIndex = author;
-    }
-
-    let ngbModalOptions: NgbModalOptions = {
-      backdrop: 'static',
-      keyboard: false,
-      windowClass: "myCustomModalClass"
-    };
-
-    const modalRef = this.ngbModal.open(AuthorPopupComponent, ngbModalOptions);
-    modalRef.componentInstance.tempAuthors = this.tempAuthors;
-
-    modalRef.componentInstance.returnAuthors.subscribe((authors) => {
-      if (authors) {
-        this.record.authors = authors.authors;
-        for (var author in this.record.authors)
-          this.record.authors[author].dataChanged = false;
-
-        var postMessage: any = {};
-        postMessage["authors"] = authors.authors;
-        console.log("postMessage", JSON.stringify(postMessage));
-
-        this.customizationServiceService.update(this.ediid, JSON.stringify(postMessage)).subscribe(
-          result => {
-            console.log("Authors updated");
-            this.fieldObject.authors["edited"] = (JSON.stringify(this.record.authors) != JSON.stringify(this.originalRecord.authors));
-            this.notificationService.showSuccessWithTimeout("Authors updated", "", 3000);
-            console.log("this.fieldObject", this.fieldObject);
-          },
-          err => {
-            console.log("Error when updating authors:", err);
+            this.onUpdateError(fieldName, err);
           });
       }
     })
@@ -1037,7 +1111,7 @@ export class LandingComponent implements OnInit {
   }
 
   visitHomePage(url: string, event, title) {
-    this.gaService.gaTrackEvent('datasource', event, title, url);
+    this.gaService.gaTrackEvent('homepage', event, title, url);
     window.open(url, '_blank');
   }
 
@@ -1049,10 +1123,16 @@ export class LandingComponent implements OnInit {
     // Send save request to back end
     this.customizationServiceService.saveRecord(this.ediid, "").subscribe(
       (res) => {
+        this.errorMsg = '';
+        this.displayError = false;
+        this.notificationService.showSuccessWithTimeout("Record saved.", "", 3000);
         console.log("Record saved");
       },
       (err) => {
-        console.log("Save record error:", err);
+        this.errorMsg = err;
+        this.displayError = true;
+        this.notificationService.showError(err, "Save error");
+        console.log("Error occured while saving record:", err);
       }
     );
     this.setRecordEditmode(false);
@@ -1073,10 +1153,11 @@ export class LandingComponent implements OnInit {
               this.setRecordEditmode(false);
               window.open('/od/id/' + this.searchValue, '_self');
             },
-            (error) => {
-              console.log("There is an error in customizationServiceService.delete.");
-              console.log(error);
-              this.errorMsg = error;
+            (err) => {
+              this.errorMsg = err;
+              this.displayError = true;
+              this.notificationService.showError(err, "Save error");
+              console.log("There is an error in customizationServiceService.delete:", err);
             }
           );
         }
@@ -1091,7 +1172,7 @@ export class LandingComponent implements OnInit {
 
   getFieldStyle(field: string) {
     if (this.recordEditmode) {
-      if (JSON.stringify(this.record[field]) != JSON.stringify(this.originalRecord[field])) {
+      if (this.fieldObject[field].edited) {
         return { 'border': '1px solid lightgrey', 'background-color': '#FCF9CD' };
       } else {
         return { 'border': '1px solid lightgrey', 'background-color': 'white' };
@@ -1105,12 +1186,10 @@ export class LandingComponent implements OnInit {
    *  Undo editing. If no more field was edited, delete the record in staging area.
    */
   undoEditing(field: string) {
-    if (this.originalRecord[field] == undefined)
-      delete this.record[field];
-    else
-      this.record[field] = JSON.parse(JSON.stringify(this.originalRecord[field]));
-
     var noMoreEdited = true;
+    var success = true;
+    var errMsg: any;
+    console.log("this.fieldObject", this.fieldObject);
     for (var fld in this.fieldObject) {
       if (field != fld && this.fieldObject[fld].edited) {
         noMoreEdited = false;
@@ -1121,27 +1200,63 @@ export class LandingComponent implements OnInit {
     if (noMoreEdited) {
       this.customizationServiceService.delete(this.ediid).subscribe(
         (res) => {
-          this.fieldObject[field].edited = false;
-          this.notificationService.showSuccessWithTimeout(field + ": edit cancelled. No more edited field.", "", 3000);
+          if (this.originalRecord[field] == undefined)
+            delete this.record[field];
+          else
+            this.record[field] = JSON.parse(JSON.stringify(this.originalRecord[field]));
+
+          this.onUpdateSuccess(field);
         },
-        (error) => {
-          console.log("There is an error in customizationServiceService.delete.");
-          console.log(error);
-          this.errorMsg = error;
+        (err) => {
+          this.onUpdateError(field, errMsg);
         }
       );
     } else {
-      this.customizationServiceService.update(this.ediid, JSON.stringify(this.record[field])).subscribe(
+      var body: string;
+      if (this.originalRecord[field] == undefined) {
+        body = '{"' + field + '":""}';
+      } else {
+        body = '{"' + field + '":' + JSON.stringify(this.originalRecord[field]) + '}';
+      }
+
+      this.customizationServiceService.update(this.ediid, body).subscribe(
         result => {
-          this.fieldObject[field].edited = false;
-          this.notificationService.showSuccessWithTimeout(field + ": edit cancelled.", "", 3000);
-          console.log("this.fieldObject", this.fieldObject);
+          if (this.originalRecord[field] == undefined)
+            delete this.record[field];
+          else
+            this.record[field] = JSON.parse(JSON.stringify(this.originalRecord[field]));
+
+          this.onUpdateSuccess(field);
         },
         err => {
-          this.notificationService.showSuccessWithTimeout("Error when updating database: " + err, "", 3000);
-          console.log("Error when updating authors:", err);
+          this.onUpdateError(field, errMsg);
         });
     }
+  }
+
+  /*
+   * When update successful
+   */
+  onUpdateSuccess(field: string) {
+    this.fieldObject[field]["edited"] = (JSON.stringify(this.record[field]) != JSON.stringify(this.originalRecord[field]));
+    this.errorMsg = '';
+    this.displayError = false;
+    this.notificationService.showSuccessWithTimeout(field + " updated.", "", 3000);
+  }
+
+  /*
+   * When update failed
+   */
+  onUpdateError(field: string, err: any) {
+    this.errorMsg = err;
+    this.displayError = true;
+    this.notificationService.showError(err, "Update error");
+    console.log("Error when updating " + field + ":", err);
+  }
+
+  changeErrorMsg(errorMessage: any) {
+    this.displayError = errorMessage.displayError;
+    this.errorMsg = errorMessage.errorMsg;
   }
 }
 

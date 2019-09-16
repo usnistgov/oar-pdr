@@ -6,25 +6,33 @@ import { ToastrService } from 'ngx-toastr';
 })
 export class NotificationService {
 
-  constructor(private toastr: ToastrService) { }
+  constructor(private toastr: ToastrService) { 
+
+  }
 
   showSuccess(message, title){
   	this.toastr.success(message, title, {
-      positionClass: 'toast-bottom-left' 
+      positionClass: 'toast-top-right' 
    })
   }
 
   showSuccessWithTimeout(message, title, timespan){
     this.toastr.info(message, title ,{
       timeOut : timespan,
-      positionClass: 'toast-bottom-left'
+      positionClass: 'toast-top-right'
     })
   }
 
   showHTMLMessage(message, title){
     this.toastr.success(message, title, {
       enableHtml : true,
-      positionClass: 'toast-bottom-left'
+      positionClass: 'toast-top-right'
     })
+  }
+
+  showError(message, title){
+  	this.toastr.error(message, title, {
+      positionClass: 'toast-top-right' 
+   })
   }
 }

@@ -73,7 +73,6 @@ import { NotificationService } from './shared/notification-service/notification.
 // used to create fake backend
 import { fakeBackendProvider } from './_helpers/fakeBackendInterceptor';
 
-
 @NgModule({
   declarations: [
     AppComponent,
@@ -89,7 +88,6 @@ import { fakeBackendProvider } from './_helpers/fakeBackendInterceptor';
       ConfigModule,        // provider for AppConfig
       FrameModule,
       AppRoutingModule,
-
       FragmentPolyfillModule.forRoot({
           smooth: true
       }),

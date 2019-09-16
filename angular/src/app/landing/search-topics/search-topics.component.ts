@@ -10,10 +10,10 @@ import { AppConfig } from '../../config/config';
   styleUrls: ['./search-topics.component.css']
 })
 export class SearchTopicsComponent implements OnInit {
-  @Input() tempTopics: string[];
+  @Input() inputValue: any;
+  @Input() title: any;
   @Input() taxonomyTree: TreeNode[];
-  @Input() recordEditmode: boolean;
-  @Output() passEntry: EventEmitter<any> = new EventEmitter();
+  @Output() returnValue: EventEmitter<any> = new EventEmitter();
 
   isVisible: boolean = true;
   scrollTop: number = 0;
@@ -26,6 +26,7 @@ export class SearchTopicsComponent implements OnInit {
     public activeModal: NgbActiveModal) { }
 
   ngOnInit() {
+    console.log('taxonomyTree', this.taxonomyTree);
     this.setTreeVisible(true);
   }
 
@@ -33,7 +34,7 @@ export class SearchTopicsComponent implements OnInit {
   *   Save contact info when click on save button in pop up dialog
   */
   saveTopic() {
-    this.passEntry.emit(this.tempTopics);
+    this.returnValue.emit(this.inputValue);
     this.activeModal.close('Close click');
   }
 
@@ -42,8 +43,8 @@ export class SearchTopicsComponent implements OnInit {
    */
   deleteTopic(index: number) {
     this.setTreeVisible(true);
-    this.searchAndExpandTaxonomyTree(this.tempTopics[index], false);
-    this.tempTopics = this.tempTopics.filter(topic => topic != this.tempTopics[index]);
+    this.searchAndExpandTaxonomyTree(this.inputValue[this.title][index], false);
+    this.inputValue[this.title] = this.inputValue[this.title].filter(topic => topic != this.inputValue[this.title][index]);
     this.refreshTopicTree();
   }
 
@@ -51,9 +52,9 @@ export class SearchTopicsComponent implements OnInit {
    * Update the topic list
    */
   updateTopics(rowNode: any) {
-    const existingTopic = this.tempTopics.filter(topic => topic == rowNode.node.data.researchTopic);
+    const existingTopic = this.inputValue[this.title].filter(topic => topic == rowNode.node.data.researchTopic);
     if (existingTopic == undefined || existingTopic == null || existingTopic.length == 0)
-      this.tempTopics.push(rowNode.node.data.researchTopic);
+      this.inputValue[this.title].push(rowNode.node.data.researchTopic);
   }
 
   /*
@@ -61,7 +62,7 @@ export class SearchTopicsComponent implements OnInit {
   */
   getTopicColor(rowNode: any) {
     // console.log("this.tempTopics", this.tempTopics);
-    const existingTopic = this.tempTopics.filter(topic => topic == rowNode.node.data.researchTopic);
+    const existingTopic = this.inputValue[this.title].filter(topic => topic == rowNode.node.data.researchTopic);
     if (existingTopic == undefined || existingTopic == null || existingTopic.length <= 0) {
       return '#1E6BA1';
     } else {
@@ -73,7 +74,7 @@ export class SearchTopicsComponent implements OnInit {
   *   Set cursor type
   */
   getTopicCursor(rowNode: any) {
-    const existingTopic = this.tempTopics.filter(topic0 => topic0 == rowNode.node.data.researchTopic);
+    const existingTopic = this.inputValue[this.title].filter(topic0 => topic0 == rowNode.node.data.researchTopic);
     if (existingTopic == undefined || existingTopic == null || existingTopic.length <= 0)
       return 'pointer';
     else

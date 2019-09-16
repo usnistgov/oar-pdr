@@ -1,4 +1,4 @@
-import { Component, Input, ChangeDetectorRef, NgZone } from '@angular/core';
+import { Component, Input, Output, ChangeDetectorRef, NgZone, EventEmitter } from '@angular/core';
 import { TreeNode } from 'primeng/api';
 import { CartService } from '../../datacart/cart.service';
 import { Data } from '../../datacart/data';
@@ -13,7 +13,6 @@ import { AppConfig } from '../../config/config';
 import { FileSaverService } from 'ngx-filesaver';
 import { Router } from '@angular/router';
 import { CommonFunctionService } from '../../shared/common-function/common-function.service';
-import { TaxonomyListService } from '../../shared/taxonomy-list';
 import { NgbModalOptions, NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { SearchTopicsComponent } from '../../landing/search-topics/search-topics.component';
 import { DescriptionPopupComponent } from './description-popup/description-popup.component';
@@ -43,6 +42,9 @@ export class DescriptionComponent {
   @Input() recordEditmode: boolean;
   @Input() inBrowser: boolean;   // false if running server-side
   @Input() fieldObject: any;
+  @Output() errorMsgChanged: any = new EventEmitter();
+  @Output() undo: any = new EventEmitter();
+  @Output() openModal: any = new EventEmitter();
 
   addAllFileSpinner: boolean = false;
   fileDetails: string = '';
@@ -90,9 +92,6 @@ export class DescriptionComponent {
   tempTopics: string[] = [];
   keywordObj: any;
   defaultText: string = "Enter description here...";
-  taxonomyList: any[];
-  errorMsg: any;
-  taxonomyTree: TreeNode[] = [];
   selectedData: TreeNode[] = [];
   isVisible: boolean = true;
   updateUrl: string;
@@ -112,7 +111,6 @@ export class DescriptionComponent {
     private _FileSaverService: FileSaverService,
     private confirmationService: ConfirmationService,
     private commonFunctionService: CommonFunctionService,
-    private taxonomyListService: TaxonomyListService,
     private ngbModal: NgbModal,
     private gaService: GoogleAnalyticsService,
     public router: Router,
@@ -171,20 +169,6 @@ export class DescriptionComponent {
     this.ediid = this.commonVarService.getEdiid();
     this.updateUrl = this.cfg.get("distService", "/rmm/") + "update/" + this.ediid;
 
-    this.taxonomyListService.get(0).subscribe((result) => {
-      if (result != null && result != undefined)
-        this.buildTaxonomyTree(result);
-
-      this.taxonomyList = [];
-      for (var i = 0; i < result.length; i++) {
-        this.taxonomyList.push({ "taxonomy": result[i].label });
-      }
-    }, (error) => {
-      console.log("There is an error getting taxonomy list.");
-      console.log(error);
-      this.errorMsg = error;
-    });
-
     this.downloadService.watchDownloadProcessStatus("landingPage").subscribe(
       value => {
         this.allProcessed = value;
@@ -239,69 +223,6 @@ export class DescriptionComponent {
     this.totalFiles = 0;
     this.getTotalFiles(this.files);
 
-  }
-
-  /*
-  *   build taxonomy tree
-  */
-  buildTaxonomyTree(result: any) {
-    let allTaxonomy: any = result;
-    var tempTaxonomyTree = {}
-    if (result != null && result != undefined) {
-      tempTaxonomyTree["data"] = this.arrangeIntoTree(result);
-      this.taxonomyTree.push(tempTaxonomyTree);
-    }
-
-    this.taxonomyTree = <TreeNode[]>this.taxonomyTree[0].data;
-  }
-
-  private arrangeIntoTree(paths) {
-    const tree = [];
-    paths.forEach((path) => {
-      var fullpath: string;
-      if (path.parent != null && path.parent != undefined && path.parent != "")
-        fullpath = path.parent + ":" + path.label;
-      else
-        fullpath = path.label;
-
-      const pathParts = fullpath.split(':');
-      let currentLevel = tree; // initialize currentLevel to root
-
-      for (var j = 0; j < pathParts.length; j++) {
-        let tempId: string = '';
-        for (var k = 0; k < j + 1; k++) {
-          tempId = tempId + pathParts[k];
-          // tempId = tempId + pathParts[k].replace(/ /g, "");
-          if (k < j) {
-            tempId = tempId + ": ";
-          }
-        }
-
-        // check to see if the path already exists.
-        const existingPath = currentLevel.filter(level => level.data.treeId === tempId);
-        if (existingPath.length > 0) {
-          // The path to this item was already in the tree, so don't add it again.
-          // Set the current level to this path's children  
-          currentLevel = existingPath[0].children;
-        } else {
-          let newPart = null;
-          newPart = {
-            data: {
-              treeId: tempId,
-              name: pathParts[j],
-              // name: pathParts[j].replace(/ /g, ""),
-              researchTopic: tempId,
-              bkcolor: 'white'
-            }, children: [],
-            expanded: false
-          };
-          currentLevel.push(newPart);
-          currentLevel = newPart.children;
-          // }
-        }
-      };
-    });
-    return tree;
   }
 
   /*
@@ -425,21 +346,6 @@ export class DescriptionComponent {
       }
       if (this.isDocumentedBy || this.isReferencedBy)
         return true;
-    }
-  }
-
-  /**
-   * Function to Check whether record has keyword
-   */
-  checkKeywords() {
-    if (Array.isArray(this.record['keyword'])) {
-      if (this.record['keyword'].length > 0)
-        return true;
-      else
-        return false;
-    }
-    else {
-      return false;
     }
   }
 
@@ -793,6 +699,7 @@ export class DescriptionComponent {
   * Function to set status when a file was downloaded
   **/
   setFileDownloaded(rowData: any) {
+    console.log("setFileDownloaded");
     // Google Analytics code to track download event
     this.gaService.gaTrackEvent('download', undefined, 'Resource title: ' + this.record['title'], rowData.downloadUrl);
 
@@ -802,25 +709,8 @@ export class DescriptionComponent {
     if (rowData.isIncart) {
       this.downloadService.setFileDownloadedFlag(true);
     }
-
-
   }
 
-  /**
-  * Function to cancel current download.
-  **/
-  // cancelDownload(rowData: any) {
-  //   if (!rowData.isLeaf) {
-  //     this.cancelDownloadAll();
-  //     rowData.downloadProgress = 0;
-  //     rowData.downloadStatus = null;
-  //   } else {
-  //     rowData.downloadInstance.unsubscribe();
-  //     rowData.downloadInstance = null;
-  //     rowData.downloadProgress = 0;
-  //     rowData.downloadStatus = null;
-  //   }
-  // }
 
   /**
   * Function to download all files based on download url.
@@ -890,44 +780,6 @@ export class DescriptionComponent {
   }
 
   /**
-  * Cancel download certain zip file
-  **/
-  // cancelDownloadZip(zip: any) {
-  //   zip.downloadInstance.unsubscribe();
-  //   zip.downloadInstance = null;
-  //   zip.downloadProgress = 0;
-  //   zip.downloadStatus = "cancelled";
-  // }
-
-  /**
-  * Cancel download all
-  **/
-  // cancelDownloadAll() {
-  //   for (let zip of this.zipData) {
-  //     if (zip.downloadInstance != null) {
-  //       zip.downloadInstance.unsubscribe();
-  //     }
-  //     zip.downloadInstance = null;
-  //     zip.downloadProgress = 0;
-  //     zip.downloadStatus = null;
-  //   }
-
-  //   for (let sub of this.subscriptions) {
-  //     sub.unsubscribe();
-  //   }
-
-  //   this.downloadService.setDownloadingNumber(0, "landingPage");
-  //   this.zipData = [];
-  //   this.downloadStatus = null;
-  //   this.cancelAllDownload = true;
-  //   this.displayDownloadFiles = false;
-  //   this.downloadService.resetZipName(this.treeRoot[0]);
-  //   this.bundlePlanMessage = null;
-  //   this.bundlePlanStatus = null;
-  //   this.bundlePlanUnhandledFiles = null;
-  // }
-
-  /**
   * Function to set the download status of all files to downloaded.
   **/
   setAllDownloaded(files: any) {
@@ -950,19 +802,6 @@ export class DescriptionComponent {
     this.cartService.updateCartItemDownloadStatus(rowData.cartId, null);
     this.allDownloaded = false;
   }
-
-  /**
-  * Return color based on different bundlePlan response status
-  **/
-  // getColor() {
-  //   if (this.bundlePlanStatus == 'warnings') {
-  //     return "darkorange";
-  //   } else if (this.bundlePlanStatus == 'error') {
-  //     return "red";
-  //   } else {
-  //     return "black";
-  //   }
-  // }
 
   /**
   * Return "download all" button color based on download status
@@ -1075,192 +914,28 @@ export class DescriptionComponent {
   *   Open Description popup modal
   */
   openDescriptionModal() {
-    let i: number;
-    let tempDecription: string;
-
-    if (this.record['description'] != null && this.record['description'] != undefined) {
-      tempDecription = this.record['description'][0];
-      for (i = 1; i < this.record['description'].length; i++) {
-        tempDecription = tempDecription + '\r\n\r\n' + this.record['description'][i];
-      }
-    }
-
-    let ngbModalOptions: NgbModalOptions = {
-      backdrop: 'static',
-      keyboard: false,
-      windowClass: "myCustomModalClass"
-    };
-
-    const modalRef = this.ngbModal.open(DescriptionPopupComponent, ngbModalOptions);
-    modalRef.componentInstance.tempDecription = tempDecription;
-    modalRef.componentInstance.title = 'Description';
-
-    modalRef.componentInstance.returnDescription.subscribe((returnValue) => {
-      if (returnValue != undefined && returnValue != null) {
-        var tempDescs = returnValue.split(/\n\s*\n/).filter(desc => desc != '');
-        if(returnValue == ''){
-          delete this.record['description'];
-        }else{ 
-          this.record['description'] = JSON.parse(JSON.stringify(tempDescs));
-        }
-
-        var postMessage: any = {};
-        postMessage["description"] = tempDescs;
-        console.log("postMessage", JSON.stringify(postMessage));
-
-        this.customizationServiceService.update(this.ediid, JSON.stringify(postMessage)).subscribe(
-          result => {
-            this.fieldObject.description["edited"] = (JSON.stringify(this.record['description']) != JSON.stringify(this.originalRecord['description']));
-            this.notificationService.showSuccessWithTimeout("Description updated", "", 3000);
-            console.log("datachanged", this.dataChanged('description'));
-          },
-          err => {
-            console.log("Error when updating description:", err);
-          });
-      }
-    })
+    this.openModal.emit('description');
   }
 
   /*
 *   Open Keyword popup modal - re-use description popup modal
 */
   openKeywordModal() {
-    let i: number;
-    let tempDecription: string = "";
-
-    if (this.checkKeywords()) {
-      tempDecription = this.record['keyword'][0];
-      for (i = 1; i < this.record['keyword'].length; i++) {
-        tempDecription = tempDecription + ',' + this.record['keyword'][i];
-      }
-    }
-    console.log('tempDecription', tempDecription);
-
-    let ngbModalOptions: NgbModalOptions = {
-      backdrop: 'static',
-      keyboard: false,
-      windowClass: "myCustomModalClass"
-    };
-
-    const modalRef = this.ngbModal.open(DescriptionPopupComponent, ngbModalOptions);
-    modalRef.componentInstance.tempDecription = tempDecription;
-    modalRef.componentInstance.title = 'Subject Keywords';
-
-    modalRef.componentInstance.returnDescription.subscribe((returnValue) => {
-      if (returnValue) {
-        let keywords: string[];
-        keywords = returnValue.split(',').filter(keyword => keyword != '');
-        this.record['keyword'] = keywords;
-
-        var postMessage: any = {};
-        postMessage["keyword"] = keywords;
-        console.log("postMessage", JSON.stringify(postMessage));
-
-        this.customizationServiceService.update(this.ediid, JSON.stringify(postMessage)).subscribe(
-          result => {
-            this.fieldObject.keyword["edited"] = (JSON.stringify(this.record['keyword']) != JSON.stringify(this.originalRecord['keyword']));
-            this.notificationService.showSuccessWithTimeout("Keyword updated", "", 3000);
-            console.log("this.editingStatus", this.editingStatus);
-          },
-          err => {
-            console.log("Error when updating keywords:", err);
-          });
-      }
-    });
+    this.openModal.emit('keyword');
   }
 
   /*
   *   Open Topic popup modal
   */
   openTopicModal() {
-    this.tempTopics = [];
-    if (this.record['topic'] != null && this.record['topic'].length > 0) {
-      for (var i = 0; i < this.record['topic'].length; i++) {
-        this.tempTopics.push(this.record['topic'][i].tag);
-      }
-    }
-
-    let ngbModalOptions: NgbModalOptions = {
-      backdrop: 'static',
-      keyboard: false,
-      windowClass: "myCustomModalClass"
-    };
-
-    const modalRef = this.ngbModal.open(SearchTopicsComponent, ngbModalOptions);
-    modalRef.componentInstance.tempTopics = this.tempTopics;
-    modalRef.componentInstance.recordEditmode = this.recordEditmode;
-    modalRef.componentInstance.taxonomyTree = this.taxonomyTree;
-    modalRef.componentInstance.passEntry.subscribe((topics) => {
-      if (topics) {
-        var strtempTopics: string = '';
-        var tempTopicsForUpdate: any = [];
-        var lTempTopics: any[] = [];
-
-        for (var i = 0; i < topics.length; ++i) {
-          strtempTopics = strtempTopics + topics[i];
-          lTempTopics.push({ '@type': 'Concept', 'scheme': 'https://www.nist.gov/od/dm/nist-themes/v1.0', 'tag': topics[i] });
-          tempTopicsForUpdate.push({ 'tag': topics[i] });
-        }
-        this.record['topic'] = JSON.parse(JSON.stringify(lTempTopics));
-
-        var postMessage: any = {};
-        postMessage["topic"] = tempTopicsForUpdate;
-        console.log("postMessage", JSON.stringify(postMessage));
-
-        this.customizationServiceService.update(this.ediid, JSON.stringify(postMessage)).subscribe(
-          result => {
-            this.fieldObject.topic["edited"] = (JSON.stringify(this.record['topic']) != JSON.stringify(this.originalRecord['topic']));
-            this.notificationService.showSuccessWithTimeout("Topic updated", "", 3000);
-            console.log("this.editingStatus", this.editingStatus);
-          },
-          err => {
-            console.log("Error when updating topic:", err);
-          });
-      }
-    })
+    this.openModal.emit('topic');
   }
 
-  /*
-   *  Undo editing
-   */
+  // /*
+  //  *  Undo editing
+  //  */
   undoEditing(field: string) {
-    if (this.originalRecord[field] == undefined)
-      delete this.record[field];
-    else
-      this.record[field] = JSON.parse(JSON.stringify(this.originalRecord[field]));
-
-    var noMoreEdited = true;
-    for (var fld in this.fieldObject) {
-      if (field != fld && this.fieldObject[fld].edited) {
-        noMoreEdited = false;
-        break;
-      }
-    }
-
-    if (noMoreEdited) {
-      this.customizationServiceService.delete(this.ediid).subscribe(
-        (res) => {
-          this.fieldObject[field].edited = false;
-          this.notificationService.showSuccessWithTimeout(field + ": edit cancelled. No more edited field.", "", 3000);
-        },
-        (error) => {
-          console.log("There is an error in customizationServiceService.delete.");
-          console.log(error);
-          this.errorMsg = error;
-        }
-      );
-    } else {
-      this.customizationServiceService.update(this.ediid, JSON.stringify(this.record[field])).subscribe(
-        result => {
-          this.fieldObject[field].edited = false;
-          this.notificationService.showSuccessWithTimeout(field + ": edit cancelled.", "", 3000);
-          console.log("this.fieldObject", this.fieldObject);
-        },
-        err => {
-          this.notificationService.showSuccessWithTimeout("Error when updating database: " + err, "", 3000);
-          console.log("Error when updating authors:", err);
-        });
-    }
+    this.undo.emit(field);
   }
 
   /*
@@ -1272,7 +947,7 @@ export class DescriptionComponent {
     if (field == 'description') {
       if (this.fieldObject[field].edited) {
         return { 'background-color': '#FCF9CD' };
-      }else{
+      } else {
         return { 'background-color': 'rgb(247, 249, 250)' };
       }
     } else {
@@ -1288,7 +963,26 @@ export class DescriptionComponent {
     }
   }
 
-  dataChanged(field: string){
+  dataChanged(field: string) {
     return JSON.stringify(this.record[field]) != JSON.stringify(this.originalRecord[field]);
+  }
+
+  /*
+   * When update successful
+   */
+  onUpdateSuccess(field: string) {
+    this.fieldObject[field]["edited"] = (JSON.stringify(this.record[field]) != JSON.stringify(this.originalRecord[field]));
+    this.errorMsgChanged.emit({ errorMsg: '', displayError: false });
+    this.notificationService.showSuccessWithTimeout(field + " updated.", "", 3000);
+  }
+
+  /*
+   * When update failed
+   */
+  onUpdateError(field: string, err: any) {
+    this.fieldObject[field]["errored"] = true;
+    this.errorMsgChanged.emit({ errorMsg: err, displayError: true });
+    this.notificationService.showError(err, "Update error");
+    console.log("Error when updating title:", err);
   }
 }

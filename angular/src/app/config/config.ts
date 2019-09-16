@@ -12,50 +12,50 @@ import { Injectable } from '@angular/core';
  */
 export interface WebLocations {
 
-    /**
-     * the institutional home page (e.g. NIST)
-     */
-    orgHome: string,
+  /**
+   * the institutional home page (e.g. NIST)
+   */
+  orgHome: string,
 
-    /**
-     * the science portal base URL.  
-     */
-    portalBase?: string,
+  /**
+   * the science portal base URL.  
+   */
+  portalBase?: string,
 
-    /**
-     * the home page for the PDR
-     */
-    pdrHome?: string,
+  /**
+   * the home page for the PDR
+   */
+  pdrHome?: string,
 
-    /**
-     * the PDR search page (i.e. the SDP search page)
-     */
-    pdrSearch?: string,
+  /**
+   * the PDR search page (i.e. the SDP search page)
+   */
+  pdrSearch?: string,
 
-    /**
-     * the base URL for the distribution service
-     */
-    distService?: string,
+  /**
+   * the base URL for the distribution service
+   */
+  distService?: string,
 
-    /**
-     * the base URL for the (public) metadata service
-     */
-    mdService?: string,
+  /**
+   * the base URL for the (public) metadata service
+   */
+  mdService?: string,
 
-    /**
-     * the base URL for the landing page service
-     */
-    landingPageService?: string, 
+  /**
+   * the base URL for the landing page service
+   */
+  landingPageService?: string,
 
-    /**
-     * the NERDm info page
-     */
-    nerdmAbout?: string
+  /**
+   * the NERDm info page
+   */
+  nerdmAbout?: string
 
-    /**
-     * other locations are allowed
-     */
-    [locName: string]: any;
+  /**
+   * other locations are allowed
+   */
+  [locName: string]: any;
 }
 
 /**
@@ -63,40 +63,45 @@ export interface WebLocations {
  */
 export interface LPSConfig {
 
-    /**
-     * URLs used in links plugged into templates
-     */
-    locations: WebLocations;
+  /**
+   * URLs used in links plugged into templates
+   */
+  locations: WebLocations;
 
-    /**
-     * Base URL for metadata service to use
-     */
-    mdAPI?: string;
+  /**
+   * Base URL for metadata service to use
+   */
+  mdAPI?: string;
 
-    /**
-     * True if editing widgets should be made available in the landing page.
-     * This is intended to be true for the internal publishing version of the 
-     * landing page, and false for the external one.  The default will be false.
-     */
-    editEnabled?: boolean;
+  /**
+   * Base URL for customization service to use
+   */
+  customizationAPI?: string;
 
-    /**
-     * a label to display (in the head bar) indicating the status of displayed interface.  
-     *
-     * This is usually populated in production contexts; example values
-     * include "Review Version", "Dev Version".  
-     */
-    status?: string;
+  /**
+   * True if editing widgets should be made available in the landing page.
+   * This is intended to be true for the internal publishing version of the 
+   * landing page, and false for the external one.  The default will be false.
+   */
+  editEnabled?: boolean;
 
-    /**
-     * the interface version to display (in the head bar)
-     */
-    appVersion?: string;
+  /**
+   * a label to display (in the head bar) indicating the status of displayed interface.  
+   *
+   * This is usually populated in production contexts; example values
+   * include "Review Version", "Dev Version".  
+   */
+  status?: string;
 
-    /**
-     * other parameters are allowed
-     */
-    [propName: string]: any;
+  /**
+   * the interface version to display (in the head bar)
+   */
+  appVersion?: string;
+
+  /**
+   * other parameters are allowed
+   */
+  [propName: string]: any;
 }
 
 /**
@@ -109,77 +114,79 @@ export interface LPSConfig {
  */
 export class AppConfig implements LPSConfig {
 
-    locations  : WebLocations;
-    mdAPI      : string;
-    editEnabled: boolean;
-    status     : string;
-    appVersion : string;
+  locations: WebLocations;
+  mdAPI: string;
+  customizationAPI: string;
+  editEnabled: boolean;
+  status: string;
+  appVersion: string;
 
-    /**
-     * create an AppConfig directly from an LPSConfig object
-     * @param params   the input data
-     */
-    constructor(params : LPSConfig) {
-        for (var key in params) 
-            this[key] = params[key];
-        this.inferMissingValues();
+  /**
+   * create an AppConfig directly from an LPSConfig object
+   * @param params   the input data
+   */
+  constructor(params: LPSConfig) {
+    for (var key in params)
+      this[key] = params[key];
+    this.inferMissingValues();
+  }
+
+  /*
+   * set some defaults for missing configuration values based on what has been
+   * set.  
+   */
+  private inferMissingValues(): void {
+    if (!this.locations.portalBase) {
+      this.locations.portalBase = this.locations.orgHome;
+      if (!this.locations.portalBase.endsWith('/'))
+        this.locations.portalBase += '/';
+      this.locations.portalBase += 'data/';
     }
 
-    /*
-     * set some defaults for missing configuration values based on what has been
-     * set.  
-     */
-    private inferMissingValues() : void {
-        if (! this.locations.portalBase) {
-            this.locations.portalBase = this.locations.orgHome;
-            if (! this.locations.portalBase.endsWith('/'))
-                this.locations.portalBase += '/';
-            this.locations.portalBase += 'data/';
-        }
+    if (!this.locations.pdrHome)
+      this.locations.pdrHome = this.locations.portalBase + "pdr/";
+    if (!this.locations.pdrSearch)
+      this.locations.pdrSearch = this.locations.portalBase + "sdp/";
+    if (!this.locations.distService)
+      this.locations.distService = this.locations.portalBase + "od/ds/";
+    if (!this.locations.mdService)
+      this.locations.mdService = this.locations.portalBase + "rmm/";
+    if (!this.locations.landingPageService)
+      this.locations.landingPageService = this.locations.portalBase + "od/id/";
+    if (!this.locations.nerdmAbout)
+      this.locations.nerdmAbout = this.locations.portalBase + "od/dm/aboutNerdm.html";
 
-        if (! this.locations.pdrHome)
-            this.locations.pdrHome = this.locations.portalBase + "pdr/";
-        if (! this.locations.pdrSearch)
-            this.locations.pdrSearch = this.locations.portalBase + "sdp/";
-        if (! this.locations.distService)
-            this.locations.distService = this.locations.portalBase + "od/ds/";
-        if (! this.locations.mdService)
-            this.locations.mdService = this.locations.portalBase + "rmm/";
-        if (! this.locations.landingPageService)
-            this.locations.landingPageService = this.locations.portalBase + "od/id/";
-        if (! this.locations.nerdmAbout)
-            this.locations.nerdmAbout = this.locations.portalBase + "od/dm/aboutNerdm.html";
+    if (!this.mdAPI) this.mdAPI = this.locations.mdService;
+    if (!this.customizationAPI) this.customizationAPI = this.locations.mdService;
 
-        if (! this.mdAPI) this.mdAPI = this.locations.mdService;
+    if (typeof (this.editEnabled) === "undefined") this.editEnabled = false;
+  }
 
-        if (typeof(this.editEnabled) === "undefined") this.editEnabled = false;
+  /**
+   * get hierarchical values by name with an option to request a default value.  
+   * 
+   * This function accomplishes two things:  first, it provides a bit of syntactic 
+   * sugar for getting at deep values in the parameter hierarchy.  That is, 
+   * `cfg.get("location.orgHome")` is equivalent to both `cfg.location.orgHome` and
+   * `cfg["location"]["orgHome"]`.  If any of the property names are not one that is 
+   * predefined as a class property, only the latter of the alternatives works.  
+   *
+   * The second bit of functionality is the optional parameter that allows the caller 
+   * to set the default value to return if the value is not set.  If the stored value
+   * is null or undefined, the default value is returned.  
+   * 
+   * @param param   the name of the desired parameter
+   */
+  get<T>(param: string, defval?: T | null): T | null | undefined {
+    let names: string[] = param.split(".");
+    let val: any = this;
+    for (var i = 0; i < names.length; i++) {
+      if (typeof val != "object")
+        return defval;
+      val = val[names[i]];
     }
-
-    /**
-     * get hierarchical values by name with an option to request a default value.  
-     * 
-     * This function accomplishes two things:  first, it provides a bit of syntactic 
-     * sugar for getting at deep values in the parameter hierarchy.  That is, 
-     * `cfg.get("location.orgHome")` is equivalent to both `cfg.location.orgHome` and
-     * `cfg["location"]["orgHome"]`.  If any of the property names are not one that is 
-     * predefined as a class property, only the latter of the alternatives works.  
-     *
-     * The second bit of functionality is the optional parameter that allows the caller 
-     * to set the default value to return if the value is not set.  If the stored value
-     * is null or undefined, the default value is returned.  
-     * 
-     * @param param   the name of the desired parameter
-     */
-    get<T>(param : string, defval ?: T|null) : T|null|undefined {
-        let names: string[] = param.split(".");
-        let val : any = this;
-        for (var i=0; i < names.length; i++) {
-            if (typeof val != "object")
-                return defval;
-            val = val[names[i]];
-        }
-        return (val != undefined) ? val : defval;
-    }
+    return (val != undefined) ? val : defval;
+  }
 
 }
 
@@ -193,6 +200,6 @@ export class AppConfig implements LPSConfig {
  * configuration information from the transfer state.  If the data is not available 
  * in the transfer state (because it is in development mode), ...
  */
-export let configFactory : () => AppConfig|null = function() {
-    return null;
+export let configFactory: () => AppConfig | null = function () {
+  return null;
 }

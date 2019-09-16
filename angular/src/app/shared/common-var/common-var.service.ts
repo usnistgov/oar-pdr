@@ -179,6 +179,52 @@ export class CommonVarService {
   }
 
   /*
+   *   Return a blank field with init value
+   */
+  getBlankField(field: string) {
+    var returnObj: any;
+
+    switch (field) {
+      case 'authors':
+        returnObj = {
+          "familyName": "",
+          "fn": "",
+          "givenName": "",
+          "middleName": "",
+          "affiliation": [
+            {
+              "@id": "",
+              "title": "National Institute of Standards and Technology",
+              "dept": "",
+              "@type": [
+                ""
+              ]
+            }
+          ],
+          "orcid": "",
+          "isCollapsed": false,
+          "fnLocked": false,
+          "dataChanged": false
+        };
+        break;
+      case 'contactPoint':
+        returnObj = {
+          "fn": "",
+          "hasEmail": "",
+          "address": [
+            ""
+          ]
+        }
+        break;
+      case 'description' || 'title':
+        returnObj = "";
+        break;
+    }
+
+    return returnObj;
+  }
+
+  /*
   *   Determine if a given value is empty
   */
   emptyString(e: any) {

@@ -1,4 +1,4 @@
-<div style="background-color: #153971;color: #FFFFFF; height: 3em;">
+<div *ngIf="editEnabled" style="background-color: #153971;color: #FFFFFF; height: 3em;">
   <button type="button" (click)="cancelRecord()" pButton type="submit"
     style="float:right;margin:.5em 2em .5em 0em;width:150px; height:2em; background-color:green;color:white;"
     [disabled]="!recordEditmode || fieldObject.title.detailEditmode">
@@ -24,6 +24,9 @@
 <div class="top_message" *ngIf="loggedIn() && record.modified != undefined">
   <span style="margin-right: 2em;">This record was edited on:
     {{record.modified}}</span>
+</div>
+<div *ngIf="displayError" style="color: red; padding: 1em;">
+  Ooops! There was a problem updating the data. Please try edit and save again. If problem persists, please contact us at <a href="mailto:datasupport@nist.gov?subject=PDR:Error updating field&body={{errorMsg}}">datasupport@nist.gov</a> to report the problem.
 </div>
 <div class="ui-grid ui-grid-responsive ui-grid-pad center" style="border: 0px solid white;">
   <div class="card landingcard">
@@ -68,7 +71,7 @@
                         {{record.title}}</h2>
                     </div>
                   </ng-template>
-                  <button class="edit_button" *ngIf="recordEditmode" type="button" (click)="openTitleModal()">
+                  <button class="edit_button" *ngIf="recordEditmode" type="button" (click)="openModal('title')">
                     <i class="faa faa-pencil icon_enabled" data-toggle="tooltip" title="Edit title"></i>
                   </button>
                   <button class="undo_button" *ngIf="recordEditmode" type="button"
@@ -112,7 +115,7 @@
                       </div>
                     </div>
                   </ng-template>
-                  <button class="edit_button" *ngIf="recordEditmode" type="button" (click)="openAuthorModal()">
+                  <button class="edit_button" *ngIf="recordEditmode" type="button" (click)="openModal('authors')">
                     <i class="faa faa-pencil icon_enabled" data-toggle="tooltip" title="Edit authors"></i>
                   </button>
                   <button class="undo_button" *ngIf="recordEditmode" type="button"
@@ -165,7 +168,7 @@
                       </div>
                     </div>
                   </ng-template>
-                  <button class="edit_button" *ngIf="recordEditmode" type="button" (click)="openContactModal()">
+                  <button class="edit_button" *ngIf="recordEditmode" type="button" (click)="openModal('contactPoint')">
                     <i class="faa faa-pencil icon_enabled" data-toggle="tooltip" title="Edit contactPoint"></i>
                   </button>
                   <button class="undo_button" *ngIf="recordEditmode" type="button"
@@ -239,9 +242,7 @@
 
           <div class="ui-g">
             <div class="ui-g-12 ui-md-12 ui-lg-12 ui-sm-12">
-              <description-resources [record]="record" [originalRecord]="originalRecord" [files]="files"
-                [distdownload]="distdownload" [isInternal]="isInternal" [filescount]="filescount" [metadata]="metadata"
-                [inBrowser]="inBrowser" [recordEditmode]="recordEditmode" [fieldObject]="fieldObject">
+              <description-resources [record]="record" [originalRecord]="originalRecord" [files]="files" [distdownload]="distdownload" [isInternal]="isInternal" [filescount]="filescount" [metadata]="metadata" [inBrowser]="inBrowser" [recordEditmode]="recordEditmode" [fieldObject]="fieldObject" (errorMsgChanged)="changeErrorMsg($event)" (undo)="undoEditing($event)" (openModal)="openModal($event)">
               </description-resources>
               <metadata-detail [record]="record" [serviceApi]="serviceApi" [inBrowser]="inBrowser"
                 [metadata]="metadata">

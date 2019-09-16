@@ -9,8 +9,9 @@ import { CommonVarService } from '../../shared/common-var';
 })
 export class ContactPopupComponent implements OnInit {
 
-  @Input() inputContactPoint: any;
-  @Output() returnContactPoint: EventEmitter<any> = new EventEmitter();
+  @Input() inputValue: any;
+  @Input() title: string;
+  @Output() returnValue: EventEmitter<any> = new EventEmitter();
 
   tempContactPoint: any;
   tempAddress: string;
@@ -20,10 +21,10 @@ export class ContactPopupComponent implements OnInit {
     ) { }
 
   ngOnInit() {
-    if (this.inputContactPoint != null && this.inputContactPoint != undefined) {
-      this.tempContactPoint = JSON.parse(JSON.stringify(this.inputContactPoint));
+    if (this.inputValue != null && this.inputValue != undefined) {
+      this.tempContactPoint = JSON.parse(JSON.stringify(this.inputValue['contactPoint']));
     } else {
-      this.tempContactPoint = this.commonVarService.getBlankContact();
+      this.tempContactPoint = this.commonVarService.getBlankField('contactPoint');
     }
 
     // strip off "mailto:"
@@ -82,7 +83,7 @@ export class ContactPopupComponent implements OnInit {
     
     // Send update to backend here...
 
-    this.returnContactPoint.emit(this.tempContactPoint);
+    this.returnValue.emit({"contactPoint": this.tempContactPoint});
     this.activeModal.close('Close click')
   }
 }

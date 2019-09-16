@@ -22,6 +22,8 @@ describe('DescriptionPopupComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(DescriptionPopupComponent);
     component = fixture.componentInstance;
+    component.inputValue = {description: "test"};
+    component.title = "description";
     fixture.detectChanges();
   });
 

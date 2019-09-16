@@ -4,13 +4,13 @@
     <div style="display: table; margin-bottom: 1em;">
       <div class="editable_container">
         <div class="editable_field" style="width:100%;" *ngIf="!record.description; else hasDescription">
-          <div class="nist-card" *ngIf="recordEditmode" style="width:inherit;"
-            [ngStyle]="getFieldStyle('description')">
+          <div class="nist-card" *ngIf="recordEditmode" style="width:inherit;" [ngStyle]="getFieldStyle('description')">
             Click edit (pencil) button to add description.
           </div>
         </div>
         <ng-template #hasDescription>
-          <div id="recordDescription" class="nist-card editable_field" style="max-width:calc(100% - 4em);" [ngStyle]="getFieldStyle('description')">
+          <div id="recordDescription" class="nist-card editable_field" style="max-width:calc(100% - 4em);"
+            [ngStyle]="getFieldStyle('description')">
             <div *ngFor="let desc of record['description']; let i =index">
               {{ record["description"][i] }}
               <p *ngIf="i<record['description'].length-1"></p>
@@ -36,8 +36,7 @@
           </div>
         </div>
         <ng-template #hasTopic>
-          <div class="editable_field" style="max-width:calc(100% - 4em);"
-            [ngStyle]="getFieldStyle('topic')">
+          <div class="editable_field" style="max-width:calc(100% - 4em);" [ngStyle]="getFieldStyle('topic')">
             <strong>Research Topics:</strong>
             <span class="font14 topics" *ngFor="let topic of record['topic']; let i =index">
               {{ topic.tag }}
@@ -58,15 +57,13 @@
     </div>
     <div style="display: table">
       <div class="editable_container">
-        <div *ngIf="!checkKeywords(); else hasKeyword">
-          <div class="editable_field" *ngIf="recordEditmode"
-            [ngStyle]="getFieldStyle('keyword')">
+        <div class="editable_field" *ngIf="!customizationServiceService.checkKeywords(record); else hasKeyword">
+          <div class="editable_field" *ngIf="recordEditmode" [ngStyle]="getFieldStyle('keyword')">
             Add subject keywords:
           </div>
         </div>
         <ng-template #hasKeyword>
-          <div class="editable_field" style="max-width:calc(100% - 4em);"
-            [ngStyle]="getFieldStyle('keyword')">
+          <div class="editable_field" style="max-width:calc(100% - 4em);" [ngStyle]="getFieldStyle('keyword')">
             <strong>Subject Keywords:</strong>
             <span class="font14 keywords" contenteditable="false"
               *ngFor="let keyword of record['keyword']; let i =index">
@@ -165,13 +162,6 @@
                     <i *ngIf="isExpanded" class="faa faa-arrow-circle-up faa-1x icon-white"
                       style="cursor: pointer;color: rgb(255, 255, 255);" data-toggle="tooltip" title="Collapse All"></i>
                   </span>
-                  <!-- <span (click)="showZipFilesNmaes = !showZipFilesNmaes" style="padding-right:0.5em;"
-                  *ngIf="zipData.length>0">
-                  <i *ngIf="!showZipFilesNmaes" class="faa faa-eye faa-1x icon-white"
-                    style="cursor: pointer;color: rgb(255, 255, 255);" data-toggle="tooltip" title="Show Zip Files"></i>
-                  <i *ngIf="showZipFilesNmaes" class="faa faa-eye-slash faa-1x icon-white"
-                    style="cursor: pointer;color: rgb(255, 255, 255);" data-toggle="tooltip" title="Hide Zip Files"></i>
-                </span> -->
                 </span>
                 {{col.header}}
               </th>
@@ -180,7 +170,8 @@
           <ng-template pTemplate="body" let-rowNode let-rowData="rowData" let-columns="columns">
             <tr [ttSelectableRow]="rowNode">
               <td [ngStyle]="titleStyle()">
-                <p-treeTableToggler [rowNode]="rowNode"></p-treeTableToggler>
+                <p-treeTableToggler [rowNode]="rowNode" data-toggle="tooltip" title="Expand/Collapse">
+                </p-treeTableToggler>
                 <a (click)="openDetails($event,rowData,op3) " style="color: #1471AE;cursor: pointer;"
                   data-toggle="tooltip" title="Click for more details">
                   {{rowData.name}} </a>
@@ -192,9 +183,11 @@
                 <div style="display: flex;">
                   <div *ngIf="rowData.isLeaf;else space_holder">
                     <a *ngIf="rowData.downloadStatus != 'downloading'" href='{{rowData.downloadUrl}}' target='_blank'
-                      download="download" data-toggle="tooltip" title="Direct download">
-                      <i class="faa faa-download" [ngStyle]="{'color':getDownloadBtnColor(rowData)}" aria-hidden="true"
-                        (click)="setFileDownloaded(rowData)"></i>
+                      download="download" data-toggle="tooltip" title="Direct download"
+                      (click)="setFileDownloaded(rowData)">
+                      <i class="faa faa-download" [ngStyle]="{'color':getDownloadBtnColor(rowData)}"
+                        aria-hidden="true"></i>
+                      <span class="sr-only">Hidden text for 508 compliance</span>
                     </a>
                   </div>
                   <ng-template #space_holder>

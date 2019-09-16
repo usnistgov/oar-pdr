@@ -58,17 +58,12 @@ describe('AuthorPopupComponent', () => {
 
     fixture = TestBed.createComponent(AuthorPopupComponent);
     component = fixture.componentInstance;
-    component.tempAuthors = tempAuthors;
+    component.inputValue = tempAuthors;
     fixture.detectChanges();
   });
 
   it('Should create', () => {
     expect(component).toBeTruthy();
-  });
-
-  it('Should have title: Authors', () => {
-    fixture.detectChanges();
-    expect(fixture.nativeElement.querySelector('#title').innerText).toEqual('Authors');
   });
 
   it('Should have author John Dow', () => {
