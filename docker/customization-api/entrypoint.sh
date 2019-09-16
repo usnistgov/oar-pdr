@@ -5,11 +5,11 @@
 case "$1" in
     makedist)
         shift
-        scripts/makedist "$@"
+        scripts/makedist.javacode "$@"
         ;;
     testall)
         shift
-        scripts/testall "$@"
+        scripts/testall.java "$@"
         ;;
     shell)
         exec /bin/bash

@@ -19,7 +19,7 @@ $prog - build and optionally test the software in this repo via docker
 
 SYNOPSIS
   $prog [-d|--docker-build] [--dist-dir DIR] [CMD ...] 
-        [DISTNAME|python|angular ...] 
+        [DISTNAME|python|angular|java ...] 
         
 
 ARGS:
@@ -164,9 +164,11 @@ if [ -z "$dodockbuild" ]; then
         if wordin shell $cmds; then
             docker_images_built oar-pdr/angtest || dodockbuild=1
         fi
-        if wordin shell $cmds; then
-            docker_images_built oar-pdr/customization-api || dodockbuild=1
-        fi
+    fi
+fi
+if [ -z "$dodockbuild" ]; then
+    if wordin java $comptypes; then
+        docker_images_built oar-pdr/customization-api || dodockbuild=1
     fi
 fi
         
