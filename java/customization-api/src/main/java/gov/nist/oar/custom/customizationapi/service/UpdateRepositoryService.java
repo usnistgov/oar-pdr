@@ -74,8 +74,9 @@ public class UpdateRepositoryService implements UpdateRepository {
      * @param recordid
      * @return bolean
      * @throws InvalidInputException
+     * @throws CustomizationException 
      */
-    private boolean processInputHelper(String params, String recordid) throws InvalidInputException {
+    private boolean processInputHelper(String params, String recordid) throws InvalidInputException, CustomizationException {
 	try {
 
 	    // Validate JSON and Validate schema against json-customization schema
@@ -102,8 +103,9 @@ public class UpdateRepositoryService implements UpdateRepository {
      * @param recordid
      * @param update
      * @return
+     * @throws CustomizationException 
      */
-    private boolean updateHelper(String recordid, Document update) {
+    private boolean updateHelper(String recordid, Document update) throws CustomizationException {
 
 	if (!this.accessData.checkRecordInCache(recordid, mconfig.getRecordCollection()))
 	    this.accessData.putDataInCache(recordid, mconfig.getRecordCollection());

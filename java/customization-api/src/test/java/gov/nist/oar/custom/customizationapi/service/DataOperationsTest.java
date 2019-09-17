@@ -123,7 +123,7 @@ public class DataOperationsTest {
     }
     
     @Test
-    public void testUpdatedDataInCache(){
+    public void testUpdatedDataInCache() throws CustomizationException{
 	mockDataOperations.putDataInCache(recordid, mockCollection);
 	Document updatedRecord = mockDataOperations.getUpdatedData(recordid, mockCollection);
 	assertNotNull(updatedRecord);

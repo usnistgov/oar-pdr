@@ -6,21 +6,3 @@ spring:
   cloud:
     config:
       uri: http://localhost:8084
-       
-server:
-    port: 8085
-    servlet:
-      context-path:  /customization
-    error:
-      include-stacktrace: never
-    connection-timeout: 300000
-    max-http-header-size: 8192
-    tomcat:
-      accesslog:
-        directory: logs
-        enabled: false
-             
-logging:
-  file: customization.log
-  path : /tmp/customization-api
-  exception-conversion-word: '%wEx'

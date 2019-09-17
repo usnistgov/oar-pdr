@@ -12,6 +12,8 @@
  */
 package gov.nist.oar.custom.customizationapi.service;
 
+import java.io.IOException;
+import java.net.UnknownHostException;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.regex.Matcher;
@@ -86,17 +88,17 @@ public class DatabaseOperations {
     public Document getData(String recordid, MongoCollection<Document> mcollection)
 	    throws ResourceNotFoundException, CustomizationException {
 	try {
-	    
-	    return checkRecordInCache(recordid, mcollection) ? 
-		    mcollection.find(Filters.eq("ediid", recordid)).first():getDataFromServer(recordid);
+
+	    return checkRecordInCache(recordid, mcollection) ? mcollection.find(Filters.eq("ediid", recordid)).first()
+		    : getDataFromServer(recordid);
 //	    if (checkRecordInCache(recordid, mcollection))
 //		return mcollection.find(Filters.eq("ediid", recordid)).first();
 //	    else
 //		return getDataFromServer(recordid);
-	} catch (IllegalArgumentException | MongoException exp) {
+	} catch (IllegalArgumentException exp) {
 	    log.error("There is an error getting record with given record id. " + exp.getMessage());
 	    throw new CustomizationException("There is an error accessing this record." + exp.getMessage());
-	} catch (Exception exp) {
+	} catch (MongoException exp) {
 	    log.error("The record requested can not be found." + exp.getMessage());
 	    throw new ResourceNotFoundException(
 		    "There are errors accessing data and resources requested not found." + exp.getMessage());
@@ -154,8 +156,10 @@ public class DatabaseOperations {
      * @param recordid
      * @param mdserver
      * @param mcollection
+     * @throws CustomizationException
+     * @throws IOException
      */
-    public void putDataInCache(String recordid, MongoCollection<Document> mcollection) {
+    public void putDataInCache(String recordid, MongoCollection<Document> mcollection) throws CustomizationException {
 	try {
 	    Document doc = getDataFromServer(recordid);
 	    doc.remove("_id");
@@ -223,7 +227,7 @@ public class DatabaseOperations {
 	    Document d = mcollection.find(Filters.eq("ediid", recordid)).first();
 
 	    DeleteResult result = mcollection.deleteOne(d);
-	    
+
 	    return result.getDeletedCount() == 1 ? true : false;
 
 	} catch (MongoException ex) {
@@ -233,10 +237,15 @@ public class DatabaseOperations {
 
     }
 
-    public Document getDataFromServer(String recordid) {
-
-	RestTemplate restTemplate = new RestTemplate();
-	return restTemplate.getForObject(mdserver + recordid, Document.class);
+    public Document getDataFromServer(String recordid) throws CustomizationException {
+	try {
+	    RestTemplate restTemplate = new RestTemplate();
+	    return restTemplate.getForObject(mdserver + recordid, Document.class);
+	} catch (Exception exp) {
+	    log.error("There is an error connecting to backend server to get data" + exp.getMessage());
+	    throw new CustomizationException(
+		    "There is an error connecting to backend server to get data." + exp.getMessage());
+	}
     }
 
 }
