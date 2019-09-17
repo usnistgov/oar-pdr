@@ -11,7 +11,7 @@ from cgi import parse_qs, escape as escape_qp
 
 from .. import PublishSystem
 from .serv import (PrePubMetadataService, SIPDirectoryNotFound, IDNotFound,
-                   ConfigurationException, StateException)
+                   ConfigurationException, StateException, InvalidRequest)
 from ....id import NIST_ARK_NAAN
 
 log = logging.getLogger(PublishSystem().subsystem_abbrev).getChild("mdserv")
