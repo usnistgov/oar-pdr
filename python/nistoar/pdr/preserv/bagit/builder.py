@@ -31,7 +31,7 @@ from multibag import open_headbag
 
 NORM=15  # Log Level for recording normal activity
 logging.addLevelName(NORM, "NORMAL")
-log = logging.getLogger(__name__)
+# log = logging.getLogger(__name__)
 
 DEF_BAGLOG_FORMAT = "%(asctime)s %(levelname)s: %(message)s"
 
@@ -71,6 +71,37 @@ class BagBuilder(PreservationSystem):
     A class for building up and populating a BagIt bag compliant with the 
     NIST Profile.
 
+    One can instantiate a BagBuilder either around an existing bag or around 
+    one that will be created upon first call to an updating method on the 
+    instance.  The interface provides functions for add data files to the bag
+    and updating metadata.  When no more additions are needed, the finalize_bag()
+    method can be called to add all additional metadata necessary to be 
+    compliant with the NIST Bag Profile.  
+
+    One key feature is that the updates are recorded via log 
+    messages in a log file inside the bag ("preserv.log").  A word of warning
+    regarding this feature:  if two BagBuilder instances updating different 
+    bags have an internal logger with the same name, the internal log files 
+    will likely collect log messages that do not belong to it.  Be default, 
+    BagBuilder instances operating on different bags will have loggers that 
+    will not collide with each other.  However, it is possible to pass in the 
+    logger object a BagBuilder should use via its constructor; in this case,
+    be sure that each instance is given a different logger (i.e. with a 
+    different name).  
+
+    Because of the possibility of log pollution (and message doubling), it is 
+    a good idea to disconnect the internal logfile from the BagBuilder instance
+    after completing all updates (e.g. after finalize_bag() or before it if that
+    call will be made later via a different instance).  This can be done one of 
+    two ways:
+      * explicitly call disconnect_logfile() after completing all updates
+      * instantiate the BagBuilder class via a with statement; when the 
+        with-block is exited, disconnect_logfile() will be called 
+        automatically.
+    (Note that this class does feature a finalizer method, __del__(); however, 
+    experience shows that this method is not typically called soon enough to 
+    avoid the danger of log pollution.)
+    
     This class can take a configuration dictionary on construction; the 
     following properties are supported:
     :prop log_filename str ("preserv.log"):  the name to give to the logfile 
@@ -150,7 +181,7 @@ class BagBuilder(PreservationSystem):
         self._bag = None
 
         if not logger:
-            logger = log
+            logger = logging.getLogger(self._bagdir)
         self.log = logger
         self.log.setLevel(NORM)
         
@@ -200,6 +231,13 @@ class BagBuilder(PreservationSystem):
 
     def __del__(self):
         self._unset_logfile()
+
+    def __enter__(self):
+        return self
+    def __exit__(self, exc_type, exc_value, tb):
+        self.disconnect_logfile()
+        return False
+
 
     def _merge_def_config(self, config):
         if not def_etc_dir:
@@ -2186,11 +2224,6 @@ format(nerdm['title'])
         except OSError, ex:
             raise BagWriteError("Problem writing about.txt file: " + str(ex),
                                 cause=ex)
-
-    
-
-    def __del__(self):
-        self._unset_logfile()
 
     def validate(self, config=None):
         """
