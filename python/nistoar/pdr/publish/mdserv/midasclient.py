@@ -1,7 +1,7 @@
 """
 a module for utilizing the MIDAS API for interacting with the NIST EDI.
 """
-import os
+import os, re
 from collections import OrderedDict
 
 import urllib
@@ -9,6 +9,20 @@ import requests
 
 from ...exceptions import (PDRException, PDRServiceException, PDRServerError,
                            ConfigurationException)
+
+_arkpre = re.compile(r'^ark:/\d+/')
+def _stripark(id):
+    return _arkpre.sub('', id)
+_mdsshldr = re.compile(r'^mds\d+\-')
+
+def midasid2recnum(midasid):
+    midasid = _stripark(midasid)
+    mdsmatch = _mdsshldr.search(midasid)
+    if mdsmatch:
+        return midasid[mdsmatch.start():]
+    if len(midasid) > 32:
+        return midasid[32:]
+    return midasid
 
 class MIDASClient(object):
     """
@@ -66,6 +80,12 @@ class MIDASClient(object):
                                        "JSON (is service URL correct?)",
                                        cause=ex)
 
+    def _extract_pod(self, data, id):
+        if 'dataset' not in data:
+            raise MIDASServerError(id, message="Unexpected Serivce response: "+
+                                   "data is missing 'dataset' property")
+        return data['dataset']
+        
     def get_pod(self, midasid):
         """
         return the POD record associated with the given MIDAS identifier.
@@ -75,11 +95,12 @@ class MIDASClient(object):
             hdrs['Authorization'] = "Bearer " + self._authkey
 
         resp = None
+        midasrecn = midasid2recnum(midasid)
         try:
-            resp = requests.get(self.baseurl + midasid, headers=hdrs)
-            return self._get_json(midasid, resp)
+            resp = requests.get(self.baseurl + midasrecn, headers=hdrs)
+            return self._extract_pod(self._get_json(midasrecn, resp), midasrecn)
         except requests.RequestException as ex:
-            raise MIDASServerError(midasid, cause=ex)
+            raise MIDASServerError(midasrecn, cause=ex)
         
     def put_pod(self, pod, midasid=None):
         """
@@ -100,12 +121,14 @@ class MIDASClient(object):
         if self._authkey:
             hdrs['Authorization'] = "Bearer " + self._authkey
 
+        midasrecn = midasid2recnum(midasid)
         try:
-            resp = requests.put(self.baseurl+midasid, json=pod)
-            return self._get_json(midasid, resp)
+            data = {"dataset": pod}
+            resp = requests.put(self.baseurl+midasrecn, json=data)
+            return self._extract_pod(self._get_json(midasrecn, resp), midasrecn)
         except requests.RequestException as ex:
-            raise MIDASServerError(midasid, cause=ex)
-        
+            raise MIDASServerError(midasrecn, cause=ex)
+
     def authorized(self, userid, midasid):
         """
         return True if the user with the given identifier is authorized to 

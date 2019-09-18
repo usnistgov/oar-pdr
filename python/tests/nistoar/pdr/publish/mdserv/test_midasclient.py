@@ -13,7 +13,7 @@ datadir = os.path.join(os.path.dirname(os.path.dirname(testdir)),
 simsrvrsrc = os.path.join(testdir, "sim_midas_srv.py")
 
 port = 9091
-baseurl = "http://localhost:{0}/".format(port)
+baseurl = "http://localhost:{0}/edi/".format(port)
 
 def startService(archdir, authmeth=None):
     srvport = port

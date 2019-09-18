@@ -1,15 +1,17 @@
 from __future__ import absolute_import, print_function
 import json, os, cgi, sys, re, hashlib, json
+from datetime import datetime
 from wsgiref.headers import Headers
-from collections import OrderedDict
+from collections import OrderedDict, Mapping
 
 try:
     import uwsgi
 except ImportError:
-    print("Warning: running midas-uwsgi in simulate mode", file=sys.stderr)
+    # print("Warning: running midas-uwsgi in simulate mode", file=sys.stderr)
     class uwsgi_mod(object):
         def __init__(self):
             self.opt={}
+            self.started_on = None
     uwsgi=uwsgi_mod()
 
 _arkpre = re.compile(r'^ark:/\d+/')
@@ -20,34 +22,56 @@ class SimArchive(object):
     def __init__(self, archdir):
         self.dir = archdir
 
-    def get_pod(self, midasid):
-        midasid = _stripark(midasid)
-        file = os.path.join(self.dir, midasid+".json")
+    def get_pod(self, midasrecn):
+        file = os.path.join(self.dir, midasrecn+".json")
         if not os.path.exists(file):
             return None
 
+        mod = datetime.fromtimestamp(os.stat(file).st_mtime).isoformat()
+
+        out = OrderedDict()
         with open(file) as fd:
-            return fd.read()
+            out['dataset'] = json.load(fd, object_pairs_hook=OrderedDict)
+        out['last_modified'] = mod
+        return json.dumps(out, fd, indent=2)
 
-    def put_pod(self, midasid, podastext):
-        midasid = _stripark(midasid)
-        file = os.path.join(self.dir, midasid+".json")
+    def put_pod(self, midasrecn, intext):
+        file = os.path.join(self.dir, midasrecn+".json")
         if not os.path.exists(file):
             return None
 
-        with open(file, 'w') as fd:
-            fd.write(podastext)
+        try:
+            data = json.loads(intext)
+        except ValueError as ex:
+            raise ValueError('Input does not appear to be JSON (starts with "' +
+                             intext[:35] + '...")')
+        if not isinstance(data, Mapping) or 'dataset' not in data:
+            raise ValueError('JSON data missing "dataset" property (starts ' +
+                             'with "' + intext[:35] + '...")')
+        if not isinstance(data['dataset'], Mapping):
+            raise ValueError('JSON data missing proper "dataset" property ' +
+                             'content (value = ' + str(data['dataset']))
 
-        return podastext
+        out = json.dumps(data['dataset'], indent=2)
+        with open(file, 'w') as fd:
+            fd.write(out)
+
+        data['last_modified'] = \
+                    datetime.fromtimestamp(os.stat(file).st_mtime).isoformat()
+        return json.dumps(data, indent=2)
 
 
 class SimMidas(object):
-    def __init__(self, archdir, authkey=None):
+    def __init__(self, archdir, authkey=None, basepath="/edi/"):
         self.archive = SimArchive(archdir)
         self._authkey = authkey
+        if basepath is None:
+            basepath = "/"
+        self._basepath = basepath
 
     def handle_request(self, env, start_resp):
-        handler = SimMidasHandler(self.archive, env, start_resp, self._authkey)
+        handler = SimMidasHandler(self.archive, env, start_resp,
+                                  self._basepath, self._authkey)
         return handler.handle(env, start_resp)
 
     def __call__(self, env, start_resp):
@@ -55,7 +79,7 @@ class SimMidas(object):
 
 class SimMidasHandler(object):
 
-    def __init__(self, archive, wsgienv, start_resp, authkey=None):
+    def __init__(self, archive, wsgienv, start_resp, basepath, authkey=None):
         self.arch = archive
         self._env = wsgienv
         self._start = start_resp
@@ -64,6 +88,7 @@ class SimMidasHandler(object):
         self._code = 0
         self._msg = "unknown status"
         self._authkey = authkey
+        self._basepath = basepath
 
     def send_error(self, code, message):
         status = "{0} {1}".format(str(code), message)
@@ -98,7 +123,10 @@ class SimMidasHandler(object):
     def handle(self, env, start_resp):
         meth_handler = 'do_'+self._meth
 
-        path = self._env.get('PATH_INFO', '/')[1:]
+        path = self._env.get('PATH_INFO', '/')
+        if not path.startswith(self._basepath):
+            return self.send_error(404, "Path not found")
+        path = path.lstrip(self._basepath)
         input = self._env.get('wsgi.input', None)
         params = cgi.parse_qs(self._env.get('QUERY_STRING', ''))
         if hasattr(self, meth_handler):
@@ -114,15 +142,14 @@ class SimMidasHandler(object):
         if not path:
             return self.send_error(200, "Ready")
         parts = path.split('/')
-        if parts[0] == "ark:":
-            parts.pop(0)
-            if len(parts) > 0:
-                parts.pop(0)
-        if len(parts) > 1:
+        if len(parts) > 2:
             return self.send_error(404, "Path not found")
 
         try:
-            out = self.arch.get_pod(path)
+            if len(parts) > 1:
+                out = self.user_can_update(parts[1], parts[0])
+            else:
+                out = self.arch.get_pod(parts[0])
         except Exception as ex:
             print(str(ex))
             return self.send_error(500, "Internal Error")
@@ -141,15 +168,13 @@ class SimMidasHandler(object):
 
     def do_PUT(self, path, input=None, params=None):
         if not self.authorized():
-            return send_unauthorized()
+            return self.send_unauthorized()
         
         parts = path.split('/')
-        if parts[0] == "ark:":
-            parts.pop(0)
-            if len(parts) > 0:
-                parts.pop(0)
-        if len(parts) > 1:
+        if len(parts) > 2:
             return self.send_error(404, "Path not found")
+        if len(parts) > 1:
+            return self.send_error(405, "PUT not allowed on this path")
 
         if not input:
             return self.send_error(400, "No POD data provided")
@@ -158,10 +183,12 @@ class SimMidasHandler(object):
         except OSError as ex:
             return self.send_error(500, "Internal Error")
         if not data:
-            return self.send_error(400, "No POD data provided")
+            return self.send_error(400, "No input data provided")
 
         try:
             out = self.arch.put_pod(path, data)
+        except ValueError as ex:
+            return self.send_error(400, "Bad input data (%s)" % str(ex))
         except Exception as ex:
             print(str(ex))
             return self.send_error(500, "Internal Error")
