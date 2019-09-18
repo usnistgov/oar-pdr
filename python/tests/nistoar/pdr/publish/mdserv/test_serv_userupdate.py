@@ -37,7 +37,7 @@ descarchdir = os.path.join(pdrmoddir, "describe", "data")
 
 simsrvrsrc = os.path.join(testdir, "sim_midas_srv.py")
 port = 9091
-baseurl = "http://localhost:{0}/".format(port)
+baseurl = "http://localhost:{0}/edi/".format(port)
 
 def startService(archdir, authmeth=None):
     srvport = port
@@ -301,7 +301,7 @@ class TestPrePubMetadataServiceMidas(test.TestCase):
         shutil.copyfile(os.path.join(datadir, "pdr2210_pod.json"),
                         os.path.join(self.svcarch, "pdr2210.json"))
         shutil.copyfile(os.path.join(self.revdir, "1491", "_pod.json"),
-                        os.path.join(self.svcarch, self.midasid+".json"))
+                        os.path.join(self.svcarch, "1491.json"))
 
         self.config = {
             'working_dir':     self.workdir,
@@ -346,19 +346,19 @@ class TestPrePubMetadataServiceMidas(test.TestCase):
         }
 
         # test open assumption
-        with open(os.path.join(self.svcarch, self.midasid+".json")) as fd:
+        with open(os.path.join(self.svcarch, self.midasid[32:]+".json")) as fd:
             midaspod = json.load(fd)
         self.assertNotEqual(midaspod['title'], 'Big!')
 
         updated = self.srv.patch_id(self.midasid, {'title': 'Big!'})
         self.assertEqual(updated['title'], 'Big!')
-        with open(os.path.join(self.svcarch, self.midasid+".json")) as fd:
+        with open(os.path.join(self.svcarch, self.midasid[32:]+".json")) as fd:
             midaspod = json.load(fd)
         self.assertEqual(midaspod['title'], 'Big!')
 
         updated = self.srv.patch_id(self.midasid, updata)
         self.assertEqual(updated['title'], 'Goober!')
-        with open(os.path.join(self.svcarch, self.midasid+".json")) as fd:
+        with open(os.path.join(self.svcarch, self.midasid[32:]+".json")) as fd:
             midaspod = json.load(fd)
         self.assertEqual(midaspod['title'], 'Goober!')
         for dist in midaspod['distribution']:
