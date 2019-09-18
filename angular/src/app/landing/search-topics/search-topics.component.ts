@@ -280,4 +280,11 @@ export class SearchTopicsComponent implements OnInit {
     }
     return tree;
   }
+
+  /*
+   *   This function is used to track ngFor loop
+   */
+  trackByFn(index: any, author: any) {
+    return index;
+  }
 }

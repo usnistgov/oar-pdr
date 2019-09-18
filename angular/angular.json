@@ -93,7 +93,7 @@
             ],
             "assets": [
               {
-                "glob": "favicon.ico",
+                "glob": "src/assets/images/favicon.ico",
                 "input": "src/",
                 "output": "/"
               },

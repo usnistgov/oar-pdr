@@ -361,6 +361,7 @@ export class LandingComponent implements OnInit {
           this.saveDataLoaded = false;
           // Make a copy of original pub data (for undo purpose)
           this.originalRecord = JSON.parse(JSON.stringify(this.record));
+          // console.log("record", this.record);
         }.bind(this), function (err) {
           alert("something went wrong while fetching the data.");
         });
@@ -553,6 +554,11 @@ export class LandingComponent implements OnInit {
 
     if (this.record['authors']) {
       for (let auth of this.record['authors']) authlist = authlist + auth.familyName + ",";
+    }else{
+      if(this.record['contactPoint']){
+        // console.log("family name", this.record['contactPoint'].fn.split(' ')[1]);
+        authlist = authlist + this.record['contactPoint'].fn.split(' ')[1] + ",";
+      }
     }
 
     var resourcesByAuthor = this.createMenuItem('Resources by Authors', "faa faa-external-link", "",
@@ -980,7 +986,6 @@ export class LandingComponent implements OnInit {
   *   Open popup modal
   */
   openModal(fieldName: string) {
-    console.log("Opening modal...", fieldName);
     let i: number;
     let tempDecription: string = "";
 

@@ -45,7 +45,7 @@ export class HeadbarComponent {
     public cartService: CartService,
     private router: Router,
     private commonVarService: CommonVarService,
-    private authService: AuthService) {
+    public authService: AuthService) {
     if (!(cfg instanceof AppConfig))
       throw new Error("HeadbarComponent: Wrong config type provided: " + cfg);
     this.searchLink = cfg.get("locations.pdrSearch", "/sdp/");
@@ -65,7 +65,6 @@ export class HeadbarComponent {
 
     this.authService.watchUserIdMode().subscribe(
       value => {
-        console.log('User ID:', value);
         this.userId = value;
       }
     )

@@ -13,6 +13,7 @@ export class DescriptionPopupComponent implements OnInit {
 
   tempDescription: any;
   tempReturn: any = {};
+  defaultText: string = "Enter description here...";
 
   constructor(public activeModal: NgbActiveModal) { }
 

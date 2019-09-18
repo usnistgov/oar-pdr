@@ -27,8 +27,6 @@ export class AuthorPopupComponent implements OnInit {
     }
 
   ngOnInit() {
-    console.log('inputValue:', this.inputValue);
-    console.log('title:', this.title);
     if (this.inputValue != undefined)
       this.originalAuthors = JSON.parse(JSON.stringify(this.inputValue));
     else

@@ -36,7 +36,7 @@
   <div
     style="display:inline-flex;width:10%; text-align: right; direction: rtl; font-size: 12px; color:#1E6BA1; cursor: pointer;margin-left: .5em;"
     (click)="showAllTopics()">Reset</div>
-  <input type="text" style="height:35px;background-color: #E7FFFE;" [(ngModel)]="searchText" (input)="onSearchTextChange($event.target.value)" placeholder="Type here to search topics" />
+  <input type="text" style="height:35px;background-color: #E7FFFE;" [(ngModel)]="searchText" (input)="onSearchTextChange()" placeholder="Type here to search topics" />
 </div>
 <div style="clear:both"></div>
 

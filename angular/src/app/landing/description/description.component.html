@@ -3,7 +3,7 @@
     <h3 name="desscription"><b>Description</b></h3><br>
     <div style="display: table; margin-bottom: 1em;">
       <div class="editable_container">
-        <div class="editable_field" style="width:100%;" *ngIf="!record.description; else hasDescription">
+        <div class="editable_field" style="width:100%;" *ngIf="!record['description']; else hasDescription">
           <div class="nist-card" *ngIf="recordEditmode" style="width:inherit;" [ngStyle]="getFieldStyle('description')">
             Click edit (pencil) button to add description.
           </div>

@@ -2,7 +2,7 @@
   <h2 style="color: white;">{{title}}</h2>
 </div>
 <div style="margin: 1em 2em 2em 2em;">
-  <div tabindex="1" contenteditable [ceModel]="inputValue[title]" [ceDefault]="defaltText"
+  <div tabindex="1" contenteditable [ceModel]="inputValue[title]" [ceDefault]="defaultText"
     (ceChange)="inputValue[title]=$event" placeholder="defaultText"
     style="border: 1px solid green !Important;padding: .5em;">
   </div>

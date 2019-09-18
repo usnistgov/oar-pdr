@@ -22,7 +22,7 @@ export class AppComponent {
 
   ngOnInit() {
     let mdapi = this.cfg.get("locations.mdService", "/unconfigured");
-    console.log("mdapi:", mdapi);
+    // console.log("mdapi:", mdapi);
     // for testing purpose, logout user everytime the app starts
     if(this.authService.loggedIn())
       this.authService.logoutUser(true);

@@ -13,16 +13,15 @@ export class CustomizationServiceService {
   customizationApi: string;
 
   recordEditedSub = new BehaviorSubject<boolean>(false);
-  // private customizationUpdateApi: string = "http://localhost:8085/customization/draft/";
-  // private customizationSaveApi: string = "http://localhost:8085/customization/savedrec/";
+
 
   constructor(
     private http: HttpClient,
     private cfg: AppConfig,
     private commonVarService: CommonVarService,
     private authService: AuthService) {
-  
-    this.customizationApi = this.cfg.get("customizationApi", "/customization");
+    this.customizationApi = "http://localhost:8085/customization/";
+    // this.customizationApi = this.cfg.get("customizationApi", "/customization");
   }
 
   /**

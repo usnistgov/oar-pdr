@@ -114,7 +114,7 @@ export class DescriptionComponent {
     private ngbModal: NgbModal,
     private gaService: GoogleAnalyticsService,
     public router: Router,
-    private customizationServiceService: CustomizationServiceService,
+    public customizationServiceService: CustomizationServiceService,
     private notificationService: NotificationService,
     ngZone: NgZone) {
     this.cols = [
@@ -699,7 +699,6 @@ export class DescriptionComponent {
   * Function to set status when a file was downloaded
   **/
   setFileDownloaded(rowData: any) {
-    console.log("setFileDownloaded");
     // Google Analytics code to track download event
     this.gaService.gaTrackEvent('download', undefined, 'Resource title: ' + this.record['title'], rowData.downloadUrl);
 
@@ -906,7 +905,6 @@ export class DescriptionComponent {
   */
   getDialogWidth() {
     var w = window.innerWidth > 500 ? 500 : window.innerWidth;
-    console.log(w);
     return w + 'px';
   }
 

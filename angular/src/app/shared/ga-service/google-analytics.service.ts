@@ -58,7 +58,6 @@ export class GoogleAnalyticsService {
   }
 
   public appendGaTrackingCode() {
-    console.log("Appending tracking code...");
     try {
       let scriptId = '_fed_an_ua_tag';
 
@@ -73,7 +72,6 @@ export class GoogleAnalyticsService {
       s.src = "https://dap.digitalgov.gov/Universal-Federated-Analytics-Min.js?agency=DOC&subagency=NIST&pua=UA-66610693-14&yt=true&exts=ppsx,pps,f90,sch,rtf,wrl,txz,m1v,xlsm,msi,xsd,f,tif,eps,mpg,xml,pl,xlt,c";
 
       var h = document.getElementsByTagName("head");
-      console.log("head", h);
       document.getElementsByTagName("head")[0].appendChild(s);
 
 
