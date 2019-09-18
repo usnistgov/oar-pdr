@@ -28,18 +28,15 @@ module.exports = function (config) {
     browsers: ['HeadlessChrome'],
     customLaunchers: {
       HeadlessChrome: {
-        base: 'Chrome',
+        base: 'ChromeHeadless',
         flags: [
-          // '--headless',
-          '--disable-gpu',
-          // Without a remote debugging port, Google Chrome exits immediately.
-          '--remote-debugging-port=9222'
+          '--no-sandbox'
         ]
       },
       DebugChrome: {
         base: 'Chrome'
       }
     },
-    singleRun: false
+    singleRun: true
   });
 };

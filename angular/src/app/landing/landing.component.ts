@@ -554,11 +554,6 @@ export class LandingComponent implements OnInit {
 
     if (this.record['authors']) {
       for (let auth of this.record['authors']) authlist = authlist + auth.familyName + ",";
-    }else{
-      if(this.record['contactPoint']){
-        // console.log("family name", this.record['contactPoint'].fn.split(' ')[1]);
-        authlist = authlist + this.record['contactPoint'].fn.split(' ')[1] + ",";
-      }
     }
 
     var resourcesByAuthor = this.createMenuItem('Resources by Authors', "faa faa-external-link", "",

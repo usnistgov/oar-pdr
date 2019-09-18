@@ -56,34 +56,4 @@ export class GoogleAnalyticsService {
       gas('send', 'event', category, action, label, 1);
     }, 1000);
   }
-
-  public appendGaTrackingCode() {
-    try {
-      let scriptId = '_fed_an_ua_tag';
-
-      if (document.getElementById(scriptId)) {
-          console.log("Found GA id.");
-          document.getElementById(scriptId).remove();
-      }
-
-      var s = document.createElement('script') as any;
-      s.type = "text/javascript";
-      s.id = scriptId;
-      s.src = "https://dap.digitalgov.gov/Universal-Federated-Analytics-Min.js?agency=DOC&subagency=NIST&pua=UA-66610693-14&yt=true&exts=ppsx,pps,f90,sch,rtf,wrl,txz,m1v,xlsm,msi,xsd,f,tif,eps,mpg,xml,pl,xlt,c";
-
-      var h = document.getElementsByTagName("head");
-      document.getElementsByTagName("head")[0].appendChild(s);
-
-
-      // const script = document.createElement('script');
-      // console.log("script", script);
-      // script.async = true;
-      // script.src = "https://dap.digitalgov.gov/Universal-Federated-Analytics-Min.js?agency=DOC&subagency=NIST&pua=UA-66610693-14&yt=true&exts=ppsx,pps,f90,sch,rtf,wrl,txz,m1v,xlsm,msi,xsd,f,tif,eps,mpg,xml,pl,xlt,c";
-      // document.head.appendChild(script);
-    } catch (ex) {
-      console.error('Error appending google analytics');
-      console.error(ex);
-    }
-
-  }
 }

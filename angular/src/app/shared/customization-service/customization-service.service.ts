@@ -20,8 +20,8 @@ export class CustomizationServiceService {
     private cfg: AppConfig,
     private commonVarService: CommonVarService,
     private authService: AuthService) {
-    this.customizationApi = "http://localhost:8085/customization/";
-    // this.customizationApi = this.cfg.get("customizationApi", "/customization");
+    // this.customizationApi = "http://localhost:8085/customization/";
+    this.customizationApi = this.cfg.get("customizationApi", "/customization");
   }
 
   /**

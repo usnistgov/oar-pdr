@@ -15,66 +15,15 @@ export class AppComponent {
   title = 'PDR Resource Landing Page';
 
   constructor(
-    private authService : AuthService,
+    private authService: AuthService,
     private gaService: GoogleAnalyticsService,
     private cfg: AppConfig,
-    ){}
+  ) { }
 
   ngOnInit() {
-    let mdapi = this.cfg.get("locations.mdService", "/unconfigured");
-    // console.log("mdapi:", mdapi);
     // for testing purpose, logout user everytime the app starts
-    if(this.authService.loggedIn())
+    if (this.authService.loggedIn())
       this.authService.logoutUser(true);
-
-      this.gaService.appendGaTrackingCode();
   }
 }
 
-/* 
- * if SSR is working, this version, which enables a "loading" spinner,
- * should not be necessary
- *
-export class AppComponent implements AfterViewInit, OnInit {
-  element: HTMLElement;
-
-  constructor(private commonVarService: CommonVarService,
-    private router: Router) {
-    this.router.events.subscribe(event => {
-      if (event instanceof NavigationStart) {
-        this.element.hidden = false;
-      } else if (event instanceof NavigationEnd || event instanceof NavigationCancel || event instanceof NavigationError) {
-        // this.element.hidden = true;
-        // console.log("Spinner is not visible.");
-      }
-    }, () => {
-      this.element.hidden = true;
-    });
-  }
-
-  /**
-   * Get the params OnInit
-   *
-  ngOnInit() {
-    this.element = document.getElementById('loadspinner') as HTMLElement;
-    this.element.hidden = false;
-    setTimeout(() => {
-      this.element.hidden = true;
-    }, 15000);
-  }
-
-  ngAfterViewInit() {
-    setTimeout(() => {
-      this.commonVarService.watchContentReady().subscribe(
-        value => {
-          // let element: HTMLElement = document.getElementById('loadspinner') as HTMLElement;
-          this.element.hidden = value;
-          setTimeout(() => {
-            this.element.hidden = true;
-          }, 10000);
-        }
-      );
-    });
-  }
-}
-*/
