@@ -20,6 +20,8 @@ datadir = os.path.join(
 loghdlr = None
 rootlog = None
 def setUpModule():
+    global loghdlr
+    global rootlog
     ensure_tmpdir()
 #    logging.basicConfig(filename=os.path.join(tmpdir(),"test_builder.log"),
 #                        level=logging.INFO)
@@ -33,7 +35,7 @@ def tearDownModule():
     global loghdlr
     if loghdlr:
         if rootlog:
-            rootlog.removeLog(loghdlr)
+            rootlog.removeHandler(loghdlr)
         loghdlr = None
     rmtmpdir()
 
@@ -79,6 +81,22 @@ class TestBuilder2(test.TestCase):
             self.fail("Failed to load default config params: missing params")
 
         self.assertFalse(self.bag._has_resmd())
+
+    def test_with_disconnect(self):
+        logtag = self.bag.log.name
+        baglog = logging.getLogger(logtag)
+        self.assertEqual(len(baglog.handlers), 0)
+        self.bag.disconnect_logfile()
+
+        with bldr.BagBuilder(self.tf.root, "testbag", self.cfg) as self.bag:
+            self.assertEqual(len(self.bag.log.handlers), 0)
+            self.assertEqual(len(baglog.handlers), 0)
+            self.bag.ensure_bagdir()
+            self.assertEqual(len(self.bag.log.handlers), 1)
+            self.assertEqual(len(baglog.handlers), 1)
+            
+        self.assertEqual(len(baglog.handlers), 0)
+        self.assertEqual(len(self.bag.log.handlers), 0)
 
     def test_ctor_on_existng_dir(self):
         bagdir = os.path.join(self.tf.root, "testbag")

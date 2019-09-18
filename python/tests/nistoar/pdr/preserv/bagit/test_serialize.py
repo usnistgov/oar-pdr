@@ -9,6 +9,8 @@ import nistoar.pdr.preserv.bagit.builder as bldr
 from nistoar.pdr.preserv.bagit.exceptions import BagSerializationError
 
 def setUpModule():
+    global loghdlr
+    global rootlog
     ensure_tmpdir()
     rootlog = logging.getLogger()
     loghdlr = logging.FileHandler(os.path.join(tmpdir(),"test_builder.log"))
@@ -17,6 +19,11 @@ def setUpModule():
     rootlog.addHandler(loghdlr)
 
 def tearDownModule():
+    global loghdlr
+    if loghdlr:
+        if rootlog:
+            rootlog.removeHandler(loghdlr)
+        loghdlr = None
     rmtmpdir()
 
 exedir = os.path.dirname(__file__)
