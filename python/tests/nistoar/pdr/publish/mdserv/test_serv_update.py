@@ -162,7 +162,8 @@ class TestPrePubMetadataService(test.TestCase):
                 'metadata_service': {
                     'service_endpoint': "http://localhost:9092/"
                 },
-            }
+            },
+            'async_file_examine': False
         }
         self.srv = serv.PrePubMetadataService(self.config)
         self.bagdir = os.path.join(self.bagparent, self.midasid)
