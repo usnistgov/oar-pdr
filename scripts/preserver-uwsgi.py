@@ -74,7 +74,7 @@ except ImportError:
 
 from nistoar.pdr.exceptions import ConfigurationException
 from nistoar.pdr.preserv.service import wsgi
-from nistoar.pdr.publish.mdserv import config
+from nistoar.pdr import config
 
 ##### These functions used when in test mode
 

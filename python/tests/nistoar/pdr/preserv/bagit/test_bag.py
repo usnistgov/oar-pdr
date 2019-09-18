@@ -10,6 +10,23 @@ import nistoar.pdr.preserv.bagit.bag as bag
 import nistoar.pdr.preserv.bagit.exceptions as bagex
 import nistoar.pdr.exceptions as exceptions
 
+def setUpModule():
+    global loghdlr
+    global rootlog
+    ensure_tmpdir()
+    rootlog = logging.getLogger()
+    loghdlr = logging.FileHandler(os.path.join(tmpdir(),"test_merge.log"))
+    loghdlr.setLevel(logging.INFO)
+    rootlog.addHandler(loghdlr)
+
+def tearDownModule():
+    global loghdlr
+    if loghdlr:
+        if rootlog:
+            rootlog.removeHandler(loghdlr)
+        loghdlr = None
+    rmtmpdir()
+
 # datadir = nistoar/pdr/preserv/data
 datadir = os.path.join( os.path.dirname(os.path.dirname(__file__)), "data" )
 bagdir = os.path.join(datadir, "samplembag")
