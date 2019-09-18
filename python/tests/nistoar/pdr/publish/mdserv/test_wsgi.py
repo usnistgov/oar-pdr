@@ -20,6 +20,7 @@ def setUpModule():
     config.configure_log(logfile)
 
 def tearDownModule():
+    global rootlog
     if config._log_handler:
         if rootlog:
             rootlog.removeHandler(config._log_handler)

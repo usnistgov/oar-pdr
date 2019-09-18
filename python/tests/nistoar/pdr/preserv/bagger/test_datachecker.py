@@ -43,6 +43,8 @@ def stopService(authmeth=None):
 loghdlr = None
 rootlog = None
 def setUpModule():
+    global loghdlr
+    global rootlog
     ensure_tmpdir()
     rootlog = logging.getLogger()
     loghdlr = logging.FileHandler(os.path.join(tmpdir(),"test_simsrv.log"))
@@ -53,7 +55,7 @@ def tearDownModule():
     global loghdlr
     if loghdlr:
         if rootlog:
-            rootlog.removeLog(loghdlr)
+            rootlog.removeHandler(loghdlr)
         loghdlr = None
     rmtmpdir()
 
