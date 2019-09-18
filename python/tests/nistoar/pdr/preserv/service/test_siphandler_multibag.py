@@ -79,6 +79,7 @@ def startServices():
     cmd = cmd.format(os.path.join(tdir,"simrmm.log"), srvport,
                      os.path.join(basedir, wpy), archdir, pidfile)
     os.system(cmd)
+    time.sleep(0.5)
 
 def stopServices():
     tdir = tmpdir()
