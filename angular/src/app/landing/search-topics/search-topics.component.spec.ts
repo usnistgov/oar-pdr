@@ -46,8 +46,6 @@ describe('SearchTopicsComponent', () => {
     };
     taxonomyTree.push(newPart);
 
-    const record: any = require('../../../assets/samplerecord.json');
-
     fixture = TestBed.createComponent(SearchTopicsComponent);
     component = fixture.componentInstance;
     component.inputValue = tempTopics;
