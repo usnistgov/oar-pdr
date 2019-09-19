@@ -3,11 +3,9 @@ package gov.nist.oar.custom.customizationapi.service;
 import java.io.IOException;
 
 import org.apache.http.client.HttpClient;
-import org.apache.http.client.ResponseHandler;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPatch;
 import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.BasicResponseHandler;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 import org.bson.Document;
@@ -72,8 +70,8 @@ public class BackendServerOperations {
 	CloseableHttpResponse response = null;
 	try {
 
-	    HttpClient httpClient = HttpClients.createDefault();// new DefaultHttpClient();
-	    HttpPatch httppatch = new HttpPatch("http://localhost:8086/service/patchrecord/" + recordid);
+	    HttpClient httpClient = HttpClients.createDefault();
+	    HttpPatch httppatch = new HttpPatch(mdserver + recordid);
 	    httppatch.addHeader("Authorization", "Bearer " + this.mdsecret);
 	    httppatch.addHeader("Content-Type", "application/json");
 	   
