@@ -350,7 +350,7 @@ class PrePubMetadataService(PublishSystem):
                 raise IDNotFound('Dataset with ID not found.');
 
             bagparent = self.cfg.get('working_dir')
-            if not bagparent or not os.path.is_dir(bagparent):
+            if not bagparent or not os.path.isdir(bagparent):
                 raise ConfigurationException(bagdir +
                                              ": working dir not found")
             bagdir = os.path.join(bagparent, bagname)
