@@ -11,7 +11,7 @@ from ...exceptions import (ConfigurationException, StateException,
                            SIPDirectoryNotFound, IDNotFound, PDRServiceException)
 from ...preserv.bagger import (MIDASMetadataBagger, UpdatePrepService,
                                midasid_to_bagname)
-from ...preserv.bagit import NISTBag, DEF_MERGE_CONV
+from ...preserv.bagit import NISTBag, BagBuilder, DEF_MERGE_CONV
 from ...utils import build_mime_type_map, read_nerd
 from ....id import PDRMinter, NIST_ARK_NAAN
 from ....nerdm import validate_nerdm
@@ -253,7 +253,7 @@ class PrePubMetadataService(PublishSystem):
     def normalize_id(self, id):
         """
         if necesary, transform the given SIP identifier into a normalized 
-        form that will be be bassed to the bagger.  This allows requests 
+        form that will be be based to the bagger.  This allows requests 
         to resolve_id() and locate_data_file() to accept several different 
         forms.
 
@@ -276,13 +276,20 @@ class PrePubMetadataService(PublishSystem):
         # this handles preparation for a dataset that has been published before.
         prepper = None
 
+        normid = self.normalize_id(id)
         try:
             
-            bagger = self.open_bagger(self.normalize_id(id))
+            bagger = self.open_bagger(normid)
             
         except SIPDirectoryNotFound as ex:
-            # there is no input data from midas; fall-back to a previously
-            # published record, if available
+            # there is no input data from midas...
+            #
+            # See if there is a working metadata bag cached
+            bagdir = os.path.join(self.workdir, midasid_to_bagname(normid))
+            if os.path.exists(bagdir):
+                return self.make_nerdm_record(bagdir)
+            
+            # fall-back to a previously published record, if available
             if self.prepsvc:
                 prepper = self.prepsvc.prepper_for(midasid_to_bagname(id),
                                                    log=self.log)
@@ -323,6 +330,7 @@ class PrePubMetadataService(PublishSystem):
         :raise InvalidRequest:  if any of the updatable data included in the 
                               request is invalid.
         """
+        datafiles = None
         try:
 
             bagger = self.open_bagger(self.normalize_id(id));
@@ -333,6 +341,7 @@ class PrePubMetadataService(PublishSystem):
             bagger.fileExaminer.launch(stop_logging=False)
             # bagger.fileExaminer.run()  # sync for testing
 
+            datafiles = bagger.datafiles
             bagbldr = bagger.bagbldr
 
         except SIPDirectoryNotFound as ex:
@@ -373,8 +382,8 @@ class PrePubMetadataService(PublishSystem):
         # save an updated POD and send it to MIDAS
         self.update_pod(updates[None], bagbldr)
 
-        mergeconv = bagbldr.cfg.get('merge_convention', DEF_MERGE_CONV)
-        return bagbldr.bag.nerdm_record(mergeconv);
+        # mergeconv = bagbldr.cfg.get('merge_convention', DEF_MERGE_CONV)
+        return self.make_nerdm_record(bagbldr.bagdir, datafiles)
 
     def _filter_and_check_updates(self, data, bldr):
         # filter out properties that are not updatable; check the values of

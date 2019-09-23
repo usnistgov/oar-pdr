@@ -16,6 +16,7 @@ import ejsonschema as ejs
 from nistoar.testing import *
 from nistoar.pdr import def_jq_libdir
 import nistoar.pdr.preserv.bagit.builder as bldr
+from nistoar.pdr.preserv import bagit
 import nistoar.pdr.publish.mdserv.serv as serv
 import nistoar.pdr.exceptions as exceptions
 from nistoar.pdr.utils import read_nerd, write_json
@@ -164,6 +165,11 @@ class TestPrePubMetadataService(test.TestCase):
                     'service_endpoint': "http://localhost:9092/"
                 },
             },
+            'update': {
+                'update_to_midas': False,
+                'updatable_properties': [ 'title' ],
+                'require_midas_sip': False
+            },
             'async_file_examine': False
         }
         self.srv = serv.PrePubMetadataService(self.config)
@@ -274,6 +280,24 @@ class TestPrePubMetadataService(test.TestCase):
         self.assertTrue(os.path.isdir(self.bagdir))
         self.assertTrue(os.path.isdir(os.path.join(self.bagdir,"multibag")))
         
+    def test_patch_id(self):
+        midasid = "pdr2210"
+        bagdir = os.path.join(self.config['working_dir'], midasid)
+
+        updated = self.srv.patch_id(midasid, {'title': 'Big!'})
+        self.assertEqual(updated['title'], 'Big!')
+        self.assertIn('bureauCode', updated)
+        self.assertIn('description', updated)
+        self.assertIn('components', updated)
+        self.assertEqual(len(updated['components']), 5)
+
+        bag = bagit.bag.NISTBag(bagdir)
+        nerdm = bag.nerdm_record(True)
+        self.assertTrue(updated == nerdm, "Updated and cached NERDm not the same")
+
+        nerdm = self.srv.resolve_id(midasid)
+        self.assertTrue(updated == nerdm, "Updated and resolved NERDm not the same")
+
 
         
 
