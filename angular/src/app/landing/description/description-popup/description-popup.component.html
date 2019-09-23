@@ -1,11 +1,12 @@
 <div style="background-color:#153971;height: 4em; color:white;text-align: center;padding-top: .5em">
-  <h2 style="color: white;">{{title}}</h2>
+  <h2 style="color: white;">{{title.toUpperCase()}}</h2>
 </div>
 <div style="margin: 1em 2em 2em 2em;">
-  <div tabindex="1" contenteditable [ceModel]="inputValue[title]" [ceDefault]="defaultText"
-    (ceChange)="inputValue[title]=$event" placeholder="defaultText"
+  <div tabindex="1" contenteditable [ceModel]="inputValue[field]" [ceDefault]="defaultText"
+    (ceChange)="inputValue[field]=$event" placeholder="defaultText"
     style="border: 1px solid green !Important;padding: .5em;">
   </div>
+  <div *ngIf="message" style="font-size: 12px; margin-top: .5em;">{{message}}</div>
   <div style="align-items: right; margin-top: 1em;">
     <button pButton class="button"
       style="float:right;margin:0em 1em 2em 1em;width:150px; height:2em; background-color:grey;color:white;padding-right: 1em;"

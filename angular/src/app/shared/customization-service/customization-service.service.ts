@@ -22,6 +22,7 @@ export class CustomizationServiceService {
     private authService: AuthService) {
     // this.customizationApi = "http://localhost:8085/customization/";
     this.customizationApi = this.cfg.get("customizationApi", "/customization");
+    if(!(this.customizationApi.endsWith('/'))) this.customizationApi = this.customizationApi + '/';
   }
 
   /**
@@ -52,7 +53,6 @@ export class CustomizationServiceService {
     // return this.http.patch(url, body, httpOptions);
 
     var url = this.customizationApi + "draft/" + recordid;
-    console.log("body", body);
     return this.http.patch(url, body);
   }
 
@@ -92,7 +92,6 @@ export class CustomizationServiceService {
     const apiToken = localStorage.getItem("apiToken");
 
     //Need to append ediid to the base API URL
-    console.log("Calling: " + this.customizationApi + "draft/" + recordid);
     return this.http.get(this.customizationApi + "draft/" + recordid);
     // return this.http.get(this.customizationUpdateApi + recordid, {
     //   headers: {

@@ -908,27 +908,6 @@ export class DescriptionComponent {
     return w + 'px';
   }
 
-  /*
-  *   Open Description popup modal
-  */
-  openDescriptionModal() {
-    this.openModal.emit('description');
-  }
-
-  /*
-*   Open Keyword popup modal - re-use description popup modal
-*/
-  openKeywordModal() {
-    this.openModal.emit('keyword');
-  }
-
-  /*
-  *   Open Topic popup modal
-  */
-  openTopicModal() {
-    this.openModal.emit('topic');
-  }
-
   // /*
   //  *  Undo editing
   //  */

@@ -18,7 +18,7 @@
     Edit
   </button>
 </div>
-<div class="top_message" *ngIf="!loggedIn()">
+<div class="top_message" *ngIf="!loggedIn() && editEnabled">
   <span style="margin-right: 3.5em;">To see previously edited data or edit current data, click on Edit button.</span>
 </div>
 <div class="top_message" *ngIf="loggedIn() && record.modified != undefined">
@@ -26,7 +26,7 @@
     {{record.modified}}</span>
 </div>
 <div *ngIf="displayError" style="color: red; padding: 1em;">
-  Ooops! There was a problem updating the data. Please try edit and save again. If problem persists, please contact us at <a href="mailto:datasupport@nist.gov?subject=PDR:Error updating field&body={{errorMsg}}">datasupport@nist.gov</a> to report the problem.
+  Ooops! {{errorMsg}}. If problem persists, please contact us at <a href="mailto:datasupport@nist.gov?subject=PDR:Error updating field&body={{errorMsgDetail}}">datasupport@nist.gov</a> to report the problem.
 </div>
 <div class="ui-grid ui-grid-responsive ui-grid-pad center" style="border: 0px solid white;">
   <div class="card landingcard">
@@ -37,7 +37,7 @@
       <div *ngIf="!isLoading" class="ui-g">
         <div class="ui-g-10 ui-md-10 ui-lg-10 ui-sm-12" style="padding-left: 1%">
           <b>No Landing page available</b>
-          <p>{{errorMsg}}</p>
+          <p>{{errorMsgDetail}}</p>
         </div>
       </div>
     </div>
@@ -230,15 +230,17 @@
             <div class="ui-g-4 ui-md-4 ui-lg-4 ui-sm-12">
               <span *ngIf="HomePageLink" style="float: right;">
                 <span *ngIf="inBrowser; else visitHomeOnServer">
-                  <button pButton type="button" class="homePageLink" icon="faa faa-external-link"
-                    label="Visit Home Page" style="padding: 0 1em 0 2em;height: 2.5em;"
-                    (click)="visitHomePage(record.landingPage, $event, 'Resource title: '+record.title)"></button>
+                    <button type="button" (click)="visitHomePage(record.landingPage, $event, 'Resource title: '+record.title)" pButton type="submit"
+                    style="float:right;margin:.5em 1em .5em 0em;width:200px; height:2em; background-color:#1471AE;color:white;padding-right: 1em;"
+                    [disabled]="recordEditmode">
+                    <i class="faa faa-external-link" style="color: #fff;padding-left: .5em;padding-right: .5em;"></i>
+                    Visit Home Page
+                  </button>
                 </span>
                 <ng-template #visitHomeOnServer>Visit Home Page</ng-template>
               </span>
             </div>
           </div>
-
 
           <div class="ui-g">
             <div class="ui-g-12 ui-md-12 ui-lg-12 ui-sm-12">

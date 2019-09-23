@@ -19,8 +19,8 @@
         &nbsp;&nbsp;
         <span *ngIf="status" class="badge" id="appStatus" style="background-color:darkcyan">{{ status }}</span>
         <div align="right" class="header-links">
-          <span *ngIf="authService.loggedIn()"
-            [ngStyle]="{'color':getMenuTextColor(),'padding-right':'2em'}"><b>Welcome: {{userId}}        </b></span>
+          <!-- <span *ngIf="authService.loggedIn()"
+            [ngStyle]="{'color':getMenuTextColor(),'padding-right':'2em'}"><b>Welcome: {{userId}}        </b></span> -->
           <span (click)="openAboutPage()"
             [ngStyle]="{'cursor': getCursor(),'color':getMenuTextColor()}"><b>About</b></span> |
           <span (click)="openSearchPage()"

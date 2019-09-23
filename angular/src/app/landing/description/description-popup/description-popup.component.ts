@@ -8,7 +8,9 @@ import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 })
 export class DescriptionPopupComponent implements OnInit {
   @Input() inputValue: any;
+  @Input() field: string;
   @Input() title: string;
+  @Input() message?: string;
   @Output() returnValue: EventEmitter<any> = new EventEmitter();
 
   tempDescription: any;
@@ -18,7 +20,7 @@ export class DescriptionPopupComponent implements OnInit {
   constructor(public activeModal: NgbActiveModal) { }
 
   ngOnInit() {
-    this.tempDescription = JSON.stringify(this.inputValue[this.title]);
+    this.tempDescription = JSON.stringify(this.inputValue[this.field]);
     let textArea = document.getElementById("address");
   }
 

@@ -10,7 +10,8 @@ import { CommonVarService } from '../../shared/common-var';
 export class ContactPopupComponent implements OnInit {
 
   @Input() inputValue: any;
-  @Input() title: string;
+  @Input() field: string;
+  @Input() title?: string;
   @Output() returnValue: EventEmitter<any> = new EventEmitter();
 
   tempContactPoint: any;
@@ -22,7 +23,7 @@ export class ContactPopupComponent implements OnInit {
 
   ngOnInit() {
     if (this.inputValue != null && this.inputValue != undefined) {
-      this.tempContactPoint = JSON.parse(JSON.stringify(this.inputValue['contactPoint']));
+      this.tempContactPoint = this.commonVarService.deepCopy(this.inputValue['contactPoint']);
     } else {
       this.tempContactPoint = this.commonVarService.getBlankField('contactPoint');
     }
@@ -54,20 +55,7 @@ export class ContactPopupComponent implements OnInit {
     e.target.style.height = textArea.scrollHeight + 'px';
   }
 
-  /*
-  *   Return a blank contact point
-  */
-  // getBlankContact() {
-  //   return {
-  //     "fn": "",
-  //     "hasEmail": "",
-  //     "address": [
-  //       ""
-  //     ]
-  //   }
-  // }
-
-    /* 
+  /* 
   *   Save contact info when click on save button in pop up dialog
   */
   saveContactInfo() {
