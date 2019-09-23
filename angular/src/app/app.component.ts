@@ -22,8 +22,8 @@ export class AppComponent {
 
   ngOnInit() {
     // for testing purpose, logout user everytime the app starts
-    if (this.authService.loggedIn())
-      this.authService.logoutUser(true);
+//     if (this.authService.loggedIn())
+//       this.authService.logoutUser(true);
   }
 }
 
