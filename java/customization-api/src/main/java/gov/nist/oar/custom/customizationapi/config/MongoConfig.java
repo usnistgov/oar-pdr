@@ -36,9 +36,8 @@ import com.mongodb.client.MongoDatabase;
 @Configuration
 @ConfigurationProperties
 @EnableAutoConfiguration
-
 /**
- * MongoDB configuration, reading all the conf details from application.yml
+ * MongoDB configuration, reading all the server details from config server.
  * 
  * @author Deoyani Nandrekar-Heinis
  *
@@ -54,6 +53,9 @@ public class MongoConfig {
     private MongoCollection<Document> recordsCollection;
     private MongoCollection<Document> changesCollection;
     private String metadataServerUrl = "";
+    List servers = new ArrayList();
+    List credentials = new ArrayList();
+    
 
     @Value("${oar.mdserver:testserver}")
     private String mdserver;
@@ -73,12 +75,12 @@ public class MongoConfig {
     private String password;
     @Value("${oar.mdserver.secret:secret}")
     private String mdserversecret;
-
+    
     @PostConstruct
     public void initIt() throws Exception {
 
 	mongoClient = (MongoClient) this.mongo();
-	log.info("########## " + dbname + " ########" + mdserver);
+	log.info("########## " + dbname + " ########");
 
 	this.setMongodb(this.dbname);
 	this.setRecordCollection(this.record);
@@ -137,7 +139,11 @@ public class MongoConfig {
     private void setChangeCollection(String change) {
 	changesCollection = mongoDb.getCollection(change);
     }
-
+    
+    /**
+     * Get Metadata service URL
+     * @return
+     */
     public String getMetadataServer() {
 	return this.metadataServerUrl;
     }
@@ -146,16 +152,16 @@ public class MongoConfig {
 	this.metadataServerUrl = mserver;
     }
 
+    /**
+     * Get Metadata service secret to communicate with API
+     * @return
+     */
     public String getMDSecret() {
 	return this.mdserversecret;
     }
-
-    List servers = new ArrayList();
-    List credentials = new ArrayList();
-
+    
     /**
-     * MongoClient
-     * 
+     * MongoClient 
      * @return
      * @throws Exception
      */

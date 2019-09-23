@@ -61,7 +61,7 @@ public class DataOperationsTest {
     @Mock
     private MongoDatabase mockDB;
     
-    private String mdserver ="http://testdata.nist.gov/rmm/records/";
+    private String mdserver = "http://testdata.nist.gov/rmm/records/";
     private static DatabaseOperations mockDataOperations;
     private static Document change;
     private static Document updatedRecord;
