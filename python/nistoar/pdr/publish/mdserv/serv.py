@@ -500,6 +500,11 @@ class PrePubMetadataService(PublishSystem):
 
         errs = self._validate_nerdm(updated, bagbldr.cfg.get('validator', {}))
         if len(errs) > 0:
+            self.log.error("User update will make record invalid " +
+                           "(see INFO details below)")
+            self.log.info("metadata patch:\n" +
+                           json.dumps(updata,indent=2))
+            self.log.info("problems:\n " + "\n ".join(errs))
             raise InvalidRequest("Update makes record invalid", errs)
 
         return updated

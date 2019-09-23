@@ -53,6 +53,7 @@ def setUpModule():
     loghdlr.setLevel(logging.INFO)
     loghdlr.setFormatter(logging.Formatter(bldr.DEF_BAGLOG_FORMAT))
     rootlog.addHandler(loghdlr)
+    rootlog.setLevel(logging.INFO)
 
 def tearDownModule():
     global loghdlr
@@ -492,6 +493,13 @@ class TestPrePubMetadataService(test.TestCase):
         self.assertFalse(any([c['mediaType'] == "text/gibberish"
                               for c in mdata['components'] if 'mediaType' in c]))
                          
+    def test_invalid_patch(self):
+        self.srv.cfg['update'] = {
+            'updatable_properties': [ "aka", "title", "components[].mediaType" ]
+        }
+
+        with self.assertRaises(serv.InvalidRequest):
+            self.srv.patch_id(self.midasid, {"title": 3})
         
 
 if __name__ == '__main__':
