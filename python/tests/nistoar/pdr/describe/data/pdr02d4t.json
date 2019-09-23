@@ -95,7 +95,7 @@
             "label": "JPCRD Monograph: NIST-JANAF Thermochemical Tables, Pt. 1 (AL-C",
             "location": "http://kinetics.nist.gov/janaf/pdf/JANAF-FourthEd-1998-1Vol1-Intro.pdf",
             "_extensionSchemas": [
-                "https://data.nist.gov/od/dm/nerdm-schema/v0.1#/definitions/DCiteDocumentReference"
+                "https://data.nist.gov/od/dm/nerdm-schema/v0.1#/definitions/DCiteReference"
             ]
         },
         {
@@ -105,7 +105,7 @@
             "label": "JPCRD Monograph: NIST-JANAF Thermochemical Tables, Pt. 2 (Cr-Zr)",
             "location": "http://kinetics.nist.gov/janaf/pdf/JANAF-FourthEd-1998-1Vol2-Intro.pdf",
             "_extensionSchemas": [
-                "https://data.nist.gov/od/dm/nerdm-schema/v0.1#/definitions/DCiteDocumentReference"
+                "https://data.nist.gov/od/dm/nerdm-schema/v0.1#/definitions/DCiteReference"
             ]
         }
     ],

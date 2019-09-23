@@ -317,9 +317,9 @@ class TestUpdatePrepper(test.TestCase):
         self.assertEqual(md["_schema"],
                          "https://data.nist.gov/od/dm/nerdm-schema/v0.2#")
         self.assertEqual(md["references"][0]["_extensionSchemas"][0],
-                         "https://data.nist.gov/od/dm/nerdm-schema/v0.2#/definitions/DCiteDocumentReference")
+                         "https://data.nist.gov/od/dm/nerdm-schema/v0.2#/definitions/DCiteReference")
         self.assertEqual(md["references"][1]["_extensionSchemas"][0],
-                         "https://data.nist.gov/od/dm/nerdm-schema/v0.2#/definitions/DCiteDocumentReference")
+                         "https://data.nist.gov/od/dm/nerdm-schema/v0.2#/definitions/DCiteReference")
         
         depinfof = os.path.join(root, "multibag", "deprecated-info.txt")
         self.assertTrue(not os.path.isfile(depinfof))
