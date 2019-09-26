@@ -51,6 +51,7 @@ def startService(archdir, authmeth=None):
     cmd = cmd.format(os.path.join(tdir,"simsrv.log"), srvport,
                      os.path.join(simsrvrsrc), pidfile, archdir)
     os.system(cmd)
+    time.sleep(0.5)
 
 def stopService(archdir, authmeth=None):
     srvport = port
@@ -101,6 +102,7 @@ class TestPrePubMetadataServiceUpdates(test.TestCase):
             'review_dir':      self.revdir,
             'upload_dir':      self.upldir,
             'id_registry_dir': self.workdir,
+            'async_file_examine': False,
             'update': {
                 'updatable_properties': [ 'title', 'components[].goob' ]
             }
