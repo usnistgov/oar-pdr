@@ -47,6 +47,7 @@ class TestApp(test.TestCase):
             'review_dir':      self.revdir,
             'upload_dir':      self.upldir,
             'id_registry_dir': self.bagparent,
+            'async_file_examine': False,
             'update': {
                 'update_auth_key': "secret",
                 'updatable_properties': ['title']
