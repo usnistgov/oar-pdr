@@ -97,7 +97,8 @@ class TestPrePubMetadataService(test.TestCase):
             'working_dir':     self.workdir,
             'review_dir':      self.revdir,
             'upload_dir':      self.upldir,
-            'id_registry_dir': self.workdir
+            'id_registry_dir': self.workdir,
+            'async_file_examine': False
         }
         self.srv = serv.PrePubMetadataService(self.config)
         self.bagdir = os.path.join(self.bagparent, self.midasid)
@@ -500,7 +501,7 @@ class TestPrePubMetadataService(test.TestCase):
 
         with self.assertRaises(serv.InvalidRequest):
             self.srv.patch_id(self.midasid, {"title": 3})
-        
+
 
 if __name__ == '__main__':
     test.main()
