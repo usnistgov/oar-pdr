@@ -365,28 +365,6 @@ export class LandingComponent implements OnInit {
       });
   }
 
-  loadDraftData() {
-    this.dataInit();
-    return this.customizationServiceService.getDraftData(this.ediid)
-      .subscribe((res) => {
-        if (res != undefined && res != null) {
-          this.onSuccess(res).then(function (result) {
-            this.commonVarService.setContentReady(true);
-            this.saveDataLoaded = true;
-            this.commonVarService.setRefreshTree(true);
-            this.checkDataChanges();
-          }.bind(this), function (err) {
-            alert("something went wrong while fetching the data.");
-          });
-        } else {
-          this.loadPubData();
-        }
-      }, (err) => {
-        this.setErrorForDisplay(err, "There was an error getting saved data.");
-        this.loadPubData();
-      });
-  }
-
   getData(): Observable<any> {
     var recordid = this.searchValue;
     const recordid_KEY = makeStateKey<string>('record-' + recordid);
@@ -906,28 +884,57 @@ export class LandingComponent implements OnInit {
   /*
   *  Set record level edit mode (for the edit button at top)
   */
-  setRecordEditmode(mode: boolean) {
-    this.recordEditmode = mode;
-    if (mode && !this.authService.loggedIn()) {
-      this.authService.loginUser()
-        .subscribe(
-          res => {
-            this.authService.handleTokenSuccess(res as ApiToken);
-            if (mode) {
-              this.loadDraftData();
-            } else {
-              this.loadPubData();
-            }
-            this.recordEditmode = mode;
-            this.commonVarService.setEditMode(mode);
-          },
-          err => {
-            this.setErrorForDisplay(err, "There was an error login in the user.");
-            this.authService.handleTokenError(err);
-          }
-        )
+ setRecordEditmode(editMode: boolean) {
+    console.log('this.inBrowser', this.inBrowser);
+    var doLoadDraftData = false;
+    if (editMode) {
+      if (this.inBrowser) {
+        if (this.authService.loggedIn()) {
+          //If user already logged in, load draft data
+          doLoadDraftData = true;
+        } else {
+          //If user not logged in, force user login then load draft data. If login failed, do nothing
+          this.authService.loginUser()
+            .subscribe(
+              res => {
+                this.authService.handleTokenSuccess(res as ApiToken);
+                doLoadDraftData = true;
+              },
+              err => {
+                this.setErrorForDisplay(err, "There was an error login in the user.");
+                this.authService.handleTokenError(err);
+              }
+            )
+        }
+        if(doLoadDraftData){
+          this.dataInit();
+          this.customizationServiceService.getDraftData(this.ediid)
+            .subscribe((res) => {
+              console.log("Draft data return:", res);
+              if (res != undefined && res != null) {
+                this.onSuccess(res).then(function (result) {
+                  this.commonVarService.setContentReady(true);
+                  this.saveDataLoaded = true;
+                  this.commonVarService.setRefreshTree(true);
+                  this.checkDataChanges();
+                  this.recordEditmode = editMode;
+                  this.commonVarService.setEditMode(editMode);
+                }.bind(this), function (err) {
+                  alert("something went wrong while fetching draft data.");
+                });
+              }
+            }, (err) => {
+              this.setErrorForDisplay(err, "There was an error getting draft data.");
+            })
+        }
+      } else {
+        //If in server side, do nothing
+      }
+    } else {
+      this.loadPubData();
+      this.recordEditmode = editMode;
+      this.commonVarService.setEditMode(editMode);
     }
-
   }
 
   /*
@@ -988,7 +995,7 @@ export class LandingComponent implements OnInit {
         var tempauthors = [];
         if (this.record['authors'] != undefined && this.record['authors'].length > 0)
           this.tempInput['authors'] = this.commonVarService.deepCopy(this.record['authors']);
-        else{
+        else {
           tempauthors.push(this.commonVarService.getBlankField(fieldName));
           this.tempInput[fieldName] = tempauthors;
         }
@@ -1249,7 +1256,7 @@ export class LandingComponent implements OnInit {
   /*
    *  Set error message for display
    */
-  setErrorForDisplay(err: any, message: string){
+  setErrorForDisplay(err: any, message: string) {
     this.errorMsg = message;
     this.errorMsgDetail = err.message;
     this.displayError = true;

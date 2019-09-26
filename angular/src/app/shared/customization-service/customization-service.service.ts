@@ -53,6 +53,8 @@ export class CustomizationServiceService {
     // return this.http.patch(url, body, httpOptions);
 
     var url = this.customizationApi + "draft/" + recordid;
+    console.log("Update URL:", url);
+    console.log("body:", body);
     return this.http.patch(url, body);
   }
 
@@ -67,6 +69,8 @@ export class CustomizationServiceService {
     //   }
     // };
     var url = this.customizationApi + "savedrec/" + recordid;
+    console.log("Save rec URL:", url);
+    console.log("body:", body);
     return this.http.put(url, body);
     // return this.http.put(url, body, httpOptions);
   }
@@ -75,14 +79,15 @@ export class CustomizationServiceService {
 *   Update one field in publication. New value is in post body.
 */
   delete(recordid: string): Observable<any> {
-    const httpOptions = {
-      headers: {
-        "Authorization": "Bearer " + this.authService.getToken(),
-        "userId": this.authService.getUserId()
-      }
-    };
+    // const httpOptions = {
+    //   headers: {
+    //     "Authorization": "Bearer " + this.authService.getToken(),
+    //     "userId": this.authService.getUserId()
+    //   }
+    // };
     var url = this.customizationApi + "draft/" + recordid;
-    return this.http.delete(url, httpOptions);
+    return this.http.delete(url);
+    // return this.http.delete(url, httpOptions);
   }
 
   /*
@@ -92,7 +97,9 @@ export class CustomizationServiceService {
     const apiToken = localStorage.getItem("apiToken");
 
     //Need to append ediid to the base API URL
-    return this.http.get(this.customizationApi + "draft/" + recordid);
+    var url = this.customizationApi + "draft/" + recordid;
+    console.log("URL to get draft data:", url);
+    return this.http.get(url);
     // return this.http.get(this.customizationUpdateApi + recordid, {
     //   headers: {
     //     "Authorization": "Bearer " + this.authService.getToken(),

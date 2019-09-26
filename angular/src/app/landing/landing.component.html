@@ -9,19 +9,23 @@
     style="float:right;margin:.5em 1em .5em 0em;width:150px; height:2em; background-color:green;color:white;padding-right: 1em;"
     [disabled]="!recordEditmode || fieldObject.title.detailEditmode">
     <i class="faa faa-save faa-1x icon-white" style="color: #fff;padding-left: .5em;padding-right: .5em;"></i>
-    Save
+    Submit
   </button>
-  <button type="button" (click)="setRecordEditmode(true)" pButton type="submit"
-    style="float:right;margin:.5em 1em .5em 1em;width:150px; height:2em; background-color:green;color:white;padding-right: 1em;"
-    [disabled]="recordEditmode">
+  <button *ngIf="!recordEditmode" type="button" (click)="setRecordEditmode(true)" pButton type="submit"
+    style="float:right;margin:.5em 1em .5em 1em;width:150px; height:2em; background-color:green;color:white;padding-right: 1em;">
     <i class="faa faa-pencil faa-1x icon-white" style="color: #fff;padding-left: .5em;padding-right: .5em;"></i>
     Edit
   </button>
+  <button *ngIf="recordEditmode" type="button" (click)="setRecordEditmode(true)" pButton type="submit"
+  style="float:right;margin:.5em 1em .5em 1em;width:150px; height:2em; background-color:green;color:white;padding-right: 1em;">
+  <i class="faa faa-exit faa-1x icon-white" style="color: #fff;padding-left: .5em;padding-right: .5em;"></i>
+  Quit Edit mode
+</button>
 </div>
-<div class="top_message" *ngIf="!loggedIn() && editEnabled">
+<div class="top_message" *ngIf="!recordEditmode && editEnabled">
   <span style="margin-right: 3.5em;">To see previously edited data or edit current data, click on Edit button.</span>
 </div>
-<div class="top_message" *ngIf="loggedIn() && record.modified != undefined">
+<div class="top_message" *ngIf="recordEditmode && record.modified != undefined">
   <span style="margin-right: 2em;">This record was edited on:
     {{record.modified}}</span>
 </div>
