@@ -1211,6 +1211,7 @@ export class LandingComponent implements OnInit {
           else
             this.record[field] = this.commonVarService.deepCopy(this.originalRecord[field]);
 
+          this.customizationServiceService.removeDraftDataStatus(this.ediid);
           this.onUpdateSuccess(field);
         },
         (err) => {
