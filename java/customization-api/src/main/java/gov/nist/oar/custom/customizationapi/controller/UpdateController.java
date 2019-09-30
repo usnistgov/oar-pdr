@@ -130,9 +130,10 @@ public class UpdateController {
     @RequestMapping(value = {
 	    "savedrecord/{ediid}" }, method = RequestMethod.PUT, headers = "accept=application/json", produces = "application/json")
     @ApiOperation(value = ".", nickname = "Save changes to server", notes = "Resource returns a boolean based on success or failure of the request.")
-    public Document saveRecord(@PathVariable @Valid String ediid, @Valid @RequestBody String params)
+    public Document saveRecord(@PathVariable @Valid String ediid, @RequestBody String params)
 	    throws CustomizationException, InvalidInputException, ResourceNotFoundException {
 	logger.info("Send updated record to backend metadata server:" + ediid);
+	logger.info("Input Params:"+params);
 	return uRepo.save(ediid, params);
 
     }
