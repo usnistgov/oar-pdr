@@ -32,7 +32,7 @@ export class AuthService implements OnInit {
     private http: HttpClient,
     private commonVarService: CommonVarService,
     private router: Router,
-    @Inject(PLATFORM_ID) private platformId: Object,) {
+    @Inject(PLATFORM_ID) private platformId: Object) {
       this.inBrowser = isPlatformBrowser(platformId);
   }
 

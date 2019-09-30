@@ -69,6 +69,7 @@ import { GoogleAnalyticsService} from "./shared/ga-service/google-analytics.serv
 import { GoogleAnalyticsServiceMock} from "./shared/ga-service/google-analytics.service.mock";
 import { ConfirmationDialogService } from './shared/confirmation-dialog/confirmation-dialog.service';
 import { NotificationService } from './shared/notification-service/notification.service';
+import { DatePipe } from '@angular/common';
 
 // used to create fake backend
 import { fakeBackendProvider } from './_helpers/fakeBackendInterceptor';
@@ -118,6 +119,7 @@ import { fakeBackendProvider } from './_helpers/fakeBackendInterceptor';
     GoogleAnalyticsServiceMock,
     ConfirmationDialogService,
     NotificationService,
+    DatePipe,
     // provider used to create fake backend
     fakeBackendProvider
   ],

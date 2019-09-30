@@ -5,12 +5,16 @@ import { CommonVarService } from '../common-var/common-var.service';
 import { AuthService } from '../auth-service/auth.service';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { AppConfig } from '../../config/config';
+import { isPlatformBrowser } from '@angular/common';
+import { PLATFORM_ID, APP_ID, Inject } from '@angular/core';
 
 @Injectable({
   providedIn: 'root'
 })
 export class CustomizationServiceService {
   customizationApi: string;
+  inBrowser: boolean = false;
+  draftStatusCookieName: string = "draft_status";
 
   recordEditedSub = new BehaviorSubject<boolean>(false);
 
@@ -19,10 +23,12 @@ export class CustomizationServiceService {
     private http: HttpClient,
     private cfg: AppConfig,
     private commonVarService: CommonVarService,
-    private authService: AuthService) {
+    private authService: AuthService,
+    @Inject(PLATFORM_ID) private platformId: Object) {
     // this.customizationApi = "http://localhost:8085/customization/";
     this.customizationApi = this.cfg.get("customizationApi", "/customization");
-    if(!(this.customizationApi.endsWith('/'))) this.customizationApi = this.customizationApi + '/';
+    if (!(this.customizationApi.endsWith('/'))) this.customizationApi = this.customizationApi + '/';
+    this.inBrowser = isPlatformBrowser(platformId);
   }
 
   /**
@@ -68,7 +74,7 @@ export class CustomizationServiceService {
     //     "userId": this.authService.getUserId()
     //   }
     // };
-    var url = this.customizationApi + "savedrec/" + recordid;
+    var url = this.customizationApi + "savedrecord/" + recordid;
     console.log("Save rec URL:", url);
     console.log("body:", body);
     return this.http.put(url, body);
@@ -118,5 +124,31 @@ export class CustomizationServiceService {
     else {
       return false;
     }
+  }
+
+  /**
+   * Function to set draft data status in local storage
+   */
+  setDraftDataStatus(ediid: string, updateDate: string) {
+    if (this.inBrowser)
+      localStorage.setItem(ediid, updateDate);
+  }
+
+  /**
+   * Function to get draft data status in local storage
+   */
+  getDraftDataStatus(ediid: string){
+    if (this.inBrowser)
+      return localStorage.getItem(ediid);
+    else 
+      return "";
+  }
+
+  /**
+   * Function to remove draft data status in local storage
+   */
+  removeDraftDataStatus(ediid: string) {
+    if(this.inBrowser)
+      localStorage.removeItem(ediid);
   }
 }

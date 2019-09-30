@@ -29,6 +29,7 @@ import { ConfirmationDialogService } from '../shared/confirmation-dialog/confirm
 import { NotificationService } from '../shared/notification-service/notification.service';
 import { ApiToken } from "../shared/auth-service/ApiToken";
 import { TaxonomyListService } from '../shared/taxonomy-list';
+import { DatePipe } from '@angular/common';
 
 declare var _initAutoTracker: Function;
 
@@ -189,6 +190,7 @@ export class LandingComponent implements OnInit {
   taxonomyTree: TreeNode[] = [];
   taxonomyList: any[];
   editEnabled: any;
+  updateDate: string;
 
   /**
    * Creates an instance of the SearchPanel
@@ -213,7 +215,8 @@ export class LandingComponent implements OnInit {
     private http: HttpClient,
     private confirmationDialogService: ConfirmationDialogService,
     private notificationService: NotificationService,
-    private taxonomyListService: TaxonomyListService) {
+    private taxonomyListService: TaxonomyListService,
+    private datePipe: DatePipe) {
     this.fieldObject['title'] = {};
     this.fieldObject['authors'] = {};
     this.fieldObject['contactPoint'] = {};
@@ -250,7 +253,6 @@ export class LandingComponent implements OnInit {
    * Get the params OnInit
    */
   ngOnInit() {
-
     this.taxonomyListService.get(0).subscribe((result) => {
       if (result != null && result != undefined)
         this.buildTaxonomyTree(result);
@@ -341,6 +343,14 @@ export class LandingComponent implements OnInit {
     this.ediid = this.searchValue;
 
     this.commonVarService.setEdiid(this.searchValue);
+
+    //Check draft data status if this is intpdr
+    if (this.editEnabled) {
+      this.updateDate = this.customizationServiceService.getDraftDataStatus(this.ediid);
+    }
+
+    this.customizationServiceService.removeDraftDataStatus(this.ediid);
+    // this.customizationServiceService.setDraftDataStatus(this.ediid, 'te                             st');
     this.files = [];
   }
 
@@ -884,7 +894,7 @@ export class LandingComponent implements OnInit {
   /*
   *  Set record level edit mode (for the edit button at top)
   */
- setRecordEditmode(editMode: boolean) {
+  setRecordEditmode(editMode: boolean) {
     console.log('this.inBrowser', this.inBrowser);
     var doLoadDraftData = false;
     if (editMode) {
@@ -906,7 +916,7 @@ export class LandingComponent implements OnInit {
               }
             )
         }
-        if(doLoadDraftData){
+        if (doLoadDraftData) {
           this.dataInit();
           this.customizationServiceService.getDraftData(this.ediid)
             .subscribe((res) => {
@@ -1125,16 +1135,17 @@ export class LandingComponent implements OnInit {
       (res) => {
         this.errorMsgDetail = '';
         this.displayError = false;
+        this.customizationServiceService.removeDraftDataStatus(this.ediid);
         this.notificationService.showSuccessWithTimeout("Record saved.", "", 3000);
+        this.setRecordEditmode(false);
+        this.commonVarService.setEditMode(false);
+        window.open('/od/id/' + this.searchValue, '_self');
         console.log("Record saved");
       },
       (err) => {
         this.setErrorForDisplay(err, "There was an error while saving the record.");
       }
     );
-    this.setRecordEditmode(false);
-    this.commonVarService.setEditMode(false);
-    window.open('/od/id/' + this.searchValue, '_self');
   }
 
   /*
@@ -1148,10 +1159,11 @@ export class LandingComponent implements OnInit {
             (res) => {
               this.notificationService.showSuccessWithTimeout("All changes have been erased.", "", 3000);
               this.setRecordEditmode(false);
+              this.customizationServiceService.removeDraftDataStatus(this.ediid);
               window.open('/od/id/' + this.searchValue, '_self');
             },
             (err) => {
-              this.setErrorForDisplay(err, "There was an error in customizationServiceService.delete.");
+              this.setErrorForDisplay(err, "There was an error deleting current changes.");
             }
           );
         }
@@ -1182,7 +1194,6 @@ export class LandingComponent implements OnInit {
   undoEditing(field: string) {
     var noMoreEdited = true;
     var success = true;
-    var errMsg: any;
     console.log("this.fieldObject", this.fieldObject);
     for (var fld in this.fieldObject) {
       if (field != fld && this.fieldObject[fld].edited) {
@@ -1192,6 +1203,7 @@ export class LandingComponent implements OnInit {
     }
 
     if (noMoreEdited) {
+      console.log("Deleting...");
       this.customizationServiceService.delete(this.ediid).subscribe(
         (res) => {
           if (this.originalRecord[field] == undefined)
@@ -1202,7 +1214,7 @@ export class LandingComponent implements OnInit {
           this.onUpdateSuccess(field);
         },
         (err) => {
-          this.onUpdateError(field, errMsg);
+          this.onUpdateError(field, err);
         }
       );
     } else {
@@ -1223,7 +1235,7 @@ export class LandingComponent implements OnInit {
           this.onUpdateSuccess(field);
         },
         err => {
-          this.onUpdateError(field, errMsg);
+          this.onUpdateError(field, err);
         });
     }
   }
@@ -1235,6 +1247,8 @@ export class LandingComponent implements OnInit {
     this.fieldObject[field]["edited"] = (JSON.stringify(this.record[field]) != JSON.stringify(this.originalRecord[field]));
     this.errorMsgDetail = '';
     this.displayError = false;
+    this.updateDate = this.datePipe.transform(new Date(), "MMM d, y, h:mm:ss a");
+    this.customizationServiceService.setDraftDataStatus(this.ediid, this.updateDate);
     this.notificationService.showSuccessWithTimeout(field + " updated.", "", 3000);
   }
 
