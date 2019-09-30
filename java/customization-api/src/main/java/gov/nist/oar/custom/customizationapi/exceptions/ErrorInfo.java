@@ -14,10 +14,6 @@ package gov.nist.oar.custom.customizationapi.exceptions;
 
 
 
-import java.util.Map;
-import java.util.Hashtable;
-
-import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 

@@ -14,8 +14,16 @@ package gov.nist.oar.custom.customizationapi.controller;
 
 
 
+import java.util.List;
+
+import org.joda.time.DateTime;
+import org.opensaml.saml2.core.Attribute;
+import org.opensaml.xml.schema.impl.XSAnyImpl;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.saml.SAMLCredential;
-import org.springframework.security.saml.userdetails.SAMLUserDetailsService;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
@@ -26,27 +34,6 @@ import com.nimbusds.jwt.SignedJWT;
 
 import gov.nist.oar.custom.customizationapi.config.SAMLConfig.SecurityConstant;
 import gov.nist.oar.custom.customizationapi.helpers.domains.UserToken;
-
-import java.security.Principal;
-import java.util.List;
-
-import org.joda.time.DateTime;
-import org.opensaml.xml.XMLObject;
-import org.opensaml.xml.schema.impl.XSAnyImpl;
-
-import org.opensaml.saml2.core.Attribute;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AnonymousAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
 
 /**
  * This controller sends JWT, a token generated after successful authentication.

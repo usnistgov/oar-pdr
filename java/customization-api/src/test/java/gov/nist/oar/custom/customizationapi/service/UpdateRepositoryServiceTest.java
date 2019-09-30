@@ -12,57 +12,35 @@ package gov.nist.oar.custom.customizationapi.service;
  * @author: Deoyani Nandrekar-Heinis
  */
 
-import com.mongodb.AggregationOutput;
-import com.mongodb.BasicDBObject;
-import com.mongodb.DBCollection;
-import com.mongodb.DBObject;
-import com.mongodb.MongoClient;
-import com.mongodb.client.FindIterable;
-import com.mongodb.client.MongoCollection;
-import com.mongodb.client.MongoCursor;
-import com.mongodb.client.MongoDatabase;
-import com.mongodb.client.model.Filters;
-
-import gov.nist.oar.custom.customizationapi.config.MongoConfig;
-import gov.nist.oar.custom.customizationapi.exceptions.CustomizationException;
-import gov.nist.oar.custom.customizationapi.exceptions.InvalidInputException;
-import gov.nist.oar.custom.customizationapi.repositories.UpdateRepository;
-
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.mock;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.when;
 
-import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 import org.bson.Document;
-import org.bson.conversions.Bson;
-import org.json.simple.JSONArray;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
-import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.util.ReflectionTestUtils;
+
+import com.mongodb.MongoClient;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoDatabase;
+
+import gov.nist.oar.custom.customizationapi.config.MongoConfig;
+import gov.nist.oar.custom.customizationapi.exceptions.CustomizationException;
+import gov.nist.oar.custom.customizationapi.exceptions.InvalidInputException;
 
 /**
  * This is a Service test written to check the functions in this class, which are as below:
@@ -110,12 +88,13 @@ public class UpdateRepositoryServiceTest {
 	Mockito.doReturn(recordCollection).when(mconfig).getRecordCollection();
 	Mockito.doReturn(changesCollection).when(mconfig).getChangeCollection();
 //	ReflectionTestUtils.setField(updateService, "mdserver", "https://testdata.nist.gov/rmm/records/");
-	ReflectionTestUtils.setField(dataOperations, "mdserver", "https://testdata.nist.gov/rmm/records/");
+	ReflectionTestUtils.setField(dataOperations, "mdserver", mdserver);
 
     }
 
     @Test
     public void editTest() throws CustomizationException, IOException {
+	logger.info("Unit tests: EditTest is called.");
 //	Mockito.doReturn(recordCollection).when(mconfig).getRecordCollection();
 //	Mockito.doReturn(changesCollection).when(mconfig).getChangeCollection();
 ////	ReflectionTestUtils.setField(updateService, "mdserver", "https://testdata.nist.gov/rmm/records/");
@@ -126,7 +105,7 @@ public class UpdateRepositoryServiceTest {
 //	when(dataOperations.checkRecordInCache(recordid, recordCollection)).thenReturn(true);
 
 //	
-	File file = new File(this.getClass().getClassLoader().getResource("record.json").getFile());
+//	File file = new File(this.getClass().getClassLoader().getResource("record.json").getFile());
 	String recorddata = new String(
 		Files.readAllBytes(Paths.get(this.getClass().getClassLoader().getResource("record.json").getFile())));
 	Document recordDoc = Document.parse(recorddata);

@@ -13,10 +13,15 @@
 package gov.nist.oar.custom.customizationapi.service;
 
 /**
+ * Exception thrown at runtime when requested resource is not available.
  * @author Deoyani Nandrekar-Heinis
  *
  */
 public class ResourceNotFoundException extends RuntimeException {
+    /**
+     * 
+     */
+    private static final long serialVersionUID = -2006356489223592443L;
     private String requestUrl = "";
 
     /**

@@ -12,34 +12,30 @@
  */
 package gov.nist.oar.custom.customizationapi.service;
 
-import org.bson.Document;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
-import org.mockito.junit.MockitoJUnitRunner;
-import org.powermock.api.mockito.PowerMockito;
-import org.springframework.test.util.ReflectionTestUtils;
-
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
-import com.mongodb.Mongo;
+import org.bson.Document;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.test.util.ReflectionTestUtils;
+
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 
 import gov.nist.oar.custom.customizationapi.exceptions.CustomizationException;
-import gov.nist.oar.custom.customizationapi.service.DatabaseOperations;
 
 /**
  * This class contains unit tests for different methods/functions available in DataOperations class
@@ -61,7 +57,7 @@ public class DataOperationsTest {
     @Mock
     private MongoDatabase mockDB;
     
-    private String mdserver = "http://testdata.nist.gov/rmm/records/";
+//    private String mdserver = "http://testdata.nist.gov/rmm/records/";
     private static DatabaseOperations mockDataOperations;
     private static Document change;
     private static Document updatedRecord;

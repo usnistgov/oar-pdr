@@ -16,14 +16,9 @@ import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 
 import com.mongodb.MongoException;
-import com.mongodb.client.MongoCollection;
 
 import gov.nist.oar.custom.customizationapi.config.MongoConfig;
 import gov.nist.oar.custom.customizationapi.exceptions.CustomizationException;
@@ -107,6 +102,7 @@ public class UpdateRepositoryService implements UpdateRepository {
      */
     private boolean updateHelper(String recordid, Document update) throws CustomizationException {
 
+	logger.info("Update Helper is called to check data in cache or changes in cache and update accordingly.");
 	if (!this.accessData.checkRecordInCache(recordid, mconfig.getRecordCollection()))
 	    this.accessData.putDataInCache(recordid, mconfig.getRecordCollection());
 

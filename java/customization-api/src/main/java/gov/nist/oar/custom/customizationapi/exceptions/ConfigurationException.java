@@ -7,6 +7,10 @@ package gov.nist.oar.custom.customizationapi.exceptions;
  */
 public class ConfigurationException extends Exception {
 
+    /**
+     * 
+     */
+    private static final long serialVersionUID = -3478456363037007927L;
     protected String parameter = null;
     protected String reason = null;
 

@@ -24,8 +24,6 @@ import org.json.JSONTokener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import gov.nist.oar.custom.customizationapi.exceptions.InvalidInputException;
 
 /**
