@@ -78,7 +78,7 @@ export class CustomizationServiceService {
     console.log("Save rec URL:", url);
     console.log("body:", body);
     body = "{}";
-    return this.http.put(url, null);
+    return this.http.put(url, body);
     // return this.http.put(url, body, httpOptions);
   }
 
