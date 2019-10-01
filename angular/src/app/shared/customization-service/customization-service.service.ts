@@ -76,8 +76,9 @@ export class CustomizationServiceService {
     // };
     var url = this.customizationApi + "savedrecord/" + recordid;
     console.log("Save rec URL:", url);
-    console.log("body:", body);
+    
     body = "{}";
+    console.log("body:", body);
     return this.http.put(url, body);
     // return this.http.put(url, body, httpOptions);
   }
