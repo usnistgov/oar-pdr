@@ -1,7 +1,7 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { LandingAboutComponent } from './landingAbout/landingAbout.component';
-import { LandingComponent } from './landing/landing.component';
+import { LandingPageComponent } from './landingPage/landingPage.component';
 import { NoidComponent } from './landing/noid.component';
 import { NerdmComponent } from './landing/nerdm.component';
 // import { SearchResolve } from './landing/search-service.resolve';
@@ -23,7 +23,7 @@ const routes: Routes = [
     children: [
       {
         path: '',
-        component: LandingComponent,
+        component: LandingPageComponent,
 
       }
     ]
@@ -32,7 +32,7 @@ const routes: Routes = [
     children: [
       {
         path: '',
-        component: LandingComponent,
+        component: LandingPageComponent,
 
       }
     ]

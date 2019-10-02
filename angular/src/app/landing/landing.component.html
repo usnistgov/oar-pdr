@@ -33,7 +33,7 @@
     <!-- <div id="overlay" *ngIf="isLocalProcessing"> -->
     <!-- <div class="loading" *ngIf="isLocalProcessing"></div> -->
     <!-- </div> -->
-    <div *ngIf="record?.length == 0 || isId === false">
+    <div *ngIf="record || isId === false">
       <div *ngIf="!isLoading" class="ui-g">
         <div class="ui-g-10 ui-md-10 ui-lg-10 ui-sm-12" style="padding-left: 1%">
           <b>No Landing page available</b>
@@ -41,7 +41,7 @@
         </div>
       </div>
     </div>
-    <div *ngIf="record.length !== 0 && isId === true">
+    <div *ngIf="record && isId === true">
       <div class="ui-g">
         <div class="ui-g-10 ui-md-10 ui-lg-10 ui-sm-12">
           <div class="ui-g">
@@ -67,8 +67,7 @@
                   </div>
                   <ng-template #hasTitle>
                     <div class="title editable_field">
-                      <h2 [ngStyle]="getFieldStyle('title')">
-                        {{record.title}}</h2>
+                      <h2 [ngStyle]="getFieldStyle('title')">{{record.title}}</h2>
                     </div>
                   </ng-template>
                   <button class="edit_button" *ngIf="recordEditmode" type="button" (click)="openModal('title')">
@@ -242,7 +241,7 @@
 
           <div class="ui-g">
             <div class="ui-g-12 ui-md-12 ui-lg-12 ui-sm-12">
-              <description-resources [record]="record" [originalRecord]="originalRecord" [files]="files" [distdownload]="distdownload" [isInternal]="isInternal" [filescount]="filescount" [metadata]="metadata" [inBrowser]="inBrowser" [recordEditmode]="recordEditmode" [fieldObject]="fieldObject" (errorMsgChanged)="changeErrorMsg($event)" (undo)="undoEditing($event)" (openModal)="openModal($event)">
+              <description-resources [record]="record" [originalRecord]="originalRecord" [files]="files" [distdownload]="distdownload" [filescount]="filescount" [metadata]="metadata" [inBrowser]="inBrowser" [recordEditmode]="recordEditmode" [fieldObject]="fieldObject" (errorMsgChanged)="changeErrorMsg($event)" (undo)="undoEditing($event)" (openModal)="openModal($event)">
               </description-resources>
               <metadata-detail [record]="record" [serviceApi]="serviceApi" [inBrowser]="inBrowser"
                 [metadata]="metadata">

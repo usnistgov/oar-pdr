@@ -3,7 +3,7 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { TransferState } from '@angular/platform-browser';
 import { Title }    from '@angular/platform-browser';
 import { ActivatedRoute, Router, Routes } from '@angular/router';
-import { HttpClientModule } from '@angular/common/http';
+import { HttpClientModule, HttpClient } from '@angular/common/http';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 import { LandingPageModule } from './landingPage.module';
@@ -19,6 +19,10 @@ import { TestDataService } from '../shared/testdata-service/testDataService';
 import * as mock from '../testing/mock.services';
 import {RouterTestingModule} from "@angular/router/testing";
 import { testdata } from '../../environments/environment';
+
+import { ToastrModule } from 'ngx-toastr';
+import { GoogleAnalyticsService } from '../shared/ga-service/google-analytics.service';
+import { ModalService } from '../shared/modal-service';
 
 describe('LandingPageComponent', () => {
     let component : LandingPageComponent;
@@ -63,13 +67,15 @@ describe('LandingPageComponent', () => {
     let setupComponent = function() {
         TestBed.configureTestingModule({
             imports: [ HttpClientModule, BrowserAnimationsModule, LandingPageModule,
-                       RouterTestingModule.withRoutes(routes) ],
+                       RouterTestingModule.withRoutes(routes),
+                       ToastrModule.forRoot() ],
             providers: [
                 { provide: ActivatedRoute,  useValue: route },
                 { provide: ElementRef,      useValue: null },
                 { provide: AppConfig,       useValue: cfg },
                 { provide: MetadataService, useValue: mds },
-                CommonVarService, CartService, DownloadService, TestDataService
+                CommonVarService, CartService, DownloadService, TestDataService,
+                GoogleAnalyticsService, ModalService, HttpClient
             ]
         }).compileComponents();
 

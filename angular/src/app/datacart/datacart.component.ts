@@ -17,7 +17,6 @@ import { Observable } from 'rxjs/Observable';
 import { ProgressSpinnerModule, DialogModule } from 'primeng/primeng';
 // import * as _ from 'lodash';
 // import * as __ from 'underscore';
-import { environment } from '../../environments/environment';
 import { DownloadData } from '../shared/download-service/downloadData';
 
 import { CommonVarService } from '../shared/common-var'
