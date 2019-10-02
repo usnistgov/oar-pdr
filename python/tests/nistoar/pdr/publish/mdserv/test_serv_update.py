@@ -298,6 +298,43 @@ class TestPrePubMetadataService(test.TestCase):
         nerdm = self.srv.resolve_id(midasid)
         self.assertTrue(updated == nerdm, "Updated and resolved NERDm not the same")
 
+    def test_resume_patching(self):
+        # this test tests for bug in which there is no SIP from MIDAS dir but
+        # there is a metadata bag from a previous call to patch_id; under the
+        # bug, the metadata bag was being destroyed and recreated, thus
+        # throwing away the previous patches.
+
+        # Establish the metadata bag
+        mdata = self.srv.resolve_id(self.midasid)
+        self.assertIn('title', mdata)
+        self.assertNotEqual(mdata['title'], "Tacos!")
+        self.assertNotIn('aka', mdata)
+
+        # configure a new service without an SIP parent directory
+        self.srv.cfg['review_dir'] = "/tmp"
+        self.srv.cfg['upload_dir'] = "/tmp"
+        self.srv.cfg['update'] = {
+            'require_midas_sip': False,
+            'updatable_properties': [ "aka", "title", "components[].mediaType" ]
+        }
+        self.srv = serv.PrePubMetadataService(self.srv.cfg)        
+        mdata = self.srv.resolve_id(self.midasid)
+        self.assertIn('title', mdata)
+        self.assertNotEqual(mdata['title'], "Tacos!")
+        self.assertNotIn('aka', mdata)
+
+        # first patch
+        mdata = self.srv.patch_id(self.midasid, {"aka": "TT"})
+
+        self.assertEqual(mdata['aka'], "TT")
+        self.assertNotEqual(mdata['title'], "Tacos!")
+        
+        # first patch
+        mdata = self.srv.patch_id(self.midasid, {"title": "Tacos!"})
+        self.assertEqual(mdata['title'], "Tacos!")
+        self.assertEqual(mdata['aka'], "TT")
+
+        
 
         
 

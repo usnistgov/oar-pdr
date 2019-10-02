@@ -349,26 +349,32 @@ class PrePubMetadataService(PublishSystem):
 
         except SIPDirectoryNotFound as ex:
 
+            # there is no input data from midas...
+            #
             if self.cfg.get('update',{}).get('require_midas_sip', True) or \
                not self.prepsvc:
                 # in principle, users need not edit data via MIDAS in order
                 # to edit via the PDR; this parameter requires it.  
                 raise IDNotFound('Dataset with ID is not currently editable');
 
+            # See if there is a working metadata bag cached
             bagname = midasid_to_bagname(id);
-            prepper = self.prepsvc.prepper_for(bagname, log=self.log)
-                                               
-            if not prepper.aip_exists():
-                raise IDNotFound('Dataset with ID not found.');
+            bagdir = os.path.join(self.workdir, bagname)
+            if not os.path.exists(bagdir):
 
-            bagparent = self.cfg.get('working_dir')
-            if not bagparent or not os.path.isdir(bagparent):
-                raise ConfigurationException(bagdir +
-                                             ": working dir not found")
-            bagdir = os.path.join(bagparent, bagname)
-            prepper.create_new_update(bagdir);
+                # create a working metadata bag from the previously published
+                # data
+                prepper = self.prepsvc.prepper_for(bagname, log=self.log)
+                                                   
+                if not prepper.aip_exists():
+                    raise IDNotFound('Dataset with ID not found.');
 
-            bagbldr = BagBuilder(bagparent, bagname,
+                if not self.workdir or not os.path.isdir(self.workdir):
+                    raise ConfigurationException(bagdir +
+                                                 ": working dir not found")
+                prepper.create_new_update(bagdir);
+
+            bagbldr = BagBuilder(self.workdir, bagname,
                               self.cfg.get('bagger', {}).get("bag_builder",{}));
 
         # this will raise an InvalidRequest exception if something wrong is
