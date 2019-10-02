@@ -42,7 +42,7 @@ export class FakeBackendInterceptor implements HttpInterceptor {
           userId: '1234',
           token: 'fake-jwt-token'
         };
-        window.alert('Click ok to login');
+        // window.alert('Click ok to login');
         return of(new HttpResponse({ status: 200, body }));
       }
 

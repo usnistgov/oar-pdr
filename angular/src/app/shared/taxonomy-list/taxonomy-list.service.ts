@@ -21,9 +21,10 @@ export class TaxonomyListService {
    */
   constructor(private http: HttpClient,
     private cfg: AppConfig) {
-      this.landingBackend = cfg.get("mdAPI", "/unconfigured");
+      console.log("AppConfig", cfg);
+      this.landingBackend = cfg.get("locations.mdService", "/unconfigured");
       if (this.landingBackend == "/unconfigured")
-          throw new Error("Metadata service endpoint not configured!");
+          throw new Error("mdService endpoint not configured!");
   }
 
   /**

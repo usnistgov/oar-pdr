@@ -30,7 +30,6 @@ import { FileSaverService } from 'ngx-filesaver';
 import { CommonFunctionService } from '../shared/common-function/common-function.service';
 import { GoogleAnalyticsService } from '../shared/ga-service/google-analytics.service';
 
-declare var Ultima: any;
 declare var saveAs: any;
 declare var $: any;
 

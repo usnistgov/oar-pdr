@@ -10,7 +10,8 @@ import { SearchService } from '../../shared/search-service/index';
 })
 export class AuthorPopupComponent implements OnInit {
   @Input() inputValue: any;
-  @Input() title: string;
+  @Input() field: string;
+  @Input() title?: string;
   @Output() returnValue: EventEmitter<any> = new EventEmitter();
 
   isAuthorCollapsed: boolean = false;
@@ -28,7 +29,7 @@ export class AuthorPopupComponent implements OnInit {
 
   ngOnInit() {
     if (this.inputValue != undefined)
-      this.originalAuthors = JSON.parse(JSON.stringify(this.inputValue));
+      this.originalAuthors = this.commonVarService.deepCopy(this.inputValue);
     else
       this.inputValue = {};
 
@@ -106,8 +107,8 @@ export class AuthorPopupComponent implements OnInit {
   }
 
   /*
-*   Update full name when middle name changed
-*/
+  *   Update full name when middle name changed
+  */
   onMiddleNameChange(author: any, middleName: string) {
     author.dataChanged = true;
     if (!author.fnLocked) {
@@ -136,8 +137,8 @@ export class AuthorPopupComponent implements OnInit {
   }
 
   /*
-*   Return header bar background color based on the data status
-*/
+  *   Return header bar background color based on the data status
+  */
   getHeaderBackgroundColor(author: any) {
     if (author.dataChanged) {
       return "green";
@@ -202,7 +203,7 @@ export class AuthorPopupComponent implements OnInit {
     if (i > this.originalAuthors.authors.length-1) {
       this.deleteAuthor(author);
     } else {
-      this.inputValue.authors[i] = JSON.parse(JSON.stringify(this.originalAuthors.authors[this.inputValue.authors[i].originalIndex]));
+      this.inputValue.authors[i] = this.commonVarService.deepCopy(this.originalAuthors.authors[this.inputValue.authors[i].originalIndex]);
       author.dataChanged = false;
       author.fnLocked = false;
       author.isCollapsed = false;
@@ -214,10 +215,10 @@ export class AuthorPopupComponent implements OnInit {
   *   Move author up
   */
   moveAuthorUp(author: any, i: number) {
-    var tempAuth01 = JSON.parse(JSON.stringify(this.inputValue.authors[i - 1]));
-    var tempAuth02 = JSON.parse(JSON.stringify(this.inputValue.authors[i]));
-    this.inputValue.authors[i - 1] = JSON.parse(JSON.stringify(tempAuth02));
-    this.inputValue.authors[i] = JSON.parse(JSON.stringify(tempAuth01));
+    var tempAuth01 = this.commonVarService.deepCopy(this.inputValue.authors[i - 1]);
+    var tempAuth02 = this.commonVarService.deepCopy(this.inputValue.authors[i]);
+    this.inputValue.authors[i - 1] = this.commonVarService.deepCopy(tempAuth02);
+    this.inputValue.authors[i] = this.commonVarService.deepCopy(tempAuth01);
     author.dataChanged = true;
   }
 
@@ -225,10 +226,10 @@ export class AuthorPopupComponent implements OnInit {
   *   Move author down
   */
   moveAuthorDown(author: any, i: number) {
-    var tempAuth01 = JSON.parse(JSON.stringify(this.inputValue.authors[i + 1]));
-    var tempAuth02 = JSON.parse(JSON.stringify(this.inputValue.authors[i]));
-    this.inputValue.authors[i + 1] = JSON.parse(JSON.stringify(tempAuth02));
-    this.inputValue.authors[i] = JSON.parse(JSON.stringify(tempAuth01));
+    var tempAuth01 = this.commonVarService.deepCopy(this.inputValue.authors[i + 1]);
+    var tempAuth02 = this.commonVarService.deepCopy(this.inputValue.authors[i]);
+    this.inputValue.authors[i + 1] = this.commonVarService.deepCopy(tempAuth02);
+    this.inputValue.authors[i] = this.commonVarService.deepCopy(tempAuth01);
     author.dataChanged = true;
   }
 

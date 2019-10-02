@@ -17,7 +17,7 @@
             </div>
           </div>
         </ng-template>
-        <button class="edit_button" *ngIf="recordEditmode" type="button" (click)="openDescriptionModal()">
+        <button class="edit_button" *ngIf="recordEditmode" type="button" (click)="openModal.emit('description')">
           <i class="faa faa-pencil icon_enabled" data-toggle="tooltip" title="Edit description"></i>
         </button>
         <button class="undo_button" *ngIf="recordEditmode" type="button" [disabled]="!fieldObject.description.edited"
@@ -44,7 +44,7 @@
             </span>
           </div>
         </ng-template>
-        <button class="edit_button" *ngIf="recordEditmode" type="button" (click)="openTopicModal()">
+        <button class="edit_button" *ngIf="recordEditmode" type="button" (click)="openModal.emit('topic')">
           <i class="faa faa-pencil icon_enabled" data-toggle="tooltip" title="Edit topic"></i>
         </button>
         <button class="undo_button" *ngIf="recordEditmode" type="button" [disabled]="!fieldObject.topic.edited"
@@ -71,7 +71,7 @@
             </span>
           </div>
         </ng-template>
-        <button class="edit_button" *ngIf="recordEditmode" type="button" (click)="openKeywordModal()">
+        <button class="edit_button" *ngIf="recordEditmode" type="button" (click)="openModal.emit('keyword')">
           <i class="faa faa-pencil icon_enabled" data-toggle="tooltip" title="Edit keyword"></i>
         </button>
         <button class="undo_button" *ngIf="recordEditmode" type="button" [disabled]="!fieldObject.keyword.edited"

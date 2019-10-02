@@ -2,31 +2,48 @@
   <button type="button" (click)="cancelRecord()" pButton type="submit"
     style="float:right;margin:.5em 2em .5em 0em;width:150px; height:2em; background-color:green;color:white;"
     [disabled]="!recordEditmode || fieldObject.title.detailEditmode">
-    <i class="faa faa-trash faa-1x icon-white" style="color: #fff;padding-left: .5em;padding-right: .5em;"></i>
+    <i class="faa faa-trash faa-1x icon-white" style="color: #fff;padding-left: .2em;padding-right: .2em;"></i>
     Discard
   </button>
   <button type="button" (click)="saveRecord()" pButton type="submit"
     style="float:right;margin:.5em 1em .5em 0em;width:150px; height:2em; background-color:green;color:white;padding-right: 1em;"
     [disabled]="!recordEditmode || fieldObject.title.detailEditmode">
-    <i class="faa faa-save faa-1x icon-white" style="color: #fff;padding-left: .5em;padding-right: .5em;"></i>
-    Save
+    <i class="faa faa-save faa-1x icon-white" style="color: #fff;padding-left: .2em;padding-right: .2em;"></i>
+    Submit
   </button>
-  <button type="button" (click)="setRecordEditmode(true)" pButton type="submit"
-    style="float:right;margin:.5em 1em .5em 1em;width:150px; height:2em; background-color:green;color:white;padding-right: 1em;"
-    [disabled]="recordEditmode">
+  <button *ngIf="!recordEditmode" type="button" (click)="setRecordEditmode(true)" pButton type="submit"
+    style="float:right;margin:.5em 1em .5em 1em;width:150px; height:2em; background-color:green;color:white;padding-right: 1em;">
     <i class="faa faa-pencil faa-1x icon-white" style="color: #fff;padding-left: .5em;padding-right: .5em;"></i>
     Edit
   </button>
+  <button *ngIf="recordEditmode" type="button" (click)="setRecordEditmode(false)" pButton type="submit"
+    style="float:right;margin:.5em 1em .5em 1em;width:150px; height:2em; background-color:green;color:white;padding-right: 1em;">
+    <i class="faa faa-sign-out faa-1x icon-white" style="color: #fff;padding-left: .2em;padding-right: .2em;"></i>
+    Quit Edit
+  </button>
 </div>
-<div class="top_message" *ngIf="!loggedIn()">
-  <span style="margin-right: 3.5em;">To see previously edited data or edit current data, click on Edit button.</span>
-</div>
-<div class="top_message" *ngIf="loggedIn() && record.modified != undefined">
-  <span style="margin-right: 2em;">This record was edited on:
-    {{record.modified}}</span>
-</div>
-<div *ngIf="displayError" style="color: red; padding: 1em;">
-  Ooops! There was a problem updating the data. Please try edit and save again. If problem persists, please contact us at <a href="mailto:datasupport@nist.gov?subject=PDR:Error updating field&body={{errorMsg}}">datasupport@nist.gov</a> to report the problem.
+<div *ngIf="editEnabled">
+  <div class="top_message" *ngIf="!recordEditmode; else editmode">
+    <span *ngIf="updateDate; else noDraft" style="color: rgb(255, 115, 0);">You have draft data edited on
+      {{updateDate}}. Click on edit button to continue editing.</span>
+    <ng-template #noDraft>
+      <span>To edit current data, click on Edit button.</span>
+    </ng-template>
+  </div>
+  <ng-template #editmode>
+    <div class="top_message">
+      <span>This record was edited on: </span>
+      <span *ngIf="updateDate; else modifyDate">{{updateDate}}</span>
+      <ng-template #modifyDate>
+        <span>{{record.modified}}</span>
+      </ng-template>
+    </div>
+  </ng-template>
+  <div *ngIf="displayError" style="color: red; padding: 1em;">
+    Ooops! {{errorMsg}}. If problem persists, please contact us at <a
+      href="mailto:datasupport@nist.gov?subject=PDR:Error updating field&body={{errorMsgDetail}}">datasupport@nist.gov</a>
+    to report the problem.
+  </div>
 </div>
 <div class="ui-grid ui-grid-responsive ui-grid-pad center" style="border: 0px solid white;">
   <div class="card landingcard">
@@ -37,7 +54,7 @@
       <div *ngIf="!isLoading" class="ui-g">
         <div class="ui-g-10 ui-md-10 ui-lg-10 ui-sm-12" style="padding-left: 1%">
           <b>No Landing page available</b>
-          <p>{{errorMsg}}</p>
+          <p>{{errorMsgDetail}}</p>
         </div>
       </div>
     </div>
@@ -128,7 +145,7 @@
               <!-- <p></p> -->
             </div>
             <div class="ui-g-8 ui-md-8 ui-lg-8 ui-sm-12">
-                            <div style="display: table;">
+              <div style="display: table;">
                 <div class="editable_container">
                   <div class="editable_field" *ngIf="!record.contactPoint; else hasContacts">
                     <div class="editable_field" *ngIf="recordEditmode" [ngStyle]="getFieldStyle('contactPoint')">
@@ -229,15 +246,19 @@
             <div class="ui-g-4 ui-md-4 ui-lg-4 ui-sm-12">
               <span *ngIf="HomePageLink" style="float: right;">
                 <span *ngIf="inBrowser; else visitHomeOnServer">
-                  <button pButton type="button" class="homePageLink" icon="faa faa-external-link"
-                    label="Visit Home Page" style="padding: 0 1em 0 2em;height: 2.5em;"
-                    (click)="visitHomePage(record.landingPage, $event, 'Resource title: '+record.title)"></button>
+                  <button type="button"
+                    (click)="visitHomePage(record.landingPage, $event, 'Resource title: '+record.title)" pButton
+                    type="submit"
+                    style="float:right;margin:.5em 1em .5em 0em;width:200px; height:2em; background-color:#1471AE;color:white;padding-right: 1em;"
+                    [disabled]="recordEditmode">
+                    <i class="faa faa-external-link" style="color: #fff;padding-left: .5em;padding-right: .5em;"></i>
+                    Visit Home Page
+                  </button>
                 </span>
                 <ng-template #visitHomeOnServer>Visit Home Page</ng-template>
               </span>
             </div>
           </div>
-
 
           <div class="ui-g">
             <div class="ui-g-12 ui-md-12 ui-lg-12 ui-sm-12">

@@ -5,6 +5,8 @@ import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { Router } from '@angular/router';
 import { CommonVarService } from '../../shared/common-var';
 import { ApiToken } from "./ApiToken";
+import { isPlatformBrowser } from '@angular/common';
+import { PLATFORM_ID, APP_ID, Inject } from '@angular/core';
 
 @Injectable({
   providedIn: 'root'
@@ -19,6 +21,7 @@ export class AuthService implements OnInit {
   baseApiUrl: string = "https://pn110559.nist.gov/saml-sp/api/mycontroller";
   loginURL: string = "https://pn110559.nist.gov/saml-sp/auth/token";
   useridModeSub = new BehaviorSubject<string>('');
+  inBrowser: boolean = false;
 
   httpOptions = {
     headers: new HttpHeaders({ 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': 'https://pn110559.nist.gov' }),
@@ -28,8 +31,9 @@ export class AuthService implements OnInit {
   constructor(
     private http: HttpClient,
     private commonVarService: CommonVarService,
-    private router: Router) {
-
+    private router: Router,
+    @Inject(PLATFORM_ID) private platformId: Object) {
+      this.inBrowser = isPlatformBrowser(platformId);
   }
 
   ngOnInit() {
@@ -131,49 +135,66 @@ export class AuthService implements OnInit {
    * Get stored token
    */
   setToken(token: any) {
-    return Promise.resolve(localStorage.setItem(this._tokenName, token));
+    if(this.inBrowser)
+      return Promise.resolve(localStorage.setItem(this._tokenName, token));
+    else
+      return Promise.resolve();
   }
 
   /*
    * Get stored token
    */
   getToken() {
-    return localStorage.getItem(this._tokenName)
+    if(this.inBrowser)
+      return localStorage.getItem(this._tokenName);
+    else  
+      return null;
   }
 
   /*
    * Remove stored token
    */
   removeToken() {
-    localStorage.removeItem(this._tokenName);
+    if(this.inBrowser)
+      localStorage.removeItem(this._tokenName);
   }
 
   /*
  * Get stored token
  */
   setUserId(userid: any) {
-    return Promise.resolve(localStorage.setItem(this.userIdFieldName, userid));
+    if(this.inBrowser)
+      return Promise.resolve(localStorage.setItem(this.userIdFieldName, userid));
+    else
+      return Promise.resolve();
   }
 
   /*
    * Get stored token
    */
   getUserId() {
-    return localStorage.getItem(this.userIdFieldName)
+    if(this.inBrowser)
+      return localStorage.getItem(this.userIdFieldName)
+    else  
+      return "";
   }
 
   /*
    * Remove stored token
    */
   removeUserId() {
-    localStorage.removeItem(this.userIdFieldName);
+    if(this.inBrowser)
+      localStorage.removeItem(this.userIdFieldName);
   }
 
   /*
    * Determine if the user is logged in by checking the existence of the token
    */
   loggedIn() {
-    return !!this.getToken();
+    if(this.inBrowser)
+      return !!this.getToken();
+    else  
+      return false;
   }
 
   /*

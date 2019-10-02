@@ -63,13 +63,7 @@ describe('Landing Component', () => {
       ]})
       .compileComponents();
     }));
-
-    beforeEach(() => {
-      fixture = TestBed.createComponent(LandingComponent);
-      component = fixture.componentInstance;
-      fixture.detectChanges();
-    });
-
+    
     it('should check the landing component', async(() => {
       expect(component).toBeTruthy();
     }));

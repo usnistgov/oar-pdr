@@ -26,6 +26,7 @@ import { ConfirmationDialogService } from '../shared/confirmation-dialog/confirm
 import { NotificationService } from '../shared/notification-service/notification.service';
 import { ApiToken } from "../shared/auth-service/ApiToken";
 import { TaxonomyListService } from '../shared/taxonomy-list';
+import { DatePipe } from '@angular/common';
 
 declare var _initAutoTracker: Function;
 
@@ -133,6 +134,7 @@ export class LandingComponent implements OnInit {
   // msgs: Message[] = [];
   exception: string;
   errorMsg: string;
+  errorMsgDetail: string;
   displayError: boolean = false;
   status: string;
   searchValue: string;
@@ -171,13 +173,10 @@ export class LandingComponent implements OnInit {
   currentMode: string = 'initial';
   tempContactPoint: any;
   tempAuthors: any = {};
-  // tempAddress: string;
   tempDecription: string;
   tempInput: any = {};
-  // isAuthorCollapsed: boolean = false;
   organizationList: string[] = ["National Institute of Standards and Technology"]
   HomePageLink: boolean = false;
-  // updateUrl: string;
   isVisible: boolean;
   hasSavedData: boolean = false;
   saveDataLoaded: boolean = false;
@@ -185,6 +184,7 @@ export class LandingComponent implements OnInit {
   taxonomyTree: TreeNode[] = [];
   taxonomyList: any[];
   editEnabled: any;
+  updateDate: string;
 
   @Input() record : NerdmRes = null;  // this should be set by the parent component
   @Input() inBrowser : boolean = false;  
@@ -208,7 +208,8 @@ export class LandingComponent implements OnInit {
     private http: HttpClient,
     private confirmationDialogService: ConfirmationDialogService,
     private notificationService: NotificationService,
-    private taxonomyListService: TaxonomyListService) {
+    private taxonomyListService: TaxonomyListService,
+    private datePipe: DatePipe) {
     this.fieldObject['title'] = {};
     this.fieldObject['authors'] = {};
     this.fieldObject['contactPoint'] = {};
@@ -244,7 +245,6 @@ export class LandingComponent implements OnInit {
    * Get the params OnInit
    */
   ngOnInit() {
-
     this.taxonomyListService.get(0).subscribe((result) => {
       if (result != null && result != undefined)
         this.buildTaxonomyTree(result);
@@ -254,10 +254,7 @@ export class LandingComponent implements OnInit {
         this.taxonomyList.push({ "taxonomy": result[i].label });
       }
     }, (err) => {
-      console.log("There is an error getting taxonomy list.");
-      console.log(err);
-      this.errorMsg = err;
-      this.displayError = true;
+      this.setErrorForDisplay(err, "There was an error getting taxonomy list.");
     });
 
     this.loadPubData();
@@ -339,6 +336,14 @@ export class LandingComponent implements OnInit {
     this.ediid = this.searchValue;
 
     this.commonVarService.setEdiid(this.searchValue);
+
+    //Check draft data status if this is intpdr
+    if (this.editEnabled) {
+      this.updateDate = this.customizationServiceService.getDraftDataStatus(this.ediid);
+    }
+
+    this.customizationServiceService.removeDraftDataStatus(this.ediid);
+    // this.customizationServiceService.setDraftDataStatus(this.ediid, 'te                             st');
     this.files = [];
   }
 
@@ -355,12 +360,12 @@ export class LandingComponent implements OnInit {
       this.searchValue = this.route.snapshot.url.toString().split("/id/").pop();
 
     
-      if (this.record) {
-          this.onSuccess();
-          this.saveDataLoaded = false;
-          this.originalRecord = JSON.parse(JSON.stringify(this.record));
-          console.log("record", this.record);
-      }
+    if (this.record) {
+      this.onSuccess();
+      this.saveDataLoaded = false;
+      this.originalRecord = this.commonVarService.deepCopy(this.record);
+      console.log("record", this.record);
+    }
   }
 
   /*
@@ -375,29 +380,7 @@ export class LandingComponent implements OnInit {
     return editingObject;
   }
 
-  loadDraftData() {
-    this.dataInit();
-    return this.customizationServiceService.getDraftData(this.ediid)
-      .subscribe((res) => {
-        if (res != undefined && res != null) {
-            this.onSuccess()
-            this.commonVarService.setContentReady(true);
-            this.saveDataLoaded = true;
-            this.commonVarService.setRefreshTree(true);
-            this.checkDataChanges();
-        } else {
-          this.loadPubData();
-        }
-      }, (err) => {
-        console.log("there is an error grtting saved data.");
-        console.log(err);
-        this.errorMsg = err;
-        this.displayError = true;
-        this.loadPubData();
-      });
-  }
-
- /*
+  /*
     Function after view init
   */
   ngAfterViewInit() {
@@ -449,9 +432,9 @@ export class LandingComponent implements OnInit {
    */
   onError(error: any) {
     this.exception = (<any>error).ex;
-    this.errorMsg = (<any>error).message;
+    this.errorMsgDetail = (<any>error).message;
     this.status = (<any>error).httpStatus;
-    //this.msgs.push({severity:'error', summary:this.errorMsg + ':', detail:this.status + ' - ' + this.exception});
+    //this.msgs.push({severity:'error', summary:this.errorMsgDetail + ':', detail:this.status + ' - ' + this.exception});
   }
 
   turnSpinnerOff() {
@@ -851,31 +834,57 @@ export class LandingComponent implements OnInit {
   /*
   *  Set record level edit mode (for the edit button at top)
   */
-  setRecordEditmode(mode: boolean) {
-    this.recordEditmode = mode;
-    if (mode && !this.authService.loggedIn()) {
-      this.authService.loginUser()
-        .subscribe(
-          res => {
-            this.authService.handleTokenSuccess(res as ApiToken);
-            if (mode) {
-              console.log("loading saved record...");
-              this.loadDraftData();
-            } else {
-              console.log("loading mdserver record...");
-              this.loadPubData();
-            }
-            this.recordEditmode = mode;
-            this.commonVarService.setEditMode(mode);
-          },
-          err => {
-            this.errorMsg = err;
-            this.displayError = true;
-            this.authService.handleTokenError(err);
-          }
-        )
+  setRecordEditmode(editMode: boolean) {
+    console.log('this.inBrowser', this.inBrowser);
+    var doLoadDraftData = false;
+    if (editMode) {
+      if (this.inBrowser) {
+        if (this.authService.loggedIn()) {
+          //If user already logged in, load draft data
+          doLoadDraftData = true;
+        } else {
+          //If user not logged in, force user login then load draft data. If login failed, do nothing
+          this.authService.loginUser()
+            .subscribe(
+              res => {
+                this.authService.handleTokenSuccess(res as ApiToken);
+                doLoadDraftData = true;
+              },
+              err => {
+                this.setErrorForDisplay(err, "There was an error login in the user.");
+                this.authService.handleTokenError(err);
+              }
+            )
+        }
+        if (doLoadDraftData) {
+          this.dataInit();
+          this.customizationServiceService.getDraftData(this.ediid)
+            .subscribe((res) => {
+              console.log("Draft data return:", res);
+              if (res != undefined && res != null) {
+                this.onSuccess(res).then(function (result) {
+                  this.commonVarService.setContentReady(true);
+                  this.saveDataLoaded = true;
+                  this.commonVarService.setRefreshTree(true);
+                  this.checkDataChanges();
+                  this.recordEditmode = editMode;
+                  this.commonVarService.setEditMode(editMode);
+                }.bind(this), function (err) {
+                  alert("something went wrong while fetching draft data.");
+                });
+              }
+            }, (err) => {
+              this.setErrorForDisplay(err, "There was an error getting draft data.");
+            })
+        }
+      } else {
+        //If in server side, do nothing
+      }
+    } else {
+      this.loadPubData();
+      this.recordEditmode = editMode;
+      this.commonVarService.setEditMode(editMode);
     }
-
   }
 
   /*
@@ -923,7 +932,6 @@ export class LandingComponent implements OnInit {
     };
 
     this.tempInput[fieldName] = this.commonVarService.getBlankField(fieldName);
-
     switch (fieldName) {
       case "description":
         // Description need special handling
@@ -934,11 +942,19 @@ export class LandingComponent implements OnInit {
         this.tempInput[fieldName] = tempDecription;
         break;
       case "authors":
-        for (var author in this.tempInput.authors) {
-          this.tempInput.authors[author].isCollapsed = false;
-          this.tempInput.authors[author].fnLocked = false;
-          this.tempInput.authors[author].originalIndex = author;
-          this.tempInput.authors[author].dataChanged = false;
+        var tempauthors = [];
+        if (this.record['authors'] != undefined && this.record['authors'].length > 0)
+          this.tempInput['authors'] = this.commonVarService.deepCopy(this.record['authors']);
+        else {
+          tempauthors.push(this.commonVarService.getBlankField(fieldName));
+          this.tempInput[fieldName] = tempauthors;
+        }
+
+        for (var author in this.tempInput['authors']) {
+          this.tempInput.authors[author]['isCollapsed'] = false;
+          this.tempInput.authors[author]['fnLocked'] = false;
+          this.tempInput.authors[author]['originalIndex'] = author;
+          this.tempInput.authors[author]['dataChanged'] = false;
         }
         break;
       case "keyword":
@@ -961,13 +977,12 @@ export class LandingComponent implements OnInit {
         break;
       default:
         if (this.record[fieldName] != undefined && this.record[fieldName] != "") {
-          this.tempInput[fieldName] = JSON.parse(JSON.stringify(this.record[fieldName]));
+          this.tempInput[fieldName] = this.commonVarService.deepCopy(this.record[fieldName]);
         } else {
           this.tempInput[fieldName] = [];
           this.tempInput[fieldName].push(this.commonVarService.getBlankField(fieldName));
         }
     }
-    console.log("this.tempInput", this.tempInput);
 
     const modalRef = this.ngbModal.open(
       (fieldName == 'authors' ? AuthorPopupComponent : (fieldName == 'title' ? DescriptionPopupComponent : (fieldName == 'contactPoint' ? ContactPopupComponent : (fieldName == 'topic' ? SearchTopicsComponent : DescriptionPopupComponent)))),
@@ -975,21 +990,24 @@ export class LandingComponent implements OnInit {
     );
 
     modalRef.componentInstance.inputValue = this.tempInput;
-    modalRef.componentInstance['title'] = fieldName;
+    modalRef.componentInstance['field'] = fieldName;
+    modalRef.componentInstance['title'] = fieldName.toUpperCase();
     if (fieldName == 'topic')
       modalRef.componentInstance.taxonomyTree = this.taxonomyTree;
+
+    if (fieldName == 'keyword')
+      modalRef.componentInstance.message = "Please enter keywords separated by comma.";
 
     modalRef.componentInstance.returnValue.subscribe((returnValue) => {
       if (returnValue) {
         switch (fieldName) {
           case "description":
             var tempDescs = returnValue[fieldName].split(/\n\s*\n/).filter(desc => desc != '');
-            console.log('tempDescs', tempDescs);
-            returnValue[fieldName] = JSON.parse(JSON.stringify(tempDescs));
+            returnValue[fieldName] = this.commonVarService.deepCopy(tempDescs);
             break;
           case "keyword":
             var tempDescs = returnValue[fieldName].split(',').filter(keyword => keyword != '');
-            returnValue[fieldName] = JSON.parse(JSON.stringify(tempDescs));
+            returnValue[fieldName] = this.commonVarService.deepCopy(tempDescs);
             break;
           case "topic":
             var strtempTopics: string = '';
@@ -1000,7 +1018,7 @@ export class LandingComponent implements OnInit {
               strtempTopics = strtempTopics + returnValue["topic"][i];
               lTempTopics.push({ '@type': 'Concept', 'scheme': 'https://www.nist.gov/od/dm/nist-themes/v1.0', 'tag': returnValue["topic"][i] });
             }
-            returnValue["topic"] = JSON.parse(JSON.stringify(lTempTopics));
+            returnValue["topic"] = this.commonVarService.deepCopy(lTempTopics);
             break;
         }
 
@@ -1010,7 +1028,7 @@ export class LandingComponent implements OnInit {
 
         this.customizationServiceService.update(this.ediid, JSON.stringify(postMessage)).subscribe(
           result => {
-            this.record[fieldName] = JSON.parse(JSON.stringify(returnValue[fieldName]));
+            this.record[fieldName] = this.commonVarService.deepCopy(returnValue[fieldName]);
             this.onUpdateSuccess(fieldName);
           },
           err => {
@@ -1055,21 +1073,19 @@ export class LandingComponent implements OnInit {
     // Send save request to back end
     this.customizationServiceService.saveRecord(this.ediid, "").subscribe(
       (res) => {
-        this.errorMsg = '';
+        this.errorMsgDetail = '';
         this.displayError = false;
+        this.customizationServiceService.removeDraftDataStatus(this.ediid);
         this.notificationService.showSuccessWithTimeout("Record saved.", "", 3000);
+        this.setRecordEditmode(false);
+        this.commonVarService.setEditMode(false);
+        window.open('/od/id/' + this.searchValue, '_self');
         console.log("Record saved");
       },
       (err) => {
-        this.errorMsg = err;
-        this.displayError = true;
-        this.notificationService.showError(err, "Save error");
-        console.log("Error occured while saving record:", err);
+        this.setErrorForDisplay(err, "There was an error while saving the record.");
       }
     );
-    this.setRecordEditmode(false);
-    this.commonVarService.setEditMode(false);
-    window.open('/od/id/' + this.searchValue, '_self');
   }
 
   /*
@@ -1083,13 +1099,11 @@ export class LandingComponent implements OnInit {
             (res) => {
               this.notificationService.showSuccessWithTimeout("All changes have been erased.", "", 3000);
               this.setRecordEditmode(false);
+              this.customizationServiceService.removeDraftDataStatus(this.ediid);
               window.open('/od/id/' + this.searchValue, '_self');
             },
             (err) => {
-              this.errorMsg = err;
-              this.displayError = true;
-              this.notificationService.showError(err, "Save error");
-              console.log("There is an error in customizationServiceService.delete:", err);
+              this.setErrorForDisplay(err, "There was an error deleting current changes.");
             }
           );
         }
@@ -1120,7 +1134,6 @@ export class LandingComponent implements OnInit {
   undoEditing(field: string) {
     var noMoreEdited = true;
     var success = true;
-    var errMsg: any;
     console.log("this.fieldObject", this.fieldObject);
     for (var fld in this.fieldObject) {
       if (field != fld && this.fieldObject[fld].edited) {
@@ -1130,17 +1143,19 @@ export class LandingComponent implements OnInit {
     }
 
     if (noMoreEdited) {
+      console.log("Deleting...");
       this.customizationServiceService.delete(this.ediid).subscribe(
         (res) => {
           if (this.originalRecord[field] == undefined)
             delete this.record[field];
           else
-            this.record[field] = JSON.parse(JSON.stringify(this.originalRecord[field]));
+            this.record[field] = this.commonVarService.deepCopy(this.originalRecord[field]);
 
+          this.customizationServiceService.removeDraftDataStatus(this.ediid);
           this.onUpdateSuccess(field);
         },
         (err) => {
-          this.onUpdateError(field, errMsg);
+          this.onUpdateError(field, err);
         }
       );
     } else {
@@ -1156,12 +1171,12 @@ export class LandingComponent implements OnInit {
           if (this.originalRecord[field] == undefined)
             delete this.record[field];
           else
-            this.record[field] = JSON.parse(JSON.stringify(this.originalRecord[field]));
+            this.record[field] = this.commonVarService.deepCopy(this.originalRecord[field]);
 
           this.onUpdateSuccess(field);
         },
         err => {
-          this.onUpdateError(field, errMsg);
+          this.onUpdateError(field, err);
         });
     }
   }
@@ -1171,8 +1186,10 @@ export class LandingComponent implements OnInit {
    */
   onUpdateSuccess(field: string) {
     this.fieldObject[field]["edited"] = (JSON.stringify(this.record[field]) != JSON.stringify(this.originalRecord[field]));
-    this.errorMsg = '';
+    this.errorMsgDetail = '';
     this.displayError = false;
+    this.updateDate = this.datePipe.transform(new Date(), "MMM d, y, h:mm:ss a");
+    this.customizationServiceService.setDraftDataStatus(this.ediid, this.updateDate);
     this.notificationService.showSuccessWithTimeout(field + " updated.", "", 3000);
   }
 
@@ -1180,15 +1197,26 @@ export class LandingComponent implements OnInit {
    * When update failed
    */
   onUpdateError(field: string, err: any) {
-    this.errorMsg = err;
-    this.displayError = true;
-    this.notificationService.showError(err, "Update error");
-    console.log("Error when updating " + field + ":", err);
+    this.setErrorForDisplay(err, "Error when updating " + field);
   }
 
+  /*
+   *  Handle the error message passed from description component
+   */
   changeErrorMsg(errorMessage: any) {
     this.displayError = errorMessage.displayError;
-    this.errorMsg = errorMessage.errorMsg;
+    this.errorMsgDetail = errorMessage.errorMsgDetail;
+  }
+
+  /*
+   *  Set error message for display
+   */
+  setErrorForDisplay(err: any, message: string) {
+    this.errorMsg = message;
+    this.errorMsgDetail = err.message;
+    this.displayError = true;
+    console.log(this.errorMsg);
+    console.log(err);
   }
 }
 

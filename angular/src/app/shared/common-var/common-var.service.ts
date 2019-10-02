@@ -253,4 +253,11 @@ export class CommonVarService {
       ]
     }
   }
+
+  /*
+  *   Deep copy
+  */
+  deepCopy(src: any){
+    return JSON.parse(JSON.stringify(src));
+  }
 }
