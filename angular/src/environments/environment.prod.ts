@@ -1,17 +1,17 @@
-export const environment = {
-  production: true,
-  RMMAPI: 'http://testdata.nist.gov/rmm/',
-  SDPAPI:  'http://testdata.nist.gov/sdp/',
-  PDRAPI:  'http://localhost:5555/#/id/',
-  DISTAPI: 'https://localhost/od/ds/',
-  METAPI:  'http://localhost/metaurl/',
-  LANDING: 'http://testdata.nist.gov/rmm/'
-};
-
+/*
+ * Angular build-time environments data.
+ * 
+ * Environment Label: prod
+ *
+ * When building under the prod environment mode, the contents of this file will get built into 
+ * the application; however, it's contents should be largely inconsequential as configuration 
+ * data should be retrieved from the configuration service.  
+ */
 import { LPSConfig } from '../app/config/config';
 
 export const context = {
     production: true
+    useMetadataService: true
 };
 
 export const config : LPSConfig = {
@@ -22,7 +22,8 @@ export const config : LPSConfig = {
         pdrSearch:   "https://data.nist.gov/sdp/"
     },
     mode:        "dev",
-    status:      "Dev Version",
-    appVersion:  "v1.1.0",
+    status:      "Production Version",
+    appVersion:  "v1.2.X",
     production:  context.production
+    editEnabled: true
 }
