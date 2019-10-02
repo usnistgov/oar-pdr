@@ -11,7 +11,8 @@ import { FormsModule } from '@angular/forms'
 export enum KEY_CODE {
   UP_ARROW = 38,
   DOWN_ARROW = 40,
-  TAB_KEY = 9
+  TAB_KEY = 9,
+  ENTER = 13
 }
 @Component({
   selector: 'combo-box',
@@ -88,12 +89,12 @@ export class ComboBoxComponent implements OnInit {
       this.controlField = this.dataList[this.counter]["columnName"];
     }
 
-    this.controlFieldChange.emit(this.controlField);
+    if (event.keyCode === KEY_CODE.ENTER) {
+      // Hide dropdown if user hit enter
+      this.showDropDown = false;
+    }
 
-    // if(event.keyCode === KEY_CODE.TAB_KEY){
-    //   this.controlField = this.dataList[this.counter];
-    //   this.showDropDown = false;
-    // }
+    this.controlFieldChange.emit(this.controlField);
   }
 
   /*
@@ -103,10 +104,6 @@ export class ComboBoxComponent implements OnInit {
     if (this.counter === currentItem) return true;
     else return false;
   }
-
-  // onTabButtonAction(event: KeyboardEvent):void{
-  //   console.log('event.keyCode',event.keyCode);   
-  // }
 
   /*
   *   Toogle dropDown menu
