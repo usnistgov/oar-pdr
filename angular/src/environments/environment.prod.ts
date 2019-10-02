@@ -10,7 +10,7 @@
 import { LPSConfig } from '../app/config/config';
 
 export const context = {
-    production: true
+    production: true,
     useMetadataService: true
 };
 
@@ -24,6 +24,10 @@ export const config : LPSConfig = {
     mode:        "dev",
     status:      "Production Version",
     appVersion:  "v1.2.X",
-    production:  context.production
+    production:  context.production,
     editEnabled: true
 }
+
+export const testdata : {} = {
+};
+
