@@ -399,7 +399,8 @@ export class LandingComponent implements OnInit {
   /**
   * If Search is successful populate list of keywords themes and authors
   */
-  onSuccess() {
+  onSuccess(newrec? : {}) {
+    if (newrec) this.record = newrec as NerdmRes;
 
     this.HomePageLink = this.displayHomePageLink();
 
@@ -862,16 +863,13 @@ export class LandingComponent implements OnInit {
             .subscribe((res) => {
               console.log("Draft data return:", res);
               if (res != undefined && res != null) {
-                this.onSuccess(res).then(function (result) {
+                  this.onSuccess(res);
                   this.commonVarService.setContentReady(true);
                   this.saveDataLoaded = true;
                   this.commonVarService.setRefreshTree(true);
                   this.checkDataChanges();
                   this.recordEditmode = editMode;
                   this.commonVarService.setEditMode(editMode);
-                }.bind(this), function (err) {
-                  alert("something went wrong while fetching draft data.");
-                });
               }
             }, (err) => {
               this.setErrorForDisplay(err, "There was an error getting draft data.");

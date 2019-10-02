@@ -5,6 +5,7 @@ import { Title }    from '@angular/platform-browser';
 import { ActivatedRoute, Router, Routes } from '@angular/router';
 import { HttpClientModule, HttpClient } from '@angular/common/http';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { DatePipe } from '@angular/common';
 
 import { LandingPageModule } from './landingPage.module';
 import { LandingPageComponent } from './landingPage.component';
@@ -75,7 +76,7 @@ describe('LandingPageComponent', () => {
                 { provide: AppConfig,       useValue: cfg },
                 { provide: MetadataService, useValue: mds },
                 CommonVarService, CartService, DownloadService, TestDataService,
-                GoogleAnalyticsService, ModalService, HttpClient
+                GoogleAnalyticsService, ModalService, HttpClient, DatePipe
             ]
         }).compileComponents();
 

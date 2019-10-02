@@ -3,6 +3,7 @@ import { ActivatedRoute, Router, Routes } from '@angular/router';
 import { RouterTestingModule } from '@angular/router/testing'; 
 import { DebugElement, ElementRef } from '@angular/core';
 import { By } from '@angular/platform-browser';
+import { DatePipe } from '@angular/common';
 
 import { LandingModule } from './landing.module';
 import { LandingComponent } from './landing.component';
@@ -59,9 +60,13 @@ describe('Landing Component', () => {
         { provide: ElementRef,      useValue: null },
         { provide: AppConfig, useValue: cfg },
         CommonVarService, CartService, DownloadService, TestDataService,
-        GoogleAnalyticsService, ModalService, HttpClient
+        GoogleAnalyticsService, ModalService, HttpClient, DatePipe
       ]})
       .compileComponents();
+
+      fixture = TestBed.createComponent(LandingComponent);
+      component = fixture.componentInstance;
+      fixture.detectChanges();
     }));
     
     it('should check the landing component', async(() => {
