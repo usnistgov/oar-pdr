@@ -18,7 +18,7 @@ import { ServerMetadataTransferModule } from './nerdm/metadatatransfer-server.mo
         ServerModule,
         ModuleMapLoaderModule,
         ServerTransferStateModule,
-        BrowserMetadataTransferModule
+        ServerMetadataTransferModule
     ],
     // Since the bootstrapped component is not inherited from your
     // imported AppModule, it needs to be repeated here.
