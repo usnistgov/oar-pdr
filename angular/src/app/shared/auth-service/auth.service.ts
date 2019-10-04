@@ -19,7 +19,9 @@ export class AuthService implements OnInit {
   ediid: string;
   authToken: string;
   baseApiUrl: string = "https://pn110559.nist.gov/saml-sp/api/mycontroller";
-  loginURL: string = "https://pn110559.nist.gov/saml-sp/auth/token";
+  // loginURL: string = "https://pn110559.nist.gov/saml-sp/auth/token";
+  loginURL: string = "Https://oardev.nist.gov/customization/saml/login";
+  tokenURL: string = "Https://oardev.nist.gov/customization/auth/token ";
   useridModeSub = new BehaviorSubject<string>('');
   inBrowser: boolean = false;
 
@@ -33,7 +35,7 @@ export class AuthService implements OnInit {
     private commonVarService: CommonVarService,
     private router: Router,
     @Inject(PLATFORM_ID) private platformId: Object) {
-      this.inBrowser = isPlatformBrowser(platformId);
+    this.inBrowser = isPlatformBrowser(platformId);
   }
 
   ngOnInit() {
@@ -57,7 +59,8 @@ export class AuthService implements OnInit {
   /*
   *  Send http login request
   */
-  loginUser() {
+  loginUser(): Observable<any> {
+    // return this.http.get(this.loginURL, this.httpOptions);
     return this.http.get(this.loginURL, this.httpOptions);
   }
 
@@ -74,6 +77,14 @@ export class AuthService implements OnInit {
           this.handleTokenError(err);
         }
       )
+  }
+
+
+  /*
+  *  Request token
+  */
+  requestToken(): Observable<any> {
+    return this.http.get(this.tokenURL);
   }
 
   /*
@@ -125,7 +136,7 @@ export class AuthService implements OnInit {
     this.removeToken();
     this.removeUserId();
     this.setAuthenticateStatus(false);
-    if(!noRefresh || noRefresh == undefined){
+    if (!noRefresh || noRefresh == undefined) {
       console.log("Refresh page...");
       this.router.navigate(['/od/id/', this.commonVarService.getEdiid()], { fragment: '' });
     }
@@ -135,7 +146,7 @@ export class AuthService implements OnInit {
    * Get stored token
    */
   setToken(token: any) {
-    if(this.inBrowser)
+    if (this.inBrowser)
       return Promise.resolve(localStorage.setItem(this._tokenName, token));
     else
       return Promise.resolve();
@@ -145,9 +156,9 @@ export class AuthService implements OnInit {
    * Get stored token
    */
   getToken() {
-    if(this.inBrowser)
+    if (this.inBrowser)
       return localStorage.getItem(this._tokenName);
-    else  
+    else
       return null;
   }
 
@@ -155,7 +166,7 @@ export class AuthService implements OnInit {
    * Remove stored token
    */
   removeToken() {
-    if(this.inBrowser)
+    if (this.inBrowser)
       localStorage.removeItem(this._tokenName);
   }
 
@@ -163,7 +174,7 @@ export class AuthService implements OnInit {
  * Get stored token
  */
   setUserId(userid: any) {
-    if(this.inBrowser)
+    if (this.inBrowser)
       return Promise.resolve(localStorage.setItem(this.userIdFieldName, userid));
     else
       return Promise.resolve();
@@ -173,9 +184,9 @@ export class AuthService implements OnInit {
    * Get stored token
    */
   getUserId() {
-    if(this.inBrowser)
+    if (this.inBrowser)
       return localStorage.getItem(this.userIdFieldName)
-    else  
+    else
       return "";
   }
 
@@ -183,7 +194,7 @@ export class AuthService implements OnInit {
    * Remove stored token
    */
   removeUserId() {
-    if(this.inBrowser)
+    if (this.inBrowser)
       localStorage.removeItem(this.userIdFieldName);
   }
 
@@ -191,9 +202,9 @@ export class AuthService implements OnInit {
    * Determine if the user is logged in by checking the existence of the token
    */
   loggedIn() {
-    if(this.inBrowser)
+    if (this.inBrowser)
       return !!this.getToken();
-    else  
+    else
       return false;
   }
 

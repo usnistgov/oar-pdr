@@ -37,7 +37,7 @@ export class FakeBackendInterceptor implements HttpInterceptor {
       }
 
       // authenticate
-      if (request.url.endsWith('/saml-sp/auth/token') && request.method === 'GET') {
+      if (request.url.endsWith('/saml/login') && request.method === 'GET') {
         let body: ApiToken = {
           userId: '1234',
           token: 'fake-jwt-token'
@@ -45,6 +45,24 @@ export class FakeBackendInterceptor implements HttpInterceptor {
         // window.alert('Click ok to login');
         return of(new HttpResponse({ status: 200, body }));
       }
+
+      if (request.url.endsWith('/auth/token') && request.method === 'GET') {
+        let body: ApiToken = {
+          userId: '1234',
+          token: 'fake-jwt-token'
+        };
+        // window.alert('Click ok to login');
+        return of(new HttpResponse({ status: 200, body }));
+      }
+
+      // if (request.url.endsWith('/saml-sp/auth/token') && request.method === 'GET') {
+      //   let body: ApiToken = {
+      //     userId: '1234',
+      //     token: 'fake-jwt-token'
+      //   };
+      //   // window.alert('Click ok to login');
+      //   return of(new HttpResponse({ status: 200, body }));
+      // }
 
       // if (request.url.indexOf('/customization/draft') > -1 && request.method === 'GET') {
       //   console.log("Interceptor returning sample record...");
