@@ -146,14 +146,14 @@ public class SecuritySamlConfig extends WebSecurityConfigurerAdapter {
 	WebSSOProfileOptions webSSOProfileOptions = new WebSSOProfileOptions();
 	webSSOProfileOptions.setIncludeScoping(false);
 	// Relay state can also be set here
-//	webSSOProfileOptions.setRelayState("https://data.nist.gov/sdp");
+	// webSSOProfileOptions.setRelayState("https://data.nist.gov/sdp");
 	return webSSOProfileOptions;
     }
 
     @Bean
     public SAMLEntryPoint samlEntryPoint() throws ConfigurationException {
 	logger.info("SAML Entry point. with application url " + applicationURL);
-	SAMLEntryPoint samlEntryPoint = new SamlWithRelayStateEntryPoint(applicationURL);
+	SAMLEntryPoint samlEntryPoint = new SamlWithRelayStateEntryPoint();
 	samlEntryPoint.setDefaultProfileOptions(defaultWebSSOProfileOptions());
 	return samlEntryPoint;
     }
@@ -381,14 +381,12 @@ public class SecuritySamlConfig extends WebSecurityConfigurerAdapter {
 	return new WebSSOProfileImpl();
     }
 
-    // not used but autowired...
     // SAML 2.0 Holder-of-Key WebSSO Assertion Consumer
     @Bean
     public WebSSOProfileConsumerHoKImpl hokWebSSOprofileConsumer() {
 	return new WebSSOProfileConsumerHoKImpl();
     }
 
-    // not used but autowired...
     // SAML 2.0 Holder-of-Key Web SSO profile
     @Bean
     public WebSSOProfileConsumerHoKImpl hokWebSSOProfile() {

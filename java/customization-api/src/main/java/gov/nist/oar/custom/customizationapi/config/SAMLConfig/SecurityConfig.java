@@ -14,6 +14,9 @@ package gov.nist.oar.custom.customizationapi.config.SAMLConfig;
 
 import javax.inject.Inject;
 
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.context.annotation.Bean;
 //import org.springframework.boot.autoconfigure.security.Http401AuthenticationEntryPoint;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -25,13 +28,13 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 
-import gov.nist.oar.custom.customizationapi.config.JWTConfig.JWTAuthenticationFilter;
+//import gov.nist.oar.custom.customizationapi.config.JWTConfig.JWTAuthenticationFilter;
 import gov.nist.oar.custom.customizationapi.config.JWTConfig.JWTAuthenticationProvider;
 
 /**
- * In this configuration all the endpoints which need to be secured under
+ * In this configuration all the end points which need to be secured under
  * authentication service are added. This configuration also sets up token
- * generator and token authorization related configuartion and end point
+ * generator and token authorization related configuration and end point
  * 
  * @author Deoyani Nandrekar-Heinis
  */
@@ -47,26 +50,34 @@ public class SecurityConfig {
     public static class RestApiSecurityConfig extends WebSecurityConfigurerAdapter {
 
 	private static final String apiMatcher = "/api/**";
-	@Inject
-	JWTAuthenticationFilter authenticationTokenFilter;
+	
+//	@Inject
+//	JWTAuthenticationFilter authenticationTokenFilter;
 
-//        @Inject
-	JWTAuthenticationProvider authenticationProvider = new JWTAuthenticationProvider();
+ 
 
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
 
-	    // http.addFilterBefore(new JWTAuthenticationFilter(apiMatcher,
-	    // super.authenticationManager()), UsernamePasswordAuthenticationFilter.class);
-	    http.addFilterBefore(authenticationTokenFilter, BasicAuthenticationFilter.class);
-	    http.authenticationProvider(authenticationProvider);
-	    http.antMatcher(apiMatcher).authorizeRequests().anyRequest().authenticated();
+//	     http.addFilterBefore(new JWTAuthenticationFilter(apiMatcher,
+//	     super.authenticationManager()), BasicAuthenticationFilter.class);
+//	    http.addFilterBefore(authenticationTokenFilter, BasicAuthenticationFilter.class);
+	    http.authenticationProvider(new JWTAuthenticationProvider());
+
+	    
+http.antMatcher(apiMatcher).authorizeRequests().anyRequest().authenticated();
 	}
 
-//        @Override
-//        protected void configure(AuthenticationManagerBuilder auth) {
-//            auth.authenticationProvider(new JWTAuthenticationProvider());
-//        }
+        @Override
+        protected void configure(AuthenticationManagerBuilder auth) {
+            auth.authenticationProvider(new JWTAuthenticationProvider());
+        }
+        
+        @Override
+        @Bean
+        public AuthenticationManager authenticationManagerBean() throws Exception {
+            return super.authenticationManagerBean();
+        }
     }
 
     /**

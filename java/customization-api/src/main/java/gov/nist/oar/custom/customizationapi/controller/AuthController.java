@@ -12,13 +12,18 @@
  */
 package gov.nist.oar.custom.customizationapi.controller;
 
-
-
+import java.io.IOException;
+import java.text.ParseException;
+import java.util.Date;
 import java.util.List;
+
+import javax.servlet.http.HttpServletResponse;
 
 import org.joda.time.DateTime;
 import org.opensaml.saml2.core.Attribute;
 import org.opensaml.xml.schema.impl.XSAnyImpl;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.saml.SAMLCredential;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -34,11 +39,13 @@ import com.nimbusds.jwt.SignedJWT;
 
 import gov.nist.oar.custom.customizationapi.config.SAMLConfig.SecurityConstant;
 import gov.nist.oar.custom.customizationapi.helpers.domains.UserToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 /**
  * This controller sends JWT, a token generated after successful authentication.
  * This token can be used to further communicated with service.
- * @author  Deoyani Nandrekar-Heinis
+ * 
+ * @author Deoyani Nandrekar-Heinis
  */
 @RestController
 //@CrossOrigin("http://localhost:4200")
@@ -46,26 +53,46 @@ import gov.nist.oar.custom.customizationapi.helpers.domains.UserToken;
 public class AuthController {
 
     @GetMapping("/token")
-    public UserToken token(Authentication authentication) throws JOSEException {
+    public UserToken token(Authentication authentication) throws JOSEException, ParseException {
 
-        final DateTime dateTime = DateTime.now();
-        //build claims
+	final DateTime dateTime = DateTime.now();
+	// build claims
 
-        JWTClaimsSet.Builder jwtClaimsSetBuilder = new JWTClaimsSet.Builder();
-        jwtClaimsSetBuilder.expirationTime(dateTime.plusMinutes(120).toDate());
-        jwtClaimsSetBuilder.claim("APP", "SAMPLE");
+	JWTClaimsSet.Builder jwtClaimsSetBuilder = new JWTClaimsSet.Builder();
+	jwtClaimsSetBuilder.expirationTime(dateTime.plusMinutes(120).toDate());
+	jwtClaimsSetBuilder.claim("APP", "SAMPLE");
 
-        //signature
-        SignedJWT signedJWT = new SignedJWT(new JWSHeader(JWSAlgorithm.HS256), jwtClaimsSetBuilder.build());
-        signedJWT.sign(new MACSigner(SecurityConstant.JWT_SECRET));
+	// signature
+	SignedJWT signedJWT = new SignedJWT(new JWSHeader(JWSAlgorithm.HS256), jwtClaimsSetBuilder.build());
+	signedJWT.sign(new MACSigner(SecurityConstant.JWT_SECRET));
 
-        SAMLCredential credential = (SAMLCredential) authentication.getCredentials();
+	Date expires = signedJWT.getJWTClaimsSet().getExpirationTime();
+	String user = signedJWT.getJWTClaimsSet().getRegisteredNames().toString();
+
+	SAMLCredential credential = (SAMLCredential) authentication.getCredentials();
 	List<Attribute> attributes = credential.getAttributes();
-	//XMLObjectChildrenList<Attribute>  
+	// XMLObjectChildrenList<Attribute>
 	org.opensaml.xml.schema.impl.XSAnyImpl xsImpl = (XSAnyImpl) attributes.get(0).getAttributeValues().get(0);
 	String userId = xsImpl.getTextContent();
-	
-        return new UserToken(userId, signedJWT.serialize());
+
+	return new UserToken(userId, signedJWT.serialize());
     }
-    
+
+    @GetMapping("/login")
+    public ResponseEntity<String> login(HttpServletResponse response) throws IOException {
+	final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+	if (authentication == null) {
+
+	    // return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+	    response.sendRedirect("https://pn110559.nist.gov/saml-sp/saml/login");
+	} else {
+	    SAMLCredential credential = (SAMLCredential) authentication.getCredentials();
+	    List<Attribute> attributes = credential.getAttributes();
+	    org.opensaml.xml.schema.impl.XSAnyImpl xsImpl = (XSAnyImpl) attributes.get(0).getAttributeValues().get(0);
+	    String userId = xsImpl.getTextContent();
+	    return new ResponseEntity<>(userId, HttpStatus.OK);
+	}
+	return null;
+    }
 }

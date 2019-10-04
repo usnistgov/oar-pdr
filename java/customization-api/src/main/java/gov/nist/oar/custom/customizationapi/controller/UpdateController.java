@@ -58,7 +58,7 @@ import io.swagger.annotations.ApiOperation;
 @RestController
 @Api(value = "Api endpoints to access editable data, update changes to data, save in the backend", tags = "Customization API")
 @Validated
-@RequestMapping("/")
+@RequestMapping("/api")
 public class UpdateController {
     private Logger logger = LoggerFactory.getLogger(UpdateController.class);
 

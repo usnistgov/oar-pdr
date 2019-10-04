@@ -59,6 +59,7 @@ public class JWTAuthenticationProvider implements AuthenticationProvider {
 	    LocalDateTime expirationTime = LocalDateTime
 		    .ofInstant(signedJWT.getJWTClaimsSet().getExpirationTime().toInstant(), ZoneId.systemDefault());
 
+	    System.out.println("Expiration time: "+ expirationTime);
 	    if (LocalDateTime.now(ZoneId.systemDefault()).isAfter(expirationTime)) {
 		throw new CredentialsExpiredException("Token expired");
 	    }

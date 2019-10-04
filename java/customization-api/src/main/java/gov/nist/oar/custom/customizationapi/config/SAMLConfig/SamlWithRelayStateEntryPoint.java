@@ -12,7 +12,12 @@
  */
 package gov.nist.oar.custom.customizationapi.config.SAMLConfig;
 
+import javax.inject.Inject;
+import javax.servlet.http.HttpServletRequest;
+
+import org.opensaml.ws.transport.http.HttpServletRequestAdapter;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.saml.SAMLEntryPoint;
 import org.springframework.security.saml.context.SAMLMessageContext;
 import org.springframework.security.saml.websso.WebSSOProfileOptions;
@@ -25,16 +30,6 @@ import org.springframework.security.saml.websso.WebSSOProfileOptions;
  */
 public class SamlWithRelayStateEntryPoint extends SAMLEntryPoint {
 
-    public SamlWithRelayStateEntryPoint() {
-
-    }
-
-    private String relaystate = "";
-
-    public SamlWithRelayStateEntryPoint(String connectingapp) {
-	this.relaystate = connectingapp;
-    }
-
     @Override
     protected WebSSOProfileOptions getProfileOptions(SAMLMessageContext context, AuthenticationException exception) {
 
@@ -45,12 +40,14 @@ public class SamlWithRelayStateEntryPoint extends SAMLEntryPoint {
 	    ssoProfileOptions = new WebSSOProfileOptions();
 	}
 
+	
+
 //        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 //        if (!(authentication instanceof AnonymousAuthenticationToken)) {
 //            String currentUserName = authentication.getName();
 //            System.out.println("****** TEST ***** +"+currentUserName);
 //        }
-//        System.out.println("****** TEST ***** +"+context);
+
 
 	// Not :
 	// Add your custom logic here if you need it.
@@ -58,10 +55,19 @@ public class SamlWithRelayStateEntryPoint extends SAMLEntryPoint {
 	// So you can let the caller pass you some special param which can be used to
 	// build an on-the-fly custom
 	// relay state param
+	
+	HttpServletRequestAdapter httpServletRequestAdapter = (HttpServletRequestAdapter)context.getInboundMessageTransport();
 
-	// ssoProfileOptions.setRelayState("http://localhost:4200");
-	ssoProfileOptions.setRelayState(this.relaystate);
-//        ssoProfileOptions.setRelayState("https://inet.nist.gov/");
+        String myRedirectUrl = httpServletRequestAdapter.getParameterValue("redirectTo");
+
+        if (myRedirectUrl != null) {
+             ssoProfileOptions.setRelayState(myRedirectUrl);
+        }else {
+            ssoProfileOptions.setRelayState("https://pn110559.nist.gov/saml-sp/auth/login/");
+        }
+	
+
+//     ssoProfileOptions.setRelayState("https://pn110559.nist.gov/saml-sp/auth/login/");
 	return ssoProfileOptions;
     }
 
