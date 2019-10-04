@@ -22,9 +22,11 @@
           <!-- <span *ngIf="authService.loggedIn()"
             [ngStyle]="{'color':getMenuTextColor(),'padding-right':'2em'}"><b>Welcome: {{userId}}        </b></span> -->
           <span (click)="openAboutPage()"
-            [ngStyle]="{'cursor': getCursor(),'color':getMenuTextColor()}"><b>About</b></span> |
+            [ngStyle]="{'cursor': getCursor(),'color':getMenuTextColor()}"><i class="faa faa-home faa-1x icon-white" style="color: white;" data-toggle="tooltip" title="Go to home page"></i></span> |
           <span (click)="openSearchPage()"
             [ngStyle]="{'cursor': getCursor(),'color':getMenuTextColor()}"><b>Search</b></span> |
+            <span 
+            [ngStyle]="{'cursor': getCursor(),'color':getMenuTextColor()}"><b>Help</b></span> |
           <a *ngIf="!isEditMode; else editMode" [routerLink]="['/datacart', 'normal']" routerLinkActive="active"
             target="_blank" (click)="updateCartStatus()"><span
               [ngStyle]="{'cursor': getCursor(),'color':getMenuTextColor()}" style="color: #fff;"

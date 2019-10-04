@@ -55,6 +55,10 @@ export class SearchTopicsComponent implements OnInit {
     const existingTopic = this.inputValue['topic'].filter(topic => topic == rowNode.node.data.researchTopic);
     if (existingTopic == undefined || existingTopic == null || existingTopic.length == 0)
       this.inputValue['topic'].push(rowNode.node.data.researchTopic);
+
+    // Reset search text box
+    this.searchText = "";
+    this.onSearchTextChange();
   }
 
   /*

@@ -1,23 +1,23 @@
 <div *ngIf="editEnabled" style="background-color: #153971;color: #FFFFFF; height: 3em;">
   <button type="button" (click)="cancelRecord()" pButton type="submit"
-    style="float:right;margin:.5em 2em .5em 0em;width:150px; height:2em; background-color:green;color:white;"
-    [disabled]="!recordEditmode || fieldObject.title.detailEditmode">
+    style="float:right;margin:.5em 2em .5em 0em;width:150px; height:2em; background-color:grey;color:white;"
+    [disabled]="!recordEditmode || fieldObject.title.detailEditmode || !dataChanged">
     <i class="faa faa-trash faa-1x icon-white" style="color: #fff;padding-left: .2em;padding-right: .2em;"></i>
     Discard
   </button>
   <button type="button" (click)="saveRecord()" pButton type="submit"
     style="float:right;margin:.5em 1em .5em 0em;width:150px; height:2em; background-color:green;color:white;padding-right: 1em;"
-    [disabled]="!recordEditmode || fieldObject.title.detailEditmode">
+    [disabled]="!recordEditmode || fieldObject.title.detailEditmode || !dataChanged">
     <i class="faa faa-save faa-1x icon-white" style="color: #fff;padding-left: .2em;padding-right: .2em;"></i>
     Submit
   </button>
   <button *ngIf="!recordEditmode" type="button" (click)="setRecordEditmode(true)" pButton type="submit"
-    style="float:right;margin:.5em 1em .5em 1em;width:150px; height:2em; background-color:green;color:white;padding-right: 1em;">
+    style="float:right;margin:.5em 1em .5em 1em;width:150px; height:2em; background-color:rgb(221, 172, 9);color:white;padding-right: 1em;">
     <i class="faa faa-pencil faa-1x icon-white" style="color: #fff;padding-left: .5em;padding-right: .5em;"></i>
     Edit
   </button>
   <button *ngIf="recordEditmode" type="button" (click)="setRecordEditmode(false)" pButton type="submit"
-    style="float:right;margin:.5em 1em .5em 1em;width:150px; height:2em; background-color:green;color:white;padding-right: 1em;">
+    style="float:right;margin:.5em 1em .5em 1em;width:150px; height:2em; background-color:rgb(221, 172, 9);color:white;padding-right: 1em;">
     <i class="faa faa-sign-out faa-1x icon-white" style="color: #fff;padding-left: .2em;padding-right: .2em;"></i>
     Quit Edit
   </button>
@@ -27,20 +27,16 @@
     <span *ngIf="updateDate; else noDraft" style="color: rgb(255, 115, 0);">You have draft data edited on
       {{updateDate}}. Click on edit button to continue editing.</span>
     <ng-template #noDraft>
-      <span>To edit current data, click on Edit button.</span>
+      <span>To see previously edited record or edit current one, click on Edit button.</span>
     </ng-template>
   </div>
   <ng-template #editmode>
     <div class="top_message">
-      <span>This record was edited on: </span>
-      <span *ngIf="updateDate; else modifyDate">{{updateDate}}</span>
-      <ng-template #modifyDate>
-        <span>{{record.modified}}</span>
-      </ng-template>
+      <span *ngIf="updateDate; else modifyDate">This record was edited on: {{updateDate}}</span>
     </div>
   </ng-template>
   <div *ngIf="displayError" style="color: red; padding: 1em;">
-    Ooops! {{errorMsg}}. If problem persists, please contact us at <a
+    Ooops! {{errorMsg}} If problem persists, please contact us at <a
       href="mailto:datasupport@nist.gov?subject=PDR:Error updating field&body={{errorMsgDetail}}">datasupport@nist.gov</a>
     to report the problem.
   </div>
@@ -84,7 +80,7 @@
                   </div>
                   <ng-template #hasTitle>
                     <div class="title editable_field">
-                      <h2 [ngStyle]="getFieldStyle('title')">
+                      <h2 [ngStyle]="getFieldStyle('title')" (click)="openModal('title')">
                         {{record.title}}</h2>
                     </div>
                   </ng-template>
@@ -124,8 +120,7 @@
                           <div *ngFor="let author of record.authors; let i = index">
                             <div>{{ author.fn}}</div>
                             <div *ngFor="let aff of author.affiliation" style="padding-left: 1em;">
-                              <div>{{aff.title}}</div>
-                              <div>{{aff.dept}}</div>
+                              <div>{{aff.title}}, {{aff.dept}}</div>
                             </div>
                           </div>
                         </div>

@@ -184,13 +184,12 @@ export class LandingComponent implements OnInit {
   HomePageLink: boolean = false;
   inBrowser: boolean = false;
   isVisible: boolean;
-  hasSavedData: boolean = false;
-  saveDataLoaded: boolean = false;
   fieldObject: any = {};
   taxonomyTree: TreeNode[] = [];
   taxonomyList: any[];
   editEnabled: any;
   updateDate: string;
+  dataChanged: boolean = false;
 
   /**
    * Creates an instance of the SearchPanel
@@ -236,7 +235,7 @@ export class LandingComponent implements OnInit {
     this.searchValue = this.route.snapshot.paramMap.get('id');
 
     this.customizationServiceService.watchRecordEdited().subscribe(value => {
-      this.hasSavedData = value;
+      this.dataChanged = value;
     });
 
     this.editEnabled = cfg.get("editEnabled", "");
@@ -346,11 +345,11 @@ export class LandingComponent implements OnInit {
 
     //Check draft data status if this is intpdr
     if (this.editEnabled) {
-      this.updateDate = this.customizationServiceService.getDraftDataStatus(this.ediid);
+      this.updateDate = this.customizationServiceService.getUpdateDate(this.ediid);
+      if(this.updateDate!=undefined && this.updateDate!=null && this.updateDate!=""){
+        this.customizationServiceService.setRecordEdited(true);
+      }
     }
-
-    this.customizationServiceService.removeDraftDataStatus(this.ediid);
-    // this.customizationServiceService.setDraftDataStatus(this.ediid, 'te                             st');
     this.files = [];
   }
 
@@ -363,7 +362,6 @@ export class LandingComponent implements OnInit {
     this.getData()
       .subscribe((res) => {
         this.onSuccess(res).then(function (result) {
-          this.saveDataLoaded = false;
           // Make a copy of original pub data (for undo purpose)
           this.originalRecord = this.commonVarService.deepCopy(this.record);
           console.log("record", this.record);
@@ -907,11 +905,19 @@ export class LandingComponent implements OnInit {
           this.authService.loginUser()
             .subscribe(
               res => {
-                this.authService.handleTokenSuccess(res as ApiToken);
-                doLoadDraftData = true;
+                console.log("User logged in. Getting token...");
+                this.authService.requestToken().subscribe(
+                  result => {
+                    this.authService.handleTokenSuccess(res as ApiToken);
+                    doLoadDraftData = true;
+                  },
+                  error => {
+                    this.setErrorForDisplay(error, "There was an error authorizing the user.");
+                  }
+                )
               },
               err => {
-                this.setErrorForDisplay(err, "There was an error login in the user.");
+                this.setErrorForDisplay(err, "There was an error logging in.");
                 this.authService.handleTokenError(err);
               }
             )
@@ -923,8 +929,11 @@ export class LandingComponent implements OnInit {
               console.log("Draft data return:", res);
               if (res != undefined && res != null) {
                 this.onSuccess(res).then(function (result) {
+                  if(res._updateDate){
+                    this.updateDate = res._updateDate;
+                    this.customizationServiceService.setDraftDataStatus(this.ediid, res._updateDate);
+                  }
                   this.commonVarService.setContentReady(true);
-                  this.saveDataLoaded = true;
                   this.commonVarService.setRefreshTree(true);
                   this.checkDataChanges();
                   this.recordEditmode = editMode;
@@ -958,6 +967,10 @@ export class LandingComponent implements OnInit {
       this.fieldObject.description.edited = this.dataEdited('description');
       this.fieldObject.topic.edited = this.dataEdited('topic');
       this.fieldObject.keyword.edited = this.dataEdited('keyword');
+
+      this.dataChanged = this.fieldObject.title.edited || this.fieldObject.authors.edited || this.fieldObject.contactPoint.edited || this.fieldObject.description.edited || this.fieldObject.topic.edited || this.fieldObject.keyword.edited;
+    } else {
+      this.dataChanged = false;
     }
   }
 
@@ -982,6 +995,8 @@ export class LandingComponent implements OnInit {
   *   Open popup modal
   */
   openModal(fieldName: string) {
+    if(!this.recordEditmode) return;
+    
     let i: number;
     let tempDecription: string = "";
 
@@ -1089,6 +1104,7 @@ export class LandingComponent implements OnInit {
         this.customizationServiceService.update(this.ediid, JSON.stringify(postMessage)).subscribe(
           result => {
             this.record[fieldName] = this.commonVarService.deepCopy(returnValue[fieldName]);
+            this.dataChanged = true;
             this.onUpdateSuccess(fieldName);
           },
           err => {
@@ -1135,10 +1151,11 @@ export class LandingComponent implements OnInit {
       (res) => {
         this.errorMsgDetail = '';
         this.displayError = false;
-        this.customizationServiceService.removeDraftDataStatus(this.ediid);
+        this.customizationServiceService.removeUpdateDate(this.ediid);
         this.notificationService.showSuccessWithTimeout("Record saved.", "", 3000);
         this.setRecordEditmode(false);
         this.commonVarService.setEditMode(false);
+        this.customizationServiceService.setRecordEdited(false);
         window.open('/od/id/' + this.searchValue, '_self');
         console.log("Record saved");
       },
@@ -1159,7 +1176,8 @@ export class LandingComponent implements OnInit {
             (res) => {
               this.notificationService.showSuccessWithTimeout("All changes have been erased.", "", 3000);
               this.setRecordEditmode(false);
-              this.customizationServiceService.removeDraftDataStatus(this.ediid);
+              this.customizationServiceService.removeUpdateDate(this.ediid);
+              this.customizationServiceService.setRecordEdited(false);
               window.open('/od/id/' + this.searchValue, '_self');
             },
             (err) => {
@@ -1211,7 +1229,8 @@ export class LandingComponent implements OnInit {
           else
             this.record[field] = this.commonVarService.deepCopy(this.originalRecord[field]);
 
-          this.customizationServiceService.removeDraftDataStatus(this.ediid);
+          this.customizationServiceService.removeUpdateDate(this.ediid);
+          this.customizationServiceService.setRecordEdited(false);
           this.onUpdateSuccess(field);
         },
         (err) => {
@@ -1249,7 +1268,7 @@ export class LandingComponent implements OnInit {
     this.errorMsgDetail = '';
     this.displayError = false;
     this.updateDate = this.datePipe.transform(new Date(), "MMM d, y, h:mm:ss a");
-    this.customizationServiceService.setDraftDataStatus(this.ediid, this.updateDate);
+    this.customizationServiceService.setUpdateDate(this.ediid, this.updateDate);
     this.notificationService.showSuccessWithTimeout(field + " updated.", "", 3000);
   }
 

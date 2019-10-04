@@ -25,8 +25,8 @@ export class CustomizationServiceService {
     private commonVarService: CommonVarService,
     private authService: AuthService,
     @Inject(PLATFORM_ID) private platformId: Object) {
-    // this.customizationApi = "http://localhost:8085/customization/";
-    this.customizationApi = this.cfg.get("customizationApi", "/customization");
+    this.customizationApi = "http://localhost:8085/customization/";
+    // this.customizationApi = this.cfg.get("customizationApi", "/customization");
     if (!(this.customizationApi.endsWith('/'))) this.customizationApi = this.customizationApi + '/';
     this.inBrowser = isPlatformBrowser(platformId);
   }
@@ -129,17 +129,17 @@ export class CustomizationServiceService {
   }
 
   /**
-   * Function to set draft data status in local storage
+   * Function to store draft data update date in local storage
    */
-  setDraftDataStatus(ediid: string, updateDate: string) {
+  setUpdateDate(ediid: string, updateDate: string) {
     if (this.inBrowser)
       localStorage.setItem(ediid, updateDate);
   }
 
   /**
-   * Function to get draft data status in local storage
+   * Function to get draft data update date in local storage
    */
-  getDraftDataStatus(ediid: string){
+  getUpdateDate(ediid: string){
     if (this.inBrowser)
       return localStorage.getItem(ediid);
     else 
@@ -149,7 +149,7 @@ export class CustomizationServiceService {
   /**
    * Function to remove draft data status in local storage
    */
-  removeDraftDataStatus(ediid: string) {
+  removeUpdateDate(ediid: string) {
     if(this.inBrowser)
       localStorage.removeItem(ediid);
   }
