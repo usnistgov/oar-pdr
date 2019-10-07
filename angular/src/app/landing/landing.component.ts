@@ -345,8 +345,8 @@ export class LandingComponent implements OnInit {
 
     //Check draft data status if this is intpdr
     if (this.editEnabled) {
-      this.updateDate = this.customizationServiceService.getUpdateDate(this.ediid);
-      if(this.updateDate!=undefined && this.updateDate!=null && this.updateDate!=""){
+      this.updateDate = this.customizationServiceService.getUpdateDate();
+      if (this.updateDate != undefined && this.updateDate != null && this.updateDate != "") {
         this.customizationServiceService.setRecordEdited(true);
       }
     }
@@ -924,14 +924,14 @@ export class LandingComponent implements OnInit {
         }
         if (doLoadDraftData) {
           this.dataInit();
-          this.customizationServiceService.getDraftData(this.ediid)
+          this.customizationServiceService.getDraftData()
             .subscribe((res) => {
               console.log("Draft data return:", res);
               if (res != undefined && res != null) {
                 this.onSuccess(res).then(function (result) {
-                  if(res._updateDate){
+                  if (res._updateDate) {
                     this.updateDate = res._updateDate;
-                    this.customizationServiceService.setDraftDataStatus(this.ediid, res._updateDate);
+                    this.customizationServiceService.setUpdateDate(res._updateDate);
                   }
                   this.commonVarService.setContentReady(true);
                   this.commonVarService.setRefreshTree(true);
@@ -972,6 +972,15 @@ export class LandingComponent implements OnInit {
     } else {
       this.dataChanged = false;
     }
+    if(this.dataChanged){
+      this.updateDate = this.datePipe.transform(new Date(), "MMM d, y, h:mm:ss a");
+      this.customizationServiceService.setUpdateDate(this.updateDate);
+      this.customizationServiceService.setRecordEdited(true);
+    }else{
+      this.updateDate = "";
+      this.customizationServiceService.removeUpdateDate();
+      this.customizationServiceService.setRecordEdited(false);
+    }
   }
 
   dataEdited(field: any) {
@@ -995,8 +1004,8 @@ export class LandingComponent implements OnInit {
   *   Open popup modal
   */
   openModal(fieldName: string) {
-    if(!this.recordEditmode) return;
-    
+    if (!this.recordEditmode) return;
+
     let i: number;
     let tempDecription: string = "";
 
@@ -1101,7 +1110,7 @@ export class LandingComponent implements OnInit {
         postMessage[fieldName] = returnValue[fieldName];
         console.log("postMessage", JSON.stringify(postMessage));
 
-        this.customizationServiceService.update(this.ediid, JSON.stringify(postMessage)).subscribe(
+        this.customizationServiceService.update(JSON.stringify(postMessage)).subscribe(
           result => {
             this.record[fieldName] = this.commonVarService.deepCopy(returnValue[fieldName]);
             this.dataChanged = true;
@@ -1147,11 +1156,11 @@ export class LandingComponent implements OnInit {
   */
   saveRecord() {
     // Send save request to back end
-    this.customizationServiceService.saveRecord(this.ediid, "").subscribe(
+    this.customizationServiceService.saveRecord("").subscribe(
       (res) => {
         this.errorMsgDetail = '';
         this.displayError = false;
-        this.customizationServiceService.removeUpdateDate(this.ediid);
+        this.customizationServiceService.removeUpdateDate();
         this.notificationService.showSuccessWithTimeout("Record saved.", "", 3000);
         this.setRecordEditmode(false);
         this.commonVarService.setEditMode(false);
@@ -1172,11 +1181,11 @@ export class LandingComponent implements OnInit {
     this.confirmationDialogService.confirm('Edited data will be lost', 'Do you want to erase changes?')
       .then((confirmed) => {
         if (confirmed) {
-          this.customizationServiceService.delete(this.ediid).subscribe(
+          this.customizationServiceService.delete().subscribe(
             (res) => {
               this.notificationService.showSuccessWithTimeout("All changes have been erased.", "", 3000);
               this.setRecordEditmode(false);
-              this.customizationServiceService.removeUpdateDate(this.ediid);
+              this.customizationServiceService.removeUpdateDate();
               this.customizationServiceService.setRecordEdited(false);
               window.open('/od/id/' + this.searchValue, '_self');
             },
@@ -1222,15 +1231,13 @@ export class LandingComponent implements OnInit {
 
     if (noMoreEdited) {
       console.log("Deleting...");
-      this.customizationServiceService.delete(this.ediid).subscribe(
+      this.customizationServiceService.delete().subscribe(
         (res) => {
           if (this.originalRecord[field] == undefined)
             delete this.record[field];
           else
             this.record[field] = this.commonVarService.deepCopy(this.originalRecord[field]);
 
-          this.customizationServiceService.removeUpdateDate(this.ediid);
-          this.customizationServiceService.setRecordEdited(false);
           this.onUpdateSuccess(field);
         },
         (err) => {
@@ -1245,7 +1252,7 @@ export class LandingComponent implements OnInit {
         body = '{"' + field + '":' + JSON.stringify(this.originalRecord[field]) + '}';
       }
 
-      this.customizationServiceService.update(this.ediid, body).subscribe(
+      this.customizationServiceService.update(body).subscribe(
         result => {
           if (this.originalRecord[field] == undefined)
             delete this.record[field];
@@ -1267,8 +1274,7 @@ export class LandingComponent implements OnInit {
     this.fieldObject[field]["edited"] = (JSON.stringify(this.record[field]) != JSON.stringify(this.originalRecord[field]));
     this.errorMsgDetail = '';
     this.displayError = false;
-    this.updateDate = this.datePipe.transform(new Date(), "MMM d, y, h:mm:ss a");
-    this.customizationServiceService.setUpdateDate(this.ediid, this.updateDate);
+    this.checkDataChanges();
     this.notificationService.showSuccessWithTimeout(field + " updated.", "", 3000);
   }
 

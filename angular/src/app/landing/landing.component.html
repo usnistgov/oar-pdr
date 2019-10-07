@@ -22,24 +22,25 @@
     Quit Edit
   </button>
 </div>
-<div *ngIf="editEnabled">
-  <div class="top_message" *ngIf="!recordEditmode; else editmode">
+<div *ngIf="editEnabled" class="top_message">
+  <div *ngIf="!recordEditmode; else editMode">
     <span *ngIf="updateDate; else noDraft" style="color: rgb(255, 115, 0);">You have draft data edited on
       {{updateDate}}. Click on edit button to continue editing.</span>
     <ng-template #noDraft>
       <span>To see previously edited record or edit current one, click on Edit button.</span>
     </ng-template>
   </div>
-  <ng-template #editmode>
-    <div class="top_message">
-      <span *ngIf="updateDate; else modifyDate">This record was edited on: {{updateDate}}</span>
-    </div>
+  <ng-template #editMode>
+      <span *ngIf="updateDate; else noDate">This record was edited on: {{updateDate}}</span>
+      <ng-template #noDate>
+        <span>Click on Quit Edit button to exit edit mode.</span>
+      </ng-template>
   </ng-template>
-  <div *ngIf="displayError" style="color: red; padding: 1em;">
-    Ooops! {{errorMsg}} If problem persists, please contact us at <a
-      href="mailto:datasupport@nist.gov?subject=PDR:Error updating field&body={{errorMsgDetail}}">datasupport@nist.gov</a>
-    to report the problem.
-  </div>
+</div>
+<div *ngIf="displayError" style="color: red; padding: 1em;">
+  Ooops! {{errorMsg}} If problem persists, please contact us at <a
+    href="mailto:datasupport@nist.gov?subject=PDR:Error updating field&body={{errorMsgDetail}}">datasupport@nist.gov</a>
+  to report the problem.
 </div>
 <div class="ui-grid ui-grid-responsive ui-grid-pad center" style="border: 0px solid white;">
   <div class="card landingcard">
@@ -120,7 +121,8 @@
                           <div *ngFor="let author of record.authors; let i = index">
                             <div>{{ author.fn}}</div>
                             <div *ngFor="let aff of author.affiliation" style="padding-left: 1em;">
-                              <div>{{aff.title}}, {{aff.dept}}</div>
+                              <span>{{aff.title}}</span>
+                              <span *ngIf="aff.dept">, {{aff.dept}}</span>
                             </div>
                           </div>
                         </div>
@@ -138,7 +140,6 @@
                   </button>
                 </div>
               </div>
-              <!-- <p></p> -->
             </div>
             <div class="ui-g-8 ui-md-8 ui-lg-8 ui-sm-12">
               <div style="display: table;">
@@ -173,7 +174,7 @@
                         </span>
                         <div class="font14" *ngIf="record.contactPoint.address">
                           <span><b>Address:</b></span>
-                          <div *ngFor="let address of record.contactPoint.address">
+                          <div *ngFor="let address of record.contactPoint.address" style="padding-left: 1em;">
                             {{address}}
                           </div>
                         </div>
