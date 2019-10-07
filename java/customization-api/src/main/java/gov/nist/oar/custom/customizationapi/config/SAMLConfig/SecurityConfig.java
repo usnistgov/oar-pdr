@@ -16,6 +16,7 @@ import javax.inject.Inject;
 
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 //import org.springframework.boot.autoconfigure.security.Http401AuthenticationEntryPoint;
 import org.springframework.context.annotation.Configuration;
@@ -26,8 +27,10 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 
+import gov.nist.oar.custom.customizationapi.config.JWTConfig.JWTAuthenticationFilter;
 //import gov.nist.oar.custom.customizationapi.config.JWTConfig.JWTAuthenticationFilter;
 import gov.nist.oar.custom.customizationapi.config.JWTConfig.JWTAuthenticationProvider;
 
@@ -50,34 +53,33 @@ public class SecurityConfig {
     public static class RestApiSecurityConfig extends WebSecurityConfigurerAdapter {
 
 	private static final String apiMatcher = "/api/**";
-	
-//	@Inject
-//	JWTAuthenticationFilter authenticationTokenFilter;
 
- 
+	@Autowired
+	JWTAuthenticationProvider jwtProvider;
 
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
 
-//	     http.addFilterBefore(new JWTAuthenticationFilter(apiMatcher,
-//	     super.authenticationManager()), BasicAuthenticationFilter.class);
-//	    http.addFilterBefore(authenticationTokenFilter, BasicAuthenticationFilter.class);
-	    http.authenticationProvider(new JWTAuthenticationProvider());
 
-	    
-http.antMatcher(apiMatcher).authorizeRequests().anyRequest().authenticated();
+	    http.addFilterBefore(new JWTAuthenticationFilter(authenticationManager()), UsernamePasswordAuthenticationFilter.class);
+
+
+	    http.antMatcher(apiMatcher).authorizeRequests().anyRequest().authenticated();
+	}
+	
+	@Override
+	@Bean
+	public AuthenticationManager authenticationManagerBean() throws Exception {
+	    return super.authenticationManagerBean();
+	}
+	
+	@Override
+	protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+	    auth.authenticationProvider(jwtProvider);
+	    auth.parentAuthenticationManager(authenticationManagerBean());
 	}
 
-        @Override
-        protected void configure(AuthenticationManagerBuilder auth) {
-            auth.authenticationProvider(new JWTAuthenticationProvider());
-        }
-        
-        @Override
-        @Bean
-        public AuthenticationManager authenticationManagerBean() throws Exception {
-            return super.authenticationManagerBean();
-        }
+	
     }
 
     /**

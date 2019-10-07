@@ -12,6 +12,7 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.CredentialsExpiredException;
 import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.security.core.Authentication;
+import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 
 import java.text.ParseException;
@@ -24,6 +25,7 @@ import java.time.ZoneId;
  * 
  * @author Deoyani Nandrekar-Heinis
  */
+@Component
 public class JWTAuthenticationProvider implements AuthenticationProvider {
 
     @Override
@@ -36,8 +38,8 @@ public class JWTAuthenticationProvider implements AuthenticationProvider {
 
 	Assert.notNull(authentication, "Authentication is missing");
 
-	Assert.isInstanceOf(JWTAuthenticationProvider.class, authentication,
-		"This method only accepts JwtAuthenticationToken");
+//	Assert.isInstanceOf(JWTAuthenticationProvider.class, authentication,
+//		"This method only accepts JwtAuthenticationToken");
 
 	String jwtToken = authentication.getName();
 
