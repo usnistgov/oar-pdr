@@ -15,7 +15,6 @@ export class CustomizationServiceService {
   customizationApi: string;
   inBrowser: boolean = false;
   draftStatusCookieName: string = "draft_status";
-
   recordEditedSub = new BehaviorSubject<boolean>(false);
 
 
@@ -25,8 +24,8 @@ export class CustomizationServiceService {
     private commonVarService: CommonVarService,
     private authService: AuthService,
     @Inject(PLATFORM_ID) private platformId: Object) {
-    this.customizationApi = "http://localhost:8085/customization/";
-    // this.customizationApi = this.cfg.get("customizationApi", "/customization");
+    // this.customizationApi = "http://localhost:8085/customization/";
+    this.customizationApi = this.cfg.get("customizationApi", "/customization");
     if (!(this.customizationApi.endsWith('/'))) this.customizationApi = this.customizationApi + '/';
     this.inBrowser = isPlatformBrowser(platformId);
   }
@@ -48,7 +47,7 @@ export class CustomizationServiceService {
   /*
   *   Update one field in publication. New value is in post body.
   */
-  update(recordid: string, body: any): Observable<any> {
+  update(body: any): Observable<any> {
     // const httpOptions = {
     //   headers: {
     //     "Authorization": "Bearer " + this.authService.getToken(),
@@ -58,7 +57,7 @@ export class CustomizationServiceService {
     // var url = this.customizationUpdateApi + recordid;
     // return this.http.patch(url, body, httpOptions);
 
-    var url = this.customizationApi + "draft/" + recordid;
+    var url = this.customizationApi + "draft/" + this.commonVarService.getEdiid();
     console.log("Update URL:", url);
     console.log("body:", body);
     return this.http.patch(url, body);
@@ -67,14 +66,14 @@ export class CustomizationServiceService {
   /*
    *   Save the whole record. The data will be pushed to mdserver
    */
-  saveRecord(recordid: string, body: any): Observable<any> {
+  saveRecord(body: any): Observable<any> {
     // const httpOptions = {
     //   headers: {
     //     "Authorization": "Bearer " + this.authService.getToken(),
     //     "userId": this.authService.getUserId()
     //   }
     // };
-    var url = this.customizationApi + "savedrecord/" + recordid;
+    var url = this.customizationApi + "savedrecord/" + this.commonVarService.getEdiid();
     console.log("Save rec URL:", url);
     
     body = "{}";
@@ -86,14 +85,14 @@ export class CustomizationServiceService {
   /*
 *   Update one field in publication. New value is in post body.
 */
-  delete(recordid: string): Observable<any> {
+  delete(): Observable<any> {
     // const httpOptions = {
     //   headers: {
     //     "Authorization": "Bearer " + this.authService.getToken(),
     //     "userId": this.authService.getUserId()
     //   }
     // };
-    var url = this.customizationApi + "draft/" + recordid;
+    var url = this.customizationApi + "draft/" + this.commonVarService.getEdiid();
     return this.http.delete(url);
     // return this.http.delete(url, httpOptions);
   }
@@ -101,14 +100,14 @@ export class CustomizationServiceService {
   /*
    *  Get draft data from staging area. If no saved data, backend return saved record
    */
-  getDraftData(recordid: string): Observable<any> {
+  getDraftData(): Observable<any> {
     const apiToken = localStorage.getItem("apiToken");
 
     //Need to append ediid to the base API URL
-    var url = this.customizationApi + "draft/" + recordid;
+    var url = this.customizationApi + "draft/" + this.commonVarService.getEdiid();
     console.log("URL to get draft data:", url);
     return this.http.get(url);
-    // return this.http.get(this.customizationUpdateApi + recordid, {
+    // return this.http.get(this.customizationUpdateApi + this.commonVarService.getEdiid(), {
     //   headers: {
     //     "Authorization": "Bearer " + this.authService.getToken(),
     //     "userId": this.authService.getUserId()
@@ -131,17 +130,17 @@ export class CustomizationServiceService {
   /**
    * Function to store draft data update date in local storage
    */
-  setUpdateDate(ediid: string, updateDate: string) {
+  setUpdateDate(updateDate: string) {
     if (this.inBrowser)
-      localStorage.setItem(ediid, updateDate);
+      localStorage.setItem(this.commonVarService.getEdiid(), updateDate);
   }
 
   /**
    * Function to get draft data update date in local storage
    */
-  getUpdateDate(ediid: string){
+  getUpdateDate(){
     if (this.inBrowser)
-      return localStorage.getItem(ediid);
+      return localStorage.getItem(this.commonVarService.getEdiid());
     else 
       return "";
   }
@@ -149,8 +148,8 @@ export class CustomizationServiceService {
   /**
    * Function to remove draft data status in local storage
    */
-  removeUpdateDate(ediid: string) {
+  removeUpdateDate() {
     if(this.inBrowser)
-      localStorage.removeItem(ediid);
+      localStorage.removeItem(this.commonVarService.getEdiid());
   }
 }
