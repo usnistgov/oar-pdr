@@ -13,33 +13,36 @@
 package gov.nist.oar.custom.customizationapi.controller;
 
 import java.io.IOException;
-import java.text.ParseException;
-import java.util.Date;
 import java.util.List;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
 
-import org.joda.time.DateTime;
 import org.opensaml.saml2.core.Attribute;
 import org.opensaml.xml.schema.impl.XSAnyImpl;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.saml.SAMLCredential;
-import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.nimbusds.jose.JOSEException;
-import com.nimbusds.jose.JWSAlgorithm;
-import com.nimbusds.jose.JWSHeader;
-import com.nimbusds.jose.crypto.MACSigner;
-import com.nimbusds.jwt.JWTClaimsSet;
-import com.nimbusds.jwt.SignedJWT;
-
-import gov.nist.oar.custom.customizationapi.config.SAMLConfig.SecurityConstant;
+import gov.nist.oar.custom.customizationapi.exceptions.CustomizationException;
+import gov.nist.oar.custom.customizationapi.exceptions.ErrorInfo;
+import gov.nist.oar.custom.customizationapi.exceptions.UnAuthorizedUserException;
 import gov.nist.oar.custom.customizationapi.helpers.domains.UserToken;
-import org.springframework.security.core.context.SecurityContextHolder;
+import gov.nist.oar.custom.customizationapi.service.JWTTokenGenerator;
+import gov.nist.oar.custom.customizationapi.service.ResourceNotFoundException;
+import io.swagger.annotations.ApiOperation;
 
 /**
  * This controller sends JWT, a token generated after successful authentication.
@@ -48,51 +51,103 @@ import org.springframework.security.core.context.SecurityContextHolder;
  * @author Deoyani Nandrekar-Heinis
  */
 @RestController
-//@CrossOrigin("http://localhost:4200")
 @RequestMapping("/auth")
 public class AuthController {
 
-    @GetMapping("/token")
-    public UserToken token(Authentication authentication) throws JOSEException, ParseException {
-
-	final DateTime dateTime = DateTime.now();
-	// build claims
-
-	JWTClaimsSet.Builder jwtClaimsSetBuilder = new JWTClaimsSet.Builder();
-	jwtClaimsSetBuilder.expirationTime(dateTime.plusMinutes(120).toDate());
-	jwtClaimsSetBuilder.claim("APP", "SAMPLE");
-
-	// signature
-	SignedJWT signedJWT = new SignedJWT(new JWSHeader(JWSAlgorithm.HS256), jwtClaimsSetBuilder.build());
-	signedJWT.sign(new MACSigner(SecurityConstant.JWT_SECRET));
-
-	Date expires = signedJWT.getJWTClaimsSet().getExpirationTime();
-	String user = signedJWT.getJWTClaimsSet().getRegisteredNames().toString();
+    private Logger logger = LoggerFactory.getLogger(AuthController.class);
+    
+    @Autowired
+    JWTTokenGenerator jwt ;
+    /**
+     * Get the JWT for the authorized user
+     * @param authentication
+     * @param ediid
+     * @return JSON with userid and token
+     * @throws UnAuthorizedUserException
+     * @throws CustomizationException 
+     */
+    @RequestMapping(value = { "_perm/{ediid}" }, method = RequestMethod.GET, produces = "application/json")
+    @ApiOperation(value = "", nickname = "Authorize user to edit the record", notes = "Resource returns a JSON if Authorized user.")
+  
+    public UserToken token(Authentication authentication, @PathVariable @Valid String ediid) throws  UnAuthorizedUserException, CustomizationException {
+	
+	if (authentication == null)
+	    throw new CustomizationException("User is not authenticated to access this resource.");
+	logger.info("Get the token for authenticated user.");
 
 	SAMLCredential credential = (SAMLCredential) authentication.getCredentials();
 	List<Attribute> attributes = credential.getAttributes();
-	// XMLObjectChildrenList<Attribute>
+
 	org.opensaml.xml.schema.impl.XSAnyImpl xsImpl = (XSAnyImpl) attributes.get(0).getAttributeValues().get(0);
 	String userId = xsImpl.getTextContent();
+	
+       
+	return jwt.getJWT(userId, ediid);
 
-	return new UserToken(userId, signedJWT.serialize());
     }
 
-    @GetMapping("/login")
+    /**
+     * Get Authenticated user information
+     * @param response
+     * @return JSON user id
+     * @throws IOException
+     */
+    
+//    @GetMapping("/loginfo")
+    @RequestMapping(value = { "/_logininfo" }, method = RequestMethod.GET, produces = "application/json")
     public ResponseEntity<String> login(HttpServletResponse response) throws IOException {
+	logger.info("Get the authenticated user info.");
 	final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
 	if (authentication == null) {
-
-	    // return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-	    response.sendRedirect("https://pn110559.nist.gov/saml-sp/saml/login");
+	    response.sendRedirect("/saml/login");
 	} else {
 	    SAMLCredential credential = (SAMLCredential) authentication.getCredentials();
 	    List<Attribute> attributes = credential.getAttributes();
 	    org.opensaml.xml.schema.impl.XSAnyImpl xsImpl = (XSAnyImpl) attributes.get(0).getAttributeValues().get(0);
 	    String userId = xsImpl.getTextContent();
-	    return new ResponseEntity<>(userId, HttpStatus.OK);
+	    String returnResponse = "{\"userid\": \""+userId+"\"}";
+	    return new ResponseEntity<>(returnResponse, HttpStatus.OK);
 	}
 	return null;
+    }
+    
+    /**
+     * Exception handling if resource not found
+     * @param ex
+     * @param req
+     * @return
+     */
+    @ExceptionHandler(ResourceNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ErrorInfo handleStreamingError(ResourceNotFoundException ex, HttpServletRequest req) {
+	logger.info("There is an error accessing requested record : " + req.getRequestURI() + "\n  " + ex.getMessage());
+	return new ErrorInfo(req.getRequestURI(), 404, "Resource Not Found", req.getMethod());
+    }
+    
+    /**
+     * Exception handling if user is not authorized
+     * @param ex
+     * @param req
+     * @return
+     */
+    @ExceptionHandler(UnAuthorizedUserException.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    public ErrorInfo handleStreamingError(UnAuthorizedUserException ex, HttpServletRequest req) {
+	logger.info("There user requesting edit access is not authorized : " + req.getRequestURI() + "\n  " + ex.getMessage());
+	return new ErrorInfo(req.getRequestURI(),401 , "Resource Not Found", req.getMethod());
+    }
+    
+    /**
+     * When an exception occurs in the customization service while connecting backend or for any other reason.
+     * @param ex
+     * @param req
+     * @return
+     */
+    @ExceptionHandler(CustomizationException.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ErrorInfo handleStreamingError(CustomizationException ex, HttpServletRequest req) {
+	logger.info("There is an internal error connecting to backend service: " + req.getRequestURI() + "\n  " + ex.getMessage());
+	return new ErrorInfo(req.getRequestURI(), 500, "Internal Server Error", "GET");
     }
 }

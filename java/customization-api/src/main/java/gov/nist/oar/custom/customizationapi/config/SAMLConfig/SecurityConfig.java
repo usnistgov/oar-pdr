@@ -12,10 +12,10 @@
  */
 package gov.nist.oar.custom.customizationapi.config.SAMLConfig;
 
-import javax.inject.Inject;
-
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 //import org.springframework.boot.autoconfigure.security.Http401AuthenticationEntryPoint;
@@ -28,7 +28,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
+
 
 import gov.nist.oar.custom.customizationapi.config.JWTConfig.JWTAuthenticationFilter;
 //import gov.nist.oar.custom.customizationapi.config.JWTConfig.JWTAuthenticationFilter;
@@ -51,6 +51,7 @@ public class SecurityConfig {
     @Configuration
     @Order(1)
     public static class RestApiSecurityConfig extends WebSecurityConfigurerAdapter {
+	 private Logger logger = LoggerFactory.getLogger(RestApiSecurityConfig.class);
 
 	private static final String apiMatcher = "/api/**";
 
@@ -59,27 +60,25 @@ public class SecurityConfig {
 
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
-
-
-	    http.addFilterBefore(new JWTAuthenticationFilter(authenticationManager()), UsernamePasswordAuthenticationFilter.class);
-
+	    logger.info("Configure REST API security endpoints.");
+	    http.addFilterBefore(new JWTAuthenticationFilter(authenticationManager()),
+		    UsernamePasswordAuthenticationFilter.class);
 
 	    http.antMatcher(apiMatcher).authorizeRequests().anyRequest().authenticated();
 	}
-	
+
 	@Override
 	@Bean
 	public AuthenticationManager authenticationManagerBean() throws Exception {
 	    return super.authenticationManagerBean();
 	}
-	
+
 	@Override
 	protected void configure(AuthenticationManagerBuilder auth) throws Exception {
 	    auth.authenticationProvider(jwtProvider);
 	    auth.parentAuthenticationManager(authenticationManagerBean());
 	}
 
-	
     }
 
     /**
@@ -88,11 +87,13 @@ public class SecurityConfig {
     @Configuration
     @Order(2)
     public static class AuthSecurityConfig extends WebSecurityConfigurerAdapter {
+	 private Logger logger = LoggerFactory.getLogger(AuthSecurityConfig.class);
 
 	private static final String apiMatcher = "/auth/token";
 
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
+	    logger.info("AuthSEcurity Config set up http related entrypoints.");
 
 	    http.exceptionHandling().authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED));
 

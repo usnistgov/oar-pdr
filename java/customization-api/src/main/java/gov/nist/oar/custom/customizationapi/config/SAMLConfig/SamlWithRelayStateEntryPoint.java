@@ -12,23 +12,28 @@
  */
 package gov.nist.oar.custom.customizationapi.config.SAMLConfig;
 
-import javax.inject.Inject;
-import javax.servlet.http.HttpServletRequest;
-
 import org.opensaml.ws.transport.http.HttpServletRequestAdapter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.saml.SAMLEntryPoint;
 import org.springframework.security.saml.context.SAMLMessageContext;
 import org.springframework.security.saml.websso.WebSSOProfileOptions;
 
 /***
- * This helps SAML endpoint to redirect after successful login service.
+ * This helps SAML endpoint to redirect after successful login.
  * 
  * @author Deoyani Nandrekar-Heinis
  *
  */
 public class SamlWithRelayStateEntryPoint extends SAMLEntryPoint {
+    private static final Logger log = LoggerFactory.getLogger(SamlWithRelayStateEntryPoint.class);
+    
+    private String defaultRedirect;
+    
+    public SamlWithRelayStateEntryPoint(String applicationURL) {
+	this.defaultRedirect = applicationURL;
+    }
 
     @Override
     protected WebSSOProfileOptions getProfileOptions(SAMLMessageContext context, AuthenticationException exception) {
@@ -40,34 +45,23 @@ public class SamlWithRelayStateEntryPoint extends SAMLEntryPoint {
 	    ssoProfileOptions = new WebSSOProfileOptions();
 	}
 
-	
-
-//        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-//        if (!(authentication instanceof AnonymousAuthenticationToken)) {
-//            String currentUserName = authentication.getName();
-//            System.out.println("****** TEST ***** +"+currentUserName);
-//        }
-
-
-	// Not :
-	// Add your custom logic here if you need it.
+	// Note for customization :
 	// Original HttpRequest can be extracted from the context param
-	// So you can let the caller pass you some special param which can be used to
-	// build an on-the-fly custom
-	// relay state param
+	// caller can pass redirect url with the request so after successful processing user can be redirected to the same page.
+	//if redirect URL is not specified user will be redirected to default url.
 	
 	HttpServletRequestAdapter httpServletRequestAdapter = (HttpServletRequestAdapter)context.getInboundMessageTransport();
 
-        String myRedirectUrl = httpServletRequestAdapter.getParameterValue("redirectTo");
+        String redirectURL = httpServletRequestAdapter.getParameterValue("redirectTo");
 
-        if (myRedirectUrl != null) {
-             ssoProfileOptions.setRelayState(myRedirectUrl);
+        if (redirectURL != null) {
+            log.info("Redirect user to +"+redirectURL);
+             ssoProfileOptions.setRelayState(redirectURL);
         }else {
-            ssoProfileOptions.setRelayState("https://pn110559.nist.gov/saml-sp/auth/login/");
+            log.info("Redirect user to default URL");
+            ssoProfileOptions.setRelayState(defaultRedirect);
         }
 	
-
-//     ssoProfileOptions.setRelayState("https://pn110559.nist.gov/saml-sp/auth/login/");
 	return ssoProfileOptions;
     }
 

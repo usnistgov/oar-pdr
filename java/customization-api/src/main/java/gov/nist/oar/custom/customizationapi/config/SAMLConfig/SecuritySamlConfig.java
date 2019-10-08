@@ -153,7 +153,7 @@ public class SecuritySamlConfig extends WebSecurityConfigurerAdapter {
     @Bean
     public SAMLEntryPoint samlEntryPoint() throws ConfigurationException {
 	logger.info("SAML Entry point. with application url " + applicationURL);
-	SAMLEntryPoint samlEntryPoint = new SamlWithRelayStateEntryPoint();
+	SAMLEntryPoint samlEntryPoint = new SamlWithRelayStateEntryPoint(applicationURL);
 	samlEntryPoint.setDefaultProfileOptions(defaultWebSSOProfileOptions());
 	return samlEntryPoint;
     }
@@ -401,7 +401,7 @@ public class SecuritySamlConfig extends WebSecurityConfigurerAdapter {
     @Bean
     public ExtendedMetadataDelegate idpMetadata() throws ConfigurationException {
 	logger.info("Read the federation metadata provided by identity provider.");
-	// throws MetadataProviderException, ResourceException {
+
 	try {
 	    Timer backgroundTaskTimer = new Timer(true);
 
@@ -409,22 +409,24 @@ public class SecuritySamlConfig extends WebSecurityConfigurerAdapter {
 		    federationMetadata);
 	    ResourceBackedMetadataProvider resourceBackedMetadataProvider = new ResourceBackedMetadataProvider(
 		    backgroundTaskTimer, fpath);
-	    // new ClasspathResource(federationMetadata));
 
+	    /**
+	     * This code is used if the metadata url is available and can be used directly.
+	     */
+	    // new ClasspathResource(federationMetadata));
 //        String fedMetadataURL = "https://sts.nist.gov/federationmetadata/2007-06/federationmetadata.xml";
 //	HTTPMetadataProvider httpMetadataProvider = new HTTPMetadataProvider(
 //			backgroundTaskTimer, httpClient(), fedMetadataURL);
 //	httpMetadataProvider.setParserPool(parserPool());
-
+//	        ExtendedMetadataDelegate extendedMetadataDelegate =
+//          new ExtendedMetadataDelegate(httpMetadataProvider , extendedMetadata());
 	    resourceBackedMetadataProvider.setParserPool(parserPool());
 
 	    ExtendedMetadataDelegate extendedMetadataDelegate = new ExtendedMetadataDelegate(
 		    resourceBackedMetadataProvider, extendedMetadata());
-//        ExtendedMetadataDelegate extendedMetadataDelegate =
-//                new ExtendedMetadataDelegate(httpMetadataProvider , extendedMetadata());
 
-	    //// **** just set this to false to solve the issue signature trust
-	    //// establishment
+	    //// **** just set this to false to solve the issue signature trust specific to
+	    //// current IDP
 	    extendedMetadataDelegate.setMetadataTrustCheck(false);
 	    extendedMetadataDelegate.setMetadataRequireSignature(false);
 	    return extendedMetadataDelegate;
@@ -490,6 +492,7 @@ public class SecuritySamlConfig extends WebSecurityConfigurerAdapter {
 
     @Bean
     CORSFilter corsFilter() {
+	logger.info("CORS filter setting for application:" + applicationURL);
 	CORSFilter filter = new CORSFilter(applicationURL);
 	return filter;
     }

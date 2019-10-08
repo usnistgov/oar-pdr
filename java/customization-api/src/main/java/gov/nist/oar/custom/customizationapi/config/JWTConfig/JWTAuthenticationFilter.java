@@ -9,6 +9,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -207,10 +208,11 @@ import com.nimbusds.jwt.JWT;
 ////}
 //
 //}
+//This should be renamed as authorization filter
 //JWTAuthorizationFilter
 public class JWTAuthenticationFilter extends BasicAuthenticationFilter {
 
-//  private static final Logger logger = LoggerFactory.getLogger(AuthenticationTokenFilter.class);
+    private static final Logger logger =LoggerFactory.getLogger(JWTAuthenticationFilter.class);
     public static final String HEADER_SECURITY_TOKEN = "Authorization";
 
 //  @Autowired
@@ -225,6 +227,7 @@ public class JWTAuthenticationFilter extends BasicAuthenticationFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest req, HttpServletResponse res, FilterChain chain)
 	    throws IOException, ServletException {
+	logger.info("Security token header invoked.");
 	String header = req.getHeader(HEADER_SECURITY_TOKEN);
 
 	if (header == null || !header.startsWith("Bearer")) {
@@ -243,6 +246,7 @@ public class JWTAuthenticationFilter extends BasicAuthenticationFilter {
         SecurityContextHolder.getContext().setAuthentication(new JWTAuthenticationToken(header.substring(7)));
 	chain.doFilter(req, res);
 	}catch(InternalAuthenticationServiceException exp) {
+	    logger.error("There is an error authorizing token requested.");
 	    res.setStatus(HttpStatus.UNAUTHORIZED.value());
 	    res.setContentType(MediaType.APPLICATION_JSON_VALUE);
 	    res.getWriter().write("{\"message\":\"User token is not authorized.\"");

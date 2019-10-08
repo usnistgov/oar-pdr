@@ -6,6 +6,8 @@ import com.nimbusds.jwt.SignedJWT;
 
 import gov.nist.oar.custom.customizationapi.config.SAMLConfig.SecurityConstant;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -28,6 +30,7 @@ import java.time.ZoneId;
 @Component
 public class JWTAuthenticationProvider implements AuthenticationProvider {
 
+    private static final Logger log = LoggerFactory.getLogger(JWTAuthenticationProvider.class);
     @Override
     public boolean supports(Class<?> authentication) {
 	return JWTAuthenticationProvider.class.isAssignableFrom(authentication);
@@ -35,6 +38,7 @@ public class JWTAuthenticationProvider implements AuthenticationProvider {
 
     @Override
     public Authentication authenticate(Authentication authentication) {
+	log.info("Authorizing the request for given token");
 
 	Assert.notNull(authentication, "Authentication is missing");
 
@@ -54,6 +58,7 @@ public class JWTAuthenticationProvider implements AuthenticationProvider {
 	    boolean isVerified = signedJWT.verify(new MACVerifier(SecurityConstant.JWT_SECRET.getBytes()));
 
 	    if (!isVerified) {
+		log.info("Signed JWT is not verified.");
 		throw new BadCredentialsException("Invalid token signature");
 	    }
 
@@ -61,6 +66,7 @@ public class JWTAuthenticationProvider implements AuthenticationProvider {
 	    LocalDateTime expirationTime = LocalDateTime
 		    .ofInstant(signedJWT.getJWTClaimsSet().getExpirationTime().toInstant(), ZoneId.systemDefault());
 
+	    /// Add code for Metadata service
 	    System.out.println("Expiration time: "+ expirationTime);
 	    if (LocalDateTime.now(ZoneId.systemDefault()).isAfter(expirationTime)) {
 		throw new CredentialsExpiredException("Token expired");

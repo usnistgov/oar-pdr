@@ -13,7 +13,6 @@
 package gov.nist.oar.custom.customizationapi.service;
 
 import java.io.IOException;
-import java.net.UnknownHostException;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.regex.Matcher;
@@ -22,9 +21,7 @@ import java.util.regex.Pattern;
 import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
@@ -37,7 +34,6 @@ import com.mongodb.client.model.Projections;
 import com.mongodb.client.model.UpdateOptions;
 import com.mongodb.client.model.changestream.ChangeStreamDocument;
 import com.mongodb.client.result.DeleteResult;
-import com.mongodb.client.result.UpdateResult;
 
 import gov.nist.oar.custom.customizationapi.exceptions.CustomizationException;
 

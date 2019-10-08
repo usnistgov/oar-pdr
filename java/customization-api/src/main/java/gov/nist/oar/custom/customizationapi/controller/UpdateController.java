@@ -62,7 +62,6 @@ import io.swagger.annotations.ApiOperation;
 public class UpdateController {
     private Logger logger = LoggerFactory.getLogger(UpdateController.class);
 
-
     @Autowired
     private UpdateRepository uRepo;
 
