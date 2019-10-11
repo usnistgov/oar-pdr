@@ -14,11 +14,9 @@ package gov.nist.oar.custom.customizationapi.controller;
 
 import java.io.IOException;
 import java.util.List;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
-
 import org.opensaml.saml2.core.Attribute;
 import org.opensaml.xml.schema.impl.XSAnyImpl;
 import org.slf4j.Logger;
@@ -35,7 +33,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-
 import gov.nist.oar.custom.customizationapi.exceptions.CustomizationException;
 import gov.nist.oar.custom.customizationapi.exceptions.ErrorInfo;
 import gov.nist.oar.custom.customizationapi.exceptions.UnAuthorizedUserException;
@@ -55,22 +52,25 @@ import io.swagger.annotations.ApiOperation;
 public class AuthController {
 
     private Logger logger = LoggerFactory.getLogger(AuthController.class);
-    
+
     @Autowired
-    JWTTokenGenerator jwt ;
+    JWTTokenGenerator jwt;
+
     /**
      * Get the JWT for the authorized user
+     * 
      * @param authentication
      * @param ediid
      * @return JSON with userid and token
      * @throws UnAuthorizedUserException
-     * @throws CustomizationException 
+     * @throws CustomizationException
      */
     @RequestMapping(value = { "_perm/{ediid}" }, method = RequestMethod.GET, produces = "application/json")
     @ApiOperation(value = "", nickname = "Authorize user to edit the record", notes = "Resource returns a JSON if Authorized user.")
-  
-    public UserToken token(Authentication authentication, @PathVariable @Valid String ediid) throws  UnAuthorizedUserException, CustomizationException {
-	
+
+    public UserToken token(Authentication authentication, @PathVariable @Valid String ediid)
+	    throws UnAuthorizedUserException, CustomizationException {
+
 	if (authentication == null)
 	    throw new CustomizationException("User is not authenticated to access this resource.");
 	logger.info("Get the token for authenticated user.");
@@ -80,19 +80,19 @@ public class AuthController {
 
 	org.opensaml.xml.schema.impl.XSAnyImpl xsImpl = (XSAnyImpl) attributes.get(0).getAttributeValues().get(0);
 	String userId = xsImpl.getTextContent();
-	
-       
+
 	return jwt.getJWT(userId, ediid);
 
     }
 
     /**
      * Get Authenticated user information
+     * 
      * @param response
      * @return JSON user id
      * @throws IOException
      */
-    
+
 //    @GetMapping("/loginfo")
     @RequestMapping(value = { "/_logininfo" }, method = RequestMethod.GET, produces = "application/json")
     public ResponseEntity<String> login(HttpServletResponse response) throws IOException {
@@ -106,14 +106,15 @@ public class AuthController {
 	    List<Attribute> attributes = credential.getAttributes();
 	    org.opensaml.xml.schema.impl.XSAnyImpl xsImpl = (XSAnyImpl) attributes.get(0).getAttributeValues().get(0);
 	    String userId = xsImpl.getTextContent();
-	    String returnResponse = "{\"userid\": \""+userId+"\"}";
+	    String returnResponse = "{\"userid\": \"" + userId + "\"}";
 	    return new ResponseEntity<>(returnResponse, HttpStatus.OK);
 	}
 	return null;
     }
-    
+
     /**
      * Exception handling if resource not found
+     * 
      * @param ex
      * @param req
      * @return
@@ -124,9 +125,10 @@ public class AuthController {
 	logger.info("There is an error accessing requested record : " + req.getRequestURI() + "\n  " + ex.getMessage());
 	return new ErrorInfo(req.getRequestURI(), 404, "Resource Not Found", req.getMethod());
     }
-    
+
     /**
      * Exception handling if user is not authorized
+     * 
      * @param ex
      * @param req
      * @return
@@ -134,12 +136,15 @@ public class AuthController {
     @ExceptionHandler(UnAuthorizedUserException.class)
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     public ErrorInfo handleStreamingError(UnAuthorizedUserException ex, HttpServletRequest req) {
-	logger.info("There user requesting edit access is not authorized : " + req.getRequestURI() + "\n  " + ex.getMessage());
-	return new ErrorInfo(req.getRequestURI(),401 , "Resource Not Found", req.getMethod());
+	logger.info("There user requesting edit access is not authorized : " + req.getRequestURI() + "\n  "
+		+ ex.getMessage());
+	return new ErrorInfo(req.getRequestURI(), 401, "Resource Not Found", req.getMethod());
     }
-    
+
     /**
-     * When an exception occurs in the customization service while connecting backend or for any other reason.
+     * When an exception occurs in the customization service while connecting
+     * backend or for any other reason.
+     * 
      * @param ex
      * @param req
      * @return
@@ -147,7 +152,8 @@ public class AuthController {
     @ExceptionHandler(CustomizationException.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ErrorInfo handleStreamingError(CustomizationException ex, HttpServletRequest req) {
-	logger.info("There is an internal error connecting to backend service: " + req.getRequestURI() + "\n  " + ex.getMessage());
+	logger.info("There is an internal error connecting to backend service: " + req.getRequestURI() + "\n  "
+		+ ex.getMessage());
 	return new ErrorInfo(req.getRequestURI(), 500, "Internal Server Error", "GET");
     }
 }

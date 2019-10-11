@@ -8,32 +8,33 @@ import gov.nist.oar.custom.customizationapi.config.SAMLConfig.SecurityConstant;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.CredentialsExpiredException;
 import org.springframework.security.authentication.InternalAuthenticationServiceException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 
 import java.text.ParseException;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-
 /**
  * JWTAuthenticationProvider class helps generate JWT, token once the user is
  * authenticated by SAML identity provider.
  * 
  * @author Deoyani Nandrekar-Heinis
  */
-@Component
+//@Component
 public class JWTAuthenticationProvider implements AuthenticationProvider {
 
     private static final Logger log = LoggerFactory.getLogger(JWTAuthenticationProvider.class);
     @Override
     public boolean supports(Class<?> authentication) {
-	return JWTAuthenticationProvider.class.isAssignableFrom(authentication);
+	return JWTAuthenticationToken.class.isAssignableFrom(authentication);
+//	return (UsernamePasswordAuthenticationToken.class.isAssignableFrom(authentication));
     }
 
     @Override
@@ -42,7 +43,7 @@ public class JWTAuthenticationProvider implements AuthenticationProvider {
 
 	Assert.notNull(authentication, "Authentication is missing");
 
-//	Assert.isInstanceOf(JWTAuthenticationProvider.class, authentication,
+//	Assert.isInstanceOf(JWTAuthenticationToken.class, authentication,
 //		"This method only accepts JwtAuthenticationToken");
 
 	String jwtToken = authentication.getName();

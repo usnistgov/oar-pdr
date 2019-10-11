@@ -26,9 +26,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-
 
 import gov.nist.oar.custom.customizationapi.config.JWTConfig.JWTAuthenticationFilter;
 //import gov.nist.oar.custom.customizationapi.config.JWTConfig.JWTAuthenticationFilter;
@@ -51,34 +51,48 @@ public class SecurityConfig {
     @Configuration
     @Order(1)
     public static class RestApiSecurityConfig extends WebSecurityConfigurerAdapter {
-	 private Logger logger = LoggerFactory.getLogger(RestApiSecurityConfig.class);
+	private Logger logger = LoggerFactory.getLogger(RestApiSecurityConfig.class);
 
+//	private static final String apiMatcher = "/api/**";
+//
+//	@Autowired
+//	JWTAuthenticationProvider jwtProvider;
+//
+//	@Override
+//	protected void configure(HttpSecurity http) throws Exception {
+//	    logger.info("Configure REST API security endpoints.");
+////	    http.addFilterBefore(new JWTAuthenticationFilter(authenticationManager()),
+////		    UsernamePasswordAuthenticationFilter.class);
+//	    http.addFilterBefore(new JWTAuthenticationFilter(apiMatcher, authenticationManagerBean()), AbstractAuthenticationProcessingFilter.class);
+//	    http.antMatcher(apiMatcher).authorizeRequests().anyRequest().authenticated();
+//	}
+//
+//	@Override
+//	@Bean
+//	public AuthenticationManager authenticationManagerBean() throws Exception {
+//	    return super.authenticationManagerBean();
+//	}
+//
+//	@Override
+//	protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+//	    auth.authenticationProvider(jwtProvider);
+//	    auth.parentAuthenticationManager(authenticationManagerBean());
+//	}
 	private static final String apiMatcher = "/api/**";
-
-	@Autowired
-	JWTAuthenticationProvider jwtProvider;
 
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
-	    logger.info("Configure REST API security endpoints.");
-	    http.addFilterBefore(new JWTAuthenticationFilter(authenticationManager()),
+
+	    http.addFilterBefore(new JWTAuthenticationFilter(apiMatcher, super.authenticationManager()),
 		    UsernamePasswordAuthenticationFilter.class);
 
 	    http.antMatcher(apiMatcher).authorizeRequests().anyRequest().authenticated();
 	}
 
 	@Override
-	@Bean
-	public AuthenticationManager authenticationManagerBean() throws Exception {
-	    return super.authenticationManagerBean();
+	protected void configure(AuthenticationManagerBuilder auth) {
+	    auth.authenticationProvider(new JWTAuthenticationProvider());
 	}
-
-	@Override
-	protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-	    auth.authenticationProvider(jwtProvider);
-	    auth.parentAuthenticationManager(authenticationManagerBean());
-	}
-
     }
 
     /**
@@ -87,7 +101,7 @@ public class SecurityConfig {
     @Configuration
     @Order(2)
     public static class AuthSecurityConfig extends WebSecurityConfigurerAdapter {
-	 private Logger logger = LoggerFactory.getLogger(AuthSecurityConfig.class);
+	private Logger logger = LoggerFactory.getLogger(AuthSecurityConfig.class);
 
 	private static final String apiMatcher = "/auth/token";
 

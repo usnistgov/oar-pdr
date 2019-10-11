@@ -165,6 +165,7 @@ public class SecuritySamlConfig extends WebSecurityConfigurerAdapter {
 
     @Bean
     public SimpleUrlAuthenticationFailureHandler authenticationFailureHandler() {
+	logger.info("SAML authentication failure!!");
 	return new SimpleUrlAuthenticationFailureHandler();
     }
 
@@ -236,7 +237,6 @@ public class SecuritySamlConfig extends WebSecurityConfigurerAdapter {
     public KeyManager keyManager() throws ConfigurationException {
 	logger.info("Read keystore key.");
 	try {
-
 	    // ClassPathResource storeFile = new ClassPathResource(keyPath);
 	    Resource storeFile = new FileSystemResource(keyPath);
 	    String storePass = keystorePass;
