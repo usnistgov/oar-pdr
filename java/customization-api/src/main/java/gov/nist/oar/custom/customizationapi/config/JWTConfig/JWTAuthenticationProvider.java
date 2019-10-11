@@ -4,11 +4,11 @@ import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.crypto.MACVerifier;
 import com.nimbusds.jwt.SignedJWT;
 
-import gov.nist.oar.custom.customizationapi.config.SAMLConfig.SecurityConstant;
+//import gov.nist.oar.custom.customizationapi.config.SAMLConfig.SecurityConstant;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -36,15 +36,16 @@ public class JWTAuthenticationProvider implements AuthenticationProvider {
 	return JWTAuthenticationToken.class.isAssignableFrom(authentication);
 //	return (UsernamePasswordAuthenticationToken.class.isAssignableFrom(authentication));
     }
-
+    @Value("${jwt.secret:}")
+    private String JWTSECRET;
     @Override
     public Authentication authenticate(Authentication authentication) {
 	log.info("Authorizing the request for given token");
 
 	Assert.notNull(authentication, "Authentication is missing");
 
-//	Assert.isInstanceOf(JWTAuthenticationToken.class, authentication,
-//		"This method only accepts JwtAuthenticationToken");
+	Assert.isInstanceOf(JWTAuthenticationToken.class, authentication,
+		"This method only accepts JWTAuthenticationToken");
 
 	String jwtToken = authentication.getName();
 
@@ -56,7 +57,7 @@ public class JWTAuthenticationProvider implements AuthenticationProvider {
 	try {
 	    signedJWT = SignedJWT.parse(jwtToken);
 
-	    boolean isVerified = signedJWT.verify(new MACVerifier(SecurityConstant.JWT_SECRET.getBytes()));
+	    boolean isVerified = signedJWT.verify(new MACVerifier(JWTSECRET.getBytes()));
 
 	    if (!isVerified) {
 		log.info("Signed JWT is not verified.");

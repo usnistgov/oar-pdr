@@ -20,6 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -171,5 +172,12 @@ public class UpdateController {
     public ErrorInfo handleRestClientError(RuntimeException ex, HttpServletRequest req) {
 	logger.error("Unexpected failure during request: " + req.getRequestURI() + "\n  " + ex.getMessage(), ex);
 	return new ErrorInfo(req.getRequestURI(), 502, "Can not connect to backend server");
+    }
+    
+    @ExceptionHandler(InternalAuthenticationServiceException.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    public ErrorInfo handleRestClientError(InternalAuthenticationServiceException ex, HttpServletRequest req) {
+	logger.error("Unauthorized user or token : " + req.getRequestURI() + "\n  " + ex.getMessage(), ex);
+	return new ErrorInfo(req.getRequestURI(),401, "Untauthorized user or token.");
     }
 }

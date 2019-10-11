@@ -31,7 +31,7 @@ import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 
-import gov.nist.oar.custom.customizationapi.config.SAMLConfig.SecurityConstant;
+//import gov.nist.oar.custom.customizationapi.config.SAMLConfig.SecurityConstant;
 import gov.nist.oar.custom.customizationapi.exceptions.CustomizationException;
 import gov.nist.oar.custom.customizationapi.exceptions.UnAuthorizedUserException;
 import gov.nist.oar.custom.customizationapi.helpers.domains.UserToken;
@@ -45,6 +45,15 @@ public class JWTTokenGenerator {
     
     @Value("${oar.mdserver:}")
     private String mdserver;
+    
+    @Value("${jwt.claimname:testsecret}")
+    private String JWTClaimName;
+    
+    @Value("${jwt.claimvalue:}")
+    private String JWTClaimValue;
+    
+    @Value("${jwt.secret:}")
+    private String JWTSECRET;
     
     /**
      * Get the UserToken if user is authorized to edit given record.
@@ -64,11 +73,11 @@ public class JWTTokenGenerator {
 
 	JWTClaimsSet.Builder jwtClaimsSetBuilder = new JWTClaimsSet.Builder();
 	jwtClaimsSetBuilder.expirationTime(dateTime.plusMinutes(120).toDate());
-	jwtClaimsSetBuilder.claim("APP", "SAMPLE");
+	jwtClaimsSetBuilder.claim(JWTClaimName, JWTClaimValue);
 
 	// signature
 	SignedJWT signedJWT = new SignedJWT(new JWSHeader(JWSAlgorithm.HS256), jwtClaimsSetBuilder.build());
-	signedJWT.sign(new MACSigner(SecurityConstant.JWT_SECRET));
+	signedJWT.sign(new MACSigner(JWTSECRET));
 
 	Date expires = signedJWT.getJWTClaimsSet().getExpirationTime();
 	String user = signedJWT.getJWTClaimsSet().getRegisteredNames().toString();
