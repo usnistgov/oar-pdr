@@ -16,6 +16,8 @@ import java.text.ParseException;
 import java.util.Date;
 
 import org.joda.time.DateTime;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -38,74 +40,80 @@ import gov.nist.oar.custom.customizationapi.helpers.domains.UserToken;
 
 @Component
 public class JWTTokenGenerator {
-    
-    
+
+    private Logger logger = LoggerFactory.getLogger(JWTTokenGenerator.class);
     @Value("${oar.mdserver.secret:testsecret}")
     private String mdsecret;
-    
+
     @Value("${oar.mdserver:}")
     private String mdserver;
-    
+
     @Value("${jwt.claimname:testsecret}")
     private String JWTClaimName;
-    
+
     @Value("${jwt.claimvalue:}")
     private String JWTClaimValue;
-    
+
     @Value("${jwt.secret:}")
     private String JWTSECRET;
-    
+
     /**
      * Get the UserToken if user is authorized to edit given record.
+     * 
      * @param userId Authenticated user
-     * @param ediid Record identifier
+     * @param ediid  Record identifier
      * @return UserToken, userid and token
      * @throws UnAuthorizedUserException
-     * @throws CustomizationException 
+     * @throws CustomizationException
      */
-    public UserToken getJWT(String userId, String ediid)throws  UnAuthorizedUserException, CustomizationException {
-	if(!isAuthorized(userId,ediid))
+    public UserToken getJWT(String userId, String ediid) throws UnAuthorizedUserException, CustomizationException {
+	logger.info("Get authorized user token.");
+	if (!isAuthorized(userId, ediid))
 	    throw new UnAuthorizedUserException("User is not authorized to edit this record.");
-	
+
 	try {
-	final DateTime dateTime = DateTime.now();
-	// build claims
+	    final DateTime dateTime = DateTime.now();
+	    // build claims
 
-	JWTClaimsSet.Builder jwtClaimsSetBuilder = new JWTClaimsSet.Builder();
-	jwtClaimsSetBuilder.expirationTime(dateTime.plusMinutes(120).toDate());
-	jwtClaimsSetBuilder.claim(JWTClaimName, JWTClaimValue);
+	    JWTClaimsSet.Builder jwtClaimsSetBuilder = new JWTClaimsSet.Builder();
+	    jwtClaimsSetBuilder.expirationTime(dateTime.plusMinutes(120).toDate());
+	    jwtClaimsSetBuilder.claim(JWTClaimName, JWTClaimValue);
 
-	// signature
-	SignedJWT signedJWT = new SignedJWT(new JWSHeader(JWSAlgorithm.HS256), jwtClaimsSetBuilder.build());
-	signedJWT.sign(new MACSigner(JWTSECRET));
+	    // signature
+	    SignedJWT signedJWT = new SignedJWT(new JWSHeader(JWSAlgorithm.HS256), jwtClaimsSetBuilder.build());
+	    signedJWT.sign(new MACSigner(JWTSECRET));
 
-	Date expires = signedJWT.getJWTClaimsSet().getExpirationTime();
-	String user = signedJWT.getJWTClaimsSet().getRegisteredNames().toString();
-	return new UserToken(userId, signedJWT.serialize());
-	}
-	catch(ParseException | JOSEException e ) {
+	    Date expires = signedJWT.getJWTClaimsSet().getExpirationTime();
+	    String user = signedJWT.getJWTClaimsSet().getRegisteredNames().toString();
+	    return new UserToken(userId, signedJWT.serialize());
+	} catch (ParseException | JOSEException e) {
 	    throw new UnAuthorizedUserException("Unable to generate token for the this user.");
 	}
     }
-    
+
     /***
-     * Connect to back end metadata service to check whether authenticated user is authorized to edit the record.
-     * @param userId authenticated userid 
-     * @param ediid Record identifier
+     * Connect to back end metadata service to check whether authenticated user is
+     * authorized to edit the record.
+     * 
+     * @param userId authenticated userid
+     * @param ediid  Record identifier
      * @return boolean true if the user is authorized.
-     * @throws CustomizationException 
+     * @throws CustomizationException
+     * @throws UnAuthorizedUserException
      */
-    private boolean isAuthorized(String userId, String ediid) throws CustomizationException {
+    private boolean isAuthorized(String userId, String ediid) throws UnAuthorizedUserException {
+	logger.info("Connect to backend metadata server to get the information.");
 	try {
-	String uri = mdserver+ediid+"/_perm/update/"+userId;
-	RestTemplate restTemplate = new RestTemplate();
-	HttpHeaders headers = new HttpHeaders();
-	headers.add("Authorized", "Bearer "+mdsecret);
-	HttpEntity<String> requestEntity = new HttpEntity<>(null, headers);
-	ResponseEntity<String> result = restTemplate.exchange(uri, HttpMethod.GET, requestEntity,String.class);
-	return result.getStatusCode().is2xxSuccessful() ? true :false;
-	}catch(Exception ie) {
-	    throw new CustomizationException("There is an error while getting user permissions from metadata srevice. "+ie.getMessage());
+	    String uri = mdserver + ediid + "/_perm/update/" + userId;
+	    RestTemplate restTemplate = new RestTemplate();
+	    HttpHeaders headers = new HttpHeaders();
+	    headers.add("Authorized", "Bearer " + mdsecret);
+	    HttpEntity<String> requestEntity = new HttpEntity<>(null, headers);
+	    ResponseEntity<String> result = restTemplate.exchange(uri, HttpMethod.GET, requestEntity, String.class);
+	    return result.getStatusCode().is2xxSuccessful() ? true : false;
+	} catch (Exception ie) {
+	    throw new UnAuthorizedUserException(
+		    "There is an error while getting user permissions from metadata srevice. " + ie.getMessage());
 	}
     }
 

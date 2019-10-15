@@ -72,7 +72,7 @@ public class AuthController {
 	    throws UnAuthorizedUserException, CustomizationException {
 
 	if (authentication == null)
-	    throw new CustomizationException("User is not authenticated to access this resource.");
+	    throw new UnAuthorizedUserException("User is not authenticated to access this resource.");
 	logger.info("Get the token for authenticated user.");
 
 	SAMLCredential credential = (SAMLCredential) authentication.getCredentials();
@@ -138,7 +138,7 @@ public class AuthController {
     public ErrorInfo handleStreamingError(UnAuthorizedUserException ex, HttpServletRequest req) {
 	logger.info("There user requesting edit access is not authorized : " + req.getRequestURI() + "\n  "
 		+ ex.getMessage());
-	return new ErrorInfo(req.getRequestURI(), 401, "Resource Not Found", req.getMethod());
+	return new ErrorInfo(req.getRequestURI(), 401, "UnAuthroized User", req.getMethod());
     }
 
     /**
