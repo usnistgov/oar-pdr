@@ -23,19 +23,11 @@
   </button>
 </div>
 <div *ngIf="editEnabled" class="top_message">
-  <div *ngIf="!recordEditmode; else editMode">
-    <span *ngIf="updateDate; else noDraft" style="color: rgb(255, 115, 0);">You have draft data edited on
-      {{updateDate}}. Click on edit button to continue editing.</span>
-    <ng-template #noDraft>
-      <span>To see previously edited record or edit current one, click on Edit button.</span>
-    </ng-template>
+  <span [ngStyle]="{'color': messageColor}">{{message}}</span>
+  <div *ngIf="isProcessing" style="width: 2em;height:2em; float: right;">
+    <i class="faa faa-spinner faa-spin faa-stack-1x"
+      style="color: rgb(22, 20, 59);width:2em;position: inherit;"></i>
   </div>
-  <ng-template #editMode>
-      <span *ngIf="updateDate; else noDate">This record was edited on: {{updateDate}}</span>
-      <ng-template #noDate>
-        <span>Click on Quit Edit button to exit edit mode.</span>
-      </ng-template>
-  </ng-template>
 </div>
 <div *ngIf="displayError" style="color: red; padding: 1em;">
   Ooops! {{errorMsg}} If problem persists, please contact us at <a
@@ -50,8 +42,8 @@
     <div *ngIf="record?.length == 0 || isId === false">
       <div *ngIf="!isLoading" class="ui-g">
         <div class="ui-g-10 ui-md-10 ui-lg-10 ui-sm-12" style="padding-left: 1%">
-          <b>No Landing page available</b>
-          <p>{{errorMsgDetail}}</p>
+          <!-- <b>No Landing page available</b>
+          <p>{{errorMsgDetail}}</p> -->
         </div>
       </div>
     </div>

@@ -21,6 +21,7 @@ export class CommonVarService {
   contentReadySub = new BehaviorSubject<boolean>(false);
   editModeSub = new BehaviorSubject<boolean>(false);
   refreshTreeSub = new BehaviorSubject<boolean>(false);
+  messageSub = new BehaviorSubject<string>('');
 
   constructor() {
     if (typeof (localStorage) !== 'undefined')
@@ -66,6 +67,20 @@ export class CommonVarService {
   **/
   watchLocalProcessing(): Observable<any> {
     return this.localProcessingSub.asObservable();
+  }
+
+  /**
+   * Set processing flag
+   **/
+  setMessage(value: string) {
+    this.messageSub.next(value);
+  }
+
+  /**
+  * Watching processing flag
+  **/
+  watchMessage(): Observable<any> {
+    return this.messageSub.asObservable();
   }
 
   /**

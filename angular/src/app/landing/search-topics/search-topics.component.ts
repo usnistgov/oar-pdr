@@ -1,8 +1,10 @@
 import { Component, OnInit, Input, EventEmitter, Output, ElementRef, ViewChild } from '@angular/core';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { TreeNode } from 'primeng/api';
-import { TemplateBindingParseResult } from '@angular/compiler';
+import { TemplateBindingParseResult, preserveWhitespacesDefault } from '@angular/compiler';
 import { AppConfig } from '../../config/config';
+
+export const ROW_COLOR = '#1E6BA1';
 
 @Component({
   selector: 'app-search-topics',
@@ -19,6 +21,7 @@ export class SearchTopicsComponent implements OnInit {
   isVisible: boolean = true;
   scrollTop: number = 0;
   searchText: string = "";
+  highlight: string = "";
 
   @ViewChild('panel', { read: ElementRef }) public panel: ElementRef<any>;
   @ViewChild('panel0', { read: ElementRef }) public panel0: ElementRef<any>;
@@ -53,12 +56,15 @@ export class SearchTopicsComponent implements OnInit {
    */
   updateTopics(rowNode: any) {
     const existingTopic = this.inputValue['topic'].filter(topic => topic == rowNode.node.data.researchTopic);
-    if (existingTopic == undefined || existingTopic == null || existingTopic.length == 0)
+    if (existingTopic == undefined || existingTopic == null || existingTopic.length == 0) {
       this.inputValue['topic'].push(rowNode.node.data.researchTopic);
 
-    // Reset search text box
-    this.searchText = "";
-    this.onSearchTextChange();
+      // Reset search text box
+      if (this.searchText != "") {
+        this.searchText = "";
+        this.onSearchTextChange();
+      }
+    }
   }
 
   /*
@@ -68,7 +74,7 @@ export class SearchTopicsComponent implements OnInit {
     // console.log("this.tempTopics", this.tempTopics);
     const existingTopic = this.inputValue['topic'].filter(topic => topic == rowNode.node.data.researchTopic);
     if (existingTopic == undefined || existingTopic == null || existingTopic.length <= 0) {
-      return '#1E6BA1';
+      return ROW_COLOR;
     } else {
       return 'lightgrey';
     }
@@ -227,10 +233,31 @@ export class SearchTopicsComponent implements OnInit {
   *   Return row background color
   */
   rowBackColor(rowData: any) {
-    if (rowData == null || rowData == undefined)
-      return "white";
-    else
-      return rowData.bkcolor;
+    if (this.highlight == "") {
+      if (rowData == null || rowData == undefined)
+        return "white";
+      else
+        return rowData.bkcolor;
+    } else {
+      if (this.highlight == rowData.name) {
+        return "#cccccc";
+      }
+    }
+  }
+
+  /*
+   *   Return row background color
+   */
+  rowColor(rowNode: any) {
+    if (this.highlight == "") {
+      return this.getTopicColor(rowNode);
+    } else {
+      if (this.highlight == rowNode.node.data.name) {
+        return "white";
+      } else {
+        return this.getTopicColor(rowNode);
+      }
+    }
   }
 
   /*
@@ -290,5 +317,12 @@ export class SearchTopicsComponent implements OnInit {
    */
   trackByFn(index: any, author: any) {
     return index;
+  }
+
+  setHighlight(rowData: any) {
+    if (rowData == "")
+      this.highlight = "";
+    else
+      this.highlight = rowData.name;
   }
 }
