@@ -72,7 +72,9 @@ export class AuthService implements OnInit {
     */
     loginUser(): Observable<any> {
         // return this.http.get(this.loginURL, this.httpOptions);
-        return this.http.get(this.loginAPI + this.commonVarService.getEdiid(), this.httpOptions);
+        var loginUrl = this.loginAPI + this.commonVarService.getEdiid();
+        console.log("Login URL:", loginUrl)
+        return this.http.get(loginUrl, this.httpOptions);
     }
 
     /*
@@ -147,7 +149,9 @@ export class AuthService implements OnInit {
      * Redirect login
      */
     loginUserRedirect() {
-        this.router.navigate([this.loginRedirectURL + this.Landingpageurl]);
+        var redirectURL = this.loginRedirectURL + this.Landingpageurl;
+        console.log("redirectURL:", redirectURL);
+        this.router.navigate([redirectURL]);
     }
 
     /*
