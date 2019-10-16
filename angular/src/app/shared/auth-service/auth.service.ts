@@ -7,6 +7,7 @@ import { CommonVarService } from '../../shared/common-var';
 import { ApiToken } from "./ApiToken";
 import { isPlatformBrowser } from '@angular/common';
 import { PLATFORM_ID, APP_ID, Inject } from '@angular/core';
+import { AppConfig } from '../../config/config';
 
 @Injectable({
     providedIn: 'root'
@@ -21,8 +22,8 @@ export class AuthService implements OnInit {
     baseApiUrl: string = "https://pn110559.nist.gov/saml-sp/api/mycontroller";
     // loginURL: string = "https://pn110559.nist.gov/saml-sp/auth/token";
     // loginURL: string = "Https://oardev.nist.gov/customization/saml/login";
-    loginURL: string = "https://datapub.nist.gov/customization/auth/_perm/";
-    tokenURL: string = "Https://oardev.nist.gov/customization/auth/token ";
+    loginAPI: string = "https://datapub.nist.gov/customization/auth/_perm/";
+    tokenAPI: string = "Https://oardev.nist.gov/customization/auth/token/";
     loginRedirectURL: string = 'https://datapub.nist.gov/customization/saml/login?redirectTo=';
     useridSub = new BehaviorSubject<string>('');
     inBrowser: boolean = false;
@@ -38,8 +39,12 @@ export class AuthService implements OnInit {
         private http: HttpClient,
         private commonVarService: CommonVarService,
         private router: Router,
+        private cfg: AppConfig,
         @Inject(PLATFORM_ID) private platformId: Object) {
         this.inBrowser = isPlatformBrowser(platformId);
+        this.loginAPI = this.cfg.get("loginAPI", "/customization/auth/_perm/");
+        this.tokenAPI = this.cfg.get("tokenAPI", "/customization/auth/token/");
+        this.loginRedirectURL = this.cfg.get("loginRedirectURL", "/customization/saml/login?redirectTo=");
     }
 
     ngOnInit() {
@@ -67,7 +72,7 @@ export class AuthService implements OnInit {
     */
     loginUser(): Observable<any> {
         // return this.http.get(this.loginURL, this.httpOptions);
-        return this.http.get(this.loginURL + this.commonVarService.getEdiid(), this.httpOptions);
+        return this.http.get(this.loginAPI + this.commonVarService.getEdiid(), this.httpOptions);
     }
 
     /*
@@ -90,7 +95,7 @@ export class AuthService implements OnInit {
     *  Request token
     */
     requestToken(): Observable<any> {
-        return this.http.get(this.tokenURL);
+        return this.http.get(this.tokenAPI);
     }
 
     /*
