@@ -5,6 +5,7 @@ import { CartEntity } from '../datacart/cart.entity';
 import { AuthService } from '../shared/auth-service/auth.service';
 import { Router } from '@angular/router';
 import { CommonVarService } from '../shared/common-var';
+import { NotificationService } from '../shared/notification-service/notification.service';
 
 /**
  * A Component that serves as the header of the landing page.  
@@ -34,7 +35,6 @@ export class HeadbarComponent {
     appVersion: string = "";
     cartLength: number = 0;
     editEnabled: any;
-    isAuthenticated: boolean = false;
     isEditMode: boolean = false;
     ediid: any;
     userId: string = '';
@@ -46,7 +46,8 @@ export class HeadbarComponent {
         public cartService: CartService,
         private router: Router,
         private commonVarService: CommonVarService,
-        public authService: AuthService) {
+        public authService: AuthService,
+        private notificationService: NotificationService) {
         if (!(cfg instanceof AppConfig))
             throw new Error("HeadbarComponent: Wrong config type provided: " + cfg);
         this.searchLink = cfg.get("locations.pdrSearch", "/sdp/");
@@ -154,5 +155,9 @@ export class HeadbarComponent {
             return 'default';
         else
             return 'pointer';
+    }
+
+    showUserId(){
+        this.notificationService.showSuccessWithTimeout(this.userId, "", 3000);
     }
 }
