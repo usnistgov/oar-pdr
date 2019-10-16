@@ -27,6 +27,7 @@ export class CustomizationServiceService {
         // this.customizationApi = "http://localhost:8085/customization/";
         this.customizationApi = this.cfg.get("customizationApi", "/customization");
         if (!(this.customizationApi.endsWith('/'))) this.customizationApi = this.customizationApi + '/';
+        this.customizationApi = this.customizationApi + 'api/';
         this.inBrowser = isPlatformBrowser(platformId);
     }
 
