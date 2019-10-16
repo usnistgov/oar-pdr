@@ -70,18 +70,25 @@ public class AuthController {
 
     public UserToken token(Authentication authentication, @PathVariable @Valid String ediid)
 	    throws UnAuthorizedUserException, CustomizationException {
+	String userId = "";
+	try {
+	    if (authentication == null)
+		throw new UnAuthorizedUserException("User is not authenticated to access this resource.");
+	    logger.info("Get the token for authenticated user.");
 
-	if (authentication == null)
-	    throw new UnAuthorizedUserException("User is not authenticated to access this resource.");
-	logger.info("Get the token for authenticated user.");
+	    SAMLCredential credential = (SAMLCredential) authentication.getCredentials();
+	    List<Attribute> attributes = credential.getAttributes();
 
-	SAMLCredential credential = (SAMLCredential) authentication.getCredentials();
-	List<Attribute> attributes = credential.getAttributes();
+	    org.opensaml.xml.schema.impl.XSAnyImpl xsImpl = (XSAnyImpl) attributes.get(0).getAttributeValues().get(0);
+	    userId = xsImpl.getTextContent();
 
-	org.opensaml.xml.schema.impl.XSAnyImpl xsImpl = (XSAnyImpl) attributes.get(0).getAttributeValues().get(0);
-	String userId = xsImpl.getTextContent();
-
-	return jwt.getJWT(userId, ediid);
+	    return jwt.getJWT(userId, ediid);
+	} catch (UnAuthorizedUserException ex) {
+	    if (!userId.isEmpty() && userId != null)
+		return new UserToken(userId, "");
+	    else
+		throw ex;
+	}
 
     }
 
