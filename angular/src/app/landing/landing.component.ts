@@ -301,7 +301,7 @@ export class LandingComponent implements OnInit {
         this.commonVarService.setMessage(message);
         this.isProcessing = processing;
 
-        if(this.updateDate)
+        if (this.updateDate)
             this.customizationServiceService.setUpdateDate(this.updateDate);
 
     }
@@ -946,17 +946,6 @@ export class LandingComponent implements OnInit {
                     this.loadDraftData(editMode);
                 } else {
                     //If user not logged in, force user login then load draft data. If login failed, do nothing
-                    if(this.authService.authenticated()){
-                        this.authService.requestToken().subscribe(
-                              res => {
-                                auService.handleTokenSuccess(res as ApiToken);
-                                this.loadDraftData(editMode);
-                              },
-                              error => {
-                                this.setErrorForDisplay(error, "There was an error authorizing the user.");
-                              }
-                        )
-                    }else{
                     this.authService.loginUser()
                         .subscribe(
                             res => {
@@ -971,7 +960,6 @@ export class LandingComponent implements OnInit {
                                 this.authService.handleTokenError(error);
                             }
                         )
-                    }
                 }
             } else {
                 //If in server side, do nothing

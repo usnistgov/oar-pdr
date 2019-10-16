@@ -19,19 +19,20 @@ export class AuthService implements OnInit {
     userIdFieldName = "userid";
     ediid: string;
     authToken: string;
+    customizationApi: string;
     baseApiUrl: string = "https://pn110559.nist.gov/saml-sp/api/mycontroller";
     // loginURL: string = "https://pn110559.nist.gov/saml-sp/auth/token";
     // loginURL: string = "Https://oardev.nist.gov/customization/saml/login";
     loginAPI: string = "https://datapub.nist.gov/customization/auth/_perm/";
-    tokenAPI: string = "Https://oardev.nist.gov/customization/auth/token/";
     loginRedirectURL: string = 'https://datapub.nist.gov/customization/saml/login?redirectTo=';
+    landingPageService: string = "/od/id/";
     useridSub = new BehaviorSubject<string>('');
     inBrowser: boolean = false;
     Landingpageurl: string;
     isAuthenticated: boolean = false;
 
     httpOptions = {
-        headers: new HttpHeaders({ 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': 'https://datapub.nist.gov' }),
+        headers: new HttpHeaders({ 'Content-Type': 'application/json' }),
         withCredentials: true,
     };
 
@@ -42,14 +43,16 @@ export class AuthService implements OnInit {
         private cfg: AppConfig,
         @Inject(PLATFORM_ID) private platformId: Object) {
         this.inBrowser = isPlatformBrowser(platformId);
-        this.loginAPI = this.cfg.get("loginAPI", "/customization/auth/_perm/");
-        this.tokenAPI = this.cfg.get("tokenAPI", "/customization/auth/token/");
-        this.loginRedirectURL = this.cfg.get("loginRedirectURL", "/customization/saml/login?redirectTo=");
+        this.customizationApi = this.cfg.get("customizationApi", "/customization");
+        if (!(this.customizationApi.endsWith('/'))) this.customizationApi = this.customizationApi + '/';
+        this.loginAPI = this.customizationApi + "auth/_perm/";
+        this.loginRedirectURL = this.customizationApi + "saml/login?redirectTo=";
+        this.landingPageService = cfg.get('landingPageService','/od/id/');
     }
 
     ngOnInit() {
         this.ediid = this.commonVarService.getEdiid();
-        this.Landingpageurl = 'od/id/' + this.ediid;
+        this.Landingpageurl = this.landingPageService + this.ediid;
     }
 
     /**
@@ -90,14 +93,6 @@ export class AuthService implements OnInit {
                     this.handleTokenError(err);
                 }
             )
-    }
-
-
-    /*
-    *  Request token
-    */
-    requestToken(): Observable<any> {
-        return this.http.get(this.tokenAPI);
     }
 
     /*
