@@ -3,11 +3,9 @@ package gov.nist.oar.custom.customizationapi.config.JWTConfig;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.crypto.MACVerifier;
 import com.nimbusds.jwt.SignedJWT;
-
-//import gov.nist.oar.custom.customizationapi.config.SAMLConfig.SecurityConstant;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.security.authentication.AuthenticationProvider;
@@ -16,6 +14,7 @@ import org.springframework.security.authentication.CredentialsExpiredException;
 import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 
 import java.text.ParseException;
@@ -27,17 +26,19 @@ import java.time.ZoneId;
  * 
  * @author Deoyani Nandrekar-Heinis
  */
-//@Component
+
 public class JWTAuthenticationProvider implements AuthenticationProvider {
 
     private static final Logger log = LoggerFactory.getLogger(JWTAuthenticationProvider.class);
     @Override
     public boolean supports(Class<?> authentication) {
 	return JWTAuthenticationToken.class.isAssignableFrom(authentication);
-//	return (UsernamePasswordAuthenticationToken.class.isAssignableFrom(authentication));
     }
-    @Value("${jwt.secret:}")
-    private String JWTSECRET;
+
+    public JWTAuthenticationProvider(String secret) {
+	this.secret = secret;
+    }
+    public String secret;
     @Override
     public Authentication authenticate(Authentication authentication) {
 	log.info("Authorizing the request for given token");
@@ -57,7 +58,7 @@ public class JWTAuthenticationProvider implements AuthenticationProvider {
 	try {
 	    signedJWT = SignedJWT.parse(jwtToken);
 
-	    boolean isVerified = signedJWT.verify(new MACVerifier(JWTSECRET.getBytes()));
+	    boolean isVerified = signedJWT.verify(new MACVerifier(secret.getBytes()));
 
 	    if (!isVerified) {
 		log.info("Signed JWT is not verified.");

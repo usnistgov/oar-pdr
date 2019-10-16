@@ -107,7 +107,7 @@ public class JWTTokenGenerator {
 	    String uri = mdserver + ediid + "/_perm/update/" + userId;
 	    RestTemplate restTemplate = new RestTemplate();
 	    HttpHeaders headers = new HttpHeaders();
-	    headers.add("Authorized", "Bearer " + mdsecret);
+	    headers.add("Authorization", "Bearer " + mdsecret);
 	    HttpEntity<String> requestEntity = new HttpEntity<>(null, headers);
 	    ResponseEntity<String> result = restTemplate.exchange(uri, HttpMethod.GET, requestEntity, String.class);
 	    return result.getStatusCode().is2xxSuccessful() ? true : false;
