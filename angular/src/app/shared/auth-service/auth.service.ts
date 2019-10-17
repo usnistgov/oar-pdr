@@ -23,7 +23,7 @@ export class AuthService implements OnInit {
     baseApiUrl: string = "https://pn110559.nist.gov/saml-sp/api/mycontroller";
     // loginURL: string = "https://pn110559.nist.gov/saml-sp/auth/token";
     // loginURL: string = "Https://oardev.nist.gov/customization/saml/login";
-    loginAPI: string = "https://datapub.nist.gov/customization/auth/_perm/";
+    loginAPI: string = "https://oardev.nist.gov/customization/auth/_perm/";
     loginRedirectURL: string = 'https://datapub.nist.gov/customization/saml/login?redirectTo=';
     landingPageService: string = "/od/id/";
     useridSub = new BehaviorSubject<string>('');
@@ -44,15 +44,18 @@ export class AuthService implements OnInit {
         @Inject(PLATFORM_ID) private platformId: Object) {
         this.inBrowser = isPlatformBrowser(platformId);
         this.customizationApi = this.cfg.get("customizationApi", "/customization");
+        // this.customizationApi = "https://oardev.nist.gov/customization/";
         if (!(this.customizationApi.endsWith('/'))) this.customizationApi = this.customizationApi + '/';
         this.loginAPI = this.customizationApi + "auth/_perm/";
         this.loginRedirectURL = this.customizationApi + "saml/login?redirectTo=";
         this.landingPageService = cfg.get('landingPageService','/od/id/');
+        // this.landingPageService = "https://oardev.nist.gov/od/id/";
     }
 
     ngOnInit() {
         this.ediid = this.commonVarService.getEdiid();
         this.Landingpageurl = this.landingPageService + this.ediid;
+        console.log('this.Landingpageurl', this.Landingpageurl);
     }
 
     /**
@@ -73,8 +76,8 @@ export class AuthService implements OnInit {
     /*
     *  Send http login request
     */
+   //hjh
     loginUser(): Observable<any> {
-        // return this.http.get(this.loginURL, this.httpOptions);
         var loginUrl = this.loginAPI + this.commonVarService.getEdiid();
         console.log("Login URL:", loginUrl)
         return this.http.get(loginUrl, this.httpOptions);
@@ -101,18 +104,17 @@ export class AuthService implements OnInit {
     handleTokenSuccess(apiToken: any) {
         console.log("response:", apiToken);
         this.authToken = apiToken.token;
-        var commonVarService = this.commonVarService;
-        this.setToken(apiToken.token).then((result) => {
-            this.setUserId(apiToken.userId);
-            this.setAuthenticateStatus(true);
-        })
+        this.setUserId(apiToken.userId);
+        this.setAuthenticateStatus(true);
+ 
     }
 
     /*
     * If login failed, display error message
     */
     handleTokenError(error: any) {
-        console.log("pased Error", error);
+        console.log("pased Error", error.status);
+
         if (error.error instanceof ErrorEvent) {
             // A client-side or network error occurred. Handle it accordingly.
             console.error('An error occurred:', error.error.message);
@@ -143,10 +145,11 @@ export class AuthService implements OnInit {
     /*
      * Redirect login
      */
-    loginUserRedirect() {
-        var redirectURL = this.loginRedirectURL + this.Landingpageurl;
+    loginUserRedirect(): Observable<any> {
+        var redirectURL = this.loginRedirectURL + this.landingPageService + this.commonVarService.getEdiid();
         console.log("redirectURL:", redirectURL);
-        this.router.navigate([redirectURL]);
+        // this.router.navigate([redirectURL]);
+        return this.http.get(redirectURL);
     }
 
     /*
@@ -166,30 +169,15 @@ export class AuthService implements OnInit {
     /*
      * Get stored token
      */
-    setToken(token: any) {
-        console.log("this._tokenName", this._tokenName);
-        if (this.inBrowser)
-            return Promise.resolve(localStorage.setItem(this._tokenName, token));
-        else
-            return Promise.resolve();
-    }
-
-    /*
-     * Get stored token
-     */
     getToken() {
-        if (this.inBrowser)
-            return localStorage.getItem(this._tokenName);
-        else
-            return null;
+        return this.authToken;
     }
 
     /*
      * Remove stored token
      */
     removeToken() {
-        if (this.inBrowser)
-            localStorage.removeItem(this._tokenName);
+        this.authToken = "";
     }
 
     /*
@@ -207,28 +195,21 @@ export class AuthService implements OnInit {
      * Get stored token
      */
     getUserId() {
-        if (this.inBrowser)
-            return localStorage.getItem(this.userIdFieldName)
-        else
-            return "";
+        return this.userId;
     }
 
     /*
      * Remove stored token
      */
     removeUserId() {
-        if (this.inBrowser)
-            localStorage.removeItem(this.userIdFieldName);
+        this.userId = "";
     }
 
     /*
      * Determine if the user is logged in by checking the existence of the token
      */
     authorized() {
-        if (this.inBrowser)
-            return !!this.getToken();
-        else
-            return false;
+        return (this.authToken != "")
     }
 
     authenticated(){
@@ -250,9 +231,8 @@ export class AuthService implements OnInit {
      * Set user ID
      **/
     setUserId(value: string) {
-        this.setUserIdLocalStorage(value).then((res) => {
-            this.useridSub.next(value);
-        });
+        this.userId = value;
+        this.useridSub.next(value);
     }
 
     /**

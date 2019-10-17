@@ -936,6 +936,7 @@ export class LandingComponent implements OnInit {
     */
     setRecordEditmode(editMode: boolean) {
         // Clear error diaplay
+        console.log('Here');
         this.displayError = false;
         console.log('this.inBrowser', this.inBrowser);
         var auService = this.authService;
@@ -953,9 +954,8 @@ export class LandingComponent implements OnInit {
                                 auService.handleTokenSuccess(res);
                                 this.loadDraftData(editMode);
                             },
-                            err => {
-                                var error = JSON.parse(err);
-                                console.log("err:", error);
+                            error => {
+                                console.log("Login err:", error);
                                 this.setErrorForDisplay(error, "There was an error logging in.");
                                 this.authService.handleTokenError(error);
                             }
@@ -976,11 +976,13 @@ export class LandingComponent implements OnInit {
     */
     loadDraftData(editMode: boolean) {
         this.updateMessage(true, "Loading...");
-        this.dataInit();
+        // this.dataInit();
+
         this.customizationServiceService.getDraftData()
             .subscribe((res) => {
-                console.log("Draft data return:", res);
+                console.log("**** Draft data return:", res);
                 if (res != undefined && res != null) {
+
                     this.onSuccess(res).then(function (result) {
                         if (res._updateDate) {
                             this.updateDate = res._updateDate;
@@ -997,6 +999,8 @@ export class LandingComponent implements OnInit {
                     });
                 }
             }, (err) => {
+                console.log("I am here");
+                console.log("Error", err);
                 this.setErrorForDisplay(err, "There was an error getting draft data.");
                 this.updateMessage(false);
             })
@@ -1349,11 +1353,11 @@ export class LandingComponent implements OnInit {
      *  Set error message for display
      */
     setErrorForDisplay(err: any, message: string) {
-        this.errorMsg = message;
-        this.errorMsgDetail = err.message;
-        this.displayError = true;
-        console.log(this.errorMsg);
         console.log(err);
+        // this.errorMsg = message;
+        // this.errorMsgDetail = err.message;
+        // this.displayError = true;
+        // console.log(this.errorMsg);
     }
 }
 

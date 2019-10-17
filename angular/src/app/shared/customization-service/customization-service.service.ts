@@ -26,6 +26,7 @@ export class CustomizationServiceService {
         @Inject(PLATFORM_ID) private platformId: Object) {
         // this.customizationApi = "http://localhost:8085/customization/";
         this.customizationApi = this.cfg.get("customizationApi", "/customization");
+        // this.customizationApi = "https://oardev.nist.gov/customization/";
         if (!(this.customizationApi.endsWith('/'))) this.customizationApi = this.customizationApi + '/';
         this.customizationApi = this.customizationApi + 'api/';
         this.inBrowser = isPlatformBrowser(platformId);
@@ -60,6 +61,7 @@ export class CustomizationServiceService {
         var url = this.customizationApi + "draft/" + this.commonVarService.getEdiid();
         console.log("Update URL:", url);
         console.log("body:", body);
+        console.log("Header:", httpOptions);
         // return this.http.patch(url, body);
         return this.http.patch(url, body, httpOptions);
     }
@@ -102,18 +104,18 @@ export class CustomizationServiceService {
      *  Get draft data from staging area. If no saved data, backend return saved record
      */
     getDraftData(): Observable<any> {
-        // const apiToken = localStorage.getItem("apiToken");
-
+        console.log("Getting draft");
         //Need to append ediid to the base API URL
         var url = this.customizationApi + "draft/" + this.commonVarService.getEdiid();
-        console.log("URL to get draft data:", url);
+        var token = this.authService.getToken();
+        console.log("Token:", this.authService.getToken());
         // return this.http.get(url);
+
         return this.http.get(url, {
-          headers: {
-            "Authorization": "Bearer " + this.authService.getToken(),
-            "userId": this.authService.getUserId()
-          }
-        });
+            headers: {
+              "Authorization": "Bearer " + token
+            }
+          });
     }
 
     /**
