@@ -90,7 +90,10 @@ public class SecurityConfig {
 	    http.addFilterBefore(new JWTAuthenticationFilter(apiMatcher, super.authenticationManager()),
 		    UsernamePasswordAuthenticationFilter.class);
 
-	    http.antMatcher(apiMatcher).authorizeRequests().anyRequest().authenticated();
+	    http.csrf().disable();
+	    http.authorizeRequests().antMatchers(apiMatcher).permitAll().anyRequest()
+	    .authenticated();
+//	    http.antMatcher(apiMatcher).authorizeRequests().anyRequest().authenticated();
 	}
 
 	@Override
@@ -107,7 +110,7 @@ public class SecurityConfig {
     public static class AuthSecurityConfig extends WebSecurityConfigurerAdapter {
 	private Logger logger = LoggerFactory.getLogger(AuthSecurityConfig.class);
 
-	private static final String apiMatcher = "/auth/token";
+	private static final String apiMatcher = "/auth/**";
 
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
