@@ -192,6 +192,7 @@ export class LandingComponent implements OnInit {
     isProcessing: boolean = true;
     message: string = "";
     messageColor: string = "black";
+    doiUrl: string = "";
 
     /**
      * Creates an instance of the SearchPanel
@@ -511,10 +512,13 @@ export class LandingComponent implements OnInit {
         if (this.files.length > 0) {
             this.setLeafs(this.files[0].data);
         }
-        if (this.record['doi'] !== undefined && this.record['doi'] !== "")
+        if (this.record['doi'] !== undefined && this.record['doi'] !== ""){
+            this.doiUrl = "https://doi.org/" + this.record['doi'].split(':')[1];
             this.isDOI = true;
-        if ("hasEmail" in this.record['contactPoint'])
+        }
+        if ("hasEmail" in this.record['contactPoint']){
             this.isEmail = true;
+        }
         this.assessNewer();
         this.updateMenu();
 
@@ -936,7 +940,6 @@ export class LandingComponent implements OnInit {
     */
     setRecordEditmode(editMode: boolean) {
         // Clear error diaplay
-        console.log('Here');
         this.displayError = false;
         console.log('this.inBrowser', this.inBrowser);
         var auService = this.authService;
@@ -999,7 +1002,6 @@ export class LandingComponent implements OnInit {
                     });
                 }
             }, (err) => {
-                console.log("I am here");
                 console.log("Error", err);
                 this.setErrorForDisplay(err, "There was an error getting draft data.");
                 this.updateMessage(false);
@@ -1354,10 +1356,10 @@ export class LandingComponent implements OnInit {
      */
     setErrorForDisplay(err: any, message: string) {
         console.log(err);
-        // this.errorMsg = message;
-        // this.errorMsgDetail = err.message;
-        // this.displayError = true;
-        // console.log(this.errorMsg);
+        this.errorMsg = message;
+        this.errorMsgDetail = err.message;
+        this.displayError = true;
+        console.log(this.errorMsg);
     }
 }
 
