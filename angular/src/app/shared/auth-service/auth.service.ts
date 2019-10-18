@@ -48,7 +48,7 @@ export class AuthService implements OnInit {
         if (!(this.customizationApi.endsWith('/'))) this.customizationApi = this.customizationApi + '/';
         this.loginAPI = this.customizationApi + "auth/_perm/";
         this.loginRedirectURL = this.customizationApi + "saml/login?redirectTo=";
-        this.landingPageService = cfg.get('landingPageService','/od/id/');
+        this.landingPageService = cfg.get('landingPageService', '/od/id/');
         // this.landingPageService = "https://oardev.nist.gov/od/id/";
     }
 
@@ -76,7 +76,6 @@ export class AuthService implements OnInit {
     /*
     *  Send http login request
     */
-   //hjh
     loginUser(): Observable<any> {
         var loginUrl = this.loginAPI + this.commonVarService.getEdiid();
         console.log("Login URL:", loginUrl)
@@ -106,7 +105,7 @@ export class AuthService implements OnInit {
         this.authToken = apiToken.token;
         this.setUserId(apiToken.userId);
         this.setAuthenticateStatus(true);
- 
+
     }
 
     /*
@@ -114,6 +113,13 @@ export class AuthService implements OnInit {
     */
     handleTokenError(error: any) {
         console.log("pased Error", error.status);
+        const JsonParseError = 'Http failure during parsing for';
+        const matches = error.message.match(new RegExp(JsonParseError, 'ig'));
+        if (error.status === 200 && matches.length === 1) {
+            console.log("Test :" + error.message);
+            var samlurl = error.message.replace("Http failure during parsing for", "");
+            window.location.replace(samlurl);
+        }
 
         if (error.error instanceof ErrorEvent) {
             // A client-side or network error occurred. Handle it accordingly.
@@ -146,7 +152,9 @@ export class AuthService implements OnInit {
      * Redirect login
      */
     loginUserRedirect(): Observable<any> {
-        var redirectURL = this.loginRedirectURL + this.landingPageService + this.commonVarService.getEdiid();
+        
+        // var redirectURL = this.loginRedirectURL + this.landingPageService + this.commonVarService.getEdiid();
+        var redirectURL = this.loginRedirectURL + window.location.href;
         console.log("redirectURL:", redirectURL);
         // this.router.navigate([redirectURL]);
         return this.http.get(redirectURL);
@@ -212,7 +220,7 @@ export class AuthService implements OnInit {
         return (this.authToken != "")
     }
 
-    authenticated(){
+    authenticated() {
         return this.isAuthenticated;
     }
     /*
