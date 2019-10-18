@@ -38,6 +38,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.MethodInvokingFactoryBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -104,6 +105,7 @@ import gov.nist.oar.custom.customizationapi.service.SamlUserDetailsService;
  * @author Deoyani Nandrekar-Heinis
  */
 @Configuration
+@Order(1)
 public class SecuritySamlConfig extends WebSecurityConfigurerAdapter {
     private static Logger logger = LoggerFactory.getLogger(SecuritySamlConfig.class);
 
@@ -465,6 +467,7 @@ public class SecuritySamlConfig extends WebSecurityConfigurerAdapter {
 	auth.authenticationProvider(samlAuthenticationProvider());
     }
 
+
     @Override
     protected void configure(HttpSecurity http) throws ConfigurationException {
 	logger.info("Set up http security related filters for saml entrypoints");
@@ -473,7 +476,7 @@ public class SecuritySamlConfig extends WebSecurityConfigurerAdapter {
 	    http.addFilterBefore(corsFilter(), SessionManagementFilter.class).exceptionHandling()
 		    .authenticationEntryPoint(samlEntryPoint());
 
-//	    http.csrf().disable();
+	    http.csrf().disable();
 
 	    http.addFilterBefore(metadataGeneratorFilter(), ChannelProcessingFilter.class).addFilterAfter(samlFilter(),
 		    BasicAuthenticationFilter.class);
