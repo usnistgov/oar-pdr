@@ -473,7 +473,7 @@ public class SecuritySamlConfig extends WebSecurityConfigurerAdapter {
 	    http.addFilterBefore(corsFilter(), SessionManagementFilter.class).exceptionHandling()
 		    .authenticationEntryPoint(samlEntryPoint());
 
-	    http.csrf().disable();
+//	    http.csrf().disable();
 
 	    http.addFilterBefore(metadataGeneratorFilter(), ChannelProcessingFilter.class).addFilterAfter(samlFilter(),
 		    BasicAuthenticationFilter.class);

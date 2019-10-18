@@ -23,6 +23,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.annotation.Order;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -90,10 +91,11 @@ public class SecurityConfig {
 	    http.addFilterBefore(new JWTAuthenticationFilter(apiMatcher, super.authenticationManager()),
 		    UsernamePasswordAuthenticationFilter.class);
 
-	    http.csrf().disable();
-	    http.authorizeRequests().antMatchers(apiMatcher).permitAll().anyRequest()
-	    .authenticated();
-//	    http.antMatcher(apiMatcher).authorizeRequests().anyRequest().authenticated();
+	    http.authorizeRequests().antMatchers(HttpMethod.PATCH,apiMatcher).permitAll();
+	    http.authorizeRequests().antMatchers(HttpMethod.PUT,apiMatcher).permitAll();
+	    http.authorizeRequests().antMatchers(HttpMethod.DELETE,apiMatcher).permitAll();
+	    http.authorizeRequests().antMatchers(apiMatcher ).authenticated().and().httpBasic().and().csrf().disable();
+
 	}
 
 	@Override

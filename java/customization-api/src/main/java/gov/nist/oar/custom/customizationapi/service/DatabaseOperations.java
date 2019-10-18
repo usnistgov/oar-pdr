@@ -220,11 +220,16 @@ public class DatabaseOperations {
      */
     public boolean deleteRecordInCache(String recordid, MongoCollection<Document> mcollection) {
 	try {
+	    boolean deleted = false;
 	    Document d = mcollection.find(Filters.eq("ediid", recordid)).first();
 
+	    if(d != null) {
 	    DeleteResult result = mcollection.deleteOne(d);
-
-	    return result.getDeletedCount() == 1 ? true : false;
+	    if(result.getDeletedCount() == 1) 
+		deleted = true;
+	    }
+//	    return result.getDeletedCount() == 1 ? true : false;
+	    return deleted;
 
 	} catch (MongoException ex) {
 	    log.error("Error deleting data in cache db" + ex.getMessage());
