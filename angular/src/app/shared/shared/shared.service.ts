@@ -4,7 +4,7 @@ import { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 
 @Injectable()
-export class CommonVarService {
+export class SharedService {
 
   private userlogin: boolean = false;
   public userObservable = new Subject<boolean>();
@@ -16,10 +16,9 @@ export class CommonVarService {
 
   localProcessingSub = new BehaviorSubject<boolean>(false);
   showDatacartSub = new BehaviorSubject<boolean>(false);
-  forceLandingPageInitSub = new BehaviorSubject<boolean>(false);
+  forceDataFileTreeInitSub = new BehaviorSubject<boolean>(false);
   openDownloadModalSub = new BehaviorSubject<boolean>(false);
   contentReadySub = new BehaviorSubject<boolean>(false);
-  editModeSub = new BehaviorSubject<boolean>(false);
   refreshTreeSub = new BehaviorSubject<boolean>(false);
   messageSub = new BehaviorSubject<string>('');
 
@@ -30,14 +29,6 @@ export class CommonVarService {
 
   userConfig(val) {
     this.userObservable.next(val);
-  }
-
-  setEdiid(ediid: string) {
-    this.ediid = ediid;
-  }
-
-  getEdiid() {
-    return this.ediid;
   }
 
   getRandomMaximum() {
@@ -72,20 +63,6 @@ export class CommonVarService {
   /**
    * Set processing flag
    **/
-  setMessage(value: string) {
-    this.messageSub.next(value);
-  }
-
-  /**
-  * Watching processing flag
-  **/
-  watchMessage(): Observable<any> {
-    return this.messageSub.asObservable();
-  }
-
-  /**
-   * Set processing flag
-   **/
   setRefreshTree(value: boolean) {
     this.refreshTreeSub.next(value);
   }
@@ -100,15 +77,15 @@ export class CommonVarService {
   /**
    * Set processing flag
    **/
-  setForceLandingPageInit(value: boolean) {
-    this.forceLandingPageInitSub.next(value);
+  setForceDataFileTreeInit(value: boolean) {
+    this.forceDataFileTreeInitSub.next(value);
   }
 
   /**
   * Watching processing flag
   **/
-  watchForceLandingPageInit(): Observable<any> {
-    return this.forceLandingPageInitSub.asObservable();
+  watchForceDataFileTreeInit(): Observable<any> {
+    return this.forceDataFileTreeInitSub.asObservable();
   }
 
   /**
@@ -151,20 +128,6 @@ export class CommonVarService {
   **/
   watchContentReady(): Observable<boolean> {
     return this.contentReadySub.asObservable();
-  }
-
-  /**
- * Set landing page ready flag
- **/
-  setEditMode(value: boolean) {
-    this.editModeSub.next(value);
-  }
-
-  /**
-  * Watching landing page ready flag
-  **/
-  watchEditMode(): Observable<boolean> {
-    return this.editModeSub.asObservable();
   }
 
   /*

@@ -1,7 +1,7 @@
 import { Component, OnInit, Input, Output, EventEmitter, ChangeDetectorRef } from '@angular/core';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
-import { CommonVarService } from '../../shared/common-var';
-import { SearchService } from '../../shared/search-service/index';
+import { SharedService } from '../../../shared/shared';
+import { SearchService } from '../../../shared/search-service/index';
 
 @Component({
   selector: 'app-author-popup',
@@ -22,7 +22,7 @@ export class AuthorPopupComponent implements OnInit {
 
   constructor(
     public activeModal: NgbActiveModal,
-    private commonVarService: CommonVarService,
+    private commonVarService: SharedService,
     private searchService: SearchService) { 
 
     }

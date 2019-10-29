@@ -1,0 +1,18 @@
+<div class="edit-control">
+    <button type="button" class="btn btn-labeled" (click)="cancelRecord()" [disabled]="!recordEditmode || !dataChanged"
+      style="float:right;margin:.5em 2em .5em 0em;height:2em; background-color:grey;color:white;border-color: grey;">
+      <span class="btn-label" style="border: 1px solid grey;"><i class="faa faa-trash faa-1x icon-white"></i></span><span
+        style="padding-right:10px;">Discard</span></button>
+    <button type="button" class="btn btn-labeled" (click)="saveRecord()" [disabled]="!recordEditmode || !dataChanged"
+      style="float:right;margin:.5em 1em .5em 0em;height:2em; background-color:green;color:white;border-color: green;">
+      <span class="btn-label" style="border: 0px solid green;left: -20px;"><i
+          class="faa faa-save faa-1x icon-white"></i></span><span style="padding-right:10px;">Submit</span></button>
+    <button *ngIf="!recordEditmode" type="button" class="btn btn-labeled" (click)="setRecordEditmode(true)"
+      style="float:right;margin:.5em 1em .5em 0em;height:2em; background-color:rgb(221, 172, 9);color:white;border-color: rgb(221, 172, 9);">
+      <span class="btn-label" style="border: 0px solid rgb(221, 172, 9);left: -32px;"><i
+          class="faa faa-pencil faa-1x icon-white"></i></span><span style="padding-right:10px;">Edit</span></button>
+    <button *ngIf="recordEditmode" type="button" class="btn btn-labeled" (click)="setRecordEditmode(false)"
+      style="float:right;margin:.5em 1em .5em 0em;height:2em; background-color:rgb(221, 172, 9);color:white;border-color: rgb(221, 172, 9);">
+      <span class="btn-label" style="border: 0px solid rgb(221, 172, 9);left: -15px;"><i
+          class="faa faa-sign-out faa-1x icon-white"></i></span><span style="padding-right:10px;">Quit Edit</span></button>
+  </div>

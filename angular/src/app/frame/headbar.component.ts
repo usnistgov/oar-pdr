@@ -4,8 +4,9 @@ import { CartService } from '../datacart/cart.service';
 import { CartEntity } from '../datacart/cart.entity';
 import { AuthService } from '../shared/auth-service/auth.service';
 import { Router } from '@angular/router';
-import { CommonVarService } from '../shared/common-var';
+import { SharedService } from '../shared/shared';
 import { NotificationService } from '../shared/notification-service/notification.service';
+import { EditControlService } from '../landing/edit-control-bar/edit-control.service';
 
 /**
  * A Component that serves as the header of the landing page.  
@@ -45,9 +46,10 @@ export class HeadbarComponent {
         private cfg: AppConfig,
         public cartService: CartService,
         private router: Router,
-        private commonVarService: CommonVarService,
+        private commonVarService: SharedService,
         public authService: AuthService,
-        private notificationService: NotificationService) {
+        private notificationService: NotificationService,
+        private editControlService: EditControlService) {
         if (!(cfg instanceof AppConfig))
             throw new Error("HeadbarComponent: Wrong config type provided: " + cfg);
         this.searchLink = cfg.get("locations.pdrSearch", "/sdp/");
@@ -59,7 +61,7 @@ export class HeadbarComponent {
             this.cartLength = value;
         });
 
-        this.commonVarService.watchEditMode().subscribe(
+        this.editControlService.watchEditMode().subscribe(
             value => {
                 this.isEditMode = value;
             }
@@ -70,13 +72,17 @@ export class HeadbarComponent {
                 console.log("Received user id:", value);
                 this.userId = value;
             }
-        )
+        );
 
         this.authService.watchAuthenticateStatus().subscribe(
             value => {
                 this.authenticated = value;
             }
-        )
+        );
+
+        this.editControlService.watchEdiid().subscribe(value => {
+            this.ediid = value;
+        });
     }
 
     /*
@@ -109,7 +115,6 @@ export class HeadbarComponent {
     *   Go to original landing page
     */
     goHome() {
-        this.ediid = this.commonVarService.getEdiid();
         this.router.navigate(['/od/id/', this.ediid], { fragment: '' });
     }
 

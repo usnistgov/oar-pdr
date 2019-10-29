@@ -20,7 +20,7 @@ import { ProgressSpinnerModule, DialogModule } from 'primeng/primeng';
 import { environment } from '../../environments/environment';
 import { DownloadData } from '../shared/download-service/downloadData';
 
-import { CommonVarService } from '../shared/common-var'
+import { SharedService } from '../shared/shared'
 import { DownloadService } from '../shared/download-service/download-service.service';
 import { ZipData } from '../shared/download-service/zipData';
 import { OverlayPanel } from 'primeng/overlaypanel';
@@ -146,7 +146,7 @@ export class DatacartComponent implements OnInit, OnDestroy {
     private downloadService: DownloadService,
     private cfg: AppConfig,
     private _FileSaverService: FileSaverService,
-    private commonVarService: CommonVarService,
+    private commonVarService: SharedService,
     private commonFunctionService: CommonFunctionService,
     private route: ActivatedRoute,
     private gaService: GoogleAnalyticsService,
@@ -178,7 +178,6 @@ export class DatacartComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.commonVarService.setContentReady(false);
     this.isProcessing = true;
-    this.ediid = this.commonVarService.getEdiid();
     this.distApi = this.cfg.get("distService", "/od/ds/");
     this.routerparams = this.route.params.subscribe(params => {
       this.mode = params['mode'];

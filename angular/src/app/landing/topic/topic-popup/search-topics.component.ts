@@ -2,7 +2,7 @@ import { Component, OnInit, Input, EventEmitter, Output, ElementRef, ViewChild }
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { TreeNode } from 'primeng/api';
 import { TemplateBindingParseResult, preserveWhitespacesDefault } from '@angular/compiler';
-import { AppConfig } from '../../config/config';
+import { AppConfig } from '../../../config/config';
 
 export const ROW_COLOR = '#1E6BA1';
 

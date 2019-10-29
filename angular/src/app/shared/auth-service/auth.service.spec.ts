@@ -2,7 +2,7 @@ import { TestBed, async } from '@angular/core/testing';
 
 import { AuthService } from './auth.service';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
-import { CommonVarService } from '../common-var/common-var.service';
+import { SharedService } from '../shared/shared.service';
 import { RouterTestingModule } from '@angular/router/testing';
 import { AppConfig } from '../../config/config';
 import { AngularEnvironmentConfigService } from '../../config/config.service';
@@ -17,7 +17,7 @@ describe('AuthService', () => {
         TestBed.configureTestingModule({
         imports: [HttpClientTestingModule, RouterTestingModule],
         providers: [
-            { provide: CommonVarService },
+            { provide: SharedService },
             { provide: AppConfig, useValue: cfg }
         ]
     })});

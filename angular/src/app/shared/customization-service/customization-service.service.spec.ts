@@ -1,6 +1,6 @@
 // import { async, TestBed } from '@angular/core/testing';
 
-// import { CustomizationServiceService } from './customization-service.service';
+// import { CustomizationService } from './customization-service.service';
 // import { HttpClientTestingModule } from '@angular/common/http/testing';
 // import { CommonVarService } from '../common-var/common-var.service';
 // import { RouterTestingModule } from '@angular/router/testing';
@@ -8,7 +8,7 @@
 // import { AngularEnvironmentConfigService } from '../../config/config.service';
 // import { TransferState } from '@angular/platform-browser';
 
-// describe('CustomizationServiceService', () => {
+// describe('customizationService', () => {
 //   let cfg: AppConfig;
 //   let plid: Object = "browser";
 //   let ts: TransferState = new TransferState();
@@ -25,7 +25,7 @@
 //   })});
 
 //   it('should be created', () => {
-//     const service: CustomizationServiceService = TestBed.get(CustomizationServiceService);
+//     const service: customizationService = TestBed.get(customizationService);
 //     expect(service).toBeTruthy();
 //   });
 // });

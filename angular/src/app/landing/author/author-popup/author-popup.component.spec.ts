@@ -3,12 +3,12 @@ import { AuthorPopupComponent } from './author-popup.component';
 import { FormsModule } from '@angular/forms';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
-import { CommonVarService } from '../../shared/common-var';
-import { SearchService } from '../../shared/search-service/index';
+import { SharedService } from '../../../shared/shared';
+import { SearchService } from '../../../shared/search-service/index';
 // import { HttpClient, HttpHeaders } from '@angular/common/http'; 
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { RouterTestingModule } from '@angular/router/testing';
-import { ConfigModule } from '../../config/config.module';
+import { ConfigModule } from '../../../config/config.module';
 import { TransferState, StateKey } from '@angular/platform-browser';
 
 describe('AuthorPopupComponent', () => {
@@ -46,7 +46,7 @@ describe('AuthorPopupComponent', () => {
         HttpClientTestingModule,
         ConfigModule],
       schemas: [NO_ERRORS_SCHEMA],
-      providers: [NgbActiveModal, CommonVarService, SearchService, TransferState]
+      providers: [NgbActiveModal, SharedService, SearchService, TransferState]
     })
     .compileComponents();
   }));

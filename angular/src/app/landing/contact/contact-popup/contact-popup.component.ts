@@ -1,6 +1,6 @@
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
-import { CommonVarService } from '../../shared/common-var';
+import { SharedService } from '../../../shared/shared';
 
 @Component({
   selector: 'app-contact-popup',
@@ -18,7 +18,7 @@ export class ContactPopupComponent implements OnInit {
   tempAddress: string;
 
   constructor(public activeModal: NgbActiveModal,
-              private commonVarService: CommonVarService
+              private commonVarService: SharedService
     ) { }
 
   ngOnInit() {

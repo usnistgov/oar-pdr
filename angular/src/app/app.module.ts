@@ -4,9 +4,6 @@ import {
   CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA
 } from '@angular/core';
 
-import { Collaspe } from './landing/collapseDirective/collapse.directive';
-import { KeyValuePipe } from './landing/keyvalue.pipe';
-import { MetadataView } from './landing/metadata/metadataview.component';
 import { SearchResolve } from './landing/search-service.resolve';
 import { AppShellRenderDirective } from './directives/app-shell-render.directive';
 import { enableProdMode } from '@angular/core';
@@ -36,27 +33,25 @@ import { ConfigModule } from './config/config.module';
 import { AppRoutingModule } from './app-routing.module';
 import { DataTableModule } from 'primeng/primeng';
 import { ContenteditableModel } from './directives/contenteditable-model.directive';
+import { LandingModule } from './landing/landing.module';
 
-import { NoidComponent } from './landing/noid.component';
-import { NerdmComponent } from './landing/nerdm.component';
 import { ErrorComponent, UserErrorComponent } from './landing/error.component';
 import { DatacartComponent } from './datacart/datacart.component';
 import { ModalComponent } from './directives';
 import { ComboBoxComponent } from './shared/combobox/combo-box.component';
 import { AppComponent } from './app.component';
-import { LandingComponent } from './landing/landing.component';
-import { DescriptionComponent } from './landing/description/description.component';
-import { MetadataComponent } from './landing/metadata/metadata.component';
 import { LandingAboutComponent } from './landingAbout/landingAbout.component';
-import { SearchTopicsComponent } from './landing/search-topics/search-topics.component';
+import { SearchTopicsComponent } from './landing/topic/topic-popup/search-topics.component';
 import { DescriptionPopupComponent } from './landing/description/description-popup/description-popup.component';
-import { AuthorPopupComponent } from './landing/author-popup/author-popup.component';
-import { ContactPopupComponent } from './landing/contact-popup/contact-popup.component';
+import { AuthorPopupComponent } from './landing/author/author-popup/author-popup.component';
+import { ContactPopupComponent } from './landing/contact/contact-popup/contact-popup.component';
+
+
 import { ConfirmationDialogComponent } from './shared/confirmation-dialog/confirmation-dialog.component';
 enableProdMode();
 
 import { SearchService } from './shared/search-service/index';
-import { CommonVarService } from './shared/common-var/index';
+import { SharedService } from './shared/shared/index';
 import { CartService } from "./datacart/cart.service";
 import { AppShellNoRenderDirective } from './directives/app-shell-no-render.directive';
 import { ModalService } from './shared/modal-service';
@@ -64,7 +59,7 @@ import { TaxonomyListService } from './shared/taxonomy-list'
 import { DownloadService } from "./shared/download-service/download-service.service";
 import { TestDataService } from './shared/testdata-service/testDataService';
 import { CommonFunctionService } from './shared/common-function/common-function.service';
-import { CustomizationServiceService } from './shared/customization-service/customization-service.service';
+import { CustomizationService } from './shared/customization-service/customization-service.service';
 import { GoogleAnalyticsService} from "./shared/ga-service/google-analytics.service";
 import { GoogleAnalyticsServiceMock} from "./shared/ga-service/google-analytics.service.mock";
 import { ConfirmationDialogService } from './shared/confirmation-dialog/confirmation-dialog.service';
@@ -76,19 +71,19 @@ import { fakeBackendProvider } from './_helpers/fakeBackendInterceptor';
 
 @NgModule({
   declarations: [
-    AppComponent,
-    LandingAboutComponent, LandingComponent, DatacartComponent,
-    Collaspe, MetadataComponent, DescriptionComponent,
-    KeyValuePipe, MetadataView, NoidComponent, NerdmComponent,
+    AppComponent, DatacartComponent,
+    SearchTopicsComponent, DescriptionPopupComponent, 
+    AuthorPopupComponent, ContactPopupComponent,
     ErrorComponent, UserErrorComponent,ComboBoxComponent,ComboBoxPipe,
-    AppShellNoRenderDirective, AppShellRenderDirective, ModalComponent, ContenteditableModel, SearchTopicsComponent, DescriptionPopupComponent, AuthorPopupComponent, ContactPopupComponent,
-    ConfirmationDialogComponent
+    AppShellNoRenderDirective, AppShellRenderDirective, ModalComponent, ContenteditableModel, 
+    ConfirmationDialogComponent,LandingAboutComponent
   ],
   imports: [
       HttpClientModule,
       ConfigModule,        // provider for AppConfig
       FrameModule,
       AppRoutingModule,
+      LandingModule,
       FragmentPolyfillModule.forRoot({
           smooth: true
       }),
@@ -100,13 +95,13 @@ import { fakeBackendProvider } from './_helpers/fakeBackendInterceptor';
         toastClass: 'toast toast-bootstrap-compatibility-fix'
       }), NgbModule.forRoot()
   ],
-  exports: [Collaspe],
+  exports: [],
   providers: [
     Title,
     Meta,
     SearchService,
     SearchResolve,
-    CommonVarService,
+    SharedService,
     CartService,
     DownloadService,
     TestDataService,
@@ -114,7 +109,7 @@ import { fakeBackendProvider } from './_helpers/fakeBackendInterceptor';
     CommonFunctionService,
     TaxonomyListService,
     ModalService,
-    CustomizationServiceService,
+    CustomizationService,
     GoogleAnalyticsService,
     GoogleAnalyticsServiceMock,
     ConfirmationDialogService,

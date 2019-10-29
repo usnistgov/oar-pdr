@@ -1,0 +1,24 @@
+<div style="display: table;">
+    <div class="editable_container">
+        <div class="editable_field" *ngIf="!record['title']; else hasTitle">
+            <span class="title">
+                <h2 [ngStyle]="getFieldStyle()">{{record.title}}</h2>
+            </span>
+        </div>
+        <ng-template #hasTitle>
+            <div class="title editable_field">
+                <h2 [ngStyle]="getFieldStyle()" (click)="openModal()">
+                    {{record.title}}</h2>
+            </div>
+        </ng-template>
+        <button class="edit_button" *ngIf="recordEditmode" type="button" (click)="openModal('title')">
+            <i class="faa faa-pencil icon_enabled" data-toggle="tooltip" title="Edit title"></i>
+        </button>
+        <button class="undo_button" *ngIf="recordEditmode" type="button" [disabled]="!fieldObject['title'].edited"
+            (click)="undoEditing('title')">
+            <i class="faa faa-undo"
+                [ngClass]="{'icon_enabled': fieldObject['title'].edited, 'icon_disabled':!fieldObject['title'].edited }"
+                data-toggle="tooltip" title="Undo title"></i>
+        </button>
+    </div>
+</div>

@@ -3,7 +3,7 @@ import { RouterTestingModule } from '@angular/router/testing';
 import { DebugElement } from '@angular/core';
 import { By } from '@angular/platform-browser';
 import { LandingAboutComponent } from './landingAbout.component';
-import { CommonVarService } from '../shared/common-var'
+import { SharedService } from '../shared/shared'
 
 
   describe('LandingAboutComponent', () => {
@@ -16,7 +16,7 @@ import { CommonVarService } from '../shared/common-var'
       TestBed.configureTestingModule({
           declarations: [LandingAboutComponent],
           imports: [ RouterTestingModule ],
-          providers: [ CommonVarService ]
+          providers: [ SharedService ]
       })
         .compileComponents();
     }));

@@ -3,7 +3,7 @@ import { ContactPopupComponent } from './contact-popup.component';
 import { FormsModule } from '@angular/forms';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
-import { CommonVarService } from '../../shared/common-var';
+import { SharedService } from '../../../shared/shared';
 
 describe('ContactPopupComponent', () => {
   let component: ContactPopupComponent;
@@ -14,7 +14,7 @@ describe('ContactPopupComponent', () => {
       declarations: [ ContactPopupComponent ],
       imports: [FormsModule],
       schemas: [NO_ERRORS_SCHEMA],
-      providers: [NgbActiveModal, CommonVarService]
+      providers: [NgbActiveModal, SharedService]
     })
     .compileComponents();
   }));

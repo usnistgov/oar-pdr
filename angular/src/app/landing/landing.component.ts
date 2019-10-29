@@ -9,7 +9,7 @@ import 'rxjs/add/operator/map';
 import { AppConfig } from '../config/config';
 import { PLATFORM_ID, APP_ID, Inject } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
-import { CommonVarService } from '../shared/common-var';
+import { SharedService } from '../shared/shared';
 import { SearchService } from '../shared/search-service/index';
 import { tap } from 'rxjs/operators';
 import { isPlatformServer } from '@angular/common';
@@ -17,19 +17,22 @@ import { makeStateKey, TransferState } from '@angular/platform-browser';
 import { AuthService } from '../shared/auth-service/auth.service';
 import { trigger, state, style, animate, transition } from '@angular/animations';
 import { ModalService } from '../shared/modal-service';
-import { AuthorPopupComponent } from './author-popup/author-popup.component';
+import { AuthorPopupComponent } from './author/author-popup/author-popup.component';
 import { NgbModalOptions, NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { ContactPopupComponent } from './contact-popup/contact-popup.component';
-import { SearchTopicsComponent } from '../landing/search-topics/search-topics.component';
-import { CustomizationServiceService } from '../shared/customization-service/customization-service.service';
+import { ContactPopupComponent } from './contact/contact-popup/contact-popup.component';
+import { SearchTopicsComponent } from './topic/topic-popup/search-topics.component';
+import { CustomizationService } from '../shared/customization-service/customization-service.service';
 import { GoogleAnalyticsService } from '../shared/ga-service/google-analytics.service';
 import { HttpClient } from '@angular/common/http';
 import { DescriptionPopupComponent } from './description/description-popup/description-popup.component';
+import { DataFilesComponent } from './data-files/data-files.component';
 import { ConfirmationDialogService } from '../shared/confirmation-dialog/confirmation-dialog.service';
 import { NotificationService } from '../shared/notification-service/notification.service';
 import { ApiToken } from "../shared/auth-service/ApiToken";
 import { TaxonomyListService } from '../shared/taxonomy-list';
 import { DatePipe } from '@angular/common';
+import { EditControlService } from './edit-control-bar/edit-control.service';
+import { ErrorHandlingService } from '../shared/error-handling-service/error-handling.service';
 
 declare var _initAutoTracker: Function;
 
@@ -95,39 +98,7 @@ function compare_histories(a, b) {
 @Component({
     selector: 'app-landing',
     templateUrl: './landing.component.html',
-    styleUrls: ['./landing.component.css'],
-    animations: [
-        trigger('changeOpacity', [
-            state('initial', style({
-                opacity: '0'
-            })),
-            state('final', style({
-                opacity: '1'
-            })),
-            transition('initial=>final', animate('500ms')),
-            transition('final=>initial', animate('500ms'))
-        ]),
-        trigger('changeBorderColor', [
-            state('initial', style({
-                border: "1px solid white"
-            })),
-            state('final', style({
-                border: "1px solid lightgrey"
-            })),
-            transition('initial=>final', animate('500ms')),
-            transition('final=>initial', animate('500ms'))
-        ]),
-        trigger('changeMode', [
-            state('initial', style({
-                height: "3em" // change to 0em for animation. Keep it here in case need it later
-            })),
-            state('final', style({
-                height: "3em"
-            })),
-            transition('initial=>final', animate('500ms')),
-            transition('final=>initial', animate('500ms'))
-        ]),
-    ]
+    styleUrls: ['./landing.component.css']
 })
 
 export class LandingComponent implements OnInit {
@@ -189,10 +160,9 @@ export class LandingComponent implements OnInit {
     editEnabled: any;
     updateDate: string;
     dataChanged: boolean = false;
-    isProcessing: boolean = true;
-    message: string = "";
-    messageColor: string = "black";
     doiUrl: string = "";
+    recordType: string = "";
+
 
     /**
      * Creates an instance of the SearchPanel
@@ -208,16 +178,18 @@ export class LandingComponent implements OnInit {
         @Inject(APP_ID) private appId: string,
         private transferState: TransferState,
         public searchService: SearchService,
-        private commonVarService: CommonVarService,
+        private sharedService: SharedService,
         private gaService: GoogleAnalyticsService,
         private authService: AuthService,
         private ngbModal: NgbModal,
         private modalService: ModalService,
-        private customizationServiceService: CustomizationServiceService,
+        private customizationService: CustomizationService,
         private http: HttpClient,
         private confirmationDialogService: ConfirmationDialogService,
         private notificationService: NotificationService,
         private taxonomyListService: TaxonomyListService,
+        private editControlService: EditControlService,
+        private errorHandlingService: ErrorHandlingService,
         private datePipe: DatePipe) {
         this.fieldObject['title'] = {};
         this.fieldObject['authors'] = {};
@@ -233,16 +205,12 @@ export class LandingComponent implements OnInit {
                 ""
             ]
         };
-        var newAuthor = this.commonVarService.getBlankAuthor();
+        var newAuthor = this.sharedService.getBlankAuthor();
         this.tempAuthors['authors'] = newAuthor;
         this.searchValue = this.route.snapshot.paramMap.get('id');
 
-        this.customizationServiceService.watchRecordEdited().subscribe(value => {
+        this.customizationService.watchRecordEdited().subscribe(value => {
             this.dataChanged = value;
-        });
-
-        this.commonVarService.watchMessage().subscribe(value => {
-            this.message = value;
         });
 
         this.editEnabled = cfg.get("editEnabled", "");
@@ -259,116 +227,28 @@ export class LandingComponent implements OnInit {
      * Get the params OnInit
      */
     ngOnInit() {
-        this.taxonomyListService.get(0).subscribe((result) => {
-            if (result != null && result != undefined)
-                this.buildTaxonomyTree(result);
-
-            this.taxonomyList = [];
-            for (var i = 0; i < result.length; i++) {
-                this.taxonomyList.push({ "taxonomy": result[i].label });
-            }
-        }, (err) => {
-            this.setErrorForDisplay(err, "There was an error getting taxonomy list.");
-        });
-
         this.authService.removeToken();
         this.authService.removeUserId();
         this.authService.setAuthenticateStatus(false);
-        this.loadPubData();
-    }
+        // this.loadPubData();
 
-    updateMessage(processing: boolean, msg?: string) {
-        var message: string = "";
-        this.messageColor = "black";
-
-        if (msg == undefined || msg == null) {
-            if (this.recordEditmode) {
-                if (this.updateDate) {
-                    message = "This record was edited on: " + this.updateDate + ".";
-                } else {
-                    message = "Click on Quit Edit button to exit edit mode.";
-                }
-            } else {
-                if (this.updateDate) {
-                    message = "You have draft data edited on " + this.updateDate + ". Click on edit button to continue editing.";
-                    this.messageColor = "rgb(255, 115, 0)";
-                } else {
-                    message = "To see previously edited record or edit current one, click on Edit button.";
-                }
-            }
-        } else {
-            message = msg;
-        }
-        this.commonVarService.setMessage(message);
-        this.isProcessing = processing;
-
-        if (this.updateDate)
-            this.customizationServiceService.setUpdateDate(this.updateDate);
-
+        this.editControlService.watchEditButtonClick().subscribe(value => {
+            this.setRecordEditmode(value);
+        });
     }
 
     /*
-    *   build taxonomy tree
-    */
-    buildTaxonomyTree(result: any) {
-        let allTaxonomy: any = result;
-        var tempTaxonomyTree = {}
-        if (result != null && result != undefined) {
-            tempTaxonomyTree["data"] = this.arrangeIntoTaxonomyTree(result);
-            this.taxonomyTree.push(tempTaxonomyTree);
+     * Update the meesage in the status bar
+     */
+    updateMessage(processing: boolean, msg?: string) {
+        console.log("Set message:", msg);
+        // this.customizationService.setUpdateDate(this.updateDate);
+        if (msg != null && msg != undefined && msg != "") {
+            this.editControlService.setMessage(msg);
+        } else {
+            this.editControlService.setMessage("");
         }
-
-        this.taxonomyTree = <TreeNode[]>this.taxonomyTree[0].data;
-    }
-
-
-    private arrangeIntoTaxonomyTree(paths) {
-        const tree = [];
-        paths.forEach((path) => {
-            var fullpath: string;
-            if (path.parent != null && path.parent != undefined && path.parent != "")
-                fullpath = path.parent + ":" + path.label;
-            else
-                fullpath = path.label;
-
-            const pathParts = fullpath.split(':');
-            let currentLevel = tree; // initialize currentLevel to root
-
-            for (var j = 0; j < pathParts.length; j++) {
-                let tempId: string = '';
-                for (var k = 0; k < j + 1; k++) {
-                    tempId = tempId + pathParts[k];
-                    // tempId = tempId + pathParts[k].replace(/ /g, "");
-                    if (k < j) {
-                        tempId = tempId + ": ";
-                    }
-                }
-
-                // check to see if the path already exists.
-                const existingPath = currentLevel.filter(level => level.data.treeId === tempId);
-                if (existingPath.length > 0) {
-                    // The path to this item was already in the tree, so don't add it again.
-                    // Set the current level to this path's children  
-                    currentLevel = existingPath[0].children;
-                } else {
-                    let newPart = null;
-                    newPart = {
-                        data: {
-                            treeId: tempId,
-                            name: pathParts[j],
-                            // name: pathParts[j].replace(/ /g, ""),
-                            researchTopic: tempId,
-                            bkcolor: 'white'
-                        }, children: [],
-                        expanded: false
-                    };
-                    currentLevel.push(newPart);
-                    currentLevel = newPart.children;
-                    // }
-                }
-            };
-        });
-        return tree;
+        this.editControlService.setIsProcessing(processing);
     }
 
     dataInit() {
@@ -380,13 +260,13 @@ export class LandingComponent implements OnInit {
 
         this.ediid = this.searchValue;
 
-        this.commonVarService.setEdiid(this.searchValue);
+        this.editControlService.setEdiid(this.searchValue);
 
         //Check draft data status if this is intpdr
         if (this.editEnabled) {
-            this.updateDate = this.customizationServiceService.getUpdateDate();
+            this.updateDate = this.customizationService.getUpdateDate();
             if (this.updateDate != undefined && this.updateDate != null && this.updateDate != "") {
-                this.customizationServiceService.setRecordEdited(true);
+                this.customizationService.setRecordEdited(true);
             }
         }
         this.files = [];
@@ -396,14 +276,14 @@ export class LandingComponent implements OnInit {
      *  Load pub data. 
      *  It loads from mdAPI.
      */
-    loadPubData() {
+    loadSavedData() {
         this.updateMessage(true, "Loading...");
         this.dataInit();
-        this.getData()
+        this.searchService.getData(this.searchValue)
             .subscribe((res) => {
                 this.onSuccess(res).then(function (result) {
                     // Make a copy of original pub data (for undo purpose)
-                    this.originalRecord = this.commonVarService.deepCopy(this.record);
+                    this.originalRecord = this.sharedService.deepCopy(this.record);
                     console.log("record", this.record);
                     this.updateMessage(false);
                 }.bind(this), function (err) {
@@ -411,54 +291,54 @@ export class LandingComponent implements OnInit {
                     this.updateMessage(false);
                 });
             }, (err) => {
-                this.setErrorForDisplay(err, "There was an error in searchservice.");
+                this.setErrorForDisplay(err, "There was an error in searchservice.", "Load saved data");
                 this.updateMessage(false);
             });
     }
 
-    getData(): Observable<any> {
-        var recordid = this.searchValue;
-        const recordid_KEY = makeStateKey<string>('record-' + recordid);
+    // getData(): Observable<any> {
+    //     var recordid = this.searchValue;
+    //     const recordid_KEY = makeStateKey<string>('record-' + recordid);
 
-        if (this.transferState.hasKey(recordid_KEY)) {
-            console.log("extracting data id=" + recordid + " embedded in web page");
-            const record = this.transferState.get<any>(recordid_KEY, null);
-            // this.transferState.remove(recordid_KEY);
-            return of(record);
-        }
-        else {
-            console.warn("record data not found in transfer state");
-            return this.searchService.searchById(recordid)
-                .catch((err: Response, caught: Observable<any[]>) => {
-                    // console.log(err);
-                    if (err !== undefined) {
-                        console.error("Failed to retrieve data for id=" + recordid + "; error status=" + err.status);
-                        if ("message" in err) console.error("Reason: " + (<any>err).message);
-                        if ("url" in err) console.error("URL used: " + (<any>err).url);
+    //     if (this.transferState.hasKey(recordid_KEY)) {
+    //         console.log("extracting data id=" + recordid + " embedded in web page");
+    //         const record = this.transferState.get<any>(recordid_KEY, null);
+    //         // this.transferState.remove(recordid_KEY);
+    //         return of(record);
+    //     }
+    //     else {
+    //         console.warn("record data not found in transfer state");
+    //         return this.searchService.searchById(recordid)
+    //             .catch((err: Response, caught: Observable<any[]>) => {
+    //                 // console.log(err);
+    //                 if (err !== undefined) {
+    //                     console.error("Failed to retrieve data for id=" + recordid + "; error status=" + err.status);
+    //                     if ("message" in err) console.error("Reason: " + (<any>err).message);
+    //                     if ("url" in err) console.error("URL used: " + (<any>err).url);
 
-                        // console.error(err);
-                        if (err.status >= 500) {
-                            this.router.navigate(["/usererror", recordid, { errorcode: err.status }]);
-                        }
-                        if (err.status >= 400 && err.status < 500) {
-                            this.router.navigate(["/usererror", recordid, { errorcode: err.status }]);
-                        }
-                        if (err.status == 0) {
-                            console.warn("Possible causes: Unable to trust site cert, CORS restrictions, ...");
-                            return Observable.throw('Unknown error requesting data for id=' + recordid);
-                        }
-                    }
-                    return Observable.throw(caught);
-                })
-                .pipe(
-                    tap(record => {
-                        if (isPlatformServer(this.platformId)) {
-                            this.transferState.set(recordid_KEY, record);
-                        }
-                    })
-                );
-        }
-    }
+    //                     // console.error(err);
+    //                     if (err.status >= 500) {
+    //                         this.router.navigate(["/usererror", recordid, { errorcode: err.status }]);
+    //                     }
+    //                     if (err.status >= 400 && err.status < 500) {
+    //                         this.router.navigate(["/usererror", recordid, { errorcode: err.status }]);
+    //                     }
+    //                     if (err.status == 0) {
+    //                         console.warn("Possible causes: Unable to trust site cert, CORS restrictions, ...");
+    //                         return Observable.throw('Unknown error requesting data for id=' + recordid);
+    //                     }
+    //                 }
+    //                 return Observable.throw(caught);
+    //             })
+    //             .pipe(
+    //                 tap(record => {
+    //                     if (isPlatformServer(this.platformId)) {
+    //                         this.transferState.set(recordid_KEY, record);
+    //                     }
+    //                 })
+    //             );
+    //     }
+    // }
 
     /*
     *   Init object - edit buttons for animation purpose
@@ -504,6 +384,25 @@ export class LandingComponent implements OnInit {
             return;
         }
 
+        switch(this.record['@type'][0]){
+            case 'nrd:SRD':{
+                this.recordType = "Standard Reference Data";
+                break;
+            }
+            case 'nrdp:DataPublication':{
+                this.recordType = "Data Publication";
+                break;
+            }
+            case 'nrdp:PublicDataResource':{
+                this.recordType = "Public Data Resource";
+                break;
+            }
+            default:
+                    this.recordType = "";
+                break;
+        }
+
+
         // console.log("this.record", this.record);
 
         this.type = this.record['@type'];
@@ -512,11 +411,11 @@ export class LandingComponent implements OnInit {
         if (this.files.length > 0) {
             this.setLeafs(this.files[0].data);
         }
-        if (this.record['doi'] !== undefined && this.record['doi'] !== ""){
+        if (this.record['doi'] !== undefined && this.record['doi'] !== "") {
             this.doiUrl = "https://doi.org/" + this.record['doi'].split(':')[1];
             this.isDOI = true;
         }
-        if ("hasEmail" in this.record['contactPoint']){
+        if ("hasEmail" in this.record['contactPoint']) {
             this.isEmail = true;
         }
         this.assessNewer();
@@ -538,11 +437,12 @@ export class LandingComponent implements OnInit {
     }
 
     turnSpinnerOff() {
-        setTimeout(() => { this.commonVarService.setContentReady(true); }, 0)
+        setTimeout(() => { this.sharedService.setContentReady(true); }, 0)
     }
 
     viewmetadata() {
-        this.metadata = true; this.similarResources = false;
+        this.metadata = true; 
+        this.similarResources = false;
     }
 
     createMenuItem(label: string, icon: string, command: any, url: string) {
@@ -809,18 +709,6 @@ export class LandingComponent implements OnInit {
         return this.renderRelAsLink(relinfo, id);
     }
 
-
-    clicked = false;
-    expandClick() {
-        this.clicked = !this.clicked;
-        return this.clicked;
-    }
-
-    clickContact = false;
-    expandContact() {
-        this.clickContact = !this.clickContact;
-        return this.clickContact;
-    }
     display: boolean = false;
 
     showDialog() {
@@ -917,25 +805,6 @@ export class LandingComponent implements OnInit {
     }
 
     /*
-    *  When mouse over title - disabled for now in case we need it later
-    */
-    titleMouseover() {
-        // if (!this.titleObj.detailEditmode) {
-        //   this.setTitleEditbox(true);
-        // }
-    }
-
-    /*
-    *  When mouse leaves title
-    */
-    titleMouseout() {
-        // console.log("title Mouseout...");
-        // if (!this.titleObj.detailEditmode) {
-        //   this.setTitleEditbox(false);
-        // }
-    }
-
-    /*
     *  Set record level edit mode (for the edit button at top)
     */
     setRecordEditmode(editMode: boolean) {
@@ -947,7 +816,16 @@ export class LandingComponent implements OnInit {
             if (this.inBrowser) {
                 if (this.authService.authorized()) {
                     //If user already logged in, load draft data
-                    this.loadDraftData(editMode);
+                    this.loadDraftData(editMode).then(
+                        (resolve) => {
+                            console.log("LoadDraft success.");
+                            this.editControlService.setEditMode(true);
+                        },
+                        (reject) => {
+                            console.log("LoadDraft failed.");
+                            this.editControlService.setEditMode(false);                            
+                        }
+                    );
                 } else {
                     //If user not logged in, force user login then load draft data. If login failed, do nothing
                     this.authService.loginUser()
@@ -955,11 +833,21 @@ export class LandingComponent implements OnInit {
                             res => {
                                 console.log("User logged in. Response:", res);
                                 auService.handleTokenSuccess(res);
-                                this.loadDraftData(editMode);
+                                this.loadDraftData(editMode).then(
+                                    (resolve) => {
+                                        console.log("LoadDraft success.");
+                                        this.editControlService.setMessage("");
+                                        this.editControlService.setEditMode(true);
+                                    },
+                                    (reject) => {
+                                        console.log("LoadDraft failed.");
+                                        this.editControlService.setEditMode(false);                      this.loadSavedData();      
+                                    }
+                                );
                             },
                             error => {
                                 console.log("Login err:", error);
-                                this.setErrorForDisplay(error, "There was an error logging in.");
+                                this.setErrorForDisplay(error, "There was an error logging in.", "Authenticate user");
                                 this.authService.handleTokenError(error);
                             }
                         )
@@ -968,9 +856,9 @@ export class LandingComponent implements OnInit {
                 //If in server side, do nothing
             }
         } else {
-            this.loadPubData();
+            this.loadSavedData();
             this.recordEditmode = editMode;
-            this.commonVarService.setEditMode(editMode);
+            this.editControlService.setEditMode(editMode);
         }
     }
 
@@ -979,199 +867,42 @@ export class LandingComponent implements OnInit {
     */
     loadDraftData(editMode: boolean) {
         this.updateMessage(true, "Loading...");
-        // this.dataInit();
+        this.dataInit();
 
-        this.customizationServiceService.getDraftData()
-            .subscribe((res) => {
-                console.log("**** Draft data return:", res);
-                if (res != undefined && res != null) {
+        var promise = new Promise((resolve, reject) => {
+            setTimeout(() => {
+                this.customizationService.getDraftData()
+                    .subscribe((res) => {
+                        console.log("**** Draft data return:", res);
+                        if (res != undefined && res != null) {
 
-                    this.onSuccess(res).then(function (result) {
-                        if (res._updateDate) {
-                            this.updateDate = res._updateDate;
-                            this.customizationServiceService.setUpdateDate(res._updateDate);
+                            this.onSuccess(res).then(function (result) {
+                                if (res._updateDate) {
+                                    this.updateDate = res._updateDate;
+                                    this.customizationService.setUpdateDate(res._updateDate);
+                                }
+                                this.sharedService.setContentReady(true);
+                                this.sharedService.setRefreshTree(true);
+                                this.customizationService.checkDataChanges(this.record, this.originalRecord, this.fieldObject);
+                                this.recordEditmode = editMode;
+                                // this.editControlService.setEditMode(editMode);
+                                this.updateMessage(false);
+                                resolve();
+                            }.bind(this), function (err) {
+                                alert("something went wrong while fetching draft data.");
+                                reject();
+                            });
                         }
-                        this.commonVarService.setContentReady(true);
-                        this.commonVarService.setRefreshTree(true);
-                        this.checkDataChanges();
-                        this.recordEditmode = editMode;
-                        this.commonVarService.setEditMode(editMode);
+                    }, (err) => {
+                        console.log("Error", err);
+                        this.setErrorForDisplay(err, "There was an error getting draft data.", "Load draft data");
                         this.updateMessage(false);
-                    }.bind(this), function (err) {
-                        alert("something went wrong while fetching draft data.");
-                    });
-                }
-            }, (err) => {
-                console.log("Error", err);
-                this.setErrorForDisplay(err, "There was an error getting draft data.");
-                this.updateMessage(false);
-            })
-    }
-    /*
-     *  Set record level edit mode (for the edit button at top)
-     */
-    checkDataChanges() {
-        if (this.record != undefined && this.originalRecord != undefined) {
-            this.fieldObject.title.edited = this.dataEdited('title');
-            this.fieldObject.authors.edited = this.dataEdited('authors');
-            this.fieldObject.contactPoint.edited = this.dataEdited('contactPoint');
-            this.fieldObject.description.edited = this.dataEdited('description');
-            this.fieldObject.topic.edited = this.dataEdited('topic');
-            this.fieldObject.keyword.edited = this.dataEdited('keyword');
-
-            this.dataChanged = this.fieldObject.title.edited || this.fieldObject.authors.edited || this.fieldObject.contactPoint.edited || this.fieldObject.description.edited || this.fieldObject.topic.edited || this.fieldObject.keyword.edited;
-        } else {
-            this.dataChanged = false;
-        }
-        if (this.dataChanged) {
-            this.updateDate = this.datePipe.transform(new Date(), "MMM d, y, h:mm:ss a");
-            this.customizationServiceService.setUpdateDate(this.updateDate);
-            this.customizationServiceService.setRecordEdited(true);
-        } else {
-            this.updateDate = "";
-            this.customizationServiceService.removeUpdateDate();
-            this.customizationServiceService.setRecordEdited(false);
-        }
-    }
-
-    dataEdited(field: any) {
-        if ((this.record[field] == undefined || this.record[field] == "") && (this.originalRecord[field] == undefined || this.originalRecord[field] == "")) {
-            return false;
-        } else {
-            return JSON.stringify(this.record[field]) != JSON.stringify(this.originalRecord[field]);
-        }
-    }
-
-    /*
-    *  Cancel edit mode for title
-    */
-    cancelEditedTitle() {
-        this.record.title = this.fieldObject.title.originalValue;
-        this.fieldObject.title.detailEditmode = false;
-        this.titleMouseout();
-    }
-
-    /*
-    *   Open popup modal
-    */
-    openModal(fieldName: string) {
-        if (!this.recordEditmode) return;
-
-        let i: number;
-        let tempDecription: string = "";
-
-        let ngbModalOptions: NgbModalOptions = {
-            backdrop: 'static',
-            keyboard: false,
-            windowClass: "myCustomModalClass"
-        };
-
-        this.tempInput[fieldName] = this.commonVarService.getBlankField(fieldName);
-        switch (fieldName) {
-            case "description":
-                // Description need special handling
-                tempDecription = this.record['description'][0];
-                for (i = 1; i < this.record['description'].length; i++) {
-                    tempDecription = tempDecription + '\r\n\r\n' + this.record['description'][i];
-                }
-                this.tempInput[fieldName] = tempDecription;
-                break;
-            case "authors":
-                var tempauthors = [];
-                if (this.record['authors'] != undefined && this.record['authors'].length > 0)
-                    this.tempInput['authors'] = this.commonVarService.deepCopy(this.record['authors']);
-                else {
-                    tempauthors.push(this.commonVarService.getBlankField(fieldName));
-                    this.tempInput[fieldName] = tempauthors;
-                }
-
-                for (var author in this.tempInput['authors']) {
-                    this.tempInput.authors[author]['isCollapsed'] = false;
-                    this.tempInput.authors[author]['fnLocked'] = false;
-                    this.tempInput.authors[author]['originalIndex'] = author;
-                    this.tempInput.authors[author]['dataChanged'] = false;
-                }
-                break;
-            case "keyword":
-                if (this.customizationServiceService.checkKeywords(this.record)) {
-                    tempDecription = this.record['keyword'][0];
-                    for (i = 1; i < this.record['keyword'].length; i++) {
-                        tempDecription = tempDecription + ',' + this.record['keyword'][i];
-                    }
-                }
-                this.tempInput[fieldName] = tempDecription;
-                break;
-            case "topic":
-                var tempTopics = [];
-                if (this.record['topic'] != null && this.record['topic'].length > 0) {
-                    for (i = 0; i < this.record['topic'].length; i++) {
-                        tempTopics.push(this.record['topic'][i].tag);
-                    }
-                }
-                this.tempInput[fieldName] = tempTopics;
-                break;
-            default:
-                if (this.record[fieldName] != undefined && this.record[fieldName] != "") {
-                    this.tempInput[fieldName] = this.commonVarService.deepCopy(this.record[fieldName]);
-                } else {
-                    this.tempInput[fieldName] = [];
-                    this.tempInput[fieldName].push(this.commonVarService.getBlankField(fieldName));
-                }
-        }
-
-        const modalRef = this.ngbModal.open(
-            (fieldName == 'authors' ? AuthorPopupComponent : (fieldName == 'title' ? DescriptionPopupComponent : (fieldName == 'contactPoint' ? ContactPopupComponent : (fieldName == 'topic' ? SearchTopicsComponent : DescriptionPopupComponent)))),
-            ngbModalOptions
-        );
-
-        modalRef.componentInstance.inputValue = this.tempInput;
-        modalRef.componentInstance['field'] = fieldName;
-        modalRef.componentInstance['title'] = fieldName.toUpperCase();
-        if (fieldName == 'topic')
-            modalRef.componentInstance.taxonomyTree = this.taxonomyTree;
-
-        if (fieldName == 'keyword')
-            modalRef.componentInstance.message = "Please enter keywords separated by comma.";
-
-        modalRef.componentInstance.returnValue.subscribe((returnValue) => {
-            if (returnValue) {
-                switch (fieldName) {
-                    case "description":
-                        var tempDescs = returnValue[fieldName].split(/\n\s*\n/).filter(desc => desc != '');
-                        returnValue[fieldName] = this.commonVarService.deepCopy(tempDescs);
-                        break;
-                    case "keyword":
-                        var tempDescs = returnValue[fieldName].split(',').filter(keyword => keyword != '');
-                        returnValue[fieldName] = this.commonVarService.deepCopy(tempDescs);
-                        break;
-                    case "topic":
-                        var strtempTopics: string = '';
-                        var tempTopicsForUpdate: any = [];
-                        var lTempTopics: any[] = [];
-
-                        for (var i = 0; i < returnValue["topic"].length; ++i) {
-                            strtempTopics = strtempTopics + returnValue["topic"][i];
-                            lTempTopics.push({ '@type': 'Concept', 'scheme': 'https://www.nist.gov/od/dm/nist-themes/v1.0', 'tag': returnValue["topic"][i] });
-                        }
-                        returnValue["topic"] = this.commonVarService.deepCopy(lTempTopics);
-                        break;
-                }
-
-                var postMessage: any = {};
-                postMessage[fieldName] = returnValue[fieldName];
-                console.log("postMessage", JSON.stringify(postMessage));
-
-                this.customizationServiceService.update(JSON.stringify(postMessage)).subscribe(
-                    result => {
-                        this.record[fieldName] = this.commonVarService.deepCopy(returnValue[fieldName]);
-                        this.dataChanged = true;
-                        this.onUpdateSuccess(fieldName);
-                    },
-                    err => {
-                        this.onUpdateError(fieldName, err);
-                    });
-            }
-        })
+                        console.log("Rejecting............");
+                        reject();
+                    })
+            }, 1000);
+        });
+        return promise;
     }
 
     /*
@@ -1201,160 +932,14 @@ export class LandingComponent implements OnInit {
         window.open(url, '_blank');
     }
 
-
-    /*
-    *  Save record (for the save button at top)
-    */
-    saveRecord() {
-        this.displayError = false;
-        // Send save request to back end
-        this.updateMessage(true, "Submitting");
-        this.customizationServiceService.saveRecord("").subscribe(
-            (res) => {
-                this.errorMsgDetail = '';
-                this.displayError = false;
-                this.customizationServiceService.removeUpdateDate();
-                this.notificationService.showSuccessWithTimeout("Record saved.", "", 3000);
-                this.setRecordEditmode(false);
-                this.commonVarService.setEditMode(false);
-                this.customizationServiceService.setRecordEdited(false);
-                this.authService.setAuthenticateStatus(false);
-                this.updateMessage(false);
-                window.open('/od/id/' + this.searchValue, '_self');
-                console.log("Record saved");
-            },
-            (err) => {
-                this.setErrorForDisplay(err, "There was an error while saving the record.");
-            }
-        );
-    }
-
-    /*
-     *  Cancel the whole edited record
-     */
-    cancelRecord() {
-        this.displayError = false;
-        this.confirmationDialogService.confirm('Edited data will be lost', 'Do you want to erase changes?')
-            .then((confirmed) => {
-                if (confirmed) {
-                    this.customizationServiceService.delete().subscribe(
-                        (res) => {
-                            this.notificationService.showSuccessWithTimeout("All changes have been erased.", "", 3000);
-                            this.setRecordEditmode(false);
-                            this.customizationServiceService.removeUpdateDate();
-                            this.customizationServiceService.setRecordEdited(false);
-                            this.authService.setAuthenticateStatus(false);
-                            window.open('/od/id/' + this.searchValue, '_self');
-                        },
-                        (err) => {
-                            this.setErrorForDisplay(err, "There was an error deleting current changes.");
-                        }
-                    );
-                }
-            })
-            .catch(() => console.log('User dismissed the dialog (e.g., by using ESC, clicking the cross icon, or clicking outside the dialog)'));
-    }
-
-    /*
-     *  Return field style based on edit status. 
-     *  This is to set the border and background color of the edit field.
-     */
-
-    getFieldStyle(field: string) {
-        if (this.recordEditmode) {
-            if (this.fieldObject[field].edited) {
-                return { 'border': '1px solid lightgrey', 'background-color': '#FCF9CD' };
-            } else {
-                return { 'border': '1px solid lightgrey', 'background-color': 'white' };
-            }
-        } else {
-            return { 'border': '0px solid white', 'background-color': 'white' };
-        }
-    }
-
-    /*
-     *  Undo editing. If no more field was edited, delete the record in staging area.
-     */
-    undoEditing(field: string) {
-        var noMoreEdited = true;
-        var success = true;
-        console.log("this.fieldObject", this.fieldObject);
-        for (var fld in this.fieldObject) {
-            if (field != fld && this.fieldObject[fld].edited) {
-                noMoreEdited = false;
-                break;
-            }
-        }
-
-        if (noMoreEdited) {
-            console.log("Deleting...");
-            this.customizationServiceService.delete().subscribe(
-                (res) => {
-                    if (this.originalRecord[field] == undefined)
-                        delete this.record[field];
-                    else
-                        this.record[field] = this.commonVarService.deepCopy(this.originalRecord[field]);
-
-                    this.updateDate = "";
-                    this.onUpdateSuccess(field);
-                },
-                (err) => {
-                    this.onUpdateError(field, err);
-                }
-            );
-        } else {
-            var body: string;
-            if (this.originalRecord[field] == undefined) {
-                body = '{"' + field + '":""}';
-            } else {
-                body = '{"' + field + '":' + JSON.stringify(this.originalRecord[field]) + '}';
-            }
-
-            this.customizationServiceService.update(body).subscribe(
-                result => {
-                    if (this.originalRecord[field] == undefined)
-                        delete this.record[field];
-                    else
-                        this.record[field] = this.commonVarService.deepCopy(this.originalRecord[field]);
-
-                    this.onUpdateSuccess(field);
-                },
-                err => {
-                    this.onUpdateError(field, err);
-                });
-        }
-    }
-
-    /*
-     * When update successful
-     */
-    onUpdateSuccess(field: string) {
-        this.fieldObject[field]["edited"] = (JSON.stringify(this.record[field]) != JSON.stringify(this.originalRecord[field]));
-        this.errorMsgDetail = '';
-        this.displayError = false;
-        this.checkDataChanges();
-        this.notificationService.showSuccessWithTimeout(field + " updated.", "", 3000);
-    }
-
-    /*
-     * When update failed
-     */
-    onUpdateError(field: string, err: any) {
-        this.setErrorForDisplay(err, "Error when updating " + field);
-    }
-
-    /*
-     *  Handle the error message passed from description component
-     */
-    changeErrorMsg(errorMessage: any) {
-        this.displayError = errorMessage.displayError;
-        this.errorMsgDetail = errorMessage.errorMsgDetail;
-    }
-
     /*
      *  Set error message for display
+     *  err: standard error. err.message will be used in email body if user want to send us email.
+     *  message: The message to display on the screen.
+     *  action: User action that caused the error.
      */
-    setErrorForDisplay(err: any, message: string) {
+    setErrorForDisplay(err: any, message: string, action: string) {
+        this.errorHandlingService.setErrMessage({ message: message, messageDetail: err.message, action: action, display: true });
         console.log(err);
         this.errorMsg = message;
         this.errorMsgDetail = err.message;

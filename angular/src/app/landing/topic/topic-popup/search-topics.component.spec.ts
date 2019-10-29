@@ -6,7 +6,12 @@ import { FormsModule } from '@angular/forms';
 import { DataTableModule, TreeModule } from 'primeng/primeng';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { TreeNode } from 'primeng/api';
-import { TestDataService } from '../../shared/testdata-service/testDataService';
+import { TestDataService } from '../../../shared/testdata-service/testDataService';
+import { AppConfig } from '../../../config/config';
+import { AngularEnvironmentConfigService } from '../../../config/config.service';
+import { TransferState } from '@angular/platform-browser';
+import { SharedService } from '../../../shared/shared';
+import { ToastrModule } from 'ngx-toastr';
 
 describe('SearchTopicsComponent', () => {
   let component: SearchTopicsComponent;
@@ -19,13 +24,20 @@ describe('SearchTopicsComponent', () => {
   let saveButton: any;
   let treeNodeLink: any;
   var tempTaxonomyTree = {};
+  let cfg: AppConfig;
+  let plid: Object = "browser";
+  let ts: TransferState = new TransferState();
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       declarations: [SearchTopicsComponent],
       imports: [FormsModule, DataTableModule, TreeModule],
       schemas: [NO_ERRORS_SCHEMA],
-      providers: [NgbActiveModal, TestDataService]
+      providers: [
+          NgbActiveModal, 
+          TestDataService,
+          SharedService,
+          { provide: AppConfig, useValue: cfg }]
     })
       .compileComponents();
   }));

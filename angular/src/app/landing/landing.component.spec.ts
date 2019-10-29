@@ -8,7 +8,7 @@
 // import {TreeModule,TreeNode} from 'primeng/primeng';
 
 // import { Collaspe } from './collapseDirective/collapse.directive';
-// import {DescriptionComponent} from './description/description.component';
+// import {DataFilesComponent} from './description/description.component';
 // import { MetadataComponent } from './metadata/metadata.component';
 // import { HttpClientTestingModule } from '@angular/common/http/testing';
 // import { FormsModule } from '@angular/forms';
@@ -42,7 +42,7 @@
 //       cfg.appVersion = "2.test";
 
 //       TestBed.configureTestingModule({
-//       declarations: [ LandingComponent, Collaspe,DescriptionComponent,
+//       declarations: [ LandingComponent, Collaspe,DataFilesComponent,
 //                       MetadataComponent
 //                     ],
 //       imports:[ MenuModule,DialogModule, FormsModule, TreeModule,FieldsetModule, HttpModule ,RouterTestingModule, HttpClientTestingModule, BrowserAnimationsModule,

@@ -3,11 +3,12 @@ import { HttpHeaders, HttpClient, HttpErrorResponse } from '@angular/common/http
 import { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { Router } from '@angular/router';
-import { CommonVarService } from '../../shared/common-var';
+import { SharedService } from '../shared';
 import { ApiToken } from "./ApiToken";
 import { isPlatformBrowser } from '@angular/common';
 import { PLATFORM_ID, APP_ID, Inject } from '@angular/core';
 import { AppConfig } from '../../config/config';
+import { EditControlService } from '../../landing/edit-control-bar/edit-control.service';
 
 @Injectable({
     providedIn: 'root'
@@ -38,9 +39,10 @@ export class AuthService implements OnInit {
 
     constructor(
         private http: HttpClient,
-        private commonVarService: CommonVarService,
+        private commonVarService: SharedService,
         private router: Router,
         private cfg: AppConfig,
+        private editControlService: EditControlService,
         @Inject(PLATFORM_ID) private platformId: Object) {
         this.inBrowser = isPlatformBrowser(platformId);
         this.customizationApi = this.cfg.get("customizationApi", "/customization");
@@ -50,10 +52,13 @@ export class AuthService implements OnInit {
         this.loginRedirectURL = this.customizationApi + "saml/login?redirectTo=";
         this.landingPageService = cfg.get('landingPageService', '/od/id/');
         // this.landingPageService = "https://oardev.nist.gov/od/id/";
+
+        this.editControlService.watchEdiid().subscribe(value => {
+            this.ediid = value;
+        });
     }
 
     ngOnInit() {
-        this.ediid = this.commonVarService.getEdiid();
         this.Landingpageurl = this.landingPageService + this.ediid;
         console.log('this.Landingpageurl', this.Landingpageurl);
     }
@@ -77,7 +82,7 @@ export class AuthService implements OnInit {
     *  Send http login request
     */
     loginUser(): Observable<any> {
-        var loginUrl = this.loginAPI + this.commonVarService.getEdiid();
+        var loginUrl = this.loginAPI + this.ediid;
         console.log("Login URL:", loginUrl)
         return this.http.get(loginUrl, this.httpOptions);
     }
@@ -153,7 +158,7 @@ export class AuthService implements OnInit {
      */
     loginUserRedirect(): Observable<any> {
         
-        // var redirectURL = this.loginRedirectURL + this.landingPageService + this.commonVarService.getEdiid();
+        // var redirectURL = this.loginRedirectURL + this.landingPageService + this.ediid;
         var redirectURL = this.loginRedirectURL + window.location.href;
         console.log("redirectURL:", redirectURL);
         // this.router.navigate([redirectURL]);
@@ -170,7 +175,7 @@ export class AuthService implements OnInit {
         this.setAuthenticateStatus(false);
         if (!noRefresh || noRefresh == undefined) {
             console.log("Refresh page...");
-            this.router.navigate(['/od/id/', this.commonVarService.getEdiid()], { fragment: '' });
+            this.router.navigate(['/od/id/', this.ediid], { fragment: '' });
         }
     }
 

@@ -1,10 +1,10 @@
 import { NgModule } from '@angular/core';
-import { CommonVarService } from './shared/common-var/index';
+import { SharedService } from './shared/shared/index';
 // import { MockSearchService } from './shared/search-service/search-service.service.mock';
 
 @NgModule({
   providers: [
-    { provide: CommonVarService, useClass: CommonVarService }
+    { provide: SharedService, useClass: SharedService }
   ]
 })
 export class MockModule {

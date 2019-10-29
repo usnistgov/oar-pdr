@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { CommonVarService } from '../shared/common-var'
+import { SharedService } from '../shared/shared'
 
 @Component({
   selector: 'landing-about',
@@ -10,7 +10,7 @@ export class LandingAboutComponent implements OnInit {
  
  headerText: string;
 
-  constructor(private commonVarService: CommonVarService) {
+  constructor(private commonVarService: SharedService) {
     
   }
 

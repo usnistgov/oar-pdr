@@ -1,0 +1,43 @@
+<div style="display: table">
+    <div class="editable_container">
+        <div class="editable_field" *ngIf="!record['authors'] || record['authors'].length==0; else hasAuthors">
+            <div class="editable_field" *ngIf="recordEditmode" [ngStyle]="getFieldStyle()">
+                Authors:
+            </div>
+        </div>
+        <ng-template #hasAuthors>
+            <div class="editable_field" style="max-width:calc(100% - 4em);" [ngStyle]="getFieldStyle()">
+                <div *ngIf="record['authors']">
+                    <span *ngFor="let author of record.authors; let i = index">
+                        {{ author.fn }}<span *ngIf="i < record.authors.length-1 ">,</span>
+                    </span>
+                    <i style="cursor: pointer; margin-left: 0.5rem;" class="faa"
+                        [ngClass]="{'faa-plus-square-o': !clickAuthors, 'faa-minus-square-o': clickAuthors}"
+                        aria-hidden="true"
+                        (click)="isCollapsedContent = !isCollapsedContent; clickAuthors = expandClick();"></i>
+                </div>
+                <div [collapse]="!isCollapsedContent" class="card card-block card-header customcard">
+                    <div class="" *ngIf="record.authors">
+                        <span><b>Authors:</b></span>
+                        <div *ngFor="let author of record.authors; let i = index">
+                            <div>{{ author.fn}}</div>
+                            <div *ngFor="let aff of author.affiliation" style="padding-left: 1em;">
+                                <span>{{aff.title}}</span>
+                                <span *ngIf="aff.dept">, {{aff.dept}}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </ng-template>
+        <button class="edit_button" *ngIf="recordEditmode" type="button" (click)="openModal('authors')">
+            <i class="faa faa-pencil icon_enabled" data-toggle="tooltip" title="Edit authors"></i>
+        </button>
+        <button class="undo_button" *ngIf="recordEditmode" type="button" [disabled]="!fieldObject.authors.edited"
+            (click)="undoEditing('authors')">
+            <i class="faa faa-undo"
+                [ngClass]="{'icon_enabled': fieldObject.authors.edited, 'icon_disabled':!fieldObject.authors.edited }"
+                data-toggle="tooltip" title="Undo authors"></i>
+        </button>
+    </div>
+</div>
