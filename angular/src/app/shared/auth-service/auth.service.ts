@@ -43,7 +43,7 @@ export class AuthService implements OnInit {
         private cfg: AppConfig,
         @Inject(PLATFORM_ID) private platformId: Object) {
         this.inBrowser = isPlatformBrowser(platformId);
-        this.customizationApi = this.cfg.get("customizationApi", "/customization");
+        this.customizationApi = this.cfg.get("customizationApi", "/saml-sp");
         // this.customizationApi = "https://oardev.nist.gov/customization/";
         if (!(this.customizationApi.endsWith('/'))) this.customizationApi = this.customizationApi + '/';
         this.loginAPI = this.customizationApi + "auth/_perm/";
