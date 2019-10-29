@@ -38,14 +38,14 @@ export class FakeBackendInterceptor implements HttpInterceptor {
             }
 
             // // authenticate
-            if (request.url.indexOf('auth/_perm/') > -1 && request.method === 'GET') {
-                let body: ApiToken = {
-                    userId: 'xyz@nist.gov',
-                    token: 'fake-jwt-token'
-                };
-                console.log("logging in...")
-                return of(new HttpResponse({ status: 200, body }));
-            }
+            // if (request.url.indexOf('auth/_perm/') > -1 && request.method === 'GET') {
+            //     let body: ApiToken = {
+            //         userId: 'xyz@nist.gov',
+            //         token: 'fake-jwt-token'
+            //     };
+            //     console.log("logging in...")
+            //     return of(new HttpResponse({ status: 200, body }));
+            // }
 
             // return 401 not authorised if token is null or invalid
             // if (request.url.indexOf('auth/_perm/') > -1 && request.method === 'GET') {
@@ -83,26 +83,26 @@ export class FakeBackendInterceptor implements HttpInterceptor {
             //   return of(new HttpResponse({ status: 200, body }));
             // }
 
-            if (request.url.indexOf('/customization/api/draft') > -1 && request.method === 'GET') {
-                console.log("Interceptor returning sample record...");
-                return of(new HttpResponse({ status: 200, body: sampleRecord }));
-            }
+            // if (request.url.indexOf('/customization/api/draft') > -1 && request.method === 'GET') {
+            //     console.log("Interceptor returning sample record...");
+            //     return of(new HttpResponse({ status: 200, body: sampleRecord }));
+            // }
 
-            if (request.url.indexOf('/customization/api/draft') > -1 && request.method === 'PATCH') {
-                console.log("Record updated...");
-                return of(new HttpResponse({ status: 200, body: undefined }));
-                // return Observable.throw('Username or password is incorrect');
-            }
+            // if (request.url.indexOf('/customization/api/draft') > -1 && request.method === 'PATCH') {
+            //     console.log("Record updated...");
+            //     return of(new HttpResponse({ status: 200, body: undefined }));
+            //     // return Observable.throw('Username or password is incorrect');
+            // }
 
-            if (request.url.indexOf('/customization/api/draft') > -1 && request.method === 'DELETE') {
-                console.log("Record deleted...");
-                return of(new HttpResponse({ status: 200, body: undefined }));
-            }
+            // if (request.url.indexOf('/customization/api/draft') > -1 && request.method === 'DELETE') {
+            //     console.log("Record deleted...");
+            //     return of(new HttpResponse({ status: 200, body: undefined }));
+            // }
 
-            if (request.url.indexOf('/customization/api/savedrec') > -1 && request.method === 'PUT') {
-                console.log("Record saved...");
-                return of(new HttpResponse({ status: 200, body: undefined }));
-            }
+            // if (request.url.indexOf('/customization/api/savedrec') > -1 && request.method === 'PUT') {
+            //     console.log("Record saved...");
+            //     return of(new HttpResponse({ status: 200, body: undefined }));
+            // }
 
             // get bundle
             // if (request.url.endsWith('/od/ds/_bundle') && request.method === 'POST') {

@@ -21,7 +21,7 @@ export class AuthService implements OnInit {
     ediid: string;
     authToken: string;
     customizationApi: string;
-    baseApiUrl: string = "https://pn110559.nist.gov/saml-sp/api/mycontroller";
+    // baseApiUrl: string = "https://pn110559.nist.gov/saml-sp/api/mycontroller";
     // loginURL: string = "https://pn110559.nist.gov/saml-sp/auth/token";
     // loginURL: string = "Https://oardev.nist.gov/customization/saml/login";
     loginAPI: string = "https://oardev.nist.gov/customization/auth/_perm/";
@@ -235,9 +235,9 @@ export class AuthService implements OnInit {
         return this._tokenName;
     }
 
-    getBaseApiUrl() {
-        return this.baseApiUrl;
-    }
+    // getBaseApiUrl() {
+    //     return this.baseApiUrl;
+    // }
 
 
     /**

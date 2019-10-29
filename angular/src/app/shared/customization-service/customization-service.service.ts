@@ -29,8 +29,8 @@ export class CustomizationService {
         private datePipe: DatePipe,
         private editControlService: EditControlService,
         @Inject(PLATFORM_ID) private platformId: Object) {
-        this.customizationApi = "http://localhost:8085/customization/";
-        // this.customizationApi = this.cfg.get("customizationApi", "/customization");
+        // this.customizationApi = "http://localhost:8085/customization/";
+        this.customizationApi = this.cfg.get("customizationApi", "/customization");
         // this.customizationApi = "https://oardev.nist.gov/customization/";
         if (!(this.customizationApi.endsWith('/'))) this.customizationApi = this.customizationApi + '/';
         this.customizationApi = this.customizationApi + 'api/';
