@@ -59,6 +59,8 @@ export class SearchService {
       backend = this.landingBackend + 'records/';
     } else
       backend = this.landingBackend;
+
+    console.log("backend", backend);
     return this.http.get(backend + searchValue, { headers: new HttpHeaders({ timeout: '${10000}' }) });
   }
 

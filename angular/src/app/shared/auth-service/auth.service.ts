@@ -20,11 +20,9 @@ export class AuthService implements OnInit {
     ediid: string;
     authToken: string;
     customizationApi: string;
-    baseApiUrl: string = "https://pn110559.nist.gov/saml-sp/api/mycontroller";
-    // loginURL: string = "https://pn110559.nist.gov/saml-sp/auth/token";
-    // loginURL: string = "Https://oardev.nist.gov/customization/saml/login";
-    loginAPI: string = "https://oardev.nist.gov/customization/auth/_perm/";
-    loginRedirectURL: string = 'https://datapub.nist.gov/customization/saml/login?redirectTo=';
+    baseApiUrl: string;
+    loginAPI: string;
+    loginRedirectURL: string;
     landingPageService: string = "/od/id/";
     useridSub = new BehaviorSubject<string>('');
     inBrowser: boolean = false;
@@ -43,13 +41,15 @@ export class AuthService implements OnInit {
         private cfg: AppConfig,
         @Inject(PLATFORM_ID) private platformId: Object) {
         this.inBrowser = isPlatformBrowser(platformId);
-        this.customizationApi = this.cfg.get("customizationApi", "/customization");
-        // this.customizationApi = "https://oardev.nist.gov/customization/";
+        this.customizationApi = this.cfg.get("customizationAPI", "/unconfigured");
+
+        if (this.customizationApi == "/unconfigured")
+        throw new Error("Customization api not configured!");
+
         if (!(this.customizationApi.endsWith('/'))) this.customizationApi = this.customizationApi + '/';
         this.loginAPI = this.customizationApi + "auth/_perm/";
         this.loginRedirectURL = this.customizationApi + "saml/login?redirectTo=";
         this.landingPageService = cfg.get('landingPageService', '/od/id/');
-        // this.landingPageService = "https://oardev.nist.gov/od/id/";
     }
 
     ngOnInit() {
@@ -112,51 +112,51 @@ export class AuthService implements OnInit {
     * If login failed, display error message
     */
     handleTokenError(error: any) {
+        var returnMessage: string = "";
         console.log("pased Error", error.status);
         const JsonParseError = 'Http failure during parsing for';
         const matches = error.message.match(new RegExp(JsonParseError, 'ig'));
         if (error.status === 200 && matches.length === 1) {
             console.log("Test :" + error.message);
-            var samlurl = error.message.replace("Http failure during parsing for", "");
-            window.location.replace(samlurl);
-        }
-
-        if (error.error instanceof ErrorEvent) {
+            console.log("error.status :" + error.status);
+            returnMessage = "200";
+        } else if(error.status === 401 || error.status === 0) {
+            if (error.message.indexOf("Unauthorizeduser") > -1) {
+                // Authenticated but not authorized
+                this.setUserId(error.Userid);
+                this.setAuthenticateStatus(true);
+                returnMessage = "You are not authorized.";
+            }
+            if (error.message.indexOf("UnAuthenticated") > -1) {
+                // not authenticated
+                this.setAuthenticateStatus(false);
+                returnMessage = "You are not authenticated.";
+            }
+        } else if (error.error instanceof ErrorEvent) {
             // A client-side or network error occurred. Handle it accordingly.
             console.error('An error occurred:', error.error.message);
+            returnMessage = error.error.message;
         } else {
             // The backend returned an unsuccessful response code.
             // The response body may contain clues as to what went wrong,
             console.error(
                 `Backend returned code ${error.status}, ` +
                 `body was: ${error.error}`);
+                returnMessage = "Error";
         }
         // return an observable with a user-facing error message
 
-        if (error.status === 401) {
-            if (error.message.indexOf("Unauthorizeduser") > -1) {
-                // Authenticated but not authorized
-                this.setUserId(error.Userid);
-                this.setAuthenticateStatus(true);
-            }
-            if (error.message.indexOf("UnAuthenticated") > -1) {
-                // not authenticated
-                this.setAuthenticateStatus(false);
-                this.loginUserRedirect();
-            }
-            // setTimeout(() => window.location.replace('https://pn110559.nist.gov/saml-sp/saml/login'), 4000);
-        }
+        return returnMessage;
     }
 
     /*
      * Redirect login
      */
-    loginUserRedirect(): Observable<any> {
+    loginUserRedirect(): Observable<any>{
         
         // var redirectURL = this.loginRedirectURL + this.landingPageService + this.commonVarService.getEdiid();
         var redirectURL = this.loginRedirectURL + window.location.href;
         console.log("redirectURL:", redirectURL);
-        // this.router.navigate([redirectURL]);
         return this.http.get(redirectURL);
     }
 

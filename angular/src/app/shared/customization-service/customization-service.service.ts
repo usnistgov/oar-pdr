@@ -24,11 +24,14 @@ export class CustomizationServiceService {
         private commonVarService: CommonVarService,
         private authService: AuthService,
         @Inject(PLATFORM_ID) private platformId: Object) {
-        // this.customizationApi = "http://localhost:8085/customization/";
-        this.customizationApi = this.cfg.get("customizationApi", "/customization");
-        // this.customizationApi = "https://oardev.nist.gov/customization/";
+        this.customizationApi = this.cfg.get("customizationAPI", "/unconfigured");
+
+        if (this.customizationApi == "/unconfigured")
+            throw new Error("Customization api not configured!");
+
         if (!(this.customizationApi.endsWith('/'))) this.customizationApi = this.customizationApi + '/';
         this.customizationApi = this.customizationApi + 'api/';
+        console.log("customizationAPI", this.customizationApi);
         this.inBrowser = isPlatformBrowser(platformId);
     }
 

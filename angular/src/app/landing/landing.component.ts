@@ -512,11 +512,11 @@ export class LandingComponent implements OnInit {
         if (this.files.length > 0) {
             this.setLeafs(this.files[0].data);
         }
-        if (this.record['doi'] !== undefined && this.record['doi'] !== ""){
+        if (this.record['doi'] !== undefined && this.record['doi'] !== "") {
             this.doiUrl = "https://doi.org/" + this.record['doi'].split(':')[1];
             this.isDOI = true;
         }
-        if ("hasEmail" in this.record['contactPoint']){
+        if ("hasEmail" in this.record['contactPoint']) {
             this.isEmail = true;
         }
         this.assessNewer();
@@ -958,9 +958,31 @@ export class LandingComponent implements OnInit {
                                 this.loadDraftData(editMode);
                             },
                             error => {
-                                console.log("Login err:", error);
-                                this.setErrorForDisplay(error, "There was an error logging in.");
-                                this.authService.handleTokenError(error);
+                                var returnMessage = this.authService.handleTokenError(error)
+                                if (returnMessage == "You are not authenticated.") {
+                                    console.log("Redirecting...");
+                                    alert("Error status: " + error.status + " Message: " + error.message);
+                                    this.authService.loginUserRedirect().subscribe(
+                                        result => {
+                                            auService.handleTokenSuccess(result);
+                                            this.loadDraftData(editMode);
+                                        },
+                                        err => {
+                                            console.log("Error occured after redirect", err);
+                                            this.setErrorForDisplay(err, "Error occured after redirect");
+                                        })
+                                } else if (returnMessage == "You are not authorized.") {
+                                    console.log("User are not authorized.");
+                                    this.setErrorForDisplay(error, returnMessage);
+                                } else if (returnMessage == "200") {
+                                    console.log("200 error");
+                                    var samlurl = error.message.replace("Http failure during parsing for", "");
+                                    window.location.replace(samlurl);
+                                    alert("Error status: " + error.status + " Message: " + error.message);
+                                }
+                                else {
+                                    this.setErrorForDisplay(error, "There was an error logging in.");
+                                }
                             }
                         )
                 }
