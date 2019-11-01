@@ -279,19 +279,7 @@ export class LandingComponent implements OnInit {
 
         if (param) {
             this.dataInit();
-            this.loadPubData().then(
-                (resolve) => {
-                    console.log("LoadSavedData success.");
-                    this.setRecordEditmode(true);
-                },
-                (reject) => {
-                    console.log("LoadDraft failed.");
-
-                }
-            );
-
-            console.log("Ediid:", this.ediid);
-
+            this.setRecordEditmode(true);
         } else {
             this.authService.removeToken();
             this.authService.removeUserId();
@@ -510,11 +498,6 @@ export class LandingComponent implements OnInit {
         this.useFragment();
         var recordid;
         if (this.record != null && isPlatformBrowser(this.platformId)) {
-            // recordid = this.searchValue;
-            // // recordid = "ark:/88434/"+this.searchValue;
-            // if(this.searchValue.includes("ark"))
-            // window.history.replaceState( {} , '', '/od/id/'+this.searchValue );
-            // else
             window.history.replaceState({}, '', '/od/id/' + this.searchValue);
         }
     }
@@ -976,20 +959,17 @@ export class LandingComponent implements OnInit {
         var auService = this.authService;
         if (editMode) {
             if (this.inBrowser) {
-                console.log("Before ************");
                 if (this.authService.authorized()) {
-                    console.log("Authorized.", this.authService.getToken());
+                    console.log("Token:", this.authService.getToken());
                     //If user already logged in, load draft data
                     this.loadDraftData(editMode);
                 } else {
                     //If user not logged in, force user login then load draft data. If login failed, do nothing
                     var returnMessage: string;
-
                     this.authService.loginUser()
                         .subscribe(
                             res => {
                                 console.log("User logged in. Response:", res);
-
                                 returnMessage = auService.handleTokenSuccess(res);
                                 if (returnMessage == "You are not authorized.") {
                                     this.setErrorForDisplay(null, res.userId + " is not authorized to edit this page.");
@@ -998,20 +978,10 @@ export class LandingComponent implements OnInit {
                                 }
                             },
                             error => {
-                                console.log("No token %%%%%%%%%%%%%%%%");
                                 returnMessage = this.authService.handleTokenError(error)
                                 if (returnMessage == "You are not authenticated.") {
                                     console.log("Redirecting...");
                                     this.authService.loginUserRedirect();
-                                    // .subscribe(
-                                    //     result => {
-                                    //         auService.handleTokenSuccess(result);
-                                    //         this.loadDraftData(editMode);
-                                    //     },
-                                    //     err => {
-                                    //         console.log("Error occured after redirect", err);
-                                    //         this.setErrorForDisplay(err, "Error occured after redirect");
-                                    //     })
                                 } else if (returnMessage == "You are not authorized.") {
                                     console.log("User are not authorized.");
                                     this.setErrorForDisplay(error, returnMessage);
