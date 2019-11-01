@@ -110,8 +110,6 @@ export class AuthService implements OnInit {
         }else if(apiToken.userId != null){
             return "You are not authorized.";
         }
-
-
     }
 
     /*
