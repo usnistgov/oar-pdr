@@ -105,7 +105,6 @@ import gov.nist.oar.custom.customizationapi.service.SamlUserDetailsService;
  * @author Deoyani Nandrekar-Heinis
  */
 @Configuration
-@Order(1)
 public class SecuritySamlConfig extends WebSecurityConfigurerAdapter {
     private static Logger logger = LoggerFactory.getLogger(SecuritySamlConfig.class);
 
