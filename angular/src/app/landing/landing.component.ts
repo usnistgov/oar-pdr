@@ -950,27 +950,35 @@ export class LandingComponent implements OnInit {
                     this.loadDraftData(editMode);
                 } else {
                     //If user not logged in, force user login then load draft data. If login failed, do nothing
+                    var returnMessage: string;
+
                     this.authService.loginUser()
                         .subscribe(
                             res => {
                                 console.log("User logged in. Response:", res);
-                                auService.handleTokenSuccess(res);
-                                this.loadDraftData(editMode);
+
+                                returnMessage = auService.handleTokenSuccess(res);
+                                if (returnMessage == "You are not authorized.") {
+                                    this.setErrorForDisplay(null, res.userId + " is not authorized to edit this page.");
+                                } else {
+                                    this.loadDraftData(editMode);
+                                }
                             },
                             error => {
-                                var returnMessage = this.authService.handleTokenError(error)
+                                returnMessage = this.authService.handleTokenError(error)
                                 if (returnMessage == "You are not authenticated.") {
                                     console.log("Redirecting...");
                                     alert("Error status: " + error.status + " Message: " + error.message);
-                                    this.authService.loginUserRedirect().subscribe(
-                                        result => {
-                                            auService.handleTokenSuccess(result);
-                                            this.loadDraftData(editMode);
-                                        },
-                                        err => {
-                                            console.log("Error occured after redirect", err);
-                                            this.setErrorForDisplay(err, "Error occured after redirect");
-                                        })
+                                    this.authService.loginUserRedirect();
+                                    // .subscribe(
+                                    //     result => {
+                                    //         auService.handleTokenSuccess(result);
+                                    //         this.loadDraftData(editMode);
+                                    //     },
+                                    //     err => {
+                                    //         console.log("Error occured after redirect", err);
+                                    //         this.setErrorForDisplay(err, "Error occured after redirect");
+                                    //     })
                                 } else if (returnMessage == "You are not authorized.") {
                                     console.log("User are not authorized.");
                                     this.setErrorForDisplay(error, returnMessage);
@@ -1378,8 +1386,12 @@ export class LandingComponent implements OnInit {
      */
     setErrorForDisplay(err: any, message: string) {
         console.log(err);
+        if (err != null) {
+            this.errorMsgDetail = err.message;
+        } else {
+            this.errorMsgDetail = "";
+        }
         this.errorMsg = message;
-        this.errorMsgDetail = err.message;
         this.displayError = true;
         console.log(this.errorMsg);
     }

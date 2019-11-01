@@ -44,7 +44,7 @@ export class AuthService implements OnInit {
         this.customizationApi = this.cfg.get("customizationAPI", "/unconfigured");
 
         if (this.customizationApi == "/unconfigured")
-        throw new Error("Customization api not configured!");
+            throw new Error("Customization api not configured!");
 
         if (!(this.customizationApi.endsWith('/'))) this.customizationApi = this.customizationApi + '/';
         this.loginAPI = this.customizationApi + "auth/_perm/";
@@ -102,9 +102,15 @@ export class AuthService implements OnInit {
     */
     handleTokenSuccess(apiToken: any) {
         console.log("response:", apiToken);
-        this.authToken = apiToken.token;
-        this.setUserId(apiToken.userId);
-        this.setAuthenticateStatus(true);
+        if (apiToken.token != null && apiToken.userId != null) {
+            this.authToken = apiToken.token;
+            this.setUserId(apiToken.userId);
+            this.setAuthenticateStatus(true);
+            return "";
+        }else if(apiToken.userId != null){
+            return "You are not authorized.";
+        }
+
 
     }
 
@@ -120,8 +126,8 @@ export class AuthService implements OnInit {
             console.log("Test :" + error.message);
             console.log("error.status :" + error.status);
             returnMessage = "200";
-        } else if(error.status === 401 || error.status === 0) {
-            if (error.message.indexOf("Unauthorizeduser") > -1) {
+        } else if (error.status === 401 || error.status === 0) {
+            if (error.message.indexOf("UnauthorizedUser") > -1) {
                 // Authenticated but not authorized
                 this.setUserId(error.Userid);
                 this.setAuthenticateStatus(true);
@@ -142,7 +148,7 @@ export class AuthService implements OnInit {
             console.error(
                 `Backend returned code ${error.status}, ` +
                 `body was: ${error.error}`);
-                returnMessage = "Error";
+            returnMessage = "Error";
         }
         // return an observable with a user-facing error message
 
@@ -152,12 +158,13 @@ export class AuthService implements OnInit {
     /*
      * Redirect login
      */
-    loginUserRedirect(): Observable<any>{
-        
+    loginUserRedirect() {
+
         // var redirectURL = this.loginRedirectURL + this.landingPageService + this.commonVarService.getEdiid();
         var redirectURL = this.loginRedirectURL + window.location.href;
         console.log("redirectURL:", redirectURL);
-        return this.http.get(redirectURL);
+        // return this.http.get(redirectURL);
+        window.location.replace(redirectURL);
     }
 
     /*
