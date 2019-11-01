@@ -35,6 +35,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import gov.nist.oar.custom.customizationapi.exceptions.CustomizationException;
 import gov.nist.oar.custom.customizationapi.exceptions.ErrorInfo;
+import gov.nist.oar.custom.customizationapi.exceptions.UnAuthenticatedUserException;
 import gov.nist.oar.custom.customizationapi.exceptions.UnAuthorizedUserException;
 import gov.nist.oar.custom.customizationapi.helpers.domains.UserToken;
 import gov.nist.oar.custom.customizationapi.service.JWTTokenGenerator;
@@ -64,16 +65,17 @@ public class AuthController {
      * @return JSON with userid and token
      * @throws UnAuthorizedUserException
      * @throws CustomizationException
+     * @throws UnAuthenticatedUserException 
      */
     @RequestMapping(value = { "_perm/{ediid}" }, method = RequestMethod.GET, produces = "application/json")
     @ApiOperation(value = "", nickname = "Authorize user to edit the record", notes = "Resource returns a JSON if Authorized user.")
 
     public UserToken token(Authentication authentication, @PathVariable @Valid String ediid)
-	    throws UnAuthorizedUserException, CustomizationException {
+	    throws UnAuthorizedUserException, CustomizationException, UnAuthenticatedUserException {
 	String userId = "";
 	try {
 	    if (authentication == null)
-		throw new UnAuthorizedUserException("User is not authenticated to access this resource.");
+		throw new UnAuthenticatedUserException(" User is not authenticated to access this resource.");
 	    logger.info("Get the token for authenticated user.");
 
 	    SAMLCredential credential = (SAMLCredential) authentication.getCredentials();
@@ -86,6 +88,7 @@ public class AuthController {
 	} catch (UnAuthorizedUserException ex) {
 	    if (!userId.isEmpty() && userId != null)
 		return new UserToken(userId, "");
+	    
 	    else
 		throw ex;
 	}
@@ -145,9 +148,23 @@ public class AuthController {
     public ErrorInfo handleStreamingError(UnAuthorizedUserException ex, HttpServletRequest req) {
 	logger.info("There user requesting edit access is not authorized : " + req.getRequestURI() + "\n  "
 		+ ex.getMessage());
-	return new ErrorInfo(req.getRequestURI(), 401, "UnAuthroized User", req.getMethod());
+	return new ErrorInfo(req.getRequestURI(), 401, "UnauthroizedUser", req.getMethod());
     }
 
+    /**
+     * Exception handling if user is not authorized
+     * 
+     * @param ex
+     * @param req
+     * @return
+     */
+    @ExceptionHandler(UnAuthenticatedUserException.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    public ErrorInfo handleStreamingError(UnAuthenticatedUserException ex, HttpServletRequest req) {
+	logger.info("There user requesting edit access is not authorized : " + req.getRequestURI() + "\n  "
+		+ ex.getMessage());
+	return new ErrorInfo(req.getRequestURI(), 401, "UnAuthenticated", req.getMethod());
+    }
     /**
      * When an exception occurs in the customization service while connecting
      * backend or for any other reason.
