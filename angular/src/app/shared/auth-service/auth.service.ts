@@ -104,7 +104,6 @@ export class AuthService implements OnInit {
         console.log("response:", apiToken);
         if (apiToken.token != null && apiToken.token != "" && apiToken.userId != null && apiToken.userId != "") {
             this.authToken = apiToken.token;
-            console.log("token &&&&&&&&&&&&&&", this.authToken);
             this.setUserId(apiToken.userId);
             this.setAuthenticateStatus(true);
             return "";
@@ -118,13 +117,9 @@ export class AuthService implements OnInit {
     */
     handleTokenError(error: any) {
         var returnMessage: string = "";
-        console.log("Error @@@@@@@@@@@@@@@@", error);
-        console.log("Error", error.error);
         const JsonParseError = 'Http failure during parsing for';
         const matches = error.message.match(new RegExp(JsonParseError, 'ig'));
         if (error.status === 200 && matches.length === 1) {
-            console.log("Test :" + error.message);
-            console.log("error.status :" + error.status);
             returnMessage = "200";
         } else if (error.status === 401 || error.status === 0) {
             if (error.error.message.indexOf("UnauthorizedUser") > -1) {

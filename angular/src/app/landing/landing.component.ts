@@ -386,7 +386,6 @@ export class LandingComponent implements OnInit {
         for (var field in this.fieldObject) {
             this.fieldObject[field] = this.editingObjectInit();
         }
-        console.log("this.router.url", this.router.url);
         if (this.router.url.includes("ark"))
             this.searchValue = this.router.url.split("/id/").pop();
 
@@ -1319,7 +1318,6 @@ export class LandingComponent implements OnInit {
         }
 
         if (noMoreEdited) {
-            console.log("Deleting...");
             this.customizationServiceService.delete().subscribe(
                 (res) => {
                     if (this.originalRecord[field] == undefined)
