@@ -104,6 +104,7 @@ export class AuthService implements OnInit {
         console.log("response:", apiToken);
         if (apiToken.token != null && apiToken.token != "" && apiToken.userId != null && apiToken.userId != "") {
             this.authToken = apiToken.token;
+            console.log("token &&&&&&&&&&&&&&", this.authToken);
             this.setUserId(apiToken.userId);
             this.setAuthenticateStatus(true);
             return "";
@@ -117,7 +118,8 @@ export class AuthService implements OnInit {
     */
     handleTokenError(error: any) {
         var returnMessage: string = "";
-        console.log("pased Error", error.status);
+        console.log("Error @@@@@@@@@@@@@@@@", error);
+        console.log("Error", error.error);
         const JsonParseError = 'Http failure during parsing for';
         const matches = error.message.match(new RegExp(JsonParseError, 'ig'));
         if (error.status === 200 && matches.length === 1) {
@@ -125,13 +127,13 @@ export class AuthService implements OnInit {
             console.log("error.status :" + error.status);
             returnMessage = "200";
         } else if (error.status === 401 || error.status === 0) {
-            if (error.message.indexOf("UnauthorizedUser") > -1) {
+            if (error.error.message.indexOf("UnauthorizedUser") > -1) {
                 // Authenticated but not authorized
                 this.setUserId(error.Userid);
                 this.setAuthenticateStatus(true);
                 returnMessage = "You are not authorized.";
             }
-            if (error.message.indexOf("UnAuthenticated") > -1) {
+            if (error.error.message.indexOf("UnAuthenticated") > -1) {
                 // not authenticated
                 this.setAuthenticateStatus(false);
                 returnMessage = "You are not authenticated.";
@@ -159,7 +161,7 @@ export class AuthService implements OnInit {
     loginUserRedirect() {
 
         // var redirectURL = this.loginRedirectURL + this.landingPageService + this.commonVarService.getEdiid();
-        var redirectURL = this.loginRedirectURL + window.location.href;
+        var redirectURL = this.loginRedirectURL + window.location.href + "?editmode=true";
         console.log("redirectURL:", redirectURL);
         // return this.http.get(redirectURL);
         window.location.replace(redirectURL);
@@ -222,7 +224,8 @@ export class AuthService implements OnInit {
      * Determine if the user is logged in by checking the existence of the token
      */
     authorized() {
-        return (this.authToken != "")
+        console.log("this.authToken", this.authToken);
+        return (this.authToken != "" && this.authToken != undefined && this.authToken != null);
     }
 
     authenticated() {

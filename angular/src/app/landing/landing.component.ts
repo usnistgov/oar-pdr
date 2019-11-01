@@ -259,6 +259,12 @@ export class LandingComponent implements OnInit {
      * Get the params OnInit
      */
     ngOnInit() {
+        var param;
+        this.route.queryParamMap.subscribe(queryParams => {
+            param = queryParams.get("editmode")
+            console.log("url param:", param);
+        })
+
         this.taxonomyListService.get(0).subscribe((result) => {
             if (result != null && result != undefined)
                 this.buildTaxonomyTree(result);
@@ -271,10 +277,27 @@ export class LandingComponent implements OnInit {
             this.setErrorForDisplay(err, "There was an error getting taxonomy list.");
         });
 
-        this.authService.removeToken();
-        this.authService.removeUserId();
-        this.authService.setAuthenticateStatus(false);
-        this.loadPubData();
+        if (param) {
+            this.dataInit();
+            this.loadPubData().then(
+                (resolve) => {
+                    console.log("LoadSavedData success.");
+                    this.setRecordEditmode(true);
+                },
+                (reject) => {
+                    console.log("LoadDraft failed.");
+
+                }
+            );
+
+            console.log("Ediid:", this.ediid);
+
+        } else {
+            this.authService.removeToken();
+            this.authService.removeUserId();
+            this.authService.setAuthenticateStatus(false);
+            this.loadPubData();
+        }
     }
 
     updateMessage(processing: boolean, msg?: string) {
@@ -375,6 +398,7 @@ export class LandingComponent implements OnInit {
         for (var field in this.fieldObject) {
             this.fieldObject[field] = this.editingObjectInit();
         }
+        console.log("this.router.url", this.router.url);
         if (this.router.url.includes("ark"))
             this.searchValue = this.router.url.split("/id/").pop();
 
@@ -399,21 +423,28 @@ export class LandingComponent implements OnInit {
     loadPubData() {
         this.updateMessage(true, "Loading...");
         this.dataInit();
-        this.getData()
-            .subscribe((res) => {
-                this.onSuccess(res).then(function (result) {
-                    // Make a copy of original pub data (for undo purpose)
-                    this.originalRecord = this.commonVarService.deepCopy(this.record);
-                    console.log("record", this.record);
-                    this.updateMessage(false);
-                }.bind(this), function (err) {
-                    alert("something went wrong while fetching the data.");
-                    this.updateMessage(false);
-                });
-            }, (err) => {
-                this.setErrorForDisplay(err, "There was an error in searchservice.");
-                this.updateMessage(false);
-            });
+        var promise = new Promise((resolve, reject) => {
+            setTimeout(() => {
+                this.getData()
+                    .subscribe((res) => {
+                        this.onSuccess(res).then(function (result) {
+                            // Make a copy of original pub data (for undo purpose)
+                            this.originalRecord = this.commonVarService.deepCopy(this.record);
+                            console.log("record", this.record);
+                            this.updateMessage(false);
+                            resolve();
+                        }.bind(this), function (err) {
+                            this.updateMessage(false);
+                            reject();
+                        });
+                    }, (err) => {
+                        this.setErrorForDisplay(err, "There was an error in searchservice.");
+                        this.updateMessage(false);
+                        reject();
+                    });
+            }, 1000);
+        });
+        return promise;
     }
 
     getData(): Observable<any> {
@@ -945,7 +976,9 @@ export class LandingComponent implements OnInit {
         var auService = this.authService;
         if (editMode) {
             if (this.inBrowser) {
+                console.log("Before ************");
                 if (this.authService.authorized()) {
+                    console.log("Authorized.", this.authService.getToken());
                     //If user already logged in, load draft data
                     this.loadDraftData(editMode);
                 } else {
@@ -965,10 +998,10 @@ export class LandingComponent implements OnInit {
                                 }
                             },
                             error => {
+                                console.log("No token %%%%%%%%%%%%%%%%");
                                 returnMessage = this.authService.handleTokenError(error)
                                 if (returnMessage == "You are not authenticated.") {
                                     console.log("Redirecting...");
-                                    alert("Error status: " + error.status + " Message: " + error.message);
                                     this.authService.loginUserRedirect();
                                     // .subscribe(
                                     //     result => {
@@ -986,7 +1019,6 @@ export class LandingComponent implements OnInit {
                                     console.log("200 error");
                                     var samlurl = error.message.replace("Http failure during parsing for", "");
                                     window.location.replace(samlurl);
-                                    alert("Error status: " + error.status + " Message: " + error.message);
                                 }
                                 else {
                                     this.setErrorForDisplay(error, "There was an error logging in.");
@@ -1028,7 +1060,7 @@ export class LandingComponent implements OnInit {
                         this.commonVarService.setEditMode(editMode);
                         this.updateMessage(false);
                     }.bind(this), function (err) {
-                        alert("something went wrong while fetching draft data.");
+
                     });
                 }
             }, (err) => {
