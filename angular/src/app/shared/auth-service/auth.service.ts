@@ -102,12 +102,12 @@ export class AuthService implements OnInit {
     */
     handleTokenSuccess(apiToken: any) {
         console.log("response:", apiToken);
-        if (apiToken.token != null && apiToken.userId != null) {
+        if (apiToken.token != null && apiToken.token != "" && apiToken.userId != null && apiToken.userId != "") {
             this.authToken = apiToken.token;
             this.setUserId(apiToken.userId);
             this.setAuthenticateStatus(true);
             return "";
-        }else if(apiToken.userId != null){
+        } else if (apiToken.userId != null && apiToken.userId != "") {
             return "You are not authorized.";
         }
     }
