@@ -16,7 +16,7 @@ export class CustomizationServiceService {
     inBrowser: boolean = false;
     draftStatusCookieName: string = "draft_status";
     recordEditedSub = new BehaviorSubject<boolean>(false);
-
+    updateDateSub = new BehaviorSubject<string>("");
 
     constructor(
         private http: HttpClient,
@@ -74,10 +74,10 @@ export class CustomizationServiceService {
      */
     saveRecord(body: any): Observable<any> {
         const httpOptions = {
-          headers: {
-            "Authorization": "Bearer " + this.authService.getToken(),
-            "userId": this.authService.getUserId()
-          }
+            headers: {
+                "Authorization": "Bearer " + this.authService.getToken(),
+                "userId": this.authService.getUserId()
+            }
         };
         var url = this.customizationApi + "savedrecord/" + this.commonVarService.getEdiid();
         console.log("Save rec URL:", url);
@@ -93,10 +93,10 @@ export class CustomizationServiceService {
   */
     delete(): Observable<any> {
         const httpOptions = {
-          headers: {
-            "Authorization": "Bearer " + this.authService.getToken(),
-            "userId": this.authService.getUserId()
-          }
+            headers: {
+                "Authorization": "Bearer " + this.authService.getToken(),
+                "userId": this.authService.getUserId()
+            }
         };
         var url = this.customizationApi + "draft/" + this.commonVarService.getEdiid();
         // return this.http.delete(url);
@@ -116,9 +116,9 @@ export class CustomizationServiceService {
 
         return this.http.get(url, {
             headers: {
-              "Authorization": "Bearer " + token
+                "Authorization": "Bearer " + token
             }
-          });
+        });
     }
 
     /**
@@ -134,12 +134,22 @@ export class CustomizationServiceService {
     }
 
     /**
-     * Function to store draft data update date in local storage
+     * Function to store draft data update date in local storage and emit update date
      */
     setUpdateDate(updateDate: string) {
-        if (this.inBrowser)
+        if (this.inBrowser) {
+            this.updateDateSub.next(updateDate);
             localStorage.setItem(this.commonVarService.getEdiid(), updateDate);
+        }
     }
+
+    /**
+     * Watching update date
+     **/
+    watchUpdateDate(): Observable<any> {
+        return this.updateDateSub.asObservable();
+    }
+
 
     /**
      * Function to get draft data update date in local storage
@@ -155,7 +165,9 @@ export class CustomizationServiceService {
      * Function to remove draft data status in local storage
      */
     removeUpdateDate() {
-        if (this.inBrowser)
+        if (this.inBrowser) {
+            this.updateDateSub.next('');
             localStorage.removeItem(this.commonVarService.getEdiid());
+        }
     }
 }

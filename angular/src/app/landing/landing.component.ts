@@ -245,6 +245,10 @@ export class LandingComponent implements OnInit {
             this.message = value;
         });
 
+        this.customizationServiceService.watchUpdateDate().subscribe(value => {
+            this.updateDate = value;
+        });
+
         this.editEnabled = cfg.get("editEnabled", "");
     }
 
@@ -425,6 +429,7 @@ export class LandingComponent implements OnInit {
                             reject();
                         });
                     }, (err) => {
+                        console.log("Error in searchservice:", err);
                         this.setErrorForDisplay(err, "There was an error in searchservice.");
                         this.updateMessage(false);
                         reject();
@@ -436,7 +441,9 @@ export class LandingComponent implements OnInit {
 
     getData(): Observable<any> {
         var recordid = this.searchValue;
+        console.log("this.searchValue:", this.searchValue);
         const recordid_KEY = makeStateKey<string>('record-' + recordid);
+        console.log("recordid_KEY:", recordid_KEY);
 
         if (this.transferState.hasKey(recordid_KEY)) {
             console.log("extracting data id=" + recordid + " embedded in web page");
@@ -1247,7 +1254,6 @@ export class LandingComponent implements OnInit {
                 this.customizationServiceService.removeUpdateDate();
                 this.notificationService.showSuccessWithTimeout("Record saved.", "", 3000);
                 this.setRecordEditmode(false);
-                this.commonVarService.setEditMode(false);
                 this.customizationServiceService.setRecordEdited(false);
                 this.authService.setAuthenticateStatus(false);
                 this.updateMessage(false);
