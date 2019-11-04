@@ -418,6 +418,7 @@ export class LandingComponent implements OnInit {
             setTimeout(() => {
                 this.getData()
                     .subscribe((res) => {
+                        console.log("**** Saved data return:", res);
                         this.onSuccess(res).then(function (result) {
                             // Make a copy of original pub data (for undo purpose)
                             this.originalRecord = this.commonVarService.deepCopy(this.record);
@@ -1017,7 +1018,7 @@ export class LandingComponent implements OnInit {
     */
     loadDraftData(editMode: boolean) {
         this.updateMessage(true, "Loading...");
-        // this.dataInit();
+        this.dataInit();
 
         this.customizationServiceService.getDraftData()
             .subscribe((res) => {
