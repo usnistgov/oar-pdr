@@ -51,7 +51,7 @@ public class SecurityConfig {
      * Rest security configuration for /api/
      */
     @Configuration
-    @Order(2)
+    @Order(1)
     public static class RestApiSecurityConfig extends WebSecurityConfigurerAdapter {
 	private Logger logger = LoggerFactory.getLogger(RestApiSecurityConfig.class);
 
@@ -82,7 +82,7 @@ public class SecurityConfig {
 //	}
 	@Value("${jwt.secret:testsecret}")
 	String secret;
-	
+
 	private static final String apiMatcher = "/api/**";
 
 	@Override
@@ -91,10 +91,10 @@ public class SecurityConfig {
 	    http.addFilterBefore(new JWTAuthenticationFilter(apiMatcher, super.authenticationManager()),
 		    UsernamePasswordAuthenticationFilter.class);
 
-	    http.authorizeRequests().antMatchers(HttpMethod.PATCH,apiMatcher).permitAll();
-	    http.authorizeRequests().antMatchers(HttpMethod.PUT,apiMatcher).permitAll();
-	    http.authorizeRequests().antMatchers(HttpMethod.DELETE,apiMatcher).permitAll();
-	    http.authorizeRequests().antMatchers(apiMatcher ).authenticated().and().httpBasic().and().csrf().disable();
+	    http.authorizeRequests().antMatchers(HttpMethod.PATCH, apiMatcher).permitAll();
+	    http.authorizeRequests().antMatchers(HttpMethod.PUT, apiMatcher).permitAll();
+	    http.authorizeRequests().antMatchers(HttpMethod.DELETE, apiMatcher).permitAll();
+	    http.authorizeRequests().antMatchers(apiMatcher).authenticated().and().httpBasic().and().csrf().disable();
 
 	}
 
@@ -108,7 +108,7 @@ public class SecurityConfig {
      * Rest security configuration for /api/
      */
     @Configuration
-    @Order(3)
+    @Order(2)
     public static class AuthSecurityConfig extends WebSecurityConfigurerAdapter {
 	private Logger logger = LoggerFactory.getLogger(AuthSecurityConfig.class);
 
