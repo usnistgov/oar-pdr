@@ -37,6 +37,7 @@ import gov.nist.oar.custom.customizationapi.exceptions.CustomizationException;
 import gov.nist.oar.custom.customizationapi.exceptions.ErrorInfo;
 import gov.nist.oar.custom.customizationapi.exceptions.UnAuthenticatedUserException;
 import gov.nist.oar.custom.customizationapi.exceptions.UnAuthorizedUserException;
+import gov.nist.oar.custom.customizationapi.helpers.ExtractUserId;
 import gov.nist.oar.custom.customizationapi.helpers.domains.UserToken;
 import gov.nist.oar.custom.customizationapi.service.JWTTokenGenerator;
 import gov.nist.oar.custom.customizationapi.service.ResourceNotFoundException;
@@ -77,13 +78,13 @@ public class AuthController {
 	    if (authentication == null)
 		throw new UnAuthenticatedUserException(" User is not authenticated to access this resource.");
 	    logger.info("Get the token for authenticated user.");
-
-	    SAMLCredential credential = (SAMLCredential) authentication.getCredentials();
-	    List<Attribute> attributes = credential.getAttributes();
-
-	    org.opensaml.xml.schema.impl.XSAnyImpl xsImpl = (XSAnyImpl) attributes.get(0).getAttributeValues().get(0);
-	    userId = xsImpl.getTextContent();
-
+	  
+//	    SAMLCredential credential = (SAMLCredential) authentication.getCredentials();
+//	    List<Attribute> attributes = credential.getAttributes();
+//
+//	    org.opensaml.xml.schema.impl.XSAnyImpl xsImpl = (XSAnyImpl) attributes.get(0).getAttributeValues().get(0);
+//	    userId = xsImpl.getTextContent();
+	    userId = ExtractUserId.getUserId();
 	    return jwt.getJWT(userId, ediid);
 	} catch (UnAuthorizedUserException ex) {
 	    if (!userId.isEmpty() && userId != null)

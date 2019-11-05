@@ -1,6 +1,7 @@
 package gov.nist.oar.custom.customizationapi.config.JWTConfig;
 
 import java.io.IOException;
+import java.text.ParseException;
 import java.util.List;
 
 import javax.servlet.FilterChain;
@@ -22,6 +23,11 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.saml.SAMLCredential;
 import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
 
+import com.nimbusds.jose.JWSObject;
+import com.nimbusds.jwt.JWTClaimsSet;
+import com.nimbusds.jwt.SignedJWT;
+
+import gov.nist.oar.custom.customizationapi.helpers.ExtractUserId;
 import gov.nist.oar.custom.customizationapi.helpers.domains.UserToken;
 
 /**
@@ -50,7 +56,37 @@ public class JWTAuthenticationFilter extends AbstractAuthenticationProcessingFil
 	String token = request.getHeader(Header_Authorization_Token);
 	if (token != null)
 	    token = token.substring(7).trim();
+	String userId = ExtractUserId.getUserId();
+	String recordId = "";
+	try {
+	    recordId = request.getRequestURI().split("/draft/")[1];
+	} catch (ArrayIndexOutOfBoundsException exp) {
+	    try {
+		recordId = request.getRequestURI().split("/savedrecord/")[1];
+	    } catch (Exception ex) {
+
+	    }
+	}
+
+	try {
+
+	    SignedJWT signedJWTtest = SignedJWT.parse(token);
+	    JWTClaimsSet claimsSet = JWTClaimsSet.parse(signedJWTtest.getPayload().toJSONObject());
+	    String testSubject = claimsSet.getSubject();
+	    String[] customSubject = testSubject.split("\\|");
+	    String tokenUser = customSubject[0];
+	    String tokenRecord = customSubject[1];
+
+	    if (!(userId.equals(tokenUser) && recordId.equals(tokenRecord)))
+		throw new IOException("Unauthorized user:");
+	    System.out.println(signedJWTtest.getParsedString());
+	} catch (ParseException e) {
+	    // TODO Auto-generated catch block
+	    e.printStackTrace();
+	}
+
 	JWTAuthenticationToken jwtAuthenticationToken = new JWTAuthenticationToken(token);
+
 	return getAuthenticationManager().authenticate(jwtAuthenticationToken);
     }
 
@@ -70,13 +106,14 @@ public class JWTAuthenticationFilter extends AbstractAuthenticationProcessingFil
 	Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 	String userId = "";
 	if (auth != null) {
-	    auth.getName();
-	    SAMLCredential credential = (SAMLCredential) auth.getCredentials();
-	    List<Attribute> attributes = credential.getAttributes();
-	    org.opensaml.xml.schema.impl.XSAnyImpl xsImpl = (XSAnyImpl) attributes.get(0).getAttributeValues().get(0);
-	    userId = xsImpl.getTextContent();
+//	    auth.getName();
+//	    SAMLCredential credential = (SAMLCredential) auth.getCredentials();
+//	    List<Attribute> attributes = credential.getAttributes();
+//	    org.opensaml.xml.schema.impl.XSAnyImpl xsImpl = (XSAnyImpl) attributes.get(0).getAttributeValues().get(0);
+//	    userId = xsImpl.getTextContent();
+	    userId = ExtractUserId.getUserId();
 	}
-	logger.info("If token is not authorized sent Unauthorized status.");
+	logger.info("If token is not authorized send Unauthorized status.");
 	response.setStatus(HttpStatus.UNAUTHORIZED.value());
 	response.setContentType(MediaType.APPLICATION_JSON_VALUE);
 	JSONObject jObject = new JSONObject();
@@ -84,7 +121,7 @@ public class JWTAuthenticationFilter extends AbstractAuthenticationProcessingFil
 	    jObject.put("userId", userId);
 	    jObject.put("message", "User is not Authorized.");
 	} else {
-	    jObject.put("message", "Try to authenticate first.");
+	    jObject.put("message", "User is not Authenticated.");
 	}
 
 	response.getWriter().write(jObject.toJSONString());

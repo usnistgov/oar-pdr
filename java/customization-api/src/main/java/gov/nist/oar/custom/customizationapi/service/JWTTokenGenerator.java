@@ -78,6 +78,7 @@ public class JWTTokenGenerator {
 	    JWTClaimsSet.Builder jwtClaimsSetBuilder = new JWTClaimsSet.Builder();
 	    jwtClaimsSetBuilder.expirationTime(dateTime.plusMinutes(120).toDate());
 	    jwtClaimsSetBuilder.claim(JWTClaimName, JWTClaimValue);
+	    jwtClaimsSetBuilder.subject(userId+"|"+ediid);
 
 	    // signature
 	    SignedJWT signedJWT = new SignedJWT(new JWSHeader(JWSAlgorithm.HS256), jwtClaimsSetBuilder.build());
@@ -111,6 +112,7 @@ public class JWTTokenGenerator {
 	    HttpEntity<String> requestEntity = new HttpEntity<>(null, headers);
 	    ResponseEntity<String> result = restTemplate.exchange(uri, HttpMethod.GET, requestEntity, String.class);
 	    return result.getStatusCode().is2xxSuccessful() ? true : false;
+//	return true;
 	} catch (Exception ie) {
 	    throw new UnAuthorizedUserException(
 		    "There is an error while getting user permissions from metadata srevice. " + ie.getMessage());
