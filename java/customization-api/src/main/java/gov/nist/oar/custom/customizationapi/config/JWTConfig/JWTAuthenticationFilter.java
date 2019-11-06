@@ -2,7 +2,7 @@ package gov.nist.oar.custom.customizationapi.config.JWTConfig;
 
 import java.io.IOException;
 import java.text.ParseException;
-import java.util.List;
+import java.util.HashMap;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -10,8 +10,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.json.simple.JSONObject;
-import org.opensaml.saml2.core.Attribute;
-import org.opensaml.xml.schema.impl.XSAnyImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -21,16 +19,12 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.saml.SAMLCredential;
 import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
 
-import com.nimbusds.jose.JWSObject;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 
-import gov.nist.oar.custom.customizationapi.exceptions.UnAuthorizedUserException;
 import gov.nist.oar.custom.customizationapi.helpers.UserDetailsExtractor;
-import gov.nist.oar.custom.customizationapi.helpers.domains.UserToken;
 
 /**
  * This filter users JWT configuration and filters all the service requests
@@ -44,6 +38,7 @@ public class JWTAuthenticationFilter extends AbstractAuthenticationProcessingFil
 
     private static final Logger logger = LoggerFactory.getLogger(JWTAuthenticationFilter.class);
     public static final String Header_Authorization_Token = "Authorization";
+    public static final String Token_starter = "Bearer";
     public UserDetailsExtractor uExtract = new UserDetailsExtractor();
 
     public JWTAuthenticationFilter(final String matcher, AuthenticationManager authenticationManager) {
@@ -59,9 +54,7 @@ public class JWTAuthenticationFilter extends AbstractAuthenticationProcessingFil
 	    throws IOException, ServletException {
 
 	logger.info("Attempt to check token and  authorized token validity");
-	String token = request.getHeader(Header_Authorization_Token);
-	if (token != null)
-	    token = token.substring(7).trim();
+	String token = request.getHeader(Header_Authorization_Token).replaceAll(Token_starter, "").trim();
 	String userId = uExtract.getUserId();
 	String recordId = uExtract.getUserRecord(request.getRequestURI());
 	try {
@@ -73,16 +66,16 @@ public class JWTAuthenticationFilter extends AbstractAuthenticationProcessingFil
 
 	    if (!(userId.equals(userRecordId[0]) && recordId.equals(userRecordId[1]))) {
 		logger.error("Unauthorized user: Token does not contain the user id or record id specified.");
-		
-		unsuccessfulAuthentication(request, response, new BadCredentialsException("Unauthorized user: Token does not contain the user id or record id specified."));
+		this.unsuccessfulAuthentication(request, response, new BadCredentialsException(
+			"Unauthorized user: Token does not contain the user id or record id specified."));
+		return null;
 	    }
-	  
+
 	} catch (ParseException e) {
-	    // TODO Auto-generated catch block
-	    //e.printStackTrace();
 	    logger.error("Unauthorized user: Token can not be parsed successfully.");
-	    unsuccessfulAuthentication(request, response, new BadCredentialsException("Unauthorized user: Token can not be parsed successfully."));
-	    //throw new IOException("Unauthorized user: Token can not be parsed successfully.");
+	    this.unsuccessfulAuthentication(request, response,
+		    new BadCredentialsException("Unauthorized user: Token can not be parsed successfully."));
+	    return null;
 	}
 
 	JWTAuthenticationToken jwtAuthenticationToken = new JWTAuthenticationToken(token);
@@ -91,7 +84,8 @@ public class JWTAuthenticationFilter extends AbstractAuthenticationProcessingFil
     }
 
     /**
-     * CAlled if attempted request with token is valid and user is authorized to perform the task
+     * Called if attempted request with token is valid and user is authorized to
+     * perform the task
      */
     @Override
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain,
@@ -99,11 +93,11 @@ public class JWTAuthenticationFilter extends AbstractAuthenticationProcessingFil
 	logger.info("If token is authorized redirect to original request.");
 	chain.doFilter(request, response);
     }
-    
-    
-/**
- * Called if attempted request with token is not valid and user is not authorized to perform this task.
- */
+
+    /**
+     * Called if attempted request with token is not valid and user is not
+     * authorized to perform this task.
+     */
     @Override
     protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response,
 	    AuthenticationException failed) throws IOException, ServletException {
@@ -116,14 +110,16 @@ public class JWTAuthenticationFilter extends AbstractAuthenticationProcessingFil
 	logger.info("If token is not authorized send Unauthorized status.");
 	response.setStatus(HttpStatus.UNAUTHORIZED.value());
 	response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-	JSONObject jObject = new JSONObject();
+	
+	HashMap<String,String> responseObject = new HashMap<String,String>();
+	
 	if (!userId.isEmpty()) {
-	    jObject.put("userId", userId);
-	    jObject.put("message", "User is not Authorized.");
+	    responseObject.put("userId", userId);
+	    responseObject.put("message", "User is not Authorized.");
 	} else {
-	    jObject.put("message", "User is not Authenticated.");
+	    responseObject.put("message", "User is not Authenticated.");
 	}
-
+	JSONObject jObject = new JSONObject(responseObject);
 	response.getWriter().write(jObject.toJSONString());
     }
 
