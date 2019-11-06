@@ -141,6 +141,13 @@ public class SecuritySamlConfig extends WebSecurityConfigurerAdapter {
     @Value("${application.url:http://localhost:4200}")
     String applicationURL;
 
+    /**
+     * Default single sign on profile options are set up here, we can add relaystate
+     * for redirect here as well.
+     * 
+     * @return
+     * @throws ConfigurationException
+     */
     @Bean
     public WebSSOProfileOptions defaultWebSSOProfileOptions() throws ConfigurationException {
 	logger.info("Setting up authticated service redirect by setting web sso profiles.");
@@ -151,6 +158,13 @@ public class SecuritySamlConfig extends WebSecurityConfigurerAdapter {
 	return webSSOProfileOptions;
     }
 
+    /**
+     * When SAML protected resource is called this entry point is used to connect to
+     * SAML service provider and get the authentication
+     * 
+     * @return
+     * @throws ConfigurationException
+     */
     @Bean
     public SAMLEntryPoint samlEntryPoint() throws ConfigurationException {
 	logger.info("SAML Entry point. with application url " + applicationURL);
@@ -159,6 +173,11 @@ public class SecuritySamlConfig extends WebSecurityConfigurerAdapter {
 	return samlEntryPoint;
     }
 
+    /**
+     * Metadatadisplay filter is called to use IDP metadata and set up SP service
+     * 
+     * @return
+     */
     @Bean
     public MetadataDisplayFilter metadataDisplayFilter() {
 	return new MetadataDisplayFilter();
@@ -394,6 +413,10 @@ public class SecuritySamlConfig extends WebSecurityConfigurerAdapter {
 	return new WebSSOProfileConsumerHoKImpl();
     }
 
+    /**
+     * Logout profile setting.
+     * @return
+     */
     @Bean
     public SingleLogoutProfile logoutprofile() {
 	return new SingleLogoutProfileImpl();
@@ -461,12 +484,17 @@ public class SecuritySamlConfig extends WebSecurityConfigurerAdapter {
 	return samlAuthenticationProvider;
     }
 
+    /**
+     * Configure authentication manager.
+     */
     @Override
     protected void configure(AuthenticationManagerBuilder auth) {
 	auth.authenticationProvider(samlAuthenticationProvider());
     }
 
-
+    /**
+     * These are all http security configurations for different endpoints.
+     */
     @Override
     protected void configure(HttpSecurity http) throws ConfigurationException {
 	logger.info("Set up http security related filters for saml entrypoints");
@@ -492,6 +520,12 @@ public class SecuritySamlConfig extends WebSecurityConfigurerAdapter {
 
     }
 
+    /**
+     * Set up filter for cross origin requests, here it is read from configserver
+     * and applicationURL is angular application URL
+     * 
+     * @return
+     */
     @Bean
     CORSFilter corsFilter() {
 	logger.info("CORS filter setting for application:" + applicationURL);

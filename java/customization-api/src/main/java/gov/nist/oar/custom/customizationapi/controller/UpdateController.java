@@ -131,6 +131,12 @@ public class UpdateController {
 
     }
 
+    /**
+     * 
+     * @param ex
+     * @param req
+     * @return
+     */
     @ExceptionHandler(CustomizationException.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ErrorInfo handleCustomization(CustomizationException ex, HttpServletRequest req) {
@@ -138,6 +144,12 @@ public class UpdateController {
 	return new ErrorInfo(req.getRequestURI(), 500, "Internal Server Error");
     }
 
+    /**
+     * 
+     * @param ex
+     * @param req
+     * @return
+     */
     @ExceptionHandler(ResourceNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorInfo handleStreamingError(ResourceNotFoundException ex, HttpServletRequest req) {
@@ -145,6 +157,12 @@ public class UpdateController {
 	return new ErrorInfo(req.getRequestURI(), 404, "Resource Not Found", req.getMethod());
     }
 
+    /**
+     * 
+     * @param ex
+     * @param req
+     * @return
+     */
     @ExceptionHandler(InvalidInputException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorInfo handleStreamingError(InvalidInputException ex, HttpServletRequest req) {
@@ -152,6 +170,12 @@ public class UpdateController {
 	return new ErrorInfo(req.getRequestURI(), 400, "Invalid input error", "PATCH");
     }
 
+    /**
+     * 
+     * @param ex
+     * @param req
+     * @return
+     */
     @ExceptionHandler(IOException.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ErrorInfo handleStreamingError(CustomizationException ex, HttpServletRequest req) {
@@ -159,6 +183,12 @@ public class UpdateController {
 	return new ErrorInfo(req.getRequestURI(), 500, "Internal Server Error", "POST");
     }
 
+    /**
+     * 
+     * @param ex
+     * @param req
+     * @return
+     */
     @ExceptionHandler(RuntimeException.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
 
@@ -167,6 +197,12 @@ public class UpdateController {
 	return new ErrorInfo(req.getRequestURI(), 500, "Unexpected Server Error");
     }
 
+    /**
+     * If backend server , IDP or metadata server is not working it wont authorized the user but it will throw an exception.
+     * @param ex
+     * @param req
+     * @return
+     */
     @ExceptionHandler(RestClientException.class)
     @ResponseStatus(HttpStatus.BAD_GATEWAY)
     public ErrorInfo handleRestClientError(RuntimeException ex, HttpServletRequest req) {
@@ -174,6 +210,12 @@ public class UpdateController {
 	return new ErrorInfo(req.getRequestURI(), 502, "Can not connect to backend server");
     }
     
+    /**
+     * Handles internal authentication service exception if user is not authorized or token is expired
+     * @param ex
+     * @param req
+     * @return
+     */
     @ExceptionHandler(InternalAuthenticationServiceException.class)
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     public ErrorInfo handleRestClientError(InternalAuthenticationServiceException ex, HttpServletRequest req) {

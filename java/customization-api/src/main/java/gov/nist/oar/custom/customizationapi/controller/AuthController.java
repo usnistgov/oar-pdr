@@ -13,12 +13,11 @@
 package gov.nist.oar.custom.customizationapi.controller;
 
 import java.io.IOException;
-import java.util.List;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
-import org.opensaml.saml2.core.Attribute;
-import org.opensaml.xml.schema.impl.XSAnyImpl;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,18 +25,18 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.saml.SAMLCredential;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+
 import gov.nist.oar.custom.customizationapi.exceptions.CustomizationException;
 import gov.nist.oar.custom.customizationapi.exceptions.ErrorInfo;
 import gov.nist.oar.custom.customizationapi.exceptions.UnAuthenticatedUserException;
 import gov.nist.oar.custom.customizationapi.exceptions.UnAuthorizedUserException;
-import gov.nist.oar.custom.customizationapi.helpers.ExtractUserId;
+import gov.nist.oar.custom.customizationapi.helpers.UserDetailsExtractor;
 import gov.nist.oar.custom.customizationapi.helpers.domains.UserToken;
 import gov.nist.oar.custom.customizationapi.service.JWTTokenGenerator;
 import gov.nist.oar.custom.customizationapi.service.ResourceNotFoundException;
@@ -58,6 +57,7 @@ public class AuthController {
     @Autowired
     JWTTokenGenerator jwt;
 
+    public UserDetailsExtractor uExtract = new UserDetailsExtractor();
     /**
      * Get the JWT for the authorized user
      * 
@@ -66,7 +66,7 @@ public class AuthController {
      * @return JSON with userid and token
      * @throws UnAuthorizedUserException
      * @throws CustomizationException
-     * @throws UnAuthenticatedUserException 
+     * @throws UnAuthenticatedUserException
      */
     @RequestMapping(value = { "_perm/{ediid}" }, method = RequestMethod.GET, produces = "application/json")
     @ApiOperation(value = "", nickname = "Authorize user to edit the record", notes = "Resource returns a JSON if Authorized user.")
@@ -78,18 +78,12 @@ public class AuthController {
 	    if (authentication == null)
 		throw new UnAuthenticatedUserException(" User is not authenticated to access this resource.");
 	    logger.info("Get the token for authenticated user.");
-	  
-//	    SAMLCredential credential = (SAMLCredential) authentication.getCredentials();
-//	    List<Attribute> attributes = credential.getAttributes();
-//
-//	    org.opensaml.xml.schema.impl.XSAnyImpl xsImpl = (XSAnyImpl) attributes.get(0).getAttributeValues().get(0);
-//	    userId = xsImpl.getTextContent();
-	    userId = ExtractUserId.getUserId();
+	    userId = uExtract.getUserId();
 	    return jwt.getJWT(userId, ediid);
 	} catch (UnAuthorizedUserException ex) {
 	    if (!userId.isEmpty() && userId != null)
 		return new UserToken(userId, "");
-	    
+
 	    else
 		throw ex;
 	}
@@ -104,7 +98,6 @@ public class AuthController {
      * @throws IOException
      */
 
-//    @GetMapping("/loginfo")
     @RequestMapping(value = { "/_logininfo" }, method = RequestMethod.GET, produces = "application/json")
     public ResponseEntity<String> login(HttpServletResponse response) throws IOException {
 	logger.info("Get the authenticated user info.");
@@ -113,10 +106,7 @@ public class AuthController {
 	if (authentication == null) {
 	    response.sendRedirect("/saml/login");
 	} else {
-	    SAMLCredential credential = (SAMLCredential) authentication.getCredentials();
-	    List<Attribute> attributes = credential.getAttributes();
-	    org.opensaml.xml.schema.impl.XSAnyImpl xsImpl = (XSAnyImpl) attributes.get(0).getAttributeValues().get(0);
-	    String userId = xsImpl.getTextContent();
+	    String userId = uExtract.getUserId();
 	    String returnResponse = "{\"userid\": \"" + userId + "\"}";
 	    return new ResponseEntity<>(returnResponse, HttpStatus.OK);
 	}
@@ -166,6 +156,7 @@ public class AuthController {
 		+ ex.getMessage());
 	return new ErrorInfo(req.getRequestURI(), 401, "UnAuthenticated", req.getMethod());
     }
+
     /**
      * When an exception occurs in the customization service while connecting
      * backend or for any other reason.

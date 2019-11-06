@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -27,7 +28,8 @@ import com.nimbusds.jose.JWSObject;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 
-import gov.nist.oar.custom.customizationapi.helpers.ExtractUserId;
+import gov.nist.oar.custom.customizationapi.exceptions.UnAuthorizedUserException;
+import gov.nist.oar.custom.customizationapi.helpers.UserDetailsExtractor;
 import gov.nist.oar.custom.customizationapi.helpers.domains.UserToken;
 
 /**
@@ -42,12 +44,16 @@ public class JWTAuthenticationFilter extends AbstractAuthenticationProcessingFil
 
     private static final Logger logger = LoggerFactory.getLogger(JWTAuthenticationFilter.class);
     public static final String Header_Authorization_Token = "Authorization";
+    public UserDetailsExtractor uExtract = new UserDetailsExtractor();
 
     public JWTAuthenticationFilter(final String matcher, AuthenticationManager authenticationManager) {
 	super(matcher);
 	super.setAuthenticationManager(authenticationManager);
     }
 
+    /**
+     * Parse requested token to extract information
+     */
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response)
 	    throws IOException, ServletException {
@@ -56,33 +62,27 @@ public class JWTAuthenticationFilter extends AbstractAuthenticationProcessingFil
 	String token = request.getHeader(Header_Authorization_Token);
 	if (token != null)
 	    token = token.substring(7).trim();
-	String userId = ExtractUserId.getUserId();
-	String recordId = "";
-	try {
-	    recordId = request.getRequestURI().split("/draft/")[1];
-	} catch (ArrayIndexOutOfBoundsException exp) {
-	    try {
-		recordId = request.getRequestURI().split("/savedrecord/")[1];
-	    } catch (Exception ex) {
-
-	    }
-	}
-
+	String userId = uExtract.getUserId();
+	String recordId = uExtract.getUserRecord(request.getRequestURI());
 	try {
 
 	    SignedJWT signedJWTtest = SignedJWT.parse(token);
 	    JWTClaimsSet claimsSet = JWTClaimsSet.parse(signedJWTtest.getPayload().toJSONObject());
-	    String testSubject = claimsSet.getSubject();
-	    String[] customSubject = testSubject.split("\\|");
-	    String tokenUser = customSubject[0];
-	    String tokenRecord = customSubject[1];
 
-	    if (!(userId.equals(tokenUser) && recordId.equals(tokenRecord)))
-		throw new IOException("Unauthorized user:");
-	    System.out.println(signedJWTtest.getParsedString());
+	    String[] userRecordId = claimsSet.getSubject().split("\\|");
+
+	    if (!(userId.equals(userRecordId[0]) && recordId.equals(userRecordId[1]))) {
+		logger.error("Unauthorized user: Token does not contain the user id or record id specified.");
+		
+		unsuccessfulAuthentication(request, response, new BadCredentialsException("Unauthorized user: Token does not contain the user id or record id specified."));
+	    }
+	  
 	} catch (ParseException e) {
 	    // TODO Auto-generated catch block
-	    e.printStackTrace();
+	    //e.printStackTrace();
+	    logger.error("Unauthorized user: Token can not be parsed successfully.");
+	    unsuccessfulAuthentication(request, response, new BadCredentialsException("Unauthorized user: Token can not be parsed successfully."));
+	    //throw new IOException("Unauthorized user: Token can not be parsed successfully.");
 	}
 
 	JWTAuthenticationToken jwtAuthenticationToken = new JWTAuthenticationToken(token);
@@ -90,28 +90,28 @@ public class JWTAuthenticationFilter extends AbstractAuthenticationProcessingFil
 	return getAuthenticationManager().authenticate(jwtAuthenticationToken);
     }
 
+    /**
+     * CAlled if attempted request with token is valid and user is authorized to perform the task
+     */
     @Override
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain,
 	    Authentication authResult) throws IOException, ServletException {
-//	boolean b = SecurityContextHolder.getContext().getAuthentication().isAuthenticated();
-//        SecurityContextHolder.getContext().setAuthentication(authResult);
 	logger.info("If token is authorized redirect to original request.");
 	chain.doFilter(request, response);
     }
-
+    
+    
+/**
+ * Called if attempted request with token is not valid and user is not authorized to perform this task.
+ */
     @Override
     protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response,
 	    AuthenticationException failed) throws IOException, ServletException {
-//        SecurityContextHolder.clearContext();
+//        SecurityContextHolder.clearContext(); //this will remove authenticated user completely
 	Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 	String userId = "";
 	if (auth != null) {
-//	    auth.getName();
-//	    SAMLCredential credential = (SAMLCredential) auth.getCredentials();
-//	    List<Attribute> attributes = credential.getAttributes();
-//	    org.opensaml.xml.schema.impl.XSAnyImpl xsImpl = (XSAnyImpl) attributes.get(0).getAttributeValues().get(0);
-//	    userId = xsImpl.getTextContent();
-	    userId = ExtractUserId.getUserId();
+	    userId = uExtract.getUserId();
 	}
 	logger.info("If token is not authorized send Unauthorized status.");
 	response.setStatus(HttpStatus.UNAUTHORIZED.value());

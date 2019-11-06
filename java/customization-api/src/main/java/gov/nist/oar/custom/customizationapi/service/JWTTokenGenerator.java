@@ -84,10 +84,9 @@ public class JWTTokenGenerator {
 	    SignedJWT signedJWT = new SignedJWT(new JWSHeader(JWSAlgorithm.HS256), jwtClaimsSetBuilder.build());
 	    signedJWT.sign(new MACSigner(JWTSECRET));
 
-	    Date expires = signedJWT.getJWTClaimsSet().getExpirationTime();
-	    String user = signedJWT.getJWTClaimsSet().getRegisteredNames().toString();
+
 	    return new UserToken(userId, signedJWT.serialize());
-	} catch (ParseException | JOSEException e) {
+	} catch (JOSEException e) {
 	    throw new UnAuthorizedUserException("Unable to generate token for the this user.");
 	}
     }
@@ -112,7 +111,6 @@ public class JWTTokenGenerator {
 	    HttpEntity<String> requestEntity = new HttpEntity<>(null, headers);
 	    ResponseEntity<String> result = restTemplate.exchange(uri, HttpMethod.GET, requestEntity, String.class);
 	    return result.getStatusCode().is2xxSuccessful() ? true : false;
-//	return true;
 	} catch (Exception ie) {
 	    throw new UnAuthorizedUserException(
 		    "There is an error while getting user permissions from metadata srevice. " + ie.getMessage());
