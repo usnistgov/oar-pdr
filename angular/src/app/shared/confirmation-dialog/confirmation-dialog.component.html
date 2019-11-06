@@ -1,10 +1,12 @@
-<div class="modal-header dialogHeader">
-  <h4 class="modal-title">{{ title }}</h4>
+<div class="modal-header dialogHeader center">
+    <h4>{{ title }}</h4>
 </div>
 <div class="modal-body">
-  {{ message }}
+    <i *ngIf="showWarningIcon" class="faa faa-warning faa-2x" style="color: rgb(252, 122, 0);padding-left: .2em;padding-right: .5em;"></i>{{ message }}
 </div>
 <div class="modal-footer">
-  <button type="button" pButton type="submit" style="width:400px;height:2em;vertical-align: middle;" (click)="accept()">{{ btnOkText }}</button>
-  <button type="button" pButton type="submit" style="width:400px;height:2em;vertical-align: middle;" (click)="decline()">{{ btnCancelText }}</button>
+    <button type="button" pButton type="submit" style="width:400px;height:2em;vertical-align: middle;"
+        (click)="accept()">{{ btnOkText }}</button>
+    <button type="button" pButton type="submit" style="width:400px;height:2em;vertical-align: middle;"
+        (click)="decline()">{{ btnCancelText }}</button>
 </div>

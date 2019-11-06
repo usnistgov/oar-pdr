@@ -21,6 +21,7 @@ export const config : LPSConfig = {
         pdrHome:     "https://data.nist.gov/pdr/",
         pdrSearch:   "https://data.nist.gov/sdp/"
     },
+    customizationAPI: "https://data.nist.gov/customization/",
     mode:        "dev",
     status:      "Dev Version",
     appVersion:  "v1.1.0",

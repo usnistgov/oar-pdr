@@ -456,7 +456,7 @@ export class LandingComponent implements OnInit {
             console.warn("record data not found in transfer state");
             return this.searchService.searchById(recordid)
                 .catch((err: Response, caught: Observable<any[]>) => {
-                    // console.log(err);
+                    console.log(err);
                     if (err !== undefined) {
                         console.error("Failed to retrieve data for id=" + recordid + "; error status=" + err.status);
                         if ("message" in err) console.error("Reason: " + (<any>err).message);
@@ -1272,7 +1272,7 @@ export class LandingComponent implements OnInit {
      */
     cancelRecord() {
         this.displayError = false;
-        this.confirmationDialogService.confirm('Edited data will be lost', 'Do you want to erase changes?')
+        this.confirmationDialogService.confirm('Discarding edited data', 'Edited data will be lost. Do you want to erase changes?', true)
             .then((confirmed) => {
                 if (confirmed) {
                     this.customizationServiceService.delete().subscribe(

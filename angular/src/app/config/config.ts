@@ -157,6 +157,7 @@ export class AppConfig implements LPSConfig {
       this.locations.nerdmAbout = this.locations.portalBase + "od/dm/aboutNerdm.html";
 
     if (!this.mdAPI) this.mdAPI = this.locations.mdService;
+    if (!this.customizationAPI) this.customizationAPI = this.locations.portalBase + "customization/";
 
     if (typeof (this.editEnabled) === "undefined") this.editEnabled = false;
   }
