@@ -1,0 +1,36 @@
+.messagebar {
+    width: 100%;
+    min-height: 2em;
+    padding-top: 0.2em;
+    font-size: 15px; 
+    background-color: #FCF9CD;
+}
+.instruction {
+    text-align: right; 
+    margin-right: 2.1em;
+    color: black;
+}
+.information {
+    padding: 1em;
+    color: black;
+}
+.tip {
+    padding: 1em;
+    color: black;
+}
+.celebration {
+    padding: 1em;
+    text-align: right; 
+    color: green;
+}
+.error {
+    padding: 1em;
+    color: red;
+}
+.syserror {
+    padding: 1em;
+    color: red;
+}
+.warning {
+    padding: 1em;
+}

@@ -1,0 +1,15 @@
+<div *ngIf="messageClass == 'syserror'; else elseFormat">
+  <div class="messagebar">
+    <div  [class]="messageClass">
+      Oops! There was a problem updating the data. Please try to edit and save again.
+      If problem persists, please contact us at
+      <a href="mailto:datasupport@nist.gov?subject=PDR Publishing Error&body={{message}}">datasupport@nist.gov</a>
+      to report the problem.
+    </div>
+  </div>
+</div>
+<ng-template #elseFormat>
+  <div class="messagebar">
+    <div  [class]="messageClass">{{message}}</div>
+  </div>
+</ng-template>
