@@ -43,6 +43,7 @@ fdescribe('EditControlComponent', () => {
 
     it('should initialize', () => {
         expect(component).toBeDefined();
+        expect(component.editMode).toBeFalsy();
 
         let cmpel = fixture.nativeElement;
         let btns = cmpel.querySelectorAll("button");
@@ -55,5 +56,133 @@ fdescribe('EditControlComponent', () => {
         expect(authed).toBeTruthy();
         expect(component.isAuthorized()).toBeTruthy();
     });
+
+    // test startEditing()
+    it('startEditing()', async(() => {
+        expect(component.editMode).toBeFalsy();
+        let cmpel = fixture.nativeElement;
+        let edbtn = cmpel.querySelector("#ec-edit-btn") 
+        let discbtn = cmpel.querySelector("#ec-discard-btn") 
+        let subbtn = cmpel.querySelector("#ec-submit-btn") 
+        let qedbtn = cmpel.querySelector("#ec-quited-btn")  
+        expect(qedbtn).toBeNull();
+        expect(edbtn.disabled).toBeFalsy();
+        expect(subbtn.disabled).toBeTruthy();
+        expect(discbtn.disabled).toBeTruthy();
+
+        component.startEditing();
+        fixture.whenStable().then(() => {
+            fixture.detectChanges();
+            expect(component.editMode).toBeTruthy();
+            
+            edbtn = cmpel.querySelector("#ec-edit-btn")     
+            discbtn = cmpel.querySelector("#ec-discard-btn")
+            subbtn = cmpel.querySelector("#ec-submit-btn")  
+            qedbtn = cmpel.querySelector("#ec-quited-btn")  
+            expect(qedbtn.disabled).toBeFalsy();
+            expect(subbtn.disabled).toBeFalsy();
+            expect(discbtn.disabled).toBeFalsy();
+            expect(edbtn).toBeNull();
+        });
+
+    }));
+
+    // test discardEdits()
+    it('discardEdits()', async(() => {
+        expect(component.editMode).toBeFalsy();
+        let cmpel = fixture.nativeElement;
+        let edbtn = cmpel.querySelector("#ec-edit-btn") 
+
+        component.startEditing();
+        fixture.whenStable().then(() => {
+            fixture.detectChanges();
+            expect(component.editMode).toBeTruthy();
+            
+            edbtn = cmpel.querySelector("#ec-edit-btn")     
+            expect(edbtn).toBeNull();
+
+            component.discardEdits();
+            fixture.whenStable().then(() => {
+                fixture.detectChanges();
+                expect(component.editMode).toBeFalsy();
+                
+                edbtn = cmpel.querySelector("#ec-edit-btn")     
+                let discbtn = cmpel.querySelector("#ec-discard-btn") 
+                let subbtn = cmpel.querySelector("#ec-submit-btn") 
+                let qedbtn = cmpel.querySelector("#ec-quited-btn")
+                
+                expect(qedbtn).toBeNull();
+                expect(edbtn.disabled).toBeFalsy();
+                expect(subbtn.disabled).toBeTruthy();
+                expect(discbtn.disabled).toBeTruthy();
+            });
+        });
+    }));
+
+    // test saveEdits
+    it('saveEdits()', async(() => {
+        expect(component.editMode).toBeFalsy();
+        let cmpel = fixture.nativeElement;
+        let edbtn = cmpel.querySelector("#ec-edit-btn") 
+
+        component.startEditing();
+        fixture.whenStable().then(() => {
+            fixture.detectChanges();
+            expect(component.editMode).toBeTruthy();
+            
+            edbtn = cmpel.querySelector("#ec-edit-btn")     
+            expect(edbtn).toBeNull();
+
+            component.saveEdits();
+            fixture.whenStable().then(() => {
+                fixture.detectChanges();
+                expect(component.editMode).toBeFalsy();
+                
+                edbtn = cmpel.querySelector("#ec-edit-btn")     
+                let discbtn = cmpel.querySelector("#ec-discard-btn") 
+                let subbtn = cmpel.querySelector("#ec-submit-btn") 
+                let qedbtn = cmpel.querySelector("#ec-quited-btn")
+                
+                expect(qedbtn).toBeNull();
+                expect(edbtn.disabled).toBeFalsy();
+                expect(subbtn.disabled).toBeTruthy();
+                expect(discbtn.disabled).toBeTruthy();
+            });
+        });
+    }));
+
+    // test pauseEditing
+    it('pauseEditing()', async(() => {
+        expect(component.editMode).toBeFalsy();
+        let cmpel = fixture.nativeElement;
+        let edbtn = cmpel.querySelector("#ec-edit-btn") 
+
+        component.startEditing();
+        fixture.whenStable().then(() => {
+            fixture.detectChanges();
+            expect(component.editMode).toBeTruthy();
+            
+            edbtn = cmpel.querySelector("#ec-edit-btn")     
+            expect(edbtn).toBeNull();
+
+            component.pauseEditing();
+            fixture.whenStable().then(() => {
+                fixture.detectChanges();
+                expect(component.editMode).toBeFalsy();
+                
+                edbtn = cmpel.querySelector("#ec-edit-btn")     
+                let discbtn = cmpel.querySelector("#ec-discard-btn") 
+                let subbtn = cmpel.querySelector("#ec-submit-btn") 
+                let qedbtn = cmpel.querySelector("#ec-quited-btn")
+                
+                expect(qedbtn).toBeNull();
+                expect(edbtn.disabled).toBeFalsy();
+                expect(subbtn.disabled).toBeTruthy();
+                expect(discbtn.disabled).toBeTruthy();
+            });
+        });
+    }));
+
+    
 });
 

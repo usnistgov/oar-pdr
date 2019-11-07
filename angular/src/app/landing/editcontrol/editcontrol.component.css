@@ -2,9 +2,9 @@
     background-color: #153971;
     color: #FFFFFF; 
     height: 3em;
-  }
+}
   
-  .btn-label {
+.btn-label {
     position: relative;
     left: -19px;
     top: -1px;
@@ -13,11 +13,38 @@
     background: rgba(0,0,0,0.15);
     border-radius: 3px 0 0 3px; 
     height: inherit;
-  }
+}
   
-  .btn-labeled {
+.btn-labeled {
     padding-top: 0;
     padding-bottom: 0;
     width:140px; 
-  }
-  .btn { margin-bottom:10px; }
+}
+.btn {
+    margin-bottom:10px;
+    height:2em;
+}
+
+#ec-edit-btn {
+    background-color:rgb(221, 172, 9);
+    color:white;
+    border-color: rgb(221, 172, 9);
+}
+
+#ec-quited-btn {
+    background-color:rgb(221, 172, 9);
+    color:white;
+    border-color: rgb(221, 172, 9);
+}
+
+#ec-submit-btn {
+    background-color:green;
+    color:white;
+    border-color: green;
+}
+
+#ec-discard-btn {
+    background-color:grey;
+    color:white;
+    border-color: grey;
+}

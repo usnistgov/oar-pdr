@@ -97,7 +97,6 @@ export class EditControlComponent implements OnInit, OnChanges {
         //        to a network glitch)?
         this.authorizeEditing().subscribe(
             (successful) => {
-                console.log("authorized: "+successful);
                 this.editMode = successful;
             }
         );
