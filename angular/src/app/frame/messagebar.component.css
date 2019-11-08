@@ -4,6 +4,11 @@
     padding-top: 0.2em;
     font-size: 15px; 
     background-color: #FCF9CD;
+    border: 1pt solid #EEEEEE;
+    border-radius: 8px;
+}
+.msg-dismiss {
+    color: #ffd940;
 }
 .instruction {
     text-align: right; 

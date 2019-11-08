@@ -1,5 +1,5 @@
-import { Component, Optional } from '@angular/core';
-import { UserMessageService } from './usermessage.service';
+import { Component, Optional, ChangeDetectorRef } from '@angular/core';
+import { UserMessageService, Message } from './usermessage.service';
 
 /**
  * A Component that can receive and display messages.
@@ -16,19 +16,50 @@ import { UserMessageService } from './usermessage.service';
 })
 export class MessageBarComponent {
 
-    messageClass : string = "instruction";
-    message : string = "";
+    private nextid = 0;
+    messages : Message[] = [];
     // bgcolor : string = "#FCF9CD";
 
-    public constructor(@Optional() private svc : UserMessageService) {
+    public constructor(private chgDetRef : ChangeDetectorRef,
+                       @Optional() private svc : UserMessageService) {
         if (svc) {
             svc._subscribe({
                 next: (msg) => {
-                    this.messageClass = msg.type;
-                    this.message = msg.text
+                    this.messages.push(msg)  // msg: an object with type, message
                 }
             });
         }
+    }
+
+    _addMessage(message : string, type ?: string) {
+        if (! type) type = "information";
+        this.messages.push({ type: type, text: message, id: ++this.nextid });
+    }
+
+    _msgid(item, i) { return item['id']; }
+
+    /**
+     * remove a message from the list currently displayed
+     */
+    public dismiss(msgid : any) {
+        let msg : any;
+        console.log("trying to dismiss message id="+msgid);
+        for (let i=0; i < this.messages.length; i++) {
+            console.log("message "+i.toString()+" id="+this.messages[i].id);
+            if (this.messages[i].id == msgid) {
+                this.messages.splice(i, 1);
+                this.chgDetRef.detectChanges();
+                break;
+            }
+        }
+    }
+
+    /**
+     * remove all messages from view
+     */
+    public dismissAll() {
+        this.messages.splice(0, this.messages.length);
+        this.chgDetRef.detectChanges();
     }
 
     /**
@@ -36,8 +67,7 @@ export class MessageBarComponent {
      * advising some action or choice of actions.
      */
     public instruct(message : string) : void {
-        this.messageClass = "instruction";
-        this.message = message;
+        this._addMessage(message, "instruction");
     }
 
     /**
@@ -45,8 +75,7 @@ export class MessageBarComponent {
      * to assure the user that a user action was successful.
      */
     public celebrate(message : string) : void {
-        this.messageClass = "celebration";
-        this.message = message;
+        this._addMessage(message, "celebration");
     }
 
     /**
@@ -54,24 +83,21 @@ export class MessageBarComponent {
      * want to remedy.
      */
     public warn(message : string) : void {
-        this.messageClass = "warning";
-        this.message = message;
+        this._addMessage(message, "warning");
     }
 
     /*
      * Provide some helpful information without concern or worry.  
      */
     public inform(message : string) : void {
-        this.messageClass = "information";
-        this.message = message;
+        this._addMessage(message, "information");
     }
 
     /*
      * Provide a suggestion.  
      */
     public tip(message : string) : void {
-        this.messageClass = "tip";
-        this.message = message;
+        this._addMessage(message, "tip");
     }
 
     /*
@@ -79,8 +105,7 @@ export class MessageBarComponent {
      * incorrect user action
      */
     public error(message : string) : void {
-        this.messageClass = "error";
-        this.message = message;
+        this._addMessage(message, "error");
     }
 
     /*
@@ -88,7 +113,6 @@ export class MessageBarComponent {
      * unexpected conditions that are not the fault of the user.  
      */
     public syserror(message : string) : void {
-        this.messageClass = "syserror";
-        this.message = message;
+        this._addMessage(message, "syserror");
     }
 }

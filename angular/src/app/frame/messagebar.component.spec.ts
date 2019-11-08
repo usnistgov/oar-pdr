@@ -2,7 +2,7 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { MessageBarComponent } from './messagebar.component';
 
-describe('MessageBarComponent', () => {
+fdescribe('MessageBarComponent', () => {
     let component : MessageBarComponent;
     let fixture : ComponentFixture<MessageBarComponent>;
 
@@ -19,18 +19,14 @@ describe('MessageBarComponent', () => {
         expect(component).toBeDefined();
     }
 
-    it('should initialize as a blank instruction', () => {
+    it('should initialize with an empty list', () => {
         makeComp();
         fixture.detectChanges();
         let cmpel = fixture.nativeElement;
         // console.log("messagebar root tag: "+cmpel.outerHTML);
         // expect(cmpel.getAttribute("class")).toEqual("messagebar");
         let mbardiv = cmpel.querySelectorAll(".messagebar");
-        expect(mbardiv.length).toEqual(1);
-        let children = mbardiv[0].querySelectorAll("div")
-        expect(children.length).toEqual(1);
-        expect(children[0].getAttribute("class")).toEqual("instruction");
-        expect(children[0].innerHTML).toEqual("");
+        expect(mbardiv.length).toEqual(0);
     });
 
     it('should display an error message on demand', () => {
@@ -40,17 +36,20 @@ describe('MessageBarComponent', () => {
         
         let cmpel = fixture.nativeElement;
         let mbardiv = cmpel.querySelectorAll(".messagebar");
+        expect(mbardiv.length).toEqual(1);  // one message
         let children = mbardiv[0].querySelectorAll("div")
-        expect(children.length).toEqual(1);
+        expect(children.length).toEqual(2);  // message and dismiss icon
 
-        expect(children[0].getAttribute("class")).toEqual("error");
-        expect(children[0].innerHTML).toEqual("Dang");
+        expect(children[1].getAttribute("class")).toEqual("error");
+        expect(children[1].innerHTML).toEqual("Dang");
 
         component.syserror("The quick brown fox jumped over the lazy dogs.  Every boy deserves favor.");
         fixture.detectChanges();
         mbardiv = cmpel.querySelectorAll(".messagebar");
-        children = mbardiv[0].querySelectorAll("div")        
-        expect(children[0].getAttribute("class")).toEqual("syserror");
+        expect(mbardiv.length).toEqual(2);  // now, two messages
+        children = mbardiv[1].querySelectorAll("div")        
+        expect(children.length).toEqual(2);
+        expect(children[1].getAttribute("class")).toEqual("syserror");
     });
 
     it('should display a syserror message on demand', () => {
@@ -60,20 +59,21 @@ describe('MessageBarComponent', () => {
         
         let cmpel = fixture.nativeElement;
         let mbardiv = cmpel.querySelectorAll(".messagebar");
+        expect(mbardiv.length).toEqual(1);  // one message
         let children = mbardiv[0].querySelectorAll("div")
-        expect(children.length).toEqual(1);
+        expect(children.length).toEqual(2);
 
-        expect(children[0].getAttribute("class")).toEqual("syserror");
-        expect(children[0].innerHTML).toContain("SuperDang");
-        expect(children[0].innerHTML).toContain("Oops!");
+        expect(children[1].getAttribute("class")).toEqual("syserror");
+        expect(children[1].innerHTML).toContain("SuperDang");
+        expect(children[1].innerHTML).toContain("Oops!");
 
         component.instruct("logout");
         fixture.detectChanges();
         mbardiv = cmpel.querySelectorAll(".messagebar");
-        children = mbardiv[0].querySelectorAll("div")        
+        children = mbardiv[1].querySelectorAll("div")        
         
-        expect(children[0].getAttribute("class")).toEqual("instruction");
-        expect(children[0].innerHTML).toEqual("logout");
+        expect(children[1].getAttribute("class")).toEqual("instruction");
+        expect(children[1].innerHTML).toEqual("logout");
     });
 
     it('should display a warning message on demand', () => {
@@ -83,17 +83,21 @@ describe('MessageBarComponent', () => {
         
         let cmpel = fixture.nativeElement;
         let mbardiv = cmpel.querySelectorAll(".messagebar");
+        expect(mbardiv.length).toEqual(1);  // one message
         let children = mbardiv[0].querySelectorAll("div")
-        expect(children.length).toEqual(1);
+        expect(children.length).toEqual(2);
 
-        expect(children[0].getAttribute("class")).toEqual("warning");
-        expect(children[0].innerHTML).toEqual("Wait!");
+        expect(children[1].getAttribute("class")).toEqual("warning");
+        expect(children[1].innerHTML).toEqual("Wait!");
 
         component.instruct("logout");
         fixture.detectChanges();
+        mbardiv = cmpel.querySelectorAll(".messagebar");
+        expect(mbardiv.length).toEqual(2);  // now, two messages
+        children = mbardiv[1].querySelectorAll("div")        
         
-        expect(children[0].getAttribute("class")).toEqual("instruction");
-        expect(children[0].innerHTML).toEqual("logout");
+        expect(children[1].getAttribute("class")).toEqual("instruction");
+        expect(children[1].innerHTML).toEqual("logout");
     });
 
     it('should display a celebratory message on demand', () => {
@@ -103,17 +107,21 @@ describe('MessageBarComponent', () => {
         
         let cmpel = fixture.nativeElement;
         let mbardiv = cmpel.querySelectorAll(".messagebar");
+        expect(mbardiv.length).toEqual(1);  // one message
         let children = mbardiv[0].querySelectorAll("div")
-        expect(children.length).toEqual(1);
+        expect(children.length).toEqual(2);
 
-        expect(children[0].getAttribute("class")).toEqual("celebration");
-        expect(children[0].innerHTML).toEqual("Yay!");
+        expect(children[1].getAttribute("class")).toEqual("celebration");
+        expect(children[1].innerHTML).toEqual("Yay!");
 
         component.instruct("logout");
         fixture.detectChanges();
+        mbardiv = cmpel.querySelectorAll(".messagebar");
+        expect(mbardiv.length).toEqual(2);  // now, two messages
+        children = mbardiv[1].querySelectorAll("div")        
         
-        expect(children[0].getAttribute("class")).toEqual("instruction");
-        expect(children[0].innerHTML).toEqual("logout");
+        expect(children[1].getAttribute("class")).toEqual("instruction");
+        expect(children[1].innerHTML).toEqual("logout");
     });
 
     it('should display a tip on demand', () => {
@@ -123,17 +131,21 @@ describe('MessageBarComponent', () => {
         
         let cmpel = fixture.nativeElement;
         let mbardiv = cmpel.querySelectorAll(".messagebar");
+        expect(mbardiv.length).toEqual(1);  // one message
         let children = mbardiv[0].querySelectorAll("div")
-        expect(children.length).toEqual(1);
+        expect(children.length).toEqual(2);
 
-        expect(children[0].getAttribute("class")).toEqual("tip");
-        expect(children[0].innerHTML).toEqual("Try it.");
+        expect(children[1].getAttribute("class")).toEqual("tip");
+        expect(children[1].innerHTML).toEqual("Try it.");
 
         component.instruct("logout");
         fixture.detectChanges();
+        mbardiv = cmpel.querySelectorAll(".messagebar");
+        expect(mbardiv.length).toEqual(2);  // now, two messages
+        children = mbardiv[1].querySelectorAll("div")        
         
-        expect(children[0].getAttribute("class")).toEqual("instruction");
-        expect(children[0].innerHTML).toEqual("logout");
+        expect(children[1].getAttribute("class")).toEqual("instruction");
+        expect(children[1].innerHTML).toEqual("logout");
     });
 
     it('should display information on demand', () => {
@@ -143,17 +155,21 @@ describe('MessageBarComponent', () => {
         
         let cmpel = fixture.nativeElement;
         let mbardiv = cmpel.querySelectorAll(".messagebar");
+        expect(mbardiv.length).toEqual(1);  // one message
         let children = mbardiv[0].querySelectorAll("div")
-        expect(children.length).toEqual(1);
+        expect(children.length).toEqual(2);
 
-        expect(children[0].getAttribute("class")).toEqual("information");
-        expect(children[0].innerHTML).toEqual("Good");
+        expect(children[1].getAttribute("class")).toEqual("information");
+        expect(children[1].innerHTML).toEqual("Good");
 
         component.instruct("logout");
         fixture.detectChanges();
+        mbardiv = cmpel.querySelectorAll(".messagebar");
+        expect(mbardiv.length).toEqual(2);  // now, two messages
+        children = mbardiv[1].querySelectorAll("div")        
         
-        expect(children[0].getAttribute("class")).toEqual("instruction");
-        expect(children[0].innerHTML).toEqual("logout");
+        expect(children[1].getAttribute("class")).toEqual("instruction");
+        expect(children[1].innerHTML).toEqual("logout");
     });
 
     it('should display an instruction on demand', () => {
@@ -163,17 +179,56 @@ describe('MessageBarComponent', () => {
         
         let cmpel = fixture.nativeElement;
         let mbardiv = cmpel.querySelectorAll(".messagebar");
+        expect(mbardiv.length).toEqual(1);  // one message
         let children = mbardiv[0].querySelectorAll("div")
-        expect(children.length).toEqual(1);
+        expect(children.length).toEqual(2);
 
-        expect(children[0].getAttribute("class")).toEqual("instruction");
-        expect(children[0].innerHTML).toEqual("Press");
+        expect(children[1].getAttribute("class")).toEqual("instruction");
+        expect(children[1].innerHTML).toEqual("Press");
 
         component.instruct("logout");
         fixture.detectChanges();
+        mbardiv = cmpel.querySelectorAll(".messagebar");
+        expect(mbardiv.length).toEqual(2);  // now, two messages
+        children = mbardiv[1].querySelectorAll("div")        
         
-        expect(children[0].getAttribute("class")).toEqual("instruction");
-        expect(children[0].innerHTML).toEqual("logout");
+        expect(children[1].getAttribute("class")).toEqual("instruction");
+        expect(children[1].innerHTML).toEqual("logout");
+    });
+
+    it('dismiss()', () => {
+        makeComp();
+        component.instruct("Press");
+        component.warn("Now!");
+        fixture.detectChanges();
+
+        let cmpel = fixture.nativeElement;
+        let mbardiv = cmpel.querySelectorAll(".messagebar");
+        expect(mbardiv.length).toEqual(2);  // now, two messages
+
+        // remove the second one
+        component.dismiss(2);
+        mbardiv = cmpel.querySelectorAll(".messagebar");
+        expect(mbardiv.length).toEqual(1);  // now, one message again
+        let children = mbardiv[0].querySelectorAll("div")
+        expect(children.length).toEqual(2);
+        expect(children[1].innerHTML).toEqual("Press");
+    });
+
+    it('dismissAll()', () => {
+        makeComp();
+        component.instruct("Press");
+        component.warn("Now!");
+        fixture.detectChanges();
+
+        let cmpel = fixture.nativeElement;
+        let mbardiv = cmpel.querySelectorAll(".messagebar");
+        expect(mbardiv.length).toEqual(2);  // now, two messages
+
+        // remove the second one
+        component.dismissAll();
+        mbardiv = cmpel.querySelectorAll(".messagebar");
+        expect(mbardiv.length).toEqual(0);  // now, one message again
     });
 
 });

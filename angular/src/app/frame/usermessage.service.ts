@@ -1,8 +1,9 @@
 import { Subject } from 'rxjs';
 
-interface _Message {
+export interface Message {
     type : string;
     text : string;
+    id  ?: any;
 }
 
 /**
@@ -18,7 +19,7 @@ interface _Message {
  */
 export class UserMessageService {
 
-    private msg : Subject<_Message> = new Subject<_Message>();
+    private msg : Subject<Message> = new Subject<Message>();
 
     /*
      * connect a receiver to this service that will display the messages
