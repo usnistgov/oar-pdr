@@ -56,7 +56,7 @@ export class EditControlComponent implements OnInit, OnChanges {
     private _resid : string = null;
     get resID() { return this._resid; }
 
-    @Input() private inBrowser : boolean = false;
+    @Input() inBrowser : boolean = false;
 
     // injected as ViewChilds so that this class can send messages to it with a synchronous method call.
     @ViewChild(EditStatusComponent)
