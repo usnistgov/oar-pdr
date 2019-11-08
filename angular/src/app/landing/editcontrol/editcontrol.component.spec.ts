@@ -183,6 +183,17 @@ fdescribe('EditControlComponent', () => {
         });
     }));
 
-    
+    it('showMessage()', () => {
+        let cmpel = fixture.nativeElement;
+        let edbtn = cmpel.querySelector("#ec-edit-btn") 
+        let mbardiv = cmpel.querySelectorAll(".messagebar");
+        expect(mbardiv.length).toEqual(0);
+
+        component.showMessage("Blah Blah");
+        component.showMessage("Yay!", "celebration");
+        component.showMessage("Huh?", "bewilderment");
+        mbardiv = cmpel.querySelectorAll(".messagebar");
+        expect(mbardiv.length).toEqual(3);
+    });
 });
 

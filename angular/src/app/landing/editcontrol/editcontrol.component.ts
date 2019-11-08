@@ -1,10 +1,11 @@
-import { Component, OnInit, OnChanges, 
-         Input, Output, EventEmitter, Optional, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, OnChanges, ViewChild,
+         Input, Output, EventEmitter, ChangeDetectorRef } from '@angular/core';
 import { Observable, of } from 'rxjs';
 
 import { ConfirmationDialogService } from '../../shared/confirmation-dialog/confirmation-dialog.service';
 import { ConfirmationDialogComponent } from '../../shared/confirmation-dialog/confirmation-dialog.component';
 import { UserMessageService } from '../../frame/usermessage.service';
+import { MessageBarComponent } from '../../frame/messagebar.component';
 import { MetadataUpdateService } from './metadataupdate.service';
 import { AuthService, WebAuthService } from './auth.service';
 import { CustomizationService } from './customization.service';
@@ -28,6 +29,9 @@ export class EditControlComponent implements OnInit, OnChanges {
 
     private _custsvc : CustomizationService = null;
     private _editmode : boolean = false;
+
+    @ViewChild(MessageBarComponent)
+    private msgbar : MessageBarComponent;
 
     /**
      * a flag indicating whether editing mode is turned on (true=yes).  This parameter is 
@@ -72,7 +76,7 @@ export class EditControlComponent implements OnInit, OnChanges {
                        private authsvc : AuthService,
                        private confirmDialogSvc : ConfirmationDialogService,
                        private chgDetRef : ChangeDetectorRef,
-                       @Optional() private msgsvc : UserMessageService)
+                       private msgsvc : UserMessageService)
     {
         this.mdupdsvc._subscribe(
             (md) => {
@@ -241,7 +245,15 @@ export class EditControlComponent implements OnInit, OnChanges {
             );
         });
     }
-    
 
+    /**
+     * send a message to the message bar.  This is provided (currently) mainly for testing purposes.
+     * @param msg    the text of the message
+     * @param type   the type of message it is (tip, error, syserror, information, instruction, 
+     *               warning, or celebration)
+     */
+    public showMessage(msg : string, mtype = "information") {
+        this.msgbar._addMessage(msg, mtype);
+    }
     
 }

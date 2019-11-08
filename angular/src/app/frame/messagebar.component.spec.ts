@@ -2,7 +2,7 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { MessageBarComponent } from './messagebar.component';
 
-fdescribe('MessageBarComponent', () => {
+describe('MessageBarComponent', () => {
     let component : MessageBarComponent;
     let fixture : ComponentFixture<MessageBarComponent>;
 
@@ -207,7 +207,7 @@ fdescribe('MessageBarComponent', () => {
         expect(mbardiv.length).toEqual(2);  // now, two messages
 
         // remove the second one
-        component.dismiss(2);
+        component.dismiss(1);
         mbardiv = cmpel.querySelectorAll(".messagebar");
         expect(mbardiv.length).toEqual(1);  // now, one message again
         let children = mbardiv[0].querySelectorAll("div")

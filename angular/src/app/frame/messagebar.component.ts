@@ -33,7 +33,8 @@ export class MessageBarComponent {
 
     _addMessage(message : string, type ?: string) {
         if (! type) type = "information";
-        this.messages.push({ type: type, text: message, id: ++this.nextid });
+        this.messages.push({ type: type, text: message, id: this.nextid++ });
+        this.chgDetRef.detectChanges();
     }
 
     _msgid(item, i) { return item['id']; }
@@ -43,9 +44,7 @@ export class MessageBarComponent {
      */
     public dismiss(msgid : any) {
         let msg : any;
-        console.log("trying to dismiss message id="+msgid);
         for (let i=0; i < this.messages.length; i++) {
-            console.log("message "+i.toString()+" id="+this.messages[i].id);
             if (this.messages[i].id == msgid) {
                 this.messages.splice(i, 1);
                 this.chgDetRef.detectChanges();
