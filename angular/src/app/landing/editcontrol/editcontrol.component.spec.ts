@@ -39,6 +39,7 @@ describe('EditControlComponent', () => {
 
     beforeEach(async(() => {
         makeComp();
+        component.inBrowser = true;
         fixture.detectChanges();
     }));
 
@@ -85,7 +86,7 @@ describe('EditControlComponent', () => {
             subbtn = cmpel.querySelector("#ec-submit-btn")  
             qedbtn = cmpel.querySelector("#ec-quited-btn")  
             expect(qedbtn.disabled).toBeFalsy();
-            expect(subbtn.disabled).toBeFalsy();
+            expect(subbtn.disabled).toBeTruthy();
             expect(discbtn.disabled).toBeFalsy();
             expect(edbtn).toBeNull();
         });

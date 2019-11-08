@@ -56,6 +56,8 @@ export class EditControlComponent implements OnInit, OnChanges {
     private _resid : string = null;
     get resID() { return this._resid; }
 
+    @Input() private inBrowser : boolean = false;
+
     // injected as ViewChilds so that this class can send messages to it with a synchronous method call.
     @ViewChild(EditStatusComponent)
     private statusbar : EditStatusComponent;
@@ -186,17 +188,17 @@ export class EditControlComponent implements OnInit, OnChanges {
      * pause the editing process: remove the editing widgets from the page so that the user can see how 
      * the changes will appear.  
      */
-    public preview() { }   // TODO
+    public preview() : void { }   // TODO
 
     /**
      * pause the editing process and hide unsaved changes
      */
-    public pauseEditing() { this.editMode = false; }
+    public pauseEditing() : void { this.editMode = false; }
 
     /**
      * return true if there are edits saved that have not be submitted
      */
-    public editsPending() { return true; }
+    public editsPending() : boolean { return Boolean(this.mdupdsvc.lastUpdate); }
 
     /**
      * return true if the user is currently authorized to to edit the resource metadata.

@@ -34,7 +34,8 @@ export class MetadataUpdateService {
 
     /**
      * any Observable that will send out the date of the last update each time the metadata
-     * is updated via this service
+     * is updated via this service.  If the date is an empty string, there are no updates 
+     * pending for submission.  
      */
     public updated : EventEmitter<string> = new EventEmitter<string>();
 
