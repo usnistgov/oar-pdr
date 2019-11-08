@@ -1,11 +1,11 @@
-import { Component, OnInit, OnChanges, ViewChild,
-         Input, Output, EventEmitter, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, OnChanges, ViewChild, Input, Output, EventEmitter } from '@angular/core';
 import { Observable, of } from 'rxjs';
 
 import { ConfirmationDialogService } from '../../shared/confirmation-dialog/confirmation-dialog.service';
 import { ConfirmationDialogComponent } from '../../shared/confirmation-dialog/confirmation-dialog.component';
 import { UserMessageService } from '../../frame/usermessage.service';
 import { MessageBarComponent } from '../../frame/messagebar.component';
+import { EditStatusComponent } from './editstatus.component';
 import { MetadataUpdateService } from './metadataupdate.service';
 import { AuthService, WebAuthService } from './auth.service';
 import { CustomizationService } from './customization.service';
@@ -30,9 +30,6 @@ export class EditControlComponent implements OnInit, OnChanges {
     private _custsvc : CustomizationService = null;
     private _editmode : boolean = false;
 
-    @ViewChild(MessageBarComponent)
-    private msgbar : MessageBarComponent;
-
     /**
      * a flag indicating whether editing mode is turned on (true=yes).  This parameter is 
      * available to a parent template via (editModeChanged).  
@@ -42,7 +39,6 @@ export class EditControlComponent implements OnInit, OnChanges {
         if (this._editmode != engage) {
             this._editmode = engage;
             this.editModeChanged.emit(engage);
-            this.chgDetRef.detectChanges();
         }
     }
     @Output() editModeChanged : EventEmitter<boolean> = new EventEmitter<boolean>();
@@ -60,6 +56,13 @@ export class EditControlComponent implements OnInit, OnChanges {
     private _resid : string = null;
     get resID() { return this._resid; }
 
+    // injected as ViewChilds so that this class can send messages to it with a synchronous method call.
+    @ViewChild(EditStatusComponent)
+    private statusbar : EditStatusComponent;
+
+    @ViewChild(MessageBarComponent)
+    private msgbar : MessageBarComponent;
+    
     /**
      * create the component
      *
@@ -75,7 +78,6 @@ export class EditControlComponent implements OnInit, OnChanges {
     public constructor(private mdupdsvc : MetadataUpdateService,
                        private authsvc : AuthService,
                        private confirmDialogSvc : ConfirmationDialogService,
-                       private chgDetRef : ChangeDetectorRef,
                        private msgsvc : UserMessageService)
     {
         this.mdupdsvc._subscribe(
@@ -86,7 +88,10 @@ export class EditControlComponent implements OnInit, OnChanges {
         );
     }
 
-    ngOnInit() { this.ngOnChanges(); }
+    ngOnInit() {
+        this.ngOnChanges();
+        this.statusbar.showLastUpdate(this.editMode)
+    }
     ngOnChanges() {
         if (! this.resID && this.mdrec)
             this._resid = this.mdrec['ediid'];
@@ -112,7 +117,8 @@ export class EditControlComponent implements OnInit, OnChanges {
     public discardEdits() : void {
         if (this._custsvc) {
             this._custsvc.discardDraft().subscribe(
-                (md) => { 
+                (md) => {
+                    this.mdupdsvc.forgetUpdateDate();
                     this.mdrec = md;
                     this.mdrecChange.emit(md);
                     this.editMode = false;
@@ -153,11 +159,14 @@ export class EditControlComponent implements OnInit, OnChanges {
      */
     public saveEdits() : void {
         if (this._custsvc) {
+            this.statusbar.showMessage("Submitting changes...", true);
             this._custsvc.saveDraft().subscribe( 
                 (md) => { 
+                    this.mdupdsvc.forgetUpdateDate();
                     this.mdrec = md;
                     this.mdrecChange.emit(md);
                     this.editMode = false;
+                    this.statusbar.showLastUpdate(this.editMode)
                 },
                 (err) => {
                     if (err.type == "user")
@@ -165,6 +174,7 @@ export class EditControlComponent implements OnInit, OnChanges {
                     else {
                         this.msgsvc.syserror("error during save: "+err.message);
                     }
+                    this.statusbar.showLastUpdate(this.editMode)
                 }
             );
         }
@@ -220,7 +230,7 @@ export class EditControlComponent implements OnInit, OnChanges {
 
         return new Observable<boolean>(subscriber => {
             console.log("obtaining editing authorization");
-            // TODO: set a status message?
+            this.statusbar.showMessage("Authenticating/authorizing access...", true)
             
             this.authsvc.authorizeEditing(this.resID).subscribe(  // this might cause redirect (see above)
                 (custsvc) => {
@@ -234,6 +244,7 @@ export class EditControlComponent implements OnInit, OnChanges {
                         console.log("authorization granted for user "+this.authsvc.userID);
                     subscriber.next(Boolean(this._custsvc));
                     subscriber.complete();
+                    this.statusbar.showLastUpdate(this.editMode)
                 },
                 (err) => {
                     let msg = "Failure during authorization: "+err.message
@@ -241,6 +252,7 @@ export class EditControlComponent implements OnInit, OnChanges {
                     this.msgsvc.syserror(msg);
                     subscriber.next(false);
                     subscriber.complete();
+                    this.statusbar.showLastUpdate(this.editMode)
                 }
             );
         });

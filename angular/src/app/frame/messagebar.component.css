@@ -3,8 +3,8 @@
     min-height: 2em;
     padding-top: 0.2em;
     font-size: 15px; 
-    background-color: #FCF9CD;
-    border: 1pt solid #EEEEEE;
+    background-color: #EEEEEE;
+    border: 1pt solid #CCCCCC;
     border-radius: 8px;
 }
 .msg-dismiss {

@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { async, ComponentFixture, TestBed, ComponentFixtureAutoDetect } from '@angular/core/testing';
 import { HttpClientModule } from '@angular/common/http';
 
 import { AppConfig } from '../../config/config';
@@ -9,6 +9,7 @@ import { MetadataUpdateService } from './metadataupdate.service';
 import { AuthService, WebAuthService, MockAuthService } from './auth.service';
 import { EditControlComponent } from './editcontrol.component';
 import { EditControlModule } from './editcontrol.module';
+import { CommonModule, DatePipe } from '@angular/common';
 
 import { config, testdata } from '../../../environments/environment';
 
@@ -26,7 +27,7 @@ fdescribe('EditControlComponent', () => {
             providers: [
                 { provide: AppConfig, useValue: cfg },
                 { provide: AuthService, useValue: authsvc },
-                UserMessageService, MetadataUpdateService
+                UserMessageService, MetadataUpdateService, DatePipe
             ]
         }).compileComponents();
 
@@ -48,6 +49,10 @@ fdescribe('EditControlComponent', () => {
         let cmpel = fixture.nativeElement;
         let btns = cmpel.querySelectorAll("button");
         expect(btns.length).toEqual(3);
+
+        let statusdiv = cmpel.querySelector(".ec-status-bar");
+        expect(statusdiv).not.toBeNull();
+        expect(statusdiv.childElementCount).toBe(2);
     });
 
     it('can get authorized', async () => {
@@ -192,6 +197,7 @@ fdescribe('EditControlComponent', () => {
         component.showMessage("Blah Blah");
         component.showMessage("Yay!", "celebration");
         component.showMessage("Huh?", "bewilderment");
+        fixture.detectChanges();
         mbardiv = cmpel.querySelectorAll(".messagebar");
         expect(mbardiv.length).toEqual(3);
     });

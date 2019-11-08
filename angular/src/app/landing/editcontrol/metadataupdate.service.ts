@@ -1,4 +1,5 @@
-import { Injectable } from '@angular/core';
+import { Injectable, EventEmitter } from '@angular/core';
+import { DatePipe } from '@angular/common';
 import { Subject } from 'rxjs';
 
 import { UserMessageService } from '../../frame/usermessage.service';
@@ -24,13 +25,27 @@ export class MetadataUpdateService {
     private mdres : Subject<{}> = new Subject<{}>();
     private custsvc : CustomizationService = null;
 
+    private _lastupdate : string = "";   // empty string means unknown
+    get lastUpdate() { return this._lastupdate; }
+    set lastUpdate(date : string) {
+        this._lastupdate = date;
+        this.updated.emit(this._lastupdate);
+    }
+
+    /**
+     * any Observable that will send out the date of the last update each time the metadata
+     * is updated via this service
+     */
+    public updated : EventEmitter<string> = new EventEmitter<string>();
+
     /**
      * construct the service
      * 
      * @param custsvc   the CustomizationService to use to send updates to the 
      *                  server.  
      */ 
-    constructor(private msgsvc  : UserMessageService)
+    constructor(private msgsvc  : UserMessageService,
+                private datePipe: DatePipe)
     { }
 
     /*
@@ -61,6 +76,7 @@ export class MetadataUpdateService {
             return;
         }
         
+        this.stampUpdateDate();
         this.custsvc.updateMetadata(md).subscribe(
             (res) => {
                 // console.log("Draft data returned from server:\n  ", res)
@@ -110,6 +126,21 @@ export class MetadataUpdateService {
                 }
             }
         );
+    }
+
+    /**
+     * record the current date/time as the last time this data was updated.
+     */
+    public stampUpdateDate() : string {
+        this.lastUpdate = this.datePipe.transform(new Date(), "MMM d, y, h:mm:ss a");
+        return this.lastUpdate;
+    }
+
+    /**
+     * erase the date of last update.  This might be done if the last update was undone. 
+     */
+    public forgetUpdateDate() : void {
+        this.lastUpdate = "";
     }
 
 }

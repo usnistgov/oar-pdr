@@ -1,4 +1,4 @@
-import { Component, Optional, ChangeDetectorRef } from '@angular/core';
+import { Component, Optional } from '@angular/core';
 import { UserMessageService, Message } from './usermessage.service';
 
 /**
@@ -20,8 +20,7 @@ export class MessageBarComponent {
     messages : Message[] = [];
     // bgcolor : string = "#FCF9CD";
 
-    public constructor(private chgDetRef : ChangeDetectorRef,
-                       @Optional() private svc : UserMessageService) {
+    public constructor(@Optional() private svc : UserMessageService) {
         if (svc) {
             svc._subscribe({
                 next: (msg) => {
@@ -31,10 +30,9 @@ export class MessageBarComponent {
         }
     }
 
-    _addMessage(message : string, type ?: string) {
+    _addMessage(message : string, type ?: string) : void {
         if (! type) type = "information";
         this.messages.push({ type: type, text: message, id: this.nextid++ });
-        this.chgDetRef.detectChanges();
     }
 
     _msgid(item, i) { return item['id']; }
@@ -47,7 +45,6 @@ export class MessageBarComponent {
         for (let i=0; i < this.messages.length; i++) {
             if (this.messages[i].id == msgid) {
                 this.messages.splice(i, 1);
-                this.chgDetRef.detectChanges();
                 break;
             }
         }
@@ -58,7 +55,6 @@ export class MessageBarComponent {
      */
     public dismissAll() {
         this.messages.splice(0, this.messages.length);
-        this.chgDetRef.detectChanges();
     }
 
     /**

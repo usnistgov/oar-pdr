@@ -1,4 +1,5 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { CommonModule, DatePipe } from '@angular/common';
 import { of, throwError } from 'rxjs';
 
 import { MetadataUpdateService } from './metadataupdate.service';
@@ -19,11 +20,16 @@ fdescribe('MetadataUpdateService', () => {
         }
     };
 
-    beforeEach(() => {
+    beforeEach(async(() => {
         resmd = null;
-        svc = new MetadataUpdateService(new UserMessageService());
+        TestBed.configureTestingModule({
+            imports: [ CommonModule ],
+            providers: [ DatePipe ]
+        });
+        let dp : DatePipe = TestBed.get(DatePipe);
+        svc = new MetadataUpdateService(new UserMessageService(), dp);
         svc._setCustomizationService(new InMemCustomizationService(rec));
-    });
+    }));
 
     it('returns initial draft metadata', () => {
         var md = null;
