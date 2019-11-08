@@ -14,30 +14,8 @@ import { MetadataUpdateService } from './metadataupdate.service';
  */
 @Component({
     selector: 'pdr-edit-status',
-    template: `
-<div class="ec-status-bar">
-    <span [ngStyle]="{'color': messageColor}">{{message}}</span>
-    <div [hidden]="!isProcessing" style="width: 2em;height:2em; float: right;">
-        <i class="faa faa-spinner faa-spin faa-stack-1x ec-status-spinner"
-            style="width:2em;position: inherit;"></i>
-    </div>
-</div>
-`,
-    styles: [`
-.ec-status-bar {
-    width: 100%;
-    height: 2em; 
-    font-size: 15px; 
-    text-align:right; 
-    background-color: #FCF9CD;
-    padding-right: 2em;
-    padding-top: .3em;
-}
-
-.ec-status-spinner {
-    color: rgb(22, 20, 59);
-}
-`]
+    templateUrl: 'editstatus.component.html',
+    styleUrls: ['editstatus.component.css']
 })
 export class EditStatusComponent implements OnInit {
 
