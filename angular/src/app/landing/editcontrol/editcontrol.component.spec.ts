@@ -13,7 +13,7 @@ import { CommonModule, DatePipe } from '@angular/common';
 
 import { config, testdata } from '../../../environments/environment';
 
-fdescribe('EditControlComponent', () => {
+describe('EditControlComponent', () => {
     let component : EditControlComponent;
     let fixture : ComponentFixture<EditControlComponent>;
     let cfg : AppConfig = new AppConfig(config);

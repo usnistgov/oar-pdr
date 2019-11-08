@@ -8,7 +8,7 @@ import { AppConfig } from '../../config/config';
 
 import { testdata, config } from '../../../environments/environment';
 
-fdescribe('WebAuthService', () => {
+describe('WebAuthService', () => {
 
     let rec = testdata['test1'];
     let cfg = new AppConfig(config);
@@ -29,7 +29,7 @@ fdescribe('WebAuthService', () => {
     });
 });
 
-fdescribe('MockAuthService', () => {
+describe('MockAuthService', () => {
 
     let rec = testdata['test1'];
     let svc : MockAuthService = null;

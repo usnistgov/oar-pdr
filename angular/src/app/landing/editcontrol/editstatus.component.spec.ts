@@ -5,7 +5,7 @@ import { EditStatusComponent } from './editstatus.component';
 import { MetadataUpdateService } from './metadataupdate.service';
 import { UserMessageService } from '../../frame/usermessage.service';
 
-fdescribe('EditStatusComponent', () => {
+describe('EditStatusComponent', () => {
     let component : EditStatusComponent;
     let fixture : ComponentFixture<EditStatusComponent>;
 

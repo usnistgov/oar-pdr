@@ -4,7 +4,7 @@ import { CustomizationService, InMemCustomizationService } from './customization
 
 import { testdata } from '../../../environments/environment';
 
-fdescribe('InMemCustomizationService', () => {
+describe('InMemCustomizationService', () => {
 
     let rec = testdata['test1'];
     let svc : CustomizationService = null;

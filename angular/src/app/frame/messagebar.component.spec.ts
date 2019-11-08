@@ -208,6 +208,7 @@ describe('MessageBarComponent', () => {
 
         // remove the second one
         component.dismiss(1);
+        fixture.detectChanges();
         mbardiv = cmpel.querySelectorAll(".messagebar");
         expect(mbardiv.length).toEqual(1);  // now, one message again
         let children = mbardiv[0].querySelectorAll("div")
@@ -227,6 +228,7 @@ describe('MessageBarComponent', () => {
 
         // remove the second one
         component.dismissAll();
+        fixture.detectChanges();
         mbardiv = cmpel.querySelectorAll(".messagebar");
         expect(mbardiv.length).toEqual(0);  // now, one message again
     });

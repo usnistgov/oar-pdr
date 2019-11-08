@@ -8,7 +8,7 @@ import { CustomizationService, InMemCustomizationService } from './customization
 
 import { testdata } from '../../../environments/environment';
 
-fdescribe('MetadataUpdateService', () => {
+describe('MetadataUpdateService', () => {
 
     let rec = testdata['test1'];
     let resmd : {} = null;
