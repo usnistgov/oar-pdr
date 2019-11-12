@@ -12,6 +12,7 @@ from cgi import parse_qs, escape as escape_qp
 from .. import PublishSystem
 from .serv import (PrePubMetadataService, SIPDirectoryNotFound, IDNotFound,
                    ConfigurationException, StateException, InvalidRequest)
+from . import midasclient as midas
 from ....id import NIST_ARK_NAAN
 
 log = logging.getLogger(PublishSystem().subsystem_abbrev).getChild("mdserv")

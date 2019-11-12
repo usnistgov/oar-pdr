@@ -42,7 +42,7 @@ class TestApp(test.TestCase):
         self.bagparent = self.tf.mkdir("publish")
         self.upldir = os.path.join(self.testsip, "upload")
         self.revdir = os.path.join(self.testsip, "review")
-        config = {
+        self.config = {
             'working_dir':     self.bagparent,
             'review_dir':      self.revdir,
             'upload_dir':      self.upldir,
@@ -55,7 +55,7 @@ class TestApp(test.TestCase):
         }
         self.bagdir = os.path.join(self.bagparent, self.midasid)
 
-        self.svc = wsgi.app(config)
+        self.svc = wsgi.app(self.config)
         self.resp = []
 
     def test_bad_id(self):
@@ -390,6 +390,19 @@ class TestApp(test.TestCase):
         self.assertIn("415", self.resp[0])
         self.assertNotIn('mds4-29sd17', self.resp[0])
 
+    def test_enableMidasClient(self):
+        self.config.update({
+            'update': {
+                'update_to_midas': True,
+                'update_auth_key': '4UPD',
+                'midas_service': {
+                    'service_endpoint': 'https://midas-ut.nist.gov/api',
+                    'auth_key': 'unittest'
+                }
+            }
+        });
+        self.svc = wsgi.app(self.config)
+        self.assertIsNotNone(self.svc._midascl)
 
 
 if __name__ == '__main__':
