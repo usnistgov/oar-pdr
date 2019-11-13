@@ -116,6 +116,12 @@ class TestMIDASClient(test.TestCase):
         
         pod = client.get_pod(ediid)
         self.assertEqual(pod['title'], "Goober!")
+
+    def test_authorized(self):
+        ediid = "ark:/88434/pdr2210"
+        client = midas.MIDASClient(self.cfg)
+        self.assertTrue(client.authorized("super", "pdr2210"));
+        self.assertFalse(client.authorized("anon", "pdr2210"));
         
 
 if __name__ == '__main__':

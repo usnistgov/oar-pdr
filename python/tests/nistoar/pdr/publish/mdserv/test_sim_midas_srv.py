@@ -145,6 +145,22 @@ class TestSimMidasHandler(test.TestCase):
         self.assertIn('last_modified', data)
         self.assertEqual(data['dataset']['identifier'], "ark:/88434/pdr2210")
 
+    def test_user_can_edit(self):
+        req = {
+            'PATH_INFO': '/goob/pdr-2210/super',
+            'REQUEST_METHOD': 'GET'
+        }
+        body = self.svc(req, self.start)
+        self.assertIn("200", self.resp[0]);
+        
+    def test_user_cant_edit(self):
+        req = {
+            'PATH_INFO': '/goob/pdr-2210/anon',
+            'REQUEST_METHOD': 'GET'
+        }
+        body = self.svc(req, self.start)
+        self.assertIn("403", self.resp[0]);
+
     def test_put(self):
         getreq = {
             'PATH_INFO': '/goob/pdr2210',

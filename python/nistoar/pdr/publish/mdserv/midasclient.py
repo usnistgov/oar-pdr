@@ -125,7 +125,8 @@ class MIDASClient(object):
         try:
             data = {"dataset": pod}
             resp = requests.put(self.baseurl+midasrecn, json=data)
-            return self._extract_pod(self._get_json(midasrecn, resp), midasrecn)
+            return self._extract_pod(self._get_json(midasrecn, resp), midasrecn,
+                                     headers=hdrs)
         except requests.RequestException as ex:
             raise MIDASServerError(midasrecn, cause=ex)
 
@@ -134,7 +135,34 @@ class MIDASClient(object):
         return True if the user with the given identifier is authorized to 
         update the record with the given ID.
         """
-        return False
+        midasrecn = midasid2recnum(midasid);
+        url = "{0}/{1}/{2}".format(self.baseurl, midasrecn, userid)
+        hdrs = {}
+        if self._authkey:
+            hdrs['Authorization'] = "Bearer " + self._authkey
+                                   
+        try:
+            resp = requests.get(url, headers=hdrs)
+            if resp.status_code == 200:
+                return True
+            elif resp.status_code == 403:
+                return False
+
+            elif resp.status_code >= 500:
+                raise MIDASServerError(relurl, resp.status_code, resp.reason)
+            elif resp.status_code == 404:
+                raise MIDASRecordNotFound(relurl, resp.reason,
+                                          "ID not found: "+midasid)
+            elif resp.status_code >= 400:
+                raise MIDASClientError(relurl, resp.status_code, resp.reason)
+            else:
+                raise MIDASServerError(relurl, resp.status_code, resp.reason,
+                               message="Unexpected response from server: {0} {1}"
+                                        .format(resp.status_code, resp.reason))
+        except requests.RequestException as ex:
+            raise MIDASServerError(midasrecn, cause=ex)
+
+
 
 
     
