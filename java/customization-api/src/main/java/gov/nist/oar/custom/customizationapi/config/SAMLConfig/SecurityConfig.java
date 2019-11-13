@@ -51,35 +51,10 @@ public class SecurityConfig {
      * Rest security configuration for /api/
      */
     @Configuration
-    @Order(1)
+    @Order(2)
     public static class RestApiSecurityConfig extends WebSecurityConfigurerAdapter {
 	private Logger logger = LoggerFactory.getLogger(RestApiSecurityConfig.class);
 
-//	private static final String apiMatcher = "/api/**";
-//
-//	@Autowired
-//	JWTAuthenticationProvider jwtProvider;
-//
-//	@Override
-//	protected void configure(HttpSecurity http) throws Exception {
-//	    logger.info("Configure REST API security endpoints.");
-////	    http.addFilterBefore(new JWTAuthenticationFilter(authenticationManager()),
-////		    UsernamePasswordAuthenticationFilter.class);
-//	    http.addFilterBefore(new JWTAuthenticationFilter(apiMatcher, authenticationManagerBean()), AbstractAuthenticationProcessingFilter.class);
-//	    http.antMatcher(apiMatcher).authorizeRequests().anyRequest().authenticated();
-//	}
-//
-//	@Override
-//	@Bean
-//	public AuthenticationManager authenticationManagerBean() throws Exception {
-//	    return super.authenticationManagerBean();
-//	}
-//
-//	@Override
-//	protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-//	    auth.authenticationProvider(jwtProvider);
-//	    auth.parentAuthenticationManager(authenticationManagerBean());
-//	}
 	@Value("${jwt.secret:testsecret}")
 	String secret;
 
@@ -87,7 +62,7 @@ public class SecurityConfig {
 
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
-
+	    logger.info("RestApiSecurityConfig HttpSecurity for REST /api endpoints");
 	    http.addFilterBefore(new JWTAuthenticationFilter(apiMatcher, super.authenticationManager()),
 		    UsernamePasswordAuthenticationFilter.class);
 
@@ -108,7 +83,7 @@ public class SecurityConfig {
      * Rest security configuration for /api/
      */
     @Configuration
-    @Order(2)
+    @Order(3)
     public static class AuthSecurityConfig extends WebSecurityConfigurerAdapter {
 	private Logger logger = LoggerFactory.getLogger(AuthSecurityConfig.class);
 
@@ -116,7 +91,7 @@ public class SecurityConfig {
 
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
-	    logger.info("AuthSEcurity Config set up http related entrypoints.");
+	    logger.info("AuthSecurity Config set up http related entrypoints.");
 
 	    http.exceptionHandling().authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED));
 

@@ -18,7 +18,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Timer;
-
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
 import org.apache.commons.httpclient.protocol.Protocol;
@@ -27,8 +26,6 @@ import org.apache.velocity.app.VelocityEngine;
 import org.opensaml.saml2.metadata.provider.MetadataProvider;
 import org.opensaml.saml2.metadata.provider.MetadataProviderException;
 import org.opensaml.saml2.metadata.provider.ResourceBackedMetadataProvider;
-//import org.opensaml.util.resource.ClasspathResource;
-//import org.opensaml.util.resource.Resource;
 import org.opensaml.util.resource.ResourceException;
 import org.opensaml.xml.parse.StaticBasicParserPool;
 import org.slf4j.Logger;
@@ -105,6 +102,7 @@ import gov.nist.oar.custom.customizationapi.service.SamlUserDetailsService;
  * @author Deoyani Nandrekar-Heinis
  */
 @Configuration
+@Order(1)
 public class SecuritySamlConfig extends WebSecurityConfigurerAdapter {
     private static Logger logger = LoggerFactory.getLogger(SecuritySamlConfig.class);
 
@@ -153,7 +151,10 @@ public class SecuritySamlConfig extends WebSecurityConfigurerAdapter {
 	logger.info("Setting up authticated service redirect by setting web sso profiles.");
 	WebSSOProfileOptions webSSOProfileOptions = new WebSSOProfileOptions();
 	webSSOProfileOptions.setIncludeScoping(false);
-	// Relay state can also be set here
+	/// Adding this force authenticate on failure to validate SAML cache
+	webSSOProfileOptions.setForceAuthN(true);
+	// Relay state can also be set here it will always go to this URL once
+	// authenticated
 	// webSSOProfileOptions.setRelayState("https://data.nist.gov/sdp");
 	return webSSOProfileOptions;
     }
@@ -277,7 +278,7 @@ public class SecuritySamlConfig extends WebSecurityConfigurerAdapter {
     }
 
     @Bean
-    public FilterChainProxy samlFilter() throws ConfigurationException {
+    public FilterChainProxy springSecurityFilter() throws ConfigurationException {
 	logger.info("Setting up different saml filters and endpoints");
 	List<SecurityFilterChain> chains = new ArrayList<>();
 
@@ -415,6 +416,7 @@ public class SecuritySamlConfig extends WebSecurityConfigurerAdapter {
 
     /**
      * Logout profile setting.
+     * 
      * @return
      */
     @Bean
@@ -493,6 +495,19 @@ public class SecuritySamlConfig extends WebSecurityConfigurerAdapter {
     }
 
     /**
+     * Set up filter for cross origin requests, here it is read from configserver
+     * and applicationURL is angular application URL
+     * 
+     * @return
+     */
+    @Bean
+    CORSFilter corsFilter() {
+	logger.info("CORS filter setting for application:" + applicationURL);
+	CORSFilter filter = new CORSFilter(applicationURL);
+	return filter;
+    }
+
+    /**
      * These are all http security configurations for different endpoints.
      */
     @Override
@@ -505,32 +520,18 @@ public class SecuritySamlConfig extends WebSecurityConfigurerAdapter {
 
 	    http.csrf().disable();
 
-	    http.addFilterBefore(metadataGeneratorFilter(), ChannelProcessingFilter.class).addFilterAfter(samlFilter(),
-		    BasicAuthenticationFilter.class);
+	    http.addFilterBefore(metadataGeneratorFilter(), ChannelProcessingFilter.class)
+		    .addFilterAfter(springSecurityFilter(), BasicAuthenticationFilter.class);
 
 	    http.authorizeRequests().antMatchers("/error").permitAll().antMatchers("/saml/**").permitAll().anyRequest()
 		    .authenticated();
 
 	    http.logout().logoutSuccessUrl("/");
 
-//        http.cors();
 	} catch (Exception e) {
 	    throw new ConfigurationException("Exception in SAML security config for HttpSecurity," + e.getMessage());
 	}
 
-    }
-
-    /**
-     * Set up filter for cross origin requests, here it is read from configserver
-     * and applicationURL is angular application URL
-     * 
-     * @return
-     */
-    @Bean
-    CORSFilter corsFilter() {
-	logger.info("CORS filter setting for application:" + applicationURL);
-	CORSFilter filter = new CORSFilter(applicationURL);
-	return filter;
     }
 
 //  private Timer backgroundTaskTimer;
