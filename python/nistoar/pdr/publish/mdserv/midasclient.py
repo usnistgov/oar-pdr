@@ -124,9 +124,9 @@ class MIDASClient(object):
         midasrecn = midasid2recnum(midasid)
         try:
             data = {"dataset": pod}
-            resp = requests.put(self.baseurl+midasrecn, json=data)
-            return self._extract_pod(self._get_json(midasrecn, resp), midasrecn,
-                                     headers=hdrs)
+            resp = requests.put(self.baseurl+midasrecn, json=data,
+                                headers=hdrs)
+            return self._extract_pod(self._get_json(midasrecn, resp), midasrecn)
         except requests.RequestException as ex:
             raise MIDASServerError(midasrecn, cause=ex)
 
