@@ -1,10 +1,12 @@
 import { async, TestBed } from '@angular/core/testing';
 import { HttpClientModule, HttpClient } from '@angular/common/http';
+import { TransferState } from '@angular/platform-browser';
 import { of, throwError } from 'rxjs';
 
-import { AuthService, WebAuthService, MockAuthService } from './auth.service';
+import { AuthService, WebAuthService, MockAuthService, createAuthService } from './auth.service';
 import { CustomizationService } from './customization.service';
 import { AppConfig } from '../../config/config';
+import { AngularEnvironmentConfigService } from '../../config/config.service';
 
 import { testdata, config } from '../../../environments/environment';
 
@@ -29,13 +31,13 @@ describe('WebAuthService', () => {
     });
 });
 
-describe('MockAuthService', () => {
+fdescribe('MockAuthService', () => {
 
     let rec = testdata['test1'];
     let svc : MockAuthService = null;
 
     beforeEach(() => {
-        svc = new MockAuthService(rec);
+        svc = new MockAuthService();
     });
 
     it('init state', () => {
@@ -50,3 +52,28 @@ describe('MockAuthService', () => {
     });
 });
 
+fdescribe('createAuthService()', () => {
+    let httpcli : HttpClient = null;
+    let cfg : AppConfig;
+    let plid : Object = "browser";
+    let ts : TransferState = new TransferState();
+
+    beforeEach(async(() => {
+        TestBed.configureTestingModule({
+            imports: [ HttpClientModule ]
+        });
+        httpcli = TestBed.get(HttpClient);
+        cfg = (new AngularEnvironmentConfigService(plid, ts)).getConfig();
+    }));
+    
+    it('supports dev mode', () => {
+        let as : AuthService = createAuthService(cfg, httpcli, true);
+        expect(as instanceof MockAuthService).toBeTruthy();
+    });
+
+    it('supports prod mode', () => {
+        let as : AuthService = createAuthService(cfg, httpcli, false);
+        expect(as instanceof WebAuthService).toBeTruthy();
+    });
+
+});

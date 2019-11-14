@@ -5,6 +5,7 @@ import { Observable, of, throwError, Subscriber } from 'rxjs';
 import { AppConfig } from '../../config/config';
 import { CustomizationService, WebCustomizationService, InMemCustomizationService, 
          SystemCustomizationError, ConnectionCustomizationError } from './customization.service';
+import * as ngenv from '../../../environments/environment';
 
 /**
  * a container for authorization and authentication information that is obtained
@@ -251,16 +252,29 @@ export class MockAuthService extends AuthService {
     
     set userID(id : string) { this._userid = id; }
 
+    private resdata : {} = {};
+
     /**
      * construct the authorization service
      *
      * @param resmd      the original resource metadata 
      * @param userid     the ID of the user; default "anon"
      */
-    constructor(private resmd : any, userid ?: string) {
+    constructor(userid ?: string) {
         super();
         if (userid === undefined) userid = "anon";
         this.userID = userid;
+
+        if (! ngenv.testdata)
+            throw new Error("No test data encoded into angular environment");
+        if (Object.keys(ngenv.testdata).length < 0)
+            console.warn("No NERDm records included in the angular environment");
+
+        // load resource metadata lookup by ediid
+        for (let key of Object.keys(ngenv.testdata)) {
+            if (ngenv.testdata[key]['ediid']) 
+                this.resdata[ngenv.testdata[key]['ediid']] = ngenv.testdata[key];
+        }
     }
 
     /**
@@ -276,12 +290,15 @@ export class MockAuthService extends AuthService {
      * associated with the given ID.
      */
     public authorizeEditing(resid : string) : Observable<CustomizationService> {
+        // REMOVE THIS when MetadataService is available
+        resid = "26DEA39AD677678AE0531A570681F32C1449";
+        
         // simulate logging in with a redirect 
         if (! this.userID) this.loginUser();
-        if (resid != this.resmd['ediid'])
+        if (! this.resdata[resid])
             return of<CustomizationService>(null);
 
-        return of<CustomizationService>(new InMemCustomizationService(this.resmd));
+        return of<CustomizationService>(new InMemCustomizationService(this.resdata[resid]));
     }
 
     /**
@@ -294,5 +311,36 @@ export class MockAuthService extends AuthService {
         if (! this._userid) this._userid = "anon";
         window.location.replace(redirectURL);
     }
+}
+
+/**
+ * create an AuthService based on the runtime context.
+ * 
+ * This factory function determines whether the application has access to a customization 
+ * web service (e.g. in production mode under oar-docker).  In this case, it will return 
+ * a AuthService configured to use the service.  In a development runtime context, where 
+ * the app is running standalone without such access, a mock service is returned.  
+ * 
+ * Which type of AuthService is returned is determined by the value of 
+ * context.useCustomizationService from the angular environment (i.e. 
+ * src/environments/environment.ts).  A value of false assumes a develoment context.
+ */
+export function createAuthService(config : AppConfig, httpClient : HttpClient, devmode ?: boolean)
+    : AuthService
+{
+    if (devmode === undefined)
+        devmode = Boolean(ngenv['context'] || ngenv['context']['useCustomizationService']);
+        
+    if (! devmode) {
+        // production mode
+        console.log("Will use configured customization web service");
+        return new WebAuthService(config, httpClient);
+    }
+
+    // dev mode
+    if (! ngenv['context'])
+        console.warn("Warning: angular environment is missing context data");
+    console.log("Using mock AuthService/CustomizationService");
+    return new MockAuthService();
 }
 

@@ -168,6 +168,10 @@ export class WebCustomizationService extends CustomizationService {
 
     /**
      * commit the changes in the draft to the saved version
+     *
+     * @return Observable<Object> -- on success, the subscriber's success (next) function is 
+     *                   passed the Object representing the full draft metadata record.  On 
+     *                   failure, error function is called with an instance of a CustomizationError.
      */
     public saveDraft() : Observable<Object> {
 

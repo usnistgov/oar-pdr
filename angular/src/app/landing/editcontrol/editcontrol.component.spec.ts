@@ -13,12 +13,12 @@ import { CommonModule, DatePipe } from '@angular/common';
 
 import { config, testdata } from '../../../environments/environment';
 
-describe('EditControlComponent', () => {
+fdescribe('EditControlComponent', () => {
     let component : EditControlComponent;
     let fixture : ComponentFixture<EditControlComponent>;
     let cfg : AppConfig = new AppConfig(config);
     let rec = testdata['test1'];
-    let authsvc : AuthService = new MockAuthService(rec)
+    let authsvc : AuthService = new MockAuthService()
 
     let makeComp = function() {
         TestBed.configureTestingModule({
