@@ -11,6 +11,8 @@ import { RouterTestingModule } from '@angular/router/testing';
 import { DatePipe } from '@angular/common';
 import { ToastrModule } from 'ngx-toastr';
 import { GoogleAnalyticsService } from '../../shared/ga-service/google-analytics.service';
+import { MetadataUpdateService } from '../editcontrol/metadataupdate.service';
+import { UserMessageService } from '../../frame/usermessage.service';
 
 describe('ContactComponent', () => {
     let component: ContactComponent;
@@ -30,8 +32,8 @@ describe('ContactComponent', () => {
             declarations: [ContactComponent],
             schemas: [NO_ERRORS_SCHEMA],
             providers: [
+                MetadataUpdateService, UserMessageService, DatePipe,
                 SharedService,
-                DatePipe,
                 GoogleAnalyticsService,
                 { provide: AppConfig, useValue: cfg }]
         })

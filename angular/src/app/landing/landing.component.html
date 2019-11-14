@@ -21,8 +21,7 @@
                             <app-author [record]="record" [inBrowser]="inBrowser"></app-author>
                         </div>
                         <div class="ui-g-8 ui-md-8 ui-lg-8 ui-sm-12">
-                            <app-contact [record]="record" [originalRecord]="originalRecord" [inBrowser]="inBrowser"
-                                [fieldObject]="fieldObject"></app-contact>
+                            <app-contact [record]="record" [inBrowser]="inBrowser"></app-contact>
 
                             <span *ngIf="isId">Identifier: </span>
                             <span *ngIf="isDOI"><i> <a class="font14" href="{{doiUrl}}"

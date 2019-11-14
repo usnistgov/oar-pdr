@@ -1,7 +1,6 @@
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { NgbModalOptions, NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { AuthorPopupComponent } from './author-popup/author-popup.component';
-import { TaxonomyListService } from '../../shared/taxonomy-list/taxonomy-list.service';
 import { NotificationService } from '../../shared/notification-service/notification.service';
 import { MetadataUpdateService } from '../editcontrol/metadataupdate.service';
 
@@ -17,7 +16,6 @@ export class AuthorComponent implements OnInit {
     tempInput: any = {};
 
     constructor(public mdupdsvc : MetadataUpdateService,        
-                private taxonomyListService: TaxonomyListService,
                 private ngbModal: NgbModal,
                 private notificationService: NotificationService)
     { }
