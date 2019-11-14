@@ -17,8 +17,7 @@
                                 <p-menu #menu3 class="rightMenuStylePop" popup="popup" [model]="rightmenu"></p-menu>
                             </div>
                             <br>
-                            <app-title [record]="record" [originalRecord]="originalRecord" [inBrowser]="inBrowser"
-                                [fieldObject]="fieldObject"></app-title>
+                            <app-title [record]="record" [inBrowser]="inBrowser"></app-title>
                             <app-author [record]="record" [originalRecord]="originalRecord" [inBrowser]="inBrowser"
                                 [fieldObject]="fieldObject"></app-author>
                         </div>
@@ -95,8 +94,7 @@
                     <div class="ui-g">
                         <div class="ui-g-12 ui-md-12 ui-lg-12 ui-sm-12">
                             <div [hidden]="metadata">
-                                <app-description [record]="record" [originalRecord]="originalRecord"
-                                    [inBrowser]="inBrowser" [fieldObject]="fieldObject"></app-description>
+                                <app-description [record]="record" [inBrowser]="inBrowser"></app-description>
                             </div>
                             <app-topic [record]="record" [originalRecord]="originalRecord" [inBrowser]="inBrowser"
                                 [fieldObject]="fieldObject"></app-topic>

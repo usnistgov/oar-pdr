@@ -4,11 +4,12 @@ import { TitleComponent } from './title.component';
 import { AppConfig } from '../../config/config';
 import { AngularEnvironmentConfigService } from '../../config/config.service';
 import { TransferState } from '@angular/platform-browser';
-import { SharedService } from '../../shared/shared';
 import { FormsModule } from '@angular/forms';
 import { RouterTestingModule } from '@angular/router/testing';
 import { DatePipe } from '@angular/common';
 import { ToastrModule } from 'ngx-toastr';
+import { MetadataUpdateService } from '../editcontrol/metadataupdate.service';
+import { UserMessageService } from '../../frame/usermessage.service';
 
 describe('TitleComponent', () => {
     let component: TitleComponent;
@@ -27,9 +28,9 @@ describe('TitleComponent', () => {
             imports: [FormsModule, HttpClientModule, RouterTestingModule, ToastrModule.forRoot()],
             declarations: [TitleComponent],
             providers: [
-                SharedService,
-                DatePipe,
-                { provide: AppConfig, useValue: cfg }]
+                MetadataUpdateService, UserMessageService, DatePipe,
+                { provide: AppConfig, useValue: cfg }
+            ]
         })
             .compileComponents();
     }));

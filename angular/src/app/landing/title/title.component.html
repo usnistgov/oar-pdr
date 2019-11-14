@@ -2,7 +2,7 @@
     <div class="editable_container">
         <div class="editable_field" *ngIf="!record['title']; else hasTitle">
             <span class="title">
-                <h2 [ngStyle]="getFieldStyle()">{{record.title}}</h2>
+                <h2 [ngStyle]="getFieldStyle()"><i style="color: #cccccc;">No title set</i></h2>
             </span>
         </div>
         <ng-template #hasTitle>
@@ -11,13 +11,13 @@
                     {{record.title}}</h2>
             </div>
         </ng-template>
-        <button class="edit_button" *ngIf="recordEditmode" type="button" (click)="openModal('title')">
+        <button class="edit_button" *ngIf="mdupdsvc.editMode" type="button" (click)="openModal('title')">
             <i class="faa faa-pencil icon_enabled" data-toggle="tooltip" title="Edit title"></i>
         </button>
-        <button class="undo_button" *ngIf="recordEditmode" type="button" [disabled]="!fieldObject['title'].edited"
-            (click)="undoEditing('title')">
+        <button class="undo_button" *ngIf="mdupdsvc.editMode" type="button" [disabled]="!updated"
+            (click)="undoEditing()">
             <i class="faa faa-undo"
-                [ngClass]="{'icon_enabled': fieldObject['title'].edited, 'icon_disabled':!fieldObject['title'].edited }"
+                [ngClass]="{'icon_enabled': updated, 'icon_disabled': !updated }"
                 data-toggle="tooltip" title="Undo title"></i>
         </button>
     </div>

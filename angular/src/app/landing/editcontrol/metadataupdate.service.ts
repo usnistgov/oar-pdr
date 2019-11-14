@@ -117,8 +117,8 @@ export class MetadataUpdateService {
             if (! this.origfields[subsetname]) 
                 this.origfields[subsetname] = {};
             for (let prop in md) {
-                if (! this.origfields[subsetname][prop]) {
-                    if (this.originalRec[prop])
+                if (this.origfields[subsetname][prop] === undefined) {
+                    if (this.originalRec[prop] === undefined)
                         this.origfields[subsetname][prop] = this.originalRec[prop]; 
                     else 
                         this.origfields[subsetname][prop] = null;   // TODO: problematic; need to clean-up nulls

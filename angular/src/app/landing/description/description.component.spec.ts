@@ -30,8 +30,7 @@ describe('DescriptionComponent', () => {
             imports: [FormsModule, HttpClientModule, RouterTestingModule, ToastrModule.forRoot()],
             declarations: [DescriptionComponent],
             providers: [
-                SharedService, MetadataUpdateService, UserMessageService,
-                DatePipe,
+                MetadataUpdateService, UserMessageService, DatePipe,
                 { provide: AppConfig, useValue: cfg }]
         })
             .compileComponents();
@@ -41,7 +40,6 @@ describe('DescriptionComponent', () => {
         fixture = TestBed.createComponent(DescriptionComponent);
         component = fixture.componentInstance;
         component.record = require('../../../assets/sampleRecord.json');
-        component.originalRecord = require('../../../assets/sampleRecord.json');
         fixture.detectChanges();
     });
 

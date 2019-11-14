@@ -99,10 +99,10 @@ export class EditControlComponent implements OnInit, OnChanges {
         this.statusbar.showLastUpdate(this.editMode)
     }
     ngOnChanges() {
-        if (this.mdrec) {
+        if (this.mdrec instanceof Object && Object.keys(this.mdrec).length > 0) {
             if (! this.resID)
                 this._resid = this.mdrec['ediid'];
-            if (! this.originalRecord) {
+            if (this.originalRecord === null) {
                 this.originalRecord = this._deepCopy(this.mdrec);
                 this.mdupdsvc._setOriginalMetadata(this.originalRecord)
             }

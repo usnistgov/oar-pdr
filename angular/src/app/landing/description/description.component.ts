@@ -11,17 +11,15 @@ import { MetadataUpdateService } from '../editcontrol/metadataupdate.service';
 })
 export class DescriptionComponent implements OnInit {
     @Input() record: any[];
-    @Input() originalRecord: any[];
     @Input() inBrowser: boolean;   // false if running server-side
-    @Input() fieldObject: any;
-
-    tempInput: any = {};
     fieldName: string = 'description';
 
     constructor(public mdupdsvc : MetadataUpdateService,        
                 private ngbModal: NgbModal,                      
                 private notificationService: NotificationService)
     { }
+
+    get updated() { return this.mdupdsvc.fieldUpdated(this.fieldName); }
 
     ngOnInit() {
     }
@@ -47,8 +45,12 @@ export class DescriptionComponent implements OnInit {
 
         const modalRef = this.ngbModal.open(DescriptionPopupComponent, ngbModalOptions);
 
+        let val = "";
+        if (this.record[this.fieldName])
+            val = this.record[this.fieldName].join('\n\n');
+
         modalRef.componentInstance.inputValue = { };
-        modalRef.componentInstance.inputValue[this.fieldName] = this.record[this.fieldName].join('\n\n');
+        modalRef.componentInstance.inputValue[this.fieldName] = val;
         modalRef.componentInstance['field'] = this.fieldName;
         modalRef.componentInstance['title'] = this.fieldName.toUpperCase();
 
