@@ -1,4 +1,4 @@
-import { Component, Optional } from '@angular/core';
+import { Component, Optional, Input } from '@angular/core';
 import { UserMessageService, Message } from './usermessage.service';
 
 /**
@@ -18,6 +18,8 @@ export class MessageBarComponent {
 
     private nextid = 0;
     messages : Message[] = [];
+
+    @Input() defSysErrorPrefix : string = "There was an internal hiccup.";
     // bgcolor : string = "#FCF9CD";
 
     public constructor(@Optional() private svc : UserMessageService) {
@@ -30,9 +32,9 @@ export class MessageBarComponent {
         }
     }
 
-    _addMessage(message : string, type ?: string) : void {
+    _addMessage(message : string, type ?: string, prefix : string = "") : void {
         if (! type) type = "information";
-        this.messages.push({ type: type, text: message, id: this.nextid++ });
+        this.messages.push({ type: type, text: message, prefix: prefix, id: this.nextid++ });
     }
 
     _msgid(item, i) { return item['id']; }
@@ -106,8 +108,11 @@ export class MessageBarComponent {
     /*
      * Report a system error.  Use this to inform the user of error conditions due to 
      * unexpected conditions that are not the fault of the user.  
+     * 
+     * @param mesage   A technical (perhaps non-user oriented) explanation of the error
+     * @param prefix   An optional, extra explanation that is expected to be more user-oriented.
      */
-    public syserror(message : string) : void {
+    public syserror(message : string, prefix ?: string) : void {
         this._addMessage(message, "syserror");
     }
 }

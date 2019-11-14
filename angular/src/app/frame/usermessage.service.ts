@@ -4,6 +4,7 @@ export interface Message {
     type : string;
     text : string;
     id  ?: any;
+    prefix ?: string;
 }
 
 /**
@@ -74,11 +75,17 @@ export class UserMessageService {
         this.msg.next({ type: "error", text: message });
     }
 
-    /*
+    /**
      * Report a system error.  Use this to inform the user of error conditions due to 
      * unexpected conditions that are not the fault of the user.  
+     * 
+     * @param mesage   A technical (perhaps non-user oriented) explanation of the error
+     * @param prefix   An optional, extra explanation that is expected to be more user-oriented.
      */
-    public syserror(message : string) : void {
-        this.msg.next({ type: "syserror", text: message });
+    public syserror(message : string, prefix ?: string) : void {
+        let out : Message = { type: "syserror", text: message };
+        if (prefix)
+            out['prefix'] = prefix
+        this.msg.next(out);
     }
 }

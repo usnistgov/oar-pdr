@@ -138,11 +138,12 @@ export class MetadataUpdateService {
                     // err will be a subtype of CustomizationError
                     if (err.type == 'user') {
                         console.error("Failed to save metadata changes: user error:" + err);
-                        this.msgsvc.error(err.message)
+                        this.msgsvc.error(err.message);
                     }
                     else {
                         console.error("Failed to save metadata changes: server/system error:" + err);
-                        this.msgsvc.syserror(err.message)
+                        this.msgsvc.syserror(err.message,
+                                             "There was an problem while updating the "+subsetname+". ");
                     }
                     resolve(false);
                 }
@@ -194,7 +195,8 @@ export class MetadataUpdateService {
                         }
                         else {
                             console.error("Failed to undo metadata changes: server/system error:" + err);
-                            this.msgsvc.syserror(err.message)
+                            this.msgsvc.syserror(err.message,
+                                     "There was an problem while undoing changes to the "+subsetname+". ")
                         }
                         resolve(false);
                     }
@@ -219,7 +221,8 @@ export class MetadataUpdateService {
                         }
                         else {
                             console.error("Failed to undo metadata changes: server/system error:" + err);
-                            this.msgsvc.syserror(err.message)
+                            this.msgsvc.syserror(err.message,
+                                     "There was an problem while undoing changes to the "+subsetname+". ")
                         }
                         resolve(false);
                     }
