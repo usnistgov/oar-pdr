@@ -1,5 +1,4 @@
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
-import { CustomizationService } from '../../shared/customization-service/customization-service.service';
 import { NgbModalOptions, NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { DescriptionPopupComponent } from '../description/description-popup/description-popup.component';
 import { NotificationService } from '../../shared/notification-service/notification.service';

@@ -1,14 +1,11 @@
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
-import { CustomizationService } from '../../shared/customization-service/customization-service.service';
 import { NgbModalOptions, NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { SharedService } from '../../shared/shared';
 import { SearchTopicsComponent } from './topic-popup/search-topics.component';
-import { EditControlService } from '../edit-control-bar/edit-control.service';
 import { NotificationService } from '../../shared/notification-service/notification.service';
 import { TreeNode } from 'primeng/primeng';
 import { TaxonomyListService } from '../../shared/taxonomy-list';
-import { DatePipe } from '@angular/common';
-import { ErrorHandlingService } from '../../shared/error-handling-service/error-handling.service';
+import { MetadataUpdateService } from '../editcontrol/metadataupdate.service';
+import { UserMessageService } from '../../frame/usermessage.service';
 
 @Component({
     selector: 'app-topic',
@@ -17,29 +14,36 @@ import { ErrorHandlingService } from '../../shared/error-handling-service/error-
 })
 export class TopicComponent implements OnInit {
     @Input() record: any[];
-    @Input() originalRecord: any[];
     @Input() inBrowser: boolean;   // false if running server-side
-    @Input() fieldObject: any;
-
-    recordEditmode: boolean = false;
-    tempInput: any = {};
     fieldName = 'topic';
+
     taxonomyTree: TreeNode[] = [];
     taxonomyList: any[];
 
-    constructor(
-        private customizationService: CustomizationService,
-        private ngbModal: NgbModal,
-        private editControlService: EditControlService,
-        private notificationService: NotificationService,
-        private taxonomyListService: TaxonomyListService,
-        private datePipe: DatePipe,
-        private errorHandlingService: ErrorHandlingService,
-        private sharedService: SharedService
-    ) {
-        this.editControlService.watchEditMode().subscribe(value => {
-            this.recordEditmode = value;
-        });
+    constructor(public mdupdsvc : MetadataUpdateService,        
+                private taxonomyListService: TaxonomyListService,
+                private ngbModal: NgbModal,
+                private msgsvc : UserMessageService,
+                private notificationService: NotificationService)
+    { }
+
+    /**
+     * a field indicating if this data has beed edited
+     */
+    get updated() { return this.mdupdsvc.fieldUpdated(this.fieldName); }
+
+    /**
+     * a field indicating whether there are no keywords are set.  
+     */
+    get isEmpty() {
+        if (! this.record[this.fieldName])
+            return true;
+        if (this.record[this.fieldName] instanceof Array &&
+            this.record[this.fieldName].map(topic => {
+                return topic.tag;
+            }).filter(topic => topic.length > 0).length == 0)
+            return true;
+        return false;
     }
 
     ngOnInit() {
@@ -52,13 +56,14 @@ export class TopicComponent implements OnInit {
                 this.taxonomyList.push({ "taxonomy": result[i].label });
             }
         }, (err) => {
-            this.onUpdateError(err, "Error Laoding taxonomy list", "Laod taxonomy list");
+            this.msgsvc.syserror(err.toString());
+            // this.onUpdateError(err, "Error Laoding taxonomy list", "Laod taxonomy list");
         });
     }
 
     /*
-*   build taxonomy tree
-*/
+     *   build taxonomy tree
+     */
     buildTaxonomyTree(result: any) {
         let allTaxonomy: any = result;
         var tempTaxonomyTree = {}
@@ -119,10 +124,9 @@ export class TopicComponent implements OnInit {
         return tree;
     }
 
-
     getFieldStyle() {
-        if (this.recordEditmode) {
-            if (this.customizationService.dataEdited(this.record[this.fieldName], this.originalRecord[this.fieldName])) {
+        if (this.mdupdsvc.editMode) {
+            if (this.mdupdsvc.fieldUpdated(this.fieldName)) {
                 return { 'border': '1px solid lightgrey', 'background-color': '#FCF9CD', 'padding-right': '1em' };
             } else {
                 return { 'border': '1px solid lightgrey', 'background-color': 'white', 'padding-right': '1em' };
@@ -133,9 +137,7 @@ export class TopicComponent implements OnInit {
     }
 
     openModal() {
-        if (!this.recordEditmode) return;
-
-        let i: number;
+        if (! this.mdupdsvc.editMode) return;
 
         let ngbModalOptions: NgbModalOptions = {
             backdrop: 'static',
@@ -143,119 +145,50 @@ export class TopicComponent implements OnInit {
             windowClass: "myCustomModalClass"
         };
 
-        this.tempInput[this.fieldName] = this.sharedService.getBlankField(this.fieldName);
-        var tempTopics = [];
-        if (this.record['topic'] != null && this.record['topic'].length > 0) {
-            for (i = 0; i < this.record['topic'].length; i++) {
-                tempTopics.push(this.record['topic'][i].tag);
-            }
-        }
-        this.tempInput[this.fieldName] = tempTopics;
-
         const modalRef = this.ngbModal.open(SearchTopicsComponent, ngbModalOptions);
 
-        modalRef.componentInstance.inputValue = this.tempInput;
+        let val : string[] = [];
+        if (this.record[this.fieldName])
+            val = this.record[this.fieldName].map((topic) => { return topic.tag; });
+
+        modalRef.componentInstance.inputValue = { };
+        modalRef.componentInstance.inputValue[this.fieldName] = val;
         modalRef.componentInstance['field'] = this.fieldName;
-        modalRef.componentInstance['title'] = this.fieldName.toUpperCase();
+        modalRef.componentInstance['title'] = "RESEARCH TOPICS";
         // console.log("this.taxonomyTree @@@", this.taxonomyTree);
         modalRef.componentInstance.taxonomyTree = this.taxonomyTree;
 
         modalRef.componentInstance.returnValue.subscribe((returnValue) => {
             if (returnValue) {
-                var strtempTopics: string = '';
-                var tempTopicsForUpdate: any = [];
-                var lTempTopics: any[] = [];
-
-                for (var i = 0; i < returnValue["topic"].length; ++i) {
-                    strtempTopics = strtempTopics + returnValue["topic"][i];
-                    lTempTopics.push({ '@type': 'Concept', 'scheme': 'https://www.nist.gov/od/dm/nist-themes/v1.0', 'tag': returnValue["topic"][i] });
-                }
-                returnValue["topic"] = this.sharedService.deepCopy(lTempTopics);
-
                 var postMessage: any = {};
-                postMessage[this.fieldName] = returnValue[this.fieldName];
-                console.log("postMessage", JSON.stringify(postMessage));
+                postMessage[this.fieldName] = returnValue[this.fieldName].map((topic) => { return {
+                    '@type': 'Concept',
+                    'scheme': 'https://www.nist.gov/od/dm/nist-themes/v1.0',
+                    'tag': topic,
+                };});
+                // console.log("postMessage", JSON.stringify(postMessage));
 
-                this.customizationService.update(JSON.stringify(postMessage)).subscribe(
-                    result => {
-                        this.record[this.fieldName] = this.sharedService.deepCopy(returnValue[this.fieldName]);
-                        this.editControlService.setDataChanged(true);
-                        this.onUpdateSuccess();
-                    },
-                    err => {
-                        this.onUpdateError(err, "Error updating topic", "Update topic");
-                    });
+                this.mdupdsvc.update(this.fieldName, postMessage).then((updateSuccess) => {
+                    // console.log("###DBG  update sent; success: "+updateSuccess.toString());
+                    if (updateSuccess)
+                        this.notificationService.showSuccessWithTimeout("Research topics updated.", "", 3000);
+                    else
+                        console.error("acknowledge topic update failure");
+                });
             }
         })
-    }
-
-    /*
-     * When update successful
-     */
-    onUpdateSuccess() {
-        this.fieldObject[this.fieldName]["edited"] = (JSON.stringify(this.record[this.fieldName]) != JSON.stringify(this.originalRecord[this.fieldName]));
-        var updateDate = this.datePipe.transform(new Date(), "MMM d, y, h:mm:ss a");
-        this.customizationService.checkDataChanges(this.record, this.originalRecord, this.fieldObject, updateDate);
-        this.notificationService.showSuccessWithTimeout("Author updated.", "", 3000);
-    }
-
-    /*
-     * When update failed
-     */
-    onUpdateError(err: any, message: string, action: string) {
-        this.errorHandlingService.setErrMessage({ message: message, messageDetail: err.message, action: action, display: true });
-        // this.setErrorMessage.emit({ error: err, displayError: true, action: action });
     }
 
     /*
      *  Undo editing. If no more field was edited, delete the record in staging area.
      */
     undoEditing() {
-        var noMoreEdited = true;
-        console.log("this.fieldObject", this.fieldObject);
-        for (var fld in this.fieldObject) {
-            if (this.fieldName != fld && this.fieldObject[fld].edited) {
-                noMoreEdited = false;
-                break;
-            }
-        }
-
-        if (noMoreEdited) {
-            console.log("Deleting...");
-            this.customizationService.delete().subscribe(
-                (res) => {
-                    if (this.originalRecord[this.fieldName] == undefined)
-                        delete this.record[this.fieldName];
-                    else
-                        this.record[this.fieldName] = this.sharedService.deepCopy(this.originalRecord[this.fieldName]);
-
-                    this.onUpdateSuccess();
-                },
-                (err) => {
-                    this.onUpdateError(err, "Error undo editing", "Undo editing - delete");
-                }
-            );
-        } else {
-            var body: string;
-            if (this.originalRecord[this.fieldName] == undefined) {
-                body = '{"' + this.fieldName + '":""}';
-            } else {
-                body = '{"' + this.fieldName + '":' + JSON.stringify(this.originalRecord[this.fieldName]) + '}';
-            }
-
-            this.customizationService.update(body).subscribe(
-                result => {
-                    if (this.originalRecord[this.fieldName] == undefined)
-                        delete this.record[this.fieldName];
-                    else
-                        this.record[this.fieldName] = this.sharedService.deepCopy(this.originalRecord[this.fieldName]);
-
-                    this.onUpdateSuccess();
-                },
-                err => {
-                    this.onUpdateError(err, "Error undo editing", "Undo editing");
-                });
-        }
+        this.mdupdsvc.undo(this.fieldName).then((success) => {
+            if (success)
+                this.notificationService.showSuccessWithTimeout("Reverted changes to keywords.", "", 3000);
+            else
+                console.error("Failed to undo keywords metadata")
+        });
     }
 
     /**
