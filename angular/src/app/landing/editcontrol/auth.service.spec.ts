@@ -31,7 +31,7 @@ describe('WebAuthService', () => {
     });
 });
 
-fdescribe('MockAuthService', () => {
+describe('MockAuthService', () => {
 
     let rec = testdata['test1'];
     let svc : MockAuthService = null;
@@ -52,7 +52,7 @@ fdescribe('MockAuthService', () => {
     });
 });
 
-fdescribe('createAuthService()', () => {
+describe('createAuthService()', () => {
     let httpcli : HttpClient = null;
     let cfg : AppConfig;
     let plid : Object = "browser";

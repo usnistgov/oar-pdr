@@ -1,6 +1,4 @@
-<edit-controls *ngIf="editEnabled"></edit-controls>
-<edit-status-bar *ngIf="editEnabled"></edit-status-bar>
-<error-message *ngIf="editEnabled"></error-message>
+<pdr-edit-control *ngIf="editEnabled" [inBrowser]="inBrowser" [(mdrec)]="record"></pdr-edit-control>
 
 <div class="ui-grid ui-grid-responsive ui-grid-pad center" style="border: 0px solid white;">
     <div class="card landingcard">

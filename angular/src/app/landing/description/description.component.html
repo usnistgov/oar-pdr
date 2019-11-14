@@ -3,7 +3,7 @@
     <div class="editable_container">
         <div class="editable_field" style="width:100%;"
             *ngIf="!record['description'] || record['description'].length==0; else hasDescription">
-            <div class="nist-card" *ngIf="recordEditmode" style="width:inherit;"
+            <div class="nist-card" *ngIf="mdupdsvc.editMode" style="width:inherit;"
                 [ngStyle]="getFieldStyle()">
                 Click edit (pencil) button to add description.
             </div>
@@ -17,10 +17,10 @@
                 </div>
             </div>
         </ng-template>
-        <button class="edit_button" *ngIf="recordEditmode" type="button" (click)="openModal()">
+        <button class="edit_button" *ngIf="mdupdsvc.editMode" type="button" (click)="openModal()">
             <i class="faa faa-pencil icon_enabled" data-toggle="tooltip" title="Edit description"></i>
         </button>
-        <button class="undo_button" *ngIf="recordEditmode" type="button" [disabled]="!fieldObject.description.edited"
+        <button class="undo_button" *ngIf="mdupdsvc.editMode" type="button" [disabled]="!fieldObject.description.edited"
             (click)="undoEditing('description')">
             <i class="faa faa-undo"
                 [ngClass]="{'icon_enabled': fieldObject.description.edited, 'icon_disabled':!fieldObject.description.edited}"

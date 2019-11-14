@@ -28,6 +28,7 @@ import { CustomizationService } from './customization.service';
 export class EditControlComponent implements OnInit, OnChanges {
 
     private _custsvc : CustomizationService = null;
+    private originalRecord : any = null;
     private _editmode : boolean = false;
 
     /**
@@ -38,6 +39,7 @@ export class EditControlComponent implements OnInit, OnChanges {
     set editMode(engage : boolean) {
         if (this._editmode != engage) {
             this._editmode = engage;
+            this.mdupdsvc.editMode = this._editmode;
             this.editModeChanged.emit(engage);
         }
     }
@@ -84,8 +86,10 @@ export class EditControlComponent implements OnInit, OnChanges {
     {
         this.mdupdsvc._subscribe(
             (md) => {
-                this.mdrec = md;
-                this.mdrecChange.emit(md);
+                if (md && md != this.mdrec) {
+                    this.mdrec = md;
+                    this.mdrecChange.emit(md);
+                }
             }
         );
     }
@@ -95,8 +99,14 @@ export class EditControlComponent implements OnInit, OnChanges {
         this.statusbar.showLastUpdate(this.editMode)
     }
     ngOnChanges() {
-        if (! this.resID && this.mdrec)
-            this._resid = this.mdrec['ediid'];
+        if (this.mdrec) {
+            if (! this.resID)
+                this._resid = this.mdrec['ediid'];
+            if (! this.originalRecord) {
+                this.originalRecord = this._deepCopy(this.mdrec);
+                this.mdupdsvc._setOriginalMetadata(this.originalRecord)
+            }
+        }
     }
 
     /**
@@ -268,6 +278,10 @@ export class EditControlComponent implements OnInit, OnChanges {
      */
     public showMessage(msg : string, mtype = "information") {
         this.msgbar._addMessage(msg, mtype);
+    }
+
+    private _deepCopy(obj : {}|[]|string|boolean|number) : {}|[]|string|boolean|number {
+        return JSON.parse(JSON.stringify(obj));
     }
     
 }

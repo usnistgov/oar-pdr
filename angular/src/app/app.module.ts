@@ -29,6 +29,7 @@ import { ToastrModule } from 'ngx-toastr';
 import { NgModule } from '@angular/core';
 import { HttpClientModule } from '@angular/common/http';
 import { FrameModule } from './frame/frame.module';
+import { UserMessageService } from './frame/usermessage.service';
 import { ConfigModule } from './config/config.module';
 import { AppRoutingModule } from './app-routing.module';
 import { DataTableModule } from 'primeng/primeng';
@@ -47,7 +48,6 @@ import { AuthorPopupComponent } from './landing/author/author-popup/author-popup
 import { ContactPopupComponent } from './landing/contact/contact-popup/contact-popup.component';
 
 
-import { ConfirmationDialogComponent } from './shared/confirmation-dialog/confirmation-dialog.component';
 enableProdMode();
 
 import { SearchService } from './shared/search-service/index';
@@ -76,7 +76,7 @@ import { fakeBackendProvider } from './_helpers/fakeBackendInterceptor';
     AuthorPopupComponent, ContactPopupComponent,
     ErrorComponent, UserErrorComponent,ComboBoxComponent,ComboBoxPipe,
     AppShellNoRenderDirective, AppShellRenderDirective, ModalComponent, ContenteditableModel, 
-    ConfirmationDialogComponent,LandingAboutComponent
+    LandingAboutComponent
   ],
   imports: [
       HttpClientModule,
@@ -115,6 +115,7 @@ import { fakeBackendProvider } from './_helpers/fakeBackendInterceptor';
     ConfirmationDialogService,
     NotificationService,
     DatePipe,
+    UserMessageService,  
     // provider used to create fake backend
     fakeBackendProvider
   ],
@@ -122,8 +123,8 @@ import { fakeBackendProvider } from './_helpers/fakeBackendInterceptor';
     SearchTopicsComponent, 
     DescriptionPopupComponent, 
     AuthorPopupComponent,
-    ContactPopupComponent,
-    ConfirmationDialogComponent],
+    ContactPopupComponent
+  ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA]
 })
 
