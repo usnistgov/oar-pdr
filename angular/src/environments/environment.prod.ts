@@ -11,7 +11,8 @@ export const environment = {
 import { LPSConfig } from '../app/config/config';
 
 export const context = {
-    production: true
+    production: true,
+    useCustomizationService: true
 };
 
 export const config : LPSConfig = {
