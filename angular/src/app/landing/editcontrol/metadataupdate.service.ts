@@ -301,4 +301,13 @@ export class MetadataUpdateService {
             return JSON.stringify(currentData) != JSON.stringify(Originaldata);
         }
     }
+
+    /**
+     * update the local (browser-side) metadata with the the original metadata from the last
+     * time the metadata was committed.  This will not update the draft that exists in the 
+     * customization service.  
+     */
+    public showOriginalMetadata() {
+        this.mdres.next(this.originalRec);
+    }
 }

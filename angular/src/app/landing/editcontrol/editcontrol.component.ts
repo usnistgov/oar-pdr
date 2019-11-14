@@ -198,12 +198,29 @@ export class EditControlComponent implements OnInit, OnChanges {
      * pause the editing process: remove the editing widgets from the page so that the user can see how 
      * the changes will appear.  
      */
-    public preview() : void { }   // TODO
+    public preview() : void {
+        this.editMode = false;
+        if (this.editsPending())
+            this.statusbar.showMessage('Click "Submit" to commit your changes '+
+                                       'or "Edit" to make more changes.');
+        else
+            this.statusbar.showLastUpdate(this.editMode);
+    }  
 
     /**
      * pause the editing process and hide unsaved changes
      */
-    public pauseEditing() : void { this.editMode = false; }
+    public pauseEditing() : void {
+        this.editMode = false;
+
+        if (this.editsPending())
+            this.statusbar.showMessage('Click "Submit" to commit your changes '+
+                                       'or "Edit" to make more changes.');
+        else
+            this.statusbar.showLastUpdate(this.editMode);
+
+        this.mdupdsvc.showOriginalMetadata();
+    }
 
     /**
      * return true if there are edits saved that have not be submitted
