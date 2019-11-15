@@ -297,7 +297,7 @@ export function createMetadataService(platid : Object, endpoint : string, httpCl
         console.log("Will load NERDm record from embedded JSON");
         return new TransferMetadataService(mdtrx);
     }
-    else if (ngenv.context.useMetadataService) {
+    else if (ngenv.context['useMetadataService']) {
         console.log("Will load NERDm records from remote web service: " + endpoint);
         svc = new RemoteWebMetadataService(endpoint, httpClient);
     }

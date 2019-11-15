@@ -37,6 +37,7 @@ import { DataTableModule } from 'primeng/primeng';
 import { ContenteditableModel } from './directives/contenteditable-model.directive';
 import { LandingModule } from './landing/landing.module';
 
+import { ErrorComponent, UserErrorComponent } from './landing/error.component';
 import { DatacartComponent } from './datacart/datacart.component';
 import { ModalComponent } from './directives';
 import { ComboBoxComponent } from './shared/combobox/combo-box.component';
@@ -75,7 +76,7 @@ import { fakeBackendProvider } from './_helpers/fakeBackendInterceptor';
     AppComponent, DatacartComponent,
     SearchTopicsComponent, DescriptionPopupComponent, 
     AuthorPopupComponent, ContactPopupComponent,
-    ComboBoxComponent,ComboBoxPipe,
+    ErrorComponent, UserErrorComponent,ComboBoxComponent,ComboBoxPipe,
     AppShellNoRenderDirective, AppShellRenderDirective, ModalComponent, ContenteditableModel, 
     LandingAboutComponent
   ],
