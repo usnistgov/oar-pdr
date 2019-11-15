@@ -22,7 +22,7 @@
 
     <!-- 
       -  Edit button:  when editing is off, the Edit button will show; if it is on, the
-      -  "Quit Edit" button will show in its place
+      -  "Preview" button will show in its place
       -->
     <button *ngIf="! editMode" type="button" class="btn btn-labeled" (click)="startEditing()" id="ec-edit-btn"
             style="float:right;margin:.5em 1em .5em 0em;">
@@ -31,11 +31,11 @@
               style="padding-right:10px;">Edit</span>
     </button>
 
-    <button *ngIf="editMode" type="button" class="btn btn-labeled" (click)="pauseEditing()" id="ec-quited-btn"
+    <button *ngIf="editMode" type="button" class="btn btn-labeled" (click)="preview()" id="ec-quited-btn"
             style="float:right;margin:.5em 1em .5em 0em;">
         <span class="btn-label" style="border: 0px solid rgb(221, 172, 9);left: -15px;"><i
               class="faa faa-sign-out faa-1x icon-white"></i></span><span 
-              style="padding-right:10px;">Quit Edit</span>
+              style="padding-right:10px;">Preview</span>
     </button>
 </div>
 

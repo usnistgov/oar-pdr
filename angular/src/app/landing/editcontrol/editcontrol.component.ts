@@ -196,7 +196,7 @@ export class EditControlComponent implements OnInit, OnChanges {
 
     /**
      * pause the editing process: remove the editing widgets from the page so that the user can see how 
-     * the changes will appear.  
+     * the changes will appear.  This function is called when the "Preview" button is clicked.
      */
     public preview() : void {
         this.editMode = false;
@@ -208,7 +208,8 @@ export class EditControlComponent implements OnInit, OnChanges {
     }  
 
     /**
-     * pause the editing process and hide unsaved changes
+     * pause the editing process and hide unsaved changes.  This function is called when the 
+     * "Quit Edit" button is clicked.
      */
     public pauseEditing() : void {
         this.editMode = false;
