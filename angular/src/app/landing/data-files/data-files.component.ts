@@ -31,7 +31,6 @@ declare var _initAutoTracker: Function;
 export class DataFilesComponent {
 
   @Input() record: any[];
-  @Input() originalRecord: any[];
   @Input() files: TreeNode[];
   @Input() editContent: boolean;
   @Input() metadata: boolean;

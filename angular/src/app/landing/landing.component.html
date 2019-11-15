@@ -78,7 +78,7 @@
                                         (click)="visitHomePage(record.landingPage, $event, 'Resource title: '+record.title)"
                                         pButton type="submit"
                                         style="float:right;margin:.5em 1em .5em 0em;width:200px; height:2em; background-color:#1471AE;color:white;padding-right: 1em;"
-                                        [disabled]="recordEditmode">
+                                        [disabled]="mdupdsvc.editMode">
                                         <i class="faa faa-external-link"
                                             style="color: #fff;padding-left: .5em;padding-right: .5em;"></i>
                                         Visit Home Page
@@ -97,7 +97,7 @@
                             <app-topic [record]="record" [inBrowser]="inBrowser"></app-topic>
                             <app-keyword [record]="record" [inBrowser]="inBrowser"></app-keyword>
                             <p></p>
-                            <description-resources [record]="record" [originalRecord]="originalRecord" [files]="files"
+                            <description-resources [record]="record" [files]="files"
                                 [metadata]="metadata" [inBrowser]="inBrowser"></description-resources>
                             <metadata-detail [record]="record" [serviceApi]="serviceApi" [inBrowser]="inBrowser"
                                 [metadata]="metadata">

@@ -9,30 +9,27 @@ import 'rxjs/add/operator/map';
 import { AppConfig } from '../config/config';
 import { PLATFORM_ID, APP_ID, Inject } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
-import { SharedService } from '../shared/shared';
 import { SearchService } from '../shared/search-service/index';
 import { tap } from 'rxjs/operators';
 import { isPlatformServer } from '@angular/common';
 import { makeStateKey, TransferState } from '@angular/platform-browser';
-import { AuthService } from '../shared/auth-service/auth.service';
 import { trigger, state, style, animate, transition } from '@angular/animations';
 import { ModalService } from '../shared/modal-service';
 import { AuthorPopupComponent } from './author/author-popup/author-popup.component';
 import { NgbModalOptions, NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ContactPopupComponent } from './contact/contact-popup/contact-popup.component';
 import { SearchTopicsComponent } from './topic/topic-popup/search-topics.component';
-import { CustomizationService } from '../shared/customization-service/customization-service.service';
 import { GoogleAnalyticsService } from '../shared/ga-service/google-analytics.service';
 import { HttpClient } from '@angular/common/http';
 import { DescriptionPopupComponent } from './description/description-popup/description-popup.component';
 import { DataFilesComponent } from './data-files/data-files.component';
 import { ConfirmationDialogService } from '../shared/confirmation-dialog/confirmation-dialog.service';
 import { NotificationService } from '../shared/notification-service/notification.service';
-import { ApiToken } from "../shared/auth-service/ApiToken";
 import { TaxonomyListService } from '../shared/taxonomy-list';
 import { DatePipe } from '@angular/common';
-import { EditControlService } from './edit-control-bar/edit-control.service';
 import { ErrorHandlingService } from '../shared/error-handling-service/error-handling.service';
+
+import { MetadataUpdateService } from './editcontrol/metadataupdate.service';
 
 declare var _initAutoTracker: Function;
 
@@ -113,7 +110,6 @@ export class LandingComponent implements OnInit {
     status: string;
     searchValue: string;
     record: any = [];
-    originalRecord: any = [];
     keyword: string;
     findId: string;
     leftmenu: MenuItem[];
@@ -141,25 +137,14 @@ export class LandingComponent implements OnInit {
     navigationSubscription: any;
     ediid: any;
     displayDatacart: boolean = false;
-    isLocalProcessing: boolean = false;
-    recordEditmode: boolean = false;
-    titleEditable: boolean = false;
-    isAuthenticated: boolean = false;
     currentMode: string = 'initial';
-    tempContactPoint: any;
-    tempAuthors: any = {};
-    tempDecription: string;
-    tempInput: any = {};
     organizationList: string[] = ["National Institute of Standards and Technology"]
     HomePageLink: boolean = false;
     inBrowser: boolean = false;
     isVisible: boolean;
-    fieldObject: any = {};
     taxonomyTree: TreeNode[] = [];
     taxonomyList: any[];
-    editEnabled: any;
-    updateDate: string;
-    dataChanged: boolean = false;
+    editEnabled: boolean;
     doiUrl: string = "";
     recordType: string = "";
 
@@ -178,97 +163,37 @@ export class LandingComponent implements OnInit {
         @Inject(APP_ID) private appId: string,
         private transferState: TransferState,
         public searchService: SearchService,
-        private sharedService: SharedService,
+        public mdupdsvc : MetadataUpdateService,
         private gaService: GoogleAnalyticsService,
-        private authService: AuthService,
         private ngbModal: NgbModal,
         private modalService: ModalService,
-        private customizationService: CustomizationService,
-        private http: HttpClient,
         private confirmationDialogService: ConfirmationDialogService,
         private notificationService: NotificationService,
         private taxonomyListService: TaxonomyListService,
-        private editControlService: EditControlService,
         private errorHandlingService: ErrorHandlingService,
-        private datePipe: DatePipe) {
-        this.fieldObject['title'] = {};
-        this.fieldObject['authors'] = {};
-        this.fieldObject['contactPoint'] = {};
-        this.fieldObject['description'] = {};
-        this.fieldObject['topic'] = {};
-        this.fieldObject['keyword'] = {};
+        private datePipe: DatePipe)
+    {
         this.inBrowser = isPlatformBrowser(platformId);
-        this.tempContactPoint = {
-            "fn": "",
-            "email": "",
-            "address": [
-                ""
-            ]
-        };
-        var newAuthor = this.sharedService.getBlankAuthor();
-        this.tempAuthors['authors'] = newAuthor;
+
         this.searchValue = this.route.snapshot.paramMap.get('id');
 
-        this.customizationService.watchRecordEdited().subscribe(value => {
-            this.dataChanged = value;
-        });
-
-        this.editEnabled = cfg.get("editEnabled", "");
-    }
-
-    /*
-    * Check if user is logged in.
-    */
-    loggedIn() {
-        return this.authService.authenticated();
+        this.editEnabled = cfg.get("editEnabled", false) as boolean;
     }
 
     /**
      * Get the params OnInit
      */
     ngOnInit() {
-        this.authService.removeToken();
-        this.authService.removeUserId();
-        this.authService.setAuthenticateStatus(false);
         // this.loadPubData();
-
-        this.editControlService.watchEditButtonClick().subscribe(value => {
-            this.setRecordEditmode(value);
-        });
-    }
-
-    /*
-     * Update the meesage in the status bar
-     */
-    updateMessage(processing: boolean, msg?: string) {
-        console.log("Set message:", msg);
-        // this.customizationService.setUpdateDate(this.updateDate);
-        if (msg != null && msg != undefined && msg != "") {
-            this.editControlService.setMessage(msg);
-        } else {
-            this.editControlService.setMessage("");
-        }
-        this.editControlService.setIsProcessing(processing);
+        this.loadSavedData();
     }
 
     dataInit() {
-        for (var field in this.fieldObject) {
-            this.fieldObject[field] = this.editingObjectInit();
-        }
         if (this.router.url.includes("ark"))
             this.searchValue = this.router.url.split("/id/").pop();
 
         this.ediid = this.searchValue;
 
-        this.editControlService.setEdiid(this.searchValue);
-
-        //Check draft data status if this is intpdr
-        if (this.editEnabled) {
-            this.updateDate = this.customizationService.getUpdateDate();
-            if (this.updateDate != undefined && this.updateDate != null && this.updateDate != "") {
-                this.customizationService.setRecordEdited(true);
-            }
-        }
         this.files = [];
     }
 
@@ -277,22 +202,16 @@ export class LandingComponent implements OnInit {
      *  It loads from mdAPI.
      */
     loadSavedData() {
-        this.updateMessage(true, "Loading...");
         this.dataInit();
         this.searchService.getData(this.searchValue)
             .subscribe((res) => {
                 this.onSuccess(res).then(function (result) {
-                    // Make a copy of original pub data (for undo purpose)
-                    this.originalRecord = this.sharedService.deepCopy(this.record);
                     console.log("record", this.record);
-                    this.updateMessage(false);
                 }.bind(this), function (err) {
                     alert("something went wrong while fetching the data.");
-                    this.updateMessage(false);
                 });
             }, (err) => {
                 this.setErrorForDisplay(err, "There was an error in searchservice.", "Load saved data");
-                this.updateMessage(false);
             });
     }
 
@@ -339,18 +258,6 @@ export class LandingComponent implements OnInit {
     //             );
     //     }
     // }
-
-    /*
-    *   Init object - edit buttons for animation purpose
-    */
-    editingObjectInit() {
-        var editingObject = {
-            "detailEditmode": false,
-            "edited": false
-        }
-
-        return editingObject;
-    }
 
     /*
       Function after view init
@@ -436,9 +343,12 @@ export class LandingComponent implements OnInit {
         //this.msgs.push({severity:'error', summary:this.errorMsgDetail + ':', detail:this.status + ' - ' + this.exception});
     }
 
-    turnSpinnerOff() {
-        setTimeout(() => { this.sharedService.setContentReady(true); }, 0)
-    }
+    // deprecated?
+    // This spinner appears within the EditControlComponenet only when editing is enabled
+    // 
+    // turnSpinnerOff() {
+    //     setTimeout(() => { this.sharedService.setContentReady(true); }, 0)
+    // }
 
     viewmetadata() {
         this.metadata = true; 
@@ -468,7 +378,9 @@ export class LandingComponent implements OnInit {
         this.distdownload = this.cfg.get("distService", "/od/ds/") + "zip?id=" + this.record['@id'];
 
         var itemsMenu: MenuItem[] = [];
-        var metadata = this.createMenuItem("Export JSON", "faa faa-file-o", (event) => { this.turnSpinnerOff(); }, this.serviceApi);
+        var metadata = this.createMenuItem("Export JSON", "faa faa-file-o",
+                                           "",   /* (event) => { this.turnSpinnerOff(); }, */
+                                           this.serviceApi);
         let authlist = "";
 
         if (this.record['authors']) {
@@ -552,7 +464,7 @@ export class LandingComponent implements OnInit {
 
     goToSelection(isMetadata: boolean, isSimilarResources: boolean, sectionId: string) {
         this.metadata = isMetadata; this.similarResources = isSimilarResources;
-        this.turnSpinnerOff();
+        // this.turnSpinnerOff();
         this.router.navigate(['/od/id/', this.searchValue], { fragment: sectionId });
         this.useFragment();
     }
@@ -805,109 +717,8 @@ export class LandingComponent implements OnInit {
     }
 
     /*
-    *  Set record level edit mode (for the edit button at top)
-    */
-    setRecordEditmode(editMode: boolean) {
-        // Clear error diaplay
-        this.displayError = false;
-        console.log('this.inBrowser', this.inBrowser);
-        var auService = this.authService;
-        if (editMode) {
-            if (this.inBrowser) {
-                if (this.authService.authorized()) {
-                    //If user already logged in, load draft data
-                    this.loadDraftData(editMode).then(
-                        (resolve) => {
-                            console.log("LoadDraft success.");
-                            this.editControlService.setEditMode(true);
-                        },
-                        (reject) => {
-                            console.log("LoadDraft failed.");
-                            this.editControlService.setEditMode(false);                            
-                        }
-                    );
-                } else {
-                    //If user not logged in, force user login then load draft data. If login failed, do nothing
-                    this.authService.loginUser()
-                        .subscribe(
-                            res => {
-                                console.log("User logged in. Response:", res);
-                                auService.handleTokenSuccess(res);
-                                this.loadDraftData(editMode).then(
-                                    (resolve) => {
-                                        console.log("LoadDraft success.");
-                                        this.editControlService.setMessage("");
-                                        this.editControlService.setEditMode(true);
-                                    },
-                                    (reject) => {
-                                        console.log("LoadDraft failed.");
-                                        this.editControlService.setEditMode(false);                      this.loadSavedData();      
-                                    }
-                                );
-                            },
-                            error => {
-                                console.log("Login err:", error);
-                                this.setErrorForDisplay(error, "There was an error logging in.", "Authenticate user");
-                                this.authService.handleTokenError(error);
-                            }
-                        )
-                }
-            } else {
-                //If in server side, do nothing
-            }
-        } else {
-            this.loadSavedData();
-            this.recordEditmode = editMode;
-            this.editControlService.setEditMode(editMode);
-        }
-    }
-
-    /*
-    *  Load draft data
-    */
-    loadDraftData(editMode: boolean) {
-        this.updateMessage(true, "Loading...");
-        this.dataInit();
-
-        var promise = new Promise((resolve, reject) => {
-            setTimeout(() => {
-                this.customizationService.getDraftData()
-                    .subscribe((res) => {
-                        console.log("**** Draft data return:", res);
-                        if (res != undefined && res != null) {
-
-                            this.onSuccess(res).then(function (result) {
-                                if (res._updateDate) {
-                                    this.updateDate = res._updateDate;
-                                    this.customizationService.setUpdateDate(res._updateDate);
-                                }
-                                this.sharedService.setContentReady(true);
-                                this.sharedService.setRefreshTree(true);
-                                this.customizationService.checkDataChanges(this.record, this.originalRecord, this.fieldObject);
-                                this.recordEditmode = editMode;
-                                // this.editControlService.setEditMode(editMode);
-                                this.updateMessage(false);
-                                resolve();
-                            }.bind(this), function (err) {
-                                alert("something went wrong while fetching draft data.");
-                                reject();
-                            });
-                        }
-                    }, (err) => {
-                        console.log("Error", err);
-                        this.setErrorForDisplay(err, "There was an error getting draft data.", "Load draft data");
-                        this.updateMessage(false);
-                        console.log("Rejecting............");
-                        reject();
-                    })
-            }, 1000);
-        });
-        return promise;
-    }
-
-    /*
-    *   This function is used to track ngFor loop
-    */
+     *   This function is used to track ngFor loop
+     */
     trackByFn(index: any, author: any) {
         return index;
     }

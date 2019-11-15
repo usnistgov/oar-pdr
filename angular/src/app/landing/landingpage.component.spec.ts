@@ -20,7 +20,7 @@ import * as mock from '../testing/mock.services';
 import {RouterTestingModule} from "@angular/router/testing";
 import { testdata } from '../../environments/environment';
 
-fdescribe('LandingPageComponent', () => {
+xdescribe('LandingPageComponent', () => {
     let component : LandingPageComponent;
     let fixture : ComponentFixture<LandingPageComponent>;
     let cfg : AppConfig;
