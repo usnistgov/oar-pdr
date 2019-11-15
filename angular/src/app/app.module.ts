@@ -28,6 +28,7 @@ import { ProgressBarModule } from 'primeng/progressbar';
 import { ToastrModule } from 'ngx-toastr';
 import { NgModule } from '@angular/core';
 import { HttpClientModule } from '@angular/common/http';
+import { ErrorsModule, AppErrorHandler } from './errors/errors.module';
 import { FrameModule } from './frame/frame.module';
 import { UserMessageService } from './frame/usermessage.service';
 import { ConfigModule } from './config/config.module';
@@ -36,11 +37,11 @@ import { DataTableModule } from 'primeng/primeng';
 import { ContenteditableModel } from './directives/contenteditable-model.directive';
 import { LandingModule } from './landing/landing.module';
 
-import { ErrorComponent, UserErrorComponent } from './landing/error.component';
 import { DatacartComponent } from './datacart/datacart.component';
 import { ModalComponent } from './directives';
 import { ComboBoxComponent } from './shared/combobox/combo-box.component';
 import { AppComponent } from './app.component';
+import { LandingPageModule } from './landing/landingpage.module';
 import { LandingAboutComponent } from './landingAbout/landingAbout.component';
 import { SearchTopicsComponent } from './landing/topic/topic-popup/search-topics.component';
 import { DescriptionPopupComponent } from './landing/description/description-popup/description-popup.component';
@@ -74,7 +75,7 @@ import { fakeBackendProvider } from './_helpers/fakeBackendInterceptor';
     AppComponent, DatacartComponent,
     SearchTopicsComponent, DescriptionPopupComponent, 
     AuthorPopupComponent, ContactPopupComponent,
-    ErrorComponent, UserErrorComponent,ComboBoxComponent,ComboBoxPipe,
+    ComboBoxComponent,ComboBoxPipe,
     AppShellNoRenderDirective, AppShellRenderDirective, ModalComponent, ContenteditableModel, 
     LandingAboutComponent
   ],
@@ -82,6 +83,8 @@ import { fakeBackendProvider } from './_helpers/fakeBackendInterceptor';
       HttpClientModule,
       ConfigModule,        // provider for AppConfig
       FrameModule,
+      ErrorsModule,
+      LandingPageModule,
       AppRoutingModule,
       LandingModule,
       FragmentPolyfillModule.forRoot({
@@ -97,6 +100,9 @@ import { fakeBackendProvider } from './_helpers/fakeBackendInterceptor';
   ],
   exports: [],
   providers: [
+      AppErrorHandler,
+      { provide: ErrorHandler,  useClass: AppErrorHandler },
+
     Title,
     Meta,
     SearchService,
@@ -117,7 +123,7 @@ import { fakeBackendProvider } from './_helpers/fakeBackendInterceptor';
     DatePipe,
     UserMessageService,  
     // provider used to create fake backend
-    fakeBackendProvider
+    // fakeBackendProvider
   ],
   entryComponents: [
     SearchTopicsComponent, 

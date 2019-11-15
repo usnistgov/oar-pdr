@@ -1,4 +1,4 @@
-import { Component, OnInit, ElementRef, HostListener } from '@angular/core';
+import { Component, OnInit, OnChanges, ElementRef, Input, Inject, APP_ID, HostListener } from '@angular/core';
 import { Title, Meta } from '@angular/platform-browser';
 import { ActivatedRoute, Router, NavigationEnd } from '@angular/router';
 import { TreeNode } from 'primeng/primeng';
@@ -7,12 +7,8 @@ import { Observable, of } from 'rxjs';
 import * as _ from 'lodash';
 import 'rxjs/add/operator/map';
 import { AppConfig } from '../config/config';
-import { PLATFORM_ID, APP_ID, Inject } from '@angular/core';
-import { isPlatformBrowser } from '@angular/common';
-import { SearchService } from '../shared/search-service/index';
+import { NerdmRes } from '../nerdm/nerdm';
 import { tap } from 'rxjs/operators';
-import { isPlatformServer } from '@angular/common';
-import { makeStateKey, TransferState } from '@angular/platform-browser';
 import { trigger, state, style, animate, transition } from '@angular/animations';
 import { ModalService } from '../shared/modal-service';
 import { AuthorPopupComponent } from './author/author-popup/author-popup.component';
@@ -25,9 +21,8 @@ import { DescriptionPopupComponent } from './description/description-popup/descr
 import { DataFilesComponent } from './data-files/data-files.component';
 import { ConfirmationDialogService } from '../shared/confirmation-dialog/confirmation-dialog.service';
 import { NotificationService } from '../shared/notification-service/notification.service';
-import { TaxonomyListService } from '../shared/taxonomy-list';
 import { DatePipe } from '@angular/common';
-import { ErrorHandlingService } from '../shared/error-handling-service/error-handling.service';
+// import { ErrorHandlingService } from '../shared/error-handling-service/error-handling.service';
 
 import { MetadataUpdateService } from './editcontrol/metadataupdate.service';
 
@@ -98,18 +93,15 @@ function compare_histories(a, b) {
     styleUrls: ['./landing.component.css']
 })
 
-export class LandingComponent implements OnInit {
+export class LandingComponent implements OnInit, OnChanges {
     layoutCompact: boolean = true;
     layoutMode: string = 'horizontal';
     profileMode: string = 'inline';
     // msgs: Message[] = [];
-    exception: string;
-    errorMsg: string;
-    errorMsgDetail: string;
-    displayError: boolean = false;
+    // errorMsg: string;
+    // errorMsgDetail: string;
+    // displayError: boolean = false;  // deprecated?
     status: string;
-    searchValue: string;
-    record: any = [];
     keyword: string;
     findId: string;
     leftmenu: MenuItem[];
@@ -117,12 +109,9 @@ export class LandingComponent implements OnInit {
     similarResources: boolean = false;
     similarResourcesResults: any[] = [];
     selectedFile: TreeNode;
-    isDOI = false;
-    isEmail = false;
     citeString: string = '';
     type: string = '';
     process: any[];
-    requestedId: string = '';
     isCopied: boolean = false;
     distdownload: string = '';
     serviceApi: string = '';
@@ -135,20 +124,22 @@ export class LandingComponent implements OnInit {
     private meta: Meta;
     private newer: reference = {};
     navigationSubscription: any;
-    ediid: any;
     displayDatacart: boolean = false;
     currentMode: string = 'initial';
     organizationList: string[] = ["National Institute of Standards and Technology"]
     HomePageLink: boolean = false;
-    inBrowser: boolean = false;
     isVisible: boolean;
-    taxonomyTree: TreeNode[] = [];
-    taxonomyList: any[];
     editEnabled: boolean;
-    doiUrl: string = "";
+    doiUrl: string = null;
     recordType: string = "";
 
+    // passed in by the parent component:
+    @Input() record : NerdmRes = null;  
+    @Input() requestId : string = null;     // the ID used in the URL to access this page
+    @Input() inBrowser : boolean = false;
 
+    ediid: string = null;
+    
     /**
      * Creates an instance of the SearchPanel
      *
@@ -159,188 +150,79 @@ export class LandingComponent implements OnInit {
         private titleService: Title,
         private cfg: AppConfig,
         private router: Router,
-        @Inject(PLATFORM_ID) private platformId: Object,
         @Inject(APP_ID) private appId: string,
-        private transferState: TransferState,
-        public searchService: SearchService,
         public mdupdsvc : MetadataUpdateService,
         private gaService: GoogleAnalyticsService,
         private ngbModal: NgbModal,
         private modalService: ModalService,
         private confirmationDialogService: ConfirmationDialogService,
-        private notificationService: NotificationService,
-        private taxonomyListService: TaxonomyListService,
-        private errorHandlingService: ErrorHandlingService,
-        private datePipe: DatePipe)
+        // private errorHandlingService: ErrorHandlingService,     // deprecated?
+        private notificationService: NotificationService)
     {
-        this.inBrowser = isPlatformBrowser(platformId);
-
-        this.searchValue = this.route.snapshot.paramMap.get('id');
-
+        // this.searchValue = this.route.snapshot.paramMap.get('id');
         this.editEnabled = cfg.get("editEnabled", false) as boolean;
     }
 
-    /**
-     * Get the params OnInit
-     */
-    ngOnInit() {
-        // this.loadPubData();
-        this.loadSavedData();
-    }
+    ngOnInit() { }
 
-    dataInit() {
-        if (this.router.url.includes("ark"))
-            this.searchValue = this.router.url.split("/id/").pop();
-
-        this.ediid = this.searchValue;
-
-        this.files = [];
-    }
-
-    /*
-     *  Load pub data. 
-     *  It loads from mdAPI.
-     */
-    loadSavedData() {
-        this.dataInit();
-        this.searchService.getData(this.searchValue)
-            .subscribe((res) => {
-                this.onSuccess(res).then(function (result) {
-                    console.log("record", this.record);
-                }.bind(this), function (err) {
-                    alert("something went wrong while fetching the data.");
-                });
-            }, (err) => {
-                this.setErrorForDisplay(err, "There was an error in searchservice.", "Load saved data");
-            });
-    }
-
-    // getData(): Observable<any> {
-    //     var recordid = this.searchValue;
-    //     const recordid_KEY = makeStateKey<string>('record-' + recordid);
-
-    //     if (this.transferState.hasKey(recordid_KEY)) {
-    //         console.log("extracting data id=" + recordid + " embedded in web page");
-    //         const record = this.transferState.get<any>(recordid_KEY, null);
-    //         // this.transferState.remove(recordid_KEY);
-    //         return of(record);
-    //     }
-    //     else {
-    //         console.warn("record data not found in transfer state");
-    //         return this.searchService.searchById(recordid)
-    //             .catch((err: Response, caught: Observable<any[]>) => {
-    //                 // console.log(err);
-    //                 if (err !== undefined) {
-    //                     console.error("Failed to retrieve data for id=" + recordid + "; error status=" + err.status);
-    //                     if ("message" in err) console.error("Reason: " + (<any>err).message);
-    //                     if ("url" in err) console.error("URL used: " + (<any>err).url);
-
-    //                     // console.error(err);
-    //                     if (err.status >= 500) {
-    //                         this.router.navigate(["/usererror", recordid, { errorcode: err.status }]);
-    //                     }
-    //                     if (err.status >= 400 && err.status < 500) {
-    //                         this.router.navigate(["/usererror", recordid, { errorcode: err.status }]);
-    //                     }
-    //                     if (err.status == 0) {
-    //                         console.warn("Possible causes: Unable to trust site cert, CORS restrictions, ...");
-    //                         return Observable.throw('Unknown error requesting data for id=' + recordid);
-    //                     }
-    //                 }
-    //                 return Observable.throw(caught);
-    //             })
-    //             .pipe(
-    //                 tap(record => {
-    //                     if (isPlatformServer(this.platformId)) {
-    //                         this.transferState.set(recordid_KEY, record);
-    //                     }
-    //                 })
-    //             );
-    //     }
-    // }
-
-    /*
-      Function after view init
-    */
-    ngAfterViewInit() {
-        this.useFragment();
-        var recordid;
-        if (this.record != null && isPlatformBrowser(this.platformId)) {
-            // recordid = this.searchValue;
-            // // recordid = "ark:/88434/"+this.searchValue;
-            // if(this.searchValue.includes("ark"))
-            // window.history.replaceState( {} , '', '/od/id/'+this.searchValue );
-            // else
-            window.history.replaceState({}, '', '/od/id/' + this.searchValue);
-        }
+    ngOnChanges() {
+        if (!this.ediid && this.recordLoaded())
+            this.useMetadata();  // initialize internal component data based on metadata
     }
 
     /**
-    * If Search is successful populate list of keywords themes and authors
-    */
-    onSuccess(searchResults: any[]) {
-        if (searchResults["ResultCount"] === undefined || searchResults["ResultCount"] !== 1)
-            this.record = searchResults;
-        else if (searchResults["ResultCount"] !== undefined && searchResults["ResultCount"] === 1)
-            this.record = searchResults["ResultData"][0];
-
+     * initial this component's internal data used to drive the display based on the 
+     * input resource metadata
+     */
+    useMetadata() : void {
+        this.ediid = this.record['ediid'];
         this.HomePageLink = this.displayHomePageLink();
+        this.recordType = this.determineResourceLabel(this.record);
 
-        if (this.record["@id"] === undefined || this.record["@id"] === "") {
-            this.isId = false;
-            return;
-        }
-
-        switch(this.record['@type'][0]){
-            case 'nrd:SRD':{
-                this.recordType = "Standard Reference Data";
-                break;
-            }
-            case 'nrdp:DataPublication':{
-                this.recordType = "Data Publication";
-                break;
-            }
-            case 'nrdp:PublicDataResource':{
-                this.recordType = "Public Data Resource";
-                break;
-            }
-            default:
-                    this.recordType = "";
-                break;
-        }
-
-
-        // console.log("this.record", this.record);
-
-        this.type = this.record['@type'];
-        this.titleService.setTitle(this.record['title']);
         this.createNewDataHierarchy();
         if (this.files.length > 0) {
             this.setLeafs(this.files[0].data);
         }
-        if (this.record['doi'] !== undefined && this.record['doi'] !== "") {
+
+        if (this.record['doi'] !== undefined && this.record['doi'] !== "") 
             this.doiUrl = "https://doi.org/" + this.record['doi'].split(':')[1];
-            this.isDOI = true;
-        }
-        if ("hasEmail" in this.record['contactPoint']) {
-            this.isEmail = true;
-        }
+
         this.assessNewer();
         this.updateMenu();
 
         if (this.files.length != 0)
             this.files = <TreeNode[]>this.files[0].data;
-        return Promise.resolve(this.files);
+        
     }
 
     /**
-     * If search is unsuccessful push the error message
+     * analyze the NERDm resource metadata and return a label indicating the type of 
+     * the resource described.  This is used as a label at the top of the page, just above 
+     * the title.
      */
-    onError(error: any) {
-        this.exception = (<any>error).ex;
-        this.errorMsgDetail = (<any>error).message;
-        this.status = (<any>error).httpStatus;
-        //this.msgs.push({severity:'error', summary:this.errorMsgDetail + ':', detail:this.status + ' - ' + this.exception});
+    determineResourceLabel(resmd : NerdmRes) : string {
+        if (this.record instanceof Array && this.record.length > 0) {
+            switch(this.record['@type'][0]){
+                case 'nrd:SRD': 
+                    return "Standard Reference Data";
+                case 'nrdp:DataPublication': 
+                    return "Data Publication";
+                case 'nrdp:PublicDataResource': 
+                    return "Public Data Resource";
+            }
+        }
+
+        return "Data Resource";
+    }
+
+    /**
+     * Housekeeping after view init
+     */
+    ngAfterViewInit() {
+        this.useFragment();
+        if (this.record != null && this.inBrowser) {
+            window.history.replaceState({}, '', '/od/id/' + this.requestId);
+        }
     }
 
     // deprecated?
@@ -395,7 +277,7 @@ export class LandingComponent implements OnInit {
         var citation = this.createMenuItem('Citation', "faa faa-angle-double-right",
             (event) => { this.getCitation(); this.showDialog(); }, '');
         var metaItem = this.createMenuItem("View Metadata", "faa faa-bars",
-            (event) => { this.goToSelection(true, false, 'metadata'); this.gaService.gaTrackPageview('/od/id/' + this.searchValue + '#metadata', this.record['title']) }, '');
+            (event) => { this.goToSelection(true, false, 'metadata'); this.gaService.gaTrackPageview('/od/id/' + this.requestId + '#metadata', this.record['title']) }, '');
         itemsMenu.push(metaItem);
         itemsMenu.push(metadata);
 
@@ -454,7 +336,7 @@ export class LandingComponent implements OnInit {
             if (this.record['publisher'].name !== null && this.record['publisher'].name !== undefined)
                 this.citeString += this.record['publisher'].name;
         }
-        if (this.isDOI) {
+        if (this.doiUrl) {
             var doistring = "https://doi.org/" + _.split(this.record['doi'], ':')[1];
             this.citeString += ", " + doistring;
         }
@@ -465,7 +347,7 @@ export class LandingComponent implements OnInit {
     goToSelection(isMetadata: boolean, isSimilarResources: boolean, sectionId: string) {
         this.metadata = isMetadata; this.similarResources = isSimilarResources;
         // this.turnSpinnerOff();
-        this.router.navigate(['/od/id/', this.searchValue], { fragment: sectionId });
+        this.router.navigate(['/od/id/', this.requestId], { fragment: sectionId });
         this.useFragment();
     }
 
@@ -486,6 +368,9 @@ export class LandingComponent implements OnInit {
         });
     }
 
+    recordLoaded() {
+        return this.record && !this.isEmptyObject(this.record);
+    }
 
     //This is to check if empty
     isEmptyObject(obj) {
@@ -743,19 +628,21 @@ export class LandingComponent implements OnInit {
         window.open(url, '_blank');
     }
 
-    /*
-     *  Set error message for display
-     *  err: standard error. err.message will be used in email body if user want to send us email.
-     *  message: The message to display on the screen.
-     *  action: User action that caused the error.
-     */
-    setErrorForDisplay(err: any, message: string, action: string) {
-        this.errorHandlingService.setErrMessage({ message: message, messageDetail: err.message, action: action, display: true });
-        console.log(err);
-        this.errorMsg = message;
-        this.errorMsgDetail = err.message;
-        this.displayError = true;
-        console.log(this.errorMsg);
-    }
+    // deprecated?
+    // 
+    // /*
+    //  *  Set error message for display
+    //  *  err: standard error. err.message will be used in email body if user want to send us email.
+    //  *  message: The message to display on the screen.
+    //  *  action: User action that caused the error.
+    //  */
+    // setErrorForDisplay(err: any, message: string, action: string) {
+    //     this.errorHandlingService.setErrMessage({ message: message, messageDetail: err.message, action: action, display: true });
+    //     console.log(err);
+    //     this.errorMsg = message;
+    //     this.errorMsgDetail = err.message;
+    //     this.displayError = true;
+    //     console.log(this.errorMsg);
+    // }
 }
 
