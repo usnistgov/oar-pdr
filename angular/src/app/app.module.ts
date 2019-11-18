@@ -15,7 +15,6 @@ import { isPlatformBrowser, CommonModule } from '@angular/common';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { TreeModule, FieldsetModule, DialogModule, OverlayPanelModule } from 'primeng/primeng';
-import { MenuModule } from 'primeng/menu';
 import { TreeTableModule } from 'primeng/treetable';
 import { ButtonModule } from 'primeng/button';
 import { TooltipModule } from 'primeng/tooltip';
@@ -93,7 +92,7 @@ import { fakeBackendProvider } from './_helpers/fakeBackendInterceptor';
       }),
       FormsModule, ReactiveFormsModule,
       CommonModule, SharedModule, BrowserAnimationsModule, FormsModule, TooltipModule,
-      TreeTableModule, TreeModule, MenuModule, FieldsetModule, DialogModule, OverlayPanelModule,
+      TreeTableModule, TreeModule, FieldsetModule, DialogModule, OverlayPanelModule,
       ButtonModule, ProgressSpinnerModule, ConfirmDialogModule, ProgressBarModule,DataTableModule,
       ToastrModule.forRoot({
         toastClass: 'toast toast-bootstrap-compatibility-fix'
