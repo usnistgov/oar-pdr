@@ -1,5 +1,5 @@
 import { Component, OnInit, OnChanges, ViewChild, Input, Output, EventEmitter } from '@angular/core';
-import { Observable, of } from 'rxjs';
+import { Observable, of, BehaviorSubject } from 'rxjs';
 
 import { ConfirmationDialogService } from '../../shared/confirmation-dialog/confirmation-dialog.service';
 import { ConfirmationDialogComponent } from '../../shared/confirmation-dialog/confirmation-dialog.component';
@@ -7,6 +7,7 @@ import { UserMessageService } from '../../frame/usermessage.service';
 import { MessageBarComponent } from '../../frame/messagebar.component';
 import { EditStatusComponent } from './editstatus.component';
 import { MetadataUpdateService } from './metadataupdate.service';
+import { EditStatusService } from './editstatus.service';
 import { AuthService, WebAuthService } from './auth.service';
 import { CustomizationService } from './customization.service';
 
@@ -40,6 +41,7 @@ export class EditControlComponent implements OnInit, OnChanges {
         if (this._editmode != engage) {
             this._editmode = engage;
             this.mdupdsvc.editMode = this._editmode;
+            this.edstatsvc._setEditMode(engage);
             this.editModeChanged.emit(engage);
         }
     }
@@ -80,6 +82,7 @@ export class EditControlComponent implements OnInit, OnChanges {
      *                           message bar
      */
     public constructor(private mdupdsvc : MetadataUpdateService,
+                       private edstatsvc : EditStatusService,
                        private authsvc : AuthService,
                        private confirmDialogSvc : ConfirmationDialogService,
                        private msgsvc : UserMessageService)
@@ -88,10 +91,16 @@ export class EditControlComponent implements OnInit, OnChanges {
             (md) => {
                 if (md && md != this.mdrec) {
                     this.mdrec = md;
+                    this.edstatsvc._setLastUpdated(this.mdupdsvc.lastUpdate);
                     this.mdrecChange.emit(md);
                 }
             }
         );
+        
+        this.edstatsvc._setLastUpdated(this.mdupdsvc.lastUpdate);
+        this.edstatsvc._setEditMode(this.editMode);
+        this.edstatsvc._setAuthorized(this.isAuthorized());
+        this.edstatsvc._setUserID(this.authsvc.userID);
     }
 
     ngOnInit() {
@@ -275,6 +284,8 @@ export class EditControlComponent implements OnInit, OnChanges {
                     subscriber.next(Boolean(this._custsvc));
                     subscriber.complete();
                     this.statusbar.showLastUpdate(this.editMode)
+                    this.edstatsvc._setUserID(this.authsvc.userID);
+                    this.edstatsvc._setAuthorized(true);
                 },
                 (err) => {
                     let msg = "Failure during authorization: "+err.message
@@ -283,6 +294,7 @@ export class EditControlComponent implements OnInit, OnChanges {
                     subscriber.next(false);
                     subscriber.complete();
                     this.statusbar.showLastUpdate(this.editMode)
+                    this.edstatsvc._setAuthorized(false);
                 }
             );
         });

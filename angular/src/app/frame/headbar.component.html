@@ -19,21 +19,21 @@
         &nbsp;&nbsp;
         <span *ngIf="status" class="badge" id="appStatus" style="background-color:darkcyan">{{ status }}</span>
         <div align="right" class="header-links">
-          <!-- <span *ngIf="authenticated"
-            [ngStyle]="{'color':getMenuTextColor(),'padding-right':'2em'}"><b>Welcome: {{userId}}        </b></span> -->
+          <!-- <span *ngIf="this.editstatsvc.authenticated"
+            [ngStyle]="{'color':getMenuTextColor(),'padding-right':'2em'}"><b>Welcome: {{this.edistatsvc.userID}}        </b></span> -->
           <span (click)="openAboutPage()"
             [ngStyle]="{'cursor': getCursor(),'color':getMenuTextColor()}"><i class="faa faa-home faa-1x icon-white" style="color: white;" data-toggle="tooltip" title="Go to home page"></i></span> |
           <span (click)="openSearchPage()"
             [ngStyle]="{'cursor': getCursor(),'color':getMenuTextColor()}"><b>Search</b></span> |
             <span 
             [ngStyle]="{'cursor': getCursor(),'color':getMenuTextColor()}"><b>Help</b></span> |
-          <a *ngIf="!isEditMode; else editMode" [routerLink]="['/datacart', 'normal']" routerLinkActive="active"
-            target="_blank" (click)="updateCartStatus()"><span
+          <a *ngIf="!this.editstatsvc.editMode; else editMode" [routerLink]="['/datacart', 'normal']" 
+              routerLinkActive="active" target="_blank" (click)="updateCartStatus()"><span
               [ngStyle]="{'cursor': getCursor(),'color':getMenuTextColor()}" style="color: #fff;"
               class="textlinks"><b>Cart </b></span>
             <i class="faa faa-shopping-cart faa-1x icon-white" style="color: white;"></i>
             <span class="w3-badge badge-pill badge-notify">&nbsp;{{cartLength}}&nbsp;</span></a>
-            <span (click)="showUserId()" *ngIf="authenticated"> | <i class="faa faa-user-circle faa-1x icon-white" style="color: white; cursor: pointer;" data-toggle="tooltip" title="{{userId}}" ></i></span>
+            <span (click)="showUserId()" *ngIf="editEnabled && this.editstatsvc.authenticated"> | <i class="faa faa-user-circle faa-1x icon-white" style="color: white; cursor: pointer;" data-toggle="tooltip" title="{{userId}}" ></i></span>
           <ng-template #editMode>
             <span style="color:grey; cursor: default;"><b>Cart </b></span>
             <i class="faa faa-shopping-cart faa-1x icon-grey" style="color:grey;"></i>

@@ -289,20 +289,6 @@ export class MetadataUpdateService {
     }
 
     /**
-     * Utility function for editing widgets that checks if any difference between the current metadata and 
-     * its original 
-     */
-    public dataEdited(currentData: {}, Originaldata: {}) {
-        if ((currentData == undefined || currentData == "") &&
-            (Originaldata == undefined || Originaldata == ""))
-        {
-            return false;
-        } else {
-            return JSON.stringify(currentData) != JSON.stringify(Originaldata);
-        }
-    }
-
-    /**
      * update the local (browser-side) metadata with the the original metadata from the last
      * time the metadata was committed.  This will not update the draft that exists in the 
      * customization service.  
