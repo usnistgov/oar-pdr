@@ -36,6 +36,7 @@ import gov.nist.oar.custom.customizationapi.exceptions.CustomizationException;
 import gov.nist.oar.custom.customizationapi.exceptions.ErrorInfo;
 import gov.nist.oar.custom.customizationapi.exceptions.UnAuthenticatedUserException;
 import gov.nist.oar.custom.customizationapi.exceptions.UnAuthorizedUserException;
+import gov.nist.oar.custom.customizationapi.helpers.AuthenticatedUserDetails;
 import gov.nist.oar.custom.customizationapi.helpers.UserDetailsExtractor;
 import gov.nist.oar.custom.customizationapi.helpers.domains.UserToken;
 import gov.nist.oar.custom.customizationapi.service.JWTTokenGenerator;
@@ -57,7 +58,9 @@ public class AuthController {
     @Autowired
     JWTTokenGenerator jwt;
 
-    public UserDetailsExtractor uExtract = new UserDetailsExtractor();
+    @Autowired
+    UserDetailsExtractor uExtract;
+//    public UserDetailsExtractor uExtract = new UserDetailsExtractor();
     /**
      * Get the JWT for the authorized user
      * 
@@ -73,16 +76,18 @@ public class AuthController {
 
     public UserToken token(Authentication authentication, @PathVariable @Valid String ediid)
 	    throws UnAuthorizedUserException, CustomizationException, UnAuthenticatedUserException {
-	String userId = "";
+//	String userId = "";
+	AuthenticatedUserDetails userDetails = null;
 	try {
 	    if (authentication == null)
 		throw new UnAuthenticatedUserException(" User is not authenticated to access this resource.");
 	    logger.info("Get the token for authenticated user.");
-	    userId = uExtract.getUserId();
-	    return jwt.getJWT(userId, ediid);
+	    userDetails = uExtract.getUserId();
+	    
+	    return jwt.getJWT(userDetails, ediid);
 	} catch (UnAuthorizedUserException ex) {
-	    if (!userId.isEmpty() && userId != null)
-		return new UserToken(userId, "");
+	    if (userDetails != null)
+		return new UserToken(userDetails, "");
 
 	    else
 		throw ex;
@@ -99,16 +104,17 @@ public class AuthController {
      */
 
     @RequestMapping(value = { "/_logininfo" }, method = RequestMethod.GET, produces = "application/json")
-    public ResponseEntity<String> login(HttpServletResponse response) throws IOException {
+    public ResponseEntity<AuthenticatedUserDetails> login(HttpServletResponse response) throws IOException {
 	logger.info("Get the authenticated user info.");
 	final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
 	if (authentication == null) {
 	    response.sendRedirect("/saml/login");
 	} else {
-	    String userId = uExtract.getUserId();
-	    String returnResponse = "{\"userid\": \"" + userId + "\"}";
-	    return new ResponseEntity<>(returnResponse, HttpStatus.OK);
+//	    String userId = uExtract.getUserId();
+//	    String returnResponse = "{\"userid\": \"" + userId + "\"}";
+	    
+	    return new ResponseEntity<>(uExtract.getUserId(), HttpStatus.OK);
 	}
 	return null;
     }

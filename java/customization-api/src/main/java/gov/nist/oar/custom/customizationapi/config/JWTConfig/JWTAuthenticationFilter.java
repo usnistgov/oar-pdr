@@ -12,6 +12,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.json.simple.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -24,6 +25,7 @@ import org.springframework.security.web.authentication.AbstractAuthenticationPro
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 
+import gov.nist.oar.custom.customizationapi.helpers.AuthenticatedUserDetails;
 import gov.nist.oar.custom.customizationapi.helpers.UserDetailsExtractor;
 
 /**
@@ -36,10 +38,13 @@ import gov.nist.oar.custom.customizationapi.helpers.UserDetailsExtractor;
 
 public class JWTAuthenticationFilter extends AbstractAuthenticationProcessingFilter {
 
+    @Autowired
+    UserDetailsExtractor uExtract;
+    
     private static final Logger logger = LoggerFactory.getLogger(JWTAuthenticationFilter.class);
     public static final String Header_Authorization_Token = "Authorization";
     public static final String Token_starter = "Bearer";
-    public UserDetailsExtractor uExtract = new UserDetailsExtractor();
+//    public UserDetailsExtractor uExtract = new UserDetailsExtractor();
 
     public JWTAuthenticationFilter(final String matcher, AuthenticationManager authenticationManager) {
 	super(matcher);
@@ -55,7 +60,7 @@ public class JWTAuthenticationFilter extends AbstractAuthenticationProcessingFil
 
 	logger.info("Attempt to check token and  authorized token validity");
 	String token = request.getHeader(Header_Authorization_Token).replaceAll(Token_starter, "").trim();
-	String userId = uExtract.getUserId();
+	String userId = uExtract.getUserId().getUserId();
 	String recordId = uExtract.getUserRecord(request.getRequestURI());
 	try {
 
@@ -103,18 +108,18 @@ public class JWTAuthenticationFilter extends AbstractAuthenticationProcessingFil
 	    AuthenticationException failed) throws IOException, ServletException {
 //        SecurityContextHolder.clearContext(); //this will remove authenticated user completely
 	Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-	String userId = "";
+	AuthenticatedUserDetails userDetails = null;
 	if (auth != null) {
-	    userId = uExtract.getUserId();
+	    userDetails = uExtract.getUserId();
 	}
 	logger.info("If token is not authorized send Unauthorized status.");
 	response.setStatus(HttpStatus.UNAUTHORIZED.value());
 	response.setContentType(MediaType.APPLICATION_JSON_VALUE);
 	
-	HashMap<String,String> responseObject = new HashMap<String,String>();
+	HashMap<String,Object> responseObject = new HashMap<String,Object>();
 	
-	if (!userId.isEmpty()) {
-	    responseObject.put("userId", userId);
+	if (userDetails !=  null) {
+	    responseObject.put("userId", userDetails);
 	    responseObject.put("message", "User is not Authorized.");
 	} else {
 	    responseObject.put("message", "User is not Authenticated.");

@@ -36,6 +36,7 @@ import com.nimbusds.jwt.SignedJWT;
 //import gov.nist.oar.custom.customizationapi.config.SAMLConfig.SecurityConstant;
 import gov.nist.oar.custom.customizationapi.exceptions.CustomizationException;
 import gov.nist.oar.custom.customizationapi.exceptions.UnAuthorizedUserException;
+import gov.nist.oar.custom.customizationapi.helpers.AuthenticatedUserDetails;
 import gov.nist.oar.custom.customizationapi.helpers.domains.UserToken;
 
 @Component
@@ -66,9 +67,9 @@ public class JWTTokenGenerator {
      * @throws UnAuthorizedUserException
      * @throws CustomizationException
      */
-    public UserToken getJWT(String userId, String ediid) throws UnAuthorizedUserException, CustomizationException {
+    public UserToken getJWT(AuthenticatedUserDetails userDetails, String ediid) throws UnAuthorizedUserException, CustomizationException {
 	logger.info("Get authorized user token.");
-	if (!isAuthorized(userId, ediid))
+	if (!isAuthorized(userDetails, ediid))
 	    throw new UnAuthorizedUserException("User is not authorized to edit this record.");
 
 	try {
@@ -78,14 +79,14 @@ public class JWTTokenGenerator {
 	    JWTClaimsSet.Builder jwtClaimsSetBuilder = new JWTClaimsSet.Builder();
 	    jwtClaimsSetBuilder.expirationTime(dateTime.plusMinutes(120).toDate());
 	    jwtClaimsSetBuilder.claim(JWTClaimName, JWTClaimValue);
-	    jwtClaimsSetBuilder.subject(userId+"|"+ediid);
+	    jwtClaimsSetBuilder.subject(userDetails.getUserEmail()+"|"+ediid);
 
 	    // signature
 	    SignedJWT signedJWT = new SignedJWT(new JWSHeader(JWSAlgorithm.HS256), jwtClaimsSetBuilder.build());
 	    signedJWT.sign(new MACSigner(JWTSECRET));
 
 
-	    return new UserToken(userId, signedJWT.serialize());
+	    return new UserToken(userDetails, signedJWT.serialize());
 	} catch (JOSEException e) {
 	    throw new UnAuthorizedUserException("Unable to generate token for the this user.");
 	}
@@ -101,10 +102,10 @@ public class JWTTokenGenerator {
      * @throws CustomizationException
      * @throws UnAuthorizedUserException
      */
-    private boolean isAuthorized(String userId, String ediid) throws UnAuthorizedUserException {
+    private boolean isAuthorized(AuthenticatedUserDetails userDetails, String ediid) throws UnAuthorizedUserException {
 	logger.info("Connect to backend metadata server to get the information.");
 	try {
-	    String uri = mdserver + ediid + "/_perm/update/" + userId;
+	    String uri = mdserver + ediid + "/_perm/update/" + userDetails.getUserId();
 	    RestTemplate restTemplate = new RestTemplate();
 	    HttpHeaders headers = new HttpHeaders();
 	    headers.add("Authorization", "Bearer " + mdsecret);

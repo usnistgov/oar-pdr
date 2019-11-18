@@ -14,6 +14,8 @@ package gov.nist.oar.custom.customizationapi.helpers.domains;
 
 
 import java.io.Serializable;
+
+import gov.nist.oar.custom.customizationapi.helpers.AuthenticatedUserDetails;
 /**
  * This is to store user id and JWT information.
  * @author Deoyani Nandrekar-Heinis
@@ -26,11 +28,11 @@ public class UserToken implements Serializable {
      */
     private static final long serialVersionUID = -3414986086109823716L;
     private String token;
-    private String userId;
+    private AuthenticatedUserDetails userDetails;
 
-    public UserToken(String userId, String token) {
+    public UserToken(AuthenticatedUserDetails userDetails, String token) {
         this.token = token;
-        this.userId = userId;
+        this.userDetails = userDetails;
     }
 
     public String getToken() {
@@ -41,11 +43,11 @@ public class UserToken implements Serializable {
         this.token = token;
     }
     
-    public String getUserId() {
-	return this.userId;
+    public AuthenticatedUserDetails getUserDetails() {
+	return this.userDetails;
     }
     
-    public void  setUserId(String userId) {
-	this.userId = userId;
+    public void  setUserDetails(AuthenticatedUserDetails userDetails) {
+	this.userDetails = userDetails;
     }
 }
