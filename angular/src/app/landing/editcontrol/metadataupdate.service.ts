@@ -4,6 +4,7 @@ import { Subject } from 'rxjs';
 
 import { UserMessageService } from '../../frame/usermessage.service';
 import { CustomizationService } from './customization.service';
+import { NerdmRes } from '../../nerdm/nerdm';
 
 /**
  * a service that receives updates to the resource metadata from update widgets.
@@ -22,9 +23,9 @@ import { CustomizationService } from './customization.service';
 @Injectable()
 export class MetadataUpdateService {
 
-    private mdres : Subject<{}> = new Subject<{}>();
+    private mdres : Subject<NerdmRes> = new Subject<NerdmRes>();
     private custsvc : CustomizationService = null;
-    private originalRec : any = null;
+    private originalRec : NerdmRes = null;
     private origfields : {} = {};   // keeps track of orginal metadata so that they can be undone
 
     private _lastupdate : string = "";   // empty string means unknown
@@ -69,7 +70,7 @@ export class MetadataUpdateService {
     _subscribe(controller) : void {
         this.mdres.subscribe(controller);
     }
-    _setOriginalMetadata(md : any) {
+    _setOriginalMetadata(md : NerdmRes) {
         this.originalRec = md;
     }
 
@@ -131,7 +132,7 @@ export class MetadataUpdateService {
             this.custsvc.updateMetadata(md).subscribe(
                 (res) => {
                     // console.log("###DBG  Draft data returned from server:\n  ", res)
-                    this.mdres.next(res);
+                    this.mdres.next(res as NerdmRes);
                     resolve(true);
                 },
                 (err) => {
@@ -184,7 +185,7 @@ export class MetadataUpdateService {
                     (res) => {
                         this.origfields = {};
                         this.forgetUpdateDate();
-                        this.mdres.next(res);
+                        this.mdres.next(res as NerdmRes);
                         resolve(true);
                     },
                     (err) => {
@@ -210,7 +211,7 @@ export class MetadataUpdateService {
                 this.custsvc.updateMetadata(this.origfields[subsetname]).subscribe(
                     (res) => {
                         delete this.origfields[subsetname];
-                        this.mdres.next(res);
+                        this.mdres.next(res as NerdmRes);
                         resolve(true);
                     },
                     (err) => {
@@ -257,7 +258,7 @@ export class MetadataUpdateService {
         this.custsvc.getDraftMetadata().subscribe(
             (res) => {
                 // console.log("Draft data returned from server:\n  ", res)
-                this.mdres.next(res);
+                this.mdres.next(res as NerdmRes);
             },
             (err) => {
                 // err will be a subtype of CustomizationError

@@ -8,6 +8,7 @@ import * as proc from 'process';
 
 import { AppConfig } from '../config/config';
 import { NerdmRes, MetadataTransfer  } from './nerdm';
+import { IDNotFound } from '../errors/error';
 import * as ngenv from '../../environments/environment';
 
 export const NERDM_MT_PREFIX = "NERDm Resource:";
@@ -55,7 +56,14 @@ export class CachingMetadataService extends MetadataService {
             return rxjs.of(rec);
 
         let out$ = this.del.getMetadata(id);
-        out$.subscribe((rcrd) => { this.cacheRecord(id, rcrd); })
+        out$.subscribe(
+            (rcrd) => { this.cacheRecord(id, rcrd); },
+            (err) => {
+                if (err instanceof IDNotFound)
+                    this.cacheRecord(id, null);
+                return rxjs.throwError(err);
+            }
+        )
         return out$;
     }
 }
@@ -159,7 +167,10 @@ export class RemoteWebMetadataService extends MetadataService {
      *                     slash will be inserted, so the endpoint should include one already
      *                     if appropriate.  
      */
-    constructor(private endpoint : string, private webclient : HttpClient) { super(); }
+    constructor(private endpoint : string,
+                private webclient : HttpClient,
+                private inBrowser : boolean)
+    { super(); }
 
     /**
      * retrieve the metadata associated with the current identifier.
@@ -180,25 +191,35 @@ export class RemoteWebMetadataService extends MetadataService {
         console.log("Pulling NERDm record from metadata service: " + url);
         let out = this.webclient.get(url) as Observable<NerdmRes>;
 
-        return out.pipe(rxjsop.map<NerdmRes, NerdmRes>(data => {
-            // strip out MongoDb search artifacts
-            if (data.hasOwnProperty("ResultData")) {
-                // search result
-                if (data.ResultData.length == 0)
-                    return null;
-                data = data.ResultData[0];
-            }
-            if (data.hasOwnProperty("_id") && data["_id"].hasOwnProperty("timestamp"))
-                delete data["_id"];
-            return data;
-        }));
+        return out.pipe(
+            rxjsop.map<NerdmRes, NerdmRes>(data => {
+                // strip out MongoDb search artifacts
+                if (data.hasOwnProperty("ResultData")) {
+                    // search result
+                    if (data.ResultData.length == 0)
+                        return null;
+                    data = data.ResultData[0];
+                }
+                if (data.hasOwnProperty("_id") && data["_id"].hasOwnProperty("timestamp"))
+                    delete data["_id"];
+                return data;
+            }),
+            rxjsop.catchError(err => {
+                // this will get handled by our global error handler
+                if (err.status == 404) 
+                    return rxjs.throwError(new IDNotFound(id));
+                return rxjs.throwError(err);
+            })
+        );
     }
 
     /**
      * instantiate a caching version of this service.  
      */
-    static withCaching(endpoint : string, webclient : HttpClient) : CachingMetadataService {
-        return new CachingMetadataService(new RemoteWebMetadataService(endpoint, webclient));
+    static withCaching(endpoint : string, webclient : HttpClient, inBrowser : boolean = false)
+        : CachingMetadataService
+    {
+        return new CachingMetadataService(new RemoteWebMetadataService(endpoint, webclient, inBrowser));
     }
 }
 
@@ -283,7 +304,7 @@ export function createMetadataService(platid : Object, endpoint : string, httpCl
             // we're in a server-side production-like mode:  get the records from
             // the web service and transmit them to the browser
             console.log("Will load NERDm records from remote web service: " + endpoint);
-            svc = new RemoteWebMetadataService(endpoint, httpClient);
+            svc = new RemoteWebMetadataService(endpoint, httpClient, false);
         }
         if (mdtrx) {
             // don't need a cache for this context; just plug in the MetadataTransfer
@@ -294,12 +315,12 @@ export function createMetadataService(platid : Object, endpoint : string, httpCl
     else if (mdtrx && mdtrx.labels().length > 0) {
         // we're in the browser and the web page contains an embedded record;
         // rely on the MetadataTransfer exclusively
-        console.log("Will load NERDm record from embedded JSON");
+        console.log("Will attempt to load NERDm record from embedded JSON");
         return new TransferMetadataService(mdtrx);
     }
     else if (ngenv.context['useMetadataService']) {
         console.log("Will load NERDm records from remote web service: " + endpoint);
-        svc = new RemoteWebMetadataService(endpoint, httpClient);
+        svc = new RemoteWebMetadataService(endpoint, httpClient, true);
     }
     else {
         console.log("Will use test NERDm records from the angular environment.");

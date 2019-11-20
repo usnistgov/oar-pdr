@@ -31,16 +31,45 @@ export class AppErrorHandler implements ErrorHandler {
         }
 
         if (isPlatformServer(this.platid)) {
+            let respstat = 500;
+            if (error instanceof IDNotFound)
+                respstat = 404;
+            
             // this is needed if rerouting is not possible or status was already set (?)
-            console.log("Setting response status to 500");
+            console.log("Setting response status to "+respstat);
             let resp : Response = this.injector.get(RESPONSE) as Response;
-            resp.status(500);
+            resp.status(respstat);
         }
 
         if (router) {
             // rerouting may not work if we've already started to build the page.  
-            console.log("attempting reroute to /int-error");
-            router.navigateByUrl("/int-error", { skipLocationChange: true });
+
+            if (error instanceof IDNotFound) {
+                console.log("attempting reroute to /not-found");
+                router.navigateByUrl("/not-found/"+error.id, { skipLocationChange: true });
+            }
+            else {
+                console.log("attempting reroute to /int-error");
+                router.navigateByUrl("/int-error", { skipLocationChange: true });
+            }
         }
     }
+}
+
+/**
+ * a custom exception indicating a request for the landing page for a non-existent identifier
+ */
+export class IDNotFound {
+
+    public message : string;
+
+    /**
+     * create the error
+     * @param id   the ID that was requested but does not exist
+     */
+    constructor(public id : string) {
+        this.message = "Resource identifier not found: "+id;
+    }
+
+    public toString() : string { return this.message; }
 }

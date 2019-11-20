@@ -5,13 +5,14 @@ import { of, throwError } from 'rxjs';
 import { MetadataUpdateService } from './metadataupdate.service';
 import { UserMessageService } from '../../frame/usermessage.service';
 import { CustomizationService, InMemCustomizationService } from './customization.service';
+import { NerdmRes } from '../../nerdm/nerdm';
 
 import { testdata } from '../../../environments/environment';
 
 describe('MetadataUpdateService', () => {
 
-    let rec = testdata['test1'];
-    let resmd : {} = null;
+    let rec : NerdmRes = testdata['test1'];
+    let resmd : NerdmRes = null;
     let svc : MetadataUpdateService = null;
 
     let subscriber = {

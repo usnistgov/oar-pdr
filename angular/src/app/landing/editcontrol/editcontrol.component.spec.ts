@@ -10,6 +10,7 @@ import { AuthService, WebAuthService, MockAuthService } from './auth.service';
 import { EditControlComponent } from './editcontrol.component';
 import { EditControlModule } from './editcontrol.module';
 import { CommonModule, DatePipe } from '@angular/common';
+import { NerdmRes } from '../../nerdm/nerdm';
 
 import { config, testdata } from '../../../environments/environment';
 
@@ -17,7 +18,7 @@ describe('EditControlComponent', () => {
     let component : EditControlComponent;
     let fixture : ComponentFixture<EditControlComponent>;
     let cfg : AppConfig = new AppConfig(config);
-    let rec = testdata['test1'];
+    let rec : NerdmRes = testdata['test1'];
     let authsvc : AuthService = new MockAuthService()
 
     let makeComp = function() {

@@ -6,6 +6,7 @@ import { Title }    from '@angular/platform-browser';
 import { AppConfig } from '../config/config';
 import { MetadataService } from '../nerdm/nerdm.service';
 import { NerdmRes } from '../nerdm/nerdm';
+import { IDNotFound } from '../errors/error';
 
 /**
  * A component providing the complete display of landing page content associated with 
@@ -65,16 +66,21 @@ export class LandingPageComponent implements OnInit {
             (data) => {
                 // successful metadata request
                 this.md = data;
-                if (! this.md)
+                if (! this.md) {
                     // id not found; reroute
-                    this.router.navigateByUrl("/not-found", { skipLocationChange: true });
+                    console.error("No data found for ID="+this.reqId);
+                    this.router.navigateByUrl("/not-found/"+this.reqId, { skipLocationChange: true });
+                }
                 else
                     // proceed with rendering of the component
                     this.useMetadata();
             },
             (err)  => {
-                console.error("Failed to retrieve metadata: "+err.message);
-                this.router.navigateByUrl("error/:"+this.reqId, { skipLocationChange: true });
+                console.error("Failed to retrieve metadata: "+err.toString());
+                if (err instanceof IDNotFound)
+                    this.router.navigateByUrl("not-found/"+this.reqId, { skipLocationChange: true });
+                else 
+                    this.router.navigateByUrl("int-error/"+this.reqId, { skipLocationChange: true });
             }
         );
     }

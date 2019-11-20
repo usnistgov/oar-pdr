@@ -4,6 +4,7 @@ import { SharedModule } from '../shared/shared.module';
 import { TreeModule, FieldsetModule, DialogModule, OverlayPanelModule,
          ConfirmDialogModule, MenuModule } from 'primeng/primeng';
 import { TreeTableModule } from 'primeng/treetable';
+import { DatePipe } from '@angular/common';
 import { EditControlModule } from './editcontrol/editcontrol.module';
 import { MetadataUpdateService } from './editcontrol/metadataupdate.service';
 
@@ -34,7 +35,7 @@ import { MetadataView } from './metadata/metadataview.component';
       ConfirmDialogModule, MenuModule,TreeTableModule, EditControlModule
   ],
   providers: [
-    MetadataUpdateService
+      MetadataUpdateService, DatePipe
   ],
   exports:[
     LandingComponent, DataFilesComponent, TitleComponent, AuthorComponent, ContactComponent,

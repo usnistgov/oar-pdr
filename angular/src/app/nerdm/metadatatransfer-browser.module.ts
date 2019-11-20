@@ -28,7 +28,7 @@ export function initBrowserMetadataTransfer(doc : Document) : MetadataTransfer {
             continue;
 
         // att = unescapeHTML(att);
-        console.log("Found embedded record with id='"+att+"'");
+        console.log("Found embedded information with id='"+att+"'");
         try {
             data = JSON.parse(scripts[i].textContent);
             if (data == {})

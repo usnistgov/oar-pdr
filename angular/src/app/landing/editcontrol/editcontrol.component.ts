@@ -10,6 +10,7 @@ import { MetadataUpdateService } from './metadataupdate.service';
 import { EditStatusService } from './editstatus.service';
 import { AuthService, WebAuthService } from './auth.service';
 import { CustomizationService } from './customization.service';
+import { NerdmRes } from '../../nerdm/nerdm';
 
 /**
  * a panel that serves as a control center for editing metadata displayed in the 
@@ -29,7 +30,7 @@ import { CustomizationService } from './customization.service';
 export class EditControlComponent implements OnInit, OnChanges {
 
     private _custsvc : CustomizationService = null;
-    private originalRecord : any = null;
+    private originalRecord : NerdmRes = null;
     private _editmode : boolean = false;
 
     /**
@@ -51,8 +52,8 @@ export class EditControlComponent implements OnInit, OnChanges {
      * the local copy of the draft (updated) metadata.  This parameter is available to a parent
      * template via [(mdrec)].
      */
-    @Input() mdrec : any;
-    @Output() mdrecChange = new EventEmitter<any>();
+    @Input() mdrec : NerdmRes;
+    @Output() mdrecChange = new EventEmitter<NerdmRes>();
 
     /**
      * the original resource identifier
@@ -90,9 +91,9 @@ export class EditControlComponent implements OnInit, OnChanges {
         this.mdupdsvc._subscribe(
             (md) => {
                 if (md && md != this.mdrec) {
-                    this.mdrec = md;
+                    this.mdrec = md as NerdmRes;
                     this.edstatsvc._setLastUpdated(this.mdupdsvc.lastUpdate);
-                    this.mdrecChange.emit(md);
+                    this.mdrecChange.emit(md as NerdmRes);
                 }
             }
         );
@@ -112,7 +113,7 @@ export class EditControlComponent implements OnInit, OnChanges {
             if (! this.resID)
                 this._resid = this.mdrec['ediid'];
             if (this.originalRecord === null) {
-                this.originalRecord = this._deepCopy(this.mdrec);
+                this.originalRecord = this._deepCopy(this.mdrec) as NerdmRes;
                 this.mdupdsvc._setOriginalMetadata(this.originalRecord)
             }
         }
@@ -140,8 +141,8 @@ export class EditControlComponent implements OnInit, OnChanges {
             this._custsvc.discardDraft().subscribe(
                 (md) => {
                     this.mdupdsvc.forgetUpdateDate();
-                    this.mdrec = md;
-                    this.mdrecChange.emit(md);
+                    this.mdrec = md as NerdmRes;
+                    this.mdrecChange.emit(md as NerdmRes);
                     this.editMode = false;
                 },
                 (err) => {
@@ -184,8 +185,8 @@ export class EditControlComponent implements OnInit, OnChanges {
             this._custsvc.saveDraft().subscribe( 
                 (md) => { 
                     this.mdupdsvc.forgetUpdateDate();
-                    this.mdrec = md;
-                    this.mdrecChange.emit(md);
+                    this.mdrec = md as NerdmRes;
+                    this.mdrecChange.emit(md as NerdmRes);
                     this.editMode = false;
                     this.statusbar.showLastUpdate(this.editMode)
                 },

@@ -5,6 +5,8 @@ import { Title }    from '@angular/platform-browser';
 import { ActivatedRoute, Router, Routes } from '@angular/router';
 import { HttpClientModule } from '@angular/common/http';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { ModalService } from '../shared/modal-service';
+import { ToastrModule } from 'ngx-toastr';
 
 import { LandingPageModule } from './landingpage.module';
 import { LandingPageComponent } from './landingpage.component';
@@ -12,15 +14,17 @@ import { AngularEnvironmentConfigService } from '../config/config.service';
 import { AppConfig } from '../config/config'
 import { MetadataTransfer, NerdmRes } from '../nerdm/nerdm'
 import { MetadataService, TransferMetadataService } from '../nerdm/nerdm.service'
-// import { CommonVarService } from '../shared/common-var';
+import { UserMessageService } from '../frame/usermessage.service';
+import { SharedService } from '../shared/shared/shared.service';
 import { CartService } from "../datacart/cart.service";
 import { DownloadService } from "../shared/download-service/download-service.service";
 import { TestDataService } from '../shared/testdata-service/testDataService';
+import { GoogleAnalyticsService } from '../shared/ga-service/google-analytics.service';
 import * as mock from '../testing/mock.services';
 import {RouterTestingModule} from "@angular/router/testing";
 import { testdata } from '../../environments/environment';
 
-xdescribe('LandingPageComponent', () => {
+describe('LandingPageComponent', () => {
     let component : LandingPageComponent;
     let fixture : ComponentFixture<LandingPageComponent>;
     let cfg : AppConfig;
@@ -62,14 +66,21 @@ xdescribe('LandingPageComponent', () => {
 
     let setupComponent = function() {
         TestBed.configureTestingModule({
-            imports: [ HttpClientModule, BrowserAnimationsModule, LandingPageModule,
-                       RouterTestingModule.withRoutes(routes) ],
+            imports: [
+                HttpClientModule, BrowserAnimationsModule, LandingPageModule,
+                RouterTestingModule.withRoutes(routes),
+                ToastrModule.forRoot({
+                    toastClass: 'toast toast-bootstrap-compatibility-fix'
+                })
+            ],
             providers: [
                 { provide: ActivatedRoute,  useValue: route },
                 { provide: ElementRef,      useValue: null },
                 { provide: AppConfig,       useValue: cfg },
                 { provide: MetadataService, useValue: mds },
-                CartService, DownloadService, TestDataService
+                UserMessageService,
+                CartService, DownloadService, TestDataService, GoogleAnalyticsService, ModalService,
+                SharedService
             ]
         }).compileComponents();
 
@@ -88,7 +99,7 @@ xdescribe('LandingPageComponent', () => {
         setupComponent();
         let cmpel = fixture.nativeElement;
         let el = cmpel.querySelector("h2"); 
-        expect(el.textContent).toBe(nrd.title);
+        expect(el.textContent).toContain(nrd.title);
     });
 
 });
