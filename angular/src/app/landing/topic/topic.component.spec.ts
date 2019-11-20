@@ -2,13 +2,14 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { HttpClientModule } from '@angular/common/http';
 import { TopicComponent } from './topic.component';
 import { RouterTestingModule } from '@angular/router/testing';
-import { SharedService } from '../../shared/shared';
 import { FormsModule } from '@angular/forms';
 import { AppConfig } from '../../config/config';
 import { AngularEnvironmentConfigService } from '../../config/config.service';
 import { TransferState } from '@angular/platform-browser';
 import { DatePipe } from '@angular/common';
 import { ToastrModule } from 'ngx-toastr';
+import { MetadataUpdateService } from '../editcontrol/metadataupdate.service';
+import { UserMessageService } from '../../frame/usermessage.service';
 
 describe('TopicComponent', () => {
     let component: TopicComponent;
@@ -27,8 +28,7 @@ describe('TopicComponent', () => {
             imports: [FormsModule, HttpClientModule, RouterTestingModule, ToastrModule.forRoot()],
             declarations: [TopicComponent],
             providers: [
-                SharedService,
-                DatePipe,
+                MetadataUpdateService, UserMessageService, DatePipe,
                 { provide: AppConfig, useValue: cfg }]
         })
             .compileComponents();

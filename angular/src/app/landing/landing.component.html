@@ -1,10 +1,8 @@
-<edit-controls *ngIf="editEnabled"></edit-controls>
-<edit-status-bar *ngIf="editEnabled"></edit-status-bar>
-<error-message *ngIf="editEnabled"></error-message>
+<pdr-edit-control *ngIf="editEnabled" [inBrowser]="inBrowser" [(mdrec)]="record"></pdr-edit-control>
 
 <div class="ui-grid ui-grid-responsive ui-grid-pad center" style="border: 0px solid white;">
     <div class="card landingcard">
-        <div *ngIf="record.length !== 0 && isId === true">
+        <div *ngIf="recordLoaded()">
             <div class="ui-g">
                 <div class="ui-g-10 ui-md-10 ui-lg-10 ui-sm-12">
                     <div class="ui-g">
@@ -19,19 +17,16 @@
                                 <p-menu #menu3 class="rightMenuStylePop" popup="popup" [model]="rightmenu"></p-menu>
                             </div>
                             <br>
-                            <app-title [record]="record" [originalRecord]="originalRecord" [inBrowser]="inBrowser"
-                                [fieldObject]="fieldObject"></app-title>
-                            <app-author [record]="record" [originalRecord]="originalRecord" [inBrowser]="inBrowser"
-                                [fieldObject]="fieldObject"></app-author>
+                            <app-title [record]="record" [inBrowser]="inBrowser"></app-title>
+                            <app-author [record]="record" [inBrowser]="inBrowser"></app-author>
                         </div>
                         <div class="ui-g-8 ui-md-8 ui-lg-8 ui-sm-12">
-                            <app-contact [record]="record" [originalRecord]="originalRecord" [inBrowser]="inBrowser"
-                                [fieldObject]="fieldObject"></app-contact>
+                            <app-contact [record]="record" [inBrowser]="inBrowser"></app-contact>
 
-                            <span *ngIf="isId">Identifier: </span>
-                            <span *ngIf="isDOI"><i> <a class="font14" href="{{doiUrl}}"
+                            <span>Identifier: </span>
+                            <span *ngIf="doiUrl"><i> <a class="font14" href="{{doiUrl}}"
                                         (click)="gaService.gaTrackEvent('outbound', $event, 'Resource title: ' + record.title, 'https://doi.org/'+record.doi.split(':')[1])">{{record.doi}}</a></i></span>
-                            <span *ngIf="!isDOI"><i> <a class="font14"
+                            <span *ngIf="!doiUrl"><i> <a class="font14"
                                         href="{{ cfg.get('landingPageService','/od/id/') }}{{record['@id']}}"
                                         (click)="gaService.gaTrackEvent('outbound', $event, 'Resource title: ' + record.title, cfg.get('landingPageService','/od/id/')+record['@id'])">{{record["@id"]}}</a></i>
                             </span>
@@ -83,7 +78,7 @@
                                         (click)="visitHomePage(record.landingPage, $event, 'Resource title: '+record.title)"
                                         pButton type="submit"
                                         style="float:right;margin:.5em 1em .5em 0em;width:200px; height:2em; background-color:#1471AE;color:white;padding-right: 1em;"
-                                        [disabled]="recordEditmode">
+                                        [disabled]="mdupdsvc.editMode">
                                         <i class="faa faa-external-link"
                                             style="color: #fff;padding-left: .5em;padding-right: .5em;"></i>
                                         Visit Home Page
@@ -97,15 +92,12 @@
                     <div class="ui-g">
                         <div class="ui-g-12 ui-md-12 ui-lg-12 ui-sm-12">
                             <div [hidden]="metadata">
-                                <app-description [record]="record" [originalRecord]="originalRecord"
-                                    [inBrowser]="inBrowser" [fieldObject]="fieldObject"></app-description>
+                                <app-description [record]="record" [inBrowser]="inBrowser"></app-description>
                             </div>
-                            <app-topic [record]="record" [originalRecord]="originalRecord" [inBrowser]="inBrowser"
-                                [fieldObject]="fieldObject"></app-topic>
-                            <app-keyword [record]="record" [originalRecord]="originalRecord" [inBrowser]="inBrowser"
-                                [fieldObject]="fieldObject"></app-keyword>
+                            <app-topic [record]="record" [inBrowser]="inBrowser"></app-topic>
+                            <app-keyword [record]="record" [inBrowser]="inBrowser"></app-keyword>
                             <p></p>
-                            <description-resources [record]="record" [originalRecord]="originalRecord" [files]="files"
+                            <description-resources [record]="record" [files]="files"
                                 [metadata]="metadata" [inBrowser]="inBrowser"></description-resources>
                             <metadata-detail [record]="record" [serviceApi]="serviceApi" [inBrowser]="inBrowser"
                                 [metadata]="metadata">
@@ -130,7 +122,7 @@
                     </div>
                 </div>
 
-                <div class="ui-g-2 ui-md-2 ui-lg-2 ui-sm-12">
+                <div *ngIf="inBrowser" class="ui-g-2 ui-md-2 ui-lg-2 ui-sm-12">
                     <div class="ui-g" style="position:sticky; top:0; ">
                         <div class="ui-g-12 ui-md-12 ui-lg-12 ui-sm-12">
                             <div class="d-none d-md-block d-lg-block d-xl-block ">

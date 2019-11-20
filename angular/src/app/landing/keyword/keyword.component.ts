@@ -1,12 +1,8 @@
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
-import { CustomizationService } from '../../shared/customization-service/customization-service.service';
 import { NgbModalOptions, NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { SharedService } from '../../shared/shared';
 import { DescriptionPopupComponent } from '../description/description-popup/description-popup.component';
-import { EditControlService } from '../edit-control-bar/edit-control.service';
 import { NotificationService } from '../../shared/notification-service/notification.service';
-import { DatePipe } from '@angular/common';
-import { ErrorHandlingService } from '../../shared/error-handling-service/error-handling.service';
+import { MetadataUpdateService } from '../editcontrol/metadataupdate.service';
 
 @Component({
     selector: 'app-keyword',
@@ -15,34 +11,37 @@ import { ErrorHandlingService } from '../../shared/error-handling-service/error-
 })
 export class KeywordComponent implements OnInit {
     @Input() record: any[];
-    @Input() originalRecord: any[];
     @Input() inBrowser: boolean;   // false if running server-side
-    @Input() fieldObject: any;
-
-    recordEditmode: boolean = false;
-    tempInput: any = {};
     fieldName: string = 'keyword';
 
-    constructor(
-        public customizationService: CustomizationService,
-        private ngbModal: NgbModal,
-        private editControlService: EditControlService,
-        private notificationService: NotificationService,
-        private datePipe: DatePipe,
-        private errorHandlingService: ErrorHandlingService,
-        private sharedService: SharedService
-    ) { 
-        this.editControlService.watchEditMode().subscribe(value => {
-            this.recordEditmode = value;
-        });
+    constructor(public mdupdsvc : MetadataUpdateService,        
+                private ngbModal: NgbModal,                      
+                private notificationService: NotificationService)
+    { }
+
+    /**
+     * a field indicating if this data has beed edited
+     */
+    get updated() { return this.mdupdsvc.fieldUpdated(this.fieldName); }
+
+    /**
+     * a field indicating whether there are no keywords are set.  
+     */
+    get isEmpty() {
+        if (! this.record[this.fieldName])
+            return true;
+        if (this.record[this.fieldName] instanceof Array &&
+            this.record[this.fieldName].filter(kw => Boolean(kw)).length == 0)
+            return true;
+        return false;
     }
 
     ngOnInit() {
     }
 
     getFieldStyle() {
-        if (this.recordEditmode) {
-            if (this.customizationService.dataEdited(this.record[this.fieldName], this.originalRecord[this.fieldName])) {
+        if (this.mdupdsvc.editMode) {
+            if (this.mdupdsvc.fieldUpdated(this.fieldName)) {
                 return { 'border': '1px solid lightgrey', 'background-color': '#FCF9CD' };
             } else {
                 return { 'border': '1px solid lightgrey', 'background-color': 'white' };
@@ -53,10 +52,7 @@ export class KeywordComponent implements OnInit {
     }
 
     openModal() {
-        if (!this.recordEditmode) return;
-
-        let i: number;
-        let tempDecription: string = "";
+        if (! this.mdupdsvc.editMode) return;
 
         let ngbModalOptions: NgbModalOptions = {
             backdrop: 'static',
@@ -64,112 +60,45 @@ export class KeywordComponent implements OnInit {
             windowClass: "myCustomModalClass"
         };
 
-        if (this.customizationService.checkKeywords(this.record)) {
-            tempDecription = this.record[this.fieldName][0];
-            for (i = 1; i < this.record[this.fieldName].length; i++) {
-                tempDecription = tempDecription + ',' + this.record[this.fieldName][i];
-            }
-        }
-        this.tempInput[this.fieldName] = tempDecription;
-        console.log("this.tempInput", this.tempInput[this.fieldName]);
         const modalRef = this.ngbModal.open(DescriptionPopupComponent, ngbModalOptions);
 
-        modalRef.componentInstance.inputValue = this.tempInput;
+        let val = "";
+        if (this.record[this.fieldName])
+            val = this.record[this.fieldName].join(', ');
+
+        modalRef.componentInstance.inputValue = { };
+        modalRef.componentInstance.inputValue[this.fieldName] = val;
         modalRef.componentInstance['field'] = this.fieldName;
         modalRef.componentInstance['title'] = this.fieldName.toUpperCase();
         modalRef.componentInstance.message = "Please enter keywords separated by comma.";
 
         modalRef.componentInstance.returnValue.subscribe((returnValue) => {
             if (returnValue) {
-                console.log("return:", returnValue);
-                var tempDescs = returnValue[this.fieldName].split(',').filter(keyword => keyword != '');
-                returnValue[this.fieldName] = this.sharedService.deepCopy(tempDescs);
-
-                var postMessage: any = {};
-                postMessage[this.fieldName] = returnValue[this.fieldName];
-                console.log("postMessage", JSON.stringify(postMessage));
-
-                this.customizationService.update(JSON.stringify(postMessage)).subscribe(
-                    result => {
-                        this.record[this.fieldName] = this.sharedService.deepCopy(returnValue[this.fieldName]);
-                        this.editControlService.setDataChanged(true);
-                        this.onUpdateSuccess();
-                    },
-                    err => {
-                        this.onUpdateError(err, "Error updating " + this.fieldName, "Update " + this.fieldName);
-                    });
+                // console.log("###DBG  receiving editing output: " +
+                //             returnValue[this.fieldName].substring(0,20) + "....");
+                let updmd = {};
+                updmd[this.fieldName] = returnValue[this.fieldName].split(/\s*,\s*/).filter(kw => kw != '');
+                this.mdupdsvc.update(this.fieldName, updmd).then((updateSuccess) => {
+                    // console.log("###DBG  update sent; success: "+updateSuccess.toString());
+                    if (updateSuccess)
+                        this.notificationService.showSuccessWithTimeout("Keywords updated.", "", 3000);
+                    else
+                        console.error("acknowledge keywords update failure");
+                });
             }
         })
-    }
-
-    /*
-     * When update successful
-     */
-    onUpdateSuccess() {
-        this.fieldObject[this.fieldName]["edited"] = (JSON.stringify(this.record[this.fieldName]) != JSON.stringify(this.originalRecord[this.fieldName]));
-
-        var updateDate = this.datePipe.transform(new Date(), "MMM d, y, h:mm:ss a");
-        this.customizationService.checkDataChanges(this.record, this.originalRecord, this.fieldObject, updateDate);
-        this.notificationService.showSuccessWithTimeout("Keyword updated.", "", 3000);
-    }
-
-    /*
-     * When update failed
-     */
-    onUpdateError(err: any, message: string, action: string) {
-        this.errorHandlingService.setErrMessage({ message: message, messageDetail: err.message, action: action, display: true });
-        // this.setErrorMessage.emit({ error: err, displayError: true, action: action });
     }
 
     /*
      *  Undo editing. If no more field was edited, delete the record in staging area.
      */
     undoEditing() {
-        var noMoreEdited = true;
-        console.log("this.fieldObject", this.fieldObject);
-        for (var fld in this.fieldObject) {
-            if (this.fieldName != fld && this.fieldObject[fld].edited) {
-                noMoreEdited = false;
-                break;
-            }
-        }
-
-        if (noMoreEdited) {
-            console.log("Deleting...");
-            this.customizationService.delete().subscribe(
-                (res) => {
-                    if (this.originalRecord[this.fieldName] == undefined)
-                        delete this.record[this.fieldName];
-                    else
-                        this.record[this.fieldName] = this.sharedService.deepCopy(this.originalRecord[this.fieldName]);
-
-                    this.onUpdateSuccess();
-                },
-                (err) => {
-                    this.onUpdateError(err, "Error undo editing", "Undo editing - delete");
-                }
-            );
-        } else {
-            var body: string;
-            if (this.originalRecord[this.fieldName] == undefined) {
-                body = '{"' + this.fieldName + '":""}';
-            } else {
-                body = '{"' + this.fieldName + '":' + JSON.stringify(this.originalRecord[this.fieldName]) + '}';
-            }
-
-            this.customizationService.update(body).subscribe(
-                result => {
-                    if (this.originalRecord[this.fieldName] == undefined)
-                        delete this.record[this.fieldName];
-                    else
-                        this.record[this.fieldName] = this.sharedService.deepCopy(this.originalRecord[this.fieldName]);
-
-                    this.onUpdateSuccess();
-                },
-                err => {
-                    this.onUpdateError(err, "Error undo editing", "Undo editing");
-                });
-        }
+        this.mdupdsvc.undo(this.fieldName).then((success) => {
+            if (success)
+                this.notificationService.showSuccessWithTimeout("Reverted changes to keywords.", "", 3000);
+            else
+                console.error("Failed to undo keywords metadata")
+        });
     }
 
 }

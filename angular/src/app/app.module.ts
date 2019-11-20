@@ -15,7 +15,6 @@ import { isPlatformBrowser, CommonModule } from '@angular/common';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { TreeModule, FieldsetModule, DialogModule, OverlayPanelModule } from 'primeng/primeng';
-import { MenuModule } from 'primeng/menu';
 import { TreeTableModule } from 'primeng/treetable';
 import { ButtonModule } from 'primeng/button';
 import { TooltipModule } from 'primeng/tooltip';
@@ -28,7 +27,9 @@ import { ProgressBarModule } from 'primeng/progressbar';
 import { ToastrModule } from 'ngx-toastr';
 import { NgModule } from '@angular/core';
 import { HttpClientModule } from '@angular/common/http';
+import { ErrorsModule, AppErrorHandler } from './errors/errors.module';
 import { FrameModule } from './frame/frame.module';
+import { UserMessageService } from './frame/usermessage.service';
 import { ConfigModule } from './config/config.module';
 import { AppRoutingModule } from './app-routing.module';
 import { DataTableModule } from 'primeng/primeng';
@@ -40,6 +41,7 @@ import { DatacartComponent } from './datacart/datacart.component';
 import { ModalComponent } from './directives';
 import { ComboBoxComponent } from './shared/combobox/combo-box.component';
 import { AppComponent } from './app.component';
+import { LandingPageModule } from './landing/landingpage.module';
 import { LandingAboutComponent } from './landingAbout/landingAbout.component';
 import { SearchTopicsComponent } from './landing/topic/topic-popup/search-topics.component';
 import { DescriptionPopupComponent } from './landing/description/description-popup/description-popup.component';
@@ -47,7 +49,6 @@ import { AuthorPopupComponent } from './landing/author/author-popup/author-popup
 import { ContactPopupComponent } from './landing/contact/contact-popup/contact-popup.component';
 
 
-import { ConfirmationDialogComponent } from './shared/confirmation-dialog/confirmation-dialog.component';
 enableProdMode();
 
 import { SearchService } from './shared/search-service/index';
@@ -76,12 +77,14 @@ import { fakeBackendProvider } from './_helpers/fakeBackendInterceptor';
     AuthorPopupComponent, ContactPopupComponent,
     ErrorComponent, UserErrorComponent,ComboBoxComponent,ComboBoxPipe,
     AppShellNoRenderDirective, AppShellRenderDirective, ModalComponent, ContenteditableModel, 
-    ConfirmationDialogComponent,LandingAboutComponent
+    LandingAboutComponent
   ],
   imports: [
       HttpClientModule,
       ConfigModule,        // provider for AppConfig
       FrameModule,
+      ErrorsModule,
+      LandingPageModule,
       AppRoutingModule,
       LandingModule,
       FragmentPolyfillModule.forRoot({
@@ -89,7 +92,7 @@ import { fakeBackendProvider } from './_helpers/fakeBackendInterceptor';
       }),
       FormsModule, ReactiveFormsModule,
       CommonModule, SharedModule, BrowserAnimationsModule, FormsModule, TooltipModule,
-      TreeTableModule, TreeModule, MenuModule, FieldsetModule, DialogModule, OverlayPanelModule,
+      TreeTableModule, TreeModule, FieldsetModule, DialogModule, OverlayPanelModule,
       ButtonModule, ProgressSpinnerModule, ConfirmDialogModule, ProgressBarModule,DataTableModule,
       ToastrModule.forRoot({
         toastClass: 'toast toast-bootstrap-compatibility-fix'
@@ -97,6 +100,9 @@ import { fakeBackendProvider } from './_helpers/fakeBackendInterceptor';
   ],
   exports: [],
   providers: [
+      AppErrorHandler,
+      { provide: ErrorHandler,  useClass: AppErrorHandler },
+
     Title,
     Meta,
     SearchService,
@@ -115,15 +121,16 @@ import { fakeBackendProvider } from './_helpers/fakeBackendInterceptor';
     ConfirmationDialogService,
     NotificationService,
     DatePipe,
+    UserMessageService,  
     // provider used to create fake backend
-    fakeBackendProvider
+    // fakeBackendProvider
   ],
   entryComponents: [
     SearchTopicsComponent, 
     DescriptionPopupComponent, 
     AuthorPopupComponent,
-    ContactPopupComponent,
-    ConfirmationDialogComponent],
+    ContactPopupComponent
+  ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA]
 })
 

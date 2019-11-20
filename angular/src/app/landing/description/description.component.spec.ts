@@ -10,6 +10,9 @@ import { FormsModule } from '@angular/forms';
 import { DatePipe } from '@angular/common';
 import { ToastrModule } from 'ngx-toastr';
 
+import { MetadataUpdateService } from '../editcontrol/metadataupdate.service';
+import { UserMessageService } from '../../frame/usermessage.service';
+
 describe('DescriptionComponent', () => {
     let component: DescriptionComponent;
     let fixture: ComponentFixture<DescriptionComponent>;
@@ -27,8 +30,7 @@ describe('DescriptionComponent', () => {
             imports: [FormsModule, HttpClientModule, RouterTestingModule, ToastrModule.forRoot()],
             declarations: [DescriptionComponent],
             providers: [
-                SharedService,
-                DatePipe,
+                MetadataUpdateService, UserMessageService, DatePipe,
                 { provide: AppConfig, useValue: cfg }]
         })
             .compileComponents();
@@ -38,7 +40,6 @@ describe('DescriptionComponent', () => {
         fixture = TestBed.createComponent(DescriptionComponent);
         component = fixture.componentInstance;
         component.record = require('../../../assets/sampleRecord.json');
-        component.originalRecord = require('../../../assets/sampleRecord.json');
         fixture.detectChanges();
     });
 

@@ -7,9 +7,12 @@ import { AppConfig } from '../../config/config';
 import { AngularEnvironmentConfigService } from '../../config/config.service';
 import { TransferState } from '@angular/platform-browser';
 import { SharedService } from '../../shared/shared';
+import { TaxonomyListService } from '../../shared/taxonomy-list/taxonomy-list.service';
 import { RouterTestingModule } from '@angular/router/testing';
 import { DatePipe } from '@angular/common';
 import { ToastrModule } from 'ngx-toastr';
+import { MetadataUpdateService } from '../editcontrol/metadataupdate.service';
+import { UserMessageService } from '../../frame/usermessage.service';
 
 describe('AuthorComponent', () => {
     let component: AuthorComponent;
@@ -29,8 +32,8 @@ describe('AuthorComponent', () => {
             declarations: [AuthorComponent],
             schemas: [NO_ERRORS_SCHEMA],
             providers: [
+                MetadataUpdateService, UserMessageService, DatePipe,
                 SharedService,
-                DatePipe,
                 { provide: AppConfig, useValue: cfg }]
         })
             .compileComponents();

@@ -11,7 +11,9 @@ export const environment = {
 import { LPSConfig } from '../app/config/config';
 
 export const context = {
-    production: true
+    production: true,
+    useMetadataService: true,
+    useCustomizationService: true
 };
 
 export const config : LPSConfig = {
@@ -24,5 +26,9 @@ export const config : LPSConfig = {
     mode:        "dev",
     status:      "Dev Version",
     appVersion:  "v1.1.0",
-    production:  context.production
+    production:  context.production,
+    editEnabled: false
 }
+
+export const testdata : {} = { }
+

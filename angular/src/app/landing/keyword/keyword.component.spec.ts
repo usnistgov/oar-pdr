@@ -4,11 +4,12 @@ import { KeywordComponent } from './keyword.component';
 import { AppConfig } from '../../config/config';
 import { AngularEnvironmentConfigService } from '../../config/config.service';
 import { TransferState } from '@angular/platform-browser';
-import { SharedService } from '../../shared/shared';
 import { RouterTestingModule } from '@angular/router/testing';
 import { FormsModule } from '@angular/forms';
 import { DatePipe } from '@angular/common';
 import { ToastrModule } from 'ngx-toastr';
+import { MetadataUpdateService } from '../editcontrol/metadataupdate.service';
+import { UserMessageService } from '../../frame/usermessage.service';
 
 describe('KeywordComponent', () => {
     let component: KeywordComponent;
@@ -27,8 +28,7 @@ describe('KeywordComponent', () => {
             imports: [FormsModule, HttpClientModule, RouterTestingModule, ToastrModule.forRoot()],
             declarations: [KeywordComponent],
             providers: [
-                SharedService,
-                DatePipe,
+                MetadataUpdateService, UserMessageService, DatePipe,
                 { provide: AppConfig, useValue: cfg }]
         })
             .compileComponents();

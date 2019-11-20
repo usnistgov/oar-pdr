@@ -1,14 +1,13 @@
 <div style="display: table;">
     <div class="editable_container">
         <div class="editable_field" *ngIf="!record['contactPoint']; else hasContacts">
-            <div class="editable_field" *ngIf="recordEditmode"
-                [ngStyle]="getFieldStyle('contactPoint')">
+            <div class="editable_field" *ngIf="mdupdsvc.editMode" [ngStyle]="getFieldStyle()">
                 Contact:
             </div>
         </div>
         <ng-template #hasContacts>
             <div class="editable_field" style="max-width:calc(100% - 4em);"
-                [ngStyle]="getFieldStyle('contactPoint')">
+                [ngStyle]="getFieldStyle()">
                 Contact:
                 <strong>
                     <a class="font14" *ngIf="isEmail"
@@ -42,16 +41,16 @@
                 </div>
             </div>
         </ng-template>
-        <button class="edit_button" *ngIf="recordEditmode" type="button"
+        <button class="edit_button" *ngIf="mdupdsvc.editMode" type="button"
             (click)="openModal('contactPoint')">
             <i class="faa faa-pencil icon_enabled" data-toggle="tooltip"
                 title="Edit contactPoint"></i>
         </button>
-        <button class="undo_button" *ngIf="recordEditmode" type="button"
-            [disabled]="!fieldObject.contactPoint.edited"
+        <button class="undo_button" *ngIf="mdupdsvc.editMode" type="button"
+            [disabled]="!updated"
             (click)="undoEditing('contactPoint')">
             <i class="faa faa-undo"
-                [ngClass]="{'icon_enabled': fieldObject.contactPoint.edited, 'icon_disabled':!fieldObject.contactPoint.edited }"
+                [ngClass]="{'icon_enabled': updated, 'icon_disabled': !updated }"
                 data-toggle="tooltip" title="Undo contactPoint"></i>
         </button>
     </div>

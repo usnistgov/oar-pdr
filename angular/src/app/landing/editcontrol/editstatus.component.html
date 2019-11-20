@@ -1,0 +1,7 @@
+<div class="ec-status-bar">
+    <span [ngStyle]="{'color': messageColor}">{{message}}</span>
+    <div [hidden]="!isProcessing" style="width: 2em;height:2em; float: right;">
+        <i class="faa faa-spinner faa-spin faa-stack-1x ec-status-spinner"
+            style="width:2em;position: inherit;"></i>
+    </div>
+</div>

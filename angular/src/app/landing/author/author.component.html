@@ -1,7 +1,7 @@
 <div style="display: table">
     <div class="editable_container">
         <div class="editable_field" *ngIf="!record['authors'] || record['authors'].length==0; else hasAuthors">
-            <div class="editable_field" *ngIf="recordEditmode" [ngStyle]="getFieldStyle()">
+            <div class="editable_field" *ngIf="mdupdsvc.editMode" [ngStyle]="getFieldStyle()">
                 Authors:
             </div>
         </div>
@@ -30,13 +30,13 @@
                 </div>
             </div>
         </ng-template>
-        <button class="edit_button" *ngIf="recordEditmode" type="button" (click)="openModal('authors')">
+        <button class="edit_button" *ngIf="mdupdsvc.editMode" type="button" (click)="openModal('authors')">
             <i class="faa faa-pencil icon_enabled" data-toggle="tooltip" title="Edit authors"></i>
         </button>
-        <button class="undo_button" *ngIf="recordEditmode" type="button" [disabled]="!fieldObject.authors.edited"
-            (click)="undoEditing('authors')">
+        <button class="undo_button" *ngIf="mdupdsvc.editMode" type="button" [disabled]="!updated"
+            (click)="undoEditing()">
             <i class="faa faa-undo"
-                [ngClass]="{'icon_enabled': fieldObject.authors.edited, 'icon_disabled':!fieldObject.authors.edited }"
+                [ngClass]="{'icon_enabled': updated, 'icon_disabled':!updated }"
                 data-toggle="tooltip" title="Undo authors"></i>
         </button>
     </div>

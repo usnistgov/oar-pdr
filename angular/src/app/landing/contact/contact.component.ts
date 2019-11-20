@@ -1,13 +1,10 @@
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
-import { CustomizationService } from '../../shared/customization-service/customization-service.service';
 import { NgbModalOptions, NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { SharedService } from '../../shared/shared';
 import { ContactPopupComponent } from './contact-popup/contact-popup.component';
-import { EditControlService } from '../edit-control-bar/edit-control.service';
 import { NotificationService } from '../../shared/notification-service/notification.service';
 import { GoogleAnalyticsService } from '../../shared/ga-service/google-analytics.service';
-import { DatePipe } from '@angular/common';
-import { ErrorHandlingService } from '../../shared/error-handling-service/error-handling.service';
+import { MetadataUpdateService } from '../editcontrol/metadataupdate.service';
 
 @Component({
     selector: 'app-contact',
@@ -16,29 +13,22 @@ import { ErrorHandlingService } from '../../shared/error-handling-service/error-
 })
 export class ContactComponent implements OnInit {
     @Input() record: any[];
-    @Input() originalRecord: any[];
     @Input() inBrowser: boolean;   // false if running server-side
-    @Input() fieldObject: any;
-
-    recordEditmode: boolean = false;
-    tempInput: any = {};
     fieldName = 'contactPoint';
+
+    tempInput: any = {};
     isEmail = false;
 
-    constructor(
-        private customizationService: CustomizationService,
-        private ngbModal: NgbModal,
-        private editControlService: EditControlService,
-        private notificationService: NotificationService,
-        private gaService: GoogleAnalyticsService,
-        private datePipe: DatePipe,
-        private errorHandlingService: ErrorHandlingService,
-        private sharedService: SharedService
-    ) { 
-        this.editControlService.watchEditMode().subscribe(value => {
-            this.recordEditmode = value;
-        });
-    }
+    constructor(public mdupdsvc : MetadataUpdateService,        
+                private ngbModal: NgbModal,
+                private gaService: GoogleAnalyticsService,
+                private notificationService: NotificationService)
+    { }
+
+    /**
+     * a field indicating if this data has beed edited
+     */
+    get updated() { return this.mdupdsvc.fieldUpdated(this.fieldName); }
 
     ngOnInit() {
         if ("hasEmail" in this.record['contactPoint'])
@@ -47,8 +37,8 @@ export class ContactComponent implements OnInit {
     }
 
     getFieldStyle() {
-        if (this.recordEditmode) {
-            if (this.customizationService.dataEdited(this.record[this.fieldName], this.originalRecord[this.fieldName])) {
+        if (this.mdupdsvc.editMode) {
+            if (this.mdupdsvc.fieldUpdated(this.fieldName)) {
                 return { 'border': '1px solid lightgrey', 'background-color': '#FCF9CD', 'padding-right': '1em' };
             } else {
                 return { 'border': '1px solid lightgrey', 'background-color': 'white', 'padding-right': '1em' };
@@ -59,9 +49,8 @@ export class ContactComponent implements OnInit {
     }
     
     openModal() {
-        if (!this.recordEditmode) return;
+        if (! this.mdupdsvc.editMode) return;
 
-        let i: number;
         let ngbModalOptions: NgbModalOptions = {
             backdrop: 'static',
             keyboard: false,
@@ -69,10 +58,10 @@ export class ContactComponent implements OnInit {
         };
 
         if (this.record[this.fieldName] != undefined && this.record[this.fieldName] != "") {
-            this.tempInput[this.fieldName] = this.sharedService.deepCopy(this.record[this.fieldName]);
+            this.tempInput[this.fieldName] = JSON.parse(JSON.stringify(this.record[this.fieldName]));
         } else {
             this.tempInput[this.fieldName] = [];
-            this.tempInput[this.fieldName].push(this.sharedService.getBlankField(this.fieldName));
+            this.tempInput[this.fieldName].push(this._getBlankField());
         }
 
         const modalRef = this.ngbModal.open(ContactPopupComponent, ngbModalOptions);
@@ -87,86 +76,35 @@ export class ContactComponent implements OnInit {
                 postMessage[this.fieldName] = returnValue[this.fieldName];
                 console.log("postMessage", JSON.stringify(postMessage));
 
-                this.customizationService.update(JSON.stringify(postMessage)).subscribe(
-                    result => {
-                        this.record[this.fieldName] = this.sharedService.deepCopy(returnValue[this.fieldName]);
-                        this.editControlService.setDataChanged(true);
-                        this.onUpdateSuccess();
-                    },
-                    err => {
-                        this.onUpdateError(err, "Error updating contact", "Update contact");
-                    });
+                this.mdupdsvc.update(this.fieldName, postMessage).then((updateSuccess) => {
+                    // console.log("###DBG  update sent; success: "+updateSuccess.toString());
+                    if (updateSuccess)
+                        this.notificationService.showSuccessWithTimeout("Contact updated.", "", 3000);
+                    else
+                        console.error("acknowledge contact update failure");
+                });
             }
         })
     }
 
-    /*
-     * When update successful
-     */
-    onUpdateSuccess() {
-        this.fieldObject[this.fieldName]["edited"] = (JSON.stringify(this.record[this.fieldName]) != JSON.stringify(this.originalRecord[this.fieldName]));
-        var updateDate = this.datePipe.transform(new Date(), "MMM d, y, h:mm:ss a");
-        this.customizationService.checkDataChanges(this.record, this.originalRecord, this.fieldObject, updateDate);
-        this.notificationService.showSuccessWithTimeout("Contact updated.", "", 3000);
-    }
-
-    /*
-     * When update failed
-     */
-    onUpdateError(err: any, message:string, action: string) {
-        this.errorHandlingService.setErrMessage({ message: message, messageDetail: err.message, action: action, display: true });
-        // this.setErrorMessage.emit({ error: err, displayError: true, action: action });
+    protected _getBlankField() {
+        return {
+            "fn": "",
+            "hasEmail": "",
+            "address": [ "" ]
+        }
     }
 
     /*
      *  Undo editing. If no more field was edited, delete the record in staging area.
      */
     undoEditing() {
-        var noMoreEdited = true;
-        console.log("this.fieldObject", this.fieldObject);
-        for (var fld in this.fieldObject) {
-            if (this.fieldName != fld && this.fieldObject[fld].edited) {
-                noMoreEdited = false;
-                break;
-            }
-        }
-
-        if (noMoreEdited) {
-            console.log("Deleting...");
-            this.customizationService.delete().subscribe(
-                (res) => {
-                    if (this.originalRecord[this.fieldName] == undefined)
-                        delete this.record[this.fieldName];
-                    else
-                        this.record[this.fieldName] = this.sharedService.deepCopy(this.originalRecord[this.fieldName]);
-
-                    this.onUpdateSuccess();
-                },
-                (err) => {
-                    this.onUpdateError(err, "Error undo editing", "Undo editing - delete");
-                }
-            );
-        } else {
-            var body: string;
-            if (this.originalRecord[this.fieldName] == undefined) {
-                body = '{"' + this.fieldName + '":""}';
-            } else {
-                body = '{"' + this.fieldName + '":' + JSON.stringify(this.originalRecord[this.fieldName]) + '}';
-            }
-
-            this.customizationService.update(body).subscribe(
-                result => {
-                    if (this.originalRecord[this.fieldName] == undefined)
-                        delete this.record[this.fieldName];
-                    else
-                        this.record[this.fieldName] = this.sharedService.deepCopy(this.originalRecord[this.fieldName]);
-
-                    this.onUpdateSuccess();
-                },
-                err => {
-                    this.onUpdateError(err, "Error undo editing", "Undo editing");
-                });
-        }
+        this.mdupdsvc.undo(this.fieldName).then((success) => {
+            if (success)
+                this.notificationService.showSuccessWithTimeout("Reverted changes to keywords.", "", 3000);
+            else
+                console.error("Failed to undo keywords metadata")
+        });
     }
 
     clickContact = false;

@@ -1,12 +1,8 @@
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
-import { CustomizationService } from '../../shared/customization-service/customization-service.service';
 import { NgbModalOptions, NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { SharedService } from '../../shared/shared';
 import { AuthorPopupComponent } from './author-popup/author-popup.component';
-import { EditControlService } from '../edit-control-bar/edit-control.service';
 import { NotificationService } from '../../shared/notification-service/notification.service';
-import { DatePipe } from '@angular/common';
-import { ErrorHandlingService } from '../../shared/error-handling-service/error-handling.service';
+import { MetadataUpdateService } from '../editcontrol/metadataupdate.service';
 
 @Component({
     selector: 'app-author',
@@ -15,34 +11,26 @@ import { ErrorHandlingService } from '../../shared/error-handling-service/error-
 })
 export class AuthorComponent implements OnInit {
     @Input() record: any[];
-    @Input() originalRecord: any[];
     @Input() inBrowser: boolean;   // false if running server-side
-    @Input() fieldObject: any;
-
-    recordEditmode: boolean = false;
-    tempInput: any = {};
     fieldName = 'authors';
+    tempInput: any = {};
 
-    constructor(
-        private customizationService: CustomizationService,
-        private ngbModal: NgbModal,
-        private editControlService: EditControlService,
-        private notificationService: NotificationService,
-        private datePipe: DatePipe,
-        private errorHandlingService: ErrorHandlingService,
-        private sharedService: SharedService
-    ) { 
-        this.editControlService.watchEditMode().subscribe(value => {
-            this.recordEditmode = value;
-        });
-    }
+    constructor(public mdupdsvc : MetadataUpdateService,        
+                private ngbModal: NgbModal,
+                private notificationService: NotificationService)
+    { }
+
+    /**
+     * a field indicating if this data has beed edited
+     */
+    get updated() { return this.mdupdsvc.fieldUpdated(this.fieldName); }
 
     ngOnInit() {
     }
 
     getFieldStyle() {
-        if (this.recordEditmode) {
-            if (this.customizationService.dataEdited(this.record[this.fieldName], this.originalRecord[this.fieldName])) {
+        if (this.mdupdsvc.editMode) {
+            if (this.mdupdsvc.fieldUpdated(this.fieldName)) {
                 return { 'border': '1px solid lightgrey', 'background-color': '#FCF9CD', 'padding-right': '1em' };
             } else {
                 return { 'border': '1px solid lightgrey', 'background-color': 'white', 'padding-right': '1em' };
@@ -53,9 +41,8 @@ export class AuthorComponent implements OnInit {
     }
     
     openModal() {
-        if (!this.recordEditmode) return;
+        if (! this.mdupdsvc.editMode) return;
 
-        let i: number;
         let ngbModalOptions: NgbModalOptions = {
             backdrop: 'static',
             keyboard: false,
@@ -64,9 +51,9 @@ export class AuthorComponent implements OnInit {
 
         var tempauthors = [];
         if (this.record[this.fieldName] != undefined && this.record[this.fieldName].length > 0)
-            this.tempInput[this.fieldName] = this.sharedService.deepCopy(this.record[this.fieldName]);
+            this.tempInput[this.fieldName] = JSON.parse(JSON.stringify(this.record[this.fieldName]));
         else {
-            tempauthors.push(this.sharedService.getBlankField(this.fieldName));
+            tempauthors.push(this._getBlankField());
             this.tempInput[this.fieldName] = tempauthors;
         }
 
@@ -87,89 +74,55 @@ export class AuthorComponent implements OnInit {
             if (returnValue) {
                 var postMessage: any = {};
                 postMessage[this.fieldName] = returnValue[this.fieldName];
-                console.log("postMessage", JSON.stringify(postMessage));
+                // console.log("postMessage", JSON.stringify(postMessage));
 
-                this.customizationService.update(JSON.stringify(postMessage)).subscribe(
-                    result => {
-                        this.record[this.fieldName] = this.sharedService.deepCopy(returnValue[this.fieldName]);
-                        this.editControlService.setDataChanged(true);
-                        this.onUpdateSuccess();
-                    },
-                    err => {
-                        this.onUpdateError(err, "Error updating author","Update authors");
-                    });
+                this.mdupdsvc.update(this.fieldName, postMessage).then((updateSuccess) => {
+                    // console.log("###DBG  update sent; success: "+updateSuccess.toString());
+                    if (updateSuccess)
+                        this.notificationService.showSuccessWithTimeout("Authors updated.", "", 3000);
+                    else
+                        console.error("acknowledge author update failure");
+                });
             }
         })
     }
 
-    /*
-     * When update successful
-     */
-    onUpdateSuccess() {
-        this.fieldObject[this.fieldName]["edited"] = (JSON.stringify(this.record[this.fieldName]) != JSON.stringify(this.originalRecord[this.fieldName]));
-        var updateDate = this.datePipe.transform(new Date(), "MMM d, y, h:mm:ss a");
-        this.customizationService.checkDataChanges(this.record, this.originalRecord, this.fieldObject, updateDate);
-        this.notificationService.showSuccessWithTimeout("Author updated.", "", 3000);
+    protected _getBlankField() {
+        return {
+          "familyName": "",
+          "fn": "",
+          "givenName": "",
+          "middleName": "",
+          "affiliation": [
+            {
+              "@id": "",
+              "title": "National Institute of Standards and Technology",
+              "dept": "",
+              "@type": [
+                ""
+              ]
+            }
+          ],
+          "orcid": "",
+          "isCollapsed": false,
+          "fnLocked": false,
+          "dataChanged": false
+        };
     }
 
-    /*
-     * When update failed
-     */
-    onUpdateError(err: any, message:string, action: string) {
-        this.errorHandlingService.setErrMessage({ message: message, messageDetail: err.message, action: action, display: true });
-        // this.setErrorMessage.emit({ error: err, displayError: true, action: action });
-    }
 
     /*
      *  Undo editing. If no more field was edited, delete the record in staging area.
      */
     undoEditing() {
-        var noMoreEdited = true;
-        console.log("this.fieldObject", this.fieldObject);
-        for (var fld in this.fieldObject) {
-            if (this.fieldName != fld && this.fieldObject[fld].edited) {
-                noMoreEdited = false;
-                break;
-            }
-        }
-
-        if (noMoreEdited) {
-            console.log("Deleting...");
-            this.customizationService.delete().subscribe(
-                (res) => {
-                    if (this.originalRecord[this.fieldName] == undefined)
-                        delete this.record[this.fieldName];
-                    else
-                        this.record[this.fieldName] = this.sharedService.deepCopy(this.originalRecord[this.fieldName]);
-
-                    this.onUpdateSuccess();
-                },
-                (err) => {
-                    this.onUpdateError(err, "Error undo editing", "Undo editing - delete");
-                }
-            );
-        } else {
-            var body: string;
-            if (this.originalRecord[this.fieldName] == undefined) {
-                body = '{"' + this.fieldName + '":""}';
-            } else {
-                body = '{"' + this.fieldName + '":' + JSON.stringify(this.originalRecord[this.fieldName]) + '}';
-            }
-
-            this.customizationService.update(body).subscribe(
-                result => {
-                    if (this.originalRecord[this.fieldName] == undefined)
-                        delete this.record[this.fieldName];
-                    else
-                        this.record[this.fieldName] = this.sharedService.deepCopy(this.originalRecord[this.fieldName]);
-
-                    this.onUpdateSuccess();
-                },
-                err => {
-                    this.onUpdateError(err, "Error undo editing", "Undo editing");
-                });
-        }
+        this.mdupdsvc.undo(this.fieldName).then((success) => {
+            if (success)
+                this.notificationService.showSuccessWithTimeout("Reverted changes to keywords.", "", 3000);
+            else
+                console.error("Failed to undo keywords metadata")
+        });
     }
+
 
     clicked = false;
     expandClick() {

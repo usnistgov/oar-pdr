@@ -2,11 +2,9 @@ import { Component, ElementRef } from '@angular/core';
 import { AppConfig } from '../config/config';
 import { CartService } from '../datacart/cart.service';
 import { CartEntity } from '../datacart/cart.entity';
-import { AuthService } from '../shared/auth-service/auth.service';
 import { Router } from '@angular/router';
-import { SharedService } from '../shared/shared';
 import { NotificationService } from '../shared/notification-service/notification.service';
-import { EditControlService } from '../landing/edit-control-bar/edit-control.service';
+import { EditStatusService } from '../landing/editcontrol/editstatus.service';
 
 /**
  * A Component that serves as the header of the landing page.  
@@ -36,20 +34,16 @@ export class HeadbarComponent {
     appVersion: string = "";
     cartLength: number = 0;
     editEnabled: any;
-    isEditMode: boolean = false;
-    ediid: any;
-    userId: string = '';
-    authenticated: boolean = false;
+    // ediid: any;
 
     constructor(
         private el: ElementRef,
         private cfg: AppConfig,
         public cartService: CartService,
         private router: Router,
-        private commonVarService: SharedService,
-        public authService: AuthService,
         private notificationService: NotificationService,
-        private editControlService: EditControlService) {
+        public editstatsvc: EditStatusService)
+    {
         if (!(cfg instanceof AppConfig))
             throw new Error("HeadbarComponent: Wrong config type provided: " + cfg);
         this.searchLink = cfg.get("locations.pdrSearch", "/sdp/");
@@ -61,28 +55,9 @@ export class HeadbarComponent {
             this.cartLength = value;
         });
 
-        this.editControlService.watchEditMode().subscribe(
-            value => {
-                this.isEditMode = value;
-            }
-        );
-
-        this.authService.watchUserId().subscribe(
-            value => {
-                console.log("Received user id:", value);
-                this.userId = value;
-            }
-        );
-
-        this.authService.watchAuthenticateStatus().subscribe(
-            value => {
-                this.authenticated = value;
-            }
-        );
-
-        this.editControlService.watchEdiid().subscribe(value => {
-            this.ediid = value;
-        });
+        // this.editControlService.watchEdiid().subscribe(value => {
+        //     this.ediid = value;
+        // });
     }
 
     /*
@@ -90,17 +65,13 @@ export class HeadbarComponent {
     */
     ngOnInit() {
         this.cartLength = this.cartService.getCartSize();
-        this.userId = this.authService.getUserId();
-        // if(this.loggedIn()){
-        //   this.authService.setAuthenticateStatus(true);
-        // }
     }
 
-    /*
-    * Check if user is logged in.
-    */
+    /**
+     * Return true if the user is logged in
+     */
     loggedIn() {
-        return this.authService.authenticated();
+        return Boolean(this.editstatsvc.userID);
     }
 
     /**
@@ -112,57 +83,50 @@ export class HeadbarComponent {
     }
 
     /*
-    *   Go to original landing page
-    */
-    goHome() {
-        this.router.navigate(['/od/id/', this.ediid], { fragment: '' });
-    }
-
-    /*
-    *   Open about window if not in edit mode. Otherwise do nothing.
-    */
+     *   Open about window if not in edit mode. Otherwise do nothing.
+     */
     openRootPage() {
-        if (!this.isEditMode)
+        if (!this.editstatsvc.editMode)
             window.open('/', '_self');
     }
 
     /*
-    *   Open about window if not in edit mode. Otherwise do nothing.
-    */
+     *   Open about window if not in edit mode. Otherwise do nothing.
+     */
     openAboutPage() {
-        if (!this.isEditMode)
+        if (!this.editstatsvc.editMode)
             window.open('/pdr/about', '_blank');
     }
 
     /*
-    *   Open search window if not in edit mode. Otherwise do nothing.
-    */
+     *   Open search window if not in edit mode. Otherwise do nothing.
+     */
     openSearchPage() {
-        if (!this.isEditMode)
+        if (!this.editstatsvc.editMode)
             window.open(this.searchLink, '_blank');
     }
 
     /*
-    *   In edit mode, top menu will be disabled - text color set to grey
-    */
+     *   In edit mode, top menu will be disabled - text color set to grey
+     */
     getMenuTextColor() {
-        if (this.isEditMode)
+        if (this.editstatsvc.editMode)
             return 'grey';
         else
             return 'white';
     }
 
     /*
-    *   In edit mode, mouse cursor set to normal
-    */
+     *   In edit mode, mouse cursor set to normal
+     */
     getCursor() {
-        if (this.isEditMode)
+        if (this.editstatsvc.editMode)
             return 'default';
         else
             return 'pointer';
     }
 
     showUserId(){
-        this.notificationService.showSuccessWithTimeout(this.userId, "", 3000);
+        this.notificationService.showSuccessWithTimeout(this.editstatsvc.userID, "", 3000);
     }
 }
