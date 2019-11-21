@@ -7,7 +7,7 @@ import { MetadataUpdateService } from '../editcontrol/metadataupdate.service';
 @Component({
     selector: 'app-description',
     templateUrl: './description.component.html',
-    styleUrls: ['../landing.component.css']
+    styleUrls: ['../landing.component.css', './description.component.css']
 })
 export class DescriptionComponent implements OnInit {
     @Input() record: any[];
@@ -25,13 +25,15 @@ export class DescriptionComponent implements OnInit {
     }
 
     getFieldStyle() {
-
-        if (this.mdupdsvc.fieldUpdated(this.fieldName)) {
-            return { 'background-color': '#FCF9CD' };
+        if (this.mdupdsvc.editMode) {
+            if (this.mdupdsvc.fieldUpdated(this.fieldName)) {
+                return { 'background-color': '#FCF9CD' };
+            } else {
+                return {  };
+            }
         } else {
-            return { 'background-color': 'rgb(247, 249, 250)' };
+            return {  };
         }
-
     }
 
     openModal() {
