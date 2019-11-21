@@ -78,7 +78,7 @@ export class EditControlsComponent implements OnInit {
      */
     cancelRecord() {
         this.setErrorMessage("", "", "", false);
-        this.confirmationDialogService.confirm('Edited data will be lost', 'Do you want to erase changes?')
+        this.confirmationDialogService.confirm('Edited data will be lost', 'Do you want to erase changes?', true)
             .then((confirmed) => {
                 if (confirmed) {
                     this.customizationService.delete().subscribe(

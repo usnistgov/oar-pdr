@@ -15,6 +15,7 @@ export class ConfirmationDialogService {
   public confirm(
     title: string,
     message: string,
+    showWarningIcon: boolean,
     btnOkText: string = 'YES',
     btnCancelText: string = 'NO',
     dialogSize: 'sm'|'lg' = 'sm'): Promise<boolean> {
@@ -23,6 +24,7 @@ export class ConfirmationDialogService {
     modalRef.componentInstance.message = message;
     modalRef.componentInstance.btnOkText = btnOkText;
     modalRef.componentInstance.btnCancelText = btnCancelText;
+    modalRef.componentInstance.showWarningIcon = showWarningIcon;
 
     return modalRef.result;
   }

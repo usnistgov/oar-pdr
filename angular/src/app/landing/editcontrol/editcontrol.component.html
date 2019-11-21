@@ -3,39 +3,25 @@
     <!-- Buttons are arranged from right to left -->
 
     <!-- Discard button -->
-    <button type="button" class="btn btn-labeled" id="ec-discard-btn"
-            (click)="confirmDiscardEdits()" [disabled]="! editMode"
-            style="float:right;margin:.5em 2em .5em 0em;">
-        <span class="btn-label" style="border: 1px solid grey;"><i
-              class="faa faa-trash faa-1x icon-white"></i></span><span
-              style="padding-right:10px;">Discard</span>
+    <button pButton type="submit" class="btn btn-labeled" id="ec-discard-btn" (click)="confirmDiscardEdits()"
+        [disabled]="! editMode" label="Discard" icon="faa faa-trash faa-1x icon-white" iconPos="left">
     </button>
 
     <!-- Submit button -->
-    <button type="button" class="btn btn-labeled" id="ec-submit-btn"
-            (click)="saveEdits()" [disabled]="!editMode || !editsPending()"
-            style="float:right;margin:.5em 1em .5em 0em;">
-        <span class="btn-label" style="border: 0px solid green;left: -20px;"><i
-              class="faa faa-save faa-1x icon-white"></i></span><span 
-              style="padding-right:10px;">Submit</span>
+    <button pButton type="submit" class="btn btn-labeled" id="ec-submit-btn" (click)="saveEdits()"
+        [disabled]="!editMode || !editsPending()" label="Submit" icon="faa faa-save faa-1x icon-white" iconPos="left">
     </button>
 
     <!-- 
       -  Edit button:  when editing is off, the Edit button will show; if it is on, the
       -  "Preview" button will show in its place
       -->
-    <button *ngIf="! editMode" type="button" class="btn btn-labeled" (click)="startEditing()" id="ec-edit-btn"
-            style="float:right;margin:.5em 1em .5em 0em;">
-        <span class="btn-label" style="border: 0px solid rgb(221, 172, 9);left: -32px;"><i
-              class="faa faa-pencil faa-1x icon-white"></i></span><span 
-              style="padding-right:10px;">Edit</span>
+    <button pButton type="submit" *ngIf="! editMode" type="button" class="btn btn-labeled" 
+        (click)="startEditing()"
+        id="ec-edit-btn" label="Edit" icon="faa faa-pencil faa-1x icon-white" iconPos="left">
     </button>
 
-    <button *ngIf="editMode" type="button" class="btn btn-labeled" (click)="preview()" id="ec-quited-btn"
-            style="float:right;margin:.5em 1em .5em 0em;">
-        <span class="btn-label" style="border: 0px solid rgb(221, 172, 9);left: -15px;"><i
-              class="faa faa-sign-out faa-1x icon-white"></i></span><span 
-              style="padding-right:10px;">Preview</span>
+    <button pButton type="submit" *ngIf="editMode" type="button" class="btn btn-labeled" (click)="preview()" id="ec-preview-btn" label="Preview" icon="faa faa-eye faa-1x icon-white" iconPos="left">
     </button>
 </div>
 

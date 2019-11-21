@@ -21,11 +21,11 @@
 
 .header-links {
     margin-right: 0px;
-    margin-top: 0px;
+    margin-top: 15px;
     color:white;
     padding-right: 2%;
+    vertical-align: bottom;
 }
-
 
 .textlinks {
     color:white;

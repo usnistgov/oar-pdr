@@ -170,7 +170,9 @@ export class RemoteWebMetadataService extends MetadataService {
     constructor(private endpoint : string,
                 private webclient : HttpClient,
                 private inBrowser : boolean)
-    { super(); }
+    { super(); 
+        console.log('webclient', webclient);
+    }
 
     /**
      * retrieve the metadata associated with the current identifier.
@@ -187,7 +189,7 @@ export class RemoteWebMetadataService extends MetadataService {
         else if (id.startsWith("doi:"))
             url += "?doi=";
         url += id;
-
+        console.log('webclient......', this.webclient);
         console.log("Pulling NERDm record from metadata service: " + url);
         let out = this.webclient.get(url) as Observable<NerdmRes>;
 

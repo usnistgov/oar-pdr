@@ -1,32 +1,28 @@
 <div style="background-color:#153971;height: 4em; color:white;text-align: center;padding-top: .5em">
-  <h2 style="color: white;">CONTACT POINT</h2>
+    <h2 style="color: white;">Contact Point</h2>
 </div>
 <div style="margin: 1em 2em 2em 2em;">
-  <p>
-    Contact full name: <input type="text" [(ngModel)]="tempContactPoint.fn" />
-  </p>
-  <p>
-    Email (must be valid NIST email): <input type="text" [(ngModel)]="tempContactPoint.hasEmail" />
-  </p>
-  Address:
-  <div>
-    <textarea id="address" style="width: 100%; padding: .5em .5em .5em 1.5em; border: 1px solid lightgrey;"
-      (keyup)="autogrow($event)" [(ngModel)]='tempAddress'
-      placeholder="Organization&#x0a;Street address&#x0a;city, state zip"></textarea>
-  </div>
-  <div style="align-items: right; margin-top: 1em;">
-    <button pButton class="button"
-      style="float:right;margin:0em 1em 2em 1em;width:150px; height:2em; background-color:grey;color:white;padding-right: 1em;"
-      (click)="activeModal.close('Close click')">
-      <i class="faa faa-trash faa-1x icon-white" style="color: #fff;padding-left: .5em;padding-right: .5em;"></i>
-      Cancel
-    </button>
-    <button pButton class="button"
-      style="float:right;margin:0em 1em 2em 1em;width:150px; height:2em; background-color:green;color:white;padding-right: 1em;"
-      (click)="saveContactInfo();">
-      <i class="faa faa-save faa-1x icon-white" style="color: #fff;padding-left: .5em;padding-right: .5em;"></i>
-      Save
-    </button>
-  </div>
-  <div style="clear:both"></div>
+    <p>
+        Contact full name: <input type="text" [(ngModel)]="tempContactPoint.fn" />
+    </p>
+    <p>
+        Email (must be valid NIST email): <input type="text" [(ngModel)]="tempContactPoint.hasEmail" />
+    </p>
+    Address:
+    <div>
+        <textarea id="address" style="width: 100%; padding: .5em .5em .5em 1.5em; border: 1px solid lightgrey;"
+            (keyup)="autogrow($event)" [(ngModel)]='tempAddress'
+            placeholder="Organization&#x0a;Street address&#x0a;city, state zip"></textarea>
+    </div>
+    <div style="align-items: right; margin-top: 1em;">
+        <button pButton type="submit" class="btn-cancel" 
+            (click)="activeModal.close('Close click')" label="Cancel"
+            icon="faa faa-trash faa-1x icon-white" iconPos="left">
+        </button>
+        <button pButton type="submit" class="btn-Save"
+            style="float:right;margin:0em 1em 2em 1em;width:150px; background-color:green;color:white;padding-right: 1em;"
+            (click)="saveContactInfo();" label="Save" icon="faa faa-save faa-1x icon-white" iconPos="left">
+        </button>
+    </div>
+    <div style="clear:both"></div>
 </div>

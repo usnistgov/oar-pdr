@@ -75,3 +75,14 @@ h2 {
   background-color: #2F96B4 !important;
   padding: 0 1em 0 1em;
 }
+
+a.disabled {
+    pointer-events: none;
+    cursor: default;
+    color: grey
+}
+
+a.enabled {
+    cursor: pointer;
+    color: white;
+}

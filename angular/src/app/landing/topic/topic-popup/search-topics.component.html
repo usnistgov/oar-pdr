@@ -1,59 +1,57 @@
 <div style="background-color:#153971;height: 4em; color:white;text-align: center;padding-top: .5em">
-  <h2 id="title" style="color: white;">RESEARCH TOPICS</h2>
+    <h2 id="title" style="color: white;">RESEARCH TOPICS</h2>
 </div>
 <div style="width:90%; margin: 1em auto 1em auto;">
-  <table width="100%" align="center">
-    <tr *ngFor="let topic of inputValue[field]; let i = index; trackBy: trackByFn" align="top"
-      style="border-bottom:1pt solid black;" height="20">
-      <td>
-        <span (click)="searchAndExpandTaxonomyTree(topic, true)" style="color: #1E6BA1; cursor: pointer;">{{topic}}</span>
-      </td>
-      <td width="50px">
-        <i class="faa faa-trash" (click)="deleteTopic(i)"
-          style="float: right;cursor: pointer;color:grey; margin: 1em .5em;" data-toggle="tooltip"
-          title="Delete affiliation"></i>
-      </td>
-    </tr>
-  </table>
-  <div style="align-items: right; margin-top: 1em;">
-    <button pButton class="button"
-      style="float:right;margin:0em 1em 2em 1em;width:150px; height:2em; background-color:grey;color:white;padding-right: 1em;"
-      (click)="activeModal.close('Close click')">
-      <i class="faa faa-trash faa-1x icon-white" style="color: #fff;padding-left: .5em;padding-right: .5em;"></i>
-      Cancel
-    </button>
-    <button pButton class="button"
-      style="float:right;margin:0em 1em 2em 1em;width:150px; height:2em; background-color:green;color:white;padding-right: 1em;"
-      (click)="saveTopic();">
-      <i class="faa faa-save faa-1x icon-white" style="color: #fff;padding-left: .5em;padding-right: .5em;"></i>
-      Save
-    </button>
-  </div>
+    <table width="100%" align="center">
+        <tr *ngFor="let topic of inputValue[field]; let i = index; trackBy: trackByFn" align="top"
+            style="border-bottom:1pt solid black;" height="20">
+            <td>
+                <span (click)="searchAndExpandTaxonomyTree(topic, true)"
+                    style="color: #1E6BA1; cursor: pointer;">{{topic}}</span>
+            </td>
+            <td width="50px">
+                <i class="faa faa-trash" (click)="deleteTopic(i)"
+                    style="float: right;cursor: pointer;color:grey; margin: 1em .5em;" data-toggle="tooltip"
+                    title="Delete affiliation"></i>
+            </td>
+        </tr>
+    </table>
+    <div style="align-items: right; margin-top: 1em;">
+        <button pButton type="submit" class="btn-cancel" 
+            (click)="activeModal.close('Close click')" label="Cancel"
+            icon="faa faa-trash faa-1x icon-white" iconPos="left">
+        </button>
+        <button pButton type="submit" class="btn-Save"
+            style="float:right;margin:0em 1em 2em 1em;width:150px; height:2em; background-color:green;color:white;padding-right: 1em;"
+            (click)="saveTopic();" label="Save" icon="faa faa-save faa-1x icon-white" iconPos="left">
+        </button>
+    </div>
 </div>
 
 <div style="width:90%;margin: 0 auto 0 auto;">
-  <div style="display:inline-flex;text-align: left;width: 89%;">Select topic(s) from the NIST research taxonomy (Click on name to select; scroll down to see more):</div>
-  <div
-    style="display:inline-flex;width:10%; text-align: right; direction: rtl; font-size: 12px; color:#1E6BA1; cursor: pointer;margin-left: .5em;"
-    (click)="showAllTopics()">Reset</div>
-  <input type="text" style="height:35px;background-color: #E7FFFE;" [(ngModel)]="searchText" (input)="onSearchTextChange()" placeholder="Type here to search topics" />
+    <div style="display:inline-flex;text-align: left;width: 89%;">Select topic(s) from the NIST research taxonomy (Click
+        on name to select; scroll down to see more):</div>
+    <div style="display:inline-flex;width:10%; text-align: right; direction: rtl; font-size: 12px; color:#1E6BA1; cursor: pointer;margin-left: .5em;"
+        (click)="showAllTopics()">Reset</div>
+    <input type="text" style="height:35px;background-color: #E7FFFE;" [(ngModel)]="searchText"
+        (input)="onSearchTextChange()" placeholder="Type here to search topics" />
 </div>
 <div style="clear:both"></div>
 
 <div #panel0
-  style="width:90%; margin: 0em auto 2em auto; height: 50vh;; overflow-y: scroll; border: 1px solid lightgrey;">
-  <div style="margin: .5em 1em .5em 1em;">
-    <p-treeTable *ngIf="isVisible" [value]="taxonomyTree">
-      <ng-template pTemplate="body" let-rowNode let-rowData="rowData">
-        <tr (click)="updateTopics(rowNode)">
-          <td (mouseover)="setHighlight(rowData)" (mouseout)="setHighlight('')" [ngStyle]="{'background-color': rowBackColor(rowData), 'display': rowVisibility(rowData), 'cursor': getTopicCursor(rowNode)}">
-            <p-treeTableToggler [rowNode]="rowNode"></p-treeTableToggler>
-            <span 
-              [ngStyle]="{'color': rowColor(rowNode)}">{{rowData.name}}</span>
-          </td>
-        </tr>
-      </ng-template>
-    </p-treeTable>
-  </div>
+    style="width:90%; margin: 0em auto 2em auto; height: 50vh;; overflow-y: scroll; border: 1px solid lightgrey;">
+    <div style="margin: .5em 1em .5em 1em;">
+        <p-treeTable *ngIf="isVisible" [value]="taxonomyTree">
+            <ng-template pTemplate="body" let-rowNode let-rowData="rowData">
+                <tr (click)="updateTopics(rowNode)">
+                    <td (mouseover)="setHighlight(rowData)" (mouseout)="setHighlight('')"
+                        [ngStyle]="{'background-color': rowBackColor(rowData), 'display': rowVisibility(rowData), 'cursor': getTopicCursor(rowNode)}">
+                        <p-treeTableToggler [rowNode]="rowNode"></p-treeTableToggler>
+                        <span [ngStyle]="{'color': rowColor(rowNode)}">{{rowData.name}}</span>
+                    </td>
+                </tr>
+            </ng-template>
+        </p-treeTable>
+    </div>
 </div>
 <div style="height: 1em;"></div>

@@ -11,6 +11,7 @@ import { EditStatusService } from './editstatus.service';
 import { AuthService, WebAuthService } from './auth.service';
 import { CustomizationService } from './customization.service';
 import { NerdmRes } from '../../nerdm/nerdm';
+import { SharedService } from '../../shared';
 
 /**
  * a panel that serves as a control center for editing metadata displayed in the 
@@ -86,7 +87,8 @@ export class EditControlComponent implements OnInit, OnChanges {
                        private edstatsvc : EditStatusService,
                        private authsvc : AuthService,
                        private confirmDialogSvc : ConfirmationDialogService,
-                       private msgsvc : UserMessageService)
+                       private msgsvc : UserMessageService,
+                       private sharedService: SharedService)
     {
         this.mdupdsvc._subscribe(
             (md) => {
@@ -102,6 +104,13 @@ export class EditControlComponent implements OnInit, OnChanges {
         this.edstatsvc._setEditMode(this.editMode);
         this.edstatsvc._setAuthorized(this.isAuthorized());
         this.edstatsvc._setUserID(this.authsvc.userID);
+
+        this.sharedService.watchEditMode().subscribe(value => {
+            if(value){
+                console.log("start editing...");
+                this.startEditing();
+            }
+        });
     }
 
     ngOnInit() {
@@ -141,6 +150,7 @@ export class EditControlComponent implements OnInit, OnChanges {
             this._custsvc.discardDraft().subscribe(
                 (md) => {
                     this.mdupdsvc.forgetUpdateDate();
+                    this.mdupdsvc.fieldReset();
                     this.mdrec = md as NerdmRes;
                     this.mdrecChange.emit(md as NerdmRes);
                     this.editMode = false;
@@ -164,7 +174,7 @@ export class EditControlComponent implements OnInit, OnChanges {
      * the data to its previous state.
      */
     public confirmDiscardEdits() : void {
-        this.confirmDialogSvc.confirm('Edited data will be lost',  'Do you want to erase changes?')
+        this.confirmDialogSvc.confirm('Edited data will be lost',  'Do you want to erase changes?', true)
             .then( (confirmed) => {
                 if (confirmed)
                     this.discardEdits()
@@ -185,6 +195,7 @@ export class EditControlComponent implements OnInit, OnChanges {
             this._custsvc.saveDraft().subscribe( 
                 (md) => { 
                     this.mdupdsvc.forgetUpdateDate();
+                    this.mdupdsvc.fieldReset();
                     this.mdrec = md as NerdmRes;
                     this.mdrecChange.emit(md as NerdmRes);
                     this.editMode = false;

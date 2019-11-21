@@ -243,6 +243,18 @@ export class MetadataUpdateService {
     }
 
     /**
+     * Reset the update status of a given field or all fields so fieldUpdated() will return false
+     * @param subsetname - optional - the name for the set of metadata of interest.
+     */
+    public fieldReset(subsetname? : string) {
+        if(subsetname){
+            this.origfields[subsetname] = null;
+        }else{
+            this.origfields = {};
+        }
+    }
+
+    /**
      * load the latest draft of the resource metadata.
      * 
      * retrieve the latest draft of the resource metadata from the server and forward it

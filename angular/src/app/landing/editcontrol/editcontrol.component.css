@@ -29,6 +29,8 @@
     background-color:rgb(221, 172, 9);
     color:white;
     border-color: rgb(221, 172, 9);
+    float:right;
+    margin:.5em 1em .5em 0em;
 }
 
 #ec-quited-btn {
@@ -41,11 +43,22 @@
     background-color:green;
     color:white;
     border-color: green;
+    float:right;
+    margin:.5em 1em .5em 0em;
 }
 
 #ec-discard-btn {
     background-color:grey;
     color:white;
     border-color: grey;
+    float:right;
+    margin:.5em 2em .5em 0em;
 }
 
+#ec-preview-btn {
+    background-color:rgb(9, 108, 221);;
+    color:white;
+    border-color: rgb(9, 108, 221);;
+    float:right;
+    margin:.5em 1em .5em 0em;
+}

@@ -1,6 +1,7 @@
 import { HttpClient, HttpResponse } from '@angular/common/http';
 import { Observable, of, throwError, Subscriber } from 'rxjs';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { AuthService, WebAuthService } from './auth.service';
 
 /**
  * a service for commiting metadata changes to a draft version stored on the server.
@@ -17,13 +18,17 @@ export abstract class CustomizationService {
     private _resid : string = null;
     get resid() : string { return this._resid; }
 
+    private _userID : string = null;
+    get userId() : string { return this._userID; }
+
     /**
      * construct the service instance 
      * 
      * @param resId      the identifier for the resource metadata being updated.
      */
-    constructor(resId : string) {
+    constructor(resId : string, userID?: string) {
         this._resid = resId
+        this._userID = userID;
     }
 
     /**
@@ -70,9 +75,9 @@ export class WebCustomizationService extends CustomizationService {
      * @param httpcli    the HttpClient service to use to submit web service requests
      */
     constructor(resid : string, private endpoint : string, private token : string,
-                private httpcli : HttpClient)
+                private httpcli : HttpClient, userId: string)
     {
-        super(resid);
+        super(resid, userId);
         if (! endpoint.endsWith('/')) endpoint += '/';
     }
 
@@ -149,16 +154,21 @@ export class WebCustomizationService extends CustomizationService {
      *                   failure, error function is called with an instance of a CustomizationError.
      */
     public updateMetadata(md : Object) : Observable<Object> {
-
+        console.log("token", this.token);
+        console.log("md", md);
         // To transform the output with proper error handling, we wrap the
         // HttpClient.patch() Observable with our own Observable
         //
         return new Observable<Object>(subscriber => {
+            console.log('user id:', this.userId);
             let url = this.endpoint + "draft/" + this.resid;
             let body = JSON.stringify(md);
             let obs : Observable<HttpResponse<Object>> = 
                 this.httpcli.patch(url, body, {
-                    headers: { "Authorization": "Bearer " + this.token },
+                    headers: { 
+                        "Authorization": "Bearer " + this.token,
+                        "userId": this.userId,
+                    },
                     observe: 'response',
                     responseType: 'json'
                 });

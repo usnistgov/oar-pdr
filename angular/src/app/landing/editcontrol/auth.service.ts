@@ -6,6 +6,7 @@ import { AppConfig } from '../../config/config';
 import { CustomizationService, WebCustomizationService, InMemCustomizationService, 
          SystemCustomizationError, ConnectionCustomizationError } from './customization.service';
 import * as ngenv from '../../../environments/environment';
+import { SharedService } from '../../shared/shared';
 
 /**
  * a container for authorization and authentication information that is obtained
@@ -84,7 +85,12 @@ export class WebAuthService extends AuthService {
     private _endpoint : string = null;
     private _authtok : string = null;
     private _authcred : AuthInfo = {
-        userId: null,
+        userDetails: {
+            userId: null,
+            userName: null,
+            userLastName: null,
+            userEmail: null
+        },
         token: null
     };
 
@@ -101,7 +107,7 @@ export class WebAuthService extends AuthService {
     /**
      * the user ID that the current authorization has been granted to.
      */
-    get userID() { return this._authcred.userId; }
+    get userID() { return this._authcred.userDetails.userId; }
 
     /**
      * create the AuthService according to the given configuration
@@ -109,10 +115,13 @@ export class WebAuthService extends AuthService {
      *                (this is normally provided by the root injector).
      * @param httpcli an HttpClient for communicating with the customization web service
      */
-    constructor(config : AppConfig, private httpcli : HttpClient) {
-        super();
-        this._endpoint = config.get('customizationAPI', '/customization/');
-        if (! this._endpoint.endsWith('/')) this._endpoint += "/";
+    constructor(
+        config : AppConfig, 
+        private httpcli : HttpClient, 
+        private sharedService: SharedService) {
+            super();
+            this._endpoint = config.get('customizationAPI', '/customization/');
+            if (! this._endpoint.endsWith('/')) this._endpoint += "/";
     }
 
     /**
@@ -134,24 +143,24 @@ export class WebAuthService extends AuthService {
      * @param resid    the identifier for the resource to edit
      */
     public authorizeEditing(resid : string) : Observable<CustomizationService> {
-        
         if (this.authToken)
-            return of(new WebCustomizationService(resid, this.endpoint, this.authToken, this.httpcli));
+            return of(new WebCustomizationService(resid, this.endpoint, this.authToken, this.httpcli, this._userid));
 
         // we need an authorization token
         return new Observable<CustomizationService>(subscriber => {
             this.getAuthorization(resid).subscribe(
                 (info) => {
+                    console.log("getAuthorization returns:", info);
                     this._authcred.token = info.token;
-                    this._authcred.userId  = info.userId;
+                    this._authcred.userDetails  = this.sharedService.deepCopy(info.userDetails);
                     if (info.token) {
                         // the user is authenticated and authorized to edit!
                         subscriber.next(
-                            new WebCustomizationService(resid, this.endpoint, this.authToken, this.httpcli)
+                            new WebCustomizationService(resid, this.endpoint, this.authToken, this.httpcli, info.userDetails.userId)
                         );
                         subscriber.complete();
                     }
-                    else if (info.userId) {
+                    else if (info.userDetails.userId) {
                         // the user is authenticated but not authorized
                         subscriber.next(null);
                         subscriber.complete();
@@ -185,7 +194,6 @@ export class WebAuthService extends AuthService {
      */
     public getAuthorization(resid : string) : Observable<AuthInfo> {
         let url = this.endpoint + "auth/_perm/" + resid;
-
         // wrap the HttpClient Observable with our own so that we can manage errors
         return new Observable<AuthInfo>(subscriber => {
             this.httpcli.get(url, {
@@ -212,10 +220,11 @@ export class WebAuthService extends AuthService {
                     subscriber.complete();
                 },
                 (err) => {
+                    this.loginUser();
                     // Unable to successfully complete connection and close
-                    subscriber.error(
-                        new ConnectionCustomizationError("Authorization service connection error: "+err)
-                    );
+                    // subscriber.error(
+                    //     new ConnectionCustomizationError("Authorization service connection error: "+err)
+                    // );
                     subscriber.complete();
                 }
             );
@@ -325,16 +334,16 @@ export class MockAuthService extends AuthService {
  * context.useCustomizationService from the angular environment (i.e. 
  * src/environments/environment.ts).  A value of false assumes a develoment context.
  */
-export function createAuthService(config : AppConfig, httpClient : HttpClient, devmode ?: boolean)
+export function createAuthService(config : AppConfig, httpClient : HttpClient, sharedService:SharedService, devmode ?: boolean)
     : AuthService
 {
     if (devmode === undefined)
         devmode = Boolean(ngenv['context'] || ngenv['context']['useCustomizationService']);
-        
+
     if (! devmode) {
         // production mode
         console.log("Will use configured customization web service");
-        return new WebAuthService(config, httpClient);
+        return new WebAuthService(config, httpClient, sharedService);
     }
 
     // dev mode

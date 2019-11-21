@@ -21,6 +21,7 @@ export class SharedService {
   contentReadySub = new BehaviorSubject<boolean>(false);
   refreshTreeSub = new BehaviorSubject<boolean>(false);
   messageSub = new BehaviorSubject<string>('');
+  setEditModeSub = new BehaviorSubject<boolean>(false);
 
   constructor() {
     if (typeof (localStorage) !== 'undefined')
@@ -37,6 +38,20 @@ export class SharedService {
 
   getRandomMinimum() {
     return this.random_minimum;
+  }
+
+    /**
+   * Set processing flag
+   **/
+  setEditMode(value: boolean) {
+    this.setEditModeSub.next(value);
+  }
+
+  /**
+  * Watching processing flag
+  **/
+  watchEditMode(): Observable<any> {
+    return this.setEditModeSub.asObservable();
   }
 
   /**

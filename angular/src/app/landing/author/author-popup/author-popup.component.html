@@ -1,172 +1,172 @@
 <div
-  style="width:100%; vertical-align: bottom;background-color:#153971;height: 4em; color:white;text-align: center;padding-top: .5em; ">
-  <div style="display: inline-block; width: 90%; height: 100%; overflow: hidden; margin: auto;">
-    <h2 id="title" style="display:inline-block; color: white;">AUTHORS</h2>
-    <i [ngClass]="getAuthorClass()" (click)="handleAuthorDisplay()" style="cursor:pointer;margin-left: .5em;"
-      data-toggle="tooltip" title="Expend/collapse author details"></i>
-    <div style="float: right; margin-right:.5em; margin-top: 1.5em;">
-      <i class="faa faa-user-plus faa-1x" (click)="addAuthor()" style="cursor:pointer; color: white;"
-        data-toggle="tooltip" title="Add author"></i>
+    style="width:100%; vertical-align: bottom;background-color:#153971;height: 4em; color:white;text-align: center;padding-top: .5em; ">
+    <div style="display: inline-block; width: 90%; height: 100%; overflow: hidden; margin: auto;">
+        <h2 id="title" style="display:inline-block; color: white;">Authors</h2>
+        
     </div>
-  </div>
 </div>
 <!-- <div style="overflow:hidden; width: 100%; height: 3em;"> -->
-<div style="width: 90%; margin-left: 1em; margin-right: 1em;">
-  <div style="display: table;margin: 0.5em auto;width:fit-content;">
-    <span *ngFor="let author of inputValue.authors; let i = index">
-      {{ author.fn }}<span *ngIf="i < inputValue.authors.length-1 ">,</span>
-    </span>
-  </div>
+<div style="width: 90%; margin:auto;">
+    <i [ngClass]="getAuthorClass()" (click)="handleAuthorDisplay()" style="float:left;cursor:pointer;vertical-align: middle;"
+        data-toggle="tooltip" title="Expend/collapse author details"></i>
+    <div style="display:table;margin:0.5em auto;width:fit-content;">
+        <span *ngFor="let author of inputValue.authors; let i = index">
+            {{ author.fn }}<span *ngIf="i < inputValue.authors.length-1 ">,</span>
+        </span>
+    </div>
 </div>
 <hr>
-<div style="overflow:hidden; width: 90%; margin: .5em auto 0em auto;">
-  <button pButton class="button"
-    style="float:right;width:150px; height:2em; background-color:grey;color:white;padding-right: 1em;"
-    (click)="activeModal.close('Close click')">
-    <i class="faa faa-trash faa-1x icon-white" style="color: #fff;padding-left: .5em;padding-right: .5em;"></i>
-    Cancel
-  </button>
-  <button pButton class="button"
-    style="float:right;margin-right: 1em;width:150px; height:2em; background-color:green;color:white;margin-right: 1em;padding-right: 1em;"
-    (click)="saveAuthorInfo();">
-    <i class="faa faa-save faa-1x icon-white" style="color: #fff;padding-left: .5em;padding-right: .5em;"></i>
-    Save
-  </button>
+<div style="width: 90%; margin: .5em auto 0em auto;">
+    <button pButton type="submit" class="btn-add-author" style="background-color:rgb(221, 172, 9);"
+        (click)="addAuthor();" label="Add Author" icon="faa faa-user-plus faa-1x icon-white" iconPos="left">
+    </button>
+    <button pButton type="submit" class="btn-cancel" 
+        (click)="activeModal.close('Close click')" label="Cancel" icon="faa faa-trash faa-1x icon-white" iconPos="left">
+    </button>
+    <button pButton type="submit" class="btn-Save" style="float:right; width:150px; background-color:green;"
+        (click)="saveAuthorInfo();" label="Save" icon="faa faa-save faa-1x icon-white" iconPos="left">
+    </button>
 </div>
 <!-- </div> -->
-<div style="text-align: center; width:100%;margin: 1em 0em 1em 0em;">
-  <div *ngFor="let author of inputValue.authors; let i = index; trackBy: trackByFn"
-    style="width: 100%;margin-bottom: .5em;">
-    <table width="90%" align="center">
-      <tr style="text-align: center;" [style.background-color]="getHeaderBackgroundColor(author)"
-        [style.color]="getHeaderForegroundColor(author)">
-        <td colspan="2">
-          {{author.fn}}
-          <i [ngClass]="getTitleClass(author)" (click)="author.isCollapsed = !author.isCollapsed"
-            style="cursor:pointer;" data-toggle="tooltip" title="Show/hide author details"></i>
-          <i class="faa faa-trash" (click)="deleteAuthor(author)"
-            style="float:right; cursor:pointer; margin: .2em .5em 0em 0em" data-toggle="tooltip"
-            title="Remove this author"></i>
-          <i class="faa faa-undo" (click)="resetAuthor(author, i);" 
-            style="float:right; cursor:pointer; margin: .2em .5em 0em 0em" data-toggle="tooltip"
-            title="Discard changes"></i>
-          <img *ngIf="i > 0" src="assets/images/arrow-alt-from-bottom.svg" (click)="moveAuthorUp(author, i)"
-            style="float:left; width:.8em; cursor:pointer; margin: .2em 0em 0em .5em" data-toggle="tooltip"
-            title="Move author up" [ngClass]="getTitleImgClass(author)">
-          <img *ngIf="i < inputValue.authors.length-1" src="assets/images/arrow-alt-from-top.svg"
-            (click)="moveAuthorDown(author, i)"
-            style="float:left; width:.8em; cursor:pointer; margin: .2em 0em 0em .5em" data-toggle="tooltip"
-            title="Move author down" [ngClass]="getTitleImgClass(author)">
-        </td>
-      </tr>
-      <tr *ngIf="!author.isCollapsed">
-        <td align="right" data-toggle="tooltip" title="Required field" width="20%">
-          <span style="margin-right: .5em;" data-toggle="tooltip" title="This field is required"><span
-              style="color:red;">*</span> Given Name:</span>
-        </td>
-        <td>
-          <input type="text" [(ngModel)]="author.givenName" style="height:2em;"
-            (input)="onGivenNameChange(author, $event.target.value)" />
-        </td>
-      </tr>
-      <tr *ngIf="!author.isCollapsed">
-        <td align="right">
-          <span style="margin-right: .5em;">Middle Name:</span>
-        </td>
-        <td>
-          <input type="text" [(ngModel)]="author.middleName" style="height:2em;"
-            (input)="onMiddleNameChange(author, $event.target.value)" />
-        </td>
-      </tr>
-      <tr *ngIf="!author.isCollapsed" data-toggle="tooltip" title="Required field">
-        <td align="right">
-          <span style="margin-right: .5em;" data-toggle="tooltip" title="This field is required"><span
-              style="color:red;">*</span> Family Name:</span>
-        </td>
-        <td>
-          <input type="text" [(ngModel)]="author.familyName" style="height:2em;"
-            (input)="onFamilyNameChange(author, $event.target.value)" />
-        </td>
-      </tr>
-      <tr *ngIf="!author.isCollapsed">
-        <td width="15%" align="right">
-          <span style="margin-right: .5em;" data-toggle="tooltip" title="This field is required"><span
-              style="color:red;">*</span> Name (as displayed)</span>
-        </td>
-        <td align="left">
-          <input type="text" [(ngModel)]="author.fn" style="width: calc(100% - 2em);height:2em; margin-right: .5em;"
-            (input)="onFullNameChange(author, $event.target.value)" />
-          <i *ngIf="!author.fnLocked" class="faa faa-unlock" (click)="author.fnLocked = !author.fnLocked"
-            style="cursor:pointer;" data-toggle="tooltip" title="Prevent full name from updated automatically"></i>
-          <i *ngIf="author.fnLocked" class="faa faa-lock" (click)="author.fnLocked = !author.fnLocked"
-            style="cursor:pointer;" data-toggle="tooltip" title="Allow full name been updated automatically"></i>
-        </td>
-      </tr>
-      <tr *ngIf="!author.isCollapsed">
-        <td align="right">
-          <span style="margin-right: .5em;" data-toggle="tooltip" title="This field is recommended"><span
-              style="color:green;">*</span> ORCID:</span>
-        </td>
-        <td>
-          <input type="text" [(ngModel)]="author.orcid"
-            style="width: calc(100% - 2em);height:2em; margin-right: .5em;" />
-          <a href="https://orcid.org" target="blank"><img src="assets/images/orcid-logo.png" style="width: 20px;"></a>
-        </td>
-      </tr>
-      <tr *ngIf="!author.isCollapsed">
-        <td align="right" style="vertical-align: top;">
-          <span style="margin-right: .5em;" data-toggle="tooltip" title="This field is recommended"><span
-              style="color:green;">*</span> Affiliations:</span>
-          <span class="faa-stack" (click)="addAffiliation(i);" data-toggle="tooltip" title="Add affiliation">
-            <i class="faa faa-circle faa-stack-2x" style="color:green;"></i>
-            <i class="faa faa-plus faa-stack-1x faa-inverse"></i>
-          </span>
-        </td>
-        <td style="border: 1px solid lightgrey;">
-          <div *ngFor="let aff of author.affiliation; let j = index; trackBy: trackByFn"
-            style="width:100%; margin: 0em 0em .5em 0em;">
-            <div style="width: 100%; background-color: rgb(248, 246, 237)">
-              <div style="float: left; width: 95%; margin-left: .5em;">
-                <table>
-                  <tr>
-                    <td width="10%" align="right">Organization Name:</td>
-                    <td>
-                      <!-- <input type="text" [(ngModel)]="author.affiliation[j].title"
+<div style="text-align: center; width:100%;margin: 0.5em 0em 1em 0em;">
+    <div *ngFor="let author of inputValue.authors; let i = index; trackBy: trackByFn"
+        style="width: 100%;margin-bottom: .5em;">
+        <table width="90%" align="center">
+            <tr style="text-align: center;" [style.background-color]="getHeaderBackgroundColor(author)"
+                [style.color]="getHeaderForegroundColor(author)">
+                <td colspan="2">
+                    {{author.fn}}
+                    <i [ngClass]="getTitleClass(author)" (click)="author.isCollapsed = !author.isCollapsed"
+                        style="cursor:pointer;" data-toggle="tooltip" title="Show/hide author details"></i>
+                    <i class="faa faa-trash" (click)="deleteAuthor(author)"
+                        style="float:right; cursor:pointer; margin: .2em .5em 0em 0em" data-toggle="tooltip"
+                        title="Remove this author"></i>
+                    <i class="faa faa-undo" (click)="resetAuthor(author, i);"
+                        style="float:right; cursor:pointer; margin: .2em .5em 0em 0em" data-toggle="tooltip"
+                        title="Discard changes"></i>
+                    <img *ngIf="i > 0" src="assets/images/arrow-alt-from-bottom.svg" (click)="moveAuthorUp(author, i)"
+                        style="float:left; width:.8em; cursor:pointer; margin: .2em 0em 0em .5em" data-toggle="tooltip"
+                        title="Move author up" [ngClass]="getTitleImgClass(author)">
+                    <img *ngIf="i < inputValue.authors.length-1" src="assets/images/arrow-alt-from-top.svg"
+                        (click)="moveAuthorDown(author, i)"
+                        style="float:left; width:.8em; cursor:pointer; margin: .2em 0em 0em .5em" data-toggle="tooltip"
+                        title="Move author down" [ngClass]="getTitleImgClass(author)">
+                </td>
+            </tr>
+            <tr *ngIf="!author.isCollapsed">
+                <td align="right" data-toggle="tooltip" title="Required field" width="20%">
+                    <span style="margin-right: .5em;" data-toggle="tooltip" title="This field is required"><span
+                            style="color:red;">*</span> Given Name:</span>
+                </td>
+                <td>
+                    <input type="text" [(ngModel)]="author.givenName" style="height:2em;"
+                        (input)="onGivenNameChange(author, $event.target.value)" />
+                </td>
+            </tr>
+            <tr *ngIf="!author.isCollapsed">
+                <td align="right">
+                    <span style="margin-right: .5em;">Middle Name:</span>
+                </td>
+                <td>
+                    <input type="text" [(ngModel)]="author.middleName" style="height:2em;"
+                        (input)="onMiddleNameChange(author, $event.target.value)" />
+                </td>
+            </tr>
+            <tr *ngIf="!author.isCollapsed" data-toggle="tooltip" title="Required field">
+                <td align="right">
+                    <span style="margin-right: .5em;" data-toggle="tooltip" title="This field is required"><span
+                            style="color:red;">*</span> Family Name:</span>
+                </td>
+                <td>
+                    <input type="text" [(ngModel)]="author.familyName" style="height:2em;"
+                        (input)="onFamilyNameChange(author, $event.target.value)" />
+                </td>
+            </tr>
+            <tr *ngIf="!author.isCollapsed">
+                <td width="15%" align="right">
+                    <span style="margin-right: .5em;" data-toggle="tooltip" title="This field is required"><span
+                            style="color:red;">*</span> Name (as displayed)</span>
+                </td>
+                <td align="left">
+                    <input type="text" [(ngModel)]="author.fn"
+                        style="width: calc(100% - 2em);height:2em; margin-right: .5em;"
+                        (input)="onFullNameChange(author, $event.target.value)" />
+                    <i *ngIf="!author.fnLocked" class="faa faa-unlock" (click)="author.fnLocked = !author.fnLocked"
+                        style="cursor:pointer;" data-toggle="tooltip"
+                        title="Prevent full name from updated automatically"></i>
+                    <i *ngIf="author.fnLocked" class="faa faa-lock" (click)="author.fnLocked = !author.fnLocked"
+                        style="cursor:pointer;" data-toggle="tooltip"
+                        title="Allow full name been updated automatically"></i>
+                </td>
+            </tr>
+            <tr *ngIf="!author.isCollapsed">
+                <td align="right">
+                    <span style="margin-right: .5em;" data-toggle="tooltip" title="This field is recommended"><span
+                            style="color:green;">*</span> ORCID:</span>
+                </td>
+                <td>
+                    <input type="text" [(ngModel)]="author.orcid"
+                        style="width: calc(100% - 2em);height:2em; margin-right: .5em;" />
+                    <a href="https://orcid.org" target="blank"><img src="assets/images/orcid-logo.png"
+                            style="width: 20px;"></a>
+                </td>
+            </tr>
+            <tr *ngIf="!author.isCollapsed">
+                <td align="right" style="vertical-align: top;">
+                    <span style="margin-right: .5em;" data-toggle="tooltip" title="This field is recommended"><span
+                            style="color:green;">*</span> Affiliations:</span>
+                    <span class="faa-stack" (click)="addAffiliation(i);" data-toggle="tooltip" title="Add affiliation">
+                        <i class="faa faa-circle faa-stack-2x" style="color:green;"></i>
+                        <i class="faa faa-plus faa-stack-1x faa-inverse"></i>
+                    </span>
+                </td>
+                <td style="border: 1px solid lightgrey;">
+                    <div *ngFor="let aff of author.affiliation; let j = index; trackBy: trackByFn"
+                        style="width:100%; margin: 0em 0em .5em 0em;">
+                        <div style="width: 100%; background-color: rgb(248, 246, 237)">
+                            <div style="float: left; width: 95%; margin-left: .5em;">
+                                <table>
+                                    <tr>
+                                        <td width="10%" align="right">Organization Name:</td>
+                                        <td>
+                                            <!-- <input type="text" [(ngModel)]="author.affiliation[j].title"
                       style="width: 100%;height:2em;" /> -->
-                      <combo-box [dataList]="affiliationList" [columnName]="'name'"
-                        [(controlField)]="author.affiliation[j].title" (controlFieldChange)="affiliationNameChanged($event, i)"></combo-box>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td width="10%" align="right" valign="center">Department/Division:</td>
-                    <td><input type="text" [(ngModel)]="author.affiliation[j].dept" style="width: 100%;height:2em;" (input)="onDeptChange(author, $event.target.value)"/>
-                    </td>
-                  </tr>
-                </table>
-              </div>
-              <i class="faa faa-trash" (click)="deleteAffiliation(i, aff)"
-                style="float: right;cursor: pointer;color:grey; margin: 1em .5em;" data-toggle="tooltip"
-                title="Delete affiliation"></i>
-            </div>
-          </div>
-        </td>
-      </tr>
-    </table>
-  </div>
+                                            <combo-box [dataList]="affiliationList" [columnName]="'name'"
+                                                [(controlField)]="author.affiliation[j].title"
+                                                (controlFieldChange)="affiliationNameChanged($event, i)"></combo-box>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td width="10%" align="right" valign="center">Department/Division:</td>
+                                        <td><input type="text" [(ngModel)]="author.affiliation[j].dept"
+                                                style="width: 100%;height:2em;"
+                                                (input)="onDeptChange(author, $event.target.value)" />
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                            <i class="faa faa-trash" (click)="deleteAffiliation(i, aff)"
+                                style="float: right;cursor: pointer;color:grey; margin: 1em .5em;" data-toggle="tooltip"
+                                title="Delete affiliation"></i>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+        </table>
+    </div>
 </div>
 <hr>
 <!-- <div style="overflow:hidden; width: 100%; height: 3em; background-color: rgb(0, 129, 180)"> -->
 <div style="overflow:hidden; width: 90%; margin: 1em auto 1em auto;">
-  <button pButton class="button"
-    style="float:right;margin:0em 1em 2em 1em;width:150px; height:2em; background-color:grey;color:white;padding-right: 1em;"
-    (click)="activeModal.close('Close click')">
-    <i class="faa faa-trash faa-1x icon-white" style="color: #fff;padding-left: .5em;padding-right: .5em;"></i>
-    Cancel
-  </button>
-  <button pButton class="button"
-    style="float:right;margin:0em 1em 2em 1em;width:150px; height:2em; background-color:green;color:white;padding-right: 1em;"
-    (click)="saveAuthorInfo();">
-    <i class="faa faa-save faa-1x icon-white" style="color: #fff;padding-left: .5em;padding-right: .5em;"></i>
-    Save
-  </button>
+    <button pButton type="submit" class="btn-add-author" style="background-color:rgb(221, 172, 9);"
+        (click)="addAuthor();" label="Add Author" icon="faa faa-user-plus faa-1x icon-white" iconPos="left">
+    </button>
+    <button pButton type="submit" class="btn-cancel" 
+        (click)="activeModal.close('Close click')" label="Cancel"
+        icon="faa faa-trash faa-1x icon-white" iconPos="left">
+    </button>
+    <button pButton type="submit" class="btn-Save" 
+        style="float:right; width:150px; background-color:green;"
+        (click)="saveAuthorInfo();" label="Save" icon="faa faa-save faa-1x icon-white" iconPos="left">
+    </button>
 </div>

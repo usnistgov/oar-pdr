@@ -30,7 +30,7 @@
                 </div>
             </div>
         </ng-template>
-        <button class="edit_button" *ngIf="mdupdsvc.editMode" type="button" (click)="openModal('authors')">
+        <button pButton type="submit" class="edit_button" *ngIf="mdupdsvc.editMode" (click)="openModal('authors')" >
             <i class="faa faa-pencil icon_enabled" data-toggle="tooltip" title="Edit authors"></i>
         </button>
         <button class="undo_button" *ngIf="mdupdsvc.editMode" type="button" [disabled]="!updated"
