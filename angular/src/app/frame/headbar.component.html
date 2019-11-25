@@ -23,7 +23,7 @@
                 <a href="{{searchLink}}" target="_blank" [ngClass]="{'disabled':editstatsvc.editMode,'enabled':!editstatsvc.editMode}"><b>Search</b></a> |
                 <!-- <a href="#" target="_blank" [ngClass]="{'disabled':editstatsvc.editMode,'enabled':!editstatsvc.editMode}"><b>Help</b></a> | -->
                 <a href="/datacart/normal" target="_blank" [ngClass]="{'disabled':editstatsvc.editMode,'enabled':!editstatsvc.editMode}"><b>Cart</b><i class="faa faa-shopping-cart faa-1x" [ngStyle]="{'color':getMenuTextColor()}"></i><span class="w3-badge badge-pill badge-notify">&nbsp;{{cartLength}}&nbsp;</span></a> | 
-                <i class="faa faa-user-circle faa-1x icon-white" style="color: white; cursor: pointer;" data-toggle="tooltip" title="{{userId}}" ></i>
+                <i class="faa faa-user-circle faa-1x icon-white" style="color: white; cursor: pointer;" data-toggle="tooltip" title="{{editstatsvc.userID}}" ></i>
             </div>
       </div>
     </div>
