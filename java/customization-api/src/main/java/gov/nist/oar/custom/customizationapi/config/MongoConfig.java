@@ -52,8 +52,8 @@ public class MongoConfig {
     private MongoCollection<Document> recordsCollection;
     private MongoCollection<Document> changesCollection;
     private String metadataServerUrl = "";
-    List servers = new ArrayList();
-    List credentials = new ArrayList();
+    List<ServerAddress> servers = new ArrayList<ServerAddress>();
+    List<MongoCredential> credentials = new ArrayList<MongoCredential>();
     
 
     @Value("${oar.mdserver:testserver}")

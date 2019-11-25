@@ -30,15 +30,21 @@ import java.time.ZoneId;
 public class JWTAuthenticationProvider implements AuthenticationProvider {
 
     private static final Logger log = LoggerFactory.getLogger(JWTAuthenticationProvider.class);
+    public String secret;
+    
     @Override
     public boolean supports(Class<?> authentication) {
 	return JWTAuthenticationToken.class.isAssignableFrom(authentication);
     }
 
+    /**
+     * Constructors with JWT secret
+     * @param secret
+     */
     public JWTAuthenticationProvider(String secret) {
 	this.secret = secret;
     }
-    public String secret;
+    
     @Override
     public Authentication authenticate(Authentication authentication) {
 	log.info("Authorizing the request for given token");
@@ -65,7 +71,7 @@ public class JWTAuthenticationProvider implements AuthenticationProvider {
 		throw new BadCredentialsException("Invalid token signature");
 	    }
 
-	    // is token expired ?
+	    // Check if token is expired ?
 	    LocalDateTime expirationTime = LocalDateTime
 		    .ofInstant(signedJWT.getJWTClaimsSet().getExpirationTime().toInstant(), ZoneId.systemDefault());
 

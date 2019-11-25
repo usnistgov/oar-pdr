@@ -40,6 +40,7 @@ import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.saml.SAMLAuthenticationProvider;
 import org.springframework.security.saml.SAMLBootstrap;
@@ -102,7 +103,7 @@ import gov.nist.oar.custom.customizationapi.service.SamlUserDetailsService;
  * @author Deoyani Nandrekar-Heinis
  */
 @Configuration
-@Order(1)
+//@Order(1)
 public class SecuritySamlConfig extends WebSecurityConfigurerAdapter {
     private static Logger logger = LoggerFactory.getLogger(SecuritySamlConfig.class);
 
@@ -152,7 +153,7 @@ public class SecuritySamlConfig extends WebSecurityConfigurerAdapter {
 	WebSSOProfileOptions webSSOProfileOptions = new WebSSOProfileOptions();
 	webSSOProfileOptions.setIncludeScoping(false);
 	/// Adding this force authenticate on failure to validate SAML cache
-	webSSOProfileOptions.setForceAuthN(true);
+//	webSSOProfileOptions.setForceAuthN(true);
 	// Relay state can also be set here it will always go to this URL once
 	// authenticated
 	// webSSOProfileOptions.setRelayState("https://data.nist.gov/sdp");
@@ -534,6 +535,11 @@ public class SecuritySamlConfig extends WebSecurityConfigurerAdapter {
 
     }
 
+    @Override
+    public void configure(WebSecurity web) throws Exception {
+        web.ignoring().antMatchers("/swagger-ui.html");
+//        web.ignoring().antMatchers("/v2/api-docs/**");
+    }
 //  private Timer backgroundTaskTimer;
 //	private MultiThreadedHttpConnectionManager multiThreadedHttpConnectionManager;
 //

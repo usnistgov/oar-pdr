@@ -5,6 +5,7 @@ import java.text.ParseException;
 import java.util.HashMap;
 
 import javax.servlet.FilterChain;
+import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -12,7 +13,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.json.simple.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -21,6 +21,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
+import org.springframework.web.context.WebApplicationContext;
+import org.springframework.web.context.support.WebApplicationContextUtils;
 
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
@@ -38,13 +40,10 @@ import gov.nist.oar.custom.customizationapi.helpers.UserDetailsExtractor;
 
 public class JWTAuthenticationFilter extends AbstractAuthenticationProcessingFilter {
 
-    @Autowired
-    UserDetailsExtractor uExtract;
-    
     private static final Logger logger = LoggerFactory.getLogger(JWTAuthenticationFilter.class);
+    private UserDetailsExtractor uExtract;
     public static final String Header_Authorization_Token = "Authorization";
     public static final String Token_starter = "Bearer";
-//    public UserDetailsExtractor uExtract = new UserDetailsExtractor();
 
     public JWTAuthenticationFilter(final String matcher, AuthenticationManager authenticationManager) {
 	super(matcher);
@@ -58,9 +57,14 @@ public class JWTAuthenticationFilter extends AbstractAuthenticationProcessingFil
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response)
 	    throws IOException, ServletException {
 
+	ServletContext servletContext = request.getServletContext();
+	WebApplicationContext webApplicationContext = WebApplicationContextUtils
+		.getWebApplicationContext(servletContext);
+	uExtract = webApplicationContext.getBean(UserDetailsExtractor.class);
+
 	logger.info("Attempt to check token and  authorized token validity");
 	String token = request.getHeader(Header_Authorization_Token).replaceAll(Token_starter, "").trim();
-	String userId = uExtract.getUserId().getUserId();
+	String userId = uExtract.getUserId().getUserEmail();
 	String recordId = uExtract.getUserRecord(request.getRequestURI());
 	try {
 
@@ -106,7 +110,6 @@ public class JWTAuthenticationFilter extends AbstractAuthenticationProcessingFil
     @Override
     protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response,
 	    AuthenticationException failed) throws IOException, ServletException {
-//        SecurityContextHolder.clearContext(); //this will remove authenticated user completely
 	Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 	AuthenticatedUserDetails userDetails = null;
 	if (auth != null) {
@@ -115,10 +118,10 @@ public class JWTAuthenticationFilter extends AbstractAuthenticationProcessingFil
 	logger.info("If token is not authorized send Unauthorized status.");
 	response.setStatus(HttpStatus.UNAUTHORIZED.value());
 	response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-	
-	HashMap<String,Object> responseObject = new HashMap<String,Object>();
-	
-	if (userDetails !=  null) {
+
+	HashMap<String, Object> responseObject = new HashMap<String, Object>();
+
+	if (userDetails != null) {
 	    responseObject.put("userId", userDetails);
 	    responseObject.put("message", "User is not Authorized.");
 	} else {
