@@ -1,7 +1,6 @@
 import { HttpClient, HttpResponse } from '@angular/common/http';
 import { Observable, of, throwError, Subscriber } from 'rxjs';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-import { AuthService, WebAuthService } from './auth.service';
 
 /**
  * a service for commiting metadata changes to a draft version stored on the server.
@@ -160,15 +159,11 @@ export class WebCustomizationService extends CustomizationService {
         // HttpClient.patch() Observable with our own Observable
         //
         return new Observable<Object>(subscriber => {
-            console.log('user id:', this.userId);
             let url = this.endpoint + "draft/" + this.resid;
             let body = JSON.stringify(md);
             let obs : Observable<HttpResponse<Object>> = 
                 this.httpcli.patch(url, body, {
-                    headers: { 
-                        "Authorization": "Bearer " + this.token,
-                        "userId": this.userId,
-                    },
+                    headers: { "Authorization": "Bearer " + this.token }, 
                     observe: 'response',
                     responseType: 'json'
                 });

@@ -11,7 +11,6 @@ import { EditStatusService } from './editstatus.service';
 import { AuthService, WebAuthService } from './auth.service';
 import { CustomizationService } from './customization.service';
 import { NerdmRes } from '../../nerdm/nerdm';
-import { SharedService } from '../../shared';
 
 /**
  * a panel that serves as a control center for editing metadata displayed in the 
@@ -87,8 +86,7 @@ export class EditControlComponent implements OnInit, OnChanges {
                        private edstatsvc : EditStatusService,
                        private authsvc : AuthService,
                        private confirmDialogSvc : ConfirmationDialogService,
-                       private msgsvc : UserMessageService,
-                       private sharedService: SharedService)
+                       private msgsvc : UserMessageService)
     {
         this.mdupdsvc._subscribe(
             (md) => {
@@ -104,12 +102,8 @@ export class EditControlComponent implements OnInit, OnChanges {
         this.edstatsvc._setEditMode(this.editMode);
         this.edstatsvc._setAuthorized(this.isAuthorized());
         this.edstatsvc._setUserID(this.authsvc.userID);
-
-        this.sharedService.watchEditMode().subscribe(value => {
-            if(value){
-                console.log("start editing...");
-                this.startEditing();
-            }
+        this.edstatsvc._watchRemoteStart((ev) => {
+            this.startEditing();
         });
     }
 
@@ -135,6 +129,7 @@ export class EditControlComponent implements OnInit, OnChanges {
     public startEditing() : void {
         // TODO:  should this function be allowed turn off editing if authorization fails (e.g. due
         //        to a network glitch)?
+        console.log("start editing...");
         this.authorizeEditing().subscribe(
             (successful) => {
                 this.editMode = successful;

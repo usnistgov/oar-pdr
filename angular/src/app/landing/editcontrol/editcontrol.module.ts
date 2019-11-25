@@ -9,15 +9,14 @@ import { FrameModule } from '../../frame/frame.module';
 import { ButtonModule } from 'primeng/primeng';
 import { AppConfig } from '../../config/config';
 import { HttpClient } from '@angular/common/http';
-import { SharedService } from '../../shared'
 
 @NgModule({
     declarations: [ EditControlComponent, EditStatusComponent ],
     imports: [ CommonModule, ConfirmationDialogModule, FrameModule, ButtonModule ],
     exports: [ EditControlComponent, EditStatusComponent ],
     providers: [
-        HttpClient,SharedService, 
-        { provide: AuthService, useFactory: createAuthService, deps: [ AppConfig, HttpClient, SharedService ] }
+        HttpClient,
+        { provide: AuthService, useFactory: createAuthService, deps: [ AppConfig, HttpClient ] }
     ]
 })
 export class EditControlModule { }

@@ -71,8 +71,8 @@ describe('EditControlComponent', () => {
         let edbtn = cmpel.querySelector("#ec-edit-btn") 
         let discbtn = cmpel.querySelector("#ec-discard-btn") 
         let subbtn = cmpel.querySelector("#ec-submit-btn") 
-        let qedbtn = cmpel.querySelector("#ec-quited-btn")  
-        expect(qedbtn).toBeNull();
+        let prevubtn = cmpel.querySelector("#ec-preview-btn")  
+        expect(prevubtn).toBeNull();
         expect(edbtn.disabled).toBeFalsy();
         expect(subbtn.disabled).toBeTruthy();
         expect(discbtn.disabled).toBeTruthy();
@@ -85,8 +85,8 @@ describe('EditControlComponent', () => {
             edbtn = cmpel.querySelector("#ec-edit-btn")     
             discbtn = cmpel.querySelector("#ec-discard-btn")
             subbtn = cmpel.querySelector("#ec-submit-btn")  
-            qedbtn = cmpel.querySelector("#ec-quited-btn")  
-            expect(qedbtn.disabled).toBeFalsy();
+            prevubtn = cmpel.querySelector("#ec-preview-btn")  
+            expect(prevubtn.disabled).toBeFalsy();
             expect(subbtn.disabled).toBeTruthy();
             expect(discbtn.disabled).toBeFalsy();
             expect(edbtn).toBeNull();
@@ -116,9 +116,9 @@ describe('EditControlComponent', () => {
                 edbtn = cmpel.querySelector("#ec-edit-btn")     
                 let discbtn = cmpel.querySelector("#ec-discard-btn") 
                 let subbtn = cmpel.querySelector("#ec-submit-btn") 
-                let qedbtn = cmpel.querySelector("#ec-quited-btn")
+                let prevubtn = cmpel.querySelector("#ec-preview-btn")
                 
-                expect(qedbtn).toBeNull();
+                expect(prevubtn).toBeNull();
                 expect(edbtn.disabled).toBeFalsy();
                 expect(subbtn.disabled).toBeTruthy();
                 expect(discbtn.disabled).toBeTruthy();
@@ -148,9 +148,9 @@ describe('EditControlComponent', () => {
                 edbtn = cmpel.querySelector("#ec-edit-btn")     
                 let discbtn = cmpel.querySelector("#ec-discard-btn") 
                 let subbtn = cmpel.querySelector("#ec-submit-btn") 
-                let qedbtn = cmpel.querySelector("#ec-quited-btn")
+                let prevubtn = cmpel.querySelector("#ec-preview-btn")
                 
-                expect(qedbtn).toBeNull();
+                expect(prevubtn).toBeNull();
                 expect(edbtn.disabled).toBeFalsy();
                 expect(subbtn.disabled).toBeTruthy();
                 expect(discbtn.disabled).toBeTruthy();
@@ -180,9 +180,9 @@ describe('EditControlComponent', () => {
                 edbtn = cmpel.querySelector("#ec-edit-btn")     
                 let discbtn = cmpel.querySelector("#ec-discard-btn") 
                 let subbtn = cmpel.querySelector("#ec-submit-btn") 
-                let qedbtn = cmpel.querySelector("#ec-quited-btn")
+                let prevubtn = cmpel.querySelector("#ec-preview-btn")
                 
-                expect(qedbtn).toBeNull();
+                expect(prevubtn).toBeNull();
                 expect(edbtn.disabled).toBeFalsy();
                 expect(subbtn.disabled).toBeTruthy();
                 expect(discbtn.disabled).toBeTruthy();

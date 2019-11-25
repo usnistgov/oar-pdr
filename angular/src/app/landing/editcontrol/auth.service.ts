@@ -6,7 +6,34 @@ import { AppConfig } from '../../config/config';
 import { CustomizationService, WebCustomizationService, InMemCustomizationService, 
          SystemCustomizationError, ConnectionCustomizationError } from './customization.service';
 import * as ngenv from '../../../environments/environment';
-import { SharedService } from '../../shared/shared';
+
+/**
+ * a container for information describing the user logged into the application.
+ */
+interface UserDetails {
+
+    // TODO: check this documentation against the documentation of the customization service
+    
+    /** 
+     * the user name that the user used to log in with at the authentication service
+     */
+    userId : string,
+
+    /**
+     * the user's given name
+     */
+    userName ?: string,
+
+    /** 
+     * the user's family name
+     */
+    userLastName ?: string,
+
+    /**
+     * the user's email address
+     */
+    userEmail ?: string
+}
 
 /**
  * a container for authorization and authentication information that is obtained
@@ -18,7 +45,7 @@ interface AuthInfo {
     /**
      * the user identifier
      */
-    userId ?: string,
+    userDetails ?: UserDetails,
 
     /**
      * the authorization token needed to edit metadata via the customization service
@@ -42,17 +69,25 @@ interface AuthInfo {
  */
 export abstract class AuthService {
 
-    protected _userid : string = null;
+    /**
+     * the full set of user information obtained via the log-in process
+     */
+    get userDetails() { return this._getUserDetails(); }
 
     /**
-     * the authenticated identifier for the current user.
+     * the user ID that the current authorization has been granted to.
      */
-    get userID() { return this._userid; }
+    get userID() { return this.userDetails.userId; }
 
     /**
      * construct the service
      */
     constructor() { }
+
+    /**
+     * return the user details in a implementation-specific way
+     */
+    protected abstract _getUserDetails() : UserDetails;
 
     /**
      * return true if the user is currently authorized to to edit the resource metadata.
@@ -85,12 +120,7 @@ export class WebAuthService extends AuthService {
     private _endpoint : string = null;
     private _authtok : string = null;
     private _authcred : AuthInfo = {
-        userDetails: {
-            userId: null,
-            userName: null,
-            userLastName: null,
-            userEmail: null
-        },
+        userDetails: { userId: null },
         token: null
     };
 
@@ -105,23 +135,19 @@ export class WebAuthService extends AuthService {
     get authToken() { return this._authcred.token; }
 
     /**
-     * the user ID that the current authorization has been granted to.
-     */
-    get userID() { return this._authcred.userDetails.userId; }
-
-    /**
      * create the AuthService according to the given configuration
      * @param config  the current app configuration which provides the customization service endpoint.
      *                (this is normally provided by the root injector).
      * @param httpcli an HttpClient for communicating with the customization web service
      */
-    constructor(
-        config : AppConfig, 
-        private httpcli : HttpClient, 
-        private sharedService: SharedService) {
-            super();
-            this._endpoint = config.get('customizationAPI', '/customization/');
-            if (! this._endpoint.endsWith('/')) this._endpoint += "/";
+    constructor(config : AppConfig, private httpcli : HttpClient) {
+        super();
+        this._endpoint = config.get('customizationAPI', '/customization/');
+        if (! this._endpoint.endsWith('/')) this._endpoint += "/";
+    }
+
+    protected _getUserDetails() : UserDetails {
+        return this._authcred.userDetails;
     }
 
     /**
@@ -144,7 +170,7 @@ export class WebAuthService extends AuthService {
      */
     public authorizeEditing(resid : string) : Observable<CustomizationService> {
         if (this.authToken)
-            return of(new WebCustomizationService(resid, this.endpoint, this.authToken, this.httpcli, this._userid));
+            return of(new WebCustomizationService(resid, this.endpoint, this.authToken, this.httpcli, this.userID));
 
         // we need an authorization token
         return new Observable<CustomizationService>(subscriber => {
@@ -152,7 +178,7 @@ export class WebAuthService extends AuthService {
                 (info) => {
                     console.log("getAuthorization returns:", info);
                     this._authcred.token = info.token;
-                    this._authcred.userDetails  = this.sharedService.deepCopy(info.userDetails);
+                    this._authcred.userDetails  = _deepCopy(info.userDetails);
                     if (info.token) {
                         // the user is authenticated and authorized to edit!
                         subscriber.next(
@@ -220,6 +246,7 @@ export class WebAuthService extends AuthService {
                     subscriber.complete();
                 },
                 (err) => {
+                    // Don't this is correct --Ray
                     this.loginUser();
                     // Unable to successfully complete connection and close
                     // subscriber.error(
@@ -252,6 +279,8 @@ export class WebAuthService extends AuthService {
 @Injectable()
 export class MockAuthService extends AuthService {
 
+    private _userid : string = null;
+
     /**
      * the authenticated identifier for the current user.  Set this to null to trigger 
      * a simulated routing through an authentication service.  
@@ -283,6 +312,12 @@ export class MockAuthService extends AuthService {
         for (let key of Object.keys(ngenv.testdata)) {
             if (ngenv.testdata[key]['ediid']) 
                 this.resdata[ngenv.testdata[key]['ediid']] = ngenv.testdata[key];
+        }
+    }
+
+    protected _getUserDetails() : UserDetails {
+        return {
+            userId: this.userID
         }
     }
 
@@ -322,6 +357,10 @@ export class MockAuthService extends AuthService {
     }
 }
 
+function _deepCopy(obj) {
+    return JSON.parse(JSON.stringify(obj));
+}
+
 /**
  * create an AuthService based on the runtime context.
  * 
@@ -334,7 +373,7 @@ export class MockAuthService extends AuthService {
  * context.useCustomizationService from the angular environment (i.e. 
  * src/environments/environment.ts).  A value of false assumes a develoment context.
  */
-export function createAuthService(config : AppConfig, httpClient : HttpClient, sharedService:SharedService, devmode ?: boolean)
+export function createAuthService(config : AppConfig, httpClient : HttpClient, devmode ?: boolean)
     : AuthService
 {
     if (devmode === undefined)
@@ -343,7 +382,7 @@ export function createAuthService(config : AppConfig, httpClient : HttpClient, s
     if (! devmode) {
         // production mode
         console.log("Will use configured customization web service");
-        return new WebAuthService(config, httpClient, sharedService);
+        return new WebAuthService(config, httpClient);
     }
 
     // dev mode

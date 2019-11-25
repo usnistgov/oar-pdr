@@ -5,9 +5,9 @@ import { Title } from '@angular/platform-browser';
 
 import { AppConfig } from '../config/config';
 import { MetadataService } from '../nerdm/nerdm.service';
+import { EditStatusService } from './editcontrol/editstatus.service';
 import { NerdmRes } from '../nerdm/nerdm';
 import { IDNotFound } from '../errors/error';
-import { SharedService } from '../shared';
 
 /**
  * A component providing the complete display of landing page content associated with 
@@ -47,12 +47,13 @@ export class LandingPageComponent implements OnInit {
      *                 ID with child components.
      */
     constructor(private route: ActivatedRoute,
-        private router: Router,
-        @Inject(PLATFORM_ID) private platformId: Object,
-        public titleSv: Title,
-        private cfg: AppConfig,
-        private mdserv: MetadataService,
-        private sharedService: SharedService) {
+                private router: Router,
+                @Inject(PLATFORM_ID) private platformId: Object,
+                public titleSv: Title,
+                private cfg: AppConfig,
+                private mdserv: MetadataService,
+                private edstatsvc: EditStatusService)
+    {
         this.reqId = this.route.snapshot.paramMap.get('id');
         this.inBrowser = isPlatformBrowser(platformId);
     }
@@ -63,36 +64,41 @@ export class LandingPageComponent implements OnInit {
      */
     ngOnInit() {
         console.log("initializing LandingPageComponent around id=" + this.reqId);
-        var param;
-        this.route.queryParamMap.subscribe(queryParams => {
-            param = queryParams.get("editmode")
-            console.log("url param:", param);
-        })
 
-        if (param) {
-            this.sharedService.setEditMode(true);
-        } else {
-            this.mdserv.getMetadata(this.reqId).subscribe(
-                (data) => {
-                    // successful metadata request
-                    this.md = data;
-                    if (!this.md) {
-                        // id not found; reroute
-                        console.error("No data found for ID=" + this.reqId);
-                        this.router.navigateByUrl("/not-found/" + this.reqId, { skipLocationChange: true });
-                    }
-                    else
-                        // proceed with rendering of the component
-                        this.useMetadata();
-                },
-                (err) => {
-                    console.error("Failed to retrieve metadata: " + err.toString());
-                    if (err instanceof IDNotFound)
-                        this.router.navigateByUrl("not-found/" + this.reqId, { skipLocationChange: true });
-                    else
-                        this.router.navigateByUrl("int-error/" + this.reqId, { skipLocationChange: true });
+        // retreive the (unedited) metadata
+        this.mdserv.getMetadata(this.reqId).subscribe(
+            (data) => {
+                // successful metadata request
+                this.md = data;
+                if (!this.md) {
+                    // id not found; reroute
+                    console.error("No data found for ID=" + this.reqId);
+                    this.router.navigateByUrl("/not-found/" + this.reqId, { skipLocationChange: true });
                 }
-            );
+                else
+                    // proceed with rendering of the component
+                    this.useMetadata();
+            },
+            (err) => {
+                console.error("Failed to retrieve metadata: " + err.toString());
+                if (err instanceof IDNotFound)
+                    this.router.navigateByUrl("not-found/" + this.reqId, { skipLocationChange: true });
+                else
+                    this.router.navigateByUrl("int-error/" + this.reqId, { skipLocationChange: true });
+            }
+        );
+
+        // if editing is enabled, the editing can be triggered via a URL parameter.  This is done
+        // in concert with the authentication process that can involve redirection to an authentication
+        // server; on successful authentication, the server can redirect the browser back to this
+        // landing page with editing turned on.  
+        if (this.edstatsvc.editingEnabled()) {
+            this.route.queryParamMap.subscribe(queryParams => {
+                let param = queryParams.get("editmode")
+                console.log("url param:", param);
+                if (param)
+                    this.edstatsvc.startEditing();
+            })
         }
     }
 

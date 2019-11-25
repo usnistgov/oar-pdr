@@ -69,12 +69,14 @@ export class MockActivatedRouteSnapshot {
 export class MockActivatedRoute {
     // Use a ReplaySubject to share previous values with subscribers
     // and pump new values into the `paramMap` observable
-    private subject = new ReplaySubject<ParamMap>();
+    private uparamSubj = new ReplaySubject<ParamMap>();
+    private qparamSubj = new ReplaySubject<ParamMap>();
     snapshot : Map;
     url : string;
 
-    /** The mock paramMap observable */
-    readonly paramMap = this.subject.asObservable();
+    /** The mock paramMaps observables */
+    readonly paramMap = this.uparamSubj.asObservable();
+    readonly queryParamMap = this.qparamSubj.asObservable();
 
     /**
      * construct the instance
@@ -84,12 +86,18 @@ export class MockActivatedRoute {
     constructor(path_info : string, public uparams?: Properties, public qparams? : QProperties) {
         this.url = path_info;
         this.setParamMap(uparams);
+        this.setQueryParamMap(qparams);
         this.snapshot = new MockActivatedRouteSnapshot(path_info, uparams, qparams);
     }
 
     /** Set the paramMap observables's next value */
     setParamMap(params?: Params) {
-        this.subject.next(convertToParamMap(params));
+        this.uparamSubj.next(convertToParamMap(params));
+    };
+
+    /** Set the paramMap observables's next value */
+    setQueryParamMap(params?: Params) {
+        this.qparamSubj.next(convertToParamMap(params));
     };
 }
 

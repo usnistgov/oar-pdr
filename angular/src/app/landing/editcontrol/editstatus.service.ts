@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, EventEmitter } from '@angular/core';
 
 import { AppConfig } from '../../config/config';
 
@@ -35,6 +35,11 @@ export class EditStatusService {
     private _editmode : boolean = false;
     _setEditMode(val : boolean) { this._editmode = val; }
 
+    private _remoteStart : EventEmitter<any> = new EventEmitter<any>();
+    _watchRemoteStart(subscriber) {
+        this._remoteStart.subscribe(subscriber);
+    }
+
     /**
      * the ID of the user currently logged in.  
      */
@@ -42,23 +47,30 @@ export class EditStatusService {
     private _userid : string = null;
     _setUserID(id : string) { this._userid = id; }
     
-    /*
+    /**
      * a flag indicating whether the current user has been authenticated.
      */
     get authenticated() : boolean { return Boolean(this._userid); }
 
-    /*
+    /**
      * a flag indicating whether the current user has been authorized to edit the landing page.  
      */
     get authorized() : boolean { return this._authzd; }
     private _authzd : boolean = false;
     _setAuthorized(val : boolean) { this._authzd = val; }
 
-    /*
+    /**
      * return true if it is possible to edit the landing page.  This will return false 
      * when running as part of the public side of the PDR.
      */
     public editingEnabled() : boolean {
         return this.cfg.get("editEnabled", false);
+    }
+
+    /**
+     * turn on editing controls allowing the user to edit the metadata
+     */
+    public startEditing() : void {
+        this._remoteStart.emit(true);
     }
 }

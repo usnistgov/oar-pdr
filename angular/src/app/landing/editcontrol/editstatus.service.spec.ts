@@ -36,6 +36,14 @@ describe('EditStatusService', () => {
         expect(svc.authenticated).toBe(true);
         expect(svc.authorized).toBe(false);
     });
+
+    it('watchable remote start', () => {
+        let started = false;
+        svc._watchRemoteStart((ev) => { started = true; })
+        expect(started).toBeFalsy();
+        svc.startEditing();
+        expect(started).toBeTruthy();
+    });
 });
 
 
