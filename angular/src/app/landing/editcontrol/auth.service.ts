@@ -377,7 +377,7 @@ export function createAuthService(config : AppConfig, httpClient : HttpClient, d
     : AuthService
 {
     if (devmode === undefined)
-        devmode = Boolean(ngenv['context'] || ngenv['context']['useCustomizationService']);
+        devmode = ! Boolean(ngenv['context'] || ! ngenv['context']['useCustomizationService']);
 
     if (! devmode) {
         // production mode
