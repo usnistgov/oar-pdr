@@ -111,8 +111,8 @@ public class JWTTokenGenerator {
 	    headers.add("Authorization", "Bearer " + mdsecret);
 	    HttpEntity<String> requestEntity = new HttpEntity<>(null, headers);
 	    ResponseEntity<String> result = restTemplate.exchange(uri, HttpMethod.GET, requestEntity, String.class);
-	    //return result.getStatusCode().is2xxSuccessful() ? true : false;
-	    return true;
+	    return result.getStatusCode().is2xxSuccessful() ? true : false;
+//	    return true;
 	} catch (Exception ie) {
 	    throw new UnAuthorizedUserException(
 		    "There is an error while getting user permissions from metadata srevice. " + ie.getMessage());
