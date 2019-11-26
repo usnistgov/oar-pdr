@@ -35,12 +35,14 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.MethodInvokingFactoryBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.core.annotation.Order;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.saml.SAMLAuthenticationProvider;
 import org.springframework.security.saml.SAMLBootstrap;
@@ -103,40 +105,74 @@ import gov.nist.oar.custom.customizationapi.service.SamlUserDetailsService;
  * @author Deoyani Nandrekar-Heinis
  */
 @Configuration
-//@Order(1)
+@Order(1)
+@EnableWebSecurity
 public class SecuritySamlConfig extends WebSecurityConfigurerAdapter {
     private static Logger logger = LoggerFactory.getLogger(SecuritySamlConfig.class);
 
+    /**
+     * Entityid for the SAML service provider, in this case customization service
+     */
     @Value("${saml.metdata.entityid:testid}")
     String entityId;
 
+    /**
+     * EntityURL for the service provider, in this case customization base url
+     */
     @Value("${saml.metadata.entitybaseUrl:testurl}")
     String entityBaseURL;
 
+    /**
+     * Keystore location
+     */
     @Value("${saml.keystore.path:testpath}")
     String keyPath;
 
+    /**
+     * Keystore store pass
+     */
     @Value("${saml.keystroe.storepass:testpass}")
     String keystorePass;
 
+    /**
+     * Keystrore key
+     */
     @Value("${saml.keystore.key:testkey}")
     String keyAlias;
 
+    /**
+     * Keystore key pass
+     */
     @Value("${saml.keystore.keypass:keypass}")
     String keyPass;
 
+    /**
+     * Federation URL or File
+     */
     @Value("${auth.federation.metadata:fedmetadata}")
     String federationMetadata;
 
+    /**
+     * SAML scheme user
+     */
     @Value("${saml.scheme:samlscheme}")
     String samlScheme;
 
-    @Value("${saml.server.name:keypass}")
+    /**
+     * SAML server name
+     */
+    @Value("${saml.server.name:server}")
     String samlServer;
 
-    @Value("${saml.server.context-path:keypass}")
+    /**
+     * SAML context path
+     */
+    @Value("${saml.server.context-path:context}")
     String samlContext;
 
+    /**
+     * SAML application URL
+     */
     @Value("${application.url:http://localhost:4200}")
     String applicationURL;
 
@@ -153,7 +189,7 @@ public class SecuritySamlConfig extends WebSecurityConfigurerAdapter {
 	WebSSOProfileOptions webSSOProfileOptions = new WebSSOProfileOptions();
 	webSSOProfileOptions.setIncludeScoping(false);
 	/// Adding this force authenticate on failure to validate SAML cache
-//	webSSOProfileOptions.setForceAuthN(true);
+	webSSOProfileOptions.setForceAuthN(true);
 	// Relay state can also be set here it will always go to this URL once
 	// authenticated
 	// webSSOProfileOptions.setRelayState("https://data.nist.gov/sdp");
@@ -185,18 +221,34 @@ public class SecuritySamlConfig extends WebSecurityConfigurerAdapter {
 	return new MetadataDisplayFilter();
     }
 
+    /**
+     * Authentication failure handler
+     * 
+     * @return
+     */
     @Bean
     public SimpleUrlAuthenticationFailureHandler authenticationFailureHandler() {
 	logger.info("SAML authentication failure!!");
 	return new SimpleUrlAuthenticationFailureHandler();
     }
 
+    /**
+     * Authentication success handler
+     * 
+     * @return
+     */
     @Bean
     public SavedRequestAwareAuthenticationSuccessHandler successRedirectHandler() {
 	SavedRequestAwareAuthenticationSuccessHandler successRedirectHandler = new SAMLRelayStateSuccessHandler();
 	return successRedirectHandler;
     }
 
+    /**
+     * SAML Web SSO processing filter
+     * 
+     * @return SAMLProcessingFilter
+     * @throws ConfigurationException
+     */
     @Bean
     public SAMLProcessingFilter samlWebSSOProcessingFilter() throws ConfigurationException {
 	logger.info("SAMLProcessingFilter adding authentication manager.");
@@ -204,8 +256,6 @@ public class SecuritySamlConfig extends WebSecurityConfigurerAdapter {
 	try {
 	    samlWebSSOProcessingFilter.setAuthenticationManager(authenticationManager());
 	} catch (Exception e) {
-	    // TODO Auto-generated catch block
-	    // e.printStackTrace();
 	    throw new ConfigurationException("Exception while setting up Authentication Manager:" + e.getMessage());
 	}
 	samlWebSSOProcessingFilter.setAuthenticationSuccessHandler(successRedirectHandler());
@@ -213,11 +263,21 @@ public class SecuritySamlConfig extends WebSecurityConfigurerAdapter {
 	return samlWebSSOProcessingFilter;
     }
 
+    /**
+     * successLogoutHandler
+     * 
+     * @return HttpStatusReturningLogoutSuccessHandler
+     */
     @Bean
     public HttpStatusReturningLogoutSuccessHandler successLogoutHandler() {
 	return new HttpStatusReturningLogoutSuccessHandler();
     }
 
+    /**
+     * SecurityContextLogoutHandler handler
+     * 
+     * @return SecurityContextLogoutHandler
+     */
     @Bean
     public SecurityContextLogoutHandler logoutHandler() {
 	logger.info("In SecurityContextLogoutHandler, setinvalid httpsession and clear authentication to true.");
@@ -227,22 +287,44 @@ public class SecuritySamlConfig extends WebSecurityConfigurerAdapter {
 	return logoutHandler;
     }
 
+    /**
+     * SAML logout filter
+     * 
+     * @return SAMLLogoutFilter
+     */
     @Bean
     public SAMLLogoutFilter samlLogoutFilter() {
 	return new SAMLLogoutFilter(successLogoutHandler(), new LogoutHandler[] { logoutHandler() },
 		new LogoutHandler[] { logoutHandler() });
     }
 
+    /**
+     * SAML logout processing filter
+     * 
+     * @return
+     */
     @Bean
     public SAMLLogoutProcessingFilter samlLogoutProcessingFilter() {
 	return new SAMLLogoutProcessingFilter(successLogoutHandler(), logoutHandler());
     }
 
+    /**
+     * Metadatagenerator
+     * 
+     * @return MetadataGenerator
+     * @throws ConfigurationException
+     */
     @Bean
     public MetadataGeneratorFilter metadataGeneratorFilter() throws ConfigurationException {
 	return new MetadataGeneratorFilter(metadataGenerator());
     }
 
+    /**
+     * Generates metadata for the service provider
+     * 
+     * @return MetadataGenerator
+     * @throws ConfigurationException
+     */
     @Bean
     public MetadataGenerator metadataGenerator() throws ConfigurationException {
 	logger.info("Metadata generator : sets the entity id and base url to establish communication with ID server.");
@@ -255,6 +337,12 @@ public class SecuritySamlConfig extends WebSecurityConfigurerAdapter {
 	return metadataGenerator;
     }
 
+    /**
+     * To load the keystore key with keypass
+     * 
+     * @return KeyManager
+     * @throws ConfigurationException
+     */
     @Bean
     public KeyManager keyManager() throws ConfigurationException {
 	logger.info("Read keystore key.");
@@ -270,6 +358,11 @@ public class SecuritySamlConfig extends WebSecurityConfigurerAdapter {
 	}
     }
 
+    /***
+     * Extended Metadata
+     * 
+     * @return ExtendedMetadata
+     */
     @Bean
     public ExtendedMetadata extendedMetadata() {
 	ExtendedMetadata extendedMetadata = new ExtendedMetadata();
@@ -278,6 +371,12 @@ public class SecuritySamlConfig extends WebSecurityConfigurerAdapter {
 	return extendedMetadata;
     }
 
+    /**
+     * Set up filter chain for the SAML authentication system, to connect to IDP
+     * 
+     * @return FilterChainProxy
+     * @throws ConfigurationException
+     */
     @Bean
     public FilterChainProxy springSecurityFilter() throws ConfigurationException {
 	logger.info("Setting up different saml filters and endpoints");
@@ -299,21 +398,41 @@ public class SecuritySamlConfig extends WebSecurityConfigurerAdapter {
 	return new FilterChainProxy(chains);
     }
 
+    /**
+     * Making sure TLS security
+     * 
+     * @return TLSProtocolConfigurer
+     */
     @Bean
     public TLSProtocolConfigurer tlsProtocolConfigurer() {
 	return new TLSProtocolConfigurer();
     }
 
+    /**
+     * 
+     * @return ProtocolSocketFactory
+     * @throws ConfigurationException
+     */
     @Bean
     public ProtocolSocketFactory socketFactory() throws ConfigurationException {
 	return new TLSProtocolSocketFactory(keyManager(), null, "default");
     }
 
+    /**
+     * 
+     * @return Protocol
+     * @throws ConfigurationException
+     */
     @Bean
     public Protocol socketFactoryProtocol() throws ConfigurationException {
 	return new Protocol("https", socketFactory(), 443);
     }
 
+    /**
+     * 
+     * @return MethodInvokingFactoryBean
+     * @throws ConfigurationException
+     */
     @Bean
     public MethodInvokingFactoryBean socketFactoryInitialization() throws ConfigurationException {
 	logger.info("Socket factory initialization.");
@@ -325,31 +444,61 @@ public class SecuritySamlConfig extends WebSecurityConfigurerAdapter {
 	return methodInvokingFactoryBean;
     }
 
+    /**
+     * XML parsing configuration
+     * 
+     * @return VelocityEngine
+     */
     @Bean
     public VelocityEngine velocityEngine() {
 	return VelocityFactory.getEngine();
     }
 
+    /**
+     * XML parsing configuration
+     * 
+     * @return StaticBasicParserPool
+     */
     @Bean(initMethod = "initialize")
     public StaticBasicParserPool parserPool() {
 	return new StaticBasicParserPool();
     }
 
+    /**
+     * XML parsing configuration
+     * 
+     * @return ParserPoolHolder
+     */
     @Bean(name = "parserPoolHolder")
     public ParserPoolHolder parserPoolHolder() {
 	return new ParserPoolHolder();
     }
 
+    /**
+     * SAML Binding which depends on IDP specifications
+     * 
+     * @return HTTPPostBinding
+     */
     @Bean
     public HTTPPostBinding httpPostBinding() {
 	return new HTTPPostBinding(parserPool(), velocityEngine());
     }
 
+    /**
+     * SAML Binding which depends on IDP specifications
+     * 
+     * @return HTTPRedirectDeflateBinding
+     */
     @Bean
     public HTTPRedirectDeflateBinding httpRedirectDeflateBinding() {
 	return new HTTPRedirectDeflateBinding(parserPool());
     }
 
+    /**
+     * SAML Binding which depends on IDP specifications
+     * 
+     * @return SAMLProcessorImpl
+     */
     @Bean
     public SAMLProcessorImpl processor() {
 	Collection<SAMLBinding> bindings = new ArrayList<>();
@@ -358,26 +507,52 @@ public class SecuritySamlConfig extends WebSecurityConfigurerAdapter {
 	return new SAMLProcessorImpl(bindings);
     }
 
+    /**
+     * Return httpclient to handle multithread
+     * 
+     * @return HttpClient
+     */
     @Bean
     public HttpClient httpClient() {
 	return new HttpClient(multiThreadedHttpConnectionManager());
     }
 
+    /**
+     * Multiple thread
+     * 
+     * @return MultiThreadedHttpConnectionManager
+     */
     @Bean
     public MultiThreadedHttpConnectionManager multiThreadedHttpConnectionManager() {
 	return new MultiThreadedHttpConnectionManager();
     }
 
+    /**
+     * To initialize SAML library with spring boot initialization
+     * 
+     * @return SAMLBootstrap
+     */
     @Bean
     public static SAMLBootstrap sAMLBootstrap() {
 	return new SAMLBootstrap();
     }
 
+    /**
+     * Default logger to make sure all SAML requests get logged into
+     * 
+     * @return SAMLDefaultLogger
+     */
     @Bean
     public SAMLDefaultLogger samlLogger() {
 	return new SAMLDefaultLogger();
     }
 
+    /**
+     * Parsing request/responses to make sure which SAML IDP or SP deal with it
+     * 
+     * @return SAMLContextProviderImpl
+     * @throws ConfigurationException
+     */
     @Bean
     public SAMLContextProviderImpl contextProvider() throws ConfigurationException {
 	logger.info("SAML context provider.");
@@ -391,25 +566,41 @@ public class SecuritySamlConfig extends WebSecurityConfigurerAdapter {
 	return samlContextProviderLB;
     }
 
-    // SAML 2.0 WebSSO Assertion Consumer
+    /***
+     * SAML 2.0 WebSSO Assertion Consumer
+     * 
+     * @return WebSSOProfileConsumer
+     */
     @Bean
     public WebSSOProfileConsumer webSSOprofileConsumer() {
 	return new WebSSOProfileConsumerImpl();
     }
 
-    // SAML 2.0 Web SSO profile
+    /**
+     * SAML 2.0 Web SSO profile
+     * 
+     * @return WebSSOProfile
+     */
     @Bean
     public WebSSOProfile webSSOprofile() {
 	return new WebSSOProfileImpl();
     }
 
-    // SAML 2.0 Holder-of-Key WebSSO Assertion Consumer
+    /***
+     * SAML 2.0 Holder-of-Key WebSSO Assertion Consumer
+     * 
+     * @return WebSSOProfileConsumerHoKImpl
+     */
     @Bean
     public WebSSOProfileConsumerHoKImpl hokWebSSOprofileConsumer() {
 	return new WebSSOProfileConsumerHoKImpl();
     }
 
-    // SAML 2.0 Holder-of-Key Web SSO profile
+    /**
+     * SAML 2.0 Holder-of-Key Web SSO profile
+     * 
+     * @return WebSSOProfileConsumerHoKImpl
+     */
     @Bean
     public WebSSOProfileConsumerHoKImpl hokWebSSOProfile() {
 	return new WebSSOProfileConsumerHoKImpl();
@@ -418,13 +609,19 @@ public class SecuritySamlConfig extends WebSecurityConfigurerAdapter {
     /**
      * Logout profile setting.
      * 
-     * @return
+     * @return SingleLogoutProfile
      */
     @Bean
     public SingleLogoutProfile logoutprofile() {
 	return new SingleLogoutProfileImpl();
     }
 
+    /**
+     * Read the federation metadata and load to extended metadata
+     * 
+     * @return ExtendedMetadataDelegate
+     * @throws ConfigurationException
+     */
     @Bean
     public ExtendedMetadataDelegate idpMetadata() throws ConfigurationException {
 	logger.info("Read the federation metadata provided by identity provider.");
@@ -466,6 +663,12 @@ public class SecuritySamlConfig extends WebSecurityConfigurerAdapter {
 	}
     }
 
+    /**
+     * 
+     * @return CachingMetadataManager
+     * @throws ConfigurationException
+     * @throws MetadataProviderException
+     */
     @Bean
     @Qualifier("metadata")
     public CachingMetadataManager metadata() throws ConfigurationException, MetadataProviderException {
@@ -474,11 +677,21 @@ public class SecuritySamlConfig extends WebSecurityConfigurerAdapter {
 	return new CachingMetadataManager(providers);
     }
 
+    /**
+     * 
+     * @return SAMLUserDetailsService
+     */
     @Bean
     public SAMLUserDetailsService samlUserDetailsService() {
 	return new SamlUserDetailsService();
     }
 
+    /**
+     * Returns Authentication provider which is capable of verifying validity of a
+     * SAMLAuthenticationToken
+     * 
+     * @return SAMLAuthenticationProvider
+     */
     @Bean
     public SAMLAuthenticationProvider samlAuthenticationProvider() {
 	SAMLAuthenticationProvider samlAuthenticationProvider = new SAMLAuthenticationProvider();
@@ -499,7 +712,7 @@ public class SecuritySamlConfig extends WebSecurityConfigurerAdapter {
      * Set up filter for cross origin requests, here it is read from configserver
      * and applicationURL is angular application URL
      * 
-     * @return
+     * @return CORSFilter
      */
     @Bean
     CORSFilter corsFilter() {
@@ -509,6 +722,20 @@ public class SecuritySamlConfig extends WebSecurityConfigurerAdapter {
     }
 
     /**
+     * Allow following URL patterns without any authentication and authorization
+     */
+    @Override
+    public void configure(WebSecurity web) throws Exception {
+	web.ignoring().antMatchers("/v2/api-docs",
+                "/configuration/ui",
+                "/swagger-resources/**",
+                "/configuration/security",
+                "/swagger-ui.html",
+                "/webjars/**");
+    }
+    
+    /**
+     * Test
      * These are all http security configurations for different endpoints.
      */
     @Override
@@ -535,11 +762,7 @@ public class SecuritySamlConfig extends WebSecurityConfigurerAdapter {
 
     }
 
-    @Override
-    public void configure(WebSecurity web) throws Exception {
-        web.ignoring().antMatchers("/swagger-ui.html");
-//        web.ignoring().antMatchers("/v2/api-docs/**");
-    }
+   
 //  private Timer backgroundTaskTimer;
 //	private MultiThreadedHttpConnectionManager multiThreadedHttpConnectionManager;
 //

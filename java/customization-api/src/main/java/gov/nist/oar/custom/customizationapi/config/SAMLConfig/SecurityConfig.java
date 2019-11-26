@@ -12,28 +12,20 @@
  */
 package gov.nist.oar.custom.customizationapi.config.SAMLConfig;
 
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
-//import org.springframework.boot.autoconfigure.security.Http401AuthenticationEntryPoint;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-
 import gov.nist.oar.custom.customizationapi.config.JWTConfig.JWTAuthenticationFilter;
-//import gov.nist.oar.custom.customizationapi.config.JWTConfig.JWTAuthenticationFilter;
 import gov.nist.oar.custom.customizationapi.config.JWTConfig.JWTAuthenticationProvider;
 
 /**
@@ -48,10 +40,10 @@ import gov.nist.oar.custom.customizationapi.config.JWTConfig.JWTAuthenticationPr
 public class SecurityConfig {
 
     /**
-     * Rest security configuration for /api/
+     * Rest security configuration for rest api
      */
     @Configuration
-    @Order(1)
+    @Order(2)
     public static class RestApiSecurityConfig extends WebSecurityConfigurerAdapter {
 	private Logger logger = LoggerFactory.getLogger(RestApiSecurityConfig.class);
 
@@ -65,7 +57,7 @@ public class SecurityConfig {
 	    logger.info("RestApiSecurityConfig HttpSecurity for REST /api endpoints");
 	    http.addFilterBefore(new JWTAuthenticationFilter(apiMatcher, super.authenticationManager()),
 		    UsernamePasswordAuthenticationFilter.class);
-	    
+
 	    http.authorizeRequests().antMatchers(HttpMethod.PATCH, apiMatcher).permitAll();
 	    http.authorizeRequests().antMatchers(HttpMethod.PUT, apiMatcher).permitAll();
 	    http.authorizeRequests().antMatchers(HttpMethod.DELETE, apiMatcher).permitAll();
@@ -80,10 +72,10 @@ public class SecurityConfig {
     }
 
     /**
-     * Rest security configuration for /api/
+     * Security configuration for authorization end points
      */
     @Configuration
-    @Order(2)
+    @Order(3)
     public static class AuthSecurityConfig extends WebSecurityConfigurerAdapter {
 	private Logger logger = LoggerFactory.getLogger(AuthSecurityConfig.class);
 
@@ -97,25 +89,6 @@ public class SecurityConfig {
 
 	    http.antMatcher(apiMatcher).authorizeRequests().anyRequest().authenticated();
 	}
-    }
-
-//    @SuppressWarnings("deprecation")
-//    @Configuration
-//    @Order(3)
-//    public class WebMvcConfigurer extends WebMvcConfigurerAdapter {
-//	    @Override
-//	    public void addCorsMappings(CorsRegistry registry) {
-//	        registry.addMapping("/**").allowedOrigins("http://localhost:4200");
-//	    }
-//	}
-
-    /**
-     * Saml security config
-     */
-    @Configuration
-    @Import(SecuritySamlConfig.class)
-    public static class SamlConfig {
-
     }
 
 }

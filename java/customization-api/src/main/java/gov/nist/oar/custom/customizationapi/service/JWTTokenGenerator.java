@@ -75,7 +75,6 @@ public class JWTTokenGenerator {
 	try {
 	    final DateTime dateTime = DateTime.now();
 	    // build claims
-
 	    JWTClaimsSet.Builder jwtClaimsSetBuilder = new JWTClaimsSet.Builder();
 	    jwtClaimsSetBuilder.expirationTime(dateTime.plusMinutes(120).toDate());
 	    jwtClaimsSetBuilder.claim(JWTClaimName, JWTClaimValue);
@@ -84,7 +83,6 @@ public class JWTTokenGenerator {
 	    // signature
 	    SignedJWT signedJWT = new SignedJWT(new JWSHeader(JWSAlgorithm.HS256), jwtClaimsSetBuilder.build());
 	    signedJWT.sign(new MACSigner(JWTSECRET));
-
 
 	    return new UserToken(userDetails, signedJWT.serialize());
 	} catch (JOSEException e) {
@@ -111,8 +109,7 @@ public class JWTTokenGenerator {
 	    headers.add("Authorization", "Bearer " + mdsecret);
 	    HttpEntity<String> requestEntity = new HttpEntity<>(null, headers);
 	    ResponseEntity<String> result = restTemplate.exchange(uri, HttpMethod.GET, requestEntity, String.class);
-	    return result.getStatusCode().is2xxSuccessful() ? true : false;
-//	    return true;
+	    return result.getStatusCode().is2xxSuccessful() ? true : false;//	    return true;
 	} catch (Exception ie) {
 	    throw new UnAuthorizedUserException(
 		    "There is an error while getting user permissions from metadata srevice. " + ie.getMessage());

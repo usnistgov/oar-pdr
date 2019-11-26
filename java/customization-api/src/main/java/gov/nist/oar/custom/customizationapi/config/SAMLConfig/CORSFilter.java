@@ -49,7 +49,6 @@ public class CORSFilter implements Filter {
 
     }
 
-//    private final List<String> allowedOrigins = Arrays.asList(alloedURLs); 
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain)
 	    throws IOException, ServletException {
@@ -58,13 +57,7 @@ public class CORSFilter implements Filter {
 	HttpServletResponse response = (HttpServletResponse) servletResponse;
 	HttpServletRequest request = (HttpServletRequest) servletRequest;
 
-//        response.setHeader("Access-Control-Allow-Origin", "http://localhost:4200");
-//        response.setHeader("Access-Control-Allow-Methods", "GET,POST,DELETE,PUT,OPTIONS");
-//        response.setHeader("Access-Control-Allow-Headers", "*");
-//        response.setHeader("Access-Control-Allow-Credentials", "true");
-//        response.setHeader("Access-Control-Max-Age", "180");
 	// Access-Control-Allow-Origin
-
 	String origin = request.getHeader("Origin");
 	response.setHeader("Access-Control-Allow-Origin", allowedOrigins.contains(origin) ? origin : "");
 	response.setHeader("Vary", "Origin");
