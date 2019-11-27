@@ -56,6 +56,11 @@ export class EditControlComponent implements OnInit, OnChanges {
     @Output() mdrecChange = new EventEmitter<NerdmRes>();
 
     /**
+     * the ID that was used to request the landing page
+     */
+    @Input() requestID : string;
+
+    /**
      * the original resource identifier
      */
     private _resid : string = null;
@@ -102,14 +107,15 @@ export class EditControlComponent implements OnInit, OnChanges {
         this.edstatsvc._setEditMode(this.editMode);
         this.edstatsvc._setAuthorized(this.isAuthorized());
         this.edstatsvc._setUserID(this.authsvc.userID);
-        this.edstatsvc._watchRemoteStart((ev) => {
-            this.startEditing();
-        });
     }
 
     ngOnInit() {
         this.ngOnChanges();
         this.statusbar.showLastUpdate(this.editMode)
+        this.edstatsvc._watchRemoteStart((start) => {
+            if (start)
+                this.startEditing();
+        });
     }
     ngOnChanges() {
         if (this.mdrec instanceof Object && Object.keys(this.mdrec).length > 0) {
@@ -127,12 +133,20 @@ export class EditControlComponent implements OnInit, OnChanges {
      * appear on the landing page, allowing the user to edit various fields.
      */
     public startEditing() : void {
-        // TODO:  should this function be allowed turn off editing if authorization fails (e.g. due
-        //        to a network glitch)?
-        console.log("start editing...");
+        // console.log("start editing...");
+        if (this._custsvc) {
+            // already authorized
+            console.log("start editing... already authorized!");
+            this.editMode = true;
+            return;
+        }
+        
+        console.log("start editing... need authorization...");
         this.authorizeEditing().subscribe(
             (successful) => {
-                this.editMode = successful;
+                this.mdupdsvc.loadDraft(() => {
+                    this.editMode = successful;
+                });
             }
         );
     }
@@ -146,9 +160,14 @@ export class EditControlComponent implements OnInit, OnChanges {
                 (md) => {
                     this.mdupdsvc.forgetUpdateDate();
                     this.mdupdsvc.fieldReset();
+                    this.editMode = false;
                     this.mdrec = md as NerdmRes;
                     this.mdrecChange.emit(md as NerdmRes);
-                    this.editMode = false;
+
+                    this.mdupdsvc.showOriginalMetadata();
+
+                    // reload this page from the source
+                    // window.location.replace("/od/id/"+this.requestID);
                 },
                 (err) => {
                     if (err.type == "user")
@@ -195,6 +214,9 @@ export class EditControlComponent implements OnInit, OnChanges {
                     this.mdrecChange.emit(md as NerdmRes);
                     this.editMode = false;
                     this.statusbar.showLastUpdate(this.editMode)
+
+                    // reload this page from the source
+                    // window.location.replace("/od/id/"+this.requestID);
                 },
                 (err) => {
                     if (err.type == "user")

@@ -95,9 +95,11 @@ export class LandingPageComponent implements OnInit {
         if (this.edstatsvc.editingEnabled()) {
             this.route.queryParamMap.subscribe(queryParams => {
                 let param = queryParams.get("editmode")
-                console.log("url param:", param);
-                if (param)
+                // console.log("editmode url param:", param);
+                if (param) {
+                    console.log("Returning from authentication redirection (editmode="+param+")");
                     this.edstatsvc.startEditing();
+                }
             })
         }
     }

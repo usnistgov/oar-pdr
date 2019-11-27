@@ -1,4 +1,4 @@
-import { Component, OnInit, OnChanges, ElementRef, Input, Inject, APP_ID, HostListener } from '@angular/core';
+import { Component, OnInit, OnChanges, ElementRef, Input, Inject, APP_ID, HostListener, ViewChild } from '@angular/core';
 import { Title, Meta } from '@angular/platform-browser';
 import { ActivatedRoute, Router, NavigationEnd } from '@angular/router';
 import { TreeNode } from 'primeng/primeng';
@@ -10,6 +10,7 @@ import { AppConfig } from '../config/config';
 import { NerdmRes } from '../nerdm/nerdm';
 import { tap } from 'rxjs/operators';
 import { trigger, state, style, animate, transition } from '@angular/animations';
+import { EditControlComponent } from './editcontrol/editcontrol.component';
 import { ModalService } from '../shared/modal-service';
 import { AuthorPopupComponent } from './author/author-popup/author-popup.component';
 import { NgbModalOptions, NgbModal } from '@ng-bootstrap/ng-bootstrap';
@@ -644,5 +645,10 @@ export class LandingComponent implements OnInit, OnChanges {
     //     this.displayError = true;
     //     console.log(this.errorMsg);
     // }
+
+    // This can be uncommented for debugging purposes
+    //
+    // @ViewChild(EditControlComponent)
+    // ecc : EditControlComponent;
 }
 

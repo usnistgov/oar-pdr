@@ -203,5 +203,19 @@ describe('EditControlComponent', () => {
         mbardiv = cmpel.querySelectorAll(".messagebar");
         expect(mbardiv.length).toEqual(3);
     });
+
+    it('sends md update', () => {
+        let md = null;
+        component.mdrecChange.subscribe((ev) => {
+            md = ev;
+        });
+        expect(md).toBeNull();
+        component.startEditing();
+        expect(md).not.toBeNull();
+
+        md = null;
+        component.discardEdits();
+        expect(md).not.toBeNull();
+    });
 });
 

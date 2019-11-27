@@ -1,78 +1,107 @@
-// import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-// import { RouterTestingModule } from '@angular/router/testing'; 
-// import { DebugElement } from '@angular/core';
-// import { By } from '@angular/platform-browser';
+import { ElementRef } from '@angular/core';
+import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { TransferState } from '@angular/platform-browser';
+import { Title }    from '@angular/platform-browser';
+import { ActivatedRoute, Router, Routes } from '@angular/router';
+import { HttpClientModule } from '@angular/common/http';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { ModalService } from '../shared/modal-service';
+import { ToastrModule } from 'ngx-toastr';
 
-// import { LandingComponent } from './landing.component';
-// import { MenuModule,DialogModule,FieldsetModule } from 'primeng/primeng';
-// import {TreeModule,TreeNode} from 'primeng/primeng';
+import { LandingModule } from './landing.module';
+import { LandingComponent } from './landing.component';
+import { AngularEnvironmentConfigService } from '../config/config.service';
+import { AppConfig } from '../config/config'
+import { NerdmRes } from '../nerdm/nerdm'
+import { UserMessageService } from '../frame/usermessage.service';
+import { SharedService } from '../shared/shared/shared.service';
+import { CartService } from "../datacart/cart.service";
+import { DownloadService } from "../shared/download-service/download-service.service";
+import { TestDataService } from '../shared/testdata-service/testDataService';
+import { GoogleAnalyticsService } from '../shared/ga-service/google-analytics.service';
+import * as mock from '../testing/mock.services';
+import {RouterTestingModule} from "@angular/router/testing";
+import { testdata } from '../../environments/environment';
 
-// import { Collaspe } from './collapseDirective/collapse.directive';
-// import {DataFilesComponent} from './description/description.component';
-// import { MetadataComponent } from './metadata/metadata.component';
-// import { HttpClientTestingModule } from '@angular/common/http/testing';
-// import { FormsModule } from '@angular/forms';
-// import { CUSTOM_ELEMENTS_SCHEMA,NO_ERRORS_SCHEMA } from '@angular/core';
-// import { HttpModule } from '@angular/http';
-// import { SearchService } from '../shared/index';
-// import 'rxjs/add/observable/from';
-// import { AppConfig } from '../config/config';
-// import { TransferState } from '@angular/platform-browser';
-// import { AngularEnvironmentConfigService } from '../config/config.service';
-// import { CommonVarService } from '../shared/common-var';
-// import { ModalService } from '../shared/modal-service';
-// import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-// import { of } from 'rxjs';
-// import { GoogleAnalyticsService } from '../shared/ga-service/google-analytics.service';
-// import { ToastrModule } from 'ngx-toastr';
+describe('LandingComponent', () => {
+    let component : LandingComponent;
+    let fixture : ComponentFixture<LandingComponent>;
+    let cfg : AppConfig;
+    let plid : Object = "browser";
+    let ts : TransferState = new TransferState();
+    let nrd : NerdmRes;
+    let route : ActivatedRoute;
+    let router : Router;
+    let routes : Routes = [ ];
 
-//   describe('Landing Component', () => {
-//     let component: LandingComponent;
-//     let fixture: ComponentFixture<LandingComponent>;
-//     let cfg : AppConfig;
-//     let plid : Object = "browser";
-//     let ts : TransferState = new TransferState();
-//     let de: DebugElement;
-//     let sampleData: any = require('../../assets/sample3.json');
+    beforeEach(() => {
+        cfg = (new AngularEnvironmentConfigService(plid, ts)).getConfig() as AppConfig;
+        cfg.locations.pdrSearch = "https://goob.nist.gov/search";
+        cfg.status = "Unit Testing";
+        cfg.appVersion = "2.test";
+        cfg.editEnabled = true;
 
-//     beforeEach(async(() => {
-//       cfg = (new AngularEnvironmentConfigService(plid, ts)).getConfig() as AppConfig;
-//       cfg.locations.pdrSearch = "https://goob.nist.gov/search";
-//       cfg.status = "Unit Testing";
-//       cfg.appVersion = "2.test";
+        nrd = JSON.parse(JSON.stringify(testdata['test1']));
+        /*
+        nrd = {
+            "@type": [ "nrd:SRD", "nrdp:DataPublication", "nrdp:DataPublicResource" ],
+            "@id": "goober",
+            title: "All About Me!"
+        }
+        */
 
-//       TestBed.configureTestingModule({
-//       declarations: [ LandingComponent, Collaspe,DataFilesComponent,
-//                       MetadataComponent
-//                     ],
-//       imports:[ MenuModule,DialogModule, FormsModule, TreeModule,FieldsetModule, HttpModule ,RouterTestingModule, HttpClientTestingModule, BrowserAnimationsModule,
-//       ToastrModule.forRoot()],
-//       schemas: [ CUSTOM_ELEMENTS_SCHEMA ,NO_ERRORS_SCHEMA],
-//       providers: [
-//         SearchService, GoogleAnalyticsService,
-//         TransferState, CommonVarService, ModalService,
-//         { provide: AppConfig, useValue: cfg }]
-//       })
-//       .compileComponents();
-//     }));
+        let r : unknown = new mock.MockActivatedRoute("/id/goober", {id: "goober"});
+        route = r as ActivatedRoute;
+    });
 
-//     beforeEach(() => {
-//       fixture = TestBed.createComponent(LandingComponent);
-//       component = fixture.componentInstance;
-//       fixture.detectChanges();
-//     });
+    let setupComponent = function() {
+        TestBed.configureTestingModule({
+            imports: [
+                HttpClientModule, BrowserAnimationsModule, LandingModule,
+                RouterTestingModule.withRoutes(routes),
+                ToastrModule.forRoot({
+                    toastClass: 'toast toast-bootstrap-compatibility-fix'
+                })
+            ],
+            providers: [
+                { provide: ActivatedRoute,  useValue: route },
+                { provide: ElementRef,      useValue: null },
+                { provide: AppConfig,       useValue: cfg },
+                UserMessageService,
+                CartService, DownloadService, TestDataService, GoogleAnalyticsService, ModalService,
+                SharedService
+            ]
+        }).compileComponents();
 
-//     it('should check the landing component', async(() => {
-//       expect(component).toBeTruthy();
-//     }));
+        router = TestBed.get(Router);
+        fixture = TestBed.createComponent(LandingComponent);
+        component = fixture.componentInstance;
+        component.record = nrd;
+        component.inBrowser = true;
+        component.requestId = "goober";
+        fixture.detectChanges();
+    }
 
-//     it('getData() should call searchById()', () => {
-//       let service = TestBed.get(SearchService);
-//       spyOn(service,'searchById').and.returnValue(of(sampleData));
-//       fixture.detectChanges();
-//       service.searchById().subscribe((result) => 
-//         expect(result.description[0]).toContain("This NIST database of fingerprint")
-//       );
-//       component.getData().subscribe(result => expect(result.description[0]).toContain("This NIST database of fingerprint"));
-//     });
-// });
+    it("includes landing display", function() {
+        setupComponent();
+        let cmpel = fixture.nativeElement;
+        let el = cmpel.querySelector("h2"); 
+        expect(el.textContent).toContain(nrd.title);
+    });
+
+    // This test requires changes to component code expressly to support this test
+    //
+    // it('receives md update', () => {
+    //     setupComponent();
+    //     expect(component.record['title']).not.toEqual("Doh!");
+        
+    //     component.ecc.startEditing();
+    //     fixture.detectChanges()
+    //     component.ecc.mdupdsvc.update("title", {title: "Doh!"})
+    //     fixture.detectChanges()
+    //     expect(component.record['title']).toEqual("Doh!");
+
+    //     component.ecc.discardEdits();
+    //     expect(component.record['title']).not.toEqual("Doh!");
+    // });
+});

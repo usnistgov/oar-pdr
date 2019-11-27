@@ -170,7 +170,8 @@ export class WebAuthService extends AuthService {
      */
     public authorizeEditing(resid : string) : Observable<CustomizationService> {
         if (this.authToken)
-            return of(new WebCustomizationService(resid, this.endpoint, this.authToken, this.httpcli, this.userID));
+            return of(new WebCustomizationService(resid, this.endpoint, this.authToken,
+                                                  this.httpcli, this.userID));
 
         // we need an authorization token
         return new Observable<CustomizationService>(subscriber => {
@@ -182,7 +183,8 @@ export class WebAuthService extends AuthService {
                     if (info.token) {
                         // the user is authenticated and authorized to edit!
                         subscriber.next(
-                            new WebCustomizationService(resid, this.endpoint, this.authToken, this.httpcli, info.userDetails.userId)
+                            new WebCustomizationService(resid, this.endpoint, this.authToken,
+                                                        this.httpcli, info.userDetails.userId)
                         );
                         subscriber.complete();
                     }
@@ -200,8 +202,13 @@ export class WebAuthService extends AuthService {
                     }
                 },
                 (err) => {
-                    subscriber.error(err);
-                    subscriber.complete();
+                    if (err['statusCode'] && err.statusCode == 401) {
+                        // User needs to log in; redirect the browser to the authentication server
+                        subscriber.complete();
+                        this.loginUser();
+                    }
+                    else 
+                        subscriber.error(err);
                 }
             );
         });
@@ -222,37 +229,35 @@ export class WebAuthService extends AuthService {
         let url = this.endpoint + "auth/_perm/" + resid;
         // wrap the HttpClient Observable with our own so that we can manage errors
         return new Observable<AuthInfo>(subscriber => {
-            this.httpcli.get(url, {
-                headers: { 'Content-Type': 'application/json' },
-                observe: 'response',
-                responseType: 'json'
-            }).subscribe(
-                (resp) => {
-                    if (resp.status == 200) {
-                        // URL returned OK
-                        subscriber.next(resp.body as AuthInfo);
-                    }
-                    else if (resp.status == 404) {
+            this.httpcli.get(url, { headers: { 'Content-Type': 'application/json' } }).subscribe(
+                (creds) => {
+                    // URL returned OK
+                    subscriber.next(creds as AuthInfo);
+                },
+                (httperr) => {
+                    if (httperr.status == 404) {
                         // URL returned Not Found
                         subscriber.next({} as AuthInfo);
+                        subscriber.complete();
+                    }
+                    else if (httperr.status < 100 && httperr.error) {
+                        let msg = "Service connection error"
+                        if (httperr['message'])
+                            msg += ": " + httperr.message
+                        if (httperr.error.message)
+                            msg += ": " + httperr.error.message
+                        if (httperr.status == 0 && httperr.statusText.includes('Unknown'))
+                            msg += " (possibly due to CORS restriction?)";
+                        subscriber.error( new ConnectionCustomizationError(msg) );
                     }
                     else {
                         // URL returned some other error status
-                        let msg = "Unexpected error during authorization: ";
-                        msg += (resp.body['message']) ? resp.body['message'] : resp.statusText;
-                        msg += " (" + resp.status.toString() + ")"
-                        subscriber.error(new SystemCustomizationError(msg, resp.status))
+                        let msg = "Unexpected error during authorization";
+                        // TODO: can we get at body of message when an error occurs?
+                        // msg += (httperr.body['message']) ? httperr.body['message'] : httperr.statusText;
+                        msg += " (" + httperr.status.toString() + " " + httperr.statusText + ")"
+                        subscriber.error(new SystemCustomizationError(msg, httperr.status))
                     }
-                    subscriber.complete();
-                },
-                (err) => {
-                    // Don't this is correct --Ray
-                    this.loginUser();
-                    // Unable to successfully complete connection and close
-                    // subscriber.error(
-                    //     new ConnectionCustomizationError("Authorization service connection error: "+err)
-                    // );
-                    subscriber.complete();
                 }
             );
         });
@@ -268,7 +273,7 @@ export class WebAuthService extends AuthService {
     public loginUser() : void {
         let redirectURL = this.endpoint + "saml/login?redirectTo=" + window.location.href + "?editmode=true";
         console.log("Redirecting to "+redirectURL+" to authenticate user");
-        window.location.replace(redirectURL);
+        window.location.assign(redirectURL);
     }
 }
 
@@ -353,7 +358,7 @@ export class MockAuthService extends AuthService {
         let redirectURL = window.location.href + "?editmode=true";
         console.log("Bypassing authentication service; redirecting directly to "+redirectURL);
         if (! this._userid) this._userid = "anon";
-        window.location.replace(redirectURL);
+        window.location.assign(redirectURL);
     }
 }
 
@@ -377,7 +382,7 @@ export function createAuthService(config : AppConfig, httpClient : HttpClient, d
     : AuthService
 {
     if (devmode === undefined)
-        devmode = ! Boolean(ngenv['context'] || ! ngenv['context']['useCustomizationService']);
+        devmode = Boolean(ngenv['context'] && ngenv['context']['useCustomizationService']) === false;
 
     if (! devmode) {
         // production mode

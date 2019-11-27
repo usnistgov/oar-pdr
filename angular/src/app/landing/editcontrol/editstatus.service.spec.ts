@@ -39,7 +39,9 @@ describe('EditStatusService', () => {
 
     it('watchable remote start', () => {
         let started = false;
-        svc._watchRemoteStart((ev) => { started = true; })
+        svc._watchRemoteStart((ev) => {
+            started = ev;
+        });
         expect(started).toBeFalsy();
         svc.startEditing();
         expect(started).toBeTruthy();

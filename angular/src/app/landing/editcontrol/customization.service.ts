@@ -63,6 +63,9 @@ export abstract class CustomizationService {
  */
 export class WebCustomizationService extends CustomizationService {
 
+    readonly draftapi : string = "api/draft/";
+    readonly saveapi : string = "api/savedrecord/";
+
     /**
      * construct the customization service
      *
@@ -86,7 +89,14 @@ export class WebCustomizationService extends CustomizationService {
      *
      * @return Observable<Object> -- on success, the subscriber's success (next) function is 
      *                   passed the Object representing the full draft metadata record.  On 
-     *                   failure, error function is called with an instance of a CustomizationError.
+     *                   failure, error function is called with a customized error object, one of 
+     *                   AuthCustomizationError -- if the request is made without being 
+     *                     authenticated or authorized.  This could happen if the user credentials
+     *                     expire during the session. 
+     *                   NotFoundCustomizationError -- if the ID for record that was requested 
+     *                     cannot be found. This should not happen normally.  
+     *                   ConnectionCustomizationError -- if it was not possible to connect to the 
+     *                     customization server, even to get back an error response.  
      */
     public getDraftMetadata() : Observable<Object> {
 
@@ -94,52 +104,49 @@ export class WebCustomizationService extends CustomizationService {
         // HttpClient.get() Observable with our own Observable
         //
         return new Observable<Object>(subscriber => {
-            let url = this.endpoint + "draft/" + this.resid;
-            let obs : Observable<HttpResponse<Object>> = 
-                this.httpcli.get(url, {
-                    headers: { "Authorization": "Bearer " + this.token },
-                    observe: 'response',
-                    responseType: 'json'
-                });
+            let url = this.endpoint + this.draftapi + this.resid;
+            let obs : Observable<Object> = 
+                this.httpcli.get(url, { headers: { "Authorization": "Bearer " + this.token } });
             this._wrapRespObs(obs, subscriber);
         });
     }
 
-    private _wrapRespObs(obs : Observable<HttpResponse<Object>>,
-                         subscriber : Subscriber<Object>) : void
-    {
+    private _wrapRespObs(obs : Observable<Object>, subscriber : Subscriber<Object>) : void {
         obs.subscribe(
-            (resp) => {
-                if (resp.status == 200) {
-                    subscriber.next(resp.body);
+            (jsonbody) => {
+                if (!jsonbody || !jsonbody['@id'])
+                    console.warn("Data returned from customization service does not look like a "+
+                                 "NERDm resource: "+JSON.stringify(jsonbody));
+                subscriber.next(jsonbody);
+            },
+            (httperr) => {   // this will be an HttpErrorResponse
+                let msg = "";
+                let err = null;
+                if (httperr.status == 401) {
+                    msg += "Authorization Error (401)";
+                    // TODO: can we get at body of message when an error occurs?
+                    // if (httperr.body['message']) msg += ": " + httperr.body['message'];
+                    err = new AuthCustomizationError(msg, httperr.status);
+                }
+                else if (httperr.status == 404) {
+                    msg += "Record Not Found (404)"
+                    // TODO: can we get at body of message when an error occurs?
+                    // if (httperr.body['message']) msg += ": " + httperr.body['message'];
+                    msg += " (Is the service endpoint correct?)"
+                    err = new NotFoundCustomizationError(msg, httperr.status);
+                }
+                else if (httperr.status < 100 && httperr.error) {
+                    msg = httperr.error.message
+                    err = new ConnectionCustomizationError("Service connection error: "+msg)
                 }
                 else {
-                    let msg = "";
-                    let err = null;
-                    if (resp.status == 401) {
-                        msg += "Authorization Error (401)";
-                        if (resp.body['message']) msg += ": " + resp.body['message'];
-                        err = new AuthCustomizationError(msg, resp.status);
-                    }
-                    else if (resp.status == 404) {
-                        msg += "Record Not Found (404)"
-                        if (resp.body['message']) msg += ": " + resp.body['message'];
-                        msg += " (Is the service endpoint correct?)"
-                        err = new NotFoundCustomizationError(msg, resp.status);
-                    }
-                    else {
-                        msg += "Unexpected Customization Error";
-                        if (resp.status > 0) msg += "(" + resp.status.toString() + ")";
-                        if (resp.body['message']) msg += ": " + resp.body['message'];
-                        err = new SystemCustomizationError(msg, resp.status);
-                    }
-                    subscriber.error(err);
+                    msg += "Unexpected Customization Error";
+                    if (httperr.status > 0) msg += "(" + httperr.status.toString() + ")";
+                    // TODO: can we get at body of message when an error occurs?
+                    // if (httperr.body['message']) msg += ": " + httperr.body['message'];
+                    err = new SystemCustomizationError(msg, httperr.status);
                 }
-                subscriber.complete();
-            },
-            (err) => {
-                subscriber.error(new ConnectionCustomizationError("Service connection error: "+err));
-                subscriber.complete();
+                subscriber.error(err);
             }
         );
     }
@@ -150,23 +157,24 @@ export class WebCustomizationService extends CustomizationService {
      *
      * @return Observable<Object> -- on success, the subscriber's success (next) function is 
      *                   passed the Object representing the full draft metadata record.  On 
-     *                   failure, error function is called with an instance of a CustomizationError.
+     *                   failure, error function is called with a customized error object, one of 
+     *                   AuthCustomizationError -- if the request is made without being 
+     *                     authenticated or authorized.  This could happen if the user credentials
+     *                     expire during the session. 
+     *                   NotFoundCustomizationError -- if the ID for record that was requested 
+     *                     cannot be found. This should not happen normally.  
+     *                   ConnectionCustomizationError -- if it was not possible to connect to the 
+     *                     customization server, even to get back an error response.  
      */
     public updateMetadata(md : Object) : Observable<Object> {
-        console.log("token", this.token);
-        console.log("md", md);
         // To transform the output with proper error handling, we wrap the
         // HttpClient.patch() Observable with our own Observable
         //
         return new Observable<Object>(subscriber => {
-            let url = this.endpoint + "draft/" + this.resid;
+            let url = this.endpoint + this.draftapi + this.resid;
             let body = JSON.stringify(md);
-            let obs : Observable<HttpResponse<Object>> = 
-                this.httpcli.patch(url, body, {
-                    headers: { "Authorization": "Bearer " + this.token }, 
-                    observe: 'response',
-                    responseType: 'json'
-                });
+            let obs : Observable<Object> = 
+                this.httpcli.patch(url, body, { headers: { "Authorization": "Bearer " + this.token } });
             this._wrapRespObs(obs, subscriber);
         });
     }
@@ -176,7 +184,14 @@ export class WebCustomizationService extends CustomizationService {
      *
      * @return Observable<Object> -- on success, the subscriber's success (next) function is 
      *                   passed the Object representing the full draft metadata record.  On 
-     *                   failure, error function is called with an instance of a CustomizationError.
+     *                   failure, error function is called with a customized error object, one of 
+     *                   AuthCustomizationError -- if the request is made without being 
+     *                     authenticated or authorized.  This could happen if the user credentials
+     *                     expire during the session. 
+     *                   NotFoundCustomizationError -- if the ID for record that was requested 
+     *                     cannot be found. This should not happen normally.  
+     *                   ConnectionCustomizationError -- if it was not possible to connect to the 
+     *                     customization server, even to get back an error response.  
      */
     public saveDraft() : Observable<Object> {
 
@@ -184,19 +199,26 @@ export class WebCustomizationService extends CustomizationService {
         // HttpClient.put() Observable with our own Observable
         //
         return new Observable<Object>(subscriber => {
-            let url = this.endpoint + "savedrecord/" + this.resid;
-            let obs : Observable<HttpResponse<Object>> = 
-                this.httpcli.put(url, {}, {
-                    headers: { "Authorization": "Bearer " + this.token },
-                    observe: 'response',
-                    responseType: 'json'
-                });
+            let url = this.endpoint + this.saveapi + this.resid;
+            let obs : Observable<Object> = 
+                this.httpcli.put(url, {}, { headers: { "Authorization": "Bearer " + this.token } });
             this._wrapRespObs(obs, subscriber);
         });
     }
 
     /**
      * discard the changes in the draft, reverting to the original metadata
+     *
+     * @return Observable<Object> -- on success, the subscriber's success (next) function is 
+     *                   passed the Object representing the full draft metadata record.  On 
+     *                   failure, error function is called with a customized error object, one of 
+     *                   AuthCustomizationError -- if the request is made without being 
+     *                     authenticated or authorized.  This could happen if the user credentials
+     *                     expire during the session. 
+     *                   NotFoundCustomizationError -- if the ID for record that was requested 
+     *                     cannot be found. This should not happen normally.  
+     *                   ConnectionCustomizationError -- if it was not possible to connect to the 
+     *                     customization server, even to get back an error response.  
      */
     public discardDraft() : Observable<Object> {
 
@@ -204,13 +226,9 @@ export class WebCustomizationService extends CustomizationService {
         // HttpClient.delete() Observable with our own Observable
         //
         return new Observable<Object>(subscriber => {
-            let url = this.endpoint + "draft/" + this.resid;
-            let obs : Observable<HttpResponse<Object>> = 
-                this.httpcli.delete(url, {
-                    headers: { "Authorization": "Bearer " + this.token },
-                    observe: 'response',
-                    responseType: 'json'
-                });
+            let url = this.endpoint + this.draftapi + this.resid;
+            let obs : Observable<Object> = 
+                this.httpcli.delete(url, { headers: { "Authorization": "Bearer " + this.token } });
             this._wrapRespObs(obs, subscriber);
         });
     }

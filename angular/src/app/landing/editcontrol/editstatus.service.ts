@@ -1,4 +1,5 @@
-import { Injectable, EventEmitter } from '@angular/core';
+import { Injectable } from '@angular/core';
+import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 
 import { AppConfig } from '../../config/config';
 
@@ -35,7 +36,7 @@ export class EditStatusService {
     private _editmode : boolean = false;
     _setEditMode(val : boolean) { this._editmode = val; }
 
-    private _remoteStart : EventEmitter<any> = new EventEmitter<any>();
+    private _remoteStart : BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
     _watchRemoteStart(subscriber) {
         this._remoteStart.subscribe(subscriber);
     }
@@ -71,6 +72,6 @@ export class EditStatusService {
      * turn on editing controls allowing the user to edit the metadata
      */
     public startEditing() : void {
-        this._remoteStart.emit(true);
+        this._remoteStart.next(true);
     }
 }
