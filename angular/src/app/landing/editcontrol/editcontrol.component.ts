@@ -161,8 +161,11 @@ export class EditControlComponent implements OnInit, OnChanges {
                     this.mdupdsvc.forgetUpdateDate();
                     this.mdupdsvc.fieldReset();
                     this.editMode = false;
-                    this.mdrec = md as NerdmRes;
-                    this.mdrecChange.emit(md as NerdmRes);
+                    if (md && md['@id']) {
+                        // assume a NerdmRes object was returned
+                        this.mdrec = md as NerdmRes;
+                        this.mdrecChange.emit(md as NerdmRes);
+                    }
 
                     this.mdupdsvc.showOriginalMetadata();
 
