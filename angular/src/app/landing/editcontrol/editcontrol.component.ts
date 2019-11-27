@@ -114,7 +114,7 @@ export class EditControlComponent implements OnInit, OnChanges {
         this.statusbar.showLastUpdate(this.editMode)
         this.edstatsvc._watchRemoteStart((start) => {
             if (start)
-                this.startEditing();
+                this.startEditing(true);
         });
     }
     ngOnChanges() {
@@ -131,8 +131,12 @@ export class EditControlComponent implements OnInit, OnChanges {
     /**
      * start (or resume) editing of the resource metadata.  Calling this will cause editing widgets to 
      * appear on the landing page, allowing the user to edit various fields.
+     * 
+     * @param nologin   if false (default) and the user is not logged in, the browser will be redirected 
+     *                  to the authentication service.  If true, redirection will not occur; instead, 
+     *                  the app will remain with editing turned off if the user is not logged in.  
      */
-    public startEditing() : void {
+    public startEditing(nologin : boolean = false) : void {
         // console.log("start editing...");
         if (this._custsvc) {
             // already authorized
@@ -142,7 +146,7 @@ export class EditControlComponent implements OnInit, OnChanges {
         }
         
         console.log("start editing... need authorization...");
-        this.authorizeEditing().subscribe(
+        this.authorizeEditing(nologin).subscribe(
             (successful) => {
                 this.mdupdsvc.loadDraft(() => {
                     this.editMode = successful;
@@ -288,11 +292,14 @@ export class EditControlComponent implements OnInit, OnChanges {
      * and, thus, this function would not return to its caller.  The authorization server should 
      * return the browser to the landing page which should trigger calling this function again.  
      * 
+     * @param nologin   if false (default) and the user is not logged in, the browser will be redirected 
+     *                  to the authentication service.  If true, redirection will not occur; instead, 
+     *                  false is returned if the user is not logged in.  
      * @return Observable<boolean>   this will resolve to true if the application is authorized; 
      *                               false, if either the user could not authenticate or is otherwise 
      *                               not allowed to edit this record.  
      */
-    public authorizeEditing() : Observable<boolean> {
+    public authorizeEditing(nologin : boolean = false) : Observable<boolean> {
         if (this._custsvc) return of<boolean>(true);   // We're already authorized
         if (! this.resID) {
             console.warn("Warning: Initial metadata record not established yet in EditControlComponent");
@@ -303,11 +310,16 @@ export class EditControlComponent implements OnInit, OnChanges {
             console.log("obtaining editing authorization");
             this.statusbar.showMessage("Authenticating/authorizing access...", true)
             
-            this.authsvc.authorizeEditing(this.resID).subscribe(  // this might cause redirect (see above)
+            this.authsvc.authorizeEditing(this.resID, nologin).subscribe(  // might cause redirect (see above)
                 (custsvc) => {
                     this._custsvc = custsvc;    // could be null, indicating user is not authorized.
                     this.mdupdsvc._setCustomizationService(custsvc);
-                    if (! custsvc) {
+                    if (! this.authsvc.userID) {
+                        console.log("authentication failed");
+                        this.msgsvc.error("User log in cancelled or failed.  To edit, please log in " +
+                                          'by clicking the "Edit" button above.')
+                    }
+                    else if (! custsvc) {
                         console.log("authorization denied for user "+this.authsvc.userID);
                         this.msgsvc.error("Sorry, you are not authorized to edit this submission.")
                     }

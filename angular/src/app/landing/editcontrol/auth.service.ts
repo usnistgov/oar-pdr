@@ -97,9 +97,19 @@ export abstract class AuthService {
 
     /**
      * create a CustomizationService that allows the user to edit the resource metadata 
-     * associated with the given ID.
+     * associated with the given ID.  Note that an implementation may need to redirect the browser 
+     * to an authentication service to determine who the current user is.  
+     *
+     * @param resid     the identifier for the resource to edit
+     * @param nologin   if false (default) and the user is not logged in, the browser will be redirected 
+     *                  to the authentication service.  If true, redirection will not occur; instead, 
+     *                  no user information is set and null is returned if the user is not logged in.  
+     * @param Observable<CustomizationService>  an observable wrapped CustomizationService that should 
+     *                  be used to send edits to the customization server.  The service will be null if 
+     *                  the user is not authorized.  
      */
-    public abstract authorizeEditing(resid : string) : Observable<CustomizationService>;
+    public abstract authorizeEditing(resid : string, nologin ?: boolean)
+        : Observable<CustomizationService>;
 
     /**
      * redirect the browser to the authentication service, instructing it to return back to 
@@ -166,9 +176,12 @@ export class WebAuthService extends AuthService {
      * Note that instead of returning, this method may redirect the browser to an authentication
      * server to authenticate the user.  
      * 
-     * @param resid    the identifier for the resource to edit
+     * @param resid     the identifier for the resource to edit
+     * @param nologin   if false (default) and the user is not logged in, the browser will be redirected 
+     *                  to the authentication service.  If true, redirection will not occur; instead, 
+     *                  no user information is set and null is returned if the user is not logged in.  
      */
-    public authorizeEditing(resid : string) : Observable<CustomizationService> {
+    public authorizeEditing(resid : string, nologin : boolean = false) : Observable<CustomizationService> {
         if (this.authToken)
             return of(new WebCustomizationService(resid, this.endpoint, this.authToken,
                                                   this.httpcli, this.userID));
@@ -198,14 +211,23 @@ export class WebAuthService extends AuthService {
                         subscriber.complete();
 
                         // redirect the browser to the authentication server
-                        this.loginUser();
+                        if (! nologin)
+                            this.loginUser();
+                        else {
+                            subscriber.next(null);
+                            subscriber.complete();
+                        }
                     }
                 },
                 (err) => {
                     if (err['statusCode'] && err.statusCode == 401) {
                         // User needs to log in; redirect the browser to the authentication server
-                        subscriber.complete();
-                        this.loginUser();
+                        if (! nologin) 
+                            this.loginUser();
+                        else {
+                            subscriber.next(null);
+                            subscriber.complete();
+                        }
                     }
                     else 
                         subscriber.error(err);
@@ -337,11 +359,16 @@ export class MockAuthService extends AuthService {
     /**
      * create a CustomizationService that allows the user to edit the resource metadata 
      * associated with the given ID.
+     *
+     * @param resid     the identifier for the resource to edit
+     * @param nologin   if false (default) and the user is not logged in, the browser will be redirected 
+     *                  to the authentication service.  If true, redirection will not occur; instead, 
+     *                  no user information is set and null is returned if the user is not logged in.  
+     * @param Observable<CustomizationService>  an observable wrapped CustomizationService that should 
+     *                  be used to send edits to the customization server.  The service will be null if 
+     *                  the user is not authorized.  
      */
-    public authorizeEditing(resid : string) : Observable<CustomizationService> {
-        // REMOVE THIS when MetadataService is available
-        resid = "26DEA39AD677678AE0531A570681F32C1449";
-        
+    public authorizeEditing(resid : string, nologin : boolean = false) : Observable<CustomizationService> {
         // simulate logging in with a redirect 
         if (! this.userID) this.loginUser();
         if (! this.resdata[resid])
