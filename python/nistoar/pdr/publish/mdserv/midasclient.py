@@ -29,7 +29,7 @@ class MIDASClient(object):
     a class for interacting with the MIDAS API
     """
 
-    def __init__(self, config, baseurl=None):
+    def __init__(self, config, baseurl=None, logger=None):
         """
         initialize the client.  
 
@@ -48,6 +48,7 @@ class MIDASClient(object):
         if not self.baseurl.endswith('/'):
             self.baseurl += '/'
         self._authkey = self.cfg.get('auth_key')
+        self.log = logger
 
     def _get_json(self, relurl, resp):
         try:
@@ -97,6 +98,9 @@ class MIDASClient(object):
         resp = None
         midasrecn = midasid2recnum(midasid)
         try:
+            if self.log:
+                self.log.debug("Retrieving latest POD record from MIDAS for rec="
+                               +midasrecn);
             resp = requests.get(self.baseurl + midasrecn, headers=hdrs)
             return self._extract_pod(self._get_json(midasrecn, resp), midasrecn)
         except requests.RequestException as ex:
@@ -123,6 +127,9 @@ class MIDASClient(object):
 
         midasrecn = midasid2recnum(midasid)
         try:
+            if self.log:
+                self.log.debug("Submitting POD record update to MIDAS for rec="
+                               +midasrecn);
             data = {"dataset": pod}
             resp = requests.put(self.baseurl+midasrecn, json=data,
                                 headers=hdrs)
@@ -142,10 +149,16 @@ class MIDASClient(object):
             hdrs['Authorization'] = "Bearer " + self._authkey
                                    
         try:
+            msg = "Edit authorization check for user=" + userid + \
+                  " on record no.=" + midasrecn
             resp = requests.get(url, headers=hdrs)
             if resp.status_code == 200:
+                if self.log:
+                    self.log.info(msg + ": authorized")
                 return True
             elif resp.status_code == 403:
+                if self.log:
+                    self.log.info(msg + ": not authorized")
                 return False
 
             elif resp.status_code >= 500:
