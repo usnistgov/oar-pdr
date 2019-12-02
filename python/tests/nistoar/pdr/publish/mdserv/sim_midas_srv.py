@@ -147,9 +147,10 @@ class SimMidasHandler(object):
 
         try:
             if len(parts) > 1:
-                if self.user_can_update(parts[1], parts[0]):
-                    return self.send_error(200, "Authorized")
-                return self.send_error(403, "Unauthorized")
+                out = json.dumps({
+                    "response_code": 200,
+                    "editable": self.user_can_update(parts[1], parts[0])
+                });
                 
             else:
                 out = self.arch.get_pod(parts[0])

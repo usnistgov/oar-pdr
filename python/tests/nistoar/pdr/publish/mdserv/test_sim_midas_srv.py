@@ -151,7 +151,11 @@ class TestSimMidasHandler(test.TestCase):
             'REQUEST_METHOD': 'GET'
         }
         body = self.svc(req, self.start)
-        self.assertIn("200", self.resp[0]);
+        self.assertIn("200", self.resp[0])
+        
+        body = json.loads("\n".join(body))
+        self.assertIn("editable", body)
+        self.assertTrue(body['editable'])
         
     def test_user_cant_edit(self):
         req = {
@@ -159,8 +163,12 @@ class TestSimMidasHandler(test.TestCase):
             'REQUEST_METHOD': 'GET'
         }
         body = self.svc(req, self.start)
-        self.assertIn("403", self.resp[0]);
-
+        self.assertIn("200", self.resp[0])
+        
+        body = json.loads("\n".join(body))
+        self.assertIn("editable", body)
+        self.assertFalse(body['editable'])
+        
     def test_put(self):
         getreq = {
             'PATH_INFO': '/goob/pdr2210',

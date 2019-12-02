@@ -1,7 +1,7 @@
 """
 a module for utilizing the MIDAS API for interacting with the NIST EDI.
 """
-import os, re
+import os, re, logging, json
 from collections import OrderedDict
 
 import urllib
@@ -47,7 +47,9 @@ class MIDASClient(object):
         self.baseurl = baseurl
         if not self.baseurl.endswith('/'):
             self.baseurl += '/'
-        self._authkey = self.cfg.get('auth_key')
+        self._authkey = self.cfg.get('update_auth_key')
+        if not logger:
+            logger = logging.getLogger("MIDASClient")
         self.log = logger
 
     def _get_json(self, relurl, resp):
@@ -98,9 +100,8 @@ class MIDASClient(object):
         resp = None
         midasrecn = midasid2recnum(midasid)
         try:
-            if self.log:
-                self.log.debug("Retrieving latest POD record from MIDAS for rec="
-                               +midasrecn);
+            self.log.debug("Retrieving latest POD record from MIDAS for rec="
+                           +midasrecn);
             resp = requests.get(self.baseurl + midasrecn, headers=hdrs)
             return self._extract_pod(self._get_json(midasrecn, resp), midasrecn)
         except requests.RequestException as ex:
@@ -127,9 +128,8 @@ class MIDASClient(object):
 
         midasrecn = midasid2recnum(midasid)
         try:
-            if self.log:
-                self.log.debug("Submitting POD record update to MIDAS for rec="
-                               +midasrecn);
+            self.log.debug("Submitting POD record update to MIDAS for rec="
+                           +midasrecn);
             data = {"dataset": pod}
             resp = requests.put(self.baseurl+midasrecn, json=data,
                                 headers=hdrs)
@@ -143,24 +143,34 @@ class MIDASClient(object):
         update the record with the given ID.
         """
         midasrecn = midasid2recnum(midasid);
-        url = "{0}/{1}/{2}".format(self.baseurl, midasrecn, userid)
+        relurl = "{0}/{1}".format(midasrecn, userid)
+        url = self.baseurl + relurl
         hdrs = {}
         if self._authkey:
             hdrs['Authorization'] = "Bearer " + self._authkey
-                                   
+
+        msg = "Edit authorization check for user=" + userid + \
+              " on record no.=" + midasrecn
+        self.log.info(msg+"...")
+        if 'Authorization' not in hdrs:
+            self.log.warn("No Authorization header included!")
+        
         try:
-            msg = "Edit authorization check for user=" + userid + \
-                  " on record no.=" + midasrecn
             resp = requests.get(url, headers=hdrs)
             if resp.status_code == 200:
-                if self.log:
-                    self.log.info(msg + ": authorized")
-                return True
-            elif resp.status_code == 403:
-                if self.log:
-                    self.log.info(msg + ": not authorized")
-                return False
+                body = resp.json()
+                if ("editable" in body):
+                    self.log.info("MIDAS says: %sauthorized",
+                                  (not body['editable'] and "not ") or "")
+                    return body['editable'];
+                else:
+                    raise MIDASServerError(relurl, resp.status_code,
+                                           "Unexpected content from MIDAS: "+
+                                           json.dumps(body))
 
+            elif resp.status_code == 403:
+                raise MIDASClientError(relurl, resp.status_code,
+                                       "Bad service authorization key")
             elif resp.status_code >= 500:
                 raise MIDASServerError(relurl, resp.status_code, resp.reason)
             elif resp.status_code == 404:
@@ -173,7 +183,16 @@ class MIDASClient(object):
                                message="Unexpected response from server: {0} {1}"
                                         .format(resp.status_code, resp.reason))
         except requests.RequestException as ex:
-            raise MIDASServerError(midasrecn, cause=ex)
+            raise MIDASServerError(relurl,
+                                   message="HTTP client request failure: "
+                                           +str(ex),
+                                   cause=ex)
+
+        except ValueError as ex:
+            raise MIDASServerError(relurl, 
+                                   message="Trouble parsing JSON response body: "
+                                           +str(ex),
+                                   cause=ex)
 
 
 
