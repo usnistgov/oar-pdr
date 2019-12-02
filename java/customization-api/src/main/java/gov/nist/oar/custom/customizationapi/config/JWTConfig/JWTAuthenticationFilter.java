@@ -62,9 +62,17 @@ public class JWTAuthenticationFilter extends AbstractAuthenticationProcessingFil
 		.getWebApplicationContext(servletContext);
 	uExtract = webApplicationContext.getBean(UserDetailsExtractor.class);
 
-	logger.info("Attempt to check token and  authorized token validity");
-	String token = request.getHeader(Header_Authorization_Token).replaceAll(Token_starter, "").trim();
-	String userId = uExtract.getUserId().getUserEmail();
+	logger.info("Attempt to check token and  authorized token validity"+request.getHeader(Header_Authorization_Token));
+	String token = request.getHeader(Header_Authorization_Token);
+	if(token == null ) {
+	    logger.error("Unauthorized user: Token is null.");
+		this.unsuccessfulAuthentication(request, response, new BadCredentialsException(
+			"Unauthorized user: Token is not provided with this request."));
+		return null;
+	}
+	    
+	token = token.replaceAll(Token_starter, "").trim();
+	String userId = uExtract.getUserDetails().getUserEmail();
 	String recordId = uExtract.getUserRecord(request.getRequestURI());
 	try {
 
@@ -113,7 +121,7 @@ public class JWTAuthenticationFilter extends AbstractAuthenticationProcessingFil
 	Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 	AuthenticatedUserDetails userDetails = null;
 	if (auth != null) {
-	    userDetails = uExtract.getUserId();
+	    userDetails = uExtract.getUserDetails();
 	}
 	logger.info("If token is not authorized send Unauthorized status.");
 	response.setStatus(HttpStatus.UNAUTHORIZED.value());
@@ -122,7 +130,7 @@ public class JWTAuthenticationFilter extends AbstractAuthenticationProcessingFil
 	HashMap<String, Object> responseObject = new HashMap<String, Object>();
 
 	if (userDetails != null) {
-	    responseObject.put("userId", userDetails);
+	    responseObject.put("userId", userDetails.getUserId());
 	    responseObject.put("message", "User is not Authorized.");
 	} else {
 	    responseObject.put("message", "User is not Authenticated.");

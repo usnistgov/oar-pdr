@@ -12,9 +12,6 @@
  */
 package gov.nist.oar.custom.customizationapi.service;
 
-import java.text.ParseException;
-import java.util.Date;
-
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

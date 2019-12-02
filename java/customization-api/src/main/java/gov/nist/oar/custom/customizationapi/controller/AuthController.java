@@ -60,6 +60,7 @@ public class AuthController {
 
     @Autowired
     UserDetailsExtractor uExtract;
+
 //    public UserDetailsExtractor uExtract = new UserDetailsExtractor();
     /**
      * Get the JWT for the authorized user
@@ -82,8 +83,8 @@ public class AuthController {
 	    if (authentication == null)
 		throw new UnAuthenticatedUserException(" User is not authenticated to access this resource.");
 	    logger.info("Get the token for authenticated user.");
-	    userDetails = uExtract.getUserId();
-	    
+	    userDetails = uExtract.getUserDetails();
+
 	    return jwt.getJWT(userDetails, ediid);
 	} catch (UnAuthorizedUserException ex) {
 	    if (userDetails != null)
@@ -111,10 +112,7 @@ public class AuthController {
 	if (authentication == null) {
 	    response.sendRedirect("/saml/login");
 	} else {
-//	    String userId = uExtract.getUserId();
-//	    String returnResponse = "{\"userid\": \"" + userId + "\"}";
-	    
-	    return new ResponseEntity<>(uExtract.getUserId(), HttpStatus.OK);
+	    return new ResponseEntity<>(uExtract.getUserDetails(), HttpStatus.OK);
 	}
 	return null;
     }

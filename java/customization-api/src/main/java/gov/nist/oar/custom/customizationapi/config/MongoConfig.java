@@ -27,6 +27,7 @@ import org.springframework.context.annotation.Configuration;
 
 import com.mongodb.Mongo;
 import com.mongodb.MongoClient;
+import com.mongodb.MongoClientOptions;
 import com.mongodb.MongoCredential;
 import com.mongodb.ServerAddress;
 import com.mongodb.client.MongoCollection;
@@ -45,7 +46,6 @@ public class MongoConfig {
 
     private static Logger log = LoggerFactory.getLogger(MongoConfig.class);
 
-    // @Autowired
     MongoClient mongoClient;
 
     private MongoDatabase mongoDb;
@@ -53,8 +53,6 @@ public class MongoConfig {
     private MongoCollection<Document> changesCollection;
     private String metadataServerUrl = "";
     List<ServerAddress> servers = new ArrayList<ServerAddress>();
-    List<MongoCredential> credentials = new ArrayList<MongoCredential>();
-    
 
     @Value("${oar.mdserver:testserver}")
     private String mdserver;
@@ -74,7 +72,7 @@ public class MongoConfig {
     private String password;
     @Value("${oar.mdserver.secret:secret}")
     private String mdserversecret;
-    
+
     @PostConstruct
     public void initIt() throws Exception {
 
@@ -138,9 +136,10 @@ public class MongoConfig {
     private void setChangeCollection(String change) {
 	changesCollection = mongoDb.getCollection(change);
     }
-    
+
     /**
      * Get Metadata service URL
+     * 
      * @return
      */
     public String getMetadataServer() {
@@ -153,20 +152,22 @@ public class MongoConfig {
 
     /**
      * Get Metadata service secret to communicate with API
+     * 
      * @return
      */
     public String getMDSecret() {
 	return this.mdserversecret;
     }
-    
+
     /**
      * MongoClient : Initialize mongoclient for db operations
+     * 
      * @return
      * @throws Exception
      */
     public Mongo mongo() throws Exception {
 	servers.add(new ServerAddress(host, port));
-	credentials.add(MongoCredential.createCredential(user, dbname, password.toCharArray()));
-	return new MongoClient(servers, credentials);
+	return new MongoClient(servers, MongoCredential.createCredential(user, dbname, password.toCharArray()),
+		MongoClientOptions.builder().build());
     }
 }

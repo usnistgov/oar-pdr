@@ -13,14 +13,17 @@
 package gov.nist.oar.custom.customizationapi.service;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
@@ -36,6 +39,8 @@ import com.mongodb.client.model.changestream.ChangeStreamDocument;
 import com.mongodb.client.result.DeleteResult;
 
 import gov.nist.oar.custom.customizationapi.exceptions.CustomizationException;
+import gov.nist.oar.custom.customizationapi.helpers.AuthenticatedUserDetails;
+import gov.nist.oar.custom.customizationapi.helpers.UserDetailsExtractor;
 
 /**
  * This class connects to the cache database to get updated record, if the
@@ -50,6 +55,9 @@ public class DatabaseOperations {
 
     @Value("${oar.mdserver:}")
     private String mdserver;
+
+    @Autowired
+    UserDetailsExtractor userDetailsExtractor;
 
     /**
      * It first checks whether recordid provided is of proper format and allowed to
@@ -66,7 +74,7 @@ public class DatabaseOperations {
 		log.error("Input record id is not valid,, check input parameters.");
 		throw new IllegalArgumentException("check input parameters.");
 	    }
-	    long count = mcollection.count(Filters.eq("ediid", recordid));
+	    long count = mcollection.countDocuments(Filters.eq("ediid", recordid));
 	    return count != 0;
 	} catch (MongoException e) {
 	    log.error("Error finding data from MongoDB for requested record id");
@@ -87,10 +95,6 @@ public class DatabaseOperations {
 
 	    return checkRecordInCache(recordid, mcollection) ? mcollection.find(Filters.eq("ediid", recordid)).first()
 		    : getDataFromServer(recordid);
-//	    if (checkRecordInCache(recordid, mcollection))
-//		return mcollection.find(Filters.eq("ediid", recordid)).first();
-//	    else
-//		return getDataFromServer(recordid);
 	} catch (IllegalArgumentException exp) {
 	    log.error("There is an error getting record with given record id. " + exp.getMessage());
 	    throw new CustomizationException("There is an error accessing this record." + exp.getMessage());
@@ -117,21 +121,6 @@ public class DatabaseOperations {
 		changes = iterator.next();
 	    }
 	    return changes;
-	    // FindIterable<Document> fd = mcollection.find(Filters.eq("ediid",
-	    // recordid))
-	    // .projection(Projections.include("ediid", "title", "description"));
-	    // Iterator<Document> iterator = fd.iterator();
-	    // while (iterator.hasNext()) {
-	    // Document d = iterator.next();
-	    // System.out.println("Document::" + d);
-	    // }
-
-	    // // Another tests
-	    // mcollection
-	    // .watch(Arrays.asList(Aggregates
-	    // .match(Filters.in("operationType", Arrays.asList("insert", "update",
-	    // "replace", "delete")))))
-	    // .fullDocument(FullDocument.UPDATE_LOOKUP).forEach(printBlock);
 	} catch (MongoException e) {
 	    log.error("Error getting changes from the updated database for given record." + e.getMessage());
 	    throw new MongoException("Error Accessing changes from database for the given record." + e.getMessage());
@@ -193,12 +182,40 @@ public class DatabaseOperations {
     public boolean updateDataInCache(String recordid, MongoCollection<Document> mcollection, Document update) {
 	try {
 	    Date now = new Date();
-	    update.append("_updateDate", now);
+	    List<Document> updateDetails = new ArrayList<Document>();
+
+	    FindIterable<Document> fd = mcollection.find(Filters.eq("ediid", recordid))
+		    .projection(Projections.include("_updateDetails"));
+	    Iterator<Document> iterator = fd.iterator();
+	    while (iterator.hasNext()) {
+		Document d = iterator.next();
+		if (d.containsKey("_updateDetails")) {
+		    List<?> updateHistory = (List<?>) d.get("_updateDetails");
+		    for (int i = 0; i < updateHistory.size(); i++) 
+			updateDetails.add((Document)updateHistory.get(i));
+		    
+		}
+	    }
+
+	    AuthenticatedUserDetails authenticatedUser = userDetailsExtractor.getUserDetails();
+	    Document userDetails = new Document();
+	    userDetails.append("userId", authenticatedUser.getUserId());
+	    userDetails.append("userName", authenticatedUser.getUserName());
+	    userDetails.append("userLastName", authenticatedUser.getUserLastName());
+	    userDetails.append("userEmail", authenticatedUser.getUserEmail());
+
+	    Document updateInfo = new Document();
+	    updateInfo.append("_userDetails", userDetails);
+	    updateInfo.append("_updateDate", now);
+	    updateDetails.add(updateInfo);
+
+	    update.append("_updateDetails", updateDetails);
 
 	    if (update.containsKey("_id"))
 		update.remove("_id");
 
 	    Document tempUpdateOp = new Document("$set", update);
+	    
 	    if (tempUpdateOp.containsKey("_id"))
 		tempUpdateOp.remove("_id");
 
@@ -209,6 +226,7 @@ public class DatabaseOperations {
 	    log.error("Error while update data in cache db" + ex.getMessage());
 	    throw new MongoException("Error while putting updated data in cache db." + ex.getMessage());
 	}
+
     }
 
     /**
@@ -223,10 +241,10 @@ public class DatabaseOperations {
 	    boolean deleted = false;
 	    Document d = mcollection.find(Filters.eq("ediid", recordid)).first();
 
-	    if(d != null) {
-	    DeleteResult result = mcollection.deleteOne(d);
-	    if(result.getDeletedCount() == 1) 
-		deleted = true;
+	    if (d != null) {
+		DeleteResult result = mcollection.deleteOne(d);
+		if (result.getDeletedCount() == 1)
+		    deleted = true;
 	    }
 //	    return result.getDeletedCount() == 1 ? true : false;
 	    return deleted;
@@ -238,6 +256,12 @@ public class DatabaseOperations {
 
     }
 
+    /**
+     * Get Data from server
+     * @param recordid
+     * @return Record document
+     * @throws CustomizationException
+     */
     public Document getDataFromServer(String recordid) throws CustomizationException {
 	try {
 	    RestTemplate restTemplate = new RestTemplate();

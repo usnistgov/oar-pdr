@@ -32,7 +32,7 @@ public class UserDetailsExtractor {
      * @return String userId
      */
 
-    public AuthenticatedUserDetails getUserId() {
+    public AuthenticatedUserDetails getUserDetails() {
 	AuthenticatedUserDetails authUser = new AuthenticatedUserDetails();
 	try {
 	    Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -69,4 +69,5 @@ public class UserDetailsExtractor {
 	}
 	return recordId;
     }
+
 }
