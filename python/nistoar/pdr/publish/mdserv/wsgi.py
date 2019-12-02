@@ -70,7 +70,8 @@ class PrePubMetadaRequestApp(object):
         if ucfg.get('update_to_midas', ucfg.get('midas_service')):
             # set up the client if have the config data to do it unless
             # 'update_to_midas' is False
-            self._midascl = midas.MIDASClient(ucfg.get('midas_service', {}))
+            self._midascl = midas.MIDASClient(ucfg.get('midas_service', {}),
+                                         logger=log.getChild('midasclient'))
 
     def handle_request(self, env, start_resp):
         handler = Handler(self.mdsvc, self.filemap, env, start_resp,
