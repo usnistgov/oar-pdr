@@ -32,6 +32,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import gov.nist.oar.custom.customizationapi.exceptions.BadGetwayException;
 import gov.nist.oar.custom.customizationapi.exceptions.CustomizationException;
 import gov.nist.oar.custom.customizationapi.exceptions.ErrorInfo;
 import gov.nist.oar.custom.customizationapi.exceptions.UnAuthenticatedUserException;
@@ -61,7 +62,6 @@ public class AuthController {
     @Autowired
     UserDetailsExtractor uExtract;
 
-//    public UserDetailsExtractor uExtract = new UserDetailsExtractor();
     /**
      * Get the JWT for the authorized user
      * 
@@ -76,8 +76,8 @@ public class AuthController {
     @ApiOperation(value = "", nickname = "Authorize user to edit the record", notes = "Resource returns a JSON if Authorized user.")
 
     public UserToken token(Authentication authentication, @PathVariable @Valid String ediid)
-	    throws UnAuthorizedUserException, CustomizationException, UnAuthenticatedUserException {
-//	String userId = "";
+	    throws UnAuthorizedUserException, CustomizationException, UnAuthenticatedUserException, BadGetwayException {
+
 	AuthenticatedUserDetails userDetails = null;
 	try {
 	    if (authentication == null)
@@ -176,4 +176,21 @@ public class AuthController {
 		+ ex.getMessage());
 	return new ErrorInfo(req.getRequestURI(), 500, "Internal Server Error", "GET");
     }
+    
+    /**
+     * When exception is thrown by customization service if the backend metadata service returns error. 
+     * 
+     * @param ex
+     * @param req
+     * @return
+     */
+    @ExceptionHandler(BadGetwayException.class)
+    @ResponseStatus(HttpStatus.BAD_GATEWAY)
+    public ErrorInfo handleStreamingError(BadGetwayException ex, HttpServletRequest req) {
+	logger.info("There is an internal error connecting to backend service: " + req.getRequestURI() + "\n  "
+		+ ex.getMessage());
+	return new ErrorInfo(req.getRequestURI(), 502, "Bad Getway Error", "GET");
+    }
+    
+    
 }

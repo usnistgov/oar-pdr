@@ -106,7 +106,7 @@ public class DatabaseOperations {
     }
 
     /**
-     * 
+     * Get Updated data
      * @param recordid
      * @param mcollection
      * @return
@@ -191,9 +191,9 @@ public class DatabaseOperations {
 		Document d = iterator.next();
 		if (d.containsKey("_updateDetails")) {
 		    List<?> updateHistory = (List<?>) d.get("_updateDetails");
-		    for (int i = 0; i < updateHistory.size(); i++) 
-			updateDetails.add((Document)updateHistory.get(i));
-		    
+		    for (int i = 0; i < updateHistory.size(); i++)
+			updateDetails.add((Document) updateHistory.get(i));
+
 		}
 	    }
 
@@ -215,7 +215,7 @@ public class DatabaseOperations {
 		update.remove("_id");
 
 	    Document tempUpdateOp = new Document("$set", update);
-	    
+
 	    if (tempUpdateOp.containsKey("_id"))
 		tempUpdateOp.remove("_id");
 
@@ -258,6 +258,7 @@ public class DatabaseOperations {
 
     /**
      * Get Data from server
+     * 
      * @param recordid
      * @return Record document
      * @throws CustomizationException

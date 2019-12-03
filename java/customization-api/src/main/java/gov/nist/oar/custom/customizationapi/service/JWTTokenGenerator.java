@@ -30,12 +30,20 @@ import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 
+import gov.nist.oar.custom.customizationapi.exceptions.BadGetwayException;
 //import gov.nist.oar.custom.customizationapi.config.SAMLConfig.SecurityConstant;
 import gov.nist.oar.custom.customizationapi.exceptions.CustomizationException;
 import gov.nist.oar.custom.customizationapi.exceptions.UnAuthorizedUserException;
 import gov.nist.oar.custom.customizationapi.helpers.AuthenticatedUserDetails;
 import gov.nist.oar.custom.customizationapi.helpers.domains.UserToken;
 
+/**
+ * This class checks authenticated user and by calling backend service checks
+ * whether user is authorized to edit the records. If user is authorized
+ * generate token.
+ * 
+ * @author Deoyani Nandrekar-Heinis
+ */
 @Component
 public class JWTTokenGenerator {
 
@@ -64,10 +72,10 @@ public class JWTTokenGenerator {
      * @throws UnAuthorizedUserException
      * @throws CustomizationException
      */
-    public UserToken getJWT(AuthenticatedUserDetails userDetails, String ediid) throws UnAuthorizedUserException, CustomizationException {
+    public UserToken getJWT(AuthenticatedUserDetails userDetails, String ediid)
+	    throws UnAuthorizedUserException, BadGetwayException, CustomizationException {
 	logger.info("Get authorized user token.");
-	if (!isAuthorized(userDetails, ediid))
-	    throw new UnAuthorizedUserException("User is not authorized to edit this record.");
+	isAuthorized(userDetails, ediid);
 
 	try {
 	    final DateTime dateTime = DateTime.now();
@@ -75,7 +83,7 @@ public class JWTTokenGenerator {
 	    JWTClaimsSet.Builder jwtClaimsSetBuilder = new JWTClaimsSet.Builder();
 	    jwtClaimsSetBuilder.expirationTime(dateTime.plusMinutes(120).toDate());
 	    jwtClaimsSetBuilder.claim(JWTClaimName, JWTClaimValue);
-	    jwtClaimsSetBuilder.subject(userDetails.getUserEmail()+"|"+ediid);
+	    jwtClaimsSetBuilder.subject(userDetails.getUserEmail() + "|" + ediid);
 
 	    // signature
 	    SignedJWT signedJWT = new SignedJWT(new JWSHeader(JWSAlgorithm.HS256), jwtClaimsSetBuilder.build());
@@ -97,7 +105,8 @@ public class JWTTokenGenerator {
      * @throws CustomizationException
      * @throws UnAuthorizedUserException
      */
-    private boolean isAuthorized(AuthenticatedUserDetails userDetails, String ediid) throws UnAuthorizedUserException {
+    private boolean isAuthorized(AuthenticatedUserDetails userDetails, String ediid)
+	    throws CustomizationException, UnAuthorizedUserException, BadGetwayException {
 	logger.info("Connect to backend metadata server to get the information.");
 	try {
 	    String uri = mdserver + ediid + "/_perm/update/" + userDetails.getUserId();
@@ -106,9 +115,28 @@ public class JWTTokenGenerator {
 	    headers.add("Authorization", "Bearer " + mdsecret);
 	    HttpEntity<String> requestEntity = new HttpEntity<>(null, headers);
 	    ResponseEntity<String> result = restTemplate.exchange(uri, HttpMethod.GET, requestEntity, String.class);
-	    return result.getStatusCode().is2xxSuccessful() ? true : false;//	    return true;
+
+	    if (result.getStatusCode().is4xxClientError()) {
+		logger.error("The backend metadata service returned status:" + result.getStatusCodeValue());
+		throw new UnAuthorizedUserException("Unauthorized user. Status:" + result.getStatusCodeValue());
+	    }
+	    if (result.getStatusCode().is3xxRedirection() || result.getStatusCode().is5xxServerError()) {
+		logger.error("The backend metadata service returned with and error with status:"
+			+ result.getStatusCodeValue());
+		throw new BadGetwayException(
+			"There is an error from backend metadata service. Status:" + result.getStatusCodeValue());
+	    }
+	    logger.info("This is response from the backend service." + result.getStatusCodeValue());
+	    return result.getStatusCode().is2xxSuccessful() ? true : false;
+	} catch (UnAuthorizedUserException exp) {
+	    logger.error("There is unauthorized user exception." + exp.getMessage());
+	    throw new UnAuthorizedUserException("User is not authorized to edit this record.");
+	} catch (BadGetwayException exp) {
+	    logger.error("There is an error response from the backend metadata service.");
+	    throw new BadGetwayException("Backend metadata service returned error." + exp.getMessage());
 	} catch (Exception ie) {
-	    throw new UnAuthorizedUserException(
+	    logger.error("There is an exception thrown while connecting to mdserver for authorizing current user.");
+	    throw new CustomizationException(
 		    "There is an error while getting user permissions from metadata srevice. " + ie.getMessage());
 	}
     }
