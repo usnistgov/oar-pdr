@@ -127,6 +127,6 @@ export class HeadbarComponent {
     }
 
     showUserId(){
-        this.notificationService.showSuccessWithTimeout(this.editstatsvc.userID, "", 3000);
+        this.notificationService.showSuccessWithTimeout("Logged in as "+this.editstatsvc.userID, "", 3000);
     }
 }
