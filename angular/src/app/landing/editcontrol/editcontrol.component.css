@@ -9,7 +9,7 @@
     left: -19px;
     top: -1px;
     display: inline-block;
-    padding: 3px 12px 0px 12px;
+    padding: 3px 0px 0px 12px;
     background: rgba(0,0,0,0.15);
     border-radius: 3px 0 0 3px; 
     height: inherit;
@@ -20,6 +20,7 @@
     padding-bottom: 0;
     width:140px; 
 }
+
 .btn {
     margin-bottom:10px;
     height:2em;
@@ -52,13 +53,18 @@
     color:white;
     border-color: grey;
     float:right;
-    margin:.5em 2em .5em 0em;
+    margin:.5em .5em .5em 0em;
 }
 
 #ec-preview-btn {
     background-color:rgb(9, 108, 221);;
     color:white;
     border-color: rgb(9, 108, 221);;
+    float:right;
+    margin:.5em 1em .5em 0em;
+}
+
+#ec-info-btn {
     float:right;
     margin:.5em 1em .5em 0em;
 }

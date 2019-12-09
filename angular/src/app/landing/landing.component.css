@@ -617,7 +617,7 @@ a:visited {
  }
 
 .filter-black{
-  filter: invert(0);
+  filter: invert(0.5);
 }
 
 .filter-white{

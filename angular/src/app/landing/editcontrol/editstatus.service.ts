@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 
 import { AppConfig } from '../../config/config';
+import { UpdateDetails } from './interfaces';
 
 /**
  * a service that can be used to monitor the editing status of the landing page.
@@ -25,9 +26,9 @@ export class EditStatusService {
     /**
      * the date of the last update to the draft landing page.  
      */
-    get lastUpdated() : string { return this._lastupdate; }
-    private _lastupdate : string = "";   // empty string means unknown
-    _setLastUpdated(date : string) { this._lastupdate = date; }
+    get lastUpdated() : UpdateDetails { return this._lastupdate; }
+    private _lastupdate : UpdateDetails = null;   // null object means unknown
+    _setLastUpdated(updateDetails : UpdateDetails) { this._lastupdate = updateDetails; }
 
     /**
      * flag indicating whether the landing page is currently being edited.  
@@ -39,6 +40,14 @@ export class EditStatusService {
     private _remoteStart : BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
     _watchRemoteStart(subscriber) {
         this._remoteStart.subscribe(subscriber);
+    }
+
+    /**
+     * BehaviorSubject that force datacart to init data file tree
+     */
+    private _forceDataFileTreeInit : BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
+    _watchForceDataFileTreeInit(subscriber) {
+        this._forceDataFileTreeInit.subscribe(subscriber);
     }
 
     /**
@@ -73,5 +82,12 @@ export class EditStatusService {
      */
     public startEditing() : void {
         this._remoteStart.next(true);
+    }
+
+    /**
+     * Force datacart to init data file tree
+     */
+    public forceDataFileTreeInit() : void {
+        this._forceDataFileTreeInit.next(true);
     }
 }

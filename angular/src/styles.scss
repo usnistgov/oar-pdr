@@ -86,3 +86,21 @@ a.enabled {
     cursor: pointer;
     color: white;
 }
+
+.popup-header-bar {
+    background-color:black;
+    height: 3em; 
+    padding: .5em .5em .5em 2em
+}
+
+.popup-header {
+    color: white; 
+    text-align: center;
+}
+
+.popup-tool-bar {
+    background-color:#153971;
+    height: 3em; 
+    color:white;
+    padding: .5em .5em .5em 2em
+}

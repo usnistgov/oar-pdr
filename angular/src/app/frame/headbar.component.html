@@ -25,10 +25,8 @@
              title="Go to home page"></i></a> |
           <a href="{{searchLink}}" target="_blank" 
              [ngClass]="{'disabled':editstatsvc.editMode,'enabled':!editstatsvc.editMode}"><b>Search</b></a> |
-          <!-- <a href="#" target="_blank" 
-             [ngClass]="{'disabled':editstatsvc.editMode,'enabled':!editstatsvc.editMode}"><b>Help</b></a> | -->
           <a href="/datacart/normal" target="_blank" 
-             [ngClass]="{'disabled':editstatsvc.editMode,'enabled':!editstatsvc.editMode}"><b>Cart</b><i 
+          [ngClass]="{'disabled':editstatsvc.editMode && editEnabled,'enabled':!editstatsvc.editMode && !editEnabled}"><b>Cart</b><i 
              class="faa faa-shopping-cart faa-1x" [ngStyle]="{'color':getMenuTextColor()}"></i><span 
              class="w3-badge badge-pill badge-notify">&nbsp;{{cartLength}}&nbsp;</span></a>
           <span *ngIf="editEnabled && editstatsvc.userID">

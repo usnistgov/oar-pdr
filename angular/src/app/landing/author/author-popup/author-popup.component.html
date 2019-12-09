@@ -1,49 +1,75 @@
-<div
-    style="width:100%; vertical-align: bottom;background-color:#153971;height: 4em; color:white;text-align: center;padding-top: .5em; ">
-    <div style="display: inline-block; width: 90%; height: 100%; overflow: hidden; margin: auto;">
-        <h2 id="title" style="display:inline-block; color: white;">Authors</h2>
-        
-    </div>
+<!-- Make the pop up window look similar to the landingpage with black header bar and blue tool bar -->
+<div class="popup-header-bar">
+    <h2 class="popup-header">Authors</h2>
 </div>
-<!-- <div style="overflow:hidden; width: 100%; height: 3em;"> -->
-<div style="width: 90%; margin:auto;">
-    <i [ngClass]="getAuthorClass()" (click)="handleAuthorDisplay()" style="float:left;cursor:pointer;vertical-align: middle;"
-        data-toggle="tooltip" title="Expend/collapse author details"></i>
-    <div style="display:table;margin:0.5em auto;width:fit-content;">
-        <span *ngFor="let author of inputValue.authors; let i = index">
+
+<div class="popup-tool-bar">
+    <!-- Buttons are arranged from right to left -->
+
+    <p-toolbar name="toolbar">
+        <div class="ui-toolbar-group-left">
+            <i [ngClass]="getAuthorClass()" (click)="handleAuthorDisplay()"
+                style="cursor:pointer;vertical-align: middle;" data-toggle="tooltip"
+                title="Expend/collapse author details"></i>
+        </div>
+        <div class="ui-toolbar-group-right">
+            <!-- Add author button -->
+            <button pButton type="submit" class="btn-add-author" style="background-color:rgb(221, 172, 9);"
+                (click)="addAuthor();" label="Add Author" icon="faa faa-user-plus faa-1x icon-white" iconPos="left">
+            </button>
+
+            <!-- Cancel button -->
+            <button pButton type="submit" class="btn-cancel" (click)="activeModal.close('Close click')" label="Cancel"
+                icon="faa faa-trash faa-1x icon-white" iconPos="left">
+            </button>
+
+            <!-- Save button -->
+            <button pButton type="submit" class="btn-Save" style="float:right; width:150px; background-color:green;"
+                (click)="saveAuthorInfo();" label="Save" icon="faa faa-save faa-1x icon-white" iconPos="left">
+            </button>
+        </div>
+    </p-toolbar>
+</div>
+
+<!-- List of authors displayed underneath the toolbar -->
+<div id="author-list-outer">
+    <div id="author-list">
+        <span class="author-list-detail">Authers: </span>
+        <span class="author-list-detail" *ngFor="let author of inputValue.authors; let i = index">
             {{ author.fn }}<span *ngIf="i < inputValue.authors.length-1 ">,</span>
         </span>
     </div>
 </div>
-<hr>
-<div style="width: 90%; margin: .5em auto 0em auto;">
-    <button pButton type="submit" class="btn-add-author" style="background-color:rgb(221, 172, 9);"
-        (click)="addAuthor();" label="Add Author" icon="faa faa-user-plus faa-1x icon-white" iconPos="left">
-    </button>
-    <button pButton type="submit" class="btn-cancel" 
-        (click)="activeModal.close('Close click')" label="Cancel" icon="faa faa-trash faa-1x icon-white" iconPos="left">
-    </button>
-    <button pButton type="submit" class="btn-Save" style="float:right; width:150px; background-color:green;"
-        (click)="saveAuthorInfo();" label="Save" icon="faa faa-save faa-1x icon-white" iconPos="left">
-    </button>
-</div>
-<!-- </div> -->
-<div style="text-align: center; width:100%;margin: 0.5em 0em 1em 0em;">
+
+<!-- Author details for editing -->
+<div id="author-details-outer">
     <div *ngFor="let author of inputValue.authors; let i = index; trackBy: trackByFn"
         style="width: 100%;margin-bottom: .5em;">
         <table width="90%" align="center">
             <tr style="text-align: center;" [style.background-color]="getHeaderBackgroundColor(author)"
                 [style.color]="getHeaderForegroundColor(author)">
                 <td colspan="2">
+                    <!-- Display author's full name in the header bar -->
                     {{author.fn}}
+
+                    <!-- Three control icons at the right side of the header bar (arranged from right to left):
+                      - Up/down arrow in circle icon: Show/hide author details;
+                      - Trashcan icon: remove this author;
+                      - Undo icon: revert the author info to it's original value.
+                      -->
                     <i [ngClass]="getTitleClass(author)" (click)="author.isCollapsed = !author.isCollapsed"
-                        style="cursor:pointer;" data-toggle="tooltip" title="Show/hide author details"></i>
-                    <i class="faa faa-trash" (click)="deleteAuthor(author)"
-                        style="float:right; cursor:pointer; margin: .2em .5em 0em 0em" data-toggle="tooltip"
+                        class="control-icons" data-toggle="tooltip" title="Show/hide author details"></i>
+                    <i class="faa faa-trash control-icons" (click)="deleteAuthor(author)" data-toggle="tooltip"
                         title="Remove this author"></i>
-                    <i class="faa faa-undo" (click)="resetAuthor(author, i);"
-                        style="float:right; cursor:pointer; margin: .2em .5em 0em 0em" data-toggle="tooltip"
+                    <i class="faa faa-undo control-icons" (click)="resetAuthor(author, i);" data-toggle="tooltip"
                         title="Discard changes"></i>
+
+                    <!-- Two control icons at the left side of the header bar
+                      - Arrow up icon: move the author one position up; 
+                        This icon will be invisible if the author is already at the top.
+                      - Arrow down icon: move the author one position down; 
+                        This icon will be invisible if the author is already at the bottom.
+                      -->
                     <img *ngIf="i > 0" src="assets/images/arrow-alt-from-bottom.svg" (click)="moveAuthorUp(author, i)"
                         style="float:left; width:.8em; cursor:pointer; margin: .2em 0em 0em .5em" data-toggle="tooltip"
                         title="Move author up" [ngClass]="getTitleImgClass(author)">
@@ -53,6 +79,10 @@
                         title="Move author down" [ngClass]="getTitleImgClass(author)">
                 </td>
             </tr>
+
+            <!-- Given name
+              - Red * means this is a required field.
+            -->
             <tr *ngIf="!author.isCollapsed">
                 <td align="right" data-toggle="tooltip" title="Required field" width="20%">
                     <span style="margin-right: .5em;" data-toggle="tooltip" title="This field is required"><span
@@ -63,6 +93,8 @@
                         (input)="onGivenNameChange(author, $event.target.value)" />
                 </td>
             </tr>
+
+            <!-- Middle name -->
             <tr *ngIf="!author.isCollapsed">
                 <td align="right">
                     <span style="margin-right: .5em;">Middle Name:</span>
@@ -72,6 +104,10 @@
                         (input)="onMiddleNameChange(author, $event.target.value)" />
                 </td>
             </tr>
+
+            <!-- Family name
+              - Red * means this is a required field.
+              -->
             <tr *ngIf="!author.isCollapsed" data-toggle="tooltip" title="Required field">
                 <td align="right">
                     <span style="margin-right: .5em;" data-toggle="tooltip" title="This field is required"><span
@@ -82,6 +118,11 @@
                         (input)="onFamilyNameChange(author, $event.target.value)" />
                 </td>
             </tr>
+
+            <!-- Full name to display in the landing page
+              - Red * means this is a required field.
+              - By default, full name is Given Name + Middle Name + Family Name. But user can it to whatever they want. Once user changes this field, the lock at the right side will be locked. Click on the lock will toggle the lock. If it's locked, user can change the value. When it's unlocked, the default value will display.
+              -->
             <tr *ngIf="!author.isCollapsed">
                 <td width="15%" align="right">
                     <span style="margin-right: .5em;" data-toggle="tooltip" title="This field is required"><span
@@ -99,6 +140,11 @@
                         title="Allow full name been updated automatically"></i>
                 </td>
             </tr>
+
+            <!-- ORCID 
+              - Allows user to enter ORCID
+              - The icon to the right will open official ORCID home page 
+            -->
             <tr *ngIf="!author.isCollapsed">
                 <td align="right">
                     <span style="margin-right: .5em;" data-toggle="tooltip" title="This field is recommended"><span
@@ -111,6 +157,8 @@
                             style="width: 20px;"></a>
                 </td>
             </tr>
+
+            <!-- Affiliation management -->
             <tr *ngIf="!author.isCollapsed">
                 <td align="right" style="vertical-align: top;">
                     <span style="margin-right: .5em;" data-toggle="tooltip" title="This field is recommended"><span
@@ -129,8 +177,6 @@
                                     <tr>
                                         <td width="10%" align="right">Organization Name:</td>
                                         <td>
-                                            <!-- <input type="text" [(ngModel)]="author.affiliation[j].title"
-                      style="width: 100%;height:2em;" /> -->
                                             <combo-box [dataList]="affiliationList" [columnName]="'name'"
                                                 [(controlField)]="author.affiliation[j].title"
                                                 (controlFieldChange)="affiliationNameChanged($event, i)"></combo-box>
@@ -154,19 +200,4 @@
             </tr>
         </table>
     </div>
-</div>
-<hr>
-<!-- <div style="overflow:hidden; width: 100%; height: 3em; background-color: rgb(0, 129, 180)"> -->
-<div style="overflow:hidden; width: 90%; margin: 1em auto 1em auto;">
-    <button pButton type="submit" class="btn-add-author" style="background-color:rgb(221, 172, 9);"
-        (click)="addAuthor();" label="Add Author" icon="faa faa-user-plus faa-1x icon-white" iconPos="left">
-    </button>
-    <button pButton type="submit" class="btn-cancel" 
-        (click)="activeModal.close('Close click')" label="Cancel"
-        icon="faa faa-trash faa-1x icon-white" iconPos="left">
-    </button>
-    <button pButton type="submit" class="btn-Save" 
-        style="float:right; width:150px; background-color:green;"
-        (click)="saveAuthorInfo();" label="Save" icon="faa faa-save faa-1x icon-white" iconPos="left">
-    </button>
 </div>

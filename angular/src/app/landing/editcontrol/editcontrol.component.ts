@@ -10,7 +10,7 @@ import { MetadataUpdateService } from './metadataupdate.service';
 import { EditStatusService } from './editstatus.service';
 import { AuthService, WebAuthService } from './auth.service';
 import { CustomizationService } from './customization.service';
-import { NerdmRes } from '../../nerdm/nerdm';
+import { NerdmRes } from '../../nerdm/nerdm'
 
 /**
  * a panel that serves as a control center for editing metadata displayed in the 
@@ -123,7 +123,8 @@ export class EditControlComponent implements OnInit, OnChanges {
                 this._resid = this.mdrec['ediid'];
             if (this.originalRecord === null) {
                 this.originalRecord = this._deepCopy(this.mdrec) as NerdmRes;
-                this.mdupdsvc._setOriginalMetadata(this.originalRecord)
+                //Should not change original rec when record changed. Only after submit or discard changes
+                // this.mdupdsvc._setOriginalMetadata(this.originalRecord)
             }
         }
     }
@@ -137,7 +138,7 @@ export class EditControlComponent implements OnInit, OnChanges {
      *                  the app will remain with editing turned off if the user is not logged in.  
      */
     public startEditing(nologin : boolean = false) : void {
-        // console.log("start editing...");
+        var _mdrec = this.mdrec;
         if (this._custsvc) {
             // already authorized
             console.log("start editing... already authorized!");
@@ -148,7 +149,11 @@ export class EditControlComponent implements OnInit, OnChanges {
         console.log("start editing... need authorization...");
         this.authorizeEditing(nologin).subscribe(
             (successful) => {
-                this.mdupdsvc.loadDraft(() => {
+                this.statusbar.showMessage("Loading draft...", true)
+                this.mdupdsvc.loadDraft().subscribe(
+                    (md) => {
+                    this.mdupdsvc.checkUpdatedFields(md as NerdmRes);
+                    // this.statusbar.showLastUpdate(successful);
                     this.editMode = successful;
                 });
             }
@@ -172,7 +177,6 @@ export class EditControlComponent implements OnInit, OnChanges {
                     }
 
                     this.mdupdsvc.showOriginalMetadata();
-
                     // reload this page from the source
                     // window.location.replace("/od/id/"+this.requestID);
                 },
@@ -327,7 +331,7 @@ export class EditControlComponent implements OnInit, OnChanges {
                         console.log("authorization granted for user "+this.authsvc.userID);
                     subscriber.next(Boolean(this._custsvc));
                     subscriber.complete();
-                    this.statusbar.showLastUpdate(this.editMode)
+                    // this.statusbar.showLastUpdate(this.editMode)
                     this.edstatsvc._setUserID(this.authsvc.userID);
                     this.edstatsvc._setAuthorized(true);
                 },

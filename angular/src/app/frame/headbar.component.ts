@@ -34,7 +34,6 @@ export class HeadbarComponent {
     appVersion: string = "";
     cartLength: number = 0;
     editEnabled: any;
-    // ediid: any;
 
     constructor(
         private el: ElementRef,
@@ -50,14 +49,9 @@ export class HeadbarComponent {
         this.status = cfg.get("status", "");
         this.appVersion = cfg.get("appVersion", "");
         this.editEnabled = cfg.get("editEnabled", "");
-
         this.cartService.watchStorage().subscribe(value => {
             this.cartLength = value;
         });
-
-        // this.editControlService.watchEdiid().subscribe(value => {
-        //     this.ediid = value;
-        // });
     }
 
     /*

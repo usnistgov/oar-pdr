@@ -54,7 +54,7 @@ export class DescriptionComponent implements OnInit {
         modalRef.componentInstance.inputValue = { };
         modalRef.componentInstance.inputValue[this.fieldName] = val;
         modalRef.componentInstance['field'] = this.fieldName;
-        modalRef.componentInstance['title'] = this.fieldName.toUpperCase();
+        modalRef.componentInstance['title'] = 'Description';
 
         modalRef.componentInstance.returnValue.subscribe((returnValue) => {
             if (returnValue) {

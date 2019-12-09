@@ -5,6 +5,11 @@ import { Subject } from 'rxjs';
 import { UserMessageService } from '../../frame/usermessage.service';
 import { CustomizationService } from './customization.service';
 import { NerdmRes } from '../../nerdm/nerdm';
+import { Observable, of, throwError, Subscriber } from 'rxjs';
+import { EditStatusComponent } from './editstatus.component';
+import { UpdateDetails } from './interfaces';
+import { AuthService, WebAuthService } from './auth.service';
+
 
 /**
  * a service that receives updates to the resource metadata from update widgets.
@@ -23,24 +28,28 @@ import { NerdmRes } from '../../nerdm/nerdm';
 @Injectable()
 export class MetadataUpdateService {
 
-    private mdres : Subject<NerdmRes> = new Subject<NerdmRes>();
-    private custsvc : CustomizationService = null;
-    private originalRec : NerdmRes = null;
-    private origfields : {} = {};   // keeps track of orginal metadata so that they can be undone
+    private mdres: Subject<NerdmRes> = new Subject<NerdmRes>();
+    private custsvc: CustomizationService = null;
+    private originalRec: NerdmRes = null;
+    private origfields: {} = {};   // keeps track of orginal metadata so that they can be undone
 
-    private _lastupdate : string = "";   // empty string means unknown
+    private _lastupdate: UpdateDetails = {} as UpdateDetails;   // null object means unknown
     get lastUpdate() { return this._lastupdate; }
-    set lastUpdate(date : string) {
-        this._lastupdate = date;
+    set lastUpdate(updateDetails: UpdateDetails) {
+        this._lastupdate = updateDetails;
         this.updated.emit(this._lastupdate);
     }
+    // set lastUpdate(date: string) {
+    //     this._lastupdate = date;
+    //     this.updated.emit(this._lastupdate);
+    // }
 
     /**
      * any Observable that will send out the date of the last update each time the metadata
      * is updated via this service.  If the date is an empty string, there are no updates 
      * pending for submission.  
      */
-    public updated : EventEmitter<string> = new EventEmitter<string>();
+    public updated: EventEmitter<UpdateDetails> = new EventEmitter<UpdateDetails>();
 
     /**
      * a flag that indicates that whether the landing page is in edit mode, i.e. displays 
@@ -49,32 +58,32 @@ export class MetadataUpdateService {
      * Note that this flag should only be updated by the controller (i.e. EditControlComponent) 
      * that subscribes to this class (via _subscribe()).
      */
-    private _editmode : boolean = false;
+    private _editmode: boolean = false;
     get editMode() { return this._editmode; }
-    set editMode(engage : boolean) { this._editmode = engage; } 
+    set editMode(engage: boolean) { this._editmode = engage; }
 
     /**
      * construct the service
      * 
      * @param custsvc   the CustomizationService to use to send updates to the 
      *                  server.  
-     */ 
-    constructor(private msgsvc  : UserMessageService,
-                private datePipe: DatePipe)
-    { } 
+     */
+    constructor(private msgsvc: UserMessageService,
+        private authsvc : AuthService,
+        private datePipe: DatePipe) { }
 
     /*
      * subscribe to updates to the metadata.  This is intended for connecting the 
      * service to the EditControlPanel.
      */
-    _subscribe(controller) : void {
+    _subscribe(controller): void {
         this.mdres.subscribe(controller);
     }
-    _setOriginalMetadata(md : NerdmRes) {
+    _setOriginalMetadata(md: NerdmRes) {
         this.originalRec = md;
     }
 
-    _setCustomizationService(svc : CustomizationService) : void {
+    _setCustomizationService(svc: CustomizationService): void {
         this.custsvc = svc;
     }
 
@@ -104,8 +113,8 @@ export class MetadataUpdateService {
      *             take care of reporting the reason.  This allows the caller in charge of 
      *             getting updates to have its UI react accordingly.
      */
-    public update(subsetname : string, md : {}) : Promise<boolean> {
-        if (! this.custsvc) {
+    public update(subsetname: string, md: {}): Promise<boolean> {
+        if (!this.custsvc) {
             console.error("Attempted to update without authorization!  Ignoring update.");
             return new Promise<boolean>((resolve, reject) => {
                 resolve(false);
@@ -115,41 +124,46 @@ export class MetadataUpdateService {
         // establish the original state for this subset of metadata (so that it this update
         // can be undone).
         if (this.originalRec) {
-            if (! this.origfields[subsetname]) 
+            if (!this.origfields[subsetname])
                 this.origfields[subsetname] = {};
             for (let prop in md) {
                 if (this.origfields[subsetname][prop] === undefined) {
                     if (this.originalRec[prop] !== undefined)
-                        this.origfields[subsetname][prop] = this.originalRec[prop]; 
-                    else 
+                        this.origfields[subsetname][prop] = this.originalRec[prop];
+                    else
                         this.origfields[subsetname][prop] = null;   // TODO: problematic; need to clean-up nulls
                 }
             }
         }
-        
-        this.stampUpdateDate();
-        return new Promise<boolean>((resolve, reject) => {
-            this.custsvc.updateMetadata(md).subscribe(
-                (res) => {
-                    // console.log("###DBG  Draft data returned from server:\n  ", res)
-                    this.mdres.next(res as NerdmRes);
-                    resolve(true);
-                },
-                (err) => {
-                    // err will be a subtype of CustomizationError
-                    if (err.type == 'user') {
-                        console.error("Failed to save metadata changes: user error:" + err.message);
-                        this.msgsvc.error(err.message);
+
+        // If current data is the same as original (user changed the data back to original), call undo instead. Otherwise do normal update
+        if (JSON.stringify(md[subsetname]) == JSON.stringify(this.origfields[subsetname])) {
+            this.undo(subsetname);
+        } else {
+            return new Promise<boolean>((resolve, reject) => {
+                this.custsvc.updateMetadata(md).subscribe(
+                    (res) => {
+                        // console.log("###DBG  Draft data returned from server:\n  ", res)
+                        this.stampUpdateDate();
+                        this.mdres.next(res as NerdmRes);
+                        resolve(true);
+                    },
+                    (err) => {
+                        // err will be a subtype of CustomizationError
+                        if (err.type == 'user') {
+                            console.error("Failed to save metadata changes: user error:" + err.message);
+                            this.msgsvc.error(err.message);
+                        }
+                        else {
+                            console.error("Failed to save metadata changes: server/system error:" + err.message);
+                            this.msgsvc.syserror(err.message,
+                                "There was an problem while updating the " + subsetname + ". ");
+                        }
+                        resolve(false);
                     }
-                    else {
-                        console.error("Failed to save metadata changes: server/system error:" + err.message);
-                        this.msgsvc.syserror(err.message,
-                                             "There was an problem while updating the "+subsetname+". ");
-                    }
-                    resolve(false);
-                }
-            );
-        });
+                );
+            });
+        }
     }
 
     /**
@@ -163,19 +177,19 @@ export class MetadataUpdateService {
      *             response allows the caller in charge of getting updates to have its UI react
      *             accordingly.
      */
-    public undo(subsetname : string) {
+    public undo(subsetname: string) {
         if (this.origfields[subsetname] === undefined) {
             // Nothing to undo!
-            console.warn("Undo called on "+subsetname+": nothing to undo");
+            console.warn("Undo called on " + subsetname + ": nothing to undo");
             return new Promise<boolean>((resolve, reject) => {
                 resolve(false);
             });
         }
-        
+
         // if there are no other updates registered, we will just request that the the draft be
         // deleted on the server.  So is this the only update we have registered?
         let finalUndo = Object.keys(this.origfields).length == 1 &&
-                        this.origfields[subsetname] !== undefined;
+            this.origfields[subsetname] !== undefined;
 
         if (finalUndo) {
             // Last set to be undone; just delete the draft on the server
@@ -185,7 +199,8 @@ export class MetadataUpdateService {
                     (res) => {
                         this.origfields = {};
                         this.forgetUpdateDate();
-                        this.mdres.next(res as NerdmRes);
+                        console.log("After undo: ", res);
+                        this.mdres.next(this.originalRec as NerdmRes);
                         resolve(true);
                     },
                     (err) => {
@@ -196,9 +211,9 @@ export class MetadataUpdateService {
                         }
                         else {
                             console.error("Failed to undo metadata changes: server/system error:" +
-                                          err.message);
+                                err.message);
                             this.msgsvc.syserror(err.message,
-                                     "There was an problem while undoing changes to the "+subsetname+". ")
+                                "There was an problem while undoing changes to the " + subsetname + ". ")
                         }
                         resolve(false);
                     }
@@ -207,7 +222,6 @@ export class MetadataUpdateService {
         }
         else {
             // Other updates are still registered; just undo the specified one
-            console.log("Last undo; discarding draft on server");
             return new Promise<boolean>((resolve, reject) => {
                 this.custsvc.updateMetadata(this.origfields[subsetname]).subscribe(
                     (res) => {
@@ -223,14 +237,43 @@ export class MetadataUpdateService {
                         }
                         else {
                             console.error("Failed to undo metadata changes: server/system error:" +
-                                          err.message);
+                                err.message);
                             this.msgsvc.syserror(err.message,
-                                     "There was an problem while undoing changes to the "+subsetname+". ")
+                                "There was an problem while undoing changes to the " + subsetname + ". ")
                         }
                         resolve(false);
                     }
                 );
             });
+        }
+    }
+
+    public checkUpdatedFields(mdrec: NerdmRes) {
+        if (mdrec != undefined && this.originalRec != undefined) {
+            for (let subset in mdrec) {
+                if (JSON.stringify(mdrec[subset]) != JSON.stringify(this.originalRec[subset]))
+                    this.origfields[subset] = this.originalRec[subset];
+            }
+        }
+
+        //Set updated date here so the submit button will lit up if we have something to submit
+        let newdate: any;
+        if (mdrec._updateDate != undefined) {
+            newdate = new Date(mdrec._updateDate);
+            this.lastUpdate = newdate.toLocaleString();
+        } else {
+            this.lastUpdate = null;
+        }
+        
+        if (mdrec._updateDetails != undefined) {
+            newdate = new Date(mdrec._updateDetails[mdrec._updateDetails.length-1]._updateDate);
+
+            this.lastUpdate = {
+                'userDetails': this.authsvc.userDetails,
+                '_updateDate': newdate.toLocaleString()
+            }
+        } else {
+            this.lastUpdate = null;
         }
     }
 
@@ -240,7 +283,7 @@ export class MetadataUpdateService {
      * undo().
      * @param subsetname    the name for the set of metadata of interest.
      */
-    public fieldUpdated(subsetname : string) : boolean {
+    public fieldUpdated(subsetname: string): boolean {
         return this.origfields[subsetname] != undefined;
     }
 
@@ -248,10 +291,10 @@ export class MetadataUpdateService {
      * Reset the update status of a given field or all fields so fieldUpdated() will return false
      * @param subsetname - optional - the name for the set of metadata of interest.
      */
-    public fieldReset(subsetname? : string) {
-        if(subsetname){
+    public fieldReset(subsetname?: string) {
+        if (subsetname) {
             this.origfields[subsetname] = null;
-        }else{
+        } else {
             this.origfields = {};
         }
     }
@@ -262,46 +305,55 @@ export class MetadataUpdateService {
      * retrieve the latest draft of the resource metadata from the server and forward it
      * to the controller for display to the user.  
      */
-    public loadDraft(onSuccess ?: () => void) : void {
-        if (! this.custsvc) {
-            console.error("Attempted to update without authorization!  Ignoring update.");
-            return;
-        }
-        
-        console.log("Loading draft metadata");
-        this.custsvc.getDraftMetadata().subscribe(
-            (res) => {
-                // console.log("Draft data returned from server:\n  ", res)
-                this.mdres.next(res as NerdmRes);
-                if (onSuccess) onSuccess();
-            },
-            (err) => {
-                // err will be a subtype of CustomizationError
-                if (err.type = 'user') {
-                    console.error("Failed to retrieve draft metadata changes: user error:" + err.message);
-                    this.msgsvc.error(err.message)
-                }
-                else {
-                    console.error("Failed to retrieve draft metadata changes: server error:" + err.message);
-                    this.msgsvc.syserror(err.message)
-                }
+    public loadDraft(onSuccess?: () => void): Observable<Object> {
+        return new Observable<Object>(subscriber => {
+            if (!this.custsvc) {
+                console.error("Attempted to update without authorization!  Ignoring update.");
+                return;
             }
-        );
+
+            console.log("Loading draft metadata");
+            this.custsvc.getDraftMetadata().subscribe(
+                (res) => {
+                    console.log("Draft data returned from server:\n  ", res)
+                    this.mdres.next(res as NerdmRes);
+                    subscriber.next(res as NerdmRes);
+                    subscriber.complete();
+                    if (onSuccess) onSuccess();
+                },
+                (err) => {
+                    // err will be a subtype of CustomizationError
+                    if (err.type = 'user') {
+                        console.error("Failed to retrieve draft metadata changes: user error:" + err.message);
+                        this.msgsvc.error(err.message)
+                    }
+                    else {
+                        console.error("Failed to retrieve draft metadata changes: server error:" + err.message);
+                        this.msgsvc.syserror(err.message)
+                    }
+                    subscriber.next(null);
+                    subscriber.complete();
+                }
+            );
+        });
     }
 
     /**
      * record the current date/time as the last time this data was updated.
      */
-    public stampUpdateDate() : string {
-        this.lastUpdate = this.datePipe.transform(new Date(), "MMM d, y, h:mm:ss a");
+    public stampUpdateDate(): UpdateDetails {
+        this.lastUpdate = {
+            'userDetails': this.authsvc.userDetails,
+            '_updateDate': this.datePipe.transform(new Date(), "MMM d, y, h:mm:ss a")
+        }
         return this.lastUpdate;
     }
 
     /**
      * erase the date of last update.  This might be done if the last update was undone. 
      */
-    public forgetUpdateDate() : void {
-        this.lastUpdate = "";
+    public forgetUpdateDate(): void {
+        this.lastUpdate = null;
     }
 
     /**

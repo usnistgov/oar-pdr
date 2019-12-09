@@ -17,6 +17,7 @@ import { GoogleAnalyticsService } from '../../shared/ga-service/google-analytics
 import { NotificationService } from '../../shared/notification-service/notification.service';
 import { EditControlService } from '../edit-control-bar/edit-control.service';
 import { ErrorHandlingService } from '../../shared/error-handling-service/error-handling.service';
+import { EditStatusService } from '../editcontrol/editstatus.service';
 
 declare var _initAutoTracker: Function;
 
@@ -35,6 +36,8 @@ export class DataFilesComponent {
   @Input() editContent: boolean;
   @Input() metadata: boolean;
   @Input() inBrowser: boolean;   // false if running server-side
+  @Input() ediid: string;
+  @Input() editEnabled: boolean;    //Disable download all functionality if edit is enabled
 
   isAccessPage: boolean = false;
   accessPages: Map<string, string> = new Map();
@@ -48,7 +51,6 @@ export class DataFilesComponent {
   cartMap: any[];
   allSelected: boolean = false;
   allDownloaded: boolean = false;
-  ediid: any;
   downloadStatus: any = null;
   totalFiles: any;
   zipData: ZipData[] = [];
@@ -86,6 +88,7 @@ export class DataFilesComponent {
     private notificationService: NotificationService,
     private editControlService: EditControlService,
     private errorHandlingService: ErrorHandlingService,
+    private edstatsvc : EditStatusService,
     ngZone: NgZone) {
     this.cols = [
       { field: 'name', header: 'Name', width: '60%' },
@@ -111,9 +114,9 @@ export class DataFilesComponent {
       this.cartLength = value;
     });
 
-    this.editControlService.watchEdiid().subscribe(value => {
-        this.ediid = value;
-    });
+    // this.editControlService.watchEdiid().subscribe(value => {
+    //     this.ediid = value;
+    // });
 
     this.commonVarService.watchRefreshTree().subscribe(value => {
       this.visible = false;
@@ -122,12 +125,12 @@ export class DataFilesComponent {
       }, 0);
     });
 
-    this.commonVarService.watchForceDataFileTreeInit().subscribe(value => {
-      if (value) {
-        this.cartMap = this.cartService.getCart();
-        this.allSelected = this.updateAllSelectStatus(this.files);
-        this.cartLength = this.cartService.getCartSize();
-      }
+    this.edstatsvc._watchForceDataFileTreeInit((start) => {
+        if (start){
+            this.cartMap = this.cartService.getCart();
+            this.allSelected = this.updateAllSelectStatus(this.files);
+            this.cartLength = this.cartService.getCartSize();
+          }
     });
   }
 
@@ -686,7 +689,7 @@ export class DataFilesComponent {
       key: key,
       accept: () => {
         // Google Analytics tracking code
-        this.gaService.gaTrackEvent('download', undefined, 'all files', this.record['title']);
+        // this.gaService.gaTrackEvent('download', undefined, 'all files', 'title');
 
         setTimeout(() => {
           let popupWidth: number = this.mobWidth * 0.8;
@@ -714,7 +717,7 @@ export class DataFilesComponent {
         this.commonVarService.setLocalProcessing(false);
         this.cartService.setCurrentCart('cart');
         this.updateStatusFromCart().then(function (result: any) {
-          this.commonVarService.setForceLandingPageInit(true);
+            this.edstatsvc.forceDataFileTreeInit();
         }.bind(this), function (err) {
           alert("something went wrong while adding file to data cart.");
         });

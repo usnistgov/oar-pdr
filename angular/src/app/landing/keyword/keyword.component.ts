@@ -69,7 +69,7 @@ export class KeywordComponent implements OnInit {
         modalRef.componentInstance.inputValue = { };
         modalRef.componentInstance.inputValue[this.fieldName] = val;
         modalRef.componentInstance['field'] = this.fieldName;
-        modalRef.componentInstance['title'] = this.fieldName.toUpperCase();
+        modalRef.componentInstance['title'] = 'Keywords';
         modalRef.componentInstance.message = "Please enter keywords separated by comma.";
 
         modalRef.componentInstance.returnValue.subscribe((returnValue) => {

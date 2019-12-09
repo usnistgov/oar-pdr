@@ -57,7 +57,7 @@ export class TitleComponent implements OnInit {
         modalRef.componentInstance.inputValue = {}
         modalRef.componentInstance.inputValue[this.fieldName] = val;
         modalRef.componentInstance['field'] = 'title';
-        modalRef.componentInstance['title'] = 'TITLE';
+        modalRef.componentInstance['title'] = 'Title';
 
         modalRef.componentInstance.returnValue.subscribe((returnValue) => {
             if (returnValue) {

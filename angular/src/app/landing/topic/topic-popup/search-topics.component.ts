@@ -264,6 +264,7 @@ export class SearchTopicsComponent implements OnInit {
   *   Display all topics
   */
   showAllTopics() {
+      this.searchText = "";
     this.setTreeVisible(true);
     this.expandTree(this.taxonomyTree, false);
 

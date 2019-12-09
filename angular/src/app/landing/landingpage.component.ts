@@ -8,6 +8,7 @@ import { MetadataService } from '../nerdm/nerdm.service';
 import { EditStatusService } from './editcontrol/editstatus.service';
 import { NerdmRes } from '../nerdm/nerdm';
 import { IDNotFound } from '../errors/error';
+import { MetadataUpdateService } from './editcontrol/metadataupdate.service';
 
 /**
  * A component providing the complete display of landing page content associated with 
@@ -52,7 +53,8 @@ export class LandingPageComponent implements OnInit {
                 public titleSv: Title,
                 private cfg: AppConfig,
                 private mdserv: MetadataService,
-                private edstatsvc: EditStatusService)
+                private edstatsvc: EditStatusService,
+                private mdupdsvc : MetadataUpdateService)
     {
         this.reqId = this.route.snapshot.paramMap.get('id');
         this.inBrowser = isPlatformBrowser(platformId);
@@ -114,7 +116,7 @@ export class LandingPageComponent implements OnInit {
     useMetadata(): void {
         // set the document title
         this.setDocumentTitle();
-
+        this.mdupdsvc._setOriginalMetadata(this.md);
     }
 
     /**
