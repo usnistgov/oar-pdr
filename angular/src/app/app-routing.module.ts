@@ -10,10 +10,10 @@ import { NotFoundComponent, InternalErrorComponent } from './errors/errors.modul
 import { DatacartComponent } from './datacart/datacart.component';
 
 const routes: Routes = [
-    { path: '', redirectTo: 'pdr/about', pathMatch: 'full' },
+    { path: '', redirectTo: 'about', pathMatch: 'full' },
 
     // app paths
-    { path: 'pdr/about',         component: LandingAboutComponent },
+    { path: 'about',         component: LandingAboutComponent },
     { path: 'od/id',
       children: [
           { path: '',                component: NoidComponent          },

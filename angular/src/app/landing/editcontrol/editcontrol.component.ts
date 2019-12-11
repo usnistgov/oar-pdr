@@ -199,7 +199,11 @@ export class EditControlComponent implements OnInit, OnChanges {
      * the data to its previous state.
      */
     public confirmDiscardEdits() : void {
-        this.confirmDialogSvc.confirm('Edited data will be lost',  'Do you want to erase changes?', true)
+        var message = 'Do you want to erase changes?';
+
+        this.confirmDialogSvc.confirm(
+            'Edited data will be lost',  
+            message, true)
             .then( (confirmed) => {
                 if (confirmed)
                     this.discardEdits()
@@ -209,6 +213,18 @@ export class EditControlComponent implements OnInit, OnChanges {
             .catch( () => {
                 console.log("User canceled discard request (indirectly)");
             });
+    }
+
+    /**
+     * discard the latest changes after receiving confirmation via a modal pop-up.  This will revert 
+     * the data to its previous state.
+     */
+    public showEditControlHelpPopup() : void {
+        var message = 'Put button description here...';
+
+        this.confirmDialogSvc.displayMessage(
+            'Edit Control Button Description',  
+            message);
     }
 
     /**

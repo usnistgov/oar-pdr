@@ -117,7 +117,6 @@ export class WebCustomizationService extends CustomizationService {
                 // if (!jsonbody || !jsonbody['@id'])
                 //     console.warn("Data returned from customization service does not look like a "+
                 //                  "NERDm resource: "+JSON.stringify(jsonbody));
-                console.log('jsonbody', jsonbody);
                 subscriber.next(jsonbody);
             },
             (httperr) => {   // this will be an HttpErrorResponse

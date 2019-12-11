@@ -71,9 +71,16 @@ h2 {
   opacity:1;
 }
 
-.toast-info {
-  background-color: #2F96B4 !important;
-  padding: 0 1em 0 1em;
+// .toast-info {
+//   background-color: #2F96B4 !important;
+//   padding: 0 1em 0 1em;
+// }
+
+.toast-success {
+  color: white;
+  padding: 0.5em 1.5em 0.5em 1.5em;
+  font-size: 2.5em;
+  font-weight: bold;
 }
 
 a.disabled {

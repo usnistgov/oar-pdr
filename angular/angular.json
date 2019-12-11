@@ -30,7 +30,8 @@
               "node_modules/primeng/resources/themes/bootstrap/theme.css",
               "src/styles/font-awesome/css/font-awesome.min.css",
               "src/styles/main.css",
-              "src/app/content/modal.less"
+              "src/app/content/modal.less",
+              "node_modules/ngx-toastr/toastr.css"
             ],
             "scripts": []
           },
@@ -85,7 +86,8 @@
               "node_modules/primeng/resources/primeng.css",
               "node_modules/primeicons/primeicons.css",
               "src/styles/font-awesome/css/font-awesome.min.css",
-              "src/styles.scss"
+              "src/styles.scss",
+              "node_modules/ngx-toastr/toastr.css"
             ],
             "assets": [
               {

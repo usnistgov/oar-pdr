@@ -126,12 +126,14 @@ export class MetadataUpdateService {
         if (this.originalRec) {
             if (!this.origfields[subsetname])
                 this.origfields[subsetname] = {};
+
             for (let prop in md) {
                 if (this.origfields[subsetname][prop] === undefined) {
-                    if (this.originalRec[prop] !== undefined)
+                    if (this.originalRec[prop] !== undefined){
                         this.origfields[subsetname][prop] = this.originalRec[prop];
-                    else
+                    }else{
                         this.origfields[subsetname][prop] = null;   // TODO: problematic; need to clean-up nulls
+                    }
                 }
             }
         }
@@ -199,7 +201,6 @@ export class MetadataUpdateService {
                     (res) => {
                         this.origfields = {};
                         this.forgetUpdateDate();
-                        console.log("After undo: ", res);
                         this.mdres.next(this.originalRec as NerdmRes);
                         resolve(true);
                     },
@@ -248,11 +249,18 @@ export class MetadataUpdateService {
         }
     }
 
+    /**
+     * Compare the subset of the given Nerdm record with original copy. If any subset is different, meaning the data has been changed, the original copy of the subset will be assigned to origfields object. The origfields object is used to set the field state in UI, i.e., the modified field will be in yellow background color.
+     * This function also checks the update details of the given record which will be displayed in the status bar at the top.
+     * @param mdrec The Nerdm record to be checked.
+     */
     public checkUpdatedFields(mdrec: NerdmRes) {
         if (mdrec != undefined && this.originalRec != undefined) {
             for (let subset in mdrec) {
-                if (JSON.stringify(mdrec[subset]) != JSON.stringify(this.originalRec[subset]))
-                    this.origfields[subset] = this.originalRec[subset];
+                if (this.originalRec[subset] != undefined && JSON.stringify(mdrec[subset]) != JSON.stringify(this.originalRec[subset])){
+                    this.origfields[subset] = {};
+                    this.origfields[subset][subset] = this.originalRec[subset];
+                }
             }
         }
 
@@ -312,7 +320,6 @@ export class MetadataUpdateService {
                 return;
             }
 
-            console.log("Loading draft metadata");
             this.custsvc.getDraftMetadata().subscribe(
                 (res) => {
                     console.log("Draft data returned from server:\n  ", res)
