@@ -10,7 +10,7 @@ import org.springframework.context.annotation.ComponentScan;
 
 @SpringBootApplication
 @RefreshScope
-@ComponentScan(basePackages = {"gov.nist.oar.custom.customizationapi"})
+@ComponentScan(basePackages = {"gov.nist.oar.customizationapi"})
 @EnableAutoConfiguration(exclude={MongoAutoConfiguration.class})
 public class CustomizationApiApplication {
 

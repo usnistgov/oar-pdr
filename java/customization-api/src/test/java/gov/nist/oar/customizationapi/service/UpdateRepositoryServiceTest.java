@@ -46,10 +46,9 @@ import gov.nist.oar.customizationapi.service.ResourceNotFoundException;
 import gov.nist.oar.customizationapi.service.UpdateRepositoryService;
 
 /**
- * This is a Service test written to check the functions in this class, which are as below:
- * access data from the server or cache
- * update the record with changes in cache
- * submit final changes to publish
+ * This is a Service test written to check the functions in this class, which
+ * are as below: access data from the server or cache update the record with
+ * changes in cache submit final changes to publish
  * 
  * @author Deoyani Nandrekar-Heinis
  *
@@ -57,64 +56,64 @@ import gov.nist.oar.customizationapi.service.UpdateRepositoryService;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class UpdateRepositoryServiceTest {
-    private Logger logger = LoggerFactory.getLogger(UpdateRepositoryServiceTest.class);
+	private Logger logger = LoggerFactory.getLogger(UpdateRepositoryServiceTest.class);
 
-    @InjectMocks
-    private UpdateRepositoryService updateService;
+	@InjectMocks
+	private UpdateRepositoryService updateService;
 
-    @Mock
-    private MongoClient mockClient;
-    @Mock
-    private MongoCollection<Document> recordCollection;
+	@Mock
+	private MongoClient mockClient;
+	@Mock
+	private MongoCollection<Document> recordCollection;
 
-    @Mock
-    private MongoCollection<Document> changesCollection;
+	@Mock
+	private MongoCollection<Document> changesCollection;
 
-    @Mock
-    private MongoDatabase mockDB;
+	@Mock
+	private MongoDatabase mockDB;
 
-    @Mock
-    private DatabaseOperations dataOperations;
+	@Mock
+	private DatabaseOperations dataOperations;
 
-    @Mock
-    private MongoConfig mconfig;
+	@Mock
+	private MongoConfig mconfig;
 
-    private String mdserver = "http://testdata.nist.gov/rmm/records/";
+	private String mdserver = "http://testdata.nist.gov/rmm/records/";
 
-    private String changedata;
-    private static Document updatedRecord;
-    private static String recordid = "FDB5909746815200E043065706813E54137";
+	private String changedata;
+	private static Document updatedRecord;
+	private static String recordid = "FDB5909746815200E043065706813E54137";
 
-    @Before
-    public void initMocks() throws IOException, CustomizationException {
-	MockitoAnnotations.initMocks(this);
-	Mockito.doReturn(recordCollection).when(mconfig).getRecordCollection();
-	Mockito.doReturn(changesCollection).when(mconfig).getChangeCollection();
+	@Before
+	public void initMocks() throws IOException, CustomizationException {
+		MockitoAnnotations.initMocks(this);
+		Mockito.doReturn(recordCollection).when(mconfig).getRecordCollection();
+		Mockito.doReturn(changesCollection).when(mconfig).getChangeCollection();
 //	ReflectionTestUtils.setField(updateService, "mdserver", "https://testdata.nist.gov/rmm/records/");
-	ReflectionTestUtils.setField(dataOperations, "mdserver", mdserver);
+		ReflectionTestUtils.setField(dataOperations, "mdserver", mdserver);
 
-    }
+	}
 
-    @Test
-    public void editTest() throws CustomizationException, IOException {
-	logger.info("Unit tests: EditTest is called.");
+	@Test
+	public void editTest() throws CustomizationException, IOException {
+		logger.info("Unit tests: EditTest is called.");
 //	Mockito.doReturn(recordCollection).when(mconfig).getRecordCollection();
 //	Mockito.doReturn(changesCollection).when(mconfig).getChangeCollection();
 ////	ReflectionTestUtils.setField(updateService, "mdserver", "https://testdata.nist.gov/rmm/records/");
 //	ReflectionTestUtils.setField(dataOperations, "mdserver", "https://testdata.nist.gov/rmm/records/");
 
-	// when(recordCollection.count()).thenReturn((long) 1);
+		// when(recordCollection.count()).thenReturn((long) 1);
 //	       when(changesCollection.count()).thenReturn((long) 1);
 //	when(dataOperations.checkRecordInCache(recordid, recordCollection)).thenReturn(true);
 
 //	
 //	File file = new File(this.getClass().getClassLoader().getResource("record.json").getFile());
-	String recorddata = new String(
-		Files.readAllBytes(Paths.get(this.getClass().getClassLoader().getResource("record.json").getFile())));
-	Document recordDoc = Document.parse(recorddata);
+		String recorddata = new String(
+				Files.readAllBytes(Paths.get(this.getClass().getClassLoader().getResource("record.json").getFile())));
+		Document recordDoc = Document.parse(recorddata);
 
 //	       when(dataOperations.getData(recordid, recordCollection, mdserver)).thenReturn(recordDoc);
-	when(dataOperations.getData(recordid, recordCollection)).thenReturn(recordDoc);
+		when(dataOperations.getData(recordid, recordCollection)).thenReturn(recordDoc);
 
 //	       FindIterable iterable = mock(FindIterable.class);
 //	       MongoCursor cursor = mock(MongoCursor.class);
@@ -130,50 +129,51 @@ public class UpdateRepositoryServiceTest {
 
 //	       when(dataOperations.getData(recordid, changesCollection, mdserver)).thenReturn(updatedRecord);
 
-	Document doc = updateService.edit(recordid);
-	assertNotNull(doc);
-	assertEquals("New Title Update Test May 7", doc.get("title"));
-	assertNotEquals("New Title Update Test May 14", doc.get("title"));
-    }
+		Document doc = updateService.edit(recordid);
+		assertNotNull(doc);
+		assertEquals("New Title Update Test May 7", doc.get("title"));
+		assertNotEquals("New Title Update Test May 14", doc.get("title"));
+	}
 
-    @Test
-    public void updateRecordTest() throws CustomizationException, IOException, ResourceNotFoundException, InvalidInputException {
+	@Test
+	public void updateRecordTest()
+			throws CustomizationException, IOException, ResourceNotFoundException, InvalidInputException {
 
-	changedata = new String(
-		Files.readAllBytes(Paths.get(this.getClass().getClassLoader().getResource("changes.json").getFile())));
-	Document change = Document.parse(changedata);
+		changedata = new String(
+				Files.readAllBytes(Paths.get(this.getClass().getClassLoader().getResource("changes.json").getFile())));
+		Document change = Document.parse(changedata);
 
-	String updateddata = new String(Files
-		.readAllBytes(Paths.get(this.getClass().getClassLoader().getResource("updatedRecord.json").getFile())));
-	updatedRecord = Document.parse(updateddata);
-	// when(dataOperations.getUpdatedData(updateddata,
-	// recordCollection)).thenReturn(updatedRecord);
-	when(dataOperations.updateDataInCache(recordid, recordCollection, change)).thenReturn(true);
-	when(dataOperations.updateDataInCache(recordid, changesCollection, change)).thenReturn(true);
-	when(dataOperations.getData(recordid, recordCollection)).thenReturn(updatedRecord);
+		String updateddata = new String(Files
+				.readAllBytes(Paths.get(this.getClass().getClassLoader().getResource("updatedRecord.json").getFile())));
+		updatedRecord = Document.parse(updateddata);
+		// when(dataOperations.getUpdatedData(updateddata,
+		// recordCollection)).thenReturn(updatedRecord);
+		when(dataOperations.updateDataInCache(recordid, recordCollection, change)).thenReturn(true);
+		when(dataOperations.updateDataInCache(recordid, changesCollection, change)).thenReturn(true);
+		when(dataOperations.getData(recordid, recordCollection)).thenReturn(updatedRecord);
 
-	Document doc = updateService.update(changedata, recordid);
-	assertNotNull(doc);
-	assertEquals("New Title Update Test May 14", doc.get("title"));
-    }
+		Document doc = updateService.update(changedata, recordid);
+		assertNotNull(doc);
+		assertEquals("New Title Update Test May 14", doc.get("title"));
+	}
 
-    @Test
-    public void saveRecordTest() throws IOException, InvalidInputException, CustomizationException {
-	changedata = new String(
-		Files.readAllBytes(Paths.get(this.getClass().getClassLoader().getResource("changes.json").getFile())));
-	Document change = Document.parse(changedata);
+	@Test
+	public void saveRecordTest() throws IOException, InvalidInputException, CustomizationException {
+		changedata = new String(
+				Files.readAllBytes(Paths.get(this.getClass().getClassLoader().getResource("changes.json").getFile())));
+		Document change = Document.parse(changedata);
 
-	String updateddata = new String(Files
-		.readAllBytes(Paths.get(this.getClass().getClassLoader().getResource("updatedRecord.json").getFile())));
-	updatedRecord = Document.parse(updateddata);
-	// when(dataOperations.getUpdatedData(updateddata,
-	// recordCollection)).thenReturn(updatedRecord);
-	when(dataOperations.updateDataInCache(recordid, recordCollection, change)).thenReturn(true);
-	when(dataOperations.updateDataInCache(recordid, changesCollection, change)).thenReturn(true);
-	when(dataOperations.getUpdatedData(recordid, changesCollection)).thenReturn(updatedRecord);
+		String updateddata = new String(Files
+				.readAllBytes(Paths.get(this.getClass().getClassLoader().getResource("updatedRecord.json").getFile())));
+		updatedRecord = Document.parse(updateddata);
+		// when(dataOperations.getUpdatedData(updateddata,
+		// recordCollection)).thenReturn(updatedRecord);
+		when(dataOperations.updateDataInCache(recordid, recordCollection, change)).thenReturn(true);
+		when(dataOperations.updateDataInCache(recordid, changesCollection, change)).thenReturn(true);
+		when(dataOperations.getUpdatedData(recordid, changesCollection)).thenReturn(updatedRecord);
 //	Document doc = updateService.save(recordid, changedata);
 //	assertNotNull(doc);
-	
-    }
+
+	}
 
 }

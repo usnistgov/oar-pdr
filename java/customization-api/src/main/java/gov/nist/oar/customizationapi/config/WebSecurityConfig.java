@@ -10,7 +10,7 @@
  * that they have been modified.
  * @author: Deoyani Nandrekar-Heinis
  */
-package gov.nist.oar.customizationapi.config.SAMLConfig;
+package gov.nist.oar.customizationapi.config;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,7 +38,7 @@ import gov.nist.oar.customizationapi.config.JWTConfig.JWTAuthenticationProvider;
  */
 @Configuration
 @EnableWebSecurity
-public class SecurityConfig {
+public class WebSecurityConfig {
 
     /**
      * Rest security configuration for rest api

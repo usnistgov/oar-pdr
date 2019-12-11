@@ -14,4 +14,4 @@
  * @author  Deoyani Nandrekar-Heinis
  *
  */
-package gov.nist.oar.customizationapi.controller;
+package gov.nist.oar.customizationapi.web;

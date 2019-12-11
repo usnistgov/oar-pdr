@@ -59,7 +59,6 @@ public class DataOperationsTest {
     @Mock
     private MongoDatabase mockDB;
     
-//    private String mdserver = "http://testdata.nist.gov/rmm/records/";
     private static DatabaseOperations mockDataOperations;
     private static Document change;
     private static Document updatedRecord;
@@ -94,7 +93,6 @@ public class DataOperationsTest {
       when(mockDataOperations.getUpdatedData(recordid, mockCollection)).thenReturn(updatedRecord); 
       when(mockDataOperations.getUpdatedData(recordid, mockChangeCollection)).thenReturn(change); 
       when(mockDataOperations.checkRecordInCache(recordid, mockCollection)).thenReturn(true);
-//      when(mockDataOperations.putDataInCacheOnlyChanges(change, mockChangeCollection)).thenReturn(recordDoc);
 
     }
     

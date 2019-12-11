@@ -10,7 +10,7 @@
  * that they have been modified.
  * @author: Deoyani Nandrekar-Heinis
  */
-package gov.nist.oar.customizationapi.controller;
+package gov.nist.oar.customizationapi.web;
 
 import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;

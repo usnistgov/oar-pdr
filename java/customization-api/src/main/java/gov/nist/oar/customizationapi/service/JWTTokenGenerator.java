@@ -34,7 +34,6 @@ import gov.nist.oar.customizationapi.exceptions.BadGetwayException;
 import gov.nist.oar.customizationapi.exceptions.CustomizationException;
 import gov.nist.oar.customizationapi.exceptions.UnAuthorizedUserException;
 import gov.nist.oar.customizationapi.helpers.AuthenticatedUserDetails;
-import gov.nist.oar.customizationapi.helpers.domains.UserToken;
 
 /**
  * This class checks authenticated user and by calling backend service checks
@@ -90,6 +89,7 @@ public class JWTTokenGenerator {
 
 	    return new UserToken(userDetails, signedJWT.serialize());
 	} catch (JOSEException e) {
+		logger.error("Unable to generate token for the this user."+e.getMessage());
 	    throw new UnAuthorizedUserException("Unable to generate token for the this user.");
 	}
     }
@@ -104,7 +104,7 @@ public class JWTTokenGenerator {
      * @throws CustomizationException
      * @throws UnAuthorizedUserException
      */
-    private boolean isAuthorized(AuthenticatedUserDetails userDetails, String ediid)
+     boolean isAuthorized(AuthenticatedUserDetails userDetails, String ediid)
 	    throws CustomizationException, UnAuthorizedUserException, BadGetwayException {
 	logger.info("Connect to backend metadata server to get the information.");
 	try {

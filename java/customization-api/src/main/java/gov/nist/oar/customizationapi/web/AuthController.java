@@ -10,7 +10,7 @@
  * that they have been modified.
  * @author: Deoyani Nandrekar-Heinis
  */
-package gov.nist.oar.customizationapi.controller;
+package gov.nist.oar.customizationapi.web;
 
 import java.io.IOException;
 
@@ -39,9 +39,9 @@ import gov.nist.oar.customizationapi.exceptions.UnAuthenticatedUserException;
 import gov.nist.oar.customizationapi.exceptions.UnAuthorizedUserException;
 import gov.nist.oar.customizationapi.helpers.AuthenticatedUserDetails;
 import gov.nist.oar.customizationapi.helpers.UserDetailsExtractor;
-import gov.nist.oar.customizationapi.helpers.domains.UserToken;
 import gov.nist.oar.customizationapi.service.JWTTokenGenerator;
 import gov.nist.oar.customizationapi.service.ResourceNotFoundException;
+import gov.nist.oar.customizationapi.service.UserToken;
 import io.swagger.annotations.ApiOperation;
 
 /**

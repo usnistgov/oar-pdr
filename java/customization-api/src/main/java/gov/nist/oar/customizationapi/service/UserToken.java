@@ -10,7 +10,7 @@
  * that they have been modified.
  * @author: Deoyani Nandrekar-Heinis
  */
-package gov.nist.oar.customizationapi.helpers.domains;
+package gov.nist.oar.customizationapi.service;
 
 
 import java.io.Serializable;

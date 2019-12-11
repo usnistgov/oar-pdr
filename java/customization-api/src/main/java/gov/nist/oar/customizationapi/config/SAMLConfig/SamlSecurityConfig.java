@@ -103,8 +103,8 @@ import gov.nist.oar.customizationapi.service.SamlUserDetailsService;
  * @author Deoyani Nandrekar-Heinis
  */
 @Configuration
-public class SecuritySamlConfig extends WebSecurityConfigurerAdapter {
-    private static Logger logger = LoggerFactory.getLogger(SecuritySamlConfig.class);
+public class SamlSecurityConfig extends WebSecurityConfigurerAdapter {
+    private static Logger logger = LoggerFactory.getLogger(SamlSecurityConfig.class);
 
     /**
      * Entityid for the SAML service provider, in this case customization service

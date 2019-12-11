@@ -31,7 +31,7 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 @Configuration
 @EnableSwagger2
-@ComponentScan({ "gov.nist.oar.custom" })
+@ComponentScan({ "gov.nist.oar.customization" })
 /**
  * Swagger configuration class takes care of Initializing swagger to be used to
  * generate documentation for the code.
