@@ -12,7 +12,7 @@ datadir = os.path.join(testdir, 'data')
 import imp
 simsrvrsrc = os.path.join(testdir, "sim_describe_svc.py")
 with open(simsrvrsrc, 'r') as fd:
-    desc = imp.load_module("sim_describe_svc.py", fd, simsrvrsrc,
+    desc = imp.load_module("sim_describe_svc", fd, simsrvrsrc,
                            (".py", 'r', imp.PY_SOURCE))
 
 basedir = os.path.dirname(os.path.dirname(os.path.dirname(
