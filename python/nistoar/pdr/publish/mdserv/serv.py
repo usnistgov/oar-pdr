@@ -143,7 +143,8 @@ class PrePubMetadataService(PublishSystem):
         if ucfg.get('update_to_midas', ucfg.get('midas_service')):
             # set up the client if have the config data to do it unless
             # 'update_to_midas' is False
-            self._midascl = midas.MIDASClient(ucfg.get('midas_service', {}))
+            self._midascl = midas.MIDASClient(ucfg.get('midas_service', {}),
+                                         logger=self.log.getChild('midasclient'))
 
     def _create_minter(self, parentdir):
         cfg = self.cfg.get('id_minter', {})

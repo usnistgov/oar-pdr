@@ -47,7 +47,8 @@ def startService(archdir, authmeth=None):
     pidfile = os.path.join(tdir,"simsrv"+str(srvport)+".pid")
     
     cmd = "uwsgi --daemonize {0} --plugin python --http-socket :{1} " \
-          "--wsgi-file {2} --pidfile {3} --set-ph archive_dir={4} " 
+          "--wsgi-file {2} --pidfile {3} --set-ph archive_dir={4} "   \
+          "--set-ph auth_key=svcsecret"
     cmd = cmd.format(os.path.join(tdir,"simsrv.log"), srvport,
                      os.path.join(simsrvrsrc), pidfile, archdir)
     os.system(cmd)
@@ -314,7 +315,7 @@ class TestPrePubMetadataServiceMidas(test.TestCase):
                 'updatable_properties': [ 'title', 'components[].goob' ],
                 'midas_service': {
                     'service_endpoint': baseurl,
-                    'auth_key': 'svcsecret'
+                    'update_auth_key': 'svcsecret'
                 }
             }
         }

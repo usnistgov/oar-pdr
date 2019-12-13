@@ -147,9 +147,14 @@ class SimMidasHandler(object):
 
         try:
             if len(parts) > 1:
-                out = self.user_can_update(parts[1], parts[0])
+                out = json.dumps({
+                    "response_code": 200,
+                    "editable": self.user_can_update(parts[1], parts[0])
+                });
+                
             else:
                 out = self.arch.get_pod(parts[0])
+                
         except Exception as ex:
             print(str(ex))
             return self.send_error(500, "Internal Error")
@@ -165,6 +170,11 @@ class SimMidasHandler(object):
         if forhead:
             return []
         return [out]
+
+    def user_can_update(self, userid, midasid):
+        if userid == "super":
+            return True;
+        return False;
 
     def do_PUT(self, path, input=None, params=None):
         if not self.authorized():

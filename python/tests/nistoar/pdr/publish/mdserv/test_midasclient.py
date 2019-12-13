@@ -23,7 +23,8 @@ def startService(archdir, authmeth=None):
     pidfile = os.path.join(tdir,"simsrv"+str(srvport)+".pid")
     
     cmd = "uwsgi --daemonize {0} --plugin python --http-socket :{1} " \
-          "--wsgi-file {2} --pidfile {3} --set-ph archive_dir={4}"
+          "--wsgi-file {2} --pidfile {3} --set-ph archive_dir={4} "   \
+          "--set-ph auth_key=secret"
     cmd = cmd.format(os.path.join(tdir,"simsrv.log"), srvport,
                      os.path.join(simsrvrsrc), pidfile, archdir)
     os.system(cmd)
@@ -68,7 +69,7 @@ class TestMIDASClient(test.TestCase):
                         os.path.join(svcarch, "pdr2210.json"))
         self.cfg = {
             "service_endpoint": baseurl,
-            "auth_key": "secret"
+            "update_auth_key": "secret"
         }
 
     def test_ctor(self):
@@ -116,6 +117,12 @@ class TestMIDASClient(test.TestCase):
         
         pod = client.get_pod(ediid)
         self.assertEqual(pod['title'], "Goober!")
+
+    def test_authorized(self):
+        ediid = "ark:/88434/pdr2210"
+        client = midas.MIDASClient(self.cfg)
+        self.assertTrue(client.authorized("super", "pdr2210"));
+        self.assertFalse(client.authorized("anon", "pdr2210"));
         
 
 if __name__ == '__main__':
