@@ -17,14 +17,14 @@ import org.springframework.security.saml.SAMLCredential;
 import org.springframework.security.saml.userdetails.SAMLUserDetailsService;
 
 /**
- * @author
+ * @author Deoyani Nandrekar-Heinis
  */
 public class SamlUserDetailsService implements SAMLUserDetailsService {
 
     @Override
     public Object loadUserBySAML(SAMLCredential credential) throws UsernameNotFoundException {
-	final String userEmail = credential.getAttributeAsString("email");
-	System.out.println("userEmail:" + userEmail);
+//	final String userEmail = credential.getAttributeAsString("email");
+//	System.out.println("userEmail:" + userEmail);
 	return new SamlUserDetails();
     }
 }

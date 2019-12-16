@@ -104,661 +104,655 @@ import gov.nist.oar.customizationapi.service.SamlUserDetailsService;
  */
 @Configuration
 public class SamlSecurityConfig extends WebSecurityConfigurerAdapter {
-    private static Logger logger = LoggerFactory.getLogger(SamlSecurityConfig.class);
+	private static Logger logger = LoggerFactory.getLogger(SamlSecurityConfig.class);
 
-    /**
-     * Entityid for the SAML service provider, in this case customization service
-     */
-    @Value("${saml.metdata.entityid:testid}")
-    String entityId;
+	/**
+	 * Entityid for the SAML service provider, in this case customization service
+	 */
+	@Value("${saml.metdata.entityid:testid}")
+	String entityId;
 
-    /**
-     * EntityURL for the service provider, in this case customization base url
-     */
-    @Value("${saml.metadata.entitybaseUrl:testurl}")
-    String entityBaseURL;
+	/**
+	 * EntityURL for the service provider, in this case customization base url
+	 */
+	@Value("${saml.metadata.entitybaseUrl:testurl}")
+	String entityBaseURL;
 
-    /**
-     * Keystore location
-     */
-    @Value("${saml.keystore.path:testpath}")
-    String keyPath;
+	/**
+	 * Keystore location
+	 */
+	@Value("${saml.keystore.path:testpath}")
+	String keyPath;
 
-    /**
-     * Keystore store pass
-     */
-    @Value("${saml.keystroe.storepass:testpass}")
-    String keystorePass;
+	/**
+	 * Keystore store pass
+	 */
+	@Value("${saml.keystroe.storepass:testpass}")
+	String keystorePass;
 
-    /**
-     * Keystrore key
-     */
-    @Value("${saml.keystore.key:testkey}")
-    String keyAlias;
+	/**
+	 * Keystrore key
+	 */
+	@Value("${saml.keystore.key:testkey}")
+	String keyAlias;
 
-    /**
-     * Keystore key pass
-     */
-    @Value("${saml.keystore.keypass:keypass}")
-    String keyPass;
+	/**
+	 * Keystore key pass
+	 */
+	@Value("${saml.keystore.keypass:keypass}")
+	String keyPass;
 
-    /**
-     * Federation URL or File
-     */
-    @Value("${auth.federation.metadata:fedmetadata}")
-    String federationMetadata;
+	/**
+	 * Federation URL or File
+	 */
+	@Value("${auth.federation.metadata:fedmetadata}")
+	String federationMetadata;
 
-    /**
-     * SAML scheme user
-     */
-    @Value("${saml.scheme:samlscheme}")
-    String samlScheme;
+	/**
+	 * SAML scheme user
+	 */
+	@Value("${saml.scheme:samlscheme}")
+	String samlScheme;
 
-    /**
-     * SAML server name
-     */
-    @Value("${saml.server.name:server}")
-    String samlServer;
+	/**
+	 * SAML server name
+	 */
+	@Value("${saml.server.name:server}")
+	String samlServer;
 
-    /**
-     * SAML context path
-     */
-    @Value("${saml.server.context-path:context}")
-    String samlContext;
+	/**
+	 * SAML context path
+	 */
+	@Value("${saml.server.context-path:context}")
+	String samlContext;
 
-    /**
-     * SAML application URL
-     */
-    @Value("${application.url:http://localhost:4200}")
-    String applicationURL;
+	/**
+	 * SAML application URL
+	 */
+	@Value("${application.url:http://localhost:4200}")
+	String applicationURL;
 
-    /**
-     * Default single sign on profile options are set up here, we can add relaystate
-     * for redirect here as well.
-     * 
-     * @return
-     * @throws ConfigurationException
-     */
-    @Bean
-    public WebSSOProfileOptions defaultWebSSOProfileOptions() throws ConfigurationException {
-	logger.info("Setting up authticated service redirect by setting web sso profiles.");
-	WebSSOProfileOptions webSSOProfileOptions = new WebSSOProfileOptions();
-	webSSOProfileOptions.setIncludeScoping(false);
-	/// Adding this force authenticate on failure to validate SAML cache
-	webSSOProfileOptions.setForceAuthN(true);
-	// Relay state can also be set here it will always go to this URL once
-	// authenticated
-	// webSSOProfileOptions.setRelayState("https://data.nist.gov/sdp");
-	return webSSOProfileOptions;
-    }
-
-    /**
-     * When SAML protected resource is called this entry point is used to connect to
-     * SAML service provider and get the authentication
-     * 
-     * @return
-     * @throws ConfigurationException
-     */
-    @Bean
-    public SAMLEntryPoint samlEntryPoint() throws ConfigurationException {
-	logger.info("SAML Entry point. with application url " + applicationURL);
-	SAMLEntryPoint samlEntryPoint = new SamlWithRelayStateEntryPoint(applicationURL);
-	samlEntryPoint.setDefaultProfileOptions(defaultWebSSOProfileOptions());
-	return samlEntryPoint;
-    }
-
-    /**
-     * Metadatadisplay filter is called to use IDP metadata and set up SP service
-     * 
-     * @return
-     */
-    @Bean
-    public MetadataDisplayFilter metadataDisplayFilter() {
-	return new MetadataDisplayFilter();
-    }
-
-    /**
-     * Authentication failure handler
-     * 
-     * @return
-     */
-    @Bean
-    public SimpleUrlAuthenticationFailureHandler authenticationFailureHandler() {
-	logger.info("SAML authentication failure!!");
-	return new SimpleUrlAuthenticationFailureHandler();
-    }
-
-    /**
-     * Authentication success handler
-     * 
-     * @return
-     */
-    @Bean
-    public SavedRequestAwareAuthenticationSuccessHandler successRedirectHandler() {
-	SavedRequestAwareAuthenticationSuccessHandler successRedirectHandler = new SAMLRelayStateSuccessHandler();
-	return successRedirectHandler;
-    }
-
-    /**
-     * SAML Web SSO processing filter
-     * 
-     * @return SAMLProcessingFilter
-     * @throws ConfigurationException
-     */
-    @Bean
-    public SAMLProcessingFilter samlWebSSOProcessingFilter() throws ConfigurationException {
-	logger.info("SAMLProcessingFilter adding authentication manager.");
-	SAMLProcessingFilter samlWebSSOProcessingFilter = new SAMLProcessingFilter();
-	try {
-	    samlWebSSOProcessingFilter.setAuthenticationManager(authenticationManager());
-	} catch (Exception e) {
-	    throw new ConfigurationException("Exception while setting up Authentication Manager:" + e.getMessage());
+	/**
+	 * Default single sign on profile options are set up here, we can add relaystate
+	 * for redirect here as well.
+	 * 
+	 * @return
+	 * @throws ConfigurationException
+	 */
+	@Bean
+	public WebSSOProfileOptions defaultWebSSOProfileOptions() throws ConfigurationException {
+		logger.info("Setting up authticated service redirect by setting web sso profiles.");
+		WebSSOProfileOptions webSSOProfileOptions = new WebSSOProfileOptions();
+		webSSOProfileOptions.setIncludeScoping(false);
+		/// Adding this force authenticate on failure to validate SAML cache
+		webSSOProfileOptions.setForceAuthN(true);
+		// Relay state can also be set here it will always go to this URL once
+		// authenticated
+		// webSSOProfileOptions.setRelayState("https://data.nist.gov/sdp");
+		return webSSOProfileOptions;
 	}
-	samlWebSSOProcessingFilter.setAuthenticationSuccessHandler(successRedirectHandler());
-	samlWebSSOProcessingFilter.setAuthenticationFailureHandler(authenticationFailureHandler());
-	return samlWebSSOProcessingFilter;
-    }
 
-    /**
-     * successLogoutHandler
-     * 
-     * @return HttpStatusReturningLogoutSuccessHandler
-     */
-    @Bean
-    public HttpStatusReturningLogoutSuccessHandler successLogoutHandler() {
-	return new HttpStatusReturningLogoutSuccessHandler();
-    }
-
-    /**
-     * SecurityContextLogoutHandler handler
-     * 
-     * @return SecurityContextLogoutHandler
-     */
-    @Bean
-    public SecurityContextLogoutHandler logoutHandler() {
-	logger.info("In SecurityContextLogoutHandler, setinvalid httpsession and clear authentication to true.");
-	SecurityContextLogoutHandler logoutHandler = new SecurityContextLogoutHandler();
-	logoutHandler.setInvalidateHttpSession(true);
-	logoutHandler.setClearAuthentication(true);
-	return logoutHandler;
-    }
-
-    /**
-     * SAML logout filter
-     * 
-     * @return SAMLLogoutFilter
-     */
-    @Bean
-    public SAMLLogoutFilter samlLogoutFilter() {
-	return new SAMLLogoutFilter(successLogoutHandler(), new LogoutHandler[] { logoutHandler() },
-		new LogoutHandler[] { logoutHandler() });
-    }
-
-    /**
-     * SAML logout processing filter
-     * 
-     * @return
-     */
-    @Bean
-    public SAMLLogoutProcessingFilter samlLogoutProcessingFilter() {
-	return new SAMLLogoutProcessingFilter(successLogoutHandler(), logoutHandler());
-    }
-
-    /**
-     * Metadatagenerator
-     * 
-     * @return MetadataGenerator
-     * @throws ConfigurationException
-     */
-    @Bean
-    public MetadataGeneratorFilter metadataGeneratorFilter() throws ConfigurationException {
-	return new MetadataGeneratorFilter(metadataGenerator());
-    }
-
-    /**
-     * Generates metadata for the service provider
-     * 
-     * @return MetadataGenerator
-     * @throws ConfigurationException
-     */
-    @Bean
-    public MetadataGenerator metadataGenerator() throws ConfigurationException {
-	logger.info("Metadata generator : sets the entity id and base url to establish communication with ID server.");
-	MetadataGenerator metadataGenerator = new MetadataGenerator();
-	metadataGenerator.setEntityId(entityId);
-	metadataGenerator.setEntityBaseURL(entityBaseURL);
-	metadataGenerator.setExtendedMetadata(extendedMetadata());
-	metadataGenerator.setIncludeDiscoveryExtension(false);
-	metadataGenerator.setKeyManager(keyManager());
-	return metadataGenerator;
-    }
-
-    /**
-     * To load the keystore key with keypass
-     * 
-     * @return KeyManager
-     * @throws ConfigurationException
-     */
-    @Bean
-    public KeyManager keyManager() throws ConfigurationException {
-	logger.info("Read keystore key.");
-	try {
-	    // ClassPathResource storeFile = new ClassPathResource(keyPath);
-	    Resource storeFile = new FileSystemResource(keyPath);
-	    String storePass = keystorePass;
-	    Map<String, String> passwords = new HashMap<>();
-	    passwords.put(keyAlias, keyPass);
-	    return new JKSKeyManager(storeFile, storePass, passwords, keyAlias);
-	} catch (Exception e) {
-	    throw new ConfigurationException("Exception while loding keystore key, " + e.getMessage());
+	/**
+	 * When SAML protected resource is called this entry point is used to connect to
+	 * SAML service provider and get the authentication
+	 * 
+	 * @return
+	 * @throws ConfigurationException
+	 */
+	@Bean
+	public SAMLEntryPoint samlEntryPoint() throws ConfigurationException {
+		logger.info("SAML Entry point. with application url " + applicationURL);
+		SAMLEntryPoint samlEntryPoint = new SamlWithRelayStateEntryPoint(applicationURL);
+		samlEntryPoint.setDefaultProfileOptions(defaultWebSSOProfileOptions());
+		return samlEntryPoint;
 	}
-    }
 
-    /***
-     * Extended Metadata
-     * 
-     * @return ExtendedMetadata
-     */
-    @Bean
-    public ExtendedMetadata extendedMetadata() {
-	ExtendedMetadata extendedMetadata = new ExtendedMetadata();
-	extendedMetadata.setIdpDiscoveryEnabled(false);
-	extendedMetadata.setSignMetadata(false);
-	return extendedMetadata;
-    }
+	/**
+	 * Metadatadisplay filter is called to use IDP metadata and set up SP service
+	 * 
+	 * @return
+	 */
+	@Bean
+	public MetadataDisplayFilter metadataDisplayFilter() {
+		return new MetadataDisplayFilter();
+	}
 
-    /**
-     * Set up filter chain for the SAML authentication system, to connect to IDP
-     * 
-     * @return FilterChainProxy
-     * @throws ConfigurationException
-     */
-    @Bean
-    public FilterChainProxy springSecurityFilter() throws ConfigurationException {
-	logger.info("Setting up different saml filters and endpoints");
-	List<SecurityFilterChain> chains = new ArrayList<>();
+	/**
+	 * Authentication failure handler
+	 * 
+	 * @return
+	 */
+	@Bean
+	public SimpleUrlAuthenticationFailureHandler authenticationFailureHandler() {
+		logger.info("SAML authentication failure!!");
+		return new SimpleUrlAuthenticationFailureHandler();
+	}
 
-	chains.add(new DefaultSecurityFilterChain(new AntPathRequestMatcher("/saml/metadata/**"),
-		metadataDisplayFilter()));
+	/**
+	 * Authentication success handler
+	 * 
+	 * @return
+	 */
+	@Bean
+	public SavedRequestAwareAuthenticationSuccessHandler successRedirectHandler() {
+		SavedRequestAwareAuthenticationSuccessHandler successRedirectHandler = new SAMLRelayStateSuccessHandler();
+		return successRedirectHandler;
+	}
 
-	chains.add(new DefaultSecurityFilterChain(new AntPathRequestMatcher("/saml/login/**"), samlEntryPoint()));
+	/**
+	 * SAML Web SSO processing filter
+	 * 
+	 * @return SAMLProcessingFilter
+	 * @throws ConfigurationException
+	 */
+	@Bean
+	public SAMLProcessingFilter samlWebSSOProcessingFilter() throws ConfigurationException {
+		logger.info("SAMLProcessingFilter adding authentication manager.");
+		SAMLProcessingFilter samlWebSSOProcessingFilter = new SAMLProcessingFilter();
+		try {
+			samlWebSSOProcessingFilter.setAuthenticationManager(authenticationManager());
+		} catch (Exception e) {
+			throw new ConfigurationException("Exception while setting up Authentication Manager:" + e.getMessage());
+		}
+		samlWebSSOProcessingFilter.setAuthenticationSuccessHandler(successRedirectHandler());
+		samlWebSSOProcessingFilter.setAuthenticationFailureHandler(authenticationFailureHandler());
+		return samlWebSSOProcessingFilter;
+	}
 
-	chains.add(new DefaultSecurityFilterChain(new AntPathRequestMatcher("/saml/SSO/**"),
-		samlWebSSOProcessingFilter()));
+	/**
+	 * successLogoutHandler
+	 * 
+	 * @return HttpStatusReturningLogoutSuccessHandler
+	 */
+	@Bean
+	public HttpStatusReturningLogoutSuccessHandler successLogoutHandler() {
+		return new HttpStatusReturningLogoutSuccessHandler();
+	}
 
-	chains.add(new DefaultSecurityFilterChain(new AntPathRequestMatcher("/saml/logout/**"), samlLogoutFilter()));
+	/**
+	 * SecurityContextLogoutHandler handler
+	 * 
+	 * @return SecurityContextLogoutHandler
+	 */
+	@Bean
+	public SecurityContextLogoutHandler logoutHandler() {
+		logger.info("In SecurityContextLogoutHandler, setinvalid httpsession and clear authentication to true.");
+		SecurityContextLogoutHandler logoutHandler = new SecurityContextLogoutHandler();
+		logoutHandler.setInvalidateHttpSession(true);
+		logoutHandler.setClearAuthentication(true);
+		return logoutHandler;
+	}
 
-	chains.add(new DefaultSecurityFilterChain(new AntPathRequestMatcher("/saml/SingleLogout/**"),
-		samlLogoutProcessingFilter()));
+	/**
+	 * SAML logout filter
+	 * 
+	 * @return SAMLLogoutFilter
+	 */
+	@Bean
+	public SAMLLogoutFilter samlLogoutFilter() {
+		return new SAMLLogoutFilter(successLogoutHandler(), new LogoutHandler[] { logoutHandler() },
+				new LogoutHandler[] { logoutHandler() });
+	}
 
-	return new FilterChainProxy(chains);
-    }
+	/**
+	 * SAML logout processing filter
+	 * 
+	 * @return
+	 */
+	@Bean
+	public SAMLLogoutProcessingFilter samlLogoutProcessingFilter() {
+		return new SAMLLogoutProcessingFilter(successLogoutHandler(), logoutHandler());
+	}
 
-    /**
-     * Making sure TLS security
-     * 
-     * @return TLSProtocolConfigurer
-     */
-    @Bean
-    public TLSProtocolConfigurer tlsProtocolConfigurer() {
-	return new TLSProtocolConfigurer();
-    }
+	/**
+	 * Metadatagenerator
+	 * 
+	 * @return MetadataGenerator
+	 * @throws ConfigurationException
+	 */
+	@Bean
+	public MetadataGeneratorFilter metadataGeneratorFilter() throws ConfigurationException {
+		return new MetadataGeneratorFilter(metadataGenerator());
+	}
 
-    /**
-     * 
-     * @return ProtocolSocketFactory
-     * @throws ConfigurationException
-     */
-    @Bean
-    public ProtocolSocketFactory socketFactory() throws ConfigurationException {
-	return new TLSProtocolSocketFactory(keyManager(), null, "default");
-    }
+	/**
+	 * Generates metadata for the service provider
+	 * 
+	 * @return MetadataGenerator
+	 * @throws ConfigurationException
+	 */
+	@Bean
+	public MetadataGenerator metadataGenerator() throws ConfigurationException {
+		logger.info("Metadata generator : sets the entity id and base url to establish communication with ID server.");
+		MetadataGenerator metadataGenerator = new MetadataGenerator();
+		metadataGenerator.setEntityId(entityId);
+		metadataGenerator.setEntityBaseURL(entityBaseURL);
+		metadataGenerator.setExtendedMetadata(extendedMetadata());
+		metadataGenerator.setIncludeDiscoveryExtension(false);
+		metadataGenerator.setKeyManager(keyManager());
+		return metadataGenerator;
+	}
 
-    /**
-     * 
-     * @return Protocol
-     * @throws ConfigurationException
-     */
-    @Bean
-    public Protocol socketFactoryProtocol() throws ConfigurationException {
-	return new Protocol("https", socketFactory(), 443);
-    }
+	/**
+	 * To load the keystore key with keypass
+	 * 
+	 * @return KeyManager
+	 * @throws ConfigurationException
+	 */
+	@Bean
+	public KeyManager keyManager() throws ConfigurationException {
+		logger.info("Read keystore key.");
+		try {
+			// ClassPathResource storeFile = new ClassPathResource(keyPath);
+			Resource storeFile = new FileSystemResource(keyPath);
+			String storePass = keystorePass;
+			Map<String, String> passwords = new HashMap<>();
+			passwords.put(keyAlias, keyPass);
+			return new JKSKeyManager(storeFile, storePass, passwords, keyAlias);
+		} catch (Exception e) {
+			throw new ConfigurationException("Exception while loding keystore key, " + e.getMessage());
+		}
+	}
 
-    /**
-     * 
-     * @return MethodInvokingFactoryBean
-     * @throws ConfigurationException
-     */
-    @Bean
-    public MethodInvokingFactoryBean socketFactoryInitialization() throws ConfigurationException {
-	logger.info("Socket factory initialization.");
-	MethodInvokingFactoryBean methodInvokingFactoryBean = new MethodInvokingFactoryBean();
-	methodInvokingFactoryBean.setTargetClass(Protocol.class);
-	methodInvokingFactoryBean.setTargetMethod("registerProtocol");
-	Object[] args = { "https", socketFactoryProtocol() };
-	methodInvokingFactoryBean.setArguments(args);
-	return methodInvokingFactoryBean;
-    }
+	/***
+	 * Extended Metadata
+	 * 
+	 * @return ExtendedMetadata
+	 */
+	@Bean
+	public ExtendedMetadata extendedMetadata() {
+		ExtendedMetadata extendedMetadata = new ExtendedMetadata();
+		extendedMetadata.setIdpDiscoveryEnabled(false);
+		extendedMetadata.setSignMetadata(false);
+		return extendedMetadata;
+	}
 
-    /**
-     * XML parsing configuration
-     * 
-     * @return VelocityEngine
-     */
-    @Bean
-    public VelocityEngine velocityEngine() {
-	return VelocityFactory.getEngine();
-    }
+	/**
+	 * Set up filter chain for the SAML authentication system, to connect to IDP
+	 * 
+	 * @return FilterChainProxy
+	 * @throws ConfigurationException
+	 */
+	@Bean
+	public FilterChainProxy springSecurityFilter() throws ConfigurationException {
+		logger.info("Setting up different saml filters and endpoints");
+		List<SecurityFilterChain> chains = new ArrayList<>();
 
-    /**
-     * XML parsing configuration
-     * 
-     * @return StaticBasicParserPool
-     */
-    @Bean(initMethod = "initialize")
-    public StaticBasicParserPool parserPool() {
-	return new StaticBasicParserPool();
-    }
+		chains.add(new DefaultSecurityFilterChain(new AntPathRequestMatcher("/saml/metadata/**"),
+				metadataDisplayFilter()));
 
-    /**
-     * XML parsing configuration
-     * 
-     * @return ParserPoolHolder
-     */
-    @Bean(name = "parserPoolHolder")
-    public ParserPoolHolder parserPoolHolder() {
-	return new ParserPoolHolder();
-    }
+		chains.add(new DefaultSecurityFilterChain(new AntPathRequestMatcher("/saml/login/**"), samlEntryPoint()));
 
-    /**
-     * SAML Binding which depends on IDP specifications
-     * 
-     * @return HTTPPostBinding
-     */
-    @Bean
-    public HTTPPostBinding httpPostBinding() {
-	return new HTTPPostBinding(parserPool(), velocityEngine());
-    }
+		chains.add(new DefaultSecurityFilterChain(new AntPathRequestMatcher("/saml/SSO/**"),
+				samlWebSSOProcessingFilter()));
 
-    /**
-     * SAML Binding which depends on IDP specifications
-     * 
-     * @return HTTPRedirectDeflateBinding
-     */
-    @Bean
-    public HTTPRedirectDeflateBinding httpRedirectDeflateBinding() {
-	return new HTTPRedirectDeflateBinding(parserPool());
-    }
+		chains.add(new DefaultSecurityFilterChain(new AntPathRequestMatcher("/saml/logout/**"), samlLogoutFilter()));
 
-    /**
-     * SAML Binding which depends on IDP specifications
-     * 
-     * @return SAMLProcessorImpl
-     */
-    @Bean
-    public SAMLProcessorImpl processor() {
-	Collection<SAMLBinding> bindings = new ArrayList<>();
-	bindings.add(httpRedirectDeflateBinding());
-	bindings.add(httpPostBinding());
-	return new SAMLProcessorImpl(bindings);
-    }
+		chains.add(new DefaultSecurityFilterChain(new AntPathRequestMatcher("/saml/SingleLogout/**"),
+				samlLogoutProcessingFilter()));
 
-    /**
-     * Return httpclient to handle multithread
-     * 
-     * @return HttpClient
-     */
-    @Bean
-    public HttpClient httpClient() {
-	return new HttpClient(multiThreadedHttpConnectionManager());
-    }
+		return new FilterChainProxy(chains);
+	}
 
-    /**
-     * Multiple thread
-     * 
-     * @return MultiThreadedHttpConnectionManager
-     */
-    @Bean
-    public MultiThreadedHttpConnectionManager multiThreadedHttpConnectionManager() {
-	return new MultiThreadedHttpConnectionManager();
-    }
+	/**
+	 * Making sure TLS security
+	 * 
+	 * @return TLSProtocolConfigurer
+	 */
+	@Bean
+	public TLSProtocolConfigurer tlsProtocolConfigurer() {
+		return new TLSProtocolConfigurer();
+	}
 
-    /**
-     * To initialize SAML library with spring boot initialization
-     * 
-     * @return SAMLBootstrap
-     */
-    @Bean
-    public static SAMLBootstrap sAMLBootstrap() {
-	return new SAMLBootstrap();
-    }
+	/**
+	 * 
+	 * @return ProtocolSocketFactory
+	 * @throws ConfigurationException
+	 */
+	@Bean
+	public ProtocolSocketFactory socketFactory() throws ConfigurationException {
+		return new TLSProtocolSocketFactory(keyManager(), null, "default");
+	}
 
-    /**
-     * Default logger to make sure all SAML requests get logged into
-     * 
-     * @return SAMLDefaultLogger
-     */
-    @Bean
-    public SAMLDefaultLogger samlLogger() {
-	return new SAMLDefaultLogger();
-    }
+	/**
+	 * 
+	 * @return Protocol
+	 * @throws ConfigurationException
+	 */
+	@Bean
+	public Protocol socketFactoryProtocol() throws ConfigurationException {
+		return new Protocol("https", socketFactory(), 443);
+	}
 
-    /**
-     * Parsing request/responses to make sure which SAML IDP or SP deal with it
-     * 
-     * @return SAMLContextProviderImpl
-     * @throws ConfigurationException
-     */
-    @Bean
-    public SAMLContextProviderImpl contextProvider() throws ConfigurationException {
-	logger.info("SAML context provider.");
-	SAMLContextProviderLB samlContextProviderLB = new SAMLContextProviderLB();
-	samlContextProviderLB.setScheme(samlScheme);
-	samlContextProviderLB.setServerName(samlServer);
-	samlContextProviderLB.setServerPort(443);
-	samlContextProviderLB.setIncludeServerPortInRequestURL(true);
-	samlContextProviderLB.setContextPath(samlContext);
-	samlContextProviderLB.setStorageFactory(new org.springframework.security.saml.storage.EmptyStorageFactory());
-	return samlContextProviderLB;
-    }
+	/**
+	 * 
+	 * @return MethodInvokingFactoryBean
+	 * @throws ConfigurationException
+	 */
+	@Bean
+	public MethodInvokingFactoryBean socketFactoryInitialization() throws ConfigurationException {
+		logger.info("Socket factory initialization.");
+		MethodInvokingFactoryBean methodInvokingFactoryBean = new MethodInvokingFactoryBean();
+		methodInvokingFactoryBean.setTargetClass(Protocol.class);
+		methodInvokingFactoryBean.setTargetMethod("registerProtocol");
+		Object[] args = { "https", socketFactoryProtocol() };
+		methodInvokingFactoryBean.setArguments(args);
+		return methodInvokingFactoryBean;
+	}
 
-    /***
-     * SAML 2.0 WebSSO Assertion Consumer
-     * 
-     * @return WebSSOProfileConsumer
-     */
-    @Bean
-    public WebSSOProfileConsumer webSSOprofileConsumer() {
-	return new WebSSOProfileConsumerImpl();
-    }
+	/**
+	 * XML parsing configuration
+	 * 
+	 * @return VelocityEngine
+	 */
+	@Bean
+	public VelocityEngine velocityEngine() {
+		return VelocityFactory.getEngine();
+	}
 
-    /**
-     * SAML 2.0 Web SSO profile
-     * 
-     * @return WebSSOProfile
-     */
-    @Bean
-    public WebSSOProfile webSSOprofile() {
-	return new WebSSOProfileImpl();
-    }
+	/**
+	 * XML parsing configuration
+	 * 
+	 * @return StaticBasicParserPool
+	 */
+	@Bean(initMethod = "initialize")
+	public StaticBasicParserPool parserPool() {
+		return new StaticBasicParserPool();
+	}
 
-    /***
-     * SAML 2.0 Holder-of-Key WebSSO Assertion Consumer
-     * 
-     * @return WebSSOProfileConsumerHoKImpl
-     */
-    @Bean
-    public WebSSOProfileConsumerHoKImpl hokWebSSOprofileConsumer() {
-	return new WebSSOProfileConsumerHoKImpl();
-    }
+	/**
+	 * XML parsing configuration
+	 * 
+	 * @return ParserPoolHolder
+	 */
+	@Bean(name = "parserPoolHolder")
+	public ParserPoolHolder parserPoolHolder() {
+		return new ParserPoolHolder();
+	}
 
-    /**
-     * SAML 2.0 Holder-of-Key Web SSO profile
-     * 
-     * @return WebSSOProfileConsumerHoKImpl
-     */
-    @Bean
-    public WebSSOProfileConsumerHoKImpl hokWebSSOProfile() {
-	return new WebSSOProfileConsumerHoKImpl();
-    }
+	/**
+	 * SAML Binding which depends on IDP specifications
+	 * 
+	 * @return HTTPPostBinding
+	 */
+	@Bean
+	public HTTPPostBinding httpPostBinding() {
+		return new HTTPPostBinding(parserPool(), velocityEngine());
+	}
 
-    /**
-     * Logout profile setting.
-     * 
-     * @return SingleLogoutProfile
-     */
-    @Bean
-    public SingleLogoutProfile logoutprofile() {
-	return new SingleLogoutProfileImpl();
-    }
+	/**
+	 * SAML Binding which depends on IDP specifications
+	 * 
+	 * @return HTTPRedirectDeflateBinding
+	 */
+	@Bean
+	public HTTPRedirectDeflateBinding httpRedirectDeflateBinding() {
+		return new HTTPRedirectDeflateBinding(parserPool());
+	}
 
-    /**
-     * Read the federation metadata and load to extended metadata
-     * 
-     * @return ExtendedMetadataDelegate
-     * @throws ConfigurationException
-     */
-    @Bean
-    public ExtendedMetadataDelegate idpMetadata() throws ConfigurationException {
-	logger.info("Read the federation metadata provided by identity provider.");
+	/**
+	 * SAML Binding which depends on IDP specifications
+	 * 
+	 * @return SAMLProcessorImpl
+	 */
+	@Bean
+	public SAMLProcessorImpl processor() {
+		Collection<SAMLBinding> bindings = new ArrayList<>();
+		bindings.add(httpRedirectDeflateBinding());
+		bindings.add(httpPostBinding());
+		return new SAMLProcessorImpl(bindings);
+	}
 
-	try {
-	    Timer backgroundTaskTimer = new Timer(true);
+	/**
+	 * Return httpclient to handle multithread
+	 * 
+	 * @return HttpClient
+	 */
+	@Bean
+	public HttpClient httpClient() {
+		return new HttpClient(multiThreadedHttpConnectionManager());
+	}
 
-	    org.opensaml.util.resource.FilesystemResource fpath = new org.opensaml.util.resource.FilesystemResource(
-		    federationMetadata);
-	    ResourceBackedMetadataProvider resourceBackedMetadataProvider = new ResourceBackedMetadataProvider(
-		    backgroundTaskTimer, fpath);
+	/**
+	 * Multiple thread
+	 * 
+	 * @return MultiThreadedHttpConnectionManager
+	 */
+	@Bean
+	public MultiThreadedHttpConnectionManager multiThreadedHttpConnectionManager() {
+		return new MultiThreadedHttpConnectionManager();
+	}
 
-	    /**
-	     * This code is used if the metadata url is available and can be used directly.
-	     */
-	    // new ClasspathResource(federationMetadata));
+	/**
+	 * To initialize SAML library with spring boot initialization
+	 * 
+	 * @return SAMLBootstrap
+	 */
+	@Bean
+	public static SAMLBootstrap sAMLBootstrap() {
+		return new SAMLBootstrap();
+	}
+
+	/**
+	 * Default logger to make sure all SAML requests get logged into
+	 * 
+	 * @return SAMLDefaultLogger
+	 */
+	@Bean
+	public SAMLDefaultLogger samlLogger() {
+		return new SAMLDefaultLogger();
+	}
+
+	/**
+	 * Parsing request/responses to make sure which SAML IDP or SP deal with it
+	 * 
+	 * @return SAMLContextProviderImpl
+	 * @throws ConfigurationException
+	 */
+	@Bean
+	public SAMLContextProviderImpl contextProvider() throws ConfigurationException {
+		logger.info("SAML context provider.");
+		SAMLContextProviderLB samlContextProviderLB = new SAMLContextProviderLB();
+		samlContextProviderLB.setScheme(samlScheme);
+		samlContextProviderLB.setServerName(samlServer);
+		samlContextProviderLB.setServerPort(443);
+		samlContextProviderLB.setIncludeServerPortInRequestURL(true);
+		samlContextProviderLB.setContextPath(samlContext);
+		samlContextProviderLB.setStorageFactory(new org.springframework.security.saml.storage.EmptyStorageFactory());
+		return samlContextProviderLB;
+	}
+
+	/***
+	 * SAML 2.0 WebSSO Assertion Consumer
+	 * 
+	 * @return WebSSOProfileConsumer
+	 */
+	@Bean
+	public WebSSOProfileConsumer webSSOprofileConsumer() {
+		return new WebSSOProfileConsumerImpl();
+	}
+
+	/**
+	 * SAML 2.0 Web SSO profile
+	 * 
+	 * @return WebSSOProfile
+	 */
+	@Bean
+	public WebSSOProfile webSSOprofile() {
+		return new WebSSOProfileImpl();
+	}
+
+	/***
+	 * SAML 2.0 Holder-of-Key WebSSO Assertion Consumer
+	 * 
+	 * @return WebSSOProfileConsumerHoKImpl
+	 */
+	@Bean
+	public WebSSOProfileConsumerHoKImpl hokWebSSOprofileConsumer() {
+		return new WebSSOProfileConsumerHoKImpl();
+	}
+
+	/**
+	 * SAML 2.0 Holder-of-Key Web SSO profile
+	 * 
+	 * @return WebSSOProfileConsumerHoKImpl
+	 */
+	@Bean
+	public WebSSOProfileConsumerHoKImpl hokWebSSOProfile() {
+		return new WebSSOProfileConsumerHoKImpl();
+	}
+
+	/**
+	 * Logout profile setting.
+	 * 
+	 * @return SingleLogoutProfile
+	 */
+	@Bean
+	public SingleLogoutProfile logoutprofile() {
+		return new SingleLogoutProfileImpl();
+	}
+
+	/**
+	 * Read the federation metadata and load to extended metadata
+	 * 
+	 * @return ExtendedMetadataDelegate
+	 * @throws ConfigurationException
+	 */
+	@Bean
+	public ExtendedMetadataDelegate idpMetadata() throws ConfigurationException {
+		logger.info("Read the federation metadata provided by identity provider.");
+
+		try {
+			Timer backgroundTaskTimer = new Timer(true);
+
+			org.opensaml.util.resource.FilesystemResource fpath = new org.opensaml.util.resource.FilesystemResource(
+					federationMetadata);
+			ResourceBackedMetadataProvider resourceBackedMetadataProvider = new ResourceBackedMetadataProvider(
+					backgroundTaskTimer, fpath);
+
+			/**
+			 * This code is used if the metadata url is available and can be used directly.
+			 */
+			// new ClasspathResource(federationMetadata));
 //        String fedMetadataURL = "https://sts.nist.gov/federationmetadata/2007-06/federationmetadata.xml";
 //	HTTPMetadataProvider httpMetadataProvider = new HTTPMetadataProvider(
 //			backgroundTaskTimer, httpClient(), fedMetadataURL);
 //	httpMetadataProvider.setParserPool(parserPool());
 //	        ExtendedMetadataDelegate extendedMetadataDelegate =
 //          new ExtendedMetadataDelegate(httpMetadataProvider , extendedMetadata());
-	    resourceBackedMetadataProvider.setParserPool(parserPool());
+			resourceBackedMetadataProvider.setParserPool(parserPool());
 
-	    ExtendedMetadataDelegate extendedMetadataDelegate = new ExtendedMetadataDelegate(
-		    resourceBackedMetadataProvider, extendedMetadata());
+			ExtendedMetadataDelegate extendedMetadataDelegate = new ExtendedMetadataDelegate(
+					resourceBackedMetadataProvider, extendedMetadata());
 
-	    //// **** just set this to false to solve the issue signature trust specific to
-	    //// current IDP
-	    extendedMetadataDelegate.setMetadataTrustCheck(false);
-	    extendedMetadataDelegate.setMetadataRequireSignature(false);
-	    return extendedMetadataDelegate;
-	} catch (MetadataProviderException mpEx) {
-	    throw new ConfigurationException(
-		    "MetadataProviderException while reading federation metadata." + mpEx.getMessage());
-	} catch (ResourceException rEx) {
-	    throw new ConfigurationException(
-		    "ResourceException while reading federationmetadata for SAML identifier, " + rEx.getMessage());
-	}
-    }
-
-    /**
-     * 
-     * @return CachingMetadataManager
-     * @throws ConfigurationException
-     * @throws MetadataProviderException
-     */
-    @Bean
-    @Qualifier("metadata")
-    public CachingMetadataManager metadata() throws ConfigurationException, MetadataProviderException {
-	List<MetadataProvider> providers = new ArrayList<>();
-	providers.add(idpMetadata());
-	return new CachingMetadataManager(providers);
-    }
-
-    /**
-     * 
-     * @return SAMLUserDetailsService
-     */
-    @Bean
-    public SAMLUserDetailsService samlUserDetailsService() {
-	return new SamlUserDetailsService();
-    }
-
-    /**
-     * Returns Authentication provider which is capable of verifying validity of a
-     * SAMLAuthenticationToken
-     * 
-     * @return SAMLAuthenticationProvider
-     */
-    @Bean
-    public SAMLAuthenticationProvider samlAuthenticationProvider() {
-	SAMLAuthenticationProvider samlAuthenticationProvider = new SAMLAuthenticationProvider();
-	samlAuthenticationProvider.setUserDetails(samlUserDetailsService());
-	samlAuthenticationProvider.setForcePrincipalAsString(false);
-	return samlAuthenticationProvider;
-    }
-
-    /**
-     * Configure authentication manager.
-     */
-    @Override
-    protected void configure(AuthenticationManagerBuilder auth) {
-	auth.authenticationProvider(samlAuthenticationProvider());
-    }
-
-    /**
-     * Set up filter for cross origin requests, here it is read from configserver
-     * and applicationURL is angular application URL
-     * 
-     * @return CORSFilter
-     */
-    @Bean
-    CORSFilter corsFilter() {
-	logger.info("CORS filter setting for application:" + applicationURL);
-	CORSFilter filter = new CORSFilter(applicationURL);
-	return filter;
-    }
-
-    /**
-     * Allow following URL patterns without any authentication and authorization
-     */
-    @Override
-    public void configure(WebSecurity web) throws Exception {
-	web.ignoring().antMatchers("/v2/api-docs",
-                "/configuration/ui",
-                "/swagger-resources/**",
-                "/configuration/security",
-                "/swagger-ui.html",
-                "/webjars/**");
-    }
-    
-    /**
-     * Test
-     * These are all http security configurations for different endpoints.
-     */
-    @Override
-    protected void configure(HttpSecurity http) throws ConfigurationException {
-	logger.info("Set up http security related filters for saml entrypoints");
-
-	try {
-	    http.addFilterBefore(corsFilter(), SessionManagementFilter.class).exceptionHandling()
-		    .authenticationEntryPoint(samlEntryPoint());
-
-	    http.csrf().disable();
-
-	    http.addFilterBefore(metadataGeneratorFilter(), ChannelProcessingFilter.class)
-		    .addFilterAfter(springSecurityFilter(), BasicAuthenticationFilter.class);
-
-	    http.authorizeRequests().antMatchers("/error").permitAll().antMatchers("/saml/**").permitAll().anyRequest()
-		    .authenticated();
-
-	    http.logout().logoutSuccessUrl("/");
-
-	} catch (Exception e) {
-	    throw new ConfigurationException("Exception in SAML security config for HttpSecurity," + e.getMessage());
+			//// **** just set this to false to solve the issue signature trust specific to
+			//// current IDP
+			extendedMetadataDelegate.setMetadataTrustCheck(false);
+			extendedMetadataDelegate.setMetadataRequireSignature(false);
+			return extendedMetadataDelegate;
+		} catch (MetadataProviderException mpEx) {
+			throw new ConfigurationException(
+					"MetadataProviderException while reading federation metadata." + mpEx.getMessage());
+		} catch (ResourceException rEx) {
+			throw new ConfigurationException(
+					"ResourceException while reading federationmetadata for SAML identifier, " + rEx.getMessage());
+		}
 	}
 
-    }
+	/**
+	 * 
+	 * @return CachingMetadataManager
+	 * @throws ConfigurationException
+	 * @throws MetadataProviderException
+	 */
+	@Bean
+	@Qualifier("metadata")
+	public CachingMetadataManager metadata() throws ConfigurationException, MetadataProviderException {
+		List<MetadataProvider> providers = new ArrayList<>();
+		providers.add(idpMetadata());
+		return new CachingMetadataManager(providers);
+	}
 
-   
+	/**
+	 * 
+	 * @return SAMLUserDetailsService
+	 */
+	@Bean
+	public SAMLUserDetailsService samlUserDetailsService() {
+		return new SamlUserDetailsService();
+	}
+
+	/**
+	 * Returns Authentication provider which is capable of verifying validity of a
+	 * SAMLAuthenticationToken
+	 * 
+	 * @return SAMLAuthenticationProvider
+	 */
+	@Bean
+	public SAMLAuthenticationProvider samlAuthenticationProvider() {
+		SAMLAuthenticationProvider samlAuthenticationProvider = new SAMLAuthenticationProvider();
+		samlAuthenticationProvider.setUserDetails(samlUserDetailsService());
+		samlAuthenticationProvider.setForcePrincipalAsString(false);
+		return samlAuthenticationProvider;
+	}
+
+	/**
+	 * Configure authentication manager.
+	 */
+	@Override
+	protected void configure(AuthenticationManagerBuilder auth) {
+		auth.authenticationProvider(samlAuthenticationProvider());
+	}
+
+	/**
+	 * Set up filter for cross origin requests, here it is read from configserver
+	 * and applicationURL is angular application URL
+	 * 
+	 * @return CORSFilter
+	 */
+	@Bean
+	CORSFilter corsFilter() {
+		logger.info("CORS filter setting for application:" + applicationURL);
+		CORSFilter filter = new CORSFilter(applicationURL);
+		return filter;
+	}
+
+	/**
+	 * Allow following URL patterns without any authentication and authorization
+	 */
+	@Override
+	public void configure(WebSecurity web) throws Exception {
+		web.ignoring().antMatchers("/v2/api-docs", "/configuration/ui", "/swagger-resources/**",
+				"/configuration/security", "/swagger-ui.html", "/webjars/**");
+	}
+
+	/**
+	 * Test These are all http security configurations for different endpoints.
+	 */
+	@Override
+	protected void configure(HttpSecurity http) throws ConfigurationException {
+		logger.info("Set up http security related filters for saml entrypoints");
+
+		try {
+			http.addFilterBefore(corsFilter(), SessionManagementFilter.class).exceptionHandling()
+					.authenticationEntryPoint(samlEntryPoint());
+
+			http.csrf().disable();
+
+			http.addFilterBefore(metadataGeneratorFilter(), ChannelProcessingFilter.class)
+					.addFilterAfter(springSecurityFilter(), BasicAuthenticationFilter.class);
+
+			http.authorizeRequests().antMatchers("/error").permitAll().antMatchers("/saml/**").permitAll().anyRequest()
+					.authenticated();
+
+			http.logout().logoutSuccessUrl("/");
+
+		} catch (Exception e) {
+			throw new ConfigurationException("Exception in SAML security config for HttpSecurity," + e.getMessage());
+		}
+
+	}
+
 //  private Timer backgroundTaskTimer;
 //	private MultiThreadedHttpConnectionManager multiThreadedHttpConnectionManager;
 //

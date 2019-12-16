@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 /**
+ * SAML user details is 
  * @author Deoyani Nandrekar-Heinis
  */
 public class SamlUserDetails implements UserDetails {
