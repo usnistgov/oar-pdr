@@ -104,7 +104,7 @@ public class JWTTokenGenerator {
      * @throws CustomizationException
      * @throws UnAuthorizedUserException
      */
-     boolean isAuthorized(AuthenticatedUserDetails userDetails, String ediid)
+     public boolean isAuthorized(AuthenticatedUserDetails userDetails, String ediid)
 	    throws CustomizationException, UnAuthorizedUserException, BadGetwayException {
 	logger.info("Connect to backend metadata server to get the information.");
 	try {

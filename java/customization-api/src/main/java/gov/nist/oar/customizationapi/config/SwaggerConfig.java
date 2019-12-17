@@ -41,40 +41,40 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
  */
 public class SwaggerConfig {
 
-    private static List<ResponseMessage> responseMessageList = new ArrayList<>();
+	private static List<ResponseMessage> responseMessageList = new ArrayList<>();
 
-    static {
-	responseMessageList.add(new ResponseMessageBuilder().code(500).message("500 - Internal Server Error")
-		.responseModel(new ModelRef("Error")).build());
-	responseMessageList.add(new ResponseMessageBuilder().code(403).message("403 - Forbidden").build());
-    }
+	static {
+		responseMessageList.add(new ResponseMessageBuilder().code(500).message("500 - Internal Server Error")
+				.responseModel(new ModelRef("Error")).build());
+		responseMessageList.add(new ResponseMessageBuilder().code(403).message("403 - Forbidden").build());
+	}
 
-    @Bean
-    /**
-     * Swagger api setting
-     * 
-     * @return Docket
-     */
-    public Docket api() {
+	@Bean
+	/**
+	 * Swagger api setting
+	 * 
+	 * @return Docket
+	 */
+	public Docket api() {
 
-	return new Docket(DocumentationType.SWAGGER_2).select()
-		.apis(RequestHandlerSelectors.basePackage("gov.nist.oar.custom")).paths(PathSelectors.any()).build()
-		.apiInfo(apiInfo());
-    }
+		return new Docket(DocumentationType.SWAGGER_2).select()
+				.apis(RequestHandlerSelectors.basePackage("gov.nist.oar.custom")).paths(PathSelectors.any()).build()
+				.apiInfo(apiInfo());
+	}
 
-    /**
-     * Swagger Api Info
-     * 
-     * @return return ApiInfo
-     * 
-     */
-    private ApiInfo apiInfo() {
+	/**
+	 * Swagger Api Info
+	 * 
+	 * @return return ApiInfo
+	 * 
+	 */
+	private ApiInfo apiInfo() {
 
-	@SuppressWarnings("deprecation")
-	ApiInfo apiInfo = new ApiInfo("Landing page Customization api", "Description goes here ",
-		"Build-1.0.0", "This is a web service to update data", "",
-		"NIST Public license", "https://www.nist.gov/director/licensing");
-	return apiInfo;
-    }
+		@SuppressWarnings("deprecation")
+		ApiInfo apiInfo = new ApiInfo("Landing page Customization api", "Description goes here ", "Build-1.0.0",
+				"This is a web service to update data", "", "NIST Public license",
+				"https://www.nist.gov/director/licensing");
+		return apiInfo;
+	}
 
 }

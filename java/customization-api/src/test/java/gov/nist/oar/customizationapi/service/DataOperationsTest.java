@@ -50,6 +50,7 @@ public class DataOperationsTest {
 
     @Mock
     private MongoClient mockClient;
+    
     @Mock
     private MongoCollection<Document> mockCollection;
     

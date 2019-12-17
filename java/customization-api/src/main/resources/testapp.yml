@@ -1,0 +1,62 @@
+oar.mdserver: "http://mdserver:8081/"
+oar.mongodb.readwrite.user: "rw"
+oar.mongodb.readwrite.password: "abc12"
+oar.mongodb.admin.user: "admin"
+oar.mongodb.admin.password: "def34"
+oar.mongodb.read.user: "op"
+oar.mongodb.read.password: "ghi56"
+oar.mongodb.port:  27017
+oar.mongodb.host: localhost
+oar.mongodb.database.name: UpdateDB
+oar.dbcollections.records: identifier
+oar.dbcollections.changes: updates
+oar.mdserver.secret: "MDSECRET"
+
+#logs
+logging.file: customization.log
+logging.path: /tmp/logs/
+logging.exception-conversion-word: '%wEx'
+logging.level.root: INFO
+logging.level.org.springframework.web: INFO
+logging.level.org.springframework.security: INFO
+logging.level.org.springframework.security.saml: DEBUG
+
+
+
+##For running local
+#server.port: 443
+#server.ssl.key-store: keystore.p12
+#server.ssl.key-store-password: tomcat123
+#server.ssl.keyStoreType: PKCS12
+#server.ssl.keyAlias: tomcat
+#
+server.servlet.context-path: /customization
+server.error.include-stacktrace: never
+server.connection-timeout: 60000
+server.max-http-header-size: 8192
+server.tomcat.accesslog.directory: logs
+server.tomcat.accesslog.enabled: false
+
+#SAML Authentication
+auth.federation.metadata: /Users/dsn1/NIST/2019/12-Dec/federationmetadata.xml
+saml.scheme: https
+saml.server.name: localhost
+saml.server.context-path: /customization
+saml.keystore.path: /Users/dsn1/NIST/2019/11-Nov/oar-docker/publish/customization-api/restapi/saml-keystore.jks
+saml.keystroe.storepass: samlstorepass
+saml.keystore.key: mykeyalias
+saml.keystore.keypass: mykeypass
+saml.metdata.entityid: gov:nist:oar:p932439
+saml.metadata.entitybaseUrl: https://localhost/customization
+
+saml.nist.attribute.claim.email: "email"
+saml.nist.attribute.claim.lastname: "lastname"
+saml.nist.attribute.claim.name: "firstname"
+saml.nist.attribute.claim.userid: "userid"
+##cross origin 
+application.url: https://localhost/pdr/about
+
+#JWT Authorization
+jwt.claimname: customization
+jwt.claimvalue: someclaim
+jwt.secret: "yeWAgVDfb$!MFn@MCJVN7uqkznHbDLR#"

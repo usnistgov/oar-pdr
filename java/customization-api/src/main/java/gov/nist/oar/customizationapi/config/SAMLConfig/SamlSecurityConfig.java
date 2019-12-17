@@ -374,7 +374,7 @@ public class SamlSecurityConfig extends WebSecurityConfigurerAdapter {
 	 * @throws ConfigurationException
 	 */
 	@Bean
-	public FilterChainProxy springSecurityFilter() throws ConfigurationException {
+	public FilterChainProxy samlFilter() throws ConfigurationException {
 		logger.info("Setting up different saml filters and endpoints");
 		List<SecurityFilterChain> chains = new ArrayList<>();
 
@@ -383,12 +383,12 @@ public class SamlSecurityConfig extends WebSecurityConfigurerAdapter {
 
 		chains.add(new DefaultSecurityFilterChain(new AntPathRequestMatcher("/saml/login/**"), samlEntryPoint()));
 
-		chains.add(new DefaultSecurityFilterChain(new AntPathRequestMatcher("/saml/SSO/**"),
+		chains.add(new DefaultSecurityFilterChain(new AntPathRequestMatcher("/saml/sso/**"),
 				samlWebSSOProcessingFilter()));
 
 		chains.add(new DefaultSecurityFilterChain(new AntPathRequestMatcher("/saml/logout/**"), samlLogoutFilter()));
 
-		chains.add(new DefaultSecurityFilterChain(new AntPathRequestMatcher("/saml/SingleLogout/**"),
+		chains.add(new DefaultSecurityFilterChain(new AntPathRequestMatcher("/saml/singleLogout/**"),
 				samlLogoutProcessingFilter()));
 
 		return new FilterChainProxy(chains);
@@ -740,7 +740,7 @@ public class SamlSecurityConfig extends WebSecurityConfigurerAdapter {
 			http.csrf().disable();
 
 			http.addFilterBefore(metadataGeneratorFilter(), ChannelProcessingFilter.class)
-					.addFilterAfter(springSecurityFilter(), BasicAuthenticationFilter.class);
+					.addFilterAfter(samlFilter(), BasicAuthenticationFilter.class);
 
 			http.authorizeRequests().antMatchers("/error").permitAll().antMatchers("/saml/**").permitAll().anyRequest()
 					.authenticated();
