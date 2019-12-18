@@ -31,8 +31,17 @@
             <div *ngIf="inBrowser; else filesLoading">
                 <div class="flex-container" style="margin-top: 2em;">
                     <div *ngIf="editEnabled; else editDisabled"
-                        style="flex: 0 0 40px; text-align: left; padding-bottom: 0em;padding-top: 0.5em;">
-                        <b>Files</b>
+                        style="flex: 0 0 110px; text-align: left; padding-bottom: 0em;">
+                        <span><b>Files </b> </span>
+                        <span class="faa-stack fa-lg icon-download" style="color: grey">
+                            <i class="faa faa-circle-thin faa-stack-2x" aria-hidden="true"></i>
+                            <i class="faa faa-download faa-stack-1x" aria-hidden="true"></i>
+                        </span>
+                        <span class="faa-stack fa-lg icon-cart addalltocart" style="color: grey; margin-right: 1em;">
+                            <i class="faa faa-circle-thin faa-stack-2x" aria-hidden="true"></i>
+                            <i class="faa faa-cart-plus faa-stack-1x" aria-hidden="true"></i>
+                            <span class="w3-badge badge-notify" style="margin-right:0.5em;background-color: grey;">{{cartLength}}</span>
+                        </span>
                     </div>
                     <ng-template #editDisabled>
                         <div style="flex: 0 0 110px; text-align: left; padding-bottom: 0em;">
@@ -60,7 +69,8 @@
                         </div>
                     </ng-template>
                     <div style="flex-grow: 9; text-align: left; padding-top: 0.5em;">
-                        <span class="font8" style="color:gray;">Click on the file/row in the table below to view more details.</span>
+                        <span class="font8" style="color:gray;">Click on the file/row in the table below to view more
+                            details.</span>
                     </div>
                     <div class="font10" style="flex-grow: 2; text-align: right; color:gray; padding-top: 0.5em;">
                         Total No. files: {{ totalFiles }}

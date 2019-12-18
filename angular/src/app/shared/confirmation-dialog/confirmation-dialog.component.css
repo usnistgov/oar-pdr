@@ -2,3 +2,20 @@
     display: flex;
     justify-content: center;
 }
+
+#cd-ok-button {
+    width:150px;
+    height:2em;
+    vertical-align: middle;
+    background-color: green;
+    color: white;
+}
+
+#cd-cancel-button {
+    width:150px;
+    height:2em;
+    vertical-align: middle;
+    background-color: grey;
+    color: white;
+}
+

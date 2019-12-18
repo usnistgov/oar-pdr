@@ -16,12 +16,14 @@ export class ConfirmationDialogService {
         title: string,
         message: string,
         showWarningIcon: boolean,
+        showCancelButton: boolean = true,
         btnOkText: string = 'YES',
         btnCancelText: string = 'NO',
         dialogSize: 'sm' | 'lg' = 'sm'): Promise<boolean> {
         let ngbModalOptions: NgbModalOptions = {
             backdrop: 'static',
             keyboard: false,
+            windowClass: "comfirmModalClass",
             size: dialogSize
         };
         const modalRef = this.modalService.open(ConfirmationDialogComponent, ngbModalOptions);
@@ -30,6 +32,7 @@ export class ConfirmationDialogService {
         modalRef.componentInstance.btnOkText = btnOkText;
         modalRef.componentInstance.btnCancelText = btnCancelText;
         modalRef.componentInstance.showWarningIcon = showWarningIcon;
+        modalRef.componentInstance.showCancelButton = showCancelButton;
 
         return modalRef.result;
     }

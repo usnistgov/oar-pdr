@@ -1,6 +1,6 @@
 <!-- Make the pop up window look similar to the landingpage with black header bar and blue tool bar -->
 <div class="popup-header-bar">
-    <h2 class="popup-header">Search Topics</h2>
+    <h2 class="popup-header">Research Topics</h2>
 </div>
 
 <div class="popup-tool-bar">
@@ -16,7 +16,7 @@
             <!-- Save button -->
             <button pButton type="submit" class="btn-Save"
                 style="float:right;margin:0em 1em 2em 1em;width:150px; height:2em; background-color:green;color:white;padding-right: 1em;"
-                (click)="saveTopic();" label="Save" icon="faa faa-save faa-1x icon-white" iconPos="left">
+                (click)="saveTopic();" label="Save" icon="faa faa-save faa-1x icon-white" iconPos="left" [disabled]="inputValue[field].length==0">
             </button>
         </div>
     </p-toolbar>
@@ -48,27 +48,28 @@
 </div>
 
 <!-- Topic search 
-  - Once user start typing in this input field, the taxonomy list below will be filtered.
+  -  Once user start typing in this input field, the taxonomy list below will be filtered.
   -->
 <div style="width:90%; margin: 1em auto 0em auto;">
     <input type="text" style="height:35px;background-color: #E7FFFE;" [(ngModel)]="searchText"
-        (input)="onSearchTextChange()" placeholder="Type here to search topics" />
+        (input)="onSearchTextChange()" placeholder="Type here to filter topics" />
 </div>
 
 <!-- Taxonomy list to select -->
-<div #panel0
-    style="width:90%; margin: 0em auto 2em auto; height: 50vh;; overflow-y: scroll; border: 1px solid lightgrey;">
-    <div class="selected-topic-header">
-        <span>Select topic(s) from the NIST research taxonomy (Click
-            on name to select; scroll down to see more):</span>
+<div class="selected-topic-header" style="width:90%; margin: 0em auto 0em auto;">
+    <span>Select topic(s) from the NIST research taxonomy (Click
+        on name to select; scroll down to see more):</span>
 
-        <!-- Reset button to reset the taxonomy list to it's original state:
-          - Display only first level
-          - No filtering
-          -->
-        <i class="faa faa-recycle" (click)="showAllTopics()"
-            style="float: right;cursor: pointer;color:black; margin: .5em;" data-toggle="tooltip" title="Reset"></i>
-    </div>
+    <!-- Reset button to reset the taxonomy list to it's original state:
+      - Display only first level
+      - No filtering
+      -->
+    <i class="faa faa-recycle reset" (click)="showAllTopics()"data-toggle="tooltip" title="Reset"></i>
+</div>
+<div style="clear: both;"></div>
+<div #panel0
+    style="width:90%; margin: 0em auto 2em auto; height: 50vh; overflow-y: scroll; border: 1px solid lightgrey;">
+
     <div style="margin: .5em 1em .5em 1em;">
         <p-treeTable *ngIf="isVisible" [value]="taxonomyTree">
             <ng-template pTemplate="body" let-rowNode let-rowData="rowData">
@@ -83,3 +84,4 @@
         </p-treeTable>
     </div>
 </div>
+

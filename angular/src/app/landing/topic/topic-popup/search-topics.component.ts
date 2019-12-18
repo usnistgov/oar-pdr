@@ -49,6 +49,7 @@ export class SearchTopicsComponent implements OnInit {
     this.searchAndExpandTaxonomyTree(this.inputValue['topic'][index], false);
     this.inputValue['topic'] = this.inputValue['topic'].filter(topic => topic != this.inputValue['topic'][index]);
     this.refreshTopicTree();
+    console.log('this.inputValue.length', this.inputValue[this.field].length);
   }
 
   /**

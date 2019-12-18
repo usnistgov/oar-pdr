@@ -153,12 +153,7 @@ export class LandingComponent implements OnInit, OnChanges {
         private router: Router,
         @Inject(APP_ID) private appId: string,
         public mdupdsvc : MetadataUpdateService,
-        private gaService: GoogleAnalyticsService,
-        private ngbModal: NgbModal,
-        private modalService: ModalService,
-        private confirmationDialogService: ConfirmationDialogService,
-        // private errorHandlingService: ErrorHandlingService,     // deprecated?
-        private notificationService: NotificationService)
+        private gaService: GoogleAnalyticsService)
     {
         // this.searchValue = this.route.snapshot.paramMap.get('id');
         this.editEnabled = cfg.get("editEnabled", false) as boolean;
@@ -504,7 +499,10 @@ export class LandingComponent implements OnInit, OnChanges {
             return "this version";
         let id: string = "View...";
         if (relinfo.refid) id = relinfo.refid;
-        return this.renderRelAsLink(relinfo, id);
+        if(this.mdupdsvc.editMode)
+            return id;
+        else
+            return this.renderRelAsLink(relinfo, id);
     }
 
     display: boolean = false;

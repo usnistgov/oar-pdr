@@ -10,6 +10,13 @@
   width: 95% !important;
 }
 
+.comfirmModalClass > .modal-dialog {
+    max-width: 500px !important;
+    min-width: 200px !important;   
+    width: 95% !important;
+    margin-top: 20vh;
+}
+
 a:link {
   color: #1471AE;
   background-color: transparent;

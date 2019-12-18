@@ -15,9 +15,10 @@ export class DescriptionComponent implements OnInit {
     fieldName: string = 'description';
 
     constructor(public mdupdsvc : MetadataUpdateService,        
-                private ngbModal: NgbModal,                      
+                private ngbModal: NgbModal,                
                 private notificationService: NotificationService)
-    { }
+    { 
+    }
 
     get updated() { return this.mdupdsvc.fieldUpdated(this.fieldName); }
 

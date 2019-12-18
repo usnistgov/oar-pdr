@@ -34,6 +34,7 @@ export class HeadbarComponent {
     appVersion: string = "";
     cartLength: number = 0;
     editEnabled: any;
+    editMode: boolean = false;
 
     constructor(
         private el: ElementRef,

@@ -10,7 +10,6 @@ import { EditStatusComponent } from './editstatus.component';
 import { UpdateDetails } from './interfaces';
 import { AuthService, WebAuthService } from './auth.service';
 
-
 /**
  * a service that receives updates to the resource metadata from update widgets.
  * 
@@ -39,10 +38,6 @@ export class MetadataUpdateService {
         this._lastupdate = updateDetails;
         this.updated.emit(this._lastupdate);
     }
-    // set lastUpdate(date: string) {
-    //     this._lastupdate = date;
-    //     this.updated.emit(this._lastupdate);
-    // }
 
     /**
      * any Observable that will send out the date of the last update each time the metadata
@@ -69,7 +64,7 @@ export class MetadataUpdateService {
      *                  server.  
      */
     constructor(private msgsvc: UserMessageService,
-        private authsvc : AuthService,
+        private authsvc: AuthService,
         private datePipe: DatePipe) { }
 
     /*
@@ -129,9 +124,9 @@ export class MetadataUpdateService {
 
             for (let prop in md) {
                 if (this.origfields[subsetname][prop] === undefined) {
-                    if (this.originalRec[prop] !== undefined){
+                    if (this.originalRec[prop] !== undefined) {
                         this.origfields[subsetname][prop] = this.originalRec[prop];
-                    }else{
+                    } else {
                         this.origfields[subsetname][prop] = null;   // TODO: problematic; need to clean-up nulls
                     }
                 }
@@ -257,7 +252,7 @@ export class MetadataUpdateService {
     public checkUpdatedFields(mdrec: NerdmRes) {
         if (mdrec != undefined && this.originalRec != undefined) {
             for (let subset in mdrec) {
-                if (this.originalRec[subset] != undefined && JSON.stringify(mdrec[subset]) != JSON.stringify(this.originalRec[subset])){
+                if (this.originalRec[subset] != undefined && JSON.stringify(mdrec[subset]) != JSON.stringify(this.originalRec[subset])) {
                     this.origfields[subset] = {};
                     this.origfields[subset][subset] = this.originalRec[subset];
                 }
@@ -266,15 +261,9 @@ export class MetadataUpdateService {
 
         //Set updated date here so the submit button will lit up if we have something to submit
         let newdate: any;
-        if (mdrec._updateDate != undefined) {
-            newdate = new Date(mdrec._updateDate);
-            this.lastUpdate = newdate.toLocaleString();
-        } else {
-            this.lastUpdate = null;
-        }
-        
+
         if (mdrec._updateDetails != undefined) {
-            newdate = new Date(mdrec._updateDetails[mdrec._updateDetails.length-1]._updateDate);
+            newdate = new Date(mdrec._updateDetails[mdrec._updateDetails.length - 1]._updateDate);
 
             this.lastUpdate = {
                 'userDetails': this.authsvc.userDetails,

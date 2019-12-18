@@ -20,12 +20,12 @@ export class TopicComponent implements OnInit {
     taxonomyTree: TreeNode[] = [];
     taxonomyList: any[];
 
-    constructor(public mdupdsvc : MetadataUpdateService,        
-                private taxonomyListService: TaxonomyListService,
-                private ngbModal: NgbModal,
-                private msgsvc : UserMessageService,
-                private notificationService: NotificationService)
-    { }
+    constructor(public mdupdsvc: MetadataUpdateService,
+        private taxonomyListService: TaxonomyListService,
+        private ngbModal: NgbModal,
+        private msgsvc: UserMessageService,
+        private notificationService: NotificationService) {
+    }
 
     /**
      * a field indicating if this data has beed edited
@@ -36,7 +36,7 @@ export class TopicComponent implements OnInit {
      * a field indicating whether there are no keywords are set.  
      */
     get isEmpty() {
-        if (! this.record[this.fieldName])
+        if (!this.record[this.fieldName])
             return true;
         if (this.record[this.fieldName] instanceof Array &&
             this.record[this.fieldName].map(topic => {
@@ -137,7 +137,7 @@ export class TopicComponent implements OnInit {
     }
 
     openModal() {
-        if (! this.mdupdsvc.editMode) return;
+        if (!this.mdupdsvc.editMode) return;
 
         let ngbModalOptions: NgbModalOptions = {
             backdrop: 'static',
@@ -147,11 +147,11 @@ export class TopicComponent implements OnInit {
 
         const modalRef = this.ngbModal.open(SearchTopicsComponent, ngbModalOptions);
 
-        let val : string[] = [];
+        let val: string[] = [];
         if (this.record[this.fieldName])
             val = this.record[this.fieldName].map((topic) => { return topic.tag; });
 
-        modalRef.componentInstance.inputValue = { };
+        modalRef.componentInstance.inputValue = {};
         modalRef.componentInstance.inputValue[this.fieldName] = val;
         modalRef.componentInstance['field'] = this.fieldName;
         modalRef.componentInstance['title'] = "RESEARCH TOPICS";
@@ -161,11 +161,13 @@ export class TopicComponent implements OnInit {
         modalRef.componentInstance.returnValue.subscribe((returnValue) => {
             if (returnValue) {
                 var postMessage: any = {};
-                postMessage[this.fieldName] = returnValue[this.fieldName].map((topic) => { return {
-                    '@type': 'Concept',
-                    'scheme': 'https://www.nist.gov/od/dm/nist-themes/v1.0',
-                    'tag': topic,
-                };});
+                postMessage[this.fieldName] = returnValue[this.fieldName].map((topic) => {
+                    return {
+                        '@type': 'Concept',
+                        'scheme': 'https://www.nist.gov/od/dm/nist-themes/v1.0',
+                        'tag': topic,
+                    };
+                });
                 // console.log("postMessage", JSON.stringify(postMessage));
 
                 this.mdupdsvc.update(this.fieldName, postMessage).then((updateSuccess) => {

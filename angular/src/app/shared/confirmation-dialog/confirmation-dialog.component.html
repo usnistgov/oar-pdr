@@ -7,11 +7,8 @@
     <span [innerHTML]="message"></span>
 </div>
 <div class="modal-footer">
-    <button type="button" pButton style="width:150px;height:2em;vertical-align: middle;"
+    <button type="button" pButton id="cd-ok-button" type="submit"
         (click)="accept()">{{ btnOkText }}</button>
     <button *ngIf="showCancelButton" type="button" pButton type="submit"
-        style="width:400px;height:2em;vertical-align: middle;" (click)="decline()">{{ btnCancelText }}</button>
-    <button pButton type="submit" class="btn btn-labeled"
-        label="Discard" icon="faa faa-trash faa-1x icon-white" iconPos="left">
-    </button>
+    id="cd-cancel-button" (click)="decline()">{{ btnCancelText }}</button>
 </div>

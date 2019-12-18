@@ -32,12 +32,29 @@ export class EditStatusService {
 
     /**
      * flag indicating whether the landing page is currently being edited.  
+     * Make editMode observable so any component that subscribe to it will
+     * get an update once the mode changed.
+     */
+    // private _editMode : BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
+    // _setEditMode(val : boolean) { 
+    //     this._editMode.next(val); 
+    // }
+    // _watchEditMode(subscriber) {
+    //     this._editMode.subscribe(subscriber);
+    // }
+
+    /**
+     * flag indicating whether the landing page is currently being edited.  
      */
     get editMode() : boolean { return this._editmode; }
     private _editmode : boolean = false;
     _setEditMode(val : boolean) { this._editmode = val; }
 
-    private _remoteStart : BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
+    /**
+     * Behavior subject to remotely start the edit function. This is used when user login
+     * and the page was redirected to current page with parameter 'editmode' set to true.
+     */
+    private _remoteStart : BehaviorSubject<string> = new BehaviorSubject<string>("");
     _watchRemoteStart(subscriber) {
         this._remoteStart.subscribe(subscriber);
     }
@@ -80,8 +97,8 @@ export class EditStatusService {
     /**
      * turn on editing controls allowing the user to edit the metadata
      */
-    public startEditing() : void {
-        this._remoteStart.next(true);
+    public startEditing(resID: string = "") : void {
+        this._remoteStart.next(resID);
     }
 
     /**

@@ -18,6 +18,7 @@ export class ContactComponent implements OnInit {
 
     tempInput: any = {};
     isEmail = false;
+    enableEdit = false; // Temprorarily disable edit mode for now. Can set it true to enable in the furure.
 
     constructor(public mdupdsvc : MetadataUpdateService,        
                 private ngbModal: NgbModal,
@@ -37,7 +38,7 @@ export class ContactComponent implements OnInit {
     }
 
     getFieldStyle() {
-        if (this.mdupdsvc.editMode) {
+        if (this.mdupdsvc.editMode && this.enableEdit) {
             if (this.mdupdsvc.fieldUpdated(this.fieldName)) {
                 return { 'border': '1px solid lightgrey', 'background-color': '#FCF9CD', 'padding-right': '1em' };
             } else {

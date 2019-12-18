@@ -25,14 +25,16 @@
 }
 
 .selected-topic-header {
-    background-color: lightskyblue;
+    background-color: #153971;
+    color:white;
     padding: .2em 0 0 1em;
     height: 2em;
     vertical-align: middle;
 }
 
 .taxonomy-list-header {
-    background-color: lightskyblue;
+    background-color: #153971;
+    color:white;
     display:inline-flex;
     text-align: left;
     height: 2em;
@@ -49,4 +51,11 @@
     background-color: lightskyblue;
     cursor: pointer;
     margin-left: .5em;
+}
+
+.reset {
+    float: right;
+    cursor: pointer;
+    color:white;
+    margin: .5em;
 }

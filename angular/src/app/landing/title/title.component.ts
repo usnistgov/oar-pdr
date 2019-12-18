@@ -14,10 +14,10 @@ export class TitleComponent implements OnInit {
     @Input() inBrowser: boolean;   // false if running server-side
     fieldName: string = 'title';
 
-    constructor(public mdupdsvc : MetadataUpdateService,        
-                private ngbModal: NgbModal,                      
-                private notificationService: NotificationService)
-    { }
+    constructor(public mdupdsvc: MetadataUpdateService,
+        private ngbModal: NgbModal,
+        private notificationService: NotificationService) {
+    }
 
     get updated() { return this.mdupdsvc.fieldUpdated(this.fieldName); }
 
@@ -33,14 +33,14 @@ export class TitleComponent implements OnInit {
             }
         } else {
             let out = { 'border': '0px solid white', 'background-color': 'white' };
-            if (! this.record[this.fieldName])
+            if (!this.record[this.fieldName])
                 out['color'] = "#ccccccc";
             return out;
         }
     }
 
     openModal() {
-        if (! this.mdupdsvc.editMode) return;
+        if (!this.mdupdsvc.editMode) return;
 
         let ngbModalOptions: NgbModalOptions = {
             backdrop: 'static',

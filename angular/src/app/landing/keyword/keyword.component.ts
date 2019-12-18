@@ -15,7 +15,7 @@ export class KeywordComponent implements OnInit {
     fieldName: string = 'keyword';
 
     constructor(public mdupdsvc : MetadataUpdateService,        
-                private ngbModal: NgbModal,                      
+                private ngbModal: NgbModal,     
                 private notificationService: NotificationService)
     { }
 
@@ -70,7 +70,7 @@ export class KeywordComponent implements OnInit {
         modalRef.componentInstance.inputValue[this.fieldName] = val;
         modalRef.componentInstance['field'] = this.fieldName;
         modalRef.componentInstance['title'] = 'Keywords';
-        modalRef.componentInstance.message = "Please enter keywords separated by comma.";
+        modalRef.componentInstance.message = "Please enter keywords separated by comma (* required).";
 
         modalRef.componentInstance.returnValue.subscribe((returnValue) => {
             if (returnValue) {

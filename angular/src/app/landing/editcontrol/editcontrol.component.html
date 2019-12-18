@@ -2,16 +2,16 @@
 <div class="edit-control-buttons">
     <!-- Buttons are arranged from right to left -->
 
-    <i class="faa faa-info-circle" id="ec-info-btn" style="cursor: pointer;" (click)="showEditControlHelpPopup()" data-toggle="tooltip" title="Show edit control help"></i>
+    <i class="faa faa-info-circle" id="ec-info-btn" (click)="showEditControlHelpPopup()" data-toggle="tooltip" title="Show edit control help"></i>
 
     <!-- Discard button -->
     <button pButton type="submit" class="btn btn-labeled" id="ec-discard-btn" (click)="confirmDiscardEdits()"
-        [disabled]="!editMode || !editsPending()" label="Discard" icon="faa faa-trash faa-1x icon-white" iconPos="left">
+        [disabled]="!((editMode || previewMode) && editsPending())" label="Discard" icon="faa faa-trash faa-1x icon-white" iconPos="left">
     </button>
 
     <!-- Submit button -->
     <button pButton type="submit" class="btn btn-labeled" id="ec-submit-btn" (click)="saveEdits()"
-        [disabled]="!editMode || !editsPending()" label="Submit" icon="faa faa-save faa-1x icon-white" iconPos="left">
+        [disabled]="!((editMode || previewMode) && editsPending())" label="Submit" icon="faa faa-save faa-1x icon-white" iconPos="left">
     </button>
 
     <!-- 

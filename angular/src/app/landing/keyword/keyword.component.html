@@ -1,7 +1,7 @@
 <div style="display: table">
         <div class="editable_container">
           <div class="editable_field" *ngIf="isEmpty; else hasKeyword">
-            <div class="editable_field" *ngIf="mdupdsvc.editMode" [ngStyle]="getFieldStyle()">
+            <div class="editable_field" *ngIf="editMode" [ngStyle]="getFieldStyle()">
               Add subject keywords:&nbsp;&nbsp;
             </div>
           </div>
@@ -23,5 +23,6 @@
               [ngClass]="{'icon_enabled': updated, 'icon_disabled':!updated }"
               data-toggle="tooltip" title="Undo keyword"></i>
           </button>
+          <span *ngIf="mdupdsvc.editMode" style="color: red;margin-left: .5em;">*</span>
         </div>
       </div>

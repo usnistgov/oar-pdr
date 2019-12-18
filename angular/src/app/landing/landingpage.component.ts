@@ -66,7 +66,6 @@ export class LandingPageComponent implements OnInit {
      */
     ngOnInit() {
         console.log("initializing LandingPageComponent around id=" + this.reqId);
-
         // retreive the (unedited) metadata
         this.mdserv.getMetadata(this.reqId).subscribe(
             (data) => {
@@ -100,7 +99,9 @@ export class LandingPageComponent implements OnInit {
                 // console.log("editmode url param:", param);
                 if (param) {
                     console.log("Returning from authentication redirection (editmode="+param+")");
-                    this.edstatsvc.startEditing();
+                    // Need to pass reqID (resID) because the resID in editControlComponent
+                    // has not been set yet and the startEditing function relies on it.
+                    this.edstatsvc.startEditing(this.reqId);
                 }
             })
         }

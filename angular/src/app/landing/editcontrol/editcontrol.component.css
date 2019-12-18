@@ -66,5 +66,7 @@
 
 #ec-info-btn {
     float:right;
-    margin:.5em 1em .5em 0em;
+    margin:.3em 1em auto 0.2em;
+    font-size: 30px;
+    cursor: pointer;
 }

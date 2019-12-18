@@ -67,9 +67,4 @@ describe('AuthorPopupComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  // it('Should have author John Dow', () => {
-  //   fixture.detectChanges();
-  //   console.log("span", fixture.nativeElement.querySelector('span'));
-  //   expect(fixture.nativeElement.querySelector('span').innerText).toEqual('John Dow');
-  // });
 });
