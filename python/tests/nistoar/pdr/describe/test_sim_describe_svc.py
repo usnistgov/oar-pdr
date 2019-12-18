@@ -4,10 +4,17 @@ import unittest as test
 from copy import deepcopy
 
 from nistoar.testing import *
-import tests.nistoar.pdr.describe.sim_describe_svc as desc
+# import tests.nistoar.pdr.describe.sim_describe_svc as desc
 
 testdir = os.path.dirname(os.path.abspath(__file__))
 datadir = os.path.join(testdir, 'data')
+
+import imp
+simsrvrsrc = os.path.join(testdir, "sim_describe_svc.py")
+with open(simsrvrsrc, 'r') as fd:
+    desc = imp.load_module("sim_describe_svc", fd, simsrvrsrc,
+                           (".py", 'r', imp.PY_SOURCE))
+
 basedir = os.path.dirname(os.path.dirname(os.path.dirname(
     os.path.dirname(os.path.dirname(testdir)))))
 
@@ -27,6 +34,7 @@ def startService(authmeth=None):
     cmd = cmd.format(os.path.join(tdir,"simsrv.log"), srvport,
                      os.path.join(basedir, wpy), pidfile)
     os.system(cmd)
+    time.sleep(0.5)
 
 def stopService(authmeth=None):
     tdir = tmpdir()
