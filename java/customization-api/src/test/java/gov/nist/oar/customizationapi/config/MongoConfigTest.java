@@ -21,9 +21,9 @@ public class MongoConfigTest {
 //	 @Autowired
 //	 MongoConfig mongoConfig;
 //
-//	@Test
-//	public void mongoConfigTest() {
+	@Test
+	public void mongoConfigTest() {
 //		assertEquals(mongoConfig.getMetadataServer(), "http://mdserver:8081/");
-//	}
+	}
 	
 }
