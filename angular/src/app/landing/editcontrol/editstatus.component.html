@@ -1,5 +1,5 @@
 <div class="ec-status-bar">
-    <span style="float: left;margin-left: 4em;" *ngIf="editMode && !previewMode"><span style="color: red;">*</span> required field</span>
+    <span style="float: left;margin-left: 4em;" *ngIf="mdupdsvc.editMode && !previewMode"><span style="color: red;">*</span> required field</span>
     <span [ngStyle]="{'color': messageColor}" [innerHTML]="message"></span>
     <div [hidden]="!isProcessing" style="width: 2em;height:2em; float: right;">
         <i class="faa faa-spinner faa-spin faa-stack-1x ec-status-spinner"
