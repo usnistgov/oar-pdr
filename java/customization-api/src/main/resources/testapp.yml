@@ -6,11 +6,11 @@ oar.mongodb.admin.password: "def34"
 oar.mongodb.read.user: "op"
 oar.mongodb.read.password: "ghi56"
 oar.mongodb.port:  27017
-oar.mongodb.host: localhost
-oar.mongodb.database.name: UpdateDB
-oar.dbcollections.records: identifier
+oar.mongodb.host: someserver
+oar.mongodb.database.name: somedb
+oar.dbcollections.records: datarecords
 oar.dbcollections.changes: updates
-oar.mdserver.secret: "MDSECRET"
+oar.mdserver.secret: "testsecret"
 
 #logs
 logging.file: customization.log

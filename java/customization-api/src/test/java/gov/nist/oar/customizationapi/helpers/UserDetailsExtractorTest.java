@@ -2,24 +2,20 @@ package gov.nist.oar.customizationapi.helpers;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.saml.SAMLCredential;
-import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
-@RunWith(SpringJUnit4ClassRunner.class)
+import gov.nist.oar.customizationapi.service.UserToken;
+
+//@RunWith(SpringJUnit4ClassRunner.class)
 //@SpringBootTest
 //@TestPropertySource(locations="classpath:testapp.yml")
-
+@RunWith(MockitoJUnitRunner.Silent.class)
 public class UserDetailsExtractorTest {
 	
-//	@Autowired
-//	UserDetailsExtractor uExtract;
+	@Mock
+	UserDetailsExtractor uExtract;
 //	@Test
 //	public void getUserDetailsTest() {
 //		SAMLCredential samlCredential = Mockito.mock(SAMLCredential.class);
@@ -38,15 +34,22 @@ public class UserDetailsExtractorTest {
 //		//org.junit.Assert.assertEquals("lastName", authDetails.getUserName());
 //		
 //	}
-//	
-//	@Test
-//	public void getUserRecordTest() {
-//		String test = uExtract.getUserRecord("https://localhost/customization/api/draft/1233534534543");
-//		System.out.println(test);
-//	}
-
+	@Mock 
+	AuthenticatedUserDetails authUserDetails;
+	
 	@Test
-	public void testThis() {
-		System.out.println("random test");
+	public void getUserDetailsTest() {
+		AuthenticatedUserDetails authDetails = new AuthenticatedUserDetails("abc@xyz.com","name","lastname","userid");
+		 UserToken utoken = new UserToken(authDetails,"123243");
+		 Mockito.doReturn(authDetails).when(uExtract).getUserDetails();
+		 org.junit.Assert.assertEquals(authDetails.getUserEmail(),"abc@xyz.com");
 	}
+	@Test
+	public void getUserRecordTest() {
+		Mockito.doReturn("1233534534543").when(uExtract).getUserRecord("https://localhost/customization/api/draft/1233534534543");
+		String test = uExtract.getUserRecord("https://localhost/customization/api/draft/1233534534543");
+		//System.out.println(test);
+		org.junit.Assert.assertEquals(test,"1233534534543");
+	}
+
 }
