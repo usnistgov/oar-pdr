@@ -1,5 +1,7 @@
 package gov.nist.oar.customizationapi;
 
+import static org.junit.Assert.assertEquals;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -11,7 +13,7 @@ public class UpdateapiApplicationTests {
 
 	@Test
 	public void contextLoads() {
-	    assert(true);
+	    assertEquals(true, true);
 	}
 
 }

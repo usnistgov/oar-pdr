@@ -46,7 +46,7 @@ saml.keystore.path: /Users/dsn1/NIST/2019/11-Nov/oar-docker/publish/customizatio
 saml.keystroe.storepass: samlstorepass
 saml.keystore.key: mykeyalias
 saml.keystore.keypass: mykeypass
-saml.metdata.entityid: gov:nist:oar:p932439
+saml.metdata.entityid: gov:nist:oar:localhost
 saml.metadata.entitybaseUrl: https://localhost/customization
 
 saml.nist.attribute.claim.email: "email"
