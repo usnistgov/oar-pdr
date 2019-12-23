@@ -3,7 +3,6 @@ import { AuthorPopupComponent } from './author-popup.component';
 import { FormsModule } from '@angular/forms';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
-import { SharedService } from '../../../shared/shared';
 import { SearchService } from '../../../shared/search-service/index';
 // import { HttpClient, HttpHeaders } from '@angular/common/http'; 
 import { HttpClientTestingModule } from '@angular/common/http/testing';
@@ -46,15 +45,13 @@ describe('AuthorPopupComponent', () => {
         HttpClientTestingModule,
         ConfigModule],
       schemas: [NO_ERRORS_SCHEMA],
-      providers: [NgbActiveModal, SharedService, SearchService, TransferState]
+      providers: [NgbActiveModal, SearchService, TransferState]
     })
     .compileComponents();
   }));
 
   beforeEach(() => {
     let tempAuthors = {author: newAuthor};
-    console.log('tempAuthors', tempAuthors);
-    // tempAuthors.authors.push(newAuthor);
 
     fixture = TestBed.createComponent(AuthorPopupComponent);
     component = fixture.componentInstance;

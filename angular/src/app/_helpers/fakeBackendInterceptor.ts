@@ -4,7 +4,6 @@ import { Observable, of, throwError } from 'rxjs';
 import { delay, mergeMap, materialize, dematerialize } from 'rxjs/operators';
 import { TestDataService } from '../shared/testdata-service/testDataService';
 import { DownloadService } from '../shared/download-service/download-service.service';
-import { ApiToken } from "../shared/auth-service/ApiToken";
 
 @Injectable()
 export class FakeBackendInterceptor implements HttpInterceptor {

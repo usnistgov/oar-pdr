@@ -6,17 +6,13 @@ import { OverlayPanel } from 'primeng/overlaypanel';
 import { DownloadService } from '../../shared/download-service/download-service.service';
 import { ConfirmationService } from 'primeng/primeng';
 import { ZipData } from '../../shared/download-service/zipData';
-import { SharedService } from '../../shared/shared';
 import { HttpClient, HttpRequest, HttpEventType } from '@angular/common/http';
 import { AppConfig } from '../../config/config';
 import { FileSaverService } from 'ngx-filesaver';
 import { Router } from '@angular/router';
 import { CommonFunctionService } from '../../shared/common-function/common-function.service';
-import { CustomizationService } from '../../shared/customization-service/customization-service.service';
 import { GoogleAnalyticsService } from '../../shared/ga-service/google-analytics.service';
 import { NotificationService } from '../../shared/notification-service/notification.service';
-import { EditControlService } from '../edit-control-bar/edit-control.service';
-import { ErrorHandlingService } from '../../shared/error-handling-service/error-handling.service';
 import { EditStatusService } from '../editcontrol/editstatus.service';
 
 declare var _initAutoTracker: Function;
@@ -76,7 +72,6 @@ export class DataFilesComponent {
     constructor(private cartService: CartService,
         private cdr: ChangeDetectorRef,
         private downloadService: DownloadService,
-        private commonVarService: SharedService,
         private http: HttpClient,
         private cfg: AppConfig,
         private _FileSaverService: FileSaverService,
@@ -84,10 +79,7 @@ export class DataFilesComponent {
         private commonFunctionService: CommonFunctionService,
         private gaService: GoogleAnalyticsService,
         public router: Router,
-        public customizationService: CustomizationService,
         private notificationService: NotificationService,
-        private editControlService: EditControlService,
-        private errorHandlingService: ErrorHandlingService,
         private edstatsvc: EditStatusService,
         ngZone: NgZone) {
         this.cols = [
@@ -112,17 +104,6 @@ export class DataFilesComponent {
 
         this.cartService.watchStorage().subscribe(value => {
             this.cartLength = value;
-        });
-
-        // this.editControlService.watchEdiid().subscribe(value => {
-        //     this.ediid = value;
-        // });
-
-        this.commonVarService.watchRefreshTree().subscribe(value => {
-            this.visible = false;
-            setTimeout(() => {
-                this.visible = true;
-            }, 0);
         });
 
         this.edstatsvc._watchForceDataFileTreeInit((start) => {
@@ -710,11 +691,9 @@ export class DataFilesComponent {
     **/
     downloadFromRoot() {
         this.cartService.setCurrentCart('landing_popup');
-        this.commonVarService.setLocalProcessing(true);
         setTimeout(() => {
             this.cartService.clearTheCart();
             this.addAllFilesToCart(this.files, true, 'popup').then(function (result) {
-                this.commonVarService.setLocalProcessing(false);
                 this.cartService.setCurrentCart('cart');
                 this.updateStatusFromCart().then(function (result: any) {
                     this.edstatsvc.forceDataFileTreeInit();
@@ -725,10 +704,6 @@ export class DataFilesComponent {
                 alert("something went wrong while adding all files to cart");
             });
         }, 0);
-
-        setTimeout(() => {
-            this.commonVarService.setLocalProcessing(false);
-        }, 10000);
     }
 
     /**

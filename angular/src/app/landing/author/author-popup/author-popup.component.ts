@@ -1,7 +1,8 @@
-import { Component, OnInit, Input, Output, EventEmitter, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
-import { SharedService } from '../../../shared/shared';
 import { SearchService } from '../../../shared/search-service/index';
+import { CommonFunctionService } from '../../../shared/common-function/common-function.service';
+import { AuthorService } from '../author.service';
 
 @Component({
   selector: 'app-author-popup',
@@ -22,14 +23,15 @@ export class AuthorPopupComponent implements OnInit {
 
   constructor(
     public activeModal: NgbActiveModal,
-    private commonVarService: SharedService,
-    private searchService: SearchService) { 
+    private cmFunctionService: CommonFunctionService,
+    private searchService: SearchService,
+    private authorService: AuthorService) { 
 
     }
 
   ngOnInit() {
     if (this.inputValue != undefined)
-      this.originalAuthors = this.commonVarService.deepCopy(this.inputValue);
+      this.originalAuthors = this.cmFunctionService.deepCopy(this.inputValue);
     else
       this.inputValue = {};
 
@@ -192,7 +194,7 @@ export class AuthorPopupComponent implements OnInit {
   *   Add author
   */
   addAuthor() {
-    var newAuthor = this.commonVarService.getBlankAuthor();
+    var newAuthor = this.authorService.getBlankAuthor();
     this.inputValue.authors.push(newAuthor);
   }
 
@@ -203,7 +205,7 @@ export class AuthorPopupComponent implements OnInit {
     if (i > this.originalAuthors.authors.length-1) {
       this.deleteAuthor(author);
     } else {
-      this.inputValue.authors[i] = this.commonVarService.deepCopy(this.originalAuthors.authors[this.inputValue.authors[i].originalIndex]);
+      this.inputValue.authors[i] = this.cmFunctionService.deepCopy(this.originalAuthors.authors[this.inputValue.authors[i].originalIndex]);
       author.dataChanged = false;
       author.fnLocked = false;
       author.isCollapsed = false;
@@ -215,10 +217,10 @@ export class AuthorPopupComponent implements OnInit {
   *   Move author up
   */
   moveAuthorUp(author: any, i: number) {
-    var tempAuth01 = this.commonVarService.deepCopy(this.inputValue.authors[i - 1]);
-    var tempAuth02 = this.commonVarService.deepCopy(this.inputValue.authors[i]);
-    this.inputValue.authors[i - 1] = this.commonVarService.deepCopy(tempAuth02);
-    this.inputValue.authors[i] = this.commonVarService.deepCopy(tempAuth01);
+    var tempAuth01 = this.cmFunctionService.deepCopy(this.inputValue.authors[i - 1]);
+    var tempAuth02 = this.cmFunctionService.deepCopy(this.inputValue.authors[i]);
+    this.inputValue.authors[i - 1] = this.cmFunctionService.deepCopy(tempAuth02);
+    this.inputValue.authors[i] = this.cmFunctionService.deepCopy(tempAuth01);
     author.dataChanged = true;
   }
 
@@ -226,10 +228,10 @@ export class AuthorPopupComponent implements OnInit {
   *   Move author down
   */
   moveAuthorDown(author: any, i: number) {
-    var tempAuth01 = this.commonVarService.deepCopy(this.inputValue.authors[i + 1]);
-    var tempAuth02 = this.commonVarService.deepCopy(this.inputValue.authors[i]);
-    this.inputValue.authors[i + 1] = this.commonVarService.deepCopy(tempAuth02);
-    this.inputValue.authors[i] = this.commonVarService.deepCopy(tempAuth01);
+    var tempAuth01 = this.cmFunctionService.deepCopy(this.inputValue.authors[i + 1]);
+    var tempAuth02 = this.cmFunctionService.deepCopy(this.inputValue.authors[i]);
+    this.inputValue.authors[i + 1] = this.cmFunctionService.deepCopy(tempAuth02);
+    this.inputValue.authors[i] = this.cmFunctionService.deepCopy(tempAuth01);
     author.dataChanged = true;
   }
 
@@ -254,18 +256,10 @@ export class AuthorPopupComponent implements OnInit {
   *   Add affiliation to an author
   */
   addAffiliation(i: number) {
-    var aff = {
-      "@id": "",
-      "title": "National Institute of Standards and Technology",
-      "dept": "",
-      "@type": [
-        ""
-      ]
-    };
     if (!this.inputValue.authors[i].affiliation)
       this.inputValue.authors[i].affiliation = [];
 
-    this.inputValue.authors[i].affiliation.push(aff);
+    this.inputValue.authors[i].affiliation.push(this.authorService.getBlankAffiliation());
     this.inputValue.authors[i].dataChanged = true;
   }
 

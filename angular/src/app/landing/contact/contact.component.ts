@@ -1,10 +1,10 @@
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { NgbModalOptions, NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { SharedService } from '../../shared/shared';
 import { ContactPopupComponent } from './contact-popup/contact-popup.component';
 import { NotificationService } from '../../shared/notification-service/notification.service';
 import { GoogleAnalyticsService } from '../../shared/ga-service/google-analytics.service';
 import { MetadataUpdateService } from '../editcontrol/metadataupdate.service';
+import { ContactService } from './contact.service';
 
 @Component({
     selector: 'app-contact',
@@ -23,7 +23,8 @@ export class ContactComponent implements OnInit {
     constructor(public mdupdsvc : MetadataUpdateService,        
                 private ngbModal: NgbModal,
                 private gaService: GoogleAnalyticsService,
-                private notificationService: NotificationService)
+                private notificationService: NotificationService,
+                private contactService : ContactService)
     { }
 
     /**
@@ -62,7 +63,7 @@ export class ContactComponent implements OnInit {
             this.tempInput[this.fieldName] = JSON.parse(JSON.stringify(this.record[this.fieldName]));
         } else {
             this.tempInput[this.fieldName] = [];
-            this.tempInput[this.fieldName].push(this._getBlankField());
+            this.tempInput[this.fieldName].push(this.contactService.getBlankContact());
         }
 
         const modalRef = this.ngbModal.open(ContactPopupComponent, ngbModalOptions);
@@ -86,14 +87,6 @@ export class ContactComponent implements OnInit {
                 });
             }
         })
-    }
-
-    protected _getBlankField() {
-        return {
-            "fn": "",
-            "hasEmail": "",
-            "address": [ "" ]
-        }
     }
 
     /*

@@ -19,7 +19,6 @@ import { ProgressSpinnerModule, DialogModule } from 'primeng/primeng';
 // import * as __ from 'underscore';
 import { DownloadData } from '../shared/download-service/downloadData';
 
-import { SharedService } from '../shared/shared'
 import { DownloadService } from '../shared/download-service/download-service.service';
 import { ZipData } from '../shared/download-service/zipData';
 import { OverlayPanel } from 'primeng/overlaypanel';
@@ -144,7 +143,6 @@ export class DatacartComponent implements OnInit, OnDestroy {
         private downloadService: DownloadService,
         private cfg: AppConfig,
         private _FileSaverService: FileSaverService,
-        private commonVarService: SharedService,
         private commonFunctionService: CommonFunctionService,
         private route: ActivatedRoute,
         private gaService: GoogleAnalyticsService,
@@ -175,7 +173,6 @@ export class DatacartComponent implements OnInit, OnDestroy {
      */
     ngOnInit() {
         console.log("Datacart init...");
-        this.commonVarService.setContentReady(false);
         this.isProcessing = true;
         this.distApi = this.cfg.get("distService", "/od/ds/");
         this.routerparams = this.route.params.subscribe(params => {
@@ -184,10 +181,8 @@ export class DatacartComponent implements OnInit, OnDestroy {
 
         if (this.mode == 'popup') {
             this.cartService.setCurrentCart('landing_popup');
-            this.commonVarService.setLocalProcessing(true);
 
             this.loadDatacart().then(function (result) {
-                this.commonVarService.setContentReady(true);
                 this.downloadAllFilesFromAPI();
             }.bind(this), function (err) {
                 console.log("Error while loading datacart:");
@@ -197,8 +192,7 @@ export class DatacartComponent implements OnInit, OnDestroy {
 
         } else {
             this.cartService.setCurrentCart('cart');
-            this.loadDatacart().then(function (result) {
-                this.commonVarService.setContentReady(true);
+            this.loadDatacart().then(function (result) {               
             }.bind(this), function (err) {
                 console.log("Error while loading datacart:");
                 console.log(err);
@@ -507,7 +501,7 @@ export class DatacartComponent implements OnInit, OnDestroy {
 
         // Sending data to _bundle_plan and get back the plan
         this.downloadService.getDownloadData(this.selectedData, this.downloadData);
-        var randomnumber = Math.floor(Math.random() * (this.commonVarService.getRandomMaximum() - this.commonVarService.getRandomMinimum() + 1)) + this.commonVarService.getRandomMinimum();
+        var randomnumber = Math.floor(Math.random() * (this.maximum - this.minimum + 1)) + this.minimum;
 
         var zipFileBaseName = "download" + randomnumber;
         files.data.downloadFileName = zipFileBaseName;

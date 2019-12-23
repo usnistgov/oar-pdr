@@ -23,7 +23,6 @@ import { DataFilesComponent } from './data-files/data-files.component';
 import { ConfirmationDialogService } from '../shared/confirmation-dialog/confirmation-dialog.service';
 import { NotificationService } from '../shared/notification-service/notification.service';
 import { DatePipe } from '@angular/common';
-// import { ErrorHandlingService } from '../shared/error-handling-service/error-handling.service';
 
 import { MetadataUpdateService } from './editcontrol/metadataupdate.service';
 
@@ -98,10 +97,6 @@ export class LandingComponent implements OnInit, OnChanges {
     layoutCompact: boolean = true;
     layoutMode: string = 'horizontal';
     profileMode: string = 'inline';
-    // msgs: Message[] = [];
-    // errorMsg: string;
-    // errorMsgDetail: string;
-    // displayError: boolean = false;  // deprecated?
     status: string;
     keyword: string;
     findId: string;
@@ -220,13 +215,6 @@ export class LandingComponent implements OnInit, OnChanges {
             window.history.replaceState({}, '', '/od/id/' + this.requestId);
         }
     }
-
-    // deprecated?
-    // This spinner appears within the EditControlComponenet only when editing is enabled
-    // 
-    // turnSpinnerOff() {
-    //     setTimeout(() => { this.sharedService.setContentReady(true); }, 0)
-    // }
 
     viewmetadata() {
         this.metadata = true; 
@@ -626,23 +614,6 @@ export class LandingComponent implements OnInit, OnChanges {
         this.gaService.gaTrackEvent('homepage', event, title, url);
         window.open(url, '_blank');
     }
-
-    // deprecated?
-    // 
-    // /*
-    //  *  Set error message for display
-    //  *  err: standard error. err.message will be used in email body if user want to send us email.
-    //  *  message: The message to display on the screen.
-    //  *  action: User action that caused the error.
-    //  */
-    // setErrorForDisplay(err: any, message: string, action: string) {
-    //     this.errorHandlingService.setErrMessage({ message: message, messageDetail: err.message, action: action, display: true });
-    //     console.log(err);
-    //     this.errorMsg = message;
-    //     this.errorMsgDetail = err.message;
-    //     this.displayError = true;
-    //     console.log(this.errorMsg);
-    // }
 
     // This can be uncommented for debugging purposes
     //

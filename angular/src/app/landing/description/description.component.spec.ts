@@ -4,7 +4,6 @@ import { DescriptionComponent } from './description.component';
 import { AppConfig } from '../../config/config';
 import { AngularEnvironmentConfigService } from '../../config/config.service';
 import { TransferState } from '@angular/platform-browser';
-import { SharedService } from '../../shared/shared';
 import { RouterTestingModule } from '@angular/router/testing';
 import { FormsModule } from '@angular/forms';
 import { DatePipe } from '@angular/common';

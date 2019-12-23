@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, ViewChild, PLATFORM_ID, APP_ID, Inject } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { makeStateKey, TransferState } from '@angular/platform-browser';
@@ -9,8 +9,7 @@ import { AppConfig } from '../../config/config';
 import * as _ from 'lodash';
 import { tap } from 'rxjs/operators';
 import { isPlatformServer } from '@angular/common';
-import { PLATFORM_ID, APP_ID, Inject } from '@angular/core';
-import { ErrorHandlingService } from '../../shared/error-handling-service/error-handling.service';
+import { MessageBarComponent } from '../../frame/messagebar.component';
 
 /**
  * This class provides the Search service with methods to search for records from tha rmm.
@@ -22,6 +21,9 @@ export class SearchService {
     private rmmBackend: string;
     editEnabled: any;
 
+    @ViewChild(MessageBarComponent)
+    private msgbar: MessageBarComponent;
+
     /**
      * Creates a new SearchService with the injected Http.
      * @param {Http} http - The injected Http.
@@ -30,7 +32,6 @@ export class SearchService {
     constructor(
         private http: HttpClient, 
         private transferState: TransferState,
-        private errorHandlingService: ErrorHandlingService,
         @Inject(PLATFORM_ID) private platformId: Object,
         private cfg: AppConfig) {
         this.landingBackend = cfg.get("mdAPI", "/unconfigured");
@@ -86,7 +87,8 @@ export class SearchService {
                         if ("message" in err) console.error("Reason: " + (<any>err).message);
                         if ("url" in err) console.error("URL used: " + (<any>err).url);
 
-                        this.errorHandlingService.setErrMessage({ message: "Failed to retrieve data for id=" + recordid, messageDetail: (<any>err).message, action: "Search by id", display: true });
+                        let msg = "Failed to retrieve data for id=" + recordid;
+                        this.msgbar.error(msg);
 
                         if (err.status == 0) {
                             console.warn("Possible causes: Unable to trust site cert, CORS restrictions, ...");
