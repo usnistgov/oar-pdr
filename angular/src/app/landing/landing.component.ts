@@ -130,12 +130,12 @@ export class LandingComponent implements OnInit, OnChanges {
     recordType: string = "";
 
     // passed in by the parent component:
-    @Input() record : NerdmRes = null;  
-    @Input() requestId : string = null;     // the ID used in the URL to access this page
-    @Input() inBrowser : boolean = false;
+    @Input() record: NerdmRes = null;
+    @Input() requestId: string = null;     // the ID used in the URL to access this page
+    @Input() inBrowser: boolean = false;
 
     ediid: string = null;
-    
+
     /**
      * Creates an instance of the SearchPanel
      *
@@ -147,9 +147,8 @@ export class LandingComponent implements OnInit, OnChanges {
         private cfg: AppConfig,
         private router: Router,
         @Inject(APP_ID) private appId: string,
-        public mdupdsvc : MetadataUpdateService,
-        private gaService: GoogleAnalyticsService)
-    {
+        public mdupdsvc: MetadataUpdateService,
+        private gaService: GoogleAnalyticsService) {
         // this.searchValue = this.route.snapshot.paramMap.get('id');
         this.editEnabled = cfg.get("editEnabled", false) as boolean;
     }
@@ -165,7 +164,7 @@ export class LandingComponent implements OnInit, OnChanges {
      * initial this component's internal data used to drive the display based on the 
      * input resource metadata
      */
-    useMetadata() : void {
+    useMetadata(): void {
         this.ediid = this.record['ediid'];
         this.HomePageLink = this.displayHomePageLink();
         this.recordType = this.determineResourceLabel(this.record);
@@ -175,7 +174,7 @@ export class LandingComponent implements OnInit, OnChanges {
             this.setLeafs(this.files[0].data);
         }
 
-        if (this.record['doi'] !== undefined && this.record['doi'] !== "") 
+        if (this.record['doi'] !== undefined && this.record['doi'] !== "")
             this.doiUrl = "https://doi.org/" + this.record['doi'].split(':')[1];
 
         this.assessNewer();
@@ -183,7 +182,7 @@ export class LandingComponent implements OnInit, OnChanges {
 
         if (this.files.length != 0)
             this.files = <TreeNode[]>this.files[0].data;
-        
+
     }
 
     /**
@@ -191,14 +190,14 @@ export class LandingComponent implements OnInit, OnChanges {
      * the resource described.  This is used as a label at the top of the page, just above 
      * the title.
      */
-    determineResourceLabel(resmd : NerdmRes) : string {
+    determineResourceLabel(resmd: NerdmRes): string {
         if (this.record instanceof Array && this.record.length > 0) {
-            switch(this.record['@type'][0]){
-                case 'nrd:SRD': 
+            switch (this.record['@type'][0]) {
+                case 'nrd:SRD':
                     return "Standard Reference Data";
-                case 'nrdp:DataPublication': 
+                case 'nrdp:DataPublication':
                     return "Data Publication";
-                case 'nrdp:PublicDataResource': 
+                case 'nrdp:PublicDataResource':
                     return "Public Data Resource";
             }
         }
@@ -217,7 +216,7 @@ export class LandingComponent implements OnInit, OnChanges {
     }
 
     viewmetadata() {
-        this.metadata = true; 
+        this.metadata = true;
         this.similarResources = false;
     }
 
@@ -245,16 +244,32 @@ export class LandingComponent implements OnInit, OnChanges {
 
         var itemsMenu: MenuItem[] = [];
         var metadata = this.createMenuItem("Export JSON", "faa faa-file-o",
-                                           "",   /* (event) => { this.turnSpinnerOff(); }, */
-                                           this.serviceApi);
+            "",   /* (event) => { this.turnSpinnerOff(); }, */
+            this.serviceApi);
         let authlist = "";
+        let contactlist = "";
 
         if (this.record['authors']) {
             for (let auth of this.record['authors']) authlist = authlist + auth.familyName + ",";
         }
 
+        if (this.record['contactPoint'] && this.record['contactPoint'].fn) {
+            contactlist = this.record['contactPoint'].fn;
+        }
+
+        // If authlist is empty, use contact point instead
+        if (!authlist) {
+            if (this.record['contactPoint'] && this.record['contactPoint'].fn) {
+                let splittedName = this.record['contactPoint'].fn.split(' ');
+                console.log("record.contactPoint", splittedName[splittedName.length - 1]);
+                authlist = splittedName[splittedName.length - 1];
+                contactlist = this.record['contactPoint'].fn;
+            }
+        }
+
+        // For search parameter 'q', need to use ASCII Encoding '%3D' for '=' and '%26' for '&'. Otherwise the router params will not be able to read the whole query
         var resourcesByAuthor = this.createMenuItem('Resources by Authors', "faa faa-external-link", "",
-            this.cfg.get("locations.pdrSearch", "/sdp/") + "/#/search?q=authors.familyName=" + authlist + "&key=&queryAdvSearch=yes");
+            this.cfg.get("locations.pdrSearch", "/sdp/") + "/#/search?q=authors.familyName%3D" + authlist + "%26logicalOp%3DOR%26contactPoint.fn%3D" + contactlist + "&key=&queryAdvSearch=yes");
         var similarRes = this.createMenuItem("Similar Resources", "faa faa-external-link", "",
             this.cfg.get("locations.pdrSearch", "/sdp/") + "/#/search?q=" + this.record['keyword'] + "&key=&queryAdvSearch=yes");
         var license = this.createMenuItem("Fair Use Statement", "faa faa-external-link", (event) => { this.gaService.gaTrackEvent('outbound', event, this.record['title']), this.record['license'] }, this.record['license']);
@@ -487,7 +502,7 @@ export class LandingComponent implements OnInit, OnChanges {
             return "this version";
         let id: string = "View...";
         if (relinfo.refid) id = relinfo.refid;
-        if(this.mdupdsvc.editMode)
+        if (this.mdupdsvc.editMode)
             return id;
         else
             return this.renderRelAsLink(relinfo, id);
