@@ -38,11 +38,11 @@ server.tomcat.accesslog.directory: logs
 server.tomcat.accesslog.enabled: false
 
 #SAML Authentication
-auth.federation.metadata: /Users/dsn1/NIST/2019/12-Dec/federationmetadata.xml
+auth.federation.metadata: /federationmetadata.xml
 saml.scheme: https
 saml.server.name: localhost
 saml.server.context-path: /customization
-saml.keystore.path: /Users/dsn1/NIST/2019/11-Nov/oar-docker/publish/customization-api/restapi/saml-keystore.jks
+saml.keystore.path: /saml-keystore.jks
 saml.keystroe.storepass: samlstorepass
 saml.keystore.key: mykeyalias
 saml.keystore.keypass: mykeypass
