@@ -27,7 +27,8 @@ export const config : LPSConfig = {
     status:      "Dev Version",
     appVersion:  "v1.1.0",
     production:  context.production,
-    editEnabled: false
+    editEnabled: false,
+    gacode: "UA-66610693-14"
 }
 
 export const testdata : {} = { }

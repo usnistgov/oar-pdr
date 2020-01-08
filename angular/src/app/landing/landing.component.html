@@ -26,10 +26,9 @@
 
                             <span>Identifier: </span>
                             <span *ngIf="doiUrl"><i> <a class="font14" href="{{doiUrl}}"
-                                        (click)="gaService.gaTrackEvent('outbound', $event, 'Resource title: ' + record.title, 'https://doi.org/'+record.doi.split(':')[1])">{{record.doi}}</a></i></span>
+                                        >{{record.doi}}</a></i></span>
                             <span *ngIf="!doiUrl"><i> <a class="font14"
-                                        href="{{ cfg.get('landingPageService','/od/id/') }}{{record['@id']}}"
-                                        (click)="gaService.gaTrackEvent('outbound', $event, 'Resource title: ' + record.title, cfg.get('landingPageService','/od/id/')+record['@id'])">{{record["@id"]}}</a></i>
+                                        href="{{ cfg.get('landingPageService','/od/id/') }}{{record['@id']}}">{{record["@id"]}}</a></i>
                             </span>
                             <span *ngIf="checkReferences()"><br>
                                 <span>Described in article: </span>
