@@ -31,7 +31,12 @@ export class GoogleAnalyticsService {
 
   // Tracking events
   gaTrackEvent(category: string, event?:any, label?: string, action?: string) {
+      console.log('category', category);
+      console.log('event', event);
+      console.log('label', label);
+      console.log('action', action);
     if(action == undefined){
+        console.log('event2', event);
       // menu item
       if(event.item != undefined){
         action = event.item.url;

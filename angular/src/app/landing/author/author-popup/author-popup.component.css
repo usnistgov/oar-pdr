@@ -1,0 +1,61 @@
+.btn-cancel {
+    float:right;
+    margin:0em 1em 2em 1em;
+    width:150px; 
+    height:2em; 
+    background-color:grey;
+    color:white;
+    padding-right: 1em;
+}
+
+.btn-save {
+    float:right;
+    margin-right: 1em;
+    width:150px; 
+    height:2em; 
+    background-color:green;
+    color:white;
+    margin-right: 1em;
+    padding-right: 1em;
+}
+
+.btn-add-author {
+    float:left;
+    margin-right: 1em;
+    width:160px; 
+    height:2em; 
+    color:white;
+    margin-right: 1em;
+    padding-right: 1em;
+}
+
+#author-list {
+    width:100%;
+    margin: .25em 1em .25em 1em;
+    padding-top: 0em;
+    display: inline-block;
+}
+
+.author-list-detail {
+    margin-right: .5em;
+}
+
+#author-list-outer {
+    width: 90%; 
+    margin:1.5em auto 1em auto;
+    height: 2em;
+    background-color: rgb(184, 220, 255);
+}
+
+.control-icons {
+    float:right; 
+    cursor:pointer;
+    margin: .2em .5em 0em 0em;
+}
+
+#author-details-outer {
+    text-align: center; 
+    width:100%;
+    margin: 0.5em 0em 1em 0em;
+    margin-bottom: 4em;;
+}

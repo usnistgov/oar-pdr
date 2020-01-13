@@ -1,6 +1,10 @@
 import { Component, AfterViewInit, OnInit } from '@angular/core';
-import { CommonVarService } from './shared/common-var';
+import { SharedService } from './shared/shared';
 import { Router, NavigationStart, NavigationEnd, NavigationCancel, NavigationError } from '@angular/router';
+import './content/modal.less';
+import { AuthService } from './shared/auth-service/auth.service';
+import { GoogleAnalyticsService } from './shared/ga-service/google-analytics.service'
+import { AppConfig } from './config/config';
 
 @Component({
   selector: 'app-root',
@@ -9,52 +13,17 @@ import { Router, NavigationStart, NavigationEnd, NavigationCancel, NavigationErr
 })
 export class AppComponent {
   title = 'PDR Resource Landing Page';
-}
 
-/* 
- * if SSR is working, this version, which enables a "loading" spinner,
- * should not be necessary
- *
-export class AppComponent implements AfterViewInit, OnInit {
-  element: HTMLElement;
+  constructor(
+    private authService: AuthService,
+    private gaService: GoogleAnalyticsService,
+    private cfg: AppConfig,
+  ) { }
 
-  constructor(private commonVarService: CommonVarService,
-    private router: Router) {
-    this.router.events.subscribe(event => {
-      if (event instanceof NavigationStart) {
-        this.element.hidden = false;
-      } else if (event instanceof NavigationEnd || event instanceof NavigationCancel || event instanceof NavigationError) {
-        // this.element.hidden = true;
-        // console.log("Spinner is not visible.");
-      }
-    }, () => {
-      this.element.hidden = true;
-    });
-  }
-
-  /**
-   * Get the params OnInit
-   *
   ngOnInit() {
-    this.element = document.getElementById('loadspinner') as HTMLElement;
-    this.element.hidden = false;
-    setTimeout(() => {
-      this.element.hidden = true;
-    }, 15000);
-  }
-
-  ngAfterViewInit() {
-    setTimeout(() => {
-      this.commonVarService.watchContentReady().subscribe(
-        value => {
-          // let element: HTMLElement = document.getElementById('loadspinner') as HTMLElement;
-          this.element.hidden = value;
-          setTimeout(() => {
-            this.element.hidden = true;
-          }, 10000);
-        }
-      );
-    });
+    // for testing purpose, logout user everytime the app starts
+//     if (this.authService.loggedIn())
+//       this.authService.logoutUser(true);
   }
 }
-*/
+

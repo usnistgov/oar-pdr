@@ -152,15 +152,15 @@
 </div>
 <div style="padding-left: 3%; padding-right: 3%; width: 100%;margin-bottom:0.5em;text-align: right;">
   <button type="button" (click)="downloadAllFilesFromAPI()" pButton type="submit"
-    [ngStyle]="{'margin-right':'1em','width':'max-content','background-color':getButtonColor()}"
-    [disabled]="selectedFileCount==0">
+    [ngStyle]="{'margin-right':'1em','width':'max-content','height':'2.5em','background-color':getButtonColor()}"
+    [disabled]="selectedFileCount==0" >
     <i class="faa faa-download faa-1x icon-white" style="color: #fff;"></i>
     Download Selected
     <span class="w3-circle button-badge" [ngStyle]="{'color':getButtonColor()}">&nbsp;{{selectedFileCount}}&nbsp;</span>
   </button>
 
   <button type="button" (click)="removeByDownloadStatus()" pButton type="submit"
-    style="margin-right:1em;width:max-content; background-color:grey;" [disabled]="noFileDownloaded">
+    style="margin-right:1em;width:max-content; height:2.5em; background-color:grey;" [disabled]="noFileDownloaded">
     <i class="faa faa-trash faa-1x icon-white" style="color: #fff;"></i>
     Remove downloaded
     <span class="w3-circle button-badge"
@@ -168,7 +168,7 @@
   </button>
 
   <button type="button" (click)="removeByDataId()" pButton type="submit"
-    style="width:max-content; background-color:grey;" [disabled]="selectedFileCount==0">
+    style="width:max-content; height:2.5em; background-color:grey;" [disabled]="selectedFileCount==0">
     <i class="faa faa-trash faa-1x icon-white" style="color: #fff;"></i>
     Remove selected
     <span class="w3-circle button-badge" [ngStyle]="{'color':'grey'}">&nbsp;{{selectedFileCount}}&nbsp;</span>

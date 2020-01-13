@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClientModule, HttpClient, HttpHeaders, HttpRequest, HttpEventType, HttpResponse } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
-import { CommonVarService } from '../../shared/common-var';
+import { SharedService } from '../shared';
 import { ZipData } from './zipData';
 import { DownloadData } from './downloadData';
 import { CartService } from '../../datacart/cart.service';
@@ -27,7 +27,7 @@ export class DownloadService {
     private cartService: CartService,
     private _FileSaverService: FileSaverService,
     private testDataService: TestDataService,
-    private commonVarService: CommonVarService
+    private commonVarService: SharedService
   ) {
     this.isLocalTesting = this.commonVarService.getLocalTestingFlag();
     this.setDownloadingNumber(-1, 'datacart');

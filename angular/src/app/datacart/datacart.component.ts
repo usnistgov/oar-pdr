@@ -17,10 +17,9 @@ import { Observable } from 'rxjs/Observable';
 import { ProgressSpinnerModule, DialogModule } from 'primeng/primeng';
 // import * as _ from 'lodash';
 // import * as __ from 'underscore';
-import { environment } from '../../environments/environment';
 import { DownloadData } from '../shared/download-service/downloadData';
 
-import { CommonVarService } from '../shared/common-var'
+import { SharedService } from '../shared/shared'
 import { DownloadService } from '../shared/download-service/download-service.service';
 import { ZipData } from '../shared/download-service/zipData';
 import { OverlayPanel } from 'primeng/overlaypanel';
@@ -31,7 +30,6 @@ import { FileSaverService } from 'ngx-filesaver';
 import { CommonFunctionService } from '../shared/common-function/common-function.service';
 import { GoogleAnalyticsService } from '../shared/ga-service/google-analytics.service';
 
-declare var Ultima: any;
 declare var saveAs: any;
 declare var $: any;
 
@@ -88,7 +86,6 @@ export class DatacartComponent implements OnInit, OnDestroy {
     selectedNode: TreeNode[] = [];
     selectedFileCount: number = 0;
     selectedParentIndex: number = 0;
-    ediid: any;
     downloadInstance: any;
     downloadStatus: any;
     downloadProgress: any;
@@ -116,7 +113,7 @@ export class DatacartComponent implements OnInit, OnDestroy {
     messageColor: any;
     noFileDownloaded: boolean; // will be true if any item in data cart is downloaded
     totalDownloaded: number = 0;
-    dataArray: TreeNode[] = [];
+    selectedNodes: TreeNode[] = [];
     distApi: string;
     currentTask: string = '';
     showCurrentTask: boolean = false;
@@ -147,7 +144,7 @@ export class DatacartComponent implements OnInit, OnDestroy {
         private downloadService: DownloadService,
         private cfg: AppConfig,
         private _FileSaverService: FileSaverService,
-        private commonVarService: CommonVarService,
+        private commonVarService: SharedService,
         private commonFunctionService: CommonFunctionService,
         private route: ActivatedRoute,
         private gaService: GoogleAnalyticsService,
@@ -177,9 +174,9 @@ export class DatacartComponent implements OnInit, OnDestroy {
      * Get the params OnInit
      */
     ngOnInit() {
+        console.log("Datacart init...");
         this.commonVarService.setContentReady(false);
         this.isProcessing = true;
-        this.ediid = this.commonVarService.getEdiid();
         this.distApi = this.cfg.get("distService", "/od/ds/");
         this.routerparams = this.route.params.subscribe(params => {
             this.mode = params['mode'];
@@ -257,7 +254,6 @@ export class DatacartComponent implements OnInit, OnDestroy {
     sizeStyle() {
         return { 'width': this.sizeWidth, 'font-size': this.fontSize };
     }
-
     statusStyle() {
         return { 'width': this.statusWidth, 'font-size': this.fontSize };
     }
@@ -304,10 +300,10 @@ export class DatacartComponent implements OnInit, OnDestroy {
             this.treeRoot.push(newPart);
 
             this.fileNode = { "data": { "resTitle": "", "size": "", "mediatype": "", "description": "", "filetype": "" } };
-            this.buildSelectDataArray(this.dataFiles);
-            this.checkNode(this.dataFiles, this.dataArray);
-            this.expandToLevel(this.dataFiles, true, 1);
+            this.buildSelectNodes(this.dataFiles)
+            this.checkNode(this.dataFiles, this.selectedNodes);
             this.dataFileCount();
+            this.expandToLevel(this.dataFiles, true, 3);
         }.bind(this), function (err) {
             console.log("Error while loading datacart:");
             console.log(err);
@@ -316,14 +312,15 @@ export class DatacartComponent implements OnInit, OnDestroy {
         return Promise.resolve(this.dataFiles);
     }
 
-    /*
-  * Pre-select tree nodes
-  */
-
-    buildSelectDataArray(nodes: TreeNode[]) {
+    /**
+     * Build selected nodes to be used to pre-select file tree. It walks through the given treenodes 
+     * and collects the nodes whose isSelected field is set and put them in selectedNodes.
+     * @param nodes The treenodes to be walked through
+     */
+    buildSelectNodes(nodes: TreeNode[]) {
         for (let i = 0; i < nodes.length; i++) {
             if (nodes[i].children.length > 0) {
-                this.buildSelectDataArray(nodes[i].children);
+                this.buildSelectNodes(nodes[i].children);
             } else {
                 if (nodes[i].data.isSelected) {
                     this.addNode(nodes[i]);
@@ -332,10 +329,15 @@ export class DatacartComponent implements OnInit, OnDestroy {
         }
     }
 
+    /**
+     * Add the given treenode and it's children nodes to selectedNodes which will be used to 
+     * pre-select the file tree.
+     * @param node The treenode to be added to selectedNodes
+     */
     addNode(node: TreeNode) {
         if (node.children.length == 0) {
-            if (!this.dataArray.includes(node)) {
-                this.dataArray.push(node);
+            if (!this.selectedNodes.includes(node)) {
+                this.selectedNodes.push(node);
             }
             return;
         }
@@ -344,12 +346,19 @@ export class DatacartComponent implements OnInit, OnDestroy {
         }
     }
 
-    checkNode(nodes: TreeNode[], str: TreeNode[]) {
+    /**
+    * Pre-select tree nodes based on a given selection
+    * 
+    * @param nodes  The treenodes to be pre-checked based on the 2nd param selectedNodes
+    * 
+    * @param selectedNodes  Selected treenodes
+    */
+    checkNode(nodes: TreeNode[], selectedNodes: TreeNode[]) {
         for (let i = 0; i < nodes.length; i++) {
             if (nodes[i].children.length > 0) {
                 for (let j = 0; j < nodes[i].children.length; j++) {
                     if (nodes[i].children[j].children.length == 0) {
-                        if (str.includes(nodes[i].children[j])) {
+                        if (selectedNodes.includes(nodes[i].children[j])) {
                             if (!this.selectedData.includes(nodes[i].children[j])) {
                                 this.selectedData.push(nodes[i].children[j]);
                             }
@@ -362,9 +371,8 @@ export class DatacartComponent implements OnInit, OnDestroy {
                         this.selectedData.push(nodes[i]);
                 }
             }
-            
             if (nodes[i].children.length > 0) {
-                this.checkNode(nodes[i].children, str);
+                this.checkNode(nodes[i].children, selectedNodes);
                 let count = nodes[i].children.length;
                 let c = 0;
                 for (let j = 0; j < nodes[i].children.length; j++) {
@@ -469,8 +477,7 @@ export class DatacartComponent implements OnInit, OnDestroy {
     * Function to download all files from API call.
     **/
     downloadAllFilesFromAPI() {
-        this.gaService.gaTrackEvent('download', undefined, 'all files', this.ediid);
-
+        this.gaService.gaTrackEvent('download', undefined, 'all files', "Data cart");
         this.clearDownloadStatus();
         this.isProcessing = true;
         this.showCurrentTask = true;
@@ -813,6 +820,7 @@ export class DatacartComponent implements OnInit, OnDestroy {
         this.totalDownloaded = 0;
         let parentObj: TreeNode = {};
 
+        var iii: number = 0;
         for (var key in arrayList) {
             // let resId = key;
             if (arrayList.hasOwnProperty(key)) {
@@ -826,7 +834,6 @@ export class DatacartComponent implements OnInit, OnDestroy {
                 for (let fields of arrayList[key]) {
                     let resId = fields.data.resId;
                     let ediid = fields.data.ediid;
-
                     let fpath = fields.data.filePath.split("/");
                     if (fpath.length > 0) {
                         let child2: TreeNode = {};
@@ -841,7 +848,7 @@ export class DatacartComponent implements OnInit, OnDestroy {
                             }
                             /// Added this code to avoid the issue of extra file layers in the datacart
                             if (fpath[path] !== "") {
-                                child2 = this.createDataCartChildrenTree(
+                                child2 = this.createDataCartChildrenTree(iii,
                                     "/" + fpath[path],
                                     fields.data.cartId,
                                     resId, ediid,
@@ -856,9 +863,10 @@ export class DatacartComponent implements OnInit, OnDestroy {
                                     fields.data.fileSize,
                                     fields.data.message
                                 );
-                                parent.children.push(child2);
 
+                                parent.children.push(child2);
                                 parent = child2;
+                                iii = iii + 1;
                             }
                         }
                     }
@@ -922,7 +930,7 @@ export class DatacartComponent implements OnInit, OnDestroy {
     /**
      * Create data hierarchy for children
      */
-    createDataCartChildrenTree(path: string, cartId: string, resId: string, ediid: string, resTitle: string, downloadUrl: string, resFilePath: string, downloadStatus: string, mediatype: string, description: string, filetype: string, isSelected: boolean, fileSize: any, message: string) {
+    createDataCartChildrenTree(iii: number, path: string, cartId: string, resId: string, ediid: string, resTitle: string, downloadUrl: string, resFilePath: string, downloadStatus: string, mediatype: string, description: string, filetype: string, isSelected: boolean, fileSize: any, message: string) {
         let child1: TreeNode = {};
         child1 = {
             data: {
@@ -943,7 +951,6 @@ export class DatacartComponent implements OnInit, OnDestroy {
             }
 
         };
-
         child1.children = [];
         return child1;
     }

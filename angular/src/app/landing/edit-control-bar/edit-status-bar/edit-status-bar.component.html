@@ -1,0 +1,7 @@
+<div class="top_message">
+    <span [ngStyle]="{'color': messageColor}">{{message}}</span>
+    <div [hidden]="!isProcessing" style="width: 2em;height:2em; float: right;">
+        <i class="faa faa-spinner faa-spin faa-stack-1x"
+            style="color: rgb(22, 20, 59);width:2em;position: inherit;"></i>
+    </div>
+</div>

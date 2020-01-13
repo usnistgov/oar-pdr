@@ -4,13 +4,15 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 import { AppModule } from './app.module';
 import { AppComponent } from './app.component';
+import { BrowserMetadataTransferModule } from './nerdm/metadatatransfer-browser.module';
 
 @NgModule({
     imports: [
         BrowserModule.withServerTransition({ appId: 'PDR-LandingPageService' }),
         BrowserAnimationsModule,
         AppModule,
-        BrowserTransferStateModule
+        BrowserTransferStateModule,
+        BrowserMetadataTransferModule
     ],
     bootstrap: [ AppComponent ]
 })
