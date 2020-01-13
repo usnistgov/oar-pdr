@@ -254,7 +254,6 @@ export class DatacartComponent implements OnInit, OnDestroy {
     sizeStyle() {
         return { 'width': this.sizeWidth, 'font-size': this.fontSize };
     }
-
     statusStyle() {
         return { 'width': this.statusWidth, 'font-size': this.fontSize };
     }
@@ -372,7 +371,6 @@ export class DatacartComponent implements OnInit, OnDestroy {
                         this.selectedData.push(nodes[i]);
                 }
             }
-
             if (nodes[i].children.length > 0) {
                 this.checkNode(nodes[i].children, selectedNodes);
                 let count = nodes[i].children.length;
@@ -480,7 +478,6 @@ export class DatacartComponent implements OnInit, OnDestroy {
     **/
     downloadAllFilesFromAPI() {
         this.gaService.gaTrackEvent('download', undefined, 'all files', "Data cart");
-
         this.clearDownloadStatus();
         this.isProcessing = true;
         this.showCurrentTask = true;
@@ -818,16 +815,10 @@ export class DatacartComponent implements OnInit, OnDestroy {
             return result;
         }, {});
 
-        console.log("arrayList");
-        console.log(JSON.stringify(arrayList));
-
         var noFileDownloadedFlag = true;
         this.dataFiles = [];
         this.totalDownloaded = 0;
         let parentObj: TreeNode = {};
-
-        console.log("this.dataFiles1");
-        console.log(this.dataFiles);
 
         var iii: number = 0;
         for (var key in arrayList) {
@@ -855,10 +846,6 @@ export class DatacartComponent implements OnInit, OnDestroy {
                                 this.totalDownloaded += 1;
                                 noFileDownloadedFlag = false;
                             }
-                            // if (iii == 151) {
-                            //   console.log("fields");
-                            //   console.log(fields);
-                            // }
                             /// Added this code to avoid the issue of extra file layers in the datacart
                             if (fpath[path] !== "") {
                                 child2 = this.createDataCartChildrenTree(iii,
@@ -878,25 +865,13 @@ export class DatacartComponent implements OnInit, OnDestroy {
                                 );
 
                                 parent.children.push(child2);
-
                                 parent = child2;
-
-                                // if (iii == 151) {
-                                // console.log("parent");
-                                // console.log(parent);
-                                // }
                                 iii = iii + 1;
                             }
                         }
                     }
                 }
                 this.walkData(parentObj, parentObj, 0);
-
-                console.log("this.dataFiles2");
-                console.log(this.dataFiles);
-                console.log("parentObj");
-                console.log(parentObj);
-
                 this.dataFiles.push(parentObj);
 
                 this.index = {};
@@ -957,10 +932,6 @@ export class DatacartComponent implements OnInit, OnDestroy {
      */
     createDataCartChildrenTree(iii: number, path: string, cartId: string, resId: string, ediid: string, resTitle: string, downloadUrl: string, resFilePath: string, downloadStatus: string, mediatype: string, description: string, filetype: string, isSelected: boolean, fileSize: any, message: string) {
         let child1: TreeNode = {};
-        // if (iii == 151) {
-        //   console.log("child1");
-        //   console.log(child1);
-        // }
         child1 = {
             data: {
                 'filePath': path,
@@ -980,10 +951,6 @@ export class DatacartComponent implements OnInit, OnDestroy {
             }
 
         };
-        // if (iii == 151) {
-        //   console.log("child1");
-        //   console.log(child1);
-        // }
         child1.children = [];
         return child1;
     }
