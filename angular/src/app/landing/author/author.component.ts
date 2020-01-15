@@ -3,6 +3,7 @@ import { NgbModalOptions, NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { AuthorPopupComponent } from './author-popup/author-popup.component';
 import { NotificationService } from '../../shared/notification-service/notification.service';
 import { MetadataUpdateService } from '../editcontrol/metadataupdate.service';
+import { AuthorService } from './author.service';
 
 @Component({
     selector: 'app-author',
@@ -17,7 +18,8 @@ export class AuthorComponent implements OnInit {
 
     constructor(public mdupdsvc : MetadataUpdateService,        
                 private ngbModal: NgbModal,
-                private notificationService: NotificationService)
+                private notificationService: NotificationService,
+                private authorService: AuthorService)
     { }
 
     /**
@@ -53,7 +55,7 @@ export class AuthorComponent implements OnInit {
         if (this.record[this.fieldName] != undefined && this.record[this.fieldName].length > 0)
             this.tempInput[this.fieldName] = JSON.parse(JSON.stringify(this.record[this.fieldName]));
         else {
-            tempauthors.push(this._getBlankField());
+            tempauthors.push(this.authorService.getBlankAuthor());
             this.tempInput[this.fieldName] = tempauthors;
         }
 
@@ -86,30 +88,6 @@ export class AuthorComponent implements OnInit {
             }
         })
     }
-
-    protected _getBlankField() {
-        return {
-          "familyName": "",
-          "fn": "",
-          "givenName": "",
-          "middleName": "",
-          "affiliation": [
-            {
-              "@id": "",
-              "title": "National Institute of Standards and Technology",
-              "dept": "",
-              "@type": [
-                ""
-              ]
-            }
-          ],
-          "orcid": "",
-          "isCollapsed": false,
-          "fnLocked": false,
-          "dataChanged": false
-        };
-    }
-
 
     /*
      *  Undo editing. If no more field was edited, delete the record in staging area.

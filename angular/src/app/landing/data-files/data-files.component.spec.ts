@@ -8,14 +8,11 @@ import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 import { DownloadService } from '../../shared/download-service/download-service.service';
 import { TestDataService } from '../../shared/testdata-service/testDataService';
-import { SharedService } from '../../shared/shared';
-// import { CommonVarService } from '../../shared/common-var';
 import { AppConfig } from '../../config/config';
 import { AngularEnvironmentConfigService } from '../../config/config.service';
 import { TransferState } from '@angular/platform-browser';
 import { GoogleAnalyticsService } from '../../shared/ga-service/google-analytics.service';
 import { ToastrModule } from 'ngx-toastr';
-// import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 
 describe('DataFilesComponent', () => {
   let component: DataFilesComponent;
@@ -42,7 +39,6 @@ describe('DataFilesComponent', () => {
         DownloadService,
         TestDataService,
         GoogleAnalyticsService,
-        SharedService,
         DatePipe,
         { provide: AppConfig, useValue: cfg }]
     })

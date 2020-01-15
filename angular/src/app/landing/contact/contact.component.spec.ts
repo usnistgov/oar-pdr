@@ -6,7 +6,6 @@ import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { AppConfig } from '../../config/config';
 import { AngularEnvironmentConfigService } from '../../config/config.service';
 import { TransferState } from '@angular/platform-browser';
-import { SharedService } from '../../shared/shared';
 import { RouterTestingModule } from '@angular/router/testing';
 import { DatePipe } from '@angular/common';
 import { ToastrModule } from 'ngx-toastr';
@@ -35,7 +34,6 @@ describe('ContactComponent', () => {
             schemas: [NO_ERRORS_SCHEMA],
             providers: [
                 MetadataUpdateService, UserMessageService, DatePipe,
-                SharedService,
                 GoogleAnalyticsService,
                 { provide: AppConfig, useValue: cfg },
                 { provide: AuthService, useValue: authsvc }

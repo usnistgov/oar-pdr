@@ -1,6 +1,9 @@
+<!-- This bloack is for the data access session of landing page -->
 <div id="dataAccess">
     <div class="font14" [hidden]="metadata">
         <h3><b>Data Access</b></h3><br>
+        
+        <!-- Decide what to display based on access level -->
         <span style="margin-left:0em" *ngIf="record['accessLevel'] === 'public'">
             <i class="faa faa-globe"></i> These data are public.
         </span>
@@ -8,15 +11,20 @@
         <span *ngIf="record['accessLevel'] === 'restricted public'">
             <i class="faa faa-lock"></i> This data has access restrictions.
         </span>
+
+        <!-- Display access right -->
         <span *ngIf="record['rights']">
             <br> The access rights are {{ record.rights }} <br>
         </span>
+
+        <!-- Display Homepage button if 'landingPage field exist and does not contain '/od/id' -->
         <span *ngIf="record['landingPage'] && record['landingPage'].indexOf('/od/id') === -1 ">
             For more information, please visit the
             <a target="_blank" href="{{ record['landingPage'] }}"
                 (click)="gaService.gaTrackEvent('homepage', $event, 'Resource title: ' + record.title, record['landingPage'])">home
                 page</a>.
         </span>
+
         <span style="margin-left:0em" *ngIf="isAccessPage">
             <br>Data is available via the following locations:
             <br>
@@ -27,9 +35,11 @@
             </span>
         </span>
 
+        <!-- Display 'Download all' and 'Add all to cart' buttons and other info -->
         <div *ngIf="files.length  > 0">
             <div *ngIf="inBrowser; else filesLoading">
                 <div class="flex-container" style="margin-top: 2em;">
+                    <!-- 'Download all' and 'Add all to cart' buttons disabled if this is internal landing page -->
                     <div *ngIf="editEnabled; else editDisabled"
                         style="flex: 0 0 110px; text-align: left; padding-bottom: 0em;">
                         <span><b>Files </b> </span>
@@ -77,8 +87,10 @@
                     </div>
                 </div>
 
+                <!-- Popup confirm dialog for 'Download all' button -->
                 <p-confirmDialog key='downloadAllConfirm'></p-confirmDialog>
 
+                <!-- Display tree table -->
                 <p-treeTable *ngIf="visible" [value]="files" [columns]="cols" selectionMode="single"
                     [resizableColumns]="true" sortField="name">
                     <ng-template pTemplate="header" let-columns>

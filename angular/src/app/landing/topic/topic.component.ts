@@ -56,8 +56,9 @@ export class TopicComponent implements OnInit {
                 this.taxonomyList.push({ "taxonomy": result[i].label });
             }
         }, (err) => {
-            this.msgsvc.syserror(err.toString());
-            // this.onUpdateError(err, "Error Laoding taxonomy list", "Laod taxonomy list");
+            console.error("Failed to load taxonomy terms from server: "+err.message);
+            this.msgsvc.warn("Failed to load taxonomy terms; you may have problems editing the "+
+                             "topics assigned to this record.");
         });
     }
 
@@ -109,7 +110,6 @@ export class TopicComponent implements OnInit {
                         data: {
                             treeId: tempId,
                             name: pathParts[j],
-                            // name: pathParts[j].replace(/ /g, ""),
                             researchTopic: tempId,
                             bkcolor: 'white'
                         }, children: [],
@@ -117,13 +117,15 @@ export class TopicComponent implements OnInit {
                     };
                     currentLevel.push(newPart);
                     currentLevel = newPart.children;
-                    // }
                 }
             };
         });
         return tree;
     }
 
+    /**
+     *  Return style based on edit mode and data update status
+     */
     getFieldStyle() {
         if (this.mdupdsvc.editMode) {
             if (this.mdupdsvc.fieldUpdated(this.fieldName)) {
@@ -136,9 +138,18 @@ export class TopicComponent implements OnInit {
         }
     }
 
+    /**
+     * Open topic pop up window
+     */
     openModal() {
+        // Do nothing if it's not in edit mode. 
+        // This should never happen because the edit button should be disabled.
         if (!this.mdupdsvc.editMode) return;
 
+        // Pop up dialog set up
+        // backdrop: 'static' - the pop up will not be closed 
+        //                      when user click outside the dialog window.
+        // windowClass: "myCustomModalClass" - pop up dialog styling defined in styles.scss
         let ngbModalOptions: NgbModalOptions = {
             backdrop: 'static',
             keyboard: false,
@@ -154,8 +165,7 @@ export class TopicComponent implements OnInit {
         modalRef.componentInstance.inputValue = {};
         modalRef.componentInstance.inputValue[this.fieldName] = val;
         modalRef.componentInstance['field'] = this.fieldName;
-        modalRef.componentInstance['title'] = "RESEARCH TOPICS";
-        // console.log("this.taxonomyTree @@@", this.taxonomyTree);
+        modalRef.componentInstance['title'] = "Research Topics";
         modalRef.componentInstance.taxonomyTree = this.taxonomyTree;
 
         modalRef.componentInstance.returnValue.subscribe((returnValue) => {
@@ -168,7 +178,6 @@ export class TopicComponent implements OnInit {
                         'tag': topic,
                     };
                 });
-                // console.log("postMessage", JSON.stringify(postMessage));
 
                 this.mdupdsvc.update(this.fieldName, postMessage).then((updateSuccess) => {
                     // console.log("###DBG  update sent; success: "+updateSuccess.toString());

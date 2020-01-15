@@ -10,7 +10,6 @@ import { TestDataService } from '../../../shared/testdata-service/testDataServic
 import { AppConfig } from '../../../config/config';
 import { AngularEnvironmentConfigService } from '../../../config/config.service';
 import { TransferState } from '@angular/platform-browser';
-import { SharedService } from '../../../shared/shared';
 import { ToastrModule } from 'ngx-toastr';
 
 describe('SearchTopicsComponent', () => {
@@ -36,7 +35,6 @@ describe('SearchTopicsComponent', () => {
             providers: [
                 NgbActiveModal,
                 TestDataService,
-                SharedService,
                 { provide: AppConfig, useValue: cfg }]
         })
             .compileComponents();

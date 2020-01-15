@@ -1,12 +1,12 @@
 import { TestBed } from '@angular/core/testing';
 
-import { EditControlService } from './edit-control.service';
+import { ContactService } from './contact.service';
 
-describe('EditControlService', () => {
+describe('ContactService', () => {
   beforeEach(() => TestBed.configureTestingModule({}));
 
   it('should be created', () => {
-    const service: EditControlService = TestBed.get(EditControlService);
+    const service: ContactService = TestBed.get(ContactService);
     expect(service).toBeTruthy();
   });
 });

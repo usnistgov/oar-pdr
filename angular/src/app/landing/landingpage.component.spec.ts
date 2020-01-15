@@ -15,7 +15,6 @@ import { AppConfig } from '../config/config'
 import { MetadataTransfer, NerdmRes } from '../nerdm/nerdm'
 import { MetadataService, TransferMetadataService } from '../nerdm/nerdm.service'
 import { UserMessageService } from '../frame/usermessage.service';
-import { SharedService } from '../shared/shared/shared.service';
 import { CartService } from "../datacart/cart.service";
 import { DownloadService } from "../shared/download-service/download-service.service";
 import { TestDataService } from '../shared/testdata-service/testDataService';
@@ -81,7 +80,6 @@ describe('LandingPageComponent', () => {
                 { provide: MetadataService, useValue: mds },
                 UserMessageService,
                 CartService, DownloadService, TestDataService, GoogleAnalyticsService, ModalService,
-                SharedService
             ]
         }).compileComponents();
 

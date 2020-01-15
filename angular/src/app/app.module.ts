@@ -52,7 +52,6 @@ import { ContactPopupComponent } from './landing/contact/contact-popup/contact-p
 enableProdMode();
 
 import { SearchService } from './shared/search-service/index';
-import { SharedService } from './shared/shared/index';
 import { CartService } from "./datacart/cart.service";
 import { AppShellNoRenderDirective } from './directives/app-shell-no-render.directive';
 import { ModalService } from './shared/modal-service';
@@ -60,7 +59,6 @@ import { TaxonomyListService } from './shared/taxonomy-list'
 import { DownloadService } from "./shared/download-service/download-service.service";
 import { TestDataService } from './shared/testdata-service/testDataService';
 import { CommonFunctionService } from './shared/common-function/common-function.service';
-import { CustomizationService } from './shared/customization-service/customization-service.service';
 import { GoogleAnalyticsService} from "./shared/ga-service/google-analytics.service";
 import { GoogleAnalyticsServiceMock} from "./shared/ga-service/google-analytics.service.mock";
 import { ConfirmationDialogService } from './shared/confirmation-dialog/confirmation-dialog.service';
@@ -107,7 +105,6 @@ import { fakeBackendProvider } from './_helpers/fakeBackendInterceptor';
     Meta,
     SearchService,
     SearchResolve,
-    SharedService,
     CartService,
     DownloadService,
     TestDataService,
@@ -115,7 +112,6 @@ import { fakeBackendProvider } from './_helpers/fakeBackendInterceptor';
     CommonFunctionService,
     TaxonomyListService,
     ModalService,
-    CustomizationService,
     GoogleAnalyticsService,
     GoogleAnalyticsServiceMock,
     ConfirmationDialogService,

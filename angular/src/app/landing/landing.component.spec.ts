@@ -14,7 +14,6 @@ import { AngularEnvironmentConfigService } from '../config/config.service';
 import { AppConfig } from '../config/config'
 import { NerdmRes } from '../nerdm/nerdm'
 import { UserMessageService } from '../frame/usermessage.service';
-import { SharedService } from '../shared/shared/shared.service';
 import { CartService } from "../datacart/cart.service";
 import { DownloadService } from "../shared/download-service/download-service.service";
 import { TestDataService } from '../shared/testdata-service/testDataService';
@@ -68,8 +67,7 @@ describe('LandingComponent', () => {
                 { provide: ElementRef,      useValue: null },
                 { provide: AppConfig,       useValue: cfg },
                 UserMessageService,
-                CartService, DownloadService, TestDataService, GoogleAnalyticsService, ModalService,
-                SharedService
+                CartService, DownloadService, TestDataService, GoogleAnalyticsService, ModalService
             ]
         }).compileComponents();
 
@@ -88,20 +86,4 @@ describe('LandingComponent', () => {
         let el = cmpel.querySelector("h2"); 
         expect(el.textContent).toContain(nrd.title);
     });
-
-    // This test requires changes to component code expressly to support this test
-    //
-    // it('receives md update', () => {
-    //     setupComponent();
-    //     expect(component.record['title']).not.toEqual("Doh!");
-        
-    //     component.ecc.startEditing();
-    //     fixture.detectChanges()
-    //     component.ecc.mdupdsvc.update("title", {title: "Doh!"})
-    //     fixture.detectChanges()
-    //     expect(component.record['title']).toEqual("Doh!");
-
-    //     component.ecc.discardEdits();
-    //     expect(component.record['title']).not.toEqual("Doh!");
-    // });
 });
