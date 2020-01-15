@@ -56,7 +56,9 @@ export class TopicComponent implements OnInit {
                 this.taxonomyList.push({ "taxonomy": result[i].label });
             }
         }, (err) => {
-            this.msgsvc.syserror(err.toString());
+            console.error("Failed to load taxonomy terms from server: "+err.message);
+            this.msgsvc.warn("Failed to load taxonomy terms; you may have problems editing the "+
+                             "topics assigned to this record.");
         });
     }
 
