@@ -32,7 +32,7 @@ class DataChecker(object):
     AVAIL_NOT = "not available"
     AVAIL_IN_BAG = "available in current bag"
     AVAIL_IN_CACHED_BAG = "available in cached bag"
-    AVAIL_IN_VIA_URL = "available via download URL"
+    AVAIL_VIA_URL = "available via download URL"
     AVAIL_IN_REMOTE_BAG = "available in remote bag via service"
 
     def __init__(self, bag, config=None, log=None):

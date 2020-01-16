@@ -26,6 +26,7 @@ def startService(authmeth=None):
     cmd = cmd.format(os.path.join(tdir,"simsrv.log"), srvport,
                      os.path.join(basedir, wpy), pidfile)
     os.system(cmd)
+    time.sleep(0.5)
 
 def stopService(authmeth=None):
     tdir = tmpdir()
@@ -42,6 +43,8 @@ def stopService(authmeth=None):
 loghdlr = None
 rootlog = None
 def setUpModule():
+    global loghdlr
+    global rootlog
     ensure_tmpdir()
     rootlog = logging.getLogger()
     loghdlr = logging.FileHandler(os.path.join(tmpdir(),"test_simsrv.log"))
@@ -53,7 +56,7 @@ def tearDownModule():
     global loghdlr
     if loghdlr:
         if rootlog:
-            rootlog.removeLog(loghdlr)
+            rootlog.removeHandler(loghdlr)
         loghdlr = None
     stopService()
     rmtmpdir()

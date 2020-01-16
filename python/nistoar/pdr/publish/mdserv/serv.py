@@ -279,7 +279,10 @@ class PrePubMetadataService(PublishSystem):
         # There is a MIDAS submission in progress; create/update the 
         # metadata bag.
         bagger = self.prepare_metadata_bag(id, bagger)
-        bagger.fileExaminer.launch(stop_logging=True)
+        if bagger.fileExaminer:
+            bagger.fileExaminer.launch(stop_logging=True)
+        elif bagger.bagbldr:
+            bagger.bagbldr.disconnect_logfile()
         return self.make_nerdm_record(bagger.bagdir, bagger.datafiles)
 
     def locate_data_file(self, id, filepath):

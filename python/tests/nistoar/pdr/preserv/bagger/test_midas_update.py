@@ -32,6 +32,8 @@ descarchdir = os.path.join(pdrmoddir, "describe", "data")
 loghdlr = None
 rootlog = None
 def setUpModule():
+    global loghdlr
+    global rootlog
     ensure_tmpdir()
 #    logging.basicConfig(filename=os.path.join(tmpdir(),"test_builder.log"),
 #                        level=logging.INFO)
@@ -46,7 +48,7 @@ def tearDownModule():
     global loghdlr
     if loghdlr:
         if rootlog:
-            rootlog.removeLog(loghdlr)
+            rootlog.removeHandler(loghdlr)
         loghdlr = None
     stopServices()
     rmtmpdir()
@@ -81,6 +83,7 @@ def startServices():
     cmd = cmd.format(os.path.join(tdir,"simrmm.log"), srvport,
                      os.path.join(basedir, wpy), archdir, pidfile)
     os.system(cmd)
+    time.sleep(0.5)
 
 def stopServices():
     tdir = tmpdir()
