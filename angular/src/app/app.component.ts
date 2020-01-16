@@ -1,8 +1,9 @@
-import { Component, AfterViewInit, OnInit } from '@angular/core';
+import { Component, AfterViewInit, OnInit, PLATFORM_ID, Inject } from '@angular/core';
 import { Router, NavigationStart, NavigationEnd, NavigationCancel, NavigationError } from '@angular/router';
 import './content/modal.less';
 import { GoogleAnalyticsService } from './shared/ga-service/google-analytics.service'
 import { AppConfig } from './config/config';
+import { isPlatformBrowser } from '@angular/common';
 
 @Component({
   selector: 'app-root',
@@ -11,13 +12,30 @@ import { AppConfig } from './config/config';
 })
 export class AppComponent {
   title = 'PDR Resource Landing Page';
+  gaCode: string;
+  inBrowser: boolean = false;
 
   constructor(
     private gaService: GoogleAnalyticsService,
     private cfg: AppConfig,
-  ) { }
+    @Inject(PLATFORM_ID) private platformId: Object
+  ) { 
+    this.inBrowser = isPlatformBrowser(platformId);
+  }
 
   ngOnInit() {
+  }
+
+  ngAfterViewInit(): void {
+    //Called after ngAfterContentInit when the component's view has been initialized. Applies to components only.
+    //Add 'implements AfterViewInit' to the class.
+    // Add Google Analytics service
+    if(this.inBrowser){
+      this.gaCode = this.cfg.get("gaCode", "") as string;
+      this.gaService.appendGaTrackingCode(this.gaCode);
+
+      console.log('this.gaCode', this.gaCode);
+    }
   }
 }
 
