@@ -1,3 +1,5 @@
+@import "~ngx-toastr/toastr.css";
+
 .myCustomModalClass .modal-dialog {
   max-width: 1920px;
 }
@@ -6,6 +8,13 @@
   max-width: 1490px !important;
   min-width: 571px !important;   
   width: 95% !important;
+}
+
+.comfirmModalClass > .modal-dialog {
+    max-width: 500px !important;
+    min-width: 200px !important;   
+    width: 95% !important;
+    margin-top: 20vh;
 }
 
 a:link {
@@ -43,4 +52,69 @@ a:visited {
   line-height: 15px;
   // margin: 10px;
   // text-align: center;
+}
+
+.login-panel .ui-inputtext:focus {
+  border-width: 2px 2px 2px 2px;
+  border-color: #1471AE;}
+
+h2 {
+  color: black;
+}
+
+.myCustomModalClass .modal-dialog {
+  max-width: 90%;
+}
+
+.dialogHeader {
+  background-color:#153971;
+  height: 4em; 
+  color:white;
+  text-align: center;
+  padding-top: .5em;
+}
+
+.toast-bootstrap-compatibility-fix {
+  opacity:1;
+}
+
+// .toast-info {
+//   background-color: #2F96B4 !important;
+//   padding: 0 1em 0 1em;
+// }
+
+.toast-success {
+  color: white;
+  padding: 0.5em 1.5em 0.5em 1.5em;
+  font-size: 2.5em;
+  font-weight: bold;
+}
+
+a.disabled {
+    pointer-events: none;
+    cursor: default;
+    color: grey
+}
+
+a.enabled {
+    cursor: pointer;
+    color: white;
+}
+
+.popup-header-bar {
+    background-color:black;
+    height: 3em; 
+    padding: .5em .5em .5em 2em
+}
+
+.popup-header {
+    color: white; 
+    text-align: center;
+}
+
+.popup-tool-bar {
+    background-color:#153971;
+    height: 3em; 
+    color:white;
+    padding: .5em .5em .5em 2em
 }

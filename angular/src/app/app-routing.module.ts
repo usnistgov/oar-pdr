@@ -1,88 +1,49 @@
-import { NgModule }             from '@angular/core';
+import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { LandingAboutComponent } from './landingAbout/landingAbout.component';
 import { LandingComponent } from './landing/landing.component';
+import { LandingPageComponent } from './landing/landingpage.component';
 import { NoidComponent } from './landing/noid.component';
 import { NerdmComponent } from './landing/nerdm.component';
 // import { SearchResolve } from './landing/search-service.resolve';
-import { ErrorComponent, UserErrorComponent } from './landing/error.component';
-import { DatacartComponent} from './datacart/datacart.component';
+import { NotFoundComponent, InternalErrorComponent } from './errors/errors.module';
+import { DatacartComponent } from './datacart/datacart.component';
 
 const routes: Routes = [
-  { path: '', redirectTo: '/about', pathMatch: 'full' },
+    { path: '', redirectTo: 'about', pathMatch: 'full' },
 
-  { path: 'about',  children: [
-    {
-      path: '',
-     component: LandingAboutComponent
-    } ] 
-  },
+    // app paths
+    { path: 'about',         component: LandingAboutComponent },
+    { path: 'od/id',
+      children: [
+          { path: '',                component: NoidComponent          },
+          { path: ':id',             component: LandingPageComponent   },
+          { path: 'ark:/88434/:id',  component: LandingPageComponent   }
+      ]
+    },
+    { path: 'nerdm',                 component: NerdmComponent         },
+    { path: 'datacart/:mode',        component: DatacartComponent      },
 
- { path: 'od/id/:id',
-   children: [
-   {
-     path: '',
-     component: LandingComponent,
-     
-   }
- ]}, {
-  path: 'od/id/ark:/88434/:id',
-  children: [
-    {
-      path: '',
-      component: LandingComponent,
-      
-    }
-  ]
-},{
-  path: 'od/id',
-  children: [
-    {
-      path: '',
-      component: NoidComponent,
-      
-    }
-  ]
-}
-,{
-  path: 'nerdm',
-  children: [
-    {
-      path: '',
-      component: NerdmComponent
-    }
-  ]
-},{
-  path: 'datacart/:mode',
-  children: [
-      {
-        path: '',
-        component: DatacartComponent
-      }
-  ]
-},{
-  path: 'error/:id',
-  children: [
-    {
-      path: '',
-      component: ErrorComponent
-    }
-  ]
-}
-,{
-  path: 'usererror/:id',
-  children: [
-    {
-      path: '',
-      component: UserErrorComponent
-    }
-  ]
-}
+    // error paths
+    { path: 'not-found', 
+      children: [
+          { path: '',                component: NotFoundComponent      },
+          { path: ':id',             component: NotFoundComponent      }
+      ]
+    },
+    { path: 'int-error', 
+      children: [
+          { path: '',                component: InternalErrorComponent },
+          { path: ':id',             component: InternalErrorComponent }
+      ]
+    },
+
+    { path: '**',                    component: NotFoundComponent      }
 ];
 
 @NgModule({
-  imports: [ RouterModule.forRoot(routes,{ initialNavigation: 'enabled' }) ],
-  exports: [ RouterModule ],
+  imports: [RouterModule.forRoot(routes, { initialNavigation: 'enabled' })],
+  exports: [RouterModule],
   // providers: [ SearchResolve ]
 })
-export class AppRoutingModule {}
+export class AppRoutingModule { }

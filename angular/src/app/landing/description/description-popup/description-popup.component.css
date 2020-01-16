@@ -1,0 +1,27 @@
+.btn-cancel {
+    float:right;
+    margin:0em 2em 2em 1em;
+    width:150px; 
+    height:2em; 
+    background-color:grey;
+    color:white;
+    padding-right: 1em;
+}
+
+#header-bar {
+    background-color:black;
+    height: 3em; 
+    padding: .5em .5em .5em 2em
+}
+
+#header {
+    color: white; 
+    text-align: center;
+}
+
+#tool-bar {
+    background-color:#153971;
+    height: 3em; 
+    color:white;
+    padding: .5em .5em .5em 2em
+}

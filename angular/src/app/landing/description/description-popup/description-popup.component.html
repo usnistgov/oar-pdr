@@ -1,0 +1,34 @@
+<!-- Make the pop up window look similar to the landingpage with black header bar and blue tool bar -->
+<div class="popup-header-bar">
+    <h2 class="popup-header">{{title}}</h2>
+</div>
+
+<div class="popup-tool-bar">
+    <!-- Buttons are arranged from right to left -->
+
+    <p-toolbar name="toolbar">
+        <div class="ui-toolbar-group-right">
+            <!-- Cancel button -->
+            <button pButton type="submit" class="btn-cancel" (click)="cancelChange();" label="Cancel"
+                icon="faa faa-trash faa-1x icon-white" iconPos="left">
+            </button>
+
+            <!-- Save button 
+              -  Will be disabled if input field is empty or all white spaces
+              -->
+            <button pButton type="submit"
+                style="float: right;width:150px; height:2em; background-color:green;color:white;padding-right: 1em;" [disabled]="inputValue[field].trim()==''"
+                (click)="saveDescription();" label="Save" icon="faa faa-save faa-1x icon-white" iconPos="left">
+            </button>
+        </div>
+    </p-toolbar>
+</div>
+
+<!-- Content editable div to allow user to edit -->
+<div style="margin: 2em;">
+    <div tabindex="1" contenteditable [ceModel]="inputValue[field]" [ceDefault]="defaultText"
+        (ceChange)="onDescriptionChange(field,$event)" placeholder="defaultText"
+        style="border: 1px solid green !Important;padding: .5em;">
+    </div>
+    <div *ngIf="message" style="font-size: 12px; margin-top: .5em;">{{message}}</div>
+</div>

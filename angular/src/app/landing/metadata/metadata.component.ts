@@ -35,7 +35,9 @@ export class MetadataComponent {
   }
 
   ngOnInit() {
+    if(this.record != undefined && this.record != null){
       delete this.record["_id"];
+    }
   }
    
   generateArray(obj){

@@ -1,0 +1,9 @@
+.btn-cancel {
+    float:right;
+    margin:0em 1em 2em 1em;
+    width:150px; 
+    background-color:grey;
+    color:white;
+    padding-right: 1em;
+}
+
