@@ -14,6 +14,7 @@ import { CommonFunctionService } from '../../shared/common-function/common-funct
 import { GoogleAnalyticsService } from '../../shared/ga-service/google-analytics.service';
 import { NotificationService } from '../../shared/notification-service/notification.service';
 import { EditStatusService } from '../editcontrol/editstatus.service';
+import { NerdmComp } from '../../nerdm/nerdm';
 
 declare var _initAutoTracker: Function;
 
@@ -35,10 +36,7 @@ export class DataFilesComponent {
     @Input() ediid: string;
     @Input() editEnabled: boolean;    //Disable download all functionality if edit is enabled
 
-    isAccessPage: boolean = false;
-    accessPages: Map<string, string> = new Map();
-    accessUrls: string[] = [];
-    accessTitles: string[] = [];
+    accessPages: NerdmComp[] = [];
     isReferencedBy: boolean = false;
     isDocumentedBy: boolean = false;
     cols: any[];
@@ -136,7 +134,9 @@ export class DataFilesComponent {
 
 
     ngOnChanges() {
-        this.checkAccesspages();
+        this.accessPages = []
+        if (this.record['components'])
+            this.accessPages = this.selectAccessPages(this.record['components']);
         this.buildTree();
     }
 
@@ -223,10 +223,10 @@ export class DataFilesComponent {
     /**
      * Function to reset the download status and incart status.
      */
-    resetStstus(files: any) {
+    resetStatus(files: any) {
         for (let comp of files) {
             if (comp.children.length > 0) {
-                this.resetStstus(comp.children);
+                this.resetStatus(comp.children);
             } else {
                 comp.data.isIncart = false;
                 // comp.data.downloadStatus = null;
@@ -239,7 +239,7 @@ export class DataFilesComponent {
      * Function to sync the download status from data cart.
      */
     updateStatusFromCart() {
-        this.resetStstus(this.files);
+        this.resetStatus(this.files);
 
         for (let key in this.cartMap) {
             let value = this.cartMap[key];
@@ -299,30 +299,11 @@ export class DataFilesComponent {
     }
 
     /**
-     * Function to Check if there are accesspages in the record inventory and components
+     * return an array of AccessPage components from the given input components array
      */
-    checkAccesspages() {
-        if (Array.isArray(this.record['inventory'])) {
-            if (this.record['inventory'][0].forCollection == "") {
-                for (let inv of this.record['inventory'][0].byType) {
-                    if (inv.forType == "nrdp:AccessPage")
-                        this.isAccessPage = true;
-                }
-            }
-        }
-        if (this.isAccessPage) {
-            this.accessPages = new Map();
-            for (let comp of this.record['components']) {
-                if (comp['@type'].includes("nrdp:AccessPage")) {
-                    if (comp["title"] !== "" && comp["title"] !== undefined)
-                        this.accessPages.set(comp["title"], comp["accessURL"]);
-                    else
-                        this.accessPages.set(comp["accessURL"], comp["accessURL"]);
-                }
-            }
-        }
-        this.accessTitles = Array.from(this.accessPages.keys());
-        this.accessUrls = Array.from(this.accessPages.values());
+    selectAccessPages(comps : NerdmComp[]) : NerdmComp[] {
+        return comps.filter(cmp => cmp['@type'].includes("nrdp:AccessPage") &&
+                                   ! cmp['@type'].includes("nrd:Hidden"));
     }
 
     /**
