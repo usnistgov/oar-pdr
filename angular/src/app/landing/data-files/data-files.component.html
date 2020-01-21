@@ -31,7 +31,7 @@
             <br>
             <span style="padding-left:2.00em" *ngFor="let apage of accessPages">
                 <i class="faa faa-external-link"> <span style="margin-left:0.3em;">
-                    <span *ngIf="apage['description']" else #noAccessTitle>
+                    <span *ngIf="apage['description']" else noAccessTitle>
                         <a href="{{apage['accessURL']}}" title="{{apage['description']}}"
                            (click)="gaService.gaTrackEvent('homepage', $event, 
                                                            'Resource title: ' + record.title,
