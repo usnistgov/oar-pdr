@@ -13,8 +13,8 @@ import { LPSConfig } from '../app/config/config';
 
 export const context = {
     production: false,
-    useMetadataService: true,
-    useCustomizationService: true
+    useMetadataService: false,
+    useCustomizationService: false
 };
 
 export const config: LPSConfig = {
@@ -51,6 +51,7 @@ export const testdata: {} = {
         ],
         "@id": "ark:/88434/mds0000fbk",
         "title": "Multiple Encounter Dataset (MEDS-I) - NIST Special Database 32",
+        "doi": "doi:10.18434/mds0000fbk",
         "contactPoint": {
             "hasEmail": "mailto:patricia.flanagan@nist.gov",
             "fn": "Patricia Flanagan"
@@ -101,12 +102,12 @@ export const testdata: {} = {
                 "downloadURL": "http://nigos.nist.gov:8080/nist/sd/32/NIST_SD32_MEDS-I_face.zip",
                 "filepath": "NIST_SD32_MEDS-I_face.zip",
                 "@type": [
-                    "nrdp:DataFile",
+                    "nrdp:AccessPage",
                     "dcat:Distribution"
                 ],
                 "@id": "cmps/NIST_SD32_MEDS-I_face.zip",
                 "_extensionSchemas": [
-                    "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+                    "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/AccessPage"
                 ]
             },
             {
@@ -126,6 +127,19 @@ export const testdata: {} = {
                 "@id": "cmps/NIST_SD32_MEDS-I_html.zip",
                 "_extensionSchemas": [
                     "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+                ]
+            },
+            {
+                "accessURL": "https://doi.org/10.18434/mds0000fbk",
+                "description": "DOI Access to landing page",
+                "title": "DOI Access to \"Multiple Encounter Dataset (MEDS-I)\"",
+                "@type": [
+                    "nrd:Hidden",
+                    "dcat:Distribution"
+                ],
+                "@id": "#doi:10.18434/mds0000fbk",
+                "_extensionSchemas": [
+                    "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/"
                 ]
             }
         ],
