@@ -302,8 +302,13 @@ export class DataFilesComponent {
      * return an array of AccessPage components from the given input components array
      */
     selectAccessPages(comps : NerdmComp[]) : NerdmComp[] {
-        return comps.filter(cmp => cmp['@type'].includes("nrdp:AccessPage") &&
-                                   ! cmp['@type'].includes("nrd:Hidden"));
+        let use : NerdmComp[] = comps.filter(cmp => cmp['@type'].includes("nrdp:AccessPage") &&
+                                       ! cmp['@type'].includes("nrd:Hidden"));
+        use = (JSON.parse(JSON.stringify(use))) as NerdmComp[];
+        return use.map((cmp) => {
+            if (! cmp['title']) cmp['title'] = cmp['accessURL']
+            return cmp;
+        });
     }
 
     /**
