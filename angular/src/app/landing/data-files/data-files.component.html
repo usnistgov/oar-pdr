@@ -207,8 +207,7 @@
                     <span *ngIf="refs['refType'] == 'IsReferencedBy'">
                         <br>
                         <i class="faa faa-external-link"> </i>
-                        <a style="margin-left:0.3em;" href={{refs.location}} target="blank"
-                            (click)="gaService.gaTrackEvent('outbound', $event, 'Resource title: '+record.title, refs.location)">
+                        <a style="margin-left:0.3em;" href={{refs.location}} target="blank">
                             {{ refs.location }}</a>
                     </span>
 

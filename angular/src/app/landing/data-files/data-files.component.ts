@@ -619,9 +619,6 @@ export class DataFilesComponent {
     * Function to set status when a file was downloaded
     **/
     setFileDownloaded(rowData: any) {
-        // Google Analytics code to track download event
-        this.gaService.gaTrackEvent('download', undefined, 'Resource title: ' + this.record['title'], rowData.downloadUrl);
-
         rowData.downloadStatus = 'downloaded';
         this.cartService.updateCartItemDownloadStatus(rowData.cartId, 'downloaded');
         this.downloadStatus = this.updateDownloadStatus(this.files) ? "downloaded" : null;
