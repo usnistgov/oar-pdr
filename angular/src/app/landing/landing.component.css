@@ -677,3 +677,11 @@ a:visited {
   clip: rect(0,0,0,0);
   border: 0;
 }
+
+.grey-color{
+  color:rgb(107, 107, 107);
+}
+
+.grey-background-color{
+  background-color:rgb(107, 107, 107);
+}

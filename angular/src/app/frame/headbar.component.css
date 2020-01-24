@@ -62,3 +62,15 @@
     width: 20px;
     padding: 5px 3px 3px 3px ;
 }
+
+a:visited {
+  color: lightpink;
+  background-color: transparent;
+  text-decoration: none;
+}
+
+a:link {
+  color: white;
+  background-color: transparent;
+  text-decoration: none;
+}
