@@ -19,7 +19,7 @@
         &nbsp;&nbsp;
         <span *ngIf="status" class="badge" id="appStatus" style="background-color:darkcyan">{{ status }}</span>
         <div class="header-links" style="float: right; vertical-align: bottom;">
-          <a href="/about" target="_blank"
+          <a href="/pdr/about" target="_blank"
             [ngClass]="{'disabled':editstatsvc.editMode,'enabled':!editstatsvc.editMode}"><b>About</b></a> |
           <a href="{{contactLink}}" target="_blank" 
             [ngClass]="{'disabled':editstatsvc.editMode,'enabled':!editstatsvc.editMode}"><b>Contact</b></a> |
