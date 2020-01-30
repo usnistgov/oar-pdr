@@ -35,6 +35,7 @@ export class HeadbarComponent {
     cartLength: number = 0;
     editEnabled: any;
     editMode: boolean = false;
+    contactLink: string = "";
 
     constructor(
         private el: ElementRef,
@@ -47,6 +48,7 @@ export class HeadbarComponent {
         if (!(cfg instanceof AppConfig))
             throw new Error("HeadbarComponent: Wrong config type provided: " + cfg);
         this.searchLink = cfg.get("locations.pdrSearch", "/sdp/");
+        this.contactLink = cfg.get("locations.pdrSearch", "/sdp/") + "#/help/app-contact-us";
         this.status = cfg.get("status", "");
         this.appVersion = cfg.get("appVersion", "");
         this.editEnabled = cfg.get("editEnabled", "");

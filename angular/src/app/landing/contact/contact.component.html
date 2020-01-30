@@ -11,8 +11,7 @@
                 Contact:
                 <strong>
                     <a class="font14" *ngIf="isEmail"
-                        href="{{record.contactPoint.hasEmail}}" target="_top"
-                        (click)="gaService.gaTrackEvent('Email', $event, 'Resource title: ' + record.title, record.contactPoint.hasEmail)">
+                        href="{{record.contactPoint.hasEmail}}" target="_top">
                         {{record.contactPoint.fn}}</a>
                     <span *ngIf="!isEmail">{{record.contactPoint.fn}}</span>
                 </strong>..
@@ -27,8 +26,7 @@
                     <span class="font14" *ngIf="isEmail">
                         <br><strong>Email:</strong>
                         <a *ngIf="isEmail" href="{{record.contactPoint.hasEmail}}"
-                            target="_top"
-                            (click)="gaService.gaTrackEvent('Email', $event, 'Resource title: ' + record.title, record.contactPoint.hasEmail)">
+                            target="_top">
                             {{record.contactPoint.hasEmail.split(":")[1]}}</a>
                     </span>
                     <div class="font14" *ngIf="record.contactPoint.address">

@@ -20,18 +20,18 @@
         <span *ngIf="status" class="badge" id="appStatus" style="background-color:darkcyan">{{ status }}</span>
         <div class="header-links" style="float: right; vertical-align: bottom;">
           <a href="/pdr/about" target="_blank"
-             [ngClass]="{'disabled':editstatsvc.editMode,'enabled':!editstatsvc.editMode}"><i
-             class="faa faa-home faa-1x" [ngStyle]="{'color':getMenuTextColor()}" data-toggle="tooltip"
-             title="Go to home page"></i></a> |
-          <a href="{{searchLink}}" target="_blank" 
-             [ngClass]="{'disabled':editstatsvc.editMode,'enabled':!editstatsvc.editMode}"><b>Search</b></a> |
-          <a href="/datacart/normal" target="_blank" 
-          [ngClass]="{'disabled':editstatsvc.editMode && editEnabled,'enabled':!editstatsvc.editMode && !editEnabled}"><b>Cart</b><i 
-             class="faa faa-shopping-cart faa-1x" [ngStyle]="{'color':getMenuTextColor()}"></i><span 
-             class="w3-badge badge-pill badge-notify">&nbsp;{{cartLength}}&nbsp;</span></a>
+            [ngClass]="{'disabled':editstatsvc.editMode,'enabled':!editstatsvc.editMode}"><b>About</b></a> |
+          <a href="{{contactLink}}" target="_blank" 
+            [ngClass]="{'disabled':editstatsvc.editMode,'enabled':!editstatsvc.editMode}"><b>Contact</b></a> |
+          <a href="{{searchLink}}" target="_blank"
+            [ngClass]="{'disabled':editstatsvc.editMode,'enabled':!editstatsvc.editMode}"><b>Search</b></a> |
+          <a href="/datacart/normal" target="_blank"
+            [ngClass]="{'disabled':editstatsvc.editMode && editEnabled,'enabled':!editstatsvc.editMode && !editEnabled}"><b>Cart</b><i
+              class="faa faa-shopping-cart faa-1x" [ngStyle]="{'color':getMenuTextColor()}"></i><span
+              class="w3-badge badge-pill badge-notify">&nbsp;{{cartLength}}&nbsp;</span></a>
           <span *ngIf="editEnabled && editstatsvc.userID">
             | <i class="faa faa-user-circle faa-1x icon-white" style="color: white; cursor: pointer;"
-                 data-toggle="tooltip" title="{{editstatsvc.userID}}" (click)="showUserId()"></i>
+              data-toggle="tooltip" title="{{editstatsvc.userID}}" (click)="showUserId()"></i>
           </span>
         </div>
       </div>
