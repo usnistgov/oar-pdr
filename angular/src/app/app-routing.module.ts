@@ -10,7 +10,7 @@ import { NotFoundComponent, InternalErrorComponent } from './errors/errors.modul
 import { DatacartComponent } from './datacart/datacart.component';
 
 const routes: Routes = [
-    { path: '', redirectTo: 'about', pathMatch: 'full' },
+    { path: '', redirectTo: '/about', pathMatch: 'full' },
 
     // app paths
     { path: 'about',         component: LandingAboutComponent },
