@@ -104,16 +104,6 @@ export class HeadbarComponent {
     }
 
     /*
-     *   In edit mode, top menu will be disabled - text color set to grey
-     */
-    getMenuTextColor() {
-        if (this.editstatsvc.editMode)
-            return 'grey';
-        else
-            return 'white';
-    }
-
-    /*
      *   In edit mode, mouse cursor set to normal
      */
     getCursor() {
@@ -125,5 +115,22 @@ export class HeadbarComponent {
 
     showUserId(){
         this.notificationService.showSuccessWithTimeout("Logged in as "+this.editstatsvc.userID, "", 3000);
+    }
+
+    /**
+     *   Get color for top menu (only handle Cart at this time. May handle other items later)
+     *     enabled: white
+     *     disabled: grey
+     */
+    getMenuColor(item?: string){
+      if(item == 'Cart'){
+        if(this.editEnabled){
+          return "grey";
+        }else{
+          return "white"
+        }
+      }else{
+        return "white"
+      }
     }
 }
