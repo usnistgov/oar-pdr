@@ -33,8 +33,6 @@ export class AppComponent {
     if(this.inBrowser){
       this.gaCode = this.cfg.get("gaCode", "") as string;
       this.gaService.appendGaTrackingCode(this.gaCode);
-
-      console.log('this.gaCode', this.gaCode);
     }
   }
 }

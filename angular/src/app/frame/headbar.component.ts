@@ -35,6 +35,7 @@ export class HeadbarComponent {
     cartLength: number = 0;
     editEnabled: any;
     editMode: boolean = false;
+    contactLink: string = "";
 
     constructor(
         private el: ElementRef,
@@ -47,6 +48,7 @@ export class HeadbarComponent {
         if (!(cfg instanceof AppConfig))
             throw new Error("HeadbarComponent: Wrong config type provided: " + cfg);
         this.searchLink = cfg.get("locations.pdrSearch", "/sdp/");
+        this.contactLink = cfg.get("locations.pdrSearch", "/sdp/") + "#/help/app-contact-us";
         this.status = cfg.get("status", "");
         this.appVersion = cfg.get("appVersion", "");
         this.editEnabled = cfg.get("editEnabled", "");
@@ -102,16 +104,6 @@ export class HeadbarComponent {
     }
 
     /*
-     *   In edit mode, top menu will be disabled - text color set to grey
-     */
-    getMenuTextColor() {
-        if (this.editstatsvc.editMode)
-            return 'grey';
-        else
-            return 'white';
-    }
-
-    /*
      *   In edit mode, mouse cursor set to normal
      */
     getCursor() {
@@ -123,5 +115,22 @@ export class HeadbarComponent {
 
     showUserId(){
         this.notificationService.showSuccessWithTimeout("Logged in as "+this.editstatsvc.userID, "", 3000);
+    }
+
+    /**
+     *   Get color for top menu (only handle Cart at this time. May handle other items later)
+     *     enabled: white
+     *     disabled: grey
+     */
+    getMenuColor(item?: string){
+      if(item == 'Cart'){
+        if(this.editEnabled){
+          return "grey";
+        }else{
+          return "white"
+        }
+      }else{
+        return "white"
+      }
     }
 }
