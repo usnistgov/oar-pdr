@@ -29,7 +29,7 @@ describe('FootbarComponent', () => {
         expect(links.includes("https://twitter.com/nist")).toBe(true);
         expect(links.includes("https://www.facebook.com/NIST/")).toBe(true);
         expect(links.includes("https://www.linkedin.com/company/nist")).toBe(true);
-        expect(links.includes("https://www.instagram.com/usnistgov/")).toBe(true);
+        expect(links.includes("https://www.instagram.com/nist/")).toBe(true);
         expect(links.includes("https://www.youtube.com/nist")).toBe(true);
         expect(links.includes("https://nist.gov/")).toBe(true);
     });
