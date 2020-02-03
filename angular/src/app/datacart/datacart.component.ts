@@ -998,7 +998,7 @@ export class DatacartComponent implements OnInit, OnDestroy {
     */
     getDownloadedColor() {
         if (this.noFileDownloaded) {
-            return "grey";
+            return "rgb(82, 82, 82)";
         } else {
             return "white";
         }
