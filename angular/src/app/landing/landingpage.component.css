@@ -1,1 +1,16 @@
+.landingcard {
+    padding: 2.5rem 2.5rem 2.5rem 2.5rem;
+    margin-bottom: 0rem;
+    border: 0px;
+}
+
+.landingcard h3 {
+    font-size: 1.25em;
+    font-weight: 400;
+}
+
+.landingcard h2 {
+    font-size: 1.375em;
+    font-weight: 400;
+}
 
