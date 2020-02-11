@@ -37,13 +37,18 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import com.nimbusds.jose.JOSEException;
+
 import gov.nist.oar.customizationapi.exceptions.BadGetwayException;
 import gov.nist.oar.customizationapi.exceptions.CustomizationException;
+import gov.nist.oar.customizationapi.exceptions.UnAuthenticatedUserException;
 import gov.nist.oar.customizationapi.exceptions.UnAuthorizedUserException;
 import gov.nist.oar.customizationapi.helpers.AuthenticatedUserDetails;
 import gov.nist.oar.customizationapi.helpers.UserDetailsExtractor;
 import gov.nist.oar.customizationapi.service.JWTTokenGenerator;
 import gov.nist.oar.customizationapi.service.UserToken;
+
+import org.junit.Assert;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
 //
@@ -104,6 +109,18 @@ public class AuthControllerTest {
 //	        assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
 	    
 	    }
+	 @WithMockSaml(samlAssertFile = "/saml-auth-assert.xml")
+     @Test
+     public void testAuthController() throws JOSEException, UnAuthorizedUserException, CustomizationException, UnAuthenticatedUserException, BadGetwayException {
+
+         //final AuthController authController = new AuthController();
+
+        
+         final UserToken apiToken = authController.token(null, null);
+
+         Assert.assertNotNull(apiToken);
+         Assert.assertTrue(apiToken.getToken().length() > 0);
+     }
 //
 //	    @LocalServerPort
 //	    int port;

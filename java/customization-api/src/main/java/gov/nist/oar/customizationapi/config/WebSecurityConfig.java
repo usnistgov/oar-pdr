@@ -16,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -28,6 +29,8 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 import gov.nist.oar.customizationapi.config.JWTConfig.JWTAuthenticationFilter;
 import gov.nist.oar.customizationapi.config.JWTConfig.JWTAuthenticationProvider;
+import gov.nist.oar.customizationapi.config.ServiceConfig.ServiceAuthenticationFilter;
+import gov.nist.oar.customizationapi.config.ServiceConfig.ServiceAuthenticationProvider;
 
 /**
  * In this configuration all the end points which need to be secured under
@@ -40,56 +43,86 @@ import gov.nist.oar.customizationapi.config.JWTConfig.JWTAuthenticationProvider;
 @EnableWebSecurity
 public class WebSecurityConfig {
 
-    /**
-     * Rest security configuration for rest api
-     */
-    @Configuration
-    @Order(1)
-    public static class RestApiSecurityConfig extends WebSecurityConfigurerAdapter {
-	private Logger logger = LoggerFactory.getLogger(RestApiSecurityConfig.class);
+	/**
+	 * Rest security configuration for rest api
+	 */
+	@Configuration
+	@Order(1)
+	public static class RestApiSecurityConfig extends WebSecurityConfigurerAdapter {
+		private Logger logger = LoggerFactory.getLogger(RestApiSecurityConfig.class);
 
-	@Value("${jwt.secret:testsecret}")
-	String secret;
+		@Value("${jwt.secret:testsecret}")
+		String secret;
 
-	private static final String apiMatcher = "/api/**";
+		private static final String apiMatcher = "/pdr/lp/editor/**";
 
-	@Override
-	protected void configure(HttpSecurity http) throws Exception {
-	    logger.info("RestApiSecurityConfig HttpSecurity for REST /api endpoints");
-	    http.addFilterBefore(new JWTAuthenticationFilter(apiMatcher, super.authenticationManager()),
-		    UsernamePasswordAuthenticationFilter.class);
+		@Override
+		protected void configure(HttpSecurity http) throws Exception {
+			logger.info("RestApiSecurityConfig HttpSecurity for REST /api endpoints");
+			http.addFilterBefore(new JWTAuthenticationFilter(apiMatcher, super.authenticationManager()),
+					UsernamePasswordAuthenticationFilter.class);
 
-	    http.authorizeRequests().antMatchers(HttpMethod.PATCH, apiMatcher).permitAll();
-	    http.authorizeRequests().antMatchers(HttpMethod.PUT, apiMatcher).permitAll();
-	    http.authorizeRequests().antMatchers(HttpMethod.DELETE, apiMatcher).permitAll();
-	    http.authorizeRequests().antMatchers(apiMatcher).authenticated().and().httpBasic().and().csrf().disable();
+			http.authorizeRequests().antMatchers(HttpMethod.PATCH, apiMatcher).permitAll();
+			http.authorizeRequests().antMatchers(HttpMethod.PUT, apiMatcher).permitAll();
+			http.authorizeRequests().antMatchers(HttpMethod.DELETE, apiMatcher).permitAll();
+			http.authorizeRequests().antMatchers(apiMatcher).authenticated().and().httpBasic().and().csrf().disable();
 
+		}
+
+		@Override
+		protected void configure(AuthenticationManagerBuilder auth) {
+			auth.authenticationProvider(new JWTAuthenticationProvider(secret));
+		}
 	}
 
-	@Override
-	protected void configure(AuthenticationManagerBuilder auth) {
-	    auth.authenticationProvider(new JWTAuthenticationProvider(secret));
+	/**
+	 * Security configuration for authorization end points
+	 */
+	@Configuration
+	@Order(3)
+	public static class AuthSecurityConfig extends WebSecurityConfigurerAdapter {
+		private Logger logger = LoggerFactory.getLogger(AuthSecurityConfig.class);
+
+		private static final String apiMatcher = "/auth/**";
+
+		@Override
+		protected void configure(HttpSecurity http) throws Exception {
+			logger.info("AuthSecurity Config set up authorization related entrypoints.");
+
+			http.exceptionHandling().authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED));
+
+			http.antMatcher(apiMatcher).authorizeRequests().anyRequest().authenticated();
+		}
 	}
-    }
 
-    /**
-     * Security configuration for authorization end points
-     */
-    @Configuration
-    @Order(2)
-    public static class AuthSecurityConfig extends WebSecurityConfigurerAdapter {
-	private Logger logger = LoggerFactory.getLogger(AuthSecurityConfig.class);
+	/**
+	 * Security configuration for service level authorization end points
+	 */
+	@Configuration
+	@Order(2)
+	public static class AuthServiceSecurityConfig extends WebSecurityConfigurerAdapter {
+		private Logger logger = LoggerFactory.getLogger(AuthServiceSecurityConfig.class);
 
-	private static final String apiMatcher = "/auth/**";
+		private static final String apiMatcher = "/pdr/lp/draft/**";
 
-	@Override
-	protected void configure(HttpSecurity http) throws Exception {
-	    logger.info("AuthSecurity Config set up http related entrypoints.");
+		@Override
+		protected void configure(HttpSecurity http) throws Exception {
+			logger.info("AuthSecurity Config set up http related entrypoints.");
 
-	    http.exceptionHandling().authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED));
+			http.addFilterBefore(new ServiceAuthenticationFilter(apiMatcher, super.authenticationManager()),
+					UsernamePasswordAuthenticationFilter.class);
 
-	    http.antMatcher(apiMatcher).authorizeRequests().anyRequest().authenticated();
+			http.authorizeRequests().antMatchers(HttpMethod.GET, apiMatcher).permitAll();
+			http.authorizeRequests().antMatchers(HttpMethod.PUT, apiMatcher).permitAll();
+			http.authorizeRequests().antMatchers(HttpMethod.DELETE, apiMatcher).permitAll();
+			http.authorizeRequests().antMatchers(apiMatcher).authenticated().and().httpBasic().and().csrf().disable();
+
+		}
+
+		@Override
+		protected void configure(AuthenticationManagerBuilder auth) {
+			auth.authenticationProvider(new ServiceAuthenticationProvider());
+		}
 	}
-    }
 
 }

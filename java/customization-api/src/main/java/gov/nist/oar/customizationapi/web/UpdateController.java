@@ -113,7 +113,7 @@ public class UpdateController {
     }
 
     /**
-     * Finalize changes made in the record and send it back to bakend metadata
+     * Finalize changes made in the record and send it back to backend metadata
      * server to merge and send for review.
      * 
      * @param ediid  Unique record id
