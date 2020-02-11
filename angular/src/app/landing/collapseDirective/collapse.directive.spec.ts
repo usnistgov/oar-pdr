@@ -2,7 +2,7 @@ import { Component, DebugElement } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 
-import { Collaspe } from './collapse.directive';
+import { Collapse } from './collapse.directive';
 
 
 @Component({
@@ -16,14 +16,14 @@ import { Collaspe } from './collapse.directive';
 })
 class TestComponent { }
 
-describe('Collaspe Directive', () => {
+describe('Collapse Directive', () => {
   let component: TestComponent;
   let fixture: ComponentFixture<TestComponent>;
   let iEle: DebugElement;
   let divEle: DebugElement;
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [Collaspe, TestComponent]
+      declarations: [Collapse, TestComponent]
     })
     fixture = TestBed.createComponent(TestComponent);
     component = fixture.componentInstance;
