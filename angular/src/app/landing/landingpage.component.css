@@ -4,12 +4,16 @@
     border: 0px;
 }
 
-.landingcard h3 {
+.landing-body {
+    border: 0px;
+}
+
+.landing-body h3 {
     font-size: 1.25em;
     font-weight: 400;
 }
 
-.landingcard h2 {
+.landing-body h2 {
     font-size: 1.375em;
     font-weight: 400;
 }
