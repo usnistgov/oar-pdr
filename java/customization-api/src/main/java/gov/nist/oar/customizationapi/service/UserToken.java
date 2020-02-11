@@ -12,42 +12,43 @@
  */
 package gov.nist.oar.customizationapi.service;
 
-
 import java.io.Serializable;
 
 import gov.nist.oar.customizationapi.helpers.AuthenticatedUserDetails;
+
 /**
  * This is to store user id and JWT information.
+ * 
  * @author Deoyani Nandrekar-Heinis
  *
  */
 public class UserToken implements Serializable {
 
-    /**
-     * 
-     */
-    private static final long serialVersionUID = -3414986086109823716L;
-    private String token;
-    private AuthenticatedUserDetails userDetails;
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -3414986086109823716L;
+	private String token;
+	private AuthenticatedUserDetails userDetails;
 
-    public UserToken(AuthenticatedUserDetails userDetails, String token) {
-        this.token = token;
-        this.userDetails = userDetails;
-    }
+	public UserToken(AuthenticatedUserDetails userDetails, String token) {
+		this.token = token;
+		this.userDetails = userDetails;
+	}
 
-    public String getToken() {
-        return token;
-    }
+	public String getToken() {
+		return token;
+	}
 
-    public void setToken(String token) {
-        this.token = token;
-    }
-    
-    public AuthenticatedUserDetails getUserDetails() {
-	return this.userDetails;
-    }
-    
-    public void  setUserDetails(AuthenticatedUserDetails userDetails) {
-	this.userDetails = userDetails;
-    }
+	public void setToken(String token) {
+		this.token = token;
+	}
+
+	public AuthenticatedUserDetails getUserDetails() {
+		return this.userDetails;
+	}
+
+	public void setUserDetails(AuthenticatedUserDetails userDetails) {
+		this.userDetails = userDetails;
+	}
 }

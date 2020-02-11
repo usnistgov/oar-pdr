@@ -44,130 +44,130 @@ import com.mongodb.client.MongoDatabase;
  */
 public class MongoConfig {
 
-    private static Logger log = LoggerFactory.getLogger(MongoConfig.class);
+	private static Logger log = LoggerFactory.getLogger(MongoConfig.class);
 
-    MongoClient mongoClient;
+	MongoClient mongoClient;
 
-    private MongoDatabase mongoDb;
-    private MongoCollection<Document> recordsCollection;
-    private MongoCollection<Document> changesCollection;
-    private String metadataServerUrl = "";
-    List<ServerAddress> servers = new ArrayList<ServerAddress>();
+	private MongoDatabase mongoDb;
+	private MongoCollection<Document> recordsCollection;
+	private MongoCollection<Document> changesCollection;
+	private String metadataServerUrl = "";
+	List<ServerAddress> servers = new ArrayList<ServerAddress>();
 
-    @Value("${oar.mdserver:testserver}")
-    private String mdserver;
-    @Value("${oar.dbcollections.records: records}")
-    private String record;
-    @Value("${oar.dbcollections.changes: changes}")
-    private String changes;
-    @Value("${oar.mongodb.port:3333}")
-    private int port;
-    @Value("${oar.mongodb.host:localhost}")
-    private String host;
-    @Value("${oar.mongodb.database.name:UpdateDB}")
-    private String dbname;
-    @Value("${oar.mongodb.readwrite.user:testuser}")
-    private String user;
-    @Value("${oar.mongodb.readwrite.password:testpassword}")
-    private String password;
-    @Value("${oar.mdserver.secret:secret}")
-    private String mdserversecret;
+	@Value("${oar.mdserver:testserver}")
+	private String mdserver;
+	@Value("${oar.dbcollections.records: records}")
+	private String record;
+	@Value("${oar.dbcollections.changes: changes}")
+	private String changes;
+	@Value("${oar.mongodb.port:3333}")
+	private int port;
+	@Value("${oar.mongodb.host:localhost}")
+	private String host;
+	@Value("${oar.mongodb.database.name:UpdateDB}")
+	private String dbname;
+	@Value("${oar.mongodb.readwrite.user:testuser}")
+	private String user;
+	@Value("${oar.mongodb.readwrite.password:testpassword}")
+	private String password;
+	@Value("${oar.mdserver.secret:secret}")
+	private String mdserversecret;
 
-    @PostConstruct
-    public void initIt() throws Exception {
+	@PostConstruct
+	public void initIt() throws Exception {
 
-	mongoClient = (MongoClient) this.mongo();
-	log.info("########## " + dbname + " ########");
+		mongoClient = (MongoClient) this.mongo();
+		log.info("########## " + dbname + " ########");
 
-	this.setMongodb(this.dbname);
-	this.setRecordCollection(this.record);
-	this.setChangeCollection(this.changes);
-	this.setMetadataServer(this.mdserver);
+		this.setMongodb(this.dbname);
+		this.setRecordCollection(this.record);
+		this.setChangeCollection(this.changes);
+		this.setMetadataServer(this.mdserver);
 
-    }
+	}
 
-    /**
-     * Get mongodb database name
-     * 
-     * @return
-     */
+	/**
+	 * Get mongodb database name
+	 * 
+	 * @return
+	 */
 
-    public MongoDatabase getMongoDb() {
-	return mongoDb;
-    }
+	public MongoDatabase getMongoDb() {
+		return mongoDb;
+	}
 
-    /**
-     * Set mongodb database name
-     * 
-     * @param dbname
-     */
-    private void setMongodb(String dbname) {
-	mongoDb = mongoClient.getDatabase(dbname);
-    }
+	/**
+	 * Set mongodb database name
+	 * 
+	 * @param dbname
+	 */
+	private void setMongodb(String dbname) {
+		mongoDb = mongoClient.getDatabase(dbname);
+	}
 
-    /***
-     * Get records collection from Mongodb
-     * 
-     * @return
-     */
-    public MongoCollection<Document> getRecordCollection() {
-	return recordsCollection;
-    }
+	/***
+	 * Get records collection from Mongodb
+	 * 
+	 * @return
+	 */
+	public MongoCollection<Document> getRecordCollection() {
+		return recordsCollection;
+	}
 
-    /**
-     * Set records collection
-     */
-    private void setRecordCollection(String record) {
-	recordsCollection = mongoDb.getCollection(record);
-    }
+	/**
+	 * Set records collection
+	 */
+	private void setRecordCollection(String record) {
+		recordsCollection = mongoDb.getCollection(record);
+	}
 
-    /***
-     * Get changes collection from Mongodb
-     * 
-     * @return
-     */
-    public MongoCollection<Document> getChangeCollection() {
-	return changesCollection;
-    }
+	/***
+	 * Get changes collection from Mongodb
+	 * 
+	 * @return
+	 */
+	public MongoCollection<Document> getChangeCollection() {
+		return changesCollection;
+	}
 
-    /**
-     * Set changes collection
-     */
-    private void setChangeCollection(String change) {
-	changesCollection = mongoDb.getCollection(change);
-    }
+	/**
+	 * Set changes collection
+	 */
+	private void setChangeCollection(String change) {
+		changesCollection = mongoDb.getCollection(change);
+	}
 
-    /**
-     * Get Metadata service URL
-     * 
-     * @return
-     */
-    public String getMetadataServer() {
-	return this.metadataServerUrl;
-    }
+	/**
+	 * Get Metadata service URL
+	 * 
+	 * @return
+	 */
+	public String getMetadataServer() {
+		return this.metadataServerUrl;
+	}
 
-    private void setMetadataServer(String mserver) {
-	this.metadataServerUrl = mserver;
-    }
+	private void setMetadataServer(String mserver) {
+		this.metadataServerUrl = mserver;
+	}
 
-    /**
-     * Get Metadata service secret to communicate with API
-     * 
-     * @return
-     */
-    public String getMDSecret() {
-	return this.mdserversecret;
-    }
+	/**
+	 * Get Metadata service secret to communicate with API
+	 * 
+	 * @return
+	 */
+	public String getMDSecret() {
+		return this.mdserversecret;
+	}
 
-    /**
-     * MongoClient : Initialize mongoclient for db operations
-     * 
-     * @return
-     * @throws Exception
-     */
-    public Mongo mongo() throws Exception {
-	servers.add(new ServerAddress(host, port));
-	return new MongoClient(servers, MongoCredential.createCredential(user, dbname, password.toCharArray()),
-		MongoClientOptions.builder().build());
-    }
+	/**
+	 * MongoClient : Initialize mongoclient for db operations
+	 * 
+	 * @return
+	 * @throws Exception
+	 */
+	public Mongo mongo() throws Exception {
+		servers.add(new ServerAddress(host, port));
+		return new MongoClient(servers, MongoCredential.createCredential(user, dbname, password.toCharArray()),
+				MongoClientOptions.builder().build());
+	}
 }

@@ -7,17 +7,16 @@ import org.springframework.boot.autoconfigure.mongo.MongoAutoConfiguration;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.context.annotation.ComponentScan;
 
-
 @SpringBootApplication
 @RefreshScope
-@ComponentScan(basePackages = {"gov.nist.oar.customizationapi"})
-@EnableAutoConfiguration(exclude={MongoAutoConfiguration.class})
+@ComponentScan(basePackages = { "gov.nist.oar.customizationapi" })
+@EnableAutoConfiguration(exclude = { MongoAutoConfiguration.class })
 public class CustomizationApiApplication {
 
-  public static void main(String[] args) {
-	System.out.println("MAIN CLASS *******************");
-	
-	SpringApplication.run(CustomizationApiApplication.class, args);
-  }
+	public static void main(String[] args) {
+		System.out.println("MAIN CLASS *******************");
+
+		SpringApplication.run(CustomizationApiApplication.class, args);
+	}
 
 }

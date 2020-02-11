@@ -22,25 +22,26 @@ import gov.nist.oar.customizationapi.helpers.JSONUtils;
 
 /**
  * Validate input parameters to check if its valid json and passes schema test.
+ * 
  * @author Deoyani Nandrekar-Heinis
  *
  */
 public class ProcessInputRequest {
-    private Logger logger = LoggerFactory.getLogger(ProcessInputRequest.class);
+	private Logger logger = LoggerFactory.getLogger(ProcessInputRequest.class);
 
-    /**
-     * Added this functionality to process input json string 
-     * 
-     * @param json
-     * @return
-     * @throws IOException
-     * @throws InvalidInputException
-     */
-    public boolean validateInputParams(String json) throws IOException, InvalidInputException {
-	logger.info("Validating input parameteres in the ProcessInputRequest class.");
-	// validate JSON and Validate schema against json-customization schema
-	return JSONUtils.validateInput(json);
-	
-    }
+	/**
+	 * Added this functionality to process input json string
+	 * 
+	 * @param json
+	 * @return
+	 * @throws IOException
+	 * @throws InvalidInputException
+	 */
+	public boolean validateInputParams(String json) throws IOException, InvalidInputException {
+		logger.info("Validating input parameteres in the ProcessInputRequest class.");
+		// validate JSON and Validate schema against json-customization schema
+		return JSONUtils.validateInput(json);
+
+	}
 
 }

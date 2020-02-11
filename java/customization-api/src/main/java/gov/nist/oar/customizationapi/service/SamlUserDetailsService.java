@@ -21,6 +21,7 @@ import gov.nist.oar.customizationapi.helpers.AuthenticatedUserDetails;
 
 /**
  * This service is called by SAML authentication provider.
+ * 
  * @author Deoyani Nandrekar-Heinis
  */
 public class SamlUserDetailsService implements SAMLUserDetailsService {

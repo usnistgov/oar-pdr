@@ -742,8 +742,8 @@ public class SamlSecurityConfig extends WebSecurityConfigurerAdapter {
 
 			http.csrf().disable();
 
-			http.addFilterBefore(metadataGeneratorFilter(), ChannelProcessingFilter.class)
-					.addFilterAfter(samlFilter(), BasicAuthenticationFilter.class);
+			http.addFilterBefore(metadataGeneratorFilter(), ChannelProcessingFilter.class).addFilterAfter(samlFilter(),
+					BasicAuthenticationFilter.class);
 
 			http.authorizeRequests().antMatchers("/error").permitAll().antMatchers("/saml/**").permitAll().anyRequest()
 					.authenticated();
@@ -755,7 +755,6 @@ public class SamlSecurityConfig extends WebSecurityConfigurerAdapter {
 		}
 
 	}
-	
 
 //  private Timer backgroundTaskTimer;
 //	private MultiThreadedHttpConnectionManager multiThreadedHttpConnectionManager;

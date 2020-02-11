@@ -35,52 +35,52 @@ import javax.servlet.http.HttpServletResponse;
  */
 public class CORSFilter implements Filter {
 
-    private String allowedURLs;
+	private String allowedURLs;
 
-    public CORSFilter() {
-    }
+	public CORSFilter() {
+	}
 
-    public CORSFilter(String listURLs) {
-	allowedURLs = listURLs;
-    }
+	public CORSFilter(String listURLs) {
+		allowedURLs = listURLs;
+	}
 
-    @Override
-    public void init(FilterConfig filterConfig) throws ServletException {
+	@Override
+	public void init(FilterConfig filterConfig) throws ServletException {
 
-    }
+	}
 
-    @Override
-    public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain)
-	    throws IOException, ServletException {
+	@Override
+	public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain)
+			throws IOException, ServletException {
 
-	List<String> allowedOrigins = Arrays.asList(allowedURLs);
-	HttpServletResponse response = (HttpServletResponse) servletResponse;
-	HttpServletRequest request = (HttpServletRequest) servletRequest;
+		List<String> allowedOrigins = Arrays.asList(allowedURLs);
+		HttpServletResponse response = (HttpServletResponse) servletResponse;
+		HttpServletRequest request = (HttpServletRequest) servletRequest;
 
-	// Access-Control-Allow-Origin
-	String origin = request.getHeader("Origin");
-	response.setHeader("Access-Control-Allow-Origin", allowedOrigins.contains(origin) ? origin : "");
-	response.setHeader("Vary", "Origin");
+		// Access-Control-Allow-Origin
+		String origin = request.getHeader("Origin");
+		response.setHeader("Access-Control-Allow-Origin", allowedOrigins.contains(origin) ? origin : "");
+		response.setHeader("Vary", "Origin");
 
-	// Access-Control-Max-Age
-	response.setHeader("Access-Control-Max-Age", "3600");
+		// Access-Control-Max-Age
+		response.setHeader("Access-Control-Max-Age", "3600");
 
-	// Access-Control-Allow-Credentials
-	response.setHeader("Access-Control-Allow-Credentials", "true");
+		// Access-Control-Allow-Credentials
+		response.setHeader("Access-Control-Allow-Credentials", "true");
 
-	// Access-Control-Allow-Methods
-	response.setHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS, DELETE");
+		// Access-Control-Allow-Methods
+		response.setHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS, DELETE");
 
-	// Access-Control-Allow-Headers
-	response.setHeader("Access-Control-Allow-Headers",
-		"Origin, X-Requested-With, Content-Type, Accept, withCredentials" + "X-CSRF-TOKEN");
+		// Access-Control-Allow-Headers
+		response.setHeader("Access-Control-Allow-Headers",
+				"Origin, X-Requested-With, Content-Type, Accept, withCredentials" + "X-CSRF-TOKEN");
 
-	filterChain.doFilter(request, response);
+		filterChain.doFilter(request, response);
 
-    }
+	}
 
-    @Override
-    public void destroy() {
+	@Override
+	public void destroy() {
 
-    }
+	}
 }

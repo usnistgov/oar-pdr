@@ -59,168 +59,172 @@ import io.swagger.annotations.ApiOperation;
 @Validated
 @RequestMapping("/api")
 public class UpdateController {
-    private Logger logger = LoggerFactory.getLogger(UpdateController.class);
+	private Logger logger = LoggerFactory.getLogger(UpdateController.class);
 
-    @Autowired
-    private UpdateRepository uRepo;
+	@Autowired
+	private UpdateRepository uRepo;
 
-    /**
-     * Update the fields of record metadata.
-     * 
-     * @param ediid  unique record id
-     * @param params subset of metadata modified in JSON format
-     * @return Updated record in JSON format
-     * @throws CustomizationException
-     * @throws InvalidInputException
-     */
-    @RequestMapping(value = {
-	    "draft/{ediid}" }, method = RequestMethod.PATCH, headers = "accept=application/json", produces = "application/json")
-    @ApiOperation(value = ".", nickname = "Cache Record Changes", notes = "Resource returns a record if it is editable and user is authenticated.")
-    public Document updateRecord(@PathVariable @Valid String ediid, @Valid @RequestBody String params)
-	    throws CustomizationException, InvalidInputException {
+	/**
+	 * Update the fields of record metadata.
+	 * 
+	 * @param ediid  unique record id
+	 * @param params subset of metadata modified in JSON format
+	 * @return Updated record in JSON format
+	 * @throws CustomizationException
+	 * @throws InvalidInputException
+	 */
+	@RequestMapping(value = {
+			"draft/{ediid}" }, method = RequestMethod.PATCH, headers = "accept=application/json", produces = "application/json")
+	@ApiOperation(value = ".", nickname = "Cache Record Changes", notes = "Resource returns a record if it is editable and user is authenticated.")
+	public Document updateRecord(@PathVariable @Valid String ediid, @Valid @RequestBody String params)
+			throws CustomizationException, InvalidInputException {
 
-	logger.info("Update the given record: " + ediid);
-	return uRepo.update(params, ediid);
+		logger.info("Update the given record: " + ediid);
+		return uRepo.update(params, ediid);
 
-    }
+	}
 
-    /***
-     * Access the record from service
-     * 
-     * @param ediid Unique record identifier
-     * @return
-     * @throws CustomizationException
-     */
-    @RequestMapping(value = { "draft/{ediid}" }, method = RequestMethod.GET, produces = "application/json")
-    @ApiOperation(value = ".", nickname = "Access editable Record", notes = "Resource returns a record if it is editable and user is authenticated.")
-    public Document editRecord(@PathVariable @Valid String ediid) throws CustomizationException {
-	logger.info("Access the record to be edited by ediid " + ediid);
-	return uRepo.edit(ediid);
-    }
+	/***
+	 * Access the record from service
+	 * 
+	 * @param ediid Unique record identifier
+	 * @return
+	 * @throws CustomizationException
+	 */
+	@RequestMapping(value = { "draft/{ediid}" }, method = RequestMethod.GET, produces = "application/json")
+	@ApiOperation(value = ".", nickname = "Access editable Record", notes = "Resource returns a record if it is editable and user is authenticated.")
+	public Document editRecord(@PathVariable @Valid String ediid) throws CustomizationException {
+		logger.info("Access the record to be edited by ediid " + ediid);
+		return uRepo.edit(ediid);
+	}
 
-    /**
-     * Delete the resource from staging area
-     * 
-     * @param ediid Unique record identifier
-     * @return JSON document original format
-     * @throws CustomizationException
-     */
-    @RequestMapping(value = { "draft/{ediid}" }, method = RequestMethod.DELETE, produces = "application/json")
-    @ApiOperation(value = ".", nickname = "Delete the Record from drafts", notes = "This will allow user to delete all the changes made in the record in draft mode, original published record will remain as it is.")
-    public boolean deleteRecord(@PathVariable @Valid String ediid) throws CustomizationException {
-	logger.info("Delete the record from stagging given by ediid " + ediid);
-	return uRepo.delete(ediid);
-    }
+	/**
+	 * Delete the resource from staging area
+	 * 
+	 * @param ediid Unique record identifier
+	 * @return JSON document original format
+	 * @throws CustomizationException
+	 */
+	@RequestMapping(value = { "draft/{ediid}" }, method = RequestMethod.DELETE, produces = "application/json")
+	@ApiOperation(value = ".", nickname = "Delete the Record from drafts", notes = "This will allow user to delete all the changes made in the record in draft mode, original published record will remain as it is.")
+	public boolean deleteRecord(@PathVariable @Valid String ediid) throws CustomizationException {
+		logger.info("Delete the record from stagging given by ediid " + ediid);
+		return uRepo.delete(ediid);
+	}
 
-    /**
-     * Finalize changes made in the record and send it back to backend metadata
-     * server to merge and send for review.
-     * 
-     * @param ediid  Unique record id
-     * @param params Modified fields in JSON
-     * @return Updated JSON record
-     * @throws CustomizationException
-     * @throws InvalidInputException
-     */
-    @RequestMapping(value = {
-	    "savedrecord/{ediid}" }, method = RequestMethod.PUT, headers = "accept=application/json", produces = "application/json")
-    @ApiOperation(value = ".", nickname = "Save changes to server", notes = "Resource returns a boolean based on success or failure of the request.")
-    public Document saveRecord(@PathVariable @Valid String ediid, @Valid @RequestBody String params)
-	    throws CustomizationException, InvalidInputException, ResourceNotFoundException {
-	logger.info("Send updated record to backend metadata server:" + ediid);
-	return uRepo.save(ediid, params);
+	/**
+	 * Finalize changes made in the record and send it back to backend metadata
+	 * server to merge and send for review.
+	 * 
+	 * @param ediid  Unique record id
+	 * @param params Modified fields in JSON
+	 * @return Updated JSON record
+	 * @throws CustomizationException
+	 * @throws InvalidInputException
+	 */
+	@RequestMapping(value = {
+			"savedrecord/{ediid}" }, method = RequestMethod.PUT, headers = "accept=application/json", produces = "application/json")
+	@ApiOperation(value = ".", nickname = "Save changes to server", notes = "Resource returns a boolean based on success or failure of the request.")
+	public Document saveRecord(@PathVariable @Valid String ediid, @Valid @RequestBody String params)
+			throws CustomizationException, InvalidInputException, ResourceNotFoundException {
+		logger.info("Send updated record to backend metadata server:" + ediid);
+		return uRepo.save(ediid, params);
 
-    }
+	}
 
-    /**
-     * 
-     * @param ex
-     * @param req
-     * @return
-     */
-    @ExceptionHandler(CustomizationException.class)
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public ErrorInfo handleCustomization(CustomizationException ex, HttpServletRequest req) {
-	logger.error("There is an error in the service: " + req.getRequestURI() + "\n  " + ex.getMessage(), ex);
-	return new ErrorInfo(req.getRequestURI(), 500, "Internal Server Error");
-    }
+	/**
+	 * 
+	 * @param ex
+	 * @param req
+	 * @return
+	 */
+	@ExceptionHandler(CustomizationException.class)
+	@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+	public ErrorInfo handleCustomization(CustomizationException ex, HttpServletRequest req) {
+		logger.error("There is an error in the service: " + req.getRequestURI() + "\n  " + ex.getMessage(), ex);
+		return new ErrorInfo(req.getRequestURI(), 500, "Internal Server Error");
+	}
 
-    /**
-     * 
-     * @param ex
-     * @param req
-     * @return
-     */
-    @ExceptionHandler(ResourceNotFoundException.class)
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ErrorInfo handleStreamingError(ResourceNotFoundException ex, HttpServletRequest req) {
-	logger.info("There is an error accessing requested record : " + req.getRequestURI() + "\n  " + ex.getMessage());
-	return new ErrorInfo(req.getRequestURI(), 404, "Resource Not Found", req.getMethod());
-    }
+	/**
+	 * 
+	 * @param ex
+	 * @param req
+	 * @return
+	 */
+	@ExceptionHandler(ResourceNotFoundException.class)
+	@ResponseStatus(HttpStatus.NOT_FOUND)
+	public ErrorInfo handleStreamingError(ResourceNotFoundException ex, HttpServletRequest req) {
+		logger.info("There is an error accessing requested record : " + req.getRequestURI() + "\n  " + ex.getMessage());
+		return new ErrorInfo(req.getRequestURI(), 404, "Resource Not Found", req.getMethod());
+	}
 
-    /**
-     * 
-     * @param ex
-     * @param req
-     * @return
-     */
-    @ExceptionHandler(InvalidInputException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorInfo handleStreamingError(InvalidInputException ex, HttpServletRequest req) {
-	logger.info("There is an error processing input data: " + req.getRequestURI() + "\n  " + ex.getMessage());
-	return new ErrorInfo(req.getRequestURI(), 400, "Invalid input error", "PATCH");
-    }
+	/**
+	 * 
+	 * @param ex
+	 * @param req
+	 * @return
+	 */
+	@ExceptionHandler(InvalidInputException.class)
+	@ResponseStatus(HttpStatus.BAD_REQUEST)
+	public ErrorInfo handleStreamingError(InvalidInputException ex, HttpServletRequest req) {
+		logger.info("There is an error processing input data: " + req.getRequestURI() + "\n  " + ex.getMessage());
+		return new ErrorInfo(req.getRequestURI(), 400, "Invalid input error", "PATCH");
+	}
 
-    /**
-     * 
-     * @param ex
-     * @param req
-     * @return
-     */
-    @ExceptionHandler(IOException.class)
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public ErrorInfo handleStreamingError(CustomizationException ex, HttpServletRequest req) {
-	logger.info("There is an error accessing data: " + req.getRequestURI() + "\n  " + ex.getMessage());
-	return new ErrorInfo(req.getRequestURI(), 500, "Internal Server Error", "POST");
-    }
+	/**
+	 * 
+	 * @param ex
+	 * @param req
+	 * @return
+	 */
+	@ExceptionHandler(IOException.class)
+	@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+	public ErrorInfo handleStreamingError(CustomizationException ex, HttpServletRequest req) {
+		logger.info("There is an error accessing data: " + req.getRequestURI() + "\n  " + ex.getMessage());
+		return new ErrorInfo(req.getRequestURI(), 500, "Internal Server Error", "POST");
+	}
 
-    /**
-     * 
-     * @param ex
-     * @param req
-     * @return
-     */
-    @ExceptionHandler(RuntimeException.class)
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+	/**
+	 * 
+	 * @param ex
+	 * @param req
+	 * @return
+	 */
+	@ExceptionHandler(RuntimeException.class)
+	@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
 
-    public ErrorInfo handleStreamingError(RuntimeException ex, HttpServletRequest req) {
-	logger.error("Unexpected failure during request: " + req.getRequestURI() + "\n  " + ex.getMessage(), ex);
-	return new ErrorInfo(req.getRequestURI(), 500, "Unexpected Server Error");
-    }
+	public ErrorInfo handleStreamingError(RuntimeException ex, HttpServletRequest req) {
+		logger.error("Unexpected failure during request: " + req.getRequestURI() + "\n  " + ex.getMessage(), ex);
+		return new ErrorInfo(req.getRequestURI(), 500, "Unexpected Server Error");
+	}
 
-    /**
-     * If backend server , IDP or metadata server is not working it wont authorized the user but it will throw an exception.
-     * @param ex
-     * @param req
-     * @return
-     */
-    @ExceptionHandler(RestClientException.class)
-    @ResponseStatus(HttpStatus.BAD_GATEWAY)
-    public ErrorInfo handleRestClientError(RuntimeException ex, HttpServletRequest req) {
-	logger.error("Unexpected failure during request: " + req.getRequestURI() + "\n  " + ex.getMessage(), ex);
-	return new ErrorInfo(req.getRequestURI(), 502, "Can not connect to backend server");
-    }
-    
-    /**
-     * Handles internal authentication service exception if user is not authorized or token is expired
-     * @param ex
-     * @param req
-     * @return
-     */
-    @ExceptionHandler(InternalAuthenticationServiceException.class)
-    @ResponseStatus(HttpStatus.UNAUTHORIZED)
-    public ErrorInfo handleRestClientError(InternalAuthenticationServiceException ex, HttpServletRequest req) {
-	logger.error("Unauthorized user or token : " + req.getRequestURI() + "\n  " + ex.getMessage(), ex);
-	return new ErrorInfo(req.getRequestURI(),401, "Untauthorized user or token.");
-    }
+	/**
+	 * If backend server , IDP or metadata server is not working it wont authorized
+	 * the user but it will throw an exception.
+	 * 
+	 * @param ex
+	 * @param req
+	 * @return
+	 */
+	@ExceptionHandler(RestClientException.class)
+	@ResponseStatus(HttpStatus.BAD_GATEWAY)
+	public ErrorInfo handleRestClientError(RuntimeException ex, HttpServletRequest req) {
+		logger.error("Unexpected failure during request: " + req.getRequestURI() + "\n  " + ex.getMessage(), ex);
+		return new ErrorInfo(req.getRequestURI(), 502, "Can not connect to backend server");
+	}
+
+	/**
+	 * Handles internal authentication service exception if user is not authorized
+	 * or token is expired
+	 * 
+	 * @param ex
+	 * @param req
+	 * @return
+	 */
+	@ExceptionHandler(InternalAuthenticationServiceException.class)
+	@ResponseStatus(HttpStatus.UNAUTHORIZED)
+	public ErrorInfo handleRestClientError(InternalAuthenticationServiceException ex, HttpServletRequest req) {
+		logger.error("Unauthorized user or token : " + req.getRequestURI() + "\n  " + ex.getMessage(), ex);
+		return new ErrorInfo(req.getRequestURI(), 401, "Untauthorized user or token.");
+	}
 }

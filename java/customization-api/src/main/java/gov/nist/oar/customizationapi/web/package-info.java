@@ -11,7 +11,7 @@
  * @author: Deoyani Nandrekar-Heinis
  */
 /**
- * @author  Deoyani Nandrekar-Heinis
+ * @author Deoyani Nandrekar-Heinis
  *
  */
 package gov.nist.oar.customizationapi.web;

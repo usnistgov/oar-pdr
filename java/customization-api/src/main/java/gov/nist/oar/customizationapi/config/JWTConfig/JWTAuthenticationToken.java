@@ -7,33 +7,35 @@ import java.util.Collection;
 
 /**
  * This class represents authentication object, which is used to generate token.
+ * 
  * @author Deoyani Nandrekar-Heinis
  */
 public class JWTAuthenticationToken extends AbstractAuthenticationToken {
 
-    private static final long serialVersionUID = -2848934719411152299L;
-   
-    private final transient Object principal;
+	private static final long serialVersionUID = -2848934719411152299L;
 
-    public JWTAuthenticationToken(Object principal) {
-        super(null);
-        this.principal=principal;
-    }
+	private final transient Object principal;
 
-    public JWTAuthenticationToken(Object principal, Object details, Collection<? extends GrantedAuthority> authorities) {
-        super(authorities);
-        this.principal = principal;
-        super.setDetails(details);
-        super.setAuthenticated(true);
-    }
+	public JWTAuthenticationToken(Object principal) {
+		super(null);
+		this.principal = principal;
+	}
 
-    @Override
-    public Object getCredentials() {
-        return "";
-    }
+	public JWTAuthenticationToken(Object principal, Object details,
+			Collection<? extends GrantedAuthority> authorities) {
+		super(authorities);
+		this.principal = principal;
+		super.setDetails(details);
+		super.setAuthenticated(true);
+	}
 
-    @Override
-    public Object getPrincipal() {
-        return principal;
-    }
+	@Override
+	public Object getCredentials() {
+		return "";
+	}
+
+	@Override
+	public Object getPrincipal() {
+		return principal;
+	}
 }

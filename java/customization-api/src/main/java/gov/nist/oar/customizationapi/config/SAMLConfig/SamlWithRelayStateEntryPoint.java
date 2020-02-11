@@ -27,42 +27,44 @@ import org.springframework.security.saml.websso.WebSSOProfileOptions;
  *
  */
 public class SamlWithRelayStateEntryPoint extends SAMLEntryPoint {
-    private static final Logger log = LoggerFactory.getLogger(SamlWithRelayStateEntryPoint.class);
-    
-    private String defaultRedirect;
-    
-    public SamlWithRelayStateEntryPoint(String applicationURL) {
-	this.defaultRedirect = applicationURL;
-    }
+	private static final Logger log = LoggerFactory.getLogger(SamlWithRelayStateEntryPoint.class);
 
-    @Override
-    protected WebSSOProfileOptions getProfileOptions(SAMLMessageContext context, AuthenticationException exception) {
+	private String defaultRedirect;
 
-	WebSSOProfileOptions ssoProfileOptions;
-	if (defaultOptions != null) {
-	    ssoProfileOptions = defaultOptions.clone();
-	} else {
-	    ssoProfileOptions = new WebSSOProfileOptions();
+	public SamlWithRelayStateEntryPoint(String applicationURL) {
+		this.defaultRedirect = applicationURL;
 	}
 
-	// Note for customization :
-	// Original HttpRequest can be extracted from the context param
-	// caller can pass redirect url with the request so after successful processing user can be redirected to the same page.
-	//if redirect URL is not specified user will be redirected to default url.
-	
-	HttpServletRequestAdapter httpServletRequestAdapter = (HttpServletRequestAdapter)context.getInboundMessageTransport();
+	@Override
+	protected WebSSOProfileOptions getProfileOptions(SAMLMessageContext context, AuthenticationException exception) {
 
-        String redirectURL = httpServletRequestAdapter.getParameterValue("redirectTo");
+		WebSSOProfileOptions ssoProfileOptions;
+		if (defaultOptions != null) {
+			ssoProfileOptions = defaultOptions.clone();
+		} else {
+			ssoProfileOptions = new WebSSOProfileOptions();
+		}
 
-        if (redirectURL != null) {
-            log.info("Redirect user to +"+redirectURL);
-             ssoProfileOptions.setRelayState(redirectURL);
-        }else {
-            log.info("Redirect user to default URL");
-            ssoProfileOptions.setRelayState(defaultRedirect);
-        }
-	
-	return ssoProfileOptions;
-    }
+		// Note for customization :
+		// Original HttpRequest can be extracted from the context param
+		// caller can pass redirect url with the request so after successful processing
+		// user can be redirected to the same page.
+		// if redirect URL is not specified user will be redirected to default url.
+
+		HttpServletRequestAdapter httpServletRequestAdapter = (HttpServletRequestAdapter) context
+				.getInboundMessageTransport();
+
+		String redirectURL = httpServletRequestAdapter.getParameterValue("redirectTo");
+
+		if (redirectURL != null) {
+			log.info("Redirect user to +" + redirectURL);
+			ssoProfileOptions.setRelayState(redirectURL);
+		} else {
+			log.info("Redirect user to default URL");
+			ssoProfileOptions.setRelayState(defaultRedirect);
+		}
+
+		return ssoProfileOptions;
+	}
 
 }
