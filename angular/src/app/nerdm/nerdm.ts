@@ -151,18 +151,18 @@ export class NERDResource {
     static _stripns(t : string, i?, a?) : string {
         return t.substr(t.indexOf(':')+1);
     }
-    static _striptypes(cmp : {}) : string[] {
-        if (! cmp['@type']) return [];
+    static _striptypes(cmp : {}, typeprop : string = "@type") : string[] {
+        if (! cmp[typeprop]) return [];
 
-        let out = cmp['@type']
+        let out = cmp[typeprop]
         if (this._isstring(out)) out = [ out ];
         if (! Array.isArray(out)) return []
 
         return out.filter(this._isstring).map(this._stripns).sort()
     }
-    static _typesintersect(obj : {}, types : string[]) : boolean {
+    static _typesintersect(obj : {}, types : string[], typeprop : string = "@type") : boolean {
         // we will assume that types is strictly an ordered array of strings
-        let ctypes : string[] = this._striptypes(obj).sort();
+        let ctypes : string[] = this._striptypes(obj, typeprop).sort();
 
         for(var c of ctypes) {
             for(var t of types) {
@@ -187,7 +187,7 @@ export class NERDResource {
         if (! Array.isArray(types)) return false;
         types = types.filter(this._isstring).map(this._stripns).sort();
 
-        return this._typesintersect(obj, types);
+        return this._typesintersect(obj, types, "@type");
     }
 
     /**
@@ -203,7 +203,7 @@ export class NERDResource {
         types = types.filter(NERDResource._isstring).map(NERDResource._stripns).sort();
 
         return this.data['components'].filter((c,i?,a?) => {
-            return NERDResource._typesintersect(c, types as string[]);
+            return NERDResource._typesintersect(c, types as string[], "@type");
         });
     }
 
@@ -230,6 +230,31 @@ export class NERDResource {
      */
     countFileListComponents() {
         return this.getFileListComponents().length;
+    }
+
+    /**
+     * return a list of reference objects matching the given types
+     */
+    getReferencesByType(types : string|string[]) : any[] {
+        if (! this.data['references'] || !Array.isArray(this.data['references']))
+            return [];
+
+        if (NERDResource._isstring(types)) types = [types as string]
+        if (! Array.isArray(types)) return [];
+        types = types.filter(NERDResource._isstring).sort();
+
+        return this.data['references'].filter((c,i?,a?) => {
+            return NERDResource._typesintersect(c, types as string[], "refType");
+        });
+    }
+
+    /**
+     * return a list of references that are marked as the primary references that 
+     * describe the data resource.  This implementation selects out those marked as 
+     * "isDocumentedBy" and "isSupplementTo".  
+     */
+    getPrimaryReferences() : any[] {
+        return this.getReferencesByType(["IsDocumentedBy", "IsSupplementTo"]);
     }
 }
 
