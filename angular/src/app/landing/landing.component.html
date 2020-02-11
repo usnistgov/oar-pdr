@@ -6,12 +6,6 @@
                     <span class="recordType">
                         <b>{{recordType}}</b>
                     </span>
-                    <div *ngIf="record.length !== 0 && inBrowser"
-                        class="ui-sm-1 d-none d-block d-sm-block d-md-none ">
-                        <button style="float: right" type="button" pButton icon="faa faa-list"
-                            class="ui-button ui-button-icon-only" (click)="menu3.toggle($event)"></button>
-                        <p-menu #menu3 class="rightMenuStylePop" popup="popup" [model]="rightmenu"></p-menu>
-                    </div>
                     <br>
                     <app-title [record]="record" [inBrowser]="inBrowser"></app-title>
                     <app-author [record]="record" [inBrowser]="inBrowser"></app-author>
