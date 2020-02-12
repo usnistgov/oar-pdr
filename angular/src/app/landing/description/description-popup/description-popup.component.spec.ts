@@ -1,6 +1,6 @@
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-import { DescriptionPopupComponent } from './description-popup.component';
+import { DescriptionModule, DescriptionPopupComponent } from '../description.module';
 import { FormsModule } from '@angular/forms';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { GoogleAnalyticsService } from '../../../shared/ga-service/google-analytics.service';
@@ -11,8 +11,8 @@ describe('DescriptionPopupComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ DescriptionPopupComponent ],
-      imports: [FormsModule],
+      declarations: [  ],
+      imports: [DescriptionModule, FormsModule],
       schemas: [NO_ERRORS_SCHEMA],
       providers: [NgbActiveModal, GoogleAnalyticsService]
     })
