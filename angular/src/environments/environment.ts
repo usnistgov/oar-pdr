@@ -31,7 +31,7 @@ export const config: LPSConfig = {
     customizationAPI: "https://datapubtest.nist.gov/customization/",
     mode: "dev",
     status: "Dev Version",
-    appVersion: "v1.2.X",
+    appVersion: "v1.3.X",
     production: context.production,
     editEnabled: false,
     distService: "https://testdata.nist.gov/od/ds/",
@@ -61,9 +61,26 @@ export const testdata: {} = {
             "hasEmail": "mailto:patricia.flanagan@nist.gov",
             "fn": "Patricia Flanagan"
         },
-        "modified": "2011-07-11",
-        "ediid": "test1",
+        "modified": "2019-03-28",
+        "ediid": "26DEA39AD677678AE0531A570681F32C1449",
         "landingPage": "https://www.nist.gov/itl/iad/image-group/special-database-32-multiple-encounter-dataset-meds",
+        "version": "1.0.1",
+        "versionHistory": [
+            {
+                "version": "1.0.0",
+                "issued": "2019-03-27 00:00:00",
+                "@id": "ark:/88434/mds0000fbk",
+                "location": "https://data.nist.gov/od/id/ark:/88434/mds0000fbk",
+                "description": "initial release"
+            },
+            {
+                "version": "1.0.1",
+                "issued": "2019-03-28 00:00:00",
+                "@id": "ark:/88434/mds0000fbkmds1103vzr",
+                "location": "https://data.nist.gov/od/id/ark:/88434/mds0000fbk",
+                "description": "metadata update"
+            }
+        ],
         "description": [
             "Multiple Encounter Dataset (MEDS-I) is a test corpus organized from an extract of submissions of deceased persons with prior multiple encounters. MEDS is provided to assist the FBI and partner organizations refine tools, techniques, and procedures for face recognition as it supports Next Generation Identification (NGI), forensic comparison, training, and analysis, and face image conformance and inter-agency exchange standards. The MITRE Corporation (MITRE) prepared MEDS in the FBI Data Analysis Support Laboratory (DASL) with support from the FBI Biometric Center of Excellence."
         ],
