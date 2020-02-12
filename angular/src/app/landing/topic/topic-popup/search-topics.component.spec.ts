@@ -15,7 +15,7 @@ import { HttpClientModule } from '@angular/common/http';
 import { RouterTestingModule } from '@angular/router/testing';
 import { UserMessageService } from '../../../frame/usermessage.service';
 
-describe('SearchTopicsComponent', () => {
+fdescribe('SearchTopicsComponent', () => {
     let component: SearchTopicsComponent;
     let fixture: ComponentFixture<SearchTopicsComponent>;
     let tempTopics: any;
