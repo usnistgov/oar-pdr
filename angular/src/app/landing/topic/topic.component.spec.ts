@@ -1,6 +1,6 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { HttpClientModule } from '@angular/common/http';
-import { TopicComponent } from './topic.component';
+import { TopicModule, TopicComponent } from './topic.module';
 import { RouterTestingModule } from '@angular/router/testing';
 import { FormsModule } from '@angular/forms';
 import { AppConfig } from '../../config/config';
@@ -12,7 +12,7 @@ import { MetadataUpdateService } from '../editcontrol/metadataupdate.service';
 import { UserMessageService } from '../../frame/usermessage.service';
 import { AuthService, WebAuthService, MockAuthService } from '../editcontrol/auth.service';
 
-describe('TopicComponent', () => {
+fdescribe('TopicComponent', () => {
     let component: TopicComponent;
     let fixture: ComponentFixture<TopicComponent>;
     let cfg: AppConfig;
@@ -27,8 +27,8 @@ describe('TopicComponent', () => {
         cfg.appVersion = "2.test";
 
         TestBed.configureTestingModule({
-            imports: [FormsModule, HttpClientModule, RouterTestingModule, ToastrModule.forRoot()],
-            declarations: [TopicComponent],
+            imports: [TopicModule, FormsModule, HttpClientModule, RouterTestingModule, ToastrModule.forRoot()],
+            declarations: [],
             providers: [
                 MetadataUpdateService, UserMessageService, DatePipe,
                 { provide: AppConfig, useValue: cfg },
