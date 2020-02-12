@@ -1,22 +1,13 @@
 import { NgModule }     from '@angular/core';
 import { CommonModule } from '@angular/common';
 
-import { ButtonModule } from 'primeng/button';
-
 import { NerdmModule } from '../../nerdm/nerdm.module';
 import { TitleModule } from '../title/title.module';
 import { AuthorModule } from '../author/author.module';
 import { ContactModule } from '../contact/contact.module';
 import { VersionModule } from '../version/version.module';
-import { DescriptionModule } from '../description/description.module';
-import { TopicModule } from '../topic/topic.module';
-import { KeywordModule } from '../keyword/keyword.module';
 import { CollapseModule } from '../collapseDirective/collapse.module';
-import { DataFilesModule } from '../data-files/data-files.module';
 import { ResourceIdentityComponent } from './resourceidentity.component';
-import { ResourceDescriptionComponent } from './resourcedescription.component';
-import { ResourceDataComponent } from './resourcedata.component';
-import { ResourceRefsComponent } from './resourcerefs.component';
 
 /**
  * A module for components that lay out the content of a resource landing page into sections.
@@ -49,24 +40,23 @@ import { ResourceRefsComponent } from './resourcerefs.component';
     imports: [
         CommonModule,
         NerdmModule,
-        TitleModule, AuthorModule, ContactModule, CollapseModule, VersionModule,
-        DescriptionModule, DataFilesModule, TopicModule, KeywordModule
+        TitleModule, AuthorModule, ContactModule, CollapseModule, VersionModule
     ],
     declarations: [
-        ResourceIdentityComponent, ResourceDescriptionComponent, ResourceDataComponent,
-        ResourceRefsComponent // , ResourceMetadataComponent
+        ResourceIdentityComponent // , ResourceDescriptionComponent, ResourceDataComponent,
+        // ResourceRefsComponent, ResourceMetadataComponent
     ],
     providers: [
     ],
     exports: [
-        ResourceIdentityComponent, ResourceDescriptionComponent, ResourceDataComponent,
-        ResourceRefsComponent // , ResourceMetadataComponent
+        ResourceIdentityComponent // , ResourceDescriptionComponent, ResourceDataComponent,
+        // ResourceRefsComponent, ResourceMetadataComponent
     ]
 })
 export class SectionsModule { }
 
 export {
-    ResourceIdentityComponent, ResourceDescriptionComponent, ResourceDataComponent,
-    ResourceRefsComponent // , ResourceMetadataComponent
+    ResourceIdentityComponent //, ResourceDescriptionComponent, ResourceDataComponent,
+    // ResourceRefsComponent, ResourceMetadataComponent
 };
     

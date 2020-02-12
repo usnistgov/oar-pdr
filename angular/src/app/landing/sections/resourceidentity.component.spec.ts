@@ -41,7 +41,7 @@ describe('ResourceIdentityComponent', () => {
     beforeEach(async(() => {
         makeComp();
         component.inBrowser = true;
-        component.editEnabled = false;
+        component.editMode = false;
         fixture.detectChanges();
     }));
 
@@ -56,6 +56,6 @@ describe('ResourceIdentityComponent', () => {
         let descs = cmpel.querySelectorAll("p");
         expect(descs.length).toBe(0);
 
-        // expect(component.versionCmp.newer).toBeNull();
+        expect(component.versionCmp.newer).toBeNull();
     });
 })

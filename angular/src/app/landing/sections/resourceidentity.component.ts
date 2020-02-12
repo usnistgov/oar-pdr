@@ -25,7 +25,7 @@ export class ResourceIdentityComponent implements OnChanges {
     // passed in by the parent component:
     @Input() record: NerdmRes = null;
     @Input() inBrowser: boolean = false;
-    @Input() editEnabled: boolean = false;
+    @Input() editMode: boolean = false;
 
     /**
      * create an instance of the Identity section
@@ -87,11 +87,7 @@ export class ResourceIdentityComponent implements OnChanges {
         return "Data Resource";
     }
 
-    /*
-     * uncomment this as needed for debugging purposes
-     *
     @ViewChild(VersionComponent)
     versionCmp : VersionComponent;
-     */
 
 }
