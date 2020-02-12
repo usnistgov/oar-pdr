@@ -142,11 +142,12 @@ export class VersionComponent implements OnChanges {
             var p = thisversion.indexOf('+');    // presence indicates this is an update
             if (p >= 0) thisversion = thisversion.substring(0, p)   // strip off +...
 
-            if (compare_histories(history[history.length - 1],
-                {
-                    version: thisversion,
-                    issued: this.record['modified']
-                }) > 0)
+            if (history[history.length - 1]['version'] != thisversion &&
+                compare_histories(history[history.length - 1],
+                                  {
+                                      version: thisversion,
+                                      issued: this.record['modified']
+                                  }) > 0)
             {
                 // this version is older than the latest one in the history
                 this.newer = JSON.parse(JSON.stringify(history[history.length - 1]));
@@ -223,18 +224,37 @@ export function compare_versions(a: string, b: string): number {
 }
 
 /**
+ * return a normalized date string for consistant parsing and comparison of the given date.  If the 
+ * input date string includes a timezone designation, it is removed.  The date is expanded as needed 
+ * to include a time to the second precision.  The input string must include at least a year.  If not 
+ * more precisely indicated, dates default to midnight the first of the month/year.  Illegal date strings
+ * are returned unaltered.
+ */
+export function normalize_date(datestr : string) {
+    // ignore zone designations
+    if (datestr.includes("Z"))
+        datestr = datestr.substring(0, datestr.indexOf("Z"));
+    
+    let m = datestr.match(/^\s*\d{4}(-\d\d(-\d\d([ T]\d\d:\d\d(:\d\d(\.\d+)?)?)?)?)?\s*$/);
+    if (! m) return datestr;
+    if (! m[1]) datestr += "-01";
+    if (! m[2]) datestr += "-01";
+    if (! m[3]) datestr += " 00:00";
+    if (! m[4]) datestr += ":00";
+    return datestr
+}
+
+/**
  * compare two date strings assumed to be in ISO Date format for sorting.  
  */
 export function compare_dates(a: string, b: string): number {
-    if (a.includes("Z"))
-        a = a.substring(0, a.indexOf("Z"));
-    if (b.includes("Z"))
-        b = b.substring(0, b.indexOf("Z"));
+    a = normalize_date(a);
+    b = normalize_date(b);
     let asc = -1, bsc = -1;
     try {
         asc = Date.parse(a);
         bsc = Date.parse(b);
-    } catch (e) { return 0; }
+    } catch (e) { return -1; }
     return asc - bsc;
 }
 
