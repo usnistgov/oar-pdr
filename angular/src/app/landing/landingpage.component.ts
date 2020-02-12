@@ -1,12 +1,13 @@
-import { Component, OnInit, ElementRef, PLATFORM_ID, Inject } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { Component, OnInit, AfterViewInit,
+         ElementRef, PLATFORM_ID, Inject, ViewEncapsulation } from '@angular/core';
+import { ActivatedRoute, Router, NavigationEnd } from '@angular/router';
 import { isPlatformBrowser } from '@angular/common';
 import { Title } from '@angular/platform-browser';
 
 import { AppConfig } from '../config/config';
 import { MetadataService } from '../nerdm/nerdm.service';
 import { EditStatusService } from './editcontrol/editstatus.service';
-import { NerdmRes } from '../nerdm/nerdm';
+import { NerdmRes, NERDResource } from '../nerdm/nerdm';
 import { IDNotFound } from '../errors/error';
 import { MetadataUpdateService } from './editcontrol/metadataupdate.service';
 
@@ -20,6 +21,9 @@ import { MetadataUpdateService } from './editcontrol/metadataupdate.service';
  * * a data access section, including a file listing (if files are availabe) and other links
  * * a references section
  * * tools and navigation section.
+ *
+ * This component sets the view encapsulation to None: this means that the style settings 
+ * defined in landingpage.component.css apply globally, including to all the child components.
  */
 @Component({
     selector: 'pdr-landing-page',
@@ -27,15 +31,19 @@ import { MetadataUpdateService } from './editcontrol/metadataupdate.service';
     styleUrls: ['./landingpage.component.css'],
     providers: [
         Title
-    ]
+    ],
+    encapsulation:  ViewEncapsulation.None
 })
-export class LandingPageComponent implements OnInit {
+export class LandingPageComponent implements OnInit, AfterViewInit {
     layoutCompact: boolean = true;
     layoutMode: string = 'horizontal';
     profileMode: string = 'inline';
-    md: NerdmRes = null;        // the NERDm resource metadata
-    reqId: string;              // the ID that was used to request this page
+    md: NerdmRes = null;       // the NERDm resource metadata
+    reqId: string;             // the ID that was used to request this page
     inBrowser: boolean = false;
+    citetext: string = null;
+    citationVisible: boolean = false;
+    editEnabled: boolean = false;
 
     /**
      * create the component.
@@ -58,6 +66,7 @@ export class LandingPageComponent implements OnInit {
     {
         this.reqId = this.route.snapshot.paramMap.get('id');
         this.inBrowser = isPlatformBrowser(platformId);
+        this.editEnabled = cfg.get('editEnabled', false) as boolean;
     }
 
     /**
@@ -108,6 +117,16 @@ export class LandingPageComponent implements OnInit {
     }
 
     /**
+     * apply housekeeping after view has been initialized
+     */
+    ngAfterViewInit() {
+        this.useFragment();
+        if (this.md && this.inBrowser) {
+            window.history.replaceState({}, '', '/od/id/' + this.reqId);
+        }
+    }
+
+    /**
      * make use of the metadata to initialize this component.  This is called asynchronously
      * from ngOnInit after the metadata has been successfully retrieved (and saved to this.md).
      * 
@@ -137,4 +156,62 @@ export class LandingPageComponent implements OnInit {
      * return the current document title
      */
     getDocumentTitle(): string { return this.titleSv.getTitle(); }
+
+    /**
+     * apply the URL fragment by scrolling to the proper place in the document
+     */
+    public useFragment() {
+        if (! this.inBrowser) return;
+
+        this.router.events.subscribe(s => {
+            if (s instanceof NavigationEnd) {
+                const tree = this.router.parseUrl(this.router.url);
+                let element = null;
+                if (tree.fragment) {
+                    element = document.querySelector("#" + tree.fragment);
+                }
+                else {
+                    element = document.querySelector("body");
+                    if (! element) 
+                        console.warn("useFragment: failed to find document body!");
+                }
+                if (element) {
+                    //element.scrollIntoView(); 
+                    setTimeout(() => {
+                        element.scrollIntoView({ behavior: "smooth", block: "start", inline: "nearest" });
+                    }, 1);
+                }
+            }
+        });
+    }
+
+    goToSection(sectionId: string) {
+        if (sectionId) 
+            this.router.navigate(['/od/id/', this.reqId], { fragment: sectionId });
+        else
+            this.router.navigate(['/od/id/', this.reqId], { fragment: "" });
+    }
+
+    /**
+     * display or hide citation information in a popup window.
+     * @param yesno   whether to show (true) or hide (false)
+     */
+    showCitation(yesno : boolean) : void {
+        this.citationVisible = yesno;
+    }
+
+    /**
+     * toggle the visibility of the citation pop-up window
+     */
+    toggleCitation() : void { this.citationVisible = !this.citationVisible; }
+
+    /**
+     * return text representing the recommended citation for this resource
+     */
+    getCitation() : string {
+        if (! this.citetext) 
+            this.citetext = (new NERDResource(this.md)).getCitation();
+        return this.citetext;
+    }
+
 }

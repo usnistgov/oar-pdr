@@ -20,6 +20,10 @@ import { TestDataService } from '../shared/testdata-service/testDataService';
 import { GoogleAnalyticsService } from '../shared/ga-service/google-analytics.service';
 import * as mock from '../testing/mock.services';
 import {RouterTestingModule} from "@angular/router/testing";
+import { DatePipe } from '@angular/common';
+import { MetadataUpdateService } from './editcontrol/metadataupdate.service';
+import { AuthService, WebAuthService, MockAuthService } from './editcontrol/auth.service';
+
 import { testdata } from '../../environments/environment';
 
 describe('LandingComponent', () => {
@@ -32,6 +36,7 @@ describe('LandingComponent', () => {
     let route : ActivatedRoute;
     let router : Router;
     let routes : Routes = [ ];
+    let authsvc : AuthService = new MockAuthService(undefined);
 
     beforeEach(() => {
         cfg = (new AngularEnvironmentConfigService(plid, ts)).getConfig() as AppConfig;
@@ -66,8 +71,10 @@ describe('LandingComponent', () => {
                 { provide: ActivatedRoute,  useValue: route },
                 { provide: ElementRef,      useValue: null },
                 { provide: AppConfig,       useValue: cfg },
+                { provide: AuthService,     useValue: authsvc },
                 UserMessageService,
-                CartService, DownloadService, TestDataService, GoogleAnalyticsService, ModalService
+                CartService, DownloadService, TestDataService, GoogleAnalyticsService, ModalService,
+                MetadataUpdateService, DatePipe
             ]
         }).compileComponents();
 

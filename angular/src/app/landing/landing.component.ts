@@ -137,7 +137,7 @@ export class LandingComponent implements OnInit, OnChanges {
     ediid: string = null;
 
     /**
-     * Creates an instance of the SearchPanel
+     * Creates an instance of the LandingComponent
      *
      */
     constructor(
@@ -149,7 +149,6 @@ export class LandingComponent implements OnInit, OnChanges {
         @Inject(APP_ID) private appId: string,
         public mdupdsvc: MetadataUpdateService,
         private gaService: GoogleAnalyticsService) {
-        // this.searchValue = this.route.snapshot.paramMap.get('id');
         this.editEnabled = cfg.get("editEnabled", false) as boolean;
     }
 
@@ -178,7 +177,6 @@ export class LandingComponent implements OnInit, OnChanges {
             this.doiUrl = "https://doi.org/" + this.record['doi'].split(':')[1];
 
         this.assessNewer();
-        this.updateMenu();
 
         if (this.files.length != 0)
             this.files = <TreeNode[]>this.files[0].data;
@@ -205,166 +203,9 @@ export class LandingComponent implements OnInit, OnChanges {
         return "Data Resource";
     }
 
-    /**
-     * Housekeeping after view init
-     */
-    ngAfterViewInit() {
-        this.useFragment();
-        if (this.record != null && this.inBrowser) {
-            window.history.replaceState({}, '', '/od/id/' + this.requestId);
-        }
-    }
-
     viewmetadata() {
         this.metadata = true;
         this.similarResources = false;
-    }
-
-    createMenuItem(label: string, icon: string, command: any, url: string) {
-        let testItem: any = {};
-        testItem.label = label;
-        testItem.icon = icon;
-        if (command !== '')
-            testItem.command = command;
-        if (url !== '')
-            testItem.url = url;
-        testItem.target = "_blank";
-        return testItem;
-    }
-
-    /**
-     * Update menu on landing page
-     */
-    updateMenu() {
-        let mdapi = this.cfg.get("locations.mdService", "/unconfigured");
-        this.serviceApi = mdapi + "records?@id=" + this.record['@id'];
-        if (!_.includes(mdapi, "/rmm/"))
-            this.serviceApi = mdapi + this.record['ediid'];
-        this.distdownload = this.cfg.get("distService", "/od/ds/") + "zip?id=" + this.record['@id'];
-
-        var itemsMenu: MenuItem[] = [];
-        var metadata = this.createMenuItem("Export JSON", "faa faa-file-o",
-            "",   /* (event) => { this.turnSpinnerOff(); }, */
-            this.serviceApi);
-        let authlist = "";
-        let contactlist = "";
-
-        if (this.record['authors']) {
-            for (let auth of this.record['authors']) authlist = authlist + auth.familyName + ",";
-        }
-
-        if (this.record['contactPoint'] && this.record['contactPoint'].fn) {
-            contactlist = this.record['contactPoint'].fn;
-        }
-
-        // If authlist is empty, use contact point instead
-        if (!authlist) {
-            if (this.record['contactPoint'] && this.record['contactPoint'].fn) {
-                let splittedName = this.record['contactPoint'].fn.split(' ');
-                console.log("record.contactPoint", splittedName[splittedName.length - 1]);
-                authlist = splittedName[splittedName.length - 1];
-                contactlist = this.record['contactPoint'].fn;
-            }
-        }
-
-        // For search parameter 'q', need to use ASCII Encoding '%3D' for '=' and '%26' for '&'. Otherwise the router params will not be able to read the whole query
-        var resourcesByAuthor = this.createMenuItem('Resources by Authors', "faa faa-external-link", "",
-            this.cfg.get("locations.pdrSearch", "/sdp/") + "/#/search?q=authors.familyName%3D" + authlist + "%26logicalOp%3DOR%26contactPoint.fn%3D" + contactlist + "&key=&queryAdvSearch=yes");
-        var similarRes = this.createMenuItem("Similar Resources", "faa faa-external-link", "",
-            this.cfg.get("locations.pdrSearch", "/sdp/") + "/#/search?q=" + this.record['keyword'] + "&key=&queryAdvSearch=yes");
-        var license = this.createMenuItem("Fair Use Statement", "faa faa-external-link", (event) => { this.gaService.gaTrackEvent('outbound', event, this.record['title']), this.record['license'] }, this.record['license']);
-        var citation = this.createMenuItem('Citation', "faa faa-angle-double-right",
-            (event) => { this.getCitation(); this.showDialog(); }, '');
-        var metaItem = this.createMenuItem("View Metadata", "faa faa-bars",
-            (event) => { this.goToSelection(true, false, 'metadata'); this.gaService.gaTrackPageview('/od/id/' + this.requestId + '#metadata', this.record['title']) }, '');
-        itemsMenu.push(metaItem);
-        itemsMenu.push(metadata);
-
-        var descItem = this.createMenuItem("Description", "faa faa-arrow-circle-right",
-            (event) => { this.goToSelection(false, false, 'description'); }, "");
-
-        var refItem = this.createMenuItem("References", "faa faa-arrow-circle-right ",
-            (event) => { this.goToSelection(false, false, 'reference'); }, '');
-
-        var filesItem = this.createMenuItem("Data Access", "faa faa-arrow-circle-right",
-            (event) => { this.goToSelection(false, false, 'dataAccess'); }, '');
-
-        var itemsMenu2: MenuItem[] = [];
-        itemsMenu2.push(descItem);
-        if (this.files.length !== 0 || (this.record['landingPage'] && this.record['landingPage'].indexOf('/od/id') === -1))
-            itemsMenu2.push(filesItem);
-        if (this.record['references'])
-            itemsMenu2.push(refItem);
-
-        this.rightmenu = [{ label: 'Go To ..', items: itemsMenu2 },
-        { label: 'Record Details', items: itemsMenu },
-        { label: 'Use', items: [citation, license] },
-        { label: 'Find', items: [similarRes, resourcesByAuthor] }];
-    }
-
-    /**
-     * Function creates Citation string to be displayed by using metadata in the record
-     */
-    getCitation() {
-        this.citeString = "";
-        let date = new Date();
-        if (this.record['authors'] !== null && this.record['authors'] !== undefined) {
-            for (let i = 0; i < this.record['authors'].length; i++) {
-                let author = this.record['authors'][i];
-                if (author.familyName !== null && author.familyName !== undefined)
-                    this.citeString += author.familyName + ', ';
-                if (author.givenName !== null && author.givenName !== undefined)
-                    this.citeString += author.givenName;
-                if (author.middleName !== null && author.middleName !== undefined)
-                    this.citeString += ' ' + author.middleName;
-                if (i != this.record['authors'].length - 1)
-                    this.citeString += ', ';
-            }
-
-        } else if (this.record['contactPoint']) {
-            if (this.record['contactPoint'].fn !== null && this.record['contactPoint'].fn !== undefined)
-                this.citeString += this.record['contactPoint'].fn;
-        }
-        if (this.record['issued'] !== null && this.record['issued'] !== undefined) {
-            this.citeString += " (" + _.split(this.record['issued'], "-")[0] + ")";
-        }
-        if (this.citeString !== "") this.citeString += ", ";
-        if (this.record['title'] !== null && this.record['title'] !== undefined)
-            this.citeString += this.record['title'] + ", ";
-        if (this.record['publisher']) {
-            if (this.record['publisher'].name !== null && this.record['publisher'].name !== undefined)
-                this.citeString += this.record['publisher'].name;
-        }
-        if (this.doiUrl) {
-            var doistring = "https://doi.org/" + _.split(this.record['doi'], ':')[1];
-            this.citeString += ", " + doistring;
-        }
-        this.citeString += " (Accessed " + date.getFullYear() + "-" + (date.getMonth() + 1) + "-" + date.getDate() + ")";
-    }
-
-
-    goToSelection(isMetadata: boolean, isSimilarResources: boolean, sectionId: string) {
-        this.metadata = isMetadata; this.similarResources = isSimilarResources;
-        // this.turnSpinnerOff();
-        this.router.navigate(['/od/id/', this.requestId], { fragment: sectionId });
-        this.useFragment();
-    }
-
-    useFragment() {
-        this.router.events.subscribe(s => {
-            if (s instanceof NavigationEnd) {
-                const tree = this.router.parseUrl(this.router.url);
-                if (tree.fragment) {
-                    const element = document.querySelector("#" + tree.fragment);
-                    if (element) {
-                        //element.scrollIntoView(); 
-                        setTimeout(() => {
-                            element.scrollIntoView({ behavior: "smooth", block: "start", inline: "nearest" });
-                        }, 1);
-                    }
-                }
-            }
-        });
     }
 
     recordLoaded() {
