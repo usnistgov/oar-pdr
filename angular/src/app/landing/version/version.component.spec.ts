@@ -2,12 +2,13 @@ import { async, ComponentFixture, TestBed, ComponentFixtureAutoDetect } from '@a
 
 import { AppConfig } from '../../config/config';
 import { NerdmRes } from '../../nerdm/nerdm';
-import { VersionComponent, compare_versions, compare_dates, compare_histories } from './version.component';
+import { VersionComponent, compare_versions, normalize_date, compare_dates, compare_histories }
+    from './version.component';
 import { VersionModule } from './version.module';
 
 import { config, testdata } from '../../../environments/environment';
 
-fdescribe('VersionComponent', () => {
+describe('VersionComponent', () => {
     let component : VersionComponent;
     let fixture : ComponentFixture<VersionComponent>;
     let cfg : AppConfig = new AppConfig(config);
@@ -40,7 +41,7 @@ fdescribe('VersionComponent', () => {
         expect(spans[0].textContent).toContain("Version:");
         expect(spans[0].textContent).toContain("1.0.1");
         expect(spans[2].textContent).toContain("Last modified:");
-        expect(spans[2].textContent).toContain("2011-07-11");
+        expect(spans[2].textContent).toContain("2019-03-28");
     });
 
     it('test renderRelAsLink()', () => {
@@ -94,6 +95,9 @@ fdescribe('VersionComponent', () => {
 
     it('test newer()', () => {
         expect(component.newer).toBeNull();
+        let cmpel = fixture.nativeElement;
+        let ps = cmpel.querySelectorAll("p"); 
+        expect(ps.length).toBe(0);
 
         component.record['version'] = "1.0.0";
         component.assessNewer();
@@ -101,8 +105,8 @@ fdescribe('VersionComponent', () => {
         expect(component.newer['version']).toBe("1.0.1");
 
         fixture.detectChanges();
-        let cmpel = fixture.nativeElement;
-        let ps = cmpel.querySelectorAll("p"); 
+        cmpel = fixture.nativeElement;
+        ps = cmpel.querySelectorAll("p"); 
         expect(ps.length).toBe(1);
         expect(ps[0].textContent).toContain("more recent release");
         expect(ps[0].textContent).toContain("1.0.1");
@@ -131,7 +135,7 @@ fdescribe('VersionComponent', () => {
 
 });
 
-fdescribe("version compare functions", () => {
+describe("version compare functions", () => {
 
     it('compare_version', () => {
         expect(compare_versions("8", "15")).toBeLessThan(0);
@@ -154,6 +158,24 @@ fdescribe("version compare functions", () => {
         expect(compare_versions("5.3.2rc12", "5.3.2rc8")).toBeGreaterThan(0);
         expect(compare_versions("5.3.2", "5.3.2rc8")).toBeLessThan(0);
         expect(compare_versions("5.3.2rc12", "5.3.2")).toBeGreaterThan(0);
+    });
+
+    it("normalize_date", () => {
+        expect(normalize_date("2017")).toBe("2017-01-01 00:00:00");
+        expect(normalize_date("2017-01")).toBe("2017-01-01 00:00:00");
+        expect(normalize_date("2017-01-01")).toBe("2017-01-01 00:00:00");
+        expect(normalize_date("2017-01-01 00:00")).toBe("2017-01-01 00:00:00");
+        expect(normalize_date("2017-01-01T00:00")).toBe("2017-01-01T00:00:00");
+        expect(normalize_date("2017-01-01 00:00:00")).toBe("2017-01-01 00:00:00");
+        expect(normalize_date("2017-01-01 00:00:00.093")).toBe("2017-01-01 00:00:00.093");
+
+        expect(normalize_date("2017Z-0530")).toBe("2017-01-01 00:00:00");
+        expect(normalize_date("2017-01Z-0530")).toBe("2017-01-01 00:00:00");
+        expect(normalize_date("2017-01-01Z-0530")).toBe("2017-01-01 00:00:00");
+        expect(normalize_date("2017-01-01 00:00Z-0530")).toBe("2017-01-01 00:00:00");
+        expect(normalize_date("2017-01-01T00:00Z-0530")).toBe("2017-01-01T00:00:00");
+        expect(normalize_date("2017-01-01 00:00:00Z-0530")).toBe("2017-01-01 00:00:00");
+        expect(normalize_date("2017-01-01 00:00:00.093Z-0530")).toBe("2017-01-01 00:00:00.093");
     });
 
     it("compare_dates", () => {
@@ -201,6 +223,21 @@ fdescribe("version compare functions", () => {
         expect(compare_dates("2009-10-09T05:36:30", "2009-10-09T05:45:30")).toBeLessThan(0);
         expect(compare_dates("2017-10-09 10:01:30", "2017-10-09 10:01:18")).toBeGreaterThan(0);
         expect(compare_dates("2009-10-09 05:36:30", "2009-10-09 05:36:31")).toBeLessThan(0);
+
+        //expect(Date.parse("2017-12-10")).toBe(Date.parse("2017-12-10 00:00:00"));
+        expect(compare_dates("2017", "2017-01-01 00:00:00")).toBe(0);
+        expect(compare_dates("2017-12", "2017-12-01 00:00:00")).toBe(0);
+        expect(compare_dates("2017-12-10", "2017-12-10 00:00:00")).toBe(0);
+        expect(compare_dates("2017-12-10 00:00", "2017-12-10 00:00:00")).toBe(0);
+        expect(compare_dates("2017-12-10T00:00", "2017-12-10 00:00:00")).toBe(0);
+        expect(compare_dates("2017-12-10 00:00", "2017-12-10 00:00:00")).toBe(0);
+
+        expect(compare_dates("2017", "2018-01-01 00:00:00")).toBeLessThan(0);
+        expect(compare_dates("2017-11", "2017-11-02 00:00:00")).toBeLessThan(0);
+        expect(compare_dates("2017-11-10", "2017-11-10 00:00:01")).toBeLessThan(0);
+        expect(compare_dates("2017-11-10 00:00", "2017-11-10 00:00:01")).toBeLessThan(0);
+        expect(compare_dates("2017-11-10T00:00", "2017-11-10 00:00:01")).toBeLessThan(0);
+        expect(compare_dates("2017-11-10 00:00", "2017-11-10 00:00:01")).toBeLessThan(0);
 
         // Zone strings are ignored
         expect(compare_dates("2017Z+05", "1995")).toBeGreaterThan(0);
