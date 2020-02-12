@@ -13,7 +13,7 @@ import { MetadataUpdateService } from '../editcontrol/metadataupdate.service';
 import { UserMessageService } from '../../frame/usermessage.service';
 import { AuthService, WebAuthService, MockAuthService } from '../editcontrol/auth.service';
 
-describe('DescriptionComponent', () => {
+fdescribe('DescriptionComponent', () => {
     let component: DescriptionComponent;
     let fixture: ComponentFixture<DescriptionComponent>;
     let cfg: AppConfig;

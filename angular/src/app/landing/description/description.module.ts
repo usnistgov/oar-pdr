@@ -10,7 +10,7 @@ import { DescriptionComponent } from './description.component';
 import { DescriptionPopupComponent } from './description-popup/description-popup.component';
 
 /**
- * module that provides support for rendering and managing a resource's text description 
+ * module that provide support for rendering and managing a resource's text description 
  */
 @NgModule({
     imports: [

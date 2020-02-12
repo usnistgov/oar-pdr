@@ -4,7 +4,6 @@ import { FormsModule } from '@angular/forms';
 
 import { TreeTableModule } from 'primeng/treetable';
 import { ToolbarModule } from 'primeng/toolbar';
-import { OverlayPanelModule } from 'primeng/overlaypanel';
 import { ToastrModule } from 'ngx-toastr';
 
 import { TopicComponent } from './topic.component';
@@ -20,7 +19,6 @@ import { SearchTopicsComponent } from './topic-popup/search-topics.component';
         FormsModule,
         ToolbarModule,
         TreeTableModule,
-        OverlayPanelModule,
         ToastrModule.forRoot()
     ],
     declarations: [
