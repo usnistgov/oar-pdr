@@ -13,7 +13,6 @@ import org.apache.http.util.EntityUtils;
 import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpHeaders;
 import org.springframework.web.client.RestTemplate;
 
 import gov.nist.oar.customizationapi.exceptions.CustomizationException;

@@ -59,7 +59,7 @@ import io.swagger.annotations.ApiOperation;
 @Validated
 @RequestMapping("/pdr/lp/editor/")
 public class EditorController {
-	private Logger logger = LoggerFactory.getLogger(UpdateController.class);
+	private Logger logger = LoggerFactory.getLogger(EditorController.class);
 
 	@Autowired
 	private UpdateRepository uRepo;
@@ -80,7 +80,7 @@ public class EditorController {
 			throws CustomizationException, InvalidInputException {
 
 		logger.info("Update the given record: " + ediid);
-		return uRepo.update(params, ediid);
+		return uRepo.updateRecord(params, ediid);
 
 	}
 
@@ -93,9 +93,9 @@ public class EditorController {
 	 */
 	@RequestMapping(value = { "{ediid}" }, method = RequestMethod.GET, produces = "application/json")
 	@ApiOperation(value = ".", nickname = "Access editable Record", notes = "Resource returns a record if it is editable and user is authenticated.")
-	public Document editRecord(@PathVariable @Valid String ediid) throws CustomizationException {
+	public Document getRecord(@PathVariable @Valid String ediid) throws CustomizationException {
 		logger.info("Access the record to be edited by ediid " + ediid);
-		return uRepo.edit(ediid);
+		return uRepo.getRecord(ediid);
 	}
 
 	/**

@@ -129,7 +129,7 @@ public class UpdateRepositoryServiceTest {
 
 //	       when(dataOperations.getData(recordid, changesCollection, mdserver)).thenReturn(updatedRecord);
 
-		Document doc = updateService.edit(recordid);
+		Document doc = updateService.getRecord(recordid);
 		assertNotNull(doc);
 		assertEquals("New Title Update Test May 7", doc.get("title"));
 		assertNotEquals("New Title Update Test May 14", doc.get("title"));
@@ -152,7 +152,7 @@ public class UpdateRepositoryServiceTest {
 		when(dataOperations.updateDataInCache(recordid, changesCollection, change)).thenReturn(true);
 		when(dataOperations.getData(recordid, recordCollection)).thenReturn(updatedRecord);
 
-		Document doc = updateService.update(changedata, recordid);
+		Document doc = updateService.updateRecord(changedata, recordid);
 		assertNotNull(doc);
 		assertEquals("New Title Update Test May 14", doc.get("title"));
 	}

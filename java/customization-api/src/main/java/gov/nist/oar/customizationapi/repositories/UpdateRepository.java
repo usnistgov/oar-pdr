@@ -39,7 +39,7 @@ public interface UpdateRepository {
 	 *                                JSON validation tests, this exception is
 	 *                                thrown
 	 */
-	public Document update(String param, String recordid) throws CustomizationException, InvalidInputException;
+	public Document updateRecord(String param, String recordid) throws CustomizationException, InvalidInputException;
 
 	/**
 	 * Returns the complete record in JSON format which can be used to edit
@@ -49,7 +49,33 @@ public interface UpdateRepository {
 	 * @throws CustomizationException Throws exception if there is issue while
 	 *                                accessing data
 	 */
-	public Document edit(String recordid) throws CustomizationException;
+	public Document getRecord(String recordid) throws CustomizationException;
+
+	
+	/**
+	 * Returns the complete record in JSON format which can be used to edit
+	 * 
+	 * @param recordid string ediid/unique record id
+	 * @return Document a complete JSON data
+	 * @throws CustomizationException Throws exception if there is issue while
+	 *                                accessing data
+	 */
+	public Document getData(String recordid,String view) throws CustomizationException;
+	/**
+	 * Returns the document once save data
+	 * 
+	 * @param recordid string ediid/unique record id
+	 * @param params   JSON string input or empty
+	 * @return Complete document in JSON format
+	 * @throws CustomizationException if there is an issue update record in data
+	 *                                base or getting record from backend for the
+	 *                                first time to put chnages in cache, it would
+	 *                                throw internal service error
+	 * @throws InvalidInputException  If input parameters are not valid and fail
+	 *                                JSON validation tests, this exception is
+	 *                                thrown
+	 */
+	public boolean put(String recordid, String params) throws CustomizationException, InvalidInputException;
 
 	/**
 	 * Returns the document once save data
@@ -65,8 +91,9 @@ public interface UpdateRepository {
 	 *                                JSON validation tests, this exception is
 	 *                                thrown
 	 */
-	public Document save(String recordid, String params) throws CustomizationException, InvalidInputException;
+//	public Document save(String recordid, String params) throws CustomizationException, InvalidInputException;
 
+	
 	/**
 	 * Delete record from the database
 	 * 

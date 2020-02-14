@@ -155,6 +155,21 @@ public class DatabaseOperations {
 			throw new MongoException("Error updating Cache (database)" + exp.getMessage());
 		}
 	}
+	
+	/**
+	 * Put the record in database
+	 * @param recordid
+	 * @param mcollection
+	 * @param doc
+	 */
+	public void putDataInRecords(String recordid,MongoCollection<Document> mcollection, Document doc ) {
+		try {
+		mcollection.insertOne(doc);
+		} catch (MongoException exp) {
+			log.error("Error while putting updated data in records db" + exp.getMessage());
+			throw new MongoException("Error updating records (database)" + exp.getMessage());
+		}
+	}
 
 	/**
 	 * This function inserts updated record changes in the Mongodb changes

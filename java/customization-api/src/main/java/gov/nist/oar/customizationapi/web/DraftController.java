@@ -13,6 +13,7 @@
 package gov.nist.oar.customizationapi.web;
 
 import java.io.IOException;
+import java.util.Optional;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
@@ -62,28 +63,31 @@ import io.swagger.annotations.ApiOperation;
 @Validated
 @RequestMapping("/pdr/lp/draft/")
 public class DraftController {
-	private Logger logger = LoggerFactory.getLogger(UpdateController.class);
+	private Logger logger = LoggerFactory.getLogger(DraftController.class);
 
 	@Autowired
 	private UpdateRepository uRepo;
 
 	/***
-	 * Access the record from service
+	 * Get complete record or only the changes made to the record by providing 'view=updates' option.
 	 * 
 	 * @param ediid Unique record identifier
-	 * @return
+	 * @return Document
 	 * @throws CustomizationException
 	 */
 	@RequestMapping(value = { "{ediid}" }, method = RequestMethod.GET, produces = "application/json")
 	@ApiOperation(value = ".", nickname = "Access editable Record", notes = "Resource returns a record if it is editable and user is authenticated.")
-	public Document editRecord(@PathVariable @Valid String ediid) throws CustomizationException {
+	public Document getData(@PathVariable @Valid String ediid, @RequestParam Optional<String> view) throws CustomizationException {
 		logger.info("Access the record to be edited by ediid " + ediid);
-		return uRepo.edit(ediid);
+		String viewoption = "";
+		if(view != null && !view.isEmpty())
+			viewoption = view.get();
+		return uRepo.getData(ediid,viewoption);
 	}
-//	,  @RequestParam("view") String viewas
+
 
 	/**
-	 * Delete the resource from staging area
+	 * Delete the resource from staging area/cache
 	 * 
 	 * @param ediid Unique record identifier
 	 * @return JSON document original format
@@ -109,10 +113,11 @@ public class DraftController {
 	@RequestMapping(value = {
 			"{ediid}" }, method = RequestMethod.PUT, headers = "accept=application/json", produces = "application/json")
 	@ApiOperation(value = ".", nickname = "Save changes to server", notes = "Resource returns a boolean based on success or failure of the request.")
-	public Document saveRecord(@PathVariable @Valid String ediid, @Valid @RequestBody String params)
+	@ResponseStatus(HttpStatus.CREATED)
+	public boolean createRecord(@PathVariable @Valid String ediid, @Valid @RequestBody String params)
 			throws CustomizationException, InvalidInputException, ResourceNotFoundException {
 		logger.info("Send updated record to backend metadata server:" + ediid);
-		return uRepo.save(ediid, params);
+		return uRepo.put(ediid, params);
 
 	}
 

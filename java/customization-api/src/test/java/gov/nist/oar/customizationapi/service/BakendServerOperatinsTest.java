@@ -1,29 +1,23 @@
 package gov.nist.oar.customizationapi.service;
 
+import static org.junit.Assert.assertEquals;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
-import org.junit.Before;
+import org.bson.Document;
 import org.junit.Test;
-import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.junit.runner.RunWith;
 import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
-
-import org.bson.Document;
-
+@SuppressWarnings("deprecation")
 @RunWith(MockitoJUnitRunner.class)
 public class BakendServerOperatinsTest {
 	String mdserver = "http://localhost";
@@ -82,5 +76,6 @@ public class BakendServerOperatinsTest {
 		String title = "New Title Update Test May 7";
 		assertEquals(title, d.getString("title"));
 		System.out.print("Doc:" + d.getString("title"));
+		System.out.print("response body::"+response.getBody());
 	}
 }

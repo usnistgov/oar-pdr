@@ -52,7 +52,7 @@ public class UpdateRepositoryService implements UpdateRepository {
 	 * @throws ResourceNotFoundException
 	 */
 	@Override
-	public Document update(String params, String recordid)
+	public Document updateRecord(String params, String recordid)
 			throws InvalidInputException, ResourceNotFoundException, CustomizationException {
 		logger.info("Update: operation to save draft called.");
 		processInputHelper(params, recordid);
@@ -113,55 +113,69 @@ public class UpdateRepositoryService implements UpdateRepository {
 	 * @throws CustomizationException Accessing records to edit in the front end.
 	 */
 	@Override
-	public Document edit(String recordid) throws CustomizationException {
+	public Document getRecord(String recordid) throws CustomizationException {
 		logger.info("get data operation in service called.");
 		return accessData.getData(recordid, mconfig.getRecordCollection());
 	}
 
+	
 	/**
-	 * Save action can accept changes and save them or just return the updated data
-	 * from cache.
-	 * 
-	 * @param params, recordid
+	 * @param recordid
 	 * @return Document
-	 * @throws InvalidInputException
-	 * @throws CustomizationException
+	 * @throws CustomizationException Accessing records to edit in the front end.
 	 */
 	@Override
-	public Document save(String recordid, String params) throws InvalidInputException, CustomizationException {
-		logger.info("save and send finalized draft to backend service.");
-		Document update = null;
-		try {
-			if (!(params.isEmpty() || params == null)) {
-				// If input is not empty process it first.
-				processInputHelper(params, recordid);
-			}
-			// if record exists send changes to mdserver
-			if (accessData.checkRecordInCache(recordid, mconfig.getChangeCollection())) {
-				// Document d = accessData.getData(recordid, mconfig.getChangeCollection());
-				BackendServerOperations bkOperations = new BackendServerOperations(mconfig.getMetadataServer(),
-						mconfig.getMDSecret());
-				update = bkOperations.sendChangesToServer(recordid,
-						accessData.getData(recordid, mconfig.getChangeCollection()));
-
-			}
-			// on successful return delete record from DB
-			if (update != null && update.size() != 0) {
-				// this.delete(recordid);
-				return update;
-			} else {
-				throw new CustomizationException("The data can not be updated successfully in the backend server.");
-			}
-		} catch (InvalidInputException ex) {
-			logger.error("Error while finalizing changes.InvalidInputException:" + ex.getMessage());
-			throw new InvalidInputException("Error while finalizing changes. " + ex.getMessage());
-		} catch (MongoException ex) {
-			logger.error("There is an error in save operation while accessing/updating data from backend database."
-					+ ex.getMessage());
-			throw new CustomizationException("There is an error accessing/updating data from backend database.");
-		}
-
+	public Document getData(String recordid,String view) throws CustomizationException {
+		logger.info("get data operation in service called.");
+		if(view.equalsIgnoreCase("updates"))
+			return accessData.getData(recordid, mconfig.getChangeCollection());
+		return accessData.getData(recordid, mconfig.getRecordCollection());
 	}
+
+//	/**
+//	 * Save action can accept changes and save them or just return the updated data
+//	 * from cache.
+//	 * 
+//	 * @param params, recordid
+//	 * @return Document
+//	 * @throws InvalidInputException
+//	 * @throws CustomizationException
+//	 */
+//	@Override
+//	public Document save(String recordid, String params) throws InvalidInputException, CustomizationException {
+//		logger.info("save and send finalized draft to backend service.");
+//		Document update = null;
+//		try {
+//			if (!(params.isEmpty() || params == null)) {
+//				// If input is not empty process it first.
+//				processInputHelper(params, recordid);
+//			}
+//			// if record exists send changes to mdserver
+//			if (accessData.checkRecordInCache(recordid, mconfig.getChangeCollection())) {
+//				// Document d = accessData.getData(recordid, mconfig.getChangeCollection());
+//				BackendServerOperations bkOperations = new BackendServerOperations(mconfig.getMetadataServer(),
+//						mconfig.getMDSecret());
+//				update = bkOperations.sendChangesToServer(recordid,
+//						accessData.getData(recordid, mconfig.getChangeCollection()));
+//
+//			}
+//			// on successful return delete record from DB
+//			if (update != null && update.size() != 0) {
+//				// this.delete(recordid);
+//				return update;
+//			} else {
+//				throw new CustomizationException("The data can not be updated successfully in the backend server.");
+//			}
+//		} catch (InvalidInputException ex) {
+//			logger.error("Error while finalizing changes.InvalidInputException:" + ex.getMessage());
+//			throw new InvalidInputException("Error while finalizing changes. " + ex.getMessage());
+//		} catch (MongoException ex) {
+//			logger.error("There is an error in save operation while accessing/updating data from backend database."
+//					+ ex.getMessage());
+//			throw new CustomizationException("There is an error accessing/updating data from backend database.");
+//		}
+//
+//	}
 
 	/**
 	 * @param recordid
@@ -174,6 +188,69 @@ public class UpdateRepositoryService implements UpdateRepository {
 		logger.info("delete operation in service called.");
 		return accessData.deleteRecordInCache(recordid, mconfig.getRecordCollection())
 				&& accessData.deleteRecordInCache(recordid, mconfig.getChangeCollection());
+	}
+	
+	/**
+	 * Save action can accept changes and save them or just return the updated data
+	 * from cache.
+	 * 
+	 * @param params, recordid
+	 * @return Document
+	 * @throws InvalidInputException
+	 * @throws CustomizationException
+	 */
+	@Override
+	public boolean put(String recordid, String params) throws InvalidInputException, CustomizationException {
+		logger.info("save and send finalized draft to backend service.");
+
+		try {
+			if (!(params.isEmpty() || params == null)) {
+				// If input is not empty process it first.
+				return inputDocumentHelper(params, recordid);
+			}
+			throw new InvalidInputException("Input is null or JSON is not valid.");
+
+		} catch (InvalidInputException ex) {
+			logger.error("Error while finalizing changes.InvalidInputException:" + ex.getMessage());
+			throw new InvalidInputException("Error while finalizing changes. " + ex.getMessage());
+		} catch (MongoException ex) {
+			logger.error("There is an error in save operation while accessing/updating data from backend database."
+					+ ex.getMessage());
+			throw new CustomizationException("There is an error accessing/updating data from backend database.");
+		}
+
+	}
+
+	/**
+	 * Check the inputed values which are of JSON format, check if JSON is valid and
+	 * passes the schema. Valid input is processed and patched in the backed
+	 * database.
+	 * 
+	 * @param params
+	 * @param recordid
+	 * @return boolean
+	 * @throws InvalidInputException
+	 * @throws CustomizationException
+	 */
+	private boolean inputDocumentHelper(String params, String recordid)
+			throws InvalidInputException, CustomizationException {
+		try {
+			// Validate JSON and Validate schema against json-customization schema
+			JSONUtils.validateInput(params);
+			Document update = Document.parse(params);
+			update.remove("_id");
+			update.append("ediid", recordid);
+
+			if (!this.accessData.checkRecordInCache(recordid, mconfig.getRecordCollection())) {
+				this.accessData.putDataInCache(recordid, mconfig.getRecordCollection());
+				return true;
+			} else
+				return false;
+
+		} catch (InvalidInputException iexp) {
+			logger.error("Error while Processing input json data: " + iexp.getMessage());
+			throw new InvalidInputException("Error while processing input JSON data:" + iexp.getMessage());
+		}
 	}
 
 }

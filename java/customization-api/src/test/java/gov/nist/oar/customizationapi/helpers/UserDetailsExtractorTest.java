@@ -43,6 +43,7 @@ public class UserDetailsExtractorTest {
 		 UserToken utoken = new UserToken(authDetails,"123243");
 		 Mockito.doReturn(authDetails).when(uExtract).getUserDetails();
 		 org.junit.Assert.assertEquals(authDetails.getUserEmail(),"abc@xyz.com");
+		 System.out.print(utoken);
 	}
 	@Test
 	public void getUserRecordTest() {

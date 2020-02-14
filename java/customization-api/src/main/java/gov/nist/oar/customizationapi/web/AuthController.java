@@ -41,7 +41,6 @@ import gov.nist.oar.customizationapi.helpers.AuthenticatedUserDetails;
 import gov.nist.oar.customizationapi.helpers.UserDetailsExtractor;
 import gov.nist.oar.customizationapi.service.JWTTokenGenerator;
 import gov.nist.oar.customizationapi.service.ResourceNotFoundException;
-import gov.nist.oar.customizationapi.service.SamlUserDetailsService;
 import gov.nist.oar.customizationapi.service.UserToken;
 import io.swagger.annotations.ApiOperation;
 

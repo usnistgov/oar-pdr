@@ -1,10 +1,12 @@
 package gov.nist.oar.customizationapi.web;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertThat;
+import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
-import org.apache.bcel.verifier.structurals.ExceptionHandler;
+import java.lang.annotation.Retention;
+
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -12,32 +14,22 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
-import static org.mockito.BDDMockito.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.client.TestRestTemplate;
-import org.springframework.boot.web.server.LocalServerPort;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.saml.SAMLCredential;
-import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.security.test.context.support.WithSecurityContext;
+import org.springframework.security.test.context.support.WithSecurityContextFactory;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import com.nimbusds.jose.JOSEException;
+//import com.nimbusds.jose.proc.SecurityContext;
 
 import gov.nist.oar.customizationapi.exceptions.BadGetwayException;
 import gov.nist.oar.customizationapi.exceptions.CustomizationException;
@@ -47,8 +39,6 @@ import gov.nist.oar.customizationapi.helpers.AuthenticatedUserDetails;
 import gov.nist.oar.customizationapi.helpers.UserDetailsExtractor;
 import gov.nist.oar.customizationapi.service.JWTTokenGenerator;
 import gov.nist.oar.customizationapi.service.UserToken;
-
-import org.junit.Assert;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
 //
@@ -115,8 +105,15 @@ public class AuthControllerTest {
 
          //final AuthController authController = new AuthController();
 
-        
-         final UserToken apiToken = authController.token(null, null);
+		 SecurityContext context = SecurityContextHolder.createEmptyContext();
+
+		    MockUserDetails principal =
+		        new MockUserDetails(customUser.username(), customUser.password());
+		    Authentication auth =
+		        new UsernamePasswordAuthenticationToken(principal, "password", principal.getAuthorities());
+		    context.setAuthentication(auth);
+//		 SecurityContext test = new WithMockCustomUserSecurityContextFactory().createSecurityContext((WithMockCustomUser) new MockUserDetails("testuser","testpassword"));
+         final UserToken apiToken = authController.token(context.getAuthentication(), "43422");
 
          Assert.assertNotNull(apiToken);
          Assert.assertTrue(apiToken.getToken().length() > 0);
@@ -176,3 +173,25 @@ public class AuthControllerTest {
 //	    }
 }
 
+//@Retention(RetentionPolicy.RUNTIME)
+@WithSecurityContext(factory = WithMockCustomUserSecurityContextFactory.class)
+ @interface WithMockCustomUser {
+
+    String username() default "testuser";
+
+    String password() default "testpassword";
+}
+class WithMockCustomUserSecurityContextFactory
+implements WithSecurityContextFactory<WithMockCustomUser> {
+@Override
+public SecurityContext createSecurityContext(WithMockCustomUser customUser) {
+    SecurityContext context = SecurityContextHolder.createEmptyContext();
+
+    MockUserDetails principal =
+        new MockUserDetails(customUser.username(), customUser.password());
+    Authentication auth =
+        new UsernamePasswordAuthenticationToken(principal, "password", principal.getAuthorities());
+    context.setAuthentication(auth);
+    return context;
+}
+}
