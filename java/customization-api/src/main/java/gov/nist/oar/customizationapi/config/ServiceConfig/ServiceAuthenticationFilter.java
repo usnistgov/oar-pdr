@@ -7,6 +7,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
@@ -17,7 +18,10 @@ public class ServiceAuthenticationFilter extends AbstractAuthenticationProcessin
 	public static final String Header_Authorization_Token = "Authorization";
 	public static final String Token_starter = "Bearer";
 
+	String secret;
+
 	public ServiceAuthenticationFilter(final String matcher, AuthenticationManager authenticationManager) {
+
 		super(matcher);
 		super.setAuthenticationManager(authenticationManager);
 	}
@@ -30,12 +34,14 @@ public class ServiceAuthenticationFilter extends AbstractAuthenticationProcessin
 	public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response)
 			throws AuthenticationException, IOException, ServletException {
 		logger.info("Attempt to check token and  authorized token validity"
-				+ request.getHeader(Header_Authorization_Token));
+				+ request.getHeader(Header_Authorization_Token) + "test :" + secret);
 		String token = request.getHeader(Header_Authorization_Token);
-		if (token == null) {
-			logger.error("Unauthorized service: Token is null.");
+		if (token != null)
+			token = token.replaceAll(Token_starter, "").trim();
+		if (token == null || !token.equalsIgnoreCase(secret)) {
+			logger.error("Unauthorized service: Token is null or Not Valid.");
 			this.unsuccessfulAuthentication(request, response, new BadCredentialsException(
-					"Unauthorized service request: Token is not provided with this request."));
+					"Unauthorized service request: Null or Invalid toke provided with the request."));
 			return null;
 		}
 
@@ -53,5 +59,9 @@ public class ServiceAuthenticationFilter extends AbstractAuthenticationProcessin
 	protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response,
 			AuthenticationException failed) throws IOException, ServletException {
 		logger.info("Unsuccessful attempt to authorize this service request");
+	}
+
+	public void setSecret(String secret) {
+		this.secret = secret;
 	}
 }

@@ -46,7 +46,7 @@ public class WebSecurityConfig {
 	 * Rest security configuration for rest api
 	 */
 	@Configuration
-	@Order(1)
+	@Order(2)
 	public static class RestApiSecurityConfig extends WebSecurityConfigurerAdapter {
 		private Logger logger = LoggerFactory.getLogger(RestApiSecurityConfig.class);
 
@@ -98,17 +98,19 @@ public class WebSecurityConfig {
 	 * Security configuration for service level authorization end points
 	 */
 	@Configuration
-	@Order(2)
+	@Order(1)
 	public static class AuthServiceSecurityConfig extends WebSecurityConfigurerAdapter {
 		private Logger logger = LoggerFactory.getLogger(AuthServiceSecurityConfig.class);
 
 		private static final String apiMatcher = "/pdr/lp/draft/**";
-
+		@Value("${custom.service.secret:testid}")
+		String secret;
 		@Override
 		protected void configure(HttpSecurity http) throws Exception {
-			logger.info("AuthSecurity Config set up http related entrypoints.");
-
-			http.addFilterBefore(new ServiceAuthenticationFilter(apiMatcher, super.authenticationManager()),
+			logger.info("AuthSecurity Config set up http related entrypoints."+secret);
+			ServiceAuthenticationFilter serviceFilter = new ServiceAuthenticationFilter(apiMatcher, super.authenticationManager());
+			serviceFilter.setSecret(secret);
+			http.addFilterBefore(serviceFilter,
 					UsernamePasswordAuthenticationFilter.class);
 
 			http.authorizeRequests().antMatchers(HttpMethod.GET, apiMatcher).permitAll();

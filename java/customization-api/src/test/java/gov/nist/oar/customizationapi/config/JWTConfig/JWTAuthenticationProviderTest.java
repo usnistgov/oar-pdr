@@ -23,7 +23,7 @@ import org.springframework.test.context.junit4.SpringRunner;
  */
 @RunWith(SpringRunner.class)
 public class JWTAuthenticationProviderTest {
-	String JWT_SECRET = "fmsgsnf#$%jsfh";
+	String JWT_SECRET = "fmsgsnf#$%jsfhghsfdjjh#$%#$%^%^%$bhsfhsh";
 
     @Test
     public void supportsShouldReturnFalse() {

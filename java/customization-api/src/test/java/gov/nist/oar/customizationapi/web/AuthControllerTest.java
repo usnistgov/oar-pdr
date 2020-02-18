@@ -99,25 +99,25 @@ public class AuthControllerTest {
 //	        assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
 	    
 	    }
-	 @WithMockSaml(samlAssertFile = "/saml-auth-assert.xml")
-     @Test
-     public void testAuthController() throws JOSEException, UnAuthorizedUserException, CustomizationException, UnAuthenticatedUserException, BadGetwayException {
-
-         //final AuthController authController = new AuthController();
-
-		 SecurityContext context = SecurityContextHolder.createEmptyContext();
-
-		    MockUserDetails principal =
-		        new MockUserDetails(customUser.username(), customUser.password());
-		    Authentication auth =
-		        new UsernamePasswordAuthenticationToken(principal, "password", principal.getAuthorities());
-		    context.setAuthentication(auth);
-//		 SecurityContext test = new WithMockCustomUserSecurityContextFactory().createSecurityContext((WithMockCustomUser) new MockUserDetails("testuser","testpassword"));
-         final UserToken apiToken = authController.token(context.getAuthentication(), "43422");
-
-         Assert.assertNotNull(apiToken);
-         Assert.assertTrue(apiToken.getToken().length() > 0);
-     }
+//	 @WithMockSaml(samlAssertFile = "/saml-auth-assert.xml")
+//     @Test
+//     public void testAuthController() throws JOSEException, UnAuthorizedUserException, CustomizationException, UnAuthenticatedUserException, BadGetwayException {
+//
+//         //final AuthController authController = new AuthController();
+//
+//		 SecurityContext context = SecurityContextHolder.createEmptyContext();
+//
+//		    MockUserDetails principal =
+//		        new MockUserDetails(customUser.username(), customUser.password());
+//		    Authentication auth =
+//		        new UsernamePasswordAuthenticationToken(principal, "password", principal.getAuthorities());
+//		    context.setAuthentication(auth);
+////		 SecurityContext test = new WithMockCustomUserSecurityContextFactory().createSecurityContext((WithMockCustomUser) new MockUserDetails("testuser","testpassword"));
+//         final UserToken apiToken = authController.token(context.getAuthentication(), "43422");
+//
+//         Assert.assertNotNull(apiToken);
+//         Assert.assertTrue(apiToken.getToken().length() > 0);
+//     }
 //
 //	    @LocalServerPort
 //	    int port;
