@@ -11,6 +11,7 @@ import { EditStatusService } from './editstatus.service';
 import { AuthService, WebAuthService } from './auth.service';
 import { CustomizationService } from './customization.service';
 import { NerdmRes } from '../../nerdm/nerdm'
+import { LandingConstants } from '../constants';
 
 /**
  * a panel that serves as a control center for editing metadata displayed in the 
@@ -31,15 +32,15 @@ export class EditControlComponent implements OnInit, OnChanges {
 
     private _custsvc: CustomizationService = null;
     private originalRecord: NerdmRes = null;
-    private _editmode: boolean = false;
-    public previewMode: boolean = false;
+    private _editmode: string;
+    private EDIT_MODES: any;
 
     /**
      * a flag indicating whether editing mode is turned on (true=yes).  This parameter is 
      * available to a parent template via (editModeChanged).  
      */
     get editMode() { return this._editmode; }
-    set editMode(engage: boolean) {
+    set editMode(engage: string) {
         if (this._editmode != engage) {
             this._editmode = engage;
             this.mdupdsvc.editMode = this._editmode;
@@ -47,7 +48,7 @@ export class EditControlComponent implements OnInit, OnChanges {
             this.editModeChanged.emit(engage);
         }
     }
-    @Output() editModeChanged: EventEmitter<boolean> = new EventEmitter<boolean>();
+    @Output() editModeChanged: EventEmitter<string> = new EventEmitter<string>();
 
     /**
      * the local copy of the draft (updated) metadata.  This parameter is available to a parent
@@ -94,6 +95,8 @@ export class EditControlComponent implements OnInit, OnChanges {
         private authsvc: AuthService,
         private confirmDialogSvc: ConfirmationDialogService,
         private msgsvc: UserMessageService) {
+
+        this.EDIT_MODES = LandingConstants.editModes;
         this.mdupdsvc._subscribe(
             (md) => {
                 if (md && md != this.mdrec) {
@@ -111,6 +114,7 @@ export class EditControlComponent implements OnInit, OnChanges {
     }
 
     ngOnInit() {
+      this._editmode = this.EDIT_MODES.PREVIEW_MODE;
         this.ngOnChanges();
         this.statusbar.showLastUpdate(this.editMode)
         this.edstatsvc._watchRemoteStart((resID) => {
@@ -118,10 +122,11 @@ export class EditControlComponent implements OnInit, OnChanges {
             // will do nothing and the app won't change to edit mode
             if (resID) {
                 this.resID = resID;
-                this.startEditing(true);
+                this.startEditing(false);
             }
         });
     }
+
     ngOnChanges() {
         if (this.mdrec instanceof Object && Object.keys(this.mdrec).length > 0) {
             if (!this.resID)
@@ -146,26 +151,30 @@ export class EditControlComponent implements OnInit, OnChanges {
         var _mdrec = this.mdrec;
         if (this._custsvc) {
             // already authorized
-            console.log("start editing... already authorized!");
-            this.editMode = true;
-            this.previewMode = false;
+            console.log("already authorized. Start editing...");
+            this.editMode = this.EDIT_MODES.EDIT_MODE;
             this.statusbar._setEditMode(this.editMode);
             this.statusbar.showLastUpdate(this.editMode);
             return;
         }
 
-        console.log("start editing... need authorization...");
         this.authorizeEditing(nologin).subscribe(
             (successful) => {
+              // User authorized
+              if(successful){
                 this.statusbar.showMessage("Loading draft...", true)
                 this.mdupdsvc.loadDraft().subscribe(
                     (md) => {
                         this.mdupdsvc.checkUpdatedFields(md as NerdmRes);
-                        this.statusbar._setEditMode(successful);
-                        this.statusbar.showLastUpdate(successful);
-                        this.editMode = successful;
-                        this.previewMode = successful;
+                        this.statusbar._setEditMode(this.EDIT_MODES.EDIT_MODE);
+                        this.statusbar.showLastUpdate(this.EDIT_MODES.EDIT_MODE);
+                        this.editMode = this.EDIT_MODES.EDIT_MODE;
                     });
+              }
+            },
+            (err) => {
+              this.statusbar.showMessage("Authentication failed.", false);
+              this.statusbar._setEditMode(this.EDIT_MODES.PREVIEW_MODE);
             }
         );
     }
@@ -179,8 +188,7 @@ export class EditControlComponent implements OnInit, OnChanges {
                 (md) => {
                     this.mdupdsvc.forgetUpdateDate();
                     this.mdupdsvc.fieldReset();
-                    this.editMode = false;
-                    this.previewMode = false;
+                    this.editMode = this.EDIT_MODES.PREVIEW_MODE;
                     if (md && md['@id']) {
                         // assume a NerdmRes object was returned
                         this.mdrec = md as NerdmRes;
@@ -250,8 +258,7 @@ export class EditControlComponent implements OnInit, OnChanges {
                     this.mdupdsvc.fieldReset();
                     this.mdrec = md as NerdmRes;
                     this.mdrecChange.emit(md as NerdmRes);
-                    this.editMode = false;
-                    this.previewMode = false;
+                    this.editMode = this.EDIT_MODES.PREVIEW_MODE;
                     this.statusbar.showLastUpdate(this.editMode)
 
                     // reload this page from the source
@@ -269,16 +276,44 @@ export class EditControlComponent implements OnInit, OnChanges {
         }
         else
             console.warn("Warning: requested edit discard without authorization");
+
+
     }
+
+
+    /**
+     * Tell backend that the editing is done
+     */
+    public doneEdits(): void {
+      if (this._custsvc){
+        this._custsvc.doneEditing().subscribe(
+          (res) => {
+            this.mdupdsvc.forgetUpdateDate();
+            this.mdupdsvc.fieldReset();
+            this.editMode = this.EDIT_MODES.DONE_MODE;
+            this.statusbar._setEditMode(this.editMode);
+            this.statusbar.showLastUpdate(this.editMode)
+          },
+          (err) => {
+            if (err.type == "user")
+              this.msgsvc.error(err.message);
+            else {
+              this.msgsvc.syserror("error during save: " + err.message);
+            }
+            this.statusbar.showLastUpdate(this.editMode)
+          }
+        );
+      }
+    }
+
 
     /**
      * pause the editing process: remove the editing widgets from the page so that the user can see how 
      * the changes will appear.  This function is called when the "Preview" button is clicked.
      */
     public preview(): void {
-        this.editMode = false;
-        this.previewMode = true;
-        this.statusbar._setEditMode(this.editMode, this.previewMode);
+        this.editMode = this.EDIT_MODES.PREVIEW_MODE;
+        this.statusbar._setEditMode(this.editMode);
         if (this.editsPending())
             this.statusbar.showMessage('Click "Submit" to commit your changes ' +
                 'or "Edit" to make more changes.');
@@ -291,8 +326,7 @@ export class EditControlComponent implements OnInit, OnChanges {
      * "Quit Edit" button is clicked.
      */
     public pauseEditing(): void {
-        this.editMode = false;
-        this.previewMode = false;
+        this.editMode = this.EDIT_MODES.PREVIEW_MODE;
         if (this.editsPending())
             this.statusbar.showMessage('Click "Submit" to commit your changes ' +
                 'or "Edit" to make more changes.');
@@ -350,17 +384,22 @@ export class EditControlComponent implements OnInit, OnChanges {
                 (custsvc) => {
                     this._custsvc = custsvc;    // could be null, indicating user is not authorized.
                     this.mdupdsvc._setCustomizationService(custsvc);
+
+                    var msg: string = "";
                     if (!this.authsvc.userID) {
-                        console.log("authentication failed");
+                        msg = "authentication failed";
                         this.msgsvc.error("User log in cancelled or failed.  To edit, please log in " +
                             'by clicking the "Edit" button above.')
                     }
                     else if (!custsvc) {
-                        console.log("authorization denied for user " + this.authsvc.userID);
+                        msg = "authorization denied for user " + this.authsvc.userID;
                         this.msgsvc.error("Sorry, you are not authorized to edit this submission.")
                     }
                     else
-                        console.log("authorization granted for user " + this.authsvc.userID);
+                        msg = "authorization granted for user " + this.authsvc.userID;
+
+                    console.log(msg);
+                    this.statusbar.showMessage(msg, false); 
                     subscriber.next(Boolean(this._custsvc));
                     subscriber.complete();
                     // this.statusbar.showLastUpdate(this.editMode)
@@ -368,7 +407,8 @@ export class EditControlComponent implements OnInit, OnChanges {
                     this.edstatsvc._setAuthorized(true);
                 },
                 (err) => {
-                    let msg = "Failure during authorization: " + err.message
+                    let msg = "Failure during authorization: " + err.message;
+                    this.statusbar.showMessage(msg, false); 
                     console.error(msg);
                     this.msgsvc.syserror(msg);
                     subscriber.next(false);

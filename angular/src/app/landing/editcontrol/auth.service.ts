@@ -164,7 +164,6 @@ export class WebAuthService extends AuthService {
         return new Observable<CustomizationService>(subscriber => {
             this.getAuthorization(resid).subscribe(
                 (info) => {
-                    console.log("getAuthorization returns:", info);
                     this._authcred.token = info.token;
                     this._authcred.userDetails = _deepCopy(info.userDetails);
                     if (info.token) {
@@ -223,7 +222,7 @@ export class WebAuthService extends AuthService {
      */
     public getAuthorization(resid: string): Observable<AuthInfo> {
         let url = this.endpoint + "auth/_perm/" + resid;
-        // wrap the HttpClient Observable with our own so that we can manage errors
+          // wrap the HttpClient Observable with our own so that we can manage errors
         return new Observable<AuthInfo>(subscriber => {
             this.httpcli.get(url, { headers: { 'Content-Type': 'application/json' } }).subscribe(
                 (creds) => {

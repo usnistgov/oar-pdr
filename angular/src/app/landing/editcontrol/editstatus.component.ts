@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 
 import { MetadataUpdateService } from './metadataupdate.service';
 import { UpdateDetails } from './interfaces';
+import { LandingConstants } from '../constants';
 
 /**
  * A panel inside the EditControlComponent that displays information about the status of 
@@ -25,8 +26,8 @@ export class EditStatusComponent implements OnInit {
     
     message : string = "";
     messageColor : string = "black";
-    previewMode: boolean = false;
-    editMode: boolean = false;
+    editMode: string;
+    EDIT_MODES: any;
 
     /**
      * construct the component
@@ -35,9 +36,11 @@ export class EditStatusComponent implements OnInit {
      *                    used to be alerted when updates have been made.
      */
     constructor(public mdupdsvc : MetadataUpdateService) {
+
+        this.EDIT_MODES = LandingConstants.editModes;
         this.mdupdsvc.updated.subscribe((details) => { 
             this._updateDetails = details; 
-            this.showLastUpdate(true);  //Once last updated date changed, refresh the status bar message
+            this.showLastUpdate(this.EDIT_MODES.EDIT_MODE);  //Once last updated date changed, refresh the status bar message
         });
     }
 
@@ -61,9 +64,8 @@ export class EditStatusComponent implements OnInit {
         this._isProcessing = onoff;
     }
 
-    _setEditMode(editMode: boolean, previewMode: boolean=false){
+    _setEditMode(editMode: string){
         this.editMode = editMode;
-        this.previewMode = previewMode;
     }
 
     ngOnInit() {
@@ -81,21 +83,26 @@ export class EditStatusComponent implements OnInit {
     /**
      * display the time of the last update, if known
      */
-    public showLastUpdate(editmode : boolean, inprogress : boolean = false) {
-        if (editmode) {
+    public showLastUpdate(editmode : string, inprogress : boolean = false) {
+      switch(editmode){
+        case this.EDIT_MODES.EDIT_MODE:
             // We are editing the metadata (and are logged in)
             if (this._updateDetails)
                 this.showMessage("This record was edited by " + this._updateDetails.userDetails.userName + " " + this._updateDetails.userDetails.userLastName + " on " + this._updateDetails._updateDate, inprogress);
             else
                 this.showMessage('Click on the <i class="faa faa-pencil"></i> button to edit or <i class="faa faa-undo"></i> button to discard the change.', inprogress);
-        }
-        else {
+          break;
+        case this.EDIT_MODES.PREVIEW_MODE:
             if (this._updateDetails)
                 this.showMessage("There are un-submitted changes last edited on " + this._updateDetails._updateDate + ".  Click on the Edit button to continue editing.", 
                 inprogress, "rgb(255, 115, 0)");
             else
                 this.showMessage('To see any previously edited inputs or to otherwise edit this page, ' +
                                  'click on the "Edit" button.', inprogress);
-        }            
+          break;   
+        case this.EDIT_MODES.DONE_MODE:
+          this.showMessage('You can now close this window and go back to Midas to either accept or discard the changes.', false);
+          break;
+      }        
     }
 }

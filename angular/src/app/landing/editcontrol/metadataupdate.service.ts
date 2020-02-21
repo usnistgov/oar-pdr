@@ -9,6 +9,7 @@ import { Observable, of, throwError, Subscriber } from 'rxjs';
 import { EditStatusComponent } from './editstatus.component';
 import { UpdateDetails } from './interfaces';
 import { AuthService, WebAuthService } from './auth.service';
+import { LandingConstants } from '../constants';
 
 /**
  * a service that receives updates to the resource metadata from update widgets.
@@ -31,6 +32,7 @@ export class MetadataUpdateService {
     private custsvc: CustomizationService = null;
     private originalRec: NerdmRes = null;
     private origfields: {} = {};   // keeps track of orginal metadata so that they can be undone
+    public  EDIT_MODES: any;
 
     private _lastupdate: UpdateDetails = {} as UpdateDetails;   // null object means unknown
     get lastUpdate() { return this._lastupdate; }
@@ -53,9 +55,9 @@ export class MetadataUpdateService {
      * Note that this flag should only be updated by the controller (i.e. EditControlComponent) 
      * that subscribes to this class (via _subscribe()).
      */
-    private _editmode: boolean = false;
+    private _editmode: string;
     get editMode() { return this._editmode; }
-    set editMode(engage: boolean) { this._editmode = engage; }
+    set editMode(engage: string) { this._editmode = engage; }
 
     /**
      * construct the service
@@ -65,7 +67,9 @@ export class MetadataUpdateService {
      */
     constructor(private msgsvc: UserMessageService,
         private authsvc: AuthService,
-        private datePipe: DatePipe) { }
+        private datePipe: DatePipe) { 
+          this.EDIT_MODES = LandingConstants.editModes;
+        }
 
     /*
      * subscribe to updates to the metadata.  This is intended for connecting the 
@@ -311,7 +315,6 @@ export class MetadataUpdateService {
 
             this.custsvc.getDraftMetadata().subscribe(
                 (res) => {
-                    console.log("Draft data returned from server:\n  ", res)
                     this.mdres.next(res as NerdmRes);
                     subscriber.next(res as NerdmRes);
                     subscriber.complete();
@@ -359,5 +362,12 @@ export class MetadataUpdateService {
      */
     public showOriginalMetadata() {
         this.mdres.next(this.originalRec);
+    }
+
+    /**
+     * Tell whether we are in edit mode
+     */
+    get isEditMode(): boolean{
+      return this._editmode == this.EDIT_MODES.EDIT_MODE;
     }
 }

@@ -26,7 +26,7 @@ export class DescriptionComponent implements OnInit {
     }
 
     getFieldStyle() {
-        if (this.mdupdsvc.editMode) {
+        if (this.mdupdsvc.isEditMode) {
             if (this.mdupdsvc.fieldUpdated(this.fieldName)) {
                 return { 'background-color': '#FCF9CD' };
             } else {
@@ -38,7 +38,7 @@ export class DescriptionComponent implements OnInit {
     }
 
     openModal() {
-        if (!this.mdupdsvc.editMode) return;
+        if (!this.mdupdsvc.isEditMode) return;
 
         let ngbModalOptions: NgbModalOptions = {
             backdrop: 'static',

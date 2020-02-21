@@ -127,7 +127,7 @@ export class TopicComponent implements OnInit {
      *  Return style based on edit mode and data update status
      */
     getFieldStyle() {
-        if (this.mdupdsvc.editMode) {
+        if (this.mdupdsvc.isEditMode) {
             if (this.mdupdsvc.fieldUpdated(this.fieldName)) {
                 return { 'border': '1px solid lightgrey', 'background-color': '#FCF9CD', 'padding-right': '1em' };
             } else {
@@ -144,7 +144,7 @@ export class TopicComponent implements OnInit {
     openModal() {
         // Do nothing if it's not in edit mode. 
         // This should never happen because the edit button should be disabled.
-        if (!this.mdupdsvc.editMode) return;
+        if (!this.mdupdsvc.isEditMode) return;
 
         // Pop up dialog set up
         // backdrop: 'static' - the pop up will not be closed 

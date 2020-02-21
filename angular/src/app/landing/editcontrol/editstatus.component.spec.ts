@@ -6,6 +6,7 @@ import { MetadataUpdateService } from './metadataupdate.service';
 import { UserMessageService } from '../../frame/usermessage.service';
 import { AuthService, WebAuthService, MockAuthService } from '../editcontrol/auth.service';
 import { UpdateDetails, UserDetails } from './interfaces';
+import { LandingConstants } from '../constants';
 
 describe('EditStatusComponent', () => {
     let component : EditStatusComponent;
@@ -21,6 +22,8 @@ describe('EditStatusComponent', () => {
         'userDetails': userDetails,
         '_updateDate': '2025 April 1'
     }
+
+    let EDIT_MODES = LandingConstants.editModes;
 
     let makeComp = function() {
         TestBed.configureTestingModule({
@@ -81,7 +84,7 @@ describe('EditStatusComponent', () => {
     it('showLastUpdate()', () => {
         expect(component.updateDetails).toBe(null);
 
-        component.showLastUpdate(false);
+        component.showLastUpdate(EDIT_MODES.PREVIEW_MODE);
         expect(component.message).toContain("To see any previously");
         fixture.detectChanges();
         let cmpel = fixture.nativeElement;
@@ -89,21 +92,24 @@ describe('EditStatusComponent', () => {
         expect(bardiv).not.toBeNull();
         expect(bardiv.firstElementChild.innerHTML).toContain("To see any previously");
         
-        component.showLastUpdate(true);
+        component.showLastUpdate(EDIT_MODES.EDIT_MODE);
         expect(component.message).toContain('Click on the <i class="faa faa-pencil"></i> button to edit');
         fixture.detectChanges();
         expect(bardiv.firstElementChild.innerHTML).toContain('<i class="faa faa-undo"></i> button to discard the change');
 
         component.setLastUpdateDetails(updateDetails);
         
-        component.showLastUpdate(false);
+        component.showLastUpdate(EDIT_MODES.PREVIEW_MODE);
         expect(component.message).toContain("There are un-submitted changes last edited on 2025 April 1");
         fixture.detectChanges();
         expect(bardiv.firstElementChild.innerHTML).toContain('There are un-submitted changes last edited');
-        component.showLastUpdate(true);
+        component.showLastUpdate(EDIT_MODES.EDIT_MODE);
         expect(component.message).toContain("This record was edited");
         fixture.detectChanges();
         expect(bardiv.firstElementChild.innerHTML).toContain('This record was edited by test01 NIST on 2025 April 1');
+
+        component.showLastUpdate(EDIT_MODES.DONE_MODE);
+        expect(component.message).toContain('You can now close this window');
     });
 
 

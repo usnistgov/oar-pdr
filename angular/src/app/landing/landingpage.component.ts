@@ -106,12 +106,12 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
             this.route.queryParamMap.subscribe(queryParams => {
                 let param = queryParams.get("editmode")
                 // console.log("editmode url param:", param);
-                if (param) {
+                // if (param) {
                     console.log("Returning from authentication redirection (editmode="+param+")");
                     // Need to pass reqID (resID) because the resID in editControlComponent
                     // has not been set yet and the startEditing function relies on it.
                     this.edstatsvc.startEditing(this.reqId);
-                }
+                // }
             })
         }
     }

@@ -46,9 +46,9 @@ export class EditStatusService {
     /**
      * flag indicating whether the landing page is currently being edited.  
      */
-    get editMode() : boolean { return this._editmode; }
-    private _editmode : boolean = false;
-    _setEditMode(val : boolean) { this._editmode = val; }
+    get editMode() : string { return this._editmode; }
+    private _editmode : string = '';
+    _setEditMode(val : string) { this._editmode = val; }
 
     /**
      * Behavior subject to remotely start the edit function. This is used when user login
