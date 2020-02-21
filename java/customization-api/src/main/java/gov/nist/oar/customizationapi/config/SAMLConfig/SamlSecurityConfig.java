@@ -376,7 +376,7 @@ public class SamlSecurityConfig extends WebSecurityConfigurerAdapter {
 	 * @throws ConfigurationException
 	 */
 	@Bean
-	public FilterChainProxy samlFilter() throws ConfigurationException {
+	public FilterChainProxy samlSpringFilter() throws ConfigurationException {
 		logger.info("Setting up different saml filters and endpoints");
 		List<SecurityFilterChain> chains = new ArrayList<>();
 
@@ -741,7 +741,7 @@ public class SamlSecurityConfig extends WebSecurityConfigurerAdapter {
 
 			http.csrf().disable();
 
-			http.addFilterBefore(metadataGeneratorFilter(), ChannelProcessingFilter.class).addFilterAfter(samlFilter(),
+			http.addFilterBefore(metadataGeneratorFilter(), ChannelProcessingFilter.class).addFilterAfter(samlSpringFilter(),
 					BasicAuthenticationFilter.class);
 
 			http.authorizeRequests().antMatchers("/error").permitAll().antMatchers("/saml/**").permitAll().anyRequest()
