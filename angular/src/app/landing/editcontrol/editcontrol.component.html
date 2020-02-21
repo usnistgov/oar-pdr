@@ -6,12 +6,12 @@
 
     <!-- Discard button -->
     <button pButton type="submit" class="btn btn-labeled" id="ec-discard-btn" (click)="confirmDiscardEdits()"
-        [disabled]="!((editMode || previewMode) && editsPending())" label="Discard" icon="faa faa-trash faa-1x icon-white" iconPos="left">
+        [disabled]="((editMode == EDIT_MODES.DONE_MODE) || !editsPending())" label="Discard" icon="faa faa-trash faa-1x icon-white" iconPos="left">
     </button>
 
     <!-- Done button -->
     <button pButton type="submit" class="btn btn-labeled" id="ec-done-btn" (click)="doneEdits()"
-        [disabled]="!((editMode || previewMode) && editsPending())" label="Done" icon="faa faa-save faa-1x icon-white" iconPos="left">
+        [disabled]="((editMode == EDIT_MODES.DONE_MODE) || !editsPending())" label="Done" icon="faa faa-save faa-1x icon-white" iconPos="left">
     </button>
 
     <!-- 
