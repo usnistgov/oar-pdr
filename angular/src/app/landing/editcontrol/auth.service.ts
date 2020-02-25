@@ -184,9 +184,9 @@ export class WebAuthService extends AuthService {
                         subscriber.complete();
 
                         // redirect the browser to the authentication server
-                        if (!nologin)
+                        if (!nologin){
                             this.loginUser();
-                        else {
+                        }else {
                             subscriber.next(null);
                             subscriber.complete();
                         }
@@ -195,9 +195,9 @@ export class WebAuthService extends AuthService {
                 (err) => {
                     if (err['statusCode'] && err.statusCode == 401) {
                         // User needs to log in; redirect the browser to the authentication server
-                        if (!nologin)
+                        if (!nologin){
                             this.loginUser();
-                        else {
+                        }else {
                             subscriber.next(null);
                             subscriber.complete();
                         }

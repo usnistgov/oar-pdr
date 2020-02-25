@@ -54,7 +54,7 @@ export class EditStatusService {
      * Behavior subject to remotely start the edit function. This is used when user login
      * and the page was redirected to current page with parameter 'editmode' set to true.
      */
-    private _remoteStart : BehaviorSubject<string> = new BehaviorSubject<string>("");
+    private _remoteStart : BehaviorSubject<object> = new BehaviorSubject<object>({resID: "", nologin: false});
     _watchRemoteStart(subscriber) {
         this._remoteStart.subscribe(subscriber);
     }
@@ -97,8 +97,8 @@ export class EditStatusService {
     /**
      * turn on editing controls allowing the user to edit the metadata
      */
-    public startEditing(resID: string = "") : void {
-        this._remoteStart.next(resID);
+    public startEditing(resID: string = "", nologin: boolean = false) : void {
+        this._remoteStart.next({'resID':resID, 'nologin':nologin});
     }
 
     /**

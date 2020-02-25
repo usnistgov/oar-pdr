@@ -117,12 +117,12 @@ export class EditControlComponent implements OnInit, OnChanges {
       this._editmode = this.EDIT_MODES.PREVIEW_MODE;
         this.ngOnChanges();
         this.statusbar.showLastUpdate(this.editMode)
-        this.edstatsvc._watchRemoteStart((resID) => {
+        this.edstatsvc._watchRemoteStart((remoteObj) => {
             // To remote start editing, resID need be set otherwise authorizeEditing()
             // will do nothing and the app won't change to edit mode
-            if (resID) {
-                this.resID = resID;
-                this.startEditing(false);
+            if (remoteObj.resID) {
+                this.resID = remoteObj.resID;
+                this.startEditing(remoteObj.nologin);
             }
         });
     }
@@ -165,6 +165,7 @@ export class EditControlComponent implements OnInit, OnChanges {
                 this.statusbar.showMessage("Loading draft...", true)
                 this.mdupdsvc.loadDraft().subscribe(
                     (md) => {
+                        this.mdupdsvc._setOriginalMetadata(md as NerdmRes);
                         this.mdupdsvc.checkUpdatedFields(md as NerdmRes);
                         this.statusbar._setEditMode(this.EDIT_MODES.EDIT_MODE);
                         this.statusbar.showLastUpdate(this.EDIT_MODES.EDIT_MODE);

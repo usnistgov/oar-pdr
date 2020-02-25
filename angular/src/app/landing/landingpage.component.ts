@@ -1,5 +1,7 @@
-import { Component, OnInit, AfterViewInit,
-         ElementRef, PLATFORM_ID, Inject, ViewEncapsulation } from '@angular/core';
+import {
+    Component, OnInit, AfterViewInit,
+    ElementRef, PLATFORM_ID, Inject, ViewEncapsulation
+} from '@angular/core';
 import { ActivatedRoute, Router, NavigationEnd } from '@angular/router';
 import { isPlatformBrowser } from '@angular/common';
 import { Title } from '@angular/platform-browser';
@@ -32,7 +34,7 @@ import { MetadataUpdateService } from './editcontrol/metadataupdate.service';
     providers: [
         Title
     ],
-    encapsulation:  ViewEncapsulation.None
+    encapsulation: ViewEncapsulation.None
 })
 export class LandingPageComponent implements OnInit, AfterViewInit {
     layoutCompact: boolean = true;
@@ -56,17 +58,24 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
      *                 ID with child components.
      */
     constructor(private route: ActivatedRoute,
-                private router: Router,
-                @Inject(PLATFORM_ID) private platformId: Object,
-                public titleSv: Title,
-                private cfg: AppConfig,
-                private mdserv: MetadataService,
-                private edstatsvc: EditStatusService,
-                private mdupdsvc : MetadataUpdateService)
-    {
+        private router: Router,
+        @Inject(PLATFORM_ID) private platformId: Object,
+        public titleSv: Title,
+        private cfg: AppConfig,
+        private mdserv: MetadataService,
+        private edstatsvc: EditStatusService,
+        private mdupdsvc: MetadataUpdateService) {
         this.reqId = this.route.snapshot.paramMap.get('id');
         this.inBrowser = isPlatformBrowser(platformId);
         this.editEnabled = cfg.get('editEnabled', false) as boolean;
+
+        this.mdupdsvc._subscribe(
+            (md) => {
+                if (md && md != this.md) {
+                    this.md = md as NerdmRes;
+                }
+            }
+        );
     }
 
     /**
@@ -75,44 +84,47 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
      */
     ngOnInit() {
         console.log("initializing LandingPageComponent around id=" + this.reqId);
-        // retreive the (unedited) metadata
-        this.mdserv.getMetadata(this.reqId).subscribe(
-            (data) => {
-                // successful metadata request
-                this.md = data;
-                if (!this.md) {
-                    // id not found; reroute
-                    console.error("No data found for ID=" + this.reqId);
-                    this.router.navigateByUrl("/not-found/" + this.reqId, { skipLocationChange: true });
-                }
-                else
-                    // proceed with rendering of the component
-                    this.useMetadata();
-            },
-            (err) => {
-                console.error("Failed to retrieve metadata: " + err.toString());
-                if (err instanceof IDNotFound)
-                    this.router.navigateByUrl("not-found/" + this.reqId, { skipLocationChange: true });
-                else
-                    this.router.navigateByUrl("int-error/" + this.reqId, { skipLocationChange: true });
-            }
-        );
 
         // if editing is enabled, the editing can be triggered via a URL parameter.  This is done
         // in concert with the authentication process that can involve redirection to an authentication
         // server; on successful authentication, the server can redirect the browser back to this
         // landing page with editing turned on.  
         if (this.edstatsvc.editingEnabled()) {
+            
             this.route.queryParamMap.subscribe(queryParams => {
                 let param = queryParams.get("editmode")
-                // console.log("editmode url param:", param);
+                console.log("editmode url param:", param);
+                // for new workflow, no need to check parameter, will call startEditing() always
                 // if (param) {
-                    console.log("Returning from authentication redirection (editmode="+param+")");
+                    console.log("Returning from authentication redirection (editmode=" + param + ")");
                     // Need to pass reqID (resID) because the resID in editControlComponent
                     // has not been set yet and the startEditing function relies on it.
                     this.edstatsvc.startEditing(this.reqId);
-                // }
+
             })
+        } else {
+            // If edit is not enabled, retreive the (unedited) metadata
+            this.mdserv.getMetadata(this.reqId).subscribe(
+                (data) => {
+                    // successful metadata request
+                    this.md = data;
+                    if (!this.md) {
+                        // id not found; reroute
+                        console.error("No data found for ID=" + this.reqId);
+                        this.router.navigateByUrl("/not-found/" + this.reqId, { skipLocationChange: true });
+                    }
+                    else
+                        // proceed with rendering of the component
+                        this.useMetadata();
+                },
+                (err) => {
+                    console.error("Failed to retrieve metadata: " + err.toString());
+                    if (err instanceof IDNotFound)
+                        this.router.navigateByUrl("not-found/" + this.reqId, { skipLocationChange: true });
+                    else
+                        this.router.navigateByUrl("int-error/" + this.reqId, { skipLocationChange: true });
+                }
+            );
         }
     }
 
@@ -161,7 +173,7 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
      * apply the URL fragment by scrolling to the proper place in the document
      */
     public useFragment() {
-        if (! this.inBrowser) return;
+        if (!this.inBrowser) return;
 
         this.router.events.subscribe(s => {
             if (s instanceof NavigationEnd) {
@@ -172,7 +184,7 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
                 }
                 else {
                     element = document.querySelector("body");
-                    if (! element) 
+                    if (!element)
                         console.warn("useFragment: failed to find document body!");
                 }
                 if (element) {
@@ -186,7 +198,7 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
     }
 
     goToSection(sectionId: string) {
-        if (sectionId) 
+        if (sectionId)
             this.router.navigate(['/od/id/', this.reqId], { fragment: sectionId });
         else
             this.router.navigate(['/od/id/', this.reqId], { fragment: "" });
@@ -196,20 +208,20 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
      * display or hide citation information in a popup window.
      * @param yesno   whether to show (true) or hide (false)
      */
-    showCitation(yesno : boolean) : void {
+    showCitation(yesno: boolean): void {
         this.citationVisible = yesno;
     }
 
     /**
      * toggle the visibility of the citation pop-up window
      */
-    toggleCitation() : void { this.citationVisible = !this.citationVisible; }
+    toggleCitation(): void { this.citationVisible = !this.citationVisible; }
 
     /**
      * return text representing the recommended citation for this resource
      */
-    getCitation() : string {
-        if (! this.citetext) 
+    getCitation(): string {
+        if (!this.citetext)
             this.citetext = (new NERDResource(this.md)).getCitation();
         return this.citetext;
     }
