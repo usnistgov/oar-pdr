@@ -98,6 +98,19 @@ public class EditorController {
 		return uRepo.getRecord(ediid);
 	}
 
+	/***
+	 * Discard/delete the changes made from client/UI side, keeping the original record as it is. 
+	 * 
+	 * @param ediid Unique record identifier
+	 * @return boolean true if successfully updated record.22
+	 * @throws CustomizationException
+	 */
+	@RequestMapping(value = { "{ediid}" }, method = RequestMethod.DELETE, produces = "application/json" )
+	@ApiOperation(value = ".", nickname = "Access editable Record", notes = "Resource returns a record if it is editable and user is authenticated.")
+	public boolean deleteChanges(@PathVariable @Valid String ediid) throws CustomizationException {
+		logger.info("Delete the changes made from client side of the record respresented by " + ediid);
+		return uRepo.deleteChanges(ediid);
+	}
 	/**
 	 * 
 	 * @param ex

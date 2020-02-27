@@ -16,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -28,6 +29,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 import gov.nist.oar.customizationapi.config.JWTConfig.JWTAuthenticationFilter;
 import gov.nist.oar.customizationapi.config.JWTConfig.JWTAuthenticationProvider;
+import gov.nist.oar.customizationapi.config.SAMLConfig.SamlSecurityConfig;
 import gov.nist.oar.customizationapi.config.ServiceConfig.ServiceAuthenticationFilter;
 import gov.nist.oar.customizationapi.config.ServiceConfig.ServiceAuthenticationProvider;
 
@@ -46,7 +48,7 @@ public class WebSecurityConfig {
 	 * Rest security configuration for rest api
 	 */
 	@Configuration
-	@Order(2)
+	@Order(1)
 	public static class RestApiSecurityConfig extends WebSecurityConfigurerAdapter {
 		private Logger logger = LoggerFactory.getLogger(RestApiSecurityConfig.class);
 
@@ -78,7 +80,7 @@ public class WebSecurityConfig {
 	 * Security configuration for authorization end points
 	 */
 	@Configuration
-	@Order(3)
+	@Order(2)
 	public static class AuthSecurityConfig extends WebSecurityConfigurerAdapter {
 		private Logger logger = LoggerFactory.getLogger(AuthSecurityConfig.class);
 
@@ -98,7 +100,7 @@ public class WebSecurityConfig {
 	 * Security configuration for service level authorization end points
 	 */
 	@Configuration
-	@Order(1)
+	@Order(3)
 	public static class AuthServiceSecurityConfig extends WebSecurityConfigurerAdapter {
 		private Logger logger = LoggerFactory.getLogger(AuthServiceSecurityConfig.class);
 
@@ -112,7 +114,6 @@ public class WebSecurityConfig {
 			serviceFilter.setSecret(secret);
 			http.addFilterBefore(serviceFilter,
 					UsernamePasswordAuthenticationFilter.class);
-
 			http.authorizeRequests().antMatchers(HttpMethod.GET, apiMatcher).permitAll();
 			http.authorizeRequests().antMatchers(HttpMethod.PUT, apiMatcher).permitAll();
 			http.authorizeRequests().antMatchers(HttpMethod.DELETE, apiMatcher).permitAll();
@@ -126,4 +127,13 @@ public class WebSecurityConfig {
 		}
 	}
 
+	 /**
+     * Saml security config
+     */
+    @Configuration
+    
+    @Import(SamlSecurityConfig.class)
+    public static class SamlConfig {
+
+    }
 }

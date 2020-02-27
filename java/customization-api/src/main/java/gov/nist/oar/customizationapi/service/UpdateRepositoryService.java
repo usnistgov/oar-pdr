@@ -55,8 +55,8 @@ public class UpdateRepositoryService implements UpdateRepository {
 	public Document updateRecord(String params, String recordid)
 			throws InvalidInputException, ResourceNotFoundException, CustomizationException {
 		logger.info("Update: operation to save draft called.");
-		processInputHelper(params, recordid);
-		return accessData.getData(recordid, mconfig.getRecordCollection());
+		return processInputHelper(params, recordid);
+		//return accessData.getData(recordid, mconfig.getRecordCollection());
 	}
 
 	/**
@@ -70,7 +70,7 @@ public class UpdateRepositoryService implements UpdateRepository {
 	 * @throws InvalidInputException
 	 * @throws CustomizationException
 	 */
-	private boolean processInputHelper(String params, String recordid)
+	private Document processInputHelper(String params, String recordid)
 			throws InvalidInputException, CustomizationException {
 		try {
 			// Validate JSON and Validate schema against json-customization schema
@@ -78,13 +78,35 @@ public class UpdateRepositoryService implements UpdateRepository {
 			Document update = Document.parse(params);
 			update.remove("_id");
 			update.append("ediid", recordid);
-			return this.updateHelper(recordid, update);
+			return this.updateMergeHelper(recordid, update);
 		} catch (InvalidInputException iexp) {
 			logger.error("Error while Processing input json data: " + iexp.getMessage());
 			throw new InvalidInputException("Error while processing input JSON data:" + iexp.getMessage());
 		}
 	}
 
+	
+	/**
+	 * UpdateHelper takes input recordid and JSON input, this function checks if the
+	 * record is there in cache If not it pulls record and puts in cache and then
+	 * update the changes.
+	 * 
+	 * @param recordid
+	 * @param update
+	 * @return boolean
+	 * @throws CustomizationException
+	 */
+	private Document updateMergeHelper(String recordid, Document update) throws CustomizationException {
+
+//		if (!this.accessData.checkRecordInCache(recordid, mconfig.getRecordCollection()))
+//			this.accessData.putDataInCache(recordid, mconfig.getRecordCollection());
+
+		if (!this.accessData.checkRecordInCache(recordid, mconfig.getChangeCollection()))
+			this.accessData.putDataInCacheOnlyChanges(update, mconfig.getChangeCollection());
+		return accessData.updateMerge(recordid,mconfig.getChangeCollection(), mconfig.getRecordCollection(), update);
+//		return accessData.updateDataInCache(recordid, mconfig.getRecordCollection(), update)
+//				&& accessData.updateDataInCache(recordid, mconfig.getChangeCollection(), update);
+	}
 	/**
 	 * UpdateHelper takes input recordid and JSON input, this function checks if the
 	 * record is there in cache If not it pulls record and puts in cache and then
@@ -97,8 +119,8 @@ public class UpdateRepositoryService implements UpdateRepository {
 	 */
 	private boolean updateHelper(String recordid, Document update) throws CustomizationException {
 
-		if (!this.accessData.checkRecordInCache(recordid, mconfig.getRecordCollection()))
-			this.accessData.putDataInCache(recordid, mconfig.getRecordCollection());
+//		if (!this.accessData.checkRecordInCache(recordid, mconfig.getRecordCollection()))
+//			this.accessData.putDataInCache(recordid, mconfig.getRecordCollection());
 
 		if (!this.accessData.checkRecordInCache(recordid, mconfig.getChangeCollection()))
 			this.accessData.putDataInCacheOnlyChanges(update, mconfig.getChangeCollection());
@@ -251,6 +273,13 @@ public class UpdateRepositoryService implements UpdateRepository {
 			logger.error("Error while Processing input json data: " + iexp.getMessage());
 			throw new InvalidInputException("Error while processing input JSON data:" + iexp.getMessage());
 		}
+	}
+
+	@Override
+	public boolean deleteChanges(String recordid) throws CustomizationException {
+	
+		logger.info("delete or discard changes ");
+		return accessData.deleteRecordInCache(recordid, mconfig.getChangeCollection());
 	}
 
 }

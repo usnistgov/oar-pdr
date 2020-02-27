@@ -77,9 +77,11 @@ public class AuthController {
 
 	public UserToken token(Authentication authentication, @PathVariable @Valid String ediid)
 			throws UnAuthorizedUserException, CustomizationException, UnAuthenticatedUserException, BadGetwayException {
-
+		
 		AuthenticatedUserDetails userDetails = null;
 		try {
+			if (authentication == null)
+			{authentication = SecurityContextHolder.getContext().getAuthentication();}
 			if (authentication == null)
 				throw new UnAuthenticatedUserException(" User is not authenticated to access this resource.");
 			logger.info("Get the token for authenticated user.");

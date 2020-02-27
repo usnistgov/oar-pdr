@@ -59,6 +59,7 @@ public class CORSFilter implements Filter {
 
 		// Access-Control-Allow-Origin
 		String origin = request.getHeader("Origin");
+		
 		response.setHeader("Access-Control-Allow-Origin", allowedOrigins.contains(origin) ? origin : "");
 		response.setHeader("Vary", "Origin");
 

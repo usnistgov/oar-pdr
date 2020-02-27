@@ -63,7 +63,7 @@ public class JWTAuthenticationFilter extends AbstractAuthenticationProcessingFil
 		uExtract = webApplicationContext.getBean(UserDetailsExtractor.class);
 
 		logger.info("Attempt to check token and  authorized token validity"
-				+ request.getHeader(Header_Authorization_Token));
+				+ request.getHeader(Header_Authorization_Token)+ ":: "+request.getRequestURI());
 		String token = request.getHeader(Header_Authorization_Token);
 		if (token == null) {
 			logger.error("Unauthorized user: Token is null.");

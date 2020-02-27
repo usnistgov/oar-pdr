@@ -103,4 +103,15 @@ public interface UpdateRepository {
 	 *                                deleting record from backend
 	 */
 	public boolean delete(String recordid) throws CustomizationException;
+	
+	/**
+	 * Delete changes made for this record from the database
+	 * 
+	 * @param recordid string ediid/unique record id
+	 * @return boolean successfully deleted changes
+	 * @throws CustomizationException Exception thrown if any error is thrown while
+	 *                                deleting record from backend
+	 */
+	public boolean deleteChanges(String recordid) throws CustomizationException;
+
 }

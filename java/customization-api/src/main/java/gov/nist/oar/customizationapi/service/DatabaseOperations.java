@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -196,6 +197,129 @@ public class DatabaseOperations {
 	 * @return Return true if data is updated successfully.
 	 */
 	public boolean updateDataInCache(String recordid, MongoCollection<Document> mcollection, Document update) {
+		try {
+			Date now = new Date();
+			List<Document> updateDetails = new ArrayList<Document>();
+
+			FindIterable<Document> fd = mcollection.find(Filters.eq("ediid", recordid))
+					.projection(Projections.include("_updateDetails"));
+			Iterator<Document> iterator = fd.iterator();
+			while (iterator.hasNext()) {
+				Document d = iterator.next();
+				if (d.containsKey("_updateDetails")) {
+					List<?> updateHistory = (List<?>) d.get("_updateDetails");
+					for (int i = 0; i < updateHistory.size(); i++)
+						updateDetails.add((Document) updateHistory.get(i));
+
+				}
+			}
+
+			AuthenticatedUserDetails authenticatedUser = userDetailsExtractor.getUserDetails();
+			Document userDetails = new Document();
+			userDetails.append("userId", authenticatedUser.getUserId());
+			userDetails.append("userName", authenticatedUser.getUserName());
+			userDetails.append("userLastName", authenticatedUser.getUserLastName());
+			userDetails.append("userEmail", authenticatedUser.getUserEmail());
+
+			Document updateInfo = new Document();
+			updateInfo.append("_userDetails", userDetails);
+			updateInfo.append("_updateDate", now);
+			updateDetails.add(updateInfo);
+
+			update.append("_updateDetails", updateDetails);
+
+			if (update.containsKey("_id"))
+				update.remove("_id");
+
+			Document tempUpdateOp = new Document("$set", update);
+
+			if (tempUpdateOp.containsKey("_id"))
+				tempUpdateOp.remove("_id");
+
+			mcollection.updateOne(Filters.eq("ediid", recordid), tempUpdateOp, new UpdateOptions().upsert(true));
+
+			return true;
+		} catch (MongoException ex) {
+			log.error("Error while update data in cache db" + ex.getMessage());
+			throw new MongoException("Error while putting updated data in cache db." + ex.getMessage());
+		}
+
+	}
+	
+	
+	/**
+	 * To update the record in the cached database
+	 * 
+	 * @param recordid an ediid of the record
+	 * @param update   json to update
+	 * @return Return true if data is updated successfully.
+	 */
+	public Document updateMerge(String recordid, MongoCollection<Document> chanegCollection, MongoCollection<Document> recordcollection, Document update) {
+		try {
+			Date now = new Date();
+			List<Document> updateDetails = new ArrayList<Document>();
+
+			FindIterable<Document> fd = chanegCollection.find(Filters.eq("ediid", recordid))
+					.projection(Projections.include("_updateDetails"));
+			Iterator<Document> iterator = fd.iterator();
+			while (iterator.hasNext()) {
+				Document d = iterator.next();
+				if (d.containsKey("_updateDetails")) {
+					List<?> updateHistory = (List<?>) d.get("_updateDetails");
+					for (int i = 0; i < updateHistory.size(); i++)
+						updateDetails.add((Document) updateHistory.get(i));
+
+				}
+			}
+
+			AuthenticatedUserDetails authenticatedUser = userDetailsExtractor.getUserDetails();
+			Document userDetails = new Document();
+			userDetails.append("userId", authenticatedUser.getUserId());
+			userDetails.append("userName", authenticatedUser.getUserName());
+			userDetails.append("userLastName", authenticatedUser.getUserLastName());
+			userDetails.append("userEmail", authenticatedUser.getUserEmail());
+
+			Document updateInfo = new Document();
+			updateInfo.append("_userDetails", userDetails);
+			updateInfo.append("_updateDate", now);
+			updateDetails.add(updateInfo);
+
+			update.append("_updateDetails", updateDetails);
+
+			if (update.containsKey("_id"))
+				update.remove("_id");
+
+			Document tempUpdateOp = new Document("$set", update);
+
+			if (tempUpdateOp.containsKey("_id"))
+				tempUpdateOp.remove("_id");
+
+			Document doc =  recordcollection.find(Filters.eq("ediid", recordid)).first();
+		
+			
+			for (Entry<String, Object> entry : tempUpdateOp.entrySet()) {
+				if(doc.containsKey(entry.getKey())) {
+					doc.replace(entry.getKey(), doc.get(entry.getKey()), entry.getValue());
+				}
+					
+			}
+			//mcollection.updateOne(Filters.eq("ediid", recordid), tempUpdateOp, new UpdateOptions().upsert(true));
+			return doc;
+			
+		} catch (MongoException ex) {
+			log.error("Error while update data in cache db" + ex.getMessage());
+			throw new MongoException("Error while putting updated data in cache db." + ex.getMessage());
+		}
+
+	}
+	/**
+	 * To update the record in the cached database
+	 * 
+	 * @param recordid an ediid of the record
+	 * @param update   json to update
+	 * @return Return true if data is updated successfully.
+	 */
+	public boolean mergeDataOnTheFly(String recordid, MongoCollection<Document> mcollection, Document update) {
 		try {
 			Date now = new Date();
 			List<Document> updateDetails = new ArrayList<Document>();
