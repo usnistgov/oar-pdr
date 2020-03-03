@@ -507,12 +507,56 @@ export class DatacartComponent implements OnInit, OnDestroy {
         postMessage.push({ "bundleName": files.data.downloadFileName, "includeFiles": this.downloadData });
         // console.log('Bundle plan post message:');
         // console.log(JSON.stringify(postMessage[0]));
+        console.log("Calling following end point to get bundle plan:");
+        console.log(this.distApi + "_bundle_plan");
 
         this.getBundlePlanRef = this.downloadService.getBundlePlan(this.distApi + "_bundle_plan", JSON.stringify(postMessage[0])).subscribe(
             blob => {
-                this.showCurrentTask = false;
-                this.isProcessing = false;
-                this.processBundle(blob, zipFileBaseName, files);
+              this.showCurrentTask = false;
+              this.isProcessing = false;
+              this.bundlePlanStatus = blob.status.toLowerCase();
+              this.messageColor = this.getColor();
+
+              switch(blob.status.toLowerCase()){
+                case 'complete':{
+                  console.log("Bundle plan return:", JSON.stringify(blob));
+                  this.processBundle(blob, zipFileBaseName, files);
+                  break;
+                }
+                case 'warning':{
+                  this.bundlePlanStatus = "warning";
+                  this.bundlePlanMessage = blob.messages;
+                  this.bundlePlanUnhandledFiles = blob.notIncluded;
+                  this.showMessageBlock = true;
+                  this.showUnhandledFiles = false;
+                  this.processBundle(blob, zipFileBaseName, files);
+                  break;
+                }
+                case 'error':{
+                  console.log("Post message:");
+                  console.log(JSON.stringify(postMessage[0]));
+                  console.log("Bundle plan return:", JSON.stringify(blob));
+                  this.bundlePlanMessage = blob.messages;
+                  this.bundlePlanStatus = "error";
+                  this.showMessageBlock = true;
+                  this.showUnhandledFiles = false;
+                  this.bundlePlanUnhandledFiles = blob.notIncluded;
+                  break;
+                }
+                default:{
+                  console.log("Post message:");
+                  console.log(JSON.stringify(postMessage[0]));
+                  console.log("Bundle plan return:", blob);
+                  this.bundlePlanMessage = blob.messages;
+                  this.bundlePlanStatus = "internal error";
+                  this.emailSubject = 'PDR: Error getting bundle plan';
+                  this.emailBody = 'URL:' + this.distApi + '_bundle_plan; ' + '%0D%0A%0D%0A' + 'Post message:%0D%0A' + JSON.stringify(postMessage[0]) + ';'  + '%0D%0A%0D%0A' + 'Return message:%0D%0A' + JSON.stringify(blob);
+                  this.showMessageBlock = true;
+                  this.showUnhandledFiles = false;
+                  this.unsubscribeBundleplan();
+                  break;
+                }
+              }
             },
             err => {
                 console.log("Calling following end point returned error:");
@@ -522,13 +566,14 @@ export class DatacartComponent implements OnInit, OnDestroy {
                 console.log("Error message:");
                 console.log(err);
                 this.bundlePlanMessage = err;
-                this.bundlePlanStatus = "error";
+                this.bundlePlanStatus = "internal error";
                 this.isProcessing = false;
                 this.showCurrentTask = false;
                 this.messageColor = this.getColor();
                 this.emailSubject = 'PDR: Error getting bundle plan';
-                this.emailBody = 'URL:' + this.distApi + '_bundle_plan; Post message:' + JSON.stringify(postMessage[0]);
-                this.unsubscribeBundleplan();
+                this.emailBody = 'URL:' + this.distApi + '_bundle_plan; ' + '%0D%0A%0D%0A' + 'Post message:%0D%0A' + JSON.stringify(postMessage[0])  + '%0D%0A%0D%0A'  + 'Error message:%0D%0A' + JSON.stringify(err);
+                console.log("emailBody:", this.emailBody);
+                this.showMessageBlock = false;
             }
         );
     }
@@ -546,7 +591,7 @@ export class DatacartComponent implements OnInit, OnDestroy {
 
         this.bundlePlanStatus = res.status.toLowerCase();
         this.messageColor = this.getColor();
-        this.bundlePlanUnhandledFiles = res.notIncluded;
+        
         this.bundlePlanMessage = res.messages;
         if (this.bundlePlanMessage != null) {
             this.broadcastMessage = 'Http responsed with warning.';
@@ -961,9 +1006,9 @@ export class DatacartComponent implements OnInit, OnDestroy {
     * Set color for bundle plan return message 
     */
     getColor() {
-        if (this.bundlePlanStatus == 'warnings') {
+        if (this.bundlePlanStatus == 'warning') {
             return "darkorange";
-        } else if (this.bundlePlanStatus == 'error') {
+        } else if (this.bundlePlanStatus == 'error' || this.bundlePlanStatus == 'internal error') {
             return "red";
         } else {
             return "black";

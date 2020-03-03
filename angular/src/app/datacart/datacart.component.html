@@ -12,7 +12,7 @@
     <div style="display: flex;justify-content: space-between;">
         <div *ngIf="bundlePlanStatus != 'complete' && bundlePlanMessage" style="display: inline; text-align: left;">
             <i class="faa faa-warning" [ngStyle]="{'color':messageColor, 'padding-right':'.5em'}"></i>
-            <span *ngIf="bundlePlanStatus == 'error';else no_error" [ngStyle]="{'color':messageColor}">
+            <span *ngIf="bundlePlanStatus == 'internal error';else no_error" [ngStyle]="{'color':messageColor}">
                 Ooops! There was a problem getting the data you need. Please contact us at <a
                     href="mailto:datasupport@nist.gov?subject=PDR: {{emailSubject}}&body={{emailBody}}"
                     (click)="gaService.gaTrackEvent('Email', $event, 'AskHelp', 'mailto:datasupport@nist.gov')">datasupport@nist.gov</a>
