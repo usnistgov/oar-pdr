@@ -32,7 +32,7 @@ This package is organized into subpackages
 from ..exceptions import *
 from ... import pdr as _pdr
 from .. import PDRSystem
-from ..utils import read_nerd, read_pod, write_json 
+from ..utils import read_nerd, read_pod, write_json, read_json
 
 _PRESSYSNAME = _pdr._PDRSYSNAME
 _PRESSYSABBREV = _pdr._PDRSYSABBREV
