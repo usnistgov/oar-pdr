@@ -81,7 +81,7 @@ public class DraftController {
 	public Document getData(@PathVariable @Valid String ediid, @RequestParam Optional<String> view) throws CustomizationException {
 		logger.info("Access the record to be edited by ediid " + ediid);
 		String viewoption = "";
-		if(view != null && !view.isEmpty())
+		if(view != null && !view.equals(""))
 			viewoption = view.get();
 		return draftRepo.getDraft(ediid,viewoption);
 	}
