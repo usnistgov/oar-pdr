@@ -13,7 +13,7 @@
 package gov.nist.oar.customizationapi.web;
 
 import java.io.IOException;
-import java.util.Optional;
+//import java.util.Optional;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
@@ -78,11 +78,11 @@ public class DraftController {
 	 */
 	@RequestMapping(value = { "{ediid}" }, method = RequestMethod.GET, produces = "application/json")
 	@ApiOperation(value = ".", nickname = "Access editable Record", notes = "Resource returns a record if it is editable and user is authenticated.")
-	public Document getData(@PathVariable @Valid String ediid, @RequestParam Optional<String> view) throws CustomizationException {
+	public Document getData(@PathVariable @Valid String ediid, @RequestParam(required = false) String view) throws CustomizationException {
 		logger.info("Access the record to be edited by ediid " + ediid);
 		String viewoption = "";
 		if(view != null && !view.equals(""))
-			viewoption = view.get();
+			viewoption = view;
 		return draftRepo.getDraft(ediid,viewoption);
 	}
 
