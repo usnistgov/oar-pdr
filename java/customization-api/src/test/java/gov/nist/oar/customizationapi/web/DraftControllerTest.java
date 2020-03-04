@@ -27,7 +27,9 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
-import gov.nist.oar.customizationapi.repositories.UpdateRepository;
+import gov.nist.oar.customizationapi.repositories.DraftService;
+
+
 
 @RunWith(MockitoJUnitRunner.Silent.class)
 //@RunWith(SpringJUnit4ClassRunner.class)
@@ -41,7 +43,7 @@ public class DraftControllerTest {
 	String recorddata, changedata, updated;
 	Document record, changes, updatedDoc;
 	@Mock
-	UpdateRepository updateRepo;
+	DraftService draft;
 
 	@InjectMocks
 	DraftController draftController;
@@ -68,7 +70,7 @@ public class DraftControllerTest {
 	public void editRecordTest() throws Exception {
 		String ediid = "12345";
 
-		Mockito.doReturn(record).when(updateRepo).getRecord(ediid);
+		Mockito.doReturn(record).when(draft).getDraft(ediid,"");
 
 		MockHttpServletResponse response = mvc.perform(get("/pdr/lp/draft/" + ediid).accept(MediaType.APPLICATION_JSON))
 				.andReturn().getResponse();
@@ -83,7 +85,7 @@ public class DraftControllerTest {
 	public void deleteRecordTest() throws Exception {
 		String ediid = "12345";
 
-		Mockito.doReturn(false).when(updateRepo).delete(ediid);
+		Mockito.doReturn(false).when(draft).deleteDraft(ediid);
 
 		MockHttpServletResponse response = mvc.perform(delete("/pdr/lp/draft/" + ediid).accept(MediaType.APPLICATION_JSON))
 				.andReturn().getResponse();
@@ -97,10 +99,9 @@ public class DraftControllerTest {
 	public void putRecordTest() throws Exception {
 		String ediid = "12345";
 
-		Mockito.doReturn(true).when(updateRepo).put(ediid, changedata);
+		Mockito.doNothing().when(draft).putDraft(ediid, Document.parse(changedata));
 
-		MockHttpServletResponse response = mvc
-				.perform(put("/pdr/lp/draft/" + ediid).content(changedata).accept(MediaType.APPLICATION_JSON))
+		MockHttpServletResponse response = mvc.perform(put("/pdr/lp/draft/" + ediid).contentType(MediaType.APPLICATION_JSON).content(changedata).accept(MediaType.APPLICATION_JSON))
 				.andReturn().getResponse();
 
 		//Document responseDoc = Document.parse(response.getContentAsString());

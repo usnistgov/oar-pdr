@@ -1,6 +1,10 @@
 package gov.nist.oar.customizationapi.config.ServiceConfig;
 
 import java.io.IOException;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -8,6 +12,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
@@ -16,7 +21,7 @@ import org.springframework.security.web.authentication.AbstractAuthenticationPro
 
 public class ServiceAuthenticationFilter extends AbstractAuthenticationProcessingFilter {
 	public static final String Header_Authorization_Token = "Authorization";
-	public static final String Token_starter = "Bearer";
+//	public static final String Token_starter = "Bearer";
 
 	String secret;
 
@@ -33,11 +38,14 @@ public class ServiceAuthenticationFilter extends AbstractAuthenticationProcessin
 	@Override
 	public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response)
 			throws AuthenticationException, IOException, ServletException {
+
+		
 		logger.info("Attempt to check token and  authorized token validity"
 				+ request.getHeader(Header_Authorization_Token) + "test :" + secret);
 		String token = request.getHeader(Header_Authorization_Token);
 		if (token != null)
-			token = token.replaceAll(Token_starter, "").trim();
+//			token = token.replaceAll(Token_starter, "").trim();
+		token = token.trim();
 		if (token == null || !token.equalsIgnoreCase(secret)) {
 			logger.error("Unauthorized service: Token is null or Not Valid.");
 			this.unsuccessfulAuthentication(request, response, new BadCredentialsException(

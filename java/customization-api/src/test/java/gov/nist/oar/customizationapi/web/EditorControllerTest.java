@@ -2,6 +2,7 @@
 package gov.nist.oar.customizationapi.web;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 
@@ -25,7 +26,8 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
-import gov.nist.oar.customizationapi.repositories.UpdateRepository;
+import gov.nist.oar.customizationapi.repositories.EditorService;
+
 
 @RunWith(MockitoJUnitRunner.Silent.class)
 //@RunWith(SpringJUnit4ClassRunner.class)
@@ -39,7 +41,7 @@ public class EditorControllerTest {
 	String recorddata, changedata, updated;
 	Document record, changes, updatedDoc;
 	@Mock
-	UpdateRepository updateRepo;
+	EditorService editor;
 
 	@InjectMocks
 	EditorController editorController;
@@ -66,7 +68,7 @@ public class EditorControllerTest {
 	public void editRecordTest() throws Exception {
 		String ediid = "12345";
 
-		Mockito.doReturn(record).when(updateRepo).getRecord(ediid);
+		Mockito.doReturn(record).when(editor).getRecord(ediid);
 
 		MockHttpServletResponse response = mvc.perform(get("/pdr/lp/editor/" + ediid).accept(MediaType.APPLICATION_JSON))
 				.andReturn().getResponse();
@@ -77,19 +79,19 @@ public class EditorControllerTest {
 
 	}
 
-//	@Test
-//	public void deleteRecordTest() throws Exception {
-//		String ediid = "12345";
-//
-//		Mockito.doReturn(false).when(updateRepo).delete(ediid);
-//
-//		MockHttpServletResponse response = mvc.perform(delete("/api/draft/" + ediid).accept(MediaType.APPLICATION_JSON))
-//				.andReturn().getResponse();
-//
-//		assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
-//		assertThat(response.getContentAsString()).isEqualTo("false");
-//
-//	}
+	@Test
+	public void deleteRecordTest() throws Exception {
+		String ediid = "12345";
+
+		Mockito.doReturn(false).when(editor).deleteRecordChanges(ediid);
+
+		MockHttpServletResponse response = mvc.perform(delete("/pdr/lp/editor/" + ediid).accept(MediaType.APPLICATION_JSON))
+				.andReturn().getResponse();
+
+		assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
+		assertThat(response.getContentAsString()).isEqualTo("false");
+
+	}
 //
 //	@Test
 //	public void putRecordTest() throws Exception {
@@ -98,7 +100,7 @@ public class EditorControllerTest {
 //		Mockito.doReturn(updatedDoc).when(updateRepo).save(ediid, changedata);
 //
 //		MockHttpServletResponse response = mvc
-//				.perform(put("/api/savedrecord/" + ediid).content(changedata).accept(MediaType.APPLICATION_JSON))
+//				.perform(put("/pdr/lp/editor/" + ediid).content(changedata).accept(MediaType.APPLICATION_JSON))
 //				.andReturn().getResponse();
 //
 //		Document responseDoc = Document.parse(response.getContentAsString());
@@ -114,7 +116,7 @@ public class EditorControllerTest {
 	public void patchRecordTest() throws Exception {
 		String ediid = "12345";
 
-		Mockito.doReturn(updatedDoc).when(updateRepo).updateRecord(changedata, ediid);
+		Mockito.doReturn(updatedDoc).when(editor).patchRecord(changedata, ediid);
 
 		MockHttpServletResponse response = mvc
 				.perform(patch("/pdr/lp/editor/" + ediid).content(changedata).accept(MediaType.APPLICATION_JSON))

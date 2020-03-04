@@ -36,7 +36,7 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
  * Swagger configuration class takes care of Initializing swagger to be used to
  * generate documentation for the code.
  * 
- * @author dsn1 Deoyani Nandrekar-Heinis
+ * @author Deoyani Nandrekar-Heinis
  *
  */
 public class SwaggerConfig {

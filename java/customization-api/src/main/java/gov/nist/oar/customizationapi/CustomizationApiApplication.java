@@ -6,7 +6,10 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.mongo.MongoAutoConfiguration;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.context.annotation.ComponentScan;
-
+/***
+ * The class is an entrypoint for an application to start running on server.
+ * @author Deoyani Nandrekar-Heinis
+ */
 @SpringBootApplication
 @RefreshScope
 @ComponentScan(basePackages = { "gov.nist.oar.customizationapi" })

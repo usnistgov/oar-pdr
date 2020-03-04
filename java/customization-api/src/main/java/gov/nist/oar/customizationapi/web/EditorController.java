@@ -20,8 +20,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.authentication.InternalAuthenticationServiceException;
+//import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -34,7 +35,8 @@ import org.springframework.web.client.RestClientException;
 import gov.nist.oar.customizationapi.exceptions.CustomizationException;
 import gov.nist.oar.customizationapi.exceptions.ErrorInfo;
 import gov.nist.oar.customizationapi.exceptions.InvalidInputException;
-import gov.nist.oar.customizationapi.repositories.UpdateRepository;
+import gov.nist.oar.customizationapi.repositories.EditorService;
+//import gov.nist.oar.customizationapi.repositories.UpdateRepository;
 import gov.nist.oar.customizationapi.service.ResourceNotFoundException;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -57,12 +59,13 @@ import io.swagger.annotations.ApiOperation;
 @RestController
 @Api(value = "Api endpoints to access editable data, update changes to data, save in the backend", tags = "Customization API")
 @Validated
+@CrossOrigin(origins = "*", allowedHeaders = "*")
 @RequestMapping("/pdr/lp/editor/")
 public class EditorController {
 	private Logger logger = LoggerFactory.getLogger(EditorController.class);
 
 	@Autowired
-	private UpdateRepository uRepo;
+	private EditorService uRepo;
 
 	/**
 	 * Update the fields of record metadata.
@@ -80,7 +83,7 @@ public class EditorController {
 			throws CustomizationException, InvalidInputException {
 
 		logger.info("Update the given record: " + ediid);
-		return uRepo.updateRecord(params, ediid);
+		return uRepo.patchRecord(params, ediid);
 
 	}
 
@@ -109,7 +112,7 @@ public class EditorController {
 	@ApiOperation(value = ".", nickname = "Access editable Record", notes = "Resource returns a record if it is editable and user is authenticated.")
 	public boolean deleteChanges(@PathVariable @Valid String ediid) throws CustomizationException {
 		logger.info("Delete the changes made from client side of the record respresented by " + ediid);
-		return uRepo.deleteChanges(ediid);
+		return uRepo.deleteRecordChanges(ediid);
 	}
 	/**
 	 * 
@@ -192,18 +195,18 @@ public class EditorController {
 		return new ErrorInfo(req.getRequestURI(), 502, "Can not connect to backend server");
 	}
 
-	/**
-	 * Handles internal authentication service exception if user is not authorized
-	 * or token is expired
-	 * 
-	 * @param ex
-	 * @param req
-	 * @return
-	 */
-	@ExceptionHandler(InternalAuthenticationServiceException.class)
-	@ResponseStatus(HttpStatus.UNAUTHORIZED)
-	public ErrorInfo handleRestClientError(InternalAuthenticationServiceException ex, HttpServletRequest req) {
-		logger.error("Unauthorized user or token : " + req.getRequestURI() + "\n  " + ex.getMessage(), ex);
-		return new ErrorInfo(req.getRequestURI(), 401, "Untauthorized user or token.");
-	}
+//	/**
+//	 * Handles internal authentication service exception if user is not authorized
+//	 * or token is expired
+//	 * 
+//	 * @param ex
+//	 * @param req
+//	 * @return
+//	 */
+//	@ExceptionHandler(InternalAuthenticationServiceException.class)
+//	@ResponseStatus(HttpStatus.UNAUTHORIZED)
+//	public ErrorInfo handleRestClientError(InternalAuthenticationServiceException ex, HttpServletRequest req) {
+//		logger.error("Unauthorized user or token : " + req.getRequestURI() + "\n  " + ex.getMessage(), ex);
+//		return new ErrorInfo(req.getRequestURI(), 401, "Untauthorized user or token.");
+//	}
 }

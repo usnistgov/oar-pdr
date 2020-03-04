@@ -12,9 +12,12 @@
  */
 package gov.nist.oar.customizationapi.config;
 
+import java.util.Arrays;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.annotation.Order;
@@ -24,11 +27,16 @@ import org.springframework.security.config.annotation.authentication.builders.Au
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.web.access.channel.ChannelProcessingFilter;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import gov.nist.oar.customizationapi.config.JWTConfig.JWTAuthenticationFilter;
 import gov.nist.oar.customizationapi.config.JWTConfig.JWTAuthenticationProvider;
+import gov.nist.oar.customizationapi.config.SAMLConfig.CORSFilter;
 import gov.nist.oar.customizationapi.config.SAMLConfig.SamlSecurityConfig;
 import gov.nist.oar.customizationapi.config.ServiceConfig.ServiceAuthenticationFilter;
 import gov.nist.oar.customizationapi.config.ServiceConfig.ServiceAuthenticationProvider;
@@ -80,7 +88,7 @@ public class WebSecurityConfig {
 	 * Security configuration for authorization end points
 	 */
 	@Configuration
-	@Order(2)
+	@Order(3)
 	public static class AuthSecurityConfig extends WebSecurityConfigurerAdapter {
 		private Logger logger = LoggerFactory.getLogger(AuthSecurityConfig.class);
 
@@ -100,7 +108,7 @@ public class WebSecurityConfig {
 	 * Security configuration for service level authorization end points
 	 */
 	@Configuration
-	@Order(3)
+	@Order(2)
 	public static class AuthServiceSecurityConfig extends WebSecurityConfigurerAdapter {
 		private Logger logger = LoggerFactory.getLogger(AuthServiceSecurityConfig.class);
 
@@ -112,6 +120,8 @@ public class WebSecurityConfig {
 			logger.info("AuthSecurity Config set up http related entrypoints."+secret);
 			ServiceAuthenticationFilter serviceFilter = new ServiceAuthenticationFilter(apiMatcher, super.authenticationManager());
 			serviceFilter.setSecret(secret);
+//			http.cors();
+			//http.addFilterBefore(cors2Filter(),ChannelProcessingFilter.class);
 			http.addFilterBefore(serviceFilter,
 					UsernamePasswordAuthenticationFilter.class);
 			http.authorizeRequests().antMatchers(HttpMethod.GET, apiMatcher).permitAll();
@@ -125,15 +135,31 @@ public class WebSecurityConfig {
 		protected void configure(AuthenticationManagerBuilder auth) {
 			auth.authenticationProvider(new ServiceAuthenticationProvider());
 		}
+		@Bean
+		CORSFilter cors2Filter() {
+			logger.info("CORS filter setting for application:");
+			CORSFilter filter = new CORSFilter("http://localhost:4200/");
+			return filter;
+		}
+//		@Bean
+//	    CorsConfigurationSource corsConfigurationSource() 
+//	    {
+//	        CorsConfiguration configuration = new CorsConfiguration();
+//	        configuration.setAllowedOrigins(Arrays.asList("http:localhost:4200"));
+//	        configuration.setAllowedMethods(Arrays.asList("GET","DELETE","PATCH"));
+//	        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+//	        source.registerCorsConfiguration("/**", configuration);
+//	        return source;
+//	    }
 	}
 
-	 /**
-     * Saml security config
-     */
-    @Configuration
-    
-    @Import(SamlSecurityConfig.class)
-    public static class SamlConfig {
-
-    }
+//	 /**
+//     * Saml security config
+//     */
+//    @Configuration
+//    
+//    @Import(SamlSecurityConfig.class)
+//    public static class SamlConfig {
+//
+//    }
 }

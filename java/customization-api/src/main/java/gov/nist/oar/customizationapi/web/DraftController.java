@@ -23,7 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.authentication.InternalAuthenticationServiceException;
+//import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -38,7 +38,8 @@ import org.springframework.web.client.RestClientException;
 import gov.nist.oar.customizationapi.exceptions.CustomizationException;
 import gov.nist.oar.customizationapi.exceptions.ErrorInfo;
 import gov.nist.oar.customizationapi.exceptions.InvalidInputException;
-import gov.nist.oar.customizationapi.repositories.UpdateRepository;
+import gov.nist.oar.customizationapi.repositories.DraftService;
+//import gov.nist.oar.customizationapi.repositories.UpdateRepository;
 import gov.nist.oar.customizationapi.service.ResourceNotFoundException;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -66,7 +67,7 @@ public class DraftController {
 	private Logger logger = LoggerFactory.getLogger(DraftController.class);
 
 	@Autowired
-	private UpdateRepository uRepo;
+	private DraftService draftRepo;
 
 	/***
 	 * Get complete record or only the changes made to the record by providing 'view=updates' option.
@@ -82,7 +83,7 @@ public class DraftController {
 		String viewoption = "";
 		if(view != null && !view.isEmpty())
 			viewoption = view.get();
-		return uRepo.getData(ediid,viewoption);
+		return draftRepo.getDraft(ediid,viewoption);
 	}
 
 
@@ -97,7 +98,7 @@ public class DraftController {
 	@ApiOperation(value = ".", nickname = "Delete the Record from drafts", notes = "This will allow user to delete all the changes made in the record in draft mode, original published record will remain as it is.")
 	public boolean deleteRecord(@PathVariable @Valid String ediid) throws CustomizationException {
 		logger.info("Delete the record from stagging given by ediid " + ediid);
-		return uRepo.delete(ediid);
+		return draftRepo.deleteDraft(ediid);
 	}
 
 	/**
@@ -114,10 +115,10 @@ public class DraftController {
 			"{ediid}" }, method = RequestMethod.PUT, headers = "accept=application/json", produces = "application/json")
 	@ApiOperation(value = ".", nickname = "Save changes to server", notes = "Resource returns a boolean based on success or failure of the request.")
 	@ResponseStatus(HttpStatus.CREATED)
-	public boolean createRecord(@PathVariable @Valid String ediid, @Valid @RequestBody String params)
+	public void createRecord(@PathVariable @Valid String ediid, @Valid @RequestBody Document params)
 			throws CustomizationException, InvalidInputException, ResourceNotFoundException {
 		logger.info("Send updated record to backend metadata server:" + ediid);
-		return uRepo.put(ediid, params);
+		draftRepo.putDraft(ediid, params);
 
 	}
 
@@ -202,18 +203,18 @@ public class DraftController {
 		return new ErrorInfo(req.getRequestURI(), 502, "Can not connect to backend server");
 	}
 
-	/**
-	 * Handles internal authentication service exception if user is not authorized
-	 * or token is expired
-	 * 
-	 * @param ex
-	 * @param req
-	 * @return
-	 */
-	@ExceptionHandler(InternalAuthenticationServiceException.class)
-	@ResponseStatus(HttpStatus.UNAUTHORIZED)
-	public ErrorInfo handleRestClientError(InternalAuthenticationServiceException ex, HttpServletRequest req) {
-		logger.error("Unauthorized user or token : " + req.getRequestURI() + "\n  " + ex.getMessage(), ex);
-		return new ErrorInfo(req.getRequestURI(), 401, "Untauthorized user or token.");
-	}
+//	/**
+//	 * Handles internal authentication service exception if user is not authorized
+//	 * or token is expired
+//	 * 
+//	 * @param ex
+//	 * @param req
+//	 * @return
+//	 */
+//	@ExceptionHandler(InternalAuthenticationServiceException.class)
+//	@ResponseStatus(HttpStatus.UNAUTHORIZED)
+//	public ErrorInfo handleRestClientError(InternalAuthenticationServiceException ex, HttpServletRequest req) {
+//		logger.error("Unauthorized user or token : " + req.getRequestURI() + "\n  " + ex.getMessage(), ex);
+//		return new ErrorInfo(req.getRequestURI(), 401, "Untauthorized user or token.");
+//	}
 }
