@@ -110,7 +110,7 @@ public class AuthController {
 	public ResponseEntity<AuthenticatedUserDetails> login(HttpServletResponse response) throws IOException {
 		logger.info("Get the authenticated user info.");
 		final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
+		
 		if (authentication == null) {
 			response.sendRedirect("/saml/login");
 		} else {

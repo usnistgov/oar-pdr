@@ -115,15 +115,17 @@ public class WebSecurityConfig {
 		private static final String apiMatcher = "/pdr/lp/draft/**";
 		@Value("${custom.service.secret:testid}")
 		String secret;
+
 		@Override
 		protected void configure(HttpSecurity http) throws Exception {
-			logger.info("AuthSecurity Config set up http related entrypoints."+secret);
-			ServiceAuthenticationFilter serviceFilter = new ServiceAuthenticationFilter(apiMatcher, super.authenticationManager());
+			logger.info("AuthSecurity Config set up http related entrypoints." + secret);
+			ServiceAuthenticationFilter serviceFilter = new ServiceAuthenticationFilter(apiMatcher,
+					super.authenticationManager());
 			serviceFilter.setSecret(secret);
-//			http.cors();
-			//http.addFilterBefore(cors2Filter(),ChannelProcessingFilter.class);
-			http.addFilterBefore(serviceFilter,
-					UsernamePasswordAuthenticationFilter.class);
+
+			// http.addFilterBefore(cors2Filter(),ChannelProcessingFilter.class);
+			// http.csrf().disable();
+			http.addFilterBefore(serviceFilter, UsernamePasswordAuthenticationFilter.class);
 			http.authorizeRequests().antMatchers(HttpMethod.GET, apiMatcher).permitAll();
 			http.authorizeRequests().antMatchers(HttpMethod.PUT, apiMatcher).permitAll();
 			http.authorizeRequests().antMatchers(HttpMethod.DELETE, apiMatcher).permitAll();
@@ -135,10 +137,11 @@ public class WebSecurityConfig {
 		protected void configure(AuthenticationManagerBuilder auth) {
 			auth.authenticationProvider(new ServiceAuthenticationProvider());
 		}
+
 		@Bean
-		CORSFilter cors2Filter() {
+		CORSFilterAuth cors2Filter() {
 			logger.info("CORS filter setting for application:");
-			CORSFilter filter = new CORSFilter("http://localhost:4200/");
+			CORSFilterAuth filter = new CORSFilterAuth("http://localhost:4200/");
 			return filter;
 		}
 //		@Bean
