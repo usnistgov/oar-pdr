@@ -1772,7 +1772,7 @@ class BagBuilder(PreservationSystem):
             # Now delete components that are not described in the POD
             oldcomps = \
                 map_comps_by_dlurl(self._bag.nerdm_record(False).get('components',[]))
-            for key in oldpod:
+            for key in oldcomps:
                 if key not in newpod:
                     comp = oldcomps.get(key,{})
                     if 'filepath' not in comp:
