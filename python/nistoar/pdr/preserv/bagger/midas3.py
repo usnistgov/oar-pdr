@@ -37,7 +37,7 @@ from nistoar.nerdm.validate import create_validator
 # _sys = PreservationSystem()
 log = logging.getLogger(_sys.system_abbrev)   \
              .getChild(_sys.subsystem_abbrev) \
-             .getChild("midas") 
+             .getChild("midas3") 
 
 DEF_MBAG_VERSION = bagutils.DEF_MBAG_VERSION
 SUPPORTED_CHECKSUM_ALGS = [ "sha256" ]
@@ -146,17 +146,81 @@ class MIDASMetadataBagger(SIPBagger):
     :prop component_merge_convention str ("dev"): the merge convention name to 
                                  use to merge MIDAS-provided component metadata
                                  with the PDR's initial component metadata.
-    :prop relative_to_indir bool (False):  If True, the output bag directory 
-       is expected to be under one of the input directories; this base class
-       will then ensure that it has write permission to create the output 
-       directory.  If False, the bagger may raise an exception if the 
-       requested output bag directory is found within an input SIP directory,
-       regardless of whether the process has permission to write there.  
     """
     BGRMD_FILENAME = "__bagger-midas3.json"
 
-    def __init__(self, midasid, workdir, reviewdir, uploaddir=None, config={},
-                 minter=None, sipdirname=None):
+    @classmethod
+    def forMetadataBag(cls, bagdir, config=None, minter=None, for_pres=False):
+        """
+        create a MIDASMetadataBagger for a existing bag constructed by this 
+        class.  The specified bag must include midas3-bagger metadata that has 
+        the necessary constructor parameters saved to it.  
+
+        :param bagdir  str:  the full path to the root directory of the bag
+        :param config dict:  a dictionary providing configuration parameters; if 
+                             not provided, the configuration stored in the 
+                             bagger metadata will be used. 
+        :param minter IDMinter:  a minter to use for minting new identifiers.
+        """
+        bag = NISTBag(bagdir)
+        bgrmdf = os.path.join(bag.metadata_dir, cls.BGRMD_FILENAME)
+        if not os.path.isfile(bgrmdf):
+            raise SIPDirectoryError(bagdir, "Unable find midas3 bagger metadata; "
+                                            "not a metadata bag?")
+        try: 
+            bgrmd = read_json(bgrmdf)
+        except ValueError as ex:
+            raise SIPDirectoryError(bagdir, "Unable parse bagger metadata from "+
+                                    os.path.join(os.path.basename(bagdir), "metadata",
+                                                 cls.BGRMD_FILENAME)+": "+str(ex), ex)
+        if config is None:
+            config = bgrmd.get('bagger_config', {})
+        upldir=None
+        if not for_pres:
+            upldir = bgrmd.get('upload_directory')
+
+        resmd = bag.nerd_metadata_for('')
+        return MIDASMetadataBagger(resmd.get['ediid'], bgrmd.get('bag_parent'),
+                                   bgrmd.get('data_directory'), upldir, config, minter)
+
+
+    @classmethod
+    def fromMIDAS(cls, midasid, workdir, reviewparent, uploadparent=None, config={},
+                  minter=None, recnum=None):
+        """
+        Find the data directories for a MIDAS submission and create a 
+        MIDASMetadataBagger for it.  The output metadata bag from a previous session 
+        may exist already; in this case, the returned bagger will simply wrap that
+        previous bag; otherwise, it will be created from the input data (via prepare()).  
+
+        :param midasid   str:  the identifier provided by MIDAS, used as the 
+                               name of the directory containing the data.
+        :param workdir   str:  the path to the directory that can contain the 
+                               output bag
+        :param reviewdir str:  the path to the parent directory containing MIDAS
+                               submission directories
+                               datasets in the review state.
+        :param uploaddir str:  the path to the directory containing submitted
+                               datasets not yet in the review state.
+        :param config   dict:  a dictionary providing configuration parameters
+        :param minter IDMinter: a minter to use for minting new identifiers.
+        :param recnum str:     the MIDAS record number for the submission, used 
+                               to determine the submission directories.  If not 
+                               provided, it is determined based on the provided 
+                               MIDAS ID.  
+        """
+        if not recnum:
+            recnum = _midadid_to_dirname(midasid, log)
+        revdir = None
+        upldir = None
+        if reviewparent:
+            revdir = os.path.join(reviewparent, recnum)
+        if uploadparent:
+            upldir = os.path.join(uploadparent, recnum)
+        return MIDASMetadataBagger(midasid, workdir, revdir, upldir, config, minter)
+
+
+    def __init__(self, midasid, bagparent, reviewdir, uploaddir=None, config={}, minter=None):
         """
         Create an SIPBagger to operate on data provided by MIDAS
 
@@ -174,22 +238,10 @@ class MIDASMetadataBagger(SIPBagger):
                                represents the SIP's directory.  If not provided,
                                the directory is determined based on the provided
                                MIDAS ID.  
-        :param file_examine_mode str:  the mode for examine and extracting file 
-                               metadata.  If null or not provided, the default 
-                               mode will be "sync", which will cause the file examination
-                               to be done synchronously when apply_pod() is called.
-                               A value of "async" will trigger asynchronous 
-                               examination in a separate thread when apply_pod() 
-                               is called; this useful for large SIPs where file 
-                               examination can take a while.  A value of "none"
-                               will prevent file examination from happening 
-                               automatically; one must call fileExaminer.run()
-                               (or fileExaminer.launch()) explicitly.
         """
         self.midasid = midasid
         self.name = midasid_to_bagname(midasid)
         self.state = 'upload'
-        self._indirs = []
 
         usenm = self.name
         if len(usenm) > 11:
@@ -197,32 +249,20 @@ class MIDASMetadataBagger(SIPBagger):
         self.log = log.getChild(usenm)
         
         # ensure we have at least one readable input directory
-        indirname = sipdirname
-        if not indirname:
-            indirname = _midadid_to_dirname(midasid, log)
+        self.revdatadir = self._check_input_datadir(reviewdir)
+        self.upldatadir = self._check_input_datadir(uploaddir)
 
-        for dir in (reviewdir, uploaddir):
-            if not dir:
-                continue
-            indir = os.path.join(dir, indirname)
-            if os.path.exists(indir):
-                if not os.path.isdir(indir):
-                    raise SIPDirectoryError(indir, "not a directory", sys=self)
-                if not os.access(indir, os.R_OK|os.X_OK):
-                    raise SIPDirectoryError(indir, "lacking read/cd permission",
-                                            sys=self)
-                self._indirs.append(indir)
-                if reviewdir and indir.startswith(reviewdir):
-                    self.state = 'review'
-                self.log.debug("Found input dir: %s", indir)
-            else:
-                self.log.debug("Candidate dir does not exist: %s", indir)    
+        self._indirs = []
+        if self.revdatadir:
+            self.state = "review"
+            self._indirs.append(self.revdatadir)
+        if self.upldatadir:
+            self._indirs.append(self.upldatadir)
 
         if not self._indirs:
-            raise SIPDirectoryNotFound(msg="No input directories available",
-                                       sys=self)
+            raise SIPDirectoryNotFound(msg="No input directories available", sys=self)
         
-        super(MIDASMetadataBagger, self).__init__(workdir, config)
+        super(MIDASMetadataBagger, self).__init__(bagparent, config)
 
         # If None, we'll create a ID minter if we need one (in self._mint_id)
         self._minter = minter
@@ -265,6 +305,7 @@ class MIDASMetadataBagger(SIPBagger):
 
         self.ensure_bag_parent_dir()
 
+
     def _mint_id(self, ediid):
         if not self._minter:
             cfg = self.cfg.get('id_minter', {})
@@ -274,6 +315,22 @@ class MIDASMetadataBagger(SIPBagger):
 
         seedkey = self.cfg.get('id_minter', {}).get('ediid_data_key', 'ediid')
         return self._minter.mint({ seedkey: ediid })
+
+    def _check_input_datadir(self, indir):
+        if not indir:
+            return None
+        if os.path.exists(indir):
+            if not os.path.isdir(indir):
+                raise SIPDirectoryError(indir, "not a directory", sys=self)
+            if not os.access(indir, os.R_OK|os.X_OK):
+                raise SIPDirectoryError(indir, "lacking read/cd permission",
+                                            sys=self)
+
+            self.log.debug("Found input dir: %s", indir)
+            return indir
+
+        self.log.debug("Candidate dir does not exist: %s", indir)
+        return None
 
     @property
     def bagdir(self):
@@ -449,6 +506,14 @@ class MIDASMetadataBagger(SIPBagger):
             self.bagbldr.update_metadata_for("", updmd)
 
             self.resmd = None  # set by ensure_res_metadata()
+
+        if not os.path.isfile(self.baggermd_file_for('')):
+            self.update_bagger_metadata_for('', {
+                'data_directory': self.revdatadir,
+                'upload_directory': self.upldatadir,
+                'bag_parent': self.bagparent,
+                'bagger_config':  self.cfg
+            })
 
         return True
                 
@@ -938,5 +1003,562 @@ class MIDASMetadataBagger(SIPBagger):
                 while self.exif.files:
                     self.exif.examine_next()
                 self.exif.finish()
+        
+
+class PreservationBagger(SIPBagger):
+    """
+    A bagger that creates an AIP--a preservation bag--from an SIP conforming to the 
+    midas3 convention.
+
+    In this convention, the Submission Information Package (SIP) is a so-called
+    "metadata bag" produced by a midas3.MIDASMetadataBagger, driven by a MIDAS 
+    user session.  This SIP is used as the basis for the output Archive Information
+    Package (AIP): user-submitted data files are added in and the finalized bag 
+    is split according to the multibag profile and serialized into zip files.  
+
+    Note that, when possible, user-provided datafiles are added to the output 
+    directory as a hard link: that is, no bytes are copied.  Metadata data files 
+    are copied.
+
+    Note that this bagger can be set explicitly in a AIP creation mode or an 
+    update mode via the asupdate parameter to the constructor.  When one of 
+    these modes is set, the repository will be queried to see if the dataset 
+    with the same AIP identifier already exists; this state must agree with the 
+    set mode, else an exception is thrown.  This parameter is provided to ensure 
+    the state assumed by the caller--namely, whether the dataset already exists--
+    is in sync with the state of the repository.  If the mode is not set by the 
+    caller, the mode is determined implicitly by whether the AIP already exists 
+    in the repository.
+
+    This class takes as its input the location of the metadata bag and, optionally,
+    the directory where the data files can be found.  If the latter is not provided,
+    this bagger will consult the "data_directory" midas3 bagger metadata in the 
+    metadata bag.  The data files must organized within the directory in the hierarchy 
+    expressed in the NERDm metadata.  Also, the metadata bag may contain a fetch.txt 
+    file; if the config parameter "fetch_data_files" is True, then any file that 
+    cannot be found in the data directory but which has a listing in the fetch.txt 
+    file will retrieved from the given URL and placed in the output bag.  
+
+    This class takes a configuration dictionary on construction; the 
+    following parameters are supported:
+    :prop bag_builder dict ({}): a set of parameters to pass to the BagBuilder
+                                 object used to populate the output bag (see
+                                 BagBuilder class documentation for supported
+                                 parameters).
+    :prop merge_etc        str:  the path to the directory containing the 
+                                 metadata merge rule configurations.  If not
+                                 set, the directory will be searched for in 
+                                 some possible default locations.
+    :prop hard_link_data bool (True):  if True, copy data files into the bag 
+                                 using a hard link whenever possible.
+    :prop conponent_merge_convention str ("dev"): the merge convention name to 
+                                 use to merge MIDAS-provided component metadata
+                                 with the PDR's initial component metadata.
+    :prop relative_to_indir bool (False):  If True, the output bag directory 
+       is expected to be under one of the input directories; this base class
+       will then ensure that it has write permission to create the output 
+       directory.  If False, the bagger may raise an exception if the 
+       requested output bag directory is found within an input SIP directory,
+       regardless of whether the process has permission to write there.  
+    :prop bag_name_format str ("{0}.mbag{1}-{2}"):  a python format string 
+       to use to form a name for the output bag.  The data required to turn
+       the format string into a name are: (0) the dataset identifier, (1)
+       a bag profile version string, and (2) a bag sequence number.
+    :prop mbag_version str:  the version string for bag profile for output
+       bags.  
+    :prop fetch_data_files bool (False):  if True and a fetch.txt file is found 
+       in the bag, any file with an entry in that file but which can not be 
+       found in the data directory will be retrieved from the registered URL 
+       given by its entry.  
+    """
+    BGRMD_FILENAME = MIDASMetadataBagger.BGRMD_FILENAME
+
+    @classmethod
+    def fromMetadataBagger(cls, mdbagger, bagparent, config=None, asupdate=None):
+        """
+        Creae a PreservationBagger for preserving a dataset described by the 
+        midas3.MIDASMetadataBagger instance
+
+        :param mdbagger MIDASMetadataBagger:  the bagger instance wrapping
+                  the SIP metadata bag that will drive the preservation
+        :param bagparent str:  the path to the directory where the preservation
+                               bag should be written.  
+        :param config dict:  the configuration data to use; if None, the 
+                  configuration associated with mdbagger will be used.
+        :param asupdate bool:  if set to true, the caller believes this bagger 
+                               should be creating an update to an existing AIP;
+                               if false, the caller believes this is a new AIP.
+                               If this believe does not correspond with the 
+                               actual contents of the repository, an exception 
+                               is raised when the attempt to process the SIP is 
+                               made.  If None (default), no check is done; if 
+                               an AIP already exists in the repository, this 
+                               bagger creates an update.  
+        """
+        if config is None:
+            config = mdbagger.cfg
+        return PreservationBagger(mdbagger.bagdir, bagparent, mdbagger.revdatadir,
+                                  config, asupdate, mdbagger)
+
+    def __init__(self, sipdir, bagparent, datadir=None, config=None,
+                 asupdate=None, _use_md_bagger=None):
+        """
+        Create an SIPBagger for preserving a dataset from a metadata bag constructed
+        using the midas3 convention.
+
+        :param mddir     str:  the path to the directory that contains the input
+                               metadata bag (SIP).  
+        :param bagparent str:  the path to the directory where the preservation
+                               bag should be written.  
+        :param datadir   str:  the path to the directory containing user-submitted
+                               datasets.  This location will be gleaned from the 
+                               bagger metadata stored in the metadata bag.  
+        :param config   dict:  a dictionary providing configuration parameters
+        :param asupdate bool:  if set to true, the caller believes this bagger 
+                               should be creating an update to an existing AIP;
+                               if false, the caller believes this is a new AIP.
+                               If this believe does not correspond with the 
+                               actual contents of the repository, an exception 
+                               is raised when the attempt to process the SIP is 
+                               made.  If None (default), no check is done; if 
+                               an AIP already exists in the repository, this 
+                               bagger creates an update.  
+
+        @raises SIPDirectoryNotFound  if the specified SIP directory does not 
+                               exist or is not, in fact, a directory; or if 
+                               the specified data directory cannot be found.  
+        @raises SIPDirectoryError  if the specified SIP directory does not 
+                               appear to be a midas3 metadata bag; in particular,
+                               if it does not include a POD record file.  
+        """
+        self.sipdir = sipdir
+        self.datadir = datadir     # can be None
+        self.asupdate = asupdate   # can be None
+        self.datafiles = None
+
+        if not os.path.isdir(self.sipdir):
+            raise SIPDirectoryNotFound(sipdir)
+        bag = NISTBag(self.sipdir)
+        if not os.path.isfile(bag.pod_file()):
+            raise SIPDirectoryError(sipdir, "Missing POD file; SIP is not ready")
+        if not os.path.isfile(bag.nerd_file_for('')):
+            raise SIPDirectoryError(sipdir, "Missing NERDm file; SIP is not ready")
+
+        if config is None:
+            config = {}
+        super(PreservationBagger, self).__init__(bagparent, config)
+
+        self.name = bag.name
+        resmd = bag.nerd_metadata_for("", True)
+        self.midasid = resmd.get('ediid', resmd.get('@id'))
+
+        usenm = self.name
+        if len(usenm) > 11:
+            usenm = usenm[:4]+"..."+usenm[-4:]
+        self.aiplog = log.getChild(usenm)
+
+        # have a metadata bagger at the ready
+        self._mdbagger = _use_md_bagger
+        if not self._mdbagger:
+            self._mdbagger = self._open_metadata_bagger(bag, self.cfg, datadir)
+
+        # create the bag builder we will use
+        bldcfg = self.cfg.get('bag_builder', {})
+        if 'ensure_component_metadata' not in bldcfg:
+            # default True can mess with annotations
+            bldcfg['ensure_component_metadata'] = False  
+        self.bagbldr = BagBuilder(self.bagparent,
+                                  self.form_bag_name(self.name), bldcfg,
+                                  logger=self.aiplog)
+
+        # check for needed configuration
+        if self.cfg.get('check_data_files', True) and \
+           not self.cfg.get('store_dir'):
+            raise ConfigurationException("PreservationBagger: store_dir " +
+                                         "config param needed")
+
+        # do a sanity check on the bag parent directory
+        if not self.cfg.get('relative_to_indir', False):
+            datapath = os.path.abspath(self.datadir)
+            if datapath[-1] != os.sep:
+                datapath += os.sep
+            if os.path.abspath(self.bagparent).startswith(datapath):
+                if self.cfg.get('relative_to_indir') == False:
+                    # you said it was not relative, but it sure looks that way
+                    raise ConfigurationException("'relative_to_indir'=False but"
+                                                 +" bag dir (" + self.bagparent+
+                                                 ") appears to be below the "+
+                                                 "data directory (" + self.datadir+")")
+
+                # bagparent is inside sipdir
+                self.bagparent = os.path.abspath(self.bagparent)[len(datapath):]
+                self.cfg['relative_to_indir'] = True
+
+        if self.cfg.get('relative_to_indir'):
+            self.bagparent = os.path.join(self.datadir, self.bagparent)
+                
+        self.ensure_bag_parent_dir()
+
+    def _open_metadata_bagger(self, sipbag, config, datadir=None):
+        if not datadir:
+            # Consult the bagger metadata in the SIP
+            bgrmdf = os.path.join(sipbag.metadata_dir, MIDASMetadataBagger.BGRMD_FILENAME)
+            if not os.path.isfile(bgrmdf):
+                raise SIPDirectoryError(bagdir, "Unable to find midas3 bagger metadata; "
+                                                "not a metadata bag?")
+            try: 
+                bgrmd = read_json(bgrmdf)
+            except ValueError as ex:
+                bgrmdf = os.path.join(os.path.basename(sipbag.dir), "metadata",
+                                      MIDASMetadataBagger.BGRMD_FILENAME)
+                raise SIPDirectoryError(sipbag.dir, "Unable parse bagger metadata from " +
+                                                    bgrmdf + ": "+str(ex), ex)
+            
+            datadir = bgrmd.get('data_directory')
+
+        if not datadir:
+            raise SIPDirectoryError(sipbag.dir, "Unable to determine data directory; "
+                                                "not a metadata bag?")
+
+        return MIDASMetadataBagger(self.midasid, os.path.dirname(sipbag.dir),
+                                   datadir, None, config, None)
+        
+
+    @property
+    def bagdir(self):
+        """
+        The path to the output bag directory.
+        """
+        return self.bagbldr.bagdir
+
+    def ensure_metadata_preparation(self):
+        """
+        prepare the NERDm metadata.  
+
+        This uses the MIDASMetadataBagger class to convert the MIDA POD data 
+        into NERDm and to extract metadata from the uploaded files.  
+        """
+
+        if self.asupdate is not None and self._mdbagger.prepsvc:
+            prepper = self._mdbagger.prepsvc.prepper_for(self.name, log=self.aiplog)
+
+            # if asupdate is set (to true or false), check for the existance 
+            # of the target AIP:
+            if prepper.aip_exists() != bool(self.asupdate):
+                # actual state does not match caller's expected state
+                if self.asupdate:
+                    msg = self.name + \
+                          ": AIP with this ID does not exist in repository"
+                else:
+                    msg = self.name + \
+                          ": AIP with this ID already exists in repository"
+                raise PreservationStateException(msg, not self.asupdate)
+
+        self._mdbagger.enhance_metadata()
+        self.datafiles = self._mdbagger.datafiles
+        self._mdbagger._clear_all_unsynced_marks()
+        self._mdbagger.bagbldr._unset_logfile()
+
+        # copy the contents of the metadata bag into the final preservation bag
+        if os.path.exists(self.bagdir):
+            # note: caller should be responsible for locking the preservation
+            # of the SIP and cleaning up afterward.  Thus, this case should
+            # not really occur
+            log.warn("Removing previous version of preservation bag, %s",
+                     self.bagbldr.bagname)
+            if os.path.isdir(self.bagdir):
+                utils.rmtree(self.bagdir)
+            else:
+                shutil.remove(self.bagdir)
+        shutil.copytree(self._mdbagger.bagdir, self.bagdir)
+        
+        # by ensuring the output preservation bag directory, we set up logging
+        self.bagbldr.ensure_bagdir()
+        self.bagbldr.log.info("Preparing final bag for preservation as %s",
+                              os.path.basename(self.bagdir))
+
+    def find_pod_file(self):
+        """
+        find an existing pod file given a list of existing possible locations
+        """
+        raise PODError("POD files not expected in midas3 SIPs: use apply_pod()")
+
+    def ensure_preparation(self, nodata=False):
+        """
+        create and update the output working bag directory to ensure it is 
+        a re-organized version of the SIP, ready for annotation 
+        and preservation.  
+
+        :param nodata bool: if True, do not copy (or link) data files to the
+                            output directory.
+        """
+        self.ensure_metadata_preparation()
+
+        if not nodata:
+            self.add_data_files()
+
+
+    def form_bag_name(self, dsid, bagseq=0, dsver="1.0"):
+        """
+        return the name to use for the working bag directory.  According to the
+        NIST BagIt Profile, preservation bag names will follow the format
+        AIPID.AIPVER.mbagMBVER-SEQ
+
+        :param str  dsid:   the AIP identifier for the dataset
+        :param int  bagseq: the multibag sequence number to assign (default: 0)
+        :param str  dsver:  the dataset's release version string.  (default: 1.0)
+        """
+        fmt = self.cfg.get('bag_name_format')
+        bver = self.cfg.get('mbag_version', DEF_MBAG_VERSION)
+        return bagutils.form_bag_name(dsid, bagseq, dsver, bver, namefmt=fmt)
+
+    def add_data_files(self):
+        """
+        link in copies of the dataset's data files
+        """
+        for dfile, srcpath in self.datafiles.items():
+            self.bagbldr.add_data_file(dfile, srcpath, False, True)
+
+    
+    def make_bag(self, lock=True):
+        """
+        convert the input SIP into a bag ready for preservation.  More 
+        specifically, the result will be a bag directory with finalized 
+        content, ready for serialization.  
+
+        :param lock bool:   if True (default), acquire a lock before making
+                            the preservation bag.
+        :return str:  the path to the finalized bag directory
+        """
+        if lock:
+            self.ensure_filelock()
+            with self.lock:
+                return self._make_bag_impl()
+
+        else:
+            return self._make_bag_impl()
+    
+    def _make_bag_impl(self):
+        # this is intended to be called from make_bag(), with or with out
+        # lock on the output bag.
+        
+        self.prepare(nodata=False)
+
+        finalcfg = self.cfg.get('bag_builder', {}).get('finalize', {})
+        if finalcfg.get('ensure_component_metadata') is None:
+            finalcfg['ensure_component_metadata'] = False
+
+        ver = self.finalize_version()
+
+        # rename the bag for a proper version and sequence number
+        seq = self._determine_seq()
+        newname = self.form_bag_name(self.name, seq, ver)
+        newdir = os.path.join(self.bagbldr._pdir, newname)
+        if os.path.isdir(newdir):
+            log.warn("Removing previously existing output bag, "+newname)
+            shutil.rmtree(newdir)
+            
+        self.bagbldr.rename_bag(newname)
+
+        # write final bag metadata and support files
+        self.bagbldr.finalize_bag(finalcfg)
+
+        # make sure we've got valid NIST preservation bag!
+        if finalcfg.get('validate', True):
+            # this will raise an exception if any issues are found
+            self._validate(finalcfg.get('validator', {}))
+        if finalcfg.get('check_data_files', True):
+            # this will raise an exception if any issues are found
+            self._check_data_files(finalcfg.get('data_checker', {}))
+
+        return self.bagbldr.bagdir
+
+    def finalize_version(self, update_reason=None):
+        """
+        update the NERDm version metadatum to reflect the changes set by this
+        SIP.  If this SIP represents the initial submission for a dataset, the
+        version is set to "1.0.0"; if it represents an update to a previously 
+        published dataset, the version will be incremented based on the 
+        contents included in the SIP and PDR policy.
+        """
+        bag = self.bagbldr.bag
+        mdata = self.bagbldr.bag.nerdm_record(True)
+        (newver, uptype) = self._determine_updated_version(mdata, bag)
+        self.aiplog.debug('Setting final version to "%s"', newver)
+        
+        annotf = self.bagbldr.bag.annotations_file_for('')
+        if os.path.exists(annotf):
+            adata = utils.read_nerd(annotf)
+        else:
+            adata = OrderedDict()
+        adata['version'] = newver
+        verhist = mdata.get('versionHistory', [])
+
+        if uptype != _NO_UPDATE and newver != mdata['version'] and \
+           ('issued' in mdata or 'modified' in mdata) and \
+           not any([h['version'] == newver for h in verhist]):
+            issued = ('modified' in mdata and mdata['modified']) or \
+                     mdata['issued']
+            verhist.append(OrderedDict([
+                ('version', newver),
+                ('issued', issued),
+                ('@id', mdata['@id']),
+                ('location', 'https://data.nist.gov/od/id/'+mdata['@id'])
+            ]))
+            if update_reason is None:
+                if uptype == _MDATA_UPDATE:
+                    update_reason = 'metadata update'
+                elif uptype == _DATA_UPDATE:
+                    update_reason = 'data update'
+                else:
+                    update_reason = ''
+            verhist[-1]['description'] = update_reason
+            adata['versionHistory'] = verhist
+        
+        utils.write_json(adata, annotf)
+
+        return newver
+
+    def _determine_seq(self):
+        depinfof = os.path.join(self.bagdir,"multibag","deprecated-info.txt")
+        if not os.path.exists(depinfof):
+            return 0
+        
+        info = self.bagbldr.bag.get_baginfo(depinfof)
+        m = re.search(r'-(\d+)$',
+                      info.get('Internal-Sender-Identifier', [''])[-1])
+        if m:
+            return int(m.group(1))+1
+        return 0
+
+    def determine_updated_version(self, mdrec=None, bag=None):
+        """
+        determine the proper policy-specified version for this SIP based on
+        the given NERD metadata record for the SIP and the current contents 
+        of the AIP bag.  
+
+        :param dict mdrec:  the NERDm metadata for the entire dataset to consider
+                            when determining the new version;  if not provided,
+                            the current stored NERDm data will be read in.
+        :param NISTBag bag: the NISTBag instance for the bag to examine; if 
+                            not provided, the current pending AIP bag will be 
+                            examined.
+        """
+        return self._determine_updated_version(mdrec, bag)[0]
+
+    def _determine_updated_version(self, mdrec=None, bag=None):
+        if not bag:
+            bag = NISTBag(self.bagbldr.bagdir)
+        if not mdrec:
+            mdrec = bag.nerdm_record(True)
+        
+        oldver = mdrec.get('version', "1.0.0")
+        ineditre = re.compile(r'^(\d+(.\d+)*)\+ \(.*\)')
+        matched = ineditre.search(oldver)
+        if matched:
+            # the version is marked as "in edit", indicating that this
+            # is an update to a previously published version.
+            oldver = matched.group(1)
+            ver = [int(f) for f in oldver.split('.')]
+            for i in range(len(ver), 3):
+                ver.append(0)
+
+            # if there are files under the data directory, consider this a
+            # data update, which increments the second field.
+            for dir, subdirs, files in os.walk(bag.data_dir):
+                if len(files) > 0:
+                    # found a file
+                    ver[1] += 1
+                    ver[2] = 0
+                    return (".".join([str(v) for v in ver]), _DATA_UPDATE)
+
+            # otherwise, this is a metadata update, which increments the
+            # third field.
+            ver[2] += 1
+            return (".".join([str(v) for v in ver]), _MDATA_UPDATE)
+
+        # otherwise, this looks like a first-time SIP submission; take the
+        # version string as is.
+        return (oldver, _NO_UPDATE)
+            
+
+    def _validate(self, config):
+        """
+        run a final validation on the output bag
+
+        :param config dict:  a configuration to pass to the validator; see 
+                             nistoar.pdr.preserv.bagit.validate for details.
+                             If not provided, the configuration for this 
+                             builder will be checked for the 'validator' 
+                             property to use as the configuration.
+        """
+        ERR = "error"
+        WARN= "warn"
+        REC = "rec"
+        raiseon_words = [ ERR, WARN, REC ]
+        
+        raiseon = config.get('raise_on', WARN)
+        if raiseon and raiseon not in raiseon_words:
+            raise ConfigurationException("raise_on property not one of "+
+                                         str(raiseon) + ": " + raiseon)
+        
+        res = self.bagbldr.validate(config)
+
+        itp = res.PROB
+        if raiseon:
+            itp = ((raiseon == ERR)  and res.ERR)  or \
+                  ((raiseon == WARN) and res.PROB) or res.ALL
+            
+        issues = res.failed(itp)
+        if len(issues):
+            log.warn("Bag Validation issues detected for AIP id="+self.name)
+            for iss in issues:
+                if iss.type == iss.ERROR:
+                    log.error(iss.description)
+                elif iss.type == iss.WARN:
+                    log.warn(iss.description)
+                else:
+                    log.info(iss.description)
+
+            if raiseon:
+                raise AIPValidationError("Bag Validation errors detected",
+                                         errors=[i.description for i in issues])
+
+        else:
+            log.info("%s: bag validation completed without issues",
+                     self.bagbldr.bagname)
+
+    def _check_data_files(self, data_checker_config, viadistrib=True):
+        """
+        make sure all of the data files are accounted for.  The bag must 
+        either contain all of the data files listed in the nerdm components
+        or they must be available else where in the publishing pipeline:
+        the output storage dir (possibly still avaiting migration to the 
+        repository) or already published in the repository.
+        """
+        config = {
+            "repo_access": self.cfg.get('repo_access', {}),
+            "store_dir":  self.cfg.get('store_dir')
+        }
+        config.update( deepcopy(data_checker_config) )
+
+        chkr = DataChecker(self.bagbldr.bag, config,log.getChild("data_checker"))
+
+        missing = chkr.unindexed_files(viadistrib=viadistrib)
+        if len(missing) > 0:
+            log.error("master bag for id=%s is missing the following "+
+                      "files from the multibag file index:\n  %s",
+                      self.name, "\n  ".join(missing))
+            raise AIPValidationError("Bag data check failure: data files are " +
+                                     "missing from the multibag file index")
+
+        missing = chkr.unavailable_files(viadistrib=viadistrib)
+        if len(missing) > 0:
+            log.error("unable to locate the following files described " +
+                      "in master bag for id=%s:\n  %s",
+                      self.name, "\n  ".join(missing))
+            raise AIPValidationError("Bag data check failure: unable to locate "+
+                                     "some data files in any available bags")
+
         
 
