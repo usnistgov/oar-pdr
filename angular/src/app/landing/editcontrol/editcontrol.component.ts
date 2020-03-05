@@ -33,7 +33,7 @@ export class EditControlComponent implements OnInit, OnChanges {
     private _custsvc: CustomizationService = null;
     private originalRecord: NerdmRes = null;
     private _editmode: string;
-    private EDIT_MODES: any;
+    public EDIT_MODES: any;
 
     /**
      * a flag indicating whether editing mode is turned on (true=yes).  This parameter is 
