@@ -25,7 +25,7 @@ describe('EditStatusService', () => {
     
     beforeEach(() => {
         cfgdata = JSON.parse(JSON.stringify(config));
-        cfgdata['enableEdit'] = true;
+        cfgdata['editEnabled'] = true;
         svc = new EditStatusService(new AppConfig(cfgdata));
     });
 
@@ -55,7 +55,7 @@ describe('EditStatusService', () => {
     it('watchable remote start', () => {
         let resID = "";
         svc._watchRemoteStart((ev) => {
-            resID = ev;
+            resID = ev.resID;
         });
         expect(resID).toEqual("");
         svc.startEditing("testid");

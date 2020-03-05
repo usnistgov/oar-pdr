@@ -6,10 +6,14 @@
 <div class="ui-grid ui-grid-responsive ui-grid-pad center">
   <div class="card landingcard">
 
-    <div *ngIf="md === null">
+    <div *ngIf="md === null && edstatsvc.authorized && !edstatsvc.hasError">
       <div class="ui-g-10 ui-md-10 ui-lg-10 ui-sm-12" style="padding-left: 1%">
         <b>Landing page is loading...</b>
       </div>
+    </div>
+
+    <!-- If there is an error. push the footer to bottom -->
+    <div *ngIf="edstatsvc.hasError" style="min-height: 60vh;">
     </div>
 
     <!-- Pop-up tool menu (for small-width devices) -->
@@ -27,9 +31,7 @@
 
         <!-- landing page content -->
         <div class="ui-g-10 ui-md-10 ui-lg-10 ui-sm-12">
-
           <app-landing [record]="md" [inBrowser]="inBrowser" [requestId]="reqId"></app-landing>
-
         </div>
 
         <!-- citation pop-up -->

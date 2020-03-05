@@ -63,7 +63,7 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
         public titleSv: Title,
         private cfg: AppConfig,
         private mdserv: MetadataService,
-        private edstatsvc: EditStatusService,
+        public edstatsvc: EditStatusService,
         private mdupdsvc: MetadataUpdateService) {
         this.reqId = this.route.snapshot.paramMap.get('id');
         this.inBrowser = isPlatformBrowser(platformId);

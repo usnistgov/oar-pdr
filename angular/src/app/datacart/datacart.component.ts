@@ -28,6 +28,7 @@ import { AsyncBooleanResultCallback } from 'async';
 import { FileSaverService } from 'ngx-filesaver';
 import { CommonFunctionService } from '../shared/common-function/common-function.service';
 import { GoogleAnalyticsService } from '../shared/ga-service/google-analytics.service';
+import { CHECKBOX_REQUIRED_VALIDATOR } from '@angular/forms/src/directives/validators';
 
 declare var saveAs: any;
 declare var $: any;
@@ -216,6 +217,8 @@ export class DatacartComponent implements OnInit, OnDestroy {
                 }
             }
         );
+
+        console.log("datafiles %%%%%%%%%%%%%%%%%%:", this.dataFiles);
     }
 
     /*
@@ -507,12 +510,31 @@ export class DatacartComponent implements OnInit, OnDestroy {
         postMessage.push({ "bundleName": files.data.downloadFileName, "includeFiles": this.downloadData });
         // console.log('Bundle plan post message:');
         // console.log(JSON.stringify(postMessage[0]));
+        console.log("Bundle plan url", this.distApi);
 
         this.getBundlePlanRef = this.downloadService.getBundlePlan(this.distApi + "_bundle_plan", JSON.stringify(postMessage[0])).subscribe(
             blob => {
-                this.showCurrentTask = false;
-                this.isProcessing = false;
-                this.processBundle(blob, zipFileBaseName, files);
+                if(blob.status.toLowerCase() != 'error'){
+                  console.log("Bundle plan successfully return:", blob);
+                  console.log("blob.status", blob.status);
+                  this.showCurrentTask = false;
+                  this.isProcessing = false;
+                  this.processBundle(blob, zipFileBaseName, files);
+                }else{
+                  console.log("Calling following end point returned error:");
+                  console.log(this.distApi + "_bundle_plan");
+                  console.log("Post message:");
+                  console.log(JSON.stringify(postMessage[0]));
+                  console.log("Bundle plan return:", blob);
+                  this.bundlePlanMessage = blob.messages;
+                  this.bundlePlanStatus = "error";
+                  this.isProcessing = false;
+                  this.showCurrentTask = false;
+                  this.messageColor = this.getColor();
+                  this.emailSubject = 'PDR: Error getting bundle plan';
+                  this.emailBody = 'URL:' + this.distApi + '_bundle_plan; ' + '%0D%0A%0D%0A' + 'Post message:%0D%0A' + JSON.stringify(postMessage[0]) + ';'  + '%0D%0A%0D%0A' + 'Return message:%0D%0A' + JSON.stringify(blob);
+                  this.unsubscribeBundleplan();
+                }
             },
             err => {
                 console.log("Calling following end point returned error:");
@@ -697,6 +719,7 @@ export class DatacartComponent implements OnInit, OnDestroy {
      */
     dataFileCount() {
         this.selectedFileCount = 0;
+        console.log("dataFiles", this.dataFiles);
         for (let selData of this.selectedData) {
             if (selData.data['resFilePath'] != null) {
                 if (selData.data.isLeaf) {

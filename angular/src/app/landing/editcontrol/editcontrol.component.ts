@@ -165,11 +165,18 @@ export class EditControlComponent implements OnInit, OnChanges {
                 this.statusbar.showMessage("Loading draft...", true)
                 this.mdupdsvc.loadDraft().subscribe(
                     (md) => {
+                      if(md){
+                      console.log('loadDraft return:', md);
                         this.mdupdsvc._setOriginalMetadata(md as NerdmRes);
                         this.mdupdsvc.checkUpdatedFields(md as NerdmRes);
                         this.statusbar._setEditMode(this.EDIT_MODES.EDIT_MODE);
                         this.statusbar.showLastUpdate(this.EDIT_MODES.EDIT_MODE);
                         this.editMode = this.EDIT_MODES.EDIT_MODE;
+                      }else{
+                        this.statusbar.showMessage("There was a problem loading draft data.", false);
+                        this.statusbar._setEditMode(this.EDIT_MODES.PREVIEW_MODE);
+                        this.edstatsvc._setError(true);
+                      }
                     });
               }
             },
@@ -387,6 +394,8 @@ export class EditControlComponent implements OnInit, OnChanges {
                     this.mdupdsvc._setCustomizationService(custsvc);
 
                     var msg: string = "";
+                    var authenticated: boolean = false;
+
                     if (!this.authsvc.userID) {
                         msg = "authentication failed";
                         this.msgsvc.error("User log in cancelled or failed.  To edit, please log in " +
@@ -396,16 +405,26 @@ export class EditControlComponent implements OnInit, OnChanges {
                         msg = "authorization denied for user " + this.authsvc.userID;
                         this.msgsvc.error("Sorry, you are not authorized to edit this submission.")
                     }
-                    else
+                    else{
                         msg = "authorization granted for user " + this.authsvc.userID;
+                        authenticated = true;
+                    }
 
                     console.log(msg);
                     this.statusbar.showMessage(msg, false); 
-                    subscriber.next(Boolean(this._custsvc));
+
+                    if(authenticated){
+                      subscriber.next(Boolean(this._custsvc));
+                      this.edstatsvc._setUserID(this.authsvc.userID);
+                      this.edstatsvc._setAuthorized(true);
+                    }else{
+                      subscriber.next(false);
+                      this.statusbar.showLastUpdate(this.editMode)
+                      this.edstatsvc._setAuthorized(false);
+                    }
+                    
                     subscriber.complete();
                     // this.statusbar.showLastUpdate(this.editMode)
-                    this.edstatsvc._setUserID(this.authsvc.userID);
-                    this.edstatsvc._setAuthorized(true);
                 },
                 (err) => {
                     let msg = "Failure during authorization: " + err.message;

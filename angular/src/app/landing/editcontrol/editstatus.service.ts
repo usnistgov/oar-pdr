@@ -51,6 +51,14 @@ export class EditStatusService {
     _setEditMode(val : string) { this._editmode = val; }
 
     /**
+     * flag indicating whether we get an error.
+     * This flag is used to reset UI display  
+     */
+    get hasError() : boolean { return this._error; }
+    private _error : boolean = false;
+    _setError(val : boolean) { this._error = val; }
+
+    /**
      * Behavior subject to remotely start the edit function. This is used when user login
      * and the page was redirected to current page with parameter 'editmode' set to true.
      */

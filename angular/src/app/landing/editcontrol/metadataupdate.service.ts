@@ -321,8 +321,9 @@ export class MetadataUpdateService {
                     if (onSuccess) onSuccess();
                 },
                 (err) => {
+                  console.log("err", err);
                     // err will be a subtype of CustomizationError
-                    if (err.type = 'user') {
+                    if (err.type == 'user') {
                         console.error("Failed to retrieve draft metadata changes: user error:" + err.message);
                         this.msgsvc.error(err.message)
                     }
