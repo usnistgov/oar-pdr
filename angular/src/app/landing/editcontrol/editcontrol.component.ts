@@ -166,7 +166,6 @@ export class EditControlComponent implements OnInit, OnChanges {
                 this.mdupdsvc.loadDraft().subscribe(
                     (md) => {
                       if(md){
-                      console.log('loadDraft return:', md);
                         this.mdupdsvc._setOriginalMetadata(md as NerdmRes);
                         this.mdupdsvc.checkUpdatedFields(md as NerdmRes);
                         this.statusbar._setEditMode(this.EDIT_MODES.EDIT_MODE);

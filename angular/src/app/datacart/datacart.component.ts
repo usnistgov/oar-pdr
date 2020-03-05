@@ -28,7 +28,6 @@ import { AsyncBooleanResultCallback } from 'async';
 import { FileSaverService } from 'ngx-filesaver';
 import { CommonFunctionService } from '../shared/common-function/common-function.service';
 import { GoogleAnalyticsService } from '../shared/ga-service/google-analytics.service';
-import { CHECKBOX_REQUIRED_VALIDATOR } from '@angular/forms/src/directives/validators';
 
 declare var saveAs: any;
 declare var $: any;
@@ -217,8 +216,6 @@ export class DatacartComponent implements OnInit, OnDestroy {
                 }
             }
         );
-
-        console.log("datafiles %%%%%%%%%%%%%%%%%%:", this.dataFiles);
     }
 
     /*
@@ -719,7 +716,6 @@ export class DatacartComponent implements OnInit, OnDestroy {
      */
     dataFileCount() {
         this.selectedFileCount = 0;
-        console.log("dataFiles", this.dataFiles);
         for (let selData of this.selectedData) {
             if (selData.data['resFilePath'] != null) {
                 if (selData.data.isLeaf) {
