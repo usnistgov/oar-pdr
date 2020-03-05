@@ -4,6 +4,9 @@ import { Observable, of, throwError } from 'rxjs';
 import { delay, mergeMap, materialize, dematerialize } from 'rxjs/operators';
 import { TestDataService } from '../shared/testdata-service/testDataService';
 import { DownloadService } from '../shared/download-service/download-service.service';
+import { AuthInfo } from '../landing/editcontrol/auth.service';
+import { UserDetails } from '../landing/editcontrol/interfaces';
+import { userInfo } from 'os';
 
 @Injectable()
 export class FakeBackendInterceptor implements HttpInterceptor {
@@ -37,13 +40,29 @@ export class FakeBackendInterceptor implements HttpInterceptor {
             }
 
             // // authenticate
-            // if (request.url.indexOf('auth/_perm/') > -1 && request.method === 'GET') {
-            //     let body: ApiToken = {
-            //         userId: 'xyz@nist.gov',
-            //         token: 'fake-jwt-token'
-            //     };
-            //     console.log("logging in...")
-            //     return of(new HttpResponse({ status: 200, body }));
+            if (request.url.indexOf('auth/_perm/') > -1 && request.method === 'GET') {
+                let body: AuthInfo = {
+                    userDetails: {
+                      userId: 'xyz@nist.gov',
+                      userName: 'xyz',
+                      userLastName: 'abc',
+                      userEmail: 'xyz@nist.gov'
+                    },
+                    token: 'fake-jwt-token'
+                };
+                console.log("logging in...")
+                return of(new HttpResponse({ status: 200, body }));
+            }
+
+            // Simulate loading draft error
+            // if (request.url.indexOf('/customization/api/draft') > -1 && request.method === 'GET') {
+            //     console.log("Interceptor simulates loading drft error...");
+            //     return Observable.throw(
+            //         JSON.stringify({
+            //             "type": 'sys',
+            //             "message": "Request ID not found."
+            //         })
+            //     );
             // }
 
             // return 401 not authorised if token is null or invalid
@@ -59,7 +78,6 @@ export class FakeBackendInterceptor implements HttpInterceptor {
             //             "Userid": "xyz@nist.gov",
             //             "message": "Unauthorizeduser: User token is empty or expired."
             //         })
-
             //     );
             // }
 
