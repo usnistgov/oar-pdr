@@ -1651,7 +1651,7 @@ class BagBuilder(PreservationSystem):
         else:
             self._write_json(pod, outfile)
 
-    def update_from_pod(self, pod, updfilemd=True, savepod=True):
+    def update_from_pod(self, pod, updfilemd=True, savepod=True, force=False):
         """
         update the NERDm metadata to match data from the given POD record.  
 
@@ -1670,6 +1670,8 @@ class BagBuilder(PreservationSystem):
         :param bool updfilemd:   if false, do not update the component metadata to 
                                  match the given POD.
         :param bool savepod:     if true, the given POD will be saved into the bag.
+        :param bool force:       if True, apply all parts of the POD, regardless of 
+                                 whether the POD has changed.  
         :param bool sharert:     if True, short sleeps will be inserted into the 
                                  processing that allow other threads to have time 
                                  for processing.  If this is a big dataset with many 
@@ -1731,7 +1733,7 @@ class BagBuilder(PreservationSystem):
 
         # if the resource level metadata has changed, update the corresponding
         # NERDm metadata.
-        if dict(oldpod[""]) != dict(newpod[""]):
+        if force or dict(oldpod[""]) != dict(newpod[""]):
             self.add_res_nerd(nerd, False,
                        message="Updating resource-level due to change in POD");
             changed.append("")
@@ -1751,7 +1753,7 @@ class BagBuilder(PreservationSystem):
             for key in newpod:
                 if not key:
                     continue
-                if dict(newpod[key]) != dict(oldpod.get(key, {})):
+                if force or dict(newpod[key]) != dict(oldpod.get(key, {})):
                     # this distribution's pod desscription has changed; save it
                     if 'filepath' not in newcomps[key]:
                         # shouldn't happen

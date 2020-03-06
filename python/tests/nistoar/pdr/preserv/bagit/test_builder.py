@@ -1316,6 +1316,10 @@ class TestBuilder2(test.TestCase):
         with open(self.bag.bag.nerd_file_for("trial1.json")) as fd:
             saved = json.load(fd)
         self.assertEqual(saved['title'], "Goobed!")
+        self.bag.update_from_pod(poddata, True, True, force=True)
+        with open(self.bag.bag.nerd_file_for("trial1.json")) as fd:
+            saved = json.load(fd)
+        self.assertNotEqual(saved['title'], "Goobed!")
 
         with open(self.bag.bag.pod_file()) as fd:
             saved = json.load(fd, object_pairs_hook=OrderedDict)
