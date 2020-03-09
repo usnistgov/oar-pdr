@@ -105,7 +105,6 @@ import gov.nist.oar.customizationapi.service.SamlUserDetailsService;
  * @author Deoyani Nandrekar-Heinis
  */
 @Configuration
-
 //@EnableWebSecurity
 public class SamlSecurityConfig extends WebSecurityConfigurerAdapter {
 	private static Logger logger = LoggerFactory.getLogger(SamlSecurityConfig.class);
@@ -378,7 +377,7 @@ public class SamlSecurityConfig extends WebSecurityConfigurerAdapter {
 	 * @throws ConfigurationException
 	 */
 	@Bean
-	public FilterChainProxy samlSpringFilter() throws ConfigurationException {
+	public FilterChainProxy samlChainFilter() throws ConfigurationException {
 		logger.info("Setting up different saml filters and endpoints");
 		List<SecurityFilterChain> chains = new ArrayList<>();
 
@@ -727,7 +726,7 @@ public class SamlSecurityConfig extends WebSecurityConfigurerAdapter {
 	@Override
 	public void configure(WebSecurity web) throws Exception {
 		web.ignoring().antMatchers("/v2/api-docs", "/configuration/ui", "/swagger-resources/**",
-				"/configuration/security", "/swagger-ui.html", "/webjars/**");
+				"/configuration/security", "/swagger-ui.html", "/webjars/**","/pdr/lp/draft/**");
 	}
 
 	/**
@@ -743,7 +742,7 @@ public class SamlSecurityConfig extends WebSecurityConfigurerAdapter {
 
 			http.csrf().disable();
 
-			http.addFilterBefore(metadataGeneratorFilter(), ChannelProcessingFilter.class).addFilterAfter(samlSpringFilter(),
+			http.addFilterBefore(metadataGeneratorFilter(), ChannelProcessingFilter.class).addFilterAfter(samlChainFilter(),
 					BasicAuthenticationFilter.class);
 
 			http.authorizeRequests().antMatchers("/error").permitAll().antMatchers("/saml/**").permitAll().anyRequest()

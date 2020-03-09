@@ -30,6 +30,7 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.web.access.channel.ChannelProcessingFilter;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -56,7 +57,7 @@ public class WebSecurityConfig {
 	 * Rest security configuration for rest api
 	 */
 	@Configuration
-	@Order(1)
+	@Order(150)
 	public static class RestApiSecurityConfig extends WebSecurityConfigurerAdapter {
 		private Logger logger = LoggerFactory.getLogger(RestApiSecurityConfig.class);
 
@@ -88,7 +89,7 @@ public class WebSecurityConfig {
 	 * Security configuration for authorization end points
 	 */
 	@Configuration
-	@Order(3)
+	@Order(370)
 	public static class AuthSecurityConfig extends WebSecurityConfigurerAdapter {
 		private Logger logger = LoggerFactory.getLogger(AuthSecurityConfig.class);
 
@@ -96,7 +97,7 @@ public class WebSecurityConfig {
 
 		@Override
 		protected void configure(HttpSecurity http) throws Exception {
-			logger.info("AuthSecurity Config set up authorization related entrypoints.");
+			logger.info("Set up authorization related entrypoints.");
 
 			http.exceptionHandling().authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED));
 
@@ -104,65 +105,51 @@ public class WebSecurityConfig {
 		}
 	}
 
-	/**
-	 * Security configuration for service level authorization end points
-	 */
-	@Configuration
-	@Order(2)
-	public static class AuthServiceSecurityConfig extends WebSecurityConfigurerAdapter {
-		private Logger logger = LoggerFactory.getLogger(AuthServiceSecurityConfig.class);
-
-		private static final String apiMatcher = "/pdr/lp/draft/**";
-		@Value("${custom.service.secret:testid}")
-		String secret;
-
-		@Override
-		protected void configure(HttpSecurity http) throws Exception {
-			logger.info("AuthSecurity Config set up http related entrypoints." + secret);
-			ServiceAuthenticationFilter serviceFilter = new ServiceAuthenticationFilter(apiMatcher,
-					super.authenticationManager());
-			serviceFilter.setSecret(secret);
-
-			// http.addFilterBefore(cors2Filter(),ChannelProcessingFilter.class);
-			// http.csrf().disable();
-			http.addFilterBefore(serviceFilter, UsernamePasswordAuthenticationFilter.class);
-			http.authorizeRequests().antMatchers(HttpMethod.GET, apiMatcher).permitAll();
-			http.authorizeRequests().antMatchers(HttpMethod.PUT, apiMatcher).permitAll();
-			http.authorizeRequests().antMatchers(HttpMethod.DELETE, apiMatcher).permitAll();
-			http.authorizeRequests().antMatchers(apiMatcher).authenticated().and().httpBasic().and().csrf().disable();
-
-		}
-
-		@Override
-		protected void configure(AuthenticationManagerBuilder auth) {
-			auth.authenticationProvider(new ServiceAuthenticationProvider());
-		}
-
-		@Bean
-		CORSFilterAuth cors2Filter() {
-			logger.info("CORS filter setting for application:");
-			CORSFilterAuth filter = new CORSFilterAuth("http://localhost:4200/");
-			return filter;
-		}
-//		@Bean
-//	    CorsConfigurationSource corsConfigurationSource() 
-//	    {
-//	        CorsConfiguration configuration = new CorsConfiguration();
-//	        configuration.setAllowedOrigins(Arrays.asList("http:localhost:4200"));
-//	        configuration.setAllowedMethods(Arrays.asList("GET","DELETE","PATCH"));
-//	        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-//	        source.registerCorsConfiguration("/**", configuration);
-//	        return source;
-//	    }
-	}
-
-//	 /**
-//     * Saml security config
-//     */
-//    @Configuration
-//    
-//    @Import(SamlSecurityConfig.class)
-//    public static class SamlConfig {
+//	/**
+//	 * Security configuration for service level authorization end points
+//	 */
+//	@Configuration
+//	@Order(560)
+//	public static class AuthServiceSecurityConfig extends WebSecurityConfigurerAdapter {
+//		private Logger logger = LoggerFactory.getLogger(AuthServiceSecurityConfig.class);
 //
-//    }
+//		private static final String apiMatcher = "/pdr/lp/draft/**";
+//		@Value("${custom.service.secret:testid}")
+//		String secret;
+//
+//		@Override
+//		protected void configure(HttpSecurity http) throws Exception {
+//			logger.info("AuthServiceSecurityConfig set up http related entrypoints." + secret);
+////			ServiceAuthenticationFilter serviceFilter = new ServiceAuthenticationFilter(apiMatcher,
+////					super.authenticationManager());
+//			ServiceAuthenticationFilter serviceFilter = new ServiceAuthenticationFilter(apiMatcher);
+//			serviceFilter.setSecret(secret);
+//
+//			// http.addFilterBefore(cors2Filter(),ChannelProcessingFilter.class);
+////			http.httpBasic().and().csrf().disable();
+//			http.addFilterBefore(serviceFilter, BasicAuthenticationFilter.class);
+//			http.antMatcher(apiMatcher).authorizeRequests().anyRequest().permitAll();
+//			http.authorizeRequests().antMatchers(HttpMethod.GET, apiMatcher).permitAll();
+//			http.authorizeRequests().antMatchers(HttpMethod.PUT, apiMatcher).permitAll();
+//			http.authorizeRequests().antMatchers(HttpMethod.DELETE, apiMatcher).permitAll();
+//			http.authorizeRequests().antMatchers(apiMatcher).authenticated().and().httpBasic().and().csrf().disable();
+//			//http.authorizeRequests().antMatchers(apiMatcher)
+//		}
+//
+//		@Override
+//		protected void configure(AuthenticationManagerBuilder auth) {
+//			auth.authenticationProvider(new ServiceAuthenticationProvider());
+//		}
+//
+//
+//	}
+
+	 /**
+     * Saml security config
+     */
+    @Configuration
+    @Import(SamlSecurityConfig.class)
+    public static class SamlConfig {
+
+    }
 }

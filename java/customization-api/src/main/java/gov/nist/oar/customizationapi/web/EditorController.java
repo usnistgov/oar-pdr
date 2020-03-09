@@ -68,7 +68,7 @@ public class EditorController {
 	private EditorService uRepo;
 
 	/**
-	 * Update the fields of record metadata.
+	 * Update the metadata, field or group of fileds allowed by the service. 
 	 * 
 	 * @param ediid  unique record id
 	 * @param params subset of metadata modified in JSON format
@@ -88,7 +88,7 @@ public class EditorController {
 	}
 
 	/***
-	 * Access the record from service
+	 * Find the record in cache which is being edited by client
 	 * 
 	 * @param ediid Unique record identifier
 	 * @return
@@ -115,7 +115,7 @@ public class EditorController {
 		return uRepo.deleteRecordChanges(ediid);
 	}
 	/**
-	 * 
+	 *  This exception is thrown only if there is an error in the service
 	 * @param ex
 	 * @param req
 	 * @return
