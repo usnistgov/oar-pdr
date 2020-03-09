@@ -70,15 +70,15 @@ public class DraftControllerTest {
 				.readAllBytes(Paths.get(this.getClass().getClassLoader().getResource("updatedRecord.json").getFile())));
 
 		updatedDoc = Document.parse(updated);
-		
-		ReflectionTestUtils.setField(draftController,"authorization","mysecret");
+
+		ReflectionTestUtils.setField(draftController, "authorization", "mysecret");
 
 	}
 
 	@Test
 	public void editRecordTest() throws Exception {
 		String ediid = "12345";
-		
+
 //		HttpHeaders mockHeader = Mockito.mock(HttpHeaders.class);
 //		HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
 //		// define the headers you want to be returned
@@ -125,19 +125,19 @@ public class DraftControllerTest {
 //		}
 //		
 
-		
-		
-		
 		Mockito.doReturn(record).when(draft).getDraft(ediid, "");
-		
+
 		HttpHeaders httpHeaders = new HttpHeaders();
 		httpHeaders.add("Authorization", "mysecret");
 		MockHttpServletResponse response = mvc
 				.perform(get("/pdr/lp/draft/" + ediid).headers(httpHeaders).accept(MediaType.APPLICATION_JSON))
 				.andReturn().getResponse();
 
-		System.out.println("Output::" + response.getContentAsString());
-
+		//System.out.println("Output::" + response.getContentAsString());
+		Document responseDoc = Document.parse(response.getContentAsString());
+		//System.out.println("response.getContentAsString() ::"+response.getContentAsString());
+		String title = "New Title Update Test May 7";
+		assertThat(title).isEqualTo(responseDoc.get("title"));
 		assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
 
 	}
@@ -151,7 +151,8 @@ public class DraftControllerTest {
 		HttpHeaders httpHeaders = new HttpHeaders();
 		httpHeaders.add("Authorization", "mysecret");
 		MockHttpServletResponse response = mvc
-				.perform(delete("/pdr/lp/draft/" + ediid).headers(httpHeaders).accept(MediaType.APPLICATION_JSON)).andReturn().getResponse();
+				.perform(delete("/pdr/lp/draft/" + ediid).headers(httpHeaders).accept(MediaType.APPLICATION_JSON))
+				.andReturn().getResponse();
 
 		assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
 		assertThat(response.getContentAsString()).isEqualTo("false");
@@ -165,14 +166,10 @@ public class DraftControllerTest {
 		Mockito.doNothing().when(draft).putDraft(ediid, Document.parse(changedata));
 		HttpHeaders httpHeaders = new HttpHeaders();
 		httpHeaders.add("Authorization", "mysecret");
-		MockHttpServletResponse response = mvc.perform(put("/pdr/lp/draft/" + ediid)
-				.contentType(MediaType.APPLICATION_JSON).content(changedata).headers(httpHeaders).accept(MediaType.APPLICATION_JSON))
+		MockHttpServletResponse response = mvc
+				.perform(put("/pdr/lp/draft/" + ediid).contentType(MediaType.APPLICATION_JSON).content(changedata)
+						.headers(httpHeaders).accept(MediaType.APPLICATION_JSON))
 				.andReturn().getResponse();
-
-		// Document responseDoc = Document.parse(response.getContentAsString());
-
-//		String title = "New Title Update Test May 14";
-		// assertThat(title).isEqualTo(responseDoc.get("title"));
 
 		assertThat(response.getStatus()).isEqualTo(HttpStatus.CREATED.value());
 

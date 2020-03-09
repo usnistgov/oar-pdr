@@ -27,6 +27,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.InternalAuthenticationServiceException;
 //import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.UnsatisfiedServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -83,10 +84,10 @@ public class DraftController {
 	@RequestMapping(value = { "{ediid}" }, method = RequestMethod.GET, produces = "application/json")
 	@ApiOperation(value = ".", nickname = "Access editable Record", notes = "Resource returns a record if it is editable and user is authenticated.")
 	public Document getData(@PathVariable @Valid String ediid, @RequestParam(required = false) String view,
-			@RequestHeader("Authorization") String serviceAuth) throws CustomizationException {
+			@RequestHeader(value="Authorization", required=false) String serviceAuth, HttpServletRequest request) throws CustomizationException, UnsatisfiedServletRequestParameterException {
 		logger.info("Access the record to be edited by ediid " + ediid);
-		if (!serviceAuth.equals(authorization))
-			throw new InternalAuthenticationServiceException("Service is not authorized to access this record.");
+		
+		processRequest(request, serviceAuth);
 		String viewoption = "";
 		if (view != null && !view.equals(""))
 			viewoption = view;
@@ -102,9 +103,10 @@ public class DraftController {
 	 */
 	@RequestMapping(value = { "{ediid}" }, method = RequestMethod.DELETE, produces = "application/json")
 	@ApiOperation(value = ".", nickname = "Delete the Record from drafts", notes = "This will allow user to delete all the changes made in the record in draft mode, original published record will remain as it is.")
-	public boolean deleteRecord(@PathVariable @Valid String ediid, @RequestHeader("Authorization") String serviceAuth)
+	public boolean deleteRecord(@PathVariable @Valid String ediid, @RequestHeader(value="Authorization", required=false) String serviceAuth,  HttpServletRequest request)
 			throws CustomizationException {
 		logger.info("Delete the record from stagging given by ediid " + ediid);
+		processRequest(request, serviceAuth);
 		if (!serviceAuth.equals(authorization))
 			throw new InternalAuthenticationServiceException("Service is not authorized to access this record.");
 
@@ -126,15 +128,22 @@ public class DraftController {
 	@ApiOperation(value = ".", nickname = "Save changes to server", notes = "Resource returns a boolean based on success or failure of the request.")
 	@ResponseStatus(HttpStatus.CREATED)
 	public void createRecord(@PathVariable @Valid String ediid, @Valid @RequestBody Document params,
-			@RequestHeader("Authorization") String serviceAuth)
+			@RequestHeader(value="Authorization", required=false) String serviceAuth, HttpServletRequest request)
 			throws CustomizationException, InvalidInputException, ResourceNotFoundException {
 		logger.info("Send updated record to backend metadata server:" + ediid);
+		processRequest(request, serviceAuth);
 		if (!serviceAuth.equals(authorization))
 			throw new InternalAuthenticationServiceException("Service is not authorized to access this record.");
 		draftRepo.putDraft(ediid, params);
 
 	}
 
+	public void processRequest(HttpServletRequest request, String serviceAuth) {
+		String authTag = request.getHeader("Authorization");
+		if(authTag == null )throw new InternalAuthenticationServiceException("No Authorized to access the record.");
+		if (!serviceAuth.equals(authorization) || serviceAuth == null )
+			throw new InternalAuthenticationServiceException("Token is not authorized, denied access to this record.");
+	}
 	/**
 	 * If there is an internal error due to certain functions failue this is called.
 	 * @param ex
@@ -229,5 +238,17 @@ public class DraftController {
 	public ErrorInfo handleRestClientError(InternalAuthenticationServiceException ex, HttpServletRequest req) {
 		logger.error("Unauthorized user or token : " + req.getRequestURI() + "\n  " + ex.getMessage(), ex);
 		return new ErrorInfo(req.getRequestURI(), 401, "Untauthorized token used to acces the service.");
+	}
+	
+	@ExceptionHandler(UnsatisfiedServletRequestParameterException.class)
+	public void onErr400(@RequestHeader(value="Authorization", required=false) String ETag, UnsatisfiedServletRequestParameterException ex) {
+	    if(ETag == null) {
+	    	logger.error("If Authorization header is not provided, throw UnAuthorized user exception");
+	    	throw new InternalAuthenticationServiceException("Not authorized to access this service.");
+	        // Ok the problem was ETag Header : give your informational message
+	    } else {
+	        // It is another error 400  : simply say request is incorrect or use ex
+	    
+	    }
 	}
 }
