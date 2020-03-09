@@ -49,13 +49,14 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
 /**
- * This is a webservice/restapi controller which gives access to customization cache database.
- * On behalf of MIDAS the metadata server can put data or record, delete or access it whenever needed.
- * There are three end points provided in this, each
- * dealing with specific tasks. In OAR project internal landing page for the edi
- * record is accessed using backed metadata. This metadata is a advanced POD
- * record called NERDm.  This webservice connects to backend MongoDB which holds the
- * record being edited. The service needs an authorized token to access these endpoints.
+ * This is a webservice/restapi controller which gives access to customization
+ * cache database. On behalf of MIDAS the metadata server can put data or
+ * record, delete or access it whenever needed. There are three end points
+ * provided in this, each dealing with specific tasks. In OAR project internal
+ * landing page for the edi record is accessed using backed metadata. This
+ * metadata is a advanced POD record called NERDm. This webservice connects to
+ * backend MongoDB which holds the record being edited. The service needs an
+ * authorized token to access these endpoints.
  * 
  * @author Deoyani Nandrekar-Heinis
  *
@@ -84,9 +85,10 @@ public class DraftController {
 	@RequestMapping(value = { "{ediid}" }, method = RequestMethod.GET, produces = "application/json")
 	@ApiOperation(value = ".", nickname = "Access editable Record", notes = "Resource returns a record if it is editable and user is authenticated.")
 	public Document getData(@PathVariable @Valid String ediid, @RequestParam(required = false) String view,
-			@RequestHeader(value="Authorization", required=false) String serviceAuth, HttpServletRequest request) throws CustomizationException, UnsatisfiedServletRequestParameterException {
+			@RequestHeader(value = "Authorization", required = false) String serviceAuth, HttpServletRequest request)
+			throws CustomizationException, UnsatisfiedServletRequestParameterException {
 		logger.info("Access the record to be edited by ediid " + ediid);
-		
+
 		processRequest(request, serviceAuth);
 		String viewoption = "";
 		if (view != null && !view.equals(""))
@@ -103,19 +105,19 @@ public class DraftController {
 	 */
 	@RequestMapping(value = { "{ediid}" }, method = RequestMethod.DELETE, produces = "application/json")
 	@ApiOperation(value = ".", nickname = "Delete the Record from drafts", notes = "This will allow user to delete all the changes made in the record in draft mode, original published record will remain as it is.")
-	public boolean deleteRecord(@PathVariable @Valid String ediid, @RequestHeader(value="Authorization", required=false) String serviceAuth,  HttpServletRequest request)
+	public boolean deleteRecord(@PathVariable @Valid String ediid,
+			@RequestHeader(value = "Authorization", required = false) String serviceAuth, HttpServletRequest request)
 			throws CustomizationException {
 		logger.info("Delete the record from stagging given by ediid " + ediid);
 		processRequest(request, serviceAuth);
-		if (!serviceAuth.equals(authorization))
-			throw new InternalAuthenticationServiceException("Service is not authorized to access this record.");
+
 
 		return draftRepo.deleteDraft(ediid);
 	}
 
 	/**
-	 * Metadata server send data over to store in the cache/staging area until editing is done and finalized by 
-	 * client application.
+	 * Metadata server send data over to store in the cache/staging area until
+	 * editing is done and finalized by client application.
 	 * 
 	 * @param ediid  Unique record id
 	 * @param params Modified fields in JSON
@@ -128,24 +130,31 @@ public class DraftController {
 	@ApiOperation(value = ".", nickname = "Save changes to server", notes = "Resource returns a boolean based on success or failure of the request.")
 	@ResponseStatus(HttpStatus.CREATED)
 	public void createRecord(@PathVariable @Valid String ediid, @Valid @RequestBody Document params,
-			@RequestHeader(value="Authorization", required=false) String serviceAuth, HttpServletRequest request)
+			@RequestHeader(value = "Authorization", required = false) String serviceAuth, HttpServletRequest request)
 			throws CustomizationException, InvalidInputException, ResourceNotFoundException {
 		logger.info("Send updated record to backend metadata server:" + ediid);
 		processRequest(request, serviceAuth);
-		if (!serviceAuth.equals(authorization))
-			throw new InternalAuthenticationServiceException("Service is not authorized to access this record.");
+		
 		draftRepo.putDraft(ediid, params);
 
 	}
 
 	public void processRequest(HttpServletRequest request, String serviceAuth) {
 		String authTag = request.getHeader("Authorization");
-		if(authTag == null )throw new InternalAuthenticationServiceException("No Authorized to access the record.");
-		if (!serviceAuth.equals(authorization) || serviceAuth == null )
+		if (authTag == null)
+			throw new InternalAuthenticationServiceException("No Authorized to access the record.");
+
+		if (serviceAuth == null || !serviceAuth.contains("Bearer"))
+			throw new InternalAuthenticationServiceException(
+					"Appropriate token value is not provided, denied access to this record.");
+		serviceAuth = serviceAuth.replace("Bearer", "").trim();
+		if (!serviceAuth.equals(authorization))
 			throw new InternalAuthenticationServiceException("Token is not authorized, denied access to this record.");
 	}
+
 	/**
 	 * If there is an internal error due to certain functions failue this is called.
+	 * 
 	 * @param ex
 	 * @param req
 	 * @return
@@ -159,6 +168,7 @@ public class DraftController {
 
 	/**
 	 * If record is not available in the database
+	 * 
 	 * @param ex
 	 * @param req
 	 * @return
@@ -172,6 +182,7 @@ public class DraftController {
 
 	/**
 	 * If input is not of allowed format
+	 * 
 	 * @param ex
 	 * @param req
 	 * @return
@@ -185,6 +196,7 @@ public class DraftController {
 
 	/**
 	 * Some generic exception thrown by service
+	 * 
 	 * @param ex
 	 * @param req
 	 * @return
@@ -198,6 +210,7 @@ public class DraftController {
 
 	/**
 	 * If there is any runtime error
+	 * 
 	 * @param ex
 	 * @param req
 	 * @return
@@ -239,16 +252,17 @@ public class DraftController {
 		logger.error("Unauthorized user or token : " + req.getRequestURI() + "\n  " + ex.getMessage(), ex);
 		return new ErrorInfo(req.getRequestURI(), 401, "Untauthorized token used to acces the service.");
 	}
-	
+
 	@ExceptionHandler(UnsatisfiedServletRequestParameterException.class)
-	public void onErr400(@RequestHeader(value="Authorization", required=false) String ETag, UnsatisfiedServletRequestParameterException ex) {
-	    if(ETag == null) {
-	    	logger.error("If Authorization header is not provided, throw UnAuthorized user exception");
-	    	throw new InternalAuthenticationServiceException("Not authorized to access this service.");
-	        // Ok the problem was ETag Header : give your informational message
-	    } else {
-	        // It is another error 400  : simply say request is incorrect or use ex
-	    
-	    }
+	public void onErr400(@RequestHeader(value = "Authorization", required = false) String ETag,
+			UnsatisfiedServletRequestParameterException ex) {
+		if (ETag == null) {
+			logger.error("If Authorization header is not provided, throw UnAuthorized user exception");
+			throw new InternalAuthenticationServiceException("Not authorized to access this service.");
+			// Ok the problem was ETag Header : give your informational message
+		} else {
+			// It is another error 400 : simply say request is incorrect or use ex
+
+		}
 	}
 }

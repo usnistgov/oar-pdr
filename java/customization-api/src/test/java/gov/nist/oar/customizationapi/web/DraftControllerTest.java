@@ -128,7 +128,7 @@ public class DraftControllerTest {
 		Mockito.doReturn(record).when(draft).getDraft(ediid, "");
 
 		HttpHeaders httpHeaders = new HttpHeaders();
-		httpHeaders.add("Authorization", "mysecret");
+		httpHeaders.add("Authorization", "Bearer mysecret");
 		MockHttpServletResponse response = mvc
 				.perform(get("/pdr/lp/draft/" + ediid).headers(httpHeaders).accept(MediaType.APPLICATION_JSON))
 				.andReturn().getResponse();
@@ -149,7 +149,7 @@ public class DraftControllerTest {
 		Mockito.doReturn(false).when(draft).deleteDraft(ediid);
 
 		HttpHeaders httpHeaders = new HttpHeaders();
-		httpHeaders.add("Authorization", "mysecret");
+		httpHeaders.add("Authorization", "Bearer mysecret");
 		MockHttpServletResponse response = mvc
 				.perform(delete("/pdr/lp/draft/" + ediid).headers(httpHeaders).accept(MediaType.APPLICATION_JSON))
 				.andReturn().getResponse();
@@ -165,7 +165,7 @@ public class DraftControllerTest {
 
 		Mockito.doNothing().when(draft).putDraft(ediid, Document.parse(changedata));
 		HttpHeaders httpHeaders = new HttpHeaders();
-		httpHeaders.add("Authorization", "mysecret");
+		httpHeaders.add("Authorization", "Bearer mysecret");
 		MockHttpServletResponse response = mvc
 				.perform(put("/pdr/lp/draft/" + ediid).contentType(MediaType.APPLICATION_JSON).content(changedata)
 						.headers(httpHeaders).accept(MediaType.APPLICATION_JSON))
