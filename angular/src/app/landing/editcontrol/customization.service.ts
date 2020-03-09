@@ -127,6 +127,7 @@ export class WebCustomizationService extends CustomizationService {
             (httperr) => {   // this will be an HttpErrorResponse
                 let msg = "";
                 let err = null;
+                console.log("httperr.status", httperr.status);
                 if (httperr.status == 401) {
                     msg += "Authorization Error (401)";
                     // TODO: can we get at body of message when an error occurs?
@@ -282,9 +283,9 @@ export class InMemCustomizationService extends CustomizationService {
      * @param resmd      the original resource metadata 
      */
     constructor(resmd : Object) {
-        super((resmd['ediid']) ? resmd['ediid'] : "resmd");
+        super((resmd && resmd['ediid']) ? resmd['ediid'] : "resmd");
         this.origmd= resmd;
-        this.resmd = JSON.parse(JSON.stringify(resmd))
+        this.resmd = (resmd == null) ? null : JSON.parse(JSON.stringify(resmd))
     }
 
     /**

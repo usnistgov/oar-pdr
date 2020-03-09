@@ -35,7 +35,6 @@ export class ContactComponent implements OnInit {
     ngOnInit() {
         if ("hasEmail" in this.record['contactPoint'])
             this.isEmail = true;
-        console.log("record.contactPoint.hasEmail",this.record['contactPoint'].hasEmail);
     }
 
     getFieldStyle() {

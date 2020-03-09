@@ -51,7 +51,6 @@ export class DownloadService {
                 'Content-Type': 'application/json'
             })
         };
-
         return this.http.post(url, body, httpOptions);
     }
 

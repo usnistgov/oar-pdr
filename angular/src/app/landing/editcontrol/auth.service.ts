@@ -16,7 +16,7 @@ import { UserDetails } from './interfaces';
  * This interface is used for receiving this information from the customization 
  * web service. 
  */
-interface AuthInfo {
+export interface AuthInfo {
     /**
      * the user identifier
      */
@@ -339,10 +339,11 @@ export class MockAuthService extends AuthService {
      */
     public authorizeEditing(resid: string, nologin: boolean = false): Observable<CustomizationService> {
         // simulate logging in with a redirect 
-        if (!this.userDetails) this.loginUser();
-        if (!this.resdata[resid])
+        if (!this.userDetails){ 
+          this.loginUser();}
+        if (!this.resdata[resid]){
             return of<CustomizationService>(null);
-
+        }
         return of<CustomizationService>(new InMemCustomizationService(this.resdata[resid]));
     }
 

@@ -114,7 +114,7 @@ export class EditControlComponent implements OnInit, OnChanges {
     }
 
     ngOnInit() {
-      this._editmode = this.EDIT_MODES.PREVIEW_MODE;
+        this.editMode = this.EDIT_MODES.PREVIEW_MODE;
         this.ngOnChanges();
         this.statusbar.showLastUpdate(this.editMode)
         this.edstatsvc._watchRemoteStart((remoteObj) => {
@@ -151,7 +151,6 @@ export class EditControlComponent implements OnInit, OnChanges {
         var _mdrec = this.mdrec;
         if (this._custsvc) {
             // already authorized
-            console.log("already authorized. Start editing...");
             this.editMode = this.EDIT_MODES.EDIT_MODE;
             this.statusbar._setEditMode(this.editMode);
             this.statusbar.showLastUpdate(this.editMode);
@@ -162,6 +161,7 @@ export class EditControlComponent implements OnInit, OnChanges {
             (successful) => {
               // User authorized
               if(successful){
+                console.log("Loading draft...");
                 this.statusbar.showMessage("Loading draft...", true)
                 this.mdupdsvc.loadDraft().subscribe(
                     (md) => {
@@ -180,6 +180,7 @@ export class EditControlComponent implements OnInit, OnChanges {
               }
             },
             (err) => {
+              console.log("Authentication failed.");
               this.statusbar.showMessage("Authentication failed.", false);
               this.statusbar._setEditMode(this.EDIT_MODES.PREVIEW_MODE);
             }

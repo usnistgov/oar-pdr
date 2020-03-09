@@ -152,7 +152,9 @@ export class LandingComponent implements OnInit, OnChanges {
         this.editEnabled = cfg.get("editEnabled", false) as boolean;
     }
 
-    ngOnInit() { }
+    ngOnInit() { 
+      // console.log('this.record', this.record);
+    }
 
     ngOnChanges() {
         if (!this.ediid && this.recordLoaded())

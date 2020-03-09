@@ -6,7 +6,6 @@ import { UserMessageService } from '../../frame/usermessage.service';
 import { CustomizationService } from './customization.service';
 import { NerdmRes } from '../../nerdm/nerdm';
 import { Observable, of, throwError, Subscriber } from 'rxjs';
-import { EditStatusComponent } from './editstatus.component';
 import { UpdateDetails } from './interfaces';
 import { AuthService, WebAuthService } from './auth.service';
 import { LandingConstants } from '../constants';
@@ -80,6 +79,7 @@ export class MetadataUpdateService {
     }
     _setOriginalMetadata(md: NerdmRes) {
         this.originalRec = md;
+        this.mdres.next(md as NerdmRes);
     }
 
     _setCustomizationService(svc: CustomizationService): void {
@@ -312,7 +312,6 @@ export class MetadataUpdateService {
                 console.error("Attempted to update without authorization!  Ignoring update.");
                 return;
             }
-
             this.custsvc.getDraftMetadata().subscribe(
                 (res) => {
                     this.mdres.next(res as NerdmRes);

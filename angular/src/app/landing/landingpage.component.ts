@@ -46,6 +46,7 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
     citetext: string = null;
     citationVisible: boolean = false;
     editEnabled: boolean = false;
+    _showData: boolean = false;
 
     /**
      * create the component.
@@ -74,6 +75,8 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
                 if (md && md != this.md) {
                     this.md = md as NerdmRes;
                 }
+
+                this.showData();
             }
         );
     }
@@ -90,18 +93,10 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
         // server; on successful authentication, the server can redirect the browser back to this
         // landing page with editing turned on.  
         if (this.edstatsvc.editingEnabled()) {
-            
-            this.route.queryParamMap.subscribe(queryParams => {
-                let param = queryParams.get("editmode")
-                console.log("editmode url param:", param);
-                // for new workflow, no need to check parameter, will call startEditing() always
-                // if (param) {
-                    console.log("Returning from authentication redirection (editmode=" + param + ")");
-                    // Need to pass reqID (resID) because the resID in editControlComponent
-                    // has not been set yet and the startEditing function relies on it.
-                    this.edstatsvc.startEditing(this.reqId);
-
-            })
+          // Somehow this variable has too init true otherwise the whole page won't display even it's
+          // set to true later.
+            this._showData = true;
+            this.edstatsvc.startEditing(this.reqId);
         } else {
             // If edit is not enabled, retreive the (unedited) metadata
             this.mdserv.getMetadata(this.reqId).subscribe(
@@ -136,6 +131,14 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
         if (this.md && this.inBrowser) {
             window.history.replaceState({}, '', '/od/id/' + this.reqId);
         }
+    }
+
+    showData() : void{
+      if(this.md != null){
+        this._showData = true;
+      }else{
+        this._showData = false;
+      }
     }
 
     /**
