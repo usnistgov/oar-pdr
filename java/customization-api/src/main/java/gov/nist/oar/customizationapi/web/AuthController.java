@@ -75,14 +75,14 @@ public class AuthController {
 	@RequestMapping(value = { "_perm/{ediid}" }, method = RequestMethod.GET, produces = "application/json")
 	@ApiOperation(value = "", nickname = "Authorize user to edit the record", notes = "Resource returns a JSON if Authorized user.")
 
-	public UserToken token(Authentication authentication, @PathVariable @Valid String ediid)
+	public UserToken token( Authentication authentication,@PathVariable @Valid String ediid)
 			throws UnAuthorizedUserException, CustomizationException, UnAuthenticatedUserException, BadGetwayException {
-		
+//		Authentication authentication = null;
 		AuthenticatedUserDetails userDetails = null;
 		try {
-			if (authentication == null)
-			{authentication = SecurityContextHolder.getContext().getAuthentication();}
-			if (authentication == null)
+//			if (authentication == null)
+//			{authentication = SecurityContextHolder.getContext().getAuthentication();}
+			if (authentication == null || authentication.getPrincipal().equals("anonymousUser"))
 				throw new UnAuthenticatedUserException(" User is not authenticated to access this resource.");
 			logger.info("Get the token for authenticated user.");
 			userDetails = uExtract.getUserDetails();
@@ -107,12 +107,12 @@ public class AuthController {
 	 */
 
 	@RequestMapping(value = { "/_logininfo" }, method = RequestMethod.GET, produces = "application/json")
-	public ResponseEntity<AuthenticatedUserDetails> login(HttpServletResponse response) throws IOException {
+	public ResponseEntity<AuthenticatedUserDetails> login(HttpServletResponse response, Authentication authentication) throws IOException {
 		logger.info("Get the authenticated user info.");
-		final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+//		final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 		
 		if (authentication == null) {
-			response.sendRedirect("/saml/login");
+			response.sendRedirect("/customization/saml/login");
 		} else {
 			return new ResponseEntity<>(uExtract.getUserDetails(), HttpStatus.OK);
 		}
