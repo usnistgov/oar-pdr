@@ -62,7 +62,7 @@ DOWNLOADABLEFILE_TYPE = NERDPUB_PRE + ":DownloadableFile"
 SUBCOLL_TYPE = NERDPUB_PRE + ":Subcollection"
 NERDM_CONTEXT = "https://data.nist.gov/od/dm/nerdm-pub-context.jsonld"
 DISTSERV = "https://data.nist.gov/od/ds/"
-DEF_MERGE_CONV = "midas1"
+DEF_MERGE_CONV = "midas0"
 
 ARK_NAAN = NIST_ARK_NAAN
 

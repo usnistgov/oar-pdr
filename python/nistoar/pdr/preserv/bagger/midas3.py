@@ -545,7 +545,7 @@ class MIDASMetadataBagger(SIPBagger):
         self.datafiles = self.registered_files()
         
 
-    def apply_pod(self, pod, validate=True, force=False):
+    def apply_pod(self, pod, validate=True, force=False, lock=True):
         """
         update the SIP with an updated POD record.  This will look for changes to 
         the POD compared to the one currently cached to the bag and applies those 
@@ -558,7 +558,20 @@ class MIDASMetadataBagger(SIPBagger):
         :param bool   validate:  if True (default) validate that the incoming POD 
                                  is a compliant POD document; if False, the POD 
                                  record is assumed to be compliant.
+        :param bool      force:  if True, apply POD regardless of whether the POD
+                                 has changed.
+        :param bool       lock:  if True (default), acquire a lock before applying
+                                 the pod record.
         """
+        if lock:
+            self.ensure_filelock()
+            with self.lock:
+                self._apply_pod(pod, validate, force)
+
+        else:
+            self._apply_pod(pod, validate, force)
+
+    def _apply_pod(self, pod, validate=True, force=False):
         if not isinstance(pod, (str, unicode, Mapping)):
             raise NERDTypeError("dict", type(pod), "POD Dataset")
         self.ensure_base_bag()
@@ -584,7 +597,7 @@ class MIDASMetadataBagger(SIPBagger):
             return
 
         # updated will contain the filepaths for components that were updated
-        updated = self.bagbldr.update_from_pod(pod, True, True)
+        updated = self.bagbldr.update_from_pod(pod, True, True, force)
 
         # we're done; update the cached NERDm metadata and the data file map
         if not self.resmd or updated['updated'] or updated['added'] or updated['deleted']:
@@ -887,7 +900,8 @@ class MIDASMetadataBagger(SIPBagger):
             return out
 
         def add(self, location, filepath):
-            self.files[filepath] = location
+            if filepath not in self.files:
+                self.files[filepath] = location
 
         def _unregister(self):
             if self.id in self.examiners:
