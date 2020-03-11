@@ -101,6 +101,19 @@ class TestCustomClient(test.TestCase):
         with self.assertRaises(exc.IDNotFound):
             self.client.get_draft("pdr2210")
 
+    def test_draft_exists(self):
+        self.assertTrue(not self.client.draft_exists("pdr2210"))
+
+        draft = self.client.create_draft({'ediid': 'ark:/88434/pdr2210', "foo": "bar"})
+        self.assertEqual(draft, {
+            'ediid': 'ark:/88434/pdr2210', "foo": "bar", "_editStatus": "in progress"
+        })
+
+        self.assertTrue(self.client.draft_exists("pdr2210"))
+        
+        self.client.delete_draft('ark:/88434/pdr2210')
+        self.assertTrue(not self.client.draft_exists("pdr2210"))
+
         
 
 if __name__ == '__main__':

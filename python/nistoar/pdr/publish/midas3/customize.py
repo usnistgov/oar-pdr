@@ -84,6 +84,7 @@ class CustomizationServiceClient(object):
         """
         return the draft NERDm record associated with the given ID
         """
+        svcnm = self._service_name
         id = self._arkprfx.sub('', id)
         args = ""
         if updates_only:
@@ -101,6 +102,7 @@ class CustomizationServiceClient(object):
         """
         delete the current draft previously created with the given identifier
         """
+        svcnm = self._service_name
         id = self._arkprfx.sub('', id)
         try:
             self.log.debug("Deleting draft NERDm record from customization service for id="+id)
@@ -127,6 +129,7 @@ class CustomizationServiceClient(object):
 
         :return dict: the NERDm record that was set up as a draft (based on the given record) 
         """
+        svcnm = self._service_name
         if 'ediid' not in nerdm:
             raise ValueError("'ediid' property not in input data (is this a NERDm record?)")
         id = self._arkprfx.sub('', nerdm['ediid'])
@@ -141,4 +144,23 @@ class CustomizationServiceClient(object):
         except requests.RequestException as ex:
             raise PDRServerError(svcnm, id, cause=ex)
 
+    def draft_exists(self, id):
+        svcnm = self._service_name
+        id = self._arkprfx.sub('', id)
+        try:
+            resp = requests.head(self.baseurl + id, headers=self._headers())
+            if resp.status_code == 404:
+                return False
+            if resp.status_code == 200:
+                return True
+
+            if resp.status_code >= 500:
+                raise PDRServerError(svcnm, relurl, resp.status_code, resp.reason)
+            elif resp.status_code == 401:
+                raise PDRServiceAuthFailure(svcnm, id, resp.reason)
+            elif resp.status_code >= 400:
+                raise PDRServiceError(svcnm, relurl, resp.status_code, resp.reason)
+
+        except requests.RequestException as ex:
+            raise PDRServerError(svcnm, id, cause=ex)
 
