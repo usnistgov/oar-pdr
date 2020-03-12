@@ -412,9 +412,9 @@ class MIDAS3PublishingService(PublishSystem):
         # key maps to the resource-level metadata (which can include none-filepath
         # components.
 
-        updatable = self.cfg.get('update',{}).get('updatable_properties',[])
-        mergeconv = self.cfg.get('customization_service', {}).get('merge_convention',
-                                                                  DEF_MERGE_CONV)
+        custcfg = self.cfg.get('customization_service', {})
+        updatable = custcfg.get('updatable_properties',[])
+        mergeconv = custcfg.get('merge_convention', DEF_MERGE_CONV)
 
         def _filter_props(fromdata, todata, parent=''):
             # fromdata and todata are either Mapping objects or lists

@@ -31,7 +31,7 @@ def setUpModule():
 #    logging.basicConfig(filename=os.path.join(tmpdir(),"test_builder.log"),
 #                        level=logging.INFO)
     rootlog = logging.getLogger()
-    loghdlr = logging.FileHandler(os.path.join(tmpdir(),"test_bagger.log"))
+    loghdlr = logging.FileHandler(os.path.join(tmpdir(),"test_publishing.log"))
     loghdlr.setLevel(logging.DEBUG)
     loghdlr.setFormatter(logging.Formatter(bldr.DEF_BAGLOG_FORMAT))
     rootlog.addHandler(loghdlr)
@@ -80,9 +80,7 @@ class TestMIDAS3PublishingServiceDraft(test.TestCase):
         'customization_service': {
             'auth_key': 'SECRET',
             'service_endpoint': custbaseurl,
-            'merge_convention': 'midas1'
-        },
-        'update': {
+            'merge_convention': 'midas1',
             'updatable_properties': [ "title", "authors", "_editStatus" ]
         }
     }
