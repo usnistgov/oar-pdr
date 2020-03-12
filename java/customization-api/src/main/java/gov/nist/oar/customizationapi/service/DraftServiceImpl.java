@@ -1,9 +1,6 @@
 package gov.nist.oar.customizationapi.service;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.List;
+import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -14,17 +11,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.mongodb.MongoException;
-import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.Filters;
-import com.mongodb.client.model.Projections;
-import com.mongodb.client.model.UpdateOptions;
 import com.mongodb.client.result.DeleteResult;
 
 import gov.nist.oar.customizationapi.config.MongoConfig;
 import gov.nist.oar.customizationapi.exceptions.CustomizationException;
 import gov.nist.oar.customizationapi.exceptions.InvalidInputException;
-import gov.nist.oar.customizationapi.helpers.AuthenticatedUserDetails;
 //import gov.nist.oar.customizationapi.helpers.UserDetailsExtractor;
 import gov.nist.oar.customizationapi.repositories.DraftService;
 
@@ -79,11 +72,59 @@ public class DraftServiceImpl implements DraftService {
 			if (view.equalsIgnoreCase("updates"))
 				return mconfig.getChangeCollection().find(Filters.eq("ediid", recordid)).first();
 
-			return mconfig.getRecordCollection().find(Filters.eq("ediid", recordid)).first();
+			return mergeDataOnTheFly(recordid);
+			//return mconfig.getRecordCollection().find(Filters.eq("ediid", recordid)).first();
 		} catch (MongoException exp) {
 			logger.error("Error while putting updated data in records db" + exp.getMessage());
 			throw new CustomizationException("Error updating records (database)" + exp.getMessage());
 
+		}
+
+	}
+	
+	
+	/**
+	 * To update the record in the cached database
+	 * 
+	 * @param recordid an ediid of the record
+	 * @param update   json to update
+	 * @return Return true if data is updated successfully.
+	 * @throws CustomizationException
+	 */
+	public Document mergeDataOnTheFly(String recordid) throws CustomizationException {
+		try {
+
+			if (!checkRecordInCache(recordid, mconfig.getRecordCollection()))
+				throw new CustomizationException("Record not found in Cache.");
+
+			Document doc = mconfig.getRecordCollection().find(Filters.eq("ediid", recordid)).first();
+
+			Document tempUpdateOp = null;
+			if (checkRecordInCache(recordid, mconfig.getChangeCollection())) {
+				tempUpdateOp = mconfig.getChangeCollection().find(Filters.eq("ediid", recordid)).first();
+				if (tempUpdateOp.containsKey("_id"))
+					tempUpdateOp.remove("_id");
+
+			}
+
+			if (tempUpdateOp != null) {
+				for (Entry<String, Object> entry : tempUpdateOp.entrySet()) {
+					System.out.println("key:" + entry.getKey());
+					if (doc.containsKey(entry.getKey())) {
+						doc.replace(entry.getKey(), doc.get(entry.getKey()), entry.getValue());
+					}
+					if(entry.getKey().equals("_updateDetails")) {
+						doc.append(entry.getKey(), entry.getValue());
+					}
+
+				}
+			}
+
+			return doc;
+
+		} catch (MongoException ex) {
+			logger.error("Error while update data in cache db" + ex.getMessage());
+			throw new MongoException("Error while putting updated data in cache db." + ex.getMessage());
 		}
 
 	}

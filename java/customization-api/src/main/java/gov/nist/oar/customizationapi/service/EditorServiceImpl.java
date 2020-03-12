@@ -1,20 +1,5 @@
 package gov.nist.oar.customizationapi.service;
 
-import org.bson.Document;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import com.mongodb.client.MongoCollection;
-
-import gov.nist.oar.customizationapi.config.MongoConfig;
-import gov.nist.oar.customizationapi.exceptions.CustomizationException;
-import gov.nist.oar.customizationapi.exceptions.InvalidInputException;
-import gov.nist.oar.customizationapi.helpers.JSONUtils;
-import gov.nist.oar.customizationapi.repositories.EditorService;
-
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
@@ -28,23 +13,23 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.stereotype.Service;
 
-import com.mongodb.Block;
 import com.mongodb.MongoException;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.Projections;
 import com.mongodb.client.model.UpdateOptions;
-import com.mongodb.client.model.changestream.ChangeStreamDocument;
 import com.mongodb.client.result.DeleteResult;
 
+import gov.nist.oar.customizationapi.config.MongoConfig;
 import gov.nist.oar.customizationapi.exceptions.CustomizationException;
+import gov.nist.oar.customizationapi.exceptions.InvalidInputException;
 import gov.nist.oar.customizationapi.helpers.AuthenticatedUserDetails;
-
+import gov.nist.oar.customizationapi.helpers.JSONUtils;
 import gov.nist.oar.customizationapi.helpers.UserDetailsExtractor;
+import gov.nist.oar.customizationapi.repositories.EditorService;
 @Service
 public class EditorServiceImpl implements EditorService {
 	private Logger logger = LoggerFactory.getLogger(EditorServiceImpl.class);
@@ -54,6 +39,9 @@ public class EditorServiceImpl implements EditorService {
 	
 	@Autowired
 	UserDetailsExtractor userDetailsExtractor;
+	
+	@Value("${nist.arkid:testid}")
+	String nistarkid;
 
 	@Override
 	public Document patchRecord(String param, String recordid) throws CustomizationException, InvalidInputException {
@@ -92,7 +80,7 @@ public class EditorServiceImpl implements EditorService {
 	 * @return boolean
 	 * @throws CustomizationException
 	 */
-	private Document updateChangesHelper(String recordid, Document update) throws CustomizationException {
+	private Document updateChangesHelper(String recordid, Document update) throws CustomizationException, ResourceNotFoundException {
 
 		if (!this.checkRecordInCache(recordid, mconfig.getChangeCollection()))
 			this.putDataInCacheOnlyChanges(update, mconfig.getChangeCollection());
@@ -177,6 +165,9 @@ public class EditorServiceImpl implements EditorService {
 				logger.error("Input record id is not valid,, check input parameters.");
 				throw new IllegalArgumentException("check input parameters.");
 			}
+			
+			if(recordid.startsWith("mds"))
+				recordid = "ark:/"+this.nistarkid+"/"+recordid;
 			long count = mcollection.countDocuments(Filters.eq("ediid", recordid));
 			return count != 0;
 		} catch (MongoException e) {
@@ -210,13 +201,12 @@ public class EditorServiceImpl implements EditorService {
 	 * @return Return true if data is updated successfully.
 	 * @throws CustomizationException
 	 */
-	public Document mergeDataOnTheFly(String recordid) throws CustomizationException {
+	public Document mergeDataOnTheFly(String recordid) throws CustomizationException, ResourceNotFoundException {
 		try {
-			Date now = new Date();
-			List<Document> updateDetails = new ArrayList<Document>();
+
 
 			if (!checkRecordInCache(recordid, mconfig.getRecordCollection()))
-				throw new CustomizationException("Record not found in Cache.");
+				throw new ResourceNotFoundException("Record not found in Cache.");
 
 			Document doc = mconfig.getRecordCollection().find(Filters.eq("ediid", recordid)).first();
 
@@ -230,7 +220,7 @@ public class EditorServiceImpl implements EditorService {
 
 			if (tempUpdateOp != null) {
 				for (Entry<String, Object> entry : tempUpdateOp.entrySet()) {
-					System.out.println("key:" + entry.getKey());
+//					System.out.println("key:" + entry.getKey());
 					if (doc.containsKey(entry.getKey())) {
 						doc.replace(entry.getKey(), doc.get(entry.getKey()), entry.getValue());
 					}
@@ -257,8 +247,12 @@ public class EditorServiceImpl implements EditorService {
 	 * @param mcollection MongoDB Collection
 	 * @return true if the record is deleted successfully.
 	 */
-	public boolean deleteRecordChangesInCache(String recordid) {
+	public boolean deleteRecordChangesInCache(String recordid) throws ResourceNotFoundException {
 		try {
+			
+			if (!checkRecordInCache(recordid, mconfig.getChangeCollection()))
+				throw new ResourceNotFoundException("Record not found in Cache.");
+			
 			boolean deleted = false;
 			Document d = mconfig.getChangeCollection().find(Filters.eq("ediid", recordid)).first();
 

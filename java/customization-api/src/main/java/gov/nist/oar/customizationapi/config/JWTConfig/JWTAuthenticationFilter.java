@@ -2,7 +2,7 @@ package gov.nist.oar.customizationapi.config.JWTConfig;
 
 import java.io.IOException;
 import java.text.ParseException;
-import java.util.Enumeration;
+//import java.util.Enumeration;
 import java.util.HashMap;
 
 import javax.servlet.FilterChain;
@@ -64,16 +64,16 @@ public class JWTAuthenticationFilter extends AbstractAuthenticationProcessingFil
 		uExtract = webApplicationContext.getBean(UserDetailsExtractor.class);
 
 		
-		Enumeration<String> headerNames = request.getHeaderNames();
-
-	    if (headerNames != null) {
-	            while (headerNames.hasMoreElements()) {
-	                    System.out.println("1 ********** Header : " + request.getHeader(headerNames.nextElement()));
-	                    System.out.println("2 ********** Header : " + request.getHeader(request.getHeader(headerNames.nextElement())));
-	            }
-	    }
-		logger.info("Attempt to check token and  authorized token validity :"
-				+ request.getHeader("authorization")+":: %#%$#%#$#$ ::"+request.getHeader("testheader")+ ":: "+request.getRequestURI());
+//		Enumeration<String> headerNames = request.getHeaderNames();
+//
+//	    if (headerNames != null) {
+//	            while (headerNames.hasMoreElements()) {
+//	                    System.out.println("1 ********** Header : " + request.getHeader(headerNames.nextElement()));
+//	                    System.out.println("2 ********** Header : " + request.getHeader(request.getHeader(headerNames.nextElement())));
+//	            }
+//	    }
+//		logger.info("Attempt to check token and  authorized token validity :"
+//				+ request.getHeader("authorization")+":: %#%$#%#$#$ ::"+request.getHeader("testheader")+ ":: "+request.getRequestURI());
 		String token = request.getHeader(Header_Authorization_Token);
 		if (token == null) {
 			logger.error("Unauthorized user: Token is null.");
@@ -84,6 +84,7 @@ public class JWTAuthenticationFilter extends AbstractAuthenticationProcessingFil
 
 		token = token.replaceAll(Token_starter, "").trim();
 		String userId = uExtract.getUserDetails().getUserEmail();
+		//** Make sure to check this code whenever there are api endpoints changes.
 		String recordId = uExtract.getUserRecord(request.getRequestURI());
 		try {
 

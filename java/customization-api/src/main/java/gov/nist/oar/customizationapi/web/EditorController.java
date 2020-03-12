@@ -35,6 +35,7 @@ import org.springframework.web.client.RestClientException;
 import gov.nist.oar.customizationapi.exceptions.CustomizationException;
 import gov.nist.oar.customizationapi.exceptions.ErrorInfo;
 import gov.nist.oar.customizationapi.exceptions.InvalidInputException;
+import gov.nist.oar.customizationapi.exceptions.UnAuthorizedUserException;
 import gov.nist.oar.customizationapi.repositories.EditorService;
 //import gov.nist.oar.customizationapi.repositories.UpdateRepository;
 import gov.nist.oar.customizationapi.service.ResourceNotFoundException;
@@ -96,7 +97,7 @@ public class EditorController {
 	 */
 	@RequestMapping(value = { "{ediid}" }, method = RequestMethod.GET, produces = "application/json")
 	@ApiOperation(value = ".", nickname = "Access editable Record", notes = "Resource returns a record if it is editable and user is authenticated.")
-	public Document getRecord(@PathVariable @Valid String ediid) throws CustomizationException {
+	public Document getRecord(@PathVariable @Valid String ediid) throws CustomizationException, ResourceNotFoundException {
 		logger.info("Access the record to be edited by ediid " + ediid);
 		return uRepo.getRecord(ediid);
 	}
@@ -110,7 +111,7 @@ public class EditorController {
 	 */
 	@RequestMapping(value = { "{ediid}" }, method = RequestMethod.DELETE, produces = "application/json" )
 	@ApiOperation(value = ".", nickname = "Access editable Record", notes = "Resource returns a record if it is editable and user is authenticated.")
-	public boolean deleteChanges(@PathVariable @Valid String ediid) throws CustomizationException {
+	public boolean deleteChanges(@PathVariable @Valid String ediid) throws CustomizationException, ResourceNotFoundException {
 		logger.info("Delete the changes made from client side of the record respresented by " + ediid);
 		return uRepo.deleteRecordChanges(ediid);
 	}
@@ -128,7 +129,7 @@ public class EditorController {
 	}
 
 	/**
-	 * 
+	 * Resource not found exception
 	 * @param ex
 	 * @param req
 	 * @return
@@ -141,7 +142,7 @@ public class EditorController {
 	}
 
 	/**
-	 * 
+	 * Invalid input exception
 	 * @param ex
 	 * @param req
 	 * @return
@@ -154,7 +155,7 @@ public class EditorController {
 	}
 
 	/**
-	 * 
+	 * Internal server error
 	 * @param ex
 	 * @param req
 	 * @return
@@ -195,6 +196,22 @@ public class EditorController {
 		return new ErrorInfo(req.getRequestURI(), 502, "Can not connect to backend server");
 	}
 
+	
+
+	/**
+	 * Exception handling if user is not authorized
+	 * 
+	 * @param ex
+	 * @param req
+	 * @return
+	 */
+	@ExceptionHandler(UnAuthorizedUserException.class)
+	@ResponseStatus(HttpStatus.UNAUTHORIZED)
+	public ErrorInfo handleStreamingError(UnAuthorizedUserException ex, HttpServletRequest req) {
+		logger.info("There user requesting edit access is not authorized : " + req.getRequestURI() + "\n  "
+				+ ex.getMessage());
+		return new ErrorInfo(req.getRequestURI(), 401, "UnauthroizedUser", req.getMethod());
+	}
 //	/**
 //	 * Handles internal authentication service exception if user is not authorized
 //	 * or token is expired

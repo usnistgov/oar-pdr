@@ -58,14 +58,12 @@ public class UserDetailsExtractor {
 	public String getUserRecord(String requestURI) {
 		String recordId = "";
 		try {
-			recordId = requestURI.split("/draft/")[1];
+			recordId = requestURI.split("/editor/")[1];
 		} catch (ArrayIndexOutOfBoundsException exp) {
-			try {
-				recordId = requestURI.split("/savedrecord/")[1];
-			} catch (Exception ex) {
-				logger.error("No record id is extracted fro request URL so empty string is returned");
-				recordId = "";
-			}
+
+			logger.error("No record id is extracted from request URL so empty string is returned");
+			recordId = "";
+
 		}
 		return recordId;
 	}

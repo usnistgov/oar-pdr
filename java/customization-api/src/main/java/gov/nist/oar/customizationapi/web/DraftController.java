@@ -25,8 +25,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.InternalAuthenticationServiceException;
-//import org.springframework.security.authentication.InternalAuthenticationServiceException;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.UnsatisfiedServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -42,6 +40,7 @@ import org.springframework.web.client.RestClientException;
 import gov.nist.oar.customizationapi.exceptions.CustomizationException;
 import gov.nist.oar.customizationapi.exceptions.ErrorInfo;
 import gov.nist.oar.customizationapi.exceptions.InvalidInputException;
+import gov.nist.oar.customizationapi.exceptions.UnAuthorizedUserException;
 import gov.nist.oar.customizationapi.repositories.DraftService;
 //import gov.nist.oar.customizationapi.repositories.UpdateRepository;
 import gov.nist.oar.customizationapi.service.ResourceNotFoundException;
@@ -132,6 +131,7 @@ public class DraftController {
 	public void createRecord(@PathVariable @Valid String ediid, @Valid @RequestBody Document params,
 			@RequestHeader(value = "Authorization", required = false) String serviceAuth, HttpServletRequest request)
 			throws CustomizationException, InvalidInputException, ResourceNotFoundException {
+
 		logger.info("Send updated record to backend metadata server:" + ediid);
 		processRequest(request, serviceAuth);
 		
@@ -237,7 +237,20 @@ public class DraftController {
 		logger.error("Unexpected failure during request: " + req.getRequestURI() + "\n  " + ex.getMessage(), ex);
 		return new ErrorInfo(req.getRequestURI(), 502, "Can not connect to backend server");
 	}
-
+	/**
+	 * Exception handling if user is not authorized
+	 * 
+	 * @param ex
+	 * @param req
+	 * @return
+	 */
+	@ExceptionHandler(UnAuthorizedUserException.class)
+	@ResponseStatus(HttpStatus.UNAUTHORIZED)
+	public ErrorInfo handleStreamingError(UnAuthorizedUserException ex, HttpServletRequest req) {
+		logger.info("There user requesting edit access is not authorized : " + req.getRequestURI() + "\n  "
+				+ ex.getMessage());
+		return new ErrorInfo(req.getRequestURI(), 401, "UnauthroizedUser", req.getMethod());
+	}
 	/**
 	 * Handles internal authentication service exception if user is not authorized
 	 * or token is expired

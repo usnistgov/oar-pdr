@@ -36,13 +36,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.MethodInvokingFactoryBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.annotation.Order;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.saml.SAMLAuthenticationProvider;
 import org.springframework.security.saml.SAMLBootstrap;
@@ -377,7 +375,7 @@ public class SamlSecurityConfig extends WebSecurityConfigurerAdapter {
 	 * @throws ConfigurationException
 	 */
 	@Bean
-	public FilterChainProxy samlChainFilter() throws ConfigurationException {
+	public FilterChainProxy springSecurityFilter() throws ConfigurationException {
 		logger.info("Setting up different saml filters and endpoints");
 		List<SecurityFilterChain> chains = new ArrayList<>();
 
@@ -743,7 +741,7 @@ public class SamlSecurityConfig extends WebSecurityConfigurerAdapter {
 
 			http.csrf().disable();
 
-			http.addFilterBefore(metadataGeneratorFilter(), ChannelProcessingFilter.class).addFilterAfter(samlChainFilter(),
+			http.addFilterBefore(metadataGeneratorFilter(), ChannelProcessingFilter.class).addFilterAfter(springSecurityFilter(),
 					BasicAuthenticationFilter.class);
 
 			http.authorizeRequests().antMatchers("/error").permitAll().antMatchers("/saml/**").permitAll().anyRequest()

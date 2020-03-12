@@ -12,12 +12,9 @@
  */
 package gov.nist.oar.customizationapi.config;
 
-import java.util.Arrays;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.annotation.Order;
@@ -27,20 +24,12 @@ import org.springframework.security.config.annotation.authentication.builders.Au
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.web.access.channel.ChannelProcessingFilter;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
-import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.CorsConfigurationSource;
-import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import gov.nist.oar.customizationapi.config.JWTConfig.JWTAuthenticationFilter;
 import gov.nist.oar.customizationapi.config.JWTConfig.JWTAuthenticationProvider;
-import gov.nist.oar.customizationapi.config.SAMLConfig.CORSFilter;
 import gov.nist.oar.customizationapi.config.SAMLConfig.SamlSecurityConfig;
-import gov.nist.oar.customizationapi.config.ServiceConfig.ServiceAuthenticationFilter;
-import gov.nist.oar.customizationapi.config.ServiceConfig.ServiceAuthenticationProvider;
 
 /**
  * In this configuration all the end points which need to be secured under
@@ -86,7 +75,7 @@ public class WebSecurityConfig {
 	}
 
 	/**
-	 * Security configuration for authorization end points
+	 * Security configuration for authorization end pointsq
 	 */
 	@Configuration
 	@Order(2)
