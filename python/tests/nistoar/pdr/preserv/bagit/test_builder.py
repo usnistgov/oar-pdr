@@ -237,6 +237,7 @@ class TestBuilder2(test.TestCase):
         self.assertIsNone(self.bag.id)
         self.assertIsNone(self.bag.ediid)
         self.assertTrue(self.bag.logfile_is_connected())
+        self.assertTrue(os.path.exists(os.path.join(self.bag.bagdir,"preserv.log")))
 
     def test_ensure_bag_structure(self):
         self.assertTrue(not os.path.exists(self.bag.bagdir))
@@ -1856,10 +1857,8 @@ class TestBuilder2(test.TestCase):
             nerd = json.load(fd)
         self.assertIn("authors", nerd)
         self.assertIn("foo", nerd)
-        # new default merge policy; title can be overridden!
-        #
-        # self.assertTrue(nerd['title'].startswith("OptSortSph: Sorting "))
-        self.assertEqual(nerd['title'], "A much better title")
+        self.assertTrue(nerd['title'].startswith("OptSortSph: Sorting "))
+        # self.assertEqual(nerd['title'], "A much better title")
         self.assertEqual(nerd["foo"], "bar")
         self.assertEqual(nerd['authors'][0]['givenName'], "Kevin")
         self.assertEqual(nerd['authors'][1]['givenName'], "Jianming")
@@ -1886,10 +1885,7 @@ class TestBuilder2(test.TestCase):
             nerd = json.load(fd)
         self.assertIn("authors", nerd)
         self.assertIn("foo", nerd)
-        # new default merge policy; title can be overridden!
-        #
-        # self.assertTrue(nerd['title'].startswith("OptSortSph: Sorting "))
-        self.assertEqual(nerd['title'], "A much better title")
+        self.assertTrue(nerd['title'].startswith("OptSortSph: Sorting "))
         self.assertEqual(nerd["foo"], "bar")
         self.assertEqual(nerd['authors'][0]['givenName'], "Kevin")
         self.assertEqual(nerd['authors'][1]['givenName'], "Jianming")
