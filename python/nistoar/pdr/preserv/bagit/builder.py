@@ -258,7 +258,7 @@ class BagBuilder(PreservationSystem):
         # builder
         if not logfile:
             logfile = self._logname
-        if not os.path.isabs(logfile):
+        if not os.path.isabs(logfile) and not logfile.startswith(self.bagdir):
             logfile = os.path.join(self.bagdir, logfile)
         for hdlr in self.log.handlers:
             if self._handles_logfile(hdlr, logfile):
@@ -269,7 +269,7 @@ class BagBuilder(PreservationSystem):
         # return True if the handler is set to write to a file with the given
         # name
         return hasattr(handler,'stream') and hasattr(handler.stream, 'name') \
-               and handler.stream.name == logfilepath
+               and os.path.abspath(handler.stream.name) == os.path.abspath(logfilepath)
 
     def _get_log_handler(self, logfilepath):
         if logfilepath not in self._log_handlers:
@@ -301,6 +301,7 @@ class BagBuilder(PreservationSystem):
             logfile = os.path.join(self.bagdir, logfile)
         if self.logfile_is_connected(logfile):
             return
+
         hdlr = self._get_log_handler(logfile)
         hdlr.setLevel(loglevel)
         
@@ -318,8 +319,8 @@ class BagBuilder(PreservationSystem):
                              bag's top directory.  If None, all connected 
                              logfiles will be disconnected.
         """
+        files = self._log_handlers.keys()
         if not logfile:
-            files = self._log_handlers.keys()
             if not files:
                 logfile = os.path.join(self.bagdir, self._logname)
                 if logfile not in self._log_handlers:
