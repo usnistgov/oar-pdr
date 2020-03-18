@@ -63,7 +63,7 @@ class TestMIDAS3PublishingService(test.TestCase):
                                                  self.revdir, self.upldir)
 
     def tearDown(self):
-        self.svc.wait_for_all_workers(300)
+        self.svc._drop_all_workers(300)
         self.tf.clean()
 
     def test_ctor(self):
@@ -78,46 +78,46 @@ class TestMIDAS3PublishingService(test.TestCase):
         bagdir = os.path.join(self.svc.mddir, "mds2-1491")
         self.assertTrue(not os.path.exists(bagdir))
 
-        t = self.svc._get_bagging_thread(self.arkid)
+        w = self.svc._get_bagging_worker(self.arkid)
         self.assertTrue(os.path.exists(bagdir))
-        self.assertEqual(t.working_pod, os.path.join(self.svc.podqdir,"current","mds2-1491.json"))
-        self.assertEqual(t.next_pod, os.path.join(self.svc.podqdir,"next","mds2-1491.json"))
-        self.assertEqual(t.lockfile, os.path.join(self.svc.podqdir,"lock","mds2-1491.lock"))
-        self.assertTrue(not os.path.exists(t.lockfile))
+        self.assertEqual(w.working_pod, os.path.join(self.svc.podqdir,"current","mds2-1491.json"))
+        self.assertEqual(w.next_pod, os.path.join(self.svc.podqdir,"next","mds2-1491.json"))
+        self.assertEqual(w.lockfile, os.path.join(self.svc.podqdir,"lock","mds2-1491.lock"))
+        self.assertTrue(not os.path.exists(w.lockfile))
 
     def test_queue_POD(self):
         bagdir = os.path.join(self.svc.mddir, "mds2-1491")
-        t = self.svc._get_bagging_thread(self.arkid)
+        w = self.svc._get_bagging_worker(self.arkid)
         self.assertTrue(os.path.exists(bagdir))
-        self.assertTrue(not os.path.exists(t.lockfile))
-        self.assertTrue(not os.path.exists(t.working_pod))
-        self.assertTrue(not os.path.exists(t.next_pod))
+        self.assertTrue(not os.path.exists(w.lockfile))
+        self.assertTrue(not os.path.exists(w.working_pod))
+        self.assertTrue(not os.path.exists(w.next_pod))
 
-        pod = utils.read_json(os.path.join(t.bagger.revdatadir, "_pod.json"))
-        t.queue_POD(pod)
-        self.assertTrue(os.path.exists(t.lockfile))
-        self.assertTrue(not os.path.exists(t.working_pod))
-        self.assertTrue(os.path.exists(t.next_pod))
+        pod = utils.read_json(os.path.join(w.bagger.revdatadir, "_pod.json"))
+        w.queue_POD(pod)
+        self.assertTrue(os.path.exists(w.lockfile))
+        self.assertTrue(not os.path.exists(w.working_pod))
+        self.assertTrue(os.path.exists(w.next_pod))
 
-        t.queue_POD(pod)
-        self.assertTrue(os.path.exists(t.lockfile))
-        self.assertTrue(not os.path.exists(t.working_pod))
-        self.assertTrue(os.path.exists(t.next_pod))
+        w.queue_POD(pod)
+        self.assertTrue(os.path.exists(w.lockfile))
+        self.assertTrue(not os.path.exists(w.working_pod))
+        self.assertTrue(os.path.exists(w.next_pod))
 
-        os.rename(t.next_pod, t.working_pod)
-        self.assertTrue(os.path.exists(t.lockfile))
-        self.assertTrue(os.path.exists(t.working_pod))
-        self.assertTrue(not os.path.exists(t.next_pod))
+        os.rename(w.next_pod, w.working_pod)
+        self.assertTrue(os.path.exists(w.lockfile))
+        self.assertTrue(os.path.exists(w.working_pod))
+        self.assertTrue(not os.path.exists(w.next_pod))
 
-        t.queue_POD(pod)
-        self.assertTrue(os.path.isfile(t.lockfile))
-        self.assertTrue(os.path.isfile(t.working_pod))
-        self.assertTrue(os.path.isfile(t.next_pod))
+        w.queue_POD(pod)
+        self.assertTrue(os.path.isfile(w.lockfile))
+        self.assertTrue(os.path.isfile(w.working_pod))
+        self.assertTrue(os.path.isfile(w.next_pod))
 
-        pod = utils.read_json(os.path.join(t.bagger.upldatadir, "_pod.json"))
-        self.assertTrue(os.path.isfile(t.lockfile))
-        self.assertTrue(os.path.isfile(t.working_pod))
-        self.assertTrue(os.path.isfile(t.next_pod))
+        pod = utils.read_json(os.path.join(w.bagger.upldatadir, "_pod.json"))
+        self.assertTrue(os.path.isfile(w.lockfile))
+        self.assertTrue(os.path.isfile(w.working_pod))
+        self.assertTrue(os.path.isfile(w.next_pod))
 
     def test_update_ds_with_pod(self):
         podf = os.path.join(self.revdir, "1491", "_pod.json")
@@ -130,6 +130,44 @@ class TestMIDAS3PublishingService(test.TestCase):
         self.assertTrue(os.path.isfile(os.path.join(bagdir,"metadata","nerdm.json")))
         self.assertTrue(os.path.isdir(os.path.join(bagdir,"metadata","trial1.json")))
         self.assertTrue(os.path.isfile(os.path.join(self.nrddir, self.midasid+".json")))
+
+    def test_drop_worker(self):
+        podf = os.path.join(self.revdir, "1491", "_pod.json")
+        pod = utils.read_json(podf)
+        bagdir = os.path.join(self.svc.mddir, self.midasid)
+
+        self.svc.update_ds_with_pod(pod, False)
+        worker = self.svc._bagging_workers.get(pod['identifier'])
+        self.assertIsNotNone(worker)
+
+        self.svc._drop_bagging_worker(worker)
+        self.assertNotIn(pod['identifier'], self.svc._bagging_workers)
+
+    def test_no_double_logging(self):
+        podf = os.path.join(self.revdir, "1491", "_pod.json")
+        pod = utils.read_json(podf)
+        bagdir = os.path.join(self.svc.mddir, self.midasid)
+
+        self.svc.update_ds_with_pod(pod, False)
+        self.assertTrue(os.path.isdir(bagdir))
+        plog = os.path.join(bagdir, "preserv.log")
+        self.assertTrue(os.path.isfile(plog))
+
+        podf = os.path.join(self.upldir, "1491", "_pod.json")
+        pod = utils.read_json(podf)
+        self.svc.update_ds_with_pod(pod, False)
+        self.assertTrue(os.path.isfile(plog))
+
+        lastline = None
+        line = None
+        doubled = 0
+        with open(plog) as fd:
+            line = fd.readline()
+            if line == lastline:
+                doubled += 1
+            lastline = line
+
+        self.assertEqual(doubled, 0, "replicated log messages detected")
 
     def test_serve_nerdm(self):
         self.assertTrue(not os.path.exists(os.path.join(self.nrddir, "gramma.json")))
@@ -162,15 +200,15 @@ class TestMIDAS3PublishingService(test.TestCase):
 
     def test_process_queue(self):
         bagdir = os.path.join(self.svc.mddir, self.midasid)
-        t = self.svc._get_bagging_thread(self.midasid)
+        w = self.svc._get_bagging_worker(self.midasid)
         self.assertTrue(os.path.exists(bagdir))
-        self.assertTrue(not os.path.exists(t.lockfile))
-        self.assertTrue(not os.path.exists(t.working_pod))
-        self.assertTrue(not os.path.exists(t.next_pod))
+        self.assertTrue(not os.path.exists(w.lockfile))
+        self.assertTrue(not os.path.exists(w.working_pod))
+        self.assertTrue(not os.path.exists(w.next_pod))
 
-        pod = utils.read_json(os.path.join(t.bagger.revdatadir, "_pod.json"))
+        pod = utils.read_json(os.path.join(w.bagger.revdatadir, "_pod.json"))
         self.svc.update_ds_with_pod(pod)
-        pod = utils.read_json(os.path.join(t.bagger.upldatadir, "_pod.json"))
+        pod = utils.read_json(os.path.join(w.bagger.upldatadir, "_pod.json"))
         self.svc.update_ds_with_pod(pod)
         
         time.sleep(0.1)

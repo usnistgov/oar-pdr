@@ -138,6 +138,10 @@ class MIDASMetadataBagger(SIPBagger):
                                  metadata merge rule configurations.  If not
                                  set, the directory will be searched for in 
                                  some possible default locations.
+    :prop nerdm_schema_dir str:  the path to the directory containing JSON schemas
+                                 and related model data, including the NERDm 
+                                 schema.  If not set, the directory will be 
+                                 searched for in possible default locations
     :prop hard_link_data bool (True):  if True, copy data files into the bag 
                                  using a hard link whenever possible.
     :prop update_by_checksum_size_lim int (0):  a size limit in bytes for which 
@@ -146,6 +150,12 @@ class MIDASMetadataBagger(SIPBagger):
     :prop component_merge_convention str ("dev"): the merge convention name to 
                                  use to merge MIDAS-provided component metadata
                                  with the PDR's initial component metadata.
+    :prop id_minter       dict:  data for configuring the ID Minter module
+    :prop enrich_refs bool (False):  if True, enhance the metadata describing 
+                                 references
+    :prop doi_resolver    dict:  data for configuring the DOI resolver client; 
+                                 see bagit.tools.enhance.ReferenceEnhancer for 
+                                 for info.
     """
     BGRMD_FILENAME = "__bagger-midas3.json"
 
@@ -270,6 +280,9 @@ class MIDASMetadataBagger(SIPBagger):
         self.bagbldr = BagBuilder(self.bagparent, self.name,
                                   self.cfg.get('bag_builder', {}),
                                   logger=self.log)
+        if not os.path.exists(self.bagbldr.bagdir):
+            self.bagbldr.disconnect_logfile()
+        
         mergeetc = self.cfg.get('merge_etc', def_merge_etcdir)
         if not mergeetc:
             raise StateException("Unable to locate the merge configuration "+
@@ -298,13 +311,22 @@ class MIDASMetadataBagger(SIPBagger):
             self.log.warning("repo_access not configured; can't support updates!")
 
         # The file-examiner allows for ansynchronous examination of the data files
-        self.fileExaminer = self._AsyncFileExaminer.getFor(self)
+        self.fileExaminer = self._AsyncFileExaminer(self)
 #        self.fileExaminer_mode = "none"
 #        if examine_file_mode:
 #            self.fileExaminer_mode = examine_file_mode
 
         self.ensure_bag_parent_dir()
 
+    def done(self):
+        """
+        signal that no further updates will be made to the bag via this bagger.  
+
+        Currently, this only disconnects the internal BagBuilder's log file inside
+        the bag; thus, it's okay if further updates are made after calling this 
+        function since the BagBuilder will reconnect the log file automatically.
+        """
+        self.bagbldr.disconnect_logfile()
 
     def _mint_id(self, ediid):
         if not self._minter:
@@ -576,6 +598,9 @@ class MIDASMetadataBagger(SIPBagger):
             raise NERDTypeError("dict", type(pod), "POD Dataset")
         self.ensure_base_bag()
 
+        log.info("BagBuilder log has %s formatters:\n%s", len(self.bagbldr.log.handlers),
+                 "\n".join([str(h.stream) for h in self.bagbldr.log.handlers]))
+
         podfile = None
         if not isinstance(pod, Mapping):
             podfile = pod
@@ -616,7 +641,7 @@ class MIDASMetadataBagger(SIPBagger):
         return "_"
         
 
-    def ensure_data_files(self, nodata=True, force=False, examine="async"):
+    def ensure_data_files(self, nodata=True, force=False, examine="async", whendone=None):
         """
         ensure that all data files have up-to-date descriptions and are
         (if nodata=False) copied into the bag.  Only process files that 
@@ -638,6 +663,10 @@ class MIDASMetadataBagger(SIPBagger):
                              examination (because they have been updated since the 
                              last examination) will still be loaded into the 
                              fileExaminer.  
+        :param function whendone:  a function to run after examination finishes.  This 
+                             is ignored if examine is False or None.  This is really 
+                             intended for when examine="async", but it will be run 
+                             if examine="sync", too.  
         """
         if not self.resmd:
             self.ensure_res_metadata()
@@ -671,11 +700,11 @@ class MIDASMetadataBagger(SIPBagger):
         # re-examine the files that have changed.
         if examine == "async":
             self.log.info("Launching file examiner thread")
-            self.fileExaminer.launch()
+            self.fileExaminer.launch(whendone=whendone)
         elif examine:
             # do it now!
             self.log.info("Running file examiner synchronously")
-            self.fileExaminer.run()
+            self.fileExaminer.run(whendone=whendone)
         else:
             self._check_checksum_files()
 
@@ -703,18 +732,39 @@ class MIDASMetadataBagger(SIPBagger):
 
         return out
 
-    def enhance_metadata(self, nodata=True, force=False, examine="sync"):
+    def enhance_metadata(self, nodata=True, force=False, examine="sync", whendone=None):
         """
         ensure that we have complete and updated metadata after applying a
         POD description.  This will look for updates to the submitted data
         file and, if necessary, extract updated metadata from the files.
         It will also ensure that all the subcollections are described with 
         metadata.  
+
+        :param bool nodata:  if True (default), don't copy the actual data files 
+                             to the output bag.  False will copy the files.
+        :param bool force:   if False (default), the data files will be examined
+                             for additional metadata only if the source data 
+                             file is newer than the corresponding metadata file 
+                             in the output bag.  
+        :param str|bool examine:  a flag indicating whether and how to examine the 
+                             individual files for metadata to extract.  A value of 
+                             "async" will cause the files to be examined asynchronously
+                             in a separate thread.  A value of "sync" or True will 
+                             cause the examination to happen synchronously within this
+                             function call.  A value of False or None will prevent 
+                             files from being examined synchronously; files require
+                             examination (because they have been updated since the 
+                             last examination) will still be loaded into the 
+                             fileExaminer.  
+        :param function whendone:  a function to run after examination finishes.  This 
+                             is ignored if examine is False or None.  This is really 
+                             intended for when examine="async", but it will be run 
+                             if examine="sync", too.  
         """
         if self.cfg.get('enrich_refs', False):
             self.ensure_enhanced_references()
         self.ensure_subcoll_metadata()
-        self.ensure_data_files(nodata, force, examine)  # may be partially asynhronous
+        self.ensure_data_files(nodata, force, examine, whendone)  # may be partially async.
 
     def ensure_enhanced_references(self):
         """
@@ -876,10 +926,7 @@ class MIDASMetadataBagger(SIPBagger):
         examination in a separate thread. 
         """
 
-        # maps bag directory to a fileExaminer instance
-        examiners = OrderedDict()
-
-        #threads = OrderedDict()
+        threads = OrderedDict()
 
         def __init__(self, bagger):
             self.bagger = bagger
@@ -887,68 +934,56 @@ class MIDASMetadataBagger(SIPBagger):
                 raise ValueError("Bagger not prepped: no bag root dir set")
             self.id = self.bagger.bagdir
             self.files = OrderedDict()
-            self.thread = None
-            self.async = True
-            self.stop_logging = False
-
-        @classmethod
-        def getFor(cls, bagger):
-            if bagger.bagdir in cls.examiners:
-                return cls.examiners[bagger.bagdir]
-            out = cls(bagger)
-            cls.examiners[out.id] = out
-            return out
 
         def add(self, location, filepath):
             if filepath not in self.files:
                 self.files[filepath] = location
 
-        def _unregister(self):
-            if self.id in self.examiners:
-                self.examiners.pop(self.id, None)
-        def __del__(self):
-            self._unregister()
-
-        def _prep(self, forasync=True):
+        def _createThread(self, stoplogging=False, whendone=None):
             if self.running():
-                log.debug("File examiner thread is still running")
-                return False
-            self.async = forasync
-            self.thread = self._Thread(self)
-            return True
+                self.bagger.log.debug("File examiner thread is still running")
+                return None
+            self.threads[self.id] = self._Thread(self, stoplogging, whendone)
+            return self.threads[self.id]
 
         def running(self):
-            return self.thread and (not self.async or self.thread.is_alive())
+            thread = self.threads.get(self.id)
+            return thread and thread.is_alive()
 
-        def launch(self, stop_logging=False):
-            # run in new thread
-            if self._prep():
-                self.stop_logging = stop_logging
-                self.thread.start()
+        def launch(self, stoplogging=False, whendone=None):
+            # run asynchronously
+            thread = self._createThread(stoplogging, whendone)
+            if thread:
+                thread.start()
 
-        def run(self):
-            # run in this thread
-            if self._prep(False):
-                self.stop_logging = False
-                self.thread.run()
-
-        def finish(self):
-            if self.stop_logging:
-                self.bagger.bagbldr.disconnect_logfile()
-            if not self.async:
-                self.async = True
+        def run(self, whendone=None):
+            # run pseudo-synchronously
+            thread = self._createThread(False, whendone)
+            if thread:
+                thread.start()
+            self.waitForCompletion(None)
+            if thread.exc:
+                raise thread.exc
 
         def waitForCompletion(self, timeout):
-            if self.running() and self.thread is not threading.current_thread():
-                try:
-                    self.thread.join(timeout)
-                except RuntimeError as ex:
-                    log.warn("Skipping wait for examiner thread, "+self.thread.getName()+
-                             ", for deadlock danger")
-                    return False
-                if self.thread.is_alive():
-                    log.warn("Thread waiting timed out: "+str(thrd))
-                    return False
+            thread = self.threads.get(self.id)
+            if not thread or not thread.is_alive():
+                return True
+
+            if thread is threading.current_thread():
+                log.warn("Thread "+thread.getName()+" trying to wait on itself; ignoring")
+                return False
+
+            try:
+                thread.join(timeout)
+            except RuntimeError as ex:
+                log.warn("Skipping wait for examiner thread, "+thread.getName()+
+                         ", for deadlock danger")
+                return False
+            if thread.is_alive():
+                log.warn("Thread waiting timed out: "+str(thread))
+                return False
+
             return True
 
         def examine_next(self):
@@ -969,9 +1004,9 @@ class MIDASMetadataBagger(SIPBagger):
                 # it's possible that this file has been deleted while this
                 # thread was launched; make sure it still exists
                 if not self.bagger.bagbldr.bag.comp_exists(filepath):
-                    self.log.warning("Examiner thread detected that component no " +
-                                     "longer exists; skipping update for bag="+
-                                     self.bagger.name+", path="+filepath)
+                    self.bagger.log.warning("Examiner thread detected that component no " +
+                                            "longer exists; skipping update for bag="+
+                                            self.bagger.name+", path="+filepath)
                     return
 
                 md = self.bagger.bagbldr.update_metadata_for(filepath, md, ct,
@@ -982,41 +1017,58 @@ class MIDASMetadataBagger(SIPBagger):
                 self.bagger._mark_filepath_synced(filepath)
 
             except Exception as ex:
-                log.error("%s: Failed to extract file metadata: %s"
-                          % (location, str(ex)))
+                self.bagger.log.error("%s: Failed to extract file metadata: %s"
+                                      % (location, str(ex)))
 
         @classmethod
         def wait_for_all(cls, timeout=10):
             log.info("Waiting for file examiner threads to finish")
-            done = len(cls.examiners.keys())
-            for exmnr in cls.examiners.values():
-                if not exmnr.thread:
+            tids = list(cls.threads.keys())
+            done = []
+            for tid in tids:
+                thread = cls.threads.get(tid)
+                if not thread:
+                    done.append(tid) 
                     continue
-                if exmnr.thread is threading.current_thread():
-                    continue
-                if exmnr.thread and not exmnr.thread.getName().startswith("Examiner-"):
+                if thread is threading.current_thread():
                     continue
                 try:
                     exmnr.thread.join(timeout)
                     if thrd.is_alive():
                         log.warn("Thread waiting timed out: "+str(thrd))
                     else:
-                        done -= 1
+                        done.append(tid)
                 except RuntimeError as ex:
                     log.warn("Skipping wait for thread, "+str(thrd)+
                              ", for deadlock danger")
-            return len(done) == 0
+            return len(done) == len(tids)
 
         class _Thread(threading.Thread):
-            def __init__(self, exmnr):
+            def __init__(self, exmnr, stoplogging=False, whendone=None):
                 super(MIDASMetadataBagger._AsyncFileExaminer._Thread, self). \
                     __init__(name="Examiner-"+exmnr.id)
                 self.exif = exmnr
+                self.stop_logging = stoplogging
+                self.on_finish = whendone
+                self.exc = None
+
             def run(self):
                 # time.sleep(0.1)
                 while self.exif.files:
                     self.exif.examine_next()
-                self.exif.finish()
+
+                try:
+                    if self.on_finish:
+                        self.on_finish()
+                except Exception as ex:
+                    self.exif.bagger.log.exception("post-file-examine function failure: "+
+                                                   str(ex))
+                    self.exc = ex
+
+                if self.stop_logging:
+                    self.exif.bagger.bagbldr.disconnect_logfile()
+
+                del self.exif.threads[self.exif.id]
         
 
 class PreservationBagger(SIPBagger):

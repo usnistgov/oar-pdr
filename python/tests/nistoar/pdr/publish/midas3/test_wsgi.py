@@ -100,7 +100,7 @@ class TestDraftHandler(test.TestCase):
         self.resp = []
 
     def tearDown(self):
-        self.svc.wait_for_all_workers(300)
+        self.svc._drop_all_workers(300)
         requests.delete(custbaseurl, headers={'Authorization': 'Bearer SECRET'})
         self.tf.clean()
 
@@ -302,7 +302,7 @@ class TestMIDAS3PublishingApp(test.TestCase):
         self.resp = []
 
     def tearDown(self):
-        self.svc.wait_for_all_workers(300)
+        self.svc._drop_all_workers(300)
         requests.delete(custbaseurl, headers={'Authorization': 'Bearer SECRET'})
         self.tf.clean()
 
@@ -386,10 +386,33 @@ class TestMIDAS3PublishingApp(test.TestCase):
         self.assertIn("201", self.resp[0])
         self.assertEquals(body, [])
 
-        self.assertTrue(os.path.isdir(os.path.join(self.bagparent,"mdbags",self.midasid)))
+        bagdir = os.path.join(self.bagparent,"mdbags",self.midasid)
+        self.assertTrue(os.path.isdir(bagdir))
+        # self.assertTrue(os.path.isfile(os.path.join(bagdir, "preserv.log")))
         self.svc.wait_for_all_workers(300)
         self.assertTrue(os.path.isfile(os.path.join(self.bagparent,"nrdserv",
                                                     self.midasid+".json")))
+
+    def test_no_double_logging(self):
+        self.test_latest_post()
+        self.resp = []
+        self.test_latest_post()
+
+        bagdir = os.path.join(self.bagparent,"mdbags",self.midasid)
+        plog = os.path.join(bagdir, "preserv.log")
+        self.assertTrue(os.path.isfile(plog))
+
+        lastline = None
+        line = None
+        doubled = 0
+        with open(plog) as fd:
+            line = fd.readline()
+            if line == lastline:
+                doubled += 1
+            lastline = line
+
+        self.assertEqual(doubled, 0, "replicated log messages detected")
+
 
     def test_draft_put(self):
         req = {

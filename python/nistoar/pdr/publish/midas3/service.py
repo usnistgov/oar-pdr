@@ -140,7 +140,7 @@ class MIDAS3PublishingService(PublishSystem):
                                                    logger=self.log.getChild("customclient"))
 
         self.schemadir = self.cfg.get('nerdm_schema_dir', pdr.def_schema_dir)
-        self._bagger_threads = {}
+        self._bagging_workers = {}
 
     def _set_working_dir(self, workdir):
         if not workdir:
@@ -190,23 +190,23 @@ class MIDAS3PublishingService(PublishSystem):
                 pending.add(podf[:-len(".json")])
 
         for id in pending:
-            thread = self._get_bagging_thread(id)
-            if not thread.is_alive():
-                thread.start()
+            worker = self._get_bagging_worker(id)
+            if not worker.is_working():
+                worker.launch()
         
 
     def wait_for_all_workers(self, timeout):
         """
         wait for all service threads to finish
         """
-        for key in list(self._bagger_threads.keys()):
-            thread = self._bagger_threads.get(key)
-            if not thread:
+        for key in list(self._bagging_workers.keys()):
+            worker = self._bagging_workers.get(key)
+            if not worker:
                 continue
-            if thread is not threading.current_thread() and thread.is_alive():
-                thread.join()
-            if thread.bagger.fileExaminer.running():
-                thread.bagger.fileExaminer.waitForCompletion(timeout)
+            if worker.is_working() and worker._thread is not threading.current_thread():
+                worker._thread.join()
+            if worker.bagger.fileExaminer.running():
+                worker.bagger.fileExaminer.waitForCompletion(timeout)
 
     def update_ds_with_pod(self, pod, async=True):
         """
@@ -235,32 +235,6 @@ class MIDAS3PublishingService(PublishSystem):
         else:
             self.log.warning("Unable to validate submitted POD data")
 
-    def _get_bagging_thread(self, id):
-        thread = self._bagger_threads.get(id)
-        if not thread:
-            bagger = self._create_bagger(id)
-            bagger.prepare()
-            thread = self.BaggingThread(self, id, bagger, self.log)
-        return thread
-
-    def _apply_pod_async(self, pod, async=True):
-        id = pod.get('identifier')
-        if not id:
-            # shouldn't happen since identifier is required for validity
-            raise ValueError("POD record is missing required identifier")
-
-        thread = self._get_bagging_thread(id)
-
-        thread.queue_POD(pod)
-
-        if not thread.is_alive():
-            if async:
-                thread.start()
-            else:
-                thread.run("sync")
-        return thread.bagger
-
-
     def _create_bagger(self, id):
         cfg = self.cfg.get('bagger', {})
         if 'store_dir' not in cfg and 'store_dir' in self.cfg:
@@ -278,6 +252,47 @@ class MIDAS3PublishingService(PublishSystem):
         bagger = MIDASMetadataBagger.fromMIDAS(id, self.mddir, self.reviewdir,
                                                self.uploaddir, cfg, self._minter)
         return bagger
+
+    def _get_bagging_worker(self, id):
+        worker = self._bagging_workers.get(id)
+        if not worker:
+            bagger = self._create_bagger(id)
+            bagger.prepare()
+            worker = self.BaggingWorker(self, id, bagger, self.log)
+            self._bagging_workers[id] = worker
+        return worker
+
+    def _drop_bagging_worker(self, worker, timeout=None):
+        if worker.is_working() and worker._thread is not threading.current_thread():
+            worker._thread.join()
+        worker.bagger.fileExaminer.waitForCompletion(timeout)
+        worker.bagger.done()
+        if worker.id in self._bagging_workers:
+            del self._bagging_workers[worker.id]
+
+    def _drop_all_workers(self, timeout=None):
+        wids = list(self._bagging_workers.keys())
+        for wid in wids:
+            if wid in self._bagging_workers:
+                self._drop_bagging_worker(self._bagging_workers[wid])
+
+    def _apply_pod_async(self, pod, async=True):
+        id = pod.get('identifier')
+        if not id:
+            # shouldn't happen since identifier is required for validity
+            raise ValueError("POD record is missing required identifier")
+
+        worker = self._get_bagging_worker(id)
+
+        worker.queue_POD(pod)
+
+        if not worker.is_working():
+            if async:
+                worker.launch()
+            else:
+                worker.run("sync")
+        return worker.bagger
+
 
     def serve_nerdm(self, nerdm, name=None):
         """
@@ -313,8 +328,8 @@ class MIDAS3PublishingService(PublishSystem):
 
         :param str ediid:  the EDI identifier for the desired record
         """
-        thread = self._bagger_threads.get(ediid)
-        if not thread:
+        worker = self._bagging_workers.get(ediid)
+        if not worker:
             try:
                 bagger = self._create_bagger(ediid)
                 if not os.path.isdir(bagger.bagdir):
@@ -322,7 +337,7 @@ class MIDAS3PublishingService(PublishSystem):
             except SIPDirectoryNotFound as ex:
                 raise IDNotFound(ediid, cause=ex)
         else:
-            bagger = thread.bagger
+            bagger = worker.bagger
 
         return NISTBag(bagger.bagdir).pod_record()
         
@@ -340,19 +355,20 @@ class MIDAS3PublishingService(PublishSystem):
         self._validate_pod(pod)
 
         self._apply_pod_async(pod, True)
-        thread = self._bagger_threads.get(id)
-        if thread:
+        worker = self._bagging_workers.get(id)
+        if worker:
             # lock the bag from further updates via update_ds_with_pod()
-            self._lock_out_pod_updates(thread.bagger)
+            self._lock_out_pod_updates(worker.bagger)
             
             # wait for the update to complete
-            try: 
-                thread.join(10.0)
-            except RuntimeError as ex:
-                self.log.error("Trouble waiting for POD update operation: "+str(ex))
-            if thread.is_alive():
-                self.log.warning("Waiting for POD update timed out (after 10s); "
-                                 "Record may not be up to date!")
+            if worker.is_working():
+                try: 
+                    worker._thread.join(10.0)
+                except RuntimeError as ex:
+                    self.log.error("Trouble waiting for POD update operation: "+str(ex))
+                if worker.is_working():
+                    self.log.warning("Waiting for POD update timed out (after 10s); "
+                                     "Record may not be up to date!")
 
         nerdf = os.path.join(self.nrddir, midasid_to_bagname(id)+".json")
         if not os.path.isfile(nerdf):
@@ -370,9 +386,9 @@ class MIDAS3PublishingService(PublishSystem):
         # pull nerdm draft from customization service
         updmd = self._custclient.get_draft(midasid_to_bagname(ediid), True)
 
-        thread = self._bagger_threads.get(ediid)
-        if thread:
-            bagger = thread.bagger
+        worker = self._bagging_workers.get(ediid)
+        if worker:
+            bagger = worker.bagger
         else:
             bagger = self._create_bagger(ediid)
             bagger.prepare()
@@ -553,9 +569,9 @@ class MIDAS3PublishingService(PublishSystem):
         updmd = self._custclient.get_draft(midasid_to_bagname(ediid), True)
 
         # filter out changes that are not allowed
-        thread = self._bagger_threads.get(ediid)
-        if thread:
-            bagger = thread.bagger
+        worker = self._bagging_workers.get(ediid)
+        if worker:
+            bagger = worker.bagger
         else:
             bagger = self._create_bagger(ediid)
             bagger.prepare()
@@ -569,24 +585,24 @@ class MIDAS3PublishingService(PublishSystem):
         return pod
 
 
-    class BaggingThread(threading.Thread):
+    class BaggingWorker(object):
         working_pod = "__pod.json"
         next_pod = "__next_pod.json"
         queue_lock = "__pod_queue.lock"
-        
+
         def __init__(self, service, id, bagger, svclog):
-            super(MIDAS3PublishingService.BaggingThread, self).__init__(name="bagger:"+bagger.name)
             self.id = id
             self.bagger = bagger
             self.service = service
             self.name = midasid_to_bagname(id)
+            self._thread = None
             
             lgnm = self.name
             if len(lgnm) > 11:
                 lgnm = lgnm[0:4]+"..."+lgnm[-4:]
             self.log = svclog.getChild(lgnm)
             
-            self.service._bagger_threads[id] = self
+            self.service._bagging_workers[id] = self
 
             working_pod_dir = os.path.join(self.service.podqdir, "current")
             next_pod_dir = os.path.join(self.service.podqdir, "next")
@@ -604,6 +620,21 @@ class MIDAS3PublishingService(PublishSystem):
             self.lockfile = os.path.join(lock_dir, self.name+".lock")
             self.qlock = None
 
+        class _Thread(threading.Thread):
+            def __init__(self, worker):
+                self.worker = worker
+                super(MIDAS3PublishingService.BaggingWorker._Thread, self). \
+                    __init__(name="bagger:"+worker.bagger.name)
+            def run(self):
+                self.worker.run()
+        
+        def is_working(self):
+            return self._thread and self._thread.is_alive()
+
+        def launch(self):
+            self._thread = self._Thread(self)
+            self._thread.start()
+
         def queue_POD(self, pod):
             self.ensure_qlock()
             with self.qlock:
@@ -612,13 +643,22 @@ class MIDAS3PublishingService(PublishSystem):
         def ensure_qlock(self):
             if not self.qlock:
                 self.qlock = filelock.FileLock(self.lockfile)
+
+        def _whendone(self):
+            self.service.serve_nerdm(self.bagger.bagbldr.bag.nerdm_record())
+
+            # clean up the worker
+            self.service._drop_bagging_worker(self)
                 
         def run(self, examine="async"):
+            whendone = None
+            if examine == "async":
+                whendone = self._whendone
             self.process_queue()
-            self.bagger.enhance_metadata(examine=examine)
+            self.bagger.enhance_metadata(examine=examine, whendone=whendone)
 
             # remove this thread from bagger threads
-            del self.service._bagger_threads[self.id]
+            # del self.service._bagging_workers[self.id]
 
         def process_queue(self):
             self.ensure_qlock()

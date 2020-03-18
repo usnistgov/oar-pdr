@@ -77,6 +77,7 @@ class TestMIDASMetadataBaggerMixed(test.TestCase):
 
     def tearDown(self):
         self.bagr.bagbldr._unset_logfile()
+        self.bagr._AsyncFileExaminer.wait_for_all()
         self.bagr = None
         self.tf.clean()
 
@@ -232,6 +233,19 @@ class TestMIDASMetadataBaggerMixed(test.TestCase):
         self.assertIsInstance(data['@context'], list)
         self.assertEqual(len(data['@context']), 2)
         self.assertEqual(data['@context'][1]['@base'], data['@id'])
+
+    def test_done(self):
+        self.assertTrue(not os.path.exists(self.bagr.bagdir))
+        self.assertTrue(not os.path.exists(self.bagr.bagdir+".lock"))
+        inpodfile = os.path.join(self.revdir,"1491","_pod.json")
+
+        self.bagr.apply_pod(inpodfile)
+        self.assertTrue(os.path.exists(self.bagr.bagdir+".lock"))
+        self.assertTrue(os.path.exists(os.path.join(self.bagr.bagdir,"preserv.log")))
+        self.assertTrue(self.bagr.bagbldr.logfile_is_connected())
+        self.bagr.done()
+        self.assertTrue(not self.bagr.bagbldr.logfile_is_connected())
+        self.assertTrue(os.path.exists(self.bagr.bagdir+".lock"))
         
     def test_apply_pod_wremove(self):
         self.assertTrue(not os.path.exists(self.bagr.bagdir))
@@ -701,10 +715,10 @@ class TestMIDASMetadataBaggerReview(test.TestCase):
         self.assertIn('checksum', fmd) # because there's a .sha256 file
 
 #        time.sleep(0.1)
-        if self.bagr.fileExaminer.thread.is_alive():
+        if self.bagr.fileExaminer.running():
             print("waiting for file examiner thread")
             n = 20
-            while n > 0 and self.bagr.fileExaminer.thread.is_alive():
+            while n > 0 and self.bagr.fileExaminer.running():
                 n -= 1
                 time.sleep(0.1)
             if n == 0:
