@@ -11,7 +11,7 @@ from ...exceptions import (ConfigurationException, StateException,
                            SIPDirectoryNotFound, IDNotFound, PDRServiceException)
 from ...preserv.bagger import (MIDASMetadataBagger, UpdatePrepService,
                                midasid_to_bagname)
-from ...preserv.bagit import NISTBag, BagBuilder, DEF_MERGE_CONV
+from ...preserv.bagit import NISTBag, BagBuilder
 from ...utils import build_mime_type_map, read_nerd
 from ....id import PDRMinter, NIST_ARK_NAAN
 from ....nerdm import validate_nerdm
@@ -20,6 +20,7 @@ from .... import pdr
 from . import midasclient as midas
 
 log = logging.getLogger(PublishSystem().subsystem_abbrev)
+DEF_MERGE_CONV = "midas1"
 
 class PrePubMetadataService(PublishSystem):
     """
