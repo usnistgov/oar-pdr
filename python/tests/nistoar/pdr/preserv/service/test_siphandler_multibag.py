@@ -3,7 +3,7 @@
 # previously published datasets.  The tests engage simulated distribution 
 # and RMM services to detect a previously published dataset. 
 #
-import os, pdb, sys, logging, yaml, time
+import os, pdb, sys, logging, yaml, time, re
 import unittest as test
 from zipfile import ZipFile
 
@@ -13,6 +13,7 @@ from nistoar.pdr.preserv.service import status
 import nistoar.pdr.preserv.bagit.builder as bldr
 from nistoar.pdr.preserv.bagit.bag import NISTBag
 from nistoar.pdr.preserv import AIPValidationError
+from nistoar.pdr import utils
 
 # datadir = nistoar/pdr/preserv/data
 datadir = os.path.join( os.path.dirname(os.path.dirname(__file__)), "data" )
@@ -182,10 +183,26 @@ class TestMultibagSIPHandler(test.TestCase):
         self.sip = None
         self.tf.clean()
 
+    def replicate_sip(self, srcdir, destdir):
+        # replicate the SIP data to a writable directory; change download
+        # urls in metadata to reference simulated service
+        shutil.copytree(srcdir, destdir)
+        self.filter_dlurls(os.path.join(destdir, "_pod.json"))
+
+    def filter_dlurls(self, podf):
+        # change download urls in given POD file to reference simulated service
+        datadotnist = re.compile(r'^https://data.nist.gov/')
+        pod = utils.read_json(podf)
+        for dist in pod.get('distribution',[]):
+            if 'downloadURL' in dist:
+                dist['downloadURL'] = \
+                    datadotnist.sub('http://localhost:9091/',dist['downloadURL'])
+        utils.write_json(pod, podf)
+
     def test_singlebag(self):
         # test creation of a small single bag
 
-        shutil.copytree(self.sipdata, os.path.join(self.revdir, "1491"))
+        self.replicate_sip(self.sipdata, os.path.join(self.revdir, "1491"))
         self.sip = sip.MIDASSIPHandler(self.midasid, self.config)
 
         self.assertEqual(self.sip.state, status.FORGOTTEN)
@@ -218,7 +235,7 @@ class TestMultibagSIPHandler(test.TestCase):
 
     def test_small_revision(self):
         # test creating small update to an existing dataset
-        shutil.copytree(self.sipdata, os.path.join(self.revdir, "1491"))
+        self.replicate_sip(self.sipdata, os.path.join(self.revdir, "1491"))
         shutil.rmtree(os.path.join(self.revdir, "1491", "trial3"))
         self.sip = sip.MIDASSIPHandler(self.midasid, self.config)
 
@@ -292,6 +309,7 @@ class TestMultibagSIPHandler(test.TestCase):
         indir = os.path.join(self.revdir, "1491")
         os.mkdir(indir)
         shutil.copy(os.path.join(self.sipdata, "_pod.json"), indir)
+        self.filter_dlurls(os.path.join(indir,"_pod.json"))
 
         self.sip = sip.MIDASSIPHandler(self.midasid, self.config)
 
