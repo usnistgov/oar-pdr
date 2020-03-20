@@ -1,0 +1,99 @@
+:host /deep/ .rightMenuStyle > .ui-menu .ui-submenu-header{
+  /* background-color: #B8D4E6; */
+  /* background-color:rgb(65, 68, 69); */
+  background-color:#2C8034;
+  padding: 2%;
+  padding-left: 5%;
+  font-family: sans-serif;
+  font-size: 16px;
+  font-weight: bold;
+  color: white;
+ 
+}
+
+:host /deep/ .rightMenuStyle > .ui-menu  .ui-menuitem-link  .ui-state-hover{
+  line-height: 1em;
+  min-height: 1em;
+  background-color: #e7f0f6;
+  word-wrap: break-word;
+  font-family: 'Sans-Serif';
+  font-size: 14px;
+}
+
+:host /deep/ .rightMenuStyle > .ui-menu  .ui-menuitem{
+  line-height: 1em;
+  min-height: 1em;
+  /* background-color:  #e7f0f6; */
+  background-color: #F0FAF1;
+  word-wrap: break-word;
+  font-family: sans-serif;
+  font-size: 14px;
+  padding: 0;
+}
+
+:host /deep/ .rightMenuStyle > .ui-menu .ui-menuitem-link{
+  padding: 0.5em 0.2em 0.5em 0.5em;
+  font-family:  sans-serif;
+  font-size: 14px;
+}
+:host /deep/ .rightMenuStyle > .ui-menu{
+  width: 100%;
+}
+
+:host /deep/ .rightMenuStyle > .ui-menu  .ui-menuitem-link:hover {
+  background-color: #ffffff;
+  color: #000000;
+}
+
+:host /deep/ .rightMenuStylePop  > .ui-menu {
+  position: absolute;
+  width: 12em;
+  word-wrap: break-word;
+  font-family: sans-serif;
+  
+}
+:host /deep/ .rightMenuStylePop > .ui-menu .ui-menuitem-link{
+  padding: 0.5em 0.2em 0.5em 0.5em;
+  font-size: 14px;
+}
+
+:host /deep/ .rightMenuStylePop > .ui-menu  .ui-menuitem{
+  line-height: 1em;
+  min-height: 1em;
+  /* background-color:  #e7f0f6; */
+  background-color: #F0FAF1;
+  word-wrap: break-word;
+  font-family: sans-serif;
+  font-size: 14px;
+  padding: 0;
+}
+
+:host /deep/ .rightMenuStylePop > .ui-menu  .ui-menuitem-link  .ui-state-hover{
+  line-height: 1em;
+  min-height: 1em;
+  background-color: #e7f0f6;
+  word-wrap: break-word;
+  font-family: 'Sans-Serif';
+  font-size: 14px;
+}
+:host /deep/ .rightMenuStylePop > .ui-menu .ui-submenu-header {
+  background-color:#2C8034;
+  padding: 2%;
+  padding-left: 5%;
+  font-family: sans-serif;
+  font-size: 16px;
+  font-weight: bold;
+  color: white;
+ 
+}
+
+:host /deep/ .rightMenuStylePop > .ui-menu .ui-submenu-header{
+  padding: 0.5em 0.2em 0.5em 0.5em;
+  font-size: 14px;
+}
+
+:host /deep/ .ui-menu{
+  padding: 0;
+  border:0;
+}
+

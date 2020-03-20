@@ -1,4 +1,4 @@
-import { Component, DebugElement }   from '@angular/core';
+import { Component, DebugElement } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 
@@ -11,7 +11,7 @@ import { Collaspe } from './collapse.directive';
   <div [collapse]="!isCollapsedContent" style="background-color:#FFFFF">
      <span> Test This Div!!</span>
   </div>
-  `, 
+  `,
 
 })
 class TestComponent { }
@@ -19,26 +19,26 @@ class TestComponent { }
 describe('Collaspe Directive', () => {
   let component: TestComponent;
   let fixture: ComponentFixture<TestComponent>;
-  let iEle: DebugElement;  
+  let iEle: DebugElement;
   let divEle: DebugElement;
   beforeEach(() => {
-     TestBed.configureTestingModule({
-      declarations: [ Collaspe, TestComponent ]
+    TestBed.configureTestingModule({
+      declarations: [Collaspe, TestComponent]
     })
     fixture = TestBed.createComponent(TestComponent);
     component = fixture.componentInstance;
-    iEle=fixture.debugElement.query(By.css('i'));
+    iEle = fixture.debugElement.query(By.css('i'));
     divEle = fixture.debugElement.query(By.css('div'));
     fixture.detectChanges(); // initial bindin
   });
 
   // color and event test
   it('should have collapsed elements', () => {
-    iEle.triggerEventHandler('mouseclick', null); 
+    iEle.triggerEventHandler('mouseclick', null);
     fixture.detectChanges();
     // console.log(divEle.nativeElement +" ::: "+ iEle);
-    expect(divEle.nativeElement.style.backgroundColor).toBe(''); 
+    expect(divEle.nativeElement.style.backgroundColor).toBe('');
   });
 
 
-  });
+});

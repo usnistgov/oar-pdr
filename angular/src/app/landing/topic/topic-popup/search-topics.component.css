@@ -1,0 +1,61 @@
+.heighttext{
+  display:inline-block;
+  padding:15px 10px;
+  line-height:10%;
+  border: 1px solid blue;
+}
+
+.btn-cancel {
+    float:right;
+    margin:0em 1em 2em 1em;
+    width:150px; 
+    height:2em; 
+    background-color:rgb(107, 107, 107);
+    color:white;
+    padding-right: 1em;
+}
+
+.btn-reset {
+    float:right;
+    margin:0em .5em 0em 1em;
+    width:100px; 
+    height:1.5em; 
+    background-color:green;
+    color:white;
+}
+
+.selected-topic-header {
+    background-color: #153971;
+    color:white;
+    padding: .2em 0 0 1em;
+    height: 2em;
+    vertical-align: middle;
+}
+
+.taxonomy-list-header {
+    background-color: #153971;
+    color:white;
+    display:inline-flex;
+    text-align: left;
+    height: 2em;
+    width:90%;
+    margin: 0 auto 0 auto;
+}
+
+.taxonomy-list-header-right {
+    float: right;
+    width:10%; 
+    text-align: right; 
+    direction: rtl; 
+    font-size: 12px; 
+    background-color: lightskyblue;
+    cursor: pointer;
+    margin-left: .5em;
+}
+
+.reset {
+    float: right;
+    cursor: pointer;
+    color:white;
+    margin: .5em;
+}

@@ -1,0 +1,56 @@
+<div style="display: table;">
+    <div class="editable_container">
+        <div class="editable_field" *ngIf="!record['contactPoint']; else hasContacts">
+            <div class="editable_field" *ngIf="mdupdsvc.editMode && enableEdit" [ngStyle]="getFieldStyle()">
+                Contact:
+            </div>
+        </div>
+        <ng-template #hasContacts>
+            <div class="editable_field" style="max-width:calc(100% - 4em);"
+                [ngStyle]="getFieldStyle()">
+                Contact:
+                <strong>
+                    <a class="font14" *ngIf="isEmail"
+                        href="{{record.contactPoint.hasEmail}}" target="_top">
+                        {{record.contactPoint.fn}}</a>
+                    <span *ngIf="!isEmail">{{record.contactPoint.fn}}</span>
+                </strong>..
+                <i style="cursor: pointer;" class="faa"
+                    [ngClass]="{'faa-plus-square-o': !clickContact, 'faa-minus-square-o': clickContact}"
+                    aria-hidden="true"
+                    (click)="closeContent = !closeContent; clickContact=expandContact();"></i>
+                <div [collapse]="!closeContent" class="card card-body bg-faded">
+                    <span class="" *ngIf="record.contactPoint.fn">
+                        <span>{{record.contactPoint.fn}}</span>
+                    </span>
+                    <span class="font14" *ngIf="isEmail">
+                        <br><strong>Email:</strong>
+                        <a *ngIf="isEmail" href="{{record.contactPoint.hasEmail}}"
+                            target="_top">
+                            {{record.contactPoint.hasEmail.split(":")[1]}}</a>
+                    </span>
+                    <div class="font14" *ngIf="record.contactPoint.address">
+                        <span><b>Address:</b></span>
+                        <div *ngFor="let address of record.contactPoint.address"
+                            style="padding-left: 1em;">
+                            {{address}}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </ng-template>
+        <button class="edit_button" *ngIf="mdupdsvc.editMode && enableEdit" type="button"
+            (click)="openModal('contactPoint')">
+            <i class="faa faa-pencil icon_enabled" data-toggle="tooltip"
+                title="Edit contactPoint"></i>
+        </button>
+        <button class="undo_button" *ngIf="mdupdsvc.editMode && enableEdit" type="button"
+            [disabled]="!updated"
+            (click)="undoEditing('contactPoint')">
+            <i class="faa faa-undo"
+                [ngClass]="{'icon_enabled': updated, 'icon_disabled': !updated }"
+                data-toggle="tooltip" title="Undo contactPoint"></i>
+        </button>
+        <span *ngIf="mdupdsvc.editMode && enableEdit" style="color: red;margin-left: .5em;">*</span>
+    </div>
+</div>

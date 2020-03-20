@@ -1,0 +1,14 @@
+<div class="modal-header dialogHeader center">
+    <h4>{{ title }}</h4>
+</div>
+<div class="modal-body">
+    <i *ngIf="showWarningIcon" class="faa faa-warning faa-2x"
+        style="color: rgb(252, 122, 0);padding-left: .2em;padding-right: .5em;"></i>
+    <span [innerHTML]="message"></span>
+</div>
+<div class="modal-footer">
+    <button type="button" pButton id="cd-ok-button" type="submit"
+        (click)="accept()">{{ btnOkText }}</button>
+    <button *ngIf="showCancelButton" type="button" pButton type="submit"
+    id="cd-cancel-button" (click)="decline()">{{ btnCancelText }}</button>
+</div>

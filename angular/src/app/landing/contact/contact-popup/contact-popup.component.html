@@ -1,0 +1,39 @@
+<!-- Make the pop up window look similar to the landingpage with black header bar and blue tool bar -->
+<div class="popup-header-bar">
+    <h2 class="popup-header">Contact Point</h2>
+</div>
+
+<div class="popup-tool-bar">
+    <!-- Buttons are arranged from right to left -->
+
+    <p-toolbar name="toolbar">
+        <div class="ui-toolbar-group-right">
+            <!-- Cancel button -->
+            <button pButton type="submit" class="btn-cancel" (click)="activeModal.close('Close click')" label="Cancel"
+                icon="faa faa-trash faa-1x icon-white" iconPos="left">
+            </button>
+
+            <!-- Save button -->
+            <button pButton type="submit" class="btn-Save"
+                style="float:right;margin:0em 1em 2em 1em;width:150px; background-color:green;color:white;padding-right: 1em;"
+                (click)="saveContactInfo();" label="Save" icon="faa faa-save faa-1x icon-white" iconPos="left">
+            </button>
+        </div>
+    </p-toolbar>
+</div>
+
+<!-- Contact details for editing -->
+<div style="margin: 1em 2em 2em 2em;">
+    <p>
+        Contact full name: <input type="text" [(ngModel)]="tempContactPoint.fn" />
+    </p>
+    <p>
+        Email (must be valid NIST email): <input type="text" [(ngModel)]="tempContactPoint.hasEmail" />
+    </p>
+    Address:
+    <div>
+        <textarea id="address" style="width: 100%; padding: .5em .5em .5em 1.5em; border: 1px solid lightgrey;"
+            (keyup)="autogrow($event)" [(ngModel)]='tempAddress'
+            placeholder="Organization&#x0a;Street address&#x0a;city, state zip"></textarea>
+    </div>
+</div>

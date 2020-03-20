@@ -1,6 +1,9 @@
-import { Component, AfterViewInit, OnInit } from '@angular/core';
-import { CommonVarService } from './shared/common-var';
+import { Component, AfterViewInit, OnInit, PLATFORM_ID, Inject } from '@angular/core';
 import { Router, NavigationStart, NavigationEnd, NavigationCancel, NavigationError } from '@angular/router';
+import './content/modal.less';
+import { GoogleAnalyticsService } from './shared/ga-service/google-analytics.service'
+import { AppConfig } from './config/config';
+import { isPlatformBrowser } from '@angular/common';
 
 @Component({
   selector: 'app-root',
@@ -9,52 +12,28 @@ import { Router, NavigationStart, NavigationEnd, NavigationCancel, NavigationErr
 })
 export class AppComponent {
   title = 'PDR Resource Landing Page';
-}
+  gaCode: string;
+  inBrowser: boolean = false;
 
-/* 
- * if SSR is working, this version, which enables a "loading" spinner,
- * should not be necessary
- *
-export class AppComponent implements AfterViewInit, OnInit {
-  element: HTMLElement;
-
-  constructor(private commonVarService: CommonVarService,
-    private router: Router) {
-    this.router.events.subscribe(event => {
-      if (event instanceof NavigationStart) {
-        this.element.hidden = false;
-      } else if (event instanceof NavigationEnd || event instanceof NavigationCancel || event instanceof NavigationError) {
-        // this.element.hidden = true;
-        // console.log("Spinner is not visible.");
-      }
-    }, () => {
-      this.element.hidden = true;
-    });
+  constructor(
+    private gaService: GoogleAnalyticsService,
+    private cfg: AppConfig,
+    @Inject(PLATFORM_ID) private platformId: Object
+  ) { 
+    this.inBrowser = isPlatformBrowser(platformId);
   }
 
-  /**
-   * Get the params OnInit
-   *
   ngOnInit() {
-    this.element = document.getElementById('loadspinner') as HTMLElement;
-    this.element.hidden = false;
-    setTimeout(() => {
-      this.element.hidden = true;
-    }, 15000);
   }
 
-  ngAfterViewInit() {
-    setTimeout(() => {
-      this.commonVarService.watchContentReady().subscribe(
-        value => {
-          // let element: HTMLElement = document.getElementById('loadspinner') as HTMLElement;
-          this.element.hidden = value;
-          setTimeout(() => {
-            this.element.hidden = true;
-          }, 10000);
-        }
-      );
-    });
+  ngAfterViewInit(): void {
+    //Called after ngAfterContentInit when the component's view has been initialized. Applies to components only.
+    //Add 'implements AfterViewInit' to the class.
+    // Add Google Analytics service
+    if(this.inBrowser){
+      this.gaCode = this.cfg.get("gaCode", "") as string;
+      this.gaService.appendGaTrackingCode(this.gaCode);
+    }
   }
 }
-*/
+
