@@ -88,7 +88,7 @@ class SimCustomHandler(object):
         return []
 
     def send_unauthorized(self):
-        return self.send_error(401, "Unorthodoxed")
+        return self.send_error(401, "Not "+self._authkey)
 
     def add_header(self, name, value):
         self._hdr.add_header(name, value)

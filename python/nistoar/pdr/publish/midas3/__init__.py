@@ -15,3 +15,23 @@ from copy import deepcopy
 from nistoar.pdr.exceptions import ConfigurationException
 
 from ..mdserv import extract_mdserv_config
+
+def extract_sip_config(config, siptype='midas3', service='pubserv'):
+    """
+    from a common configuration shared with the preservation service, 
+    extract the bits needed by the metadata service.   
+    """
+    if 'sip_type' not in config:
+        # this is the old-style configuration, return it unchangesd
+        return config
+
+    if siptype not in config['sip_type']:
+        raise ConfigurationException("ppmdserver config: "+siptype+" missing as an "+
+                                     "sip_type")
+    out = deepcopy(config)
+    del out['sip_type']
+    midas = config['sip_type'][siptype]
+    out.update(midas.get('common', {}))
+    out.update(midas.get(service, {}))
+
+    return out

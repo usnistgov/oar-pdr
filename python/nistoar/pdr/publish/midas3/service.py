@@ -339,7 +339,11 @@ class MIDAS3PublishingService(PublishSystem):
         else:
             bagger = worker.bagger
 
-        return NISTBag(bagger.bagdir).pod_record()
+        bag = NISTBag(bagger.bagdir)
+        if worker and not os.path.exists(bag.pod_file()):
+            if worker._thread:
+                worker._thread.join(0.5)
+        return bag.pod_record()
         
 
     def start_customization_for(self, pod):
