@@ -1,0 +1,46 @@
+logfile: pubserver.log
+auth_key: secret
+
+review_dir:  /data/review
+upload_dir:  /data/upload
+id_minter:
+   shoulder_for_edi: mds1
+mimetype_files:
+  - /etc/nginx/mime.types
+bagger:
+  relative_to_indir: True
+  bag_builder:
+    init_bag_info:
+      Source-Organization:
+        - "National Institute of Standards and Technology"
+      Contact-Name: "NIST Data Support Team"
+      Contact-Email: ["datasupport@nist.gov"]
+      Organization-Address: ["100 Bureau Dr., Gaithersburg, MD 20899"]
+      NIST-BagIt-Version: "0.4"
+      NIST-POD-Metadata: "metadata/pod.json"
+      NIST-NERDm-Metadata: "metadata/nerdm.json"
+      Multibag-Version: "0.4"
+      Multibag-Tag-Directory: "multibag"
+    finalize:
+      trim_folders: true
+      confirm_checksums: false
+    validate_id: "mds[012]\\w"
+  enrich_refs: true
+  doi_resolver:
+    app_name: "NIST Public Data Repository: preserver (oar-pdr)"
+    app_version: "1.2.2+"
+    app_url: https://data.nist.gov/
+    email: datasupport@nist.gov
+
+customization_service:
+  updatable_properties:
+    - _editStatus
+    - title
+    - authors
+    - description
+    - subject
+    - topic
+  merge_convention: midas1
+  service_endpoint: http://customization/
+  auth_key: csecret
+
