@@ -20,5 +20,19 @@ export OAR_MERGE_ETC=$PACKAGE_DIR/oar-metadata/etc/merge
 export OAR_SCHEMA_DIR=$PACKAGE_DIR/oar-metadata/model
 export OAR_ETC_DIR=$PACKAGE_DIR/etc
 export OAR_HOME=$PACKAGE_DIR
-exec $PACKAGE_DIR/python/runtests.py
+
+status=0
+$PACKAGE_DIR/python/runtests.py || status=$?
+echo
+$PACKAGE_DIR/scripts/tests/test-pubserver.sh -q || status=$?
+echo
+
+if [ "$status" -ne 0 ]; then
+    echo Some tests failed
+    exit $status
+fi
+
+echo All Tests OK
+exit 0
+
 

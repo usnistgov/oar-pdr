@@ -22,9 +22,21 @@ Options:
    --working-dir | -w DIR   write output files to tihs directory; if it doesn't exist it 
                             will be created.
    --pid-file | -p FILE     use this file as the server's PID file
+   --custserv-url | -U URL  base URL for the customization service to use; if not given, 
+                            a mock one will be launched locally
+   --custserv-secret | -T T use T as the authorization token for the customization service
+                            (ignored unless --custserv-url is specified)
+   --midas-data-dir | -m DIR  use DIR as the parent directory containing MIDAS review and 
+                            upload directories
+   --quiet | -q             suppress most status messages 
+   --verbose | -v           print extra messages about internals
+   --help                   print this help message
 EOF
 }
 
+quiet=
+verbose=
+noclean=
 pods=()
 while [ "$1" != "" ]; do
   case "$1" in
@@ -53,6 +65,7 @@ while [ "$1" != "" ]; do
           [ $# -lt 2 ] && { echo Missing argument to $1 option; false; }
           shift
           workdir=$1
+          noclean=1
           ;;
       --midas-data-dir|-m)
           [ $# -lt 2 ] && { echo Missing argument to $1 option; false; }
@@ -68,6 +81,15 @@ while [ "$1" != "" ]; do
           [ $# -lt 2 ] && { echo Missing argument to $1 option; false; }
           shift
           cust_secret=$1
+          ;;
+      --quiet|-q)
+          quiet=1
+          ;;
+      --verbose|-v)
+          verbose=1
+          ;;
+      --no-clean)
+          noclean=1
           ;;
       --help|-h)
           help
@@ -135,7 +157,7 @@ done
     workdir=`echo $prog | sed -e 's/\.[bash]+//'`
     workdir="_${workdir}-$$"
 }
-mkdir $workdir
+[ -d "$workdir" ] || mkdir $workdir
 
 [ -n "$server_pid_file" ] || server_pid_file=$workdir/pubserver.pid
 [ -n "$cust_pid_file" ] || cust_pid_file=$workdir/simcustom.pid
@@ -148,8 +170,8 @@ function launch_test_server {
     [ -z "$custserv_url" ] || {
         custcfg="--set-ph oar_custom_serv_url=$custserv_url"
     }
-    echo starting uwsgi for pubserver...
-    set -x
+    tell starting uwsgi for pubserver...
+    [ -n "$quiet" -o -z "$verbose" ] || set -x
     uwsgi --daemonize $workdir/uwsgi.log --plugin python --enable-threads \
           --http-socket :9090 --wsgi-file $uwsgi_script --pidfile $server_pid_file \
           --set-ph oar_testmode_workdir=$workdir --set-ph oar_testmode_midas_parent=$midasdir \
@@ -159,13 +181,13 @@ function launch_test_server {
 }
 
 function stop_test_server {
-    echo stopping uwsgi for pubserver...
+    tell stopping uwsgi for pubserver...
     uwsgi --stop $server_pid_file
 }
 
 function launch_simcust_server {
-    echo starting uwsgi for simulated customization server "(with key=$custserv_secret)"...
-    set -x
+    tell starting uwsgi for simulated customization server "(with key=$custserv_secret)"...
+    [ -n "$quiet" -o -z "$verbose" ] || set -x
     uwsgi --daemonize $workdir/cust-uwsgi.log --plugin python \
           --http-socket :9091 --wsgi-file $cust_uwsgi --pidfile $cust_pid_file \
           --set-ph auth_key=$custserv_secret
@@ -173,7 +195,7 @@ function launch_simcust_server {
 }
 
 function stop_simcust_server {
-    echo stopping uwsgi for simulated customization server...
+    tell stopping uwsgi for simulated customization server...
     uwsgi --stop $cust_pid_file && rm $cust_pid_file
 }
 
@@ -187,7 +209,11 @@ function stop_servers {
     stop_test_server
     [ -f "$cust_pid_file" ] && stop_simcust_server
     set -e
-}    
+}
+
+function tell {
+    [ -n "$quiet" ] || echo "$@"
+}
 
 function exitopwith { 
     echo $2 > $1.exit
@@ -244,6 +270,8 @@ function property_in_pod {
     python $workdir/get_pod_prop.py "$@"
 }
 
+echo Testing pubserver via curl...
+
 launch_servers
 trap stop_servers SIGKILL SIGINT
 
@@ -252,10 +280,10 @@ set +e
 curlcmd=(curl -s -w '%{http_code}\n' -H 'Authorization: Bearer secret' http://localhost:9090/pod/latest/mds2-1000)
 respcode=`"${curlcmd[@]}"`
 [ "$respcode" == "404" ] || {
-    echo '---------------------------------------'
-    echo FAILED
-    echo "${curlcmd[@]}"
-    echo "Non-existent record does not produce 404 response:" $respcode
+    tell '---------------------------------------'
+    tell FAILED
+    tell "${curlcmd[@]}"
+    tell "Non-existent record does not produce 404 response:" $respcode
 }
 
 # run the tests against the server
@@ -266,36 +294,36 @@ for pod in "${pods[@]}"; do
     id=`property_in_pod identifier $pod`
     oldtitle=`property_in_pod title $pod`
     [ -n "$id" ] || {
-        echo ${prog}: identifier not found in $pod
+        tell ${prog}: identifier not found in $pod
         exit 1
     }
-    echo "Processing POD with identifier =" $id
+    tell "Processing POD with identifier =" $id
 
     curlcmd=(curl -s -w '%{http_code}\n' -H 'Content-type: application/json' -H 'Authorization: Bearer secret' --data @$pod http://localhost:9090/pod/latest)
     respcode=`"${curlcmd[@]}"`
     [ "$respcode" == "201" ] || {
-        echo '---------------------------------------'
-        echo FAILED
-        echo "${curlcmd[@]}"
-        echo "Unexpected response to post to latest:" $respcode
+        tell '---------------------------------------'
+        tell FAILED
+        tell "${curlcmd[@]}"
+        tell "Unexpected response to post to latest:" $respcode
         ((failures += 1))
     }
 
     curlcmd=(curl -s -H 'Authorization: Bearer secret' http://localhost:9090/pod/latest/$id)
     "${curlcmd[@]}" > $workdir/pod.json
     if [ $? -ne 0 ]; then
-        echo '---------------------------------------'
-        echo FAILED
-        echo "${curlcmd[@]}"
-        echo `basename $pod`: "Failed to retrieve POD posted to latest"
+        tell '---------------------------------------'
+        tell FAILED
+        tell "${curlcmd[@]}"
+        tell `basename $pod`: "Failed to retrieve POD posted to latest"
         ((failures += 1))
     else 
         newid=`property_in_pod identifier $workdir/pod.json`
         [ "$id" == "$newid" ] || {
-            echo '---------------------------------------'
-            echo FAILED
-            echo "${curlcmd[@]}"
-            echo `basename $pod`: "Unexpected identifier returned from latest:" $newid
+            tell '---------------------------------------'
+            tell FAILED
+            tell "${curlcmd[@]}"
+            tell `basename $pod`: "Unexpected identifier returned from latest:" $newid
             ((failures += 1))
         }
     fi
@@ -303,45 +331,45 @@ for pod in "${pods[@]}"; do
     curlcmd=(curl -s -w '%{http_code}\n' -H 'Content-type: application/json' -H 'Authorization: Bearer secret' -X PUT --data @$pod http://localhost:9090/pod/draft/$id)
     respcode=`"${curlcmd[@]}"`
     [ "$respcode" == "201" ] || {
-        echo '---------------------------------------'
-        echo FAILED
-        echo ${curlcmd[@]}
-        echo "Unexpected response to post to draft:" $respcode
+        tell '---------------------------------------'
+        tell FAILED
+        tell ${curlcmd[@]}
+        tell "Unexpected response to post to draft:" $respcode
         ((failures += 1))
     }
 
     curlcmd=(curl -s -H 'Authorization: Bearer secret' http://localhost:9090/pod/draft/$id)
     "${curlcmd[@]}" > $workdir/pod.json
     if [ $? -ne 0 ]; then
-        echo '---------------------------------------'
-        echo FAILED
-        echo ${curlcmd[@]}
-        echo `basename $pod`: "Failed to retrieve POD posted to draft"
+        tell '---------------------------------------'
+        tell FAILED
+        tell ${curlcmd[@]}
+        tell `basename $pod`: "Failed to retrieve POD posted to draft"
     else
         newid=`property_in_pod identifier $workdir/pod.json`
         [ "$id" == "$newid" ] || {
-            echo '---------------------------------------'
-            echo FAILED
-            echo ${curlcmd[@]}
-            echo `basename $pod`: "Unexpected identifier returned from draft:" $newid
+            tell '---------------------------------------'
+            tell FAILED
+            tell ${curlcmd[@]}
+            tell `basename $pod`: "Unexpected identifier returned from draft:" $newid
             ((failures += 1))
         }
     fi
         
     newtitle=`property_in_pod title $pod`
     [ "$oldtitle" == "$newtitle" ] || {
-        echo '---------------------------------------'
-        echo FAILED
-        echo ${curlcmd[@]}
-        echo `basename $pod`: "Unexpected title returned from draft:" $newtitle
+        tell '---------------------------------------'
+        tell FAILED
+        tell ${curlcmd[@]}
+        tell `basename $pod`: "Unexpected title returned from draft:" $newtitle
         ((failures += 1))
     }
 
     sleep 1
     [ -f "$workdir/mdbags/$id/metadata/nerdm.json" ] || {
-        echo '---------------------------------------'
-        echo FAILED
-        echo `basename $pod`: "No generated NERDm record found at " \
+        tell '---------------------------------------'
+        tell FAILED
+        tell `basename $pod`: "No generated NERDm record found at " \
              "$workdir/mdbags/$id/metadata/nerdm.json"
         ((failures += 1))
     }
@@ -350,24 +378,24 @@ for pod in "${pods[@]}"; do
          --data '{ "title": "Star Wars", "_editStatus": "done" }' \
          http://localhost:9091/draft/$id || \
     {
-        echo '---------------------------------------'
-        echo WARNING: Back door PATCH to draft failed
+        tell '---------------------------------------'
+        tell WARNING: Back door PATCH to draft failed
     }
 
     curlcmd=(curl -s -H 'Authorization: Bearer secret' http://localhost:9090/pod/draft/$id)
     "${curlcmd[@]}" > $workdir/pod.json
     if [ $? -ne 0 ]; then
-        echo '---------------------------------------'
-        echo FAILED
-        echo ${curlcmd[@]}
-        echo `basename $pod`: "Failed to retrieve POD posted to draft"
+        tell '---------------------------------------'
+        tell FAILED
+        tell ${curlcmd[@]}
+        tell `basename $pod`: "Failed to retrieve POD posted to draft"
     else
         newtitle=`property_in_pod title $workdir/pod.json`
         [ "$newtitle" == "Star Wars" ] || {
-            echo '---------------------------------------'
-            echo FAILED
-            echo ${curlcmd[@]}
-            echo `basename $pod`: "Title from draft failed to get updated:" $newtitle
+            tell '---------------------------------------'
+            tell FAILED
+            tell ${curlcmd[@]}
+            tell `basename $pod`: "Title from draft failed to get updated:" $newtitle
             ((failures += 1))
         }
     fi
@@ -375,56 +403,62 @@ for pod in "${pods[@]}"; do
     curlcmd=(curl -s -w '%{http_code}\n' -H 'Authorization: Bearer secret' -X DELETE http://localhost:9090/pod/draft/$id)
     respcode=`"${curlcmd[@]}"`
     [ "$respcode" == "200" ] || {
-        echo '---------------------------------------'
-        echo FAILED
-        echo ${curlcmd[@]}
-        echo "Unexpected response to delete of draft:" $respcode
+        tell '---------------------------------------'
+        tell FAILED
+        tell ${curlcmd[@]}
+        tell "Unexpected response to delete of draft:" $respcode
         ((failures += 1))
     }
 
     curlcmd=(curl -s -H 'Authorization: Bearer secret' http://localhost:9090/pod/latest/$id)
     "${curlcmd[@]}" > $workdir/pod.json
     if [ $? -ne 0 ]; then
-        echo '---------------------------------------'
-        echo FAILED
-        echo ${curlcmd[@]}
-        echo `basename $pod`: "Failed to retrieve POD posted to latest"
+        tell '---------------------------------------'
+        tell FAILED
+        tell ${curlcmd[@]}
+        tell `basename $pod`: "Failed to retrieve POD posted to latest"
     else
         newid=`property_in_pod identifier $workdir/pod.json`
         [ "$id" == "$newid" ] || {
-            echo '---------------------------------------'
-            echo FAILED
-            echo ${curlcmd[@]}
-            echo `basename $pod`: "Unexpected identifier returned from latest:" $newid
+            tell '---------------------------------------'
+            tell FAILED
+            tell ${curlcmd[@]}
+            tell `basename $pod`: "Unexpected identifier returned from latest:" $newid
             ((failures += 1))
         }
     fi
     [ "$newtitle" == "Star Wars" ] || {
-        echo '---------------------------------------'
-        echo FAILED
-        echo ${curlcmd[@]}
-        echo `basename $pod`: "Failed to commit updated title:" $newtitle
+        tell '---------------------------------------'
+        tell FAILED
+        tell ${curlcmd[@]}
+        tell `basename $pod`: "Failed to commit updated title:" $newtitle
         ((failures += 1))
     }
 
     (( passed = 10 - failures ))
-    echo '###########################################'
-    echo  ${pod}:
-    echo  10 tests, $failures failures, $passed successes
-    echo '###########################################'
+    tell '###########################################'
+    tell  ${pod}:
+    tell  10 tests, $failures failures, $passed successes
+    tell '###########################################'
     (( totfailures += failures ))
 done
 
 trap - ERR
 stop_servers
 
-echo workdir=$workdir
 tottests=$(( 10 * ${#pods[@]} ))
 (( passed = tottests - totfailures ))
 echo '###########################################'
 echo  All files:
 echo  $tottests tests, $totfailures failures, $passed successes
 echo '###########################################'
+
+if [ -z "$noclean" ]; then
+    [ -z "$verbose" ] || tell Cleaning up workdir \(`basename $workdir`\)
+    rm -rf $workdir
+else
+    echo Will not clean-up workdir: $workdir
+fi
 
 exit $totfailures
 
