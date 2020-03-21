@@ -149,6 +149,7 @@ elif 'oar_config_service' in uwsgi.opt:
     srvc.wait_until_up(int(uwsgi.opt.get('oar_config_timeout', 10)),
                        True, sys.stderr)
     cfg = srvc.get(uwsgi.opt.get('oar_config_appname', 'pdr-publish'))
+    cfg = extract_sip_config(cfg)
 elif config.service:
     config.service.wait_until_up(int(os.environ.get('OAR_CONFIG_TIMEOUT', 10)),
                                  True, sys.stderr)
