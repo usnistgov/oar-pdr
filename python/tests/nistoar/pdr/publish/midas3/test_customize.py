@@ -83,6 +83,9 @@ class TestCustomClient(test.TestCase):
             self.client.get_draft("pdr2210")
 
         draft = self.client.create_draft({'ediid': 'ark:/88434/pdr2210', "foo": "bar"})
+        self.assertIsNone(draft, None)
+
+        draft = self.client.get_draft('pdr2210')
         self.assertEqual(draft, {
             'ediid': 'ark:/88434/pdr2210', "foo": "bar", "_editStatus": "in progress"
         })
@@ -105,6 +108,9 @@ class TestCustomClient(test.TestCase):
         self.assertTrue(not self.client.draft_exists("pdr2210"))
 
         draft = self.client.create_draft({'ediid': 'ark:/88434/pdr2210', "foo": "bar"})
+        self.assertIsNone(draft, None)
+
+        draft = self.client.get_draft('pdr2210')
         self.assertEqual(draft, {
             'ediid': 'ark:/88434/pdr2210', "foo": "bar", "_editStatus": "in progress"
         })

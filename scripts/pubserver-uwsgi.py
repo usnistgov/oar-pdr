@@ -182,6 +182,7 @@ if cfg.get('test_mode'):
                  cfg.get('working_dir'), cfg.get('test_data_dir'))
     # clean_working_dir(cfg.get('working_dir'))
 
-logging.warning("Using customization key="+cfg.get('customization_service',{}).get('auth_key'))
 application = wsgi.app(cfg)
+logging.info("pubserver ready")
+
 

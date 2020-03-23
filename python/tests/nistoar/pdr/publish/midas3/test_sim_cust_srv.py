@@ -181,6 +181,18 @@ class TestCustomHandler(test.TestCase):
 
         body = self.svc(req, self.start)
         self.assertIn("201", self.resp[0])
+        self.assertEqual(body, [])
+
+        self.resp = []
+        req = {
+            'PATH_INFO': '/draft/goob',
+            'REQUEST_METHOD': 'GET',
+            'HTTP_AUTHORIZATION': 'Bearer secret',
+            'wsgi.input': StringIO('{"foo": "bar"}')
+        }
+        
+        body = self.svc(req, self.start)
+        self.assertIn("200", self.resp[0])
         body = json.loads("\n".join(body))
         self.assertEqual(body, {"foo":"bar", "_editStatus":"in progress"})
         self.assertEqual(self.svc.data["goob"], {"foo": "bar"})
@@ -207,6 +219,18 @@ class TestCustomHandler(test.TestCase):
         self.resp = []
         body = self.svc(req, self.start)
         self.assertIn("201", self.resp[0])
+        self.assertEqual(body, [])
+
+        self.resp = []
+        req = {
+            'PATH_INFO': '/draft/goob',
+            'REQUEST_METHOD': 'GET',
+            'HTTP_AUTHORIZATION': 'Bearer secret',
+            'wsgi.input': StringIO('{"foo": "bar"}')
+        }
+        
+        body = self.svc(req, self.start)
+        self.assertIn("200", self.resp[0])
         body = json.loads("\n".join(body))
         self.assertEqual(body, {"hank":"frank", "_editStatus":"in progress"})
 
@@ -277,6 +301,17 @@ class TestCustomHandler(test.TestCase):
         }
         body = self.svc(req, self.start)
         self.assertIn("201", self.resp[0])
+
+        self.resp = []
+        req = {
+            'PATH_INFO': '/draft/goob',
+            'REQUEST_METHOD': 'GET',
+            'HTTP_AUTHORIZATION': 'Bearer secret',
+            'wsgi.input': StringIO('{"foo": "bar"}')
+        }
+        
+        body = self.svc(req, self.start)
+        self.assertIn("200", self.resp[0])
         body = json.loads("\n".join(body))
         self.assertEqual(body, {"hank":"frank", "_editStatus":"in progress"})
 

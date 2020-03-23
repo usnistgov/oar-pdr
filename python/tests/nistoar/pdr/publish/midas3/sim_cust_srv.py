@@ -241,7 +241,7 @@ class SimCustomHandler(object):
         try:
             nerdm = json.load(input)
             self.repo.put(id, nerdm)
-            return self.do_GET(id, ok=201, okmsg="Draft created")
+            return self.send_error(201, "Accepted")
         except (ValueError, TypeError) as ex:
             self.send_error(400, "Input is not JSON")
         except Exception as ex:

@@ -62,12 +62,12 @@ class CustomizationServiceClient(object):
         except ValueError as ex:
             if resp and resp.text and \
                ("<body" in resp.text or "<BODY" in resp.text):
-                raise PDRServerError(svcnm, midasid,
+                raise PDRServerError(svcnm, relurl,
                                      message="HTML returned where JSON "+
                                              "expected (is service URL correct?)",
                                      cause=ex)
             else:
-                raise PDRServerError(svcnm, midasid,
+                raise PDRServerError(svcnm, relurl,
                                      message="Unable to parse response as "+
                                              "JSON (is service URL correct?)",
                                      cause=ex)
@@ -127,7 +127,7 @@ class CustomizationServiceClient(object):
         """
         create a draft that can be edited via the customization service
 
-        :return dict: the NERDm record that was set up as a draft (based on the given record) 
+        :return None: nothing returned
         """
         svcnm = self._service_name
         if 'ediid' not in nerdm:
@@ -139,7 +139,23 @@ class CustomizationServiceClient(object):
             self.log.debug("Creating draft in customization service for id="+ nerdm['ediid'])
             resp = requests.put(self.baseurl + id, json=nerdm,
                                 headers=self._headers())
-            return self._get_json(id, resp)
+
+            if resp.status_code >= 500:
+                raise PDRServerError(svcnm, id, resp.status_code, resp.reason)
+            elif resp.status_code == 404:
+                raise IDNotFound(id, "draft ID not found")
+            elif resp.status_code == 401:
+                raise PDRServiceAuthFailure(svcnm, id, resp.reason)
+            elif resp.status_code == 406:
+                raise PDRServiceError(svcnm, id, resp.status_code, resp.reason,
+                                      message="JSON data not available from"+
+                                              " this URL (is URL correct?)")
+            elif resp.status_code >= 400:
+                raise PDRServiceClientError(id, resp.status_code, resp.reason)
+            elif resp.status_code < 200 or resp.status_code > 201:
+                raise PDRServerError(svcnm, id, resp.status_code, resp.reason,
+                                     message="Unexpected response from server: {0} {1}"
+                                     .format(resp.status_code, resp.reason))
         
         except requests.RequestException as ex:
             raise PDRServerError(svcnm, id, cause=ex)
