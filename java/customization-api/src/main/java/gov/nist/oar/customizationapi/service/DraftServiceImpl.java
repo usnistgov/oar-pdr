@@ -43,6 +43,8 @@ public class DraftServiceImpl implements DraftService {
 		logger.info("Put the nerdm record in the data cache.");
 		// return updateDataInCache(recordid, record);
 		try {
+			if (checkRecordInCache(recordid, mconfig.getRecordCollection()))
+				deleteRecordInCache(recordid, mconfig.getRecordCollection());
 			mconfig.getRecordCollection().insertOne(record);
 		} catch (MongoException exp) {
 			logger.error("Error while putting updated data in records db" + exp.getMessage());
