@@ -47,7 +47,7 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
     citationVisible: boolean = false;
     editEnabled: boolean = false;
     _showData: boolean = false;
-
+    headerObj: any;
     /**
      * create the component.
      * @param route   the requested URL path to be fulfilled with this view
@@ -95,8 +95,8 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
         if (this.edstatsvc.editingEnabled()) {
           // Somehow this variable has too init true otherwise the whole page won't display even it's
           // set to true later.
-            this._showData = true;
-            this.edstatsvc.startEditing(this.reqId);
+          console.log("Start editing...");
+          this.edstatsvc.startEditing(this.reqId);
         } else {
             // If edit is not enabled, retreive the (unedited) metadata
             this.mdserv.getMetadata(this.reqId).subscribe(

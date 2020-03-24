@@ -230,6 +230,7 @@ export class WebAuthService extends AuthService {
                     subscriber.next(creds as AuthInfo);
                 },
                 (httperr) => {
+                  console.log('httperr', httperr);
                     if (httperr.status == 404) {
                         // URL returned Not Found
                         subscriber.next({} as AuthInfo);
@@ -266,7 +267,8 @@ export class WebAuthService extends AuthService {
      *                  successful.  
      */
     public loginUser(): void {
-        let redirectURL = this.endpoint + "saml/login?redirectTo=" + window.location.href + "?editmode=true";
+        let redirectURL = this.endpoint + "saml/login?redirectTo=" + window.location.href;
+        // let redirectURL = this.endpoint + "saml/login?redirectTo=" + window.location.href + "?editmode=true";
         console.log("Redirecting to " + redirectURL + " to authenticate user");
         window.location.assign(redirectURL);
     }

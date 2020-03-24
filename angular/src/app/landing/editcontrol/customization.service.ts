@@ -68,7 +68,7 @@ export abstract class CustomizationService {
  */
 export class WebCustomizationService extends CustomizationService {
 
-    readonly draftapi : string = "api/draft/";
+    readonly draftapi : string = "pdr/lp/editor/";
     readonly saveapi : string = "api/savedrecord/";
 
     /**
@@ -233,6 +233,7 @@ export class WebCustomizationService extends CustomizationService {
         //
         return new Observable<Object>(subscriber => {
             let url = this.endpoint + this.draftapi + this.resid;
+            console.log("Discard url", url);
             let obs : Observable<Object> = 
                 this.httpcli.delete(url, { headers: { "Authorization": "Bearer " + this.token } });
             this._wrapRespObs(obs, subscriber);

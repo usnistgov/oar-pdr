@@ -52,7 +52,7 @@ export class EditStatusService {
 
     /**
      * flag indicating whether we get an error.
-     * This flag is used to reset UI display  
+     * This flag is used to reset UI display - push the footer to the bottom of the page  
      */
     get hasError() : boolean { return this._error; }
     private _error : boolean = false;
