@@ -60,17 +60,21 @@ public class DraftServiceImpl implements DraftService {
 	}
 
 	/**
-	 * #############$%$$$^^^^^^^^^ This method returns the nerdm record with changes
+	 * This method returns the nerdm record with changes
 	 * merged on the fly.
 	 * 
 	 * @param recordid
 	 * @param view
 	 * @return
 	 */
-	public Document returnMergedChanges(String recordid, String view) throws CustomizationException {
+	public Document returnMergedChanges(String recordid, String view) throws CustomizationException, ResourceNotFoundException {
 		try {
-			if (view.equalsIgnoreCase("updates"))
-				return mconfig.getChangeCollection().find(Filters.eq("ediid", recordid)).first();
+			Document doc = null;
+			if (view.equalsIgnoreCase("updates")){
+				doc = mconfig.getChangeCollection().find(Filters.eq("ediid", recordid)).first() ;
+				return (doc != null) ?doc: new Document();
+			}
+			//	return mconfig.getChangeCollection().find(Filters.eq("ediid", recordid)).first();
 
 			return mergeDataOnTheFly(recordid);
 			//return mconfig.getRecordCollection().find(Filters.eq("ediid", recordid)).first();
@@ -91,11 +95,11 @@ public class DraftServiceImpl implements DraftService {
 	 * @return Return true if data is updated successfully.
 	 * @throws CustomizationException
 	 */
-	public Document mergeDataOnTheFly(String recordid) throws CustomizationException {
+	public Document mergeDataOnTheFly(String recordid) throws CustomizationException, ResourceNotFoundException {
 		try {
 
 			if (!checkRecordInCache(recordid, mconfig.getRecordCollection()))
-				throw new CustomizationException("Record not found in Cache.");
+				throw new ResourceNotFoundException("Record not found in Cache.");
 
 			Document doc = mconfig.getRecordCollection().find(Filters.eq("ediid", recordid)).first();
 

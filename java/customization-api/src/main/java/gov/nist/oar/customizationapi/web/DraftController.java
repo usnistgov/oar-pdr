@@ -24,6 +24,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.web.bind.UnsatisfiedServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -130,7 +131,7 @@ public class DraftController {
 	@ResponseStatus(HttpStatus.CREATED)
 	public void createRecord(@PathVariable @Valid String ediid, @Valid @RequestBody Document params,
 			@RequestHeader(value = "Authorization", required = false) String serviceAuth, HttpServletRequest request)
-			throws CustomizationException, InvalidInputException, ResourceNotFoundException {
+			throws CustomizationException, InvalidInputException, ResourceNotFoundException,HttpMessageNotReadableException {
 
 		logger.info("Send updated record to backend metadata server:" + ediid);
 		processRequest(request, serviceAuth);
@@ -163,7 +164,7 @@ public class DraftController {
 	@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
 	public ErrorInfo handleCustomization(CustomizationException ex, HttpServletRequest req) {
 		logger.error("There is an error in the service: " + req.getRequestURI() + "\n  " + ex.getMessage(), ex);
-		return new ErrorInfo(req.getRequestURI(), 500, "Internal Server Error");
+		return new ErrorInfo(req.getRequestURI(), 500, "Internal Server Error",req.getMethod());
 	}
 
 	/**
@@ -191,9 +192,23 @@ public class DraftController {
 	@ResponseStatus(HttpStatus.BAD_REQUEST)
 	public ErrorInfo handleStreamingError(InvalidInputException ex, HttpServletRequest req) {
 		logger.info("There is an error processing input data: " + req.getRequestURI() + "\n  " + ex.getMessage());
-		return new ErrorInfo(req.getRequestURI(), 400, "Invalid input error", "PATCH");
+		return new ErrorInfo(req.getRequestURI(), 400, "Invalid input error", req.getMethod());
 	}
+	
 
+	/**
+	 * If input is not of allowed format
+	 * 
+	 * @param ex
+	 * @param req
+	 * @return
+	 */
+	@ExceptionHandler(HttpMessageNotReadableException.class)
+	@ResponseStatus(HttpStatus.BAD_REQUEST)
+	public ErrorInfo handleStreamingError(HttpMessageNotReadableException ex, HttpServletRequest req) {
+		logger.info("There is an error processing input data: " + req.getRequestURI() +" ::"+req.getMethod() + "\n  " + ex.getMessage());
+		return new ErrorInfo(req.getRequestURI(), 400, "Invalid input error", req.getMethod());
+	}
 	/**
 	 * Some generic exception thrown by service
 	 * 
@@ -204,8 +219,8 @@ public class DraftController {
 	@ExceptionHandler(IOException.class)
 	@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
 	public ErrorInfo handleStreamingError(CustomizationException ex, HttpServletRequest req) {
-		logger.info("There is an error accessing data: " + req.getRequestURI() + "\n  " + ex.getMessage());
-		return new ErrorInfo(req.getRequestURI(), 500, "Internal Server Error", "POST");
+		logger.info("There is an error accessing data: " + req.getRequestURI()+" ::"+req.getMethod() + "\n  " + ex.getMessage());
+		return new ErrorInfo(req.getRequestURI(), 500, "Internal Server Error", req.getMethod());
 	}
 
 	/**
@@ -220,7 +235,7 @@ public class DraftController {
 
 	public ErrorInfo handleStreamingError(RuntimeException ex, HttpServletRequest req) {
 		logger.error("Unexpected failure during request: " + req.getRequestURI() + "\n  " + ex.getMessage(), ex);
-		return new ErrorInfo(req.getRequestURI(), 500, "Unexpected Server Error");
+		return new ErrorInfo(req.getRequestURI(), 500, "Unexpected Server Error", req.getMethod());
 	}
 
 	/**
@@ -235,7 +250,7 @@ public class DraftController {
 	@ResponseStatus(HttpStatus.BAD_GATEWAY)
 	public ErrorInfo handleRestClientError(RuntimeException ex, HttpServletRequest req) {
 		logger.error("Unexpected failure during request: " + req.getRequestURI() + "\n  " + ex.getMessage(), ex);
-		return new ErrorInfo(req.getRequestURI(), 502, "Can not connect to backend server");
+		return new ErrorInfo(req.getRequestURI(), 502, "Can not connect to backend server",req.getMethod());
 	}
 	/**
 	 * Exception handling if user is not authorized
@@ -263,7 +278,7 @@ public class DraftController {
 	@ResponseStatus(HttpStatus.UNAUTHORIZED)
 	public ErrorInfo handleRestClientError(InternalAuthenticationServiceException ex, HttpServletRequest req) {
 		logger.error("Unauthorized user or token : " + req.getRequestURI() + "\n  " + ex.getMessage(), ex);
-		return new ErrorInfo(req.getRequestURI(), 401, "Untauthorized token used to acces the service.");
+		return new ErrorInfo(req.getRequestURI(), 401, "Untauthorized token used to acces the service.",req.getMethod());
 	}
 
 	@ExceptionHandler(UnsatisfiedServletRequestParameterException.class)

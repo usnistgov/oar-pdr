@@ -45,7 +45,7 @@ import io.swagger.annotations.ApiOperation;
 
 /**
  * This controller sends JWT, a token generated after successful authentication.
- * This token can be used to further communicated with service.
+ * This token can be used to further communication with service. 
  * 
  * @author Deoyani Nandrekar-Heinis
  */
@@ -76,11 +76,10 @@ public class AuthController {
 
 	public UserToken token( Authentication authentication,@PathVariable @Valid String ediid)
 			throws UnAuthorizedUserException, CustomizationException, UnAuthenticatedUserException, BadGetwayException {
-//		Authentication authentication = null;
+
 		AuthenticatedUserDetails userDetails = null;
 		try {
-//			if (authentication == null)
-//			{authentication = SecurityContextHolder.getContext().getAuthentication();}
+
 			if (authentication == null || authentication.getPrincipal().equals("anonymousUser"))
 				throw new UnAuthenticatedUserException(" User is not authenticated to access this resource.");
 			logger.info("Get the token for authenticated user.");
@@ -175,7 +174,7 @@ public class AuthController {
 	public ErrorInfo handleStreamingError(CustomizationException ex, HttpServletRequest req) {
 		logger.info("There is an internal error connecting to backend service: " + req.getRequestURI() + "\n  "
 				+ ex.getMessage());
-		return new ErrorInfo(req.getRequestURI(), 500, "Internal Server Error", "GET");
+		return new ErrorInfo(req.getRequestURI(), 500, "Internal Server Error", req.getMethod());
 	}
 
 	/**
@@ -191,7 +190,7 @@ public class AuthController {
 	public ErrorInfo handleStreamingError(BadGetwayException ex, HttpServletRequest req) {
 		logger.info("There is an internal error connecting to backend service: " + req.getRequestURI() + "\n  "
 				+ ex.getMessage());
-		return new ErrorInfo(req.getRequestURI(), 502, "Bad Getway Error", "GET");
+		return new ErrorInfo(req.getRequestURI(), 502, "Bad Getway Error", req.getMethod());
 	}
 
 }

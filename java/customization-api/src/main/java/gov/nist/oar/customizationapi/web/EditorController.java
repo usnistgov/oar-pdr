@@ -125,7 +125,7 @@ public class EditorController {
 	@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
 	public ErrorInfo handleCustomization(CustomizationException ex, HttpServletRequest req) {
 		logger.error("There is an error in the service: " + req.getRequestURI() + "\n  " + ex.getMessage(), ex);
-		return new ErrorInfo(req.getRequestURI(), 500, "Internal Server Error");
+		return new ErrorInfo(req.getRequestURI(), 500, "Internal Server Error",req.getMethod());
 	}
 
 	/**
@@ -151,7 +151,7 @@ public class EditorController {
 	@ResponseStatus(HttpStatus.BAD_REQUEST)
 	public ErrorInfo handleStreamingError(InvalidInputException ex, HttpServletRequest req) {
 		logger.info("There is an error processing input data: " + req.getRequestURI() + "\n  " + ex.getMessage());
-		return new ErrorInfo(req.getRequestURI(), 400, "Invalid input error", "PATCH");
+		return new ErrorInfo(req.getRequestURI(), 400, "Invalid input error", req.getMethod());
 	}
 
 	/**
@@ -164,7 +164,7 @@ public class EditorController {
 	@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
 	public ErrorInfo handleStreamingError(CustomizationException ex, HttpServletRequest req) {
 		logger.info("There is an error accessing data: " + req.getRequestURI() + "\n  " + ex.getMessage());
-		return new ErrorInfo(req.getRequestURI(), 500, "Internal Server Error", "POST");
+		return new ErrorInfo(req.getRequestURI(), 500, "Internal Server Error", req.getMethod());
 	}
 
 	/**
@@ -178,7 +178,7 @@ public class EditorController {
 
 	public ErrorInfo handleStreamingError(RuntimeException ex, HttpServletRequest req) {
 		logger.error("Unexpected failure during request: " + req.getRequestURI() + "\n  " + ex.getMessage(), ex);
-		return new ErrorInfo(req.getRequestURI(), 500, "Unexpected Server Error");
+		return new ErrorInfo(req.getRequestURI(), 500, "Unexpected Server Error",req.getMethod());
 	}
 
 	/**
@@ -193,7 +193,7 @@ public class EditorController {
 	@ResponseStatus(HttpStatus.BAD_GATEWAY)
 	public ErrorInfo handleRestClientError(RuntimeException ex, HttpServletRequest req) {
 		logger.error("Unexpected failure during request: " + req.getRequestURI() + "\n  " + ex.getMessage(), ex);
-		return new ErrorInfo(req.getRequestURI(), 502, "Can not connect to backend server");
+		return new ErrorInfo(req.getRequestURI(), 502, "Can not connect to backend server",req.getMethod());
 	}
 
 	
