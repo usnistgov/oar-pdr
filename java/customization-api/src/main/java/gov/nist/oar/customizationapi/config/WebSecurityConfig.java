@@ -46,7 +46,7 @@ public class WebSecurityConfig {
 	 * Rest security configuration for rest api
 	 */
 	@Configuration
-	@Order(1)
+	@Order(2)
 	public static class RestApiSecurityConfig extends WebSecurityConfigurerAdapter {
 		private Logger logger = LoggerFactory.getLogger(RestApiSecurityConfig.class);
 
@@ -78,7 +78,7 @@ public class WebSecurityConfig {
 	 * Security configuration for authorization end pointsq
 	 */
 	@Configuration
-	@Order(2)
+	@Order(3)
 	public static class AuthSecurityConfig extends WebSecurityConfigurerAdapter {
 		private Logger logger = LoggerFactory.getLogger(AuthSecurityConfig.class);
 
