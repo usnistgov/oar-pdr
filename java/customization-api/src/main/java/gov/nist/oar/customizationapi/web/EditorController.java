@@ -111,7 +111,7 @@ public class EditorController {
 	 */
 	@RequestMapping(value = { "{ediid}" }, method = RequestMethod.DELETE, produces = "application/json" )
 	@ApiOperation(value = ".", nickname = "Access editable Record", notes = "Resource returns a record if it is editable and user is authenticated.")
-	public boolean deleteChanges(@PathVariable @Valid String ediid) throws CustomizationException, ResourceNotFoundException {
+	public Document deleteChanges(@PathVariable @Valid String ediid) throws CustomizationException, ResourceNotFoundException {
 		logger.info("Delete the changes made from client side of the record respresented by " + ediid);
 		return uRepo.deleteRecordChanges(ediid);
 	}

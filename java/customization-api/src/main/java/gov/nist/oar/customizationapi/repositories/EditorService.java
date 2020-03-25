@@ -42,5 +42,5 @@ public interface EditorService {
 	 * @throws CustomizationException Exception thrown if any error is thrown while
 	 *                                deleting record from backend
 	 */
-	public boolean deleteRecordChanges(String recordid) throws CustomizationException;
+	public Document deleteRecordChanges(String recordid) throws CustomizationException;
 }

@@ -66,8 +66,14 @@ public class EditorServiceImpl implements EditorService {
 	}
 
 	@Override
-	public boolean deleteRecordChanges(String recordid) throws CustomizationException {
-		return deleteRecordChangesInCache(recordid);
+	public Document deleteRecordChanges(String recordid) throws CustomizationException {
+		deleteRecordChangesInCache(recordid);
+		
+		if (!checkRecordInCache(recordid, mconfig.getRecordCollection()))
+			throw new ResourceNotFoundException("Record not found in Cache.");
+
+		return mconfig.getRecordCollection().find(Filters.eq("ediid", recordid)).first();
+		 
 	}
 
 	/**
@@ -210,22 +216,24 @@ public class EditorServiceImpl implements EditorService {
 
 			Document doc = mconfig.getRecordCollection().find(Filters.eq("ediid", recordid)).first();
 
-			Document tempUpdateOp = null;
+			Document changes = null;
 			if (checkRecordInCache(recordid, mconfig.getChangeCollection())) {
-				tempUpdateOp = mconfig.getChangeCollection().find(Filters.eq("ediid", recordid)).first();
-				if (tempUpdateOp.containsKey("_id"))
-					tempUpdateOp.remove("_id");
+				changes = mconfig.getChangeCollection().find(Filters.eq("ediid", recordid)).first();
+				if (changes.containsKey("_id"))
+					changes.remove("_id");
 
 			}
 
-			if (tempUpdateOp != null) {
-				for (Entry<String, Object> entry : tempUpdateOp.entrySet()) {
+			if (changes != null) {
+				for (Entry<String, Object> entry : changes.entrySet()) {
 //					System.out.println("key:" + entry.getKey());
 					if (doc.containsKey(entry.getKey())) {
 						doc.replace(entry.getKey(), doc.get(entry.getKey()), entry.getValue());
-					}
-					if(entry.getKey().equals("_updateDetails")) {
+					}else {
+					
+					//if(entry.getKey().equals("_updateDetails")) {
 						doc.append(entry.getKey(), entry.getValue());
+					//}
 					}
 
 				}
