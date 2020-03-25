@@ -89,7 +89,6 @@ class Handler(object):
     handlers specialized for the supported resource paths.
     """
 
-
     def __init__(self, path, wsgienv, start_resp, auth=None):
         self._path = path
         self._env = wsgienv

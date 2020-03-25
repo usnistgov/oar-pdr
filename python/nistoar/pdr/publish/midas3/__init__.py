@@ -14,7 +14,7 @@ This module deprecates the pre-publication landing page service (mdserv) which c
 from copy import deepcopy
 from nistoar.pdr.exceptions import ConfigurationException
 
-from ..mdserv import extract_mdserv_config
+from ..mdserv import extract_mdserv_config, midasclient
 
 def extract_sip_config(config, siptype='midas3', service='pubserv'):
     """

@@ -17,7 +17,7 @@ from abc import ABCMeta, abstractmethod, abstractproperty
 from collections import OrderedDict, Mapping
 from copy import deepcopy
 
-from .base import SIPBagger, moddate_of, checksum_of, read_pod
+from .base import SIPBagger, moddate_of, checksum_of, read_pod, read_json
 from .base import sys as _sys
 from . import utils as bagutils
 from ..bagit.builder import BagBuilder, NERDMD_FILENAME, FILEMD_FILENAME
@@ -78,7 +78,254 @@ def midasid_to_bagname(midasid, log=None):
         out = re.sub(r'/', '_', re.sub(r'^ark:/\d+/', '', midasid))
 
     return out
+
+class MIDASSIP(object):
+    """
+    This class represents the Submission Information Package (SIP) provided by MIDAS as
+    input to the bagging process.  It's main function is to provide the location of data 
+    files given an inventory provided by a POD (or NERDm) record.
+    """
+
+    @classmethod
+    def fromPOD(cls, podrec, reviewdir, uploaddir=None):
+        """
+        create an MIDASSIP instance from a given POD record.  This will extract the 
+        MIDAS EDI-ID from the record and use it to determine the directories containing 
+        submitted data.
+        :param podrec  str|dict:  either the POD record data (as a dict) or a filepath to 
+                                  the POD JSON file
+        :param reviewdir    str:  the path to the parent directory containing submission 
+                                  directories for data in the review state.
+        :param uploaddir    str:  the path to the parent directory containing submission
+                                  directories for data not yet in the review state.
+        """
+        if isinstance(podrec, Mapping):
+            pod = podrec
+        else:
+            pod = read_json(podrec)
+        midasid = pod.get('identifier')
+        if not midasid:
+            msg = "Missing required identifier property from POD"
+            if not isinstance(podrec, Mapping):
+                msg += " ("+podrec+")"
+            raise PODError(msg)
+
+        recnum = _midadid_to_dirname(midasid)
+        revdir = os.path.join(reviewdir, recnum)
+        upldir = os.path.join(uploaddir, recnum)
+        if not os.path.isdir(upldir):
+            upldir = None
+
+        return cls(midasid, revdir, upldir, pod)
+
+    @classmethod
+    def fromNERD(cls, nerdrec, reviewdir, uploaddir=None):
+        """
+        create an MIDASSIP instance from a given NERDm record.  This will extract the 
+        MIDAS EDI-ID from the record and use it to determine the directories containing 
+        submitted data.
+        :param nerdrec str|dict:  either the NERDm record data (as a dict) or a filepath to 
+                                  the NERDm JSON file
+        :param reviewdir    str:  the path to the parent directory containing submission 
+                                  directories for data in the review state.
+        :param uploaddir    str:  the path to the parent directory containing submission
+                                  directories for data not yet in the review state.
+        """
+        if isinstance(nerdrec, Mapping):
+            nerd = nerdrec
+        else:
+            nerd = read_json(nerdrec)
+        midasid = nerd.get('ediid')
+        if not midasid:
+            msg = "Missing required ediid property from NERDm record"
+            if not isinstance(nerdrec, Mapping):
+                msg += " ("+nerdrec+")"
+            raise NERDError(msg)
+
+        recnum = _midadid_to_dirname(midasid)
+        revdir = os.path.join(reviewdir, recnum)
+        upldir = os.path.join(uploaddir, recnum)
+        if not os.path.isdir(upldir):
+            upldir = None
+
+        return cls(midasid, revdir, upldir, nerdrec=nerd)
+
+    def __init__(self, midasid, reviewdir, uploaddir=None, podrec=None, nerdrec=None):
+        """
+        :param midasid      str:  the identifier provided by MIDAS, used as the 
+                                  name of the directory containing the data.
+        :param reviewdir    str:  the path to the directory containing submitted
+                                  datasets in the review state.
+        :param uploaddir    str:  the path to the directory containing submitted
+                                  datasets not yet in the review state.
+        :param podrec  str|dict:  either the POD record data (as a dict) or a filepath to 
+                                  the POD JSON file
+        :param nerdrec str|dict:  either the NERDm record data (as a dict) or a filepath to 
+                                  the NERDm JSON file
+        """
+        self.midasid = midasid
+
+        # ensure we have at least one readable input directory
+        self.revdatadir = self._check_input_datadir(reviewdir)
+        self.upldatadir = self._check_input_datadir(uploaddir)
+
+        self._indirs = []
+        if self.revdatadir:
+            self._indirs.append(self.revdatadir)
+        if self.upldatadir:
+            self._indirs.append(self.upldatadir)
+
+        if not self._indirs:
+            raise SIPDirectoryNotFound(msg="No input directories available", sys=self)
+
+        self.nerd = nerdrec
+        self.pod  = podrec
+
+    @property
+    def input_dirs(self):
+        return tuple(self._indirs)
         
+    def _check_input_datadir(self, indir):
+        if not indir:
+            return None
+        if os.path.exists(indir):
+            if not os.path.isdir(indir):
+                raise SIPDirectoryError(indir, "not a directory", sys=self)
+            if not os.access(indir, os.R_OK|os.X_OK):
+                raise SIPDirectoryError(indir, "lacking read/cd permission",
+                                            sys=self)
+
+            log.debug("Found input dir for %s: %s", self.midasid, indir)
+            return indir
+
+        log.debug("Candidate dir for %s does not exist: %s", self.midasid, indir)
+        return None
+
+    def _pod_rec(self):
+        if not self.pod:
+            return OrderedDict([("distribution", [])])
+        
+        if isinstance(self.pod, Mapping):
+            return self.pod
+        
+        return utils.read_json(self.pod)
+
+    def _nerdm_rec(self):
+        if not self.nerd:
+            return OrderedDict([("components", [])])
+        
+        if isinstance(self.nerd, Mapping):
+            return self.nerd
+        
+        return utils.read_json(self.nerd)
+
+    def list_registered_filepaths(self, prefer_pod=False):
+        """
+        return a list of the file paths that registered as being part of this dataset.  
+        A file path is considered registered if it is listed as a member in the metadata.
+        By default, the attached NERDm record is the source of the member list; otherwise,
+        this attached POD record is the source.  If neither are available, this function
+        returns an empty list.
+        :param bool prefer_pod:   if True, the pod file is treated as the source of this 
+                                  information, even if there exists an attached NERDm 
+                                  record.  
+        """
+        if self.nerd and not prefer_pod:
+            return self._filepaths_in_nerd()
+
+        return self._filepaths_in_pod()
+
+    def _filepaths_in_nerd(self):
+        if not self.nerd:
+            return []
+
+        nerd = self._nerdm_rec()
+        return [c['filepath'] for c in nerd['components']
+                              if 'filepath' in c and
+                                 any([t.endswith(":DataFile") or t.endswith(":ChecksumFile")
+                                      for t in c['@type']])]
+
+    _distsvcurl = re.compile("https?://[\w\.:]+/od/ds/(ark:/\w+/)?")
+    def _filepaths_in_pod(self):
+        if not self.pod:
+            return []
+
+        pod = self._pod_rec()
+
+        return [self._distsvcurl.sub('', d['downloadURL']) for d in pod['distribution']
+                                                           if 'downloadURL' in d]
+
+    def registered_files(self, prefer_pod=False):
+        """
+        return a mapping of component filepaths to actual filesystem paths
+        to the corresponding file on disk.  To be included in the map, the 
+        component must be registered in the NERDm metadata (and be included 
+        in the last applied POD file), have a downloadURL that based in the PDR's
+        data distribution service, and there is a corresponding file in either 
+        the SIP upload directory or review directory.  
+
+        :return dict: a mapping of logical filepaths relative to the dataset 
+                      root to full paths to the input data file for all data
+                      files found in the SIP.
+        """
+        out = OrderedDict()
+
+        for fp in self.list_registered_filepaths(prefer_pod):
+            srcpath = self.find_source_file_for(fp)
+            if srcpath:
+                out[fp] = srcpath
+
+        return out
+
+    def available_files(self):
+        """
+        get a list of the data files available in the SIP input directories
+        (including hash files).  Some may not be currently part of the 
+        collection; such files must be listed as distributions in the 
+        POD record.
+
+        :return dict: a mapping of logical filepaths relative to the dataset 
+                      root to full paths to the input data file for all data
+                      files found in the SIP.
+        """
+        datafiles = {}
+
+        # check each of the possible locations; locations found later take
+        # precedence
+        for root in self._indirs:
+            root = root.rstrip('/')
+            for dir, subdirs, files in os.walk(root):
+                reldir = dir[len(root)+1:]
+                for f in files:
+                    # don't descend into subdirectories with ignorable names
+                    for d in range(len(subdirs)-1, -1, -1):
+                        if subdirs[d].startswith('.') or \
+                           subdirs[d].startswith('_'):
+                            del subdirs[d]
+                    
+                    if f.startswith('.') or f.startswith('_'):
+                        # skip dot-files and pod files written by MIDAS
+                        continue
+
+                    datafiles[os.path.join(reldir, f)] = os.path.join(dir, f)
+
+        return datafiles
+
+    def find_source_file_for(self, filepath):
+        """
+        return the location in the SIP of the source data file corresponding 
+        to the given filepath (representing its target location in the output
+        bag).  None is returned if the filepath cannot be found in any of the
+        SIP locations.
+        """
+        for sipdir in reversed(self._indirs):
+            srcpath = os.path.join(sipdir, filepath)
+            if os.path.isfile(srcpath):
+                return srcpath
+        return None
+
+
+    
 
 class MIDASMetadataBagger(SIPBagger):
     """
@@ -178,7 +425,7 @@ class MIDASMetadataBagger(SIPBagger):
             raise SIPDirectoryError(bagdir, "Unable find midas3 bagger metadata; "
                                             "not a metadata bag?")
         try: 
-            bgrmd = read_json(bgrmdf)
+            bgrmd = utils.read_json(bgrmdf)
         except ValueError as ex:
             raise SIPDirectoryError(bagdir, "Unable parse bagger metadata from "+
                                     os.path.join(os.path.basename(bagdir), "metadata",
@@ -236,7 +483,7 @@ class MIDASMetadataBagger(SIPBagger):
 
         :param midasid   str:  the identifier provided by MIDAS, used as the 
                                name of the directory containing the data.
-        :param workdir   str:  the path to the directory that can contain the 
+        :param bagparent str:  the path to the directory that can contain the 
                                output bag
         :param reviewdir str:  the path to the directory containing submitted
                                datasets in the review state.
@@ -251,27 +498,16 @@ class MIDASMetadataBagger(SIPBagger):
         """
         self.midasid = midasid
         self.name = midasid_to_bagname(midasid)
-        self.state = 'upload'
 
         usenm = self.name
         if len(usenm) > 11:
             usenm = usenm[:4]+"..."+usenm[-4:]
         self.log = log.getChild(usenm)
         
-        # ensure we have at least one readable input directory
-        self.revdatadir = self._check_input_datadir(reviewdir)
-        self.upldatadir = self._check_input_datadir(uploaddir)
+        # This will raise an exception if the expected input directories do not
+        # exist.
+        self.sip = MIDASSIP(midasid, reviewdir, uploaddir)
 
-        self._indirs = []
-        if self.revdatadir:
-            self.state = "review"
-            self._indirs.append(self.revdatadir)
-        if self.upldatadir:
-            self._indirs.append(self.upldatadir)
-
-        if not self._indirs:
-            raise SIPDirectoryNotFound(msg="No input directories available", sys=self)
-        
         super(MIDASMetadataBagger, self).__init__(bagparent, config)
 
         # If None, we'll create a ID minter if we need one (in self._mint_id)
@@ -291,7 +527,6 @@ class MIDASMetadataBagger(SIPBagger):
 
         self.schemadir = self.cfg.get('nerdm_schema_dir', pdr.def_schema_dir)
         self.hardlinkdata = self.cfg.get('hard_link_data', True)
-        self.resmd = None
         self.prepared = False
 
         # this will contain a mapping of files that currently appear in the
@@ -337,22 +572,6 @@ class MIDASMetadataBagger(SIPBagger):
 
         seedkey = self.cfg.get('id_minter', {}).get('ediid_data_key', 'ediid')
         return self._minter.mint({ seedkey: ediid })
-
-    def _check_input_datadir(self, indir):
-        if not indir:
-            return None
-        if os.path.exists(indir):
-            if not os.path.isdir(indir):
-                raise SIPDirectoryError(indir, "not a directory", sys=self)
-            if not os.access(indir, os.R_OK|os.X_OK):
-                raise SIPDirectoryError(indir, "lacking read/cd permission",
-                                            sys=self)
-
-            self.log.debug("Found input dir: %s", indir)
-            return indir
-
-        self.log.debug("Candidate dir does not exist: %s", indir)
-        return None
 
     @property
     def bagdir(self):
@@ -401,67 +620,6 @@ class MIDASMetadataBagger(SIPBagger):
                 semaphore = os.path.join(base, UNSYNCED_FILE)
                 if os.path.exists(semaphore):
                     os.remove(semaphore)
-
-    def registered_files(self):
-        """
-        return a mapping of component filepaths to actual filesystem paths
-        to the corresponding file on disk.  To be included in the map, the 
-        component must be registered in the NERDm metadata (and be included 
-        in the last applied POD file), have a downloadURL that based in the PDR's
-        data distribution service, and there is a corresponding file in either 
-        the SIP upload directory or review directory.  
-
-        :return dict: a mapping of logical filepaths relative to the dataset 
-                      root to full paths to the input data file for all data
-                      files found in the SIP.
-        """
-        out = OrderedDict()
-        if not self.resmd:
-            return out
-        
-        for comp in self.resmd.get('components', []):
-            if 'filepath' not in comp or \
-               any([":Subcollection" in t for t in comp.get('@type',[])]):
-                continue
-            srcpath = self.find_source_file_for(comp['filepath'])
-            if srcpath:
-                out[comp['filepath']] = srcpath
-
-        return out
-
-    def available_files(self):
-        """
-        get a list of the data files available in the SIP input directories
-        (including hash files).  Some may not be currently part of the 
-        collection; such files must be listed as distributions in the 
-        POD record.
-
-        :return dict: a mapping of logical filepaths relative to the dataset 
-                      root to full paths to the input data file for all data
-                      files found in the SIP.
-        """
-        datafiles = {}
-
-        # check each of the possible locations; locations found later take
-        # precedence
-        for root in self._indirs:
-            root = root.rstrip('/')
-            for dir, subdirs, files in os.walk(root):
-                reldir = dir[len(root)+1:]
-                for f in files:
-                    # don't descend into subdirectories with ignorable names
-                    for d in range(len(subdirs)-1, -1, -1):
-                        if subdirs[d].startswith('.') or \
-                           subdirs[d].startswith('_'):
-                            del subdirs[d]
-                    
-                    if f.startswith('.') or f.startswith('_'):
-                        # skip dot-files and pod files written by MIDAS
-                        continue
-
-                    datafiles[os.path.join(reldir, f)] = os.path.join(dir, f)
-
-        return datafiles
 
     def _merger_for(self, convention, objtype):
         return self._merger_factory.make_merger(convention, objtype)
@@ -527,12 +685,12 @@ class MIDASMetadataBagger(SIPBagger):
             updmd = OrderedDict([('ediid', self.midasid), ('version', "1.0.0")])
             self.bagbldr.update_metadata_for("", updmd)
 
-            self.resmd = None  # set by ensure_res_metadata()
+            self.sip.nerd = None  # set by ensure_res_metadata()
 
         if not os.path.isfile(self.baggermd_file_for('')):
             self.update_bagger_metadata_for('', {
-                'data_directory': self.revdatadir,
-                'upload_directory': self.upldatadir,
+                'data_directory': self.sip.revdatadir,
+                'upload_directory': self.sip.upldatadir,
                 'bag_parent': self.bagparent,
                 'bagger_config':  self.cfg
             })
@@ -556,15 +714,15 @@ class MIDASMetadataBagger(SIPBagger):
         if updmd:
             self.bagbldr.update_metadata_for("", updmd)
 
-        self.resmd = self.bagbldr.bag.nerdm_record(True);
+        self.sip.nerd = self.bagbldr.bag.nerdm_record(True);
 
         # ensure an initial version
-        if 'version' not in self.resmd:
-            self.resmd['version'] = "1.0.0"
+        if 'version' not in self.sip.nerd:
+            self.sip.nerd['version'] = "1.0.0"
             self.bagbldr.update_annotations_for('',
-                                            {'version': self.resmd["version"]})
+                                            {'version': self.sip.nerd["version"]})
 
-        self.datafiles = self.registered_files()
+        self.datafiles = self.sip.registered_files()
         
 
     def apply_pod(self, pod, validate=True, force=False, lock=True):
@@ -625,9 +783,9 @@ class MIDASMetadataBagger(SIPBagger):
         updated = self.bagbldr.update_from_pod(pod, True, True, force)
 
         # we're done; update the cached NERDm metadata and the data file map
-        if not self.resmd or updated['updated'] or updated['added'] or updated['deleted']:
-            self.resmd = self.bagbldr.bag.nerdm_record(True)
-            self.datafiles = self.registered_files()
+        if not self.sip.nerd or updated['updated'] or updated['added'] or updated['deleted']:
+            self.sip.nerd = self.bagbldr.bag.nerdm_record(True)
+            self.datafiles = self.sip.registered_files()
       
     def _get_ejs_flavor(self, data):
         """
@@ -668,7 +826,7 @@ class MIDASMetadataBagger(SIPBagger):
                              intended for when examine="async", but it will be run 
                              if examine="sync", too.  
         """
-        if not self.resmd:
+        if not self.sip.nerd:
             self.ensure_res_metadata()
 
         # we will determine if any of the submitted data files have changed since 
@@ -725,7 +883,7 @@ class MIDASMetadataBagger(SIPBagger):
                 filepath = pat.sub('', dist['downloadURL'])
 
             if filepath:
-                srcpath = self.find_source_file_for(filepath)
+                srcpath = self.sip.find_source_file_for(filepath)
                 if srcpath and moddate_of(srcpath) > since:
                     self.fileExaminer.add(srcpath, filepath)
                     out.append(filepath)
@@ -772,25 +930,12 @@ class MIDASMetadataBagger(SIPBagger):
         metadata obtained by resolving their DOI metadata.
         """
         self.ensure_preparation()
-        if 'references' in self.resmd:
+        if 'references' in self.sip.nerd:
             self.log.debug("Will enrich references as able")
             synchronize_enhanced_refs(self.bagbldr, config=self.cfg.get('doi_resolver'),
                                       log=self.log)
             nerd = self.bagbldr.bag.nerd_metadata_for("", True)
-            self.resmd['references'] = nerd.get('references',[])
-
-    def find_source_file_for(self, filepath):
-        """
-        return the location in the SIP of the source data file corresponding 
-        to the given filepath (representing its target location in the output
-        bag).  None is returned if the filepath cannot be found in any of the
-        SIP locations.
-        """
-        for sipdir in reversed(self._indirs):
-            srcpath = os.path.join(sipdir, filepath)
-            if os.path.isfile(srcpath):
-                return srcpath
-        return None
+            self.sip.nerd['references'] = nerd.get('references',[])
 
     def ensure_subcoll_metadata(self):
         if not self.datafiles:
@@ -865,17 +1010,17 @@ class MIDASMetadataBagger(SIPBagger):
 
             # update self.resmd; this is cheaper than recreating it from scratch
             # with nerdm_record()
-            if self.resmd:
-                cmps = self.resmd.get('components',[])
+            if self.sip.nerd:
+                cmps = self.sip.nerd.get('components',[])
                 for i in range(len(cmps)):
                     if md['@id'] == cmps[i]['@id']:
                         cmps[i] = md
                         break
                 if i >= len(cmps):
                     if len(cmps) == 0:
-                        self.resmd['components'] = [md]
+                        self.sip.nerd['components'] = [md]
                     else:
-                        self.resmd['components'].append(md)
+                        self.sip.nerd['components'].append(md)
 
 
     def _check_checksum_files(self):
@@ -884,12 +1029,12 @@ class MIDASMetadataBagger(SIPBagger):
         # stored in the metadata for the datafile it is associated with.  If
         # they do not match, the valid metadata flag for the checksum file
         # will be set to false.
-        for comp in self.resmd.get('components', []):
+        for comp in self.sip.nerd.get('components', []):
             if 'filepath' not in comp or \
                not any([":ChecksumFile" in t for t in comp.get('@type',[])]):
                 continue
 
-            srcpath = self.find_source_file_for(comp['filepath'])
+            srcpath = self.sip.find_source_file_for(comp['filepath'])
             if srcpath:
                 # read the checksum stored in the file
                 try:
@@ -1163,7 +1308,7 @@ class PreservationBagger(SIPBagger):
         """
         if config is None:
             config = mdbagger.cfg
-        return PreservationBagger(mdbagger.bagdir, bagparent, mdbagger.revdatadir,
+        return PreservationBagger(mdbagger.bagdir, bagparent, mdbagger.sip.revdatadir,
                                   config, asupdate, mdbagger)
 
     def __init__(self, sipdir, bagparent, datadir=None, config=None,
@@ -1273,7 +1418,7 @@ class PreservationBagger(SIPBagger):
                 raise SIPDirectoryError(bagdir, "Unable to find midas3 bagger metadata; "
                                                 "not a metadata bag?")
             try: 
-                bgrmd = read_json(bgrmdf)
+                bgrmd = utils.read_json(bgrmdf)
             except ValueError as ex:
                 bgrmdf = os.path.join(os.path.basename(sipbag.dir), "metadata",
                                       MIDASMetadataBagger.BGRMD_FILENAME)

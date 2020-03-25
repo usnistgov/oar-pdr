@@ -93,7 +93,7 @@ class TestMIDAS3PublishingService(test.TestCase):
         self.assertTrue(not os.path.exists(w.working_pod))
         self.assertTrue(not os.path.exists(w.next_pod))
 
-        pod = utils.read_json(os.path.join(w.bagger.revdatadir, "_pod.json"))
+        pod = utils.read_json(os.path.join(w.bagger.sip.revdatadir, "_pod.json"))
         w.queue_POD(pod)
         self.assertTrue(os.path.exists(w.lockfile))
         self.assertTrue(not os.path.exists(w.working_pod))
@@ -114,7 +114,7 @@ class TestMIDAS3PublishingService(test.TestCase):
         self.assertTrue(os.path.isfile(w.working_pod))
         self.assertTrue(os.path.isfile(w.next_pod))
 
-        pod = utils.read_json(os.path.join(w.bagger.upldatadir, "_pod.json"))
+        pod = utils.read_json(os.path.join(w.bagger.sip.upldatadir, "_pod.json"))
         self.assertTrue(os.path.isfile(w.lockfile))
         self.assertTrue(os.path.isfile(w.working_pod))
         self.assertTrue(os.path.isfile(w.next_pod))
@@ -206,9 +206,9 @@ class TestMIDAS3PublishingService(test.TestCase):
         self.assertTrue(not os.path.exists(w.working_pod))
         self.assertTrue(not os.path.exists(w.next_pod))
 
-        pod = utils.read_json(os.path.join(w.bagger.revdatadir, "_pod.json"))
+        pod = utils.read_json(os.path.join(w.bagger.sip.revdatadir, "_pod.json"))
         self.svc.update_ds_with_pod(pod)
-        pod = utils.read_json(os.path.join(w.bagger.upldatadir, "_pod.json"))
+        pod = utils.read_json(os.path.join(w.bagger.sip.upldatadir, "_pod.json"))
         self.svc.update_ds_with_pod(pod)
         
         time.sleep(0.1)
