@@ -46,10 +46,12 @@ class TestApp(test.TestCase):
             'review_dir':      self.revdir,
             'upload_dir':      self.upldir,
             'prepub_nerd_dir': datadir,
+            'base_path': '/',
             'update': {
                 'update_auth_key': "secret",
                 'updatable_properties': ['title']
-            }
+            },
+            'download_base_url': '/midas/'
         }
 
         self.svc = wsgi.app(self.config)
@@ -115,6 +117,9 @@ class TestApp(test.TestCase):
         data = json.loads(body[0])
         self.assertEqual(data['ediid'], '3A1EE2F169DD3B8CE0531A570681DB5D1491')
         self.assertEqual(len(data['components']), 8)
+        for cmp in data['components']:
+            if 'downloadURL' in cmp:
+                self.assertNotIn("/od/ds/", cmp['downloadURL'])
         
     def test_head_good_id(self):
         req = {

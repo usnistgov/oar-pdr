@@ -24,7 +24,7 @@ export OAR_HOME=$PACKAGE_DIR
 status=0
 $PACKAGE_DIR/python/runtests.py || status=$?
 echo
-$PACKAGE_DIR/scripts/tests/test-pubserver.sh -q || status=$?
+$PACKAGE_DIR/scripts/tests/test-pubserver.sh -q -M || status=$?
 echo
 
 if [ "$status" -ne 0 ]; then

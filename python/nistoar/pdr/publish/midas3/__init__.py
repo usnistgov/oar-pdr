@@ -16,7 +16,7 @@ from nistoar.pdr.exceptions import ConfigurationException
 
 from ..mdserv import extract_mdserv_config, midasclient
 
-def extract_sip_config(config, siptype='midas3', service='pubserv'):
+def extract_sip_config(config, service='pubserv', siptype='midas3'):
     """
     from a common configuration shared with the preservation service, 
     extract the bits needed by the metadata service.   

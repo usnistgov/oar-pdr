@@ -28,6 +28,7 @@ Options:
                             (ignored unless --custserv-url is specified)
    --midas-data-dir | -m DIR  use DIR as the parent directory containing MIDAS review and 
                             upload directories
+   --with-mdserver | -M     launch and test an accompanying metadata server
    --quiet | -q             suppress most status messages 
    --verbose | -v           print extra messages about internals
    --help                   print this help message
@@ -37,6 +38,7 @@ EOF
 quiet=
 verbose=
 noclean=
+withmdserver=
 pods=()
 while [ "$1" != "" ]; do
   case "$1" in
@@ -81,6 +83,9 @@ while [ "$1" != "" ]; do
           [ $# -lt 2 ] && { echo Missing argument to $1 option; false; }
           shift
           cust_secret=$1
+          ;;
+      --with-mdserver|-M)
+          withmdserver=1
           ;;
       --quiet|-q)
           quiet=1
@@ -164,6 +169,13 @@ done
 [ -n "$cust_uwsgi" ] || cust_uwsgi=python/tests/nistoar/pdr/publish/midas3/sim_cust_srv.py
 [ -n "$custserv_secret" ] || custserv_secret=secret
 custser_url=
+[ -n "$mdserver_uwsgi" ] || mdserver_uwsgi=scripts/ppmdserver3-uwsgi.py
+[ -n "$mdserver_config" ] || mdserver_config=$OAR_ETC_DIR/mdservice-test-config.yml
+[ -n "$mdserver_pid_file" ] || mdserver_pid_file=$workdir/mdserver.pid
+[ -z "$withmdserver" -o -f "$mdserver_config" ] || {
+    echo ${prog}: server config file does not exist as file: $server_config 1&>2
+    false
+}
 
 function launch_test_server {
     custcfg="--set-ph oar_custom_serv_url=http://localhost:9091/draft/"
@@ -199,15 +211,32 @@ function stop_simcust_server {
     uwsgi --stop $cust_pid_file && rm $cust_pid_file
 }
 
+function launch_mdserver {
+    tell starting uwsgi for metadata server...
+    [ -n "$quiet" -o -z "$verbose" ] || set -x
+    uwsgi --daemonize $workdir/mdserver-uwsgi.log --plugin python \
+          --http-socket :9092 --wsgi-file $mdserver_uwsgi --pidfile $mdserver_pid_file \
+          --set-ph oar_testmode_workdir=$workdir --set-ph oar_testmode_midas_parent=$midasdir \
+          --set-ph oar_config_file=$mdserver_config 
+    set +x
+}
+    
+function stop_mdserver {
+    tell stopping uwsgi for metadata server...
+    uwsgi --stop $mdserver_pid_file && rm $mdserver_pid_file
+}
+
 function launch_servers {
     launch_test_server
     [ -n "$custserv_url" ] || launch_simcust_server
+    [ -z "$withmdserver" ] || launch_mdserver
 }
 
 function stop_servers {
     set +e
     stop_test_server
     [ -f "$cust_pid_file" ] && stop_simcust_server
+    [ -f "$mdserver_pid_file" ] && stop_mdserver
     set -e
 }
 
@@ -286,10 +315,23 @@ respcode=`"${curlcmd[@]}"`
     tell "Non-existent record does not produce 404 response:" $respcode
 }
 
+[ -z "$withmdserver" ] || {
+    curlcmd=(curl -s -w '%{http_code}\n' http://localhost:9092/midas/mds2-1000)
+    respcode=`"${curlcmd[@]}"`
+    [ "$respcode" == "404" ] || {
+        tell '---------------------------------------'
+        tell FAILED
+        tell "${curlcmd[@]}"
+        tell "Non-existent record does not produce 404 response:" $respcode
+    }
+}
+
 # run the tests against the server
 totfailures=0
+totcount=0
 for pod in "${pods[@]}"; do
     failures=0
+    count=0
 
     id=`property_in_pod identifier $pod`
     oldtitle=`property_in_pod title $pod`
@@ -308,6 +350,7 @@ for pod in "${pods[@]}"; do
         tell "Unexpected response to post to latest:" $respcode
         ((failures += 1))
     }
+    ((count += 1))
 
     curlcmd=(curl -s -H 'Authorization: Bearer secret' http://localhost:9090/pod/latest/$id)
     "${curlcmd[@]}" > $workdir/pod.json
@@ -327,6 +370,29 @@ for pod in "${pods[@]}"; do
             ((failures += 1))
         }
     fi
+    ((count += 1))
+
+    [ -z "$withmdserver" ] || {
+        curlcmd=(curl -s http://localhost:9092/midas/$id)
+        "${curlcmd[@]}" > $workdir/nerdm.json
+        if [ $? -ne 0 ]; then
+            tell '---------------------------------------'
+            tell FAILED
+            tell "${curlcmd[@]}"
+            tell `basename $pod`: "Failed to retrieve generated NERDm record"
+            ((failures += 1))
+        else 
+            newid=`property_in_pod ediid $workdir/nerdm.json`
+            [ "$id" == "$newid" ] || {
+                tell '---------------------------------------'
+                tell FAILED
+                tell "${curlcmd[@]}"
+                tell `basename $pod`: "Unexpected identifier returned from mdserver rec:" $newid
+                ((failures += 1))
+            }
+        fi
+        ((count += 1))
+    }
 
     curlcmd=(curl -s -w '%{http_code}\n' -H 'Content-type: application/json' -H 'Authorization: Bearer secret' -X PUT --data @$pod http://localhost:9090/pod/draft/$id)
     respcode=`"${curlcmd[@]}"`
@@ -337,6 +403,7 @@ for pod in "${pods[@]}"; do
         tell "Unexpected response to post to draft:" $respcode
         ((failures += 1))
     }
+    ((count += 1))
 
     curlcmd=(curl -s -H 'Authorization: Bearer secret' http://localhost:9090/pod/draft/$id)
     "${curlcmd[@]}" > $workdir/pod.json
@@ -355,6 +422,7 @@ for pod in "${pods[@]}"; do
             ((failures += 1))
         }
     fi
+    ((count += 1))
         
     newtitle=`property_in_pod title $pod`
     [ "$oldtitle" == "$newtitle" ] || {
@@ -364,6 +432,7 @@ for pod in "${pods[@]}"; do
         tell `basename $pod`: "Unexpected title returned from draft:" $newtitle
         ((failures += 1))
     }
+    ((count += 1))
 
     sleep 1
     [ -f "$workdir/mdbags/$id/metadata/nerdm.json" ] || {
@@ -373,6 +442,7 @@ for pod in "${pods[@]}"; do
              "$workdir/mdbags/$id/metadata/nerdm.json"
         ((failures += 1))
     }
+    ((count += 1))
 
     curl -H "Authorization: Bearer $custserv_secret" -X PATCH -H 'Content-type: application/json' \
          --data '{ "title": "Star Wars", "_editStatus": "done" }' \
@@ -399,6 +469,7 @@ for pod in "${pods[@]}"; do
             ((failures += 1))
         }
     fi
+    ((count += 1))
     
     curlcmd=(curl -s -w '%{http_code}\n' -H 'Authorization: Bearer secret' -X DELETE http://localhost:9090/pod/draft/$id)
     respcode=`"${curlcmd[@]}"`
@@ -409,6 +480,7 @@ for pod in "${pods[@]}"; do
         tell "Unexpected response to delete of draft:" $respcode
         ((failures += 1))
     }
+    ((count += 1))
 
     curlcmd=(curl -s -H 'Authorization: Bearer secret' http://localhost:9090/pod/latest/$id)
     "${curlcmd[@]}" > $workdir/pod.json
@@ -427,6 +499,7 @@ for pod in "${pods[@]}"; do
             ((failures += 1))
         }
     fi
+    ((count += 1))
     [ "$newtitle" == "Star Wars" ] || {
         tell '---------------------------------------'
         tell FAILED
@@ -434,23 +507,24 @@ for pod in "${pods[@]}"; do
         tell `basename $pod`: "Failed to commit updated title:" $newtitle
         ((failures += 1))
     }
+    ((count += 1))
 
-    (( passed = 10 - failures ))
+    (( passed = count - failures ))
     tell '###########################################'
     tell  ${pod}:
-    tell  10 tests, $failures failures, $passed successes
+    tell  $count tests, $failures failures, $passed successes
     tell '###########################################'
     (( totfailures += failures ))
+    (( totcount += count ))
 done
 
 trap - ERR
 stop_servers
 
-tottests=$(( 10 * ${#pods[@]} ))
-(( passed = tottests - totfailures ))
+(( passed = totcount - totfailures ))
 echo '###########################################'
 echo  All files:
-echo  $tottests tests, $totfailures failures, $passed successes
+echo  $totcount tests, $totfailures failures, $passed successes
 echo '###########################################'
 
 if [ -z "$noclean" ]; then

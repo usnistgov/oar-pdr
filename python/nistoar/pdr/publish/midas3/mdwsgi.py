@@ -130,7 +130,12 @@ class Handler(object):
     def handle(self):
         meth_handler = 'do_'+self._meth
 
-        path = self._env.get('PATH_INFO', '/')[1:]
+        path = self._env.get('PATH_INFO', '/')
+        if '/' not in path:
+            path += '/'
+        if not path.startswith(self.app.base_path):
+            return self.send_error(404, "Resource not found")
+        path = path[len(self.app.base_path):]
 
         if hasattr(self, meth_handler):
             return getattr(self, meth_handler)(path)
@@ -195,6 +200,7 @@ class Handler(object):
                 mdfile = os.path.join(dir, dsid+".json")
                 if os.path.isfile(mdfile):
                     mdata = read_json(mdfile)
+                    log.info("Retrieving metadata record for id=%s from %s", dsid, mdfile)
 
         except ValueError as ex:
             log.exception("Internal error while parsing JSON file, %s: %s", mdfile, str(ex))
@@ -209,6 +215,7 @@ class Handler(object):
         try:
             mdata = self.get_metadata(dsid)
             if mdata is None:
+                log.info("Metadata record not found for ID="+dsid)
                 return self.send_error(404,
                                        "Dataset with ID={0} not being edited".format(dsid))
         except ValueError as ex:
@@ -232,8 +239,8 @@ class Handler(object):
         datafiles = sip.registered_files()
         
         pat = self._distsvc
-        if self._baseurl and 'components' in mddata:
-            for comp in mddata['components']:
+        if self._baseurl and 'components' in mdata:
+            for comp in mdata['components']:
                 # do a download URL substitution if 1) it looks like a
                 # distribution service URL, and 2) the file exists in our
                 # SIP areas.  
@@ -252,11 +259,13 @@ class Handler(object):
             
             mdata = self.get_metadata(id)
             if mdata is None:
+                log.info("send_datafile: Metadata record not found for ID="+id)
                 return self.send_error(404,"Dataset with ID={0} not available".format(id))
             sip = MIDASSIP.fromNERD(mdata, self.app.revdir, self.app.upldir)
             
         except SIPDirectoryNotFound as ex:
             # shouldn't happen
+            log.warn("No SIP directories for ID="+dsid)
             self.send_error(404,"Dataset with ID={0} not available".format(id))
             return []
         except Exception as ex:
