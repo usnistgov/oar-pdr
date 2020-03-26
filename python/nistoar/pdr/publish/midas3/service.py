@@ -458,6 +458,7 @@ class MIDAS3PublishingService(PublishSystem):
                             todata.append(subdata)
                         
             elif isinstance(fromdata, Mapping):
+                pkey = parent;
                 for key in fromdata:
                     pkey = parent;
                     if pkey:  pkey += "."

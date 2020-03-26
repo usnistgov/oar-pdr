@@ -30,6 +30,10 @@ class MIDAS3DataAccessApp(object):
     """
     def __init__(self, config):
         self.cfg = config
+        level = config.get('loglevel')
+        if level:
+            log.setLevel(level)
+
         self.base_path = config.get('base_path', DEF_BASE_PATH)
 
         self.revdir = config.get('review_dir')
@@ -49,6 +53,9 @@ class MIDAS3DataAccessApp(object):
             self.postpubdir = config.get('cachedir')
             if self.postpubdir:
                 self.postpubdir = os.path.join(self.postpubdir, "_nerd")
+
+        log.debug("Looking for records in:\n  %s\n  %s",
+                  str(self.prepubdir), str(self.postpubdir))
 
         ucfg = config.get('update', {})
         self.update_authkey = ucfg.get("update_auth_key");
@@ -235,22 +242,27 @@ class Handler(object):
         return [ out ]
 
     def _transform_dlurls(self, mdata):
-        sip = MIDASSIP.fromNERD(mdata, self.app.revdir, self.app.upldir)
-        datafiles = sip.registered_files()
-        
-        pat = self._distsvc
-        if self._baseurl and 'components' in mdata:
-            for comp in mdata['components']:
-                # do a download URL substitution if 1) it looks like a
-                # distribution service URL, and 2) the file exists in our
-                # SIP areas.  
-                if 'downloadURL' in comp and pat.search(comp['downloadURL']):
-                    # it matches
-                    filepath = comp.get('filepath', pat.sub('',comp['downloadURL']))
-                    if filepath in datafiles:
-                        # it exists
-                        comp['downloadURL'] = pat.sub(self._baseurl, comp['downloadURL'])
+        try: 
+            sip = MIDASSIP.fromNERD(mdata, self.app.revdir, self.app.upldir)
+            datafiles = sip.registered_files()
+            
+            pat = self._distsvc
+            if self._baseurl and 'components' in mdata:
+                for comp in mdata['components']:
+                    # do a download URL substitution if 1) it looks like a
+                    # distribution service URL, and 2) the file exists in our
+                    # SIP areas.  
+                    if 'downloadURL' in comp and pat.search(comp['downloadURL']):
+                        # it matches
+                        filepath = comp.get('filepath', pat.sub('',comp['downloadURL']))
+                        if filepath in datafiles:
+                            # it exists
+                            comp['downloadURL'] = pat.sub(self._baseurl, comp['downloadURL'])
 
+        except SIPDirectoryNotFound as ex:
+            # (probably) because the record came from the post-pub cache
+            log.debug("NOTE: No SIP directories found for ID=%s", str(midas.get('ediid')))
+        
         return mdata
 
     def send_datafile(self, id, filepath):
