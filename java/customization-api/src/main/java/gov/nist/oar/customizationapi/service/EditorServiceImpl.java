@@ -1,6 +1,7 @@
 package gov.nist.oar.customizationapi.service;
 
 import java.util.ArrayList;
+
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -30,6 +31,12 @@ import gov.nist.oar.customizationapi.helpers.AuthenticatedUserDetails;
 import gov.nist.oar.customizationapi.helpers.JSONUtils;
 import gov.nist.oar.customizationapi.helpers.UserDetailsExtractor;
 import gov.nist.oar.customizationapi.repositories.EditorService;
+
+/**
+ * Implemention of EditorService interface where request to get data, get updates
+ * delete changes and Update field requests are processed and corresponding fields in mongodb is updated.
+ * @author Deoyani Nandrekar-Heinis
+ */
 @Service
 public class EditorServiceImpl implements EditorService {
 	private Logger logger = LoggerFactory.getLogger(EditorServiceImpl.class);

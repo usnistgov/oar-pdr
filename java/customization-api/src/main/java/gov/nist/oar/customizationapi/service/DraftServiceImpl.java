@@ -1,6 +1,7 @@
 package gov.nist.oar.customizationapi.service;
 
 import java.util.Map.Entry;
+
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -20,7 +21,11 @@ import gov.nist.oar.customizationapi.exceptions.CustomizationException;
 import gov.nist.oar.customizationapi.exceptions.InvalidInputException;
 //import gov.nist.oar.customizationapi.helpers.UserDetailsExtractor;
 import gov.nist.oar.customizationapi.repositories.DraftService;
-
+/**
+ * Implemention of DraftService interface where request to put draft in the database, get the draft,
+ * delete once editing completed.
+ * @author Deoyani Nandrekar-Heinis
+ */
 @Service
 public class DraftServiceImpl implements DraftService {
 
@@ -29,8 +34,6 @@ public class DraftServiceImpl implements DraftService {
 	@Autowired
 	MongoConfig mconfig;
 
-//	@Autowired
-//	UserDetailsExtractor userDetailsExtractor;
 
 	@Override
 	public Document getDraft(String recordid, String view) throws CustomizationException {
@@ -41,7 +44,7 @@ public class DraftServiceImpl implements DraftService {
 	@Override
 	public void putDraft(String recordid, Document record) throws CustomizationException, InvalidInputException {
 		logger.info("Put the nerdm record in the data cache.");
-		// return updateDataInCache(recordid, record);
+
 		try {
 			if (checkRecordInCache(recordid, mconfig.getRecordCollection()))
 				deleteRecordInCache(recordid, mconfig.getRecordCollection());
@@ -73,14 +76,14 @@ public class DraftServiceImpl implements DraftService {
 		try {
 			Document doc = null;
 			if (view.equalsIgnoreCase("updates")){
+				
+				if (!checkRecordInCache(recordid, mconfig.getRecordCollection()))
+					throw new ResourceNotFoundException("Record not found in Cache.");
 				doc = mconfig.getChangeCollection().find(Filters.eq("ediid", recordid)).first() ;
 				return (doc != null) ?doc: new Document();
 			}
-			//	return mconfig.getChangeCollection().find(Filters.eq("ediid", recordid)).first();
-
-			return mergeDataOnTheFly(recordid);
-			//return mconfig.getRecordCollection().find(Filters.eq("ediid", recordid)).first();
-		} catch (MongoException exp) {
+				return mergeDataOnTheFly(recordid);
+			} catch (MongoException exp) {
 			logger.error("Error while putting updated data in records db" + exp.getMessage());
 			throw new CustomizationException("Error updating records (database)" + exp.getMessage());
 

@@ -105,7 +105,7 @@ import org.springframework.core.Ordered;
  */
 @Configuration
 //@EnableWebSecurity
-@Order(Ordered.HIGHEST_PRECEDENCE)
+//@Order(Ordered.HIGHEST_PRECEDENCE)
 public class SamlSecurityConfig extends WebSecurityConfigurerAdapter {
 	private static Logger logger = LoggerFactory.getLogger(SamlSecurityConfig.class);
 
