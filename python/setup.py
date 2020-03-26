@@ -57,11 +57,11 @@ def find_oar_metadata(submoddir='oar-metadata'):
     outpy = os.path.join(out, "python", "nistoar")
     if not os.path.exists(out):
         msg = "oar-metadata submodule not found in {0} subdirectory" 
-        raise RuntimeError(msg.format(dirname))
+        raise RuntimeError(msg.format(out))
     if not os.path.exists(outpy):
         msg = "{0} subdirectory does apparently does not contain oar-metadata " \
               "submodule"
-        raise RuntimeError(msg.format(dirname))
+        raise RuntimeError(msg.format(out))
     return out
 
 def build_oar_metadata(pkgdir, buildlib, buildscrp):

@@ -1,0 +1,87 @@
+<!-- Make the pop up window look similar to the landingpage with black header bar and blue tool bar -->
+<div class="popup-header-bar">
+    <h2 class="popup-header">{{title}}</h2>
+</div>
+
+<div class="popup-tool-bar">
+    <!-- Buttons are arranged from right to left -->
+
+    <p-toolbar name="toolbar">
+        <div class="ui-toolbar-group-right">
+            <!-- Cancel button -->
+            <button pButton type="submit" class="btn-cancel" (click)="activeModal.close('Close click')" label="Cancel"
+                icon="faa faa-trash faa-1x icon-white" iconPos="left">
+            </button>
+
+            <!-- Save button -->
+            <button pButton type="submit" class="btn-Save"
+                style="float:right;margin:0em 1em 2em 1em;width:150px; height:2em; background-color:green;color:white;padding-right: 1em;"
+                (click)="saveTopic();" label="Save" icon="faa faa-save faa-1x icon-white" iconPos="left" [disabled]="inputValue[field].length==0">
+            </button>
+        </div>
+    </p-toolbar>
+</div>
+
+<!-- Selected topics -->
+<div style="width:90%; margin: 1em auto 1em auto;">
+    <table width="100%" align="center">
+        <tr class="selected-topic-header">
+            <td class="selected-topic-header">
+                <span>Selected topics:</span>
+            </td>
+            <td width="50px">
+            </td>
+        </tr>
+        <tr *ngFor="let topic of inputValue[field]; let i = index; trackBy: trackByFn" align="top"
+            style="border-bottom:1pt solid black; background-color: ivory;" height="2em">
+            <td style="padding-left: 2em;">
+                <span (click)="searchAndExpandTaxonomyTree(topic, true)"
+                    style="color: #1E6BA1; cursor: pointer;">{{topic}}</span>
+            </td>
+            <td width="50px">
+                <i class="faa faa-trash" (click)="deleteTopic(i)"
+                    style="float: right;cursor: pointer;color:grey; margin: .5em;" data-toggle="tooltip"
+                    title="Delete affiliation"></i>
+            </td>
+        </tr>
+    </table>
+</div>
+
+<!-- Topic search 
+  -  Once user start typing in this input field, the taxonomy list below will be filtered.
+  -->
+<div style="width:90%; margin: 1em auto 0em auto;">
+    <input type="text" style="height:35px;background-color: #E7FFFE;" [(ngModel)]="searchText"
+        (input)="onSearchTextChange()" placeholder="Type here to filter topics" />
+</div>
+
+<!-- Taxonomy list to select -->
+<div class="selected-topic-header" style="width:90%; margin: 0em auto 0em auto;">
+    <span>Select topic(s) from the NIST research taxonomy (Click
+        on name to select; scroll down to see more):</span>
+
+    <!-- Reset button to reset the taxonomy list to it's original state:
+      - Display only first level
+      - No filtering
+      -->
+    <i class="faa faa-recycle reset" (click)="showAllTopics()"data-toggle="tooltip" title="Reset"></i>
+</div>
+<div style="clear: both;"></div>
+<div #panel0
+    style="width:90%; margin: 0em auto 2em auto; height: 50vh; overflow-y: scroll; border: 1px solid lightgrey;">
+
+    <div style="margin: .5em 1em .5em 1em;">
+        <p-treeTable *ngIf="isVisible" [value]="taxonomyTree">
+            <ng-template pTemplate="body" let-rowNode let-rowData="rowData">
+                <tr (click)="updateTopics(rowNode)">
+                    <td (mouseover)="setHighlight(rowData)" (mouseout)="setHighlight('')"
+                        [ngStyle]="{'background-color': rowBackColor(rowData), 'display': rowVisibility(rowData), 'cursor': getTopicCursor(rowNode)}">
+                        <p-treeTableToggler [rowNode]="rowNode"></p-treeTableToggler>
+                        <span [ngStyle]="{'color': rowColor(rowNode)}">{{rowData.name}}</span>
+                    </td>
+                </tr>
+            </ng-template>
+        </p-treeTable>
+    </div>
+</div>
+

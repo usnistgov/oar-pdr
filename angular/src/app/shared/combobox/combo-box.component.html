@@ -1,0 +1,14 @@
+<div (click)="handleAsideClick($event)" class="combo-container" style="display: inline-block; width:100%;">
+  <div style="width:100%; height:2em; vertical-align: top; display: inline-block;">
+    <input type="text" [(ngModel)]="controlField" (ngModelChange)="textChange($event)" ngControl="controlField"
+      name="controlField" (keyup)="onKeyDownAction($event)" (focus)="onFocusEventAction()" (blur)="onBlurEventAction()"
+      style="height: 2em; max-width:calc(100% - 1.8em); margin: 0; float: left;" />
+    <button style="float:right;width:1.8em;margin-top: 2px;" class="drop-down-button" (click)="toogleDropDown()"><i
+        [ngClass]="arrowClass()"></i></button>
+  </div>
+  <div class="data-container" *ngIf="showDropDown">
+    <div style="padding-left: .5em;" *ngFor="let data of dummyDataList; let i = index" class="data-list"
+      (click)="updateTextBox(data[columnName])" (mouseover)="counter=i;checkHighlight(i)"
+      [ngClass]="{highlight:checkHighlight(i)}">{{data[columnName]}}</div>
+  </div>
+</div>

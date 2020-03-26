@@ -1,0 +1,57 @@
+<!-- edit control panel (visible when editing is enabled) -->
+<pdr-edit-control *ngIf="editEnabled" [inBrowser]="inBrowser"
+                  [(mdrec)]="md" [requestID]="requestId"></pdr-edit-control>
+
+<!-- landing page panel -->
+<div class="ui-grid ui-grid-responsive ui-grid-pad center">
+  <div class="card landingcard">
+
+    <div *ngIf="md === null">
+      <div class="ui-g-10 ui-md-10 ui-lg-10 ui-sm-12" style="padding-left: 1%">
+        <b>Landing page is loading...</b>
+      </div>
+    </div>
+
+    <!-- Pop-up tool menu (for small-width devices) -->
+    <div *ngIf="md !== null && inBrowser"
+         class="ui-sm-1 d-none d-block d-sm-block d-md-none ">
+      <button style="position: absolute; top: 1.0rem; left: 1.5rem" type="button"
+              pButton icon="faa faa-list" class="ui-button ui-button-icon-only" 
+              (click)="menu3.togglePopup($event)"></button>
+      <tools-menu #menu3 [record]="md" [isPopup]="true" (toggle_citation)="toggleCitation()"
+                         (scroll)="goToSection($event)"></tools-menu>
+    </div>
+
+    <div *ngIf="md">
+      <div class="ui-g">
+
+        <!-- landing page content -->
+        <div class="ui-g-10 ui-md-10 ui-lg-10 ui-sm-12">
+
+          <app-landing [record]="md" [inBrowser]="inBrowser" [requestId]="reqId"></app-landing>
+
+        </div>
+
+        <!-- citation pop-up -->
+        <div *ngIf="inBrowser">
+          <citation-popup [citetext]="getCitation()"
+                          [(visible)]="citationVisible"></citation-popup>
+        </div>
+
+        <!-- side tool menu (for tablets and desktop displays  -->
+        <div class="ui-g-2 ui-md-2 ui-lg-2 ui-sm-12">
+          <div class="ui-g" style="position: sticky; top: 0;">
+            <div class="ui-g-12 ui-md-12 ui-lg-12 ui-sm-12">
+              <div *ngIf="inBrowser" class="d-none d-md-block d-lg-block d-xl-block ">
+
+                <tools-menu #menu2 [record]="md" [isPopup]="false"
+                                   (toggle_citation)="toggleCitation()"
+                                   (scroll)="goToSection($event)"></tools-menu>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

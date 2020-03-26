@@ -4,7 +4,7 @@ describe('About Page', function() {
 
   beforeEach(async () => {
     //browser.waitForAngular();
-    return await browser.get('/about');
+    return await browser.get('/pdr/about');
   });
 
   it('should display title of about page', async() => {

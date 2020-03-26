@@ -1,0 +1,72 @@
+.edit-control-buttons {
+    background-color: #153971;
+    color: #FFFFFF; 
+    height: 3em;
+}
+  
+.btn-label {
+    position: relative;
+    left: -19px;
+    top: -1px;
+    display: inline-block;
+    padding: 3px 0px 0px 12px;
+    background: rgba(0,0,0,0.15);
+    border-radius: 3px 0 0 3px; 
+    height: inherit;
+}
+  
+.btn-labeled {
+    padding-top: 0;
+    padding-bottom: 0;
+    width:140px; 
+}
+
+.btn {
+    margin-bottom:10px;
+    height:2em;
+}
+
+#ec-edit-btn {
+    background-color:rgb(245, 198, 54);
+    color:black;
+    border-color: rgb(245, 198, 54);
+    float:right;
+    margin:.5em 1em .5em 0em;
+}
+
+#ec-quited-btn {
+    background-color:rgb(221, 172, 9);
+    color:white;
+    border-color: rgb(221, 172, 9);
+}
+
+#ec-submit-btn {
+    background-color:green;
+    color:white;
+    border-color: green;
+    float:right;
+    margin:.5em 1em .5em 0em;
+}
+
+#ec-discard-btn {
+    background-color:rgb(94, 94, 94);
+    color:white;
+    border-color: grey;
+    float:right;
+    margin:.5em .5em .5em 0em;
+}
+
+#ec-preview-btn {
+    background-color:rgb(9, 108, 221);;
+    color:white;
+    border-color: rgb(9, 108, 221);;
+    float:right;
+    margin:.5em 1em .5em 0em;
+}
+
+#ec-info-btn {
+    float:right;
+    margin:.3em 1em auto 0.2em;
+    font-size: 30px;
+    cursor: pointer;
+}
