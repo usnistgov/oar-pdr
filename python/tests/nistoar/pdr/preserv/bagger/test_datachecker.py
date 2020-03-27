@@ -7,6 +7,7 @@ from nistoar.testing import *
 from nistoar.pdr.distrib import client as dcli
 from nistoar.pdr.preserv.bagit.bag import NISTBag
 import nistoar.pdr.preserv.bagger.datachecker as dc
+from nistoar.pdr import utils
 
 storedir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "distrib", "data")
 basedir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(storedir))))))
@@ -59,6 +60,22 @@ def tearDownModule():
         loghdlr = None
     rmtmpdir()
 
+def mk_dlurls_local(bagdir):
+    # convert the download urls so that they point to the local
+    # sim dist service
+    datadotnist = re.compile(r'^https://data.nist.gov/')
+
+    mddir = os.path.join(bagdir, "metadata")
+    for (dpath, dirs, files) in os.walk(mddir):
+        if 'nerdm.json' not in files:
+            continue
+        nf = os.path.join(dpath, 'nerdm.json')
+        nerd = utils.read_json(nf)
+        if 'downloadURL' in nerd:
+            nerd['downloadURL'] = \
+                datadotnist.sub('http://localhost:9091/',nerd['downloadURL'])
+            utils.write_json(nerd, nf)
+        
 class TestDataChecker(test.TestCase):
 
     hbagsrc = os.path.join(storedir, "pdr2210.3_1_3.mbag0_3-5.zip")
@@ -71,6 +88,7 @@ class TestDataChecker(test.TestCase):
         if os.system(uz) != 0:
             raise RuntimeError("Failed to unpack sample bag")
         self.hbag = os.path.join(bagp, os.path.basename(self.hbagsrc[:-4]))
+        mk_dlurls_local(self.hbag)
 
         self.config = { 'store_dir': storedir }
         self.ckr = dc.DataChecker(NISTBag(self.hbag), self.config,
@@ -218,6 +236,7 @@ class TestDataCheckerWithService(test.TestCase):
         if os.system(uz) != 0:
             raise RuntimeError("Failed to unpack sample bag")
         self.hbag = os.path.join(bagp, os.path.basename(self.hbagsrc[:-4]))
+        mk_dlurls_local(self.hbag)
 
         self.config = {
             'store_dir': storedir,
