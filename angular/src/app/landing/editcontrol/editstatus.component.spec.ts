@@ -7,11 +7,14 @@ import { UserMessageService } from '../../frame/usermessage.service';
 import { AuthService, WebAuthService, MockAuthService } from '../editcontrol/auth.service';
 import { UpdateDetails, UserDetails } from './interfaces';
 import { LandingConstants } from '../constants';
+import { AppConfig } from '../../config/config';
+import { config, testdata } from '../../../environments/environment';
 
 describe('EditStatusComponent', () => {
     let component : EditStatusComponent;
     let fixture : ComponentFixture<EditStatusComponent>;
     let authsvc : AuthService = new MockAuthService(undefined);
+    let cfg : AppConfig = new AppConfig(config);
     let userDetails: UserDetails = {
         'userId': 'dsn1',
         'userName': 'test01',
@@ -31,7 +34,8 @@ describe('EditStatusComponent', () => {
             declarations: [ EditStatusComponent ],
             providers: [
                 UserMessageService, MetadataUpdateService, DatePipe,
-                { provide: AuthService, useValue: authsvc }
+                { provide: AuthService, useValue: authsvc },
+                { provide: AppConfig, useValue: cfg }
             ]
         }).compileComponents();
 
@@ -54,10 +58,10 @@ describe('EditStatusComponent', () => {
         let cmpel = fixture.nativeElement;
         let bardiv = cmpel.querySelector(".ec-status-bar");
         expect(bardiv).not.toBeNull();
-        expect(bardiv.childElementCount).toBe(2);
+        expect(bardiv.childElementCount).toBe(3);
         expect(bardiv.firstElementChild.tagName).toEqual("SPAN");
-        expect(bardiv.firstElementChild.innerHTML).toEqual("");
-        expect(bardiv.firstElementChild.nextElementSibling.tagName).toEqual("DIV");
+        expect(bardiv.firstElementChild.innerHTML).toContain("required field");
+        expect(bardiv.firstElementChild.nextElementSibling.tagName).toEqual("SPAN");
     });
 
     it('showMessage()', () => {
@@ -70,7 +74,7 @@ describe('EditStatusComponent', () => {
         let cmpel = fixture.nativeElement;
         let bardiv = cmpel.querySelector(".ec-status-bar");
         expect(bardiv).not.toBeNull();
-        expect(bardiv.firstElementChild.innerHTML).toEqual("Okay, Boomer.");
+        expect(bardiv.firstElementChild.innerHTML).toContain("required field");
 
         component.showMessage("Wait...", true, "blue");
         expect(component.message).toBe("Wait...");
@@ -78,7 +82,7 @@ describe('EditStatusComponent', () => {
         expect(component.isProcessing).toBeTruthy();
         fixture.detectChanges();
 
-        expect(bardiv.firstElementChild.innerHTML).toEqual("Wait...");
+        expect(bardiv.firstElementChild.innerHTML).toContain("required field");
     });
 
     it('showLastUpdate()', () => {
@@ -90,23 +94,23 @@ describe('EditStatusComponent', () => {
         let cmpel = fixture.nativeElement;
         let bardiv = cmpel.querySelector(".ec-status-bar");
         expect(bardiv).not.toBeNull();
-        expect(bardiv.firstElementChild.innerHTML).toContain("To see any previously");
+        expect(bardiv.firstElementChild.innerHTML).toContain("required field");
         
         component.showLastUpdate(EDIT_MODES.EDIT_MODE);
         expect(component.message).toContain('Click on the <i class="faa faa-pencil"></i> button to edit');
         fixture.detectChanges();
-        expect(bardiv.firstElementChild.innerHTML).toContain('<i class="faa faa-undo"></i> button to discard the change');
+        expect(bardiv.firstElementChild.innerHTML).toContain('required field');
 
         component.setLastUpdateDetails(updateDetails);
         
         component.showLastUpdate(EDIT_MODES.PREVIEW_MODE);
         expect(component.message).toContain("There are un-submitted changes last edited on 2025 April 1");
         fixture.detectChanges();
-        expect(bardiv.firstElementChild.innerHTML).toContain('There are un-submitted changes last edited');
+        expect(bardiv.firstElementChild.innerHTML).toContain('required field');
         component.showLastUpdate(EDIT_MODES.EDIT_MODE);
         expect(component.message).toContain("This record was edited");
         fixture.detectChanges();
-        expect(bardiv.firstElementChild.innerHTML).toContain('This record was edited by test01 NIST on 2025 April 1');
+        expect(bardiv.firstElementChild.innerHTML).toContain('required field');
 
         component.showLastUpdate(EDIT_MODES.DONE_MODE);
         expect(component.message).toContain('You can now close this window');

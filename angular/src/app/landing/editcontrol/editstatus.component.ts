@@ -3,6 +3,7 @@ import { Component, OnInit } from '@angular/core';
 import { MetadataUpdateService } from './metadataupdate.service';
 import { UpdateDetails } from './interfaces';
 import { LandingConstants } from '../constants';
+import { EditStatusService } from './editstatus.service';
 
 /**
  * A panel inside the EditControlComponent that displays information about the status of 
@@ -35,10 +36,10 @@ export class EditStatusComponent implements OnInit {
      * @param mdupdsvc    the MetadataUpdateService that is receiving updates.  This will be 
      *                    used to be alerted when updates have been made.
      */
-    constructor(public mdupdsvc : MetadataUpdateService) {
+    constructor(public mdupdsvc : MetadataUpdateService, public edstatsvc: EditStatusService,) {
 
         this.EDIT_MODES = LandingConstants.editModes;
-        this.editMode = this.EDIT_MODES.VIEWONLY_MODE;
+        this.editMode = this.EDIT_MODES.EDIT_MODE;
         this.mdupdsvc.updated.subscribe((details) => { 
             this._updateDetails = details; 
             this.showLastUpdate(this.EDIT_MODES.EDIT_MODE);  //Once last updated date changed, refresh the status bar message

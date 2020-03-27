@@ -48,15 +48,10 @@ describe('EditControlComponent', () => {
 
     it('should initialize', () => {
         expect(component).toBeDefined();
-        expect(component.editMode).toBe(EDIT_MODES.PREVIEW_MODE);
 
         let cmpel = fixture.nativeElement;
         let btns = cmpel.querySelectorAll("button");
-        expect(btns.length).toEqual(3);
-
-        let statusdiv = cmpel.querySelector(".ec-status-bar");
-        expect(statusdiv).not.toBeNull();
-        expect(statusdiv.childElementCount).toBe(2);
+        expect(btns.length).toEqual(2);
     });
 
     it('can get authorized', async () => {
@@ -68,14 +63,13 @@ describe('EditControlComponent', () => {
 
     // test startEditing()
     it('startEditing()', async(() => {
-        expect(component.editMode).toBe(EDIT_MODES.PREVIEW_MODE);
         let cmpel = fixture.nativeElement;
         let edbtn = cmpel.querySelector("#ec-edit-btn") 
         let discbtn = cmpel.querySelector("#ec-discard-btn") 
         let donebtn = cmpel.querySelector("#ec-done-btn") 
         let prevubtn = cmpel.querySelector("#ec-preview-btn")  
-        expect(prevubtn).toBeNull();
-        expect(edbtn.disabled).toBeFalsy();
+        // expect(prevubtn).toBeNull();
+        // expect(edbtn.disabled).toBeFalsy();
         expect(donebtn.disabled).toBeFalsy();
         expect(discbtn.disabled).toBeFalsy();
 
@@ -88,7 +82,7 @@ describe('EditControlComponent', () => {
             discbtn = cmpel.querySelector("#ec-discard-btn")
             donebtn = cmpel.querySelector("#ec-done-btn")  
             prevubtn = cmpel.querySelector("#ec-preview-btn")  
-            expect(prevubtn.disabled).toBeFalsy();
+            // expect(prevubtn.disabled).toBeFalsy();
             expect(donebtn.disabled).toBeFalsy();
             expect(discbtn.disabled).toBeFalsy();
             expect(edbtn).toBeNull();
@@ -98,7 +92,6 @@ describe('EditControlComponent', () => {
 
     // test discardEdits()
     it('discardEdits()', async(() => {
-        expect(component.editMode).toBe(EDIT_MODES.PREVIEW_MODE);
         let cmpel = fixture.nativeElement;
         let edbtn = cmpel.querySelector("#ec-edit-btn") 
 
@@ -162,7 +155,6 @@ describe('EditControlComponent', () => {
 
     // test pauseEditing
     it('pauseEditing()', async(() => {
-        expect(component.editMode).toBe(EDIT_MODES.PREVIEW_MODE);
         let cmpel = fixture.nativeElement;
         let edbtn = cmpel.querySelector("#ec-edit-btn") 
 
@@ -177,7 +169,6 @@ describe('EditControlComponent', () => {
             component.pauseEditing();
             fixture.whenStable().then(() => {
                 fixture.detectChanges();
-                expect(component.editMode).toBe(EDIT_MODES.PREVIEW_MODE);
                 
                 edbtn = cmpel.querySelector("#ec-edit-btn")     
                 let discbtn = cmpel.querySelector("#ec-discard-btn") 
