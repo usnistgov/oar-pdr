@@ -337,22 +337,27 @@ export class MetadataUpdateService {
                 (err) => {
                   console.log("err", err);
                     // err will be a subtype of CustomizationError
-                    if (err.status == 404) {
+                    if (err.statusCode == 404) {
                       // URL returned Not Found, display rmm record in view only mode
-                      this.mdres.next(this.rmmRec);
                       this.edstatsvc._setEditMode(this.EDIT_MODES.VIEWONLY_MODE);
+                      console.log('this.rmmRec', this.rmmRec);
+                      this.mdres.next(this.rmmRec);
+                      subscriber.next(this.rmmRec);
+                      subscriber.complete();
+                    }else{
+                      if (err.type == 'user') {
+                          console.error("Failed to retrieve draft metadata changes: user error:" + err.message);
+                          this.msgsvc.error(err.message);
+                          subscriber.next(null);
+                      }
+                      else {
+                          console.error("Failed to retrieve draft metadata changes: server error:" + err.message);
+                          this.msgsvc.syserror(err.message);
+                          subscriber.next(null);
+                      }
+                      
+                      subscriber.complete();
                     }
-
-                    if (err.type == 'user') {
-                        console.error("Failed to retrieve draft metadata changes: user error:" + err.message);
-                        this.msgsvc.error(err.message)
-                    }
-                    else {
-                        console.error("Failed to retrieve draft metadata changes: server error:" + err.message);
-                        this.msgsvc.syserror(err.message)
-                    }
-                    subscriber.next(null);
-                    subscriber.complete();
                 }
             );
         });
