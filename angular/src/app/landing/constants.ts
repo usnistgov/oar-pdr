@@ -3,7 +3,8 @@ export class LandingConstants {
       return {
         EDIT_MODE: 'editMode',
         PREVIEW_MODE: 'previewMode',
-        DONE_MODE: 'doneMode'
+        DONE_MODE: 'doneMode',
+        VIEWONLY_MODE: 'viewOnlyMode'
       }
     }
 }

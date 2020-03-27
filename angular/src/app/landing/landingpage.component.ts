@@ -12,6 +12,7 @@ import { EditStatusService } from './editcontrol/editstatus.service';
 import { NerdmRes, NERDResource } from '../nerdm/nerdm';
 import { IDNotFound } from '../errors/error';
 import { MetadataUpdateService } from './editcontrol/metadataupdate.service';
+import { LandingConstants } from './constants';
 
 /**
  * A component providing the complete display of landing page content associated with 
@@ -48,6 +49,8 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
     editEnabled: boolean = false;
     _showData: boolean = false;
     headerObj: any;
+    public EDIT_MODES: any;
+
     /**
      * create the component.
      * @param route   the requested URL path to be fulfilled with this view
@@ -69,6 +72,7 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
         this.reqId = this.route.snapshot.paramMap.get('id');
         this.inBrowser = isPlatformBrowser(platformId);
         this.editEnabled = cfg.get('editEnabled', false) as boolean;
+        this.EDIT_MODES = LandingConstants.editModes;
 
         this.mdupdsvc._subscribe(
             (md) => {
@@ -88,39 +92,78 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
     ngOnInit() {
         console.log("initializing LandingPageComponent around id=" + this.reqId);
 
+        // Retrive Nerdm record and keep it in case we need to display it in preview mode
+        // use case: user manually open PDR landing page but the record was not edited by MIDAS
+
+        this.mdserv.getMetadata(this.reqId).subscribe(
+          (data) => {
+              // successful metadata request
+              this.md = data;
+              if (!this.md) {
+                  // id not found; reroute
+                  console.error("No data found for ID=" + this.reqId);
+                  this.router.navigateByUrl("/not-found/" + this.reqId, { skipLocationChange: true });
+              }
+              else
+                  // proceed with rendering of the component
+                  this.useMetadata();
+          },
+          (err) => {
+              console.error("Failed to retrieve metadata: " + err.toString());
+              if (err instanceof IDNotFound)
+                  this.router.navigateByUrl("not-found/" + this.reqId, { skipLocationChange: true });
+              else
+                  this.router.navigateByUrl("int-error/" + this.reqId, { skipLocationChange: true });
+          }
+        );
+
         // if editing is enabled, the editing can be triggered via a URL parameter.  This is done
         // in concert with the authentication process that can involve redirection to an authentication
         // server; on successful authentication, the server can redirect the browser back to this
         // landing page with editing turned on.  
-        if (this.edstatsvc.editingEnabled()) {
-          // Somehow this variable has too init true otherwise the whole page won't display even it's
-          // set to true later.
-          console.log("Start editing...");
-          this.edstatsvc.startEditing(this.reqId);
-        } else {
-            // If edit is not enabled, retreive the (unedited) metadata
-            this.mdserv.getMetadata(this.reqId).subscribe(
-                (data) => {
-                    // successful metadata request
-                    this.md = data;
-                    if (!this.md) {
-                        // id not found; reroute
-                        console.error("No data found for ID=" + this.reqId);
-                        this.router.navigateByUrl("/not-found/" + this.reqId, { skipLocationChange: true });
-                    }
-                    else
-                        // proceed with rendering of the component
-                        this.useMetadata();
-                },
-                (err) => {
-                    console.error("Failed to retrieve metadata: " + err.toString());
-                    if (err instanceof IDNotFound)
-                        this.router.navigateByUrl("not-found/" + this.reqId, { skipLocationChange: true });
-                    else
-                        this.router.navigateByUrl("int-error/" + this.reqId, { skipLocationChange: true });
-                }
-            );
+        if(this.inBrowser){
+          if (this.edstatsvc.editingEnabled()) {
+            this.route.queryParamMap.subscribe(queryParams => {
+              let param = queryParams.get("editEnabled")
+              // console.log("editmode url param:", param);
+              if (param) {
+                  console.log("Returning from authentication redirection (editmode="+param+")");
+                  // Need to pass reqID (resID) because the resID in editControlComponent
+                  // has not been set yet and the startEditing function relies on it.
+                    this.edstatsvc.startEditing(this.reqId);
+              }else{
+                this.edstatsvc._setEditMode(this.EDIT_MODES.VIEWONLY_MODE);
+              }
+            })
+          } 
         }
+    }
+
+    /**
+     * Retrive Nerdm record
+     */
+    retriveNerdmRecord(){
+      this.mdserv.getMetadata(this.reqId).subscribe(
+        (data) => {
+            // successful metadata request
+            this.md = data;
+            if (!this.md) {
+                // id not found; reroute
+                console.error("No data found for ID=" + this.reqId);
+                this.router.navigateByUrl("/not-found/" + this.reqId, { skipLocationChange: true });
+            }
+            else
+                // proceed with rendering of the component
+                this.useMetadata();
+        },
+        (err) => {
+            console.error("Failed to retrieve metadata: " + err.toString());
+            if (err instanceof IDNotFound)
+                this.router.navigateByUrl("not-found/" + this.reqId, { skipLocationChange: true });
+            else
+                this.router.navigateByUrl("int-error/" + this.reqId, { skipLocationChange: true });
+        }
+      );
     }
 
     /**
@@ -152,6 +195,7 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
         // set the document title
         this.setDocumentTitle();
         this.mdupdsvc._setOriginalMetadata(this.md);
+        this.mdupdsvc._setRmmMetadata(this.md);
     }
 
     /**

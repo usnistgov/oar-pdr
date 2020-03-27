@@ -38,6 +38,7 @@ export class EditStatusComponent implements OnInit {
     constructor(public mdupdsvc : MetadataUpdateService) {
 
         this.EDIT_MODES = LandingConstants.editModes;
+        this.editMode = this.EDIT_MODES.VIEWONLY_MODE;
         this.mdupdsvc.updated.subscribe((details) => { 
             this._updateDetails = details; 
             this.showLastUpdate(this.EDIT_MODES.EDIT_MODE);  //Once last updated date changed, refresh the status bar message

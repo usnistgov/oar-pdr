@@ -222,6 +222,7 @@ export class WebAuthService extends AuthService {
      */
     public getAuthorization(resid: string): Observable<AuthInfo> {
         let url = this.endpoint + "auth/_perm/" + resid;
+        // console.log(url);
           // wrap the HttpClient Observable with our own so that we can manage errors
         return new Observable<AuthInfo>(subscriber => {
             this.httpcli.get(url, { headers: { 'Content-Type': 'application/json' } }).subscribe(
@@ -267,9 +268,8 @@ export class WebAuthService extends AuthService {
      *                  successful.  
      */
     public loginUser(): void {
-        let redirectURL = this.endpoint + "saml/login?redirectTo=" + window.location.href;
-        // let redirectURL = this.endpoint + "saml/login?redirectTo=" + window.location.href + "?editmode=true";
-        console.log("Redirecting to " + redirectURL + " to authenticate user");
+        let redirectURL = this.endpoint + "saml/login?redirectTo=" + window.location.href + "?editEnabled=true";
+        // console.log("Redirecting to " + redirectURL + " to authenticate user");
         window.location.assign(redirectURL);
     }
 }
@@ -354,7 +354,7 @@ export class MockAuthService extends AuthService {
      * the current landing page.  
      */
     public loginUser(): void {
-        let redirectURL = window.location.href + "?editmode=true";
+        let redirectURL = window.location.href + "?editEnabled=true";
         console.log("Bypassing authentication service; redirecting directly to " + redirectURL);
         if (!this._authcred.userDetails){
             this._authcred = {

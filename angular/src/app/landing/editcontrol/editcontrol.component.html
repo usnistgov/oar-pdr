@@ -1,5 +1,5 @@
 <!-- Edit Control button bar -->
-<div class="edit-control-buttons">
+<div class="edit-control-buttons" *ngIf="edstatsvc.editMode != EDIT_MODES.VIEWONLY_MODE">
     <!-- Buttons are arranged from right to left -->
 
     <i class="faa faa-info-circle" id="ec-info-btn" (click)="showEditControlHelpPopup()" data-toggle="tooltip" title="Show edit control help"></i>

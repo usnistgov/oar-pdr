@@ -91,7 +91,7 @@ export class EditControlComponent implements OnInit, OnChanges {
      *                           message bar
      */
     public constructor(private mdupdsvc: MetadataUpdateService,
-        private edstatsvc: EditStatusService,
+        public edstatsvc: EditStatusService,
         private authsvc: AuthService,
         private confirmDialogSvc: ConfirmationDialogService,
         private msgsvc: UserMessageService) {
@@ -108,13 +108,13 @@ export class EditControlComponent implements OnInit, OnChanges {
         );
 
         this.edstatsvc._setLastUpdated(this.mdupdsvc.lastUpdate);
-        this.edstatsvc._setEditMode(this.editMode);
+        // this.edstatsvc._setEditMode(this.editMode);
         this.edstatsvc._setAuthorized(this.isAuthorized());
         this.edstatsvc._setUserID(this.authsvc.userID);
     }
 
     ngOnInit() {
-        this.editMode = this.EDIT_MODES.PREVIEW_MODE;
+        // this.editMode = this.EDIT_MODES.PREVIEW_MODE;
         this.ngOnChanges();
         this.statusbar.showLastUpdate(this.editMode)
         this.edstatsvc._watchRemoteStart((remoteObj) => {
@@ -166,6 +166,7 @@ export class EditControlComponent implements OnInit, OnChanges {
                 this.mdupdsvc.loadDraft().subscribe(
                     (md) => {
                       if(md){
+                        console.log("Draft loaded:", md);
                         this.mdupdsvc._setOriginalMetadata(md as NerdmRes);
                         this.mdupdsvc.checkUpdatedFields(md as NerdmRes);
                         this.statusbar._setEditMode(this.EDIT_MODES.EDIT_MODE);
@@ -194,6 +195,7 @@ export class EditControlComponent implements OnInit, OnChanges {
         if (this._custsvc) {
             this._custsvc.discardDraft().subscribe(
                 (md) => {
+                    console.log("Discard edit return:", md);
                     this.mdupdsvc.forgetUpdateDate();
                     this.mdupdsvc.fieldReset();
                     this.editMode = this.EDIT_MODES.PREVIEW_MODE;
@@ -296,6 +298,7 @@ export class EditControlComponent implements OnInit, OnChanges {
       if (this._custsvc){
         this._custsvc.doneEditing().subscribe(
           (res) => {
+            console.log("Done edit return:", res);
             this.mdupdsvc.forgetUpdateDate();
             this.mdupdsvc.fieldReset();
             this.editMode = this.EDIT_MODES.DONE_MODE;

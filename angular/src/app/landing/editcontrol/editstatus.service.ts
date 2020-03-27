@@ -48,7 +48,9 @@ export class EditStatusService {
      */
     get editMode() : string { return this._editmode; }
     private _editmode : string = '';
-    _setEditMode(val : string) { this._editmode = val; }
+    _setEditMode(val : string) { 
+      this._editmode = val; 
+    }
 
     /**
      * flag indicating whether we get an error.

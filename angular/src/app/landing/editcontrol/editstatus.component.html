@@ -1,4 +1,4 @@
-<div class="ec-status-bar">
+<div class="ec-status-bar" *ngIf="editMode != EDIT_MODES.PREVIEW_MODE && editMode != EDIT_MODES.VIEWONLY_MODE">
     <span style="float: left;margin-left: 4em;" *ngIf="editMode == EDIT_MODES.EDIT_MODE"><span style="color: rgb(173, 0, 0);">*</span> required field</span>
     <span [ngStyle]="{'color': messageColor}" [innerHTML]="message"></span>
     <div [hidden]="!isProcessing" style="width: 2em;height:2em; float: right;">

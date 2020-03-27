@@ -70,6 +70,7 @@ export class ContactComponent implements OnInit {
         modalRef.componentInstance.inputValue = this.tempInput;
         modalRef.componentInstance['field'] = this.fieldName;
         modalRef.componentInstance['title'] = this.fieldName.toUpperCase();
+        modalRef.componentInstance.inBrowser = this.inBrowser;
 
         modalRef.componentInstance.returnValue.subscribe((returnValue) => {
             if (returnValue) {

@@ -9,6 +9,7 @@ import { Observable, of, throwError, Subscriber } from 'rxjs';
 import { UpdateDetails } from './interfaces';
 import { AuthService, WebAuthService } from './auth.service';
 import { LandingConstants } from '../constants';
+import { EditStatusService } from './editstatus.service';
 
 /**
  * a service that receives updates to the resource metadata from update widgets.
@@ -30,6 +31,7 @@ export class MetadataUpdateService {
     private mdres: Subject<NerdmRes> = new Subject<NerdmRes>();
     private custsvc: CustomizationService = null;
     private originalRec: NerdmRes = null;
+    private rmmRec: NerdmRes = null;
     private origfields: {} = {};   // keeps track of orginal metadata so that they can be undone
     public  EDIT_MODES: any;
 
@@ -65,6 +67,7 @@ export class MetadataUpdateService {
      *                  server.  
      */
     constructor(private msgsvc: UserMessageService,
+        private edstatsvc: EditStatusService,
         private authsvc: AuthService,
         private datePipe: DatePipe) { 
           this.EDIT_MODES = LandingConstants.editModes;
@@ -77,9 +80,18 @@ export class MetadataUpdateService {
     _subscribe(controller): void {
         this.mdres.subscribe(controller);
     }
+
     _setOriginalMetadata(md: NerdmRes) {
         this.originalRec = md;
         this.mdres.next(md as NerdmRes);
+    }
+
+    _setRmmMetadata(md: NerdmRes) {
+      this.rmmRec = md;
+    }
+
+    get rmmMetadata(){
+      return this.rmmRec;
     }
 
     _setCustomizationService(svc: CustomizationService): void {
@@ -119,7 +131,8 @@ export class MetadataUpdateService {
                 resolve(false);
             });
         }
-
+        console.log('md', md);
+        console.log('this.originalRec', this.originalRec);
         // establish the original state for this subset of metadata (so that it this update
         // can be undone).
         if (this.originalRec) {
@@ -137,6 +150,7 @@ export class MetadataUpdateService {
             }
         }
 
+        console.log('this.origfields', this.origfields);
         // If current data is the same as original (user changed the data back to original), call undo instead. Otherwise do normal update
         if (JSON.stringify(md[subsetname]) == JSON.stringify(this.origfields[subsetname])) {
             this.undo(subsetname);
@@ -144,6 +158,7 @@ export class MetadataUpdateService {
             return new Promise<boolean>((resolve, reject) => {
                 this.custsvc.updateMetadata(md).subscribe(
                     (res) => {
+                        console.log('custsvc.updateMetadata return', res);
                         // console.log("###DBG  Draft data returned from server:\n  ", res)
                         this.stampUpdateDate();
                         this.mdres.next(res as NerdmRes);
@@ -322,6 +337,12 @@ export class MetadataUpdateService {
                 (err) => {
                   console.log("err", err);
                     // err will be a subtype of CustomizationError
+                    if (err.status == 404) {
+                      // URL returned Not Found, display rmm record in view only mode
+                      this.mdres.next(this.rmmRec);
+                      this.edstatsvc._setEditMode(this.EDIT_MODES.VIEWONLY_MODE);
+                    }
+
                     if (err.type == 'user') {
                         console.error("Failed to retrieve draft metadata changes: user error:" + err.message);
                         this.msgsvc.error(err.message)

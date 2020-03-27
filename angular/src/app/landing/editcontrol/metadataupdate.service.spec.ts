@@ -19,6 +19,7 @@ describe('MetadataUpdateService', () => {
     let rec : NerdmRes = testdata['test1'];
     let resmd : NerdmRes = null;
     let svc : MetadataUpdateService = null;
+    let edstatsvc : EditStatusService = null;
 
     let subscriber = {
         next: (md) => {
@@ -35,7 +36,7 @@ describe('MetadataUpdateService', () => {
         let dp : DatePipe = TestBed.get(DatePipe);
         let cfgdata = null;
         cfgdata = JSON.parse(JSON.stringify(config));
-        svc = new MetadataUpdateService(new UserMessageService(), new MockAuthService(),dp);
+        svc = new MetadataUpdateService(new UserMessageService(), edstatsvc, new MockAuthService(),dp);
         svc._setCustomizationService(new InMemCustomizationService(rec));
     }));
 
