@@ -27,7 +27,7 @@ export class EditStatusComponent implements OnInit {
     
     message : string = "";
     messageColor : string = "black";
-    editMode: string;
+    _editmode: string;
     EDIT_MODES: any;
 
     /**
@@ -39,10 +39,14 @@ export class EditStatusComponent implements OnInit {
     constructor(public mdupdsvc : MetadataUpdateService, public edstatsvc: EditStatusService,) {
 
         this.EDIT_MODES = LandingConstants.editModes;
-        this.editMode = this.EDIT_MODES.EDIT_MODE;
+        this._editmode = this.EDIT_MODES.EDIT_MODE;
         this.mdupdsvc.updated.subscribe((details) => { 
             this._updateDetails = details; 
             this.showLastUpdate(this.EDIT_MODES.EDIT_MODE);  //Once last updated date changed, refresh the status bar message
+        });
+
+        this.edstatsvc._watchEditMode((editMode) => {
+          this._editmode = editMode;
         });
     }
 
@@ -66,10 +70,6 @@ export class EditStatusComponent implements OnInit {
         this._isProcessing = onoff;
     }
 
-    _setEditMode(editMode: string){
-        this.editMode = editMode;
-    }
-
     ngOnInit() {
     }
 
@@ -85,8 +85,8 @@ export class EditStatusComponent implements OnInit {
     /**
      * display the time of the last update, if known
      */
-    public showLastUpdate(editmode : string, inprogress : boolean = false) {
-      switch(editmode){
+    public showLastUpdate(_editmode : string, inprogress : boolean = false) {
+      switch(_editmode){
         case this.EDIT_MODES.EDIT_MODE:
             // We are editing the metadata (and are logged in)
             if (this._updateDetails)

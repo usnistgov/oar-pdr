@@ -32,23 +32,8 @@ export class EditControlComponent implements OnInit, OnChanges {
 
     private _custsvc: CustomizationService = null;
     private originalRecord: NerdmRes = null;
-    private _editmode: string;
+    private editMode: string;
     public EDIT_MODES: any;
-
-    /**
-     * a flag indicating whether editing mode is turned on (true=yes).  This parameter is 
-     * available to a parent template via (editModeChanged).  
-     */
-    get editMode() { return this._editmode; }
-    set editMode(engage: string) {
-        if (this._editmode != engage) {
-            this._editmode = engage;
-            this.mdupdsvc.editMode = this._editmode;
-            this.edstatsvc._setEditMode(engage);
-            this.editModeChanged.emit(engage);
-        }
-    }
-    @Output() editModeChanged: EventEmitter<string> = new EventEmitter<string>();
 
     /**
      * the local copy of the draft (updated) metadata.  This parameter is available to a parent
@@ -108,13 +93,11 @@ export class EditControlComponent implements OnInit, OnChanges {
         );
 
         this.edstatsvc._setLastUpdated(this.mdupdsvc.lastUpdate);
-        // this.edstatsvc._setEditMode(this.editMode);
         this.edstatsvc._setAuthorized(this.isAuthorized());
         this.edstatsvc._setUserID(this.authsvc.userID);
     }
 
     ngOnInit() {
-        // this.editMode = this.EDIT_MODES.PREVIEW_MODE;
         this.ngOnChanges();
         this.statusbar.showLastUpdate(this.editMode)
         this.edstatsvc._watchRemoteStart((remoteObj) => {
@@ -124,6 +107,10 @@ export class EditControlComponent implements OnInit, OnChanges {
                 this.resID = remoteObj.resID;
                 this.startEditing(remoteObj.nologin);
             }
+        });
+
+        this.edstatsvc._watchEditMode((editMode) => {
+          this.editMode = editMode;
         });
     }
 
@@ -152,7 +139,7 @@ export class EditControlComponent implements OnInit, OnChanges {
         if (this._custsvc) {
             // already authorized
             this.editMode = this.EDIT_MODES.EDIT_MODE;
-            this.statusbar._setEditMode(this.editMode);
+            this.edstatsvc._setEditMode(this.editMode);
             this.statusbar.showLastUpdate(this.editMode);
             return;
         }
@@ -169,12 +156,12 @@ export class EditControlComponent implements OnInit, OnChanges {
                         console.log("Draft loaded:", md);
                         this.mdupdsvc._setOriginalMetadata(md as NerdmRes);
                         this.mdupdsvc.checkUpdatedFields(md as NerdmRes);
-                        this.statusbar._setEditMode(this.EDIT_MODES.EDIT_MODE);
+                        this.edstatsvc._setEditMode(this.EDIT_MODES.EDIT_MODE);
                         this.statusbar.showLastUpdate(this.EDIT_MODES.EDIT_MODE);
                         this.editMode = this.EDIT_MODES.EDIT_MODE;
                       }else{
                         this.statusbar.showMessage("There was a problem loading draft data.", false);
-                        this.statusbar._setEditMode(this.EDIT_MODES.PREVIEW_MODE);
+                        this.edstatsvc._setEditMode(this.EDIT_MODES.PREVIEW_MODE);
                         this.edstatsvc._setError(true);
                       }
                     });
@@ -183,7 +170,7 @@ export class EditControlComponent implements OnInit, OnChanges {
             (err) => {
               console.log("Authentication failed.");
               this.statusbar.showMessage("Authentication failed.", false);
-              this.statusbar._setEditMode(this.EDIT_MODES.PREVIEW_MODE);
+              this.edstatsvc._setEditMode(this.EDIT_MODES.PREVIEW_MODE);
             }
         );
     }
@@ -198,7 +185,8 @@ export class EditControlComponent implements OnInit, OnChanges {
                     console.log("Discard edit return:", md);
                     this.mdupdsvc.forgetUpdateDate();
                     this.mdupdsvc.fieldReset();
-                    this.editMode = this.EDIT_MODES.PREVIEW_MODE;
+                    // this.editMode = this.EDIT_MODES.PREVIEW_MODE;
+                    this.edstatsvc._setEditMode(this.EDIT_MODES.PREVIEW_MODE);
                     if (md && md['@id']) {
                         // assume a NerdmRes object was returned
                         this.mdrec = md as NerdmRes;
@@ -302,7 +290,7 @@ export class EditControlComponent implements OnInit, OnChanges {
             this.mdupdsvc.forgetUpdateDate();
             this.mdupdsvc.fieldReset();
             this.editMode = this.EDIT_MODES.DONE_MODE;
-            this.statusbar._setEditMode(this.editMode);
+            this.edstatsvc._setEditMode(this.editMode);
             this.statusbar.showLastUpdate(this.editMode)
           },
           (err) => {
@@ -324,7 +312,7 @@ export class EditControlComponent implements OnInit, OnChanges {
      */
     public preview(): void {
         this.editMode = this.EDIT_MODES.PREVIEW_MODE;
-        this.statusbar._setEditMode(this.editMode);
+        this.edstatsvc._setEditMode(this.editMode);
         if (this.editsPending())
             this.statusbar.showMessage('Click "Submit" to commit your changes ' +
                 'or "Edit" to make more changes.');

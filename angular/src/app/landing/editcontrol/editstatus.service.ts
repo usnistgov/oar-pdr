@@ -3,6 +3,7 @@ import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 
 import { AppConfig } from '../../config/config';
 import { UpdateDetails } from './interfaces';
+import { LandingConstants } from '../constants';
 
 /**
  * a service that can be used to monitor the editing status of the landing page.
@@ -16,11 +17,13 @@ import { UpdateDetails } from './interfaces';
     providedIn: 'root'
 })
 export class EditStatusService {
+  public EDIT_MODES: any;
 
     /**
      * construct the service
      */
     constructor(private cfg : AppConfig) {
+      this.EDIT_MODES = LandingConstants.editModes;
     }
 
     /**
@@ -35,22 +38,22 @@ export class EditStatusService {
      * Make editMode observable so any component that subscribe to it will
      * get an update once the mode changed.
      */
-    // private _editMode : BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
-    // _setEditMode(val : boolean) { 
-    //     this._editMode.next(val); 
-    // }
-    // _watchEditMode(subscriber) {
-    //     this._editMode.subscribe(subscriber);
-    // }
+    private _editMode : BehaviorSubject<string> = new BehaviorSubject<string>("");
+    _setEditMode(val : string) { 
+        this._editMode.next(val); 
+    }
+    _watchEditMode(subscriber) {
+        this._editMode.subscribe(subscriber);
+    }
 
     /**
      * flag indicating whether the landing page is currently being edited.  
      */
-    get editMode() : string { return this._editmode; }
-    private _editmode : string = '';
-    _setEditMode(val : string) { 
-      this._editmode = val; 
-    }
+    // get editMode() : string { return this._editmode; }
+    // private _editmode : string = '';
+    // _setEditMode(val : string) { 
+    //   this._editmode = val; 
+    // }
 
     /**
      * flag indicating whether we get an error.

@@ -25,6 +25,8 @@ import { NotificationService } from '../shared/notification-service/notification
 import { DatePipe } from '@angular/common';
 
 import { MetadataUpdateService } from './editcontrol/metadataupdate.service';
+import { LandingConstants } from '../landing/constants';
+import { EditStatusService } from '../landing/editcontrol/editstatus.service';
 
 declare var _initAutoTracker: Function;
 
@@ -128,6 +130,8 @@ export class LandingComponent implements OnInit, OnChanges {
     editEnabled: boolean;
     doiUrl: string = null;
     recordType: string = "";
+    editMode: string;
+    EDIT_MODES: any;
 
     // passed in by the parent component:
     @Input() record: NerdmRes = null;
@@ -148,8 +152,15 @@ export class LandingComponent implements OnInit, OnChanges {
         private router: Router,
         @Inject(APP_ID) private appId: string,
         public mdupdsvc: MetadataUpdateService,
-        private gaService: GoogleAnalyticsService) {
+        private edstatsvc: EditStatusService,
+        private gaService: GoogleAnalyticsService) 
+    {
         this.editEnabled = cfg.get("editEnabled", false) as boolean;
+        this.EDIT_MODES = LandingConstants.editModes;
+
+        this.edstatsvc._watchEditMode((editMode) => {
+          this.editMode = editMode;
+        });
     }
 
     ngOnInit() { 
@@ -345,7 +356,7 @@ export class LandingComponent implements OnInit, OnChanges {
             return "this version";
         let id: string = "View...";
         if (relinfo.refid) id = relinfo.refid;
-        if (this.mdupdsvc.editMode)
+        if (this.editMode == this.EDIT_MODES.EDIT_MODE)
             return id;
         else
             return this.renderRelAsLink(relinfo, id);

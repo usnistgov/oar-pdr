@@ -56,9 +56,9 @@ export class MetadataUpdateService {
      * Note that this flag should only be updated by the controller (i.e. EditControlComponent) 
      * that subscribes to this class (via _subscribe()).
      */
-    private _editmode: string;
-    get editMode() { return this._editmode; }
-    set editMode(engage: string) { this._editmode = engage; }
+    private editMode: string;
+    // get editMode() { return this.editMode; }
+    // set editMode(engage: string) { this.editMode = engage; }
 
     /**
      * construct the service
@@ -71,6 +71,10 @@ export class MetadataUpdateService {
         private authsvc: AuthService,
         private datePipe: DatePipe) { 
           this.EDIT_MODES = LandingConstants.editModes;
+
+          this.edstatsvc._watchEditMode((editMode) => {
+            this.editMode = editMode;
+          });
         }
 
     /*
@@ -394,6 +398,6 @@ export class MetadataUpdateService {
      * Tell whether we are in edit mode
      */
     get isEditMode(): boolean{
-      return this._editmode == this.EDIT_MODES.EDIT_MODE;
+      return this.editMode == this.EDIT_MODES.EDIT_MODE;
     }
 }
