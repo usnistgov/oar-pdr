@@ -45,7 +45,6 @@ describe('EditStatusService', () => {
 
         expect(svc.lastUpdated._updateDate).toEqual("today");
         expect(svc.lastUpdated.userDetails).toEqual(userDetails);
-        expect(svc._editMode).toEqual(EDIT_MODES.EDIT_MODE);
         expect(svc.userID).toEqual("Hank");
         expect(svc.authenticated).toBe(true);
         expect(svc.authorized).toBe(false);
