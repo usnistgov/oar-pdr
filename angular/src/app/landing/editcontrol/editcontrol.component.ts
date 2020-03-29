@@ -32,8 +32,8 @@ export class EditControlComponent implements OnInit, OnChanges {
 
     private _custsvc: CustomizationService = null;
     private originalRecord: NerdmRes = null;
-    private editMode: string;
-    public EDIT_MODES: any;
+    editMode: string;
+    EDIT_MODES: any;
 
     /**
      * the local copy of the draft (updated) metadata.  This parameter is available to a parent

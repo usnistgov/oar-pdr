@@ -38,7 +38,7 @@ export class EditStatusService {
      * Make editMode observable so any component that subscribe to it will
      * get an update once the mode changed.
      */
-    private _editMode : BehaviorSubject<string> = new BehaviorSubject<string>("");
+    _editMode : BehaviorSubject<string> = new BehaviorSubject<string>("");
     _setEditMode(val : string) { 
         this._editMode.next(val); 
     }
