@@ -185,17 +185,17 @@ export class EditControlComponent implements OnInit, OnChanges {
                     console.log("Discard edit return:", md);
                     this.mdupdsvc.forgetUpdateDate();
                     this.mdupdsvc.fieldReset();
-                    // this.editMode = this.EDIT_MODES.PREVIEW_MODE;
                     this.edstatsvc._setEditMode(this.EDIT_MODES.PREVIEW_MODE);
                     if (md && md['@id']) {
                         // assume a NerdmRes object was returned
                         this.mdrec = md as NerdmRes;
+                        this.mdupdsvc._setOriginalMetadata(md as NerdmRes);
                         this.mdrecChange.emit(md as NerdmRes);
+                    }else{
+                      // If backend didn't return a Nerdm record, just set edit mode to preview
+                      console.log("Backend didn't return a Nerdm record after the discard request.")
+                      this.edstatsvc._setEditMode(this.EDIT_MODES.PREVIEW_MODE);
                     }
-
-                    this.mdupdsvc.showOriginalMetadata();
-                    // reload this page from the source
-                    // window.location.replace("/od/id/"+this.requestID);
                 },
                 (err) => {
                     if (err.type == "user")

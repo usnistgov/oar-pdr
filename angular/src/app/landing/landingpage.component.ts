@@ -91,7 +91,9 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
      */
     ngOnInit() {
         console.log("initializing LandingPageComponent around id=" + this.reqId);
-
+        //On init, set edit mode to view only mode so SSR won't failed on primeng buttons 
+        this.edstatsvc._setEditMode(this.EDIT_MODES.VIEWONLY_MODE);
+        
         // Retrive Nerdm record and keep it in case we need to display it in preview mode
         // use case: user manually open PDR landing page but the record was not edited by MIDAS
 
