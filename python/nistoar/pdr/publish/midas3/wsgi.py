@@ -82,6 +82,7 @@ class MIDAS3PublishingApp(object):
 app = MIDAS3PublishingApp
 
 _badidre = re.compile(r"[<>\s/]")
+_arkidre = re.compile(r"^ark:/(\d+)/")
 
 class Handler(object):
     """
@@ -185,9 +186,11 @@ class DraftHandler(Handler):
         if not path:
             return self.send_ok("Ready", '"No identifier given"')
 
-        if _badidre.search(path):
+        m = _arkidre.search(path)
+        path = _arkidre.sub('', path)
+        if (m and m.group(1) != NIST_ARK_NAAN) or _badidre.search(path):
             return self.send_error(400, "Bad identifier syntax")
-
+        
         try:
             out = self._svc.get_customized_pod(path)
             out = json.dumps(out, indent=2)
@@ -223,10 +226,13 @@ class DraftHandler(Handler):
         
         if "/json" not in self._env.get('CONTENT_TYPE', 'application/json'):
             return self.send_error(415, "Non-JSON input content type specified")
-        
-        if path and _badidre.search(path):
-            return self.send_error(400, "Bad identifier syntax")
 
+        if path:
+            m = _arkidre.search(path)
+            path = _arkidre.sub('', path)
+            if (m and m.group(1) != NIST_ARK_NAAN) or _badidre.search(path):
+                return self.send_error(400, "Bad identifier syntax")
+        
         try:
             bodyin = self._env.get('wsgi.input')
             if bodyin is None:
@@ -261,9 +267,11 @@ class DraftHandler(Handler):
         if not self.authorized():
             return self.send_error(401, "Unauthorized")
         
-        if _badidre.search(path):
+        m = _arkidre.search(path)
+        path = _arkidre.sub('', path)
+        if (m and m.group(1) != NIST_ARK_NAAN) or _badidre.search(path):
             return self.send_error(400, "Bad identifier syntax")
-
+        
         try:
 
             self._svc.end_customization_for(path)

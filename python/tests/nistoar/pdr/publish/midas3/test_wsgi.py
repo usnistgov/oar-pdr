@@ -209,6 +209,44 @@ class TestDraftHandler(test.TestCase):
         self.assertEqual(pod["identifier"], self.midasid)
         self.assertEqual(pod["_editStatus"], "in progress")
 
+    def test_do_GET_wark(self):
+        req = {
+            'REQUEST_METHOD': "GET",
+            'PATH_INFO': '/pdr/draft/ark:/88434/'+self.midasid,
+            'HTTP_AUTHORIZATION': 'Bearer secret'
+        }
+        self.hdlr = self.gethandler("ark:/88434/"+self.midasid, req)
+
+        # draft does not exist yet
+        body = self.hdlr.handle()
+        self.assertIn("404", self.resp[0])
+        self.assertEquals(body, [])
+
+        self.resp = []
+        self.test_do_POST()
+
+        # we can get a draft now
+        self.resp = []
+        self.hdlr = self.gethandler("ark:/88434/"+self.midasid, req)
+        body = self.hdlr.handle()
+        self.assertIn("200", self.resp[0])
+        pod = json.loads("\n".join(body))
+        self.assertEqual(pod["identifier"], self.midasid)
+        self.assertEqual(pod["_editStatus"], "in progress")
+
+    def test_do_GET_wbadark(self):
+        req = {
+            'REQUEST_METHOD': "GET",
+            'PATH_INFO': '/pdr/draft/ark:/88888/'+self.midasid,
+            'HTTP_AUTHORIZATION': 'Bearer secret'
+        }
+        self.hdlr = self.gethandler("ark:/88888/"+self.midasid, req)
+
+        # draft does not exist yet
+        body = self.hdlr.handle()
+        self.assertIn("400", self.resp[0])
+        self.assertEquals(body, [])
+
     def test_do_DELETE(self):
         req = {
             'REQUEST_METHOD': "DELETE",
@@ -228,6 +266,33 @@ class TestDraftHandler(test.TestCase):
         # we can delete a draft now
         self.resp = []
         self.hdlr = self.gethandler(self.midasid, req)
+        body = self.hdlr.handle()
+        self.assertIn("200", self.resp[0])
+        self.assertEquals(body, [])
+
+        resp = requests.head(custbaseurl+self.midasid,
+                             headers={'Authorization': 'Bearer SECRET'})
+        self.assertEqual(resp.status_code, 404)
+
+    def test_do_DELETE_wark(self):
+        req = {
+            'REQUEST_METHOD': "DELETE",
+            'PATH_INFO': '/pdr/draft/ark:/88434/'+self.midasid,
+            'HTTP_AUTHORIZATION': 'Bearer secret'
+        }
+        self.hdlr = self.gethandler("ark:/88434/"+self.midasid, req)
+
+        # draft does not exist yet
+        body = self.hdlr.handle()
+        self.assertIn("404", self.resp[0])
+        self.assertEquals(body, [])
+
+        self.resp = []
+        self.test_do_POST()
+
+        # we can delete a draft now
+        self.resp = []
+        self.hdlr = self.gethandler("ark:/88434/"+self.midasid, req)
         body = self.hdlr.handle()
         self.assertIn("200", self.resp[0])
         self.assertEquals(body, [])
@@ -437,6 +502,45 @@ class TestMIDAS3PublishingApp(test.TestCase):
         resp = requests.head(custbaseurl+self.midasid,
                              headers={'Authorization': 'Bearer SECRET'})
         self.assertEqual(resp.status_code, 200)
+
+    def test_draft_put_ark(self):
+        req = {
+            'REQUEST_METHOD': "PUT",
+            'CONTENT_TYPE': 'application/json',
+            'PATH_INFO': '/pod/draft/ark:/88434/'+self.midasid,
+            'HTTP_AUTHORIZATION': 'Bearer secret'
+        }
+
+        with open(self.podf) as fd:
+            req['wsgi.input'] = fd
+            body = self.web(req, self.start)
+
+        self.assertIn("201", self.resp[0])
+        self.assertEquals(body, [])
+
+        self.assertTrue(os.path.isdir(os.path.join(self.bagparent,"mdbags",self.midasid)))
+        self.svc.wait_for_all_workers(300)
+        self.assertTrue(os.path.isfile(os.path.join(self.bagparent,"nrdserv",
+                                                    self.midasid+".json")))
+        
+        resp = requests.head(custbaseurl+self.midasid,
+                             headers={'Authorization': 'Bearer SECRET'})
+        self.assertEqual(resp.status_code, 200)
+
+    def test_draft_put_badark(self):
+        req = {
+            'REQUEST_METHOD': "PUT",
+            'CONTENT_TYPE': 'application/json',
+            'PATH_INFO': '/pod/draft/ark:/88888/'+self.midasid,
+            'HTTP_AUTHORIZATION': 'Bearer secret'
+        }
+
+        with open(self.podf) as fd:
+            req['wsgi.input'] = fd
+            body = self.web(req, self.start)
+
+        self.assertIn("400", self.resp[0])
+        self.assertEquals(body, [])
 
         
 
