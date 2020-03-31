@@ -221,7 +221,7 @@ public class EditorServiceImpl implements EditorService {
 			if (!checkRecordInCache(recordid, mconfig.getRecordCollection()))
 				throw new ResourceNotFoundException("Record not found in Cache.");
 
-			Document doc = mconfig.getRecordCollection().find(Filters.eq("ediid", recordid)).first();
+			Document doc = this.getRecordFromCache(recordid);
 
 			Document changes = null;
 			if (checkRecordInCache(recordid, mconfig.getChangeCollection())) {
@@ -253,6 +253,12 @@ public class EditorServiceImpl implements EditorService {
 			throw new MongoException("Error while putting updated data in cache db." + ex.getMessage());
 		}
 
+	}
+	
+	public Document getRecordFromCache(String recordid) {
+		if(recordid.startsWith("mds"))
+			recordid = "ark:/"+this.nistarkid+"/"+recordid;
+		return mconfig.getRecordCollection().find(Filters.eq("ediid", recordid)).first();
 	}
 
 	/**

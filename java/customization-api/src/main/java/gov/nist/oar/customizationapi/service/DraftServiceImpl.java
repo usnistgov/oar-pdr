@@ -9,6 +9,7 @@ import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.mongodb.MongoException;
@@ -22,7 +23,7 @@ import gov.nist.oar.customizationapi.exceptions.InvalidInputException;
 //import gov.nist.oar.customizationapi.helpers.UserDetailsExtractor;
 import gov.nist.oar.customizationapi.repositories.DraftService;
 /**
- * Implemention of DraftService interface where request to put draft in the database, get the draft,
+ * Implementation of DraftService interface where request to put draft in the database, get the draft,
  * delete once editing completed.
  * @author Deoyani Nandrekar-Heinis
  */
@@ -34,13 +35,22 @@ public class DraftServiceImpl implements DraftService {
 	@Autowired
 	MongoConfig mconfig;
 
+	@Value("${nist.arkid:testid}")
+	String nistarkid;
 
+	/**
+	 * Service returns metadata associated with requested record, if there are changes made from user/client service 
+	 * the returned metadata returns updated record/metadata
+	 */
 	@Override
 	public Document getDraft(String recordid, String view) throws CustomizationException, ResourceNotFoundException, InvalidInputException {
 		logger.info("Return the draft saved in the cache database.");
 		return returnMergedChanges(recordid, view);
 	}
 
+	/**
+	 * Create new record or enter metadata entry in the database for requested ID.
+	 */
 	@Override
 	public void putDraft(String recordid, Document record) throws CustomizationException, InvalidInputException {
 		logger.info("Put the nerdm record in the data cache.");
@@ -55,6 +65,10 @@ public class DraftServiceImpl implements DraftService {
 		}
 	}
 
+	/**
+	 * Delete metadata from the database for requested record id. 
+	 * This deletes both original record and changes made by client/user application. 
+	 */
 	@Override
 	public boolean deleteDraft(String recordid) throws CustomizationException {
 		logger.info("Delete the record and changes from the database.");
@@ -108,7 +122,7 @@ public class DraftServiceImpl implements DraftService {
 			if (!checkRecordInCache(recordid, mconfig.getRecordCollection()))
 				throw new ResourceNotFoundException("Record not found in Cache.");
 
-			Document doc = mconfig.getRecordCollection().find(Filters.eq("ediid", recordid)).first();
+			Document doc = this.getRecordFromCache(recordid);
 
 			Document tempUpdateOp = null;
 			if (checkRecordInCache(recordid, mconfig.getChangeCollection())) {
@@ -123,11 +137,8 @@ public class DraftServiceImpl implements DraftService {
 					System.out.println("key:" + entry.getKey());
 					if (doc.containsKey(entry.getKey())) {
 						doc.replace(entry.getKey(), doc.get(entry.getKey()), entry.getValue());
-					}
-					if(entry.getKey().equals("_updateDetails")) {
-						doc.append(entry.getKey(), entry.getValue());
-					}
-
+					}else
+						doc.append(entry.getKey(), entry.getValue()); //any new metadata added
 				}
 			}
 
@@ -139,9 +150,15 @@ public class DraftServiceImpl implements DraftService {
 		}
 
 	}
+	
+	public Document getRecordFromCache(String recordid) {
+		if(recordid.startsWith("mds"))
+			recordid = "ark:/"+this.nistarkid+"/"+recordid;
+		return mconfig.getRecordCollection().find(Filters.eq("ediid", recordid)).first();
+	}
 
 	/**
-	 * It first checks whether recordid provided is of proper format and allowed to
+	 * It first checks whether recordID provided is of proper format and allowed to
 	 * be used to search in the database. It uses find method to search database.
 	 * 
 	 * @param recordid
@@ -156,6 +173,8 @@ public class DraftServiceImpl implements DraftService {
 				logger.error("Requested record id is not valid, record id has unsupported characters.");
 				throw new InvalidInputException("Check the requested record id.");
 			}
+			if(recordid.startsWith("mds"))
+				recordid = "ark:/"+this.nistarkid+"/"+recordid;   // this is added for new record ID style
 			long count = mcollection.countDocuments(Filters.eq("ediid", recordid));
 			return count != 0;
 		} 
@@ -165,62 +184,6 @@ public class DraftServiceImpl implements DraftService {
 		}
 	}
 
-//	/**
-//	 * To update the record in the cached database
-//	 * 
-//	 * @param recordid an ediid of the record
-//	 * @param update   json to update
-//	 * @return Return true if data is updated successfully.
-//	 */
-//	public boolean updateDataInCache(String recordid,  Document update) {
-//		try {
-//			Date now = new Date();
-//			List<Document> updateDetails = new ArrayList<Document>();
-//
-//			FindIterable<Document> fd = mconfig.getRecordCollection().find(Filters.eq("ediid", recordid))
-//					.projection(Projections.include("_updateDetails"));
-//			Iterator<Document> iterator = fd.iterator();
-//			while (iterator.hasNext()) {
-//				Document d = iterator.next();
-//				if (d.containsKey("_updateDetails")) {
-//					List<?> updateHistory = (List<?>) d.get("_updateDetails");
-//					for (int i = 0; i < updateHistory.size(); i++)
-//						updateDetails.add((Document) updateHistory.get(i));
-//
-//				}
-//			}
-//
-//			AuthenticatedUserDetails authenticatedUser = userDetailsExtractor.getUserDetails();
-//			Document userDetails = new Document();
-//			userDetails.append("userId", authenticatedUser.getUserId());
-//			userDetails.append("userName", authenticatedUser.getUserName());
-//			userDetails.append("userLastName", authenticatedUser.getUserLastName());
-//			userDetails.append("userEmail", authenticatedUser.getUserEmail());
-//
-//			Document updateInfo = new Document();
-//			updateInfo.append("_userDetails", userDetails);
-//			updateInfo.append("_updateDate", now);
-//			updateDetails.add(updateInfo);
-//
-//			update.append("_updateDetails", updateDetails);
-//
-//			if (update.containsKey("_id"))
-//				update.remove("_id");
-//
-//			Document tempUpdateOp = new Document("$set", update);
-//
-//			if (tempUpdateOp.containsKey("_id"))
-//				tempUpdateOp.remove("_id");
-//
-//			mconfig.getRecordCollection().updateOne(Filters.eq("ediid", recordid), tempUpdateOp, new UpdateOptions().upsert(true));
-//
-//			return true;
-//		} catch (MongoException ex) {
-//			logger.error("Error while update data in cache db" + ex.getMessage());
-//			throw new MongoException("Error while putting updated data in cache db." + ex.getMessage());
-//		}
-//
-//	}
 
 	/**
 	 * Find the record of given id in the collection and remove.
