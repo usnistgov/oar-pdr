@@ -241,13 +241,13 @@ class DraftHandler(Handler):
             bodyin = self._env.get('wsgi.input')
             if bodyin is None:
                 return send_error(400, "Missing input POD document")
-            if log.isEnabled(logging.DEBUG):
+            if log.isEnabledFor(logging.DEBUG):
                 body = bodyin.read()
                 pod = json.loads(body, object_pairs_hook=OrderedDict)
             else:
                 pod = json.load(bodyin, object_pairs_hook=OrderedDict)
         except (ValueError, TypeError) as ex:
-            if log.isEnabled(logging.DEBUG):
+            if log.isEnabledFor(logging.DEBUG):
                 log.error("Failed to parse input: %s", str(ex))
                 log.debug("\n%s", body)
             return self.send_error(400, "Input not parseable as JSON")
