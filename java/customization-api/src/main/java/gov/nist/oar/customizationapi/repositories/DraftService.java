@@ -4,6 +4,7 @@ import org.bson.Document;
 
 import gov.nist.oar.customizationapi.exceptions.CustomizationException;
 import gov.nist.oar.customizationapi.exceptions.InvalidInputException;
+import gov.nist.oar.customizationapi.service.ResourceNotFoundException;
 
 public interface DraftService {
 	
@@ -15,7 +16,7 @@ public interface DraftService {
 	 * @throws CustomizationException Throws exception if there is issue while
 	 *                                accessing data
 	 */
-	public Document getDraft(String recordid,String view) throws CustomizationException;
+	public Document getDraft(String recordid,String view) throws CustomizationException, InvalidInputException, ResourceNotFoundException;
 	
 	/**
 	 * Returns the document once save data
@@ -31,7 +32,7 @@ public interface DraftService {
 	 *                                JSON validation tests, this exception is
 	 *                                thrown
 	 */
-	public void putDraft(String recordid, Document params) throws CustomizationException, InvalidInputException;
+	public void putDraft(String recordid, Document params) throws CustomizationException, InvalidInputException, ResourceNotFoundException;
 	
 	/**
 	 * Delete record from the database

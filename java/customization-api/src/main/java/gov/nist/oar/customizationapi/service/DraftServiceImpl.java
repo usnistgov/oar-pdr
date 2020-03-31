@@ -36,7 +36,7 @@ public class DraftServiceImpl implements DraftService {
 
 
 	@Override
-	public Document getDraft(String recordid, String view) throws CustomizationException {
+	public Document getDraft(String recordid, String view) throws CustomizationException, ResourceNotFoundException, InvalidInputException {
 		logger.info("Return the draft saved in the cache database.");
 		return returnMergedChanges(recordid, view);
 	}
@@ -71,8 +71,9 @@ public class DraftServiceImpl implements DraftService {
 	 * @param recordid
 	 * @param view
 	 * @return
+	 * @throws InvalidInputException 
 	 */
-	public Document returnMergedChanges(String recordid, String view) throws CustomizationException, ResourceNotFoundException {
+	public Document returnMergedChanges(String recordid, String view) throws CustomizationException, ResourceNotFoundException, InvalidInputException {
 		try {
 			Document doc = null;
 			if (view.equalsIgnoreCase("updates")){
@@ -99,8 +100,9 @@ public class DraftServiceImpl implements DraftService {
 	 * @param update   json to update
 	 * @return Return true if data is updated successfully.
 	 * @throws CustomizationException
+	 * @throws InvalidInputException 
 	 */
-	public Document mergeDataOnTheFly(String recordid) throws CustomizationException, ResourceNotFoundException {
+	public Document mergeDataOnTheFly(String recordid) throws CustomizationException, ResourceNotFoundException, InvalidInputException {
 		try {
 
 			if (!checkRecordInCache(recordid, mconfig.getRecordCollection()))
@@ -143,19 +145,21 @@ public class DraftServiceImpl implements DraftService {
 	 * be used to search in the database. It uses find method to search database.
 	 * 
 	 * @param recordid
+	 * @throws InvalidInputException 
 	 * @returns
 	 */
-	public boolean checkRecordInCache(String recordid, MongoCollection<Document> mcollection) {
+	public boolean checkRecordInCache(String recordid, MongoCollection<Document> mcollection) throws InvalidInputException {
 		try {
-			Pattern p = Pattern.compile("[^a-z0-9]", Pattern.CASE_INSENSITIVE);
+			Pattern p = Pattern.compile("[^a-z0-9_.-]", Pattern.CASE_INSENSITIVE);
 			Matcher m = p.matcher(recordid);
 			if (m.find()) {
-				logger.error("Input record id is not valid,, check input parameters.");
-				throw new IllegalArgumentException("check input parameters.");
+				logger.error("Requested record id is not valid, record id has unsupported characters.");
+				throw new InvalidInputException("Check the requested record id.");
 			}
 			long count = mcollection.countDocuments(Filters.eq("ediid", recordid));
 			return count != 0;
-		} catch (MongoException e) {
+		} 
+		catch (MongoException e) {
 			logger.error("Error finding data from MongoDB for requested record id");
 			throw e;
 		}

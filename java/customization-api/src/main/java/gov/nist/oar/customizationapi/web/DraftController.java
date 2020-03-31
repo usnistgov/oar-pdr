@@ -81,12 +81,14 @@ public class DraftController {
 	 * @param ediid Unique record identifier
 	 * @return Document
 	 * @throws CustomizationException
+	 * @throws InvalidInputException 
+	 * @throws ResourceNotFoundException 
 	 */
 	@RequestMapping(value = { "{ediid}" }, method = RequestMethod.GET, produces = "application/json")
 	@ApiOperation(value = ".", nickname = "Access editable Record", notes = "Resource returns a record if it is editable and user is authenticated.")
 	public Document getData(@PathVariable @Valid String ediid, @RequestParam(required = false) String view,
 			@RequestHeader(value = "Authorization", required = false) String serviceAuth, HttpServletRequest request)
-			throws CustomizationException, UnsatisfiedServletRequestParameterException {
+			throws CustomizationException, UnsatisfiedServletRequestParameterException, ResourceNotFoundException, InvalidInputException {
 		logger.info("Access the record to be edited by ediid " + ediid);
 
 		processRequest(request, serviceAuth);
@@ -164,7 +166,7 @@ public class DraftController {
 	@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
 	public ErrorInfo handleCustomization(CustomizationException ex, HttpServletRequest req) {
 		logger.error("There is an error in the service: " + req.getRequestURI() + "\n  " + ex.getMessage(), ex);
-		return new ErrorInfo(req.getRequestURI(), 500, "Internal Server Error",req.getMethod());
+		return new ErrorInfo(req.getRequestURI(), 500, "Some internal error occured.",req.getMethod());
 	}
 
 	/**
@@ -192,7 +194,7 @@ public class DraftController {
 	@ResponseStatus(HttpStatus.BAD_REQUEST)
 	public ErrorInfo handleStreamingError(InvalidInputException ex, HttpServletRequest req) {
 		logger.info("There is an error processing input data: " + req.getRequestURI() + "\n  " + ex.getMessage());
-		return new ErrorInfo(req.getRequestURI(), 400, "Invalid input error", req.getMethod());
+		return new ErrorInfo(req.getRequestURI(), 400, "Invalid input or invalid request ID", req.getMethod());
 	}
 	
 
@@ -207,7 +209,7 @@ public class DraftController {
 	@ResponseStatus(HttpStatus.BAD_REQUEST)
 	public ErrorInfo handleStreamingError(HttpMessageNotReadableException ex, HttpServletRequest req) {
 		logger.info("There is an error processing input data: " + req.getRequestURI() +" ::"+req.getMethod() + "\n  " + ex.getMessage());
-		return new ErrorInfo(req.getRequestURI(), 400, "Invalid input error", req.getMethod());
+		return new ErrorInfo(req.getRequestURI(), 400, "Invalid Input", req.getMethod());
 	}
 	/**
 	 * Some generic exception thrown by service
