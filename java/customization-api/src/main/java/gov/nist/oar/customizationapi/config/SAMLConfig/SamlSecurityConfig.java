@@ -42,6 +42,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.saml.SAMLAuthenticationProvider;
 import org.springframework.security.saml.SAMLBootstrap;
@@ -104,8 +105,6 @@ import org.springframework.core.Ordered;
  * @author Deoyani Nandrekar-Heinis
  */
 @Configuration
-//@EnableWebSecurity
-@Order(Ordered.HIGHEST_PRECEDENCE)
 public class SamlSecurityConfig extends WebSecurityConfigurerAdapter {
 	private static Logger logger = LoggerFactory.getLogger(SamlSecurityConfig.class);
 
@@ -326,7 +325,7 @@ public class SamlSecurityConfig extends WebSecurityConfigurerAdapter {
 	 */
 	@Bean
 	public MetadataGenerator metadataGenerator() throws ConfigurationException {
-		logger.info("Metadata generator : sets the entity id and base url to establish communication with ID server.");
+		logger.info("Metadata generator : sets the entity id and base url to establish communication with ID server." +entityId );
 		MetadataGenerator metadataGenerator = new MetadataGenerator();
 		metadataGenerator.setEntityId(entityId);
 		metadataGenerator.setEntityBaseURL(entityBaseURL);

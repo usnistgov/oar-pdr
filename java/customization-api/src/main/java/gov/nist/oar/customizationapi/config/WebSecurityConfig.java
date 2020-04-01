@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -137,6 +138,7 @@ public class WebSecurityConfig {
      * Saml security config
      */
     @Configuration
+    @Order(0)
     @Import(SamlSecurityConfig.class)
     public static class SamlConfig {
 
