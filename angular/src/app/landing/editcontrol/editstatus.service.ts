@@ -34,26 +34,17 @@ export class EditStatusService {
     _setLastUpdated(updateDetails : UpdateDetails) { this._lastupdate = updateDetails; }
 
     /**
-     * flag indicating whether the landing page is currently being edited.  
+     * flag indicating the current edit mode.  
      * Make editMode observable so any component that subscribe to it will
      * get an update once the mode changed.
      */
     _editMode : BehaviorSubject<string> = new BehaviorSubject<string>("");
-    _setEditMode(val : string) { 
+    public setEditMode(val : string) { 
         this._editMode.next(val); 
     }
-    _watchEditMode(subscriber) {
+    public watchEditMode(subscriber) {
         this._editMode.subscribe(subscriber);
     }
-
-    /**
-     * flag indicating whether the landing page is currently being edited.  
-     */
-    // get editMode() : string { return this._editmode; }
-    // private _editmode : string = '';
-    // _setEditMode(val : string) { 
-    //   this._editmode = val; 
-    // }
 
     /**
      * flag indicating whether we get an error.

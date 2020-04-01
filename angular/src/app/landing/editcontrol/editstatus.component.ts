@@ -45,7 +45,7 @@ export class EditStatusComponent implements OnInit {
             this.showLastUpdate(this.EDIT_MODES.EDIT_MODE);  //Once last updated date changed, refresh the status bar message
         });
 
-        this.edstatsvc._watchEditMode((editMode) => {
+        this.edstatsvc.watchEditMode((editMode) => {
           this._editmode = editMode;
         });
     }

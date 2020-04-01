@@ -24,7 +24,7 @@ export class MessageBarComponent {
 
     public constructor(@Optional() private svc : UserMessageService) {
         if (svc) {
-            svc._subscribe({
+            svc.subscribe({
                 next: (msg) => {
                     this.messages.push(msg)  // msg: an object with type, message
                 }
@@ -32,7 +32,7 @@ export class MessageBarComponent {
         }
     }
 
-    _addMessage(message : string, type ?: string, prefix : string = "") : void {
+    private _addMessage(message : string, type ?: string, prefix : string = "") : void {
         if (! type) type = "information";
         this.messages.push({ type: type, text: message, prefix: prefix, id: this.nextid++ });
     }

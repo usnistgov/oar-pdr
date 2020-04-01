@@ -82,7 +82,7 @@ export class EditControlComponent implements OnInit, OnChanges {
         private msgsvc: UserMessageService) {
 
         this.EDIT_MODES = LandingConstants.editModes;
-        this.mdupdsvc._subscribe(
+        this.mdupdsvc.subscribe(
             (md) => {
                 if (md && md != this.mdrec) {
                     this.mdrec = md as NerdmRes;
@@ -98,20 +98,22 @@ export class EditControlComponent implements OnInit, OnChanges {
     }
 
     ngOnInit() {
-        this.ngOnChanges();
-        this.statusbar.showLastUpdate(this.editMode)
-        this.edstatsvc._watchRemoteStart((remoteObj) => {
-            // To remote start editing, resID need be set otherwise authorizeEditing()
-            // will do nothing and the app won't change to edit mode
-            if (remoteObj.resID) {
-                this.resID = remoteObj.resID;
-                this.startEditing(remoteObj.nologin);
-            }
-        });
+      // set edit mode to view only on init
+      this.edstatsvc.setEditMode(this.EDIT_MODES.VIEWONLY_MODE);
+      this.ngOnChanges();
+      this.statusbar.showLastUpdate(this.editMode)
+      this.edstatsvc._watchRemoteStart((remoteObj) => {
+          // To remote start editing, resID need be set otherwise authorizeEditing()
+          // will do nothing and the app won't change to edit mode
+          if (remoteObj.resID) {
+              this.resID = remoteObj.resID;
+              this.startEditing(remoteObj.nologin);
+          }
+      });
 
-        this.edstatsvc._watchEditMode((editMode) => {
-          this.editMode = editMode;
-        });
+      this.edstatsvc.watchEditMode((editMode) => {
+        this.editMode = editMode;
+      });
     }
 
     ngOnChanges() {
@@ -121,7 +123,7 @@ export class EditControlComponent implements OnInit, OnChanges {
             if (this.originalRecord === null) {
                 this.originalRecord = this._deepCopy(this.mdrec) as NerdmRes;
                 //Should not change original rec when record changed. Only after submit or discard changes
-                // this.mdupdsvc._setOriginalMetadata(this.originalRecord)
+                // this.mdupdsvc.setOriginalMetadata(this.originalRecord)
             }
         }
     }
@@ -139,7 +141,7 @@ export class EditControlComponent implements OnInit, OnChanges {
         if (this._custsvc) {
             // already authorized
             this.editMode = this.EDIT_MODES.EDIT_MODE;
-            this.edstatsvc._setEditMode(this.editMode);
+            this.edstatsvc.setEditMode(this.editMode);
             this.statusbar.showLastUpdate(this.editMode);
             return;
         }
@@ -154,23 +156,28 @@ export class EditControlComponent implements OnInit, OnChanges {
                     (md) => {
                       if(md){
                         console.log("Draft loaded:", md);
-                        this.mdupdsvc._setOriginalMetadata(md as NerdmRes);
+                        this.mdupdsvc.setOriginalMetadata(md as NerdmRes);
                         this.mdupdsvc.checkUpdatedFields(md as NerdmRes);
-                        this.edstatsvc._setEditMode(this.EDIT_MODES.EDIT_MODE);
+                        this.edstatsvc.setEditMode(this.EDIT_MODES.EDIT_MODE);
                         this.statusbar.showLastUpdate(this.EDIT_MODES.EDIT_MODE);
                         this.editMode = this.EDIT_MODES.EDIT_MODE;
                       }else{
                         this.statusbar.showMessage("There was a problem loading draft data.", false);
-                        this.edstatsvc._setEditMode(this.EDIT_MODES.PREVIEW_MODE);
+                        this.edstatsvc.setEditMode(this.EDIT_MODES.PREVIEW_MODE);
                         this.edstatsvc._setError(true);
                       }
-                    });
+                    },
+                    (err) => {
+                      this.mdupdsvc.setOriginalMetadataToRmm();
+                      this.edstatsvc.setEditMode(this.EDIT_MODES.VIEWONLY_MODE);
+                    }
+                );
               }
             },
             (err) => {
               console.log("Authentication failed.");
               this.statusbar.showMessage("Authentication failed.", false);
-              this.edstatsvc._setEditMode(this.EDIT_MODES.PREVIEW_MODE);
+              this.edstatsvc.setEditMode(this.EDIT_MODES.PREVIEW_MODE);
             }
         );
     }
@@ -185,16 +192,16 @@ export class EditControlComponent implements OnInit, OnChanges {
                     console.log("Discard edit return:", md);
                     this.mdupdsvc.forgetUpdateDate();
                     this.mdupdsvc.fieldReset();
-                    this.edstatsvc._setEditMode(this.EDIT_MODES.PREVIEW_MODE);
+                    this.edstatsvc.setEditMode(this.EDIT_MODES.PREVIEW_MODE);
                     if (md && md['@id']) {
                         // assume a NerdmRes object was returned
                         this.mdrec = md as NerdmRes;
-                        this.mdupdsvc._setOriginalMetadata(md as NerdmRes);
+                        this.mdupdsvc.setOriginalMetadata(md as NerdmRes);
                         this.mdrecChange.emit(md as NerdmRes);
                     }else{
                       // If backend didn't return a Nerdm record, just set edit mode to preview
                       console.log("Backend didn't return a Nerdm record after the discard request.")
-                      this.edstatsvc._setEditMode(this.EDIT_MODES.PREVIEW_MODE);
+                      this.edstatsvc.setEditMode(this.EDIT_MODES.PREVIEW_MODE);
                     }
                 },
                 (err) => {
@@ -245,41 +252,6 @@ export class EditControlComponent implements OnInit, OnChanges {
     }
 
     /**
-     * commit the latest changes to the metadata.  
-     */
-    public saveEdits(): void {
-        if (this._custsvc) {
-            this.statusbar.showMessage("Submitting changes...", true);
-            this._custsvc.saveDraft().subscribe(
-                (md) => {
-                    this.mdupdsvc.forgetUpdateDate();
-                    this.mdupdsvc.fieldReset();
-                    this.mdrec = md as NerdmRes;
-                    this.mdrecChange.emit(md as NerdmRes);
-                    this.editMode = this.EDIT_MODES.PREVIEW_MODE;
-                    this.statusbar.showLastUpdate(this.editMode)
-
-                    // reload this page from the source
-                    // window.location.replace("/od/id/"+this.requestID);
-                },
-                (err) => {
-                    if (err.type == "user")
-                        this.msgsvc.error(err.message);
-                    else {
-                        this.msgsvc.syserror("error during save: " + err.message);
-                    }
-                    this.statusbar.showLastUpdate(this.editMode)
-                }
-            );
-        }
-        else
-            console.warn("Warning: requested edit discard without authorization");
-
-
-    }
-
-
-    /**
      * Tell backend that the editing is done
      */
     public doneEdits(): void {
@@ -290,7 +262,7 @@ export class EditControlComponent implements OnInit, OnChanges {
             this.mdupdsvc.forgetUpdateDate();
             this.mdupdsvc.fieldReset();
             this.editMode = this.EDIT_MODES.DONE_MODE;
-            this.edstatsvc._setEditMode(this.editMode);
+            this.edstatsvc.setEditMode(this.editMode);
             this.statusbar.showLastUpdate(this.editMode)
           },
           (err) => {
@@ -312,7 +284,7 @@ export class EditControlComponent implements OnInit, OnChanges {
      */
     public preview(): void {
         this.editMode = this.EDIT_MODES.PREVIEW_MODE;
-        this.edstatsvc._setEditMode(this.editMode);
+        this.edstatsvc.setEditMode(this.editMode);
         if (this.editsPending())
             this.statusbar.showMessage('Click "Submit" to commit your changes ' +
                 'or "Edit" to make more changes.');
@@ -429,16 +401,6 @@ export class EditControlComponent implements OnInit, OnChanges {
                 }
             );
         });
-    }
-
-    /**
-     * send a message to the message bar.  This is provided (currently) mainly for testing purposes.
-     * @param msg    the text of the message
-     * @param type   the type of message it is (tip, error, syserror, information, instruction, 
-     *               warning, or celebration)
-     */
-    public showMessage(msg: string, mtype = "information") {
-        this.msgbar._addMessage(msg, mtype);
     }
 
     private _deepCopy(obj: {} | [] | string | boolean | number): {} | [] | string | boolean | number {

@@ -72,7 +72,7 @@ export class MetadataUpdateService {
         private datePipe: DatePipe) { 
           this.EDIT_MODES = LandingConstants.editModes;
 
-          this.edstatsvc._watchEditMode((editMode) => {
+          this.edstatsvc.watchEditMode((editMode) => {
             this.editMode = editMode;
           });
         }
@@ -81,16 +81,21 @@ export class MetadataUpdateService {
      * subscribe to updates to the metadata.  This is intended for connecting the 
      * service to the EditControlPanel.
      */
-    _subscribe(controller): void {
+    public subscribe(controller): void {
         this.mdres.subscribe(controller);
     }
 
-    _setOriginalMetadata(md: NerdmRes) {
+    public setOriginalMetadata(md: NerdmRes) {
         this.originalRec = md;
         this.mdres.next(md as NerdmRes);
     }
 
-    _setRmmMetadata(md: NerdmRes) {
+    public setOriginalMetadataToRmm() {
+      this.originalRec = this.rmmRec;
+      this.mdres.next(this.rmmRec as NerdmRes);
+    }
+
+    public setRmmMetadata(md: NerdmRes) {
       this.rmmRec = md;
     }
 
@@ -333,35 +338,24 @@ export class MetadataUpdateService {
             }
             this.custsvc.getDraftMetadata().subscribe(
                 (res) => {
-                    this.mdres.next(res as NerdmRes);
-                    subscriber.next(res as NerdmRes);
-                    subscriber.complete();
-                    if (onSuccess) onSuccess();
+                  this.mdres.next(res as NerdmRes);
+                  subscriber.next(res as NerdmRes);
+                  subscriber.complete();
+                  if (onSuccess) onSuccess();
                 },
                 (err) => {
                   console.log("err", err);
-                    // err will be a subtype of CustomizationError
-                    if (err.statusCode == 404) {
-                      // URL returned Not Found, display rmm record in view only mode
-                      this.edstatsvc._setEditMode(this.EDIT_MODES.VIEWONLY_MODE);
-                      console.log('this.rmmRec', this.rmmRec);
-                      this.mdres.next(this.rmmRec);
-                      subscriber.next(this.rmmRec);
-                      subscriber.complete();
-                    }else{
-                      if (err.type == 'user') {
-                          console.error("Failed to retrieve draft metadata changes: user error:" + err.message);
-                          this.msgsvc.error(err.message);
-                          subscriber.next(null);
-                      }
-                      else {
-                          console.error("Failed to retrieve draft metadata changes: server error:" + err.message);
-                          this.msgsvc.syserror(err.message);
-                          subscriber.next(null);
-                      }
-                      
-                      subscriber.complete();
-                    }
+                  // err will be a subtype of CustomizationError
+                  if (err.type == 'user') {
+                      console.error("Failed to retrieve draft metadata changes: user error:" + err.message);
+                      this.msgsvc.error(err.message);
+                  }
+                  else {
+                      console.error("Failed to retrieve draft metadata changes: server error:" + err.message);
+                      this.msgsvc.syserror(err.message);
+                  }
+                  subscriber.next(null);
+                  subscriber.complete();
                 }
             );
         });

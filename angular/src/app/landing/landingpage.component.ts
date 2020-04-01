@@ -74,7 +74,7 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
         this.editEnabled = cfg.get('editEnabled', false) as boolean;
         this.EDIT_MODES = LandingConstants.editModes;
 
-        this.mdupdsvc._subscribe(
+        this.mdupdsvc.subscribe(
             (md) => {
                 if (md && md != this.md) {
                     this.md = md as NerdmRes;
@@ -91,8 +91,6 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
      */
     ngOnInit() {
         console.log("initializing LandingPageComponent around id=" + this.reqId);
-        //On init, set edit mode to view only mode so SSR won't failed on primeng buttons 
-        this.edstatsvc._setEditMode(this.EDIT_MODES.VIEWONLY_MODE);
         
         // Retrive Nerdm record and keep it in case we need to display it in preview mode
         // use case: user manually open PDR landing page but the record was not edited by MIDAS
@@ -134,38 +132,11 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
                   // has not been set yet and the startEditing function relies on it.
                     this.edstatsvc.startEditing(this.reqId);
               }else{
-                this.edstatsvc._setEditMode(this.EDIT_MODES.VIEWONLY_MODE);
+                this.edstatsvc.setEditMode(this.EDIT_MODES.VIEWONLY_MODE);
               }
             })
           } 
         }
-    }
-
-    /**
-     * Retrive Nerdm record
-     */
-    retriveNerdmRecord(){
-      this.mdserv.getMetadata(this.reqId).subscribe(
-        (data) => {
-            // successful metadata request
-            this.md = data;
-            if (!this.md) {
-                // id not found; reroute
-                console.error("No data found for ID=" + this.reqId);
-                this.router.navigateByUrl("/not-found/" + this.reqId, { skipLocationChange: true });
-            }
-            else
-                // proceed with rendering of the component
-                this.useMetadata();
-        },
-        (err) => {
-            console.error("Failed to retrieve metadata: " + err.toString());
-            if (err instanceof IDNotFound)
-                this.router.navigateByUrl("not-found/" + this.reqId, { skipLocationChange: true });
-            else
-                this.router.navigateByUrl("int-error/" + this.reqId, { skipLocationChange: true });
-        }
-      );
     }
 
     /**
@@ -196,8 +167,8 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
     useMetadata(): void {
         // set the document title
         this.setDocumentTitle();
-        this.mdupdsvc._setOriginalMetadata(this.md);
-        this.mdupdsvc._setRmmMetadata(this.md);
+        this.mdupdsvc.setOriginalMetadata(this.md);
+        this.mdupdsvc.setRmmMetadata(this.md);
     }
 
     /**

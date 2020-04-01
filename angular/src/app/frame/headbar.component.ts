@@ -67,7 +67,7 @@ export class HeadbarComponent {
         this.cartLength = this.cartService.getCartSize();
         this.editMode = this.EDIT_MODES.VIEWONLY_MODE;
 
-        this.editstatsvc._watchEditMode((editMode) => {
+        this.editstatsvc.watchEditMode((editMode) => {
           this.editMode = editMode;
         });
     }

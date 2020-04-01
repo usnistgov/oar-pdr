@@ -158,7 +158,7 @@ export class LandingComponent implements OnInit, OnChanges {
         this.editEnabled = cfg.get("editEnabled", false) as boolean;
         this.EDIT_MODES = LandingConstants.editModes;
 
-        this.edstatsvc._watchEditMode((editMode) => {
+        this.edstatsvc.watchEditMode((editMode) => {
           this.editMode = editMode;
         });
     }

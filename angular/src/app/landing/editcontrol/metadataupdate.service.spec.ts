@@ -43,7 +43,7 @@ describe('MetadataUpdateService', () => {
 
     it('returns initial draft metadata', () => {
         var md = null;
-        svc._subscribe({
+        svc.subscribe({
             next: (res) => { md = res; },
             error: (err) => { throw err; }
         }); 
@@ -67,8 +67,8 @@ describe('MetadataUpdateService', () => {
         expect(svc.lastUpdate).toEqual({} as UpdateDetails);
 
         var md = null;
-        svc._setOriginalMetadata(resmd);
-        svc._subscribe({
+        svc.setOriginalMetadata(resmd);
+        svc.subscribe({
             next: (res) => { md = res; },
             error: (err) => { throw err; }
         }); 
@@ -86,8 +86,8 @@ describe('MetadataUpdateService', () => {
         expect(svc.fieldUpdated('gurn')).toBeFalsy();
 
         var md = null;
-        svc._setOriginalMetadata(rec);
-        svc._subscribe({
+        svc.setOriginalMetadata(rec);
+        svc.subscribe({
             next: (res) => { md = res; },
             error: (err) => { throw err; }
         }); 
@@ -113,8 +113,8 @@ describe('MetadataUpdateService', () => {
         expect(svc.fieldUpdated('gurn')).toBeFalsy();
 
         var md = null;
-        svc._setOriginalMetadata(rec);
-        svc._subscribe({
+        svc.setOriginalMetadata(rec);
+        svc.subscribe({
             next: (res) => { md = res; },
             error: (err) => { throw err; }
         }); 
