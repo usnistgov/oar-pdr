@@ -138,7 +138,6 @@ public class WebSecurityConfig {
      * Saml security config
      */
     @Configuration
-    @Order(0)
     @Import(SamlSecurityConfig.class)
     public static class SamlConfig {
 
