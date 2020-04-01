@@ -176,6 +176,9 @@ class MIDASSIP(object):
             self._indirs.append(self.upldatadir)
 
         if not self._indirs:
+            if log.isEnabledFor(logging.DEBUG):
+                log.warn("No input directories available for midasid=%s", midasid)
+                log.debug("Input dirs:\n  %s\n  %s", str(self.revdatadir), str(selfupldatadir))
             raise SIPDirectoryNotFound(msg="No input directories available", sys=self)
 
         self.nerd = nerdrec

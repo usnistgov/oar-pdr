@@ -578,8 +578,13 @@ class MIDAS3PublishingService(PublishSystem):
         if worker:
             bagger = worker.bagger
         else:
-            bagger = self._create_bagger(ediid)
-            bagger.prepare()
+            try:
+                bagger = self._create_bagger(ediid)
+                bagger.prepare()
+            except (IDNotFound, SIPDirectoryNotFound) as ex:
+                msg = "A draft exists for dataset not being edited: " + ediid + ": " + str(ex)
+                log.error(msg)
+                raise StateException(msg=msg, cause=ex, sys=self)
 
         updates = self._filter_and_check_cust_updates(updmd, bagger.bagbldr)
 
