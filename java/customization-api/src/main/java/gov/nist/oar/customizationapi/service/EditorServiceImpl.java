@@ -172,7 +172,7 @@ public class EditorServiceImpl implements EditorService {
 	 */
 	public boolean checkRecordInCache(String recordid, MongoCollection<Document> mcollection) {
 		try {
-			Pattern p = Pattern.compile("[^a-z0-9]", Pattern.CASE_INSENSITIVE);
+			Pattern p = Pattern.compile("[^a-z0-9_.-]", Pattern.CASE_INSENSITIVE);
 			Matcher m = p.matcher(recordid);
 			if (m.find()) {
 				logger.error("Input record id is not valid,, check input parameters.");
