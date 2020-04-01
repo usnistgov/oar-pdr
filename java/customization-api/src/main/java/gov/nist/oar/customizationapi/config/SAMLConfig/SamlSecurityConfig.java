@@ -105,7 +105,7 @@ import org.springframework.core.Ordered;
  */
 @Configuration
 //@EnableWebSecurity
-//@Order(Ordered.HIGHEST_PRECEDENCE)
+@Order(Ordered.HIGHEST_PRECEDENCE)
 public class SamlSecurityConfig extends WebSecurityConfigurerAdapter {
 	private static Logger logger = LoggerFactory.getLogger(SamlSecurityConfig.class);
 
@@ -748,8 +748,10 @@ public class SamlSecurityConfig extends WebSecurityConfigurerAdapter {
 //			http.addFilterBefore(metadataGeneratorFilter(), ChannelProcessingFilter.class).addFilterAfter(springSecurityFilter(),
 //					BasicAuthenticationFilter.class);
 
-			http.authorizeRequests().antMatchers("/error").permitAll().antMatchers("/saml/**").permitAll().anyRequest()
-					.authenticated();
+			http.authorizeRequests()
+				.antMatchers("/error").permitAll()
+				.antMatchers("/saml/**").permitAll()
+				.anyRequest().authenticated();
 
 			http.logout().logoutSuccessUrl("/");
 
