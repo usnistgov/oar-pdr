@@ -91,10 +91,14 @@ import org.springframework.security.web.authentication.logout.SecurityContextLog
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.security.web.session.SessionManagementFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
 import gov.nist.oar.customizationapi.exceptions.ConfigurationException;
 import gov.nist.oar.customizationapi.service.SamlUserDetailsService;
 import org.springframework.core.Ordered;
+
 /**
  * This class reads configurations values from config server and set ups the
  * SAML service related parameters. It also helps to initialize different SAML
@@ -105,6 +109,7 @@ import org.springframework.core.Ordered;
  * @author Deoyani Nandrekar-Heinis
  */
 @Configuration
+@Order(0)
 public class SamlSecurityConfig extends WebSecurityConfigurerAdapter {
 	private static Logger logger = LoggerFactory.getLogger(SamlSecurityConfig.class);
 
@@ -209,15 +214,7 @@ public class SamlSecurityConfig extends WebSecurityConfigurerAdapter {
 		return samlEntryPoint;
 	}
 
-	/**
-	 * Metadatadisplay filter is called to use IDP metadata and set up SP service
-	 * 
-	 * @return
-	 */
-	@Bean
-	public MetadataDisplayFilter metadataDisplayFilter() {
-		return new MetadataDisplayFilter();
-	}
+	
 
 	/**
 	 * Authentication failure handler
@@ -325,7 +322,8 @@ public class SamlSecurityConfig extends WebSecurityConfigurerAdapter {
 	 */
 	@Bean
 	public MetadataGenerator metadataGenerator() throws ConfigurationException {
-		logger.info("Metadata generator : sets the entity id and base url to establish communication with ID server." +entityId );
+		logger.info("Metadata generator : sets the entity id and base url to establish communication with ID server."
+				+ entityId);
 		MetadataGenerator metadataGenerator = new MetadataGenerator();
 		metadataGenerator.setEntityId(entityId);
 		metadataGenerator.setEntityBaseURL(entityBaseURL);
@@ -334,7 +332,16 @@ public class SamlSecurityConfig extends WebSecurityConfigurerAdapter {
 		metadataGenerator.setKeyManager(keyManager());
 		return metadataGenerator;
 	}
-
+	
+	/**
+	 * Metadatadisplay filter is called to use IDP metadata and set up SP service
+	 * 
+	 * @return
+	 */
+	@Bean
+	public MetadataDisplayFilter metadataDisplayFilter() {
+		return new MetadataDisplayFilter();
+	}
 	/**
 	 * To load the keystore key with keypass
 	 * 
@@ -369,6 +376,7 @@ public class SamlSecurityConfig extends WebSecurityConfigurerAdapter {
 		return extendedMetadata;
 	}
 
+	
 	/**
 	 * Set up filter chain for the SAML authentication system, to connect to IDP
 	 * 
@@ -376,12 +384,9 @@ public class SamlSecurityConfig extends WebSecurityConfigurerAdapter {
 	 * @throws ConfigurationException
 	 */
 	@Bean
-	public FilterChainProxy samlFilter() throws ConfigurationException {
+	public FilterChainProxy samlSecurityFilter() throws ConfigurationException {
 		logger.info("Setting up different saml filters and endpoints");
 		List<SecurityFilterChain> chains = new ArrayList<>();
-
-		chains.add(new DefaultSecurityFilterChain(new AntPathRequestMatcher("/saml/metadata/**"),
-				metadataDisplayFilter()));
 
 		chains.add(new DefaultSecurityFilterChain(new AntPathRequestMatcher("/saml/login/**"), samlEntryPoint()));
 
@@ -392,6 +397,8 @@ public class SamlSecurityConfig extends WebSecurityConfigurerAdapter {
 
 		chains.add(new DefaultSecurityFilterChain(new AntPathRequestMatcher("/saml/singleLogout/**"),
 				samlLogoutProcessingFilter()));
+		chains.add(new DefaultSecurityFilterChain(new AntPathRequestMatcher("/saml/metadata/**"),
+				metadataDisplayFilter()));
 
 		return new FilterChainProxy(chains);
 	}
@@ -719,14 +726,24 @@ public class SamlSecurityConfig extends WebSecurityConfigurerAdapter {
 		return filter;
 	}
 
+//	@SuppressWarnings("deprecation")
+//	@Bean
+//    public WebMvcConfigurer corsConfigurer() {
+//        return new WebMvcConfigurerAdapter() {
+//            @Override
+//            public void addCorsMappings(CorsRegistry registry) {
+//                registry.addMapping("/**").allowedOrigins(applicationURL);
+//            }
+//        };
+//    }
 	/**
 	 * Allow following URL patterns without any authentication and authorization
 	 */
 	@Override
 	public void configure(WebSecurity web) throws Exception {
 		web.ignoring().antMatchers("/v2/api-docs", "/configuration/ui", "/swagger-resources/**",
-				"/configuration/security", "/swagger-ui.html", "/webjars/**","/pdr/lp/draft/**");
-				//, "/auth/_perm/**");
+				"/configuration/security", "/swagger-ui.html", "/webjars/**", "/pdr/lp/draft/**");
+		// , "/auth/_perm/**");
 	}
 
 	/**
@@ -737,20 +754,21 @@ public class SamlSecurityConfig extends WebSecurityConfigurerAdapter {
 		logger.info("Set up http security related filters for saml entrypoints");
 
 		try {
-			http.addFilterBefore(metadataGeneratorFilter(), ChannelProcessingFilter.class).addFilterAfter(samlFilter(),
-					BasicAuthenticationFilter.class);
+			
 			http.addFilterBefore(corsFilter(), SessionManagementFilter.class).exceptionHandling()
-					.authenticationEntryPoint(samlEntryPoint());
+			.authenticationEntryPoint(samlEntryPoint());
+//			http.addFilterBefore(metadataGeneratorFilter(), ChannelProcessingFilter.class).addFilterAfter(samlFilter(),
+//					BasicAuthenticationFilter.class);
+			//http.addFilterBefore(corsFilter(), SessionManagementFilter.class)
+			
 
 			http.csrf().disable();
 
-//			http.addFilterBefore(metadataGeneratorFilter(), ChannelProcessingFilter.class).addFilterAfter(springSecurityFilter(),
-//					BasicAuthenticationFilter.class);
+			http.addFilterBefore(metadataGeneratorFilter(), ChannelProcessingFilter.class).addFilterAfter(samlSecurityFilter(),
+					BasicAuthenticationFilter.class);
 
-			http.authorizeRequests()
-				.antMatchers("/error").permitAll()
-				.antMatchers("/saml/**").permitAll()
-				.anyRequest().authenticated();
+			http.authorizeRequests().antMatchers("/error").permitAll().antMatchers("/saml/**").permitAll().anyRequest()
+					.authenticated();
 
 			http.logout().logoutSuccessUrl("/");
 

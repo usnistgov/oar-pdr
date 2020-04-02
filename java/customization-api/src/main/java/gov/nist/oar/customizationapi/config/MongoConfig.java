@@ -42,6 +42,7 @@ import com.mongodb.client.MongoDatabase;
  * @author Deoyani Nandrekar-Heinis
  *
  */
+
 public class MongoConfig {
 
 	private static Logger log = LoggerFactory.getLogger(MongoConfig.class);

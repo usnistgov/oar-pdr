@@ -138,6 +138,7 @@ public class WebSecurityConfig {
      * Saml security config
      */
     @Configuration
+   
     @Import(SamlSecurityConfig.class)
     public static class SamlConfig {
 
