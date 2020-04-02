@@ -93,28 +93,24 @@ describe('EditStatusComponent', () => {
         fixture.detectChanges();
         let cmpel = fixture.nativeElement;
         let bardiv = cmpel.querySelector(".ec-status-bar");
-        expect(bardiv).not.toBeNull();
-        expect(bardiv.firstElementChild.innerHTML).toContain("To see any previously edited");
+        expect(bardiv).toBeNull();
         
         component._editmode = EDIT_MODES.EDIT_MODE;
         component.showLastUpdate();
         expect(component.message).toContain('Click on the <i class="faa faa-pencil"></i> button to edit');
         fixture.detectChanges();
-        expect(bardiv.firstElementChild.innerHTML).toContain('button to edit');
+        cmpel = fixture.nativeElement;
+        bardiv = cmpel.querySelector(".ec-status-bar");
+        expect(bardiv.children[1].innerHTML).toContain('button to edit');
 
         component.setLastUpdateDetails(updateDetails);
-        
-        component._editmode = EDIT_MODES.PREVIEW_MODE;
-        component.showLastUpdate();
-        expect(component.message).toContain("There are un-submitted changes last edited on 2025 April 1");
-        fixture.detectChanges();
-        expect(bardiv.firstElementChild.innerHTML).toContain('There are un-submitted changes');
 
         component._editmode = EDIT_MODES.EDIT_MODE;
         component.showLastUpdate();
         expect(component.message).toContain("This record was edited");
         fixture.detectChanges();
-        expect(bardiv.firstElementChild.innerHTML).toContain('This record was edited by');
+        expect(bardiv.firstElementChild.innerHTML).toContain('required field');
+        expect(bardiv.children[1].innerHTML).toContain('This record was edited by');
 
         component._editmode = EDIT_MODES.DONE_MODE;
         component.showLastUpdate();
