@@ -105,6 +105,7 @@ import org.springframework.core.Ordered;
  * @author Deoyani Nandrekar-Heinis
  */
 @Configuration
+@Order(0)
 public class SamlSecurityConfig extends WebSecurityConfigurerAdapter {
 	private static Logger logger = LoggerFactory.getLogger(SamlSecurityConfig.class);
 
@@ -737,8 +738,7 @@ public class SamlSecurityConfig extends WebSecurityConfigurerAdapter {
 		logger.info("Set up http security related filters for saml entrypoints");
 
 		try {
-			http.addFilterBefore(metadataGeneratorFilter(), ChannelProcessingFilter.class).addFilterAfter(samlFilter(),
-					BasicAuthenticationFilter.class);
+			
 			http.addFilterBefore(corsFilter(), SessionManagementFilter.class).exceptionHandling()
 					.authenticationEntryPoint(samlEntryPoint());
 
@@ -747,6 +747,9 @@ public class SamlSecurityConfig extends WebSecurityConfigurerAdapter {
 //			http.addFilterBefore(metadataGeneratorFilter(), ChannelProcessingFilter.class).addFilterAfter(springSecurityFilter(),
 //					BasicAuthenticationFilter.class);
 
+			http.addFilterBefore(metadataGeneratorFilter(), ChannelProcessingFilter.class).addFilterAfter(samlFilter(),
+					BasicAuthenticationFilter.class);
+			
 			http.authorizeRequests()
 				.antMatchers("/error").permitAll()
 				.antMatchers("/saml/**").permitAll()

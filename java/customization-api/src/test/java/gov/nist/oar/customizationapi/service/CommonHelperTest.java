@@ -11,11 +11,11 @@ import gov.nist.oar.customizationapi.exceptions.InvalidInputException;
  * @author Deoyani Nandrekar-Heinis
  *
  */
-public class ProcessInputRequestTest {
+public class CommonHelperTest {
 
 	@Test
 	public void validateInputParamsTest() throws IOException, InvalidInputException {
-		ProcessInputRequest processInputRequest = new ProcessInputRequest();
+		CommonHelper processInputRequest = new CommonHelper();
 		String json = "{\n" + 
 				"    \"title\" : \"Title of Record\",\n" + 
 				"    \"description\" : [\"Description for the record\"],\n" + 

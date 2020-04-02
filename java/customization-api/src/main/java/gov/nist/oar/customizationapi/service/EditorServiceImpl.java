@@ -1,13 +1,10 @@
 package gov.nist.oar.customizationapi.service;
 
 import java.util.ArrayList;
-
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.bson.Document;
 import org.slf4j.Logger;
@@ -22,7 +19,6 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.Projections;
 import com.mongodb.client.model.UpdateOptions;
-import com.mongodb.client.result.DeleteResult;
 
 import gov.nist.oar.customizationapi.config.MongoConfig;
 import gov.nist.oar.customizationapi.exceptions.CustomizationException;
@@ -33,8 +29,10 @@ import gov.nist.oar.customizationapi.helpers.UserDetailsExtractor;
 import gov.nist.oar.customizationapi.repositories.EditorService;
 
 /**
- * Implemention of EditorService interface where request to get data, get updates
- * delete changes and Update field requests are processed and corresponding fields in mongodb is updated.
+ * Implemention of EditorService interface where request to get data, get
+ * updates delete changes and Update field requests are processed and
+ * corresponding fields in mongodb is updated.
+ * 
  * @author Deoyani Nandrekar-Heinis
  */
 @Service
@@ -43,17 +41,30 @@ public class EditorServiceImpl implements EditorService {
 
 	@Autowired
 	MongoConfig mconfig;
-	
+
 	@Autowired
 	UserDetailsExtractor userDetailsExtractor;
-	
+
 	@Value("${nist.arkid:testid}")
 	String nistarkid;
 
+	CommonHelper commonHelper = new CommonHelper();
+
+	@Override
+	public Document getRecord(String recordid) throws CustomizationException {
+		logger.info("Retrieve the metadata record from chache requested by ::"+recordid);
+		recordid = commonHelper.getIdentifier(recordid, nistarkid);
+		commonHelper.checkRecordInCache(recordid, mconfig.getRecordCollection());
+		return commonHelper.mergeDataOnTheFly(recordid,mconfig.getRecordCollection(), mconfig.getChangeCollection());
+	}
+
 	@Override
 	public Document patchRecord(String param, String recordid) throws CustomizationException, InvalidInputException {
+		logger.info("Updated changes in cache made by client and reuested by :: "+recordid);
 
 		try {
+			recordid = commonHelper.getIdentifier(recordid, nistarkid);
+			commonHelper.checkRecordInCache(recordid, mconfig.getRecordCollection());
 			// Validate JSON and Validate schema against json-customization schema
 			JSONUtils.validateInput(param);
 			Document update = Document.parse(param);
@@ -67,20 +78,16 @@ public class EditorServiceImpl implements EditorService {
 
 	}
 
-	@Override
-	public Document getRecord(String recordid) throws CustomizationException {
-		return this.mergeDataOnTheFly(recordid);
-	}
-
+	/***
+	 * Delete only the changes  and return original record
+	 */
 	@Override
 	public Document deleteRecordChanges(String recordid) throws CustomizationException {
-		deleteRecordChangesInCache(recordid);
-		
-		if (!checkRecordInCache(recordid, mconfig.getRecordCollection()))
-			throw new ResourceNotFoundException("Record not found in Cache.");
-
-		return mconfig.getRecordCollection().find(Filters.eq("ediid", recordid)).first();
-		 
+		logger.info("Delete only the changes in record from cache requested by ::"+recordid);
+		recordid = commonHelper.getIdentifier(recordid, nistarkid);
+		commonHelper.checkRecordInCache(recordid, mconfig.getRecordCollection());
+		commonHelper.deleteRecordInCache(recordid, mconfig.getChangeCollection());
+		return commonHelper.getRecordFromCache(recordid, mconfig.getRecordCollection());
 	}
 
 	/**
@@ -93,15 +100,16 @@ public class EditorServiceImpl implements EditorService {
 	 * @return boolean
 	 * @throws CustomizationException
 	 */
-	private Document updateChangesHelper(String recordid, Document update) throws CustomizationException, ResourceNotFoundException {
+	private Document updateChangesHelper(String recordid, Document update)
+			throws CustomizationException, ResourceNotFoundException {
 
-		if (!this.checkRecordInCache(recordid, mconfig.getChangeCollection()))
+		if (!commonHelper.isRecordInCache(recordid, mconfig.getChangeCollection()))
 			this.putDataInCacheOnlyChanges(update, mconfig.getChangeCollection());
 
-		else {
+		else
 			updateChangesCache(recordid, update);
-		}
-		return mergeDataOnTheFly(recordid);
+
+		return commonHelper.mergeDataOnTheFly(recordid,mconfig.getRecordCollection(), mconfig.getChangeCollection());
 
 	}
 
@@ -164,32 +172,6 @@ public class EditorServiceImpl implements EditorService {
 	}
 
 	/**
-	 * It first checks whether recordid provided is of proper format and allowed to
-	 * be used to search in the database. It uses find method to search database.
-	 * 
-	 * @param recordid
-	 * @return
-	 */
-	public boolean checkRecordInCache(String recordid, MongoCollection<Document> mcollection) {
-		try {
-			Pattern p = Pattern.compile("[^a-z0-9_.-]", Pattern.CASE_INSENSITIVE);
-			Matcher m = p.matcher(recordid);
-			if (m.find()) {
-				logger.error("Input record id is not valid,, check input parameters.");
-				throw new IllegalArgumentException("check input parameters.");
-			}
-			
-			if(recordid.startsWith("mds"))
-				recordid = "ark:/"+this.nistarkid+"/"+recordid;
-			long count = mcollection.countDocuments(Filters.eq("ediid", recordid));
-			return count != 0;
-		} catch (MongoException e) {
-			logger.error("Error finding data from MongoDB for requested record id");
-			throw e;
-		}
-	}
-
-	/**
 	 * This function inserts updated record changes in the Mongodb changes
 	 * collection.
 	 * 
@@ -206,89 +188,4 @@ public class EditorServiceImpl implements EditorService {
 		}
 	}
 
-	/**
-	 * To update the record in the cached database
-	 * 
-	 * @param recordid an ediid of the record
-	 * @param update   json to update
-	 * @return Return true if data is updated successfully.
-	 * @throws CustomizationException
-	 */
-	public Document mergeDataOnTheFly(String recordid) throws CustomizationException, ResourceNotFoundException {
-		try {
-
-
-			if (!checkRecordInCache(recordid, mconfig.getRecordCollection()))
-				throw new ResourceNotFoundException("Record not found in Cache.");
-
-			Document doc = this.getRecordFromCache(recordid);
-
-			Document changes = null;
-			if (checkRecordInCache(recordid, mconfig.getChangeCollection())) {
-				changes = mconfig.getChangeCollection().find(Filters.eq("ediid", recordid)).first();
-				if (changes.containsKey("_id"))
-					changes.remove("_id");
-
-			}
-
-			if (changes != null) {
-				for (Entry<String, Object> entry : changes.entrySet()) {
-//					System.out.println("key:" + entry.getKey());
-					if (doc.containsKey(entry.getKey())) {
-						doc.replace(entry.getKey(), doc.get(entry.getKey()), entry.getValue());
-					}else {
-					
-					//if(entry.getKey().equals("_updateDetails")) {
-						doc.append(entry.getKey(), entry.getValue());
-					//}
-					}
-
-				}
-			}
-
-			return doc;
-
-		} catch (MongoException ex) {
-			logger.error("Error while update data in cache db" + ex.getMessage());
-			throw new MongoException("Error while putting updated data in cache db." + ex.getMessage());
-		}
-
-	}
-	
-	public Document getRecordFromCache(String recordid) {
-		if(recordid.startsWith("mds"))
-			recordid = "ark:/"+this.nistarkid+"/"+recordid;
-		return mconfig.getRecordCollection().find(Filters.eq("ediid", recordid)).first();
-	}
-
-	/**
-	 * Find the record of given id in the collection and remove.
-	 * 
-	 * @param recordid    Unique record identifier
-	 * @param mcollection MongoDB Collection
-	 * @return true if the record is deleted successfully.
-	 */
-	public boolean deleteRecordChangesInCache(String recordid) throws ResourceNotFoundException {
-		try {
-			
-			if (!checkRecordInCache(recordid, mconfig.getChangeCollection()))
-				throw new ResourceNotFoundException("Record not found in Cache.");
-			
-			boolean deleted = false;
-			Document d = mconfig.getChangeCollection().find(Filters.eq("ediid", recordid)).first();
-
-			if (d != null) {
-				DeleteResult result = mconfig.getChangeCollection().deleteOne(d);
-				if (result.getDeletedCount() == 1)
-					deleted = true;
-			}
-
-			return deleted;
-
-		} catch (MongoException ex) {
-			logger.error("Error deleting data in cache db" + ex.getMessage());
-			throw new MongoException("Error while deleteing data in cache db." + ex.getMessage());
-		}
-
-	}
 }
