@@ -131,8 +131,6 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
                   // Need to pass reqID (resID) because the resID in editControlComponent
                   // has not been set yet and the startEditing function relies on it.
                     this.edstatsvc.startEditing(this.reqId);
-              }else{
-                this.edstatsvc.setEditMode(this.EDIT_MODES.VIEWONLY_MODE);
               }
             })
           } 
@@ -168,7 +166,6 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
         // set the document title
         this.setDocumentTitle();
         this.mdupdsvc.setOriginalMetadata(this.md);
-        this.mdupdsvc.setRmmMetadata(this.md);
     }
 
     /**

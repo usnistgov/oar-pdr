@@ -39,7 +39,7 @@ export class EditStatusService {
      * get an update once the mode changed.
      */
     _editMode : BehaviorSubject<string> = new BehaviorSubject<string>("");
-    public setEditMode(val : string) { 
+    _setEditMode(val : string) { 
         this._editMode.next(val); 
     }
     public watchEditMode(subscriber) {

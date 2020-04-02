@@ -31,7 +31,6 @@ export class MetadataUpdateService {
     private mdres: Subject<NerdmRes> = new Subject<NerdmRes>();
     private custsvc: CustomizationService = null;
     private originalRec: NerdmRes = null;
-    private rmmRec: NerdmRes = null;
     private origfields: {} = {};   // keeps track of orginal metadata so that they can be undone
     public  EDIT_MODES: any;
 
@@ -90,17 +89,8 @@ export class MetadataUpdateService {
         this.mdres.next(md as NerdmRes);
     }
 
-    public setOriginalMetadataToRmm() {
-      this.originalRec = this.rmmRec;
-      this.mdres.next(this.rmmRec as NerdmRes);
-    }
-
-    public setRmmMetadata(md: NerdmRes) {
-      this.rmmRec = md;
-    }
-
-    get rmmMetadata(){
-      return this.rmmRec;
+    public resetOriginal() {
+      this.mdres.next(this.originalRec as NerdmRes);
     }
 
     _setCustomizationService(svc: CustomizationService): void {

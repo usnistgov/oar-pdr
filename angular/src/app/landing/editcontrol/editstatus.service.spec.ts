@@ -39,7 +39,7 @@ describe('EditStatusService', () => {
 
     it('setable', () => {
         svc._setLastUpdated(updateDetails);
-        svc.setEditMode(EDIT_MODES.EDIT_MODE);
+        svc._setEditMode(EDIT_MODES.EDIT_MODE);
         svc._setUserID("Hank");
         svc._setAuthorized(false);
 

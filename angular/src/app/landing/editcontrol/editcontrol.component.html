@@ -1,29 +1,29 @@
 <!-- Edit Control button bar -->
-<div class="edit-control-buttons" *ngIf="editMode != EDIT_MODES.VIEWONLY_MODE">
+<div class="edit-control-buttons" *ngIf="_editMode != EDIT_MODES.VIEWONLY_MODE">
     <!-- Buttons are arranged from right to left -->
 
     <i class="faa faa-info-circle" id="ec-info-btn" (click)="showEditControlHelpPopup()" data-toggle="tooltip" title="Show edit control help"></i>
 
     <!-- Discard button -->
     <button pButton type="submit" class="btn btn-labeled" id="ec-discard-btn" (click)="confirmDiscardEdits()"
-        [disabled]="((editMode == EDIT_MODES.DONE_MODE) || !editsPending())" label="Discard" icon="faa faa-trash faa-1x icon-white" iconPos="left">
+        [disabled]="((_editMode == EDIT_MODES.DONE_MODE) || !editsPending())" label="Discard" icon="faa faa-trash faa-1x icon-white" iconPos="left">
     </button>
 
     <!-- Done button -->
     <button pButton type="submit" class="btn btn-labeled" id="ec-done-btn" (click)="doneEdits()"
-        [disabled]="((editMode == EDIT_MODES.DONE_MODE) || !editsPending())" label="Done" icon="faa faa-save faa-1x icon-white" iconPos="left">
+        [disabled]="((_editMode == EDIT_MODES.DONE_MODE) || !editsPending())" label="Done" icon="faa faa-save faa-1x icon-white" iconPos="left">
     </button>
 
     <!-- 
       -  Edit button:  when editing is off, the Edit button will show; if it is on, the
       -  "Preview" button will show in its place
       -->
-    <button pButton type="submit" *ngIf="editMode == EDIT_MODES.PREVIEW_MODE" type="button" class="btn btn-labeled" 
+    <button pButton type="submit" *ngIf="_editMode == EDIT_MODES.PREVIEW_MODE" type="button" class="btn btn-labeled" 
         (click)="startEditing()"
         id="ec-edit-btn" label="Edit" icon="faa faa-pencil faa-1x icon-white" iconPos="left">
     </button>
 
-    <button pButton type="submit" *ngIf="editMode == EDIT_MODES.EDIT_MODE" type="button" class="btn btn-labeled" (click)="preview()" id="ec-preview-btn" label="Preview" icon="faa faa-eye faa-1x icon-white" iconPos="left">
+    <button pButton type="submit" *ngIf="_editMode == EDIT_MODES.EDIT_MODE" type="button" class="btn btn-labeled" (click)="preview()" id="ec-preview-btn" label="Preview" icon="faa faa-eye faa-1x icon-white" iconPos="left">
     </button>
 </div>
 

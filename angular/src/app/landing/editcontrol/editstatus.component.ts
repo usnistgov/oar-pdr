@@ -27,8 +27,8 @@ export class EditStatusComponent implements OnInit {
     
     message : string = "";
     messageColor : string = "black";
-    _editmode: string;
     EDIT_MODES: any;
+    _editmode: string;
 
     /**
      * construct the component
@@ -39,14 +39,14 @@ export class EditStatusComponent implements OnInit {
     constructor(public mdupdsvc : MetadataUpdateService, public edstatsvc: EditStatusService,) {
 
         this.EDIT_MODES = LandingConstants.editModes;
-        this._editmode = this.EDIT_MODES.EDIT_MODE;
         this.mdupdsvc.updated.subscribe((details) => { 
             this._updateDetails = details; 
-            this.showLastUpdate(this.EDIT_MODES.EDIT_MODE);  //Once last updated date changed, refresh the status bar message
+            this.showLastUpdate();  //Once last updated date changed, refresh the status bar message
         });
 
         this.edstatsvc.watchEditMode((editMode) => {
           this._editmode = editMode;
+          this.showLastUpdate();
         });
     }
 
@@ -85,25 +85,24 @@ export class EditStatusComponent implements OnInit {
     /**
      * display the time of the last update, if known
      */
-    public showLastUpdate(_editmode : string, inprogress : boolean = false) {
-      switch(_editmode){
+    public showLastUpdate() {
+      switch(this._editmode){
         case this.EDIT_MODES.EDIT_MODE:
             // We are editing the metadata (and are logged in)
             if (this._updateDetails)
-                this.showMessage("This record was edited by " + this._updateDetails.userDetails.userName + " " + this._updateDetails.userDetails.userLastName + " on " + this._updateDetails._updateDate, inprogress);
+                this.showMessage("This record was edited by " + this._updateDetails.userDetails.userName + " " + this._updateDetails.userDetails.userLastName + " on " + this._updateDetails._updateDate);
             else
-                this.showMessage('Click on the <i class="faa faa-pencil"></i> button to edit or <i class="faa faa-undo"></i> button to discard the change.', inprogress);
+                this.showMessage('Click on the <i class="faa faa-pencil"></i> button to edit or <i class="faa faa-undo"></i> button to discard the change.');
           break;
         case this.EDIT_MODES.PREVIEW_MODE:
             if (this._updateDetails)
                 this.showMessage("There are un-submitted changes last edited on " + this._updateDetails._updateDate + ".  Click on the Edit button to continue editing.", 
-                inprogress, "rgb(255, 115, 0)");
+                false, "rgb(255, 115, 0)");
             else
-                this.showMessage('To see any previously edited inputs or to otherwise edit this page, ' +
-                                 'click on the "Edit" button.', inprogress);
+                this.showMessage('To see any previously edited inputs or to otherwise edit this page, click on the "Edit" button.');
           break;   
         case this.EDIT_MODES.DONE_MODE:
-          this.showMessage('You can now close this window and go back to Midas to either accept or discard the changes.', false);
+          this.showMessage('You can now close this window and go back to Midas to either accept or discard the changes.');
           break;
       }        
     }

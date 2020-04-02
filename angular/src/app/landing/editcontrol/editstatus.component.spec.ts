@@ -87,7 +87,8 @@ describe('EditStatusComponent', () => {
     it('showLastUpdate()', () => {
         expect(component.updateDetails).toBe(null);
 
-        component.showLastUpdate(EDIT_MODES.PREVIEW_MODE);
+        component._editmode = EDIT_MODES.PREVIEW_MODE;
+        component.showLastUpdate();
         expect(component.message).toContain("To see any previously");
         fixture.detectChanges();
         let cmpel = fixture.nativeElement;
@@ -95,23 +96,28 @@ describe('EditStatusComponent', () => {
         expect(bardiv).not.toBeNull();
         expect(bardiv.firstElementChild.innerHTML).toContain("To see any previously edited");
         
-        component.showLastUpdate(EDIT_MODES.EDIT_MODE);
+        component._editmode = EDIT_MODES.EDIT_MODE;
+        component.showLastUpdate();
         expect(component.message).toContain('Click on the <i class="faa faa-pencil"></i> button to edit');
         fixture.detectChanges();
         expect(bardiv.firstElementChild.innerHTML).toContain('button to edit');
 
         component.setLastUpdateDetails(updateDetails);
         
-        component.showLastUpdate(EDIT_MODES.PREVIEW_MODE);
+        component._editmode = EDIT_MODES.PREVIEW_MODE;
+        component.showLastUpdate();
         expect(component.message).toContain("There are un-submitted changes last edited on 2025 April 1");
         fixture.detectChanges();
         expect(bardiv.firstElementChild.innerHTML).toContain('There are un-submitted changes');
-        component.showLastUpdate(EDIT_MODES.EDIT_MODE);
+
+        component._editmode = EDIT_MODES.EDIT_MODE;
+        component.showLastUpdate();
         expect(component.message).toContain("This record was edited");
         fixture.detectChanges();
         expect(bardiv.firstElementChild.innerHTML).toContain('This record was edited by');
 
-        component.showLastUpdate(EDIT_MODES.DONE_MODE);
+        component._editmode = EDIT_MODES.DONE_MODE;
+        component.showLastUpdate();
         expect(component.message).toContain('You can now close this window');
     });
 
