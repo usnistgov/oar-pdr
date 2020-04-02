@@ -20,6 +20,7 @@ from ejsonschema import ValidationError
 log = logging.getLogger(PublishSystem().subsystem_abbrev).getChild("pubserv")
 
 DEF_BASE_PATH = "/pod/"
+ARK_NAAN = NIST_ARK_NAAN
 
 class MIDAS3PublishingApp(object):
     """
@@ -86,7 +87,7 @@ class MIDAS3PublishingApp(object):
 app = MIDAS3PublishingApp
 
 _badidre = re.compile(r"[<>\s/]")
-_arkidre = re.compile(r"^ark:/(\d+)/")
+_arkidre = re.compile(r"^ark:/"+ARK_NAAN+"/")
 
 class Handler(object):
     """
@@ -190,13 +191,20 @@ class DraftHandler(Handler):
         if not path:
             return self.send_ok("Ready", '"No identifier given"')
 
-        m = _arkidre.search(path)
-        path = _arkidre.sub('', path)
-        if (m and m.group(1) != NIST_ARK_NAAN) or _badidre.search(path):
+        midasid = path
+        if not midasid.startswith("ark:"):
+            if len(path) >= 30:
+                # this looks like an old-style MIDAS identifier
+                if _badidre.search(midasid):
+                    return self.send_error(400, "Bad identifier syntax")
+            else:
+                # assume new style identifier and convert to ark: syntax
+                midasid = "ark:/"+ARK_NAAN+"/"+midasid
+        if midasid.startswith("ark:") and not _arkidre.search(path):
             return self.send_error(400, "Bad identifier syntax")
         
         try:
-            out = self._svc.get_customized_pod(path)
+            out = self._svc.get_customized_pod(midasid)
             out = json.dumps(out, indent=2)
         except IDNotFound as ex:
             return self.send_error(404, "Identifier not found as draft")
@@ -231,10 +239,17 @@ class DraftHandler(Handler):
         if "/json" not in self._env.get('CONTENT_TYPE', 'application/json'):
             return self.send_error(415, "Non-JSON input content type specified")
 
-        if path:
-            m = _arkidre.search(path)
-            path = _arkidre.sub('', path)
-            if (m and m.group(1) != NIST_ARK_NAAN) or _badidre.search(path):
+        midasid = path
+        if midasid:
+            if not midasid.startswith("ark:"):
+                if len(path) >= 30:
+                    # this looks like an old-style MIDAS identifier
+                    if _badidre.search(midasid):
+                        return self.send_error(400, "Bad identifier syntax")
+                else:
+                    # assume new style identifier and convert to ark: syntax
+                    midasid = "ark:/"+ARK_NAAN+"/"+midasid
+            if midasid.startswith("ark:") and not _arkidre.search(path):
                 return self.send_error(400, "Bad identifier syntax")
         
         try:
@@ -254,8 +269,8 @@ class DraftHandler(Handler):
 
         if 'identifier' not in pod:
             return self.send_error(400, "Input POD missing required identifier property")
-        if not path:
-            path = pod['identifier']
+        if not midasid:
+            midasid = pod['identifier']
 
         try:
             
@@ -278,14 +293,21 @@ class DraftHandler(Handler):
         if not self.authorized():
             return self.send_error(401, "Unauthorized")
         
-        m = _arkidre.search(path)
-        path = _arkidre.sub('', path)
-        if (m and m.group(1) != NIST_ARK_NAAN) or _badidre.search(path):
+        midasid = path
+        if not midasid.startswith("ark:"):
+            if len(path) >= 30:
+                # this looks like an old-style MIDAS identifier
+                if _badidre.search(midasid):
+                    return self.send_error(400, "Bad identifier syntax")
+            else:
+                # assume new style identifier and convert to ark: syntax
+                midasid = "ark:/"+ARK_NAAN+"/"+midasid
+        if midasid.startswith("ark:") and not _arkidre.search(path):
             return self.send_error(400, "Bad identifier syntax")
         
         try:
 
-            self._svc.end_customization_for(path)
+            self._svc.end_customization_for(midasid)
 
         except IDNotFound as ex:
             return self.send_error(404, "Draft not found")
