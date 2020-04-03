@@ -73,7 +73,7 @@ public class JWTTokenGenerator {
 	public UserToken getJWT(AuthenticatedUserDetails userDetails, String ediid)
 			throws UnAuthorizedUserException, BadGetwayException, CustomizationException {
 		logger.info("Get authorized user token.");
-		//isAuthorized(userDetails, ediid);
+		isAuthorized(userDetails, ediid);
 
 		try {
 			final DateTime dateTime = DateTime.now();
