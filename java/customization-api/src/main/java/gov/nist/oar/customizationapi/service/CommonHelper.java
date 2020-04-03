@@ -129,7 +129,7 @@ public class CommonHelper {
 			Document d = mcollection.find(Filters.eq("ediid", recordid)).first();
 
 			if (d != null) {
-				DeleteResult result = mcollection.deleteOne(d);
+				DeleteResult result = mcollection.deleteMany(d);
 				if (result.getDeletedCount() == 1)
 					deleted = true;
 			}
