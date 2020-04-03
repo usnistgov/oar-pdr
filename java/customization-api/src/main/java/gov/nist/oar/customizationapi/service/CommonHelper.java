@@ -124,10 +124,7 @@ public class CommonHelper {
 	public boolean deleteRecordInCache(String recordid, MongoCollection<Document> mcollection)
 			throws ResourceNotFoundException {
 		try {
-
-			if (!isRecordInCache(recordid, mcollection))
-				throw new ResourceNotFoundException("Record not found in Cache.");
-
+			
 			boolean deleted = false;
 			Document d = mcollection.find(Filters.eq("ediid", recordid)).first();
 

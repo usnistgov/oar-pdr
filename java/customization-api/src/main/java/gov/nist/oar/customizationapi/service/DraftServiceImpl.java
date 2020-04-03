@@ -68,11 +68,16 @@ public class DraftServiceImpl implements DraftService {
 	 */
 	@Override
 	public boolean deleteDraft(String recordid) throws CustomizationException {
+		boolean deleted = false;
 		logger.info("Delete the record and changes from the database.");
 		recordid = commonHelper.getIdentifier(recordid, nistarkid);
-		commonHelper.checkRecordInCache(recordid, mconfig.getRecordCollection());
-		return commonHelper.deleteRecordInCache(recordid, mconfig.getRecordCollection())
-				&& commonHelper.deleteRecordInCache(recordid, mconfig.getChangeCollection());
+		if(commonHelper.isRecordInCache(recordid, mconfig.getRecordCollection())) {
+			commonHelper.deleteRecordInCache(recordid, mconfig.getRecordCollection());
+			if(commonHelper.isRecordInCache(recordid, mconfig.getChangeCollection()))
+				commonHelper.deleteRecordInCache(recordid, mconfig.getChangeCollection());
+			deleted = true;
+		}
+		return deleted;	
 
 	}
 
