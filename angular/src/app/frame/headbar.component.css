@@ -21,16 +21,11 @@
 
 .header-links {
     margin-right: 0px;
-    margin-top: 0px;
+    margin-top: 15px;
     color:white;
     padding-right: 2%;
+    vertical-align: bottom;
 }
-
-
-.textlinks {
-    color:white;
-}
-
 
 .badgesm {
     font-size: 12px;
@@ -38,8 +33,6 @@
     color: #fff;
     padding: 3px 7px; 
     vertical-align: 50%;
-/*    margin-top: -3.0em;
-    margin-right: -2.0em; */
     height:20px;
     width:20px;
     min-width: 10px;
@@ -61,4 +54,10 @@
     height: 20px;
     width: 20px;
     padding: 5px 3px 3px 3px ;
+}
+
+a:link, a:hover, a:visited{
+  color: white;
+  background-color: transparent;
+  text-decoration: none;
 }

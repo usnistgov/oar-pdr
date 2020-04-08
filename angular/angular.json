@@ -23,13 +23,15 @@
               }
             ],
             "styles": [
-              "src/styles/main.css",
+              "src/styles.scss",
               "node_modules/bootstrap/dist/css/bootstrap.min.css",
               "node_modules/primeng/resources/primeng.css",
-              "src/styles/ultima-ng-5.2.4/assets/layout/css/layout-indigo.css",
-              "src/styles/ultima-ng-5.2.4/assets/theme/theme-indigo.css",
               "node_modules/primeicons/primeicons.css",
-              "src/styles/font-awesome/css/font-awesome.min.css"
+              "node_modules/primeng/resources/themes/bootstrap/theme.css",
+              "src/styles/font-awesome/css/font-awesome.min.css",
+              "src/styles/main.css",
+              "src/app/content/modal.less",
+              "node_modules/ngx-toastr/toastr.css"
             ],
             "scripts": []
           },
@@ -82,14 +84,14 @@
               "src/styles/main.css",
               "node_modules/bootstrap/dist/css/bootstrap.min.css",
               "node_modules/primeng/resources/primeng.css",
-              "src/styles/ultima-ng-5.2.4/assets/layout/css/layout-indigo.css",
-              "src/styles/ultima-ng-5.2.4/assets/theme/theme-indigo.css",
               "node_modules/primeicons/primeicons.css",
-              "src/styles/font-awesome/css/font-awesome.min.css"
+              "src/styles/font-awesome/css/font-awesome.min.css",
+              "src/styles.scss",
+              "node_modules/ngx-toastr/toastr.css"
             ],
             "assets": [
               {
-                "glob": "favicon.ico",
+                "glob": "src/assets/images/favicon.ico",
                 "input": "src/",
                 "output": "/"
               },
@@ -103,7 +105,7 @@
         },
         "lint": {
           "builder": "@angular-devkit/build-angular:tslint",
-          "options": {            
+          "options": {
             "tsConfig": [
               "src/tsconfig.app.json"
             ],
@@ -133,7 +135,7 @@
       }
     },
     "oar-lps-e2e": {
-      "root": "",
+      "root": "e2e",
       "projectType": "application",
       "cli": {},
       "schematics": {},
@@ -160,30 +162,30 @@
   "cli": {},
   "schematics": {
     "@schematics/angular:class": {
-      "spec": false
+      "spec": true
     },
     "@schematics/angular:component": {
-      "spec": false,
-      "inlineStyle": true,
-      "inlineTemplate": true,
+      "spec": true,
+      "inlineStyle": false,
+      "inlineTemplate": false,
       "prefix": "app",
       "styleext": "css"
     },
     "@schematics/angular:directive": {
-      "spec": false,
+      "spec": true,
       "prefix": "app"
     },
     "@schematics/angular:guard": {
-      "spec": false
+      "spec": true
     },
     "@schematics/angular:module": {
-      "spec": false
+      "spec": true
     },
     "@schematics/angular:pipe": {
-      "spec": false
+      "spec": true
     },
     "@schematics/angular:service": {
-      "spec": false
+      "spec": true
     }
   }
 }
