@@ -45,6 +45,9 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
     citationVisible: boolean = false;
     editEnabled: boolean = false;
 
+    // this will be removed in next restructure
+    showMetadata = false;
+
     /**
      * create the component.
      * @param route   the requested URL path to be fulfilled with this view
