@@ -458,12 +458,7 @@ export class LandingComponent implements OnInit, OnChanges {
         if (this.record.landingPage == null || this.record.landingPage == undefined) {
             return false;
         }
-        var url = 'od/id/' + this.ediid;
-        if (this.record.landingPage.search(url) > -1) {
-            return false;
-        } else {
-            return true;
-        }
+        return (this.record.landingPage.search(/^https?:\/\/[\w\.\-]+\/od\/id\//) < 0)
     }
 
     visitHomePage(url: string, event, title) {
