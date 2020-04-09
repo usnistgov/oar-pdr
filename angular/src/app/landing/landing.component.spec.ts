@@ -26,7 +26,7 @@ import { AuthService, WebAuthService, MockAuthService } from './editcontrol/auth
 
 import { testdata } from '../../environments/environment';
 
-fdescribe('LandingComponent', () => {
+describe('LandingComponent', () => {
     let component : LandingComponent;
     let fixture : ComponentFixture<LandingComponent>;
     let cfg : AppConfig;
