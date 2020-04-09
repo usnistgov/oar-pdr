@@ -189,6 +189,7 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
     }
 
     goToSection(sectionId: string) {
+        this.showMetadata = (sectionId == "metadata");
         if (sectionId) 
             this.router.navigate(['/od/id/', this.reqId], { fragment: sectionId });
         else
