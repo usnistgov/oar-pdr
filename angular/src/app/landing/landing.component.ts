@@ -111,7 +111,6 @@ export class LandingComponent implements OnInit, OnChanges {
     isCopied: boolean = false;
     distdownload: string = '';
     serviceApi: string = '';
-    metadata: boolean = false;
     private files: TreeNode[] = [];
     pdrApi: string = '';
     isResultAvailable: boolean = true;
@@ -133,6 +132,9 @@ export class LandingComponent implements OnInit, OnChanges {
     @Input() record: NerdmRes = null;
     @Input() requestId: string = null;     // the ID used in the URL to access this page
     @Input() inBrowser: boolean = false;
+
+    // this will be removed in the next restructure iteration
+    @Input() showMetadata: boolean = false;
 
     ediid: string = null;
 
@@ -204,7 +206,7 @@ export class LandingComponent implements OnInit, OnChanges {
     }
 
     viewmetadata() {
-        this.metadata = true;
+        this.showMetadata = true;
         this.similarResources = false;
     }
 
