@@ -73,23 +73,23 @@
                                 Visit Home Page
                             </button>
                         </span>
-                        <ng-template #visitHomeOnServer>Visit Home Page</ng-template>
+                        <ng-template #visitHomeOnServer><a href="{{record.landingPage}}">Visit Home Page</a></ng-template>
                     </span>
                 </div>
             </div>
 
             <div class="ui-g">
                 <div class="ui-g-12 ui-md-12 ui-lg-12 ui-sm-12">
-                    <div [hidden]="metadata">
+                    <div [hidden]="showMetadata">
                         <app-description [record]="record" [inBrowser]="inBrowser"></app-description>
                     </div>
                     <app-topic [record]="record" [inBrowser]="inBrowser"></app-topic>
                     <app-keyword [record]="record" [inBrowser]="inBrowser"></app-keyword>
                     <p></p>
                     <description-resources [record]="record" [files]="files"
-                        [metadata]="metadata" [inBrowser]="inBrowser" [ediid]="ediid" [editEnabled]="editEnabled"></description-resources>
+                        [metadata]="showMetadata" [inBrowser]="inBrowser" [ediid]="ediid" [editEnabled]="editEnabled"></description-resources>
                     <metadata-detail [record]="record" [serviceApi]="serviceApi" [inBrowser]="inBrowser"
-                        [metadata]="metadata">
+                        [metadata]="showMetadata">
                     </metadata-detail>
                 </div>
                 <div *ngIf="record.length !== 0 && inBrowser">

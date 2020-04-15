@@ -71,7 +71,7 @@ export class GoogleAnalyticsService {
       var s = document.createElement('script') as any;
       s.type = "text/javascript";
       s.id = scriptId;
-      s.src = "https://dap.digitalgov.gov/Universal-Federated-Analytics-Min.js?agency=DOC&subagency=NIST&pua=" + gaCode + "&yt=true&exts=ppsx,pps,f90,sch,rtf,wrl,txz,m1v,xlsm,msi,xsd,f,tif,eps,mpg,xml,pl,xlt,c";
+      s.src = "https://dap.digitalgov.gov/Universal-Federated-Analytics-Min.js?agency=DOC&subagency=NIST&pua=" + gaCode + "&exts=ppsx,pps,f90,sch,rtf,wrl,txz,m1v,xlsm,msi,xsd,f,tif,eps,mpg,xml,pl,xlt,c";
 
       var h = document.getElementsByTagName("head");
       document.getElementsByTagName("head")[0].appendChild(s);

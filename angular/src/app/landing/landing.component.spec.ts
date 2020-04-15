@@ -93,4 +93,19 @@ describe('LandingComponent', () => {
         let el = cmpel.querySelector("h2"); 
         expect(el.textContent).toContain(nrd.title);
     });
+
+    it("can detect PDR landing pages", function() {
+        setupComponent();
+        expect(component.displayHomePageLink()).toBeTruthy();
+        component.record.landingPage = "https://data.nist.gov/od/id/mds2-111";
+        expect(component.displayHomePageLink()).toBeFalsy();
+        component.record.landingPage = "https://testdata.nist.gov/od/id/EBC9DB05EDEA5B0EE043065706812DF81";
+        expect(component.displayHomePageLink()).toBeFalsy();
+        component.record.landingPage = "https://oardev.nist.gov/od/id/EBC9DB05EDEA5B0EE043065706812DF81";
+        expect(component.displayHomePageLink()).toBeFalsy();
+        component.record.landingPage = "https://localhost/od/id/EBC9DB05EDEA5B0EE043065706812DF81";
+        expect(component.displayHomePageLink()).toBeFalsy();
+        component.record.landingPage = "https://www.nist.gov/data"
+        expect(component.displayHomePageLink()).toBeTruthy();
+    });
 });
