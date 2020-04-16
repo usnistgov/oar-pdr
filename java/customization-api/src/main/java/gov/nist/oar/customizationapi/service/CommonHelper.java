@@ -130,7 +130,7 @@ public class CommonHelper {
 
 			if (d != null) {
 				DeleteResult result = mcollection.deleteMany(d);
-				if (result.getDeletedCount() == 1)
+				if (result.getDeletedCount() >= 1)
 					deleted = true;
 			}
 
