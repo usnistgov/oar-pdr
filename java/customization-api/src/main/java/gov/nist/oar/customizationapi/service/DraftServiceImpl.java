@@ -50,11 +50,8 @@ public class DraftServiceImpl implements DraftService {
 	@Override
 	public void putDraft(String recordid, Document record) throws CustomizationException, InvalidInputException {
 		logger.info("Put the nerdm record in the data cache.");
-		recordid = commonHelper.getIdentifier(recordid, nistarkid);
 		try {
-			//If record already exists just remove and replace.
-			if (commonHelper.isRecordInCache(recordid, mconfig.getRecordCollection()))
-				commonHelper.deleteRecordInCache(recordid, mconfig.getRecordCollection());
+			this.deleteDraft(recordid);
 			mconfig.getRecordCollection().insertOne(record);
 		} catch (MongoException exp) {
 			logger.error("Error while putting updated data in records db" + exp.getMessage());

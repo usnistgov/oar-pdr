@@ -1,5 +1,10 @@
 package gov.nist.oar.customizationapi.exceptions;
 
+/**
+ * Handle empty request or invalid requests.
+ * @author Deoyani Nandrekar-Heinis
+ *
+ */
 public class InvalidInputException extends Exception {
 
 	/**
