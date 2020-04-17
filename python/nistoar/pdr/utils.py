@@ -161,6 +161,7 @@ class LockedFile(object):
         return self.open()
 
     def __exit__(self, e1, e2, e3):
+        self.close()
         return False
 
     def __del__(self):
