@@ -72,6 +72,12 @@ class TestMIDASClient(test.TestCase):
             "update_auth_key": "secret"
         }
 
+    def test_midasid2recnum(self):
+        self.assertEquals(midas.midasid2recnum("pdr2210"), "pdr2210")
+        self.assertEquals(midas.midasid2recnum("ark:/88888/pdr2210"), "pdr2210")
+        self.assertEquals(midas.midasid2recnum("ark:/88888/mds5-2210"), "2210")
+        self.assertEquals(midas.midasid2recnum("3A1EE2F169DD3B8CE0531A570681DB5D1491"), "1491")
+
     def test_ctor(self):
         client = midas.MIDASClient(self.cfg)
         self.assertEqual(client.baseurl, baseurl)

@@ -19,7 +19,7 @@ def midasid2recnum(midasid):
     midasid = _stripark(midasid)
     mdsmatch = _mdsshldr.search(midasid)
     if mdsmatch:
-        return midasid[mdsmatch.start():]
+        return midasid[mdsmatch.end():]
     if len(midasid) > 32:
         return midasid[32:]
     return midasid
