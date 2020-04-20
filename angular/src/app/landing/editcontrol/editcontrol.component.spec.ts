@@ -112,13 +112,13 @@ describe('EditControlComponent', () => {
                 
                 edbtn = cmpel.querySelector("#ec-edit-btn")     
                 let discbtn = cmpel.querySelector("#ec-discard-btn") 
-                let subbtn = cmpel.querySelector("#ec-done-btn") 
+                let donebtn = cmpel.querySelector("#ec-done-btn") 
                 let prevubtn = cmpel.querySelector("#ec-preview-btn")
                 
                 expect(prevubtn).toBeNull();
                 expect(edbtn.disabled).toBeFalsy();
-                expect(subbtn.disabled).toBeTruthy();
-                expect(discbtn.disabled).toBeTruthy();
+                expect(donebtn.disabled).toBeFalsy();
+                expect(discbtn.disabled).toBeFalsy();
             });
         });
     }));
