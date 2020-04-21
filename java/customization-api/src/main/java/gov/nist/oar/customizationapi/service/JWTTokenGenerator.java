@@ -104,7 +104,7 @@ public class JWTTokenGenerator {
 	 * @throws CustomizationException
 	 * @throws UnAuthorizedUserException
 	 */
-	public boolean isAuthorized(AuthenticatedUserDetails userDetails, String ediid)
+	public void isAuthorized(AuthenticatedUserDetails userDetails, String ediid)
 			throws CustomizationException, UnAuthorizedUserException, BadGetwayException {
 		logger.info("Connect to backend metadata server to get the information.");
 		try {
@@ -114,29 +114,9 @@ public class JWTTokenGenerator {
 			headers.add("Authorization", "Bearer " + mdsecret);
 			HttpEntity<String> requestEntity = new HttpEntity<>(null, headers);
 			ResponseEntity<String> result = restTemplate.exchange(uri, HttpMethod.GET, requestEntity, String.class);
-
-			if (result.getStatusCode().is4xxClientError()) {
-				logger.error("The backend metadata service returned status:" + result.getStatusCodeValue());
-				throw new UnAuthorizedUserException("Unauthorized user. Status:" + result.getStatusCodeValue());
-			}
-			if (result.getStatusCode().is3xxRedirection() || result.getStatusCode().is5xxServerError()) {
-				logger.error("The backend metadata service returned with and error with status:"
-						+ result.getStatusCodeValue());
-				throw new BadGetwayException(
-						"There is an error from backend metadata service. Status:" + result.getStatusCodeValue());
-			}
-			logger.info("This is response from the backend service." + result.getStatusCodeValue());
-			return result.getStatusCode().is2xxSuccessful() ? true : false;
-		} catch (UnAuthorizedUserException exp) {
-			logger.error("There is unauthorized user exception." + exp.getMessage());
-			throw new UnAuthorizedUserException("User is not authorized to edit this record.");
-		} catch (BadGetwayException exp) {
-			logger.error("There is an error response from the backend metadata service.");
-			throw new BadGetwayException("Backend metadata service returned error." + exp.getMessage());
 		} catch (Exception ie) {
-			logger.error("There is an exception thrown while connecting to mdserver for authorizing current user.");
-			throw new CustomizationException(
-					"There is an error while getting user permissions from metadata srevice. " + ie.getMessage());
+			logger.error("There is an exception thrown while connecting to mdserver for authorizing current user."+ie.getMessage());
+			throw new UnAuthorizedUserException("User is not authorized to edit this record.");
 		}
 	}
 

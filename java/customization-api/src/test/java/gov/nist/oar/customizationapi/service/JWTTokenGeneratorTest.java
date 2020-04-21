@@ -61,7 +61,9 @@ public class JWTTokenGeneratorTest {
 		AuthenticatedUserDetails authUserDetails = new AuthenticatedUserDetails("test@test.com", "testName",
 				"testLastNAme", "testid");
 		String ediid = "1243562145312";
-		Mockito.doReturn(true).when(jwtGenerator).isAuthorized(authUserDetails, ediid);
+//		Mockito.doReturn(true).when(jwtGenerator).isAuthorized(authUserDetails, ediid);
+		Mockito.doNothing().when(jwtGenerator).isAuthorized(authUserDetails, ediid);
+		
 		UserToken utoken = jwtGenerator.getJWT(authUserDetails, ediid);
 		System.out.println(utoken.getToken());
 //		assertEquals(utoken, userToken);
@@ -81,7 +83,8 @@ public class JWTTokenGeneratorTest {
 		AuthenticatedUserDetails authUserDetails = new AuthenticatedUserDetails("test@test.com", "testName",
 				"testLastNAme", "testid");
 		String ediid = "1243562145312";
-		Mockito.doReturn(true).when(jwtGenerator).isAuthorized(authUserDetails, ediid);
+//		Mockito.doReturn(true).when(jwtGenerator).isAuthorized(authUserDetails, ediid);
+		Mockito.doNothing().when(jwtGenerator).isAuthorized(authUserDetails, ediid);
 		exception.expect(UnAuthorizedUserException.class);
 		UserToken utoken = jwtGenerator.getJWT(authUserDetails, ediid);
 		org.junit.Assert.assertNotNull(utoken);
@@ -106,7 +109,8 @@ public class JWTTokenGeneratorTest {
 		String ediid = "1243562145312";
 		final JWTTokenGenerator jwtGenerator = Mockito.spy( new JWTTokenGenerator());
 //		doReturn()
-		Mockito.doReturn(true).when(jwtGenerator).isAuthorized(authUserDetails, ediid);
+//		Mockito.doReturn(true).when(jwtGenerator).isAuthorized(authUserDetails, ediid);
+		Mockito.doNothing().when(jwtGenerator).isAuthorized(authUserDetails, ediid);
 //		Mockito.when(jwtGenerator.isAuthorized(authUserDetails, ediid)).thenReturn(true);
 
 	}

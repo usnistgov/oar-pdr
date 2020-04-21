@@ -89,13 +89,13 @@ public class AuthControllerTest {
 		 UserToken utoken = new UserToken(authDetails,"123243");
 //		 Mockito.doReturn(true).when(jwt).isAuthorized(authDetails, ediid);
 //	     Mockito.doReturn(utoken).when(jwt).getJWT(authDetails, ediid);
-		 given(jwt.isAuthorized(authDetails, ediid)).willReturn(true);
-	     given(jwt.getJWT(authDetails, ediid)).willReturn(utoken);
-
-	        // when
+//		 given(jwt.isAuthorized(authDetails, ediid)).willReturn(true);
+//	     given(jwt.getJWT(authDetails, ediid)).willReturn(utoken);
+//
+//	        // when
 	        MockHttpServletResponse response = mvc.perform(get("/auth/_perm/"+ediid).accept(MediaType.APPLICATION_JSON)).andReturn().getResponse();
 	        System.out.println(response.getContentAsString());
-	        // then
+//	        // then
 //	        assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
 	    
 	    }
