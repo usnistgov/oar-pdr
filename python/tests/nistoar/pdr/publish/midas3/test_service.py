@@ -8,6 +8,7 @@ from nistoar.testing import *
 from nistoar.pdr import utils
 from nistoar.pdr.publish.midas3 import service as mdsvc
 from nistoar.pdr.preserv.bagit import builder as bldr
+from nistoar.pdr.preserv.bagit import NISTBag
 
 # datadir = nistoar/preserv/data
 datadir = os.path.join( os.path.dirname(os.path.dirname(os.path.dirname(__file__))),
@@ -130,6 +131,35 @@ class TestMIDAS3PublishingService(test.TestCase):
         self.assertTrue(os.path.isfile(os.path.join(bagdir,"metadata","nerdm.json")))
         self.assertTrue(os.path.isdir(os.path.join(bagdir,"metadata","trial1.json")))
         self.assertTrue(os.path.isfile(os.path.join(self.nrddir, self.midasid+".json")))
+        data = utils.read_json(os.path.join(self.nrddir, self.midasid+".json"))
+        self.assertEqual(data.get('ediid'), self.midasid)
+
+    def test_update_ds_with_pod_wannot(self):
+        podf = os.path.join(self.revdir, "1491", "_pod.json")
+        pod = utils.read_json(podf)
+        bagdir = os.path.join(self.svc.mddir, self.midasid)
+
+        self.svc.update_ds_with_pod(pod, False)
+        self.assertTrue(os.path.isfile(os.path.join(bagdir,"metadata","nerdm.json")))
+
+        # add some annotations
+        annotf = os.path.join(bagdir,"metadata","annot.json")
+        utils.write_json({"_marker": True}, annotf)
+        self.assertTrue(NISTBag(bagdir).nerdm_record(True).get("_marker"),
+                        "Failed to initialize annotations")
+
+        self.svc.update_ds_with_pod(pod, True)
+        self.svc.wait_for_all_workers(5)
+        self.assertTrue(os.path.isdir(bagdir))
+        self.assertTrue(os.path.isfile(os.path.join(bagdir,"metadata","pod.json")))
+        self.assertTrue(os.path.isfile(os.path.join(bagdir,"metadata","nerdm.json")))
+        self.assertTrue(os.path.isfile(os.path.join(bagdir,"metadata","annot.json")))
+        self.assertTrue(os.path.isdir(os.path.join(bagdir,"metadata","trial1.json")))
+        self.assertTrue(os.path.isfile(os.path.join(self.nrddir, self.midasid+".json")))
+        data = utils.read_json(os.path.join(self.nrddir, self.midasid+".json"))
+        self.assertEqual(data.get('ediid'), self.midasid)
+        self.assertTrue(data.get('_marker'), "Failed to retain annotations")
+                        
 
     def test_drop_worker(self):
         podf = os.path.join(self.revdir, "1491", "_pod.json")

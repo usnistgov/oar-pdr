@@ -655,7 +655,7 @@ class MIDAS3PublishingService(PublishSystem):
                 self.qlock = filelock.FileLock(self.lockfile)
 
         def _whendone(self):
-            self.service.serve_nerdm(self.bagger.bagbldr.bag.nerdm_record())
+            self.service.serve_nerdm(self.bagger.bagbldr.bag.nerdm_record(True))
 
             # clean up the worker
             self.service._drop_bagging_worker(self)
