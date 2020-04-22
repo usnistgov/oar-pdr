@@ -51,6 +51,9 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
     headerObj: any;
     public EDIT_MODES: any;
 
+    // this will be removed in next restructure
+    showMetadata = false;
+
     /**
      * create the component.
      * @param route   the requested URL path to be fulfilled with this view
@@ -215,7 +218,8 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
     }
 
     goToSection(sectionId: string) {
-        if (sectionId)
+        this.showMetadata = (sectionId == "metadata");
+        if (sectionId) 
             this.router.navigate(['/od/id/', this.reqId], { fragment: sectionId });
         else
             this.router.navigate(['/od/id/', this.reqId], { fragment: "" });

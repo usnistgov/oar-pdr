@@ -129,18 +129,32 @@ export class ToolMenuComponent implements OnChanges {
         let authlist = "";
         if (this.record['authors']) {
             for (let a of this.record['authors']) {
-                if (a['familyName'])
-                    authlist += ","+a.familyName
+                if (a['fn'])
+                    authlist += ',"'+a.fn + '"';
             }
             if (authlist.length > 0) authlist = authlist.slice(1);
+        }
+
+        let contactlist = "";
+        if (this.record['contactPoint'] && this.record['contactPoint'].fn) {
+          contactlist = this.record['contactPoint'].fn;
+        }
+
+        // If authlist is empty, use contact point instead
+        if (!authlist) {
+            if (this.record['contactPoint'] && this.record['contactPoint'].fn) {
+                let splittedName = this.record['contactPoint'].fn.split(' ');
+                console.log("record.contactPoint", splittedName[splittedName.length - 1]);
+                authlist = splittedName[splittedName.length - 1];
+                contactlist = this.record['contactPoint'].fn;
+            }
         }
         subitems = [
             this.createMenuItem("Similar Resources", "faa faa-external-link", null,
                                 searchbase + "#/search?q=" + this.record['keyword'] +
                                 "&key=&queryAdvSearch=yes"),
-            this.createMenuItem('Resources by Authors', "faa faa-external-link", null,
-                                searchbase + "#/search?q=authors.familyName=" + authlist +
-                                "&key=&queryAdvSearch=yes")
+            this.createMenuItem('Resources by Authors', "faa faa-external-link", "",
+            this.cfg.get("locations.pdrSearch", "/sdp/") + "/#/search?q=authors.fn%3D" + authlist + "%26logicalOp%3DOR%26contactPoint.fn%3D" + contactlist + "&key=&queryAdvSearch=yes")
         ];
         mitems.push({ label: "Find", items: subitems });
 
