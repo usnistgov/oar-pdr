@@ -384,4 +384,19 @@ export class MetadataUpdateService {
     get isEditMode(): boolean{
       return this.editMode == this.EDIT_MODES.EDIT_MODE;
     }
+
+    /**
+     *  Return field style based on edit mode and data update status
+     */
+    getFieldStyle(fieldName : string) {
+      if (this.isEditMode) {
+          if (this.fieldUpdated(fieldName)) {
+              return { 'border': '1px solid lightgrey', 'background-color': '#FCF9CD', 'padding-right': '1em' };
+          } else {
+              return { 'border': '1px solid lightgrey', 'background-color': 'white', 'padding-right': '1em' };
+          }
+      } else {
+          return { 'border': '0px solid white', 'background-color': 'white', 'padding-right': '1em' };
+      }
+  }
 }

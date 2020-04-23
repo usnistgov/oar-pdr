@@ -3,12 +3,12 @@
         <span style="display: table;">
             <div class="editable_container">
                 <div class="editable_field" *ngIf="isEmpty; else hasTopic">
-                    <div *ngIf="mdupdsvc.isEditMode" [ngStyle]="getFieldStyle()">
+                    <div *ngIf="mdupdsvc.isEditMode" [ngStyle]="mdupdsvc.getFieldStyle(fieldName)">
                         Add topics: &nbsp;&nbsp;
                     </div>
                 </div>
                 <ng-template #hasTopic>
-                    <div class="editable_field" style="width: calc(100%-1em);" [ngStyle]="getFieldStyle()">
+                    <div class="editable_field" style="width: calc(100%-1em);" [ngStyle]="mdupdsvc.getFieldStyle(fieldName)">
                         <strong>Research Topics: </strong>
                         <span class="font14 topics" *ngFor="let topic of record['topic']; let i =index">
                             {{ topic.tag }}

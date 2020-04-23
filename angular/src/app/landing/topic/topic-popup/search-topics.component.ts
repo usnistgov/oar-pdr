@@ -3,6 +3,8 @@ import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { TreeNode } from 'primeng/api';
 import { TemplateBindingParseResult, preserveWhitespacesDefault } from '@angular/compiler';
 import { AppConfig } from '../../../config/config';
+import { TaxonomyListService } from '../../../shared/taxonomy-list';
+import { UserMessageService } from '../../../frame/usermessage.service';
 
 export const ROW_COLOR = '#1E6BA1';
 
@@ -15,22 +17,101 @@ export class SearchTopicsComponent implements OnInit {
   @Input() inputValue: any;
   @Input() field: any;
   @Input() title?: string;
-  @Input() taxonomyTree: TreeNode[];
   @Output() returnValue: EventEmitter<any> = new EventEmitter();
 
   isVisible: boolean = true;
   scrollTop: number = 0;
   searchText: string = "";
   highlight: string = "";
+  taxonomyList: any[];
+  taxonomyTree: TreeNode[] = [];
 
   @ViewChild('panel', { read: ElementRef }) public panel: ElementRef<any>;
   @ViewChild('panel0', { read: ElementRef }) public panel0: ElementRef<any>;
 
   constructor(
+    private taxonomyListService: TaxonomyListService,
+    private msgsvc: UserMessageService,
     public activeModal: NgbActiveModal) { }
 
   ngOnInit() {
-    this.setTreeVisible(true);
+    // this.taxonomyListService.get(0).subscribe((result) => {
+    //   if (result != null && result != undefined)
+    //       this.buildTaxonomyTree(result);
+
+    //   this.taxonomyList = [];
+    //   for (var i = 0; i < result.length; i++) {
+    //       this.taxonomyList.push({ "taxonomy": result[i].label });
+    //   }
+
+    //   this.setTreeVisible(true);
+
+    // }, (err) => {
+    //     console.error("Failed to load taxonomy terms from server: "+err.message);
+    //     this.msgsvc.warn("Failed to load taxonomy terms; you may have problems editing the "+
+    //                     "topics assigned to this record.");
+    // });
+  }
+
+  /*
+    *   build taxonomy tree
+    */
+  buildTaxonomyTree(result: any) {
+    let allTaxonomy: any = result;
+    var tempTaxonomyTree = {}
+    if (result != null && result != undefined) {
+        tempTaxonomyTree["data"] = this.arrangeIntoTaxonomyTree(result);
+        this.taxonomyTree.push(tempTaxonomyTree);
+    }
+
+    this.taxonomyTree = <TreeNode[]>this.taxonomyTree[0].data;
+  }
+
+  private arrangeIntoTaxonomyTree(paths) {
+      const tree = [];
+      paths.forEach((path) => {
+          var fullpath: string;
+          if (path.parent != null && path.parent != undefined && path.parent != "")
+              fullpath = path.parent + ":" + path.label;
+          else
+              fullpath = path.label;
+
+          const pathParts = fullpath.split(':');
+          let currentLevel = tree; // initialize currentLevel to root
+
+          for (var j = 0; j < pathParts.length; j++) {
+              let tempId: string = '';
+              for (var k = 0; k < j + 1; k++) {
+                  tempId = tempId + pathParts[k];
+                  // tempId = tempId + pathParts[k].replace(/ /g, "");
+                  if (k < j) {
+                      tempId = tempId + ": ";
+                  }
+              }
+
+              // check to see if the path already exists.
+              const existingPath = currentLevel.filter(level => level.data.treeId === tempId);
+              if (existingPath.length > 0) {
+                  // The path to this item was already in the tree, so don't add it again.
+                  // Set the current level to this path's children  
+                  currentLevel = existingPath[0].children;
+              } else {
+                  let newPart = null;
+                  newPart = {
+                      data: {
+                          treeId: tempId,
+                          name: pathParts[j],
+                          researchTopic: tempId,
+                          bkcolor: 'white'
+                      }, children: [],
+                      expanded: false
+                  };
+                  currentLevel.push(newPart);
+                  currentLevel = newPart.children;
+              }
+          };
+      });
+      return tree;
   }
 
   /* 

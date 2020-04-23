@@ -38,14 +38,8 @@ export class ContactComponent implements OnInit {
     }
 
     getFieldStyle() {
-        if (this.mdupdsvc.isEditMode && this.enableEdit) {
-            if (this.mdupdsvc.fieldUpdated(this.fieldName)) {
-                return { 'border': '1px solid lightgrey', 'background-color': '#FCF9CD', 'padding-right': '1em' };
-            } else {
-                return { 'border': '1px solid lightgrey', 'background-color': 'white', 'padding-right': '1em' };
-            }
-        } else {
-            return { 'border': '0px solid white', 'background-color': 'white', 'padding-right': '1em' };
+        if (this.enableEdit) {
+            return this.mdupdsvc.getFieldStyle(this.fieldName);
         }
     }
     

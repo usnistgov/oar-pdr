@@ -1,12 +1,12 @@
 <div style="display: table">
     <div class="editable_container">
         <div class="editable_field" *ngIf="!record['authors'] || record['authors'].length==0; else hasAuthors">
-            <div class="editable_field" *ngIf="mdupdsvc.isEditMode" [ngStyle]="getFieldStyle()">
+            <div class="editable_field" *ngIf="mdupdsvc.isEditMode" [ngStyle]="mdupdsvc.getFieldStyle(fieldName)">
                 Authors:
             </div>
         </div>
         <ng-template #hasAuthors>
-            <div class="editable_field" style="max-width:calc(100% - 4em);" [ngStyle]="getFieldStyle()">
+            <div class="editable_field" style="max-width:calc(100% - 4em);" [ngStyle]="mdupdsvc.getFieldStyle(fieldName)">
                 <div *ngIf="record['authors']">
                     <span *ngFor="let author of record.authors; let i = index">
                         {{ author.fn }}<span *ngIf="i < record.authors.length-1 ">,</span>

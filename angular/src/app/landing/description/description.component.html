@@ -10,13 +10,13 @@
         <div class="editable_container">
             <div class="editable_field" style="width:100%;"
                 *ngIf="!record['description'] || record['description'].length==0; else hasDescription">
-                <div class="nist-card" *ngIf="mdupdsvc.isEditMode" style="width:inherit;" [ngStyle]="getFieldStyle()">
+                <div class="nist-card" *ngIf="mdupdsvc.isEditMode" style="width:inherit;" [ngStyle]="mdupdsvc.getFieldStyle(fieldName)">
                     Click edit (pencil) button to add description.
                 </div>
             </div>
             <ng-template #hasDescription>
                 <div id="recordDescription" class="desc-card editable_field" style="max-width:calc(100% - 4em);"
-                    [ngStyle]="getFieldStyle()">
+                    [ngStyle]="mdupdsvc.getFieldStyle(fieldName)">
                     <div *ngFor="let desc of record['description']; let i =index">
                         {{ record["description"][i] }}
                         <p *ngIf="i<record['description'].length-1"></p>

@@ -3,12 +3,12 @@
         <div class="editable_container">
             <div class="editable_field" *ngIf="!record['title']; else hasTitle">
                 <span class="title">
-                    <h2 [ngStyle]="getFieldStyle()"><i style="color: #cccccc;">No title set</i></h2>
+                    <h2 [ngStyle]="mdupdsvc.getFieldStyle(fieldName)"><i style="color: #cccccc;">No title set</i></h2>
                 </span>
             </div>
             <ng-template #hasTitle>
                 <div class="title editable_field">
-                    <h2 [ngStyle]="getFieldStyle()" (click)="openModal()">
+                    <h2 [ngStyle]="mdupdsvc.getFieldStyle(fieldName)" (click)="openModal()">
                         {{record.title}}</h2>
                 </div>
             </ng-template>

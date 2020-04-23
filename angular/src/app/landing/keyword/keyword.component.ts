@@ -39,18 +39,6 @@ export class KeywordComponent implements OnInit {
     ngOnInit() {
     }
 
-    getFieldStyle() {
-        if (this.mdupdsvc.isEditMode) {
-            if (this.mdupdsvc.fieldUpdated(this.fieldName)) {
-                return { 'border': '1px solid lightgrey', 'background-color': '#FCF9CD' };
-            } else {
-                return { 'border': '1px solid lightgrey', 'background-color': 'white' };
-            }
-        } else {
-            return { 'border': '0px solid white', 'background-color': 'white' };
-        }
-    }
-
     openModal() {
         if (! this.mdupdsvc.isEditMode) return;
 

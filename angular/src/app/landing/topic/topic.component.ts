@@ -3,9 +3,7 @@ import { NgbModalOptions, NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { SearchTopicsComponent } from './topic-popup/search-topics.component';
 import { NotificationService } from '../../shared/notification-service/notification.service';
 import { TreeNode } from 'primeng/primeng';
-import { TaxonomyListService } from '../../shared/taxonomy-list';
 import { MetadataUpdateService } from '../editcontrol/metadataupdate.service';
-import { UserMessageService } from '../../frame/usermessage.service';
 
 @Component({
     selector: 'app-topic',
@@ -17,13 +15,8 @@ export class TopicComponent implements OnInit {
     @Input() inBrowser: boolean;   // false if running server-side
     fieldName = 'topic';
 
-    taxonomyTree: TreeNode[] = [];
-    taxonomyList: any[];
-
     constructor(public mdupdsvc: MetadataUpdateService,
-        private taxonomyListService: TaxonomyListService,
         private ngbModal: NgbModal,
-        private msgsvc: UserMessageService,
         private notificationService: NotificationService) {
     }
 
@@ -47,95 +40,6 @@ export class TopicComponent implements OnInit {
     }
 
     ngOnInit() {
-        this.taxonomyListService.get(0).subscribe((result) => {
-            if (result != null && result != undefined)
-                this.buildTaxonomyTree(result);
-
-            this.taxonomyList = [];
-            for (var i = 0; i < result.length; i++) {
-                this.taxonomyList.push({ "taxonomy": result[i].label });
-            }
-        }, (err) => {
-            console.error("Failed to load taxonomy terms from server: "+err.message);
-            this.msgsvc.warn("Failed to load taxonomy terms; you may have problems editing the "+
-                             "topics assigned to this record.");
-        });
-    }
-
-    /*
-     *   build taxonomy tree
-     */
-    buildTaxonomyTree(result: any) {
-        let allTaxonomy: any = result;
-        var tempTaxonomyTree = {}
-        if (result != null && result != undefined) {
-            tempTaxonomyTree["data"] = this.arrangeIntoTaxonomyTree(result);
-            this.taxonomyTree.push(tempTaxonomyTree);
-        }
-
-        this.taxonomyTree = <TreeNode[]>this.taxonomyTree[0].data;
-    }
-
-    private arrangeIntoTaxonomyTree(paths) {
-        const tree = [];
-        paths.forEach((path) => {
-            var fullpath: string;
-            if (path.parent != null && path.parent != undefined && path.parent != "")
-                fullpath = path.parent + ":" + path.label;
-            else
-                fullpath = path.label;
-
-            const pathParts = fullpath.split(':');
-            let currentLevel = tree; // initialize currentLevel to root
-
-            for (var j = 0; j < pathParts.length; j++) {
-                let tempId: string = '';
-                for (var k = 0; k < j + 1; k++) {
-                    tempId = tempId + pathParts[k];
-                    // tempId = tempId + pathParts[k].replace(/ /g, "");
-                    if (k < j) {
-                        tempId = tempId + ": ";
-                    }
-                }
-
-                // check to see if the path already exists.
-                const existingPath = currentLevel.filter(level => level.data.treeId === tempId);
-                if (existingPath.length > 0) {
-                    // The path to this item was already in the tree, so don't add it again.
-                    // Set the current level to this path's children  
-                    currentLevel = existingPath[0].children;
-                } else {
-                    let newPart = null;
-                    newPart = {
-                        data: {
-                            treeId: tempId,
-                            name: pathParts[j],
-                            researchTopic: tempId,
-                            bkcolor: 'white'
-                        }, children: [],
-                        expanded: false
-                    };
-                    currentLevel.push(newPart);
-                    currentLevel = newPart.children;
-                }
-            };
-        });
-        return tree;
-    }
-
-    /**
-     *  Return style based on edit mode and data update status
-     */
-    getFieldStyle() {
-        if (this.mdupdsvc.isEditMode) {
-            if (this.mdupdsvc.fieldUpdated(this.fieldName)) {
-                return { 'border': '1px solid lightgrey', 'background-color': '#FCF9CD', 'padding-right': '1em' };
-            } else {
-                return { 'border': '1px solid lightgrey', 'background-color': 'white', 'padding-right': '1em' };
-            }
-        } else {
-            return { 'border': '0px solid white', 'background-color': 'white', 'padding-right': '1em' };
-        }
     }
 
     /**
@@ -166,7 +70,6 @@ export class TopicComponent implements OnInit {
         modalRef.componentInstance.inputValue[this.fieldName] = val;
         modalRef.componentInstance['field'] = this.fieldName;
         modalRef.componentInstance['title'] = "Research Topics";
-        modalRef.componentInstance.taxonomyTree = this.taxonomyTree;
 
         modalRef.componentInstance.returnValue.subscribe((returnValue) => {
             if (returnValue) {

@@ -25,18 +25,6 @@ export class DescriptionComponent implements OnInit {
     ngOnInit() {
     }
 
-    getFieldStyle() {
-        if (this.mdupdsvc.isEditMode) {
-            if (this.mdupdsvc.fieldUpdated(this.fieldName)) {
-                return { 'background-color': '#FCF9CD' };
-            } else {
-                return {  };
-            }
-        } else {
-            return {  };
-        }
-    }
-
     openModal() {
         if (!this.mdupdsvc.isEditMode) return;
 

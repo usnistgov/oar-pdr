@@ -29,18 +29,6 @@ export class AuthorComponent implements OnInit {
 
     ngOnInit() {
     }
-
-    getFieldStyle() {
-        if (this.mdupdsvc.isEditMode) {
-            if (this.mdupdsvc.fieldUpdated(this.fieldName)) {
-                return { 'border': '1px solid lightgrey', 'background-color': '#FCF9CD', 'padding-right': '1em' };
-            } else {
-                return { 'border': '1px solid lightgrey', 'background-color': 'white', 'padding-right': '1em' };
-            }
-        } else {
-            return { 'border': '0px solid white', 'background-color': 'white', 'padding-right': '1em' };
-        }
-    }
     
     openModal() {
         if (! this.mdupdsvc.isEditMode) return;
