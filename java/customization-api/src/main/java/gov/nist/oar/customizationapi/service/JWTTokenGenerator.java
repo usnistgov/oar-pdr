@@ -21,6 +21,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import com.nimbusds.jose.JOSEException;
@@ -105,7 +107,7 @@ public class JWTTokenGenerator {
 	 * @throws UnAuthorizedUserException
 	 */
 	public void isAuthorized(AuthenticatedUserDetails userDetails, String ediid)
-			throws CustomizationException, UnAuthorizedUserException, BadGetwayException {
+			throws UnAuthorizedUserException {
 		logger.info("Connect to backend metadata server to get the information.");
 		try {
 			String uri = mdserver + ediid + "/_perm/update/" + userDetails.getUserId();
@@ -114,10 +116,30 @@ public class JWTTokenGenerator {
 			headers.add("Authorization", "Bearer " + mdsecret);
 			HttpEntity<String> requestEntity = new HttpEntity<>(null, headers);
 			ResponseEntity<String> result = restTemplate.exchange(uri, HttpMethod.GET, requestEntity, String.class);
-		} catch (Exception ie) {
-			logger.error("There is an exception thrown while connecting to mdserver for authorizing current user."+ie.getMessage());
+			
+			if (result.getStatusCode().is3xxRedirection() || result.getStatusCode().is5xxServerError()) {
+				logger.error("The backend metadata service returned with and error with status:"
+						+ result.getStatusCodeValue());
+				throw new BadGetwayException(
+						"There is an error from backend metadata service. Status:" + result.getStatusCodeValue());
+			}
+			logger.info("This is response from the backend service." + result.getStatusCodeValue());
+			boolean authorized = result.getStatusCode().is2xxSuccessful() ? true : false;
+		}catch (final HttpClientErrorException httpClientErrorException) {
+			logger.error("4xx Error while requesting authorization from mdserver: " + httpClientErrorException.getMessage());
+			throw new UnAuthorizedUserException("Unable to generate token for the this user.");
+		}catch (HttpServerErrorException httpServerErrorException) {  
+			logger.error("5xx error while connecting mdserver" + httpServerErrorException.getMessage());
 			throw new UnAuthorizedUserException("User is not authorized to edit this record.");
+		} catch (BadGetwayException exp) {
+			logger.error("There is an error response from the backend metadata service.");
+			throw new UnAuthorizedUserException("Backend metadata service returned error." + exp.getMessage());
+		} catch (Exception ie) {
+			logger.error("There is an exception thrown while connecting to mdserver for authorizing current user.");
+			throw new UnAuthorizedUserException(
+					"There is an error while getting user permissions from metadata srevice. " + ie.getMessage());
 		}
+
 	}
 
 }
