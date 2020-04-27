@@ -393,7 +393,7 @@ export class MetadataUpdateService {
           if (this.fieldUpdated(fieldName)) {
               return { 'border': '1px solid lightgrey', 'background-color': '#FCF9CD', 'padding-right': '1em' };
           } else {
-              return { 'border': '1px solid lightgrey', 'background-color': 'white', 'padding-right': '1em' };
+              return { 'border': '1px solid lightgrey', 'background-color': '#e6f2ff', 'padding-right': '1em' };
           }
       } else {
           return { 'border': '0px solid white', 'background-color': 'white', 'padding-right': '1em' };

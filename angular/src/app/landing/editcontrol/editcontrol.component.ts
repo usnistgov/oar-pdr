@@ -1,4 +1,4 @@
-import { Component, OnInit, OnChanges, ViewChild, Input, Output, EventEmitter } from '@angular/core';
+import { Component, OnInit, OnChanges, ViewChild, Input, Output, EventEmitter, HostListener } from '@angular/core';
 import { Observable, of, BehaviorSubject } from 'rxjs';
 
 import { ConfirmationDialogService } from '../../shared/confirmation-dialog/confirmation-dialog.service';
@@ -12,6 +12,7 @@ import { AuthService, WebAuthService } from './auth.service';
 import { CustomizationService } from './customization.service';
 import { NerdmRes } from '../../nerdm/nerdm'
 import { LandingConstants } from '../constants';
+import { AppConfig } from '../../config/config';
 
 /**
  * a panel that serves as a control center for editing metadata displayed in the 
@@ -34,6 +35,8 @@ export class EditControlComponent implements OnInit, OnChanges {
     private originalRecord: NerdmRes = null;
     _editMode: string;
     EDIT_MODES: any;
+    screenWidth: number;
+    screenSizeBreakPoint: number;
 
     /**
      * the local copy of the draft (updated) metadata.  This parameter is available to a parent
@@ -79,6 +82,7 @@ export class EditControlComponent implements OnInit, OnChanges {
         public edstatsvc: EditStatusService,
         private authsvc: AuthService,
         private confirmDialogSvc: ConfirmationDialogService,
+        private cfg: AppConfig,
         private msgsvc: UserMessageService) {
 
         this.EDIT_MODES = LandingConstants.editModes;
@@ -95,6 +99,7 @@ export class EditControlComponent implements OnInit, OnChanges {
         this.edstatsvc._setLastUpdated(this.mdupdsvc.lastUpdate);
         this.edstatsvc._setAuthorized(this.isAuthorized());
         this.edstatsvc._setUserID(this.authsvc.userID);
+        this.screenSizeBreakPoint = +this.cfg.get("screenSizeBreakPoint", "768");
     }
 
     ngOnInit() {
@@ -124,6 +129,22 @@ export class EditControlComponent implements OnInit, OnChanges {
     }
 
     /**
+     *  Following functions detect screen size
+     */
+    @HostListener("window:resize", [])
+    public onResize() {
+        this.detectScreenSize();
+    }
+
+    public ngAfterViewInit() {
+        this.detectScreenSize();
+    }
+
+    private detectScreenSize() {
+        this.screenWidth = window.innerWidth;
+    }
+
+    /**
      * flag indicating whether the current editing mode of the landing page.  
      * @param editmode   
      */
@@ -131,6 +152,33 @@ export class EditControlComponent implements OnInit, OnChanges {
       this._editMode = editmode;
       //broadcast the editmode
       this.edstatsvc._setEditMode(editmode);
+    }
+
+    /**
+     * 
+     * @param nologin Return current mode string for display
+     */
+    get currentMode(){
+      let returnString: string = "";
+      switch(this._editMode) { 
+        case this.EDIT_MODES.EDIT_MODE: { 
+          returnString = "EDIT MODE";
+           break; 
+        } 
+        case this.EDIT_MODES.PREVIEW_MODE: { 
+          returnString = "PREVIEW MODE";
+           break; 
+        } 
+        case this.EDIT_MODES.DONE_MODE: { 
+            returnString = "DONE MODE";
+             break; 
+          } 
+        default: { 
+           break; 
+        } 
+     } 
+
+     return returnString;
     }
 
     /**

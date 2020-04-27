@@ -34,7 +34,7 @@
 <!-- List of authors displayed underneath the toolbar -->
 <div id="author-list-outer">
     <div id="author-list">
-        <span class="author-list-detail">Authers: </span>
+        <span class="author-list-detail" style="font-weight: bolder;">Authors: </span>
         <span class="author-list-detail" *ngFor="let author of inputValue.authors; let i = index">
             {{ author.fn }}<span *ngIf="i < inputValue.authors.length-1 ">,</span>
         </span>

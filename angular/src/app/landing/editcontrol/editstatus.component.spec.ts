@@ -60,7 +60,7 @@ describe('EditStatusComponent', () => {
         expect(bardiv).not.toBeNull();
         expect(bardiv.childElementCount).toBe(2);
         expect(bardiv.firstElementChild.tagName).toEqual("SPAN");
-        expect(bardiv.firstElementChild.nextElementSibling.tagName).toEqual("DIV");
+        expect(bardiv.firstElementChild.nextElementSibling.tagName).toEqual("SPAN");
     });
 
     it('showMessage()', () => {
@@ -73,7 +73,7 @@ describe('EditStatusComponent', () => {
         let cmpel = fixture.nativeElement;
         let bardiv = cmpel.querySelector(".ec-status-bar");
         expect(bardiv).not.toBeNull();
-        expect(bardiv.firstElementChild.innerHTML).toContain("Okay, Boomer.");
+        expect(bardiv.lastElementChild.innerHTML).toContain("Okay, Boomer.");
 
         component.showMessage("Wait...", true, "blue");
         expect(component.message).toBe("Wait...");
@@ -81,7 +81,7 @@ describe('EditStatusComponent', () => {
         expect(component.isProcessing).toBeTruthy();
         fixture.detectChanges();
 
-        expect(bardiv.firstElementChild.innerHTML).toContain("Wait...");
+        expect(bardiv.lastElementChild.innerHTML).toContain("Wait...");
     });
 
     it('showLastUpdate()', () => {
@@ -96,25 +96,23 @@ describe('EditStatusComponent', () => {
         expect(bardiv).toBeNull();
         
         component._editmode = EDIT_MODES.EDIT_MODE;
-        component.showLastUpdate();
-        expect(component.message).toContain('Click on the <i class="faa faa-pencil"></i> button to edit');
         fixture.detectChanges();
         cmpel = fixture.nativeElement;
         bardiv = cmpel.querySelector(".ec-status-bar");
-        expect(bardiv.children[1].innerHTML).toContain('button to edit');
+        expect(bardiv.children[0].innerHTML).toContain('- edit');
 
         component.setLastUpdateDetails(updateDetails);
 
         component._editmode = EDIT_MODES.EDIT_MODE;
         component.showLastUpdate();
-        expect(component.message).toContain("This record was edited");
+        expect(component.message).toContain("Edited by test01 NIST on 2025 April 1");
         fixture.detectChanges();
-        expect(bardiv.firstElementChild.innerHTML).toContain('required field');
-        expect(bardiv.children[1].innerHTML).toContain('This record was edited by');
+        expect(bardiv.firstElementChild.innerHTML).toContain('- edit');
+        expect(bardiv.children[1].innerHTML).toContain('Edited by test01 NIST on 2025 April 1');
 
         component._editmode = EDIT_MODES.DONE_MODE;
         component.showLastUpdate();
-        expect(component.message).toContain('You can now close this window');
+        expect(component.message).toBe('');
     });
 
 

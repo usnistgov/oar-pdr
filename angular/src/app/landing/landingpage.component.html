@@ -3,7 +3,7 @@
                   [(mdrec)]="md" [requestID]="requestId"></pdr-edit-control>
 
 <!-- landing page panel -->
-<div class="ui-grid ui-grid-responsive ui-grid-pad center">
+<div *ngIf="!isDoneMode" class="ui-grid ui-grid-responsive ui-grid-pad center">
   <div class="card landingcard">
 
     <div *ngIf="md === null && edstatsvc.authorized && !edstatsvc.hasError">
@@ -59,4 +59,9 @@
       </div>
     </div>
   </div>
+</div>
+
+<!-- Display done page -->
+<div *ngIf="isDoneMode">
+    <pdr-done></pdr-done>
 </div>

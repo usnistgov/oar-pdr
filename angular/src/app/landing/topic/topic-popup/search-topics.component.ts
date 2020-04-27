@@ -35,22 +35,22 @@ export class SearchTopicsComponent implements OnInit {
     public activeModal: NgbActiveModal) { }
 
   ngOnInit() {
-    // this.taxonomyListService.get(0).subscribe((result) => {
-    //   if (result != null && result != undefined)
-    //       this.buildTaxonomyTree(result);
+    this.taxonomyListService.get(0).subscribe((result) => {
+      if (result != null && result != undefined)
+          this.buildTaxonomyTree(result);
 
-    //   this.taxonomyList = [];
-    //   for (var i = 0; i < result.length; i++) {
-    //       this.taxonomyList.push({ "taxonomy": result[i].label });
-    //   }
+      this.taxonomyList = [];
+      for (var i = 0; i < result.length; i++) {
+          this.taxonomyList.push({ "taxonomy": result[i].label });
+      }
 
-    //   this.setTreeVisible(true);
+      this.setTreeVisible(true);
 
-    // }, (err) => {
-    //     console.error("Failed to load taxonomy terms from server: "+err.message);
-    //     this.msgsvc.warn("Failed to load taxonomy terms; you may have problems editing the "+
-    //                     "topics assigned to this record.");
-    // });
+    }, (err) => {
+        console.error("Failed to load taxonomy terms from server: "+err.message);
+        this.msgsvc.warn("Failed to load taxonomy terms; you may have problems editing the "+
+                        "topics assigned to this record.");
+    });
   }
 
   /*
@@ -252,18 +252,6 @@ export class SearchTopicsComponent implements OnInit {
   *   Refresh the taxonomy tree 
   */
   refreshTopicTree() {
-    // for (let i = 0; i < this.taxonomyTree.length; i++) {
-    //   if (this.tempTopics.indexOf(this.taxonomyTree[i].data.researchTopic) > -1) {
-    //     var j: number = 0;
-    //     var parentNode = this.taxonomyTree[i].parent;
-    //     while (parentNode != null) {
-    //       this.taxonomyTree[i].parent.expanded = true;
-    //       parentNode = parentNode.parent;
-    //       console.log("parentNode", parentNode);
-    //     }
-    //   }
-    // }
-
     this.isVisible = false;
     setTimeout(() => {
       this.isVisible = true;

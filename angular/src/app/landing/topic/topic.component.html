@@ -8,7 +8,7 @@
                     </div>
                 </div>
                 <ng-template #hasTopic>
-                    <div class="editable_field" style="width: calc(100%-1em);" [ngStyle]="mdupdsvc.getFieldStyle(fieldName)">
+                    <div class="editable_field" style="cursor: pointer;width: calc(100%-1em);" [ngStyle]="mdupdsvc.getFieldStyle(fieldName)" (click)="openModal()">
                         <strong>Research Topics: </strong>
                         <span class="font14 topics" *ngFor="let topic of record['topic']; let i =index">
                             {{ topic.tag }}

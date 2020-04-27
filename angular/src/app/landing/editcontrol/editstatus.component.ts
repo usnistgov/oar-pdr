@@ -90,9 +90,9 @@ export class EditStatusComponent implements OnInit {
         case this.EDIT_MODES.EDIT_MODE:
             // We are editing the metadata (and are logged in)
             if (this._updateDetails)
-                this.showMessage("This record was edited by " + this._updateDetails.userDetails.userName + " " + this._updateDetails.userDetails.userLastName + " on " + this._updateDetails._updateDate);
+                this.showMessage("Edited by " + this._updateDetails.userDetails.userName + " " + this._updateDetails.userDetails.userLastName + " on " + this._updateDetails._updateDate);
             else
-                this.showMessage('Click on the <i class="faa faa-pencil"></i> button to edit or <i class="faa faa-undo"></i> button to discard the change.');
+                this.showMessage('');
           break;
         case this.EDIT_MODES.PREVIEW_MODE:
             if (this._updateDetails)
@@ -102,7 +102,7 @@ export class EditStatusComponent implements OnInit {
                 this.showMessage('To see any previously edited inputs or to otherwise edit this page, click on the "Edit" button.');
           break;   
         case this.EDIT_MODES.DONE_MODE:
-          this.showMessage('You can now close this window and go back to Midas to either accept or discard the changes.');
+            this.showMessage('');
           break;
       }        
     }

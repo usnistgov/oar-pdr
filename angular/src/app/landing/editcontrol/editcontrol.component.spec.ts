@@ -67,7 +67,7 @@ describe('EditControlComponent', () => {
         let cmpel = fixture.nativeElement;
         let edbtn = cmpel.querySelector("#ec-edit-btn") 
         let discbtn = cmpel.querySelector("#ec-discard-btn") 
-        let donebtn = cmpel.querySelector("#ec-done-btn") 
+        let donebtn = cmpel.querySelector("#ec-close-btn") 
         let prevubtn = cmpel.querySelector("#ec-preview-btn")  
         expect(component._editMode).toBe(EDIT_MODES.VIEWONLY_MODE);
         expect(prevubtn).toBeNull();
@@ -82,7 +82,7 @@ describe('EditControlComponent', () => {
             
             edbtn = cmpel.querySelector("#ec-edit-btn")     
             discbtn = cmpel.querySelector("#ec-discard-btn")
-            donebtn = cmpel.querySelector("#ec-done-btn")  
+            donebtn = cmpel.querySelector("#ec-close-btn")  
             prevubtn = cmpel.querySelector("#ec-preview-btn")  
             expect(prevubtn.disabled).toBeFalsy();
             expect(donebtn.disabled).toBeFalsy();
@@ -112,7 +112,7 @@ describe('EditControlComponent', () => {
                 
                 edbtn = cmpel.querySelector("#ec-edit-btn")     
                 let discbtn = cmpel.querySelector("#ec-discard-btn") 
-                let donebtn = cmpel.querySelector("#ec-done-btn") 
+                let donebtn = cmpel.querySelector("#ec-close-btn") 
                 let prevubtn = cmpel.querySelector("#ec-preview-btn")
                 
                 expect(prevubtn).toBeNull();
@@ -144,7 +144,7 @@ describe('EditControlComponent', () => {
                 
                 edbtn = cmpel.querySelector("#ec-edit-btn")     
                 let discbtn = cmpel.querySelector("#ec-discard-btn") 
-                let donebtn = cmpel.querySelector("#ec-done-btn") 
+                let donebtn = cmpel.querySelector("#ec-close-btn") 
                 let prevubtn = cmpel.querySelector("#ec-preview-btn")
                 
                 expect(prevubtn).toBeNull();
@@ -154,36 +154,6 @@ describe('EditControlComponent', () => {
             });
         });
     }));
-
-    // test pauseEditing
-    // it('pauseEditing()', async(() => {
-    //     let cmpel = fixture.nativeElement;
-    //     let edbtn = cmpel.querySelector("#ec-edit-btn") 
-
-    //     component.startEditing();
-    //     fixture.whenStable().then(() => {
-    //         fixture.detectChanges();
-    //         expect(component._editMode).toBe(EDIT_MODES.EDIT_MODE);
-            
-    //         edbtn = cmpel.querySelector("#ec-edit-btn")     
-    //         expect(edbtn).toBeNull();
-
-    //         component.pauseEditing();
-    //         fixture.whenStable().then(() => {
-    //             fixture.detectChanges();
-                
-    //             edbtn = cmpel.querySelector("#ec-edit-btn")     
-    //             let discbtn = cmpel.querySelector("#ec-discard-btn") 
-    //             let donebtn = cmpel.querySelector("#ec-done-btn") 
-    //             let prevubtn = cmpel.querySelector("#ec-preview-btn")
-                
-    //             expect(prevubtn).toBeNull();
-    //             expect(edbtn.disabled).toBeFalsy();
-    //             expect(donebtn.disabled).toBeFalsy();
-    //             expect(discbtn.disabled).toBeFalsy();
-    //         });
-    //     });
-    // }));
 
     it('sends md update', () => {
         let md = null;

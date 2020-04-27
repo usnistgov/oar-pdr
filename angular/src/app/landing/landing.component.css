@@ -657,6 +657,7 @@ a:visited {
   /* padding-right: .5em;  */
   text-align: left; 
   vertical-align: top;
+  cursor: pointer;
 }
 
 .nist-card {

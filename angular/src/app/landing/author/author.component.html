@@ -8,16 +8,16 @@
         <ng-template #hasAuthors>
             <div class="editable_field" style="max-width:calc(100% - 4em);" [ngStyle]="mdupdsvc.getFieldStyle(fieldName)">
                 <div *ngIf="record['authors']">
-                    <span *ngFor="let author of record.authors; let i = index">
+                    <span *ngFor="let author of record.authors; let i = index" (click)="openModal()">
                         {{ author.fn }}<span *ngIf="i < record.authors.length-1 ">,</span>
                     </span>
-                    <i style="cursor: pointer; margin-left: 0.5rem;" class="faa"
+                    <i style="margin-left: 0.5rem;" class="faa"
                         [ngClass]="{'faa-plus-square-o': !clickAuthors, 'faa-minus-square-o': clickAuthors}"
                         aria-hidden="true"
                         (click)="isCollapsedContent = !isCollapsedContent; clickAuthors = expandClick();"></i>
                 </div>
                 <div [collapse]="!isCollapsedContent" class="card card-block card-header customcard">
-                    <div class="" *ngIf="record.authors">
+                    <div class="" *ngIf="record.authors" (click)="openModal()">
                         <span><b>Authors:</b></span>
                         <div *ngFor="let author of record.authors; let i = index">
                             <div>{{ author.fn}}</div>

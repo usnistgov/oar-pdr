@@ -50,6 +50,7 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
     _showData: boolean = false;
     headerObj: any;
     public EDIT_MODES: any;
+    editMode: string;
 
     // this will be removed in next restructure
     showMetadata = false;
@@ -71,11 +72,16 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
         private cfg: AppConfig,
         private mdserv: MetadataService,
         public edstatsvc: EditStatusService,
-        private mdupdsvc: MetadataUpdateService) {
+        private mdupdsvc: MetadataUpdateService) 
+    {
         this.reqId = this.route.snapshot.paramMap.get('id');
         this.inBrowser = isPlatformBrowser(platformId);
         this.editEnabled = cfg.get('editEnabled', false) as boolean;
         this.EDIT_MODES = LandingConstants.editModes;
+
+        this.edstatsvc.watchEditMode((editMode) => {
+            this.editMode = editMode;
+        });
 
         this.mdupdsvc.subscribe(
             (md) => {
@@ -148,6 +154,13 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
         if (this.md && this.inBrowser) {
             window.history.replaceState({}, '', '/od/id/' + this.reqId);
         }
+    }
+
+    /**
+     * Detect if current mode is DONE to switch display items
+     */
+    get isDoneMode(){
+        return this.editMode == this.EDIT_MODES.DONE_MODE;
     }
 
     showData() : void{
