@@ -40,7 +40,7 @@ public class UserDetailsExtractorTest {
 	@Test
 	public void getUserDetailsTest() {
 		AuthenticatedUserDetails authDetails = new AuthenticatedUserDetails("abc@xyz.com","name","lastname","userid");
-		 UserToken utoken = new UserToken(authDetails,"123243");
+		 UserToken utoken = new UserToken(authDetails,"123243","");
 		 Mockito.doReturn(authDetails).when(uExtract).getUserDetails();
 		 org.junit.Assert.assertEquals(authDetails.getUserEmail(),"abc@xyz.com");
 		 System.out.print(utoken);

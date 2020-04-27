@@ -14,7 +14,9 @@ package gov.nist.oar.customizationapi.config;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.Ordered;
@@ -31,6 +33,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import gov.nist.oar.customizationapi.config.JWTConfig.JWTAuthenticationFilter;
 import gov.nist.oar.customizationapi.config.JWTConfig.JWTAuthenticationProvider;
 import gov.nist.oar.customizationapi.config.SAMLConfig.SamlSecurityConfig;
+import gov.nist.oar.customizationapi.web.CustomAccessDeniedHandler;
 
 /**
  * In this configuration all the end points which need to be secured under
@@ -47,6 +50,7 @@ public class WebSecurityConfig {
 	 * Rest security configuration for rest api
 	 */
 	@Configuration
+	@ConditionalOnProperty(prefix = "samlauth", name = "enabled", havingValue = "true", matchIfMissing = true)
 	@Order(1)
 	public static class RestApiSecurityConfig extends WebSecurityConfigurerAdapter {
 		private Logger logger = LoggerFactory.getLogger(RestApiSecurityConfig.class);
@@ -79,18 +83,20 @@ public class WebSecurityConfig {
 	 * Security configuration for authorization end pointsq
 	 */
 	@Configuration
+//	@ConditionalOnProperty(prefix = "samlauth", name = "enabled", havingValue = "true", matchIfMissing = true)
 	@Order(2)
 	public static class AuthSecurityConfig extends WebSecurityConfigurerAdapter {
 		private Logger logger = LoggerFactory.getLogger(AuthSecurityConfig.class);
 
 		private static final String apiMatcher = "/auth/**";
-
+		@Autowired
+		private CustomAccessDeniedHandler accessDeniedHandler;
 		@Override
 		protected void configure(HttpSecurity http) throws Exception {
 			logger.info("Set up authorization related entrypoints.");
 
 			http.exceptionHandling().authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED));
-
+			http.exceptionHandling().accessDeniedHandler(accessDeniedHandler);
 			http.antMatcher(apiMatcher).authorizeRequests().anyRequest().authenticated();
 		}
 	}
@@ -134,10 +140,12 @@ public class WebSecurityConfig {
 //
 //	}
 
+	
 	 /**
      * Saml security config
      */
     @Configuration
+    @ConditionalOnProperty(prefix = "samlauth", name = "enabled", havingValue = "true", matchIfMissing = true)
     @Import(SamlSecurityConfig.class)
     public static class SamlConfig {
 

@@ -88,7 +88,7 @@ public class AuthController {
 			return jwt.getJWT(userDetails, ediid);
 		} catch (UnAuthorizedUserException ex) {
 			if (userDetails != null)
-				return new UserToken(userDetails, "");
+				return new UserToken(userDetails, "",ex.getMessage());
 
 			else
 				throw ex;

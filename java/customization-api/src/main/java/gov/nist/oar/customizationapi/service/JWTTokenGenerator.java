@@ -89,7 +89,7 @@ public class JWTTokenGenerator {
 			SignedJWT signedJWT = new SignedJWT(new JWSHeader(JWSAlgorithm.HS256), jwtClaimsSetBuilder.build());
 			signedJWT.sign(new MACSigner(JWTSECRET));
 
-			return new UserToken(userDetails, signedJWT.serialize());
+			return new UserToken(userDetails, signedJWT.serialize(),"");
 		} catch (JOSEException e) {
 			logger.error("Unable to generate token for the this user." + e.getMessage());
 			throw new UnAuthorizedUserException("Unable to generate token for the this user.");
@@ -106,8 +106,7 @@ public class JWTTokenGenerator {
 	 * @throws CustomizationException
 	 * @throws UnAuthorizedUserException
 	 */
-	public void isAuthorized(AuthenticatedUserDetails userDetails, String ediid)
-			throws UnAuthorizedUserException {
+	public void isAuthorized(AuthenticatedUserDetails userDetails, String ediid) throws UnAuthorizedUserException {
 		logger.info("Connect to backend metadata server to get the information.");
 		try {
 			String uri = mdserver + ediid + "/_perm/update/" + userDetails.getUserId();
@@ -116,7 +115,7 @@ public class JWTTokenGenerator {
 			headers.add("Authorization", "Bearer " + mdsecret);
 			HttpEntity<String> requestEntity = new HttpEntity<>(null, headers);
 			ResponseEntity<String> result = restTemplate.exchange(uri, HttpMethod.GET, requestEntity, String.class);
-			
+
 			if (result.getStatusCode().is3xxRedirection() || result.getStatusCode().is5xxServerError()) {
 				logger.error("The backend metadata service returned with and error with status:"
 						+ result.getStatusCodeValue());
@@ -125,19 +124,29 @@ public class JWTTokenGenerator {
 			}
 			logger.info("This is response from the backend service." + result.getStatusCodeValue());
 			boolean authorized = result.getStatusCode().is2xxSuccessful() ? true : false;
-		}catch (final HttpClientErrorException httpClientErrorException) {
-			logger.error("4xx Error while requesting authorization from mdserver: " + httpClientErrorException.getMessage());
-			throw new UnAuthorizedUserException("Unable to generate token for the this user.");
-		}catch (HttpServerErrorException httpServerErrorException) {  
+		} catch (final HttpClientErrorException httpClientErrorException) {
+			logger.error(
+					"4xx Error while requesting authorization from mdserver: " + httpClientErrorException.getMessage());
+			if(httpClientErrorException.getStatusCode().value() == 401)
+				throw new UnAuthorizedUserException("User does not have permissions to edit this record. ");
+			else if(httpClientErrorException.getStatusCode().value() == 404)
+				throw new UnAuthorizedUserException("User does not have permissions to edit this record as this record does not exist. ");
+			else
+				throw new UnAuthorizedUserException("User does not have permissions to edit this record, authorization service returns"+httpClientErrorException.getStatusCode().value());
+			
+		} catch (HttpServerErrorException httpServerErrorException) {
 			logger.error("5xx error while connecting mdserver" + httpServerErrorException.getMessage());
-			throw new UnAuthorizedUserException("User is not authorized to edit this record.");
+			throw new UnAuthorizedUserException("Unable to get permissions to edit record."
+					+ "There is an error getting user authorized as backend Authorization service returns code " + httpServerErrorException.getStatusCode());
 		} catch (BadGetwayException exp) {
-			logger.error("There is an error response from the backend metadata service.");
-			throw new UnAuthorizedUserException("Backend metadata service returned error." + exp.getMessage());
+			logger.error("There is an error response from the backend metadata service." + exp.getMessage());
+			throw new UnAuthorizedUserException("Unable to get permissions to edit record. "
+					+ "Backend authorization service returns error.");
 		} catch (Exception ie) {
-			logger.error("There is an exception thrown while connecting to mdserver for authorizing current user.");
+			logger.error("There is an exception thrown while connecting to mdserver for authorizing current user."
+					+ ie.getMessage());
 			throw new UnAuthorizedUserException(
-					"There is an error while getting user permissions from metadata srevice. " + ie.getMessage());
+					"There is a problem connecting backend service, can not get permissions for user to edit the record. ");
 		}
 
 	}

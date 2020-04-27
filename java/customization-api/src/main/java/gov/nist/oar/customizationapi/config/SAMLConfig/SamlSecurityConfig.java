@@ -34,6 +34,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.MethodInvokingFactoryBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
@@ -105,10 +106,14 @@ import org.springframework.core.Ordered;
  * @author Deoyani Nandrekar-Heinis
  */
 @Configuration
-//@Order(0)
+@ConditionalOnProperty(prefix = "samlauth", name = "enabled", havingValue = "true", matchIfMissing = true)
 public class SamlSecurityConfig extends WebSecurityConfigurerAdapter {
 	private static Logger logger = LoggerFactory.getLogger(SamlSecurityConfig.class);
-
+//	/**
+//	 * Entityid for the SAML service provider, in this case customization service
+//	 */
+//	@Value("${saml.enabled:true}")
+//	boolean samlEnabled;
 	/**
 	 * Entityid for the SAML service provider, in this case customization service
 	 */
@@ -250,8 +255,10 @@ public class SamlSecurityConfig extends WebSecurityConfigurerAdapter {
 	 */
 	@Bean
 	public SAMLProcessingFilter samlWebSSOProcessingFilter() throws ConfigurationException {
+		
 		logger.info("SAMLProcessingFilter adding authentication manager.");
 		SAMLProcessingFilter samlWebSSOProcessingFilter = new SAMLProcessingFilter();
+		
 		try {
 			samlWebSSOProcessingFilter.setAuthenticationManager(authenticationManager());
 		} catch (Exception e) {
@@ -259,7 +266,9 @@ public class SamlSecurityConfig extends WebSecurityConfigurerAdapter {
 		}
 		samlWebSSOProcessingFilter.setAuthenticationSuccessHandler(successRedirectHandler());
 		samlWebSSOProcessingFilter.setAuthenticationFailureHandler(authenticationFailureHandler());
+		
 		return samlWebSSOProcessingFilter;
+		
 	}
 
 	/**
@@ -380,7 +389,7 @@ public class SamlSecurityConfig extends WebSecurityConfigurerAdapter {
 	public FilterChainProxy samlFilter() throws ConfigurationException {
 		logger.info("Setting up different saml filters and endpoints");
 		List<SecurityFilterChain> chains = new ArrayList<>();
-
+		
 		chains.add(new DefaultSecurityFilterChain(new AntPathRequestMatcher("/saml/metadata/**"),
 				metadataDisplayFilter()));
 
@@ -393,7 +402,7 @@ public class SamlSecurityConfig extends WebSecurityConfigurerAdapter {
 
 		chains.add(new DefaultSecurityFilterChain(new AntPathRequestMatcher("/saml/singleLogout/**"),
 				samlLogoutProcessingFilter()));
-
+		
 		return new FilterChainProxy(chains);
 	}
 
@@ -726,8 +735,9 @@ public class SamlSecurityConfig extends WebSecurityConfigurerAdapter {
 	@Override
 	public void configure(WebSecurity web) throws Exception {
 		web.ignoring().antMatchers("/v2/api-docs", "/configuration/ui", "/swagger-resources/**",
-				"/configuration/security", "/swagger-ui.html", "/webjars/**","/pdr/lp/draft/**");
-				//, "/auth/_perm/**");
+				"/configuration/security", "/swagger-ui.html", "/webjars/**","/pdr/lp/draft/**");	
+//		if(!this.samlEnabled)
+//		web.ignoring().antMatchers("/pdr/lp/editor/**");
 	}
 
 	/**
