@@ -389,12 +389,14 @@ export class EditControlComponent implements OnInit, OnChanges {
 
                     if (!this.authsvc.userID) {
                         msg = "authentication failed";
-                        this.msgsvc.error("User log in cancelled or failed.  To edit, please log in " +
-                            'by clicking the "Edit" button above.')
+                        this.msgsvc.error("User log in cancelled or failed.")
                     }
                     else if (!custsvc) {
                         msg = "authorization denied for user " + this.authsvc.userID;
-                        this.msgsvc.error("Sorry, you are not authorized to edit this submission.")
+                        if(this.authsvc.errorMessage)
+                            this.msgsvc.error(this.authsvc.errorMessage);
+                        else    // Default message
+                            this.msgsvc.error("Sorry, you are not authorized to edit this submission.")
                     }
                     else{
                         msg = "authorization granted for user " + this.authsvc.userID;

@@ -61,6 +61,14 @@ export abstract class AuthService {
     set userDetails(userDetails: UserDetails) { this._authcred.userDetails = userDetails; }
 
     /**
+     * Store the error message returned from authorizeEditing
+     */
+    protected _errorMessage: string;
+
+    set errorMessage(errMsg: string) { this._errorMessage = errMsg; }
+    get errorMessage() { return this._errorMessage; }
+
+    /**
      * construct the service
      */
     constructor() { }
@@ -176,6 +184,7 @@ export class WebAuthService extends AuthService {
                     }
                     else if (info.userDetails.userId) {
                         // the user is authenticated but not authorized
+                        this.errorMessage = info.errorMessage;
                         subscriber.next(null);
                         subscriber.complete();
                     }
