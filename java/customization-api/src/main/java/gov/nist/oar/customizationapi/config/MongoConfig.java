@@ -77,8 +77,7 @@ public class MongoConfig {
 	public void initIt() throws Exception {
 
 		mongoClient = (MongoClient) this.mongo();
-		log.info("########## " + dbname + " ########");
-
+		log.info("#### Initialize MongoDB with dbname:"+this.dbname+"####");
 		this.setMongodb(this.dbname);
 		this.setRecordCollection(this.record);
 		this.setChangeCollection(this.changes);

@@ -15,6 +15,8 @@ package gov.nist.oar.customizationapi.config;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -41,6 +43,7 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
  */
 public class SwaggerConfig {
 
+	private static Logger log = LoggerFactory.getLogger(SwaggerConfig.class);
 	private static List<ResponseMessage> responseMessageList = new ArrayList<>();
 
 	static {
@@ -70,9 +73,10 @@ public class SwaggerConfig {
 	 */
 	private ApiInfo apiInfo() {
 
+		log.info("### Swagger Initialization ####");
 		@SuppressWarnings("deprecation")
-		ApiInfo apiInfo = new ApiInfo("Landing page Customization api", "Description goes here ", "Build-1.0.0",
-				"This is a web service to update data", "", "NIST Public license",
+		ApiInfo apiInfo = new ApiInfo("Landing page Customization api", "This api is developed for authoriozed users to edit records using customization UI", "Build-1.0.0",
+				"This is a REST based web service to edit, create and delete data.", "", "NIST Public license",
 				"https://www.nist.gov/director/licensing");
 		return apiInfo;
 	}

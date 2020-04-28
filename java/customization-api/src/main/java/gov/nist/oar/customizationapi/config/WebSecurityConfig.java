@@ -47,21 +47,21 @@ import gov.nist.oar.customizationapi.web.CustomAccessDeniedHandler;
 @EnableWebSecurity
 public class WebSecurityConfig {
 	
-//	@Value("${saml.enabled:true}")
-//	boolean samlEnabled;
-//	
-//	public  WebSecurityConfig() {
-//		if(!samlEnabled)
-//		System.out.println("#### SAML Authentication is NOT Active.###");
-//	}
+	@Value("${saml.enabled:true}")
+	boolean samlEnabled;
+	
+	public  WebSecurityConfig() {
+		if(!samlEnabled)
+		System.out.println("#### ***** SAML Authentication is NOT Active. ***** ###");
+	}
 	
 
 	/**
 	 * Rest security configuration for rest api
 	 */
 	@Configuration
-	@Profile({"prod","dev","test"})
-	//@ConditionalOnProperty(prefix = "samlauth", name = "enabled", havingValue = "true", matchIfMissing = true)
+//	@Profile({"prod","dev","test"})
+	@ConditionalOnProperty(prefix = "samlauth", name = "enabled", havingValue = "true", matchIfMissing = true)
 	@Order(1)
 	public static class RestApiSecurityConfig extends WebSecurityConfigurerAdapter {
 		private Logger logger = LoggerFactory.getLogger(RestApiSecurityConfig.class);
@@ -73,7 +73,7 @@ public class WebSecurityConfig {
 
 		@Override
 		protected void configure(HttpSecurity http) throws Exception {
-			logger.info("RestApiSecurityConfig HttpSecurity for REST /api endpoints");
+			logger.info("#### RestApiSecurityConfig HttpSecurity for REST /pdr/lp/editor/ endpoints ###");
 			http.addFilterBefore(new JWTAuthenticationFilter(apiMatcher, super.authenticationManager()),
 					UsernamePasswordAuthenticationFilter.class);
 
@@ -156,8 +156,8 @@ public class WebSecurityConfig {
      * Saml security config
      */
     @Configuration
-    @Profile({"prod","dev","test"})
-   // @ConditionalOnProperty(prefix = "samlauth", name = "enabled", havingValue = "true", matchIfMissing = true)
+//    @Profile({"prod","dev","test"})
+    @ConditionalOnProperty(prefix = "samlauth", name = "enabled", havingValue = "true", matchIfMissing = true)
     @Import(SamlSecurityConfig.class)
     public static class SamlConfig {
 

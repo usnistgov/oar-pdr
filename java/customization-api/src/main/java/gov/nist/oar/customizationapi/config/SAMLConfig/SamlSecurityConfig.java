@@ -37,14 +37,11 @@ import org.springframework.beans.factory.config.MethodInvokingFactoryBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Profile;
-import org.springframework.core.annotation.Order;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.saml.SAMLAuthenticationProvider;
 import org.springframework.security.saml.SAMLBootstrap;
@@ -96,7 +93,6 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 import gov.nist.oar.customizationapi.exceptions.ConfigurationException;
 import gov.nist.oar.customizationapi.service.SamlUserDetailsService;
-import org.springframework.core.Ordered;
 /**
  * This class reads configurations values from config server and set ups the
  * SAML service related parameters. It also helps to initialize different SAML
@@ -107,15 +103,14 @@ import org.springframework.core.Ordered;
  * @author Deoyani Nandrekar-Heinis
  */
 @Configuration
-//@ConditionalOnProperty(prefix = "samlauth", name = "enabled", havingValue = "true", matchIfMissing = true)
-@Profile({"prod","dev","test"})
+@ConditionalOnProperty(prefix = "samlauth", name = "enabled", havingValue = "true", matchIfMissing = true)
 public class SamlSecurityConfig extends WebSecurityConfigurerAdapter {
 	private static Logger logger = LoggerFactory.getLogger(SamlSecurityConfig.class);
-//	/**
-//	 * Entityid for the SAML service provider, in this case customization service
-//	 */
-//	@Value("${saml.enabled:true}")
-//	boolean samlEnabled;
+	/**
+	 * Entityid for the SAML service provider, in this case customization service
+	 */
+	@Value("${saml.enabled:true}")
+	boolean samlEnabled;
 	/**
 	 * Entityid for the SAML service provider, in this case customization service
 	 */
