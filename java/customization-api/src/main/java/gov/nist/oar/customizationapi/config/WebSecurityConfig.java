@@ -100,14 +100,14 @@ public class WebSecurityConfig {
 		private Logger logger = LoggerFactory.getLogger(AuthSecurityConfig.class);
 
 		private static final String apiMatcher = "/auth/**";
-		@Autowired
-		private CustomAccessDeniedHandler accessDeniedHandler;
+//		@Autowired
+//		private CustomAccessDeniedHandler accessDeniedHandler;
 		@Override
 		protected void configure(HttpSecurity http) throws Exception {
 			logger.info("Set up authorization related entrypoints.");
 
 			http.exceptionHandling().authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED));
-			http.exceptionHandling().accessDeniedHandler(accessDeniedHandler);
+//			http.exceptionHandling().accessDeniedHandler(accessDeniedHandler);
 			http.antMatcher(apiMatcher).authorizeRequests().anyRequest().authenticated();
 		}
 	}
