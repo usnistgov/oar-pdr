@@ -2,12 +2,23 @@ spring:
   application:
     name: oar-customization-service
   profiles:
-    active: default
+    active: local
+---
+spring:
+  application:
+    name: oar-customization-service
+  profiles: local
   cloud:
     config:
       uri: http://localhost:8087
-
-logging:
-  path : /var/log/customization-api
-  exception-conversion-word: '%wEx'
-
+      
+samlauth:
+  enabled: false
+---
+spring:
+  application:
+    name: oar-customization-service
+  profiles: default
+  cloud:
+    config:
+      uri: http://localhost:8087

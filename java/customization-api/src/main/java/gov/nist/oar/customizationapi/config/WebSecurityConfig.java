@@ -19,6 +19,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Profile;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpMethod;
@@ -45,12 +46,22 @@ import gov.nist.oar.customizationapi.web.CustomAccessDeniedHandler;
 @Configuration
 @EnableWebSecurity
 public class WebSecurityConfig {
+	
+//	@Value("${saml.enabled:true}")
+//	boolean samlEnabled;
+//	
+//	public  WebSecurityConfig() {
+//		if(!samlEnabled)
+//		System.out.println("#### SAML Authentication is NOT Active.###");
+//	}
+	
 
 	/**
 	 * Rest security configuration for rest api
 	 */
 	@Configuration
-	@ConditionalOnProperty(prefix = "samlauth", name = "enabled", havingValue = "true", matchIfMissing = true)
+	@Profile({"prod","dev","test"})
+	//@ConditionalOnProperty(prefix = "samlauth", name = "enabled", havingValue = "true", matchIfMissing = true)
 	@Order(1)
 	public static class RestApiSecurityConfig extends WebSecurityConfigurerAdapter {
 		private Logger logger = LoggerFactory.getLogger(RestApiSecurityConfig.class);
@@ -145,7 +156,8 @@ public class WebSecurityConfig {
      * Saml security config
      */
     @Configuration
-    @ConditionalOnProperty(prefix = "samlauth", name = "enabled", havingValue = "true", matchIfMissing = true)
+    @Profile({"prod","dev","test"})
+   // @ConditionalOnProperty(prefix = "samlauth", name = "enabled", havingValue = "true", matchIfMissing = true)
     @Import(SamlSecurityConfig.class)
     public static class SamlConfig {
 
