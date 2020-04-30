@@ -6,7 +6,11 @@ spring:
     active: local
   cloud:
     config:
-      uri: http://localhost:8084
+      uri: http://localhost:8087
       
 samlauth:
   enabled: true
+
+logging:
+   path : /var/log/customization-api
+   exception-conversion-word: '%wEx'
