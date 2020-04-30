@@ -9,9 +9,17 @@
 
 <!-- Display message returned from bundle plan if any -->
 <div style="width: 94%; margin-top: 2em; margin-left: 3%; ">
-    <div style="display: flex;justify-content: space-between;">
+    <div style="justify-content: space-between;">
         <div *ngIf="bundlePlanStatus != 'complete' && bundlePlanMessage" style="display: inline; text-align: left;">
-            <i class="faa faa-warning" [ngStyle]="{'color':messageColor, 'padding-right':'.5em'}"></i>
+            <!-- Icon button to show/hide bundle message details -->
+            <span (click)="showMessageBlock = !showMessageBlock">
+                <i *ngIf="!showMessageBlock" class="faa faa-arrow-circle-down"
+                    [ngStyle]="{'color':messageColor,'cursor':'pointer','margin':'0 .5em'}" data-toggle="tooltip"
+                    title="Show details"></i>
+                <i *ngIf="showMessageBlock" class="faa faa-arrow-circle-up faa-1x icon-white"
+                    [ngStyle]="{'color':messageColor,'cursor':'pointer','margin':'0 .5em'}" data-toggle="tooltip"
+                    title="Hide details"></i>
+            </span>
             <span *ngIf="bundlePlanStatus == 'internal error';else no_error" [ngStyle]="{'color':messageColor}">
                 Ooops! There was a problem getting the data you need. Please contact us at <a
                     href="mailto:datasupport@nist.gov?subject=PDR: {{emailSubject}}&body={{emailBody}}"
@@ -20,15 +28,10 @@
                 report.</span>
             <ng-template #no_error>
                 <span [ngStyle]="{'color':getColor(), 'padding-right':'.5em'}">{{broadcastMessage}}</span>
-
-                <!-- Icon button to show/hide bundle message details -->
-                <span (click)="showMessageBlock = !showMessageBlock">
-                    <i *ngIf="!showMessageBlock" class="faa faa-arrow-circle-down"
-                        [ngStyle]="{'color':messageColor,'cursor':'pointer'}" data-toggle="tooltip"
-                        title="Show details"></i>
-                    <i *ngIf="showMessageBlock" class="faa faa-arrow-circle-up faa-1x icon-white"
-                        [ngStyle]="{'color':messageColor,'cursor':'pointer'}" data-toggle="tooltip"
-                        title="Hide details"></i>
+                <span *ngIf="broadcastMessage">
+                    <a
+                    href="mailto:datasupport@nist.gov?subject=PDR: {{emailSubject}}&body={{emailBody}}"
+                    (click)="gaService.gaTrackEvent('Email', $event, 'AskHelp', 'mailto:datasupport@nist.gov')"><i class="faa faa-envelope" data-toggle="tooltip" title="Email tech support"></i></a>
                 </span>
             </ng-template>
         </div>
@@ -41,7 +44,7 @@
         <thead style="background-color:darkorange; margin:0; color:white">
             <tr>
                 <th scope="col" style="padding-left:.5em;">
-                    <span *ngIf="bundlePlanUnhandledFiles" (click)="showMessage = !showMessage">
+                    <span *ngIf="bundlePlanMessage" (click)="showMessage = !showMessage">
                         <i *ngIf="showMessage; else hideMessage" class="faa faa-arrow-circle-up faa-1x icon-white"
                             style="cursor: pointer;color: rgb(255, 255, 255);" data-toggle="tooltip"
                             title="Collapse All"></i>
