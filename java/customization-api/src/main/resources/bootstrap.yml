@@ -8,5 +8,8 @@ spring:
     config:
       uri: http://localhost:8087
       
+logging:
+  path : /var/log/customization-api
+  exception-conversion-word: '%wEx'
 #samlauth:
 #  enabled: false
