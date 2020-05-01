@@ -3,14 +3,10 @@ spring:
   application:
     name: oar-customization-service
   profiles:
-    active: local
+    active: default
   cloud:
     config:
       uri: http://localhost:8087
       
-samlauth:
-  enabled: true
-
-logging:
-   path : /var/log/customization-api
-   exception-conversion-word: '%wEx'
+#samlauth:
+#  enabled: false

@@ -37,6 +37,7 @@ import org.springframework.beans.factory.config.MethodInvokingFactoryBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -103,14 +104,11 @@ import gov.nist.oar.customizationapi.service.SamlUserDetailsService;
  * @author Deoyani Nandrekar-Heinis
  */
 @Configuration
-@ConditionalOnProperty(prefix = "samlauth", name = "enabled", havingValue = "true", matchIfMissing = true)
+//@ConditionalOnProperty(prefix = "samlauth", name = "enabled", havingValue = "true", matchIfMissing = true)
+@Profile({"prod","dev","test","default"})
 public class SamlSecurityConfig extends WebSecurityConfigurerAdapter {
 	private static Logger logger = LoggerFactory.getLogger(SamlSecurityConfig.class);
-	/**
-	 * Entityid for the SAML service provider, in this case customization service
-	 */
-	@Value("${saml.enabled:true}")
-	boolean samlEnabled;
+
 	/**
 	 * Entityid for the SAML service provider, in this case customization service
 	 */

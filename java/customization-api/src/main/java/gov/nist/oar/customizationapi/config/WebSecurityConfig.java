@@ -46,22 +46,24 @@ import gov.nist.oar.customizationapi.web.CustomAccessDeniedHandler;
 @Configuration
 @EnableWebSecurity
 public class WebSecurityConfig {
-	
-	@Value("${saml.enabled:true}")
-	boolean samlEnabled;
-	
-	public  WebSecurityConfig() {
-		if(!samlEnabled)
-		System.out.println("#### ***** SAML Authentication is NOT Active. ***** ###");
-	}
-	
+	private Logger logger = LoggerFactory.getLogger(WebSecurityConfig.class);
+	@Configuration
+	@Profile({"local"})
+	public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
+	    @Override
+	    protected void configure(HttpSecurity security) throws Exception
+	    {
+	     logger.info("#### SAML authentication and authorization service is disabled in this mode. #####");	
+	     security.httpBasic().disable();
+	    }
+	}
 	/**
 	 * Rest security configuration for rest api
 	 */
 	@Configuration
-//	@Profile({"prod","dev","test"})
-	@ConditionalOnProperty(prefix = "samlauth", name = "enabled", havingValue = "true", matchIfMissing = true)
+	@Profile({"prod","dev","test","default"})
+//	@ConditionalOnProperty(prefix = "samlauth", name = "enabled", havingValue = "true", matchIfMissing = true)
 	@Order(1)
 	public static class RestApiSecurityConfig extends WebSecurityConfigurerAdapter {
 		private Logger logger = LoggerFactory.getLogger(RestApiSecurityConfig.class);
@@ -95,6 +97,7 @@ public class WebSecurityConfig {
 	 */
 	@Configuration
 //	@ConditionalOnProperty(prefix = "samlauth", name = "enabled", havingValue = "true", matchIfMissing = true)
+	@Profile({"prod","dev","test","default"})
 	@Order(2)
 	public static class AuthSecurityConfig extends WebSecurityConfigurerAdapter {
 		private Logger logger = LoggerFactory.getLogger(AuthSecurityConfig.class);
@@ -156,8 +159,8 @@ public class WebSecurityConfig {
      * Saml security config
      */
     @Configuration
-//    @Profile({"prod","dev","test"})
-    @ConditionalOnProperty(prefix = "samlauth", name = "enabled", havingValue = "true", matchIfMissing = true)
+    @Profile({"prod","dev","test","default"})
+//    @ConditionalOnProperty(prefix = "samlauth", name = "enabled", havingValue = "true", matchIfMissing = true)
     @Import(SamlSecurityConfig.class)
     public static class SamlConfig {
 
