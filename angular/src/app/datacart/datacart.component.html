@@ -139,23 +139,14 @@
                         <span style="display:inline;margin-left: 0.5em;">
                             {{zip.downloadStatus}}
                         </span>
-                        <!-- Once backend can provide progress info, the following div can be activated -->
-                        <!-- <div style="padding-left: .5em; flex: 0 0 auto;">
-                                <span style="display:inline;font-size: 0.8em">
-                                {{zip.downloadProgress}}%
-                                </span>
-                            </div>
-                            <div style="padding-left: 2%; padding-top: 8px;width: 200px;flex: 0 0 auto;height: 2em;">
-                                <p-progressBar [value]="zip.downloadProgress" showValue="false"></p-progressBar>
-                        </div> -->
                         <div style="padding-left:5px; flex: 0 0 auto;">
                             <span (click)="cancelDownloadZip(zip)" style="cursor: pointer;"><i
                                     class="faa faa-remove"></i></span>
                         </div>
                     </div>
                     <ng-template #not_downloading>
-                        <div *ngIf="zip.downloadStatus != 'Error'; else download_error"
-                            style="padding-left: 2%; width: 200px; display:inline;">
+                        <div *ngIf="zip.downloadStatus != 'error'; else download_error"
+                            style="padding-left: 2%; display:inline;">
                             <i *ngIf="zip.downloadStatus === 'downloaded'" class="faa faa-check"
                                 style="margin-top: 8px;"></i>
                             <i *ngIf="zip.downloadStatus === 'cancelled'" class="faa faa-remove"
@@ -266,32 +257,6 @@
                     <span *ngIf="rowData.isLeaf">{{formatBytes(rowData.fileSize)}}</span>
                 </td>
                 <td [ngStyle]="statusStyle()">
-                    <!-- use following block when server side provide progress info -->
-                    <!-- <div style="display:flex;">
-                    <div *ngIf="rowData.isLeaf" (click)="downloadOneFile(rowData)">
-                    <i *ngIf="rowData.downloadStatus == null" class="faa faa-download" style="color: #1E6BA1;cursor: pointer;"
-                        aria-hidden="true" data-toggle="tooltip" title="Direct download"></i>
-                    <i *ngIf="rowData.downloadStatus === 'downloaded'" class="faa faa-download"
-                        style="color:green; cursor: pointer;" aria-hidden="true" data-toggle="tooltip"
-                        title="Download again"></i>
-                    </div>
-                    <div *ngIf="showDownloadProgress && rowData.downloadStatus === 'downloading'"
-                    style="display:inline;font-size: 0.8em">
-                    {{rowData.downloadProgress}}%
-                    </div>
-                    <div *ngIf="showDownloadProgress && rowData.downloadStatus === 'downloading'"
-                    style="flex: 0 0 auto; width: 30px;padding-top: 8px; margin-left: 4px;">
-                    <p-progressBar [value]="rowData.downloadProgress" showValue="true"></p-progressBar>
-                    </div>
-                    <div *ngIf="showDownloadProgress && rowData.downloadStatus === 'downloading'"
-                    style="padding-left:5px; flex: 0 0 auto;">
-                    <div (click)="cancelDownload(rowData)" style="cursor: pointer;"><i class="faa faa-remove"></i></div>
-                    </div>
-                    <div id="downloadstatus" *ngIf="rowData.isLeaf && rowData.downloadStatus != 'downloading'" [ngStyle]="{'padding-left':'0.5em','color':getDownloadStatusStyle(rowData)}" data-toggle="tooltip" title="{{(rowData.message.status=='404')?'File not found.': 'Server error'}}">
-                    {{rowData.downloadStatus}}
-                    </div>
-                </div> -->
-
                     <div *ngIf="rowData.isLeaf;else space_holder" style="display:inline;">
                         <a *ngIf="rowData.downloadStatus != 'downloading'" href='{{rowData.downloadUrl}}'
                             target='_blank' download="download" data-toggle="tooltip" title="Direct download" aria-label="Direct download">
