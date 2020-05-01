@@ -731,8 +731,6 @@ public class SamlSecurityConfig extends WebSecurityConfigurerAdapter {
 	public void configure(WebSecurity web) throws Exception {
 		web.ignoring().antMatchers("/v2/api-docs", "/configuration/ui", "/swagger-resources/**",
 				"/configuration/security", "/swagger-ui.html", "/webjars/**","/pdr/lp/draft/**");	
-//		if(!this.samlEnabled)
-//		web.ignoring().antMatchers("/pdr/lp/editor/**");
 	}
 
 	/**
@@ -748,9 +746,6 @@ public class SamlSecurityConfig extends WebSecurityConfigurerAdapter {
 					.authenticationEntryPoint(samlEntryPoint());
 
 			http.csrf().disable();
-
-//			http.addFilterBefore(metadataGeneratorFilter(), ChannelProcessingFilter.class).addFilterAfter(springSecurityFilter(),
-//					BasicAuthenticationFilter.class);
 
 			http.addFilterBefore(metadataGeneratorFilter(), ChannelProcessingFilter.class).addFilterAfter(samlFilter(),
 					BasicAuthenticationFilter.class);

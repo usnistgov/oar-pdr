@@ -26,6 +26,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
@@ -47,22 +48,38 @@ import gov.nist.oar.customizationapi.web.CustomAccessDeniedHandler;
 @EnableWebSecurity
 public class WebSecurityConfig {
 	private Logger logger = LoggerFactory.getLogger(WebSecurityConfig.class);
+
+	/**
+	 * The following configuration should get loaded only in local profile.
+	 * 
+	 * @author Deoyani Nandrekar-Heinis
+	 *
+	 */
 	@Configuration
-	@Profile({"local"})
+	@Profile({ "local" })
 	public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
-	    @Override
-	    protected void configure(HttpSecurity security) throws Exception
-	    {
-	     logger.info("#### SAML authentication and authorization service is disabled in this mode. #####");	
-	     security.httpBasic().disable();
-	    }
+		@Override
+		protected void configure(HttpSecurity security) throws Exception {
+			logger.info("#### SAML authentication and authorization service is disabled in this mode. #####");
+			security.httpBasic().disable();
+		}
+
+		/**
+		 * Allow following URL patterns without any authentication and authorization
+		 */
+		@Override
+		public void configure(WebSecurity web) throws Exception {
+			web.ignoring().antMatchers("/v2/api-docs", "/configuration/ui", "/swagger-resources/**",
+					"/configuration/security", "/swagger-ui.html", "/webjars/**", "/pdr/lp/draft/**");
+		}
 	}
+
 	/**
 	 * Rest security configuration for rest api
 	 */
 	@Configuration
-	@Profile({"prod","dev","test","default"})
+	@Profile({ "prod", "dev", "test", "default" })
 //	@ConditionalOnProperty(prefix = "samlauth", name = "enabled", havingValue = "true", matchIfMissing = true)
 	@Order(1)
 	public static class RestApiSecurityConfig extends WebSecurityConfigurerAdapter {
@@ -97,12 +114,13 @@ public class WebSecurityConfig {
 	 */
 	@Configuration
 //	@ConditionalOnProperty(prefix = "samlauth", name = "enabled", havingValue = "true", matchIfMissing = true)
-	@Profile({"prod","dev","test","default"})
+	@Profile({ "prod", "dev", "test", "default" })
 	@Order(2)
 	public static class AuthSecurityConfig extends WebSecurityConfigurerAdapter {
 		private Logger logger = LoggerFactory.getLogger(AuthSecurityConfig.class);
 
 		private static final String apiMatcher = "/auth/**";
+
 //		@Autowired
 //		private CustomAccessDeniedHandler accessDeniedHandler;
 		@Override
@@ -154,15 +172,14 @@ public class WebSecurityConfig {
 //
 //	}
 
-	
-	 /**
-     * Saml security config
-     */
-    @Configuration
-    @Profile({"prod","dev","test","default"})
+	/**
+	 * Saml security config
+	 */
+	@Configuration
+	@Profile({ "prod", "dev", "test", "default" })
 //    @ConditionalOnProperty(prefix = "samlauth", name = "enabled", havingValue = "true", matchIfMissing = true)
-    @Import(SamlSecurityConfig.class)
-    public static class SamlConfig {
+	@Import(SamlSecurityConfig.class)
+	public static class SamlConfig {
 
-    }
+	}
 }
