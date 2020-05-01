@@ -516,30 +516,43 @@ export class DatacartComponent implements OnInit, OnDestroy {
               this.isProcessing = false;
               this.bundlePlanStatus = blob.status.toLowerCase();
               this.bundlePlanMessage = blob.messages;
+              this.bundlePlanUnhandledFiles = blob.notIncluded;
               if (this.bundlePlanMessage != null && this.bundlePlanMessage != undefined && this.bundlePlanStatus != 'complete') 
               {
                 this.broadcastMessage = 'Server responsed with ' + this.bundlePlanStatus + '.';
               }
               this.messageColor = this.getColor();
-
-              if(this.bundlePlanStatus != 'error')
+              console.log("Bundle plan return:", JSON.stringify(blob));
+              
+              if(this.bundlePlanStatus == 'complete')
               {
-                console.log("Bundle plan return:", JSON.stringify(blob));
-  
                 this.processBundle(blob);                 
               }
-              else
+              else if(this.bundlePlanStatus == 'warnings')
               {
+                this.showMessageBlock = true;
+                this.showUnhandledFiles = false;
+                this.processBundle(blob);  
+              }
+              else // error
+              {
+                let dateTime = new Date()
+
                 console.log("Bundle plan returned error. Post message:", JSON.stringify(postMessage[0]));
                 console.log("Bundle plan return:", blob);
-                this.emailSubject = 'PDR: Error getting bundle plan';
-                this.emailBody = 'URL:' + this.distApi + '_bundle_plan; ' + '%0D%0A%0D%0A' + 'Post message:%0D%0A' + JSON.stringify(postMessage[0]) + ';'  + '%0D%0A%0D%0A' + 'Return message:%0D%0A' + JSON.stringify(blob);
+                this.emailSubject = 'PDR: Error getting download plan';
+                this.emailBody = 'The information below describes an error that occurred while downloading data via the data cart.' + '%0D%0A%0D%0A' 
+                + '[From the PDR Team:  feel free to add additional information about the failure or your questions here.  Thanks for sending this message!]' + '%0D%0A%0D%0A'
+                + 'URL:' + this.distApi + '_bundle_plan; ' + '%0D%0A' 
+                + 'Time: ' + dateTime.toString() + '%0D%0A%0D%0A'
+                + 'Post message:%0D%0A' + JSON.stringify(postMessage[0]) + ';'  + '%0D%0A%0D%0A' + 'Return message:%0D%0A' + JSON.stringify(blob);
                 this.showMessageBlock = true;
                 this.showUnhandledFiles = false;
                 this.unsubscribeBundleplan();
               }
             },
             err => {
+                let dateTime = new Date()
                 console.log("Calling following end point returned error:");
                 console.log(this.distApi + "_bundle_plan");
                 console.log("Post message:");
@@ -551,8 +564,15 @@ export class DatacartComponent implements OnInit, OnDestroy {
                 this.isProcessing = false;
                 this.showCurrentTask = false;
                 this.messageColor = this.getColor();
-                this.emailSubject = 'PDR: Error getting bundle plan';
-                this.emailBody = 'URL:' + this.distApi + '_bundle_plan; ' + '%0D%0A%0D%0A' + 'Post message:%0D%0A' + JSON.stringify(postMessage[0])  + '%0D%0A%0D%0A'  + 'Error message:%0D%0A' + JSON.stringify(err);
+                this.emailSubject = 'PDR: Error getting download plan';
+                this.emailBody = 
+                'The information below describes an error that occurred while downloading data via the data cart.' + '%0D%0A%0D%0A' 
+                + '[From the PDR Team:  feel free to add additional information about the failure or your questions here.  Thanks for sending this message!]' + '%0D%0A%0D%0A' 
+                + 'URL:' + this.distApi + '%0D%0A'  
+                + 'Time: ' + dateTime.toString() + '%0D%0A%0D%0A' 
+                + '_bundle_plan; ' + '%0D%0A%0D%0A' 
+                + 'Post message:%0D%0A' + JSON.stringify(postMessage[0])  + '%0D%0A%0D%0A'  
+                + 'Error message:%0D%0A' + JSON.stringify(err);
                 console.log("emailBody:", this.emailBody);
                 this.showMessageBlock = false;
             }
