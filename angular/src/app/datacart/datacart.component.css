@@ -210,3 +210,8 @@ tr {
 .fileDialog {
   z-index: 999;
 }
+
+.unhandled-files {
+    max-height: 200px;
+    overflow: scroll;
+}

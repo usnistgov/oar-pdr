@@ -22,16 +22,16 @@
             </span>
             <span *ngIf="bundlePlanStatus == 'internal error';else no_error" [ngStyle]="{'color':messageColor}">
                 Ooops! There was a problem getting the data you need. Please contact us at <a
-                    href="mailto:datasupport@nist.gov?subject=PDR: {{emailSubject}}&body={{emailBody}}"
+                    href="mailto:datasupport@nist.gov?subject={{emailSubject}}&body={{emailBody}}"
                     (click)="gaService.gaTrackEvent('Email', $event, 'AskHelp', 'mailto:datasupport@nist.gov')">datasupport@nist.gov</a>
-                to report the problem. If possible, include the string "PDR: Error getting bundle plan" in your email
+                to report the problem. If possible, include the string "PDR: Error getting download plan" in your email
                 report.</span>
             <ng-template #no_error>
                 <span [ngStyle]="{'color':getColor(), 'padding-right':'.5em'}">{{broadcastMessage}}</span>
                 <span *ngIf="bundlePlanStatus == 'error'">
-                    <a
-                    href="mailto:datasupport@nist.gov?subject=PDR: {{emailSubject}}&body={{emailBody}}"
-                    (click)="gaService.gaTrackEvent('Email', $event, 'AskHelp', 'mailto:datasupport@nist.gov')"><i class="faa faa-envelope" data-toggle="tooltip" title="Email tech support"></i></a>
+                    For tech support, please email to 
+                    <a href="mailto:datasupport@nist.gov?subject={{emailSubject}}&body={{emailBody}}"
+                        (click)="gaService.gaTrackEvent('Email', $event, 'AskHelp', 'mailto:datasupport@nist.gov')">datasupport@nist.gov <i class="faa faa-envelope" data-toggle="tooltip" title="Email tech support"></i></a>
                 </span>
             </ng-template>
         </div>
@@ -68,34 +68,37 @@
     </table>
 
     <!-- Show unhandled files if any -->
-    <table *ngIf="bundlePlanUnhandledFiles" style="width: 100%;margin-bottom: 0.5em;">
-        <tr style="background-color:darkorange; margin:0; color:white" data-toggle="tooltip" title="Unhandled Files">
-            <th style="width: 30%;padding-left:.5em;">
-                <span *ngIf="bundlePlanUnhandledFiles" (click)="showUnhandledFiles = !showUnhandledFiles">
-                    <i *ngIf="showUnhandledFiles; else hideUnhandledFiles"
-                        class="faa faa-arrow-circle-up faa-1x icon-white"
-                        style="cursor: pointer;color: rgb(255, 255, 255);" data-toggle="tooltip"
-                        title="Collapse All"></i>
-                    <ng-template #hideUnhandledFiles>
-                        <i class="faa faa-arrow-circle-down faa-1x icon-white"
+    <div *ngIf="bundlePlanUnhandledFiles" class="unhandled-files">
+        <table  style="width: 100%;margin-bottom: 0.5em;">
+            <tr style="background-color:darkorange; margin:0; color:white" data-toggle="tooltip"
+                title="Unhandled Files">
+                <th style="width: 30%;padding-left:.5em;">
+                    <span *ngIf="bundlePlanUnhandledFiles" (click)="showUnhandledFiles = !showUnhandledFiles">
+                        <i *ngIf="showUnhandledFiles; else hideUnhandledFiles"
+                            class="faa faa-arrow-circle-up faa-1x icon-white"
                             style="cursor: pointer;color: rgb(255, 255, 255);" data-toggle="tooltip"
-                            title="Expand All"></i>
-                    </ng-template>
-                </span>
-                File Path
-            </th>
-            <th style="width: 30%;padding-left:.5em;">Download Url</th>
-            <th style="width: 40%;padding-left:.5em;">Detail message</th>
-        </tr>
-        <tbody *ngIf="showUnhandledFiles">
-            <tr *ngFor="let file of bundlePlanUnhandledFiles">
-                <td width="30%" style="padding-left:.5em;border-bottom:1pt solid black;">{{file.filePath}}</td>
-                <td width="30%" style="padding-left:.5em;border-bottom:1pt solid black;">{{file.downloadUrl}}
-                </td>
-                <td width="40%" style="padding-left:.5em;border-bottom:1pt solid black;">{{file.message}}</td>
+                            title="Collapse All"></i>
+                        <ng-template #hideUnhandledFiles>
+                            <i class="faa faa-arrow-circle-down faa-1x icon-white"
+                                style="cursor: pointer;color: rgb(255, 255, 255);" data-toggle="tooltip"
+                                title="Expand All"></i>
+                        </ng-template>
+                    </span>
+                    File Path
+                </th>
+                <th style="width: 30%;padding-left:.5em;">Download Url</th>
+                <th style="width: 40%;padding-left:.5em;">Detail message</th>
             </tr>
-        </tbody>
-    </table>
+            <tbody *ngIf="showUnhandledFiles">
+                <tr *ngFor="let file of bundlePlanUnhandledFiles">
+                    <td width="30%" style="padding-left:.5em;border-bottom:1pt solid black;">{{file.filePath}}</td>
+                    <td width="30%" style="padding-left:.5em;border-bottom:1pt solid black;">{{file.downloadUrl}}
+                    </td>
+                    <td width="40%" style="padding-left:.5em;border-bottom:1pt solid black;">{{file.message}}</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
 </div>
 
 <!-- Display zip files if any -->
@@ -182,7 +185,8 @@
     </button>
 
     <button type="button" (click)="removeByDownloadStatus()" pButton type="submit"
-        style="margin-right:1em;width:max-content; height:2.5em; background-color:rgb(82, 82, 82);" [disabled]="noFileDownloaded">
+        style="margin-right:1em;width:max-content; height:2.5em; background-color:rgb(82, 82, 82);"
+        [disabled]="noFileDownloaded">
         <i class="faa faa-trash faa-1x icon-white" style="color: #fff;"></i>
         Remove downloaded
         <span class="w3-circle button-badge"
@@ -193,7 +197,8 @@
         style="width:max-content; height:2.5em; background-color:rgb(82, 82, 82);" [disabled]="selectedFileCount==0">
         <i class="faa faa-trash faa-1x icon-white" style="color: #fff;"></i>
         Remove selected
-        <span class="w3-circle button-badge" [ngStyle]="{'color':'rgb(82, 82, 82)'}">&nbsp;{{selectedFileCount}}&nbsp;</span>
+        <span class="w3-circle button-badge"
+            [ngStyle]="{'color':'rgb(82, 82, 82)'}">&nbsp;{{selectedFileCount}}&nbsp;</span>
     </button>
 </div>
 
@@ -259,7 +264,8 @@
                 <td [ngStyle]="statusStyle()">
                     <div *ngIf="rowData.isLeaf;else space_holder" style="display:inline;">
                         <a *ngIf="rowData.downloadStatus != 'downloading'" href='{{rowData.downloadUrl}}'
-                            target='_blank' download="download" data-toggle="tooltip" title="Direct download" aria-label="Direct download">
+                            target='_blank' download="download" data-toggle="tooltip" title="Direct download"
+                            aria-label="Direct download">
                             <i class="faa faa-download" [ngStyle]="{'color':getDownloadBtnColor(rowData)}"
                                 aria-hidden="true" (click)="setFileDownloaded(rowData)"></i>
                         </a>
