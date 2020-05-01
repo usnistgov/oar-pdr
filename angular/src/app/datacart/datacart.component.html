@@ -28,7 +28,7 @@
                 report.</span>
             <ng-template #no_error>
                 <span [ngStyle]="{'color':getColor(), 'padding-right':'.5em'}">{{broadcastMessage}}</span>
-                <span *ngIf="broadcastMessage">
+                <span *ngIf="bundlePlanStatus == 'error'">
                     <a
                     href="mailto:datasupport@nist.gov?subject=PDR: {{emailSubject}}&body={{emailBody}}"
                     (click)="gaService.gaTrackEvent('Email', $event, 'AskHelp', 'mailto:datasupport@nist.gov')"><i class="faa faa-envelope" data-toggle="tooltip" title="Email tech support"></i></a>
