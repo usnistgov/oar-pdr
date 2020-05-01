@@ -211,7 +211,50 @@ tr {
   z-index: 999;
 }
 
-.unhandled-files {
-    max-height: 200px;
-    overflow: scroll;
+table {
+    width: 100%;
+    table-layout: fixed;
+}
+
+td {
+    word-wrap: break-word;
+    padding-left:.5em;
+}
+
+.th30 {
+    width: 30% !important;
+    padding-left:.5em;
+}
+
+.th40 {
+    width: 40% !important;
+    padding-left:.5em;
+}
+
+.th-orange {
+    background-color: darkorange;
+    color:white;
+    margin:0;
+}
+
+.th-green {
+    background-color: green;
+    color:white;
+    margin:0;
+}
+
+.unhandled-files{
+    overflow-y:auto;
+    max-height:200px;
+    width:100%;
+    word-wrap: break-word;
+}
+
+.th50{
+    width: 50%;
+    padding-left:.5em;
+}
+
+.underline {
+    border-bottom: 1px solid black;
 }
