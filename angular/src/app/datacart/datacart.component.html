@@ -12,7 +12,7 @@
     <div style="justify-content: space-between;">
         <div *ngIf="bundlePlanStatus != 'complete' && bundlePlanMessage" style="display: inline; text-align: left;">
             <!-- Icon button to show/hide bundle message details -->
-            <span (click)="showMessageBlock = !showMessageBlock">
+            <span *ngIf="bundlePlanStatus != 'internal error'" (click)="showMessageBlock = !showMessageBlock">
                 <i *ngIf="!showMessageBlock" class="faa faa-arrow-circle-down"
                     [ngStyle]="{'color':messageColor,'cursor':'pointer','margin':'0 .5em'}" data-toggle="tooltip"
                     title="Show details"></i>
