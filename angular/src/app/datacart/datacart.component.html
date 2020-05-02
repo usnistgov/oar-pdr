@@ -20,6 +20,7 @@
                     [ngStyle]="{'color':messageColor,'cursor':'pointer','margin':'0 .5em'}" data-toggle="tooltip"
                     title="Hide details"></i>
             </span>
+            <!-- http error -->
             <span *ngIf="bundlePlanStatus == 'internal error';else no_error" [ngStyle]="{'color':messageColor}">
                 Ooops! There was a problem getting the data you need. Please contact us at <a
                     href="mailto:datasupport@nist.gov?subject={{emailSubject}}&body={{emailBody}}"
@@ -28,6 +29,7 @@
                 report.</span>
             <ng-template #no_error>
                 <span [ngStyle]="{'color':getColor(), 'padding-right':'.5em'}">{{broadcastMessage}}</span>
+                <!-- Server returned ok with certain error -->
                 <span *ngIf="bundlePlanStatus == 'error'">
                     For tech support, please email <a
                         href="mailto:datasupport@nist.gov?subject={{emailSubject}}&body={{emailBody}}"
@@ -136,10 +138,10 @@
                     <ng-template #download_error>
                         <div style="display:inline-block;margin-left: .5em;font-size: 0.8em; color: red">
                             <i class="faa faa-warning"
-                                [ngStyle]="{'color':messageColor, 'padding-right':'.5em', 'margin-top':'8px'}"></i>
-                            Error
+                                [ngStyle]="{'padding-right':'.5em', 'margin-top':'8px'}"></i>
+                            Error. 
                             <a href="mailto:datasupport@nist.gov?subject=PDR: Error downloading zip file&body={{getEmailBody(zip)}}"
-                                (click)="gaService.gaTrackEvent('Email', $event, 'AskHelp', 'mailto:datasupport@nist.gov')">
+                                (click)="gaService.gaTrackEvent('Email', $event, 'AskHelp', 'mailto:datasupport@nist.gov')">Send details to tech support 
                                 <i class="faa faa-envelope" data-toggle="tooltip" title="Email tech support"></i></a>
                         </div>
                     </ng-template>
