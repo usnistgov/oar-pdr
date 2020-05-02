@@ -505,8 +505,8 @@ export class DatacartComponent implements OnInit, OnDestroy {
         files.data.downloadStatus = 'downloading';
 
         postMessage.push({ "bundleName": files.data.downloadFileName, "includeFiles": this.downloadData });
-        console.log('Bundle plan post message:');
-        console.log(JSON.stringify(postMessage[0]));
+        // console.log('Bundle plan post message:');
+        // console.log(JSON.stringify(postMessage[0]));
         console.log("Calling following end point to get bundle plan:");
         console.log(this.distApi + "_bundle_plan");
 
@@ -522,7 +522,7 @@ export class DatacartComponent implements OnInit, OnDestroy {
                 this.broadcastMessage = 'Server responsed with ' + this.bundlePlanStatus + '.';
               }
               this.messageColor = this.getColor();
-              console.log("Bundle plan return:", JSON.stringify(blob));
+            //   console.log("Bundle plan return:", JSON.stringify(blob));
               
               if(this.bundlePlanStatus == 'complete')
               {
@@ -538,8 +538,8 @@ export class DatacartComponent implements OnInit, OnDestroy {
               {
                 let dateTime = new Date()
 
-                console.log("Bundle plan returned error. Post message:", JSON.stringify(postMessage[0]));
-                console.log("Bundle plan return:", blob);
+                // console.log("Bundle plan returned error. Post message:", JSON.stringify(postMessage[0]));
+                // console.log("Bundle plan return:", blob);
                 this.emailSubject = 'PDR: Error getting download plan';
                 this.emailBody = 'The information below describes an error that occurred while downloading data via the data cart.' + '%0D%0A%0D%0A' 
                 + '[From the PDR Team:  feel free to add additional information about the failure or your questions here.  Thanks for sending this message!]' + '%0D%0A%0D%0A'
