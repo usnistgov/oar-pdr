@@ -73,14 +73,14 @@
             File Path
         </span>
         <span class="span30">Download Url</span>
-        <span class="span-end" style="width: 35%;">Detail message</span>
+        <span class="span-end" style="width: 40%;">Detail message</span>
     </div>
     <!-- body -->
     <div class="unhandled-files" *ngIf="showUnhandledFiles">
         <div class="underline" style="width: 100%;" *ngFor="let file of bundlePlanUnhandledFiles">
             <span class="span30">{{file.filePath}}</span>
             <span class="span30">{{file.downloadUrl}}</span>
-            <span class="span-end" style="width: 30%;">{{file.message}}</span>
+            <span class="span-end" style="width: 40%;">{{file.message}}</span>
         </div>
     </div>
 </div>
@@ -88,7 +88,7 @@
 <!-- Display zip files if any -->
 <!-- header -->
 <div class="full-span">
-    <div *ngIf="zipData.length > 0 && showMessageBlock" class="header-green" style="width: 100%;" data-toggle="tooltip"
+    <div *ngIf="zipData.length > 0" class="header-green" style="width: 100%;" data-toggle="tooltip"
         title="Zip Files">
         <span class="span30">
             <!-- Toggle button to show/hide zip files-->
@@ -108,10 +108,10 @@
         </span>
     </div>
     <!-- body -->
-    <div class="unhandled-files" *ngIf="showZipFiles && showMessageBlock">
+    <div class="unhandled-files" *ngIf="showZipFiles">
         <div class="underline" style="width: 100%;" *ngFor="let zip of zipData">
             <span class="span30">{{zip.fileName}}</span>
-            <span class="span-end">
+            <span class="span-end" style="width: 70%;">
                 <div style="display:inline-block;" *ngIf="zip.downloadStatus === 'downloading';else not_downloading">
                     <span style="display:inline-block;padding-left: .5em;">
                         <p-progressSpinner [style]="{width: '12px', height: '12px'}"></p-progressSpinner>
@@ -123,7 +123,7 @@
                         style="display:inline-block;cursor: pointer;padding-left:5px;"><i
                             class="faa faa-remove"></i></span>
                 </div>
-                <ng-template #not_downloading>
+                <ng-template #not_downloading style="display:inline-block;">
                     <div *ngIf="zip.downloadStatus != 'error'; else download_error" style="display:inline-block;">
                         <i *ngIf="zip.downloadStatus === 'downloaded'" class="faa faa-check"
                             style="margin-top: 8px;"></i>

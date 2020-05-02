@@ -505,8 +505,8 @@ export class DatacartComponent implements OnInit, OnDestroy {
         files.data.downloadStatus = 'downloading';
 
         postMessage.push({ "bundleName": files.data.downloadFileName, "includeFiles": this.downloadData });
-        // console.log('Bundle plan post message:');
-        // console.log(JSON.stringify(postMessage[0]));
+        console.log('Bundle plan post message:');
+        console.log(JSON.stringify(postMessage[0]));
         console.log("Calling following end point to get bundle plan:");
         console.log(this.distApi + "_bundle_plan");
 
@@ -1100,7 +1100,7 @@ export class DatacartComponent implements OnInit, OnDestroy {
     */
     getDialogWidth() {
         var w = window.innerWidth > 500 ? 500 : window.innerWidth;
-        console.log(w);
+        // console.log(w);
         return w + 'px';
     }
 }
