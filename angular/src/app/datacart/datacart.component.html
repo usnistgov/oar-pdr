@@ -53,7 +53,8 @@
         Message
     </div>
     <div *ngIf="showMessage">
-        <div class="underline" style="padding-left:.5em;margin-bottom: .5em;" *ngFor="let msg of bundlePlanMessage; let i =index">
+        <div [ngStyle]="{'width': '100%', 'background-color': getBackColor(i)}"
+            *ngFor="let msg of bundlePlanMessage; let i =index">
             {{msg}}
         </div>
     </div>
@@ -77,7 +78,8 @@
     </div>
     <!-- body -->
     <div class="unhandled-files" *ngIf="showUnhandledFiles">
-        <div class="underline" style="width: 100%;" *ngFor="let file of bundlePlanUnhandledFiles">
+        <div [ngStyle]="{'width': '100%', 'background-color': getBackColor(i)}" style="width: 100%;"
+            *ngFor="let file of bundlePlanUnhandledFiles; let i=index">
             <span class="span30">{{file.filePath}}</span>
             <span class="span30">{{file.downloadUrl}}</span>
             <span class="span-end" style="width: 40%;">{{file.message}}</span>
@@ -88,8 +90,7 @@
 <!-- Display zip files if any -->
 <!-- header -->
 <div class="full-span">
-    <div *ngIf="zipData.length > 0" class="header-green" style="width: 100%;" data-toggle="tooltip"
-        title="Zip Files">
+    <div *ngIf="zipData.length > 0" class="header-green" style="width: 100%;" data-toggle="tooltip" title="Zip Files">
         <span class="span30">
             <!-- Toggle button to show/hide zip files-->
             <span (click)="showZipFiles = !showZipFiles">
@@ -109,7 +110,8 @@
     </div>
     <!-- body -->
     <div class="unhandled-files" *ngIf="showZipFiles">
-        <div class="underline" style="width: 100%;" *ngFor="let zip of zipData">
+        <div [ngStyle]="{'width': '100%', 'background-color': getBackColor(i)}"
+            *ngFor="let zip of zipData; let i=index">
             <span class="span30">{{zip.fileName}}</span>
             <span class="span-end" style="width: 70%;">
                 <div style="display:inline-block;" *ngIf="zip.downloadStatus === 'downloading';else not_downloading">
@@ -135,7 +137,10 @@
                         <div style="display:inline-block;margin-left: .5em;font-size: 0.8em; color: red">
                             <i class="faa faa-warning"
                                 [ngStyle]="{'color':messageColor, 'padding-right':'.5em', 'margin-top':'8px'}"></i>
-                            {{zip.downloadErrorMessage}}
+                            Error
+                            <a href="mailto:datasupport@nist.gov?subject=PDR: Error downloading zip file&body={{getEmailBody(zip)}}"
+                                (click)="gaService.gaTrackEvent('Email', $event, 'AskHelp', 'mailto:datasupport@nist.gov')">
+                                <i class="faa faa-envelope" data-toggle="tooltip" title="Email tech support"></i></a>
                         </div>
                     </ng-template>
                     <i *ngIf="zip.downloadStatus != null" class="faa faa-repeat"

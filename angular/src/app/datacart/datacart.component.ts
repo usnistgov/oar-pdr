@@ -133,6 +133,7 @@ export class DatacartComponent implements OnInit, OnDestroy {
     fontSize: string;
     emailSubject: string;
     emailBody: string;
+    emailBodyBase: string = 'The information below describes an error that occurred while downloading data via the data cart. %0D%0A%0D%0A [From the PDR Team:  feel free to add additional information about the failure or your questions here.  Thanks for sending this message!] %0D%0A%0D%0A';
 
     /**
      * Creates an instance of the SearchPanel
@@ -536,13 +537,12 @@ export class DatacartComponent implements OnInit, OnDestroy {
               }
               else // error
               {
-                let dateTime = new Date()
+                let dateTime = new Date();
 
                 // console.log("Bundle plan returned error. Post message:", JSON.stringify(postMessage[0]));
                 // console.log("Bundle plan return:", blob);
                 this.emailSubject = 'PDR: Error getting download plan';
-                this.emailBody = 'The information below describes an error that occurred while downloading data via the data cart.' + '%0D%0A%0D%0A' 
-                + '[From the PDR Team:  feel free to add additional information about the failure or your questions here.  Thanks for sending this message!]' + '%0D%0A%0D%0A'
+                this.emailBody = this.emailBodyBase
                 + 'URL:' + this.distApi + '_bundle_plan; ' + '%0D%0A' 
                 + 'Time: ' + dateTime.toString() + '%0D%0A%0D%0A'
                 + 'Post message:%0D%0A' + JSON.stringify(postMessage[0]) + ';'  + '%0D%0A%0D%0A' + 'Return message:%0D%0A' + JSON.stringify(blob);
@@ -1102,6 +1102,32 @@ export class DatacartComponent implements OnInit, OnDestroy {
         var w = window.innerWidth > 500 ? 500 : window.innerWidth;
         // console.log(w);
         return w + 'px';
+    }
+
+    /**
+     * Return row background color
+     * @param i - row number
+     */
+    getBackColor(i: number) 
+    {
+        if(i % 2 != 0) return 'rgb(231, 231, 231)';
+        else return 'white';
+    }
+
+    /**
+     * Construct email body for error reporting
+     * @param zip - bundle download zip object
+     */
+    getEmailBody(zip: any)
+    {
+        let dateTime = new Date();
+
+        let emaibody = this.emailBodyBase
+        + 'URL:' + zip.downloadUrl + '%0D%0A' 
+        + 'Time: ' + dateTime.toString() + '%0D%0A%0D%0A'
+        + 'Details:%0D%0A' + JSON.stringify(zip.bundle);
+
+        return emaibody;
     }
 }
 
