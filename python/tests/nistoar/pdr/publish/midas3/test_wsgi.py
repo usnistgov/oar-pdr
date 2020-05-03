@@ -191,9 +191,9 @@ class TestDraftHandler(test.TestCase):
                              headers={'Authorization': 'Bearer SECRET'})
         self.assertEqual(resp.status_code, 200)
 
-    def test_do_PUTasGET(self):
+    def test_do_PUTasPOST(self):
         req = {
-            'REQUEST_METHOD': "GET",
+            'REQUEST_METHOD': "POST",
             'HTTP_X_HTTP_METHOD_OVERRIDE': "PUT",
             'CONTENT_TYPE': 'application/json',
             'PATH_INFO': '/pdr/draft/'+self.midasid,
@@ -372,7 +372,7 @@ class TestDraftHandler(test.TestCase):
         self.assertEquals(body, [])
 
         self.resp = []
-        self.test_do_PUTasGET()
+        self.test_do_PUTasPOST()
 
         # we can delete a draft now
         self.resp = []
@@ -411,7 +411,7 @@ class TestMIDAS3PublishingApp(test.TestCase):
             'customization_service': {
                 'service_endpoint': custbaseurl,
                 'merge_convention': 'midas1',
-                'updatable_properties': [ "title", "authors", "_editStatus" ],
+                'updatable_properties': [ "title", "authors", "keyword", "_editStatus" ],
                 'auth_key': "SECRET"
             }
         }
@@ -646,6 +646,43 @@ class TestMIDAS3PublishingApp(test.TestCase):
         resp = requests.head(custbaseurl+self.midasid,
                              headers={'Authorization': 'Bearer SECRET'})
         self.assertEqual(resp.status_code, 200)
+
+    def test_draft_get_upd(self):
+        self.test_draft_put()
+
+        req = {
+            'REQUEST_METHOD': "GET",
+            'CONTENT_TYPE': 'application/json',
+            'PATH_INFO': '/pod/draft/'+self.midasid,
+            'HTTP_AUTHORIZATION': 'Bearer secret'
+        }
+        self.resp = []
+        body = self.web(req, self.start)
+        self.assertIn("200 ", self.resp[0])
+        data = json.loads("\n".join(body))
+        self.assertEqual(data['identifier'], self.midasid)
+        self.assertNotIn('goobers', data['keyword'])
+
+        resp = requests.patch(custbaseurl+self.midasid,
+                              headers={'Authorization': 'Bearer SECRET'},
+                              json={"keyword": data['keyword']+['goobers']})
+        self.assertEqual(resp.status_code, 201)
+        resp = requests.get(custbaseurl+self.midasid,
+                            headers={'Authorization': 'Bearer SECRET'})
+        self.assertIn('goobers', resp.json().get('keyword'))
+
+        self.resp = []
+        req = {
+            'REQUEST_METHOD': "GET",
+            'CONTENT_TYPE': 'application/json',
+            'PATH_INFO': '/pod/draft/'+self.midasid,
+            'HTTP_AUTHORIZATION': 'Bearer secret'
+        }
+        body = self.web(req, self.start)
+        self.assertIn("200 ", self.resp[0])
+        data = json.loads("\n".join(body))
+        self.assertEqual(data['identifier'], self.midasid)
+        self.assertEqual(data['keyword'][-1], "goobers")
 
     def test_draft_put_ark(self):
         arkid = 'ark:/88434/mds2-1491'
