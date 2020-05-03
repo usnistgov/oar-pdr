@@ -102,10 +102,9 @@ export class DownloadService {
 
             },
             err => {
-                console.log(err);
-                console.log('Download details:');
-                console.log(nextZip);
-                nextZip.downloadStatus = 'Error';
+                console.log('Error:', err);
+                console.log('Download details:', nextZip);
+                nextZip.downloadStatus = 'error';
                 nextZip.downloadErrorMessage = err.message;
                 nextZip.downloadProgress = 0;
                 this.decreaseNumberOfDownloading(whichPage);

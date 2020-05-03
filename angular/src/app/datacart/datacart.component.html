@@ -139,7 +139,7 @@
                         <div style="display:inline-block;margin-left: .5em;font-size: 0.8em; color: red">
                             <i class="faa faa-warning"
                                 [ngStyle]="{'padding-right':'.5em', 'margin-top':'8px'}"></i>
-                                {{zip.downloadErrorMessage}} -- error 
+                                Error. 
                             <a href="mailto:datasupport@nist.gov?subject=PDR: Error downloading zip file&body={{getEmailBody(zip)}}"
                                 (click)="gaService.gaTrackEvent('Email', $event, 'AskHelp', 'mailto:datasupport@nist.gov')">Send details to tech support 
                                 <i class="faa faa-envelope" data-toggle="tooltip" title="Email tech support"></i></a>
