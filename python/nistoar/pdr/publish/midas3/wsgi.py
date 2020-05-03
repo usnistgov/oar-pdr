@@ -88,6 +88,7 @@ app = MIDAS3PublishingApp
 
 _badidre = re.compile(r"[<>\s/]")
 _arkidre = re.compile(r"^ark:/"+ARK_NAAN+"/")
+_arklocalre = re.compile(r"^mds\d+\-\d{3}\d+")
 
 class Handler(object):
     """
@@ -378,8 +379,10 @@ class LatestHandler(Handler):
             self.end_headers()
             return ['"No identifier given"']
 
-        if _badidre.search(path):
+        if not _arkidre.search(path) and _badidre.search(path):
             return self.send_error(400, "Bad identifier syntax")
+        if _arklocalre.search(path):
+            path = "ark:/"+ARK_NAAN+"/"+path
 
         try:
             pod = self._svc.get_pod(path)

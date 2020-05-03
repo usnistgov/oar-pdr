@@ -492,6 +492,36 @@ class TestMIDAS3PublishingApp(test.TestCase):
         self.assertIn("401 ", self.resp[0])
         self.assertEqual(body, [])
 
+    def test_latest_get(self):
+        self.test_latest_post()
+        self.resp = []
+        req = {
+            'REQUEST_METHOD': "GET",
+            'CONTENT_TYPE': 'application/json',
+            'PATH_INFO': '/pod/latest/'+self.midasid,
+            'HTTP_AUTHORIZATION': 'Bearer secret'
+        }
+        body = self.web(req, self.start)
+        self.assertIn("200 ", self.resp[0])
+        data = json.loads("\n".join(body))
+        self.assertEqual(data['identifier'], self.midasid)
+        
+
+    def test_latest_post_wrongep(self):
+        req = {
+            'REQUEST_METHOD': "POST",
+            'CONTENT_TYPE': 'application/json',
+            'PATH_INFO': '/pod/latest/'+self.midasid,
+            'HTTP_AUTHORIZATION': 'Bearer secret'
+        }
+
+        with open(self.podf) as fd:
+            req['wsgi.input'] = fd
+            body = self.web(req, self.start)
+        
+        self.assertIn("405 ", self.resp[0])
+        
+
     def test_latest_post(self):
         req = {
             'REQUEST_METHOD': "POST",
@@ -513,6 +543,64 @@ class TestMIDAS3PublishingApp(test.TestCase):
         self.svc.wait_for_all_workers(300)
         self.assertTrue(os.path.isfile(os.path.join(self.bagparent,"nrdserv",
                                                     self.midasid+".json")))
+
+    def test_latest_post_arkid(self):
+        base = 'mds0-1491'
+        arkid = 'ark:/88434/'+base
+        podf = self.tf("pod.json")
+        altpod(self.podf, podf, {"identifier": arkid})
+        req = {
+            'REQUEST_METHOD': "POST",
+            'CONTENT_TYPE': 'application/json',
+            'PATH_INFO': '/pod/latest',
+            'HTTP_AUTHORIZATION': 'Bearer secret'
+        }
+
+        with open(podf) as fd:
+            req['wsgi.input'] = fd
+            body = self.web(req, self.start)
+
+        self.assertIn("201", self.resp[0])
+        self.assertEquals(body, [])
+
+        bagdir = os.path.join(self.bagparent,"mdbags",base)
+        self.assertTrue(os.path.isdir(bagdir))
+        # self.assertTrue(os.path.isfile(os.path.join(bagdir, "preserv.log")))
+        self.svc.wait_for_all_workers(300)
+        self.assertTrue(os.path.isfile(os.path.join(self.bagparent,"nrdserv",
+                                                    base+".json")))
+
+    def test_latest_get_arkid(self):
+        base = 'mds0-1491'
+        arkid = 'ark:/88434/'+base
+        podf = self.tf("pod.json")
+        altpod(self.podf, podf, {"identifier": arkid})
+        self.test_latest_post_arkid()
+        
+        self.resp = []
+        req = {
+            'REQUEST_METHOD': "GET",
+            'CONTENT_TYPE': 'application/json',
+            'PATH_INFO': '/pod/latest/'+arkid,
+            'HTTP_AUTHORIZATION': 'Bearer secret'
+        }
+        body = self.web(req, self.start)
+        self.assertIn("200 ", self.resp[0])
+        data = json.loads("\n".join(body))
+        self.assertEqual(data['identifier'], arkid)
+
+        self.resp = []
+        req = {
+            'REQUEST_METHOD': "GET",
+            'CONTENT_TYPE': 'application/json',
+            'PATH_INFO': '/pod/latest/'+base,
+            'HTTP_AUTHORIZATION': 'Bearer secret'
+        }
+        body = self.web(req, self.start)
+        self.assertIn("200 ", self.resp[0])
+        data = json.loads("\n".join(body))
+        self.assertEqual(data['identifier'], arkid)
+        
 
     def test_no_double_logging(self):
         self.test_latest_post()
