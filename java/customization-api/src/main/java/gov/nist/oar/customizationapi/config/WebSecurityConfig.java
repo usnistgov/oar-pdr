@@ -12,6 +12,13 @@
  */
 package gov.nist.oar.customizationapi.config;
 
+import java.io.IOException;
+
+import javax.servlet.FilterChain;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,8 +36,10 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.web.authentication.AnonymousAuthenticationFilter;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.filter.GenericFilterBean;
 
 import gov.nist.oar.customizationapi.config.JWTConfig.JWTAuthenticationFilter;
 import gov.nist.oar.customizationapi.config.JWTConfig.JWTAuthenticationProvider;
@@ -62,8 +71,23 @@ public class WebSecurityConfig {
 		@Override
 		protected void configure(HttpSecurity security) throws Exception {
 			logger.info("#### SAML authentication and authorization service is disabled in this mode. #####");
-			security.httpBasic().disable();
+//			security.httpBasic().disable();
 			security.cors().and().csrf().disable();
+//			security.authorizeRequests()
+//			.antMatchers("/error").permitAll()
+//			.antMatchers("/saml/**").permitAll()
+//			.anyRequest().authenticated();
+//			
+//			security.formLogin()
+//            .loginPage("/saml/login");
+			
+			security
+	            .authorizeRequests()
+	                .anyRequest().authenticated()
+	                .and()
+	            .formLogin()
+	                .loginPage("/saml/login")
+	                .permitAll();
 		}
 
 		/**
@@ -75,13 +99,47 @@ public class WebSecurityConfig {
 					"/configuration/security", "/swagger-ui.html", "/webjars/**", "/pdr/lp/draft/**");
 		}
 	}
+	
+	
+	/**
+	 * Rest security configuration for rest api
+	 */
+	@Configuration
+	@Profile({ "local" })
+	@Order(1)
+	public static class RestApiSecurityConfigLocal extends WebSecurityConfigurerAdapter {
+		private Logger logger = LoggerFactory.getLogger(RestApiSecurityConfigLocal.class);
+
+		@Value("${jwt.secret:testsecret}")
+		String secret;
+
+		private static final String apiMatcher = "/pdr/lp/editor/**";
+
+		@Override
+		protected void configure(HttpSecurity http) throws Exception {
+			logger.info("#### RestApiSecurityConfig HttpSecurity for REST /pdr/lp/editor/ endpoints ###");
+			http.addFilterBefore(new JWTAuthenticationFilter(apiMatcher, super.authenticationManager()),
+					UsernamePasswordAuthenticationFilter.class);
+
+			http.authorizeRequests().antMatchers(HttpMethod.PATCH, apiMatcher).permitAll();
+			http.authorizeRequests().antMatchers(HttpMethod.PUT, apiMatcher).permitAll();
+			http.authorizeRequests().antMatchers(HttpMethod.DELETE, apiMatcher).permitAll();
+			//http.authorizeRequests().antMatchers(apiMatcher).authenticated().and()
+			http.httpBasic().and().csrf().disable();
+
+		}
+
+		@Override
+		protected void configure(AuthenticationManagerBuilder auth) {
+			auth.authenticationProvider(new JWTAuthenticationProvider(secret));
+		}
+	}
 
 	/**
 	 * Rest security configuration for rest api
 	 */
 	@Configuration
 	@Profile({ "prod", "dev", "test", "default" })
-//	@ConditionalOnProperty(prefix = "samlauth", name = "enabled", havingValue = "true", matchIfMissing = true)
 	@Order(1)
 	public static class RestApiSecurityConfig extends WebSecurityConfigurerAdapter {
 		private Logger logger = LoggerFactory.getLogger(RestApiSecurityConfig.class);
@@ -109,13 +167,15 @@ public class WebSecurityConfig {
 			auth.authenticationProvider(new JWTAuthenticationProvider(secret));
 		}
 	}
+	
+	
 
 	/**
 	 * Security configuration for authorization end pointsq
 	 */
 	@Configuration
 //	@ConditionalOnProperty(prefix = "samlauth", name = "enabled", havingValue = "true", matchIfMissing = true)
-	@Profile({ "prod", "dev", "test", "default" })
+//	@Profile({ "prod", "dev", "test", "default" })
 	@Order(2)
 	public static class AuthSecurityConfig extends WebSecurityConfigurerAdapter {
 		private Logger logger = LoggerFactory.getLogger(AuthSecurityConfig.class);
@@ -134,6 +194,20 @@ public class WebSecurityConfig {
 		}
 	}
 
+
+
+	/**
+	 * Saml security config
+	 */
+	@Configuration
+	@Profile({ "prod", "dev", "test", "default" })
+//    @ConditionalOnProperty(prefix = "samlauth", name = "enabled", havingValue = "true", matchIfMissing = true)
+	@Import(SamlSecurityConfig.class)
+	public static class SamlConfig {
+
+	}
+	
+	
 //	/**
 //	 * Security configuration for service level authorization end points
 //	 */
@@ -172,15 +246,4 @@ public class WebSecurityConfig {
 //
 //
 //	}
-
-	/**
-	 * Saml security config
-	 */
-	@Configuration
-	@Profile({ "prod", "dev", "test", "default" })
-//    @ConditionalOnProperty(prefix = "samlauth", name = "enabled", havingValue = "true", matchIfMissing = true)
-	@Import(SamlSecurityConfig.class)
-	public static class SamlConfig {
-
-	}
 }

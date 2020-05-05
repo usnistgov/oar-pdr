@@ -150,5 +150,39 @@ public class JWTTokenGenerator {
 		}
 
 	}
+	
+	//Only for local testing
+	/**
+	 * Get the UserToken if user is authorized to edit given record.
+	 * 
+	 * @param userId Authenticated user
+	 * @param ediid  Record identifier
+	 * @return UserToken, userid and token
+	 * @throws UnAuthorizedUserException
+	 * @throws CustomizationException
+	 */
+	public UserToken getLocalJWT(AuthenticatedUserDetails userDetails, String ediid)
+			throws UnAuthorizedUserException, BadGetwayException, CustomizationException {
+		logger.info("Get authorized user token.");
+//		isAuthorized(userDetails, ediid);
+
+		try {
+			final DateTime dateTime = DateTime.now();
+			// build claims
+			JWTClaimsSet.Builder jwtClaimsSetBuilder = new JWTClaimsSet.Builder();
+			jwtClaimsSetBuilder.expirationTime(dateTime.plusMinutes(120).toDate());
+			jwtClaimsSetBuilder.claim(JWTClaimName, JWTClaimValue);
+			jwtClaimsSetBuilder.subject(userDetails.getUserEmail() + "|" + ediid);
+
+			// signature
+			SignedJWT signedJWT = new SignedJWT(new JWSHeader(JWSAlgorithm.HS256), jwtClaimsSetBuilder.build());
+			signedJWT.sign(new MACSigner(JWTSECRET));
+
+			return new UserToken(userDetails, signedJWT.serialize(),"");
+		} catch (JOSEException e) {
+			logger.error("Unable to generate token for the this user." + e.getMessage());
+			throw new UnAuthorizedUserException("Unable to generate token for the this user.");
+		}
+	}
 
 }
