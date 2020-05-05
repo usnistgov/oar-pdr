@@ -233,7 +233,7 @@ tr {
     display: inline-block;
     background-color: darkorange;
     color:white;
-    font-weight: bolder;
+    font-weight: bolder ;
     margin:0;
     width: 100%;
     margin-bottom: .2em;
@@ -262,4 +262,70 @@ tr {
 .title-line {
     display: inline-block;
     width: 100%;
+}
+
+.blinking{
+    animation:blinkingText 1.2s infinite;
+}
+@keyframes blinkingText{
+    0%{     color: #1E6BA1;    }
+    49%{    color: #1E6BA1; }
+    60%{    color: transparent; }
+    99%{    color:transparent;  }
+    100%{   color: #1E6BA1;    }
+}
+
+.status-reset-button {
+    color:black;
+    background-color:#f0f0f0;
+    vertical-align: text-top; 
+    font-size:10px; 
+    margin-top:5px; 
+    float: right;
+    cursor: pointer;
+}
+
+.message-block {
+    width: 100%;
+    margin-left: .5em;
+}
+
+.message-details {
+    width: 100%;
+    text-align: center;
+    color: white; 
+    background-color: #1471AE;
+    height: 30px;
+    padding-top: 3px;
+    font-weight: bolder;
+    margin-bottom: .5em;
+}
+
+.top-banner {
+    width: 100%;
+    background-position: center 63%;
+    margin-bottom: .5em;;
+    height: 80px;
+}
+
+.top-banner-text {
+    color: white !important;
+    margin-bottom: 3em;
+}
+
+.inner-box {
+    width: 94%;
+    padding-top: 1em;
+    margin: auto;
+}
+
+.top-banner-btns {
+    float:right;
+    padding-left: 3%; 
+    margin-top:1em;
+    text-align: right; 
+}
+
+button:disabled{
+    opacity: .7;
 }

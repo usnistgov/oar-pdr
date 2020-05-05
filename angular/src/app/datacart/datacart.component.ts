@@ -129,10 +129,13 @@ export class DatacartComponent implements OnInit, OnDestroy {
     titleWidth: string;
     typeWidth: string;
     sizeWidth: string;
+    actionWidth: string;
     statusWidth: string;
     fontSize: string;
+    downloadflag: boolean = true;
     emailSubject: string;
     emailBody: string;
+    imageURL: string;
     emailBodyBase: string = 'The information below describes an error that occurred while downloading data via the data cart. %0D%0A%0D%0A [From the PDR Team:  feel free to add additional information about the failure or your questions here.  Thanks for sending this message!] %0D%0A%0D%0A';
 
     /**
@@ -173,6 +176,8 @@ export class DatacartComponent implements OnInit, OnDestroy {
      * Get the params OnInit
      */
     ngOnInit() {
+        this.imageURL = 'assets/images/sdp-background.jpg';
+
         console.log("Datacart init...");
         this.isProcessing = true;
         this.distApi = this.cfg.get("distService", "/od/ds/");
@@ -184,6 +189,7 @@ export class DatacartComponent implements OnInit, OnDestroy {
             this.cartService.setCurrentCart('landing_popup');
 
             this.loadDatacart().then(function (result) {
+                this.clearDownloadingStatus();
                 this.downloadAllFilesFromAPI();
             }.bind(this), function (err) {
                 console.log("Error while loading datacart:");
@@ -193,7 +199,8 @@ export class DatacartComponent implements OnInit, OnDestroy {
 
         } else {
             this.cartService.setCurrentCart('cart');
-            this.loadDatacart().then(function (result) {               
+            this.loadDatacart().then(function (result) {
+                this.clearDownloadingStatus();
             }.bind(this), function (err) {
                 console.log("Error while loading datacart:");
                 console.log(err);
@@ -234,6 +241,10 @@ export class DatacartComponent implements OnInit, OnDestroy {
         return { 'background-color': '#1E6BA1', 'width': this.sizeWidth, 'color': 'white', 'font-size': this.fontSize };
     }
 
+    actionStyleHeader() {
+        return { 'background-color': '#1E6BA1', 'width': this.actionWidth, 'color': 'white', 'font-size': this.fontSize };
+    }
+
     statusStyleHeader() {
         return { 'background-color': '#1E6BA1', 'width': this.statusWidth, 'color': 'white', 'font-size': this.fontSize, 'white-space': 'nowrap' };
     }
@@ -258,12 +269,14 @@ export class DatacartComponent implements OnInit, OnDestroy {
             this.titleWidth = '60%';
             this.typeWidth = 'auto';
             this.sizeWidth = 'auto';
+            this.actionWidth = '30px';
             this.statusWidth = 'auto';
             this.fontSize = '16px';
         } else if (mobWidth > 780 && this.mobWidth <= 1340) {
             this.titleWidth = '60%';
             this.typeWidth = '150px';
             this.sizeWidth = '100px';
+            this.actionWidth = '30px';
             this.statusWidth = '150px';
             this.fontSize = '14px';
         }
@@ -271,6 +284,7 @@ export class DatacartComponent implements OnInit, OnDestroy {
             this.titleWidth = '40%';
             this.typeWidth = '20%';
             this.sizeWidth = '20%';
+            this.actionWidth = '10%';
             this.statusWidth = '20%';
             this.fontSize = '12px';
         }
@@ -513,43 +527,50 @@ export class DatacartComponent implements OnInit, OnDestroy {
 
         this.getBundlePlanRef = this.downloadService.getBundlePlan(this.distApi + "_bundle_plan", JSON.stringify(postMessage[0])).subscribe(
             blob => {
-              this.showCurrentTask = false;
-              this.isProcessing = false;
-              this.bundlePlanStatus = blob.status.toLowerCase();
-              this.bundlePlanMessage = blob.messages;
-              this.bundlePlanUnhandledFiles = blob.notIncluded;
-              if (this.bundlePlanMessage != null && this.bundlePlanMessage != undefined && this.bundlePlanStatus != 'complete') 
-              {
-                this.broadcastMessage = 'Server responsed with ' + this.bundlePlanStatus + '.';
-              }
-              this.messageColor = this.getColor();
-            //   console.log("Bundle plan return:", JSON.stringify(blob));
-              
-              if(this.bundlePlanStatus == 'complete')
-              {
-                this.processBundle(blob);                 
-              }
-              else if(this.bundlePlanStatus == 'warnings')
-              {
-                this.showMessageBlock = true;
-                this.showUnhandledFiles = false;
-                this.processBundle(blob);  
-              }
-              else // error
-              {
-                let dateTime = new Date();
+                this.showCurrentTask = false;
+                this.isProcessing = false;
+                this.bundlePlanStatus = blob.status.toLowerCase();
+                this.bundlePlanMessage = blob.messages;
+                this.bundlePlanUnhandledFiles = blob.notIncluded;
+                if (this.bundlePlanMessage != null && this.bundlePlanMessage != undefined && this.bundlePlanStatus != 'complete') {
+                    this.broadcastMessage = 'Server responsed with ' + this.bundlePlanStatus + '.';
+                }
+                this.messageColor = this.getColor();
+                //   console.log("Bundle plan return:", JSON.stringify(blob));
 
-                // console.log("Bundle plan returned error. Post message:", JSON.stringify(postMessage[0]));
-                // console.log("Bundle plan return:", blob);
-                this.emailSubject = 'PDR: Error getting download plan';
-                this.emailBody = this.emailBodyBase
-                + 'URL:' + this.distApi + '_bundle_plan; ' + '%0D%0A' 
-                + 'Time: ' + dateTime.toString() + '%0D%0A%0D%0A'
-                + 'Post message:%0D%0A' + JSON.stringify(postMessage[0]) + ';'  + '%0D%0A%0D%0A' + 'Return message:%0D%0A' + JSON.stringify(blob);
-                this.showMessageBlock = true;
-                this.showUnhandledFiles = false;
-                this.unsubscribeBundleplan();
-              }
+                if (this.bundlePlanUnhandledFiles) {
+                    this.markUnhandledFiles();
+                }
+
+                if (this.bundlePlanStatus == 'complete') {
+                    this.processBundle(blob);
+                }
+                else if (this.bundlePlanStatus == 'warnings') {
+                    let dateTime = new Date();
+
+                    this.showMessageBlock = true;
+                    this.showUnhandledFiles = false;
+                    this.emailSubject = 'PDR: Error getting download plan';
+                    this.emailBody = this.emailBodyBase
+                        + 'URL:' + this.distApi + '_bundle_plan; ' + '%0D%0A'
+                        + 'Time: ' + dateTime.toString() + '%0D%0A%0D%0A'
+                        + 'Post message:%0D%0A' + JSON.stringify(postMessage[0]) + ';' + '%0D%0A%0D%0A' + 'Return message:%0D%0A' + JSON.stringify(blob);
+                    this.processBundle(blob);
+                }
+                else // error
+                {
+                    let dateTime = new Date();
+                    // console.log("Bundle plan returned error. Post message:", JSON.stringify(postMessage[0]));
+                    // console.log("Bundle plan return:", blob);
+                    this.emailSubject = 'PDR: Error getting download plan';
+                    this.emailBody = this.emailBodyBase
+                        + 'URL:' + this.distApi + '_bundle_plan; ' + '%0D%0A'
+                        + 'Time: ' + dateTime.toString() + '%0D%0A%0D%0A'
+                        + 'Post message:%0D%0A' + JSON.stringify(postMessage[0]) + ';' + '%0D%0A%0D%0A' + 'Return message:%0D%0A' + JSON.stringify(blob);
+                    this.showMessageBlock = true;
+                    this.showUnhandledFiles = false;
+                    this.unsubscribeBundleplan();
+                }
             },
             err => {
                 let dateTime = new Date()
@@ -565,14 +586,14 @@ export class DatacartComponent implements OnInit, OnDestroy {
                 this.showCurrentTask = false;
                 this.messageColor = this.getColor();
                 this.emailSubject = 'PDR: Error getting download plan';
-                this.emailBody = 
-                'The information below describes an error that occurred while downloading data via the data cart.' + '%0D%0A%0D%0A' 
-                + '[From the PDR Team:  feel free to add additional information about the failure or your questions here.  Thanks for sending this message!]' + '%0D%0A%0D%0A' 
-                + 'URL:' + this.distApi + '%0D%0A'  
-                + 'Time: ' + dateTime.toString() + '%0D%0A%0D%0A' 
-                + '_bundle_plan; ' + '%0D%0A%0D%0A' 
-                + 'Post message:%0D%0A' + JSON.stringify(postMessage[0])  + '%0D%0A%0D%0A'  
-                + 'Error message:%0D%0A' + JSON.stringify(err);
+                this.emailBody =
+                    'The information below describes an error that occurred while downloading data via the data cart.' + '%0D%0A%0D%0A'
+                    + '[From the PDR Team:  feel free to add additional information about the failure or your questions here.  Thanks for sending this message!]' + '%0D%0A%0D%0A'
+                    + 'URL:' + this.distApi + '%0D%0A'
+                    + 'Time: ' + dateTime.toString() + '%0D%0A%0D%0A'
+                    + '_bundle_plan; ' + '%0D%0A%0D%0A'
+                    + 'Post message:%0D%0A' + JSON.stringify(postMessage[0]) + '%0D%0A%0D%0A'
+                    + 'Error message:%0D%0A' + JSON.stringify(err);
                 console.log("emailBody:", this.emailBody);
                 this.showMessageBlock = false;
             }
@@ -590,7 +611,7 @@ export class DatacartComponent implements OnInit, OnDestroy {
     processBundle(res: any) {
         this.currentTask = "Processing Each Bundle...";
         this.messageColor = this.getColor();
-        
+
         let bundlePlan: any[] = res.bundleNameFilePathUrl;
         let downloadUrl: any = this.distApi + res.postEachTo;
         console.log("Bundle url:");
@@ -612,6 +633,8 @@ export class DatacartComponent implements OnInit, OnDestroy {
                         break;
                     }
                 }
+
+                this.downloadService.setDownloadStatus(zip, this.dataFiles, 'pending');
             }
         }
 
@@ -993,6 +1016,7 @@ export class DatacartComponent implements OnInit, OnDestroy {
         zip.downloadInstance = null;
         zip.downloadProgress = 0;
         zip.downloadStatus = "cancelled";
+        this.downloadService.setDownloadStatus(zip, this.dataFiles, "cancelled");
         this.downloadService.decreaseNumberOfDownloading("datacart");
     }
 
@@ -1057,11 +1081,48 @@ export class DatacartComponent implements OnInit, OnDestroy {
     /**
     * Return "download" button color based on download status
     **/
-    getDownloadBtnColor(rowData: any) {
-        if (rowData.downloadStatus == 'downloaded')
-            return 'green';
+    getDownloadStatusColor(rowData: any) {
+        let returnColor = '#1E6BA1';
 
-        return '#1E6BA1';
+        switch (rowData.downloadStatus) {
+            case 'downloaded':
+                {
+                    returnColor = 'green';
+                    break;
+                }
+            case 'downloading':
+                {
+                    returnColor = '#00ace6';
+                    break;
+                }
+            case 'warning':
+                {
+                    returnColor = 'darkorange';
+                    break;
+                }
+            case 'cancelled':
+                {
+                    returnColor = 'darkorange';
+                    break;
+                }
+            case 'failed':
+                {
+                    returnColor = 'darkorange';
+                    break;
+                }
+            case 'error':
+                {
+                    returnColor = 'red';
+                    break;
+                }
+            default:
+                {
+                    //statements; 
+                    break;
+                }
+        }
+
+        return returnColor;
     }
 
     /**
@@ -1108,26 +1169,70 @@ export class DatacartComponent implements OnInit, OnDestroy {
      * Return row background color
      * @param i - row number
      */
-    getBackColor(i: number) 
-    {
-        if(i % 2 != 0) return 'rgb(231, 231, 231)';
+    getBackColor(i: number) {
+        if (i % 2 != 0) return 'rgb(231, 231, 231)';
         else return 'white';
     }
 
     /**
      * Construct email body for error reporting
-     * @param zip - bundle download zip object
      */
-    getEmailBody(zip: any)
-    {
+    getEmailBody() {
         let dateTime = new Date();
+        let emaibody = this.emailBody;
+        if(!emaibody)
+        {
+            emaibody = this.emailBodyBase + 'Time: ' + dateTime.toString() + '%0D%0A%0D%0A';
+        }
 
-        let emaibody = this.emailBodyBase
-        + 'URL:' + zip.downloadUrl + '%0D%0A' 
-        + 'Time: ' + dateTime.toString() + '%0D%0A%0D%0A'
-        + 'Details:%0D%0A' + JSON.stringify(zip.bundle);
+        for (let zip of this.zipData) 
+        {
+            if(zip.downloadStatus == 'error')
+            {
+                emaibody += '%0D%0A%0D%0A'+ 'Zip error details:%0D%0A' + JSON.stringify(zip.bundle);
+            }
+        }
 
         return emaibody;
+    }
+
+    /**
+     * Clear "downloading" and "pending" status of given tree node
+     **/
+    clearDownloadingStatus() {
+        for (let dataFile of this.dataFiles) {
+            this.clearTreeByDownloadStatus(dataFile);
+        }
+    }
+
+    clearTreeByDownloadStatus(element) {
+        if (element.data.isLeaf && (element.data.downloadStatus == 'downloading' || element.data.downloadStatus == 'pending')) {
+            element.data.downloadStatus = null;
+        }
+
+        for (let i = 0; i < element.children.length; i++) {
+            this.clearTreeByDownloadStatus(element.children[i]);
+        }
+    }
+
+    /**
+     * 
+     */
+    markUnhandledFiles() {
+        for (let unhandledFile of this.bundlePlanUnhandledFiles) {
+            let resFilePath = unhandledFile.filePath.substring(unhandledFile.filePath.indexOf('/'));
+            for (let dataFile of this.dataFiles) {
+                let node = this.downloadService.searchTreeByfilePath(dataFile, resFilePath);
+                if (node != null) {
+                    node.data.downloadStatus = 'failed';
+                    node.data.filePath = unhandledFile.filePath;
+                    node.data.downloadUrl = unhandledFile.downloadUrl;
+                    node.data.message = unhandledFile.message;
+                    this.cartService.updateCartItemDownloadStatus(node.data['cartId'], 'failed');
+                    break;
+                }
+            }
+        }
     }
 }
 

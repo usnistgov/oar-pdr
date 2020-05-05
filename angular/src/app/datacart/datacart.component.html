@@ -1,4 +1,42 @@
-<div id="title">Download Manager</div>
+<!-- Top banner -->
+<div class="top-banner" [ngStyle]="{ 'background-image': 'url(' + imageURL + ')'}">
+    <div class="inner-box">
+        <span style="font-size: xx-large;" class="top-banner-text">
+            <i class="faa faa-cloud-download faa-lg" style="padding-right: .5em;"></i><label>Download Manager</label>
+        </span>
+
+        <!-- Control buttons -->
+        <div class="top-banner-btns">
+            <button type="button" (click)="downloadAllFilesFromAPI()" pButton type="submit"
+                [ngStyle]="{'margin-right':'1em','width':'max-content','height':'2.5em','background-color':'#307F38'}"
+                [disabled]="selectedFileCount==0">
+                <i class="faa faa-download faa-1x icon-white" style="color: #fff;"></i>
+                Download Selected
+                <span class="w3-circle button-badge"
+                    [ngStyle]="{'color':'#307F38'}">&nbsp;{{selectedFileCount}}&nbsp;</span>
+            </button>
+
+            <button type="button" (click)="removeByDownloadStatus()" pButton type="submit"
+                style="margin-right:1em;width:max-content; height:2.5em; background-color:rgb(82, 82, 82);"
+                [disabled]="noFileDownloaded">
+                <i class="faa faa-trash faa-1x icon-white" style="color: #fff;"></i>
+                Remove downloaded
+                <span class="w3-circle button-badge"
+                    [ngStyle]="{'color':getDownloadedColor(),'background-color':getDownloadedBkColor()}">&nbsp;{{totalDownloaded}}&nbsp;</span>
+            </button>
+
+            <button type="button" (click)="removeByDataId()" pButton type="submit"
+                style="width:max-content; height:2.5em; background-color:rgb(82, 82, 82);"
+                [disabled]="selectedFileCount==0">
+                <i class="faa faa-trash faa-1x icon-white" style="color: #fff;"></i>
+                Remove selected
+                <span class="w3-circle button-badge"
+                    [ngStyle]="{'color':'rgb(82, 82, 82)'}">&nbsp;{{selectedFileCount}}&nbsp;</span>
+            </button>
+        </div>
+    </div>
+</div>
+
 <div id="current-task" *ngIf="showCurrentTask">
     <div id="current-task-detail">
         <p-progressSpinner [style]="{'width': '25px', 'height': '25px', 'padding-right':'0.5em', 'padding-top': '0em'}">
@@ -7,42 +45,9 @@
     </div>
 </div>
 
-<!-- Display message returned from bundle plan if any -->
-<div class="full-span">
-    <div style="justify-content: space-between;">
-        <div *ngIf="bundlePlanStatus != 'complete' && bundlePlanMessage" class="title-line">
-            <!-- Icon button to show/hide bundle message details -->
-            <span *ngIf="bundlePlanStatus != 'internal error'" (click)="showMessageBlock = !showMessageBlock">
-                <i *ngIf="!showMessageBlock" class="faa faa-arrow-circle-down"
-                    [ngStyle]="{'color':messageColor,'cursor':'pointer','margin':'0 .5em'}" data-toggle="tooltip"
-                    title="Show details"></i>
-                <i *ngIf="showMessageBlock" class="faa faa-arrow-circle-up faa-1x icon-white"
-                    [ngStyle]="{'color':messageColor,'cursor':'pointer','margin':'0 .5em'}" data-toggle="tooltip"
-                    title="Hide details"></i>
-            </span>
-            <!-- http error -->
-            <span *ngIf="bundlePlanStatus == 'internal error';else no_error" [ngStyle]="{'color':messageColor}">
-                Ooops! There was a problem getting the data you need. Please contact us at <a
-                    href="mailto:datasupport@nist.gov?subject={{emailSubject}}&body={{emailBody}}"
-                    (click)="gaService.gaTrackEvent('Email', $event, 'AskHelp', 'mailto:datasupport@nist.gov')">datasupport@nist.gov</a>
-                to report the problem. If possible, include the string "PDR: Error getting download plan" in your email
-                report.</span>
-            <ng-template #no_error>
-                <span [ngStyle]="{'color':getColor(), 'padding-right':'.5em'}">{{broadcastMessage}}</span>
-                <!-- Server returned ok with certain error -->
-                <span *ngIf="bundlePlanStatus == 'error'">
-                    For tech support, please email <a
-                        href="mailto:datasupport@nist.gov?subject={{emailSubject}}&body={{emailBody}}"
-                        (click)="gaService.gaTrackEvent('Email', $event, 'AskHelp', 'mailto:datasupport@nist.gov')">datasupport@nist.gov
-                        <i class="faa faa-envelope" data-toggle="tooltip" title="Email tech support"></i></a>
-                </span>
-            </ng-template>
-        </div>
-    </div>
-</div>
-
 <!-- Display bundle message details -->
-<div class="full-span" *ngIf="showMessageBlock">
+<div class="full-span"
+    *ngIf="bundlePlanStatus == 'error' || bundlePlanStatus == 'internal error' || bundlePlanStatus === 'warnings'">
     <div class="header-orange" data-toggle="tooltip" title="Bundle message details">
         <span style="margin-left: .5em;" *ngIf="bundlePlanMessage" (click)="showMessage = !showMessage">
             <i *ngIf="showMessage; else hideMessage" class="faa faa-arrow-circle-up faa-1x icon-white"
@@ -53,39 +58,28 @@
             </ng-template>
         </span>
         Message
+        <span
+            *ngIf="(bundlePlanStatus == 'error' || bundlePlanStatus == 'warnings') && bundlePlanStatus != 'internal error'"
+            style="float: right;font-weight: lighter; margin-right: .5em;">
+            For tech support, please email <a style="color: rgb(255, 248, 182);"
+                href="mailto:datasupport@nist.gov?subject={{emailSubject}}&body={{getEmailBody()}}"
+                (click)="gaService.gaTrackEvent('Email', $event, 'AskHelp', 'mailto:datasupport@nist.gov')">datasupport@nist.gov
+                <!-- <i class="faa faa-envelope" data-toggle="tooltip" title="Email tech support"></i> -->
+            </a>
+        </span>
     </div>
     <div *ngIf="showMessage">
-        <div [ngStyle]="{'width': '100%', 'background-color': getBackColor(i)}"
-            *ngFor="let msg of bundlePlanMessage; let i =index">
-            {{msg}}
-        </div>
-    </div>
-
-    <!-- Show unhandled files if any -->
-    <!-- header -->
-    <div class="header-orange" data-toggle="tooltip" title="Unhandled Files">
-        <span class="span30">
-            <span *ngIf="bundlePlanUnhandledFiles" (click)="showUnhandledFiles = !showUnhandledFiles">
-                <i *ngIf="showUnhandledFiles; else hideUnhandledFiles" class="faa faa-arrow-circle-up faa-1x icon-white"
-                    style="cursor: pointer;color: rgb(255, 255, 255);" data-toggle="tooltip" title="Collapse All"></i>
-                <ng-template #hideUnhandledFiles>
-                    <i class="faa faa-arrow-circle-down faa-1x icon-white"
-                        style="cursor: pointer;color: rgb(255, 255, 255);" data-toggle="tooltip" title="Expand All"></i>
-                </ng-template>
-            </span>
-            File Path
-        </span>
-        <span class="span30">Download Url</span>
-        <span class="span-end" style="width: 40%;">Detail message</span>
-    </div>
-    <!-- body -->
-    <div class="unhandled-files" *ngIf="showUnhandledFiles">
-        <div [ngStyle]="{'width': '100%', 'background-color': getBackColor(i)}" style="width: 100%;"
-            *ngFor="let file of bundlePlanUnhandledFiles; let i=index">
-            <span class="span30">{{file.filePath}}</span>
-            <span class="span30">{{file.downloadUrl}}</span>
-            <span class="span-end" style="width: 40%;">{{file.message}}</span>
-        </div>
+        <span *ngIf="bundlePlanStatus == 'internal error';else no_internal_error" [ngStyle]="{'color':messageColor}">
+            Ooops! There was a problem getting the data you need. Please contact us at <a
+                href="mailto:datasupport@nist.gov?subject={{emailSubject}}&body={{getEmailBody()}}"
+                (click)="gaService.gaTrackEvent('Email', $event, 'AskHelp', 'mailto:datasupport@nist.gov')">datasupport@nist.gov</a>
+            to report the problem. If possible, include the string "PDR: Error getting download plan" in your email
+            report.</span>
+        <ng-template #no_internal_error>
+            <div class="message-block" *ngFor="let msg of bundlePlanMessage; let i =index">
+                {{msg}}
+            </div>
+        </ng-template>
     </div>
 </div>
 
@@ -137,12 +131,8 @@
                     </div>
                     <ng-template #download_error>
                         <div style="display:inline-block;margin-left: .5em;font-size: 0.8em; color: red">
-                            <i class="faa faa-warning"
-                                [ngStyle]="{'padding-right':'.5em', 'margin-top':'8px'}"></i>
-                                Error. 
-                            <a href="mailto:datasupport@nist.gov?subject=PDR: Error downloading zip file&body={{getEmailBody(zip)}}"
-                                (click)="gaService.gaTrackEvent('Email', $event, 'AskHelp', 'mailto:datasupport@nist.gov')">Send details to tech support 
-                                <i class="faa faa-envelope" data-toggle="tooltip" title="Email tech support"></i></a>
+                            <i class="faa faa-warning" [ngStyle]="{'padding-right':'.5em', 'margin-top':'8px'}"></i>
+                            Error.
                         </div>
                     </ng-template>
                     <i *ngIf="zip.downloadStatus != null" class="faa faa-repeat"
@@ -152,34 +142,6 @@
             </span>
         </div>
     </div>
-</div>
-<!-- Control buttons -->
-<div style="padding-left: 3%; padding-right: 3%; width: 100%;margin-bottom:0.5em;text-align: right;">
-    <button type="button" (click)="downloadAllFilesFromAPI()" pButton type="submit"
-        [ngStyle]="{'margin-right':'1em','width':'max-content','height':'2.5em','background-color':getButtonColor()}"
-        [disabled]="selectedFileCount==0">
-        <i class="faa faa-download faa-1x icon-white" style="color: #fff;"></i>
-        Download Selected
-        <span class="w3-circle button-badge"
-            [ngStyle]="{'color':getButtonColor()}">&nbsp;{{selectedFileCount}}&nbsp;</span>
-    </button>
-
-    <button type="button" (click)="removeByDownloadStatus()" pButton type="submit"
-        style="margin-right:1em;width:max-content; height:2.5em; background-color:rgb(82, 82, 82);"
-        [disabled]="noFileDownloaded">
-        <i class="faa faa-trash faa-1x icon-white" style="color: #fff;"></i>
-        Remove downloaded
-        <span class="w3-circle button-badge"
-            [ngStyle]="{'color':getDownloadedColor(),'background-color':getDownloadedBkColor()}">&nbsp;{{totalDownloaded}}&nbsp;</span>
-    </button>
-
-    <button type="button" (click)="removeByDataId()" pButton type="submit"
-        style="width:max-content; height:2.5em; background-color:rgb(82, 82, 82);" [disabled]="selectedFileCount==0">
-        <i class="faa faa-trash faa-1x icon-white" style="color: #fff;"></i>
-        Remove selected
-        <span class="w3-circle button-badge"
-            [ngStyle]="{'color':'rgb(82, 82, 82)'}">&nbsp;{{selectedFileCount}}&nbsp;</span>
-    </button>
 </div>
 
 <!-- Display data file tree table -->
@@ -211,11 +173,16 @@
                 </th>
                 <th [ngStyle]="typeStyleHeader()" ttResizableColumn>Media Type</th>
                 <th [ngStyle]="sizeStyleHeader()" ttResizableColumn>Size</th>
+                <th [ngStyle]="actionStyleHeader()" ttResizableColumn>
+                    <i class="faa faa-cloud-download" aria-hidden="true" data-toggle="tooltip" title="Actions"></i>
+                </th>
                 <th [ngStyle]="statusStyleHeader()" ttResizableColumn>
-                    <i class="faa faa-recycle faa-1x icon-white" (click)="clearDownloadStatus()"
+                    <!-- <i class="faa faa-recycle faa-1x icon-white" (click)="clearDownloadStatus()"
                         style="cursor: pointer;color: rgb(255, 255, 255);padding-right:0.5em;" data-toggle="tooltip"
-                        title="Reset Download Status"></i>
+                        title="Reset Download Status"></i> -->
                     Status
+                    <div class="badge status-reset-button" (click)="clearDownloadStatus()" data-toggle="tooltip"
+                        title="Reset status">Reset</div>
                 </th>
             </tr>
         </ng-template>
@@ -241,21 +208,37 @@
                 <td [ngStyle]="sizeStyle()">
                     <span *ngIf="rowData.isLeaf">{{formatBytes(rowData.fileSize)}}</span>
                 </td>
-                <td [ngStyle]="statusStyle()">
+                <td [ngStyle]="sizeStyle()">
                     <div *ngIf="rowData.isLeaf;else space_holder" style="display:inline;">
-                        <a *ngIf="rowData.downloadStatus != 'downloading'" href='{{rowData.downloadUrl}}'
-                            target='_blank' download="download" data-toggle="tooltip" title="Direct download"
-                            aria-label="Direct download">
-                            <i class="faa faa-download" [ngStyle]="{'color':getDownloadBtnColor(rowData)}"
+                        <a href='{{rowData.downloadUrl}}' target='_blank' download="download" data-toggle="tooltip"
+                            title="Direct download" aria-label="Direct download">
+                            <i class="faa faa-download" *ngIf="rowData.downloadStatus != 'downloading'"
                                 aria-hidden="true" (click)="setFileDownloaded(rowData)"></i>
+                            <i class="faa faa-download blinking" *ngIf="rowData.downloadStatus == 'downloading'"
+                                aria-hidden="true"></i>
                         </a>
                     </div>
                     <ng-template #space_holder>
                         <div style="display:inline;padding-right: 0.4em;">&nbsp;&nbsp;</div>
                     </ng-template>
-                    <div id="downloadstatus" *ngIf="rowData.isLeaf && rowData.downloadStatus != 'downloading'"
-                        style="display:inline;">
-                        {{rowData.downloadStatus}}
+                </td>
+                <td [ngStyle]="statusStyle()">
+                    <div id="downloadstatus" *ngIf="rowData.isLeaf" style="display:inline;"
+                        [ngStyle]="{'color':getDownloadStatusColor(rowData)}">
+                        <!-- <i class="faa faa-check" *ngIf="rowData.downloadStatus == 'downloaded'"
+                            aria-hidden="true" data-toggle="tooltip" title="{{rowData.downloadStatus}}">downloaded</i> -->
+                        <span *ngIf="rowData.downloadStatus == 'downloaded'">downloaded</span>
+                        <!-- <span *ngIf="!rowData.downloadStatus">Available</span> -->
+                        <p-progressSpinner *ngIf="rowData.downloadStatus == 'downloading'"
+                            [style]="{width: '12px', height: '12px', 'margin-right': '.5em'}"></p-progressSpinner>
+                        <span
+                            *ngIf="rowData.downloadStatus == 'error' || rowData.downloadStatus == 'failed'; else normal"
+                            style="cursor: pointer;"
+                            (click)="openDetails($event,rowData,op4) "><u>{{rowData.downloadStatus}}</u></span>
+                        <ng-template #normal>
+                            <span
+                                *ngIf="rowData.downloadStatus && rowData.downloadStatus != 'downloaded'">{{rowData.downloadStatus}}</span>
+                        </ng-template>
                     </div>
                 </td>
             </tr>
@@ -298,6 +281,21 @@
                     <span *ngIf="!fileNode.description"><i>No Description Available</i></span>
                     <span *ngIf="fileNode.description">{{ fileNode.description }} </span>
                 </div>
+            </div>
+        </div>
+    </div>
+</p-overlayPanel>
+
+<!-- Popup dialog for download details -->
+<p-overlayPanel class="fileDialog" #op4 [dismissable]="true" [showCloseIcon]="true"
+    [style]="{'display':'inline-block','position':'related','left':'50%','top':'80%'}" appendToBody=true>
+    <div class="filecard" [ngStyle]="{'max-width':getDialogWidth()}">
+        <div class="ui-g filesection">
+            <div *ngIf="fileNode" class="ui-g-12 ui-md-12 ui-lg-12 ui-sm-10">
+                <div class="message-details">Message details</div>
+                <div>File path: {{fileNode.filePath}}</div>
+                <div>Download URL: {{fileNode.downloadUrl}}</div>
+                <div>Message: {{fileNode.message}}</div>
             </div>
         </div>
     </div>
