@@ -63,6 +63,7 @@ public class WebSecurityConfig {
 		protected void configure(HttpSecurity security) throws Exception {
 			logger.info("#### SAML authentication and authorization service is disabled in this mode. #####");
 			security.httpBasic().disable();
+			security.cors().and().csrf().disable();
 		}
 
 		/**
