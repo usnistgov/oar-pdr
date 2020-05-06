@@ -321,14 +321,14 @@
 
 <!-- Popup dialog for download details -->
 <p-overlayPanel class="fileDialog" #op4 [dismissable]="true" [showCloseIcon]="true"
-    [style]="{'display':'inline-block','position':'related','left':'50%','top':'80%'}" appendToBody=true>
-    <div class="filecard" [ngStyle]="{'max-width':getDialogWidth()}">
+[style]="{'display':'inline-block','position':'related','left':'50%','top':'80%','max-width':'400px'}" appendToBody=true>
+    <div class="filecard">
         <div class="ui-g filesection">
             <div *ngIf="fileNode" class="ui-g-12 ui-md-12 ui-lg-12 ui-sm-10">
                 <div class="message-details">Message details</div>
-                <div>File path: {{fileNode.filePath}}</div>
-                <div>Download URL: {{fileNode.downloadUrl}}</div>
-                <div>Message: {{fileNode.message}}</div>
+                <div class="long-text">File path: {{fileNode.filePath}}</div>
+                <div class="long-text">Download URL: {{fileNode.downloadUrl}}</div>
+                <div class="long-text">Message: {{fileNode.message}}</div>
             </div>
         </div>
     </div>
