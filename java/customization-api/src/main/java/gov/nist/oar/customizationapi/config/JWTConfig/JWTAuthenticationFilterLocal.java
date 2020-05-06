@@ -50,6 +50,12 @@ public class JWTAuthenticationFilterLocal extends AbstractAuthenticationProcessi
 
 		logger.info("## This filter is created for local authentication/authorization testing. ## ");
 		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+		if (auth == null) {
+			logger.error("Unauhenticated user: Authentication is null.");
+			this.unsuccessfulAuthentication(request, response,
+					new BadCredentialsException("Unauthenticated user: can not extract user information."));
+			return null;
+		}
 		AuthenticatedUserDetails pauth = (AuthenticatedUserDetails) auth.getPrincipal();
 		
 		String token = request.getHeader(Header_Authorization_Token);
