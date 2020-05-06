@@ -191,13 +191,14 @@
 }
 
 #current-task {
+    display: inline-block;
     width:100%; 
     margin-bottom: 1em;
 }
 
 #current-task-detail {
     text-align: center; 
-    margin: 0 auto; 
+    margin: auto; 
     font-size: 14pt;
 }
 
@@ -319,13 +320,17 @@ tr {
     margin: auto;
 }
 
-.top-banner-btns {
-    float:right;
+.control-btns {
     padding-left: 3%; 
     margin-top:1em;
     text-align: right; 
+    height: fit-content;
 }
 
 button:disabled{
     opacity: .7;
+}
+
+.long-text {
+    overflow-wrap: break-word;
 }

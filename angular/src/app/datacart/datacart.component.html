@@ -5,8 +5,8 @@
             <i class="faa faa-cloud-download faa-lg" style="padding-right: .5em;"></i><label>Download Manager</label>
         </span>
 
-        <!-- Control buttons -->
-        <div class="top-banner-btns">
+        <!-- Control buttons for large screen -->
+        <div class="control-btns" *ngIf="screenWidth > screenSizeBreakPoint" style="float: right;">
             <button type="button" (click)="downloadAllFilesFromAPI()" pButton type="submit"
                 [ngStyle]="{'margin-right':'1em','width':'max-content','height':'2.5em','background-color':'#307F38'}"
                 [disabled]="selectedFileCount==0">
@@ -37,6 +37,68 @@
     </div>
 </div>
 
+<!-- Control buttons for small screen -->
+<!-- <div style="width: 100%; text-align: center;" >
+    <div class="full-span" style="display: inline-block; margin-bottom:.5em; text-align: right;">
+        <button type="button" (click)="downloadAllFilesFromAPI()" pButton type="submit"
+            [ngStyle]="{'margin-right':'1em','width':'max-content','height':'2.5em','background-color':'#307F38'}"
+            [disabled]="selectedFileCount==0">
+            <i class="faa faa-download faa-1x icon-white" style="color: #fff;"></i>
+            Download Selected
+            <span class="w3-circle button-badge"
+                [ngStyle]="{'color':'#307F38'}">&nbsp;{{selectedFileCount}}&nbsp;</span>
+        </button>
+
+        <button type="button" (click)="removeByDownloadStatus()" pButton type="submit"
+            style="margin-right:1em;width:max-content; height:2.5em; background-color:rgb(82, 82, 82);"
+            [disabled]="noFileDownloaded">
+            <i class="faa faa-trash faa-1x icon-white" style="color: #fff;"></i>
+            Remove downloaded
+            <span class="w3-circle button-badge"
+                [ngStyle]="{'color':getDownloadedColor(),'background-color':getDownloadedBkColor()}">&nbsp;{{totalDownloaded}}&nbsp;</span>
+        </button>
+
+        <button type="button" (click)="removeByDataId()" pButton type="submit"
+            style="width:max-content; height:2.5em; background-color:rgb(82, 82, 82);"
+            [disabled]="selectedFileCount==0">
+            <i class="faa faa-trash faa-1x icon-white" style="color: #fff;"></i>
+            Remove selected
+            <span class="w3-circle button-badge"
+                [ngStyle]="{'color':'rgb(82, 82, 82)'}">&nbsp;{{selectedFileCount}}&nbsp;</span>
+        </button>
+    </div>
+</div> -->
+
+<div class="full-span" *ngIf="screenWidth <= screenSizeBreakPoint" style="margin-bottom:.5em;">
+    <div class="control-btns">
+        <button type="button" (click)="downloadAllFilesFromAPI()" pButton type="submit"
+            [ngStyle]="{'margin-right':'1em','width':'max-content','height':'2.5em','background-color':'#307F38'}"
+            [disabled]="selectedFileCount==0">
+            <i class="faa faa-download faa-1x icon-white" style="color: #fff;"></i>
+            Download Selected
+            <span class="w3-circle button-badge"
+                [ngStyle]="{'color':'#307F38'}">&nbsp;{{selectedFileCount}}&nbsp;</span>
+        </button>
+
+        <button type="button" (click)="removeByDownloadStatus()" pButton type="submit"
+            style="margin-right:1em;width:max-content; height:2.5em; background-color:rgb(82, 82, 82);"
+            [disabled]="noFileDownloaded">
+            <i class="faa faa-trash faa-1x icon-white" style="color: #fff;"></i>
+            Remove downloaded
+            <span class="w3-circle button-badge"
+                [ngStyle]="{'color':getDownloadedColor(),'background-color':getDownloadedBkColor()}">&nbsp;{{totalDownloaded}}&nbsp;</span>
+        </button>
+
+        <button type="button" (click)="removeByDataId()" pButton type="submit"
+            style="width:max-content; height:2.5em; background-color:rgb(82, 82, 82);"
+            [disabled]="selectedFileCount==0">
+            <i class="faa faa-trash faa-1x icon-white" style="color: #fff;"></i>
+            Remove selected
+            <span class="w3-circle button-badge"
+                [ngStyle]="{'color':'rgb(82, 82, 82)'}">&nbsp;{{selectedFileCount}}&nbsp;</span>
+        </button>
+    </div>
+</div>
 <div id="current-task" *ngIf="showCurrentTask">
     <div id="current-task-detail">
         <p-progressSpinner [style]="{'width': '25px', 'height': '25px', 'padding-right':'0.5em', 'padding-top': '0em'}">
@@ -145,112 +207,114 @@
 </div>
 
 <!-- Display data file tree table -->
-<div>
-    <p-treeTable *ngIf="isVisible" [resizableColumns]="true" selectionMode="checkbox" [value]="dataFiles"
-        (onNodeSelect)="dataFileCount()" (onNodeUnselect)="dataFileCount()" [(selection)]="selectedData"
-        [style]="{ 'padding-left':'3%','padding-right':'3%','padding-bottom':'3%', 'color':'black'}">
-        <ng-template pTemplate="header">
-            <tr>
-                <th [ngStyle]="titleStyleHeader()" ttResizableColumn>
-                    <span (click)="expandToLevel(dataFiles, !isExpanded, null)" style="padding-right:0.5em;">
-                        <i *ngIf="!isExpanded" class="faa faa-arrow-circle-down faa-1x icon-white"
-                            style="cursor: pointer;color: rgb(255, 255, 255);" data-toggle="tooltip"
-                            title="Expand All"></i>
-                        <i *ngIf="isExpanded" class="faa faa-arrow-circle-up faa-1x icon-white"
-                            style="cursor: pointer;color: rgb(255, 255, 255);" data-toggle="tooltip"
-                            title="Collapse All"></i>
-                    </span>
-                    <span (click)="showZipFilesNmaes = !showZipFilesNmaes" style="padding-right:0.5em;"
-                        *ngIf="zipData.length>0">
-                        <i *ngIf="!showZipFilesNmaes" class="faa faa-eye faa-1x icon-white"
-                            style="cursor: pointer;color: rgb(255, 255, 255);" data-toggle="tooltip"
-                            title="Show Zip Files"></i>
-                        <i *ngIf="showZipFilesNmaes" class="faa faa-eye-slash faa-1x icon-white"
-                            style="cursor: pointer;color: rgb(255, 255, 255);" data-toggle="tooltip"
-                            title="Hide Zip Files"></i>
-                    </span>
-                    Name
-                </th>
-                <th [ngStyle]="typeStyleHeader()" ttResizableColumn>Media Type</th>
-                <th [ngStyle]="sizeStyleHeader()" ttResizableColumn>Size</th>
-                <th [ngStyle]="actionStyleHeader()" ttResizableColumn>
-                    <i class="faa faa-cloud-download" aria-hidden="true" data-toggle="tooltip" title="Actions"></i>
-                </th>
-                <th [ngStyle]="statusStyleHeader()" ttResizableColumn>
-                    <!-- <i class="faa faa-recycle faa-1x icon-white" (click)="clearDownloadStatus()"
+<div style="display: inline-block; margin: auto;">
+    <div class="full-span" style="width: 94%;">
+        <p-treeTable *ngIf="isVisible" [resizableColumns]="true" selectionMode="checkbox" [value]="dataFiles"
+            (onNodeSelect)="dataFileCount()" (onNodeUnselect)="dataFileCount()" [(selection)]="selectedData"
+            [style]="{'margin':'auto', 'padding-bottom':'3%', 'color':'black'}">
+            <ng-template pTemplate="header">
+                <tr>
+                    <th [ngStyle]="titleStyleHeader()" ttResizableColumn>
+                        <span (click)="expandToLevel(dataFiles, !isExpanded, null)" style="padding-right:0.5em;">
+                            <i *ngIf="!isExpanded" class="faa faa-arrow-circle-down faa-1x icon-white"
+                                style="cursor: pointer;color: rgb(255, 255, 255);" data-toggle="tooltip"
+                                title="Expand All"></i>
+                            <i *ngIf="isExpanded" class="faa faa-arrow-circle-up faa-1x icon-white"
+                                style="cursor: pointer;color: rgb(255, 255, 255);" data-toggle="tooltip"
+                                title="Collapse All"></i>
+                        </span>
+                        <span (click)="showZipFilesNmaes = !showZipFilesNmaes" style="padding-right:0.5em;"
+                            *ngIf="zipData.length>0">
+                            <i *ngIf="!showZipFilesNmaes" class="faa faa-eye faa-1x icon-white"
+                                style="cursor: pointer;color: rgb(255, 255, 255);" data-toggle="tooltip"
+                                title="Show Zip Files"></i>
+                            <i *ngIf="showZipFilesNmaes" class="faa faa-eye-slash faa-1x icon-white"
+                                style="cursor: pointer;color: rgb(255, 255, 255);" data-toggle="tooltip"
+                                title="Hide Zip Files"></i>
+                        </span>
+                        Name
+                    </th>
+                    <th [ngStyle]="typeStyleHeader()" ttResizableColumn>Media Type</th>
+                    <th [ngStyle]="sizeStyleHeader()" ttResizableColumn>Size</th>
+                    <th [ngStyle]="actionStyleHeader()" ttResizableColumn>
+                        <i class="faa faa-cloud-download" aria-hidden="true" data-toggle="tooltip" title="Actions"></i>
+                    </th>
+                    <th [ngStyle]="statusStyleHeader()" ttResizableColumn>
+                        <!-- <i class="faa faa-recycle faa-1x icon-white" (click)="clearDownloadStatus()"
                         style="cursor: pointer;color: rgb(255, 255, 255);padding-right:0.5em;" data-toggle="tooltip"
                         title="Reset Download Status"></i> -->
-                    Status
-                    <div class="badge status-reset-button" (click)="clearDownloadStatus()" data-toggle="tooltip"
-                        title="Reset status">Reset</div>
-                </th>
-            </tr>
-        </ng-template>
-        <ng-template let-rowNode let-rowData="rowData" let-i="rowIndex" pTemplate="body">
-            <tr style="background: #FFFFFF">
-                <td [ngStyle]="titleStyle()">
-                    <p-treeTableToggler [rowNode]="rowNode"></p-treeTableToggler>
-                    &nbsp;<p-treeTableCheckbox [value]="rowNode"></p-treeTableCheckbox>
-                    <span *ngIf="rowData.isLeaf">
-                        <a (click)="openDetails($event,rowData,op3) " style="color: #1471AE; cursor: pointer;"
-                            data-toggle="tooltip" title="Click for more details">
-                            {{rowData.resTitle}} </a>
-                    </span>
-                    <span *ngIf="!rowData.isLeaf">
-                        {{rowData.resTitle}}
-                    </span>
-                    <span *ngIf="showZipFilesNmaes" style="color:grey;margin-left: 1em;font-style: italic;">
-                        {{rowData.zipFile}}</span>
-                </td>
-                <td [ngStyle]="typeStyle()">
-                    <span>{{rowData.mediatype}}</span>
-                </td>
-                <td [ngStyle]="sizeStyle()">
-                    <span *ngIf="rowData.isLeaf">{{formatBytes(rowData.fileSize)}}</span>
-                </td>
-                <td [ngStyle]="sizeStyle()">
-                    <div *ngIf="rowData.isLeaf;else space_holder" style="display:inline;">
-                        <a href='{{rowData.downloadUrl}}' target='_blank' download="download" data-toggle="tooltip"
-                            title="Direct download" aria-label="Direct download">
-                            <i class="faa faa-download" *ngIf="rowData.downloadStatus != 'downloading'"
-                                aria-hidden="true" (click)="setFileDownloaded(rowData)"></i>
-                            <i class="faa faa-download blinking" *ngIf="rowData.downloadStatus == 'downloading'"
-                                aria-hidden="true"></i>
-                        </a>
-                    </div>
-                    <ng-template #space_holder>
-                        <div style="display:inline;padding-right: 0.4em;">&nbsp;&nbsp;</div>
-                    </ng-template>
-                </td>
-                <td [ngStyle]="statusStyle()">
-                    <div id="downloadstatus" *ngIf="rowData.isLeaf" style="display:inline;"
-                        [ngStyle]="{'color':getDownloadStatusColor(rowData)}">
-                        <!-- <i class="faa faa-check" *ngIf="rowData.downloadStatus == 'downloaded'"
-                            aria-hidden="true" data-toggle="tooltip" title="{{rowData.downloadStatus}}">downloaded</i> -->
-                        <span *ngIf="rowData.downloadStatus == 'downloaded'">downloaded</span>
-                        <!-- <span *ngIf="!rowData.downloadStatus">Available</span> -->
-                        <p-progressSpinner *ngIf="rowData.downloadStatus == 'downloading'"
-                            [style]="{width: '12px', height: '12px', 'margin-right': '.5em'}"></p-progressSpinner>
-                        <span
-                            *ngIf="rowData.downloadStatus == 'error' || rowData.downloadStatus == 'failed'; else normal"
-                            style="cursor: pointer;"
-                            (click)="openDetails($event,rowData,op4) "><u>{{rowData.downloadStatus}}</u></span>
-                        <ng-template #normal>
-                            <span
-                                *ngIf="rowData.downloadStatus && rowData.downloadStatus != 'downloaded'">{{rowData.downloadStatus}}</span>
+                        Status
+                        <div class="badge status-reset-button" (click)="clearDownloadStatus()" data-toggle="tooltip"
+                            title="Reset status">Reset</div>
+                    </th>
+                </tr>
+            </ng-template>
+            <ng-template let-rowNode let-rowData="rowData" let-i="rowIndex" pTemplate="body">
+                <tr style="background: #FFFFFF">
+                    <td [ngStyle]="titleStyle()">
+                        <p-treeTableToggler [rowNode]="rowNode"></p-treeTableToggler>
+                        &nbsp;<p-treeTableCheckbox [value]="rowNode"></p-treeTableCheckbox>
+                        <span *ngIf="rowData.isLeaf">
+                            <a (click)="openDetails($event,rowData,op3) " style="color: #1471AE; cursor: pointer;"
+                                data-toggle="tooltip" title="Click for more details">
+                                {{rowData.resTitle}} </a>
+                        </span>
+                        <span *ngIf="!rowData.isLeaf">
+                            {{rowData.resTitle}}
+                        </span>
+                        <span *ngIf="showZipFilesNmaes" style="color:grey;margin-left: 1em;font-style: italic;">
+                            {{rowData.zipFile}}</span>
+                    </td>
+                    <td [ngStyle]="typeStyle()">
+                        <span>{{rowData.mediatype}}</span>
+                    </td>
+                    <td [ngStyle]="sizeStyle()">
+                        <span *ngIf="rowData.isLeaf">{{formatBytes(rowData.fileSize)}}</span>
+                    </td>
+                    <td [ngStyle]="sizeStyle()">
+                        <div *ngIf="rowData.isLeaf;else space_holder" style="display:inline;">
+                            <a href='{{rowData.downloadUrl}}' target='_blank' download="download" data-toggle="tooltip"
+                                title="Direct download" aria-label="Direct download">
+                                <i class="faa faa-download" *ngIf="rowData.downloadStatus != 'downloading'"
+                                    aria-hidden="true" (click)="setFileDownloaded(rowData)"></i>
+                                <i class="faa faa-download blinking" *ngIf="rowData.downloadStatus == 'downloading'"
+                                    aria-hidden="true"></i>
+                            </a>
+                        </div>
+                        <ng-template #space_holder>
+                            <div style="display:inline;padding-right: 0.4em;">&nbsp;&nbsp;</div>
                         </ng-template>
-                    </div>
-                </td>
-            </tr>
-        </ng-template>
-        <ng-template pTemplate="emptymessage">
-            <tr>
-                <td align="center" colspan="3">
-                    No records found
-                </td>
-            </tr>
-        </ng-template>
-    </p-treeTable>
+                    </td>
+                    <td [ngStyle]="statusStyle()">
+                        <div id="downloadstatus" *ngIf="rowData.isLeaf" style="display:inline;"
+                            [ngStyle]="{'color':getDownloadStatusColor(rowData)}">
+                            <!-- <i class="faa faa-check" *ngIf="rowData.downloadStatus == 'downloaded'"
+                            aria-hidden="true" data-toggle="tooltip" title="{{rowData.downloadStatus}}">downloaded</i> -->
+                            <span *ngIf="rowData.downloadStatus == 'downloaded'">downloaded</span>
+                            <!-- <span *ngIf="!rowData.downloadStatus">Available</span> -->
+                            <p-progressSpinner *ngIf="rowData.downloadStatus == 'downloading'"
+                                [style]="{width: '12px', height: '12px', 'margin-right': '.5em'}"></p-progressSpinner>
+                            <span
+                                *ngIf="rowData.downloadStatus == 'error' || rowData.downloadStatus == 'failed'; else normal"
+                                style="cursor: pointer;"
+                                (click)="openDetails($event,rowData,op4) "><u>{{rowData.downloadStatus}}</u></span>
+                            <ng-template #normal>
+                                <span
+                                    *ngIf="rowData.downloadStatus && rowData.downloadStatus != 'downloaded'">{{rowData.downloadStatus}}</span>
+                            </ng-template>
+                        </div>
+                    </td>
+                </tr>
+            </ng-template>
+            <ng-template pTemplate="emptymessage">
+                <tr>
+                    <td align="center" colspan="3">
+                        No records found
+                    </td>
+                </tr>
+            </ng-template>
+        </p-treeTable>
+    </div>
 </div>
 
 <!-- Popup dialog for file details -->

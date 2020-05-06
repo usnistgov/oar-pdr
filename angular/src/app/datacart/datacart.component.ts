@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, AfterViewInit, ElementRef, ViewChildren, Input, NgZone } from '@angular/core';
+import { Component, OnInit, OnDestroy, AfterViewInit, ElementRef, ViewChildren, Input, NgZone, HostListener } from '@angular/core';
 //import {Headers, RequestOptions, Response, ResponseContentType, URLSearchParams} from '@angular/common/http';
 import { HttpClientModule, HttpClient, HttpParams, HttpRequest, HttpEventType } from '@angular/common/http';
 import { ActivatedRoute } from '@angular/router';
@@ -136,6 +136,8 @@ export class DatacartComponent implements OnInit, OnDestroy {
     emailSubject: string;
     emailBody: string;
     imageURL: string;
+    screenWidth: number;
+    screenSizeBreakPoint: number;
     emailBodyBase: string = 'The information below describes an error that occurred while downloading data via the data cart. %0D%0A%0D%0A [From the PDR Team:  feel free to add additional information about the failure or your questions here.  Thanks for sending this message!] %0D%0A%0D%0A';
 
     /**
@@ -150,10 +152,12 @@ export class DatacartComponent implements OnInit, OnDestroy {
         private commonFunctionService: CommonFunctionService,
         private route: ActivatedRoute,
         private gaService: GoogleAnalyticsService,
-        ngZone: NgZone) {
+        ngZone: NgZone) 
+    {
         this.mobHeight = (window.innerHeight);
         this.mobWidth = (window.innerWidth);
         this.setWidth(this.mobWidth);
+        this.screenSizeBreakPoint = +this.cfg.get("screenSizeBreakPoint", "768");
 
         window.onresize = (e) => {
             ngZone.run(() => {
@@ -224,6 +228,22 @@ export class DatacartComponent implements OnInit, OnDestroy {
                 }
             }
         );
+    }
+
+    /**
+     *  Following functions detect screen size
+     */
+    @HostListener("window:resize", [])
+    public onResize() {
+        this.detectScreenSize();
+    }
+
+    public ngAfterViewInit() {
+        this.detectScreenSize();
+    }
+
+    private detectScreenSize() {
+        this.screenWidth = window.innerWidth;
     }
 
     /*
@@ -680,6 +700,7 @@ export class DatacartComponent implements OnInit, OnDestroy {
         }
 
         this.resetDownloadParams();
+        this.clearDownloadingStatus();
         this.isProcessing = false;
         this.showCurrentTask = false;
         this.showMessageBlock = false;
