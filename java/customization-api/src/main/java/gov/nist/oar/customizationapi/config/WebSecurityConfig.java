@@ -47,7 +47,8 @@ public class WebSecurityConfig {
 	private Logger logger = LoggerFactory.getLogger(WebSecurityConfig.class);
 
 	/**
-	 * The following configuration should get loaded only in local profile.
+	 * The following configuration should get loaded only in local profile. 
+	 * This is to test locally without connecting the identity server.
 	 * 
 	 * @author Deoyani Nandrekar-Heinis
 	 *
@@ -63,7 +64,6 @@ public class WebSecurityConfig {
 			security.formLogin().disable();
 			security.cors().and().csrf().disable();
 			security.authorizeRequests().antMatchers("/").permitAll();
-//			security.sessionManagement() .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 		}
 
 		/**
@@ -75,10 +75,9 @@ public class WebSecurityConfig {
 					"/configuration/security", "/swagger-ui.html", "/webjars/**", "/pdr/lp/draft/**");
 		}
 	}
-	
-	
+
 	/**
-	 * Rest security configuration for rest api
+	 * This bean is created only in local profile this avoids using external SAML id server.
 	 */
 	@Configuration
 	@Profile({ "local" })
@@ -96,12 +95,8 @@ public class WebSecurityConfig {
 			logger.info("#### RestApiSecurityConfig HttpSecurity for REST /pdr/lp/editor/ endpoints ###");
 			http.addFilterBefore(new JWTAuthenticationFilterLocal(apiMatcher, super.authenticationManager()),
 					UsernamePasswordAuthenticationFilter.class);
+
 			http.formLogin().disable();
-			
-			//http.authorizeRequests().antMatchers(HttpMethod.PATCH, apiMatcher).permitAll();
-			//http.authorizeRequests().antMatchers(HttpMethod.GET, apiMatcher).permitAll();
-			//http.authorizeRequests().antMatchers(HttpMethod.DELETE, apiMatcher).permitAll();
-			//http.authorizeRequests().antMatchers(apiMatcher).authenticated().and()
 			http.httpBasic().and().csrf().disable();
 
 		}
@@ -117,6 +112,7 @@ public class WebSecurityConfig {
 	 */
 	@Configuration
 	@Profile({ "prod", "dev", "test", "default" })
+	//@ConditionalOnProperty(prefix = "samlauth", name = "enabled", havingValue = "true", matchIfMissing = true)
 	@Order(1)
 	public static class RestApiSecurityConfig extends WebSecurityConfigurerAdapter {
 		private Logger logger = LoggerFactory.getLogger(RestApiSecurityConfig.class);
@@ -144,15 +140,11 @@ public class WebSecurityConfig {
 			auth.authenticationProvider(new JWTAuthenticationProvider(secret));
 		}
 	}
-	
-	
 
 	/**
 	 * Security configuration for authorization end pointsq
 	 */
 	@Configuration
-//	@ConditionalOnProperty(prefix = "samlauth", name = "enabled", havingValue = "true", matchIfMissing = true)
-//	@Profile({ "prod", "dev", "test", "default" })
 	@Order(2)
 	public static class AuthSecurityConfig extends WebSecurityConfigurerAdapter {
 		private Logger logger = LoggerFactory.getLogger(AuthSecurityConfig.class);
@@ -171,20 +163,17 @@ public class WebSecurityConfig {
 		}
 	}
 
-
-
 	/**
 	 * Saml security config
 	 */
 	@Configuration
 	@Profile({ "prod", "dev", "test", "default" })
-//    @ConditionalOnProperty(prefix = "samlauth", name = "enabled", havingValue = "true", matchIfMissing = true)
+
 	@Import(SamlSecurityConfig.class)
 	public static class SamlConfig {
 
 	}
-	
-	
+
 //	/**
 //	 * Security configuration for service level authorization end points
 //	 */
