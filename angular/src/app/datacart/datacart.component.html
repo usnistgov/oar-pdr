@@ -37,39 +37,7 @@
     </div>
 </div>
 
-<!-- Control buttons for small screen -->
-<!-- <div style="width: 100%; text-align: center;" >
-    <div class="full-span" style="display: inline-block; margin-bottom:.5em; text-align: right;">
-        <button type="button" (click)="downloadAllFilesFromAPI()" pButton type="submit"
-            [ngStyle]="{'margin-right':'1em','width':'max-content','height':'2.5em','background-color':'#307F38'}"
-            [disabled]="selectedFileCount==0">
-            <i class="faa faa-download faa-1x icon-white" style="color: #fff;"></i>
-            Download Selected
-            <span class="w3-circle button-badge"
-                [ngStyle]="{'color':'#307F38'}">&nbsp;{{selectedFileCount}}&nbsp;</span>
-        </button>
-
-        <button type="button" (click)="removeByDownloadStatus()" pButton type="submit"
-            style="margin-right:1em;width:max-content; height:2.5em; background-color:rgb(82, 82, 82);"
-            [disabled]="noFileDownloaded">
-            <i class="faa faa-trash faa-1x icon-white" style="color: #fff;"></i>
-            Remove downloaded
-            <span class="w3-circle button-badge"
-                [ngStyle]="{'color':getDownloadedColor(),'background-color':getDownloadedBkColor()}">&nbsp;{{totalDownloaded}}&nbsp;</span>
-        </button>
-
-        <button type="button" (click)="removeByDataId()" pButton type="submit"
-            style="width:max-content; height:2.5em; background-color:rgb(82, 82, 82);"
-            [disabled]="selectedFileCount==0">
-            <i class="faa faa-trash faa-1x icon-white" style="color: #fff;"></i>
-            Remove selected
-            <span class="w3-circle button-badge"
-                [ngStyle]="{'color':'rgb(82, 82, 82)'}">&nbsp;{{selectedFileCount}}&nbsp;</span>
-        </button>
-    </div>
-</div> -->
-
-<div class="full-span" *ngIf="screenWidth <= screenSizeBreakPoint" style="margin-bottom:.5em;">
+<div class="full-span" *ngIf="screenWidth <= screenSizeBreakPoint">
     <div class="control-btns">
         <button type="button" (click)="downloadAllFilesFromAPI()" pButton type="submit"
             [ngStyle]="{'margin-right':'1em','width':'max-content','height':'2.5em','background-color':'#307F38'}"
@@ -99,6 +67,7 @@
         </button>
     </div>
 </div>
+
 <div id="current-task" *ngIf="showCurrentTask">
     <div id="current-task-detail">
         <p-progressSpinner [style]="{'width': '25px', 'height': '25px', 'padding-right':'0.5em', 'padding-top': '0em'}">

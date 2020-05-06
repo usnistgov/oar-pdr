@@ -158,7 +158,7 @@ export class DatacartComponent implements OnInit, OnDestroy {
         this.mobWidth = (window.innerWidth);
         this.setWidth(this.mobWidth);
         this.screenSizeBreakPoint = +this.cfg.get("screenSizeBreakPoint", "768");
-
+        console.log('this.screenSizeBreakPoint', this.screenSizeBreakPoint)
         window.onresize = (e) => {
             ngZone.run(() => {
                 this.mobWidth = window.innerWidth;
