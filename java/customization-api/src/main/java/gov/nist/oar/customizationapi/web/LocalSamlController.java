@@ -45,7 +45,7 @@ public class LocalSamlController {
 //		
 		AuthenticatedUserDetails authDetails = new AuthenticatedUserDetails("testuser@test.nist.gov","TestUser", "TestLast", "TestId");
 		Authentication auth = new UsernamePasswordAuthenticationToken(authDetails, "guestpass");
-		auth.setAuthenticated(true);
+		//auth.setAuthenticated(true);
 		
 		SecurityContext sc = SecurityContextHolder.getContext();
 		sc.setAuthentication(auth);

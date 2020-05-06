@@ -97,7 +97,8 @@ public class JWTAuthenticationFilterLocal extends AbstractAuthenticationProcessi
 	@Override
 	protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain,
 			Authentication authResult) throws IOException, ServletException {
-		logger.info("If token is authorized redirect to original request.");
+		logger.info("If token is authorized redirect to original request."+request.getRequestURI());
+		
 		chain.doFilter(request, response);
 	}
 

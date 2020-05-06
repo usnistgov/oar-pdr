@@ -12,22 +12,12 @@
  */
 package gov.nist.oar.customizationapi.config;
 
-import java.io.IOException;
-
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Profile;
-import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -36,15 +26,13 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.web.authentication.AnonymousAuthenticationFilter;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.web.filter.GenericFilterBean;
 
 import gov.nist.oar.customizationapi.config.JWTConfig.JWTAuthenticationFilter;
+import gov.nist.oar.customizationapi.config.JWTConfig.JWTAuthenticationFilterLocal;
 import gov.nist.oar.customizationapi.config.JWTConfig.JWTAuthenticationProvider;
 import gov.nist.oar.customizationapi.config.SAMLConfig.SamlSecurityConfig;
-import gov.nist.oar.customizationapi.web.CustomAccessDeniedHandler;
 
 /**
  * In this configuration all the end points which need to be secured under
@@ -71,23 +59,11 @@ public class WebSecurityConfig {
 		@Override
 		protected void configure(HttpSecurity security) throws Exception {
 			logger.info("#### SAML authentication and authorization service is disabled in this mode. #####");
-//			security.httpBasic().disable();
+			security.httpBasic().disable();
+			security.formLogin().disable();
 			security.cors().and().csrf().disable();
-//			security.authorizeRequests()
-//			.antMatchers("/error").permitAll()
-//			.antMatchers("/saml/**").permitAll()
-//			.anyRequest().authenticated();
-//			
-//			security.formLogin()
-//            .loginPage("/saml/login");
-			
-			security
-	            .authorizeRequests()
-	                .anyRequest().authenticated()
-	                .and()
-	            .formLogin()
-	                .loginPage("/saml/login")
-	                .permitAll();
+			security.authorizeRequests().antMatchers("/").permitAll();
+//			security.sessionManagement() .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 		}
 
 		/**
@@ -118,12 +94,13 @@ public class WebSecurityConfig {
 		@Override
 		protected void configure(HttpSecurity http) throws Exception {
 			logger.info("#### RestApiSecurityConfig HttpSecurity for REST /pdr/lp/editor/ endpoints ###");
-			http.addFilterBefore(new JWTAuthenticationFilter(apiMatcher, super.authenticationManager()),
+			http.addFilterBefore(new JWTAuthenticationFilterLocal(apiMatcher, super.authenticationManager()),
 					UsernamePasswordAuthenticationFilter.class);
-
-			http.authorizeRequests().antMatchers(HttpMethod.PATCH, apiMatcher).permitAll();
-			http.authorizeRequests().antMatchers(HttpMethod.PUT, apiMatcher).permitAll();
-			http.authorizeRequests().antMatchers(HttpMethod.DELETE, apiMatcher).permitAll();
+			http.formLogin().disable();
+			
+			//http.authorizeRequests().antMatchers(HttpMethod.PATCH, apiMatcher).permitAll();
+			//http.authorizeRequests().antMatchers(HttpMethod.GET, apiMatcher).permitAll();
+			//http.authorizeRequests().antMatchers(HttpMethod.DELETE, apiMatcher).permitAll();
 			//http.authorizeRequests().antMatchers(apiMatcher).authenticated().and()
 			http.httpBasic().and().csrf().disable();
 
@@ -156,7 +133,7 @@ public class WebSecurityConfig {
 					UsernamePasswordAuthenticationFilter.class);
 
 			http.authorizeRequests().antMatchers(HttpMethod.PATCH, apiMatcher).permitAll();
-			http.authorizeRequests().antMatchers(HttpMethod.PUT, apiMatcher).permitAll();
+			http.authorizeRequests().antMatchers(HttpMethod.GET, apiMatcher).permitAll();
 			http.authorizeRequests().antMatchers(HttpMethod.DELETE, apiMatcher).permitAll();
 			http.authorizeRequests().antMatchers(apiMatcher).authenticated().and().httpBasic().and().csrf().disable();
 
