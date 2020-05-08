@@ -1265,6 +1265,9 @@ export class DatacartComponent implements OnInit, OnDestroy {
             case 'complete':
                 iconClass = 'faa faa-check';
                 break;
+            case 'downloaded':
+                iconClass = 'faa faa-check';
+                break;
             case 'cancelled':
                 iconClass = 'faa faa-remove';
                 break;
@@ -1274,7 +1277,6 @@ export class DatacartComponent implements OnInit, OnDestroy {
             case 'error':
                 iconClass = 'faa faa-warning';
                 break;  
-    
             default:
                 break;              
         }
@@ -1309,6 +1311,8 @@ export class DatacartComponent implements OnInit, OnDestroy {
             default:
                 break;    
         }
+
+        return status;
     }    
 }
 
