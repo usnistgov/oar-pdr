@@ -1268,6 +1268,9 @@ export class DatacartComponent implements OnInit, OnDestroy {
             case 'downloaded':
                 iconClass = 'faa faa-check';
                 break;
+            case 'pending':
+                iconClass = 'faa faa-clock-o';
+                break;
             case 'cancelled':
                 iconClass = 'faa faa-remove';
                 break;
@@ -1299,9 +1302,12 @@ export class DatacartComponent implements OnInit, OnDestroy {
             case 'downloaded':
                 status = 'Downloaded';
                 break;
+            case 'pending':
+                status = 'Pending';
+                break;
             case 'cancelled':
-            status = 'Cancelled';
-            break;
+                status = 'Cancelled';
+                break;
             case 'failed':
                 status = 'Failed';
                 break;
