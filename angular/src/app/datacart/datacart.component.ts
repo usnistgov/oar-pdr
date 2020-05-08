@@ -1255,5 +1255,27 @@ export class DatacartComponent implements OnInit, OnDestroy {
             }
         }
     }
+
+    /**
+     * Return icon class based on download status
+     */
+    getIconClass(rowData: any){
+        let iconClass = "";
+        switch(rowData.downloadStatus){
+            case 'complete':
+                iconClass = 'faa faa-check';
+                break;
+            case 'cancelled':
+                iconClass = 'faa faa-remove';
+                break;
+            case 'failed':
+                iconClass = 'faa faa-warning';
+                break;  
+            default:
+                break;              
+        }
+
+        return iconClass; 
+    }
 }
 

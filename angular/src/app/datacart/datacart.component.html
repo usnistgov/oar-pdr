@@ -203,11 +203,11 @@
                         </span>
                         Name
                     </th>
-                    <th [ngStyle]="typeStyleHeader()" ttResizableColumn>Media Type</th>
-                    <th [ngStyle]="sizeStyleHeader()" ttResizableColumn>Size</th>
                     <th [ngStyle]="actionStyleHeader()" ttResizableColumn>
                         <i class="faa faa-cloud-download" aria-hidden="true" data-toggle="tooltip" title="Actions"></i>
                     </th>
+                    <th [ngStyle]="typeStyleHeader()" ttResizableColumn>Media Type</th>
+                    <th [ngStyle]="sizeStyleHeader()" ttResizableColumn>Size</th>
                     <th [ngStyle]="statusStyleHeader()" ttResizableColumn>
                         <!-- <i class="faa faa-recycle faa-1x icon-white" (click)="clearDownloadStatus()"
                         style="cursor: pointer;color: rgb(255, 255, 255);padding-right:0.5em;" data-toggle="tooltip"
@@ -234,16 +234,10 @@
                         <span *ngIf="showZipFilesNmaes" style="color:grey;margin-left: 1em;font-style: italic;">
                             {{rowData.zipFile}}</span>
                     </td>
-                    <td [ngStyle]="typeStyle()">
-                        <span>{{rowData.mediatype}}</span>
-                    </td>
-                    <td [ngStyle]="sizeStyle()">
-                        <span *ngIf="rowData.isLeaf">{{formatBytes(rowData.fileSize)}}</span>
-                    </td>
                     <td [ngStyle]="sizeStyle()">
                         <div *ngIf="rowData.isLeaf;else space_holder" style="display:inline;">
                             <a href='{{rowData.downloadUrl}}' target='_blank' download="download" data-toggle="tooltip"
-                                title="Direct download" aria-label="Direct download">
+                                title="Direct download" aria-label="Download this file">
                                 <i class="faa faa-download" *ngIf="rowData.downloadStatus != 'downloading'"
                                     aria-hidden="true" (click)="setFileDownloaded(rowData)"></i>
                                 <i class="faa faa-download blinking" *ngIf="rowData.downloadStatus == 'downloading'"
@@ -254,13 +248,18 @@
                             <div style="display:inline;padding-right: 0.4em;">&nbsp;&nbsp;</div>
                         </ng-template>
                     </td>
+                    <td [ngStyle]="typeStyle()">
+                        <span>{{rowData.mediatype}}</span>
+                    </td>
+                    <td [ngStyle]="sizeStyle()">
+                        <span *ngIf="rowData.isLeaf">{{formatBytes(rowData.fileSize)}}</span>
+                    </td>
                     <td [ngStyle]="statusStyle()">
                         <div id="downloadstatus" *ngIf="rowData.isLeaf" style="display:inline;"
                             [ngStyle]="{'color':getDownloadStatusColor(rowData)}">
-                            <!-- <i class="faa faa-check" *ngIf="rowData.downloadStatus == 'downloaded'"
-                            aria-hidden="true" data-toggle="tooltip" title="{{rowData.downloadStatus}}">downloaded</i> -->
+                            <i [class]="getIconClass(rowData)" 
+                            aria-hidden="true" data-toggle="tooltip" title="{{rowData.downloadStatus}}"></i>
                             <span *ngIf="rowData.downloadStatus == 'downloaded'">downloaded</span>
-                            <!-- <span *ngIf="!rowData.downloadStatus">Available</span> -->
                             <p-progressSpinner *ngIf="rowData.downloadStatus == 'downloading'"
                                 [style]="{width: '12px', height: '12px', 'margin-right': '.5em'}"></p-progressSpinner>
                             <span
