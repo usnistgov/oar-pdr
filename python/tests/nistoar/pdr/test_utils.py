@@ -150,10 +150,14 @@ class TestLockedFile(test.TestCase):
                 self.f('o')
 
     def lockedop(self, who, mode='r', sleep=0.5):
-        with utils.LockedFile(self.lfile, mode) as lockdfile:
+        lf = utils.LockedFile(self.lfile, mode)
+        self.assertIsNone(lf.fo)
+        with lf as lockdfile:
+            self.assertIsNotNone(lf.fo)
             self.rfd.write(who+'a')
             time.sleep(sleep)
             self.rfd.write(who+'r')
+        self.assertIsNone(lf.fo)
     
     def setUp(self):
         self.tf = Tempfiles()

@@ -233,6 +233,10 @@ class TestMIDASMetadataBaggerMixed(test.TestCase):
         self.assertEqual(data['@context'][1]['@base'], data['@id'])
 
     def test_ensure_res_metadata_wremove(self):
+        # don't use upload version of pod file
+        self.bagr = midas.MIDASMetadataBagger(self.midasid, self.bagparent,
+                                              self.revdir, None)
+
         self.assertFalse(os.path.exists(self.bagdir))
         self.assertIsNone(self.bagr.inpodfile)
         self.bagr.ensure_res_metadata()
@@ -240,19 +244,29 @@ class TestMIDASMetadataBaggerMixed(test.TestCase):
         # make sure file components were registered
         self.assertTrue(os.path.isfile(
             self.bagr.bagbldr.bag.nerd_file_for("trial1.json")))
+        self.assertTrue(os.path.isfile(
+            self.bagr.bagbldr.bag.nerd_file_for("trial1.json.sha256")))
 
         # add metadata for a data file that doesn't exist in the source dir
         self.bagr.bagbldr.register_data_file(os.path.join("gold","trial5.json"),
                                              os.path.join(self.revdir,
                                                           self.midasid[32:],
                                                           "trial1.json") )
+        self.bagr.bagbldr.register_data_file(os.path.join("gold","trial5.json.sha256"),
+                                             os.path.join(self.revdir,
+                                                          self.midasid[32:],
+                                                          "trial1.json.sha256") )
         self.assertTrue(os.path.isfile(
             self.bagr.bagbldr.bag.nerd_file_for("gold/trial5.json")))
+        self.assertTrue(os.path.isfile(
+            self.bagr.bagbldr.bag.nerd_file_for("gold/trial5.json.sha256")))
 
         # now watch it get erased
         self.bagr.ensure_res_metadata(force=True)
         self.assertTrue(not os.path.exists(
             self.bagr.bagbldr.bag.nerd_file_for("gold/trial5.json")))
+        self.assertTrue(not os.path.exists(
+            self.bagr.bagbldr.bag.nerd_file_for("gold/trial5.json.sha256")))
         self.assertTrue(not os.path.exists(
             self.bagr.bagbldr.bag.nerd_file_for("gold")))
         self.assertTrue(not os.path.exists(
