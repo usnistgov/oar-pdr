@@ -231,7 +231,7 @@
                     <td [ngStyle]="sizeStyle()">
                         <div *ngIf="rowData.isLeaf;else space_holder" style="display:inline;">
                             <a href='{{rowData.downloadUrl}}' target='_blank' download="download" data-toggle="tooltip"
-                                title="Direct download" aria-label="Download this file">
+                                title="Download this file" aria-label="Download this file">
                                 <i class="faa faa-download" *ngIf="rowData.downloadStatus != 'downloading'"
                                     aria-hidden="true" (click)="setFileDownloaded(rowData)"></i>
                                 <i class="faa faa-download blinking" *ngIf="rowData.downloadStatus == 'downloading'"
