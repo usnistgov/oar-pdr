@@ -146,24 +146,21 @@
                         <p-progressSpinner [style]="{width: '12px', height: '12px'}"></p-progressSpinner>
                     </span>
                     <span style="display:inline-block;margin-left: 0.5em;">
-                        {{zip.downloadStatus}}
+                        {{getStatusForDisplay(zip.downloadStatus)}}
                     </span>
                     <span (click)="cancelDownloadZip(zip)"
                         style="display:inline-block;cursor: pointer;padding-left:5px;"><i
                             class="faa faa-remove"></i></span>
                 </div>
-                <ng-template #not_downloading style="display:inline-block;">
-                    <div *ngIf="zip.downloadStatus != 'error'; else download_error" style="display:inline-block;">
-                        <i *ngIf="zip.downloadStatus === 'downloaded'" class="faa faa-check"
-                            style="margin-top: 8px;"></i>
-                        <i *ngIf="zip.downloadStatus === 'cancelled'" class="faa faa-remove"
-                            style="margin-top: 8px;"></i>
-                        {{zip.downloadStatus}}
+                <ng-template #not_downloading style="display:inline-block;" >
+                    <div *ngIf="zip.downloadStatus != 'error'; else download_error" style="display:inline-block;" [ngStyle]="{'color':getDownloadStatusColor(zip.downloadStatus)}">
+                        <i [class]="getIconClass(zip.downloadStatus)" style="margin-top: 8px;"></i>
+                        {{getStatusForDisplay(zip.downloadStatus)}}
                     </div>
                     <ng-template #download_error>
                         <div style="display:inline-block;margin-left: .5em;font-size: 0.8em; color: red">
                             <i class="faa faa-warning" [ngStyle]="{'padding-right':'.5em', 'margin-top':'8px'}"></i>
-                            Error.
+                            {{getStatusForDisplay(zip.downloadStatus)}}
                         </div>
                     </ng-template>
                     <i *ngIf="zip.downloadStatus != null" class="faa faa-repeat"
@@ -209,9 +206,6 @@
                     <th [ngStyle]="typeStyleHeader()" ttResizableColumn>Media Type</th>
                     <th [ngStyle]="sizeStyleHeader()" ttResizableColumn>Size</th>
                     <th [ngStyle]="statusStyleHeader()" ttResizableColumn>
-                        <!-- <i class="faa faa-recycle faa-1x icon-white" (click)="clearDownloadStatus()"
-                        style="cursor: pointer;color: rgb(255, 255, 255);padding-right:0.5em;" data-toggle="tooltip"
-                        title="Reset Download Status"></i> -->
                         Status
                         <div class="badge status-reset-button" (click)="clearDownloadStatus()" data-toggle="tooltip"
                             title="Reset status">Reset</div>
@@ -256,17 +250,17 @@
                     </td>
                     <td [ngStyle]="statusStyle()">
                         <div id="downloadstatus" *ngIf="rowData.isLeaf" style="display:inline;"
-                            [ngStyle]="{'color':getDownloadStatusColor(rowData)}">
-                            <i [class]="getIconClass(rowData)" style="margin-right: .5em;"
+                            [ngStyle]="{'color':getDownloadStatusColor(rowData.downloadStatus)}">
+                            <i [class]="getIconClass(rowData.downloadStatus)" style="margin-right: .5em;"
                             aria-hidden="true" data-toggle="tooltip" title="{{rowData.downloadStatus}}"></i>
                             <p-progressSpinner *ngIf="rowData.downloadStatus == 'downloading'"
                                 [style]="{width: '12px', height: '12px', 'margin-right': '.5em'}"></p-progressSpinner>
                             <span
                                 *ngIf="rowData.downloadStatus == 'error' || rowData.downloadStatus == 'failed'; else normal"
                                 style="cursor: pointer;"
-                                (click)="openDetails($event,rowData,op4) "><u>{{getStatusForDisplay(rowData)}}</u></span>
+                                (click)="openDetails($event,rowData,op4) "><u>{{getStatusForDisplay(rowData.downloadStatus)}}</u></span>
                             <ng-template #normal>
-                                <span>{{getStatusForDisplay(rowData)}}</span>
+                                <span>{{getStatusForDisplay(rowData.downloadStatus)}}</span>
                             </ng-template>
                         </div>
                     </td>

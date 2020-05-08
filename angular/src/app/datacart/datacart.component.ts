@@ -1102,10 +1102,10 @@ export class DatacartComponent implements OnInit, OnDestroy {
     /**
     * Return "download" button color based on download status
     **/
-    getDownloadStatusColor(rowData: any) {
+    getDownloadStatusColor(downloadStatus: string) {
         let returnColor = '#1E6BA1';
 
-        switch (rowData.downloadStatus) {
+        switch (downloadStatus) {
             case 'downloaded':
                 {
                     returnColor = 'green';
@@ -1259,9 +1259,9 @@ export class DatacartComponent implements OnInit, OnDestroy {
     /**
      * Return icon class based on download status
      */
-    getIconClass(rowData: any){
+    getIconClass(downloadStatus: string){
         let iconClass = "";
-        switch(rowData.downloadStatus){
+        switch(downloadStatus){
             case 'complete':
                 iconClass = 'faa faa-check';
                 break;
@@ -1293,14 +1293,17 @@ export class DatacartComponent implements OnInit, OnDestroy {
      * serves as a mapper.
      * @param rowData - row data of dataFiles
      */
-    getStatusForDisplay(rowData: any){
+    getStatusForDisplay(downloadStatus: string){
         let status = "";
-        switch(rowData.downloadStatus){
+        switch(downloadStatus){
             case 'complete':
                 status = 'Completed';
                 break;
             case 'downloaded':
                 status = 'Downloaded';
+                break;
+            case 'downloading':
+                status = 'Downloading';
                 break;
             case 'pending':
                 status = 'Pending';
