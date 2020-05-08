@@ -257,18 +257,16 @@
                     <td [ngStyle]="statusStyle()">
                         <div id="downloadstatus" *ngIf="rowData.isLeaf" style="display:inline;"
                             [ngStyle]="{'color':getDownloadStatusColor(rowData)}">
-                            <i [class]="getIconClass(rowData)" 
+                            <i [class]="getIconClass(rowData)" style="margin-right: .5em;"
                             aria-hidden="true" data-toggle="tooltip" title="{{rowData.downloadStatus}}"></i>
-                            <span *ngIf="rowData.downloadStatus == 'downloaded'">downloaded</span>
                             <p-progressSpinner *ngIf="rowData.downloadStatus == 'downloading'"
                                 [style]="{width: '12px', height: '12px', 'margin-right': '.5em'}"></p-progressSpinner>
                             <span
                                 *ngIf="rowData.downloadStatus == 'error' || rowData.downloadStatus == 'failed'; else normal"
                                 style="cursor: pointer;"
-                                (click)="openDetails($event,rowData,op4) "><u>{{rowData.downloadStatus}}</u></span>
+                                (click)="openDetails($event,rowData,op4) "><u>{{getStatusForDisplay(rowData)}}</u></span>
                             <ng-template #normal>
-                                <span
-                                    *ngIf="rowData.downloadStatus && rowData.downloadStatus != 'downloaded'">{{rowData.downloadStatus}}</span>
+                                <span>{{getStatusForDisplay(rowData)}}</span>
                             </ng-template>
                         </div>
                     </td>

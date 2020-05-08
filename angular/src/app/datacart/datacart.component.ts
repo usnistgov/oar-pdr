@@ -1270,12 +1270,45 @@ export class DatacartComponent implements OnInit, OnDestroy {
                 break;
             case 'failed':
                 iconClass = 'faa faa-warning';
+                break;
+            case 'error':
+                iconClass = 'faa faa-warning';
                 break;  
+    
             default:
                 break;              
         }
 
         return iconClass; 
     }
+
+
+    /**
+     * The status we want to display may not be exactly the same as the status in the database. This function 
+     * serves as a mapper.
+     * @param rowData - row data of dataFiles
+     */
+    getStatusForDisplay(rowData: any){
+        let status = "";
+        switch(rowData.downloadStatus){
+            case 'complete':
+                status = 'Completed';
+                break;
+            case 'downloaded':
+                status = 'Downloaded';
+                break;
+            case 'cancelled':
+            status = 'Cancelled';
+            break;
+            case 'failed':
+                status = 'Failed';
+                break;
+            case 'error':
+                status = 'Error';
+                break;  
+            default:
+                break;    
+        }
+    }    
 }
 
