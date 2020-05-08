@@ -141,7 +141,8 @@ export class EditControlComponent implements OnInit, OnChanges {
     }
 
     private detectScreenSize() {
-        this.screenWidth = window.innerWidth;
+        if(this.inBrowser)
+            this.screenWidth = window.innerWidth;
     }
 
     /**
