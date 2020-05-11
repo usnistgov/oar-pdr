@@ -182,13 +182,15 @@ class TestLatestHandler(test.TestCase):
         self.assertIn("400 ", self.resp[0])
         self.assertEqual(body, [])
 
+        # Currently, the code now accepts the following ID as legal; thus, this
+        # will return not found
         self.resp = []
         id = "ark:/88434/pdr2210"
         req['PATH_INFO'] = '/pdr/latest/'+id
         self.hdlr = self.gethandler(id, req)
 
         body = self.hdlr.handle()
-        self.assertIn("400 ", self.resp[0])
+        self.assertIn("404 ", self.resp[0])
         self.assertEqual(body, [])
 
     def test_no_PUT(self):
