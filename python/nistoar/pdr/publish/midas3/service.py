@@ -15,7 +15,7 @@ from ...preserv.bagit import NISTBag, DEF_MERGE_CONV
 from ...preserv.bagger.midas3 import MIDASMetadataBagger, midasid_to_bagname, PreservationBagger
 from ...utils import build_mime_type_map, read_nerd, write_json
 from ....id import PDRMinter, NIST_ARK_NAAN
-from ....nerdm.convert import Res2PODds
+from ....nerdm.convert import Res2PODds, topics2themes
 from ....nerdm import validate
 from .... import pdr
 from .customize import CustomizationServiceClient
@@ -488,6 +488,11 @@ class MIDAS3PublishingService(PublishSystem):
 
         fltrd = OrderedDict()
         _filter_props(data, fltrd)    # filter out properties you can't edit
+
+        # if topic was updated, migrate these to theme
+        if 'topic' in fltrd and 'theme' not in fltrd:
+            fltrd['theme'] = topics2themes(fltrd['topic'], False)
+        
         oldnerdm = bldr.bag.nerdm_record(mergeconv)
         newnerdm = self._validate_update(fltrd, oldnerdm, bldr, mergeconv)  # may raise InvalidRequest
 

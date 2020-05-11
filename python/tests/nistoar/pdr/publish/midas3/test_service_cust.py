@@ -13,6 +13,7 @@ from nistoar.pdr import utils
 from nistoar.pdr.publish.midas3 import service as mdsvc
 from nistoar.pdr.publish.midas3 import customize
 from nistoar.pdr.preserv.bagit import builder as bldr
+from nistoar.pdr.preserv.bagit.bag import NISTBag
 
 testdir = os.path.dirname(os.path.abspath(__file__))
 simsrvrsrc = os.path.join(testdir, "sim_cust_srv.py")
@@ -81,7 +82,7 @@ class TestMIDAS3PublishingServiceDraft(test.TestCase):
             'auth_key': 'SECRET',
             'service_endpoint': custbaseurl,
             'merge_convention': 'midas1',
-            'updatable_properties': [ "title", "authors", "_editStatus" ]
+            'updatable_properties': [ "title", "topic", "authors", "_editStatus" ]
         }
     }
 
@@ -143,7 +144,7 @@ class TestMIDAS3PublishingServiceDraft(test.TestCase):
         pod = self.svc.get_customized_pod(self.midasid)
         self.assertEqual(pod['title'], "Goobers!")
         self.assertEqual(pod['_editStatus'], "in progress")
-        
+
         resp = requests.patch(custbaseurl+self.midasid, json={"_editStatus": "done"},
                               headers={'Authorization': 'Bearer SECRET'})
         self.assertEqual(resp.status_code, 201)
@@ -163,8 +164,30 @@ class TestMIDAS3PublishingServiceDraft(test.TestCase):
         nerdm = utils.read_json(nerdf)
         self.assertEqual(nerdm['title'], "Goobers!")
 
+    TAXONURI = "https://www.nist.gov/od/dm/nist-themes/v1.0"
 
+    def test_get_customized_pod_wtopic(self):
 
+        podf = os.path.join(self.revdir, "1491", "_pod.json")
+        pod = utils.read_json(podf)
+        bagdir = os.path.join(self.svc.mddir, self.midasid)
+
+        self.assertTrue(not self.client.draft_exists(self.midasid))
+        self.svc.start_customization_for(pod)
+        self.assertTrue(self.client.draft_exists(self.midasid))
+
+        resp = requests.patch(custbaseurl+self.midasid,
+                              json={"topic": [{"@type": "Concept", "scheme": self.TAXONURI,
+                                               "tag": "Bioscience: Genomics" }]},
+                              headers={'Authorization': 'Bearer SECRET'})
+
+        self.assertEqual(resp.status_code, 201)
+        pod = self.svc.get_customized_pod(self.midasid)
+        self.assertEqual(pod['identifier'], self.midasid)
+
+        self.assertIn('theme', pod)
+        self.assertNotEqual(len(pod['theme']), 0);
+        self.assertEqual(pod['theme'][-1], "Bioscience: Genomics")
 
 
 if __name__ == '__main__':
