@@ -13,7 +13,8 @@ import { MetadataUpdateService } from '../editcontrol/metadataupdate.service';
 export class TopicComponent implements OnInit {
     @Input() record: any[];
     @Input() inBrowser: boolean;   // false if running server-side
-    fieldName = 'topic';
+    //05-12-2020 Ray asked to read topic data from 'theme' instead of 'topic'
+    fieldName = 'theme';
 
     constructor(public mdupdsvc: MetadataUpdateService,
         private ngbModal: NgbModal,
@@ -32,9 +33,7 @@ export class TopicComponent implements OnInit {
         if (!this.record[this.fieldName])
             return true;
         if (this.record[this.fieldName] instanceof Array &&
-            this.record[this.fieldName].map(topic => {
-                return topic.tag;
-            }).filter(topic => topic.length > 0).length == 0)
+            this.record[this.fieldName].filter(topic => topic.length > 0).length == 0)
             return true;
         return false;
     }
@@ -64,7 +63,7 @@ export class TopicComponent implements OnInit {
 
         let val: string[] = [];
         if (this.record[this.fieldName])
-            val = this.record[this.fieldName].map((topic) => { return topic.tag; });
+            val = JSON.parse(JSON.stringify(this.record[this.fieldName]));
 
         modalRef.componentInstance.inputValue = {};
         modalRef.componentInstance.inputValue[this.fieldName] = val;
@@ -74,14 +73,7 @@ export class TopicComponent implements OnInit {
         modalRef.componentInstance.returnValue.subscribe((returnValue) => {
             if (returnValue) {
                 var postMessage: any = {};
-                postMessage[this.fieldName] = returnValue[this.fieldName].map((topic) => {
-                    return {
-                        '@type': 'Concept',
-                        'scheme': 'https://www.nist.gov/od/dm/nist-themes/v1.0',
-                        'tag': topic,
-                    };
-                });
-
+                postMessage[this.fieldName] = returnValue[this.fieldName];
                 this.mdupdsvc.update(this.fieldName, postMessage).then((updateSuccess) => {
                     // console.log("###DBG  update sent; success: "+updateSuccess.toString());
                     if (updateSuccess)
@@ -99,9 +91,9 @@ export class TopicComponent implements OnInit {
     undoEditing() {
         this.mdupdsvc.undo(this.fieldName).then((success) => {
             if (success)
-                this.notificationService.showSuccessWithTimeout("Reverted changes to keywords.", "", 3000);
+                this.notificationService.showSuccessWithTimeout("Reverted changes to research topic.", "", 3000);
             else
-                console.error("Failed to undo keywords metadata")
+                console.error("Failed to undo research topic")
         });
     }
 
@@ -109,8 +101,8 @@ export class TopicComponent implements OnInit {
      * Function to Check record has topics
      */
     checkTopics() {
-        if (Array.isArray(this.record['topic'])) {
-            if (this.record['topic'].length > 0)
+        if (Array.isArray(this.record[this.fieldName])) {
+            if (this.record[this.fieldName].length > 0)
                 return true;
             else
                 return false;

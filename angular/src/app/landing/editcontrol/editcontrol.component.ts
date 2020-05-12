@@ -227,6 +227,8 @@ export class EditControlComponent implements OnInit, OnChanges {
                     (err) => {
                       if(err.statusCode == 404){
                         this.mdupdsvc.resetOriginal();
+                        let msg = "The record is not available for editing. Please make sure it was set to edit in MIDAS.";
+                        this.msgbar.error(msg);
                         this._setEditMode(this.EDIT_MODES.VIEWONLY_MODE);
                       }
                     }

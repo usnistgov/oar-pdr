@@ -89,26 +89,26 @@ export class SearchTopicsComponent implements OnInit {
                   }
               }
 
-              // check to see if the path already exists.
-              const existingPath = currentLevel.filter(level => level.data.treeId === tempId);
-              if (existingPath.length > 0) {
-                  // The path to this item was already in the tree, so don't add it again.
-                  // Set the current level to this path's children  
-                  currentLevel = existingPath[0].children;
-              } else {
-                  let newPart = null;
-                  newPart = {
-                      data: {
-                          treeId: tempId,
-                          name: pathParts[j],
-                          researchTopic: tempId,
-                          bkcolor: 'white'
-                      }, children: [],
-                      expanded: false
-                  };
-                  currentLevel.push(newPart);
-                  currentLevel = newPart.children;
-              }
+            // check to see if the path already exists.
+            const existingPath = currentLevel.filter(level => level.data.treeId === tempId);
+            if (existingPath.length > 0) {
+                // The path to this item was already in the tree, so don't add it again.
+                // Set the current level to this path's children  
+                currentLevel = existingPath[0].children;
+            } else {
+                let newPart = null;
+                newPart = {
+                    data: {
+                        treeId: tempId,
+                        name: pathParts[j],
+                        researchTopic: tempId,
+                        bkcolor: 'white'
+                    }, children: [],
+                    expanded: false
+                };
+                currentLevel.push(newPart);
+                currentLevel = newPart.children;
+            }
           };
       });
       return tree;
@@ -127,8 +127,8 @@ export class SearchTopicsComponent implements OnInit {
    */
   deleteTopic(index: number) {
     this.setTreeVisible(true);
-    this.searchAndExpandTaxonomyTree(this.inputValue['topic'][index], false);
-    this.inputValue['topic'] = this.inputValue['topic'].filter(topic => topic != this.inputValue['topic'][index]);
+    this.searchAndExpandTaxonomyTree(this.inputValue[this.field][index], false);
+    this.inputValue[this.field] = this.inputValue[this.field].filter(topic => topic != this.inputValue[this.field][index]);
     this.refreshTopicTree();
     console.log('this.inputValue.length', this.inputValue[this.field].length);
   }
@@ -137,9 +137,9 @@ export class SearchTopicsComponent implements OnInit {
    * Update the topic list
    */
   updateTopics(rowNode: any) {
-    const existingTopic = this.inputValue['topic'].filter(topic => topic == rowNode.node.data.researchTopic);
+    const existingTopic = this.inputValue[this.field].filter(topic => topic == rowNode.node.data.researchTopic);
     if (existingTopic == undefined || existingTopic == null || existingTopic.length == 0) {
-      this.inputValue['topic'].push(rowNode.node.data.researchTopic);
+      this.inputValue[this.field].push(rowNode.node.data.researchTopic);
 
       // Reset search text box
       if (this.searchText != "") {
@@ -154,7 +154,7 @@ export class SearchTopicsComponent implements OnInit {
   */
   getTopicColor(rowNode: any) {
     // console.log("this.tempTopics", this.tempTopics);
-    const existingTopic = this.inputValue['topic'].filter(topic => topic == rowNode.node.data.researchTopic);
+    const existingTopic = this.inputValue[this.field].filter(topic => topic == rowNode.node.data.researchTopic);
     if (existingTopic == undefined || existingTopic == null || existingTopic.length <= 0) {
       return ROW_COLOR;
     } else {
@@ -166,7 +166,7 @@ export class SearchTopicsComponent implements OnInit {
   *   Set cursor type
   */
   getTopicCursor(rowNode: any) {
-    const existingTopic = this.inputValue['topic'].filter(topic0 => topic0 == rowNode.node.data.researchTopic);
+    const existingTopic = this.inputValue[this.field].filter(topic0 => topic0 == rowNode.node.data.researchTopic);
     if (existingTopic == undefined || existingTopic == null || existingTopic.length <= 0)
       return 'pointer';
     else

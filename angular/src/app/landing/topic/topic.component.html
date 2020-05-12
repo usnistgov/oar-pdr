@@ -10,9 +10,9 @@
                 <ng-template #hasTopic>
                     <div class="editable_field" style="cursor: pointer;width: calc(100%-1em);" [ngStyle]="mdupdsvc.getFieldStyle(fieldName)" (click)="openModal()">
                         <strong>Research Topics: </strong>
-                        <span class="font14 topics" *ngFor="let topic of record['topic']; let i =index">
-                            {{ topic.tag }}
-                            <span *ngIf="i < record['topic'].length-1 ">,</span>
+                        <span class="font14 topics" *ngFor="let topic of record['theme']; let i =index">
+                            {{ topic }}
+                            <span *ngIf="i < record['theme'].length-1 ">,</span>
                         </span> &nbsp; &nbsp;
                     </div>
                 </ng-template>

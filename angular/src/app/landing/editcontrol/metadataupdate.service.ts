@@ -130,8 +130,6 @@ export class MetadataUpdateService {
                 resolve(false);
             });
         }
-        console.log('md', md);
-        console.log('this.originalRec', this.originalRec);
         // establish the original state for this subset of metadata (so that it this update
         // can be undone).
         if (this.originalRec) {
@@ -149,7 +147,6 @@ export class MetadataUpdateService {
             }
         }
 
-        console.log('this.origfields', this.origfields);
         // If current data is the same as original (user changed the data back to original), call undo instead. Otherwise do normal update
         if (JSON.stringify(md[subsetname]) == JSON.stringify(this.origfields[subsetname])) {
             this.undo(subsetname);
