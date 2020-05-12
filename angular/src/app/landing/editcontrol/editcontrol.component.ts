@@ -13,6 +13,12 @@ import { CustomizationService } from './customization.service';
 import { NerdmRes } from '../../nerdm/nerdm'
 import { LandingConstants } from '../constants';
 import { AppConfig } from '../../config/config';
+import { OverlayPanel } from 'primeng/overlaypanel';
+import {
+    TreeTableModule, TreeNode, MenuItem, OverlayPanelModule,
+    FieldsetModule, PanelModule, ContextMenuModule,
+    MenuModule
+} from 'primeng/primeng';
 
 /**
  * a panel that serves as a control center for editing metadata displayed in the 
@@ -297,12 +303,11 @@ export class EditControlComponent implements OnInit, OnChanges {
      * discard the latest changes after receiving confirmation via a modal pop-up.  This will revert 
      * the data to its previous state.
      */
-    public showEditControlHelpPopup(): void {
-        var message = 'Put button description here...';
-
-        this.confirmDialogSvc.displayMessage(
-            'Edit Control Button Description',
-            message);
+    public showEditControlHelpPopup(event, overlaypanel: OverlayPanel): void {
+        overlaypanel.hide();
+        setTimeout(() => {
+            overlaypanel.show(event);
+        }, 100);
     }
 
     /**
