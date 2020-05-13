@@ -28,6 +28,8 @@ import { AsyncBooleanResultCallback } from 'async';
 import { FileSaverService } from 'ngx-filesaver';
 import { CommonFunctionService } from '../shared/common-function/common-function.service';
 import { GoogleAnalyticsService } from '../shared/ga-service/google-analytics.service';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { ConfirmationDialogComponent } from '../shared/confirmation-dialog/confirmation-dialog.component';
 
 declare var saveAs: any;
 declare var $: any;
@@ -108,7 +110,6 @@ export class DatacartComponent implements OnInit, OnDestroy {
     isExpanded: boolean = true;
     showUnhandledFilesTable: boolean = true;
     fileNode: TreeNode;
-    showMessageBlock: boolean = false;
     messageColor: any;
     noFileDownloaded: boolean; // will be true if any item in data cart is downloaded
     totalDownloaded: number = 0;
@@ -138,6 +139,8 @@ export class DatacartComponent implements OnInit, OnDestroy {
     imageURL: string;
     screenWidth: number;
     screenSizeBreakPoint: number;
+    bundleSizeAlert: number;
+    modalRef: any;
     emailBodyBase: string = 'The information below describes an error that occurred while downloading data via the data cart. %0D%0A%0D%0A [From the PDR Team:  feel free to add additional information about the failure or your questions here.  Thanks for sending this message!] %0D%0A%0D%0A';
 
     /**
@@ -152,6 +155,7 @@ export class DatacartComponent implements OnInit, OnDestroy {
         private commonFunctionService: CommonFunctionService,
         private route: ActivatedRoute,
         private gaService: GoogleAnalyticsService,
+        private modalService: NgbModal,
         ngZone: NgZone) 
     {
         this.mobHeight = (window.innerHeight);
@@ -185,6 +189,7 @@ export class DatacartComponent implements OnInit, OnDestroy {
         console.log("Datacart init...");
         this.isProcessing = true;
         this.distApi = this.cfg.get("distService", "/od/ds/");
+        this.bundleSizeAlert = +this.cfg.get("bundleSizeAlert", "2000000000");
         this.routerparams = this.route.params.subscribe(params => {
             this.mode = params['mode'];
         })
@@ -193,7 +198,6 @@ export class DatacartComponent implements OnInit, OnDestroy {
             this.cartService.setCurrentCart('landing_popup');
 
             this.loadDatacart().then(function (result) {
-                this.clearDownloadingStatus();
                 this.downloadAllFilesFromAPI();
             }.bind(this), function (err) {
                 console.log("Error while loading datacart:");
@@ -540,15 +544,11 @@ export class DatacartComponent implements OnInit, OnDestroy {
         files.data.downloadStatus = 'downloading';
 
         postMessage.push({ "bundleName": files.data.downloadFileName, "includeFiles": this.downloadData });
-        // console.log('Bundle plan post message:');
-        // console.log(JSON.stringify(postMessage[0]));
-        console.log("Calling following end point to get bundle plan:");
-        console.log(this.distApi + "_bundle_plan");
+        // console.log('Bundle plan post message:', JSON.stringify(postMessage[0]));
+        console.log("Calling following end point to get bundle plan:", this.distApi + "_bundle_plan");
 
         this.getBundlePlanRef = this.downloadService.getBundlePlan(this.distApi + "_bundle_plan", JSON.stringify(postMessage[0])).subscribe(
             blob => {
-                this.showCurrentTask = false;
-                this.isProcessing = false;
                 this.bundlePlanStatus = blob.status.toLowerCase();
                 this.bundlePlanMessage = blob.messages;
                 this.bundlePlanUnhandledFiles = blob.notIncluded;
@@ -562,20 +562,44 @@ export class DatacartComponent implements OnInit, OnDestroy {
                     this.markUnhandledFiles();
                 }
 
-                if (this.bundlePlanStatus == 'complete') {
-                    this.processBundle(blob);
-                }
-                else if (this.bundlePlanStatus == 'warnings') {
-                    let dateTime = new Date();
+                if (this.bundlePlanStatus == 'complete' || this.bundlePlanStatus == 'warnings') {
+                    if(this.bundlePlanStatus == 'warnings')
+                    {
+                        let dateTime = new Date();
 
-                    this.showMessageBlock = true;
-                    this.showUnhandledFiles = false;
-                    this.emailSubject = 'PDR: Error getting download plan';
-                    this.emailBody = this.emailBodyBase
-                        + 'URL:' + this.distApi + '_bundle_plan; ' + '%0D%0A'
-                        + 'Time: ' + dateTime.toString() + '%0D%0A%0D%0A'
-                        + 'Post message:%0D%0A' + JSON.stringify(postMessage[0]) + ';' + '%0D%0A%0D%0A' + 'Return message:%0D%0A' + JSON.stringify(blob);
-                    this.processBundle(blob);
+                        this.showUnhandledFiles = false;
+                        this.emailSubject = 'PDR: Error getting download plan';
+                        this.emailBody = this.emailBodyBase
+                            + 'URL:' + this.distApi + '_bundle_plan; ' + '%0D%0A'
+                            + 'Time: ' + dateTime.toString() + '%0D%0A%0D%0A'
+                            + 'Post message:%0D%0A' + JSON.stringify(postMessage[0]) + ';' + '%0D%0A%0D%0A' + 'Return message:%0D%0A' + JSON.stringify(blob);
+                    }
+                    console.log("Bundle plan:", blob);
+                    var message = 'It might take a while to download all files.';
+                    if(blob.size > this.bundleSizeAlert){
+                        message = 'This bundle contains large file(s). It might take a long time to download.';
+                    }
+    
+                    this.modalRef = this.modalService.open(ConfirmationDialogComponent);
+                    this.modalRef.componentInstance.title = 'Please confirm';
+                    this.modalRef.componentInstance.btnOkText = 'Download';
+                    this.modalRef.componentInstance.btnCancelText = 'Cancel';
+                    this.modalRef.componentInstance.showCancelButton = true;
+                    this.modalRef.componentInstance.message = message;
+                    this.modalRef.result.then((result) => {
+                        console.log(result);
+                        if ( result ) {
+                            this.showCurrentTask = false;
+                            this.isProcessing = false;
+                            this.processBundle(blob);
+                        }else{
+                            this.showCurrentTask = false;
+                            this.isProcessing = false;
+    
+                            console.log("User canceled download");
+                        }
+                    }, (reason) => {
+                    });
                 }
                 else // error
                 {
@@ -587,7 +611,6 @@ export class DatacartComponent implements OnInit, OnDestroy {
                         + 'URL:' + this.distApi + '_bundle_plan; ' + '%0D%0A'
                         + 'Time: ' + dateTime.toString() + '%0D%0A%0D%0A'
                         + 'Post message:%0D%0A' + JSON.stringify(postMessage[0]) + ';' + '%0D%0A%0D%0A' + 'Return message:%0D%0A' + JSON.stringify(blob);
-                    this.showMessageBlock = true;
                     this.showUnhandledFiles = false;
                     this.unsubscribeBundleplan();
                 }
@@ -596,10 +619,8 @@ export class DatacartComponent implements OnInit, OnDestroy {
                 let dateTime = new Date()
                 console.log("Calling following end point returned error:");
                 console.log(this.distApi + "_bundle_plan");
-                console.log("Post message:");
-                console.log(JSON.stringify(postMessage[0]));
-                console.log("Error message:");
-                console.log(err);
+                console.log("Post message:", JSON.stringify(postMessage[0]));
+                console.log("Error message:", err);
                 this.bundlePlanMessage = err;
                 this.bundlePlanStatus = "internal error";
                 this.isProcessing = false;
@@ -615,7 +636,6 @@ export class DatacartComponent implements OnInit, OnDestroy {
                     + 'Post message:%0D%0A' + JSON.stringify(postMessage[0]) + '%0D%0A%0D%0A'
                     + 'Error message:%0D%0A' + JSON.stringify(err);
                 console.log("emailBody:", this.emailBody);
-                this.showMessageBlock = false;
             }
         );
     }
@@ -634,13 +654,13 @@ export class DatacartComponent implements OnInit, OnDestroy {
 
         let bundlePlan: any[] = res.bundleNameFilePathUrl;
         let downloadUrl: any = this.distApi + res.postEachTo;
-        console.log("Bundle url:");
-        console.log(downloadUrl);
-
+        console.log("Bundle url:", downloadUrl);
+        console.log("bundleSize", res.size);
+        let bundleSize = res.size;
         let tempData: any[] = [];
 
         for (let bundle of bundlePlan) {
-            this.zipData.push({ "fileName": bundle.bundleName, "downloadProgress": 0, "downloadStatus": null, "downloadInstance": null, "bundle": bundle, "downloadUrl": downloadUrl, "downloadErrorMessage": "" });
+            this.zipData.push({ "fileName": bundle.bundleName, "downloadProgress": 0, "downloadStatus": null, "downloadInstance": null, "bundle": bundle, "downloadUrl": downloadUrl, "downloadErrorMessage": "","bundleSize": bundleSize, 'downloadTime': 0 });
         }
         // Associate zipData with files
         for (let zip of this.zipData) {
@@ -703,7 +723,6 @@ export class DatacartComponent implements OnInit, OnDestroy {
         this.clearDownloadingStatus();
         this.isProcessing = false;
         this.showCurrentTask = false;
-        this.showMessageBlock = false;
     }
 
     /**
@@ -865,7 +884,6 @@ export class DatacartComponent implements OnInit, OnDestroy {
         this.resetDatafileDownloadStatus(this.dataFiles, null);
         this.downloadService.setFileDownloadedFlag(false);
         this.totalDownloaded = 0;
-        this.showMessageBlock = false;
     }
 
     /**
@@ -1323,5 +1341,25 @@ export class DatacartComponent implements OnInit, OnDestroy {
 
         return status;
     }    
+
+    /**
+     * Return download time in HH:MM:SS format
+     * @param downloadTime - download time in seconds 
+     */
+    getDownloadTime(downloadTime)
+    {
+        // console.log('downloadTime', downloadTime);
+        if(!downloadTime) return "";
+
+        let hours = Math.floor(downloadTime / 3600);
+        let minutes = Math.floor((downloadTime - hours * 3600)/60);
+        let seconds = Math.floor(downloadTime - hours * 3600 - minutes * 60);
+
+        let returnFormat = seconds + "";
+        if(minutes > 0) returnFormat = minutes + ":" + returnFormat;
+        if(hours > 0) returnFormat = hours + ":" + returnFormat;
+
+        return returnFormat;
+    }
 }
 

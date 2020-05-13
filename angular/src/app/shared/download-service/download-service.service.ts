@@ -71,6 +71,11 @@ export class DownloadService {
      **/
     download(nextZip: ZipData, zipdata: ZipData[], dataFiles: any, whichPage: any) {
         let sub = this.zipFilesDownloadingSub;
+        let preTime: number = 0;
+        let preDownloaded: number = 0;
+        let currentTime: number;
+        let currentDownloaded: number;
+
         if (whichPage == "datacart") {
             sub = this.zipFilesDownloadingDataCartSub;
         }
@@ -79,6 +84,7 @@ export class DownloadService {
         this.setDownloadStatus(nextZip, dataFiles, "downloading");
         this.increaseNumberOfDownloading(whichPage);
 
+        console.log('nextZip.bundleSize', nextZip.bundleSize);
         nextZip.downloadInstance = this.getBundle(nextZip.downloadUrl, JSON.stringify(nextZip.bundle)).subscribe(
             event => {
                 switch (event.type) {
@@ -93,8 +99,26 @@ export class DownloadService {
                         this.setFileDownloadedFlag(true);
                         break;
                     case HttpEventType.DownloadProgress:
-                        if (event.total > 0) {
-                            nextZip.downloadProgress = Math.round(100 * event.loaded / event.total);
+                        if (nextZip.bundleSize > 0) {
+                            nextZip.downloadProgress = Math.round(100 * event.loaded / nextZip.bundleSize);
+
+                            if(preTime == 0){
+                                preTime = new Date().getTime() / 1000;
+                                preDownloaded = event.loaded;
+                                currentTime = new Date().getTime() / 1000;
+                                currentDownloaded = event.loaded;
+                            }else{
+                                currentTime = new Date().getTime() / 1000;
+                                currentDownloaded = event.loaded;
+                                //Estimate download time every 10sec
+                                if(currentTime - preTime > 10) 
+                                {
+                                    nextZip.downloadTime = Math.round((nextZip.bundleSize-event.loaded)*(currentTime - preTime)/(currentDownloaded - preDownloaded));
+                                    preTime = currentTime;
+                                    preDownloaded = currentDownloaded;
+                                }
+                            }
+                            new Date().getTime() / 1000;
                         }
                         break;
                     default:
