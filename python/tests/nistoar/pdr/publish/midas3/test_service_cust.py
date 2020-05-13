@@ -187,7 +187,7 @@ class TestMIDAS3PublishingServiceDraft(test.TestCase):
 
         self.assertIn('theme', pod)
         self.assertNotEqual(len(pod['theme']), 0);
-        self.assertEqual(pod['theme'][-1], "Bioscience: Genomics")
+        self.assertEqual(pod['theme'][-1], "Bioscience-> Genomics")
 
 
 if __name__ == '__main__':
