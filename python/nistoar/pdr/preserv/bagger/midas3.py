@@ -859,13 +859,14 @@ class MIDASMetadataBagger(SIPBagger):
                                            self.hardlinkdata)
 
         # re-examine the files that have changed.
-        if examine == "async":
-            self.log.info("Launching file examiner thread")
-            self.fileExaminer.launch(whendone=whendone)
-        elif examine:
-            # do it now!
-            self.log.info("Running file examiner synchronously")
-            self.fileExaminer.run(whendone=whendone)
+        if examine and len(self.fileExaminer.files) > 0:
+            if examine == "async":
+                self.log.info("Launching file examiner thread")
+                self.fileExaminer.launch(whendone=whendone)
+            else:
+                # do it now!
+                self.log.info("Running file examiner synchronously")
+                self.fileExaminer.run(whendone=whendone)
         else:
             self._check_checksum_files()
 

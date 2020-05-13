@@ -1725,19 +1725,17 @@ class BagBuilder(PreservationSystem):
         
         oldpod = map_pod(self._bag.pod_record())
         newpod = map_pod(pod)
-        updated = []
-        added = []
-        deleted = []
-        changed = updated
+        changes = { "updated": [], "added": [], "deleted": [] }
+        chtype = "updated"
         if not os.path.exists(self._bag.nerd_file_for("")):
-            changed = added
+            chtype = "added"
 
         # if the resource level metadata has changed, update the corresponding
         # NERDm metadata.
         if force or dict(oldpod[""]) != dict(newpod[""]):
             self.add_res_nerd(nerd, False,
                        message="Updating resource-level due to change in POD");
-            changed.append("")
+            changes[chtype].append("")
 
         if updfilemd and 'distribution' in pod:
             # examine the POD metadata for each distribution; if it appears to 
@@ -1755,22 +1753,22 @@ class BagBuilder(PreservationSystem):
                 if not key:
                     continue
                 if force or dict(newpod[key]) != dict(oldpod.get(key, {})):
-                    # this distribution's pod desscription has changed; save it
+                    # this distribution's pod description has changed; save it
                     if 'filepath' not in newcomps[key]:
                         # shouldn't happen
                         self.log.warning("Unable to update component for downloadURL="+
                                          key+": missing filepath")
                         continue
 
-                    changed = updated
+                    chtype = "updated"
                     if not os.path.exists(self._bag.nerd_file_for(newcomps[key]['filepath'])):
-                        changed = added
+                        chtype = "added"
                     self.update_metadata_for(newcomps[key]['filepath'], newcomps[key])
-                    changed.append(newcomps[key]['filepath'])
+                    changes[chtype].append(newcomps[key]['filepath'])
 
-            if updated or added:
+            if changes["updated"] or changes["added"]:
                 self.log.info("Updated {} components due to POD distribution changes"
-                              .format(len(updated) + len(added)))
+                              .format(len(changes['updated']) + len(changes['added'])))
 
             # Now delete components that are not described in the POD
             oldcomps = \
@@ -1787,16 +1785,15 @@ class BagBuilder(PreservationSystem):
                         self.log.info("Deleting component with filepath=" +
                                       comp['filepath'])
                         self.remove_component(comp['filepath'], True);
-                        deleted.append(comp['filepath'])
+                        changes["deleted"].append(comp['filepath'])
 
-            if not deleted and not([p for p in updated if p]):
-                self.log.info("No changes detected in distributions: "
-                              "no components updated.")
+            if not any([len(v) for v in changes.values()]):
+                self.log.info("No changes detected in distributions: no components updated.")
 
         if savepod:
             self.save_pod(podfile or pod)
 
-        return { "updated": updated, "added": added, "deleted": deleted }
+        return changes
 
 
     def finalize_bag(self, finalcfg=None, stop_logging=False):
