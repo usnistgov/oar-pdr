@@ -189,6 +189,28 @@ class TestMIDAS3PublishingServiceDraft(test.TestCase):
         self.assertNotEqual(len(pod['theme']), 0);
         self.assertEqual(pod['theme'][-1], "Bioscience-> Genomics")
 
+    def test_get_customized_pod_wtheme(self):
+
+        podf = os.path.join(self.revdir, "1491", "_pod.json")
+        pod = utils.read_json(podf)
+        bagdir = os.path.join(self.svc.mddir, self.midasid)
+
+        self.assertTrue(not self.client.draft_exists(self.midasid))
+        self.svc.start_customization_for(pod)
+        self.assertTrue(self.client.draft_exists(self.midasid))
+
+        resp = requests.patch(custbaseurl+self.midasid,
+                              json={"theme": ["Bioscience: Genomics"]},
+                              headers={'Authorization': 'Bearer SECRET'})
+
+        self.assertEqual(resp.status_code, 201)
+        pod = self.svc.get_customized_pod(self.midasid)
+        self.assertEqual(pod['identifier'], self.midasid)
+
+        self.assertIn('theme', pod)
+        self.assertNotEqual(len(pod['theme']), 0);
+        self.assertEqual(pod['theme'][-1], "Bioscience-> Genomics")
+
 
 if __name__ == '__main__':
     test.main()

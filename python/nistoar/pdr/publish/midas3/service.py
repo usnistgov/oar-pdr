@@ -16,6 +16,7 @@ from ...preserv.bagger.midas3 import MIDASMetadataBagger, midasid_to_bagname, Pr
 from ...utils import build_mime_type_map, read_nerd, write_json
 from ....id import PDRMinter, NIST_ARK_NAAN
 from ....nerdm.convert import Res2PODds, topics2themes
+from ....nerdm.taxonomy import ResearchTopicsTaxonomy
 from ....nerdm import validate
 from .... import pdr
 from .customize import CustomizationServiceClient
@@ -490,8 +491,12 @@ class MIDAS3PublishingService(PublishSystem):
         _filter_props(data, fltrd)    # filter out properties you can't edit
 
         # if topic was updated, migrate these to theme
-        if 'topic' in fltrd and 'theme' not in fltrd:
-            fltrd['theme'] = topics2themes(fltrd['topic'], False)
+        if ('topic' in fltrd) != ('theme' in fltrd):
+            if 'topic' in fltrd:
+                fltrd['theme'] = topics2themes(fltrd['topic'], False)
+            elif self.schemadir and 'theme' in fltrd:
+                taxon = ResearchTopicsTaxonomy.from_schema_dir(self.schemadir)
+                fltrd['topic'] = taxon.themes2topics(fltrd['theme'])
         
         oldnerdm = bldr.bag.nerdm_record(mergeconv)
         newnerdm = self._validate_update(fltrd, oldnerdm, bldr, mergeconv)  # may raise InvalidRequest
