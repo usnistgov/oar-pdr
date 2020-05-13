@@ -28,7 +28,8 @@ export const config : LPSConfig = {
     appVersion:  "v1.1.0",
     production:  context.production,
     editEnabled: false,
-    gacode: "UA-66610693-14"
+    gacode: "UA-66610693-14",
+    screenSizeBreakPoint: 768
 }
 
 export const testdata : {} = { }
