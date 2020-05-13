@@ -82,7 +82,7 @@ class TestMIDAS3PublishingServiceDraft(test.TestCase):
             'auth_key': 'SECRET',
             'service_endpoint': custbaseurl,
             'merge_convention': 'midas1',
-            'updatable_properties': [ "title", "topic", "authors", "_editStatus" ]
+            'updatable_properties': [ "title", "topic", "theme", "authors", "_editStatus" ]
         }
     }
 
