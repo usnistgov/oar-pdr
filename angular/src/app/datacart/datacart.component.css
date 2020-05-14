@@ -212,6 +212,12 @@ tr {
   z-index: 999;
 }
 
+.span15 {
+    display: inline-block;
+    width: 15% !important;
+    padding-left:.5em;
+}
+
 .span30 {
     display: inline-block;
     width: 30% !important;
@@ -333,4 +339,16 @@ button:disabled{
 
 .long-text {
     overflow-wrap: break-word;
+}
+
+.overlay-title {
+    color: white; 
+    background-color: #1c4d9b;
+    width: 100%;
+    text-align: center;
+    height: 2.5em;
+    padding-top: .5em;
+    font-weight: bolder;
+    font-size: larger;
+    margin-bottom: .5em;
 }

@@ -655,10 +655,10 @@ export class DatacartComponent implements OnInit, OnDestroy {
         let bundlePlan: any[] = res.bundleNameFilePathUrl;
         let downloadUrl: any = this.distApi + res.postEachTo;
         console.log("Bundle url:", downloadUrl);
-        console.log("bundleSize", res.size);
+        let bundleSize = res.size;
 
         for (let bundle of bundlePlan) {
-            this.zipData.push({ "fileName": bundle.bundleName, "downloadProgress": 0, "downloadStatus": null, "downloadInstance": null, "bundle": bundle, "downloadUrl": downloadUrl, "downloadErrorMessage": "","bundleSize": bundle.bundleSize, 'downloadTime': 0 });
+            this.zipData.push({ "fileName": bundle.bundleName, "downloadProgress": 0, "downloadStatus": null, "downloadInstance": null, "bundle": bundle, "downloadUrl": downloadUrl, "downloadErrorMessage": "","bundleSize": bundleSize, 'downloadTime': null });
         }
         // Associate zipData with files
         for (let zip of this.zipData) {
@@ -1073,7 +1073,7 @@ export class DatacartComponent implements OnInit, OnDestroy {
     /*
     * Popup file details
     */
-    openDetails(event, fileNode: TreeNode, overlaypanel: OverlayPanel) {
+    openDetails(event, overlaypanel: OverlayPanel, fileNode: TreeNode = null ) {
         this.isNodeSelected = true;
         this.fileNode = fileNode;
         overlaypanel.hide();
@@ -1353,11 +1353,28 @@ export class DatacartComponent implements OnInit, OnDestroy {
         let minutes = Math.floor((downloadTime - hours * 3600)/60);
         let seconds = Math.floor(downloadTime - hours * 3600 - minutes * 60);
 
-        let returnFormat = seconds + "";
-        if(minutes > 0) returnFormat = minutes + ":" + returnFormat;
-        if(hours > 0) returnFormat = hours + ":" + returnFormat;
+        let returnFormat = seconds + "sec";
+        if(minutes > 0) returnFormat = minutes + "min " + returnFormat;
+        if(hours > 0) returnFormat = hours + "hour " + returnFormat;
 
         return returnFormat;
+    }
+
+    /**
+     *  Convert the file size into display format
+     * @param bundleSize - input file size in byte
+     */
+    getSizeForDisplay(bundleSize: number)
+    {
+        let displaySize = "";
+        if(bundleSize >= 1000000000)
+            displaySize = Math.round(bundleSize / 1000000000) + "GB";
+        else if(bundleSize >= 1000000)
+            displaySize = Math.round(bundleSize / 1000000) + "MB";
+        else 
+            displaySize = Math.round(bundleSize / 1000) + "KB";
+
+        return displaySize;
     }
 }
 

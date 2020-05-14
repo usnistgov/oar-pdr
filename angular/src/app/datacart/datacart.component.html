@@ -128,11 +128,15 @@
             </span>
             Zip File Name
         </span>
+        <span class="span15">File Size</span>
         Download Status
         <span class="span-end" *ngIf="!allProcessed" class="faa-stack fa-lg"
             style="cursor: pointer; display: inline-block;" (click)="cancelDownloadAll()" data-toggle="tooltip"
             title="Cancel All Downloads">
             <i class="faa faa-remove faa-stack-1x" aria-hidden="true" style="color: rgb(255, 255, 255);"></i>
+        </span>
+        <span style="float: right; margin: .2em .5em 0 0;">Estimated downloading time
+            <i class="faa faa-info-circle" (click)="openDetails($event,op5)" data-toggle="tooltip" title="Show download time help"></i>
         </span>
     </div>
     <!-- body -->
@@ -140,9 +144,13 @@
         <div [ngStyle]="{'width': '100%', 'background-color': getBackColor(i)}"
             *ngFor="let zip of zipData; let i=index">
             <span class="span30">{{zip.fileName}}</span>
-            <span class="span-end" style="width: 70%;">
-                <span style="float: right;margin-right: 0.5em;">Estimated downloading time: {{getDownloadTime(zip.downloadTime)}}
+            <span class="span15">{{getSizeForDisplay(zip.bundleSize)}}</span>
+            <span class="span-end" style="width: 55%;">
+                <span *ngIf="zip.downloadStatus === 'downloading' && zip.downloadTime != null; else calculating" style="float: right;margin-right: 0.5em;">{{getDownloadTime(zip.downloadTime)}}
                 </span>
+                <ng-template #calculating>
+                    <span *ngIf="zip.downloadStatus === 'downloading' && zip.downloadTime == null" style="float: right;margin-right: 0.5em;">Calculating...</span>
+                </ng-template>
                 <div style="display:inline-block;" *ngIf="zip.downloadStatus === 'downloading';else not_downloading">
                     <span style="display:inline-block;padding-left: .5em;">
                         <p-progressSpinner [style]="{width: '12px', height: '12px'}"></p-progressSpinner>
@@ -224,7 +232,7 @@
                         <p-treeTableToggler [rowNode]="rowNode"></p-treeTableToggler>
                         &nbsp;<p-treeTableCheckbox [value]="rowNode"></p-treeTableCheckbox>
                         <span *ngIf="rowData.isLeaf">
-                            <a (click)="openDetails($event,rowData,op3) " style="color: #1471AE; cursor: pointer;"
+                            <a (click)="openDetails($event,op3,rowData) " style="color: #1471AE; cursor: pointer;"
                                 data-toggle="tooltip" title="Click for more details">
                                 {{rowData.resTitle}} </a>
                         </span>
@@ -264,7 +272,7 @@
                             <span
                                 *ngIf="rowData.downloadStatus == 'error' || rowData.downloadStatus == 'failed'; else normal"
                                 style="cursor: pointer;"
-                                (click)="openDetails($event,rowData,op4) "><u>{{getStatusForDisplay(rowData.downloadStatus)}}</u></span>
+                                (click)="openDetails($event,op4,rowData) "><u>{{getStatusForDisplay(rowData.downloadStatus)}}</u></span>
                             <ng-template #normal>
                                 <span>{{getStatusForDisplay(rowData.downloadStatus)}}</span>
                             </ng-template>
@@ -329,4 +337,13 @@
             </div>
         </div>
     </div>
+</p-overlayPanel>
+
+<!-- Popup dialog for download time info -->
+<p-overlayPanel class="fileDialog" #op5 [dismissable]="true" [showCloseIcon]="true"
+[style]="{'display':'inline-block','position':'related','left':'50%','top':'80%','max-width':'400px'}" appendToBody=true>
+    <div class="overlay-title">
+        How download time get estimated
+    </div>
+    <div style="width: 90%;">The download time was calculated based on the data downloaded in the past 10 seconds. Depends on the download speed, the estimated download time may vary from time to time.</div>
 </p-overlayPanel>
