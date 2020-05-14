@@ -656,11 +656,9 @@ export class DatacartComponent implements OnInit, OnDestroy {
         let downloadUrl: any = this.distApi + res.postEachTo;
         console.log("Bundle url:", downloadUrl);
         console.log("bundleSize", res.size);
-        let bundleSize = res.size;
-        let tempData: any[] = [];
 
         for (let bundle of bundlePlan) {
-            this.zipData.push({ "fileName": bundle.bundleName, "downloadProgress": 0, "downloadStatus": null, "downloadInstance": null, "bundle": bundle, "downloadUrl": downloadUrl, "downloadErrorMessage": "","bundleSize": bundleSize, 'downloadTime': 0 });
+            this.zipData.push({ "fileName": bundle.bundleName, "downloadProgress": 0, "downloadStatus": null, "downloadInstance": null, "bundle": bundle, "downloadUrl": downloadUrl, "downloadErrorMessage": "","bundleSize": bundle.bundleSize, 'downloadTime': 0 });
         }
         // Associate zipData with files
         for (let zip of this.zipData) {

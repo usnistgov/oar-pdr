@@ -141,6 +141,8 @@
             *ngFor="let zip of zipData; let i=index">
             <span class="span30">{{zip.fileName}}</span>
             <span class="span-end" style="width: 70%;">
+                <span style="float: right;margin-right: 0.5em;">Estimated downloading time: {{getDownloadTime(zip.downloadTime)}}
+                </span>
                 <div style="display:inline-block;" *ngIf="zip.downloadStatus === 'downloading';else not_downloading">
                     <span style="display:inline-block;padding-left: .5em;">
                         <p-progressSpinner [style]="{width: '12px', height: '12px'}"></p-progressSpinner>
@@ -151,8 +153,7 @@
                     <span style="display:inline-block;margin-left: 0.5em;width: 100px;">
                         <ngb-progressbar type="info" [value]="zip.downloadProgress" textType="white" [showValue]="true" [striped]="true"></ngb-progressbar>
                     </span>
-                    <span style="display:inline-block;margin-left: 0.5em;">Estimated download time: {{getDownloadTime(zip.downloadTime)}}
-                    </span>
+
                     <span (click)="cancelDownloadZip(zip)"
                         style="float: right;cursor: pointer;padding-left:5px;"><i
                             class="faa faa-remove"></i></span>

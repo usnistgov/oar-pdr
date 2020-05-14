@@ -32,7 +32,7 @@ export const config: LPSConfig = {
     production: context.production,
     editEnabled: false,
     distService: "https://testdata.nist.gov/od/ds/",
-    gacode: "UA-115121490-8",
+    gacode: "not-set",
     screenSizeBreakPoint: 1060
 }
 
