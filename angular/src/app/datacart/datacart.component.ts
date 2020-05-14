@@ -655,10 +655,9 @@ export class DatacartComponent implements OnInit, OnDestroy {
         let bundlePlan: any[] = res.bundleNameFilePathUrl;
         let downloadUrl: any = this.distApi + res.postEachTo;
         console.log("Bundle url:", downloadUrl);
-        let bundleSize = res.size;
 
         for (let bundle of bundlePlan) {
-            this.zipData.push({ "fileName": bundle.bundleName, "downloadProgress": 0, "downloadStatus": null, "downloadInstance": null, "bundle": bundle, "downloadUrl": downloadUrl, "downloadErrorMessage": "","bundleSize": bundleSize, 'downloadTime': null });
+            this.zipData.push({ "fileName": bundle.bundleName, "downloadProgress": 0, "downloadStatus": null, "downloadInstance": null, "bundle": bundle, "downloadUrl": downloadUrl, "downloadErrorMessage": "","bundleSize": bundle.bundleSize, 'downloadTime': null });
         }
         // Associate zipData with files
         for (let zip of this.zipData) {
@@ -1368,11 +1367,11 @@ export class DatacartComponent implements OnInit, OnDestroy {
     {
         let displaySize = "";
         if(bundleSize >= 1000000000)
-            displaySize = Math.round(bundleSize / 1000000000) + "GB";
+            displaySize = (bundleSize / 1000000000).toFixed(2) + "GB";
         else if(bundleSize >= 1000000)
-            displaySize = Math.round(bundleSize / 1000000) + "MB";
+            displaySize = (bundleSize / 1000000).toFixed(2) + "MB";
         else 
-            displaySize = Math.round(bundleSize / 1000) + "KB";
+            displaySize = (bundleSize / 1000).toFixed(2) + "KB";
 
         return displaySize;
     }
