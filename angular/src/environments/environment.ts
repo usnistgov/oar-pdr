@@ -13,8 +13,8 @@ import { LPSConfig } from '../app/config/config';
 
 export const context = {
     production: false,
-    useMetadataService: false,
-    useCustomizationService: false
+    useMetadataService: true,
+    useCustomizationService: true
 };
 
 export const config: LPSConfig = {
@@ -24,14 +24,16 @@ export const config: LPSConfig = {
         pdrHome: "https://data.nist.gov/pdr/",
         pdrSearch: "https://data.nist.gov/sdp/"
     },
-    mdAPI: "https://oardev.nist.gov/midas/",
-    customizationAPI: "https://oardev.nist.gov/customization/",
+    mdAPI: "https://data.nist.gov/rmm/records/",
+    customizationAPI: "https://testdata.nist.gov/customization/",
     mode: "dev",
     status: "Dev Version",
     appVersion: "v1.2.X",
     production: context.production,
-    editEnabled: true,
-    gacode: "UA-115121490-8"
+    editEnabled: false,
+    distService: "https://testdata.nist.gov/od/ds/",
+    gacode: "UA-115121490-8",
+    screenSizeBreakPoint: 1060
 }
 
 export const testdata: {} = {
