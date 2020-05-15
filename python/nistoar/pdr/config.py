@@ -71,6 +71,8 @@ def load_from_file(configfile):
 
 LOG_FORMAT = "%(asctime)s %(name)s %(levelname)s: %(message)s"
 _log_handler = None
+global_logdir = None         # this is set when configure_log() is run
+global_logfile = None        # this is set when configure_log() is run
 
 def configure_log(logfile=None, level=None, format=None, config=None,
                   addstderr=False):
@@ -92,6 +94,8 @@ def configure_log(logfile=None, level=None, format=None, config=None,
                          provided as a str, it is the formatting string for 
                          messages sent to standard error.
     """
+    global global_logdir
+    global global_logfile
     if not config:
         config = {}
     if not logfile:
@@ -104,7 +108,9 @@ def configure_log(logfile=None, level=None, format=None, config=None,
         logdir = config.get('logdir', os.environ.get('OAR_LOG_DIR', deflogdir))
         if not os.path.exists(logdir):
             logdir = "/tmp"
+        global_logdir = logdir
         logfile = os.path.join(logdir, logfile)
+    global_logfile = logfile
     
     if level is None:
         level = config.get('loglevel', logging.DEBUG)

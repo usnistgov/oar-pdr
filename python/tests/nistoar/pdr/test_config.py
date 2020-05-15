@@ -103,6 +103,9 @@ class TestLogConfig(test.TestCase):
         self.assertFalse(os.path.exists(self.logfile))
 
         config.configure_log(config=cfg)
+        self.assertEqual(config.global_logdir, tmpd)
+        self.assertEqual(config.global_logfile, self.logfile)
+
         self.rootlog.warn('Oops')
         self.assertTrue(os.path.exists(self.logfile))
         with open(self.logfile) as fd:

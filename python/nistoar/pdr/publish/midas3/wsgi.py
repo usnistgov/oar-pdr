@@ -17,6 +17,7 @@ from .service import (MIDAS3PublishingService, SIPDirectoryNotFound, IDNotFound,
 from .webrecord import WebRecorder
 from ....id import NIST_ARK_NAAN
 from ejsonschema import ValidationError
+from ... import config as cfgmod
 
 log = logging.getLogger(PublishSystem().subsystem_abbrev).getChild("pubserv")
 
@@ -62,6 +63,8 @@ class MIDAS3PublishingApp(object):
         self._recorder = None
         wrlogf = config.get('record_to')
         if wrlogf:
+            if not os.path.isabs(wrlogf) and cfgmod.global_logdir:
+                wrlogf = os.path.join(cfgmod.global_logdir, wrlogf)
             self._recorder = WebRecorder(wrlogf, "pubserver")
 
         self.base_path = asre(config.get('base_path', DEF_BASE_PATH))
