@@ -14,6 +14,7 @@ from collections import OrderedDict
 from .. import PublishSystem, PDRServerError
 from .service import (MIDAS3PublishingService, SIPDirectoryNotFound, IDNotFound,
                       ConfigurationException, StateException, InvalidRequest)
+from .webrecord import WebRecorder
 from ....id import NIST_ARK_NAAN
 from ejsonschema import ValidationError
 
@@ -57,6 +58,12 @@ class MIDAS3PublishingApp(object):
         if level:
             log.setLevel(level)
 
+        # log input messages
+        self._recorder = None
+        wrlogf = config.get('record_to')
+        if wrlogf:
+            self._recorder = WebRecorder(wrlogf, "pubserver")
+
         self.base_path = asre(config.get('base_path', DEF_BASE_PATH))
         self.draft_res = asre(config.get('draft_path', '/draft/'))
         self.latest_res = asre(config.get('draft_path', '/latest/'))
@@ -67,18 +74,21 @@ class MIDAS3PublishingApp(object):
 
     def handle_request(self, env, start_resp):
         handler = None
+        req = None
+        if self._recorder:
+            req = self._recorder.from_wsgi(env)
         path = env.get('PATH_INFO', '/')
         if self.base_path.match(path):
             path = self.base_path.sub('/', path)
             if self.draft_res.match(path):
                 path = self.draft_res.sub('', path)
-                handler = DraftHandler(path, self.pubsvc, env, start_resp, self._authkey)
+                handler = DraftHandler(path, self.pubsvc, env, start_resp, self._authkey, req)
             elif self.latest_res.match(path):
                 path = self.latest_res.sub('', path)
-                handler = LatestHandler(path, self.pubsvc, env, start_resp, self._authkey)
+                handler = LatestHandler(path, self.pubsvc, env, start_resp, self._authkey, req)
 
         if not handler:
-            handler = Handler(path, env, start_resp)
+            handler = Handler(path, env, start_resp, self._authkey, req)
         return handler.handle()
 
     def __call__(self, env, start_resp):
@@ -96,7 +106,7 @@ class Handler(object):
     handlers specialized for the supported resource paths.
     """
 
-    def __init__(self, path, wsgienv, start_resp, auth=None):
+    def __init__(self, path, wsgienv, start_resp, auth=None, req=None):
         self._path = path
         self._env = wsgienv
         self._start = start_resp
@@ -104,6 +114,7 @@ class Handler(object):
         self._code = 0
         self._msg = "unknown status"
         self._authkey = auth
+        self._reqrec = req
 
         self._meth = self._env.get('REQUEST_METHOD', 'GET')
 
@@ -160,11 +171,15 @@ class Handler(object):
         if hasattr(self, meth_handler):
             return getattr(self, meth_handler)(self._path)
         else:
+            if self._reqrec:
+                self._reqrec.record()
             return self.send_error(405, self._meth +
                                    " not supported on this resource")
 
 
     def do_GET(self, path):
+        if self._reqrec:
+            self._reqrec.record()
         if path and path != "/":
            return self.send_error(404, "Resource does not exist")
 
@@ -180,11 +195,13 @@ class DraftHandler(Handler):
     to the customization service.
     """
 
-    def __init__(self, path, service, wsgienv, start_resp, auth=None):
-        super(DraftHandler, self).__init__(path, wsgienv, start_resp, auth)
+    def __init__(self, path, service, wsgienv, start_resp, auth=None, req=None):
+        super(DraftHandler, self).__init__(path, wsgienv, start_resp, auth, req)
         self._svc = service
 
     def do_GET(self, path):
+        if self._reqrec:
+            self._reqrec.record()
         if not self.authorized():
             return self.send_error(401, "Unauthorized")
         
@@ -256,17 +273,29 @@ class DraftHandler(Handler):
         try:
             bodyin = self._env.get('wsgi.input')
             if bodyin is None:
+                if self._reqrec:
+                    self._reqrec.record()
                 return send_error(400, "Missing input POD document")
-            if log.isEnabledFor(logging.DEBUG):
+            if log.isEnabledFor(logging.DEBUG) or self._reqrec:
                 body = bodyin.read()
                 pod = json.loads(body, object_pairs_hook=OrderedDict)
             else:
                 pod = json.load(bodyin, object_pairs_hook=OrderedDict)
+            if self._reqrec:
+                self._reqrec.add_body_text(json.dumps(pod, indent=2)).record()
+
         except (ValueError, TypeError) as ex:
             if log.isEnabledFor(logging.DEBUG):
                 log.error("Failed to parse input: %s", str(ex))
                 log.debug("\n%s", body)
+            if self._reqrec:
+                self._reqrec.add_body_text(body).record()
             return self.send_error(400, "Input not parseable as JSON")
+
+        except Exception as ex:
+            if self._reqrec:
+                self._reqrec.add_body_text(body).record()
+            raise
 
         if 'identifier' not in pod:
             return self.send_error(400, "Input POD missing required identifier property")
@@ -291,6 +320,8 @@ class DraftHandler(Handler):
 
 
     def do_DELETE(self, path):
+        if self._reqrec:
+            self._reqrec.record()
         if not self.authorized():
             return self.send_error(401, "Unauthorized")
         
@@ -328,8 +359,8 @@ class LatestHandler(Handler):
     to the PDR.
     """
 
-    def __init__(self, path, service, wsgienv, start_resp, auth=None):
-        super(LatestHandler, self).__init__(path, wsgienv, start_resp, auth)
+    def __init__(self, path, service, wsgienv, start_resp, auth=None, req=None):
+        super(LatestHandler, self).__init__(path, wsgienv, start_resp, auth, req)
         self._svc = service
 
     def do_POST(self, path):
@@ -345,9 +376,24 @@ class LatestHandler(Handler):
         try:
             bodyin = self._env.get('wsgi.input')
             if bodyin is None:
+                if self._reqrec:
+                    self._reqrec.record()
                 return send_error(400, "Missing input POD document")
-            pod = json.load(bodyin, object_pairs_hook=OrderedDict)
+
+            if log.isEnabledFor(logging.DEBUG) or self._reqrec:
+                body = bodyin.read()
+                pod = json.loads(body, object_pairs_hook=OrderedDict)
+            else:
+                pod = json.load(bodyin, object_pairs_hook=OrderedDict)
+            if self._reqrec:
+                self._reqrec.add_body_text(json.dumps(pod, indent=2)).record()
+
         except (ValueError, TypeError) as ex:
+            if log.isEnabledFor(logging.DEBUG):
+                log.error("Failed to parse input: %s", str(ex))
+                log.debug("\n%s", body)
+            if self._reqrec:
+                self._reqrec.add_body_text(body).record()
             return self.send_error(400, "Input not parseable as JSON")
 
         if 'identifier' not in pod:
@@ -369,6 +415,8 @@ class LatestHandler(Handler):
 
 
     def do_GET(self, path):
+        if self._reqrec:
+            self._reqrec.record()
         if not self.authorized():
             return self.send_error(401, "Unauthorized")
         
@@ -399,6 +447,6 @@ class LatestHandler(Handler):
 
         return [ pod ]
 
-        
-        
-    
+
+
+
