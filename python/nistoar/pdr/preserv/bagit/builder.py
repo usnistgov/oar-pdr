@@ -1417,7 +1417,7 @@ class BagBuilder(PreservationSystem):
         if not comptype:
             comptype = self._determine_file_comp_type(srcpath)
 
-        if asupdate and os.path.exists(self.bag.nerd_file_for(destpath)):
+        if asupdate and self.bag and os.path.exists(self.bag.nerd_file_for(destpath)):
             # TODO: what if comptype has changed?
             mdata = self.bag.nerd_metadata_for(destpath, True)
         else:
