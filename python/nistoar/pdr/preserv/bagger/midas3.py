@@ -759,8 +759,8 @@ class MIDASMetadataBagger(SIPBagger):
             raise NERDTypeError("dict", type(pod), "POD Dataset")
         self.ensure_base_bag()
 
-        log.info("BagBuilder log has %s formatters:\n%s", len(self.bagbldr.log.handlers),
-                 "\n".join([str(h.stream) for h in self.bagbldr.log.handlers]))
+        log.debug("BagBuilder log has %s formatters:\n%s", len(self.bagbldr.log.handlers),
+                  "\n".join([str(h.stream) for h in self.bagbldr.log.handlers]))
 
         podfile = None
         if not isinstance(pod, Mapping):

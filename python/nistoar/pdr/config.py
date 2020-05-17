@@ -124,7 +124,16 @@ def configure_log(logfile=None, level=None, format=None, config=None,
     _log_handler.setFormatter(frmtr)
     rootlogger = logging.getLogger()
     rootlogger.addHandler(_log_handler)
-    rootlogger.setLevel(logging.DEBUG)
+    rootlogger.setLevel(logging.DEBUG-1)
+
+    # jsonmerge is way too chatty at the DEBUG level
+    if level >= logging.DEBUG:
+        jmlevel = max(level, logging.INFO)
+        logging.getLogger("jsonmerge").setLevel(jmlevel)
+
+    # filelock is one level too chatty
+    if level >= logging.DEBUG:
+        logging.getLogger("filelock").setLevel(level+10)
 
     if addstderr:
         if not isinstance(addstderr, (str, unicode)):
