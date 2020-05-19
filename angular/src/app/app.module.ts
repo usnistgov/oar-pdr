@@ -67,6 +67,7 @@ import { DatePipe } from '@angular/common';
 
 // used to create fake backend
 import { fakeBackendProvider } from './_helpers/fakeBackendInterceptor';
+import { DownloadConfirmComponent } from './datacart/download-confirm/download-confirm.component';
 
 @NgModule({
   declarations: [
@@ -75,7 +76,7 @@ import { fakeBackendProvider } from './_helpers/fakeBackendInterceptor';
     AuthorPopupComponent, ContactPopupComponent,
     ErrorComponent, UserErrorComponent,ComboBoxComponent,ComboBoxPipe,
     AppShellNoRenderDirective, AppShellRenderDirective, ModalComponent, ContenteditableModel, 
-    LandingAboutComponent
+    LandingAboutComponent, DownloadConfirmComponent
   ],
   imports: [
       HttpClientModule,
@@ -125,7 +126,8 @@ import { fakeBackendProvider } from './_helpers/fakeBackendInterceptor';
     SearchTopicsComponent, 
     DescriptionPopupComponent, 
     AuthorPopupComponent,
-    ContactPopupComponent
+    ContactPopupComponent,
+    DownloadConfirmComponent
   ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA]
 })

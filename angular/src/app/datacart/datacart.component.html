@@ -76,6 +76,99 @@
     </div>
 </div>
 
+<!-- Display zip files if any -->
+<!-- header -->
+<div class="full-span">
+    <div *ngIf="zipData.length > 0" class="header-green" style="width: 100%;" data-toggle="tooltip" title="Zip Files">
+        <span class="span30">
+            <!-- Toggle button to show/hide zip files-->
+            <span (click)="showZipFiles = !showZipFiles">
+                <i *ngIf="!showZipFiles" class="faa faa-arrow-circle-down faa-1x icon-white"
+                    style="cursor: pointer;color: rgb(255, 255, 255);" data-toggle="tooltip" title="Expand All"></i>
+                <i *ngIf="showZipFiles" class="faa faa-arrow-circle-up faa-1x icon-white"
+                    style="cursor: pointer;color: rgb(255, 255, 255);" data-toggle="tooltip" title="Collapse All"></i>
+            </span>
+            Zip File Name
+        </span>
+        <span class="span15">Zip File Size</span>
+        Download Status
+        <span style="float: right; margin: .2em .5em 0 0;">Estimated downloading time
+            <i class="faa faa-info-circle" (click)="openDetails($event,op5)" data-toggle="tooltip"
+                title="Show download time help"></i>
+        </span>
+    </div>
+    <!-- body -->
+    <div class="unhandled-files" *ngIf="showZipFiles">
+        <div [ngStyle]="{'width': '100%', 'background-color': getBackColor(i)}"
+            *ngFor="let zip of zipData; let i=index">
+            <span class="span30">{{zip.fileName}}</span>
+            <span class="span15">{{commonFunctionService.getSizeForDisplay(zip.bundleSize)}}</span>
+            <span class="span-end" style="width: 55%;">
+                <span *ngIf="zip.downloadStatus === 'downloading' && zip.downloadTime != null; else calculating"
+                    style="float: right;margin-right: 0.5em;">{{getDownloadTime(zip.downloadTime)}}
+                </span>
+                <ng-template #calculating>
+                    <span *ngIf="zip.downloadStatus === 'downloading' && zip.downloadTime == null"
+                        style="float: right;margin-right: 0.5em;">Calculating...</span>
+                </ng-template>
+                <div style="display:inline-block;" *ngIf="zip.downloadStatus === 'downloading';else not_downloading">
+                    <span style="display:inline-block;padding-left: .5em;">
+                        <p-progressSpinner [style]="{width: '12px', height: '12px'}"></p-progressSpinner>
+                    </span>
+                    <span style="display:inline-block;margin-left: 0.5em;">
+                        {{getStatusForDisplay(zip.downloadStatus)}}
+                    </span>
+                    <span style="display:inline-block;margin-left: 0.5em;width: 100px;">
+                        <ngb-progressbar type="info" [value]="zip.downloadProgress" textType="white" [showValue]="true"
+                            [striped]="true"></ngb-progressbar>
+                    </span>
+
+                    <span (click)="cancelDownloadZip(zip)" style="float: right;cursor: pointer;padding-left:5px;"><i
+                            class="faa faa-remove"></i></span>
+                </div>
+                <ng-template #not_downloading style="display:inline-block;">
+                    <div *ngIf="zip.downloadStatus != 'error'; else download_error" style="display:inline-block;"
+                        [ngStyle]="{'color':getDownloadStatusColor(zip.downloadStatus)}">
+                        <i [class]="getIconClass(zip.downloadStatus)" style="margin-top: 8px;"></i>
+                        {{getStatusForDisplay(zip.downloadStatus)}}
+                    </div>
+                    <ng-template #download_error>
+                        <div style="display:inline-block;margin-left: .5em;font-size: 0.8em; color: red">
+                            <i class="faa faa-warning" [ngStyle]="{'padding-right':'.5em', 'margin-top':'8px'}"></i>
+                            {{getStatusForDisplay(zip.downloadStatus)}}
+                        </div>
+                    </ng-template>
+                    <i *ngIf="zip.downloadStatus != null" class="faa faa-repeat"
+                        style="display: inline-block; margin-left: .5em; font-size: 0.8em; color: #1E6BA1; cursor: pointer;"
+                        data-toggle="tooltip" title="Retry" (click)="downloadOneZip(zip)"></i>
+                </ng-template>
+            </span>
+        </div>
+    </div>
+
+    <!-- Overall progress -->
+    <div *ngIf="overallStatus != null" style="background-color: rgb(170, 212, 189);">
+        <span class="span30">Overall progress</span>
+        <span class="span15">{{commonFunctionService.getSizeForDisplay(totalDownloadSize)}}</span>
+        <span class="span-end" style="width: 55%;">
+            <span *ngIf="overallStatus === 'downloading'"
+                style="float: right;margin-right: 0.5em;">{{getDownloadTime(overallDownloadTime)}}
+            </span>
+            <div style="display:inline-block;" *ngIf="overallStatus === 'downloading';else not_overall_downloading">
+                <span style="display:inline-block;margin-left: 0.5em;width: 100px;">
+                    <ngb-progressbar type="info" [value]="overallProgress" textType="white" [showValue]="true"
+                        [striped]="true"></ngb-progressbar>
+                </span>
+                <span (click)="cancelDownloadAll()" style="float: right;cursor: pointer;padding-left:5px;"><i
+                        class="faa faa-remove"></i></span>
+            </div>
+            <ng-template #not_overall_downloading style="display:inline-block;">
+                {{getStatusForDisplay(overallStatus)}}
+            </ng-template>
+        </span>
+    </div>
+</div>
+
 <!-- Display bundle message details -->
 <div class="full-span"
     *ngIf="bundlePlanStatus == 'error' || bundlePlanStatus == 'internal error' || bundlePlanStatus === 'warnings'">
@@ -111,78 +204,6 @@
                 {{msg}}
             </div>
         </ng-template>
-    </div>
-</div>
-
-<!-- Display zip files if any -->
-<!-- header -->
-<div class="full-span">
-    <div *ngIf="zipData.length > 0" class="header-green" style="width: 100%;" data-toggle="tooltip" title="Zip Files">
-        <span class="span30">
-            <!-- Toggle button to show/hide zip files-->
-            <span (click)="showZipFiles = !showZipFiles">
-                <i *ngIf="!showZipFiles" class="faa faa-arrow-circle-down faa-1x icon-white"
-                    style="cursor: pointer;color: rgb(255, 255, 255);" data-toggle="tooltip" title="Expand All"></i>
-                <i *ngIf="showZipFiles" class="faa faa-arrow-circle-up faa-1x icon-white"
-                    style="cursor: pointer;color: rgb(255, 255, 255);" data-toggle="tooltip" title="Collapse All"></i>
-            </span>
-            Zip File Name
-        </span>
-        <span class="span15">File Size</span>
-        Download Status
-        <span class="span-end" *ngIf="!allProcessed" class="faa-stack fa-lg"
-            style="cursor: pointer; display: inline-block;" (click)="cancelDownloadAll()" data-toggle="tooltip"
-            title="Cancel All Downloads">
-            <i class="faa faa-remove faa-stack-1x" aria-hidden="true" style="color: rgb(255, 255, 255);"></i>
-        </span>
-        <span style="float: right; margin: .2em .5em 0 0;">Estimated downloading time
-            <i class="faa faa-info-circle" (click)="openDetails($event,op5)" data-toggle="tooltip" title="Show download time help"></i>
-        </span>
-    </div>
-    <!-- body -->
-    <div class="unhandled-files" *ngIf="showZipFiles">
-        <div [ngStyle]="{'width': '100%', 'background-color': getBackColor(i)}"
-            *ngFor="let zip of zipData; let i=index">
-            <span class="span30">{{zip.fileName}}</span>
-            <span class="span15">{{getSizeForDisplay(zip.bundleSize)}}</span>
-            <span class="span-end" style="width: 55%;">
-                <span *ngIf="zip.downloadStatus === 'downloading' && zip.downloadTime != null; else calculating" style="float: right;margin-right: 0.5em;">{{getDownloadTime(zip.downloadTime)}}
-                </span>
-                <ng-template #calculating>
-                    <span *ngIf="zip.downloadStatus === 'downloading' && zip.downloadTime == null" style="float: right;margin-right: 0.5em;">Calculating...</span>
-                </ng-template>
-                <div style="display:inline-block;" *ngIf="zip.downloadStatus === 'downloading';else not_downloading">
-                    <span style="display:inline-block;padding-left: .5em;">
-                        <p-progressSpinner [style]="{width: '12px', height: '12px'}"></p-progressSpinner>
-                    </span>
-                    <span style="display:inline-block;margin-left: 0.5em;">
-                        {{getStatusForDisplay(zip.downloadStatus)}}
-                    </span>
-                    <span style="display:inline-block;margin-left: 0.5em;width: 100px;">
-                        <ngb-progressbar type="info" [value]="zip.downloadProgress" textType="white" [showValue]="true" [striped]="true"></ngb-progressbar>
-                    </span>
-
-                    <span (click)="cancelDownloadZip(zip)"
-                        style="float: right;cursor: pointer;padding-left:5px;"><i
-                            class="faa faa-remove"></i></span>
-                </div>
-                <ng-template #not_downloading style="display:inline-block;" >
-                    <div *ngIf="zip.downloadStatus != 'error'; else download_error" style="display:inline-block;" [ngStyle]="{'color':getDownloadStatusColor(zip.downloadStatus)}">
-                        <i [class]="getIconClass(zip.downloadStatus)" style="margin-top: 8px;"></i>
-                        {{getStatusForDisplay(zip.downloadStatus)}}
-                    </div>
-                    <ng-template #download_error>
-                        <div style="display:inline-block;margin-left: .5em;font-size: 0.8em; color: red">
-                            <i class="faa faa-warning" [ngStyle]="{'padding-right':'.5em', 'margin-top':'8px'}"></i>
-                            {{getStatusForDisplay(zip.downloadStatus)}}
-                        </div>
-                    </ng-template>
-                    <i *ngIf="zip.downloadStatus != null" class="faa faa-repeat"
-                        style="display: inline-block; margin-left: .5em; font-size: 0.8em; color: #1E6BA1; cursor: pointer;"
-                        data-toggle="tooltip" title="Retry" (click)="downloadOneZip(zip)"></i>
-                </ng-template>
-            </span>
-        </div>
     </div>
 </div>
 
@@ -244,13 +265,16 @@
                     </td>
                     <td [ngStyle]="sizeStyle()">
                         <div *ngIf="rowData.isLeaf;else space_holder" style="display:inline;">
-                            <a href='{{rowData.downloadUrl}}' target='_blank' download="download" data-toggle="tooltip"
+                            <a *ngIf="rowData.downloadStatus != 'downloading'" href='{{rowData.downloadUrl}}' target='_blank' download="download" data-toggle="tooltip" 
                                 title="Download this file" aria-label="Download this file">
-                                <i class="faa faa-download" *ngIf="rowData.downloadStatus != 'downloading'"
+                                <i class="faa faa-download"
                                     aria-hidden="true" (click)="setFileDownloaded(rowData)"></i>
-                                <i class="faa faa-download blinking" *ngIf="rowData.downloadStatus == 'downloading'"
-                                    aria-hidden="true"></i>
                             </a>
+                            <a *ngIf="rowData.downloadStatus == 'downloading'" data-toggle="tooltip" 
+                            title="Download this file" aria-label="Download this file">
+                            <i class="faa faa-download"
+                                aria-hidden="true"></i>
+                        </a>
                         </div>
                         <ng-template #space_holder>
                             <div style="display:inline;padding-right: 0.4em;">&nbsp;&nbsp;</div>
@@ -266,7 +290,7 @@
                         <div id="downloadstatus" *ngIf="rowData.isLeaf" style="display:inline;"
                             [ngStyle]="{'color':getDownloadStatusColor(rowData.downloadStatus)}">
                             <i [class]="getIconClass(rowData.downloadStatus)" style="margin-right: .5em;"
-                            aria-hidden="true" data-toggle="tooltip" title="{{rowData.downloadStatus}}"></i>
+                                aria-hidden="true" data-toggle="tooltip" title="{{rowData.downloadStatus}}"></i>
                             <p-progressSpinner *ngIf="rowData.downloadStatus == 'downloading'"
                                 [style]="{width: '12px', height: '12px', 'margin-right': '.5em'}"></p-progressSpinner>
                             <span
@@ -326,7 +350,8 @@
 
 <!-- Popup dialog for download details -->
 <p-overlayPanel class="fileDialog" #op4 [dismissable]="true" [showCloseIcon]="true"
-[style]="{'display':'inline-block','position':'related','left':'50%','top':'80%','max-width':'400px'}" appendToBody=true>
+    [style]="{'display':'inline-block','position':'related','left':'50%','top':'80%','max-width':'400px'}"
+    appendToBody=true>
     <div class="filecard">
         <div class="ui-g filesection">
             <div *ngIf="fileNode" class="ui-g-12 ui-md-12 ui-lg-12 ui-sm-10">
@@ -341,9 +366,11 @@
 
 <!-- Popup dialog for download time info -->
 <p-overlayPanel class="fileDialog" #op5 [dismissable]="true" [showCloseIcon]="true"
-[style]="{'display':'inline-block','position':'related','left':'50%','top':'80%','max-width':'400px'}" appendToBody=true>
+    [style]="{'display':'inline-block','position':'related','left':'50%','top':'80%','max-width':'400px'}"
+    appendToBody=true>
     <div class="overlay-title">
         How download time get estimated
     </div>
-    <div style="width: 90%;">The download time was calculated based on the data downloaded in the past 10 seconds. Depends on the download speed, the estimated download time may vary from time to time.</div>
+    <div style="width: 90%;">The download time was calculated based on the data downloaded in the past 20 seconds.
+        Depends on the download speed, the estimated download time may vary from time to time.</div>
 </p-overlayPanel>
