@@ -225,7 +225,9 @@ class MIDAS3PublishingService(PublishSystem):
         synchronously, but file examination is asynchronously.  
         """
         # First validate the POD
-        self._validate_pod(pod)     
+        if self.cfg.get('require_valid_pod'):
+            self._validate_pod(pod)
+
         return self._apply_pod_async(pod, async)
 
     def _validate_pod(self, pod):
@@ -357,7 +359,10 @@ class MIDAS3PublishingService(PublishSystem):
         if not id:
             raise ValueError("POD is missing required property, identifier")
 
-        self._validate_pod(pod)
+        if self.cfg.get('require_valid_pod'):
+            self._validate_pod(pod)
+        else:
+            self._add_minimal_pod_data(pod)
 
         self._apply_pod_async(pod, True)
         worker = self._bagging_workers.get(id)

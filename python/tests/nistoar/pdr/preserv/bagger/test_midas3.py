@@ -315,6 +315,17 @@ class TestMIDASMetadataBaggerMixed(test.TestCase):
         self.assertEqual(len(data['@context']), 2)
         self.assertEqual(data['@context'][1]['@base'], data['@id'])
 
+    def test_apply_minpod(self):
+        pod = {"identifier": self.midasid}
+
+        self.bagr.apply_pod(pod, False)
+
+        self.assertTrue(os.path.exists(self.bagr.bagdir))
+        self.assertTrue(os.path.exists(self.bagr.bagbldr.bag.pod_file()))
+        self.assertTrue(os.path.exists(self.bagr.bagbldr.bag.nerd_file_for("")))
+        self.assertEqual(self.bagr.sip.nerd.get('title'), "")
+        self.assertEqual(self.bagr.sip.nerd.get('description'), [])
+
     def test_done(self):
         self.assertTrue(not os.path.exists(self.bagr.bagdir))
         self.assertTrue(not os.path.exists(self.bagr.bagdir+".lock"))

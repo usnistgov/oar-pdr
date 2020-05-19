@@ -775,6 +775,8 @@ class MIDASMetadataBagger(SIPBagger):
                                  strict=True, raiseex=True)
             else:
                 self.log.warning("Unable to validate submitted POD data")
+        else:
+            self._add_minimal_pod_data(pod)
 
         # determine if the pod record has changed
         oldpod = self.bagbldr.bag.pod_record()
@@ -790,6 +792,12 @@ class MIDASMetadataBagger(SIPBagger):
             self.sip.nerd = self.bagbldr.bag.nerdm_record(True)
             self.datafiles = self.sip.registered_files()
       
+    def _add_minimal_pod_data(self, pod):
+        if 'description' not in pod:
+            pod['description'] = ""
+        if 'title' not in pod:
+            pod['title'] = ""
+
     def _get_ejs_flavor(self, data):
         """
         return the prefix (or a default) used to identify meta-properties
