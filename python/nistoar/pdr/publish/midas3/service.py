@@ -4,6 +4,7 @@ It is designed to operate on SIP work areas created and managed by MIDAS for pub
 """
 import os, logging, re, json, copy, time, threading
 from collections import Mapping, OrderedDict
+from copy import deepcopy
 
 from .. import PublishSystem
 from ...exceptions import (ConfigurationException, StateException,
@@ -555,7 +556,20 @@ class MIDAS3PublishingService(PublishSystem):
         for prop in [p for p in updata.keys() if p.startswith('_')]:
             updated[prop] = updata[prop]
 
-        errs = self._validate_nerdm(updated, bagbldr.cfg.get('validator', {}))
+        # we will validate a version of the nerdm with minimal defaults added in
+        checked = deepcopy(updated)
+        if not checked.get('contactPoint'):
+            checked['contactPoint'] = OrderedDict([("@type", "vcard:Contact")])
+        checked['contactPoint'].setdefault('fn',"_")
+        checked['contactPoint'].setdefault('hasEmail',"mailto:a@b.c")
+        if not checked.get('keyword'):
+            checked['keyword'] = []
+        if len(checked['keyword']) == 0 or checked['keyword'] == [""]:
+            checked['keyword'] = ['k']
+        if not checked.get('modified'):
+            checked['modified'] = '0000-01-01'
+
+        errs = self._validate_nerdm(checked, bagbldr.cfg.get('validator', {}))
         if len(errs) > 0:
             self.log.error("User update will make record invalid " +
                            "(see INFO details below)")

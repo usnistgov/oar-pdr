@@ -1724,6 +1724,8 @@ class BagBuilder(PreservationSystem):
         if not useid and '@id' in nerd:
             self.log.warning("ARK identifier not set for resource")
             del nerd['@id']
+        if len(nerd.get('description',[])) < 1:
+            nerd['description'] = [""]
 
         # load the old POD metadata for comparison
         def map_pod(podmd):

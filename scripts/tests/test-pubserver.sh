@@ -12,7 +12,7 @@ function help {
     echo ${prog} -- launch a pubserver server and send it to some test requests
     cat <<EOF
 
-Usage: $prog [OPTION ...]
+Usage: $prog [OPTION ...] [PODFILE ...]
 
 Options:
    --change-dir | -C DIR    change into DIR before launch service.  All path 
@@ -32,6 +32,9 @@ Options:
    --quiet | -q             suppress most status messages 
    --verbose | -v           print extra messages about internals
    --help                   print this help message
+
+Arguments:
+   PODFILE                  path to a pod file to test against the service
 EOF
 }
 
@@ -305,6 +308,11 @@ launch_servers
 trap stop_servers SIGKILL SIGINT
 
 set +e
+totfailures=0
+totcount=0
+failures=0
+count=2
+tell  Testing failure modes
 #set -x
 curlcmd=(curl -s -w '%{http_code}\n' -H 'Authorization: Bearer secret' http://localhost:9090/pod/latest/mds2-1000)
 respcode=`"${curlcmd[@]}"`
@@ -313,9 +321,21 @@ respcode=`"${curlcmd[@]}"`
     tell FAILED
     tell "${curlcmd[@]}"
     tell "Non-existent record does not produce 404 response:" $respcode
+    ((failures += 1))
+}
+
+curlcmd=(curl -s -w '%{http_code}\n' -H 'Authorization: Bearer secret' -H 'Content-type: application/json' --data '{}' http://localhost:9090/pod/latest)
+respcode=`"${curlcmd[@]}"`
+[ "$respcode" == "400" ] || {
+    tell '---------------------------------------'
+    tell FAILED
+    tell "${curlcmd[@]}"
+    tell "Empty record does not produce 400 response:" $respcode
+    ((failures += 1))
 }
 
 [ -z "$withmdserver" ] || {
+    ((count += 1))
     curlcmd=(curl -s -w '%{http_code}\n' http://localhost:9092/midas/mds2-1000)
     respcode=`"${curlcmd[@]}"`
     [ "$respcode" == "404" ] || {
@@ -323,12 +343,19 @@ respcode=`"${curlcmd[@]}"`
         tell FAILED
         tell "${curlcmd[@]}"
         tell "Non-existent record does not produce 404 response:" $respcode
+        ((failures += 1))
     }
 }
 
+(( passed = count - failures ))
+tell '###########################################'
+tell  failure modes
+tell  $count tests, $failures failures, $passed successes
+tell '###########################################'
+(( totfailures += failures ))
+(( totcount += count ))
+
 # run the tests against the server
-totfailures=0
-totcount=0
 for pod in "${pods[@]}"; do
     failures=0
     count=0

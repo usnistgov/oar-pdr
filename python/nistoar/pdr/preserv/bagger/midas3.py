@@ -53,6 +53,18 @@ _NO_UPDATE    = 0
 _MDATA_UPDATE = 1
 _DATA_UPDATE  = 2
 
+_minimal_pod = OrderedDict([
+    ("title", ""),
+    ("description", ""),
+    ("publisher", OrderedDict([
+        ("name", "National Institute of Standards and Technology"),
+        ("@type", "org:Organization")
+    ])),
+    ("accessLevel", "public"),
+    ("bureauCode", []),
+    ("programCode", [])
+])
+
 def _midadid_to_dirname(midasid, log=None):
     out = midasid
 
@@ -793,10 +805,9 @@ class MIDASMetadataBagger(SIPBagger):
             self.datafiles = self.sip.registered_files()
       
     def _add_minimal_pod_data(self, pod):
-        if 'description' not in pod:
-            pod['description'] = ""
-        if 'title' not in pod:
-            pod['title'] = ""
+        for key in _minimal_pod:
+            if key not in pod:
+                pod[key] = _minimal_pod[key]
 
     def _get_ejs_flavor(self, data):
         """

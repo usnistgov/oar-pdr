@@ -122,6 +122,23 @@ class TestMIDAS3PublishingServiceDraft(test.TestCase):
         self.svc.end_customization_for(self.midasid)
         self.assertTrue(not self.client.draft_exists(self.midasid))
 
+    def test_start_customization_for_emptypod(self):
+        self.assertTrue(not self.client.draft_exists(self.midasid))
+        with self.assertRaises(ValueError):
+            self.svc.start_customization_for({})
+        self.assertTrue(not self.client.draft_exists(self.midasid))
+
+    def test_start_customization_for_minpod(self):
+        bagdir = os.path.join(self.svc.mddir, self.midasid)
+        pod = {"identifier": self.midasid}
+        self.assertTrue(not self.client.draft_exists(self.midasid))
+        
+        self.svc.start_customization_for(pod)
+        self.assertTrue(self.client.draft_exists(self.midasid))
+
+        self.svc.end_customization_for(self.midasid)
+        self.assertTrue(not self.client.draft_exists(self.midasid))
+
     def test_get_customized_pod(self):
         podf = os.path.join(self.revdir, "1491", "_pod.json")
         pod = utils.read_json(podf)
@@ -210,6 +227,26 @@ class TestMIDAS3PublishingServiceDraft(test.TestCase):
         self.assertIn('theme', pod)
         self.assertNotEqual(len(pod['theme']), 0);
         self.assertEqual(pod['theme'][-1], "Bioscience-> Genomics")
+
+    def test_get_customized_minnpod(self):
+        bagdir = os.path.join(self.svc.mddir, self.midasid)
+        pod = {"identifier": self.midasid}
+        self.assertTrue(not self.client.draft_exists(self.midasid))
+        
+        self.svc.start_customization_for(pod)
+        self.assertTrue(self.client.draft_exists(self.midasid))
+
+        pod = self.svc.get_customized_pod(self.midasid)
+        self.assertEqual(pod['title'], "")
+        resp = requests.patch(custbaseurl+self.midasid, json={"title": "Goobers!"},
+                              headers={'Authorization': 'Bearer SECRET'})
+        self.assertEqual(resp.status_code, 201)
+
+        pod = self.svc.get_pod(self.midasid)
+        self.assertNotEqual(pod['title'], "Goobers!")
+        pod = self.svc.get_customized_pod(self.midasid)
+        self.assertEqual(pod['title'], "Goobers!")
+        self.assertEqual(pod['_editStatus'], "in progress")
 
 
 if __name__ == '__main__':
