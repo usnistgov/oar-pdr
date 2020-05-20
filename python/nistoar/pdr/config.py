@@ -73,6 +73,17 @@ LOG_FORMAT = "%(asctime)s %(name)s %(levelname)s: %(message)s"
 _log_handler = None
 global_logdir = None         # this is set when configure_log() is run
 global_logfile = None        # this is set when configure_log() is run
+_log_levels_byname = {
+    "NOTSET":   logging.NOTSET,
+    "DEBUG":    logging.DEBUG,
+    "NORM":     15,
+    "NORMAL":   15,
+    "INFO":     logging.INFO,
+    "WARN":     logging.WARNING,
+    "WARNING":  logging.WARNING,
+    "ERROR":    logging.ERROR,
+    "CRITICAL": logging.CRITICAL
+}
 
 def configure_log(logfile=None, level=None, format=None, config=None,
                   addstderr=False):
@@ -114,6 +125,11 @@ def configure_log(logfile=None, level=None, format=None, config=None,
     
     if level is None:
         level = config.get('loglevel', logging.DEBUG)
+    if not isinstance(level, int):
+        level = _log_levels_byname.get(str(level), level)
+    if not isinstance(level, int):
+        raise ConfigurationException("Unrecognized loglevel value: "+str(level))
+    
     if not format:
         format = config.get('logformat', LOG_FORMAT)
     frmtr = logging.Formatter(format)

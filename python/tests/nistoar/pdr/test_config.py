@@ -96,7 +96,8 @@ class TestLogConfig(test.TestCase):
         logfile = "cfgd.log"
         cfg = {
             'logdir': tmpd,
-            'logfile': logfile
+            'logfile': logfile,
+            'loglevel': 'DEBUG'
         }
 
         self.logfile = os.path.join(tmpd, logfile)
