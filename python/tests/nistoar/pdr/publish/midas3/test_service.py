@@ -83,40 +83,32 @@ class TestMIDAS3PublishingService(test.TestCase):
         self.assertTrue(os.path.exists(bagdir))
         self.assertEqual(w.working_pod, os.path.join(self.svc.podqdir,"current","mds2-1491.json"))
         self.assertEqual(w.next_pod, os.path.join(self.svc.podqdir,"next","mds2-1491.json"))
-        self.assertEqual(w.lockfile, os.path.join(self.svc.podqdir,"lock","mds2-1491.lock"))
-        self.assertTrue(not os.path.exists(w.lockfile))
 
     def test_queue_POD(self):
         bagdir = os.path.join(self.svc.mddir, "mds2-1491")
         w = self.svc._get_bagging_worker(self.arkid)
         self.assertTrue(os.path.exists(bagdir))
-        self.assertTrue(not os.path.exists(w.lockfile))
         self.assertTrue(not os.path.exists(w.working_pod))
         self.assertTrue(not os.path.exists(w.next_pod))
 
         pod = utils.read_json(os.path.join(w.bagger.sip.revdatadir, "_pod.json"))
         w.queue_POD(pod)
-        self.assertTrue(os.path.exists(w.lockfile))
         self.assertTrue(not os.path.exists(w.working_pod))
         self.assertTrue(os.path.exists(w.next_pod))
 
         w.queue_POD(pod)
-        self.assertTrue(os.path.exists(w.lockfile))
         self.assertTrue(not os.path.exists(w.working_pod))
         self.assertTrue(os.path.exists(w.next_pod))
 
         os.rename(w.next_pod, w.working_pod)
-        self.assertTrue(os.path.exists(w.lockfile))
         self.assertTrue(os.path.exists(w.working_pod))
         self.assertTrue(not os.path.exists(w.next_pod))
 
         w.queue_POD(pod)
-        self.assertTrue(os.path.isfile(w.lockfile))
         self.assertTrue(os.path.isfile(w.working_pod))
         self.assertTrue(os.path.isfile(w.next_pod))
 
         pod = utils.read_json(os.path.join(w.bagger.sip.upldatadir, "_pod.json"))
-        self.assertTrue(os.path.isfile(w.lockfile))
         self.assertTrue(os.path.isfile(w.working_pod))
         self.assertTrue(os.path.isfile(w.next_pod))
 
@@ -241,7 +233,6 @@ class TestMIDAS3PublishingService(test.TestCase):
         bagdir = os.path.join(self.svc.mddir, self.midasid)
         w = self.svc._get_bagging_worker(self.midasid)
         self.assertTrue(os.path.exists(bagdir))
-        self.assertTrue(not os.path.exists(w.lockfile))
         self.assertTrue(not os.path.exists(w.working_pod))
         self.assertTrue(not os.path.exists(w.next_pod))
 
@@ -249,8 +240,9 @@ class TestMIDAS3PublishingService(test.TestCase):
         self.svc.update_ds_with_pod(pod)
         pod = utils.read_json(os.path.join(w.bagger.sip.upldatadir, "_pod.json"))
         self.svc.update_ds_with_pod(pod)
-        
+
         time.sleep(0.1)
+        # there has not been enough time about to process the second one yet
         self.assertTrue(os.path.isdir(os.path.join(bagdir,"metadata","sim++.json")))
         self.assertTrue(not os.path.isdir(os.path.join(bagdir,"metadata","sim.json")))
 

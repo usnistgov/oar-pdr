@@ -2,7 +2,7 @@
 The implementation module for the MIDAS-to-PDR publishing service (pubserver), Mark III version.  
 It is designed to operate on SIP work areas created and managed by MIDAS for publishing.
 """
-import os, logging, re, json, copy, time, threading, filelock
+import os, logging, re, json, copy, time, threading
 from collections import Mapping, OrderedDict
 
 from .. import PublishSystem
@@ -13,7 +13,7 @@ from ...preserv.bagger.midas3 import (MIDASMetadataBagger, UpdatePrepService, Pr
 
 from ...preserv.bagit import NISTBag, DEF_MERGE_CONV
 from ...preserv.bagger.midas3 import MIDASMetadataBagger, midasid_to_bagname, PreservationBagger
-from ...utils import build_mime_type_map, read_nerd, write_json
+from ...utils import build_mime_type_map, read_nerd, write_json, read_pod
 from ....id import PDRMinter, NIST_ARK_NAAN
 from ....nerdm.convert import Res2PODds, topics2themes
 from ....nerdm.taxonomy import ResearchTopicsTaxonomy
@@ -361,8 +361,6 @@ class MIDAS3PublishingService(PublishSystem):
 
         if self.cfg.get('require_valid_pod'):
             self._validate_pod(pod)
-        else:
-            self._add_minimal_pod_data(pod)
 
         self._apply_pod_async(pod, True)
         worker = self._bagging_workers.get(id)
@@ -611,9 +609,6 @@ class MIDAS3PublishingService(PublishSystem):
 
 
     class BaggingWorker(object):
-        working_pod = "__pod.json"
-        next_pod = "__next_pod.json"
-        queue_lock = "__pod_queue.lock"
 
         def __init__(self, service, id, bagger, svclog):
             self.id = id
@@ -631,18 +626,14 @@ class MIDAS3PublishingService(PublishSystem):
 
             working_pod_dir = os.path.join(self.service.podqdir, "current")
             next_pod_dir = os.path.join(self.service.podqdir, "next")
-            lock_dir = os.path.join(self.service.podqdir, "lock")
 
             if not os.path.exists(working_pod_dir):
                 os.mkdir(working_pod_dir)
             if not os.path.exists(next_pod_dir):
                 os.mkdir(next_pod_dir)
-            if not os.path.exists(lock_dir):
-                os.mkdir(lock_dir)
 
             self.working_pod = os.path.join(working_pod_dir, self.name+".json")
             self.next_pod = os.path.join(next_pod_dir, self.name+".json")
-            self.lockfile = os.path.join(lock_dir, self.name+".lock")
             self.qlock = None
 
         class _Thread(threading.Thread):
@@ -667,7 +658,7 @@ class MIDAS3PublishingService(PublishSystem):
 
         def ensure_qlock(self):
             if not self.qlock:
-                self.qlock = filelock.FileLock(self.lockfile)
+                self.qlock = threading.RLock()
 
         def _whendone(self):
             self.service.serve_nerdm(self.bagger.bagbldr.bag.nerdm_record(True))
@@ -698,11 +689,18 @@ class MIDAS3PublishingService(PublishSystem):
                         os.rename(self.next_pod, self.working_pod)
 
                 if os.path.exists(self.working_pod):
-                    self.bagger.apply_pod(self.working_pod, False)
-                    self.service.serve_nerdm(self.bagger.bagbldr.bag.nerdm_record(True))
-                    with self.qlock:
-                        os.remove(self.working_pod)
-                        
+                    try:
+                        pod = None
+                        with self.qlock:
+                            pod = read_pod(self.working_pod)
+                        self.bagger.apply_pod(pod, False)
+                        self.service.serve_nerdm(self.bagger.bagbldr.bag.nerdm_record(True))
+                    except Exception as ex:
+                        import pdb; pdb.set_trace()
+                        self.log.exception("failure while processing POD update: "+str(ex))
+                    finally:
+                        with self.qlock:
+                            os.remove(self.working_pod)
 
                 # let other threads have a chance
                 time.sleep(0.1)
