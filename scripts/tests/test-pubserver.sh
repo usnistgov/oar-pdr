@@ -157,8 +157,8 @@ done
     false
 }
 [ -n "$pods" ] || {
-    pods=($midasdir/review/1491/_pod.json $midasdir/upload/1491/_pod.json)
-    unit_test="1491"
+    pods=($midasdir/review/1491/_pod.json $midasdir/upload/1491/_pod.json \
+          $midasdir/upload/7213/pod0.json $midasdir/upload/7213/pod0-1.json )
 }
 
 [ -n "$workdir" ] || {
@@ -293,8 +293,8 @@ except Exception as ex:
     print("Unexpected error: "+str(ex), file=sys.stderr)
     sys.exit(4)
 
-if sys.argv[1] == 'identifier':
-    val = re.sub(r'ark:/\d+/','',val)
+# if sys.argv[1] == 'identifier':
+#     val = re.sub(r'ark:/\d+/','',val)
 print(val)
 EOF
 
@@ -361,6 +361,7 @@ for pod in "${pods[@]}"; do
     count=0
 
     id=`property_in_pod identifier $pod`
+    localid=`echo $id | perl -pe 's/^ark:\/\d+\///;'`
     oldtitle=`property_in_pod title $pod`
     [ -n "$id" ] || {
         tell ${prog}: identifier not found in $pod
@@ -400,7 +401,7 @@ for pod in "${pods[@]}"; do
     ((count += 1))
 
     [ -z "$withmdserver" ] || {
-        curlcmd=(curl -s http://localhost:9092/midas/$id)
+        curlcmd=(curl -s http://localhost:9092/midas/$localid)
         "${curlcmd[@]}" > $workdir/nerdm.json
         if [ $? -ne 0 ]; then
             tell '---------------------------------------'
@@ -462,18 +463,18 @@ for pod in "${pods[@]}"; do
     ((count += 1))
 
     sleep 1
-    [ -f "$workdir/mdbags/$id/metadata/nerdm.json" ] || {
+    [ -f "$workdir/mdbags/$localid/metadata/nerdm.json" ] || {
         tell '---------------------------------------'
         tell FAILED
         tell `basename $pod`: "No generated NERDm record found at " \
-             "$workdir/mdbags/$id/metadata/nerdm.json"
+             "$workdir/mdbags/$localid/metadata/nerdm.json"
         ((failures += 1))
     }
     ((count += 1))
 
     curl -H "Authorization: Bearer $custserv_secret" -X PATCH -H 'Content-type: application/json' \
          --data '{ "title": "Star Wars", "_editStatus": "done" }' \
-         http://localhost:9091/draft/$id || \
+         http://localhost:9091/draft/$localid || \
     {
         tell '---------------------------------------'
         tell WARNING: Back door PATCH to draft failed
