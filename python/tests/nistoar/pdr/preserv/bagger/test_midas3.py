@@ -324,7 +324,7 @@ class TestMIDASMetadataBaggerMixed(test.TestCase):
         self.assertTrue(os.path.exists(self.bagr.bagbldr.bag.pod_file()))
         self.assertTrue(os.path.exists(self.bagr.bagbldr.bag.nerd_file_for("")))
         self.assertEqual(self.bagr.sip.nerd.get('title'), "")
-        self.assertEqual(self.bagr.sip.nerd.get('description'), [])
+        self.assertEqual(self.bagr.sip.nerd.get('description'), [""])
 
     def test_done(self):
         self.assertTrue(not os.path.exists(self.bagr.bagdir))
