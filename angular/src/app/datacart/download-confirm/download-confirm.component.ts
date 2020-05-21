@@ -11,7 +11,7 @@ import { AppConfig } from '../../config/config';
 })
 export class DownloadConfirmComponent implements OnInit {
     @Input() bundle_plan_size: number;
-    @Input() zipData: ZipData;
+    @Input() zipData: ZipData[];
     @Input() totalFiles: number;
     @Output() returnValue: EventEmitter<boolean> = new EventEmitter();
 

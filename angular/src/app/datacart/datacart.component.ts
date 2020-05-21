@@ -665,13 +665,6 @@ export class DatacartComponent implements OnInit, OnDestroy {
             return 0;
     }
 
-    // get overallDownloadTime(){
-    //     if(this.downloadService.downloadSpeed > 0)
-    //         return Math.round((this.downloadService.totalBundleSize-this.downloadService.totalDownloaded)/this.downloadService.downloadSpeed);
-    //     else    
-    //         return 0;
-    // }
-
     /**
     * Download one particular zip
     **/
