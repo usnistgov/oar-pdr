@@ -149,13 +149,13 @@
     <!-- Overall progress -->
     <div *ngIf="overallStatus != null" style="background-color: rgb(170, 212, 189);">
         <span class="span30">Overall progress</span>
-        <span class="span15">{{commonFunctionService.getSizeForDisplay(totalDownloadSize)}}</span>
+        <span class="span15">{{commonFunctionService.getSizeForDisplay(downloadService.totalBundleSize)}}</span>
         <span class="span-end" style="width: 55%;">
             <span *ngIf="overallStatus === 'downloading'"
-                style="float: right;margin-right: 0.5em;">{{getDownloadTime(overallDownloadTime)}}
+                style="float: right;margin-right: 0.5em;">{{getDownloadTime(downloadService.overallDownloadTime)}}
             </span>
             <div style="display:inline-block;" *ngIf="overallStatus === 'downloading';else not_overall_downloading">
-                <span style="display:inline-block;margin-left: 0.5em;width: 100px;">
+                <span style="display:inline-block;margin-left: 0.5em;width: 200px;">
                     <ngb-progressbar type="info" [value]="overallProgress" textType="white" [showValue]="true"
                         [striped]="true"></ngb-progressbar>
                 </span>
@@ -163,7 +163,12 @@
                         class="faa faa-remove"></i></span>
             </div>
             <ng-template #not_overall_downloading style="display:inline-block;">
-                {{getStatusForDisplay(overallStatus)}}
+                <span *ngIf="overallStatus === 'complete';else other">
+                    Download started at: {{downloadStartTime}}, ended at: {{downloadEndTime}}.
+                </span>
+                <ng-template #other>
+                    {{getStatusForDisplay(overallStatus)}}
+                </ng-template>
             </ng-template>
         </span>
     </div>
@@ -215,7 +220,7 @@
             [style]="{'margin':'auto', 'padding-bottom':'3%', 'color':'black'}">
             <ng-template pTemplate="header">
                 <tr>
-                    <th [ngStyle]="titleStyleHeader()" ttResizableColumn>
+                    <th [ngStyle]="headerStyle(titleWidth)" ttResizableColumn>
                         <span (click)="expandToLevel(dataFiles, !isExpanded, null)" style="padding-right:0.5em;">
                             <i *ngIf="!isExpanded" class="faa faa-arrow-circle-down faa-1x icon-white"
                                 style="cursor: pointer;color: rgb(255, 255, 255);" data-toggle="tooltip"
@@ -235,12 +240,12 @@
                         </span>
                         Name
                     </th>
-                    <th [ngStyle]="actionStyleHeader()" ttResizableColumn>
+                    <th [ngStyle]="headerStyle(actionWidth)" ttResizableColumn>
                         <i class="faa faa-cloud-download" aria-hidden="true" data-toggle="tooltip" title="Actions"></i>
                     </th>
-                    <th [ngStyle]="typeStyleHeader()" ttResizableColumn>Media Type</th>
-                    <th [ngStyle]="sizeStyleHeader()" ttResizableColumn>Size</th>
-                    <th [ngStyle]="statusStyleHeader()" ttResizableColumn>
+                    <th [ngStyle]="headerStyle(typeWidth)" ttResizableColumn>Media Type</th>
+                    <th [ngStyle]="headerStyle(sizeWidth)" ttResizableColumn>Size</th>
+                    <th [ngStyle]="headerStyle(statusWidth)" ttResizableColumn>
                         Status
                         <div class="badge status-reset-button" (click)="clearDownloadStatus()" data-toggle="tooltip"
                             title="Reset status">Reset</div>
@@ -249,7 +254,7 @@
             </ng-template>
             <ng-template let-rowNode let-rowData="rowData" let-i="rowIndex" pTemplate="body">
                 <tr style="background: #FFFFFF">
-                    <td [ngStyle]="titleStyle()">
+                    <td [ngStyle]="bodyStyle(titleWidth)">
                         <p-treeTableToggler [rowNode]="rowNode"></p-treeTableToggler>
                         &nbsp;<p-treeTableCheckbox [value]="rowNode"></p-treeTableCheckbox>
                         <span *ngIf="rowData.isLeaf">
@@ -263,7 +268,7 @@
                         <span *ngIf="showZipFilesNmaes" style="color:grey;margin-left: 1em;font-style: italic;">
                             {{rowData.zipFile}}</span>
                     </td>
-                    <td [ngStyle]="sizeStyle()">
+                    <td [ngStyle]="bodyStyle(sizeWidth)">
                         <div *ngIf="rowData.isLeaf;else space_holder" style="display:inline;">
                             <a *ngIf="rowData.downloadStatus != 'downloading'" href='{{rowData.downloadUrl}}' target='_blank' download="download" data-toggle="tooltip" 
                                 title="Download this file" aria-label="Download this file">
@@ -280,13 +285,13 @@
                             <div style="display:inline;padding-right: 0.4em;">&nbsp;&nbsp;</div>
                         </ng-template>
                     </td>
-                    <td [ngStyle]="typeStyle()">
+                    <td [ngStyle]="bodyStyle(typeWidth)">
                         <span>{{rowData.mediatype}}</span>
                     </td>
-                    <td [ngStyle]="sizeStyle()">
+                    <td [ngStyle]="bodyStyle(sizeWidth)">
                         <span *ngIf="rowData.isLeaf">{{formatBytes(rowData.fileSize)}}</span>
                     </td>
-                    <td [ngStyle]="statusStyle()">
+                    <td [ngStyle]="bodyStyle(statusWidth)">
                         <div id="downloadstatus" *ngIf="rowData.isLeaf" style="display:inline;"
                             [ngStyle]="{'color':getDownloadStatusColor(rowData.downloadStatus)}">
                             <i [class]="getIconClass(rowData.downloadStatus)" style="margin-right: .5em;"

@@ -18,9 +18,12 @@ export class DownloadService {
 
     anyFileDownloadedFlagSub = new BehaviorSubject<boolean>(false);
     private download_maximum: number = 2;
+    _totalBundleSize = 0;
     _totalDownloaded = 0;
     _downloadSpeed = 0.00;
-
+    //By default, download time is calculated every 20sec. But when it's closed to finish, this interval need be changed to 10s, 5s or 1s accordingly.
+    _displayInterval = 20; 
+    _overallDownloadTime = 0;
 
     constructor(
         private http: HttpClient,
@@ -34,15 +37,66 @@ export class DownloadService {
     /**
      *  Return total downloaded size in bytes
      */
-    public get totalDownloaded()
+    get totalDownloaded()
     {
         return this._totalDownloaded;
     }
 
     /**
+     * Set total downloaded size. Used by cancel function.
+     * @param downloaded  
+     */
+    setTotalDownloaded(downloaded: number)
+    {
+        this._totalDownloaded = downloaded;
+    }
+
+    /**
+     * Return total bundle size
+     */
+    get totalBundleSize()
+    {
+        return this._totalBundleSize;
+    }
+
+    /**
+     * Set total bundle size
+     * @param size 
+     */
+    setTotalBundleSize(size: number)
+    {
+        this._totalBundleSize = size;
+    }
+
+    /**
+     * Increase total bundle size by input number
+     * @param size 
+     */
+    increaseTotalBundleBySize(size: number)
+    {
+        this._totalBundleSize += size;
+    }
+
+    /**
+     * Increase total bundle size by input number
+     * @param size 
+     */
+    decreaseTotalBundleBySize(size: number)
+    {
+        this._totalBundleSize -= size;
+    }
+
+    /**
+     * Return estimated overall download time
+     */
+    get overallDownloadTime()
+    {
+        return this._overallDownloadTime;
+    }
+
+    /**
      *  Return current download speed
      */
-
     public get downloadSpeed()
     {
         return this._downloadSpeed;
@@ -55,6 +109,8 @@ export class DownloadService {
     {
         this._totalDownloaded = 0;
         this._downloadSpeed = 0.00;
+        this._totalBundleSize = 0;
+        this._overallDownloadTime = 0;
     }
 
     /**
@@ -101,7 +157,9 @@ export class DownloadService {
     download(nextZip: ZipData, zipdata: ZipData[], dataFiles: any, whichPage: any) {
         let sub = this.zipFilesDownloadingSub;
         let preTime: number = 0;
+        let preTime2: number = 0;
         let preDownloaded: number = 0;
+        let preDownloaded2: number = 0;
         let currentTime: number = 0;
         let currentDownloaded: number = 0;
 
@@ -134,24 +192,42 @@ export class DownloadService {
                             //Estimate download time every 20sec
                             if(preTime == 0){   // init
                                 preTime = new Date().getTime() / 1000;
+                                preTime2 = preTime;
                                 preDownloaded = event.loaded;
+                                preDownloaded2 = event.loaded;
                                 currentTime = new Date().getTime() / 1000;
                                 currentDownloaded = event.loaded;
                                 this._totalDownloaded += currentDownloaded;
                             }else{
                                 currentTime = new Date().getTime() / 1000;
                                 currentDownloaded = event.loaded;
-                                
-                                if(currentTime - preTime > 20) 
+                                this._totalDownloaded += currentDownloaded - preDownloaded;
+
+                                if(currentTime - preTime2 > this._displayInterval) 
                                 {
-                                    this._totalDownloaded += currentDownloaded - preDownloaded;
-                                    nextZip.downloadTime = Math.round((nextZip.bundleSize-event.loaded)*(currentTime - preTime)/(currentDownloaded - preDownloaded));
-                                    this._downloadSpeed = (currentDownloaded - preDownloaded)/(currentTime - preTime);
+                                    this._downloadSpeed = (currentDownloaded - preDownloaded2)/(currentTime - preTime2);
+
+                                    if(this._downloadSpeed > 0)
+                                    {
+                                        nextZip.downloadTime = Math.round((nextZip.bundleSize-event.loaded)*(currentTime - preTime2)/(currentDownloaded - preDownloaded2));
+
+                                        this._overallDownloadTime = Math.round((this._totalBundleSize-this._totalDownloaded)/this._downloadSpeed)
+                                    }
+                                    preTime2 = currentTime;
+                                    preTime = currentTime;
+                                    preDownloaded = currentDownloaded;
+                                    preDownloaded2 = currentDownloaded;
+
+                                    if(nextZip.downloadTime > 60) this._displayInterval = 20;
+                                    else if(nextZip.downloadTime > 40) this._displayInterval = 10;
+                                    else if(nextZip.downloadTime > 20) this._displayInterval = 5;
+                                    else this._displayInterval = 1;
+                                }else
+                                {
                                     preTime = currentTime;
                                     preDownloaded = currentDownloaded;
                                 }
                             }
-                            new Date().getTime() / 1000;
                         }
                         break;
                     default:
@@ -181,6 +257,10 @@ export class DownloadService {
 
         if (sub.getValue() >= 0) {
             this.setDownloadingNumber(sub.getValue() - 1, whichPage);
+        }
+
+        if (sub.getValue() == 0) {
+            this.setDownloadProcessStatus(true, whichPage);
         }
     }
 
