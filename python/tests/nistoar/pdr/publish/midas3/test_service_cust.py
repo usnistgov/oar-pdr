@@ -143,10 +143,19 @@ class TestMIDAS3PublishingServiceDraft(test.TestCase):
         podf = os.path.join(self.revdir, "1491", "_pod.json")
         pod = utils.read_json(podf)
         bagdir = os.path.join(self.svc.mddir, self.midasid)
+        bmddir = os.path.join(bagdir, "metadata")
+        nerdf = os.path.join(bmddir, "nerdm.json")
+        annotf = os.path.join(bmddir, "annot.json")
+        self.assertTrue(not os.path.exists(nerdf))
+        self.assertTrue(not os.path.exists(annotf))
 
         self.assertTrue(not self.client.draft_exists(self.midasid))
         self.svc.start_customization_for(pod)
         self.assertTrue(self.client.draft_exists(self.midasid))
+        self.assertTrue(os.path.exists(nerdf))
+        self.assertTrue(not os.path.exists(annotf))
+        nerdm = utils.read_json(nerdf)
+        self.assertNotEqual(nerdm.get('title'), "Goobers!")
 
         pod = self.svc.get_pod(self.midasid)
         self.assertNotEqual(pod['title'], "Goobers!")
@@ -162,24 +171,38 @@ class TestMIDAS3PublishingServiceDraft(test.TestCase):
         self.assertEqual(pod['title'], "Goobers!")
         self.assertEqual(pod['_editStatus'], "in progress")
 
-        resp = requests.patch(custbaseurl+self.midasid, json={"_editStatus": "done"},
+        resp = requests.patch(custbaseurl+self.midasid,
+                              json={"_editStatus": "done",
+                                    "authors": [{"fn": "Enya"}] },
                               headers={'Authorization': 'Bearer SECRET'})
         self.assertEqual(resp.status_code, 201)
         pod = self.svc.get_customized_pod(self.midasid)
         self.assertEqual(pod['title'], "Goobers!")
         self.assertEqual(pod['_editStatus'], "done")
         self.assertEqual(pod['identifier'], self.midasid)
+        self.assertNotIn('authors', pod)
         
         self.svc.end_customization_for(self.midasid)
         self.assertTrue(not self.client.draft_exists(self.midasid))
+        self.assertTrue(os.path.isfile(nerdf))
+        self.assertTrue(os.path.isfile(annotf))
 
         pod = self.svc.get_pod(self.midasid)
         self.assertEqual(pod['title'], "Goobers!")
+
+        nerdm = utils.read_json(nerdf)
+        self.assertEqual(nerdm['title'], "Goobers!")
+        self.assertNotIn('authors', nerdm)
+        nerdm = utils.read_json(annotf)
+        self.assertIn('authors', nerdm)
+        self.assertEqual(nerdm['authors'][0]['fn'], "Enya")
+        self.assertNotIn('title', nerdm)
 
         nerdf = os.path.join(self.nrddir, self.midasid+".json")
         self.assertTrue(os.path.isfile(nerdf))
         nerdm = utils.read_json(nerdf)
         self.assertEqual(nerdm['title'], "Goobers!")
+        self.assertIn('authors', nerdm)
 
     TAXONURI = "https://www.nist.gov/od/dm/nist-themes/v1.0"
 

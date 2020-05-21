@@ -421,11 +421,21 @@ class MIDAS3PublishingService(PublishSystem):
             updates = self._filter_and_check_cust_updates(updmd, bagger.bagbldr)
 
             #   combine changes with current nerdm
+            forannots = ["authors"]
             msg = "User-generated metadata updates to path='{0}': {1}"
             for destpath in updates:
-                if destpath is not None:
-                    bagger.bagbldr.update_annotations_for(destpath, updates[destpath],
-                                 message=msg.format(destpath, str(updates[destpath].keys())))
+                if destpath == '':
+                    # POD-native metadata goes into main metadata
+                    upd = OrderedDict([(k,v) for (k,v) in updates[''].items() if k not in forannots])
+                    bagger.bagbldr.update_metadata_for(destpath, upd,
+                                          message=msg.format(destpath, str(upd.keys())))
+                    # non-POD metadata goes into annotations
+                    upd = OrderedDict([(k,v) for (k,v) in updates[''].items() if k in forannots])
+                    bagger.bagbldr.update_annotations_for(destpath, upd,
+                                          message=msg.format(destpath, str(upd.keys())))
+                elif destpath is not None:
+                    bagger.bagbldr.update_annotations_for(destpath, upd,
+                                          message=msg.format(destpath, str(upd.keys())))
             nerdm = updates[None]
             self.serve_nerdm(nerdm)
 
