@@ -132,7 +132,7 @@ export class DatacartComponent implements OnInit, OnDestroy {
         private _FileSaverService: FileSaverService,
         public commonFunctionService: CommonFunctionService,
         private route: ActivatedRoute,
-        private gaService: GoogleAnalyticsService,
+        public gaService: GoogleAnalyticsService,
         private modalService: NgbModal,
         ngZone: NgZone) 
     {
