@@ -309,22 +309,31 @@ class MIDAS3PublishingService(PublishSystem):
         """
         nerdf = None
         if not isinstance(nerdm, Mapping):
-            nerdf = nerdm
-            nerdm = None
+            nerdm = read_nerd(nerdm)
 
         if not name:
-            if not nerdm:
-                nerdm = read_nerd(nerdf)
             if 'ediid' not in nerdm:
                 raise ValueError("serve_nerdm(): NERDm record is missing req. property, ediid")
             name = re.sub(r'^ark:/\d+/', '', nerdm['ediid'])
+
+        # the NERDm metadata may be under-specified
+        self._pad_nerdm(nerdm)
                         
-        if not nerdf:
-            # first stage to a temp file (this helps avoid collisions)
-            nerdf = os.path.join(self.nrddir, "_"+name+".json")
-            write_json(nerdm, nerdf)
+        # first stage to a temp file (this helps avoid collisions)
+        nerdf = os.path.join(self.nrddir, "_"+name+".json")
+        write_json(nerdm, nerdf)
 
         os.rename(nerdf, os.path.join(self.nrddir, name+".json"))
+
+    def _pad_nerdm(self, nerdm):
+        if not nerdm.get('contactPoint'):
+            nerdm['contactPoint'] = { "@type": "vcard:Contact" }
+        if not nerdm['contactPoint'].get('fn'):
+            nerdm['contactPoint']['fn'] = ""
+        if not nerdm['contactPoint'].get('hasEmail:'):
+            nerdm['contactPoint']['hasEmail'] = ""
+        if not nerdm.get('keyword'):
+            nerdm['keyword'] = []
 
     def get_pod(self, ediid):
         """
@@ -383,6 +392,9 @@ class MIDAS3PublishingService(PublishSystem):
         if not os.path.isfile(nerdf):
             raise StateException("Missing NERDm file in cache: "+os.path.basename(nerdf))
         nerdm = read_nerd(nerdf)
+
+        # nerdm record may be underspecified
+        self._pad_nerdm(nerdm)
 
         # put nerdm to customization to start session (will raise exception on failure)
         self._custclient.create_draft(nerdm)
