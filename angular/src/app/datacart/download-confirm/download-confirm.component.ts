@@ -21,7 +21,7 @@ export class DownloadConfirmComponent implements OnInit {
     (
         public activeModal: NgbActiveModal,
         private cfg: AppConfig,
-        private commonFunctionService: CommonFunctionService
+        public commonFunctionService: CommonFunctionService
     ) 
     { }
 
