@@ -42,3 +42,8 @@
     font-size: 30px;
     font-weight: bolder;
 }
+
+#summary {
+    background-color: rgb(170, 212, 189);
+    margin: .5em 0em;
+}

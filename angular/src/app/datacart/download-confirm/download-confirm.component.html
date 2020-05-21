@@ -25,6 +25,12 @@
             <span class="span-end">{{commonFunctionService.getSizeForDisplay(zip.bundleSize)}}</span>
         </div>
     </div>
+
+    <!-- Summary -->
+    <div id="summary">
+        <span class="span50">{{totalFiles}} file<span *ngIf="totalFiles > 1">s</span> selected</span>
+        <span class="span-end">Total size: {{commonFunctionService.getSizeForDisplay(bundle_plan_size)}}</span>
+    </div>
 </div>
 <hr>
 <div class="control-btns">

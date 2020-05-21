@@ -242,6 +242,7 @@ export class DownloadService {
                 nextZip.downloadErrorMessage = err.message;
                 nextZip.downloadProgress = 0;
                 this.decreaseNumberOfDownloading(whichPage);
+                this.setDownloadStatus(nextZip, dataFiles, "failed", err.message);
             }
         );
     }
@@ -381,13 +382,14 @@ export class DownloadService {
     /**
      * Set download status of given tree node
      **/
-    setDownloadStatus(zip: any, dataFiles: any, status: any) {
+    setDownloadStatus(zip: any, dataFiles: any, status: any, message: string = '') {
         for (let includeFile of zip.bundle.includeFiles) {
             let resFilePath = includeFile.filePath.substring(includeFile.filePath.indexOf('/'));
             for (let dataFile of dataFiles) {
                 let node = this.searchTreeByfilePath(dataFile, resFilePath);
                 if (node != null) {
                     node.data.downloadStatus = status;
+                    node.data.message = message;
                     this.cartService.updateCartItemDownloadStatus(node.data['cartId'], status);
                     break;
                 }

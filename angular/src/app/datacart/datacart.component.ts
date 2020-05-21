@@ -93,11 +93,22 @@ export class DatacartComponent implements OnInit, OnDestroy {
     zipData: ZipData[] = [];
     allDownloadCancelled: boolean = false;
     subscriptions: any = [];
+    problemZip: ZipData = {
+        fileName: "",
+        downloadProgress: 0,
+        downloadStatus: null,
+        downloadInstance: null,
+        bundle: null,
+        downloadUrl: null,
+        downloadErrorMessage: '',
+        bundleSize: 0,
+        downloadTime: 0
+    };
 
     // Email
     emailSubject: string;
     emailBody: string;
-    emailBodyBase: string = 'The information below describes an error that occurred while downloading data via the data cart. %0D%0A%0D%0A [From the PDR Team:  feel free to add additional information about the failure or your questions here.  Thanks for sending this message!] %0D%0A%0D%0A';
+    emailBodyBase: string = 'The information below describes an error that occurred while downloading data via the data cart. %0D%0A%0D%0A [From the PDR Team:  feel free to add additional information about the failure or your questions here. Thanks for sending this message!] %0D%0A%0D%0A';
 
     // Overall progress
     totalDownloadedSize: number = 0;
@@ -189,7 +200,7 @@ export class DatacartComponent implements OnInit, OnDestroy {
                 {
                     this.totalDownloadedSize = 0;
                     let today = new Date();
-                    this.downloadEndTime = formatDate(today, 'dd-MM-yyyy hh:mm:ss a', 'en-US', '+0530');
+                    this.downloadEndTime = formatDate(today, 'dd-MM-yyyy hh:mm:ss a', 'en-US');
                     console.log('this.downloadEndTime', this.downloadEndTime);
                     this.overallStatus = 'complete';
                 }
@@ -470,7 +481,7 @@ export class DatacartComponent implements OnInit, OnDestroy {
         this.downloadService.setDownloadingNumber(0, "datacart");
 
         let today = new Date();
-        this.downloadStartTime = formatDate(today, 'dd-MM-yyyy hh:mm:ss a', 'en-US', '+0530')
+        this.downloadStartTime = formatDate(today, 'dd-MM-yyyy hh:mm:ss a', 'en-US')
 
         // create root
         const newPart = {
@@ -523,7 +534,6 @@ export class DatacartComponent implements OnInit, OnDestroy {
                             + 'Time: ' + dateTime.toString() + '%0D%0A%0D%0A'
                             + 'Post message:%0D%0A' + JSON.stringify(postMessage[0]) + ';' + '%0D%0A%0D%0A' + 'Return message:%0D%0A' + JSON.stringify(blob);
                     }
-                    console.log("Bundle plan:", blob);
 
                     this.bundleplan = blob;
                     this.downloadService.setTotalBundleSize(blob.size);
@@ -1069,6 +1079,19 @@ export class DatacartComponent implements OnInit, OnDestroy {
     }
 
     /*
+    * Display zip file error message
+    */
+    openZipDetails(event, overlaypanel: OverlayPanel, zip: ZipData = null ) {
+        console.log('zip', zip);
+        this.problemZip = zip;
+        this.emailSubject = 'PDR: Error downloading zip file';
+
+        overlaypanel.hide();
+        setTimeout(() => {
+            overlaypanel.show(event);
+        }, 100);
+    }
+    /*
         Return button color based on Downloaded status
     */
     getButtonColor() {
@@ -1205,14 +1228,19 @@ export class DatacartComponent implements OnInit, OnDestroy {
         let emaibody = this.emailBody;
         if(!emaibody)
         {
-            emaibody = this.emailBodyBase + 'Time: ' + dateTime.toString() + '%0D%0A%0D%0A';
+            emaibody = this.emailBodyBase + 'Time: ' + dateTime.toString();
         }
+
+        emaibody += '%0D%0A%0D%0A details:';
 
         for (let zip of this.zipData) 
         {
             if(zip.downloadStatus == 'error')
             {
-                emaibody += '%0D%0A%0D%0A'+ 'Zip error details:%0D%0A' + JSON.stringify(zip.bundle);
+                emaibody += '%0D%0A%0D%0A'+ zip.fileName 
+                         + ':%0D%0A download URL: ' + zip.downloadUrl
+                         + ':%0D%0A error message: ' + zip.downloadErrorMessage
+                         + ':%0D%0A details: ' + JSON.stringify(zip.bundle);
             }
         }
 

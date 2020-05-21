@@ -233,7 +233,7 @@ tr {
 .span-end{
     display: inline-block;
     padding-left:.5em;
-    width: 35%;
+    /* width: 35%; */
 }
 
 .header-orange {
@@ -341,9 +341,9 @@ button:disabled{
     overflow-wrap: break-word;
 }
 
-.overlay-title {
+.warning-overlay-title {
     color: white; 
-    background-color: #1c4d9b;
+    background-color: darkorange;
     width: 100%;
     text-align: center;
     height: 2.5em;
