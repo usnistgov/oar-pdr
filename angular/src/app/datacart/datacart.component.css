@@ -171,7 +171,7 @@
 }
 
 .filedesc{
-  background-color:#307F38;
+  background-color:rgb(245, 245, 245);
   text-align: left;
   color: white;
   word-wrap: break-word;
@@ -339,6 +339,18 @@ button:disabled{
 
 .long-text {
     overflow-wrap: break-word;
+}
+
+.overlay-title {
+    color: white; 
+    background-color: #1E6BA1;
+    width: 100%;
+    text-align: center;
+    height: 2.5em;
+    padding-top: .5em;
+    font-weight: bolder;
+    font-size: larger;
+    margin-bottom: .5em;
 }
 
 .warning-overlay-title {

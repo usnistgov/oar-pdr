@@ -114,8 +114,9 @@ export class DatacartComponent implements OnInit, OnDestroy {
     totalDownloadedSize: number = 0;
     downloadSpeed = 0.00;
     overallStatus: string = null;
-    downloadStartTime: string;
-    downloadEndTime: string;
+    downloadStartTime: any;
+    downloadEndTime: any;
+    totalDownloadTime: number;
 
     // For pop up
     modalRef: any;
@@ -199,8 +200,9 @@ export class DatacartComponent implements OnInit, OnDestroy {
                 if(value)
                 {
                     this.totalDownloadedSize = 0;
-                    let today = new Date();
-                    this.downloadEndTime = formatDate(today, 'dd-MM-yyyy hh:mm:ss a', 'en-US');
+                    this.downloadService.setTotalBundleSize(0);
+                    this.downloadEndTime = new Date();
+                    this.totalDownloadTime = this.downloadEndTime.getTime() / 1000 - this.downloadStartTime.getTime() / 1000;
                     console.log('this.downloadEndTime', this.downloadEndTime);
                     this.overallStatus = 'complete';
                 }
@@ -480,8 +482,7 @@ export class DatacartComponent implements OnInit, OnDestroy {
         this.currentTask = "Zipping files...";
         this.downloadService.setDownloadingNumber(0, "datacart");
 
-        let today = new Date();
-        this.downloadStartTime = formatDate(today, 'dd-MM-yyyy hh:mm:ss a', 'en-US')
+        this.downloadStartTime = new Date();
 
         // create root
         const newPart = {
@@ -1072,24 +1073,18 @@ export class DatacartComponent implements OnInit, OnDestroy {
     openDetails(event, overlaypanel: OverlayPanel, fileNode: TreeNode = null ) {
         this.isNodeSelected = true;
         this.fileNode = fileNode;
-        overlaypanel.hide();
-        setTimeout(() => {
-            overlaypanel.show(event);
-        }, 100);
+
+        overlaypanel.toggle(event);
     }
 
     /*
     * Display zip file error message
     */
     openZipDetails(event, overlaypanel: OverlayPanel, zip: ZipData = null ) {
-        console.log('zip', zip);
         this.problemZip = zip;
         this.emailSubject = 'PDR: Error downloading zip file';
 
-        overlaypanel.hide();
-        setTimeout(() => {
-            overlaypanel.show(event);
-        }, 100);
+        overlaypanel.toggle(event);
     }
     /*
         Return button color based on Downloaded status

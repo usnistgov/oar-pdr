@@ -153,7 +153,7 @@
                 style="float: right;margin-right: 0.5em;">{{getDownloadTime(downloadService.overallDownloadTime)}}
             </span> -->
             <div style="display:inline-block;" *ngIf="overallStatus === 'downloading';else not_overall_downloading">
-                <span style="display:inline-block;margin-left: 0.5em;width: 200px;">
+                <span style="display:inline-block;margin-left: 0.5em;width: 100px;">
                     <ngb-progressbar type="info" [value]="overallProgress" textType="white" [showValue]="true"
                         [striped]="true"></ngb-progressbar>
                 </span>
@@ -162,11 +162,14 @@
             </div>
             <ng-template #not_overall_downloading style="display:inline-block;">
                 <span *ngIf="overallStatus === 'complete';else other">
-                    Download started at: {{downloadStartTime}}, ended at: {{downloadEndTime}}.
+                    Finished at: {{downloadEndTime | date:'shortTime'}}.
                 </span>
                 <ng-template #other>
                     {{getStatusForDisplay(overallStatus)}}
                 </ng-template>
+                <span *ngIf="overallStatus === 'complete'" style="float: right;margin-right: 0.5em;">
+                    Download time: {{getDownloadTime(totalDownloadTime)}}
+                </span>
             </ng-template>
         </span>
     </div>
@@ -319,9 +322,12 @@
 </div>
 
 <!-- Popup dialog for file details -->
-<p-overlayPanel class="fileDialog" #op3 [dismissable]="true" [showCloseIcon]="true"
+<p-overlayPanel class="fileDialog" #op3 [dismissable]="true" [showCloseIcon]="false"
     [style]="{'display':'inline-block','position':'related','left':'50%','top':'80%'}" appendToBody=true>
     <div *ngIf="isNodeSelected" class="filecard" [ngStyle]="{'max-width':getDialogWidth()}">
+        <div class="overlay-title">
+            File details
+        </div>
         <div class="ui-g filesection">
             <div *ngIf="fileNode" class="ui-g-12 ui-md-12 ui-lg-12 ui-sm-10">
                 <span class="font8" style="color:grey">
@@ -352,13 +358,13 @@
 </p-overlayPanel>
 
 <!-- Popup dialog for download details -->
-<p-overlayPanel class="fileDialog" #op4 [dismissable]="true" [showCloseIcon]="true"
+<p-overlayPanel class="fileDialog" #op4 [dismissable]="true" [showCloseIcon]="false"
     [style]="{'display':'inline-block','position':'related','left':'50%','top':'80%','max-width':'400px'}"
     appendToBody=true>
     <div class="filecard">
         <div class="ui-g filesection">
             <div *ngIf="fileNode" class="ui-g-12 ui-md-12 ui-lg-12 ui-sm-10">
-                <div class="message-details">Message details</div>
+                <div class="warning-overlay-title">Message details</div>
                 <div class="long-text">File path: {{fileNode.filePath}}</div>
                 <div class="long-text">Download URL: {{fileNode.downloadUrl}}</div>
                 <div class="long-text">Message: {{fileNode.message}}</div>
@@ -368,7 +374,7 @@
 </p-overlayPanel>
 
 <!-- Popup dialog for download time info -->
-<p-overlayPanel class="fileDialog" #op5 [dismissable]="true" [showCloseIcon]="true"
+<p-overlayPanel class="fileDialog" #op5 [dismissable]="true" [showCloseIcon]="false"
     [style]="{'display':'inline-block','position':'related','top':'80%','max-width':getDialogWidth(),'overflow-wrap': 'break-word'}"
     appendToBody=true>
     <div class="warning-overlay-title">
