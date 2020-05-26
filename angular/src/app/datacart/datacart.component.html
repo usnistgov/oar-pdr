@@ -115,8 +115,7 @@
                             [striped]="true"></ngb-progressbar>
                     </span>
 
-                    <span (click)="cancelDownloadZip(zip)" style="float: right;cursor: pointer;padding-left:5px;"><i
-                            class="faa faa-remove"></i></span>
+                    <span (click)="cancelDownloadZip(zip)" style="float: right;cursor: pointer;padding-left:5px;" data-toggle="tooltip" title="Cancel current download"><i class="faa faa-remove"></i></span>
                 </div>
                 <ng-template #not_downloading style="display:inline-block;">
                     <div *ngIf="zip.downloadStatus != 'error'; else download_error" style="display:inline-block;"
@@ -148,8 +147,7 @@
                     <ngb-progressbar type="info" [value]="overallProgress" textType="white" [showValue]="true"
                         [striped]="true"></ngb-progressbar>
                 </span>
-                <span (click)="cancelDownloadAll()" style="float: right;cursor: pointer;padding-left:5px;"><i
-                        class="faa faa-remove"></i></span>
+                <span (click)="cancelDownloadAll()" style="float: right;cursor: pointer;padding-left:5px;" data-toggle="tooltip" title="Cancel all downloads"><i class="faa faa-remove"></i></span>
             </div>
             <ng-template #not_overall_downloading style="display:inline-block;">
                 <span *ngIf="overallStatus === 'complete';else other">
