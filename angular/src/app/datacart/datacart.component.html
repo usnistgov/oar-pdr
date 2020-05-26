@@ -110,12 +110,6 @@
                         style="float: right;margin-right: 0.5em;">Calculating...</span>
                 </ng-template>
                 <div style="display:inline-block;" *ngIf="zip.downloadStatus === 'downloading';else not_downloading">
-                    <span style="display:inline-block;padding-left: .5em;">
-                        <p-progressSpinner [style]="{width: '12px', height: '12px'}"></p-progressSpinner>
-                    </span>
-                    <span style="display:inline-block;margin-left: 0.5em;">
-                        {{getStatusForDisplay(zip.downloadStatus)}}
-                    </span>
                     <span style="display:inline-block;margin-left: 0.5em;width: 100px;">
                         <ngb-progressbar type="info" [value]="zip.downloadProgress" textType="white" [showValue]="true"
                             [striped]="true"></ngb-progressbar>
@@ -145,13 +139,10 @@
     </div>
 
     <!-- Overall progress -->
-    <div *ngIf="overallStatus != null" style="background-color: rgb(170, 212, 189);">
+    <div *ngIf="zipData.length > 0 && overallStatus != null" style="background-color: rgb(170, 212, 189);">
         <span class="span30">Overall progress</span>
         <span class="span15">{{commonFunctionService.getSizeForDisplay(downloadService.totalBundleSize)}}</span>
         <span class="span-end" style="width: 55%;">
-            <!-- <span *ngIf="overallStatus === 'downloading'"
-                style="float: right;margin-right: 0.5em;">{{getDownloadTime(downloadService.overallDownloadTime)}}
-            </span> -->
             <div style="display:inline-block;" *ngIf="overallStatus === 'downloading';else not_overall_downloading">
                 <span style="display:inline-block;margin-left: 0.5em;width: 100px;">
                     <ngb-progressbar type="info" [value]="overallProgress" textType="white" [showValue]="true"
@@ -194,7 +185,6 @@
             For tech support, please email <a style="color: rgb(255, 248, 182);"
                 href="mailto:datasupport@nist.gov?subject={{emailSubject}}&body={{getEmailBody()}}"
                 (click)="gaService.gaTrackEvent('Email', $event, 'AskHelp', 'mailto:datasupport@nist.gov')">datasupport@nist.gov
-                <!-- <i class="faa faa-envelope" data-toggle="tooltip" title="Email tech support"></i> -->
             </a>
         </span>
     </div>
