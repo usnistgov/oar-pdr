@@ -340,6 +340,7 @@ export class MetadataUpdateService {
 
                   if(err.statusCode == 404)
                   {
+                    this.statusbar.showMessage("", false)
                     this.resetOriginal();
                     this.edstatsvc._setEditMode(this.EDIT_MODES.OUTSIDE_MIDAS_MODE);
                   }else{
