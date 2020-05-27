@@ -47,6 +47,8 @@ export class EditStatusComponent implements OnInit {
         this.edstatsvc.watchEditMode((editMode) => {
           this._editmode = editMode;
           this.showLastUpdate();
+          if(this._editmode == this.EDIT_MODES.OUTSIDE_MIDAS_MODE)
+            this.showMessage("", false);
         });
     }
 
