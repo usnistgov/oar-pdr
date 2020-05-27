@@ -110,7 +110,8 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
      */
     ngOnInit() {
         console.log("initializing LandingPageComponent around id=" + this.reqId);
-        
+        let metadataError = "";
+
         // Retrive Nerdm record and keep it in case we need to display it in preview mode
         // use case: user manually open PDR landing page but the record was not edited by MIDAS
 
@@ -121,7 +122,8 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
               if (!this.md) {
                   // id not found; reroute
                   console.error("No data found for ID=" + this.reqId);
-                  this.router.navigateByUrl("/not-found/" + this.reqId, { skipLocationChange: true });
+                  metadataError = "noti-found";
+                //   this.router.navigateByUrl("/not-found/" + this.reqId, { skipLocationChange: true });
               }
               else
                   // proceed with rendering of the component
@@ -130,9 +132,14 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
           (err) => {
               console.error("Failed to retrieve metadata: " + err.toString());
               if (err instanceof IDNotFound)
-                  this.router.navigateByUrl("not-found/" + this.reqId, { skipLocationChange: true });
-              else
-                  this.router.navigateByUrl("int-error/" + this.reqId, { skipLocationChange: true });
+              {
+                  metadataError = "not-found";
+                //   this.router.navigateByUrl("not-found/" + this.reqId, { skipLocationChange: true });
+              }else
+              {
+                metadataError = "int-error";
+                // this.router.navigateByUrl("int-error/" + this.reqId, { skipLocationChange: true });
+              }
           }
         );
 
@@ -141,7 +148,8 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
         // server; on successful authentication, the server can redirect the browser back to this
         // landing page with editing turned on.  
         if(this.inBrowser){
-          if (this.edstatsvc.editingEnabled()) {
+          if (this.edstatsvc.editingEnabled()) 
+          {
             this.route.queryParamMap.subscribe(queryParams => {
               let param = queryParams.get("editEnabled")
               // console.log("editmode url param:", param);
@@ -152,6 +160,12 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
                     this.edstatsvc.startEditing(this.reqId);
               }
             })
+          }else
+          {
+            if(metadataError == "not-found")
+                this.router.navigateByUrl("not-found/" + this.reqId, { skipLocationChange: true });
+            else if(metadataError == "int-error")
+                this.router.navigateByUrl("int-error/" + this.reqId, { skipLocationChange: true });
           } 
         }
     }
