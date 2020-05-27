@@ -1,4 +1,4 @@
-import { Injectable, EventEmitter } from '@angular/core';
+import { Injectable, EventEmitter, ViewChild } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { Subject } from 'rxjs';
 
@@ -10,6 +10,7 @@ import { UpdateDetails } from './interfaces';
 import { AuthService, WebAuthService } from './auth.service';
 import { LandingConstants } from '../constants';
 import { EditStatusService } from './editstatus.service';
+import { EditStatusComponent } from './editstatus.component';
 
 /**
  * a service that receives updates to the resource metadata from update widgets.
@@ -58,6 +59,10 @@ export class MetadataUpdateService {
     private editMode: string;
     // get editMode() { return this.editMode; }
     // set editMode(engage: string) { this.editMode = engage; }
+
+    // injected as ViewChilds so that this class can send messages to it with a synchronous method call.
+    @ViewChild(EditStatusComponent)
+    private statusbar: EditStatusComponent;
 
     /**
      * construct the service
@@ -341,6 +346,13 @@ export class MetadataUpdateService {
                       console.error("Failed to retrieve draft metadata changes: server error:" + err.message);
                       this.msgsvc.syserror(err.message);
                   }
+                  if(err.statusCode == 404)
+                  {
+                    this.resetOriginal();
+                    this.statusbar.showMessage("", false)
+                    this.edstatsvc._setEditMode(this.EDIT_MODES.OUTSIDE_MIDAS_MODE);
+                  }
+
                   subscriber.next(null);
                   subscriber.complete();
                 }
