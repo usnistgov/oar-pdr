@@ -17,6 +17,7 @@ import { GoogleAnalyticsService } from '../shared/ga-service/google-analytics.se
 import { NgbModalOptions, NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { DownloadConfirmComponent } from './download-confirm/download-confirm.component';
 import {formatDate } from '@angular/common';
+import { ConfirmationDialogComponent } from '../shared/confirmation-dialog/confirmation-dialog.component';
 
 declare var saveAs: any;
 declare var $: any;
@@ -200,7 +201,7 @@ export class DatacartComponent implements OnInit, OnDestroy {
                 if(value)
                 {
                     this.totalDownloadedSize = 0;
-                    this.downloadService.setTotalBundleSize(0);
+                    // this.downloadService.setTotalBundleSize(0);
                     this.downloadEndTime = new Date();
                     this.totalDownloadTime = this.downloadEndTime.getTime() / 1000 - this.downloadStartTime.getTime() / 1000;
                     console.log('this.downloadEndTime', this.downloadEndTime);
@@ -687,6 +688,31 @@ export class DatacartComponent implements OnInit, OnDestroy {
         this.downloadService.download(zip, this.zipData, this.dataFiles, "datacart");
     }
 
+    /**
+     * Cancel all downloads confirmation
+     */
+    cancelDownloadAllConfirmation()
+    {
+        var message = 'This will cancel all current and pending download process.';
+
+        this.modalRef = this.modalService.open(ConfirmationDialogComponent);
+        this.modalRef.componentInstance.title = 'Please confirm';
+        this.modalRef.componentInstance.btnOkText = 'Yes';
+        this.modalRef.componentInstance.btnCancelText = 'No';
+        this.modalRef.componentInstance.message = message;
+        this.modalRef.componentInstance.showWarningIcon = true;
+        this.modalRef.componentInstance.showCancelButton = true;
+
+        this.modalRef.result.then((result) => {
+            console.log("Confirmation:", result);
+            if ( result ) {
+                this.cancelDownloadAll();
+            }else{
+                console.log("User changed mind.");
+            }
+        }, (reason) => {
+        });
+    }
     /**
     * Cancell all download instances
     **/

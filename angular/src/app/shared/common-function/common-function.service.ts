@@ -38,15 +38,13 @@ export class CommonFunctionService {
     getSizeForDisplay(fileSize: number)
     {
         let displaySize = "";
-        if(fileSize >= 1000000000)
-            displaySize = Math.round(fileSize / 1000000000) + " GB";
-        else if(fileSize >= 1000000)
-            displaySize = Math.round(fileSize / 1000000) + " MB";
-        else if(fileSize >= 1000)
-            displaySize = (fileSize / 1000).toFixed(2) + " KB";
-        else
-            displaySize = fileSize + " Bytes";
+        let dm = 0;
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+        const i = Math.floor(Math.log(fileSize) / Math.log(k));
 
-        return displaySize;
+        if(i > 2) dm = 2;
+
+        return parseFloat((fileSize / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
     }    
 }
