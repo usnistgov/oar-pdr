@@ -51,6 +51,7 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
     headerObj: any;
     public EDIT_MODES: any;
     editMode: string;
+    message: string;
 
     // this will be removed in next restructure
     showMetadata = false;
@@ -81,6 +82,15 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
 
         this.edstatsvc.watchEditMode((editMode) => {
             this.editMode = editMode;
+            if(this.editMode == this.EDIT_MODES.DONE_MODE)
+            {
+                this.message = 'You can now close this browser tab <p>and go back to MIDAS to either accept or discard the changes.'
+            }
+
+            if(this.editMode == this.EDIT_MODES.OUTSIDE_MIDAS_MODE)
+            {
+                this.message = 'This record is not currently available for editing. <p>Please return to MIDAS and click "Edit Landing Page" to edit.'
+            }
         });
 
         this.mdupdsvc.subscribe(
@@ -161,6 +171,13 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
      */
     get isDoneMode(){
         return this.editMode == this.EDIT_MODES.DONE_MODE;
+    }
+
+    /**
+     * Detect if current mode is DONE to switch display items
+     */
+    get isOutsideMidasMode(){
+        return this.editMode == this.EDIT_MODES.OUTSIDE_MIDAS_MODE;
     }
 
     showData() : void{

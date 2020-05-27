@@ -20,12 +20,12 @@
 
         <!-- Discard button -->
         <button pButton type="submit" class="btn btn-labeled" id="ec-discard-btn" (click)="confirmDiscardEdits()"
-            [disabled]="(_editMode == EDIT_MODES.DONE_MODE)" label="Discard" icon="faa faa-trash faa-1x icon-white" iconPos="left">
+            [disabled]="(_editMode == EDIT_MODES.DONE_MODE || _editMode == EDIT_MODES.OUTSIDE_MIDAS_MODE)" label="Discard" icon="faa faa-trash faa-1x icon-white" iconPos="left">
         </button>
 
         <!-- Finish button -->
         <button pButton type="submit" class="btn btn-labeled" id="ec-close-btn" (click)="doneEdits()"
-            [disabled]="(_editMode == EDIT_MODES.DONE_MODE)" label="Finish" icon="faa faa-save faa-1x icon-white" iconPos="left">
+            [disabled]="(_editMode == EDIT_MODES.DONE_MODE || _editMode == EDIT_MODES.OUTSIDE_MIDAS_MODE)" label="Finish" icon="faa faa-save faa-1x icon-white" iconPos="left">
         </button>
     </div>
 </div>
@@ -47,12 +47,12 @@
 
             <!-- Discard button -->
             <button pButton type="submit" class="btn btn-labeled" id="ec-discard-btn" (click)="confirmDiscardEdits()"
-            [disabled]="(_editMode == EDIT_MODES.DONE_MODE)" label="Discard" icon="faa faa-trash faa-1x icon-white" iconPos="left">
+            [disabled]="(_editMode == EDIT_MODES.DONE_MODE || _editMode == EDIT_MODES.OUTSIDE_MIDAS_MODE)" label="Discard" icon="faa faa-trash faa-1x icon-white" iconPos="left">
             </button>
 
             <!-- Finish button -->
             <button pButton type="submit" class="btn btn-labeled" id="ec-close-btn" (click)="doneEdits()"
-            [disabled]="(_editMode == EDIT_MODES.DONE_MODE)" label="Finish" icon="faa faa-save faa-1x icon-white" iconPos="left">
+            [disabled]="(_editMode == EDIT_MODES.DONE_MODE || _editMode == EDIT_MODES.OUTSIDE_MIDAS_MODE)" label="Finish" icon="faa faa-save faa-1x icon-white" iconPos="left">
             </button>
         </div>
 </div>
