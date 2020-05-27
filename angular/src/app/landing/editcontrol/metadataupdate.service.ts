@@ -337,20 +337,23 @@ export class MetadataUpdateService {
                 },
                 (err) => {
                   console.log("err", err);
-                  // err will be a subtype of CustomizationError
-                  if (err.type == 'user') {
-                      console.error("Failed to retrieve draft metadata changes: user error:" + err.message);
-                      this.msgsvc.error(err.message);
-                  }
-                  else {
-                      console.error("Failed to retrieve draft metadata changes: server error:" + err.message);
-                      this.msgsvc.syserror(err.message);
-                  }
+
                   if(err.statusCode == 404)
                   {
                     this.resetOriginal();
-                    this.statusbar.showMessage("", false)
                     this.edstatsvc._setEditMode(this.EDIT_MODES.OUTSIDE_MIDAS_MODE);
+                  }else{
+                    // err will be a subtype of CustomizationError
+                    if (err.type == 'user') 
+                    {
+                        console.error("Failed to retrieve draft metadata changes: user error:" + err.message);
+                        this.msgsvc.error(err.message);
+                    }
+                    else 
+                    {
+                        console.error("Failed to retrieve draft metadata changes: server error:" + err.message);
+                        this.msgsvc.syserror(err.message);
+                    }
                   }
 
                   subscriber.next(null);

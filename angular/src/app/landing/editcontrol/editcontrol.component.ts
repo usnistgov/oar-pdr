@@ -219,9 +219,9 @@ export class EditControlComponent implements OnInit, OnChanges {
                         this.mdupdsvc.checkUpdatedFields(md as NerdmRes);
                         this._setEditMode(this.EDIT_MODES.EDIT_MODE);
                       }else{
-                        this.statusbar.showMessage("There was a problem loading draft data.", false);
-                        this._setEditMode(this.EDIT_MODES.PREVIEW_MODE);
-                        this.edstatsvc._setError(true);
+                        // this.statusbar.showMessage("There was a problem loading draft data.", false);
+                        // this._setEditMode(this.EDIT_MODES.PREVIEW_MODE);
+                        // this.edstatsvc._setError(true);
                       }
                     },
                     (err) => {
