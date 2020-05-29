@@ -1,161 +1,289 @@
 {
-    "$schema": "http://json-schema.org/draft-04/schema#",
-    "$extensionSchemas": ["https://www.nist.gov/od/dm/enhanced-json-schema/v0.1#"],
-    "title": "Customization",
-    "description": "Cutomization API related fields",
-    "type": "object",
-    "properties": 
-    {
-        "title": {
-            "title": "Title",
-            "description": "Human-readable, descriptive name of the resource",
+	"$schema": "http://json-schema.org/draft-04/schema#",
+	"$extensionSchemas": [
+		"https://www.nist.gov/od/dm/enhanced-json-schema/v0.1#"
+	],
+	"title": "Customization",
+	"description": "Cutomization API related fields",
+	"type": "object",
+	"properties": {
+		"title": {
+			"title": "Title",
+			"description": "Human-readable, descriptive name of the resource",
+			"notes": [
+				"Acronyms should be avoided"
+			],
+			"type": "string",
+			"asOntology": {
+				"@context": "profile-schema-onto.json",
+				"prefLabel": "Title",
+				"referenceProperty": "dc:title"
+			}
+		},
+		"description": {
+			"title": "Description",
+			"description": "Human-readable description (e.g., an abstract) of the resource",
+			"notes": [
+				"Each element in the array should be considered a separate paragraph"
+			],
+			"type": "array",
+			"items": {
+				"type": "string"
+			},
+			"minItems": 1,
+			"asOntology": {
+				"@context": "profile-schema-onto.json",
+				"prefLabel": "Description",
+				"referenceProperty": "dc:description"
+			}
+		},
+		"keyword": {
+			"title": "Tags",
+			"description": "Tags (or keywords) help users discover your dataset; please include terms that would be used by technical and non-technical users.",
+			"notes": [
+				"Surround each keyword with quotes. Separate keywords with commas. Avoid duplicate keywords in the same record."
+			],
+			"type": "array",
+			"items": {
+				"type": "string",
+				"minLength": 1
+			},
+			"asOntology": {
+				"@context": "profile-schema-onto.json",
+				"prefLabel": "Tags",
+				"referenceProperty": "dcat:keyword"
+			}
+		},
+		"topic": {
+			"description": "Identified tags referring to things or concepts that this resource addresses or speaks to",
+			"type": "array",
+			"items": {
+				"$ref": "#/definitions/Topic"
+			},
+			"asOntology": {
+				"@context": "profile-schema-onto.json",
+				"prefLabel": "Topic",
+				"referenceProperty": "foaf:topic"
+			}
+		},
+		"contactPoint": {
+			"description": "Contact information for getting more information about this resource",
+			"notes": [
+				"This should include at least a name and an email address",
+				"The information can reflect either a person or a group (such as a help desk)"
+			],
+			"$ref": "#/definitions/ContactInfo",
+			"asOntology": {
+				"@context": "profile-schema-onto.json",
+				"prefLabel": "Contact Information",
+				"referenceProperty": "dcat:contactPoint"
+			}
+		},
+		"theme": {
+			"title": "Category",
+			"description": "Main thematic category of the dataset.",
+			"notes": [
+				"Could include ISO Topic Categories (http://www.isotopicmaps.org/)"
+			],
+			"anyOf": [
+				{
+					"type": "array",
+					"items": {
+						"type": "string",
+						"minLength": 1
+					},
+					"minItems": 1,
+					"uniqueItems": true
+				},
+				{
+					"type": "null"
+				}
+			]
+		},
+		"person": {
+			 "description": "an identification a Person contributing to the publication of a resource",
             "notes": [
-                "Acronyms should be avoided"
+                "The information here is intended to reflect information about the person at teh time of the contribution or publication."
             ],
-            "type": "string",
-            "asOntology": {
-                "@context": "profile-schema-onto.json",
-                "prefLabel": "Title",
-                "referenceProperty": "dc:title"
-            }
-        },
-        "description": {
-            "title": "Description",                    
-            "description": "Human-readable description (e.g., an abstract) of the resource",
+            "type": "object",
+            "items": {
+				"$ref": "#/definitions/Person"
+			},
+			"asOntology": {
+				"@context": "profile-schema-onto.json",
+				"prefLabel": "Person",
+				"referenceProperty": "foaf:person"
+			}
+		}
+	},
+	"definitions": {
+		"Topic": {
+			"description": "a container for an identified concept term or proper thing",
+			"notes": [
+				"A concept term refers to a subject or keyword term, like 'magnetism' while a proper thing is a particular instance of a concept that has a name, like the planet 'Saturn' or the person called 'Abraham Lincoln'",
+				"The meaning of concept is that given by the OWL ontology (owl:Concept); the meaning of thing is that given by the SKOS ontology (skos:Thing).  See also the FOAF ontology."
+			],
+			"type": "object",
+			"properties": {
+				"@type": {
+					"description": "a label indicating whether the value refers to a concept or a thing",
+					"type": "string",
+					"enum": [
+						"Concept",
+						"Thing"
+					],
+					"valueDocumentation": {
+						"Concept": {
+							"description": "label indicating that the value refers to a concept (as in owl:Concept)"
+						},
+						"Thing": {
+							"description": "label indicating that the value refers to a named person, place, or thing (as in skos:Thing)"
+						}
+					}
+				},
+				"scheme": {
+					"description": "a URI that identifies the controlled vocabulary, registry, or identifier system that the value is defined in.",
+					"type": "string",
+					"format": "uri",
+					"asOnotology": {
+						"@context": "profile-schema-onto.json",
+						"prefLabel": "Schema",
+						"referenceProperty": "vold:vocabulary"
+					}
+				},
+				"@id": {
+					"description": "the unique identifier identifying the concept or thing",
+					"type": "string",
+					"format": "uri"
+				},
+				"tag": {
+					"description": "a short, display-able token that locally represents the concept or thing",
+					"notes": [
+						"As a token, it is intended that applications can search for this value and find all resources that are talking about the same thing.  Thus, regardless of whether the @id field is provided, all references to the same concept or thing should use the same tag value."
+					],
+					"type": "string"
+				}
+			},
+			"required": [
+				"@type",
+				"tag"
+			]
+		},
+		"ContactInfo": {
+			"description": "Information describing various ways to contact an entity",
+			"notes": [],
+			"properties": {
+				"@type": {
+					"type": "string",
+					"enum": [
+						"vcard:Contact"
+					]
+				},
+				"fn": {
+					"title": "Contact Name",
+					"description": "full name of the contact person, role, or organization",
+					"type": "string",
+					"minLength": 1,
+					"asOntology": {
+						"@context": "profile-schema-onto.json",
+						"prefLabel": "Contact Name",
+						"referenceProperty": "vcard:fn"
+					}
+				},
+				"hasEmail": {
+					"title": "Email",
+					"description": "The email address of the resource contact",
+					"type": "string",
+					"pattern": "^[\\w\\_\\~\\!\\$\\&\\'\\(\\)\\*\\+\\,\\;\\=\\:.-]+@[\\w.-]+\\.[\\w.-]+?$",
+					"asOntology": {
+						"@context": "profile-schema-onto.json",
+						"prefLabel": "Contact Email",
+						"referenceProperty": "vcard:hasEmail"
+					}
+				},
+				"postalAddress": {
+					"description": "the contact mailing address",
+					"notes": [],
+					"$ref": "#/definitions/PostalAddress",
+					"asOntology": {
+						"@context": "profile-schema-onto.json",
+						"prefLabel": "Contact Address",
+						"referenceProperty": "vcard:hasAddress"
+					}
+				},
+				"phoneNumber": {
+					"description": "the contact telephone number",
+					"notes": [
+						"Complete international dialing codes should be given, e.g. '+1-410-338-1234'"
+					],
+					"type": "string",
+					"asOntology": {
+						"@context": "profile-schema-onto.json",
+						"prefLabel": "Contact Phone Number",
+						"referenceProperty": "vcard:hasTelephone"
+					}
+				},
+				"timezone": {
+					"description": "the time zone where the contact typically operates",
+					"type": "string",
+					"pattern": "^[-+][0-9]{4}$",
+					"asOntology": {
+						"@context": "profile-schema-onto.json",
+						"prefLabel": "Contact Address",
+						"referenceProperty": "transit:timezone"
+					}
+				},
+				"proxyFor": {
+					"description": "a local identifier representing this person",
+					"notes": [
+						"This identifier is expected to point to an up-to-date description of the person as known to the local system.  The properties associated with that identifier may be different those given in the current record."
+					],
+					"type": "string",
+					"format": "uri",
+					"asOntology": {
+						"@context": "profile-schema-onto.json",
+						"prefLabel": "Current Person Information",
+						"referenceProperty": "ore:proxyFor"
+					}
+				}
+			},
+			"asOntology": {
+				"@context": "profile-schema-onto.json",
+				"@id": "pod:ContactPerson",
+				"@type": "owl:Class",
+				"prefLabel": "Contact Information",
+				"referenceClass": "vcard:Contact"
+			}
+		},
+		"PostalAddress": {
+			"description": "a line-delimited listing of a postal address",
+			"type": "array",
+			"items": {
+				"type": "string",
+				"minLength": 1
+			},
+			"asOntology": {
+				"@context": "profile-schema-onto.json",
+				"referenceProperty": "vcard:hasAddress"
+			}
+		},
+		 "Person": {
+            "description": "an identification a Person contributing to the publication of a resource",
             "notes": [
-                "Each element in the array should be considered a separate paragraph"
-            ],
-            "type": "array",
-            "items": { "type": "string" },
-            "minItems": 1,
-            "asOntology": {
-                "@context": "profile-schema-onto.json",
-                "prefLabel": "Description",
-                "referenceProperty": "dc:description"
-            }
-        },
-        "keyword": {
-            "title": "Tags",
-            "description": "Tags (or keywords) help users discover your dataset; please include terms that would be used by technical and non-technical users.",
-            "notes": [
-                        "Surround each keyword with quotes. Separate keywords with commas. Avoid duplicate keywords in the same record."
-            ],
-            "type": "array",
-            "items": { "type": "string", "minLength": 1 },
-            "asOntology": {
-                "@context": "profile-schema-onto.json",
-                "prefLabel": "Tags",
-                "referenceProperty": "dcat:keyword"
-            }
-        },
-        "topic": {
-            "description": "Identified tags referring to things or concepts that this resource addresses or speaks to",
-            "type": "array",
-            "items": { "$ref": "#/definitions/Topic" },
-            "asOntology": {
-                "@context": "profile-schema-onto.json",
-                "prefLabel": "Topic",
-                "referenceProperty": "foaf:topic"
-            }
-        },
-        "contactPoint": {
-            "description": "Contact information for getting more information about this resource",
-            "notes": [
-                "This should include at least a name and an email address",
-                "The information can reflect either a person or a group (such as a help desk)"
-            ],
-            "$ref": "#/definitions/ContactInfo",
-            "asOntology": {
-                "@context": "profile-schema-onto.json",
-                "prefLabel": "Contact Information",
-                "referenceProperty": "dcat:contactPoint"
-            }
-        },
-        "theme": {
-            "title": "Category",
-            "description": "Main thematic category of the dataset.",
-            "notes": [
-                "Could include ISO Topic Categories (http://www.isotopicmaps.org/)"
-            ],
-            "anyOf": [
-                {
-                    "type": "array",
-                    "items": {
-                        "type": "string",
-                        "minLength": 1
-                    },
-                    "minItems": 1,
-                    "uniqueItems": true
-                },
-                {
-                    "type": "null"
-                }
-            ]
-        }
-
-    },
-    "definitions": {
-        "Topic": {
-            "description": "a container for an identified concept term or proper thing",
-            "notes": [
-                "A concept term refers to a subject or keyword term, like 'magnetism' while a proper thing is a particular instance of a concept that has a name, like the planet 'Saturn' or the person called 'Abraham Lincoln'",
-                "The meaning of concept is that given by the OWL ontology (owl:Concept); the meaning of thing is that given by the SKOS ontology (skos:Thing).  See also the FOAF ontology."
+                "The information here is intended to reflect information about the person at teh time of the contribution or publication."
             ],
             "type": "object",
             "properties": {
                 "@type": {
-                    "description": "a label indicating whether the value refers to a concept or a thing",
+                    "description": "the class indicating that this is a Person",
                     "type": "string",
-                    "enum": [ "Concept", "Thing" ],
-                    "valueDocumentation": {
-                        "Concept": {
-                            "description": "label indicating that the value refers to a concept (as in owl:Concept)"
-                        },
-                        "Thing": {
-                            "description": "label indicating that the value refers to a named person, place, or thing (as in skos:Thing)"
-                        }
-                    }
+                    "enum": [
+                        "foaf:Person"
+                    ]
                 },
 
-                "scheme": {
-                    "description": "a URI that identifies the controlled vocabulary, registry, or identifier system that the value is defined in.",
-                    "type": "string",
-                    "format": "uri",
-                    "asOnotology": {
-                        "@context": "profile-schema-onto.json",
-                        "prefLabel": "Schema",
-                        "referenceProperty": "vold:vocabulary"
-                    }
-                },
-
-                "@id": {
-                    "description": "the unique identifier identifying the concept or thing",
-                    "type": "string",
-                    "format": "uri"
-                },
-
-                "tag": {
-                    "description": "a short, display-able token that locally represents the concept or thing",
-                    "notes": [
-                        "As a token, it is intended that applications can search for this value and find all resources that are talking about the same thing.  Thus, regardless of whether the @id field is provided, all references to the same concept or thing should use the same tag value."
-                    ],
-                    "type": "string"
-                }
-            },
-            "required": [ "@type", "tag" ]
-        },
-        "ContactInfo": {
-            "description": "Information describing various ways to contact an entity",
-            "notes": [
-            ],
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "enum": [ "vcard:Contact" ]
-                },
                 "fn": {
-                    "title": "Contact Name",
-                    "description": "full name of the contact person, role, or organization",
+                    "description": "the author's full name in the preferred format",
                     "type": "string",
                     "minLength": 1,
                     "asOntology": {
@@ -164,53 +292,75 @@
                         "referenceProperty": "vcard:fn"
                     }
                 },
-            
-                "hasEmail": {
-                    "title": "Email",
-                    "description": "The email address of the resource contact",
+
+                "givenName": {
+                    "description":  "the author's given name",
+                    "notes": [
+                        "Often referred to in English-speaking conventions as the first name"
+                    ],
                     "type": "string",
-                    "pattern": "^[\\w\\_\\~\\!\\$\\&\\'\\(\\)\\*\\+\\,\\;\\=\\:.-]+@[\\w.-]+\\.[\\w.-]+?$",
+                    "minLength": 1,
                     "asOntology": {
                         "@context": "profile-schema-onto.json",
-                        "prefLabel": "Contact Email",
-                        "referenceProperty": "vcard:hasEmail"
+                        "prefLabel": "First Name",
+                        "referenceProperty": "foaf:givenName"
                     }
                 },
 
-                "postalAddress": {
-                    "description": "the contact mailing address",
+                "familyName": {
+                    "description":  "the author's family name",
                     "notes": [
+                        "Often referred to in English-speaking conventions as the last name"
                     ],
-                    "$ref": "#/definitions/PostalAddress",
+                    "type": "string",
+                    "minLength": 1,
                     "asOntology": {
                         "@context": "profile-schema-onto.json",
-                        "prefLabel": "Contact Address",
-                        "referenceProperty": "vcard:hasAddress"
+                        "prefLabel": "Last Name",
+                        "referenceProperty": "foaf:familyName"
                     }
                 },
-                
-                "phoneNumber": {
-                    "description": "the contact telephone number",
-                    "notes": [ "Complete international dialing codes should be given, e.g. '+1-410-338-1234'" ],
-                    "type" : "string",
+
+                "middleName": {
+                    "description":  "the author's middle names or initials",
+                    "notes": [
+                        "Often referred to in English-speaking conventions as the first name"
+                    ],
+                    "type": "string",
+                    "minLength": 1,
                     "asOntology": {
                         "@context": "profile-schema-onto.json",
-                        "prefLabel": "Contact Phone Number",
-                        "referenceProperty": "vcard:hasTelephone"
+                        "prefLabel": "Middle Names or Initials",
+                        "referenceProperty": "vcard:middleName"
                     }
                 },
-                
-                "timezone": {
-                    "description": "the time zone where the contact typically operates",
-                    "type" : "string",
-                    "pattern": "^[-+][0-9]{4}$",
+
+                "orcid": {
+                    "description":  "the author's ORCID",
+                    "notes:": [
+                        "The value should not include the resolving URI base (http://orcid.org)"
+                    ],
+                    "$ref": "#/definitions/ORCIDpath",
                     "asOntology": {
                         "@context": "profile-schema-onto.json",
-                        "prefLabel": "Contact Address",
-                        "referenceProperty": "transit:timezone"
+                        "prefLabel": "Last Name",
+                        "referenceProperty": "vivo:orcidid"
                     }
                 },
-                
+
+                "affiliation": {
+                    "description": "The institution the person was affiliated with at the time of publication",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Affiliation"
+                    },
+                    "asOntology": {
+                        "@context": "profile-schema-onto.json",
+                        "prefLabel": "Affiliation",
+                        "referenceProperty": "schema:affiliation"
+                    } 
+                },
+
                 "proxyFor": {
                     "description": "a local identifier representing this person",
                     "notes": [
@@ -224,26 +374,39 @@
                         "referenceProperty": "ore:proxyFor"
                     }
                 }
-                
             },
-            "asOntology": {
-                "@context": "profile-schema-onto.json",
-                "@id": "pod:ContactPerson",
-                "@type": "owl:Class",
-                "prefLabel": "Contact Information",
-                "referenceClass": "vcard:Contact"
-            }
-
+            "required": [ "fn" ]
         },
-
-        "PostalAddress": {
-            "description": "a line-delimited listing of a postal address",
-            "type": "array",
-            "items": { "type": "string", "minLength": 1 },
-            "asOntology": {
-                "@context": "profile-schema-onto.json",
-                "referenceProperty": "vcard:hasAddress"
-            }
+		"ORCIDpath": {
+            "description": "the format of the path portion of an ORCID identifier (i.e. without the preceding resolver URL base)",
+            "type": "string",
+            "pattern": "^[0-9]{4}-[0-9]{4}-[0-9]{4}-[0-9]{3}[0-9X]$"
+        },
+        "Affiliation": {
+            "description":  "a description of an organization that a person is a member of",
+            "allOf": [
+                { "$ref": "https://data.nist.gov/od/dm/nerdm-schema/v0.2#/definitions/ResourceReference" },
+                {
+                    "properties": {
+                        "subunits": { 
+                            "description": "sub-units of the main organization the that the person is a member of",
+                            "notes": [
+                                "The order of the array elements should be treated as significant.  Typically (though not required), each element will reflect a more specific unit contained in unit nameed in the previous element."
+                            ],
+                            "type": "array",
+                            "items": { "type": "string" },
+                            "asOntology": {
+                                "@context": "profile-schema-onto.json",
+                                "prefLabel": "Sub-unit",
+                                "referenceProperty": "org:OrganizationalUnit"
+                            }
+                        }
+                    },
+                    "required": [ "@type" ]
+                }
+            ]
         }
-    }
+	},
+	"additionalProperties": false
+	
 }
