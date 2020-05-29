@@ -100,19 +100,19 @@
 				}
 			]
 		},
-		"person": {
-			 "description": "an identification a Person contributing to the publication of a resource",
-            "notes": [
-                "The information here is intended to reflect information about the person at teh time of the contribution or publication."
-            ],
-            "type": "object",
-            "items": {
+		"authors": {
+			"description": "the ordered list of authors of this data publication",
+			"notes": [
+				"Authors should generally be assumed to be considered creators of the data; where this is is not true or insufficient, the contributors property can be used ot add or clarify who contributed to data creation."
+			],
+			"type": "array",
+			"items": {
 				"$ref": "#/definitions/Person"
 			},
 			"asOntology": {
-				"@context": "profile-schema-onto.json",
-				"prefLabel": "Person",
-				"referenceProperty": "foaf:person"
+				"@conxtext": "profile-schema-onto.json",
+				"prefLabel": "Authors",
+				"referenceProperty": "bibo:authorList"
 			}
 		}
 	},
@@ -267,146 +267,146 @@
 				"referenceProperty": "vcard:hasAddress"
 			}
 		},
-		 "Person": {
-            "description": "an identification a Person contributing to the publication of a resource",
-            "notes": [
-                "The information here is intended to reflect information about the person at teh time of the contribution or publication."
-            ],
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "description": "the class indicating that this is a Person",
-                    "type": "string",
-                    "enum": [
-                        "foaf:Person"
-                    ]
-                },
-
-                "fn": {
-                    "description": "the author's full name in the preferred format",
-                    "type": "string",
-                    "minLength": 1,
-                    "asOntology": {
-                        "@context": "profile-schema-onto.json",
-                        "prefLabel": "Contact Name",
-                        "referenceProperty": "vcard:fn"
-                    }
-                },
-
-                "givenName": {
-                    "description":  "the author's given name",
-                    "notes": [
-                        "Often referred to in English-speaking conventions as the first name"
-                    ],
-                    "type": "string",
-                    "minLength": 1,
-                    "asOntology": {
-                        "@context": "profile-schema-onto.json",
-                        "prefLabel": "First Name",
-                        "referenceProperty": "foaf:givenName"
-                    }
-                },
-
-                "familyName": {
-                    "description":  "the author's family name",
-                    "notes": [
-                        "Often referred to in English-speaking conventions as the last name"
-                    ],
-                    "type": "string",
-                    "minLength": 1,
-                    "asOntology": {
-                        "@context": "profile-schema-onto.json",
-                        "prefLabel": "Last Name",
-                        "referenceProperty": "foaf:familyName"
-                    }
-                },
-
-                "middleName": {
-                    "description":  "the author's middle names or initials",
-                    "notes": [
-                        "Often referred to in English-speaking conventions as the first name"
-                    ],
-                    "type": "string",
-                    "minLength": 1,
-                    "asOntology": {
-                        "@context": "profile-schema-onto.json",
-                        "prefLabel": "Middle Names or Initials",
-                        "referenceProperty": "vcard:middleName"
-                    }
-                },
-
-                "orcid": {
-                    "description":  "the author's ORCID",
-                    "notes:": [
-                        "The value should not include the resolving URI base (http://orcid.org)"
-                    ],
-                    "$ref": "#/definitions/ORCIDpath",
-                    "asOntology": {
-                        "@context": "profile-schema-onto.json",
-                        "prefLabel": "Last Name",
-                        "referenceProperty": "vivo:orcidid"
-                    }
-                },
-
-                "affiliation": {
-                    "description": "The institution the person was affiliated with at the time of publication",
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/Affiliation"
-                    },
-                    "asOntology": {
-                        "@context": "profile-schema-onto.json",
-                        "prefLabel": "Affiliation",
-                        "referenceProperty": "schema:affiliation"
-                    } 
-                },
-
-                "proxyFor": {
-                    "description": "a local identifier representing this person",
-                    "notes": [
-                        "This identifier is expected to point to an up-to-date description of the person as known to the local system.  The properties associated with that identifier may be different those given in the current record."
-                    ],
-                    "type": "string",
-                    "format": "uri",
-                    "asOntology": {
-                        "@context": "profile-schema-onto.json",
-                        "prefLabel": "Current Person Information",
-                        "referenceProperty": "ore:proxyFor"
-                    }
-                }
-            },
-            "required": [ "fn" ]
-        },
+		"Person": {
+			"description": "an identification a Person contributing to the publication of a resource",
+			"notes": [
+				"The information here is intended to reflect information about the person at teh time of the contribution or publication."
+			],
+			"type": "object",
+			"properties": {
+				"@type": {
+					"description": "the class indicating that this is a Person",
+					"type": "string",
+					"enum": [
+						"foaf:Person"
+					]
+				},
+				"fn": {
+					"description": "the author's full name in the preferred format",
+					"type": "string",
+					"minLength": 1,
+					"asOntology": {
+						"@context": "profile-schema-onto.json",
+						"prefLabel": "Contact Name",
+						"referenceProperty": "vcard:fn"
+					}
+				},
+				"givenName": {
+					"description": "the author's given name",
+					"notes": [
+						"Often referred to in English-speaking conventions as the first name"
+					],
+					"type": "string",
+					"minLength": 1,
+					"asOntology": {
+						"@context": "profile-schema-onto.json",
+						"prefLabel": "First Name",
+						"referenceProperty": "foaf:givenName"
+					}
+				},
+				"familyName": {
+					"description": "the author's family name",
+					"notes": [
+						"Often referred to in English-speaking conventions as the last name"
+					],
+					"type": "string",
+					"minLength": 1,
+					"asOntology": {
+						"@context": "profile-schema-onto.json",
+						"prefLabel": "Last Name",
+						"referenceProperty": "foaf:familyName"
+					}
+				},
+				"middleName": {
+					"description": "the author's middle names or initials",
+					"notes": [
+						"Often referred to in English-speaking conventions as the first name"
+					],
+					"type": "string",
+					"minLength": 1,
+					"asOntology": {
+						"@context": "profile-schema-onto.json",
+						"prefLabel": "Middle Names or Initials",
+						"referenceProperty": "vcard:middleName"
+					}
+				},
+				"orcid": {
+					"description": "the author's ORCID",
+					"notes:": [
+						"The value should not include the resolving URI base (http://orcid.org)"
+					],
+					"$ref": "#/definitions/ORCIDpath",
+					"asOntology": {
+						"@context": "profile-schema-onto.json",
+						"prefLabel": "Last Name",
+						"referenceProperty": "vivo:orcidid"
+					}
+				},
+				"affiliation": {
+					"description": "The institution the person was affiliated with at the time of publication",
+					"type": "array",
+					"items": {
+						"$ref": "#/definitions/Affiliation"
+					},
+					"asOntology": {
+						"@context": "profile-schema-onto.json",
+						"prefLabel": "Affiliation",
+						"referenceProperty": "schema:affiliation"
+					}
+				},
+				"proxyFor": {
+					"description": "a local identifier representing this person",
+					"notes": [
+						"This identifier is expected to point to an up-to-date description of the person as known to the local system.  The properties associated with that identifier may be different those given in the current record."
+					],
+					"type": "string",
+					"format": "uri",
+					"asOntology": {
+						"@context": "profile-schema-onto.json",
+						"prefLabel": "Current Person Information",
+						"referenceProperty": "ore:proxyFor"
+					}
+				}
+			},
+			"required": [
+				"fn"
+			]
+		},
 		"ORCIDpath": {
-            "description": "the format of the path portion of an ORCID identifier (i.e. without the preceding resolver URL base)",
-            "type": "string",
-            "pattern": "^[0-9]{4}-[0-9]{4}-[0-9]{4}-[0-9]{3}[0-9X]$"
-        },
-        "Affiliation": {
-            "description":  "a description of an organization that a person is a member of",
-            "allOf": [
-                { "$ref": "https://data.nist.gov/od/dm/nerdm-schema/v0.2#/definitions/ResourceReference" },
-                {
-                    "properties": {
-                        "subunits": { 
-                            "description": "sub-units of the main organization the that the person is a member of",
-                            "notes": [
-                                "The order of the array elements should be treated as significant.  Typically (though not required), each element will reflect a more specific unit contained in unit nameed in the previous element."
-                            ],
-                            "type": "array",
-                            "items": { "type": "string" },
-                            "asOntology": {
-                                "@context": "profile-schema-onto.json",
-                                "prefLabel": "Sub-unit",
-                                "referenceProperty": "org:OrganizationalUnit"
-                            }
-                        }
-                    },
-                    "required": [ "@type" ]
-                }
-            ]
-        }
+			"description": "the format of the path portion of an ORCID identifier (i.e. without the preceding resolver URL base)",
+			"type": "string",
+			"pattern": "^[0-9]{4}-[0-9]{4}-[0-9]{4}-[0-9]{3}[0-9X]$"
+		},
+		"Affiliation": {
+			"description": "a description of an organization that a person is a member of",
+			"allOf": [
+				{
+					"$ref": "https://data.nist.gov/od/dm/nerdm-schema/v0.2#/definitions/ResourceReference"
+				},
+				{
+					"properties": {
+						"subunits": {
+							"description": "sub-units of the main organization the that the person is a member of",
+							"notes": [
+								"The order of the array elements should be treated as significant.  Typically (though not required), each element will reflect a more specific unit contained in unit nameed in the previous element."
+							],
+							"type": "array",
+							"items": {
+								"type": "string"
+							},
+							"asOntology": {
+								"@context": "profile-schema-onto.json",
+								"prefLabel": "Sub-unit",
+								"referenceProperty": "org:OrganizationalUnit"
+							}
+						}
+					},
+					"required": [
+						"@type"
+					]
+				}
+			]
+		}
 	},
 	"additionalProperties": false
-	
 }
