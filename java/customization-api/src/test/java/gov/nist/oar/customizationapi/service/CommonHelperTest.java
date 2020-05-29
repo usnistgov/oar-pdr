@@ -18,8 +18,7 @@ public class CommonHelperTest {
 		CommonHelper processInputRequest = new CommonHelper();
 		String json = "{\n" + 
 				"    \"title\" : \"Title of Record\",\n" + 
-				"    \"description\" : [\"Description for the record\"],\n" + 
-				"    \"ediid\" : \"FDB5909746815200E043065706813E54137\"\n" + 
+				"    \"description\" : [\"Description for the record\"]\n" + 
 				"}";
 		
 		org.junit.Assert.assertTrue(processInputRequest.validateInputParams(json));
