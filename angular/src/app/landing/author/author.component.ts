@@ -62,9 +62,25 @@ export class AuthorComponent implements OnInit {
 
         modalRef.componentInstance.returnValue.subscribe((returnValue) => {
             if (returnValue) {
+                console.log("returnValue", returnValue);
+                var authors: any[] = [];
+                var postMessageDetail: any = {};
                 var postMessage: any = {};
-                postMessage[this.fieldName] = returnValue[this.fieldName];
-                // console.log("postMessage", JSON.stringify(postMessage));
+                var properties = ['affiliation', 'familyName', 'fn', 'givenName', 'middleName', 'orcid'];
+
+                for(let author of returnValue[this.fieldName]) {
+                    console.log("author", author);
+                    for(let prop in author)
+                    {
+                        if(properties.indexOf(prop) > -1)
+                            postMessageDetail[prop] = JSON.parse(JSON.stringify(author[prop]));
+                    }
+
+                    authors.push(postMessageDetail);
+                }
+
+                postMessage[this.fieldName] = JSON.parse(JSON.stringify(authors));
+                console.log("postMessage", postMessage);
 
                 this.mdupdsvc.update(this.fieldName, postMessage).then((updateSuccess) => {
                     // console.log("###DBG  update sent; success: "+updateSuccess.toString());
