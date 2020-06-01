@@ -79,7 +79,7 @@ export class AuthorComponent implements OnInit {
 
         modalRef.componentInstance.returnValue.subscribe((returnValue) => {
             if (returnValue) {
-                // console.log("returnValue", returnValue);
+                console.log("returnValue", JSON.parse(JSON.stringify(returnValue)));
                 var authors: any[] = [];
                 var postMessageDetail: any = {};
                 var postMessage: any = {};
@@ -87,6 +87,7 @@ export class AuthorComponent implements OnInit {
                 var reyurnAuthors = returnValue[this.fieldName];
 
                 for(let author of reyurnAuthors) {
+                    postMessageDetail = {};
                     for(let prop in author)
                     {
                         if(properties.indexOf(prop) > -1)
