@@ -11,7 +11,7 @@ export class AuthorService {
         return {
             "@id": "",
             "title": "National Institute of Standards and Technology",
-            "dept": "",
+            "subunits": "",
             "@type": [
                 ""
             ]
@@ -42,7 +42,7 @@ export class AuthorService {
  export interface Affiliation {
     '@id': string,
     title: string,
-    dept: string,
+    subunits: string, // This is an array in NERDm but we convert it to string for UI editing purpose
     "@type": [string]
  }
 /**

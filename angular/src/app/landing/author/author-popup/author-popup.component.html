@@ -184,9 +184,9 @@
                                     </tr>
                                     <tr>
                                         <td width="10%" align="right" valign="center">Department/Division:</td>
-                                        <td><input type="text" [(ngModel)]="author.affiliation[j].dept"
+                                        <td><input type="text" [(ngModel)]="author.affiliation[j].subunits"
                                                 style="width: 100%;height:2em;"
-                                                (input)="onDeptChange(author, $event.target.value)" />
+                                                (input)="onDeptChange(author)" />
                                         </td>
                                     </tr>
                                 </table>

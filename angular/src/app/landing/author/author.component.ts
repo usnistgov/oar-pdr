@@ -47,11 +47,28 @@ export class AuthorComponent implements OnInit {
             this.tempInput[this.fieldName] = tempauthors;
         }
 
-        for (var author in this.tempInput[this.fieldName]) {
+        for (var author in this.tempInput[this.fieldName]) 
+        {
             this.tempInput.authors[author]['isCollapsed'] = false;
             this.tempInput.authors[author]['fnLocked'] = false;
             this.tempInput.authors[author]['originalIndex'] = author;
             this.tempInput.authors[author]['dataChanged'] = false;
+            // For affiliation, we will convert subunits into a string for editing purpose.
+            // After the value return, we will convert it back to array
+            if(this.tempInput.authors[author]['affiliation'])
+            {
+                for(let i in this.tempInput.authors[author]['affiliation'])
+                {
+                    if(this.tempInput.authors[author]['affiliation'][i]['subunits'])
+                    {
+                        if(this.tempInput.authors[author]['affiliation'][i]['subunits'] instanceof Array)
+                        {
+                            this.tempInput.authors[author]['affiliation'][i]['subunits'] = this.tempInput.authors[author]['affiliation'][i]['subunits'].join(',');
+                        }
+                    }                    
+                }
+
+            }
         }
 
         const modalRef = this.ngbModal.open(AuthorPopupComponent, ngbModalOptions);
@@ -62,18 +79,36 @@ export class AuthorComponent implements OnInit {
 
         modalRef.componentInstance.returnValue.subscribe((returnValue) => {
             if (returnValue) {
-                console.log("returnValue", returnValue);
+                // console.log("returnValue", returnValue);
                 var authors: any[] = [];
                 var postMessageDetail: any = {};
                 var postMessage: any = {};
                 var properties = ['affiliation', 'familyName', 'fn', 'givenName', 'middleName', 'orcid'];
+                var reyurnAuthors = returnValue[this.fieldName];
 
-                for(let author of returnValue[this.fieldName]) {
-                    console.log("author", author);
+                for(let author of reyurnAuthors) {
                     for(let prop in author)
                     {
                         if(properties.indexOf(prop) > -1)
+                        {
+                            if(properties.indexOf('affiliation') > -1) // Convert subunits back to array
+                            {
+                                if(author['affiliation'])
+                                {
+                                    for(let j in author['affiliation'])
+                                    {
+                                        if(author['affiliation'][j]['subunits'])
+                                        {
+                                            if(!(author['affiliation'][j]['subunits'] instanceof Array))
+                                                author['affiliation'][j]['subunits'] = JSON.parse(JSON.stringify(author['affiliation'][j]['subunits'].split(/\s*,\s*/).filter(su => su != '')));
+                                        }
+                                    }
+                                }
+                            }
+                                
                             postMessageDetail[prop] = JSON.parse(JSON.stringify(author[prop]));
+
+                        }
                     }
 
                     authors.push(postMessageDetail);
@@ -110,5 +145,15 @@ export class AuthorComponent implements OnInit {
     expandClick() {
         this.clicked = !this.clicked;
         return this.clicked;
+    }
+
+    getSubunites(subunites)
+    {
+        if(subunites instanceof Array)
+        {
+            return subunites.join(',');
+        }else{
+            return subunites;
+        }
     }
 }

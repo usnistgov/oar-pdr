@@ -23,7 +23,7 @@
                             <div>{{ author.fn}}</div>
                             <div *ngFor="let aff of author.affiliation" style="padding-left: 1em;">
                                 <span>{{aff.title}}</span>
-                                <span *ngIf="aff.dept">, {{aff.dept}}</span>
+                                <span *ngIf="aff.subunits">, {{getSubunites(aff.subunits)}}</span>
                             </div>
                         </div>
                     </div>
