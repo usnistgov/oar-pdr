@@ -98,10 +98,12 @@ export class AuthorComponent implements OnInit {
                                 {
                                     for(let j in author['affiliation'])
                                     {
-                                        if(author['affiliation'][j]['subunits'])
+                                        if(author['affiliation'][j]['subunits'] != null || author['affiliation'][j]['subunits'] != undefined)
                                         {
                                             if(!(author['affiliation'][j]['subunits'] instanceof Array))
+                                            {
                                                 author['affiliation'][j]['subunits'] = JSON.parse(JSON.stringify(author['affiliation'][j]['subunits'].split(/\s*,\s*/).filter(su => su != '')));
+                                            }
                                         }
                                     }
                                 }
