@@ -41,7 +41,7 @@
 		<appender-ref ref="SAVE-TO-FILE" />
 	</logger>
 
-	<logger name="gov.nist.oar.ds" level="DEBUG" additivity="false">
+	<logger name="gov.nist.oar.customizationapi" level="INFO" additivity="false">
 		<appender-ref ref="STDOUT" />
 		<appender-ref ref="SAVE-TO-FILE" />
 	</logger>

@@ -17,6 +17,7 @@ import java.io.InputStream;
 
 import org.apache.commons.io.IOUtils;
 import org.everit.json.schema.Schema;
+import org.everit.json.schema.ValidationException;
 import org.everit.json.schema.loader.SchemaLoader;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -92,9 +93,14 @@ public final class JSONUtils {
 			System.out.println("Exception validating with json schema:" + e.getMessage());
 			throw new InvalidInputException("Exception validating input JSON against customization service schema");
 
-		} catch (Exception e) {
-			logger.error("There is error validation input against JSON schema:" + e.getMessage());
+		} catch (ValidationException e) {
+			StringBuilder sb = new StringBuilder("Schema validation error detected in input: ");
+			sb.append(e.getMessage());
+			for (ValidationException ve : e.getCausingExceptions()) 
+				sb.append("\n  ").append(ve.getMessage());
+			logger.error(sb.toString());
 			System.out.println("Exception validating with json schema:" + e.getMessage());
+			logger.debug("On record:\n"+jsonRequest);
 			throw new InvalidInputException("Exception validating input JSON against customization service schema");
 		}
 	}
