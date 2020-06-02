@@ -98,7 +98,7 @@ export class AuthorComponent implements OnInit {
                                 {
                                     for(let j in author['affiliation'])
                                     {
-                                        if(author['affiliation'][j]['subunits'] != null || author['affiliation'][j]['subunits'] != undefined)
+                                        if(author['affiliation'][j]['subunits'] != null && author['affiliation'][j]['subunits'] != undefined)
                                         {
                                             if(!(author['affiliation'][j]['subunits'] instanceof Array))
                                             {
