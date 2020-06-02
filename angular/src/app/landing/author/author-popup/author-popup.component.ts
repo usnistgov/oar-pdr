@@ -19,7 +19,6 @@ export class AuthorPopupComponent implements OnInit {
   originalAuthors: any;
   errorMsg: any;
   affiliationList: any[] = [];
-  // organizationList: string[] = [];
 
   constructor(
     public activeModal: NgbActiveModal,
@@ -93,9 +92,63 @@ export class AuthorPopupComponent implements OnInit {
   /*
   *   Save author info and close popup dialog
   */
-  saveAuthorInfo() {
-    this.returnValue.emit(this.inputValue);
-    this.activeModal.close('Close click')
+  saveAuthorInfo() 
+  {
+    if(this.finalValidation())
+    {
+        this.returnValue.emit(this.inputValue);
+        this.activeModal.close('Close click')
+    }
+  }
+
+  /**
+   *  Final validation
+   */
+  finalValidation()
+  {
+      var validated = true;
+
+      for(let author of this.inputValue.authors)
+      {
+        //Validate ORCID value
+        if(!this.orcid_validation(author.orcid))
+        {
+            author.orcidValid = false;
+            validated = false;
+        }
+      }
+
+      return validated;
+  }
+
+  /**
+   * ORCID validation for UI
+   * @param author - author object
+   */
+  validateOrcid(author)
+  {
+    if(!this.orcid_validation(author.orcid))
+    {
+        author.orcidValid = false;
+    }else{
+        author.orcidValid = true;
+    }
+  }
+
+  /**
+   *  ORCID validation
+   */
+  orcid_validation(orcid):boolean
+  {
+      //Allow blank
+      if(orcid == '') return true;
+
+      const URL_REGEXP = /^[0-9]{4}-[0-9]{4}-[0-9]{4}-[0-9]{3}[0-9X]$/;
+      if (URL_REGEXP.test(orcid)) {
+          return true;
+      }
+
+      return false;
   }
 
   /*

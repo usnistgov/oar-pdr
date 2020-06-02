@@ -53,6 +53,7 @@ export class AuthorComponent implements OnInit {
             this.tempInput.authors[author]['fnLocked'] = false;
             this.tempInput.authors[author]['originalIndex'] = author;
             this.tempInput.authors[author]['dataChanged'] = false;
+            this.tempInput.authors[author]['orcidValid'] = true;
             // For affiliation, we will convert subunits into a string for editing purpose.
             // After the value return, we will convert it back to array
             if(this.tempInput.authors[author]['affiliation'])
@@ -98,7 +99,7 @@ export class AuthorComponent implements OnInit {
                                 {
                                     for(let j in author['affiliation'])
                                     {
-                                        if(author['affiliation'][j]['subunits'] != null || author['affiliation'][j]['subunits'] != undefined)
+                                        if(author['affiliation'][j]['subunits'] != null && author['affiliation'][j]['subunits'] != undefined)
                                         {
                                             if(!(author['affiliation'][j]['subunits'] instanceof Array))
                                             {

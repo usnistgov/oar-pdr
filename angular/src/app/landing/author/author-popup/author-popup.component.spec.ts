@@ -24,16 +24,17 @@ describe('AuthorPopupComponent', () => {
           {
             "@id": "",
             "title": "",
-            "dept": "",
+            "subunits": [""],
             "@type": [
               ""
             ]
           }
         ],
-        "orcid": "",
+        "orcid": "0000-1832-8812-1125",
         "isCollapsed": false,
         "fnLocked": false,
-        "dataChanged": false
+        "dataChanged": false,
+        "orcidValid": true
       }]
   };
 
@@ -64,4 +65,16 @@ describe('AuthorPopupComponent', () => {
     expect(component).toBeTruthy();
   });
 
+  it('ORCID check', () => {
+    expect(component.orcid_validation(newAuthor.authors[0].orcid)).toBeTruthy();
+    component.validateOrcid(newAuthor.authors[0]);
+    expect(newAuthor.authors[0].orcidValid).toBeTruthy();
+
+    newAuthor.authors[0].orcid = "0000-1832-8812-112";
+    component.validateOrcid(newAuthor.authors[0]);
+    expect(newAuthor.authors[0].orcidValid).toBeFalsy();
+
+    component.inputValue = newAuthor;
+    expect(component.finalValidation()).toBeFalsy();
+  });
 });

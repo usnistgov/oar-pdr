@@ -151,10 +151,10 @@
                             style="color:green;">*</span> ORCID:</span>
                 </td>
                 <td>
-                    <input type="text" [(ngModel)]="author.orcid"
-                        style="width: calc(100% - 2em);height:2em; margin-right: .5em;" />
+                    <input type="text" [(ngModel)]="author.orcid" id="orcid-input" (blur)="validateOrcid(author)" (keyup.enter)="validateOrcid(author)" />
                     <a href="https://orcid.org" target="blank"><img src="assets/images/orcid-logo.png"
                             style="width: 20px;"></a>
+                    <div *ngIf="!author.orcidValid" id="orcid-warning">Please enter valid ORCID. Examples: 0000-1832-8812-1125, 0030-0422-1347-101X</div>
                 </td>
             </tr>
 
