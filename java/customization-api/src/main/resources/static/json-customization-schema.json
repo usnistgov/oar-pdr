@@ -114,8 +114,12 @@
 				"prefLabel": "Authors",
 				"referenceProperty": "bibo:authorList"
 			}
+		},
+		"_editStatus": {
+			"type": "string"
 		}
 	},
+	"additionalProperties": false,
 	"definitions": {
 		"Topic": {
 			"description": "a container for an identified concept term or proper thing",
@@ -406,6 +410,5 @@
 				}
 			]
 		}
-	},
-	"additionalProperties": false
+	}
 }
