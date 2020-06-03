@@ -5,7 +5,11 @@
 
 <!-- Display zip info -->
 <div class="full-span" style="margin: auto; padding: .5em 0em;">
-    You have selected {{totalFiles}} file<span *ngIf="totalFiles > 1">s</span>. The total file size is {{commonFunctionService.getSizeForDisplay(bundle_plan_size)}}<span *ngIf="bundle_plan_size > bundleSizeAlert"> which might take a while to download</span>. The file<span *ngIf="totalFiles > 1">s along with the folder structure</span> will be packed into following zip file<span *ngIf="zipData.length > 1">s</span>. Would you like to continue?
+    You have selected {{totalFiles}} file<span *ngIf="totalFiles > 1">s</span> with a total size of {{commonFunctionService.getSizeForDisplay(bundle_plan_size)}}.
+ 
+    <div *ngIf="bundle_plan_size > bundleSizeAlert" style="margin-top: .5em;">Warning:  this may a take a long time to download completely. </div> 
+    
+    <div style="margin-top: .5em;">The files will be downloaded in the following zip files.</div>
 </div>
 
 <!-- Display zip files if any -->
@@ -32,12 +36,17 @@
         <span class="span-end">Total size: {{commonFunctionService.getSizeForDisplay(bundle_plan_size)}}</span>
     </div>
 </div>
+
+<div class="full-span" style="margin-top: .5em;">
+    Unpack each zip file in the same folder on your disk to preserve the data hierarchy.
+</div>
+
 <hr>
 <div class="control-btns">
     <!-- Buttons are arranged from right to left -->
         <!-- Continue Download button -->
         <button pButton type="submit" class="btn btn-labeled" id="btn-download" (click)="ContinueDownload()"
-        label="Continue Download" icon="faa faa-cloud-download faa-1x icon-white" iconPos="left"></button>
+        label="Start Download" icon="faa faa-cloud-download faa-1x icon-white" iconPos="left"></button>
 
         <!-- Cancel button -->
         <button pButton type="submit" class="btn btn-labeled" id="btn-cancel" (click)="CancelDownload()"
