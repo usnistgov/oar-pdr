@@ -2,7 +2,7 @@
 Utility functions useful across the pdr package
 """
 from collections import OrderedDict, Mapping
-import hashlib, json, re, shutil, os, time, subprocess, logging
+import hashlib, json, re, shutil, os, time, subprocess, logging, threading
 try:
     import fcntl
 except ImportError:
@@ -26,6 +26,147 @@ def blab(log, msg, *args, **kwargs):
     :param kwargs:      other arbitrary keywords to pass to log.log()
     """
     log.log(BLAB, msg, *args, **kwargs)
+
+class LockedFile(object):
+    """
+    An object representing a file in a locked state.  The file is locked against
+    simultaneous accesses across both threads and processes.  
+
+    The easiest way to use this class is via the with statement.  For example,
+    to read a file with a shared lock (many reads, no writes):
+    .. code-block:: python
+
+       with LockedFile(filename) as fd:
+           data = json.load(fd)
+
+    And to write a file with an exclusive write (no other simultaneous reads 
+    or writes):
+    .. code-block:: python
+
+       with LockedFile(filename, 'w') as fd:
+           json.dump(data, fd)
+
+    An example of its use without the with statement might be:
+    .. code-block:: python
+
+       lkdfile = LockedFile(filename)
+       fd = lkdfile.open()
+       data = json.load(fd)
+       lkdfile.close()    #  do not call fd.close() !!!
+
+       lkdfile.mode = 'w'
+       with lkdfile as fd:
+          json.dump(data, fd)
+
+    """
+    _thread_locks = {}
+    _class_lock = threading.RLock()
+
+    class _ThreadLock(object):
+        _reader_count = 0
+        def __init__(self):
+            self.ex_lock = threading.Lock()
+            self.sh_lock = threading.Lock()
+        def acquire_shared(self):
+            with self.ex_lock:
+                if not self._reader_count:
+                    self.sh_lock.acquire()
+                self._reader_count += 1
+        def release_shared(self):
+            with self.ex_lock:
+                if self._reader_count > 0:
+                    self._reader_count -= 1
+                if self._reader_count <= 0:
+                    self.sh_lock.release()
+        def acquire_exclusive(self):
+            with self.sh_lock:
+                self.ex_lock.acquire()
+        def release_exclusive(self):
+            self.ex_lock.release()
+            
+    @classmethod
+    def _get_thread_lock_for(cls, filepath):
+        filepath = os.path.abspath(filepath)
+        with cls._class_lock:
+            if filepath not in cls._thread_locks:
+                cls._thread_locks[filepath] = cls._ThreadLock()
+            return cls._thread_locks[filepath]
+
+    def __init__(self, filename, mode='r'):
+        self.mode = mode
+        self._fname = filename
+        self._thread_lock = self._get_thread_lock_for(filename)
+        self._writing = None
+        self._fo = None
+
+    @property
+    def fo(self):
+        """
+        the open file object or None if the file is not currently open
+        """
+        return self._fo
+
+    def _acquire_thread_lock(self):
+        if self._writing:
+            self._thread_lock.acquire_exclusive()
+        else:
+            self._thread_lock.acquire_shared()
+    def _release_thread_lock(self):
+        if self._writing:
+            self._thread_lock.release_exclusive()
+        else:
+            self._thread_lock.release_shared()
+
+    def open(self, mode=None):
+        """
+        Open the file so that it is appropriate locked.  If mode is not 
+        provided, the mode will be the value set when this object was 
+        created.  
+        """
+        if self._fo:
+            raise StateException(self._fname+": file is already open")
+        if mode:
+            self.mode = mode
+            
+        self._writing = 'a' in self.mode or 'w' in self.mode or '+' in self.mode
+        self._acquire_thread_lock()
+        try:
+            self._fo = open(self._fname, self.mode)
+        except:
+            self._release_thread_lock()
+            if self._fo:
+                try:
+                    self._fo.close()
+                except:
+                    pass
+            self._fo = None
+            self._writing = None
+
+        if fcntl:
+            lock_type = (self._writing and fcntl.LOCK_EX) or fcntl.LOCK_SH
+            fcntl.lockf(self.fo, lock_type)
+        return self.fo
+
+    def close(self):
+        if not self._fo:
+            return
+        try:
+            self._fo.close()
+        finally:
+            self._fo = None
+            self._release_thread_lock()
+            self._writing = None
+
+    def __enter__(self):
+        return self.open()
+
+    def __exit__(self, e1, e2, e3):
+        self.close()
+        return False
+
+    def __del__(self):
+        if self._fo:
+            self.close()
 
 def read_nerd(nerdfile):
     """
@@ -69,22 +210,11 @@ def read_json(jsonfile, nolock=False):
                      the file contents
     :raise ValueError:  if JSON format errors are detected.
     """
-    with open(jsonfile) as fd:
-        if fcntl and not nolock:
-            fcntl.lockf(fd, fcntl.LOCK_SH)
-            blab(log, "Acquired shared lock for reading: "+jsonfile)
-        data = fd.read()
+    with LockedFile(jsonfile) as fd:
+        blab(log, "Acquired shared lock for reading: "+jsonfile)
+        out = json.load(fd, object_pairs_hook=OrderedDict)
     blab(log, "released SH")
-    if not data:
-        # this is an unfortunate hack multithreaded reading/writing
-        time.sleep(0.02)
-        with open(jsonfile) as fd:
-            if fcntl and not nolock:
-                fcntl.lockf(fd, fcntl.LOCK_SH)
-                blab(log, "(Re)Acquired shared lock for reading: "+jsonfile)
-            data = fd.read()
-        blab(log, "released SH")
-    return json.loads(data, object_pairs_hook=OrderedDict)
+    return out
 
 def write_json(jsdata, destfile, indent=4, nolock=False):
     """
@@ -99,14 +229,11 @@ def write_json(jsdata, destfile, indent=4, nolock=False):
                            data without a lock
     """
     try:
-        with open(destfile, 'a') as fd:
-            if fcntl and not nolock:
-                fcntl.lockf(fd, fcntl.LOCK_EX)
-                blab(log, "Acquired exclusive lock for writing: "+destfile)
+        with LockedFile(destfile, 'a') as fd:
+            blab(log, "Acquired exclusive lock for writing: "+destfile)
             fd.truncate(0)
             json.dump(jsdata, fd, indent=indent, separators=(',', ': '))
         blab(log, "released EX")
-            
     except Exception, ex:
         raise StateException("{0}: Failed to write JSON data to file: {1}"
                              .format(destfile, str(ex)), cause=ex)

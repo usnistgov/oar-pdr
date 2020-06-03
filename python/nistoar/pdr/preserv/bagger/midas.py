@@ -469,7 +469,8 @@ class MIDASMetadataBagger(SIPBagger):
                 
             resmd = self.bagbldr.bag.nerdm_record(False)
             for cmp in resmd.get('components', []):
-                if any([':DataFile' in t for t in cmp.get('@type',[])]) and \
+                if any([(':DataFile' in t or ':ChecksumFile' in t)
+                        for t in cmp.get('@type',[])]) and \
                    cmp.get('filepath') and \
                    not has_cmp_with_path(podnerd.get('components', []),
                                          cmp['filepath']):

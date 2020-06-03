@@ -76,6 +76,7 @@ export class DownloadService {
         }
 
         nextZip.downloadStatus = 'downloading';
+        this.setDownloadStatus(nextZip, dataFiles, "downloading");
         this.increaseNumberOfDownloading(whichPage);
 
         nextZip.downloadInstance = this.getBundle(nextZip.downloadUrl, JSON.stringify(nextZip.bundle)).subscribe(
@@ -102,10 +103,9 @@ export class DownloadService {
 
             },
             err => {
-                console.log(err);
-                console.log('Download details:');
-                console.log(nextZip);
-                nextZip.downloadStatus = 'Error';
+                console.log('Error:', err);
+                console.log('Download details:', nextZip);
+                nextZip.downloadStatus = 'error';
                 nextZip.downloadErrorMessage = err.message;
                 nextZip.downloadProgress = 0;
                 this.decreaseNumberOfDownloading(whichPage);
