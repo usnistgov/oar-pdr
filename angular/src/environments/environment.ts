@@ -34,7 +34,7 @@ export const config: LPSConfig = {
     distService: "https://testdata.nist.gov/od/ds/",
     gacode: "not-set",
     screenSizeBreakPoint: 1060,
-    bundleSizeAlert: 1000000000
+    bundleSizeAlert: 500000000
 }
 
 export const testdata: {} = {
