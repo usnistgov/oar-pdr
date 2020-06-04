@@ -28,6 +28,7 @@ export class DownloadConfirmComponent implements OnInit {
     ngOnInit() 
     {
         this.bundleSizeAlert = +this.cfg.get("bundleSizeAlert", "1000000000");
+        console.log('bundleSizeAlert', this.bundleSizeAlert);
     }
 
     /* 

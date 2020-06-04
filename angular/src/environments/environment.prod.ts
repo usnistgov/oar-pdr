@@ -30,7 +30,7 @@ export const config : LPSConfig = {
     editEnabled: false,
     gacode: "not-set",
     screenSizeBreakPoint: 1060,
-    bundleSizeAlert: 1000000000
+    bundleSizeAlert: 500000000
 }
 
 export const testdata : {} = { }
