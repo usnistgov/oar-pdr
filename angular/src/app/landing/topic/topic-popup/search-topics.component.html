@@ -73,7 +73,7 @@
     <div style="margin: .5em 1em .5em 1em;">
         <p-treeTable *ngIf="isVisible" [value]="taxonomyTree">
             <ng-template pTemplate="body" let-rowNode let-rowData="rowData">
-                <tr (click)="updateTopics(rowNode)">
+                <tr (dblclick)="updateTopics(rowNode)">
                     <td (mouseover)="setHighlight(rowData)" (mouseout)="setHighlight('')"
                         [ngStyle]="{'background-color': rowBackColor(rowData), 'display': rowVisibility(rowData), 'cursor': getTopicCursor(rowNode)}">
                         <p-treeTableToggler [rowNode]="rowNode"></p-treeTableToggler>
