@@ -16,7 +16,8 @@
             <!-- Save button -->
             <button pButton type="submit" class="btn-Save"
                 style="float:right;margin:0em 1em 2em 1em;width:150px; height:2em; background-color:green;color:white;padding-right: 1em;"
-                (click)="saveTopic();" label="Save" icon="faa faa-save faa-1x icon-white" iconPos="left" [disabled]="inputValue[field].length==0">
+                (click)="saveTopic();" label="Save" icon="faa faa-save faa-1x icon-white" iconPos="left"
+                [disabled]="inputValue[field].length==0">
             </button>
         </div>
     </p-toolbar>
@@ -57,14 +58,14 @@
 
 <!-- Taxonomy list to select -->
 <div class="selected-topic-header" style="width:90%; margin: 0em auto 0em auto;">
-    <span>Select topic(s) from the NIST research taxonomy (Click
+    <span>Select topic(s) from the NIST research taxonomy (Double click
         on name to select; scroll down to see more):</span>
 
     <!-- Reset button to reset the taxonomy list to it's original state:
       - Display only first level
       - No filtering
       -->
-    <i class="faa faa-recycle reset" (click)="showAllTopics()"data-toggle="tooltip" title="Reset"></i>
+    <i class="faa faa-recycle reset" (click)="showAllTopics()" data-toggle="tooltip" title="Reset"></i>
 </div>
 <div style="clear: both;"></div>
 <div #panel0
@@ -73,7 +74,7 @@
     <div style="margin: .5em 1em .5em 1em;">
         <p-treeTable *ngIf="isVisible" [value]="taxonomyTree">
             <ng-template pTemplate="body" let-rowNode let-rowData="rowData">
-                <tr (dblclick)="updateTopics(rowNode)">
+                <tr (dblclick)="updateTopics(rowNode)" (click)="openPopup($event,op5)">
                     <td (mouseover)="setHighlight(rowData)" (mouseout)="setHighlight('')"
                         [ngStyle]="{'background-color': rowBackColor(rowData), 'display': rowVisibility(rowData), 'cursor': getTopicCursor(rowNode)}">
                         <p-treeTableToggler [rowNode]="rowNode"></p-treeTableToggler>
@@ -85,3 +86,8 @@
     </div>
 </div>
 
+<p-overlayPanel class="fileDialog" #op5 [baseZIndex]=9999 [dismissable]="true" [showCloseIcon]="false" [style]="{'display':'inline-block','position':'absolute','left':'0','top':'20%'}" [appendTo]="'body'">
+    <div>
+        Double-click on theme to select.
+    </div>
+</p-overlayPanel>

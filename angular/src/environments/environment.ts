@@ -13,8 +13,8 @@ import { LPSConfig } from '../app/config/config';
 
 export const context = {
     production: false,
-    useMetadataService: true,
-    useCustomizationService: true
+    useMetadataService: false,
+    useCustomizationService: false
 };
 
 export const config: LPSConfig = {
@@ -26,7 +26,7 @@ export const config: LPSConfig = {
     },
     // mdAPI: "https://oardev.nist.gov/midas/",
     mdAPI: "https://data.nist.gov/rmm/records/",
-    customizationAPI: "https://oardev.nist.gov/customization/",
+    customizationAPI: "https://datapubtest.nist.gov/customization/",
     mode: "dev",
     status: "Dev Version",
     appVersion: "v1.2.X",

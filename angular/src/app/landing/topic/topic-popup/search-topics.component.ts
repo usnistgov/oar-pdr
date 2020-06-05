@@ -5,6 +5,7 @@ import { TemplateBindingParseResult, preserveWhitespacesDefault } from '@angular
 import { AppConfig } from '../../../config/config';
 import { TaxonomyListService } from '../../../shared/taxonomy-list';
 import { UserMessageService } from '../../../frame/usermessage.service';
+import { OverlayPanel } from 'primeng/overlaypanel';
 
 export const ROW_COLOR = '#1E6BA1';
 
@@ -25,6 +26,7 @@ export class SearchTopicsComponent implements OnInit {
   highlight: string = "";
   taxonomyList: any[];
   taxonomyTree: TreeNode[] = [];
+  toggle: Boolean = true;  
 
   @ViewChild('panel', { read: ElementRef }) public panel: ElementRef<any>;
   @ViewChild('panel0', { read: ElementRef }) public panel0: ElementRef<any>;
@@ -137,6 +139,7 @@ export class SearchTopicsComponent implements OnInit {
    * Update the topic list
    */
   updateTopics(rowNode: any) {
+    this.toggle = false;
     const existingTopic = this.inputValue[this.field].filter(topic => topic == rowNode.node.data.researchTopic);
     if (existingTopic == undefined || existingTopic == null || existingTopic.length == 0) {
       this.inputValue[this.field].push(rowNode.node.data.researchTopic);
@@ -216,7 +219,7 @@ export class SearchTopicsComponent implements OnInit {
     }, 0);
 
     setTimeout(() => {
-      this.panel0.nativeElement.scrollTop = index * 40;
+      this.panel0.nativeElement.scrollTop = index * 30;
     }, 1);
 
   }
@@ -395,5 +398,14 @@ export class SearchTopicsComponent implements OnInit {
       this.highlight = "";
     else
       this.highlight = rowData.name;
+  }
+
+  openPopup($event, overlaypanel: OverlayPanel){
+    this.toggle = true;
+    setTimeout(()=>{
+        if(this.toggle){
+            overlaypanel.toggle($event)
+        }
+    },250)
   }
 }
