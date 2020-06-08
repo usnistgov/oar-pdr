@@ -114,8 +114,12 @@
 				"prefLabel": "Authors",
 				"referenceProperty": "bibo:authorList"
 			}
+		},
+		"_editStatus": {
+			"type": "string"
 		}
 	},
+	"additionalProperties": false,
 	"definitions": {
 		"Topic": {
 			"description": "a container for an identified concept term or proper thing",
@@ -323,7 +327,6 @@
 						"Often referred to in English-speaking conventions as the first name"
 					],
 					"type": "string",
-					"minLength": 1,
 					"asOntology": {
 						"@context": "profile-schema-onto.json",
 						"prefLabel": "Middle Names or Initials",
@@ -375,7 +378,7 @@
 		"ORCIDpath": {
 			"description": "the format of the path portion of an ORCID identifier (i.e. without the preceding resolver URL base)",
 			"type": "string",
-			"pattern": "^[0-9]{4}-[0-9]{4}-[0-9]{4}-[0-9]{3}[0-9X]$"
+			"pattern": "^([0-9]{4}-[0-9]{4}-[0-9]{4}-[0-9]{3}[0-9X])?$"
 		},
 		"Affiliation": {
 			"description": "a description of an organization that a person is a member of",
@@ -407,6 +410,5 @@
 				}
 			]
 		}
-	},
-	"additionalProperties": false
+	}
 }
