@@ -516,6 +516,13 @@ class MIDAS3PublishingService(PublishSystem):
         fltrd = OrderedDict()
         _filter_props(data, fltrd)    # filter out properties you can't edit
 
+        # if authors was updated, filter out unrecognized sub-properties
+        if 'authors' in fltrd:
+            if not isinstance(fltrd['authors'], list):
+                del fltrd['authors']
+            else:
+                self._filter_author_subprops(fltrd['authors'])
+
         # if topic was updated, migrate these to theme
         if ('topic' in fltrd) != ('theme' in fltrd):
             if 'topic' in fltrd:
@@ -544,6 +551,41 @@ class MIDAS3PublishingService(PublishSystem):
         out[''] = fltrd
         out[None] = newnerdm
         return out
+
+    def _filter_author_subprops(self, authors):
+        def _filter_subprops(obj, subprops):
+            for subprop in obj:
+                if subprop not in subprops:
+                    del obj[subprop]
+                    
+        authprops = "fn familyName givenName middleName orcid affiliation proxyFor".split()
+        afflprops = "title proxyFor location label description subunits".split()
+        for i in reversed(range(len(authors))):
+            if not isinstance(authors[i], Mapping):
+                del authors[i]
+                continue
+
+            _filter_subprops(authors[i], authprops)
+            authors[i]['@type'] = "foaf:Person"
+            if 'affiliation' in authors[i]:
+                if not isinstance(authors[i]['affiliation'], list):
+                    del authors[i]['affiliation']
+                else:
+                    for j in reversed(range(len(authors[i]['affiliation']))):
+                        if not isinstance(authors[i]['affiliation'][j], Mapping):
+                            del authors[i]['affiliation'][j]
+                            continue
+                        _filter_subprops(authors[i]['affiliation'][j], afflprops)
+                        authors[i]['affiliation'][j]['@type'] = "org:Organization"
+                        affid = self._affil_id_for(authors[i]['affiliation'][j].get('title'))
+                        if affid:
+                            authors[i]['affiliation'][j]['@id'] = affid
+
+    def _affil_id_for(self, afftitle):
+        if not afftitle:
+            return None
+        if "NIST" in afftitle or "National Institute of Standards and Technology" in afftitle:
+            return "ror:05xpvk416"
 
     def _item_with_id(self, array, id):
         out = [e for e in array if e['@id'] == id]

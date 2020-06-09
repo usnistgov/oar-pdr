@@ -173,7 +173,9 @@ class TestMIDAS3PublishingServiceDraft(test.TestCase):
 
         resp = requests.patch(custbaseurl+self.midasid,
                               json={"_editStatus": "done",
-                                    "authors": [{"fn": "Enya"}] },
+                                    "authors": [{"fn": "Enya",
+                                                 "affiliation": [{"title": "NIST"}, "UMD"]},
+                                                "Madonna"]},
                               headers={'Authorization': 'Bearer SECRET'})
         self.assertEqual(resp.status_code, 201)
         pod = self.svc.get_customized_pod(self.midasid)
@@ -181,7 +183,7 @@ class TestMIDAS3PublishingServiceDraft(test.TestCase):
         self.assertEqual(pod['_editStatus'], "done")
         self.assertEqual(pod['identifier'], self.midasid)
         self.assertNotIn('authors', pod)
-        
+
         self.svc.end_customization_for(self.midasid)
         self.assertTrue(not self.client.draft_exists(self.midasid))
         self.assertTrue(os.path.isfile(nerdf))
@@ -195,7 +197,14 @@ class TestMIDAS3PublishingServiceDraft(test.TestCase):
         self.assertNotIn('authors', nerdm)
         nerdm = utils.read_json(annotf)
         self.assertIn('authors', nerdm)
+        self.assertEqual(len(nerdm['authors']), 1)
         self.assertEqual(nerdm['authors'][0]['fn'], "Enya")
+        self.assertEqual(nerdm['authors'][0]['@type'], "foaf:Person")
+        self.assertIn('affiliation', nerdm['authors'][0])
+        self.assertEqual(len(nerdm['authors'][0]['affiliation']), 1)
+        self.assertEqual(nerdm['authors'][0]['affiliation'][0]['title'], "NIST")
+        self.assertEqual(nerdm['authors'][0]['affiliation'][0]['@type'], "org:Organization")
+        self.assertEqual(nerdm['authors'][0]['affiliation'][0]['@id'], "ror:05xpvk416")
         self.assertNotIn('title', nerdm)
 
         nerdf = os.path.join(self.nrddir, self.midasid+".json")
