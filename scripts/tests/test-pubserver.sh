@@ -367,7 +367,7 @@ for pod in "${pods[@]}"; do
         tell ${prog}: identifier not found in $pod
         exit 1
     }
-    tell "Processing POD with identifier =" $id
+    tell Processing `basename $pod` "POD with identifier =" $id
 
     curlcmd=(curl -s -w '%{http_code}\n' -H 'Content-type: application/json' -H 'Authorization: Bearer secret' --data @$pod http://localhost:9090/pod/latest)
     respcode=`"${curlcmd[@]}"`

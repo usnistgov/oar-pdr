@@ -174,7 +174,11 @@ class TestMIDAS3PublishingServiceDraft(test.TestCase):
         resp = requests.patch(custbaseurl+self.midasid,
                               json={"_editStatus": "done",
                                     "authors": [{"fn": "Enya",
-                                                 "affiliation": [{"title": "NIST"}, "UMD"]},
+                                                 "affiliation": [
+                                                     {"title": "NIST", "subunits": ["MML", "ODI"], "dept":"SDG"},
+                                                     "UMD"
+                                                 ]
+                                                },
                                                 "Madonna"]},
                               headers={'Authorization': 'Bearer SECRET'})
         self.assertEqual(resp.status_code, 201)
@@ -205,6 +209,8 @@ class TestMIDAS3PublishingServiceDraft(test.TestCase):
         self.assertEqual(nerdm['authors'][0]['affiliation'][0]['title'], "NIST")
         self.assertEqual(nerdm['authors'][0]['affiliation'][0]['@type'], "org:Organization")
         self.assertEqual(nerdm['authors'][0]['affiliation'][0]['@id'], "ror:05xpvk416")
+        self.assertIn('subunits', nerdm['authors'][0]['affiliation'][0])
+        self.assertEqual(nerdm['authors'][0]['affiliation'][0]['subunits'], ["MML","ODI"])
         self.assertNotIn('title', nerdm)
 
         nerdf = os.path.join(self.nrddir, self.midasid+".json")
