@@ -384,7 +384,7 @@
 			"description": "a description of an organization that a person is a member of",
 			"allOf": [
 				{
-					"$ref": "https://data.nist.gov/od/dm/nerdm-schema/v0.2#/definitions/ResourceReference"
+					"$ref": "#/definitions/ResourceReference"
 				},
 				{
 					"properties": {
@@ -409,6 +409,79 @@
 					]
 				}
 			]
-		}
+		},
+
+		"RelatedResource": {
+			"description": "a resource that is related in some way to this resource",
+			"type": "object",
+
+			"properties": {
+			    "@id": {
+			        "description": "an identifier for the reference",
+			        "type": "string"
+			    },
+			    "@type": {
+			        "anyOf": [
+			            {
+			                "type": "string",
+			                "enum": [
+			                    "deo:BibliographicReference",
+			                    "org:Organization"
+			                ]
+			            },
+			            {
+			                "type": "array",
+			                "items": { "type": "string"  }
+			            }
+			        ]
+			    },
+
+    
+			    "title": {
+			        "description": "the name of the resource being referenced",
+			        "type": "string",
+			        "minLength": 1
+			    },
+			    "proxyFor": {
+			        "description": "a local identifier representing this resource",
+			        "type": "string",
+			        "format": "uri"
+			    },
+			    "location": {
+			        "description": "the URL for accessing the resource",
+			        "type": "string",
+			        "format": "uri"
+			    },
+
+			    "label": {
+			        "description": "a recommended label or title to display as the text for a link to the document",
+			        "type": "string"
+			    },
+
+			    "description": {
+			        "description": "a brief, human-readable description of what this reference refers to and/or why it is being referenced.",
+			        "type": "string"
+			    }
+
+			},
+
+			"dependencies": {
+			    "proxyFor": {
+			        "required": [ "@type" ]
+			    }
+			}            
+		},
+		"ResourceReference": {
+			"description":  "a reference to another resource that may have an associated ID",
+			"notes": [
+				"While providing a resType property is recommended, it is required if the proxyFor ID is given."
+			],
+			"allOf": [
+				{ "$ref": "#/definitions/RelatedResource" },
+				{
+					"required": [ "title" ]
+				}
+			]
+                }
 	}
 }
