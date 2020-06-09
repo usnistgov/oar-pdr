@@ -1081,9 +1081,13 @@ class MIDASMetadataBagger(SIPBagger):
                                  ": hash value in file looks invalid")
                     else:
                         self.log.debug(nerd['filepath']+": hash value looks valid")
-                    comp['valid'] = bool(valid)
-                    self.bagbldr.update_metadata_for(comp['filepath'],
-                                                     {'valid': comp['valid']})
+                    if comp.get('valid') is None or comp.get('valid') != bool(valid):
+                        comp['valid'] = bool(valid)
+                        msg="Updating valid=%s in metadata for ChecksumFile %s" % \
+                            (comp['valid'], comp['filepath'])
+                        self.bagbldr.update_metadata_for(comp['filepath'],
+                                                         {'valid': comp['valid']},
+                                                         "ChecksumFile", msg)
 
 
     class _AsyncFileExaminer():
