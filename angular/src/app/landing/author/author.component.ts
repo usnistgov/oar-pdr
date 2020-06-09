@@ -80,7 +80,6 @@ export class AuthorComponent implements OnInit {
 
         modalRef.componentInstance.returnValue.subscribe((returnValue) => {
             if (returnValue) {
-                console.log("returnValue", JSON.parse(JSON.stringify(returnValue)));
                 var authors: any[] = [];
                 var postMessageDetail: any = {};
                 var postMessage: any = {};
@@ -101,12 +100,14 @@ export class AuthorComponent implements OnInit {
                                     {
                                         if(author['affiliation'][j]['subunits'] != null && author['affiliation'][j]['subunits'] != undefined)
                                         {
-                                            if(author['affiliation'][j]['subunits'].trim() == '')
+                                            if(!(author['affiliation'][j]['subunits'] instanceof Array))
                                             {
-                                                delete author['affiliation'][j]['subunits'];
-                                            }else if(!(author['affiliation'][j]['subunits'] instanceof Array))
-                                            {
-                                                author['affiliation'][j]['subunits'] = JSON.parse(JSON.stringify(author['affiliation'][j]['subunits'].split(/\s*,\s*/).filter(su => su != '')));
+                                                if(author['affiliation'][j]['subunits'].trim() == '')
+                                                {
+                                                    delete author['affiliation'][j]['subunits'];
+                                                }else{
+                                                    author['affiliation'][j]['subunits'] = JSON.parse(JSON.stringify(author['affiliation'][j]['subunits'].split(/\s*,\s*/).filter(su => su != '')));
+                                                }
                                             }
                                         }
                                     }
@@ -158,7 +159,7 @@ export class AuthorComponent implements OnInit {
     {
         if(subunites instanceof Array)
         {
-            return subunites.join(',');
+            return subunites.join(', ');
         }else{
             return subunites;
         }

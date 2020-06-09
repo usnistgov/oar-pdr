@@ -28,6 +28,7 @@ export class AuthorService {
                 this.getBlankAffiliation()
             ],
             "orcid": "",
+            "orcidValid": true,
             "isCollapsed": false,
             "fnLocked": false,
             "dataChanged": false
@@ -61,6 +62,8 @@ export interface Author {
     affiliation: Affiliation[],
     // Orcid
     orcid: string,
+    // Valid ORCID flag
+    orcidValid: boolean,
     // flag for UI control - determind if current author detail info is collapsed
     isCollapsed: boolean,
     // flag for UI control - determind if current author's full name is locked

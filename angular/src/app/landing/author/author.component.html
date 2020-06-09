@@ -1,4 +1,4 @@
-<div style="display: table">
+<div style="display: table;">
     <div class="editable_container">
         <div class="editable_field" *ngIf="!record['authors'] || record['authors'].length==0; else hasAuthors">
             <div class="editable_field" *ngIf="mdupdsvc.isEditMode" [ngStyle]="mdupdsvc.getFieldStyle(fieldName)">
@@ -16,14 +16,14 @@
                         aria-hidden="true"
                         (click)="isCollapsedContent = !isCollapsedContent; clickAuthors = expandClick();"></i>
                 </div>
-                <div [collapse]="!isCollapsedContent" class="card card-block card-header customcard">
+                <div [collapse]="!isCollapsedContent" class="card card-block card-header customcard" style="width: fit-content; padding:.5em;">
                     <div class="" *ngIf="record.authors" (click)="openModal()">
                         <span><b>Authors:</b></span>
                         <div *ngFor="let author of record.authors; let i = index">
                             <div>{{ author.fn}}</div>
-                            <div *ngFor="let aff of author.affiliation" style="padding-left: 1em;">
-                                <span>{{aff.title}}</span>
-                                <span *ngIf="aff.subunits">, {{getSubunites(aff.subunits)}}</span>
+                            <div *ngFor="let aff of author.affiliation" style="padding-left: 1em">
+                                <div>{{aff.title}}</div>
+                                <div *ngIf="aff.subunits" style="padding-left: 1em">{{getSubunites(aff.subunits)}}</div>
                             </div>
                         </div>
                     </div>
