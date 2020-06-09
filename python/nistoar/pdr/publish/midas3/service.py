@@ -580,6 +580,9 @@ class MIDAS3PublishingService(PublishSystem):
                         affid = self._affil_id_for(authors[i]['affiliation'][j].get('title'))
                         if affid:
                             authors[i]['affiliation'][j]['@id'] = affid
+                        if 'subunits' in authors[i]['affiliation'][j] and \
+                           not authors[i]['affiliation'][j]['subunits']:
+                            del authors[i]['affiliation'][j]['subunits']
 
     def _affil_id_for(self, afftitle):
         if not afftitle:
