@@ -91,7 +91,7 @@ export class AuthorComponent implements OnInit {
                     postMessageDetail = {};
                     for(let prop in author)
                     {
-                        if(properties.indexOf(prop) > -1)
+                        if(properties.indexOf(prop) > -1) // Filter temp fields
                         {
                             if(properties.indexOf('affiliation') > -1) // Convert subunits back to array
                             {
@@ -101,7 +101,10 @@ export class AuthorComponent implements OnInit {
                                     {
                                         if(author['affiliation'][j]['subunits'] != null && author['affiliation'][j]['subunits'] != undefined)
                                         {
-                                            if(!(author['affiliation'][j]['subunits'] instanceof Array))
+                                            if(author['affiliation'][j]['subunits'].trim() == '')
+                                            {
+                                                delete author['affiliation'][j]['subunits'];
+                                            }else if(!(author['affiliation'][j]['subunits'] instanceof Array))
                                             {
                                                 author['affiliation'][j]['subunits'] = JSON.parse(JSON.stringify(author['affiliation'][j]['subunits'].split(/\s*,\s*/).filter(su => su != '')));
                                             }
