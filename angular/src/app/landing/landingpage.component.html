@@ -18,7 +18,7 @@
       <button style="position: absolute; top: 1.0rem; left: 1.5rem" type="button"
               pButton icon="faa faa-list" class="ui-button ui-button-icon-only" 
               (click)="menu3.togglePopup($event)"></button>
-      <tools-menu #menu3 [record]="md" [isPopup]="true" (toggle_citation)="toggleCitation()"
+      <tools-menu #menu3 [record]="md" [isPopup]="true" (toggle_citation)="toggleCitation('small')"
                          (scroll)="goToSection($event)"></tools-menu>
     </div>
 
@@ -36,7 +36,8 @@
         <!-- citation pop-up -->
         <div *ngIf="inBrowser">
           <citation-popup [citetext]="getCitation()"
-                          [(visible)]="citationVisible"></citation-popup>
+                          [(visible)]="citationVisible"
+                          [width]="citationDialogWith"></citation-popup>
         </div>
 
         <!-- side tool menu (for tablets and desktop displays  -->
@@ -46,7 +47,7 @@
               <div *ngIf="inBrowser" class="d-none d-md-block d-lg-block d-xl-block ">
 
                 <tools-menu #menu2 [record]="md" [isPopup]="false"
-                                   (toggle_citation)="toggleCitation()"
+                                   (toggle_citation)="toggleCitation('large')"
                                    (scroll)="goToSection($event)"></tools-menu>
               </div>
             </div>
