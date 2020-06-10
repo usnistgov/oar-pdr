@@ -213,10 +213,27 @@ class TestMIDAS3PublishingService(test.TestCase):
         self.assertTrue(os.path.isfile(os.path.join(self.nrddir, "gramma.json")))
         self.assertTrue(not os.path.exists(os.path.join(self.nrddir, "pdr0-1000.json")))
 
+        # see if we properly padded the record
+        nerd = utils.read_json(os.path.join(self.nrddir, "gramma.json"))
+        self.assertIn('contactPoint', nerd)
+        self.assertEqual(nerd['contactPoint']['@type'], "vcard:Contact")
+        self.assertEqual(nerd['contactPoint']['fn'], "")
+        self.assertEqual(nerd['contactPoint']['hasEmail'], "")
+
+        nerdm['contactPoint'] = {
+            "fn": "Joe",
+            "hasEmail": "joe@joe.com"
+        }
+
         self.svc.serve_nerdm(nerdm)
         self.assertTrue(os.path.isfile(os.path.join(self.nrddir, "gramma.json")))
         self.assertTrue(os.path.isfile(os.path.join(self.nrddir, "pdr0-1000.json")))
 
+        nerd = utils.read_json(os.path.join(self.nrddir, "pdr0-1000.json"))
+        self.assertIn('contactPoint', nerd)
+        self.assertEqual(nerd['contactPoint']['fn'], "Joe")
+        self.assertEqual(nerd['contactPoint']['hasEmail'], "joe@joe.com")
+        self.assertEqual(nerd['contactPoint']['@type'], "vcard:Contact")
 
     def test_update_ds_with_pod_async(self):
         podf = os.path.join(self.revdir, "1491", "_pod.json")

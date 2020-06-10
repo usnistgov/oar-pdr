@@ -327,10 +327,12 @@ class MIDAS3PublishingService(PublishSystem):
 
     def _pad_nerdm(self, nerdm):
         if not nerdm.get('contactPoint'):
-            nerdm['contactPoint'] = { "@type": "vcard:Contact" }
+            nerdm['contactPoint'] = { }
+        if not nerdm['contactPoint'].get('@type'):
+            nerdm['contactPoint']['@type'] = "vcard:Contact"
         if not nerdm['contactPoint'].get('fn'):
             nerdm['contactPoint']['fn'] = ""
-        if not nerdm['contactPoint'].get('hasEmail:'):
+        if not nerdm['contactPoint'].get('hasEmail'):
             nerdm['contactPoint']['hasEmail'] = ""
         if not nerdm.get('keyword'):
             nerdm['keyword'] = []
