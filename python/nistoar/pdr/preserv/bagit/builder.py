@@ -1759,7 +1759,7 @@ class BagBuilder(PreservationSystem):
                        message="Updating resource-level due to change in POD");
             changes[chtype].append("")
 
-        if updfilemd and 'distribution' in pod:
+        if updfilemd:
             # examine the POD metadata for each distribution; if it appears to 
             # have changed, update the corresponding NERDm metadata.
 

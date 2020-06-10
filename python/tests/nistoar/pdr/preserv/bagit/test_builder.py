@@ -1348,6 +1348,17 @@ class TestBuilder2(test.TestCase):
         self.assertTrue(os.path.exists(self.bag.bag.pod_file()))
         self.assertTrue(os.path.exists(self.bag.bag.nerd_file_for("")))
         self.assertTrue(not os.path.exists(self.bag.bag.nerd_file_for("trial1.json")))
+        self.assertTrue(os.path.exists(self.bag.bag.nerd_file_for("trial2.json")))
+        
+        # test deleting all componetnts (via non-existent distribution property)
+        del poddata['distribution']
+        self.bag.update_from_pod(poddata)
+        self.assertTrue(os.path.exists(self.bag.bag.pod_file()))
+        self.assertTrue(os.path.exists(self.bag.bag.nerd_file_for("")))
+        self.assertTrue(not os.path.exists(self.bag.bag.nerd_file_for("trial1.json")))
+        self.assertTrue(not os.path.exists(self.bag.bag.nerd_file_for("trial2.json")))
+        self.assertTrue(not os.path.exists(self.bag.bag.nerd_file_for("trial3/trial3a.json")))
+        self.assertTrue(not os.path.exists(self.bag.bag.nerd_file_for("trial3")))
         
 
 
