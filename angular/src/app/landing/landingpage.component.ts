@@ -52,6 +52,7 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
     public EDIT_MODES: any;
     editMode: string;
     message: string;
+    citationDialogWith: number = 550; // Default width
 
     // this will be removed in next restructure
     showMetadata = false;
@@ -280,7 +281,14 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
     /**
      * toggle the visibility of the citation pop-up window
      */
-    toggleCitation(): void { this.citationVisible = !this.citationVisible; }
+    toggleCitation(size: string) : void { 
+        if(size == 'small')
+            this.citationDialogWith = 400;
+        else
+            this.citationDialogWith = 550;
+
+        this.citationVisible = !this.citationVisible; 
+    }
 
     /**
      * return text representing the recommended citation for this resource
