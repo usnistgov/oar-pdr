@@ -20,55 +20,67 @@ export class FakeBackendInterceptor implements HttpInterceptor {
 
     const sampleData: any = require('../../assets/sample2.json');
     const sampleRecord: any = require('../../assets/sampleRecord2.json');
-    const bundlePlanRes: any = require('../../assets/bundle-sample.json');
 
-    // let httpRequest: any[] = [
-    //     {"url":"https://s3.amazonaws.com/nist-midas/1858/20170213_PowderPlate2_Pad.zip","body":null,"reportProgress":true,"withCredentials":false,"responseType":"blob","method":"GET","headers":{"normalizedNames":{},"lazyUpdate":null,"headers":{}},"params":{"updates":null,"cloneFrom":null,"encoder":{},"map":null},"urlWithParams":"https://s3.amazonaws.com/nist-midas/1858/20170213_PowderPlate2_Pad.zip"}
-    // ];
+    // Choose one of the following files to simulate different cases:
+    // bundle-plan-complete.json - no error. Bundle plan returns all zip files.
+    // bundle-plan-warning.json - Unable to get part of the requested files.
+    // bundle-plan-error.json - Unable to get all requested files.
+    const bundlePlanRes: any = require('../../assets/bundle-plan-complete.json');
+    // const bundlePlanRes: any = require('../../assets/bundle-plan-warning.json');
+    // const bundlePlanRes: any = require('../../assets/bundle-plan-error.json');
 
     // wrap in delayed observable to simulate server api call
     return of(null).pipe(mergeMap(() => {
-      // get bundlePlan
-      // if (request.url.endsWith('/od/ds/_bundle_plan') && request.method === 'POST') {
-      //   return of(new HttpResponse({ status: 200, body: JSON.parse(bundlePlanRes) }));
-      // }
       console.log("request.url", request.url);
-      console.log("request.url.indexOf('/customization/api/draft')", request.url.indexOf('/customization/api/draft'));
+      console.log("request.url.indexOf('_bundle_plan')", request.url.indexOf('_bundle_plan'));
       // For e2e test
-      if (request.url.endsWith('/rmm/records/SAMPLE123456') && request.method === 'GET') {
-        return of(new HttpResponse({ status: 200, body: sampleData }));
+      // if (request.url.endsWith('/rmm/records/SAMPLE123456') && request.method === 'GET') {
+      //   return of(new HttpResponse({ status: 200, body: sampleData }));
+      // }
+
+      // Generate bundle plan
+    //   if (request.url.indexOf('_bundle_plan') > -1 && request.method === 'POST') 
+    //   {
+    //     console.log("Record saved...");
+    //     return of(new HttpResponse({ status: 200, body: bundlePlanRes }));
+    //   }
+
+      // Generate bundle plan internal error
+      // if (request.url.indexOf('_bundle_plan') > -1 && request.method === 'POST') 
+      // {
+      //   console.log("Throw error...");
+      //   throw new HttpErrorResponse(
+      //     {
+      //       error: 'internal error message goes here...',
+      //       headers: request.headers,
+      //       status: 500,
+      //       statusText: 'internal error',
+      //       url: request.url
+      //     });
+      // }
+
+    // Generate bundle download internal error
+      if (request.url.indexOf('_bundle') > -1 && request.url.indexOf('_bundle_plan') <= 0 && request.method === 'POST') 
+      {
+        console.log("Throw error...");
+        throw new HttpErrorResponse(
+          {
+            error: 'internal error message goes here...',
+            headers: request.headers,
+            status: 500,
+            statusText: 'internal error',
+            url: request.url
+          });
       }
 
-      //authenticate
-      if (request.url.indexOf('auth/_perm/') > -1 && request.method === 'GET') {
-        let body: AuthInfo = {
-          userDetails: {
-            userId: 'xyz@nist.gov',
-            userName: 'xyz',
-            userLastName: 'abc',
-            userEmail: 'xyz@nist.gov'
-          },
-          token: 'fake-jwt-token'
-        };
-        console.log("logging in...")
-        return of(new HttpResponse({ status: 200, body }));
-      }
-
-      // Simulate loading draft
-      if (request.url.indexOf('/customization/api/draft') > -1 && request.method === 'GET') {
-        console.log("Interceptor returning sample record...");
-        return of(new HttpResponse({ status: 200, body: sampleRecord }));
-      }
-
-      // Simulate loading draft error
-      // if (request.url.indexOf('/customization/api/draft') > -1 && request.method === 'GET') {
-      //     console.log("Interceptor simulates loading drft error...");
-      //     return Observable.throw(
-      //         JSON.stringify({
-      //             "type": 'sys',
-      //             "message": "Request ID not found."
-      //         })
-      //     );
+      // // authenticate
+      // if (request.url.indexOf('auth/_perm/') > -1 && request.method === 'GET') {
+      //     let body: ApiToken = {
+      //         userId: 'xyz@nist.gov',
+      //         token: 'fake-jwt-token'
+      //     };
+      //     console.log("logging in...")
+      //     return of(new HttpResponse({ status: 200, body }));
       // }
 
       // return 401 not authorised if token is null or invalid
@@ -106,6 +118,11 @@ export class FakeBackendInterceptor implements HttpInterceptor {
       //   return of(new HttpResponse({ status: 200, body }));
       // }
 
+      // if (request.url.indexOf('/customization/api/draft') > -1 && request.method === 'GET') {
+      //     console.log("Interceptor returning sample record...");
+      //     return of(new HttpResponse({ status: 200, body: sampleRecord }));
+      // }
+
       // if (request.url.indexOf('/customization/api/draft') > -1 && request.method === 'PATCH') {
       //     console.log("Record updated...");
       //     return of(new HttpResponse({ status: 200, body: undefined }));
@@ -140,12 +157,12 @@ export class FakeBackendInterceptor implements HttpInterceptor {
       // pass through any requests not handled above
       return next.handle(request);
 
-    }))
+  }))
 
       // call materialize and dematerialize to ensure delay even if an error is thrown (https://github.com/Reactive-Extensions/RxJS/issues/648)
       .pipe(materialize())
       .pipe(delay(500))
-      .pipe(dematerialize());
+  .pipe(dematerialize());
   }
 }
 

@@ -24,16 +24,18 @@ export const config: LPSConfig = {
         pdrHome: "https://data.nist.gov/pdr/",
         pdrSearch: "https://data.nist.gov/sdp/"
     },
-    // mdAPI: "https://oardev.nist.gov/midas/",
     mdAPI: "https://data.nist.gov/rmm/records/",
+    // customizationAPI: "https://testdata.nist.gov/customization/",
     customizationAPI: "https://datapubtest.nist.gov/customization/",
     mode: "dev",
     status: "Dev Version",
     appVersion: "v1.2.X",
     production: context.production,
-    distService: "https://testdata.nist.gov/od/ds/",
     editEnabled: true,
-    gacode: "not-set"
+    distService: "https://testdata.nist.gov/od/ds/",
+    gacode: "not-set",
+    screenSizeBreakPoint: 1060,
+    bundleSizeAlert: 500000000
 }
 
 export const testdata: {} = {

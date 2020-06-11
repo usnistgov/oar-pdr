@@ -29,7 +29,8 @@ export const config : LPSConfig = {
     production:  context.production,
     editEnabled: false,
     gacode: "not-set",
-    screenSizeBreakPoint: 768
+    screenSizeBreakPoint: 1060,
+    bundleSizeAlert: 500000000
 }
 
 export const testdata : {} = { }

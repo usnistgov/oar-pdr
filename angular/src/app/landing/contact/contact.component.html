@@ -27,7 +27,8 @@
                         <br><strong>Email:</strong>
                         <a *ngIf="isEmail" href="{{record.contactPoint.hasEmail}}"
                             target="_top">
-                            {{record.contactPoint.hasEmail.split(":")[1]}}</a>
+                            {{email(record.contactPoint.hasEmail)}}
+                        </a>
                     </span>
                     <div class="font14" *ngIf="record.contactPoint.address">
                         <span><b>Address:</b></span>

@@ -12,4 +12,6 @@ export interface ZipData {
     bundle: any;
     downloadUrl: any;
     downloadErrorMessage: any;
+    bundleSize: number;
+    downloadTime: number;
   }
