@@ -1,33 +1,23 @@
-import { Component, OnInit, OnDestroy, AfterViewInit, ElementRef, ViewChildren, Input, NgZone, HostListener } from '@angular/core';
-//import {Headers, RequestOptions, Response, ResponseContentType, URLSearchParams} from '@angular/common/http';
-import { HttpClientModule, HttpClient, HttpParams, HttpRequest, HttpEventType } from '@angular/common/http';
+import { Component, OnInit, OnDestroy, NgZone, HostListener } from '@angular/core';
+import { HttpClient, HttpRequest, HttpEventType } from '@angular/common/http';
 import { ActivatedRoute } from '@angular/router';
-import { Http, HttpModule } from '@angular/http';
 import 'rxjs/add/operator/map';
-import { Subscription } from 'rxjs/Subscription';
-import { Message } from 'primeng/components/common/api';
-import {
-    TreeTableModule, TreeNode, MenuItem, OverlayPanelModule,
-    FieldsetModule, PanelModule, ContextMenuModule,
-    MenuModule
-} from 'primeng/primeng';
+import { TreeNode } from 'primeng/primeng';
 import { CartService } from './cart.service';
 import { CartEntity } from './cart.entity';
-import { Observable } from 'rxjs/Observable';
-import { ProgressSpinnerModule, DialogModule } from 'primeng/primeng';
-// import * as _ from 'lodash';
-// import * as __ from 'underscore';
 import { DownloadData } from '../shared/download-service/downloadData';
 
 import { DownloadService } from '../shared/download-service/download-service.service';
 import { ZipData } from '../shared/download-service/zipData';
 import { OverlayPanel } from 'primeng/overlaypanel';
 import { AppConfig } from '../config/config';
-import { BootstrapOptions } from '@angular/core/src/application_ref';
-import { AsyncBooleanResultCallback } from 'async';
 import { FileSaverService } from 'ngx-filesaver';
 import { CommonFunctionService } from '../shared/common-function/common-function.service';
 import { GoogleAnalyticsService } from '../shared/ga-service/google-analytics.service';
+import { NgbModalOptions, NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { DownloadConfirmComponent } from './download-confirm/download-confirm.component';
+import {formatDate } from '@angular/common';
+import { ConfirmationDialogComponent } from '../shared/confirmation-dialog/confirmation-dialog.component';
 
 declare var saveAs: any;
 declare var $: any;
@@ -40,90 +30,30 @@ declare var $: any;
 })
 
 export class DatacartComponent implements OnInit, OnDestroy {
-    layoutCompact: boolean = true;
-    layoutMode: string = 'horizontal';
-    profileMode: string = 'inline';
-    msgs: Message[] = [];
-    exception: string;
-    errorMsg: string;
-    status: string;
-    errorMessage: string;
-    errorMessageArray: string[];
-    //searchResults: any[] = [];
-    searchValue: string;
-    recordDisplay: any[] = [];
-    keyword: string;
-    downloadZIPURL: string;
-    summaryCandidate: any[];
-    showSpinner: boolean = false;
-    findId: string;
-    leftmenu: MenuItem[];
-    rightmenu: MenuItem[];
-    similarResources: boolean = false;
-    similarResourcesResults: any[] = [];
-    qcriteria: string = '';
-    selectedFile: TreeNode;
-    isDOI = false;
-    isEmail = false;
-    citeString: string = '';
-    type: string = '';
-    process: any[];
-    requestedId: string = '';
-    isCopied: boolean = false;
-    distdownload: string = '';
-    serviceApi: string = '';
-    metadata: boolean = false;
+    //Data cart
     cartEntities: CartEntity[];
-    cols: any[];
-    selectedData: TreeNode[] = [];
-    dataFiles: TreeNode[] = [];
-    childNode: TreeNode = {};
-    minimum: number = 1;
-    maximum: number = 100000;
-    displayFiles: any = [];
-    index: any = {};
-    selectedNode: TreeNode[] = [];
-    selectedFileCount: number = 0;
-    selectedParentIndex: number = 0;
-    downloadInstance: any;
-    downloadStatus: any;
-    downloadProgress: any;
-    displayDownloadFiles: boolean = false;
-    downloadData: DownloadData[];
-    zipData: ZipData[] = [];
-    cancelAllDownload: boolean = false;
-    treeRoot = [];
-    selectedTreeRoot = [];
-    subscriptions: any = [];
-    showZipFiles: boolean = true;
-    showZipFilesNmaes: boolean = true;
-    allProcessed: boolean = false;
-    downloadStatusExpanded: boolean = true;
+
+    //Bundle
     bundlePlanStatus: any;
     bundlePlanMessage: any[];
     unhandledFiles: any[];
     bundlePlanUnhandledFiles: any[] = null;
+    bundleSizeAlert: number;
+    bundleplan: any;
+    bundlePlanRef: any;
+
+    //For display
+    downloadStatusExpanded: boolean = true;
     showUnhandledFiles: boolean = true;
     isVisible: boolean = true;
     isExpanded: boolean = true;
     showUnhandledFilesTable: boolean = true;
-    fileNode: TreeNode;
-    showMessageBlock: boolean = false;
-    messageColor: any;
-    noFileDownloaded: boolean; // will be true if any item in data cart is downloaded
-    totalDownloaded: number = 0;
-    selectedNodes: TreeNode[] = [];
-    distApi: string;
-    currentTask: string = '';
+    showZipFiles: boolean = true;
+    showZipFilesNmaes: boolean = true;
     showCurrentTask: boolean = false;
     showMessage: boolean = true;
-    broadcastMessage: string = '';
-    showDownloadProgress: boolean = false;
-    isProcessing: boolean = false;
-    isNodeSelected: boolean = false;
-    getBundlePlanRef: any;
-    mode: any;
-    routerparams: any;
+    messageColor: any;
+    currentTask: string = '';
     mobWidth: number;
     mobHeight: number;
     titleWidth: string;
@@ -132,13 +62,66 @@ export class DatacartComponent implements OnInit, OnDestroy {
     actionWidth: string;
     statusWidth: string;
     fontSize: string;
-    downloadflag: boolean = true;
-    emailSubject: string;
-    emailBody: string;
-    imageURL: string;
     screenWidth: number;
     screenSizeBreakPoint: number;
-    emailBodyBase: string = 'The information below describes an error that occurred while downloading data via the data cart. %0D%0A%0D%0A [From the PDR Team:  feel free to add additional information about the failure or your questions here.  Thanks for sending this message!] %0D%0A%0D%0A';
+    imageURL: string;
+
+    //Connection
+    distApi: string;
+    routerparams: any;
+    serviceApi: string = '';
+
+    //Data
+    fileNode: TreeNode;
+    selectedNodes: TreeNode[] = [];
+    isNodeSelected: boolean = false;
+    mode: any;
+    treeRoot = [];
+    selectedTreeRoot = [];
+    index: any = {};
+    selectedNode: TreeNode[] = [];
+    selectedFileCount: number = 0;
+    selectedParentIndex: number = 0;
+    minimum: number = 1;
+    maximum: number = 100000;
+    selectedData: TreeNode[] = [];
+    dataFiles: TreeNode[] = [];
+
+    //Download
+    totalDownloaded: number = 0;
+    noFileDownloaded: boolean; // will be true if any item in data cart is downloaded
+    downloadData: DownloadData[];
+    zipData: ZipData[] = [];
+    allDownloadCancelled: boolean = false;
+    subscriptions: any = [];
+    problemZip: ZipData = {
+        fileName: "",
+        downloadProgress: 0,
+        downloadStatus: null,
+        downloadInstance: null,
+        bundle: null,
+        downloadUrl: null,
+        downloadErrorMessage: '',
+        bundleSize: 0,
+        downloadTime: 0
+    };
+
+    // Email
+    emailSubject: string;
+    emailBody: string;
+    emailBodyBase: string = 'The information below describes an error that occurred while downloading data via the data cart. %0D%0A%0D%0A [From the PDR Team:  feel free to add additional information about the failure or your questions here. Thanks for sending this message!] %0D%0A%0D%0A';
+
+    // Overall progress
+    totalDownloadedSize: number = 0;
+    downloadSpeed = 0.00;
+    overallStatus: string = null;
+    downloadStartTime: any;
+    downloadEndTime: any;
+    totalDownloadTime: number;
+
+    // For pop up
+    modalRef: any;
+
 
     /**
      * Creates an instance of the SearchPanel
@@ -149,9 +132,10 @@ export class DatacartComponent implements OnInit, OnDestroy {
         private downloadService: DownloadService,
         private cfg: AppConfig,
         private _FileSaverService: FileSaverService,
-        private commonFunctionService: CommonFunctionService,
+        public commonFunctionService: CommonFunctionService,
         private route: ActivatedRoute,
-        private gaService: GoogleAnalyticsService,
+        public gaService: GoogleAnalyticsService,
+        private modalService: NgbModal,
         ngZone: NgZone) 
     {
         this.mobHeight = (window.innerHeight);
@@ -183,8 +167,8 @@ export class DatacartComponent implements OnInit, OnDestroy {
         this.imageURL = 'assets/images/sdp-background.jpg';
 
         console.log("Datacart init...");
-        this.isProcessing = true;
         this.distApi = this.cfg.get("distService", "/od/ds/");
+        this.bundleSizeAlert = +this.cfg.get("bundleSizeAlert", "1000000000");
         this.routerparams = this.route.params.subscribe(params => {
             this.mode = params['mode'];
         })
@@ -193,7 +177,6 @@ export class DatacartComponent implements OnInit, OnDestroy {
             this.cartService.setCurrentCart('landing_popup');
 
             this.loadDatacart().then(function (result) {
-                this.clearDownloadingStatus();
                 this.downloadAllFilesFromAPI();
             }.bind(this), function (err) {
                 console.log("Error while loading datacart:");
@@ -215,8 +198,15 @@ export class DatacartComponent implements OnInit, OnDestroy {
 
         this.downloadService.watchDownloadProcessStatus("datacart").subscribe(
             value => {
-                this.allProcessed = value;
-                // this.updateDownloadStatus(this.files);
+                if(value)
+                {
+                    this.totalDownloadedSize = 0;
+                    // this.downloadService.setTotalBundleSize(0);
+                    this.downloadEndTime = new Date();
+                    this.totalDownloadTime = this.downloadEndTime.getTime() / 1000 - this.downloadStartTime.getTime() / 1000;
+                    console.log('this.downloadEndTime', this.downloadEndTime);
+                    this.overallStatus = 'complete';
+                }
             }
         );
 
@@ -224,7 +214,7 @@ export class DatacartComponent implements OnInit, OnDestroy {
             value => {
                 this.noFileDownloaded = !value;
                 if (value) {
-                    this.totalDownloaded = this.downloadService.getTotalDownloaded(this.dataFiles);
+                    this.totalDownloaded = this.downloadService.getTotalDownloadedFiles(this.dataFiles);
                 }
             }
         );
@@ -249,39 +239,12 @@ export class DatacartComponent implements OnInit, OnDestroy {
     /*
     * Following functions set tree table style
     */
-    titleStyleHeader() {
-        return { 'background-color': '#1E6BA1', 'width': this.titleWidth, 'color': 'white', 'font-size': this.fontSize };
+    headerStyle(width) {
+        return { 'background-color': '#1E6BA1', 'width': width, 'color': 'white', 'font-size': this.fontSize };
     }
 
-    typeStyleHeader() {
-        return { 'background-color': '#1E6BA1', 'width': this.typeWidth, 'color': 'white', 'font-size': this.fontSize };
-    }
-
-    sizeStyleHeader() {
-        return { 'background-color': '#1E6BA1', 'width': this.sizeWidth, 'color': 'white', 'font-size': this.fontSize };
-    }
-
-    actionStyleHeader() {
-        return { 'background-color': '#1E6BA1', 'width': this.actionWidth, 'color': 'white', 'font-size': this.fontSize };
-    }
-
-    statusStyleHeader() {
-        return { 'background-color': '#1E6BA1', 'width': this.statusWidth, 'color': 'white', 'font-size': this.fontSize, 'white-space': 'nowrap' };
-    }
-
-    titleStyle() {
-        return { 'width': this.titleWidth, 'font-size': this.fontSize };
-    }
-
-    typeStyle() {
-        return { 'width': this.typeWidth, 'font-size': this.fontSize };
-    }
-
-    sizeStyle() {
-        return { 'width': this.sizeWidth, 'font-size': this.fontSize };
-    }
-    statusStyle() {
-        return { 'width': this.statusWidth, 'font-size': this.fontSize };
+    bodyStyle(width) {
+        return { 'width': width, 'font-size': this.fontSize };
     }
 
     setWidth(mobWidth: number) {
@@ -505,21 +468,23 @@ export class DatacartComponent implements OnInit, OnDestroy {
     /**
     * Function to download all files from API call.
     **/
-    downloadAllFilesFromAPI() {
+   downloadAllFilesFromAPI() {
         this.gaService.gaTrackEvent('download', undefined, 'all files', "Data cart");
         this.clearDownloadStatus();
-        this.isProcessing = true;
         this.showCurrentTask = true;
         let postMessage: any[] = [];
         this.downloadData = [];
         this.zipData = [];
-        this.displayDownloadFiles = true;
-        this.cancelAllDownload = false;
+        // this.displayDownloadFiles = true;
+        this.allDownloadCancelled = false;
         this.bundlePlanMessage = null;
-        this.downloadStatus = 'downloading';
+        // this.downloadStatus = 'downloading';
         this.downloadService.setDownloadProcessStatus(false, "datacart");
         this.currentTask = "Zipping files...";
         this.downloadService.setDownloadingNumber(0, "datacart");
+
+        this.downloadStartTime = new Date();
+
         // create root
         const newPart = {
             data: {
@@ -540,21 +505,18 @@ export class DatacartComponent implements OnInit, OnDestroy {
         files.data.downloadStatus = 'downloading';
 
         postMessage.push({ "bundleName": files.data.downloadFileName, "includeFiles": this.downloadData });
-        // console.log('Bundle plan post message:');
-        // console.log(JSON.stringify(postMessage[0]));
-        console.log("Calling following end point to get bundle plan:");
-        console.log(this.distApi + "_bundle_plan");
+        // console.log('Bundle plan post message:', JSON.stringify(postMessage[0]));
+        console.log("Calling following end point to get bundle plan:", this.distApi + "_bundle_plan");
 
-        this.getBundlePlanRef = this.downloadService.getBundlePlan(this.distApi + "_bundle_plan", JSON.stringify(postMessage[0])).subscribe(
+        this.bundlePlanRef = this.downloadService.getBundlePlan(this.distApi + "_bundle_plan", JSON.stringify(postMessage[0])).subscribe(
             blob => {
-                this.showCurrentTask = false;
-                this.isProcessing = false;
+                console.log('Bundle plan return:', blob);
                 this.bundlePlanStatus = blob.status.toLowerCase();
                 this.bundlePlanMessage = blob.messages;
                 this.bundlePlanUnhandledFiles = blob.notIncluded;
-                if (this.bundlePlanMessage != null && this.bundlePlanMessage != undefined && this.bundlePlanStatus != 'complete') {
-                    this.broadcastMessage = 'Server responsed with ' + this.bundlePlanStatus + '.';
-                }
+                // if (this.bundlePlanMessage != null && this.bundlePlanMessage != undefined && this.bundlePlanStatus != 'complete') {
+                //     this.broadcastMessage = 'Server responsed with ' + this.bundlePlanStatus + '.';
+                // }
                 this.messageColor = this.getColor();
                 //   console.log("Bundle plan return:", JSON.stringify(blob));
 
@@ -562,20 +524,79 @@ export class DatacartComponent implements OnInit, OnDestroy {
                     this.markUnhandledFiles();
                 }
 
-                if (this.bundlePlanStatus == 'complete') {
-                    this.processBundle(blob);
-                }
-                else if (this.bundlePlanStatus == 'warnings') {
-                    let dateTime = new Date();
+                if (this.bundlePlanStatus == 'complete' || this.bundlePlanStatus == 'warnings') {
+                    if(this.bundlePlanStatus == 'warnings')
+                    {
+                        let dateTime = new Date();
 
-                    this.showMessageBlock = true;
-                    this.showUnhandledFiles = false;
-                    this.emailSubject = 'PDR: Error getting download plan';
-                    this.emailBody = this.emailBodyBase
-                        + 'URL:' + this.distApi + '_bundle_plan; ' + '%0D%0A'
-                        + 'Time: ' + dateTime.toString() + '%0D%0A%0D%0A'
-                        + 'Post message:%0D%0A' + JSON.stringify(postMessage[0]) + ';' + '%0D%0A%0D%0A' + 'Return message:%0D%0A' + JSON.stringify(blob);
-                    this.processBundle(blob);
+                        this.showUnhandledFiles = false;
+                        this.emailSubject = 'PDR: Error getting download plan';
+                        this.emailBody = this.emailBodyBase
+                            + 'URL:' + this.distApi + '_bundle_plan; ' + '%0D%0A'
+                            + 'Time: ' + dateTime.toString() + '%0D%0A%0D%0A'
+                            + 'Post message:%0D%0A' + JSON.stringify(postMessage[0]) + ';' + '%0D%0A%0D%0A' + 'Return message:%0D%0A' + JSON.stringify(blob);
+                    }
+
+                    this.bundleplan = blob;
+                    this.downloadService.setTotalBundleSize(blob.size);
+
+                    let bundlePlan: any[] = blob.bundleNameFilePathUrl;
+                    let downloadUrl: any = this.distApi + blob.postEachTo;
+
+                    for (let bundle of bundlePlan) {
+                        this.zipData.push({ "fileName": bundle.bundleName, "downloadProgress": 0, "downloadStatus": null, "downloadInstance": null, "bundle": bundle, "downloadUrl": downloadUrl, "downloadErrorMessage": "","bundleSize": bundle.bundleSize, 'downloadTime': null });
+                    }
+            
+                    // Associate zipData with files
+                    for (let zip of this.zipData) {
+                        for (let includeFile of zip.bundle.includeFiles) {
+                            let resFilePath = includeFile.filePath.substring(includeFile.filePath.indexOf('/'));
+                            for (let dataFile of this.dataFiles) {
+                                let treeNode = this.downloadService.searchTreeByfilePath(dataFile, resFilePath);
+                                if (treeNode != null) {
+                                    treeNode.data.zipFile = zip.fileName;
+                                    break;
+                                }
+                            }
+            
+                            this.downloadService.setDownloadStatus(zip, this.dataFiles, 'pending');
+                        }
+                    }
+
+                    let ngbModalOptions: NgbModalOptions = {
+                        backdrop: 'static',
+                        keyboard: false,
+                        windowClass: "myCustomModalClass",
+                        size: 'lg'
+                    };
+
+                    // If bundle size exceeds the alert limit, pop up confirm window
+                    // if(blob.size > this.bundleSizeAlert)
+                    // {
+                        this.modalRef = this.modalService.open(DownloadConfirmComponent, ngbModalOptions);
+                        this.modalRef.componentInstance.bundle_plan_size = blob.size;
+                        this.modalRef.componentInstance.zipData = this.zipData;
+                        this.modalRef.componentInstance.totalFiles = blob.filesCount;
+                        this.modalRef.componentInstance.returnValue.subscribe((returnValue) => {
+                            console.log(returnValue);
+                            if ( returnValue ) {
+                                this.showCurrentTask = false;
+                                this.processBundle(this.bundleplan);
+                            }else{
+                                this.showCurrentTask = false;
+                                this.cancelDownloadAll()
+                                console.log("User canceled download");
+                            }
+                        }, (reason) => {
+                            this.showCurrentTask = false;
+                            this.cancelDownloadAll()
+                        });
+
+                    // }else  // If bundle size does not exceed the alert limit, continue download
+                    // {
+                    //     this.showCurrentTask = false;
+                    //     this.processBundle(this.bundleplan);
+                    // }
                 }
                 else // error
                 {
@@ -587,8 +608,8 @@ export class DatacartComponent implements OnInit, OnDestroy {
                         + 'URL:' + this.distApi + '_bundle_plan; ' + '%0D%0A'
                         + 'Time: ' + dateTime.toString() + '%0D%0A%0D%0A'
                         + 'Post message:%0D%0A' + JSON.stringify(postMessage[0]) + ';' + '%0D%0A%0D%0A' + 'Return message:%0D%0A' + JSON.stringify(blob);
-                    this.showMessageBlock = true;
                     this.showUnhandledFiles = false;
+                    this.showCurrentTask = false;
                     this.unsubscribeBundleplan();
                 }
             },
@@ -596,13 +617,10 @@ export class DatacartComponent implements OnInit, OnDestroy {
                 let dateTime = new Date()
                 console.log("Calling following end point returned error:");
                 console.log(this.distApi + "_bundle_plan");
-                console.log("Post message:");
-                console.log(JSON.stringify(postMessage[0]));
-                console.log("Error message:");
-                console.log(err);
+                console.log("Post message:", JSON.stringify(postMessage[0]));
+                console.log("Error message:", err);
                 this.bundlePlanMessage = err;
                 this.bundlePlanStatus = "internal error";
-                this.isProcessing = false;
                 this.showCurrentTask = false;
                 this.messageColor = this.getColor();
                 this.emailSubject = 'PDR: Error getting download plan';
@@ -615,14 +633,13 @@ export class DatacartComponent implements OnInit, OnDestroy {
                     + 'Post message:%0D%0A' + JSON.stringify(postMessage[0]) + '%0D%0A%0D%0A'
                     + 'Error message:%0D%0A' + JSON.stringify(err);
                 console.log("emailBody:", this.emailBody);
-                this.showMessageBlock = false;
             }
         );
     }
 
     unsubscribeBundleplan() {
-        this.getBundlePlanRef.unsubscribe();
-        this.getBundlePlanRef = null;
+        this.bundlePlanRef.unsubscribe();
+        this.bundlePlanRef = null;
     }
 
     /**
@@ -632,44 +649,32 @@ export class DatacartComponent implements OnInit, OnDestroy {
         this.currentTask = "Processing Each Bundle...";
         this.messageColor = this.getColor();
 
-        let bundlePlan: any[] = res.bundleNameFilePathUrl;
-        let downloadUrl: any = this.distApi + res.postEachTo;
-        console.log("Bundle url:");
-        console.log(downloadUrl);
-
-        let tempData: any[] = [];
-
-        for (let bundle of bundlePlan) {
-            this.zipData.push({ "fileName": bundle.bundleName, "downloadProgress": 0, "downloadStatus": null, "downloadInstance": null, "bundle": bundle, "downloadUrl": downloadUrl, "downloadErrorMessage": "" });
-        }
-        // Associate zipData with files
-        for (let zip of this.zipData) {
-            for (let includeFile of zip.bundle.includeFiles) {
-                let resFilePath = includeFile.filePath.substring(includeFile.filePath.indexOf('/'));
-                for (let dataFile of this.dataFiles) {
-                    let treeNode = this.downloadService.searchTreeByfilePath(dataFile, resFilePath);
-                    if (treeNode != null) {
-                        treeNode.data.zipFile = zip.fileName;
-                        break;
-                    }
-                }
-
-                this.downloadService.setDownloadStatus(zip, this.dataFiles, 'pending');
-            }
-        }
-
         this.downloadService.downloadNextZip(this.zipData, this.dataFiles, "datacart");
 
         // Start downloading the first one, this will set the downloaded zip file to 1
         this.subscriptions.push(this.downloadService.watchDownloadingNumber("datacart").subscribe(
             value => {
                 if (value >= 0) {
-                    if (!this.cancelAllDownload) {
+                    if (!this.allDownloadCancelled) {
+                        this.overallStatus = "downloading";
                         this.downloadService.downloadNextZip(this.zipData, this.dataFiles, "datacart");
+                    }
+                    else
+                    {
+                        this.overallStatus = "Cancelled";
                     }
                 }
             }
         ));
+    }
+
+    get overallProgress(){
+        if(this.downloadService.totalBundleSize > 0 && this.downloadService.totalBundleSize >= this.downloadService.totalDownloaded)
+            return Math.round(100 * this.downloadService.totalDownloaded / this.downloadService.totalBundleSize);
+        else if(this.downloadService.totalBundleSize > 0)
+            return 100;
+        else    
+            return 0;
     }
 
     /**
@@ -679,9 +684,35 @@ export class DatacartComponent implements OnInit, OnDestroy {
         if (zip.downloadInstance != null) {
             zip.downloadInstance.unsubscribe();
         }
+        this.downloadService.increaseTotalBundleBySize(zip.bundleSize);
         this.downloadService.download(zip, this.zipData, this.dataFiles, "datacart");
     }
 
+    /**
+     * Cancel all downloads confirmation
+     */
+    cancelDownloadAllConfirmation()
+    {
+        var message = 'This will cancel all current and pending download process.';
+
+        this.modalRef = this.modalService.open(ConfirmationDialogComponent);
+        this.modalRef.componentInstance.title = 'Please confirm';
+        this.modalRef.componentInstance.btnOkText = 'Yes';
+        this.modalRef.componentInstance.btnCancelText = 'No';
+        this.modalRef.componentInstance.message = message;
+        this.modalRef.componentInstance.showWarningIcon = true;
+        this.modalRef.componentInstance.showCancelButton = true;
+
+        this.modalRef.result.then((result) => {
+            console.log("Confirmation:", result);
+            if ( result ) {
+                this.cancelDownloadAll();
+            }else{
+                console.log("User changed mind.");
+            }
+        }, (reason) => {
+        });
+    }
     /**
     * Cancell all download instances
     **/
@@ -701,9 +732,9 @@ export class DatacartComponent implements OnInit, OnDestroy {
 
         this.resetDownloadParams();
         this.clearDownloadingStatus();
-        this.isProcessing = false;
         this.showCurrentTask = false;
-        this.showMessageBlock = false;
+        this.overallStatus = "cancelled";
+        this.downloadService.resetDownloadData();
     }
 
     /**
@@ -712,9 +743,9 @@ export class DatacartComponent implements OnInit, OnDestroy {
     resetDownloadParams() {
         this.zipData = [];
         this.downloadService.setDownloadingNumber(-1, "datacart");
-        this.downloadStatus = null;
-        this.cancelAllDownload = true;
-        this.displayDownloadFiles = false;
+        // this.downloadStatus = null;
+        this.allDownloadCancelled = true;
+        // this.displayDownloadFiles = false;
         this.downloadService.resetZipName(this.treeRoot[0]);
         this.bundlePlanMessage = null;
         this.bundlePlanStatus = null;
@@ -731,7 +762,6 @@ export class DatacartComponent implements OnInit, OnDestroy {
             rowData.downloadProgress = 0;
             let url = rowData.downloadUrl.replace('http:', 'https:');
             // if (rowData.downloadUrl.length > 5 && rowData.downloadUrl.substring(0, 5).toLowerCase() == 'https') {
-            this.showDownloadProgress = true;
             const req = new HttpRequest('GET', url, {
                 reportProgress: true, responseType: 'blob'
             });
@@ -864,8 +894,8 @@ export class DatacartComponent implements OnInit, OnDestroy {
         this.cartService.updateCartDownloadStatus(null);
         this.resetDatafileDownloadStatus(this.dataFiles, null);
         this.downloadService.setFileDownloadedFlag(false);
+        this.downloadService.resetDownloadData();
         this.totalDownloaded = 0;
-        this.showMessageBlock = false;
     }
 
     /**
@@ -1032,7 +1062,16 @@ export class DatacartComponent implements OnInit, OnDestroy {
         return child1;
     }
 
+    /**
+     *  Cancel the download process of the given zip file
+     * @param zip - the zip file to be cancelled
+     */
     cancelDownloadZip(zip: any) {
+        //Need to re-calculate the total file size and total downloaded size
+        this.downloadService.decreaseTotalBundleBySize(zip.bundleSize);
+        let downloaded = this.downloadService.totalDownloaded - zip.bundleSize*zip.downloadProgress/100;
+        this.downloadService.setTotalDownloaded(downloaded);
+
         zip.downloadInstance.unsubscribe();
         zip.downloadInstance = null;
         zip.downloadProgress = 0;
@@ -1057,15 +1096,22 @@ export class DatacartComponent implements OnInit, OnDestroy {
     /*
     * Popup file details
     */
-    openDetails(event, fileNode: TreeNode, overlaypanel: OverlayPanel) {
+    openDetails(event, overlaypanel: OverlayPanel, fileNode: TreeNode = null ) {
         this.isNodeSelected = true;
         this.fileNode = fileNode;
-        overlaypanel.hide();
-        setTimeout(() => {
-            overlaypanel.show(event);
-        }, 100);
+
+        overlaypanel.toggle(event);
     }
 
+    /*
+    * Display zip file error message
+    */
+    openZipDetails(event, overlaypanel: OverlayPanel, zip: ZipData = null ) {
+        this.problemZip = zip;
+        this.emailSubject = 'PDR: Error downloading zip file';
+
+        overlaypanel.toggle(event);
+    }
     /*
         Return button color based on Downloaded status
     */
@@ -1203,14 +1249,19 @@ export class DatacartComponent implements OnInit, OnDestroy {
         let emaibody = this.emailBody;
         if(!emaibody)
         {
-            emaibody = this.emailBodyBase + 'Time: ' + dateTime.toString() + '%0D%0A%0D%0A';
+            emaibody = this.emailBodyBase + 'Time: ' + dateTime.toString();
         }
+
+        emaibody += '%0D%0A%0D%0A details:';
 
         for (let zip of this.zipData) 
         {
             if(zip.downloadStatus == 'error')
             {
-                emaibody += '%0D%0A%0D%0A'+ 'Zip error details:%0D%0A' + JSON.stringify(zip.bundle);
+                emaibody += '%0D%0A%0D%0A'+ zip.fileName 
+                         + ':%0D%0A download URL: ' + zip.downloadUrl
+                         + ':%0D%0A error message: ' + zip.downloadErrorMessage
+                         + ':%0D%0A details: ' + JSON.stringify(zip.bundle);
             }
         }
 
@@ -1323,5 +1374,25 @@ export class DatacartComponent implements OnInit, OnDestroy {
 
         return status;
     }    
+
+    /**
+     * Return download time in HH:MM:SS format
+     * @param downloadTime - download time in seconds 
+     */
+    getDownloadTime(downloadTime)
+    {
+        // console.log('downloadTime', downloadTime);
+        if(!downloadTime) return "Calculating...";
+
+        let hours = Math.floor(downloadTime / 3600);
+        let minutes = Math.floor((downloadTime - hours * 3600)/60);
+        let seconds = Math.floor(downloadTime - hours * 3600 - minutes * 60);
+
+        let returnFormat = seconds + "sec";
+        if(minutes > 0) returnFormat = minutes + "min " + returnFormat;
+        if(hours > 0) returnFormat = hours + "hour " + returnFormat;
+
+        return returnFormat;
+    }
 }
 

@@ -32,8 +32,9 @@ export const config: LPSConfig = {
     production: context.production,
     editEnabled: false,
     distService: "https://testdata.nist.gov/od/ds/",
-    gacode: "UA-115121490-8",
-    screenSizeBreakPoint: 1060
+    gacode: "not-set",
+    screenSizeBreakPoint: 1060,
+    bundleSizeAlert: 500000000
 }
 
 export const testdata: {} = {

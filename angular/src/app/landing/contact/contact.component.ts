@@ -32,6 +32,18 @@ export class ContactComponent implements OnInit {
      */
     get updated() { return this.mdupdsvc.fieldUpdated(this.fieldName); }
 
+    email(hasEmail)
+    {
+        if(hasEmail == null || hasEmail == undefined)
+            return "";
+
+        let email = hasEmail.split(":");
+        if(email.length <= 1)
+            return email[0];
+        else
+            return email[1];
+    }
+
     ngOnInit() {
         if ("hasEmail" in this.record['contactPoint'])
             this.isEmail = true;

@@ -30,4 +30,21 @@ export class CommonFunctionService {
     deepCopy(obj) {
         return JSON.parse(JSON.stringify(obj));
     }
+
+    /**
+     *  Convert the file size into display format
+     * @param fileSize - input file size in byte
+     */
+    getSizeForDisplay(fileSize: number)
+    {
+        let displaySize = "";
+        let dm = 0;
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+        const i = Math.floor(Math.log(fileSize) / Math.log(k));
+
+        if(i > 2) dm = 2;
+
+        return parseFloat((fileSize / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+    }    
 }
