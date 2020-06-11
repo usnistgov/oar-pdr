@@ -36,11 +36,11 @@ export class FakeBackendInterceptor implements HttpInterceptor {
       // }
 
       // Generate bundle plan
-      if (request.url.indexOf('_bundle_plan') > -1 && request.method === 'POST') 
-      {
-        console.log("Record saved...");
-        return of(new HttpResponse({ status: 200, body: bundlePlanRes }));
-      }
+    //   if (request.url.indexOf('_bundle_plan') > -1 && request.method === 'POST') 
+    //   {
+    //     console.log("Record saved...");
+    //     return of(new HttpResponse({ status: 200, body: bundlePlanRes }));
+    //   }
 
       // Generate bundle plan internal error
       // if (request.url.indexOf('_bundle_plan') > -1 && request.method === 'POST') 
@@ -55,6 +55,20 @@ export class FakeBackendInterceptor implements HttpInterceptor {
       //       url: request.url
       //     });
       // }
+
+    // Generate bundle download internal error
+      if (request.url.indexOf('_bundle') > -1 && request.url.indexOf('_bundle_plan') <= 0 && request.method === 'POST') 
+      {
+        console.log("Throw error...");
+        throw new HttpErrorResponse(
+          {
+            error: 'internal error message goes here...',
+            headers: request.headers,
+            status: 500,
+            statusText: 'internal error',
+            url: request.url
+          });
+      }
 
       // // authenticate
       // if (request.url.indexOf('auth/_perm/') > -1 && request.method === 'GET') {

@@ -171,7 +171,7 @@
 }
 
 .filedesc{
-  background-color:#307F38;
+  background-color:rgb(245, 245, 245);
   text-align: left;
   color: white;
   word-wrap: break-word;
@@ -212,6 +212,12 @@ tr {
   z-index: 999;
 }
 
+.span15 {
+    display: inline-block;
+    width: 15% !important;
+    padding-left:.5em;
+}
+
 .span30 {
     display: inline-block;
     width: 30% !important;
@@ -227,7 +233,7 @@ tr {
 .span-end{
     display: inline-block;
     padding-left:.5em;
-    width: 35%;
+    /* width: 35%; */
 }
 
 .header-orange {
@@ -242,7 +248,7 @@ tr {
 
 .header-green {
     display: inline-block;
-    background-color: green;
+    background-color: rgb(41, 123, 61);
     color:white;
     font-weight: bolder;
     margin-bottom: .2em;
@@ -333,4 +339,28 @@ button:disabled{
 
 .long-text {
     overflow-wrap: break-word;
+}
+
+.overlay-title {
+    color: white; 
+    background-color: #1E6BA1;
+    width: 100%;
+    text-align: center;
+    height: 2.5em;
+    padding-top: .5em;
+    font-weight: bolder;
+    font-size: larger;
+    margin-bottom: .5em;
+}
+
+.warning-overlay-title {
+    color: white; 
+    background-color: darkorange;
+    width: 100%;
+    text-align: center;
+    height: 2.5em;
+    padding-top: .5em;
+    font-weight: bolder;
+    font-size: larger;
+    margin-bottom: .5em;
 }

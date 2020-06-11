@@ -69,7 +69,7 @@
                         <div style="flex: 0 0 110px; text-align: left; padding-bottom: 0em;">
                             <span><b>Files </b> </span>
                             <a class="faa-stack fa-lg icon-download" *ngIf="!editEnabled"
-                                (click)="downloadAllConfirm('Download All Files', 'This will download all files. Continue?', 'downloadAllConfirm')"
+                                (click)="downloadFromRoot()"
                                 data-toggle="tooltip" title="Download all files"
                                 [ngStyle]="{'color':getDownloadAllBtnColor(),'cursor':'pointer'}">
                                 <i class="faa faa-circle-thin faa-stack-2x" aria-hidden="true"></i>
@@ -98,9 +98,6 @@
                         Total No. files: {{ totalFiles }}
                     </div>
                 </div>
-
-                <!-- Popup confirm dialog for 'Download all' button -->
-                <p-confirmDialog key='downloadAllConfirm'></p-confirmDialog>
 
                 <!-- Display tree table -->
                 <p-treeTable *ngIf="visible" [value]="files" [columns]="cols" selectionMode="single"
