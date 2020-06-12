@@ -4,10 +4,17 @@ import unittest as test
 from copy import deepcopy
 
 from nistoar.testing import *
-import tests.nistoar.pdr.describe.sim_describe_svc as desc
+# import tests.nistoar.pdr.describe.sim_describe_svc as desc
 
 testdir = os.path.dirname(os.path.abspath(__file__))
 datadir = os.path.join(testdir, 'data')
+
+import imp
+simsrvrsrc = os.path.join(testdir, "sim_describe_svc.py")
+with open(simsrvrsrc, 'r') as fd:
+    desc = imp.load_module("sim_describe_svc", fd, simsrvrsrc,
+                           (".py", 'r', imp.PY_SOURCE))
+
 basedir = os.path.dirname(os.path.dirname(os.path.dirname(
     os.path.dirname(os.path.dirname(testdir)))))
 
@@ -27,6 +34,7 @@ def startService(authmeth=None):
     cmd = cmd.format(os.path.join(tdir,"simsrv.log"), srvport,
                      os.path.join(basedir, wpy), pidfile)
     os.system(cmd)
+    time.sleep(0.5)
 
 def stopService(authmeth=None):
     tdir = tmpdir()
@@ -43,6 +51,8 @@ def stopService(authmeth=None):
 loghdlr = None
 rootlog = None
 def setUpModule():
+    global loghdlr
+    global rootlog
     ensure_tmpdir()
     rootlog = logging.getLogger()
     loghdlr = logging.FileHandler(os.path.join(tmpdir(),"test_simsrv.log"))
@@ -54,7 +64,7 @@ def tearDownModule():
     global loghdlr
     if loghdlr:
         if rootlog:
-            rootlog.removeLog(loghdlr)
+            rootlog.removeHandler(loghdlr)
         loghdlr = None
     stopService()
     rmtmpdir()
@@ -67,7 +77,9 @@ class TestArchive(test.TestCase):
 
     def test_ctor(self):
         self.assertEqual(self.arch.dir, datadir)
-        self.assertEqual(self.arch.lu, {"ABCDEFG": "pdr02d4t"})
+        self.assertEqual(self.arch.lu, {"ABCDEFG": "pdr02d4t",
+                                        "ark:/88434/pdr2210": "pdr2210",
+                                        "pdr2210": "pdr2210"})
 
     def test_ediid_to_id(self):
         self.assertEqual(self.arch.ediid_to_id("ABCDEFG"), "pdr02d4t")

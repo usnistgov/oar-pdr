@@ -27,7 +27,7 @@ function launch_test_preserver {
     workdir=$PWD/_preserver-test-$$
     [ ! -e "$workdir" ] || rm -r $workdir
     mkdir -p $workdir
-    uwsgi --daemonize $workdir/uwsgi.log --plugin python --uwsgi-socket :9090 --wsgi-file scripts/preserver-uwsgi.py --pidfile $OAR_HOME/var/preserver.pid --set-ph oar_testmode_workdir=$workdir
+    uwsgi --daemonize $workdir/uwsgi.log --plugin python --enable-threads --uwsgi-socket :9091 --wsgi-file scripts/preserver-uwsgi.py --pidfile $OAR_HOME/var/preserver.pid --set-ph oar_testmode_workdir=$workdir
     echo starting nginx...
     sudo service nginx start
 }
@@ -35,6 +35,23 @@ function launch_test_preserver {
 function exitopwith { 
     echo $2 > $1.exit
     exit $2
+}
+
+function diagnose {
+    # spit out some outputs that will help what went wrong with service calls
+    set +x
+    [ -z "$1" ] || [ ! -f "$1" ] || {
+        echo "============="
+        echo Output:
+        echo "-------------"
+        cat $1
+    }
+    [ -z "$2" ] || [ ! -f "$2" ] || {
+        echo "============="
+        echo Log:
+        tail "$2"
+    }
+    set -x
 }
 
 cmd=$1
@@ -49,7 +66,7 @@ case "$1" in
             exitopwith testall 2
         }
         shift
-        scripts/testall.python "$@" && stat=$?
+        scripts/testall.python "$@"; stat=$?
         echo Launching/testing the metadata server via nginx...
         launch_test_mdserv
         
@@ -72,27 +89,27 @@ case "$1" in
         curl http://localhost:8080/preserve/ \
              > stat_out.txt; \
              python -c 'import sys, json; fd = open("stat_out.txt"); data = json.load(fd); sys.exit(0 if data==["midas"] else 13)' || \
-             stat=$?
+             { stat=$? && diagnose stat_out.txt $PWD/_preserver-test-$$/uwsgi.log; }
         
         curl http://localhost:8080/preserve/midas/3A1EE2F169DD3B8CE0531A570681DB5D1491 \
              > stat_out.txt; \
              python -c 'import sys, json; fd = open("stat_out.txt"); data = json.load(fd); sys.exit(0 if data["state"]=="ready" else 14)' || \
-             stat=$?
+             { stat=$? && diagnose stat_out.txt $PWD/_preserver-test-$$/uwsgi.log; }
         
         curl http://localhost:8080/preserve/midas/goober \
              > stat_out.txt; \
              python -c 'import sys, json; fd = open("stat_out.txt"); data = json.load(fd); sys.exit(0 if data["state"]=="not found" else 15)' || \
-             stat=$?; 
+             { stat=$? && diagnose stat_out.txt $PWD/_preserver-test-$$/uwsgi.log; }
         
         curl -X PUT http://localhost:8080/preserve/midas/3A1EE2F169DD3B8CE0531A570681DB5D1491 \
              > stat_out.txt; \
              python -c 'import sys, json; fd = open("stat_out.txt"); data = json.load(fd); sys.exit(0 if data["state"]=="successful" else 16)' || \
-             stat=$?; 
+             { stat=$? && diagnose stat_out.txt $PWD/_preserver-test-$$/uwsgi.log; }
         
         curl -X GOOB -H 'X-HTTP-Method-Override: GET'  http://localhost:8080/preserve/midas/3A1EE2F169DD3B8CE0531A570681DB5D1491 \
              > stat_out.txt; \
              python -c 'import sys, json; fd = open("stat_out.txt"); data = json.load(fd); sys.exit(0 if data["state"]=="successful" else 17)' || \
-             stat=$?; 
+             { stat=$? && diagnose stat_out.txt $PWD/_preserver-test-$$/uwsgi.log; }
         set +x
         
         [ "$stat" != "0" ] && {

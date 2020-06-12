@@ -42,6 +42,8 @@ def stopService(authmeth=None):
 loghdlr = None
 rootlog = None
 def setUpModule():
+    global loghdlr
+    global rootlog
     ensure_tmpdir()
     rootlog = logging.getLogger()
     loghdlr = logging.FileHandler(os.path.join(tmpdir(),"test_simsrv.log"))
@@ -53,7 +55,7 @@ def tearDownModule():
     global loghdlr
     if loghdlr:
         if rootlog:
-            rootlog.removeLog(loghdlr)
+            rootlog.removeHandler(loghdlr)
         loghdlr = None
     stopService()
     rmtmpdir()
@@ -177,7 +179,7 @@ class TestHeadBagCacher(test.TestCase):
         info = self.cacher._recall_head_info("pdr1010")
         self.assertIn("1", info)
 
-        hbfile = os.path.join(self.cachedir, "pdr2210.2.mbag0_3-1.zip")
+        hbfile = os.path.join(self.cachedir, "pdr2210.2.mbag0_3-2.zip")
         infofile = os.path.join(self.infodir, "pdr2210")
         self.assertTrue(not os.path.exists(hbfile))
         self.assertTrue(not os.path.exists(infofile))
@@ -188,7 +190,7 @@ class TestHeadBagCacher(test.TestCase):
         info = self.cacher._recall_head_info("pdr2210")
         self.assertIn("2", info)
 
-        hbfile = os.path.join(self.cachedir, "pdr2210.3_1_3.mbag0_3-4.zip")
+        hbfile = os.path.join(self.cachedir, "pdr2210.3_1_3.mbag0_3-5.zip")
         self.assertTrue(not os.path.exists(hbfile))
         self.assertTrue(os.path.exists(infofile))
         self.assertEqual(self.cacher.cache_headbag("pdr2210"), hbfile)

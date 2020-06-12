@@ -13,8 +13,9 @@ import { LandingAboutComponent } from './landingAbout.component';
 
     beforeEach(async(() => {
       TestBed.configureTestingModule({
-        declarations: [LandingAboutComponent]
-        , imports:[ RouterTestingModule ]
+          declarations: [LandingAboutComponent],
+          imports: [ RouterTestingModule ],
+          providers: [ ]
       })
         .compileComponents();
     }));

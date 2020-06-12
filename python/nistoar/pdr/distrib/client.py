@@ -141,6 +141,47 @@ class RESTServiceClient(object):
             if resp is not None:
                 resp.close()
 
+    def head(self, relurl):
+        """
+        send a HEAD request to the given relative URL to determine if the 
+        resource it refers to is available.  
+
+        :rtype tuple:  a 2-tuple including the integer response status (e.g. 
+                       200, 404, etc) and the associated message.  
+        :raises DistribServerError: if there is a failure while trying to 
+                       connect to the server.
+        """
+        if not relurl.startswith('/'):
+            relurl = '/'+relurl
+
+        resp = None
+        try:
+            resp = requests.get(self.base+relurl, allow_redirects=True)
+            return (resp.status_code, resp.reason)
+
+        except requests.RequestException as ex:
+            raise DistribServerError(message="Trouble connecting to distribution"
+                                     +" service: "+ str(ex), cause=ex)
+        
+        finally:
+            if resp is not None:
+                resp.close()
+
+    def is_available(self, relurl):
+        """
+        return True if the resource pointed to by the given URL is retrievable
+        by sending a HEAD request to it and ensuring a response in the 200 range.
+        False is returned if any other status code is returned or if there is 
+        an error connecting to the service.
+        """
+        try:
+            stat = self.head(relurl)[0]
+            return stat >= 200 and stat < 300
+        except DistribServerError as ex:
+            return False
+
+        
+
 class DistribServiceException(PDRServiceException):
     """
     an exception indicating a problem using the distribution service.

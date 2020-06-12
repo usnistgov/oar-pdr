@@ -1,0 +1,49 @@
+#btn-download {
+    /* width:200px;  */
+    background-color:green;
+    color:white;
+    margin-right: 1em;
+    /* white-space: nowrap; */
+}
+
+#btn-cancel {
+    background-color:rgb(94, 94, 94);
+    color:white;
+    border-color: grey;
+    margin-right: 3%;
+}
+
+.control-btns {
+    width: 94%;
+    height: 3em; 
+    color:white;
+    margin: 1em 0em;
+    /* border: 1px solid green; */
+    border-top-style: 1px solid grey;
+}
+
+.span50 {
+    display: inline-block;
+    width: 50% !important;
+    padding-left:.5em;
+}
+
+.zip-details{
+    overflow-y:auto;
+    max-height:200px;
+    word-wrap: break-word;
+}
+
+.bar {
+    color: white;
+    background-color:#153971;
+    width: 100%;
+    text-align: center;
+    font-size: 30px;
+    font-weight: bolder;
+}
+
+#summary {
+    background-color: rgb(170, 212, 189);
+    margin: .5em 0em;
+}

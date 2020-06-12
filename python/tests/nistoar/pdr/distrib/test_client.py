@@ -42,6 +42,8 @@ def stopService(authmeth=None):
 loghdlr = None
 rootlog = None
 def setUpModule():
+    global loghdlr
+    global rootlog
     ensure_tmpdir()
     rootlog = logging.getLogger()
     loghdlr = logging.FileHandler(os.path.join(tmpdir(),"test_simsrv.log"))
@@ -53,7 +55,7 @@ def tearDownModule():
     global loghdlr
     if loghdlr:
         if rootlog:
-            rootlog.removeLog(loghdlr)
+            rootlog.removeHandler(loghdlr)
         loghdlr = None
     stopService()
     rmtmpdir()
@@ -117,7 +119,21 @@ class TestRESTServiceClient(test.TestCase):
         with self.assertRaises(dcli.DistribResourceNotFound):
             self.cli.retrieve_file("/_aip/goob.zip", out)
         
+    def test_head(self):
+        resp = self.cli.head("/_aip/pdr1010.mbag0_3-2.zip")
+        self.assertTrue(isinstance(resp, tuple))
+        self.assertEqual(len(resp), 2)
+        self.assertEqual(resp[0], 200)
+        self.assertEqual(resp[1], "Bag file found")
 
+        resp = self.cli.head("/_aip/goob.zip")
+        self.assertEqual(resp[0], 404)
+        self.assertNotEqual(resp[1], "Bag file found")
+
+    def test_is_available(self):
+        self.assertTrue(self.cli.is_available("/_aip/pdr1010.mbag0_3-2.zip"))
+        self.assertFalse(self.cli.is_available("/_aip/goob.zip"))
+        
 
 if __name__ == '__main__':
     test.main()

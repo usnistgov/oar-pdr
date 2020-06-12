@@ -17,7 +17,7 @@
 
 .title
 {
-  color:#1471AE;
+  /* color:#1471AE; */
   font-size: 20px;
 }
 
@@ -555,6 +555,17 @@
   animation: spin 2s linear infinite;
 }
 
+a:link {
+  color: #1471AE;
+  background-color: transparent;
+  text-decoration: none;
+}
+a:visited {
+  color: #551A8B;
+  background-color: transparent;
+  text-decoration: none;
+}
+
 @keyframes spin {
   0% {
     transform: rotate(0deg);
@@ -563,4 +574,114 @@
   100% {
     transform: rotate(360deg);
   }
+}
+
+#title {
+  font-size: 1.5em;
+}
+
+.edit_button {
+  display: table-cell;
+  width: 1.65em;
+  height: 1.65em;
+  background-color: rgb(233, 233, 233);
+  vertical-align: top;
+  border-style: solid;
+  border-color: lightgrey;
+  border-width: 1px 1px 1px 0px;
+}
+
+.undo_button {
+  display: table-cell;
+  width: 1.65em;
+  height: 1.65em;
+  /* border-radius: 0 4px 4px 0px; */
+  background-color: rgb(233, 233, 233);
+  vertical-align: top;
+  border-style: solid;
+  border-color: lightgrey;
+  border-width: 1px 1px 1px 0px;
+}
+
+.icon_enabled { 
+  cursor: pointer;
+  color: black;
+  padding: auto;
+  font-size: 1em;
+ }
+
+ .icon_disabled { 
+  color: rgb(200, 200, 200);
+  padding: auto;
+  font-size: 1em;
+ }
+
+.filter-black{
+  filter: invert(0.5);
+}
+
+.filter-white{
+  filter: invert(1);
+}
+
+.top_message {
+  width: 100%;
+  height: 2em; 
+  font-size: 15px; 
+  text-align:right; 
+  background-color: #FCF9CD;
+  padding-right: 2em;
+  padding-top: .3em;
+}
+
+.border_green {
+  border: 2px solid green;
+}
+
+.border_grey {
+  border: 1px solid lightgrey;
+}
+
+.border_clear {
+  border: 0px solid green;
+}
+
+.editable_container {
+  display: table-row;
+  text-align: left; 
+  vertical-align: top;
+}
+
+.editable_field {
+  display: table-cell; 
+  /* padding-right: .5em;  */
+  text-align: left; 
+  vertical-align: top;
+}
+
+.nist-card {
+  padding: 1em;
+  /* max-width:calc(100% - 4em); */
+  border: 1px solid lightgrey;
+  border-radius: 4px;
+  box-shadow: 0px 0px 3px lightgrey;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0,0,0,0);
+  border: 0;
+}
+
+.grey-color{
+  color:rgb(107, 107, 107);
+}
+
+.grey-background-color{
+  background-color:rgb(107, 107, 107);
 }

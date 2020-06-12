@@ -16,6 +16,7 @@ import ejsonschema as ejs
 from nistoar.testing import *
 from nistoar.pdr import def_jq_libdir
 import nistoar.pdr.preserv.bagit.builder as bldr
+import nistoar.pdr.preserv.bagger.midas as midas
 import nistoar.pdr.publish.mdserv.serv as serv
 import nistoar.pdr.exceptions as exceptions
 from nistoar.pdr.utils import read_nerd, write_json
@@ -37,6 +38,8 @@ descarchdir = os.path.join(pdrmoddir, "describe", "data")
 loghdlr = None
 rootlog = None
 def setUpModule():
+    global loghdlr
+    global rootlog
     ensure_tmpdir()
 #    logging.basicConfig(filename=os.path.join(tmpdir(),"test_builder.log"),
 #                        level=logging.INFO)
@@ -50,7 +53,7 @@ def tearDownModule():
     global loghdlr
     if loghdlr:
         if rootlog:
-            rootlog.removeLog(loghdlr)
+            rootlog.removeHandler(loghdlr)
         loghdlr = None
     rmtmpdir()
 
@@ -69,6 +72,7 @@ class TestPrePubMetadataService(test.TestCase):
 
     testsip = os.path.join(datadir, "midassip")
     midasid = '3A1EE2F169DD3B8CE0531A570681DB5D1491'
+    arkid = "ark:/88434/mds2-1491"
 
     def assertEqualOD(self, od1, od2, message=None):
         d1 = to_dict(od1)
@@ -93,6 +97,8 @@ class TestPrePubMetadataService(test.TestCase):
         self.bagdir = os.path.join(self.bagparent, self.midasid)
 
     def tearDown(self):
+        if not midas.MIDASMetadataBagger._AsyncFileExaminer.wait_for_all():
+            raise RuntimeError("Trouble waiting for file examiner threads")
         self.srv = None
         self.tf.clean()
 
@@ -104,6 +110,11 @@ class TestPrePubMetadataService(test.TestCase):
                           self.workdir)
 
         self.assertIsNone(self.srv.prepsvc)  # update support turned off
+
+    def test_normalize_id(self):
+        self.assertEqual(self.midasid, self.srv.normalize_id(self.midasid))
+        self.assertEqual(self.arkid, self.srv.normalize_id(self.arkid))
+        self.assertEqual(self.arkid, self.srv.normalize_id(self.arkid[11:]))
 
     def test_prepare_metadata_bag(self):
         metadir = os.path.join(self.bagdir, 'metadata')
@@ -141,13 +152,13 @@ class TestPrePubMetadataService(test.TestCase):
         
         self.assertIn("ediid", data)
         self.assertIn("components", data)
-        self.assertIn("inventory", data)
+        self.assertNotIn("inventory", data)
 
         self.assertEqual(len(data['components']), 7)
-        self.assertEqual(data['inventory'][0]['forCollection'], "")
-        self.assertEqual(len(data['inventory']), 2)
-        self.assertEqual(data['inventory'][0]['childCount'], 5)
-        self.assertEqual(data['inventory'][0]['descCount'], 7)
+        # self.assertEqual(data['inventory'][0]['forCollection'], "")
+        # self.assertEqual(len(data['inventory']), 2)
+        # self.assertEqual(data['inventory'][0]['childCount'], 5)
+        # self.assertEqual(data['inventory'][0]['descCount'], 7)
 
         comps = data['components']
         dlcount = 0
@@ -174,13 +185,13 @@ class TestPrePubMetadataService(test.TestCase):
         
         self.assertIn("ediid", data)
         self.assertIn("components", data)
-        self.assertIn("inventory", data)
+        self.assertNotIn("inventory", data)
 
         self.assertEqual(len(data['components']), 7)
-        self.assertEqual(data['inventory'][0]['forCollection'], "")
-        self.assertEqual(len(data['inventory']), 2)
-        self.assertEqual(data['inventory'][0]['childCount'], 5)
-        self.assertEqual(data['inventory'][0]['descCount'], 7)
+        # self.assertEqual(data['inventory'][0]['forCollection'], "")
+        # self.assertEqual(len(data['inventory']), 2)
+        # self.assertEqual(data['inventory'][0]['childCount'], 5)
+        # self.assertEqual(data['inventory'][0]['descCount'], 7)
         
         comps = data['components']
         dlcount = 0
@@ -243,7 +254,7 @@ class TestPrePubMetadataService(test.TestCase):
         
         self.assertIn("ediid", data)
         self.assertIn("components", data)
-        self.assertIn("inventory", data)
+        self.assertNotIn("inventory", data)
         self.assertIn("authors", data)
         self.assertEqual(data['ediid'], ediid)
         self.assertEqual(data['foo'], "bar")
@@ -271,12 +282,65 @@ class TestPrePubMetadataService(test.TestCase):
         val = ejs.ExtValidator(loader, ejsprefix='_')
         val.validate(mdata, False, True)
 
-        # resolve_id() needs to be indepodent
-        data = self.srv.resolve_id(self.midasid)
-        self.assertEqualOD(data, mdata)
+        # resolve_id() is not indepodent with async file examination turned on!
+        #
+        ## resolve_id() needs to be indepodent
+        #data = self.srv.resolve_id(self.midasid)
+        #self.assertEqualOD(data, mdata)
 
         with self.assertRaises(serv.IDNotFound):
             self.srv.resolve_id("asldkfjsdalfk")
+
+    def test_resolve_arkid(self):
+        indir = os.path.join(self.workdir, os.path.basename(self.testsip))
+        shutil.copytree(self.testsip, indir)
+        self.upldir = os.path.join(indir, "upload")
+        self.revdir = os.path.join(indir, "review")
+
+        podf = os.path.join(self.upldir,"1491","_pod.json")
+        with open(podf) as fd:
+            pod = json.load(fd)
+        pod['identifier'] = self.arkid
+        with open(podf, 'w') as fd:
+            json.dump(pod, fd, indent=2)
+        podf = os.path.join(self.revdir,"1491","_pod.json")
+        with open(podf, 'w') as fd:
+            json.dump(pod, fd, indent=2)
+
+        self.config = {
+            'working_dir':     self.workdir,
+            'review_dir':      self.revdir,
+            'upload_dir':      self.upldir,
+            'id_registry_dir': self.workdir,
+            'bagger': {
+                'bag_builder': { 'validate_id': r'(pdr\d)|(mds[01])' }
+            }
+        }
+        self.srv = serv.PrePubMetadataService(self.config)
+        self.bagdir = os.path.join(self.bagparent, self.arkid[11:])
+
+        metadir = os.path.join(self.bagdir, 'metadata')
+        self.assertFalse(os.path.exists(metadir))
+
+        mdata = self.srv.resolve_id(self.arkid)
+        self.assertIn("ediid", mdata)
+        self.assertEquals(mdata['ediid'], self.arkid)
+        self.assertEquals(mdata['@id'], self.arkid)
+
+        # just for testing purposes, a pdr_status property will appear
+        # in the record if this dataset is an update to a previous
+        # release.  
+        self.assertNotIn("pdr_status", mdata)  
+
+        loader = ejs.SchemaLoader.from_directory(schemadir)
+        val = ejs.ExtValidator(loader, ejsprefix='_')
+        val.validate(mdata, False, True)
+
+        # resolve_id() is not indepodent with async file examination turned on!
+        #
+        ## resolve_id() needs to be indepodent
+        #data = self.srv.resolve_id(self.arkid)
+        #self.assertEqualOD(data, mdata)
 
     def test_locate_data_file(self):
         loc = self.srv.locate_data_file(self.midasid, 'trial3/trial3a.json')

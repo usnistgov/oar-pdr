@@ -20,6 +20,8 @@ datadir = os.path.join(
 loghdlr = None
 rootlog = None
 def setUpModule():
+    global loghdlr
+    global rootlog
     ensure_tmpdir()
 #    logging.basicConfig(filename=os.path.join(tmpdir(),"test_builder.log"),
 #                        level=logging.INFO)
@@ -33,7 +35,7 @@ def tearDownModule():
     global loghdlr
     if loghdlr:
         if rootlog:
-            rootlog.removeLog(loghdlr)
+            rootlog.removeHandler(loghdlr)
         loghdlr = None
     rmtmpdir()
 
@@ -56,7 +58,7 @@ class TestBuilder2(test.TestCase):
         self.tf.track("issued-ids.json")
 
     def tearDown(self):
-        self.bag._unset_logfile()
+        self.bag.disconnect_logfile()
         self.bag = None
         self.tf.clean()
 
@@ -64,7 +66,7 @@ class TestBuilder2(test.TestCase):
         self.assertEqual(self.bag.bagname, "testbag")
         self.assertEqual(self.bag.bagdir, os.path.join(self.tf.root, "testbag"))
         self.assertTrue(self.bag.log)
-        self.assertFalse(self.bag._loghdlr)
+        self.assertFalse(self.bag._log_handlers)
         self.assertEqual(self.bag.logname, "preserv.log")
         self.assertIsNone(self.bag.id)
         self.assertIsNone(self.bag.bag)
@@ -80,6 +82,22 @@ class TestBuilder2(test.TestCase):
 
         self.assertFalse(self.bag._has_resmd())
 
+    def test_with_disconnect(self):
+        logtag = self.bag.log.name
+        baglog = logging.getLogger(logtag)
+        self.assertEqual(len(baglog.handlers), 0)
+        self.bag.disconnect_logfile()
+
+        with bldr.BagBuilder(self.tf.root, "testbag", self.cfg) as self.bag:
+            self.assertEqual(len(self.bag.log.handlers), 0)
+            self.assertEqual(len(baglog.handlers), 0)
+            self.bag.ensure_bagdir()
+            self.assertEqual(len(self.bag.log.handlers), 1)
+            self.assertEqual(len(baglog.handlers), 1)
+            
+        self.assertEqual(len(baglog.handlers), 0)
+        self.assertEqual(len(self.bag.log.handlers), 0)
+
     def test_ctor_on_existng_dir(self):
         bagdir = os.path.join(self.tf.root, "testbag")
         if not os.path.exists(bagdir):
@@ -89,7 +107,7 @@ class TestBuilder2(test.TestCase):
         self.assertEqual(self.bag.bagname, "testbag")
         self.assertEqual(self.bag.bagdir, os.path.join(self.tf.root, "testbag"))
         self.assertTrue(self.bag.log)
-        self.assertTrue(self.bag._loghdlr)
+        self.assertTrue(self.bag.logfile_is_connected())
         self.assertEqual(self.bag.logname, "preserv.log")
         self.assertTrue(os.path.exists(os.path.join(self.bag.bagdir,
                                                     "preserv.log")))
@@ -106,7 +124,8 @@ class TestBuilder2(test.TestCase):
         self.assertEqual(self.bag.bagname, "testbag")
         self.assertEqual(self.bag.bagdir, os.path.join(self.tf.root, "testbag"))
         self.assertTrue(self.bag.log)
-        self.assertIsNone(self.bag._loghdlr)
+        self.assertFalse(self.bag.logfile_is_connected())
+        self.assertFalse(self.bag._log_handlers)
         self.assertEqual(self.bag.logname, "preserv.log")
         self.assertTrue(not os.path.exists(self.bag.bagdir))
         self.assertEqual(self.bag.id, "ark:/88434/edi00hw91c")
@@ -115,6 +134,7 @@ class TestBuilder2(test.TestCase):
         self.assertFalse(self.bag._has_resmd())
 
     def test_fix_id(self):
+        self.bag.cfg['validate_id'] = True
         self.assertIsNone(self.bag._fix_id(None))
         self.assertEqual(self.bag._fix_id("ARK:/88434/edi00hw91c"),
                          "ark:/88434/edi00hw91c")
@@ -128,6 +148,8 @@ class TestBuilder2(test.TestCase):
             self.bag._fix_id("ark:/goober/foo")
         with self.assertRaises(ValueError):
             self.bag._fix_id("ark:/88434/edi00hw91d")
+        with self.assertRaises(ValueError):
+            self.bag._fix_id("ark:/88434/mds2-4193")
 
         self.cfg['validate_id'] = False
         self.bag = bldr.BagBuilder(self.tf.root, "testbag", self.cfg)
@@ -135,9 +157,27 @@ class TestBuilder2(test.TestCase):
                          "ark:/88434/edi00hw91c")
         self.assertEqual(self.bag._fix_id("ark:/88434/edi00hw91d"),
                          "ark:/88434/edi00hw91d")
+        self.assertEqual(self.bag._fix_id("ark:/88434/mds2-4193"),
+                         "ark:/88434/mds2-4193")
+        with self.assertRaises(ValueError):
+            self.bag._fix_id("ark:/goober/foo")
+
+        self.cfg['validate_id'] = r'(edi\d)|(mds[01])'
+        self.bag = bldr.BagBuilder(self.tf.root, "testbag", self.cfg)
+        with self.assertRaises(ValueError):
+            # validate this one
+            self.bag._fix_id("ark:/88434/edi00hw91d")
+
+        # don't validate this these
+        self.assertEqual(self.bag._fix_id("ark:/88434/pdr00hw91c"),
+                         "ark:/88434/pdr00hw91c")
+        self.assertEqual(self.bag._fix_id("ark:/88434/mds2-4193"),
+                         "ark:/88434/mds2-4193")
+
         with self.assertRaises(ValueError):
             self.bag._fix_id("ark:/goober/foo")
         
+        self.cfg['validate_id'] = r'(edi\d)|(mds[01])'
         self.cfg['require_ark_id'] = False
         self.bag = bldr.BagBuilder(self.tf.root, "testbag", self.cfg)
         self.assertEqual(self.bag._fix_id("edi00hw91c"), "edi00hw91c")
@@ -162,9 +202,31 @@ class TestBuilder2(test.TestCase):
         self.assertTrue(isinstance(resmd['@context'], list))
         self.assertEqual(resmd['@context'][1]['@base'], "ark:/88434/edi00hw91c")
 
+    def test_log_disconnect(self):
+        self.assertTrue(not self.bag.logfile_is_connected())
+        self.bag.ensure_bagdir()
+        self.assertTrue(self.bag.logfile_is_connected())
+
+        self.bag.disconnect_logfile()
+        self.assertTrue(not self.bag.logfile_is_connected())
+        self.bag.record("i did it!")
+        
+        with open(os.path.join(self.bag.bagdir, "preserv.log")) as fd:
+            lines = [l for l in fd]
+        self.assertNotIn("i did it!", lines[-1])
+
+        self.bag.ensure_bagdir()
+        self.bag.record("i did it!")
+        self.assertTrue(self.bag.logfile_is_connected())
+
+        with open(os.path.join(self.bag.bagdir, "preserv.log")) as fd:
+            lines = [l for l in fd]
+        self.assertIn("i did it!", lines[-1])
+
     def test_ensure_bagdir(self):
         self.assertTrue(not os.path.exists(self.bag.bagdir))
-        self.assertFalse(self.bag._loghdlr)
+        self.assertTrue(not self.bag.logfile_is_connected())
+        self.assertFalse(self.bag._log_handlers)
         self.assertIsNone(self.bag.bag)
         self.assertIsNone(self.bag.id)
 
@@ -174,6 +236,7 @@ class TestBuilder2(test.TestCase):
         self.assertEqual(self.bag.bag.dir, self.bag.bagdir)
         self.assertIsNone(self.bag.id)
         self.assertIsNone(self.bag.ediid)
+        self.assertTrue(self.bag.logfile_is_connected())
 
     def test_ensure_bag_structure(self):
         self.assertTrue(not os.path.exists(self.bag.bagdir))
@@ -953,6 +1016,7 @@ class TestBuilder2(test.TestCase):
         self.assertEqual(md['checksum'], {"algorithm": {'@type': 'Thing',
                                                         "tag": "sha256" },
     "hash": "d155d99281ace123351a311084cd8e34edda6a9afcddd76eb039bad479595ec9"})
+        self.assertNotIn('downloadURL', md)  # because bag does not exist
 
         md = self.bag.describe_data_file(srcfile, "goob/trial1.json", False)
         self.assertEqual(md['filepath'], "goob/trial1.json")
@@ -981,6 +1045,39 @@ class TestBuilder2(test.TestCase):
         self.assertEqual(md['checksum'], {"algorithm": {'@type': 'Thing',
                                                         "tag": "sha256" },
     "hash": "d155d99281ace123351a311084cd8e34edda6a9afcddd76eb039bad479595ec9"})
+
+        # if bag exists, downloadURL will be set
+        self.bag.ensure_bagdir()
+        self.bag.ediid = "goober"
+        md = self.bag.describe_data_file(srcfile, "foo/trial1.json")
+        self.assertEqual(md['filepath'], "foo/trial1.json")
+        self.assertIn('downloadURL', md)
+        self.assertTrue(md['downloadURL'].endswith("/od/ds/goober/foo/trial1.json"))
+
+        self.bag.ediid = "ark:/88434/goober"
+        md = self.bag.describe_data_file(srcfile)
+        self.assertEqual(md['filepath'], "trial1.json")
+        self.assertIn('downloadURL', md)
+        self.assertTrue(md['downloadURL'].endswith("/od/ds/goober/trial1.json"))
+
+        # don't override existing metadata
+        exturl = "https://example.com/goober/trial1.json"
+        md['downloadURL'] = exturl
+        md['title'] = "a fine file"
+        self.bag.update_metadata_for("trial1.json", md)
+        md = self.bag.describe_data_file(srcfile)
+        self.assertEqual(md['filepath'], "trial1.json")
+        self.assertIn('downloadURL', md)
+        self.assertEqual(md['downloadURL'], exturl)
+        self.assertEqual(md['title'], "a fine file")
+
+        # override existing metadata when told to
+        self.bag.update_metadata_for("trial1.json", md)
+        md = self.bag.describe_data_file(srcfile, "foo/trial1.json", asupdate=False)
+        self.assertEqual(md['filepath'], "foo/trial1.json")
+        self.assertIn('downloadURL', md)
+        self.assertNotIn('title', md)
+        self.assertTrue(md['downloadURL'].endswith("/od/ds/goober/foo/trial1.json"))
 
     def test_register_data_file(self):
         srcfile = os.path.join(datadir, "trial1.json")
@@ -1146,6 +1243,14 @@ class TestBuilder2(test.TestCase):
         self.assertNotIn('@id', data)
         self.assertFalse(os.path.exists(self.bag.bag.nerd_file_for("trial1.json")))
         self.assertFalse(os.path.exists(self.bag.bag.nerd_file_for("trial3/trial3a.json")))
+
+        # special check for theme processing
+        self.assertEqual(poddata['theme'][0], "Optical physics")
+        self.assertEqual(len(poddata['theme']), 1)
+        self.assertEqual(len(data['topic']), 1)
+        self.assertEqual(data['topic'][0]['tag'], "Physics: Optical physics")
+        self.assertEqual(len(data['theme']), 1)
+        self.assertEqual(data['theme'][0], "Physics: Optical physics")
 
     def test_add_ds_pod_filemd(self):
         podfile = os.path.join(datadir, "_pod.json")
@@ -1511,7 +1616,7 @@ class TestBuilder2(test.TestCase):
         self.assertEqual(len(oxum), 1)
         oxum = [int(n) for n in oxum[0].split(': ')[1].split('.')]
         self.assertEqual(oxum[1], 14)
-        self.assertEqual(oxum[0], 12271)  # this will change if logging changes
+        self.assertEqual(oxum[0], 12152)  # this will change if logging changes
 
         bagsz = [l for l in lines if "Bag-Size: " in l]
         self.assertEqual(len(bagsz), 1)

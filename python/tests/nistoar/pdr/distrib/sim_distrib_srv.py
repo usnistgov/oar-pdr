@@ -196,10 +196,15 @@ class SimDistribHandler(object):
             return self.send_error(403, self._meth +
                                    " not supported on this resource")
 
-    def do_GET(self, path, params=None):
+    def do_HEAD(self, path, params=None, forhead=False):
+        return self.do_GET(path, params, True)
+
+    def do_GET(self, path, params=None, forhead=False):
         aid = None
         vers = None
         path = path.strip('/')
+        if path.startswith("od/ds/"):
+            path = path[len("od/ds/"):]
         print("processing "+path)
 
         # refresh the archive
@@ -213,7 +218,10 @@ class SimDistribHandler(object):
 
             self.set_response(200, "AIP Identifiers")
             self.add_header('Content-Type', 'application/json')
+            self.add_header('Content-Length', str(len(out)))
             self.end_headers()
+            if forhead:
+                return []
             return [out]
 
         elif path.startswith("_aip/"):
@@ -224,6 +232,8 @@ class SimDistribHandler(object):
                 self.set_response(200, "Bag file found")
                 self.add_header('Content-Type', "application/zip")
                 self.end_headers()
+                if forhead:
+                    return []
                 return self.iter_file(filepath)
             else:
                 return self.send_error(404, "bag file does not exist")
@@ -248,7 +258,10 @@ class SimDistribHandler(object):
         if not path:
             self.set_response(200, "AIP Identifier exists")
             self.add_header('Content-Type', 'application/json')
+            self.add_header('Content-Length', str(len(aid)+4))
             self.end_headers()
+            if forhead:
+                return []
             return ['["'+aid+'"]']
         
         elif path == "_aip":
@@ -259,7 +272,10 @@ class SimDistribHandler(object):
 
             self.set_response(200, "All bags for ID")
             self.add_header('Content-Type', 'application/json')
+            self.add_header('Content-Length', str(len(out)))
             self.end_headers()
+            if forhead:
+                return []
             return [out]
 
         elif path == "_aip/_head":
@@ -275,7 +291,10 @@ class SimDistribHandler(object):
             if out:
                 self.set_response(200, "Head bags for ID/vers")
                 self.add_header('Content-Type', 'application/json')
+                self.add_header('Content-Length', str(len(out)))
                 self.end_headers()
+                if forhead:
+                    return []
                 return [out]
             else:
                 return self.send_error(404, "resource does not exist")
@@ -288,7 +307,10 @@ class SimDistribHandler(object):
 
             self.set_response(200, "versions for ID")
             self.add_header('Content-Type', 'application/json')
+            self.add_header('Content-Length', str(len(out)))
             self.end_headers()
+            if forhead:
+                return []
             return [out]
             
         elif path.startswith("_aip/_v/"):
@@ -320,7 +342,10 @@ class SimDistribHandler(object):
             if out:
                 self.set_response(200, "All bags for ID/vers")
                 self.add_header('Content-Type', 'application/json')
+                self.add_header('Content-Length', str(len(out)))
                 self.end_headers()
+                if forhead:
+                    return []
                 return [out]
             else:
                 return self.send_error(404, "resource does not exist")
@@ -338,7 +363,10 @@ class SimDistribHandler(object):
             if out:
                 self.set_response(200, "Head bags for ID/vers")
                 self.add_header('Content-Type', 'application/json')
+                self.add_header('Content-Length', str(len(out)))
                 self.end_headers()
+                if forhead:
+                    return []
                 return [out]
             else:
                 return self.send_error(404, "resource does not exist")

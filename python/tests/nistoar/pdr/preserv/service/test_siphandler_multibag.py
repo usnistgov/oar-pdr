@@ -3,7 +3,7 @@
 # previously published datasets.  The tests engage simulated distribution 
 # and RMM services to detect a previously published dataset. 
 #
-import os, pdb, sys, logging, yaml, time
+import os, pdb, sys, logging, yaml, time, re
 import unittest as test
 from zipfile import ZipFile
 
@@ -13,6 +13,7 @@ from nistoar.pdr.preserv.service import status
 import nistoar.pdr.preserv.bagit.builder as bldr
 from nistoar.pdr.preserv.bagit.bag import NISTBag
 from nistoar.pdr.preserv import AIPValidationError
+from nistoar.pdr import utils
 
 # datadir = nistoar/pdr/preserv/data
 datadir = os.path.join( os.path.dirname(os.path.dirname(__file__)), "data" )
@@ -28,6 +29,8 @@ descarchdir = os.path.join(pdrmoddir, "describe", "data")
 loghdlr = None
 rootlog = None
 def setUpModule():
+    global loghdlr
+    global rootlog
     ensure_tmpdir()
 #    logging.basicConfig(filename=os.path.join(tmpdir(),"test_builder.log"),
 #                        level=logging.INFO)
@@ -42,7 +45,7 @@ def tearDownModule():
     global loghdlr
     if loghdlr:
         if rootlog:
-            rootlog.removeLog(loghdlr)
+            rootlog.removeHandler(loghdlr)
         loghdlr = None
     stopServices()
     rmtmpdir()
@@ -77,6 +80,7 @@ def startServices():
     cmd = cmd.format(os.path.join(tdir,"simrmm.log"), srvport,
                      os.path.join(basedir, wpy), archdir, pidfile)
     os.system(cmd)
+    time.sleep(0.5)
 
 def stopServices():
     tdir = tmpdir()
@@ -179,10 +183,26 @@ class TestMultibagSIPHandler(test.TestCase):
         self.sip = None
         self.tf.clean()
 
+    def replicate_sip(self, srcdir, destdir):
+        # replicate the SIP data to a writable directory; change download
+        # urls in metadata to reference simulated service
+        shutil.copytree(srcdir, destdir)
+        self.filter_dlurls(os.path.join(destdir, "_pod.json"))
+
+    def filter_dlurls(self, podf):
+        # change download urls in given POD file to reference simulated service
+        datadotnist = re.compile(r'^https://data.nist.gov/')
+        pod = utils.read_json(podf)
+        for dist in pod.get('distribution',[]):
+            if 'downloadURL' in dist:
+                dist['downloadURL'] = \
+                    datadotnist.sub('http://localhost:9091/',dist['downloadURL'])
+        utils.write_json(pod, podf)
+
     def test_singlebag(self):
         # test creation of a small single bag
 
-        shutil.copytree(self.sipdata, os.path.join(self.revdir, "1491"))
+        self.replicate_sip(self.sipdata, os.path.join(self.revdir, "1491"))
         self.sip = sip.MIDASSIPHandler(self.midasid, self.config)
 
         self.assertEqual(self.sip.state, status.FORGOTTEN)
@@ -215,16 +235,19 @@ class TestMultibagSIPHandler(test.TestCase):
 
     def test_small_revision(self):
         # test creating small update to an existing dataset
-        shutil.copytree(self.sipdata, os.path.join(self.revdir, "1491"))
+        self.replicate_sip(self.sipdata, os.path.join(self.revdir, "1491"))
         shutil.rmtree(os.path.join(self.revdir, "1491", "trial3"))
         self.sip = sip.MIDASSIPHandler(self.midasid, self.config)
 
         srczip = os.path.join(distarchdir, "1491.1_0.mbag0_4-0.zip")
         destzip = os.path.join(distarchive, self.midasid+".1_0.mbag0_4-0.zip")
         cached = os.path.join(self.pubcache, os.path.basename(destzip))
+        rmmrec = os.path.join(mdarchive, self.midasid+".json")
 
         try:
             shutil.copyfile(srczip, destzip)
+            shutil.copy(os.path.join(datadir, self.midasid+".json"),
+                        mdarchive)
 
             try:
                 self.sip.bagit()
@@ -276,6 +299,8 @@ class TestMultibagSIPHandler(test.TestCase):
                 os.remove(destzip)
             if os.path.exists(cached):
                 os.remove(cached)
+            if os.path.exists(rmmrec):
+                os.remove(rmmrec)
         
 
 
@@ -284,15 +309,18 @@ class TestMultibagSIPHandler(test.TestCase):
         indir = os.path.join(self.revdir, "1491")
         os.mkdir(indir)
         shutil.copy(os.path.join(self.sipdata, "_pod.json"), indir)
+        self.filter_dlurls(os.path.join(indir,"_pod.json"))
 
         self.sip = sip.MIDASSIPHandler(self.midasid, self.config)
 
         srczip = os.path.join(distarchdir, "1491.1_0.mbag0_4-0.zip")
         destzip = os.path.join(distarchive, self.midasid+".1_0.mbag0_4-0.zip")
         cached = os.path.join(self.pubcache, os.path.basename(destzip))
+        rmmrec = os.path.join(mdarchive, self.midasid+".json")
 
         try:
             shutil.copyfile(srczip, destzip)
+            shutil.copyfile(os.path.join(datadir, self.midasid+".json"), rmmrec)
 
             try:
                 self.sip.bagit()
@@ -340,6 +368,8 @@ class TestMultibagSIPHandler(test.TestCase):
                 os.remove(destzip)
             if os.path.exists(cached):
                 os.remove(cached)
+            if os.path.exists(rmmrec):
+                os.remove(rmmrec)
         
 
 

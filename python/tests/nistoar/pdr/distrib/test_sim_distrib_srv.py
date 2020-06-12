@@ -43,6 +43,8 @@ def stopService(authmeth=None):
 loghdlr = None
 rootlog = None
 def setUpModule():
+    global loghdlr
+    global rootlog
     ensure_tmpdir()
     rootlog = logging.getLogger()
     loghdlr = logging.FileHandler(os.path.join(tmpdir(),"test_simsrv.log"))
@@ -54,7 +56,7 @@ def tearDownModule():
     global loghdlr
     if loghdlr:
         if rootlog:
-            rootlog.removeLog(loghdlr)
+            rootlog.removeHandler(loghdlr)
         loghdlr = None
     stopService()
     rmtmpdir()
@@ -103,13 +105,15 @@ class TestArchive(test.TestCase):
 
         self.assertIn("pdr2210.1_0.mbag0_3-0.zip",
                       self.arch._aips['pdr2210']['1.0'])
-        self.assertEqual(len(self.arch._aips['pdr2210']['1.0']), 1)
-        self.assertIn("pdr2210.2.mbag0_3-1.zip",
+        self.assertIn("pdr2210.1_0.mbag0_3-1.zip",
+                      self.arch._aips['pdr2210']['1.0'])
+        self.assertEqual(len(self.arch._aips['pdr2210']['1.0']), 2)
+        self.assertIn("pdr2210.2.mbag0_3-2.zip",
                       self.arch._aips['pdr2210']['2'])
-        self.assertEqual(len(self.arch._aips['pdr2210']['1.0']), 1)
-        self.assertIn("pdr2210.3_1_3.mbag0_3-4.zip",
+        self.assertEqual(len(self.arch._aips['pdr2210']['2']), 1)
+        self.assertIn("pdr2210.3_1_3.mbag0_3-5.zip",
                       self.arch._aips['pdr2210']['3.1.3'])
-        self.assertEqual(len(self.arch._aips['pdr2210']['1.0']), 1)
+        self.assertEqual(len(self.arch._aips['pdr2210']['3.1.3']), 1)
 
         self.assertIn("1491.1_0.mbag0_4-0.zip",
                       self.arch._aips['1491']['1.0'])
@@ -131,8 +135,8 @@ class TestArchive(test.TestCase):
         self.assertEqual([f['name'] for f in self.arch.list_bags('pdr1010')],
                          ["pdr1010.mbag0_3-1.zip", "pdr1010.mbag0_3-2.zip"])
         self.assertEqual([f['name'] for f in self.arch.list_bags('pdr2210')],
-                         ["pdr2210.1_0.mbag0_3-0.zip", "pdr2210.2.mbag0_3-1.zip",
-                          "pdr2210.3_1_3.mbag0_3-4.zip"])
+                      ["pdr2210.1_0.mbag0_3-0.zip", "pdr2210.1_0.mbag0_3-1.zip", 
+                       "pdr2210.2.mbag0_3-2.zip", "pdr2210.3_1_3.mbag0_3-5.zip"])
         self.assertEqual(self.arch.list_bags('pdr1010')[0],
                          {'name': 'pdr1010.mbag0_3-1.zip', 'aipid': 'pdr1010', 
                           'contentLength': 375, 'sinceVersion': '1',
@@ -152,13 +156,13 @@ class TestArchive(test.TestCase):
 
         self.assertEqual([f['name'] for f in
                           self.arch.list_for_version('pdr2210', '1.0')],
-                         ["pdr2210.1_0.mbag0_3-0.zip"])
+                      ["pdr2210.1_0.mbag0_3-0.zip", "pdr2210.1_0.mbag0_3-1.zip"])
         self.assertEqual([f['name'] for f in
                           self.arch.list_for_version('pdr2210', '2')],
-                         ["pdr2210.2.mbag0_3-1.zip"])
+                         ["pdr2210.2.mbag0_3-2.zip"])
         self.assertEqual([f['name'] for f in
                           self.arch.list_for_version('pdr2210', '3.1.3')],
-                         ["pdr2210.3_1_3.mbag0_3-4.zip"])
+                         ["pdr2210.3_1_3.mbag0_3-5.zip"])
         self.assertEqual([f['name'] for f in
                           self.arch.list_for_version('pdr2210', '3.1.2')], [])
 
@@ -171,20 +175,20 @@ class TestArchive(test.TestCase):
                          ["pdr1010.mbag0_3-1.zip", "pdr1010.mbag0_3-2.zip"])
         self.assertEqual([f['name'] for f in
                           self.arch.list_for_version('pdr2210', 'latest')],
-                         ["pdr2210.3_1_3.mbag0_3-4.zip"])
+                         ["pdr2210.3_1_3.mbag0_3-5.zip"])
         self.assertEqual([f['name'] for f in
                           self.arch.list_for_version('pdr2210')],
-                         ["pdr2210.3_1_3.mbag0_3-4.zip"])
+                         ["pdr2210.3_1_3.mbag0_3-5.zip"])
 
     def test_head_for(self):
         self.assertEqual(self.arch.head_for('pdr1010', '1')['name'],
                          "pdr1010.mbag0_3-2.zip")
         self.assertEqual(self.arch.head_for('pdr2210', '1.0')['name'],
-                         "pdr2210.1_0.mbag0_3-0.zip")
+                         "pdr2210.1_0.mbag0_3-1.zip")
         self.assertEqual(self.arch.head_for('pdr2210', '2')['name'],
-                         "pdr2210.2.mbag0_3-1.zip")
+                         "pdr2210.2.mbag0_3-2.zip")
         self.assertEqual(self.arch.head_for('pdr2210', '3.1.3')['name'],
-                         "pdr2210.3_1_3.mbag0_3-4.zip")
+                         "pdr2210.3_1_3.mbag0_3-5.zip")
         self.assertIsNone(self.arch.head_for('pdr2210', '3'))
 
     def test_head_for_latest(self):
@@ -236,8 +240,8 @@ class TestSimService(test.TestCase):
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(resp.reason, "All bags for ID")
         self.assertEqual([f['name'] for f in resp.json()], 
-                         ["pdr2210.1_0.mbag0_3-0.zip", "pdr2210.2.mbag0_3-1.zip",
-                          "pdr2210.3_1_3.mbag0_3-4.zip"])
+                      ["pdr2210.1_0.mbag0_3-0.zip", "pdr2210.1_0.mbag0_3-1.zip", 
+                       "pdr2210.2.mbag0_3-2.zip", "pdr2210.3_1_3.mbag0_3-5.zip"])
 
     def test_versions_for(self):
         resp = requests.get(baseurl+"/pdr1010/_aip/_v")
@@ -265,19 +269,19 @@ class TestSimService(test.TestCase):
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(resp.reason, "All bags for ID/vers")
         self.assertEqual([f['name'] for f in resp.json()],
-                         ["pdr2210.1_0.mbag0_3-0.zip"])
+                    ["pdr2210.1_0.mbag0_3-0.zip", "pdr2210.1_0.mbag0_3-1.zip"])
                          
         resp = requests.get(baseurl+"/pdr2210/_aip/_v/2")
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(resp.reason, "All bags for ID/vers")
         self.assertEqual([f['name'] for f in resp.json()],
-                         ["pdr2210.2.mbag0_3-1.zip"])
+                         ["pdr2210.2.mbag0_3-2.zip"])
 
         resp = requests.get(baseurl+"/pdr2210/_aip/_v/3.1.3")
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(resp.reason, "All bags for ID/vers")
         self.assertEqual([f['name'] for f in resp.json()],
-                         ["pdr2210.3_1_3.mbag0_3-4.zip"])
+                         ["pdr2210.3_1_3.mbag0_3-5.zip"])
 
     def test_list_for_latest_version(self):
         resp = requests.get(baseurl+"/pdr1010/_aip/_v/latest")
@@ -290,7 +294,7 @@ class TestSimService(test.TestCase):
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(resp.reason, "All bags for ID/vers")
         self.assertEqual([f['name'] for f in resp.json()],
-                         ["pdr2210.3_1_3.mbag0_3-4.zip"])
+                         ["pdr2210.3_1_3.mbag0_3-5.zip"])
 
     def test_head(self):
         resp = requests.get(baseurl+"/pdr1010/_aip/_v/1/_head")
@@ -301,17 +305,17 @@ class TestSimService(test.TestCase):
         resp = requests.get(baseurl+"/pdr2210/_aip/_v/1.0/_head")
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(resp.reason, "Head bags for ID/vers")
-        self.assertEqual(resp.json()['name'], "pdr2210.1_0.mbag0_3-0.zip")
+        self.assertEqual(resp.json()['name'], "pdr2210.1_0.mbag0_3-1.zip")
                          
         resp = requests.get(baseurl+"/pdr2210/_aip/_v/2/_head")
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(resp.reason, "Head bags for ID/vers")
-        self.assertEqual(resp.json()['name'], "pdr2210.2.mbag0_3-1.zip")
+        self.assertEqual(resp.json()['name'], "pdr2210.2.mbag0_3-2.zip")
 
         resp = requests.get(baseurl+"/pdr2210/_aip/_v/3.1.3/_head")
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(resp.reason, "Head bags for ID/vers")
-        self.assertEqual(resp.json()['name'], "pdr2210.3_1_3.mbag0_3-4.zip")
+        self.assertEqual(resp.json()['name'], "pdr2210.3_1_3.mbag0_3-5.zip")
 
         resp = requests.get(baseurl+"/pdr1010/_aip/_v/2/_head")
         self.assertEqual(resp.status_code, 404)
@@ -326,7 +330,7 @@ class TestSimService(test.TestCase):
         resp = requests.get(baseurl+"/pdr2210/_aip/_v/latest/_head")
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(resp.reason, "Head bags for ID/vers")
-        self.assertEqual(resp.json()['name'], "pdr2210.3_1_3.mbag0_3-4.zip")
+        self.assertEqual(resp.json()['name'], "pdr2210.3_1_3.mbag0_3-5.zip")
 
     def test_download(self):
         out = os.path.join(tmpdir(), "bag.zip")

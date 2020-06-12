@@ -1,0 +1,323 @@
+#footer {
+    background: #000000;
+    /*background-color: white;*/
+    color: white;
+    position: relative;
+}
+
+.footer__inner {
+    padding-left:20px;
+    padding-top:20px;
+    padding-right:20px;
+    padding-bottom:10px;
+
+}
+
+#footer .footer__logo img {
+    width: 286px;
+}
+
+.footer__logo {
+  margin-bottom: 1em;
+}
+
+field-items img
+{width:100%;}
+
+img {
+    border: 0;
+    max-width: 100%;
+    height: auto;
+}
+
+#footer a {
+    color: white;
+}
+
+.clearfix:after {
+    content: ".";
+    display: block;
+    height: 0;
+    clear: both;
+    visibility: hidden;
+}
+
+#footer .footer__contact {
+    font-size: 15px;
+    line-height: 17px;
+    border-bottom: 1px solid #595959;
+    padding-bottom : .6rem;
+}
+
+.custom-icon:hover {
+  color:#8ac34e;
+}
+
+.item-list li{
+  display:inline;
+  padding:0px 0px 0px 0px;
+  padding:0rem .2rem 0rem 0rem;
+  list-style-type:none;
+  background-image:none;
+  margin-bottom:24px;
+  margin-bottom:1.5rem;
+  margin-left:0;
+}
+
+.menu--footer-main-menu {
+    clear: both;
+    border-top: 1px solid #595959;
+    border-bottom: 1px solid #595959;
+    padding-bottom: 40px;
+    padding-bottom: 2.5rem;
+}
+
+.block {
+    margin-bottom: 1.0rem;
+}
+
+.menu--footer-main-menu ul.menu {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+dl, menu, ol, ul {
+    margin: 0px 0px 20px 16px;
+    margin: 0rem 0rem 1.25rem 1rem;
+    padding: 0px 0px 0px 32px;
+    padding: 0rem 0rem 0rem 2rem;
+}
+
+ul, menu, dir {
+    display: block;
+    list-style-type: disc;
+    -webkit-margin-before: 1em;
+    -webkit-margin-after: 1em;
+    -webkit-margin-start: 0px;
+    -webkit-margin-end: 0px;
+    -webkit-padding-start: 40px;
+}
+
+.menu--footer-main-menu ul.menu li {
+    padding: 0;
+    margin-bottom: 0;
+    vertical-align: top;
+    font-size: 16px;
+    font-size: 1rem;
+    line-height: 20px;
+    line-height: 1.25rem;
+}
+
+#footer .social-links {
+    float: right;
+}
+
+.social-btn--large {
+    height: 40px;
+}
+
+.social-btn {
+    margin-right: 2px;
+    margin-left: 0;
+    padding: 0;
+    height: 34px;
+    color: white;
+}
+
+ul.list-horiz > li, li.list-horiz {
+    list-style: none;
+    display: inline-block;
+    margin: 0;
+}
+
+.social-btn:hover, .social-btn:visited, .social-btn:active {
+    color: white;
+}
+
+a:visited {
+    color: #2d9de7;
+}
+
+.social-btn--large i:before {
+    font-size: 26px;
+    line-height: 40px;
+    height: 40px;
+    width: 40px;
+    text-align: center;
+    display: inline-block;
+}
+
+.social-btn .ext {
+    display: none;
+}
+
+span.ext {
+    display: inline-block;
+    padding-right: 0;
+    text-indent: -99999px;
+    width: 12px;
+}
+
+.element-invisible, .element-focusable, #navigation .block-menu .block__title, #navigation .block-menu-block .block__title {
+    position: absolute !important;
+    height: 1px;
+    width: 1px;
+    overflow: hidden;
+    clip: rect(1px, 1px, 1px, 1px);
+}
+
+.menu--footer-menu {
+    clear: both;
+     margin-bottom: 0.6rem;
+}
+
+
+.menu--footer-menu ul.menu {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    text-align: center;
+}
+
+
+ul, menu, dir {
+    display: block;
+    -webkit-margin-before: 1em;
+    -webkit-margin-after: 1em;
+    -webkit-margin-start: 0px;
+    -webkit-margin-end: 0px;
+    -webkit-padding-start: 40px;
+}
+
+.menu--footer-menu ul.menu li {
+    display: inline-block;
+    font-size: 0.9rem;
+    padding: 0;
+    margin-bottom: 0;
+    margin-left: 0;
+}
+
+.menu--footer-menu ul.menu {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.menu--footer-menu ul.menu li.first:before {
+    content: none;
+}
+.menu--footer-menu ul.menu li:before {
+    content: '|';
+    margin-left: 1.6px;
+    margin-left: 0.1rem;
+    display: inherit;
+    position: static;
+    font: inherit;
+    line-height: inherit;
+    color: inherit;
+}
+
+#footer a {
+    color:  white;
+}
+.menu--footer-menu ul.menu li.first a {
+    margin-left: 0;
+}
+.menu--footer-menu ul.menu li a {
+    font-weight: normal;
+    white-space: nowrap;
+}
+.menu a {
+    text-decoration: none;
+}
+
+.menu--footer-menu ul.menu li {
+    display: inline-block;
+    padding: 0;
+    margin-bottom: 0;
+    margin-left: 0;
+}
+
+.social-btn {
+  margin-right:2px;
+  margin-left:0;
+  padding:0;
+  height:40px;
+  color:gray;
+}
+.social-btn:hover,.social-btn:visited,.social-btn:active{
+  color:gray;
+}
+.social-btn i:before{
+  font-size:22px;
+  line-height:40px;
+  height:40px;
+  width:40px;
+  text-align:center;
+  display:inline-block;
+}
+
+.social-btn i{
+  transition:background-color 300ms ease;
+}
+.social-btn i:hover{
+  color:#fff;
+  background:gray;
+  height: 40px;
+  line-height: 40px;
+  text-align:center;
+  display:inline-block;
+}
+.social-btn i.faa-facebook:hover{
+  background:#3a5897;
+}
+.social-btn i.faa-linkedin:hover{
+  background:#04669A;
+}
+.social-btn i.faa-instagram:hover{
+  background:rgb(182, 1, 253);
+}
+.social-btn i.faa-twitter:hover{
+  background:#49c9f2;
+}
+.social-btn i.faa-youtube:hover{
+  background:#e52d27;
+}
+.social-btn i.faa-rss:hover{
+  background:#fd8f00;
+}
+.social-btn i.faa-envelope:hover{
+  background:lightgrey;
+}
+
+.social-btn {
+  margin-right: 2px;
+  margin-left: 0;
+  padding: 0;
+  height: 34px;
+  color: white;
+}
+
+.fa, .social-share a {
+  display: inline-block;
+  font: normal normal normal 14px/1 FontAwesome;
+  font-size: inherit;
+  text-rendering: auto;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.menu--footer-menu.first {
+  padding-top: 1.0rem;
+}
+
+ul, menu, dir {
+  display: block;
+  -webkit-margin-before: 1em;
+  -webkit-margin-after: 1em;
+  -webkit-margin-start: 0px;
+  -webkit-margin-end: 0px;
+  -webkit-padding-start: 40px;
+}
+

@@ -14,6 +14,8 @@ datadir = os.path.join( os.path.dirname(os.path.dirname(__file__)), "data" )
 loghdlr = None
 rootlog = None
 def setUpModule():
+    global loghdlr
+    global rootlog
     ensure_tmpdir()
     rootlog = logging.getLogger()
     loghdlr = logging.FileHandler(os.path.join(tmpdir(),"test_siphandler.log"))
@@ -24,7 +26,7 @@ def tearDownModule():
     global loghdlr
     if loghdlr:
         if rootlog:
-            rootlog.removeLog(loghdlr)
+            rootlog.removeHandler(loghdlr)
         loghdlr = None
     rmtmpdir()
 
@@ -158,6 +160,30 @@ class TestApp(test.TestCase):
         self.assertIn("400", self.resp[0])
         self.assertIn('_bar', self.resp[0])
         self.resp = []
+        
+        req = {
+            'PATH_INFO': '/midas/ark:/88888/goob/er',
+            'REQUEST_METHOD': 'GET'
+        }
+
+        body = self.svc(req, self.start)
+        self.assertGreater(len(self.resp), 0)
+        self.assertIn("400", self.resp[0])
+        self.assertIn('ark:/88888/goob/er', self.resp[0])
+        self.resp = []
+        
+
+    def test_accept_arkid(self):
+        req = {
+            'PATH_INFO': '/midas/ark:/88888/goob',
+            'REQUEST_METHOD': 'GET'
+        }
+
+        body = self.svc(req, self.start)
+        self.assertGreater(len(self.resp), 0)
+        self.assertIn("404", self.resp[0])
+        self.resp = []
+        
         
     def test_ready(self):
         req = {

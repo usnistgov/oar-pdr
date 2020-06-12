@@ -1,255 +1,37 @@
-<div id="description">
-  <div [hidden]="metadata">
-    <h3 name="desscription"><b>Description</b></h3><br>
-    <div contenteditable="false" id="recordDescription" class="card card-body bg-light">
-      <p *ngFor="let topic of record['description']; let i =index">
-        {{ record["description"][i] }}
-      </p>
-    </div>
-
-    <div *ngIf="checkTopics()">
-      <strong contenteditable="false">Research Topics:</strong>
-      <span class="font14" *ngFor="let topic of record['topic']; let i =index">
-        {{ topic.tag }}
-        <span *ngIf="i < record['topic'].length-1 ">,</span>
-      </span>
-    </div>
-    <div *ngIf="checkKeywords()">
-      <b>Subject Keywords:</b>
-      <span class="font14" contenteditable="false" *ngFor="let keyword of record['keyword']; let i =index">
-        {{ keyword }}<span *ngIf="i < record['keyword'].length-1 ">,</span>
-      </span>
-    </div>
-    <br>
-  </div>
+<!-- Description header 
+  -  Red * only display in edit mode indicating this is a required field
+-->
+<div style="margin-bottom: 1em;">
+    <h3 style="display: inline-block;" name="desscription" id="description"><b>Description</b></h3>
+    <!-- <span *ngIf="mdupdsvc.editMode" style="color: red;margin-left: .5em;">*</span> -->
 </div>
-
-<div id="dataAccess">
-  <div class="font14" [hidden]="metadata">
-    <h3><b>Data Access</b></h3><br>
-    <span style="margin-left:0em" *ngIf="record['accessLevel'] === 'public'">
-      <i class="faa faa-globe"></i> These data are public.
-    </span>
-
-    <span *ngIf="record['accessLevel'] === 'restricted public'">
-      <i class="faa faa-lock"></i> This data has access restrictions.
-    </span>
-    <span *ngIf="record['rights']">
-      <br> The access rights are {{ record.rights }} <br>
-    </span>
-    <span *ngIf="record['landingPage'] && record['landingPage'].indexOf('/od/id') === -1 ">
-      For more information, please visit the
-      <a target="_blank" href="{{ record['landingPage'] }}">home page</a>.
-    </span>
-    <span style="margin-left:0em" *ngIf="isAccessPage">
-      <br>Data is available via the following locations:
-      <br>
-      <span style="padding-left:2.00em" *ngFor="let title of accessTitles; let i =index">
-        <i class="faa faa-external-link"> <span style="margin-left:0.3em;"> <a
-              href="{{accessUrls[i]}}">{{title}}</a></span>
-        </i><br>
-      </span>
-    </span>
-
-    <div *ngIf="files.length  > 0">
-      <div class="flex-container" style="margin-top: 2em;">
-        <div style="flex: 0 0 110px; text-align: left; padding-bottom: 0em;">
-          <span><b>Files </b> </span>
-          <a class="faa-stack fa-lg icon-download"
-            (click)="downloadAllConfirm('Download All Files', 'This will download all files. Continue?', 'downloadAllConfirm')"
-            data-toggle="tooltip" title="Download all files"
-            [ngStyle]="{'color':getDownloadAllBtnColor(),'cursor':'pointer'}">
-            <i class="faa faa-circle-thin faa-stack-2x" aria-hidden="true"></i>
-            <i class="faa faa-download faa-stack-1x" aria-hidden="true"></i>
-          </a>
-          <a id="routeToDatacart" target="_blank" [routerLink]="['/datacart', 'popup']" style="display:none"></a>
-          <span class="faa-stack fa-lg icon-cart" (click)="cartProcess(files)"
-            [ngStyle]="{'color':getAddAllToDataCartBtnColor(),'cursor':'pointer','margin-right':'1em'}"
-            data-toggle="tooltip" [title]="getCartProcessTooltip()">
-            <i class="faa faa-circle-thin faa-stack-2x" aria-hidden="true"></i>
-            <i *ngIf="!isLocalProcessing; else show_spinner" class="faa faa-cart-plus faa-stack-1x"
-              aria-hidden="true"></i>
-            <ng-template #show_spinner><i class="faa faa-spinner faa-spin faa-stack-1x" style="color:#1E6BA1"
-                aria-hidden="true"></i></ng-template>
-            <span class="w3-badge badge-notify" style="margin-right:0.5em;">{{cartLength}}</span>
-          </span>
-        </div>
-        <div style="flex-grow: 9; text-align: left; padding-top: 0.5em;">
-          <span class="font8" style="color:gray;">Click on the file/row in the table below to view more details.</span>
-        </div>
-        <div class="font10" style="flex-grow: 2; text-align: right; color:gray; padding-top: 0.5em;">
-          Total No. files: {{ totalFiles }}
-        </div>
-      </div>
-
-      <p-confirmDialog key='downloadAllConfirm'></p-confirmDialog>
-      <!-- <ngbd-modal-download-manager></ngbd-modal-download-manager> -->
-      <div *ngIf="bundlePlanStatus != 'success' && bundlePlanMessage" style="text-align: left;">
-        <i class="faa faa-warning" [ngStyle]="{'color':messageColor, 'padding-right':'.5em'}"></i>
-        <span [ngStyle]="{'color':getColor(), 'padding-right':'.5em'}">Http responsed with warning. </span>
-        <span (click)="showMessageBlock = !showMessageBlock">
-          <i *ngIf="!showMessageBlock" class="faa faa-arrow-circle-down"
-            [ngStyle]="{'color':messageColor,'cursor':'pointer'}" data-toggle="tooltip" title="Show details"></i>
-          <i *ngIf="showMessageBlock" class="faa faa-arrow-circle-up faa-1x icon-white"
-            [ngStyle]="{'color':messageColor,'cursor':'pointer'}" data-toggle="tooltip" title="Hide details"></i>
-        </span>
-      </div>
-      <div *ngIf="showMessageBlock" style="margin-bottom: 1em;">
-        <li *ngFor="let msg of bundlePlanMessage; let i =index"
-          [ngStyle]="{'color':getColor(), 'padding-right':'.5em'}">
-          {{msg}}
-        </li>
-        <table *ngIf="bundlePlanUnhandledFiles" style="width: 100%;">
-          <tr style="background-color:darkorange; margin:0; color:white" data-toggle="tooltip" title="Unhandled Files">
-            <th style="width: 30%;padding-left:.5em;">
-              <span (click)="showUnhandledFiles = !showUnhandledFiles">
-                <i *ngIf="!showUnhandledFiles" class="faa faa-arrow-circle-down faa-1x icon-white"
-                  style="cursor: pointer;color: rgb(255, 255, 255);" data-toggle="tooltip" title="Expand All"></i>
-                <i *ngIf="showUnhandledFiles" class="faa faa-arrow-circle-up faa-1x icon-white"
-                  style="cursor: pointer;color: rgb(255, 255, 255);" data-toggle="tooltip" title="Collapse All"></i>
-              </span>
-              File Path
-            </th>
-            <th style="width: 30%;padding-left:.5em;">Download Url</th>
-            <th style="width: 40%;padding-left:.5em;">message</th>
-          </tr>
-          <tr *ngFor="let file of bundlePlanUnhandledFiles">
-            <td *ngIf="showUnhandledFiles" style="padding-left:.5em;border-bottom:1pt solid black;">{{file.filePath}}
-            </td>
-            <td *ngIf="showUnhandledFiles" style="padding-left:.5em;border-bottom:1pt solid black;">{{file.downloadUrl}}
-            </td>
-            <td *ngIf="showUnhandledFiles" style="padding-left:.5em;border-bottom:1pt solid black;">{{file.message}}
-            </td>
-          </tr>
-        </table>
-      </div>
-
-      <p-treeTable *ngIf="visible" [value]="files" [columns]="cols" selectionMode="single" [resizableColumns]="true"
-        sortField="name">
-        <ng-template pTemplate="header" let-columns>
-          <tr>
-            <th *ngFor="let col of columns" [style.width]="col.width" [style.font-size]="fontSize" ttResizableColumn>
-              <span *ngIf="col.header == 'Name'">
-                <span (click)="expandToLevel(files, !isExpanded, null)" style="padding-right:0.5em;">
-                  <i *ngIf="!isExpanded" class="faa faa-arrow-circle-down faa-1x icon-white"
-                    style="cursor: pointer;color: rgb(255, 255, 255);" data-toggle="tooltip" title="Expand All"></i>
-                  <i *ngIf="isExpanded" class="faa faa-arrow-circle-up faa-1x icon-white"
-                    style="cursor: pointer;color: rgb(255, 255, 255);" data-toggle="tooltip" title="Collapse All"></i>
-                </span>
-                <span (click)="showZipFilesNmaes = !showZipFilesNmaes" style="padding-right:0.5em;"
-                  *ngIf="zipData.length>0">
-                  <i *ngIf="!showZipFilesNmaes" class="faa faa-eye faa-1x icon-white"
-                    style="cursor: pointer;color: rgb(255, 255, 255);" data-toggle="tooltip" title="Show Zip Files"></i>
-                  <i *ngIf="showZipFilesNmaes" class="faa faa-eye-slash faa-1x icon-white"
-                    style="cursor: pointer;color: rgb(255, 255, 255);" data-toggle="tooltip" title="Hide Zip Files"></i>
-                </span>
-              </span>
-              {{col.header}}
-            </th>
-          </tr>
-        </ng-template>
-        <ng-template pTemplate="body" let-rowNode let-rowData="rowData" let-columns="columns">
-          <tr [ttSelectableRow]="rowNode">
-            <td [ngStyle]="titleStyle()">
-              <p-treeTableToggler [rowNode]="rowNode"></p-treeTableToggler>
-              <a (click)="openDetails($event,rowData,op3) " style="color: #1E6BA1;cursor: pointer;"
-                data-toggle="tooltip" title="Click for more details">
-                {{rowData.name}} </a>
-              <span *ngIf="showZipFilesNmaes" style="color:darkgreen; margin-left: 2em;">{{rowData.zipFile}}</span>
-            </td>
-            <td [ngStyle]="typeStyle()">{{rowData.mediatype}}</td>
-            <td [ngStyle]="sizeStyle()"><span *ngIf="rowData.size">{{formatBytes(rowData.size)}}</span></td>
-            <td [ngStyle]="statusStyle()">
-              <div style="display: flex;">
-                <div *ngIf="rowData.isLeaf;else space_holder">
-                  <a *ngIf="rowData.downloadStatus != 'downloading'" href='{{rowData.downloadUrl}}' target='_blank'
-                    download="download" data-toggle="tooltip" title="Direct download">
-                    <i class="faa faa-download" [ngStyle]="{'color':getDownloadBtnColor(rowData)}" aria-hidden="true"
-                      (click)="setFileDownloaded(rowData)"></i>
-                  </a>
+<div style="display: inline-block; width: fit-content; max-width: 95%;">
+    <div style="display: table; margin-bottom: 1em;">
+        <div class="editable_container">
+            <div class="editable_field" style="width:100%;"
+                *ngIf="!record['description'] || record['description'].length==0; else hasDescription">
+                <div class="nist-card" *ngIf="mdupdsvc.editMode" style="width:inherit;" [ngStyle]="getFieldStyle()">
+                    Click edit (pencil) button to add description.
                 </div>
-                <ng-template #space_holder>
-                  <div style="padding-right: 0.4em;">&nbsp;&nbsp;</div>
-                </ng-template>
-                <div style="padding-left:10px;" *ngIf="rowData.isIncart;else not_in_cart"
-                  (click)="removeFromNode(rowData)">
-                  <i class="faa faa-cart-plus" style="color: green;cursor: pointer;" aria-hidden="true"
-                    data-toggle="tooltip" title="Remove from cart"></i>
+            </div>
+            <ng-template #hasDescription>
+                <div id="recordDescription" class="desc-card editable_field" style="max-width:calc(100% - 4em);"
+                    [ngStyle]="getFieldStyle()">
+                    <div *ngFor="let desc of record['description']; let i =index">
+                        {{ record["description"][i] }}
+                        <p *ngIf="i<record['description'].length-1"></p>
+                    </div>
                 </div>
-                <div *ngIf="rowData.isIncart" style="margin-left: 0.5em;font-size: 0.5em">Added</div>
-                <ng-template #not_in_cart>
-                  <div style="padding-left:10px;" (click)="addSubFilesToCartAndUpdate(rowData)">
-                    <i class="faa faa-cart-plus" style="color: #1E6BA1;cursor: pointer;" aria-hidden="true"
-                      data-toggle="tooltip" title="Add to cart"></i>
-                  </div>
-                </ng-template>
-              </div>
-            </td>
-          </tr>
-        </ng-template>
-      </p-treeTable>
-    </div>
-  </div>
-</div>
-
-<div id="reference">
-  <div [hidden]="metadata">
-    <br>
-    <div *ngIf="checkReferences()">
-      <h3><b>References</b></h3>
-      <span class="font14" *ngIf="isDocumentedBy">
-        This data is discussed in :
-        <span *ngFor="let refs of record['references']">
-          <span *ngIf="refs['refType'] == 'IsDocumentedBy'">
-            <br>
-            <i class="faa faa-external-link">
-              <a style="margin-left:0.3em;" href={{refs.location}} target="blank">{{ refs.label }}</a>
-            </i>
-          </span>
-        </span>
-      </span>
-      <span class="font14" *ngIf="isReferencedBy">
-        This data is referenced in :
-        <span class="reflinks" *ngFor="let refs of record['references']">
-          <span *ngIf="refs['refType'] == 'IsReferencedBy'">
-            <br>
-            <i class="faa faa-external-link"> </i>
-            <a style="margin-left:0.3em;" href={{refs.location}} target="blank"> {{ refs.location }}</a>
-          </span>
-
-        </span>
-      </span>
-    </div>
-  </div>
-</div>
-<p-overlayPanel class="fileDialog" #op3 [dismissable]="true" [showCloseIcon]="true" [style]="{'display':'inline-block'}"
-  [appendTo]="'body'">
-  <div *ngIf="isNodeSelected" class="filecard">
-    <div class="ui-g filesection">
-      <div *ngIf="fileNode" class="ui-g-12 ui-md-12 ui-lg-12 ui-sm-10">
-        <span class="font8" style="color:grey">
-          <span *ngIf="fileNode.filetype == 'nrdp:DataFile' ">Selected File</span>
-          <span *ngIf="fileNode.filetype == 'nrdp:ChecksumFile' ">Selected Checksum File</span>
-          <span *ngIf="fileNode.filetype == 'nrdp:Subcollection'">Selected SubCollection </span>
-          <br>
-        </span>
-        <span class="font14">{{ fileNode ? fileNode.name : '' }}</span>
-        <span class="font8" style="color:grey">
-          <br><b>Type:</b>
-          <span style="margin-left:0.5em;" class="textstyle1">{{ fileNode.mediatype ? fileNode.mediatype : 'Not
-            Available'}} </span>
-        </span>
-        <span class="font8" style="margin-left: 2.5rem">
-          Size:
-          <span *ngIf="fileNode.size" class="textstyle1">{{ formatBytes(fileNode.size) }} </span>
-          <span *ngIf="!fileNode.size" class="textstyle1"><i>Not Available</i></span>
-        </span>
-        <br><span class="font10"><b>Description:</b> </span>
-        <div class="well filedesc">
-          <span *ngIf="!fileNode.description"><i>No Description Available</i></span>
-          <span *ngIf="fileNode.description">{{ fileNode.description }} </span>
+            </ng-template>
+            <button class="edit_button" *ngIf="mdupdsvc.editMode" type="button" (click)="openModal()" aria-label="edit button">
+                <i class="faa faa-pencil icon_enabled" data-toggle="tooltip" title="Edit description"></i>
+            </button>
+            <button class="undo_button" *ngIf="mdupdsvc.editMode" type="button" [disabled]="!updated"
+                (click)="undoEditing()" aria-label="undo button">
+                <i class="faa faa-undo" [ngClass]="{'icon_enabled': updated, 'icon_disabled': !updated}"
+                    data-toggle="tooltip" title="Undo description"></i>
+            </button>
         </div>
-      </div>
     </div>
-  </div>
-</p-overlayPanel>
+</div>
+<div *ngIf="mdupdsvc.editMode" style="color: rgb(173, 0, 0); display: inline-block;width: fit-content; max-width:5%;vertical-align: top;text-align: left; ">*</div>

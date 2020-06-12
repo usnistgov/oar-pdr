@@ -1,0 +1,63 @@
+
+
+.header__logo-link {
+    /* display: block; */
+}
+.background-black
+{
+    background-color: #000000;
+}
+.header-background {
+    background-color: #000000;
+}
+.header-div {
+    /*vertical-align: middle;*/
+    padding-top: 0.7em;
+    /*margin-bottom: 10px;*/
+    padding-bottom: 0.6em;
+    padding-left: 0.7em;
+    color: white;
+}
+
+.header-links {
+    margin-right: 0px;
+    margin-top: 15px;
+    color:white;
+    padding-right: 2%;
+    vertical-align: bottom;
+}
+
+.badgesm {
+    font-size: 12px;
+    font-weight: bold;
+    color: #fff;
+    padding: 3px 7px; 
+    vertical-align: 50%;
+    height:20px;
+    width:20px;
+    min-width: 10px;
+    z-index: 10;
+    line-height: 1;
+    text-align: center;
+    white-space: nowrap;
+    background-color: #777;
+    border-radius: 10px;
+}
+
+.badge-notify {
+    background-color: green;
+    color: white;
+    position: relative;
+    top: -10px;
+    left: -5px;
+    font-size: 9px;
+    height: 20px;
+    width: 20px;
+    padding: 5px 3px 3px 3px ;
+}
+
+a:link, a:hover, a:visited{
+  color: white;
+  background-color: transparent;
+  text-decoration: none;
+}

@@ -152,6 +152,7 @@ class UpdatePrepService(object):
         if not self.sercache:
             raise ConfigurationException("UpdatePrepService: Missing property: "+
                                          "headbag_cache")
+        self.storedir = self.cfg.get('store_dir')
         scfg = self.cfg.get('distrib_service', {})
         self.distsvc = distrib.RESTServiceClient(scfg.get('service_endpoint'))
         scfg = self.cfg.get('metadata_service', {})
@@ -163,7 +164,7 @@ class UpdatePrepService(object):
         return an UpdatePrepper instance for the given dataset identifier
         """
         return UpdatePrepper(aipid, self.cfg, self.cacher, self.mdsvc,
-                             version, log)
+                             self.storedir, version, log)
 
 
 class UpdatePrepper(object):
@@ -173,7 +174,7 @@ class UpdatePrepper(object):
     system.  
     """
 
-    def __init__(self, aipid, config, headcacher, pubmdclient,
+    def __init__(self, aipid, config, headcacher, pubmdclient, storedir=None,
                  version=None, log=None):
         """
         create the prepper for the given dataset identifier.  
@@ -183,6 +184,7 @@ class UpdatePrepper(object):
         """
         self.aipid = aipid
         self.cacher = headcacher
+        self.storedir = storedir
         self.version = version
         self.mdcli = pubmdclient
         self.mdcache = os.path.join(self.cacher.cachedir, "_nerd")
@@ -224,6 +226,24 @@ class UpdatePrepper(object):
             except IDNotFound as ex:
                 return None
         return out
+
+    def find_bag_in_store(self, version):
+        """
+        look for a bag for a particular version of the current AIP 
+        in the bag storage directory.  (This is the directory where 
+        AIP bags are copied to for long-term storage.)
+        """
+        if not self.storedir:
+            return None
+
+        foraip = [f for f in os.listdir(self.storedir)
+                    if f.startswith(self.aipid+'.') and
+                       not f.endswith('.sha256')        ]
+        foraip = bagutils.select_version(foraip, version)
+        if len(foraip) == 0:
+            return None
+
+        return os.path.join(self.storedir, bagutils.find_latest_head_bag(foraip))
 
     def aip_exists(self):
         """
@@ -300,22 +320,32 @@ class UpdatePrepper(object):
                              "\n   (may indicate earlier failure)")
             shutil.rmtree(mdbag)
 
-        latest_headbag = self.cache_headbag()
+        latest_nerd = self.cache_nerdm_rec()
+        if not latest_nerd:
+            self.log.info("ID not published previously; will start afresh")
+            return False
+        version = self.version
+        if not version:
+            nerd = utils.read_nerd(latest_nerd)
+            version = nerd.get('version', '0')
+
+        # This has been published before; look for a head bag in the store dir
+        latest_headbag = self.find_bag_in_store(version)
+        if not latest_headbag:
+            # store dir came up empty; try the distribution service
+            latest_headbag = self.cache_headbag()
+
         if latest_headbag:
             fmt = "Preparing update based on previous head preservation bag (%s)"
             self.log.info(fmt, os.path.basename(latest_headbag)) 
             self.create_from_headbag(latest_headbag, mdbag)
             return True
 
-        latest_nerd = self.cache_nerdm_rec()
-        if latest_nerd:
-            self.log.info("No previous bag available; preparing based on " +
-                          "existing published NERDm record")
-            self.create_from_nerdm(latest_nerd, mdbag)
-            return True
-
-        self.log.info("ID not published previously; will start afresh")
-        return False
+        # This dataset was "published" without a preservation bag
+        self.log.info("No previous bag available; preparing based on " +
+                      "existing published NERDm record")
+        self.create_from_nerdm(latest_nerd, mdbag)
+        return True
 
 
     def create_from_headbag(self, headbag, mdbag):
@@ -371,8 +401,8 @@ class UpdatePrepper(object):
         if not nerdm.get('@id'):
             raise StateException("Bag {0}: missing @id"
                                  .format(os.path.basename(mdbag)))
-        bag = BagBuilder(parent, os.path.basename(mdbag), {}, nerdm.get('@id'),
-                         logger=deflog)
+        bag = BagBuilder(parent, os.path.basename(mdbag), {'validate_id': False},
+                         nerdm.get('@id'), logger=deflog)
         bag.add_res_nerd(nerdm, savefilemd=True)
 
         # finally set the version to a value appropriate for an update in
@@ -408,7 +438,8 @@ class UpdatePrepper(object):
         # (this assumes forward compatibility).
         bagutils.update_nerdm_schema(nerd)
         
-        bldr = BagBuilder(parent, bagname, {}, nerd['@id'], logger=deflog)
+        bldr = BagBuilder(parent, bagname, {'validate_id': False},
+                          nerd['@id'], logger=deflog)
         bldr.add_res_nerd(nerd, savefilemd=True)
 
         # update the version appropriate for edit mode

@@ -4,7 +4,7 @@ Package (SIP) into an Archive Information Package (BagIt bags).  It also
 includes implementations for different known SIPs
 """
 from __future__ import print_function
-import os, sys, re, shutil, logging
+import os, sys, re, shutil, logging, errno
 from abc import ABCMeta, abstractmethod, abstractproperty
 from collections import OrderedDict
 from copy import deepcopy
@@ -20,6 +20,7 @@ from .. import (ConfigurationException, StateException, PODError)
 from .. import PreservationException, sys as _sys
 from . import status
 from ...ingest.rmm import IngestClient
+from ...utils import write_json
 
 log = logging.getLogger(_sys.system_abbrev).getChild(_sys.subsystem_abbrev)
 
@@ -225,6 +226,15 @@ class SIPHandler(object):
             })
 
         self._status.cache()
+
+        # remove the source bags
+        if self.cfg.get("cleanup_unserialized_bags", True):
+            for bagd in srcbags:
+                try:
+                    shutil.rmtree(bagd)
+                except Exception as ex:
+                    log.warn("Trouble removing unserialized bag: "+bagd)
+        
         return outfiles
 
     def _is_ingested(self):
@@ -354,8 +364,13 @@ class MIDASSIPHandler(SIPHandler):
                                  "directory: " + self.mdbagdir)
 
         bgrcfg = config.get('bagger', {})
+        if 'store_dir' not in bgrcfg and 'store_dir' in config:
+            bgrcfg['store_dir'] = config['store_dir']
         if 'repo_access' not in bgrcfg and 'repo_access' in config:
             bgrcfg['repo_access'] = config['repo_access']
+            if 'store_dir' not in bgrcfg['repo_access'] and 'store_dir' in bgrcfg:
+                bgrcfg['repo_access']['store_dir'] = bgrcfg['store_dir']
+            
         self.bagger = PreservationBagger(sipid, bagparent, self.sipparent,
                                          self.mdbagdir, bgrcfg, self._minter, 
                                          self._asupdate, sipdirname)
@@ -446,10 +461,11 @@ class MIDASSIPHandler(SIPHandler):
                 self.bagger.bagbldr._unset_logfile() # disengage the internal log
 
         # Stage the full NERDm record for ingest into the RMM
+        bag = NISTBag(self.bagger.bagdir)
+        nerdm = bag.nerdm_record()
         if self._ingester:
             try:
-                bag = NISTBag(self.bagger.bagdir)
-                self._ingester.stage(bag.nerdm_record(), self.bagger.name)
+                self._ingester.stage(nerdm, self.bagger.name)
             except Exception as ex:
                 msg = "Failure staging NERDm record for " + self.bagger.name + \
                       " for ingest: " + str(ex)
@@ -468,9 +484,16 @@ class MIDASSIPHandler(SIPHandler):
         self._status.record_progress("Delivering preservation artifacts")
         log.debug("writing files to %s", destdir)
         errors = []
+        saved = []
         try:
             for f in savefiles:
+                destfile = os.path.join(destdir, os.path.basename(f))
+                if os.path.exists(destfile) and \
+                   not self.cfg.get('allow_bag_overwrite', False):
+                    raise OSError(errno.EEXIST, os.strerror(errno.EEXIST),
+                                  destfile)
                 shutil.copy(f, destdir)
+                saved.append(f)
         except OSError, ex:
             log.error("Failed to copy preservation file: %s\n" +
                       "  to long-term storage: %s", f, destdir)
@@ -479,10 +502,11 @@ class MIDASSIPHandler(SIPHandler):
             msg = "Failed to copy preservation files to long-term storage"
             self.set_state(status.FAILED, msg)
 
-            for f in savefiles:
-                f = os.path.join(destdir, os.path.basename(f))
-                if os.path.exists(f):
-                    os.remove(f)
+            for f in saved:
+                fp = os.path.join(destdir, os.path.basename(f))
+                if os.path.exists(fp):
+                    log.warn("Removing %s from long-term storage", f)
+                    os.remove(fp)
 
             raise PreservationException(msg, [str(ex)])
 
@@ -527,6 +551,36 @@ class MIDASSIPHandler(SIPHandler):
                                     summary="checksum file write failure",
                                     desc=msg, id=self._sipid)
                 
+        # remove the metadata bag directory so that that an attempt to update
+        # will force a rebuild based on the published version
+        mdbag = os.path.join(self.mdbagdir, self.bagger.name)
+        log.debug("ensuring the removal metadata bag directory: %s", mdbag)
+        if os.path.isdir(mdbag):
+            log.debug("removing metadata bag directory...")
+            try:
+                shutil.rmtree(mdbag)
+            except Exception as ex:
+                log.error("Failed to clean up the metadata bag directory: "+
+                          mdbag + ": "+str(ex))
+            if os.path.isfile(mdbag+".lock"):
+                try:
+                    os.remove(mdbag+".lock")
+                except Exception as ex:
+                    log.warn("Failed to clean up the metadata bag lock file: "+
+                             mdbag + ".lock: "+str(ex))
+
+        # cache the latest nerdm record under the staging directory
+        try:
+            mdcache = os.path.join(self.stagedir, '_nerd')
+            staged = os.path.join(mdcache, self.bagger.name+".json")
+            if os.path.isdir(mdcache):
+                write_json(nerdm, staged)
+        except Exception as ex:
+            log.error("Failed to cache the new NERDm record: "+str(ex))
+            if os.path.exists(staged):
+                # remove the old record as it is now out of date
+                os.remove(staged)
+
         self.set_state(status.SUCCESSFUL)
 
         # submit NERDm record to ingest service
@@ -550,16 +604,6 @@ class MIDASSIPHandler(SIPHandler):
             self.notifier.alert("preserve.success", origin=self.name,
                            summary="New MIDAS SIP preserved: "+self.bagger.name,
                                 id=self.bagger.name)
-
-        # remove the metadata bag directory so that that an attempt to update
-        # will force a rebuild based on the published version
-        mdbag = os.path.join(self.mdbagdir, self.bagger.name)
-        log.debug("ensuring the removal metadata bag directory: %s", mdbag)
-        if os.path.isdir(mdbag):
-            log.debug("removing metadata bag directory...")
-            shutil.rmtree(mdbag)
-            if os.path.isfile(mdbag+".lock"):
-                os.remove(mdbag+".lock")
 
         # clean up staging area
         if self.cfg.get('clean_bag_staging', True):

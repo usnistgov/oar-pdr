@@ -20,19 +20,21 @@ module.exports = function (config) {
       reports: ['html', 'lcovonly'],
       fixWebpackSourcePaths: true
     },
-    angularCli: {
-      environment: 'dev'
-    },
     reporters: ['progress', 'kjhtml'],
     port: 9876,
     colors: true,
     logLevel: config.LOG_INFO,
-    autoWatch: false,
+    autoWatch: true,
     browsers: ['HeadlessChrome'],
-    customLaunchers:{
-      HeadlessChrome:{
+    customLaunchers: {
+      HeadlessChrome: {
         base: 'ChromeHeadless',
-        flags: ['--no-sandbox']
+        flags: [
+          '--no-sandbox'
+        ]
+      },
+      DebugChrome: {
+        base: 'Chrome'
       }
     },
     singleRun: true

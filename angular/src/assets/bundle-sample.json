@@ -1,0 +1,43 @@
+{
+  "status": "warnings",
+  "messages": [
+    "Some urls are not added due to unsupported host.",
+    "Additional message here."
+  ],
+  "notIncluded": [
+    {
+      "filePath": "/1894/license2.pdf",
+      "downloadUrl": "https://project-open-data.cio.gov/v1.1/schema",
+      "message": "Not valid Url."
+    }
+  ],
+  "bundleNameFilePathUrl": [
+    {
+      "bundleName": "testdownload-1.zip",
+      "includeFiles": [
+        {
+          "filePath": "5BD6911D381AB2E3E0531A57068151FA1869/NFRL_LocalizedFireTest_SteelBeam_08112017.xlsx",
+          "downloadUrl": "https://s3.amazonaws.com/nist-midas/1856/NFRL_LocalizedFireTest_SteelBeam_08112017.xlsx"
+        },
+        {
+          "filePath": "5BD6911D381AB2E3E0531A57068151FA1869/NFRL_LocalizedFireTest_SteelBeam_08112017.xlsx.sha256",
+          "downloadUrl": "https://s3.amazonaws.com/nist-midas/1856/NFRL_LocalizedFireTest_SteelBeam_08112017.xlsx.sha256"
+        }
+      ]
+    },
+    {
+      "bundleName": "testdownload-2.zip",
+      "includeFiles": [
+        {
+          "filePath": "5BD6911D381AB2E3E0531A57068151FA1869/NFRL_LocalizedFireTest_SteelBeam_09012017.xlsx",
+          "downloadUrl": "https://s3.amazonaws.com/nist-midas/1856/NFRL_LocalizedFireTest_SteelBeam_09012017.xlsx"
+        },
+        {
+          "filePath": "5BD6911D381AB2E3E0531A57068151FA1869/NFRL_LocalizedFireTest_SteelBeam_09012017.xlsx.sha256",
+          "downloadUrl": "https://s3.amazonaws.com/nist-midas/1856/NFRL_LocalizedFireTest_SteelBeam_09012017.xlsx.sha256"
+        }
+      ]
+    }
+  ],
+  "postEach": "_bundle"
+}

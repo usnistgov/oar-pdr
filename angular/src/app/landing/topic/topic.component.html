@@ -1,0 +1,31 @@
+<div>
+    <div style="display: inline-block; width: fit-content; max-width: 95%;">
+        <span style="display: table;">
+            <div class="editable_container">
+                <div class="editable_field" *ngIf="isEmpty; else hasTopic">
+                    <div *ngIf="mdupdsvc.editMode" [ngStyle]="getFieldStyle()">
+                        Add topics: &nbsp;&nbsp;
+                    </div>
+                </div>
+                <ng-template #hasTopic>
+                    <div class="editable_field" style="width: calc(100%-1em);" [ngStyle]="getFieldStyle()">
+                        <strong>Research Topics: </strong>
+                        <span class="font14 topics" *ngFor="let topic of record['topic']; let i =index">
+                            {{ topic.tag }}
+                            <span *ngIf="i < record['topic'].length-1 ">,</span>
+                        </span> &nbsp; &nbsp;
+                    </div>
+                </ng-template>
+                <button class="edit_button" *ngIf="mdupdsvc.editMode" type="button" (click)="openModal()" aria-label="edit button">
+                    <i class="faa faa-pencil icon_enabled" data-toggle="tooltip" title="Edit topic"></i>
+                </button>
+                <button class="undo_button" *ngIf="mdupdsvc.editMode" type="button" [disabled]="!updated"
+                    (click)="undoEditing()" aria-label="undo button">
+                    <i class="faa faa-undo" [ngClass]="{'icon_enabled': updated, 'icon_disabled':!updated }"
+                        data-toggle="tooltip" title="Undo topic"></i>
+                </button>
+            </div>
+        </span>
+    </div>
+    <div *ngIf="mdupdsvc.editMode" style="color: rgb(173, 0, 0); display: inline-block;width: fit-content; max-width:5%;vertical-align: top;text-align: left; padding-left: .5em;">*</div>
+</div>

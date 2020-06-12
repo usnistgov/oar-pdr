@@ -66,8 +66,8 @@ def form_bag_name03(aipid, bagseq=0, mbver="0.3"):
     return form_bag_name(aipid, bagseq, "", mbver,
                          "{aipid}.mbag{mbver}-{bagseq}")
 
-BAGNAME04_RE = re.compile(r"^(\w+)\.(\d+(_\d+)*)\.mbag(\d+_\d+)-(\d+)(\..*)?$")
-BAGNAME02_RE = re.compile(r"^(\w+)\.mbag(\d+_\d+)-(\d+)(\..*)?$")
+BAGNAME04_RE = re.compile(r"^(\w[\w\-]*)\.(\d+(_\d+)*)\.mbag(\d+_\d+)-(\d+)(\..*)?$")
+BAGNAME02_RE = re.compile(r"^(\w[\w\-]*)\.mbag(\d+_\d+)-(\d+)(\..*)?$")
 BAGNAME_RE = BAGNAME04_RE
 
 def parse_bag_name(bagname, nistprof=None):
@@ -384,14 +384,16 @@ def select_version(bagnames, version):
     # Most likely given current NIST practice, if version is simply "0" or "1",
     # we're refering to bags following the 0.2 naming convention.
     if version == "0" or version == "1":
-        out = selectVersion(bagnames, "")
+        out = select_version(bagnames, "")
         if len(out) > 0:
             return out
 
-    out = []
-    vernamere = (version == "" and re.compile(r"^(\w+)\.mbag")) \
-                               or  re.compile(r"^(\w+)\."+version+"\.")
+    if version == "":
+        vernamere = re.compile(r"^(\w[\w\-]+)\.mbag")
+        return [b for b in bagnames if vernamere.match(b)]
 
+    out = []
+    vernamere = re.compile(r"^(\w[\w\-]+)\."+version+r"\.")
     while len(version) > 0:
         for name in bagnames:
             if vernamere.match(name):

@@ -32,6 +32,8 @@ descarchdir = os.path.join(pdrmoddir, "describe", "data")
 loghdlr = None
 rootlog = None
 def setUpModule():
+    global loghdlr
+    global rootlog
     ensure_tmpdir()
 #    logging.basicConfig(filename=os.path.join(tmpdir(),"test_builder.log"),
 #                        level=logging.INFO)
@@ -46,7 +48,7 @@ def tearDownModule():
     global loghdlr
     if loghdlr:
         if rootlog:
-            rootlog.removeLog(loghdlr)
+            rootlog.removeHandler(loghdlr)
         loghdlr = None
     stopServices()
     rmtmpdir()
@@ -81,6 +83,7 @@ def startServices():
     cmd = cmd.format(os.path.join(tdir,"simrmm.log"), srvport,
                      os.path.join(basedir, wpy), archdir, pidfile)
     os.system(cmd)
+    time.sleep(0.5)
 
 def stopServices():
     tdir = tmpdir()
@@ -160,7 +163,8 @@ class TestPreservationUpdateBagger(test.TestCase):
                 'metadata_service': {
                     'service_endpoint': "http://localhost:9092/"
                 }
-            }
+            },
+            'store_dir': distarchdir
         }
         
         self.bagr = midas.PreservationBagger(self.midasid, '_preserv',
@@ -231,6 +235,8 @@ class TestPreservationUpdateBagger(test.TestCase):
 
         try:
             shutil.copyfile(srczip, destzip)
+            shutil.copy(os.path.join(datadir, self.midasid+".json"),
+                        mdarchive)
 
             self.bagr.ensure_metadata_preparation()
 
@@ -286,9 +292,11 @@ class TestPreservationUpdateBagger(test.TestCase):
         srczip = os.path.join(distarchive, "1491.1_0.mbag0_4-0.zip")
         destzip = os.path.join(distarchive, self.midasid+".1_0.mbag0_4-0.zip")
         cached = os.path.join(self.pubcache, os.path.basename(destzip))
+        rmmrec = os.path.join(mdarchive, self.midasid+".json")
 
         try:
             shutil.copyfile(srczip, destzip)
+            shutil.copyfile(os.path.join(datadir, self.midasid+".json"), rmmrec)
 
             self.bagr.prepare(nodata=True)
 
@@ -309,14 +317,18 @@ class TestPreservationUpdateBagger(test.TestCase):
                 os.remove(destzip)
             if os.path.exists(cached):
                 os.remove(cached)
+            if os.path.exists(rmmrec):
+                os.remove(rmmrec)
 
     def test_make_updated_bag(self):
         srczip = os.path.join(distarchive, "1491.1_0.mbag0_4-0.zip")
         destzip = os.path.join(distarchive, self.midasid+".1_0.mbag0_4-0.zip")
         cached = os.path.join(self.pubcache, os.path.basename(destzip))
+        rmmrec = os.path.join(mdarchive, self.midasid+".json")
 
         try:
             shutil.copyfile(srczip, destzip)
+            shutil.copyfile(os.path.join(datadir, self.midasid+".json"), rmmrec)
 
             try:
                 self.bagr.make_bag()
@@ -354,6 +366,8 @@ class TestPreservationUpdateBagger(test.TestCase):
                 os.remove(destzip)
             if os.path.exists(cached):
                 os.remove(cached)
+            if os.path.exists(rmmrec):
+                os.remove(rmmrec)
         
 
 if __name__ == '__main__':

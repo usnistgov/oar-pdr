@@ -25,7 +25,7 @@ submit the metadata to the PDR metadata database.
 """
 from copy import deepcopy
 from abc import ABCMeta, abstractmethod, abstractproperty
-import os, logging, threading, time, errno
+import os, logging, threading, time, errno, re
 
 from detach import Detach
 
@@ -143,6 +143,7 @@ class PreservationService(object):
         # create a Handler object that will be launched asynchronously
         try:
             hdlr = self._make_handler(sipid, siptype, asupdate=False)
+            log.info("Initial preservation requested for SIP=%s", sipid)
         except (IDNotFound, SIPDirectoryNotFound) as ex:
             return self._not_found_state(sipid, siptype)
         except Exception as ex:
@@ -151,10 +152,11 @@ class PreservationService(object):
         # check for the existence of an AIP corresponding to the input SIP ID:
         # if one exists, fail because the user should have called update()
         if self._prepsvc:
-            if self._prepsvc.prepper_for(sipid, log=log).aip_exists():
+            aipid = re.sub(r'^ark:/\d+/','', sipid)
+            if self._prepsvc.prepper_for(aipid, log=log).aip_exists():
                 hdlr.set_state(status.CONFLICT,
                                "requested initial preservation of existing AIP")
-                msg = "AIP with ID already exists (need to request update?) :"
+                msg = "AIP with ID already exists (need to request update?): "
                 raise PreservationStateException(msg + sipid, True)
 
         # React to the current state. This state reflects the state prior to
@@ -221,6 +223,7 @@ class PreservationService(object):
         # create a Handler object that will be launched asynchronously
         try:
             hdlr = self._make_handler(sipid, siptype, asupdate=True)
+            log.info("Preservation update requested for SIP=%s", sipid)
         except (IDNotFound, SIPDirectoryNotFound) as ex:
             return self._not_found_state(sipid, siptype)
         except Exception as ex:
@@ -230,7 +233,8 @@ class PreservationService(object):
         # if one does not exists, fail because the user should have called
         # preserve()
         if self._prepsvc:
-            if not self._prepsvc.prepper_for(sipid, log=log).aip_exists():
+            aipid = re.sub(r'^ark:/\d+/','', sipid)
+            if not self._prepsvc.prepper_for(aipid, log=log).aip_exists():
                 hdlr.set_state(status.CONFLICT,
                                "requested update to non-existing AIP")
                 msg = "AIP with ID does not exist (unable to update): "

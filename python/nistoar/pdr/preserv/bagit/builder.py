@@ -3,7 +3,7 @@ Tools for building a NIST Preservation bags
 """
 from __future__ import print_function, absolute_import
 from __future__ import print_function, absolute_import
-import os, errno, logging, re, json, pkg_resources, textwrap, datetime
+import os, errno, logging, re, pkg_resources, textwrap, datetime
 import pynoid as noid
 from shutil import copy as filecopy, rmtree
 from copy import deepcopy
@@ -31,7 +31,7 @@ from multibag import open_headbag
 
 NORM=15  # Log Level for recording normal activity
 logging.addLevelName(NORM, "NORMAL")
-log = logging.getLogger(__name__)
+# log = logging.getLogger(__name__)
 
 DEF_BAGLOG_FORMAT = "%(asctime)s %(levelname)s: %(message)s"
 
@@ -71,6 +71,37 @@ class BagBuilder(PreservationSystem):
     A class for building up and populating a BagIt bag compliant with the 
     NIST Profile.
 
+    One can instantiate a BagBuilder either around an existing bag or around 
+    one that will be created upon first call to an updating method on the 
+    instance.  The interface provides functions for add data files to the bag
+    and updating metadata.  When no more additions are needed, the finalize_bag()
+    method can be called to add all additional metadata necessary to be 
+    compliant with the NIST Bag Profile.  
+
+    One key feature is that the updates are recorded via log 
+    messages in a log file inside the bag ("preserv.log").  A word of warning
+    regarding this feature:  if two BagBuilder instances updating different 
+    bags have an internal logger with the same name, the internal log files 
+    will likely collect log messages that do not belong to it.  Be default, 
+    BagBuilder instances operating on different bags will have loggers that 
+    will not collide with each other.  However, it is possible to pass in the 
+    logger object a BagBuilder should use via its constructor; in this case,
+    be sure that each instance is given a different logger (i.e. with a 
+    different name).  
+
+    Because of the possibility of log pollution (and message doubling), it is 
+    a good idea to disconnect the internal logfile from the BagBuilder instance
+    after completing all updates (e.g. after finalize_bag() or before it if that
+    call will be made later via a different instance).  This can be done one of 
+    two ways:
+      * explicitly call disconnect_logfile() after completing all updates
+      * instantiate the BagBuilder class via a with statement; when the 
+        with-block is exited, disconnect_logfile() will be called 
+        automatically.
+    (Note that this class does feature a finalizer method, __del__(); however, 
+    experience shows that this method is not typically called soon enough to 
+    avoid the danger of log pollution.)
+    
     This class can take a configuration dictionary on construction; the 
     following properties are supported:
     :prop log_filename str ("preserv.log"):  the name to give to the logfile 
@@ -89,9 +120,10 @@ class BagBuilder(PreservationSystem):
     :prop merge_convention str ("dev"): the merge convention name to 
                                  use to merge annotation data into the primary
                                  NERDm metadata.
-    :prop validate_id bool (True):  If True, an identifier provided to the 
+    :prop validate_id bool (False):  If True, an identifier provided to the 
                               constructor will be checked for transcription
-                              error.
+                              error (assuming the identifier contains a "check
+                              character")
     :prop copy_on_link_failure bool (True):  If True, then when moving datafiles 
                               to output bag via a hardlink, then the file 
                               will get copied if the linking fails.  
@@ -149,8 +181,9 @@ class BagBuilder(PreservationSystem):
         self._bag = None
 
         if not logger:
-            logger = log
+            logger = logging.getLogger(self._bagdir)
         self.log = logger
+        self.log.setLevel(NORM)
         
         if not config:
             config = {}
@@ -159,7 +192,7 @@ class BagBuilder(PreservationSystem):
         self._id = None   # set below
         self._ediid = None
         self._logname = self.cfg.get('log_filename', 'preserv.log')
-        self._loghdlr = None
+        self._log_handlers = {}
         self._mimetypes = None
         self._distbase = self.cfg.get('distrib_service_baseurl', DISTSERV)
         if not self._distbase.endswith('/'):
@@ -199,6 +232,13 @@ class BagBuilder(PreservationSystem):
     def __del__(self):
         self._unset_logfile()
 
+    def __enter__(self):
+        return self
+    def __exit__(self, exc_type, exc_value, tb):
+        self.disconnect_logfile()
+        return False
+
+
     def _merge_def_config(self, config):
         if not def_etc_dir:
             self.log.warning("BagBuilder: Can't load default config: " +
@@ -213,23 +253,101 @@ class BagBuilder(PreservationSystem):
         defconf = load_from_file(defconffile)
         return merge_config(config, defconf)
 
+    def logfile_is_connected(self, logfile=None):
+        # return True if the bagdir/preserv.log is currently attached to this
+        # builder
+        if not logfile:
+            logfile = self._logname
+        if not os.path.isabs(logfile):
+            logfile = os.path.join(self.bagdir, logfile)
+        for hdlr in self.log.handlers:
+            if self._handles_logfile(hdlr, logfile):
+                return True
+        return False
+
+    def _handles_logfile(self, handler, logfilepath):
+        # return True if the handler is set to write to a file with the given
+        # name
+        return hasattr(handler,'stream') and hasattr(handler.stream, 'name') \
+               and handler.stream.name == logfilepath
+
+    def _get_log_handler(self, logfilepath):
+        if logfilepath not in self._log_handlers:
+            self._log_handlers[logfilepath] = None
+
+        hdlr = self._log_handlers[logfilepath]
+        if not hdlr:
+            hdlr = logging.FileHandler(logfilepath)
+            fmt = self.cfg.get('bag_log_format', DEF_BAGLOG_FORMAT)
+            hdlr.setFormatter(logging.Formatter(fmt))
+            self._log_handlers[logfilepath] = hdlr
+
+        return hdlr
+
+    def connect_logfile(self, logfile=None, loglevel=NORM):
+        """
+        connect the bag's internal log file to this builder so that it can 
+        record what it's doing.  
+
+        :param str logfile:  the path to the log file to connect.  If the 
+                             path is relative, it is taken to be relative to 
+                             bag's top directory.  If None, the default 
+                             (configured) logfile name ("preserv.log") is 
+                             assumed.
+        """
+        if not logfile:
+            logfile = self._logname
+        if not os.path.isabs(logfile):
+            logfile = os.path.join(self.bagdir, logfile)
+        if self.logfile_is_connected(logfile):
+            return
+        hdlr = self._get_log_handler(logfile)
+        hdlr.setLevel(loglevel)
+        
+        self.log.addHandler(hdlr)
+
+    def disconnect_logfile(self, logfile=None):
+        """
+        disconnect the log file from this builder.  This ensures that the 
+        logfile is closed so that the bag can be savely removed, moved, etc.
+        It may be reconnected automatically when the builder is called to 
+        update the bag.  
+
+        :param str logfile:  the path to the log file to connect.  If the 
+                             path is relative, it is taken to be relative to 
+                             bag's top directory.  If None, all connected 
+                             logfiles will be disconnected.
+        """
+        if not logfile:
+            files = self._log_handlers.keys()
+            if not files:
+                logfile = os.path.join(self.bagdir, self._logname)
+                if logfile not in self._log_handlers:
+                    self._log_handlers[logfile] = None
+
+        if not files and isinstance(logfile, str):
+            if not os.path.isabs(logfile):
+                logfile = os.path.join(self.bagdir, logfile)
+            files = [ logfile ]
+
+        self.log.debug("Disconnecting BagBuilder from internal log")
+
+        for lf in files:
+            hdlrs = [h for h in self.log.handlers if self._handles_logfile(h,lf)]
+            for h in hdlrs:
+                self.log.removeHandler(h)
+                h.close()
+            self._log_handlers[lf] = None
+        
     def _set_logfile(self):
-        if self._loghdlr:
-            self._unset_logfile()
-        filepath = os.path.join(self.bagdir, self.logname)
-        self._loghdlr = logging.FileHandler(filepath)
-        self._loghdlr.setLevel(NORM)
-        fmt = self.cfg.get('bag_log_format', DEF_BAGLOG_FORMAT)
-        self._loghdlr.setFormatter(logging.Formatter(fmt))
-        self.log.addHandler(self._loghdlr)
-        if not self.log.isEnabledFor(NORM):
-            self.log.setLevel(NORM)
+        # for backward compatiblity
+        self.log.debug("Deprecated _set_logfile() called")
+        self.connect_logfile()
 
     def _unset_logfile(self):
-        if hasattr(self, '_loghdlr') and self._loghdlr:
-            self.log.removeHandler(self._loghdlr)
-            self._loghdlr.close()
-            self._loghdlr = None
+        # for backward compatiblity
+        self.disconnect_logfile()
+        self.log.debug("Deprecated _unset_logfile() called")
 
     @property
     def bagname(self):
@@ -271,22 +389,25 @@ class BagBuilder(PreservationSystem):
         elif self._ediid:
             self.record("Unsetting ediid")
         self._ediid = val
-        self._upd_ediid(val)
-        if self._ediid:
+        old = self._upd_ediid(val)
+        if self._ediid and self._ediid != old:
             self._upd_downloadurl(self._ediid)
 
     def _upd_ediid(self, ediid):
         # this updates the ediid metadatum in the resource nerdm.json
+        old = None
         if self.bag:
             mdfile = self.bag.nerd_file_for("")
             if os.path.exists(mdfile):
                 mdata = read_nerd(mdfile)
-                if mdata.get('ediid') != ediid:
+                old = mdata.get('ediid')
+                if old and old != ediid:
                     if ediid:
                         mdata['ediid'] = ediid
                     elif 'ediid' in mdata:
                         del mdata['ediid']
                     self._write_json(mdata, mdfile)
+        return old
 
     def _upd_downloadurl(self, ediid):
         mdtree = os.path.join(self.bagdir, 'metadata')
@@ -310,6 +431,10 @@ class BagBuilder(PreservationSystem):
 
     def _download_url(self, ediid, destpath):
         path = "/".join(destpath.split(os.sep))
+        arkpfx= "ark:/{0}/".format(ARK_NAAN)
+        if ediid.startswith(arkpfx):
+            # our convention is to omit the "ark:/88434/" prefix
+            ediid = ediid[len(arkpfx):]
         return self._distbase + ediid + '/' + urlencode(path)
 
     def assign_id(self, id, keep_conv=False):
@@ -364,7 +489,17 @@ class BagBuilder(PreservationSystem):
         if id.startswith("ark:"):
             if not re.match(r"^ark:/\d+/\w", id):
                 raise ValueError("Invalid ARK identifier provided: "+id)
-            if self.cfg.get('validate_id', True):
+
+            validate = self.cfg.get('validate_id', False)
+            if isinstance(validate, (unicode, str)):
+                # assume that this is a RE of matching shoulders to validate
+                try:
+                    validate = bool( re.match(r'ark:/\d+/('+validate+')', id) )
+                except re.error as ex:
+                    raise ConfigurationException("validate_id: Contains bad "
+                                                 "regular expression value: " +
+                                                 validate, ex)
+            if validate:
                 try:
                     noid.validate(id)
                 except noid.ValidationError as ex:
@@ -413,12 +548,12 @@ class BagBuilder(PreservationSystem):
             raise BagWriteError("Insufficient permissions on bag directory: " +
                                 self.bagdir, sys=self)
 
-        if not self._loghdlr:
-            self._set_logfile()
+        self.connect_logfile()
         if didit:
             self.record("Created bag with name, %s", self.bagname)
         self._bag = NISTBag(self.bagdir)
-        if os.path.exists(self._bag.nerd_file_for("")):
+        if (not self._id or not self._ediid) and \
+           os.path.exists(self._bag.nerd_file_for("")):
             # load the resource-level metadata that's already there
             md = self._bag.nerd_metadata_for("")
             if not self._id:
@@ -948,7 +1083,10 @@ class BagBuilder(PreservationSystem):
                 raise StateException("Existing component not a "+comptype+
                                      ": "+str(orig.get('@type',[])))
             if msg is None:
-                msg = "Updating %s metadata: %s" % (comptype, destpath)
+                ct = comptype
+                if not ct and not destpath:
+                    ct = "resource-level"
+                msg = "Updating %s metadata: %s" % (ct, destpath)
         else:
             orig = self._create_init_md_for(destpath, comptype)
             if msg is None:
@@ -958,7 +1096,6 @@ class BagBuilder(PreservationSystem):
                     msg = "Creating new %s: %s" % (comptype, destpath)
 
         mdata = self._update_md(orig, mdata)
-        out = self.bag.nerd_file_for(destpath)
         self._replace_file_metadata(destpath, mdata, msg)
         return mdata
 
@@ -1124,7 +1261,7 @@ class BagBuilder(PreservationSystem):
         add a data file into the bag at the given destination path.  Metadata
         will be created for the file unless the register parameter is False.  
         If a file already exists or is otherwise already registered for that 
-        destination, the file and associated will be over-written.  
+        destination, the file and associated metadata will be over-written.  
 
         Metadata is created for the file using the register_data_file() method,
         and by default the file will be examined for extractable metadata.  
@@ -1203,9 +1340,10 @@ class BagBuilder(PreservationSystem):
     def register_data_file(self, destpath, srcpath=None, examine=True,
                            comptype=None, message=None):
         """
-        create and install metadata into the bag for the given file to be 
+        create and install metadata into the bag for the given file to be (newly)
         added at the given destination path.  The file itself is not actually 
-        inserted into the bag (see add_data_file()).  
+        inserted into the bag (see add_data_file()).  This will completely 
+        overwrite any metadata for this file already registered.
 
         :param str destpath:   the desired path for the file relative to the 
                                root of the dataset.
@@ -1229,7 +1367,8 @@ class BagBuilder(PreservationSystem):
             comptype = self._determine_file_comp_type(srcpath or destpath)
 
         if srcpath:
-            mdata = self.describe_data_file(srcpath, destpath, examine, comptype)
+            mdata = self.describe_data_file(srcpath, destpath, examine,
+                                            comptype, False)
         else:
             mdata = self.define_component(destpath, comptype)
             self._add_mediatype(destpath, mdata)
@@ -1240,7 +1379,7 @@ class BagBuilder(PreservationSystem):
         return self.replace_metadata_for(destpath, mdata, message)
 
     def describe_data_file(self, srcpath, destpath=None, examine=True,
-                           comptype=None):
+                           comptype=None, asupdate=True):
         """
         examine the given file and return a metadata description of it.  
 
@@ -1260,6 +1399,13 @@ class BagBuilder(PreservationSystem):
                                component.  If not specified, the type will be
                                discerned by examining the file (defaulting 
                                to "DataFile").  
+        :param bool asupdate:  if True (default), the metadata generated will 
+                               by considered an update to the previously saved 
+                               metadata (if it exists) capturing changes due to 
+                               changes in the datafile itself; if False, the metadata
+                               returned will not take into account previous metadata
+                               as if assuming the file is being examined for the first
+                               time.  
         """
         if not destpath:
             destpath = os.path.basename(srcpath)
@@ -1268,12 +1414,16 @@ class BagBuilder(PreservationSystem):
         if not comptype:
             comptype = self._determine_file_comp_type(srcpath)
             
-        mdata = self._create_init_md_for(destpath, comptype)
+        if asupdate and self.bag and os.path.exists(self.bag.nerd_file_for(destpath)):
+            # TODO: what if comptype has changed?
+            mdata = self.bag.nerd_metadata_for(destpath, True)
+        else:
+            mdata = self._create_init_md_for(destpath, comptype)
 
         try:
             self._add_file_specs(srcpath, mdata)
             if examine:
-                self._add_checksum(srcpath, mdata)
+                self._add_checksum(checksum_of(srcpath), mdata)
                 self._add_extracted_metadata(srcpath, mdata)
         except OSError as ex:
             raise BagWriteError("Unable to examine data file for metadata: "+
@@ -1316,7 +1466,7 @@ class BagBuilder(PreservationSystem):
         out = OrderedDict()
         self._add_file_specs(datafile, out)
         if checksum:
-            self._add_checksum(datafile, out)
+            self._add_checksum(checksum_of(datafile), out)
         return out
 
     def _add_file_specs(self, datafile, mdata):
@@ -1327,18 +1477,24 @@ class BagBuilder(PreservationSystem):
 
     def _add_osfile_metadata(self, dfile, mdata, config=None):
         mdata['size'] = os.stat(dfile).st_size
-    def _add_checksum(self, dfile, mdata, config=None):
+    def _add_checksum(self, hash, mdata, algorithm='sha256', config=None):
         mdata['checksum'] = {
-            'algorithm': { '@type': "Thing", 'tag': 'sha256' },
-            'hash': checksum_of(dfile)
+            'algorithm': { '@type': "Thing", 'tag': algorithm },
+            'hash': hash
         }
     def _add_mediatype(self, dfile, mdata, config=None):
+        defmt = 'application/octet-stream'
+        if 'mediaType' in mdata and mdata['mediaType'] != defmt:
+            # we will not override the mediaType if it's already set to something
+            # specific
+            return 
+
         if not self._mimetypes:
             mtfile = pkg_resources.resource_filename('nistoar.pdr',
                                                      'data/mime.types')
             self._mimetypes = build_mime_type_map([mtfile])
         mdata['mediaType'] = self._mimetypes.get(os.path.splitext(dfile)[1][1:],
-                                                 'application/octet-stream')
+                                                 defmt)
 
     def _add_extracted_metadata(self, datafile, mdata, config=None):
         # deeper extraction not yet supported.
@@ -1428,8 +1584,11 @@ class BagBuilder(PreservationSystem):
             # of it.
             del mdata['dataHierarchy']
         if 'ediid' in mdata:
-            # this will trigger updates to DataFile components
-            self.ediid = mdata['ediid']
+            self._ediid = mdata['ediid']
+            #
+            ## this will trigger updates to DataFile components unless
+            ## self.ediid is not set or was already set to new value
+            #self.ediid = mdata['ediid']
 
         defmd = self._create_init_md_for("", "Resource")
         mdata = self._update_md(defmd, mdata)
@@ -1638,7 +1797,7 @@ class BagBuilder(PreservationSystem):
                     # register does not do checksum when examine=False;
                     # get it now
                     md = OrderedDict()
-                    self._add_checksum(dfpath, md)
+                    self._add_checksum(checksum_of(dfpath), md)
                     self.update_metadata_for(dfile, md,
                                          message="Updating checksum for "+dfile)
 
@@ -1918,10 +2077,11 @@ format(nerdm['title'])
                    not isinstance(vals, Sequence):
                     vals = [vals]
                 for val in vals:
-                    out = "{0}: {1}".format(name, val.encode('utf-8'))
+                    # WARNING: when cvting to python3, careful with encoding
+                    out = u"{0}: {1}".format(name, val)
                     if len(out) > 79:
                         out = textwrap.fill(out, 79, subsequent_indent=' ')
-                    print(out, file=fd)
+                    print(out.encode('utf-8'), file=fd)
 
     def write_mbag_files(self, overwrite=False):
         """
@@ -2086,11 +2246,6 @@ format(nerdm['title'])
         except OSError, ex:
             raise BagWriteError("Problem writing about.txt file: " + str(ex),
                                 cause=ex)
-
-    
-
-    def __del__(self):
-        self._unset_logfile()
 
     def validate(self, config=None):
         """
