@@ -143,7 +143,9 @@ export class EditControlComponent implements OnInit, OnChanges {
     }
 
     public ngAfterViewInit() {
-        this.detectScreenSize();
+        setTimeout(() => {
+            this.detectScreenSize();
+        });
     }
 
     private detectScreenSize() {
