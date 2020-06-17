@@ -31,7 +31,7 @@ from detach import Detach
 
 from .. import (PDRException, StateException, IDNotFound, 
                 ConfigurationException, SIPDirectoryNotFound,
-                PreservationStateException)
+                PreservationStateError)
 from ....id import PDRMinter
 from . import status
 from . import siphandler as hndlr
@@ -157,7 +157,7 @@ class PreservationService(object):
                 hdlr.set_state(status.CONFLICT,
                                "requested initial preservation of existing AIP")
                 msg = "AIP with ID already exists (need to request update?): "
-                raise PreservationStateException(msg + sipid, True)
+                raise PreservationStateError(msg + sipid, True)
 
         # React to the current state. This state reflects the state prior to
         # the current request.  Make sure it is in a state that allows the
@@ -238,7 +238,7 @@ class PreservationService(object):
                 hdlr.set_state(status.CONFLICT,
                                "requested update to non-existing AIP")
                 msg = "AIP with ID does not exist (unable to update): "
-                raise PreservationStateException(msg + sipid, False)
+                raise PreservationStateError(msg + sipid, False)
         
         # React to the current state. This state reflects the state prior to
         # the current request.  Make sure it is in a state that allows the
@@ -427,7 +427,7 @@ class ThreadedPreservationService(PreservationService):
                 time.sleep(0)
                 self._hdlr.bagit(self._stype, self._dest, self._params)
             except Exception, ex:
-                if isinstance(ex, PreservationStateException):
+                if isinstance(ex, PreservationStateError):
                     log.exception("Incorrect state for client's request: "+
                                   str(ex))
                     if ex.aipexists:
@@ -568,7 +568,7 @@ class MultiprocPreservationService(PreservationService):
                 try:
                     handler.bagit('zip', self.storedir)
                 except Exception, e:
-                    if isinstance(ex, PreservationStateException):
+                    if isinstance(ex, PreservationStateError):
                         log.exception("Incorrect state for client's request: "+
                                       str(ex))
                         if ex.aipexists:

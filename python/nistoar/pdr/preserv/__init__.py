@@ -98,7 +98,7 @@ class AIPValidationError(PreservationException):
     pass
 
 
-class PreservationStateException(PreservationException):
+class PreservationStateError(PreservationException):
     """
     An indication that the client's preservation request does not match the 
     state of the SIP/AIP.  In particular, the client either requested an initial

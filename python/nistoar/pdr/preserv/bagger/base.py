@@ -9,7 +9,7 @@ from abc import ABCMeta, abstractmethod, abstractproperty
 
 from .. import PreservationSystem, sys, read_nerd, read_pod, read_json, write_json
 from .. import (SIPDirectoryError, PDRException, NERDError, PODError,
-                StateException)
+                PreservationStateError)
 from ..bagit.builder import checksum_of
 from ...config import merge_config
 
@@ -74,8 +74,8 @@ class SIPBagger(PreservationSystem):
                                             bagparent + ") under SIP "+
                                             "dir: " + str(e), cause=e)
             else:
-                raise StateException("Bag Workspace dir does not exist: " +
-                                     self.bagparent)
+                raise PreservationStateError("Bag Workspace dir does not exist: " +
+                                             self.bagparent)
 
     @abstractmethod
     def find_pod_file(self):
@@ -184,30 +184,4 @@ class SIPBagger(PreservationSystem):
         # update the values of orig with the values in updates
         # this uses the same algorithm as used to merge config data
         return merge_config(updates, orig)
-
-
-
-
-class PreservationStateError(StateException):
-    """
-    an exception that indicates the assumed state of an SIPs ingest and 
-    preservation does not match its actual state.
-
-    A key place this is used is when a bagger's caller requests either 
-    the creation of a new AIP or an update to an existing AIP when the 
-    AIPS does or does not (respectively) already exist.  
-    """
-    def __init__(self, message, aipexists=None):
-        """
-        :param bool aipexists:  true if the AIP already exists, false if it 
-                                doesn't.  If this is set, it should be assumed 
-                                thrower was set to assume the opposite.  
-                                Set to None (default) if this fact is not 
-                                relevent.
-        """
-        super(message)
-        self.aipsexists = aipexists
-
-
-
 

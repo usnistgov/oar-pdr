@@ -24,7 +24,7 @@ from ....id import PDRMinter, NIST_ARK_NAAN
 from ... import def_merge_etcdir, utils
 from .. import (SIPDirectoryError, SIPDirectoryNotFound, AIPValidationError,
                 ConfigurationException, StateException, PODError,
-                PreservationStateException)
+                PreservationStateError)
 from .prepupd import UpdatePrepService
 from .datachecker import DataChecker
 from nistoar.nerdm.merge import MergerFactory
@@ -978,7 +978,7 @@ class PreservationBagger(SIPBagger):
                 else:
                     msg = self.name + \
                           ": AIP with this ID already exists in repository"
-                raise PreservationStateException(msg, not self.asupdate)
+                raise PreservationStateError(msg, not self.asupdate)
 
         mdbagger.prepare(nodata=True)
         self.datafiles = mdbagger.datafiles
