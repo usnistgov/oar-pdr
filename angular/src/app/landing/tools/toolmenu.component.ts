@@ -73,7 +73,7 @@ export class ToolMenuComponent implements OnChanges {
         var mitems : MenuItem[] = [];
         var subitems : MenuItem[] = [];
 
-        let mdapi = this.cfg.get("locations.mdService", "/unconfigured");
+        let mdapi = this.cfg.get("mdAPI", "/unconfigured");
         if (mdapi.slice(-1) != '/') mdapi += '/';
         if (mdapi.search("/rmm/") < 0)
             mdapi += this.record['ediid'];

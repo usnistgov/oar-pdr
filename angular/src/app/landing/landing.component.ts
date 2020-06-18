@@ -112,7 +112,7 @@ export class LandingComponent implements OnInit, OnChanges {
     process: any[];
     isCopied: boolean = false;
     distdownload: string = '';
-    serviceApi: string = '';
+    mdApi: string = '';
     private files: TreeNode[] = [];
     pdrApi: string = '';
     isResultAvailable: boolean = true;
@@ -158,6 +158,7 @@ export class LandingComponent implements OnInit, OnChanges {
         private gaService: GoogleAnalyticsService) 
     {
         this.editEnabled = cfg.get("editEnabled", false) as boolean;
+        this.mdApi = this.cfg.get("mdAPI", "/unconfigured");
         this.EDIT_MODES = LandingConstants.editModes;
 
         this.edstatsvc.watchEditMode((editMode) => {
