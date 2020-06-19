@@ -159,6 +159,7 @@ export class LandingComponent implements OnInit, OnChanges {
     {
         this.editEnabled = cfg.get("editEnabled", false) as boolean;
         this.mdApi = this.cfg.get("mdAPI", "/unconfigured");
+        console.log('this.mdApi', this.mdApi);
         this.EDIT_MODES = LandingConstants.editModes;
 
         this.edstatsvc.watchEditMode((editMode) => {
