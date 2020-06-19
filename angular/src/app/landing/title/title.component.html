@@ -1,13 +1,13 @@
 <div style="display: inline-block; width: fit-content; max-width: 95%;">
     <div style="display: table;">
         <div class="editable_container">
-            <div class="editable_field" *ngIf="!record['title']; else hasTitle">
+            <div class="editable_field" *ngIf="!record['title']; else hasTitle" [style.cursor]="mdupdsvc.isEditMode ? 'pointer' : 'default'">
                 <span class="title">
                     <h2 [ngStyle]="mdupdsvc.getFieldStyle(fieldName)"><i style="color: #cccccc;">No title set</i></h2>
                 </span>
             </div>
             <ng-template #hasTitle>
-                <div class="title editable_field">
+                <div class="title editable_field" [style.cursor]="mdupdsvc.isEditMode ? 'pointer' : 'default'">
                     <h2 [ngStyle]="mdupdsvc.getFieldStyle(fieldName)" (click)="openModal()">
                         {{record.title}}</h2>
                 </div>

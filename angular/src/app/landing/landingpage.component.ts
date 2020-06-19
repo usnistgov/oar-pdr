@@ -123,7 +123,7 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
               if (!this.md) {
                   // id not found; reroute
                   console.error("No data found for ID=" + this.reqId);
-                  metadataError = "noti-found";
+                  metadataError = "not-found";
                 //   this.router.navigateByUrl("/not-found/" + this.reqId, { skipLocationChange: true });
               }
               else
