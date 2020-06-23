@@ -165,7 +165,22 @@ export class LandingComponent implements OnInit, OnChanges {
         this.edstatsvc.watchEditMode((editMode) => {
           this.editMode = editMode;
         });
+    }
 
+    ngOnInit() { 
+      // console.log('this.record', this.record);
+    }
+
+    ngOnChanges() {
+        if (!this.ediid && this.recordLoaded())
+            this.useMetadata();  // initialize internal component data based on metadata
+    }
+
+    /**
+     * Return mdAPI
+     */
+    getMdAPI()
+    {
         if(this.edstatsvc.editingEnabled()){
             this.mdApi = this.cfg.get("locations.mdService", "/unconfigured");
 
@@ -180,15 +195,8 @@ export class LandingComponent implements OnInit, OnChanges {
             else
                 this.mdApi += "records?@id=" + this.record['@id'];
         }
-    }
 
-    ngOnInit() { 
-      // console.log('this.record', this.record);
-    }
-
-    ngOnChanges() {
-        if (!this.ediid && this.recordLoaded())
-            this.useMetadata();  // initialize internal component data based on metadata
+        return this.mdApi;
     }
 
     /**
