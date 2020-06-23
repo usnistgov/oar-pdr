@@ -77,16 +77,22 @@ export class ToolMenuComponent implements OnChanges {
         var mitems : MenuItem[] = [];
         var subitems : MenuItem[] = [];
 
-        let mdapi = this.cfg.get("mdAPI", "/unconfigured");
+        let mdapi: string;
+
         if(this.edstatsvc.editingEnabled()){
             mdapi = this.cfg.get("locations.mdService", "/unconfigured");
-        }
 
-        if (mdapi.slice(-1) != '/') mdapi += '/';
-        if (mdapi.search("/rmm/") < 0)
-            mdapi += this.record['ediid'];
-        else
+            if (mdapi.slice(-1) != '/') mdapi += '/';
             mdapi += "records?@id=" + this.record['@id'];
+        }else{
+            mdapi = this.cfg.get("mdAPI", "/unconfigured");
+
+            if (mdapi.slice(-1) != '/') mdapi += '/';
+            if (mdapi.search("/rmm/") < 0)
+                mdapi += this.record['ediid'];
+            else
+                mdapi += "records?@id=" + this.record['@id'];
+        }
 
         // Go To...
         // top of the page

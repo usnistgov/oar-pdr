@@ -159,12 +159,7 @@ export class LandingComponent implements OnInit, OnChanges {
         private gaService: GoogleAnalyticsService) 
     {
         this.editEnabled = cfg.get("editEnabled", false) as boolean;
-        this.mdApi = this.cfg.get("mdAPI", "/unconfigured");
-        if(this.edstatsvc.editingEnabled()){
-            this.mdApi = this.cfg.get("mdServer", "/unconfigured");
-        }
 
-        console.log('this.mdApi', this.mdApi);
         this.EDIT_MODES = LandingConstants.editModes;
 
         this.edstatsvc.watchEditMode((editMode) => {
@@ -179,6 +174,25 @@ export class LandingComponent implements OnInit, OnChanges {
     ngOnChanges() {
         if (!this.ediid && this.recordLoaded())
             this.useMetadata();  // initialize internal component data based on metadata
+    }
+
+    getMdAPI(){
+        if(this.edstatsvc.editingEnabled()){
+            this.mdApi = this.cfg.get("locations.mdService", "/unconfigured");
+
+            if (this.mdApi.slice(-1) != '/') this.mdApi += '/';
+            this.mdApi += "records?@id=" + this.record['@id'];
+        }else{
+            this.mdApi = this.cfg.get("mdAPI", "/unconfigured");
+
+            if (this.mdApi.slice(-1) != '/') this.mdApi += '/';
+            if (this.mdApi.search("/rmm/") < 0)
+                this.mdApi += this.record['ediid'];
+            else
+                this.mdApi += "records?@id=" + this.record['@id'];
+        }
+
+        console.log('this.mdApi', this.mdApi);
     }
 
     /**
