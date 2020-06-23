@@ -181,7 +181,7 @@ export class LandingComponent implements OnInit, OnChanges {
             this.mdApi = this.cfg.get("locations.mdService", "/unconfigured");
 
             if (this.mdApi.slice(-1) != '/') this.mdApi += '/';
-            this.mdApi += "records?@id=" + this.record['@id'];
+            this.mdApi += this.record['@id'];
         }else{
             this.mdApi = this.cfg.get("mdAPI", "/unconfigured");
 
@@ -193,6 +193,7 @@ export class LandingComponent implements OnInit, OnChanges {
         }
 
         console.log('this.mdApi', this.mdApi);
+        return this.mdApi;
     }
 
     /**
