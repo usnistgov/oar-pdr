@@ -83,7 +83,7 @@ export class ToolMenuComponent implements OnChanges {
             mdapi = this.cfg.get("locations.mdService", "/unconfigured");
 
             if (mdapi.slice(-1) != '/') mdapi += '/';
-            mdapi += "records?@id=" + this.record['@id'];
+            mdapi += this.record['ediid'];
         }else{
             mdapi = this.cfg.get("mdAPI", "/unconfigured");
 
