@@ -43,6 +43,11 @@ export interface WebLocations {
   mdService?: string,
 
   /**
+   * the URL to fetch taxonomy list
+   */
+  taxonomyService?: string,
+
+  /**
    * the base URL for the landing page service
    */
   landingPageService?: string,
@@ -157,6 +162,8 @@ export class AppConfig implements LPSConfig {
       this.locations.distService = this.locations.portalBase + "od/ds/";
     if (!this.locations.mdService)
       this.locations.mdService = this.locations.portalBase + "rmm/";
+    if(!this.locations.taxonomyService)
+        this.locations.taxonomyService = this.locations.portalBase + "rmm/taxonomy";
     if (!this.locations.landingPageService)
       this.locations.landingPageService = this.locations.portalBase + "od/id/";
     if (!this.locations.nerdmAbout)

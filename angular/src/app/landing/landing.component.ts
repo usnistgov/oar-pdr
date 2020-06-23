@@ -112,7 +112,8 @@ export class LandingComponent implements OnInit, OnChanges {
     process: any[];
     isCopied: boolean = false;
     distdownload: string = '';
-    serviceApi: string = '';
+    mdApi: string = '';
+    mdServer: string = '';
     private files: TreeNode[] = [];
     pdrApi: string = '';
     isResultAvailable: boolean = true;
@@ -158,6 +159,7 @@ export class LandingComponent implements OnInit, OnChanges {
         private gaService: GoogleAnalyticsService) 
     {
         this.editEnabled = cfg.get("editEnabled", false) as boolean;
+
         this.EDIT_MODES = LandingConstants.editModes;
 
         this.edstatsvc.watchEditMode((editMode) => {
@@ -172,6 +174,29 @@ export class LandingComponent implements OnInit, OnChanges {
     ngOnChanges() {
         if (!this.ediid && this.recordLoaded())
             this.useMetadata();  // initialize internal component data based on metadata
+    }
+
+    /**
+     * Return mdAPI
+     */
+    getMdAPI()
+    {
+        if(this.edstatsvc.editingEnabled()){
+            this.mdApi = this.cfg.get("locations.mdService", "/unconfigured");
+
+            if (this.mdApi.slice(-1) != '/') this.mdApi += '/';
+            this.mdApi += this.record['ediid'];
+        }else{
+            this.mdApi = this.cfg.get("mdAPI", "/unconfigured");
+
+            if (this.mdApi.slice(-1) != '/') this.mdApi += '/';
+            if (this.mdApi.search("/rmm/") < 0)
+                this.mdApi += this.record['ediid'];
+            else
+                this.mdApi += "records?@id=" + this.record['@id'];
+        }
+
+        return this.mdApi;
     }
 
     /**

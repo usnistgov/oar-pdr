@@ -11,8 +11,9 @@ import { GoogleAnalyticsService } from '../../shared/ga-service/google-analytics
           <span style="">
             For more information about the metadata, consult the <a href="/od/dm/nerdm/" (click)="gaService.gaTrackEvent('outbound', undefined, 'Resource title: ' + record.title, '/od/dm/nerdm/')">NERDm documentation</a>. 
           </span>
-          <button style="position:relative; float:right; background-color: #1371AE;" type="button" pButton icon="faa faa-file-code-o"
-                    title="Get Metadata in JSON format." label="json" (click)="onjson()"></button>
+          <a [href]='this.serviceApi' style="position:relative; float:right;">
+          <button style="background-color: #1371AE;" type="button" pButton icon="faa faa-file-code-o"
+                    title="Get Metadata in JSON format." label="json" (click)="onjson()"></button></a>
           <br>
           <span style="font-size:8pt;color:grey;" >* item[number] indicates an array not a key name</span>
           <br><br>
@@ -35,6 +36,7 @@ export class MetadataComponent {
   }
 
   ngOnInit() {
+      console.log('serviceApi', this.serviceApi);
     if(this.record != undefined && this.record != null){
       delete this.record["_id"];
     }
@@ -63,6 +65,6 @@ export class MetadataComponent {
   onjson(){
     this.gaService.gaTrackEvent('download', undefined, this.record['title'], this.serviceApi);
     //alert(this.serviceApi);
-    window.open(this.serviceApi);
+    // window.open(this.serviceApi);
   }
 }

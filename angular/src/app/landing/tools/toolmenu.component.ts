@@ -5,6 +5,8 @@ import { Menu } from 'primeng/menu';
 
 import { AppConfig } from '../../config/config';
 import { NerdmRes } from '../../nerdm/nerdm';
+import { EditStatusService } from '../editcontrol/editstatus.service';
+
 
 /**
  * A component for displaying access to landing page tools in a menu.
@@ -48,7 +50,9 @@ export class ToolMenuComponent implements OnChanges {
      * create the component.
      * @param cfg   the app configuration data
      */
-    constructor(private cfg : AppConfig) {  }
+    constructor(
+        private cfg : AppConfig,
+        public edstatsvc: EditStatusService,) {  }
 
     /**
      * toggle the appearance of a popup menu
@@ -73,12 +77,22 @@ export class ToolMenuComponent implements OnChanges {
         var mitems : MenuItem[] = [];
         var subitems : MenuItem[] = [];
 
-        let mdapi = this.cfg.get("locations.mdService", "/unconfigured");
-        if (mdapi.slice(-1) != '/') mdapi += '/';
-        if (mdapi.search("/rmm/") < 0)
+        let mdapi: string;
+
+        if(this.edstatsvc.editingEnabled()){
+            mdapi = this.cfg.get("locations.mdService", "/unconfigured");
+
+            if (mdapi.slice(-1) != '/') mdapi += '/';
             mdapi += this.record['ediid'];
-        else
-            mdapi += "records?@id=" + this.record['@id'];
+        }else{
+            mdapi = this.cfg.get("mdAPI", "/unconfigured");
+
+            if (mdapi.slice(-1) != '/') mdapi += '/';
+            if (mdapi.search("/rmm/") < 0)
+                mdapi += this.record['ediid'];
+            else
+                mdapi += "records?@id=" + this.record['@id'];
+        }
 
         // Go To...
         // top of the page
