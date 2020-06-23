@@ -113,6 +113,7 @@ export class LandingComponent implements OnInit, OnChanges {
     isCopied: boolean = false;
     distdownload: string = '';
     mdApi: string = '';
+    mdServer: string = '';
     private files: TreeNode[] = [];
     pdrApi: string = '';
     isResultAvailable: boolean = true;
@@ -159,6 +160,10 @@ export class LandingComponent implements OnInit, OnChanges {
     {
         this.editEnabled = cfg.get("editEnabled", false) as boolean;
         this.mdApi = this.cfg.get("mdAPI", "/unconfigured");
+        if(this.edstatsvc.editingEnabled()){
+            this.mdApi = this.cfg.get("mdServer", "/unconfigured");
+        }
+
         console.log('this.mdApi', this.mdApi);
         this.EDIT_MODES = LandingConstants.editModes;
 
