@@ -79,11 +79,14 @@ class TestMIDASSIPMixed(test.TestCase):
         self.assertIsNone(self.sip.pod)
         self.assertEqual(self.sip._pod_rec(), {'distribution': []})
         self.assertEqual(self.sip._nerdm_rec(), {'components': []})
+        self.assertIsNone(self.sip.get_ediid())
+        self.assertIsNone(self.sip.get_pdrid())
 
         self.assertEqual(self.sip._filepaths_in_pod(), [])
         self.assertEqual(self.sip._filepaths_in_nerd(), [])
         self.assertEqual(self.sip.list_registered_filepaths(), [])
         self.assertEqual(self.sip.list_registered_filepaths(True), [])
+
 
     def test_pod_rec(self):
         self.sip.pod = os.path.join(self.sip.revdatadir, "_pod.json")
@@ -91,6 +94,8 @@ class TestMIDASSIPMixed(test.TestCase):
         pod = self.sip._pod_rec()
         self.assertEqual(pod['accessLevel'], "public")
         self.assertEqual(pod['identifier'], self.midasid)
+
+        self.assertEqual(self.sip.get_ediid(), self.midasid)
 
         self.sip.pod = pod
         pod = self.sip._pod_rec()
@@ -115,6 +120,29 @@ class TestMIDASSIPMixed(test.TestCase):
         self.assertEqual(datafiles["trial3/trial3a.json"],
                          os.path.join(self.sip.upldatadir, "trial3/trial3a.json"))
         self.assertEqual(len(datafiles), 5)
+
+    def test_registered_files(self):
+        pod = utils.read_json(os.path.join(self.revdir, "1491", "_pod.json"))
+        del pod['distribution'][1]
+        self.sip = midas.MIDASSIP(self.midasid, os.path.join(self.revdir, "1491"),
+                                  podrec=pod)
+        datafiles = self.sip.registered_files()
+
+        self.assertIsInstance(datafiles, dict)
+        self.assertEqual(len(datafiles), 4)
+        self.assertIn("trial1.json", datafiles)
+        self.assertNotIn("trial1.json.sha256", datafiles)
+        self.assertIn("trial2.json", datafiles)
+        self.assertIn("trial3/trial3a.json", datafiles)
+        self.assertIn("trial3/trial3a.json.sha256", datafiles)
+        self.assertEqual(len([k for k in datafiles.keys() if 'sim' in k]), 0) # sim* not in
+        self.assertEqual(datafiles["trial1.json"],
+                         os.path.join(self.sip.revdatadir, "trial1.json"))
+        self.assertEqual(datafiles["trial2.json"],
+                         os.path.join(self.sip.revdatadir, "trial2.json"))
+        self.assertEqual(datafiles["trial3/trial3a.json"],
+                         os.path.join(self.sip.revdatadir, "trial3/trial3a.json"))
+        self.assertEqual(len(datafiles), 4)
 
     def test_fromPOD(self):
         podf = os.path.join(self.revdir, "1491", "_pod.json")
@@ -796,6 +824,24 @@ class TestMIDASMetadataBaggerReview(test.TestCase):
         fmd = self.bagr.bagbldr.bag.nerd_metadata_for("trial2.json")
         self.assertIn('checksum', fmd)
 
+    def test_finalize_version(self):
+        # because there is data in the review directory, this will be seen
+        # as a metadata update.
+        inpodfile = os.path.join(self.revdir,"1491","_pod.json")
+        self.bagr.apply_pod(inpodfile)
+        self.bagr.ensure_data_files(examine="sync")
+        
+        self.bagr.bagbldr.update_annotations_for('', {'version': "1.0.0+ (in edit)"})
+        nerd = self.bagr.bagbldr.bag.nerd_metadata_for('', True)
+        self.bagr.sip.nerd = nerd
+        self.assertEqual(nerd['version'], "1.0.0+ (in edit)")
+
+        nerd = self.bagr.finalize_version()
+        self.assertEqual(nerd['version'], "1.1.0")
+        self.assertEqual(self.bagr.sip.nerd['version'], "1.1.0")
+        nerd = self.bagr.bagbldr.bag.nerd_metadata_for('', True)
+        self.assertEqual(nerd['version'], "1.1.0")
+        
 class TestMIDASMetadataBaggerUpload(test.TestCase):
 
     testsip = os.path.join(datadir, "midassip")
@@ -910,23 +956,63 @@ class TestMIDASMetadataBaggerUpload(test.TestCase):
                          os.path.join(uplsip, "trial3/trial3a.json"))
         self.assertEqual(len(datafiles), 1)
 
+    def test_finalize_version(self):
+        inpodfile = os.path.join(self.upldir,"1491","_pod.json")
+        self.bagr.apply_pod(inpodfile)
+        self.bagr.ensure_data_files(examine="sync")
+
+        self.bagr.datafiles = {}  # trick into thinking there are no files to update
+        self.bagr.bagbldr.update_annotations_for('', {'version': "1.0.0+ (in edit)"})
+        nerd = self.bagr.bagbldr.bag.nerd_metadata_for('', True)
+        self.bagr.sip.nerd = nerd
+        self.assertEqual(nerd['version'], "1.0.0+ (in edit)")
+
+        nerd = self.bagr.finalize_version()
+        self.assertEqual(nerd['version'], "1.0.1")
+        self.assertEqual(self.bagr.sip.nerd['version'], "1.0.1")
+        nerd = self.bagr.bagbldr.bag.nerd_metadata_for('', True)
+        self.assertEqual(nerd['version'], "1.0.1")
+        
+        
+    def test_finalize_version_preset(self):
+        inpodfile = os.path.join(self.upldir,"1491","_pod.json")
+        self.bagr.apply_pod(inpodfile)
+        self.bagr.ensure_data_files(examine="sync")
+
+        self.bagr.bagbldr.update_annotations_for('', {'version': "10.3"})
+        nerd = self.bagr.bagbldr.bag.nerd_metadata_for('', True)
+        self.bagr.sip.nerd = nerd
+        self.assertEqual(nerd['version'], "10.3")
+
+        nerd = self.bagr.finalize_version()
+        self.assertEqual(nerd['version'], "10.3")
+        self.assertEqual(self.bagr.sip.nerd['version'], "10.3")
+        nerd = self.bagr.bagbldr.bag.nerd_metadata_for('', True)
+        self.assertEqual(nerd['version'], "10.3")
+        
+        
+
 class TestPreservationBagger(test.TestCase):
     
-    testsip = os.path.join(datadir, "midassip")
+    testsip = os.path.join(datadir, "metadatabag")
+    testdata = os.path.join(datadir, "samplembag", "data")
     midasid = '3A1EE2F169DD3B8CE0531A570681DB5D1491'
     arkid = "ark:/88434/mds2-1491"
 
     def setUp(self):
         self.tf = Tempfiles()
         self.workdir = self.tf.mkdir("bagger")
-        self.mddir = os.path.join(self.workdir, "mddir")
-        os.mkdir(self.mddir)
-        self.sipdir = os.path.join(self.mddir, self.midasid)
+        self.mdbags =  os.path.join(self.workdir, "mdbags")
+        self.datadir = os.path.join(self.workdir, "data")
+        self.bagparent = os.path.join(self.datadir, "_preserv")
+        self.sipdir = os.path.join(self.mdbags, self.midasid)
+
+        # copy the data files first
+        shutil.copytree(self.testdata, self.datadir)
+        # os.mkdir(self.bagparent)
 
         # copy input data to writable location
-        testsip = os.path.join(self.testsip, "review")
-        self.revdir = os.path.join(self.workdir, "review")
-        shutil.copytree(testsip, self.revdir)
+        shutil.copytree(self.testsip, self.sipdir)
 
         # set the config we'll use
         self.config = {
@@ -947,23 +1033,20 @@ class TestPreservationBagger(test.TestCase):
             'store_dir': '/tmp'
         }
 
-        # prepare the SIP
-        self.datadir = os.path.join(self.revdir, "1491")
-        self.mdbagger = midas.MIDASMetadataBagger.fromMIDAS(self.midasid, self.mddir, self.revdir, 
-                                                            None, self.config, None)
-        self.mdbagger.prepare()
-        self.mdbagger.apply_pod(os.path.join(self.datadir,"_pod.json"))
-        self.mdbagger.enhance_metadata()
-        
-        self.bagparent = os.path.join(self.datadir, "_preserv")
+        mdbgr = midas.MIDASMetadataBagger(self.midasid, self.mdbags, self.datadir)
+        mdbgr.ensure_data_files(examine="sync")
+        mdbgr.done()
+
         self.bagr = None
 
     def createPresBagger(self):
-        self.bagr = midas.PreservationBagger(self.sipdir, self.bagparent, self.datadir, self.config)
+        self.bagr = midas.PreservationBagger(self.sipdir, self.bagparent, self.datadir,
+                                             self.config)
 
     def tearDown(self):
         if self.bagr:
-            self.bagr.bagbldr._unset_logfile()
+            if self.bagr.bagbldr:
+                self.bagr.bagbldr._unset_logfile()
             self.bagr = None
         self.mdbagger = None
         self.tf.clean()
@@ -974,11 +1057,10 @@ class TestPreservationBagger(test.TestCase):
         self.assertEqual(self.bagr.sipdir, self.sipdir)
         self.assertEqual(self.bagr.datadir, self.datadir)
         self.assertEqual(self.bagr.bagparent, self.bagparent)
-        self.assertIsNotNone(self.bagr.bagbldr)
-        self.assertIsNotNone(self.bagr._mdbagger)
+        self.assertIsNone(self.bagr.bagbldr)
         self.assertTrue(os.path.exists(self.bagparent))
 
-        bagdir = os.path.join(self.bagparent, self.midasid+".1_0.mbag0_4-0")
+        bagdir = os.path.join(self.bagparent, self.bagr.name)
         self.assertEqual(self.bagr.bagdir, bagdir)
 
     def test_form_bag_name(self):
@@ -987,25 +1069,6 @@ class TestPreservationBagger(test.TestCase):
         bagname = self.bagr.form_bag_name("goober", 3, "1.0.1")
         self.assertEqual(bagname, "goober.1_0_1.mbag1_2-3")
 
-    def test_ensure_metadata_preparation(self):
-        self.createPresBagger()
-        self.bagr.ensure_metadata_preparation()
-        self.assertTrue(os.path.exists(self.bagr.bagdir),
-                        "Output bag dir not created")
-        self.assertTrue(os.path.exists(os.path.join(self.bagr.bagdir, "data")))
-        self.assertTrue(os.path.exists(os.path.join(self.bagr.bagdir,
-                                                    "metadata")))
-        self.assertTrue(os.path.exists(os.path.join(self.bagr.bagdir,
-                                                    "preserv.log")))
-        self.assertTrue(os.path.isdir(os.path.join(self.bagr.bagdir,
-                                                   "metadata", "trial1.json")))
-        self.assertTrue(os.path.isfile(os.path.join(self.bagr.bagdir,
-                                      "metadata", "trial1.json", "nerdm.json")))
-
-        # data files do not yet appear in output bag
-        self.assertTrue(not os.path.isdir(os.path.join(self.bagr.bagdir,
-                                                       "data", "trial1.json")),
-                        "Datafiles copied prematurely")
         
 
     def test_preparation(self):
@@ -1031,13 +1094,13 @@ class TestPreservationBagger(test.TestCase):
                                              "data", "trial3", "trial3a.json")))
         
 
-    def test_make_bag(self):
+    def test_finalize_bag(self):
         self.createPresBagger()
         try:
-            self.bagr.make_bag()
+            self.bagr.finalize_bag()
         except AIPValidationError as ex:
             self.fail(ex.description)
-            
+
         self.assertTrue(os.path.exists(self.bagr.bagdir),
                         "Output bag dir not created")
         self.assertTrue(os.path.exists(os.path.join(self.bagr.bagdir, "data")))
@@ -1057,10 +1120,6 @@ class TestPreservationBagger(test.TestCase):
                                           "metadata", "trial3", "trial3a.json")))
         self.assertTrue(os.path.isfile(os.path.join(self.bagr.bagdir,
                             "metadata", "trial3", "trial3a.json", "nerdm.json")))
-        self.assertTrue(os.path.isdir(os.path.join(self.bagr.bagdir,
-                                                   "metadata", "sim++.json")))
-        self.assertTrue(os.path.isfile(os.path.join(self.bagr.bagdir,
-                                      "metadata", "sim++.json", "nerdm.json")))
 
         self.assertTrue(os.path.isfile(os.path.join(self.bagr.bagdir,
                                                    "data", "trial1.json")))
@@ -1068,8 +1127,6 @@ class TestPreservationBagger(test.TestCase):
                                                    "data", "trial2.json")))
         self.assertTrue(os.path.isfile(os.path.join(self.bagr.bagdir,
                                              "data", "trial3", "trial3a.json")))
-        self.assertFalse(os.path.isfile(os.path.join(self.bagr.bagdir,
-                                                     "data", "sim++.json")))
 
         # test if we lost the downloadURLs
         mdf = os.path.join(self.bagr.bagdir,
@@ -1083,8 +1140,7 @@ class TestPreservationBagger(test.TestCase):
         self.assertIn("dcat:Distribution", md.get("@type", []))
         self.assertIn("downloadURL", md)
         self.assertIn("title", md)
-        self.assertEqual(md.get("title"),
-                         "JSON version of the Mathematica notebook")
+        self.assertEqual(md.get("title"), "a better title")
         
         # test for BagIt-required files
         self.assertTrue(os.path.isfile(os.path.join(self.bagr.bagdir,
@@ -1104,85 +1160,26 @@ class TestPreservationBagger(test.TestCase):
         self.assertTrue(os.path.isfile(os.path.join(self.bagr.bagdir,
                                                    "about.txt")))
 
-        # make sure we could've found missing files
+    def test_check_data_files(self):
+        self.createPresBagger()
+        self.bagr.prepare()
+
+        # register a file available from an external service
+        self.bagr.bagbldr.update_metadata_for("sim++.json", {
+            "downloadURL": "https://example.nist.gov/data/sim++.json"
+        }, "DataFile")
+        
+        try:
+            self.bagr.finalize_bag()
+        except AIPValidationError as ex:
+            self.fail(ex.description)
+
+        # make sure we could've found missing files; relies on sim++.json
         self.bagr._check_data_files(self.bagr.cfg.get('data_checker',{}))
         with self.assertRaises(AIPValidationError):
             self.bagr._check_data_files(self.bagr.cfg.get('data_checker',{}),
                                         viadistrib=False)
 
-    def test_determine_updated_version(self):
-        self.createPresBagger()
-        self.bagr.prepare(nodata=False)
-        bag = NISTBag(self.bagr.bagdir)
-        mdrec = bag.nerdm_record(True)
-        self.assertEqual(mdrec['version'], '1.0.0')  # set as the default
-
-        del mdrec['version']
-        newver = self.bagr.determine_updated_version(mdrec, bag)
-        self.assertEqual(newver, "1.0.0")
-        newver = self.bagr.determine_updated_version(mdrec)
-        self.assertEqual(newver, "1.0.0")
-        newver = self.bagr.determine_updated_version()
-        self.assertEqual(newver, "1.0.0")
-
-        newver = self.bagr.determine_updated_version(mdrec, bag)
-        self.assertEqual(newver, "1.0.0")
-        newver = self.bagr.determine_updated_version(mdrec)
-        self.assertEqual(newver, "1.0.0")
-        newver = self.bagr.determine_updated_version()
-        self.assertEqual(newver, "1.0.0")
-
-        mdrec['version'] = "9.0"
-        newver = self.bagr.determine_updated_version(mdrec)
-        self.assertEqual(newver, "9.0")
-
-        mdrec['version'] = "1.0.5+ (in edit)"
-        newver = self.bagr.determine_updated_version(mdrec)
-        self.assertEqual(newver, "1.1.0")
-
-    def test_determine_updated_version_minor(self):
-        self.createPresBagger()
-        self.bagr.prepare(nodata=True)
-        bag = NISTBag(self.bagr.bagdir)
-        mdrec = bag.nerdm_record(True)
-
-        mdrec['version'] = "1.0.5+ (in edit)"
-        newver = self.bagr.determine_updated_version(mdrec)
-        self.assertEqual(newver, "1.0.6")
-        
-    def test_finalize_version(self):
-        self.createPresBagger()
-        self.bagr.prepare(nodata=True)
-
-        bag = NISTBag(self.bagr.bagdir)
-        mdrec = bag.nerdm_record(True)
-        self.assertEqual(mdrec['version'], "1.0.0")
-
-        self.bagr.finalize_version()
-        mdrec = bag.nerdm_record(True)
-        self.assertEqual(mdrec['version'], "1.0.0")
-
-        annotf = os.path.join(bag.metadata_dir, "annot.json")
-        data = utils.read_nerd(annotf)
-        self.assertEqual(data['version'], "1.0.0")
-
-        self.bagr.bagbldr.update_annotations_for('',
-                                                 {'version': "1.0.0+ (in edit)"})
-        data = utils.read_nerd(annotf)
-        self.assertEqual(data['version'], "1.0.0+ (in edit)")
-
-        self.bagr.finalize_version()
-        data = utils.read_nerd(annotf)
-        self.assertEqual(data['version'], "1.0.1")
-        self.assertIn('versionHistory', data)
-
-        mdrec = bag.nerdm_record(True)
-        self.assertEqual(mdrec['version'], "1.0.1")
-        self.assertIn('versionHistory', mdrec)
-        hist = mdrec['versionHistory']
-        self.assertEqual(hist[-1]['version'], "1.0.1")
-        self.assertEqual(hist[-1]['description'], "metadata update")
-            
 
 
 

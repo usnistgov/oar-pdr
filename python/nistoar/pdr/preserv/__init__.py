@@ -109,14 +109,14 @@ class PreservationStateError(PreservationException):
     is True, then the AIP already exists (i.e. SIP has already been preserved
     once already).  
     """
-    def __init__(self, message, aipexists):
+    def __init__(self, message, aipexists=None):
         """
         create the exception
         :param str message:     the message describing mismatched state
         :param bool aipexists:  the true current state of the AIP where True
                                 indicates that the AIP already exists.
         """
-        super(PreservationStateException, self).__init__(message)
+        super(PreservationStateError, self).__init__(message)
         self.aipexists = aipexists
 
 class CorruptedBagError(PDRException):
