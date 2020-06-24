@@ -92,6 +92,9 @@ def configure_log(logfile=None, level=None, format=None, config=None,
     as necessary.  These can be provided explicitly or provided via the 
     configuration; the former takes precedence.  
 
+    If this is called a second time, it will first close the previously opened logfile, 
+    reconfigure the logging to given inputs.  
+
     :param logfile str:  the path to the output logfile.  If given as a relative
                          path, it will be assumed that it is relative to a 
                          configured log directory.
@@ -135,10 +138,15 @@ def configure_log(logfile=None, level=None, format=None, config=None,
     frmtr = logging.Formatter(format)
 
     global _log_handler
+    rootlogger = logging.getLogger()
+    if _log_handler:
+        rootlogger.removeHandler(_log_handler)
+        if hasattr(_log_handler, 'close'):
+            _log_handler.close()
+        _log_handler = None
     _log_handler = logging.FileHandler(logfile)
     _log_handler.setLevel(level)
     _log_handler.setFormatter(frmtr)
-    rootlogger = logging.getLogger()
     rootlogger.addHandler(_log_handler)
     rootlogger.setLevel(logging.DEBUG-1)
 

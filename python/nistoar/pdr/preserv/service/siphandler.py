@@ -156,6 +156,7 @@ class SIPHandler(object):
         """
         a dictionary describing the current status of the SIP's preservation.
         """
+        self._status.refresh()
         return self._status.user_export()
 
     @property
@@ -165,6 +166,12 @@ class SIPHandler(object):
         is equivalent to self.status['state'].  
         """
         return self._status.state
+
+    def refresh_state(self):
+        """
+        refresh the status from presistent storage so that the state is up to date
+        """
+        self._status.refresh()
 
     def set_state(self, state, message=None, cache=True):
         """

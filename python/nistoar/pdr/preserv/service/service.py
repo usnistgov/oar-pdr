@@ -23,11 +23,10 @@ the creation a preservation (AIP) bag to a "bagger" class (see
 created, the SIP handler may serialize it, deliver it long term storage, and
 submit the metadata to the PDR metadata database.  
 """
+from __future__ import print_function
 from copy import deepcopy
 from abc import ABCMeta, abstractmethod, abstractproperty
 import os, logging, threading, time, errno, re
-
-from detach import Detach
 
 from .. import (PDRException, StateException, IDNotFound, 
                 ConfigurationException, SIPDirectoryNotFound,
@@ -37,6 +36,8 @@ from . import status
 from . import siphandler as hndlr
 from ...notify import NotificationService
 from ..bagger.prepupd import UpdatePrepService
+from ..bagger.midas3 import midasid_to_bagname
+from ... import config as configmod
 
 from .. import PreservationException, sys as _sys
 log = logging.getLogger(_sys.system_abbrev)   \
@@ -302,7 +303,14 @@ class PreservationService(object):
             hdlr = self._make_handler(sipid, siptype)
             if hdlr.state == status.FORGOTTEN or hdlr.state == status.NOT_READY:
                 hdlr.isready()
+
+            if 'published' not in hdlr.status and self._prepsvc:
+                aipid = re.sub(r'^ark:/\d+/','', sipid)
+                hdlr.status['published'] = \
+                            self._prepsvc.prepper_for(aipid, log=log).aip_exists()
+                
             return hdlr.status
+
         except (IDNotFound, SIPDirectoryNotFound) as ex:
             return self._not_found_state(sipid, siptype)
         except Exception as ex:
@@ -497,8 +505,6 @@ class ThreadedPreservationService(PreservationService):
         return (handler.status, t)
 
 
-# NOT WORKING (use ThreadedPreservationService)
-
 class MultiprocPreservationService(PreservationService):
     """
     A class that asynchronously handles requests to ingest and preserve 
@@ -530,69 +536,97 @@ class MultiprocPreservationService(PreservationService):
                 raise
         return True
 
-    def _launch_handler(self, handler, timeout=None):
+    def _fork(self, sync=False):
+        # fork this process so that work can be done in the child.
+        if sync:
+            # synchronous execution requested; don't really fork
+            return 0
+        return os.fork()
+
+    def _wait_and_see_proc(self, pid, handler, timeout=None):
+        # for the parent process:
+        # wait a short bit to see if the child finishes quickly
+        if timeout is None:
+            timeout = self.cfg.get('sync_timeout', 5)
+        starttime = time.time()
+        since = time.time() - starttime
+        while since < timeout:
+            if not self._pid_is_alive(pid):
+                break
+            time.sleep(1)
+            since = time.time() - starttime
+
+        # check for problems
+        if not self._pid_is_alive(pid):
+            # done already?
+            handler.refresh_state()
+            if handler.state == status.IN_PROGRESS:
+                # died midway for some reason
+                handler.set_state(status.FAILED,
+                         "preservation thread died for unknown reasons")
+            elif handler.state == status.READY:
+                # never started, it seems
+                handler.set_state(status.FAILED,
+                     "preservation failed to start for unknown reasons")
+
+    def _in_child_handle(self, handler, sync=False):
+        # for child process:
+        # setup child process logging, execute preservation business, and catch exec problems
+        try:
+            self._setup_child(handler)
+            log.info("Preserving %s SIP id=%s", handler.name, handler._sipid)
+            handler.bagit('zip', self.storedir)
+        except Exception, e:
+            if isinstance(ex, PreservationStateError):
+                log.exception("Incorrect state for client's request: "+
+                              str(ex))
+                if ex.aipexists:
+                    reason = "requested initial preservation of " + \
+                             "existing AIP"
+                else:
+                    reason = "requested update to non-existing AIP"
+                handler.set_state(status.CONFLICT, reason)
+            else:
+                log.exception("Preservation handler failed: %s", str(e))
+
+            # alert a human!
+            if handler.notifier:
+                handler.notifier.alert("preserve.failure",
+                                          origin=self._hdlr.name,
+              summary="Preservation failed for SIP="+self._hdlr._sipid,
+                                          desc=str(ex),
+                                          id=self._hdlr._sipid)
+        finally:
+            ex = ((handler.state != status.SUCCESSFUL) and 1) or 0
+            if self.cfg.get('announce_subproc', True):
+                print("{0} process for {1} exiting with status={2}" 
+                      .format(handler.name, handler._sipid, ex))
+
+        if sync:
+            return (handler.status, 0)
+        sys.exit(ex)
+        
+
+    def _launch_handler(self, handler, timeout=None, sync=False):
         """
         launch the given handler in a separate thread.  After launching, 
         this function will join with the thread for a maximum time given by 
         the timeout value.  
         """
-        cpid = None
         try:
-          with Detach() as d:
-            if d.pid:
+            pid = self._fork(sync)
+            if pid:
                 # parent process: wait a short bit to see if the child finishes
                 # quickly
-                cpid = d.pid
-
-                if timeout is None:
-                    timeout = self.cfg.get('sync_timeout', 5)
-                starttime = time.time()
-                since = time.time() - starttime
-                while since < timeout:
-                    if not self._pid_is_alive(d.pid):
-                        break
-                    time.sleep(1)
-                    since = time.time() - starttime
-
-                if not self._pid_is_alive(d.pid):
-                    if handler.state == status.IN_PROGRESS:
-                        handler.set_state(status.FAILED,
-                                 "preservation thread died for unknown reasons")
-                    elif handler.state == status.READY:
-                        handler.set_state(status.FAILED,
-                             "preservation failed to start for unknown reasons")
-
-                return (handler.status, d.pid)
+                self._wait_and_see_proc(pid, handler, timeout)
+                return (handler.status, pid)
             else:
                 # child
-                try:
-                    handler.bagit('zip', self.storedir)
-                except Exception, e:
-                    if isinstance(ex, PreservationStateError):
-                        log.exception("Incorrect state for client's request: "+
-                                      str(ex))
-                        if ex.aipexists:
-                            reason = "requested initial preservation of " + \
-                                     "existing AIP"
-                        else:
-                            reason = "requested update to non-existing AIP"
-                        self._hdlr.set_state(status.CONFLICT, reason)
-                    else:
-                        log.exception("Preservation handler failed: %s", str(e))
-
-                    # alert a human!
-                    if self._hdlr.notifier:
-                        self._hdlr.notifier.alert("preserve.failure",
-                                                  origin=self._hdlr.name,
-                      summary="Preservation failed for SIP="+self._hdlr._sipid,
-                                                  desc=str(ex),
-                                                  id=self._hdlr._sipid)
-                finally:
-                    ex = ((handler.state != status.SUCCESSFUL) and 1) or 0
-                    sys.exit(ex)
+                # Note: if we did a real fork above, this call will not return; it will exit.
+                return self._in_child_handle(handler, sync)
 
         except Exception, e:
-            if cpid is None:
+            if pid is None:
                 log.exception("Failed to launch preservation process: %s",str(e))
                 handler.set_state(status.FAILED,
                                   "Failed to launch preservation process")
@@ -600,7 +634,27 @@ class MultiprocPreservationService(PreservationService):
             else:
                 log.exception("Unexpected failure while monitoring "+
                               "preservation process: %s", str(e))
-                return (handler.status, cpid)
+                return (handler.status, pid)
+
+    def _setup_child(self, handler):
+        # reconfigure the logger
+        plogdir = handler.cfg.get('logdir', configmod.global_logdir)
+        if not plogdir:
+            if self.cfg.get('announce_subproc', True):
+                print("Warning: global log file directory not set; using /tmp")
+            plogdir = "/tmp"
+        plogdir = os.path.join(plogdir, handler.name)
+        plogname = midasid_to_bagname(handler._sipid) + ".log"
+        try:
+            if not os.path.isdir(plogdir):
+                os.makedirs(plogdir)
+            handler.cfg['logdir'] = plogdir
+            configmod.configure_log(plogname, config=handler.cfg)
+            if self.cfg.get("announce_subproc", True):
+                print("{0} preservation process for {1} starting".format(handler.name, handler._sipid))
+        except Exception as ex:
+            handler.set_state(status.FAILED, "Failed to setup logging to "+os.path.join(plogdir,plogname))
+            print("Preservation failure while setting up logging: "+str(ex))
 
 class RerequestException(PreservationException):
     """
