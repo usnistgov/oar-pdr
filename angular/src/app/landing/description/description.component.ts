@@ -44,6 +44,7 @@ export class DescriptionComponent implements OnInit {
         modalRef.componentInstance.inputValue[this.fieldName] = val;
         modalRef.componentInstance['field'] = this.fieldName;
         modalRef.componentInstance['title'] = 'Description';
+        modalRef.componentInstance['message'] = 'Separate paragraphs by 2 lines.';
 
         modalRef.componentInstance.returnValue.subscribe((returnValue) => {
             if (returnValue) {
