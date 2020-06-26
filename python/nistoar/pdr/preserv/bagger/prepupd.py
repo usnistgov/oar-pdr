@@ -3,7 +3,7 @@ This bagger submodule provides functions for preparing an update to a previously
 preserved collection.  This includes a service client for retrieving previous
 head bags from cache or long-term storage.  
 """
-import os, shutil, json, logging
+import os, shutil, json, logging, re
 from abc import ABCMeta, abstractmethod, abstractproperty
 from collections import OrderedDict
 from zipfile import ZipFile
@@ -483,7 +483,104 @@ class UpdatePrepper(object):
     def make_edit_version(self, prev_vers):
         return prev_vers + "+ (in edit)"
         
+    def update_multibag_info(self, headbag, destbag):
+        """
+        copy the multibag info found in a specified head bag to a destination bag.  
+        The multibag subdirectory in the destination bag may exist prior to calling 
+        this function; only those files within with the same name as in the source 
+        head bag will be overwritten.
+        """
+        if not os.path.exists(destbag):
+            raise OSError(errno.EEXIST, os.strerror(errno.EEXIST), destbag)
+        mbdir = os.path.join(destbag, "multibag")
+        if not os.path.exists(mbdir):
+            os.mkdir(mbdir)
 
+        if os.path.isdir(headbag):
+            # unserialized bag
+
+            # copy the headbag's bag-info.txt as a deprecated one
+            baginfo = os.path.join(headbag, "bag-info.txt")
+            if os.path.isfile(baginfo):
+                shutil.copy(baginfo, os.path.join(mbdir, "deprecated-info.txt"))
+
+            # copy contents of the source multibag sub-directory
+            hmbdir = os.path.join(headbag, "multibag")+os.sep
+            for root, dirs, files in os.walk(hmbdir):
+                relroot = root[len(hmbdir):]
+                for d in dirs:
+                    dest = os.path.join(mbdir, relroot, d)
+                    if not os.path.isdir(dest):
+                        os.mkdir(dest)
+                for f in files:
+                    shutil.copy(os.path.join(root, f), os.path.join(mbdir, relroot, f))
+            
+        elif not os.path.isfile(headbag):
+            raise ValueError("UpdatePrepper: head bag does not exist: "+headbag)
+
+        else:
+            # serialized bag file
+            # self._unpack_bag_as(headbag, mdbag)
+            if not headbag.endswith('.zip'):
+                raise StateException("Don't know how to unpack serialized bag: "+
+                                     os.path.basename(headbag))
+            with ZipFile(headbag, 'r') as zip:
+                mbfiles = [f for f in zip.namelist() if '/multibag/' in f]
+                if len(mbfiles) <= 0:
+                    raise StateException("No multibag files found in headbag: "+
+                                         os.path.basename(headbag))
+                srcmbd = re.sub(os.sep+r'.*$', '', mbfiles[0])
+                baginfo = "/".join([srcmbd, "bag-info.txt"])
+                srcmbd += '/multibag/'
+
+                for entry in zip.infolist():
+                    if entry.filename == baginfo:
+                        # copy the headbag's bag-info.txt as a deprecated-info.txt
+                        entry.filename = "deprecated-info.txt"
+                        zip.extract(entry, mbdir)
+                        
+                    elif entry.filename.startswith(srcmbd):
+                        # copy the contents of the multibag subdirectory
+                        # adjust the entry name so that we can send the file directly
+                        # to the output multibag directory
+                        entry.filename = entry.filename[len(srcmbd):]
+                        if not entry.filename or entry.filename == "deprecated-info.txt":
+                            continue
+                        zip.extract(entry, mbdir)
+        
+    def set_multibag_info(self, destbag):
+        """
+        set or update the multibag info in a target bag with from the latest, previously
+        published headbag for the dataset.  If none exist, the target bag is unchanged.  
+        """
+        latest_nerd = self.cache_nerdm_rec()
+        if not latest_nerd:
+            self.log.info("ID not published previously; will start afresh")
+            return False
+        version = self.version
+        if not version:
+            nerd = utils.read_nerd(latest_nerd)
+            version = nerd.get('version', '0')
+
+        # This has been published before; look for a head bag in the store dir
+        latest_headbag = self.find_bag_in_store(version)
+        if not latest_headbag:
+            # store dir came up empty; try the distribution service
+            latest_headbag = self.cache_headbag()
+
+        if not latest_headbag:
+            # This dataset was "published" without a preservation bag
+            self.log.info("No previous bag available; multibag info not initialized.")
+            return False
+        
+        fmt = "Updating multibag info from previous head preservation bag (%s)"
+        self.log.info(fmt, os.path.basename(latest_headbag))
+        self.update_multibag_info(latest_headbag, destbag)
+        return True
+
+        
+                    
+                    
         
                              
 
