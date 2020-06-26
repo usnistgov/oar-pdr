@@ -2,12 +2,13 @@
 This module creates bags from MIDAS input data via the SIPBagger interface
 according to the "Mark III" specifications.
 
-It specifically provides two SIPBagger implementations: MIDASMetadataBagger and 
-MIDASFinalBagger.  The former is used by the pre-publication landing page 
-service to prepare the NERDm metadata to be displayed as a data publication
-is being previewed as well as by the PDR publication tools that will collect
-additional metadata.  The latter implementation is used complete the bagging 
-process for the preservation service.
+It specifically provides two SIPBagger implementations: MIDAS3MetadataBagger and 
+PreservationBagger.  The former is used by the PDR pubserver (driven by MIDAS)
+to create a metadata bag from which a pre-publication landing page is constructed.
+The latter will combine the metadata bag with the user-uploaded data to produce the
+final (unserialized) bag for preservation.  (See the documentation for 
+nistoar.pdr.preserv.service, particularly the siphandler sub-module, for triggering,
+serializing, and storing of preservation bags.)
 
 The implementations use the BagBuilder class to populate the output bag.   
 """
@@ -1617,6 +1618,17 @@ class PreservationBagger(SIPBagger):
         for dfile, srcpath in self.datafiles.items():
             self.bagbldr.add_data_file(dfile, srcpath, False, True)
 
+    def make_bag(self, lock=True):
+        """
+        convert the input SIP into a bag ready for preservation.  More 
+        specifically, the result will be a bag directory with finalized 
+        content, ready for serialization.  
+
+        :param lock bool:   if True (default), acquire a lock before making
+                            the preservation bag.
+        :return str:  the path to the finalized bag directory
+        """
+        return self.finalize_bag(lock)
     
     def finalize_bag(self, lock=True):
         """
@@ -1637,7 +1649,7 @@ class PreservationBagger(SIPBagger):
             return self._finalize_bag_impl()
     
     def _finalize_bag_impl(self):
-        # this is intended to be called from make_bag(), with or with out
+        # this is intended to be called from finalize_bag(), with or with out
         # lock on the output bag.
         
         self.prepare(nodata=False)
