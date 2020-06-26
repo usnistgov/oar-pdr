@@ -48,6 +48,7 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
     citationVisible: boolean = false;
     editEnabled: boolean = false;
     _showData: boolean = false;
+    _showContent: boolean;
     headerObj: any;
     public EDIT_MODES: any;
     editMode: string;
@@ -56,6 +57,9 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
 
     // this will be removed in next restructure
     showMetadata = false;
+    routerParamEditEnabled: boolean = false;
+
+    loadingMessage = '<i class="faa faa-spinner faa-spin"></i> Loading...';
 
     /**
      * create the component.
@@ -103,6 +107,10 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
                 this.showData();
             }
         );
+
+        this.edstatsvc.watchShowLPContent((showContent) => {
+            this._showContent = showContent;
+        });
     }
 
     /**
@@ -113,54 +121,69 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
         console.log("initializing LandingPageComponent around id=" + this.reqId);
         let metadataError = "";
 
+        this.route.queryParamMap.subscribe(queryParams => {
+            var param = queryParams.get("editEnabled");
+            if(param)
+                this.routerParamEditEnabled = (param.toLowerCase() == 'true');
+            else
+                this.routerParamEditEnabled = false;
+        })
+
+        // if editEnabled = true, we don't want to display the data that came from mdserver
+        // Will set the display to true after the authentication process. If authentication failed, 
+        // we set it to true and the data loaded from mdserver will be displayed. If authentication 
+        // passed and draft data loaded from customization service, we will set this flad to true 
+        // to display the data from MIDAS.
+        if(this.routerParamEditEnabled) 
+            this.edstatsvc.setShowLPContent(false);
+        else 
+            this.edstatsvc.setShowLPContent(true);
+
         // Retrive Nerdm record and keep it in case we need to display it in preview mode
         // use case: user manually open PDR landing page but the record was not edited by MIDAS
-
+        // This part will only be executed if "editEnabled=true" is not in URL parameter.
         this.mdserv.getMetadata(this.reqId).subscribe(
-          (data) => {
-              // successful metadata request
-              this.md = data;
-              if (!this.md) {
-                  // id not found; reroute
-                  console.error("No data found for ID=" + this.reqId);
-                  metadataError = "not-found";
+        (data) => {
+            // successful metadata request
+            this.md = data;
+            if (!this.md) {
+                // id not found; reroute
+                console.error("No data found for ID=" + this.reqId);
+                metadataError = "not-found";
                 //   this.router.navigateByUrl("/not-found/" + this.reqId, { skipLocationChange: true });
-              }
-              else
-                  // proceed with rendering of the component
-                  this.useMetadata();
-          },
-          (err) => {
-              console.error("Failed to retrieve metadata: " + err.toString());
-              if (err instanceof IDNotFound)
-              {
-                  metadataError = "not-found";
+            }
+            else
+                // proceed with rendering of the component
+                this.useMetadata();
+        },
+        (err) => {
+            console.error("Failed to retrieve metadata: " + err.toString());
+            if (err instanceof IDNotFound)
+            {
+                metadataError = "not-found";
                 //   this.router.navigateByUrl("not-found/" + this.reqId, { skipLocationChange: true });
-              }else
-              {
+            }else
+            {
                 metadataError = "int-error";
                 // this.router.navigateByUrl("int-error/" + this.reqId, { skipLocationChange: true });
-              }
-          }
+            }
+        }
         );
 
-        // if editing is enabled, the editing can be triggered via a URL parameter.  This is done
-        // in concert with the authentication process that can involve redirection to an authentication
-        // server; on successful authentication, the server can redirect the browser back to this
-        // landing page with editing turned on.  
+        // if editing is enabled, and "editEnabled=true" is in URL parameter, try to start the page
+        // in editing mode.  This is done in concert with the authentication process that can involve 
+        // redirection to an authentication server; on successful authentication, the server can 
+        // redirect the browser back to this landing page with editing turned on. 
         if(this.inBrowser){
           if (this.edstatsvc.editingEnabled()) 
           {
-            this.route.queryParamMap.subscribe(queryParams => {
-              let param = queryParams.get("editEnabled")
               // console.log("editmode url param:", param);
-              if (param) {
-                  console.log("Returning from authentication redirection (editmode="+param+")");
+              if (this.routerParamEditEnabled) {
+                  console.log("Returning from authentication redirection (editmode="+this.routerParamEditEnabled+")");
                   // Need to pass reqID (resID) because the resID in editControlComponent
                   // has not been set yet and the startEditing function relies on it.
                     this.edstatsvc.startEditing(this.reqId);
               }
-            })
           }else
           {
             if(metadataError == "not-found")

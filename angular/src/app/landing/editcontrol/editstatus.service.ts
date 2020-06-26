@@ -47,6 +47,19 @@ export class EditStatusService {
     }
 
     /**
+     * Flag to tell the app to hide the content display or not. 
+     * Usecase: to hide server side rendering content while in edit mode and display the content when 
+     * browser side rendering is ready.
+     */
+    _showLPContent: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
+    setShowLPContent(val: boolean){
+        this._showLPContent.next(val);
+    }
+    public watchShowLPContent(subscriber) {
+        this._showLPContent.subscribe(subscriber);
+    }
+
+    /**
      * flag indicating whether we get an error.
      * This flag is used to reset UI display - push the footer to the bottom of the page  
      */

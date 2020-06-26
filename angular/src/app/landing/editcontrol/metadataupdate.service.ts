@@ -85,7 +85,7 @@ export class MetadataUpdateService {
     }
 
     public setOriginalMetadata(md: NerdmRes) {
-        this.originalRec = md;
+        this.originalRec = JSON.parse(JSON.stringify(md));
         this.mdres.next(md as NerdmRes);
     }
 

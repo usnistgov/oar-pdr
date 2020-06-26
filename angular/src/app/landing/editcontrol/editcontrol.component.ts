@@ -214,32 +214,42 @@ export class EditControlComponent implements OnInit, OnChanges {
                 console.log("Loading draft...");
                 this.statusbar.showMessage("Loading draft...", true)
                 this.mdupdsvc.loadDraft().subscribe(
-                    (md) => {
-                      if(md){
-                        console.log("Draft loaded:", md);
-                        this.mdupdsvc.setOriginalMetadata(md as NerdmRes);
-                        this.mdupdsvc.checkUpdatedFields(md as NerdmRes);
-                        this._setEditMode(this.EDIT_MODES.EDIT_MODE);
-                      }else{
+                    (md) => 
+                    {
+                        this.edstatsvc.setShowLPContent(true);
+
+                        if(md)
+                        {
+                            console.log("Draft loaded:", md);
+                            this.mdupdsvc.setOriginalMetadata(md as NerdmRes);
+                            this.mdupdsvc.checkUpdatedFields(md as NerdmRes);
+                            this._setEditMode(this.EDIT_MODES.EDIT_MODE);
+                        }else{
                         // this.statusbar.showMessage("There was a problem loading draft data.", false);
                         // this._setEditMode(this.EDIT_MODES.PREVIEW_MODE);
                         // this.edstatsvc._setError(true);
-                      }
+                        }
                     },
-                    (err) => {
-                      if(err.statusCode == 404){
-                        this.mdupdsvc.resetOriginal();
-                        this.statusbar.showMessage("", false)
-                        this._setEditMode(this.EDIT_MODES.OUTSIDE_MIDAS_MODE);
-                      }
+                    (err) => 
+                    {
+                        this.edstatsvc.setShowLPContent(true);
+
+                        if(err.statusCode == 404)
+                        {
+                            this.mdupdsvc.resetOriginal();
+                            this.statusbar.showMessage("", false)
+                            this._setEditMode(this.EDIT_MODES.OUTSIDE_MIDAS_MODE);
+                        }
                     }
                 );
               }
             },
             (err) => {
-              console.log("Authentication failed.");
-              this._setEditMode(this.EDIT_MODES.PREVIEW_MODE);
-              this.statusbar.showMessage("Authentication failed.");
+                this.edstatsvc.setShowLPContent(true);
+
+                console.log("Authentication failed.");
+                this._setEditMode(this.EDIT_MODES.PREVIEW_MODE);
+                this.statusbar.showMessage("Authentication failed.");
             }
         );
       }
