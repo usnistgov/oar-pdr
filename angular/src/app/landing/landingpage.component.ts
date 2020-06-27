@@ -170,11 +170,18 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
         }
         );
 
+        // Display content after 15sec no matter what
+        setTimeout(() => {
+            this.edstatsvc.setShowLPContent(true);
+        }, 15000);
+
         // if editing is enabled, and "editEnabled=true" is in URL parameter, try to start the page
         // in editing mode.  This is done in concert with the authentication process that can involve 
         // redirection to an authentication server; on successful authentication, the server can 
         // redirect the browser back to this landing page with editing turned on. 
         if(this.inBrowser){
+            var showError: boolean = false;
+
           if (this.edstatsvc.editingEnabled()) 
           {
               // console.log("editmode url param:", param);
@@ -183,9 +190,17 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
                   // Need to pass reqID (resID) because the resID in editControlComponent
                   // has not been set yet and the startEditing function relies on it.
                     this.edstatsvc.startEditing(this.reqId);
+              }else{
+                  showError = true;
               }
-          }else
+          }else{
+              showError = true;
+          }
+
+          if(showError)
           {
+            this.edstatsvc.setShowLPContent(true);
+
             if(metadataError == "not-found")
                 this.router.navigateByUrl("not-found/" + this.reqId, { skipLocationChange: true });
             else if(metadataError == "int-error")
