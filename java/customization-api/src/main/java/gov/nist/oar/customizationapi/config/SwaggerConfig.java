@@ -29,6 +29,9 @@ import springfox.documentation.service.ApiInfo;
 import springfox.documentation.service.ResponseMessage;
 import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spring.web.plugins.Docket;
+import springfox.documentation.swagger.web.DocExpansion;
+import springfox.documentation.swagger.web.UiConfiguration;
+import springfox.documentation.swagger.web.UiConfigurationBuilder;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 @Configuration
@@ -66,6 +69,16 @@ public class SwaggerConfig {
 	}
 
 	/**
+	 * Swagger user interface configuration
+	 * 
+	 * @return
+	 */
+	@Bean
+	UiConfiguration uiConfig() {
+		return UiConfigurationBuilder.builder().docExpansion(DocExpansion.LIST).build();
+	}
+
+	/**
 	 * Swagger Api Info
 	 * 
 	 * @return return ApiInfo
@@ -75,7 +88,8 @@ public class SwaggerConfig {
 
 		log.info("### Swagger Initialization ####");
 		@SuppressWarnings("deprecation")
-		ApiInfo apiInfo = new ApiInfo("Landing page Customization api", "This api is developed for authoriozed users to edit records using customization UI", "Build-1.0.0",
+		ApiInfo apiInfo = new ApiInfo("Landing page Customization api",
+				"This api is developed for authoriozed users to edit records using customization UI", "Build-1.0.0",
 				"This is a REST based web service to edit, create and delete data.", "", "NIST Public license",
 				"https://www.nist.gov/director/licensing");
 		return apiInfo;
