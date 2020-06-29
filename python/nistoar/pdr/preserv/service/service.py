@@ -379,6 +379,9 @@ class PreservationService(object):
         if siptype == 'midas':
             return hndlr.MIDASSIPHandler(sipid, pcfg, self.minters[siptype],
                                          notifier=self._notifier)
+        elif siptype == 'midas3':
+            return hndlr.MIDAS3SIPHandler(sipid, pcfg, self.minters[siptype],
+                                          notifier=self._notifier)
         else:
             raise PDRException("SIP type not supported: "+siptype, sys=_sys)
 

@@ -6,6 +6,7 @@ from nistoar.pdr.preserv.service import service as serv
 from nistoar.pdr.preserv.service import status
 from nistoar.pdr.preserv.service.siphandler import SIPHandler, MIDASSIPHandler
 from nistoar.pdr.exceptions import PDRException, StateException
+from nistoar.pdr import config
 
 # datadir = nistoar/preserv/data
 datadir = os.path.join( os.path.dirname(os.path.dirname(__file__)), "data" )
@@ -17,9 +18,11 @@ def setUpModule():
     global rootlog
     ensure_tmpdir()
     rootlog = logging.getLogger()
-    loghdlr = logging.FileHandler(os.path.join(tmpdir(),"test_siphandler.log"))
+    loghdlr = logging.FileHandler(os.path.join(tmpdir(),"test_pressvc.log"))
     loghdlr.setLevel(logging.INFO)
     rootlog.addHandler(loghdlr)
+    config._log_handler = loghdlr
+    config.global_logdir = tmpdir()
 
 def tearDownModule():
     global loghdlr
@@ -328,6 +331,7 @@ class TestMultiprocPreservationService(test.TestCase):
             "working_dir": self.workdir,
             "store_dir": self.store,
             "id_registry_dir": self.workdir,
+            "announce_subproc": False,
             "sip_type": {
                 "midas": {
                     "common": {
@@ -341,7 +345,7 @@ class TestMultiprocPreservationService(test.TestCase):
                         "bagparent_dir": "_preserv",
                         "staging_dir": self.stagedir,
                         "bagger": baggercfg,
-                        "status_manager": { "cachedir": self.statusdir },
+                        "status_manager": { "cachedir": self.statusdir }
                     }
                 }
             }
@@ -349,7 +353,7 @@ class TestMultiprocPreservationService(test.TestCase):
 
         try:
             self.svc = serv.MultiprocPreservationService(self.config)
-        except Exception, e:
+        except Exception as e:
             self.tearDown()
             raise
 
@@ -364,31 +368,58 @@ class TestMultiprocPreservationService(test.TestCase):
 
         self.assertEqual(self.svc.siptypes, ['midas'])
 
-# multiproc is not working
-#
-#    def test_launch_sync(self):
-#        hndlr = self.svc._make_handler(self.midasid, 'midas')
-#        self.assertEqual(hndlr.state, status.FORGOTTEN)
-#        self.assertTrue(hndlr.isready())
-#         self.assertEqual(hndlr.state, status.READY)
-# 
-#         cpid = 0
-#         try:
-#             pdb.set_trace()
-#             (stat, cpid) = self.svc._launch_handler(hndlr, 10)
-#             self.assertEqual(stat['state'], status.SUCCESSFUL)
-#         finally:
-#             if cpid > 0:
-#                 try:
-#                     os.waitpid(cpid, 0)
-#                 except OSError, e:
-#                     time.sleep(2)
-# 
-#         self.assertEqual(hndlr.state, status.SUCCESSFUL)
-#         self.assertTrue(os.path.exists(os.path.join(self.store,
-#                                            self.midasid+".1_0.mbag0_4-0.zip")))
-#         self.assertTrue(os.path.exists(os.path.join(self.store,
-#                                     self.midasid+".1_0.mbag0_4-0.zip.sha256")))
+    def test_fork(self):
+        self.assertEqual(self.svc._fork(True), 0)
+
+    def test_wait_and_see_proc(self):
+        hndlr = self.svc._make_handler(self.midasid, 'midas')
+        self.assertEquals(hndlr.state, status.FORGOTTEN)
+        self.assertTrue(hndlr.isready())
+        self.assertEqual(hndlr.state, status.READY)
+        
+        self.svc._wait_and_see_proc(999999, hndlr, 0.2)
+        self.assertEquals(hndlr.state, status.FAILED)
+
+        hndlr.set_state(status.SUCCESSFUL, "Done!")
+        self.svc._wait_and_see_proc(999999, hndlr, 0.2)
+        self.assertEquals(hndlr.state, status.SUCCESSFUL)
+
+    def test_setup_child(self):
+        hndlr = self.svc._make_handler(self.midasid, 'midas')
+        self.assertEquals(hndlr.state, status.FORGOTTEN)
+        self.assertTrue(hndlr.isready())
+        self.assertEqual(hndlr.state, status.READY)
+
+        try:
+            self.svc._setup_child(hndlr)
+            self.assertEqual(os.path.basename(config.global_logfile),
+                             self.midasid+".log")
+        finally:
+            rootlogger = logging.getLogger()
+            rootlogger.removeHandler(config._log_handler)
+            setUpModule()
+
+    def test_launch_sync(self):
+        hndlr = self.svc._make_handler(self.midasid, 'midas')
+        self.assertEqual(hndlr.state, status.FORGOTTEN)
+        self.assertTrue(hndlr.isready())
+        self.assertEqual(hndlr.state, status.READY)
+
+        cpid = -1
+        try:
+            (stat, cpid) = self.svc._launch_handler(hndlr, 10, True)
+            self.assertEqual(cpid, 0)
+            self.assertEqual(stat['state'], status.SUCCESSFUL)
+        finally:
+            rootlogger = logging.getLogger()
+            rootlogger.removeHandler(config._log_handler)
+            setUpModule()
+
+        self.assertEqual(hndlr.state, status.SUCCESSFUL)
+        self.assertTrue(os.path.exists(os.path.join(self.store,
+                                           self.midasid+".1_0_0.mbag0_4-0.zip")))
+        self.assertTrue(os.path.exists(os.path.join(self.store,
+                                    self.midasid+".1_0_0.mbag0_4-0.zip.sha256")))
         
 
 

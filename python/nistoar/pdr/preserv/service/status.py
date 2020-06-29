@@ -340,6 +340,8 @@ class SIPStatus(object):
         """
         out = deepcopy(self._data['user'])
         out['history'] = self._data['history']
+        if out['history'] or out['state'] == SUCCESSFUL:
+            out['published'] = True
         return out
 
 
