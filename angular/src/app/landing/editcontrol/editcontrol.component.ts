@@ -234,10 +234,11 @@ export class EditControlComponent implements OnInit, OnChanges {
                     {
                         if(err.statusCode == 404)
                         {
+                            console.log("404 error.");
+                            this.edstatsvc.setShowLPContent(true);
                             this.mdupdsvc.resetOriginal();
                             this.statusbar.showMessage("", false)
                             this._setEditMode(this.EDIT_MODES.OUTSIDE_MIDAS_MODE);
-                            this.edstatsvc.setShowLPContent(true);
                         }
                     }
                 );
@@ -245,9 +246,9 @@ export class EditControlComponent implements OnInit, OnChanges {
             },
             (err) => {
                 console.log("Authentication failed.");
+                this.edstatsvc.setShowLPContent(true);
                 this._setEditMode(this.EDIT_MODES.PREVIEW_MODE);
                 this.statusbar.showMessage("Authentication failed.");
-                this.edstatsvc.setShowLPContent(true);
             }
         );
       }

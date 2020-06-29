@@ -332,7 +332,8 @@ export class MetadataUpdateService {
                 },
                 (err) => {
                   console.log("err", err);
-
+                  this.edstatsvc.setShowLPContent(true);
+                  
                   if(err.statusCode == 404)
                   {
                     this.resetOriginal();

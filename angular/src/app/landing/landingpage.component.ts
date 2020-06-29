@@ -191,11 +191,9 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
                     this.edstatsvc.startEditing(this.reqId);
               }else{
                   showError = true;
-                  this.edstatsvc.setShowLPContent(true);
               }
           }else{
               showError = true;
-              this.edstatsvc.setShowLPContent(true);
           }
 
           if(showError)
