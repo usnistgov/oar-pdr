@@ -90,9 +90,9 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
             this.editMode = editMode;
             if(this.editMode == this.EDIT_MODES.DONE_MODE || this.editMode == this.EDIT_MODES.OUTSIDE_MIDAS_MODE){
                 this.displaySpecialMessage = true;
+                this._showContent = true;
+                this.setMessage();
             }
-            this._showContent = true;
-            this.setMessage();
         });
 
         this.mdupdsvc.subscribe(
