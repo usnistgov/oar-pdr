@@ -53,6 +53,7 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
     public EDIT_MODES: any;
     editMode: string;
     message: string;
+    displaySpecialMessage: boolean = false;
     citationDialogWith: number = 550; // Default width
 
     // this will be removed in next restructure
@@ -87,15 +88,10 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
 
         this.edstatsvc.watchEditMode((editMode) => {
             this.editMode = editMode;
-            if(this.editMode == this.EDIT_MODES.DONE_MODE)
-            {
-                this.message = 'You can now close this browser tab <p>and go back to MIDAS to either accept or discard the changes.'
+            if(this.editMode == this.EDIT_MODES.DONE_MODE || this.editMode == this.EDIT_MODES.OUTSIDE_MIDAS_MODE){
+                this.displaySpecialMessage = true;
             }
-
-            if(this.editMode == this.EDIT_MODES.OUTSIDE_MIDAS_MODE)
-            {
-                this.message = 'This record is not currently available for editing. <p>Please return to MIDAS and click "Edit Landing Page" to edit.'
-            }
+            this.setMessage();
         });
 
         this.mdupdsvc.subscribe(
@@ -120,6 +116,7 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
     ngOnInit() {
         console.log("initializing LandingPageComponent around id=" + this.reqId);
         let metadataError = "";
+        this.displaySpecialMessage = false;
 
         this.route.queryParamMap.subscribe(queryParams => {
             var param = queryParams.get("editEnabled");
@@ -158,7 +155,6 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
         },
         (err) => {
             console.error("Failed to retrieve metadata: " + err.toString());
-            showError = true;
             if (err instanceof IDNotFound)
             {
                 metadataError = "not-found";
@@ -205,6 +201,8 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
             if(metadataError == "not-found")
             {
                 this.edstatsvc._setEditMode(this.EDIT_MODES.OUTSIDE_MIDAS_MODE);
+                this.setMessage();
+                this.displaySpecialMessage = true;
             }
                 // this.router.navigateByUrl("not-found/" + this.reqId, { skipLocationChange: true });
             else if(metadataError == "int-error")
@@ -221,20 +219,6 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
         if (this.md && this.inBrowser) {
             window.history.replaceState({}, '', '/od/id/' + this.reqId);
         }
-    }
-
-    /**
-     * Detect if current mode is DONE to switch display items
-     */
-    get isDoneMode(){
-        return this.editMode == this.EDIT_MODES.DONE_MODE;
-    }
-
-    /**
-     * Detect if current mode is DONE to switch display items
-     */
-    get isOutsideMidasMode(){
-        return this.editMode == this.EDIT_MODES.OUTSIDE_MIDAS_MODE;
     }
 
     showData() : void{
@@ -339,5 +323,17 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
     {
         this.citetext = (new NERDResource(this.md)).getCitation();
         return this.citetext;
+    }
+
+    setMessage(){
+        if(this.editMode == this.EDIT_MODES.DONE_MODE)
+        {
+            this.message = 'You can now close this browser tab <p>and go back to MIDAS to either accept or discard the changes.'
+        }
+
+        if(this.editMode == this.EDIT_MODES.OUTSIDE_MIDAS_MODE)
+        {
+            this.message = 'This record is not currently available for editing. <p>Please return to MIDAS and click "Edit Landing Page" to edit.'
+        }
     }
 }

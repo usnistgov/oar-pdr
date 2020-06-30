@@ -64,6 +64,6 @@
 </div>
 
 <!-- Display done page -->
-<div *ngIf="isDoneMode || isOutsideMidasMode">
+<div [ngStyle]="{'display': displaySpecialMessage? 'block' : 'none'}">
     <pdr-done [message] = 'message'></pdr-done>
 </div>
