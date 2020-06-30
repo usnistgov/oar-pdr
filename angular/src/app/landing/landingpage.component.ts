@@ -91,6 +91,7 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
             if(this.editMode == this.EDIT_MODES.DONE_MODE || this.editMode == this.EDIT_MODES.OUTSIDE_MIDAS_MODE){
                 this.displaySpecialMessage = true;
             }
+            this._showContent = true;
             this.setMessage();
         });
 

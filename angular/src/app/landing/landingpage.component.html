@@ -3,7 +3,7 @@
                   [(mdrec)]="md" [requestID]="requestId"></pdr-edit-control>
 
 <!-- landing page panel -->
-<div *ngIf="!isDoneMode && !isOutsideMidasMode && _showContent" class="ui-grid ui-grid-responsive ui-grid-pad center">
+<div *ngIf="!displaySpecialMessage && _showContent" class="ui-grid ui-grid-responsive ui-grid-pad center">
   <div class="card landingcard">
 
     <div *ngIf="md === null && edstatsvc.authorized && !edstatsvc.hasError">

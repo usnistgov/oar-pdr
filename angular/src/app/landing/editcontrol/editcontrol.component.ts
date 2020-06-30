@@ -431,6 +431,7 @@ export class EditControlComponent implements OnInit, OnChanges {
                     }else{
                       subscriber.next(false);
                       this.edstatsvc._setAuthorized(false);
+                      this.edstatsvc._setEditMode(this.EDIT_MODES.PREVIEW_MODE)
                     }
                     
                     subscriber.complete();
@@ -443,6 +444,7 @@ export class EditControlComponent implements OnInit, OnChanges {
                     subscriber.next(false);
                     subscriber.complete();
                     this.edstatsvc._setAuthorized(false);
+                    this.edstatsvc._setEditMode(this.EDIT_MODES.PREVIEW_MODE)
                 }
             );
         });
