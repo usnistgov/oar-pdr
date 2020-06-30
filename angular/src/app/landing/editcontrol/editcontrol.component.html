@@ -31,7 +31,7 @@
 </div>
 
 <!-- In small screen mode, control buttons need be in a separate line -->
-<div *ngIf="screenWidth <= screenSizeBreakPoint" style="margin-top: .5em;">
+<div *ngIf="screenWidth <= screenSizeBreakPoint && _editMode != EDIT_MODES.VIEWONLY_MODE" style="margin-top: .5em;">
         <!-- 
         -  Edit button:  when editing is off, the Edit button will show; if it is on, the
         -  "Preview" button will show in its place
