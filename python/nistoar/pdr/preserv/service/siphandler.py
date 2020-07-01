@@ -27,8 +27,9 @@ from ..bagger import utils as bagutils
 from ..bagger.base import checksum_of
 from ..bagger.midas import PreservationBagger, midasid_to_bagname, _midadid_to_dirname
 from ..bagger.midas3 import PreservationBagger as PreservationM3Bagger 
-from .. import (ConfigurationException, StateException, PODError)
-from .. import PreservationException, sys as _sys
+from .. import (ConfigurationException, StateException, PODError, PreservationException, 
+                PreservationStateError, SIPDirectoryError)
+from .. import sys as _sys
 from . import status
 from ...ingest.rmm import IngestClient
 from ...utils import write_json
@@ -723,23 +724,11 @@ class MIDAS3SIPHandler(SIPHandler):
                                MIDAS ID.  
         """
         SIPHandler.__init__(self, sipid, config, None, serializer, notifier, asupdate)
+        self.bagname = self._midasid_to_bagname(self._sipid)
                                                
         workdir = self.cfg.get('working_dir')
         if workdir and not os.path.exists(workdir):
             os.mkdir(workdir)
-
-        isrel = self.cfg.get('bagger',{}).get('relative_to_indir')
-        bagparent = self.cfg.get('bagparent_dir')
-        if not bagparent:
-            bagparent = "_preserv"
-            if not isrel:
-                bagparent = sipid + bagparent
-        if not os.path.isabs(bagparent):
-            if not isrel:
-                if not workdir:
-                    raise ConfigurationException("Missing needed config "+
-                                                 "property: workdir_dir")
-                bagparent = os.path.join(workdir, bagparent)
 
         self.stagedir = self.cfg.get('staging_dir')
         if not self.stagedir:
@@ -761,6 +750,21 @@ class MIDAS3SIPHandler(SIPHandler):
             sipdatadir = self._midasid_to_recnum(self._sipid)
         datadir = os.path.join(datadir, sipdatadir)
 
+        isrel = self.cfg.get('bagger',{}).get('relative_to_indir')
+        bagparent = self.cfg.get('bagparent_dir')
+        if not bagparent:
+            bagparent = "_preserv"
+            if not isrel:
+                bagparent = sipid + bagparent
+        if not os.path.isabs(bagparent):
+            if isrel:
+                bagparent = os.path.join(datadir, bagparent)
+            else:
+                if not workdir:
+                    raise ConfigurationException("Missing needed config "+
+                                                 "property: workdir_dir")
+                bagparent = os.path.join(workdir, bagparent)
+
         self.mdbagdir = self.cfg.get('mdbags_dir')
         if not self.mdbagdir:
             self.mdbagdir = "mdbags"
@@ -775,9 +779,9 @@ class MIDAS3SIPHandler(SIPHandler):
                                  "directory: " + self.mdbagdir)
 
         bagname = self._midasid_to_bagname(self._sipid)
-        sipdir = os.path.join(bagparent, bagname)
-        if self.cfg.get('force_copy_mdbag') or not os.path.isdir(sipdir):
-            sipdir = os.path.join(self.mdbagdir, bagname)
+        self.sipdir = os.path.join(bagparent, bagname)
+        if self.cfg.get('force_copy_mdbag') or not os.path.isdir(self.sipdir):
+            self.sipdir = os.path.join(self.mdbagdir, bagname)
 
         bgrcfg = config.get('bagger', {})
         if 'store_dir' not in bgrcfg and 'store_dir' in config:
@@ -786,12 +790,17 @@ class MIDAS3SIPHandler(SIPHandler):
             bgrcfg['repo_access'] = config['repo_access']
             if 'store_dir' not in bgrcfg['repo_access'] and 'store_dir' in bgrcfg:
                 bgrcfg['repo_access']['store_dir'] = bgrcfg['store_dir']
-            
-        self.bagger = PreservationM3Bagger(sipdir, bagparent, datadir, bgrcfg, self._asupdate)
 
-        if self.state == status.FORGOTTEN and self._is_preserved():
-            self.set_state(status.SUCCESSFUL, 
-                      "SIP with forgotten state is apparently already preserved")
+        try:
+            self.bagger = PreservationM3Bagger(self.sipdir, bagparent, datadir, bgrcfg, self._asupdate)
+        except (SIPDirectoryError, PreservationStateError) as ex:
+            self.bagger = None
+            self.sipdir = None
+
+        if self.state == status.FORGOTTEN:
+            if self._is_preserved():
+                self.set_state(status.SUCCESSFUL, 
+                               "SIP with forgotten state is apparently already preserved")
 
         self._ingester = None
         ingcfg = self.cfg.get('ingester')
@@ -807,6 +816,11 @@ class MIDAS3SIPHandler(SIPHandler):
                        preservation; False, otherwise.
         """
         if not super(MIDAS3SIPHandler, self).isready(_inprogress):
+            return False
+
+        if not self.bagger:
+            if not os.path.isdir(self.sipdir):
+                self.set_state(status.NOT_FOUND, cache=False)
             return False
 
         if self.state != status.READY:
@@ -952,24 +966,6 @@ class MIDAS3SIPHandler(SIPHandler):
                                     summary="checksum file write failure",
                                     desc=msg, id=self._sipid)
                 
-        # remove the metadata bag directory so that that an attempt to update
-        # will force a rebuild based on the published version
-        mdbag = os.path.join(self.mdbagdir, self.bagger.name)
-        log.debug("ensuring the removal metadata bag directory: %s", mdbag)
-        if os.path.isdir(mdbag):
-            log.debug("removing metadata bag directory...")
-            try:
-                shutil.rmtree(mdbag)
-            except Exception as ex:
-                log.error("Failed to clean up the metadata bag directory: "+
-                          mdbag + ": "+str(ex))
-            if os.path.isfile(mdbag+".lock"):
-                try:
-                    os.remove(mdbag+".lock")
-                except Exception as ex:
-                    log.warn("Failed to clean up the metadata bag lock file: "+
-                             mdbag + ".lock: "+str(ex))
-
         # cache the latest nerdm record under the staging directory
         try:
             mdcache = os.path.join(self.stagedir, '_nerd')
@@ -1037,10 +1033,11 @@ class MIDAS3SIPHandler(SIPHandler):
         definitive evidence of success (i.e. existence in long-term storage) 
         as possible.
         """
+        bagname = (self.bagger and self.bagger.name) or self.bagname
+
         # look for files in the serialized bag store with names that start
         # with the SIP identifier
-        return len([f for f in os.listdir(self.storedir)
-                      if f.startswith(self.bagger.name+'.')]) > 0
+        return len([f for f in os.listdir(self.storedir) if f.startswith(bagname+'.')]) > 0
     
     def _midasid_to_bagname(self, id):
         return midasid_to_bagname(id)

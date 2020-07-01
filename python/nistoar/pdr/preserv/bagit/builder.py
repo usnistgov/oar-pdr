@@ -1221,7 +1221,9 @@ class BagBuilder(PreservationSystem):
         afile = self.bag.annotations_file_for(destpath)
         if os.path.exists(afile):
             if message is None:
-                message = "Updating annoations for " + destpath
+                message = "Updating annotations for " + destpath
+                if not destpath:
+                    message += "resource-level metadata"
             orig = read_nerd(afile)
             mdata = self._update_md(orig, mdata)
         else:
@@ -1375,7 +1377,6 @@ class BagBuilder(PreservationSystem):
         else:
             mdata = self.define_component(destpath, comptype)
             self._add_mediatype(destpath, mdata)
-            self.replace_metadata_for(destpath, mdata,'')
 
         if message is None:
             message = "adding file metadata for "+destpath

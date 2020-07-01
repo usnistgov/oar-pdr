@@ -697,9 +697,7 @@ class MIDASMetadataBagger(SIPBagger):
 
         elif self.prepsvc:
             self.log.debug("Looking for previously published version of bag")
-
-            prepper = self.prepsvc.prepper_for(self.name,
-                                               log=self.log.getChild("prepper"))
+            prepper = self.get_prepper()
 
             if prepper.create_new_update(self.bagdir):
                 self.log.info("Working bag initialized with metadata from previous "
@@ -734,6 +732,11 @@ class MIDASMetadataBagger(SIPBagger):
             })
 
         return True
+
+    def get_prepper(self):
+        if not self.prepsvc:
+            return None
+        return self.prepsvc.prepper_for(self.name, log=self.log.getChild("prepper"))
                 
     def ensure_res_metadata(self):
         """
@@ -1160,7 +1163,7 @@ class MIDASMetadataBagger(SIPBagger):
         # set the version history
         if uptype != _NO_UPDATE and self.sip.nerd['version'] != oldver and \
            ('issued' in self.sip.nerd or 'modified' in self.sip.nerd) and \
-           not any([h['version'] == newver for h in verhist]):
+           not any([h['version'] == self.sip.nerd['version'] for h in verhist]):
             issued = ('modified' in self.sip.nerd and self.sip.nerd['modified']) or \
                      self.sip.nerd['issued']
             verhist.append(OrderedDict([
@@ -1422,8 +1425,8 @@ class PreservationBagger(SIPBagger):
                                 AIP (see constructor documentation).
         """
         if not config:
-            config = mdbagger.cfg.get('preserve', {})
-        datadir = self.mdbagger.sip.revdatadir
+            config = mdbagger.cfg.get('preservation_service', {})
+        datadir = mdbagger.sip.revdatadir
         return cls(mdbagger.bagdir, bagparent, datadir, config, asupdate=None)
 
     def __init__(self, sipdir, bagparent, datadir, config=None, asupdate=None):
@@ -1616,6 +1619,17 @@ class PreservationBagger(SIPBagger):
         if not os.path.exists(self.bagbldr.bag.data_dir):
             os.mkdir(self.bagbldr.bag.data_dir);
         for dfile, srcpath in self.datafiles.items():
+            # need to do a final re-examine of all files as the metadata building
+            # stage may have been looking at files in upload that were never
+            # accepted into review.
+            md = self.bagbldr.describe_data_file(srcpath, dfile, True)
+            ct = md.get('@type')
+            if ct:
+                ct = re.sub(r'^[^:]*:', '', ct[0])
+            md = self.bagbldr.update_metadata_for(dfile, md, ct,
+                        "final metadata update for file, "+dfile)
+
+            # migrate the data file into the bag
             self.bagbldr.add_data_file(dfile, srcpath, False, True)
 
     def make_bag(self, lock=True):
@@ -1795,7 +1809,7 @@ class PreservationBagger(SIPBagger):
             if len(rmkeys) > 0:
                 for key in rmkeys:
                     del md[key]
-                utils.write_json(md, self.bagbldr.bag.pod_file)
+                utils.write_json(md, self.bagbldr.bag.pod_file())
 
         # remove non-standard, administrative metadata from nerdm
         # for (files, dirs, root) in os.walk(self.bagbldr.bag.metadata_dir):

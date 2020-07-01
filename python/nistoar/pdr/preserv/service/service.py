@@ -26,10 +26,10 @@ submit the metadata to the PDR metadata database.
 from __future__ import print_function
 from copy import deepcopy
 from abc import ABCMeta, abstractmethod, abstractproperty
-import os, logging, threading, time, errno, re
+import os, sys, logging, threading, time, errno, re
 
 from .. import (PDRException, StateException, IDNotFound, 
-                ConfigurationException, SIPDirectoryNotFound,
+                ConfigurationException, SIPDirectoryNotFound, AIPValidationError,
                 PreservationStateError)
 from ....id import PDRMinter
 from . import status
@@ -43,6 +43,10 @@ from .. import PreservationException, sys as _sys
 log = logging.getLogger(_sys.system_abbrev)   \
              .getChild(_sys.subsystem_abbrev) \
              .getChild('service')
+
+# this is used during testing to run preservation processing syncronously within
+# MultiprocessPreservationService
+mp_sync = False
 
 class PreservationService(object):
     """
@@ -304,12 +308,12 @@ class PreservationService(object):
             if hdlr.state == status.FORGOTTEN or hdlr.state == status.NOT_READY:
                 hdlr.isready()
 
+            out = hdlr.status
             if 'published' not in hdlr.status and self._prepsvc:
                 aipid = re.sub(r'^ark:/\d+/','', sipid)
-                hdlr.status['published'] = \
-                            self._prepsvc.prepper_for(aipid, log=log).aip_exists()
+                out['published'] = self._prepsvc.prepper_for(aipid, log=log).aip_exists()
                 
-            return hdlr.status
+            return out
 
         except (IDNotFound, SIPDirectoryNotFound) as ex:
             return self._not_found_state(sipid, siptype)
@@ -396,13 +400,17 @@ class PreservationService(object):
         pcfg.update(cfg4type.get('preserv', {}))
                     
         if 'working_dir' not in pcfg:
-            pcfg['working_dir'] = os.path.join(self.workdir, 'preserv')
+            pcfg['working_dir'] = self.workdir
         if 'store_dir' not in pcfg:
             pcfg['store_dir'] = self.storedir
         if 'id_registry_dir' not in pcfg:
             pcfg['id_registry_dir'] = self.idregdir
         if 'mdbag_dir' not in pcfg:
-            pcfg['mdbag_dir'] = cfg4type.get('mdserv',{}).get('working_dir',
+            if siptype == 'midas3':
+                pcfg['mdbag_dir'] = cfg4type.get('pubserv',{}).get('working_dir',
+                                        os.path.join(self.workdir, 'mdbags'))
+            else:
+                pcfg['mdbag_dir'] = cfg4type.get('mdserv',{}).get('working_dir',
                                         os.path.join(self.workdir, 'mdserv'))
         if 'repo_access' not in pcfg and 'repo_access' in self.cfg:
             pcfg['repo_access'] = deepcopy(self.cfg['repo_access'])
@@ -524,6 +532,7 @@ class MultiprocPreservationService(PreservationService):
         initialize the service based on the given configuration.
         """
         super(MultiprocPreservationService, self).__init__(config)
+        self._oldlogfile = None
 
     def _pid_is_alive(self, pid):
         if pid <= 0:
@@ -576,21 +585,23 @@ class MultiprocPreservationService(PreservationService):
         # for child process:
         # setup child process logging, execute preservation business, and catch exec problems
         try:
-            self._setup_child(handler)
+            self._setup_child(handler, sync)
             log.info("Preserving %s SIP id=%s", handler.name, handler._sipid)
             handler.bagit('zip', self.storedir)
         except Exception, e:
-            if isinstance(ex, PreservationStateError):
-                log.exception("Incorrect state for client's request: "+
-                              str(ex))
-                if ex.aipexists:
-                    reason = "requested initial preservation of " + \
-                             "existing AIP"
+            if isinstance(e, PreservationStateError):
+                log.exception("Incorrect state for client's request: "+str(e))
+                if e.aipexists:
+                    reason = "requested initial preservation of existing AIP"
                 else:
                     reason = "requested update to non-existing AIP"
                 handler.set_state(status.CONFLICT, reason)
+            elif isinstance(e, AIPValidationError):
+                log.exception("Preservation validation failure: %s", str(e))
+                handler.set_state(status.FAILED, "Preservation validation failure")
             else:
                 log.exception("Preservation handler failed: %s", str(e))
+                handler.set_state(status.FAILED, "Unexpected failure")
 
             # alert a human!
             if handler.notifier:
@@ -604,18 +615,21 @@ class MultiprocPreservationService(PreservationService):
             if self.cfg.get('announce_subproc', True):
                 print("{0} process for {1} exiting with status={2}" 
                       .format(handler.name, handler._sipid, ex))
+            self._teardown_child(handler, sync)
 
         if sync:
             return (handler.status, 0)
         sys.exit(ex)
         
 
-    def _launch_handler(self, handler, timeout=None, sync=False):
+    def _launch_handler(self, handler, timeout=None, sync=None):
         """
         launch the given handler in a separate thread.  After launching, 
         this function will join with the thread for a maximum time given by 
         the timeout value.  
         """
+        if sync is None:
+            sync = mp_sync
         try:
             pid = self._fork(sync)
             if pid:
@@ -639,7 +653,10 @@ class MultiprocPreservationService(PreservationService):
                               "preservation process: %s", str(e))
                 return (handler.status, pid)
 
-    def _setup_child(self, handler):
+    def _setup_child(self, handler, sync=False):
+        if sync:
+            self._oldlogfile = configmod.global_logfile
+
         # reconfigure the logger
         plogdir = handler.cfg.get('logdir', configmod.global_logdir)
         if not plogdir:
@@ -658,6 +675,10 @@ class MultiprocPreservationService(PreservationService):
         except Exception as ex:
             handler.set_state(status.FAILED, "Failed to setup logging to "+os.path.join(plogdir,plogname))
             print("Preservation failure while setting up logging: "+str(ex))
+
+    def _teardown_child(self, handler, sync=False):
+        if sync and self._oldlogfile:
+            configmod.configure_log(self._oldlogfile, config=handler.cfg)
 
 class RerequestException(PreservationException):
     """

@@ -34,4 +34,8 @@ def extract_sip_config(config, service='pubserv', siptype='midas3'):
     out.update(midas.get('common', {}))
     out.update(midas.get(service, {}))
 
+    if service == "pubserv" and siptype == "midas3":
+        if 'preservation_service' not in out and 'preserv' in midas:
+            out['preservation_service'] = config
+
     return out
