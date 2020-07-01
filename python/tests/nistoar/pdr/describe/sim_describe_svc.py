@@ -86,6 +86,28 @@ class SimRMMHandler(object):
             return self.send_error(403, self._meth +
                                    " not supported on this resource")
 
+    def do_POST(self, path, params=None):
+        if path:
+            path = path.rstrip('/')
+        if path.startswith("records"):
+            path = path[len("records"):].lstrip('/')
+        id = None
+        if len(path.strip()) > 0:
+            return self.send_error(405, "POST not allowed on this resource")
+
+        try:
+            bodyin = self._env['wsgi.input']
+            nerd = json.load(bodyin, object_pairs_hook=OrderedDict)
+            id = re.sub(r'^ark:/\d+/', '', nerd['@id'])
+            with open(os.path.join(self.arch.dir, id+".json"), 'w') as fd:
+                json.dump(nerd, fd, indent=2)
+        except ValueError as ex:
+            return self.send_error(400, "Unparseable JSON input")
+        except TypeError as ex:
+            return self.send_error(500, "Write error")
+
+        return self.send_error(201, "Accepted")
+
     def do_GET(self, path, params=None):
         if path:
             path = path.rstrip('/')
