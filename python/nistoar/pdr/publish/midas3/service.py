@@ -18,6 +18,7 @@ from ...preserv.bagit import NISTBag, DEF_MERGE_CONV
 from ...preserv.service import status as ps
 from ...preserv.service.service import MultiprocPreservationService
 from ...utils import build_mime_type_map, read_nerd, write_json, read_pod
+from ... import config as _configmod
 from ....id import PDRMinter, NIST_ARK_NAAN
 from ....nerdm.convert import Res2PODds, topics2themes
 from ....nerdm.taxonomy import ResearchTopicsTaxonomy
@@ -146,7 +147,30 @@ class MIDAS3PublishingService(PublishSystem):
 
         self.schemadir = self.cfg.get('nerdm_schema_dir', pdr.def_schema_dir)
         self._bagging_workers = {}
-        self.pressvc = MultiprocPreservationService(self.cfg.get('preservation_service', {}))
+        self.pressvc = MultiprocPreservationService(self._presv_config())
+
+    def _presv_config(self):
+        comm = {
+            "review_dir": self.reviewdir
+        }
+        for prop in "upload_dir id_minter mimetype_files".split():
+            if prop in self.cfg:
+                comm[prop] = self.cfg[prop]
+            
+        out = {
+            "working_dir": self.workdir,
+            "store_dir": self.storedir,
+            "id_registry_dir": self.cfg.get('id_registry_dir', self.workdir),
+            "auth_key": self.cfg.get('auth_key', 'INCORRECT_AUTH_KEY'),
+            "auth_method": self.cfg.get('auth_method', "header"),
+            "sip_type": {
+                "midas3": {
+                    "common": comm
+                }
+            }
+        }
+        return _configmod.merge_config(self.cfg.get('preservation_service', {}), out)
+            
 
     def _set_working_dir(self, workdir):
         if not workdir:

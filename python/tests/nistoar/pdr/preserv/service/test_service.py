@@ -136,8 +136,7 @@ class TestThreadedPreservationService(test.TestCase):
                         "hndlr wrong type for 'midas': "+str(type(hndlr)))
         self.assertIsNotNone(hndlr.notifier)
 
-        self.assertEqual(hndlr.cfg['working_dir'],
-                         os.path.join(self.workdir,'preserv'))
+        self.assertEqual(hndlr.cfg['working_dir'], self.workdir)
         self.assertEqual(hndlr.cfg['store_dir'], self.store)
         self.assertEqual(hndlr.cfg['id_registry_dir'], self.workdir)
         self.assertEqual(hndlr.cfg['review_dir'], self.revdir)

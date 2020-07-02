@@ -164,10 +164,11 @@ class TestMIDAS3SIPHandler(test.TestCase):
         staged = os.path.join(self.stagedir,'_nerd',self.midasid+".json")
         self.assertFalse(os.path.exists(staged))
 
-        # has the metadata bag been cleaned up?
+        # has the metadata bag NOT been cleaned up?  (Clean up happens via pubserver
+        # service call which this test is not configured for)
         mdbagdir = os.path.join(self.sip.mdbagdir, self.midasid)
-        self.assertFalse( os.path.exists(mdbagdir),
-                          "Failed to clean up metadata bag directory: "+mdbagdir)
+        self.assertTrue( os.path.exists(mdbagdir),
+                         "Failed to clean up metadata bag directory: "+mdbagdir)
 
         # has unserialized bags been cleaned up?
         bb = self.midasid+".1_0_0.mbag0_4-"
