@@ -819,7 +819,7 @@ class MIDAS3SIPHandler(SIPHandler):
             return False
 
         if not self.bagger:
-            if not os.path.isdir(self.sipdir):
+            if not self.sipdir:
                 self.set_state(status.NOT_FOUND, cache=False)
             return False
 

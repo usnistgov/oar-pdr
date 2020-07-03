@@ -26,6 +26,8 @@ from ....nerdm import validate
 from .... import pdr
 from .customize import CustomizationServiceClient
 
+bg_sync = False
+
 log = logging.getLogger(PublishSystem().subsystem_abbrev)
 
 class MIDAS3PublishingService(PublishSystem):
@@ -718,7 +720,7 @@ class MIDAS3PublishingService(PublishSystem):
             pod[prop] = updates[''][prop]
         return pod
 
-    def preserve_new(self, ediid, async=True):
+    def preserve_new(self, ediid, async=None):
         """
         request that the SIP given by ediid be preserved for the first time.  
 
@@ -727,12 +729,14 @@ class MIDAS3PublishingService(PublishSystem):
         the mark and take responsibility for starting the preservation process.
 
         :param str ediid:   the EDI ID for the dataset to be preserved.
-        :param bool async:  if True, process any pending PODs asynchronously.  Note that this 
+        :param bool async:  if True (default), process any pending PODs asynchronously.  Note that this 
                             only affects POD processing, not the actual preservation.
         :rtype dict:  a status JSON object giving the status of the preservation.  
         :raise PreservationStateError:  if the SIP has been published before under the requested ID
                             and preserve_update() should have been used.  
         """
+        if async is None:
+            async = not bg_sync
         stat = self.pressvc.status(ediid, "midas3")
         if stat['state'] == ps.SUCCESSFUL or stat.get('published'):
             raise PreservationStateError("AIP with ID already exists (need to request update?): " +
@@ -765,7 +769,7 @@ class MIDAS3PublishingService(PublishSystem):
 
         return self.pressvc.status(ediid, "midas3")
 
-    def preserve_update(self, ediid, async=True):
+    def preserve_update(self, ediid, async=None):
         """
         request that the update to the SIP given by ediid be preserved.  
 
@@ -774,12 +778,14 @@ class MIDAS3PublishingService(PublishSystem):
         the mark and take responsibility for starting the preservation process.
 
         :param str ediid:   the EDI ID for the dataset to be preserved.
-        :param bool async:  if True, process any pending PODs asynchronously.  Note that this 
+        :param bool async:  if True (default), process any pending PODs asynchronously.  Note that this 
                             only affects POD processing, not the actual preservation.
         :rtype dict:  a status JSON object giving the status of the preservation.  
         :raise PreservationStateError:  if the SIP has not been published before under the requested ID
                             and preserve_new() should have been used.  
         """
+        if async is None:
+            async = not bg_sync
         stat = self.pressvc.status(ediid, "midas3")
         if not stat.get('published'):
             raise PreservationStateError("AIP with ID does not exist (not updateable?): " +

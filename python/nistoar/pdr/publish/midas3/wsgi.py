@@ -14,6 +14,8 @@ from collections import OrderedDict
 from .. import PublishSystem, PDRServerError
 from .service import (MIDAS3PublishingService, SIPDirectoryNotFound, IDNotFound,
                       ConfigurationException, StateException, InvalidRequest)
+from ...preserv.service import status as ps
+from ...preserv.service.service import RerequestException, PreservationStateError
 from .webrecord import WebRecorder
 from ....id import NIST_ARK_NAAN
 from ejsonschema import ValidationError
@@ -535,17 +537,17 @@ class PreserveHandler(Handler):
             self.send_error(500, "Internal error")
             return ["{}"]
 
-        if stat['state'] == status.NOT_READY and \
+        if stat['state'] == ps.NOT_READY and \
            stat['message'].startswith('Internal Error'):
             self.set_response(500, stat['message'])
             
-        elif stat['state'] == status.FORGOTTEN:
+        elif stat['state'] == ps.FORGOTTEN:
             self.set_response(404, "Preservation history for SIP identifer not found "+
                               "(or forgotten)")
-        elif stat['state'] == status.NOT_FOUND:
+        elif stat['state'] == ps.NOT_FOUND:
             self.set_response(404, "Preservation history for SIP identifer not found")
 
-        elif stat['state'] == status.READY:
+        elif stat['state'] == ps.READY:
             self.set_response(404, "Preservation history for SIP identifer not found (but is ready)")
 
         else:
@@ -591,22 +593,22 @@ class PreserveHandler(Handler):
             # launch the job asynchronously.  Fast failures resulting from
             # checks that can be done syncronously result in exceptions (see
             # below).  
-            if out['state'] == status.NOT_FOUND:
+            if out['state'] == ps.NOT_FOUND:
                 log.warn("Requested SIP ID not found: "+sipid)
                 self.set_response(404, "SIP not found")
-            elif out['state'] == status.NOT_READY:
+            elif out['state'] == ps.NOT_READY:
                 log.warn("Premature request for SIP preservation (not ready): "+
                          sipid)
                 self.set_response(409, "SIP is not ready")
-            elif out['state'] == status.SUCCESSFUL:
+            elif out['state'] == ps.SUCCESSFUL:
                 log.info("SIP preservation request completed synchronously: "+
                          sipid)
                 self.set_response(201, "SIP preservation completed successfully")
-            elif out['state'] == status.CONFLICT:
+            elif out['state'] == ps.CONFLICT:
                 log.error(out['message'])
-                out['state'] = status.FAILED
+                out['state'] = ps.FAILED
                 self.set_response(409, out['message'])
-            elif out['state'] == status.FAILED:
+            elif out['state'] == ps.FAILED:
                 log.error(out['message'])
                 self.set_response(500, "SIP preservation failed: " +
                                   out['message'])
@@ -619,23 +621,23 @@ class PreserveHandler(Handler):
 
         except RerequestException as ex:
             log.warn("Rerequest of SIP detected: "+sipid)
-            out =  {
+            out = json.dumps({
                 "id": sipid,
-                "state": status.IN_PROGRESS,
+                "state": ps.IN_PROGRESS,
                 "message": str(ex),
                 "history": []
-            }
+            })
             self.set_response(403, "Preservation for SIP was already requested "+
                               "(current status: "+ex.state+")")
 
         except PreservationStateError as ex:
             log.warn("Wrong AIP state for client request: "+str(ex))
-            out =  {
+            out = json.dumps({
                 "id": sipid,
-                "state": status.CONFLICT,
+                "state": ps.CONFLICT,
                 "message": str(ex),
                 "history": []
-            }
+            })
             self.set_response(409, "Already preserved (need to request update "+
                                    "via PATCH?)")
 
@@ -684,18 +686,18 @@ class PreserveHandler(Handler):
             # launch the job asynchronously.  Fast failures resulting from
             # checks that can be done syncronously result in exceptions (see
             # below).  
-            if out['state'] == status.NOT_FOUND:
+            if out['state'] == ps.NOT_FOUND:
                 log.warn("Requested SIP ID not found: "+sipid)
                 self.set_response(404, "SIP not found (or is not ready)")
-            elif out['state'] == status.SUCCESSFUL:
+            elif out['state'] == ps.SUCCESSFUL:
                 log.info("SIP update request completed synchronously: "+
                          sipid)
                 self.set_response(202, "SIP update completed successfully")
-            elif out['state'] == status.CONFLICT:
+            elif out['state'] == ps.CONFLICT:
                 log.error(out['message'])
-                out['state'] = status.FAILED
+                out['state'] = ps.FAILED
                 self.set_response(409, out['message'])
-            elif out['state'] == status.FAILED:
+            elif out['state'] == ps.FAILED:
                 log.error(out['message'])
                 self.set_response(500, "SIP update failed: " +
                                   out['message'])
@@ -708,23 +710,23 @@ class PreserveHandler(Handler):
 
         except RerequestException, ex:
             log.warn("Rerequest of SIP update detected: "+sipid)
-            out =  {
+            out = json.dumps({
                 "id": sipid,
-                "state": status.IN_PROGRESS,
+                "state": ps.IN_PROGRESS,
                 "message": str(ex),
                 "history": []
-            }
+            })
             self.set_response(403, "Preservation update for SIP was already "+
                               "requested (current status: "+ex.state+")")
             
         except PreservationStateError as ex:
             log.warn("Wrong AIP state for client request: "+str(ex))
-            out =  {
+            out = json.dumps({
                 "id": sipid,
-                "state": status.CONFLICT,
+                "state": ps.CONFLICT,
                 "message": str(ex),
                 "history": []
-            }
+            })
             self.set_response(409, "Not previously preserved (need to issue "+
                                    "PUT?)")
 
