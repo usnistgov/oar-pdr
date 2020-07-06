@@ -111,7 +111,6 @@ export class LandingComponent implements OnInit, OnChanges {
     isCopied: boolean = false;
     distdownload: string = '';
     serviceApi: string = '';
-    metadata: boolean = false;
     private files: TreeNode[] = [];
     pdrApi: string = '';
     isResultAvailable: boolean = true;
@@ -133,6 +132,9 @@ export class LandingComponent implements OnInit, OnChanges {
     @Input() record: NerdmRes = null;
     @Input() requestId: string = null;     // the ID used in the URL to access this page
     @Input() inBrowser: boolean = false;
+
+    // this will be removed in the next restructure iteration
+    @Input() showMetadata: boolean = false;
 
     ediid: string = null;
 
@@ -204,7 +206,7 @@ export class LandingComponent implements OnInit, OnChanges {
     }
 
     viewmetadata() {
-        this.metadata = true;
+        this.showMetadata = true;
         this.similarResources = false;
     }
 
@@ -458,12 +460,7 @@ export class LandingComponent implements OnInit, OnChanges {
         if (this.record.landingPage == null || this.record.landingPage == undefined) {
             return false;
         }
-        var url = 'od/id/' + this.ediid;
-        if (this.record.landingPage.search(url) > -1) {
-            return false;
-        } else {
-            return true;
-        }
+        return (this.record.landingPage.search(/^https?:\/\/[\w\.\-]+\/od\/id\//) < 0)
     }
 
     visitHomePage(url: string, event, title) {
