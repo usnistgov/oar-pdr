@@ -150,8 +150,10 @@ class PreservationService(object):
             hdlr = self._make_handler(sipid, siptype, asupdate=False)
             log.info("Initial preservation requested for SIP=%s", sipid)
         except (IDNotFound, SIPDirectoryNotFound) as ex:
+            log.warn("SIP=%s not available for preservation: %s", sipid, str(ex))
             return self._not_found_state(sipid, siptype)
         except Exception as ex:
+            log.error("Problem getting SIP status for preservation: %s", str(ex))
             return self._internal_error_state(sipid, siptype)
 
         # check for the existence of an AIP corresponding to the input SIP ID:
@@ -230,8 +232,10 @@ class PreservationService(object):
             hdlr = self._make_handler(sipid, siptype, asupdate=True)
             log.info("Preservation update requested for SIP=%s", sipid)
         except (IDNotFound, SIPDirectoryNotFound) as ex:
+            log.warn("SIP=%s not available for preservation: %s", sipid, str(ex))
             return self._not_found_state(sipid, siptype)
         except Exception as ex:
+            log.error("Problem getting SIP status for preservation: %s", str(ex))
             return self._internal_error_state(sipid, siptype)
 
         # check for the existence of an AIP corresponding to the input SIP ID:
@@ -303,28 +307,28 @@ class PreservationService(object):
         :return dict:  a dictionary wiht metadata describing the status of 
                        preservation effort.
         """
+        log.debug("Checking status of SIP=%s by request", sipid)
         try:
             hdlr = self._make_handler(sipid, siptype)
             if hdlr.state == status.FORGOTTEN or hdlr.state == status.NOT_READY:
                 hdlr.isready()
 
-            out = hdlr.status
-            if 'published' not in hdlr.status and self._prepsvc:
-                aipid = re.sub(r'^ark:/\d+/','', sipid)
-                out['published'] = self._prepsvc.prepper_for(aipid, log=log).aip_exists()
-                
-            return out
+            return hdlr.status
 
         except (IDNotFound, SIPDirectoryNotFound) as ex:
+            log.debug("Requested status on SIP=%s that is complete: %s", sipid, str(ex))
             return self._not_found_state(sipid, siptype)
         except Exception as ex:
+            log.error("Problem getting SIP status: %s", str(ex))
             return self._internal_error_state(sipid, siptype)
 
-    def _not_found_state(self, sipid, siptype):
+    def _not_found_state(self, sipid, siptype, message=None):
+        if not message:
+            message = status.user_message[status.NOT_FOUND]
         return {
             "id": sipid,
             "state": status.NOT_FOUND,
-            "message": status.user_message[status.NOT_FOUND],
+            "message": message,
             "history": []
         }
 
@@ -356,7 +360,10 @@ class PreservationService(object):
             if siptype and siptype != tp:
                 continue
             hndlrcfg = self._get_handler_config(tp)
-            ids = status.SIPStatus.requests(hndlrcfg.get('status_manager',{}))
+            cfg = hndlrcfg.get('status_manager',{})
+            if 'cachedir' not in cfg:
+                cfg['cachedir'] = os.path.join(self.workdir, 'preserv_status')
+            ids = status.SIPStatus.requests(cfg)
             for id in ids:
                 out[id] = tp
 
@@ -552,7 +559,9 @@ class MultiprocPreservationService(PreservationService):
         # fork this process so that work can be done in the child.
         if sync:
             # synchronous execution requested; don't really fork
+            log.info("Launching preservation synchronously")
             return 0
+        log.info("Launching preservation in subprocess")
         return os.fork()
 
     def _wait_and_see_proc(self, pid, handler, timeout=None):
@@ -574,12 +583,19 @@ class MultiprocPreservationService(PreservationService):
             handler.refresh_state()
             if handler.state == status.IN_PROGRESS:
                 # died midway for some reason
+                log.warn("preservation thread for SIP=%s died for unknown reasons", handler.sipid)
                 handler.set_state(status.FAILED,
                          "preservation thread died for unknown reasons")
             elif handler.state == status.READY:
                 # never started, it seems
+                log.warn("preservation of SIP=%s failed to start for unknown reasons", handler.sipid)
                 handler.set_state(status.FAILED,
                      "preservation failed to start for unknown reasons")
+            else:
+                log.debug("Preservation process for SIP=%s ended with state: %s",
+                          handler.sipid, handler.state)
+        else:
+            log.debug("Allowing preservation for SIP=%s to run asynchronously", handler.sipid)
 
     def _in_child_handle(self, handler, sync=False):
         # for child process:

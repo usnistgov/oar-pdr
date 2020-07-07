@@ -285,7 +285,7 @@ class TestPreserveHandler(test.TestCase):
         self.hdlr = self.gethandler(req['PATH_INFO'], req)
 
         body = self.hdlr.handle()
-        self.assertIn("202 ", self.resp[0])
+        self.assertIn("200 ", self.resp[0])
 
         stat = json.loads("\n".join(body))
         self.assertEqual(stat['state'], ps.SUCCESSFUL)

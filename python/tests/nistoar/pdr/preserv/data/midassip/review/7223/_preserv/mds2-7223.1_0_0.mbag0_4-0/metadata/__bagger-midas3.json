@@ -1,0 +1,26 @@
+{
+    "bagger_config": {
+        "relative_to_indir": true,
+        "repo_access": {
+            "headbag_cache": "_test-preserv.sh-9479/stage",
+            "metadata_service": {
+                "service_endpoint": "http://localhost:9092/"
+            }
+        },
+        "bag_builder": {
+            "validate_id": "mds[012]\\w"
+        },
+        "doi_resolver": {
+            "app_url": "https://data.nist.gov/",
+            "app_version": "1.3+",
+            "app_name": "NIST Public Data Repository: pubserver (oar-pdr)",
+            "email": "datasupport@nist.gov"
+        },
+        "enrich_refs": true
+    },
+    "bag_parent": "_test-preserv.sh-9479/mdbags",
+    "upload_directory": null,
+    "data_directory": "/home/rlp3/NIST/ODI/OAR/dev/oar-pdr2/python/tests/nistoar/pdr/preserv/data/midassip/review/7223",
+    "last_file_examine": 1594070695.712128,
+    "last_file_examine_datetime": "2020-07-06 17:24:55.712128"
+}

@@ -155,9 +155,12 @@ class UpdatePrepService(object):
         self.storedir = self.cfg.get('store_dir')
         scfg = self.cfg.get('distrib_service', {})
         self.distsvc = distrib.RESTServiceClient(scfg.get('service_endpoint'))
-        scfg = self.cfg.get('metadata_service', {})
-        self.mdsvc  = rmm.MetadataClient(scfg.get('service_endpoint'))
         self.cacher = HeadBagCacher(self.distsvc, self.sercache)
+
+        self.mdsvc = None
+        scfg = self.cfg.get('metadata_service', {})
+        if scfg.get('service_endpoint'):
+            self.mdsvc  = rmm.MetadataClient(scfg.get('service_endpoint'))
 
     def prepper_for(self, aipid, version=None, log=None):
         """
@@ -219,6 +222,9 @@ class UpdatePrepper(object):
         """
         out = os.path.join(self.mdcache, self.aipid+".json")
         if not os.path.exists(out):
+            if not self.mdcli:
+                # not configured to consult repository
+                return None
             try:
                 data = self.mdcli.describe(self.aipid)
                 with open(out, 'w') as fd:

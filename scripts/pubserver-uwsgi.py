@@ -104,6 +104,7 @@ def update_if_test_mode(config):
     
     if not workdir:
         workdir = "_pubserver-"+str(os.getpid())
+    workdir = os.path.abspath(workdir)
     if not datadir:
         datadir = os.path.join(os.path.dirname(os.path.dirname(
                                os.path.abspath(__file__))), "python", "tests", 
@@ -111,18 +112,55 @@ def update_if_test_mode(config):
     if not os.path.exists(workdir):
         os.mkdir(workdir)
     print("workdir: "+os.path.abspath(workdir))
+    storedir = os.path.join(workdir, "store")
+    if not os.path.exists(storedir):
+        os.mkdir(storedir)
 
     out = copy.deepcopy(config)
     out.update( {
         'test_mode':         True,
         'test_data_dir':     datadir,
         'working_dir':       workdir,
-        'review_dir':        os.path.join(datadir, "review"),
-        'upload_dir':        os.path.join(datadir, "upload"),
-        'id_registry_dir':   workdir,
-        'logdir':            workdir,
-        'loglevel':          logging.DEBUG
+        'store_dir':         storedir,
+        'staging_dir':       os.path.join(workdir, "stage"),
+        'id_registry_dir':   workdir
     } )
+    out.setdefault('sip_type',{})
+    out['sip_type'].setdefault('midas3',{})
+    out['sip_type']['midas3'].setdefault('common',{})
+    out['sip_type']['midas3'].setdefault('pubserv',{})
+    out['sip_type']['midas3'].setdefault('preserv',{})
+
+    out['sip_type']['midas3']['common'].update({
+        'review_dir':  os.path.join(datadir, "review"),
+        'upload_dir':  os.path.join(datadir, "upload")
+    })
+    out['sip_type']['midas3']['pubserv'].update({
+        'logdir':    workdir,
+        'loglevel':  logging.DEBUG,
+        'logfile':   "pubserver.log"
+    })
+    out['sip_type']['midas3']['preserv'].update({
+        'status_manager': {
+            "cachedir":  os.path.join(workdir, "preserve_status")
+        }
+    })
+
+    repourl = uwsgi.opt.get('oar_testmode_repo_access')
+    if repourl:
+        out.update( {
+            'repo_access': {
+                'headbag_cache': os.path.join(workdir, "stage"),
+                'metadata_service': {
+                    'service_endpoint':  repourl
+                }
+            }
+        } )
+        out['sip_type']['midas3']['preserv']['ingester'] = {
+            'data_dir':  os.path.join(workdir, "ingest"),
+            'service_endpoint':  repourl
+        }                           
+    
 
     return out
 
@@ -149,12 +187,10 @@ elif 'oar_config_service' in uwsgi.opt:
     srvc.wait_until_up(int(uwsgi.opt.get('oar_config_timeout', 10)),
                        True, sys.stderr)
     cfg = srvc.get(uwsgi.opt.get('oar_config_appname', 'pdr-publish'))
-    cfg = extract_sip_config(cfg)
 elif config.service:
     config.service.wait_until_up(int(os.environ.get('OAR_CONFIG_TIMEOUT', 10)),
                                  True, sys.stderr)
     cfg = config.service.get(os.environ.get('OAR_CONFIG_APP', 'pdr-publish'))
-    cfg = extract_sip_config(cfg)
 # elif is_in_test_mode():
 #     cfg = {}
 else:
@@ -162,6 +198,7 @@ else:
                                  "provided")
 
 cfg = update_if_test_mode(cfg)
+cfg = extract_sip_config(cfg)
 config.configure_log(config=cfg)
 
 # let uwsgi env over-ride customization service config

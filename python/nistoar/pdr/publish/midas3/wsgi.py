@@ -93,7 +93,7 @@ class MIDAS3PublishingApp(object):
                 path = self.latest_res.sub('', path)
                 handler = LatestHandler(path, self.pubsvc, env, start_resp, self._authkey, req)
         elif self.preserve_res.match(path):
-            path = self.preserve_path.sub('', path)
+            path = self.preserve_res.sub('', path)
             handler = PreserveHandler(path, self.pubsvc, env, start_resp, self._authkey, req)
 
         if not handler:
@@ -469,6 +469,11 @@ class PreserveHandler(Handler):
 
     def do_GET(self, path):
         # return the status on request or a list of previous requests
+        if self._reqrec:
+            self._reqrec.record()
+        if not self.authorized():
+            return self.send_error(401, "Unauthorized")
+        
         steps = path.split('/')
         if steps[0] == '':
             try:
@@ -513,7 +518,7 @@ class PreserveHandler(Handler):
         requested.
         """
         try: 
-            reqs = self._svc.preservation_requests('midas3')
+            reqs = self._svc.preservation_requests()
             out = json.dumps(reqs.keys())
         except Exception, ex:
             log.exception("Internal error: "+str(ex))
@@ -559,6 +564,10 @@ class PreserveHandler(Handler):
 
     def do_PUT(self, path):
         # create a new preservation request
+        if self._reqrec:
+            self._reqrec.record()
+        if not self.authorized():
+            return self.send_error(401, "Unauthorized")
         
         steps = path.split('/')
         if steps[0] == '':
@@ -652,7 +661,11 @@ class PreserveHandler(Handler):
 
     def do_PATCH(self, path):
         # create an update request
-
+        if self._reqrec:
+            self._reqrec.record()
+        if not self.authorized():
+            return self.send_error(401, "Unauthorized")
+        
         steps = path.split('/')
         if steps[0] == '':
             self.send_error(403, "PATCH is not supported on this resource")
@@ -692,7 +705,7 @@ class PreserveHandler(Handler):
             elif out['state'] == ps.SUCCESSFUL:
                 log.info("SIP update request completed synchronously: "+
                          sipid)
-                self.set_response(202, "SIP update completed successfully")
+                self.set_response(200, "SIP update completed successfully")
             elif out['state'] == ps.CONFLICT:
                 log.error(out['message'])
                 out['state'] = ps.FAILED

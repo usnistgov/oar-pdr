@@ -149,7 +149,8 @@ class MIDAS3PublishingService(PublishSystem):
 
         self.schemadir = self.cfg.get('nerdm_schema_dir', pdr.def_schema_dir)
         self._bagging_workers = {}
-        self.pressvc = MultiprocPreservationService(self._presv_config())
+        self.pressvc = MultiprocPreservationService(self.cfg.get('preservation_service',
+                                                                 self._presv_config()))
 
     def _presv_config(self):
         comm = {
@@ -167,11 +168,12 @@ class MIDAS3PublishingService(PublishSystem):
             "auth_method": self.cfg.get('auth_method', "header"),
             "sip_type": {
                 "midas3": {
-                    "common": comm
+                    "common": comm,
+                    "preserv": {}
                 }
             }
         }
-        return _configmod.merge_config(self.cfg.get('preservation_service', {}), out)
+        return out 
             
 
     def _set_working_dir(self, workdir):
@@ -735,18 +737,20 @@ class MIDAS3PublishingService(PublishSystem):
         :raise PreservationStateError:  if the SIP has been published before under the requested ID
                             and preserve_update() should have been used.  
         """
+        self.log.info("Queuing (first-time) preservation of SIP=%s", ediid)
         if async is None:
             async = not bg_sync
         stat = self.pressvc.status(ediid, "midas3")
-        if stat['state'] == ps.SUCCESSFUL or stat.get('published'):
-            raise PreservationStateError("AIP with ID already exists (need to request update?): " +
-                                         ediid)
-
         if stat['state'] in [ ps.NOT_FOUND, ps.PENDING, ps.IN_PROGRESS ]:
             # can't comply with request; just return stat, which tells the story
             return stat
 
         worker = self._get_bagging_worker(ediid)
+        prepr = worker.bagger.get_prepper()
+        if stat['state'] == ps.SUCCESSFUL or (prepr and prepr.aip_exists()):
+            raise PreservationStateError("AIP with ID already exists (need to request update?): " +
+                                         ediid)
+            
         halted = worker.get_halt_reason()
         if halted is not None:
             raise PreservationStateError("Publishing service processing is (unexpectedly) halted; reason: "
@@ -755,11 +759,11 @@ class MIDAS3PublishingService(PublishSystem):
 
         if not worker.is_working():
             if async:
-                timeout = self.cfg.get('preservation_service',{}).get('sync_timeout', 0.5)
+                timeout = self.cfg.get('preservation_service',{}).get('sync_timeout', 2)
                 worker.launch()
                 if worker.is_working:
                     # wait around for a little while to see if finishes quickly
-                    # (this is a bit of hack; and not optimal)
+                    # (this is a bit of hack and not optimal)
                     worker._thread.join(timeout/2.0)
                     if not worker.is_working():
                         # this is for the preservation service
@@ -784,31 +788,43 @@ class MIDAS3PublishingService(PublishSystem):
         :raise PreservationStateError:  if the SIP has not been published before under the requested ID
                             and preserve_new() should have been used.  
         """
+        self.log.info("Queuing (update) preservation of SIP=%s", ediid)
         if async is None:
             async = not bg_sync
         stat = self.pressvc.status(ediid, "midas3")
-        if not stat.get('published'):
-            raise PreservationStateError("AIP with ID does not exist (not updateable?): " +
-                                         ediid)
-
         if stat['state'] in [ ps.NOT_FOUND, ps.PENDING, ps.IN_PROGRESS ]:
             # can't comply with request; just return stat, which tells the story
             return stat
 
         worker = self._get_bagging_worker(ediid)
+        prepr = worker.bagger.get_prepper()
+        if prepr and not prepr.aip_exists():
+            raise PreservationStateError("AIP with ID does not exist (not updateable?): " +
+                                         ediid)
+
+        # worker may still be finishing up with preservation
+        timeout = self.cfg.get('preservation_service',{}).get('sync_timeout', 2)
         halted = worker.get_halt_reason()
         if halted is not None:
-            raise PreservationStateError("Publishing service processing is (unexpectedly) halted; reason: "
-                                         + halted)
+            if worker.is_working():
+                self.log.debug("Waiting for worker to finish launch of preservation for %s", worker.id)
+                worker._thread.join(timeout/2.0)
+                halted = worker.get_halt_reason()
+        if halted is not None:
+            if worker.is_working():
+                msg = "Previous preservation request still being processed; please wait"
+            else:
+                msg = "Publishing service processing is (unexpectedly) halted; reason: " + halted
+            raise PreservationStateError(msg)
+        
         worker.mark_for_preservation(True)
 
         if not worker.is_working():
             if async:
-                timeout = self.cfg.get('preservation_service',{}).get('sync_timeout', 0.5)
                 worker.launch()
-                if worker.is_working:
+                if worker.is_working():
                     # wait around for a little while to see if finishes quickly
-                    # (this is a bit of hack; and not optimal)
+                    # (this is a bit of hack and not optimal)
                     worker._thread.join(timeout/2.0)
                     if not worker.is_working():
                         # this is for the preservation service
@@ -827,6 +843,13 @@ class MIDAS3PublishingService(PublishSystem):
         # If this dataset has been idle since last preservation, clean it up
         worker = self._get_bagging_worker(ediid)
         return worker.preservation_status()
+
+    def preservation_requests(self):
+        """
+        return a list of identifiers for datasets for which there have been 
+        (unforgotten) requests for preservation.
+        """
+        return self.pressvc.requests()
 
 
     class BaggingWorker(object):
@@ -873,6 +896,7 @@ class MIDAS3PublishingService(PublishSystem):
 
         def launch(self):
             self._thread = self._Thread(self)
+            self.log.debug("Starting worker thread %s", self._thread.name)
             self._thread.start()
 
         def queue_POD(self, pod):
@@ -881,6 +905,8 @@ class MIDAS3PublishingService(PublishSystem):
                 write_json(pod, self.next_pod)
 
         def mark_for_preservation(self, asupdate=False):
+#            self.service.pressvc._make_handler(self.id, "midas3")._status.reset(
+#                                            "completing metadata updates before preservation")
             self.ensure_qlock()
             with self.qlock:
                 if os.path.exists(self.next_pod):
@@ -949,9 +975,10 @@ class MIDAS3PublishingService(PublishSystem):
                             # turn off pod queue processing
                             self.log.info("Pausing processing of POD updates for preservation")
                             self.halt_pod_processing("preserve")
+                            self.log.debug("enhancing file metadata...")
                             self.bagger.enhance_metadata(examine="sync")
+                            self.log.debug("launching preservation process...")
                             self.launch_preservation(pod['_preserve'] == "update")
-                            self.resume_pod_processing()
 
                     except PreservationException as ex:
                         self.log.error(str(ex))
@@ -959,6 +986,10 @@ class MIDAS3PublishingService(PublishSystem):
                     except Exception as ex:
                         self.log.exception("failure while processing POD update: "+str(ex))
                     finally:
+                        if pod.get('_preserve'):
+                            self.log.debug("resuming POD processing...")
+                            self.resume_pod_processing()
+                            self.log.info("POD update processing resumed")
                         with self.qlock:
                             os.remove(self.working_pod)
 
@@ -995,7 +1026,7 @@ class MIDAS3PublishingService(PublishSystem):
         def resume_pod_processing(self):
             # resume processing pod updates
             if not os.path.exists(self.halt_sema):
-                log.warn('POD processing apparently already resumed')
+                self.log.warn('POD processing apparently already resumed')
             else:
                 os.remove(self.halt_sema)
 
@@ -1003,16 +1034,15 @@ class MIDAS3PublishingService(PublishSystem):
             try: 
                 self.bagger.fileExaminer.waitForCompletion(None)
 
-                # determine location of preservation queue directory
-                pcfg = self.service.cfg.get('preservation_service', {})
-                wdir = pcfg.get('working_dir', self.service.workdir)
-                pbagparent = self.service.cfg.get('bagparent_dir', '_preserv')
-                isrel = self.service.cfg.get('bagger',{}).get('relative_to_indir')
+                # determine preservation bagger configuration
+                pcfg = self.service.pressvc._get_handler_config("midas3").get('bagger',{})
+                pbagparent = pcfg.get('bagparent_dir', self.service.cfg.get('bagparent_dir', '_preserv'))
+                isrel = pcfg.get('relative_to_indir')
                 if not os.path.isabs(pbagparent):
                     if isrel:
                         pbagparent = os.path.join(self.bagger.sip.revdatadir, pbagparent)
                     else:
-                        pbagparent = os.path.join(pcfg.get('working_dir'), pbagparent)
+                        pbagparent = os.path.join(pcfg.get('working_dir',self.service.workdir), pbagparent)
                 if not os.path.exists(pbagparent):
                     os.makedirs(pbagparent)
 
@@ -1023,6 +1053,7 @@ class MIDAS3PublishingService(PublishSystem):
 
                 # copy the metadata bag to the preservation queue
                 if self.bagger.prepsvc:
+                    self.log.debug("Will pull multibag info from previous published bag")
                     prepper = self.bagger.get_prepper()
                     prepper.set_multibag_info(self.bagger.bagdir)
                 pbagger = PreservationBagger.fromMetadataBagger(self.bagger, pbagparent, pcfg)
@@ -1045,7 +1076,7 @@ class MIDAS3PublishingService(PublishSystem):
             except PreservationException as ex:
                 raise
             except Exception as ex:
-                self.log.exception("Unexpected error whil managing preservation process: %s", str(ex))
+                self.log.exception("Unexpected error while managing preservation process: %s", str(ex))
                 raise PreservationException("Failure while managing preservation process: "+str(ex),
                                             cause=ex)
 

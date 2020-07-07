@@ -52,7 +52,7 @@ def submit_for_ingest(record, endpoint, name=None,
             raise NotValidForIngest(errs, resp.status_code, resp.reason, name)
         elif resp.status_code >= 400:
             raise IngestClientError(resp.status_code, resp.reason, name)
-        elif resp.status_code != 200:
+        elif resp.status_code != 200 and resp.status_code != 201:
             raise IngestServerError(resp.status_code, resp.reason, name,
                             message="Unexpected response from server: {0} {1}"
                                     .format(resp.status_code, resp.reason))

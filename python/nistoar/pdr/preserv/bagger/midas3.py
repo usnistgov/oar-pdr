@@ -12,7 +12,7 @@ serializing, and storing of preservation bags.)
 
 The implementations use the BagBuilder class to populate the output bag.   
 """
-import os, errno, logging, re, json, shutil, threading, time
+import os, errno, logging, re, json, shutil, threading, time, urllib
 from datetime import datetime
 from abc import ABCMeta, abstractmethod, abstractproperty
 from collections import OrderedDict, Mapping
@@ -290,8 +290,9 @@ class MIDASSIP(object):
 
         pod = self._pod_rec()
 
-        return [self._distsvcurl.sub('', d['downloadURL']) for d in pod['distribution']
-                                                           if 'downloadURL' in d]
+        return [self._distsvcurl.sub('', urllib.unquote(d['downloadURL']))
+                for d in pod['distribution'] if 'downloadURL' in d]
+                
 
     def registered_files(self, prefer_pod=False):
         """

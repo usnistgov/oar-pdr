@@ -1,0 +1,31 @@
+{
+    "_schema": "https://data.nist.gov/od/dm/nerdm-schema/v0.2#/definitions/Component",
+    "@context": "https://data.nist.gov/od/dm/nerdm-pub-context.jsonld",
+    "@id": "cmps/RegistryFederationFigure.pptx.sha256",
+    "@type": [
+        "nrdp:ChecksumFile",
+        "nrdp:DownloadableFile",
+        "dcat:Distribution"
+    ],
+    "filepath": "RegistryFederationFigure.pptx.sha256",
+    "downloadURL": "https://testdata.nist.gov/od/ds/mds2-7223/RegistryFederationFigure.pptx.sha256",
+    "algorithm": {
+        "tag": "sha256",
+        "@type": "Thing"
+    },
+    "describes": "cmps/RegistryFederationFigure.pptx",
+    "description": "SHA-256 checksum value for RegistryFederationFigure.pptx",
+    "_extensionSchemas": [
+        "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/ChecksumFile"
+    ],
+    "mediaType": "text/plain",
+    "size": 64,
+    "checksum": {
+        "hash": "a6c784ec0dbd790f4d34847c5fd5076bf14e5535b64dca0c8064a3f1c0635d58",
+        "algorithm": {
+            "tag": "sha256",
+            "@type": "Thing"
+        }
+    },
+    "valid": true
+}

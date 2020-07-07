@@ -1,0 +1,48 @@
+{
+  "title": "Editable Landing Pages for the PDR", 
+  "description": "NIST Researchers publishing data via MIDAS can now edit associated metadata directly on the landing page.  This record enables testing of this feature.", 
+  "modified": "2020-05-12", 
+  "publisher": {
+    "name": "National Institute of Standards and Technology", 
+    "@type": "org:Organization"
+  }, 
+  "contactPoint": {
+    "fn": "Raymond Plante", 
+    "hasEmail": "mailto:raymond.plante@nist.gov"
+  }, 
+  "identifier": "ark:/88434/mds2-7223", 
+  "accessLevel": "public", 
+  "@type": "dcat:Dataset", 
+  "license": "https://www.nist.gov/open/license", 
+  "distribution": [
+    {
+      "downloadURL": "https://testdata.nist.gov/od/ds/mds2-7223/RegistryFederationFigure.pptx.sha256", 
+      "mediaType": "text/plain"
+    }, 
+    {
+      "downloadURL": "https://testdata.nist.gov/od/ds/mds2-7223/RegistryFederationFigure.pptx", 
+      "mediaType": "application/vnd.openxmlformats-officedocument.presentationml.presentation"
+    }
+  ], 
+  "accrualPeriodicity": "irregular", 
+  "landingPage": "https://testdata.nist.gov/od/id/mds2-7223", 
+  "keyword": [
+    "data publishing", 
+    "testing"
+  ], 
+  "bureauCode": [
+    "006:55"
+  ], 
+  "programCode": [
+    "006:052"
+  ], 
+  "language": [
+    "en"
+  ], 
+  "theme": [
+    "Fire:Fire detection", 
+    "Information Technology:Data and informatics", 
+    "Electronics"
+  ]
+}
+

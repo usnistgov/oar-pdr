@@ -1,7 +1,8 @@
 #! /bin/bash
 #
-#  test-pubserver.sh -- launch a pubserver service and send it some test requests
+#  test-preserv.sh -- launch a pubserver service and send it some preservation requests
 #
+#  This is tests the midas3 conventions for MIDAS preservation.
 #
 set -e
 prog=`basename $0`
@@ -22,10 +23,6 @@ Options:
    --working-dir | -w DIR   write output files to this directory; if it doesn't exist it 
                             will be created.
    --pid-file | -p FILE     use this file as the server's PID file
-   --custserv-url | -U URL  base URL for the customization service to use; if not given, 
-                            a mock one will be launched locally
-   --custserv-secret | -T T use T as the authorization token for the customization service
-                            (ignored unless --custserv-url is specified)
    --midas-data-dir | -m DIR  use DIR as the parent directory containing MIDAS review and 
                             upload directories
    --with-mdserver | -M     launch and test an accompanying metadata server
@@ -35,6 +32,7 @@ Options:
 
 Arguments:
    PODFILE                  path to a pod file to test against the service
+
 EOF
 }
 
@@ -77,16 +75,6 @@ while [ "$1" != "" ]; do
           shift
           midasdir=$1
           ;;
-      --custserv-url|-U)
-          [ $# -lt 2 ] && { echo Missing argument to $1 option; false; }
-          shift
-          cust_service=$1
-          ;;
-      --custserv-secret|-T)
-          [ $# -lt 2 ] && { echo Missing argument to $1 option; false; }
-          shift
-          cust_secret=$1
-          ;;
       --with-mdserver|-M)
           withmdserver=1
           ;;
@@ -114,11 +102,9 @@ while [ "$1" != "" ]; do
   shift
 done
 
-[ "$execdir" = "" ] && execdir=$PWD
-
 [ -n "$server_config" ] || {
-    if [ -f etc/pubservice-test-config.yml ]; then
-        server_config=etc/pubservice-test-config.yml
+    if [ -f etc/preserv-test-config.yml ]; then
+        server_config=etc/preserv-test-config.yml
     else 
         [ -n "$OAR_ETC_DIR" ] || {
             [ -n "$OAR_HOME" ] || {
@@ -127,7 +113,7 @@ done
             }
             OAR_ETC_DIR=$OAR_HOME/etc
         }
-        server_config=$OAR_ETC_DIR/pubservice-test-config.yml
+        server_config=$OAR_ETC_DIR/preserv-test-config.yml
     fi
 }
 [ -f "$server_config" ] || {
@@ -157,8 +143,7 @@ done
     false
 }
 [ -n "$pods" ] || {
-    pods=($midasdir/review/1491/_pod.json $midasdir/upload/1491/_pod.json \
-          $midasdir/upload/7213/pod0.json $midasdir/upload/7213/pod0-1.json )
+    pods=($midasdir/review/7223/pod2.json $midasdir/review/7223/pod3.json )
 }
 
 [ -n "$workdir" ] || {
@@ -166,32 +151,22 @@ done
     workdir="_${workdir}-$$"
 }
 [ -d "$workdir" ] || mkdir $workdir
+[ -z "$withmdserver" ] || mkdir $workdir/mdarchive
 
 [ -n "$server_pid_file" ] || server_pid_file=$workdir/pubserver.pid
-[ -n "$cust_pid_file" ] || cust_pid_file=$workdir/simcustom.pid
-[ -n "$cust_uwsgi" ] || cust_uwsgi=python/tests/nistoar/pdr/publish/midas3/sim_cust_srv.py
-[ -n "$custserv_secret" ] || custserv_secret=secret
-custser_url=
-[ -n "$mdserver_uwsgi" ] || mdserver_uwsgi=scripts/ppmdserver3-uwsgi.py
-[ -n "$mdserver_config" ] || mdserver_config=$OAR_ETC_DIR/mdservice-test-config.yml
+[ -n "$mdserver_uwsgi" ] || mdserver_uwsgi=python/tests/nistoar/pdr/describe/sim_describe_svc.py
+[ -n "$mdserver_archdir" ] || mdserver_archdir=$workdir/mdarchive
 [ -n "$mdserver_pid_file" ] || mdserver_pid_file=$workdir/mdserver.pid
-[ -z "$withmdserver" -o -f "$mdserver_config" ] || {
-    echo ${prog}: server config file does not exist as file: $server_config 1>&2
-    false
-}
 
 function launch_test_server {
-    custcfg="--set-ph oar_custom_serv_url=http://localhost:9091/draft/"
-    [ -z "$custserv_url" ] || {
-        custcfg="--set-ph oar_custom_serv_url=$custserv_url"
-    }
     tell starting uwsgi for pubserver...
     [ -n "$quiet" -o -z "$verbose" ] || set -x
+    mdsopt=""
+    [ -z "$withmdserver" ] || mdsopt="--set-ph oar_testmode_repo_access=http://localhost:9092/"
     uwsgi --daemonize $workdir/uwsgi.log --plugin python --enable-threads \
           --http-socket :9090 --wsgi-file $uwsgi_script --pidfile $server_pid_file \
           --set-ph oar_testmode_workdir=$workdir --set-ph oar_testmode_midas_parent=$midasdir \
-          --set-ph oar_config_file=$server_config --set-ph oar_custom_serv_key=$custserv_secret\
-           $custcfg
+          --set-ph oar_config_file=$server_config $mdsopt
     set +x
 }
 
@@ -200,27 +175,12 @@ function stop_test_server {
     uwsgi --stop $server_pid_file
 }
 
-function launch_simcust_server {
-    tell starting uwsgi for simulated customization server "(with key=$custserv_secret)"...
-    [ -n "$quiet" -o -z "$verbose" ] || set -x
-    uwsgi --daemonize $workdir/cust-uwsgi.log --plugin python \
-          --http-socket :9091 --wsgi-file $cust_uwsgi --pidfile $cust_pid_file \
-          --set-ph auth_key=$custserv_secret
-    set +x
-}
-
-function stop_simcust_server {
-    tell stopping uwsgi for simulated customization server...
-    uwsgi --stop $cust_pid_file && rm $cust_pid_file
-}
-
 function launch_mdserver {
     tell starting uwsgi for metadata server...
     [ -n "$quiet" -o -z "$verbose" ] || set -x
     uwsgi --daemonize $workdir/mdserver-uwsgi.log --plugin python \
           --http-socket :9092 --wsgi-file $mdserver_uwsgi --pidfile $mdserver_pid_file \
-          --set-ph oar_testmode_workdir=$workdir --set-ph oar_testmode_midas_parent=$midasdir \
-          --set-ph oar_config_file=$mdserver_config 
+          --set-ph archive_dir=$mdserver_archdir
     set +x
 }
     
@@ -231,14 +191,12 @@ function stop_mdserver {
 
 function launch_servers {
     launch_test_server
-    [ -n "$custserv_url" ] || launch_simcust_server
     [ -z "$withmdserver" ] || launch_mdserver
 }
 
 function stop_servers {
     set +e
     stop_test_server
-    [ -f "$cust_pid_file" ] && stop_simcust_server
     [ -f "$mdserver_pid_file" ] && stop_mdserver
     set -e
 }
@@ -302,7 +260,7 @@ function property_in_pod {
     python $workdir/get_pod_prop.py "$@"
 }
 
-echo Testing pubserver via curl...
+echo Testing preservation through pubserver via curl...
 
 launch_servers
 trap stop_servers SIGKILL SIGINT
@@ -311,10 +269,30 @@ set +e
 totfailures=0
 totcount=0
 failures=0
-count=2
-tell  Testing failure modes
-#set -x
-curlcmd=(curl -s -w '%{http_code}\n' -H 'Authorization: Bearer secret' http://localhost:9090/pod/latest/mds2-1000)
+count=3
+
+tell Testing that service is configured properly and working
+curlcmd=(curl -o /dev/null -s -w '%{http_code}\n' http://localhost:9090/preserve/midas)
+respcode=`"${curlcmd[@]}"`
+[ "$respcode" == "401" ] || {
+    tell '---------------------------------------'
+    tell FAILED
+    tell "${curlcmd[@]}"
+    tell "Lack of auth token does not produce 401 response:" $respcode
+    ((failures += 1))
+}
+
+curlcmd=(curl -o /dev/null -s -w '%{http_code}\n' -H 'Authorization: Bearer secret' http://localhost:9090/preserve/midas)
+respcode=`"${curlcmd[@]}"`
+[ "$respcode" == "200" ] || {
+    tell '---------------------------------------'
+    tell FAILED
+    tell "${curlcmd[@]}"
+    tell "Health check does not produce 200 response:" $respcode
+    ((failures += 1))
+}
+
+curlcmd=(curl -o /dev/null -s -w '%{http_code}\n' -H 'Authorization: Bearer secret' -X PUT http://localhost:9090/preserve/midas/goober)
 respcode=`"${curlcmd[@]}"`
 [ "$respcode" == "404" ] || {
     tell '---------------------------------------'
@@ -324,38 +302,16 @@ respcode=`"${curlcmd[@]}"`
     ((failures += 1))
 }
 
-curlcmd=(curl -s -w '%{http_code}\n' -H 'Authorization: Bearer secret' -H 'Content-type: application/json' --data '{}' http://localhost:9090/pod/latest)
-respcode=`"${curlcmd[@]}"`
-[ "$respcode" == "400" ] || {
-    tell '---------------------------------------'
-    tell FAILED
-    tell "${curlcmd[@]}"
-    tell "Empty record does not produce 400 response:" $respcode
-    ((failures += 1))
-}
-
-[ -z "$withmdserver" ] || {
-    ((count += 1))
-    curlcmd=(curl -s -w '%{http_code}\n' http://localhost:9092/midas/mds2-1000)
-    respcode=`"${curlcmd[@]}"`
-    [ "$respcode" == "404" ] || {
-        tell '---------------------------------------'
-        tell FAILED
-        tell "${curlcmd[@]}"
-        tell "Non-existent record does not produce 404 response:" $respcode
-        ((failures += 1))
-    }
-}
-
 (( passed = count - failures ))
 tell '###########################################'
-tell  failure modes
+tell  service health
 tell  $count tests, $failures failures, $passed successes
 tell '###########################################'
 (( totfailures += failures ))
 (( totcount += count ))
 
 # run the tests against the server
+declare -A idcount
 for pod in "${pods[@]}"; do
     failures=0
     count=0
@@ -368,174 +324,73 @@ for pod in "${pods[@]}"; do
         exit 1
     }
     tell Processing `basename $pod` "POD with identifier =" $id
+    [ -n "${idcount[$id]}" ] || idcount[$id]=0
 
-    curlcmd=(curl -s -w '%{http_code}\n' -H 'Content-type: application/json' -H 'Authorization: Bearer secret' --data @$pod http://localhost:9090/pod/latest)
+    curlcmd=(curl -o /dev/null -s -w '%{http_code}\n' -H 'Content-type: application/json' -H 'Authorization: Bearer secret' --data @$pod http://localhost:9090/pod/latest)
     respcode=`"${curlcmd[@]}"`
-    [ "$respcode" == "201" ] || {
+    ((count += 1))
+    if [ "$respcode" != "201" ]; then
         tell '---------------------------------------'
         tell FAILED
         tell "${curlcmd[@]}"
         tell "Unexpected response to post to latest:" $respcode
         ((failures += 1))
-    }
-    ((count += 1))
-
-    curlcmd=(curl -s -H 'Authorization: Bearer secret' http://localhost:9090/pod/latest/$id)
-    "${curlcmd[@]}" > $workdir/pod.json
-    if [ $? -ne 0 ]; then
-        tell '---------------------------------------'
-        tell FAILED
+        continue
+    elif [ -n "$verbose" ]; then
         tell "${curlcmd[@]}"
-        tell `basename $pod`: "Failed to retrieve POD posted to latest"
-        ((failures += 1))
-    else 
-        newid=`property_in_pod identifier $workdir/pod.json`
-        [ "$id" == "$newid" ] || {
+    fi
+    sleep 1
+
+    if [ ${idcount[$id]} -gt 0 ]; then
+        curlcmd=(curl -o /dev/null -s -w '%{http_code}\n' -X PATCH -H 'Authorization: Bearer secret' http://localhost:9090/preserve/midas/$id)
+        respcode=`"${curlcmd[@]}"`
+        if [ "$respcode" != "200" -a "$respcode" != "202" ]; then
             tell '---------------------------------------'
             tell FAILED
             tell "${curlcmd[@]}"
-            tell `basename $pod`: "Unexpected identifier returned from latest:" $newid
+            tell "Unexpected response to PATCH to preserve:" $respcode
+            ((failures += 1))
+        elif [ -n "$verbose" ]; then
+            tell "${curlcmd[@]}"
+        fi            
+        ((count += 1))
+        [ "$respcode" == "200" ] || sleep 1
+
+        [ -f "$workdir/store/$localid.1_${idcount[$id]}_0.mbag0_4-${idcount[$id]}.zip" ] || {
+            tell '---------------------------------------'
+            tell FAILED
+            tell "Failed to find zipped bag resulting from preservation: " \
+                 $workdir/store/$localid.1_${idcount[$id]}_0.mbag0_4-${idcount[$id]}.zip
             ((failures += 1))
         }
-    fi
-    ((count += 1))
-
-    [ -z "$withmdserver" ] || {
-        curlcmd=(curl -s http://localhost:9092/midas/$localid)
-        "${curlcmd[@]}" > $workdir/nerdm.json
-        if [ $? -ne 0 ]; then
+        ((count += 1))
+        ((idcount[$id] += 1))
+    else
+        curlcmd=(curl -o /dev/null -s -w '%{http_code}\n' -X PUT -H 'Authorization: Bearer secret' http://localhost:9090/preserve/midas/$id)
+        respcode=`"${curlcmd[@]}"`
+        if [ "$respcode" != "201" -a "$respcode" != "202" ]; then
             tell '---------------------------------------'
             tell FAILED
             tell "${curlcmd[@]}"
-            tell `basename $pod`: "Failed to retrieve generated NERDm record"
+            tell "Unexpected response to PUT to preserve:" $respcode
             ((failures += 1))
-        else 
-            newid=`property_in_pod ediid $workdir/nerdm.json`
-            [ "$id" == "$newid" ] || {
-                tell '---------------------------------------'
-                tell FAILED
-                tell "${curlcmd[@]}"
-                tell `basename $pod`: "Unexpected identifier returned from mdserver rec:" $newid
-                ((failures += 1))
-            }
+        elif [ -n "$verbose" ]; then
+            tell "${curlcmd[@]}"
         fi
         ((count += 1))
-    }
+        [ "$respcode" == "201" ] || sleep 2
 
-    curlcmd=(curl -s -w '%{http_code}\n' -H 'Content-type: application/json' -H 'Authorization: Bearer secret' -X PUT --data @$pod http://localhost:9090/pod/draft/$id)
-    respcode=`"${curlcmd[@]}"`
-    [ "$respcode" == "201" ] || {
-        tell '---------------------------------------'
-        tell FAILED
-        tell ${curlcmd[@]}
-        tell "Unexpected response to post to draft:" $respcode
-        ((failures += 1))
-    }
-    ((count += 1))
-
-    curlcmd=(curl -s -H 'Authorization: Bearer secret' http://localhost:9090/pod/draft/$id)
-    "${curlcmd[@]}" > $workdir/pod.json
-    if [ $? -ne 0 ]; then
-        tell '---------------------------------------'
-        tell FAILED
-        tell ${curlcmd[@]}
-        tell `basename $pod`: "Failed to retrieve POD posted to draft"
-    else
-        newid=`property_in_pod identifier $workdir/pod.json`
-        [ "$id" == "$newid" ] || {
+        [ -f "$workdir/store/$localid.1_0_0.mbag0_4-0.zip" ] || {
             tell '---------------------------------------'
             tell FAILED
-            tell ${curlcmd[@]}
-            tell `basename $pod`: "Unexpected identifier returned from draft:" $newid
+            tell "Failed to find zipped bag resulting from preservation: " \
+                 $workdir/store/$localid.1_0_0.mbag0_4-0.zip
             ((failures += 1))
         }
+        ((count += 1))
+        ((idcount[$id] += 1))
     fi
-    ((count += 1))
-        
-    newtitle=`property_in_pod title $pod`
-    [ "$oldtitle" == "$newtitle" ] || {
-        tell '---------------------------------------'
-        tell FAILED
-        tell ${curlcmd[@]}
-        tell `basename $pod`: "Unexpected title returned from draft:" $newtitle
-        ((failures += 1))
-    }
-    ((count += 1))
-
-    sleep 1
-    [ -f "$workdir/mdbags/$localid/metadata/nerdm.json" ] || {
-        tell '---------------------------------------'
-        tell FAILED
-        tell `basename $pod`: "No generated NERDm record found at " \
-             "$workdir/mdbags/$localid/metadata/nerdm.json"
-        ((failures += 1))
-    }
-    ((count += 1))
-
-    curl -H "Authorization: Bearer $custserv_secret" -X PATCH -H 'Content-type: application/json' \
-         --data '{ "title": "Star Wars", "_editStatus": "done" }' \
-         http://localhost:9091/draft/$localid || \
-    {
-        tell '---------------------------------------'
-        tell WARNING: Back door PATCH to draft failed
-    }
-
-    curlcmd=(curl -s -H 'Authorization: Bearer secret' http://localhost:9090/pod/draft/$id)
-    "${curlcmd[@]}" > $workdir/pod.json
-    if [ $? -ne 0 ]; then
-        tell '---------------------------------------'
-        tell FAILED
-        tell ${curlcmd[@]}
-        tell `basename $pod`: "Failed to retrieve POD posted to draft"
-    else
-        newtitle=`property_in_pod title $workdir/pod.json`
-        [ "$newtitle" == "Star Wars" ] || {
-            tell '---------------------------------------'
-            tell FAILED
-            tell ${curlcmd[@]}
-            tell `basename $pod`: "Title from draft failed to get updated:" $newtitle
-            ((failures += 1))
-        }
-    fi
-    ((count += 1))
     
-    curlcmd=(curl -s -w '%{http_code}\n' -H 'Authorization: Bearer secret' -X DELETE http://localhost:9090/pod/draft/$id)
-    respcode=`"${curlcmd[@]}"`
-    [ "$respcode" == "200" ] || {
-        tell '---------------------------------------'
-        tell FAILED
-        tell ${curlcmd[@]}
-        tell "Unexpected response to delete of draft:" $respcode
-        ((failures += 1))
-    }
-    ((count += 1))
-
-    curlcmd=(curl -s -H 'Authorization: Bearer secret' http://localhost:9090/pod/latest/$id)
-    "${curlcmd[@]}" > $workdir/pod.json
-    if [ $? -ne 0 ]; then
-        tell '---------------------------------------'
-        tell FAILED
-        tell ${curlcmd[@]}
-        tell `basename $pod`: "Failed to retrieve POD posted to latest"
-    else
-        newid=`property_in_pod identifier $workdir/pod.json`
-        [ "$id" == "$newid" ] || {
-            tell '---------------------------------------'
-            tell FAILED
-            tell ${curlcmd[@]}
-            tell `basename $pod`: "Unexpected identifier returned from latest:" $newid
-            ((failures += 1))
-        }
-    fi
-    ((count += 1))
-    [ "$newtitle" == "Star Wars" ] || {
-        tell '---------------------------------------'
-        tell FAILED
-        tell ${curlcmd[@]}
-        tell `basename $pod`: "Failed to commit updated title:" $newtitle
-        ((failures += 1))
-    }
-    ((count += 1))
 
     (( passed = count - failures ))
     tell '###########################################'
@@ -545,6 +400,10 @@ for pod in "${pods[@]}"; do
     (( totfailures += failures ))
     (( totcount += count ))
 done
+
+
+
+
 
 trap - ERR
 stop_servers
@@ -563,4 +422,3 @@ else
 fi
 
 exit $totfailures
-

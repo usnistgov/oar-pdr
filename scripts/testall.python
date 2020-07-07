@@ -26,6 +26,8 @@ $PACKAGE_DIR/python/runtests.py || status=$?
 echo
 $PACKAGE_DIR/scripts/tests/test-pubserver.sh -q -M || status=$?
 echo
+$PACKAGE_DIR/scripts/tests/test-preserv.sh -q -M || status=$?
+echo
 
 if [ "$status" -ne 0 ]; then
     echo Some tests failed

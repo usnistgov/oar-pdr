@@ -1,0 +1,31 @@
+{
+    "_schema": "https://data.nist.gov/od/dm/nerdm-schema/v0.2#/definitions/Component",
+    "@context": "https://data.nist.gov/od/dm/nerdm-pub-context.jsonld",
+    "@id": "cmps/res-md.xsd.sha256",
+    "@type": [
+        "nrdp:ChecksumFile",
+        "nrdp:DownloadableFile",
+        "dcat:Distribution"
+    ],
+    "filepath": "res-md.xsd.sha256",
+    "downloadURL": "https://testdata.nist.gov/od/ds/mds2-7223/res-md.xsd.sha256",
+    "algorithm": {
+        "tag": "sha256",
+        "@type": "Thing"
+    },
+    "describes": "cmps/res-md.xsd",
+    "description": "SHA-256 checksum value for res-md.xsd",
+    "_extensionSchemas": [
+        "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/ChecksumFile"
+    ],
+    "mediaType": "text/plain",
+    "size": 64,
+    "checksum": {
+        "hash": "9915ac260a47c90861405031ac2ca2e8c5480033ba197fcddb70b8e749cbf40e",
+        "algorithm": {
+            "tag": "sha256",
+            "@type": "Thing"
+        }
+    },
+    "valid": true
+}

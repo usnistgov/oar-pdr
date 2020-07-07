@@ -165,6 +165,13 @@ class SIPHandler(object):
         raise NotImplementedError()
 
     @property
+    def sipid(self):
+        """
+        the identifier for the SIP being handled by this handler
+        """
+        return self._sipid
+
+    @property
     def status(self):
         """
         a dictionary describing the current status of the SIP's preservation.
@@ -403,6 +410,7 @@ class MIDASSIPHandler(SIPHandler):
                                          self._asupdate, sipdirname)
 
         if self.state == status.FORGOTTEN and self._is_preserved():
+            log.debug("Detected successful preservation that was forgotten, SIP=%s", self._sipid)
             self.set_state(status.SUCCESSFUL, 
                       "SIP with forgotten state is apparently already preserved")
 
@@ -750,12 +758,18 @@ class MIDAS3SIPHandler(SIPHandler):
             sipdatadir = self._midasid_to_recnum(self._sipid)
         datadir = os.path.join(datadir, sipdatadir)
 
-        isrel = self.cfg.get('bagger',{}).get('relative_to_indir')
+        bgrcfg = config.get('bagger', {})
+        if 'store_dir' not in bgrcfg and 'store_dir' in config:
+            bgrcfg['store_dir'] = config['store_dir']
+        if 'repo_access' not in bgrcfg and 'repo_access' in config:
+            bgrcfg['repo_access'] = config['repo_access']
+            if 'store_dir' not in bgrcfg['repo_access'] and 'store_dir' in bgrcfg:
+                bgrcfg['repo_access']['store_dir'] = bgrcfg['store_dir']
+
+        isrel = bgrcfg.get('relative_to_indir')
         bagparent = self.cfg.get('bagparent_dir')
         if not bagparent:
             bagparent = "_preserv"
-            if not isrel:
-                bagparent = sipid + bagparent
         if not os.path.isabs(bagparent):
             if isrel:
                 bagparent = os.path.join(datadir, bagparent)
@@ -764,6 +778,8 @@ class MIDAS3SIPHandler(SIPHandler):
                     raise ConfigurationException("Missing needed config "+
                                                  "property: workdir_dir")
                 bagparent = os.path.join(workdir, bagparent)
+                if not os.path.exists(bagparent):
+                    os.mkdir(bagparent)
 
         self.mdbagdir = self.cfg.get('mdbags_dir')
         if not self.mdbagdir:
@@ -783,22 +799,16 @@ class MIDAS3SIPHandler(SIPHandler):
         if self.cfg.get('force_copy_mdbag') or not os.path.isdir(self.sipdir):
             self.sipdir = os.path.join(self.mdbagdir, bagname)
 
-        bgrcfg = config.get('bagger', {})
-        if 'store_dir' not in bgrcfg and 'store_dir' in config:
-            bgrcfg['store_dir'] = config['store_dir']
-        if 'repo_access' not in bgrcfg and 'repo_access' in config:
-            bgrcfg['repo_access'] = config['repo_access']
-            if 'store_dir' not in bgrcfg['repo_access'] and 'store_dir' in bgrcfg:
-                bgrcfg['repo_access']['store_dir'] = bgrcfg['store_dir']
-
         try:
             self.bagger = PreservationM3Bagger(self.sipdir, bagparent, datadir, bgrcfg, self._asupdate)
         except (SIPDirectoryError, PreservationStateError) as ex:
+            log.debug("Unable to create PreservationBagger: %s", str(ex))
             self.bagger = None
             self.sipdir = None
 
         if self.state == status.FORGOTTEN:
             if self._is_preserved():
+                log.debug("Detected successful preservation that was forgotten, SIP=%s", self._sipid)
                 self.set_state(status.SUCCESSFUL, 
                                "SIP with forgotten state is apparently already preserved")
 
@@ -806,6 +816,8 @@ class MIDAS3SIPHandler(SIPHandler):
         ingcfg = self.cfg.get('ingester')
         if ingcfg:
             self._ingester = IngestClient(ingcfg, log.getChild("ingester"))
+        else:
+            log.warn("Ingester client not configured: archived records will not get loaded to repo")
 
     def isready(self, _inprogress=False):
         """
@@ -827,6 +839,11 @@ class MIDAS3SIPHandler(SIPHandler):
             # check for the existence of the input data
             if not os.path.exists(self.bagger.sipdir) or \
                not os.path.exists(self.bagger.datadir):
+                if log.isEnabledFor(logging.DEBUG):
+                    if not os.path.exists(self.bagger.sipdir):
+                        log.debug("SIP metadata bag directory missing: %s", self.bagger.sipdir)
+                    if not os.path.exists(self.bagger.datadir):
+                        log.debug("SIP data directory missing: %s", self.bagger.datadir)
                 self.set_state(status.NOT_FOUND, cache=False)
                 return False
 
@@ -871,6 +888,7 @@ class MIDAS3SIPHandler(SIPHandler):
         self._status.record_progress("Collecting metadata and files from MIDAS session")
         try:
             bagdir = self.bagger.make_bag()
+            self.bagger.bagbldr.record("Preservation bag is built and ready to be serialized.")
         finally:
             if hasattr(self.bagger, 'bagbldr') and self.bagger.bagbldr:
                 self.bagger.bagbldr._unset_logfile() # disengage the internal log
@@ -930,8 +948,8 @@ class MIDAS3SIPHandler(SIPHandler):
         # The file with sequence number 0 must be written last; this is a
         # signal that preservation is complete.
         try:
-            sigbase = self._sipid+"_"
-            ckspat = re.compile(self._sipid+r'.*-(\d+).\w+.sha256$')
+            sigbase = self.bagname+"_"
+            ckspat = re.compile(self.bagname+r'.*-(\d+).\w+.sha256$')
             cksfiles = [f for f in savefiles if ckspat.search(f)]
             cksfiles.sort(key=lambda f: int(ckspat.search(f).group(1)),
                           reverse=True)
