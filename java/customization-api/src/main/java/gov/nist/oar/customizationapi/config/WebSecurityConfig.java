@@ -15,6 +15,7 @@ package gov.nist.oar.customizationapi.config;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Profile;
@@ -47,8 +48,8 @@ public class WebSecurityConfig {
 	private Logger logger = LoggerFactory.getLogger(WebSecurityConfig.class);
 
 	/**
-	 * The following configuration should get loaded only in local profile. 
-	 * This is to test locally without connecting the identity server.
+	 * The following configuration should get loaded only in local profile. This is
+	 * to test locally without connecting the identity server.
 	 * 
 	 * @author Deoyani Nandrekar-Heinis
 	 *
@@ -59,6 +60,7 @@ public class WebSecurityConfig {
 
 		@Override
 		protected void configure(HttpSecurity security) throws Exception {
+
 			logger.info("#### SAML authentication and authorization service is disabled in this mode. #####");
 			security.httpBasic().disable();
 			security.formLogin().disable();
@@ -77,7 +79,8 @@ public class WebSecurityConfig {
 	}
 
 	/**
-	 * This bean is created only in local profile this avoids using external SAML id server.
+	 * This bean is created only in local profile this avoids using external SAML id
+	 * server.
 	 */
 	@Configuration
 	@Profile({ "local" })
@@ -112,7 +115,8 @@ public class WebSecurityConfig {
 	 */
 	@Configuration
 	@Profile({ "prod", "dev", "test", "default" })
-	//@ConditionalOnProperty(prefix = "samlauth", name = "enabled", havingValue = "true", matchIfMissing = true)
+	// @ConditionalOnProperty(prefix = "samlauth", name = "enabled", havingValue =
+	// "true", matchIfMissing = true)
 	@Order(1)
 	public static class RestApiSecurityConfig extends WebSecurityConfigurerAdapter {
 		private Logger logger = LoggerFactory.getLogger(RestApiSecurityConfig.class);
@@ -120,21 +124,49 @@ public class WebSecurityConfig {
 		@Value("${jwt.secret:testsecret}")
 		String secret;
 
+		@Value("${samlauth.enabled:true}")
+		boolean authEnabled;
 		private static final String apiMatcher = "/pdr/lp/editor/**";
 
 		@Override
 		protected void configure(HttpSecurity http) throws Exception {
-			logger.info("#### RestApiSecurityConfig HttpSecurity for REST /pdr/lp/editor/ endpoints ###");
-			http.addFilterBefore(new JWTAuthenticationFilter(apiMatcher, super.authenticationManager()),
-					UsernamePasswordAuthenticationFilter.class);
+			if (!authEnabled) {
+				logger.info("#### SAML authentication and authorization service is disabled in this mode. #####");
+				http.addFilterBefore(new JWTAuthenticationFilterLocal(apiMatcher, super.authenticationManager()),
+						UsernamePasswordAuthenticationFilter.class);
+				http.httpBasic().disable();
+				http.formLogin().disable();
+				http.cors().and().csrf().disable();
+				http.authorizeRequests().antMatchers("/").permitAll();
+				
 
-			http.authorizeRequests().antMatchers(HttpMethod.PATCH, apiMatcher).permitAll();
-			http.authorizeRequests().antMatchers(HttpMethod.GET, apiMatcher).permitAll();
-			http.authorizeRequests().antMatchers(HttpMethod.DELETE, apiMatcher).permitAll();
-			http.authorizeRequests().antMatchers(apiMatcher).authenticated().and().httpBasic().and().csrf().disable();
+			} else {
+				logger.info("#### RestApiSecurityConfig HttpSecurity for REST /pdr/lp/editor/ endpoints ###");
+				http.addFilterBefore(new JWTAuthenticationFilter(apiMatcher, super.authenticationManager()),
+						UsernamePasswordAuthenticationFilter.class);
 
+				http.authorizeRequests().antMatchers(HttpMethod.PATCH, apiMatcher).permitAll();
+				http.authorizeRequests().antMatchers(HttpMethod.GET, apiMatcher).permitAll();
+				http.authorizeRequests().antMatchers(HttpMethod.DELETE, apiMatcher).permitAll();
+				http.authorizeRequests().antMatchers(apiMatcher).authenticated().and().httpBasic().and().csrf()
+						.disable();
+			}
 		}
 
+		/**
+		 * Allow following URL patterns without any authentication and authorization
+		 */
+		@Override
+		public void configure(WebSecurity web) throws Exception {
+			if (!authEnabled) {
+				web.ignoring().antMatchers("/v2/api-docs", "/configuration/ui", "/swagger-resources/**",
+						"/configuration/security", "/swagger-ui.html", "/webjars/**", "/pdr/lp/draft/**");
+			}
+		}
+		
+		/**
+		 * 
+		 */
 		@Override
 		protected void configure(AuthenticationManagerBuilder auth) {
 			auth.authenticationProvider(new JWTAuthenticationProvider(secret));
@@ -168,7 +200,7 @@ public class WebSecurityConfig {
 	 */
 	@Configuration
 	@Profile({ "prod", "dev", "test", "default" })
-
+	@ConditionalOnProperty(value = "samlauth.enabled", havingValue = "true", matchIfMissing = true)
 	@Import(SamlSecurityConfig.class)
 	public static class SamlConfig {
 

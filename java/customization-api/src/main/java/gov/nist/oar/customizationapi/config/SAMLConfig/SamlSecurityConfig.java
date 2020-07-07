@@ -104,7 +104,7 @@ import gov.nist.oar.customizationapi.service.SamlUserDetailsService;
  * @author Deoyani Nandrekar-Heinis
  */
 @Configuration
-//@ConditionalOnProperty(prefix = "samlauth", name = "enabled", havingValue = "true", matchIfMissing = true)
+@ConditionalOnProperty(value = "samlauth.enabled", havingValue = "true", matchIfMissing = true)
 @Profile({"prod","dev","test","default"})
 public class SamlSecurityConfig extends WebSecurityConfigurerAdapter {
 	private static Logger logger = LoggerFactory.getLogger(SamlSecurityConfig.class);

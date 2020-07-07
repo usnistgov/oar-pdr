@@ -11,5 +11,6 @@ spring:
 logging:
   path : /var/log/customization-api
   exception-conversion-word: '%wEx'
-#samlauth:
-#  enabled: false
+  
+samlauth:
+  enabled: false

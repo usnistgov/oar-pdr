@@ -6,6 +6,7 @@ import javax.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
@@ -37,7 +38,8 @@ import gov.nist.oar.customizationapi.service.UserToken;
 @RestController
 @CrossOrigin(origins = "*", allowedHeaders = "*")
 @RequestMapping("/auth")
-@Profile({ "local" })
+//@Profile({ "local" })
+@ConditionalOnProperty(value = "samlauth.enabled", havingValue = "false", matchIfMissing = true)
 public class LocalAuthController {
 	private Logger logger = LoggerFactory.getLogger(LocalAuthController.class);
 
@@ -51,7 +53,6 @@ public class LocalAuthController {
 				"This should be called only in local profile, while testing locally. It returns sample user values.");
 //		String name = authentication.getName();
 //		Object ob = authentication.getDetails();
-//		
 //		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 		if(authentication == null)throw new UnAuthenticatedUserException("No user authenticated to complete this request.");
 		AuthenticatedUserDetails pauth = (AuthenticatedUserDetails) authentication.getPrincipal();
