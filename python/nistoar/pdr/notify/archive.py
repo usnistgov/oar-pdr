@@ -3,7 +3,7 @@ This module proivdes the implementation for archiving notifications.
 """
 
 import os, fcntl, time
-from .base import NotificationTarget, ChannelService
+from .base import NotificationTarget, ChannelService, NotificationError
 from ..exceptions import ConfigurationException, StateException
 
 class Archiver(ChannelService):
@@ -49,7 +49,7 @@ class Archiver(ChannelService):
                 fd.write('\n,\n')  # this line is an end-of-record marker
         except IOError as ex:
             raise NotificationError("Failed to archive notification to " +
-                                    target + " due to IOError: " + str(ex))
+                                    target + " due to IOError: " + str(ex), ex)
 
     def open_archive_file(self, target):
         """
@@ -118,5 +118,4 @@ class ArchiveTarget(NotificationTarget):
             targetname = self.name
         self.service.archive(targetname, notice)
 
-        
         
