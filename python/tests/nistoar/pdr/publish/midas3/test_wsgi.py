@@ -57,6 +57,7 @@ def startService(workdir):
     cmd = cmd.format(os.path.join(tdir,"simsrv.log"), srvport,
                      os.path.join(simsrvrsrc), pidfile)
     os.system(cmd)
+    time.sleep(0.5)
 
 def stopService(workdir):
     srvport = custport
