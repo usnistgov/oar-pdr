@@ -22,7 +22,7 @@ PACKAGE_NAME=oar-pdr
 ## containers to be built.  List them in dependency order (where a latter one
 ## depends the former ones).  
 #
-DOCKER_IMAGE_DIRS="pymongo jq ejsonschema pdrtest pdrangular angtest"
+DOCKER_IMAGE_DIRS="pymongo jqfromsrc ejsonschema pdrtest pdrangular angtest"
 
 . $codedir/oar-build/_dockbuild.sh
 
