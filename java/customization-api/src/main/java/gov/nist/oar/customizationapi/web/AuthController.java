@@ -53,7 +53,7 @@ import io.swagger.annotations.ApiOperation;
  */
 @RestController
 @RequestMapping("/auth")
-@Profile({"prod","dev","test","default"})
+//@Profile({"prod","dev","test","default"})
 @ConditionalOnProperty(value = "samlauth.enabled", havingValue = "true", matchIfMissing = true)
 public class AuthController {
 

@@ -105,7 +105,7 @@ import gov.nist.oar.customizationapi.service.SamlUserDetailsService;
  */
 @Configuration
 @ConditionalOnProperty(value = "samlauth.enabled", havingValue = "true", matchIfMissing = true)
-@Profile({"prod","dev","test","default"})
+//@Profile({"prod","dev","test","default"}) //This Profile setting can be used to enable the feature based on certain profiles/platforms.
 public class SamlSecurityConfig extends WebSecurityConfigurerAdapter {
 	private static Logger logger = LoggerFactory.getLogger(SamlSecurityConfig.class);
 

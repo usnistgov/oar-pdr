@@ -55,7 +55,8 @@ public class WebSecurityConfig {
 	 *
 	 */
 	@Configuration
-	@Profile({ "local" })
+//	@Profile({ "local" }) //This setting can be used to enable the feature based on certain profiles/platforms.
+	@ConditionalOnProperty(value = "samlauth.enabled", havingValue = "false", matchIfMissing = true)
 	public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
 		@Override
@@ -83,7 +84,8 @@ public class WebSecurityConfig {
 	 * server.
 	 */
 	@Configuration
-	@Profile({ "local" })
+//	@Profile({ "local" }) //This setting can be used to enable the feature based on certain profiles/platforms.
+	@ConditionalOnProperty(value = "samlauth.enabled", havingValue = "false", matchIfMissing = true)
 	@Order(1)
 	public static class RestApiSecurityConfigLocal extends WebSecurityConfigurerAdapter {
 		private Logger logger = LoggerFactory.getLogger(RestApiSecurityConfigLocal.class);
@@ -114,9 +116,9 @@ public class WebSecurityConfig {
 	 * Rest security configuration for rest api
 	 */
 	@Configuration
-	@Profile({ "prod", "dev", "test", "default" })
-	// @ConditionalOnProperty(prefix = "samlauth", name = "enabled", havingValue =
-	// "true", matchIfMissing = true)
+	// @Profile({ "prod", "dev", "test", "default" }) //This setting can be used to
+	// enable the feature based on certain profiles/platforms.
+	@ConditionalOnProperty(value = "samlauth.enabled", havingValue = "true", matchIfMissing = true)
 	@Order(1)
 	public static class RestApiSecurityConfig extends WebSecurityConfigurerAdapter {
 		private Logger logger = LoggerFactory.getLogger(RestApiSecurityConfig.class);
@@ -124,48 +126,24 @@ public class WebSecurityConfig {
 		@Value("${jwt.secret:testsecret}")
 		String secret;
 
-		@Value("${samlauth.enabled:true}")
-		boolean authEnabled;
 		private static final String apiMatcher = "/pdr/lp/editor/**";
 
 		@Override
 		protected void configure(HttpSecurity http) throws Exception {
-			if (!authEnabled) {
-				logger.info("#### SAML authentication and authorization service is disabled in this mode. #####");
-				http.addFilterBefore(new JWTAuthenticationFilterLocal(apiMatcher, super.authenticationManager()),
-						UsernamePasswordAuthenticationFilter.class);
-				http.httpBasic().disable();
-				http.formLogin().disable();
-				http.cors().and().csrf().disable();
-				http.authorizeRequests().antMatchers("/").permitAll();
-				
 
-			} else {
-				logger.info("#### RestApiSecurityConfig HttpSecurity for REST /pdr/lp/editor/ endpoints ###");
-				http.addFilterBefore(new JWTAuthenticationFilter(apiMatcher, super.authenticationManager()),
-						UsernamePasswordAuthenticationFilter.class);
+			logger.info("#### RestApiSecurityConfig HttpSecurity for REST /pdr/lp/editor/ endpoints ###");
+			http.addFilterBefore(new JWTAuthenticationFilter(apiMatcher, super.authenticationManager()),
+					UsernamePasswordAuthenticationFilter.class);
 
-				http.authorizeRequests().antMatchers(HttpMethod.PATCH, apiMatcher).permitAll();
-				http.authorizeRequests().antMatchers(HttpMethod.GET, apiMatcher).permitAll();
-				http.authorizeRequests().antMatchers(HttpMethod.DELETE, apiMatcher).permitAll();
-				http.authorizeRequests().antMatchers(apiMatcher).authenticated().and().httpBasic().and().csrf()
-						.disable();
-			}
+			http.authorizeRequests().antMatchers(HttpMethod.PATCH, apiMatcher).permitAll();
+			http.authorizeRequests().antMatchers(HttpMethod.GET, apiMatcher).permitAll();
+			http.authorizeRequests().antMatchers(HttpMethod.DELETE, apiMatcher).permitAll();
+			http.authorizeRequests().antMatchers(apiMatcher).authenticated().and().httpBasic().and().csrf().disable();
+
 		}
 
 		/**
-		 * Allow following URL patterns without any authentication and authorization
-		 */
-		@Override
-		public void configure(WebSecurity web) throws Exception {
-			if (!authEnabled) {
-				web.ignoring().antMatchers("/v2/api-docs", "/configuration/ui", "/swagger-resources/**",
-						"/configuration/security", "/swagger-ui.html", "/webjars/**", "/pdr/lp/draft/**");
-			}
-		}
-		
-		/**
-		 * 
+		 * Authentication provider configuration
 		 */
 		@Override
 		protected void configure(AuthenticationManagerBuilder auth) {
@@ -199,49 +177,11 @@ public class WebSecurityConfig {
 	 * Saml security config
 	 */
 	@Configuration
-	@Profile({ "prod", "dev", "test", "default" })
+//	@Profile({ "prod", "dev", "test", "default" }) //This setting can be used to enable the feature based on certain profiles/platforms.
 	@ConditionalOnProperty(value = "samlauth.enabled", havingValue = "true", matchIfMissing = true)
 	@Import(SamlSecurityConfig.class)
 	public static class SamlConfig {
 
 	}
 
-//	/**
-//	 * Security configuration for service level authorization end points
-//	 */
-//	@Configuration
-//	@Order(560)
-//	public static class AuthServiceSecurityConfig extends WebSecurityConfigurerAdapter {
-//		private Logger logger = LoggerFactory.getLogger(AuthServiceSecurityConfig.class);
-//
-//		private static final String apiMatcher = "/pdr/lp/draft/**";
-//		@Value("${custom.service.secret:testid}")
-//		String secret;
-//
-//		@Override
-//		protected void configure(HttpSecurity http) throws Exception {
-//			logger.info("AuthServiceSecurityConfig set up http related entrypoints." + secret);
-////			ServiceAuthenticationFilter serviceFilter = new ServiceAuthenticationFilter(apiMatcher,
-////					super.authenticationManager());
-//			ServiceAuthenticationFilter serviceFilter = new ServiceAuthenticationFilter(apiMatcher);
-//			serviceFilter.setSecret(secret);
-//
-//			// http.addFilterBefore(cors2Filter(),ChannelProcessingFilter.class);
-////			http.httpBasic().and().csrf().disable();
-//			http.addFilterBefore(serviceFilter, BasicAuthenticationFilter.class);
-//			http.antMatcher(apiMatcher).authorizeRequests().anyRequest().permitAll();
-//			http.authorizeRequests().antMatchers(HttpMethod.GET, apiMatcher).permitAll();
-//			http.authorizeRequests().antMatchers(HttpMethod.PUT, apiMatcher).permitAll();
-//			http.authorizeRequests().antMatchers(HttpMethod.DELETE, apiMatcher).permitAll();
-//			http.authorizeRequests().antMatchers(apiMatcher).authenticated().and().httpBasic().and().csrf().disable();
-//			//http.authorizeRequests().antMatchers(apiMatcher)
-//		}
-//
-//		@Override
-//		protected void configure(AuthenticationManagerBuilder auth) {
-//			auth.authenticationProvider(new ServiceAuthenticationProvider());
-//		}
-//
-//
-//	}
 }

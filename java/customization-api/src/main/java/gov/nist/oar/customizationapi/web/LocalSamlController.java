@@ -33,7 +33,7 @@ import gov.nist.oar.customizationapi.helpers.AuthenticatedUserDetails;
 @Validated
 @CrossOrigin(origins = "*", allowedHeaders = "*")
 @RequestMapping("/saml/login")
-//@Profile({ "local" })
+//@Profile({ "local" })  //This setting can be used to enable the feature based on certain profiles/platforms.
 @ConditionalOnProperty(value = "samlauth.enabled", havingValue = "false", matchIfMissing = true)
 public class LocalSamlController {
 	private Logger logger = LoggerFactory.getLogger(LocalSamlController.class);

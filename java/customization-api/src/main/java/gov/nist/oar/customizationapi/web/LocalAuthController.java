@@ -38,7 +38,7 @@ import gov.nist.oar.customizationapi.service.UserToken;
 @RestController
 @CrossOrigin(origins = "*", allowedHeaders = "*")
 @RequestMapping("/auth")
-//@Profile({ "local" })
+//@Profile({ "local" }) //This setting can be used to enable the feature based on certain profiles/platforms.
 @ConditionalOnProperty(value = "samlauth.enabled", havingValue = "false", matchIfMissing = true)
 public class LocalAuthController {
 	private Logger logger = LoggerFactory.getLogger(LocalAuthController.class);
