@@ -38,6 +38,7 @@ from ...notify import NotificationService
 from ..bagger.prepupd import UpdatePrepService
 from ..bagger.midas3 import midasid_to_bagname
 from ... import config as configmod
+from ... import utils
 
 from .. import PreservationException, sys as _sys
 log = logging.getLogger(_sys.system_abbrev)   \
@@ -540,6 +541,8 @@ class MultiprocPreservationService(PreservationService):
         """
         super(MultiprocPreservationService, self).__init__(config)
         self._oldlogfile = None
+        self.combinedlog = os.path.join(self.cfg.get('logdir', configmod.global_logdir),
+                                        self.cfg.get('logfile', 'preservation.log'))
 
     def _pid_is_alive(self, pid):
         if pid <= 0:
@@ -693,8 +696,36 @@ class MultiprocPreservationService(PreservationService):
             print("Preservation failure while setting up logging: "+str(ex))
 
     def _teardown_child(self, handler, sync=False):
+        mylog = configmod.global_logfile
+        emsg = None
+        try:
+            with utils.LockedFile(self.combinedlog, 'a') as dfd:
+                with open(mylog) as sfd:
+                    dfd.write("----------- Preserving %s --------------\n" % handler.sipid)
+                    txt = sfd.read(10240)
+                    while txt:
+                        dfd.write(txt)
+                        txt = sfd.read(10240)
+        except OSError as ex:
+            emsg = "Trouble saving sublog, %s, to combined log, %s" % (mylog, self.combinedlog)
+
         if sync and self._oldlogfile:
-            configmod.configure_log(self._oldlogfile, config=handler.cfg)
+            try:
+                configmod.configure_log(self._oldlogfile, config=handler.cfg)
+            except Exception as ex:
+                lmsg = "Problem switching back logging: " + str(ex)
+                log.error(lmsg)
+                print("Warning: "+lmsg)
+
+        if emsg:
+            log.error(emsg)
+            print("Warning: "+emsg)
+        else:
+            try:
+                os.remove(mylog)
+            except Exception as ex:
+                log.exception("Trouble removing sublog, %s: %s", mylog, str(ex))
+                
 
 class RerequestException(PreservationException):
     """
