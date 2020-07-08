@@ -159,15 +159,10 @@ class TestM3MultiprocessPreservationService(test.TestCase):
         self.assertTrue(hndlr.isready())
         self.assertEqual(hndlr.state, status.READY)
 
-        cpid = -1
-        try:
-            (stat, cpid) = self.svc._launch_handler(hndlr, 10, True)
-            self.assertEqual(cpid, 0)
-            self.assertEqual(stat['state'], status.SUCCESSFUL)
-        finally:
-            rootlogger = logging.getLogger()
-            rootlogger.removeHandler(config._log_handler)
-            setUpModule()
+        proc = None
+        (stat, proc) = self.svc._launch_handler(hndlr, 10, True)
+        self.assertIsNone(proc)
+        self.assertEqual(stat['state'], status.SUCCESSFUL)
 
         self.assertEqual(hndlr.state, status.SUCCESSFUL)
         self.assertTrue(os.path.exists(os.path.join(self.storedir,

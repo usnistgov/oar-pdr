@@ -425,6 +425,8 @@ class TestMultiprocPreservationService(test.TestCase):
 
         proc = None
         (stat, proc) = self.svc._launch_handler(hndlr, 10)
+        self.assertNotEqual(stat, status.FAILED,
+                            "Unexpected handler failure: "+hndlr.status['message'])
         self.assertIsNotNone(proc)
         proc.join()
         self.assertFalse(proc.is_alive())

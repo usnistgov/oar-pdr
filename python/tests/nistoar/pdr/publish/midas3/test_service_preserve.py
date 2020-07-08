@@ -15,7 +15,6 @@ from nistoar.pdr.preserv.bagit import builder as bldr
 from nistoar.pdr.preserv.bagit import NISTBag
 
 from nistoar.pdr.preserv.service import service as _psrvc
-_psrvc.mp_sync = True
 
 # datadir = nistoar/preserv/data
 datadir = os.path.join( os.path.dirname(os.path.dirname(os.path.dirname(__file__))),
@@ -44,7 +43,11 @@ def setUpModule():
     logging.getLogger("jsonmerge").setLevel(logging.INFO)
     startService()
 
+    _psrvc.mp_sync = True
+    
 def tearDownModule():
+    _psrvc.mp_sync = False
+
     global loghdlr
     if loghdlr:
         if rootlog:

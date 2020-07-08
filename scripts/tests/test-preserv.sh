@@ -26,6 +26,7 @@ Options:
    --midas-data-dir | -m DIR  use DIR as the parent directory containing MIDAS review and 
                             upload directories
    --with-mdserver | -M     launch and test an accompanying metadata server
+   --pause | -P SECS        sleep SECS seconds between processing each POD
    --quiet | -q             suppress most status messages 
    --verbose | -v           print extra messages about internals
    --help                   print this help message
@@ -40,6 +41,7 @@ quiet=
 verbose=
 noclean=
 withmdserver=
+pausebetween=
 pods=()
 while [ "$1" != "" ]; do
   case "$1" in
@@ -77,6 +79,11 @@ while [ "$1" != "" ]; do
           ;;
       --with-mdserver|-M)
           withmdserver=1
+          ;;
+      --pause|-P)
+          [ $# -lt 2 ] && { echo Missing argument to $1 option; false; }
+          shift
+          pausebetween=$1
           ;;
       --quiet|-q)
           quiet=1
@@ -163,7 +170,8 @@ function launch_test_server {
     [ -n "$quiet" -o -z "$verbose" ] || set -x
     mdsopt=""
     [ -z "$withmdserver" ] || mdsopt="--set-ph oar_testmode_repo_access=http://localhost:9092/"
-    uwsgi --daemonize $workdir/uwsgi.log --plugin python --enable-threads \
+    export OAR_LOG_DIR=$workdir
+    uwsgi --daemonize $workdir/uwsgi.log --plugin python --enable-threads --close-on-exec \
           --http-socket :9090 --wsgi-file $uwsgi_script --pidfile $server_pid_file \
           --set-ph oar_testmode_workdir=$workdir --set-ph oar_testmode_midas_parent=$midasdir \
           --set-ph oar_config_file=$server_config $mdsopt
@@ -315,6 +323,12 @@ declare -A idcount
 for pod in "${pods[@]}"; do
     failures=0
     count=0
+
+    # sleep between file processing as requested
+    [ $count -eq 0 -o -z "$pausebetween" ] || {
+        [ -n "$quiet" ] || echo "Resting for $pausebetween seconds..."
+        sleep $pausebetween
+    }
 
     id=`property_in_pod identifier $pod`
     localid=`echo $id | perl -pe 's/^ark:\/\d+\///;'`

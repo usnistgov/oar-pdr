@@ -828,7 +828,7 @@ class MIDAS3PublishingService(PublishSystem):
                     worker._thread.join(timeout/2.0)
                     if not worker.is_working():
                         # this is for the preservation service
-                        timer.sleep(timeout/2.0)
+                        time.sleep(timeout/2.0)
             else:
                 worker.run("sync")
 
@@ -1028,13 +1028,13 @@ class MIDAS3PublishingService(PublishSystem):
 
         def resume_pod_processing(self):
             # resume processing pod updates
-            if not os.path.exists(self.halt_sema):
-                self.log.warn('POD processing apparently already resumed')
-            else:
+            if os.path.exists(self.halt_sema):
                 try:
                     os.remove(self.halt_sema)
                 except Exception as ex:
                     self.log.error("Trouble removing halt file: %s", str(ex))
+            else:
+                self.log.warn('POD processing apparently already resumed')
 
         def launch_preservation(self, asupdate=False):
             try: 
