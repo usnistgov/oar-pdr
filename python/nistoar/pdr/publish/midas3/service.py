@@ -991,7 +991,10 @@ class MIDAS3PublishingService(PublishSystem):
                             self.resume_pod_processing()
                             self.log.info("POD update processing resumed")
                         with self.qlock:
-                            os.remove(self.working_pod)
+                            try:
+                                os.remove(self.working_pod)
+                            except Exception as ex:
+                                self.log.warn("Trouble removing current consumed POD: %s", str(ex))
 
                 if os.path.exists(self.halt_sema):
                     break
@@ -1028,7 +1031,10 @@ class MIDAS3PublishingService(PublishSystem):
             if not os.path.exists(self.halt_sema):
                 self.log.warn('POD processing apparently already resumed')
             else:
-                os.remove(self.halt_sema)
+                try:
+                    os.remove(self.halt_sema)
+                except Exception as ex:
+                    self.log.error("Trouble removing halt file: %s", str(ex))
 
         def launch_preservation(self, asupdate=False):
             try: 
