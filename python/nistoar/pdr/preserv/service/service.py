@@ -26,7 +26,7 @@ submit the metadata to the PDR metadata database.
 from __future__ import print_function
 from copy import deepcopy
 from abc import ABCMeta, abstractmethod, abstractproperty
-import os, sys, logging, threading, time, errno, re
+import os, sys, logging, threading, multiprocessing, time, errno, re
 
 from .. import (PDRException, StateException, IDNotFound, 
                 ConfigurationException, SIPDirectoryNotFound, AIPValidationError,
@@ -46,7 +46,7 @@ log = logging.getLogger(_sys.system_abbrev)   \
              .getChild('service')
 
 # this is used during testing to run preservation processing syncronously within
-# MultiprocessPreservationService
+# MultiprocPreservationService
 mp_sync = False
 
 class PreservationService(object):
@@ -377,8 +377,17 @@ class PreservationService(object):
         """
         if not siptype:
             siptype = 'midas'
+        cls = None
+        if siptype == hndlr.MIDASSIPHandler.key or siptype == hndlr.MIDASSIPHandler.name:
+            # key = "midas"
+            cls = hndlr.MIDASSIPHandler
+        elif siptype == hndlr.MIDAS3SIPHandler.key or siptype == hndlr.MIDAS3SIPHandler.name:
+            # key = "midas3"
+            cls = hndlr.MIDAS3SIPHandler
+        else:
+            raise PDRException("SIP type not supported: "+siptype, sys=_sys)
 
-        pcfg = self._get_handler_config(siptype)
+        pcfg = self._get_handler_config(cls.key)
             
         # get an IDMinter we can use
         if siptype not in self.minters:
@@ -388,10 +397,10 @@ class PreservationService(object):
             cfg = pcfg.get('id_minter', {})
             self.minters[siptype] = PDRMinter(mntrdir, cfg)
 
-        if siptype == 'midas':
+        if siptype == 'midas' or siptype == hndlr.MIDASSIPHandler.name:
             return hndlr.MIDASSIPHandler(sipid, pcfg, self.minters[siptype],
                                          notifier=self._notifier)
-        elif siptype == 'midas3':
+        elif siptype == 'midas3' or siptype == hndlr.MIDAS3SIPHandler.name:
             return hndlr.MIDAS3SIPHandler(sipid, pcfg, self.minters[siptype],
                                           notifier=self._notifier)
         else:
@@ -602,9 +611,7 @@ class MultiprocPreservationService(PreservationService):
 
     def _in_child_handle(self, handler, sync=False):
         # for child process:
-        # setup child process logging, execute preservation business, and catch exec problems
         try:
-            self._setup_child(handler, sync)
             log.info("Preserving %s SIP id=%s", handler.name, handler._sipid)
             handler.bagit('zip', self.storedir)
         except Exception, e:
@@ -629,17 +636,8 @@ class MultiprocPreservationService(PreservationService):
               summary="Preservation failed for SIP="+self._hdlr._sipid,
                                           desc=str(ex),
                                           id=self._hdlr._sipid)
-        finally:
-            ex = ((handler.state != status.SUCCESSFUL) and 1) or 0
-            if self.cfg.get('announce_subproc', True):
-                print("{0} process for {1} exiting with status={2}" 
-                      .format(handler.name, handler._sipid, ex))
-            self._teardown_child(handler, sync)
+            raise
 
-        if sync:
-            return (handler.status, 0)
-        sys.exit(ex)
-        
 
     def _launch_handler(self, handler, timeout=None, sync=None):
         """
@@ -649,20 +647,43 @@ class MultiprocPreservationService(PreservationService):
         """
         if sync is None:
             sync = mp_sync
-        try:
-            pid = self._fork(sync)
-            if pid:
-                # parent process: wait a short bit to see if the child finishes
-                # quickly
-                self._wait_and_see_proc(pid, handler, timeout)
-                return (handler.status, pid)
-            else:
-                # child
-                # Note: if we did a real fork above, this call will not return; it will exit.
-                return self._in_child_handle(handler, sync)
 
+        if timeout is None:
+            timeout = self.cfg.get('sync_timeout', 5)
+        hndlrlog = os.path.join(handler.name, midasid_to_bagname(handler.sipid) + ".log")
+
+        proc = None
+        try:
+            if not sync:
+                # launch a subprocess
+                proc = multiprocessing.Process(target=_subprocess_handle,
+                                               args=(self.cfg, hndlrlog, handler.sipid, handler.name,
+                                                     handler._asupdate, timeout))
+                proc.start()
+                proc.join(timeout)
+                    
+                if not proc.is_alive():
+                    log.info("%s: preservation completed synchronously",
+                             handler._sipid)
+                    handler.refresh_state()
+                    if handler.state == status.IN_PROGRESS:
+                        handler.set_state(status.FAILED,
+                                     "preservation thread died for unknown reasons")
+                    elif handler.state == status.READY:
+                        handler.set_state(status.FAILED,
+                                 "preservation failed to start for unknown reasons")
+                else:
+                    log.info("%s: preservation running asynchronously",
+                             handler._sipid)
+                return (handler.status, proc)
+
+            else:
+                # this is the child
+                self._in_child_handle(handler, sync=True)
+                return (handler.status, None)
+                
         except Exception, e:
-            if pid is None:
+            if proc is None:
                 log.exception("Failed to launch preservation process: %s",str(e))
                 handler.set_state(status.FAILED,
                                   "Failed to launch preservation process")
@@ -670,7 +691,7 @@ class MultiprocPreservationService(PreservationService):
             else:
                 log.exception("Unexpected failure while monitoring "+
                               "preservation process: %s", str(e))
-                return (handler.status, pid)
+                return (handler.status, proc)
 
     def _setup_child(self, handler, sync=False):
         if sync:
@@ -695,19 +716,37 @@ class MultiprocPreservationService(PreservationService):
             handler.set_state(status.FAILED, "Failed to setup logging to "+os.path.join(plogdir,plogname))
             print("Preservation failure while setting up logging: "+str(ex))
 
-    def _teardown_child(self, handler, sync=False):
-        mylog = configmod.global_logfile
+    def _save_preserv_log(self, sipid, forlog=None):
+        mylog = forlog
+        if not mylog:
+            mylog = configmod.global_logfile
         emsg = None
         try:
             with utils.LockedFile(self.combinedlog, 'a') as dfd:
                 with open(mylog) as sfd:
-                    dfd.write("----------- Preserving %s --------------\n" % handler.sipid)
+                    dfd.write("----------- Preserving %s --------------\n" % sipid)
                     txt = sfd.read(10240)
                     while txt:
                         dfd.write(txt)
                         txt = sfd.read(10240)
-        except OSError as ex:
-            emsg = "Trouble saving sublog, %s, to combined log, %s" % (mylog, self.combinedlog)
+        except Exception as ex:
+            emsg = "Trouble saving sublog, %s, to combined log, %s: %s" % \
+                   (mylog, self.combinedlog, str(ex))
+            if not forlog:
+                log.error(emsg)
+                print("Warning: "+emsg)
+
+        if not forlog:
+            try:
+                os.remove(mylog)
+            except Exception as ex:
+                log.exception("Trouble removing sublog, %s: %s", mylog, str(ex))
+
+        return emsg
+
+    def _teardown_child(self, handler, sync=False):
+        mylog = configmod.global_logfile
+        emsg = self._save_preserv_log(handler.sipid, mylog)
 
         if sync and self._oldlogfile:
             try:
@@ -739,4 +778,27 @@ class RerequestException(PreservationException):
                 format(request_state)
         super(RerequestException, self).__init__(msg)
         self.state = request_state
+
+def _subprocess_handle(config, logfile, sipid, siptype, asupdate, timeout):
+    svc = None
+    shout = config.get('announce_subproc', True)
+    try:
+        if shout:
+            print("{0} preservation process for {1} started".format(siptype, sipid))
+        configmod.configure_log(logfile, config=config)
+        svc = MultiprocPreservationService(config)
+        handler = svc._make_handler(sipid, siptype, asupdate)
+        svc._launch_handler(handler, timeout, sync=True)
+    except Exception as ex:
+        if svc:
+            log.exception("{0} Failure while handling preservation: {1}".format(siptype, str(ex)))
+        if shout:
+            print("{0} Preservation process failed with error: {1}".format(siptype, str(ex)))
+    else:
+        if shout:
+            print("{0} Preservation process completed successfully".format(siptype))
+    finally:
+        if svc:
+            svc._save_preserv_log(sipid)
+
 

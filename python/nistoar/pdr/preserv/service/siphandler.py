@@ -312,6 +312,7 @@ class MIDASSIPHandler(SIPHandler):
     
     """
     name = "MIDAS-SIP"
+    key = "midas"
 
     def __init__(self, sipid, config, minter=None, serializer=None,
                  notifier=None, asupdate=None, sipdirname=None):
@@ -706,6 +707,7 @@ class MIDAS3SIPHandler(SIPHandler):
     
     """
     name = "MIDAS3-SIP"
+    key = "midas3"
 
     def __init__(self, sipid, config, minter=None, serializer=None,
                  notifier=None, asupdate=None, sipdatadir=None):

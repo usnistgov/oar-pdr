@@ -124,6 +124,8 @@ def configure_log(logfile=None, level=None, format=None, config=None,
             logdir = "/tmp"
         global_logdir = logdir
         logfile = os.path.join(logdir, logfile)
+        if not os.path.exists(os.path.dirname(logfile)):
+            os.makedirs(os.path.dirname(logfile))
     global_logfile = logfile
     
     if level is None:
