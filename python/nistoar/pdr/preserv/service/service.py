@@ -629,19 +629,19 @@ class MultiprocPreservationService(PreservationService):
                     
                 if not proc.is_alive():
                     handler.refresh_state()
+                    origstate = handler.state
                     if handler.state == status.IN_PROGRESS:
-                        log.error("%s: preservation completed synchronously (%s)",
-                                  handler._sipid, handler.state)
                         handler.set_state(status.FAILED,
                                      "preservation thread died for unknown reasons")
                     elif handler.state == status.READY:
-                        log.error("%s: preservation completed synchronously (%s)",
-                                  handler._sipid, handler.state)
                         handler.set_state(status.FAILED,
                                  "preservation failed to start for unknown reasons")
+                    if handler.state == FAILED:
+                        log.error("%s: preservation process completed synchronously (%s)",
+                                  handler._sipid, origstate)
                     else:
                         log.info("%s: preservation completed synchronously (%s)",
-                                 handler._sipid, handler.state)
+                                 handler._sipid, origstate)
                 else:
                     log.info("%s: preservation running asynchronously",
                              handler._sipid)
