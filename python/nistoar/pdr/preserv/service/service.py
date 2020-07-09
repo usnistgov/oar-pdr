@@ -569,39 +569,6 @@ class MultiprocPreservationService(PreservationService):
         log.info("Launching preservation in subprocess")
         return os.fork()
 
-    def _wait_and_see_proc(self, pid, handler, timeout=None):
-        # for the parent process:
-        # wait a short bit to see if the child finishes quickly
-        if timeout is None:
-            timeout = self.cfg.get('sync_timeout', 5)
-        starttime = time.time()
-        since = time.time() - starttime
-        while since < timeout:
-            if not self._pid_is_alive(pid):
-                break
-            time.sleep(1)
-            since = time.time() - starttime
-
-        # check for problems
-        if not self._pid_is_alive(pid):
-            # done already?
-            handler.refresh_state()
-            if handler.state == status.IN_PROGRESS:
-                # died midway for some reason
-                log.warn("preservation thread for SIP=%s died for unknown reasons", handler.sipid)
-                handler.set_state(status.FAILED,
-                         "preservation thread died for unknown reasons")
-            elif handler.state == status.READY:
-                # never started, it seems
-                log.warn("preservation of SIP=%s failed to start for unknown reasons", handler.sipid)
-                handler.set_state(status.FAILED,
-                     "preservation failed to start for unknown reasons")
-            else:
-                log.debug("Preservation process for SIP=%s ended with state: %s",
-                          handler.sipid, handler.state)
-        else:
-            log.debug("Allowing preservation for SIP=%s to run asynchronously", handler.sipid)
-
     def _in_child_handle(self, handler, sync=False):
         # for child process:
         try:
@@ -625,11 +592,9 @@ class MultiprocPreservationService(PreservationService):
             # alert a human!
             if handler.notifier:
                 handler.notifier.alert("preserve.failure",
-                                          origin=self._hdlr.name,
-              summary="Preservation failed for SIP="+self._hdlr._sipid,
-                                          desc=str(ex),
-                                          id=self._hdlr._sipid)
-            raise
+                                       origin=handler.name,
+                                       summary="Preservation failed for SIP="+handler.sipid,
+                                       desc=str(ex), id=handler.sipid)
 
 
     def _launch_handler(self, handler, timeout=None, sync=None):
@@ -645,16 +610,16 @@ class MultiprocPreservationService(PreservationService):
             timeout = self.cfg.get('sync_timeout', 5)
 
         proc = None
-        try:
-            # work out where the log in the child process will go
-            hlog = os.path.join(handler.name, midasid_to_bagname(handler.sipid) + ".log")
-            hlogd = handler.cfg.get('logdir')
-            if hlogd:
-                if not os.path.exists(os.path.join(hlogd, handler.name)):
-                    os.makedirs(os.path.join(hlogd, handler.name))
-                hlog = os.path.join(hlogd, hlog)
+        if not sync:
+            try:
+                # work out where the log in the subprocess will go
+                hlog = os.path.join(handler.name, midasid_to_bagname(handler.sipid) + ".log")
+                hlogd = handler.cfg.get('logdir')
+                if hlogd:
+                    if not os.path.exists(os.path.join(hlogd, handler.name)):
+                        os.makedirs(os.path.join(hlogd, handler.name))
+                    hlog = os.path.join(hlogd, hlog)
             
-            if not sync:
                 # launch a subprocess
                 proc = multiprocessing.Process(target=_subprocess_handle,
                                                args=(self.cfg, hlog, handler.sipid, handler.name,
@@ -677,44 +642,20 @@ class MultiprocPreservationService(PreservationService):
                              handler._sipid)
                 return (handler.status, proc)
 
-            else:
-                # this is the child
-                self._in_child_handle(handler, sync=True)
-                return (handler.status, None)
+            except Exception, e:
+                if proc is None:
+                    log.exception("Failed to launch preservation process: %s",str(e))
+                    handler.set_state(status.FAILED, "Failed to launch preservation process")
+                    return (handler.status, None)
+                else:
+                    log.exception("Unexpected failure while monitoring "+
+                                  "preservation process: %s", str(e))
+                    return (handler.status, proc)
+        else:
+            # this is the child
+            self._in_child_handle(handler, sync=True)  # (handles exceptions)
+            return (handler.status, None)
                 
-        except Exception, e:
-            if proc is None:
-                log.exception("Failed to launch preservation process: %s",str(e))
-                handler.set_state(status.FAILED,
-                                  "Failed to launch preservation process")
-                return (handler.status, None)
-            else:
-                log.exception("Unexpected failure while monitoring "+
-                              "preservation process: %s", str(e))
-                return (handler.status, proc)
-
-    def _setup_child(self, handler, sync=False):
-        if sync:
-            self._oldlogfile = configmod.global_logfile
-
-        # reconfigure the logger
-        plogdir = handler.cfg.get('logdir', configmod.global_logdir)
-        if not plogdir:
-            if self.cfg.get('announce_subproc', True):
-                print("Warning: global log file directory not set; using /tmp")
-            plogdir = "/tmp"
-        plogdir = os.path.join(plogdir, handler.name)
-        plogname = midasid_to_bagname(handler._sipid) + ".log"
-        try:
-            if not os.path.isdir(plogdir):
-                os.makedirs(plogdir)
-            handler.cfg['logdir'] = plogdir
-            configmod.configure_log(plogname, config=handler.cfg)
-            if self.cfg.get("announce_subproc", True):
-                print("{0} preservation process for {1} starting".format(handler.name, handler._sipid))
-        except Exception as ex:
-            handler.set_state(status.FAILED, "Failed to setup logging to "+os.path.join(plogdir,plogname))
-            print("Preservation failure while setting up logging: "+str(ex))
 
     def _save_preserv_log(self, sipid, forlog=None):
         mylog = forlog
