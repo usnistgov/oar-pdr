@@ -21,7 +21,10 @@ from ....id import NIST_ARK_NAAN
 from ejsonschema import ValidationError
 from ... import config as cfgmod
 
-log = logging.getLogger(PublishSystem().subsystem_abbrev).getChild("pubserv")
+from .. import sys as pdrsys
+log = logging.getLogger(pdrsys.system_abbrev)   \
+             .getChild(pdrsys.subsystem_abbrev) \
+             .getChild('wsgi')
 
 DEF_BASE_PATH = "/pod/"
 ARK_NAAN = NIST_ARK_NAAN

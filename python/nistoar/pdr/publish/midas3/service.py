@@ -6,7 +6,6 @@ import os, logging, re, json, copy, time, threading, shutil
 from collections import Mapping, OrderedDict
 from copy import deepcopy
 
-from .. import PublishSystem
 from ...exceptions import (ConfigurationException, StateException, 
                            SIPDirectoryNotFound, IDNotFound, PDRServiceException)
 from ...preserv.bagger.midas3 import (MIDASMetadataBagger, UpdatePrepService, PreservationBagger,
@@ -28,7 +27,9 @@ from .customize import CustomizationServiceClient
 
 bg_sync = False
 
-log = logging.getLogger(PublishSystem().subsystem_abbrev)
+from .. import PublishSystem, sys as pdrsys
+log = logging.getLogger(pdrsys.system_abbrev)   \
+             .getChild(pdrsys.subsystem_abbrev) 
 
 class MIDAS3PublishingService(PublishSystem):
     """
@@ -94,7 +95,7 @@ class MIDAS3PublishingService(PublishSystem):
                              "dictionary: " + str(config))
         self.cfg = config
 
-        self.log = log.getChild("m3pub")
+        self.log = log.getChild("m3svc")
 
         # set some working areas
         self.workdir = None     # default location for output/internal data

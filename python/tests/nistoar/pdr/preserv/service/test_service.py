@@ -231,7 +231,7 @@ class TestThreadedPreservationService(test.TestCase):
                    t.join()
 
     def test_status2(self):
-        stat = self.svc.status("FFFFFFFFFF")
+        stat = self.svc.status("FFFFFFFFFF", "midas")
         self.assertEqual(stat['state'], status.NOT_FOUND)
         self.assertTrue(not os.path.exists(os.path.join(self.statusdir,
                                                         "FFFFFFFFFF.json")))
@@ -243,17 +243,17 @@ class TestThreadedPreservationService(test.TestCase):
                                                         "FFFFFFFFFF.json")))
         
     def test_status(self):
-        stat = self.svc.status(self.midasid)
+        stat = self.svc.status(self.midasid, "midas")
         self.assertEqual(stat['state'], status.READY)
         self.assertTrue(not os.path.exists(os.path.join(self.statusdir,
                                                         self.midasid+".json")))
         
         hndlr = self.svc._make_handler(self.midasid, 'midas')
         hndlr.set_state(status.IN_PROGRESS)
-        stat = self.svc.status(self.midasid)
+        stat = self.svc.status(self.midasid, "midas")
         self.assertEqual(stat['state'], status.IN_PROGRESS)
         hndlr._status.reset()
-        stat = self.svc.status(self.midasid)
+        stat = self.svc.status(self.midasid, "midas")
         self.assertEqual(stat['state'], status.PENDING)
 
         with self.assertRaises(serv.RerequestException):
@@ -266,13 +266,13 @@ class TestThreadedPreservationService(test.TestCase):
             for t in threading.enumerate():
                 if t.name == self.midasid:
                    t.join()
-        stat = self.svc.status(self.midasid)
+        stat = self.svc.status(self.midasid, "midas")
         self.assertEqual(stat['state'], status.SUCCESSFUL)
 
         # if there is no longer a cached status file, ensure that we notice
         # when there is bag in the store dir
         os.remove(os.path.join(self.statusdir, self.midasid+'.json'))
-        stat = self.svc.status(self.midasid)
+        stat = self.svc.status(self.midasid, "midas")
         self.assertEqual(stat['state'], status.SUCCESSFUL)
         self.assertIn('orgotten', stat['message'])
 

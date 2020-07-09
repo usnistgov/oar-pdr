@@ -19,7 +19,10 @@ from . import midasclient as midas
 from ...preserv.bagger.midas3 import MIDASSIP
 from ....id import NIST_ARK_NAAN
 
-log = logging.getLogger(PublishSystem().subsystem_abbrev).getChild("mdserv")
+pdrsys = PublishSystem()
+log = logging.getLogger(pdrsys.system_abbrev)   \
+             .getChild(pdrsys.subsystem_abbrev) \
+             .getChild("m3mdserv")
 
 DEF_BASE_PATH = "/midas/"
 
