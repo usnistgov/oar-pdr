@@ -636,7 +636,7 @@ class MultiprocPreservationService(PreservationService):
                     elif handler.state == status.READY:
                         handler.set_state(status.FAILED,
                                  "preservation failed to start for unknown reasons")
-                    if handler.state == FAILED:
+                    if handler.state == status.FAILED:
                         log.error("%s: preservation process completed synchronously (%s)",
                                   handler._sipid, origstate)
                     else:
