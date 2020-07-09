@@ -37,7 +37,7 @@ from ..utils import read_nerd, read_pod, write_json, read_json
 _PRESSYSNAME = _pdr._PDRSYSNAME
 _PRESSYSABBREV = _pdr._PDRSYSABBREV
 _PRESSUBSYSNAME = "Preservation"
-_PRESSUBSYSABBREV = _PRESSUBSYSNAME
+_PRESSUBSYSABBREV = "Preserv"
 
 class PreservationSystem(PDRSystem):
     """
