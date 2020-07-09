@@ -978,7 +978,7 @@ class MIDAS3PublishingService(PublishSystem):
                             self.halt_pod_processing("preserve")
                             self.log.debug("enhancing file metadata...")
                             self.bagger.enhance_metadata(examine="sync")
-                            self.log.debug("launching preservation process...")
+                            self.log.debug("preparing preservation process...")
                             self.launch_preservation(pod['_preserve'] == "update")
 
                     except PreservationException as ex:

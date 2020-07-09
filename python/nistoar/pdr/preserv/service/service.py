@@ -594,7 +594,7 @@ class MultiprocPreservationService(PreservationService):
                 handler.notifier.alert("preserve.failure",
                                        origin=handler.name,
                                        summary="Preservation failed for SIP="+handler.sipid,
-                                       desc=str(ex), id=handler.sipid)
+                                       desc=str(e), id=handler.sipid)
 
 
     def _launch_handler(self, handler, timeout=None, sync=None):
