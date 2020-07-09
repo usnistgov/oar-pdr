@@ -376,7 +376,7 @@ class PreservationService(object):
         create an SIPHandler of the given type for the given ID.
         """
         if not siptype:
-            siptype = 'midas'
+            siptype = 'midas3'
         cls = None
         if siptype == hndlr.MIDASSIPHandler.key or siptype == hndlr.MIDASSIPHandler.name:
             # key = "midas"
