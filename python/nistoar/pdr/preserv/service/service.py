@@ -397,14 +397,7 @@ class PreservationService(object):
             cfg = pcfg.get('id_minter', {})
             self.minters[siptype] = PDRMinter(mntrdir, cfg)
 
-        if siptype == 'midas' or siptype == hndlr.MIDASSIPHandler.name:
-            return hndlr.MIDASSIPHandler(sipid, pcfg, self.minters[siptype],
-                                         notifier=self._notifier)
-        elif siptype == 'midas3' or siptype == hndlr.MIDAS3SIPHandler.name:
-            return hndlr.MIDAS3SIPHandler(sipid, pcfg, self.minters[siptype],
-                                          notifier=self._notifier)
-        else:
-            raise PDRException("SIP type not supported: "+siptype, sys=_sys)
+        return cls(sipid, pcfg, self.minters[siptype], notifier=self._notifier)
 
     def _get_handler_config(self, siptype):
         # from our service configuration, build a configuration object that
@@ -650,14 +643,21 @@ class MultiprocPreservationService(PreservationService):
 
         if timeout is None:
             timeout = self.cfg.get('sync_timeout', 5)
-        hndlrlog = os.path.join(handler.name, midasid_to_bagname(handler.sipid) + ".log")
 
         proc = None
         try:
+            # work out where the log in the child process will go
+            hlog = os.path.join(handler.name, midasid_to_bagname(handler.sipid) + ".log")
+            hlogd = handler.cfg.get('logdir')
+            if hlogd:
+                if not os.path.exists(os.path.join(hlogd, handler.name)):
+                    os.makedirs(os.path.join(hlogd, handler.name))
+                hlog = os.path.join(hlogd, hlog)
+            
             if not sync:
                 # launch a subprocess
                 proc = multiprocessing.Process(target=_subprocess_handle,
-                                               args=(self.cfg, hndlrlog, handler.sipid, handler.name,
+                                               args=(self.cfg, hlog, handler.sipid, handler.name,
                                                      handler._asupdate, timeout))
                 proc.start()
                 proc.join(timeout)
