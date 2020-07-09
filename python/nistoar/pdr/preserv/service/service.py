@@ -628,9 +628,9 @@ class MultiprocPreservationService(PreservationService):
                 proc.join(timeout)
                     
                 if not proc.is_alive():
-                    log.info("%s: preservation completed synchronously",
-                             handler._sipid)
                     handler.refresh_state()
+                    log.info("%s: preservation completed synchronously (%s)",
+                             handler._sipid, handler.state)
                     if handler.state == status.IN_PROGRESS:
                         handler.set_state(status.FAILED,
                                      "preservation thread died for unknown reasons")
