@@ -543,7 +543,8 @@ class MultiprocPreservationService(PreservationService):
         """
         super(MultiprocPreservationService, self).__init__(config)
         self._oldlogfile = None
-        self.combinedlog = os.path.join(self.cfg.get('logdir', configmod.global_logdir),
+        deflogdir = configmod.global_logdir or configmod.determine_default_logdir()
+        self.combinedlog = os.path.join(self.cfg.get('logdir', deflogdir),
                                         self.cfg.get('logfile', 'preservation.log'))
 
     def _pid_is_alive(self, pid):

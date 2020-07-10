@@ -146,7 +146,7 @@ class MIDAS3PublishingService(PublishSystem):
             raise ConfigurationException("Missing required config parameters: "+
                                          'customization_service', sys=self)
         self._custclient = CustomizationServiceClient(self.cfg.get('customization_service'),
-                                                   logger=self.log.getChild("customclient"))
+                                                      logger=self.log.getChild("customclient"))
 
         self.schemadir = self.cfg.get('nerdm_schema_dir', pdr.def_schema_dir)
         self._bagging_workers = {}
@@ -186,23 +186,26 @@ class MIDAS3PublishingService(PublishSystem):
                                  "directory: " + workdir, sys=self)
         self.workdir = workdir
 
-        self.mddir = self.cfg.get('metadata_bags_dir')
-        if not self.mddir:
-            self.mddir = os.path.join(workdir,"mdbags")
-            if not os.path.exists(self.mddir):  os.mkdir(self.mddir)
-        self.nrddir = self.cfg.get('nerdm_serve_dir')
-        if not self.nrddir:
-            self.nrddir = os.path.join(workdir,"nrdserv")
-            if not os.path.exists(self.nrddir):  os.mkdir(self.nrddir)
-        self.podq = self.cfg.get('pod_queue_dir')
-        if not self.podqdir:
-            self.podqdir = os.path.join(workdir,"podq")
-            if not os.path.exists(self.podqdir):  os.mkdir(self.podqdir)
+        self.mddir = self.cfg.get('metadata_bags_dir', "mdbags")
+        if not os.path.isabs(self.mddir):
+            self.mddir = os.path.join(workdir, self.mddir)
+            if not os.path.exists(self.mddir):  os.makedirs(self.mddir)
+        self.nrddir = self.cfg.get('nerdm_serve_dir', "nrdserv")
+        if not os.path.isabs(self.nrddir):
+            self.nrddir = os.path.join(workdir,self.nrddir)
+            if not os.path.exists(self.nrddir):  os.makedirs(self.nrddir)
+        self.podqdir = self.cfg.get('pod_queue_dir', "podq")
+        if not os.path.isabs(self.podqdir):
+            self.podqdir = os.path.join(workdir, self.podqdir)
+            if not os.path.exists(self.podqdir):  os.makedirs(self.podqdir)
         self.storedir = self.cfg.get('store_dir')
         if not self.storedir:
-            self.storedir = os.path.join(workdir,"store")
-            if not os.path.exists(self.storedir):  os.mkdir(self.storedir)
-
+            self.log.warn("store_dir config param not set; setting it to %s",
+                          os.path.join(workdir, "store"))
+            self.storedir = "store"
+        if not os.path.isabs(self.storedir):
+            self.storedir = os.path.join(workdir, self.storedir)
+            if not os.path.exists(self.storedir):  os.makedirs(self.storedir)
 
     def _create_minter(self, parentdir):
         cfg = self.cfg.get('id_minter', {})

@@ -44,6 +44,7 @@ class TestMIDAS3PublishingService(test.TestCase):
     wrongid = '333333333333333333333333333333331491'
     arkid = "ark:/88434/mds2-1491"
     defcfg = {
+        'store_dir': "store",
         'customization_service': {
             'auth_key': 'SECRET',
             'service_endpoint': "http:notused.net/",
@@ -60,6 +61,7 @@ class TestMIDAS3PublishingService(test.TestCase):
         self.upldir = os.path.join(self.testsip, "upload")
         self.revdir = os.path.join(self.testsip, "review")
         self.nrddir = os.path.join(self.workdir, "nrdserv")
+        self.storedir = os.path.join(self.workdir, "store")
         self.svc = mdsvc.MIDAS3PublishingService(self.defcfg, self.workdir,
                                                  self.revdir, self.upldir)
 

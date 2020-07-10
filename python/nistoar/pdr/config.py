@@ -119,9 +119,7 @@ def configure_log(logfile=None, level=None, format=None, config=None,
         # The log directory can be set either from the configuration or via
         # the OAR_LOG_DIR environment variable; the former takes precedence
         deflogdir = os.path.join(oar_home,'var','logs')
-        logdir = config.get('logdir', os.environ.get('OAR_LOG_DIR', deflogdir))
-        if not os.path.exists(logdir):
-            logdir = "/tmp"
+        logdir = config.get('logdir', determine_default_logdir())
         global_logdir = logdir
         logfile = os.path.join(logdir, logfile)
         if not os.path.exists(os.path.dirname(logfile)):
@@ -169,6 +167,12 @@ def configure_log(logfile=None, level=None, format=None, config=None,
         handler.setFormatter(logging.Formatter(addstderr))
         rootlogger.addHandler(handler)
         rootlogger.error("FYI: Writing log messages to %s",logfile)
+
+def determine_default_logdir():
+    out = os.environ.get('OAR_LOG_DIR', os.path.join(oar_home, 'var', 'logs'))
+    if not os.path.exists(out):
+        out = "/tmp"
+    return out
         
 class ConfigService(object):
     """
