@@ -125,34 +125,6 @@ class TestM3MultiprocessPreservationService(test.TestCase):
         self.assertIn('midas', self.svc.siptypes)
         self.assertIn('midas3', self.svc.siptypes)
 
-    def test_wait_and_see_proc(self):
-        hndlr = self.svc._make_handler(self.midasid, 'midas3')
-        self.assertEquals(hndlr.state, status.FORGOTTEN)
-        self.assertTrue(hndlr.isready())
-        self.assertEqual(hndlr.state, status.READY)
-        
-        self.svc._wait_and_see_proc(999999, hndlr, 0.2)
-        self.assertEquals(hndlr.state, status.FAILED)
-
-        hndlr.set_state(status.SUCCESSFUL, "Done!")
-        self.svc._wait_and_see_proc(999999, hndlr, 0.2)
-        self.assertEquals(hndlr.state, status.SUCCESSFUL)
-
-    def test_setup_child(self):
-        hndlr = self.svc._make_handler(self.midasid, 'midas3')
-        self.assertEquals(hndlr.state, status.FORGOTTEN)
-        self.assertTrue(hndlr.isready())
-        self.assertEqual(hndlr.state, status.READY)
-
-        try:
-            self.svc._setup_child(hndlr)
-            self.assertEqual(os.path.basename(config.global_logfile),
-                             self.midasid+".log")
-        finally:
-            rootlogger = logging.getLogger()
-            rootlogger.removeHandler(config._log_handler)
-            setUpModule()
-
     def test_launch_sync(self):
         hndlr = self.svc._make_handler(self.midasid, 'midas3')
         self.assertEqual(hndlr.state, status.FORGOTTEN)

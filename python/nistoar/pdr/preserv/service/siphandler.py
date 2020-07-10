@@ -384,7 +384,7 @@ class MIDASSIPHandler(SIPHandler):
             raise ConfigurationException("'review_dir' does not exist: "+
                                          self.sipparent)
 
-        self.mdbagdir = self.cfg.get('mdbag_dir')
+        self.mdbagdir = self.cfg.get('metadata_bags_dir')
         if not self.mdbagdir:
             self.mdbagdir = "mdserv"
         if not os.path.isabs(self.mdbagdir):

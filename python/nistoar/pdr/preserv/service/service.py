@@ -415,13 +415,13 @@ class PreservationService(object):
             pcfg['store_dir'] = self.storedir
         if 'id_registry_dir' not in pcfg:
             pcfg['id_registry_dir'] = self.idregdir
-        if 'mdbag_dir' not in pcfg:
+        if 'metadata_bags_dir' not in pcfg:
             if siptype == 'midas3':
-                pcfg['mdbag_dir'] = cfg4type.get('pubserv',{}).get('working_dir',
-                                        os.path.join(self.workdir, 'mdbags'))
+                pcfg['metadata_bags_dir'] = cfg4type.get('pubserv',{}).get('working_dir',
+                                                 os.path.join(self.workdir, 'mdbags'))
             else:
-                pcfg['mdbag_dir'] = cfg4type.get('mdserv',{}).get('working_dir',
-                                        os.path.join(self.workdir, 'mdserv'))
+                pcfg['metadata_bags_dir'] = cfg4type.get('mdserv',{}).get('working_dir',
+                                                 os.path.join(self.workdir, 'mdserv'))
         if 'repo_access' not in pcfg and 'repo_access' in self.cfg:
             pcfg['repo_access'] = deepcopy(self.cfg['repo_access'])
 

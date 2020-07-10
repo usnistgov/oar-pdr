@@ -143,7 +143,7 @@ class TestThreadedPreservationService(test.TestCase):
         self.assertEqual(hndlr.cfg['review_dir'], self.revdir)
         self.assertEqual(hndlr.cfg['id_minter']['shoulder_for_edi'], 'edi0')
         self.assertEqual(hndlr.cfg['bagparent_dir'], '_preserv')
-        self.assertEqual(hndlr.cfg['mdbag_dir'], self.mdserv)
+        self.assertEqual(hndlr.cfg['metadata_bags_dir'], self.mdserv)
         self.assertEqual(hndlr.cfg['bagger']['relative_to_indir'], True)
         self.assertEqual(hndlr.cfg['status_manager']['cachedir'], self.statusdir)
 
@@ -368,37 +368,6 @@ class TestMultiprocPreservationService(test.TestCase):
         self.assertTrue(os.path.exists(self.store))
 
         self.assertEqual(self.svc.siptypes, ['midas'])
-
-    def dont_test_fork(self):
-        self.assertEqual(self.svc._fork(True), 0)
-
-    def dont_test_wait_and_see_proc(self):
-        hndlr = self.svc._make_handler(self.midasid, 'midas')
-        self.assertEquals(hndlr.state, status.FORGOTTEN)
-        self.assertTrue(hndlr.isready())
-        self.assertEqual(hndlr.state, status.READY)
-        
-        self.svc._wait_and_see_proc(999999, hndlr, 0.2)
-        self.assertEquals(hndlr.state, status.FAILED)
-
-        hndlr.set_state(status.SUCCESSFUL, "Done!")
-        self.svc._wait_and_see_proc(999999, hndlr, 0.2)
-        self.assertEquals(hndlr.state, status.SUCCESSFUL)
-
-    def dont_test_setup_child(self):
-        hndlr = self.svc._make_handler(self.midasid, 'midas')
-        self.assertEquals(hndlr.state, status.FORGOTTEN)
-        self.assertTrue(hndlr.isready())
-        self.assertEqual(hndlr.state, status.READY)
-
-        try:
-            self.svc._setup_child(hndlr)
-            self.assertEqual(os.path.basename(config.global_logfile),
-                             self.midasid+".log")
-        finally:
-            rootlogger = logging.getLogger()
-            rootlogger.removeHandler(config._log_handler)
-            setUpModule()
 
     def test_launch_sync(self):
         hndlr = self.svc._make_handler(self.midasid, 'midas')
