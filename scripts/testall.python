@@ -26,6 +26,7 @@ $PACKAGE_DIR/python/runtests.py || status=$?
 echo
 $PACKAGE_DIR/scripts/tests/test-pubserver.sh -q -M || status=$?
 echo
+sleep 1
 $PACKAGE_DIR/scripts/tests/test-preserv.sh -q -M || status=$?
 echo
 
