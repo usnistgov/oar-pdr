@@ -158,7 +158,7 @@ done
     workdir="_${workdir}-$$"
 }
 [ -d "$workdir" ] || mkdir $workdir
-[ -z "$withmdserver" ] || mkdir $workdir/mdarchive
+[ -z "$withmdserver" -o -d "$workdir/mdarchive" ] || mkdir $workdir/mdarchive
 
 [ -n "$server_pid_file" ] || server_pid_file=$workdir/pubserver.pid
 [ -n "$mdserver_uwsgi" ] || mdserver_uwsgi=python/tests/nistoar/pdr/describe/sim_describe_svc.py
