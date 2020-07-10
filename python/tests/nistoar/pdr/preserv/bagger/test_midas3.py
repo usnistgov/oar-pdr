@@ -354,6 +354,29 @@ class TestMIDASMetadataBaggerMixed(test.TestCase):
         self.assertEqual(self.bagr.sip.nerd.get('title'), "")
         self.assertEqual(self.bagr.sip.nerd.get('description'), [""])
 
+        # bagger was not configured to set a default DOI
+        self.assertNotIn('doi', self.bagr.sip.nerd)
+
+    def test_apply_defdoi(self):
+        self.bagr = midas.MIDASMetadataBagger.fromMIDAS(self.midasid, self.bagparent,
+                                                        self.revdir, self.upldir,
+                                                        {"doi_minter": {"naan": "44.88888"}})
+
+        # old-style identifier
+        pod = {"identifier": self.midasid}
+        self.bagr.apply_pod(pod, False)
+        self.assertNotIn('doi', self.bagr.sip.nerd)
+
+        self.bagr = midas.MIDASMetadataBagger.fromMIDAS(self.arkid, self.bagparent,
+                                                        self.revdir, self.upldir,
+                                                        {"doi_minter": {"naan": "44.88888"}})
+        
+        # new-style identifier will trigger a default DOI to be set
+        pod = {"identifier": self.arkid}
+        self.bagr.apply_pod(pod, False)
+        self.assertEqual(self.bagr.sip.nerd.get('doi'), "doi:44.88888/mds2-1491")
+
+
     def test_done(self):
         self.assertTrue(not os.path.exists(self.bagr.bagdir))
         self.assertTrue(not os.path.exists(self.bagr.bagdir+".lock"))

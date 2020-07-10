@@ -826,9 +826,23 @@ class MIDASMetadataBagger(SIPBagger):
         # updated will contain the filepaths for components that were updated
         updated = self.bagbldr.update_from_pod(pod, True, True, force)
 
+        # set a default DOI.  For a default to be set, the dataset must use the new
+        # EDI-ID ARK form and the dataset must not have been published, yet; that is,
+        # this must be for version 1.0.0.  To turn setting the DOI off, do not include the
+        # 'doi_minter' property in the configuration (or more precisely, 'doi_minter.naan').
+        doi = None
+        nerd = self.bagbldr.bag.nerdm_record(True)
+        doi_prefix = self.cfg.get('doi_minter',{}).get('naan')
+        if doi_prefix and not nerd.get('doi') and nerd.get('ediid','').startswith("ark:/") and \
+           ('version' not in nerd or nerd['version'] == "1.0.0"):
+            doi = "doi:{0}/{1}".format(doi_prefix, self.name)
+            nerd['doi'] = doi
+            self.bagbldr.update_metadata_for('', {'doi': doi},
+                                             message="added default DOI: "+doi)
+
         # we're done; update the cached NERDm metadata and the data file map
         if not self.sip.nerd or updated['updated'] or updated['added'] or updated['deleted']:
-            self.sip.nerd = self.bagbldr.bag.nerdm_record(True)
+            self.sip.nerd = nerd
             self.datafiles = self.sip.registered_files()
       
     def _add_minimal_pod_data(self, pod):
