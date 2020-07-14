@@ -25,6 +25,9 @@ from ....nerdm import validate
 from .... import pdr
 from .customize import CustomizationServiceClient
 
+import ejsonschema as ejs
+from ejsonschema import schemaloader
+
 bg_sync = False
 
 from .. import PublishSystem, sys as pdrsys
@@ -137,6 +140,11 @@ class MIDAS3PublishingService(PublishSystem):
 
         # used for validating during updates (via patch_id())
         self._schemadir = self.cfg.get('nerdm_schema_dir', pdr.def_schema_dir)
+        self._podvalid8r = None
+        if self.cfg.get('require_valid_pod', True):
+            if not self._schemadir:
+                raise ConfigurationException("'reuqire_valid_pod' is set but cannot find schema dir")
+            self._podvalid8r = self._make_pod_validator(self._schemadir)
 
         # used to convert NERDm to POD
         self._nerd2pod = Res2PODds(pdr.def_jq_libdir, logger=self.log)
@@ -148,7 +156,6 @@ class MIDAS3PublishingService(PublishSystem):
         self._custclient = CustomizationServiceClient(self.cfg.get('customization_service'),
                                                       logger=self.log.getChild("customclient"))
 
-        self.schemadir = self.cfg.get('nerdm_schema_dir', pdr.def_schema_dir)
         self._bagging_workers = {}
         self.pressvc = MultiprocPreservationService(self.cfg.get('preservation_service',
                                                                  self._presv_config()))
@@ -262,16 +269,46 @@ class MIDAS3PublishingService(PublishSystem):
         synchronously, but file examination is asynchronously.  
         """
         # First validate the POD
-        if self.cfg.get('require_valid_pod'):
+        if self.cfg.get('require_valid_pod', True):
             self._validate_pod(pod)
 
         return self._apply_pod_async(pod, async)
 
+    def _make_pod_validator(self, schemadir):
+        # we need to accept incomplete POD records but not otherwise illegal ones; thus,
+        # this funtion takes the POD schema and removes all 'required' constraints.
+        # NOTE: this assumes that this is the special PDR-formatted version of the schema
+        schemauri = DEF_POD_DATASET_SCHEMA.split('#')[0]
+
+        # load the POD schema
+        ldr = schemaloader.SchemaLoader.from_directory(schemadir)
+        try:
+            podschema = ldr.load_schema(schemauri)
+        except KeyError as ex:
+            raise StateException("POD schema not found!")
+        except IOError as ex:
+            raise StateException("Problem loading POD schema: "+str(ex))
+
+        # remove 'required' items from each defined type
+        defs = podschema.get('definitions', {})
+        for tpnm in defs:
+            if 'required' in defs[tpnm]:
+                del defs[tpnm]['required']
+            if 'dependencies' in defs[tpnm]:
+                deps = defs[tpnm]['dependencies']
+                for prop in deps:
+                    if 'required' in prop:
+                        del prop['required']
+
+        # create the validator and load the modified schema into it
+        out = ejs.ExtValidator(ldr, "_")
+        out.load_schema(podschema, schemauri)
+        return out
+
     def _validate_pod(self, pod):
-        if self.schemadir:
-            valid8r = validate.create_validator(self.schemadir, pod)
-            valid8r.validate(pod, schemauri=DEF_POD_DATASET_SCHEMA,
-                             strict=True, raiseex=True)
+        if self._podvalid8r:
+            self._podvalid8r.validate(pod, schemauri=DEF_POD_DATASET_SCHEMA,
+                                      strict=True, raiseex=True)
         else:
             self.log.warning("Unable to validate submitted POD data")
 
@@ -407,7 +444,7 @@ class MIDAS3PublishingService(PublishSystem):
         if not id:
             raise ValueError("POD is missing required property, identifier")
 
-        if self.cfg.get('require_valid_pod'):
+        if self.cfg.get('require_valid_pod', True):
             self._validate_pod(pod)
 
         self._apply_pod_async(pod, True)
@@ -565,8 +602,8 @@ class MIDAS3PublishingService(PublishSystem):
         if ('topic' in fltrd) != ('theme' in fltrd):
             if 'topic' in fltrd:
                 fltrd['theme'] = topics2themes(fltrd['topic'], False)
-            elif self.schemadir and 'theme' in fltrd:
-                taxon = ResearchTopicsTaxonomy.from_schema_dir(self.schemadir)
+            elif self.valid8r and 'theme' in fltrd:
+                taxon = ResearchTopicsTaxonomy.from_schema_dir(self._schemadir)
                 fltrd['topic'] = taxon.themes2topics(fltrd['theme'])
         
         oldnerdm = bldr.bag.nerdm_record(mergeconv)

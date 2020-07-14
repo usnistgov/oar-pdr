@@ -9,6 +9,7 @@ from nistoar.pdr import utils
 from nistoar.pdr.publish.midas3 import service as mdsvc
 from nistoar.pdr.preserv.bagit import builder as bldr
 from nistoar.pdr.preserv.bagit import NISTBag
+from ejsonschema import ValidationError
 
 # datadir = nistoar/preserv/data
 datadir = os.path.join( os.path.dirname(os.path.dirname(os.path.dirname(__file__))),
@@ -77,6 +78,8 @@ class TestMIDAS3PublishingService(test.TestCase):
         self.assertTrue(os.path.isdir(self.svc.storedir))
         self.assertTrue(os.path.isdir(self.svc._schemadir))
 
+        self.assertIsNotNone(self.svc._podvalid8r)
+
     def test_get_bagging_thread(self):
         bagdir = os.path.join(self.svc.mddir, "mds2-1491")
         self.assertTrue(not os.path.exists(bagdir))
@@ -140,6 +143,16 @@ class TestMIDAS3PublishingService(test.TestCase):
         self.assertTrue(os.path.isdir(bagdir))
         data = utils.read_json(os.path.join(self.nrddir, self.midasid+".json"))
         self.assertEqual(data.get('ediid'), self.midasid)
+
+    def test_update_ds_with_badpod(self):
+        podf = os.path.join(self.revdir, "1491", "_pod.json")
+        pod = utils.read_json(podf)
+        pod['contactPoint']['hasEmail'] = "gurn.cranston@nist.gov"   # missing mailto: prefix!
+        bagdir = os.path.join(self.svc.mddir, self.midasid)
+
+        with self.assertRaises(ValidationError):
+            self.svc.update_ds_with_pod(pod, False)
+        
 
     def test_update_ds_with_pod_wannot(self):
         podf = os.path.join(self.revdir, "1491", "_pod.json")
