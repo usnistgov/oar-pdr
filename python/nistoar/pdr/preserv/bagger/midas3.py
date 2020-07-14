@@ -832,7 +832,7 @@ class MIDASMetadataBagger(SIPBagger):
         # 'doi_minter' property in the configuration (or more precisely, 'doi_minter.naan').
         doi = None
         nerd = self.bagbldr.bag.nerdm_record(True)
-        doi_prefix = self.cfg.get('doi_minter',{}).get('naan')
+        doi_prefix = self.cfg.get('doi_minter',{}).get('minting_naan')
         if doi_prefix and not nerd.get('doi') and nerd.get('ediid','').startswith("ark:/") and \
            ('version' not in nerd or nerd['version'] == "1.0.0"):
             doi = "doi:{0}/{1}".format(doi_prefix, self.name)

@@ -13,6 +13,7 @@ This module deprecates the pre-publication landing page service (mdserv) which c
 """
 from copy import deepcopy
 from nistoar.pdr.exceptions import ConfigurationException
+from nistoar.pdr import config as cfgmod
 
 from ..mdserv import extract_mdserv_config, midasclient
 
@@ -31,8 +32,8 @@ def extract_sip_config(config, service='pubserv', siptype='midas3'):
     out = deepcopy(config)
     del out['sip_type']
     midas = config['sip_type'][siptype]
-    out.update(midas.get('common', {}))
-    out.update(midas.get(service, {}))
+    out = cfgmod.merge_config(midas.get('common', {}), out)
+    out = cfgmod.merge_config(midas.get(service, {}), out)
 
     if service == "pubserv" and siptype == "midas3":
         if 'preservation_service' not in out and 'preserv' in midas:

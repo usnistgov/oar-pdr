@@ -360,7 +360,7 @@ class TestMIDASMetadataBaggerMixed(test.TestCase):
     def test_apply_defdoi(self):
         self.bagr = midas.MIDASMetadataBagger.fromMIDAS(self.midasid, self.bagparent,
                                                         self.revdir, self.upldir,
-                                                        {"doi_minter": {"naan": "44.88888"}})
+                                                        {"doi_minter": {"minting_naan": "44.88888"}})
 
         # old-style identifier
         pod = {"identifier": self.midasid}
@@ -369,7 +369,7 @@ class TestMIDASMetadataBaggerMixed(test.TestCase):
 
         self.bagr = midas.MIDASMetadataBagger.fromMIDAS(self.arkid, self.bagparent,
                                                         self.revdir, self.upldir,
-                                                        {"doi_minter": {"naan": "44.88888"}})
+                                                        {"doi_minter": {"minting_naan": "44.88888"}})
         
         # new-style identifier will trigger a default DOI to be set
         pod = {"identifier": self.arkid}
