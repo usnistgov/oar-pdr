@@ -205,6 +205,7 @@ class TestMIDASMetadataBaggerMixed(test.TestCase):
 
         self.assertTrue(os.path.exists(self.bagparent))
         self.assertFalse(os.path.exists(self.bagdir))
+        self.assertIsNone(self.bagr.bagbldr.bag)
 
 
     def test_ark_ediid(self):
@@ -238,10 +239,12 @@ class TestMIDASMetadataBaggerMixed(test.TestCase):
         self.assertEqual(os.path.basename(self.bagr.bagdir), self.bagr.name)
         self.assertIsNone(self.bagr.prepsvc)
         self.assertTrue(not self.bagr.prepared)
+        self.assertIsNone(self.bagr.bagbldr.bag)
         
         self.bagr.ensure_base_bag()
         self.assertTrue(os.path.exists(self.bagr.bagdir))
         self.assertTrue(not self.bagr.prepared)
+        self.assertIsNotNone(self.bagr.bagbldr.bag)
 
         with open(os.path.join(self.bagr.bagdir,"metadata","nerdm.json")) as fd:
             nerdm = json.load(fd)
@@ -254,9 +257,11 @@ class TestMIDASMetadataBaggerMixed(test.TestCase):
 
         self.bagr = midas.MIDASMetadataBagger.fromMIDAS(self.midasid, self.bagparent,
                                                         self.revdir, self.upldir)
+        self.assertIsNotNone(self.bagr.bagbldr.bag)
         self.bagr.ensure_base_bag()
         self.assertTrue(os.path.exists(self.bagr.bagdir))
         self.assertTrue(self.bagr.prepared)
+        self.assertIsNotNone(self.bagr.bagbldr.bag)
 
         self.assertIsNone(self.bagr.sip.nerd)
         self.assertIsNone(self.bagr.datafiles)

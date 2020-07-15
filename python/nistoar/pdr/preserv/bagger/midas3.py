@@ -691,6 +691,8 @@ class MIDASMetadataBagger(SIPBagger):
         
         if os.path.exists(self.bagdir):
             # We already have an established working bag
+            self.bagbldr.ensure_bagdir()  # sets builders bag instance
+
             if not self.prepared:
                 self.log.info("Refreshing previously established working bag")
             self.prepared = True

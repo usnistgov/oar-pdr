@@ -502,7 +502,8 @@ class PreserveHandler(Handler):
                     
                     self.send_error(400, "Unsupported SIP identifier: "+path)
                     return []
-                
+
+                log.debug("Preservation status requested for %s", path)
                 return self.request_status(path)
                 
             else:
