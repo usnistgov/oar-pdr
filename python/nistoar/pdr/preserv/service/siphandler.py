@@ -510,7 +510,8 @@ class MIDASSIPHandler(SIPHandler):
                 if self.notifier:
                     self.notifier.alert("preserve.failure", origin=self.name,
                                   summary="Ingest failed for "+self.bagger.name,
-                                        desc=msg, id=self.bagger.name)
+                                        desc=msg, id=self.bagger.name,
+                                        version=nerdm.get('version', 'unknown'))
 
         # zip it up; this may split the bag into multibags
         self._status.record_progress("Serializing")
@@ -575,8 +576,9 @@ class MIDASSIPHandler(SIPHandler):
             if cpfailures and self.notifier:
                 # alert subscribers of these failures with an email
                 self.notifier.alert("preserve.failure", origin=self.name,
-                                    summary="checksum file copy failure",
-                                    desc=msg)
+                                    summary="checksum file copy failure", desc=msg, 
+                                    version=nerdm.get('version', 'unknown'))
+                                    
                     
         except Exception, ex:
             msg = "%s: Failure while writing checksum file(s) to " + \
@@ -585,7 +587,8 @@ class MIDASSIPHandler(SIPHandler):
             if self.notifier:
                 self.notifier.alert("preserve.failure", origin=self.name,
                                     summary="checksum file write failure",
-                                    desc=msg, id=self._sipid)
+                                    desc=msg, id=self._sipid,
+                                    version=nerdm.get('version', 'unknown'))
                 
         # remove the metadata bag directory so that that an attempt to update
         # will force a rebuild based on the published version
@@ -633,13 +636,15 @@ class MIDASSIPHandler(SIPHandler):
                 if self.notifier:
                     self.notifier.alert("ingest.failure", origin=self.name,
                           summary="NERDm ingest failure: " + self.bagger.name,
-                                        desc=msg, id=self.bagger.name)
+                                        desc=msg, id=self.bagger.name,
+                                        version=nerdm.get('version', 'unknown'))
 
         # tell a human that things are great!
         if self.notifier:
             self.notifier.alert("preserve.success", origin=self.name,
                            summary="New MIDAS SIP preserved: "+self.bagger.name,
-                                id=self.bagger.name)
+                                id=self.bagger.name,
+                                version=nerdm.get('version', 'unknown'))
 
         # clean up staging area
         if self.cfg.get('clean_bag_staging', True):
@@ -816,7 +821,7 @@ class MIDAS3SIPHandler(SIPHandler):
 
         self._ingester = None
         ingcfg = self.cfg.get('ingester')
-        if ingcfg:
+        if ingcfg and ingcfg.get('service_endpoint'):
             self._ingester = IngestClient(ingcfg, log.getChild("ingester"))
         else:
             log.warn("Ingester client not configured: archived records will not get loaded to repo")
@@ -909,7 +914,8 @@ class MIDAS3SIPHandler(SIPHandler):
                 if self.notifier:
                     self.notifier.alert("preserve.failure", origin=self.name,
                                   summary="Ingest failed for "+self.bagger.name,
-                                        desc=msg, id=self.bagger.name)
+                                        desc=msg, id=self.bagger.name,
+                                        version=nerdm.get('version', 'unknown'))
 
         # zip it up; this may split the bag into multibags
         self._status.record_progress("Serializing")
@@ -974,8 +980,8 @@ class MIDAS3SIPHandler(SIPHandler):
             if cpfailures and self.notifier:
                 # alert subscribers of these failures with an email
                 self.notifier.alert("preserve.failure", origin=self.name,
-                                    summary="checksum file copy failure",
-                                    desc=msg)
+                                    summary="checksum file copy failure", desc=msg,
+                                    version=nerdm.get('version', 'unknown'))
                     
         except Exception, ex:
             msg = "%s: Failure while writing checksum file(s) to review dir: %s" \
@@ -984,7 +990,8 @@ class MIDAS3SIPHandler(SIPHandler):
             if self.notifier:
                 self.notifier.alert("preserve.failure", origin=self.name,
                                     summary="checksum file write failure",
-                                    desc=msg, id=self._sipid)
+                                    desc=msg, id=self._sipid,
+                                    version=nerdm.get('version', 'unknown'))
                 
         # cache the latest nerdm record under the staging directory
         try:
@@ -1009,18 +1016,20 @@ class MIDAS3SIPHandler(SIPHandler):
                 msg = "Failed to ingest record with name=" + \
                       self.bagger.name + " into RMM: " + str(ex)
                 log.exception(msg)
-                log.info("Ingest service endpoint: "+self._ingester.endpoint)
+                log.info("Ingest service endpoint: %s", self._ingester.endpoint)
 
                 if self.notifier:
                     self.notifier.alert("ingest.failure", origin=self.name,
                           summary="NERDm ingest failure: " + self.bagger.name,
-                                        desc=msg, id=self.bagger.name)
+                                        desc=msg, id=self.bagger.name,
+                                        version=nerdm.get('version', 'unknown'))
 
         # tell a human that things are great!
         if self.notifier:
             self.notifier.alert("preserve.success", origin=self.name,
                            summary="New MIDAS SIP preserved: "+self.bagger.name,
-                                id=self.bagger.name)
+                                id=self.bagger.name,
+                                version=nerdm.get('version', 'unknown'))
 
         # clean up staging area
         if self.cfg.get('clean_bag_staging', True):
