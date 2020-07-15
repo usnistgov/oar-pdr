@@ -1130,6 +1130,7 @@ class MIDAS3PublishingService(PublishSystem):
         def _check_preservation(self, stat, _inprogress=False):
             if os.path.exists(self.bagger.bagdir) and \
                (stat['state'] == ps.SUCCESSFUL or stat['state'] == ps.FORGOTTEN):
+                self.ensure_qlock()
                 with self.qlock:
                     if not os.path.exists(self.next_pod) and not os.path.exists(self.presv_pod) and \
                        (_inprogress or not os.path.exists(self.working_pod)):
