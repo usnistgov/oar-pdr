@@ -602,7 +602,7 @@ class MIDAS3PublishingService(PublishSystem):
         if ('topic' in fltrd) != ('theme' in fltrd):
             if 'topic' in fltrd:
                 fltrd['theme'] = topics2themes(fltrd['topic'], False)
-            elif self.valid8r and 'theme' in fltrd:
+            elif self._schemadir and 'theme' in fltrd:
                 taxon = ResearchTopicsTaxonomy.from_schema_dir(self._schemadir)
                 fltrd['topic'] = taxon.themes2topics(fltrd['theme'])
         
