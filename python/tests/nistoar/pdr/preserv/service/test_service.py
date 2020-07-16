@@ -238,7 +238,7 @@ class TestThreadedPreservationService(test.TestCase):
 
         os.mkdir(os.path.join(self.revdir, "FFFFFFFFFF"))
         stat = self.svc.status("FFFFFFFFFF")
-        self.assertEqual(stat['state'], status.NOT_READY)
+        self.assertEqual(stat['state'], status.FAILED)
         self.assertTrue(not os.path.exists(os.path.join(self.statusdir,
                                                         "FFFFFFFFFF.json")))
         
@@ -278,7 +278,7 @@ class TestThreadedPreservationService(test.TestCase):
 
     def test_status_badtype(self):
         stat = self.svc.status(self.midasid, 'goob')
-        self.assertEqual(stat['state'], status.NOT_READY)
+        self.assertEqual(stat['state'], status.FAILED)
 
     def test_requests(self):
         reqs = self.svc.requests()
