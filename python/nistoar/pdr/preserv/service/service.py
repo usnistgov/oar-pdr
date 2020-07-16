@@ -338,7 +338,7 @@ class PreservationService(object):
                       "sipid=%s while checking status", sipid, siptype)
         return {
             "id": sipid,
-            "state": status.FAILURE,
+            "state": status.FAILED,
             "message": "Internal Error: Unable to get status as siptype={0}" \
                        .format(siptype),
             "history": []
