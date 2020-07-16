@@ -28,6 +28,9 @@ from .customize import CustomizationServiceClient
 import ejsonschema as ejs
 from ejsonschema import schemaloader
 
+# we will use a relaxed version to validate potentially incomplete POD submissions
+POD_DATASET_SCHEMA = re.sub(r'/v([^#]+)#/', '/relaxed-\g<1>#', DEF_POD_DATASET_SCHEMA)
+
 bg_sync = False
 
 from .. import PublishSystem, sys as pdrsys
@@ -144,7 +147,8 @@ class MIDAS3PublishingService(PublishSystem):
         if self.cfg.get('require_valid_pod', True):
             if not self._schemadir:
                 raise ConfigurationException("'reuqire_valid_pod' is set but cannot find schema dir")
-            self._podvalid8r = self._make_pod_validator(self._schemadir)
+            self._podvalid8r = validate.create_validator(self._schemadir, "_")
+
 
         # used to convert NERDm to POD
         self._nerd2pod = Res2PODds(pdr.def_jq_libdir, logger=self.log)
@@ -274,40 +278,9 @@ class MIDAS3PublishingService(PublishSystem):
 
         return self._apply_pod_async(pod, async)
 
-    def _make_pod_validator(self, schemadir):
-        # we need to accept incomplete POD records but not otherwise illegal ones; thus,
-        # this funtion takes the POD schema and removes all 'required' constraints.
-        # NOTE: this assumes that this is the special PDR-formatted version of the schema
-        schemauri = DEF_POD_DATASET_SCHEMA.split('#')[0]
-
-        # load the POD schema
-        ldr = schemaloader.SchemaLoader.from_directory(schemadir)
-        try:
-            podschema = ldr.load_schema(schemauri)
-        except KeyError as ex:
-            raise StateException("POD schema not found!")
-        except IOError as ex:
-            raise StateException("Problem loading POD schema: "+str(ex))
-
-        # remove 'required' items from each defined type
-        defs = podschema.get('definitions', {})
-        for tpnm in defs:
-            if 'required' in defs[tpnm]:
-                del defs[tpnm]['required']
-            if 'dependencies' in defs[tpnm]:
-                deps = defs[tpnm]['dependencies']
-                for prop in deps:
-                    if 'required' in prop:
-                        del prop['required']
-
-        # create the validator and load the modified schema into it
-        out = ejs.ExtValidator(ldr, "_")
-        out.load_schema(podschema, schemauri)
-        return out
-
     def _validate_pod(self, pod):
         if self._podvalid8r:
-            self._podvalid8r.validate(pod, schemauri=DEF_POD_DATASET_SCHEMA,
+            self._podvalid8r.validate(pod, schemauri=POD_DATASET_SCHEMA,
                                       strict=True, raiseex=True)
         else:
             self.log.warning("Unable to validate submitted POD data")

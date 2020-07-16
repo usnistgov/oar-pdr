@@ -144,6 +144,13 @@ class TestMIDAS3PublishingService(test.TestCase):
         data = utils.read_json(os.path.join(self.nrddir, self.midasid+".json"))
         self.assertEqual(data.get('ediid'), self.midasid)
 
+        pod = {"identifier": self.midasid, "description": ""}
+
+        self.svc.update_ds_with_pod(pod, False)
+        self.assertTrue(os.path.isdir(bagdir))
+        data = utils.read_json(os.path.join(self.nrddir, self.midasid+".json"))
+        self.assertEqual(data.get('ediid'), self.midasid)
+
     def test_update_ds_with_badpod(self):
         podf = os.path.join(self.revdir, "1491", "_pod.json")
         pod = utils.read_json(podf)
