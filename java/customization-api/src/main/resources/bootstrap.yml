@@ -6,11 +6,11 @@ spring:
     active: default
   cloud:
     config:
-      uri: http://localhost:8087
+      uri: http://localhost:8084
       
 logging:
   path : /var/log/customization-api
   exception-conversion-word: '%wEx'
   
-samlauth:
-  enabled: false
+#samlauth:
+#  enabled: false

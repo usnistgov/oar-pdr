@@ -12,13 +12,17 @@
  */
 package gov.nist.oar.customizationapi.service;
 
+import java.util.Arrays;
+
 import org.joda.time.DateTime;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
@@ -109,12 +113,17 @@ public class JWTTokenGenerator {
 	public void isAuthorized(AuthenticatedUserDetails userDetails, String ediid) throws UnAuthorizedUserException {
 		logger.info("Connect to backend metadata server to get the information.");
 		try {
-			String uri = mdserver + ediid + "/_perm/update/" + userDetails.getUserId();
+			String uri = mdserver + ediid + "/_perm/update/";
+			//String uri = "http://localhost:8085/rmm/test/4765EE7CC5EAA396";
+			//+ userDetails.getUserId();
+			JSONObject jObject = new JSONObject();
+			jObject.put("userId",userDetails.getUserId());
 			RestTemplate restTemplate = new RestTemplate();
 			HttpHeaders headers = new HttpHeaders();
 			headers.add("Authorization", "Bearer " + mdsecret);
-			HttpEntity<String> requestEntity = new HttpEntity<>(null, headers);
-			ResponseEntity<String> result = restTemplate.exchange(uri, HttpMethod.GET, requestEntity, String.class);
+			headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
+			HttpEntity<String> requestEntity = new HttpEntity<>(jObject.toString(), headers);
+			ResponseEntity<String> result = restTemplate.exchange(uri, HttpMethod.POST, requestEntity, String.class);
 
 			if (result.getStatusCode().is3xxRedirection() || result.getStatusCode().is5xxServerError()) {
 				logger.error("The backend metadata service returned with and error with status:"
@@ -164,7 +173,7 @@ public class JWTTokenGenerator {
 	public UserToken getLocalJWT(AuthenticatedUserDetails userDetails, String ediid)
 			throws UnAuthorizedUserException, BadGetwayException, CustomizationException {
 		logger.info("Get authorized user token.");
-//		isAuthorized(userDetails, ediid);
+		//isAuthorized(userDetails, ediid);
 
 		try {
 			final DateTime dateTime = DateTime.now();
