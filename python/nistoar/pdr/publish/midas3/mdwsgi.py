@@ -231,6 +231,8 @@ class Handler(object):
             return self.send_unauthorized()
 
         if "/json" not in self._env.get('CONTENT_TYPE', 'application/json'):
+            log.debug("Attempt to post with incorrect Content-Type: "+
+                      self._env.get('CONTENT_TYPE', 'application/json'))
             return self.send_error(415, "Non-JSON input content type specified")
         
         try:
@@ -446,7 +448,6 @@ class Handler(object):
         return answer(out)
 
     def do_HEAD(self, path):
-
         self.do_GET(path)
         return []
         
