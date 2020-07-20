@@ -114,7 +114,7 @@ public class JWTTokenGenerator {
 		logger.info("Connect to backend metadata server to get the information.");
 		try {
 			String uri = mdserver + ediid + "/_perm/update/";
-			//String uri = "http://localhost:8085/rmm/test/4765EE7CC5EAA396";
+//			String uri = "http://localhost:8085/rmm/test/4765EE7CC5EAA396";
 			//+ userDetails.getUserId();
 			JSONObject jObject = new JSONObject();
 			jObject.put("user",userDetails.getUserId());
@@ -122,6 +122,7 @@ public class JWTTokenGenerator {
 			HttpHeaders headers = new HttpHeaders();
 			headers.add("Authorization", "Bearer " + mdsecret);
 			headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
+			headers.setContentType(MediaType.APPLICATION_JSON);
 			HttpEntity<String> requestEntity = new HttpEntity<>(jObject.toString(), headers);
 			ResponseEntity<String> result = restTemplate.exchange(uri, HttpMethod.POST, requestEntity, String.class);
 
@@ -173,7 +174,7 @@ public class JWTTokenGenerator {
 	public UserToken getLocalJWT(AuthenticatedUserDetails userDetails, String ediid)
 			throws UnAuthorizedUserException, BadGetwayException, CustomizationException {
 		logger.info("Get authorized user token.");
-		//isAuthorized(userDetails, ediid);
+		isAuthorized(userDetails, ediid);
 
 		try {
 			final DateTime dateTime = DateTime.now();
