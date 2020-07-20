@@ -389,7 +389,7 @@ class Handler(object):
 
         if action == "read":
             if not user:
-                return answer(["all"])
+                return answer({"user": "all"})
             return self.send_error(200, "User has read permission")
 
         if action == "update":
@@ -399,7 +399,7 @@ class Handler(object):
                 return self.send_error(404,
                                        "Update permission is not available for all")
             if self._update_authorized_for(dsid, user):
-                return self.send_error(200, "User has update permission")
+                return answer({"user": user})
             return self.send_error(404, "User does not have update permission")
 
         return self.send_error(404, "Permission not recognized")

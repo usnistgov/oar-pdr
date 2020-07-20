@@ -189,7 +189,7 @@ class TestApp(test.TestCase):
         self.assertNotEqual(body, [])
         self.assertEqual(len(body), 1)
         data = json.loads(body[0])
-        self.assertEqual(data, ["all"])
+        self.assertEqual(data, {"user": "all"})
 
         self.resp = []
         body = hdlr.test_permission('mds2-2000', None)
