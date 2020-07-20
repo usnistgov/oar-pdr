@@ -147,6 +147,10 @@ class SimMidasHandler(object):
 
         try:
             if len(parts) > 1:
+                if parts[1] == "_perm":
+                    return self.send_error(403, "Forbidden")
+                return self.send_error(404, "Not found")
+            
                 out = json.dumps({
                     "response_code": 200,
                     "editable": self.user_can_update(parts[1], parts[0])
@@ -169,6 +173,46 @@ class SimMidasHandler(object):
         
         if forhead:
             return []
+        return [out]
+
+
+    def do_POST(self, path, input=None, params=None):
+        if not path:
+            return self.send_error(405, "POST not allowed")
+        parts = path.split('/')
+        if len(parts) > 2:
+            return self.send_error(404, "Path not found")
+
+        try:
+            if len(parts) > 1:
+                if parts[1] == "_perm":
+                    try:
+                        indata = json.load(input)
+                    except (TypeError, ValueError) as ex:
+                        return self.send_error(400, "Not parseable as JSON")
+
+                    if not isinstance(indata, Mapping) or  'user' not in indata:
+                        return self.send_error(400, "Uninterpetable JSON query")
+                    out = json.dumps({
+                        "response_code": 200,
+                        "editable": self.user_can_update(indata['user'], parts[0])
+                    });
+                
+            else:
+                return self.send_error(405, "POST not allowed")
+                
+        except Exception as ex:
+            print(str(ex))
+            return self.send_error(500, "Internal Error")
+        
+        if not out:
+            return self.send_error(404, "Identifier not found")
+
+        self.set_response(200, "Identifier resolved")
+        self.add_header('Content-Type', 'application/json')
+        self.add_header('Content-Length', str(len(out)))
+        self.end_headers()
+        
         return [out]
 
     def user_can_update(self, userid, midasid):

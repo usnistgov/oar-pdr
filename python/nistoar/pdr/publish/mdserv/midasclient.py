@@ -143,7 +143,7 @@ class MIDASClient(object):
         update the record with the given ID.
         """
         midasrecn = midasid2recnum(midasid);
-        relurl = "{0}/{1}".format(midasrecn, userid)
+        relurl = "/{0}/_perm".format(midasrecn)
         url = self.baseurl + relurl
         hdrs = {}
         if self._authkey:
@@ -156,7 +156,7 @@ class MIDASClient(object):
             self.log.warn("No Authorization header included!")
         
         try:
-            resp = requests.get(url, headers=hdrs)
+            resp = requests.post(url, headers=hdrs, json={'user': userid})
             if resp.status_code == 200:
                 body = resp.json()
                 if ("editable" in body):

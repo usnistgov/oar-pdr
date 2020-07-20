@@ -146,10 +146,35 @@ class TestSimMidasHandler(test.TestCase):
         self.assertIn('last_modified', data)
         self.assertEqual(data['dataset']['identifier'], "ark:/88434/pdr2210")
 
-    def test_user_can_edit(self):
+    def test_user_perm_by_get(self):
+        # Note: this is way of checking permissions (via GET) is no longer supported
         req = {
             'PATH_INFO': '/goob/pdr-2210/super',
             'REQUEST_METHOD': 'GET'
+        }
+        body = self.svc(req, self.start)
+        self.assertIn("404", self.resp[0])
+
+        self.resp = []
+        req['PATH_INFO'] = '/goob/pdr-2210/_perm'
+        body = self.svc(req, self.start)
+        self.assertIn("403", self.resp[0])
+        
+    def test_bad_post(self):
+        # Note: this is way of checking permissions (via GET) is no longer supported
+        req = {
+            'PATH_INFO': '/goob/pdr-2210',
+            'REQUEST_METHOD': 'POST',
+            'wsgi.input':  StringIO('{"user": "anon"}')
+        }
+        body = self.svc(req, self.start)
+        self.assertIn("405", self.resp[0])
+        
+    def test_user_can_edit(self):
+        req = {
+            'PATH_INFO': '/goob/pdr-2210/_perm',
+            'REQUEST_METHOD': 'POST',
+            'wsgi.input':  StringIO('{"user": "super"}')
         }
         body = self.svc(req, self.start)
         self.assertIn("200", self.resp[0])
@@ -160,8 +185,9 @@ class TestSimMidasHandler(test.TestCase):
         
     def test_user_cant_edit(self):
         req = {
-            'PATH_INFO': '/goob/pdr-2210/anon',
-            'REQUEST_METHOD': 'GET'
+            'PATH_INFO': '/goob/pdr-2210/_perm',
+            'REQUEST_METHOD': 'POST',
+            'wsgi.input':  StringIO('{"user": "anon"}')
         }
         body = self.svc(req, self.start)
         self.assertIn("200", self.resp[0])
