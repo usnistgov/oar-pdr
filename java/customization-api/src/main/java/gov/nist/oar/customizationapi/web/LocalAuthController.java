@@ -1,6 +1,9 @@
 package gov.nist.oar.customizationapi.web;
 
+import java.io.IOException;
+
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import org.slf4j.Logger;
@@ -9,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -54,13 +58,36 @@ public class LocalAuthController {
 //		String name = authentication.getName();
 //		Object ob = authentication.getDetails();
 //		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-		if(authentication == null)throw new UnAuthenticatedUserException("No user authenticated to complete this request.");
+		if (authentication == null)
+			throw new UnAuthenticatedUserException("No user authenticated to complete this request.");
 		AuthenticatedUserDetails pauth = (AuthenticatedUserDetails) authentication.getPrincipal();
-		return jwt.getLocalJWT(pauth,ediid);
-	// return jwt.getLocalJWT(new AuthenticatedUserDetails("TestGuest@nist.gov", "Guest", "User", "Guest"), ediid);
+		return jwt.getLocalJWT(pauth, ediid);
+		// return jwt.getLocalJWT(new AuthenticatedUserDetails("TestGuest@nist.gov",
+		// "Guest", "User", "Guest"), ediid);
 
 	}
-	
+
+	/**
+	 * Get Authenticated user information
+	 * 
+	 * @param response
+	 * @return JSON user id
+	 * @throws IOException
+	 */
+
+	@RequestMapping(value = { "/_logininfo" }, method = RequestMethod.GET, produces = "application/json")
+	public ResponseEntity<AuthenticatedUserDetails> login(HttpServletResponse response, Authentication authentication) throws IOException {
+		logger.info("Get the authenticated user info.");
+//		final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		if (authentication == null) {
+			response.sendRedirect("/customization/saml/login");
+		} else {
+			AuthenticatedUserDetails pauth = (AuthenticatedUserDetails) authentication.getPrincipal();
+			
+			return new ResponseEntity<>(pauth, HttpStatus.OK);
+		}
+		return null;
+	}
 	/**
 	 * Exception handling if user is not authorized
 	 * 

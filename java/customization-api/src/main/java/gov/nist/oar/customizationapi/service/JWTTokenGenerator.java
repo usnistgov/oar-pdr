@@ -117,7 +117,7 @@ public class JWTTokenGenerator {
 			//String uri = "http://localhost:8085/rmm/test/4765EE7CC5EAA396";
 			//+ userDetails.getUserId();
 			JSONObject jObject = new JSONObject();
-			jObject.put("userId",userDetails.getUserId());
+			jObject.put("user",userDetails.getUserId());
 			RestTemplate restTemplate = new RestTemplate();
 			HttpHeaders headers = new HttpHeaders();
 			headers.add("Authorization", "Bearer " + mdsecret);
