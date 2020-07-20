@@ -145,7 +145,7 @@ class Handler(object):
             path += '/'
         if not path.startswith(self.app.base_path):
             return self.send_error(404, "Resource not found")
-        path = path[len(self.app.base_path):]
+        path = path[len(self.app.base_path):].rstrip('/')
 
         if hasattr(self, meth_handler):
             return getattr(self, meth_handler)(path)
@@ -224,9 +224,9 @@ class Handler(object):
             return []
 
         if not parts or parts[0] != "_perm":
-            return send_methnotallowed('POST')
+            return self.send_methnotallowed('POST')
         elif len(parts) > 2:
-            return send_error(403, "Forbidden")
+            return self.send_error(403, "Forbidden")
         if not self.authorized_for_update():
             return self.send_unauthorized()
 
@@ -236,7 +236,7 @@ class Handler(object):
         try:
             bodyin = self._env.get('wsgi.input')
             if bodyin is None:
-                return send_error(400, "Missing input query document")
+                return self.send_error(400, "Missing input query document")
             query = json.load(bodyin, object_pairs_hook=OrderedDict)
         except (ValueError, TypeError) as ex:
             if log.isEnabledFor(logging.DEBUG):
