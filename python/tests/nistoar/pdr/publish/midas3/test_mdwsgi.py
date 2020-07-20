@@ -193,11 +193,8 @@ class TestApp(test.TestCase):
 
         self.resp = []
         body = hdlr.test_permission('mds2-2000', None)
-        self.assertIn("200", self.resp[0])
-        self.assertNotEqual(body, [])
-        self.assertEqual(len(body), 1)
-        data = json.loads(body[0])
-        self.assertEqual(data, {"read": "all"})
+        self.assertIn("404", self.resp[0])
+        self.assertEqual(body, [])
 
     def test_test_permission_update(self):
         hdlr = wsgi.Handler(self.svc, {}, self.start)
@@ -208,7 +205,8 @@ class TestApp(test.TestCase):
         body = hdlr.test_permission('mds2-2000', 'update', None)
         self.assertIn("400", self.resp[0])
 
-    def test_get_permission_by_path(self):
+    def test_get_permission_by_old_path(self):
+        # note: this path syntax is no longer allowed
         req = {
             'PATH_INFO': '/3A1EE2F169DD3B8CE0531A570681DB5D1491/_perm/read/me',
             'REQUEST_METHOD': 'GET',
@@ -216,90 +214,70 @@ class TestApp(test.TestCase):
         }
 
         body = self.svc(req, self.start)
-        self.assertIn("200", self.resp[0])
+        self.assertIn("403", self.resp[0])
 
         req['PATH_INFO'] = '/mds2-3000/_perm/read/all'
         self.resp = []
         body = self.svc(req, self.start)
-        self.assertIn("200", self.resp[0])
+        self.assertIn("403", self.resp[0])
 
-        req['PATH_INFO'] = '/mds2-3000/_perm/update/all'
-        self.resp = []
-        body = self.svc(req, self.start)
-        self.assertIn("404", self.resp[0])
-
-        req['PATH_INFO'] = '/mds2-3000/_perm/update/me'
-        self.resp = []
-        body = self.svc(req, self.start)
-        self.assertIn("200", self.resp[0])
-        
         req['HTTP_AUTHORIZATION'] = 'Bearer token'
         self.resp = []
         body = self.svc(req, self.start)
         self.assertIn("401", self.resp[0])
 
-    def test_get_permission_by_query(self):
+    def test_get_permission_by_post(self):
         req = {
             'PATH_INFO': '/3A1EE2F169DD3B8CE0531A570681DB5D1491/_perm/read',
-            'REQUEST_METHOD': 'GET',
-            'QUERY_STRING': "user=me",
+            'REQUEST_METHOD': 'POST',
             'HTTP_AUTHORIZATION': "Bearer secret"
         }
+        req['wsgi.input'] = StringIO('{"user": "me"}')
+
         body = self.svc(req, self.start)
         self.assertIn("200", self.resp[0])
-        self.assertEqual(json.loads(body[0]), ["me"])
 
-        del req['QUERY_STRING']
         self.resp = []
+        req['PATH_INFO'] = '/3A1EE2F169DD3B8CE0531A570681DB5D1491/_perm/update'
+        req['wsgi.input'] = StringIO('{"user": "all"}')
+        body = self.svc(req, self.start)
+        self.assertIn("404", self.resp[0])
+
+    def test_query_permission_by_post(self):
+        req = {
+            'PATH_INFO': '/3A1EE2F169DD3B8CE0531A570681DB5D1491/_perm',
+            'REQUEST_METHOD': 'POST',
+            'HTTP_AUTHORIZATION': "Bearer secret"
+        }
+        req['wsgi.input'] = StringIO('{"action": "read", "user": "me"}')
         body = self.svc(req, self.start)
         self.assertIn("200", self.resp[0])
-        self.assertEqual(json.loads(body[0]), ["all"])
+        self.assertEqual(json.loads(body[0]), {"read": ["me"]})
 
-        req['PATH_INFO'] = '/mds2-3000/_perm/update'
         self.resp = []
-        body = self.svc(req, self.start)
-        self.assertIn("400", self.resp[0])
-        self.assertEqual(body, [])
-
-        req['QUERY_STRING'] = 'user=all'
-        self.resp = []
+        req['wsgi.input'] = StringIO('{"action": ["read", "update"], "user": "all"}')
         body = self.svc(req, self.start)
         self.assertIn("200", self.resp[0])
-        self.assertEqual(json.loads(body[0]), [])
+        self.assertEqual(json.loads(body[0]), {"read": ["all"], "update": []})
 
-        req['QUERY_STRING'] = 'action=read&user=all'
         self.resp = []
+        req['wsgi.input'] = StringIO('{"action": ["update"], "user": "all"}')
         body = self.svc(req, self.start)
         self.assertIn("200", self.resp[0])
-        self.assertEqual(json.loads(body[0]), [])
+        self.assertEqual(json.loads(body[0]), {"update": []})
 
-        req['QUERY_STRING'] = 'user=me&user=you'
         self.resp = []
+        req['wsgi.input'] = StringIO('{"user": "all"}')
         body = self.svc(req, self.start)
         self.assertIn("200", self.resp[0])
-        self.assertEqual(json.loads(body[0]), ["me", "you"])
+        self.assertEqual(json.loads(body[0]), {"read": ["all"], "update": []})
 
-        req['PATH_INFO'] = '/mds2-3000/_perm'
-        req['QUERY_STRING'] = 'action=goob&action=read&action=update&user=me&user=you'
         self.resp = []
+        req['wsgi.input'] = StringIO('{}')
         body = self.svc(req, self.start)
         self.assertIn("200", self.resp[0])
-        self.assertEqual(json.loads(body[0]),
-                         {"update": ["me", "you"],"read": ["me", "you"]})
+        self.assertEqual(json.loads(body[0]), {"read": ["all"]})
 
-        req['QUERY_STRING'] = 'action=goob&user=me&user=you'
-        self.resp = []
-        body = self.svc(req, self.start)
-        self.assertIn("200", self.resp[0])
-        self.assertEqual(json.loads(body[0]), {})
-
-        req['QUERY_STRING'] = 'action=&user=me&user=you'
-        self.resp = []
-        body = self.svc(req, self.start)
-        self.assertIn("200", self.resp[0])
-        self.assertEqual(json.loads(body[0]),
-                         {"update": ["me", "you"],"read": ["me", "you"]})
-        
         
     def test_enableMidasClient(self):
         self.config.update({

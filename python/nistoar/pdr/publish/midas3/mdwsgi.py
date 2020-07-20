@@ -182,24 +182,72 @@ class Handler(object):
             if filepath.startswith("_perm"):
                 if not self.authorized_for_update():
                     return self.send_unauthorized()
-                perm = filepath.split('/', 2)
+                perm = filepath.split('/')
                 if perm[0] != "_perm":
                     return self.send_error(404, "meta-resource for id={0} not found"
                                            .format(dsid))
-                if len(perm) < 3:
-                    perm += [None, None]
+                if len(perm) < 2:
+                    perm += [None]
+                elif len(perm) > 2:
+                    return self.send_error(403, "Forbidden")
 
-                if self._env.get('QUERY_STRING'):
-                    query = parse_qs(self._env.get('QUERY_STRING', ""))
-                    return self.query_permissions(dsid, query, perm[1])
-
-                return self.test_permission(dsid, perm[1], perm[2])
+                return self.test_permission(dsid, perm[1])
 
             else:
                 return self.send_datafile(dsid, filepath)
 
         return self.send_metadata(dsid)
 
+    def do_POST(self, path):
+        if not path:
+            self.code = 403
+            self.send_error(self.code, "No identifier given")
+            return ["Server ready\n"]
+
+        if path.startswith('/'):
+            path = path[1:]
+        parts = path.split('/')
+
+        if parts[0] == "ark:":
+            # support full ark identifiers
+            if len(parts) > 2 and parts[1] == NIST_ARK_NAAN:
+                dsid = parts[2]
+            else:
+                dsid = '/'.join(parts[:3])
+            parts = parts[3:]
+        else:
+            dsid = parts[0]
+            parts = parts[1:]
+            
+        if self.badidre.search(dsid):
+            self.send_error(400, "Unsupported SIP identifier: "+dsid)
+            return []
+
+        if not parts or parts[0] != "_perm":
+            return send_methnotallowed('POST')
+        elif len(parts) > 2:
+            return send_error(403, "Forbidden")
+        if not self.authorized_for_update():
+            return self.send_unauthorized()
+
+        if "/json" not in self._env.get('CONTENT_TYPE', 'application/json'):
+            return self.send_error(415, "Non-JSON input content type specified")
+        
+        try:
+            bodyin = self._env.get('wsgi.input')
+            if bodyin is None:
+                return send_error(400, "Missing input query document")
+            query = json.load(bodyin, object_pairs_hook=OrderedDict)
+        except (ValueError, TypeError) as ex:
+            if log.isEnabledFor(logging.DEBUG):
+                log.error("Failed to parse input as JSON: %s", str(ex))
+            return self.send_error(400, "Input not parseable as JSON")
+
+        if len(parts) < 2:
+            return self.query_permissions(dsid, query)
+        return self.test_permission(dsid, parts[1], query.get('user'))
+        
+            
     def get_metadata(self, dsid):
         mdata = None
         mdfile = None
@@ -334,7 +382,7 @@ class Handler(object):
             return [ json.dumps(data, indent=4, separators=(',', ': ')) ]
 
         if not action:
-            return answer({"read": "all"})
+            return self.send_error(404, "Missing permission action")
         
         if action not in ["update", "read"]:
             return self.send_error(404, "Unrecognized permission action: "+action)
@@ -375,10 +423,12 @@ class Handler(object):
             query['action'] = [action]
         elif not query.get('action'):
             query['action'] = ["read"]
-            if query['user']:
+            if query.get('user'):
                 query['action'].append("update")
         if not query.get("user"):
             query['user'] = ["all"]
+        elif isinstance(query['user'], (str, unicode)):
+            query['user'] = [query['user']]
 
         out = {}
         if 'read' in query.get('action',[]):
@@ -388,7 +438,6 @@ class Handler(object):
             for user in query['user']:
                 if user == "all":
                     continue
-                user = escape_qp(user)
                 if self._update_authorized_for(dsid, user):
                     out['update'].append(user)
 
