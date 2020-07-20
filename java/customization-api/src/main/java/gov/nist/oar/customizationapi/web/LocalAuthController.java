@@ -43,7 +43,7 @@ import gov.nist.oar.customizationapi.service.UserToken;
 @CrossOrigin(origins = "*", allowedHeaders = "*")
 @RequestMapping("/auth")
 //@Profile({ "local" }) //This setting can be used to enable the feature based on certain profiles/platforms.
-@ConditionalOnProperty(value = "samlauth.enabled", havingValue = "false", matchIfMissing = true)
+@ConditionalOnProperty(value = "samlauth.enabled", havingValue = "false", matchIfMissing = false)
 public class LocalAuthController {
 	private Logger logger = LoggerFactory.getLogger(LocalAuthController.class);
 
@@ -51,7 +51,7 @@ public class LocalAuthController {
 	JWTTokenGenerator jwt;
 
 	@RequestMapping(value = { "_perm/{ediid}" }, method = RequestMethod.GET, produces = "application/json")
-	public UserToken token(Authentication authentication, @PathVariable @Valid String ediid)
+	public UserToken tokenLocal(Authentication authentication, @PathVariable @Valid String ediid)
 			throws UnAuthorizedUserException, CustomizationException, UnAuthenticatedUserException, BadGetwayException {
 		logger.info(
 				"This should be called only in local profile, while testing locally. It returns sample user values.");
@@ -76,7 +76,7 @@ public class LocalAuthController {
 	 */
 
 	@RequestMapping(value = { "/_logininfo" }, method = RequestMethod.GET, produces = "application/json")
-	public ResponseEntity<AuthenticatedUserDetails> login(HttpServletResponse response, Authentication authentication) throws IOException {
+	public ResponseEntity<AuthenticatedUserDetails> loginLocal(HttpServletResponse response, Authentication authentication) throws IOException {
 		logger.info("Get the authenticated user info.");
 //		final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 		if (authentication == null) {

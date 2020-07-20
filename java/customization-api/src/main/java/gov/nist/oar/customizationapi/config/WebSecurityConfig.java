@@ -56,7 +56,7 @@ public class WebSecurityConfig {
 	 */
 	@Configuration
 //	@Profile({ "local" }) //This setting can be used to enable the feature based on certain profiles/platforms.
-	@ConditionalOnProperty(value = "samlauth.enabled", havingValue = "false", matchIfMissing = true)
+	@ConditionalOnProperty(value = "samlauth.enabled", havingValue = "false", matchIfMissing = false)
 	public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
 		@Override
@@ -85,7 +85,7 @@ public class WebSecurityConfig {
 	 */
 	@Configuration
 //	@Profile({ "local" }) //This setting can be used to enable the feature based on certain profiles/platforms.
-	@ConditionalOnProperty(value = "samlauth.enabled", havingValue = "false", matchIfMissing = true)
+	@ConditionalOnProperty(value = "samlauth.enabled", havingValue = "false", matchIfMissing = false)
 	@Order(1)
 	public static class RestApiSecurityConfigLocal extends WebSecurityConfigurerAdapter {
 		private Logger logger = LoggerFactory.getLogger(RestApiSecurityConfigLocal.class);
