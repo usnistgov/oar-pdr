@@ -12,6 +12,9 @@
  */
 package gov.nist.oar.customizationapi.config.SAMLConfig;
 
+import java.net.MalformedURLException;
+import java.net.URL;
+
 import org.opensaml.ws.transport.http.HttpServletRequestAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,6 +22,8 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.saml.SAMLEntryPoint;
 import org.springframework.security.saml.context.SAMLMessageContext;
 import org.springframework.security.saml.websso.WebSSOProfileOptions;
+
+import gov.nist.oar.customizationapi.exceptions.CustomizationException;
 
 /***
  * This helps SAML endpoint to redirect after successful login.
@@ -55,13 +60,33 @@ public class SamlWithRelayStateEntryPoint extends SAMLEntryPoint {
 				.getInboundMessageTransport();
 
 		String redirectURL = httpServletRequestAdapter.getParameterValue("redirectTo");
+		String[] urls = defaultRedirect.split(",");
+		try {
 
-		if (redirectURL != null) {
-			log.info("Redirect user to +" + redirectURL);
-			ssoProfileOptions.setRelayState(redirectURL);
-		} else {
-			log.info("Redirect user to default URL");
-			ssoProfileOptions.setRelayState(defaultRedirect);
+			for (String urlString : urls) {
+				URL url = new URL(redirectURL);
+				URL nUrl = new URL(urlString);
+
+				if (redirectURL == null) {
+
+					ssoProfileOptions.setRelayState(urls[0]);
+					break;
+				}
+				if (redirectURL != null && !url.getHost().equalsIgnoreCase(nUrl.getHost())) {
+					ssoProfileOptions.setRelayState(urls[0]);
+
+//				return null;
+				}
+				if (redirectURL != null && url.getHost().equalsIgnoreCase(nUrl.getHost())) {
+
+					log.info("Redirect user to +" + redirectURL);
+					ssoProfileOptions.setRelayState(redirectURL);
+					break;
+				}
+			}
+
+		} catch (MalformedURLException e) {
+			ssoProfileOptions.setRelayState(urls[0]);
 		}
 
 		return ssoProfileOptions;

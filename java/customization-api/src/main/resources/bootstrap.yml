@@ -14,3 +14,9 @@ logging:
   
 #samlauth:
 #  enabled: false
+  
+server:
+  servlet:
+    session:
+      cookie:
+        secure: true
