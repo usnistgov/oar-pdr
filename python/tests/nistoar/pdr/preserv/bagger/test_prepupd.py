@@ -251,6 +251,29 @@ class TestUpdatePrepper(test.TestCase):
         self.assertEqual(self.prepr.cache_nerdm_rec(), cached)
         self.assertTrue(os.path.exists(cached))
 
+    def test_latest_version_from_nerdmfile(self):
+        cached = os.path.join(self.headcache,"_nerd","ABCDEFG.json")
+        self.prepr.cache_nerdm_rec()        
+        self.assertTrue(os.path.exists(cached))
+        self.assertEqual(self.prepr._latest_version_from_nerdmfile(cached), "1.0")
+        
+        cached = os.path.join(self.headcache,"_nerd","goober.json")
+        self.assertEqual(self.prepr._latest_version_from_nerdmfile(cached), "0")
+        
+    def test_latest_version_from_nerdcache(self):
+        cached = os.path.join(self.headcache,"_nerd","ABCDEFG.json")
+        self.prepr.cache_nerdm_rec()        
+        self.assertTrue(os.path.exists(cached))
+        self.assertEqual(self.prepr._latest_version_from_nerdcache(), "1.0")
+        self.prepr.aipid = "goober"
+        self.assertEqual(self.prepr._latest_version_from_nerdcache(), "0")
+        
+    def test_latest_version_from_repo(self):
+        self.assertEqual(self.prepr._latest_version_from_repo(), "1.0")
+        self.prepr.aipid = "goober"
+        self.assertEqual(self.prepr._latest_version_from_repo(), "0")
+        
+
     def test_aip_exists(self):
         self.assertTrue(self.prepr.aip_exists())
 
@@ -359,7 +382,7 @@ class TestUpdatePrepper(test.TestCase):
 
         bag = NISTBag(root)
         mdata = bag.nerdm_record(True)
-        self.assertEquals(mdata['version'], "1.0.0+ (in edit)")
+        self.assertEquals(mdata['version'], "1.0+ (in edit)")
 
 
     def test_no_create_new_update(self):

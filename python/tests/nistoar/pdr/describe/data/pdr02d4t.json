@@ -3,6 +3,7 @@
     "@type": [ "nrd:SRD", "nrdp:DataPublication", "nrdp:PublicDataResource" ],
     "@id": "ark:/88434/pdr02d4t",
     "abbrev": [ "SRD#13" ],
+    "version": "1.0",
     "authors": [
         {
             "fn": "M.W. Chase, Jr.",

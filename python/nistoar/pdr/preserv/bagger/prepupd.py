@@ -451,6 +451,62 @@ class UpdatePrepper(object):
         # update the version appropriate for edit mode
         self.update_version_for_edit(bldr.bagdir)
 
+    def latest_version(self, source="repo"):
+        """
+        return the version label for the latest known version of the dataset.  The 
+        choice for the source parameter can be chosen with consideration of the 
+        current state of the dataset update or preservation process and performance.  
+        :param str source:  a label indicating the method that should be used 
+                            to determine the version, one of "repo" (query the 
+                            repository's public metadata service), "bag-store" 
+                            (the long-term bag storage directory), "bag-cache" 
+                            (the bag-staging directory), "nerdm-cache"
+                            (the local nerdm metadata cache).  "repo" is generally
+                            considered most definitive but least performant.
+        :rtype str:  the version string of the last known version.  "0" is returned if 
+                     no previous version can be found/determined.
+        """
+        if source == "repo":
+            return self._latest_version_from_repo()
+        elif source == "bag-store":
+            return self._latest_version_from_dir(self.storedir)
+        elif source == "bag-cache":
+            return self._latest_version_from_dir(self.cacher.cachedir)
+        elif source == "nerdm-cache":
+            return self._latest_version_from_nerdmcache()
+        else:
+            raise ValueError("latest_version(): Unrecognized source label: "+str(source))
+
+    def _latest_version_from_repo(self):
+        latest_nerd = self.cache_nerdm_rec()
+        if not latest_nerd:
+            return "0"
+        return self._latest_version_from_nerdmfile(latest_nerd)
+
+    def _latest_version_from_nerdcache(self):
+        nerdf = os.path.join(self.mdcache, self.aipid+".json")
+        return self._latest_version_from_nerdmfile(nerdf)
+
+    def _latest_version_from_dir(self, bagparent):
+        foraip = [f for f in os.listdir(bagparent)
+                    if f.startswith(self.aipid+'.') and
+                       not f.endswith('.sha256')        ]
+        latest = bagutils.find_latest_head_bag(foraip)
+
+        version = bagutils.parse_bag_name(latest)[1]
+        if not version:
+            version = "1.0.0"
+        return version
+
+    def _latest_version_from_nerdmfile(self, nerdfile):
+        if not os.path.exists(nerdfile):
+            return "0"
+        nerd = utils.read_nerd(nerdfile)
+        return nerd.get('version', '0')
+        
+        
+        
+
     def update_version_for_edit(self, bagdir):
         """
         update the version metadatum to something appropriate for edit mode.
