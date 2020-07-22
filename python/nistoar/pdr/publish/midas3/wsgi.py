@@ -101,6 +101,8 @@ class MIDAS3PublishingApp(object):
 
         if not handler:
             handler = Handler(path, env, start_resp, self._authkey, req)
+        log.debug("handling %s path=%s via %s", env.get('REQUEST_METHOD', 'GET?'),
+                  path, repr(handler))
         return handler.handle()
 
     def __call__(self, env, start_resp):
@@ -161,9 +163,6 @@ class Handler(object):
 
     def end_headers(self):
         status = "{0} {1}".format(str(self._code), self._msg)
-        ###DEBUG:
-        log.debug("sending header: %s", str(self._hdr.items()))
-        ###DEBUG:
         self._start(status, self._hdr.items())
 
     _spdel = re.compile(r'\s+')
@@ -319,7 +318,7 @@ class DraftHandler(Handler):
             self._svc.start_customization_for(pod)
 
         except ValidationError as ex:
-            log.error("/latest/: Input is not a valid POD record:\n  "+str(ex))
+            log.error("/draft/: Input is not a valid POD record:\n  "+str(ex))
             return self.send_error(400, "Input is not a valid POD record")
         except PDRServerError as ex:
             log.exception("Problem accessing customization service: "+str(ex))
@@ -416,9 +415,6 @@ class LatestHandler(Handler):
         except ValidationError as ex:
             log.error("/latest/: Input is not a valid POD record:\n  "+str(ex))
             return self.send_error(400, "Input is not a valid POD record")
-        except PDRServerError as ex:
-            log.exception("Problem accessing customization service: "+str(ex))
-            return self.send_error(502, "Customization Service access failure")
         except Exception as ex:
             log.exception("Internal error: "+str(ex))
             return self.send_error(500, "Internal error")
