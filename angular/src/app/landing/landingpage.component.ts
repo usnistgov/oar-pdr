@@ -181,11 +181,16 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
 
             if(showError){
                 if(metadataError == "not-found"){
-                    console.log("ID not found...");
-                    this.edstatsvc._setEditMode(this.EDIT_MODES.OUTSIDE_MIDAS_MODE);
-                    this.setMessage();
-                    this.displaySpecialMessage = true;
+                    if(this.routerParamEditEnabled){
+                        console.log("ID not found...");
+                        this.edstatsvc._setEditMode(this.EDIT_MODES.OUTSIDE_MIDAS_MODE);
+                        this.setMessage();
+                        this.displaySpecialMessage = true;
+                    }else{
+                        this.router.navigateByUrl("not-found/" + this.reqId, { skipLocationChange: true });
+                    }
                 }
+
             }
         },
         (err) => {
