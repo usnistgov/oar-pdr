@@ -939,6 +939,8 @@ class MIDAS3PublishingService(PublishSystem):
                     
                 pod['_preserve'] = (asupdate and "update") or "new"
                 write_json(pod, self.presv_pod)
+                if os.path.exists(self.next_pod):
+                    os.remove(self.next_pod)
 
         def ensure_qlock(self):
             if not self.qlock:
