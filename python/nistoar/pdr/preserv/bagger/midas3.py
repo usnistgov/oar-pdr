@@ -1148,10 +1148,23 @@ class MIDASMetadataBagger(SIPBagger):
         ineditre = re.compile(r'^(\d+(.\d+)*)\+ \(.*\)')
         matched = ineditre.search(oldver)
         if matched:
-            # the version is marked as "in edit", indicating that this
-            # is an update to a previously published version.
-            oldver = matched.group(1)
-            ver = [int(f) for f in oldver.split('.')]
+            # the version is marked as "+ (in edit)", indicating that the
+            # next published version should be based on the last published
+            # version.  Note that the base version currently set is not necessarily
+            # accurate: it may reflect the target version the last time
+            # preservation was initiated; if that preservation failed, that version
+            # would not be correct.  Thus, we must check for the last published
+            # version.
+
+            # get the last published version
+            lastver = "0"
+            prepr = self.get_prepper()
+            if prepr:
+                lastver = prepr.latest_version(["bag-cache", "bag-store", "repo"])
+            if lastver == "0":
+                lastver = matched.group(1)
+            
+            ver = [int(f) for f in lastver.split('.')]
             for i in range(len(ver), 3):
                 ver.append(0)
 
@@ -1178,7 +1191,7 @@ class MIDASMetadataBagger(SIPBagger):
         verhist = self.sip.nerd.get('versionHistory', [])
 
         # set the version history
-        if uptype != _NO_UPDATE and self.sip.nerd['version'] != oldver and \
+        if uptype != _NO_UPDATE and self.sip.nerd['version'] != lastver and \
            ('issued' in self.sip.nerd or 'modified' in self.sip.nerd) and \
            not any([h['version'] == self.sip.nerd['version'] for h in verhist]):
             issued = ('modified' in self.sip.nerd and self.sip.nerd['modified']) or \

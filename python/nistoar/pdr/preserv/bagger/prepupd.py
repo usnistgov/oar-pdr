@@ -466,16 +466,24 @@ class UpdatePrepper(object):
         :rtype str:  the version string of the last known version.  "0" is returned if 
                      no previous version can be found/determined.
         """
-        if source == "repo":
-            return self._latest_version_from_repo()
-        elif source == "bag-store":
-            return self._latest_version_from_dir(self.storedir)
-        elif source == "bag-cache":
-            return self._latest_version_from_dir(self.cacher.cachedir)
-        elif source == "nerdm-cache":
-            return self._latest_version_from_nerdcache()
-        else:
-            raise ValueError("latest_version(): Unrecognized source label: "+str(source))
+        if not isinstance(source, (list, tuple)):
+            source = [source]
+        out = "0"
+        for src in source:
+            if src == "repo":
+                out = self._latest_version_from_repo()
+            elif src == "bag-store":
+                if self.storedir:
+                    out = self._latest_version_from_dir(self.storedir)
+            elif src == "bag-cache":
+                out = self._latest_version_from_dir(self.cacher.cachedir)
+            elif src == "nerdm-cache":
+                out = self._latest_version_from_nerdcache()
+            else:
+                raise ValueError("latest_version(): Unrecognized source label: "+str(src))
+            if out != "0":
+                return out
+        return out
 
     def _latest_version_from_repo(self):
         latest_nerd = self.cache_nerdm_rec()
@@ -495,7 +503,7 @@ class UpdatePrepper(object):
             return "0"
         latest = bagutils.find_latest_head_bag(foraip)
 
-        version = bagutils.parse_bag_name(latest)[1]
+        version = re.sub(r'_', '.', bagutils.parse_bag_name(latest)[1])
         if not version:
             version = "1.0.0"
         return version
