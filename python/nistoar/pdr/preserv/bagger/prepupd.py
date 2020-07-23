@@ -473,7 +473,7 @@ class UpdatePrepper(object):
         elif source == "bag-cache":
             return self._latest_version_from_dir(self.cacher.cachedir)
         elif source == "nerdm-cache":
-            return self._latest_version_from_nerdmcache()
+            return self._latest_version_from_nerdcache()
         else:
             raise ValueError("latest_version(): Unrecognized source label: "+str(source))
 
@@ -491,6 +491,8 @@ class UpdatePrepper(object):
         foraip = [f for f in os.listdir(bagparent)
                     if f.startswith(self.aipid+'.') and
                        not f.endswith('.sha256')        ]
+        if not foraip:
+            return "0"
         latest = bagutils.find_latest_head_bag(foraip)
 
         version = bagutils.parse_bag_name(latest)[1]

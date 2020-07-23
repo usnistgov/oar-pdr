@@ -265,13 +265,26 @@ class TestUpdatePrepper(test.TestCase):
         self.prepr.cache_nerdm_rec()        
         self.assertTrue(os.path.exists(cached))
         self.assertEqual(self.prepr._latest_version_from_nerdcache(), "1.0")
+        self.assertEqual(self.prepr.latest_version("nerdm-cache"), "1.0")
         self.prepr.aipid = "goober"
         self.assertEqual(self.prepr._latest_version_from_nerdcache(), "0")
         
     def test_latest_version_from_repo(self):
         self.assertEqual(self.prepr._latest_version_from_repo(), "1.0")
+        self.assertEqual(self.prepr.latest_version("repo"), "1.0")
+        self.assertEqual(self.prepr.latest_version(), "1.0")
         self.prepr.aipid = "goober"
         self.assertEqual(self.prepr._latest_version_from_repo(), "0")
+
+    def test_latest_version_from_dir(self):
+        cached = os.path.join(self.headcache, "ABCDEFG.2.mbag0_4-4.zip")
+        self.assertEqual(self.prepr.cache_headbag(), cached)
+        self.assertTrue(os.path.exists(cached))
+        
+        self.assertEqual(self.prepr._latest_version_from_dir(self.headcache), "2")
+        self.assertEqual(self.prepr.latest_version("bag-cache"), "2")
+        self.prepr.aipid = "goober"
+        self.assertEqual(self.prepr._latest_version_from_dir(self.headcache), "0")
         
 
     def test_aip_exists(self):
