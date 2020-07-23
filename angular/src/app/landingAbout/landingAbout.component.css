@@ -1,4 +1,13 @@
 
 .labelStyle{
-color:#1E6BA1;
+    color:#1E6BA1;
+    font-size: 40px;
+}
+.smlabelStyle{
+    color:#1E6BA1;
+    font-size: 25px;
+}
+.bodyTextSize{
+    font-size: 20px;
+    line-height: 30px;
 }
