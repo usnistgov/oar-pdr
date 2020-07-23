@@ -92,6 +92,7 @@ import org.springframework.security.web.authentication.www.BasicAuthenticationFi
 import org.springframework.security.web.session.SessionManagementFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
+import gov.nist.oar.customizationapi.config.CustomFilter;
 import gov.nist.oar.customizationapi.exceptions.ConfigurationException;
 import gov.nist.oar.customizationapi.service.SamlUserDetailsService;
 /**
@@ -175,6 +176,18 @@ public class SamlSecurityConfig extends WebSecurityConfigurerAdapter {
 	@Value("${application.url:http://localhost:4200}")
 	String applicationURL;
 
+	/**
+	 * Set up filter for cross origin requests, here it is read from configserver
+	 * and applicationURL is angular application URL
+	 * 
+	 * @return CORSFilter
+	 */
+	@Bean
+	CustomFilter customFilter() {
+		logger.info("CORS filter setting for application:" + applicationURL);
+		CustomFilter filter = new CustomFilter(applicationURL);
+		return filter;
+	}
 	/**
 	 * Default single sign on profile options are set up here, we can add relaystate
 	 * for redirect here as well.
@@ -388,7 +401,7 @@ public class SamlSecurityConfig extends WebSecurityConfigurerAdapter {
 		chains.add(new DefaultSecurityFilterChain(new AntPathRequestMatcher("/saml/metadata/**"),
 				metadataDisplayFilter()));
 
-		chains.add(new DefaultSecurityFilterChain(new AntPathRequestMatcher("/saml/login/**"), samlEntryPoint()));
+		chains.add(new DefaultSecurityFilterChain(new AntPathRequestMatcher("/saml/login/**"),customFilter(), samlEntryPoint()));
 
 		chains.add(new DefaultSecurityFilterChain(new AntPathRequestMatcher("/saml/sso/**"),
 				samlWebSSOProcessingFilter()));

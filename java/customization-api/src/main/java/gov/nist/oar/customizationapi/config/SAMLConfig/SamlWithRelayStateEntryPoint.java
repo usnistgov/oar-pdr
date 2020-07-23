@@ -15,6 +15,7 @@ package gov.nist.oar.customizationapi.config.SAMLConfig;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+import org.opensaml.ws.transport.http.HTTPOutTransport;
 import org.opensaml.ws.transport.http.HttpServletRequestAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,15 +41,18 @@ public class SamlWithRelayStateEntryPoint extends SAMLEntryPoint {
 		this.defaultRedirect = applicationURL;
 	}
 
+	
 	@Override
 	protected WebSSOProfileOptions getProfileOptions(SAMLMessageContext context, AuthenticationException exception) {
 
 		WebSSOProfileOptions ssoProfileOptions;
 		if (defaultOptions != null) {
 			ssoProfileOptions = defaultOptions.clone();
+			
 		} else {
 			ssoProfileOptions = new WebSSOProfileOptions();
 		}
+		System.out.println("ssoProfileOptions :"+ssoProfileOptions.getRelayState());
 
 		// Note for customization :
 		// Original HttpRequest can be extracted from the context param
@@ -60,33 +64,14 @@ public class SamlWithRelayStateEntryPoint extends SAMLEntryPoint {
 				.getInboundMessageTransport();
 
 		String redirectURL = httpServletRequestAdapter.getParameterValue("redirectTo");
-		String[] urls = defaultRedirect.split(",");
-		try {
 
-			for (String urlString : urls) {
-				URL url = new URL(redirectURL);
-				URL nUrl = new URL(urlString);
 
-				if (redirectURL == null) {
-
-					ssoProfileOptions.setRelayState(urls[0]);
-					break;
-				}
-				if (redirectURL != null && !url.getHost().equalsIgnoreCase(nUrl.getHost())) {
-					ssoProfileOptions.setRelayState(urls[0]);
-
-//				return null;
-				}
-				if (redirectURL != null && url.getHost().equalsIgnoreCase(nUrl.getHost())) {
-
-					log.info("Redirect user to +" + redirectURL);
-					ssoProfileOptions.setRelayState(redirectURL);
-					break;
-				}
-			}
-
-		} catch (MalformedURLException e) {
-			ssoProfileOptions.setRelayState(urls[0]);
+		if (redirectURL != null) {
+			log.info("Redirect user to +" + redirectURL);
+			ssoProfileOptions.setRelayState(redirectURL);
+		} else {
+			log.info("Redirect user to default URL");
+			ssoProfileOptions.setRelayState(defaultRedirect);
 		}
 
 		return ssoProfileOptions;
