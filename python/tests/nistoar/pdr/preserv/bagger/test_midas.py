@@ -191,7 +191,7 @@ class TestMIDASMetadataBaggerMixed(test.TestCase):
         data = self.bagr.resmd
         self.assertNotIn('@id', data)
         self.assertEqual(data['ediid'], self.midasid)
-        self.assertEqual(data['doi'], "doi:10.18434/T4SW26")
+        self.assertEqual(data['doi'], "doi:10.88434/pdrut-T4SW26")
         self.assertNotIn('foo', data)
         self.assertEqual(len(data['components']), 7)
         self.assertEqual(data['components'][0]['@type'][0], 'nrd:Hidden')
@@ -224,7 +224,7 @@ class TestMIDASMetadataBaggerMixed(test.TestCase):
         data = self.bagr.bagbldr.bag.nerd_metadata_for("")
         self.assertEqual(data['@id'], "ark:/88434/mds00hw91v")
         self.assertEqual(data['ediid'], self.midasid)
-        self.assertEqual(data['doi'], "doi:10.18434/T4SW26")
+        self.assertEqual(data['doi'], "doi:10.88434/pdrut-T4SW26")
         self.assertEqual(data['foo'], 'bar')
         self.assertEqual(len(data['components']), 1)
         self.assertEqual(data['components'][0]['@type'][0], 'nrd:Hidden')

@@ -32,6 +32,7 @@ from .. import (ConfigurationException, StateException, PODError, PreservationEx
 from .. import sys as _sys
 from . import status
 from ...ingest.rmm import IngestClient
+from ...doimint import DOIMintingClient
 from ...utils import write_json
 
 log = logging.getLogger(_sys.system_abbrev).getChild(_sys.subsystem_abbrev)
@@ -826,6 +827,13 @@ class MIDAS3SIPHandler(SIPHandler):
         else:
             log.warn("Ingester client not configured: archived records will not get loaded to repo")
 
+        self._doiminter = None
+        dmcfg = self.cfg.get('doi_minter')
+        if dmcfg and dmcfg.get('datacite_api'):
+            self._doiminter = DOIMintingClient(dmcfg, log.getChild("doimint"))
+        else:
+            log.warn("DOI minting client not configured: archived records will not get submitted to DataCite")
+
     def isready(self, _inprogress=False):
         """
         do a quick check of the input SIP to determine if it can be 
@@ -912,8 +920,22 @@ class MIDAS3SIPHandler(SIPHandler):
                 log.exception(msg)
                 # send an alert email to interested subscribers
                 if self.notifier:
-                    self.notifier.alert("preserve.failure", origin=self.name,
+                    self.notifier.alert("ingest.failure", origin=self.name,
                                   summary="Ingest failed for "+self.bagger.name,
+                                        desc=msg, id=self.bagger.name,
+                                        version=nerdm.get('version', 'unknown'))
+
+        # Stage the DataCite DOI record for submission to DataCite
+        if self._doiminter:
+            try:
+                self._doiminter.stage(nerdm, name=self.bagger.name)
+            except Exception as ex:
+                msg = "Failure staging DataCite record for " + slef.bagger.name + \
+                      " for DOI minting/updating: " + str(ex)
+                log.exception(msg)
+                if self.notifier:
+                    self.notifier.alert("doi.failure", origin=self.name,
+                                  summary="DOI minting failed for "+self.bagger.name,
                                         desc=msg, id=self.bagger.name,
                                         version=nerdm.get('version', 'unknown'))
 
@@ -1020,6 +1042,23 @@ class MIDAS3SIPHandler(SIPHandler):
 
                 if self.notifier:
                     self.notifier.alert("ingest.failure", origin=self.name,
+                          summary="NERDm ingest failure: " + self.bagger.name,
+                                        desc=msg, id=self.bagger.name,
+                                        version=nerdm.get('version', 'unknown'))
+
+        # submit NERDm record to ingest service
+        if self._doiminter and self._doiminter.is_staged(self.bagger.name):
+            try:
+                self._doiminter.submit(self.bagger.name)
+                log.info("Submitted DOI record to DataCite")
+            except Exception as ex:
+                msg = "Failed to submit DOI record with name=" + \
+                      self.bagger.name + " to DataCite: " + str(ex)
+                log.exception(msg)
+                log.info("DOI minter service endpoint: %s", self._doiminter.dccli._ep)
+
+                if self.notifier:
+                    self.notifier.alert("doi.failure", origin=self.name,
                           summary="NERDm ingest failure: " + self.bagger.name,
                                         desc=msg, id=self.bagger.name,
                                         version=nerdm.get('version', 'unknown'))

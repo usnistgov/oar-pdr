@@ -36,9 +36,7 @@ class DOIMintingClient(object):
                 creds = (dccfg.get('user'), dccfg.get('pass'))
             self.dccli = dc.DataCiteDOIClient(dccfg['service_endpoint'], creds, [self.naan],
                                               dccfg.get('default_data',{}))
-        self._publish_by_default = True
-        if dccfg:
-            self._publish_by_default = dccfg.get('publish', True)
+        self._publish_by_default = self._cfg.get('publish', True)
 
         if not log:
             log = logging.getLogger("OOIClient")
@@ -203,13 +201,13 @@ class DOIMintingClient(object):
             shutil.move(recfile, self._inprogdir)
             recfile = os.path.join(self._inprogdir, name+".json")
             rec = read_json(recfile)
-            publish = rec.get('event') == "publish"
+            publish = (rec.get('event') == "publish")
 
             try:
 
                 self.submit_rec(rec)
 
-            except DOIClientException as ex:
+            except dc.DOIClientException as ex:
                 # the file is bad, send it to jail
                 if hasattr(ex.errdata, 'explain'):
                     self.log.error("%s: %s", name, ex.errdata.explain())
@@ -217,7 +215,7 @@ class DOIMintingClient(object):
                     self.log.error("%s: invalid DOI request: %s:", name, str(ex))
                 shutil.move(recfile, self._faildir)
                 raise
-            except DOIResolverError as ex:
+            except dc.DOIResolverError as ex:
                 # server's fault; try again later
                 self.log.warn("%s: unexpected service error: %s (will try again later)",
                               name, str(ex))
