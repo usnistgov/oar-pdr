@@ -270,8 +270,8 @@ class PDRServiceAuthFailure(PDRServiceException):
     authorization credentials.
     """
 
-    def __init__(self, service_name, resource=None, http_code=None,
-                 http_status=None, message=None, cause=None, sys=None):
+    def __init__(self, service_name, resource=None, http_status=None, 
+                 message=None, cause=None, http_code=401, sys=None):
         if not message:
             if resource:
                 message = "Client not properly authorized to access " + \
