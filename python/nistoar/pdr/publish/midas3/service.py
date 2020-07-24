@@ -293,6 +293,8 @@ class MIDAS3PublishingService(PublishSystem):
             cfg['repo_access'] = self.cfg['repo_access']
             if 'store_dir' not in cfg['repo_access'] and 'store_dir' in cfg:
                 cfg['repo_access']['store_dir'] = cfg['store_dir']
+        if 'doi_minter' not in cfg and 'doi_minter' in self.cfg:
+            cfg['doi_minter'] = self.cfg['doi_minter']
         if not os.path.exists(self.workdir):
             os.mkdir(workdir)
         elif not os.path.isdir(self.workdir):
