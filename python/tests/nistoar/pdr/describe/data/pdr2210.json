@@ -5,9 +5,9 @@
       "@base": "ark:/88434/edi00hw91c"
     }
   ], 
-  "_schema": "https://data.nist.gov/od/dm/nerdm-schema/v0.1#", 
+  "_schema": "https://data.nist.gov/od/dm/nerdm-schema/v0.2#", 
   "_extensionSchemas": [
-    "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/PublicDataResource"
+    "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/PublicDataResource"
   ], 
   "@type": [
     "nrdp:PublicDataResource"
@@ -43,7 +43,7 @@
       "refType": "IsReferencedBy", 
       "location": "https://doi.org/10.1364/OE.24.014100", 
       "_extensionSchemas": [
-        "https://data.nist.gov/od/dm/nerdm-schema/v0.1#/definitions/DCiteReference"
+        "https://data.nist.gov/od/dm/nerdm-schema/v0.2#/definitions/DCiteReference"
       ]
     }
   ], 
@@ -82,7 +82,7 @@
         "dcat:Distribution"
       ], 
       "_extensionSchemas": [
-        "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+        "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/DataFile"
       ]
     }, 
     {
@@ -105,7 +105,7 @@
         "dcat:Distribution"
       ], 
       "_extensionSchemas": [
-        "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+        "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/DataFile"
       ]
     }, 
     {
@@ -115,7 +115,7 @@
         "nrdp:Subcollection"
       ], 
       "_extensionSchemas": [
-        "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/Subcollection"
+        "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/Subcollection"
       ]
     }, 
     {
@@ -136,7 +136,7 @@
         "dcat:Distribution"
       ], 
       "_extensionSchemas": [
-        "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+        "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/DataFile"
       ]
     }
   ], 
