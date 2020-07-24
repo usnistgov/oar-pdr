@@ -312,6 +312,26 @@ class MIDAS3PublishingService(PublishSystem):
             self._bagging_workers[id] = worker
         return worker
 
+    def delete(self, id):
+        """
+        delete the working metadata bag for the given identifier.  Afterward, it must be recreated 
+        via a call to update_ds_with_pod(id).
+        """
+        worker = self._bagging_workers.get(id)
+        if not worker:
+            bagger = self._create_bagger(id)
+            worker = self.BaggingWorker(self, id, bagger, self.log)
+
+        if os.path.exists(worker.bagger.bagdir):
+            worker = self._get_bagging_worker(id)
+            worker.delete_bag()
+        self._drop_bagging_worker(worker)
+
+        # now delete the built landing page
+        nerdf = os.path.join(self.nrddir, worker.bagger.name+".json")
+        if os.path.exists(nerdf):
+            os.remove(nerdf)
+
     def _drop_bagging_worker(self, worker, timeout=None):
         if worker.is_working() and worker._thread is not threading.current_thread():
             worker._thread.join()
@@ -1117,6 +1137,18 @@ class MIDAS3PublishingService(PublishSystem):
                             # it's safe to clean up metadata bag
                             self.bagger.done()
                             shutil.rmtree(self.bagger.bagdir)
+
+        def delete_bag(self):
+            """
+            throw the working metadata bag away, forcing MIDAS to start over with the current dataset
+            """
+            if os.path.exists(self.bagger.bagdir):
+                self.ensure_qlock()
+                with self.qlock:
+                    self.bagger.done()
+                    self.bagger.sip.nerd = None
+                    self.bagger.sip.pod = None
+                    shutil.rmtree(self.bagger.bagdir)
                 
         def preservation_status(self):
             # signal that preservation of this dataset has completed.

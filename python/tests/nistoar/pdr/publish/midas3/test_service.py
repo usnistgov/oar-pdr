@@ -187,6 +187,17 @@ class TestMIDAS3PublishingService(test.TestCase):
         self.assertEqual(data.get('ediid'), self.midasid)
         self.assertTrue(data.get('_marker'), "Failed to retain annotations")
                         
+    def test_delete(self):
+        podf = os.path.join(self.revdir, "1491", "_pod.json")
+        pod = utils.read_json(podf)
+        bagdir = os.path.join(self.svc.mddir, self.midasid)
+
+        self.assertTrue(not os.path.isdir(bagdir))
+        self.svc.update_ds_with_pod(pod, False)
+        self.assertTrue(os.path.isdir(bagdir))
+
+        self.svc.delete(pod['identifier'])
+        self.assertTrue(not os.path.isdir(bagdir))
 
     def test_drop_worker(self):
         podf = os.path.join(self.revdir, "1491", "_pod.json")

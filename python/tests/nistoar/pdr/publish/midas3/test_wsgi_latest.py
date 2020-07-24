@@ -95,6 +95,41 @@ class TestLatestHandler(test.TestCase):
         self.assertTrue(os.path.isfile(os.path.join(self.bagparent,"nrdserv",
                                                     self.midasid+".json")))
 
+    def test_do_private_POST(self):
+        req = {
+            'REQUEST_METHOD': "POST",
+            'CONTENT_TYPE': 'application/json',
+            'PATH_INFO': '/pdr/latest',
+            'HTTP_AUTHORIZATION': 'Bearer secret'
+        }
+        self.hdlr = self.gethandler('', req)
+
+        pod = None
+        with open(self.podf) as fd:
+            pod = json.load(fd)
+        req['wsgi.input'] = StringIO(json.dumps(pod))
+        body = self.hdlr.handle()
+
+        self.assertIn("201", self.resp[0])
+        self.assertEquals(body, [])
+
+        bagdir = os.path.join(self.bagparent,"mdbags",self.midasid)
+        self.assertTrue(os.path.isdir(bagdir))
+        self.svc.wait_for_all_workers(300)
+        self.assertTrue(os.path.isfile(os.path.join(self.bagparent,"nrdserv",
+                                                    self.midasid+".json")))
+
+        # now turn it private
+        pod['accessLevel'] = "non-public"
+        self.resp = []
+        req['wsgi.input'] = StringIO(json.dumps(pod))
+        body = self.hdlr.handle()
+
+        self.assertTrue(not os.path.isdir(bagdir))
+        self.svc.wait_for_all_workers(300)
+        self.assertTrue(not os.path.isfile(os.path.join(self.bagparent,"nrdserv",
+                                                        self.midasid+".json")))
+
     def test_do_unauthorized_POST(self):
         req = {
             'REQUEST_METHOD': "POST",

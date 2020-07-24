@@ -409,9 +409,16 @@ class LatestHandler(Handler):
 
         if 'identifier' not in pod:
             return self.send_error(400, "Input POD missing required identifier property")
+        # if 'accessLevel' not in pod:
+        #    return self.send_error(400, "Input POD missing required accessLevel property")
 
         try:
+            if pod.get('accessLevel','public') == "non-public":
+                self._svc.delete(pod['identifier'])
+                return self.send_ok("Non-public POD Ignored", code=200)
+
             self._svc.update_ds_with_pod(pod)
+
         except ValidationError as ex:
             log.error("/latest/: Input is not a valid POD record:\n  "+str(ex))
             return self.send_error(400, "Input is not a valid POD record")
