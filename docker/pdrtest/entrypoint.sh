@@ -61,7 +61,7 @@ case "$1" in
         set -x
         curl http://localhost:8080/midas/3A1EE2F169DD3B8CE0531A570681DB5D1491 \
              > mdserv_out.txt && \
-             python -c 'import sys, json; fd = open("mdserv_out.txt"); data = json.load(fd); sys.exit(0 if data["doi"]=="doi:10.18434/T4SW26" else 11)' || \
+             python -c 'import sys, json; fd = open("mdserv_out.txt"); data = json.load(fd); sys.exit(0 if data["doi"]=="doi:10.80443/pdrut-T4SW26" else 11)' || \
              stat=$?
         
         curl http://localhost:8080/midas/3A1EE2F169DD3B8CE0531A570681DB5D1491/trial1.json \
