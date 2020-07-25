@@ -44,7 +44,7 @@ class DOIMintingClient(object):
 
         base = self._cfg.get('data_dir')
         missing = [name for name in 
-                   "staging_dir succeeded_dir failed_dir inprogress_dir".split()
+                   "staging_dir reserved_dir published_dir failed_dir inprogress_dir".split()
                    if not self._cfg.get(name)]
         if not base and missing:
             raise ConfigurationException("Missing config params: need '"+
