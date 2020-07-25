@@ -119,7 +119,7 @@ public class WebSecurityConfig {
 	// @Profile({ "prod", "dev", "test", "default" }) //This setting can be used to
 	// enable the feature based on certain profiles/platforms.
 	@ConditionalOnProperty(value = "samlauth.enabled", havingValue = "true", matchIfMissing = true)
-	@Order(1)
+	@Order(150)
 	public static class RestApiSecurityConfig extends WebSecurityConfigurerAdapter {
 		private Logger logger = LoggerFactory.getLogger(RestApiSecurityConfig.class);
 
@@ -155,7 +155,7 @@ public class WebSecurityConfig {
 	 * Security configuration for authorization end pointsq
 	 */
 	@Configuration
-	@Order(2)
+	@Order(250)
 	public static class AuthSecurityConfig extends WebSecurityConfigurerAdapter {
 		private Logger logger = LoggerFactory.getLogger(AuthSecurityConfig.class);
 
