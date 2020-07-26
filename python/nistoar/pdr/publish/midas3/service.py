@@ -1091,7 +1091,7 @@ class MIDAS3PublishingService(PublishSystem):
                     os.makedirs(pbagparent)
 
                 # assign next version to this submission
-                nerd = self.bagger.finalize_version()
+                nerd = self.finalize_version()
                 nerd['_preserve'] = True
                 self.service.serve_nerdm(nerd)
 
@@ -1157,6 +1157,16 @@ class MIDAS3PublishingService(PublishSystem):
             stat = self.service.pressvc.status(self.bagger.midasid, "midas3")
             self._check_preservation(stat)  # this may clean up the metadata bag
             return stat
+
+        def finalize_version():
+            self.bagger.done()
+            
+            # create a metadata bagger that only looks at the review dir;
+            # in other words, data files must appear in the review directory to be
+            # considered part of this version of the dataset.  
+            usebagger = MIDASMetadataBagger(self.bagger.midasid, self.bagger.bagparent,
+                                            self.bagger.sip.revdatadir, config=self.bagger.cfg)
+            return usebagger.finalize_version()
 
 
 

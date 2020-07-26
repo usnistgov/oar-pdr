@@ -1173,13 +1173,21 @@ class MIDASMetadataBagger(SIPBagger):
                 uptype = _DATA_UPDATE
                 ver[1] += 1
                 ver[2] = 0
+                umsg = "incrementing for updated data files"
+                self.log.debug("data files being updated: %s", self.datafiles.keys())
             else:
                 # otherwise, this is a metadata update, which increments the
                 # third field.
                 uptype = _MDATA_UPDATE
                 ver[2] += 1
+                umsg = "incrementing for updated metadata only"
 
             self.sip.nerd['version'] = ".".join([str(v) for v in ver])
+            self.log.info("finalizing version: %s: %s", umsg, self.sip.nerd['version'])
+
+        else:
+            self.log.info("finalizing version: sticking with explicitly set value: %s",
+                          self.sip.nerd['version'])
 
         # record the version in the annotations
         annotf = self.bagbldr.bag.annotations_file_for('')
