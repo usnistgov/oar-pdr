@@ -1158,7 +1158,7 @@ class MIDAS3PublishingService(PublishSystem):
             self._check_preservation(stat)  # this may clean up the metadata bag
             return stat
 
-        def finalize_version():
+        def finalize_version(self):
             self.bagger.done()
             
             # create a metadata bagger that only looks at the review dir;
