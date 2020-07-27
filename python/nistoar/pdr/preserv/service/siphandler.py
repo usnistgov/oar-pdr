@@ -926,7 +926,7 @@ class MIDAS3SIPHandler(SIPHandler):
                                         version=nerdm.get('version', 'unknown'))
 
         # Stage the DataCite DOI record for submission to DataCite
-        if self._doiminter:
+        if self._doiminter and 'doi' in nerdm:
             try:
                 self._doiminter.stage(nerdm, name=self.bagger.name)
             except Exception as ex:
