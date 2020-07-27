@@ -1017,6 +1017,7 @@ class TestBuilder2(test.TestCase):
         self.assertEqual(md['checksum'], {"algorithm": {'@type': 'Thing',
                                                         "tag": "sha256" },
     "hash": "d155d99281ace123351a311084cd8e34edda6a9afcddd76eb039bad479595ec9"})
+        self.assertNotIn('downloadURL', md)  # because bag does not exist
 
         md = self.bag.describe_data_file(srcfile, "goob/trial1.json", False)
         self.assertEqual(md['filepath'], "goob/trial1.json")
@@ -1045,6 +1046,39 @@ class TestBuilder2(test.TestCase):
         self.assertEqual(md['checksum'], {"algorithm": {'@type': 'Thing',
                                                         "tag": "sha256" },
     "hash": "d155d99281ace123351a311084cd8e34edda6a9afcddd76eb039bad479595ec9"})
+
+        # if bag exists, downloadURL will be set
+        self.bag.ensure_bagdir()
+        self.bag.ediid = "goober"
+        md = self.bag.describe_data_file(srcfile, "foo/trial1.json")
+        self.assertEqual(md['filepath'], "foo/trial1.json")
+        self.assertIn('downloadURL', md)
+        self.assertTrue(md['downloadURL'].endswith("/od/ds/goober/foo/trial1.json"))
+
+        self.bag.ediid = "ark:/88434/goober"
+        md = self.bag.describe_data_file(srcfile)
+        self.assertEqual(md['filepath'], "trial1.json")
+        self.assertIn('downloadURL', md)
+        self.assertTrue(md['downloadURL'].endswith("/od/ds/goober/trial1.json"))
+
+        # don't override existing metadata
+        exturl = "https://example.com/goober/trial1.json"
+        md['downloadURL'] = exturl
+        md['title'] = "a fine file"
+        self.bag.update_metadata_for("trial1.json", md)
+        md = self.bag.describe_data_file(srcfile)
+        self.assertEqual(md['filepath'], "trial1.json")
+        self.assertIn('downloadURL', md)
+        self.assertEqual(md['downloadURL'], exturl)
+        self.assertEqual(md['title'], "a fine file")
+
+        # override existing metadata when told to
+        self.bag.update_metadata_for("trial1.json", md)
+        md = self.bag.describe_data_file(srcfile, "foo/trial1.json", asupdate=False)
+        self.assertEqual(md['filepath'], "foo/trial1.json")
+        self.assertIn('downloadURL', md)
+        self.assertNotIn('title', md)
+        self.assertTrue(md['downloadURL'].endswith("/od/ds/goober/foo/trial1.json"))
 
     def test_register_data_file(self):
         srcfile = os.path.join(datadir, "trial1.json")

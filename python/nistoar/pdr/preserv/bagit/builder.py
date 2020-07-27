@@ -1268,7 +1268,7 @@ class BagBuilder(PreservationSystem):
         add a data file into the bag at the given destination path.  Metadata
         will be created for the file unless the register parameter is False.  
         If a file already exists or is otherwise already registered for that 
-        destination, the file and associated will be over-written.  
+        destination, the file and associated metadata will be over-written.  
 
         Metadata is created for the file using the register_data_file() method,
         and by default the file will be examined for extractable metadata.  
@@ -1347,9 +1347,10 @@ class BagBuilder(PreservationSystem):
     def register_data_file(self, destpath, srcpath=None, examine=True,
                            comptype=None, message=None):
         """
-        create and install metadata into the bag for the given file to be 
+        create and install metadata into the bag for the given file to be (newly)
         added at the given destination path.  The file itself is not actually 
-        inserted into the bag (see add_data_file()).  
+        inserted into the bag (see add_data_file()).  This will completely 
+        overwrite any metadata for this file already registered.
 
         :param str destpath:   the desired path for the file relative to the 
                                root of the dataset.
@@ -1373,7 +1374,8 @@ class BagBuilder(PreservationSystem):
             comptype = self._determine_file_comp_type(srcpath or destpath)
 
         if srcpath:
-            mdata = self.describe_data_file(srcpath, destpath, examine, comptype)
+            mdata = self.describe_data_file(srcpath, destpath, examine,
+                                            comptype, False)
         else:
             mdata = self.define_component(destpath, comptype)
             self._add_mediatype(destpath, mdata)
@@ -1492,7 +1494,7 @@ class BagBuilder(PreservationSystem):
             # we will not override the mediaType if it's already set to something
             # specific
             return 
-            
+
         if not self._mimetypes:
             mtfile = pkg_resources.resource_filename('nistoar.pdr',
                                                      'data/mime.types')

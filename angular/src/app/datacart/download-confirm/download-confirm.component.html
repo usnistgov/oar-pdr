@@ -1,0 +1,54 @@
+<!-- Make the pop up window look similar to the landingpage with black header bar and blue tool bar -->
+<div class="bar" style="color: white !important;">
+    Confirm Downloading
+</div>
+
+<!-- Display zip info -->
+<div class="full-span" style="margin: auto; padding: .5em 0em;">
+    You have selected {{totalFiles}} file<span *ngIf="totalFiles > 1">s</span> with a total size of {{commonFunctionService.getSizeForDisplay(bundle_plan_size)}}.
+ 
+    <div *ngIf="bundle_plan_size > bundleSizeAlert" style="margin-top: .5em;">Warning:  this may a take a long time to download completely. </div> 
+    
+    <div style="margin-top: .5em;">The files will be downloaded in the following zip files.</div>
+</div>
+
+<!-- Display zip files if any -->
+<!-- header -->
+<div class="full-span">
+    <div *ngIf="zipData.length > 0" class="header-green" style="width: 100%;" data-toggle="tooltip" title="Zip Files">
+        <span class="span50">
+            Zip File Name
+        </span>
+        <span class="span-end">Zip File Size</span>
+    </div>
+    <!-- body -->
+    <div class="zip-details">
+        <div [ngStyle]="{'width': '100%', 'background-color': getBackColor(i)}"
+            *ngFor="let zip of zipData; let i=index">
+            <span class="span50">{{zip.fileName}}</span>
+            <span class="span-end">{{commonFunctionService.getSizeForDisplay(zip.bundleSize)}}</span>
+        </div>
+    </div>
+
+    <!-- Summary -->
+    <div id="summary">
+        <span class="span50">{{totalFiles}} file<span *ngIf="totalFiles > 1">s</span> selected</span>
+        <span class="span-end">Total size: {{commonFunctionService.getSizeForDisplay(bundle_plan_size)}}</span>
+    </div>
+</div>
+
+<div class="full-span" style="margin-top: .5em;">
+    Unpack each zip file in the same folder on your disk to preserve the data hierarchy.
+</div>
+
+<hr>
+<div class="control-btns">
+    <!-- Buttons are arranged from right to left -->
+        <!-- Continue Download button -->
+        <button pButton type="submit" class="btn btn-labeled" id="btn-download" (click)="ContinueDownload()"
+        label="Start Download" icon="faa faa-cloud-download faa-1x icon-white" iconPos="left"></button>
+
+        <!-- Cancel button -->
+        <button pButton type="submit" class="btn btn-labeled" id="btn-cancel" (click)="CancelDownload()"
+        label="Cancel Download" icon="faa faa-remove faa-1x icon-white" iconPos="left"></button>
+</div>
