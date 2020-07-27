@@ -211,9 +211,9 @@ class DOIMintingClient(object):
                 # the file is bad, send it to jail
                 if hasattr(ex.errdata, 'explain'):
                     self.log.error("%s: %s", name, ex.errdata.explain())
-                    self.log.debug("Allowed prefixes: %s", self.dccli.prefs)
                 else:
                     self.log.error("%s: invalid DOI request: %s:", name, str(ex))
+                    self.log.debug("Allowed prefixes: %s", self.dccli.prefs)
                 self._move_status_file(recfile, self._faildir)
                 raise
             except dc.DOIResolverError as ex:
