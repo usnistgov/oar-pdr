@@ -930,7 +930,7 @@ class MIDAS3SIPHandler(SIPHandler):
             try:
                 self._doiminter.stage(nerdm, name=self.bagger.name)
             except Exception as ex:
-                msg = "Failure staging DataCite record for " + slef.bagger.name + \
+                msg = "Failure staging DataCite record for " + self.bagger.name + \
                       " for DOI minting/updating: " + str(ex)
                 log.exception(msg)
                 if self.notifier:
