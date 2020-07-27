@@ -1,30 +1,60 @@
 <!-- Edit Control button bar -->
-<div class="edit-control-buttons">
+<div class="edit-control-buttons" *ngIf="_editMode != EDIT_MODES.VIEWONLY_MODE">
+    <div *ngIf="_editMode != EDIT_MODES.DONE_MODE" style="color: white; background-color: #1c4d9b; float: left; margin: 0em .5em 0em 03em; padding: .4em .5em .4em .5em; font-size: 20px; font-weight:bolder !important;">{{currentMode}}</div>
     <!-- Buttons are arranged from right to left -->
 
-    <i class="faa faa-info-circle" id="ec-info-btn" (click)="showEditControlHelpPopup()" data-toggle="tooltip" title="Show edit control help"></i>
+    <i class="faa faa-info-circle" id="ec-info-btn" (click)="showEditControlHelpPopup($event,op3)" data-toggle="tooltip" title="Show edit control help"></i>
 
-    <!-- Discard button -->
-    <button pButton type="submit" class="btn btn-labeled" id="ec-discard-btn" (click)="confirmDiscardEdits()"
-        [disabled]="!((editMode || previewMode) && editsPending())" label="Discard" icon="faa faa-trash faa-1x icon-white" iconPos="left">
-    </button>
+    <div *ngIf="screenWidth > screenSizeBreakPoint" style="float: right; margin-top: .5em !important;">
+        <!-- 
+        -  Edit button:  when editing is off, the Edit button will show; if it is on, the
+        -  "Preview" button will show in its place
+        -->
+        <button pButton type="submit" *ngIf="_editMode == EDIT_MODES.PREVIEW_MODE" type="button" class="btn btn-labeled" 
+            (click)="startEditing()"
+            id="ec-edit-btn" label="Edit" icon="faa faa-pencil faa-1x icon-white" iconPos="left">
+        </button>
 
-    <!-- Submit button -->
-    <button pButton type="submit" class="btn btn-labeled" id="ec-submit-btn" (click)="saveEdits()"
-        [disabled]="!((editMode || previewMode) && editsPending())" label="Submit" icon="faa faa-save faa-1x icon-white" iconPos="left">
-    </button>
+        <button pButton type="submit" *ngIf="_editMode == EDIT_MODES.EDIT_MODE" type="button" class="btn btn-labeled" (click)="preview()" id="ec-preview-btn" label="Preview" icon="faa faa-eye faa-1x icon-white" iconPos="left">
+        </button>
 
-    <!-- 
-      -  Edit button:  when editing is off, the Edit button will show; if it is on, the
-      -  "Preview" button will show in its place
-      -->
-    <button pButton type="submit" *ngIf="!editMode" type="button" class="btn btn-labeled" 
-        (click)="startEditing()"
-        id="ec-edit-btn" label="Edit" icon="faa faa-pencil faa-1x icon-white" iconPos="left">
-    </button>
+        <!-- Discard button -->
+        <button pButton type="submit" class="btn btn-labeled" id="ec-discard-btn" (click)="confirmDiscardEdits()"
+            [disabled]="(_editMode == EDIT_MODES.DONE_MODE || _editMode == EDIT_MODES.OUTSIDE_MIDAS_MODE)" label="Discard" icon="faa faa-trash faa-1x icon-white" iconPos="left">
+        </button>
 
-    <button pButton type="submit" *ngIf="editMode" type="button" class="btn btn-labeled" (click)="preview()" id="ec-preview-btn" label="Preview" icon="faa faa-eye faa-1x icon-white" iconPos="left">
-    </button>
+        <!-- Finish button -->
+        <button pButton type="submit" class="btn btn-labeled" id="ec-close-btn" (click)="doneEdits()"
+            [disabled]="(_editMode == EDIT_MODES.DONE_MODE || _editMode == EDIT_MODES.OUTSIDE_MIDAS_MODE)" label="Finish" icon="faa faa-save faa-1x icon-white" iconPos="left">
+        </button>
+    </div>
+</div>
+
+<!-- In small screen mode, control buttons need be in a separate line -->
+<div *ngIf="screenWidth <= screenSizeBreakPoint && _editMode != EDIT_MODES.VIEWONLY_MODE" style="margin-top: .5em;">
+        <!-- 
+        -  Edit button:  when editing is off, the Edit button will show; if it is on, the
+        -  "Preview" button will show in its place
+        -->
+        <div style="width: 100%; text-align: right !important;">
+            <button pButton type="submit" *ngIf="_editMode == EDIT_MODES.PREVIEW_MODE" type="button" class="btn btn-labeled" 
+                (click)="startEditing()"
+                id="ec-edit-btn" label="Edit" icon="faa faa-pencil faa-1x icon-white" iconPos="left">
+            </button>
+
+            <button pButton type="submit" *ngIf="_editMode == EDIT_MODES.EDIT_MODE" type="button" class="btn btn-labeled"  (click)="preview()" id="ec-preview-btn" label="Preview" icon="faa faa-eye faa-1x icon-white" iconPos="left">
+            </button>
+
+            <!-- Discard button -->
+            <button pButton type="submit" class="btn btn-labeled" id="ec-discard-btn" (click)="confirmDiscardEdits()"
+            [disabled]="(_editMode == EDIT_MODES.DONE_MODE || _editMode == EDIT_MODES.OUTSIDE_MIDAS_MODE)" label="Discard" icon="faa faa-trash faa-1x icon-white" iconPos="left">
+            </button>
+
+            <!-- Finish button -->
+            <button pButton type="submit" class="btn btn-labeled" id="ec-close-btn" (click)="doneEdits()"
+            [disabled]="(_editMode == EDIT_MODES.DONE_MODE || _editMode == EDIT_MODES.OUTSIDE_MIDAS_MODE)" label="Finish" icon="faa faa-save faa-1x icon-white" iconPos="left">
+            </button>
+        </div>
 </div>
 
 <!-- status message bar -->
@@ -32,3 +62,30 @@
 
 <!-- error messages go here -->
 <pdr-message [defSysErrorPrefix]="'There was a problem while editing your record.'"></pdr-message>
+
+<!-- Popup dialog for control button help -->
+<p-overlayPanel class="fileDialog" #op3 [dismissable]="true" [showCloseIcon]="true"
+[style]="{'display':'inline-block','position':'related','left':'20%','right':'5%','max-width':'800px'}" appendToBody=true>
+    <div class="overlay-title">
+        About the Control Buttons
+    </div>
+
+    <div style="margin-bottom: .5em;">The three large buttons on the upper right of the page allow you to control your session:</div>
+    <table class="table">
+        <tbody>
+            <tr>
+                <th scope="row">Preview</th>
+                <td>Shows you how the page will look to visitors (removes edit controls). Use the “Edit” button to return to the editing page from the preview page.</td>
+            </tr>
+            <tr>
+                <th scope="row">Discard</th>
+                <td>	Discards any changes that have been made to the landing page. Use this button to abandon any changes you have made. You will have the opportunity to continue editing using the initial contents of the landing page.</td>
+            </tr>
+            <tr>
+                <th scope="row">Finish</th>
+                <td>Finish your editing session. Carefully follow the instructions which will appear on the screen. You will be instructed to return to the MIDAS system and accept or reject the new landing page.</td>
+            </tr>
+        </tbody>
+    </table>
+    <div style="height: .2em; width: 100%; background-color: #1c4d9b; margin: -1em 0 .5em 0;"></div>
+</p-overlayPanel>

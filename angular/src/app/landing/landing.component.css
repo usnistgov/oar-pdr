@@ -654,7 +654,6 @@ a:visited {
 
 .editable_field {
   display: table-cell; 
-  /* padding-right: .5em;  */
   text-align: left; 
   vertical-align: top;
 }

@@ -12,7 +12,7 @@ import { AppConfig } from '../../config/config';
   providedIn: 'root'
 })
 export class TaxonomyListService {
-  private landingBackend : string = "";
+  private taxonomyService : string = "";
 
   /**
    * Creates a new TaxonomyListService with the injected Http.
@@ -21,9 +21,9 @@ export class TaxonomyListService {
    */
   constructor(private http: HttpClient,
     private cfg: AppConfig) {
-      console.log("AppConfig", cfg);
-      this.landingBackend = cfg.get("locations.mdService", "/unconfigured");
-      if (this.landingBackend == "/unconfigured")
+      this.taxonomyService = cfg.get("locations.taxonomyService", "/unconfigured");
+      console.log('this.taxonomyService', this.taxonomyService);
+      if (this.taxonomyService == "/unconfigured")
           throw new Error("mdService endpoint not configured!");
   }
 
@@ -33,9 +33,9 @@ export class TaxonomyListService {
    */
   get(level: number): Observable<any> {
     if (level == 0)
-      return this.http.get(this.landingBackend + 'taxonomy?');
+      return this.http.get(this.taxonomyService);
     else
-      return this.http.get(this.landingBackend + 'taxonomy?level=' + level.toString());
+      return this.http.get(this.taxonomyService + '?level=' + level.toString());
   }
 
   /**

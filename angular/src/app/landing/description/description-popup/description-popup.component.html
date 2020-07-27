@@ -9,15 +9,15 @@
     <p-toolbar name="toolbar">
         <div class="ui-toolbar-group-right">
             <!-- Cancel button -->
-            <button pButton type="submit" class="btn-cancel" (click)="cancelChange();" label="Cancel"
+            <button pButton type="submit" id="btn-cancel" (click)="cancelChange();" label="Cancel"
                 icon="faa faa-trash faa-1x icon-white" iconPos="left">
             </button>
 
             <!-- Save button 
               -  Will be disabled if input field is empty or all white spaces
               -->
-            <button pButton type="submit"
-                style="float: right;width:150px; height:2em; background-color:green;color:white;padding-right: 1em;" [disabled]="inputValue[field].trim()==''"
+            <button pButton type="submit" id="btn-save"
+                [disabled]="inputValue[field].trim()==''"
                 (click)="saveDescription();" label="Save" icon="faa faa-save faa-1x icon-white" iconPos="left">
             </button>
         </div>
@@ -28,7 +28,7 @@
 <div style="margin: 2em;">
     <div tabindex="1" contenteditable [ceModel]="inputValue[field]" [ceDefault]="defaultText"
         (ceChange)="onDescriptionChange(field,$event)" placeholder="defaultText"
-        style="border: 1px solid green !Important;padding: .5em;">
+        id="content">
     </div>
-    <div *ngIf="message" style="font-size: 12px; margin-top: .5em;">{{message}}</div>
+    <div *ngIf="message" id="message">{{message}}</div>
 </div>

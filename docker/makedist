@@ -10,6 +10,7 @@
 #                      (instead of the default directory, dist)
 #   python             build only the python-based distributions
 #   angular            build only the angular-based distributions
+#   java               build only the java-based distributions 
 #
 prog=`basename $0`
 execdir=`dirname $0`

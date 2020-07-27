@@ -53,6 +53,11 @@ export abstract class CustomizationService {
      * discard the changes in the draft, reverting to the original metadata
      */
     public abstract discardDraft() : Observable<Object>;
+
+    /**
+     * Tell backend that the editing is done
+     */
+    public abstract doneEditing() : Observable<Object>;
 }
 
 /**
@@ -63,7 +68,7 @@ export abstract class CustomizationService {
  */
 export class WebCustomizationService extends CustomizationService {
 
-    readonly draftapi : string = "api/draft/";
+    readonly draftapi : string = "pdr/lp/editor/";
     readonly saveapi : string = "api/savedrecord/";
 
     /**
@@ -122,6 +127,7 @@ export class WebCustomizationService extends CustomizationService {
             (httperr) => {   // this will be an HttpErrorResponse
                 let msg = "";
                 let err = null;
+                console.log("httperr.status", httperr.status);
                 if (httperr.status == 401) {
                     msg += "Authorization Error (401)";
                     // TODO: can we get at body of message when an error occurs?
@@ -178,7 +184,7 @@ export class WebCustomizationService extends CustomizationService {
             this._wrapRespObs(obs, subscriber);
         });
     }
-
+  
     /**
      * commit the changes in the draft to the saved version
      *
@@ -227,11 +233,39 @@ export class WebCustomizationService extends CustomizationService {
         //
         return new Observable<Object>(subscriber => {
             let url = this.endpoint + this.draftapi + this.resid;
+            console.log("Discard url", url);
             let obs : Observable<Object> = 
                 this.httpcli.delete(url, { headers: { "Authorization": "Bearer " + this.token } });
             this._wrapRespObs(obs, subscriber);
         });
     }
+
+    /**
+     * Ends the editing session
+     *
+     * @return Observable<Object> -- on success, the subscriber's success (next) function is 
+     *                   passed the Object representing the full draft metadata record.  On 
+     *                   failure, error function is called with a customized error object, one of 
+     *                   AuthCustomizationError -- if the request is made without being 
+     *                     authenticated or authorized.  This could happen if the user credentials
+     *                     expire during the session. 
+     *                   NotFoundCustomizationError -- if the ID for record that was requested 
+     *                     cannot be found. This should not happen normally.  
+     *                   ConnectionCustomizationError -- if it was not possible to connect to the 
+     *                     customization server, even to get back an error response.  
+     */
+    public doneEditing() : Observable<Object> {
+      // To transform the output with proper error handling, we wrap the
+      // HttpClient.patch() Observable with our own Observable
+      //
+      return new Observable<Object>(subscriber => {
+          let url = this.endpoint + this.draftapi + this.resid;
+          let body = { "_editStatus": "done" };
+          let obs : Observable<Object> = 
+              this.httpcli.patch(url, body, { headers: { "Authorization": "Bearer " + this.token } });
+          this._wrapRespObs(obs, subscriber);
+      });
+  }
 }
 
 /**
@@ -250,9 +284,9 @@ export class InMemCustomizationService extends CustomizationService {
      * @param resmd      the original resource metadata 
      */
     constructor(resmd : Object) {
-        super((resmd['ediid']) ? resmd['ediid'] : "resmd");
+        super((resmd && resmd['ediid']) ? resmd['ediid'] : "resmd");
         this.origmd= resmd;
-        this.resmd = JSON.parse(JSON.stringify(resmd))
+        this.resmd = (resmd == null) ? null : JSON.parse(JSON.stringify(resmd))
     }
 
     /**
@@ -270,20 +304,13 @@ export class InMemCustomizationService extends CustomizationService {
 
 
     /**
-     * update some portion of the resource metadata, and return the full modified 
-     * draft.
+     * Ends the editing session
      *
      * @return Observable<Object> -- on success, the subscriber's success (next) function is 
      *                   passed the Object representing the full draft metadata record.  On 
      *                   failure, error function is called with an instance of a CustomizationError.
      */
-    public updateMetadata(md : Object) : Observable<Object> {
-        if (! md)
-            return throwError(new SystemCustomizationError("No update data provided"));
-
-        for(let prop in md) {
-            this.resmd[prop] = JSON.parse(JSON.stringify(md[prop]));
-        }
+    public doneEditing() : Observable<Object> {
         return of<Object>(this.resmd);
     }    
 
@@ -302,6 +329,24 @@ export class InMemCustomizationService extends CustomizationService {
         this.resmd = JSON.parse(JSON.stringify(this.origmd));
         return of<Object>(this.resmd);
     }
+
+    /**
+     * update some portion of the resource metadata, and return the full modified 
+     * draft.
+     *
+     * @return Observable<Object> -- on success, the subscriber's success (next) function is 
+     *                   passed the Object representing the full draft metadata record.  On 
+     *                   failure, error function is called with an instance of a CustomizationError.
+     */
+    public updateMetadata(md : Object) : Observable<Object> {
+      if (! md)
+          return throwError(new SystemCustomizationError("No update data provided"));
+
+      for(let prop in md) {
+          this.resmd[prop] = JSON.parse(JSON.stringify(md[prop]));
+      }
+      return of<Object>(this.resmd);
+  }    
 }
 
 

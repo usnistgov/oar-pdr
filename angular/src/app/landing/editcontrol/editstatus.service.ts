@@ -3,6 +3,7 @@ import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 
 import { AppConfig } from '../../config/config';
 import { UpdateDetails } from './interfaces';
+import { LandingConstants } from '../constants';
 
 /**
  * a service that can be used to monitor the editing status of the landing page.
@@ -16,11 +17,13 @@ import { UpdateDetails } from './interfaces';
     providedIn: 'root'
 })
 export class EditStatusService {
+  public EDIT_MODES: any;
 
     /**
      * construct the service
      */
     constructor(private cfg : AppConfig) {
+      this.EDIT_MODES = LandingConstants.editModes;
     }
 
     /**
@@ -31,30 +34,44 @@ export class EditStatusService {
     _setLastUpdated(updateDetails : UpdateDetails) { this._lastupdate = updateDetails; }
 
     /**
-     * flag indicating whether the landing page is currently being edited.  
+     * flag indicating the current edit mode.  
      * Make editMode observable so any component that subscribe to it will
      * get an update once the mode changed.
      */
-    // private _editMode : BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
-    // _setEditMode(val : boolean) { 
-    //     this._editMode.next(val); 
-    // }
-    // _watchEditMode(subscriber) {
-    //     this._editMode.subscribe(subscriber);
-    // }
+    _editMode : BehaviorSubject<string> = new BehaviorSubject<string>("");
+    _setEditMode(val : string) { 
+        this._editMode.next(val); 
+    }
+    public watchEditMode(subscriber) {
+        this._editMode.subscribe(subscriber);
+    }
 
     /**
-     * flag indicating whether the landing page is currently being edited.  
+     * Flag to tell the app to hide the content display or not. 
+     * Usecase: to hide server side rendering content while in edit mode and display the content when 
+     * browser side rendering is ready.
      */
-    get editMode() : boolean { return this._editmode; }
-    private _editmode : boolean = false;
-    _setEditMode(val : boolean) { this._editmode = val; }
+    _showLPContent: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
+    setShowLPContent(val: boolean){
+        this._showLPContent.next(val);
+    }
+    public watchShowLPContent(subscriber) {
+        this._showLPContent.subscribe(subscriber);
+    }
+
+    /**
+     * flag indicating whether we get an error.
+     * This flag is used to reset UI display - push the footer to the bottom of the page  
+     */
+    get hasError() : boolean { return this._error; }
+    private _error : boolean = false;
+    _setError(val : boolean) { this._error = val; }
 
     /**
      * Behavior subject to remotely start the edit function. This is used when user login
      * and the page was redirected to current page with parameter 'editmode' set to true.
      */
-    private _remoteStart : BehaviorSubject<string> = new BehaviorSubject<string>("");
+    private _remoteStart : BehaviorSubject<object> = new BehaviorSubject<object>({resID: "", nologin: false});
     _watchRemoteStart(subscriber) {
         this._remoteStart.subscribe(subscriber);
     }
@@ -97,8 +114,8 @@ export class EditStatusService {
     /**
      * turn on editing controls allowing the user to edit the metadata
      */
-    public startEditing(resID: string = "") : void {
-        this._remoteStart.next(resID);
+    public startEditing(resID: string = "", nologin: boolean = false) : void {
+        this._remoteStart.next({'resID':resID, 'nologin':nologin});
     }
 
     /**

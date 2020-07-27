@@ -1,0 +1,32 @@
+HELP.md
+/target/
+!.mvn/wrapper/maven-wrapper.jar
+
+### STS ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
+
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+/build/
+/customization.log.2019-12-20.0.gz
+/customization.log.2019-12-21.0.gz
+/customization.log.2019-12-25.0.gz
+/customization.log.2019-12-27.0.gz
+/customization.log.2019-12-27.0164269105694266.tmp
+*.log

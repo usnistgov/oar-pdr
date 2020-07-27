@@ -3,10 +3,10 @@
                   [(mdrec)]="md" [requestID]="requestId"></pdr-edit-control>
 
 <!-- landing page panel -->
-<div class="ui-grid ui-grid-responsive ui-grid-pad center">
+<div *ngIf="!displaySpecialMessage && _showContent" class="ui-grid ui-grid-responsive ui-grid-pad center">
   <div class="card landingcard">
 
-    <div *ngIf="md === null">
+    <div *ngIf="md === null && edstatsvc.authorized && !edstatsvc.hasError">
       <div class="ui-g-10 ui-md-10 ui-lg-10 ui-sm-12" style="padding-left: 1%">
         <b>Landing page is loading...</b>
       </div>
@@ -22,7 +22,7 @@
                          (scroll)="goToSection($event)"></tools-menu>
     </div>
 
-    <div *ngIf="md">
+    <div *ngIf="_showData">
       <div class="ui-g">
 
         <!-- landing page content -->
@@ -56,4 +56,14 @@
       </div>
     </div>
   </div>
+</div>
+
+<!-- Show spinner -->
+<div *ngIf="!_showContent">
+    <pdr-done [message] = "loadingMessage"></pdr-done>
+</div>
+
+<!-- Display done page -->
+<div [ngStyle]="{'display': displaySpecialMessage? 'block' : 'none'}">
+    <pdr-done [message] = 'message'></pdr-done>
 </div>

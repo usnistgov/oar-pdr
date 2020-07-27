@@ -1,4 +1,13 @@
-.btn-cancel {
+#btn-save {
+    float:right;
+    width:150px; 
+    height:2em; 
+    background-color:green;
+    color:white;
+    padding-right: 1em;
+}
+
+#btn-cancel {
     float:right;
     margin:0em 2em 2em 1em;
     width:150px; 
@@ -24,4 +33,14 @@
     height: 3em; 
     color:white;
     padding: .5em .5em .5em 2em
+}
+
+#message {
+    font-size: 12px; 
+    margin-top: .5em;
+    width: 100%;
+}
+
+#content {
+    padding: .5em;
 }

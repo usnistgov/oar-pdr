@@ -6,11 +6,15 @@ import { MetadataUpdateService } from './metadataupdate.service';
 import { UserMessageService } from '../../frame/usermessage.service';
 import { AuthService, WebAuthService, MockAuthService } from '../editcontrol/auth.service';
 import { UpdateDetails, UserDetails } from './interfaces';
+import { LandingConstants } from '../constants';
+import { AppConfig } from '../../config/config';
+import { config, testdata } from '../../../environments/environment';
 
 describe('EditStatusComponent', () => {
     let component : EditStatusComponent;
     let fixture : ComponentFixture<EditStatusComponent>;
     let authsvc : AuthService = new MockAuthService(undefined);
+    let cfg : AppConfig = new AppConfig(config);
     let userDetails: UserDetails = {
         'userId': 'dsn1',
         'userName': 'test01',
@@ -22,13 +26,16 @@ describe('EditStatusComponent', () => {
         '_updateDate': '2025 April 1'
     }
 
+    let EDIT_MODES = LandingConstants.editModes;
+
     let makeComp = function() {
         TestBed.configureTestingModule({
             imports: [ CommonModule ],
             declarations: [ EditStatusComponent ],
             providers: [
                 UserMessageService, MetadataUpdateService, DatePipe,
-                { provide: AuthService, useValue: authsvc }
+                { provide: AuthService, useValue: authsvc },
+                { provide: AppConfig, useValue: cfg }
             ]
         }).compileComponents();
 
@@ -53,8 +60,7 @@ describe('EditStatusComponent', () => {
         expect(bardiv).not.toBeNull();
         expect(bardiv.childElementCount).toBe(2);
         expect(bardiv.firstElementChild.tagName).toEqual("SPAN");
-        expect(bardiv.firstElementChild.innerHTML).toEqual("");
-        expect(bardiv.firstElementChild.nextElementSibling.tagName).toEqual("DIV");
+        expect(bardiv.firstElementChild.nextElementSibling.tagName).toEqual("SPAN");
     });
 
     it('showMessage()', () => {
@@ -67,7 +73,7 @@ describe('EditStatusComponent', () => {
         let cmpel = fixture.nativeElement;
         let bardiv = cmpel.querySelector(".ec-status-bar");
         expect(bardiv).not.toBeNull();
-        expect(bardiv.firstElementChild.innerHTML).toEqual("Okay, Boomer.");
+        expect(bardiv.lastElementChild.innerHTML).toContain("Okay, Boomer.");
 
         component.showMessage("Wait...", true, "blue");
         expect(component.message).toBe("Wait...");
@@ -75,35 +81,38 @@ describe('EditStatusComponent', () => {
         expect(component.isProcessing).toBeTruthy();
         fixture.detectChanges();
 
-        expect(bardiv.firstElementChild.innerHTML).toEqual("Wait...");
+        expect(bardiv.lastElementChild.innerHTML).toContain("Wait...");
     });
 
     it('showLastUpdate()', () => {
         expect(component.updateDetails).toBe(null);
 
-        component.showLastUpdate(false);
+        component._editmode = EDIT_MODES.PREVIEW_MODE;
+        component.showLastUpdate();
         expect(component.message).toContain("To see any previously");
         fixture.detectChanges();
         let cmpel = fixture.nativeElement;
         let bardiv = cmpel.querySelector(".ec-status-bar");
-        expect(bardiv).not.toBeNull();
-        expect(bardiv.firstElementChild.innerHTML).toContain("To see any previously");
+        expect(bardiv).toBeNull();
         
-        component.showLastUpdate(true);
-        expect(component.message).toContain('Click on the <i class="faa faa-pencil"></i> button to edit');
+        component._editmode = EDIT_MODES.EDIT_MODE;
         fixture.detectChanges();
-        expect(bardiv.firstElementChild.innerHTML).toContain('<i class="faa faa-undo"></i> button to discard the change');
+        cmpel = fixture.nativeElement;
+        bardiv = cmpel.querySelector(".ec-status-bar");
+        expect(bardiv.children[0].innerHTML).toContain('- edit');
 
         component.setLastUpdateDetails(updateDetails);
-        
-        component.showLastUpdate(false);
-        expect(component.message).toContain("There are un-submitted changes last edited on 2025 April 1");
+
+        component._editmode = EDIT_MODES.EDIT_MODE;
+        component.showLastUpdate();
+        expect(component.message).toContain("Edited by test01 NIST on 2025 April 1");
         fixture.detectChanges();
-        expect(bardiv.firstElementChild.innerHTML).toContain('There are un-submitted changes last edited');
-        component.showLastUpdate(true);
-        expect(component.message).toContain("This record was edited");
-        fixture.detectChanges();
-        expect(bardiv.firstElementChild.innerHTML).toContain('This record was edited by test01 NIST on 2025 April 1');
+        expect(bardiv.firstElementChild.innerHTML).toContain('- edit');
+        expect(bardiv.children[1].innerHTML).toContain('Edited by test01 NIST on 2025 April 1');
+
+        component._editmode = EDIT_MODES.DONE_MODE;
+        component.showLastUpdate();
+        expect(component.message).toBe('');
     });
 
 

@@ -13,6 +13,7 @@ import { CommonModule, DatePipe } from '@angular/common';
 import { NerdmRes } from '../../nerdm/nerdm';
 
 import { config, testdata } from '../../../environments/environment';
+import { LandingConstants } from '../constants';
 
 describe('EditControlComponent', () => {
     let component : EditControlComponent;
@@ -20,6 +21,7 @@ describe('EditControlComponent', () => {
     let cfg : AppConfig = new AppConfig(config);
     let rec : NerdmRes = testdata['test1'];
     let authsvc : AuthService = new MockAuthService()
+    let EDIT_MODES = LandingConstants.editModes;
 
     let makeComp = function() {
         TestBed.configureTestingModule({
@@ -46,15 +48,11 @@ describe('EditControlComponent', () => {
 
     it('should initialize', () => {
         expect(component).toBeDefined();
-        expect(component.editMode).toBeFalsy();
 
         let cmpel = fixture.nativeElement;
         let btns = cmpel.querySelectorAll("button");
-        expect(btns.length).toEqual(3);
-
-        let statusdiv = cmpel.querySelector(".ec-status-bar");
-        expect(statusdiv).not.toBeNull();
-        expect(statusdiv.childElementCount).toBe(2);
+        //Init with view only mode, no button will be displayed
+        expect(btns.length).toEqual(0);
     });
 
     it('can get authorized', async () => {
@@ -66,28 +64,28 @@ describe('EditControlComponent', () => {
 
     // test startEditing()
     it('startEditing()', async(() => {
-        expect(component.editMode).toBeFalsy();
         let cmpel = fixture.nativeElement;
         let edbtn = cmpel.querySelector("#ec-edit-btn") 
         let discbtn = cmpel.querySelector("#ec-discard-btn") 
-        let subbtn = cmpel.querySelector("#ec-submit-btn") 
+        let donebtn = cmpel.querySelector("#ec-close-btn") 
         let prevubtn = cmpel.querySelector("#ec-preview-btn")  
+        expect(component._editMode).toBe(EDIT_MODES.VIEWONLY_MODE);
         expect(prevubtn).toBeNull();
-        expect(edbtn.disabled).toBeFalsy();
-        expect(subbtn.disabled).toBeTruthy();
-        expect(discbtn.disabled).toBeTruthy();
+        expect(edbtn).toBeNull();
+        expect(donebtn).toBeNull();
+        expect(discbtn).toBeNull();
 
         component.startEditing();
         fixture.whenStable().then(() => {
             fixture.detectChanges();
-            expect(component.editMode).toBeTruthy();
+            expect(component._editMode).toBe(EDIT_MODES.EDIT_MODE);
             
             edbtn = cmpel.querySelector("#ec-edit-btn")     
             discbtn = cmpel.querySelector("#ec-discard-btn")
-            subbtn = cmpel.querySelector("#ec-submit-btn")  
+            donebtn = cmpel.querySelector("#ec-close-btn")  
             prevubtn = cmpel.querySelector("#ec-preview-btn")  
             expect(prevubtn.disabled).toBeFalsy();
-            expect(subbtn.disabled).toBeFalsy();
+            expect(donebtn.disabled).toBeFalsy();
             expect(discbtn.disabled).toBeFalsy();
             expect(edbtn).toBeNull();
         });
@@ -96,14 +94,13 @@ describe('EditControlComponent', () => {
 
     // test discardEdits()
     it('discardEdits()', async(() => {
-        expect(component.editMode).toBeFalsy();
         let cmpel = fixture.nativeElement;
         let edbtn = cmpel.querySelector("#ec-edit-btn") 
 
         component.startEditing();
         fixture.whenStable().then(() => {
             fixture.detectChanges();
-            expect(component.editMode).toBeTruthy();
+            expect(component._editMode).toBe(EDIT_MODES.EDIT_MODE);
             
             edbtn = cmpel.querySelector("#ec-edit-btn")     
             expect(edbtn).toBeNull();
@@ -111,98 +108,52 @@ describe('EditControlComponent', () => {
             component.discardEdits();
             fixture.whenStable().then(() => {
                 fixture.detectChanges();
-                expect(component.editMode).toBeFalsy();
+                expect(component._editMode).toBe(EDIT_MODES.PREVIEW_MODE);
                 
                 edbtn = cmpel.querySelector("#ec-edit-btn")     
                 let discbtn = cmpel.querySelector("#ec-discard-btn") 
-                let subbtn = cmpel.querySelector("#ec-submit-btn") 
+                let donebtn = cmpel.querySelector("#ec-close-btn") 
                 let prevubtn = cmpel.querySelector("#ec-preview-btn")
                 
                 expect(prevubtn).toBeNull();
                 expect(edbtn.disabled).toBeFalsy();
-                expect(subbtn.disabled).toBeTruthy();
-                expect(discbtn.disabled).toBeTruthy();
+                expect(donebtn.disabled).toBeFalsy();
+                expect(discbtn.disabled).toBeFalsy();
             });
         });
     }));
 
-    // test saveEdits
-    it('saveEdits()', async(() => {
-        expect(component.editMode).toBeFalsy();
+    // test doneEdits
+    it('doneEdits()', async(() => {
+        expect(component._editMode).toBe(EDIT_MODES.VIEWONLY_MODE);
         let cmpel = fixture.nativeElement;
         let edbtn = cmpel.querySelector("#ec-edit-btn") 
 
         component.startEditing();
         fixture.whenStable().then(() => {
             fixture.detectChanges();
-            expect(component.editMode).toBeTruthy();
+            expect(component._editMode).toBe(EDIT_MODES.EDIT_MODE);
             
             edbtn = cmpel.querySelector("#ec-edit-btn")     
             expect(edbtn).toBeNull();
 
-            component.saveEdits();
+            component.doneEdits();
             fixture.whenStable().then(() => {
                 fixture.detectChanges();
-                expect(component.editMode).toBeFalsy();
+                expect(component._editMode).toBe(EDIT_MODES.DONE_MODE);
                 
                 edbtn = cmpel.querySelector("#ec-edit-btn")     
                 let discbtn = cmpel.querySelector("#ec-discard-btn") 
-                let subbtn = cmpel.querySelector("#ec-submit-btn") 
+                let donebtn = cmpel.querySelector("#ec-close-btn") 
                 let prevubtn = cmpel.querySelector("#ec-preview-btn")
                 
                 expect(prevubtn).toBeNull();
-                expect(edbtn.disabled).toBeFalsy();
-                expect(subbtn.disabled).toBeTruthy();
+                expect(edbtn).toBeNull();
+                expect(donebtn.disabled).toBeTruthy();
                 expect(discbtn.disabled).toBeTruthy();
             });
         });
     }));
-
-    // test pauseEditing
-    it('pauseEditing()', async(() => {
-        expect(component.editMode).toBeFalsy();
-        let cmpel = fixture.nativeElement;
-        let edbtn = cmpel.querySelector("#ec-edit-btn") 
-
-        component.startEditing();
-        fixture.whenStable().then(() => {
-            fixture.detectChanges();
-            expect(component.editMode).toBeTruthy();
-            
-            edbtn = cmpel.querySelector("#ec-edit-btn")     
-            expect(edbtn).toBeNull();
-
-            component.pauseEditing();
-            fixture.whenStable().then(() => {
-                fixture.detectChanges();
-                expect(component.editMode).toBeFalsy();
-                
-                edbtn = cmpel.querySelector("#ec-edit-btn")     
-                let discbtn = cmpel.querySelector("#ec-discard-btn") 
-                let subbtn = cmpel.querySelector("#ec-submit-btn") 
-                let prevubtn = cmpel.querySelector("#ec-preview-btn")
-                
-                expect(prevubtn).toBeNull();
-                expect(edbtn.disabled).toBeFalsy();
-                expect(subbtn.disabled).toBeTruthy();
-                expect(discbtn.disabled).toBeTruthy();
-            });
-        });
-    }));
-
-    it('showMessage()', () => {
-        let cmpel = fixture.nativeElement;
-        let edbtn = cmpel.querySelector("#ec-edit-btn") 
-        let mbardiv = cmpel.querySelectorAll(".messagebar");
-        expect(mbardiv.length).toEqual(0);
-
-        component.showMessage("Blah Blah");
-        component.showMessage("Yay!", "celebration");
-        component.showMessage("Huh?", "bewilderment");
-        fixture.detectChanges();
-        mbardiv = cmpel.querySelectorAll(".messagebar");
-        expect(mbardiv.length).toEqual(3);
-    });
 
     it('sends md update', () => {
         let md = null;

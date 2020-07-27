@@ -1,0 +1,62 @@
+oar.mdserver: "http://mdserver:8081/"
+oar.mongodb.readwrite.user: "rw"
+oar.mongodb.readwrite.password: "abc12"
+oar.mongodb.admin.user: "admin"
+oar.mongodb.admin.password: "def34"
+oar.mongodb.read.user: "op"
+oar.mongodb.read.password: "ghi56"
+oar.mongodb.port:  27017
+oar.mongodb.host: someserver
+oar.mongodb.database.name: somedb
+oar.dbcollections.records: datarecords
+oar.dbcollections.changes: updates
+oar.mdserver.secret: "testsecret"
+
+#logs
+logging.file: customization.log
+logging.path: /tmp/logs/
+logging.exception-conversion-word: '%wEx'
+logging.level.root: INFO
+logging.level.org.springframework.web: INFO
+logging.level.org.springframework.security: INFO
+logging.level.org.springframework.security.saml: DEBUG
+
+
+
+##For running local
+#server.port: 443
+#server.ssl.key-store: keystore.p12
+#server.ssl.key-store-password: tomcat123
+#server.ssl.keyStoreType: PKCS12
+#server.ssl.keyAlias: tomcat
+#
+server.servlet.context-path: /customization
+server.error.include-stacktrace: never
+server.connection-timeout: 60000
+server.max-http-header-size: 8192
+server.tomcat.accesslog.directory: logs
+server.tomcat.accesslog.enabled: false
+
+#SAML Authentication
+auth.federation.metadata: /federationmetadata.xml
+saml.scheme: https
+saml.server.name: localhost
+saml.server.context-path: /customization
+saml.keystore.path: /saml-keystore.jks
+saml.keystroe.storepass: samlstorepass
+saml.keystore.key: mykeyalias
+saml.keystore.keypass: mykeypass
+saml.metdata.entityid: gov:nist:oar:localhost
+saml.metadata.entitybaseUrl: https://localhost/customization
+
+saml.nist.attribute.claim.email: "email"
+saml.nist.attribute.claim.lastname: "lastname"
+saml.nist.attribute.claim.name: "firstname"
+saml.nist.attribute.claim.userid: "userid"
+##cross origin 
+application.url: https://localhost/pdr/about
+
+#JWT Authorization
+jwt.claimname: customization
+jwt.claimvalue: someclaim
+jwt.secret: "yeWAgVDfb$!MFn@MCJVN7uqkznHbDLR#"

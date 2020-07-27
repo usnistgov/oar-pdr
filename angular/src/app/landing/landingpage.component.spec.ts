@@ -48,7 +48,7 @@ describe('LandingPageComponent', () => {
         cfg.locations.pdrSearch = "https://goob.nist.gov/search";
         cfg.status = "Unit Testing";
         cfg.appVersion = "2.test";
-        cfg.editEnabled = true;
+        cfg.editEnabled = false;
 
         nrd = testdata['test1'];
         /*

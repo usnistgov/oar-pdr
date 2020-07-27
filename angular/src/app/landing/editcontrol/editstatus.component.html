@@ -1,8 +1,15 @@
-<div class="ec-status-bar">
-    <span style="float: left;margin-left: 4em;" *ngIf="mdupdsvc.editMode && !previewMode"><span style="color: rgb(173, 0, 0);">*</span> required field</span>
-    <span [ngStyle]="{'color': messageColor}" [innerHTML]="message"></span>
-    <div [hidden]="!isProcessing" style="width: 2em;height:2em; float: right;">
-        <i class="faa faa-spinner faa-spin faa-stack-1x ec-status-spinner"
-            style="width:2em;position: inherit;"></i>
-    </div>
+<div class="ec-status-bar" *ngIf="_editmode != EDIT_MODES.PREVIEW_MODE && _editmode != EDIT_MODES.VIEWONLY_MODE">
+    <span style="width: 50%;">
+        <span style="margin: -.2em 0em .5em 3em; font-size: 20px;"
+            *ngIf="_editmode == EDIT_MODES.EDIT_MODE">
+            <i class="faa faa-pencil" style="color: rgb(173, 0, 0);"></i><span style="margin-right: .5em;"> - edit;
+            </span>
+            <i class="faa faa-undo" style="color: rgb(173, 0, 0);"></i><span style="margin-right: .5em;"> - undo;
+            </span>
+            <span style="color: rgb(173, 0, 0);">*</span> required field</span>
+        </span>
+    <span style="text-align: right;float: right;">
+        <span [ngStyle]="{'color': messageColor}" [innerHTML]="message"></span>
+        <i [hidden]="!isProcessing" class="faa faa-spinner faa-spin faa-stack-1x ec-status-spinner" style="width:2em;height:2em;position: inherit;"></i>
+    </span>
 </div>
