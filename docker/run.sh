@@ -19,14 +19,15 @@ $prog - build and optionally test the software in this repo via docker
 
 SYNOPSIS
   $prog [-d|--docker-build] [--dist-dir DIR] [CMD ...] 
-        [DISTNAME|python|angular ...] 
+        [DISTNAME|python|angular|java ...] 
         
 
 ARGS:
   python    apply commands to just the python distributions
   angular   apply commands to just the angular distributions
+  java      apply commands to just the java distributions
 
-DISTNAMES:  pdr-lps, pdr-publish
+DISTNAMES:  pdr-lps, pdr-publish, customization-api
 
 CMDs:
   build     build the software
@@ -68,6 +69,7 @@ args=()
 dargs=()
 pyargs=()
 angargs=()
+jargs=()
 testcl=()
 while [ "$1" != "" ]; do
     case "$1" in
@@ -103,7 +105,7 @@ while [ "$1" != "" ]; do
         -*)
             args=(${args[@]} $1)
             ;;
-        python|angular)
+        python|angular|java)
             comptypes="$comptypes $1"
             ;;
         pdr-lps)
@@ -113,6 +115,10 @@ while [ "$1" != "" ]; do
         pdr-publish)
             wordin python $comptypes || comptypes="$comptypes python"
             pyargs=(${pyargs[@]} $1)
+            ;;
+        customization-api)
+            wordin java $comptypes || comptypes="$comptypes java"
+            jargs=(${jargs[@]} $1)
             ;;
         build|install|test|shell)
             cmds="$cmds $1"
@@ -158,6 +164,11 @@ if [ -z "$dodockbuild" ]; then
         if wordin shell $cmds; then
             docker_images_built oar-pdr/angtest || dodockbuild=1
         fi
+    fi
+fi
+if [ -z "$dodockbuild" ]; then
+    if wordin java $comptypes; then
+        docker_images_built oar-pdr/customization-api || dodockbuild=1
     fi
 fi
         
@@ -225,4 +236,37 @@ if wordin python $comptypes; then
                         "${args[@]}"  "${pyargs[@]}"
     fi
 fi
+
+# Java build and test
+# 
+if wordin java $comptypes; then
+    
+    if wordin build $cmds; then
+        # build = makedist
+        echo '+' docker run --rm $volopt $distvol oar-pdr/customization-api makedist \
+                        "${args[@]}"  "${jargs[@]}"
+        docker run $ti --rm $volopt $distvol oar-pdr/customization-api makedist \
+               "${args[@]}"  "${jargs[@]}"
+    fi
+
+    if wordin test $cmds; then
+        # test = testall
+        echo '+' docker run --rm $volopt $distvol oar-pdr/customization-api testall \
+                        "${args[@]}"  "${jargs[@]}"
+        docker run $ti --rm $volopt $distvol oar-pdr/customization-api testall \
+               "${args[@]}"  "${jargs[@]}"
+    fi
+
+    if wordin shell $cmds; then
+        cmd="testshell"
+        if wordin install $cmds; then
+            cmd="installshell"
+        fi
+        echo '+' docker run -ti --rm $volopt $distvol oar-pdr/customization-api $cmd \
+                        "${args[@]}"  "${jargs[@]}"
+        exec docker run -ti --rm $volopt $distvol oar-pdr/customization-api $cmd \
+                        "${args[@]}"  "${jargs[@]}"
+    fi
+fi
+
 

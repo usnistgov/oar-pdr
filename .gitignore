@@ -35,6 +35,7 @@ sdist
 develop-eggs
 .installed.cfg
 distribute-*.tar.gz
+m2repo
 
 # Other
 .cache
