@@ -198,7 +198,7 @@ class DOIMintingClient(object):
         if not os.path.exists(recfile):
             raise IngestFileNotStaged(name)
         try:
-            shutil.move(recfile, self._inprogdir)
+            self._move_status_file(recfile, self._inprogdir)
             recfile = os.path.join(self._inprogdir, name+".json")
             rec = read_json(recfile)
             publish = (rec.get('event') == "publish")
@@ -211,10 +211,10 @@ class DOIMintingClient(object):
                 # the file is bad, send it to jail
                 if hasattr(ex.errdata, 'explain'):
                     self.log.error("%s: %s", name, ex.errdata.explain())
+                    self.log.debug("Allowed prefixes: %s", self.dccli.prefs)
                 else:
                     self.log.error("%s: invalid DOI request: %s:", name, str(ex))
-                    self.log.debug("Allowed prefixes: %s", self.dccli.prefs)
-                shutil.move(recfile, self._faildir)
+                self._move_status_file(recfile, self._faildir)
                 raise
             except dc.DOIResolverError as ex:
                 # server's fault; try again later
@@ -237,10 +237,7 @@ class DOIMintingClient(object):
 
             # success; send file to millionaire acres
             dest = (publish and self._publishdir) or self._reservedir
-            destfile = os.path.join(dest, os.path.basename(recfile))
-            if os.path.isfile(destfile):
-                os.remove(destfile)
-            shutil.move(recfile, dest)
+            self._move_status_file(recfile, dest)
             
         except (OSError, shutil.Error) as ex:
             # problem moving file
@@ -258,12 +255,21 @@ class DOIMintingClient(object):
             self.log.exception("Problem reading data from JSON file, {0}: {1}"
                                .format(recfile, str(ex)))
             try:
-                shutil.move(recfile, self._faildir)
+                self._move_status_file(recfile, self._faildir)
             except (OSError, IOError, shutil.Error) as e:
                 msg = "Problem moving file from {0} to {1}: {3}" \
                       .format(recfile, self._faildir, str(e))
                 self.log.exception(msg)
                 raise StateException(msg, cause=ex)
+
+    def _move_status_file(self, recfile, statdir):
+        try:
+            dest = os.path.join(statdir, os.path.basename(recfile))
+            if os.path.isfile(dest):
+                os.remove(dest)
+            shutil.move(recfile, dest)
+        except OSError as ex:
+            self.log.exception("Problem moving status file: "+str(ex))
 
     def submit_rec(self, rec):
         """
