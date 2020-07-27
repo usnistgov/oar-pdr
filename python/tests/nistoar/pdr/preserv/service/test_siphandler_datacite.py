@@ -208,6 +208,9 @@ class TestPreservationDOIMockSrvr(test.TestCase):
         self.assertFalse(self.sip._is_preserved())
         doipath = "{0}/pdrut-T4SW26".format(prefixes[0])
 
+        doi = self.sip._doiminter.dccli.lookup(prefixes[0]+"/pdrut-T4SW26", relax=True)
+        self.assertTrue(not doi.exists)
+
         try:
             self.sip.bagit()
             self.assertTrue(self.sip._is_preserved())
