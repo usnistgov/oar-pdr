@@ -956,7 +956,7 @@ class MIDAS3PublishingService(PublishSystem):
                 else:
                     # read the pod from the metadata bag, mark it and resubmit it to queue
                     if not os.path.exists(self.bagger.bagbldr._bag.pod_file()):
-                        raise StateException("POD has yet to be submitted for ID="+ediid)
+                        raise StateException("POD has yet to be submitted for ID="+self.name)
                     pod = self.bagger.bagbldr._bag.pod_record()
                     
                 pod['_preserve'] = (asupdate and "update") or "new"

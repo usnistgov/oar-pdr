@@ -218,10 +218,6 @@ class DOIMintingClient(object):
                     self.log.error("%s: %s", name, ex.errdata.explain())
                 else:
                     self.log.error("%s: invalid DOI request: %s", name, str(ex))
-                self.log.info("%s is %san one of the allowed prefixes: %s",
-                              rec.get('doi','??').split('/')[0],
-                              (self.dccli.supports_prefix(rec.get('doi','??').split('/')[0]) and '') or "not ",
-                              self.dccli.prefs)
                 self._move_status_file(recfile, self._faildir)
                 raise
             except dc.DOIResolverError as ex:
@@ -230,7 +226,7 @@ class DOIMintingClient(object):
                               name, str(ex))
                 shutil.move(recfile, self._stagedir)
                 raise
-            except DOICommunicationError as ex:
+            except dc.DOICommunicationError as ex:
                 # network's fault; try again later
                 self.log.warn("%s: unexpected comm error: %s (will try again later)",
                               name, str(ex))
