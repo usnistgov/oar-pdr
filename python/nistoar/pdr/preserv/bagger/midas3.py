@@ -291,7 +291,7 @@ class MIDASSIP(object):
         pod = self._pod_rec()
 
         return [self._distsvcurl.sub('', urllib.unquote(d['downloadURL']))
-                for d in pod['distribution'] if 'downloadURL' in d]
+                for d in pod.get('distribution',[]) if 'downloadURL' in d]
                 
 
     def registered_files(self, prefer_pod=False):
