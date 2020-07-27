@@ -837,7 +837,7 @@ class MIDASMetadataBagger(SIPBagger):
         doi_prefix = self.cfg.get('doi_minter',{}).get('minting_naan')
         if doi_prefix and not nerd.get('doi') and nerd.get('ediid','').startswith("ark:/") and \
            ('version' not in nerd or nerd['version'] == "1.0.0"):
-            doi = "doi:{0}/{1}".format(doi_prefix, self.name)
+            doi = "doi:{0}/{1}".format(str(doi_prefix), self.name)
             nerd['doi'] = doi
             self.bagbldr.update_metadata_for('', {'doi': doi},
                                              message="added default DOI: "+doi)
