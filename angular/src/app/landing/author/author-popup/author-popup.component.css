@@ -59,3 +59,18 @@
     margin: 0.5em 0em 1em 0em;
     margin-bottom: 4em;;
 }
+
+#orcid-input {
+    width: calc(100% - 2em);
+    height:2em; 
+    margin-right: .5em;
+}
+
+#orcid-warning {
+    color: rgb(212, 103, 0); 
+    font-size: 12px; 
+    margin-right: 3em; 
+    margin-top: -10px; 
+    margin-top: -.7em; 
+    text-align: right;
+}

@@ -1,5 +1,7 @@
-import { Component, OnInit, AfterViewInit,
-         ElementRef, PLATFORM_ID, Inject, ViewEncapsulation } from '@angular/core';
+import {
+    Component, OnInit, AfterViewInit,
+    ElementRef, PLATFORM_ID, Inject, ViewEncapsulation
+} from '@angular/core';
 import { ActivatedRoute, Router, NavigationEnd } from '@angular/router';
 import { isPlatformBrowser } from '@angular/common';
 import { Title } from '@angular/platform-browser';
@@ -10,6 +12,7 @@ import { EditStatusService } from './editcontrol/editstatus.service';
 import { NerdmRes, NERDResource } from '../nerdm/nerdm';
 import { IDNotFound } from '../errors/error';
 import { MetadataUpdateService } from './editcontrol/metadataupdate.service';
+import { LandingConstants } from './constants';
 
 /**
  * A component providing the complete display of landing page content associated with 
@@ -32,7 +35,7 @@ import { MetadataUpdateService } from './editcontrol/metadataupdate.service';
     providers: [
         Title
     ],
-    encapsulation:  ViewEncapsulation.None
+    encapsulation: ViewEncapsulation.None
 })
 export class LandingPageComponent implements OnInit, AfterViewInit {
     layoutCompact: boolean = true;
@@ -44,10 +47,20 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
     citetext: string = null;
     citationVisible: boolean = false;
     editEnabled: boolean = false;
+    _showData: boolean = false;
+    _showContent: boolean;
+    headerObj: any;
+    public EDIT_MODES: any;
+    editMode: string;
+    message: string;
+    displaySpecialMessage: boolean = false;
     citationDialogWith: number = 550; // Default width
 
     // this will be removed in next restructure
     showMetadata = false;
+    routerParamEditEnabled: boolean = false;
+
+    loadingMessage = '<i class="faa faa-spinner faa-spin"></i> Loading...';
 
     /**
      * create the component.
@@ -60,17 +73,41 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
      *                 ID with child components.
      */
     constructor(private route: ActivatedRoute,
-                private router: Router,
-                @Inject(PLATFORM_ID) private platformId: Object,
-                public titleSv: Title,
-                private cfg: AppConfig,
-                private mdserv: MetadataService,
-                private edstatsvc: EditStatusService,
-                private mdupdsvc : MetadataUpdateService)
+        private router: Router,
+        @Inject(PLATFORM_ID) private platformId: Object,
+        public titleSv: Title,
+        private cfg: AppConfig,
+        private mdserv: MetadataService,
+        public edstatsvc: EditStatusService,
+        private mdupdsvc: MetadataUpdateService) 
     {
         this.reqId = this.route.snapshot.paramMap.get('id');
         this.inBrowser = isPlatformBrowser(platformId);
         this.editEnabled = cfg.get('editEnabled', false) as boolean;
+        this.EDIT_MODES = LandingConstants.editModes;
+
+        this.edstatsvc.watchEditMode((editMode) => {
+            this.editMode = editMode;
+            if(this.editMode == this.EDIT_MODES.DONE_MODE || this.editMode == this.EDIT_MODES.OUTSIDE_MIDAS_MODE){
+                this.displaySpecialMessage = true;
+                this._showContent = true;
+                this.setMessage();
+            }
+        });
+
+        this.mdupdsvc.subscribe(
+            (md) => {
+                if (md && md != this.md) {
+                    this.md = md as NerdmRes;
+                }
+
+                this.showData();
+            }
+        );
+
+        this.edstatsvc.watchShowLPContent((showContent) => {
+            this._showContent = showContent;
+        });
     }
 
     /**
@@ -79,45 +116,103 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
      */
     ngOnInit() {
         console.log("initializing LandingPageComponent around id=" + this.reqId);
-        // retreive the (unedited) metadata
-        this.mdserv.getMetadata(this.reqId).subscribe(
-            (data) => {
-                // successful metadata request
-                this.md = data;
-                if (!this.md) {
-                    // id not found; reroute
-                    console.error("No data found for ID=" + this.reqId);
-                    this.router.navigateByUrl("/not-found/" + this.reqId, { skipLocationChange: true });
-                }
-                else
-                    // proceed with rendering of the component
-                    this.useMetadata();
-            },
-            (err) => {
-                console.error("Failed to retrieve metadata: " + err.toString());
-                if (err instanceof IDNotFound)
-                    this.router.navigateByUrl("not-found/" + this.reqId, { skipLocationChange: true });
-                else
-                    this.router.navigateByUrl("int-error/" + this.reqId, { skipLocationChange: true });
-            }
-        );
+        var showError: boolean = true;
+        let metadataError = "";
+        this.displaySpecialMessage = false;
 
-        // if editing is enabled, the editing can be triggered via a URL parameter.  This is done
-        // in concert with the authentication process that can involve redirection to an authentication
-        // server; on successful authentication, the server can redirect the browser back to this
-        // landing page with editing turned on.  
-        if (this.edstatsvc.editingEnabled()) {
-            this.route.queryParamMap.subscribe(queryParams => {
-                let param = queryParams.get("editmode")
-                // console.log("editmode url param:", param);
-                if (param) {
-                    console.log("Returning from authentication redirection (editmode="+param+")");
-                    // Need to pass reqID (resID) because the resID in editControlComponent
-                    // has not been set yet and the startEditing function relies on it.
-                    this.edstatsvc.startEditing(this.reqId);
+        this.route.queryParamMap.subscribe(queryParams => {
+            var param = queryParams.get("editEnabled");
+            if(param)
+                this.routerParamEditEnabled = (param.toLowerCase() == 'true');
+            else
+                this.routerParamEditEnabled = false;
+        })
+
+        // if editEnabled = true, we don't want to display the data that came from mdserver
+        // Will set the display to true after the authentication process. If authentication failed, 
+        // we set it to true and the data loaded from mdserver will be displayed. If authentication 
+        // passed and draft data loaded from customization service, we will set this flag to true 
+        // to display the data from MIDAS.
+        if(this.routerParamEditEnabled) 
+            this.edstatsvc.setShowLPContent(false);
+        else 
+            this.edstatsvc.setShowLPContent(true);
+
+        // Retrive Nerdm record and keep it in case we need to display it in preview mode
+        // use case: user manually open PDR landing page but the record was not edited by MIDAS
+        // This part will only be executed if "editEnabled=true" is not in URL parameter.
+        this.mdserv.getMetadata(this.reqId).subscribe(
+        (data) => {
+            // successful metadata request
+            this.md = data;
+            if (!this.md) {
+                // id not found; reroute
+                console.error("No data found for ID=" + this.reqId);
+                metadataError = "not-found";
+                //   this.router.navigateByUrl("/not-found/" + this.reqId, { skipLocationChange: true });
+            }
+            else{
+                // proceed with rendering of the component
+                this.useMetadata();
+
+                // if editing is enabled, and "editEnabled=true" is in URL parameter, try to start the page
+                // in editing mode.  This is done in concert with the authentication process that can involve 
+                // redirection to an authentication server; on successful authentication, the server can 
+                // redirect the browser back to this landing page with editing turned on. 
+                if(this.inBrowser){
+                    // Display content after 15sec no matter what
+                    setTimeout(() => {
+                        this.edstatsvc.setShowLPContent(true);
+                    }, 15000);
+        
+                  if (this.edstatsvc.editingEnabled()) 
+                  {
+                      // console.log("editmode url param:", param);
+                      if (this.routerParamEditEnabled) {
+                          showError = false;
+                          console.log("Returning from authentication redirection (editmode="+this.routerParamEditEnabled+")");
+                          // Need to pass reqID (resID) because the resID in editControlComponent
+                          // has not been set yet and the startEditing function relies on it.
+                            this.edstatsvc.startEditing(this.reqId);
+                      }else{
+                          showError = true;
+                      }
+                  }else{
+                      showError = true;
+                  }
                 }
-            })
+            }
+
+            if(showError){
+                if(metadataError == "not-found"){
+                    if(this.routerParamEditEnabled){
+                        console.log("ID not found...");
+                        this.edstatsvc._setEditMode(this.EDIT_MODES.OUTSIDE_MIDAS_MODE);
+                        this.setMessage();
+                        this.displaySpecialMessage = true;
+                    }else{
+                        this.router.navigateByUrl("not-found/" + this.reqId, { skipLocationChange: true });
+                    }
+                }
+
+            }
+        },
+        (err) => {
+            console.error("Failed to retrieve metadata: ", err);
+            this.edstatsvc.setShowLPContent(true);
+            if (err instanceof IDNotFound)
+            {
+                metadataError = "not-found";
+                  this.router.navigateByUrl("not-found/" + this.reqId, { skipLocationChange: true });
+            }else
+            {
+                metadataError = "int-error";
+                // this.router.navigateByUrl("int-error/" + this.reqId, { skipLocationChange: true });
+
+                this.router.navigateByUrl("int-error/" + this.reqId, { skipLocationChange: true });
+            }
         }
+        );
     }
 
     /**
@@ -130,6 +225,14 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
         }
     }
 
+    showData() : void{
+      if(this.md != null){
+        this._showData = true;
+      }else{
+        this._showData = false;
+      }
+    }
+
     /**
      * make use of the metadata to initialize this component.  This is called asynchronously
      * from ngOnInit after the metadata has been successfully retrieved (and saved to this.md).
@@ -140,7 +243,7 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
     useMetadata(): void {
         // set the document title
         this.setDocumentTitle();
-        this.mdupdsvc._setOriginalMetadata(this.md);
+        this.mdupdsvc.setOriginalMetadata(this.md);
     }
 
     /**
@@ -165,7 +268,7 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
      * apply the URL fragment by scrolling to the proper place in the document
      */
     public useFragment() {
-        if (! this.inBrowser) return;
+        if (!this.inBrowser) return;
 
         this.router.events.subscribe(s => {
             if (s instanceof NavigationEnd) {
@@ -176,7 +279,7 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
                 }
                 else {
                     element = document.querySelector("body");
-                    if (! element) 
+                    if (!element)
                         console.warn("useFragment: failed to find document body!");
                 }
                 if (element) {
@@ -201,7 +304,7 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
      * display or hide citation information in a popup window.
      * @param yesno   whether to show (true) or hide (false)
      */
-    showCitation(yesno : boolean) : void {
+    showCitation(yesno: boolean): void {
         this.citationVisible = yesno;
     }
 
@@ -220,10 +323,21 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
     /**
      * return text representing the recommended citation for this resource
      */
-    getCitation() : string {
-        if (! this.citetext) 
-            this.citetext = (new NERDResource(this.md)).getCitation();
+    getCitation(): string 
+    {
+        this.citetext = (new NERDResource(this.md)).getCitation();
         return this.citetext;
     }
 
+    setMessage(){
+        if(this.editMode == this.EDIT_MODES.DONE_MODE)
+        {
+            this.message = 'You can now close this browser tab <p>and go back to MIDAS to either accept or discard the changes.'
+        }
+
+        if(this.editMode == this.EDIT_MODES.OUTSIDE_MIDAS_MODE)
+        {
+            this.message = 'This record is not currently available for editing. <p>Please return to MIDAS and click "Edit Landing Page" to edit.'
+        }
+    }
 }

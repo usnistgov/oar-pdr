@@ -35,8 +35,6 @@ export class ErrorComponent {
     this.response.statusCode = 500;
     this.response.statusMessage = "There is internal server error!"
   }
-  ngAfterViewInit() {
-  }
 }
 
 @Component({
@@ -69,9 +67,5 @@ export class UserErrorComponent implements OnInit {
       this.response.statusMessage = "There is an user error!";
       console.log(this.errorcode);
     }
-  }
-  ngAfterViewInit() {
-
-    //window.history.replaceState( {} , '#/error/', '/error/');
   }
 }

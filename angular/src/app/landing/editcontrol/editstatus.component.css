@@ -1,8 +1,7 @@
 .ec-status-bar {
     width: 100%;
-    height: 2em; 
+    height: fit-content; 
     font-size: 15px; 
-    text-align:right; 
     background-color: #FCF9CD;
     padding-right: 2em;
     padding-top: .3em;

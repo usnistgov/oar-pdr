@@ -6,7 +6,7 @@
            class="faa faa-times faa-lg msg-dismiss" style="margin-right: 8px; margin-left: 12px;"></i></a>
       </div>
       <div  [class]="msg.type">
-        Oops! {{msg.prefix || defSysErrorPrefix}} Please try to edit and save again.
+        Oops! {{msg.prefix || defSysErrorPrefix}} {{msg.text}} Please try to edit and save again.
         If problem persists, please contact us at
         <a href="mailto:datasupport@nist.gov?subject=PDR Publishing Error&body={{msg.text}}">datasupport@nist.gov</a>
         to report the problem.

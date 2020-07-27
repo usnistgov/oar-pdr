@@ -24,23 +24,8 @@ export class TitleComponent implements OnInit {
     ngOnInit() {
     }
 
-    getFieldStyle() {
-        if (this.mdupdsvc.editMode) {
-            if (this.mdupdsvc.fieldUpdated(this.fieldName)) {
-                return { 'border': '1px solid lightgrey', 'background-color': '#FCF9CD' };
-            } else {
-                return { 'border': '1px solid lightgrey', 'background-color': 'white' };
-            }
-        } else {
-            let out = { 'border': '0px solid white', 'background-color': 'white' };
-            if (!this.record[this.fieldName])
-                out['color'] = "#ccccccc";
-            return out;
-        }
-    }
-
     openModal() {
-        if (!this.mdupdsvc.editMode) return;
+        if (!this.mdupdsvc.isEditMode) return;
 
         let ngbModalOptions: NgbModalOptions = {
             backdrop: 'static',

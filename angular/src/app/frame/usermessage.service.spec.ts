@@ -20,7 +20,7 @@ describe('UserMessageService', () => {
     })
 
     it('sends tip', () => {
-        svc._subscribe(subscriber);
+        svc.subscribe(subscriber);
         expect(message).toBeNull();
         expect(type).toBeNull();
         svc.tip("50c");
@@ -29,7 +29,7 @@ describe('UserMessageService', () => {
     });
 
     it('sends tip', () => {
-        svc._subscribe(subscriber);
+        svc.subscribe(subscriber);
         expect(message).toBeNull();
         expect(type).toBeNull();
         svc.tip("50c");
@@ -41,7 +41,7 @@ describe('UserMessageService', () => {
     });
 
     it('sends instruction', () => {
-        svc._subscribe(subscriber);
+        svc.subscribe(subscriber);
         expect(message).toBeNull();
         expect(type).toBeNull();
         svc.instruct("Stop!");
@@ -53,7 +53,7 @@ describe('UserMessageService', () => {
     });
 
     it('sends warning', () => {
-        svc._subscribe(subscriber);
+        svc.subscribe(subscriber);
         expect(message).toBeNull();
         expect(type).toBeNull();
         svc.warn("Beware.");
@@ -65,7 +65,7 @@ describe('UserMessageService', () => {
     });
 
     it('sends an error', () => {
-        svc._subscribe(subscriber);
+        svc.subscribe(subscriber);
         expect(message).toBeNull();
         expect(type).toBeNull();
         svc.error("tsk");
@@ -77,7 +77,7 @@ describe('UserMessageService', () => {
     });
 
     it('sends a system error', () => {
-        svc._subscribe(subscriber);
+        svc.subscribe(subscriber);
         expect(message).toBeNull();
         expect(type).toBeNull();
         svc.syserror("ouch");
@@ -89,7 +89,7 @@ describe('UserMessageService', () => {
     });
 
     it('sends a celebration', () => {
-        svc._subscribe(subscriber);
+        svc.subscribe(subscriber);
         expect(message).toBeNull();
         expect(type).toBeNull();
         svc.celebrate("sing!");
@@ -101,7 +101,7 @@ describe('UserMessageService', () => {
     });
 
     it('sends an informational item', () => {
-        svc._subscribe(subscriber);
+        svc.subscribe(subscriber);
         expect(message).toBeNull();
         expect(type).toBeNull();
         svc.inform("I am");
@@ -121,7 +121,7 @@ describe('UserMessageService', () => {
         expect(message).toBeNull();
         expect(type).toBeNull();
 
-        svc._subscribe(subscriber);
+        svc.subscribe(subscriber);
         expect(message).toBeNull();
         expect(type).toBeNull();
 

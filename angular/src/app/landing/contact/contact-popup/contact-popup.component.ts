@@ -13,6 +13,7 @@ export class ContactPopupComponent implements OnInit {
     @Input() inputValue: any;
     @Input() field: string;
     @Input() title?: string;
+    @Input() inBrowser: boolean;   // false if running server-side
     @Output() returnValue: EventEmitter<any> = new EventEmitter();
 
     tempContactPoint: any;
@@ -40,9 +41,11 @@ export class ContactPopupComponent implements OnInit {
             }
         }
 
-        let textArea = document.getElementById("address");
-        if (this.tempContactPoint.address != undefined && this.tempContactPoint.address != null)
-            textArea.style.height = (this.tempContactPoint.address.length * 30).toString() + 'px';;
+        if(this.inBrowser){
+          let textArea = document.getElementById("address");
+          if (this.tempContactPoint.address != undefined && this.tempContactPoint.address != null)
+              textArea.style.height = (this.tempContactPoint.address.length * 30).toString() + 'px';;
+        }
     }
 
     /*

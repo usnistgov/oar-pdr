@@ -19,6 +19,7 @@ describe('MetadataUpdateService', () => {
     let rec : NerdmRes = testdata['test1'];
     let resmd : NerdmRes = null;
     let svc : MetadataUpdateService = null;
+    let edstatsvc : EditStatusService;
 
     let subscriber = {
         next: (md) => {
@@ -35,13 +36,14 @@ describe('MetadataUpdateService', () => {
         let dp : DatePipe = TestBed.get(DatePipe);
         let cfgdata = null;
         cfgdata = JSON.parse(JSON.stringify(config));
-        svc = new MetadataUpdateService(new UserMessageService(), new MockAuthService(),dp);
+        edstatsvc = new EditStatusService(new AppConfig(cfgdata));
+        svc = new MetadataUpdateService(new UserMessageService(), edstatsvc, new MockAuthService(),dp);
         svc._setCustomizationService(new InMemCustomizationService(rec));
     }));
 
     it('returns initial draft metadata', () => {
         var md = null;
-        svc._subscribe({
+        svc.subscribe({
             next: (res) => { md = res; },
             error: (err) => { throw err; }
         }); 
@@ -65,8 +67,8 @@ describe('MetadataUpdateService', () => {
         expect(svc.lastUpdate).toEqual({} as UpdateDetails);
 
         var md = null;
-        svc._setOriginalMetadata(resmd);
-        svc._subscribe({
+        svc.setOriginalMetadata(resmd);
+        svc.subscribe({
             next: (res) => { md = res; },
             error: (err) => { throw err; }
         }); 
@@ -84,8 +86,8 @@ describe('MetadataUpdateService', () => {
         expect(svc.fieldUpdated('gurn')).toBeFalsy();
 
         var md = null;
-        svc._setOriginalMetadata(rec);
-        svc._subscribe({
+        svc.setOriginalMetadata(rec);
+        svc.subscribe({
             next: (res) => { md = res; },
             error: (err) => { throw err; }
         }); 
@@ -111,8 +113,8 @@ describe('MetadataUpdateService', () => {
         expect(svc.fieldUpdated('gurn')).toBeFalsy();
 
         var md = null;
-        svc._setOriginalMetadata(rec);
-        svc._subscribe({
+        svc.setOriginalMetadata(rec);
+        svc.subscribe({
             next: (res) => { md = res; },
             error: (err) => { throw err; }
         }); 

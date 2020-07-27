@@ -22,8 +22,6 @@ import { Component } from '@angular/core';
 })
 
 export class NerdmComponent {
-  ngAfterViewInit() {
-    //window.history.replaceState( {} , '#/nerdm/', '/pdr/nerdm/' );
-  }
+
 }
    

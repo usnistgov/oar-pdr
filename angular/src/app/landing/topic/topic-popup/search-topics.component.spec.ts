@@ -11,6 +11,9 @@ import { AppConfig } from '../../../config/config';
 import { AngularEnvironmentConfigService } from '../../../config/config.service';
 import { TransferState } from '@angular/platform-browser';
 import { ToastrModule } from 'ngx-toastr';
+import { HttpClientModule } from '@angular/common/http';
+import { RouterTestingModule } from '@angular/router/testing';
+import { UserMessageService } from '../../../frame/usermessage.service';
 
 describe('SearchTopicsComponent', () => {
     let component: SearchTopicsComponent;
@@ -28,12 +31,18 @@ describe('SearchTopicsComponent', () => {
     let ts: TransferState = new TransferState();
 
     beforeEach(async(() => {
+      cfg = (new AngularEnvironmentConfigService(plid, ts)).getConfig() as AppConfig;
+      cfg.locations.pdrSearch = "https://goob.nist.gov/search";
+      cfg.status = "Unit Testing";
+      cfg.appVersion = "2.test";
+
         TestBed.configureTestingModule({
             declarations: [SearchTopicsComponent],
-            imports: [FormsModule, DataTableModule, TreeModule],
+            imports: [FormsModule, DataTableModule, TreeModule, HttpClientModule, RouterTestingModule],
             schemas: [NO_ERRORS_SCHEMA],
             providers: [
                 NgbActiveModal,
+                UserMessageService,
                 TestDataService,
                 { provide: AppConfig, useValue: cfg }]
         })
@@ -60,7 +69,6 @@ describe('SearchTopicsComponent', () => {
         component = fixture.componentInstance;
         component.field = 'topic';
         component.inputValue = tempTopics;
-        component.taxonomyTree = taxonomyTree;
 
         saveButton = fixture.nativeElement.getElementsByTagName('button')[1];
         treeNodeLink = fixture.nativeElement.getElementsByTagName('span')[1];
@@ -70,14 +78,6 @@ describe('SearchTopicsComponent', () => {
     it('should create', () => {
         expect(component).toBeTruthy();
     });
-
-    // it('should have title: Research Topics', () => {
-    //   fixture.detectChanges();
-
-    //   expect(fixture.nativeElement.getElementsByTagName('span')[0].innerText).toEqual('Bioscience: Genomic measurements');
-
-    //   expect((fixture.nativeElement.getElementsByTagName('p-treeTable')[0].value)[0].data.name).toEqual('Test1');
-    // });
 
     it('saveTopic() should be called', () => {
         component.returnValue.subscribe((value) => {

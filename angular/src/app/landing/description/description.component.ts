@@ -25,20 +25,8 @@ export class DescriptionComponent implements OnInit {
     ngOnInit() {
     }
 
-    getFieldStyle() {
-        if (this.mdupdsvc.editMode) {
-            if (this.mdupdsvc.fieldUpdated(this.fieldName)) {
-                return { 'background-color': '#FCF9CD' };
-            } else {
-                return {  };
-            }
-        } else {
-            return {  };
-        }
-    }
-
     openModal() {
-        if (!this.mdupdsvc.editMode) return;
+        if (!this.mdupdsvc.isEditMode) return;
 
         let ngbModalOptions: NgbModalOptions = {
             backdrop: 'static',
@@ -56,6 +44,7 @@ export class DescriptionComponent implements OnInit {
         modalRef.componentInstance.inputValue[this.fieldName] = val;
         modalRef.componentInstance['field'] = this.fieldName;
         modalRef.componentInstance['title'] = 'Description';
+        modalRef.componentInstance['message'] = 'Separate paragraphs by 2 lines.';
 
         modalRef.componentInstance.returnValue.subscribe((returnValue) => {
             if (returnValue) {

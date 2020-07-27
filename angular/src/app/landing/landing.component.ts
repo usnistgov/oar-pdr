@@ -25,6 +25,8 @@ import { NotificationService } from '../shared/notification-service/notification
 import { DatePipe } from '@angular/common';
 
 import { MetadataUpdateService } from './editcontrol/metadataupdate.service';
+import { LandingConstants } from '../landing/constants';
+import { EditStatusService } from '../landing/editcontrol/editstatus.service';
 
 declare var _initAutoTracker: Function;
 
@@ -110,7 +112,8 @@ export class LandingComponent implements OnInit, OnChanges {
     process: any[];
     isCopied: boolean = false;
     distdownload: string = '';
-    serviceApi: string = '';
+    mdApi: string = '';
+    mdServer: string = '';
     private files: TreeNode[] = [];
     pdrApi: string = '';
     isResultAvailable: boolean = true;
@@ -127,6 +130,8 @@ export class LandingComponent implements OnInit, OnChanges {
     editEnabled: boolean;
     doiUrl: string = null;
     recordType: string = "";
+    editMode: string;
+    EDIT_MODES: any;
 
     // passed in by the parent component:
     @Input() record: NerdmRes = null;
@@ -150,15 +155,48 @@ export class LandingComponent implements OnInit, OnChanges {
         private router: Router,
         @Inject(APP_ID) private appId: string,
         public mdupdsvc: MetadataUpdateService,
-        private gaService: GoogleAnalyticsService) {
+        private edstatsvc: EditStatusService,
+        private gaService: GoogleAnalyticsService) 
+    {
         this.editEnabled = cfg.get("editEnabled", false) as boolean;
+
+        this.EDIT_MODES = LandingConstants.editModes;
+
+        this.edstatsvc.watchEditMode((editMode) => {
+          this.editMode = editMode;
+        });
     }
 
-    ngOnInit() { }
+    ngOnInit() { 
+      // console.log('this.record', this.record);
+    }
 
     ngOnChanges() {
         if (!this.ediid && this.recordLoaded())
             this.useMetadata();  // initialize internal component data based on metadata
+    }
+
+    /**
+     * Return mdAPI
+     */
+    getMdAPI()
+    {
+        if(this.edstatsvc.editingEnabled()){
+            this.mdApi = this.cfg.get("locations.mdService", "/unconfigured");
+
+            if (this.mdApi.slice(-1) != '/') this.mdApi += '/';
+            this.mdApi += this.record['ediid'];
+        }else{
+            this.mdApi = this.cfg.get("mdAPI", "/unconfigured");
+
+            if (this.mdApi.slice(-1) != '/') this.mdApi += '/';
+            if (this.mdApi.search("/rmm/") < 0)
+                this.mdApi += this.record['ediid'];
+            else
+                this.mdApi += "records?@id=" + this.record['@id'];
+        }
+
+        return this.mdApi;
     }
 
     /**
@@ -345,7 +383,7 @@ export class LandingComponent implements OnInit, OnChanges {
             return "this version";
         let id: string = "View...";
         if (relinfo.refid) id = relinfo.refid;
-        if (this.mdupdsvc.editMode)
+        if (this.editMode == this.EDIT_MODES.EDIT_MODE)
             return id;
         else
             return this.renderRelAsLink(relinfo, id);

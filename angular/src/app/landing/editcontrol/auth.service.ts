@@ -16,7 +16,7 @@ import { UserDetails } from './interfaces';
  * This interface is used for receiving this information from the customization 
  * web service. 
  */
-interface AuthInfo {
+export interface AuthInfo {
     /**
      * the user identifier
      */
@@ -59,6 +59,14 @@ export abstract class AuthService {
     get userID() { return this.userDetails.userId; }
 
     set userDetails(userDetails: UserDetails) { this._authcred.userDetails = userDetails; }
+
+    /**
+     * Store the error message returned from authorizeEditing
+     */
+    protected _errorMessage: string;
+
+    set errorMessage(errMsg: string) { this._errorMessage = errMsg; }
+    get errorMessage() { return this._errorMessage; }
 
     /**
      * construct the service
@@ -164,7 +172,6 @@ export class WebAuthService extends AuthService {
         return new Observable<CustomizationService>(subscriber => {
             this.getAuthorization(resid).subscribe(
                 (info) => {
-                    console.log("getAuthorization returns:", info);
                     this._authcred.token = info.token;
                     this._authcred.userDetails = _deepCopy(info.userDetails);
                     if (info.token) {
@@ -177,6 +184,7 @@ export class WebAuthService extends AuthService {
                     }
                     else if (info.userDetails.userId) {
                         // the user is authenticated but not authorized
+                        this.errorMessage = info.errorMessage;
                         subscriber.next(null);
                         subscriber.complete();
                     }
@@ -185,9 +193,9 @@ export class WebAuthService extends AuthService {
                         subscriber.complete();
 
                         // redirect the browser to the authentication server
-                        if (!nologin)
+                        if (!nologin){
                             this.loginUser();
-                        else {
+                        }else {
                             subscriber.next(null);
                             subscriber.complete();
                         }
@@ -196,9 +204,9 @@ export class WebAuthService extends AuthService {
                 (err) => {
                     if (err['statusCode'] && err.statusCode == 401) {
                         // User needs to log in; redirect the browser to the authentication server
-                        if (!nologin)
+                        if (!nologin){
                             this.loginUser();
-                        else {
+                        }else {
                             subscriber.next(null);
                             subscriber.complete();
                         }
@@ -223,7 +231,8 @@ export class WebAuthService extends AuthService {
      */
     public getAuthorization(resid: string): Observable<AuthInfo> {
         let url = this.endpoint + "auth/_perm/" + resid;
-        // wrap the HttpClient Observable with our own so that we can manage errors
+        // console.log(url);
+          // wrap the HttpClient Observable with our own so that we can manage errors
         return new Observable<AuthInfo>(subscriber => {
             this.httpcli.get(url, { headers: { 'Content-Type': 'application/json' } }).subscribe(
                 (creds) => {
@@ -231,6 +240,7 @@ export class WebAuthService extends AuthService {
                     subscriber.next(creds as AuthInfo);
                 },
                 (httperr) => {
+                  console.log('httperr', httperr);
                     if (httperr.status == 404) {
                         // URL returned Not Found
                         subscriber.next({} as AuthInfo);
@@ -267,8 +277,8 @@ export class WebAuthService extends AuthService {
      *                  successful.  
      */
     public loginUser(): void {
-        let redirectURL = this.endpoint + "saml/login?redirectTo=" + window.location.href + "?editmode=true";
-        console.log("Redirecting to " + redirectURL + " to authenticate user");
+        let redirectURL = this.endpoint + "saml/login?redirectTo=" + window.location.href + "?editEnabled=true";
+        // console.log("Redirecting to " + redirectURL + " to authenticate user");
         window.location.assign(redirectURL);
     }
 }
@@ -340,10 +350,11 @@ export class MockAuthService extends AuthService {
      */
     public authorizeEditing(resid: string, nologin: boolean = false): Observable<CustomizationService> {
         // simulate logging in with a redirect 
-        if (!this.userDetails) this.loginUser();
-        if (!this.resdata[resid])
+        if (!this.userDetails){ 
+          this.loginUser();}
+        if (!this.resdata[resid]){
             return of<CustomizationService>(null);
-
+        }
         return of<CustomizationService>(new InMemCustomizationService(this.resdata[resid]));
     }
 
@@ -352,7 +363,7 @@ export class MockAuthService extends AuthService {
      * the current landing page.  
      */
     public loginUser(): void {
-        let redirectURL = window.location.href + "?editmode=true";
+        let redirectURL = window.location.href + "?editEnabled=true";
         console.log("Bypassing authentication service; redirecting directly to " + redirectURL);
         if (!this._authcred.userDetails){
             this._authcred = {

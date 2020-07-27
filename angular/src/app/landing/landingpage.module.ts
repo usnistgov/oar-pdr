@@ -10,6 +10,7 @@ import { MetadataUpdateService } from './editcontrol/metadataupdate.service';
 import { EditControlModule } from './editcontrol/editcontrol.module';
 import { ToolsModule } from './tools/tools.module';
 import { CitationModule } from './citation/citation.module';
+import { DoneComponent } from './done/done.component';
 
 /**
  * A module supporting the complete display of landing page content associated with 
@@ -26,7 +27,7 @@ import { CitationModule } from './citation/citation.module';
         CitationModule
     ],
     declarations: [
-        LandingPageComponent,
+        LandingPageComponent, DoneComponent
     ],
     providers: [
         MetadataUpdateService, DatePipe
