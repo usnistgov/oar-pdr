@@ -141,6 +141,7 @@ class LockedFile(object):
                     pass
             self._fo = None
             self._writing = None
+            raise
 
         if fcntl:
             lock_type = (self._writing and fcntl.LOCK_EX) or fcntl.LOCK_SH
