@@ -22,3 +22,6 @@ class PublishSystem(PDRSystem):
     def subsystem_name(self): return _PRESSUBSYSNAME
     @property
     def subsystem_abbrev(self): return _PRESSUBSYSABBREV
+
+sys = PublishSystem()
+

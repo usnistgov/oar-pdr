@@ -223,7 +223,7 @@ class TestPreservationUpdateBagger(test.TestCase):
         try:
             self.bagr.ensure_metadata_preparation()
             self.fail("Failed to prevent to ensure previous publication")
-        except midas.PreservationStateException as ex:
+        except midas.PreservationStateError as ex:
             self.assertTrue(not ex.aipexists)
         
     def test_ensure_metadata_preparation_withupdate(self):
@@ -276,7 +276,7 @@ class TestPreservationUpdateBagger(test.TestCase):
             shutil.copyfile(srczip, destzip)
             self.bagr.ensure_metadata_preparation()
             self.fail("Failed to prevent represerving without update")
-        except midas.PreservationStateException as ex:
+        except midas.PreservationStateError as ex:
             self.assertTrue(ex.aipexists)
         finally:
             if os.path.exists(destzip):

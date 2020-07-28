@@ -1,0 +1,76 @@
+auth_key: secret
+sip_type:
+  midas3:
+    common:
+       id_minter:
+          shoulder_for_edi: mds1
+
+    pubserv:
+       bagger:
+         relative_to_indir: True
+         bag_builder:
+           validate_id: "mds[012]\\w"
+         enrich_refs: true
+         doi_resolver:
+           app_name: "NIST Public Data Repository: pubserver (oar-pdr)"
+           app_version: "1.3+"
+           app_url: https://data.nist.gov/
+           email: datasupport@nist.gov
+
+       customization_service:
+         updatable_properties:
+           - _editStatus
+           - title
+           - authors
+           - description
+           - subject
+           - topic
+           - theme
+           - keyword
+         merge_convention: midas1
+         service_endpoint: http://customizationapi:8085/customization/pdr/lp/draft/
+         auth_key: csecret
+
+    preserv:
+       bagparent_dir: "_preserv"
+       logfile: preservation.log
+       bagger:
+         relative_to_indir: True
+         bag_builder:
+           init_bag_info:
+             Source-Organization:
+               - "National Institute of Standards and Technology"
+             Contact-Name: "NIST Data Support Team"
+             Contact-Email: ["datasupport@nist.gov"]
+             Organization-Address: ["100 Bureau Dr., Gaithersburg, MD 20899"]
+             NIST-BagIt-Version: "0.4"
+             NIST-POD-Metadata: "metadata/pod.json"
+             NIST-NERDm-Metadata: "metadata/nerdm.json"
+             Multibag-Version: "0.4"
+             Multibag-Tag-Directory: "multibag"
+           finalize:
+             trim_folders: true
+             confirm_checksums: false
+           validate_id: "mds[01]\\w"
+         enrich_refs: true
+         doi_resolver:
+           app_name: "NIST Public Data Repository: preserver (oar-pdr)"
+           app_version: "1.3+"
+           app_url: https://data.nist.gov/
+           email: datasupport@nist.gov
+       multibag:
+         max_headbag_size:  5000000
+         max_bag_size:    200000000
+         verify_complete: true
+         replace:         true
+
+    mdserv:
+       prepub_nerd_dir: /data/pdr/nrdserv
+       postpub_nerd_dir: /data/pdr/stage/_nerdm
+       logfile: mdserver.log
+       logdir:  /var/log/mdserver
+       download_base_url: https://localhost/midas/
+       base_path: /
+       update:
+         update_auth_key:  SECRET
+

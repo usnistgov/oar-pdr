@@ -1,0 +1,12 @@
+logfile: mdserver.log
+loglevel: DEBUG
+
+review_dir:  /data/review
+upload_dir:  /data/upload
+mimetype_files:
+  - /etc/nginx/mime.types
+prepub_nerd_dir: /data/pdr/nrdserv
+postpub_nerd_dir: /data/pdr/stage/_nerdm
+download_base_url: https://localhost:9092/midas/
+update:
+  update_auth_key:  MDSECRET

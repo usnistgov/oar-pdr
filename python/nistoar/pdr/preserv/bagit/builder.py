@@ -258,7 +258,7 @@ class BagBuilder(PreservationSystem):
         # builder
         if not logfile:
             logfile = self._logname
-        if not os.path.isabs(logfile):
+        if not os.path.isabs(logfile) and not logfile.startswith(self.bagdir):
             logfile = os.path.join(self.bagdir, logfile)
         for hdlr in self.log.handlers:
             if self._handles_logfile(hdlr, logfile):
@@ -269,7 +269,7 @@ class BagBuilder(PreservationSystem):
         # return True if the handler is set to write to a file with the given
         # name
         return hasattr(handler,'stream') and hasattr(handler.stream, 'name') \
-               and handler.stream.name == logfilepath
+               and os.path.abspath(handler.stream.name) == os.path.abspath(logfilepath)
 
     def _get_log_handler(self, logfilepath):
         if logfilepath not in self._log_handlers:
@@ -301,6 +301,7 @@ class BagBuilder(PreservationSystem):
             logfile = os.path.join(self.bagdir, logfile)
         if self.logfile_is_connected(logfile):
             return
+
         hdlr = self._get_log_handler(logfile)
         hdlr.setLevel(loglevel)
         
@@ -318,8 +319,8 @@ class BagBuilder(PreservationSystem):
                              bag's top directory.  If None, all connected 
                              logfiles will be disconnected.
         """
+        files = self._log_handlers.keys()
         if not logfile:
-            files = self._log_handlers.keys()
             if not files:
                 logfile = os.path.join(self.bagdir, self._logname)
                 if logfile not in self._log_handlers:
@@ -469,7 +470,7 @@ class BagBuilder(PreservationSystem):
             self.update_metadata_for("", {"@context": md['@context']}, message="")
 
         # no other metadata conventions requiring consistency with the ID 
-        # is currently supported.
+        # are currently supported.
         
     def _fix_id(self, id):
         if id is None:
@@ -762,15 +763,19 @@ class BagBuilder(PreservationSystem):
 
     def remove_component(self, destpath, trimcolls=False):
         """
-        remove a data file or subcollection and all its associated metadata 
-        from the bag.  
+        remove a data file, subcollection, or other component along with all 
+        its associated metadata from the bag.  The component is either identified
+        via file path within the collection or its (relative) identifier; in the 
+        latter case (used to remove non-file components), the identifier must be
+        prefixed with "@id:".
 
         Note that it is not an error to attempt to remove a component that 
         does not actually exist in the bag; rather, a warning is written to 
         the log.  
 
         :param destpath  str:  the root-collection-relative path to the data
-                               file
+                               file or component @id identifier; if identifier, 
+                               it should be prefixed with "@id:"
         :parm trimcolls bool:  If True, remove any ancestor subcollections that
                                become empty as a result of the removal.
         :return bool:  True if anything was found and removed.  
@@ -1216,7 +1221,9 @@ class BagBuilder(PreservationSystem):
         afile = self.bag.annotations_file_for(destpath)
         if os.path.exists(afile):
             if message is None:
-                message = "Updating annoations for " + destpath
+                message = "Updating annotations for " + destpath
+                if not destpath:
+                    message += "resource-level metadata"
             orig = read_nerd(afile)
             mdata = self._update_md(orig, mdata)
         else:
@@ -1372,7 +1379,6 @@ class BagBuilder(PreservationSystem):
         else:
             mdata = self.define_component(destpath, comptype)
             self._add_mediatype(destpath, mdata)
-            self.replace_metadata_for(destpath, mdata,'')
 
         if message is None:
             message = "adding file metadata for "+destpath
@@ -1388,7 +1394,7 @@ class BagBuilder(PreservationSystem):
                                data subdirectory; this value will be set as the 
                                'filepath' property.  If None, the source file's
                                base filename will be used.
-        :param bool examine:   if False, restrict the examination to determining,
+        :param bool examine:   if False, restrict the examination to determining
                                the size and format (based on file extension 
                                only) of the file; do not calculate the checksum
                                nor evaluate the contents of the file.
@@ -1413,7 +1419,7 @@ class BagBuilder(PreservationSystem):
         # determine the component type
         if not comptype:
             comptype = self._determine_file_comp_type(srcpath)
-            
+
         if asupdate and self.bag and os.path.exists(self.bag.nerd_file_for(destpath)):
             # TODO: what if comptype has changed?
             mdata = self.bag.nerd_metadata_for(destpath, True)
@@ -1557,10 +1563,10 @@ class BagBuilder(PreservationSystem):
                        components[i].get('@id','').startswith("cmps/"):
                         components[i]['filepath'] = components[i]['@id'][5:]
                     if savefilemd and 'filepath' not in components[i]:
-                        msg = "File component missing 'filepath' property"
+                        emsg = "File component missing 'filepath' property"
                         if '@id' in components[i]:
-                            msg += " ({0})".format(components[i]['@id'])
-                        self.log.warning(msg)
+                            emsg += " ({0})".format(components[i]['@id'])
+                        self.log.warning(emsg)
                     else:
                         if savefilemd:
                             # update instead of replace (this sets defaults
@@ -1597,6 +1603,8 @@ class BagBuilder(PreservationSystem):
 
     def add_ds_pod(self, pod, convert=True, savefilemd=True):
         """
+        Note: deprecated; consider using update_from_pod()
+
         add the dataset-level POD data to the bag.  This will also, by default, 
         be converted to NERD metadata and added as well.  
 
@@ -1646,6 +1654,171 @@ class BagBuilder(PreservationSystem):
                 del nerd['@id']
             self.add_res_nerd(nerd, savefilemd)
         return nerd
+
+    def save_pod(self, pod):
+        """
+        accept the given dictionary as the latest POD description of the SIP and 
+        save it into the bag.  This checks to make sure that identifier in the POD 
+        record matches the EDI-ID (midasid) for this bag; however, it does not update
+        the NERDm metadata accordingly (see update_pod() and update_to_pod()).
+
+        :param dict|string pod:  the POD record to save into the bag.  If value is 
+                                 a string, it is taken as a local file path to the 
+                                 JSON-serialized POD record.
+        """
+        self.log.info("Saving POD data")
+        self.ensure_bag_structure()
+
+        outfile = os.path.join(self.bagdir, "metadata", POD_FILENAME)
+        if not isinstance(pod, Mapping):
+            filecopy(pod, outfile)
+        else:
+            self._write_json(pod, outfile)
+
+    def update_from_pod(self, pod, updfilemd=True, savepod=True, force=False):
+        """
+        update the NERDm metadata to match data from the given POD record.  
+
+        This method assumes that the given POD is the source of truth about the 
+        dataset; that is, it converts the POD record to NERDm and merges it with 
+        any existing NERDm metadata.  If updfilemd=True, file and subcollection 
+        components are updated to match the POD: any new file distributions will be 
+        added as files, existing files not represented in the POD will be removed,
+        and empty subcollections will be removed.
+
+        Generally, either add_ds_pod() or update_from_pod() should be used, not both.
+
+        :param dict|string pod:  the new POD record to sync to.  If the value is 
+                                 a string, it is taken as a local file path to the 
+                                 JSON-serialized POD record.
+        :param bool updfilemd:   if false, do not update the component metadata to 
+                                 match the given POD.
+        :param bool savepod:     if true, the given POD will be saved into the bag.
+        :param bool force:       if True, apply all parts of the POD, regardless of 
+                                 whether the POD has changed.  
+        :param bool sharert:     if True, short sleeps will be inserted into the 
+                                 processing that allow other threads to have time 
+                                 for processing.  If this is a big dataset with many 
+                                 files and updfilemd=True, this method can take a while 
+                                 to complete.  
+        :returns dict:  a listing of the filepaths for things that were changed, segregated
+                        into three properties, "updated", "added", and "deleted".  An
+                        empty filepath (either in updated or added) indicates that the 
+                        resource-level metadata was updated.  
+        """
+        if not isinstance(pod, (str, unicode, Mapping)):
+            raise NERDTypeError("dict", type(pod), "POD Dataset")
+        self.ensure_bag_structure()
+
+        podfile = None
+        if not isinstance(pod, Mapping):
+            podfile = pod
+            pod = read_pod(podfile)
+
+        self.log.info("Syncing metadata to new POD...");
+
+        # convert the POD record
+        useid = self.id
+        if useid is None:
+            useid = ""
+
+        # convert the POD to NERDm
+        nerd = self.pod2nrd.convert_data(pod, useid)
+        if not useid and '@id' in nerd:
+            self.log.warning("ARK identifier not set for resource")
+            del nerd['@id']
+        if len(nerd.get('description',[])) < 1:
+            nerd['description'] = [""]
+
+        # load the old POD metadata for comparison
+        def map_pod(podmd):
+            # create a special map of the pod to allow for comparisons
+            out = { "": OrderedDict(podmd) }  # does a shallow copy
+            if 'distribution' not in podmd:
+                return out
+
+            dists = podmd.get('distribution', [])
+            out[""]['distribution'] = []
+
+            for dist in dists:
+                if 'downloadURL' in dist:
+                    out[dist['downloadURL']] = dist
+                else:
+                    out[""]['distribution'].append(dist);
+
+            return out;
+        
+        oldpod = map_pod(self._bag.pod_record())
+        newpod = map_pod(pod)
+        changes = { "updated": [], "added": [], "deleted": [] }
+        chtype = "updated"
+        if not os.path.exists(self._bag.nerd_file_for("")):
+            chtype = "added"
+
+        # if the resource level metadata has changed, update the corresponding
+        # NERDm metadata.
+        if force or dict(oldpod[""]) != dict(newpod[""]):
+            self.add_res_nerd(nerd, False,
+                       message="Updating resource-level due to change in POD");
+            changes[chtype].append("")
+
+        if updfilemd:
+            # examine the POD metadata for each distribution; if it appears to 
+            # have changed, update the corresponding NERDm metadata.
+
+            def map_comps_by_dlurl(comps):
+                out = OrderedDict()
+                for comp in comps:
+                    if 'downloadURL' in comp:
+                        out[comp['downloadURL']] = comp
+                return out;
+
+            newcomps = map_comps_by_dlurl(nerd.get('components',[]))
+            for key in newpod:
+                if not key:
+                    continue
+                if force or dict(newpod[key]) != dict(oldpod.get(key, {})):
+                    # this distribution's pod description has changed; save it
+                    if 'filepath' not in newcomps[key]:
+                        # shouldn't happen
+                        self.log.warning("Unable to update component for downloadURL="+
+                                         key+": missing filepath")
+                        continue
+
+                    chtype = "updated"
+                    if not os.path.exists(self._bag.nerd_file_for(newcomps[key]['filepath'])):
+                        chtype = "added"
+                    self.update_metadata_for(newcomps[key]['filepath'], newcomps[key])
+                    changes[chtype].append(newcomps[key]['filepath'])
+
+            if changes["updated"] or changes["added"]:
+                self.log.info("Updated {} components due to POD distribution changes"
+                              .format(len(changes['updated']) + len(changes['added'])))
+
+            # Now delete components that are not described in the POD
+            oldcomps = \
+                map_comps_by_dlurl(self._bag.nerdm_record(False).get('components',[]))
+            for key in oldcomps:
+                if key not in newpod:
+                    comp = oldcomps.get(key,{})
+                    if 'filepath' not in comp:
+                        self.log.warning("Problem matching components for downloadURL="+
+                                         key+": old component is missing filepath")
+                        continue
+                    
+                    if comp:
+                        self.log.info("Deleting component with filepath=" +
+                                      comp['filepath'])
+                        self.remove_component(comp['filepath'], True);
+                        changes["deleted"].append(comp['filepath'])
+
+            if not any([len(v) for v in changes.values()]):
+                self.log.info("No changes detected in distributions: no components updated.")
+
+        if savepod:
+            self.save_pod(podfile or pod)
+
+        return changes
 
 
     def finalize_bag(self, finalcfg=None, stop_logging=False):

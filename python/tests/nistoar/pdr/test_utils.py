@@ -1,4 +1,4 @@
-import os, sys, pdb, json, subprocess, threading, time
+import os, sys, pdb, json, subprocess, threading, time, logging
 import unittest as test
 
 from nistoar.testing import *
@@ -8,6 +8,44 @@ testdir = os.path.dirname(os.path.abspath(__file__))
 testdatadir = os.path.join(testdir, 'data')
 testdatadir3 = os.path.join(testdir, 'preserv', 'data')
 testdatadir2 = os.path.join(testdatadir3, 'simplesip')
+
+loghdlr = None
+rootlog = None
+def setUpModule():
+    global loghdlr
+    global rootlog
+    ensure_tmpdir()
+    rootlog = logging.getLogger()
+    loghdlr = logging.FileHandler(os.path.join(tmpdir(),"test_utils.log"))
+    loghdlr.setLevel(logging.INFO)
+    rootlog.addHandler(loghdlr)
+
+def tearDownModule():
+    global loghdlr
+    if loghdlr:
+        if rootlog:
+            rootlog.removeHandler(loghdlr)
+        loghdlr = None
+    rmtmpdir()
+
+loghdlr = None
+rootlog = None
+def setUpModule():
+    global loghdlr
+    global rootlog
+    ensure_tmpdir()
+    rootlog = logging.getLogger()
+    loghdlr = logging.FileHandler(os.path.join(tmpdir(),"test_utils.log"))
+    loghdlr.setLevel(logging.INFO)
+    rootlog.addHandler(loghdlr)
+
+def tearDownModule():
+    global loghdlr
+    if loghdlr:
+        if rootlog:
+            rootlog.removeHandler(loghdlr)
+        loghdlr = None
+    rmtmpdir()
 
 class TestMimeTypeLoading(test.TestCase):
 

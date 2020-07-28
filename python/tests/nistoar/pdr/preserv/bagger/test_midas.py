@@ -191,7 +191,7 @@ class TestMIDASMetadataBaggerMixed(test.TestCase):
         data = self.bagr.resmd
         self.assertNotIn('@id', data)
         self.assertEqual(data['ediid'], self.midasid)
-        self.assertEqual(data['doi'], "doi:10.18434/T4SW26")
+        self.assertEqual(data['doi'], "doi:10.80443/pdrut-T4SW26")
         self.assertNotIn('foo', data)
         self.assertEqual(len(data['components']), 7)
         self.assertEqual(data['components'][0]['@type'][0], 'nrd:Hidden')
@@ -224,7 +224,7 @@ class TestMIDASMetadataBaggerMixed(test.TestCase):
         data = self.bagr.bagbldr.bag.nerd_metadata_for("")
         self.assertEqual(data['@id'], "ark:/88434/mds00hw91v")
         self.assertEqual(data['ediid'], self.midasid)
-        self.assertEqual(data['doi'], "doi:10.18434/T4SW26")
+        self.assertEqual(data['doi'], "doi:10.80443/pdrut-T4SW26")
         self.assertEqual(data['foo'], 'bar')
         self.assertEqual(len(data['components']), 1)
         self.assertEqual(data['components'][0]['@type'][0], 'nrd:Hidden')
@@ -507,6 +507,52 @@ class TestMIDASMetadataBaggerMixed(test.TestCase):
                          os.path.join(uplsip, "trial3/trial3a.json"))
         self.assertEqual(len(datafiles), 5)
 
+    def test_baggermd_file_for(self):
+        self.bagr.ensure_base_bag()
+        self.assertEqual(self.bagr.baggermd_file_for(''),
+                         os.path.join(self.bagr.bagbldr.bag.metadata_dir,"__bagger.json"))
+
+        self.bagr.ensure_res_metadata()
+        self.assertEqual(self.bagr.baggermd_file_for("trial1.json"), 
+                         os.path.join(self.bagr.bagbldr.bag.metadata_dir,"trial1.json",
+                                      "__bagger.json"))
+
+    def test_baggermd_for(self):
+        self.bagr.ensure_base_bag()
+        bgmdf = os.path.join(self.bagr.bagbldr.bag.metadata_dir,"__bagger.json")
+        self.assertFalse(os.path.exists(bgmdf))
+
+        self.assertEqual(self.bagr.baggermd_for(''), {})
+        self.assertFalse(os.path.exists(bgmdf))
+        with open(bgmdf, 'w') as fd:
+            json.dump({"a": 1, "b": 2}, fd)
+        self.assertEqual(self.bagr.baggermd_for(''), {"a": 1, "b": 2})
+
+    def test_update_bagger_metadata_for(self):
+        self.bagr.ensure_base_bag()
+        bgmdf = os.path.join(self.bagr.bagbldr.bag.metadata_dir,"__bagger.json")
+        self.assertFalse(os.path.exists(bgmdf))
+
+        self.bagr.update_bagger_metadata_for('', {})
+        self.assertTrue(os.path.exists(bgmdf))
+        with open(bgmdf) as fd:
+            saved = json.load(fd)
+        self.assertEqual(saved, {})
+
+        self.bagr.update_bagger_metadata_for('', {"a": 1, "b": 2})
+        with open(bgmdf) as fd:
+            saved = json.load(fd)
+        self.assertEqual(saved, {"a": 1, "b": 2})
+
+        self.bagr.update_bagger_metadata_for('', {"c": 8, "b": 5})
+        with open(bgmdf) as fd:
+            saved = json.load(fd)
+        self.assertEqual(saved, {"a": 1, "b": 5, "c": 8})
+
+        
+        
+
+
 class TestMIDASMetadataBaggerReview(test.TestCase):
 
     testsip = os.path.join(datadir, "midassip")
@@ -654,7 +700,7 @@ class TestMIDASMetadataBaggerReview(test.TestCase):
         self.assertIn('_status', fmd)
         self.assertNotIn('checksum', fmd)
 
-        # self.bagr.fileExaminer.thread.run()
+        # self.bagr.fileExaminer.run()
         self.bagr.fileExaminer.launch()
         self.bagr.fileExaminer.thread.join()
         fmd = self.bagr.bagbldr.bag.nerd_metadata_for("trial2.json")

@@ -32,12 +32,12 @@ This package is organized into subpackages
 from ..exceptions import *
 from ... import pdr as _pdr
 from .. import PDRSystem
-from ..utils import read_nerd, read_pod, write_json 
+from ..utils import read_nerd, read_pod, write_json, read_json
 
 _PRESSYSNAME = _pdr._PDRSYSNAME
 _PRESSYSABBREV = _pdr._PDRSYSABBREV
 _PRESSUBSYSNAME = "Preservation"
-_PRESSUBSYSABBREV = _PRESSUBSYSNAME
+_PRESSUBSYSABBREV = "Preserv"
 
 class PreservationSystem(PDRSystem):
     """
@@ -98,7 +98,7 @@ class AIPValidationError(PreservationException):
     pass
 
 
-class PreservationStateException(PreservationException):
+class PreservationStateError(PreservationException):
     """
     An indication that the client's preservation request does not match the 
     state of the SIP/AIP.  In particular, the client either requested an initial
@@ -109,14 +109,14 @@ class PreservationStateException(PreservationException):
     is True, then the AIP already exists (i.e. SIP has already been preserved
     once already).  
     """
-    def __init__(self, message, aipexists):
+    def __init__(self, message, aipexists=None):
         """
         create the exception
         :param str message:     the message describing mismatched state
         :param bool aipexists:  the true current state of the AIP where True
                                 indicates that the AIP already exists.
         """
-        super(PreservationStateException, self).__init__(message)
+        super(PreservationStateError, self).__init__(message)
         self.aipexists = aipexists
 
 class CorruptedBagError(PDRException):

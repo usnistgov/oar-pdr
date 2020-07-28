@@ -24,7 +24,7 @@ from ....id import PDRMinter, NIST_ARK_NAAN
 from ... import def_merge_etcdir, utils
 from .. import (SIPDirectoryError, SIPDirectoryNotFound, AIPValidationError,
                 ConfigurationException, StateException, PODError,
-                PreservationStateException)
+                PreservationStateError)
 from .prepupd import UpdatePrepService
 from .datachecker import DataChecker
 from nistoar.nerdm.merge import MergerFactory
@@ -747,9 +747,12 @@ class MIDASMetadataBagger(SIPBagger):
                 md = self.bagger.bagbldr.describe_data_file(location, filepath,
                                                             True, ct)
                 if '_status' in md:
+                    md['_status'] = "updated"
+                md = self.bagger.bagbldr.update_metadata_for(filepath, md, ct,
+                                   "async metadata update for file, "+filepath)
+                if '_status' in md:
                     del md['_status']
-                self.bagger.bagbldr.replace_metadata_for(filepath, md,
-                                "async metadata update for file, "+filepath)
+                    self.bagger.bagbldr.replace_metadata_for(filepath, md, '')
                 self.bagger._mark_filepath_synced(filepath)
 
             except Exception as ex:
@@ -975,7 +978,7 @@ class PreservationBagger(SIPBagger):
                 else:
                     msg = self.name + \
                           ": AIP with this ID already exists in repository"
-                raise PreservationStateException(msg, not self.asupdate)
+                raise PreservationStateError(msg, not self.asupdate)
 
         mdbagger.prepare(nodata=True)
         self.datafiles = mdbagger.datafiles

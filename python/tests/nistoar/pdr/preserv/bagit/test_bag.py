@@ -65,6 +65,12 @@ class TestNISTBag(test.TestCase):
         self.assertEqual(self.bag.pod_file(),
                          os.path.join(bagdir, "metadata", "pod.json"))
 
+    def test_pod_record(self):
+        pod = self.bag.pod_record()
+        self.assertNotEqual(len(pod), 0)  # not empty
+        self.assertEqual(pod["@type"], "dcat:Dataset")
+        self.assertIn("identifier", pod)
+
     def test_nerd_file_for(self):
         self.assertEqual(self.bag.nerd_file_for(""),
                          os.path.join(bagdir, "metadata", "nerdm.json"))
@@ -131,7 +137,11 @@ class TestNISTBag(test.TestCase):
 
         nerd = self.bag.nerd_metadata_for("", True)
         self.assertIn('authors', nerd)
-        self.assertTrue(nerd['title'].startswith("OptSortSph: Sorting "))
+
+        # new default merge policy; title can be overridden!
+        #
+        # self.assertTrue(nerd['title'].startswith("OptSortSph: Sorting "))
+        self.assertEqual(nerd['title'], "A much better title")
         self.assertEqual(nerd['ediid'], "3A1EE2F169DD3B8CE0531A570681DB5D1491")
         self.assertIn('foo', nerd)
         self.assertIn(nerd['foo'], "bar")
@@ -147,7 +157,10 @@ class TestNISTBag(test.TestCase):
         
         nerd = self.bag.nerd_metadata_for("trial1.json", True)
         self.assertIn("previewURL", nerd)
-        self.assertTrue(nerd['title'].startswith("JSON version of"))
+        # new default merge policy; title can be overridden!
+        #
+        # self.assertTrue(nerd['title'].startswith("JSON version of"))
+        self.assertEqual(nerd['title'], "a better title")
         self.assertTrue(nerd['previewURL'].endswith("trial1.json/preview"))
         
     def test_nerdm_component(self):
@@ -213,7 +226,10 @@ class TestNISTBag(test.TestCase):
         nerd = self.bag.nerdm_record(True)
 
         self.assertIn('authors', nerd)
-        self.assertTrue(nerd['title'].startswith("OptSortSph: Sorting "))
+        # new default merge policy; title can be overridden!
+        #
+        # self.assertTrue(nerd['title'].startswith("OptSortSph: Sorting "))
+        self.assertEqual(nerd['title'], "A much better title")
         self.assertEqual(nerd['ediid'], "3A1EE2F169DD3B8CE0531A570681DB5D1491")
 
         self.assertEqual(nerd['authors'][0]['givenName'], "Kevin")

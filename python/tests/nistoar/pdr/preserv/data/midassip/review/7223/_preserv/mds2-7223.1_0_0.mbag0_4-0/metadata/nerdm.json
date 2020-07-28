@@ -1,0 +1,71 @@
+{
+    "_schema": "https://data.nist.gov/od/dm/nerdm-schema/v0.2#",
+    "@context": [
+        "https://data.nist.gov/od/dm/nerdm-pub-context.jsonld",
+        {
+            "@base": "ark:/88434/mds2-7223"
+        }
+    ],
+    "@type": [
+        "nrdp:PublicDataResource",
+        "dcat:Dataset"
+    ],
+    "_extensionSchemas": [
+        "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/PublicDataResource"
+    ],
+    "@id": "ark:/88434/mds2-7223",
+    "ediid": "ark:/88434/mds2-7223",
+    "version": "1.0.0",
+    "title": "Editable Landing Pages for the PDR",
+    "contactPoint": {
+        "fn": "Raymond Plante",
+        "hasEmail": "mailto:raymond.plante@nist.gov"
+    },
+    "modified": "2020-05-12",
+    "landingPage": "https://testdata.nist.gov/od/id/mds2-7223",
+    "description": [
+        "NIST Researchers publishing data via MIDAS can now edit associated metadata directly on the landing page.  This record enables testing of this feature."
+    ],
+    "keyword": [
+        "data publishing",
+        "testing"
+    ],
+    "theme": [
+        "Fire: Fire detection",
+        "Information Technology: Data and informatics",
+        "Electronics"
+    ],
+    "topic": [
+        {
+            "@type": "Concept",
+            "scheme": "https://data.nist.gov/od/dm/nist-themes/v1.1",
+            "tag": "Fire: Fire detection"
+        },
+        {
+            "@type": "Concept",
+            "scheme": "https://data.nist.gov/od/dm/nist-themes/v1.1",
+            "tag": "Information Technology: Data and informatics"
+        },
+        {
+            "@type": "Concept",
+            "scheme": "https://data.nist.gov/od/dm/nist-themes/v1.1",
+            "tag": "Electronics"
+        }
+    ],
+    "accessLevel": "public",
+    "license": "https://www.nist.gov/open/license",
+    "components": [],
+    "publisher": {
+        "name": "National Institute of Standards and Technology",
+        "@type": "org:Organization"
+    },
+    "language": [
+        "en"
+    ],
+    "bureauCode": [
+        "006:55"
+    ],
+    "programCode": [
+        "006:052"
+    ]
+}

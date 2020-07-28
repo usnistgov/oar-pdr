@@ -71,6 +71,19 @@ def load_from_file(configfile):
 
 LOG_FORMAT = "%(asctime)s %(name)s %(levelname)s: %(message)s"
 _log_handler = None
+global_logdir = None         # this is set when configure_log() is run
+global_logfile = None        # this is set when configure_log() is run
+_log_levels_byname = {
+    "NOTSET":   logging.NOTSET,
+    "DEBUG":    logging.DEBUG,
+    "NORM":     15,
+    "NORMAL":   15,
+    "INFO":     logging.INFO,
+    "WARN":     logging.WARNING,
+    "WARNING":  logging.WARNING,
+    "ERROR":    logging.ERROR,
+    "CRITICAL": logging.CRITICAL
+}
 
 def configure_log(logfile=None, level=None, format=None, config=None,
                   addstderr=False):
@@ -78,6 +91,9 @@ def configure_log(logfile=None, level=None, format=None, config=None,
     configure the log file, setting the output file, threshold, and format
     as necessary.  These can be provided explicitly or provided via the 
     configuration; the former takes precedence.  
+
+    If this is called a second time, it will first close the previously opened logfile, 
+    reconfigure the logging to given inputs.  
 
     :param logfile str:  the path to the output logfile.  If given as a relative
                          path, it will be assumed that it is relative to a 
@@ -92,6 +108,8 @@ def configure_log(logfile=None, level=None, format=None, config=None,
                          provided as a str, it is the formatting string for 
                          messages sent to standard error.
     """
+    global global_logdir
+    global global_logfile
     if not config:
         config = {}
     if not logfile:
@@ -101,24 +119,45 @@ def configure_log(logfile=None, level=None, format=None, config=None,
         # The log directory can be set either from the configuration or via
         # the OAR_LOG_DIR environment variable; the former takes precedence
         deflogdir = os.path.join(oar_home,'var','logs')
-        logdir = config.get('logdir', os.environ.get('OAR_LOG_DIR', deflogdir))
-        if not os.path.exists(logdir):
-            logdir = "/tmp"
+        logdir = config.get('logdir', determine_default_logdir())
+        global_logdir = logdir
         logfile = os.path.join(logdir, logfile)
+        if not os.path.exists(os.path.dirname(logfile)):
+            os.makedirs(os.path.dirname(logfile))
+    global_logfile = logfile
     
     if level is None:
         level = config.get('loglevel', logging.DEBUG)
+    if not isinstance(level, int):
+        level = _log_levels_byname.get(str(level), level)
+    if not isinstance(level, int):
+        raise ConfigurationException("Unrecognized loglevel value: "+str(level))
+    
     if not format:
         format = config.get('logformat', LOG_FORMAT)
     frmtr = logging.Formatter(format)
 
     global _log_handler
+    rootlogger = logging.getLogger()
+    if _log_handler:
+        rootlogger.removeHandler(_log_handler)
+        if hasattr(_log_handler, 'close'):
+            _log_handler.close()
+        _log_handler = None
     _log_handler = logging.FileHandler(logfile)
     _log_handler.setLevel(level)
     _log_handler.setFormatter(frmtr)
-    rootlogger = logging.getLogger()
     rootlogger.addHandler(_log_handler)
-    rootlogger.setLevel(logging.DEBUG)
+    rootlogger.setLevel(logging.DEBUG-1)
+
+    # jsonmerge is way too chatty at the DEBUG level
+    if level >= logging.DEBUG:
+        jmlevel = max(level, logging.INFO)
+        logging.getLogger("jsonmerge").setLevel(jmlevel)
+
+    # filelock is one level too chatty
+    if level >= logging.DEBUG:
+        logging.getLogger("filelock").setLevel(level+10)
 
     if addstderr:
         if not isinstance(addstderr, (str, unicode)):
@@ -128,6 +167,12 @@ def configure_log(logfile=None, level=None, format=None, config=None,
         handler.setFormatter(logging.Formatter(addstderr))
         rootlogger.addHandler(handler)
         rootlogger.error("FYI: Writing log messages to %s",logfile)
+
+def determine_default_logdir():
+    out = os.environ.get('OAR_LOG_DIR', os.path.join(oar_home, 'var', 'logs'))
+    if not os.path.exists(out):
+        out = "/tmp"
+    return out
         
 class ConfigService(object):
     """

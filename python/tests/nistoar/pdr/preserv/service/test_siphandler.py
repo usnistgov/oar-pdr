@@ -59,7 +59,7 @@ class TestMIDASSIPHandler(test.TestCase):
             "store_dir": self.store,
             "staging_dir": self.stagedir,
             "review_dir":  self.revdir,
-            "mdbag_dir":   self.mdserv,
+            "metadata_bags_dir":   self.mdserv,
             "status_manager": { "cachedir": self.statusdir },
             "logdir": self.workdir,
             "bagparent_dir": "_preserv",

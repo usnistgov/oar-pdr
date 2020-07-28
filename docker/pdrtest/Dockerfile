@@ -32,6 +32,7 @@ RUN set -ex; \
     wget -O /usr/local/bin/gosu.asc \
 "https://github.com/tianon/gosu/releases/download/$GOSU_VERSION/gosu-$arch.asc";\
     export GNUPGHOME="$(mktemp -d)"; \
+    echo "disable-ipv6" >> "$GNUPGHOME/dirmngr.conf"; \
     gpg --keyserver hkp://ha.pool.sks-keyservers.net:80 \
          --recv-keys B42F6819007F00F88E364FD4036A9C25BF357DD4; \
     gpg --batch --verify /usr/local/bin/gosu.asc /usr/local/bin/gosu; \

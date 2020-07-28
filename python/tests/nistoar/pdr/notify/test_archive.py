@@ -2,7 +2,7 @@ import os, sys, pdb, json
 import unittest as test
 
 from nistoar.testing import *
-from nistoar.pdr.notify.base import Notice
+from nistoar.pdr.notify.base import Notice, NotificationError
 import nistoar.pdr.notify.archive as notify
 from nistoar.pdr.exceptions import ConfigurationException
 
@@ -88,6 +88,10 @@ class TestArchiver(test.TestCase):
         self.assertEqual(lines[-2], '}\n')
         self.assertEqual(lines[-1], ',\n')
         self.assertGreater(len(lines), 10)
+
+    def test_notification_error(self):
+        with self.assertRaises(NotificationError):
+            raise NotificationError("Testing")
 
 class TestArchiveTarget(test.TestCase):
     

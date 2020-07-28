@@ -6,6 +6,7 @@ from nistoar.pdr.preserv.service import service as serv
 from nistoar.pdr.preserv.service import status
 from nistoar.pdr.preserv.service.siphandler import SIPHandler, MIDASSIPHandler
 from nistoar.pdr.exceptions import PDRException, StateException
+from nistoar.pdr import config
 
 # datadir = nistoar/preserv/data
 datadir = os.path.join( os.path.dirname(os.path.dirname(__file__)), "data" )
@@ -17,9 +18,12 @@ def setUpModule():
     global rootlog
     ensure_tmpdir()
     rootlog = logging.getLogger()
-    loghdlr = logging.FileHandler(os.path.join(tmpdir(),"test_siphandler.log"))
+    loghdlr = logging.FileHandler(os.path.join(tmpdir(),"test_pressvc.log"))
     loghdlr.setLevel(logging.INFO)
     rootlog.addHandler(loghdlr)
+    config._log_handler = loghdlr
+    config.global_logdir = tmpdir()
+    config.global_logfile = os.path.join(tmpdir(),"test_pressvc.log")
 
 def tearDownModule():
     global loghdlr
@@ -133,14 +137,13 @@ class TestThreadedPreservationService(test.TestCase):
                         "hndlr wrong type for 'midas': "+str(type(hndlr)))
         self.assertIsNotNone(hndlr.notifier)
 
-        self.assertEqual(hndlr.cfg['working_dir'],
-                         os.path.join(self.workdir,'preserv'))
+        self.assertEqual(hndlr.cfg['working_dir'], self.workdir)
         self.assertEqual(hndlr.cfg['store_dir'], self.store)
         self.assertEqual(hndlr.cfg['id_registry_dir'], self.workdir)
         self.assertEqual(hndlr.cfg['review_dir'], self.revdir)
         self.assertEqual(hndlr.cfg['id_minter']['shoulder_for_edi'], 'edi0')
         self.assertEqual(hndlr.cfg['bagparent_dir'], '_preserv')
-        self.assertEqual(hndlr.cfg['mdbag_dir'], self.mdserv)
+        self.assertEqual(hndlr.cfg['metadata_bags_dir'], self.mdserv)
         self.assertEqual(hndlr.cfg['bagger']['relative_to_indir'], True)
         self.assertEqual(hndlr.cfg['status_manager']['cachedir'], self.statusdir)
 
@@ -228,29 +231,29 @@ class TestThreadedPreservationService(test.TestCase):
                    t.join()
 
     def test_status2(self):
-        stat = self.svc.status("FFFFFFFFFF")
+        stat = self.svc.status("FFFFFFFFFF", "midas")
         self.assertEqual(stat['state'], status.NOT_FOUND)
         self.assertTrue(not os.path.exists(os.path.join(self.statusdir,
                                                         "FFFFFFFFFF.json")))
 
         os.mkdir(os.path.join(self.revdir, "FFFFFFFFFF"))
         stat = self.svc.status("FFFFFFFFFF")
-        self.assertEqual(stat['state'], status.NOT_READY)
+        self.assertEqual(stat['state'], status.FAILED)
         self.assertTrue(not os.path.exists(os.path.join(self.statusdir,
                                                         "FFFFFFFFFF.json")))
         
     def test_status(self):
-        stat = self.svc.status(self.midasid)
+        stat = self.svc.status(self.midasid, "midas")
         self.assertEqual(stat['state'], status.READY)
         self.assertTrue(not os.path.exists(os.path.join(self.statusdir,
                                                         self.midasid+".json")))
         
         hndlr = self.svc._make_handler(self.midasid, 'midas')
         hndlr.set_state(status.IN_PROGRESS)
-        stat = self.svc.status(self.midasid)
+        stat = self.svc.status(self.midasid, "midas")
         self.assertEqual(stat['state'], status.IN_PROGRESS)
         hndlr._status.reset()
-        stat = self.svc.status(self.midasid)
+        stat = self.svc.status(self.midasid, "midas")
         self.assertEqual(stat['state'], status.PENDING)
 
         with self.assertRaises(serv.RerequestException):
@@ -263,19 +266,19 @@ class TestThreadedPreservationService(test.TestCase):
             for t in threading.enumerate():
                 if t.name == self.midasid:
                    t.join()
-        stat = self.svc.status(self.midasid)
+        stat = self.svc.status(self.midasid, "midas")
         self.assertEqual(stat['state'], status.SUCCESSFUL)
 
         # if there is no longer a cached status file, ensure that we notice
         # when there is bag in the store dir
         os.remove(os.path.join(self.statusdir, self.midasid+'.json'))
-        stat = self.svc.status(self.midasid)
+        stat = self.svc.status(self.midasid, "midas")
         self.assertEqual(stat['state'], status.SUCCESSFUL)
         self.assertIn('orgotten', stat['message'])
 
     def test_status_badtype(self):
         stat = self.svc.status(self.midasid, 'goob')
-        self.assertEqual(stat['state'], status.NOT_READY)
+        self.assertEqual(stat['state'], status.FAILED)
 
     def test_requests(self):
         reqs = self.svc.requests()
@@ -327,7 +330,9 @@ class TestMultiprocPreservationService(test.TestCase):
         self.config = {
             "working_dir": self.workdir,
             "store_dir": self.store,
+            "logdir": self.troot,
             "id_registry_dir": self.workdir,
+            "announce_subproc": False,
             "sip_type": {
                 "midas": {
                     "common": {
@@ -341,7 +346,7 @@ class TestMultiprocPreservationService(test.TestCase):
                         "bagparent_dir": "_preserv",
                         "staging_dir": self.stagedir,
                         "bagger": baggercfg,
-                        "status_manager": { "cachedir": self.statusdir },
+                        "status_manager": { "cachedir": self.statusdir }
                     }
                 }
             }
@@ -349,7 +354,7 @@ class TestMultiprocPreservationService(test.TestCase):
 
         try:
             self.svc = serv.MultiprocPreservationService(self.config)
-        except Exception, e:
+        except Exception as e:
             self.tearDown()
             raise
 
@@ -364,33 +369,62 @@ class TestMultiprocPreservationService(test.TestCase):
 
         self.assertEqual(self.svc.siptypes, ['midas'])
 
-# multiproc is not working
-#
-#    def test_launch_sync(self):
-#        hndlr = self.svc._make_handler(self.midasid, 'midas')
-#        self.assertEqual(hndlr.state, status.FORGOTTEN)
-#        self.assertTrue(hndlr.isready())
-#         self.assertEqual(hndlr.state, status.READY)
-# 
-#         cpid = 0
-#         try:
-#             pdb.set_trace()
-#             (stat, cpid) = self.svc._launch_handler(hndlr, 10)
-#             self.assertEqual(stat['state'], status.SUCCESSFUL)
-#         finally:
-#             if cpid > 0:
-#                 try:
-#                     os.waitpid(cpid, 0)
-#                 except OSError, e:
-#                     time.sleep(2)
-# 
-#         self.assertEqual(hndlr.state, status.SUCCESSFUL)
-#         self.assertTrue(os.path.exists(os.path.join(self.store,
-#                                            self.midasid+".1_0.mbag0_4-0.zip")))
-#         self.assertTrue(os.path.exists(os.path.join(self.store,
-#                                     self.midasid+".1_0.mbag0_4-0.zip.sha256")))
-        
+    def test_launch_sync(self):
+        hndlr = self.svc._make_handler(self.midasid, 'midas')
+        self.assertEqual(hndlr.state, status.FORGOTTEN)
+        self.assertTrue(hndlr.isready())
+        self.assertEqual(hndlr.state, status.READY)
 
+        proc = None
+        (stat, proc) = self.svc._launch_handler(hndlr, 10, True)
+        self.assertIsNone(proc)
+        self.assertEqual(stat['state'], status.SUCCESSFUL)
+
+        self.assertEqual(hndlr.state, status.SUCCESSFUL)
+        self.assertTrue(os.path.exists(os.path.join(self.store,
+                                           self.midasid+".1_0_0.mbag0_4-0.zip")))
+        self.assertTrue(os.path.exists(os.path.join(self.store,
+                                    self.midasid+".1_0_0.mbag0_4-0.zip.sha256")))
+        
+    def test_launch_async(self):
+        hndlr = self.svc._make_handler(self.midasid, 'midas')
+        self.assertEqual(hndlr.state, status.FORGOTTEN)
+        self.assertTrue(hndlr.isready())
+        self.assertEqual(hndlr.state, status.READY)
+
+        proc = None
+        (stat, proc) = self.svc._launch_handler(hndlr, 10)
+        self.assertNotEqual(stat, status.FAILED,
+                            "Unexpected handler failure: "+hndlr.status['message'])
+        self.assertIsNotNone(proc)
+        proc.join()
+        self.assertFalse(proc.is_alive())
+        self.assertEqual(stat['state'], status.SUCCESSFUL,
+                         "Unsuccessful state: %s: %s" % (stat['state'], stat['message']))
+
+        self.assertEqual(hndlr.state, status.SUCCESSFUL)
+        self.assertTrue(os.path.exists(os.path.join(self.store,
+                                           self.midasid+".1_0_0.mbag0_4-0.zip")))
+        self.assertTrue(os.path.exists(os.path.join(self.store,
+                                    self.midasid+".1_0_0.mbag0_4-0.zip.sha256")))
+        
+    def test_subprocess_handle(self):
+        try: 
+            serv._subprocess_handle(self.svc.cfg, "SUBDIR/pres.log", self.midasid, "MIDAS-SIP", False, 5)
+            
+            hndlr = self.svc._make_handler(self.midasid, 'midas')
+            self.assertEqual(hndlr.state, status.SUCCESSFUL)
+            self.assertTrue(os.path.exists(os.path.join(self.store,
+                                               self.midasid+".1_0_0.mbag0_4-0.zip")))
+            self.assertTrue(os.path.exists(os.path.join(self.store,
+                                        self.midasid+".1_0_0.mbag0_4-0.zip.sha256")))
+
+            plog = os.path.join(self.troot, "preservation.log")
+            self.assertTrue(os.path.isfile(plog), "Missing preservation logfile: "+plog)
+        finally:
+            rootlogger = logging.getLogger()
+            rootlogger.removeHandler(config._log_handler)
+            setUpModule()
 
 
 if __name__ == '__main__':

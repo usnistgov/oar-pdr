@@ -1,10 +1,4 @@
 {
-    "hash": {
-        "value": "d155d99281ace123351a311084cd8e34edda6a9afcddd76eb039bad479595ec9",
-        "algorithm": {
-            "tag": "sha256"
-        }
-    },
     "description": "First trial of experiment",
     "filepath": "trial1.json",
     "title": "JSON version of the Mathematica notebook",

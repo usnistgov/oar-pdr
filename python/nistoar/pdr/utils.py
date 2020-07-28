@@ -94,10 +94,10 @@ class LockedFile(object):
 
     def __init__(self, filename, mode='r'):
         self.mode = mode
+        self._fo = None
         self._fname = filename
         self._thread_lock = self._get_thread_lock_for(filename)
         self._writing = None
-        self._fo = None
 
     @property
     def fo(self):

@@ -1,0 +1,42 @@
+2020-07-06 17:24:54,635 NORMAL: Created bag with name, mds2-7223
+2020-07-06 17:24:54,644 NORMAL: setting resource ID: ark:/88434/mds2-7223
+2020-07-06 17:24:54,653 NORMAL: Updating resource-level metadata: 
+2020-07-06 17:24:54,654 INFO: Refreshing previously established working bag
+2020-07-06 17:24:54,657 INFO: Syncing metadata to new POD...
+2020-07-06 17:24:54,673 NORMAL: Updating resource-level due to change in POD
+2020-07-06 17:24:54,675 NORMAL: Creating new ChecksumFile: RegistryFederationFigure.pptx.sha256
+2020-07-06 17:24:54,675 NORMAL: Creating new DataFile: res-md.xsd
+2020-07-06 17:24:54,676 NORMAL: Creating new ChecksumFile: res-md.xsd.sha256
+2020-07-06 17:24:54,677 NORMAL: Creating new DataFile: RegistryFederationFigure.pptx
+2020-07-06 17:24:54,677 INFO: Updated 5 components due to POD distribution changes
+2020-07-06 17:24:54,678 INFO: Saving POD data
+2020-07-06 17:24:54,789 NORMAL: Updating DataFile metadata: res-md.xsd
+2020-07-06 17:24:54,790 NORMAL: Updating ChecksumFile metadata: RegistryFederationFigure.pptx.sha256
+2020-07-06 17:24:54,792 NORMAL: Updating ChecksumFile metadata: res-md.xsd.sha256
+2020-07-06 17:24:54,793 NORMAL: Updating DataFile metadata: RegistryFederationFigure.pptx
+2020-07-06 17:24:54,793 INFO: Running file examiner synchronously
+2020-07-06 17:24:54,795 NORMAL: async metadata update for file, RegistryFederationFigure.pptx
+2020-07-06 17:24:54,796 NORMAL: async metadata update for file, res-md.xsd.sha256
+2020-07-06 17:24:54,798 NORMAL: async metadata update for file, RegistryFederationFigure.pptx.sha256
+2020-07-06 17:24:54,800 NORMAL: async metadata update for file, res-md.xsd
+2020-07-06 17:24:55,683 INFO: Syncing metadata to new POD...
+2020-07-06 17:24:55,700 NORMAL: Updating resource-level due to change in POD
+2020-07-06 17:24:55,701 INFO: Updated 1 components due to POD distribution changes
+2020-07-06 17:24:55,702 INFO: Saving POD data
+2020-07-06 17:24:55,714 NORMAL: Updating valid=True in metadata for ChecksumFile RegistryFederationFigure.pptx.sha256
+2020-07-06 17:24:55,715 NORMAL: Updating valid=True in metadata for ChecksumFile res-md.xsd.sha256
+2020-07-06 17:24:55,716 NORMAL: Preparing for preservation of 1.0.0 by setting version, version history
+2020-07-06 17:24:55,981 INFO: ID not published previously; will start afresh
+2020-07-06 17:24:56,010 NORMAL: final metadata update for file, RegistryFederationFigure.pptx.sha256
+2020-07-06 17:24:56,011 NORMAL: Added data file at RegistryFederationFigure.pptx.sha256
+2020-07-06 17:24:56,012 NORMAL: final metadata update for file, RegistryFederationFigure.pptx
+2020-07-06 17:24:56,012 NORMAL: Added data file at RegistryFederationFigure.pptx
+2020-07-06 17:24:56,013 NORMAL: final metadata update for file, res-md.xsd.sha256
+2020-07-06 17:24:56,014 NORMAL: Added data file at res-md.xsd.sha256
+2020-07-06 17:24:56,015 NORMAL: final metadata update for file, res-md.xsd
+2020-07-06 17:24:56,016 NORMAL: Added data file at res-md.xsd
+2020-07-06 17:24:56,020 NORMAL: Merging in annotations into all metdata
+2020-07-06 17:24:56,033 ERROR: Implementation of Bag finalization is not complete!
+2020-07-06 17:24:56,033 ERROR: Implementation of Bag finalization is not complete!
+2020-07-06 17:24:56,033 INFO: Bag does not include PREMIS and ORE files
+2020-07-06 17:24:56,033 INFO: Bag does not include PREMIS and ORE files

@@ -237,6 +237,7 @@ class TestBuilder2(test.TestCase):
         self.assertIsNone(self.bag.id)
         self.assertIsNone(self.bag.ediid)
         self.assertTrue(self.bag.logfile_is_connected())
+        self.assertTrue(os.path.exists(os.path.join(self.bag.bagdir,"preserv.log")))
 
     def test_ensure_bag_structure(self):
         self.assertTrue(not os.path.exists(self.bag.bagdir))
@@ -1275,6 +1276,126 @@ class TestBuilder2(test.TestCase):
         self.assertEquals(data['filepath'], "trial3/trial3a.json")
         self.assertEquals(data['@id'], "cmps/trial3/trial3a.json")
 
+    def test_save_pod(self):
+        podfile = os.path.join(datadir, "_pod.json")
+        with open(podfile) as fd:
+            poddata = json.load(fd)
+
+        self.assertTrue(not os.path.exists(self.bag.bagdir))
+        self.bag.save_pod(poddata)
+        self.assertTrue(os.path.exists(self.bag.bagdir))
+        self.assertTrue(os.path.exists(self.bag.bag.pod_file()))
+        self.assertTrue(not os.path.exists(self.bag.bag.nerd_file_for("")))
+
+        with open(self.bag.bag.pod_file()) as fd:
+            saved = json.load(fd)
+        self.assertEqual(poddata, saved)
+        
+    def test_save_pod_from_file(self):
+        podfile = os.path.join(datadir, "_pod.json")
+        self.assertTrue(not os.path.exists(self.bag.bagdir))
+        
+        self.bag.save_pod(podfile)
+        self.assertTrue(os.path.exists(self.bag.bagdir))
+        self.assertTrue(os.path.exists(self.bag.bag.pod_file()))
+        self.assertTrue(not os.path.exists(self.bag.bag.nerd_file_for("")))
+
+        with open(podfile) as fd:
+            srcdata = fd.read()
+        with open(self.bag.bag.pod_file()) as fd:
+            saved = fd.read()
+        self.assertEqual(srcdata, saved)
+
+    def test_update_from_pod(self):
+        podfile = os.path.join(datadir, "_pod.json")
+        with open(podfile) as fd:
+            poddata = json.load(fd)
+        self.assertTrue(not os.path.exists(self.bag.bagdir))
+
+        self.bag.update_from_pod(poddata, False, False)
+        self.assertTrue(os.path.exists(self.bag.bagdir))
+        self.assertTrue(not os.path.exists(self.bag.bag.pod_file()))
+        self.assertTrue(os.path.exists(self.bag.bag.nerd_file_for("")))
+
+        with open(self.bag.bag.nerd_file_for("")) as fd:
+            saved = json.load(fd)
+        self.assertEqual(poddata['identifier'], saved['ediid'])
+        self.assertTrue(saved['title'])
+        self.assertTrue(not os.path.exists(self.bag.bag.nerd_file_for("trial1.json")))
+
+        # because we did not save the pod, this altered value will get overridden
+        saved['title'] = "Goobed!"
+        with open(self.bag.bag.nerd_file_for(""), 'w') as fd:
+            json.dump(saved, fd)
+
+        self.bag.update_from_pod(poddata, True, False)
+        self.assertTrue(not os.path.exists(self.bag.bag.pod_file()))
+        self.assertTrue(os.path.exists(self.bag.bag.nerd_file_for("")))
+        self.assertTrue(os.path.exists(self.bag.bag.nerd_file_for("trial1.json")))
+        
+        with open(self.bag.bag.nerd_file_for("")) as fd:
+            saved = json.load(fd)
+        self.assertEqual(poddata['identifier'], saved['ediid'])
+        self.assertNotEqual(saved['title'], "Goobed!")
+
+        # Because updfilemd=False, this will not get overridden
+        with open(self.bag.bag.nerd_file_for("trial1.json")) as fd:
+            saved = json.load(fd, object_pairs_hook=OrderedDict)
+        saved['title'] = "Goobed!"
+        with open(self.bag.bag.nerd_file_for("trial1.json"), 'w') as fd:
+            json.dump(saved, fd)
+
+        self.bag.update_from_pod(poddata, False, True)
+        self.assertTrue(os.path.exists(self.bag.bag.pod_file()))
+        self.assertTrue(os.path.exists(self.bag.bag.nerd_file_for("")))
+        self.assertTrue(os.path.exists(self.bag.bag.nerd_file_for("trial1.json")))
+
+        with open(self.bag.bag.nerd_file_for("trial1.json")) as fd:
+            saved = json.load(fd)
+        self.assertEqual(saved['title'], "Goobed!")
+
+        # Because the POD has not changed, the trial1 metadata is not overridden
+        self.bag.update_from_pod(poddata, True, True)
+        with open(self.bag.bag.nerd_file_for("trial1.json")) as fd:
+            saved = json.load(fd)
+        self.assertEqual(saved['title'], "Goobed!")
+        self.bag.update_from_pod(poddata, True, True, force=True)
+        with open(self.bag.bag.nerd_file_for("trial1.json")) as fd:
+            saved = json.load(fd)
+        self.assertNotEqual(saved['title'], "Goobed!")
+
+        with open(self.bag.bag.pod_file()) as fd:
+            saved = json.load(fd, object_pairs_hook=OrderedDict)
+        saved['distribution'][0]['title'] = "Gurned!"
+        with open(self.bag.bag.pod_file(), 'w') as fd:
+            json.dump(saved, fd)
+
+        self.bag.update_from_pod(poddata, True, True)
+        with open(self.bag.bag.nerd_file_for("trial1.json")) as fd:
+            saved = json.load(fd, object_pairs_hook=OrderedDict)
+        self.assertNotEqual(saved['title'], "Goobed!")
+        self.assertNotEqual(saved['title'], "Gurned!")
+
+        # test deleting componetnts
+        del poddata['distribution'][0]
+        self.bag.update_from_pod(poddata)
+        self.assertTrue(os.path.exists(self.bag.bag.pod_file()))
+        self.assertTrue(os.path.exists(self.bag.bag.nerd_file_for("")))
+        self.assertTrue(not os.path.exists(self.bag.bag.nerd_file_for("trial1.json")))
+        self.assertTrue(os.path.exists(self.bag.bag.nerd_file_for("trial2.json")))
+        
+        # test deleting all componetnts (via non-existent distribution property)
+        del poddata['distribution']
+        self.bag.update_from_pod(poddata)
+        self.assertTrue(os.path.exists(self.bag.bag.pod_file()))
+        self.assertTrue(os.path.exists(self.bag.bag.nerd_file_for("")))
+        self.assertTrue(not os.path.exists(self.bag.bag.nerd_file_for("trial1.json")))
+        self.assertTrue(not os.path.exists(self.bag.bag.nerd_file_for("trial2.json")))
+        self.assertTrue(not os.path.exists(self.bag.bag.nerd_file_for("trial3/trial3a.json")))
+        self.assertTrue(not os.path.exists(self.bag.bag.nerd_file_for("trial3")))
+        
+
+
     def test_trim_metadata_folders(self):
         manfile = os.path.join(self.bag.bagdir, "manifest-sha256.txt")
         datafiles = [ "trial1.json", "trial2.json", 
@@ -1616,7 +1737,7 @@ class TestBuilder2(test.TestCase):
         self.assertEqual(len(oxum), 1)
         oxum = [int(n) for n in oxum[0].split(': ')[1].split('.')]
         self.assertEqual(oxum[1], 14)
-        self.assertEqual(oxum[0], 12152)  # this will change if logging changes
+        self.assertEqual(oxum[0], 12176)  # this will change if logging changes
 
         bagsz = [l for l in lines if "Bag-Size: " in l]
         self.assertEqual(len(bagsz), 1)
@@ -1789,7 +1910,8 @@ class TestBuilder2(test.TestCase):
             nerd = json.load(fd)
         self.assertIn("authors", nerd)
         self.assertIn("foo", nerd)
-        self.assertTrue(nerd["title"].startswith("OptSortSph: Sorting "))
+        self.assertTrue(nerd['title'].startswith("OptSortSph: Sorting "))
+        # self.assertEqual(nerd['title'], "A much better title")
         self.assertEqual(nerd["foo"], "bar")
         self.assertEqual(nerd['authors'][0]['givenName'], "Kevin")
         self.assertEqual(nerd['authors'][1]['givenName'], "Jianming")
@@ -1816,7 +1938,7 @@ class TestBuilder2(test.TestCase):
             nerd = json.load(fd)
         self.assertIn("authors", nerd)
         self.assertIn("foo", nerd)
-        self.assertTrue(nerd["title"].startswith("OptSortSph: Sorting "))
+        self.assertTrue(nerd['title'].startswith("OptSortSph: Sorting "))
         self.assertEqual(nerd["foo"], "bar")
         self.assertEqual(nerd['authors'][0]['givenName'], "Kevin")
         self.assertEqual(nerd['authors'][1]['givenName'], "Jianming")
