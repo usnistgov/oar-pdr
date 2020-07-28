@@ -794,7 +794,13 @@ class MIDAS3PublishingService(PublishSystem):
         if halted is not None:
             raise PreservationStateError("Publishing service processing is (unexpectedly) halted; reason: "
                                          + halted)
-        worker.mark_for_preservation()
+
+        try: 
+            worker.mark_for_preservation()
+        except StateException as ex:
+            # Means dataset is not ready for preserving
+            return { "id": worker.id, "state": ps.NOT_FOUND, "message": str(ex),
+                     "history": stat.get('history',[]) }
 
         if not worker.is_working():
             if async:
@@ -855,8 +861,13 @@ class MIDAS3PublishingService(PublishSystem):
             else:
                 msg = "Publishing service processing is (unexpectedly) halted; reason: " + halted
             raise PreservationStateError(msg)
-        
-        worker.mark_for_preservation(True)
+
+        try:
+            worker.mark_for_preservation(True)
+        except StateException as ex:
+            # Means dataset is not ready for preserving
+            return { "id": worker.id, "state": ps.NOT_FOUND, "message": str(ex),
+                     "history": stat.get('history',[]) }
 
         if not worker.is_working():
             if async:
@@ -958,7 +969,9 @@ class MIDAS3PublishingService(PublishSystem):
 
                 else:
                     # read the pod from the metadata bag, mark it and resubmit it to queue
-                    if not os.path.exists(self.bagger.bagbldr._bag.pod_file()):
+                    if not os.path.exists(self.bagger.bagdir) or \
+                       not self.bagger.bagbldr.bag or            \
+                       not os.path.exists(self.bagger.bagbldr.bag.pod_file()):
                         raise StateException("POD has yet to be submitted for ID="+self.name)
                     pod = self.bagger.bagbldr._bag.pod_record()
                     
