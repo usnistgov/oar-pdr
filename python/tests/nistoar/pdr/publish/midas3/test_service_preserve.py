@@ -13,6 +13,7 @@ from nistoar.pdr.publish.midas3 import service as mdsvc
 from nistoar.pdr.publish.midas3 import extract_sip_config
 from nistoar.pdr.preserv.bagit import builder as bldr
 from nistoar.pdr.preserv.bagit import NISTBag
+from nistoar.pdr import exceptions as pdrexc
 
 from nistoar.pdr.preserv.service import service as _psrvc
 
@@ -178,6 +179,24 @@ class TestMIDAS3PublishingServicePreserve(test.TestCase):
 
         self.assertIsNotNone(self.svc.pressvc)
 
+    def test_preserve_wo_pod(self):
+        bagdir = os.path.join(self.svc.mddir, self.midasid)
+        self.assertTrue(not os.path.exists(bagdir))
+        
+        stat = self.svc.preserve_new(self.midasid, False)
+        self.assertEqual(stat['state'], status.NOT_FOUND)
+        self.assertTrue(not os.path.exists(bagdir))
+
+        self.create_sip()
+        self.assertTrue(os.path.exists(bagdir))
+        stat = self.svc.preserve_new(self.midasid, False)
+        self.assertEqual(stat['state'], status.SUCCESSFUL)
+        self.assertTrue(not os.path.exists(bagdir))
+
+        stat = self.svc.preserve_update(self.midasid, False)
+        self.assertEqual(stat['state'], status.NOT_FOUND)
+        self.assertTrue(not os.path.exists(bagdir))
+        
     def test_preserve_new(self):
         self.create_sip()
         stat = self.svc.preserve_new(self.midasid, False)
