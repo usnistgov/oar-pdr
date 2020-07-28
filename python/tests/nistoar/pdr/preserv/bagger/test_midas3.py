@@ -853,6 +853,24 @@ class TestMIDASMetadataBaggerReview(test.TestCase):
         self.assertIn('checksum', fmd)
 
     def test_finalize_version(self):
+        stagedir = os.path.join(self.bagparent,"stage")
+        if not os.path.isdir(stagedir):
+            os.mkdir(stagedir)
+        nerddir = os.path.join(stagedir, "_nerd")
+        if not os.path.isdir(nerddir):
+            os.mkdir(nerddir)
+        storedir = os.path.join(self.bagparent,"store")
+        if not os.path.isdir(storedir):
+            os.mkdir(storedir)
+        config = {
+            'repo_access': {
+                'headbag_cache': stagedir,
+                'store_dir': storedir,
+            }
+        }
+        self.bagr = midas.MIDASMetadataBagger.fromMIDAS(self.midasid, self.bagparent,
+                                                        self.revdir, config=config)
+
         # because there is data in the review directory, this will be seen
         # as a metadata update.
         inpodfile = os.path.join(self.revdir,"1491","_pod.json")
@@ -865,10 +883,23 @@ class TestMIDASMetadataBaggerReview(test.TestCase):
         self.assertEqual(nerd['version'], "1.0.0+ (in edit)")
 
         nerd = self.bagr.finalize_version()
+        # it's never been published before, so version goes to 1.0.0
+        self.assertEqual(nerd['version'], "1.0.0")
+        self.assertEqual(self.bagr.sip.nerd['version'], "1.0.0")
+        nerd = self.bagr.bagbldr.bag.nerd_metadata_for('', True)
+        self.assertEqual(nerd['version'], "1.0.0")
+
+        # now pretend like it has.
+        self.bagr.bagbldr.update_annotations_for('', {'version': "1.0.0+ (in edit)"})
+        with open(os.path.join(stagedir, self.midasid+".1_0_0.mbag0_4-0.zip"), 'w') as fd:
+            fd.write("\n")
+        self.bagr = midas.MIDASMetadataBagger.fromMIDAS(self.midasid, self.bagparent,
+                                                        self.revdir, config=config)
+        nerd = self.bagr.finalize_version()
         self.assertEqual(nerd['version'], "1.1.0")
-        self.assertEqual(self.bagr.sip.nerd['version'], "1.1.0")
         nerd = self.bagr.bagbldr.bag.nerd_metadata_for('', True)
         self.assertEqual(nerd['version'], "1.1.0")
+        
         
 class TestMIDASMetadataBaggerUpload(test.TestCase):
 
@@ -985,6 +1016,24 @@ class TestMIDASMetadataBaggerUpload(test.TestCase):
         self.assertEqual(len(datafiles), 1)
 
     def test_finalize_version(self):
+        stagedir = os.path.join(self.bagparent,"stage")
+        if not os.path.isdir(stagedir):
+            os.mkdir(stagedir)
+        nerddir = os.path.join(stagedir, "_nerd")
+        if not os.path.isdir(nerddir):
+            os.mkdir(nerddir)
+        storedir = os.path.join(self.bagparent,"store")
+        if not os.path.isdir(storedir):
+            os.mkdir(storedir)
+        config = {
+            'repo_access': {
+                'headbag_cache': stagedir,
+                'store_dir': storedir,
+            }
+        }
+        self.bagr = midas.MIDASMetadataBagger.fromMIDAS(self.midasid, self.bagparent,
+                                                        None, self.upldir, config=config)
+
         inpodfile = os.path.join(self.upldir,"1491","_pod.json")
         self.bagr.apply_pod(inpodfile)
         self.bagr.ensure_data_files(examine="sync")
@@ -996,8 +1045,20 @@ class TestMIDASMetadataBaggerUpload(test.TestCase):
         self.assertEqual(nerd['version'], "1.0.0+ (in edit)")
 
         nerd = self.bagr.finalize_version()
+        self.assertEqual(nerd['version'], "1.0.0")
+        self.assertEqual(self.bagr.sip.nerd['version'], "1.0.0")
+        nerd = self.bagr.bagbldr.bag.nerd_metadata_for('', True)
+        self.assertEqual(nerd['version'], "1.0.0")
+
+        # now pretend like it has.
+        self.bagr.bagbldr.update_annotations_for('', {'version': "1.0.0+ (in edit)"})
+        with open(os.path.join(stagedir, self.midasid+".1_0_0.mbag0_4-0.zip"), 'w') as fd:
+            fd.write("\n")
+        self.bagr = midas.MIDASMetadataBagger.fromMIDAS(self.midasid, self.bagparent,
+                                                        None, self.upldir, config=config)
+        self.bagr.datafiles = {}
+        nerd = self.bagr.finalize_version()
         self.assertEqual(nerd['version'], "1.0.1")
-        self.assertEqual(self.bagr.sip.nerd['version'], "1.0.1")
         nerd = self.bagr.bagbldr.bag.nerd_metadata_for('', True)
         self.assertEqual(nerd['version'], "1.0.1")
         

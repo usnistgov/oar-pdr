@@ -414,6 +414,7 @@ class LatestHandler(Handler):
 
         try:
             if pod.get('accessLevel','public') == "non-public":
+                log.info("Received a non-public POD: scrubbing record from publishing system")
                 self._svc.delete(pod['identifier'])
                 return self.send_ok("Non-public POD Ignored", code=200)
 
