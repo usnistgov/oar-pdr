@@ -85,19 +85,20 @@ class TestMIDAS3PublishingService(test.TestCase):
         self.assertTrue(not os.path.exists(bagdir))
 
         w = self.svc._get_bagging_worker(self.arkid)
-        self.assertTrue(os.path.exists(bagdir))
+        self.assertTrue(not os.path.exists(bagdir))  # not created until request to do something
         self.assertEqual(w.working_pod, os.path.join(self.svc.podqdir,"current","mds2-1491.json"))
         self.assertEqual(w.next_pod, os.path.join(self.svc.podqdir,"next","mds2-1491.json"))
 
     def test_queue_POD(self):
         bagdir = os.path.join(self.svc.mddir, "mds2-1491")
         w = self.svc._get_bagging_worker(self.arkid)
-        self.assertTrue(os.path.exists(bagdir))
+        self.assertTrue(not os.path.exists(bagdir))
         self.assertTrue(not os.path.exists(w.working_pod))
         self.assertTrue(not os.path.exists(w.next_pod))
 
         pod = utils.read_json(os.path.join(w.bagger.sip.revdatadir, "_pod.json"))
         w.queue_POD(pod)
+        self.assertTrue(not os.path.exists(bagdir))
         self.assertTrue(not os.path.exists(w.working_pod))
         self.assertTrue(os.path.exists(w.next_pod))
 
@@ -286,12 +287,13 @@ class TestMIDAS3PublishingService(test.TestCase):
     def test_process_queue(self):
         bagdir = os.path.join(self.svc.mddir, self.midasid)
         w = self.svc._get_bagging_worker(self.midasid)
-        self.assertTrue(os.path.exists(bagdir))
+        self.assertTrue(not os.path.exists(bagdir))
         self.assertTrue(not os.path.exists(w.working_pod))
         self.assertTrue(not os.path.exists(w.next_pod))
 
         pod = utils.read_json(os.path.join(w.bagger.sip.revdatadir, "_pod.json"))
         self.svc.update_ds_with_pod(pod)
+        self.assertTrue(os.path.exists(bagdir))
         pod = utils.read_json(os.path.join(w.bagger.sip.upldatadir, "_pod.json"))
         self.svc.update_ds_with_pod(pod)
 

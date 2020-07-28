@@ -309,7 +309,7 @@ class MIDAS3PublishingService(PublishSystem):
         worker = self._bagging_workers.get(id)
         if not worker:
             bagger = self._create_bagger(id)
-            bagger.prepare()
+            # bagger.prepare()
             worker = self.BaggingWorker(self, id, bagger, self.log)
             self._bagging_workers[id] = worker
         return worker
@@ -355,6 +355,9 @@ class MIDAS3PublishingService(PublishSystem):
             raise ValueError("POD record is missing required identifier")
 
         worker = self._get_bagging_worker(id)
+        if not os.path.exists(worker.bagger.bagdir):
+            # prep the bag synchronously (in case there's an issue)
+            worker.bagger.prepare()
 
         worker.queue_POD(pod)
 
