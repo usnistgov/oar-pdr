@@ -673,6 +673,12 @@ export class DataFilesComponent {
     * Function to download all.
     **/
     downloadFromRoot() {
+        let popupWidth: number = this.mobWidth * 0.8;
+        let left: number = this.mobWidth * 0.1;
+        let screenSize = 'height=880,width=' + popupWidth.toString() + ',top=100,left=' + left.toString();
+        window.open('/datacart/popup', 'DownloadManager', screenSize);
+        this.cancelAllDownload = false;
+        console.log("Downloading...");
         this.cartService.setCurrentCart('landing_popup');
         setTimeout(() => {
             this.cartService.clearTheCart();

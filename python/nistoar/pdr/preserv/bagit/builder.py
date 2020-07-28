@@ -431,6 +431,10 @@ class BagBuilder(PreservationSystem):
 
     def _download_url(self, ediid, destpath):
         path = "/".join(destpath.split(os.sep))
+        arkpfx= "ark:/{0}/".format(ARK_NAAN)
+        if ediid.startswith(arkpfx):
+            # our convention is to omit the "ark:/88434/" prefix
+            ediid = ediid[len(arkpfx):]
         return self._distbase + ediid + '/' + urlencode(path)
 
     def assign_id(self, id, keep_conv=False):
@@ -1092,7 +1096,6 @@ class BagBuilder(PreservationSystem):
                     msg = "Creating new %s: %s" % (comptype, destpath)
 
         mdata = self._update_md(orig, mdata)
-        out = self.bag.nerd_file_for(destpath)
         self._replace_file_metadata(destpath, mdata, msg)
         return mdata
 
@@ -1258,7 +1261,7 @@ class BagBuilder(PreservationSystem):
         add a data file into the bag at the given destination path.  Metadata
         will be created for the file unless the register parameter is False.  
         If a file already exists or is otherwise already registered for that 
-        destination, the file and associated will be over-written.  
+        destination, the file and associated metadata will be over-written.  
 
         Metadata is created for the file using the register_data_file() method,
         and by default the file will be examined for extractable metadata.  
@@ -1337,9 +1340,10 @@ class BagBuilder(PreservationSystem):
     def register_data_file(self, destpath, srcpath=None, examine=True,
                            comptype=None, message=None):
         """
-        create and install metadata into the bag for the given file to be 
+        create and install metadata into the bag for the given file to be (newly)
         added at the given destination path.  The file itself is not actually 
-        inserted into the bag (see add_data_file()).  
+        inserted into the bag (see add_data_file()).  This will completely 
+        overwrite any metadata for this file already registered.
 
         :param str destpath:   the desired path for the file relative to the 
                                root of the dataset.
@@ -1363,7 +1367,8 @@ class BagBuilder(PreservationSystem):
             comptype = self._determine_file_comp_type(srcpath or destpath)
 
         if srcpath:
-            mdata = self.describe_data_file(srcpath, destpath, examine, comptype)
+            mdata = self.describe_data_file(srcpath, destpath, examine,
+                                            comptype, False)
         else:
             mdata = self.define_component(destpath, comptype)
             self._add_mediatype(destpath, mdata)
@@ -1374,7 +1379,7 @@ class BagBuilder(PreservationSystem):
         return self.replace_metadata_for(destpath, mdata, message)
 
     def describe_data_file(self, srcpath, destpath=None, examine=True,
-                           comptype=None):
+                           comptype=None, asupdate=True):
         """
         examine the given file and return a metadata description of it.  
 
@@ -1394,6 +1399,13 @@ class BagBuilder(PreservationSystem):
                                component.  If not specified, the type will be
                                discerned by examining the file (defaulting 
                                to "DataFile").  
+        :param bool asupdate:  if True (default), the metadata generated will 
+                               by considered an update to the previously saved 
+                               metadata (if it exists) capturing changes due to 
+                               changes in the datafile itself; if False, the metadata
+                               returned will not take into account previous metadata
+                               as if assuming the file is being examined for the first
+                               time.  
         """
         if not destpath:
             destpath = os.path.basename(srcpath)
@@ -1402,7 +1414,11 @@ class BagBuilder(PreservationSystem):
         if not comptype:
             comptype = self._determine_file_comp_type(srcpath)
             
-        mdata = self._create_init_md_for(destpath, comptype)
+        if asupdate and self.bag and os.path.exists(self.bag.nerd_file_for(destpath)):
+            # TODO: what if comptype has changed?
+            mdata = self.bag.nerd_metadata_for(destpath, True)
+        else:
+            mdata = self._create_init_md_for(destpath, comptype)
 
         try:
             self._add_file_specs(srcpath, mdata)
@@ -1467,12 +1483,18 @@ class BagBuilder(PreservationSystem):
             'hash': hash
         }
     def _add_mediatype(self, dfile, mdata, config=None):
+        defmt = 'application/octet-stream'
+        if 'mediaType' in mdata and mdata['mediaType'] != defmt:
+            # we will not override the mediaType if it's already set to something
+            # specific
+            return 
+
         if not self._mimetypes:
             mtfile = pkg_resources.resource_filename('nistoar.pdr',
                                                      'data/mime.types')
             self._mimetypes = build_mime_type_map([mtfile])
         mdata['mediaType'] = self._mimetypes.get(os.path.splitext(dfile)[1][1:],
-                                                 'application/octet-stream')
+                                                 defmt)
 
     def _add_extracted_metadata(self, datafile, mdata, config=None):
         # deeper extraction not yet supported.
