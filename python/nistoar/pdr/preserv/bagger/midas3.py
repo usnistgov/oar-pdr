@@ -1140,7 +1140,7 @@ class MIDASMetadataBagger(SIPBagger):
         if self.datafiles is None:
             self.ensure_res_metadata()
         if not self.sip.nerd:
-           self.sip.nerd = bag.nerdm_record(True)
+           self.sip.nerd = self.bagbldr.bag.nerdm_record(True)
 
         # determine the type of update under way
         uptype = _NO_UPDATE
@@ -1162,28 +1162,31 @@ class MIDASMetadataBagger(SIPBagger):
             if prepr:
                 lastver = prepr.latest_version(["bag-cache", "bag-store", "repo"])
             if lastver == "0":
-                lastver = matched.group(1)
-            
-            ver = [int(f) for f in lastver.split('.')]
-            for i in range(len(ver), 3):
-                ver.append(0)
+                self.log.debug("finalizing version: dataset has never been published; setting version to 1.0.0")
+                self.sip.nerd['version'] = "1.0.0"
 
-            if len(self.datafiles) > 0:
-                # there're data files waiting to be included; it's a data update
-                uptype = _DATA_UPDATE
-                ver[1] += 1
-                ver[2] = 0
-                umsg = "incrementing for updated data files"
-                self.log.debug("data files being updated: %s", self.datafiles.keys())
             else:
-                # otherwise, this is a metadata update, which increments the
-                # third field.
-                uptype = _MDATA_UPDATE
-                ver[2] += 1
-                umsg = "incrementing for updated metadata only"
+                # it's been published before under version=lastver
+                ver = [int(f) for f in lastver.split('.')]
+                for i in range(len(ver), 3):
+                    ver.append(0)
 
-            self.sip.nerd['version'] = ".".join([str(v) for v in ver])
-            self.log.info("finalizing version: %s: %s", umsg, self.sip.nerd['version'])
+                if len(self.datafiles) > 0:
+                    # there're data files waiting to be included; it's a data update
+                    uptype = _DATA_UPDATE
+                    ver[1] += 1
+                    ver[2] = 0
+                    umsg = "incrementing for updated data files"
+                    self.log.debug("data files being updated: %s", self.datafiles.keys())
+                else:
+                    # otherwise, this is a metadata update, which increments the
+                    # third field.
+                    uptype = _MDATA_UPDATE
+                    ver[2] += 1
+                    umsg = "incrementing for updated metadata only"
+
+                self.sip.nerd['version'] = ".".join([str(v) for v in ver])
+                self.log.info("finalizing version: %s: %s", umsg, self.sip.nerd['version'])
 
         else:
             self.log.info("finalizing version: sticking with explicitly set value: %s",
