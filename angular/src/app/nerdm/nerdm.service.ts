@@ -189,7 +189,6 @@ export class RemoteWebMetadataService extends MetadataService {
         url += id;
         console.log("Pulling NERDm record from metadata service: " + url);
         let out = this.webclient.get(url) as Observable<NerdmRes>;
-
         return out.pipe(
             rxjsop.map<NerdmRes, NerdmRes>(data => {
                 // strip out MongoDb search artifacts

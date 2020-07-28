@@ -94,7 +94,27 @@ def _setlibs():
             raise RuntimeError("merge config dir ({0}) not found (do you need to run 'git submodule'?)".format(libdir))
 
         pdr.def_merge_etcdir = libdir
-        
+
+import re
+_clstrt_re = re.compile(r".*<class '")
+_clend_re = re.compile(r"'>.*")
+def list_test_cases(suites):
+    out = []
+    if isinstance(suites, (list, unittest.TestSuite)):
+        for test in suites:
+            for tc in list_test_cases(test):
+                if len(out) == 0 or out[-1] != tc:
+                    out.append(tc)
+    elif isinstance(suites, unittest.TestCase):
+        out.append(_clend_re.sub('', _clstrt_re.sub('', str(type(suites)))))
+    else:
+        out.append(str(suites))
+
+    return out
+
+def print_test_cases(suites):
+    for tc in list_test_cases(suites):
+        print(tc)
 
 if __name__ == '__main__':
     _setlibs()
@@ -109,6 +129,9 @@ if __name__ == '__main__':
         if mod.startswith('nistoar'):
             mod = "tests."+mod
         suites.append( discover(mod) )
+
+#    print_test_cases(suites)
+#    sys.exit(0)
 
     result = unittest.TextTestRunner().run(unittest.TestSuite(suites))
     if result.testsRun == 0:

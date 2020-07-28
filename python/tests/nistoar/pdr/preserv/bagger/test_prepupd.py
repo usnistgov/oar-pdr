@@ -136,7 +136,7 @@ class TestSimServices(test.TestCase):
 
         data = cli.get_json("ABCDEFG/_aip/_v/latest/_head")
         self.assertEqual(data, {"aipid": "ABCDEFG", "sinceVersion": "2", 
-                                "contentLength": 10075, "multibagSequence" : 4,
+                                "contentLength": 10083, "multibagSequence" : 4,
                                 "multibagProfileVersion" : "0.4",
                                 "contentType": "application/zip",
                                 "serialization": "zip",
@@ -145,7 +145,7 @@ class TestSimServices(test.TestCase):
 
         data = cli.get_json("ABCDEFG/_aip/_v/1/_head")
         self.assertEqual(data, {"aipid": "ABCDEFG", "sinceVersion": "1", 
-                                "contentLength": 10075, "multibagSequence" : 2,
+                                "contentLength": 10083, "multibagSequence" : 2,
                                 "multibagProfileVersion" : "0.4",
                                 "contentType": "application/zip",
                                 "serialization": "zip",
@@ -251,6 +251,42 @@ class TestUpdatePrepper(test.TestCase):
         self.assertEqual(self.prepr.cache_nerdm_rec(), cached)
         self.assertTrue(os.path.exists(cached))
 
+    def test_latest_version_from_nerdmfile(self):
+        cached = os.path.join(self.headcache,"_nerd","ABCDEFG.json")
+        self.prepr.cache_nerdm_rec()        
+        self.assertTrue(os.path.exists(cached))
+        self.assertEqual(self.prepr._latest_version_from_nerdmfile(cached), "1.0")
+        
+        cached = os.path.join(self.headcache,"_nerd","goober.json")
+        self.assertEqual(self.prepr._latest_version_from_nerdmfile(cached), "0")
+        
+    def test_latest_version_from_nerdcache(self):
+        cached = os.path.join(self.headcache,"_nerd","ABCDEFG.json")
+        self.prepr.cache_nerdm_rec()        
+        self.assertTrue(os.path.exists(cached))
+        self.assertEqual(self.prepr._latest_version_from_nerdcache(), "1.0")
+        self.assertEqual(self.prepr.latest_version("nerdm-cache"), "1.0")
+        self.prepr.aipid = "goober"
+        self.assertEqual(self.prepr._latest_version_from_nerdcache(), "0")
+        
+    def test_latest_version_from_repo(self):
+        self.assertEqual(self.prepr._latest_version_from_repo(), "1.0")
+        self.assertEqual(self.prepr.latest_version("repo"), "1.0")
+        self.assertEqual(self.prepr.latest_version(), "1.0")
+        self.prepr.aipid = "goober"
+        self.assertEqual(self.prepr._latest_version_from_repo(), "0")
+
+    def test_latest_version_from_dir(self):
+        cached = os.path.join(self.headcache, "ABCDEFG.2.mbag0_4-4.zip")
+        self.assertEqual(self.prepr.cache_headbag(), cached)
+        self.assertTrue(os.path.exists(cached))
+        
+        self.assertEqual(self.prepr._latest_version_from_dir(self.headcache), "2")
+        self.assertEqual(self.prepr.latest_version("bag-cache"), "2")
+        self.prepr.aipid = "goober"
+        self.assertEqual(self.prepr._latest_version_from_dir(self.headcache), "0")
+        
+
     def test_aip_exists(self):
         self.assertTrue(self.prepr.aip_exists())
 
@@ -284,10 +320,10 @@ class TestUpdatePrepper(test.TestCase):
 
         bag = NISTBag(root)
         mdata = bag.nerdm_record(True)
-        self.assertEquals(mdata['version'], "1.0.0+ (in edit)")
+        self.assertEquals(mdata['version'], "1.0+ (in edit)")
         self.assertIn('versionHistory', mdata)
         self.assertEquals(len(mdata['versionHistory']), 1)
-        self.assertEquals(mdata['versionHistory'][0]['version'], "1.0.0")
+        self.assertEquals(mdata['versionHistory'][0]['version'], "1.0")
         self.assertEquals(mdata['versionHistory'][0]['@id'], mdata["@id"])
         self.assertIn('issued', mdata['versionHistory'][0])
 
@@ -317,9 +353,9 @@ class TestUpdatePrepper(test.TestCase):
         self.assertEqual(md["_schema"],
                          "https://data.nist.gov/od/dm/nerdm-schema/v0.2#")
         self.assertEqual(md["references"][0]["_extensionSchemas"][0],
-                         "https://data.nist.gov/od/dm/nerdm-schema/v0.2#/definitions/DCiteDocumentReference")
+                         "https://data.nist.gov/od/dm/nerdm-schema/v0.2#/definitions/DCiteReference")
         self.assertEqual(md["references"][1]["_extensionSchemas"][0],
-                         "https://data.nist.gov/od/dm/nerdm-schema/v0.2#/definitions/DCiteDocumentReference")
+                         "https://data.nist.gov/od/dm/nerdm-schema/v0.2#/definitions/DCiteReference")
         
         depinfof = os.path.join(root, "multibag", "deprecated-info.txt")
         self.assertTrue(not os.path.isfile(depinfof))
@@ -359,7 +395,7 @@ class TestUpdatePrepper(test.TestCase):
 
         bag = NISTBag(root)
         mdata = bag.nerdm_record(True)
-        self.assertEquals(mdata['version'], "1.0.0+ (in edit)")
+        self.assertEquals(mdata['version'], "1.0+ (in edit)")
 
 
     def test_no_create_new_update(self):
@@ -425,6 +461,71 @@ class TestUpdatePrepper(test.TestCase):
         mdata = bag.nerdm_record(True)
         self.assertEquals(mdata['version'], "3.1.3+ (in edit)")
 
+    def test_update_multibag_info_zip(self):
+        root = self.tf.mkdir("outbag")
+        self.assertTrue(os.path.exists(root))
+        bagzip = os.path.join(self.bagsdir, "ABCDEFG.2.mbag0_4-4.zip")
+
+        self.prepr.update_multibag_info(bagzip, root)
+        mbdir = os.path.join(root, "multibag")
+        self.assertTrue(os.path.isdir(mbdir))
+        self.assertTrue(os.path.isfile(os.path.join(mbdir,"file-lookup.tsv")))
+        self.assertTrue(os.path.isfile(os.path.join(mbdir,"member-bags.tsv")))
+        self.assertTrue(os.path.isfile(os.path.join(mbdir,"deprecated-info.txt")))
+
+        self.assertTrue(os.stat(os.path.join(mbdir,"member-bags.tsv")).st_size > 0)
+
+    def test_update_multibag_info_dir(self):
+        bag = self.tf.track("goober")
+        self.assertTrue(not os.path.exists(bag))
+        bagzip = os.path.join(self.bagsdir, "ABCDEFG.2.mbag0_4-4.zip")
+        self.prepr._unpack_bag_as(bagzip, bag)
+        
+        out = self.tf.mkdir("outbag")
+        self.prepr.update_multibag_info(bag, out)
+        mbdir = os.path.join(out, "multibag")
+        self.assertTrue(os.path.isdir(mbdir))
+        self.assertTrue(os.path.isfile(os.path.join(mbdir,"file-lookup.tsv")))
+        self.assertTrue(os.path.isfile(os.path.join(mbdir,"member-bags.tsv")))
+        self.assertTrue(os.path.isfile(os.path.join(mbdir,"deprecated-info.txt")))
+        self.assertFalse(os.path.exists(os.path.join(mbdir,"goober.txt")))
+        self.assertTrue(os.stat(os.path.join(mbdir,"member-bags.tsv")).st_size > 0)
+
+        shutil.copyfile(os.path.join(mbdir,"member-bags.tsv"),
+                        os.path.join(mbdir,"goober.txt"))
+        os.remove(os.path.join(mbdir,"member-bags.tsv"))
+
+        self.prepr.update_multibag_info(bag, out)
+        self.assertTrue(os.path.isdir(mbdir))
+        self.assertTrue(os.path.isfile(os.path.join(mbdir,"goober.txt")))
+        self.assertTrue(os.path.isfile(os.path.join(mbdir,"file-lookup.tsv")))
+        self.assertTrue(os.path.isfile(os.path.join(mbdir,"member-bags.tsv")))
+        self.assertTrue(os.path.isfile(os.path.join(mbdir,"deprecated-info.txt")))
+        self.assertTrue(os.stat(os.path.join(mbdir,"member-bags.tsv")).st_size > 0)
+
+        
+    def test_set_multibag_info(self):
+        headbag = os.path.join(self.bagsdir, "ABCDEFG.2.mbag0_4-4.zip")
+        cached = os.path.join(self.headcache, "ABCDEFG.2.mbag0_4-4.zip")
+        root = os.path.join(self.workdir, "ABCDEFG")
+        self.assertTrue(not os.path.exists(root))
+        self.assertTrue(not os.path.exists(cached))
+
+        self.assertTrue(self.prepr.create_new_update(root))
+        self.assertTrue(os.path.isdir(root))
+        self.assertTrue(os.path.exists(cached))
+
+        shutil.rmtree(os.path.join(root,"multibag"))
+        self.assertTrue(not os.path.exists(os.path.join(root,"multibag")))
+
+        self.prepr.set_multibag_info(root)
+        mbdir = os.path.join(root, "multibag")
+        self.assertTrue(os.path.isdir(mbdir))
+        self.assertTrue(os.path.isfile(os.path.join(mbdir,"file-lookup.tsv")))
+        self.assertTrue(os.path.isfile(os.path.join(mbdir,"member-bags.tsv")))
+        self.assertTrue(os.path.isfile(os.path.join(mbdir,"deprecated-info.txt")))
+        self.assertTrue(os.stat(os.path.join(mbdir,"member-bags.tsv")).st_size > 0)
+        
         
                               
                          

@@ -1,0 +1,20 @@
+Payload-Oxum: 3175.4
+Contact-Name: NIST Data Support Team
+Contact-Email: datasupport@nist.gov
+NIST-POD-Metadata: metadata/pod.json
+NIST-NERDm-Metadata: metadata/nerdm.json
+Multibag-Head-Version: 1.0.0
+Internal-Sender-Identifier: mds2-7223.1_0_0.mbag0_4-0
+External-Identifier: ark:/88434/mds2-7223
+Organization-Address: 100 Bureau Dr., Gaithersburg, MD 20899
+Multibag-Tag-Directory: multibag
+NIST-BagIt-Version: 0.4
+Bagging-Date: 2020-07-06
+External-Description: NIST Researchers publishing data via MIDAS can now edit
+ associated metadata directly on the landing page.  This record enables testing
+ of this feature.
+Bag-Group-Identifier: ark:/88434/mds2-7223
+Source-Organization: National Institute of Standards and Technology
+Multibag-Version: 0.4
+Bag-Oxum: 17422.19
+Bag-Size: 17.42 kB

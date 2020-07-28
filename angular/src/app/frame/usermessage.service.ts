@@ -25,7 +25,7 @@ export class UserMessageService {
     /*
      * connect a receiver to this service that will display the messages
      */
-    _subscribe(receiver) : void {
+    public subscribe(receiver) : void {
         this.msg.subscribe(receiver);
     }
     

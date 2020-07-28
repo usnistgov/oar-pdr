@@ -47,23 +47,16 @@ export class ContactComponent implements OnInit {
     ngOnInit() {
         if ("hasEmail" in this.record['contactPoint'])
             this.isEmail = true;
-        console.log("record.contactPoint.hasEmail",this.record['contactPoint'].hasEmail);
     }
 
     getFieldStyle() {
-        if (this.mdupdsvc.editMode && this.enableEdit) {
-            if (this.mdupdsvc.fieldUpdated(this.fieldName)) {
-                return { 'border': '1px solid lightgrey', 'background-color': '#FCF9CD', 'padding-right': '1em' };
-            } else {
-                return { 'border': '1px solid lightgrey', 'background-color': 'white', 'padding-right': '1em' };
-            }
-        } else {
-            return { 'border': '0px solid white', 'background-color': 'white', 'padding-right': '1em' };
+        if (this.enableEdit) {
+            return this.mdupdsvc.getFieldStyle(this.fieldName);
         }
     }
     
     openModal() {
-        if (! this.mdupdsvc.editMode) return;
+        if (! this.mdupdsvc.isEditMode) return;
 
         let ngbModalOptions: NgbModalOptions = {
             backdrop: 'static',
@@ -83,6 +76,7 @@ export class ContactComponent implements OnInit {
         modalRef.componentInstance.inputValue = this.tempInput;
         modalRef.componentInstance['field'] = this.fieldName;
         modalRef.componentInstance['title'] = this.fieldName.toUpperCase();
+        modalRef.componentInstance.inBrowser = this.inBrowser;
 
         modalRef.componentInstance.returnValue.subscribe((returnValue) => {
             if (returnValue) {

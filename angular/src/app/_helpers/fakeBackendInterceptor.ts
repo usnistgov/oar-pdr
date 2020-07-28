@@ -4,6 +4,9 @@ import { Observable, of, throwError } from 'rxjs';
 import { delay, mergeMap, materialize, dematerialize } from 'rxjs/operators';
 import { TestDataService } from '../shared/testdata-service/testDataService';
 import { DownloadService } from '../shared/download-service/download-service.service';
+import { AuthInfo } from '../landing/editcontrol/auth.service';
+import { UserDetails } from '../landing/editcontrol/interfaces';
+import { userInfo } from 'os';
 
 @Injectable()
 export class FakeBackendInterceptor implements HttpInterceptor {
@@ -93,7 +96,6 @@ export class FakeBackendInterceptor implements HttpInterceptor {
       //             "Userid": "xyz@nist.gov",
       //             "message": "Unauthorizeduser: User token is empty or expired."
       //         })
-
       //     );
       // }
 

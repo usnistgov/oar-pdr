@@ -1,7 +1,7 @@
 <div style="display: table;">
     <div class="editable_container">
         <div class="editable_field" *ngIf="!record['contactPoint']; else hasContacts">
-            <div class="editable_field" *ngIf="mdupdsvc.editMode && enableEdit" [ngStyle]="getFieldStyle()">
+            <div class="editable_field" *ngIf="mdupdsvc.isEditMode && enableEdit" [ngStyle]="getFieldStyle()">
                 Contact:
             </div>
         </div>
@@ -40,18 +40,18 @@
                 </div>
             </div>
         </ng-template>
-        <button class="edit_button" *ngIf="mdupdsvc.editMode && enableEdit" type="button"
+        <button class="edit_button" *ngIf="mdupdsvc.isEditMode && enableEdit" type="button"
             (click)="openModal('contactPoint')">
             <i class="faa faa-pencil icon_enabled" data-toggle="tooltip"
                 title="Edit contactPoint"></i>
         </button>
-        <button class="undo_button" *ngIf="mdupdsvc.editMode && enableEdit" type="button"
+        <button class="undo_button" *ngIf="mdupdsvc.isEditMode && enableEdit" type="button"
             [disabled]="!updated"
             (click)="undoEditing('contactPoint')">
             <i class="faa faa-undo"
                 [ngClass]="{'icon_enabled': updated, 'icon_disabled': !updated }"
                 data-toggle="tooltip" title="Undo contactPoint"></i>
         </button>
-        <span *ngIf="mdupdsvc.editMode && enableEdit" style="color: red;margin-left: .5em;">*</span>
+        <span *ngIf="mdupdsvc.isEditMode && enableEdit" style="color: red;margin-left: .5em;">*</span>
     </div>
 </div>

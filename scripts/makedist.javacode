@@ -1,0 +1,118 @@
+#! /bin/bash
+#
+# build.sh:  build the package
+#
+set -e
+prog=`basename $0`
+execdir=`dirname $0`
+[ "$execdir" = "" -o "$execdir" = "." ] && execdir=$PWD
+# PACKAGE_DIR=`(cd $execdir/.. > /dev/null 2>&1; pwd)`
+# DIST_DIR=$PACKAGE_DIR/dist
+# targetdir=$PACKAGE_DIR/target
+
+# this is needed because realpath is not on macs
+function realpath {
+    if [ -d "$1" ]; then
+        (cd $1 && pwd)
+    elif [ -f "$1" ]; then
+        file=`basename $1`
+        parent=`dirname $1`
+        realdir=`(cd $parent && pwd)`
+        echo "$realdir/$file"
+    elif [[ $1 = /* ]]; then
+        echo $1
+    else
+        echo "$PWD/${1#./}"
+    fi
+}
+
+execdir=`realpath $execdir`
+PACKAGE_DIR=`dirname $execdir`
+DIST_DIR=$PACKAGE_DIR/dist
+SOURCE_DIR=$PACKAGE_DIR/java/customization-api
+BUILD_DIR=$SOURCE_DIR/dist
+targetdir=$PACKAGE_DIR/java/customization-api/target
+# Update this list with the names of the individual component names
+# 
+DISTNAMES=customization-api
+cd $SOURCE_DIR
+# handle command line options
+MAKEDIST=
+while [ "$1" != "" ]; do 
+  case "$1" in
+    --dist-dir=*)
+        DIST_DIR=`echo $1 | sed -e 's/[^=]*=//'`
+        ;;
+    --dist-dir)
+        shift
+        DIST_DIR=$1
+        ;;
+    --source-dir=*|--dir=*)
+        PACKAGE_DIR=`echo $1 | sed -e 's/[^=]*=//'`
+        ;;
+    -d|--dir|--source-dir)
+        shift
+        PACKAGE_DIR=$1
+        ;;
+    -*)
+        echo "$prog: unsupported option:" $1
+        false
+        ;;
+    *)
+        (echo :${DISTNAMES[@]}: | sed -e 's/ /:/g' | grep -qs :${1}:) || {
+            echo "${prog}: ${1}: unrecognized distribution name"
+            false
+        }
+        MAKEDIST="$MAKEDIST $1"
+        ;;
+  esac
+  shift
+done
+[ -n "$MAKEDIST" ] || MAKEDIST=${DISTNAMES[@]}
+
+true ${DIST_DIR:=$SOURCE_DIR/dist}
+
+java_version=`javac -version 2>&1 | awk '{print $2}'`
+java_major_version=`echo $java_version | perl -pe 's/^[0-9]+\.// ; s/[\.\-\_].*//;'`
+[ "$java_major_version" -ge 8 ] || {
+    echo "${prog}: Java 8 required to make distributions (found $java_version)"
+    false
+}
+
+# set the current version.  This will inject the version into the code, if 
+# needed.
+#
+$PACKAGE_DIR/scripts/setversion.sh 
+
+
+# [ -n "$PACKAGE_NAME" ] 
+export PACKAGE_NAME=`cat $PACKAGE_DIR/VERSION | awk '{print $1}'`
+version=`cat $PACKAGE_DIR/VERSION | awk '{print $2}'`
+vers4fn=`echo $version | perl -pe 's#\s$##;s#[/\s]+#_#g'`
+
+echo "---- Test version here 3 ----"
+echo "${vers4fn}"
+# ENTER BUILD COMMANDS HERE
+#
+# The build products should be written into the "dist" directory
+# mvn clean package
+mvn  -DfinalName=${DISTNAMES[0]} clean package
+[ -f "$targetdir/${DISTNAMES[0]}.jar" ] || {
+    echo "${prog}:" Failed to build distribution: \
+         "$targetdir/${DISTNAMES[0]}.jar"
+    false
+}
+
+# ENTER COMMANDS for creating the dependency file(s)
+#
+# A dependency file should be called DISTNAME-${version}_dep.json
+mkdir -p $DIST_DIR
+mvn dependency:tree -DoutputType=dot -DoutputFile=target/deptree.dot
+$PACKAGE_DIR/scripts/record_deps.py ${DISTNAMES[0]}  $version $targetdir > $DIST_DIR/${DISTNAMES[0]}-${vers4fn}_dep.json
+
+# ENTER COMMANDS for bundling (or renaming) the distribution, if needed
+
+# A distribution file should be called DISTNAME-${vers4fn}.DISTEXT
+
+cp $targetdir/${DISTNAMES[0]}.jar $DIST_DIR/${DISTNAMES[0]}-$vers4fn.jar
+

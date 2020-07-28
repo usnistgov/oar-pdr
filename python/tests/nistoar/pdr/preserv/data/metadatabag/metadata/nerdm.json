@@ -13,7 +13,7 @@
         "nrdp:PublicDataResource"
     ],
     "@id": "ark:/88434/mds00hw91v",
-    "doi": "doi:10.18434/T4SW26",
+    "doi": "doi:10.80443/pdrut-T4SW26",
     "title": "OptSortSph: Sorting Spherical Dielectric Particles in a Standing-Wave Interference Field",
     "contactPoint": {
         "fn": "Zachary Levine",
@@ -74,5 +74,6 @@
     ],
     "programCode": [
         "006:045"
-    ]
+    ],
+    "version": "1.0.0"
 }

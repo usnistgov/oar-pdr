@@ -19,7 +19,6 @@ export class AuthorPopupComponent implements OnInit {
   originalAuthors: any;
   errorMsg: any;
   affiliationList: any[] = [];
-  // organizationList: string[] = [];
 
   constructor(
     public activeModal: NgbActiveModal,
@@ -43,16 +42,23 @@ export class AuthorPopupComponent implements OnInit {
   *   Get a list of current affiliation
   */
   getAffiliationList() {
-    this.searchService.getAllRecords().subscribe((result) => {
-      for (var i = 0; i < result.ResultData.length; i++) {
-        if (result.ResultData[i].authors != undefined && result.ResultData[i].authors != null) {
-          for (var j = 0; j < result.ResultData[i].authors.length; j++) {
-            if (result.ResultData[i].authors[j].affiliation != undefined) {
-              for (var k = 0; k < result.ResultData[i].authors[j].affiliation.length; k++) {
-                if (result.ResultData[i].authors[j].affiliation[k].title != undefined) {
-                  const existingAffiliation = this.affiliationList.filter(aff => aff.name === result.ResultData[i].authors[j].affiliation[k].title && aff.dept === "");
+    this.searchService.getAllRecords().subscribe((result) => 
+    {
+      for (var i = 0; i < result.ResultData.length; i++) 
+      {
+        if (result.ResultData[i].authors != undefined && result.ResultData[i].authors != null) 
+        {
+          for (var j = 0; j < result.ResultData[i].authors.length; j++) 
+          {
+            if (result.ResultData[i].authors[j].affiliation != undefined) 
+            {
+              for (var k = 0; k < result.ResultData[i].authors[j].affiliation.length; k++) 
+              {
+                if (result.ResultData[i].authors[j].affiliation[k].title != undefined) 
+                {
+                  const existingAffiliation = this.affiliationList.filter(aff => aff.name === result.ResultData[i].authors[j].affiliation[k].title && aff.subunits === "");
                   if (existingAffiliation.length == 0) {
-                    this.affiliationList.push({ "name": result.ResultData[i].authors[j].affiliation[k].title, "dept": "" })
+                    this.affiliationList.push({ "name": result.ResultData[i].authors[j].affiliation[k].title, "subunits": "" })
                     // this.organizationList.push(result.ResultData[i].authors[j].affiliation[k].title);
                   }
                 }
@@ -64,7 +70,7 @@ export class AuthorPopupComponent implements OnInit {
       this.affiliationList.sort((a, b) => a.name.localeCompare(b.name));
       //Put "National Institute of Standards and Technology" on top of the list
       this.affiliationList = this.affiliationList.filter(entry => entry.name != "National Institute of Standards and Technology");
-      this.affiliationList.unshift({ name: "National Institute of Standards and Technology", dept: "" });
+      this.affiliationList.unshift({ name: "National Institute of Standards and Technology", subunits: "" });
     }, (error) => {
       console.log("There was an error getting records list.");
       console.log(error);
@@ -86,9 +92,63 @@ export class AuthorPopupComponent implements OnInit {
   /*
   *   Save author info and close popup dialog
   */
-  saveAuthorInfo() {
-    this.returnValue.emit(this.inputValue);
-    this.activeModal.close('Close click')
+  saveAuthorInfo() 
+  {
+    if(this.finalValidation())
+    {
+        this.returnValue.emit(this.inputValue);
+        this.activeModal.close('Close click')
+    }
+  }
+
+  /**
+   *  Final validation
+   */
+  finalValidation()
+  {
+      var validated = true;
+
+      for(let author of this.inputValue.authors)
+      {
+        //Validate ORCID value
+        if(!this.orcid_validation(author.orcid))
+        {
+            author.orcidValid = false;
+            validated = false;
+        }
+      }
+
+      return validated;
+  }
+
+  /**
+   * ORCID validation for UI
+   * @param author - author object
+   */
+  validateOrcid(author)
+  {
+    if(!this.orcid_validation(author.orcid))
+    {
+        author.orcidValid = false;
+    }else{
+        author.orcidValid = true;
+    }
+  }
+
+  /**
+   *  ORCID validation
+   */
+  orcid_validation(orcid):boolean
+  {
+      //Allow blank
+      if(orcid == '') return true;
+
+      const URL_REGEXP = /^[0-9]{4}-[0-9]{4}-[0-9]{4}-[0-9]{3}[0-9X]$/;
+      if (URL_REGEXP.test(orcid)) {
+          return true;
+      }
+
+      return false;
   }
 
   /*
@@ -281,7 +341,7 @@ export class AuthorPopupComponent implements OnInit {
   /*
   *   When affiliation department/division changed
   */
-  onDeptChange(author: any, dept: string) {
+  onDeptChange(author: any) {
     author.dataChanged = true;
   }
 }

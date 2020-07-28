@@ -1,0 +1,13 @@
+This data package contain NIST Public Data
+
+Editable Landing Pages for the PDR
+Identifier: ark:/88434/mds2-7223
+
+Contact: Raymond Plante (raymond.plante@nist.gov)
+
+NIST Researchers publishing data via MIDAS can now edit associated
+metadata directly on the landing page.  This record enables testing of
+this feature.
+
+More information:
+https://testdata.nist.gov/od/id/mds2-7223

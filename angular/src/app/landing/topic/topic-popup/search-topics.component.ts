@@ -3,6 +3,9 @@ import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { TreeNode } from 'primeng/api';
 import { TemplateBindingParseResult, preserveWhitespacesDefault } from '@angular/compiler';
 import { AppConfig } from '../../../config/config';
+import { TaxonomyListService } from '../../../shared/taxonomy-list';
+import { UserMessageService } from '../../../frame/usermessage.service';
+import { OverlayPanel } from 'primeng/overlaypanel';
 
 export const ROW_COLOR = '#1E6BA1';
 
@@ -15,22 +18,102 @@ export class SearchTopicsComponent implements OnInit {
   @Input() inputValue: any;
   @Input() field: any;
   @Input() title?: string;
-  @Input() taxonomyTree: TreeNode[];
   @Output() returnValue: EventEmitter<any> = new EventEmitter();
 
   isVisible: boolean = true;
   scrollTop: number = 0;
   searchText: string = "";
   highlight: string = "";
+  taxonomyList: any[];
+  taxonomyTree: TreeNode[] = [];
+  toggle: Boolean = true;  
 
   @ViewChild('panel', { read: ElementRef }) public panel: ElementRef<any>;
   @ViewChild('panel0', { read: ElementRef }) public panel0: ElementRef<any>;
 
   constructor(
+    private taxonomyListService: TaxonomyListService,
+    private msgsvc: UserMessageService,
     public activeModal: NgbActiveModal) { }
 
   ngOnInit() {
-    this.setTreeVisible(true);
+    this.taxonomyListService.get(0).subscribe((result) => {
+      if (result != null && result != undefined)
+          this.buildTaxonomyTree(result);
+
+      this.taxonomyList = [];
+      for (var i = 0; i < result.length; i++) {
+          this.taxonomyList.push({ "taxonomy": result[i].label });
+      }
+
+      this.setTreeVisible(true);
+
+    }, (err) => {
+        console.error("Failed to load taxonomy terms from server: "+err.message);
+        this.msgsvc.warn("Failed to load taxonomy terms; you may have problems editing the "+
+                        "topics assigned to this record.");
+    });
+  }
+
+  /*
+    *   build taxonomy tree
+    */
+  buildTaxonomyTree(result: any) {
+    let allTaxonomy: any = result;
+    var tempTaxonomyTree = {}
+    if (result != null && result != undefined) {
+        tempTaxonomyTree["data"] = this.arrangeIntoTaxonomyTree(result);
+        this.taxonomyTree.push(tempTaxonomyTree);
+    }
+
+    this.taxonomyTree = <TreeNode[]>this.taxonomyTree[0].data;
+  }
+
+  private arrangeIntoTaxonomyTree(paths) {
+      const tree = [];
+      paths.forEach((path) => {
+          var fullpath: string;
+          if (path.parent != null && path.parent != undefined && path.parent != "")
+              fullpath = path.parent + ":" + path.label;
+          else
+              fullpath = path.label;
+
+          const pathParts = fullpath.split(':');
+          let currentLevel = tree; // initialize currentLevel to root
+
+          for (var j = 0; j < pathParts.length; j++) {
+              let tempId: string = '';
+              for (var k = 0; k < j + 1; k++) {
+                  tempId = tempId + pathParts[k];
+                  // tempId = tempId + pathParts[k].replace(/ /g, "");
+                  if (k < j) {
+                      tempId = tempId + ": ";
+                  }
+              }
+
+            // check to see if the path already exists.
+            const existingPath = currentLevel.filter(level => level.data.treeId === tempId);
+            if (existingPath.length > 0) {
+                // The path to this item was already in the tree, so don't add it again.
+                // Set the current level to this path's children  
+                currentLevel = existingPath[0].children;
+            } else {
+                let newPart = null;
+                newPart = {
+                    data: {
+                        treeId: tempId,
+                        name: pathParts[j],
+                        researchTopic: tempId,
+                        bkcolor: 'white'
+                    }, children: [],
+                    expanded: false
+                };
+                currentLevel.push(newPart);
+                currentLevel = newPart.children;
+            }
+          };
+      });
+      return tree;
   }
 
   /* 
@@ -46,8 +129,8 @@ export class SearchTopicsComponent implements OnInit {
    */
   deleteTopic(index: number) {
     this.setTreeVisible(true);
-    this.searchAndExpandTaxonomyTree(this.inputValue['topic'][index], false);
-    this.inputValue['topic'] = this.inputValue['topic'].filter(topic => topic != this.inputValue['topic'][index]);
+    this.searchAndExpandTaxonomyTree(this.inputValue[this.field][index], false);
+    this.inputValue[this.field] = this.inputValue[this.field].filter(topic => topic != this.inputValue[this.field][index]);
     this.refreshTopicTree();
     console.log('this.inputValue.length', this.inputValue[this.field].length);
   }
@@ -56,9 +139,10 @@ export class SearchTopicsComponent implements OnInit {
    * Update the topic list
    */
   updateTopics(rowNode: any) {
-    const existingTopic = this.inputValue['topic'].filter(topic => topic == rowNode.node.data.researchTopic);
+    this.toggle = false;
+    const existingTopic = this.inputValue[this.field].filter(topic => topic == rowNode.node.data.researchTopic);
     if (existingTopic == undefined || existingTopic == null || existingTopic.length == 0) {
-      this.inputValue['topic'].push(rowNode.node.data.researchTopic);
+      this.inputValue[this.field].push(rowNode.node.data.researchTopic);
 
       // Reset search text box
       if (this.searchText != "") {
@@ -73,7 +157,7 @@ export class SearchTopicsComponent implements OnInit {
   */
   getTopicColor(rowNode: any) {
     // console.log("this.tempTopics", this.tempTopics);
-    const existingTopic = this.inputValue['topic'].filter(topic => topic == rowNode.node.data.researchTopic);
+    const existingTopic = this.inputValue[this.field].filter(topic => topic == rowNode.node.data.researchTopic);
     if (existingTopic == undefined || existingTopic == null || existingTopic.length <= 0) {
       return ROW_COLOR;
     } else {
@@ -85,7 +169,7 @@ export class SearchTopicsComponent implements OnInit {
   *   Set cursor type
   */
   getTopicCursor(rowNode: any) {
-    const existingTopic = this.inputValue['topic'].filter(topic0 => topic0 == rowNode.node.data.researchTopic);
+    const existingTopic = this.inputValue[this.field].filter(topic0 => topic0 == rowNode.node.data.researchTopic);
     if (existingTopic == undefined || existingTopic == null || existingTopic.length <= 0)
       return 'pointer';
     else
@@ -135,7 +219,7 @@ export class SearchTopicsComponent implements OnInit {
     }, 0);
 
     setTimeout(() => {
-      this.panel0.nativeElement.scrollTop = index * 40;
+      this.panel0.nativeElement.scrollTop = index * 30;
     }, 1);
 
   }
@@ -171,18 +255,6 @@ export class SearchTopicsComponent implements OnInit {
   *   Refresh the taxonomy tree 
   */
   refreshTopicTree() {
-    // for (let i = 0; i < this.taxonomyTree.length; i++) {
-    //   if (this.tempTopics.indexOf(this.taxonomyTree[i].data.researchTopic) > -1) {
-    //     var j: number = 0;
-    //     var parentNode = this.taxonomyTree[i].parent;
-    //     while (parentNode != null) {
-    //       this.taxonomyTree[i].parent.expanded = true;
-    //       parentNode = parentNode.parent;
-    //       console.log("parentNode", parentNode);
-    //     }
-    //   }
-    // }
-
     this.isVisible = false;
     setTimeout(() => {
       this.isVisible = true;
@@ -326,5 +398,14 @@ export class SearchTopicsComponent implements OnInit {
       this.highlight = "";
     else
       this.highlight = rowData.name;
+  }
+
+  openPopup($event, overlaypanel: OverlayPanel){
+    this.toggle = true;
+    setTimeout(()=>{
+        if(this.toggle){
+            overlaypanel.toggle($event)
+        }
+    },250)
   }
 }

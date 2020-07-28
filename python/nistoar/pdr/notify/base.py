@@ -28,6 +28,7 @@ from collections import Mapping, OrderedDict
 import json
 
 from ... import pdr as _pdr
+from ...pdr import exceptions as _pdrexc
 
 class NotificationTarget(object):
     """
@@ -202,3 +203,11 @@ class Notice(object):
                       data.get('description'), data.get('origin'),
                       data.get('issued'), **mdata)
             
+class NotificationError(_pdrexc.PDRException):
+    """
+    a class indicating that the PDR system or environment is in 
+    an uncorrectable state preventing proper processing
+    """
+    pass
+
+        

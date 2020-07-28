@@ -1,0 +1,24 @@
+{
+    "_schema": "https://data.nist.gov/od/dm/nerdm-schema/v0.2#/definitions/Component",
+    "@context": "https://data.nist.gov/od/dm/nerdm-pub-context.jsonld",
+    "@id": "cmps/res-md.xsd",
+    "@type": [
+        "nrdp:DataFile",
+        "nrdp:DownloadableFile",
+        "dcat:Distribution"
+    ],
+    "_extensionSchemas": [
+        "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/DataFile"
+    ],
+    "filepath": "res-md.xsd",
+    "downloadURL": "https://testdata.nist.gov/od/ds/mds2-7223/res-md.xsd",
+    "mediaType": "application/octet-stream",
+    "size": 1658,
+    "checksum": {
+        "hash": "71fb85c11c093fe4a1e7f5bc9e456062f95969ccae4d1fe4d4f3f4f2485b9e24",
+        "algorithm": {
+            "tag": "sha256",
+            "@type": "Thing"
+        }
+    }
+}

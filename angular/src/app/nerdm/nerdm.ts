@@ -79,6 +79,7 @@ export class NERDResource {
      * return the recommend text for citing this resource
      */
     getCitation() : string {
+      if(this.data != null){
         if (this.data['citation'])
             return this.data.citation;
 
@@ -136,7 +137,12 @@ export class NERDResource {
         n = (n < 10) ? "0" + n.toString() : n.toString();
         out += n + ')';
         
-        return out
+        return out;
+      }
+      else
+      {
+        return "";
+      }
     }
 
     static _isstring(v : any, i?, a?) : boolean {

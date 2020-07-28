@@ -7,10 +7,11 @@ import os, json, filelock
 from collections import OrderedDict
 from abc import ABCMeta, abstractmethod, abstractproperty
 
-from .. import PreservationSystem, sys, read_nerd, read_pod
+from .. import PreservationSystem, sys, read_nerd, read_pod, read_json, write_json
 from .. import (SIPDirectoryError, PDRException, NERDError, PODError,
-                StateException)
+                PreservationStateError)
 from ..bagit.builder import checksum_of
+from ...config import merge_config
 
 def moddate_of(filepath):
     """
@@ -44,6 +45,7 @@ class SIPBagger(PreservationSystem):
        regardless of whether the process has permission to write there.  
     """
     __metaclass__ = ABCMeta
+    BGRMD_FILENAME = "__bagger.json"   # default bagger metadata file; may be overridden
 
     def __init__(self, outdir, config):
         """
@@ -72,8 +74,8 @@ class SIPBagger(PreservationSystem):
                                             bagparent + ") under SIP "+
                                             "dir: " + str(e), cause=e)
             else:
-                raise StateException("Bag Workspace dir does not exist: " +
-                                     self.bagparent)
+                raise PreservationStateError("Bag Workspace dir does not exist: " +
+                                             self.bagparent)
 
     @abstractmethod
     def find_pod_file(self):
@@ -124,27 +126,62 @@ class SIPBagger(PreservationSystem):
         else:
             self.ensure_preparation(nodata)
 
-
-class PreservationStateError(StateException):
-    """
-    an exception that indicates the assumed state of an SIPs ingest and 
-    preservation does not match its actual state.
-
-    A key place this is used is when a bagger's caller requests either 
-    the creation of a new AIP or an update to an existing AIP when the 
-    AIPS does or does not (respectively) already exist.  
-    """
-    def __init__(self, message, aipexists=None):
+    def baggermd_file_for(self, destpath):
         """
-        :param bool aipexists:  true if the AIP already exists, false if it 
-                                doesn't.  If this is set, it should be assumed 
-                                thrower was set to assume the opposite.  
-                                Set to None (default) if this fact is not 
-                                relevent.
+        return the full path within the bag for bagger metadata file for the 
+        given component filepath 
+
+        Bagger metadata is a metadata that an SIPBagger may temporarily cache 
+        into files within the bag while building it up.  It is expected that 
+        the files will be removed during the finalization phase.
         """
-        super(message)
-        self.aipsexists = aipexists
+        return os.path.join(self.bagdir,"metadata",destpath,self.BGRMD_FILENAME)
 
+    def baggermd_for(self, destpath):
+        """
+        return the bagger-specific metadata associated with the particular 
+        component.  Resource-level metadata can be updated by providing an empty
+        string as the component filepath.  
+        """
+        mdfile = self.baggermd_file_for(destpath)
+        if os.path.exists(mdfile):
+            return read_json(mdfile)
+        return OrderedDict()
 
+    def update_bagger_metadata_for(self, destpath, mdata):
+        """
+        update the bagger-specific metadata.  
 
+        (Note that this metadata is expected to be removed from the bag during 
+        the finalization phase.)
+
+        Resource-level metadata can be updated by providing an empty
+        string as the component filepath.  The given metadata will be 
+        merged with the currently saved metadata.  If there are no metadata
+        yet saved for the filepath, the given metadata will be merged 
+        with default metadata.
+
+        When the metadata is merged, note that whole array values will be 
+        replaced with corresponding arrays from the input metadata; the 
+        arrays are not combined in any way.
+        
+        :param str filepath:   the filepath to the component to update.  An
+                               empty string ("") updates the resource-level
+                               metadata.  
+        :param dict   mdata:   the new metadata to merge in
+        """
+        mdfile = self.baggermd_file_for(destpath)
+        if os.path.exists(mdfile):
+            out = read_json(mdfile)
+        else:
+            out = OrderedDict()
+
+        out = self._update_md(out, mdata)
+        write_json(out, mdfile)
+        return out
+
+    def _update_md(self, orig, updates):
+        # update the values of orig with the values in updates
+        # this uses the same algorithm as used to merge config data
+        return merge_config(updates, orig)
 

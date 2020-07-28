@@ -1,0 +1,24 @@
+{
+    "_schema": "https://data.nist.gov/od/dm/nerdm-schema/v0.2#/definitions/Component",
+    "@context": "https://data.nist.gov/od/dm/nerdm-pub-context.jsonld",
+    "@id": "cmps/RegistryFederationFigure.pptx",
+    "@type": [
+        "nrdp:DataFile",
+        "nrdp:DownloadableFile",
+        "dcat:Distribution"
+    ],
+    "_extensionSchemas": [
+        "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/DataFile"
+    ],
+    "filepath": "RegistryFederationFigure.pptx",
+    "downloadURL": "https://testdata.nist.gov/od/ds/mds2-7223/RegistryFederationFigure.pptx",
+    "mediaType": "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+    "size": 1389,
+    "checksum": {
+        "hash": "c43add971bf8a9025e95cc350e3a103f32267c20506775bc11109d27209ef4e7",
+        "algorithm": {
+            "tag": "sha256",
+            "@type": "Thing"
+        }
+    }
+}

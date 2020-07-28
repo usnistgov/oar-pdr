@@ -15,7 +15,7 @@ from ....nerdm.convert import ComponentCounter, HierarchyBuilder
 POD_FILENAME = "pod.json"
 NERDMD_FILENAME = "nerdm.json"
 ANNOTS_FILENAME = "annot.json"
-DEFAULT_MERGE_CONVENTION = "midas0"
+DEFAULT_MERGE_CONVENTION = "midas1"
 
 JQLIB = def_jq_libdir
 MERGECONF = def_merge_etcdir
@@ -395,6 +395,15 @@ class NISTBag(PreservationSystem):
 
     def read_pod(self, podfile):
         return read_pod(podfile)
+
+    def pod_record(self):
+        """
+        return the POD record data currently saved in the bag
+        """
+        pf = self.pod_file()
+        if not os.path.exists(pf):
+            return {}
+        return self.read_pod(pf)
 
     def iter_data_files(self):
         """

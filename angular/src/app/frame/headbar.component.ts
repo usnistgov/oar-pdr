@@ -5,6 +5,7 @@ import { CartEntity } from '../datacart/cart.entity';
 import { Router } from '@angular/router';
 import { NotificationService } from '../shared/notification-service/notification.service';
 import { EditStatusService } from '../landing/editcontrol/editstatus.service';
+import { LandingConstants } from '../landing/constants';
 
 /**
  * A Component that serves as the header of the landing page.  
@@ -34,8 +35,9 @@ export class HeadbarComponent {
     appVersion: string = "";
     cartLength: number = 0;
     editEnabled: any;
-    editMode: boolean = false;
+    editMode: string;
     contactLink: string = "";
+    public EDIT_MODES: any;
 
     constructor(
         private el: ElementRef,
@@ -55,6 +57,7 @@ export class HeadbarComponent {
         this.cartService.watchStorage().subscribe(value => {
             this.cartLength = value;
         });
+        this.EDIT_MODES = LandingConstants.editModes;
     }
 
     /*
@@ -62,6 +65,11 @@ export class HeadbarComponent {
     */
     ngOnInit() {
         this.cartLength = this.cartService.getCartSize();
+        this.editMode = this.EDIT_MODES.VIEWONLY_MODE;
+
+        this.editstatsvc.watchEditMode((editMode) => {
+          this.editMode = editMode;
+        });
     }
 
     /**
@@ -83,7 +91,7 @@ export class HeadbarComponent {
      *   Open about window if not in edit mode. Otherwise do nothing.
      */
     openRootPage() {
-        if (!this.editstatsvc.editMode)
+        if (this.editMode != this.EDIT_MODES.EDIT_MODE)
             window.open('/', '_self');
     }
 
@@ -91,7 +99,7 @@ export class HeadbarComponent {
      *   Open about window if not in edit mode. Otherwise do nothing.
      */
     openAboutPage() {
-        if (!this.editstatsvc.editMode)
+        if (this.editMode != this.EDIT_MODES.EDIT_MODE)
             window.open('/pdr/about', '_blank');
     }
 
@@ -99,7 +107,7 @@ export class HeadbarComponent {
      *   Open search window if not in edit mode. Otherwise do nothing.
      */
     openSearchPage() {
-        if (!this.editstatsvc.editMode)
+        if (this.editMode != this.EDIT_MODES.EDIT_MODE)
             window.open(this.searchLink, '_blank');
     }
 
@@ -107,7 +115,7 @@ export class HeadbarComponent {
      *   In edit mode, mouse cursor set to normal
      */
     getCursor() {
-        if (this.editstatsvc.editMode)
+        if (this.editMode == this.EDIT_MODES.EDIT_MODE)
             return 'default';
         else
             return 'pointer';

@@ -50,7 +50,8 @@ class TestWebServer(test.TestCase):
             'working_dir':     self.bagparent,
             'review_dir':      self.revdir,
             'upload_dir':      self.upldir,
-            'id_registry_dir': self.bagparent
+            'id_registry_dir': self.bagparent,
+            'async_file_examine': False
         }
         self.bagdir = os.path.join(self.bagparent, self.midasid)
         self.server = make_server(config)

@@ -2,7 +2,11 @@
 # do not include support for accessing metadata that represent an update to a 
 # previously published dataset (via use of the UpdatePrepService class).  
 # Because testing support for updates require simulated RMM and distribution 
-# services to be running, they have been seperated out into test_serv_update.py.
+# services to be running, they have been separated out into test_serv_update.py.
+#
+# These test also do not include testing of the user update interface via
+# patch_id() and the pushing of affected POD data to MIDAS.  This is covered 
+# in test_serv_userupdate.py
 #
 import os, sys, pdb, shutil, logging, json, time, signal
 from cStringIO import StringIO
@@ -20,6 +24,7 @@ import nistoar.pdr.preserv.bagger.midas as midas
 import nistoar.pdr.publish.mdserv.serv as serv
 import nistoar.pdr.exceptions as exceptions
 from nistoar.pdr.utils import read_nerd, write_json
+from nistoar.nerdm import CORE_SCHEMA_URI, PUB_SCHEMA_URI
 
 testdir = os.path.dirname(os.path.abspath(__file__))
 testdatadir = os.path.join(testdir, 'data')
@@ -48,6 +53,7 @@ def setUpModule():
     loghdlr.setLevel(logging.INFO)
     loghdlr.setFormatter(logging.Formatter(bldr.DEF_BAGLOG_FORMAT))
     rootlog.addHandler(loghdlr)
+    rootlog.setLevel(logging.INFO)
 
 def tearDownModule():
     global loghdlr
@@ -91,7 +97,8 @@ class TestPrePubMetadataService(test.TestCase):
             'working_dir':     self.workdir,
             'review_dir':      self.revdir,
             'upload_dir':      self.upldir,
-            'id_registry_dir': self.workdir
+            'id_registry_dir': self.workdir,
+            'async_file_examine': False
         }
         self.srv = serv.PrePubMetadataService(self.config)
         self.bagdir = os.path.join(self.bagparent, self.midasid)
@@ -361,9 +368,140 @@ class TestPrePubMetadataService(test.TestCase):
         self.assertIsNone(loc[0])
         self.assertIsNone(loc[1])
 
+    def test_validate_nerdm(self):
+        nerdf = os.path.join(datadir, "samplembag", "metadata", "nerdm.json")
+        data = read_nerd(nerdf)
+        
+        self.assertIsNone(self.srv._schemadir)
+        errs = self.srv._validate_nerdm(data, {})
+        self.assertTrue(os.path.isdir(self.srv._schemadir),
+                        "NERDm schema directory not set")
+        self.assertEqual(errs, [])
 
-        
-        
+        del data['title']
+        errs = self.srv._validate_nerdm(data, {})
+        self.assertGreater(len(errs), 0,
+                           "Failed to detecter NERDm validation failure")
+
+    def test_validate_update(self):
+        bag = bldr.BagBuilder(datadir, "samplembag", {})
+        upd = {
+            "goob": "gurn", "aka": ["PDR"],
+            "@type": [ "nrdp:DataPublication", "nrdp:PublicDataResource" ],
+            "_extensionSchemas": [PUB_SCHEMA_URI+"#/definitions/DataPublication",
+                                  PUB_SCHEMA_URI+"#/definitions/PublicDataResource"],
+            "title": "Tacos!"
+        }
+
+        try:
+            updated = self.srv._validate_update(upd, bag.bag.nerdm_record(True), bag)
+        except serv.InvalidRequest as ex:
+            self.fail("invalid result:\n  " + "\n  ".join(ex.reasons))
+        finally:
+            bag.disconnect_logfile()
+
+        self.assertIn("aka", updated)
+        self.assertIn("goob", updated)
+        self.assertTrue(updated['_extensionSchemas'][0].endswith('/DataPublication'))
+        self.assertEqual(len(updated['_extensionSchemas']), 2)
+        self.assertEqual(updated['@type'],
+                         [ "nrdp:DataPublication", "nrdp:PublicDataResource" ])
+        self.assertEqual(updated['title'], "Tacos!")
+
+    def test_filter_and_check_updates(self):
+      self.srv.cfg['update'] = {
+          'updatable_properties': [ "aka", "title", "components[].mediaType" ]
+      }
+
+      try:
+        bag = bldr.BagBuilder(datadir, "samplembag", {})
+        upd = {
+            "goob": "gurn", "aka": ["PDR"],
+            "@type": [ "nrdp:DataPublication", "nrdp:PublicDataResource" ],
+            "_extensionSchemas": [PUB_SCHEMA_URI+"#/definitions/DataPublication",
+                                  PUB_SCHEMA_URI+"#/definitions/PublicDataResource"],
+            "title": "Tacos!",
+            "components": [
+                { "mediaType": "goober" },
+                { "@id": "cmps/trial1.json", "mediaType": "text/json-x" },
+                { "@id": "cmps/goober", "mediaType": "text/gibberish" }
+            ]
+        }
+
+        data = self.srv._filter_and_check_updates(upd, bag)
+      finally:
+        bag.disconnect_logfile()
+      self.assertIn('', data)
+      self.assertEqual(data['']['aka'], ['PDR'])
+      self.assertEqual(data['']['title'], "Tacos!")
+      self.assertNotIn('goob', data[''])
+      self.assertNotIn('@type', data[''])
+      self.assertNotIn('_extensionsSchemas', data[''])
+      self.assertEqual(len(data['']), 2)
+      self.assertIn(None, data)
+      self.assertEqual(len(data), 3)
+      self.assertIn('trial1.json', data)
+      self.assertEqual(data['trial1.json']['mediaType'], "text/json-x")
+      self.assertNotIn('@id', data['trial1.json'])
+
+    def test_patch_id(self):
+        self.srv.cfg['update'] = {
+            'updatable_properties': [ "aka", "title", "components[].mediaType" ]
+        }
+        upd = {
+            "goob": "gurn", "aka": ["PDR"],
+            "title": "Tacos!",
+            "description": ["Every Tuesday!"],
+            "components": [
+                { "mediaType": "goober" },
+                { "@id": "cmps/trial1.json", "mediaType": "text/json-x" },
+                { "@id": "cmps/goober", "mediaType": "text/gibberish" }
+            ]
+        }
+
+        metadir = os.path.join(self.bagdir, 'metadata')
+        self.assertFalse(os.path.exists(self.bagdir))
+
+        mdata = self.srv.resolve_id(self.midasid)
+        self.assertIn("ediid", mdata)
+
+        mdata = self.srv.patch_id(self.midasid, upd)
+
+        ndata = read_nerd(os.path.join(metadir,"annot.json"))
+        self.assertEqual(ndata['aka'], ["PDR"])
+        self.assertEqual(ndata['title'], "Tacos!")
+        self.assertEqual(ndata['version'], "1.0.0")
+        self.assertEqual(len(ndata), 3)
+
+        ndata = read_nerd(os.path.join(metadir,"trial1.json","annot.json"))
+        self.assertEqual(ndata['mediaType'], "text/json-x")
+        self.assertEqual(len(ndata), 1)
+        self.assertFalse(os.path.exists(os.path.join(metadir,
+                                                     "trial2.json","annot.json")))
+        self.assertFalse(os.path.exists(os.path.join(metadir, "trial3",
+                                                     "trial3a.json","annot.json")))
+
+        self.assertEqual(mdata['aka'], ["PDR"])
+        self.assertEqual(mdata['title'], "Tacos!")
+        self.assertNotEqual(mdata['description'], ["Every Tuesday!"])
+        for cmp in mdata['components']:
+            if cmp.get('filepath') == 'trial1.json':
+                self.assertEqual(cmp['mediaType'], "text/json-x")
+            elif 'mediaType' in cmp:
+                self.assertNotEqual(cmp['mediaType'], "text/json-x")
+        self.assertFalse(any([c['mediaType'] == "goober"
+                              for c in mdata['components'] if 'mediaType' in c]))
+        self.assertFalse(any([c['mediaType'] == "text/gibberish"
+                              for c in mdata['components'] if 'mediaType' in c]))
+                         
+    def test_invalid_patch(self):
+        self.srv.cfg['update'] = {
+            'updatable_properties': [ "aka", "title", "components[].mediaType" ]
+        }
+
+        with self.assertRaises(serv.InvalidRequest):
+            self.srv.patch_id(self.midasid, {"title": 3})
+
 
 if __name__ == '__main__':
     test.main()

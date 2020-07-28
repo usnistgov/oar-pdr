@@ -13,8 +13,8 @@ import { LPSConfig } from '../app/config/config';
 
 export const context = {
     production: false,
-    useMetadataService: true,
-    useCustomizationService: true
+    useMetadataService: false,
+    useCustomizationService: false
 };
 
 export const config: LPSConfig = {
@@ -22,15 +22,18 @@ export const config: LPSConfig = {
         orgHome: "https://nist.gov/",
         portalBase: "https://data.nist.gov/",
         pdrHome: "https://data.nist.gov/pdr/",
-        pdrSearch: "https://data.nist.gov/sdp/"
+        pdrSearch: "https://data.nist.gov/sdp/",
+        mdService:   "https://datapub.nist.gov/midas/",
+        taxonomyService: "https://data.nist.gov/rmm/taxonomy"
     },
     mdAPI: "https://data.nist.gov/rmm/records/",
-    customizationAPI: "https://testdata.nist.gov/customization/",
+    // customizationAPI: "https://testdata.nist.gov/customization/",
+    customizationAPI: "https://datapubtest.nist.gov/customization/",
     mode: "dev",
     status: "Dev Version",
     appVersion: "v1.2.X",
     production: context.production,
-    editEnabled: false,
+    editEnabled: true,
     distService: "https://testdata.nist.gov/od/ds/",
     gacode: "not-set",
     screenSizeBreakPoint: 1060,
@@ -59,7 +62,7 @@ export const testdata: {} = {
             "fn": "Patricia Flanagan"
         },
         "modified": "2011-07-11",
-        "ediid": "26DEA39AD677678AE0531A570681F32C1449",
+        "ediid": "test1",
         "landingPage": "https://www.nist.gov/itl/iad/image-group/special-database-32-multiple-encounter-dataset-meds",
         "description": [
             "Multiple Encounter Dataset (MEDS-I) is a test corpus organized from an extract of submissions of deceased persons with prior multiple encounters. MEDS is provided to assist the FBI and partner organizations refine tools, techniques, and procedures for face recognition as it supports Next Generation Identification (NGI), forensic comparison, training, and analysis, and face image conformance and inter-agency exchange standards. The MITRE Corporation (MITRE) prepared MEDS in the FBI Data Analysis Support Laboratory (DASL) with support from the FBI Biometric Center of Excellence."

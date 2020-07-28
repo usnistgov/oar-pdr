@@ -9,10 +9,11 @@ import { FrameModule } from '../../frame/frame.module';
 import { ButtonModule } from 'primeng/primeng';
 import { AppConfig } from '../../config/config';
 import { HttpClient } from '@angular/common/http';
+import { TreeModule, FieldsetModule, DialogModule, OverlayPanelModule } from 'primeng/primeng';
 
 @NgModule({
     declarations: [ EditControlComponent, EditStatusComponent ],
-    imports: [ CommonModule, ConfirmationDialogModule, FrameModule, ButtonModule ],
+    imports: [ CommonModule, ConfirmationDialogModule, FrameModule, ButtonModule, OverlayPanelModule ],
     exports: [ EditControlComponent, EditStatusComponent ],
     providers: [
         HttpClient,

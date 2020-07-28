@@ -25,7 +25,9 @@ def startService(authmeth=None):
           "--wsgi-file {2} --pidfile {3}"
     cmd = cmd.format(os.path.join(tdir,"simsrv.log"), srvport,
                      os.path.join(basedir, wpy), pidfile)
-    return os.system(cmd) == 0
+    status = (os.system(cmd) == 0)
+    time.sleep(0.5)
+    return status
 
 def stopService(authmeth=None):
     tdir = tmpdir()

@@ -3,6 +3,7 @@ import { AngularEnvironmentConfigService } from '../../config/config.service';
 import { AppConfig } from '../../config/config'
 import { config } from '../../../environments/environment'
 import { UpdateDetails, UserDetails } from './interfaces';
+import { LandingConstants } from '../constants';
 
 describe('EditStatusService', () => {
 
@@ -20,6 +21,8 @@ describe('EditStatusService', () => {
         '_updateDate': 'today'
     }
 
+    let EDIT_MODES = LandingConstants.editModes;
+    
     beforeEach(() => {
         cfgdata = JSON.parse(JSON.stringify(config));
         cfgdata['editEnabled'] = true;
@@ -28,7 +31,6 @@ describe('EditStatusService', () => {
 
     it('initialize', () => {
         expect(svc.lastUpdated).toEqual(null);
-        expect(svc.editMode).toEqual(false);
         expect(svc.userID).toBeNull();
         expect(svc.authenticated).toBe(false);
         expect(svc.authorized).toBe(false);
@@ -37,13 +39,12 @@ describe('EditStatusService', () => {
 
     it('setable', () => {
         svc._setLastUpdated(updateDetails);
-        svc._setEditMode(true);
+        svc._setEditMode(EDIT_MODES.EDIT_MODE);
         svc._setUserID("Hank");
         svc._setAuthorized(false);
 
         expect(svc.lastUpdated._updateDate).toEqual("today");
         expect(svc.lastUpdated.userDetails).toEqual(userDetails);
-        expect(svc.editMode).toEqual(true);
         expect(svc.userID).toEqual("Hank");
         expect(svc.authenticated).toBe(true);
         expect(svc.authorized).toBe(false);
@@ -52,7 +53,7 @@ describe('EditStatusService', () => {
     it('watchable remote start', () => {
         let resID = "";
         svc._watchRemoteStart((ev) => {
-            resID = ev;
+            resID = ev.resID;
         });
         expect(resID).toEqual("");
         svc.startEditing("testid");

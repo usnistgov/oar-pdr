@@ -10,7 +10,7 @@ import os, sys, logging, json, cgi, re
 from wsgiref.headers import Headers
 
 from .service import (ThreadedPreservationService, RerequestException,
-                      ConfigurationException, PreservationStateException)
+                      ConfigurationException, PreservationStateError)
 from . import status
 from .. import PreservationSystem
 
@@ -298,7 +298,7 @@ class Handler(object):
             self.set_response(403, "Preservation update for SIP was already "+
                               "requested (current status: "+ex.state+")")
             
-        except PreservationStateException as ex:
+        except PreservationStateError as ex:
             log.warn("Wrong AIP state for client request: "+str(ex))
             out =  {
                 "id": sipid,
@@ -393,7 +393,7 @@ class Handler(object):
             self.set_response(403, "Preservation for SIP was already requested "+
                               "(current status: "+ex.state+")")
 
-        except PreservationStateException as ex:
+        except PreservationStateError as ex:
             log.warn("Wrong AIP state for client request: "+str(ex))
             out =  {
                 "id": sipid,

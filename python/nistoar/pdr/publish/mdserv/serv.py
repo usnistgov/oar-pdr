@@ -3,19 +3,24 @@ This module manages the preparation of the metadata needed by pre-publication
 landing page service.  It uses an SIPBagger to create the NERDm metadata from 
 POD metadata provided by MIDAS and assembles it into an exportable form.  
 """
-import os, logging, re, json
-from collections import Mapping
+import os, logging, re, json, copy
+from collections import Mapping, OrderedDict
 
 from .. import PublishSystem
 from ...exceptions import (ConfigurationException, StateException,
-                           SIPDirectoryNotFound, IDNotFound)
+                           SIPDirectoryNotFound, IDNotFound, PDRServiceException)
 from ...preserv.bagger import (MIDASMetadataBagger, UpdatePrepService,
                                midasid_to_bagname)
-from ...preserv.bagit import NISTBag
+from ...preserv.bagit import NISTBag, BagBuilder
 from ...utils import build_mime_type_map, read_nerd
 from ....id import PDRMinter, NIST_ARK_NAAN
+from ....nerdm import validate_nerdm
+from ....nerdm.convert import Res2PODds
+from .... import pdr
+from . import midasclient as midas
 
 log = logging.getLogger(PublishSystem().subsystem_abbrev)
+DEF_MERGE_CONV = "midas1"
 
 class PrePubMetadataService(PublishSystem):
     """
@@ -128,6 +133,20 @@ class PrePubMetadataService(PublishSystem):
             self.log.info("repo_access not configured; no access to published "+
                           "records.")
 
+        # used for validating during updates (via patch_id())
+        self._schemadir = None
+
+        # used to convert NERDm to POD
+        self._nerd2pod = Res2PODds(pdr.def_jq_libdir, logger=self.log)
+
+        self._midascl = None
+        ucfg = self.cfg.get('update', {})
+        if ucfg.get('update_to_midas', ucfg.get('midas_service')):
+            # set up the client if have the config data to do it unless
+            # 'update_to_midas' is False
+            self._midascl = midas.MIDASClient(ucfg.get('midas_service', {}),
+                                         logger=self.log.getChild('midasclient'))
+
     def _create_minter(self, parentdir):
         cfg = self.cfg.get('id_minter', {})
         out = PDRMinter(parentdir, cfg)
@@ -236,7 +255,7 @@ class PrePubMetadataService(PublishSystem):
     def normalize_id(self, id):
         """
         if necesary, transform the given SIP identifier into a normalized 
-        form that will be be bassed to the bagger.  This allows requests 
+        form that will be be based to the bagger.  This allows requests 
         to resolve_id() and locate_data_file() to accept several different 
         forms.
 
@@ -259,13 +278,20 @@ class PrePubMetadataService(PublishSystem):
         # this handles preparation for a dataset that has been published before.
         prepper = None
 
+        normid = self.normalize_id(id)
         try:
             
-            bagger = self.open_bagger(self.normalize_id(id))
+            bagger = self.open_bagger(normid)
             
         except SIPDirectoryNotFound as ex:
-            # there is no input data from midas; fall-back to a previously
-            # published record, if available
+            # there is no input data from midas...
+            #
+            # See if there is a working metadata bag cached
+            bagdir = os.path.join(self.workdir, midasid_to_bagname(normid))
+            if os.path.exists(bagdir):
+                return self.make_nerdm_record(bagdir)
+            
+            # fall-back to a previously published record, if available
             if self.prepsvc:
                 prepper = self.prepsvc.prepper_for(midasid_to_bagname(id),
                                                    log=self.log)
@@ -285,6 +311,229 @@ class PrePubMetadataService(PublishSystem):
             bagger.bagbldr.disconnect_logfile()
         return self.make_nerdm_record(bagger.bagdir, bagger.datafiles)
 
+    def patch_id(self, id, frag):
+        """
+        update the NERDm metadata for the SIP with a given dataset identifier
+        and return the full, updated record.  
+
+        This implementation will examine each property in the input dictionary
+        (frag) to ensure it is among those configured as updatable and its 
+        value is valid.  Values for properties that are not configured as 
+        updatable will be ignored.  Invalid values for updatable properties 
+        will be cause the whole request to be rejected and an exception is 
+        raised.  
+
+        :param id    str:   the ID for the record being updated.
+        :param frag dict:   a NERDm resource record fragment containing the 
+                              properties to update.  
+        :return dict:   the full, updated NERDm record
+        :raise IDNotFound:  if the dataset with the given ID is not currently 
+                              in an editable state.  
+        :raise InvalidRequest:  if any of the updatable data included in the 
+                              request is invalid.
+        """
+        datafiles = None
+        try:
+
+            bagger = self.open_bagger(self.normalize_id(id));
+
+            # There is a MIDAS submission in progress; create the metadata bag 
+            # and capture any updates from MIDAS
+            bagger = self.prepare_metadata_bag(id, bagger)
+            if bagger.fileExaminer:
+                bagger.fileExaminer.launch(stop_logging=False)
+                # bagger.fileExaminer.run()  # sync for testing
+            elif bagger.bagbldr:
+                bagger.bagbldr.disconnect_logfile()
+
+            datafiles = bagger.datafiles
+            bagbldr = bagger.bagbldr
+
+        except SIPDirectoryNotFound as ex:
+
+            # there is no input data from midas...
+            #
+            if self.cfg.get('update',{}).get('require_midas_sip', True) or \
+               not self.prepsvc:
+                # in principle, users need not edit data via MIDAS in order
+                # to edit via the PDR; this parameter requires it.  
+                raise IDNotFound('Dataset with ID is not currently editable');
+
+            # See if there is a working metadata bag cached
+            bagname = midasid_to_bagname(id);
+            bagdir = os.path.join(self.workdir, bagname)
+            if not os.path.exists(bagdir):
+
+                # create a working metadata bag from the previously published
+                # data
+                prepper = self.prepsvc.prepper_for(bagname, log=self.log)
+                                                   
+                if not prepper.aip_exists():
+                    raise IDNotFound('Dataset with ID not found.');
+
+                if not self.workdir or not os.path.isdir(self.workdir):
+                    raise ConfigurationException(bagdir +
+                                                 ": working dir not found")
+                prepper.create_new_update(bagdir);
+
+            bagbldr = BagBuilder(self.workdir, bagname,
+                              self.cfg.get('bagger', {}).get("bag_builder",{}));
+
+        # this will raise an InvalidRequest exception if something wrong is
+        # found with the input data
+        updates = self._filter_and_check_updates(frag, bagbldr);
+
+        outmsgs = []
+        msg = "User-generated metadata updates to path='{0}': {1}"
+        for destpath in updates:
+            if destpath is not None:
+                bagbldr.update_annotations_for(destpath, updates[destpath],
+                        message=msg.format(destpath, str(updates[destpath].keys())))
+
+        # save an updated POD and send it to MIDAS
+        self.update_pod(updates[None], bagbldr)
+
+        # mergeconv = bagbldr.cfg.get('merge_convention', DEF_MERGE_CONV)
+        return self.make_nerdm_record(bagbldr.bagdir, datafiles)
+
+    def _filter_and_check_updates(self, data, bldr):
+        # filter out properties that are not updatable; check the values of
+        # the remaining.  The returned value is a dictionary mapping filepath
+        # values to the associated metadata for that component; the empty string
+        # key maps to the resource-level metadata (which can include none-filepath
+        # components.
+
+        updatable = self.cfg.get('update',{}).get('updatable_properties',[])
+        mergeconv = bldr.cfg.get('merge_convention', DEF_MERGE_CONV)
+
+        def _filter_props(fromdata, todata, parent=''):
+            # fromdata and todata are either Mapping objects or lists
+            if isinstance(fromdata, list):
+                # parent should end with '[]'
+                for el in fromdata:
+                    if parent in updatable:
+                        todata.append(el)
+                        continue
+                    elif isinstance(el, list):
+                        if not any([e.startswith(parent+'[]') for e in updatable]):
+                            continue
+                        subdata = []
+                        _filter_props(el, subdata, parent+'[]')
+                        if subdata:
+                            todata.append(subdata)
+                    elif isinstance(el, Mapping):
+                        subdata = OrderedDict()
+                        _filter_props(el, subdata, parent)
+                        if subdata:
+                            todata.append(subdata)
+                        
+            elif isinstance(fromdata, Mapping):
+                for key in fromdata:
+                    pkey = parent;
+                    if pkey:  pkey += "."
+                    pkey += key
+
+                    if pkey in updatable:
+                        todata[key] = fromdata[key]
+
+                    elif isinstance(fromdata[key], list):
+                        if not any([e.startswith(pkey+'[]') for e in updatable]):
+                            continue
+                        subdata = []
+                        _filter_props(fromdata[key], subdata, pkey+'[]')
+                        if subdata:
+                            todata[key] = subdata
+
+                    elif isinstance(fromdata[key], Mapping):
+                        if not any([e.startswith(pkey+'.') for e in updatable]):
+                            continue
+                        subdata = OrderedDict()
+                        _filter_props(fromdata[key], subdata, pkey)
+                        if subdata:
+                            todata[key] = subdata
+
+                if pkey!='' and '@id' in fromdata and todata and '@id' not in todata:
+                    todata['@id'] = fromdata['@id']
+
+        fltrd = OrderedDict()
+        _filter_props(data, fltrd)    # filter out properties you can't edit
+        oldnerdm = bldr.bag.nerdm_record(mergeconv)
+        newnerdm = self._validate_update(fltrd, oldnerdm, bldr)  # may raise InvalidRequest
+
+        # separate file-based components from main metadata; return parts
+        # by destination path.  Every component is now guaranteed to have an
+        # '@id' property
+        out = OrderedDict()
+        if 'components' in fltrd:
+            for i in range(len(fltrd['components'])-1, -1, -1):
+                cmp = fltrd['components'][i]
+                oldcmp = self._item_with_id(oldnerdm['components'], cmp['@id'])
+                if 'filepath' in oldcmp:
+                    del cmp['@id']  # don't update the ID
+                    out[oldcmp['filepath']] = cmp
+                    del fltrd['components'][i]
+            if len(fltrd['components']) <= 0:
+                del fltrd['components']
+        out[''] = fltrd
+        out[None] = newnerdm
+        return out
+
+    def _item_with_id(self, array, id):
+        out = [e for e in array if e['@id'] == id]
+        return (len(out) > 0 and out[0]) or None
+
+    def _validate_update(self, updata, nerdm, bagbldr):
+        # make sure the update produces valid NERDm.  This is done primarily by
+        # merging the update with the current metadata and validating the results.
+        # Other checks may be encapsulated in this function.  If any of the checks
+        # fail, this function will raise a InvalidRequest exception
+
+        if 'components' in updata and 'components' not in nerdm:
+            del updata['components']
+        if 'components' in updata:
+            cmps = updata['components']
+
+            # make sure the component updates correspond to components already
+            # defined (as specified by the component's identifier); eliminate
+            # those that do not.  
+            for i in range(len(cmps)-1, -1, -1):
+                if '@id' not in cmps[i] or \
+                   not self._item_with_id(nerdm['components'], cmps[i]['@id']):
+                    del cmps[i]
+            if len(cmps) == 0:
+                del updata['components']
+
+        mergeconv = bagbldr.cfg.get('merge_convention', DEF_MERGE_CONV)
+        merger = bagbldr.bag._make_merger(mergeconv, "Resource")
+
+        # nerdm = bagbldr.bag.nerdm_record(mergeconv)
+        updated = merger.merge(nerdm, updata)
+
+        errs = self._validate_nerdm(updated, bagbldr.cfg.get('validator', {}))
+        if len(errs) > 0:
+            self.log.error("User update will make record invalid " +
+                           "(see INFO details below)")
+            self.log.info("metadata patch:\n" +
+                           json.dumps(updata,indent=2))
+            self.log.info("problems:\n " + "\n ".join(errs))
+            raise InvalidRequest("Update makes record invalid", errs)
+
+        return updated
+
+    def _validate_nerdm(self, nerdm, valcfg):
+        if not self._schemadir:
+            self._schemadir = valcfg.get('nerdm_schema_dir', pdr.def_schema_dir)
+            if not self._schemadir:
+                raise ConfigurationException("Need to set "+
+                                            "bag_builder.validator.nerdm_schema_dir")
+            if not os.path.isdir(self._schemadir):
+                raise ConfigurationException("nerdm_schema_dir directory does not "+
+                                             "exist as a directory: " +
+                                             self._schemadir)
+
+        return [str(e) for e in validate_nerdm(nerdm, self._schemadir)]
+        
+                                           
     def locate_data_file(self, id, filepath):
         """
         return the location and recommended MIME-type for a data file associated
@@ -311,5 +560,81 @@ class PrePubMetadataService(PublishSystem):
             mt = self.mimetypes.get(os.path.splitext(loc)[1][1:],
                                     'application/octet-stream')
         return (loc, mt)
+
+    def update_pod(self, nerdm, bagbldr):
+        """
+        create a POD record from the given NERDm record and determine if a 
+        change has been made.  If so, save it to the metadata bag and submit 
+        it to MIDAS.  
+
+        :param Mapping nerdm:  The updated NERDm Resource record from which to 
+                               get the POD data
+        :param BagBuilder bagbldr:  A BagBuilder instance that should be used 
+                               to save the POD 
+        """
+        # sanity check the input NERDm record
         
+        # create the updated POD
+        newpod = self._nerd2pod.convert_data(nerdm)
+        pod4midas = self._pod4midas(newpod)
+
+        # compare it to the currently saved POD record
+        oldpod = self._pod4midas(bagbldr.bag.pod_record())
+        if newpod.get('_committed', True) and pod4midas == oldpod:
+            # nothing's changed
+            self.log.debug("No change requiring update to POD detected")
+            return
+
+        # attempt to commit it to MIDAS.  If it fails, we'll try to get it
+        # next time.
+        if self._midascl and not self._submit_to_midas(pod4midas):
+            newpod['_committed'] = False
+
+        # save the updated POD to our bag
+        bagbldr.add_ds_pod(newpod, convert=False)
+
+    def _pod4midas(self, pod):
+        pod = copy.deepcopy(pod)
+        # del pod['...']
         
+        return pod
+
+    def _submit_to_midas(self, pod):
+        # send the POD record to MIDAS via its API
+
+        if not self._midascl:
+            raise StateException("No MIDAS service available")
+
+        midasid = pod.get('identifier')
+        if not midasid:
+            self.log.error("_submit_to_midas(): POD is missing identifier prop!")
+            raise ValueError("POD record is missing required 'identifier' field")
+
+        try:
+            self._midascl.put_pod(pod, midasid)
+        except Exception as ex:
+            self.log.error("Failed to commit POD to MIDAS for ediid=%s", midasid)
+            self.log.exception(ex)
+            return False
+                           
+        return True
+
+        
+class InvalidRequest(PDRServiceException):
+    """
+    An invalid request was made of the metadata service.  
+    """
+
+    def __init__(self, message, reasons=[]):
+        """
+        create the exception
+
+        :param str message:  the message summarizing what makes the request invalid
+        :param reasons:  a list of the specific reasons why the request is invalid
+        :type reasons: array of str
+        """
+        super(InvalidRequest, self).__init__("Metadata Service", http_code=400,
+                                             message=message, sys=PublishSystem)
+        self.reasons = reasons
+
+

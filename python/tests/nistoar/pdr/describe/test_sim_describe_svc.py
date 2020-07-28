@@ -23,6 +23,7 @@ baseurl = "http://localhost:{0}/".format(port)
 
 def startService(authmeth=None):
     tdir = tmpdir()
+    arcdir = os.path.join(tdir, "archive")
     srvport = port
     if authmeth == 'header':
         srvport += 1
@@ -30,9 +31,9 @@ def startService(authmeth=None):
     
     wpy = "python/tests/nistoar/pdr/describe/sim_describe_svc.py"
     cmd = "uwsgi --daemonize {0} --plugin python --http-socket :{1} " \
-          "--wsgi-file {2} --pidfile {3}"
+          "--wsgi-file {2} --pidfile {3} --set-ph archive_dir={4}"
     cmd = cmd.format(os.path.join(tdir,"simsrv.log"), srvport,
-                     os.path.join(basedir, wpy), pidfile)
+                     os.path.join(basedir, wpy), pidfile, arcdir)
     os.system(cmd)
     time.sleep(0.5)
 
@@ -58,7 +59,6 @@ def setUpModule():
     loghdlr = logging.FileHandler(os.path.join(tmpdir(),"test_simsrv.log"))
     loghdlr.setLevel(logging.DEBUG)
     rootlog.addHandler(loghdlr)
-    startService()
 
 def tearDownModule():
     global loghdlr
@@ -66,7 +66,6 @@ def tearDownModule():
         if rootlog:
             rootlog.removeHandler(loghdlr)
         loghdlr = None
-    stopService()
     rmtmpdir()
 
 class TestArchive(test.TestCase):
@@ -86,6 +85,17 @@ class TestArchive(test.TestCase):
 
 class TestSimService(test.TestCase):
 
+    @classmethod
+    def setUpClass(cls):
+        tdir = tmpdir()
+        adir = os.path.join(tdir, "archive")
+        shutil.copytree(datadir, adir)
+        startService()
+
+    @classmethod
+    def tearDownClass(cls):
+        stopService()
+
     def test_found_ediid(self):
         resp = requests.get(baseurl+"ABCDEFG")
         self.assertEqual(resp.status_code, 200)
@@ -100,7 +110,20 @@ class TestSimService(test.TestCase):
         data = resp.json()
         self.assertEqual(data['ResultData'][0]["ediid"], "ABCDEFG")
 
+    def test_post_rec(self):
+        id = "ark:/55121/mds1-1000"
+        rec = {
+            'ediid': id,
+            '@id': id
+        }
+        resp = requests.post(baseurl, json=rec)
+        self.assertEqual(resp.status_code, 201)
+
+        resp = requests.get(baseurl+id)
+        data = resp.json()
+        self.assertEqual(data["@id"], id)
         
+                             
 
 
 if __name__ == '__main__':
