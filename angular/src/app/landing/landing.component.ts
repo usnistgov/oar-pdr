@@ -177,26 +177,22 @@ export class LandingComponent implements OnInit, OnChanges {
     }
 
     /**
-     * Return mdAPI
+     * Return mdService
      */
-    getMdAPI()
+    getMdService()
     {
-        if(this.edstatsvc.editingEnabled()){
-            this.mdApi = this.cfg.get("locations.mdService", "/unconfigured");
+        let mdService: string;
 
-            if (this.mdApi.slice(-1) != '/') this.mdApi += '/';
-            this.mdApi += this.record['ediid'];
-        }else{
-            this.mdApi = this.cfg.get("mdAPI", "/unconfigured");
+        mdService = this.cfg.get("locations.mdService", "/unconfigured");
+            
+        if (mdService.slice(-1) != '/') mdService += '/';
+        if (mdService.search("/rmm/") < 0)
+            mdService += this.record['ediid'];
+        else
+            mdService += "records?@id=" + this.record['@id'];
 
-            if (this.mdApi.slice(-1) != '/') this.mdApi += '/';
-            if (this.mdApi.search("/rmm/") < 0)
-                this.mdApi += this.record['ediid'];
-            else
-                this.mdApi += "records?@id=" + this.record['@id'];
-        }
 
-        return this.mdApi;
+        return mdService;
     }
 
     /**

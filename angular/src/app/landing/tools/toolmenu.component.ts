@@ -77,22 +77,14 @@ export class ToolMenuComponent implements OnChanges {
         var mitems : MenuItem[] = [];
         var subitems : MenuItem[] = [];
 
-        let mdapi: string;
+        let mdService: string;
+        mdService = this.cfg.get("locations.mdService", "/unconfigured");
 
-        if(this.edstatsvc.editingEnabled()){
-            mdapi = this.cfg.get("locations.mdService", "/unconfigured");
-
-            if (mdapi.slice(-1) != '/') mdapi += '/';
-            mdapi += this.record['ediid'];
-        }else{
-            mdapi = this.cfg.get("mdAPI", "/unconfigured");
-
-            if (mdapi.slice(-1) != '/') mdapi += '/';
-            if (mdapi.search("/rmm/") < 0)
-                mdapi += this.record['ediid'];
-            else
-                mdapi += "records?@id=" + this.record['@id'];
-        }
+        if (mdService.slice(-1) != '/') mdService += '/';
+        if (mdService.search("/rmm/") < 0)
+            mdService += this.record['ediid'];
+        else
+            mdService += "records?@id=" + this.record['@id'];
 
         // Go To...
         // top of the page
@@ -101,7 +93,7 @@ export class ToolMenuComponent implements OnChanges {
                                 (event) => { this.goToSection(null); }, null)
         );
 
-        // Go To...
+        // Go To Description
         subitems.push(
             this.createMenuItem("Description", "faa faa-arrow-circle-right",
                                 (event) => { this.goToSection('description'); }, null)
@@ -124,7 +116,7 @@ export class ToolMenuComponent implements OnChanges {
         subitems = [
             this.createMenuItem("View Metadata", "faa faa-bars",
                                 (event) => { this.goToSection('metadata'); },null),
-            this.createMenuItem("Export JSON", "faa faa-file-o", null, mdapi)
+            this.createMenuItem("Export JSON", "faa faa-file-o", null, mdService)
         ];
         mitems.push({ label: "Record Details", items: subitems });
 
