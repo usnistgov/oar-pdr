@@ -1,0 +1,956 @@
+{
+  "issued": "2020-05-08", 
+  "_schema": "https://data.nist.gov/od/dm/nerdm-schema/v0.2#", 
+  "topic": [
+    {
+      "tag": "Physics:Atomic, molecular, and quantum", 
+      "@type": "Concept"
+    }, 
+    {
+      "scheme": "https://data.nist.gov/od/dm/nist-themes/v1.1", 
+      "tag": "Metrology: Thermometry metrology", 
+      "@type": "Concept"
+    }, 
+    {
+      "scheme": "https://data.nist.gov/od/dm/nist-themes/v1.1", 
+      "tag": "Metrology: Pressure and vacuum metrology", 
+      "@type": "Concept"
+    }, 
+    {
+      "scheme": "https://data.nist.gov/od/dm/nist-themes/v1.1", 
+      "tag": "Chemistry: Theoretical chemistry and modeling", 
+      "@type": "Concept"
+    }
+  ], 
+  "references": [], 
+  "_extensionSchemas": [
+    "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/PublicDataResource"
+  ], 
+  "accessLevel": "public", 
+  "title": "Calculated values of the second dielectric and refractivity virial coefficients of helium, neon, and argon. ", 
+  "_editStatus": "done", 
+  "theme": [
+    "Physics:Atomic, molecular, and quantum", 
+    "Metrology: Thermometry metrology", 
+    "Metrology: Pressure and vacuum metrology", 
+    "Chemistry: Theoretical chemistry and modeling"
+  ], 
+  "version": "1.3.0", 
+  "programCode": [
+    "006:052"
+  ], 
+  "@context": [
+    "https://data.nist.gov/od/dm/nerdm-pub-context.jsonld", 
+    {
+      "@base": "ark:/88434/mds2-2225"
+    }
+  ], 
+  "description": [
+    "Values of second dielectric and refractivity virial coefficients computed, with rigorous accounting for quantum effects, from state-of-the-art pair potentials and interaction polarizabilities.  Values given at 1 K intervals (finer intervals below 10 K) for helium (both mass 3 and 4 isotopes), neon (both mass 20 and 22 isotopes), and argon (mass 40 isotope).  Upper temperature limit is 2000 K in all cases. Lower temperature limit is 0.5 K for helium, 4 K for neon, 50 K for argon.\\nThese files are Supplemental information to: G. Garberoglio and A.H. Harvey, \"Path-integral Calculation of the Second Dielectric and Refractivity Virial Coefficients of Helium, Neon, and Argon,\" submitted to J. Res. NIST (2020), which describes how the values were calculated."
+  ], 
+  "language": [
+    "en"
+  ], 
+  "bureauCode": [
+    "006:55"
+  ], 
+  "authors": [
+    {
+      "middleName": "H.", 
+      "familyName": "Harvey", 
+      "affiliation": [
+        {
+          "subunits": [
+            "Applied Chemicals and Materials Division"
+          ], 
+          "@id": "ror:05xpvk416", 
+          "@type": "org:Organization", 
+          "title": "National Institute of Standards and Technology"
+        }
+      ], 
+      "orcid": "0000-0002-0072-2332", 
+      "givenName": "Allan", 
+      "@type": "foaf:Person", 
+      "fn": "Allan H. Harvey"
+    }, 
+    {
+      "middleName": "", 
+      "familyName": "Garberoglio", 
+      "affiliation": [
+        {
+          "@type": "org:Organization", 
+          "title": "European Centre for Theoretical Studies in Nuclear Physics and Related Areas (FBK-ECT*)"
+        }
+      ], 
+      "orcid": "0000-0002-9201-2716", 
+      "givenName": "Giovanni", 
+      "@type": "foaf:Person", 
+      "fn": "Giovanni  Garberoglio"
+    }
+  ], 
+  "contactPoint": {
+    "hasEmail": "mailto:allan.harvey@nist.gov", 
+    "fn": "Allan H. Harvey"
+  }, 
+  "landingPage": null, 
+  "@id": "ark:/88434/mds2-2225", 
+  "publisher": {
+    "name": "National Institute of Standards and Technology", 
+    "@type": "org:Organization"
+  }, 
+  "doi": "doi:10.18434/M32225", 
+  "keyword": [
+    "argon", 
+    "dielectric virials", 
+    "helium", 
+    "neon", 
+    "pressure", 
+    "refractivity virials", 
+    "thermometry"
+  ], 
+  "license": "https://www.nist.gov/open/license", 
+  "modified": "2020-04-23", 
+  "ediid": "ark:/88434/mds2-2225", 
+  "components": [
+    {
+      "accessURL": "https://doi.org/10.18434/M32225", 
+      "@id": "#doi:10.18434/M32225", 
+      "@type": [
+        "nrd:Hidden", 
+        "dcat:Distribution"
+      ]
+    }, 
+    {
+      "description": "Second dielectric virial coefficient for helium, calculated classically", 
+      "filepath": "Beps_He_classical.dat", 
+      "checksum": {
+        "hash": "26b9b89c6720a474dc8a6314b6c8009e1162c483861634cfed9dd8017cc815b1", 
+        "algorithm": {
+          "tag": "sha256", 
+          "@type": "Thing"
+        }
+      }, 
+      "format": {
+        "description": "ASCII .dat file"
+      }, 
+      "mediaType": "application/octet-stream", 
+      "downloadURL": "https://data.nist.gov/od/ds/mds2-2225/Beps_He_classical.dat", 
+      "title": "Classical B_eps for helium", 
+      "size": 32424, 
+      "@id": "cmps/Beps_He_classical.dat", 
+      "@type": [
+        "nrdp:DataFile", 
+        "nrdp:DownloadableFile", 
+        "dcat:Distribution"
+      ], 
+      "_extensionSchemas": [
+        "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/DataFile"
+      ]
+    }, 
+    {
+      "size": 64, 
+      "description": "SHA-256 checksum value for Beps_He4.dat", 
+      "algorithm": {
+        "tag": "sha256", 
+        "@type": "Thing"
+      }, 
+      "filepath": "Beps_He4.dat.sha256", 
+      "checksum": {
+        "hash": "009a2943176b1ee9f23d63cdf0c9ab99b0b4a37b18d4314a0d70d9717a067ec1", 
+        "algorithm": {
+          "tag": "sha256", 
+          "@type": "Thing"
+        }
+      }, 
+      "mediaType": "text/plain", 
+      "downloadURL": "https://data.nist.gov/od/ds/mds2-2225/Beps_He4.dat.sha256", 
+      "valid": true, 
+      "_status": "in progress", 
+      "describes": "cmps/Beps_He4.dat", 
+      "@id": "cmps/Beps_He4.dat.sha256", 
+      "@type": [
+        "nrdp:ChecksumFile", 
+        "nrdp:DownloadableFile", 
+        "dcat:Distribution"
+      ], 
+      "_extensionSchemas": [
+        "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/ChecksumFile"
+      ]
+    }, 
+    {
+      "size": 64, 
+      "description": "SHA-256 checksum value for BR_Ne20.dat", 
+      "algorithm": {
+        "tag": "sha256", 
+        "@type": "Thing"
+      }, 
+      "filepath": "BR_Ne20.dat.sha256", 
+      "checksum": {
+        "hash": "1b3a85da4c2e04b138ddb075ff93495843a020d014888b14736cdc44b7e4aa49", 
+        "algorithm": {
+          "tag": "sha256", 
+          "@type": "Thing"
+        }
+      }, 
+      "mediaType": "text/plain", 
+      "downloadURL": "https://data.nist.gov/od/ds/mds2-2225/BR_Ne20.dat.sha256", 
+      "valid": true, 
+      "_status": "in progress", 
+      "describes": "cmps/BR_Ne20.dat", 
+      "@id": "cmps/BR_Ne20.dat.sha256", 
+      "@type": [
+        "nrdp:ChecksumFile", 
+        "nrdp:DownloadableFile", 
+        "dcat:Distribution"
+      ], 
+      "_extensionSchemas": [
+        "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/ChecksumFile"
+      ]
+    }, 
+    {
+      "size": 64, 
+      "description": "SHA-256 checksum value for Beps_Ne20.dat", 
+      "algorithm": {
+        "tag": "sha256", 
+        "@type": "Thing"
+      }, 
+      "filepath": "Beps_Ne20.dat.sha256", 
+      "checksum": {
+        "hash": "20a1d0a6e78011dffb5019df1c207a1d814ab12eb5f4cb4a313241bac5cb3972", 
+        "algorithm": {
+          "tag": "sha256", 
+          "@type": "Thing"
+        }
+      }, 
+      "mediaType": "text/plain", 
+      "downloadURL": "https://data.nist.gov/od/ds/mds2-2225/Beps_Ne20.dat.sha256", 
+      "valid": true, 
+      "_status": "in progress", 
+      "describes": "cmps/Beps_Ne20.dat", 
+      "@id": "cmps/Beps_Ne20.dat.sha256", 
+      "@type": [
+        "nrdp:ChecksumFile", 
+        "nrdp:DownloadableFile", 
+        "dcat:Distribution"
+      ], 
+      "_extensionSchemas": [
+        "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/ChecksumFile"
+      ]
+    }, 
+    {
+      "size": 64, 
+      "description": "SHA-256 checksum value for Beps_He_classical.dat", 
+      "algorithm": {
+        "tag": "sha256", 
+        "@type": "Thing"
+      }, 
+      "filepath": "Beps_He_classical.dat.sha256", 
+      "checksum": {
+        "hash": "82153f69f12d16c127a2365f37682a25492512971204bf6af32fb0c21234a540", 
+        "algorithm": {
+          "tag": "sha256", 
+          "@type": "Thing"
+        }
+      }, 
+      "mediaType": "text/plain", 
+      "downloadURL": "https://data.nist.gov/od/ds/mds2-2225/Beps_He_classical.dat.sha256", 
+      "valid": true, 
+      "_status": "in progress", 
+      "describes": "cmps/Beps_He_classical.dat", 
+      "@id": "cmps/Beps_He_classical.dat.sha256", 
+      "@type": [
+        "nrdp:ChecksumFile", 
+        "nrdp:DownloadableFile", 
+        "dcat:Distribution"
+      ], 
+      "_extensionSchemas": [
+        "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/ChecksumFile"
+      ]
+    }, 
+    {
+      "description": "Second dielectric virial coefficient for neon-20, calculated fully quantum", 
+      "filepath": "Beps_Ne20.dat", 
+      "checksum": {
+        "hash": "8269d3bbe9b3cd01863e5956cdc579cd6ec3e8dadeaf1c832d73e9ad9e0630d9", 
+        "algorithm": {
+          "tag": "sha256", 
+          "@type": "Thing"
+        }
+      }, 
+      "format": {
+        "description": "ASCII .dat file"
+      }, 
+      "mediaType": "application/octet-stream", 
+      "downloadURL": "https://data.nist.gov/od/ds/mds2-2225/Beps_Ne20.dat", 
+      "title": "B_eps for neon-20", 
+      "size": 29625, 
+      "@id": "cmps/Beps_Ne20.dat", 
+      "@type": [
+        "nrdp:DataFile", 
+        "nrdp:DownloadableFile", 
+        "dcat:Distribution"
+      ], 
+      "_extensionSchemas": [
+        "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/DataFile"
+      ]
+    }, 
+    {
+      "description": "Second refractivity virial coefficient and dispersion correction factor for argon-40", 
+      "filepath": "BR_Ar40.dat", 
+      "checksum": {
+        "hash": "2bc92c40f2cd505fb20f0bf7bfbe04d038f81dccd45593a3a6ea2acfd6e8f132", 
+        "algorithm": {
+          "tag": "sha256", 
+          "@type": "Thing"
+        }
+      }, 
+      "format": {
+        "description": "ASCII .dat file"
+      }, 
+      "mediaType": "application/octet-stream", 
+      "downloadURL": "https://data.nist.gov/od/ds/mds2-2225/BR_Ar40.dat", 
+      "title": "B_R for argon-40", 
+      "size": 41583, 
+      "@id": "cmps/BR_Ar40.dat", 
+      "@type": [
+        "nrdp:DataFile", 
+        "nrdp:DownloadableFile", 
+        "dcat:Distribution"
+      ], 
+      "_extensionSchemas": [
+        "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/DataFile"
+      ]
+    }, 
+    {
+      "description": "Second refractivity virial coefficient and dispersion correction factor for helium-4", 
+      "filepath": "BR_He4.dat", 
+      "checksum": {
+        "hash": "9e045d81aa81e497d2aa92b6255c26f9a803263564d01619a3a112049927ae8a", 
+        "algorithm": {
+          "tag": "sha256", 
+          "@type": "Thing"
+        }
+      }, 
+      "format": {
+        "description": "ASCII .dat file"
+      }, 
+      "mediaType": "application/octet-stream", 
+      "downloadURL": "https://data.nist.gov/od/ds/mds2-2225/BR_He4.dat", 
+      "title": "B_R for helium-4", 
+      "size": 45878, 
+      "@id": "cmps/BR_He4.dat", 
+      "@type": [
+        "nrdp:DataFile", 
+        "nrdp:DownloadableFile", 
+        "dcat:Distribution"
+      ], 
+      "_extensionSchemas": [
+        "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/DataFile"
+      ]
+    }, 
+    {
+      "size": 64, 
+      "description": "SHA-256 checksum value for BR_He4.dat", 
+      "algorithm": {
+        "tag": "sha256", 
+        "@type": "Thing"
+      }, 
+      "filepath": "BR_He4.dat.sha256", 
+      "checksum": {
+        "hash": "7a7b5bc3548de82bb548e140c44baa2b4b5b49ada6cafc8a869d8bb61407c368", 
+        "algorithm": {
+          "tag": "sha256", 
+          "@type": "Thing"
+        }
+      }, 
+      "mediaType": "text/plain", 
+      "downloadURL": "https://data.nist.gov/od/ds/mds2-2225/BR_He4.dat.sha256", 
+      "valid": true, 
+      "_status": "in progress", 
+      "describes": "cmps/BR_He4.dat", 
+      "@id": "cmps/BR_He4.dat.sha256", 
+      "@type": [
+        "nrdp:ChecksumFile", 
+        "nrdp:DownloadableFile", 
+        "dcat:Distribution"
+      ], 
+      "_extensionSchemas": [
+        "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/ChecksumFile"
+      ]
+    }, 
+    {
+      "size": 64, 
+      "description": "SHA-256 checksum value for Beps_Ar_classical.dat", 
+      "algorithm": {
+        "tag": "sha256", 
+        "@type": "Thing"
+      }, 
+      "filepath": "Beps_Ar_classical.dat.sha256", 
+      "checksum": {
+        "hash": "c6c2da736a23129ca0f01b5937b3fb8ddb8ea38dd6e254828f92c52b02c92d76", 
+        "algorithm": {
+          "tag": "sha256", 
+          "@type": "Thing"
+        }
+      }, 
+      "title": "SHA256 File for Classical B_eps for argon", 
+      "mediaType": "text/plain", 
+      "downloadURL": "https://data.nist.gov/od/ds/mds2-2225/Beps_Ar_classical.dat.sha256", 
+      "valid": true, 
+      "describes": "cmps/Beps_Ar_classical.dat", 
+      "@id": "cmps/Beps_Ar_classical.dat.sha256", 
+      "@type": [
+        "nrdp:ChecksumFile", 
+        "nrdp:DownloadableFile", 
+        "dcat:Distribution"
+      ], 
+      "_extensionSchemas": [
+        "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/ChecksumFile"
+      ]
+    }, 
+    {
+      "description": "Second dielectric virial coefficient of argon-40, quantum calculation, with its expanded uncertainty.", 
+      "filepath": "Beps_Ar40.dat", 
+      "checksum": {
+        "hash": "d5cf70f334b1cbcb1ad50c88eac864d6cd5a0675bbb00ca2edce1c573f701296", 
+        "algorithm": {
+          "tag": "sha256", 
+          "@type": "Thing"
+        }
+      }, 
+      "format": {
+        "description": "ASCII .dat file"
+      }, 
+      "mediaType": "application/octet-stream", 
+      "downloadURL": "https://data.nist.gov/od/ds/mds2-2225/Beps_Ar40.dat", 
+      "title": "B_eps for argon-40", 
+      "size": 41730, 
+      "@id": "cmps/Beps_Ar40.dat", 
+      "@type": [
+        "nrdp:DataFile", 
+        "nrdp:DownloadableFile", 
+        "dcat:Distribution"
+      ], 
+      "_extensionSchemas": [
+        "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/DataFile"
+      ]
+    }, 
+    {
+      "description": "Readme file documenting the various data files", 
+      "filepath": "Readme.txt", 
+      "checksum": {
+        "hash": "32148155b3cb040afe0663a1cb951cd8f50625db51d5ace7fdfccc9e35c72343", 
+        "algorithm": {
+          "tag": "sha256", 
+          "@type": "Thing"
+        }
+      }, 
+      "format": {
+        "description": "txt file"
+      }, 
+      "mediaType": "text/plain", 
+      "downloadURL": "https://data.nist.gov/od/ds/mds2-2225/Readme.txt", 
+      "title": "Readme.txt", 
+      "size": 1737, 
+      "@id": "cmps/Readme.txt", 
+      "@type": [
+        "nrdp:DataFile", 
+        "nrdp:DownloadableFile", 
+        "dcat:Distribution"
+      ], 
+      "_extensionSchemas": [
+        "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/DataFile"
+      ]
+    }, 
+    {
+      "description": "Second refractivity virial coefficient and dispersion correction factor for helium-3", 
+      "filepath": "BR_He3.dat", 
+      "checksum": {
+        "hash": "e9da6dbc8a21d9853f3e91090c55e63183b3ef5b43ca52a08af9eb1acba79e0c", 
+        "algorithm": {
+          "tag": "sha256", 
+          "@type": "Thing"
+        }
+      }, 
+      "format": {
+        "description": "ASCII .dat file"
+      }, 
+      "mediaType": "application/octet-stream", 
+      "downloadURL": "https://data.nist.gov/od/ds/mds2-2225/BR_He3.dat", 
+      "title": "B_R for helium-3", 
+      "size": 45905, 
+      "@id": "cmps/BR_He3.dat", 
+      "@type": [
+        "nrdp:DataFile", 
+        "nrdp:DownloadableFile", 
+        "dcat:Distribution"
+      ], 
+      "_extensionSchemas": [
+        "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/DataFile"
+      ]
+    }, 
+    {
+      "size": 64, 
+      "description": "SHA-256 checksum value for BR_He3.dat", 
+      "algorithm": {
+        "tag": "sha256", 
+        "@type": "Thing"
+      }, 
+      "filepath": "BR_He3.dat.sha256", 
+      "checksum": {
+        "hash": "510c8ab6aef490316a279a11f2cfd4e05a16bf34c15fc6ffb2e5fbf0240b1010", 
+        "algorithm": {
+          "tag": "sha256", 
+          "@type": "Thing"
+        }
+      }, 
+      "mediaType": "text/plain", 
+      "downloadURL": "https://data.nist.gov/od/ds/mds2-2225/BR_He3.dat.sha256", 
+      "valid": true, 
+      "_status": "in progress", 
+      "describes": "cmps/BR_He3.dat", 
+      "@id": "cmps/BR_He3.dat.sha256", 
+      "@type": [
+        "nrdp:ChecksumFile", 
+        "nrdp:DownloadableFile", 
+        "dcat:Distribution"
+      ], 
+      "_extensionSchemas": [
+        "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/ChecksumFile"
+      ]
+    }, 
+    {
+      "size": 64, 
+      "description": "SHA-256 checksum value for BR_Ar40.dat", 
+      "algorithm": {
+        "tag": "sha256", 
+        "@type": "Thing"
+      }, 
+      "filepath": "BR_Ar40.dat.sha256", 
+      "checksum": {
+        "hash": "1c8631f3e896fd4a3c74a5828474bc3491c9054fe5cb391a19feeafdc065eacb", 
+        "algorithm": {
+          "tag": "sha256", 
+          "@type": "Thing"
+        }
+      }, 
+      "mediaType": "text/plain", 
+      "downloadURL": "https://data.nist.gov/od/ds/mds2-2225/BR_Ar40.dat.sha256", 
+      "valid": true, 
+      "_status": "in progress", 
+      "describes": "cmps/BR_Ar40.dat", 
+      "@id": "cmps/BR_Ar40.dat.sha256", 
+      "@type": [
+        "nrdp:ChecksumFile", 
+        "nrdp:DownloadableFile", 
+        "dcat:Distribution"
+      ], 
+      "_extensionSchemas": [
+        "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/ChecksumFile"
+      ]
+    }, 
+    {
+      "size": 64, 
+      "description": "SHA-256 checksum value for Beps_Ar40.dat", 
+      "algorithm": {
+        "tag": "sha256", 
+        "@type": "Thing"
+      }, 
+      "filepath": "Beps_Ar40.dat.sha256", 
+      "checksum": {
+        "hash": "66c7991d4e88fbd77b540c2ae50e91ef6bd59ab50f6f9bd552295a168b7f842b", 
+        "algorithm": {
+          "tag": "sha256", 
+          "@type": "Thing"
+        }
+      }, 
+      "title": "SHA256 File for B_eps for argon-40", 
+      "mediaType": "text/plain", 
+      "downloadURL": "https://data.nist.gov/od/ds/mds2-2225/Beps_Ar40.dat.sha256", 
+      "valid": true, 
+      "describes": "cmps/Beps_Ar40.dat", 
+      "@id": "cmps/Beps_Ar40.dat.sha256", 
+      "@type": [
+        "nrdp:ChecksumFile", 
+        "nrdp:DownloadableFile", 
+        "dcat:Distribution"
+      ], 
+      "_extensionSchemas": [
+        "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/ChecksumFile"
+      ]
+    }, 
+    {
+      "description": "Second dielectric virial coefficient for helium-4, calculated fully quantum, with its expanded uncertainty.", 
+      "filepath": "Beps_He4.dat", 
+      "checksum": {
+        "hash": "a2e7a8dfe3c08bc8b46620e74cd96466734a5e79cecebc0ca498dca284041328", 
+        "algorithm": {
+          "tag": "sha256", 
+          "@type": "Thing"
+        }
+      }, 
+      "format": {
+        "description": "ASCII .dat file"
+      }, 
+      "mediaType": "application/octet-stream", 
+      "downloadURL": "https://data.nist.gov/od/ds/mds2-2225/Beps_He4.dat", 
+      "title": "B_eps for helium-4", 
+      "size": 50421, 
+      "@id": "cmps/Beps_He4.dat", 
+      "@type": [
+        "nrdp:DataFile", 
+        "nrdp:DownloadableFile", 
+        "dcat:Distribution"
+      ], 
+      "_extensionSchemas": [
+        "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/DataFile"
+      ]
+    }, 
+    {
+      "size": 64, 
+      "description": "SHA-256 checksum value for Beps_Ne22.dat", 
+      "algorithm": {
+        "tag": "sha256", 
+        "@type": "Thing"
+      }, 
+      "filepath": "Beps_Ne22.dat.sha256", 
+      "checksum": {
+        "hash": "afc553e1c60dac3ff414eac4ff95e72ad507a2a32b45af741d856b0774eba6ec", 
+        "algorithm": {
+          "tag": "sha256", 
+          "@type": "Thing"
+        }
+      }, 
+      "mediaType": "text/plain", 
+      "downloadURL": "https://data.nist.gov/od/ds/mds2-2225/Beps_Ne22.dat.sha256", 
+      "valid": true, 
+      "_status": "in progress", 
+      "describes": "cmps/Beps_Ne22.dat", 
+      "@id": "cmps/Beps_Ne22.dat.sha256", 
+      "@type": [
+        "nrdp:ChecksumFile", 
+        "nrdp:DownloadableFile", 
+        "dcat:Distribution"
+      ], 
+      "_extensionSchemas": [
+        "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/ChecksumFile"
+      ]
+    }, 
+    {
+      "description": "Second refractivity virial coefficient and dispersion correction factor for neon-22", 
+      "filepath": "BR_Ne22.dat", 
+      "checksum": {
+        "hash": "935ad00a1ca302394a051cd3fc1ef601a4bfd06adfc1d13e369124d1c14ae25d", 
+        "algorithm": {
+          "tag": "sha256", 
+          "@type": "Thing"
+        }
+      }, 
+      "format": {
+        "description": "ASCII .dat file"
+      }, 
+      "mediaType": "application/octet-stream", 
+      "downloadURL": "https://data.nist.gov/od/ds/mds2-2225/BR_Ne22.dat", 
+      "title": "B_R for neon-22", 
+      "size": 48778, 
+      "@id": "cmps/BR_Ne22.dat", 
+      "@type": [
+        "nrdp:DataFile", 
+        "nrdp:DownloadableFile", 
+        "dcat:Distribution"
+      ], 
+      "_extensionSchemas": [
+        "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/DataFile"
+      ]
+    }, 
+    {
+      "size": 64, 
+      "description": "SHA-256 checksum value for BR_Ne22.dat", 
+      "algorithm": {
+        "tag": "sha256", 
+        "@type": "Thing"
+      }, 
+      "filepath": "BR_Ne22.dat.sha256", 
+      "checksum": {
+        "hash": "f439b7c7cd5f6141a4b2836eff842b15d66c0db02757f044a026c78ddd292ec2", 
+        "algorithm": {
+          "tag": "sha256", 
+          "@type": "Thing"
+        }
+      }, 
+      "mediaType": "text/plain", 
+      "downloadURL": "https://data.nist.gov/od/ds/mds2-2225/BR_Ne22.dat.sha256", 
+      "valid": true, 
+      "_status": "in progress", 
+      "describes": "cmps/BR_Ne22.dat", 
+      "@id": "cmps/BR_Ne22.dat.sha256", 
+      "@type": [
+        "nrdp:ChecksumFile", 
+        "nrdp:DownloadableFile", 
+        "dcat:Distribution"
+      ], 
+      "_extensionSchemas": [
+        "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/ChecksumFile"
+      ]
+    }, 
+    {
+      "description": "Second dielectric virial coefficient for neon, calculated classically", 
+      "filepath": "Beps_Ne_classical.dat", 
+      "checksum": {
+        "hash": "52b96ea7da3cfa717769813000d45c9c2527d137ce1cb2ea190da94d6692bdf7", 
+        "algorithm": {
+          "tag": "sha256", 
+          "@type": "Thing"
+        }
+      }, 
+      "format": {
+        "description": "ASCII .dat file"
+      }, 
+      "mediaType": "application/octet-stream", 
+      "downloadURL": "https://data.nist.gov/od/ds/mds2-2225/Beps_Ne_classical.dat", 
+      "title": "Classical B_eps for neon", 
+      "size": 53365, 
+      "@id": "cmps/Beps_Ne_classical.dat", 
+      "@type": [
+        "nrdp:DataFile", 
+        "nrdp:DownloadableFile", 
+        "dcat:Distribution"
+      ], 
+      "_extensionSchemas": [
+        "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/DataFile"
+      ]
+    }, 
+    {
+      "size": 64, 
+      "description": "SHA-256 checksum value for Beps_Ne_classical.dat", 
+      "algorithm": {
+        "tag": "sha256", 
+        "@type": "Thing"
+      }, 
+      "filepath": "Beps_Ne_classical.dat.sha256", 
+      "checksum": {
+        "hash": "7a57f2459e2cfc7162fc36ffc09f3edf9c164aff68f5b544b84b0060d54010b1", 
+        "algorithm": {
+          "tag": "sha256", 
+          "@type": "Thing"
+        }
+      }, 
+      "mediaType": "text/plain", 
+      "downloadURL": "https://data.nist.gov/od/ds/mds2-2225/Beps_Ne_classical.dat.sha256", 
+      "valid": true, 
+      "_status": "in progress", 
+      "describes": "cmps/Beps_Ne_classical.dat", 
+      "@id": "cmps/Beps_Ne_classical.dat.sha256", 
+      "@type": [
+        "nrdp:ChecksumFile", 
+        "nrdp:DownloadableFile", 
+        "dcat:Distribution"
+      ], 
+      "_extensionSchemas": [
+        "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/ChecksumFile"
+      ]
+    }, 
+    {
+      "size": 64, 
+      "description": "SHA-256 checksum value for Readme.txt", 
+      "algorithm": {
+        "tag": "sha256", 
+        "@type": "Thing"
+      }, 
+      "filepath": "Readme.txt.sha256", 
+      "checksum": {
+        "hash": "306ce2129da19836afed6a2d39c979fb0d33b7e24a90f138c183e91bc33f2207", 
+        "algorithm": {
+          "tag": "sha256", 
+          "@type": "Thing"
+        }
+      }, 
+      "title": "SHA256 File for Readme", 
+      "mediaType": "text/plain", 
+      "downloadURL": "https://data.nist.gov/od/ds/mds2-2225/Readme.txt.sha256", 
+      "valid": true, 
+      "describes": "cmps/Readme.txt", 
+      "@id": "cmps/Readme.txt.sha256", 
+      "@type": [
+        "nrdp:ChecksumFile", 
+        "nrdp:DownloadableFile", 
+        "dcat:Distribution"
+      ], 
+      "_extensionSchemas": [
+        "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/ChecksumFile"
+      ]
+    }, 
+    {
+      "size": 64, 
+      "description": "SHA-256 checksum value for Beps_He3.dat", 
+      "algorithm": {
+        "tag": "sha256", 
+        "@type": "Thing"
+      }, 
+      "filepath": "Beps_He3.dat.sha256", 
+      "checksum": {
+        "hash": "8efc05e0fd8dc16db2c112712263c9e32d4616fad8e315972091e7e39a1d005a", 
+        "algorithm": {
+          "tag": "sha256", 
+          "@type": "Thing"
+        }
+      }, 
+      "mediaType": "text/plain", 
+      "downloadURL": "https://data.nist.gov/od/ds/mds2-2225/Beps_He3.dat.sha256", 
+      "valid": true, 
+      "_status": "in progress", 
+      "describes": "cmps/Beps_He3.dat", 
+      "@id": "cmps/Beps_He3.dat.sha256", 
+      "@type": [
+        "nrdp:ChecksumFile", 
+        "nrdp:DownloadableFile", 
+        "dcat:Distribution"
+      ], 
+      "_extensionSchemas": [
+        "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/ChecksumFile"
+      ]
+    }, 
+    {
+      "description": "Second refractivity virial coefficient and dispersion correction factor for neon-20", 
+      "filepath": "BR_Ne20.dat", 
+      "checksum": {
+        "hash": "afb479ab53374da3767c3e5df9566295a9692622835a722deb47a0ba2e667312", 
+        "algorithm": {
+          "tag": "sha256", 
+          "@type": "Thing"
+        }
+      }, 
+      "format": {
+        "description": "ASCII .dat file"
+      }, 
+      "mediaType": "application/octet-stream", 
+      "downloadURL": "https://data.nist.gov/od/ds/mds2-2225/BR_Ne20.dat", 
+      "title": "B_R for neon-20", 
+      "size": 48838, 
+      "@id": "cmps/BR_Ne20.dat", 
+      "@type": [
+        "nrdp:DataFile", 
+        "nrdp:DownloadableFile", 
+        "dcat:Distribution"
+      ], 
+      "_extensionSchemas": [
+        "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/DataFile"
+      ]
+    }, 
+    {
+      "description": "Second dielectric virial coefficient for neon-22, calculated fully quantum", 
+      "filepath": "Beps_Ne22.dat", 
+      "checksum": {
+        "hash": "bdcbff05550b7f0949a2a1368f1f82966ecb14314290f96635ff6f7c66063600", 
+        "algorithm": {
+          "tag": "sha256", 
+          "@type": "Thing"
+        }
+      }, 
+      "format": {
+        "description": "ASCII .dat file"
+      }, 
+      "mediaType": "application/octet-stream", 
+      "downloadURL": "https://data.nist.gov/od/ds/mds2-2225/Beps_Ne22.dat", 
+      "title": "B_eps for neon-22", 
+      "size": 29587, 
+      "@id": "cmps/Beps_Ne22.dat", 
+      "@type": [
+        "nrdp:DataFile", 
+        "nrdp:DownloadableFile", 
+        "dcat:Distribution"
+      ], 
+      "_extensionSchemas": [
+        "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/DataFile"
+      ]
+    }, 
+    {
+      "description": "Second dielectric virial coefficient for argon, calculated classically", 
+      "filepath": "Beps_Ar_classical.dat", 
+      "checksum": {
+        "hash": "63e42ec5f26a75da92d789a0c54e4448781a6e33d42436219f227df0ad2b9e32", 
+        "algorithm": {
+          "tag": "sha256", 
+          "@type": "Thing"
+        }
+      }, 
+      "format": {
+        "description": "ASCII .dat file"
+      }, 
+      "mediaType": "application/octet-stream", 
+      "downloadURL": "https://data.nist.gov/od/ds/mds2-2225/Beps_Ar_classical.dat", 
+      "title": "Classical B_eps for argon", 
+      "size": 25146, 
+      "@id": "cmps/Beps_Ar_classical.dat", 
+      "@type": [
+        "nrdp:DataFile", 
+        "nrdp:DownloadableFile", 
+        "dcat:Distribution"
+      ], 
+      "_extensionSchemas": [
+        "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/DataFile"
+      ]
+    }, 
+    {
+      "description": "Second dielectric virial coefficient for helium-3, calculated fully quantum, with its expanded uncertainty", 
+      "filepath": "Beps_He3.dat", 
+      "checksum": {
+        "hash": "95dcbe304bc90ca7b085e2465725b547a78dd175d6afa71c9c184cab0e5685f8", 
+        "algorithm": {
+          "tag": "sha256", 
+          "@type": "Thing"
+        }
+      }, 
+      "format": {
+        "description": "ASCII .dat file"
+      }, 
+      "mediaType": "application/octet-stream", 
+      "downloadURL": "https://data.nist.gov/od/ds/mds2-2225/Beps_He3.dat", 
+      "title": "B_eps for helium-3", 
+      "size": 41069, 
+      "@id": "cmps/Beps_He3.dat", 
+      "@type": [
+        "nrdp:DataFile", 
+        "nrdp:DownloadableFile", 
+        "dcat:Distribution"
+      ], 
+      "_extensionSchemas": [
+        "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/DataFile"
+      ]
+    }
+  ], 
+  "versionHistory": [
+    {
+      "issued": "2020-04-23 00:00:00", 
+      "version": "1.0.0", 
+      "@id": "ark:/88434/mds2-2225", 
+      "location": "https://data.nist.gov/od/id/ark:/88434/mds2-2225", 
+      "description": "initial release"
+    }, 
+    {
+      "issued": "2020-04-23 00:00:00", 
+      "version": "1.1.0", 
+      "@id": "ark:/88434/mds2-2225", 
+      "location": "https://data.nist.gov/od/id/ark:/88434/mds2-2225", 
+      "description": "data update"
+    }, 
+    {
+      "issued": "2020-04-23 00:00:00", 
+      "version": "1.2.0", 
+      "@id": "ark:/88434/mds2-2225", 
+      "location": "https://data.nist.gov/od/id/ark:/88434/mds2-2225", 
+      "description": "data update"
+    }, 
+    {
+      "issued": "2020-04-23", 
+      "version": "1.3.0", 
+      "@id": "ark:/88434/mds2-2225", 
+      "location": "https://data.nist.gov/od/id/ark:/88434/mds2-2225", 
+      "description": "data update"
+    }
+  ], 
+  "@type": [
+    "nrdp:PublicDataResource", 
+    "dcat:Dataset"
+  ]
+}

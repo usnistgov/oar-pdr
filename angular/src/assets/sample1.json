@@ -1,5 +1,4 @@
 {
-    "_id" : ObjectId("5bc4c4dfb4c0630145163c6f"),
     "_schema" : "https://data.nist.gov/od/dm/nerdm-schema/v0.2#",
     "topic" : [],
     "_extensionSchemas" : [ 
