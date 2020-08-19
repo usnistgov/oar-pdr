@@ -87,15 +87,24 @@ describe('LandingComponent', () => {
         fixture.detectChanges();
     }
 
-    it("includes landing display", function() {
+    fit("includes landing display", function() {
         setupComponent();
         let cmpel = fixture.nativeElement;
         let el = cmpel.querySelector("h2"); 
         expect(el.textContent).toContain(nrd.title);
+
+        component.useMetadata();
+        expect(component.recordType).toEqual("Public Data Resource");
+    });
+
+    fit("dataset type's proper label is shown (Data Publication)", function() {
+        nrd['@type'] = [ "nrdp:DataPublication", "nrdp:DataPublicResource", "dcat:Dataset" ];
+        setupComponent();
+        component.useMetadata();
+        expect(component.recordType).toEqual("Data Publication");
     });
 
     it("can detect PDR landing pages", function() {
-        setupComponent();
         expect(component.displayHomePageLink()).toBeTruthy();
         component.record.landingPage = "https://data.nist.gov/od/id/mds2-111";
         expect(component.displayHomePageLink()).toBeFalsy();
