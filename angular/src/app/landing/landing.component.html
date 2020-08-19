@@ -23,7 +23,7 @@
                         <span>Described in article: </span>
                         <small *ngFor="let refs of record['references']; let i =index">
                             <span style="padding-left:2.75em" *ngIf="refs.refType == 'IsDocumentedBy'">
-                                <br><i class="faa faa-external-link">
+                                <br><i class="faa faa-external-link"> &nbsp;
                                     <a class="font14" href={{refs.location}} target="blank"
                                         (click)="gaService.gaTrackEvent('outbound', $event, 'Resource title: ' + record.title, refs.location)">{{ refs.label }}</a></i>
                                 <span *ngIf="i < record.references.length-1 ">,</span>
