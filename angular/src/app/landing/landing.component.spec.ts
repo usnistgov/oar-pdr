@@ -105,6 +105,7 @@ describe('LandingComponent', () => {
     });
 
     it("can detect PDR landing pages", function() {
+        setupComponent();
         expect(component.displayHomePageLink()).toBeTruthy();
         component.record.landingPage = "https://data.nist.gov/od/id/mds2-111";
         expect(component.displayHomePageLink()).toBeFalsy();
