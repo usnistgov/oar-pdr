@@ -87,7 +87,7 @@ describe('LandingComponent', () => {
         fixture.detectChanges();
     }
 
-    fit("includes landing display", function() {
+    it("includes landing display", function() {
         setupComponent();
         let cmpel = fixture.nativeElement;
         let el = cmpel.querySelector("h2"); 
@@ -97,7 +97,7 @@ describe('LandingComponent', () => {
         expect(component.recordType).toEqual("Public Data Resource");
     });
 
-    fit("dataset type's proper label is shown (Data Publication)", function() {
+    it("dataset type's proper label is shown (Data Publication)", function() {
         nrd['@type'] = [ "nrdp:DataPublication", "nrdp:DataPublicResource", "dcat:Dataset" ];
         setupComponent();
         component.useMetadata();
