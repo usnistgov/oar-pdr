@@ -904,6 +904,7 @@ class MIDAS3SIPHandler(SIPHandler):
         try:
             bagdir = self.bagger.make_bag()
             self.bagger.bagbldr.record("Preservation bag is built and ready to be serialized.")
+            self.bagger.done();  # disconnect the log
         finally:
             if hasattr(self.bagger, 'bagbldr') and self.bagger.bagbldr:
                 self.bagger.bagbldr._unset_logfile() # disengage the internal log
