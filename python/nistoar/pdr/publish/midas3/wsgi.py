@@ -713,7 +713,7 @@ class PreserveHandler(Handler):
             elif out['state'] == ps.SUCCESSFUL:
                 log.info("SIP update request completed synchronously: "+
                          sipid)
-                self.set_response(200, "SIP update completed successfully")
+                self.set_response(201, "SIP update completed successfully")
             elif out['state'] == ps.CONFLICT:
                 log.error(out['message'])
                 out['state'] = ps.FAILED

@@ -358,7 +358,10 @@ for pod in "${pods[@]}"; do
     if [ ${idcount[$id]} -gt 0 ]; then
         curlcmd=(curl -o /dev/null -s -w '%{http_code}\n' -X PATCH -H 'Authorization: Bearer secret' http://localhost:9090/preserve/midas/$id)
         respcode=`"${curlcmd[@]}"`
-        if [ "$respcode" != "200" -a "$respcode" != "202" ]; then
+        #
+        # NOTE:  changing response to 201 (from 200)
+        #
+        if [ "$respcode" != "201" -a "$respcode" != "202" ]; then
             tell '---------------------------------------'
             tell FAILED
             tell "${curlcmd[@]}"
@@ -368,7 +371,7 @@ for pod in "${pods[@]}"; do
             tell "${curlcmd[@]}"
         fi            
         ((count += 1))
-        [ "$respcode" == "200" ] || sleep 1
+        [ "$respcode" == "201" ] || sleep 1
 
         [ -f "$workdir/store/$localid.1_${idcount[$id]}_0.mbag0_4-${idcount[$id]}.zip" ] || {
             tell '---------------------------------------'
