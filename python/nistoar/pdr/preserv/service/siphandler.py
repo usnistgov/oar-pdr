@@ -984,13 +984,22 @@ class MIDAS3SIPHandler(SIPHandler):
             cksfiles = [f for f in savefiles if ckspat.search(f)]
             cksfiles.sort(key=lambda f: int(ckspat.search(f).group(1)),
                           reverse=True)
-            log.debug("copying %s checksum files to %s",
-                      str(len(cksfiles)), self.bagger.bagparent)
+
+            # put checksums where MIDAS can find them.  With new ARK identifiers, MIDAS expects
+            # ark prefix to be part of the checksum file path.
+            cksdir = self.bagger.bagparent
+            m = re.search(r'^ark:/(\d+)/', self._sipid)
+            if m and self.cfg.get("bag_checksum_in_ark_subdir", True):
+                cksdir = os.path.join(cksdir, "ark:", m.group(1))
+                if not os.path.exists(cksdir):
+                    os.makedirs(cksdir);
+                            
+            log.debug("copying %s checksum files to %s", str(len(cksfiles)), cksdir)
             cpfailures = []
             for f in cksfiles:
                 try:
                     sigfile = sigbase+ckspat.search(f).group(1)+'.sha256'
-                    sigfile = os.path.join(self.bagger.bagparent,sigfile)
+                    sigfile = os.path.join(cksdir, sigfile)
                     log.debug("copying checksum file to %s", sigfile)
                     shutil.copyfile(f, sigfile)
                 except Exception, ex:
