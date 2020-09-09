@@ -92,6 +92,16 @@ describe('LandingComponent', () => {
         let cmpel = fixture.nativeElement;
         let el = cmpel.querySelector("h2"); 
         expect(el.textContent).toContain(nrd.title);
+
+        component.useMetadata();
+        expect(component.recordType).toEqual("Public Data Resource");
+    });
+
+    it("dataset type's proper label is shown (Data Publication)", function() {
+        nrd['@type'] = [ "nrdp:DataPublication", "nrdp:DataPublicResource", "dcat:Dataset" ];
+        setupComponent();
+        component.useMetadata();
+        expect(component.recordType).toEqual("Data Publication");
     });
 
     it("can detect PDR landing pages", function() {

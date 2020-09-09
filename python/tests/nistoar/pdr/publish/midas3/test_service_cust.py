@@ -214,11 +214,43 @@ class TestMIDAS3PublishingServiceDraft(test.TestCase):
         self.assertEqual(nerdm['authors'][0]['affiliation'][0]['subunits'], ["MML","ODI"])
         self.assertNotIn('title', nerdm)
 
+        # ensure that @type has DataPublication in it
+        self.assertIn('@type', nerdm)
+        self.assertIn('nrdp:DataPublication', nerdm.get('@type'))
+
         nerdf = os.path.join(self.nrddir, self.midasid+".json")
         self.assertTrue(os.path.isfile(nerdf))
         nerdm = utils.read_json(nerdf)
         self.assertEqual(nerdm['title'], "Goobers!")
         self.assertIn('authors', nerdm)
+        self.assertIn('nrdp:DataPublication', nerdm.get('@type', []))
+
+        # test add an author
+        self.assertEqual(len(nerdm['authors']), 1)
+        pod = self.svc.get_pod(self.midasid)
+        self.svc.start_customization_for(pod)
+        authors = nerdm['authors']
+        authors.append({"fn": "Madonna"})
+        resp = requests.patch(custbaseurl+self.midasid,
+                              json={"_editStatus": "done", "authors": authors},
+                              headers={'Authorization': 'Bearer SECRET'})
+        self.svc.end_customization_for(self.midasid)
+        nerdm = utils.read_json(annotf)
+        self.assertEqual(len(nerdm['authors']), 2)
+        self.assertIn('@type', nerdm)
+        self.assertIn('nrdp:DataPublication', nerdm.get('@type'))
+
+        # test removal of authors
+        pod = self.svc.get_pod(self.midasid)
+        self.svc.start_customization_for(pod)
+        resp = requests.patch(custbaseurl+self.midasid,
+                              json={"_editStatus": "done", "authors": []},
+                              headers={'Authorization': 'Bearer SECRET'})
+        self.svc.end_customization_for(self.midasid)
+        nerdm = utils.read_json(annotf)
+        self.assertIn('@type', nerdm)
+        self.assertNotIn('nrdp:DataPublication', nerdm.get('@type'))
+        
 
     TAXONURI = "https://www.nist.gov/od/dm/nist-themes/v1.0"
 
