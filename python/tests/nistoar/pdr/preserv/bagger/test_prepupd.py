@@ -351,11 +351,11 @@ class TestUpdatePrepper(test.TestCase):
 
         md = read_nerd(nfile)
         self.assertEqual(md["_schema"],
-                         "https://data.nist.gov/od/dm/nerdm-schema/v0.2#")
+                         "https://data.nist.gov/od/dm/nerdm-schema/v0.3#")
         self.assertEqual(md["references"][0]["_extensionSchemas"][0],
-                         "https://data.nist.gov/od/dm/nerdm-schema/v0.2#/definitions/DCiteReference")
+                         "https://data.nist.gov/od/dm/nerdm-schema/v0.3#/definitions/DCiteReference")
         self.assertEqual(md["references"][1]["_extensionSchemas"][0],
-                         "https://data.nist.gov/od/dm/nerdm-schema/v0.2#/definitions/DCiteReference")
+                         "https://data.nist.gov/od/dm/nerdm-schema/v0.3#/definitions/DCiteReference")
         
         depinfof = os.path.join(root, "multibag", "deprecated-info.txt")
         self.assertTrue(not os.path.isfile(depinfof))
