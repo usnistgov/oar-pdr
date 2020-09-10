@@ -225,7 +225,7 @@ export class LandingComponent implements OnInit, OnChanges {
      * the title.
      */
     determineResourceLabel(resmd: NerdmRes): string {
-        if (this.record instanceof Array && this.record.length > 0) {
+        if (this.record['@type'] instanceof Array && this.record['@type'].length > 0) {
             switch (this.record['@type'][0]) {
                 case 'nrd:SRD':
                     return "Standard Reference Data";

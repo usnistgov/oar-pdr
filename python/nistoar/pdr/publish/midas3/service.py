@@ -494,7 +494,7 @@ class MIDAS3PublishingService(PublishSystem):
             updates = self._filter_and_check_cust_updates(updmd, bagger.bagbldr)
 
             #   combine changes with current nerdm
-            forannots = ["authors"]
+            forannots = ["authors", "@type"]
             msg = "User-generated metadata updates to path='{0}': {1}"
             for destpath in updates:
                 if destpath == '':
@@ -589,12 +589,25 @@ class MIDAS3PublishingService(PublishSystem):
         fltrd = OrderedDict()
         _filter_props(data, fltrd)    # filter out properties you can't edit
 
+        oldnerdm = bldr.bag.nerdm_record(mergeconv)
+
         # if authors was updated, filter out unrecognized sub-properties
         if 'authors' in fltrd:
             if not isinstance(fltrd['authors'], list):
                 del fltrd['authors']
             else:
                 self._filter_author_subprops(fltrd['authors'])
+
+            if len(fltrd['authors']) > 0:
+                # we have authors; ensure that we type this as a DataPublication
+                updtypes = self._with_DataPubl_added(oldnerdm.get('@type', ['nrd:Dataset']))
+                if updtypes:
+                    fltrd['@type'] = updtypes
+            else:
+                # all authors have been removed; this is no longer a DataPublication
+                updtypes = self._with_DataPubl_removed(oldnerdm.get('@type', ['nrd:Dataset']))
+                if updtypes:
+                    fltrd['@type'] = updtypes
 
         # if topic was updated, migrate these to theme
         if ('topic' in fltrd) != ('theme' in fltrd):
@@ -604,7 +617,6 @@ class MIDAS3PublishingService(PublishSystem):
                 taxon = ResearchTopicsTaxonomy.from_schema_dir(self._schemadir)
                 fltrd['topic'] = taxon.themes2topics(fltrd['theme'])
         
-        oldnerdm = bldr.bag.nerdm_record(mergeconv)
         newnerdm = self._validate_update(fltrd, oldnerdm, bldr, mergeconv)  # may raise InvalidRequest
 
         # separate file-based components from main metadata; return parts
@@ -666,6 +678,19 @@ class MIDAS3PublishingService(PublishSystem):
     def _item_with_id(self, array, id):
         out = [e for e in array if e['@id'] == id]
         return (len(out) > 0 and out[0]) or None
+
+    def _with_DataPubl_removed(self, semtypes):
+        return [t for t in semtypes if t != 'nrdp:DataPublication']
+
+    def _with_DataPubl_added(self, semtypes):
+        if 'nrdp:DataPublication' not in semtypes:
+            # insert it just before PublicDataResource, Resource, or Dataset
+            inslocs = [p[0] for p in enumerate(semtypes)
+                            if p[1] in ["nrdp:PublicDataResource", "nrd:Resource", "dc:Dataset"]] + [0]
+            out = list(semtypes)
+            out.insert(inslocs[0], "nrdp:DataPublication")
+            return out
+        return None
 
     def _validate_update(self, updata, nerdm, bagbldr, mergeconv):
         # make sure the update produces valid NERDm.  This is done primarily by
