@@ -438,14 +438,14 @@ class TestBagUtils(test.TestCase):
         self.assertTrue(
    bagut._nrdpat.match("https://data.nist.gov/od/dm/nerdm-schema/pub/v1.0#Res") )
         self.assertTrue(
-   bagut._nrdpat.match("https://data.nist.gov/od/dm/nerdm-schema/goob/v0.2") )
+   bagut._nrdpat.match("https://data.nist.gov/od/dm/nerdm-schema/goob/v0.3") )
         self.assertTrue(
-   bagut._nrdpat.match("https://data.nist.gov/od/dm/nerdm-schema/foo/bar/v0.2#"))
+   bagut._nrdpat.match("https://data.nist.gov/od/dm/nerdm-schema/foo/bar/v0.3#"))
 
         self.assertFalse(
-   bagut._nrdpat.match("https://www.nist.gov/od/id/nerdm-schema/blue/v0.2#"))
+   bagut._nrdpat.match("https://www.nist.gov/od/id/nerdm-schema/blue/v0.3#"))
         self.assertFalse(
-   bagut._nrdpat.match("https://data.nist.gov/od/dm/nerdm-schema/v0.2#Res"))
+   bagut._nrdpat.match("https://data.nist.gov/od/dm/nerdm-schema/v0.3#Res"))
 
         pat = bagut._schuripatfor(bagut.NERDM_SCH_ID_BASE)
         self.assertTrue(
@@ -594,12 +594,12 @@ class TestBagUtils(test.TestCase):
         }
         bagut.update_nerdm_schema(data)
         self.assertEqual(data['_schema'], 
-                         "https://data.nist.gov/od/dm/nerdm-schema/v0.2")
+                         "https://data.nist.gov/od/dm/nerdm-schema/v0.3")
         self.assertEqual(data['foo']['_extensionSchemas'], 
                          [ "http://example.com/anext/v88#goob",
                            "http://goober.com/foop/v99#big" ])
         self.assertEqual(data['bar']['tex']['_extensionSchemas'], 
-                     "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#Contact")
+                     "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.3#Contact")
         self.assertEqual(data['bar']['_extensionSchemas'], [])
         
 

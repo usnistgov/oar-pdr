@@ -347,17 +347,17 @@ class TestBuilder2(test.TestCase):
     def test_create_init_md_for(self):
         md = self.bag._create_init_md_for("", None)
         self.assertEqual(md['_schema'],
-                         "https://data.nist.gov/od/dm/nerdm-schema/v0.2#")
+                         "https://data.nist.gov/od/dm/nerdm-schema/v0.3#")
         self.assertEqual(md['_extensionSchemas'],
-                         ["https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/PublicDataResource"])
+                         ["https://data.nist.gov/od/dm/nerdm-schema/pub/v0.3#/definitions/PublicDataResource"])
         self.assertEqual(md['@type'], ["nrdp:PublicDataResource"])
         self.assertIn("@context", md)
 
         md = self.bag._create_init_md_for("foo/bar", "DataFile")
         self.assertEqual(md['_schema'],
-          "https://data.nist.gov/od/dm/nerdm-schema/v0.2#/definitions/Component")
+          "https://data.nist.gov/od/dm/nerdm-schema/v0.3#/definitions/Component")
         self.assertEqual(md['_extensionSchemas'],
-                         ["https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/DataFile"])
+                         ["https://data.nist.gov/od/dm/nerdm-schema/pub/v0.3#/definitions/DataFile"])
         self.assertEqual(md['@type'],
                  ["nrdp:DataFile", "nrdp:DownloadableFile", "dcat:Distribution"])
         self.assertIn("@context", md)
@@ -367,9 +367,9 @@ class TestBuilder2(test.TestCase):
 
         md = self.bag._create_init_md_for("foo/bar.sha256", "ChecksumFile")
         self.assertEqual(md['_schema'],
-          "https://data.nist.gov/od/dm/nerdm-schema/v0.2#/definitions/Component")
+          "https://data.nist.gov/od/dm/nerdm-schema/v0.3#/definitions/Component")
         self.assertEqual(md['_extensionSchemas'],
-                         ["https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/ChecksumFile"])
+                         ["https://data.nist.gov/od/dm/nerdm-schema/pub/v0.3#/definitions/ChecksumFile"])
         self.assertEqual(md['@type'],
             ["nrdp:ChecksumFile", "nrdp:DownloadableFile", "dcat:Distribution"])
         self.assertIn("@context", md)
@@ -379,9 +379,9 @@ class TestBuilder2(test.TestCase):
 
         md = self.bag._create_init_md_for("foo/", "Subcollection")
         self.assertEqual(md['_schema'],
-          "https://data.nist.gov/od/dm/nerdm-schema/v0.2#/definitions/Component")
+          "https://data.nist.gov/od/dm/nerdm-schema/v0.3#/definitions/Component")
         self.assertEqual(md['_extensionSchemas'],
-                         ["https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/Subcollection"])
+                         ["https://data.nist.gov/od/dm/nerdm-schema/pub/v0.3#/definitions/Subcollection"])
         self.assertEqual(md['@type'], ["nrdp:Subcollection"])
         self.assertIn("@context", md)
         self.assertEqual(md['@id'], "cmps/foo")
@@ -390,9 +390,9 @@ class TestBuilder2(test.TestCase):
 
         md = self.bag._create_init_md_for("@id:cmps/foo/", "Subcollection")
         self.assertEqual(md['_schema'],
-          "https://data.nist.gov/od/dm/nerdm-schema/v0.2#/definitions/Component")
+          "https://data.nist.gov/od/dm/nerdm-schema/v0.3#/definitions/Component")
         self.assertEqual(md['_extensionSchemas'],
-                         ["https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/Subcollection"])
+                         ["https://data.nist.gov/od/dm/nerdm-schema/pub/v0.3#/definitions/Subcollection"])
         self.assertEqual(md['@type'], ["nrdp:Subcollection"])
         self.assertIn("@context", md)
         self.assertEqual(md['@id'], "cmps/foo")

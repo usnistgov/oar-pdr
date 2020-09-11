@@ -1587,6 +1587,16 @@ class PreservationBagger(SIPBagger):
         if not nodata:
             self.add_data_files()
 
+    def done(self):
+        """
+        signal that no further updates will be made to the bag via this bagger.  
+
+        Currently, this only disconnects the internal BagBuilder's log file inside
+        the bag; thus, it's okay if further updates are made after calling this 
+        function since the BagBuilder will reconnect the log file automatically.
+        """
+        self.bagbldr.disconnect_logfile()
+
     def establish_output_bag(self):
         """
         set up preservation bag in the target output bag-parent directory.  If the 
