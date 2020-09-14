@@ -182,8 +182,11 @@ class BagBuilder(PreservationSystem):
 
         if not logger:
             logger = logging.getLogger(self._bagdir)
-        self.log = logger
+        self.plog = logger   # will serve as parent; internal log attached to this
+        self.log = logger.getChild("bldr")  # allow us to over-ride log level
         self.log.setLevel(NORM)
+        if self.plog.isEnabledFor(logging.DEBUG):
+            self.log.setLevel(logging.DEBUG)
         
         if not config:
             config = {}
@@ -260,7 +263,7 @@ class BagBuilder(PreservationSystem):
             logfile = self._logname
         if not os.path.isabs(logfile) and not logfile.startswith(self.bagdir):
             logfile = os.path.join(self.bagdir, logfile)
-        for hdlr in self.log.handlers:
+        for hdlr in self.plog.handlers:
             if self._handles_logfile(hdlr, logfile):
                 return True
         return False
@@ -302,10 +305,11 @@ class BagBuilder(PreservationSystem):
         if self.logfile_is_connected(logfile):
             return
 
+        self.log.debug("Connecting bag log file under %s", self.bagdir);
         hdlr = self._get_log_handler(logfile)
         hdlr.setLevel(loglevel)
         
-        self.log.addHandler(hdlr)
+        self.plog.addHandler(hdlr)
 
     def disconnect_logfile(self, logfile=None):
         """
@@ -331,12 +335,12 @@ class BagBuilder(PreservationSystem):
                 logfile = os.path.join(self.bagdir, logfile)
             files = [ logfile ]
 
-        self.log.debug("Disconnecting BagBuilder from internal log")
+        self.log.debug("Disconnecting BagBuilder from internal log (under %s)", self.bagdir)
 
         for lf in files:
-            hdlrs = [h for h in self.log.handlers if self._handles_logfile(h,lf)]
+            hdlrs = [h for h in self.plog.handlers if self._handles_logfile(h,lf)]
             for h in hdlrs:
-                self.log.removeHandler(h)
+                self.plog.removeHandler(h)
                 h.close()
             self._log_handlers[lf] = None
         
