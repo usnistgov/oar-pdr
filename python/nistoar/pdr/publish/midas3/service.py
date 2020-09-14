@@ -1142,7 +1142,10 @@ class MIDAS3PublishingService(PublishSystem):
                     prepper = self.bagger.get_prepper()
                     prepper.set_multibag_info(self.bagger.bagdir)
                 pbagger = PreservationBagger.fromMetadataBagger(self.bagger, pbagparent, pcfg)
-                pbagger.establish_output_bag()
+                try:
+                    pbagger.establish_output_bag()
+                finally:
+                    pbagger.done()  # disconnect internal log
 
                 # Further updates from MIDAS are possible, so we'll return the version
                 # in the metadata to update status
