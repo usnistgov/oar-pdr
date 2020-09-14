@@ -83,20 +83,20 @@ class TestBuilder2(test.TestCase):
         self.assertFalse(self.bag._has_resmd())
 
     def test_with_disconnect(self):
-        logtag = self.bag.log.name
+        logtag = self.bag.plog.name
         baglog = logging.getLogger(logtag)
         self.assertEqual(len(baglog.handlers), 0)
         self.bag.disconnect_logfile()
 
         with bldr.BagBuilder(self.tf.root, "testbag", self.cfg) as self.bag:
-            self.assertEqual(len(self.bag.log.handlers), 0)
+            self.assertEqual(len(self.bag.plog.handlers), 0)
             self.assertEqual(len(baglog.handlers), 0)
             self.bag.ensure_bagdir()
-            self.assertEqual(len(self.bag.log.handlers), 1)
+            self.assertEqual(len(self.bag.plog.handlers), 1)
             self.assertEqual(len(baglog.handlers), 1)
             
         self.assertEqual(len(baglog.handlers), 0)
-        self.assertEqual(len(self.bag.log.handlers), 0)
+        self.assertEqual(len(self.bag.plog.handlers), 0)
 
     def test_ctor_on_existng_dir(self):
         bagdir = os.path.join(self.tf.root, "testbag")
