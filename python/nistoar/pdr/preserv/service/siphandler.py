@@ -984,11 +984,10 @@ class MIDAS3SIPHandler(SIPHandler):
             cksfiles.sort(key=lambda f: int(ckspat.search(f).group(1)),
                           reverse=True)
 
-            # put checksums where MIDAS can find them.  With new ARK identifiers, MIDAS expects
-            # ark prefix to be part of the checksum file path.
+            # put checksums where MIDAS can find them.  
             cksdir = self.bagger.bagparent
             m = re.search(r'^ark:/(\d+)/', self._sipid)
-            if m and self.cfg.get("bag_checksum_in_ark_subdir", True):
+            if m and self.cfg.get("bag_checksum_in_ark_subdir", False):
                 cksdir = os.path.join(cksdir, "ark:", m.group(1))
                 if not os.path.exists(cksdir):
                     os.makedirs(cksdir);
