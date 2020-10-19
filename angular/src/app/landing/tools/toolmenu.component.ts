@@ -155,12 +155,22 @@ export class ToolMenuComponent implements OnChanges {
                 contactlist = this.record['contactPoint'].fn;
             }
         }
+        let keywords: string[] = this.record['keyword'];
+        let keywordString: string = "";
+        for(let i = 0; i < keywords.length; i++){
+            if(i > 0) keywordString += ' ';
+
+            if(keywords[i].indexOf(" ") > 0)
+                keywordString += '"' + keywords[i] + '"';
+            else
+            keywordString += keywords[i];
+        }
+
         subitems = [
             this.createMenuItem("Similar Resources", "faa faa-external-link", null,
-                                searchbase + "#/search?q=" + this.record['keyword'] +
-                                "&key=&queryAdvSearch=yes"),
+                                searchbase + "#/search?q=" + keywordString),
             this.createMenuItem('Resources by Authors', "faa faa-external-link", "",
-            this.cfg.get("locations.pdrSearch", "/sdp/") + "/#/search?q=authors.fn%3D" + authlist + "%26logicalOp%3DOR%26contactPoint.fn%3D" + contactlist + "&key=&queryAdvSearch=yes")
+            this.cfg.get("locations.pdrSearch", "/sdp/") + "/#/search?q=authors.fn%3D" + authlist + "%20OR%20contactPoint.fn%3D" + contactlist)
         ];
         mitems.push({ label: "Find", items: subitems });
 
