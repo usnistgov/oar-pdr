@@ -174,10 +174,10 @@ export class ToolMenuComponent implements OnChanges {
         for(let i = 0; i < keywords.length; i++){
             if(i > 0) keywordString += ',';
 
-            if(keywords[i].indexOf(" ") > 0)
-                keywordString += '"' + keywords[i] + '"';
+            if(keywords[i].trim().indexOf(" ") > 0)
+                keywordString += '"' + keywords[i].trim() + '"';
             else
-            keywordString += keywords[i];
+            keywordString += keywords[i].trim();
         }
 
         subitems = [
