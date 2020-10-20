@@ -36,7 +36,6 @@ export class MetadataComponent {
   }
 
   ngOnInit() {
-      console.log('serviceApi', this.serviceApi);
     if(this.record != undefined && this.record != null){
       delete this.record["_id"];
     }
