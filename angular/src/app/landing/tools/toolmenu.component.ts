@@ -171,7 +171,7 @@ export class ToolMenuComponent implements OnChanges {
         let keywords: string[] = this.record['keyword'];
         let keywordString: string = "";
         for(let i = 0; i < keywords.length; i++){
-            if(i > 0) keywordString += ' ';
+            if(i > 0) keywordString += ',';
 
             if(keywords[i].trim().indexOf(" ") > 0)
                 keywordString += '"' + keywords[i].trim() + '"';
@@ -181,7 +181,7 @@ export class ToolMenuComponent implements OnChanges {
 
         subitems = [
             this.createMenuItem("Similar Resources", "faa faa-external-link", null,
-                                searchbase + "#/search?q=" + keywordString),
+                                searchbase + "#/search?q=keyword%3D" + keywordString),
             this.createMenuItem('Resources by Authors', "faa faa-external-link", "",
             this.cfg.get("locations.pdrSearch", "/sdp/") + authorSearchString)
         ];
