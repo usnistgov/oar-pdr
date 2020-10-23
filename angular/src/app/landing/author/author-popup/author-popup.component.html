@@ -200,4 +200,21 @@
             </tr>
         </table>
     </div>
+    <div style="padding: 0 2em;"><hr></div>
+    <div class="ui-toolbar-group-right" style="padding-right: .5em;">
+        <!-- Add author button -->
+        <button pButton type="submit" class="btn-add-author" style="background-color:rgb(221, 172, 9);"
+            (click)="addAuthor();" label="Add Author" icon="faa faa-user-plus faa-1x icon-white" iconPos="left">
+        </button>
+
+        <!-- Cancel button -->
+        <button pButton type="submit" class="btn-cancel" (click)="activeModal.close('Close click')" label="Cancel"
+            icon="faa faa-trash faa-1x icon-white" iconPos="left">
+        </button>
+
+        <!-- Save button -->
+        <button pButton type="submit" class="btn-Save" style="float:right; width:150px; background-color:green;"
+            (click)="saveAuthorInfo();" label="Save" icon="faa faa-save faa-1x icon-white" iconPos="left">
+        </button>
+    </div>
 </div>
