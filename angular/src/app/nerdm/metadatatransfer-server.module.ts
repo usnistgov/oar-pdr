@@ -16,6 +16,36 @@ const escapeHTMLchars = function(text : string, doc : Document) : string {
     return div.innerHTML.replace(/"/g,'&quot;').replace(/'/g,"&apos;");
 }
 
+const convertNerdmSchema = function(textContent: string) : string{
+    let inputObject = JSON.parse(textContent);
+    let returnSchemaObject: any = {};
+
+    returnSchemaObject['@context'] = "https://schema.org";
+    returnSchemaObject['@type'] = "WebSite";
+
+    if(inputObject['ediid'])
+        returnSchemaObject['url'] = "https://data.nist.org/od/id/" + inputObject['ediid'];
+
+
+    if(inputObject['title'])
+        returnSchemaObject['name'] = inputObject['title'];
+
+    returnSchemaObject['sameAs'] = "NIST Public Data Repository";
+
+    if(inputObject['description'])
+        returnSchemaObject['description'] = inputObject['description'];
+
+    returnSchemaObject['about'] = "?";
+    returnSchemaObject['abstract'] = "?";
+    returnSchemaObject['dateCreated'] = new Date();
+    returnSchemaObject['conditionsOfAccess'] = "Open to public";
+
+    if(inputObject['keyword'])
+        returnSchemaObject['keywords'] = inputObject['keyword'].toString();
+
+    return JSON.stringify(returnSchemaObject, null, 2);
+}
+
 /**
  * the factory function for inserting metadata into script elements in the 
  * document DOM.  
@@ -50,7 +80,9 @@ export function serializeMetadataTransferFactory(doc : Document, mdtrx : Metadat
             if (data && data.hasOwnProperty("@context"))
                 type = "application/ld+json";
             script.setAttribute("type", type);
-            script.textContent = mdtrx.serialize(label);
+            // script.textContent = mdtrx.serialize(label);
+            script.textContent = convertNerdmSchema(mdtrx.serialize(label));
+            console.log('script.textContent', script.textContent);
             doc.body.insertBefore(script, insertPoint)
         });
     };
