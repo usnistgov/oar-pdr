@@ -73,16 +73,9 @@ const convertNerdmSchema = function(textContent: string) : string{
  */
 export function serializeMetadataTransferFactory(doc : Document, mdtrx : MetadataTransfer) {
     return () => {
-        let shouldAppend = false;
         let className = 'structured-data';
         let jsonLDScript;
-
-        if (doc.head.getElementsByClassName(className).length) {
-            jsonLDScript = doc.head.getElementsByClassName(className)[0];
-        } else {
-            jsonLDScript = doc.createElement('script');
-            shouldAppend = true;
-        }
+        jsonLDScript = doc.createElement('script');
 
         let insertPoint = doc.body.firstElementChild;
         mdtrx.labels().forEach((label) => {
@@ -104,9 +97,7 @@ export function serializeMetadataTransferFactory(doc : Document, mdtrx : Metadat
             jsonLDScript.setAttribute('class', className);
             jsonLDScript.type = "application/ld+json";
             jsonLDScript.text = convertNerdmSchema(mdtrx.serialize(label));
-            if (shouldAppend) {
-                doc.head.appendChild(jsonLDScript);
-            }
+            doc.head.appendChild(jsonLDScript);
         });
     };
 }
