@@ -16,6 +16,11 @@ const escapeHTMLchars = function(text : string, doc : Document) : string {
     return div.innerHTML.replace(/"/g,'&quot;').replace(/'/g,"&apos;");
 }
 
+
+/**
+ * Create JSON-LD object based on input Nerdm record string
+ * @param textContent Nerdm record string
+ */
 const convertNerdmSchema = function(textContent: string) : string{
     let inputObject = JSON.parse(textContent);
     let returnSchemaObject: any = {};
@@ -35,7 +40,8 @@ const convertNerdmSchema = function(textContent: string) : string{
     if(inputObject['description'])
         returnSchemaObject['description'] = inputObject['description'];
 
-    returnSchemaObject['about'] = "?";
+    returnSchemaObject['identifier'] = inputObject['ediid'];
+    returnSchemaObject['about'] = "The NIST Public Data Repository (PDR) is a key part of NIST research data infrastructure supporting public search and access to a multi-disciplinary growing collection of NIST public data. The repository fosters FAIR reproducibility, interoperability and discovery of scientific, engineering and technical information in service of the NIST mission.";
     returnSchemaObject['abstract'] = "?";
     returnSchemaObject['dateCreated'] = new Date();
     returnSchemaObject['conditionsOfAccess'] = "Open to public";
@@ -67,23 +73,40 @@ const convertNerdmSchema = function(textContent: string) : string{
  */
 export function serializeMetadataTransferFactory(doc : Document, mdtrx : MetadataTransfer) {
     return () => {
+        let shouldAppend = false;
+        let className = 'structured-data';
+        let jsonLDScript;
+
+        if (doc.head.getElementsByClassName(className).length) {
+            jsonLDScript = doc.head.getElementsByClassName(className)[0];
+        } else {
+            jsonLDScript = doc.createElement('script');
+            shouldAppend = true;
+        }
+
         let insertPoint = doc.body.firstElementChild;
         mdtrx.labels().forEach((label) => {
             let data = mdtrx.get(label);
             if (data == null)
                 data = null;
 
+            // Creating the script for Nerdm data transfer
             let script = doc.createElement('script');
             script.id = escapeHTMLchars(label, doc);
             console.log("Embedding metadata with id='"+script.id+"'");
             let type = "application/json";
-            if (data && data.hasOwnProperty("@context"))
-                type = "application/ld+json";
+
             script.setAttribute("type", type);
-            // script.textContent = mdtrx.serialize(label);
-            script.textContent = convertNerdmSchema(mdtrx.serialize(label));
-            console.log('script.textContent', script.textContent);
+            script.textContent = mdtrx.serialize(label);
             doc.body.insertBefore(script, insertPoint)
+
+            // Creating the script for Schema.org
+            jsonLDScript.setAttribute('class', className);
+            jsonLDScript.type = "application/ld+json";
+            jsonLDScript.text = convertNerdmSchema(mdtrx.serialize(label));
+            if (shouldAppend) {
+                doc.head.appendChild(jsonLDScript);
+            }
         });
     };
 }

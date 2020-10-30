@@ -21,7 +21,7 @@ export function initBrowserMetadataTransfer(doc : Document) : MetadataTransfer {
     const scripts = doc.body.getElementsByTagName("script");
     for (let i=0; i < scripts.length; i++) {
         att = scripts[i].getAttribute("type");
-        if (!att || (att != "application/json" && att != "application/ld+json"))
+        if (!att || (att != "application/json"))
             continue;
         att = scripts[i].getAttribute("id");
         if (!att || att.endsWith("-state"))  // TransferState; don't want this

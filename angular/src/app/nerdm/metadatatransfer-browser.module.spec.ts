@@ -39,7 +39,7 @@ describe('initBrowserMetadataTransfer', function() {
         doc.body.appendChild(doc.createElement("p"));
 
         child = doc.createElement("script");
-        child.setAttribute("type", "application/ld+json");
+        child.setAttribute("type", "application/json");
         child.setAttribute("id", "gomer");
         child.textContent = JSON.stringify(data2);
         doc.body.appendChild(child);

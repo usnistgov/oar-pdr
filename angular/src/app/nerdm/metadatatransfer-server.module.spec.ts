@@ -45,7 +45,7 @@ describe('serializeMetadataTransferFactory', function() {
         expect(els.length).toBe(2);
         expect(els[1].tagName).toBe("SCRIPT");
         expect(els[1].getAttribute("id")).toBe("exciting");
-        expect(els[1].getAttribute("type")).toBe("application/ld+json");
+        expect(els[1].getAttribute("type")).toBe("application/json");
     });
 
     it('resists XSS/injection attacks', function() {
