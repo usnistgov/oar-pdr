@@ -10,7 +10,12 @@ describe('serializeMetadataTransferFactory', function() {
         doc = new Document();
         doc = doc.implementation.createHTMLDocument();
         mdtrx = new MetadataTransfer();
-        mdtrx.set("boring", { title: "All about me!" });
+        mdtrx.set("boring", 
+          { title: "All about me!",
+            ediid: "123456",
+            description: "Dummy dummy.",
+            keyword: ['keyword01'] },
+          );
     });
 
     it('assumptions', function() {
@@ -23,9 +28,28 @@ describe('serializeMetadataTransferFactory', function() {
         mdt.serializeMetadataTransferFactory(doc, mdtrx)();
         expect(doc.body.firstElementChild).not.toBeNull();
         let el = doc.body.firstElementChild;
+        console.log("el1", el);
         expect(el.tagName).toBe("SCRIPT");
         expect(el.getAttribute("id")).toBe("boring");
         expect(el.getAttribute("type")).toBe("application/json");
+
+        expect(doc.head.getElementsByClassName('structured-data')[0]).not.toBeNull();
+        el = doc.head.getElementsByClassName('structured-data')[0];
+        let el_content = JSON.parse(doc.head.getElementsByClassName('structured-data')[0].textContent);
+        expect(el.tagName).toBe("SCRIPT");
+        expect(el.getAttribute("class")).toBe("structured-data");
+        expect(el.getAttribute("type")).toBe("application/ld+json");
+
+        console.log("el_content", el_content);
+        expect(el_content['@context']).toBe("https://schema.org");
+        expect(el_content['@type']).toBe("WebSite");
+        expect(el_content['name']).toBe("All about me!");
+        expect(el_content['identifier']).toBe("123456");
+        expect(el_content['sameAs']).toBe("NIST Public Data Repository");
+        expect(el_content['description']).toBe("Dummy dummy.");
+        expect(el_content['about']).toContain("The NIST Public Data Repository");
+        expect(el_content['conditionsOfAccess']).toBe("Open to public");
+        expect(el_content['keywords']).toContain("keyword01");
     });
 
     it('add 2 records in non-empty body', function() {
@@ -65,8 +89,5 @@ describe('serializeMetadataTransferFactory', function() {
         expect(idatt.includes("<")).not.toBe(true);
         expect(idatt.includes('"')).not.toBe(true);
         expect(idatt.includes("&")).toBe(true);
-
-        
     });
-
 });
