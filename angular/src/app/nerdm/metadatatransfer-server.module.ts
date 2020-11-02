@@ -9,6 +9,7 @@ import { DOCUMENT } from '@angular/platform-browser';
 import { BEFORE_APP_SERIALIZED } from '@angular/platform-server';
 
 import { MetadataTransfer } from './nerdm';
+import { NERDResource } from '../nerdm/nerdm';
 
 const escapeHTMLchars = function(text : string, doc : Document) : string {
     let div = doc.createElement('div');
@@ -16,38 +17,68 @@ const escapeHTMLchars = function(text : string, doc : Document) : string {
     return div.innerHTML.replace(/"/g,'&quot;').replace(/'/g,"&apos;");
 }
 
-
 /**
  * Create JSON-LD object based on input Nerdm record string
  * @param textContent Nerdm record string
  */
 const convertNerdmSchema = function(textContent: string) : string{
-    let inputObject = JSON.parse(textContent);
+    let NerdmObject = JSON.parse(textContent);
     let returnSchemaObject: any = {};
+    let mainContentOfPage: any = {};
+    let accountablePerson: any = {};
+    let author: any = {};
 
-    returnSchemaObject['@context'] = "https://schema.org";
-    returnSchemaObject['@type'] = "WebSite";
+    // accountablePerson
+    accountablePerson["@type"] = "Person";
+    if(NerdmObject['hasEmail']){
+        accountablePerson["email"] = NerdmObject['hasEmail'].substring(NerdmObject['hasEmail'].indexOf(':')<0 ? 0 : NerdmObject['hasEmail'].indexOf(':') + 1);
+    }
 
-    if(inputObject['ediid'])
-        returnSchemaObject['url'] = "https://data.nist.org/od/id/" + inputObject['ediid'];
+    if(NerdmObject['contactPoint']){
+        accountablePerson["name"] = NerdmObject['contactPoint'].fn;
+    }
 
+    // Author
+    author["@type"] = "Person";
+    if(NerdmObject['authors']){
+        let i = 0;
+        NerdmObject['authors'].forEach(item => {
+            author["name"] += item.fn;
+            i++;
+            if(i < NerdmObject['authors'].length-1)
+            author["name"] += ",";
+        });
+    }
 
-    if(inputObject['title'])
-        returnSchemaObject['name'] = inputObject['title'];
-
-    returnSchemaObject['sameAs'] = "NIST Public Data Repository";
-
-    if(inputObject['description'])
-        returnSchemaObject['description'] = inputObject['description'];
-
-    returnSchemaObject['identifier'] = inputObject['ediid'];
-    returnSchemaObject['about'] = "The NIST Public Data Repository (PDR) is a key part of NIST research data infrastructure supporting public search and access to a multi-disciplinary growing collection of NIST public data. The repository fosters FAIR reproducibility, interoperability and discovery of scientific, engineering and technical information in service of the NIST mission.";
-    returnSchemaObject['abstract'] = "?";
-    returnSchemaObject['dateCreated'] = new Date();
-    returnSchemaObject['conditionsOfAccess'] = "Open to public";
-
-    if(inputObject['keyword'])
-        returnSchemaObject['keywords'] = inputObject['keyword'].toString();
+    // SearchResultsPage
+    returnSchemaObject = {
+        '@context': "https://schema.org",
+        '@type': "SearchResultsPage",
+        'primaryImageOfPage': '../assets/images/nist_logo_reverse.png',
+        'specialty': NerdmObject['keyword'].toString(),
+        'identifier': NerdmObject['ediid'],
+        'about': "The NIST Public Data Repository (PDR) is a key part of NIST research data infrastructure supporting public search and access to a multi-disciplinary growing collection of NIST public data. The repository fosters FAIR reproducibility, interoperability and discovery of scientific, engineering and technical information in service of the NIST mission.",
+        'accessMode': 'textual',
+        'accessModeSufficient': 'textual',
+        'accountablePerson': accountablePerson,
+        'acquireLicensePage': NerdmObject['license'],
+        'dateCreated': new Date(),
+        'dateModified': NerdmObject['modified'],
+        'conditionsOfAccess': NerdmObject["accessLevel"],
+        'url': NerdmObject['ediid']? "https://data.nist.org/od/id/" + NerdmObject['ediid'] : "",
+        'significantLink': NerdmObject['landingPage']? NerdmObject['landingPage'] : "",
+        'relatedLink': NerdmObject['references']? NerdmObject['references'][0].location : "",
+        'name': NerdmObject['title'],
+        'description': NerdmObject['description'],
+        'keywords': NerdmObject['keyword']? NerdmObject['keyword'].toString() : "",
+        'author': author,
+        'citation': (new NERDResource(NerdmObject)).getCitation(),
+        'inLanguage': NerdmObject['language'],
+        'isAccessibleForFree': true,
+        'schemaVersion': 'http://schema.org/version/10.0/',
+        'text': NerdmObject['description'],
+        'usageInfo': 'https://data.nist.gov/pdr/about'
+    }
 
     return JSON.stringify(returnSchemaObject, null, 2);
 }
