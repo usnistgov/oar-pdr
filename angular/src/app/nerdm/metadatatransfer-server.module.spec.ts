@@ -14,7 +14,8 @@ describe('serializeMetadataTransferFactory', function() {
           { title: "All about me!",
             ediid: "123456",
             description: "Dummy dummy.",
-            keyword: ['keyword01'] },
+            keyword: ['keyword01'],
+            accessLevel: "Public" },
           );
     });
 
@@ -42,13 +43,12 @@ describe('serializeMetadataTransferFactory', function() {
 
         console.log("el_content", el_content);
         expect(el_content['@context']).toBe("https://schema.org");
-        expect(el_content['@type']).toBe("WebSite");
+        expect(el_content['@type']).toBe("SearchResultsPage");
         expect(el_content['name']).toBe("All about me!");
         expect(el_content['identifier']).toBe("123456");
-        expect(el_content['sameAs']).toBe("NIST Public Data Repository");
         expect(el_content['description']).toBe("Dummy dummy.");
         expect(el_content['about']).toContain("The NIST Public Data Repository");
-        expect(el_content['conditionsOfAccess']).toBe("Open to public");
+        expect(el_content['conditionsOfAccess']).toBe("Public");
         expect(el_content['keywords']).toContain("keyword01");
     });
 
