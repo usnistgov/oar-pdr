@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
+import { Component, OnInit, Input, Output, EventEmitter, ViewChild, ElementRef, HostListener } from '@angular/core';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { SearchService } from '../../../shared/search-service/index';
 import { CommonFunctionService } from '../../../shared/common-function/common-function.service';
@@ -19,6 +19,8 @@ export class AuthorPopupComponent implements OnInit {
   originalAuthors: any;
   errorMsg: any;
   affiliationList: any[] = [];
+
+  @ViewChild('authors') private myScrollContainer: ElementRef;
 
   constructor(
     public activeModal: NgbActiveModal,
@@ -256,6 +258,22 @@ export class AuthorPopupComponent implements OnInit {
   addAuthor() {
     var newAuthor = this.authorService.getBlankAuthor();
     this.inputValue.authors.push(newAuthor);
+    
+    setTimeout(() => {
+        this.scrollToBottom(this.myScrollContainer.nativeElement);
+    }, 0);
+  }
+
+  /**
+   * Scroll to the bottom of the target element
+   * @param el target element object
+   */
+  scrollToBottom(el): void {
+    el.scroll({
+        top: this.myScrollContainer.nativeElement.scrollHeight,
+        left: 0,
+        behavior: 'smooth'
+    });
   }
 
   /*
