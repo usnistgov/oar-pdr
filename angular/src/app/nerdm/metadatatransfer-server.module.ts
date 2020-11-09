@@ -24,9 +24,10 @@ const escapeHTMLchars = function(text : string, doc : Document) : string {
 const convertNerdmSchema = function(textContent: string) : string{
     let NerdmObject = JSON.parse(textContent);
     let returnSchemaObject: any = {};
-    let mainContentOfPage: any = {};
+    let publisher: any = {};
     let accountablePerson: any = {};
     let author: any = {};
+    let copyrightHolder: any = {};
 
     // accountablePerson
     accountablePerson["@type"] = "Person";
@@ -50,34 +51,65 @@ const convertNerdmSchema = function(textContent: string) : string{
         });
     }
 
-    // SearchResultsPage
+    // copyrightHolder
+    copyrightHolder = {
+        "@type": "Organization",
+        "name": "National Institute of Standards and Technology",
+        "address": {
+            "@type": "PostalAddress",
+            "addressLocality": "Gaithersburg, MD",
+            "postalCode": "20899",
+            "streetAddress": "100 Bureau Drive"
+        },
+    }
+
+    //publisher
+    publisher = copyrightHolder;
+     
+    // DigitalDocument
     returnSchemaObject = {
         '@context': "https://schema.org",
-        '@type': "SearchResultsPage",
-        'primaryImageOfPage': '../assets/images/nist_logo_reverse.png',
-        'specialty': NerdmObject['keyword']? NerdmObject['keyword'].toString() : "",
-        'identifier': NerdmObject['ediid']? NerdmObject['ediid'] : "",
+        '@type': "DigitalDocument",
+        'name': NerdmObject['title'],
+        'author': author,
+        "hasDigitalDocumentPermission": [
+            {
+              "@type": "DigitalDocumentPermission",
+              "permissionType": "https://schema.org/ReadPermission",
+              "grantee": {
+                "@type": "Audience",
+                "audienceType": "public"
+              }
+            }
+        ],
         'about': "The NIST Public Data Repository (PDR) is a key part of NIST research data infrastructure supporting public search and access to a multi-disciplinary growing collection of NIST public data. The repository fosters FAIR reproducibility, interoperability and discovery of scientific, engineering and technical information in service of the NIST mission.",
         'accessMode': 'textual',
         'accessModeSufficient': 'textual',
-        'accountablePerson': accountablePerson,
-        'acquireLicensePage': NerdmObject['license']? NerdmObject['license'] : "",
-        'dateCreated': new Date(),
-        'dateModified': NerdmObject['modified']? NerdmObject['modified'] : "",
-        'conditionsOfAccess': NerdmObject["accessLevel"]? NerdmObject["accessLevel"] : "",
-        'url': NerdmObject['ediid']? "https://data.nist.org/od/id/" + NerdmObject['ediid'] : "",
-        'significantLink': NerdmObject['landingPage']? NerdmObject['landingPage'] : "",
-        'relatedLink': NerdmObject['references']? NerdmObject['references'][0].location : "",
-        'name': NerdmObject['title']? NerdmObject['title'] : "",
-        'description': NerdmObject['description']? NerdmObject['description'] : "",
-        'keywords': NerdmObject['keyword']? NerdmObject['keyword'].toString() : "",
-        'author': author,
+        'accountablePerson':accountablePerson,
+        'acquireLicensePage': NerdmObject['license'],
+        'audience': {
+            "@type": "Audience",
+            "audienceType": "public"
+        },
         'citation': (new NERDResource(NerdmObject)).getCitation(),
-        'inLanguage': NerdmObject['language']? NerdmObject['language'] : "",
+        'conditionsOfAccess': NerdmObject["accessLevel"],
+        'copyrightHolder': copyrightHolder,
+        'dateCreated': new Date(),
+        'dateModified': NerdmObject['modified'],
+        'inLanguage': NerdmObject['language'],
         'isAccessibleForFree': true,
-        'schemaVersion': 'http://schema.org/version/10.0/',
+        'keywords': NerdmObject['keyword']? NerdmObject['keyword'].toString() : "",
+        'license': NerdmObject['license']? NerdmObject['license'].toString() : "",
+        'publisher': publisher,
+        'schemaVersion': 'http://schema.org/version/10.0/', // This needs be configurable
+        'description': NerdmObject['description']? NerdmObject['description'] : "",
         'text': NerdmObject['description']? NerdmObject['description'] : "",
-        'usageInfo': 'https://data.nist.gov/pdr/about'
+        'identifier': NerdmObject['ediid']? NerdmObject['ediid'] : "",
+        'url': NerdmObject['ediid']? "https://data.nist.org/od/id/" + NerdmObject['ediid'] : "",
+        'usageInfo': 'https://data.nist.gov/pdr/about',
+        'mentions': NerdmObject['references']? NerdmObject['references'][0].location : "",
+        'mainEntityOfPage': NerdmObject['landingPage']? NerdmObject['landingPage'] : "",
+        'thumbnailUrl': '../assets/images/nist_logo_reverse.png'
     }
 
     return JSON.stringify(returnSchemaObject, null, 2);
