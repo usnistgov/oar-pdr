@@ -10,57 +10,7 @@
                     <app-title [record]="record" [inBrowser]="inBrowser"></app-title>
                     <app-author [record]="record" [inBrowser]="inBrowser"></app-author>
                 </div>
-                <div class="ui-g-8 ui-md-8 ui-lg-8 ui-sm-12">
-                    <app-contact [record]="record" [inBrowser]="inBrowser"></app-contact>
-
-                    <span>Identifier: </span>
-                    <span *ngIf="doiUrl"><i> <a class="font14" href="{{doiUrl}}"
-                                >{{record.doi}}</a></i></span>
-                    <span *ngIf="!doiUrl"><i> <a class="font14"
-                                href="{{ cfg.get('landingPageService','/od/id/') }}{{record['@id']}}">{{record["@id"]}}</a></i>
-                    </span>
-                    <span *ngIf="checkReferences()"><br>
-                        <span>Described in article: </span>
-                        <small *ngFor="let refs of record['references']; let i =index">
-                            <span style="padding-left:2.75em" *ngIf="refs.refType == 'IsDocumentedBy'">
-                                <br><i class="faa faa-external-link"> &nbsp;
-                                    <a class="font14" href={{refs.location}} target="blank"
-                                        (click)="gaService.gaTrackEvent('outbound', $event, 'Resource title: ' + record.title, refs.location)">{{ refs.label }}</a></i>
-                                <span *ngIf="i < record.references.length-1 ">,</span>
-                            </span>
-                        </small>
-                    </span><br>
-                    <span class="" *ngIf="record.version"> Version: <strong>{{record.version}}</strong></span>
-                    <span class="" *ngIf="record.versionHistory" style="padding-right: 15pt;">...
-                        <i style="cursor: pointer;" class="faa" aria-hidden="true"
-                            [ngClass]="{'faa-plus-square-o': !clickHistory, 'faa-minus-square-o': clickHistory}"
-                            (click)="closeHistory = !closeHistory; clickHistory = expandHistory();"></i>
-                    </span>
-                    <span class="" *ngIf="record.issued" style="padding-right: 10pt;"> Released:
-                        <strong>{{record.issued}}</strong></span>
-                    <span class="" *ngIf="record.modified" style="padding-right: 10pt;"> Last modified:
-                        <strong>{{record.modified}}</strong></span>
-                    <div class="card customcard" [collapse]="!closeHistory">
-                        <b>Version History:</b>
-                        <span *ngFor="let release of record.versionHistory">
-                            <br> <b [innerHTML]="renderRelVer(release, record.version)"></b> &nbsp;&nbsp;
-                            <span *ngIf="release.issued">Released: {{release.issued}}</span>
-                            <span *ngIf="release.location || release.refid"> &nbsp;&nbsp;
-                                <i [innerHTML]="renderRelId(release, record.version)"></i>
-                            </span>
-                            <span *ngIf="release.description"> <br> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                                <i>{{release.description}}</i>
-                            </span>
-                        </span>
-                    </div>
-                    <p style="margin-top: 10px;" *ngIf="newer.location">
-                        <b>There is a more recent release of this resource available: &nbsp;&nbsp;
-                            <a href="{{newer.location}}"
-                                (click)="gaService.gaTrackEvent('outbound', $event, 'Resource title: ' + record.title, newer.label)">{{newer.label}}</a></b>
-                    </p>
-                </div>
-
-                <div class="ui-g-4 ui-md-4 ui-lg-4 ui-sm-12">
+                <div class="ui-g-12 ui-md-12 ui-lg-12 ui-sm-12">
                     <span *ngIf="HomePageLink" style="float: right;">
                         <span *ngIf="inBrowser; else visitHomeOnServer">
                             <button type="button"
@@ -75,6 +25,74 @@
                         </span>
                         <ng-template #visitHomeOnServer><a href="{{record.landingPage}}">Visit Home Page</a></ng-template>
                     </span>
+
+                    <!-- Contact point -->
+                    <app-contact [record]="record" [inBrowser]="inBrowser"></app-contact>
+
+                    <!-- Identifier -->
+                    <div>
+                        <span>Identifier: </span>
+                        <span *ngIf="doiUrl"><i> <a class="font14" href="{{doiUrl}}"
+                                    >{{record.doi}}</a></i></span>
+                        <span *ngIf="!doiUrl"><i> <a class="font14"
+                                    href="{{ cfg.get('landingPageService','/od/id/') }}{{record['@id']}}">{{record["@id"]}}</a></i>
+                        </span>
+                    </div>
+
+                    <!-- References -->
+                    <div *ngIf="checkReferences()">
+                        <div>This data is described in:</div>
+                        <small *ngFor="let refs of record['references']; let i =index">
+                            <span style="padding-left:2.75em;" *ngIf="refs.refType == 'IsDocumentedBy' || refs.refType == 'isSupplementTo'">
+                                <i class="faa faa-external-link"> &nbsp;
+                                    <span *ngIf="!refs['label'] && !refs['label']">URL: </span>
+                                    <a class="font14" href={{refs.location}} target="blank"
+                                        (click)="gaService.gaTrackEvent('outbound', $event, 'Resource title: ' + record.title, refs.location)">{{getReferenceText(refs)}}</a></i>
+                            </span>
+                        </small>
+                    </div>
+
+                    <!-- Version -->
+                    <div *ngIf="record.version"> Version: <strong>{{record.version}}</strong>
+                        <span *ngIf="record.versionHistory" style="padding-right: 15pt;">...
+                            <i style="cursor: pointer;" class="faa" aria-hidden="true"
+                                [ngClass]="{'faa-plus-square-o': !clickHistory, 'faa-minus-square-o': clickHistory}"
+                                (click)="closeHistory = !closeHistory; clickHistory = expandHistory();"></i>
+                        </span>
+
+                        <!-- Last modified -->
+                        <span *ngIf="record.modified" style="padding-right: 10pt;margin-left: 1em;"> Last modified:
+                            <strong>{{record.modified}}</strong></span>
+                    </div>
+                    <div class="card customcard" [collapse]="!closeHistory">
+                        <b>Version History:</b>
+                        <span *ngFor="let release of record.versionHistory">
+                            <br> <b [innerHTML]="renderRelVer(release, record.version)"></b> &nbsp;&nbsp;
+                            <span *ngIf="release.issued">Released: {{release.issued}}</span>
+                            <span *ngIf="release.location || release.refid"> &nbsp;&nbsp;
+                                <i [innerHTML]="renderRelId(release, record.version)"></i>
+                            </span>
+                            <span *ngIf="release.description"> <br> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                                <i>{{release.description}}</i>
+                            </span>
+                        </span>
+                    </div>
+
+                    <!-- Released -->
+                    <div *ngIf="record.issued" style="padding-right: 10pt;"> Released:
+                        <strong>{{record.issued}}</strong></div>
+
+
+
+                    <p style="margin-top: 10px;" *ngIf="newer.location">
+                        <b>There is a more recent release of this resource available: &nbsp;&nbsp;
+                            <a href="{{newer.location}}"
+                                (click)="gaService.gaTrackEvent('outbound', $event, 'Resource title: ' + record.title, newer.label)">{{newer.label}}</a></b>
+                    </p>
+                <!-- </div> -->
+
+                <!-- <div class="ui-g-4 ui-md-4 ui-lg-4 ui-sm-12"> -->
+
                 </div>
             </div>
 

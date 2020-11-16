@@ -403,12 +403,32 @@ export class LandingComponent implements OnInit, OnChanges {
         this.titleService.setTitle(newTitle);
     }
 
+    /**
+     * Check if current record contains reference for display.
+     * Valid reference types are IsDocumentedBy and isSupplementTo.
+     */
     checkReferences() {
         if (Array.isArray(this.record['references'])) {
             for (let ref of this.record['references']) {
-                if (ref.refType == "IsDocumentedBy") return true;
+                if (ref.refType == "IsDocumentedBy" || ref.refType == "isSupplementTo") return true;
             }
         }
+    }
+
+    /**
+     * Return the link text of the given reference.
+     * 1. the value of the label property (if set and is not empty)
+     * 2. the value of the citation property (if set and is not empty)
+     * 3. to "URL: " appended by the value of the location property.
+     * @param refs reference object
+     */
+    getReferenceText(refs){
+        if(refs['label']) 
+            return refs['label'];
+        if(refs['citation'])
+            return refs['citation'];
+        
+            return refs['location'];
     }
 
     isArray(obj: any) {
