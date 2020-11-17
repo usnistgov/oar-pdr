@@ -5,11 +5,18 @@
   border: 1px solid blue;
 }
 
-.btn-cancel {
+#btn-save {
     float:right;
-    margin:0em 1em 2em 1em;
     width:150px; 
-    height:2em; 
+    background-color:green;
+    color:white;
+    padding-right: 1em;
+}
+
+#btn-cancel {
+    float:right;
+    margin:0em 2em 2em 1em;
+    width:150px; 
     background-color:rgb(107, 107, 107);
     color:white;
     padding-right: 1em;
