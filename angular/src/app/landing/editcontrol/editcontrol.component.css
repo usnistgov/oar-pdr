@@ -44,7 +44,7 @@
     background-color:green;
     color:white;
     border-color: green;
-    margin: 0em 1em .5em 0em;
+    margin: 0em .5em .5em 0em;
     width: 120px;
 }
 
@@ -52,7 +52,7 @@
     background-color:rgb(94, 94, 94);
     color:white;
     border-color: rgb(94, 94, 94);
-    margin: 0em 1em .5em 0em;
+    margin: 0em .5em .5em 0em;
     width: 120px;
 }
 

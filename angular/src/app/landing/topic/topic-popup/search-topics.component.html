@@ -9,12 +9,12 @@
     <p-toolbar name="toolbar">
         <div class="ui-toolbar-group-right">
             <!-- Cancel button -->
-            <button pButton type="submit" id="btn-cancel" (click)="activeModal.close('Close click')" label="Cancel"
+            <button pButton type="submit" class="btn-labeled" id="btn-cancel" (click)="activeModal.close('Close click')" label="Cancel"
                 icon="faa faa-trash faa-1x icon-white" iconPos="left">
             </button>
 
             <!-- Save button -->
-            <button pButton type="submit" id="btn-save"
+            <button pButton type="submit" class="btn-labeled" id="btn-save"
                 (click)="saveTopic();" label="Save" icon="faa faa-save faa-1x icon-white" iconPos="left"
                 [disabled]="inputValue[field].length==0">
             </button>

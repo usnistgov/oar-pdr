@@ -1,29 +1,13 @@
 #btn-cancel {
-    float:right;
-    margin:0em 1em 2em 1em;
-    width:150px; 
     background-color:rgb(107, 107, 107);
-    color:white;
-    padding-right: 1em;
 }
 
 #btn-save {
-    float:right;
-    margin-right: 1em;
-    width:150px; 
     background-color:green;
-    color:white;
-    margin-right: 1em;
-    padding-right: 1em;
 }
 
 #btn-add-author {
-    float:left;
-    margin-right: 1em;
-    width:160px; 
-    color:white;
-    margin-right: 1em;
-    padding-right: 1em;
+    background-color:rgb(221, 172, 9);
 }
 
 #author-list {
