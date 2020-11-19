@@ -43,9 +43,9 @@
                     <div *ngIf="checkReferences()">
                         <div>This data is described in:</div>
                         <small *ngFor="let refs of record['references']; let i =index">
-                            <span style="padding-left:2.75em;" *ngIf="refs.refType == 'IsDocumentedBy' || refs.refType == 'isSupplementTo'">
+                            <span style="margin-left:1em;" *ngIf="refs.refType == 'IsDocumentedBy' || refs.refType == 'isSupplementTo'">
                                 <i class="faa faa-external-link"> &nbsp;
-                                    <span *ngIf="!refs['label'] && !refs['label']">URL: </span>
+                                    <span *ngIf="!refs['label'] && !refs['citation']">URL: </span>
                                     <a class="font14" href={{refs.location}} target="blank"
                                         (click)="gaService.gaTrackEvent('outbound', $event, 'Resource title: ' + record.title, refs.location)">{{getReferenceText(refs)}}</a></i>
                             </span>
@@ -89,10 +89,6 @@
                             <a href="{{newer.location}}"
                                 (click)="gaService.gaTrackEvent('outbound', $event, 'Resource title: ' + record.title, newer.label)">{{newer.label}}</a></b>
                     </p>
-                <!-- </div> -->
-
-                <!-- <div class="ui-g-4 ui-md-4 ui-lg-4 ui-sm-12"> -->
-
                 </div>
             </div>
 

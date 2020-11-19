@@ -288,13 +288,10 @@ export class DataFilesComponent {
      * Function to Check whether given record has references in it.
      */
     checkReferences() {
-        if (Array.isArray(this.record['references'])) {
-            for (let ref of this.record['references']) {
-                if (ref.refType === 'IsDocumentedBy') this.isDocumentedBy = true;
-                if (ref.refType === 'IsReferencedBy') this.isReferencedBy = true;
-            }
-            if (this.isDocumentedBy || this.isReferencedBy)
-                return true;
+        if (this.record['references'] && this.record['references'].length > 0) {
+            return true;
+        }else{
+            return false;
         }
     }
 
@@ -823,5 +820,21 @@ export class DataFilesComponent {
     getDialogWidth() {
         var w = window.innerWidth > 500 ? 500 : window.innerWidth;
         return w + 'px';
+    }
+
+    /**
+     * Return the link text of the given reference.
+     * 1. the value of the citation property (if set and is not empty)
+     * 2. the value of the label property (if set and is not empty)
+     * 3. to "URL: " appended by the value of the location property.
+     * @param refs reference object
+     */
+    getReferenceText(refs){
+        if(refs['citation']) 
+            return refs['citation'];
+        if(refs['label'])
+            return refs['label'];
+        
+            return refs['location'];
     }
 }
