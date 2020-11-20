@@ -1,9 +1,7 @@
-.btn-cancel {
-    float:right;
-    margin:0em 1em 2em 1em;
-    width:150px; 
+#btn-cancel {
     background-color:rgb(107, 107, 107);
-    color:white;
-    padding-right: 1em;
 }
 
+#btn-save {
+    background-color:green;
+}
