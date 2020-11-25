@@ -7,7 +7,7 @@ This module defines a set of subcommands to a command called (by default) "pub".
 include
   - prepupd:  setup a metadata bag based on the last published version of a specified dataset.
 """
-from . import prepupd
+from . import prepupd, servenerd
 from ... import cli
 
 default_name = "pub"
@@ -28,6 +28,7 @@ def load_into(subparser, as_cmd=None):
         as_cmd = default_name
     out = cli.CommandSuite(as_cmd, p)
     out.load_subcommand(prepupd)
+    out.load_subcommand(servenerd)
     return out
 
     

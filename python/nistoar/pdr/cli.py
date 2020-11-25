@@ -257,7 +257,7 @@ class PDRCLI(CommandSuite):
                                      argparse.Namespace instance.  
         """
         if isinstance(args, list):
-            args = parse_args(args)
+            args = self.parse_args(args)
         cmd = self._cmds.get(args.cmd)
         if cmd is None:
             raise PDRCommandFailure(args.cmd, "Unrecognized command: "+args.cmd, 1)
