@@ -4,13 +4,13 @@ from __future__ import print_function
 import os, sys
 import traceback as tb
 
-from nistoar.pdr import cli
+from nistoar.pdr import cli, def_etc_dir
 import nistoar.pdr.publish.cmd as pub
 
 def main(cmdname, args):
 
     # set up the commands
-    pdr = cli.PDRCLI(cmdname)
+    pdr = cli.PDRCLI(cmdname, os.path.join(def_etc_dir, "pdr-cli-config.yml"))
     pdr.load_subcommand(pub)
 
     # execute the commands

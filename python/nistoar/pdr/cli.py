@@ -24,9 +24,12 @@ def define_opts(progname=None, parser=None):
         parser = ArgumentParser(progname, None, description, epilog)
 
     parser.add_argument("-w", "--workdir", type=str, dest='workdir', metavar='DIR', default=".", 
-                        help="target input and output files with DIR by default (including log); default=.")
+                        help="target input and output files with DIR by default (including log); default='.'")
     parser.add_argument("-c", "--config", type=str, dest='conf', metavar='FILE',
-                        help="read configuration from FILE")
+                        help="read configuration from FILE (over-rides --in-live-sys)")
+    parser.add_argument("-S", "--in-live-system", action="store_true", dest='livesys',
+                        help="operate within the live PDR data publishing environment; this is " +
+                             "accomplished by loading a configuration from the configuration service")
     parser.add_argument("-l", "--logfile", type=str, dest='logfile', metavar='FILE', 
                         help="log messages to FILE, over-riding the configured logfile")
     parser.add_argument("-q", "--quiet", action="store_true", dest='quiet',
@@ -131,13 +134,14 @@ class PDRCLI(CommandSuite):
     """
     default_name = default_prog_name
 
-    def __init__(self, progname=None):
+    def __init__(self, progname=None, defconffile=None):
         if not progname:
             progname = self.default_name
 
         super(PDRCLI, self).__init__(progname, None)
         self.parser = define_opts(self.suitename)
         self._subparser_src = self.parser.add_subparsers(title="commands", dest="cmd")
+        self._defconffile = defconffile
         
         self._cmds = {}
         self._next_exit_offset = 10
@@ -218,8 +222,32 @@ class PDRCLI(CommandSuite):
             log.info("FYI: Writing log messages to %s", cfgmod.global_logfile)
 
         return log
-        
 
+    def load_config(self, args):
+        """
+        load the configuration according to the specified arguments.  A specific config file can be 
+        specified via --config, and --in-live-sys will pull the configuration from an available 
+        configuration service (the former overrides the latter).  A configuration service is detected 
+        when the OAR_CONFIG_SERVICE environment variable is set to the service URL.  If neither are set,
+        the default configuration file, set at construction, will be loaded
+
+        :param argparse.Namespace args:  the parsed command line arguments
+        :rtype:  dict
+        :return:  the configuration data
+        """
+        if args.conf:
+            config = cfgmod.load_from_file(args.conf)
+        elif args.livesys:
+            if not cfgmod.service:
+                raise PDRCommandFailure(args.cmd,
+                                        "Live system not detected; config service not availalbe", 2)
+            config = cfgmod.service.get(OAR_CONFIG_APP)
+        elif self._defconffile and os.path.isfile(self._defconffile):
+            config = cfgmod.load_from_file(self._defconffile)
+        else:
+            config = {}
+        return config
+                
     def execute(self, args, config=None, siptype='cli'):
         """
         execute the command given in the arguments
@@ -235,10 +263,7 @@ class PDRCLI(CommandSuite):
             raise PDRCommandFailure(args.cmd, "Unrecognized command: "+args.cmd, 1)
 
         if config is None:
-            if args.conf:
-                config = cfgmod.load_from_file(args.conf)
-            else:
-                config = {}
+            config = self.load_config(args)
         if 'sip_type' in config:
             config = extract_cli_config(config, siptype)
         if args.workdir:
