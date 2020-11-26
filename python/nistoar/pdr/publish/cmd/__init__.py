@@ -5,9 +5,11 @@ the general CLI infrastructure.
 
 This module defines a set of subcommands to a command called (by default) "pub".  These subcommands
 include
-  - prepupd:  setup a metadata bag based on the last published version of a specified dataset.
+  - prepupd:    setup a metadata bag based on the last published version of a specified dataset.
+  - servenerd:  extract the full NERDm record from a bag and copy it to an export directory (or stdout)
+  - fix:        fix various special problems via subcommands
 """
-from . import prepupd, servenerd
+from . import prepupd, servenerd, fix
 from ... import cli
 
 default_name = "pub"
@@ -29,6 +31,7 @@ def load_into(subparser, as_cmd=None):
     out = cli.CommandSuite(as_cmd, p)
     out.load_subcommand(prepupd)
     out.load_subcommand(servenerd)
+    out.load_subcommand(fix)
     return out
 
     

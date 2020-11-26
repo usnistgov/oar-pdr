@@ -21,6 +21,9 @@ class TestServenerdCmd(test.TestCase):
         self.cmd = cli.PDRCLI()
         self.cmd.load_subcommand(servenerd)
 
+    def tearDown(self):
+        self.tf.clean()
+
     def test_parse(self):
         args = self.cmd.parse_args("-q servenerd pdr2222".split())
         self.assertEqual(args.workdir, ".")
