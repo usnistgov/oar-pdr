@@ -29,12 +29,12 @@ def load_into(subparser):
     p.description = description
     p.add_argument("aipid", metavar="AIPID", type=str, nargs='?', help="the AIP-ID for the bag to examine "+
                    "or the file path to the bag's root directory")
-    p.add_argument("-n", "--nerd-serve-dir", metavar="DIR", type=str, dest='nrdserv',
-                   help="the output directory to write the record to; if set to '-', the record will be"+
-                        "printed to standard out")
     p.add_argument("-b", "--bag-parent-dir", metavar="DIR", type=str, dest='bagparent',
                    help="the directory to look for the specified bag; if not specified, it will either set "+
                         "to the metadata_bag_dir config or otherwise to the working directory")
+    p.add_argument("-n", "--nerd-serve-dir", metavar="DIR", type=str, dest='nrdserv',
+                   help="the output directory to write the record to; if set to '-', the record will be"+
+                        "printed to standard out")
 
     return None
 
