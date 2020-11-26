@@ -2,15 +2,22 @@
 module for assembling command-line interface to PDR operational commands
 """
 import logging, os, sys
-from argparse import ArgumentParser
+from argparse import ArgumentParser, HelpFormatter
 from copy import deepcopy
 
 from nistoar.pdr.exceptions import PDRException, ConfigurationException
 from nistoar.pdr import config as cfgmod
 
 description = "execute PDR administrative operations"
-epilog = None
 default_prog_name = "pdr"
+epilog = None
+
+class _MyHelpFormatter(HelpFormatter):
+    def _fill_text(self, text, width, indent):
+        paras = []
+        for para in text.split("\n\n"):
+            paras.append(super(_MyHelpFormatter, self)._fill_text(para, width, indent))
+        return "\n\n".join(paras)
 
 def define_opts(progname=None, parser=None):
     """
@@ -21,7 +28,13 @@ def define_opts(progname=None, parser=None):
     if not parser:
         if not progname:
             progname = default_prog_name
-        parser = ArgumentParser(progname, None, description, epilog)
+        parser = ArgumentParser(progname, None, description, epilog, formatter_class=_MyHelpFormatter)
+
+    morehelp = "Run '%(prog)s CMD -h' for help specifically on CMD."
+    if parser.epilog:
+        parser.epilog = morehelp+"\n\n"+parser.epilog
+    else:
+        parser.epilog = morehelp
 
     parser.add_argument("-w", "--workdir", type=str, dest='workdir', metavar='DIR', default=".", 
                         help="target input and output files with DIR by default (including log); default='.'")
@@ -102,11 +115,19 @@ class CommandSuite(object):
         """
         if not cmdname:
             cmdname = cmdmod.default_name
-        subparser = self._subparser_src.add_parser(cmdname, help=cmdmod.help)
+        subparser = self._subparser_src.add_parser(cmdname, help=cmdmod.help, formatter_class=_MyHelpFormatter)
         subcmd = cmdmod.load_into(subparser)
+        
         if not subcmd:
             subcmd = cmdmod
         self._cmds[cmdname] = subcmd
+
+        if subparser._subparsers is not None:
+            morehelp = "Run '%(prog)s CMD -h' for help specifically on CMD"
+            if subparser.epilog:
+                subparser.epilog = morehelp + "\n\n" + subparser.epilog
+            else:
+                subparser.epilog = morehelp
 
     def execute(self, args, config=None, log=None):
         """
@@ -189,6 +210,14 @@ class PDRCLI(CommandSuite):
         if not cmd:
             cmd = cmdmod
         self._cmds[cmdname] = (cmd, exit_offset)
+
+        if subparser._subparsers is not None:
+            morehelp = "Run '%(prog)s CMD -h' for help specifically on CMD"
+            if subparser.epilog:
+                subparser.epilog = morehelp + "\n\n" + subparser.epilog
+            else:
+                subparser.epilog = morehelp
+
 
     def configure_log(self, args, config):
         """
