@@ -21,8 +21,8 @@ class TestModFunctions(test.TestCase):
     def test_define_opts(self):
         p = cli.define_opts()
         self.assertEqual(p.prog, "pdr")
-        self.assertTrue("PDR" in p.description)
-        self.assertIsNone(p.epilog)
+        self.assertIn("PDR", p.description)
+        self.assertIn("help specifically on CMD", p.epilog)
         
         args = p.parse_args([])
         self.assertEqual(args.workdir, ".")
@@ -225,7 +225,7 @@ class TestPDRCLI(test.TestCase):
             self.default_name = "mock"
             self.help = "mighty helpful"
             self.last_exec = None
-        def load_command(self, sp):
+        def load_into(self, sp):
             sp.help = "helpful"
             sp.add_argument("uid", metavar="ID", type=str, help="the ID to use")
         def execute(self, args, config, log):
