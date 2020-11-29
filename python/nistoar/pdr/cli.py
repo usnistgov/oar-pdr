@@ -5,7 +5,7 @@ import logging, os, sys
 from argparse import ArgumentParser, HelpFormatter
 from copy import deepcopy
 
-from nistoar.pdr.exceptions import PDRException, ConfigurationException
+from nistoar.pdr.exceptions import PDRException, ConfigurationException, StateException
 from nistoar.pdr import config as cfgmod
 
 description = "execute PDR administrative operations"
