@@ -1,6 +1,5 @@
 """
-CLI command that will update to the NERDm topics metadatum with values converted from the 
-theme property.  
+CLI command that will update apply various validation tests to a specified bag.
 """
 import logging, argparse, sys, os, shutil, tempfile, json
 from copy import deepcopy
