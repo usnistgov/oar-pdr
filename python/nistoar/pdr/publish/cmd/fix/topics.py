@@ -12,6 +12,7 @@ from nistoar.pdr.utils import write_json
 from nistoar.pdr.cli import PDRCommandFailure
 from nistoar.pdr import def_schema_dir
 from nistoar.nerdm.taxonomy import ResearchTopicsTaxonomy
+from .. import validate as vald8
 
 default_name = "topics"
 help = "update the research topics based on the values of the themes"
@@ -47,7 +48,7 @@ def load_into(subparser):
                    help="remove all previously save topics from the NIST Taxonomy")
     p.add_argument("-t", "--add-theme", metavar='THEME', type=str, dest="addthemes", nargs='*',
                    help="add THEME in addition the themes in the theme property")
-    p.add_argument("-v", "--validate", action="store_true", dest="validate",
+    p.add_argument("-V", "--validate", action="store_true", dest="validate",
                    help="validate the NERDm metadata after update.")
     
     return None
@@ -87,7 +88,7 @@ def execute(args, config=None, log=None):
     bag = NISTBag(bagdir)
     update_topics(bag, args.frompod, args.replacethemes, args.addthemes, args.asannots, log)
     if args.validate:
-        pass
+        validate_resource(bag, log)
 
 def update_topics(bag, frompod=False, replace=False, extrathemes=None, asannots=False, log=None):
 
@@ -156,4 +157,10 @@ def open_research_topics_taxonomy(schemadir=None):
         return ResearchTopicsTaxonomy.from_schema_dir(schemadir)
     except IOError as ex:
         raise PDRCommandFailure(default_name, "Unable to read taxonomy dictionary: "+str(ex), 3, ex)
+
+def validate_resource(bag, log, merge=True):
+    vald8.validate_nerdm_for(bag, '', log, merge, "Updated metadata is valid")
+
+
+
 

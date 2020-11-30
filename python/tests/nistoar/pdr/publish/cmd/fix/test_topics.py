@@ -83,6 +83,25 @@ class TestFixTopicsCmd(test.TestCase):
         self.assertGreater(len(nerd.get('topic')), 0)
         self.assertEquals(nerd.get('topic')[0]['tag'], "Physics: Optical physics")
 
+    def test_exceute_wvalidation(self):
+        bagdir = os.path.join(self.workdir, "pdr2210")
+        shutil.copytree(os.path.join(datadir, "metadatabag"), bagdir)
+        
+        bldr = BagBuilder(self.workdir, "pdr2210")
+        bldr.update_metadata_for('', {'topic': []}, message="test prep topics")
+
+        bag = NISTBag(bagdir)
+        nerd = bag.nerdm_record()
+        self.assertEqual(nerd.get('topic'), [])
+        self.assertGreater(len(nerd.get('theme')), 0)
+        self.assertIn("Optical physics", nerd.get('theme'))
+
+        argline = "-q -w "+self.workdir+" topics "+bagdir+" -V"
+        self.cmd.execute(argline.split(), deepcopy(self.config))
+        nerd = bag.nerdm_record(False)
+        self.assertGreater(len(nerd.get('topic')), 0)
+        self.assertEquals(nerd.get('topic')[0]['tag'], "Physics: Optical physics")
+
     def test_exceute_addtheme(self):
         bagdir = os.path.join(self.workdir, "pdr2210")
         shutil.copytree(os.path.join(datadir, "metadatabag"), bagdir)
