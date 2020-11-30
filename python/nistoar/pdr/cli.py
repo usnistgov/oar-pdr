@@ -145,7 +145,14 @@ class CommandSuite(object):
             raise PDRCommandFailure(args.cmd, "Unrecognized subcommand of "+cmdname+": "+subcmd, 1)
 
         log = log.getChild(subcmd)
-        return cmd.execute(args, config, log)
+        try:
+            return cmd.execute(args, config, log)
+        except PDRCommandFailure as ex:
+            if ' ' in ex.cmd:
+                ex.cmd = subcmd + ' ' + ex.cmd
+            else:
+                ex.cmd = subcmd
+            raise ex
 
         
 
@@ -304,7 +311,10 @@ class PDRCLI(CommandSuite):
         try:
             cmd[0].execute(args, config, proglog.getChild(args.cmd))
         except PDRCommandFailure as ex:
-            ex.cmd = args.cmd
+            if ex.cmd:
+                ex.cmd = args.cmd + " " + ex.cmd
+            else:
+                ex.cmd = args.cmd
             ex.stat += cmd[1]
             raise ex
         except ConfigurationException as ex:
