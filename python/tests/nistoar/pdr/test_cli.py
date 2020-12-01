@@ -54,39 +54,6 @@ class TestModFunctions(test.TestCase):
         self.assertFalse(args.verbose)
         self.assertFalse(args.debug)
 
-    def test_extract_cli_config(self):
-        config = {"foo": "bar"}
-        cfg = cli.extract_cli_config(config)
-        self.assertTrue(cfg is config)
-
-        config = {
-            "foo": "bar",
-            "fred": "felon",
-            "sip_type": {
-                "cli" : {
-                    "fred": "cranston",
-                    "goober": "cleveland"
-                },
-                "midas3": {
-                    "goober": "pittsburgh"
-                }
-            }
-        }
-        cfg = cli.extract_cli_config(config)
-        self.assertTrue(cfg is not config)
-        self.assertEqual(cfg.get('foo'), "bar")
-        self.assertEqual(cfg.get('fred'), "cranston")
-        self.assertEqual(cfg.get('goober'), "cleveland")
-
-        cfg = cli.extract_cli_config(config, "midas3")
-        self.assertTrue(cfg is not config)
-        self.assertEqual(cfg.get('foo'), "bar")
-        self.assertEqual(cfg.get('fred'), "felon")
-        self.assertEqual(cfg.get('goober'), "pittsburgh")
-
-        with self.assertRaises(ConfigurationException):
-            cfg = cli.extract_cli_config(config, "gurn")
-
     def test_PDRComandFailure(self):
         ex = cli.PDRCommandFailure("goob", "hey, don't do that!", 3)
         self.assertEqual(ex.cmd, "goob")
@@ -265,6 +232,31 @@ class TestPDRCLI(test.TestCase):
         self.assertEqual(tstmod.last_exec['config'],
                          {'logdir': '.', 'logfile': "pdr.log", 'working_dir': '.'})
         self.assertIsNotNone(tstmod.last_exec['log'])
+
+    def test_extract_config_for_cmd(self):
+        cmd = cli.PDRCLI()
+        tstmod = self.TestCmdMod()
+        
+        config = {
+            "foo": "bar",
+            "fred": "felon",
+            "cmd": {
+                "pub" : {
+                    "fred": "cranston",
+                    "goober": "cleveland"
+                },
+                "mock": {
+                    "goober": "pittsburgh"
+                }
+            }
+        }
+
+        cfg = cmd.extract_config_for_cmd(config, 'pub', tstmod)
+        self.assertEqual(cfg.get('goober'), "cleveland")
+        self.assertEqual(cfg.get('fred'), "cranston")
+        cfg = cmd.extract_config_for_cmd(config, 'preserve', tstmod)
+        self.assertEqual(cfg.get('goober'), "pittsburgh")
+        self.assertEqual(cfg.get('fred'), "felon")
 
 
 if __name__ == '__main__':
