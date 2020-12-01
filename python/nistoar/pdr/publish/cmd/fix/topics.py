@@ -44,8 +44,10 @@ def load_into(subparser):
                         "metadata")
     p.add_argument("-a", "--as-annotations", action="store_true", dest="asannots",
                    help="save the updated topics as annotations")
-    p.add_argument("-r", "--replace", action="store_true", dest="replacethemes",
+    p.add_argument("-r", "--replace", action="store_true", dest="replacetopics",
                    help="remove all previously save topics from the NIST Taxonomy")
+    p.add_argument("-T", "--correct-themes", action="store_true", dest="replacethemes",
+                   help="replace themes with their taxonomy-corrected values")
     p.add_argument("-t", "--add-theme", metavar='THEME', type=str, dest="addthemes", nargs='*',
                    help="add THEME in addition the themes in the theme property")
     p.add_argument("-V", "--validate", action="store_true", dest="validate",
@@ -86,11 +88,13 @@ def execute(args, config=None, log=None):
         raise PDRCommandFailure(default_name, "Input bag does not exist (as a dir): "+bagdir, 2)
 
     bag = NISTBag(bagdir)
-    update_topics(bag, args.frompod, args.replacethemes, args.addthemes, args.asannots, log)
+    update_topics(bag, args.frompod, args.replacetopics, args.replacethemes,
+                  args.addthemes, args.asannots, log)
     if args.validate:
         validate_resource(bag, log)
 
-def update_topics(bag, frompod=False, replace=False, extrathemes=None, asannots=False, log=None):
+def update_topics(bag, frompod=False, replace=False, correct=False,
+                  extrathemes=None, asannots=False, log=None):
 
     # load the taxonomy vocabulary
     taxon = open_research_topics_taxonomy()
@@ -104,7 +108,7 @@ def update_topics(bag, frompod=False, replace=False, extrathemes=None, asannots=
 
     tid = taxon.data.get('@id')
     if replace:
-        # remove entries from the NIST taxonomy
+        # remove topic entries that are from the NIST taxonomy
         topics = [t for t in topics if not t.get('scheme') or t.get('scheme') != tid]
 
     # get the input themes
@@ -140,11 +144,15 @@ def update_topics(bag, frompod=False, replace=False, extrathemes=None, asannots=
             next_insert += 1
 
     # save the result
+    update = { 'topic': topics }
+    if correct:
+        update['theme'] = [t['tag'] for t in topics if t['scheme'] == tid]
+
     bldr = BagBuilder(os.path.dirname(bag.dir), os.path.basename(bag.dir), logger=log)
     if asannots:
-        bldr.update_annotations_for('', {'topic': topics}, message="topics updated (to annotations)")
+        bldr.update_annotations_for('', update, message="topics updated (to annotations)")
     else:
-        bldr.update_metadata_for('', {'topic': topics}, message="topics updated")
+        bldr.update_metadata_for('', update, message="topics updated")
     bldr.disconnect_logfile()
         
 def open_research_topics_taxonomy(schemadir=None):

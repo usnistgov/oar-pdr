@@ -172,6 +172,25 @@ class TestFixTopicsCmd(test.TestCase):
         self.assertGreater(len(nerd.get('topic')), 0)
         self.assertEquals(nerd.get('topic')[0]['tag'], "Physics: Optical physics")
 
+    def test_exceute_correct(self):
+        bagdir = os.path.join(self.workdir, "pdr2210")
+        shutil.copytree(os.path.join(datadir, "metadatabag"), bagdir)
+        
+        bag = NISTBag(bagdir)
+        nerd = bag.nerdm_record()
+        self.assertEqual(nerd.get('topic'), [])
+        self.assertGreater(len(nerd.get('theme')), 0)
+        self.assertIn("Optical physics", nerd.get('theme'))
+
+        argline = "-q -w "+self.workdir+" topics "+bagdir+" -t genomics -T"
+        self.cmd.execute(argline.split(), deepcopy(self.config))
+        nerd = bag.nerdm_record(False)
+        self.assertGreater(len(nerd.get('topic')), 1)
+        self.assertEquals(nerd.get('topic')[0]['tag'], "Physics: Optical physics")
+        self.assertEquals(nerd.get('topic')[1]['tag'], "Bioscience: Genomics")
+        self.assertEquals(nerd.get('theme')[0], "Physics: Optical physics")
+        self.assertEquals(nerd.get('theme')[1], "Bioscience: Genomics")
+
     def test_exceute_asannots(self):
         bagdir = os.path.join(self.workdir, "pdr2210")
         shutil.copytree(os.path.join(datadir, "metadatabag"), bagdir)
