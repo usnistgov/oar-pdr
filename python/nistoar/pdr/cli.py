@@ -129,6 +129,27 @@ class CommandSuite(object):
             else:
                 subparser.epilog = morehelp
 
+    def extract_config_for_cmd(self, config, cmdname, cmd=None):
+        """
+        merge command-specific configuration with the top-level configuration.  The input config
+        can contain a property 'cmd' that holds configuration data that is specific to particular 
+        subcommands.  The properties of the 'cmd' object are names of the commands (either the commands' 
+        default name or names as configured).  If a matching config property is found, it's contents 
+        are extracted and merged into top-level metadata (after deleting the 'cmd' object).  The resulting 
+        dictionary is returned as the configuration to use.
+        """
+        if 'cmd' not in config:
+            return config
+
+        out = deepcopy(config)
+        del out['cmd']
+        if cmdname not in config['cmd'] and cmd and hasattr(cmd, 'default_name'):
+            cmdname = getattr(cmd, 'default_name')
+        if cmdname in config['cmd']:
+            out = cfgmod.merge_config(config['cmd'][cmdname], out)
+
+        return out
+
     def execute(self, args, config=None, log=None):
         """
         execute a subcommand from this command suite
@@ -143,6 +164,8 @@ class CommandSuite(object):
         cmd = self._cmds.get(subcmd)
         if cmd is None:
             raise PDRCommandFailure(args.cmd, "Unrecognized subcommand of "+cmdname+": "+subcmd, 1)
+
+        config = extract_config_for_cmd(config, subcmd, cmd)
 
         log = log.getChild(subcmd)
         try:
@@ -274,6 +297,8 @@ class PDRCLI(CommandSuite):
         if args.conf:
             config = cfgmod.load_from_file(args.conf)
         elif args.livesys:
+            ## FIXME
+            OAR_CONFIG_APP = "pdr-cli"
             if not cfgmod.service:
                 raise PDRCommandFailure(args.cmd,
                                         "Live system not detected; config service not availalbe", 2)
@@ -300,8 +325,8 @@ class PDRCLI(CommandSuite):
 
         if config is None:
             config = self.load_config(args)
-        if 'sip_type' in config:
-            config = extract_cli_config(config, siptype)
+        config = self.extract_config_for_cmd(config, args.cmd, cmd)
+      
         if args.workdir:
             if not os.path.isdir(args.workdir):
                 raise PDRCommandFailure(args.cmd, "Working dir is not an existing directory: "+args.workdir, 2)
@@ -320,21 +345,4 @@ class PDRCLI(CommandSuite):
         except ConfigurationException as ex:
             raise PDRCommandFailure(args.cmd, "Configuration error: "+str(ex), 2, ex)
 
-
-def extract_cli_config(config, siptype="cli"):
-    """
-    from a common configuration shared with the various publication services, 
-    extract the bits needed by the command line interface
-    """
-    if 'sip_type' not in config:
-        # this is the old-style configuration, return it unchangesd
-        return config
-
-    if siptype not in config['sip_type']:
-        raise ConfigurationException("CLI config: "+siptype+" missing as an sip_type")
-    out = deepcopy(config)
-    del out['sip_type']
-    out = cfgmod.merge_config(config['sip_type'][siptype], out)
-
-    return out
 
