@@ -6,12 +6,14 @@ import traceback as tb
 
 from nistoar.pdr import cli, def_etc_dir
 import nistoar.pdr.publish.cmd as pub
+import nistoar.pdr.preserv.cmd as preserve
 
 def main(cmdname, args):
 
     # set up the commands
     pdr = cli.PDRCLI(cmdname, os.path.join(def_etc_dir, "pdr-cli-config.yml"))
     pdr.load_subcommand(pub)
+    pdr.load_subcommand(preserve)
 
     # execute the commands
     args = pdr.parse_args(args)
