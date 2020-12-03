@@ -77,7 +77,14 @@ def execute(args, config=None, log=None):
     # set the input bag
     workdir = config.get('working_dir', '.')
     bagparent = config.get('metadata_bag_dir')
-    if args.bagparent:
+    if os.sep in args.aipid:
+        bagpath = os.path.abspath(args.aipid)
+        if not os.path.exists(bagpath):
+            if args.workdir:
+                bagpath = os.path.join(args.workdir, args.aipid)
+        bagparent = os.path.dirname(bagpath)
+        args.aipid = os.path.basename(bagpath)
+    elif args.bagparent:
         bagparent = args.bagparent
     if not bagparent:
         bagparent = workdir
@@ -86,6 +93,7 @@ def execute(args, config=None, log=None):
     bagdir = os.path.join(bagparent, args.aipid)
     if not os.path.isdir(bagdir):
         raise PDRCommandFailure(default_name, "Input bag does not exist (as a dir): "+bagdir, 2)
+    log.info("Found input bag at "+bagdir)
 
     bag = NISTBag(bagdir)
     update_topics(bag, args.frompod, args.replacetopics, args.replacethemes,
