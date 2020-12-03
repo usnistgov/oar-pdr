@@ -25,7 +25,7 @@ class TestModFunctions(test.TestCase):
         self.assertIn("help specifically on CMD", p.epilog)
         
         args = p.parse_args([])
-        self.assertEqual(args.workdir, ".")
+        self.assertEqual(args.workdir, "")
         self.assertIsNone(args.conf)
         self.assertIsNone(args.logfile)
         self.assertFalse(args.quiet)
@@ -35,7 +35,7 @@ class TestModFunctions(test.TestCase):
         p = cli.define_opts("goob")
         self.assertEqual(p.prog, "goob")
         args = p.parse_args([])
-        self.assertEqual(args.workdir, ".")
+        self.assertEqual(args.workdir, "")
         self.assertIsNone(args.conf)
         self.assertIsNone(args.logfile)
         self.assertFalse(args.quiet)
@@ -47,7 +47,7 @@ class TestModFunctions(test.TestCase):
         self.assertTrue(p is parser)
         self.assertEqual(p.prog, "fred")
         args = p.parse_args([])
-        self.assertEqual(args.workdir, ".")
+        self.assertEqual(args.workdir, "")
         self.assertIsNone(args.conf)
         self.assertIsNone(args.logfile)
         self.assertFalse(args.quiet)
@@ -230,7 +230,7 @@ class TestPDRCLI(test.TestCase):
         self.assertTrue(tstmod.last_exec['args'].quiet)
         self.assertTrue(not tstmod.last_exec['args'].verbose)
         self.assertEqual(tstmod.last_exec['config'],
-                         {'logdir': '.', 'logfile': "pdr.log", 'working_dir': '.'})
+                         {'working_dir': os.getcwd(), 'logdir': os.getcwd(), 'logfile': "pdr.log"})
         self.assertIsNotNone(tstmod.last_exec['log'])
 
     def test_extract_config_for_cmd(self):

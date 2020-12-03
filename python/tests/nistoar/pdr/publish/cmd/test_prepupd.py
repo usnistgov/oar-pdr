@@ -112,7 +112,7 @@ class TestPrepupdCmd(test.TestCase):
 
     def test_parse(self):
         args = self.cmd.parser.parse_args("-q prepupd pdr2222".split())
-        self.assertEqual(args.workdir, ".")
+        self.assertEqual(args.workdir, "")
         self.assertIsNone(args.cachedir)
         self.assertTrue(args.quiet)
         self.assertFalse(args.verbose)

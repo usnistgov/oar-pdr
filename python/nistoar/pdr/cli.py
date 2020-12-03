@@ -36,7 +36,7 @@ def define_opts(progname=None, parser=None):
     else:
         parser.epilog = morehelp
 
-    parser.add_argument("-w", "--workdir", type=str, dest='workdir', metavar='DIR', default=".", 
+    parser.add_argument("-w", "--workdir", type=str, dest='workdir', metavar='DIR', default="", 
                         help="target input and output files with DIR by default (including log); default='.'")
     parser.add_argument("-c", "--config", type=str, dest='conf', metavar='FILE',
                         help="read configuration from FILE (over-rides --in-live-sys)")
@@ -165,7 +165,7 @@ class CommandSuite(object):
         if cmd is None:
             raise PDRCommandFailure(args.cmd, "Unrecognized subcommand of "+cmdname+": "+subcmd, 1)
 
-        config = extract_config_for_cmd(config, subcmd, cmd)
+        config = self.extract_config_for_cmd(config, subcmd, cmd)
 
         log = log.getChild(subcmd)
         try:
@@ -326,11 +326,17 @@ class PDRCLI(CommandSuite):
         if config is None:
             config = self.load_config(args)
         config = self.extract_config_for_cmd(config, args.cmd, cmd)
-      
+
         if args.workdir:
+            args.workdir = os.path.abspath(args.workdir)
             if not os.path.isdir(args.workdir):
                 raise PDRCommandFailure(args.cmd, "Working dir is not an existing directory: "+args.workdir, 2)
             config['working_dir'] = args.workdir
+        elif 'working_dir' in config:
+            config['working_dir'] = os.path.abspath(config['working_dir'])
+        else:
+            config['working_dir'] = os.getcwd()
+
         proglog = self.configure_log(args, config)
 
         try:

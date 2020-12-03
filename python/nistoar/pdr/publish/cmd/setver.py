@@ -128,7 +128,14 @@ def execute(args, config=None, log=None):
     # set the input bag
     workdir = config.get('working_dir', '.')
     bagparent = config.get('metadata_bag_dir')
-    if args.bagparent:
+    if os.sep in args.aipid:
+        bagpath = os.path.abspath(args.aipid)
+        if not os.path.exists(bagpath):
+            if args.workdir:
+                bagpath = os.path.join(args.workdir, args.aipid)
+        bagparent = os.path.dirname(bagpath)
+        args.aipid = os.path.basename(bagpath)
+    elif args.bagparent:
         bagparent = args.bagparent
     if not bagparent:
         bagparent = workdir
@@ -137,6 +144,7 @@ def execute(args, config=None, log=None):
     bagdir = os.path.join(bagparent, args.aipid)
     if not os.path.isdir(bagdir):
         raise PDRCommandFailure(default_name, "Input bag does not exist (as a dir): "+bagdir, 2)
+    log.info("Found input bag at "+bagdir)
 
     _check_opt_choices(args, config)
 
@@ -186,7 +194,7 @@ def execute(args, config=None, log=None):
 
     # write out the update
     try:
-        bldr = BagBuilder(os.path.dirname(bag.dir), os.path.basename(bag.dir))
+        bldr = BagBuilder(os.path.dirname(bag.dir), os.path.basename(bag.dir), logger=log)
         msg = "version updated to "+version
         if not args.setver and not args.level:
             msg = "version history updated for "+version

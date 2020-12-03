@@ -27,6 +27,9 @@ def load_into(subparser):
     p.add_argument("aipid", metavar="AIPID", type=str, nargs='?', help="the AIP-ID for the dataset to prep")
     p.add_argument("-r", "--repo-url-base", metavar='BASEURL', type=str, dest='repourl',
                    help="the base URL to use for PDR data access services")
+    p.add_argument("-d", "--output-dir", metavar='DIR', type=str, dest='outdir',
+                   help="the directory to cache write the bag into; if not provided, defaults to the "+
+                        "working directory")
     p.add_argument("-C", "--cache-dir", metavar='DIR', type=str, dest='cachedir',
                    help="a local directory to cache retrieved head bags into")
 
@@ -84,9 +87,11 @@ def execute(args, config=None, log=None):
         usenm = usenm[:4]+"..."+usenm[-4:]
     log = log.getChild(usenm)
     
-    outdir = config.get('working_dir')
+    outdir = args.outdir
     if not outdir:
-        raise PDRCommandFailure(default_name, "Output directory not specified (use '-w')", 1)
+        outdir = config.get('working_dir')
+    if not outdir:
+        raise PDRCommandFailure(default_name, "Output directory not specified (use '-d' or '-w')", 1)
     outbag = os.path.join(outdir, args.aipid)
     if os.path.exists(outbag):
         raise PDRCommandFailure(default_name, "Output bag already exists: "+outbag, 2)
