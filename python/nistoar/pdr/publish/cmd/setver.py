@@ -9,7 +9,7 @@ from collections import OrderedDict
 from nistoar.pdr.exceptions import ConfigurationException, PDRException, PDRServerError
 from nistoar.pdr.preserv.bagit import NISTBag, BagBuilder
 from nistoar.pdr.cli import PDRCommandFailure
-from . import validate as vald8
+from . import validate as vald8, define_pub_opts, determine_bag_path
 
 default_name = "setver"
 help = "set the release version in a bag's NERDm metadata"
@@ -26,11 +26,11 @@ def load_into(subparser):
     """
     p = subparser
     p.description = description
-    p.add_argument("aipid", metavar="AIPID", type=str, nargs='?', help="the AIP-ID for the bag to examine "+
-                   "or the file path to the bag's root directory")
-    p.add_argument("-b", "--bag-parent-dir", metavar="DIR", type=str, dest='bagparent',
-                   help="the directory to look for the specified bag; if not specified, it will either set "+
-                        "to the metadata_bag_dir config or otherwise to the working directory")
+
+    # args common to all pub subcommands
+    define_pub_opts(p)
+
+    # setver-specific args
     p.add_argument("-s", "--set-version", metavar="VERSION", type=str, dest='setver',
                    help="set the full version value to VERSION, an arbitrary string")
     p.add_argument("-i", "--increment-level", metavar="LEV", type=int, dest='level',
@@ -126,22 +126,7 @@ def execute(args, config=None, log=None):
     log = log.getChild(usenm)
     
     # set the input bag
-    workdir = config.get('working_dir', '.')
-    bagparent = config.get('metadata_bag_dir')
-    if os.sep in args.aipid:
-        bagpath = os.path.abspath(args.aipid)
-        if not os.path.exists(bagpath):
-            if args.workdir:
-                bagpath = os.path.join(args.workdir, args.aipid)
-        bagparent = os.path.dirname(bagpath)
-        args.aipid = os.path.basename(bagpath)
-    elif args.bagparent:
-        bagparent = args.bagparent
-    if not bagparent:
-        bagparent = workdir
-    elif not bagparent.startswith('./') and not bagparent.startswith('../') and not os.path.isabs(bagparent):
-        bagparent = os.path.join(workdir, bagparent)
-    bagdir = os.path.join(bagparent, args.aipid)
+    workdir, bagparent, bagdir = determine_bag_path(args, config)
     if not os.path.isdir(bagdir):
         raise PDRCommandFailure(default_name, "Input bag does not exist (as a dir): "+bagdir, 2)
     log.info("Found input bag at "+bagdir)

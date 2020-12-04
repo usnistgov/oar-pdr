@@ -10,6 +10,7 @@ from nistoar.pdr.preserv.bagger.prepupd import UpdatePrepService
 from nistoar.pdr.preserv.bagit.bag import NISTBag
 from nistoar.pdr.utils import write_json
 from nistoar.pdr.cli import PDRCommandFailure
+from . import define_pub_opts, determine_bag_path
 
 default_name = "servenerd"
 help = "copy the NERDm record from a bag to NERDm serve directory"
@@ -27,11 +28,11 @@ def load_into(subparser):
     """
     p = subparser
     p.description = description
-    p.add_argument("aipid", metavar="AIPID", type=str, nargs='?', help="the AIP-ID for the bag to examine "+
-                   "or the file path to the bag's root directory")
-    p.add_argument("-b", "--bag-parent-dir", metavar="DIR", type=str, dest='bagparent',
-                   help="the directory to look for the specified bag; if not specified, it will either set "+
-                        "to the metadata_bag_dir config or otherwise to the working directory")
+
+    # args common to all pub subcommands
+    define_pub_opts(p)
+
+    # setver-specific args
     p.add_argument("-n", "--nerd-serve-dir", metavar="DIR", type=str, dest='nrdserv',
                    help="the output directory to write the record to; if set to '-', the record will be"+
                         "printed to standard out")
@@ -62,15 +63,7 @@ def execute(args, config=None, log=None):
     log = log.getChild(usenm)
 
     # set the input bag
-    workdir = config.get('working_dir', '.')
-    bagparent = config.get('metadata_bag_dir')
-    if args.bagparent:
-        bagparent = args.bagparent
-    if not bagparent:
-        bagparent = workdir
-    elif not bagparent.startswith('./') and not bagparent.startswith('../') and not os.path.isabs(bagparent):
-        bagparent = os.path.join(workdir, bagparent)
-    bagdir = os.path.join(bagparent, args.aipid)
+    workdir, bagparent, bagdir = determine_bag_path(args, config)
     if not os.path.isdir(bagdir):
         raise PDRCommandFailure(default_name, "Input bag does not exist (as a dir): "+bagdir, 2)
 

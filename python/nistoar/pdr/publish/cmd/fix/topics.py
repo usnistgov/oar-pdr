@@ -12,7 +12,7 @@ from nistoar.pdr.utils import write_json
 from nistoar.pdr.cli import PDRCommandFailure
 from nistoar.pdr import def_schema_dir
 from nistoar.nerdm.taxonomy import ResearchTopicsTaxonomy
-from .. import validate as vald8
+from .. import validate as vald8, define_pub_opts, determine_bag_path
 
 default_name = "topics"
 help = "update the research topics based on the values of the themes"
@@ -64,7 +64,7 @@ def execute(args, config=None, log=None):
     if isinstance(args, list):
         # cmd-line arguments not parsed yet
         p = argparse.ArgumentParser()
-        load_command(p)
+        load_into(p)
         args = p.parse_args(args)
 
     if not args.aipid:
@@ -75,22 +75,7 @@ def execute(args, config=None, log=None):
     log = log.getChild(usenm)
 
     # set the input bag
-    workdir = config.get('working_dir', '.')
-    bagparent = config.get('metadata_bag_dir')
-    if os.sep in args.aipid:
-        bagpath = os.path.abspath(args.aipid)
-        if not os.path.exists(bagpath):
-            if args.workdir:
-                bagpath = os.path.join(args.workdir, args.aipid)
-        bagparent = os.path.dirname(bagpath)
-        args.aipid = os.path.basename(bagpath)
-    elif args.bagparent:
-        bagparent = args.bagparent
-    if not bagparent:
-        bagparent = workdir
-    elif not bagparent.startswith('./') and not bagparent.startswith('../') and not os.path.isabs(bagparent):
-        bagparent = os.path.join(workdir, bagparent)
-    bagdir = os.path.join(bagparent, args.aipid)
+    workdir, bagparent, bagdir = determine_bag_path(args, config)
     if not os.path.isdir(bagdir):
         raise PDRCommandFailure(default_name, "Input bag does not exist (as a dir): "+bagdir, 2)
     log.info("Found input bag at "+bagdir)

@@ -14,7 +14,7 @@ testdir = os.path.dirname(os.path.abspath(__file__))
 pdrmoddir = os.path.dirname(os.path.dirname(testdir))
 datadir = os.path.join(pdrmoddir, "preserv", "data")
 
-class TestFixTopicsCmd(test.TestCase):
+class TestSetverCmd(test.TestCase):
 
     def setUp(self):
         self.tf = Tempfiles()
