@@ -27,7 +27,7 @@ def load_into(subparser):
     p.add_argument("aipid", metavar="AIPID", type=str, nargs='?', help="the AIP-ID for the dataset to prep")
     p.add_argument("-r", "--repo-url-base", metavar='BASEURL', type=str, dest='repourl',
                    help="the base URL to use for PDR data access services")
-    p.add_argument("-d", "--output-dir", metavar='DIR', type=str, dest='outdir',
+    p.add_argument("-d", "--output-dir", "-b", "--bag-parent-dir", metavar='DIR', type=str, dest='outdir',
                    help="the directory to cache write the bag into; if not provided, defaults to the "+
                         "working directory")
     p.add_argument("-C", "--cache-dir", metavar='DIR', type=str, dest='cachedir',

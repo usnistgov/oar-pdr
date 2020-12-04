@@ -26,7 +26,7 @@ class TestServenerdCmd(test.TestCase):
 
     def test_parse(self):
         args = self.cmd.parse_args("-q servenerd pdr2222".split())
-        self.assertEqual(args.workdir, ".")
+        self.assertEqual(args.workdir, "")
         self.assertTrue(args.quiet)
         self.assertFalse(args.verbose)
         self.assertEqual(args.cmd, "servenerd")
