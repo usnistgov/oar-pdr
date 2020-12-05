@@ -24,7 +24,7 @@ def load_into(subparser):
     """
     p = subparser
     p.description = description
-    p.add_argument("aipid", metavar="AIPID", type=str, nargs='?', help="the AIP-ID for the dataset to prep")
+    p.add_argument("aipid", metavar="AIPID", type=str, nargs=1, help="the AIP-ID for the dataset to prep")
     p.add_argument("-r", "--repo-url-base", metavar='BASEURL', type=str, dest='repourl',
                    help="the base URL to use for PDR data access services")
     p.add_argument("-d", "--output-dir", "-b", "--bag-parent-dir", metavar='DIR', type=str, dest='outdir',
@@ -82,6 +82,7 @@ def execute(args, config=None, log=None):
 
     if not args.aipid:
         raise PDRCommandFailure(default_name, "AIP ID not specified", 1)
+    args.aipid = args.aipid[0]
     usenm = args.aipid
     if len(usenm) > 11:
         usenm = usenm[:4]+"..."+usenm[-4:]

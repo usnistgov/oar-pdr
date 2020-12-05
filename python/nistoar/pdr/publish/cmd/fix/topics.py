@@ -34,7 +34,7 @@ def load_into(subparser):
     """
     p = subparser
     p.description = description
-    p.add_argument("aipid", metavar="AIPID", type=str, nargs='?', help="the AIP-ID for the bag to examine "+
+    p.add_argument("aipid", metavar="AIPID", type=str, nargs=1, help="the AIP-ID for the bag to examine "+
                    "or the file path to the bag's root directory")
     p.add_argument("-b", "--bag-parent-dir", metavar="DIR", type=str, dest='bagparent',
                    help="the directory to look for the specified bag; if not specified, it will either set "+
@@ -69,6 +69,7 @@ def execute(args, config=None, log=None):
 
     if not args.aipid:
         raise PDRCommandFailure(default_name, "AIP ID not specified", 1)
+    args.aipid = args.aipid[0]
     usenm = args.aipid
     if len(usenm) > 11:
         usenm = usenm[:4]+"..."+usenm[-4:]

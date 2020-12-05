@@ -31,9 +31,9 @@ def load_into(subparser, as_cmd=None):
         as_cmd = default_name
     out = cli.CommandSuite(as_cmd, subparser)
     out.load_subcommand(prepupd)
-    out.load_subcommand(servenerd)
     out.load_subcommand(setver)
     out.load_subcommand(validate)
+    out.load_subcommand(servenerd)
     out.load_subcommand(fix)
     return out
 
@@ -44,7 +44,7 @@ def define_pub_opts(subparser):
      - --bag-parent-dir -- the directory to look for the AIP bag directory in; saved as "bagparent"
     """
     p = subparser
-    p.add_argument("aipid", metavar="AIPID", type=str, nargs='?',
+    p.add_argument("aipid", metavar="AIPID", type=str, nargs=1,
                    help="the AIP-ID for the bag to examine or the file path to the bag's root directory")
     p.add_argument("-b", "--bag-parent-dir", metavar="DIR", type=str, dest='bagparent',
                    help="the directory to look for the specified bag; if not specified, it will either "+
