@@ -115,7 +115,8 @@ class CommandSuite(object):
         """
         if not cmdname:
             cmdname = cmdmod.default_name
-        subparser = self._subparser_src.add_parser(cmdname, help=cmdmod.help, formatter_class=_MyHelpFormatter)
+        subparser = self._subparser_src.add_parser(cmdname, description=cmdmod.description,
+                                                   help=cmdmod.help, formatter_class=_MyHelpFormatter)
         subcmd = cmdmod.load_into(subparser)
         
         if not subcmd:
