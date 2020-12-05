@@ -120,6 +120,7 @@ def execute(args, config=None, log=None):
 
     if not args.aipid:
         raise PDRCommandFailure(default_name, "AIP ID not specified", 1)
+    args.aipid = args.aipid[0]
     usenm = args.aipid
     if len(usenm) > 11:
         usenm = usenm[:4]+"..."+usenm[-4:]

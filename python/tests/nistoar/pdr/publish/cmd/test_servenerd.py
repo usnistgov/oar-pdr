@@ -30,7 +30,7 @@ class TestServenerdCmd(test.TestCase):
         self.assertTrue(args.quiet)
         self.assertFalse(args.verbose)
         self.assertEqual(args.cmd, "servenerd")
-        self.assertEqual(args.aipid, "pdr2222")
+        self.assertEqual(args.aipid, ["pdr2222"])
         self.assertIsNone(args.bagparent)
         self.assertIsNone(args.nrdserv)
 
@@ -40,7 +40,7 @@ class TestServenerdCmd(test.TestCase):
         self.assertTrue(args.quiet)
         self.assertFalse(args.verbose)
         self.assertEqual(args.cmd, "servenerd")
-        self.assertEqual(args.aipid, "pdr2210")
+        self.assertEqual(args.aipid, ["pdr2210"])
         self.assertEqual(args.bagparent, "mdserv")
         self.assertEqual(args.nrdserv, "-")
 

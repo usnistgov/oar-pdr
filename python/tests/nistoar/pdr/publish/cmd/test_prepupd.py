@@ -117,7 +117,7 @@ class TestPrepupdCmd(test.TestCase):
         self.assertTrue(args.quiet)
         self.assertFalse(args.verbose)
         self.assertEqual(args.cmd, "prepupd")
-        self.assertEqual(args.aipid, "pdr2222")
+        self.assertEqual(args.aipid, ["pdr2222"])
 
         argline = "-q -w "+self.workdir+" prepupd pdr2210 -C headbags -r https://data.nist.gov/"
         args = self.cmd.parser.parse_args(argline.split())
@@ -127,7 +127,7 @@ class TestPrepupdCmd(test.TestCase):
         self.assertTrue(args.quiet)
         self.assertFalse(args.verbose)
         self.assertEqual(args.cmd, "prepupd")
-        self.assertEqual(args.aipid, "pdr2210")
+        self.assertEqual(args.aipid, ["pdr2210"])
 
     def test_get_access_config(self):
         args = self.cmd.parser.parse_args("-q prepupd pdr2222".split())
