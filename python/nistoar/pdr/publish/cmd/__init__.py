@@ -23,7 +23,7 @@ def load_into(subparser, as_cmd=None):
     :param argparser.ArgumentParser subparser:  the argument parser instance to define this command's 
                                                 interface into it 
     """
-    from . import prepupd, servenerd, fix, validate, setver
+    from . import prepupd, servenerd, fix, validate, setver, author
     
     subparser.description = description
 
@@ -31,6 +31,7 @@ def load_into(subparser, as_cmd=None):
         as_cmd = default_name
     out = cli.CommandSuite(as_cmd, subparser)
     out.load_subcommand(prepupd)
+    out.load_subcommand(author)
     out.load_subcommand(setver)
     out.load_subcommand(validate)
     out.load_subcommand(servenerd)
