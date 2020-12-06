@@ -126,10 +126,10 @@ def validate_nerdm_for(bag, filepath, log, merge=True, success=None, schemadir=N
     errs = validate(nerd, schemadir)
     if errs:
         if filepath:
-            log.error("%i validation%s detected in metadata for %s",
+            log.error("%i validation error%s detected in metadata for %s",
                       len(errs), (len(errs) > 1 and "s") or "", filepath)
         else:
-            log.error("%i validation%s detected in resource-level metadata:",
+            log.error("%i validation error%s detected in resource-level metadata:",
                       len(errs), (len(errs) > 1 and "s") or "")
         for err in errs:
             log.error(str(err))
