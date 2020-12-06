@@ -209,6 +209,7 @@ class TestEditAuthorCmd(test.TestCase):
         self.assertEqual(auths[1]['fn'], "@MarkTrail")
         self.assertEqual(auths[1]['givenName'], "M.")
         self.assertEqual(auths[1]['familyName'], "trial")
+        self.assertEqual(auths[1]['@type'], "foaf:Person")
         self.assertEqual(len(auths[1]['affiliation']), 1)
         self.assertEqual(auths[1]['affiliation'][0]['title'], "UIUC")
         self.assertEqual(auths[1]['affiliation'][0]['subunits'][0], "NCSA")
@@ -220,6 +221,7 @@ class TestEditAuthorCmd(test.TestCase):
         self.assertEqual(auths[1]['fn'], "@MarkTrail")
         self.assertEqual(auths[1]['givenName'], "M.")
         self.assertEqual(auths[1]['familyName'], "trial")
+        self.assertEqual(auths[1]['@type'], "foaf:Person")
         self.assertEqual(len(auths[1]['affiliation']), 2)
         self.assertEqual(auths[1]['affiliation'][0]['title'], "USForestService")
         self.assertNotIn('subunit', auths[1]['affiliation'][0])
@@ -234,6 +236,7 @@ class TestEditAuthorCmd(test.TestCase):
         self.assertEqual(auths[1]['fn'], "@MarkTrail")
         self.assertEqual(auths[1]['givenName'], "M.")
         self.assertEqual(auths[1]['familyName'], "Trail")
+        self.assertEqual(auths[1]['@type'], "foaf:Person")
         self.assertEqual(len(auths[1]['affiliation']), 2)
         self.assertEqual(auths[1]['affiliation'][1]['title'], "USForestService")
         self.assertNotIn('subunit', auths[1]['affiliation'][0])
@@ -246,6 +249,7 @@ class TestEditAuthorCmd(test.TestCase):
         self.authcmd.update_auth_data(auths[1], args)
         self.assertEqual(auths[1]['fn'], "@MarkTrail")
         self.assertEqual(auths[1]['givenName'], "M.")
+        self.assertEqual(auths[1]['@type'], "foaf:Person")
         self.assertEqual(auths[1]['familyName'], "Trail")
         self.assertEqual(len(auths[1]['affiliation']), 2)
         self.assertEqual(auths[1]['affiliation'][0]['title'], "National Institute of Standards and Technology")
@@ -290,29 +294,7 @@ class TestEditAuthorCmd(test.TestCase):
         self.assertEqual(auths[1]['fn'], "@MarkTrail")
         self.assertEqual(auths[1]['givenName'], "M.")
         self.assertEqual(auths[1]['familyName'], "trial")
-        self.assertEqual(len(auths[1]['affiliation']), 1)
-        self.assertEqual(auths[1]['affiliation'][0]['title'], "UIUC")
-        self.assertEqual(auths[1]['affiliation'][0]['subunits'][0], "NCSA")
-        self.assertEqual(auths[1]['affiliation'][0]['subunits'][1], "astronomy")
-        self.assertEqual(auths[1]['affiliation'][0]['subunits'][2], "LSST")
-
-        self.assertEqual(auths[0]['fn'], "Gurn W. Cranston")
-        self.assertEqual(auths[0]['givenName'], "Gurn")
-        self.assertEqual(auths[0]['familyName'], "Cranston")
-        self.assertEqual(len(auths[0]['affiliation']), 2)
-
-    def test_execute(self):
-        argline = "-q edit -b "+self.workdir+\
-                  " pdr2210 -k Trail -n @MarkTrail -g M. -f trial -i UIUC NCSA astronomy LSST"
-        self.cmd.execute(argline.split(), deepcopy(self.config))
-
-        bag = NISTBag(self.bagdir)
-        nerd = bag.nerdm_record(False)
-        auths = nerd.get('authors')
-
-        self.assertEqual(auths[1]['fn'], "@MarkTrail")
-        self.assertEqual(auths[1]['givenName'], "M.")
-        self.assertEqual(auths[1]['familyName'], "trial")
+        self.assertEqual(auths[1]['@type'], "foaf:Person")
         self.assertEqual(len(auths[1]['affiliation']), 1)
         self.assertEqual(auths[1]['affiliation'][0]['title'], "UIUC")
         self.assertEqual(auths[1]['affiliation'][0]['subunits'][0], "NCSA")
@@ -360,6 +342,54 @@ class TestAddAuthorCmd(test.TestCase):
     def tearDown(self):
         self.tf.clean()
 
+    def test_update_to_datapub(self):
+        bag = NISTBag(self.bagdir)
+        nerd = bag.nerdm_record(False)
+        self.assertEqual(nerd["@type"], ["nrdp:PublicDataResource"])
+        self.assertEqual(len(nerd['_extensionSchemas']), 1)
+        self.assertTrue(nerd["_extensionSchemas"][0].endswith("/PublicDataResource"))
+
+        upd = self.authcmd.update_to_datapub(nerd)
+        self.assertEqual(upd["@type"], ["nrdp:DataPublication", "nrdp:PublicDataResource", "dcat:Dataset"])
+        self.assertEqual(len(upd['_extensionSchemas']), 2)
+        self.assertTrue(upd["_extensionSchemas"][-1].endswith("/DataPublication"))
+        self.assertEqual(len(upd), 2)
+
+        upd = self.authcmd.update_to_datapub(upd)
+        self.assertEqual(len(upd), 0)
+
+        upd = self.authcmd.update_to_datapub({})
+        self.assertEqual(upd["@type"], ["nrdp:DataPublication", "dcat:Dataset"])
+        self.assertEqual(len(upd['_extensionSchemas']), 1)
+        self.assertTrue(upd["_extensionSchemas"][-1].endswith("/DataPublication"))
+        self.assertEqual(len(upd), 2)
+
+        upd = self.authcmd.update_to_datapub({"$extensionSchemas": []})
+        self.assertEqual(upd["@type"], ["nrdp:DataPublication", "dcat:Dataset"])
+        self.assertNotIn('_extensionSchemas', upd)
+        self.assertIn('$extensionSchemas', upd)
+        self.assertEqual(len(upd['$extensionSchemas']), 1)
+        self.assertTrue(upd["$extensionSchemas"][-1].endswith("/DataPublication"))
+        self.assertEqual(len(upd), 2)
+        
+        nerd['@type'].insert(0, "nrd:SRD")
+        nerd['@type'].append("dcat:Dataset")
+        upd = self.authcmd.update_to_datapub(nerd)
+        self.assertEqual(upd["@type"], ["nrd:SRD", "nrdp:DataPublication", "nrdp:PublicDataResource",
+                                        "dcat:Dataset"])
+        self.assertEqual(len(upd['_extensionSchemas']), 2)
+        self.assertTrue(upd["_extensionSchemas"][-1].endswith("/DataPublication"))
+        self.assertEqual(len(upd), 2)
+
+        nerd['@type'] = ["nrd:SRD", "dcat:Dataset"]
+        del nerd["_extensionSchemas"]
+        upd = self.authcmd.update_to_datapub(nerd)
+        self.assertEqual(upd["@type"], ["nrd:SRD", "nrdp:DataPublication", "dcat:Dataset"])
+        self.assertEqual(len(upd['_extensionSchemas']), 1)
+        self.assertTrue(upd["_extensionSchemas"][-1].endswith("/DataPublication"))
+        self.assertEqual(len(upd), 2)
+
+
     def test_execute(self):
         argline = "-q add -b "+self.workdir+\
                   " pdr2210 -n @MarkTrail -g M. -f trial -i UIUC NCSA astronomy LSST"
@@ -377,6 +407,7 @@ class TestAddAuthorCmd(test.TestCase):
         self.assertEqual(auths[0]['affiliation'][0]['subunits'][0], "NCSA")
         self.assertEqual(auths[0]['affiliation'][0]['subunits'][1], "astronomy")
         self.assertEqual(auths[0]['affiliation'][0]['subunits'][2], "LSST")
+        self.assertEqual(auths[0]['@type'], "foaf:Person")
 
         nerd = bag.nerdm_record(True)
         auths = nerd.get('authors')
@@ -397,6 +428,7 @@ class TestAddAuthorCmd(test.TestCase):
         self.assertEqual(auths[-1]['fn'], "@MarkTrail")
         self.assertEqual(auths[-1]['givenName'], "M.")
         self.assertEqual(auths[-1]['familyName'], "trial")
+        self.assertEqual(auths[-1]['@type'], "foaf:Person")
         self.assertEqual(len(auths[-1]['affiliation']), 1)
         self.assertEqual(auths[-1]['affiliation'][0]['title'], "UIUC")
         self.assertEqual(auths[-1]['affiliation'][0]['subunits'][0], "NCSA")

@@ -11,9 +11,11 @@ include
 from __future__ import print_function
 import sys, os, logging, re
 from collections import OrderedDict
+from copy import deepcopy
 
 from nistoar.pdr import cli
 from nistoar.pdr.preserv.bagit import NISTBag, BagBuilder
+from nistoar.nerdm import PUB_SCHEMA_URI
 from . import validate as vald8, define_pub_opts, determine_bag_path
 # from . import add, edit
 
@@ -134,6 +136,9 @@ class AuthorCmd(object):
         :rtype dict-list:  
         :return: the list of matching authors
         """
+        if not key:
+            return authors
+
         word = re.compile(r"\b"+key+r"\b")
         if not selection:
             selection = 'f g m n o a u'.split()
@@ -189,7 +194,7 @@ class AuthorCmd(object):
         if args.affil:
             author['affiliation'] = []
             for affil in args.affil:
-                data = {'title': affil[0]}
+                data = OrderedDict([('@type', "org:Organization"), ('title', affil[0])])
                 affilid = lookup_inst_id(affil[0])
                 if affilid:
                     data['@id'] = affilid
@@ -199,7 +204,69 @@ class AuthorCmd(object):
                     data['subunits'] = affil[1:]
                 author['affiliation'].append(data)
 
+        if '@type' not in author:
+            author['@type'] = "foaf:Person"
+
         return author
+
+    def update_to_datapub(self, nerdm):
+        """
+        return an object with the necessary properties that would update the resource type of the 
+        given NERDm record to DataPublication.  If the record is already of this type, the returned 
+        object will be empty; otherwise, it will include two properties: updated "@id" and 
+        "_extensionSchemas". 
+        """
+        def pos_of(lookfor, intypes):
+            found = [t[0] for t in enumerate(intypes) if lookfor in t[1]]
+            return (len(found) == 0 and -1) or found[0]
+
+        def det_metaprefix(nerdm):
+            if '_extensionSchemas' in nerdm or '_schema' in nerdm:
+                return '_'
+            if '$schema' in nerdm or '$extensionSchemas' in nerdm:
+                return '$'
+            return '_'
+
+        out = OrderedDict()
+        if not any([":DataPublication" in t for t in nerdm.get('@type',[])]):
+            # okay, this is not yet a DataPublication; find a good position in the types list to add it
+            insertpt = -1
+            for lookfor in ":PublicDataResource :Dataset".split():
+                insertpt = pos_of(lookfor, nerdm.get('@type',[]))
+                if insertpt >= 0:
+                    break
+            if insertpt < 0:
+                insertpt = 0
+
+            # add it in
+            out['@type'] = deepcopy(nerdm.get('@type',[]))
+            out['@type'].insert(insertpt, "nrdp:DataPublication")
+
+        if out:
+            # make sure extensionSchemas has the associated schema
+            tag = det_metaprefix(nerdm) + "extensionSchemas"
+            schmas = deepcopy(nerdm.get(tag, []))
+            if not any([u.endswith("/DataPublication") for u in schmas]):
+                # remove the schema for PublicDataResource (as it would be redundant)
+                oldidx = pos_of("/PublicDataResource", schmas)
+                if oldidx >= 0:
+                    del schmas[oldidx]
+
+                # replace it with that for DataPublication
+                schmas.append(PUB_SCHEMA_URI + "#/definitions/DataPublication")
+                out[tag] = schmas
+
+            # make sure Dataset is among the types
+            if "dcat:Dataset" not in out.get('@type',[]):
+                out['@type'].append("dcat:Dataset")
+
+        elif pos_of(":Dataset", nerdm.get('@type',[])) < 0:
+            # make sure Dataset is among the types
+            out['@type'] = deepcopy(nerdm.get('@type',[]))
+            out['@type'].append("dcat:Dataset")
+
+        return out
+        
             
 NIST_AFFIL_ID = "ror:05xpvk416"
 def lookup_inst_id(affilname):
@@ -278,6 +345,7 @@ class AddAuthorCmd(AuthorCmd):
             authors.append(author)
 
             update = { 'authors': authors }
+            update.update(self.update_to_datapub(nerd))
             if args.asannots:
                 bldr.update_annotations_for('', update, message=msg+" (to annotations)")
             else:
@@ -371,6 +439,8 @@ class EditAuthorCmd(AuthorCmd):
         # save the updates
         msg = "Updated author metadata"
         update = { 'authors': authors }
+        update.update(self.update_to_datapub(nerd))
+
         bldr = BagBuilder(os.path.dirname(bagdir), os.path.basename(bagdir), logger=log)
         try:
             if args.asannots:
@@ -475,7 +545,7 @@ class ListAuthorCmd(AuthorCmd):
             self.tell("  ORCID: %s" % auth.get('orcid', '???'))
             for affil in auth.get('affiliation', []):
                 self.tell("  from: %s" % affil.get('title', '???'))
-                for unit in affil.get('subunits'):
+                for unit in affil.get('subunits', []):
                     self.tell("        %s" % unit)
                 if affil.get('@id'):
                     self.tell("        id: " + affil.get('@id'))
