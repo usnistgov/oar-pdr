@@ -355,7 +355,7 @@ class AddAuthorCmd(AuthorCmd):
         
         # validate the update if requested
         if args.validate:
-            vald8.validate_nerdm_for(bag, '', log, args.asannots, "Updated metadata is valid")
+            vald8.validate_nerdm_for(bldr.bag, '', log, args.asannots, "Updated metadata is valid")
 
         
 class EditAuthorCmd(AuthorCmd):
@@ -452,7 +452,7 @@ class EditAuthorCmd(AuthorCmd):
 
         # validate the update if requested
         if args.validate:
-            vald8.validate_nerdm_for(bag, '', log, args.asannots, "Updated metadata is valid")
+            vald8.validate_nerdm_for(bldr.bag, '', log, args.asannots, "Updated metadata is valid")
 
         
 class ListAuthorCmd(AuthorCmd):
