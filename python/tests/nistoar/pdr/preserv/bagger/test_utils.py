@@ -4,6 +4,7 @@ from copy import deepcopy
 
 from nistoar.testing import *
 from nistoar.pdr.preserv.bagger import utils as bagut
+from nistoar.nerdm.constants import CORE_SCHEMA_URI, PUB_SCHEMA_URI
 
 class TestVersion(test.TestCase):
 
@@ -593,13 +594,11 @@ class TestBagUtils(test.TestCase):
             }
         }
         bagut.update_nerdm_schema(data)
-        self.assertEqual(data['_schema'], 
-                         "https://data.nist.gov/od/dm/nerdm-schema/v0.3")
+        self.assertEqual(data['_schema'], CORE_SCHEMA_URI)
         self.assertEqual(data['foo']['_extensionSchemas'], 
                          [ "http://example.com/anext/v88#goob",
                            "http://goober.com/foop/v99#big" ])
-        self.assertEqual(data['bar']['tex']['_extensionSchemas'], 
-                     "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.3#Contact")
+        self.assertEqual(data['bar']['tex']['_extensionSchemas'], PUB_SCHEMA_URI+"#Contact")
         self.assertEqual(data['bar']['_extensionSchemas'], [])
         
 

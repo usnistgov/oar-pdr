@@ -10,6 +10,7 @@ from nistoar.pdr.utils import checksum_of
 from nistoar.pdr.distrib import DistribResourceNotFound
 from nistoar.pdr.preserv.bagit import NISTBag
 from nistoar.pdr.utils import read_nerd
+from nistoar.nerdm.constants import CORE_SCHEMA_URI, PUB_SCHEMA_URI
 
 bagsrcdir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data")
 mdsrcdir = os.path.join(os.path.dirname(os.path.dirname(bagsrcdir)), "describe", "data")
@@ -350,12 +351,11 @@ class TestUpdatePrepper(test.TestCase):
         self.assertTrue(os.path.isfile(nfile))
 
         md = read_nerd(nfile)
-        self.assertEqual(md["_schema"],
-                         "https://data.nist.gov/od/dm/nerdm-schema/v0.3#")
-        self.assertEqual(md["references"][0]["_extensionSchemas"][0],
-                         "https://data.nist.gov/od/dm/nerdm-schema/v0.3#/definitions/DCiteReference")
+        self.assertEqual(md["_schema"], CORE_SCHEMA_URI+"#")
+        self.assertEqual(md["references"][0]["_extensionSchemas"][0], 
+                         CORE_SCHEMA_URI+"#/definitions/DCiteReference")
         self.assertEqual(md["references"][1]["_extensionSchemas"][0],
-                         "https://data.nist.gov/od/dm/nerdm-schema/v0.3#/definitions/DCiteReference")
+                         CORE_SCHEMA_URI+"#/definitions/DCiteReference")
         
         depinfof = os.path.join(root, "multibag", "deprecated-info.txt")
         self.assertTrue(not os.path.isfile(depinfof))
