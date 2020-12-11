@@ -257,6 +257,8 @@ class TestEnrichReferences(test.TestCase):
         self.assertIn('title', enh.refs[enh.refs.keys()[0]])
         self.assertIn('citation', enh.refs[enh.refs.keys()[0]])
 
+    @test.skipIf("doi" not in os.environ.get("OAR_TEST_INCLUDE",""),
+                 "kindly skipping doi service checks")
     def test_remove_missing_from(self):
         enh = tools.ReferenceEnhancer(rescfg, self.log).enhancer_for(self.bag)
 
