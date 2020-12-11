@@ -547,6 +547,7 @@ class TestBagUtils(test.TestCase):
         byext = {
             "http://example.com/anext/": "v0.1",
             "pub":  "v1.2",
+            "bib":  "v0.8",
             "":     "v2.2"
         }
 
@@ -564,7 +565,16 @@ class TestBagUtils(test.TestCase):
                     "blah": "blah"
                 },
                 "$extensionSchemas": []
-            }
+            },
+            "references": [
+                {
+                    'location': 'https://tinyurl.com/asdf',
+                    "$extensionSchemas": [
+                        "https://data.nist.gov/od/dm/nerdm-schema/v0.3#/definitions/BibliographicReference",
+                        "https://data.nist.gov/od/dm/nerdm-schema/v0.3#/definitions/DCiteReference"
+                    ]
+                }
+            ]
         }
 
         bagut.update_nerdm_schema(data, "1.0", byext)
@@ -576,6 +586,10 @@ class TestBagUtils(test.TestCase):
         self.assertEqual(data['bar']['tex']['$extensionSchemas'], 
                      "https://data.nist.gov/od/dm/nerdm-schema/pub/v1.2#Contact")
         self.assertEqual(data['bar']['$extensionSchemas'], [])
+        self.assertEqual(data['references'][0]['$extensionSchemas'][0],
+                         "https://data.nist.gov/od/dm/nerdm-schema/v2.2#/definitions/BibliographicReference")
+        self.assertEqual(data['references'][0]['$extensionSchemas'][1],
+                         "https://data.nist.gov/od/dm/nerdm-schema/bib/v0.8#/definitions/DCiteReference")
         
         data = {
             "_schema": "https://data.nist.gov/od/dm/nerdm-schema/v0.3",
