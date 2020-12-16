@@ -10,12 +10,14 @@ import os, sys, logging, json, re
 from wsgiref.headers import Headers
 from cgi import parse_qs, escape as escape_qp
 from collections import OrderedDict
+from cStringIO import StringIO
 
 from .. import PublishSystem
 from ...exceptions import (SIPDirectoryNotFound, IDNotFound,
                            ConfigurationException, StateException)
 from ...utils import read_json, build_mime_type_map
 from . import midasclient as midas
+from ..readme import ReadmeGenerator
 from ...preserv.bagger.midas3 import MIDASSIP
 from ....id import NIST_ARK_NAAN
 
@@ -148,7 +150,11 @@ class Handler(object):
         path = path[len(self.app.base_path):].rstrip('/')
 
         if hasattr(self, meth_handler):
-            return getattr(self, meth_handler)(path)
+            try:
+                return getattr(self, meth_handler)(path)
+            except Exception as ex:
+                log.exception("Failed to respond to %s %s: %s", meth_handler, path, str(ex))
+                return self.send_error(500, "Internal server error")
         else:
             return self.send_methnotallowed(self._meth)
 
@@ -193,6 +199,19 @@ class Handler(object):
 
                 return self.test_permission(dsid, perm[1])
 
+            elif filepath == "README.txt":
+                qs = parse_qs(self._env.get("QUERY_STRING",""))
+                def auto_is_true(val):
+                    if val == 'false' or val == '0':
+                        return False
+                    return bool(val)
+                if any([auto_is_true(a) for a in qs.get('auto',[])]):
+                    # support auto-generated README file requests
+                    flags = "".join(qs.get('flags',[''])).upper()
+                    return self.send_auto_readme(dsid, 'P' not in flags, 'B' in flags)
+                else:
+                    return self.send_datafile(dsid, filepath)
+                
             else:
                 return self.send_datafile(dsid, filepath)
 
@@ -267,8 +286,37 @@ class Handler(object):
             raise ex
 
         return mdata
-        
 
+    def send_auto_readme(self, dsid, withprompts=True, bebrief=False):
+        mdata = None
+        
+        try:
+            mdata = self.get_metadata(dsid)
+            if mdata is None:
+                log.info("Metadata record not found for ID="+dsid)
+                return self.send_error(404,
+                                       "Dataset with ID={0} not being edited".format(dsid))
+        except ValueError as ex:
+            return self.send_error(500, "Internal parsing error")
+        except Exception as ex:
+            log.exception("Internal error: "+str(ex))
+            return self.send_error(500, "Internal error")
+
+        out = StringIO()
+        try:
+            gen = ReadmeGenerator()
+            gen.generate(mdata, out, withprompts, bebrief)
+        except Exception as ex:
+            log.exception("Internal error during README generation: "+str(ex))
+            return self.send_error(500, "Internal error")
+
+        self.set_response(200, "File generated")
+        self.add_header('Content-Type', 'text/plain')
+        self.add_header('Content-Length', str(len(out.getvalue())))
+        self.end_headers()
+        return out.getvalue().split("\n")
+
+        
     def send_metadata(self, dsid):
 
         mdata = None

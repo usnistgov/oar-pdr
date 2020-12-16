@@ -5,6 +5,7 @@ import textwrap, os
 from mako.template import Template
 
 from nistoar.pdr.exceptions import StateException
+from nistoar import pdr
 
 class ReadmeGenerator(object):
 
@@ -27,6 +28,8 @@ class ReadmeGenerator(object):
             return os.path.join(os.environ['OAR_MAKO_TEMPLATES_DIR'], "readme")
         if 'OAR_ETC_DIR' in os.environ:
             return os.path.join(os.environ['OAR_ETC_DIR'], "mako", "readme")
+        if pdr.def_etc_dir:
+            return os.path.join(pdr.def_etc_dir, "mako", "readme")
         if 'OAR_HOME' in os.environ:
             return os.path.join(os.environ['OAR_HOME'], "etc", "mako", "readme")
         return None
