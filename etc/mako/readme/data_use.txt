@@ -1,0 +1,66 @@
+<%!
+    import textwrap, re
+
+    def get_citation(n):
+        if n.get('citation'):
+           return n['citation']
+
+        out = ""
+        if 'authors' in n:
+            for i, auth in enumerate(n['authors']):
+                if auth.get('familyName'):
+                    out += auth['familyName']+','
+                if auth.get('givenName'):
+                    out += ' '+auth['givenName']
+                if auth.get('middleName'):
+                    out += ' '+auth['middleName']
+                if i != len(n['authors'])-1:
+                    out += ', '
+
+        elif n.get('contactPoint',{}).get('fn'):
+            out += n['contactPoint']['fn']
+        elif n.get('publisher', {}).get('name'):
+            out += n['publisher']['name']
+        else:
+            out += "National Institute of Standards and Technology"
+
+        date = n.get('issued')
+        if not date:
+            date = n.get('modified')
+        if date:
+            out += ' (' + date.split('-', 1)[0] + ')'
+
+        if n.get('title'):
+            out += ', ' + n['title'].strip()
+        if n.get('version'):
+            out += ', Version ' + n['version']
+        if n.get('publisher',{}).get('name'):
+            out += ', ' + n['publisher']['name']
+
+        if n.get('doi'):
+            out += ', ' + re.sub(r'^doi:','https://doi.org/', n['doi'])
+        elif n.get('landingPage'):
+            out += ', ' + n['landingPage']
+
+        out += " (Accessed: [give download date])"
+        return out
+%>\
+--------------
+Data Use Notes
+--------------
+
+% if dataAccess != 'private':
+This data is publically available according to the NIST statements of
+copyright, fair use and licensing; see
+https://www.nist.gov/director/copyright-fair-use-and-licensing-statements-srd-data-and-software
+
+% else:
+This data is not publically available and is made available to you
+under the follow restrictions:
+
+${textwrap.fill(nrd.get('rights','[## List restrictions here ##]'), 80)}
+
+% endif
+You may cite the use of this data as follows:
+${textwrap.fill(get_citation(nrd), 80)}
+

@@ -1,0 +1,39 @@
+% if _prompts:
+--------------------------
+Methodological Information
+--------------------------
+
+${'##'}
+# Describe the methods used for collection/generation of data.  Include links
+# or references to publications or other documentation containing experimental
+# design or protocols used in data collection
+${'##'}
+
+${'##'}
+# Describe the methods used to process the data.  
+${'##'}
+
+${'##'}
+# Describe the instrument- or software-specific information that is useful to
+# interpret the data
+${'##'}
+
+${'##'}
+# Provide any relevant standards or calibration information
+${'##'}
+
+${'##'}
+# Describe the relevant environmental/experimental conditions during data
+# collection
+${'##'}
+
+${'##'}
+# Describe any quality-assurance procedures performed on the data
+${'##'}
+
+${'##'}
+# List additional people involved with sample collection, processing, analysis
+# and/or submission
+${'##'}
+
+% endif
