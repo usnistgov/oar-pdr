@@ -72,6 +72,7 @@ class TestReadmeGenerator(test.TestCase):
         self.assertGreater(len(txt), 5)
         self.assertIn(self.nerdm['title'][:50], txt)
         self.assertIn('Version '+self.nerdm['version'], txt)
+        self.assertIn('DOI: https://doi.org/'+self.nerdm['doi'][4:], txt)
         self.assertIn('##', txt)
                          
         txt = StringIO()
@@ -215,6 +216,7 @@ class TestReadmeGenerator(test.TestCase):
         self.assertIn('  trial3\n', txt)
         self.assertIn('    trial3a.json', txt)
         self.assertIn('[##', txt)
+        self.assertNotIn('is accessible', txt)
                          
         txt = StringIO()
         wrtr = self.gen.Writer(self.gen, self.nerdm, txt, False)
@@ -226,7 +228,43 @@ class TestReadmeGenerator(test.TestCase):
         self.assertIn('  trial3\n', txt)
         self.assertIn('    trial3a.json', txt)
         self.assertNotIn('##', txt)
+        self.assertNotIn('is accessible', txt)
 
+        txt = StringIO()
+        wrtr = self.gen.Writer(self.gen, self.nerdm, txt, False, True)
+        wrtr.write_data_overview()
+        txt = txt.getvalue()
+        self.assertEqual(len(txt), 0)
+
+        self.nerdm['components'].append({
+            "@type": ["dcat:Distribution"],
+            "accessURL": "https://doi.org/"+self.nerdm['doi'][4:],
+            "title": "DOI Access for \""+self.nerdm['title']+"\"",
+            "description": "This URL is just another way to get to the landing page."
+        })
+        txt = StringIO()
+        wrtr = self.gen.Writer(self.gen, self.nerdm, txt, False, True)
+        wrtr.write_data_overview()
+        txt = txt.getvalue()
+        self.assertGreater(len(txt), 5)
+        self.assertIn('Data Overview', txt)
+        self.assertNotIn('trial1.json', txt)
+        self.assertNotIn('trial3', txt)
+        self.assertIn('is available', txt)
+        self.assertIn('DOI Access', txt)
+        self.assertIn('another way', txt)
+
+        self.nerdm['components'][-1]['@type'] = ["nrd:Hidden", "dcat:Distribution"]
+        txt = StringIO()
+        wrtr = self.gen.Writer(self.gen, self.nerdm, txt, True, False)
+        wrtr.write_data_overview()
+        txt = txt.getvalue()
+        self.assertGreater(len(txt), 5)
+        self.assertIn('Data Overview', txt)
+        self.assertIn('trial1.json', txt)
+        self.assertIn('trial3', txt)
+        self.assertNotIn('is available', txt)
+        
     def test_generate(self):
         self.nerdm['references'][0]['citation'] = "Curry & Levine 2016"
 
@@ -257,9 +295,10 @@ class TestReadmeGenerator(test.TestCase):
         self.assertIn('General Information', txt)
         self.assertIn('Data Use Notes', txt)
         self.assertIn('References', txt)
-        self.assertIn('Data Overview', txt)
+        self.assertNotIn('Data Overview', txt)
         self.assertNotIn('trial1.json', txt)
         self.assertNotIn('trial3', txt)
+        self.assertNotIn('is accessible', txt)
         self.assertIn('Version History', txt)
         self.assertIn('Methodological Information', txt)
         self.assertIn('##', txt)
@@ -295,7 +334,6 @@ class TestReadmeGenerator(test.TestCase):
         self.assertIn('Version History', txt)
         self.assertNotIn('Methodological Information', txt)
         self.assertNotIn('##', txt)
-
 
 
 
