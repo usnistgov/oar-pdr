@@ -42,24 +42,40 @@
         lines[0] = lines[0][len(indent):]
         return lines
 
-    def is_datacmp(c, tp):
+    def is_datacmp(c, tp=None):
         if not c.get('filepath'):
             return False
+        if not tp:
+            return True
         for t in c.get('@type',[]):
             if ':'+tp in t:
                 return True
         return False
 
-%>
+    def is_accessible(c, tp=None):
+        if not c.get('accessURL'):
+            return False
+        for t in c.get('@type',[]):
+            if tp and ':'+tp in t:
+                return True
+            if ':Hidden' in t:
+               return False
+        return not bool(tp)
+
+%>\
 ##
 ## 
 <%def name="list_data_components(components)">
 ${"\n".join(render_data_components([c for c in components if c.get('filepath')],
                                    (_prompts and caller.body()) or ''))}
-</%def>
+</%def>\
 ##
 ##
-% if not _brief or _prompts:
+<%
+    accessibles = [c for c in nrd.get('components',[]) if is_accessible(c)]
+    downloadables = [c for c in nrd.get('components',[]) if is_datacmp(c)]
+%>\
+% if not _brief or _prompt or len(accessibles):
 -------------
 Data Overview
 -------------
@@ -84,7 +100,7 @@ This data was derived from the following sources:
   *  [## description, repository, or data identifier ##]
 
 % endif
-% if not _brief and nrd.get('components',[]):
+% if not _brief and len(downloadables) > 0:
   % if _prompts:
 ${'##'}
 # In the file listing below, consider adding useful information like:
@@ -95,5 +111,20 @@ ${'##'}
   % endif
 Files included in this publication:
 ${"\n".join(list_data_components(nrd.get('components',[]), _prompts))}
+% endif
+% if len(accessibles) > 0:
+% for cmp in accessibles:
+% if 'title' in cmp:
+${textwrap.fill(cmp['title'])} is available at:
+% else:
+Access to additional data/information is available via:
+% endif
+  ${cmp['accessURL']}
+
+% if 'description' in cmp:
+  ${"  \n".join(textwrap.wrap(cmp['description'], 78))}
+
+% endif
+% endfor
 % endif
 % endif
