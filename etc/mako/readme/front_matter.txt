@@ -18,6 +18,11 @@
 %>NIST ${resource_type_label(nrd['@type'])}:
 ${textwrap.fill(title, 80)}
 Version ${version}
+% if nrd.get('doi'):
+DOI: ${re.sub(r'^doi:','https://doi.org/', doi)}
+% elif nrd.get('landingPage'):
+Home Page: ${landingPage}
+% endif
 
 % if _prompts:
 ${'###'}
