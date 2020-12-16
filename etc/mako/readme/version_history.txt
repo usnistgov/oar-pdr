@@ -1,0 +1,28 @@
+<%!
+    import textwrap, re
+%>\
+---------------
+Version History
+---------------
+
+% if nrd.get('versionHistory',[]):
+% for i, his in enumerate(reversed(nrd.get('versionHistory',[]))):
+% if his.get('version','??') == nrd.get('version'):
+Version ${his.get('version','??')} (this version)
+% else:
+Version ${his.get('version','??')}
+% endif
+% if _prompts and i != len(nrd['versionHistory'])-1:
+  ${"  \n".join(textwrap.wrap(his.get('description','')+" [## elaborate if useful ##]", 80))}
+% else:
+  ${"  \n".join(textwrap.wrap(his.get('description',''), 80))}
+% endif
+
+% endfor
+% else:
+${nrd.get('version','1.0')} (this version)
+  initial release
+% if _prompt:
+  [## elaborate if useful ##]
+% endif
+% endif

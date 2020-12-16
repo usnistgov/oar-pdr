@@ -1,0 +1,99 @@
+<%!
+    import textwrap, re
+
+    FILE_DESC_PROMPT = "[## add'l info about this file (see recommendations above) ##]"
+
+    def list_data_components(components, prompting=True):
+        cmps = [c for c in components if c.get('filepath') and
+                                         not any([':ChecksumFile' in t for t in c.get('@type',[])])]
+        return render_data_components(cmps, (prompting and FILE_DESC_PROMPT) or '')
+
+    def render_data_components(components, fileprompt, collpath='', prefix='  ', indent='  '):
+        out = []
+        for cmp in components:
+            if '/' not in cmp.get('filepath','')[len(collpath):]:
+                if is_datacmp(cmp, 'Subcollection'):
+                    out.append(prefix + cmp.get('filepath','')[len(collpath):])
+                    nxtcollpath = cmp['filepath'] + '/'
+                    out.extend(render_data_components([c for c in components
+                                                         if c.get('filepath') and
+                                                            c['filepath'].startswith(nxtcollpath)],
+                                                      fileprompt, nxtcollpath, prefix+indent, indent))
+
+                elif is_datacmp(cmp, 'DataFile'):
+                    lines = [prefix + cmp.get('filepath','')[len(collpath):]]
+                    if cmp.get('title'):
+                        lines.extend(hang(cmp['title'], prefix+indent, indent))
+                    if cmp.get('description'):
+                        lines.extend(hang(cmp['description'], prefix+indent, indent))
+                    if cmp.get('format',{}).get('description'):
+                        lines.extend(hang("Format: "+cmp['format']['description'], prefix+indent, indent))
+                    if fileprompt:
+                        lines.append(prefix+indent+fileprompt)
+                    if len(lines) > 1:
+                        lines.insert(1, '')
+                        lines.append('')
+                    out.extend(lines)
+        return out
+
+    def hang(text, prefix, indent):
+        lines = textwrap.wrap(text, max(40, 80-len(prefix+indent)))
+        lines = [prefix+indent+ln for ln in lines]
+        lines[0] = lines[0][len(indent):]
+        return lines
+
+    def is_datacmp(c, tp):
+        if not c.get('filepath'):
+            return False
+        for t in c.get('@type',[]):
+            if ':'+tp in t:
+                return True
+        return False
+
+%>
+##
+## 
+<%def name="list_data_components(components)">
+${"\n".join(render_data_components([c for c in components if c.get('filepath')],
+                                   (_prompts and caller.body()) or ''))}
+</%def>
+##
+##
+% if not _brief or _prompts:
+-------------
+Data Overview
+-------------
+
+% if _prompts:
+${'##'}
+# Describe any special standards used to encode or document the data
+# in this collection.  Examples could include: 
+#
+# - FGDC-CSDGM (Federal Geographic Data Committee's Content Standard for
+#   Digital Geospatial Metadata (https://www.fgdc.gov/metadata)  
+# - MIBBI - Minimum Information for Biological and Biomedical Investigations
+#   (https://fairsharing.org/collection/MIBBI) 
+${'##'}
+
+${'##'}
+#  Was data derived from another source? (example, Open FEMA)
+#  If yes, list source(s) below
+${'##'}
+
+This data was derived from the following sources:
+  *  [## description, repository, or data identifier ##]
+
+% endif
+% if not _brief and nrd.get('components',[]):
+  % if _prompts:
+${'##'}
+# In the file listing below, consider adding useful information like:
+#  * description of the file contents
+#  * defintion of variables (or table columns)
+#  * format details
+${'##'}
+  % endif
+Files included in this publication:
+${"\n".join(list_data_components(nrd.get('components',[]), _prompts))}
+% endif
+% endif
