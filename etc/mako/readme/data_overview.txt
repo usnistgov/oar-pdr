@@ -110,6 +110,7 @@ ${'##'}
 ${'##'}
   % endif
 Files included in this publication:
+
 ${"\n".join(list_data_components(nrd.get('components',[]), _prompts))}
 % endif
 % if len(accessibles) > 0:

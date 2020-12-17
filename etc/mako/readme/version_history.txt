@@ -25,4 +25,5 @@ ${nrd.get('version','1.0')} (this version)
 % if _prompt:
   [## elaborate if useful ##]
 % endif
+
 % endif
