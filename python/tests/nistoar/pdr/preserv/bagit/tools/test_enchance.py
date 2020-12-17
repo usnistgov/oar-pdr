@@ -271,6 +271,7 @@ class TestEnrichReferences(test.TestCase):
         # setup
         doid = "10.1126/science.169.3946.635"
         doiu = "https://doi.org/"+doid
+        pdb.set_trace()
         enh.merge_enhanced_ref("doi:"+doid)
         self.assertEqual(len(enh.refs), 2)
 
