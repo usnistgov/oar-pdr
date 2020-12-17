@@ -1,7 +1,7 @@
 <%!
     import textwrap, re
 %>\
-% if nrd['references'] or _prompts:
+% if nrd.get('references') or _prompts:
 ----------
 References
 ----------
