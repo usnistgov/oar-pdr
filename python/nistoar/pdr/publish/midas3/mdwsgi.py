@@ -208,6 +208,7 @@ class Handler(object):
                 if any([auto_is_true(a) for a in qs.get('auto',[])]):
                     # support auto-generated README file requests
                     flags = "".join(qs.get('flags',[''])).upper()
+                    log.info("Auto-generating a README.txt for id=%s", dsid)
                     return self.send_auto_readme(dsid, 'P' not in flags, 'B' in flags)
                 else:
                     return self.send_datafile(dsid, filepath)
@@ -314,7 +315,7 @@ class Handler(object):
         self.add_header('Content-Type', 'text/plain')
         self.add_header('Content-Length', str(len(out.getvalue())))
         self.end_headers()
-        return out.getvalue().split("\n")
+        return [ln+"\n" for ln in out.getvalue().split("\n")]
 
         
     def send_metadata(self, dsid):

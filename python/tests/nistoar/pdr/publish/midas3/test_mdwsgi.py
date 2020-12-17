@@ -336,7 +336,7 @@ class TestApp(test.TestCase):
         }
         body = self.svc(req, self.start)
         self.assertIn("200", self.resp[0])
-        body = "\n".join(body)
+        body = "".join(body)
         self.assertIn("Version ", body)
         self.assertIn("Version History", body)
         self.assertIn("trial1.json", body)
@@ -350,7 +350,7 @@ class TestApp(test.TestCase):
         }
         body = self.svc(req, self.start)
         self.assertIn("200", self.resp[0])
-        body = "\n".join(body)
+        body = "".join(body)
         self.assertIn("Version ", body)
         self.assertIn("Version History", body)
         self.assertIn("trial1.json", body)
@@ -364,7 +364,7 @@ class TestApp(test.TestCase):
         }
         body = self.svc(req, self.start)
         self.assertIn("200", self.resp[0])
-        body = "\n".join(body)
+        body = "".join(body)
         self.assertIn("Version ", body)
         self.assertIn("Version History", body)
         self.assertNotIn("trial1.json", body)
@@ -378,7 +378,7 @@ class TestApp(test.TestCase):
         }
         body = self.svc(req, self.start)
         self.assertIn("200", self.resp[0])
-        body = "\n".join(body)
+        body = "".join(body)
         self.assertIn("Version ", body)
         self.assertIn("Version History", body)
         self.assertNotIn("trial1.json", body)
