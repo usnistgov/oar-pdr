@@ -8,6 +8,7 @@ from nistoar.pdr.preserv.bagit import NISTBag
 from nistoar.pdr.publish import readme
 import nistoar.pdr.exceptions as exceptions
 from nistoar.pdr.utils import read_nerd
+import nistoar.pdr
 
 utestdir = os.path.dirname(os.path.abspath(__file__))
 pdrdir = os.path.dirname(utestdir)
@@ -46,6 +47,7 @@ class TestReadmeGenerator(test.TestCase):
         self.assertIn("Version ", out)
 
     def test_find_default_templatedir(self):
+        nistoar.pdr.def_etc_dir = None
         self.assertIsNone(readme.ReadmeGenerator.find_default_templatedir())
 
         os.environ['OAR_HOME'] = "goob"
