@@ -257,12 +257,15 @@ class TestEnrichReferences(test.TestCase):
         self.assertIn('title', enh.refs[enh.refs.keys()[0]])
         self.assertIn('citation', enh.refs[enh.refs.keys()[0]])
 
+    @test.skipIf("doi" not in os.environ.get("OAR_TEST_INCLUDE",""),
+                 "kindly skipping doi service checks")
     def test_remove_missing_from(self):
         enh = tools.ReferenceEnhancer(rescfg, self.log).enhancer_for(self.bag)
 
         # setup
         doid = "10.1126/science.169.3946.635"
         doiu = "https://doi.org/"+doid
+        pdb.set_trace()
         enh.merge_enhanced_ref("doi:"+doid)
         self.assertEqual(len(enh.refs), 2)
 
