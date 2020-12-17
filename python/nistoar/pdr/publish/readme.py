@@ -52,7 +52,7 @@ class ReadmeGenerator(object):
                 withprompts = self._withprompts
             if brief is None:
                 brief = self._brief
-            self.out.write(tmpl8.render(_prompts=withprompts, _brief=brief, nrd=data, **data))
+            self.out.write(tmpl8.render(_prompts=withprompts, _brief=brief, nrd=data, **data).encode('utf8'))
 
         def apply(self, tmpl8name, data, withprompts=None, brief=None):
             tmpl8 = self.ngn._get_tmpl8(tmpl8name)
