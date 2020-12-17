@@ -35,6 +35,8 @@ class TestReadmeGenerator(test.TestCase):
         for key in "OAR_HOME OAR_ETC_DIR OAR_MAKO_TEMPLATES_DIR".split():
             if key in os.environ:
                 del os.environ[key]
+        if not nistoar.pdr.def_etc_dir:
+            nistoar.pdr.def_etc_dir = nistoar.pdr.find_etc_dir()
 
         bag = NISTBag(metabagdir)
         self.nerdm = bag.nerdm_record()
