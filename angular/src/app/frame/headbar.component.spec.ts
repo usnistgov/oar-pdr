@@ -9,7 +9,7 @@ import { HeadbarComponent } from './headbar.component';
 import { AngularEnvironmentConfigService } from '../config/config.service';
 import { AppConfig } from '../config/config'
 import { CartService } from '../datacart/cart.service';
-import { Data } from '../datacart/data';
+import { Data } from '../datacart/cartconstants';
 import { ToastrModule } from 'ngx-toastr';
 import { NotificationService } from '../shared/notification-service/notification.service';
 import { EditStatusService } from '../landing/editcontrol/editstatus.service';
@@ -145,7 +145,7 @@ describe('HeadbarComponent', () => {
         expect(component.cartLength).toBe(1);
 
         // consequence of a click on the datacart
-        component.updateCartStatus();
+        // component.updateCartStatus();
     });
 
     afterEach(() => {

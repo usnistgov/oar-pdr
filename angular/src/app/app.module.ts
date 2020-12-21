@@ -37,7 +37,6 @@ import { ContenteditableModel } from './directives/contenteditable-model.directi
 import { LandingModule } from './landing/landing.module';
 
 import { ErrorComponent, UserErrorComponent } from './landing/error.component';
-import { DatacartComponent } from './datacart/datacart.component';
 import { ModalComponent } from './directives';
 import { ComboBoxComponent } from './shared/combobox/combo-box.component';
 import { AppComponent } from './app.component';
@@ -52,7 +51,6 @@ import { ContactPopupComponent } from './landing/contact/contact-popup/contact-p
 enableProdMode();
 
 import { SearchService } from './shared/search-service/index';
-import { CartService } from "./datacart/cart.service";
 import { AppShellNoRenderDirective } from './directives/app-shell-no-render.directive';
 import { ModalService } from './shared/modal-service';
 import { TaxonomyListService } from './shared/taxonomy-list'
@@ -67,16 +65,18 @@ import { DatePipe } from '@angular/common';
 
 // used to create fake backend
 import { fakeBackendProvider } from './_helpers/fakeBackendInterceptor';
-import { DownloadConfirmComponent } from './datacart/download-confirm/download-confirm.component';
+
+// Datacart
+import { DatacartModule } from './datacart/datacart.module';
 
 @NgModule({
   declarations: [
-    AppComponent, DatacartComponent,
+    AppComponent, 
     SearchTopicsComponent, DescriptionPopupComponent, 
     AuthorPopupComponent, ContactPopupComponent,
     ErrorComponent, UserErrorComponent,ComboBoxComponent,ComboBoxPipe,
     AppShellNoRenderDirective, AppShellRenderDirective, ModalComponent, ContenteditableModel, 
-    LandingAboutComponent, DownloadConfirmComponent
+    LandingAboutComponent
   ],
   imports: [
       HttpClientModule,
@@ -86,6 +86,7 @@ import { DownloadConfirmComponent } from './datacart/download-confirm/download-c
       LandingPageModule,
       AppRoutingModule,
       LandingModule,
+      DatacartModule,
       FragmentPolyfillModule.forRoot({
           smooth: true
       }),
@@ -106,7 +107,6 @@ import { DownloadConfirmComponent } from './datacart/download-confirm/download-c
     Meta,
     SearchService,
     SearchResolve,
-    CartService,
     DownloadService,
     TestDataService,
     ConfirmationService,
@@ -126,8 +126,7 @@ import { DownloadConfirmComponent } from './datacart/download-confirm/download-c
     SearchTopicsComponent, 
     DescriptionPopupComponent, 
     AuthorPopupComponent,
-    ContactPopupComponent,
-    DownloadConfirmComponent
+    ContactPopupComponent
   ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA]
 })

@@ -23,7 +23,8 @@ const routes: Routes = [
       ]
     },
     { path: 'nerdm',                 component: NerdmComponent         },
-    { path: 'datacart/:mode',        component: DatacartComponent      },
+    // If ediid='global', local normal cart. Otherwise, load the cart with key=ediid
+    { path: 'datacart/:ediid',        component: DatacartComponent      },
     { path: 'done',         component: DoneComponent },
     // error paths
     { path: 'not-found', 

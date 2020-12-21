@@ -1,40 +1,43 @@
-import { Data } from './data';
+import { CartConstants } from './cartconstants';
 import { Injectable } from '@angular/core';
-import { CartEntity } from './cart.entity';
-import { HttpClientModule, HttpClient } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { Observable } from 'rxjs';
 import * as _ from 'lodash';
 import 'rxjs/add/operator/toPromise';
+import { DataCart } from '../datacart/cart';
 
 /**
  * The cart service provides a way to store the cart in local store.
  **/
 @Injectable()
 export class CartService {
-
-    public cartEntities: CartEntity[];
+    public CART_CONSTANTS: any;
     storageSub = new BehaviorSubject<number>(0);
+    selectedFileCountSub = new BehaviorSubject<number>(0);
     addCartSpinnerSub = new BehaviorSubject<boolean>(false);
     addAllCartSpinnerSub = new BehaviorSubject<boolean>(false);
     displayCartSub = new BehaviorSubject<boolean>(false);
     cartEntitesReadySub = new BehaviorSubject<boolean>(false);
     forceDatacartReloadSub = new BehaviorSubject<boolean>(false);
-    cartSize: number = 0;
+
     showAddCartSpinner: boolean = false;
     showAddAllCartSpinner: boolean = false;
     displayCart: boolean = false;
     private _storage = null;
-    currentCart: string = 'cart';
+    currentCart: string;
+    statusStorageName: string;
 
-    constructor(private http: HttpClient) {
+    constructor(
+        private http: HttpClient) 
+    {
+        this.CART_CONSTANTS = CartConstants.cartConst;
+        this.currentCart = this.CART_CONSTANTS.GLOBAL_CART_NAME;
+        this.statusStorageName = this.CART_CONSTANTS.CART_STATUS_STORAGE_NAME;
+
         // localStorage will be undefined on the server
         if (typeof (localStorage) !== 'undefined')
             this._storage = localStorage;
-
-        this.initCart();
-        this.getAllCartEntities();
-        this.setCartLength(this.cartSize);
     }
 
     watchStorage(): Observable<any> {
@@ -49,233 +52,74 @@ export class CartService {
         return this.addAllCartSpinnerSub.asObservable();
     }
 
-    watchCart(): Observable<any> {
-        return this.displayCartSub.asObservable();
+    /**
+     * Set the number of cart items
+     **/
+    setSelectedFileCount(selectedFileCount: number) {
+        this.selectedFileCountSub.next(selectedFileCount);
     }
 
+    watchSelectedFileCount(subscriber) {
+        return this.selectedFileCountSub.subscribe(subscriber);
+    }
+    
     private emptyMap(): { [key: string]: number; } {
         return {};
     }
 
     /**
-     * Initialize cart
-     * **/
-    initCart() {
-
+     * Cart status is used to determine if current cart is still in use. When a new tab opens for certain 
+     * ediid, the ediid will be 'registered' in the storage whose name is defined in this.statusStorageName 
+     * and the status will be set to 'open'. When the tab is closed, the status will be set to 'close'.
+     * When landing page starts up, it will clean up all storages whose status is 'close'. The reason to
+     * clean up the storage in this way is to handle the refresh of the tab - when a tab refreshes, it
+     * will set the status to 'close' then 'open'. But if a tab closes, it only sets the status to 'close'.
+     * 
+     * @param status the status of the current cart
+     */
+    setCartStatus(cartID: string, status: string){
         if (this._storage) {
-            // only while running in the browser (otherwise,
-            // this._storage is null)
+            let cartStatusObj: any = JSON.parse(this._storage.getItem(this.statusStorageName));
 
-            // if we dont have  any cart history, create a empty cart
-            if (!this._storage.getItem(this.currentCart)) {
+            if(cartStatusObj == undefined) cartStatusObj = {};
+            cartStatusObj[cartID] = {status: status};
 
-                this.setCart(this.emptyMap());
+            this._storage.removeItem(this.statusStorageName);
+            this._storage.setItem(this.statusStorageName, JSON.stringify(cartStatusObj));
+        }
+    }
 
+    /**
+     * Return the status of the current cart - 'open' or 'close'. Undefined ot empty means current
+     * cart hasn't been processed before.
+     */
+    getCartStatus(){
+        if (!this._storage)
+            return '';
+        else{
+            let cartStatusObj = JSON.parse(this._storage.getItem(this.statusStorageName));
+            return cartStatusObj[this.currentCart];
+        }
+    }
+
+    /**
+     * Clean up status storage - remove items whose status is not 'open'
+     */
+    cleanUpStatusStorage(){
+        if (this._storage){
+            let oldCartStatusObj = JSON.parse(this._storage.getItem(this.statusStorageName));
+            let newCartStatusObj: any = {};
+
+            for (let key in oldCartStatusObj) {
+                if(oldCartStatusObj[key]['status'] == 'open'){
+                    newCartStatusObj[key] = { status: 'open' };
+                }else{
+                    this._storage.removeItem(key);
+                }
             }
+            this._storage.removeItem(this.statusStorageName);
+            this._storage.setItem(this.statusStorageName, JSON.stringify(newCartStatusObj));
         }
-    }
-
-    /**
-     * Save cart entries
-     * **/
-    saveListOfCartEntities(listOfCartEntries: CartEntity[]) {
-        let cartMap = listOfCartEntries.reduce(function (map, cartEntry, i) {
-            map[cartEntry.data.cartId] = cartEntry;
-            return map;
-        }, {});
-
-        // persist the map
-        this.setCart(cartMap);
-        let cart = this.getAllCartEntities();
-        if (this.currentCart == 'cart') {
-            this.setCartLength(this.cartSize);
-        }
-    }
-
-    /**
-     * Returns all the items in the cart from the local storage
-     **/
-    getAllCartEntities() {
-        // get the cart
-        let myCartMap = this.getCart();
-        let cartEntities: CartEntity[] = [];
-
-        // convert the map to an array
-        for (let key in myCartMap) {
-            let value = myCartMap[key];
-            cartEntities.push(value);
-        }
-        this.cartSize = cartEntities.length;
-        // return the array
-        return Promise.resolve(cartEntities);
-
-    }
-
-    /**
-     * Update cart item download status
-     **/
-    updateCartItemDownloadStatus(cartId: string, status: any) {
-        // get the cart
-        let myCartMap = this.getCart();
-        let cartEntities: CartEntity[] = [];
-
-        // convert the map to an array
-        for (let key in myCartMap) {
-            let value = myCartMap[key];
-            if (value.data.cartId == cartId) {
-                value.data.downloadStatus = status;
-            }
-            cartEntities.push(value);
-        }
-
-        let cartMap = cartEntities.reduce(function (map, cartEntry, i) {
-            map[cartEntry.data.cartId] = cartEntry;
-            return map;
-        }, {});
-
-        // persist the map
-        this.setCart(cartMap);
-        this.getCart();
-
-        this.cartSize = cartEntities.length;
-        // return the array
-        return Promise.resolve(cartEntities);
-
-    }
-
-    /**
-     * Get cart size
-     **/
-    getCartSize() {
-        let myCartMap = this.getCart();
-        let cartEntities: CartEntity[] = [];
-
-        // convert the map to an array
-        for (let key in myCartMap) {
-            let value = myCartMap[key];
-            cartEntities.push(value);
-        }
-        this.cartSize = cartEntities.length
-        if (this.currentCart == 'cart') {
-            this.setCartLength(this.cartSize);
-        }
-        return this.cartSize;
-    }
-
-    /**
-     * Update cart download status
-     **/
-    updateCartDownloadStatus(status: boolean) {
-        // get the cart
-        let myCartMap = this.getCart();
-        let cartEntities: CartEntity[] = [];
-
-        // convert the map to an array
-        for (let key in myCartMap) {
-            let value = myCartMap[key];
-            value.data.downloadStatus = status;
-            cartEntities.push(value);
-        }
-        // console.log("cart" + JSON.stringify(cartEntities));
-        let cartMap = cartEntities.reduce(function (map, cartEntry, i) {
-            map[cartEntry.data.cartId] = cartEntry;
-            return map;
-        }, {});
-        // persist the map
-        this.setCart(cartMap);
-        this.getCart();
-        this.cartSize = cartEntities.length;
-        // return the array
-        return Promise.resolve(cartEntities);
-
-    }
-
-    /**
-     * Remove cart items with download status
-     **/
-    removeByDownloadStatus() {
-        // get the cart
-        let myCartMap = this.getCart();
-        let cartEntities: CartEntity[] = [];
-
-        // convert the map to an array
-        for (let key in myCartMap) {
-            let value = myCartMap[key];
-            if (value.data.downloadStatus == null) {
-                cartEntities.push(value);
-            }
-        }
-        let cartMap = cartEntities.reduce(function (map, cartEntry, i) {
-            map[cartEntry.data.cartId] = cartEntry;
-            return map;
-        }, {});
-        this.clearTheCart();
-        // persist the map
-        this.setCart(cartMap);
-        this.getCart();
-        this.cartSize = cartEntities.length;
-        if (this.currentCart == 'cart') {
-            this.setCartLength(this.cartSize);
-        }
-        // return the array
-        return Promise.resolve(cartEntities);
-
-    }
-
-    /**
-     * Remove cart items with cartId
-     **/
-    removeCartId(cartId: string) {
-        // get the cart
-        let myCartMap = this.getCart();
-        let cartEntities: CartEntity[] = [];
-
-        // convert the map to an array
-        for (let key in myCartMap) {
-            let value = myCartMap[key];
-            if (value.data.cartId != cartId) {
-                cartEntities.push(value);
-            }
-        }
-
-        let cartMap = cartEntities.reduce(function (map, cartEntry, i) {
-            map[cartEntry.data.cartId] = cartEntry;
-            return map;
-        }, {});
-        this.clearTheCart();
-        // persist the map
-        this.setCart(cartMap);
-        let cart = this.getAllCartEntities();
-        if (this.currentCart == 'cart') {
-            this.setCartLength(this.cartSize);
-        }
-    }
-
-    /**
-     * Clear the current cart
-     **/
-    clearTheCart() {
-        // if running on the server, cart is disabled.
-        if (!this._storage) return;
-
-        this._storage.removeItem(this.currentCart);
-    }
-
-    /**
-     * Return the current cart
-     **/
-    getCurrentCartName() {
-        return this.currentCart;
-    }
-
-    /**
-     * Returns a specific cart entry from the cartEntry map
-     **/
-    getCartEntryByDataId(dataId) {
-
-        let myCartMap = this.getCart();
-        return Promise.resolve(myCartMap[dataId]);
-
     }
 
     /**
@@ -286,146 +130,148 @@ export class CartService {
     }
 
     /**
-     * Will persist the product to local storage
-     **/
-    deselectAll() {
-        // if running on the server, cart is disabled.
-        if (!this._storage) return Promise.resolve(this.emptyMap());;
-
-        if (!this._storage.getItem(this.currentCart)) {
-
-            this.setCart(this.emptyMap());
-            let cartMap = this.getCart();
-
-            // save the map
-            this.setCart(cartMap);
-        }
-
-        let cartMap = this.getCart();
-        for (let key in cartMap) {
-            let value = cartMap[key];
-            value.data.isSelected = false;
-        }
-
-        // save the map
-        this.setCart(cartMap);
-        return Promise.resolve(cartMap);
+     * Behavior subject to remotely start the control function.
+     */
+    private _remoteCommand : BehaviorSubject<any> = new BehaviorSubject<any>({});
+    _watchRemoteCommand(subscriber) {
+        this._remoteCommand.subscribe(subscriber);
     }
 
     /**
-     * Will persist the product to local storage
-     **/
-    addDataToCart(data: Data) {
-        // if running on the server, cart is disabled.
-        if (!this._storage) return;
-
-        // product id , quantity
-        let cartMap = this.getCart();
-        // if we dont have  any cart history, create a empty cart
-        if (!this._storage.getItem(this.currentCart)) {
-
-            this.setCart(this.emptyMap());
-            let cartMap = this.getCart();
-            // if not, set default value
-            cartMap[data.cartId] = {
-                'data': data,
-            }
-            // save the map
-            this.setCart(cartMap);
-        }
-
-        cartMap = this.getCart();
-        cartMap[data.cartId] = {
-            'data': data,
-        }
-
-        // save the map
-        this.setCart(cartMap);
-        let cart = this.getAllCartEntities();
-        if (this.currentCart == 'cart') {
-            this.setCartLength(this.cartSize);
-        }
-        return Promise.resolve(cartMap);
+     * Execute the remote command
+     */
+    public executeCommand(command: string = "", data: any = null) : void {
+        this._remoteCommand.next({'command':command, 'data': data});
     }
 
     /**
-     * Update File spinner status
+     * Reset datafile download status
      **/
-    updateFileSpinnerStatus(addFileSpinner: boolean) {
-        this.addCartSpinnerSub.next(addFileSpinner);
-    }
-
-    /**
-     * Update All File spinner status
-     **/
-    updateAllFilesSpinnerStatus(addAllFilesSpinner: boolean) {
-        this.addAllCartSpinnerSub.next(addAllFilesSpinner);
-    }
-
-    /**
-     * Update cart display status
-     **/
-    updateCartDisplayStatus(displayCart: boolean) {
-        this.displayCartSub.next(displayCart);
-    }
-
-    /**
-     * Retrieve the cart from local storage
-     **/
-    getCart() {
-        if (!this._storage)
-            return this.emptyMap();
-
-        let cartAsString = this._storage.getItem(this.currentCart);
-
-        return JSON.parse(cartAsString);
-    }
-
-    /**
-     * Persists the cart to local storage
-     **/
-    private setCart(cartMap): void {
-        if (this._storage) {
-            this._storage.setItem(this.currentCart, JSON.stringify(cartMap));
-            //this.storageSub.next(true);
-        }
-        // otherwise, cart is disabled and input is ignored
-    }
-
-    /**
-     * Update cart entites ready flag
-     **/
-    setForceDatacartReload(ready: boolean) {
-        this.forceDatacartReloadSub.next(ready);
-    }
-
-    /**
-     * Watch update cart entites ready flag
-     **/
-    watchForceDatacartReload(): Observable<boolean> {
-        return this.forceDatacartReloadSub.asObservable();
-    }
-
-
-    /**
-     * Function to check if cartId is in the data cart.
-     **/
-    isInDataCart(cartId: string) {
-        let cartMap = this.getCart();
-
-        for (let key in cartMap) {
-            let value = cartMap[key];
-            if (value.data.cartId == cartId) {
-                return true;
+    resetDatafileDownloadStatus(dataFiles: any, dataCart: DataCart, downloadStatus: string) {
+        for (let i = 0; i < dataFiles.length; i++) {
+            if (dataFiles[i].children.length > 0) {
+                this.resetDatafileDownloadStatus(dataFiles[i].children, dataCart, downloadStatus);
+            } else {
+                dataFiles[i].data.downloadStatus = downloadStatus;
+                dataCart.setDownloadStatus(dataFiles[i].data.resId, dataFiles[i].data.filePath, downloadStatus);
             }
         }
-        return false;
+
+        dataCart.save();
     }
 
     /**
-     * Function to set current data cart.
-     **/
-    setCurrentCart(cart: string) {
-        this.currentCart = cart;
+     * Return "download" button color based on download status
+     */
+    getDownloadStatusColor(downloadStatus: string) {
+        let returnColor = '#1E6BA1';
+
+        switch (downloadStatus) {
+            case 'downloaded':
+                {
+                    returnColor = 'green';
+                    break;
+                }
+            case 'downloading':
+                {
+                    returnColor = '#00ace6';
+                    break;
+                }
+            case 'warning':
+                {
+                    returnColor = 'darkorange';
+                    break;
+                }
+            case 'cancelled':
+                {
+                    returnColor = 'darkorange';
+                    break;
+                }
+            case 'failed':
+                {
+                    returnColor = 'darkorange';
+                    break;
+                }
+            case 'error':
+                {
+                    returnColor = 'red';
+                    break;
+                }
+            default:
+                {
+                    //statements; 
+                    break;
+                }
+        }
+
+        return returnColor;
     }
+
+    /**
+     * The status we want to display may not be exactly the same as the status in the database. This function 
+     * serves as a mapper.
+     * @param rowData - row data of dataFiles
+     */
+    getStatusForDisplay(downloadStatus: string){
+        let status = "";
+        switch(downloadStatus){
+            case 'complete':
+                status = 'Completed';
+                break;
+            case 'downloaded':
+                status = 'Downloaded';
+                break;
+            case 'downloading':
+                status = 'Downloading';
+                break;
+            case 'pending':
+                status = 'Pending';
+                break;
+            case 'cancelled':
+                status = 'Cancelled';
+                break;
+            case 'failed':
+                status = 'Failed';
+                break;
+            case 'error':
+                status = 'Error';
+                break;  
+            default:
+                break;    
+        }
+
+        return status;
+    }    
+
+    /**
+     * Return icon class based on download status
+     */
+    getIconClass(downloadStatus: string){
+        let iconClass = "";
+        switch(downloadStatus){
+            case 'complete':
+                iconClass = 'faa faa-check';
+                break;
+            case 'downloaded':
+                iconClass = 'faa faa-check';
+                break;
+            case 'pending':
+                iconClass = 'faa faa-clock-o';
+                break;
+            case 'cancelled':
+                iconClass = 'faa faa-remove';
+                break;
+            case 'failed':
+                iconClass = 'faa faa-warning';
+                break;
+            case 'error':
+                iconClass = 'faa faa-warning';
+                break;  
+            default:
+                break;              
+        }
+
+        return iconClass; 
+    }
+
 }
