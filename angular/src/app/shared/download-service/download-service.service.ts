@@ -7,6 +7,8 @@ import { DownloadData } from './downloadData';
 import { CartService } from '../../datacart/cart.service';
 import { TestDataService } from '../../shared/testdata-service/testDataService';
 import { FileSaverService } from 'ngx-filesaver';
+import { TreeNode } from 'primeng/primeng';
+import { DataCart } from '../../datacart/cart';
 
 @Injectable()
 export class DownloadService {
@@ -17,6 +19,8 @@ export class DownloadService {
     zipFilesProcessedDataCartSub = new BehaviorSubject<boolean>(false);
 
     anyFileDownloadedFlagSub = new BehaviorSubject<boolean>(false);
+    totalFileDownloadedSub = new BehaviorSubject<number>(0);
+
     private download_maximum: number = 2;
     _totalBundleSize = 0;
     _totalDownloaded = 0;
@@ -31,7 +35,7 @@ export class DownloadService {
         private _FileSaverService: FileSaverService,
         private testDataService: TestDataService
     ) {
-        this.setDownloadingNumber(-1, 'datacart');
+        this.setDownloadingNumber(-1);
     }
 
     /**
@@ -153,8 +157,8 @@ export class DownloadService {
     /**
      * Download zip
      **/
-    download(nextZip: ZipData, zipdata: ZipData[], dataFiles: any, whichPage: any) {
-        let sub = this.zipFilesDownloadingSub;
+    download(nextZip: ZipData, zipdata: ZipData[], dataFiles: any, dataCart: DataCart) {
+        let sub = this.zipFilesDownloadingDataCartSub;
         let preTime: number = 0;
         let preTime2: number = 0;
         let preDownloaded: number = 0;
@@ -162,15 +166,11 @@ export class DownloadService {
         let currentTime: number = 0;
         let currentDownloaded: number = 0;
 
-        if (whichPage == "datacart") {
-            sub = this.zipFilesDownloadingDataCartSub;
-        }
-
         nextZip.downloadStatus = 'downloading';
-        this.setDownloadStatus(nextZip, dataFiles, "downloading");
-        this.increaseNumberOfDownloading(whichPage);
+        this.setDownloadStatus(nextZip, dataFiles, "downloading", dataCart);
+        this.increaseNumberOfDownloading();
 
-        console.log('nextZip.bundleSize', nextZip.bundleSize);
+        // console.log('nextZip.bundleSize', nextZip.bundleSize);
         nextZip.downloadInstance = this.getBundle(nextZip.downloadUrl, JSON.stringify(nextZip.bundle)).subscribe(
             event => {
                 switch (event.type) {
@@ -179,9 +179,9 @@ export class DownloadService {
                         this._FileSaverService.save(<any>event.body, nextZip.fileName);
                         nextZip.downloadProgress = 0;
                         nextZip.downloadStatus = 'downloaded';
-                        this.decreaseNumberOfDownloading(whichPage);
-                        this.setDownloadProcessStatus(this.allDownloadFinished(zipdata), whichPage);
-                        this.setDownloadStatus(nextZip, dataFiles, "downloaded");
+                        this.decreaseNumberOfDownloading();
+                        this.setDownloadProcessStatus(this.allDownloadFinished(zipdata));
+                        this.setDownloadStatus(nextZip, dataFiles, "downloaded", dataCart);
                         this.setFileDownloadedFlag(true);
                         break;
                     case HttpEventType.DownloadProgress:
@@ -240,7 +240,7 @@ export class DownloadService {
                 nextZip.downloadStatus = 'error';
                 nextZip.downloadErrorMessage = err.message;
                 nextZip.downloadProgress = 0;
-                this.decreaseNumberOfDownloading(whichPage);
+                this.decreaseNumberOfDownloading();
                 this.setDownloadStatus(nextZip, dataFiles, "failed", err.message);
             }
         );
@@ -249,47 +249,39 @@ export class DownloadService {
     /**
      * Decrease the number of current downloading by 1
      **/
-    decreaseNumberOfDownloading(whichPage: any) {
-        let sub = this.zipFilesDownloadingSub;
-        if (whichPage == "datacart") {
-            sub = this.zipFilesDownloadingDataCartSub;
-        }
+    decreaseNumberOfDownloading() {
+        let sub = this.zipFilesDownloadingDataCartSub;
 
         if (sub.getValue() >= 0) {
-            this.setDownloadingNumber(sub.getValue() - 1, whichPage);
+            this.setDownloadingNumber(sub.getValue() - 1);
         }
 
         if (sub.getValue() == 0) {
-            this.setDownloadProcessStatus(true, whichPage);
+            this.setDownloadProcessStatus(true);
         }
     }
 
     /**
      * Increase the number of current downloading by 1
      **/
-    increaseNumberOfDownloading(whichPage: any) {
-        let sub = this.zipFilesDownloadingSub;
-        if (whichPage == "datacart") {
-            sub = this.zipFilesDownloadingDataCartSub;
-        }
+    increaseNumberOfDownloading() {
+        let sub = this.zipFilesDownloadingDataCartSub;
 
         if (sub.getValue() < this.getDownloadMaximum()) {
-            this.setDownloadingNumber(sub.getValue() + 1, whichPage);
+            this.setDownloadingNumber(sub.getValue() + 1);
         }
     }
 
     /**
      * Download next available zip in the queue
      **/
-    downloadNextZip(zipData: ZipData[], dataFiles: any, whichPage: any) {
-        let sub = this.zipFilesDownloadingSub;
-        if (whichPage == "datacart") {
-            sub = this.zipFilesDownloadingDataCartSub;
-        }
+    downloadNextZip(zipData: ZipData[], dataFiles: any, dataCart: DataCart) {
+        let sub = this.zipFilesDownloadingDataCartSub;
+
         if (sub.getValue() < this.getDownloadMaximum()) {
             let nextZip = this.getNextZipInQueue(zipData);
             if (nextZip != null) {
-                this.download(nextZip, zipData, dataFiles, whichPage);
+                this.download(nextZip, zipData, dataFiles, dataCart);
             }
         }
     }
@@ -333,55 +325,39 @@ export class DownloadService {
     /**
     * Set the number of downloading zip files
     **/
-    watchDownloadingNumber(whichPage: any): Observable<any> {
-        let sub = this.zipFilesDownloadingSub;
-        if (whichPage == "datacart") {
-            sub = this.zipFilesDownloadingDataCartSub;
-        }
-
+    watchDownloadingNumber(): Observable<any> {
+        let sub = this.zipFilesDownloadingDataCartSub;
         return sub.asObservable();
     }
 
     /**
      * Set the number of downloading zip files
      **/
-    setDownloadingNumber(value: number, whichPage: any) {
-        let sub = this.zipFilesDownloadingSub;
-        if (whichPage == "datacart") {
-            sub = this.zipFilesDownloadingDataCartSub;
-        }
-
+    setDownloadingNumber(value: number) {
+        let sub = this.zipFilesDownloadingDataCartSub;
         sub.next(value);
     }
 
     /**
     * Watch overall process status
     **/
-    watchDownloadProcessStatus(whichPage: any): Observable<any> {
-        let sub = this.zipFilesProcessedSub;
-        if (whichPage == "datacart") {
-            sub = this.zipFilesProcessedDataCartSub;
-        }
-
+    watchDownloadProcessStatus(): Observable<any> {
+        let sub = this.zipFilesProcessedDataCartSub;
         return sub.asObservable();
     }
 
     /**
      * Set overall process status
      **/
-    setDownloadProcessStatus(value: boolean, whichPage: any) {
-        let sub = this.zipFilesProcessedSub;
-        if (whichPage == "datacart") {
-            sub = this.zipFilesProcessedDataCartSub;
-        }
-
+    setDownloadProcessStatus(value: boolean) {
+        let sub = this.zipFilesProcessedDataCartSub;
         sub.next(value);
     }
 
     /**
      * Set download status of given tree node
      **/
-    setDownloadStatus(zip: any, dataFiles: any, status: any, message: string = '') {
+    setDownloadStatus(zip: any, dataFiles: any, status: any, dataCart: DataCart, message: string = '') {
         for (let includeFile of zip.bundle.includeFiles) {
             let resFilePath = includeFile.filePath.substring(includeFile.filePath.indexOf('/'));
             for (let dataFile of dataFiles) {
@@ -389,11 +365,14 @@ export class DownloadService {
                 if (node != null) {
                     node.data.downloadStatus = status;
                     node.data.message = message;
-                    this.cartService.updateCartItemDownloadStatus(node.data['cartId'], status);
+                    dataCart.setDownloadStatus(node.data.resId, node.data.filePath);
+
                     break;
                 }
             }
         }
+
+        dataCart.save();
     }
 
     /**
@@ -478,6 +457,18 @@ export class DownloadService {
         return this.anyFileDownloadedFlagSub.asObservable();
     }
 
+
+    /**
+     * Set the number of files downloaded
+     **/
+    setTotalFileDownloaded(fileDownloadedCount: number) {
+        this.totalFileDownloadedSub.next(fileDownloadedCount);
+    }
+
+    watchTotalFileDownloaded(subscriber) {
+        return this.totalFileDownloadedSub.subscribe(subscriber);
+    }
+
     /**
      * Return total number of downloaded files in a given dataFiles (tree)
      **/
@@ -493,5 +484,23 @@ export class DownloadService {
             }
         }
         return totalDownloaded;
+    }
+
+    /**
+     *  Cancel the download process of the given zip file
+     * @param zip - the zip file to be cancelled
+     */
+    cancelDownloadZip(zip: ZipData, dataFiles: TreeNode[], dataCart: DataCart) {
+        //Need to re-calculate the total file size and total downloaded size
+        this.decreaseTotalBundleBySize(zip.bundleSize);
+        let downloaded = this.totalDownloaded - zip.bundleSize*zip.downloadProgress/100;
+        this.setTotalDownloaded(downloaded);
+
+        zip.downloadInstance.unsubscribe();
+        zip.downloadInstance = null;
+        zip.downloadProgress = 0;
+        zip.downloadStatus = "cancelled";
+        this.setDownloadStatus(zip, dataFiles, "cancelled", dataCart);
+        this.decreaseNumberOfDownloading();
     }
 }
