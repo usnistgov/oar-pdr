@@ -214,7 +214,7 @@ class ReferenceEnhancer(object):
         unannot = OrderedDict()
         for ref in urefs:
             if 'location' in ref:
-                unannot[ref['location']] = ref
+                unannot[normalize_doi(ref['location'])] = ref
 
         # remove any references in the annotated reference list that
         # might have gotten removed from the unannotated list
