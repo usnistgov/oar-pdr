@@ -201,10 +201,12 @@ class TestEnrichReferences(test.TestCase):
         self.assertEqual(enh.refs[doiu]['location'], doiu)
         self.assertIn('citation', enh.refs[doiu])
         self.assertIn('title', enh.refs[doiu])
+        self.assertEqual(enh.refs[doiu]['refType'], "IsCitedBy")
 
         # test effectiveness of override, and of updates
         del enh.refs[doiu]['title']
         enh.refs[doiu]['description'] = "The Real Story"
+        enh.refs[doiu]['refType'] = "IsSupplementTo"
         self.assertFalse(enh.merge_enhanced_ref("doi:"+doid, False))
         self.assertIn('citation', enh.refs[doiu])
         self.assertNotIn('title', enh.refs[doiu])
@@ -213,6 +215,7 @@ class TestEnrichReferences(test.TestCase):
         self.assertIn('citation', enh.refs[doiu])
         self.assertIn('title', enh.refs[doiu])
         self.assertEqual(enh.refs[doiu]['description'], "The Real Story")
+        self.assertEqual(enh.refs[doiu]['refType'], "IsSupplementTo")
 
         # test alternate forms of DOI
         del enh.refs[doiu]['citation']
@@ -221,6 +224,7 @@ class TestEnrichReferences(test.TestCase):
         self.assertIn('citation', enh.refs[doiu])
         self.assertIn('title', enh.refs[doiu])
         self.assertEqual(enh.refs[doiu]['description'], "The Real Story")
+        self.assertEqual(enh.refs[doiu]['refType'], "IsSupplementTo")
 
         del enh.refs[doiu]['citation']
         del enh.refs[doiu]['title']
@@ -228,6 +232,7 @@ class TestEnrichReferences(test.TestCase):
         self.assertIn('citation', enh.refs[doiu])
         self.assertIn('title', enh.refs[doiu])
         self.assertEqual(enh.refs[doiu]['description'], "The Real Story")
+        self.assertEqual(enh.refs[doiu]['refType'], "IsSupplementTo")
 
         # test enhancing existing reference
         doid = "10.1364/OE.24.014100"
@@ -239,6 +244,7 @@ class TestEnrichReferences(test.TestCase):
         self.assertIn('title', enh.refs[doiu])
         self.assertIn('optical sorting', enh.refs[doiu]['title'])
         self.assertNotIn('description', enh.refs[doiu])
+        self.assertEqual(enh.refs[doiu]['refType'], "IsReferencedBy")
 
         # test failure mode
         self.assertFalse(enh.merge_enhanced_ref("doi:88888/baddoi", False))
@@ -265,7 +271,6 @@ class TestEnrichReferences(test.TestCase):
         # setup
         doid = "10.1126/science.169.3946.635"
         doiu = "https://doi.org/"+doid
-        pdb.set_trace()
         enh.merge_enhanced_ref("doi:"+doid)
         self.assertEqual(len(enh.refs), 2)
 

@@ -293,9 +293,14 @@ class ReferenceEnhancer(object):
                     if not override and 'citation' in self.refs[key]:
                         return False
                     id = self.refs[key].get('@id')
+                    refType = self.refs[key].get("refType")
                     self.refs[key].update(self.doir.to_reference(doi))
                     if id:
                         self.refs[key]['@id'] = id  # keep previous @id
+                    if refType and refType != "References":
+                        # "References" is a generic reference; if the enhanced one is more specific
+                        # use it; otherwise, keep the original designation
+                        self.refs[key]['refType'] = refType
 
                 else:
                     self.refs[key] = self.doir.to_reference(doi)
