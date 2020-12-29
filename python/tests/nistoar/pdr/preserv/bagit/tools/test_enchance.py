@@ -429,6 +429,7 @@ class TestEnrichReferences(test.TestCase):
         self.assertEqual(len(rmd), 3)
 
         self.assertEqual(rmd[0]['location'], origdoi)
+        self.assertEqual(rmd[0]['refType'], 'IsReferencedBy')
         self.assertNotEqual(rmd[0]['citation'], "in press")
         self.assertEqual(rmd[1]['location'], nondoi)
         self.assertEqual(rmd[1]['title'], "Irreproducibily")
@@ -436,7 +437,7 @@ class TestEnrichReferences(test.TestCase):
         self.assertEqual(rmd[2]['title'], "An old publication")
         self.assertNotIn('citation', rmd[2])
 
-        # check unannotated references are unchanged
+        # check unannotated references are unchanged (and that missing reference is removed)
         rmd = self.bag.bag.nerd_metadata_for('', False).get('references', [])
         self.assertEqual(len(rmd), 2)
         self.assertEqual(rmd[0]['location'], origdoi)
@@ -444,6 +445,48 @@ class TestEnrichReferences(test.TestCase):
         self.assertEqual(rmd[1]['location'], nondoi)
         self.assertEqual(rmd[1]['title'], "Irreproducibily")
         
+    @test.skipIf("doi" not in os.environ.get("OAR_TEST_INCLUDE",""),
+                 "kindly skipping doi service checks")
+    def test_synchronize_annotated_refs_reftype(self):
+        nondoi = "http://example.com/paper"
+        doid = "10.1126/science.169.3946.635"
+        doiu = "https://doi.org/"+doid
+        origdoi = "https://doi.org/10.1364/OE.24.014100"
+
+        # setup
+        rmd = self.bag.bag.nerd_metadata_for('', False).get('references', [])
+        self.assertEqual(len(rmd), 1)
+        rmd[0]['citation'] = "in press"
+        rmd[0]['refType'] = "References"
+        rmd.append({ "location": doiu, "citation": "in press", "refType": "IsSupplementTo",
+                     "@id": "#doi:"+doid })
+        self.bag.update_metadata_for('', {'references': rmd})
+        self.assertEqual(len(rmd), 2)
+        self.bag.update_annotations_for('', {'references': rmd})
+
+        # test
+        enh = tools.ReferenceEnhancer(rescfg, self.log)
+        enh.synchronize_annotated_refs(self.bag, override=True)
+
+        # check annotated references
+        rmd = self.bag.bag.annotations_metadata_for('').get('references', [])
+        self.assertEqual(len(rmd), 2)
+
+        self.assertEqual(rmd[0]['location'], origdoi)
+        self.assertEqual(rmd[0]['refType'], 'IsCitedBy')
+        self.assertNotEqual(rmd[0]['citation'], "in press")
+        self.assertEqual(rmd[1]['location'], doiu)
+        self.assertEqual(rmd[1]['@id'], "#doi:"+doid)
+        self.assertNotEqual(rmd[1]['citation'], "in press")
+        self.assertEqual(rmd[1]['refType'], 'IsSupplementTo')
+
+    def test_normalize_doi(self):
+        doi = "10.88888/goober"
+        self.assertEqual(tools.normalize_doi("doi:"+doi), "https://doi.org/"+doi)
+        self.assertEqual(tools.normalize_doi("https://dx.doi.org/"+doi), "https://doi.org/"+doi)
+        self.assertEqual(tools.normalize_doi("https://doi.org/"+doi), "https://doi.org/"+doi)
+        self.assertEqual(tools.normalize_doi(doi), doi)
+
         
         
         

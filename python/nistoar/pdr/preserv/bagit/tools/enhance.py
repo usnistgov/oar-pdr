@@ -118,6 +118,12 @@ def update_authors(bagbldr, as_annot=False, config=None):
 
 
 _altdoifmt = re.compile('^((https?://dx.doi.org/)|(doi:))')
+def normalize_doi(doi):
+    """
+    convert a DOI recognized as using an alternate format (i.e., beginning with "doi:" or 
+    "https://ds.doi.org/") to the prefered format (i.e., beginning with "https://doi.org/")
+    """
+    return _altdoifmt.sub('https://doi.org/', doi)
 
 class ReferenceEnhancer(object):
     """
@@ -266,7 +272,7 @@ class ReferenceEnhancer(object):
             i=0
             for ref in reflist:
                 if 'location' in ref:
-                    key = _altdoifmt.sub('https://doi.org/', ref['location'])
+                    key = normalize_doi(ref['location'])
                                          
                     out[key] = ref
                 else:
@@ -286,7 +292,7 @@ class ReferenceEnhancer(object):
             the DOI will not be resolved and the existing reference
             description will not be overridden
             """
-            key = _altdoifmt.sub('https://doi.org/', doi)
+            key = normalize_doi(doi)
             try:
 
                 if key in self.refs:
@@ -305,9 +311,7 @@ class ReferenceEnhancer(object):
                 else:
                     self.refs[key] = self.doir.to_reference(doi)
                     if self.refs[key]['@id'].startswith("doi:"):
-                        self.refs[key]['@id'] = \
-                                          _altdoifmt.sub('https://doi.org/',
-                                                         self.refs[key]['@id'])
+                        self.refs[key]['@id'] = normalize_doi(self.refs[key]['@id'])
 
             except DOIResolutionException as ex:
                 if self.log:
@@ -336,9 +340,9 @@ class ReferenceEnhancer(object):
             for ref in refs:
                 if isinstance(ref, (str, unicode)):
                     # it's a DOI
-                    ref = _altdoifmt.sub('https://doi.org/', ref)
+                    ref = normalize_doi(ref)
                 elif isinstance(ref, Mapping) and 'location' in ref:
-                    ref = ref['location']
+                    ref = normalize_doi(ref['location'])
                 else:
                     continue
                 locs.append(ref)
