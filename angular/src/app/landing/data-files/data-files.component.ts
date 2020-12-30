@@ -16,6 +16,7 @@ import { NotificationService } from '../../shared/notification-service/notificat
 import { EditStatusService } from '../editcontrol/editstatus.service';
 import { NerdmComp } from '../../nerdm/nerdm';
 import { DataCart, DataCartItem } from '../../datacart/cart';
+import { DataCartStatus } from '../../datacart/cartstatus';
 
 declare var _initAutoTracker: Function;
 
@@ -39,6 +40,7 @@ export class DataFilesComponent {
 
     globalDataCart: DataCart;
     specialDataCart: DataCart;
+    dataCartStatus: DataCartStatus;
 
     accessPages: NerdmComp[] = [];
     isReferencedBy: boolean = false;
@@ -116,13 +118,14 @@ export class DataFilesComponent {
             }
         });
 
-        this.cartService.watchStorage().subscribe(value => {
+        this.cartService.watchCartLength().subscribe(value => {
             this.cartLength = value;
         });
     }
 
     ngOnInit() {
         this.globalDataCart = DataCart.openCart(this.CART_CONSTANTS.GLOBAL_CART_NAME);
+        this.dataCartStatus = DataCartStatus.openCartStatus();
         this.cartLength = this.globalDataCart.size();
         this.updateStatusFromCart();
 
@@ -226,7 +229,7 @@ export class DataFilesComponent {
      */
     resetStatus(files: any) {
         for (let comp of files) {
-            if (comp.children.length > 0) {
+            if (comp.children && comp.children.length > 0) {
                 this.resetStatus(comp.children);
             } else {
                 comp.data.isIncart = false;

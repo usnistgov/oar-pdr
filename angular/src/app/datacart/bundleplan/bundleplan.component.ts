@@ -13,6 +13,7 @@ import { DownloadConfirmComponent } from '../download-confirm/download-confirm.c
 import { ConfirmationDialogComponent } from '../../shared/confirmation-dialog/confirmation-dialog.component';
 import { DataCart } from '../cart';
 import { CartConstants } from '../cartconstants';
+import { DataCartStatus } from '../cartstatus';
 
 @Component({
   selector: 'app-bundleplan',
@@ -22,6 +23,7 @@ import { CartConstants } from '../cartconstants';
 export class BundleplanComponent implements OnInit {
     dataCart: DataCart;
     public CART_CONSTANTS: any;
+    dataCartStatus: DataCartStatus;
 
     //Bundle
     bundlePlanStatus: any;
@@ -97,10 +99,8 @@ export class BundleplanComponent implements OnInit {
         this.CART_CONSTANTS = CartConstants.cartConst;
 
         this.cartService._watchRemoteCommand((command) => {
-            console.log('command',command);
             switch(command.command) { 
                 case 'downloadSelected': { 
-                    console.log("Downloading...")
                     if(command.data)
                         this.selectedData = command.data;
                    this.downloadAllFilesFromAPI();
@@ -119,6 +119,8 @@ export class BundleplanComponent implements OnInit {
     }
 
     ngOnInit() {
+        this.dataCartStatus = DataCartStatus.openCartStatus();
+
         if (this.ediid != this.CART_CONSTANTS.GLOBAL_CART_NAME) {
             this.dataCart = DataCart.openCart(this.ediid);
         }else{
@@ -134,6 +136,9 @@ export class BundleplanComponent implements OnInit {
                     this.downloadEndTime = new Date();
                     this.totalDownloadTime = this.downloadEndTime.getTime() / 1000 - this.downloadStartTime.getTime() / 1000;
                     this.overallStatus = 'complete';
+                    setTimeout(() => {
+                        this.dataCartStatus.updateDownloadPercentage(this.ediid, 100);
+                    }, 1000);
                 }
             }
         );
@@ -173,11 +178,12 @@ export class BundleplanComponent implements OnInit {
         let minutes = Math.floor((downloadTime - hours * 3600)/60);
         let seconds = Math.floor(downloadTime - hours * 3600 - minutes * 60);
 
-        let returnFormat = seconds + "sec";
+        let returnFormat: string = ""; 
+        if(seconds > 0) returnFormat = seconds + "sec";
         if(minutes > 0) returnFormat = minutes + "min " + returnFormat;
         if(hours > 0) returnFormat = hours + "hour " + returnFormat;
 
-        return returnFormat;
+        return returnFormat.trim();
     }
 
     /**
@@ -433,11 +439,13 @@ export class BundleplanComponent implements OnInit {
                     if (!this.allDownloadCancelled) {
                         this.overallStatus = "downloading";
                         this.downloadService.downloadNextZip(this.zipData, this.dataFiles, this.dataCart);
-                        console.log('dataCart333', this.dataCart);
                     }
                     else
                     {
                         this.overallStatus = "Cancelled";
+                        setTimeout(() => {
+                            this.dataCartStatus.updateDownloadPercentage(this.ediid, 0);
+                        }, 1000);
                     }
                 }
             }
@@ -445,12 +453,16 @@ export class BundleplanComponent implements OnInit {
     }
 
     get overallProgress(){
+        let returnValue = 0;
         if(this.downloadService.totalBundleSize > 0 && this.downloadService.totalBundleSize >= this.downloadService.totalDownloaded)
-            return Math.round(100 * this.downloadService.totalDownloaded / this.downloadService.totalBundleSize);
+            returnValue = Math.round(100 * this.downloadService.totalDownloaded / this.downloadService.totalBundleSize);
         else if(this.downloadService.totalBundleSize > 0)
-            return 100;
+            returnValue = 100;
         else    
-            return 0;
+            returnValue = 0;
+
+        this.dataCartStatus.updateDownloadPercentage(this.ediid, returnValue)
+        return returnValue;
     }
 
     /**
@@ -563,20 +575,8 @@ export class BundleplanComponent implements OnInit {
         this.showCurrentTask = false;
         this.overallStatus = "cancelled";
         this.downloadService.resetDownloadData();
+        this.dataCartStatus.updateDownloadPercentage(this.ediid, 0)
     }
-
-    /**
-     * Reset datafile download status
-     **/
-    // resetDatafileDownloadStatus(dataFiles: any, downloadStatus: any) {
-    //     for (let i = 0; i < dataFiles.length; i++) {
-    //         if (dataFiles[i].children.length > 0) {
-    //             this.resetDatafileDownloadStatus(dataFiles[i].children, downloadStatus);
-    //         } else {
-    //             dataFiles[i].data.downloadStatus = downloadStatus;
-    //         }
-    //     }
-    // }
 
     /**
      * Clear "downloading" and "pending" status of given tree node

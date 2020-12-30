@@ -5,6 +5,8 @@
  * and their download status.
  */
 
+import { CartConstants } from './cartconstants';
+
 /**
  * convert the TreeNode[] data to a string appropriate for saving to local storage
  */
@@ -37,15 +39,15 @@ export class DataCartStatusItem {
     /**
      * Identifier for the cart status data.    
      */
-    cartName: string; 
+    itemId: string; 
 
     /**
      * the status of the cart 
      */
     statusData : DataCartStatusData;
 
-    constructor(cartName: string, statusData? : DataCartStatusData){
-        this.cartName = cartName;
+    constructor(itemId: string, statusData? : DataCartStatusData){
+        this.itemId = itemId;
         if(!statusData){
             this.statusData = new DataCartStatusData();
         }else{
@@ -69,13 +71,16 @@ export interface DataCartStatusLookup {
  * user's (via the browser) local disk.  
  */
 export class DataCartStatus {
-
+    public CART_CONSTANTS: any;
+    name: string = "cartstatus";
     _storage: Storage = null;           // the persistant storage; if null, this cart is in-memory only
     dataCartStatusItems: DataCartStatusLookup = {};
 
-    constructor(dataCartStatusItem: DataCartStatusLookup, store: Storage|null = localStorage){
-        if(dataCartStatusItem){
-            this.dataCartStatusItems = dataCartStatusItem;
+    constructor(name: string = "cartstatus", dataCartStatusItems: DataCartStatusLookup, store: Storage|null = localStorage){
+        this.CART_CONSTANTS = CartConstants.cartConst;
+        this.name = name;
+        if(dataCartStatusItems){
+            this.dataCartStatusItems = dataCartStatusItems;
         }
         this._storage = store;  // if null; cart is in-memory only
     }
@@ -83,22 +88,22 @@ export class DataCartStatus {
     /**
      * return the DataCart from persistent storage.  If it does not exist, create an empty one.
      */
-    public static openCartStatus(cartName: string, store: Storage = localStorage) : DataCartStatus {
+    public static openCartStatus(cartName: string = "cartstatus", store: Storage = localStorage) : DataCartStatus {
         let cartstatusItems: DataCartStatusLookup = <DataCartStatusLookup>{};
         if (store) {
-            cartstatusItems = parseCartStatus(store.getItem("cartstatus"));
+            cartstatusItems = parseCartStatus(store.getItem(cartName));
             if (!cartstatusItems)
-                return DataCartStatus.createCartStatus(cartstatusItems, store);
+                return DataCartStatus.createCartStatus(cartName, store);
         }
-        return new DataCartStatus(cartstatusItems, store);
+        return new DataCartStatus(cartName, cartstatusItems, store);
     }
 
     /**
      * create a new empty DataCartStatus with the given name and register it into persistent storage.  If 
      * a DataCartStatus already exists with that name, it will be discarded.
      */
-    public static createCartStatus(cartstatusItems: DataCartStatusLookup, store: Storage = localStorage) : DataCartStatus {
-        let out: DataCartStatus = new DataCartStatus(cartstatusItems, store);
+    public static createCartStatus(name: string, store: Storage = localStorage) : DataCartStatus {
+        let out: DataCartStatus = new DataCartStatus(name, <DataCartStatusLookup>{}, store);
         out.save();
         return out;
     }
@@ -108,7 +113,7 @@ export class DataCartStatus {
      */
     public save() : void {
         if (this._storage)
-            this._storage.setItem("cartstatus", stringifyCart(this.dataCartStatusItems));
+            this._storage.setItem(this.name, stringifyCart(this.dataCartStatusItems));
     }
 
     /**
@@ -116,7 +121,7 @@ export class DataCartStatus {
      */
     public forget() : void {
         if (this._storage)
-            this._storage.removeItem("cartstatus");
+            this._storage.removeItem(this.name);
     }
 
     /**
@@ -125,7 +130,14 @@ export class DataCartStatus {
      */
     public restore() : void {
         if (this._storage)
-            this.dataCartStatusItems = parseCartStatus(this._storage.getItem("cartstatus"));
+            this.dataCartStatusItems = parseCartStatus(this._storage.getItem(this.name));
+    }
+
+    /**
+     * get the key of this cart
+     */
+    public getName() : string {
+        return this.name;
     }
 
     /**
@@ -134,8 +146,8 @@ export class DataCartStatus {
      * @param cartId    the ID of the file within this cart
      * @return DataCartItem  -- the matching file item
      */
-    findStatusByName(cartName: string) : DataCartStatusItem {
-        return this.dataCartStatusItems[cartName];
+    findStatusById(itemId: string) : DataCartStatusItem {
+        return this.dataCartStatusItems[itemId];
     }
 
     /**
@@ -143,7 +155,7 @@ export class DataCartStatus {
      */
     addItem(item: DataCartStatusItem) : void {
         this.restore();
-        this.dataCartStatusItems[item.cartName] = item;
+        this.dataCartStatusItems[item.itemId] = item;
         this.save();
         // this._statusUpdated.next(true);
     }
@@ -153,11 +165,11 @@ export class DataCartStatus {
      * @param cartName     cart name
      * @return boolean -- true if the item was found to be in the cart and then removed. 
      */
-    public removeItemByName(cartName: string) : boolean {
+    public removeItemById(itemId: string) : boolean {
         this.restore();
 
-        if (this.dataCartStatusItems[cartName]){ 
-            delete this.dataCartStatusItems[cartName];
+        if (this.dataCartStatusItems[itemId]){ 
+            delete this.dataCartStatusItems[itemId];
             this.save();
             return true;
         }
@@ -169,9 +181,16 @@ export class DataCartStatus {
      * @param cartName The name of the cart to be updated
      * @param inUse Status to be updated
      */
-    public updateCartStatusInUse(cartName: string, inUse: boolean=false){
-        let targetItem : DataCartStatusItem = this.findStatusByName(cartName);
-        targetItem.statusData.isInUse = inUse;
+    public updateCartStatusInUse(itemId: string, inUse: boolean=false){
+        let targetItem : DataCartStatusItem = this.findStatusById(itemId);
+        if(!targetItem) {
+            targetItem = new DataCartStatusItem(itemId, new DataCartStatusData(inUse))
+            this.addItem(targetItem);
+        }else{
+            targetItem.statusData.isInUse = inUse;
+        }
+
+        this.save();
     }
 
     /**
@@ -179,8 +198,28 @@ export class DataCartStatus {
      * @param cartName The name of the cart to be updated
      * @param percentage Status to be updated
      */
-    public updateDownloadPercentahe(cartName: string, percentage: number=0){
-        let targetItem : DataCartStatusItem = this.findStatusByName(cartName);
-        targetItem.statusData.downloadPercentage = percentage;
+    public updateDownloadPercentage(itemId: string, percentage: number=0){
+        this.restore();
+        let targetItem : DataCartStatusItem = this.findStatusById(itemId);
+        if(targetItem){
+            targetItem.statusData.downloadPercentage = percentage;
+            this.save();
+        }
+    }
+
+    /**
+     * Clean up status storage - remove items whois not in use
+     */
+    cleanUpStatusStorage(){
+        this.restore();
+        for(let key in this.dataCartStatusItems){
+            if(this.dataCartStatusItems[key].statusData && !this.dataCartStatusItems[key].statusData.isInUse){
+                if (this.dataCartStatusItems[key].itemId != this.CART_CONSTANTS.GLOBAL_CART_NAME) 
+                    this._storage.removeItem('cart:'+this.dataCartStatusItems[key].itemId);
+                delete this.dataCartStatusItems[this.dataCartStatusItems[key].itemId];
+            }
+        }
+
+        this.save();
     }
 }

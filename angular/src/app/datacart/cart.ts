@@ -161,6 +161,7 @@ export class DataCart {
      * count and return the total number of files currently marked as downloaded
      */
     public countFilesDownloaded() : number {
+        console.log('this.contents1', JSON.stringify(this.contents));
         return Object.values(this.contents).filter((c,i?,a?) => {
             return c['downloadStatus'] == "downloaded";
         }).length;
@@ -189,19 +190,20 @@ export class DataCart {
      * find the file entry in the contents of this cart with the given file ID or null if the 
      * ID does not exist. 
      * @param resId     the local identifier for the resource that the file is from
-     * @param resFilePath  the path to the file within the resource collection.
+     * @param filePath  the path to the file within the resource collection.
      */
-    public findFile(resId: string, resFilePath: string) : DataCartItem {
-        return this.findFileById(this._idFor(resId, resFilePath));
+    public findFile(resId: string, filePath: string) : DataCartItem {
+        console.log('this.contents', JSON.stringify(this.contents));
+        return this.findFileById(this._idFor(resId, filePath));
     }
 
     public findItem(item: DataCartItem) {
-        return this.findFileById(this._idFor(item['resId'], item['resFilePath']));
+        return this.findFileById(this._idFor(item['resId'], item['filePath']));
     }
 
-    private _idFor(resId: string, resFilePath: string) { return resId+resFilePath; }
+    private _idFor(resId: string, filePath: string) { return resId+'/'+filePath; }
     private _idForItem(item: DataCartItem) {
-        return this._idFor(item['resId'], item['resFilePath']);
+        return this._idFor(item['resId'], item['filePath']);
     }
 
     /**
@@ -223,13 +225,11 @@ export class DataCart {
         let fail = function(msg: string) : void {
             console.error("Unable to load file NERDm component: "+msg+": "+JSON.stringify(file));
         }
-        
         if (! resid) return fail("Missing resid argument");
-        if (! file['resFilePath']) return fail("missing component property, resFilePath");
+        if (! file['filePath']) return fail("missing component property, filePath");
         if (! file['downloadURL']) return fail("missing component property, downloadURL");
 
         this.restore();
-        
         let item = JSON.parse(JSON.stringify(file));
         item['resId'] = resid;
         if (item['downloadStatus'] === undefined)
@@ -237,6 +237,7 @@ export class DataCart {
         item['isSelected'] = markSelected;
         this.addItem(item);
         this.save();
+        console.log('this.contents4', JSON.stringify(this.contents));
     }
 
     /**
@@ -245,9 +246,9 @@ export class DataCart {
      * @param filePath  the path to the file within the resource collection to remove.
      * @return boolean -- true if the file was found to be in the cart and then removed. 
      */
-    public removeFileById(resid: string, resFilePath: string) : boolean {
+    public removeFileById(resid: string, filePath: string) : boolean {
         this.restore();
-        let id = this._idFor(resid, resFilePath);
+        let id = this._idFor(resid, filePath);
 
         let found = this.contents[id];
         if (found) 
@@ -272,15 +273,15 @@ export class DataCart {
     /**
      * mark a file as having been downloaded.
      * @param resId     the local identifier for the resource that the file is from
-     * @param resFilePath  the path to the file within the resource collection.
+     * @param filePath  the path to the file within the resource collection.
      * @param downloadStatus  download status: "downloaded", "" or "failed".  
      * @return boolean -- true if the identified file was found in this cart and its status updated; 
      *                    false, otherwise.
      */
-    public setDownloadStatus(resid: string, resFilePath: string, downloadedStatus: string = "downloaded") : boolean {
+    public setDownloadStatus(resid: string, filePath: string, downloadedStatus: string = "downloaded") : boolean {
         this.restore();
         
-        let item: DataCartItem = this.findFile(resid, resFilePath);
+        let item: DataCartItem = this.findFile(resid, filePath);
         if (! item)
             return false;
 
@@ -423,5 +424,15 @@ export class DataCart {
         }
         // return the array
         return cartItems;
+    }
+
+    markAsDownloaded(resid: string, filePath: string = '', status: boolean = true){
+        let found = this.findFile(resid, filePath);
+        if(found){
+            found.downloadStatus = status? "downloaded" : "";
+            return true;
+        }else{
+            return false;
+        }
     }
 }

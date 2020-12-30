@@ -14,6 +14,7 @@ import { IDNotFound } from '../errors/error';
 import { MetadataUpdateService } from './editcontrol/metadataupdate.service';
 import { LandingConstants } from './constants';
 import { CartService } from '../datacart/cart.service';
+import { DataCartStatus } from '../datacart/cartstatus';
 
 /**
  * A component providing the complete display of landing page content associated with 
@@ -62,6 +63,8 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
     routerParamEditEnabled: boolean = false;
 
     loadingMessage = '<i class="faa faa-spinner faa-spin"></i> Loading...';
+
+    dataCartStatus: DataCartStatus;
 
     /**
      * create the component.
@@ -123,7 +126,9 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
         this.displaySpecialMessage = false;
 
         // Clean up cart status storage 
-        this.cartService.cleanUpStatusStorage();
+        this.dataCartStatus = DataCartStatus.openCartStatus();
+        this.dataCartStatus.cleanUpStatusStorage();
+        // this.cartService.cleanUpStatusStorage();
 
         this.route.queryParamMap.subscribe(queryParams => {
             var param = queryParams.get("editEnabled");

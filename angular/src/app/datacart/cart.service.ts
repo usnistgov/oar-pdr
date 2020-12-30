@@ -1,10 +1,7 @@
 import { CartConstants } from './cartconstants';
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { Observable } from 'rxjs';
-import * as _ from 'lodash';
-import 'rxjs/add/operator/toPromise';
 import { DataCart } from '../datacart/cart';
 
 /**
@@ -13,120 +10,45 @@ import { DataCart } from '../datacart/cart';
 @Injectable()
 export class CartService {
     public CART_CONSTANTS: any;
-    storageSub = new BehaviorSubject<number>(0);
+    cartLengthSub = new BehaviorSubject<number>(0);
     selectedFileCountSub = new BehaviorSubject<number>(0);
-    addCartSpinnerSub = new BehaviorSubject<boolean>(false);
-    addAllCartSpinnerSub = new BehaviorSubject<boolean>(false);
-    displayCartSub = new BehaviorSubject<boolean>(false);
-    cartEntitesReadySub = new BehaviorSubject<boolean>(false);
-    forceDatacartReloadSub = new BehaviorSubject<boolean>(false);
-
-    showAddCartSpinner: boolean = false;
-    showAddAllCartSpinner: boolean = false;
-    displayCart: boolean = false;
     private _storage = null;
-    currentCart: string;
-    statusStorageName: string;
 
-    constructor(
-        private http: HttpClient) 
+    constructor() 
     {
         this.CART_CONSTANTS = CartConstants.cartConst;
-        this.currentCart = this.CART_CONSTANTS.GLOBAL_CART_NAME;
-        this.statusStorageName = this.CART_CONSTANTS.CART_STATUS_STORAGE_NAME;
 
         // localStorage will be undefined on the server
         if (typeof (localStorage) !== 'undefined')
             this._storage = localStorage;
     }
 
-    watchStorage(): Observable<any> {
-        return this.storageSub.asObservable();
-    }
-
-    watchAddFileCart(): Observable<any> {
-        return this.addCartSpinnerSub.asObservable();
-    }
-
-    watchAddAllFilesCart(): Observable<any> {
-        return this.addAllCartSpinnerSub.asObservable();
+    /**
+     * Watch the cart length
+     */
+    watchCartLength(): Observable<any> {
+        return this.cartLengthSub.asObservable();
     }
 
     /**
-     * Set the number of cart items
+     * Set the number of selected cart items
      **/
     setSelectedFileCount(selectedFileCount: number) {
         this.selectedFileCountSub.next(selectedFileCount);
     }
 
+    /**
+     * Watch the number of selected cart items
+     **/
     watchSelectedFileCount(subscriber) {
         return this.selectedFileCountSub.subscribe(subscriber);
     }
     
-    private emptyMap(): { [key: string]: number; } {
-        return {};
-    }
-
-    /**
-     * Cart status is used to determine if current cart is still in use. When a new tab opens for certain 
-     * ediid, the ediid will be 'registered' in the storage whose name is defined in this.statusStorageName 
-     * and the status will be set to 'open'. When the tab is closed, the status will be set to 'close'.
-     * When landing page starts up, it will clean up all storages whose status is 'close'. The reason to
-     * clean up the storage in this way is to handle the refresh of the tab - when a tab refreshes, it
-     * will set the status to 'close' then 'open'. But if a tab closes, it only sets the status to 'close'.
-     * 
-     * @param status the status of the current cart
-     */
-    setCartStatus(cartID: string, status: string){
-        if (this._storage) {
-            let cartStatusObj: any = JSON.parse(this._storage.getItem(this.statusStorageName));
-
-            if(cartStatusObj == undefined) cartStatusObj = {};
-            cartStatusObj[cartID] = {status: status};
-
-            this._storage.removeItem(this.statusStorageName);
-            this._storage.setItem(this.statusStorageName, JSON.stringify(cartStatusObj));
-        }
-    }
-
-    /**
-     * Return the status of the current cart - 'open' or 'close'. Undefined ot empty means current
-     * cart hasn't been processed before.
-     */
-    getCartStatus(){
-        if (!this._storage)
-            return '';
-        else{
-            let cartStatusObj = JSON.parse(this._storage.getItem(this.statusStorageName));
-            return cartStatusObj[this.currentCart];
-        }
-    }
-
-    /**
-     * Clean up status storage - remove items whose status is not 'open'
-     */
-    cleanUpStatusStorage(){
-        if (this._storage){
-            let oldCartStatusObj = JSON.parse(this._storage.getItem(this.statusStorageName));
-            let newCartStatusObj: any = {};
-
-            for (let key in oldCartStatusObj) {
-                if(oldCartStatusObj[key]['status'] == 'open'){
-                    newCartStatusObj[key] = { status: 'open' };
-                }else{
-                    this._storage.removeItem(key);
-                }
-            }
-            this._storage.removeItem(this.statusStorageName);
-            this._storage.setItem(this.statusStorageName, JSON.stringify(newCartStatusObj));
-        }
-    }
-
     /**
      * Set the number of cart items
      **/
     setCartLength(value: number) {
-        this.storageSub.next(value);
+        this.cartLengthSub.next(value);
     }
 
     /**

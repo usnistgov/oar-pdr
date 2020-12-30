@@ -9,7 +9,6 @@ import { HeadbarComponent } from './headbar.component';
 import { AngularEnvironmentConfigService } from '../config/config.service';
 import { AppConfig } from '../config/config'
 import { CartService } from '../datacart/cart.service';
-import { Data } from '../datacart/cartconstants';
 import { ToastrModule } from 'ngx-toastr';
 import { NotificationService } from '../shared/notification-service/notification.service';
 import { EditStatusService } from '../landing/editcontrol/editstatus.service';
@@ -135,20 +134,8 @@ describe('HeadbarComponent', () => {
         expect(component).toBeDefined();
         expect(component.cartLength).toBe(0);
 
-        let data : Data = {
-            cartId: "cart", ediid: "YYZ", id: "urn:YYZ", downloadUrl: "http://goob/YYZ", 
-            resId: null, resTitle: "Booya!", resFilePath: "YYZ", filePath: "YYZ", fileName: "YYZ", 
-            fileSize: null, filetype: "text/plain", downloadStatus: "burnt", mediatype: "text/plain",
-            description: null, isSelected: false, message: "hello world"
-        };
-        component.cartService.addDataToCart(data);
-        expect(component.cartLength).toBe(1);
-
-        // consequence of a click on the datacart
-        // component.updateCartStatus();
     });
 
     afterEach(() => {
-      component.cartService.clearTheCart();
     });
 });
