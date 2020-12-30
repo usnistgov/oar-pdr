@@ -834,7 +834,6 @@ export class DataFilesComponent {
             return refs['citation'];
         if(refs['label'])
             return refs['label'];
-        
-            return refs['location'];
+        return refs['location'];
     }
 }

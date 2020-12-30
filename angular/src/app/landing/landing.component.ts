@@ -405,12 +405,12 @@ export class LandingComponent implements OnInit, OnChanges {
 
     /**
      * Check if current record contains reference for display.
-     * Valid reference types are IsDocumentedBy and isSupplementTo.
+     * Valid reference types are IsDocumentedBy and IsSupplementTo.
      */
     checkReferences() {
         if (Array.isArray(this.record['references'])) {
             for (let ref of this.record['references']) {
-                if (ref.refType == "IsDocumentedBy" || ref.refType == "isSupplementTo") return true;
+                if (ref.refType == "IsDocumentedBy" || ref.refType == "IsSupplementTo") return true;
             }
         }
     }
@@ -427,8 +427,7 @@ export class LandingComponent implements OnInit, OnChanges {
             return refs['label'];
         if(refs['citation'])
             return refs['citation'];
-        
-            return refs['location'];
+        return refs['location'];
     }
 
     isArray(obj: any) {

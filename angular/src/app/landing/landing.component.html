@@ -43,7 +43,7 @@
                     <div *ngIf="checkReferences()">
                         <div>This data is described in:</div>
                         <small *ngFor="let refs of record['references']; let i =index">
-                            <span style="margin-left:1em;" *ngIf="refs.refType == 'IsDocumentedBy' || refs.refType == 'isSupplementTo'">
+                            <span style="margin-left:1em;" *ngIf="refs.refType == 'IsDocumentedBy' || refs.refType == 'IsSupplementTo'">
                                 <i class="faa faa-external-link"> &nbsp;
                                     <span *ngIf="!refs['label'] && !refs['citation']">URL: </span>
                                     <a class="font14" href={{refs.location}} target="blank"
