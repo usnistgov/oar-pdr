@@ -1,0 +1,13 @@
+<div *ngIf="showDownloadStatus" style="text-align: center; background-color: #1E6BA1; color: white; width: 100%;margin-top: 1em;">Download Status</div>
+<div *ngFor="let key of getKeys; let i=index" style="width: 100%;border: 1px solid rgb(231, 231, 231); ">
+    <span *ngIf="dataCartStatus.dataCartStatusItems[key].statusData.downloadPercentage > 0" style="display:inline-block;padding: 0.5em; width: 100%;">
+        <span style="font-size:smaller ;font-weight: 100;">{{dataCartStatus.dataCartStatusItems[key].itemId}}</span>
+        <div style="width: 100%;">
+            <span style="display:inline-block;width: 80%;">
+                <ngb-progressbar type="info" [value]="dataCartStatus.dataCartStatusItems[key].statusData.downloadPercentage" textType="white" [showValue]="true"
+                    [striped]="true"></ngb-progressbar>
+            </span>
+            <span (click)="removeStatusItem(key)" style="float: right;cursor: pointer;padding-left:5px;" data-toggle="tooltip" title="Cancel all downloads"><i class="faa faa-remove"></i></span>
+        </div>
+    </span>
+</div>

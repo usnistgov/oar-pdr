@@ -7,6 +7,7 @@ import { CommonFunctionService } from '../../shared/common-function/common-funct
 import { GoogleAnalyticsService } from '../../shared/ga-service/google-analytics.service';
 import { CartConstants } from '../cartconstants';
 import { DataCart } from '../cart';
+import { DataCartStatus } from '../cartstatus';
 
 @Component({
   selector: 'app-treetable',
@@ -17,6 +18,7 @@ export class TreetableComponent implements OnInit {
     public CART_CONSTANTS: any;
 
     dataCart: DataCart;
+    dataCartStatus: DataCartStatus;
 
     // Data
     selectedFileCount: number = 0;
@@ -46,9 +48,7 @@ export class TreetableComponent implements OnInit {
     // Remove the cart upon tab closed
     @HostListener('window:beforeunload', ['$event'])
     beforeunloadHandler(event) {
-        if(this.ediid != this.CART_CONSTANTS.GLOBAL_CART_NAME){
-            this.cartService.setCartStatus(this.ediid, 'close');
-        }
+        this.dataCartStatus.updateCartStatusInUse(this.ediid, false);
     }
 
     constructor(
@@ -93,14 +93,15 @@ export class TreetableComponent implements OnInit {
     }
 
     ngOnInit() {
+        this.dataCartStatus = DataCartStatus.openCartStatus();
         if (this.ediid != this.CART_CONSTANTS.GLOBAL_CART_NAME) {
             this.dataCart = DataCart.openCart(this.ediid);
-
-            this.cartService.setCartStatus(this.ediid, 'open');
+            this.dataCartStatus.updateCartStatusInUse(this.ediid, true);
 
             this.loadDataTree(false);
         } else {
             this.dataCart = DataCart.openCart(this.CART_CONSTANTS.GLOBAL_CART_NAME);
+            this.dataCartStatus.updateCartStatusInUse(this.CART_CONSTANTS.GLOBAL_CART_NAME, true);
             this.loadDataTree();
         }
 
@@ -285,6 +286,8 @@ export class TreetableComponent implements OnInit {
         this.cartService.setCartLength(this.dataCart.size());
         this.selectedData = [];
         this.dataFileCount();
+        //reset downloaded file count in case some were removed already
+        this.downloadService.setTotalFileDownloaded(this.downloadService.getTotalDownloadedFiles(this.dataFiles));
         this.expandToLevel(this.dataFiles, true, 1);
     }
 

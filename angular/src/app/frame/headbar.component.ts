@@ -58,7 +58,7 @@ export class HeadbarComponent {
         this.appVersion = cfg.get("appVersion", "");
         this.editEnabled = cfg.get("editEnabled", "");
 
-        this.cartService.watchStorage().subscribe(value => {
+        this.cartService.watchCartLength().subscribe(value => {
             this.cartLength = value;
         });
         this.EDIT_MODES = LandingConstants.editModes;
@@ -94,14 +94,6 @@ export class HeadbarComponent {
     loggedIn() {
         return Boolean(this.editstatsvc.userID);
     }
-
-    /**
-     * ensure that the data cart display is up to date
-     */
-    // updateCartStatus() {
-    //     this.cartService.updateCartDisplayStatus(true);
-    //     this.cartService.setCurrentCart('global');
-    // }
 
     /*
      *   Open about window if not in edit mode. Otherwise do nothing.

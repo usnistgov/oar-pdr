@@ -26,18 +26,6 @@ export class CartcontrolComponent implements OnInit {
     ) { 
         this.screenSizeBreakPoint = +this.cfg.get("screenSizeBreakPoint", "1060");
 
-        // this.cartService._watchRemoteCommand((command) => {
-        //     switch(command.command) { 
-        //         case 'resetDownloadParams': {
-        //             break;
-        //         }
-        //         default: { 
-        //            //statements; 
-        //            break; 
-        //         } 
-        //      } 
-        // });
-
         this.cartService.watchSelectedFileCount((value) => {
             this.selectedFileCount = value;
         });
@@ -83,7 +71,9 @@ export class CartcontrolComponent implements OnInit {
     }
 
     private detectScreenSize() {
-        this.screenWidth = window.innerWidth;
+        setTimeout(() => {
+            this.screenWidth = window.innerWidth;
+        }, 0);
     }
 
     /*
