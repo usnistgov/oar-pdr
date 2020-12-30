@@ -43,7 +43,7 @@
                         <p-treeTableToggler [rowNode]="rowNode"></p-treeTableToggler>
                         &nbsp;<p-treeTableCheckbox [value]="rowNode"></p-treeTableCheckbox>
                         <span *ngIf="rowData.isLeaf">
-                            <a (click)="openDetails($event,op3,rowData) " style="color: #1471AE; cursor: pointer;"
+                            <a (click)="openDetails($event,rowData,op3) " style="color: #1471AE; cursor: pointer;"
                                 data-toggle="tooltip" title="Click for more details">
                                 {{rowData.resTitle}} </a>
                         </span>
@@ -106,9 +106,9 @@
 </div>
 
 <!-- Popup dialog for file details -->
-<p-overlayPanel class="fileDialog" #op3 [dismissable]="true" [showCloseIcon]="false"
+<p-overlayPanel class="fileDialog" #op3 [dismissable]="true" [showCloseIcon]="true"
     [style]="{'display':'inline-block','position':'related','left':'50%','top':'80%'}" appendToBody=true>
-    <div *ngIf="isNodeSelected" class="filecard" [ngStyle]="{'max-width':getDialogWidth()}">
+    <div class="filecard" [ngStyle]="{'max-width':getDialogWidth()}">
         <div class="overlay-title">
             File details
         </div>

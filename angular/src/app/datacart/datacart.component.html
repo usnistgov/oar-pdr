@@ -1,14 +1,6 @@
 <!-- Top banner -->
 <app-cartcontrol [dataFiles]="dataFiles"></app-cartcontrol>
 
-<div id="current-task" *ngIf="showCurrentTask">
-    <div id="current-task-detail">
-        <p-progressSpinner [style]="{'width': '25px', 'height': '25px', 'padding-right':'0.5em', 'padding-top': '0em'}">
-        </p-progressSpinner>
-        {{currentTask}}
-    </div>
-</div>
-
 <!-- Bundle plan -->
 <app-bundleplan [dataFiles]="dataFiles" [selectedData]="selectedData" [ediid]="ediid" (outputZipData)="updateZipDafa($event)"></app-bundleplan>
 

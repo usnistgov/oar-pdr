@@ -8,6 +8,7 @@ import { GoogleAnalyticsService } from '../../shared/ga-service/google-analytics
 import { CartConstants } from '../cartconstants';
 import { DataCart } from '../cart';
 import { DataCartStatus } from '../cartstatus';
+import { OverlayPanel } from 'primeng/overlaypanel';
 
 @Component({
   selector: 'app-treetable',
@@ -26,6 +27,7 @@ export class TreetableComponent implements OnInit {
     treeRoot = [];
     selectedNodes: TreeNode[] = [];
     dataFiles: TreeNode[] = [];
+    fileNode: TreeNode;
 
     // Display
     isExpanded: boolean = true;
@@ -580,4 +582,25 @@ export class TreetableComponent implements OnInit {
         }
     }
 
+    /**
+     * Make sure the width of popup dialog is less than 500px or 80% of the window width
+     */
+    getDialogWidth() {
+        var w = window.innerWidth > 500 ? 500 : window.innerWidth;
+        return w + 'px';
+    }
+
+    /**
+     *  Open a popup window to display file details
+     * @param event 
+     * @param fileNode 
+     * @param overlaypanel 
+     */
+    openDetails(event, fileNode: TreeNode, overlaypanel: OverlayPanel) {
+        this.fileNode = fileNode;
+        overlaypanel.hide();
+        setTimeout(() => {
+            overlaypanel.show(event);
+        }, 100);
+    }
 }

@@ -215,7 +215,7 @@
 </div>
 <p-overlayPanel class="fileDialog" #op3 [dismissable]="true" [showCloseIcon]="true"
     [style]="{'display':'inline-block','position':'related','left':'50%','top':'80%'}" [appendTo]="'body'">
-    <div *ngIf="isNodeSelected" class="filecard" [ngStyle]="{'max-width':getDialogWidth()}">
+    <div class="filecard" [ngStyle]="{'max-width':getDialogWidth()}">
         <div class="ui-g filesection">
             <div *ngIf="fileNode" class="ui-g-12 ui-md-12 ui-lg-12 ui-sm-10">
                 <span class="font8" style="color:grey">
