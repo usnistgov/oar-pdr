@@ -320,9 +320,13 @@ export class DataFilesComponent {
         return this.commonFunctionService.formatBytes(bytes, numAfterDecimal);
     }
 
-    isNodeSelected: boolean = false;
+    /**
+     *  Open a popup window to display file details
+     * @param event 
+     * @param fileNode 
+     * @param overlaypanel 
+     */
     openDetails(event, fileNode: TreeNode, overlaypanel: OverlayPanel) {
-        this.isNodeSelected = true;
         this.fileNode = fileNode;
         overlaypanel.hide();
         setTimeout(() => {
