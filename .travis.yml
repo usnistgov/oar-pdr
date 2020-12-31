@@ -6,6 +6,7 @@ services:
   - docker
 
 before_install:
+  - bash scripts/dhsetup.sh
   - cd docker && bash ./dockbuild.sh
 
 script:
