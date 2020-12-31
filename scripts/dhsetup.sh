@@ -12,13 +12,14 @@ set -e
     docker_version=`docker -v | awk '{ print $3}' | sed -e 's/,.*$//'`
     docker_major_version=`echo $docker_version | sed -e 's/\..*$//'`
 
-    echo '+' docker login --username '$DH_USER'
     if [ "$docker_major_version" -gt 17 ]; then
-        (echo "$DHTOKEN" | docker login --username $DH_USER --password-stdin) || {
+        echo '+' docker login --username '$DH_USER' --password-stdin
+        (echo "$DH_TOKEN" | docker login --username $DH_USER --password-stdin) || {
             echo "dhsetup: docker login failed"
             false
         }
     else
+        echo '+' docker login --username '$DH_USER' --password '$DH_TOKEN'
         docker login --username $DH_USER --password $DH_TOKEN || {
             echo "dhsetup: docker login failed"
             false
