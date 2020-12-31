@@ -575,7 +575,9 @@ export class BundleplanComponent implements OnInit {
         this.showCurrentTask = false;
         this.overallStatus = "cancelled";
         this.downloadService.resetDownloadData();
-        this.dataCartStatus.updateDownloadPercentage(this.ediid, 0)
+        setTimeout(() => {
+            this.dataCartStatus.updateDownloadPercentage(this.ediid, 0)
+        }, 1000);
     }
 
     /**
