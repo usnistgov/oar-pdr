@@ -126,8 +126,10 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
         this.displaySpecialMessage = false;
 
         // Clean up cart status storage 
-        this.dataCartStatus = DataCartStatus.openCartStatus();
-        this.dataCartStatus.cleanUpStatusStorage();
+        if(this.inBrowser){
+            this.dataCartStatus = DataCartStatus.openCartStatus();
+            this.dataCartStatus.cleanUpStatusStorage();
+        }
         // this.cartService.cleanUpStatusStorage();
 
         this.route.queryParamMap.subscribe(queryParams => {

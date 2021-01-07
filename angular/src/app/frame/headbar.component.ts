@@ -1,4 +1,4 @@
-import { Component, ElementRef } from '@angular/core';
+import { Component, ElementRef, PLATFORM_ID, Inject } from '@angular/core';
 import { AppConfig } from '../config/config';
 import { CartService } from '../datacart/cart.service';
 import { Router } from '@angular/router';
@@ -7,6 +7,7 @@ import { EditStatusService } from '../landing/editcontrol/editstatus.service';
 import { LandingConstants } from '../landing/constants';
 import { CartConstants } from '../datacart/cartconstants';
 import { DataCart, DataCartItem } from '../datacart/cart';
+import { isPlatformBrowser } from '@angular/common';
 
 /**
  * A Component that serves as the header of the landing page.  
@@ -29,6 +30,7 @@ import { DataCart, DataCartItem } from '../datacart/cart';
 })
 export class HeadbarComponent {
 
+    inBrowser: boolean = false;
     layoutCompact: boolean = true;
     layoutMode: string = 'horizontal';
     searchLink: string = "";
@@ -48,8 +50,10 @@ export class HeadbarComponent {
         public cartService: CartService,
         private router: Router,
         private notificationService: NotificationService,
-        public editstatsvc: EditStatusService)
+        public editstatsvc: EditStatusService,
+        @Inject(PLATFORM_ID) private platformId: Object)
     {
+        this.inBrowser = isPlatformBrowser(platformId);
         if (!(cfg instanceof AppConfig))
             throw new Error("HeadbarComponent: Wrong config type provided: " + cfg);
         this.searchLink = cfg.get("locations.pdrSearch", "/sdp/");
@@ -68,17 +72,19 @@ export class HeadbarComponent {
     *   init
     */
     ngOnInit() {
-        this.generalDataCart = DataCart.openCart(this.CART_CONSTANTS.GLOBAL_CART_NAME);
-        this.cartLength = this.generalDataCart.size();
+        if(this.inBrowser){
+            this.generalDataCart = DataCart.openCart(this.CART_CONSTANTS.GLOBAL_CART_NAME);
+            this.cartLength = this.generalDataCart.size();
 
-        // this.cartLength = this.cartService.getCartSize();
-        this.editMode = this.EDIT_MODES.VIEWONLY_MODE;
+            // this.cartLength = this.cartService.getCartSize();
+            this.editMode = this.EDIT_MODES.VIEWONLY_MODE;
 
-        this.editstatsvc.watchEditMode((editMode) => {
-          this.editMode = editMode;
-        });
+            this.editstatsvc.watchEditMode((editMode) => {
+            this.editMode = editMode;
+            });
 
-        window.addEventListener("storage", this.cartChanged.bind(this));
+            window.addEventListener("storage", this.cartChanged.bind(this));
+        }
     }
 
     cartChanged(ev){
