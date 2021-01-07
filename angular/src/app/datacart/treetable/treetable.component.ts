@@ -43,6 +43,7 @@ export class TreetableComponent implements OnInit {
     mobHeight: number;
 
     @Input() ediid: string;
+    @Input() inBrowser: boolean;
     @Input() zipData: ZipData[] = [];
     @Output() outputDataFiles = new EventEmitter<TreeNode[]>();
     @Output() outputSelectedData = new EventEmitter<TreeNode[]>();
@@ -95,19 +96,22 @@ export class TreetableComponent implements OnInit {
     }
 
     ngOnInit() {
-        this.dataCartStatus = DataCartStatus.openCartStatus();
-        if (this.ediid != this.CART_CONSTANTS.GLOBAL_CART_NAME) {
-            this.dataCart = DataCart.openCart(this.ediid);
-            this.dataCartStatus.updateCartStatusInUse(this.ediid, true);
+        if(this.inBrowser){
+            this.dataCartStatus = DataCartStatus.openCartStatus();
 
-            this.loadDataTree(false);
-        } else {
-            this.dataCart = DataCart.openCart(this.CART_CONSTANTS.GLOBAL_CART_NAME);
-            this.dataCartStatus.updateCartStatusInUse(this.CART_CONSTANTS.GLOBAL_CART_NAME, true);
-            this.loadDataTree();
+            if (this.ediid != this.CART_CONSTANTS.GLOBAL_CART_NAME) {
+                this.dataCart = DataCart.openCart(this.ediid);
+                this.dataCartStatus.updateCartStatusInUse(this.ediid, true);
+
+                this.loadDataTree(false);
+            } else {
+                this.dataCart = DataCart.openCart(this.CART_CONSTANTS.GLOBAL_CART_NAME);
+                this.dataCartStatus.updateCartStatusInUse(this.CART_CONSTANTS.GLOBAL_CART_NAME, true);
+                this.loadDataTree();
+            }
+
+            window.addEventListener("storage", this.cartChanged.bind(this));
         }
-
-        window.addEventListener("storage", this.cartChanged.bind(this));
     }
 
     // When storage changed and the key matches current datacart, reload the datacart and refresh the tree table.

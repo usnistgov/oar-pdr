@@ -1,9 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, PLATFORM_ID, Inject } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import 'rxjs/add/operator/map';
 import { TreeNode } from 'primeng/primeng';
 import { CartConstants } from './cartconstants';
 import { ZipData } from '../shared/download-service/zipData';
+import { isPlatformBrowser } from '@angular/common';
 
 @Component({
     moduleId: module.id,
@@ -13,6 +14,8 @@ import { ZipData } from '../shared/download-service/zipData';
 })
 
 export class DatacartComponent implements OnInit {
+    inBrowser: boolean = false;
+
     //Connection
     routerparams: any;
 
@@ -27,9 +30,12 @@ export class DatacartComponent implements OnInit {
      * Creates an instance of the SearchPanel
      *
      */
-    constructor( private route: ActivatedRoute ) 
+    constructor( 
+        private route: ActivatedRoute,
+        @Inject(PLATFORM_ID) private platformId: Object ) 
     {
         this.CART_CONSTANTS = CartConstants.cartConst;
+        this.inBrowser = isPlatformBrowser(platformId);
     }
 
     /**
