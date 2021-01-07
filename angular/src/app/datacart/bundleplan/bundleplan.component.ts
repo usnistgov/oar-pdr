@@ -82,7 +82,7 @@ export class BundleplanComponent implements OnInit {
         downloadTime: 0
     };
 
-
+    @Input() inBrowser: boolean;
     @Input() dataFiles: TreeNode[] = [];
     @Input() selectedData: TreeNode[];
     @Input() ediid: string;
@@ -119,14 +119,16 @@ export class BundleplanComponent implements OnInit {
     }
 
     ngOnInit() {
-        this.dataCartStatus = DataCartStatus.openCartStatus();
+        if(this.inBrowser){
+            this.dataCartStatus = DataCartStatus.openCartStatus();
 
-        if (this.ediid != this.CART_CONSTANTS.GLOBAL_CART_NAME) {
-            this.dataCart = DataCart.openCart(this.ediid);
-        }else{
-            this.dataCart = DataCart.openCart(this.CART_CONSTANTS.GLOBAL_CART_NAME);
+            if (this.ediid != this.CART_CONSTANTS.GLOBAL_CART_NAME) {
+                this.dataCart = DataCart.openCart(this.ediid);
+            }else{
+                this.dataCart = DataCart.openCart(this.CART_CONSTANTS.GLOBAL_CART_NAME);
+            }
         }
-
+        
         this.distApi = this.cfg.get("distService", "/od/ds/");
 
         this.downloadService.watchDownloadProcessStatus().subscribe(
