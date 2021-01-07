@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Input } from '@angular/core';
 import { DataCartStatus } from '../../datacart/cartstatus';
 
 @Component({
@@ -9,11 +9,15 @@ import { DataCartStatus } from '../../datacart/cartstatus';
 export class DownloadstatusComponent implements OnInit {
     dataCartStatus: DataCartStatus;
 
+    @Input() inBrowser: boolean;
+
     constructor() { }
 
     ngOnInit() {
-        this.dataCartStatus = DataCartStatus.openCartStatus();
-        window.addEventListener("storage", this.cartChanged.bind(this));
+        if(this.inBrowser){
+            this.dataCartStatus = DataCartStatus.openCartStatus();
+            window.addEventListener("storage", this.cartChanged.bind(this));
+        }
     }
 
     /**

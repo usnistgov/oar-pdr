@@ -124,12 +124,15 @@ export class DataFilesComponent {
     }
 
     ngOnInit() {
-        this.globalDataCart = DataCart.openCart(this.CART_CONSTANTS.GLOBAL_CART_NAME);
-        this.dataCartStatus = DataCartStatus.openCartStatus();
-        this.cartLength = this.globalDataCart.size();
-        this.updateStatusFromCart();
+        if(this.inBrowser){
+            this.globalDataCart = DataCart.openCart(this.CART_CONSTANTS.GLOBAL_CART_NAME);
+            this.dataCartStatus = DataCartStatus.openCartStatus();
 
-        window.addEventListener("storage", this.cartChanged.bind(this));
+            this.cartLength = this.globalDataCart.size();
+            this.updateStatusFromCart();
+
+            window.addEventListener("storage", this.cartChanged.bind(this));
+        }
     }
 
     cartChanged(ev){
