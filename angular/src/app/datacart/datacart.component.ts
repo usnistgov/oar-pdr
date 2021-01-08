@@ -1,10 +1,12 @@
-import { Component, OnInit, PLATFORM_ID, Inject } from '@angular/core';
+import { Component, OnInit, PLATFORM_ID, Inject, ViewChild } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import 'rxjs/add/operator/map';
 import { TreeNode } from 'primeng/primeng';
 import { CartConstants } from './cartconstants';
 import { ZipData } from '../shared/download-service/zipData';
 import { isPlatformBrowser } from '@angular/common';
+import { FormCanDeactivate } from '../form-can-deactivate/form-can-deactivate';
+import { CartService } from '../datacart/cart.service';
 
 @Component({
     moduleId: module.id,
@@ -13,7 +15,7 @@ import { isPlatformBrowser } from '@angular/common';
     styleUrls: ['datacart.component.css'],
 })
 
-export class DatacartComponent implements OnInit {
+export class DatacartComponent extends FormCanDeactivate implements OnInit {
     inBrowser: boolean = false;
 
     //Connection
@@ -26,14 +28,20 @@ export class DatacartComponent implements OnInit {
     CART_CONSTANTS: any;
     zipData: ZipData[] = [];
 
+    @ViewChild('overallStatus')
+    overallStatus: string = "";
+
     /**
      * Creates an instance of the SearchPanel
      *
      */
     constructor( 
         private route: ActivatedRoute,
+        public cartService: CartService,
         @Inject(PLATFORM_ID) private platformId: Object ) 
     {
+        super(cartService);
+
         this.CART_CONSTANTS = CartConstants.cartConst;
         this.inBrowser = isPlatformBrowser(platformId);
     }
@@ -69,6 +77,14 @@ export class DatacartComponent implements OnInit {
      */
     updateZipDafa(zipData: ZipData[]){
         this.zipData = zipData;
+    }
+
+    /**
+     * Update overall download status from bundle download
+     * @param overallStatus 
+     */
+    updateOverallStatus(overallStatus: string){
+        this.overallStatus = overallStatus;
     }
 }
 

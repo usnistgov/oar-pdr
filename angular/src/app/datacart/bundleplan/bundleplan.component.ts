@@ -87,6 +87,7 @@ export class BundleplanComponent implements OnInit {
     @Input() selectedData: TreeNode[];
     @Input() ediid: string;
     @Output() outputZipData = new EventEmitter<ZipData[]>();
+    @Output() outputOverallStatus = new EventEmitter<string>();
 
     constructor(
         private downloadService: DownloadService,
@@ -108,6 +109,10 @@ export class BundleplanComponent implements OnInit {
                 } 
                 case 'resetDownloadParams': {
                     this.resetDownloadParams();
+                    break;
+                }
+                case 'cancelDownloadAll': {
+                    this.cancelDownloadAll();
                     break;
                 }
                 default: { 
@@ -138,6 +143,7 @@ export class BundleplanComponent implements OnInit {
                     this.downloadEndTime = new Date();
                     this.totalDownloadTime = this.downloadEndTime.getTime() / 1000 - this.downloadStartTime.getTime() / 1000;
                     this.overallStatus = 'complete';
+                    this.outputOverallStatus.emit(this.overallStatus);
                     setTimeout(() => {
                         this.updateDownloadPercentage(100);
                     }, 1000);
@@ -156,14 +162,26 @@ export class BundleplanComponent implements OnInit {
         this.treeRoot.push(newPart);
     }
 
+    /**
+     * Return font color based on input download status
+     * @param downloadStatus 
+     */
     getDownloadStatusColor(downloadStatus: string){
         return this.cartService.getDownloadStatusColor(downloadStatus);
     }
 
+    /**
+     * Reture icon class based on input download status
+     * @param downloadStatus 
+     */
     getIconClass(downloadStatus: string){
         return this.cartService.getIconClass(downloadStatus);
     }
 
+    /**
+     * Return status string for display (usually the same as input download status)
+     * @param downloadStatus 
+     */
     getStatusForDisplay(downloadStatus: string){
         return this.cartService.getStatusForDisplay(downloadStatus);
     }
@@ -311,7 +329,7 @@ export class BundleplanComponent implements OnInit {
         files.data.downloadStatus = 'downloading';
 
         postMessage.push({ "bundleName": files.data.downloadFileName, "includeFiles": this.downloadData });
-        console.log('Bundle plan post message:', JSON.stringify(postMessage[0]));
+        // console.log('Bundle plan post message:', JSON.stringify(postMessage[0]));
         console.log("Calling following end point to get bundle plan:", this.distApi + "_bundle_plan");
 
         this.bundlePlanRef = this.downloadService.getBundlePlan(this.distApi + "_bundle_plan", JSON.stringify(postMessage[0])).subscribe(
@@ -452,11 +470,13 @@ export class BundleplanComponent implements OnInit {
                 if (value >= 0) {
                     if (!this.allDownloadCancelled) {
                         this.overallStatus = "downloading";
+                        this.outputOverallStatus.emit(this.overallStatus);
                         this.downloadService.downloadNextZip(this.zipData, this.dataFiles, this.dataCart);
                     }
                     else
                     {
                         this.overallStatus = "Cancelled";
+                        this.outputOverallStatus.emit(this.overallStatus);
                         setTimeout(() => {
                             this.updateDownloadPercentage(0);
                         }, 1000);
@@ -588,6 +608,7 @@ export class BundleplanComponent implements OnInit {
         this.clearDownloadingStatus();
         this.showCurrentTask = false;
         this.overallStatus = "cancelled";
+        this.outputOverallStatus.emit(this.overallStatus);
         this.downloadService.resetDownloadData();
         setTimeout(() => {
             this.updateDownloadPercentage(0)
