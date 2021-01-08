@@ -161,7 +161,6 @@ export class DataCart {
      * count and return the total number of files currently marked as downloaded
      */
     public countFilesDownloaded() : number {
-        console.log('this.contents1', JSON.stringify(this.contents));
         return Object.values(this.contents).filter((c,i?,a?) => {
             return c['downloadStatus'] == "downloaded";
         }).length;
@@ -193,7 +192,6 @@ export class DataCart {
      * @param filePath  the path to the file within the resource collection.
      */
     public findFile(resId: string, filePath: string) : DataCartItem {
-        console.log('this.contents', JSON.stringify(this.contents));
         return this.findFileById(this._idFor(resId, filePath));
     }
 
@@ -237,7 +235,6 @@ export class DataCart {
         item['isSelected'] = markSelected;
         this.addItem(item);
         this.save();
-        console.log('this.contents4', JSON.stringify(this.contents));
     }
 
     /**
