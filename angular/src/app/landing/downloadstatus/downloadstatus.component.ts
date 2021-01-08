@@ -1,5 +1,6 @@
 import { Component, OnInit, Input } from '@angular/core';
 import { DataCartStatus } from '../../datacart/cartstatus';
+import { CartConstants } from '../../datacart/cartconstants';
 
 @Component({
   selector: 'app-downloadstatus',
@@ -8,6 +9,7 @@ import { DataCartStatus } from '../../datacart/cartstatus';
 })
 export class DownloadstatusComponent implements OnInit {
     dataCartStatus: DataCartStatus;
+    public CART_CONSTANTS: any = CartConstants.cartConst;
 
     @Input() inBrowser: boolean;
 
@@ -48,7 +50,7 @@ export class DownloadstatusComponent implements OnInit {
         let hasStatusToDisplay: boolean = false;
 
         for(let key in this.dataCartStatus.dataCartStatusItems){
-            if(this.dataCartStatus.dataCartStatusItems[key].statusData.downloadPercentage > 0){
+            if(this.dataCartStatus.dataCartStatusItems[key].downloadPercentage > 0){
                 hasStatusToDisplay = true;
                 break;
             }
@@ -65,5 +67,13 @@ export class DownloadstatusComponent implements OnInit {
         this.dataCartStatus.restore();
         delete this.dataCartStatus.dataCartStatusItems[key];
         this.dataCartStatus.save();
+    }
+
+    cartName(key: string){
+        if(this.dataCartStatus.dataCartStatusItems[key].displayName == this.CART_CONSTANTS.GLOBAL_CART_NAME)
+            return "Global Datacart";
+        else
+            return this.dataCartStatus.dataCartStatusItems[key].displayName;
+        
     }
 }

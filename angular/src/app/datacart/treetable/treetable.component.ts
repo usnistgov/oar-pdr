@@ -101,15 +101,12 @@ export class TreetableComponent implements OnInit {
 
             if (this.ediid != this.CART_CONSTANTS.GLOBAL_CART_NAME) {
                 this.dataCart = DataCart.openCart(this.ediid);
-                this.dataCartStatus.updateCartStatusInUse(this.ediid, true);
-
                 this.loadDataTree(false);
             } else {
                 this.dataCart = DataCart.openCart(this.CART_CONSTANTS.GLOBAL_CART_NAME);
-                this.dataCartStatus.updateCartStatusInUse(this.CART_CONSTANTS.GLOBAL_CART_NAME, true);
-                this.loadDataTree();
+                this.loadDataTree(true);
             }
-
+            
             window.addEventListener("storage", this.cartChanged.bind(this));
         }
     }
@@ -146,6 +143,14 @@ export class TreetableComponent implements OnInit {
         this.dataFileCount();
         this.expandToLevel(this.dataFiles, true, 3);
         this.outputDataFiles.emit(this.dataFiles);
+        console.log('this.dataFiles', this.dataFiles);
+
+        if (this.ediid != this.CART_CONSTANTS.GLOBAL_CART_NAME) {
+            if(this.dataFiles[0])
+                this.dataCartStatus.updateCartStatusInUse(this.ediid, true, this.dataFiles[0].data.resTitle.substring(0,20)+"...");
+        } else {
+            this.dataCartStatus.updateCartStatusInUse(this.CART_CONSTANTS.GLOBAL_CART_NAME, true, this.CART_CONSTANTS.GLOBAL_CART_NAME);
+        }
 
         if(!isGlobal){
             this.cartService.executeCommand('downloadSelected', this.selectedData);
@@ -442,6 +447,7 @@ export class TreetableComponent implements OnInit {
      * This is where dafaFiles get generated
      */
     createDataCartHierarchy() {
+        console.log('this.dataCart', this.dataCart);
         let arrayList = this.dataCart.getCartItems().reduce(function (result, current) {
             result[current.resTitle] = result[current.resTitle] || [];
             result[current.resTitle].push({data:current});

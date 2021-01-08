@@ -43,6 +43,7 @@ export class HeadbarComponent {
     public EDIT_MODES: any;
     public CART_CONSTANTS: any = CartConstants.cartConst;
     generalDataCart: DataCart;
+    globalCartUrl: string = "/datacart/" + this.CART_CONSTANTS.GLOBAL_CART_NAME;
 
     constructor(
         private el: ElementRef,

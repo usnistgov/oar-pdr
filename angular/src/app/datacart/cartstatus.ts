@@ -40,19 +40,29 @@ export class DataCartStatusItem {
      * Identifier for the cart status data.    
      */
     itemId: string; 
+    displayName: string;
+    isInUse: boolean = true; 
+    downloadPercentage: number = 0; 
 
     /**
      * the status of the cart 
      */
-    statusData : DataCartStatusData;
+    // statusData : DataCartStatusData;
 
-    constructor(itemId: string, statusData? : DataCartStatusData){
+    // constructor(itemId: string, statusData? : DataCartStatusData){
+    //     this.itemId = itemId;
+    //     if(!statusData){
+    //         this.statusData = new DataCartStatusData();
+    //     }else{
+    //         this.statusData = statusData;
+    //     }
+    // }
+
+    constructor(itemId: string, isInUse : boolean = true, downloadPercentage : number = 0, displayName? : string){
         this.itemId = itemId;
-        if(!statusData){
-            this.statusData = new DataCartStatusData();
-        }else{
-            this.statusData = statusData;
-        }
+        this.displayName = displayName;
+        this.isInUse = isInUse;
+        this.downloadPercentage = downloadPercentage;
     }
 }
 
@@ -181,13 +191,17 @@ export class DataCartStatus {
      * @param cartName The name of the cart to be updated
      * @param inUse Status to be updated
      */
-    public updateCartStatusInUse(itemId: string, inUse: boolean=false){
+    public updateCartStatusInUse(itemId: string, inUse: boolean=false, displayName?: string){
         let targetItem : DataCartStatusItem = this.findStatusById(itemId);
+        let lDisplayName: string = displayName;
+
+        if(!lDisplayName) lDisplayName = itemId;
+        
         if(!targetItem) {
-            targetItem = new DataCartStatusItem(itemId, new DataCartStatusData(inUse))
+            targetItem = new DataCartStatusItem(itemId, inUse, 0, displayName);
             this.addItem(targetItem);
         }else{
-            targetItem.statusData.isInUse = inUse;
+            targetItem.isInUse = inUse;
         }
 
         this.save();
@@ -198,12 +212,15 @@ export class DataCartStatus {
      * @param cartName The name of the cart to be updated
      * @param percentage Status to be updated
      */
-    public updateDownloadPercentage(itemId: string, percentage: number=0){
+    public updateDownloadPercentage(itemId: string, percentage: number=0, displayName: string=itemId){
         this.restore();
         let targetItem : DataCartStatusItem = this.findStatusById(itemId);
         if(targetItem){
-            targetItem.statusData.downloadPercentage = percentage;
+            targetItem.downloadPercentage = percentage;
             this.save();
+        }else{
+            targetItem = new DataCartStatusItem(itemId, true, percentage, displayName);
+            this.addItem(targetItem);
         }
     }
 
@@ -213,7 +230,7 @@ export class DataCartStatus {
     cleanUpStatusStorage(){
         this.restore();
         for(let key in this.dataCartStatusItems){
-            if(this.dataCartStatusItems[key].statusData && !this.dataCartStatusItems[key].statusData.isInUse){
+            if(!this.dataCartStatusItems[key].isInUse){
                 if (this.dataCartStatusItems[key].itemId != this.CART_CONSTANTS.GLOBAL_CART_NAME) 
                     this._storage.removeItem('cart:'+this.dataCartStatusItems[key].itemId);
                 delete this.dataCartStatusItems[this.dataCartStatusItems[key].itemId];
