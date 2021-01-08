@@ -128,7 +128,7 @@ export class BundleplanComponent implements OnInit {
                 this.dataCart = DataCart.openCart(this.CART_CONSTANTS.GLOBAL_CART_NAME);
             }
         }
-        
+
         this.distApi = this.cfg.get("distService", "/od/ds/");
 
         this.downloadService.watchDownloadProcessStatus().subscribe(
@@ -139,7 +139,7 @@ export class BundleplanComponent implements OnInit {
                     this.totalDownloadTime = this.downloadEndTime.getTime() / 1000 - this.downloadStartTime.getTime() / 1000;
                     this.overallStatus = 'complete';
                     setTimeout(() => {
-                        this.dataCartStatus.updateDownloadPercentage(this.ediid, 100);
+                        this.updateDownloadPercentage(100);
                     }, 1000);
                 }
             }
@@ -166,6 +166,18 @@ export class BundleplanComponent implements OnInit {
 
     getStatusForDisplay(downloadStatus: string){
         return this.cartService.getStatusForDisplay(downloadStatus);
+    }
+
+    /**
+     * Update the percentage in the cartstatus
+     */
+    updateDownloadPercentage(percentage: number){
+        if (this.ediid != this.CART_CONSTANTS.GLOBAL_CART_NAME) {
+            if(this.dataFiles[0])
+                this.dataCartStatus.updateDownloadPercentage(this.ediid, percentage, this.dataFiles[0].data.resTitle.substring(0,20)+"...");
+        } else {
+            this.dataCartStatus.updateDownloadPercentage(this.CART_CONSTANTS.GLOBAL_CART_NAME, percentage, this.CART_CONSTANTS.GLOBAL_CART_NAME);
+        }
     }
 
     /**
@@ -446,7 +458,7 @@ export class BundleplanComponent implements OnInit {
                     {
                         this.overallStatus = "Cancelled";
                         setTimeout(() => {
-                            this.dataCartStatus.updateDownloadPercentage(this.ediid, 0);
+                            this.updateDownloadPercentage(0);
                         }, 1000);
                     }
                 }
@@ -463,7 +475,7 @@ export class BundleplanComponent implements OnInit {
         else    
             returnValue = 0;
 
-        this.dataCartStatus.updateDownloadPercentage(this.ediid, returnValue)
+        this.updateDownloadPercentage(returnValue)
         return returnValue;
     }
 
@@ -578,7 +590,7 @@ export class BundleplanComponent implements OnInit {
         this.overallStatus = "cancelled";
         this.downloadService.resetDownloadData();
         setTimeout(() => {
-            this.dataCartStatus.updateDownloadPercentage(this.ediid, 0)
+            this.updateDownloadPercentage(0)
         }, 1000);
     }
 
