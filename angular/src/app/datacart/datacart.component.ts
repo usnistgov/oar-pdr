@@ -5,7 +5,7 @@ import { TreeNode } from 'primeng/primeng';
 import { CartConstants } from './cartconstants';
 import { ZipData } from '../shared/download-service/zipData';
 import { isPlatformBrowser } from '@angular/common';
-import { FormCanDeactivate } from '../form-can-deactivate/form-can-deactivate';
+import { FormCanDeactivate } from '..//form-can-deactivate/form-can-deactivate';
 import { CartService } from '../datacart/cart.service';
 
 @Component({

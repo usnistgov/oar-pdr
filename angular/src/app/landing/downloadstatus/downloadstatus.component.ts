@@ -28,8 +28,6 @@ export class DownloadstatusComponent implements OnInit {
      * @param ev Event - storage
      */
     cartChanged(ev){
-        this.dataCartStatus.restore();
-
         if(ev.key == this.dataCartStatus.getName()){
             this.dataCartStatus.restore();
         }
@@ -48,7 +46,6 @@ export class DownloadstatusComponent implements OnInit {
      */
     get showDownloadStatus(){
         let hasStatusToDisplay: boolean = false;
-
         for(let key in this.dataCartStatus.dataCartStatusItems){
             if(this.dataCartStatus.dataCartStatusItems[key].downloadPercentage > 0){
                 hasStatusToDisplay = true;
@@ -69,6 +66,11 @@ export class DownloadstatusComponent implements OnInit {
         this.dataCartStatus.save();
     }
 
+    /**
+     * Return the display name of a dataCartStatusItem. For global data cart, display "Global Datacart". 
+     * Otherwise, display property displayName as it is.
+     * @param key the key of dataCartStatusItems
+     */
     cartName(key: string){
         if(this.dataCartStatus.dataCartStatusItems[key].displayName == this.CART_CONSTANTS.GLOBAL_CART_NAME)
             return "Global Datacart";

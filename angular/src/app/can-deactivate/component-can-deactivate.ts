@@ -1,3 +1,4 @@
+  
 import {HostListener} from "@angular/core";
 import { CartService } from '../datacart/cart.service';
 
@@ -11,9 +12,7 @@ export abstract class ComponentCanDeactivate {
 
     @HostListener('window:beforeunload', ['$event'])
     unloadNotification($event: any) {
-        $event.preventDefault();
         if (!this.canDeactivate()) {
-            this.cartService.executeCommand("cancelDownloadAll");
             $event.returnValue = true;
         }
     }
