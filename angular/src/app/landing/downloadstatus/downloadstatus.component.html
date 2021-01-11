@@ -7,8 +7,7 @@
                 <ngb-progressbar type="info" [value]="dataCartStatus.dataCartStatusItems[key].downloadPercentage" textType="white" [showValue]="true"
                     [striped]="true"></ngb-progressbar>
             </span>
-            <span *ngIf="dataCartStatus.dataCartStatusItems[key].downloadPercentage == 100" (click)="removeStatusItem(key)" style="float: right;cursor: pointer;padding-left:5px;" data-toggle="tooltip" title="Cancel all downloads"><i class="faa faa-remove"></i></span>
-            <span *ngIf="dataCartStatus.dataCartStatusItems[key].downloadPercentage != 100" style="float: right;padding-left:5px; color: grey;" data-toggle="tooltip" title="Cancel all downloads"><i class="faa faa-remove"></i></span>
+            <span (click)="removeStatusItem(key)" style="float: right;cursor: pointer;padding-left:5px;" data-toggle="tooltip" title="Cancel all downloads"><i class="faa faa-remove"></i></span>
         </div>
     </span>
 </div>
