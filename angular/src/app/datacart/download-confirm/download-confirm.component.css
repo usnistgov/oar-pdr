@@ -15,11 +15,12 @@
 }
 
 .control-buttons {
-    width: 94%;
+    width: 98%;
     height: 3em; 
     color:white;
-    margin: 1em 0em;  
+    margin: 1em 0em;
     border-top-style: 1px solid grey;
+    text-align: right; 
 }
 
 .span50 {
