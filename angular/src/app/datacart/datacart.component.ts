@@ -495,17 +495,20 @@ export class DatacartComponent implements OnInit, OnDestroy {
         this.selectedTreeRoot.push(newPart);
 
         let files = this.selectedTreeRoot[0];
+        console.log('this.selectedData', this.selectedData);
 
         // Sending data to _bundle_plan and get back the plan
         this.downloadService.getDownloadData(this.selectedData, this.downloadData);
-        var randomnumber = Math.floor(Math.random() * (this.maximum - this.minimum + 1)) + this.minimum;
 
-        var zipFileBaseName = "download" + randomnumber;
-        files.data.downloadFileName = zipFileBaseName;
+        if(this.mode == 'popup')
+            files.data.downloadFileName = this.selectedData[this.selectedData.length-1].data.resTitle.substring(0,20);
+        else
+            files.data.downloadFileName = "GlobalDataCart";
+
         files.data.downloadStatus = 'downloading';
 
         postMessage.push({ "bundleName": files.data.downloadFileName, "includeFiles": this.downloadData });
-        // console.log('Bundle plan post message:', JSON.stringify(postMessage[0]));
+        console.log('Bundle plan post message:', JSON.stringify(postMessage[0]));
         console.log("Calling following end point to get bundle plan:", this.distApi + "_bundle_plan");
 
         this.bundlePlanRef = this.downloadService.getBundlePlan(this.distApi + "_bundle_plan", JSON.stringify(postMessage[0])).subscribe(
@@ -514,11 +517,7 @@ export class DatacartComponent implements OnInit, OnDestroy {
                 this.bundlePlanStatus = blob.status.toLowerCase();
                 this.bundlePlanMessage = blob.messages;
                 this.bundlePlanUnhandledFiles = blob.notIncluded;
-                // if (this.bundlePlanMessage != null && this.bundlePlanMessage != undefined && this.bundlePlanStatus != 'complete') {
-                //     this.broadcastMessage = 'Server responsed with ' + this.bundlePlanStatus + '.';
-                // }
                 this.messageColor = this.getColor();
-                //   console.log("Bundle plan return:", JSON.stringify(blob));
 
                 if (this.bundlePlanUnhandledFiles) {
                     this.markUnhandledFiles();
@@ -570,39 +569,28 @@ export class DatacartComponent implements OnInit, OnDestroy {
                         size: 'lg'
                     };
 
-                    // If bundle size exceeds the alert limit, pop up confirm window
-                    // if(blob.size > this.bundleSizeAlert)
-                    // {
-                        this.modalRef = this.modalService.open(DownloadConfirmComponent, ngbModalOptions);
-                        this.modalRef.componentInstance.bundle_plan_size = blob.size;
-                        this.modalRef.componentInstance.zipData = this.zipData;
-                        this.modalRef.componentInstance.totalFiles = blob.filesCount;
-                        this.modalRef.componentInstance.returnValue.subscribe((returnValue) => {
-                            console.log(returnValue);
-                            if ( returnValue ) {
-                                this.showCurrentTask = false;
-                                this.processBundle(this.bundleplan);
-                            }else{
-                                this.showCurrentTask = false;
-                                this.cancelDownloadAll()
-                                console.log("User canceled download");
-                            }
-                        }, (reason) => {
+                    this.modalRef = this.modalService.open(DownloadConfirmComponent, ngbModalOptions);
+                    this.modalRef.componentInstance.bundle_plan_size = blob.size;
+                    this.modalRef.componentInstance.zipData = this.zipData;
+                    this.modalRef.componentInstance.totalFiles = blob.filesCount;
+                    this.modalRef.componentInstance.returnValue.subscribe((returnValue) => {
+                        console.log(returnValue);
+                        if ( returnValue ) {
+                            this.showCurrentTask = false;
+                            this.processBundle(this.bundleplan);
+                        }else{
                             this.showCurrentTask = false;
                             this.cancelDownloadAll()
-                        });
-
-                    // }else  // If bundle size does not exceed the alert limit, continue download
-                    // {
-                    //     this.showCurrentTask = false;
-                    //     this.processBundle(this.bundleplan);
-                    // }
+                            console.log("User canceled download");
+                        }
+                    }, (reason) => {
+                        this.showCurrentTask = false;
+                        this.cancelDownloadAll()
+                    });
                 }
                 else // error
                 {
                     let dateTime = new Date();
-                    // console.log("Bundle plan returned error. Post message:", JSON.stringify(postMessage[0]));
-                    // console.log("Bundle plan return:", blob);
                     this.emailSubject = 'PDR: Error getting download plan';
                     this.emailBody = this.emailBodyBase
                         + 'URL:' + this.distApi + '_bundle_plan; ' + '%0D%0A'
@@ -743,9 +731,7 @@ export class DatacartComponent implements OnInit, OnDestroy {
     resetDownloadParams() {
         this.zipData = [];
         this.downloadService.setDownloadingNumber(-1, "datacart");
-        // this.downloadStatus = null;
         this.allDownloadCancelled = true;
-        // this.displayDownloadFiles = false;
         this.downloadService.resetZipName(this.treeRoot[0]);
         this.bundlePlanMessage = null;
         this.bundlePlanStatus = null;
@@ -761,7 +747,6 @@ export class DatacartComponent implements OnInit, OnDestroy {
             rowData.downloadStatus = 'downloading';
             rowData.downloadProgress = 0;
             let url = rowData.downloadUrl.replace('http:', 'https:');
-            // if (rowData.downloadUrl.length > 5 && rowData.downloadUrl.substring(0, 5).toLowerCase() == 'https') {
             const req = new HttpRequest('GET', url, {
                 reportProgress: true, responseType: 'blob'
             });
@@ -829,7 +814,6 @@ export class DatacartComponent implements OnInit, OnDestroy {
         }.bind(this), function (err) {
             console.log("Error while updating cart entries:");
             console.log(err);
-            // alert("something went wrong while fetching the products");
         });
     }
 

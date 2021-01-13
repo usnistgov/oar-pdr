@@ -1,3 +1,4 @@
+<div>
 <!-- Make the pop up window look similar to the landingpage with black header bar and blue tool bar -->
 <div class="bar" style="color: white !important;">
     Confirm Downloading
@@ -42,13 +43,14 @@
 </div>
 
 <hr>
-<div class="control-btns">
+<div class="control-buttons">
     <!-- Buttons are arranged from right to left -->
         <!-- Continue Download button -->
-        <button pButton type="submit" class="btn btn-labeled" id="btn-download" (click)="ContinueDownload()"
+        <button pButton class="btn btn-labeled" id="btn-download" (click)="ContinueDownload()"
         label="Start Download" icon="faa faa-cloud-download faa-1x icon-white" iconPos="left"></button>
 
         <!-- Cancel button -->
-        <button pButton type="submit" class="btn btn-labeled" id="btn-cancel" (click)="CancelDownload()"
+        <button pButton class="btn btn-labeled" id="btn-cancel" (click)="CancelDownload()"
         label="Cancel Download" icon="faa faa-remove faa-1x icon-white" iconPos="left"></button>
+</div>
 </div>
