@@ -495,7 +495,6 @@ export class DatacartComponent implements OnInit, OnDestroy {
         this.selectedTreeRoot.push(newPart);
 
         let files = this.selectedTreeRoot[0];
-        console.log('this.selectedData', this.selectedData);
 
         // Sending data to _bundle_plan and get back the plan
         this.downloadService.getDownloadData(this.selectedData, this.downloadData);
@@ -513,7 +512,6 @@ export class DatacartComponent implements OnInit, OnDestroy {
 
         this.bundlePlanRef = this.downloadService.getBundlePlan(this.distApi + "_bundle_plan", JSON.stringify(postMessage[0])).subscribe(
             blob => {
-                console.log('Bundle plan return:', blob);
                 this.bundlePlanStatus = blob.status.toLowerCase();
                 this.bundlePlanMessage = blob.messages;
                 this.bundlePlanUnhandledFiles = blob.notIncluded;
