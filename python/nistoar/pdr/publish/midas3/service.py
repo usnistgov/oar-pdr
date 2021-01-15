@@ -786,11 +786,11 @@ class MIDAS3PublishingService(PublishSystem):
             pod[prop] = updates[''][prop]
         return pod
 
-    def preserve_new(self, ediid, async=None):
+    def preserve_new(self, pod, async=None):
         """
         request that the SIP given by ediid be preserved for the first time.  
 
-        This is done by marking the last POD submitted via update_ds_from_pod() as the final 
+        This is done by marking the last POD submitted via update_ds_with_pod() as the final 
         one for publishing so that it can be queued for preservation.  The bag worker will see 
         the mark and take responsibility for starting the preservation process.
 
@@ -801,11 +801,19 @@ class MIDAS3PublishingService(PublishSystem):
         :raise PreservationStateError:  if the SIP has been published before under the requested ID
                             and preserve_update() should have been used.  
         """
+        # First validate the POD; raises ValidationError if unacceptable
+        self._check_pod_for_preservation(pod)
+
+        ediid = pod.get('identifier')
+        if not ediid:
+            # shouldn't happen as this is checked above
+            raise ValueError("Input POD is missing required property: identifier")
+            
         self.log.info("Queuing (first-time) preservation of SIP=%s", ediid)
         if async is None:
             async = not bg_sync
         stat = self.pressvc.status(ediid, "midas3")
-        if stat['state'] in [ ps.NOT_FOUND, ps.PENDING, ps.IN_PROGRESS ]:
+        if stat['state'] in [ ps.PENDING, ps.IN_PROGRESS ]:
             # can't comply with request; just return stat, which tells the story
             return stat
 
@@ -820,34 +828,35 @@ class MIDAS3PublishingService(PublishSystem):
             raise PreservationStateError("Publishing service processing is (unexpectedly) halted; reason: "
                                          + halted)
 
-        try: 
-            worker.mark_for_preservation()
-        except StateException as ex:
-            # Means dataset is not ready for preserving
-            return { "id": worker.id, "state": ps.NOT_FOUND, "message": str(ex),
-                     "history": stat.get('history',[]) }
-
-        if not worker.is_working():
-            if async:
-                timeout = self.cfg.get('preservation_service',{}).get('sync_timeout', 2)
-                worker.launch()
-                if worker.is_working:
-                    # wait around for a little while to see if finishes quickly
-                    # (this is a bit of hack and not optimal)
-                    worker._thread.join(timeout/2.0)
-                    if not worker.is_working():
-                        # this is for the preservation service
-                        time.sleep(timeout/2.0)
-            else:
-                worker.run("sync")
-
+        pod['_preserve'] = 'new'
+        self._apply_pod_async(pod, async)
+        if async and worker.is_working():
+            # wait around for a little while to see if finishes quickly
+            # (this is a bit of hack and not optimal)
+            timeout = self.cfg.get('preservation_service',{}).get('sync_timeout', 2)
+            worker._thread.join(timeout/2.0)
+            if not worker.is_working():
+                # this is for the preservation service
+                time.sleep(timeout/2.0)
+        
         return self.pressvc.status(ediid, "midas3")
 
-    def preserve_update(self, ediid, async=None):
+    def _check_pod_for_preservation(self, pod):
+        if not isinstance(pod, Mapping):
+            raise TypeError("Not a dictionary: "+str(pod)[:20]+"...")
+        if self.cfg.get('require_valid_pod', True):
+            self._validate_pod(pod)
+        if not pod.get('identifier'):
+            raise ValidationError("POD record missing required property: identifier")
+        if pod.get('accessLevel') != 'public':
+            raise ValidationError("Unacceptable accessLevel property value for preservation: " +
+                                  str(pod.get('accessLevel')))
+
+    def preserve_update(self, pod, async=None):
         """
         request that the update to the SIP given by ediid be preserved.  
 
-        This is done by marking the last POD submitted via update_ds_from_pod() as the final 
+        This is done by marking the last POD submitted via update_ds_with_pod() as the final 
         one for publishing so that it can be queued for preservation.  The bag worker will see 
         the mark and take responsibility for starting the preservation process.
 
@@ -858,11 +867,19 @@ class MIDAS3PublishingService(PublishSystem):
         :raise PreservationStateError:  if the SIP has not been published before under the requested ID
                             and preserve_new() should have been used.  
         """
+        # First validate the POD; raises ValidationError if unacceptable
+        self._check_pod_for_preservation(pod)
+
+        ediid = pod.get('identifier')
+        if not ediid:
+            # shouldn't happen as this is checked above
+            raise ValueError("Input POD is missing required property: identifier")
+            
         self.log.info("Queuing (update) preservation of SIP=%s", ediid)
         if async is None:
             async = not bg_sync
         stat = self.pressvc.status(ediid, "midas3")
-        if stat['state'] in [ ps.NOT_FOUND, ps.PENDING, ps.IN_PROGRESS ]:
+        if stat['state'] in [ ps.PENDING, ps.IN_PROGRESS ]:
             # can't comply with request; just return stat, which tells the story
             return stat
 
@@ -887,26 +904,16 @@ class MIDAS3PublishingService(PublishSystem):
                 msg = "Publishing service processing is (unexpectedly) halted; reason: " + halted
             raise PreservationStateError(msg)
 
-        try:
-            worker.mark_for_preservation(True)
-        except StateException as ex:
-            # Means dataset is not ready for preserving
-            return { "id": worker.id, "state": ps.NOT_FOUND, "message": str(ex),
-                     "history": stat.get('history',[]) }
-
-        if not worker.is_working():
-            if async:
-                worker.launch()
-                if worker.is_working():
-                    # wait around for a little while to see if finishes quickly
-                    # (this is a bit of hack and not optimal)
-                    worker._thread.join(timeout/2.0)
-                    if not worker.is_working():
-                        # this is for the preservation service
-                        time.sleep(timeout/2.0)
-            else:
-                worker.run("sync")
-
+        pod['_preserve'] = 'update'
+        self._apply_pod_async(pod, async)
+        if async and worker.is_working():
+            # wait around for a little while to see if finishes quickly
+            # (this is a bit of hack and not optimal)
+            worker._thread.join(timeout/2.0)
+            if not worker.is_working():
+                # this is for the preservation service
+                time.sleep(timeout/2.0)
+        
         return self.pressvc.status(ediid, "midas3")
 
     def preservation_status(self, ediid):
@@ -980,6 +987,8 @@ class MIDAS3PublishingService(PublishSystem):
                 write_json(pod, self.next_pod)
 
         def mark_for_preservation(self, asupdate=False):
+            # NOTE: use of this function is DEPRECATED
+
 #            self.service.pressvc._make_handler(self.id, "midas3")._status.reset(
 #                                            "completing metadata updates before preservation")
             self.ensure_qlock()
