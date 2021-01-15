@@ -302,11 +302,11 @@ respcode=`"${curlcmd[@]}"`
 
 curlcmd=(curl -o /dev/null -s -w '%{http_code}\n' -H 'Authorization: Bearer secret' -X PUT http://localhost:9090/preserve/midas/goober)
 respcode=`"${curlcmd[@]}"`
-[ "$respcode" == "404" ] || {
+[ "$respcode" == "400" ] || {
     tell '---------------------------------------'
     tell FAILED
     tell "${curlcmd[@]}"
-    tell "Non-existent record does not produce 404 response:" $respcode
+    tell "Missing POD record does not produce 400 response:" $respcode
     ((failures += 1))
 }
 
@@ -356,7 +356,7 @@ for pod in "${pods[@]}"; do
     sleep 1
 
     if [ ${idcount[$id]} -gt 0 ]; then
-        curlcmd=(curl -o /dev/null -s -w '%{http_code}\n' -X PATCH -H 'Authorization: Bearer secret' http://localhost:9090/preserve/midas/$id)
+        curlcmd=(curl -o /dev/null -s -w '%{http_code}\n' -X PATCH --data @$pod -H 'Authorization: Bearer secret' http://localhost:9090/preserve/midas/$id)
         respcode=`"${curlcmd[@]}"`
         #
         # NOTE:  changing response to 201 (from 200)
@@ -383,7 +383,7 @@ for pod in "${pods[@]}"; do
         ((count += 1))
         ((idcount[$id] += 1))
     else
-        curlcmd=(curl -o /dev/null -s -w '%{http_code}\n' -X PUT -H 'Authorization: Bearer secret' http://localhost:9090/preserve/midas/$id)
+        curlcmd=(curl -o /dev/null -s -w '%{http_code}\n' -X PUT --data @$pod -H 'Authorization: Bearer secret' http://localhost:9090/preserve/midas/$id)
         respcode=`"${curlcmd[@]}"`
         if [ "$respcode" != "201" -a "$respcode" != "202" ]; then
             tell '---------------------------------------'
