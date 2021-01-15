@@ -286,7 +286,7 @@ class DraftHandler(Handler):
             if bodyin is None:
                 if self._reqrec:
                     self._reqrec.record()
-                return send_error(400, "Missing input POD document")
+                return self.send_error(400, "Missing input POD document")
             if log.isEnabledFor(logging.DEBUG) or self._reqrec:
                 body = bodyin.read()
                 pod = json.loads(body, object_pairs_hook=OrderedDict)
@@ -389,7 +389,7 @@ class LatestHandler(Handler):
             if bodyin is None:
                 if self._reqrec:
                     self._reqrec.record()
-                return send_error(400, "Missing input POD document")
+                return self.send_error(400, "Missing input POD document")
 
             if log.isEnabledFor(logging.DEBUG) or self._reqrec:
                 body = bodyin.read()
@@ -590,20 +590,46 @@ class PreserveHandler(Handler):
                 if steps[1].startswith("_") or steps[1].startswith(".") or \
                    self.badidre.search(steps[1]):
                     
-                    self.send_error(400, "Unsupported SIP identifier: "+path)
-                    return []
+                    return self.send_error(400, "Unsupported SIP identifier: "+path)
                 
                 return self.preserve_sip(path)
             else:
-                self.send_error(403, "PUT not supported on this resource")
+                return self.send_error(403, "PUT not supported on this resource")
         else:
             self.send_error(404, "SIP Type not supported")
             return ["{}"]
 
     def preserve_sip(self, sipid):
         out = {}
-        try: 
-            out = self._svc.preserve_new(sipid)
+        try:
+            bodyin = self._env.get('wsgi.input')
+            if bodyin is None:
+                if self._reqrec:
+                    self._reqrec.record()
+                return self.send_error(400, "Missing input POD document")
+
+            if log.isEnabledFor(logging.DEBUG) or self._reqrec:
+                body = bodyin.read()
+                pod = json.loads(body, object_pairs_hook=OrderedDict)
+            else:
+                pod = json.load(bodyin, object_pairs_hook=OrderedDict)
+            if self._reqrec:
+                self._reqrec.add_body_text(json.dumps(pod, indent=2)).record()
+
+        except (ValueError, TypeError) as ex:
+            if log.isEnabledFor(logging.DEBUG):
+                log.error("Failed to parse input: %s", str(ex))
+                log.debug("\n%s", body)
+            if self._reqrec:
+                self._reqrec.add_body_text(body).record()
+            return self.send_error(400, "Input not parseable as JSON")
+
+        if sipid != pod.get('identifier'):
+            log.warn("preservation request's EDI-ID does not match input POD")
+            return self.send_error(400, "Wrong POD record for ID")
+
+        try:
+            out = self._svc.preserve_new(pod)
 
             # FYI: detecting success or failure is handled through the
             # returned status object because the preservation service will
@@ -646,6 +672,10 @@ class PreserveHandler(Handler):
             })
             self.set_response(403, "Preservation for SIP was already requested "+
                               "(current status: "+ex.state+")")
+
+        except ValidationError as ex:
+            log.error("/preserve/midas/: Input is not a valid POD record:\n  "+str(ex))
+            return self.send_error(400, "Input is not a valid POD record")
 
         except PreservationStateError as ex:
             log.warn("Wrong AIP state for client request: "+str(ex))
@@ -700,7 +730,34 @@ class PreserveHandler(Handler):
     def update_sip(self, sipid):
         out = {}
         try: 
-            out = self._svc.preserve_update(sipid)
+            bodyin = self._env.get('wsgi.input')
+            if bodyin is None:
+                if self._reqrec:
+                    self._reqrec.record()
+                return self.send_error(400, "Missing input POD document")
+
+            if log.isEnabledFor(logging.DEBUG) or self._reqrec:
+                body = bodyin.read()
+                pod = json.loads(body, object_pairs_hook=OrderedDict)
+            else:
+                pod = json.load(bodyin, object_pairs_hook=OrderedDict)
+            if self._reqrec:
+                self._reqrec.add_body_text(json.dumps(pod, indent=2)).record()
+
+        except (ValueError, TypeError) as ex:
+            if log.isEnabledFor(logging.DEBUG):
+                log.error("Failed to parse input: %s", str(ex))
+                log.debug("\n%s", body)
+            if self._reqrec:
+                self._reqrec.add_body_text(body).record()
+            return self.send_error(400, "Input not parseable as JSON")
+
+        if sipid != pod.get('identifier'):
+            log.warn("preservation request's EDI-ID does not match input POD")
+            return self.send_error(400, "Wrong POD record for ID")
+
+        try:
+            out = self._svc.preserve_update(pod)
         
             # FYI: detecting success or failure is handled through the
             # returned status object because the preservation service will
@@ -740,6 +797,10 @@ class PreserveHandler(Handler):
             self.set_response(403, "Preservation update for SIP was already "+
                               "requested (current status: "+ex.state+")")
             
+        except ValidationError as ex:
+            log.error("/preserve/midas/: Input is not a valid POD record:\n  "+str(ex))
+            return self.send_error(400, "Input is not a valid POD record")
+
         except PreservationStateError as ex:
             log.warn("Wrong AIP state for client request: "+str(ex))
             out = json.dumps({
