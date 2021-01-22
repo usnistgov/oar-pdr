@@ -33,7 +33,7 @@ export const config: LPSConfig = {
     status: "Dev Version",
     appVersion: "v1.2.X",
     production: context.production,
-    editEnabled: true,
+    editEnabled: false,
     distService: "https://testdata.nist.gov/od/ds/",
     gacode: "not-set",
     screenSizeBreakPoint: 1060,
@@ -84,13 +84,25 @@ export const testdata: {} = {
         ],
         "references": [
             {
-                "@type": "deo:BibliographicReference",
-                "@id": "#ref:publications/multiple-encounter-dataset-i-meds-i",
-                "refType": "IsReferencedBy",
-                "location": "https://www.nist.gov/publications/multiple-encounter-dataset-i-meds-i",
-                "_extensionSchemas": [
-                    "https://www.nist.gov/od/dm/nerdm-schema/v0.1#/definitions/DCiteDocumentReference"
-                ]
+                "refType":"IsDocumentedBy",
+                "title":"In-situ Raman spectroscopic measurements of the deformation region in indented glasses",
+                "issued":"2020-02",
+                "citation":"Gerbig, Y. B., & Michaels, C. A. (2020). In-situ Raman spectroscopic measurements of the deformation region in indented glasses. Journal of Non-Crystalline Solids, 530, 119828. doi:10.1016/j.jnoncrysol.2019.119828\n",
+                "label":"Journal of Non-Crystalline Solids: In-situ Raman spectroscopic measurements of the deformation region in indented glasses",
+                "location":"https://doi.org/10.1016/j.jnoncrysol.2019.119828",
+                "@id":"#ref:10.1016/j.jnoncrysol.2019.119828",
+                "@type":["schema:Article"],
+                "_extensionSchemas":["https://data.nist.gov/od/dm/nerdm-schema/v0.2#/definitions/DCiteReference"]
+            },
+            {
+                "refType":"IsCitedBy",
+                "title":"Indentation device forin situRaman spectroscopic and optical studies",
+                "issued":"2012-12",
+                "citation":"Gerbig, Y. B., Michaels, C. A., Forster, A. M., Hettenhouser, J. W., Byrd, W. E., Morris, D. J., & Cook, R. F. (2012). Indentation device forin situRaman spectroscopic and optical studies. Review of Scientific Instruments, 83(12), 125106. doi:10.1063/1.4769995\n",
+                "location":"https://doi.org/10.1063/1.4769995",
+                "@id":"#ref:10.1063/1.4769995",
+                "@type":["schema:Article"],
+                "_extensionSchemas":["https://data.nist.gov/od/dm/nerdm-schema/v0.2#/definitions/DCiteReference"]
             }
         ],
         "accessLevel": "public",
