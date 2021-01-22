@@ -13,7 +13,8 @@ import os, re
 from collections import Sequence, Mapping
 from urlparse import urlparse
 
-from ..bagit.builder import NERDM_SCH_ID_BASE, NERDM_SCH_VER, NERDMPUB_SCH_VER
+from ..bagit.builder import (NERDM_SCH_ID_BASE, NERDM_SCH_VER, NERDMPUB_SCH_VER,
+                             NERDMBIB_SCH_ID_BASE, NERDMBIB_SCH_VER)
 
 DEF_MBAG_VERSION = "0.4"
 DEF_NIST_PROF_VERSION = "0.4"
@@ -456,6 +457,8 @@ def update_nerdm_schema(nerdmd, version=None, byext={}):
         byext = dict(byext)
     if not version and "pub" not in byext:
         byext["pub"] = NERDMPUB_SCH_VER
+    if not version and "bib" not in byext:
+        byext["bib"] = NERDMBIB_SCH_VER
     if "" not in byext:
         byext[""] = defver
 
@@ -474,6 +477,14 @@ def update_nerdm_schema(nerdmd, version=None, byext={}):
     if updated:
         nerdmd[mtc+"schema"] = updated
     _upd_schema_ver_on_node(nerdmd, mtc+"extensionSchemas", matchrs, defver)
+
+    # correct to start using bib extension if needed
+    if any(mtc+"extensionSchemas" in r for r in nerdmd.get('references',[])):
+        for ref in nerdmd['references']:
+            for i, ext in enumerate(ref.get(mtc+"extensionSchemas", [])):
+                if ext.startswith(NERDM_SCH_ID_BASE+"v") and '#/definitions/DCite' in ext:
+                    ref[mtc+"extensionSchemas"][i] = NERDMBIB_SCH_ID_BASE + byext['bib'] + \
+                                                     ext[ext.index('#'):]
 
     return nerdmd
 

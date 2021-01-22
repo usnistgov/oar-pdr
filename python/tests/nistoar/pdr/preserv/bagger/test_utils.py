@@ -4,6 +4,7 @@ from copy import deepcopy
 
 from nistoar.testing import *
 from nistoar.pdr.preserv.bagger import utils as bagut
+from nistoar.nerdm.constants import CORE_SCHEMA_URI, PUB_SCHEMA_URI
 
 class TestVersion(test.TestCase):
 
@@ -546,6 +547,7 @@ class TestBagUtils(test.TestCase):
         byext = {
             "http://example.com/anext/": "v0.1",
             "pub":  "v1.2",
+            "bib":  "v0.8",
             "":     "v2.2"
         }
 
@@ -563,7 +565,16 @@ class TestBagUtils(test.TestCase):
                     "blah": "blah"
                 },
                 "$extensionSchemas": []
-            }
+            },
+            "references": [
+                {
+                    'location': 'https://tinyurl.com/asdf',
+                    "$extensionSchemas": [
+                        "https://data.nist.gov/od/dm/nerdm-schema/v0.3#/definitions/BibliographicReference",
+                        "https://data.nist.gov/od/dm/nerdm-schema/v0.3#/definitions/DCiteReference"
+                    ]
+                }
+            ]
         }
 
         bagut.update_nerdm_schema(data, "1.0", byext)
@@ -575,6 +586,10 @@ class TestBagUtils(test.TestCase):
         self.assertEqual(data['bar']['tex']['$extensionSchemas'], 
                      "https://data.nist.gov/od/dm/nerdm-schema/pub/v1.2#Contact")
         self.assertEqual(data['bar']['$extensionSchemas'], [])
+        self.assertEqual(data['references'][0]['$extensionSchemas'][0],
+                         "https://data.nist.gov/od/dm/nerdm-schema/v2.2#/definitions/BibliographicReference")
+        self.assertEqual(data['references'][0]['$extensionSchemas'][1],
+                         "https://data.nist.gov/od/dm/nerdm-schema/bib/v0.8#/definitions/DCiteReference")
         
         data = {
             "_schema": "https://data.nist.gov/od/dm/nerdm-schema/v0.3",
@@ -593,13 +608,11 @@ class TestBagUtils(test.TestCase):
             }
         }
         bagut.update_nerdm_schema(data)
-        self.assertEqual(data['_schema'], 
-                         "https://data.nist.gov/od/dm/nerdm-schema/v0.3")
+        self.assertEqual(data['_schema'], CORE_SCHEMA_URI)
         self.assertEqual(data['foo']['_extensionSchemas'], 
                          [ "http://example.com/anext/v88#goob",
                            "http://goober.com/foop/v99#big" ])
-        self.assertEqual(data['bar']['tex']['_extensionSchemas'], 
-                     "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.3#Contact")
+        self.assertEqual(data['bar']['tex']['_extensionSchemas'], PUB_SCHEMA_URI+"#Contact")
         self.assertEqual(data['bar']['_extensionSchemas'], [])
         
 

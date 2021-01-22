@@ -5,9 +5,9 @@
             "@base": "ark:/88434/edi00hw91c"
         }
     ],
-    "_schema": "https://data.nist.gov/od/dm/nerdm-schema/v0.1#",
+    "_schema": "https://data.nist.gov/od/dm/nerdm-schema/v0.4#",
     "_extensionSchemas": [
-        "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/PublicDataResource"
+        "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.4#/definitions/PublicDataResource"
     ],
     "@type": [
         "nrdp:PublicDataResource"
@@ -42,7 +42,7 @@
             "refType": "IsReferencedBy",
             "location": "https://doi.org/10.1364/OE.24.014100",
             "_extensionSchemas": [
-                "https://data.nist.gov/od/dm/nerdm-schema/v0.1#/definitions/DCiteDocumentReference"
+                "https://data.nist.gov/od/dm/nerdm-schema/bib/v0.4#/definitions/DCiteReference"
             ]
         }
     ],
