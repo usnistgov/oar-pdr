@@ -10,6 +10,7 @@ from nistoar.testing import *
 import nistoar.pdr.preserv.bagit.builder as bldr
 import nistoar.pdr.exceptions as exceptions
 from nistoar.pdr.utils import read_nerd
+from nistoar.nerdm.constants import CORE_SCHEMA_URI, PUB_SCHEMA_URI
 
 # datadir = tests/nistoar/pdr/preserv/data
 datadir = os.path.join(
@@ -346,18 +347,14 @@ class TestBuilder2(test.TestCase):
 
     def test_create_init_md_for(self):
         md = self.bag._create_init_md_for("", None)
-        self.assertEqual(md['_schema'],
-                         "https://data.nist.gov/od/dm/nerdm-schema/v0.3#")
-        self.assertEqual(md['_extensionSchemas'],
-                         ["https://data.nist.gov/od/dm/nerdm-schema/pub/v0.3#/definitions/PublicDataResource"])
+        self.assertEqual(md['_schema'], CORE_SCHEMA_URI+"#")
+        self.assertEqual(md['_extensionSchemas'], [PUB_SCHEMA_URI+"#/definitions/PublicDataResource"])
         self.assertEqual(md['@type'], ["nrdp:PublicDataResource"])
         self.assertIn("@context", md)
 
         md = self.bag._create_init_md_for("foo/bar", "DataFile")
-        self.assertEqual(md['_schema'],
-          "https://data.nist.gov/od/dm/nerdm-schema/v0.3#/definitions/Component")
-        self.assertEqual(md['_extensionSchemas'],
-                         ["https://data.nist.gov/od/dm/nerdm-schema/pub/v0.3#/definitions/DataFile"])
+        self.assertEqual(md['_schema'], CORE_SCHEMA_URI+"#/definitions/Component")
+        self.assertEqual(md['_extensionSchemas'], [PUB_SCHEMA_URI+"#/definitions/DataFile"])
         self.assertEqual(md['@type'],
                  ["nrdp:DataFile", "nrdp:DownloadableFile", "dcat:Distribution"])
         self.assertIn("@context", md)
@@ -366,10 +363,8 @@ class TestBuilder2(test.TestCase):
         self.assertNotIn('downloadURL', md)
 
         md = self.bag._create_init_md_for("foo/bar.sha256", "ChecksumFile")
-        self.assertEqual(md['_schema'],
-          "https://data.nist.gov/od/dm/nerdm-schema/v0.3#/definitions/Component")
-        self.assertEqual(md['_extensionSchemas'],
-                         ["https://data.nist.gov/od/dm/nerdm-schema/pub/v0.3#/definitions/ChecksumFile"])
+        self.assertEqual(md['_schema'], CORE_SCHEMA_URI+"#/definitions/Component")
+        self.assertEqual(md['_extensionSchemas'], [PUB_SCHEMA_URI+"#/definitions/ChecksumFile"])
         self.assertEqual(md['@type'],
             ["nrdp:ChecksumFile", "nrdp:DownloadableFile", "dcat:Distribution"])
         self.assertIn("@context", md)
@@ -378,10 +373,8 @@ class TestBuilder2(test.TestCase):
         self.assertNotIn('downloadURL', md)
 
         md = self.bag._create_init_md_for("foo/", "Subcollection")
-        self.assertEqual(md['_schema'],
-          "https://data.nist.gov/od/dm/nerdm-schema/v0.3#/definitions/Component")
-        self.assertEqual(md['_extensionSchemas'],
-                         ["https://data.nist.gov/od/dm/nerdm-schema/pub/v0.3#/definitions/Subcollection"])
+        self.assertEqual(md['_schema'], CORE_SCHEMA_URI+"#/definitions/Component")
+        self.assertEqual(md['_extensionSchemas'], [PUB_SCHEMA_URI+"#/definitions/Subcollection"])
         self.assertEqual(md['@type'], ["nrdp:Subcollection"])
         self.assertIn("@context", md)
         self.assertEqual(md['@id'], "cmps/foo")
@@ -389,10 +382,8 @@ class TestBuilder2(test.TestCase):
         self.assertNotIn('downloadURL', md)
 
         md = self.bag._create_init_md_for("@id:cmps/foo/", "Subcollection")
-        self.assertEqual(md['_schema'],
-          "https://data.nist.gov/od/dm/nerdm-schema/v0.3#/definitions/Component")
-        self.assertEqual(md['_extensionSchemas'],
-                         ["https://data.nist.gov/od/dm/nerdm-schema/pub/v0.3#/definitions/Subcollection"])
+        self.assertEqual(md['_schema'], CORE_SCHEMA_URI+"#/definitions/Component")
+        self.assertEqual(md['_extensionSchemas'], [PUB_SCHEMA_URI+"#/definitions/Subcollection"])
         self.assertEqual(md['@type'], ["nrdp:Subcollection"])
         self.assertIn("@context", md)
         self.assertEqual(md['@id'], "cmps/foo")
@@ -1144,7 +1135,7 @@ class TestBuilder2(test.TestCase):
         md = self.bag.bag.nerd_metadata_for("gurn")
         self.assertEqual(md['filepath'], "gurn")
         self.assertEqual(md['@id'], "cmps/gurn")
-                        
+
     def test_update_ediid(self):
         self.assertIsNone(self.bag.ediid)
         self.bag.ediid = "9999"
@@ -1737,7 +1728,7 @@ class TestBuilder2(test.TestCase):
         self.assertEqual(len(oxum), 1)
         oxum = [int(n) for n in oxum[0].split(': ')[1].split('.')]
         self.assertEqual(oxum[1], 14)
-        self.assertEqual(oxum[0], 12176)  # this will change if logging changes
+        self.assertEqual(oxum[0], 12180)  # this will change if logging changes
 
         bagsz = [l for l in lines if "Bag-Size: " in l]
         self.assertEqual(len(bagsz), 1)

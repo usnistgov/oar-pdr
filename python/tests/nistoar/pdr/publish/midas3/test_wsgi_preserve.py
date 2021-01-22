@@ -24,6 +24,8 @@ cfgdir = os.path.join(os.path.dirname(__file__), "data")
 basedir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(
     os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))))))
 
+enrichrefs = "doi" in os.environ.get('OAR_TEST_INCLUDE',"")
+
 loghdlr = None
 rootlog = None
 def setUpModule():
@@ -158,6 +160,9 @@ class TestPreserveHandler(test.TestCase):
             "prepub_nerd_dir":  self.nrddir,
             "postpub_nerd_dir": os.path.join(self.stagedir, "_nerdm")
         })
+        defcfg['sip_type']['midas3']['pubserv']['bagger']['enrich_refs'] = enrichrefs
+        defcfg['sip_type']['midas3']['preserv']['bagger']['enrich_refs'] = enrichrefs
+
         self.cfg = extract_sip_config(defcfg, "pubserv")
 
         self.svc = mdsvc.MIDAS3PublishingService(self.cfg)
@@ -219,9 +224,10 @@ class TestPreserveHandler(test.TestCase):
         mbdir = os.path.join(mdbag, "multbag")
         self.assertFalse(os.path.exists(os.path.join(mbdir,"file-lookup.tsv")))
         nerdf = os.path.join(mdbag, "metadata", "annot.json")
-        with open(nerdf) as fd:
-            nerd = json.load(fd)
-        self.assertNotIn('version', nerd)
+        if os.path.exists(nerdf):
+            with open(nerdf) as fd:
+                nerd = json.load(fd)
+            self.assertNotIn('version', nerd)
         
         req = {
             'REQUEST_METHOD': "PUT",
