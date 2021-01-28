@@ -106,12 +106,8 @@ export class DataFilesComponent {
             };
         }
 
-        // this.cartService.watchStorage().subscribe(value => {
-        //     this.cartLength = value;
-        // });
-
         this.edstatsvc._watchForceDataFileTreeInit((start) => {
-            if (start) {
+            if (start && this.inBrowser) {
                 this.globalDataCart = DataCart.openCart(this.CART_CONSTANTS.GLOBAL_CART_NAME);
                 this.allSelected = this.updateAllSelectStatus(this.files);
                 this.cartLength = this.globalDataCart.size();
@@ -150,6 +146,9 @@ export class DataFilesComponent {
         this.buildTree();
     }
 
+    /**
+     * Build data file tree
+     */
     buildTree() {
         this.fileNode = { "data": { "name": "", "size": "", "mediatype": "", "description": "", "filetype": "" } };
 
@@ -181,9 +180,9 @@ export class DataFilesComponent {
 
     }
 
-    /*
-    *   Init object - edit buttons for animation purpose
-    */
+    /**
+     *   Init object - edit buttons for animation purpose
+     */
     editingObjectInit() {
         var editingObject = {
             "originalValue": '',
@@ -198,29 +197,36 @@ export class DataFilesComponent {
 
     /**
      * Function to expand tree display to certain level
+     * @param dataFiles - file tree
+     * @param expanded - expand flag 
+     * @param targetLevel 
      */
-    expandToLevel(dataFiles: any, option: boolean, targetLevel: any) {
-        this.expandAll(dataFiles, option, 0, targetLevel)
+    expandToLevel(dataFiles: any, expanded: boolean, targetLevel: any) {
+        this.expandAll(dataFiles, expanded, 0, targetLevel)
     }
 
     /**
      * Function to expand tree display to certain level - used by expandToLevel()
+     * @param dataFiles - file tree
+     * @param expanded 
+     * @param level 
+     * @param targetLevel 
      */
-    expandAll(dataFiles: any, option: boolean, level: any, targetLevel: any) {
+    expandAll(dataFiles: any, expanded: boolean, level: any, targetLevel: any) {
         let currentLevel = level + 1;
         for (let i = 0; i < dataFiles.length; i++) {
-            dataFiles[i].expanded = option;
+            dataFiles[i].expanded = expanded;
             if (targetLevel != null) {
                 if (dataFiles[i].children.length > 0 && currentLevel < targetLevel) {
-                    this.expandAll(dataFiles[i].children, option, currentLevel, targetLevel);
+                    this.expandAll(dataFiles[i].children, expanded, currentLevel, targetLevel);
                 }
             } else {
                 if (dataFiles[i].children.length > 0) {
-                    this.expandAll(dataFiles[i].children, option, currentLevel, targetLevel);
+                    this.expandAll(dataFiles[i].children, expanded, currentLevel, targetLevel);
                 }
             }
         }
-        this.isExpanded = option;
+        this.isExpanded = expanded;
         this.visible = false;
         setTimeout(() => {
             this.visible = true;
@@ -229,6 +235,7 @@ export class DataFilesComponent {
 
     /**
      * Function to reset the download status and incart status.
+     * @param files - file tree 
      */
     resetStatus(files: any) {
         for (let comp of files) {
@@ -248,15 +255,17 @@ export class DataFilesComponent {
     updateStatusFromCart() {
         this.resetStatus(this.files);
 
-        if(!this.globalDataCart)
-            this.globalDataCart = DataCart.openCart(this.CART_CONSTANTS.GLOBAL_CART_NAME);
+        if(this.inBrowser){
+            if(!this.globalDataCart)
+                this.globalDataCart = DataCart.openCart(this.CART_CONSTANTS.GLOBAL_CART_NAME);
 
-        for (let key in this.globalDataCart.contents) {
-            this.setFilesDownloadStatus(this.files, this.globalDataCart.contents[key].resId, this.globalDataCart.contents[key].downloadStatus);
-            if (this.globalDataCart.contents[key].cartId != undefined) {
-                let treeNode = this.searchTree(this.treeRoot[0], this.globalDataCart.contents[key].cartId);
-                if (treeNode != null) {
-                    treeNode.data.isIncart = true;
+            for (let key in this.globalDataCart.contents) {
+                this.setFilesDownloadStatus(this.files, this.globalDataCart.contents[key].resId, this.globalDataCart.contents[key].downloadStatus);
+                if (this.globalDataCart.contents[key].cartId != undefined) {
+                    let treeNode = this.searchTree(this.treeRoot[0], this.globalDataCart.contents[key].cartId);
+                    if (treeNode != null) {
+                        treeNode.data.isIncart = true;
+                    }
                 }
             }
         }
@@ -266,6 +275,7 @@ export class DataFilesComponent {
 
     /**
      * Function to get total number of files.
+     * @param files - file tree
      */
     getTotalFiles(files) {
         for (let comp of files) {
@@ -279,6 +289,9 @@ export class DataFilesComponent {
 
     /**
      * Function to set files download status.
+     * @param files - file tree
+     * @param cartId - cart ID of the item to be set the status
+     * @param downloadStatus - download status
      */
     setFilesDownloadStatus(files, cartId, downloadStatus) {
         for (let comp of files) {
@@ -308,6 +321,7 @@ export class DataFilesComponent {
 
     /**
      * return an array of AccessPage components from the given input components array
+     * @param comps 
      */
     selectAccessPages(comps : NerdmComp[]) : NerdmComp[] {
         let use : NerdmComp[] = comps.filter(cmp => cmp['@type'].includes("nrdp:AccessPage") &&
@@ -320,8 +334,10 @@ export class DataFilesComponent {
     }
 
     /**
-    * Function to display bytes in appropriate format.
-    **/
+     * Function to display bytes in appropriate format.
+     * @param bytes 
+     * @param numAfterDecimal - number of digits after decimal
+     */
     formatBytes(bytes, numAfterDecimal) {
         return this.commonFunctionService.formatBytes(bytes, numAfterDecimal);
     }
@@ -341,8 +357,10 @@ export class DataFilesComponent {
     }
 
     /**
-    * Function to add whole subfolder files to data cart then update status
-    **/
+     * Function to add whole subfolder files to data cart then update status
+     * @param rowData - node in the file tree
+     * @param isSelected - flag indicating if the node is selected
+     */
     addSubFilesToCartAndUpdate(rowData: any, isSelected: boolean) {
         this.addSubFilesToCart(rowData, isSelected).then(function (result: any) {
             this.allSelected = this.updateAllSelectStatus(this.files);
@@ -352,8 +370,10 @@ export class DataFilesComponent {
     }
 
     /**
-    * Function to add whole subfolder files to data cart
-    **/
+     * Function to add whole subfolder files to data cart
+     * @param rowData - node in the file tree
+     * @param isSelected - flag indicating if the node is selected
+     */
     addSubFilesToCart(rowData: any, isSelected: boolean) {
         if (!rowData.isLeaf) {
             let subFiles: any = null;
@@ -375,8 +395,10 @@ export class DataFilesComponent {
     }
 
     /**
-    * Function to search the file tree for a given cartid.
-    **/
+     * Function to search the file tree for a given cartid.
+     * @param element - tree to be searched
+     * @param cartId - cart ID for searching
+     */
     searchTree(element, cartId) {
         if (element.data.cartId == cartId) {
             return element;
@@ -392,8 +414,9 @@ export class DataFilesComponent {
     }
 
     /**
-    * Function to add/remove all files to/from data cart.
-    **/
+     * Function to add/remove all files to/from data cart.
+     * @param files - file tree
+     */
     cartProcess(files: any) {
         this.isLocalProcessing = true;
 
@@ -424,28 +447,30 @@ export class DataFilesComponent {
     }
 
     /**
-    * Function to add all files to data cart.
-    **/
+     * Function to add all files to data cart.
+     * @param files - file tree
+     * @param isSelected - flag indicating if the node is selected
+     * @param cartKey - key of the cart
+     */
     addAllFilesToCart(files: any, isSelected: boolean, cartKey: string) {
-        // this.cartService.deselectAll().then(function (result1: any) {
-            this.addFilesToCart(files, isSelected, cartKey).then(function (result2: any) {
-                // this.cartService.setForceDatacartReload(true);
-                this.allSelected = this.updateAllSelectStatus(this.files);
-                if (cartKey != '') {
-                    this.allSelected = true;
-                }
-            }.bind(this), function (err) {
-                alert("something went wrong while adding one file to data cart.");
-            });
-        // }.bind(this), function (err) {
-        //     alert("something went wrong while cleaning up data cart select flag.");
-        // });
+        this.addFilesToCart(files, isSelected, cartKey).then(function (result2: any) {
+            this.allSelected = this.updateAllSelectStatus(this.files);
+            if (cartKey != '') {
+                this.allSelected = true;
+            }
+        }.bind(this), function (err) {
+            alert("something went wrong while adding one file to data cart.");
+        });
+
         return Promise.resolve(files);
     }
 
     /**
-    * Function to add given file tree to data cart.
-    **/
+     * Function to add given file tree to data cart.
+     * @param files - file tree
+     * @param isSelected - flag indicating if the node is selected
+     * @param cartKey - key of the cart
+     */
     addFilesToCart(files: any, isSelected: boolean, cartKey: string) {
         let compValue: any;
         for (let comp of files) {
@@ -463,8 +488,11 @@ export class DataFilesComponent {
     }
 
     /**
-    * Function to add one file to data cart with pre-select option.
-    **/
+     * Function to add one file to data cart with pre-select option.
+     * @param rowData - node in the file tree
+     * @param isSelected - flag indicating if the node is selected
+     * @param cartKey - key of the cart
+     */
     addtoCart(rowData: any, isSelected: boolean, cartKey: string) {
         let dataCartItem: DataCartItem = {
             cartId: rowData.cartId,
@@ -499,17 +527,19 @@ export class DataFilesComponent {
     }
 
     /**
-    * Remove one node from cart and set flag
-    **/
+     * Remove one node from cart and set flag
+     * @param rowData - node in the file tree
+     */
     removeFromNode(rowData: any) {
         this.removeCart(rowData);
         this.cartService.setCartLength(this.globalDataCart.size());
         this.allSelected = this.updateAllSelectStatus(this.files);
     }
 
-    /**
+   /**
     * Remove one node from cart - can be a file or sub-tree
-    **/
+    * @param rowData - node in the file tree 
+    */
     removeCart(rowData: any) {
         if (!rowData.isLeaf) {
             let subFiles: any = null;
@@ -531,8 +561,9 @@ export class DataFilesComponent {
     }
 
     /**
-    * Remove all files from cart and set flags
-    **/
+     * Remove all files from cart and set flags
+     * @param files - file tree
+     */
     removeFilesFromCart(files: TreeNode[]) {
         this.removeFromCart(files);
         this.allSelected = this.updateAllSelectStatus(this.files);
@@ -540,8 +571,9 @@ export class DataFilesComponent {
     }
 
     /**
-    * Remove all files from cart - used by removeFilesFromCart()
-    **/
+     * Remove all files from cart - used by removeFilesFromCart()
+     * @param files - file tree
+     */
     removeFromCart(files: TreeNode[]) {
         for (let comp of files) {
             if (comp.children.length > 0) {
@@ -557,8 +589,9 @@ export class DataFilesComponent {
     }
 
     /**
-    * Check if all chirldren nodes were selected
-    **/
+     * Update select status - Check if all chirldren nodes were selected
+     * @param files - file tree
+     */
     updateAllSelectStatus(files: any) {
         var allSelected = true;
         for (let comp of files) {
@@ -576,8 +609,9 @@ export class DataFilesComponent {
     }
 
     /**
-    * Once a file was downloaded, we need to update it's parent's status as well
-    **/
+     * Update download status - once a file was downloaded, we need to update it's parent's status as well
+     * @param files - file tree
+     */
     updateDownloadStatus(files: any) {
         var allDownloaded = true;
         var noFileDownloadedFlag = true;
@@ -605,8 +639,9 @@ export class DataFilesComponent {
     }
 
     /**
-    * Downloaded one file
-    **/
+     * Downloaded one file
+     * @param rowData - tree node
+     */
     downloadOneFile(rowData: any) {
         let filename = decodeURI(rowData.downloadUrl).replace(/^.*[\\\/]/, '');
         rowData.downloadStatus = 'downloading';
@@ -633,8 +668,9 @@ export class DataFilesComponent {
     }
 
     /**
-    * Function to set status when a file was downloaded
-    **/
+     * Function to set status when a file was downloaded
+     * @param rowData - tree node
+     */
     setFileDownloaded(rowData: any) {
         rowData.downloadStatus = 'downloaded';
         // this.cartService.updateCartItemDownloadStatus(rowData.cartId, 'downloaded');
@@ -645,10 +681,10 @@ export class DataFilesComponent {
         }
     }
 
-
     /**
-    * Function to download all files based on download url.
-    **/
+     * Function to download all files based on download url.
+     * @param files - file tree
+     */
     downloadAllFilesFromUrl(files: any) {
         for (let comp of files) {
             if (comp.children.length > 0) {
@@ -662,8 +698,8 @@ export class DataFilesComponent {
     }
 
     /**
-    * Function to download all.
-    **/
+     * Function to download all.
+     */
     downloadFromRoot() {
         this.cancelAllDownload = false;
         this.specialDataCart = DataCart.createCart(this.ediid);
@@ -685,8 +721,9 @@ export class DataFilesComponent {
     }
 
     /**
-    * Function to set the download status of all files to downloaded.
-    **/
+     * Function to set the download status of all files to downloaded.
+     * @param files - file tree
+     */
     setAllDownloaded(files: any) {
         for (let comp of files) {
             if (comp.children.length > 0) {
@@ -700,8 +737,9 @@ export class DataFilesComponent {
     }
 
     /**
-    * Function to reset the download status of a file.
-    **/
+     * Function to reset the download status of a file.
+     * @param rowData - tree node
+     */
     resetDownloadStatus(rowData) {
         rowData.downloadStatus = null;
         rowData.downloadProgress = 0;
@@ -712,7 +750,7 @@ export class DataFilesComponent {
 
     /**
      * Return "download all" button color based on download status
-     **/
+     */
     getDownloadAllBtnColor() {
         if (this.downloadStatus == null)
             return '#1E6BA1';
@@ -721,8 +759,9 @@ export class DataFilesComponent {
     }
 
     /**
-    * Return "download" button color based on download status
-    **/
+     * Return "download" button color based on download status
+     * @param rowData - tree node
+     */
     getDownloadBtnColor(rowData: any) {
         if (rowData.downloadStatus == 'downloaded')
             return 'green';
@@ -731,8 +770,8 @@ export class DataFilesComponent {
     }
 
     /**
-    * Return "add all to datacart" button color based on select status
-    **/
+     * Return "add all to datacart" button color based on select status
+     */
     getAddAllToDataCartBtnColor() {
         if (this.allSelected)
             return 'green';
@@ -741,8 +780,8 @@ export class DataFilesComponent {
     }
 
     /**
-    * Return tooltip text based on select status
-    **/
+     * Return tooltip text based on select status
+     */
     getCartProcessTooltip() {
         if (this.allSelected)
             return 'Remove all from cart';
@@ -750,9 +789,9 @@ export class DataFilesComponent {
             return 'Add all to cart';
     }
 
-    /*
-  * Following functions set tree table style
-  */
+    /**
+     * Following functions set tree table style
+     */
     titleStyleHeader() {
         return { 'background-color': '#1E6BA1', 'width': this.cols[0].width, 'color': 'white', 'font-size': this.fontSize };
     }
@@ -785,6 +824,10 @@ export class DataFilesComponent {
         return { 'width': this.cols[3].width, 'font-size': this.fontSize };
     }
 
+    /**
+     * Set column width
+     * @param mobWidth 
+     */
     setWidth(mobWidth: number) {
         if (mobWidth > 1340) {
             this.cols[0].width = '60%';
@@ -808,11 +851,13 @@ export class DataFilesComponent {
         }
     }
 
-    /*
-    * Make sure the width of popup dialog is less than 500px or 80% of the window width
-    */
+    /**
+     * Make sure the width of popup dialog is less than 500px or 80% of the window width
+     */
     getDialogWidth() {
-        var w = window.innerWidth > 500 ? 500 : window.innerWidth;
-        return w + 'px';
+        if(this.inBrowser){
+            var w = window.innerWidth > 500 ? 500 : window.innerWidth;
+            return w + 'px';
+        }
     }
 }
