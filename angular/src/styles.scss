@@ -114,7 +114,15 @@ a.enabled {
 
 .popup-tool-bar {
     background-color:#153971;
-    height: 3em; 
+    height: 3.3em; 
     color:white;
     padding: .5em .5em .5em 2em
+}
+
+.btn-labeled {
+    float:right;
+    margin-right: 1em;
+    width:160px; 
+    color:white;
+    padding-right: 1em;
 }

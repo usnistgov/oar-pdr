@@ -16,6 +16,7 @@ from .exceptions import (BagProfileError, BagWriteError, BadBagRequest,
                          ComponentNotFound)
 from ....nerdm.exceptions import (NERDError, NERDTypeError)
 from ....nerdm.convert import PODds2Res
+from ....nerdm.constants import core_schema_base, schema_versions
 from ....id import PDRMinter, NIST_ARK_NAAN
 from ...utils import (build_mime_type_map, checksum_of, measure_dir_size,
                       read_nerd, read_pod, write_json)
@@ -48,14 +49,18 @@ COLLANNOT_FILENAME = ANNOT_FILENAME
 
 NERD_PRE = "nrd"
 NERDPUB_PRE = "nrdp"
-NERDM_SCH_ID_BASE = "https://data.nist.gov/od/dm/nerdm-schema/"
-NERDMPUB_SCH_ID_BASE = "https://data.nist.gov/od/dm/nerdm-schema/pub/"
-NERDM_SCH_VER = "v0.3"
+NERDM_SCH_ID_BASE = core_schema_base
+NERDMPUB_SCH_ID_BASE = core_schema_base + "pub/"
+NERDMBIB_SCH_ID_BASE = core_schema_base + "bib/"
+NERDM_SCH_VER = schema_versions[0]
 NERDMPUB_SCH_VER = NERDM_SCH_VER
+NERDMBIB_SCH_VER = NERDM_SCH_VER
 NERDM_SCH_ID = NERDM_SCH_ID_BASE + NERDM_SCH_VER + "#"
 NERDMPUB_SCH_ID = NERDMPUB_SCH_ID_BASE + NERDMPUB_SCH_VER + "#"
+NERDMBIB_SCH_ID = NERDMBIB_SCH_ID_BASE + NERDMPUB_SCH_VER + "#"
 NERD_DEF = NERDM_SCH_ID + "/definitions/"
 NERDPUB_DEF = NERDMPUB_SCH_ID + "/definitions/"
+NERDBIB_DEF = NERDMBIB_SCH_ID + "/definitions/"
 DATAFILE_TYPE = NERDPUB_PRE + ":DataFile"
 CHECKSUMFILE_TYPE = NERDPUB_PRE + ":ChecksumFile"
 DOWNLOADABLEFILE_TYPE = NERDPUB_PRE + ":DownloadableFile"

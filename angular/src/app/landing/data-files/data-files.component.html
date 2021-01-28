@@ -182,37 +182,21 @@
     </div>
 </div>
 
-<div id="reference">
+<!-- references -->
+<div id="reference" style="margin: 1em 0em;">
     <div [hidden]="metadata">
-        <br>
         <div *ngIf="checkReferences()">
-            <h3><b>References</b></h3>
-            <span class="font14" *ngIf="isDocumentedBy">
-                This data is discussed in :
-                <span *ngFor="let refs of record['references']">
-                    <span *ngIf="refs['refType'] == 'IsDocumentedBy'">
-                        <br>
-                        <i class="faa faa-external-link">
-                            <a style="margin-left:0.3em;" href={{refs.location}} target="blank">{{ refs.label }}</a>
-                        </i>
-                    </span>
-                </span>
-            </span>
-            <span class="font14" *ngIf="isReferencedBy">
-                This data are referenced in :
-                <span class="reflinks" *ngFor="let refs of record['references']">
-                    <span *ngIf="refs['refType'] == 'IsReferencedBy'">
-                        <br>
-                        <i class="faa faa-external-link"> </i>
-                        <a style="margin-left:0.3em;" href={{refs.location}} target="blank">
-                            {{ refs.location }}</a>
-                    </span>
-
-                </span>
-            </span>
+            <div style="margin-bottom: 1em;"><h3><b>References</b></h3></div>
+            <div class="font14" style="margin: 0em 0em .5em 1em;" *ngFor="let refs of record['references']">
+                <i class="faa faa-external-link"> &nbsp;
+                    <a href={{refs.location}} target="blank">{{ getReferenceText(refs) }}</a>
+                </i>
+            </div>
         </div>
     </div>
 </div>
+
+<!-- file details -->
 <p-overlayPanel class="fileDialog" #op3 [dismissable]="true" [showCloseIcon]="true"
     [style]="{'display':'inline-block','position':'related','left':'50%','top':'80%'}" [appendTo]="'body'">
     <div class="filecard" [ngStyle]="{'max-width':getDialogWidth()}">
