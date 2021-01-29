@@ -855,6 +855,8 @@ export class DataFilesComponent {
         if(this.inBrowser){
             var w = window.innerWidth > 500 ? 500 : window.innerWidth;
             return w + 'px';
+        }else{
+            return "500px";
         }
     }
 
