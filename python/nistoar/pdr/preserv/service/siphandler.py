@@ -814,6 +814,13 @@ class MIDAS3SIPHandler(SIPHandler):
             self.bagger = None
             self.sipdir = None
 
+        # (these are for diagnostic purposes only)
+        self.bagdir = os.path.join(bagparent, self.bagname)
+        self.datadir = datadir
+        if self.bagger:
+            self.bagdir = self.bagger.bagdir
+            self.datadir = self.bagger.datadir
+
         if self.state == status.FORGOTTEN:
             if self._is_preserved():
                 log.debug("Detected successful preservation that was forgotten, SIP=%s", self._sipid)
@@ -893,8 +900,8 @@ class MIDAS3SIPHandler(SIPHandler):
             destdir = self.storedir
 
         if not self.isready(_inprogress=True):
-            if not os.path.exists(self.datadir):
-                log.warn("bagit request for id=%s has missing data dir: "+self.datadir)
+            if self.bagger and not os.path.exists(self.bagger.datadir):
+                log.warn("bagit request for id=%s has missing data dir: "+self.bagger.datadir)
             raise StateException("{0}: SIP is not ready: {1}".
                                  format(self._sipid, self._status.message),
                                  sys=_sys)

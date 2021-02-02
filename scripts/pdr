@@ -1,0 +1,13 @@
+#!/bin/bash
+#
+prog=`basename $0`
+execdir=`dirname $0`
+[ "$execdir" = "" -o "$execdir" = "." ] && execdir=$PWD
+
+[ -f "$execdir/${prog}.py" ] || {
+    echo "${prog}:" Missing script: "$execdir/${prog}.py" 1>&2
+    exit 255
+}
+
+exec python "$execdir/${prog}.py" "$@"
+
