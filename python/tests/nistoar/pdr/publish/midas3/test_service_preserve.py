@@ -16,6 +16,7 @@ from nistoar.pdr.preserv.bagit import NISTBag
 from nistoar.pdr import exceptions as pdrexc
 
 from nistoar.pdr.preserv.service import service as _psrvc
+import ejsonschema as ejs
 
 # datadir = nistoar/preserv/data
 datadir = os.path.join( os.path.dirname(os.path.dirname(os.path.dirname(__file__))),
@@ -165,13 +166,16 @@ class TestMIDAS3PublishingServicePreserve(test.TestCase):
             os.remove(os.path.join(mdarchive, f))
 
     def create_sip(self):
-        podf = os.path.join(self.revdir, "1491", "_pod.json")
-        pod = utils.read_json(podf)
+        pod = self.open_sip_pod()
         bagdir = os.path.join(self.svc.mddir, self.midasid)
 
         self.svc.update_ds_with_pod(pod, False)
         self.assertTrue(os.path.isdir(bagdir))
+        return pod
         
+    def open_sip_pod(self):
+        podf = os.path.join(self.revdir, "1491", "_pod.json")
+        return utils.read_json(podf)
 
     def test_ctor(self):
         self.assertTrue(os.path.isdir(self.svc.workdir))
@@ -183,27 +187,11 @@ class TestMIDAS3PublishingServicePreserve(test.TestCase):
 
         self.assertIsNotNone(self.svc.pressvc)
 
-    def test_preserve_wo_pod(self):
-        bagdir = os.path.join(self.svc.mddir, self.midasid)
-        self.assertTrue(not os.path.exists(bagdir))
-        
-        stat = self.svc.preserve_new(self.midasid, False)
-        self.assertEqual(stat['state'], status.NOT_FOUND)
-        self.assertTrue(not os.path.exists(bagdir))
-
-        self.create_sip()
-        self.assertTrue(os.path.exists(bagdir))
-        stat = self.svc.preserve_new(self.midasid, False)
-        self.assertEqual(stat['state'], status.SUCCESSFUL)
-        self.assertTrue(not os.path.exists(bagdir))
-
-        stat = self.svc.preserve_update(self.midasid, False)
-        self.assertEqual(stat['state'], status.NOT_FOUND)
-        self.assertTrue(not os.path.exists(bagdir))
-        
     def test_preserve_new(self):
-        self.create_sip()
-        stat = self.svc.preserve_new(self.midasid, False)
+        pod = self.open_sip_pod()
+        bagdir = os.path.join(self.svc.mddir, self.midasid)
+
+        stat = self.svc.preserve_new(pod, False)
 
         self.assertEqual(stat['state'], status.SUCCESSFUL)
         self.assertTrue(os.path.exists(os.path.join(self.storedir,
@@ -225,49 +213,52 @@ class TestMIDAS3PublishingServicePreserve(test.TestCase):
         self.assertTrue(os.path.join(mdarchive, self.midasid+".json"))
 
     def test_preserve_cant_update(self):
-        self.create_sip()
+        pod = self.open_sip_pod()
+        with self.assertRaises(mdsvc.PreservationStateError):
+            stat = self.svc.preserve_update(pod, False)
+
+        pod = self.create_sip()
 
         with self.assertRaises(mdsvc.PreservationStateError):
-            stat = self.svc.preserve_update(self.midasid, False)
+            stat = self.svc.preserve_update(pod, False)
         
 
     def test_preserve_cant_renew(self):
-        self.create_sip()
+        pod = self.create_sip()
 
         # do initial submission
-        stat = self.svc.preserve_new(self.midasid, False)
+        stat = self.svc.preserve_new(pod, False)
         self.assertEqual(stat['state'], status.SUCCESSFUL)
         self.assertTrue(os.path.exists(os.path.join(self.storedir,
                                            self.midasid+".1_0_0.mbag0_4-0.zip")))
         mdbag = os.path.join(self.mdbags, self.midasid)
         self.assertFalse(os.path.exists(mdbag))
 
-        self.create_sip()
+        pod = self.create_sip()
 
         # prove that we can't use preserve_new() now
         with self.assertRaises(mdsvc.PreservationStateError):
-            stat = self.svc.preserve_new(self.midasid, False)
+            stat = self.svc.preserve_new(pod, False)
 
 
     def test_preserve_update(self):
-        self.create_sip()
+        pod = self.open_sip_pod()
+        bagdir = os.path.join(self.svc.mddir, self.midasid)
 
         # do initial submission
-        stat = self.svc.preserve_new(self.midasid, False)
+        stat = self.svc.preserve_new(pod, False)
         self.assertEqual(stat['state'], status.SUCCESSFUL)
         self.assertTrue(os.path.exists(os.path.join(self.storedir,
                                            self.midasid+".1_0_0.mbag0_4-0.zip")))
         mdbag = os.path.join(self.mdbags, self.midasid)
         self.assertFalse(os.path.exists(mdbag))
 
-        self.create_sip()
-
         # prove that we can't use preserve_new() now
         with self.assertRaises(mdsvc.PreservationStateError):
-            stat = self.svc.preserve_new(self.midasid, False)
+            stat = self.svc.preserve_new(pod, False)
 
         # now test update
-        stat = self.svc.preserve_update(self.midasid, False)
+        stat = self.svc.preserve_update(pod, False)
 
         self.assertEqual(stat['state'], status.SUCCESSFUL)
         self.assertTrue(os.path.exists(os.path.join(self.storedir,
@@ -285,6 +276,27 @@ class TestMIDAS3PublishingServicePreserve(test.TestCase):
         mdbag = os.path.join(self.mdbags, self.midasid)
         self.assertFalse(os.path.exists(mdbag))
 
+    def test_catch_invalid_pod(self):
+        pod = self.create_sip()
+
+        # prove that preserve_new() fails when POD is invalid
+        pod['distribution'][1]['mediaType'] = '';
+        with self.assertRaises(ejs.ValidationError):
+            stat = self.svc.preserve_new(pod, False) 
+
+        pod['distribution'][1]['mediaType'] = 'application/json';
+        stat = self.svc.preserve_new(pod, False)
+        self.assertEqual(stat['state'], status.SUCCESSFUL)
+
+        pod['distribution'][1]['mediaType'] = '';
+        with self.assertRaises(ejs.ValidationError):
+            stat = self.svc.preserve_update(pod, False) 
+
+        pod['distribution'][1]['mediaType'] = 'application/json';
+        stat = self.svc.preserve_update(pod, False)
+        self.assertEqual(stat['state'], status.SUCCESSFUL)
+
+        
 
 if __name__ == '__main__':
     test.main()

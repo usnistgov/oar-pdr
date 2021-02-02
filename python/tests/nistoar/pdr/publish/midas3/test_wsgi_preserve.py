@@ -174,13 +174,17 @@ class TestPreserveHandler(test.TestCase):
         for f in os.listdir(mdarchive):
             os.remove(os.path.join(mdarchive, f))
 
+    def get_sip_podfile(self):
+        return os.path.join(self.revdir, "1491", "_pod.json")
+
     def create_sip(self):
-        podf = os.path.join(self.revdir, "1491", "_pod.json")
+        podf = self.get_sip_podfile()
         pod = utils.read_json(podf)
         bagdir = os.path.join(self.svc.mddir, self.midasid)
 
         self.svc.update_ds_with_pod(pod, False)
         self.assertTrue(os.path.isdir(bagdir))
+        return podf
         
     def gethandler(self, path, env):
         return wsgi.PreserveHandler(path, self.svc, env, self.start, "secret")
@@ -216,8 +220,48 @@ class TestPreserveHandler(test.TestCase):
         self.assertEqual(stat['state'], ps.READY)
 
 
+    def test_preserve_cold(self):
+        # test that we can preserve without first creating the metadata bag
+        podf = self.get_sip_podfile()
+
+        req = {
+            'REQUEST_METHOD': "PUT",
+            'CONTENT_TYPE': 'application/json',
+            'PATH_INFO': 'midas/'+self.midasid,
+            'HTTP_AUTHORIZATION': 'Bearer secret'
+        }
+        self.hdlr = self.gethandler(req['PATH_INFO'], req)
+
+        with open(podf) as fd:
+            req['wsgi.input'] = fd
+            body = self.hdlr.handle()
+
+        self.assertIn("201 ", self.resp[0])
+
+        stat = json.loads("\n".join(body))
+        self.assertEqual(stat['state'], ps.SUCCESSFUL)
+
+        self.assertTrue(os.path.exists(os.path.join(self.storedir,
+                                           self.midasid+".1_0_0.mbag0_4-0.zip")))
+        self.assertTrue(os.path.exists(os.path.join(self.storedir,
+                                    self.midasid+".1_0_0.mbag0_4-0.zip.sha256")))
+
+        statfile = os.path.join(self.statusdir, self.midasid+".json")
+        self.assertTrue(os.path.isfile(statfile))
+        with open(statfile) as fd:
+            stat = json.load(fd)
+        self.assertEqual(stat['user']['state'], ps.SUCCESSFUL)
+        
+        # metadata bag was deleted
+        mdbag = os.path.join(self.mdbags, self.midasid)
+        self.assertFalse(os.path.exists(mdbag))
+
+        # data was ingested
+        self.assertTrue(os.path.isfile(os.path.join(mdarchive, self.arkbase+".json")))
+
+
     def test_preserve(self):
-        self.create_sip()
+        podf = self.create_sip()
 
         # confirm this is a new publication
         mdbag = os.path.join(self.mdbags, self.midasid)
@@ -231,12 +275,16 @@ class TestPreserveHandler(test.TestCase):
         
         req = {
             'REQUEST_METHOD': "PUT",
+            'CONTENT_TYPE': 'application/json',
             'PATH_INFO': 'midas/'+self.midasid,
             'HTTP_AUTHORIZATION': 'Bearer secret'
         }
         self.hdlr = self.gethandler(req['PATH_INFO'], req)
 
-        body = self.hdlr.handle()
+        with open(podf) as fd:
+            req['wsgi.input'] = fd
+            body = self.hdlr.handle()
+
         self.assertIn("201 ", self.resp[0])
 
         stat = json.loads("\n".join(body))
@@ -261,15 +309,15 @@ class TestPreserveHandler(test.TestCase):
         self.assertTrue(os.path.isfile(os.path.join(mdarchive, self.arkbase+".json")))
 
         # TEST republishing
-        self.create_sip()
+        # podf = self.create_sip()
 
         # confirm that new metadata bag was constructed from the previous published
         # head bag.
-        mbdir = os.path.join(mdbag, "multibag")
-        self.assertTrue(os.path.exists(os.path.join(mbdir,"file-lookup.tsv")))
-        with open(nerdf) as fd:
-            nerd = json.load(fd)
-        self.assertEquals(nerd['version'], "1.0.0+ (in edit)")
+#         mbdir = os.path.join(mdbag, "multibag")
+#         self.assertTrue(os.path.exists(os.path.join(mbdir,"file-lookup.tsv")))
+#         with open(nerdf) as fd:
+#             nerd = json.load(fd)
+#         self.assertEquals(nerd['version'], "1.0.0+ (in edit)")
 
         # confirm that we fail if we try to publish it as if it's the first time
         self.resp = []
@@ -280,7 +328,10 @@ class TestPreserveHandler(test.TestCase):
         }
         self.hdlr = self.gethandler(req['PATH_INFO'], req)
 
-        body = self.hdlr.handle()
+        with open(podf) as fd:
+            req['wsgi.input'] = fd
+            body = self.hdlr.handle()
+
         self.assertIn("409 ", self.resp[0])
         stat = json.loads("\n".join(body))
         self.assertEqual(stat['state'], ps.CONFLICT)
@@ -294,7 +345,10 @@ class TestPreserveHandler(test.TestCase):
         }
         self.hdlr = self.gethandler(req['PATH_INFO'], req)
 
-        body = self.hdlr.handle()
+        with open(podf) as fd:
+            req['wsgi.input'] = fd
+            body = self.hdlr.handle()
+
         #
         # NOTE:  changing response to 201 (from 200)
         #
