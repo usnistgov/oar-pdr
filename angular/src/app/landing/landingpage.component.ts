@@ -13,6 +13,8 @@ import { NerdmRes, NERDResource } from '../nerdm/nerdm';
 import { IDNotFound } from '../errors/error';
 import { MetadataUpdateService } from './editcontrol/metadataupdate.service';
 import { LandingConstants } from './constants';
+import { CartService } from '../datacart/cart.service';
+import { DataCartStatus } from '../datacart/cartstatus';
 
 /**
  * A component providing the complete display of landing page content associated with 
@@ -62,6 +64,8 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
 
     loadingMessage = '<i class="faa faa-spinner faa-spin"></i> Loading...';
 
+    dataCartStatus: DataCartStatus;
+
     /**
      * create the component.
      * @param route   the requested URL path to be fulfilled with this view
@@ -79,6 +83,7 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
         private cfg: AppConfig,
         private mdserv: MetadataService,
         public edstatsvc: EditStatusService,
+        private cartService: CartService,
         private mdupdsvc: MetadataUpdateService) 
     {
         this.reqId = this.route.snapshot.paramMap.get('id');
@@ -119,6 +124,13 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
         var showError: boolean = true;
         let metadataError = "";
         this.displaySpecialMessage = false;
+
+        // Clean up cart status storage 
+        if(this.inBrowser){
+            this.dataCartStatus = DataCartStatus.openCartStatus();
+            this.dataCartStatus.cleanUpStatusStorage();
+        }
+        // this.cartService.cleanUpStatusStorage();
 
         this.route.queryParamMap.subscribe(queryParams => {
             var param = queryParams.get("editEnabled");
@@ -167,7 +179,6 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
         
                   if (this.edstatsvc.editingEnabled()) 
                   {
-                      // console.log("editmode url param:", param);
                       if (this.routerParamEditEnabled) {
                           showError = false;
                           console.log("Returning from authentication redirection (editmode="+this.routerParamEditEnabled+")");

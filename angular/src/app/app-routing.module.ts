@@ -9,8 +9,10 @@ import { NerdmComponent } from './landing/nerdm.component';
 import { NotFoundComponent, InternalErrorComponent } from './errors/errors.module';
 import { DatacartComponent } from './datacart/datacart.component';
 import { DoneComponent } from './landing/done/done.component';
+import { DatacartRoutes } from './datacart/datacart.routes';
 
 const routes: Routes = [
+    ...DatacartRoutes,
     { path: '', redirectTo: '/about', pathMatch: 'full' },
 
     // app paths
@@ -23,7 +25,8 @@ const routes: Routes = [
       ]
     },
     { path: 'nerdm',                 component: NerdmComponent         },
-    { path: 'datacart/:mode',        component: DatacartComponent      },
+    // If ediid='global', local normal cart. Otherwise, load the cart with key=ediid
+    // { path: 'datacart/:ediid',        component: DatacartComponent      },
     { path: 'done',         component: DoneComponent },
     // error paths
     { path: 'not-found', 
