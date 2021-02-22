@@ -148,19 +148,15 @@ describe('NERDResource', function() {
         let nrd = new nerdm.NERDResource(testdata['test1']);
         let refs : any[] = nrd.getReferencesByType(["IsReferencedBy","IsDocumentedBy"]);
         expect(refs.length).toBe(1);
-        expect(refs[0].refType).toBe("IsReferencedBy");
+        expect(refs[0].refType).toBe("IsDocumentedBy");
 
-        refs = nrd.getReferencesByType(["IsSupplementTo","IsDocumentedBy"]);
+        refs = nrd.getReferencesByType(["IsSupplementTo","IsReferencedBy"]);
         expect(refs.length).toBe(0);
     });
 
     it("getPrimaryReferences", () => {
         let nrd = new nerdm.NERDResource(JSON.parse(JSON.stringify(testdata['test1'])));
         let refs : any[] = nrd.getPrimaryReferences();
-        expect(refs.length).toBe(0);
-
-        nrd.data['references'][0]['refType'] = "IsDocumentedBy"
-        refs = nrd.getPrimaryReferences();
         expect(refs.length).toBe(1);
         expect(refs[0]['refType']).toBe("IsDocumentedBy");
 
@@ -168,6 +164,10 @@ describe('NERDResource', function() {
         refs = nrd.getPrimaryReferences();
         expect(refs.length).toBe(1);
         expect(refs[0]['refType']).toBe("IsSupplementTo");
+
+        nrd.data['references'][0]['refType'] = "IsReferencedBy"
+        refs = nrd.getPrimaryReferences();
+        expect(refs.length).toBe(0);
     });
 
     it("getCitation", () => {
