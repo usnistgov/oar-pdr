@@ -15,7 +15,7 @@ import { DescriptionComponent } from './description/description.component';
 import { TopicComponent } from './topic/topic.component';
 import { KeywordComponent } from './keyword/keyword.component';
 import { MetadataComponent } from './metadata/metadata.component';
-import { Collaspe } from './collapseDirective/collapse.directive';
+import { Collapse } from './collapseDirective/collapse.directive';
 import { NoidComponent } from './noid.component';
 import { NerdmComponent } from './nerdm.component';
 import { KeyValuePipe } from './keyvalue.pipe';
@@ -25,7 +25,7 @@ import { MetadataView } from './metadata/metadataview.component';
   declarations: [
     LandingComponent,DataFilesComponent,TitleComponent,AuthorComponent,ContactComponent,
     DescriptionComponent, TopicComponent, KeywordComponent,
-    MetadataComponent, Collaspe,
+    MetadataComponent, Collapse,
     NoidComponent, NerdmComponent,KeyValuePipe,MetadataView
   ],
   imports: [
@@ -35,7 +35,7 @@ import { MetadataView } from './metadata/metadataview.component';
   exports:[
     LandingComponent, DataFilesComponent, TitleComponent, AuthorComponent, ContactComponent,
     DescriptionComponent, TopicComponent, KeywordComponent, MetadataComponent,
-    Collaspe, NoidComponent, NerdmComponent,KeyValuePipe,MetadataView
+    Collapse, NoidComponent, NerdmComponent,KeyValuePipe,MetadataView
   ]
 })
 export class LandingModule { }
