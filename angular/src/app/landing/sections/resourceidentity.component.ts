@@ -87,7 +87,11 @@ export class ResourceIdentityComponent implements OnChanges {
         return "Data Resource";
     }
 
+    /*
+     * uncomment this as needed for debugging purposes
+     *
     @ViewChild(VersionComponent)
     versionCmp : VersionComponent;
+     */
 
 }
