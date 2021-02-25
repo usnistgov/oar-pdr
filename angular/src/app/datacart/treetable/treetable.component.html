@@ -1,6 +1,6 @@
 <div style="display: inline-block; margin: auto;">
     <div class="full-span" style="width: 94%;">
-        <p-treeTable *ngIf="isVisible" [resizableColumns]="true" selectionMode="checkbox" [value]="dataFiles"
+        <p-treeTable *ngIf="isVisible && inBrowser" [resizableColumns]="true" selectionMode="checkbox" [value]="dataFiles"
             (onNodeSelect)="dataFileCount()" (onNodeUnselect)="dataFileCount()" [(selection)]="selectedData"
             [style]="{'margin':'auto', 'padding-bottom':'3%', 'color':'black'}">
             <ng-template pTemplate="header">

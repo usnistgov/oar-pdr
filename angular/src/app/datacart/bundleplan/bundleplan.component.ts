@@ -100,26 +100,28 @@ export class BundleplanComponent implements OnInit {
         this.CART_CONSTANTS = CartConstants.cartConst;
 
         this.cartService._watchRemoteCommand((command) => {
-            switch(command.command) { 
-                case 'downloadSelected': { 
-                    if(command.data)
-                        this.selectedData = command.data;
-                        this.downloadAllFilesFromAPI();
+            if(this.inBrowser){
+                switch(command.command) { 
+                    case 'downloadSelected': { 
+                        if(command.data)
+                            this.selectedData = command.data;
+                            this.downloadAllFilesFromAPI();
+                        break; 
+                    } 
+                    case 'resetDownloadParams': {
+                        this.resetDownloadParams();
+                        break;
+                    }
+                    case 'cancelDownloadAll': {
+                        this.cancelDownloadAll();
+                        break;
+                    }
+                    default: { 
+                    //statements; 
                     break; 
+                    } 
                 } 
-                case 'resetDownloadParams': {
-                    this.resetDownloadParams();
-                    break;
-                }
-                case 'cancelDownloadAll': {
-                    this.cancelDownloadAll();
-                    break;
-                }
-                default: { 
-                   //statements; 
-                   break; 
-                } 
-             } 
+            }
         });
     }
 
@@ -138,8 +140,7 @@ export class BundleplanComponent implements OnInit {
 
         this.downloadService.watchDownloadProcessStatus().subscribe(
             value => {
-                if(value && this.downloadStarted)
-                {
+                if(value && this.downloadStarted && this.inBrowser){
                     this.downloadEndTime = new Date();
                     this.totalDownloadTime = this.downloadEndTime.getTime() / 1000 - this.downloadStartTime.getTime() / 1000;
                     this.overallStatus = 'complete';

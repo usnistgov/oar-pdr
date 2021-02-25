@@ -80,20 +80,22 @@ export class TreetableComponent implements OnInit {
         // removeSelected - remove selected files from the data cart
 
         this.cartService._watchRemoteCommand((command) => {
-            switch(command.command) { 
-                case 'removeDownloaded': { 
-                   this.removeAllDownloadedFiles();
-                   break; 
+            if(this.inBrowser){
+                switch(command.command) { 
+                    case 'removeDownloaded': { 
+                    this.removeAllDownloadedFiles();
+                    break; 
+                    } 
+                    case 'removeSelected': {
+                        this.removeSelectedData();
+                        break;
+                    }
+                    default: { 
+                    //statements; 
+                    break; 
+                    } 
                 } 
-                case 'removeSelected': {
-                    this.removeSelectedData();
-                    break;
-                }
-                default: { 
-                   //statements; 
-                   break; 
-                } 
-             } 
+            }
         });
     }
 
@@ -284,7 +286,7 @@ export class TreetableComponent implements OnInit {
         setTimeout(() => {
             this.expandToLevel(this.dataFiles, true, 1);
         }, 0);
-        this.refreTree();
+        this.refreshTree();
     }
     
     /**
@@ -400,13 +402,13 @@ export class TreetableComponent implements OnInit {
             }
         }
         this.isExpanded = option;
-        this.refreTree();
+        this.refreshTree();
     }
 
     /**
      * Refresh the tree table
      */
-    refreTree(){
+    refreshTree(){
         this.isVisible = false;
         setTimeout(() => {
             this.isVisible = true;

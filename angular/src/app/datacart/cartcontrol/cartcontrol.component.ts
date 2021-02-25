@@ -18,6 +18,7 @@ export class CartcontrolComponent implements OnInit {
     noFileDownloaded: boolean = true; // will be true if any item in data cart is downloaded
     
     @Input() dataFiles: TreeNode[] = [];
+    @Input() inBrowser: boolean;
 
     constructor(
         private cfg: AppConfig,
@@ -38,9 +39,11 @@ export class CartcontrolComponent implements OnInit {
     ngOnInit() {
         this.downloadService.watchAnyFileDownloaded().subscribe(
             value => {
-                this.noFileDownloaded = !value;
-                if (value) {
-                    this.downloadService.setTotalFileDownloaded(this.downloadService.getTotalDownloadedFiles(this.dataFiles));
+                if(this.inBrowser){
+                    this.noFileDownloaded = !value;
+                    if (value) {
+                        this.downloadService.setTotalFileDownloaded(this.downloadService.getTotalDownloadedFiles(this.dataFiles));
+                    }
                 }
             }
         );
@@ -72,7 +75,9 @@ export class CartcontrolComponent implements OnInit {
 
     private detectScreenSize() {
         setTimeout(() => {
-            this.screenWidth = window.innerWidth;
+            if(this.inBrowser){
+                this.screenWidth = window.innerWidth;
+            }
         }, 0);
     }
 
