@@ -596,8 +596,12 @@ export class TreetableComponent implements OnInit {
      * Make sure the width of popup dialog is less than 500px or 80% of the window width
      */
     getDialogWidth() {
-        var w = window.innerWidth > 500 ? 500 : window.innerWidth;
-        return w + 'px';
+        if(this.inBrowser){
+            var w = window.innerWidth > 500 ? 500 : window.innerWidth;
+            return w + 'px';
+        }else{
+            return '500px';
+        }
     }
 
     /**
