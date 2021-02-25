@@ -73,20 +73,25 @@
                                 data-toggle="tooltip" title="Download all files"
                                 [ngStyle]="{'color':getDownloadAllBtnColor(),'cursor':'pointer'}">
                                 <i class="faa faa-circle-thin faa-stack-2x" aria-hidden="true"></i>
-                                <i class="faa faa-download faa-stack-1x" aria-hidden="true"></i>
+                                <!-- <i class="faa faa-download faa-stack-1x" aria-hidden="true"></i> -->
+                                <i *ngIf="!addingToCart; else show_spinner1" class="faa faa-download faa-stack-1x"
+                                aria-hidden="true"></i>
+                                <ng-template #show_spinner1><i class="faa faa-spinner faa-spin faa-stack-1x"
+                                        style="color:#1E6BA1" aria-hidden="true"></i></ng-template>
                             </a>
                             <a id="routeToDatacart" target="_blank" [routerLink]="['/datacart', 'popup']"
                                 style="display:none"></a>
-                            <span *ngIf="!editEnabled" class="faa-stack fa-lg icon-cart addalltocart"
+                            <span *ngIf="!editEnabled" class="faa-stack fa-lg icon-cart"
                                 (click)="cartProcess(files)"
-                                [ngStyle]="{'color':getAddAllToDataCartBtnColor(),'cursor':'pointer','margin-right':'1em'}"
+                                [ngStyle]="{'color':getAddAllToDataCartBtnColor(), 'cursor': 'pointer',
+                                'margin-right': '1em'}"
                                 data-toggle="tooltip" [title]="getCartProcessTooltip()">
                                 <i class="faa faa-circle-thin faa-stack-2x" aria-hidden="true"></i>
                                 <i *ngIf="!isLocalProcessing; else show_spinner" class="faa faa-cart-plus faa-stack-1x"
                                     aria-hidden="true"></i>
                                 <ng-template #show_spinner><i class="faa faa-spinner faa-spin faa-stack-1x"
                                         style="color:#1E6BA1" aria-hidden="true"></i></ng-template>
-                                <span class="w3-badge badge-notify" style="margin-right:0.5em;">{{cartLength}}</span>
+                                <span class="w3-badge badge-notify" style="margin-right:0em;">{{cartLength}}</span>
                             </span>
                         </div>
                     </ng-template>

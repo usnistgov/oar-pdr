@@ -104,8 +104,8 @@ export class BundleplanComponent implements OnInit {
                 case 'downloadSelected': { 
                     if(command.data)
                         this.selectedData = command.data;
-                   this.downloadAllFilesFromAPI();
-                   break; 
+                        this.downloadAllFilesFromAPI();
+                    break; 
                 } 
                 case 'resetDownloadParams': {
                     this.resetDownloadParams();
@@ -331,7 +331,7 @@ export class BundleplanComponent implements OnInit {
         postMessage.push({ "bundleName": files.data.downloadFileName, "includeFiles": this.downloadData });
         // console.log('Bundle plan post message:', JSON.stringify(postMessage[0]));
         console.log("Calling following end point to get bundle plan:", this.distApi + "_bundle_plan");
-
+        
         this.bundlePlanRef = this.downloadService.getBundlePlan(this.distApi + "_bundle_plan", JSON.stringify(postMessage[0])).subscribe(
             blob => {
                 this.bundlePlanStatus = blob.status.toLowerCase();

@@ -66,6 +66,7 @@ export class DataFilesComponent {
     mobWidth: number = 800;   // default value used in server context
     mobHeight: number = 900;  // default value used in server context
     fontSize: string;
+    addingToCart: boolean = false;
     public CART_CONSTANTS: any = CartConstants.cartConst;
 
     /* Function to Return Keys object properties */
@@ -106,14 +107,6 @@ export class DataFilesComponent {
             };
         }
 
-        this.edstatsvc._watchForceDataFileTreeInit((start) => {
-            if (start && this.inBrowser) {
-                this.globalDataCart = DataCart.openCart(this.CART_CONSTANTS.GLOBAL_CART_NAME);
-                this.allSelected = this.updateAllSelectStatus(this.files);
-                this.cartLength = this.globalDataCart.size();
-            }
-        });
-
         this.cartService.watchCartLength().subscribe(value => {
             this.cartLength = value;
         });
@@ -128,6 +121,17 @@ export class DataFilesComponent {
             this.updateStatusFromCart();
 
             window.addEventListener("storage", this.cartChanged.bind(this));
+        }
+    }
+
+    /**
+     * Initialize data tree
+     */
+    initDataFileTree(){
+        if (this.inBrowser) {
+            this.globalDataCart = DataCart.openCart(this.CART_CONSTANTS.GLOBAL_CART_NAME);
+            this.allSelected = this.updateAllSelectStatus(this.files);
+            this.cartLength = this.globalDataCart.size();
         }
     }
 
@@ -698,20 +702,24 @@ export class DataFilesComponent {
      * Function to download all.
      */
     downloadFromRoot() {
+        this.addingToCart = true;
         this.cancelAllDownload = false;
         this.specialDataCart = DataCart.createCart(this.ediid);
 
         setTimeout(() => {
             // this.cartService.clearTheCart();
             this.addAllFilesToCart(this.files, true, this.ediid).then(function (result) {
-                // this.cartService.setCurrentCart(this.CART_CONSTANTS.GLOBAL_CART_NAME);
+                this.addingToCart = false;
                 window.open('/datacart/'+this.ediid, this.ediid);
                 this.updateStatusFromCart().then(function (result: any) {
-                    this.edstatsvc.forceDataFileTreeInit();
+                    // this.edstatsvc.forceDataFileTreeInit();
+                    this.initDataFileTree();
                 }.bind(this), function (err) {
+                    this.addingToCart = false;
                     alert("something went wrong while adding file to data cart.");
                 });
             }.bind(this), function (err) {
+                this.addingToCart = false;
                 alert("something went wrong while adding all files to cart");
             });
         }, 0);

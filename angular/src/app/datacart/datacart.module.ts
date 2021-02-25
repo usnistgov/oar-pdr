@@ -13,6 +13,8 @@ import { TreeTableModule } from 'primeng/treetable';
 import { ButtonModule } from 'primeng/button';
 import { TooltipModule } from 'primeng/tooltip';
 import { TreetableComponent } from './treetable/treetable.component';
+import { CanDeactivateGuard } from '../can-deactivate/can-deactivate.guard';
+
 
 @NgModule({
   declarations: [ 
@@ -31,7 +33,10 @@ import { TreetableComponent } from './treetable/treetable.component';
     DownloadConfirmComponent
   ],
   providers: [
-    CartService
+    CartService,
+    CanDeactivateGuard
   ]
 })
-export class DatacartModule { }
+export class DatacartModule {
+
+ }

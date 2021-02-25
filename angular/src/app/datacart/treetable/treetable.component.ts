@@ -62,16 +62,18 @@ export class TreetableComponent implements OnInit {
         private ngZone: NgZone
     ) { 
         this.CART_CONSTANTS = CartConstants.cartConst;
-        this.mobHeight = (window.innerHeight);
-        this.mobWidth = (window.innerWidth);
-        this.setWidth(this.mobWidth);
-        window.onresize = (e) => {
-            ngZone.run(() => {
-                this.mobWidth = window.innerWidth;
-                this.mobHeight = window.innerHeight;
-                this.setWidth(this.mobWidth);
-            });
-        };
+        if(this.inBrowser){
+            this.mobHeight = (window.innerHeight);
+            this.mobWidth = (window.innerWidth);
+            this.setWidth(this.mobWidth);
+            window.onresize = (e) => {
+                ngZone.run(() => {
+                    this.mobWidth = window.innerWidth;
+                    this.mobHeight = window.innerHeight;
+                    this.setWidth(this.mobWidth);
+                });
+            };
+        }
 
         // Watch remote command from cartControl component
         // removeDownloaded - remove downloaded files from the data cart
@@ -143,7 +145,6 @@ export class TreetableComponent implements OnInit {
         this.dataFileCount();
         this.expandToLevel(this.dataFiles, true, 3);
         this.outputDataFiles.emit(this.dataFiles);
-        console.log('this.dataFiles', this.dataFiles);
 
         if (this.ediid != this.CART_CONSTANTS.GLOBAL_CART_NAME) {
             if(this.dataFiles[0])
@@ -447,7 +448,6 @@ export class TreetableComponent implements OnInit {
      * This is where dafaFiles get generated
      */
     createDataCartHierarchy() {
-        console.log('this.dataCart', this.dataCart);
         let arrayList = this.dataCart.getCartItems().reduce(function (result, current) {
             result[current.resTitle] = result[current.resTitle] || [];
             result[current.resTitle].push({data:current});
