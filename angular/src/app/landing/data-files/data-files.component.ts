@@ -13,7 +13,6 @@ import { Router } from '@angular/router';
 import { CommonFunctionService } from '../../shared/common-function/common-function.service';
 import { GoogleAnalyticsService } from '../../shared/ga-service/google-analytics.service';
 import { NotificationService } from '../../shared/notification-service/notification.service';
-import { EditStatusService } from '../editcontrol/editstatus.service';
 import { NerdmComp } from '../../nerdm/nerdm';
 import { DataCart, DataCartItem } from '../../datacart/cart';
 import { DataCartStatus } from '../../datacart/cartstatus';
@@ -85,7 +84,6 @@ export class DataFilesComponent {
         private gaService: GoogleAnalyticsService,
         public router: Router,
         private notificationService: NotificationService,
-        private edstatsvc: EditStatusService,
         ngZone: NgZone) {
         this.cols = [
             { field: 'name', header: 'Name', width: '60%' },
@@ -712,7 +710,6 @@ export class DataFilesComponent {
                 this.addingToCart = false;
                 window.open('/datacart/'+this.ediid, this.ediid);
                 this.updateStatusFromCart().then(function (result: any) {
-                    // this.edstatsvc.forceDataFileTreeInit();
                     this.initDataFileTree();
                 }.bind(this), function (err) {
                     this.addingToCart = false;
