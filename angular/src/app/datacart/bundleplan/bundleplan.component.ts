@@ -300,7 +300,6 @@ export class BundleplanComponent implements OnInit {
      * Function to download all files from API call.
      **/
     downloadAllFilesFromAPI() {
-        this.gaService.gaTrackEvent('download', undefined, 'all files', "Data cart");
         this.clearDownloadStatus();
         this.showCurrentTask = true;
         let postMessage: any[] = [];
@@ -465,6 +464,8 @@ export class BundleplanComponent implements OnInit {
     **/
     processBundle(res: any) {
         this.currentTask = "Processing Each Bundle...";
+        this.gaService.gaTrackEvent('download', undefined, 'all files', "Data cart");
+
         this.messageColor = this.getColor();
 
         this.downloadService.downloadNextZip(this.zipData, this.dataFiles, this.dataCart);
