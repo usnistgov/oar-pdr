@@ -222,7 +222,7 @@ export class DataCart {
      * @param resid   a repository-local identifier for the resource that the file is from
      * @param file    the DataCartItem or NerdmComp that describes the file being added.
      */
-    addFile(resid: string, file: DataCartItem|NerdmComp, markSelected: boolean = false) : void {
+    addFile(resid: string, file: DataCartItem|NerdmComp, markSelected: boolean = false, savecart:boolean = false) : void {
         let fail = function(msg: string) : void {
             console.error("Unable to load file NERDm component: "+msg+": "+JSON.stringify(file));
         }
@@ -236,6 +236,8 @@ export class DataCart {
             item['downloadStatus'] = "";
         item['isSelected'] = markSelected;
         this.addItem(item);
+
+        if(savecart) this.save();
     }
 
     /**
