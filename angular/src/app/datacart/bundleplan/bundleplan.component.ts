@@ -106,7 +106,6 @@ export class BundleplanComponent implements OnInit {
             if(this.inBrowser){
                 switch(command.command) { 
                     case 'downloadSelected': { 
-                        console.log("downloading selected...");
                         if(command.data)
                             this.selectedData = command.data;
                             this.downloadAllFilesFromAPI();
@@ -144,7 +143,6 @@ export class BundleplanComponent implements OnInit {
 
         this.downloadService.watchDownloadProcessStatus().subscribe(
             value => {
-                console.log("watchDownloadProcessStatus", value);
                 if(value && this.downloadStarted && this.inBrowser){
                     this.setProcessComplete();
                 }
@@ -169,7 +167,6 @@ export class BundleplanComponent implements OnInit {
         this.downloadEndTime = new Date();
         this.totalDownloadTime = this.downloadEndTime.getTime() / 1000 - this.downloadStartTime.getTime() / 1000;
         this.overallStatus = 'complete';
-        console.log("this.dataFiles", this.dataFiles);
         this.outputOverallStatus.emit(this.overallStatus);
         setTimeout(() => {
             this.updateDownloadPercentage(100);
@@ -317,18 +314,14 @@ export class BundleplanComponent implements OnInit {
      * Function to download all files from API call.
      */
     downloadAllFilesFromAPI() {
-        console.log("Start downloading...");
         this.showCurrentTask = true;
         this.currentTask = "Preparing downloads...";
-        console.log("Reset download status...");
         this.clearDownloadStatus();
         let postMessage: any[] = [];
         this.downloadData = [];
         this.zipData = [];
         this.allDownloadCancelled = false;
         this.bundlePlanMessage = null;
-        this.downloadService.setDownloadingNumber(0);
-
         this.downloadStartTime = new Date();
 
         // create root
@@ -349,7 +342,6 @@ export class BundleplanComponent implements OnInit {
         files.data.downloadStatus = 'downloading';
 
         postMessage.push({ "bundleName": files.data.downloadFileName, "includeFiles": this.downloadData });
-        // console.log('Bundle plan post message:', JSON.stringify(postMessage[0]));
         console.log("Calling following end point to get bundle plan:", this.distApi + "_bundle_plan");
         
         this.bundlePlanRef = this.downloadService.getBundlePlan(this.distApi + "_bundle_plan", JSON.stringify(postMessage[0])).subscribe(
@@ -362,7 +354,6 @@ export class BundleplanComponent implements OnInit {
                 if (this.bundlePlanUnhandledFiles) {
                     this.markUnhandledFiles();
                 }
-                console.log('bundlePlan return status:', this.bundlePlanStatus);
                 if (this.bundlePlanStatus == 'complete' || this.bundlePlanStatus == 'warnings') {
                     if(this.bundlePlanStatus == 'warnings'){
                         let dateTime = new Date();
@@ -385,7 +376,6 @@ export class BundleplanComponent implements OnInit {
                         this.zipData.push({ "fileName": bundle.bundleName, "downloadProgress": 0, "downloadStatus": null, "downloadInstance": null, "bundle": bundle, "downloadUrl": downloadUrl, "downloadErrorMessage": "","bundleSize": bundle.bundleSize, 'downloadTime': null });
                     }
 
-                    console.log('this.zipData', this.zipData);
                     let ngbModalOptions: NgbModalOptions = {
                         backdrop: 'static',
                         keyboard: false,
@@ -461,7 +451,6 @@ export class BundleplanComponent implements OnInit {
      * Process data returned from bundle_plan (stored in zipData)
      */
     processBundle() {
-        console.log("Processing Each Bundle...")
         this.gaService.gaTrackEvent('download', undefined, 'all files', "Data cart");
 
         this.messageColor = this.getColor();
@@ -529,8 +518,6 @@ export class BundleplanComponent implements OnInit {
         this.dataCart.restore();
         this.dataCart.resetDatafileDownloadStatus(this.dataFiles, '');
         this.dataCart.save();
-
-        this.downloadService.setTotalFileDownloaded(0);
         this.downloadService.resetDownloadData();
     }
 

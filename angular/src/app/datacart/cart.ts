@@ -252,9 +252,6 @@ export class DataCart {
         let found = this.contents[id];
         if (found){ 
             delete this.contents[id];
-        }else{
-            console.log("this.contents ", this.contents);
-            console.log("Not found ", id);
         }
 
         if(updateCart) this.save();
@@ -291,7 +288,7 @@ export class DataCart {
                 this.resetDatafileDownloadStatus(dataFiles[i].children, downloadStatus);
             } else {
                 dataFiles[i].data.downloadStatus = downloadStatus;
-                this.setDownloadStatus(dataFiles[i].data.resId, dataFiles[i].data.filePath, downloadStatus);
+                this.setDownloadStatus(dataFiles[i].data.resId, dataFiles[i].data.resFilePath, downloadStatus);
             }
         }
     }
@@ -336,7 +333,6 @@ export class DataCart {
 
         let item: DataCartItem = this.findFile(resid, filePath);
         if (! item){
-            console.log("Not found", resid + '/' + filePath);
             return false;
         }
 

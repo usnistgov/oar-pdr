@@ -18,7 +18,6 @@ export class CartcontrolComponent implements OnInit {
     totalDownloaded: number = 0; 
     inBrowser: boolean = false;
     noFileDownloaded: boolean = true; // will be true if any item in data cart is downloaded
-    // dataFiles: TreeNode[] = [];
 
     @Input() dataFiles: TreeNode[] = [];
 
@@ -38,9 +37,7 @@ export class CartcontrolComponent implements OnInit {
         this.downloadService.watchTotalFileDownloaded((value) => {
             this.totalDownloaded = value;
         });
-    }
 
-    ngOnInit() {
         this.downloadService.watchAnyFileDownloaded().subscribe(
             value => {
                 if(this.inBrowser){
@@ -51,6 +48,9 @@ export class CartcontrolComponent implements OnInit {
                 }
             }
         );
+    }
+
+    ngOnInit() {
     }
 
     /**

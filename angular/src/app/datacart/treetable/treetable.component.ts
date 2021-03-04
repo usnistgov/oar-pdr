@@ -22,6 +22,7 @@ export class TreetableComponent implements OnInit {
     dataCart: DataCart;
     dataCartStatus: DataCartStatus;
     inBrowser: boolean = false;
+    isGlobalCart: boolean = true;
 
     // Data
     selectedFileCount: number = 0;
@@ -30,6 +31,7 @@ export class TreetableComponent implements OnInit {
     selectedNodes: TreeNode[] = [];
     dataFiles: TreeNode[] = [];
     fileNode: TreeNode;
+    totalDownloaded: number = 0;
 
     // Display
     isExpanded: boolean = true;
@@ -43,6 +45,7 @@ export class TreetableComponent implements OnInit {
     fontSize: string;
     mobWidth: number;
     mobHeight: number;
+    defaultExpandLevel: number = 3;
 
     @Input() ediid: string;
     @Input() zipData: ZipData[] = [];
@@ -106,15 +109,16 @@ export class TreetableComponent implements OnInit {
     ngOnInit() {
         if(this.inBrowser){
             this.dataCartStatus = DataCartStatus.openCartStatus();
+            this.isGlobalCart = (this.ediid == this.CART_CONSTANTS.GLOBAL_CART_NAME);
 
-            if (this.ediid != this.CART_CONSTANTS.GLOBAL_CART_NAME) {
+            if (!this.isGlobalCart) {
                 this.dataCart = DataCart.openCart(this.ediid);
-                this.loadDataTree(false);
+                this.loadDataTree();
+                this.cartService.executeCommand('downloadSelected', this.selectedData);
             } else {
                 this.dataCart = DataCart.openCart(this.CART_CONSTANTS.GLOBAL_CART_NAME);
-                this.loadDataTree(true);
+                this.loadDataTree();
             }
-            
             window.addEventListener("storage", this.cartChanged.bind(this));
         }
     }
@@ -125,6 +129,9 @@ export class TreetableComponent implements OnInit {
      */
     ngOnChanges(changes: SimpleChanges) {
         if (changes['zipData']) {
+            if(changes['zipData'].previousValue == undefined && changes['zipData'].currentValue.length == 0)
+                return;
+
             this.updateDataFiles(this.zipData);
         }
     }
@@ -136,7 +143,7 @@ export class TreetableComponent implements OnInit {
     updateDataFiles(zipData: ZipData[]){
         // Associate zipData with files
         for (let zip of zipData) {
-            this.downloadService.setDownloadStatus(zip, this.dataFiles, 'pending', this.dataCart);
+            this.downloadService.setDownloadStatus(zip, this.dataFiles, zip.downloadStatus, this.dataCart);
         }
     }
 
@@ -147,7 +154,6 @@ export class TreetableComponent implements OnInit {
      */
     cartChanged(event){
         if (event.key == this.dataCart.getKey()) {
-            console.log("--");
             this.dataCart.restore();
             this.loadDataTree();
             if (this.ediid == this.CART_CONSTANTS.GLOBAL_CART_NAME) {
@@ -161,7 +167,7 @@ export class TreetableComponent implements OnInit {
      * bundle download function will be fired immediately. Otherwise just display the data cart.
      * @param isGlobal - indicates if this is a global data cart
      */
-    loadDataTree(isGlobal: boolean = true) {
+    loadDataTree() {
         this.selectedData = [];
         this.createDataCartHierarchy();
 
@@ -176,8 +182,10 @@ export class TreetableComponent implements OnInit {
         this.treeRoot.push(root);
         this.buildSelectNodes(this.dataFiles);
         this.checkNode(this.dataFiles, this.selectedNodes);
-        this.dataFileCount();
-        this.expandToLevel(this.dataFiles, true, 3);
+        this.selectedDataFileCount();
+
+        this.outputSelectedData.emit(this.selectedData);
+        this.cartService.setSelectedFileCount(this.selectedFileCount);
         this.outputDataFiles.emit(this.dataFiles);
 
         if (this.ediid != this.CART_CONSTANTS.GLOBAL_CART_NAME) {
@@ -185,12 +193,6 @@ export class TreetableComponent implements OnInit {
                 this.dataCartStatus.updateCartStatusInUse(this.ediid, true, this.dataFiles[0].data.resTitle.substring(0,20)+"...");
         } else {
             this.dataCartStatus.updateCartStatusInUse(this.CART_CONSTANTS.GLOBAL_CART_NAME, true, this.CART_CONSTANTS.GLOBAL_CART_NAME);
-        }
-
-        if(!isGlobal){
-            this.cartService.executeCommand('downloadSelected', this.selectedData);
-        }else{
-            this.downloadService.setTotalFileDownloaded(this.downloadService.getTotalDownloadedFiles(this.dataFiles));
         }
     }
 
@@ -313,7 +315,7 @@ export class TreetableComponent implements OnInit {
         this.cartService.setCartLength(this.dataCart.size());
         this.downloadService.setTotalFileDownloaded(this.downloadService.getTotalDownloadedFiles(this.dataFiles));
         this.selectedData = [];
-        this.dataFileCount();
+        this.selectedDataFileCount();
         setTimeout(() => {
             this.expandToLevel(this.dataFiles, true, 1);
         }, 0);
@@ -331,25 +333,13 @@ export class TreetableComponent implements OnInit {
         this.createDataCartHierarchy();
         this.cartService.setCartLength(this.dataCart.size());
         this.selectedData = [];
-        this.dataFileCount();
+        this.selectedFileCount = 0;
+        this.outputSelectedData.emit(this.selectedData);
+        this.cartService.setSelectedFileCount(this.selectedFileCount);
         //reset downloaded file count in case some were removed already
         this.downloadService.setTotalFileDownloaded(this.downloadService.getTotalDownloadedFiles(this.dataFiles));
         this.expandToLevel(this.dataFiles, true, 1);
     }
-
-    /**
-     * Remove the selected data from the data cart
-     * @param selectedData 
-     */
-    // removeSelectedDataFromCart(selectedData: any){
-    //     for (let selData of selectedData) {
-    //         if(!selData.data.isLeaf){
-    //                 this.removeSelectedDataFromCart(selData.children);
-    //         }else{
-    //             this.dataCart.removeFileById(selData.data['resId'], selData.data['resFilePath'])
-    //         }
-    //     }
-    // }
 
     /**
      * Set data table's column widthes based on the width of the device window
@@ -384,7 +374,7 @@ export class TreetableComponent implements OnInit {
     /**
      * Count the selected files
      */
-    dataFileCount() {
+    selectedDataFileCount(emit:boolean = false) {
         this.selectedFileCount = 0;
         for (let selData of this.selectedData) {
             if (selData.data['resFilePath'] != null) {
@@ -394,8 +384,10 @@ export class TreetableComponent implements OnInit {
             }
         }
 
-        this.outputSelectedData.emit(this.selectedData);
-        this.cartService.setSelectedFileCount(this.selectedFileCount);
+        if(emit){
+            this.outputSelectedData.emit(this.selectedData);
+            this.cartService.setSelectedFileCount(this.selectedFileCount);
+        }
     }
 
     /**
@@ -464,13 +456,9 @@ export class TreetableComponent implements OnInit {
      * clears all download status for both dataFiles and dataCart
      */
     clearDownloadStatus() {
-        console.log('clearDownloadStatus');
         this.dataCart.restore();
-        console.log("this.datacart", this.dataCart.contents);
         this.dataCart.resetDatafileDownloadStatus(this.dataFiles, '');
         this.dataCart.save();
-        console.log('cart saved.');
-
         this.downloadService.setTotalFileDownloaded(0);
         this.downloadService.resetDownloadData();
     }
@@ -504,6 +492,8 @@ export class TreetableComponent implements OnInit {
      * This is where dafaFiles get generated
      */
     createDataCartHierarchy() {
+        this.totalDownloaded = 0;
+
         let arrayList = this.dataCart.getCartItems().reduce(function (result, current) {
             result[current.resTitle] = result[current.resTitle] || [];
             result[current.resTitle].push({data:current});
@@ -516,7 +506,6 @@ export class TreetableComponent implements OnInit {
 
         var iii: number = 0;
         for (var key in arrayList) {
-            // let resId = key;
             if (arrayList.hasOwnProperty(key)) {
                 parentObj = {
                     data: {
@@ -524,9 +513,9 @@ export class TreetableComponent implements OnInit {
                     },
                     children:[]
                 };
-
-                // parentObj.children = [];
+                let level = 0;
                 for (let fields of arrayList[key]) {
+                    level = 0;
                     let resId = fields.data.resId;
                     let ediid = fields.data.ediid;
                     let fpath = fields.data.filePath.split("/");
@@ -562,6 +551,10 @@ export class TreetableComponent implements OnInit {
                                 parent = child2;
                                 iii = iii + 1;
                             }
+                            level++;
+                            if(level <= this.defaultExpandLevel){
+                                parent.expanded = true;
+                            }
                         }
                     }
                 }
@@ -570,6 +563,7 @@ export class TreetableComponent implements OnInit {
             }
         }
         this.downloadService.setFileDownloadedFlag(!noFileDownloadedFlag);
+        this.downloadService.setTotalFileDownloaded(this.totalDownloaded);
     }
 
 
@@ -617,6 +611,10 @@ export class TreetableComponent implements OnInit {
 
         if ((inputArray.data.filetype == 'nrdp:DataFile' || inputArray.data.filetype == 'nrdp:ChecksumFile') && inputArray.children.length == 0) {
             inputArray.data.isLeaf = true;
+
+            if (inputArray.data.downloadStatus == "downloaded") {
+                this.totalDownloaded++;
+            }
         } else {
             inputArray.data.cartId = null;
             inputArray.data.isLeaf = false;

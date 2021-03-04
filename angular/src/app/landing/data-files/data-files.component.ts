@@ -68,11 +68,6 @@ export class DataFilesComponent {
     addingToCart: boolean = false;
     public CART_CONSTANTS: any = CartConstants.cartConst;
 
-    /* Function to Return Keys object properties */
-    //   keys(): Array<string> {
-    //     return Object.keys(this.fileDetails);
-    //   }
-
     constructor(private cartService: CartService,
         private cdr: ChangeDetectorRef,
         private downloadService: DownloadService,
@@ -245,7 +240,6 @@ export class DataFilesComponent {
                 this.resetStatus(comp.children);
             } else {
                 comp.data.isIncart = false;
-                // comp.data.downloadStatus = null;
             }
         }
         return Promise.resolve(files);
@@ -427,7 +421,7 @@ export class DataFilesComponent {
                     this.isLocalProcessing = false;
                     this.allSelected = false;
                     this.downloadStatus = null;
-                    this.cartService.setCartLength(0);
+                    this.cartService.setCartLength(this.globalDataCart.size());
                     this.isLocalProcessing = false;
                 }.bind(this), function (err) {
                     alert("something went wrong while removing file from data cart.");
@@ -522,13 +516,11 @@ export class DataFilesComponent {
         }
         if(cartKey == '') {   // general data cart
             this.globalDataCart.addFile(rowData.resId, dataCartItem, isSelected);
-            // this.globalDataCart.save();
             this.cartService.setCartLength(this.globalDataCart.size());
             if (cartKey == '')
                 rowData.isIncart = true;
         }else{
             this.specialDataCart.addFile(rowData.resId, dataCartItem, isSelected);
-            // this.specialDataCart.save();
         }
 
         return Promise.resolve(true);
@@ -539,7 +531,6 @@ export class DataFilesComponent {
      * @param rowData - node in the file tree
      */
     removeFromNode(rowData: any) {
-        console.log("Remove from node...");
         this.removeCart(rowData);
         this.cartService.setCartLength(this.globalDataCart.size());
         this.allSelected = this.updateAllSelectStatus(this.files);
@@ -573,7 +564,6 @@ export class DataFilesComponent {
      * @param files - file tree
      */
     removeFilesFromCart(files: TreeNode[]) {
-        console.log("removeFilesFromCart...");
         this.globalDataCart.restore();
         this.globalDataCart.removeFromTree(files);
         this.globalDataCart.save();
@@ -581,24 +571,6 @@ export class DataFilesComponent {
         this.allSelected = this.updateAllSelectStatus(this.files);
         return Promise.resolve(files);
     }
-
-    /**
-     * Remove all files from cart - used by removeFilesFromCart()
-     * @param files - file tree
-     */
-    // removeFromCart(files: TreeNode[]) {
-    //     for (let comp of files) {
-    //         if (comp.children.length > 0) {
-    //             comp.data.isIncart = false;
-    //             this.removeFromCart(comp.children);
-    //         } else {
-    //             this.globalDataCart.removeFileById(comp.data.resId,comp.data.filePath);
-    //             // this.cartService.removeCartId(comp.data.cartId);
-    //             comp.data.isIncart = false;
-    //         }
-    //     }
-
-    // }
 
     /**
      * Update select status - Check if all chirldren nodes were selected
@@ -632,7 +604,6 @@ export class DataFilesComponent {
                 var status = this.updateDownloadStatus(comp.children);
                 if (status) {
                     comp.data.downloadStatus = 'downloaded';
-                    // this.cartService.updateCartItemDownloadStatus(comp.data.cartId, 'downloaded');
                     this.globalDataCart.setDownloadStatus(comp.data.resId, comp.data.filePath, comp.data.downloadStatus);
                 }
                 allDownloaded = allDownloaded && status;
@@ -685,7 +656,6 @@ export class DataFilesComponent {
      */
     setFileDownloaded(rowData: any) {
         rowData.downloadStatus = 'downloaded';
-        // this.cartService.updateCartItemDownloadStatus(rowData.cartId, 'downloaded');
         this.globalDataCart.restore();
 
         this.globalDataCart.setDownloadStatus(rowData.resId, rowData.filePath, rowData.downloadStatus);
@@ -722,7 +692,6 @@ export class DataFilesComponent {
         this.specialDataCart = DataCart.createCart(this.ediid);
 
         setTimeout(() => {
-            // this.cartService.clearTheCart();
             this.addAllFilesToCart(this.files, true, this.ediid).then(function (result) {
                 this.addingToCart = false;
                 window.open('/datacart/'+this.ediid, this.ediid);
@@ -751,24 +720,12 @@ export class DataFilesComponent {
                 this.setAllDownloaded(comp.children);
             } else {
                 comp.data.downloadStatus = 'downloaded';
-                // this.cartService.updateCartItemDownloadStatus(comp.data.cartId, 'downloaded');
                 this.globalDataCart.setDownloadStatus(comp.data.resId, comp.data.filePath, "downloaded");
             }
         }
 
         this.globalDataCart.save();
     }
-
-    /**
-     * Function to reset the download status of a file.
-     * @param rowData - tree node
-     */
-    // resetDownloadStatus(rowData) {
-    //     rowData.downloadStatus = null;
-    //     rowData.downloadProgress = 0;
-    //     this.globalDataCart.setDownloadStatus(rowData.resId, rowData.filePath);
-    //     this.allDownloaded = false;
-    // }
 
     /**
      * Return "download all" button color based on download status

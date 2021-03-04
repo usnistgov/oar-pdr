@@ -21,7 +21,7 @@ export class DownloadService {
     anyFileDownloadedFlagSub = new BehaviorSubject<boolean>(false);
     totalFileDownloadedSub = new BehaviorSubject<number>(0);
 
-    private download_maximum: number = 2;
+    private max_concur_download: number = 2;
     _totalBundleSize = 0;
     _totalDownloaded = 0;
     _downloadSpeed = 0.00;
@@ -120,8 +120,8 @@ export class DownloadService {
     /**
      * Return max download instances allowed at same time
      */
-    getDownloadMaximum() {
-        return this.download_maximum;
+    getMaxConcurDownload() {
+        return this.max_concur_download-1;
     }
 
     /**
@@ -280,7 +280,7 @@ export class DownloadService {
     increaseNumberOfDownloading() {
         let sub = this.zipFilesDownloadingDataCartSub;
 
-        if (sub.getValue() < this.getDownloadMaximum()) {
+        if (sub.getValue() < this.getMaxConcurDownload()) {
             this.setDownloadingNumber(sub.getValue() + 1);
         }
     }
@@ -291,7 +291,7 @@ export class DownloadService {
     downloadNextZip(zipData: ZipData[], dataFiles: any, dataCart: DataCart) {
         let sub = this.zipFilesDownloadingDataCartSub;
 
-        if (sub.getValue() < this.getDownloadMaximum()) {
+        if (sub.getValue() < this.getMaxConcurDownload()) {
             let nextZip = this.getNextZipInQueue(zipData);
             if (nextZip != null) {
                 this.download(nextZip, zipData, dataFiles, dataCart);
