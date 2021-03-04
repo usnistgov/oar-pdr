@@ -1,4 +1,4 @@
-import { Component, OnInit, Output, Input, NgZone, HostListener, OnChanges, SimpleChanges, EventEmitter } from '@angular/core';
+import { Component, OnInit, Output, Input, NgZone, HostListener, Inject, PLATFORM_ID, EventEmitter, SimpleChanges } from '@angular/core';
 import { TreeNode } from 'primeng/primeng';
 import { ZipData } from '../../shared/download-service/zipData';
 import { CartService } from '../cart.service';
@@ -9,6 +9,7 @@ import { CartConstants } from '../cartconstants';
 import { DataCart } from '../cart';
 import { DataCartStatus } from '../cartstatus';
 import { OverlayPanel } from 'primeng/overlaypanel';
+import { isPlatformBrowser } from '@angular/common';
 
 @Component({
   selector: 'app-treetable',
@@ -20,6 +21,7 @@ export class TreetableComponent implements OnInit {
 
     dataCart: DataCart;
     dataCartStatus: DataCartStatus;
+    inBrowser: boolean = false;
 
     // Data
     selectedFileCount: number = 0;
@@ -43,7 +45,6 @@ export class TreetableComponent implements OnInit {
     mobHeight: number;
 
     @Input() ediid: string;
-    @Input() inBrowser: boolean;
     @Input() zipData: ZipData[] = [];
     @Output() outputDataFiles = new EventEmitter<TreeNode[]>();
     @Output() outputSelectedData = new EventEmitter<TreeNode[]>();
@@ -59,9 +60,12 @@ export class TreetableComponent implements OnInit {
         public commonFunctionService: CommonFunctionService,
         public cartService: CartService,
         public gaService: GoogleAnalyticsService,
-        private ngZone: NgZone
+        private ngZone: NgZone,
+        @Inject(PLATFORM_ID) private platformId: Object
     ) { 
+        this.inBrowser = isPlatformBrowser(platformId);
         this.CART_CONSTANTS = CartConstants.cartConst;
+
         if(this.inBrowser){
             this.mobHeight = (window.innerHeight);
             this.mobWidth = (window.innerWidth);
@@ -115,9 +119,35 @@ export class TreetableComponent implements OnInit {
         }
     }
 
-    // When storage changed and the key matches current datacart, reload the datacart and refresh the tree table.
-    cartChanged(ev){
-        if (ev.key == this.dataCart.getKey()) {
+    /**
+     * When zipData changed
+     * @param changes 
+     */
+    ngOnChanges(changes: SimpleChanges) {
+        if (changes['zipData']) {
+            this.updateDataFiles(this.zipData);
+        }
+    }
+
+    /**
+     * Update dataFiles with input zipData
+     * @param zipData 
+     */
+    updateDataFiles(zipData: ZipData[]){
+        // Associate zipData with files
+        for (let zip of zipData) {
+            this.downloadService.setDownloadStatus(zip, this.dataFiles, 'pending', this.dataCart);
+        }
+    }
+
+    /**
+     * When storage changed and the key matches current datacart, 
+     * reload the datacart and refresh the tree table.
+     * @param event - change event
+     */
+    cartChanged(event){
+        if (event.key == this.dataCart.getKey()) {
+            console.log("--");
             this.dataCart.restore();
             this.loadDataTree();
             if (this.ediid == this.CART_CONSTANTS.GLOBAL_CART_NAME) {
@@ -126,9 +156,11 @@ export class TreetableComponent implements OnInit {
         }
     }
 
-    /*
-    * Loaing datacart
-    */
+    /**
+     * Load the data cart. If this is not the global data cart (user clicked on Download All button),
+     * bundle download function will be fired immediately. Otherwise just display the data cart.
+     * @param isGlobal - indicates if this is a global data cart
+     */
     loadDataTree(isGlobal: boolean = true) {
         this.selectedData = [];
         this.createDataCartHierarchy();
@@ -200,7 +232,6 @@ export class TreetableComponent implements OnInit {
      * Pre-select tree nodes based on a given selection
      * 
      * @param nodes  The treenodes to be pre-checked based on the 2nd param selectedNodes
-     * 
      * @param selectedNodes  Selected treenodes
      **/
     checkNode(nodes: TreeNode[], selectedNodes: TreeNode[]) {
@@ -293,9 +324,10 @@ export class TreetableComponent implements OnInit {
      * Removes all selected files from the dataFiles and the dataCart
      **/
     removeSelectedData() {
-        this.removeSelectedDataFromCart(this.selectedData);
-
+        this.dataCart.restore();
+        this.dataCart.removeSelectedData(this.selectedData);
         this.dataCart.save();
+
         this.createDataCartHierarchy();
         this.cartService.setCartLength(this.dataCart.size());
         this.selectedData = [];
@@ -305,15 +337,19 @@ export class TreetableComponent implements OnInit {
         this.expandToLevel(this.dataFiles, true, 1);
     }
 
-    removeSelectedDataFromCart(selectedData: any){
-        for (let selData of selectedData) {
-            if(!selData.data.isLeaf){
-                    this.removeSelectedDataFromCart(selData.children);
-            }else{
-                this.dataCart.removeFileById(selData.data['resId'], selData.data['resFilePath'])
-            }
-        }
-    }
+    /**
+     * Remove the selected data from the data cart
+     * @param selectedData 
+     */
+    // removeSelectedDataFromCart(selectedData: any){
+    //     for (let selData of selectedData) {
+    //         if(!selData.data.isLeaf){
+    //                 this.removeSelectedDataFromCart(selData.children);
+    //         }else{
+    //             this.dataCart.removeFileById(selData.data['resId'], selData.data['resFilePath'])
+    //         }
+    //     }
+    // }
 
     /**
      * Set data table's column widthes based on the width of the device window
@@ -323,7 +359,7 @@ export class TreetableComponent implements OnInit {
         if (mobWidth > 1340) {
             this.titleWidth = '60%';
             this.typeWidth = 'auto';
-            this.sizeWidth = 'auto';
+            this.sizeWidth = '100px';
             this.actionWidth = '30px';
             this.statusWidth = 'auto';
             this.fontSize = '16px';
@@ -364,6 +400,7 @@ export class TreetableComponent implements OnInit {
 
     /**
      * Set the header style of the tree table 
+     * @param width - width of the column
      */
     headerStyle(width) {
         return { 'background-color': '#1E6BA1', 'width': width, 'color': 'white', 'font-size': this.fontSize };
@@ -371,37 +408,45 @@ export class TreetableComponent implements OnInit {
 
     /**
      * Set the body style of the tree table 
+     * @param width - width of the tree table
      */
     bodyStyle(width) {
         return { 'width': width, 'font-size': this.fontSize };
     }
 
-    /*
-    * Expand the tree to a level
-    */
-    expandToLevel(dataFiles: any, option: boolean, targetLevel: any) {
-        this.expandAll(dataFiles, option, 0, targetLevel)
+    /**
+     * Expand the tree to a level
+     * @param dataFiles - tree data file
+     * @param isExpanded - flag indicating if the tree is expanded
+     * @param targetLevel - level to expand
+     */
+    expandToLevel(dataFiles: any, isExpanded: boolean, targetLevel: any) {
+        this.expandAll(dataFiles, isExpanded, 0, targetLevel)
     }
 
-    /*
-    * Expand the tree to a level - detail
-    */
-    expandAll(dataFiles: any, option: boolean, level: any, targetLevel: any) {
+    /**
+     * Expand the tree to a level - recursive
+     * @param dataFiles  - tree data file
+     * @param isExpanded - flag indicating if the tree is expanded
+     * @param level - current level
+     * @param targetLevel - level to expand
+     */
+    expandAll(dataFiles: any, isExpanded: boolean, level: any, targetLevel: any) {
         let currentLevel = level + 1;
 
         for (let i = 0; i < dataFiles.length; i++) {
-            dataFiles[i].expanded = option;
+            dataFiles[i].expanded = isExpanded;
             if (targetLevel != null) {
                 if (dataFiles[i].children.length > 0 && currentLevel < targetLevel) {
-                    this.expandAll(dataFiles[i].children, option, currentLevel, targetLevel);
+                    this.expandAll(dataFiles[i].children, isExpanded, currentLevel, targetLevel);
                 }
             } else {
                 if (dataFiles[i].children.length > 0) {
-                    this.expandAll(dataFiles[i].children, option, currentLevel, targetLevel);
+                    this.expandAll(dataFiles[i].children, isExpanded, currentLevel, targetLevel);
                 }
             }
         }
-        this.isExpanded = option;
+        this.isExpanded = isExpanded;
         this.refreshTree();
     }
 
@@ -417,30 +462,39 @@ export class TreetableComponent implements OnInit {
 
     /**
      * clears all download status for both dataFiles and dataCart
-     **/
+     */
     clearDownloadStatus() {
-        this.cartService.resetDatafileDownloadStatus(this.dataFiles, this.dataCart, '');
+        console.log('clearDownloadStatus');
+        this.dataCart.restore();
+        console.log("this.datacart", this.dataCart.contents);
+        this.dataCart.resetDatafileDownloadStatus(this.dataFiles, '');
+        this.dataCart.save();
+        console.log('cart saved.');
+
         this.downloadService.setTotalFileDownloaded(0);
         this.downloadService.resetDownloadData();
     }
 
     /**
      * Function to display bytes in appropriate format.
-     **/
+     * @param bytes - input data in bytes
+     * @param numAfterDecimal - number of digits after decimal
+     */
     formatBytes(bytes, numAfterDecimal) {
         return this.commonFunctionService.formatBytes(bytes, numAfterDecimal);
     }
 
     /**
      * Function to set status when a file was downloaded
-     **/
+     * @param rowData - tree node that the file was downloaded
+     */
     setFileDownloaded(rowData: any) {
         // Google Analytics code to track download event
         this.gaService.gaTrackEvent('download', undefined, rowData.ediid, rowData.downloadUrl);
 
         rowData.downloadStatus = 'downloaded';
 
-        this.dataCart.setDownloadStatus(rowData.resId, rowData.resFilePath);
+        this.dataCart.setDownloadStatus(rowData.resId, rowData.resFilePath, rowData.downloadStatus, true);
         this.downloadService.setFileDownloadedFlag(true);
         this.outputDataFiles.emit(this.dataFiles);
     }

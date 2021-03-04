@@ -119,21 +119,25 @@ export class DownloadService {
 
     /**
      * Return max download instances allowed at same time
-     **/
+     */
     getDownloadMaximum() {
         return this.download_maximum;
     }
 
     /**
-    * Get file from a given url
-    **/
+     * Get file from a given url
+     * @param url 
+     * @param params 
+     */
     getFile(url, params): Observable<Blob> {
         return this.http.get(url, { responseType: 'blob', params: params });
     }
 
     /**
-     * Calling end point 1 to get the bundle plan
-     **/
+     * Get bundle plan from the given url
+     * @param url - end point
+     * @param body - message body
+     */
     getBundlePlan(url: string, body: any): Observable<any> {
         const httpOptions = {
             headers: new HttpHeaders({
@@ -144,8 +148,10 @@ export class DownloadService {
     }
 
     /**
-    * Calling end point 2 to get the bundle
-    **/
+     * Get bundle from the given url
+     * @param url - end point
+     * @param body - message body
+     */
     getBundle(url, body): Observable<any> {
         const request = new HttpRequest(
             "POST", url, body,
@@ -155,8 +161,13 @@ export class DownloadService {
     }
 
     /**
-     * Download zip
-     **/
+     * Download zip data
+     * @param ediid - 
+     * @param nextZip 
+     * @param zipdata 
+     * @param dataFiles 
+     * @param dataCart 
+     */
     download(nextZip: ZipData, zipdata: ZipData[], dataFiles: any, dataCart: DataCart) {
         let sub = this.zipFilesDownloadingDataCartSub;
         let preTime: number = 0;
@@ -180,7 +191,9 @@ export class DownloadService {
                         nextZip.downloadProgress = 0;
                         nextZip.downloadStatus = 'downloaded';
                         this.decreaseNumberOfDownloading();
-                        this.setDownloadProcessStatus(this.allDownloadFinished(zipdata));
+                        if(this.allDownloadFinished(zipdata))
+                            this.setDownloadProcessStatus(true);
+
                         this.setDownloadStatus(nextZip, dataFiles, "downloaded", dataCart);
                         this.setFileDownloadedFlag(true);
                         break;
@@ -358,14 +371,24 @@ export class DownloadService {
      * Set download status of given tree node
      **/
     setDownloadStatus(zip: any, dataFiles: any, status: any, dataCart: DataCart, message: string = '') {
+        let resFilePath: string;
+
+        dataCart.restore();
+        
         for (let includeFile of zip.bundle.includeFiles) {
-            let resFilePath = includeFile.filePath.substring(includeFile.filePath.indexOf('/'));
+            resFilePath = includeFile.filePath;
+
+            if(includeFile.filePath.indexOf('ark:') >= 0){
+                resFilePath = includeFile.filePath.replace('ark:/88434/', '');
+            }
+            resFilePath = resFilePath.substring(resFilePath.indexOf('/'));
             for (let dataFile of dataFiles) {
                 let node = this.searchTreeByfilePath(dataFile, resFilePath);
                 if (node != null) {
                     node.data.downloadStatus = status;
                     node.data.message = message;
-                    dataCart.setDownloadStatus(node.data.resId, node.data.filePath);
+                    node.data.zipFile = zip.fileName;
+                    dataCart.setDownloadStatus(node.data.resId, node.data.resFilePath, status);
 
                     break;
                 }

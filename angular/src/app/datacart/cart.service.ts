@@ -67,20 +67,22 @@ export class CartService {
     }
 
     /**
-     * Reset datafile download status
-     **/
-    resetDatafileDownloadStatus(dataFiles: any, dataCart: DataCart, downloadStatus: string) {
-        for (let i = 0; i < dataFiles.length; i++) {
-            if (dataFiles[i].children.length > 0) {
-                this.resetDatafileDownloadStatus(dataFiles[i].children, dataCart, downloadStatus);
-            } else {
-                dataFiles[i].data.downloadStatus = downloadStatus;
-                dataCart.setDownloadStatus(dataFiles[i].data.resId, dataFiles[i].data.filePath, downloadStatus);
-            }
-        }
-
-        dataCart.save();
-    }
+     * Reset datafile download status. Because this is a recursive function, the datacart should be opened and saved outside this function
+     * otherwise it will take a long time for a large dataset. 
+     * @param dataFiles 
+     * @param dataCart 
+     * @param downloadStatus 
+     */
+    // resetDatafileDownloadStatus(dataFiles: any, dataCart: DataCart, downloadStatus: string) {
+    //     for (let i = 0; i < dataFiles.length; i++) {
+    //         if (dataFiles[i].children.length > 0) {
+    //             this.resetDatafileDownloadStatus(dataFiles[i].children, dataCart, downloadStatus);
+    //         } else {
+    //             dataFiles[i].data.downloadStatus = downloadStatus;
+    //             dataCart.setDownloadStatus(dataFiles[i].data.resId, dataFiles[i].data.filePath, downloadStatus);
+    //         }
+    //     }
+    // }
 
     /**
      * Return "download" button color based on download status

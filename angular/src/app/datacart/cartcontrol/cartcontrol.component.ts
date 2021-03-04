@@ -1,8 +1,9 @@
-import { Component, OnInit, Input, Output, HostListener, SimpleChanges, EventEmitter } from '@angular/core';
+import { Component, OnInit, Input, Output, HostListener, Inject, PLATFORM_ID } from '@angular/core';
 import { TreeNode } from 'primeng/primeng';
 import { AppConfig } from '../../config/config';
 import { CartService } from '../cart.service';
 import { DownloadService } from '../../shared/download-service/download-service.service';
+import { isPlatformBrowser } from '@angular/common';
 
 @Component({
   selector: 'app-cartcontrol',
@@ -12,19 +13,22 @@ import { DownloadService } from '../../shared/download-service/download-service.
 export class CartcontrolComponent implements OnInit {
     imageURL: string = 'assets/images/sdp-background.jpg';
     selectedFileCount: number = 0;
-    screenWidth: number;
+    screenWidth: number = 1080;
     screenSizeBreakPoint: number;
     totalDownloaded: number = 0; 
+    inBrowser: boolean = false;
     noFileDownloaded: boolean = true; // will be true if any item in data cart is downloaded
-    
+    // dataFiles: TreeNode[] = [];
+
     @Input() dataFiles: TreeNode[] = [];
-    @Input() inBrowser: boolean;
 
     constructor(
         private cfg: AppConfig,
         private downloadService: DownloadService,
-        public cartService: CartService
+        public cartService: CartService,
+        @Inject(PLATFORM_ID) private platformId: Object
     ) { 
+        this.inBrowser = isPlatformBrowser(platformId);
         this.screenSizeBreakPoint = +this.cfg.get("screenSizeBreakPoint", "1060");
 
         this.cartService.watchSelectedFileCount((value) => {
@@ -49,18 +53,6 @@ export class CartcontrolComponent implements OnInit {
         );
     }
 
-    getDownloadStatusColor(downloadStatus: string){
-        return this.cartService.getDownloadStatusColor(downloadStatus);
-    }
-
-    getStatusForDisplay(downloadStatus: string){
-        return this.cartService.getStatusForDisplay(downloadStatus);
-    }
-
-    getIconClass(downloadStatus: string){
-        return this.cartService.getIconClass(downloadStatus);
-    }
-
     /**
      *  Following functions detect screen size
      */
@@ -81,9 +73,9 @@ export class CartcontrolComponent implements OnInit {
         }, 0);
     }
 
-    /*
-        Return button color based on Downloaded status
-    */
+    /**
+     * Return button color based on Downloaded status
+     */
     getButtonColor() {
         if (this.noFileDownloaded) {
             return "#1E6BA1";
@@ -92,9 +84,9 @@ export class CartcontrolComponent implements OnInit {
         }
     }
 
-    /*
-        Return text color for Remove Downloaded badge
-    */
+    /**
+     * Return text color for Remove Downloaded badge
+     */
     getDownloadedColor() {
         if (this.noFileDownloaded) {
             return "rgb(82, 82, 82)";
@@ -103,9 +95,9 @@ export class CartcontrolComponent implements OnInit {
         }
     }
 
-    /*
-        Return background color for Remove Downloaded badge
-    */
+    /**
+     * Return background color for Remove Downloaded badge
+     */
     getDownloadedBkColor() {
         if (this.noFileDownloaded) {
             return "white";
@@ -115,7 +107,11 @@ export class CartcontrolComponent implements OnInit {
     }
 
     /**
-     *  Download selected files
+     * Issue a command (from control buttons)
+     *      - Download selected
+     *      - Remove selected
+     *      - Remove downloaded
+     * @param command 
      */
     executeCommand(command: string){
         this.cartService.executeCommand(command);

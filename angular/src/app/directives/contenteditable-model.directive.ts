@@ -66,7 +66,7 @@ export class ContenteditableModel implements OnInit, OnChanges {
     this.elRef.nativeElement.focus()
   }
 
-  /*
+  /**
    * Below will be triggered if source is modified in aside section
    */
   ngOnChanges(changes: SimpleChanges) {

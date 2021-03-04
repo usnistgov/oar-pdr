@@ -28,6 +28,8 @@ export class DatacartComponent extends FormCanDeactivate implements OnInit {
     CART_CONSTANTS: any;
     zipData: ZipData[] = [];
 
+    // overallStatus is used in can-deactivate component. If overallStatus is not 'completed'
+    // and user tried to close the tab, a warning dialog will pop up.
     @ViewChild('overallStatus')
     overallStatus: string = "";
 
@@ -82,6 +84,7 @@ export class DatacartComponent extends FormCanDeactivate implements OnInit {
      * @param zipData zipDta from bundlePlan component
      */
     updateZipDafa(zipData: ZipData[]){
+        console.log("Updating zipData...");
         this.zipData = zipData;
     }
 

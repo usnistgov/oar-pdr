@@ -10,16 +10,26 @@ import { CartConstants } from '../../datacart/cartconstants';
 export class DownloadstatusComponent implements OnInit {
     dataCartStatus: DataCartStatus;
     public CART_CONSTANTS: any = CartConstants.cartConst;
+    inited: boolean = false;
 
     @Input() inBrowser: boolean;
 
-    constructor() { }
+    constructor() { 
+
+    }
 
     ngOnInit() {
+        this.dataCartStatus = DataCartStatus.openCartStatus();
+
         if(this.inBrowser){
-            this.dataCartStatus = DataCartStatus.openCartStatus();
             window.addEventListener("storage", this.cartChanged.bind(this));
         }
+    }
+
+    ngAfterViewInit(): void {
+        //Called after ngAfterContentInit when the component's view has been initialized. Applies to components only.
+        //Add 'implements AfterViewInit' to the class.
+        this.inited = true;
     }
 
     /**
@@ -28,8 +38,10 @@ export class DownloadstatusComponent implements OnInit {
      * @param ev Event - storage
      */
     cartChanged(ev){
-        if(ev.key == this.dataCartStatus.getName()){
-            this.dataCartStatus.restore();
+        if(this.inited){
+            if(ev.key == this.dataCartStatus.getName()){
+                this.dataCartStatus.restore();
+            }
         }
     }
 

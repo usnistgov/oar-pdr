@@ -48,7 +48,7 @@
                         {{getStatusForDisplay(zip.downloadStatus)}}
                     </div>
                     <ng-template #download_error>
-                        <div style="display:inline-block;margin-left: .5em;font-size: 0.8em; color: red; cursor: pointer;" (click)="openZipDetails($event,op5,zip) ">
+                        <div style="display:inline-block;margin-left: .5em;font-size: 0.8em; color: red; cursor: pointer;" (click)="openErrZipDetails($event,op5,zip) ">
                             <i class="faa faa-warning" [ngStyle]="{'padding-right':'.5em', 'margin-top':'8px'}"></i>
                             <u>{{getStatusForDisplay(zip.downloadStatus)}}</u>
                         </div>
