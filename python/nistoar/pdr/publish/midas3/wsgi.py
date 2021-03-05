@@ -9,7 +9,7 @@ a framework-based implementation if any further capabilities are needed.
 import os, sys, logging, json, re
 from wsgiref.headers import Headers
 from cgi import parse_qs, escape as escape_qp
-from collections import OrderedDict
+from collections import OrderedDict, Mapping
 
 from .. import PublishSystem, PDRServerError
 from .service import (MIDAS3PublishingService, SIPDirectoryNotFound, IDNotFound,
@@ -137,17 +137,46 @@ class Handler(object):
         if self._env.get('HTTP_X_HTTP_METHOD_OVERRIDE'):
             self._meth = self._env.get('HTTP_X_HTTP_METHOD_OVERRIDE')
 
-    def send_error(self, code, message):
+    def send_error(self, code, message, content=None, contenttype=None):
         status = "{0} {1}".format(str(code), message)
-        self._start(status, [], sys.exc_info())
-        return []
 
-    def send_ok(self, message="OK", content=None, code=200):
-        status = "{0} {1}".format(str(code), message)
-        self._start(status, [], None)
         if content is not None:
-            return [content]
-        return []
+            if not isinstance(content, list):
+                content = [str(content)]
+            if not contenttype:
+                contenttype = "text/plain"
+        else:
+            content = []
+
+        hdrs = []
+        if contenttype:
+            hdrs = Headers([])
+            hdrs.add_header("Content-type", str(contenttype).encode("ISO-8859-1"))
+            hdrs = hdrs.items()
+
+        self._start(status, hdrs, sys.exc_info())
+
+        return content
+
+    def send_ok(self, message="OK", content=None, code=200, contenttype=None):
+        status = "{0} {1}".format(str(code), message)
+
+        if content is not None:
+            if not isinstance(content, list):
+                content = [str(content)]
+            if not contenttype:
+                contenttype = "text/plain"
+        else:
+            content = []
+
+        hdrs = []
+        if contenttype:
+            hdrs = Headers([])
+            hdrs.add_header("Content-type", str(contenttype).encode("ISO-8859-1"))
+            hdrs = hdrs.items()
+
+        self._start(status, hdrs, None)
+        return content
 
     def add_header(self, name, value):
         # Caution: HTTP does not support Unicode characters (see
@@ -622,11 +651,14 @@ class PreserveHandler(Handler):
                 log.debug("\n%s", body)
             if self._reqrec:
                 self._reqrec.add_body_text(body).record()
-            return self.send_error(400, "Input not parseable as JSON")
+            return self.send_error(400, "Input not parseable as JSON",
+                                   "Input not parseable as JSON:\n"+str(ex))
 
         if sipid != pod.get('identifier'):
             log.warn("preservation request's EDI-ID does not match input POD")
-            return self.send_error(400, "Wrong POD record for ID")
+            return self.send_error(400, "Wrong POD record for ID",
+                                   "Wrong POD record for ID:\nidentifier=%s != %s" 
+                                   % (pod.get('identifier'), sipid))
 
         try:
             out = self._svc.preserve_new(pod)
@@ -675,7 +707,8 @@ class PreserveHandler(Handler):
 
         except ValidationError as ex:
             log.error("/preserve/midas/: Input is not a valid POD record:\n  "+str(ex))
-            return self.send_error(400, "Input is not a valid POD record")
+            return self.send_error(400, "Input is not a valid POD record",
+                                   "Input is not a valid POD record:\n"+str(ex))
 
         except PreservationStateError as ex:
             log.warn("Wrong AIP state for client request: "+str(ex))
@@ -750,7 +783,7 @@ class PreserveHandler(Handler):
                 log.debug("\n%s", body)
             if self._reqrec:
                 self._reqrec.add_body_text(body).record()
-            return self.send_error(400, "Input not parseable as JSON")
+            return self.send_error(400, "Input not parseable as JSON", str(ex))
 
         if sipid != pod.get('identifier'):
             log.warn("preservation request's EDI-ID does not match input POD")
@@ -799,7 +832,7 @@ class PreserveHandler(Handler):
             
         except ValidationError as ex:
             log.error("/preserve/midas/: Input is not a valid POD record:\n  "+str(ex))
-            return self.send_error(400, "Input is not a valid POD record")
+            return self.send_error(400, "Input is not a valid POD record", str(ex))
 
         except PreservationStateError as ex:
             log.warn("Wrong AIP state for client request: "+str(ex))
