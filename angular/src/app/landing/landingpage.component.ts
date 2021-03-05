@@ -120,7 +120,6 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
      * the Angular rendering infrastructure.
      */
     ngOnInit() {
-        console.log("initializing LandingPageComponent around id=" + this.reqId);
         var showError: boolean = true;
         let metadataError = "";
         this.displaySpecialMessage = false;
@@ -181,7 +180,7 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
                   {
                       if (this.routerParamEditEnabled) {
                           showError = false;
-                          console.log("Returning from authentication redirection (editmode="+this.routerParamEditEnabled+")");
+                        //   console.log("Returning from authentication redirection (editmode="+this.routerParamEditEnabled+")");
                           // Need to pass reqID (resID) because the resID in editControlComponent
                           // has not been set yet and the startEditing function relies on it.
                             this.edstatsvc.startEditing(this.reqId);

@@ -33,7 +33,6 @@ export class SearchResolve implements Resolve<any> {
     const recordid_KEY = makeStateKey<any>('record-' + recordid);
 
     if (this.transferState.hasKey(recordid_KEY)) {
-      console.log("1. Is it here @@@");
       const record = this.transferState.get<any>(recordid_KEY, null);
       this.transferState.remove(recordid_KEY);
       return of(record);

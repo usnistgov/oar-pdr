@@ -6,7 +6,6 @@ export abstract class FormCanDeactivate extends ComponentCanDeactivate{
  abstract get overallStatus():string;
  
  canDeactivate():boolean{
-     console.log('this.overallStatus', this.overallStatus);
      return (this.overallStatus != "downloading");
   }
 }

@@ -84,7 +84,6 @@ export class DatacartComponent extends FormCanDeactivate implements OnInit {
      * @param zipData zipDta from bundlePlan component
      */
     updateZipDafa(zipData: ZipData[]){
-        console.log("Updating zipData...");
         this.zipData = zipData;
     }
 

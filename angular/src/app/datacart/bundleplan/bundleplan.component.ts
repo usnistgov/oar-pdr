@@ -455,7 +455,8 @@ export class BundleplanComponent implements OnInit {
 
         this.messageColor = this.getColor();
 
-        // Start downloading the first one, this will set the downloaded zip file to 1
+        // Start downloading the first one, this will set the downloaded zip file to 1 which will
+        // trigger the following listener
         this.downloadService.downloadNextZip(this.zipData, this.dataFiles, this.dataCart);
 
         this.subscriptions.push(this.downloadService.watchDownloadingNumber().subscribe(

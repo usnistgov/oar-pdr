@@ -123,7 +123,7 @@ export class AuthorComponent implements OnInit {
                 }
 
                 postMessage[this.fieldName] = JSON.parse(JSON.stringify(authors));
-                console.log("postMessage", postMessage);
+                // console.log("postMessage", postMessage);
 
                 this.mdupdsvc.update(this.fieldName, postMessage).then((updateSuccess) => {
                     // console.log("###DBG  update sent; success: "+updateSuccess.toString());
