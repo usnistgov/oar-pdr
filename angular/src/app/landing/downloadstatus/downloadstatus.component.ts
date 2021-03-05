@@ -19,9 +19,9 @@ export class DownloadstatusComponent implements OnInit {
     }
 
     ngOnInit() {
-        this.dataCartStatus = DataCartStatus.openCartStatus();
-
         if(this.inBrowser){
+            this.dataCartStatus = DataCartStatus.openCartStatus();
+
             window.addEventListener("storage", this.cartChanged.bind(this));
         }
     }

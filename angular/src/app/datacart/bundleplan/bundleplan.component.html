@@ -1,5 +1,5 @@
 <!-- Display zip files if any -->
-<div class="full-span">
+<div *ngIf="inBrowser" class="full-span">
     <!-- Show current task -->
     <div *ngIf="showCurrentTask" style="text-align: center; margin:auto; width:100%;"><i class="faa faa-spinner faa-spin" style="color:#1E6BA1;" aria-hidden="true"></i><span style="padding-left: .5em;">{{currentTask}}</span></div>
     <!-- header -->
@@ -90,7 +90,7 @@
 
 <!-- Display bundle plan message details -->
 <div class="full-span"
-    *ngIf="bundlePlanStatus == 'error' || bundlePlanStatus == 'internal error' || bundlePlanStatus === 'warnings'">
+    *ngIf="inBrowser && (bundlePlanStatus == 'error' || bundlePlanStatus == 'internal error' || bundlePlanStatus === 'warnings')">
     <div class="header-orange" data-toggle="tooltip" title="Bundle message details">
         <span style="margin-left: .5em;" *ngIf="bundlePlanMessage" (click)="showMessage = !showMessage">
             <i *ngIf="showMessage; else hideMessage" class="faa faa-arrow-circle-up faa-1x icon-white"

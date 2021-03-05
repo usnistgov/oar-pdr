@@ -86,7 +86,7 @@ export class DataFilesComponent {
             { field: 'size', header: 'Size', width: 'auto' },
             { field: 'download', header: 'Status', width: 'auto' }];
 
-        if (typeof (window) !== 'undefined') {
+        if (this.inBrowser && typeof (window) !== 'undefined') {
             this.mobHeight = (window.innerHeight);
             this.mobWidth = (window.innerWidth);
             this.setWidth(this.mobWidth);
@@ -251,17 +251,15 @@ export class DataFilesComponent {
     updateStatusFromCart() {
         this.resetStatus(this.files);
 
-        if(this.inBrowser){
-            if(!this.globalDataCart)
-                this.globalDataCart = DataCart.openCart(this.CART_CONSTANTS.GLOBAL_CART_NAME);
+        if(!this.globalDataCart)
+            this.globalDataCart = DataCart.openCart(this.CART_CONSTANTS.GLOBAL_CART_NAME);
 
-            for (let key in this.globalDataCart.contents) {
-                this.setFilesDownloadStatus(this.files, this.globalDataCart.contents[key].resId, this.globalDataCart.contents[key].downloadStatus);
-                if (this.globalDataCart.contents[key].cartId != undefined) {
-                    let treeNode = this.searchTree(this.treeRoot[0], this.globalDataCart.contents[key].cartId);
-                    if (treeNode != null) {
-                        treeNode.data.isIncart = true;
-                    }
+        for (let key in this.globalDataCart.contents) {
+            this.setFilesDownloadStatus(this.files, this.globalDataCart.contents[key].resId, this.globalDataCart.contents[key].downloadStatus);
+            if (this.globalDataCart.contents[key].cartId != undefined) {
+                let treeNode = this.searchTree(this.treeRoot[0], this.globalDataCart.contents[key].cartId);
+                if (treeNode != null) {
+                    treeNode.data.isIncart = true;
                 }
             }
         }

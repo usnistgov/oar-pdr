@@ -477,7 +477,7 @@ export class TreetableComponent implements OnInit {
      * @param rowData - tree node that the file was downloaded
      */
     setFileDownloaded(rowData: any) {
-        // Google Analytics code to track download event
+            // Google Analytics code to track download event
         this.gaService.gaTrackEvent('download', undefined, rowData.ediid, rowData.downloadUrl);
 
         rowData.downloadStatus = 'downloaded';

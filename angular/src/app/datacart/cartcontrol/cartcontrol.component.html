@@ -1,4 +1,4 @@
-<div class="top-banner" [ngStyle]="{ 'background-image': 'url(' + imageURL + ')'}">
+<div *ngIf="inBrowser" class="top-banner" [ngStyle]="{ 'background-image': 'url(' + imageURL + ')'}">
     <div class="inner-box">
         <span style="font-size: xx-large;" class="top-banner-text">
             <i class="faa faa-cloud-download faa-lg" style="padding-right: .5em;text-shadow: 1px 1px 2px darkgrey;"></i><label>Download Manager</label>

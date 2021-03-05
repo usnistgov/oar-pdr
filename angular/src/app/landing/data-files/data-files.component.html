@@ -1,5 +1,5 @@
 <!-- This bloack is for the data access session of landing page -->
-<div id="dataAccess">
+<div *ngIf="inBrowser" id="dataAccess">
     <div class="font14" [hidden]="metadata">
         <h3><b>Data Access</b></h3><br>
         
@@ -152,6 +152,8 @@
                                                 aria-hidden="true"></i>
                                             <span class="sr-only">Hidden text for 508 compliance</span>
                                         </a>
+                                        <p-progressSpinner *ngIf="rowData.downloadStatus == 'downloading'"
+                                        [style]="{width: '12px', height: '12px', 'margin-right': '.5em'}"></p-progressSpinner>
                                     </div>
                                     <ng-template #space_holder>
                                         <div style="padding-right: 0.4em;">&nbsp;&nbsp;</div>

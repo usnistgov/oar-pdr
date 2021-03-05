@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { SharedModule } from '../shared/shared.module';
 import { TreeModule, FieldsetModule, DialogModule, OverlayPanelModule,
          ConfirmDialogModule, MenuModule } from 'primeng/primeng';
+import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { TreeTableModule } from 'primeng/treetable';
 
 import { LandingComponent } from './landing.component';
@@ -29,7 +30,7 @@ import { MetadataView } from './metadata/metadataview.component';
   ],
   imports: [
     CommonModule,SharedModule,TreeModule,FieldsetModule, DialogModule, OverlayPanelModule,
-      ConfirmDialogModule, MenuModule,TreeTableModule
+      ConfirmDialogModule, MenuModule,TreeTableModule, ProgressSpinnerModule
   ],
   exports:[
     LandingComponent, DataFilesComponent, TitleComponent, AuthorComponent, ContactComponent,
