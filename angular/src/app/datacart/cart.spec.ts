@@ -214,7 +214,7 @@ describe('DataCart', () => {
         expect(dc.size()).toEqual(0);
         expect(localStorage.getItem("cart:cart")).toEqual("{}");
 
-        dc.addFile("foo", { filePath: "bar/goo", count: 3, downloadURL: "http://here" });
+        dc.addFile("foo", { filePath: "bar/goo", count: 3, downloadURL: "http://here" }, false, true);
         expect(dc.size()).toEqual(1);
         expect(parseCart(localStorage.getItem("cart:cart"))).toEqual(dc.contents);
         let file = dc.findFile("foo", "bar/goo");
@@ -224,7 +224,7 @@ describe('DataCart', () => {
         expect(file['downloadURL']).toEqual("http://here");
         expect(file['count']).toEqual(3);
 
-        dc.addFile("foo", { filePath: "bar/good", count: 8, downloadURL: "http://here" });
+        dc.addFile("foo", { filePath: "bar/good", count: 8, downloadURL: "http://here" }, false, true);
         expect(dc.size()).toEqual(2);
         expect(parseCart(localStorage.getItem("cart:cart"))).toEqual(dc.contents);
         file = dc.findFile("foo", "bar/good");
@@ -234,7 +234,7 @@ describe('DataCart', () => {
         expect(file['downloadURL']).toEqual("http://here");
         expect(file['count']).toEqual(8);
 
-        dc.addFile("foo", { filePath: "bar/goo", count: 1, downloadStatus: "downloaded", downloadURL: "http://here" });
+        dc.addFile("foo", { filePath: "bar/goo", count: 1, downloadStatus: "downloaded", downloadURL: "http://here" }, false, true);
         expect(dc.size()).toEqual(2);
         expect(parseCart(localStorage.getItem("cart:cart"))).toEqual(dc.contents);
         file = dc.findFile("foo", "bar/goo");

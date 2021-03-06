@@ -77,14 +77,6 @@ export class EditStatusService {
     }
 
     /**
-     * BehaviorSubject that force datacart to init data file tree
-     */
-    private _forceDataFileTreeInit : BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
-    _watchForceDataFileTreeInit(subscriber) {
-        this._forceDataFileTreeInit.subscribe(subscriber);
-    }
-
-    /**
      * the ID of the user currently logged in.  
      */
     get userID() : string { return this._userid; }
@@ -116,12 +108,5 @@ export class EditStatusService {
      */
     public startEditing(resID: string = "", nologin: boolean = false) : void {
         this._remoteStart.next({'resID':resID, 'nologin':nologin});
-    }
-
-    /**
-     * Force datacart to init data file tree
-     */
-    public forceDataFileTreeInit() : void {
-        this._forceDataFileTreeInit.next(true);
     }
 }

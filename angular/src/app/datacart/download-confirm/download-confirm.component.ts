@@ -28,11 +28,10 @@ export class DownloadConfirmComponent implements OnInit {
     ngOnInit() 
     {
         this.bundleSizeAlert = +this.cfg.get("bundleSizeAlert", "1000000000");
-        console.log('bundleSizeAlert', this.bundleSizeAlert);
     }
 
-    /* 
-     *   Return true when user click on Continue Download
+    /**
+     * When user clicks on Continue Download, close the pop up dialog and continue downloading.
      */
     ContinueDownload() 
     {
@@ -40,8 +39,8 @@ export class DownloadConfirmComponent implements OnInit {
         this.activeModal.close('Close click');
     }
 
-    /* 
-     *   Return false when user click on Cancel button
+    /** 
+     * When user click on Cancel, close the pop up dialog and do nothing.
      */
     CancelDownload() 
     {

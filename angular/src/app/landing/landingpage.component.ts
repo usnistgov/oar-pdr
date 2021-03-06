@@ -120,7 +120,6 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
      * the Angular rendering infrastructure.
      */
     ngOnInit() {
-        console.log("initializing LandingPageComponent around id=" + this.reqId);
         var showError: boolean = true;
         let metadataError = "";
         this.displaySpecialMessage = false;
@@ -181,7 +180,7 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
                   {
                       if (this.routerParamEditEnabled) {
                           showError = false;
-                          console.log("Returning from authentication redirection (editmode="+this.routerParamEditEnabled+")");
+                        //   console.log("Returning from authentication redirection (editmode="+this.routerParamEditEnabled+")");
                           // Need to pass reqID (resID) because the resID in editControlComponent
                           // has not been set yet and the startEditing function relies on it.
                             this.edstatsvc.startEditing(this.reqId);
@@ -230,8 +229,8 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
      * apply housekeeping after view has been initialized
      */
     ngAfterViewInit() {
-        this.useFragment();
         if (this.md && this.inBrowser) {
+            this.useFragment();
             window.history.replaceState({}, '', '/od/id/' + this.reqId);
         }
     }
@@ -279,8 +278,6 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
      * apply the URL fragment by scrolling to the proper place in the document
      */
     public useFragment() {
-        if (!this.inBrowser) return;
-
         this.router.events.subscribe(s => {
             if (s instanceof NavigationEnd) {
                 const tree = this.router.parseUrl(this.router.url);
@@ -321,6 +318,7 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
 
     /**
      * toggle the visibility of the citation pop-up window
+     * @param size 
      */
     toggleCitation(size: string) : void { 
         if(size == 'small')
@@ -340,6 +338,9 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
         return this.citetext;
     }
 
+    /**
+     * Set the message to display based on the edit mode.
+     */
     setMessage(){
         if(this.editMode == this.EDIT_MODES.DONE_MODE)
         {

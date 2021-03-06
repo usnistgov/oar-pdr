@@ -1,7 +1,7 @@
-<div class="top-banner" [ngStyle]="{ 'background-image': 'url(' + imageURL + ')'}">
+<div *ngIf="inBrowser" class="top-banner" [ngStyle]="{ 'background-image': 'url(' + imageURL + ')'}">
     <div class="inner-box">
         <span style="font-size: xx-large;" class="top-banner-text">
-            <i class="faa faa-cloud-download faa-lg" style="padding-right: .5em;"></i><label>Download Manager</label>
+            <i class="faa faa-cloud-download faa-lg" style="padding-right: .5em;text-shadow: 1px 1px 2px darkgrey;"></i><label>Download Manager</label>
         </span>
 
         <!-- Control buttons for large screen -->
@@ -62,7 +62,7 @@
             <i class="faa faa-trash faa-1x icon-white" style="color: #fff;"></i>
             Remove selected
             <span class="w3-circle button-badge"
-                [ngStyle]="{'color':'rgb(82, 82, 82)'}">&nbsp;{{selectedFileCount}}&nbsp;</span>
+                [ngStyle]="{'color':'rgb(82, 82, 82)'}">&nbsp;{{selectedFileCount}&nbsp;</span>
         </button>
     </div>
 </div>

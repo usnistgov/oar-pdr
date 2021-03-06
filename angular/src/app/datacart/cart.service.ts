@@ -67,22 +67,6 @@ export class CartService {
     }
 
     /**
-     * Reset datafile download status
-     **/
-    resetDatafileDownloadStatus(dataFiles: any, dataCart: DataCart, downloadStatus: string) {
-        for (let i = 0; i < dataFiles.length; i++) {
-            if (dataFiles[i].children.length > 0) {
-                this.resetDatafileDownloadStatus(dataFiles[i].children, dataCart, downloadStatus);
-            } else {
-                dataFiles[i].data.downloadStatus = downloadStatus;
-                dataCart.setDownloadStatus(dataFiles[i].data.resId, dataFiles[i].data.filePath, downloadStatus);
-            }
-        }
-
-        dataCart.save();
-    }
-
-    /**
      * Return "download" button color based on download status
      */
     getDownloadStatusColor(downloadStatus: string) {

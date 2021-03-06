@@ -13,7 +13,6 @@ import { Router } from '@angular/router';
 import { CommonFunctionService } from '../../shared/common-function/common-function.service';
 import { GoogleAnalyticsService } from '../../shared/ga-service/google-analytics.service';
 import { NotificationService } from '../../shared/notification-service/notification.service';
-import { EditStatusService } from '../editcontrol/editstatus.service';
 import { NerdmComp } from '../../nerdm/nerdm';
 import { DataCart, DataCartItem } from '../../datacart/cart';
 import { DataCartStatus } from '../../datacart/cartstatus';
@@ -66,12 +65,8 @@ export class DataFilesComponent {
     mobWidth: number = 800;   // default value used in server context
     mobHeight: number = 900;  // default value used in server context
     fontSize: string;
+    addingToCart: boolean = false;
     public CART_CONSTANTS: any = CartConstants.cartConst;
-
-    /* Function to Return Keys object properties */
-    //   keys(): Array<string> {
-    //     return Object.keys(this.fileDetails);
-    //   }
 
     constructor(private cartService: CartService,
         private cdr: ChangeDetectorRef,
@@ -84,7 +79,6 @@ export class DataFilesComponent {
         private gaService: GoogleAnalyticsService,
         public router: Router,
         private notificationService: NotificationService,
-        private edstatsvc: EditStatusService,
         ngZone: NgZone) {
         this.cols = [
             { field: 'name', header: 'Name', width: '60%' },
@@ -92,7 +86,7 @@ export class DataFilesComponent {
             { field: 'size', header: 'Size', width: 'auto' },
             { field: 'download', header: 'Status', width: 'auto' }];
 
-        if (typeof (window) !== 'undefined') {
+        if (this.inBrowser && typeof (window) !== 'undefined') {
             this.mobHeight = (window.innerHeight);
             this.mobWidth = (window.innerWidth);
             this.setWidth(this.mobWidth);
@@ -105,14 +99,6 @@ export class DataFilesComponent {
                 });
             };
         }
-
-        this.edstatsvc._watchForceDataFileTreeInit((start) => {
-            if (start && this.inBrowser) {
-                this.globalDataCart = DataCart.openCart(this.CART_CONSTANTS.GLOBAL_CART_NAME);
-                this.allSelected = this.updateAllSelectStatus(this.files);
-                this.cartLength = this.globalDataCart.size();
-            }
-        });
 
         this.cartService.watchCartLength().subscribe(value => {
             this.cartLength = value;
@@ -131,9 +117,20 @@ export class DataFilesComponent {
         }
     }
 
+    /**
+     * Initialize data tree
+     */
+    initDataFileTree(){
+        if (this.inBrowser) {
+            this.globalDataCart = DataCart.openCart(this.CART_CONSTANTS.GLOBAL_CART_NAME);
+            this.allSelected = this.updateAllSelectStatus(this.files);
+            this.cartLength = this.globalDataCart.size();
+        }
+    }
+
     cartChanged(ev){
         if (ev.key == this.globalDataCart.getKey()) {
-            this.globalDataCart = DataCart.openCart(this.CART_CONSTANTS.GLOBAL_CART_NAME);
+            this.globalDataCart.restore();
             this.cartLength = this.globalDataCart.size();
             this.buildTree();
         }
@@ -243,7 +240,6 @@ export class DataFilesComponent {
                 this.resetStatus(comp.children);
             } else {
                 comp.data.isIncart = false;
-                // comp.data.downloadStatus = null;
             }
         }
         return Promise.resolve(files);
@@ -253,9 +249,9 @@ export class DataFilesComponent {
      * Function to sync the download status from data cart.
      */
     updateStatusFromCart() {
-        this.resetStatus(this.files);
-
         if(this.inBrowser){
+            this.resetStatus(this.files);
+
             if(!this.globalDataCart)
                 this.globalDataCart = DataCart.openCart(this.CART_CONSTANTS.GLOBAL_CART_NAME);
 
@@ -269,7 +265,6 @@ export class DataFilesComponent {
                 }
             }
         }
-
         return Promise.resolve(this.files);
     }
 
@@ -359,8 +354,10 @@ export class DataFilesComponent {
      * @param isSelected - flag indicating if the node is selected
      */
     addSubFilesToCartAndUpdate(rowData: any, isSelected: boolean) {
+        this.globalDataCart.restore();
         this.addSubFilesToCart(rowData, isSelected).then(function (result: any) {
             this.allSelected = this.updateAllSelectStatus(this.files);
+            this.globalDataCart.save();
         }.bind(this), function (err) {
             alert("something went wrong while adding file to data cart.");
         });
@@ -418,14 +415,18 @@ export class DataFilesComponent {
         this.isLocalProcessing = true;
 
         setTimeout(() => {
-            if (this.allSelected) {
+            if (this.allSelected) { // Remove all from cart
                 this.removeFilesFromCart(files).then(function (result1: any) {
+                    this.isLocalProcessing = false;
+                    this.allSelected = false;
+                    this.downloadStatus = null;
+                    this.cartService.setCartLength(this.globalDataCart.size());
                     this.isLocalProcessing = false;
                 }.bind(this), function (err) {
                     alert("something went wrong while removing file from data cart.");
                 });
             }
-            else {
+            else {  // Add all to cart
                 this.addAllFilesToCart(files, false, '').then(function (result1: any) {
                     this.updateStatusFromCart();
                     this.allSelected = this.updateAllSelectStatus(this.files);
@@ -454,6 +455,9 @@ export class DataFilesComponent {
             this.allSelected = this.updateAllSelectStatus(this.files);
             if (cartKey != '') {
                 this.allSelected = true;
+                this.specialDataCart.save();
+            }else{
+                this.globalDataCart.save();
             }
         }.bind(this), function (err) {
             alert("something went wrong while adding one file to data cart.");
@@ -511,13 +515,11 @@ export class DataFilesComponent {
         }
         if(cartKey == '') {   // general data cart
             this.globalDataCart.addFile(rowData.resId, dataCartItem, isSelected);
-            this.globalDataCart.save();
             this.cartService.setCartLength(this.globalDataCart.size());
             if (cartKey == '')
                 rowData.isIncart = true;
         }else{
             this.specialDataCart.addFile(rowData.resId, dataCartItem, isSelected);
-            this.specialDataCart.save();
         }
 
         return Promise.resolve(true);
@@ -551,8 +553,7 @@ export class DataFilesComponent {
                 rowData.isIncart = false;
             }
         } else {
-            this.globalDataCart.removeFileById(rowData.resId,rowData.filePath);
-            // this.cartService.removeCartId(rowData.cartId);
+            this.globalDataCart.removeFileById(rowData.resId,rowData.filePath, true);
             rowData.isIncart = false;
         }
     }
@@ -562,27 +563,12 @@ export class DataFilesComponent {
      * @param files - file tree
      */
     removeFilesFromCart(files: TreeNode[]) {
-        this.removeFromCart(files);
+        this.globalDataCart.restore();
+        this.globalDataCart.removeFromTree(files);
+        this.globalDataCart.save();
+
         this.allSelected = this.updateAllSelectStatus(this.files);
         return Promise.resolve(files);
-    }
-
-    /**
-     * Remove all files from cart - used by removeFilesFromCart()
-     * @param files - file tree
-     */
-    removeFromCart(files: TreeNode[]) {
-        for (let comp of files) {
-            if (comp.children.length > 0) {
-                comp.data.isIncart = false;
-                this.removeFromCart(comp.children);
-            } else {
-                this.globalDataCart.removeFileById(comp.data.resId,comp.data.filePath);
-                // this.cartService.removeCartId(comp.data.cartId);
-                comp.data.isIncart = false;
-            }
-        }
-
     }
 
     /**
@@ -617,8 +603,7 @@ export class DataFilesComponent {
                 var status = this.updateDownloadStatus(comp.children);
                 if (status) {
                     comp.data.downloadStatus = 'downloaded';
-                    // this.cartService.updateCartItemDownloadStatus(comp.data.cartId, 'downloaded');
-                    this.globalDataCart.setDownloadStatus(comp.data.resId, comp.data.filePath);
+                    this.globalDataCart.setDownloadStatus(comp.data.resId, comp.data.filePath, comp.data.downloadStatus);
                 }
                 allDownloaded = allDownloaded && status;
             } else {
@@ -670,9 +655,12 @@ export class DataFilesComponent {
      */
     setFileDownloaded(rowData: any) {
         rowData.downloadStatus = 'downloaded';
-        // this.cartService.updateCartItemDownloadStatus(rowData.cartId, 'downloaded');
-        this.globalDataCart.setDownloadStatus(rowData.resId, rowData.filePath);
+        this.globalDataCart.restore();
+
+        this.globalDataCart.setDownloadStatus(rowData.resId, rowData.filePath, rowData.downloadStatus);
         this.downloadStatus = this.updateDownloadStatus(this.files) ? "downloaded" : null;
+        this.globalDataCart.save();
+
         if (rowData.isIncart) {
             this.downloadService.setFileDownloadedFlag(true);
         }
@@ -698,23 +686,27 @@ export class DataFilesComponent {
      * Function to download all.
      */
     downloadFromRoot() {
-        this.cancelAllDownload = false;
-        this.specialDataCart = DataCart.createCart(this.ediid);
+        if(this.inBrowser){
+            this.addingToCart = true;
+            this.cancelAllDownload = false;
+            this.specialDataCart = DataCart.createCart(this.ediid);
 
-        setTimeout(() => {
-            // this.cartService.clearTheCart();
-            this.addAllFilesToCart(this.files, true, this.ediid).then(function (result) {
-                // this.cartService.setCurrentCart(this.CART_CONSTANTS.GLOBAL_CART_NAME);
-                window.open('/datacart/'+this.ediid, this.ediid);
-                this.updateStatusFromCart().then(function (result: any) {
-                    this.edstatsvc.forceDataFileTreeInit();
+            setTimeout(() => {
+                this.addAllFilesToCart(this.files, true, this.ediid).then(function (result) {
+                    this.addingToCart = false;
+                    window.open('/datacart/'+this.ediid, this.ediid);
+                    this.updateStatusFromCart().then(function (result: any) {
+                        this.initDataFileTree();
+                    }.bind(this), function (err) {
+                        this.addingToCart = false;
+                        alert("something went wrong while adding file to data cart.");
+                    });
                 }.bind(this), function (err) {
-                    alert("something went wrong while adding file to data cart.");
+                    this.addingToCart = false;
+                    alert("something went wrong while adding all files to cart");
                 });
-            }.bind(this), function (err) {
-                alert("something went wrong while adding all files to cart");
-            });
-        }, 0);
+            }, 0);
+        }
     }
 
     /**
@@ -722,27 +714,18 @@ export class DataFilesComponent {
      * @param files - file tree
      */
     setAllDownloaded(files: any) {
+        this.globalDataCart.restore();
+
         for (let comp of files) {
             if (comp.children.length > 0) {
                 this.setAllDownloaded(comp.children);
             } else {
                 comp.data.downloadStatus = 'downloaded';
-                // this.cartService.updateCartItemDownloadStatus(comp.data.cartId, 'downloaded');
-                this.globalDataCart.setDownloadStatus(comp.data.resId, comp.data.filePath);
+                this.globalDataCart.setDownloadStatus(comp.data.resId, comp.data.filePath, "downloaded");
             }
         }
-    }
 
-    /**
-     * Function to reset the download status of a file.
-     * @param rowData - tree node
-     */
-    resetDownloadStatus(rowData) {
-        rowData.downloadStatus = null;
-        rowData.downloadProgress = 0;
-        // this.cartService.updateCartItemDownloadStatus(rowData.cartId, null);
-        this.globalDataCart.setDownloadStatus(rowData.resId, rowData.filePath);
-        this.allDownloaded = false;
+        this.globalDataCart.save();
     }
 
     /**

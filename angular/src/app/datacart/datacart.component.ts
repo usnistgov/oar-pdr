@@ -1,5 +1,5 @@
 import { Component, OnInit, PLATFORM_ID, Inject, ViewChild } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import 'rxjs/add/operator/map';
 import { TreeNode } from 'primeng/primeng';
 import { CartConstants } from './cartconstants';
@@ -28,6 +28,8 @@ export class DatacartComponent extends FormCanDeactivate implements OnInit {
     CART_CONSTANTS: any;
     zipData: ZipData[] = [];
 
+    // overallStatus is used in can-deactivate component. If overallStatus is not 'completed'
+    // and user tried to close the tab, a warning dialog will pop up.
     @ViewChild('overallStatus')
     overallStatus: string = "";
 
@@ -37,6 +39,7 @@ export class DatacartComponent extends FormCanDeactivate implements OnInit {
      */
     constructor( 
         private route: ActivatedRoute,
+        private router: Router,
         public cartService: CartService,
         @Inject(PLATFORM_ID) private platformId: Object ) 
     {
@@ -50,8 +53,13 @@ export class DatacartComponent extends FormCanDeactivate implements OnInit {
      * Get the params OnInit
      */
     ngOnInit() {
+        let currentUrl = this.router.url;
+
         this.routerparams = this.route.params.subscribe(params => {
-            this.ediid = params['ediid'];
+            if(currentUrl.indexOf("ark:/88434") >= 0)
+                this.ediid = 'ark:/88434/' + params['ediid'];
+            else
+                this.ediid = params['ediid'];
         })
     }
 

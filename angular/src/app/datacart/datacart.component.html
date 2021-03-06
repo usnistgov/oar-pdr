@@ -2,7 +2,7 @@
 <app-cartcontrol [dataFiles]="dataFiles"></app-cartcontrol>
 
 <!-- Bundle plan -->
-<app-bundleplan [inBrowser]="inBrowser" [dataFiles]="dataFiles" [selectedData]="selectedData" [ediid]="ediid" (outputZipData)="updateZipDafa($event)" (outputOverallStatus)=updateOverallStatus($event)></app-bundleplan>
+<app-bundleplan [dataFiles]="dataFiles" [selectedData]="selectedData" [ediid]="ediid" (outputZipData)="updateZipDafa($event)" (outputOverallStatus)=updateOverallStatus($event)></app-bundleplan>
 
 <!-- Tree table -->
-<app-treetable [ediid]="ediid" [inBrowser]="inBrowser" [zipData]="zipData" (outputDataFiles)="updateDafaFiles($event)" (outputSelectedData)="updateSelectedData($event)"></app-treetable>
+<app-treetable [ediid]="ediid" [zipData]="zipData" (outputDataFiles)="updateDafaFiles($event)" (outputSelectedData)="updateSelectedData($event)"></app-treetable>

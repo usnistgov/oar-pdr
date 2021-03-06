@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
+import { Component, OnInit, Input, Output, Inject, PLATFORM_ID, EventEmitter } from '@angular/core';
 import { ZipData } from '../../shared/download-service/zipData';
 import { TreeNode } from 'primeng/primeng';
 import { DownloadService } from '../../shared/download-service/download-service.service';
@@ -14,6 +14,7 @@ import { ConfirmationDialogComponent } from '../../shared/confirmation-dialog/co
 import { DataCart } from '../cart';
 import { CartConstants } from '../cartconstants';
 import { DataCartStatus } from '../cartstatus';
+import { isPlatformBrowser } from '@angular/common';
 
 @Component({
   selector: 'app-bundleplan',
@@ -24,6 +25,7 @@ export class BundleplanComponent implements OnInit {
     dataCart: DataCart;
     public CART_CONSTANTS: any;
     dataCartStatus: DataCartStatus;
+    inBrowser: boolean = false;
 
     //Bundle
     bundlePlanStatus: any;
@@ -82,7 +84,6 @@ export class BundleplanComponent implements OnInit {
         downloadTime: 0
     };
 
-    @Input() inBrowser: boolean;
     @Input() dataFiles: TreeNode[] = [];
     @Input() selectedData: TreeNode[];
     @Input() ediid: string;
@@ -95,31 +96,35 @@ export class BundleplanComponent implements OnInit {
         private cfg: AppConfig,
         public gaService: GoogleAnalyticsService,
         public cartService: CartService,
-        private modalService: NgbModal
+        private modalService: NgbModal,
+        @Inject(PLATFORM_ID) private platformId: Object
     ) { 
+        this.inBrowser = isPlatformBrowser(platformId);
         this.CART_CONSTANTS = CartConstants.cartConst;
 
         this.cartService._watchRemoteCommand((command) => {
-            switch(command.command) { 
-                case 'downloadSelected': { 
-                    if(command.data)
-                        this.selectedData = command.data;
-                   this.downloadAllFilesFromAPI();
-                   break; 
+            if(this.inBrowser){
+                switch(command.command) { 
+                    case 'downloadSelected': { 
+                        if(command.data)
+                            this.selectedData = command.data;
+                            this.downloadAllFilesFromAPI();
+                        break; 
+                    } 
+                    case 'resetDownloadParams': {
+                        this.resetDownloadParams();
+                        break;
+                    }
+                    case 'cancelDownloadAll': {
+                        this.cancelDownloadAll();
+                        break;
+                    }
+                    default: { 
+                    //statements; 
+                    break; 
+                    } 
                 } 
-                case 'resetDownloadParams': {
-                    this.resetDownloadParams();
-                    break;
-                }
-                case 'cancelDownloadAll': {
-                    this.cancelDownloadAll();
-                    break;
-                }
-                default: { 
-                   //statements; 
-                   break; 
-                } 
-             } 
+            }
         });
     }
 
@@ -138,15 +143,8 @@ export class BundleplanComponent implements OnInit {
 
         this.downloadService.watchDownloadProcessStatus().subscribe(
             value => {
-                if(value && this.downloadStarted)
-                {
-                    this.downloadEndTime = new Date();
-                    this.totalDownloadTime = this.downloadEndTime.getTime() / 1000 - this.downloadStartTime.getTime() / 1000;
-                    this.overallStatus = 'complete';
-                    this.outputOverallStatus.emit(this.overallStatus);
-                    setTimeout(() => {
-                        this.updateDownloadPercentage(100);
-                    }, 1000);
+                if(value && this.downloadStarted && this.inBrowser){
+                    this.setProcessComplete();
                 }
             }
         );
@@ -160,6 +158,19 @@ export class BundleplanComponent implements OnInit {
         };
 
         this.treeRoot.push(newPart);
+    }
+
+    /**
+     * Set the overall status to complete
+     */
+    setProcessComplete(){
+        this.downloadEndTime = new Date();
+        this.totalDownloadTime = this.downloadEndTime.getTime() / 1000 - this.downloadStartTime.getTime() / 1000;
+        this.overallStatus = 'complete';
+        this.outputOverallStatus.emit(this.overallStatus);
+        setTimeout(() => {
+            this.updateDownloadPercentage(100);
+        }, 1000);
     }
 
     /**
@@ -219,17 +230,20 @@ export class BundleplanComponent implements OnInit {
     }
 
     /**
-     * Cancel download
+     * Cancel download a particular zip file in the bundle
      * @param zip Current zip to be cancelled
      */
     cancelDownloadZip(zip: ZipData){
         this.downloadService.cancelDownloadZip(zip, this.dataFiles, this.dataCart);
     }
 
-    /*
-    * Display zip file error message
-    */
-    openZipDetails(event, overlaypanel: OverlayPanel, zip: ZipData = null ) {
+    /**
+     * Display error message of the given zip file 
+     * @param event 
+     * @param overlaypanel - the pop up control
+     * @param zip 
+     */
+    openErrZipDetails(event, overlaypanel: OverlayPanel, zip: ZipData = null ) {
         this.problemZip = zip;
         this.emailSubject = 'PDR: Error downloading zip file';
 
@@ -267,8 +281,12 @@ export class BundleplanComponent implements OnInit {
      * Make sure the width of popup dialog is less than 500px or 80% of the window width
      */
     getDialogWidth() {
-        var w = window.innerWidth > 500 ? 500 : window.innerWidth;
-        return w + 'px';
+        if(this.inBrowser){
+            var w = window.innerWidth > 500 ? 500 : window.innerWidth;
+            return w + 'px';
+        }else{
+            return '500px';
+        }
     }
 
     /**
@@ -282,6 +300,7 @@ export class BundleplanComponent implements OnInit {
 
     /**
      * Download one particular zip
+     * @param zip 
      */
     downloadOneZip(zip: ZipData) {
         if (zip.downloadInstance != null) {
@@ -293,30 +312,24 @@ export class BundleplanComponent implements OnInit {
 
     /**
      * Function to download all files from API call.
-     **/
+     */
     downloadAllFilesFromAPI() {
-        this.gaService.gaTrackEvent('download', undefined, 'all files', "Data cart");
-        this.clearDownloadStatus();
         this.showCurrentTask = true;
+        this.currentTask = "Preparing downloads...";
+        this.clearDownloadStatus();
         let postMessage: any[] = [];
         this.downloadData = [];
         this.zipData = [];
         this.allDownloadCancelled = false;
         this.bundlePlanMessage = null;
-        // this.downloadStatus = 'downloading';
-        this.downloadService.setDownloadProcessStatus(false);
-        this.currentTask = "Preparing downloads...";
-        this.downloadService.setDownloadingNumber(0);
-
         this.downloadStartTime = new Date();
 
         // create root
         const newPart = {
             data: {
                 resTitle: "root"
-            }, children: []
+            }, children: this.selectedData
         };
-        newPart.children = this.selectedData;
         this.selectedTreeRoot.push(newPart);
 
         let files = this.selectedTreeRoot[0];
@@ -329,9 +342,8 @@ export class BundleplanComponent implements OnInit {
         files.data.downloadStatus = 'downloading';
 
         postMessage.push({ "bundleName": files.data.downloadFileName, "includeFiles": this.downloadData });
-        // console.log('Bundle plan post message:', JSON.stringify(postMessage[0]));
         console.log("Calling following end point to get bundle plan:", this.distApi + "_bundle_plan");
-
+        
         this.bundlePlanRef = this.downloadService.getBundlePlan(this.distApi + "_bundle_plan", JSON.stringify(postMessage[0])).subscribe(
             blob => {
                 this.bundlePlanStatus = blob.status.toLowerCase();
@@ -342,10 +354,8 @@ export class BundleplanComponent implements OnInit {
                 if (this.bundlePlanUnhandledFiles) {
                     this.markUnhandledFiles();
                 }
-
                 if (this.bundlePlanStatus == 'complete' || this.bundlePlanStatus == 'warnings') {
-                    if(this.bundlePlanStatus == 'warnings')
-                    {
+                    if(this.bundlePlanStatus == 'warnings'){
                         let dateTime = new Date();
 
                         this.showUnhandledFiles = false;
@@ -366,24 +376,6 @@ export class BundleplanComponent implements OnInit {
                         this.zipData.push({ "fileName": bundle.bundleName, "downloadProgress": 0, "downloadStatus": null, "downloadInstance": null, "bundle": bundle, "downloadUrl": downloadUrl, "downloadErrorMessage": "","bundleSize": bundle.bundleSize, 'downloadTime': null });
                     }
 
-                    this.outputZipData.emit(this.zipData);
-            
-                    // Associate zipData with files
-                    for (let zip of this.zipData) {
-                        for (let includeFile of zip.bundle.includeFiles) {
-                            let resFilePath = includeFile.filePath.substring(includeFile.filePath.indexOf('/'));
-                            for (let dataFile of this.dataFiles) {
-                                let treeNode = this.downloadService.searchTreeByfilePath(dataFile, resFilePath);
-                                if (treeNode != null) {
-                                    treeNode.data.zipFile = zip.fileName;
-                                    break;
-                                }
-                            }
-            
-                            this.downloadService.setDownloadStatus(zip, this.dataFiles, 'pending', this.dataCart);
-                        }
-                    }
-
                     let ngbModalOptions: NgbModalOptions = {
                         backdrop: 'static',
                         keyboard: false,
@@ -399,7 +391,7 @@ export class BundleplanComponent implements OnInit {
                         if ( returnValue ) {
                             this.showCurrentTask = false;
                             this.downloadStarted = true;
-                            this.processBundle(this.bundleplan);
+                            this.processBundle();
                         }else{
                             this.showCurrentTask = false;
                             this.cancelDownloadAll()
@@ -456,15 +448,17 @@ export class BundleplanComponent implements OnInit {
     }
 
     /**
-    * Process data returned from bundle_plan
-    **/
-    processBundle(res: any) {
-        this.currentTask = "Processing Each Bundle...";
+     * Process data returned from bundle_plan (stored in zipData)
+     */
+    processBundle() {
+        this.gaService.gaTrackEvent('download', undefined, 'all files', "Data cart");
+
         this.messageColor = this.getColor();
 
+        // Start downloading the first one, this will set the downloaded zip file to 1 which will
+        // trigger the following listener
         this.downloadService.downloadNextZip(this.zipData, this.dataFiles, this.dataCart);
 
-        // Start downloading the first one, this will set the downloaded zip file to 1
         this.subscriptions.push(this.downloadService.watchDownloadingNumber().subscribe(
             value => {
                 if (value >= 0) {
@@ -486,22 +480,26 @@ export class BundleplanComponent implements OnInit {
         ));
     }
 
+    /**
+     * Get the overall progress for progress bar display
+     */
     get overallProgress(){
         let returnValue = 0;
-        if(this.downloadService.totalBundleSize > 0 && this.downloadService.totalBundleSize >= this.downloadService.totalDownloaded)
+        if(this.downloadService.totalBundleSize > 0 && this.downloadService.totalBundleSize >= this.downloadService.totalDownloaded){
             returnValue = Math.round(100 * this.downloadService.totalDownloaded / this.downloadService.totalBundleSize);
-        else if(this.downloadService.totalBundleSize > 0)
+        }else if(this.downloadService.totalBundleSize > 0){
             returnValue = 100;
-        else    
+        }else {   
             returnValue = 0;
+        }
 
         this.updateDownloadPercentage(returnValue)
         return returnValue;
     }
 
     /**
-    * Reset download params
-    **/
+     * Reset download params
+     */
     resetDownloadParams() {
         this.zipData = [];
         this.downloadService.setDownloadingNumber(-1);
@@ -514,16 +512,18 @@ export class BundleplanComponent implements OnInit {
 
     /**
      * clears all download status
-     **/
+     */
     clearDownloadStatus() {
         this.resetDownloadParams();
-        this.cartService.resetDatafileDownloadStatus(this.dataFiles, this.dataCart, '');
-        this.downloadService.setTotalFileDownloaded(0);
+
+        this.dataCart.restore();
+        this.dataCart.resetDatafileDownloadStatus(this.dataFiles, '');
+        this.dataCart.save();
         this.downloadService.resetDownloadData();
     }
 
     /**
-     * Set color for bundle plan return message 
+     * Set color for the message from bundle plan
      */
     getColor() {
         if (this.bundlePlanStatus == 'warnings') {
@@ -536,7 +536,7 @@ export class BundleplanComponent implements OnInit {
     }
 
     /**
-     * 
+     * Mark the data cart for those unhandled files
      */
     markUnhandledFiles() {
         this.dataCart.restore();
@@ -550,7 +550,6 @@ export class BundleplanComponent implements OnInit {
                     node.data.filePath = unhandledFile.filePath;
                     node.data.downloadUrl = unhandledFile.downloadUrl;
                     node.data.message = unhandledFile.message;
-                    // this.cartService.updateCartItemDownloadStatus(node.data['cartId'], 'failed');
                     let cartItem = this.dataCart.findFile(node.data.resId, node.data.filePath);
                     if(cartItem) cartItem.downloadStatus = 'failed';
 
@@ -588,8 +587,8 @@ export class BundleplanComponent implements OnInit {
     }
 
     /**
-     * Cancell all download instances
-     **/
+     * Cancell all download
+     */
     cancelDownloadAll() {
         for (let zip of this.zipData) {
             if (zip.downloadInstance != null) {
@@ -616,14 +615,22 @@ export class BundleplanComponent implements OnInit {
     }
 
     /**
-     * Clear "downloading" and "pending" status of given tree node
-     **/
+     * Clear "downloading" and "pending" status in this.dataFiles
+     */
     clearDownloadingStatus() {
+        this.dataCart.restore();
+
         for (let dataFile of this.dataFiles) {
             this.clearTreeByDownloadStatus(dataFile);
         }
+
+        this.dataCart.save();
     }
 
+    /**
+     * Clear tree by download status - recursive
+     * @param element 
+     */
     clearTreeByDownloadStatus(element) {
         if (element.data.isLeaf && (element.data.downloadStatus == 'downloading' || element.data.downloadStatus == 'pending')) {
             element.data.downloadStatus = null;

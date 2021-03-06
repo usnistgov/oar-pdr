@@ -83,7 +83,7 @@ export class DataCart {
     // Different listeners--namely a landing page and a data cart window--are not expected to execute
     // in the same runtime space; thus, they can't share their updates to a cart in real time via a Subject
     // 
-    private _statusUpdated = new BehaviorSubject<boolean>(false);   // for alerts about changes to the cart
+    // private _statusUpdated = new BehaviorSubject<boolean>(false);   // for alerts about changes to the cart
 
     /**
      * initialize this cart.  This is not intended to be called directly by users; the static functions
@@ -199,7 +199,12 @@ export class DataCart {
         return this.findFileById(this._idFor(item['resId'], item['filePath']));
     }
 
-    private _idFor(resId: string, filePath: string) { return resId+'/'+filePath; }
+    private _idFor(resId: string, filePath: string) { 
+        if(filePath[0] != '/')
+            return resId+'/'+filePath; 
+        else 
+            return resId+filePath; 
+    }
     private _idForItem(item: DataCartItem) {
         return this._idFor(item['resId'], item['filePath']);
     }
@@ -208,10 +213,8 @@ export class DataCart {
      * add a DataCartItem to the cart
      */
     addItem(item: DataCartItem) : void {
-        this.restore();
         this.contents[this._idForItem(item)] = item;
-        this.save();
-        this._statusUpdated.next(true);
+        // this._statusUpdated.next(true);
     }
 
     /**
@@ -219,7 +222,7 @@ export class DataCart {
      * @param resid   a repository-local identifier for the resource that the file is from
      * @param file    the DataCartItem or NerdmComp that describes the file being added.
      */
-    addFile(resid: string, file: DataCartItem|NerdmComp, markSelected: boolean = false) : void {
+    addFile(resid: string, file: DataCartItem|NerdmComp, markSelected: boolean = false, savecart:boolean = false) : void {
         let fail = function(msg: string) : void {
             console.error("Unable to load file NERDm component: "+msg+": "+JSON.stringify(file));
         }
@@ -227,14 +230,14 @@ export class DataCart {
         if (! file['filePath']) return fail("missing component property, filePath");
         if (! file['downloadURL']) return fail("missing component property, downloadURL");
 
-        this.restore();
         let item = JSON.parse(JSON.stringify(file));
         item['resId'] = resid;
         if (item['downloadStatus'] === undefined)
             item['downloadStatus'] = "";
         item['isSelected'] = markSelected;
         this.addItem(item);
-        this.save();
+
+        if(savecart) this.save();
     }
 
     /**
@@ -243,16 +246,67 @@ export class DataCart {
      * @param filePath  the path to the file within the resource collection to remove.
      * @return boolean -- true if the file was found to be in the cart and then removed. 
      */
-    public removeFileById(resid: string, filePath: string) : boolean {
-        this.restore();
+    public removeFileById(resid: string, filePath: string, updateCart: boolean = false) : boolean {
+        if(updateCart) this.restore();
+
         let id = this._idFor(resid, filePath);
 
         let found = this.contents[id];
-        if (found) 
+        if (found){ 
             delete this.contents[id];
+        }
 
-        this.save();
+        if(updateCart) this.save();
         return !!found;
+    }
+
+    /**
+     * Remove all files from cart - used by removeFilesFromCart()
+     * @param files - file tree
+     */
+    removeFromTree(files: TreeNode[]) {
+        for (let comp of files) {
+            if (comp.children.length > 0) {
+                comp.data.isIncart = false;
+                this.removeFromTree(comp.children);
+            } else {
+                this.removeFileById(comp.data.resId,comp.data.filePath);
+                // this.cartService.removeCartId(comp.data.cartId);
+                comp.data.isIncart = false;
+            }
+        }
+    }
+
+    /**
+     * Reset datafile download status. Because this is a recursive function, the datacart should be opened and saved outside this function
+     * otherwise it will take a long time for a large dataset. 
+     * @param dataFiles 
+     * @param dataCart 
+     * @param downloadStatus 
+     */
+    resetDatafileDownloadStatus(dataFiles: any, downloadStatus: string) {
+        for (let i = 0; i < dataFiles.length; i++) {
+            if (dataFiles[i].children.length > 0) {
+                this.resetDatafileDownloadStatus(dataFiles[i].children, downloadStatus);
+            } else {
+                dataFiles[i].data.downloadStatus = downloadStatus;
+                this.setDownloadStatus(dataFiles[i].data.resId, dataFiles[i].data.resFilePath, downloadStatus);
+            }
+        }
+    }
+
+    /**
+     * Remove the selected data from the data cart
+     * @param selectedData 
+     */
+    removeSelectedData(selectedData: any){
+        for (let selData of selectedData) {
+            if(!selData.data.isLeaf){
+                    this.removeSelectedData(selData.children);
+            }else{
+                this.removeFileById(selData.data['resId'], selData.data['resFilePath'])
+            }
+        }
     }
 
     /**
@@ -275,16 +329,19 @@ export class DataCart {
      * @return boolean -- true if the identified file was found in this cart and its status updated; 
      *                    false, otherwise.
      */
-    public setDownloadStatus(resid: string, filePath: string, downloadedStatus: string = "downloaded") : boolean {
-        this.restore();
+    public setDownloadStatus(resid: string, filePath: string, downloadedStatus: string = "downloaded", updateCart:boolean = false) : boolean {
         
+        if(updateCart) this.restore();
+
         let item: DataCartItem = this.findFile(resid, filePath);
-        if (! item)
+        if (! item){
             return false;
+        }
 
         item.downloadStatus = downloadedStatus;
-        this.save();
-        this._statusUpdated.next(true);
+
+        if(updateCart) this.save();
+        // this._statusUpdated.next(true);
 
         return true;
     }
@@ -339,15 +396,15 @@ export class DataCart {
      * @param filePath  the path to the file within the resource collection.
      * @param unselect  if true, unselect the referenced files rather than selecting them
      */
-    public setSelected(resid: string, filePath: string = '', unselect: boolean = false) : void {
-        this.restore();
-        let match = this.matchFiles(resid, filePath);
-        if (match.length) {
-            for (let file of match) 
-                file['isSelected'] = !unselect;
-            this.save();
-        }
-    }
+    // public setSelected(resid: string, filePath: string = '', unselect: boolean = false) : void {
+    //     this.restore();
+    //     let match = this.matchFiles(resid, filePath);
+    //     if (match.length) {
+    //         for (let file of match) 
+    //             file['isSelected'] = !unselect;
+    //         this.save();
+    //     }
+    // }
 
     /**
      * return an array containing DataCartItem objects for file part of a resource with a given resource ID
@@ -404,9 +461,9 @@ export class DataCart {
     /**
      * register to get alerts when files have been downloaded
      */
-    public watchForChanges(subscriber): void {
-        this._statusUpdated.subscribe(subscriber);
-    }
+    // public watchForChanges(subscriber): void {
+    //     this._statusUpdated.subscribe(subscriber);
+    // }
 
     /**
      * Return cart items as an array for display purpose

@@ -1,7 +1,7 @@
-<div style="display: inline-block; margin: auto;">
+<div *ngIf="inBrowser" style="display: inline-block; margin: auto;">
     <div class="full-span" style="width: 94%;">
         <p-treeTable *ngIf="isVisible" [resizableColumns]="true" selectionMode="checkbox" [value]="dataFiles"
-            (onNodeSelect)="dataFileCount()" (onNodeUnselect)="dataFileCount()" [(selection)]="selectedData"
+            (onNodeSelect)="selectedDataFileCount(true)" (onNodeUnselect)="selectedDataFileCount(true)" [(selection)]="selectedData"
             [style]="{'margin':'auto', 'padding-bottom':'3%', 'color':'black'}">
             <ng-template pTemplate="header">
                 <tr>
@@ -14,8 +14,7 @@
                                 style="cursor: pointer;color: rgb(255, 255, 255);" data-toggle="tooltip"
                                 title="Collapse All"></i>
                         </span>
-                        <span (click)="showZipFilesNames = !showZipFilesNames" style="padding-right:0.5em;"
-                            *ngIf="zipData.length>0">
+                        <span (click)="showZipFilesNames = !showZipFilesNames" style="padding-right:0.5em;">
                             <i *ngIf="!showZipFilesNames" class="faa faa-eye faa-1x icon-white"
                                 style="cursor: pointer;color: rgb(255, 255, 255);" data-toggle="tooltip"
                                 title="Show Zip Files"></i>
@@ -25,11 +24,11 @@
                         </span>
                         Name
                     </th>
+                    <th [ngStyle]="headerStyle(typeWidth)" ttResizableColumn>Media Type</th>
+                    <th [ngStyle]="headerStyle(sizeWidth)" ttResizableColumn>Size</th>
                     <th [ngStyle]="headerStyle(actionWidth)" ttResizableColumn>
                         <i class="faa faa-cloud-download" aria-hidden="true" data-toggle="tooltip" title="Actions"></i>
                     </th>
-                    <th [ngStyle]="headerStyle(typeWidth)" ttResizableColumn>Media Type</th>
-                    <th [ngStyle]="headerStyle(sizeWidth)" ttResizableColumn>Size</th>
                     <th [ngStyle]="headerStyle(statusWidth)" ttResizableColumn>
                         Status
                         <div class="badge status-reset-button" (click)="clearDownloadStatus()" data-toggle="tooltip"
@@ -53,6 +52,12 @@
                         <span *ngIf="showZipFilesNames" style="color:grey;margin-left: 1em;font-style: italic;">
                             {{rowData.zipFile}}</span>
                     </td>
+                    <td [ngStyle]="bodyStyle(typeWidth)">
+                        <span>{{rowData.mediatype}}</span>
+                    </td>
+                    <td [ngStyle]="bodyStyle(sizeWidth)">
+                        <span *ngIf="rowData.isLeaf">{{formatBytes(rowData.fileSize)}}</span>
+                    </td>
                     <td [ngStyle]="bodyStyle(sizeWidth)">
                         <div *ngIf="rowData.isLeaf;else space_holder" style="display:inline;color: green;" >
                             <a *ngIf="rowData.downloadStatus != 'downloading'" href='{{rowData.downloadUrl}}' target='_blank' download="download" data-toggle="tooltip" 
@@ -69,12 +74,6 @@
                         <ng-template #space_holder>
                             <div style="display:inline;padding-right: 0.4em;">&nbsp;&nbsp;</div>
                         </ng-template>
-                    </td>
-                    <td [ngStyle]="bodyStyle(typeWidth)">
-                        <span>{{rowData.mediatype}}</span>
-                    </td>
-                    <td [ngStyle]="bodyStyle(sizeWidth)">
-                        <span *ngIf="rowData.isLeaf">{{formatBytes(rowData.fileSize)}}</span>
                     </td>
                     <td [ngStyle]="bodyStyle(statusWidth)">
                         <div id="downloadstatus" *ngIf="rowData.isLeaf" style="display:inline;"
