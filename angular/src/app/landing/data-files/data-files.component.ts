@@ -249,21 +249,22 @@ export class DataFilesComponent {
      * Function to sync the download status from data cart.
      */
     updateStatusFromCart() {
-        this.resetStatus(this.files);
+        if(this.inBrowser){
+            this.resetStatus(this.files);
 
-        if(!this.globalDataCart)
-            this.globalDataCart = DataCart.openCart(this.CART_CONSTANTS.GLOBAL_CART_NAME);
+            if(!this.globalDataCart)
+                this.globalDataCart = DataCart.openCart(this.CART_CONSTANTS.GLOBAL_CART_NAME);
 
-        for (let key in this.globalDataCart.contents) {
-            this.setFilesDownloadStatus(this.files, this.globalDataCart.contents[key].resId, this.globalDataCart.contents[key].downloadStatus);
-            if (this.globalDataCart.contents[key].cartId != undefined) {
-                let treeNode = this.searchTree(this.treeRoot[0], this.globalDataCart.contents[key].cartId);
-                if (treeNode != null) {
-                    treeNode.data.isIncart = true;
+            for (let key in this.globalDataCart.contents) {
+                this.setFilesDownloadStatus(this.files, this.globalDataCart.contents[key].resId, this.globalDataCart.contents[key].downloadStatus);
+                if (this.globalDataCart.contents[key].cartId != undefined) {
+                    let treeNode = this.searchTree(this.treeRoot[0], this.globalDataCart.contents[key].cartId);
+                    if (treeNode != null) {
+                        treeNode.data.isIncart = true;
+                    }
                 }
             }
         }
-
         return Promise.resolve(this.files);
     }
 
@@ -685,25 +686,27 @@ export class DataFilesComponent {
      * Function to download all.
      */
     downloadFromRoot() {
-        this.addingToCart = true;
-        this.cancelAllDownload = false;
-        this.specialDataCart = DataCart.createCart(this.ediid);
+        if(this.inBrowser){
+            this.addingToCart = true;
+            this.cancelAllDownload = false;
+            this.specialDataCart = DataCart.createCart(this.ediid);
 
-        setTimeout(() => {
-            this.addAllFilesToCart(this.files, true, this.ediid).then(function (result) {
-                this.addingToCart = false;
-                window.open('/datacart/'+this.ediid, this.ediid);
-                this.updateStatusFromCart().then(function (result: any) {
-                    this.initDataFileTree();
+            setTimeout(() => {
+                this.addAllFilesToCart(this.files, true, this.ediid).then(function (result) {
+                    this.addingToCart = false;
+                    window.open('/datacart/'+this.ediid, this.ediid);
+                    this.updateStatusFromCart().then(function (result: any) {
+                        this.initDataFileTree();
+                    }.bind(this), function (err) {
+                        this.addingToCart = false;
+                        alert("something went wrong while adding file to data cart.");
+                    });
                 }.bind(this), function (err) {
                     this.addingToCart = false;
-                    alert("something went wrong while adding file to data cart.");
+                    alert("something went wrong while adding all files to cart");
                 });
-            }.bind(this), function (err) {
-                this.addingToCart = false;
-                alert("something went wrong while adding all files to cart");
-            });
-        }, 0);
+            }, 0);
+        }
     }
 
     /**
