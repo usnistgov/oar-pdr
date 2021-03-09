@@ -2,22 +2,24 @@
  * Non-GUI classes and interfaces for managing the contents of a data cart.  This does *not* include 
  * downloading functionality.
  */
-import { TreeNode } from 'primeng/api';
-
-import { Observable, BehaviorSubject } from 'rxjs';
+import { Observable, Subject } from 'rxjs';
 
 import { NerdmComp } from '../nerdm/nerdm';
 
 /**
- * convert the TreeNode[] data to a string appropriate for saving to local storage
+ * convert a data cart contents to a string appropriate for saving to local storage
  */
 export function stringifyCart(data: DataCartLookup) : string { return JSON.stringify(data); }
+export function stringifyMD(data: DataCartMD) : string { return JSON.stringify(data); }
 
 /**
- * parse a string pulled from local storage into TreeNode[] data 
+ * parse a string pulled from local storage into data cart contents
  */
 export function parseCart(datastr: string) : DataCartLookup {
     return <DataCartLookup>((datastr) ? JSON.parse(datastr) : {});
+}
+export function parseMD(datastr: string) : DataCartMD {
+    return <DataCartMD>((datastr) ? JSON.parse(datastr) : null);
 }
 
 /**
@@ -69,30 +71,48 @@ export interface DataCartLookup {
     [propName: string]: DataCartItem;
 }
 
+interface DataCartMD {
+    /**
+     * the epoch time when this data was updated last
+     */
+    updated : number;
+}
+
 /**
  * a container for the contents of a data cart.  This manages persisting the content data to the 
- * user's (via the browser) local disk.  
+ * user's (via the browser) local disk.  It can be watched for changes.
+ *
+ * The contents can be accessed via the "contents" property, which itself is a javascript object where 
+ * the properties are file properties and the values are DataCartItem objects describe a file in the cart 
+ * and its status.  
+ * 
+ * Gemerally, watchers and users should instantiate a cart directly but rather get a cart via 
+ * a CartService (injected) instance.  The service will ensure that all clients receive the same instance
+ * of the cart, thereby having a synchronized view of its contents.  
  */
 export class DataCart {
 
     contents: DataCartLookup = {};      // the list of files in this cart
     cartName: string = null             // the name for this data cart; this is the name it is persisted under
     _storage: Storage = null;           // the persistant storage; if null, this cart is in-memory only
+    lastUpdated: number = 0;            // epoch time the contents were last updated; used to control updates
+                                        //    to subscribers
 
-    // Caution: in the current application, this Observerable is not likely to work.  
-    // Different listeners--namely a landing page and a data cart window--are not expected to execute
-    // in the same runtime space; thus, they can't share their updates to a cart in real time via a Subject
-    // 
-    // private _statusUpdated = new BehaviorSubject<boolean>(false);   // for alerts about changes to the cart
+    private _statusUpdated = new Subject<string>();   // for alerts about changes to the cart
 
     /**
      * initialize this cart.  This is not intended to be called directly by users; the static functions
      * should be used instead.
      */
-    constructor(name: string, data?: DataCartLookup, store: Storage|null = localStorage) {
+    constructor(name: string, data?: DataCartLookup, store: Storage|null = localStorage, update: number = 0) {
         this.cartName = name;
         if (data) this.contents = data;
         this._storage = store;  // if null; cart is in-memory only
+        this.lastUpdated = update;
+
+        // watch for changes that occur in other browser tabs/windows
+        if (this._storage && window) 
+            window.addEventListener("storage", this._checkForUpdate.bind(this))
     }
 
     /**
@@ -100,12 +120,14 @@ export class DataCart {
      */
     public static openCart(id: string, store: Storage = localStorage) : DataCart {
         let data: DataCartLookup = <DataCartLookup>{};
+        let md: string = null;
         if (store) {
-            data = parseCart(store.getItem("cart:"+id));
-            if (! data)
+            data = parseCart(store.getItem(DataCart.keyFor(id)));
+            if (! data) 
                 return DataCart.createCart(id, store);
+            md = store.getItem(DataCart.keyFor(id)+".md");
         }
-        return new DataCart(id, data, store);
+        return new DataCart(id, data, store, (md != null) ? parseMD(md).updated : 0);
     }
 
     /**
@@ -118,20 +140,34 @@ export class DataCart {
         return out;
     }
 
+    static keyFor(id: string) : string {
+        return "cart:"+id;
+    }
+
     /**
      * save the contents of this cart to its persistent storage
      */
     public save() : void {
-        if (this._storage)
-            this._storage.setItem("cart:"+this.cartName, stringifyCart(this.contents));
+        this.lastUpdated = Date.now();
+        if (this._storage) {
+            this._storage.setItem(this.getKey()+".md", stringifyMD(this.updatedMD(this.lastUpdated))); 
+            this._storage.setItem(this.getKey(), stringifyCart(this.contents));
+        }
+        this._statusUpdated.next(this.cartName);
+    }
+
+    private updatedMD(time : number) : DataCartMD {
+        return { updated: time };
     }
 
     /**
      * delete the contents of this cart from persistent storage
      */
     public forget() : void {
-        if (this._storage)
-            this._storage.removeItem("cart:"+this.cartName);
+        if (this._storage) {
+            this._storage.removeItem(this.getKey());
+            this._storage.removeItem(this.getKey()+".md");
+        }
     }
 
     /**
@@ -139,8 +175,37 @@ export class DataCart {
      * this if they want to ensure they have the latest changes to the cart.  
      */
     public restore() : void {
-        if (this._storage)
-            this.contents = parseCart(this._storage.getItem("cart:"+this.cartName));
+        if (this._storage) {
+            let md : DataCartMD|null = this._getStoreMD();
+            this.lastUpdated = (md != null) ? md.updated : Date.now();
+            this.contents = parseCart(this._storage.getItem(this.getKey()));
+        }
+    }
+
+    /*
+     * check to see if this cart has been updated via another instance
+     */
+    _checkForUpdate(ev) : void {
+        console.log("detected update to "+ev.key);
+        if (ev.key != this.getKey())
+            // not this cart
+            return;
+
+        let md : DataCartMD|null = this._getStoreMD();
+        if (md == null)
+            // not saved yet (or was forgotten)
+            return;
+        if (md.updated > this.lastUpdated) {
+            // another instance updated this cart
+            this.restore();
+            this._statusUpdated.next(this.cartName);
+        }
+    }
+
+    private _getStoreMD() : DataCartMD|null {
+        if (this._storage) 
+            return parseMD(this._storage.getItem(this.getKey()+".md"));
+        return null;
     }
 
     /**
@@ -154,7 +219,7 @@ export class DataCart {
      * get the key of this cart
      */
     public getKey() : string {
-        return "cart:"+this.cartName;
+        return DataCart.keyFor(this.cartName);
     }
 
     /**
@@ -212,17 +277,22 @@ export class DataCart {
     /**
      * add a DataCartItem to the cart
      */
-    addItem(item: DataCartItem) : void {
+    addItem(item: DataCartItem, dosave: boolean = false) : void {
         this.contents[this._idForItem(item)] = item;
-        // this._statusUpdated.next(true);
+
+        if (dosave) this.save();
     }
 
     /**
      * add a file to this data cart.  The item must have filePath and a downloadURL properties
      * @param resid   a repository-local identifier for the resource that the file is from
      * @param file    the DataCartItem or NerdmComp that describes the file being added.
+     * @param markSelected   if true, the new file will be marked as selected
+     * @param dosave         if true, the updated cart contents will be added after adding the file
      */
-    addFile(resid: string, file: DataCartItem|NerdmComp, markSelected: boolean = false, savecart:boolean = false) : void {
+    addFile(resid: string, file: DataCartItem|NerdmComp,
+            markSelected: boolean = false, dosave: boolean = false) : void
+    {
         let fail = function(msg: string) : void {
             console.error("Unable to load file NERDm component: "+msg+": "+JSON.stringify(file));
         }
@@ -235,9 +305,7 @@ export class DataCart {
         if (item['downloadStatus'] === undefined)
             item['downloadStatus'] = "";
         item['isSelected'] = markSelected;
-        this.addItem(item);
-
-        if(savecart) this.save();
+        this.addItem(item, dosave);
     }
 
     /**
@@ -246,79 +314,26 @@ export class DataCart {
      * @param filePath  the path to the file within the resource collection to remove.
      * @return boolean -- true if the file was found to be in the cart and then removed. 
      */
-    public removeFileById(resid: string, filePath: string, updateCart: boolean = false) : boolean {
-        if(updateCart) this.restore();
-
+    public removeFileById(resid: string, filePath: string, dosave: boolean = false) : boolean {
         let id = this._idFor(resid, filePath);
 
         let found = this.contents[id];
-        if (found){ 
+        if (found) { 
             delete this.contents[id];
         }
 
-        if(updateCart) this.save();
+        if (dosave) this.save();
         return !!found;
-    }
-
-    /**
-     * Remove all files from cart - used by removeFilesFromCart()
-     * @param files - file tree
-     */
-    removeFromTree(files: TreeNode[]) {
-        for (let comp of files) {
-            if (comp.children.length > 0) {
-                comp.data.isIncart = false;
-                this.removeFromTree(comp.children);
-            } else {
-                this.removeFileById(comp.data.resId,comp.data.filePath);
-                // this.cartService.removeCartId(comp.data.cartId);
-                comp.data.isIncart = false;
-            }
-        }
-    }
-
-    /**
-     * Reset datafile download status. Because this is a recursive function, the datacart should be opened and saved outside this function
-     * otherwise it will take a long time for a large dataset. 
-     * @param dataFiles 
-     * @param dataCart 
-     * @param downloadStatus 
-     */
-    resetDatafileDownloadStatus(dataFiles: any, downloadStatus: string) {
-        for (let i = 0; i < dataFiles.length; i++) {
-            if (dataFiles[i].children.length > 0) {
-                this.resetDatafileDownloadStatus(dataFiles[i].children, downloadStatus);
-            } else {
-                dataFiles[i].data.downloadStatus = downloadStatus;
-                this.setDownloadStatus(dataFiles[i].data.resId, dataFiles[i].data.resFilePath, downloadStatus);
-            }
-        }
-    }
-
-    /**
-     * Remove the selected data from the data cart
-     * @param selectedData 
-     */
-    removeSelectedData(selectedData: any){
-        for (let selData of selectedData) {
-            if(!selData.data.isLeaf){
-                    this.removeSelectedData(selData.children);
-            }else{
-                this.removeFileById(selData.data['resId'], selData.data['resFilePath'])
-            }
-        }
     }
 
     /**
      * remove a list of files
      */
-    public removeFiles(files: DataCartItem[]) : void {
-        this.restore();
-
+    public removeFiles(files: DataCartItem[], dosave: boolean = false) : void {
         for (let file of files) 
             delete this.contents[this._idForItem(file)]
 
-        this.save();
+        if (dosave) this.save();
     }
 
     /**
@@ -329,19 +344,15 @@ export class DataCart {
      * @return boolean -- true if the identified file was found in this cart and its status updated; 
      *                    false, otherwise.
      */
-    public setDownloadStatus(resid: string, filePath: string, downloadedStatus: string = "downloaded", updateCart:boolean = false) : boolean {
-        
-        if(updateCart) this.restore();
-
+    public setDownloadStatus(resid: string, filePath: string,
+                             downloadedStatus: string = "downloaded", dosave: boolean = false) : boolean
+    {
         let item: DataCartItem = this.findFile(resid, filePath);
-        if (! item){
+        if (! item)
             return false;
-        }
 
         item.downloadStatus = downloadedStatus;
-
-        if(updateCart) this.save();
-        // this._statusUpdated.next(true);
+        if(dosave) this.save();
 
         return true;
     }
@@ -396,15 +407,16 @@ export class DataCart {
      * @param filePath  the path to the file within the resource collection.
      * @param unselect  if true, unselect the referenced files rather than selecting them
      */
-    // public setSelected(resid: string, filePath: string = '', unselect: boolean = false) : void {
-    //     this.restore();
-    //     let match = this.matchFiles(resid, filePath);
-    //     if (match.length) {
-    //         for (let file of match) 
-    //             file['isSelected'] = !unselect;
-    //         this.save();
-    //     }
-    // }
+    public setSelected(resid: string, filePath: string = '',
+                       unselect: boolean = false, dosave: boolean = false) : void
+    {
+        let match = this.matchFiles(resid, filePath);
+        if (match.length) {
+            for (let file of match) 
+                file['isSelected'] = !unselect;
+            if (dosave) this.save();
+        }
+    }
 
     /**
      * return an array containing DataCartItem objects for file part of a resource with a given resource ID
@@ -420,7 +432,9 @@ export class DataCart {
         let matched = this.contents[id]
         if (matched) return [matched];
 
-        id += '/'
+        id = resid;
+        if (filePath) id = resid+'/'+filePath;
+        id += '/';
         let matched2 = Object.keys(this.contents).filter((k) => { return k.startsWith(id); });
         return matched2.map((k) => { return this.contents[k]; });
     }
@@ -459,11 +473,12 @@ export class DataCart {
     }
 
     /**
-     * register to get alerts when files have been downloaded
+     * register to get alerts when files have been downloaded.  The subscriber is a function
+     * that takes the name of the cart as its value.
      */
-    // public watchForChanges(subscriber): void {
-    //     this._statusUpdated.subscribe(subscriber);
-    // }
+    public watchForChanges(subscriber): void {
+        this._statusUpdated.subscribe(subscriber);
+    }
 
     /**
      * Return cart items as an array for display purpose

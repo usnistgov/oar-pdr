@@ -1,4 +1,4 @@
-import { DataCart, DataCartItem, DataCartLookup, stringifyCart, parseCart } from './cart';
+import { DataCart, DataCartItem, DataCartLookup, stringifyCart, parseCart, stringifyMD, parseMD } from './cart';
 import { testdata } from '../../environments/environment';
 
 let emptycoll: DataCartLookup = <DataCartLookup>{};
@@ -6,14 +6,23 @@ let fakecoll: DataCartLookup = { "goob/gurn": { filePath: "gurn", resId: "goob",
 let fakecoll_json: string = JSON.stringify(fakecoll);
 
 describe('stringify-parse', () => {
-    it("empty", () => {
+    it("empty cart", () => {
         expect(stringifyCart(emptycoll)).toEqual('{}');
         expect(parseCart(stringifyCart(emptycoll))).toEqual(emptycoll);
     });
 
-    it("non-empty", () => {
+    it("non-empty cart", () => {
         expect(stringifyCart(fakecoll)).toEqual(fakecoll_json);
         expect(parseCart(stringifyCart(fakecoll))).toEqual(fakecoll);
+    });
+
+    it("empty metadata", () => {
+        expect(parseMD(null)).toBeNull();
+    });
+
+    it("non-empty metadata", () => {
+        expect(stringifyMD({updated: 4000})).toEqual('{"updated":4000}');
+        expect(parseMD(stringifyMD({updated: 4000}))).toEqual({updated: 4000});
     });
 });
 
@@ -76,16 +85,26 @@ describe('DataCart', () => {
     });
 
     it('save()', () => {
+        let changes = 0;
+
         let dc = new DataCart("cart", {});
         expect(localStorage.getItem("cart:cart")).toBeNull();
+        expect(dc.lastUpdated).toEqual(0);
+
+        dc.watchForChanges((w) => { changes++; });
+        expect(changes).toEqual(0);  // changes does not get initialized
         dc.save();
         expect(localStorage.getItem("cart:cart")).toEqual("{}");
+        expect(dc.lastUpdated).toBeGreaterThan(0);
+        expect(changes).toEqual(1);
         
         dc = new DataCart("cart", sample, sessionStorage);
         expect(sessionStorage.getItem("cart:cart")).toBeNull();
+        expect(dc.lastUpdated).toEqual(0);
         dc.save();
         expect(sessionStorage.getItem("cart:cart")).toEqual(fakecoll_json);
         expect(localStorage.getItem("cart:cart")).toEqual('{}');
+        expect(dc.lastUpdated).toBeGreaterThan(0);
     });
 
     it('forget()', () => {
@@ -93,6 +112,8 @@ describe('DataCart', () => {
         expect(localStorage.getItem("cart:cart")).toEqual("{}");
         dc.forget();
         expect(localStorage.getItem("cart:cart")).toBeNull();
+        dc.restore();
+        expect(dc.contents).toEqual({});
         dc.save();
         expect(localStorage.getItem("cart:cart")).toEqual("{}");
 
@@ -106,12 +127,24 @@ describe('DataCart', () => {
     });
 
     it('restore()', () => {
+        window.addEventListener("storage", (ev) => { console.log("Detected store update to "+ev.key); });
         let dc = DataCart.createCart("cart");
         expect(localStorage.getItem("cart:cart")).toEqual("{}");
         localStorage.setItem("cart:cart", stringifyCart(sample));
         expect(dc.contents).toEqual({});
         dc.restore();
         expect(dc.contents).toEqual(sample);
+    });
+
+    it('_checkForUpdate()', () => {
+        window.addEventListener("storage", (ev) => { console.log("Detected store update to "+ev.key); });
+        let dc = DataCart.createCart("cart");
+        expect(localStorage.getItem("cart:cart")).toEqual("{}");
+        localStorage.setItem("cart:cart", stringifyCart(sample));
+        expect(dc.contents).toEqual({});
+        dc._checkForUpdate({ key: "cart:cart" });
+        expect(dc.contents).toEqual({});   // because date was not updated
+        localStorage.setItem("cart:cart.md", stringifyMD({updated: Date.now()}));
     });
 
     it('findFileById()', () => {
@@ -316,6 +349,102 @@ describe('DataCart', () => {
         expect(dc.findFile("gov", "hank")['downloadStatus']).toEqual("downloading");
         expect(dc.findFile("gov", "fred")['inCart']).not.toBeDefined(true);
         expect(dc.findFile("gov", "hank")['inCart']).not.toBeDefined(true);
+    });
+
+    it('matchFiles()', () => {
+        let dc = DataCart.createCart("cart");
+        dc.addFile("foo", { filePath: "bar/goo", count: 3, downloadURL: "http://here" });
+        dc.addFile("foo", { filePath: "bar/good", count: 8, downloadURL: "http://here" });
+        dc.addFile("gov", { filePath: "fred", count: 1, downloadStatus: "downloaded", downloadURL: "http://here" });
+        dc.addFile("gov", { filePath: "hank", count: 8, downloadStatus: "downloading", downloadURL: "http://here" });
+        expect(dc.size()).toEqual(4);
+        expect(dc.countFilesDownloaded()).toEqual(1);
+
+        expect(dc.matchFiles("gov").length).toEqual(2);
+        expect(dc.matchFiles("foo", "bar/goo").length).toEqual(1);
+        expect(dc.matchFiles("foo", "bar").length).toEqual(2);
+    });
+
+    it('getSelected()', () => {
+        let dc = DataCart.createCart("cart");
+        dc.addFile("foo", { filePath: "bar/goo", count: 3, downloadURL: "http://here" });
+        dc.addFile("foo", { filePath: "bar/good", count: 8, downloadURL: "http://here" });
+        dc.addFile("gov", { filePath: "fred", count: 1, downloadStatus: "downloaded", downloadURL: "http://here" });
+        dc.addFile("gov", { filePath: "hank", count: 8, downloadStatus: "downloading", downloadURL: "http://here" });
+        expect(dc.size()).toEqual(4);
+        expect(dc.countFilesDownloaded()).toEqual(1);
+        expect(dc.getSelectedFiles().length).toEqual(0);
+
+        dc.setSelected("gov");
+        let sel = dc.getSelectedFiles();
+        expect(sel.length).toEqual(2);
+        expect(sel[0].resId).toEqual("gov");
+        expect(sel[1].resId).toEqual("gov");
+        expect(sel[0].filePath).not.toEqual(sel[1].filePath);
+
+        dc.setSelected("gov", '', true);
+        expect(dc.getSelectedFiles().length).toEqual(0);
+
+        dc.setSelected("foo", "bar");
+        sel = dc.getSelectedFiles();
+        expect(sel.length).toEqual(2);
+        expect(sel[0].resId).toEqual("foo");
+        expect(sel[1].resId).toEqual("foo");
+        expect(sel[0].filePath.startsWith("bar/")).toBeTruthy();
+        expect(sel[1].filePath.startsWith("bar/")).toBeTruthy();
+        expect(sel[0].filePath).not.toEqual(sel[1].filePath);
+
+        dc.setSelected("gov", "fred");
+        sel = dc.getSelectedFiles();
+        expect(sel.length).toEqual(3);
+        expect(sel[0].resId).toEqual("foo");
+        expect(sel[1].resId).toEqual("foo");
+        expect(sel[2].resId).toEqual("gov");
+        expect(sel[2].filePath).toEqual("fred");
+
+        dc.removeSelectedFiles();
+        expect(dc.size()).toEqual(1);
+        expect(dc.countFilesDownloaded()).toEqual(0);
+        expect(dc.getSelectedFiles().length).toEqual(0);
+    });
+
+    it('getSelected()', () => {
+        let dc = DataCart.createCart("cart");
+        dc.addFile("foo", { filePath: "bar/goo", count: 3, downloadURL: "http://here" });
+        dc.addFile("foo", { filePath: "bar/good", count: 8, downloadURL: "http://here" });
+        dc.addFile("gov", { filePath: "fred", count: 1, downloadStatus: "downloaded", downloadURL: "http://here" });
+        dc.addFile("gov", { filePath: "hank", count: 8, downloadStatus: "downloading", downloadURL: "http://here" });
+        expect(dc.size()).toEqual(4);
+        expect(dc.countFilesDownloaded()).toEqual(1);
+        expect(dc.getSelectedFiles().length).toEqual(0);
+
+        let sel = dc.getDownloadedFiles();
+        expect(sel.length).toEqual(1);
+        expect(sel[0].resId).toEqual("gov");
+        expect(sel[0].filePath).toEqual("fred");
+
+        expect(dc.setDownloadStatus("gov", "hank")).toBeTruthy();
+        expect(dc.countFilesDownloaded()).toEqual(2);
+        sel = dc.getDownloadedFiles();
+        expect(sel.length).toEqual(2);
+        expect(sel[0].resId).toEqual("gov");
+        expect(sel[0].filePath).toEqual("fred");
+        expect(sel[1].resId).toEqual("gov");
+        expect(sel[1].filePath).toEqual("hank");
+
+        dc.removeDownloadedFiles();
+        expect(dc.size()).toEqual(2);
+        expect(dc.countFilesDownloaded()).toEqual(0);
+
+        expect(dc.setDownloadStatus("foo", "bar/goo", "downloading")).toBeTruthy();
+        expect(dc.countFilesDownloaded()).toEqual(0);
+        expect(dc.findFile("foo", "bar/goo").downloadStatus).toEqual('downloading');
+        expect(dc.setDownloadStatus("foo", "bar", "downloaded")).toBeFalsy();
+        expect(dc.countFilesDownloaded()).toEqual(0);
+        expect(dc.findFile("foo", "bar/goo").downloadStatus).toEqual('downloading');
+        expect(dc.setDownloadStatus("foo", "bar/good", "downloaded")).toBeTruthy();
+        expect(dc.countFilesDownloaded()).toEqual(1);
+        expect(dc.findFile("foo", "bar/good").downloadStatus).toEqual('downloaded');
     });
 })
 
