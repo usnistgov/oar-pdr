@@ -85,18 +85,18 @@ describe('DataCart', () => {
     });
 
     it('save()', () => {
-        let changes = 0;
+        let saves = 0;
 
         let dc = new DataCart("cart", {});
         expect(localStorage.getItem("cart:cart")).toBeNull();
         expect(dc.lastUpdated).toEqual(0);
 
-        dc.watchForChanges((w) => { changes++; });
-        expect(changes).toEqual(0);  // changes does not get initialized
+        dc.watchForChanges((w) => { saves++; });
+        expect(saves).toEqual(0);  // saves does not get initialized
         dc.save();
         expect(localStorage.getItem("cart:cart")).toEqual("{}");
         expect(dc.lastUpdated).toBeGreaterThan(0);
-        expect(changes).toEqual(1);
+        expect(saves).toEqual(1);
         
         dc = new DataCart("cart", sample, sessionStorage);
         expect(sessionStorage.getItem("cart:cart")).toBeNull();
@@ -366,17 +366,27 @@ describe('DataCart', () => {
     });
 
     it('getSelected()', () => {
+        let saves = 0;
+
         let dc = DataCart.createCart("cart");
-        dc.addFile("foo", { filePath: "bar/goo", count: 3, downloadURL: "http://here" });
+        dc.watchForChanges((w) => { saves++; });
+        dc.addFile("foo", { filePath: "bar/goo", count: 3, downloadURL: "http://here" }, false, false);
         dc.addFile("foo", { filePath: "bar/good", count: 8, downloadURL: "http://here" });
-        dc.addFile("gov", { filePath: "fred", count: 1, downloadStatus: "downloaded", downloadURL: "http://here" });
+        dc.addFile("gov", { filePath: "fred", count: 1, downloadStatus: "downloaded", downloadURL: "http://here" }, true);
         dc.addFile("gov", { filePath: "hank", count: 8, downloadStatus: "downloading", downloadURL: "http://here" });
         expect(dc.size()).toEqual(4);
         expect(dc.countFilesDownloaded()).toEqual(1);
-        expect(dc.getSelectedFiles().length).toEqual(0);
+        expect(dc.getSelectedFiles().length).toEqual(1);
+        expect(saves).toEqual(3);
+
+        let sel = dc.getSelectedFiles();
+        expect(sel.length).toEqual(1);
+        expect(sel[0].resId).toEqual("gov");
+        expect(sel[0].filePath).toEqual("fred");
 
         dc.setSelected("gov");
-        let sel = dc.getSelectedFiles();
+        expect(saves).toEqual(4);
+        sel = dc.getSelectedFiles();
         expect(sel.length).toEqual(2);
         expect(sel[0].resId).toEqual("gov");
         expect(sel[1].resId).toEqual("gov");
@@ -384,8 +394,10 @@ describe('DataCart', () => {
 
         dc.setSelected("gov", '', true);
         expect(dc.getSelectedFiles().length).toEqual(0);
+        expect(saves).toEqual(5);
 
-        dc.setSelected("foo", "bar");
+        dc.setSelected("foo", "bar", false, false);
+        expect(saves).toEqual(5);
         sel = dc.getSelectedFiles();
         expect(sel.length).toEqual(2);
         expect(sel[0].resId).toEqual("foo");
@@ -395,6 +407,7 @@ describe('DataCart', () => {
         expect(sel[0].filePath).not.toEqual(sel[1].filePath);
 
         dc.setSelected("gov", "fred");
+        expect(saves).toEqual(6);
         sel = dc.getSelectedFiles();
         expect(sel.length).toEqual(3);
         expect(sel[0].resId).toEqual("foo");
@@ -403,20 +416,25 @@ describe('DataCart', () => {
         expect(sel[2].filePath).toEqual("fred");
 
         dc.removeSelectedFiles();
+        expect(saves).toEqual(7);
         expect(dc.size()).toEqual(1);
         expect(dc.countFilesDownloaded()).toEqual(0);
         expect(dc.getSelectedFiles().length).toEqual(0);
     });
 
-    it('getSelected()', () => {
+    it('getDownloadedFiles()', () => {
+        let saves = 0;
+
         let dc = DataCart.createCart("cart");
-        dc.addFile("foo", { filePath: "bar/goo", count: 3, downloadURL: "http://here" });
-        dc.addFile("foo", { filePath: "bar/good", count: 8, downloadURL: "http://here" });
+        dc.watchForChanges((w) => { saves++; });
+        dc.addFile("foo", { filePath: "bar/goo", count: 3, downloadURL: "http://here" }, false, false);
+        dc.addFile("foo", { filePath: "bar/good", count: 8, downloadURL: "http://here" }, false, false);
         dc.addFile("gov", { filePath: "fred", count: 1, downloadStatus: "downloaded", downloadURL: "http://here" });
         dc.addFile("gov", { filePath: "hank", count: 8, downloadStatus: "downloading", downloadURL: "http://here" });
         expect(dc.size()).toEqual(4);
         expect(dc.countFilesDownloaded()).toEqual(1);
         expect(dc.getSelectedFiles().length).toEqual(0);
+        expect(saves).toEqual(2)
 
         let sel = dc.getDownloadedFiles();
         expect(sel.length).toEqual(1);
@@ -425,6 +443,7 @@ describe('DataCart', () => {
 
         expect(dc.setDownloadStatus("gov", "hank")).toBeTruthy();
         expect(dc.countFilesDownloaded()).toEqual(2);
+        expect(saves).toEqual(3)
         sel = dc.getDownloadedFiles();
         expect(sel.length).toEqual(2);
         expect(sel[0].resId).toEqual("gov");
@@ -435,16 +454,23 @@ describe('DataCart', () => {
         dc.removeDownloadedFiles();
         expect(dc.size()).toEqual(2);
         expect(dc.countFilesDownloaded()).toEqual(0);
+        expect(saves).toEqual(4)
 
-        expect(dc.setDownloadStatus("foo", "bar/goo", "downloading")).toBeTruthy();
+        expect(dc.setDownloadStatus("foo", "bar/goo", "downloading", false)).toBeTruthy();
         expect(dc.countFilesDownloaded()).toEqual(0);
+        expect(saves).toEqual(4)
         expect(dc.findFile("foo", "bar/goo").downloadStatus).toEqual('downloading');
-        expect(dc.setDownloadStatus("foo", "bar", "downloaded")).toBeFalsy();
+        expect(dc.setDownloadStatus("foo", "bar", "downloaded", false)).toBeFalsy();
         expect(dc.countFilesDownloaded()).toEqual(0);
+        expect(saves).toEqual(4)
         expect(dc.findFile("foo", "bar/goo").downloadStatus).toEqual('downloading');
-        expect(dc.setDownloadStatus("foo", "bar/good", "downloaded")).toBeTruthy();
+        expect(dc.setDownloadStatus("foo", "bar/good", "downloaded", false)).toBeTruthy();
         expect(dc.countFilesDownloaded()).toEqual(1);
+        expect(saves).toEqual(4)
         expect(dc.findFile("foo", "bar/good").downloadStatus).toEqual('downloaded');
+
+        dc.save();
+        expect(saves).toEqual(5)
     });
 })
 

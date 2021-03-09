@@ -186,7 +186,6 @@ export class DataCart {
      * check to see if this cart has been updated via another instance
      */
     _checkForUpdate(ev) : void {
-        console.log("detected update to "+ev.key);
         if (ev.key != this.getKey())
             // not this cart
             return;
@@ -277,7 +276,7 @@ export class DataCart {
     /**
      * add a DataCartItem to the cart
      */
-    addItem(item: DataCartItem, dosave: boolean = false) : void {
+    addItem(item: DataCartItem, dosave: boolean = true) : void {
         this.contents[this._idForItem(item)] = item;
 
         if (dosave) this.save();
@@ -291,7 +290,7 @@ export class DataCart {
      * @param dosave         if true, the updated cart contents will be added after adding the file
      */
     addFile(resid: string, file: DataCartItem|NerdmComp,
-            markSelected: boolean = false, dosave: boolean = false) : void
+            markSelected: boolean = false, dosave: boolean = true) : void
     {
         let fail = function(msg: string) : void {
             console.error("Unable to load file NERDm component: "+msg+": "+JSON.stringify(file));
@@ -314,7 +313,7 @@ export class DataCart {
      * @param filePath  the path to the file within the resource collection to remove.
      * @return boolean -- true if the file was found to be in the cart and then removed. 
      */
-    public removeFileById(resid: string, filePath: string, dosave: boolean = false) : boolean {
+    public removeFileById(resid: string, filePath: string, dosave: boolean = true) : boolean {
         let id = this._idFor(resid, filePath);
 
         let found = this.contents[id];
@@ -329,7 +328,7 @@ export class DataCart {
     /**
      * remove a list of files
      */
-    public removeFiles(files: DataCartItem[], dosave: boolean = false) : void {
+    public removeFiles(files: DataCartItem[], dosave: boolean = true) : void {
         for (let file of files) 
             delete this.contents[this._idForItem(file)]
 
@@ -345,7 +344,7 @@ export class DataCart {
      *                    false, otherwise.
      */
     public setDownloadStatus(resid: string, filePath: string,
-                             downloadedStatus: string = "downloaded", dosave: boolean = false) : boolean
+                             downloadedStatus: string = "downloaded", dosave: boolean = true) : boolean
     {
         let item: DataCartItem = this.findFile(resid, filePath);
         if (! item)
@@ -408,7 +407,7 @@ export class DataCart {
      * @param unselect  if true, unselect the referenced files rather than selecting them
      */
     public setSelected(resid: string, filePath: string = '',
-                       unselect: boolean = false, dosave: boolean = false) : void
+                       unselect: boolean = false, dosave: boolean = true) : void
     {
         let match = this.matchFiles(resid, filePath);
         if (match.length) {
