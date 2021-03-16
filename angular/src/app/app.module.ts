@@ -68,6 +68,7 @@ import { fakeBackendProvider } from './_helpers/fakeBackendInterceptor';
 
 // Datacart
 import { DatacartModule } from './datacart/datacart.module';
+import { MetrixComponent } from './metrix/metrix.component';
 
 @NgModule({
   declarations: [
@@ -76,7 +77,7 @@ import { DatacartModule } from './datacart/datacart.module';
     AuthorPopupComponent, ContactPopupComponent,
     ErrorComponent, UserErrorComponent,ComboBoxComponent,ComboBoxPipe,
     AppShellNoRenderDirective, AppShellRenderDirective, ModalComponent, ContenteditableModel, 
-    LandingAboutComponent
+    LandingAboutComponent, MetrixComponent
   ],
   imports: [
       HttpClientModule,

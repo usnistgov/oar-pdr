@@ -84,7 +84,8 @@ export class DataFilesComponent {
             { field: 'name', header: 'Name', width: '60%' },
             { field: 'mediatype', header: 'Media Type', width: 'auto' },
             { field: 'size', header: 'Size', width: 'auto' },
-            { field: 'download', header: 'Status', width: 'auto' }];
+            { field: 'download', header: 'Status', width: 'auto' },
+            { field: 'downloads', header: 'Total Downloads', width: 'auto' }];
 
         if (this.inBrowser && typeof (window) !== 'undefined') {
             this.mobHeight = (window.innerHeight);
@@ -801,6 +802,10 @@ export class DataFilesComponent {
     }
 
     statusStyle() {
+        return { 'width': this.cols[3].width, 'font-size': this.fontSize };
+    }
+
+    totalDownloadsStyle() {
         return { 'width': this.cols[3].width, 'font-size': this.fontSize };
     }
 

@@ -1,0 +1,36 @@
+<div style="margin: 2em; text-align: center;">
+    <h2>OptSortSph: Sorting Spherical Dielectric Particles in a Standing-Wave Interference Field</h2>
+    <img src="assets/images/sample-files.png">
+</div>
+<div style="text-align: center; margin-bottom: 1em;">
+    <h2>Download Details</h2>
+
+    <div class="dropdown" style="float: right; margin: 0px 50px 10px 0px;">
+        <button class="dropbtn">Category</button>
+        <div class="dropdown-content">
+          <div style="cursor: pointer;" (click)="loadTotalUser()">Total Users</div>
+          <div style="cursor: pointer;" (click)="loadTotalDownload()">Total Downloads</div>
+        </div>
+    </div>
+
+    <div class="dropdown" style="float: right;margin: 0px 10px 10px 0px;">
+        <button class="dropbtn">Zoom</button>
+        <div class="dropdown-content">
+          <div style="cursor: pointer;" (click)="loadTotalDownloadYear()">Year</div>
+          <div style="cursor: pointer;" (click)="loadTotalDownloadMonth()">Month</div>
+        </div>
+    </div>
+</div>
+
+<div class="grid-container">
+    <div class="grid-child child" style="text-align: center;padding-top: 2em;">
+        <h2>File level download details</h2>
+        <img src="assets/images/Metrix-record-details03.jpg">
+    </div>
+    <div class="grid-child child" style="text-align: center;padding-top: 2em; ">
+        <div style="text-align: center;padding-bottom: 1em;">
+            <h2>{{chartTitle02}}</h2>
+        </div>
+        <img [src]="imgChart">
+    </div>
+</div>
