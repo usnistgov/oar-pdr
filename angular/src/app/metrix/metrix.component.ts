@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { userInfo } from 'os';
 
 @Component({
   selector: 'app-metrix',
@@ -9,30 +10,50 @@ export class MetrixComponent implements OnInit {
 
     imageURL = '/assets/images/sample-files.png';
     imgChart = 'assets/images/line-chart-yearly.png';
-    chartTitle02 = "Total Downloads in the Past Year"
+    chartTitle02 = "Total Downloads in the Past Year";
+    currentMonth: string = "";
+    currentYear: string = "2021";
+    category: string = "download";
 
     constructor() { }
 
     ngOnInit() {
     }
 
-    loadTotalUser(){
-        this.chartTitle02 = "Total Users in the Past Year"
+    loadTotalUser(e){
+        this.currentMonth = "";
+        this.chartTitle02 = "users";
         this.imgChart = 'assets/images/total-user-year.png';
     }
 
-    loadTotalDownload(){
-        this.chartTitle02 = "Total Downloads in the Past Year"
+    loadTotalDownload(e){
+        console.log("this.category", this.category);
+        this.chartTitle02 = "downloads";
         this.imgChart = 'assets/images/line-chart-yearly.png';
     }
 
-    loadTotalDownloadYear(){
-        this.chartTitle02 = "Total Downloads in the Past Year"
-        this.imgChart = 'assets/images/line-chart-yearly.png';
+    changeYear(e) {
+        this.currentYear = e.target.value;
+        if(this.category == "user"){
+            this.currentMonth = "";
+            this.chartTitle02 = "users";
+            this.imgChart = 'assets/images/total-user-year.png';
+        }else{
+            this.chartTitle02 = "downloads";
+            this.currentMonth = "";
+            this.imgChart = 'assets/images/line-chart-yearly.png';
+        }
     }
 
-    loadTotalDownloadMonth(){
-        this.chartTitle02 = "Total Downloads in Month..."
-        this.imgChart = 'assets/images/line-chart-month.png';
+    changeMonth(e) {
+        this.currentMonth = e.target.value;
+        if(this.category == "user"){
+            this.currentMonth = "";
+            this.chartTitle02 = "users";
+            this.imgChart = 'assets/images/total-user-year.png';
+        }else{
+            this.chartTitle02 = "downloads";
+            this.imgChart = 'assets/images/line-chart-month.png';
+        }
     }
 }
