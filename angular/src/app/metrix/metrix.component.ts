@@ -10,7 +10,7 @@ export class MetrixComponent implements OnInit {
 
     imageURL = '/assets/images/sample-files.png';
     imgChart = 'assets/images/line-chart-yearly.png';
-    chartTitle02 = "Total Downloads in the Past Year";
+    chartTitle02 = "downloads";
     currentMonth: string = "";
     currentYear: string = "2021";
     category: string = "download";

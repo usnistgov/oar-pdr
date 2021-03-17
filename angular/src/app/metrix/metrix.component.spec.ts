@@ -1,5 +1,5 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-
+import { FormsModule } from '@angular/forms';
 import { MetrixComponent } from './metrix.component';
 
 describe('MetrixComponent', () => {
@@ -8,7 +8,8 @@ describe('MetrixComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ MetrixComponent ]
+      declarations: [ MetrixComponent ],
+      imports: [FormsModule]
     })
     .compileComponents();
   }));
