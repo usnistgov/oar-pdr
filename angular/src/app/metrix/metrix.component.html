@@ -13,7 +13,7 @@
         </div>
     </div> -->
 
-    <div class="dropdown" style="float: right;margin: 0px 50px 10px 0px;font-size: 30px;">
+    <div class="dropdown" style="float: right;margin: 0px 50px 10px 0px;font-size: 20px;">
         <label for="months">Choose a month:</label>
         <select name="months" id="months" (change)="changeMonth($event)">
             <option value="JAN">JAN</option>
@@ -31,7 +31,7 @@
         </select>
     </div>
 
-    <div class="dropdown" style="float: right;margin: 0px 40px 10px 0px;font-size: 30px;">
+    <div class="dropdown" style="float: right;margin: 0px 40px 10px 0px;font-size: 20px;">
         <label for="years">Choose a year:</label>
         <select name="years" id="years" (change)="changeYear($event)">
             <option value="2021">2021</option>
@@ -41,7 +41,7 @@
         </select>
     </div>
 
-    <div style="float: right;margin: 0px 40px 10px 0px;font-size: 30px;">
+    <div style="float: right;margin: 0px 40px 10px 0px;font-size: 20px;">
         <label class="form-check-inline">
             <input type="radio" name="mode" value="user" [(ngModel)]="category" (change)="loadTotalUser($event)">Users
         </label>
