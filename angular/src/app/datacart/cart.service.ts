@@ -4,180 +4,62 @@ import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { Observable } from 'rxjs';
 import { DataCart } from '../datacart/cart';
 
+interface CartLookup {
+    /**
+     * a lookup for remembered carts based on name.  
+     */
+    [propName: string]: DataCart;
+}
+
 /**
- * The cart service provides a way to store the cart in local store.
- **/
+ * The cart service provides access to data carts.  It ensures that there is only one 
+ * cart instance with a given name shared across a single javascript execution context.
+ */
 @Injectable()
 export class CartService {
-    public CART_CONSTANTS: any;
-    cartLengthSub = new BehaviorSubject<number>(0);
-    selectedFileCountSub = new BehaviorSubject<number>(0);
-    private _storage = null;
+    public CART_CONSTANTS: any = CartConstants.cartConst;
+    carts : CartLookup = {};
 
-    constructor() 
-    {
-        this.CART_CONSTANTS = CartConstants.cartConst;
-
-        // localStorage will be undefined on the server
-        if (typeof (localStorage) !== 'undefined')
-            this._storage = localStorage;
-    }
+    constructor() { }
 
     /**
-     * Watch the cart length
+     * return the cart instance with the given name.  This is normally an EDIID for a 
+     * cart specific to a dataset.  See also getGlobalCart().  
      */
-    watchCartLength(): Observable<any> {
-        return this.cartLengthSub.asObservable();
+    public getCart(name : string) : DataCart {
+        if (! this.carts[name])
+            this.carts[name] = DataCart.openCart(name);
+        return this.carts[name];
     }
 
     /**
-     * Set the number of selected cart items
-     **/
-    setSelectedFileCount(selectedFileCount: number) {
-        this.selectedFileCountSub.next(selectedFileCount);
-    }
-
-    /**
-     * Watch the number of selected cart items
-     **/
-    watchSelectedFileCount(subscriber) {
-        return this.selectedFileCountSub.subscribe(subscriber);
-    }
-    
-    /**
-     * Set the number of cart items
-     **/
-    setCartLength(value: number) {
-        this.cartLengthSub.next(value);
-    }
-
-    /**
-     * Behavior subject to remotely start the control function.
+     * return the instance of the global cart which can contain data files from many datasets
      */
-    private _remoteCommand : BehaviorSubject<any> = new BehaviorSubject<any>({});
-    _watchRemoteCommand(subscriber) {
-        this._remoteCommand.subscribe(subscriber);
+    public getGlobalCart() : DataCart {
+        return this.getCart(this.CART_CONSTANTS.GLOBAL_CART_NAME);
     }
 
     /**
-     * Execute the remote command
+     * shut down the given DataCart and throw away its contents.  This is intended for cleaning up
+     * a dataset-specific data cart after it has been used to download all its data.  
+     * 
+     * It is an error to pass a DataCart that was not returned by this service via getCart(): an 
+     * error message will be recorded with the console and the request will be ignored.  It is 
+     * also not possible to forget the global DataCart.  
      */
-    public executeCommand(command: string = "", data: any = null) : void {
-        this._remoteCommand.next({'command':command, 'data': data});
-    }
-
-    /**
-     * Return "download" button color based on download status
-     */
-    getDownloadStatusColor(downloadStatus: string) {
-        let returnColor = '#1E6BA1';
-
-        switch (downloadStatus) {
-            case 'downloaded':
-                {
-                    returnColor = 'green';
-                    break;
-                }
-            case 'downloading':
-                {
-                    returnColor = '#00ace6';
-                    break;
-                }
-            case 'warning':
-                {
-                    returnColor = 'darkorange';
-                    break;
-                }
-            case 'cancelled':
-                {
-                    returnColor = 'darkorange';
-                    break;
-                }
-            case 'failed':
-                {
-                    returnColor = 'darkorange';
-                    break;
-                }
-            case 'error':
-                {
-                    returnColor = 'red';
-                    break;
-                }
-            default:
-                {
-                    //statements; 
-                    break;
-                }
+    public dropCart(cart : DataCart) : void {
+        let name : string = cart.getName();
+        if (name == this.CART_CONSTANTS.GLOBAL_CART_NAME) {
+            console.warn("Attempt to drop the global cart; Ignoring.");
+            return;
         }
 
-        return returnColor;
-    }
-
-    /**
-     * The status we want to display may not be exactly the same as the status in the database. This function 
-     * serves as a mapper.
-     * @param rowData - row data of dataFiles
-     */
-    getStatusForDisplay(downloadStatus: string){
-        let status = "";
-        switch(downloadStatus){
-            case 'complete':
-                status = 'Completed';
-                break;
-            case 'downloaded':
-                status = 'Downloaded';
-                break;
-            case 'downloading':
-                status = 'Downloading';
-                break;
-            case 'pending':
-                status = 'Pending';
-                break;
-            case 'cancelled':
-                status = 'Cancelled';
-                break;
-            case 'failed':
-                status = 'Failed';
-                break;
-            case 'error':
-                status = 'Error';
-                break;  
-            default:
-                break;    
+        if (this.carts[name] !== cart) {
+            console.error("Attempt to drop outlaw data cart by the name of '"+name+"'!");
+            return;
         }
-
-        return status;
-    }    
-
-    /**
-     * Return icon class based on download status
-     */
-    getIconClass(downloadStatus: string){
-        let iconClass = "";
-        switch(downloadStatus){
-            case 'complete':
-                iconClass = 'faa faa-check';
-                break;
-            case 'downloaded':
-                iconClass = 'faa faa-check';
-                break;
-            case 'pending':
-                iconClass = 'faa faa-clock-o';
-                break;
-            case 'cancelled':
-                iconClass = 'faa faa-remove';
-                break;
-            case 'failed':
-                iconClass = 'faa faa-warning';
-                break;
-            case 'error':
-                iconClass = 'faa faa-warning';
-                break;  
-            default:
-                break;              
-        }
-
-        return iconClass; 
+        cart._forget();
+        delete this.carts[name];
     }
-
 }
+

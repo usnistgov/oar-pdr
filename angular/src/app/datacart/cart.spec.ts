@@ -2,7 +2,11 @@ import { DataCart, DataCartItem, DataCartLookup, stringifyCart, parseCart, strin
 import { testdata } from '../../environments/environment';
 
 let emptycoll: DataCartLookup = <DataCartLookup>{};
-let fakecoll: DataCartLookup = { "goob/gurn": { filePath: "gurn", resId: "goob", downloadURL: "http://here" } };
+let fakecoll: DataCartLookup = {
+    "goob/gurn": {
+        key: "goob/gurn", filePath: "gurn", resId: "goob", downloadURL: "http://here"
+    }
+};
 let fakecoll_json: string = JSON.stringify(fakecoll);
 
 describe('stringify-parse', () => {
@@ -107,10 +111,10 @@ describe('DataCart', () => {
         expect(dc.lastUpdated).toBeGreaterThan(0);
     });
 
-    it('forget()', () => {
+    it('_forget()', () => {
         let dc = DataCart.createCart("cart");
         expect(localStorage.getItem("cart:cart")).toEqual("{}");
-        dc.forget();
+        dc._forget();
         expect(localStorage.getItem("cart:cart")).toBeNull();
         dc.restore();
         expect(dc.contents).toEqual({});
@@ -120,7 +124,7 @@ describe('DataCart', () => {
         localStorage.setItem("cart:cart", stringifyCart(sample));
         dc = DataCart.openCart("cart");
         expect(dc.contents).toEqual(sample);
-        dc.forget();
+        dc._forget();
         expect(localStorage.getItem("cart:cart")).toBeNull();
         dc.save();
         expect(localStorage.getItem("cart:cart")).toEqual(fakecoll_json);
@@ -247,7 +251,9 @@ describe('DataCart', () => {
         expect(dc.size()).toEqual(0);
         expect(localStorage.getItem("cart:cart")).toEqual("{}");
 
-        dc.addFile("foo", { filePath: "bar/goo", count: 3, downloadURL: "http://here" }, false, true);
+        let dci: DataCartItem = dc.addFile("foo", { filePath: "bar/goo", count: 3, downloadURL: "http://here" },
+                                           false, true);
+        expect(dci.key).toBeTruthy();
         expect(dc.size()).toEqual(1);
         expect(parseCart(localStorage.getItem("cart:cart"))).toEqual(dc.contents);
         let file = dc.findFile("foo", "bar/goo");
@@ -471,6 +477,39 @@ describe('DataCart', () => {
 
         dc.save();
         expect(saves).toEqual(5)
+    });
+
+    it('removeMatchingFiles()', () => {
+        let saves = 0;
+
+        let dc = DataCart.createCart("cart");
+        dc.watchForChanges((w) => { saves++; });
+        dc.addFile("foo", { filePath: "bar/goo", count: 3, downloadURL: "http://here" }, false, false);
+        dc.addFile("foo", { filePath: "bar/good", count: 8, downloadURL: "http://here" }, false, false);
+        dc.addFile("fab", { filePath: "fred", count: 1, downloadStatus: "downloaded", downloadURL: "http://here" });
+        dc.addFile("fab", { filePath: "frank", count: 1, downloadStatus: "downloaded", downloadURL: "http://here" });
+        dc.addFile("gov", { filePath: "hank", count: 8, downloadStatus: "downloading", downloadURL: "http://here" });
+        expect(dc.size()).toEqual(5);
+        expect(dc.countFilesDownloaded()).toEqual(2);
+        expect(dc.getSelectedFiles().length).toEqual(0);
+        expect(saves).toEqual(3)
+
+        expect(dc.matchFiles("foo", "ba").length).toBe(0);  
+        dc.removeMatchingFiles("foo", "ba");  // does not match; no change
+        expect(dc.size()).toEqual(5);
+        expect(saves).toEqual(3)
+
+        expect(dc.matchFiles("fab").length).toBe(2);  
+        dc.removeMatchingFiles("fab");       // matches fred and frank
+        expect(dc.size()).toEqual(3);
+        expect(saves).toEqual(4)
+        expect(dc.matchFiles("fab").length).toBe(0);  
+
+        expect(dc.matchFiles("foo", "bar").length).toBe(2);  
+        dc.removeMatchingFiles("foo", "bar");  // match foo/bar/*
+        expect(dc.size()).toEqual(1);
+        expect(saves).toEqual(5)
+        expect(dc.matchFiles("foo", "bar").length).toBe(0);  
     });
 })
 
