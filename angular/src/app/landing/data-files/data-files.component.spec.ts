@@ -13,6 +13,7 @@ import { AngularEnvironmentConfigService } from '../../config/config.service';
 import { TransferState } from '@angular/platform-browser';
 import { GoogleAnalyticsService } from '../../shared/ga-service/google-analytics.service';
 import { ToastrModule } from 'ngx-toastr';
+import { TreeTableModule } from 'primeng/treetable';
 
 describe('DataFilesComponent', () => {
   let component: DataFilesComponent;
@@ -32,6 +33,7 @@ describe('DataFilesComponent', () => {
       imports: [FormsModule,
         RouterTestingModule,
         HttpClientTestingModule,
+        TreeTableModule,
         ToastrModule.forRoot()],
       schemas: [NO_ERRORS_SCHEMA],
       providers: [
@@ -47,11 +49,9 @@ describe('DataFilesComponent', () => {
 
   beforeEach(() => {
     let record: any = require('../../../assets/sampleRecord.json');
-    let files: any = require('../../../assets/files.json');
     fixture = TestBed.createComponent(DataFilesComponent);
     component = fixture.componentInstance;
     component.record = record;
-    component.files = files;
     // component.distdownload = "/od/ds/zip?id=ark:/88434/mds0149s9z";
     // component.filescount = 8;
     component.metadata = false;
@@ -62,6 +62,10 @@ describe('DataFilesComponent', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+    expect(component.files.length > 0).toBeTruthy();
+    expect(component.fileCount).toBe(3);
+    expect(component.downloadStatus).not.toBe("downloaded");
+    expect(component.allInCart).toBeFalsy();
   });
 
   it('Should have title Data Access', () => {
@@ -69,11 +73,16 @@ describe('DataFilesComponent', () => {
     expect(fixture.nativeElement.querySelector('h3').innerText).toEqual('Data Access');
   });
 
+  it('Should have file tree table', () => {
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelectorAll('th').length).toBeGreaterThan(0);
+  });
+
   it('cartProcess() should be called', () => {
     let cmpel = fixture.nativeElement;
-    let aels = cmpel.querySelectorAll("span")[4];
-    spyOn(component, 'cartProcess');
+    let aels = cmpel.querySelectorAll(".icon-cart")[0];
+    spyOn(component, 'toggleAllFilesInGlobalCart');
     aels.click();
-    expect(component.cartProcess).toHaveBeenCalled();
+    expect(component.toggleAllFilesInGlobalCart).toHaveBeenCalled();
   });
 });

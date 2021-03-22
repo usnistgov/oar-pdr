@@ -86,6 +86,8 @@ export class DownloadstatusComponent implements OnInit {
     cartName(key: string){
         if(this.dataCartStatus.dataCartStatusItems[key].displayName == this.CART_CONSTANTS.GLOBAL_CART_NAME)
             return "Global Datacart";
+        else if (this.dataCartStatus.dataCartStatusItems[key].displayName.length > 20)
+            return this.dataCartStatus.dataCartStatusItems[key].displayName.substring(0,17) + "...";
         else
             return this.dataCartStatus.dataCartStatusItems[key].displayName;
         

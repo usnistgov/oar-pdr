@@ -1,17 +1,21 @@
 import { Injectable } from '@angular/core';
 import { HttpClientModule, HttpClient, HttpHeaders, HttpRequest, HttpEventType, HttpResponse } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { BehaviorSubject } from 'rxjs/BehaviorSubject';
+import { BehaviorSubject, throwError } from 'rxjs/index';
+import { map, catchError } from 'rxjs/operators';
+import { AppConfig } from '../../config/config';
 import { ZipData } from './zipData';
 import { DownloadData } from './downloadData';
 import { CartService } from '../../datacart/cart.service';
+import { DataCartItem } from '../../datacart/cart';
 import { TestDataService } from '../../shared/testdata-service/testDataService';
 import { FileSaverService } from 'ngx-filesaver';
-import { TreeNode } from 'primeng/primeng';
 import { DataCart } from '../../datacart/cart';
+import { DownloadStatus } from '../../datacart/cartconstants';
 
 @Injectable()
 export class DownloadService {
+    distApi : string = null;
     zipFilesDownloadingSub = new BehaviorSubject<number>(0);
     zipFilesProcessedSub = new BehaviorSubject<boolean>(false);
 
@@ -30,11 +34,13 @@ export class DownloadService {
     _overallDownloadTime = 0;
 
     constructor(
+        private cfg: AppConfig,
         private http: HttpClient,
         private cartService: CartService,
         private _FileSaverService: FileSaverService,
         private testDataService: TestDataService
     ) {
+        this.distApi = this.cfg.get("distService", "/od/ds/");
         this.setDownloadingNumber(-1);
     }
 
@@ -134,11 +140,66 @@ export class DownloadService {
     }
 
     /**
-     * Get bundle plan from the given url
+     * Get a bundle plan for a given list of data (from the cart).
+     *
+     * The returned Observable object is object returned from the service with an extra property added 
+     * to it called 'diagnostics'; this property encodes extra information about the call made to the 
+     * server that can aid in handling problems in the response.  The diagnostics property is an object 
+     * with the following fields:
+     *   url        the URL the plan request was sent to (via POST)
+     *   time       the datetime that a response came back
+     *   body       the message that was POSTed to the URL (as a string)
+     *   error      an error message if the response status was something other than 200; if successful,
+     *                 this property is not set (i.e. undefined).
+     * If the HTTP POST fails, the subscriber's error handler function will be passed this diagnostics object. 
+     * @param planname    a name for the plan; this is used as the base name for each bundle file returned
+     *                    in the plan
+     * @param files       the list of files (as pulled from the data cart) to be downloaded
+     * @return Observable of bundle plan object returned by the bundle service (with diagnostic info added)
+     */
+    getBundlePlan(planName : string, files : DataCartItem[]) : Observable<any> {
+        // create the request body
+        let reqfiles = [];
+        for (let item of files) {
+            reqfiles.push({
+                "filePath": item.resId + '/' + item.filePath,
+                "downloadUrl": item.downloadURL
+            });
+        }
+
+        let body: string = JSON.stringify({
+            "bundleName": planName,
+            "includeFiles": reqfiles
+        });
+        let diagnostics = {
+            'url':   this.distApi + '_bundle_plan',
+            'body':  body
+        };
+
+        // submit the request and return the Observable result; add some diagnostic information on the way out
+        let url = this.distApi + "_bundle_plan";
+        console.log("Requesting bundle plan for " + reqfiles.length + " from " + url)
+        return this._getBundlePlan(url, body).pipe(
+            map(plan => {
+                diagnostics['time'] = Date();
+                plan['diagnostics'] = diagnostics;
+                return plan;
+            }),
+            catchError(err => {
+                diagnostics['time'] = Date();
+                diagnostics['error'] = err;
+                return throwError(diagnostics);
+            })
+        );
+    }
+
+    /**
+     * Submit the bundle plan request and return a plan
      * @param url - end point
      * @param body - message body
+     * @return Observable of bundle plan object returned by the bundle service
      */
-    getBundlePlan(url: string, body: any): Observable<any> {
+    _getBundlePlan(url: string, body: any): Observable<any> {
         const httpOptions = {
             headers: new HttpHeaders({
                 'Content-Type': 'application/json'
@@ -148,11 +209,20 @@ export class DownloadService {
     }
 
     /**
+     * request a single bundle from a plan
+     * @param relurl   the URL relative to the distribution service's base URL to retrieve the URL from
+     * @param bundle   the bundle description object for assembling the bundle zip file
+     */
+    getBundle(relurl, bundle) : Observable<any> {
+        return this._getBundle(this.distApi + relurl, JSON.stringify(bundle));
+    }
+
+    /**
      * Get bundle from the given url
      * @param url - end point
      * @param body - message body
      */
-    getBundle(url, body): Observable<any> {
+    _getBundle(url, body): Observable<any> {
         const request = new HttpRequest(
             "POST", url, body,
             { headers: new HttpHeaders({ 'Content-Type': 'application/json', 'responseType': 'blob' }), reportProgress: true, responseType: 'blob' });
@@ -164,10 +234,9 @@ export class DownloadService {
      * Download zip data
      * @param nextZip - zip to be downloaded
      * @param zipdata - zip queue. To check if all zips have been downloaded.
-     * @param dataFiles - data tree
      * @param dataCart - data cart: update the download status so other tab can be updated.
      */
-    download(nextZip: ZipData, zipdata: ZipData[], dataFiles: any, dataCart: DataCart) {
+    download(nextZip: ZipData, zipdata: ZipData[], dataCart: DataCart) {
         let sub = this.zipFilesDownloadingDataCartSub;
         let preTime: number = 0;
         let preTime2: number = 0;
@@ -176,23 +245,23 @@ export class DownloadService {
         let currentTime: number = 0;
         let currentDownloaded: number = 0;
 
-        nextZip.downloadStatus = 'downloading';
-        this.setDownloadStatus(nextZip, dataFiles, "downloading", dataCart);
+        nextZip.downloadStatus = DownloadStatus.DOWNLOADING;
+        this.setDownloadStatus(nextZip, DownloadStatus.DOWNLOADING, dataCart);
         this.increaseNumberOfDownloading();
 
-        nextZip.downloadInstance = this.getBundle(nextZip.downloadUrl, JSON.stringify(nextZip.bundle)).subscribe(
+        nextZip.downloadInstance = this.getBundle(nextZip.downloadUrl, nextZip.bundle).subscribe(
             event => {
                 switch (event.type) {
                     case HttpEventType.Response:
                         nextZip.downloadStatus = 'Writing data to destination';
                         this._FileSaverService.save(<any>event.body, nextZip.fileName);
                         nextZip.downloadProgress = 0;
-                        nextZip.downloadStatus = 'downloaded';
+                        nextZip.downloadStatus = DownloadStatus.DOWNLOADED;
                         this.decreaseNumberOfDownloading();
                         if(this.allDownloadFinished(zipdata))
                             this.setDownloadProcessStatus(true);
 
-                        this.setDownloadStatus(nextZip, dataFiles, "downloaded", dataCart);
+                        this.setDownloadStatus(nextZip, DownloadStatus.DOWNLOADED, dataCart);
                         this.setFileDownloadedFlag(true);
                         break;
                     case HttpEventType.DownloadProgress:
@@ -246,13 +315,13 @@ export class DownloadService {
 
             },
             err => {
-                console.log('Error:', err);
+                console.error('Error:', err);
                 console.log('Download details:', nextZip);
-                nextZip.downloadStatus = 'error';
+                nextZip.downloadStatus = DownloadStatus.ERROR;
                 nextZip.downloadErrorMessage = err.message;
                 nextZip.downloadProgress = 0;
                 this.decreaseNumberOfDownloading();
-                this.setDownloadStatus(nextZip, dataFiles, "failed", err.message);
+                this.setDownloadStatus(nextZip, DownloadStatus.FAILED, dataCart, err.message);
             }
         );
     }
@@ -287,16 +356,15 @@ export class DownloadService {
     /**
      * Download next available zip in the queue
      * @param zipData - zip queue
-     * @param dataFiles - the data tree. For updating the download status.
      * @param dataCart - data cart: update the download status so other tab can be updated.
      */
-    downloadNextZip(zipData: ZipData[], dataFiles: any, dataCart: DataCart) {
+    downloadNextZip(zipData: ZipData[], dataCart: DataCart) {
         let sub = this.zipFilesDownloadingDataCartSub;
 
         if (sub.getValue() < this.getMaxConcurDownload()) {
             let nextZip = this.getNextZipInQueue(zipData);
             if (nextZip != null) {
-                this.download(nextZip, zipData, dataFiles, dataCart);
+                this.download(nextZip, zipData, dataCart);
             }
         }
     }
@@ -312,31 +380,6 @@ export class DownloadService {
             return zipQueue[0];
         } else {
             return null;
-        }
-    }
-
-    /**
-     * Generate downloadData from a given file tree that will be used to create post message for bundle plan
-     * @param files - input file tree
-     * @param downloadData - output download data
-     */
-    getDownloadData(files: any, downloadData: any) {
-        let existItem: any;
-        for (let comp of files) {
-            if (comp.children.length > 0) {
-                this.getDownloadData(comp.children, downloadData);
-            } else {
-                if (comp.data['resFilePath'] != null && comp.data['resFilePath'] != undefined) {
-                    if (comp.data['resFilePath'].split(".").length > 1) {
-                        existItem = downloadData.filter(item => item.filePath === comp.data['ediid'] + comp.data['resFilePath']
-                            && item.downloadUrl === comp.data['downloadUrl']);
-
-                        if (existItem.length == 0) {
-                            downloadData.push({ "filePath": comp.data['ediid'] + comp.data['resFilePath'], 'downloadUrl': comp.data['downloadUrl'] });
-                        }
-                    }
-                }
-            }
         }
     }
 
@@ -375,38 +418,40 @@ export class DownloadService {
     }
 
     /**
-     * Set download status of given zip
-     * @param zip - input zip file that has download status in it's include files
-     * @param dataFiles - file tree that to be set the download status
-     * @param status - download status
-     * @param dataCart - data cart that to be set the download status - keep other tab in sync
-     * @param message - any message that need to be added to the tree 
+     * Set download statuses of the data files being included in a given zip file
+     * @param zip - the zip file that the files are being written to
+     * @param status - a string tag indicating the new status to apply to the files
+     * @param dataCart - the DataCart that the data files were drawn from.  (It's setDownloadStatus() 
+     *                   function will be called for each file.)
+     * @param message - a brief message (e.g. an error message) to associate with the files' status
      */
-    setDownloadStatus(zip: any, dataFiles: any, status: any, dataCart: DataCart, message: string = '') {
-        let resFilePath: string;
+    setDownloadStatus(zip: ZipData, status: string, dataCart: DataCart, message: string = null) {
+        let resFilePath: string = null;
+        let resId: string = null;
+        let p: number = -1;
 
         dataCart.restore();
         
         for (let includeFile of zip.bundle.includeFiles) {
             resFilePath = includeFile.filePath;
-
             if(includeFile.filePath.indexOf('ark:') >= 0){
-                resFilePath = includeFile.filePath.replace('ark:/88434/', '');
+                resFilePath = includeFile.filePath.replace(/ark:\/\d\//, '');
             }
-            resFilePath = resFilePath.substring(resFilePath.indexOf('/'));
-            for (let dataFile of dataFiles) {
-                let node = this.searchTreeByfilePath(dataFile, resFilePath);
-                if (node != null) {
-                    node.data.downloadStatus = status;
-                    node.data.message = message;
-                    node.data.zipFile = zip.fileName;
-                    dataCart.setDownloadStatus(node.data.resId, node.data.resFilePath, status);
+            
+            p = resFilePath.indexOf('/');
+            if (p < 0) {
+                console.warn("Unexpected filePath for member of bundle: "+resFilePath);
+                continue;
+            }
+            resId = resFilePath.substring(0, p);
+            resFilePath = resFilePath.substring(p+1);
 
-                    break;
-                }
-            }
+            let extra = { zipFile: zip.fileName }
+            if (message) 
+                extra['message'] = message;
+
+            dataCart.setDownloadStatus(resId, resFilePath, status, false, extra);
         }
-
         dataCart.save();
     }
 
@@ -416,30 +461,11 @@ export class DownloadService {
      */
     allDownloadFinished(zipData: any) {
         for (let zip of zipData) {
-            if (zip.downloadStatus == null || zip.downloadStatus == 'downloading') {
+            if (zip.downloadStatus == null || zip.downloadStatus == DownloadStatus.DOWNLOADING) {
                 return false;
             }
         }
         return true;
-    }
-
-    /**
-     * Search a given tree by given full path
-     * @param tree 
-     * @param resFilePath 
-     */
-    searchTreeByfilePath(tree, resFilePath) {
-        if (tree.data.isLeaf && tree.data.resFilePath == resFilePath) {
-            return tree;
-        } else if (tree.children.length > 0) {
-            var i;
-            var result = null;
-            for (i = 0; result == null && i < tree.children.length; i++) {
-                result = this.searchTreeByfilePath(tree.children[i], resFilePath);
-            }
-            return result;
-        }
-        return null;
     }
 
     /**
@@ -449,7 +475,7 @@ export class DownloadService {
     getDownloadedNumber(zipData: any) {
         let totalDownloadedZip: number = 0;
         for (let zip of zipData) {
-            if (zip.downloadStatus == 'downloaded') {
+            if (zip.downloadStatus == DownloadStatus.DOWNLOADED) {
                 totalDownloadedZip += 1;
             }
         }
@@ -503,28 +529,10 @@ export class DownloadService {
     }
 
     /**
-     * Return total number of downloaded files in a given dataFiles (tree)
-     * @param dataFiles 
-     */
-    getTotalDownloadedFiles(dataFiles: any) {
-        let totalDownloaded: number = 0;
-        for (let comp of dataFiles) {
-            if (comp.children.length > 0) {
-                totalDownloaded += this.getTotalDownloadedFiles(comp.children);
-            } else {
-                if (comp.data.downloadStatus == 'downloaded') {
-                    totalDownloaded += 1;
-                }
-            }
-        }
-        return totalDownloaded;
-    }
-
-    /**
      * Cancel the download process of the given zip file
      * @param zip - the zip file to be cancelled
      */
-    cancelDownloadZip(zip: ZipData, dataFiles: TreeNode[], dataCart: DataCart) {
+    cancelDownloadZip(zip: ZipData, dataCart: DataCart) {
         //Need to re-calculate the total file size and total downloaded size
         this.decreaseTotalBundleBySize(zip.bundleSize);
         let downloaded = this.totalDownloaded - zip.bundleSize*zip.downloadProgress/100;
@@ -533,8 +541,9 @@ export class DownloadService {
         zip.downloadInstance.unsubscribe();
         zip.downloadInstance = null;
         zip.downloadProgress = 0;
-        zip.downloadStatus = "cancelled";
-        this.setDownloadStatus(zip, dataFiles, "cancelled", dataCart);
+        zip.downloadStatus = DownloadStatus.CANCELED;
+        
+        this.setDownloadStatus(zip, DownloadStatus.CANCELED, dataCart);
         this.decreaseNumberOfDownloading();
     }
 }

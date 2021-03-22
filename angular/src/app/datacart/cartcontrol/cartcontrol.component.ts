@@ -1,7 +1,9 @@
-import { Component, OnInit, Input, Output, HostListener, Inject, PLATFORM_ID } from '@angular/core';
+import { Component, OnInit, OnChanges, SimpleChanges, Input, Output,
+         HostListener, Inject, PLATFORM_ID, EventEmitter } from '@angular/core';
 import { TreeNode } from 'primeng/primeng';
 import { AppConfig } from '../../config/config';
 import { CartService } from '../cart.service';
+import { DataCart } from '../cart';
 import { DownloadService } from '../../shared/download-service/download-service.service';
 import { isPlatformBrowser } from '@angular/common';
 
@@ -10,47 +12,78 @@ import { isPlatformBrowser } from '@angular/common';
   templateUrl: './cartcontrol.component.html',
   styleUrls: ['./cartcontrol.component.css', '../datacart.component.css']
 })
-export class CartcontrolComponent implements OnInit {
+export class CartcontrolComponent implements OnInit, OnChanges {
     imageURL: string = 'assets/images/sdp-background.jpg';
-    selectedFileCount: number = 0;
+
+    inBrowser: boolean = false;
     screenWidth: number = 1080;
     screenSizeBreakPoint: number;
-    totalDownloaded: number = 0; 
-    inBrowser: boolean = false;
-    noFileDownloaded: boolean = true; // will be true if any item in data cart is downloaded
+    selectedFileCount: number = 0;
+    totalDownloaded: number = 0;
+    datacart: DataCart = null;
 
-    @Input() dataFiles: TreeNode[] = [];
+    @Input() cartName: string;
+    @Output() onDownloadSelected = new EventEmitter<boolean>();  
+    @Output() onRemoveSelected = new EventEmitter<boolean>();  
+    @Output() onRemoveDownloaded = new EventEmitter<boolean>();  
 
     constructor(
         private cfg: AppConfig,
-        private downloadService: DownloadService,
         public cartService: CartService,
         @Inject(PLATFORM_ID) private platformId: Object
     ) { 
         this.inBrowser = isPlatformBrowser(platformId);
         this.screenSizeBreakPoint = +this.cfg.get("screenSizeBreakPoint", "1060");
-
-        this.cartService.watchSelectedFileCount((value) => {
-            this.selectedFileCount = value;
-        });
-
-        this.downloadService.watchTotalFileDownloaded((value) => {
-            this.totalDownloaded = value;
-        });
-
-        this.downloadService.watchAnyFileDownloaded().subscribe(
-            value => {
-                if(this.inBrowser){
-                    this.noFileDownloaded = !value;
-                    if (value) {
-                        this.downloadService.setTotalFileDownloaded(this.downloadService.getTotalDownloadedFiles(this.dataFiles));
-                    }
-                }
-            }
-        );
     }
 
     ngOnInit() {
+        if (this.cartName) {
+            this.datacart = this.cartService.getCart(this.cartName);
+            this.updateCounts();
+
+            this.datacart.watchForChanges((ev) => {
+                this.updateCounts();
+            });
+        }
+    }
+    
+    ngOnChanges(changes: SimpleChanges) {
+        // cart name should not change
+        if (changes.cartName && this.datacart)
+            this.cartName = this.datacart.getName();
+    }
+
+    updateCounts() : void {
+        if (! this.datacart) return;
+
+        this.selectedFileCount = this.datacart.getSelectedFiles().length;
+        this.totalDownloaded = this.datacart.getDownloadedFiles().length; 
+    }
+
+    /**
+     * return true if any files from this cart have been marked as downloaded
+     */
+    anyDownloaded() : boolean { return this.totalDownloaded > 0; }
+
+    /**
+     * react to the "download selected" button: start download planning and processing
+     */
+    downloadSelected() : void {
+        this.onDownloadSelected.emit(true);
+    }
+
+    /**
+     * react to the "remove downloaded" button: signal that files should be removed from the cart
+     */
+    removeDownloaded() : void {
+        this.onRemoveDownloaded.emit(true);
+    }
+
+    /**
+     * react to the "remove selected" button: signal that files should be removed from the cart
+     */
+    removeSelected() : void {
+        this.onRemoveSelected.emit(true);
     }
 
     /**
@@ -77,7 +110,7 @@ export class CartcontrolComponent implements OnInit {
      * Return button color based on Downloaded status
      */
     getButtonColor() {
-        if (this.noFileDownloaded) {
+        if (! this.anyDownloaded()) {
             return "#1E6BA1";
         } else {
             return "#307F38";
@@ -88,7 +121,7 @@ export class CartcontrolComponent implements OnInit {
      * Return text color for Remove Downloaded badge
      */
     getDownloadedColor() {
-        if (this.noFileDownloaded) {
+        if (!this.anyDownloaded()) {
             return "rgb(82, 82, 82)";
         } else {
             return "white";
@@ -99,21 +132,10 @@ export class CartcontrolComponent implements OnInit {
      * Return background color for Remove Downloaded badge
      */
     getDownloadedBkColor() {
-        if (this.noFileDownloaded) {
+        if (!this.anyDownloaded()) {
             return "white";
         } else {
             return "green";
         }
-    }
-
-    /**
-     * Issue a command (from control buttons)
-     *      - Download selected
-     *      - Remove selected
-     *      - Remove downloaded
-     * @param command 
-     */
-    executeCommand(command: string){
-        this.cartService.executeCommand(command);
     }
 }

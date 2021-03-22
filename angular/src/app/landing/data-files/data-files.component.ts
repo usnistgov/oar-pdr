@@ -1,23 +1,70 @@
 import { Component, Input, Output, ChangeDetectorRef, NgZone, EventEmitter } from '@angular/core';
 import { TreeNode } from 'primeng/api';
 import { CartService } from '../../datacart/cart.service';
-import { CartConstants } from '../../datacart/cartconstants';
 import { OverlayPanel } from 'primeng/overlaypanel';
 import { DownloadService } from '../../shared/download-service/download-service.service';
 import { ConfirmationService } from 'primeng/primeng';
-import { ZipData } from '../../shared/download-service/zipData';
+// import { ZipData } from '../../shared/download-service/zipData';  // currently disabled
 import { HttpClient, HttpRequest, HttpEventType } from '@angular/common/http';
 import { AppConfig } from '../../config/config';
-import { FileSaverService } from 'ngx-filesaver';
+import { FileSaverService } from 'ngx-filesaver';  // currently disabled
 import { Router } from '@angular/router';
 import { CommonFunctionService } from '../../shared/common-function/common-function.service';
 import { GoogleAnalyticsService } from '../../shared/ga-service/google-analytics.service';
 import { NotificationService } from '../../shared/notification-service/notification.service';
-import { NerdmComp } from '../../nerdm/nerdm';
+import { NerdmRes, NerdmComp } from '../../nerdm/nerdm';
 import { DataCart, DataCartItem } from '../../datacart/cart';
+import { DownloadStatus } from '../../datacart/cartconstants';
 import { DataCartStatus } from '../../datacart/cartstatus';
 
 declare var _initAutoTracker: Function;
+
+/**
+ * the structure used as the data item in a TreeNode displaying a file or collection component
+ */
+interface DataFileItem {
+
+    /**
+     * a unique key for identifying this item
+     */
+    key : string;
+
+    /**
+     * the name of the file or collection
+     */
+    name : string;
+
+    /**
+     * the NERDm component metadata
+     */
+    comp : NerdmComp;
+
+    /**
+     * a display rendering of the size of the file
+     */
+    size : string;
+
+    /**
+     * a display rendering of the file's media type
+     */
+    mediaType : string;
+
+    /**
+     * true if the component is currently in the global data cart
+     */
+    isInCart? : boolean;
+
+    /**
+     * a label indicating the download status of this file
+     */
+    downloadStatus? : string;
+
+    /**
+     * a number representing the progress toward completing the download of this file. 
+     * (Note: use of this feature is currently disabled.)
+     */
+    downloadProgress? : number;
+}
 
 @Component({
     moduleId: module.id,
@@ -29,48 +76,35 @@ declare var _initAutoTracker: Function;
 
 export class DataFilesComponent {
 
-    @Input() record: any[];
-    @Input() files: TreeNode[];
-    @Input() editContent: boolean;
+    @Input() record: NerdmRes;
     @Input() metadata: boolean;
     @Input() inBrowser: boolean;   // false if running server-side
     @Input() ediid: string;
     @Input() editEnabled: boolean;    //Disable download all functionality if edit is enabled
 
-    globalDataCart: DataCart;
-    specialDataCart: DataCart;
+    files: TreeNode[] = [];           // the hierarchy of collections and files
+    fileCount: number = 0;            // number of files being displayed
+    downloadStatus: string = '';      // the download status for the dataset collection as a whole
+    globalDataCart: DataCart = null;
     dataCartStatus: DataCartStatus;
+    allInCart: boolean = false;
+    isAddingToDownloadAllCart: boolean = false;
+    isTogglingAllInGlobalCart: boolean = false;
 
     accessPages: NerdmComp[] = [];
-    isReferencedBy: boolean = false;
-    isDocumentedBy: boolean = false;
     cols: any[];
-    fileNode: TreeNode;
-    displayDownloadFiles: boolean = false;
-    allSelected: boolean = false;
-    allDownloaded: boolean = false;
-    downloadStatus: any = null;
-    totalFiles: any;
-    zipData: ZipData[] = [];
+    fileNode: TreeNode;               // the node whose description has been opened
     isExpanded: boolean = false;
     visible: boolean = true;
-    cancelAllDownload: boolean = false;
     cartLength: number;
-    treeRoot = [];
-    showZipFiles: boolean = true;
-    allProcessed: boolean = false;
-    noFileDownloaded: boolean; // will be true if any item in data cart is downloaded
-    isLocalProcessing: boolean;
+    showZipFileNames: boolean = false;    // zip file display is currently disabled
     showDownloadProgress: boolean = false;
     mobWidth: number = 800;   // default value used in server context
     mobHeight: number = 900;  // default value used in server context
     fontSize: string;
-    addingToCart: boolean = false;
-    public CART_CONSTANTS: any = CartConstants.cartConst;
 
     constructor(private cartService: CartService,
         private cdr: ChangeDetectorRef,
-        private downloadService: DownloadService,
         private http: HttpClient,
         private cfg: AppConfig,
         private _FileSaverService: FileSaverService,
@@ -82,7 +116,7 @@ export class DataFilesComponent {
         ngZone: NgZone) {
         this.cols = [
             { field: 'name', header: 'Name', width: '60%' },
-            { field: 'mediatype', header: 'Media Type', width: 'auto' },
+            { field: 'mediaType', header: 'Media Type', width: 'auto' },
             { field: 'size', header: 'Size', width: 'auto' },
             { field: 'download', header: 'Status', width: 'auto' }];
 
@@ -99,82 +133,111 @@ export class DataFilesComponent {
                 });
             };
         }
-
-        this.cartService.watchCartLength().subscribe(value => {
-            this.cartLength = value;
-        });
     }
 
     ngOnInit() {
         if(this.inBrowser){
-            this.globalDataCart = DataCart.openCart(this.CART_CONSTANTS.GLOBAL_CART_NAME);
+            this.globalDataCart = this.cartService.getGlobalCart();
+            this.cartLength = this.globalDataCart.size();
+            this.globalDataCart.watchForChanges((which) => { this.cartChanged(which); })
+
             this.dataCartStatus = DataCartStatus.openCartStatus();
-
-            this.cartLength = this.globalDataCart.size();
-            this.updateStatusFromCart();
-
-            window.addEventListener("storage", this.cartChanged.bind(this));
-        }
-    }
-
-    /**
-     * Initialize data tree
-     */
-    initDataFileTree(){
-        if (this.inBrowser) {
-            this.globalDataCart = DataCart.openCart(this.CART_CONSTANTS.GLOBAL_CART_NAME);
-            this.allSelected = this.updateAllSelectStatus(this.files);
-            this.cartLength = this.globalDataCart.size();
-        }
-    }
-
-    cartChanged(ev){
-        if (ev.key == this.globalDataCart.getKey()) {
-            this.globalDataCart.restore();
-            this.cartLength = this.globalDataCart.size();
             this.buildTree();
         }
     }
 
+    cartChanged(which){
+        this.cartLength = this.globalDataCart.size();
+        this.buildTree();
+    }
+
+    /*
     ngOnChanges() {
         this.accessPages = []
         if (this.record['components'])
             this.accessPages = this.selectAccessPages(this.record['components']);
         this.buildTree();
     }
+    */
 
     /**
      * Build data file tree
      */
-    buildTree() {
-        this.fileNode = { "data": { "name": "", "size": "", "mediatype": "", "description": "", "filetype": "" } };
+    buildTree() : void {
+        if (! this.record['components'])
+            return;
 
-        const newPart = {
-            data: {
-                cartId: "/",
-                ediid: this.ediid,
-                name: "files",
-                mediatype: "",
-                size: null,
-                downloadUrl: null,
-                description: null,
-                filetype: null,
-                resId: "/",
-                filePath: "/",
-                downloadProgress: 0,
-                downloadInstance: null,
-                isIncart: false,
-                zipFile: null,
-                message: ''
-            }, children: this.files
+        let makeNodeData = (name: string, parentKey: string, comp: NerdmComp) => {
+            let key = (parentKey) ? parentKey + '/' + name : name;
+            let out = { name: name, key: key, comp: null, size: '', mediaType: '',
+                        isInCart: false, downloadStatus: '', downloadProgress: 0   };
+            if (comp) {
+                out['comp'] = comp;
+                out['mediaType'] = comp.mediaType || '';
+                out['size'] = (comp.size === null || comp.size === undefined) ? ''
+                                                                              : this.formatBytes(comp.size);
+            }
+            return out;
+        }
+        let _insertComp = (levels: string[], comp: NerdmComp, tree: TreeNode) => {
+            for (let child of tree.children) {
+                if (child.data.name == levels[0]) {
+                    if (levels.length > 1) 
+                        return _insertComp(levels.slice(1), comp, child);
+                    else  {
+                        // this is the node we are looking for
+                        child.data = makeNodeData(levels[0], tree.data.key, comp);
+                        return child;
+                    }
+                }
+            }
+            // anscestor node does not exist yet
+            if (levels.length > 1) {
+                // haven't found leaf yet
+                let child = { data: makeNodeData(levels[0], tree.data.key, null), children: [] };
+                tree.children.push(child);
+                return _insertComp(levels.slice(1), comp, child);
+            }
+            else {
+                let child = { data: makeNodeData(levels[0], tree.data.key, comp), children: [] };
+                tree.children.push(child);
+                return child;
+            }
+        }
+        let insertComp = (comp: NerdmComp, root: TreeNode) => {
+            let levels = comp.filepath.split('/');
+            return _insertComp(levels, comp, root);
         };
-        this.treeRoot.push(newPart);
-        this.updateStatusFromCart();
-        this.allSelected = this.updateAllSelectStatus(this.files);
-        this.downloadStatus = this.updateDownloadStatus(this.files) ? "downloaded" : null;
-        this.totalFiles = 0;
-        this.getTotalFiles(this.files);
 
+        let count = 0;
+        let downloadedCount = 0;
+        let inCartCount = 0;
+        let root: TreeNode = { data: { name: '', key: '' }, children: [] };
+        let node: TreeNode = null;
+        let cartitem: DataCartItem = null;
+        for (let comp of this.record['components']) {
+            if (comp.filepath && comp['@type'].filter(tp => tp.includes(':Hidden')).length == 0) {
+                node = insertComp(comp, root);
+                cartitem = this.globalDataCart.findFile(this.record['@id'], comp.filepath);
+                if (cartitem) {
+                    node.data.isInCart = true;
+                    inCartCount++;
+                    node.data.downloadStatus = cartitem.downloadStatus;
+                }
+                if (node.data.comp['@type'].filter(tp => tp.endsWith("File")).length > 0) {
+                    count++;
+                    if (node.data.downloadStatus == DownloadStatus.DOWNLOADED) downloadedCount++;
+                }
+            }
+        }
+        this.files = [...root.children];
+        this.fileCount = count;
+        if (count > 0) {
+            if (downloadedCount == count)
+                this.downloadStatus = DownloadStatus.DOWNLOADED
+            if (inCartCount == count)
+                this.allInCart = true;
+        }
     }
 
     /**
@@ -236,11 +299,10 @@ export class DataFilesComponent {
      */
     resetStatus(files: any) {
         for (let comp of files) {
-            if (comp.children && comp.children.length > 0) {
+            comp.data['isInCart'] = false;
+            comp.data['downloadStatus'] = '';
+            if (comp.children && comp.children.length > 0) 
                 this.resetStatus(comp.children);
-            } else {
-                comp.data.isIncart = false;
-            }
         }
         return Promise.resolve(files);
     }
@@ -249,55 +311,22 @@ export class DataFilesComponent {
      * Function to sync the download status from data cart.
      */
     updateStatusFromCart() {
-        if(this.inBrowser){
-            this.resetStatus(this.files);
-
-            if(!this.globalDataCart)
-                this.globalDataCart = DataCart.openCart(this.CART_CONSTANTS.GLOBAL_CART_NAME);
-
-            for (let key in this.globalDataCart.contents) {
-                this.setFilesDownloadStatus(this.files, this.globalDataCart.contents[key].resId, this.globalDataCart.contents[key].downloadStatus);
-                if (this.globalDataCart.contents[key].cartId != undefined) {
-                    let treeNode = this.searchTree(this.treeRoot[0], this.globalDataCart.contents[key].cartId);
-                    if (treeNode != null) {
-                        treeNode.data.isIncart = true;
+        let _setStatus = (nodes: TreeNode[]) => {
+            for (let node of nodes) {
+                if (node.children.length > 0)
+                    _setStatus(node.children);
+                else {
+                    let cartitem = this.globalDataCart.findFile(node.data.resId, node.data.comp.filepath);
+                    if (cartitem) {
+                        node.data.isInCart = true;
+                        node.data.downloadStatus = cartitem.downloadStatus;
                     }
                 }
             }
         }
+        if (this.globalDataCart) 
+            _setStatus(this.files);
         return Promise.resolve(this.files);
-    }
-
-    /**
-     * Function to get total number of files.
-     * @param files - file tree
-     */
-    getTotalFiles(files) {
-        for (let comp of files) {
-            if (comp.children.length > 0) {
-                this.getTotalFiles(comp.children);
-            } else {
-                this.totalFiles = this.totalFiles + 1;
-            }
-        }
-    }
-
-    /**
-     * Function to set files download status.
-     * @param files - file tree
-     * @param cartId - cart ID of the item to be set the status
-     * @param downloadStatus - download status
-     */
-    setFilesDownloadStatus(files, cartId, downloadStatus) {
-        for (let comp of files) {
-            if (comp.children.length > 0) {
-                this.setFilesDownloadStatus(comp.children, cartId, downloadStatus);
-            } else {
-                if (comp.data.cartId == cartId) {
-                    comp.data.downloadStatus = downloadStatus;
-                }
-            }
-        }
     }
 
     /**
@@ -328,10 +357,9 @@ export class DataFilesComponent {
     /**
      * Function to display bytes in appropriate format.
      * @param bytes 
-     * @param numAfterDecimal - number of digits after decimal
      */
-    formatBytes(bytes, numAfterDecimal) {
-        return this.commonFunctionService.formatBytes(bytes, numAfterDecimal);
+    formatBytes(bytes) {
+        return this.commonFunctionService.formatBytes(bytes, null);
     }
 
     /**
@@ -349,284 +377,155 @@ export class DataFilesComponent {
     }
 
     /**
-     * Function to add whole subfolder files to data cart then update status
-     * @param rowData - node in the file tree
-     * @param isSelected - flag indicating if the node is selected
+     * return the TreeNode with the given key or null if not found
      */
-    addSubFilesToCartAndUpdate(rowData: any, isSelected: boolean) {
-        this.globalDataCart.restore();
-        this.addSubFilesToCart(rowData, isSelected).then(function (result: any) {
-            this.allSelected = this.updateAllSelectStatus(this.files);
-            this.globalDataCart.save();
-        }.bind(this), function (err) {
-            alert("something went wrong while adding file to data cart.");
-        });
-    }
-
-    /**
-     * Function to add whole subfolder files to data cart
-     * @param rowData - node in the file tree
-     * @param isSelected - flag indicating if the node is selected
-     */
-    addSubFilesToCart(rowData: any, isSelected: boolean) {
-        if (!rowData.isLeaf) {
-            let subFiles: any = null;
-            for (let comp of this.files) {
-                subFiles = this.searchTree(comp, rowData.cartId);
-                if (subFiles != null) {
-                    break;
-                }
+    findNode(nodes: TreeNode[], key: string) : TreeNode {
+        for (let node of nodes) {
+            console.log("To find " + key + ", looking at " + node.data.key);
+            if (node.data.key == key)
+                return node;
+            else if (node.children.length > 0) {
+                let out = this.findNode(node.children, key);
+                if (out) return out;
             }
-            if (subFiles != null) {
-                this.addFilesToCart(subFiles.children, isSelected, '');
-                rowData.isIncart = true;
-            }
-        } else {
-            this.addtoCart(rowData, isSelected, '');
-        }
-
-        return Promise.resolve(rowData);
-    }
-
-    /**
-     * Function to search the file tree for a given cartid.
-     * @param element - tree to be searched
-     * @param cartId - cart ID for searching
-     */
-    searchTree(element, cartId) {
-        if (element.data.cartId == cartId) {
-            return element;
-        } else if (element.children.length > 0) {
-            var i;
-            var result = null;
-            for (i = 0; result == null && i < element.children.length; i++) {
-                result = this.searchTree(element.children[i], cartId);
-            }
-            return result;
         }
         return null;
-    }
-
-    /**
-     * Function to add/remove all files to/from data cart.
-     * @param files - file tree
-     */
-    cartProcess(files: any) {
-        this.isLocalProcessing = true;
-
-        setTimeout(() => {
-            if (this.allSelected) { // Remove all from cart
-                this.removeFilesFromCart(files).then(function (result1: any) {
-                    this.isLocalProcessing = false;
-                    this.allSelected = false;
-                    this.downloadStatus = null;
-                    this.cartService.setCartLength(this.globalDataCart.size());
-                    this.isLocalProcessing = false;
-                }.bind(this), function (err) {
-                    alert("something went wrong while removing file from data cart.");
-                });
-            }
-            else {  // Add all to cart
-                this.addAllFilesToCart(files, false, '').then(function (result1: any) {
-                    this.updateStatusFromCart();
-                    this.allSelected = this.updateAllSelectStatus(this.files);
-                    this.downloadStatus = this.updateDownloadStatus(this.files) ? "downloaded" : null;
-                    this.cartService.setCartLength(this.globalDataCart.size());
-                    this.isLocalProcessing = false;
-                }.bind(this), function (err) {
-                    alert("something went wrong while adding file to data cart.");
-                });
-            }
-        }, 0);
-
-        setTimeout(() => {
-            this.isLocalProcessing = false;
-        }, 10000);
-    }
-
-    /**
-     * Function to add all files to data cart.
-     * @param files - file tree
-     * @param isSelected - flag indicating if the node is selected
-     * @param cartKey - key of the cart
-     */
-    addAllFilesToCart(files: any, isSelected: boolean, cartKey: string) {
-        this.addFilesToCart(files, isSelected, cartKey).then(function (result2: any) {
-            this.allSelected = this.updateAllSelectStatus(this.files);
-            if (cartKey != '') {
-                this.allSelected = true;
-                this.specialDataCart.save();
-            }else{
-                this.globalDataCart.save();
-            }
-        }.bind(this), function (err) {
-            alert("something went wrong while adding one file to data cart.");
-        });
-
-        return Promise.resolve(files);
-    }
-
-    /**
-     * Function to add given file tree to data cart.
-     * @param files - file tree
-     * @param isSelected - flag indicating if the node is selected
-     * @param cartKey - key of the cart
-     */
-    addFilesToCart(files: any, isSelected: boolean, cartKey: string) {
-        let compValue: any;
-        for (let comp of files) {
-            if (comp.children.length > 0) {
-                compValue += this.addFilesToCart(comp.children, isSelected, cartKey);
-            } else {
-                this.addtoCart(comp.data, isSelected, cartKey).then(function (result) {
-                    compValue = 1;
-                }.bind(this), function (err) {
-                    alert("something went wrong while adding one file to data cart.");
-                });
-            }
-        }
-        return Promise.resolve(compValue);
-    }
-
-    /**
-     * Function to add one file to data cart with pre-select option.
-     * @param rowData - node in the file tree
-     * @param isSelected - flag indicating if the node is selected
-     * @param cartKey - key of the cart
-     */
-    addtoCart(rowData: any, isSelected: boolean, cartKey: string) {
-        let dataCartItem: DataCartItem = {
-            cartId: rowData.cartId,
-            resId: rowData.resId, 
-            ediid: this.ediid,
-            filePath: rowData.filePath,
-            downloadURL: rowData.downloadUrl,
-            downloadStatus: rowData.downloadStatus,
-            isIncart: true,
-            resTitle: this.record['title'],
-            resFilePath: rowData.filePath,
-            fileName: rowData.name,
-            fileSize: rowData.size,
-            filetype: rowData.filetype,
-            mediatype: rowData.mediatype,
-            description: rowData.description,
-            isSelected: false,
-            message: rowData.message
-        }
-        if(cartKey == '') {   // general data cart
-            this.globalDataCart.addFile(rowData.resId, dataCartItem, isSelected);
-            this.cartService.setCartLength(this.globalDataCart.size());
-            if (cartKey == '')
-                rowData.isIncart = true;
-        }else{
-            this.specialDataCart.addFile(rowData.resId, dataCartItem, isSelected);
-        }
-
-        return Promise.resolve(true);
     }
 
     /**
      * Remove one node from cart and set flag
      * @param rowData - node in the file tree
      */
-    removeFromNode(rowData: any) {
-        this.removeCart(rowData);
-        this.cartService.setCartLength(this.globalDataCart.size());
-        this.allSelected = this.updateAllSelectStatus(this.files);
+    removeFromGlobalCart(rowData: any) {
+        setTimeout(() => {
+            if (!this.globalDataCart)
+                this.globalDataCart.removeMatchingFiles(rowData.resId, rowData.comp.filepath, true);
+            this.allInCart = false;
+        }, 0);
     }
 
-   /**
-    * Remove one node from cart - can be a file or sub-tree
-    * @param rowData - node in the file tree 
-    */
-    removeCart(rowData: any) {
-        if (!rowData.isLeaf) {
-            let subFiles: any = null;
-            for (let comp of this.files) {
-                subFiles = this.searchTree(comp, rowData.cartId);
-                if (subFiles != null) {
-                    break;
-                }
+    /**
+     * Add a node to the global data cart
+     */
+    addToGlobalCart(rowData: any) : void {
+        if (! this.globalDataCart)
+            // not inBrowser or otherwise ready
+            return;
+        
+        setTimeout(() => {
+            let node : TreeNode = this.findNode(this.files, rowData.key);
+            if (node) {
+                console.log("Adding all within "+node.data.key+" to global cart");
+                this._addAllWithinToCart(node, this.globalDataCart, false);
+                this.globalDataCart.save();
+                this.allInCart = this._areAllInCart(this.files);
             }
-            if (subFiles != null) {
-                this.removeFilesFromCart(subFiles.children);
-                rowData.isIncart = false;
-            }
-        } else {
-            this.globalDataCart.removeFileById(rowData.resId,rowData.filePath, true);
-            rowData.isIncart = false;
+            else
+                console.error("Unable to add row with key="+rowData.key+"; Failed to find node in tree");
+        }, 0);
+    }
+    _addAllWithinToCart(node: TreeNode, cart: DataCart, selected: boolean = false) : void {
+        if (node.children.length > 0) {
+            for(let child of node.children) 
+                this._addAllWithinToCart(child, cart, selected);
+        }
+        else 
+            this.addFileToCart(node.data.comp, cart, selected, false);
+    }
+
+    /**
+     * add a single file component to the global data cart
+     */
+    addFileToCart(file: NerdmComp, cart: DataCart, selected: boolean =false, dosave: boolean =true) : DataCartItem {
+        if (cart && file.filepath && file.downloadURL) {
+            let added: DataCartItem = cart.addFile(this.ediid, file, selected, dosave);
+            added['resTitle'] = this.record['title'];
+            return added;
         }
     }
 
     /**
-     * Remove all files from cart and set flags
-     * @param files - file tree
+     * walk through the files tree to determine if all files from this dataset are currently in 
+     * the global cart
      */
-    removeFilesFromCart(files: TreeNode[]) {
-        this.globalDataCart.restore();
-        this.globalDataCart.removeFromTree(files);
-        this.globalDataCart.save();
+    _areAllInCart(nodes: TreeNode[]) : boolean {
+        for (let node of nodes) {
+            if (node.children.length > 0) {
+                if (! this._areAllInCart(node.children))
+                    return false;
+            }
+            else if (! node.data.isInCart)
+                return false;
+        }
+        return true;
+    }
 
-        this.allSelected = this.updateAllSelectStatus(this.files);
-        return Promise.resolve(files);
+    /** 
+     * Either add/remove all files to/from the global data cart.  This responds to the user clicking 
+     * on the "add all to cart" icon.  If all files are already in the cart, all files will be removed;
+     * otherwise, all not in the cart will be added.
+     */
+    toggleAllFilesInGlobalCart() : void {
+        if (! this.globalDataCart) return;
+        this.isTogglingAllInGlobalCart = true;
+        setTimeout(() => {
+            if (this.allInCart) {
+                this.globalDataCart.removeMatchingFiles(this.ediid, '', false);
+                this.allInCart = true;
+            }
+            else {
+                for (let child of this.files) 
+                    this._addAllWithinToCart(child, this.globalDataCart, false);
+                this.allInCart = false;
+            }
+            this.globalDataCart.save();
+            this.isTogglingAllInGlobalCart = false;
+        }, 0);
     }
 
     /**
-     * Update select status - Check if all chirldren nodes were selected
-     * @param files - file tree
+     * open up an exclusive cart and start to download all files from this dataset.  This
+     * responds to the user clicking on the download-all icon.  
      */
-    updateAllSelectStatus(files: any) {
-        var allSelected = true;
-        for (let comp of files) {
-            if (comp.children.length > 0) {
-                comp.data.isIncart = this.updateAllSelectStatus(comp.children);
-                allSelected = allSelected && comp.data.isIncart;
-            } else {
-                if (!comp.data.isIncart) {
-                    this.allSelected = false;
-                    allSelected = false;
-                }
-            }
-        }
-        return allSelected;
+    downloadAllFiles() {
+        let cartName : string = this.ediid;
+        if (cartName.startsWith("ark:/"))
+            cartName = cartName.replace(/^ark:\/\d+\//, '');
+        let downloadAllCart = this.cartService.getCart(cartName);
+        downloadAllCart.setDisplayName(this.record['title'], false);
+        this.isAddingToDownloadAllCart = true;
+        
+        setTimeout(() => {
+            for (let child of this.files) 
+                this._addAllWithinToCart(child, downloadAllCart, true);
+            downloadAllCart.save();
+            this.isAddingToDownloadAllCart = false;
+            window.open('/datacart/'+cartName, cartName);
+        }, 0);
     }
 
     /**
-     * Update download status - once a file was downloaded, we need to update it's parent's status as well
-     * @param files - file tree
+     * mark a file as downloaded in the data cart.  This will happen if the user clicks on the 
+     * individual file download icon.
      */
-    updateDownloadStatus(files: any) {
-        var allDownloaded = true;
-        var noFileDownloadedFlag = true;
-        for (let comp of files) {
-            if (comp.children != undefined && comp.children.length > 0) {
-                var status = this.updateDownloadStatus(comp.children);
-                if (status) {
-                    comp.data.downloadStatus = 'downloaded';
-                    this.globalDataCart.setDownloadStatus(comp.data.resId, comp.data.filePath, comp.data.downloadStatus);
-                }
-                allDownloaded = allDownloaded && status;
-            } else {
-                if (comp.data.downloadStatus != 'downloaded') {
-                    allDownloaded = false;
-                }
-                if (comp.data.downloadStatus == 'downloaded' && comp.data.isIncart) {
-                    noFileDownloadedFlag = true;
-                }
-            }
+    setFileDownloaded(rowData: DataFileItem) : void {
+        if (this.globalDataCart) {
+            this.globalDataCart.restore();
+            this.globalDataCart.setDownloadStatus(this.record.ediid, rowData.comp.filepath);
         }
-
-        this.downloadService.setFileDownloadedFlag(!noFileDownloadedFlag);
-        return allDownloaded;
     }
 
+    /*
+     * Note: downloadOneFile() and downloadAllFromUrl() are currently not used
+     */
+    
     /**
      * Downloaded one file
      * @param rowData - tree node
      */
     downloadOneFile(rowData: any) {
         let filename = decodeURI(rowData.downloadUrl).replace(/^.*[\\\/]/, '');
-        rowData.downloadStatus = 'downloading';
+        rowData.downloadStatus = DownloadStatus.DOWNLOADING;
         this.showDownloadProgress = true;
         rowData.downloadProgress = 0;
         let url = rowData.downloadUrl.replace('http:', 'https:');
@@ -650,23 +549,6 @@ export class DataFilesComponent {
     }
 
     /**
-     * Function to set status when a file was downloaded
-     * @param rowData - tree node
-     */
-    setFileDownloaded(rowData: any) {
-        rowData.downloadStatus = 'downloaded';
-        this.globalDataCart.restore();
-
-        this.globalDataCart.setDownloadStatus(rowData.resId, rowData.filePath, rowData.downloadStatus);
-        this.downloadStatus = this.updateDownloadStatus(this.files) ? "downloaded" : null;
-        this.globalDataCart.save();
-
-        if (rowData.isIncart) {
-            this.downloadService.setFileDownloadedFlag(true);
-        }
-    }
-
-    /**
      * Function to download all files based on download url.
      * @param files - file tree
      */
@@ -683,59 +565,13 @@ export class DataFilesComponent {
     }
 
     /**
-     * Function to download all.
-     */
-    downloadFromRoot() {
-        if(this.inBrowser){
-            this.addingToCart = true;
-            this.cancelAllDownload = false;
-            this.specialDataCart = DataCart.createCart(this.ediid);
-
-            setTimeout(() => {
-                this.addAllFilesToCart(this.files, true, this.ediid).then(function (result) {
-                    this.addingToCart = false;
-                    window.open('/datacart/'+this.ediid, this.ediid);
-                    this.updateStatusFromCart().then(function (result: any) {
-                        this.initDataFileTree();
-                    }.bind(this), function (err) {
-                        this.addingToCart = false;
-                        alert("something went wrong while adding file to data cart.");
-                    });
-                }.bind(this), function (err) {
-                    this.addingToCart = false;
-                    alert("something went wrong while adding all files to cart");
-                });
-            }, 0);
-        }
-    }
-
-    /**
-     * Function to set the download status of all files to downloaded.
-     * @param files - file tree
-     */
-    setAllDownloaded(files: any) {
-        this.globalDataCart.restore();
-
-        for (let comp of files) {
-            if (comp.children.length > 0) {
-                this.setAllDownloaded(comp.children);
-            } else {
-                comp.data.downloadStatus = 'downloaded';
-                this.globalDataCart.setDownloadStatus(comp.data.resId, comp.data.filePath, "downloaded");
-            }
-        }
-
-        this.globalDataCart.save();
-    }
-
-    /**
      * Return "download all" button color based on download status
      */
     getDownloadAllBtnColor() {
-        if (this.downloadStatus == null)
-            return '#1E6BA1';
-        else if (this.downloadStatus == 'downloaded')
+        if (this.downloadStatus == DownloadStatus.DOWNLOADED)
             return 'green';
+        else
+            return '#1E6BA1';
     }
 
     /**
@@ -743,7 +579,7 @@ export class DataFilesComponent {
      * @param rowData - tree node
      */
     getDownloadBtnColor(rowData: any) {
-        if (rowData.downloadStatus == 'downloaded')
+        if (rowData.downloadStatus == DownloadStatus.DOWNLOADED)
             return 'green';
 
         return '#1E6BA1';
@@ -753,7 +589,7 @@ export class DataFilesComponent {
      * Return "add all to datacart" button color based on select status
      */
     getAddAllToDataCartBtnColor() {
-        if (this.allSelected)
+        if (this.allInCart)
             return 'green';
         else
             return '#1E6BA1';
@@ -763,7 +599,7 @@ export class DataFilesComponent {
      * Return tooltip text based on select status
      */
     getCartProcessTooltip() {
-        if (this.allSelected)
+        if (this.allInCart)
             return 'Remove all from cart';
         else
             return 'Add all to cart';

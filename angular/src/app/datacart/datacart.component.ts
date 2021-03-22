@@ -2,11 +2,12 @@ import { Component, OnInit, PLATFORM_ID, Inject, ViewChild } from '@angular/core
 import { ActivatedRoute, Router } from '@angular/router';
 import 'rxjs/add/operator/map';
 import { TreeNode } from 'primeng/primeng';
-import { CartConstants } from './cartconstants';
+import { DownloadStatus } from './cartconstants';
 import { ZipData } from '../shared/download-service/zipData';
 import { isPlatformBrowser } from '@angular/common';
-import { FormCanDeactivate } from '..//form-can-deactivate/form-can-deactivate';
-import { CartService } from '../datacart/cart.service';
+import { CartService } from './cart.service';
+import { DataCart } from './cart';
+import { BundleplanComponent } from './bundleplan/bundleplan.component';
 
 @Component({
     moduleId: module.id,
@@ -15,23 +16,22 @@ import { CartService } from '../datacart/cart.service';
     styleUrls: ['datacart.component.css'],
 })
 
-export class DatacartComponent extends FormCanDeactivate implements OnInit {
+export class DatacartComponent implements OnInit {
     inBrowser: boolean = false;
 
     //Connection
     routerparams: any;
 
     //Data
-    ediid: string;
+    dataCart : DataCart = null;
     selectedData: TreeNode[] = [];
     dataFiles: TreeNode[] = [];
-    CART_CONSTANTS: any;
     zipData: ZipData[] = [];
 
-    // overallStatus is used in can-deactivate component. If overallStatus is not 'completed'
-    // and user tried to close the tab, a warning dialog will pop up.
-    @ViewChild('overallStatus')
     overallStatus: string = "";
+
+    @ViewChild('bundler')
+    bundler : BundleplanComponent;
 
     /**
      * Creates an instance of the SearchPanel
@@ -43,9 +43,6 @@ export class DatacartComponent extends FormCanDeactivate implements OnInit {
         public cartService: CartService,
         @Inject(PLATFORM_ID) private platformId: Object ) 
     {
-        super(cartService);
-
-        this.CART_CONSTANTS = CartConstants.cartConst;
         this.inBrowser = isPlatformBrowser(platformId);
     }
 
@@ -56,34 +53,69 @@ export class DatacartComponent extends FormCanDeactivate implements OnInit {
         let currentUrl = this.router.url;
 
         this.routerparams = this.route.params.subscribe(params => {
-            if(currentUrl.indexOf("ark:/88434") >= 0)
-                this.ediid = 'ark:/88434/' + params['ediid'];
-            else
-                this.ediid = params['ediid'];
-        })
+            let cartName = params['cartname'];
+            this.dataCart = this.cartService.getCart(cartName);
+        });
     }
 
     /**
-     * Update selectedData from the output of treeTable component
-     * @param selectedData Selected data array from treeTable component
+     * trigger download planning and display plan in the bundle-plan panel
      */
-    updateSelectedData(selectedData){
-        this.selectedData = selectedData;
+    downloadSelectedFiles(event) : void {
+        if (this.bundler) 
+            this.bundler.downloadSelectedFiles();
     }
 
     /**
-     * Update dataFiles from the output of treeTable component
-     * @param dataFiles dataFiles from treeTable component
+     * remove the currently selected files from the data cart.  The child component displaying the 
+     * cart contents will updated automatically because it is watching the cart for changes.
      */
-    updateDafaFiles(dataFiles){
-        this.dataFiles = dataFiles;
+    removeSelectedFiles(event) : void {
+        this.dataCart.removeSelectedFiles();
     }
+
+    /**
+     * remove the currently selected files from the data cart.  The child component displaying the 
+     * cart contents will updated automatically because it is watching the cart for changes.
+     */
+    remvoeDownloadedFiles(event) : void {
+        this.dataCart.removeDownloadedFiles();
+    }
+
+    /**
+     * receive the current overall download status of the cart
+     */
+    updateCartOperationalStatus(status : string) : void {
+        this.overallStatus = status;
+    }
+    
+    /* Control closing of this cart prematurely */
+
+    /**
+     * return true if the user should not close this tab/window because downloading is currently in progress.
+     * This is used by LeaveWhileDownloadingGuard which is configured as part of the DataCartModule.
+     */
+    public canDeactivate() : boolean {
+        return (this.overallStatus != DownloadStatus.DOWNLOADING);
+    }
+
+    /*
+    @HostListener('window:beforeunload', ['$event'])
+    unloadNotification($event: any) {
+        if (! this.canDeactivate()) $event.returnValue = true;
+    }
+    */
+
+
+    /******************************************/
+
+    /**
 
     /**
      * Update zipData from the output of bundlePlan component
      * @param zipData zipDta from bundlePlan component
      */
-    updateZipDafa(zipData: ZipData[]){
+    updateZipData(zipData: ZipData[]){
         this.zipData = zipData;
     }
 
