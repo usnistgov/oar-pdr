@@ -153,10 +153,10 @@
       "@type": [
         "nrdp:Subcollection"
       ],
-      "filepath": "/1868"
+      "filepath": "1868"
     },
     {
-      "filepath": "/1868/Intel-Edison-PS-master.zip",
+      "filepath": "1868/Intel-Edison-PS-master.zip",
       "mediaType": "text/plain",
       "downloadURL": "https://s3.amazonaws.com/nist-midas/1868/Intel-Edison-PS-master.zip",
       "@id": "cmps/1868/Intel-Edison-PS-master.zip",
@@ -169,7 +169,7 @@
       ]
     },
     {
-      "filepath": "/1868/Intel-Edison-PS-master.zip.sha256",
+      "filepath": "1868/Intel-Edison-PS-master.zip.sha256",
       "mediaType": "text/plain",
       "downloadURL": "https://s3.amazonaws.com/nist-midas/1868/Intel-Edison-PS-master.zip.sha256",
       "@id": "cmps/1868/Intel-Edison-PS-master.zip.sha256",
@@ -182,12 +182,12 @@
       ]
     },
     {
-      "filepath": "/1868/Intel-Edison-PS-master.zip",
+      "filepath": "1868/Intel-Edison-PS-master.zip",
       "mediaType": "application/zip",
       "downloadURL": "https://s3.amazonaws.com/nist-midas/1868/Intel-Edison-PS-master.zip",
       "@id": "cmps/1868/Intel-Edison-PS-master.zip",
       "@type": [
-        "nrdp:DataFile",
+        "nrdp:ChecksumFile",
         "dcat:Distribution"
       ],
       "_extensionSchemas": [
@@ -210,13 +210,12 @@
       "format": {
         "description": "This is a github repository primarily written in javascript."
       },
-      "filepath": "/Intel-Edison-PS.git",
-      "mediaType": "text/javascript",
-      "downloadURL": "https://github.com/usnistgov/Intel-Edison-PS.git",
+      "mediaType": "text/html",
+      "accessURL": "https://github.com/usnistgov/Intel-Edison-PS",
       "title": "Embedded Subscribe/Publish Networking Software for the Intel Edison Platform",
       "@id": "cmps/Intel-Edison-PS.git",
       "@type": [
-        "nrdp:DataFile",
+        "nrdp:AccessPage",
         "dcat:Distribution"
       ],
       "_extensionSchemas": [

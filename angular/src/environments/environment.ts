@@ -225,6 +225,7 @@ export const testdata: {} = {
         "modified": "2011-07-11",
         "landingPage": "https://www.nist.gov/itl/iad/image-group/special-database-32-multiple-encounter-dataset-meds",
         "description": [ "para1", "para2" ],
+        "keyword": [],
         "publisher": {
             "@type": "org:Organization",
             "name": "National Institute of Standards and Technology"
@@ -233,6 +234,8 @@ export const testdata: {} = {
             {
                 "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
                 "filepath": "README.txt",
+                "size": "784",
+                "mediaType": "text/plain",
                 "downloadURL": "https://data.nist.gov/od/ds/mds0000fbk/README.txt"
             },
             {
@@ -246,11 +249,15 @@ export const testdata: {} = {
             {
                 "@type": [ "nrdp:DataFile", "dcat:Distribution" ],
                 "filepath": "data/file.csv",
+                "size": "21784",
+                "mediaType": "text/csv",
                 "downloadURL": "https://data.nist.gov/od/ds/mds0000fbk/data/file.csv"
             },
             {
                 "@type": [ "nrdp:DataFile", "nrd:Hidden" ],
                 "filepath": "data/secret.csv",
+                "size": "15784",
+                "mediaType": "text/csv",
                 "downloadURL": "https://data.nist.gov/od/ds/mds0000fbk/data/file.csv"
             }
         ]
