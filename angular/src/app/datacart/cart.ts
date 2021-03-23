@@ -534,7 +534,7 @@ export class DataCart {
 
         id = resid || '';
         id = id.replace(/ark:\/\d+\//,'');
-        if (filePath) id = resid+'/'+filePath;
+        if (filePath) id = id+'/'+filePath;
         id += '/';
         let matched2 = Object.keys(this.contents).filter((k) => { return k.startsWith(id); });
         return matched2.map((k) => { return this.contents[k]; });
