@@ -330,10 +330,12 @@ export class DataCart {
     }
 
     static itemKeyFor(resId: string, filePath: string) : string {
+        let localid = resId || '';
+        localid = localid.replace(/^ark:\/\d+\//, '');
         if(filePath[0] != '/')
-            return resId+'/'+filePath; 
+            return localid+'/'+filePath; 
         else 
-            return resId+filePath; 
+            return localid+filePath; 
     }
     private _idForItem(item: DataCartItem) {
         return item['key'];
@@ -530,7 +532,8 @@ export class DataCart {
         let matched = this.contents[id]
         if (matched) return [matched];
 
-        id = resid;
+        id = resid || '';
+        id = id.replace(/ark:\/\d+\//,'');
         if (filePath) id = resid+'/'+filePath;
         id += '/';
         let matched2 = Object.keys(this.contents).filter((k) => { return k.startsWith(id); });

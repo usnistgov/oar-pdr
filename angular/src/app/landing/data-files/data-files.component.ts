@@ -139,16 +139,45 @@ export class DataFilesComponent {
         if(this.inBrowser){
             this.globalDataCart = this.cartService.getGlobalCart();
             this.cartLength = this.globalDataCart.size();
-            this.globalDataCart.watchForChanges((which) => { this.cartChanged(which); })
+            this.globalDataCart.watchForChanges((ev) => { this.cartChanged(ev); })
 
             this.dataCartStatus = DataCartStatus.openCartStatus();
             this.buildTree();
         }
     }
 
-    cartChanged(which){
+    cartChanged(ev){
         this.cartLength = this.globalDataCart.size();
-        this.buildTree();
+        if (this.files.length > 0) {
+            console.log("updating status from cart");
+            setTimeout(() => {
+                this.allInCart = this._updateNodesFromCart(this.files, this.globalDataCart);
+            }, 0);
+        }
+    }
+    _updateNodesFromCart(nodes: TreeNode[], dc: DataCart): boolean {
+        let allIn: boolean = true;
+        for (let child of nodes) {
+            if (child.children.length > 0) {
+                child.data.isInCart = this._updateNodesFromCart(child.children, dc);
+                if (! child.data.isInCart) 
+                    allIn = false;
+            }
+            else if (child.data.comp && child.data.comp.downloadURL) {
+                // a file node
+                let dci: DataCartItem = dc.findFile(this.ediid, child.data.comp.filepath);
+                if (dci) {
+                    child.data.downloadStatus = dci.downloadStatus;
+                    child.data.isInCart = true;
+                }
+                else 
+                    child.data.isInCart = false;
+                if (! child.data.isInCart)
+                    allIn = false;
+            }
+        }
+
+        return allIn;
     }
 
     /*
@@ -218,12 +247,14 @@ export class DataFilesComponent {
         for (let comp of this.record['components']) {
             if (comp.filepath && comp['@type'].filter(tp => tp.includes(':Hidden')).length == 0) {
                 node = insertComp(comp, root);
+                /*
                 cartitem = this.globalDataCart.findFile(this.record['@id'], comp.filepath);
                 if (cartitem) {
                     node.data.isInCart = true;
                     inCartCount++;
                     node.data.downloadStatus = cartitem.downloadStatus;
                 }
+                */
                 if (node.data.comp['@type'].filter(tp => tp.endsWith("File")).length > 0) {
                     count++;
                     if (node.data.downloadStatus == DownloadStatus.DOWNLOADED) downloadedCount++;
@@ -232,12 +263,9 @@ export class DataFilesComponent {
         }
         this.files = [...root.children];
         this.fileCount = count;
-        if (count > 0) {
-            if (downloadedCount == count)
-                this.downloadStatus = DownloadStatus.DOWNLOADED
-            if (inCartCount == count)
-                this.allInCart = true;
-        }
+        this.allInCart = this._updateNodesFromCart(this.files, this.globalDataCart);
+        if (count > 0 && downloadedCount == count) 
+            this.downloadStatus = DownloadStatus.DOWNLOADED
     }
 
     /**
@@ -381,7 +409,6 @@ export class DataFilesComponent {
      */
     findNode(nodes: TreeNode[], key: string) : TreeNode {
         for (let node of nodes) {
-            console.log("To find " + key + ", looking at " + node.data.key);
             if (node.data.key == key)
                 return node;
             else if (node.children.length > 0) {
@@ -397,9 +424,13 @@ export class DataFilesComponent {
      * @param rowData - node in the file tree
      */
     removeFromGlobalCart(rowData: any) {
+        if (!this.globalDataCart)
+            // not inBrowser or otherwise ready
+            return;
+
         setTimeout(() => {
-            if (!this.globalDataCart)
-                this.globalDataCart.removeMatchingFiles(rowData.resId, rowData.comp.filepath, true);
+            console.log("Removing all within "+this.ediid+"/"+rowData.comp.filepath+" from global cart");
+            this.globalDataCart.removeMatchingFiles(this.ediid, rowData.comp.filepath, true);
             this.allInCart = false;
         }, 0);
     }
@@ -470,13 +501,15 @@ export class DataFilesComponent {
         this.isTogglingAllInGlobalCart = true;
         setTimeout(() => {
             if (this.allInCart) {
+                console.log("Removing all files from "+this.ediid+" from cart");
                 this.globalDataCart.removeMatchingFiles(this.ediid, '', false);
-                this.allInCart = true;
+                this.allInCart = false;
             }
             else {
+                console.log("Adding all files from "+this.ediid+" to cart");
                 for (let child of this.files) 
                     this._addAllWithinToCart(child, this.globalDataCart, false);
-                this.allInCart = false;
+                this.allInCart = true;
             }
             this.globalDataCart.save();
             this.isTogglingAllInGlobalCart = false;
