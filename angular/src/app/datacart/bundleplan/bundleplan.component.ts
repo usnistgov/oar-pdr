@@ -2,7 +2,7 @@ import { Component, OnInit, Input, Output, Inject, PLATFORM_ID, EventEmitter } f
 import { ZipData } from '../../shared/download-service/zipData';
 import { TreeNode } from 'primeng/primeng';
 import { DownloadService } from '../../shared/download-service/download-service.service';
-import { CommonFunctionService } from '../../shared/common-function/common-function.service';
+import { formatBytes } from '../../utils';
 import { OverlayPanel } from 'primeng/overlaypanel';
 import { GoogleAnalyticsService } from '../../shared/ga-service/google-analytics.service';
 import { DownloadData } from '../../shared/download-service/downloadData';
@@ -92,7 +92,6 @@ export class BundleplanComponent implements OnInit {
 
     constructor(
         private downloadService: DownloadService,
-        public commonFunctionService: CommonFunctionService,
         public gaService: GoogleAnalyticsService,
         public cartService: CartService,
         private modalService: NgbModal,
@@ -563,5 +562,13 @@ export class BundleplanComponent implements OnInit {
         setTimeout(() => {
             this.updateDownloadPercentage(0)
         }, 1000);
+    }
+
+    /**
+     * Function to display bytes in appropriate format.
+     * @param bytes - input data in bytes
+     */
+    formatBytes(bytes) {
+        return formatBytes(bytes);
     }
 }

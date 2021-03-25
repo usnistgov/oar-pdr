@@ -24,7 +24,7 @@
         <div [ngStyle]="{'width': '100%', 'background-color': getBackColor(i)}"
             *ngFor="let zip of zipData; let i=index">
             <span class="span30">{{zip.fileName}}</span>
-            <span class="span15">{{commonFunctionService.getSizeForDisplay(zip.bundleSize)}}</span>
+            <span class="span15">{{formatBytes(zip.bundleSize)}}</span>
             <span class="span-end" style="width: 55%;">
                 <span *ngIf="zip.downloadStatus === 'downloading' && zip.downloadTime != null; else calculating"
                     style="float: right;margin-right: 0.5em;">{{getDownloadTime(zip.downloadTime)}}
@@ -64,7 +64,7 @@
     <!-- Overall progress -->
     <div *ngIf="zipData.length > 0 && overallStatus != null" style="background-color: rgb(170, 212, 189);">
         <span class="span30">Overall progress</span>
-        <span class="span15">{{commonFunctionService.getSizeForDisplay(downloadService.totalBundleSize)}}</span>
+        <span class="span15">{{formatBytes(downloadService.totalBundleSize)}}</span>
         <span class="span-end" style="width: 55%;">
             <div style="display:inline-block;" *ngIf="overallStatus === 'downloading';else not_overall_downloading">
                 <span style="display:inline-block;margin-left: 0.5em;width: 100px;">
