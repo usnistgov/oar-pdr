@@ -17,7 +17,7 @@ import { GoogleAnalyticsService } from '../../shared/ga-service/google-analytics
 import { ToastrModule } from 'ngx-toastr';
 import { TreeTableModule } from 'primeng/treetable';
 
-fdescribe('DataFilesComponent', () => {
+describe('DataFilesComponent', () => {
   let component: DataFilesComponent;
   let fixture: ComponentFixture<DataFilesComponent>;
   let cfg: AppConfig;

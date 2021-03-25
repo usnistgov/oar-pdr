@@ -1,13 +1,13 @@
 <div *ngIf="inBrowser" style="display: inline-block; margin: auto;">
     <div class="full-span" style="width: 94%;">
-        <p-treeTable *ngIf="isVisible" [resizableColumns]="true" selectionMode="checkbox" [value]="dataFiles"
-                     dataKey="key" [(selection)]="selectedData"
+        <p-treeTable *ngIf="isVisible" #ngtt [resizableColumns]="true" selectionMode="checkbox" sortField="name"
+                     [value]="dataTree.children" dataKey="key" [(selection)]="selectedData"
                      (onNodeSelect)="onNodeSelect($event)" (onNodeUnselect)="onNodeUnselect($event)"
                      [style]="{'margin':'auto', 'padding-bottom':'3%', 'color':'black'}">
             <ng-template pTemplate="header">
                 <tr>
                     <th [ngStyle]="headerStyle(titleWidth)" ttResizableColumn>
-                        <span (click)="expandToLevel(dataFiles, !isExpanded, null)" style="padding-right:0.5em;">
+                        <span (click)="expandToLevel(dataTree.children, !isExpanded, null)" style="padding-right:0.5em;">
                             <i *ngIf="!isExpanded" class="faa faa-arrow-circle-down faa-1x icon-white"
                                 style="cursor: pointer;color: rgb(255, 255, 255);" data-toggle="tooltip"
                                 title="Expand All"></i>
@@ -117,10 +117,7 @@
         <div class="ui-g filesection">
             <div *ngIf="fileNode" class="ui-g-12 ui-md-12 ui-lg-12 ui-sm-10">
                 <span class="font8" style="color:grey">
-                    <span *ngIf="fileNode.filetype == 'DataFile' ">Selected File</span>
-                    <span *ngIf="fileNode.filetype == 'ChecksumFile' ">Selected Checksum File</span>
-                    <span *ngIf="fileNode.filetype == 'Subcollection'">Selected SubCollection </span>
-                    <br>
+                    Selected {{fileNode.filetype}} <br>
                 </span>
                 <span class="font14">{{ fileNode ? fileNode.name : '' }}</span>
                 <span class="font8" style="color:grey">
@@ -129,7 +126,7 @@
                 </span>
                 <span class="font8" style="margin-left: 2.5rem">
                     Size:
-                    <span *ngIf="fileNode.cartItem.size" class="textstyle1">{{ formatBytes(fileNode.cartItem.size) }} </span>
+                    <span *ngIf="fileNode.cartItem.size" class="textstyle1">{{ fileNode.size }} </span>
                     <span *ngIf="!fileNode.cartItem.size" class="textstyle1"><i>Not Available</i></span>
                 </span>
                 <br><span class="font10"><b>Description:</b> </span>

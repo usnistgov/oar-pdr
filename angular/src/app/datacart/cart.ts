@@ -261,7 +261,7 @@ export class DataCart {
             this.contents[Object.keys(this.contents)[0]].name)
         {
             let key = Object.keys(this.contents)[0];
-            return this.contents[key].resTitle || this.contents[key].name;
+            return this.contents[key].resTitle || this.contents[key].resId;
         }
         return this.cartName;
     }
