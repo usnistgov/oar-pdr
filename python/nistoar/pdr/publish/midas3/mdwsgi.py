@@ -362,7 +362,7 @@ class Handler(object):
         self.set_response(200, "Data file found")
         self.add_header('Content-Type', mtype)
         self.add_header('Content-Disposition',
-                        'inline; filname="%s"' % os.path.basename(filepath)) 
+                        'inline; filename="%s"' % os.path.basename(filepath)) 
         if xsend:
             self.add_header('X-Accel-Redirect', xsend)
         self.end_headers()
