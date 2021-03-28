@@ -9,13 +9,23 @@ import { CartService } from './cart.service';
 import { DataCart } from './cart';
 import { BundleplanComponent } from './bundleplan/bundleplan.component';
 
+/**
+ * a component that provides an interface for viewing the contents of a data cart and download items 
+ * from it in bulk (as zip files).  It includes three main subcomponents:
+ *   * `CartcontrolComponent` -- the control panel for initiating downloads and cleaning out the contents  
+ *           of the cart.
+ *   * `BundleplanComponent` -- a panel that displays the status of zipfiles being created and downloaded
+ *   * `TreetableComponent` -- a panel showing the contents of the cart as a hierarchical tree.
+ * 
+ * A `DatacartComponent` provides a view of only one cart; the cart it displays and controls is determined
+ * by the cart name it is given (via its HTML template).  
+ */
 @Component({
     moduleId: module.id,
     selector: 'data-cart',
     templateUrl: 'datacart.component.html',
     styleUrls: ['datacart.component.css'],
 })
-
 export class DatacartComponent implements OnInit {
     inBrowser: boolean = false;
 

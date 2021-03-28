@@ -1,3 +1,17 @@
+/**
+ * Classes supporting the view of the list of data cart files.  The files are displayed as a hierarchical 
+ * tree using the PrimeNG component, TreeTable.  The top level of the hierarchy represents the dataset the 
+ * files are a part of, and levels below it represent the subcollections that contain the files.  The key 
+ * entities provide in this source file are:
+ * 
+ *   * CartTreeData -- an interface representing the data used to visualize the file; it serves as the
+ *          data properties for the TreeNodes provided to the TreeTable.
+ *   * CartTreeNode -- an implementation of the TreeNode interface that provides functions useful for 
+ *          creating and updating the TreeNode hierarchy.  
+ *   * TreetableComponent -- the Angular component class that provides the view of the data cart list; it 
+ *          holds the TreeNode hierarchy and uses the PrimeNG TreeTable component to display it.
+ *
+ */
 import { Component, OnInit, OnChanges, AfterViewInit, Output, Input, ViewChild, NgZone, HostListener, Inject,
          PLATFORM_ID, EventEmitter, SimpleChanges } from '@angular/core';
 import { TreeNode, TreeTable } from 'primeng/primeng';
@@ -66,7 +80,7 @@ interface CartTreeData {
 }
 
 /**
- * A tree node that knows how to insert and update items from a data cart
+ * A TreeNode that knows how to insert and update items from a data cart
  */
 export class CartTreeNode implements TreeNode {
     children = [];
@@ -195,6 +209,9 @@ export class CartTreeNode implements TreeNode {
     }
 }
 
+/**
+ * the component providing the view of the files in the data cart.
+ */
 @Component({
   selector: 'app-treetable',
   templateUrl: './treetable.component.html',
@@ -208,7 +225,7 @@ export class TreetableComponent implements OnInit, AfterViewInit {
     inBrowser: boolean = false;
 
     // Data
-    dataTree: CartTreeNode = new CartTreeNode(); // its children are data for TreeTable
+    dataTree: CartTreeNode = new CartTreeNode(); // its children are the TreeNode[] given to TreeTable
     selectedData: TreeNode[] = [];               // selected data for TreeTable
     fileNode: CartTreeData;
 
