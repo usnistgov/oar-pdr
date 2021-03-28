@@ -21,11 +21,11 @@ sync.
 
 ### The `DataCart` and the `CartService`
 
-At the center of the data cart framework is the `[DataCart](cart.ts)` class.  It holds a list of
+At the center of the data cart framework is the [`DataCart`](cart.ts) class.  It holds a list of
 files that have been placed in the cart.  Its key features are:
 
   *  it provides functions for adding and removing files to and from the cart
-  *  the information stored for each files is defined by the `[DataCartItem](cart.ts)` interface;
+  *  the information stored for each files is defined by the [`DataCartItem`](cart.ts) interface;
      it includes:
      *  the `NerdmComp` metadata for the file
      *  the download URL for retrieving the file
@@ -78,12 +78,12 @@ The figure below illustrates which components interact with the data carts.
 Here is an inventory of components that need information from or access to a data cart:
 
   * Landing Page:
-    1. the `[HeadbarComponent](../frame/headbar.component.ts)` includes an icon representing the
+    1. the [`HeadbarComponent`](../frame/headbar.component.ts) includes an icon representing the
       Global Data Cart:
       * the icon displays the number of data files currently in the cart
       * clicking on the icon opens up the a `DatacartComponent` view of the global cart (in a
         separate tab).
-    2. The `[DataFilesComponent](../landing/data-files/data-files.component.ts)` component lists
+    2. The [`DataFilesComponent`](../landing/data-files/data-files.component.ts) component lists
       the files in the dataset; the display includes:
       * an "add all to cart" icon for adding/removing all of the files to and from the global cart:
         * the icon displays the number of files from the dataset that are currently in the cart
@@ -102,18 +102,18 @@ Here is an inventory of components that need information from or access to a dat
           in the cart, the file is removed.
         * when the file is added to the cart, the cart is annotated with the label, "Added".
   * `DatacartComponent`:
-    3. `[TreetableComponent](treecomponent/treecomponent.component.ts)` displays the contents of the cart
+    3. [`TreetableComponent`](treecomponent/treecomponent.component.ts) displays the contents of the cart
       * A checkbox by each file listed as in the cart allows the user to select (or unselect) the
         file to be part of a bundled download request.
       * Each row shows the current download status for the file.  If the file is currently being
         downloaded, the name of the zip file it is being bundled into is displayed as well.
-    4. `[CartControlComponent](cartcontrol.component.ts)` provides control buttons for operating on
+    4. [`CartControlComponent`](cartcontrol.component.ts) provides control buttons for operating on
       the cart:
       * It needs to know how many are currently selected.  One button will
         commence downloading on them, and another one can remove them from the cart.
       * It needs to know which files have been successfully downloaded (and how many); a button
         allows those files to be removed.
-    5. `[BundleplanComponent](bundleplan/bundleplan.component.ts)` manages the download process
+    5. [`BundleplanComponent`](bundleplan/bundleplan.component.ts) manages the download process
       (triggered via `CartControlComponent` or a "download all" icon-click).
       * As particular data files are bundled into zip bundles, this component updates the download status
         for those files.  It also adds the name of the zip file contain a particular file to the
@@ -122,7 +122,8 @@ Here is an inventory of components that need information from or access to a dat
 
 On a related note, there is a download progress meter that appears on landing pages while
 downloads are in progress.  This progress is coordinated between the landing page and the
-`BundleplanComponent` separately using the `[DataCartStatus](../cartstatus.ts)` class.
+[`BundleplanComponent`](bundleplan/bundleplan.component.ts) separately using the
+[`DataCartStatus`](../cartstatus.ts) class.
 
 
 
