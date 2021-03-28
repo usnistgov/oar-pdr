@@ -79,46 +79,47 @@ Here is an inventory of components that need information from or access to a dat
 
   * Landing Page:
     1. the [`HeadbarComponent`](../frame/headbar.component.ts) includes an icon representing the
-      Global Data Cart:
-      * the icon displays the number of data files currently in the cart
-      * clicking on the icon opens up the a `DatacartComponent` view of the global cart (in a
-        separate tab).
+       Global Data Cart:
+        * the icon displays the number of data files currently in the cart
+        * clicking on the icon opens up the a `DatacartComponent` view of the global cart (in a
+          separate tab).
     2. The [`DataFilesComponent`](../landing/data-files/data-files.component.ts) component lists
-      the files in the dataset; the display includes:
-      * an "add all to cart" icon for adding/removing all of the files to and from the global cart:
-        * the icon displays the number of files from the dataset that are currently in the cart
-        * the color of the cart reflects whether all of the files in the dataset are currently in
-          the cart.
-        * clicking on the icon adds all of the files from the dataset (not currently in the cart)
-          to the global cart; if all of the files are already in the cart; clicking removes them
-          all.
-      * a "download all" icon that, when clicked, adds all files to a special cart just for this
-        dataset (i.e. _not_ the global cart), then opens up the display for this cart (in a
-        separate tab), and commences the bulk downloading process.
-      * In the listing of the files in the dataset, each row showing a file includes a data cart
-        icon for adding and removing it from the Global Data Cart:
-        * the color indicates whether that file is currently in the global cart
-        * when the user clicks on the icon, the file is added to the cart; if the file is already
-          in the cart, the file is removed.
-        * when the file is added to the cart, the cart is annotated with the label, "Added".
+       the files in the dataset; the display includes:
+        * an "add all to cart" icon for adding/removing all of the files to and from the global cart:
+           * the icon displays the number of files from the dataset that are currently in the cart
+           * the color of the cart reflects whether all of the files in the dataset are currently in
+             the cart.
+           * clicking on the icon adds all of the files from the dataset (not currently in the cart)
+             to the global cart; if all of the files are already in the cart; clicking removes them
+             all.
+        * a "download all" icon that, when clicked, adds all files to a special cart just for this
+          dataset (i.e. _not_ the global cart), then opens up the display for this cart (in a
+          separate tab), and commences the bulk downloading process.
+        * In the listing of the files in the dataset, each row showing a file includes a data cart
+          icon for adding and removing it from the Global Data Cart:
+           * the color indicates whether that file is currently in the global cart
+           * when the user clicks on the icon, the file is added to the cart; if the file is already
+             in the cart, the file is removed.
+           * when the file is added to the cart, the cart is annotated with the label, "Added".
   * `DatacartComponent`:
-    3. [`TreetableComponent`](treecomponent/treecomponent.component.ts) displays the contents of the cart
-      * A checkbox by each file listed as in the cart allows the user to select (or unselect) the
-        file to be part of a bundled download request.
-      * Each row shows the current download status for the file.  If the file is currently being
-        downloaded, the name of the zip file it is being bundled into is displayed as well.
-    4. [`CartControlComponent`](cartcontrol.component.ts) provides control buttons for operating on
-      the cart:
-      * It needs to know how many are currently selected.  One button will
-        commence downloading on them, and another one can remove them from the cart.
-      * It needs to know which files have been successfully downloaded (and how many); a button
-        allows those files to be removed.
-    5. [`BundleplanComponent`](bundleplan/bundleplan.component.ts) manages the download process
-      (triggered via `CartControlComponent` or a "download all" icon-click).
-      * As particular data files are bundled into zip bundles, this component updates the download status
-        for those files.  It also adds the name of the zip file contain a particular file to the
-        metadata saved for that file in the data cart.
-      * If a file fails to download, the download status for the file is updated accordingly.
+  
+     3. [`TreetableComponent`](treecomponent/treecomponent.component.ts) displays the contents of the cart
+        * A checkbox by each file listed as in the cart allows the user to select (or unselect) the
+          file to be part of a bundled download request.
+        * Each row shows the current download status for the file.  If the file is currently being
+          downloaded, the name of the zip file it is being bundled into is displayed as well.
+     4. [`CartControlComponent`](cartcontrol.component.ts) provides control buttons for operating on
+        the cart:
+        * It needs to know how many are currently selected.  One button will
+          commence downloading on them, and another one can remove them from the cart.
+        * It needs to know which files have been successfully downloaded (and how many); a button
+          allows those files to be removed.
+     5. [`BundleplanComponent`](bundleplan/bundleplan.component.ts) manages the download process
+        (triggered via `CartControlComponent` or a "download all" icon-click).
+        * As particular data files are bundled into zip bundles, this component updates the download status
+          for those files.  It also adds the name of the zip file contain a particular file to the
+          metadata saved for that file in the data cart.
+        * If a file fails to download, the download status for the file is updated accordingly.
 
 On a related note, there is a download progress meter that appears on landing pages while
 downloads are in progress.  This progress is coordinated between the landing page and the
