@@ -1,6 +1,7 @@
 <!-- Top control panel -->
-<app-cartcontrol [cartName]="dataCart.getName()" (onDownloadSelected)="downloadSelectedFiles($ev)"
-                 (onRemoveSelected)="removeSelectedFiles($ev)" (onRemoveDownloaded)="removeSelectedFiles($ev)">
+<app-cartcontrol [cartName]="dataCart.getName()" (onDownloadSelected)="downloadSelectedFiles($event)"
+                 (onRemoveSelected)="removeSelectedFiles($event)"
+                 (onRemoveDownloaded)="removeSelectedFiles($event)">
 </app-cartcontrol>
 
 <!-- Bundle plan -->

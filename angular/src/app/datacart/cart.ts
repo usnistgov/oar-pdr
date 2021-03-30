@@ -123,16 +123,22 @@ export class DataCart {
         this.lastUpdated = update;
 
         // watch for changes that occur in other browser tabs/windows
-        if (this._storage && window) 
+        if (this._storage && typeof window !== 'undefined') 
             window.addEventListener("storage", this._checkForUpdate.bind(this))
     }
 
     /**
      * return the DataCart from persistent storage.  If it does not exist, create an empty one.
+     * @param id      the unique name for the cart
+     * @param store   the Storage object to use to persist the cart data.  If null and localStorage
+     *                   is defined, localStorage will be used; otherwise, the data will not be
+     *                   persisted.
      */
-    public static openCart(id: string, store: Storage = localStorage) : DataCart {
+    public static openCart(id: string, store: Storage = null) : DataCart {
         let data: DataCartLookup = <DataCartLookup>{};
         let md: string = null;
+        if (! store && typeof localStorage !== 'undefined')
+            store = localStorage;
         if (store) {
             data = parseCart(store.getItem(DataCart.storeKeyFor(id)));
             if (! data) 
