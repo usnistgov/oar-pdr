@@ -23,6 +23,8 @@ export const config : LPSConfig = {
         pdrHome:     "https://data.nist.gov/pdr/",
         pdrSearch:   "https://data.nist.gov/sdp/"
     },
+    mdAPI: "https://data.nist.gov/rmm/records/",
+    distService: "https://data.nist.gov/od/ds/",
     mode:        "dev",
     status:      "Dev Version",
     appVersion:  "v1.1.0",
@@ -30,7 +32,8 @@ export const config : LPSConfig = {
     editEnabled: false,
     gacode: "not-set",
     screenSizeBreakPoint: 1060,
-    bundleSizeAlert: 500000000
+    bundleSizeAlert: 500000000,
+    embedMetadata: "schema.org#Dataset"
 }
 
 export const testdata : {} = { }
