@@ -51,10 +51,10 @@ export function nerdm2schemaorg(nerdm: NerdmRes) : JSONObject {
         'schemaVersion': 'http://schema.org/version/10.0/', 
         'mainEntityOfPage': nerdm['landingPage'],
         'url': 'https://data.nist.gov/od/id/' + nerdm['ediid'],
-        'keywords': nerdm['keywords'] || [],
+        'keywords': nerdm['keyword'] || [],
         'publisher': nerdm['publisher']
     };
-    if (nerdm.doi) out['sameAs'] = nerdm.replace(/^doi:/, "https://doi.org/");
+    if (nerdm.doi) out['sameAs'] = nerdm.doi.replace(/^doi:/, "https://doi.org/");
     if (nerdm.accessLevel == "public") out['isAccessibleForFree'] = true;
     if (nerdm.topic) out.keywords.push(...nerdm.topic.map(t => t.tag));
 
@@ -133,7 +133,7 @@ export class MetadataEnvelope {
     public serialize() : string {
         if (typeof this.md === 'string')
             return this.md
-        return JSON.stringify(this.md);
+        return JSON.stringify(this.md, null, 2);
     }
 }
 
