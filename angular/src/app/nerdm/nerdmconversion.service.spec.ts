@@ -14,7 +14,16 @@ describe('convert functions', function() {
         expect(so.about).toEqual(testdata['test1']['@id']);
         expect(so.name).toEqual(testdata['test1']['title']);
         expect(so.publisher).toBeTruthy();
+        expect(so.publisher.name).toBe("National Institute of Standards and Technology");
+        expect(so.publisher['@type']).toEqual("Organization");
+        expect(so.maintainer).toBeTruthy();
+        expect(so.maintainer['@type']).toEqual("Person");
+        expect(so.maintainer['name']).toEqual("Patricia Flanagan");
+        expect(so.maintainer['email']).toEqual("patricia.flanagan@nist.gov");
         expect(so.citation).toBeTruthy();
+        expect(so.creator).toBeTruthy();
+        expect(so.creator.length).toEqual(1);
+        expect(so.creator[0]).toEqual(so.maintainer);
         expect(so.mainEntityOfPage).toEqual(testdata['test1']['landingPage']);
         expect(so.url).toEqual("https://data.nist.gov/od/id/test1");
     });

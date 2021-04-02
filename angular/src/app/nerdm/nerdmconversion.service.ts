@@ -50,23 +50,30 @@ export function nerdm2schemaorg(nerdm: NerdmRes) : JSONObject {
         'inLanguage': nerdm['language'],
         'schemaVersion': 'http://schema.org/version/10.0/', 
         'mainEntityOfPage': nerdm['landingPage'],
-        'url': 'https://data.nist.gov/od/id/' + nerdm['ediid'],
-        'keywords': nerdm['keyword'] || [],
-        'publisher': nerdm['publisher']
+        'url': 'https://data.nist.gov/od/id/' + nerdm['ediid']
     };
     if (nerdm.doi) out['sameAs'] = nerdm.doi.replace(/^doi:/, "https://doi.org/");
     if (nerdm.accessLevel == "public") out['isAccessibleForFree'] = true;
+
+    // add topics (and themes) to keywords
+    out['keywords'] = JSON.parse(JSON.stringify(nerdm['keyword']));
     if (nerdm.topic) out.keywords.push(...nerdm.topic.map(t => t.tag));
+
+    // publisher
+    if (nerdm['publisher']) {
+        out['publisher'] = JSON.parse(JSON.stringify(nerdm['publisher']));
+        out['publisher']['@type'] = "Organization";
+    }
 
     // contact point => maintainer
     if (nerdm['contactPoint']) {
         let person: JSONObject = { "@type": "Person" };
         person["name"] = nerdm['contactPoint'].fn;
 
-        if(nerdm['hasEmail']){
-            person["email"] = nerdm['hasEmail'];
-            let p = nerdm['hasEmail'].indexOf(':');
-            if (p >= 0) person["email"] = nerdm['hasEmail'].substring(p+1);
+        if(nerdm['contactPoint']['hasEmail']){
+            person["email"] = nerdm['contactPoint']['hasEmail'];
+            let p = nerdm['contactPoint']['hasEmail'].indexOf(':');
+            if (p >= 0) person["email"] = nerdm['contactPoint']['hasEmail'].substring(p+1);
         }
         out['maintainer'] = person;
     }
@@ -95,7 +102,13 @@ export function nerdm2schemaorg(nerdm: NerdmRes) : JSONObject {
             authors.push(auth);
         }
 
-        if (authors.length > 0) out['author'] = authors;
+        if (authors.length > 0) out['creator'] = authors;
+    }
+    else if (out['maintainer']) {
+        out['creator'] = [out['maintainer']];
+    }
+    else {
+        out['creator'] = [out['publisher']];
     }
 
     return out;
