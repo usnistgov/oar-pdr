@@ -33,7 +33,7 @@ export const config : LPSConfig = {
     gacode: "not-set",
     screenSizeBreakPoint: 1060,
     bundleSizeAlert: 500000000,
-    embedMetadata: "schema.org#Dataset"
+    embedMetadata: "schema.org"
 }
 
 export const testdata : {} = { }

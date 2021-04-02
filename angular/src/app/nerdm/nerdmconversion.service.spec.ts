@@ -35,16 +35,16 @@ describe('convert functions', function() {
 
     beforeEach(() => {
         let cfg = JSON.parse(JSON.stringify(config));
-        cfg['embedMetadata'] = [convert.SchemaLabel.SCHEMA_ORG_DATASET];
+        cfg['embedMetadata'] = [convert.SchemaLabel.SCHEMA_ORG];
         let appcfg = new AppConfig(cfg);
         svc = new convert.NerdmConversionService(appcfg);
     });
 
     it('constructor', () => {
-        expect(svc.supportedFormats()).toEqual([convert.SchemaLabel.SCHEMA_ORG_DATASET]);
-        expect(svc.supportsFormat(convert.SchemaLabel.SCHEMA_ORG_DATASET)).toBeTruthy();
+        expect(svc.supportedFormats()).toEqual([convert.SchemaLabel.SCHEMA_ORG]);
+        expect(svc.supportsFormat(convert.SchemaLabel.SCHEMA_ORG)).toBeTruthy();
         expect(svc.supportsFormat("scare")).toBeFalsy();
-        expect(svc.formatsToEmbed()).toEqual([convert.SchemaLabel.SCHEMA_ORG_DATASET]);
+        expect(svc.formatsToEmbed()).toEqual([convert.SchemaLabel.SCHEMA_ORG]);
 
         svc = new convert.NerdmConversionService(new AppConfig(config));  // embedMetadata not included
         expect(svc.formatsToEmbed()).toEqual([]);
@@ -52,15 +52,15 @@ describe('convert functions', function() {
 
     it('supportConversion', () => {
         svc.supportConversion("scare", (md: NerdmRes): string => { return "boo!"; }, "text/plain");
-        expect(svc.supportsFormat(convert.SchemaLabel.SCHEMA_ORG_DATASET)).toBeTruthy();
+        expect(svc.supportsFormat(convert.SchemaLabel.SCHEMA_ORG)).toBeTruthy();
         expect(svc.supportsFormat("scare")).toBeTruthy();
         expect(svc.supportsFormat("goob")).toBeFalsy();
     });
 
     it('convertTo()', () => {
-        let so = svc.convertTo(testdata['test1'], convert.SchemaLabel.SCHEMA_ORG_DATASET);
+        let so = svc.convertTo(testdata['test1'], convert.SchemaLabel.SCHEMA_ORG);
         expect(so.contentType).toEqual("application/ld+json");
-        expect(so.label).toEqual(convert.SchemaLabel.SCHEMA_ORG_DATASET);
+        expect(so.label).toEqual(convert.SchemaLabel.SCHEMA_ORG);
 
         expect(Object.keys(so.md).length).toBeGreaterThan(5);
         expect(so.md['@context']).toEqual("https://schema.org");
@@ -85,7 +85,7 @@ describe('convert functions', function() {
         svc.convertToEmbedFormats(testdata['test1']).subscribe({
             next(so) {
                 expect(so.contentType).toEqual("application/ld+json");
-                expect(so.label).toEqual(convert.SchemaLabel.SCHEMA_ORG_DATASET);
+                expect(so.label).toEqual(convert.SchemaLabel.SCHEMA_ORG);
                 expect(Object.keys(so.md).length).toBeGreaterThan(5);
                 expect(so.md['@context']).toEqual("https://schema.org");
                 expect(so.md['@type']).toEqual("Dataset");
@@ -104,7 +104,7 @@ describe('convert functions', function() {
                 }
                 else {
                     expect(so.contentType).toEqual("application/ld+json");
-                    expect(so.label).toEqual(convert.SchemaLabel.SCHEMA_ORG_DATASET);
+                    expect(so.label).toEqual(convert.SchemaLabel.SCHEMA_ORG);
                     expect(Object.keys(so.md).length).toBeGreaterThan(5);
                     expect(so.md['@context']).toEqual("https://schema.org");
                     expect(so.md['@type']).toEqual("Dataset");

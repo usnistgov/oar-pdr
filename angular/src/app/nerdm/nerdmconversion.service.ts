@@ -12,7 +12,7 @@ export class SchemaLabel {
     static readonly NERDM_RESOURCE = "NERDm#Resource";
 
     /** Schema.org JSON-LD schema, as harvested by Google */
-    static readonly SCHEMA_ORG_DATASET = "schema.org#Dataset";
+    static readonly SCHEMA_ORG = "schema.org";
 
 }
 
@@ -150,9 +150,9 @@ export class MetadataEnvelope {
     }
 }
 
-let _cvt_supported = [ SchemaLabel.SCHEMA_ORG_DATASET ];
+let _cvt_supported = [ SchemaLabel.SCHEMA_ORG ];
 let _cvt_defcvtrs = {};
-_cvt_defcvtrs[SchemaLabel.SCHEMA_ORG_DATASET] = [nerdm2schemaorg, "application/ld+json"];
+_cvt_defcvtrs[SchemaLabel.SCHEMA_ORG] = [nerdm2schemaorg, "application/ld+json"];
 
 /**
  * a service that converts NERDm metadata into other formats.  

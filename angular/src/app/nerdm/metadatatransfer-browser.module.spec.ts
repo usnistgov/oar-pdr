@@ -49,7 +49,7 @@ describe('initBrowserMetadataTransfer', function() {
         // not this (wrong id prefix)
         child = doc.createElement("script");
         child.setAttribute("type", "application/ld+json");
-        child.setAttribute("id", "schema.org#Dataset:gomer");
+        child.setAttribute("id", "schema.org:gomer");
         child.textContent = JSON.stringify({ config: {} });
         doc.body.appendChild(child);
 

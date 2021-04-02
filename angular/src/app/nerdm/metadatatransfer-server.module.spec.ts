@@ -25,7 +25,7 @@ describe('serializeMetadataTransferFactory', function() {
         });
 
         let cfg = JSON.parse(JSON.stringify(config));
-        cfg['embedMetadata'] = [SchemaLabel.SCHEMA_ORG_DATASET];
+        cfg['embedMetadata'] = [SchemaLabel.SCHEMA_ORG];
         appcfg = new AppConfig(cfg);
     });
 
@@ -92,9 +92,9 @@ describe('serializeMetadataTransferFactory', function() {
         expect(script.length).toEqual(1);
         script = script[0];
         expect(script).not.toBeNull();
-        expect(script.getAttribute("id")).toEqual("schema.org#Dataset:boring");
+        expect(script.getAttribute("id")).toEqual("schema.org:boring");
         expect(script.getAttribute("type")).toEqual("application/ld+json");
-        expect(script.getAttribute("class")).toEqual("structured-data schema.org Dataset");
+        expect(script.getAttribute("class")).toEqual("structured-data schema.org");
 
         el_content = JSON.parse(script.textContent);
         expect(el_content['@context']).toEqual("https://schema.org");
