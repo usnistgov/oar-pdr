@@ -8,6 +8,9 @@ import { NgModule, InjectionToken } from '@angular/core';
 import { DOCUMENT } from '@angular/platform-browser';
 
 import { MetadataTransfer } from './nerdm';
+import { SchemaLabel } from './nerdmconversion.service';
+
+const NERDM_MT_PREFIX = SchemaLabel.NERDM_RESOURCE+':';
 
 /**
  * the factory function for creating a browser-side MetadataTransfer instance
@@ -18,14 +21,16 @@ export function initBrowserMetadataTransfer(doc : Document) : MetadataTransfer {
 
     let att : string = null;
     let data : {}|null = null;
-    const scripts = doc.body.getElementsByTagName("script");
+    const scripts = doc.head.getElementsByTagName("script");
     for (let i=0; i < scripts.length; i++) {
         att = scripts[i].getAttribute("type");
-        if (!att || (att != "application/json"))
+        if (!att || (! att.includes("json")))
             continue;
         att = scripts[i].getAttribute("id");
-        if (!att || att.endsWith("-state"))  // TransferState; don't want this
+        if (! att.startsWith(NERDM_MT_PREFIX))
+            // We'll only load the NERDM record
             continue;
+        att = att.substring(NERDM_MT_PREFIX.length);
 
         // att = unescapeHTML(att);
         console.log("Found embedded information with id='"+att+"'");

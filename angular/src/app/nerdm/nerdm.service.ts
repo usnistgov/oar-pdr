@@ -11,8 +11,6 @@ import { NerdmRes, MetadataTransfer  } from './nerdm';
 import { IDNotFound } from '../errors/error';
 import * as ngenv from '../../environments/environment';
 
-export const NERDM_MT_PREFIX = "NERDm Resource:";
-
 /**
  * a service that will retrieve a NERDm record.  Its behavior will depend on the 
  * runtime context.
@@ -35,7 +33,7 @@ export class CachingMetadataService extends MetadataService {
 
     private del : MetadataService;
 
-    constructor(delegate : MetadataService, private cache? : MetadataTransfer) {
+    constructor(delegate : MetadataService, protected cache? : MetadataTransfer) {
         super();
         this.del = delegate;
         if (! this.cache)
@@ -147,7 +145,7 @@ export class TransferMetadataService extends MetadataService {
      * @param id   the identifier of the resource to load
      */
     getMetadata(id : string) : Observable<NerdmRes> {
-        return rxjs.of(this.mdtrx.get(NERDM_MT_PREFIX+id) as NerdmRes);
+        return rxjs.of(this.mdtrx.get(id) as NerdmRes);
     }
 }
 
@@ -229,14 +227,6 @@ export class TransmittingMetadataService extends CachingMetadataService {
 
     constructor(delegate : MetadataService, mdtrx : MetadataTransfer) {
         super(delegate, mdtrx);
-    }
-
-    queryCache(id : string) : NerdmRes {
-        return super.queryCache(NERDM_MT_PREFIX+id);
-    }
-
-    cacheRecord(id : string, data : NerdmRes) : void {
-        super.cacheRecord(NERDM_MT_PREFIX+id, data);
     }
 }
 

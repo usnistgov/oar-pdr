@@ -2,6 +2,9 @@ import * as mdt from './metadatatransfer-browser.module';
 import * as smdt from './metadatatransfer-server.module';
 import * as nrdsv from './nerdm.service';
 import { MetadataTransfer } from './nerdm';
+import { SchemaLabel } from './nerdmconversion.service';
+
+const NERDM_MT_PREFIX = SchemaLabel.NERDM_RESOURCE + ':';
 
 describe('initBrowserMetadataTransfer', function() {
 
@@ -18,11 +21,11 @@ describe('initBrowserMetadataTransfer', function() {
 
     it('extract single entry', function() {
         let child = doc.createElement("script");
-        child.setAttribute("type", "application/json");
-        child.setAttribute("id", "goober");
+        child.setAttribute("type", "application/ld+json");
+        child.setAttribute("id", NERDM_MT_PREFIX+"goober");
         child.textContent = JSON.stringify(data1);
-        doc.body.appendChild(child);
-        doc.body.appendChild(doc.createElement("p"));
+        doc.head.appendChild(child);
+        doc.head.appendChild(doc.createElement("rel"));
 
         mdtrx = mdt.initBrowserMetadataTransfer(doc);
         expect(mdtrx.get("goober")).toEqual(data1);
@@ -30,27 +33,36 @@ describe('initBrowserMetadataTransfer', function() {
     });
 
     it('extract multiple entries', function() {
+        // extract this
         let child = doc.createElement("script");
-        child.setAttribute("type", "application/json");
-        child.setAttribute("id", "goober");
+        child.setAttribute("type", "application/ld+json");
+        child.setAttribute("id", NERDM_MT_PREFIX+"goober");
         child.textContent = JSON.stringify(data1);
-        doc.body.appendChild(child);
-        
-        doc.body.appendChild(doc.createElement("p"));
+        doc.head.appendChild(child);
 
+        // not this (wrong content type)
         child = doc.createElement("script");
         child.setAttribute("type", "application/json");
-        child.setAttribute("id", "gomer");
-        child.textContent = JSON.stringify(data2);
-        doc.body.appendChild(child);
+        child.setAttribute("id", NERDM_MT_PREFIX+"fooey");
+        doc.head.appendChild(child);
 
-        doc.body.appendChild(doc.createElement("p"));
-
+        // not this (wrong id prefix)
         child = doc.createElement("script");
-        child.setAttribute("type", "application/json");
-        child.setAttribute("id", "myapp-state");
+        child.setAttribute("type", "application/ld+json");
+        child.setAttribute("id", "schema.org#Dataset:gomer");
         child.textContent = JSON.stringify({ config: {} });
         doc.body.appendChild(child);
+
+        doc.head.appendChild(doc.createElement("rel"));
+
+        // extract this, too
+        child = doc.createElement("script");
+        child.setAttribute("type", "application/ld+json");
+        child.setAttribute("id", NERDM_MT_PREFIX+"gomer");
+        child.textContent = JSON.stringify(data2);
+        doc.head.appendChild(child);
+
+        doc.head.appendChild(doc.createElement("rel"));
 
         mdtrx = mdt.initBrowserMetadataTransfer(doc);
         expect(mdtrx.get("goober")).toEqual(data1);
