@@ -19,6 +19,7 @@
     padding-top: 0;
     padding-bottom: 0;
     width:140px; 
+    margin: 0em .5em .5em 0em;
 }
 
 .btn {
@@ -29,39 +30,26 @@
 #ec-edit-btn {
     background-color:rgb(245, 198, 54);
     color:black;
-    border-color: rgb(245, 198, 54);
-    margin: 0em 1em .5em 0em;
-    width: 120px;
 }
 
 #ec-quited-btn {
     background-color:rgb(221, 172, 9);
     color:white;
-    border-color: rgb(221, 172, 9);
 }
 
 #ec-close-btn {
     background-color:green;
     color:white;
-    border-color: green;
-    margin: 0em 1em .5em 0em;
-    width: 120px;
 }
 
 #ec-discard-btn {
     background-color:rgb(94, 94, 94);
     color:white;
-    border-color: rgb(94, 94, 94);
-    margin: 0em 1em .5em 0em;
-    width: 120px;
 }
 
 #ec-preview-btn {
     background-color:rgb(9, 108, 221);
     color:white;
-    border-color: rgb(9, 108, 221);
-    margin: 0em .5em .5em 0em;
-    width: 120px;
 }
 
 #ec-info-btn {

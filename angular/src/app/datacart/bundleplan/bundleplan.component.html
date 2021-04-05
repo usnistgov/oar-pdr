@@ -1,0 +1,162 @@
+<!-- Display zip files if any -->
+<div *ngIf="inBrowser" class="full-span">
+    <!-- Show current task -->
+    <div *ngIf="showCurrentTask" style="text-align: center; margin:auto; width:100%;"><i class="faa faa-spinner faa-spin" style="color:#1E6BA1;" aria-hidden="true"></i><span style="padding-left: .5em;">{{currentTask}}</span></div>
+    <!-- header -->
+    <div *ngIf="zipData.length > 0" class="header-green" style="width: 100%;" data-toggle="tooltip" title="Zip Files">
+        <span class="span30">
+            <!-- Toggle button to show/hide zip files-->
+            <span (click)="showZipFiles = !showZipFiles">
+                <i *ngIf="!showZipFiles" class="faa faa-arrow-circle-down faa-1x icon-white"
+                    style="cursor: pointer;color: rgb(255, 255, 255);" data-toggle="tooltip" title="Expand All"></i>
+                <i *ngIf="showZipFiles" class="faa faa-arrow-circle-up faa-1x icon-white"
+                    style="cursor: pointer;color: rgb(255, 255, 255);" data-toggle="tooltip" title="Collapse All"></i>
+            </span>
+            Zip File Name
+        </span>
+        <span class="span15">Zip File Size</span>
+        Download Status
+        <span style="float: right; margin: .2em .5em 0 0;">Estimated downloading time
+        </span>
+    </div>
+    <!-- body -->
+    <div class="unhandled-files" *ngIf="showZipFiles">
+        <div [ngStyle]="{'width': '100%', 'background-color': getBackColor(i)}"
+            *ngFor="let zip of zipData; let i=index">
+            <span class="span30">{{zip.fileName}}</span>
+            <span class="span15">{{commonFunctionService.getSizeForDisplay(zip.bundleSize)}}</span>
+            <span class="span-end" style="width: 55%;">
+                <span *ngIf="zip.downloadStatus === 'downloading' && zip.downloadTime != null; else calculating"
+                    style="float: right;margin-right: 0.5em;">{{getDownloadTime(zip.downloadTime)}}
+                </span>
+                <ng-template #calculating>
+                    <span *ngIf="zip.downloadStatus === 'downloading' && zip.downloadTime == null"
+                        style="float: right;margin-right: 0.5em;">Calculating...</span>
+                </ng-template>
+                <div style="display:inline-block;" *ngIf="zip.downloadStatus === 'downloading';else not_downloading">
+                    <span style="display:inline-block;margin-left: 0.5em;width: 100px;">
+                        <ngb-progressbar type="info" [value]="zip.downloadProgress" textType="white" [showValue]="true"
+                            [striped]="true"></ngb-progressbar>
+                    </span>
+
+                    <span (click)="cancelDownloadZip(zip)" style="float: right;cursor: pointer;padding-left:5px;" data-toggle="tooltip" title="Cancel current download"><i class="faa faa-remove"></i></span>
+                </div>
+                <ng-template #not_downloading style="display:inline-block;">
+                    <div *ngIf="zip.downloadStatus != 'error'; else download_error" style="display:inline-block;"
+                        [ngStyle]="{'color':getDownloadStatusColor(zip.downloadStatus)}">
+                        <i [class]="getIconClass(zip.downloadStatus)" style="margin-top: 8px;"></i>
+                        {{getStatusForDisplay(zip.downloadStatus)}}
+                    </div>
+                    <ng-template #download_error>
+                        <div style="display:inline-block;margin-left: .5em;font-size: 0.8em; color: red; cursor: pointer;" (click)="openErrZipDetails($event,op5,zip) ">
+                            <i class="faa faa-warning" [ngStyle]="{'padding-right':'.5em', 'margin-top':'8px'}"></i>
+                            <u>{{getStatusForDisplay(zip.downloadStatus)}}</u>
+                        </div>
+                    </ng-template>
+                    <i *ngIf="zip.downloadStatus != null" class="faa faa-repeat"
+                        style="display: inline-block; margin-left: .5em; font-size: 0.8em; color: #1E6BA1; cursor: pointer;"
+                        data-toggle="tooltip" title="Retry" (click)="downloadOneZip(zip)"></i>
+                </ng-template>
+            </span>
+        </div>
+    </div>
+
+    <!-- Overall progress -->
+    <div *ngIf="zipData.length > 0 && overallStatus != null" style="background-color: rgb(170, 212, 189);">
+        <span class="span30">Overall progress</span>
+        <span class="span15">{{commonFunctionService.getSizeForDisplay(downloadService.totalBundleSize)}}</span>
+        <span class="span-end" style="width: 55%;">
+            <div style="display:inline-block;" *ngIf="overallStatus === 'downloading';else not_overall_downloading">
+                <span style="display:inline-block;margin-left: 0.5em;width: 100px;">
+                    <ngb-progressbar type="info" [value]="overallProgress" textType="white" [showValue]="true"
+                        [striped]="true"></ngb-progressbar>
+                </span>
+                <span (click)="cancelDownloadAllConfirmation()" style="float: right;cursor: pointer;padding-left:5px;" data-toggle="tooltip" title="Cancel all downloads"><i class="faa faa-remove"></i></span>
+            </div>
+            <ng-template #not_overall_downloading style="display:inline-block;">
+                <span *ngIf="overallStatus === 'complete';else other">
+                    Finished at: {{downloadEndTime | date:'shortTime'}}.
+                </span>
+                <ng-template #other>
+                    {{getStatusForDisplay(overallStatus)}}
+                </ng-template>
+                <span *ngIf="overallStatus === 'complete'" style="float: right;margin-right: 0.5em;">
+                    Download time: {{getDownloadTime(totalDownloadTime)}}
+                </span>
+            </ng-template>
+        </span>
+    </div>
+</div>
+
+<!-- Display bundle plan message details -->
+<div class="full-span"
+    *ngIf="inBrowser && (bundlePlanStatus == 'error' || bundlePlanStatus == 'internal error' || bundlePlanStatus === 'warnings')">
+    <div class="header-orange" data-toggle="tooltip" title="Bundle message details">
+        <span style="margin-left: .5em;" *ngIf="bundlePlanMessage" (click)="showMessage = !showMessage">
+            <i *ngIf="showMessage; else hideMessage" class="faa faa-arrow-circle-up faa-1x icon-white"
+                style="cursor: pointer;color: rgb(255, 255, 255);" data-toggle="tooltip" title="Collapse All"></i>
+            <ng-template #hideMessage>
+                <i class="faa faa-arrow-circle-down faa-1x icon-white"
+                    style="cursor: pointer;color: rgb(255, 255, 255);" data-toggle="tooltip" title="Expand All"></i>
+            </ng-template>
+        </span>
+        Message
+        <span
+            *ngIf="(bundlePlanStatus == 'error' || bundlePlanStatus == 'warnings') && bundlePlanStatus != 'internal error'"
+            style="float: right;font-weight: lighter; margin-right: .5em;">
+            For tech support, please email <a style="color: rgb(255, 248, 182);"
+                href="mailto:datasupport@nist.gov?subject={{emailSubject}}&body={{getEmailBody()}}"
+                (click)="gaService.gaTrackEvent('Email', $event, 'AskHelp', 'mailto:datasupport@nist.gov')">datasupport@nist.gov
+            </a>
+        </span>
+    </div>
+    <div *ngIf="showMessage">
+        <span *ngIf="bundlePlanStatus == 'internal error';else no_internal_error" [ngStyle]="{'color':messageColor}">
+            Ooops! There was a problem getting the data you need. Please contact us at <a
+                href="mailto:datasupport@nist.gov?subject={{emailSubject}}&body={{getEmailBody()}}"
+                (click)="gaService.gaTrackEvent('Email', $event, 'AskHelp', 'mailto:datasupport@nist.gov')">datasupport@nist.gov</a>
+            to report the problem. If possible, include the string "PDR: Error getting download plan" in your email
+            report.</span>
+        <ng-template #no_internal_error>
+            <div class="message-block" *ngFor="let msg of bundlePlanMessage; let i =index">
+                {{msg}}
+            </div>
+        </ng-template>
+    </div>
+</div>
+
+<!-- Popup dialog for download time info -->
+<p-overlayPanel class="fileDialog" #op5 [dismissable]="true" [showCloseIcon]="false"
+    [style]="{'display':'inline-block','position':'related','top':'80%','max-width':getDialogWidth(),'overflow-wrap': 'break-word'}"
+    appendToBody=true>
+    <div class="warning-overlay-title">
+        Message details
+    </div>
+
+    <table class="table">
+        <tbody>
+            <tr>
+                <th scope="row" style="width: 40%;">Zip file name</th>
+                <td>{{problemZip.fileName}}</td>
+            </tr>
+            <tr>
+                <th scope="row">Download URL</th>
+                <td>{{problemZip.downloadUrl}}</td>
+            </tr>
+            <tr>
+                <th scope="row">Size</th>
+                <td>{{problemZip.bundleSize}}</td>
+            </tr>
+            <tr>
+                <th scope="row">Error message</th>
+                <td>{{problemZip.downloadErrorMessage}}</td>
+            </tr>
+            <tr>
+                <th scope="row">Tech support</th>
+                <td><a href="mailto:datasupport@nist.gov?subject={{emailSubject}}&body={{getEmailBody()}}"
+                    (click)="gaService.gaTrackEvent('Email', $event, 'AskHelp', 'mailto:datasupport@nist.gov')">datasupport@nist.gov
+                </a></td>
+            </tr>
+        </tbody>
+    </table>
+</p-overlayPanel>

@@ -11,6 +11,8 @@ import { EditControlModule } from './editcontrol/editcontrol.module';
 import { ToolsModule } from './tools/tools.module';
 import { CitationModule } from './citation/citation.module';
 import { DoneComponent } from './done/done.component';
+import { DownloadstatusComponent } from './downloadstatus/downloadstatus.component';
+import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 
 /**
  * A module supporting the complete display of landing page content associated with 
@@ -24,10 +26,11 @@ import { DoneComponent } from './done/done.component';
         LandingModule,
         EditControlModule,
         ToolsModule,
-        CitationModule
+        CitationModule,
+        NgbModule
     ],
     declarations: [
-        LandingPageComponent, DoneComponent
+        LandingPageComponent, DoneComponent, DownloadstatusComponent
     ],
     providers: [
         MetadataUpdateService, DatePipe

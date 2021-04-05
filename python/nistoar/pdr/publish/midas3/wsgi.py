@@ -9,7 +9,7 @@ a framework-based implementation if any further capabilities are needed.
 import os, sys, logging, json, re
 from wsgiref.headers import Headers
 from cgi import parse_qs, escape as escape_qp
-from collections import OrderedDict
+from collections import OrderedDict, Mapping
 
 from .. import PublishSystem, PDRServerError
 from .service import (MIDAS3PublishingService, SIPDirectoryNotFound, IDNotFound,
@@ -137,17 +137,46 @@ class Handler(object):
         if self._env.get('HTTP_X_HTTP_METHOD_OVERRIDE'):
             self._meth = self._env.get('HTTP_X_HTTP_METHOD_OVERRIDE')
 
-    def send_error(self, code, message):
+    def send_error(self, code, message, content=None, contenttype=None):
         status = "{0} {1}".format(str(code), message)
-        self._start(status, [], sys.exc_info())
-        return []
 
-    def send_ok(self, message="OK", content=None, code=200):
-        status = "{0} {1}".format(str(code), message)
-        self._start(status, [], None)
         if content is not None:
-            return [content]
-        return []
+            if not isinstance(content, list):
+                content = [str(content)]
+            if not contenttype:
+                contenttype = "text/plain"
+        else:
+            content = []
+
+        hdrs = []
+        if contenttype:
+            hdrs = Headers([])
+            hdrs.add_header("Content-type", str(contenttype).encode("ISO-8859-1"))
+            hdrs = hdrs.items()
+
+        self._start(status, hdrs, sys.exc_info())
+
+        return content
+
+    def send_ok(self, message="OK", content=None, code=200, contenttype=None):
+        status = "{0} {1}".format(str(code), message)
+
+        if content is not None:
+            if not isinstance(content, list):
+                content = [str(content)]
+            if not contenttype:
+                contenttype = "text/plain"
+        else:
+            content = []
+
+        hdrs = []
+        if contenttype:
+            hdrs = Headers([])
+            hdrs.add_header("Content-type", str(contenttype).encode("ISO-8859-1"))
+            hdrs = hdrs.items()
+
+        self._start(status, hdrs, None)
+        return content
 
     def add_header(self, name, value):
         # Caution: HTTP does not support Unicode characters (see
@@ -286,7 +315,7 @@ class DraftHandler(Handler):
             if bodyin is None:
                 if self._reqrec:
                     self._reqrec.record()
-                return send_error(400, "Missing input POD document")
+                return self.send_error(400, "Missing input POD document")
             if log.isEnabledFor(logging.DEBUG) or self._reqrec:
                 body = bodyin.read()
                 pod = json.loads(body, object_pairs_hook=OrderedDict)
@@ -389,7 +418,7 @@ class LatestHandler(Handler):
             if bodyin is None:
                 if self._reqrec:
                     self._reqrec.record()
-                return send_error(400, "Missing input POD document")
+                return self.send_error(400, "Missing input POD document")
 
             if log.isEnabledFor(logging.DEBUG) or self._reqrec:
                 body = bodyin.read()
@@ -590,20 +619,49 @@ class PreserveHandler(Handler):
                 if steps[1].startswith("_") or steps[1].startswith(".") or \
                    self.badidre.search(steps[1]):
                     
-                    self.send_error(400, "Unsupported SIP identifier: "+path)
-                    return []
+                    return self.send_error(400, "Unsupported SIP identifier: "+path)
                 
                 return self.preserve_sip(path)
             else:
-                self.send_error(403, "PUT not supported on this resource")
+                return self.send_error(403, "PUT not supported on this resource")
         else:
             self.send_error(404, "SIP Type not supported")
             return ["{}"]
 
     def preserve_sip(self, sipid):
         out = {}
-        try: 
-            out = self._svc.preserve_new(sipid)
+        try:
+            bodyin = self._env.get('wsgi.input')
+            if bodyin is None:
+                if self._reqrec:
+                    self._reqrec.record()
+                return self.send_error(400, "Missing input POD document")
+
+            if log.isEnabledFor(logging.DEBUG) or self._reqrec:
+                body = bodyin.read()
+                pod = json.loads(body, object_pairs_hook=OrderedDict)
+            else:
+                pod = json.load(bodyin, object_pairs_hook=OrderedDict)
+            if self._reqrec:
+                self._reqrec.add_body_text(json.dumps(pod, indent=2)).record()
+
+        except (ValueError, TypeError) as ex:
+            if log.isEnabledFor(logging.DEBUG):
+                log.error("Failed to parse input: %s", str(ex))
+                log.debug("\n%s", body)
+            if self._reqrec:
+                self._reqrec.add_body_text(body).record()
+            return self.send_error(400, "Input not parseable as JSON",
+                                   "Input not parseable as JSON:\n"+str(ex))
+
+        if sipid != pod.get('identifier'):
+            log.warn("preservation request's EDI-ID does not match input POD")
+            return self.send_error(400, "Wrong POD record for ID",
+                                   "Wrong POD record for ID:\nidentifier=%s != %s" 
+                                   % (pod.get('identifier'), sipid))
+
+        try:
+            out = self._svc.preserve_new(pod)
 
             # FYI: detecting success or failure is handled through the
             # returned status object because the preservation service will
@@ -646,6 +704,11 @@ class PreserveHandler(Handler):
             })
             self.set_response(403, "Preservation for SIP was already requested "+
                               "(current status: "+ex.state+")")
+
+        except ValidationError as ex:
+            log.error("/preserve/midas/: Input is not a valid POD record:\n  "+str(ex))
+            return self.send_error(400, "Input is not a valid POD record",
+                                   "Input is not a valid POD record:\n"+str(ex))
 
         except PreservationStateError as ex:
             log.warn("Wrong AIP state for client request: "+str(ex))
@@ -700,7 +763,34 @@ class PreserveHandler(Handler):
     def update_sip(self, sipid):
         out = {}
         try: 
-            out = self._svc.preserve_update(sipid)
+            bodyin = self._env.get('wsgi.input')
+            if bodyin is None:
+                if self._reqrec:
+                    self._reqrec.record()
+                return self.send_error(400, "Missing input POD document")
+
+            if log.isEnabledFor(logging.DEBUG) or self._reqrec:
+                body = bodyin.read()
+                pod = json.loads(body, object_pairs_hook=OrderedDict)
+            else:
+                pod = json.load(bodyin, object_pairs_hook=OrderedDict)
+            if self._reqrec:
+                self._reqrec.add_body_text(json.dumps(pod, indent=2)).record()
+
+        except (ValueError, TypeError) as ex:
+            if log.isEnabledFor(logging.DEBUG):
+                log.error("Failed to parse input: %s", str(ex))
+                log.debug("\n%s", body)
+            if self._reqrec:
+                self._reqrec.add_body_text(body).record()
+            return self.send_error(400, "Input not parseable as JSON", str(ex))
+
+        if sipid != pod.get('identifier'):
+            log.warn("preservation request's EDI-ID does not match input POD")
+            return self.send_error(400, "Wrong POD record for ID")
+
+        try:
+            out = self._svc.preserve_update(pod)
         
             # FYI: detecting success or failure is handled through the
             # returned status object because the preservation service will
@@ -740,6 +830,10 @@ class PreserveHandler(Handler):
             self.set_response(403, "Preservation update for SIP was already "+
                               "requested (current status: "+ex.state+")")
             
+        except ValidationError as ex:
+            log.error("/preserve/midas/: Input is not a valid POD record:\n  "+str(ex))
+            return self.send_error(400, "Input is not a valid POD record", str(ex))
+
         except PreservationStateError as ex:
             log.warn("Wrong AIP state for client request: "+str(ex))
             out = json.dumps({

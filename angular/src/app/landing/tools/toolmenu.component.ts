@@ -6,7 +6,7 @@ import { Menu } from 'primeng/menu';
 import { AppConfig } from '../../config/config';
 import { NerdmRes } from '../../nerdm/nerdm';
 import { EditStatusService } from '../editcontrol/editstatus.service';
-
+import * as _ from 'lodash';
 
 /**
  * A component for displaying access to landing page tools in a menu.
@@ -134,33 +134,56 @@ export class ToolMenuComponent implements OnChanges {
         if (searchbase.slice(-1) != '/') searchbase += "/"
         let authlist = "";
         if (this.record['authors']) {
-            for (let a of this.record['authors']) {
-                if (a['fn'])
-                    authlist += ',"'+a.fn + '"';
+            for (let i = 0; i < this.record['authors'].length; i++) {
+                if(i > 0) authlist += ',';
+                let fn = this.record['authors'][i]['fn'];
+
+                if (fn != null && fn != undefined && fn.trim().indexOf(" ") > 0)
+                    authlist += '"'+ fn.trim() + '"';
+                else    
+                authlist += fn.trim();
             }
-            if (authlist.length > 0) authlist = authlist.slice(1);
         }
 
-        let contactlist = "";
+        let contactPoint = "";
         if (this.record['contactPoint'] && this.record['contactPoint'].fn) {
-          contactlist = this.record['contactPoint'].fn;
+            contactPoint = this.record['contactPoint'].fn.trim();
+            if(contactPoint.indexOf(" ") > 0){
+                contactPoint = '"' + contactPoint + '"';
+            }
         }
 
         // If authlist is empty, use contact point instead
+        let authorSearchString: string = "";
+        if(_.isEmpty(authlist)){
+            authorSearchString = "/#/search?q=contactPoint.fn%3D" + contactPoint;
+        }else{
+            authorSearchString = "/#/search?q=authors.fn%3D" + authlist + "%20OR%20contactPoint.fn%3D" + contactPoint;
+        }
+
         if (!authlist) {
             if (this.record['contactPoint'] && this.record['contactPoint'].fn) {
                 let splittedName = this.record['contactPoint'].fn.split(' ');
-                console.log("record.contactPoint", splittedName[splittedName.length - 1]);
                 authlist = splittedName[splittedName.length - 1];
-                contactlist = this.record['contactPoint'].fn;
             }
         }
+
+        let keywords: string[] = this.record['keyword'];
+        let keywordString: string = "";
+        for(let i = 0; i < keywords.length; i++){
+            if(i > 0) keywordString += ',';
+
+            if(keywords[i].trim().indexOf(" ") > 0)
+                keywordString += '"' + keywords[i].trim() + '"';
+            else
+            keywordString += keywords[i].trim();
+        }
+
         subitems = [
             this.createMenuItem("Similar Resources", "faa faa-external-link", null,
-                                searchbase + "#/search?q=" + this.record['keyword'] +
-                                "&key=&queryAdvSearch=yes"),
+                                searchbase + "#/search?q=keyword%3D" + keywordString),
             this.createMenuItem('Resources by Authors', "faa faa-external-link", "",
-            this.cfg.get("locations.pdrSearch", "/sdp/") + "/#/search?q=authors.fn%3D" + authlist + "%26logicalOp%3DOR%26contactPoint.fn%3D" + contactlist + "&key=&queryAdvSearch=yes")
+            this.cfg.get("locations.pdrSearch", "/sdp/") + authorSearchString)
         ];
         mitems.push({ label: "Find", items: subitems });
 

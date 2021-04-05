@@ -255,13 +255,37 @@ def find_schema_dir(config=None):
         # The code might be coming from an installation, build, or source
         # directory.
         import nistoar
-        basedir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(
-                                            os.path.abspath(nistoar.__file__)))))
-        candidates = [os.path.join(basedir, 'etc', 'schemas')]
-        candidates.append(os.path.join(basedir, 'oar-metadata', 'etc','schemas'))
-        basedir = os.path.dirname(basedir)
-        candidates.append(os.path.join(basedir, 'oar-metadata', 'etc','schemas'))
+        candidates = []
+
+        # assume library has been installed; library is rooted at {root}/lib/python,
+        basedir = os.path.dirname(                       # {root}
+                  os.path.dirname(                       # lib
+                  os.path.dirname(                       # python
+                  os.path.dirname(                       # nistoar
+                  os.path.abspath(nistoar.__file__)))))  # __init__.py
+
+        # and the schema dir is {root}/etc/schemas o
         candidates.append(os.path.join(basedir, 'etc', 'schemas'))
+
+        # assume library has been built within the source code directory at {root}/python/build/lib*
+        basedir = os.path.dirname(                       # {root}
+                  os.path.dirname(                       # python
+                  os.path.dirname(                       # build
+                  os.path.dirname(                       # lib.*
+                  os.path.dirname(                       # nistoar
+                  os.path.abspath(nistoar.__file__)))))) # __init__.py
+
+        # then the schema would be under {root}/oar-metadata/model
+        candidates.append(os.path.join(basedir, 'oar-metadata', 'model'))
+
+        # assume library being used from its source code location
+        basedir = os.path.dirname(                      # {root}
+                  os.path.dirname(                      # python
+                  os.path.dirname(                      # nistoar
+                  os.path.abspath(nistoar.__file__))))  # __init__.py
+
+        # and is under {root}/oar-metadata/model
+        candidates.append(os.path.join(basedir, 'oar-metadata', 'model'))
 
     for dir in candidates:
         if os.path.exists(dir):

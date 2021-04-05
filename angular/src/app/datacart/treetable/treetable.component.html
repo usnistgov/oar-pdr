@@ -1,0 +1,157 @@
+<div *ngIf="inBrowser" style="display: inline-block; margin: auto;">
+    <div class="full-span" style="width: 94%;">
+        <p-treeTable *ngIf="isVisible" [resizableColumns]="true" selectionMode="checkbox" [value]="dataFiles"
+            (onNodeSelect)="selectedDataFileCount(true)" (onNodeUnselect)="selectedDataFileCount(true)" [(selection)]="selectedData"
+            [style]="{'margin':'auto', 'padding-bottom':'3%', 'color':'black'}">
+            <ng-template pTemplate="header">
+                <tr>
+                    <th [ngStyle]="headerStyle(titleWidth)" ttResizableColumn>
+                        <span (click)="expandToLevel(dataFiles, !isExpanded, null)" style="padding-right:0.5em;">
+                            <i *ngIf="!isExpanded" class="faa faa-arrow-circle-down faa-1x icon-white"
+                                style="cursor: pointer;color: rgb(255, 255, 255);" data-toggle="tooltip"
+                                title="Expand All"></i>
+                            <i *ngIf="isExpanded" class="faa faa-arrow-circle-up faa-1x icon-white"
+                                style="cursor: pointer;color: rgb(255, 255, 255);" data-toggle="tooltip"
+                                title="Collapse All"></i>
+                        </span>
+                        <span (click)="showZipFilesNames = !showZipFilesNames" style="padding-right:0.5em;">
+                            <i *ngIf="!showZipFilesNames" class="faa faa-eye faa-1x icon-white"
+                                style="cursor: pointer;color: rgb(255, 255, 255);" data-toggle="tooltip"
+                                title="Show Zip Files"></i>
+                            <i *ngIf="showZipFilesNames" class="faa faa-eye-slash faa-1x icon-white"
+                                style="cursor: pointer;color: rgb(255, 255, 255);" data-toggle="tooltip"
+                                title="Hide Zip Files"></i>
+                        </span>
+                        Name
+                    </th>
+                    <th [ngStyle]="headerStyle(typeWidth)" ttResizableColumn>Media Type</th>
+                    <th [ngStyle]="headerStyle(sizeWidth)" ttResizableColumn>Size</th>
+                    <th [ngStyle]="headerStyle(actionWidth)" ttResizableColumn>
+                        <i class="faa faa-cloud-download" aria-hidden="true" data-toggle="tooltip" title="Actions"></i>
+                    </th>
+                    <th [ngStyle]="headerStyle(statusWidth)" ttResizableColumn>
+                        Status
+                        <div class="badge status-reset-button" (click)="clearDownloadStatus()" data-toggle="tooltip"
+                            title="Reset status">Reset</div>
+                    </th>
+                </tr>
+            </ng-template>
+            <ng-template let-rowNode let-rowData="rowData" let-i="rowIndex" pTemplate="body">
+                <tr style="background: #FFFFFF">
+                    <td [ngStyle]="bodyStyle(titleWidth)">
+                        <p-treeTableToggler [rowNode]="rowNode"></p-treeTableToggler>
+                        &nbsp;<p-treeTableCheckbox [value]="rowNode"></p-treeTableCheckbox>
+                        <span *ngIf="rowData.isLeaf">
+                            <a (click)="openDetails($event,rowData,op3) " style="color: #1471AE; cursor: pointer;"
+                                data-toggle="tooltip" title="Click for more details">
+                                {{rowData.resTitle}} </a>
+                        </span>
+                        <span *ngIf="!rowData.isLeaf">
+                            {{rowData.resTitle}}
+                        </span>
+                        <span *ngIf="showZipFilesNames" style="color:grey;margin-left: 1em;font-style: italic;">
+                            {{rowData.zipFile}}</span>
+                    </td>
+                    <td [ngStyle]="bodyStyle(typeWidth)">
+                        <span>{{rowData.mediatype}}</span>
+                    </td>
+                    <td [ngStyle]="bodyStyle(sizeWidth)">
+                        <span *ngIf="rowData.isLeaf">{{formatBytes(rowData.fileSize)}}</span>
+                    </td>
+                    <td [ngStyle]="bodyStyle(sizeWidth)">
+                        <div *ngIf="rowData.isLeaf;else space_holder" style="display:inline;color: green;" >
+                            <a *ngIf="rowData.downloadStatus != 'downloading'" href='{{rowData.downloadUrl}}' target='_blank' download="download" data-toggle="tooltip" 
+                                title="Download this file" aria-label="Download this file">
+                                <i class="faa faa-download"
+                                    aria-hidden="true" (click)="setFileDownloaded(rowData)"></i>
+                            </a>
+                            <a *ngIf="rowData.downloadStatus == 'downloading'" data-toggle="tooltip" 
+                            title="Download this file" aria-label="Download this file">
+                            <i class="faa faa-download"
+                                aria-hidden="true"></i>
+                        </a>
+                        </div>
+                        <ng-template #space_holder>
+                            <div style="display:inline;padding-right: 0.4em;">&nbsp;&nbsp;</div>
+                        </ng-template>
+                    </td>
+                    <td [ngStyle]="bodyStyle(statusWidth)">
+                        <div id="downloadstatus" *ngIf="rowData.isLeaf" style="display:inline;"
+                            [ngStyle]="{'color':getDownloadStatusColor(rowData.downloadStatus)}">
+                            <i [class]="getIconClass(rowData.downloadStatus)" style="margin-right: .5em;"
+                                aria-hidden="true" data-toggle="tooltip" title="{{rowData.downloadStatus}}"></i>
+                            <p-progressSpinner *ngIf="rowData.downloadStatus == 'downloading'"
+                                [style]="{width: '12px', height: '12px', 'margin-right': '.5em'}"></p-progressSpinner>
+                            <span
+                                *ngIf="rowData.downloadStatus == 'error' || rowData.downloadStatus == 'failed'; else normal"
+                                style="cursor: pointer;"
+                                (click)="openDetails($event,op4,rowData) "><u>{{getStatusForDisplay(rowData.downloadStatus)}}</u></span>
+                            <ng-template #normal>
+                                <span>{{getStatusForDisplay(rowData.downloadStatus)}}</span>
+                            </ng-template>
+                        </div>
+                    </td>
+                </tr>
+            </ng-template>
+            <ng-template pTemplate="emptymessage">
+                <tr>
+                    <td align="center" colspan="3">
+                        No records found
+                    </td>
+                </tr>
+            </ng-template>
+        </p-treeTable>
+    </div>
+</div>
+
+<!-- Popup dialog for file details -->
+<p-overlayPanel class="fileDialog" #op3 [dismissable]="true" [showCloseIcon]="true"
+    [style]="{'display':'inline-block','position':'related','left':'50%','top':'80%'}" appendToBody=true>
+    <div class="filecard" [ngStyle]="{'max-width':getDialogWidth()}">
+        <div class="overlay-title">
+            File details
+        </div>
+        <div class="ui-g filesection">
+            <div *ngIf="fileNode" class="ui-g-12 ui-md-12 ui-lg-12 ui-sm-10">
+                <span class="font8" style="color:grey">
+                    <span *ngIf="fileNode.filetype == 'nrdp:DataFile' ">Selected File</span>
+                    <span *ngIf="fileNode.filetype == 'nrdp:ChecksumFile' ">Selected Checksum File</span>
+                    <span *ngIf="fileNode.filetype == 'nrdp:Subcollection'">Selected SubCollection </span>
+                    <br>
+                </span>
+                <span class="font14">{{ fileNode ? fileNode.resTitle : '' }}</span>
+                <span class="font8" style="color:grey">
+                    <br><b>Type:</b>
+                    <span style="margin-left:0.5em;" class="textstyle1">{{ fileNode.mediatype ? fileNode.mediatype : 'Not
+            Available'}} </span>
+                </span>
+                <span class="font8" style="margin-left: 2.5rem">
+                    Size:
+                    <span *ngIf="fileNode.size" class="textstyle1">{{ formatBytes(fileNode.size) }} </span>
+                    <span *ngIf="!fileNode.size" class="textstyle1"><i>Not Available</i></span>
+                </span>
+                <br><span class="font10"><b>Description:</b> </span>
+                <div class="well filedesc">
+                    <span *ngIf="!fileNode.description"><i>No Description Available</i></span>
+                    <span *ngIf="fileNode.description">{{ fileNode.description }} </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</p-overlayPanel>
+
+<!-- Popup dialog for download details -->
+<p-overlayPanel class="fileDialog" #op4 [dismissable]="true" [showCloseIcon]="false"
+    [style]="{'display':'inline-block','position':'related','left':'50%','top':'80%','max-width':'400px'}"
+    appendToBody=true>
+    <div class="filecard">
+        <div class="ui-g filesection">
+            <div *ngIf="fileNode" class="ui-g-12 ui-md-12 ui-lg-12 ui-sm-10">
+                <div class="warning-overlay-title">Message details</div>
+                <div class="long-text">File path: {{fileNode.filePath}}</div>
+                <div class="long-text">Download URL: {{fileNode.downloadUrl}}</div>
+                <div class="long-text">Message: {{fileNode.message}}</div>
+            </div>
+        </div>
+    </div>
+</p-overlayPanel>

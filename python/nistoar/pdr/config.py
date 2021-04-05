@@ -84,6 +84,7 @@ _log_levels_byname = {
     "ERROR":    logging.ERROR,
     "CRITICAL": logging.CRITICAL
 }
+NORMAL = _log_levels_byname["NORMAL"]
 
 def configure_log(logfile=None, level=None, format=None, config=None,
                   addstderr=False):

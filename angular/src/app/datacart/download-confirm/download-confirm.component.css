@@ -1,25 +1,25 @@
 #btn-download {
-    /* width:200px;  */
+    width:200px; 
     background-color:green;
     color:white;
     margin-right: 1em;
-    /* white-space: nowrap; */
 }
 
 #btn-cancel {
+    width:200px;
     background-color:rgb(94, 94, 94);
     color:white;
     border-color: grey;
-    margin-right: 3%;
+    margin-right: 1%;
 }
 
-.control-btns {
-    width: 94%;
+.control-buttons {
+    width: 98%;
     height: 3em; 
     color:white;
     margin: 1em 0em;
-    /* border: 1px solid green; */
     border-top-style: 1px solid grey;
+    text-align: right; 
 }
 
 .span50 {

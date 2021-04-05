@@ -314,7 +314,7 @@ class UpdatePrepper(object):
         """
         create an updatable metadata bag for the purposes of creating a new 
         version of the dataset.   If this dataset has been through the 
-        preservation service before, it will be built form the latest headbag;
+        preservation service before, it will be built from the latest headbag;
         otherwise, it will be created from its latest public NERDm record.  
 
         :param str destbag:  the full path to the root directory of the metadata 

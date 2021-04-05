@@ -1,11 +1,13 @@
-import { Component, ElementRef } from '@angular/core';
+import { Component, ElementRef, PLATFORM_ID, Inject } from '@angular/core';
 import { AppConfig } from '../config/config';
 import { CartService } from '../datacart/cart.service';
-import { CartEntity } from '../datacart/cart.entity';
 import { Router } from '@angular/router';
 import { NotificationService } from '../shared/notification-service/notification.service';
 import { EditStatusService } from '../landing/editcontrol/editstatus.service';
 import { LandingConstants } from '../landing/constants';
+import { CartConstants } from '../datacart/cartconstants';
+import { DataCart, DataCartItem } from '../datacart/cart';
+import { isPlatformBrowser } from '@angular/common';
 
 /**
  * A Component that serves as the header of the landing page.  
@@ -28,6 +30,7 @@ import { LandingConstants } from '../landing/constants';
 })
 export class HeadbarComponent {
 
+    inBrowser: boolean = false;
     layoutCompact: boolean = true;
     layoutMode: string = 'horizontal';
     searchLink: string = "";
@@ -38,6 +41,9 @@ export class HeadbarComponent {
     editMode: string;
     contactLink: string = "";
     public EDIT_MODES: any;
+    public CART_CONSTANTS: any = CartConstants.cartConst;
+    generalDataCart: DataCart;
+    globalCartUrl: string = "/datacart/" + this.CART_CONSTANTS.GLOBAL_CART_NAME;
 
     constructor(
         private el: ElementRef,
@@ -45,16 +51,19 @@ export class HeadbarComponent {
         public cartService: CartService,
         private router: Router,
         private notificationService: NotificationService,
-        public editstatsvc: EditStatusService)
+        public editstatsvc: EditStatusService,
+        @Inject(PLATFORM_ID) private platformId: Object)
     {
+        this.inBrowser = isPlatformBrowser(platformId);
         if (!(cfg instanceof AppConfig))
             throw new Error("HeadbarComponent: Wrong config type provided: " + cfg);
         this.searchLink = cfg.get("locations.pdrSearch", "/sdp/");
-        this.contactLink = cfg.get("locations.pdrSearch", "/sdp/") + "#/help/app-contact-us";
+        this.contactLink = cfg.get("locations.pdrSearch", "/sdp/") + "#/help/contactus";
         this.status = cfg.get("status", "");
         this.appVersion = cfg.get("appVersion", "");
         this.editEnabled = cfg.get("editEnabled", "");
-        this.cartService.watchStorage().subscribe(value => {
+
+        this.cartService.watchCartLength().subscribe(value => {
             this.cartLength = value;
         });
         this.EDIT_MODES = LandingConstants.editModes;
@@ -64,12 +73,26 @@ export class HeadbarComponent {
     *   init
     */
     ngOnInit() {
-        this.cartLength = this.cartService.getCartSize();
-        this.editMode = this.EDIT_MODES.VIEWONLY_MODE;
+        if(this.inBrowser){
+            this.generalDataCart = DataCart.openCart(this.CART_CONSTANTS.GLOBAL_CART_NAME);
+            this.cartLength = this.generalDataCart.size();
 
-        this.editstatsvc.watchEditMode((editMode) => {
-          this.editMode = editMode;
-        });
+            // this.cartLength = this.cartService.getCartSize();
+            this.editMode = this.EDIT_MODES.VIEWONLY_MODE;
+
+            this.editstatsvc.watchEditMode((editMode) => {
+            this.editMode = editMode;
+            });
+
+            window.addEventListener("storage", this.cartChanged.bind(this));
+        }
+    }
+
+    cartChanged(ev){
+        if (ev.key == this.generalDataCart.getKey()) {
+            this.generalDataCart = DataCart.openCart(this.CART_CONSTANTS.GLOBAL_CART_NAME);
+            this.cartLength = this.generalDataCart.size();
+        }
     }
 
     /**
@@ -77,14 +100,6 @@ export class HeadbarComponent {
      */
     loggedIn() {
         return Boolean(this.editstatsvc.userID);
-    }
-
-    /**
-     * ensure that the data cart display is up to date
-     */
-    updateCartStatus() {
-        this.cartService.updateCartDisplayStatus(true);
-        this.cartService.setCurrentCart('cart');
     }
 
     /*
