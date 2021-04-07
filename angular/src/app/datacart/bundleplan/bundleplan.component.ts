@@ -291,6 +291,7 @@ export class BundleplanComponent implements OnInit {
         
         this.bundlePlanRef = this.downloadService.getBundlePlan(bundleBaseName, this.downloadFiles).subscribe(
             blob => {
+                console.log(JSON.stringify(blob, null, 2));
                 this.bundlePlanStatus = blob.status.toLowerCase();
                 this.bundlePlanMessage = blob.messages;
                 this.bundlePlanUnhandledFiles = blob.notIncluded;
@@ -316,11 +317,8 @@ export class BundleplanComponent implements OnInit {
                     this.bundleplan = blob;
                     this.downloadService.setTotalBundleSize(blob.size);
 
-                    let bundlePlan: any[] = blob.bundleNameFilePathUrl;
-                    let downloadUrl: any = this.distApi + blob.postEachTo;
-
-                    for (let bundle of bundlePlan) {
-                        this.zipData.push({ "fileName": bundle.bundleName, "downloadProgress": 0, "downloadStatus": null, "downloadInstance": null, "bundle": bundle, "downloadUrl": downloadUrl, "downloadErrorMessage": "","bundleSize": bundle.bundleSize, 'downloadTime': null });
+                    for (let bundle of blob.bundleNameFilePathUrl) {
+                        this.zipData.push({ "fileName": bundle.bundleName, "downloadProgress": 0, "downloadStatus": null, "downloadInstance": null, "bundle": bundle, "downloadUrl": blob.postEachTo, "downloadErrorMessage": "","bundleSize": bundle.bundleSize, 'downloadTime': null });
                     }
 
                     let ngbModalOptions: NgbModalOptions = {
