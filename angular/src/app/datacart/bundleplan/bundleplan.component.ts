@@ -469,7 +469,7 @@ export class BundleplanComponent implements OnInit {
         if (! this.downloadFiles)
             return;
         for (let dfile of this.downloadFiles) 
-            this.dataCart.setDownloadStatus(dfile.data.resId, dfile.data.resFilePath, DownloadStatus.NO_STATUS,
+            this.dataCart.setDownloadStatus(dfile.resId, dfile.filePath, DownloadStatus.NO_STATUS,
                                             false, { zipFile: '', message: '' });
     }
 
