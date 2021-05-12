@@ -120,9 +120,9 @@ import { DatacartModule } from './datacart/datacart.module';
     ConfirmationDialogService,
     NotificationService,
     DatePipe,
-    UserMessageService,  
+    UserMessageService 
     // provider used to create fake backend
-    fakeBackendProvider
+    // fakeBackendProvider
   ],
   entryComponents: [
     SearchTopicsComponent, 

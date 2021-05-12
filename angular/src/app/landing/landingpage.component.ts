@@ -171,6 +171,9 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
                 //   this.router.navigateByUrl("/not-found/" + this.reqId, { skipLocationChange: true });
             }
             else{
+                // Get metrics 
+                this.getMetrics();
+
                 // proceed with rendering of the component
                 this.useMetadata();
 
