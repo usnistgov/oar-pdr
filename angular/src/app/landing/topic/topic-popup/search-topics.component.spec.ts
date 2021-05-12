@@ -11,7 +11,7 @@ import { AppConfig } from '../../../config/config';
 import { AngularEnvironmentConfigService } from '../../../config/config.service';
 import { TransferState } from '@angular/platform-browser';
 import { ToastrModule } from 'ngx-toastr';
-import { HttpClientModule } from '@angular/common/http';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 import { UserMessageService } from '../../../frame/usermessage.service';
 
@@ -38,7 +38,7 @@ describe('SearchTopicsComponent', () => {
 
         TestBed.configureTestingModule({
             declarations: [SearchTopicsComponent],
-            imports: [FormsModule, DataTableModule, TreeModule, HttpClientModule, RouterTestingModule],
+            imports: [FormsModule, DataTableModule, TreeModule, HttpClientTestingModule, RouterTestingModule],
             schemas: [NO_ERRORS_SCHEMA],
             providers: [
                 NgbActiveModal,

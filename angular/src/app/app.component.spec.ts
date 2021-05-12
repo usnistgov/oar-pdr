@@ -12,7 +12,7 @@ import { TransferState, StateKey } from '@angular/platform-browser';
 import { AppConfig } from './config/config';
 import { AngularEnvironmentConfigService } from './config/config.service';
 import { CartService } from './datacart/cart.service';
-import { HttpClientModule, HttpClient } from '@angular/common/http';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { ToastrModule } from 'ngx-toastr';
 
 describe('AppComponent', () => {
@@ -28,7 +28,7 @@ describe('AppComponent', () => {
             declarations: [
                 AppComponent
             ], providers: [GoogleAnalyticsService, CartService, { provide: AppConfig, useValue: cfg }]
-            , imports: [RouterTestingModule, FrameModule, ConfigModule, BrowserTransferStateModule, BrowserModule, HttpClientModule, ToastrModule.forRoot()],
+            , imports: [RouterTestingModule, FrameModule, ConfigModule, BrowserTransferStateModule, BrowserModule, HttpClientTestingModule, ToastrModule.forRoot()],
         }).compileComponents();
     }));
     it('should create the app', async(() => {

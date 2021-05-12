@@ -4,7 +4,6 @@ import { FormsModule } from '@angular/forms';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { SearchService } from '../../../shared/search-service/index';
-// import { HttpClient, HttpHeaders } from '@angular/common/http'; 
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 import { ConfigModule } from '../../../config/config.module';

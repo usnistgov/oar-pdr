@@ -2,8 +2,7 @@ import { async, inject, TestBed } from '@angular/core/testing';
 import { AppConfig } from '../../config/config';
 import { MetricsService } from './metrics.service';
 import { AngularEnvironmentConfigService } from '../../config/config.service';
-import { HttpModule, Http, XHRBackend, Response, ResponseOptions } from '@angular/http';
-import { HttpClientModule } from '@angular/common/http';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 import { TransferState } from '@angular/platform-browser';
 
@@ -19,7 +18,7 @@ describe('MetricsService', () => {
         cfg.appVersion = "2.test";
 
         TestBed.configureTestingModule({
-        imports: [HttpModule, RouterTestingModule, HttpClientModule],
+        imports: [RouterTestingModule, HttpClientTestingModule],
         providers: [
             { provide: AppConfig, useValue: cfg }
         ]

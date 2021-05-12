@@ -3,7 +3,7 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { TransferState } from '@angular/platform-browser';
 import { Title }    from '@angular/platform-browser';
 import { ActivatedRoute, Router, Routes } from '@angular/router';
-import { HttpClientModule } from '@angular/common/http';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { ModalService } from '../shared/modal-service';
 import { ToastrModule } from 'ngx-toastr';
@@ -61,7 +61,7 @@ describe('LandingComponent', () => {
     let setupComponent = function() {
         TestBed.configureTestingModule({
             imports: [
-                HttpClientModule, BrowserAnimationsModule, LandingModule,
+                HttpClientTestingModule, BrowserAnimationsModule, LandingModule,
                 RouterTestingModule.withRoutes(routes),
                 ToastrModule.forRoot({
                     toastClass: 'toast toast-bootstrap-compatibility-fix'
