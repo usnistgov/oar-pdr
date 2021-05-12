@@ -1,0 +1,42 @@
+.d3-chart {
+    width: 100%;
+    /* height: 380px; */
+    height: 27vh;
+    overflow-y: scroll
+}
+  
+.d3-chart .axis path,
+.d3-chart .axis line {
+    stroke: #999;
+}
+
+.d3-chart .axis text {
+    fill: #999;
+}
+
+line#limit {
+    stroke: #FED966;
+    stroke-width: 3;
+    stroke-dasharray: 3 6;
+}
+
+text .value {
+    font-size: 8px;
+    fill: #000;
+}
+
+.toolTip {
+	position: absolute;
+    display: none;
+    z-index: 10;
+    min-width: 80px;
+    height: auto;
+    /* background: none repeat scroll 0 0 #ffffff; */
+    background: rgba(0,0,0,0.6);
+    /* border: 1px solid #666666; */
+    border-radius: 4px;		
+    color: #fff;
+    text-align: center;
+}
+
+.axis { font: 14px sans-serif; }

@@ -7,6 +7,8 @@ import { AppConfig } from '../../config/config';
 import { NerdmRes } from '../../nerdm/nerdm';
 import { EditStatusService } from '../editcontrol/editstatus.service';
 import * as _ from 'lodash';
+import { RecordLevelMetrics } from '../../metrics/metrics';
+import { CommonFunctionService } from '../../shared/common-function/common-function.service';
 
 /**
  * A component for displaying access to landing page tools in a menu.
@@ -30,6 +32,12 @@ export class ToolMenuComponent implements OnChanges {
     // the resource record metadata that the tool menu data is drawn from
     @Input() record : NerdmRes|null = null;
 
+    // Record level metrics data
+    @Input() recordLevelMetrics : RecordLevelMetrics|null = new RecordLevelMetrics();
+
+    // Record level metrics data
+    @Input() metricsUrl : string|null = "";
+
     // true if this menu should appear as a popup
     @Input() isPopup : boolean = false;
 
@@ -52,6 +60,7 @@ export class ToolMenuComponent implements OnChanges {
      */
     constructor(
         private cfg : AppConfig,
+        public commonFunctionService: CommonFunctionService,
         public edstatsvc: EditStatusService,) {  }
 
     /**
@@ -186,6 +195,23 @@ export class ToolMenuComponent implements OnChanges {
             this.cfg.get("locations.pdrSearch", "/sdp/") + authorSearchString)
         ];
         mitems.push({ label: "Find", items: subitems });
+
+        // Dataset Metrics
+        let totalDownload = this.recordLevelMetrics.DataSetMetrics[0] != undefined? this.recordLevelMetrics.DataSetMetrics[0].success_get : 0;
+
+        let totalUsers = this.recordLevelMetrics.DataSetMetrics[0] != undefined? this.recordLevelMetrics.DataSetMetrics[0].number_users : 0;
+
+        let totalDownloadSize = this.recordLevelMetrics.DataSetMetrics[0] != undefined?
+            this.commonFunctionService.formatBytes(this.recordLevelMetrics.DataSetMetrics[0].total_size, 2) : 0;
+
+        subitems = [
+            this.createMenuItem('• Total # of downloads: ' + totalDownload, null,null, null),
+            this.createMenuItem('• Total users: ' + totalUsers, null,null, null),
+            this.createMenuItem('• Total download size: ' + totalDownloadSize, null,null, null),
+            this.createMenuItem('More ...', null,null, this.metricsUrl)
+        ];
+
+        mitems.push({ label: "Dataset Metrics", items: subitems });
 
         this.items = mitems;
     }

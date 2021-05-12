@@ -35,6 +35,7 @@ import { AppRoutingModule } from './app-routing.module';
 import { DataTableModule } from 'primeng/primeng';
 import { ContenteditableModel } from './directives/contenteditable-model.directive';
 import { LandingModule } from './landing/landing.module';
+import { MetricsModule } from './metrics/metrics.module';
 
 import { ErrorComponent, UserErrorComponent } from './landing/error.component';
 import { ModalComponent } from './directives';
@@ -87,6 +88,7 @@ import { DatacartModule } from './datacart/datacart.module';
       AppRoutingModule,
       LandingModule,
       DatacartModule,
+      MetricsModule,
       FragmentPolyfillModule.forRoot({
           smooth: true
       }),
@@ -120,7 +122,7 @@ import { DatacartModule } from './datacart/datacart.module';
     DatePipe,
     UserMessageService,  
     // provider used to create fake backend
-    // fakeBackendProvider
+    fakeBackendProvider
   ],
   entryComponents: [
     SearchTopicsComponent, 

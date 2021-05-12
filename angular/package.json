@@ -41,6 +41,7 @@
     "bootstrap": "^4.3.1",
     "classlist.js": "^1.1.20150312",
     "core-js": "^2.4.1",
+    "d3": "^5.7.0",
     "express": "^4.15.2",
     "file-saver": "^2.0.0",
     "ngx-filesaver": "^2.2.0",
@@ -53,7 +54,8 @@
     "rxjs": "6.3.3",
     "rxjs-compat": "6.3.3",
     "webpack": "^4.12.2",
-    "zone.js": "^0.8.26"
+    "zone.js": "^0.8.26",
+    "save-svg-as-png": "^1.4.17"
   },
   "devDependencies": {
     "@angular-devkit/build-angular": "0.13.8",

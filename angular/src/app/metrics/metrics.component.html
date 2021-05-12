@@ -1,0 +1,127 @@
+<!-- Top banner -->
+<div class="ui-g top-banner" [ngStyle]="{ 'background-image': 'url(' + imageURL + ')'}">
+    <div class="inner-top-banner">
+        <span class="top-banner-text top-label">
+            <i class="faa faa-bar-chart faa-lg" style="padding-right: .5em;text-shadow: 1px 1px 2px darkgrey;"></i><label>Dataset Metrics</label>
+        </span>
+        <!-- <span style="width: 100%;border: 1px solid red;padding-top: 2em;"> -->
+            <button (click)="saveMetricsAsImage()" pButton [ngStyle]="{'width':'150px', 'height':'35px', 'float':'right', 'background-color':'green','margin-top':'1em', 'margin-right':'1.5em'}">
+                Download Graphics
+            </button>
+            <button (click)="saveMetrics()" pButton [ngStyle]="{'width':'150px', 'height':'35px', 'float':'right', 'background-color':'green', 'margin-right':'0.5em','margin-top':'1em'}">
+                Download Metrics
+            </button>
+        <!-- </span> -->
+    </div>
+</div>
+
+<div style="text-align: center; margin-bottom: 1em;">
+    <!-- Dataset title -->
+    <div style="padding-top: 1em;color: #12659c;"><h3>{{datasetTitle}}</h3></div>
+
+    <!-- Metrics details -->
+    <div class="grid-container">
+        <div class="child min-height-300" style="position: relative;">
+            <div class="dataset-summary-title"><h4 style="color: #fff;">Dataset Summary</h4></div>
+            <div *ngIf="firstTimeLogged != ''" style="width: 95%; text-align: center; margin: 0em auto 1.5em auto; font-size: larger;border-bottom: 1px solid lightgray;">Since {{firstTimeLogged}}</div>
+
+            <div class="left-side-data">
+                <div class="min-height-20">
+                    <span class="float-left">Total file downloads</span>
+                    <span class="float-right">{{recordLevelTotalDownloads}}</span>
+                </div>
+                <div style="clear: both;"></div>
+                <div class="min-height-20">
+                    <span class="float-left">Total dataset downloads</span>
+                    <span class="float-right">{{TotalDatasetDownloads}}</span>
+                </div>
+                <div style="clear: both;"></div>
+                <div class="min-height-20">
+                    <span class="float-left">Total bytes downloaded</span>
+                    <span class="float-right">{{totalDownloadSize}}</span>
+                </div>
+                <div style="clear: both;"></div>
+                <div class="min-height-20">
+                    <span class="float-left">Total unique users</span>
+                    <span class="float-right">{{TotalUniqueUsers}}</span>
+                </div>
+                <div style="clear: both;"></div>
+                <div class="min-height-20">
+                    <span class="float-left">Last download time</span>
+                    <span class="float-right">{{lastDownloadDate}}</span>
+                </div>
+                <div style="clear: both;"></div>
+            </div>
+
+        </div>
+        <div class="child min-height-300">
+            <div class="dataset-summary-title"><h4 style="color: #fff;">File Details</h4></div>
+            <div *ngIf="!noChartData">
+                <app-horizontal-barchart *ngIf="chartData" 
+                    [inputdata]="chartData" 
+                    [chart_title]=""
+                    [xAxisLabel]="xAxisLabel"
+                    [yAxisLabel]="yAxisLabel">
+
+                </app-horizontal-barchart>
+            </div>
+            <div *ngIf="noChartData" style="margin-top: 3em; font-size: larger;">
+                No metrics data available.
+            </div>
+        </div>
+
+        <!-- <div style="position: absolute; bottom: 20px; right: 20px;"> -->
+        <!-- <div style="clear: both;"></div>
+        <div style="width: 100%;">
+            <button (click)="saveMetricsAsImage()" pButton [ngStyle]="{'width':'150px', 'height':'35px', 'float':'right', 'background-color':'green'}">
+                Download Graphics
+            </button>
+            <button (click)="saveMetrics()" pButton [ngStyle]="{'width':'150px', 'height':'35px', 'float':'right', 'background-color':'green', 'margin-right':'0.5em'}">
+                Download Metrics
+            </button>
+        </div> -->
+    </div>
+</div>
+
+<!-- Display tree table -->
+<div class="flex-container" style="margin: 1em auto; width: 90%;max-height:420px;height: auto;">
+    <p-treeTable *ngIf="visible" [value]="files" [columns]="cols" selectionMode="single" [style]="{'max-height':'400px','overflow':'auto'}" stickyHeader="true" stickyTopAt=".layout-topbar"
+        [resizableColumns]="true" sortField="name">
+        <ng-template pTemplate="header" let-columns>
+            <tr>
+                <th *ngFor="let col of columns" [style.width]="col.width" [style.font-size]="fontSize"
+                    ttResizableColumn>
+                    <span *ngIf="col.header == 'Name'">
+                        <span (click)="expandToLevel(files, !isExpanded, 0, null)"
+                            style="padding-right:0.5em;">
+                            <i *ngIf="!isExpanded" class="faa faa-arrow-circle-down faa-1x icon-white"
+                                style="cursor: pointer;color: rgb(255, 255, 255);" data-toggle="tooltip"
+                                title="Expand All"></i>
+                            <i *ngIf="isExpanded" class="faa faa-arrow-circle-up faa-1x icon-white"
+                                style="cursor: pointer;color: rgb(255, 255, 255);" data-toggle="tooltip"
+                                title="Collapse All"></i>
+                        </span>
+                    </span>
+                    {{col.header}}
+                </th>
+            </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-rowNode let-rowData="rowData" let-columns="columns">
+            <tr [ttSelectableRow]="rowNode">
+                <td [ngStyle]="titleStyle()">
+                    <p-treeTableToggler [rowNode]="rowNode" data-toggle="tooltip" title="Expand/Collapse">
+                    </p-treeTableToggler>
+                    <a (click)="openDetails($event,rowData,op3) " style="color: #1471AE;cursor: pointer;"
+                        data-toggle="tooltip" title="Click for more details">
+                        {{rowData.name}} </a>
+                </td>
+                <td [ngStyle]="successGetStyle()">
+                    <span *ngIf="rowData.isLeaf">{{rowData.success_get}}</span>
+                </td>
+                <td [ngStyle]="totalDownloadsStyle()">
+                    <span *ngIf="rowData.isLeaf">{{commonFunctionService.formatBytes(rowData.download_size,2)}}</span>
+                </td>
+            </tr>
+        </ng-template>
+    </p-treeTable>
+</div>

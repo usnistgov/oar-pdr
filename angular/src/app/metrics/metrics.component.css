@@ -1,0 +1,79 @@
+.flex-container {
+    width: 60%;
+    display: flex;
+    height: 550px;
+    padding: 20px 20px;
+}
+
+.flex-child {
+    flex: 1;
+    border: 2px solid rgb(218, 218, 218);
+}  
+
+.flex-child:first-child {
+    margin-right: 20px;
+} 
+
+.grid-container {
+    border: 2px solid rgb(218, 218, 218);
+    margin: 1em auto 0em auto;
+    width: 90%;
+    height: fit-content;
+    display: grid;
+    grid-template-columns: 3fr 6fr;
+    grid-gap: 20px;
+    padding: 30px 50px 30px 50px;
+}
+
+.child{
+    /* height: 100%; */
+    height:40vh;
+    width: 100%;
+    border: 2px solid rgb(218, 218, 218);
+    border-radius: 10px 10px 0 0;
+}
+
+.left-side-data {
+    width: 90%; 
+    margin: auto; 
+    /* font-size:small; */
+}
+
+.dataset-summary-title {
+    width: 100%; 
+    text-align: center; 
+    margin-bottom: .5em;
+    background-color: #12659c;
+    color: #fff !important;
+    padding-top: .5em;
+    padding-bottom: .5em;
+    border-radius: 10px 10px 0 0;
+}
+
+.top-label {
+    margin-left: 1.2em;
+}
+
+.float-left {
+    float: left;
+    font-size:1.2vw;
+}
+
+.float-right {
+    float: right;
+    font-size:1.2vw;
+}
+
+.min-height-300 {
+    min-height: 300px;
+}
+
+.min-height-20 {
+    min-height: 20px;
+    padding-bottom: .9em;
+    /* border-bottom: 1px solid lightgray; */
+}
+
+.odd-row {
+    background-color: lightgray;
+}

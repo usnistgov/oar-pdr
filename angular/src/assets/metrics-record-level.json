@@ -1,0 +1,12 @@
+{ "DataSetMetricsCount":1,
+    "PageSize":0,
+    "DataSetMetrics":[
+        {
+            "ediid":"ark:/88434/mds2-2154",
+            "first_time_logged":"2021-02-01T14:15:21.000+0000",
+            "last_time_logged":"2021-02-09T19:33:13.000+0000",
+            "total_size":131872892,
+            "success_get":20,
+            "number_users":8
+        }
+]}

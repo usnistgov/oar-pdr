@@ -13,8 +13,8 @@ import { LPSConfig } from '../app/config/config';
 
 export const context = {
     production: false,
-    useMetadataService: false,
-    useCustomizationService: false
+    useMetadataService: true,
+    useCustomizationService: true
 };
 
 export const config: LPSConfig = {
@@ -27,6 +27,7 @@ export const config: LPSConfig = {
         taxonomyService: "https://data.nist.gov/rmm/taxonomy"
     },
     mdAPI: "https://data.nist.gov/rmm/records/",
+    metricsAPI: "https://localhost/rmm/usagemetrics/",
     // customizationAPI: "https://testdata.nist.gov/customization/",
     customizationAPI: "https://datapubtest.nist.gov/customization/",
     mode: "dev",

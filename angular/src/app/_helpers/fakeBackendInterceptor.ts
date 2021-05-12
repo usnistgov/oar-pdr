@@ -28,11 +28,24 @@ export class FakeBackendInterceptor implements HttpInterceptor {
     const bundlePlanRes: any = require('../../assets/bundle-plan-complete.json');
     // const bundlePlanRes: any = require('../../assets/bundle-plan-warning.json');
     // const bundlePlanRes: any = require('../../assets/bundle-plan-error.json');
+    // const metricsRecordDetails: any = require('../../assets/metrics_record_details.json');
+    const metricsRecordDetails: any = require('../../assets/metrics_record_details_short.json');
+    const metricsRecordLevel: any = require('../../assets/metrics-record-level.json');
 
     // wrap in delayed observable to simulate server api call
     return of(null).pipe(mergeMap(() => {
       console.log("request.url", request.url);
-      console.log("request.url.indexOf('_bundle_plan')", request.url.indexOf('_bundle_plan'));
+      console.log("request.url.indexOf('usagemetrics')", request.url.indexOf('usagemetrics'));
+
+        // metrics
+        if (request.url.indexOf('usagemetrics/files') > -1 && request.method === 'GET') {
+            return of(new HttpResponse({ status: 200, body: metricsRecordDetails }));
+        }
+
+        if (request.url.indexOf('usagemetrics/records') > -1 && request.method === 'GET') {
+            return of(new HttpResponse({ status: 200, body: metricsRecordLevel }));
+        }
+
       // For e2e test
       // if (request.url.endsWith('/rmm/records/SAMPLE123456') && request.method === 'GET') {
       //   return of(new HttpResponse({ status: 200, body: sampleData }));

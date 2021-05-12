@@ -52,14 +52,19 @@ export class SearchService {
         console.log("Test service here:" + this.landingBackend);
         return this.http.get(this.landingBackend);
     }
+    
     searchById(searchValue: string) {
         var backend: any;
         if (_.includes(this.landingBackend, 'rmm') && _.includes(searchValue, 'ark'))
             backend = this.landingBackend + 'records?@id=';
         else if (_.includes(this.landingBackend, 'rmm')) {
-            backend = this.landingBackend + 'records/';
+            if(!_.includes(this.landingBackend, 'records'))
+                backend = this.landingBackend + 'records/';
+            else
+                backend = this.landingBackend;
         } else
             backend = this.landingBackend;
+
         return this.http.get(backend + searchValue, { headers: new HttpHeaders({ timeout: '${10000}' }) });
     }
 

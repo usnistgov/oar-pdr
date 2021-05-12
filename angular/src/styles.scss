@@ -126,3 +126,22 @@ a.enabled {
     color:white;
     padding-right: 1em;
 }
+
+.top-banner {
+    width: 100%;
+    background-position: center 63%;
+    margin-bottom: .5em;;
+    height: 80px;
+    border: 1px solid rgb(0, 23, 43);
+}
+
+.top-banner-text {
+    color: white !important;
+    margin: 2em 0em 0em 0em;
+    font-size: xx-large;
+}
+
+.inner-top-banner {
+    width: 94%;
+    margin: 1em auto;
+}
