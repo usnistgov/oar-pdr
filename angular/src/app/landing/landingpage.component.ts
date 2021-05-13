@@ -172,7 +172,8 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
             }
             else{
                 // Get metrics 
-                this.getMetrics();
+                if(this.inBrowser)
+                    this.getMetrics();
 
                 // proceed with rendering of the component
                 this.useMetadata();

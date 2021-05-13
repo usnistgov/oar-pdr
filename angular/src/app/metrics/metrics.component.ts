@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild, Inject, PLATFORM_ID } from '@angular/core';
 import { userInfo } from 'os';
 import { CommonFunctionService } from '../shared/common-function/common-function.service';
 import { ActivatedRoute } from '@angular/router';
@@ -10,6 +10,7 @@ import { RecordLevelMetrics } from './metrics';
 import { DatePipe } from '@angular/common';
 import { HorizontalBarchartComponent } from './horizontal-barchart/horizontal-barchart.component';
 import { SearchService } from '../shared/search-service/search-service.service';
+import { isPlatformBrowser } from '@angular/common';
 
 @Component({
     selector: 'app-metrics',
@@ -19,6 +20,8 @@ import { SearchService } from '../shared/search-service/search-service.service';
 export class MetricsComponent implements OnInit {
 
     imageURL: string = 'assets/images/sdp-background.jpg';
+    inBrowser: boolean = false;
+
     // Data
     ediid: string;
     files: any[] = [];
@@ -49,11 +52,13 @@ export class MetricsComponent implements OnInit {
 
     constructor(
         private route: ActivatedRoute,
+        @Inject(PLATFORM_ID) private platformId: Object,
         public commonFunctionService: CommonFunctionService,
         private datePipe: DatePipe,
         private searchService: SearchService,
         public metricsService: MetricsService) { 
 
+            this.inBrowser = isPlatformBrowser(platformId);
         }
 
     ngOnInit() {
@@ -68,83 +73,74 @@ export class MetricsComponent implements OnInit {
         this.chart_title = "File Level Details";
         this.yAxisLabel = "";
 
-        this.route.params.subscribe(queryParams => {
-            this.ediid = queryParams.id;
-            // Get dataset title
-            this.searchService.searchById(this.ediid).subscribe(md => {
-                if(md) {
-                    this.datasetTitle = md['title'];
-                }
-            })
+        if(this.inBrowser){
+            this.route.params.subscribe(queryParams => {
+                this.ediid = queryParams.id;
+                // Get dataset title
+                this.searchService.searchById(this.ediid).subscribe(md => {
+                    if(md) {
+                        this.datasetTitle = md['title'];
+                    }
+                })
 
-            this.metricsService.getRecordLevelMetrics(this.ediid).subscribe(metricsData => {
-                console.log('metricsData', metricsData);
-                this.recordLevelData = JSON.parse(JSON.stringify(metricsData));
-                if(this.recordLevelData.DataSetMetrics != undefined && this.recordLevelData.DataSetMetrics.length > 0){
-                    this.firstTimeLogged = this.datePipe.transform(this.recordLevelData.DataSetMetrics[0].first_time_logged, "MMM d, y")
+                this.metricsService.getRecordLevelMetrics(this.ediid).subscribe(metricsData => {
+                    console.log('metricsData', metricsData);
+                    this.recordLevelData = JSON.parse(JSON.stringify(metricsData));
+                    if(this.recordLevelData.DataSetMetrics != undefined && this.recordLevelData.DataSetMetrics.length > 0){
+                        this.firstTimeLogged = this.datePipe.transform(this.recordLevelData.DataSetMetrics[0].first_time_logged, "MMM d, y")
 
-                    this.xAxisLabel = "Total Downloads Since " + this.firstTimeLogged;
-                }
+                        this.xAxisLabel = "Total Downloads Since " + this.firstTimeLogged;
+                    }
+                });
+
+                this.metricsService.getDatasetMetrics(this.ediid).subscribe(metricsData => {
+                    console.log('fileLevelData', metricsData);
+                    this.fileLevelData = metricsData;
+                    if(this.fileLevelData.FilesMetrics != undefined && this.fileLevelData.FilesMetrics.length > 0){
+                        this.noChartData = false;
+                        this.createChartData();
+                        this.lastDownloadDate = this.getLastDownloadDate()
+                        this.files = JSON.parse(JSON.stringify(this.createTreeFromPaths(this.fileLevelData.FilesMetrics)));
+                        this.expandToLevel(this.files, true, 0, 1);
+                    }else{
+                        this.noChartData = true;
+                    }
+
+                });
             });
-
-            this.metricsService.getDatasetMetrics(this.ediid).subscribe(metricsData => {
-                console.log('fileLevelData', metricsData);
-                this.fileLevelData = metricsData;
-                if(this.fileLevelData.FilesMetrics != undefined && this.fileLevelData.FilesMetrics.length > 0){
-                    this.noChartData = false;
-                    this.createChartData();
-                    this.lastDownloadDate = this.getLastDownloadDate()
-                    this.files = JSON.parse(JSON.stringify(this.createTreeFromPaths(this.fileLevelData.FilesMetrics)));
-                    this.expandToLevel(this.files, true, 0, 1);
-                }else{
-                    this.noChartData = true;
-                }
-
-            });
-        });
+        }
     }
 
     /**
      * Save metrics data in json format
      */
     saveMetrics() {
-        // let metrics4Export = {};
-        // metrics4Export['recordLevelTotalDownloads'] = this.recordLevelTotalDownloads;
-        // metrics4Export['totalDownloadSize'] = this.totalDownloadSize;
+        // convert JSON to CSV
+        const replacer = (key, value) => value === null ? '' : value // specify how you want to handle null values here
+        const header = Object.keys(this.fileLevelData.FilesMetrics[0])
+        let csv = this.fileLevelData.FilesMetrics.map(row => header.map(fieldName => 
+        JSON.stringify(row[fieldName], replacer)).join(','))
+        csv.unshift(header.join(','))
+        csv = csv.join('\r\n')
 
-        // let fileLevelMetrics = JSON.parse(JSON.stringify(this.fileLevelData));
-        // metrics4Export = {...metrics4Export, ...fileLevelMetrics};
+        // Add summary
+        csv = "# Record id," + this.ediid
+            + "# Total file downloads," + this.recordLevelTotalDownloads + "\r\n"
+            + "# Total dataset downloads," + this.TotalDatasetDownloads + "\r\n"
+            + "# Total bytes downloaded," + this.totalDownloadSize + "\r\n"
+            + "# Total unique users," + this.TotalUniqueUsers
+            + "\r\n" + csv;
 
-        // let file = new Blob([JSON.stringify(metrics4Export)], { type: 'text/json;charset=utf-8' });
-        // saveAs(file, 'metrics.json');
+        console.log('csv', csv)
 
-        {
-            // convert JSON to CSV
-            const replacer = (key, value) => value === null ? '' : value // specify how you want to handle null values here
-            const header = Object.keys(this.fileLevelData.FilesMetrics[0])
-            let csv = this.fileLevelData.FilesMetrics.map(row => header.map(fieldName => 
-            JSON.stringify(row[fieldName], replacer)).join(','))
-            csv.unshift(header.join(','))
-            csv = csv.join('\r\n')
-
-            // Add summary
-            csv = "# Total file downloads\r\n" + this.recordLevelTotalDownloads + "\r\n"
-                + "# Total dataset downloads\r\n" + this.TotalDatasetDownloads + "\r\n"
-                + "# Total bytes downloaded\r\n" + this.totalDownloadSize + "\r\n"
-                + "# Total unique users\r\n" + this.TotalUniqueUsers
-                + "\r\n" + csv;
-
-            console.log('csv', csv)
-
-            // Create link and download
-            var link = document.createElement('a');
-            link.setAttribute('href', 'data:text/csv;charset=utf-8,%EF%BB%BF' + encodeURIComponent(csv));
-            link.setAttribute('download', this.ediid + '.csv');
-            link.style.visibility = 'hidden';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        };
+        // Create link and download
+        var link = document.createElement('a');
+        link.setAttribute('href', 'data:text/csv;charset=utf-8,%EF%BB%BF' + encodeURIComponent(csv));
+        link.setAttribute('download', this.ediid + '.csv');
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
     }
 
     get TotalDatasetDownloads() {
