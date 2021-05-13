@@ -16,6 +16,7 @@ export class HorizontalBarchartComponent implements OnInit {
     @Input() chart_title: string = "";
     @Input() xAxisLabel: string = "";
     @Input() yAxisLabel: string = "";
+    @Input() inBrowser: boolean = false;
 
     margin: any = { top: 60, bottom: 20, left: 50, right: 50};
     svg: any;
@@ -33,12 +34,14 @@ export class HorizontalBarchartComponent implements OnInit {
     constructor() { }
 
     ngOnInit() {
-        this.initData();
-        this.chart.exit().remove();
+        if(this.inBrowser){
+            this.initData();
+            this.chart.exit().remove();
 
-        this.createChart();
-        if (this.data) {
-            this.updateChart();
+            this.createChart();
+            if (this.data) {
+                this.updateChart();
+            }
         }
     }
 
@@ -108,7 +111,7 @@ export class HorizontalBarchartComponent implements OnInit {
      * On change, update the chart
      */
     ngOnChanges() {
-        if (this.chart) {
+        if (this.chart && this.inBrowser) {
             this.initData();
             this.updateChart();
         }
@@ -355,7 +358,8 @@ export class HorizontalBarchartComponent implements OnInit {
 
 
     saveMetricsAsImage(){
-        saveSvgAsPng(document.getElementsByTagName("svg")[0], "plot.png", {scale: 2, backgroundColor: "#FFFFFF"});
+        if(this.inBrowser)
+            saveSvgAsPng(document.getElementsByTagName("svg")[0], "plot.png", {scale: 2, backgroundColor: "#FFFFFF"});
 
         // var svgString = this.getSVGString(this.svg.node());
         // this.svgString2Image( svgString, 2*this.width, 2*this.height, 'png' ); // passes Blob and filesize String to 

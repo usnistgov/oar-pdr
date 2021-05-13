@@ -9,5 +9,13 @@
         <input type="radio" value="2" name="sortitem" [ngModel]="sortitem" (change)="sortBarChart($event)"> Descending
         <input type="radio" value="3" name="sortitem" [ngModel]="sortitem" (change)="sortBarChart($event)"> Original
     </div>
-    <div class="d3-chart" #chart (window:resize)="onResize()" style="min-height: 200px;"></div>
+    <div *ngIf="inBrowser; else filesLoading" class="d3-chart" #chart (window:resize)="onResize()" style="min-height: 200px;"></div>
+    <ng-template #filesLoading>
+        <div>
+            <b>Metrics </b>
+        </div>
+        <p>
+            <i>Loading metrics data...</i>
+        </p>
+    </ng-template>
 </div>

@@ -115,32 +115,34 @@ export class MetricsComponent implements OnInit {
      * Save metrics data in json format
      */
     saveMetrics() {
-        // convert JSON to CSV
-        const replacer = (key, value) => value === null ? '' : value // specify how you want to handle null values here
-        const header = Object.keys(this.fileLevelData.FilesMetrics[0])
-        let csv = this.fileLevelData.FilesMetrics.map(row => header.map(fieldName => 
-        JSON.stringify(row[fieldName], replacer)).join(','))
-        csv.unshift(header.join(','))
-        csv = csv.join('\r\n')
+        if(this.inBrowser){
+            // convert JSON to CSV
+            const replacer = (key, value) => value === null ? '' : value // specify how you want to handle null values here
+            const header = Object.keys(this.fileLevelData.FilesMetrics[0])
+            let csv = this.fileLevelData.FilesMetrics.map(row => header.map(fieldName => 
+            JSON.stringify(row[fieldName], replacer)).join(','))
+            csv.unshift(header.join(','))
+            csv = csv.join('\r\n')
 
-        // Add summary
-        csv = "# Record id," + this.ediid
-            + "# Total file downloads," + this.recordLevelTotalDownloads + "\r\n"
-            + "# Total dataset downloads," + this.TotalDatasetDownloads + "\r\n"
-            + "# Total bytes downloaded," + this.totalDownloadSize + "\r\n"
-            + "# Total unique users," + this.TotalUniqueUsers
-            + "\r\n" + csv;
+            // Add summary
+            csv = "# Record id," + this.ediid
+                + "# Total file downloads," + this.recordLevelTotalDownloads + "\r\n"
+                + "# Total dataset downloads," + this.TotalDatasetDownloads + "\r\n"
+                + "# Total bytes downloaded," + this.totalDownloadSize + "\r\n"
+                + "# Total unique users," + this.TotalUniqueUsers
+                + "\r\n" + csv;
 
-        console.log('csv', csv)
+            console.log('csv', csv)
 
-        // Create link and download
-        var link = document.createElement('a');
-        link.setAttribute('href', 'data:text/csv;charset=utf-8,%EF%BB%BF' + encodeURIComponent(csv));
-        link.setAttribute('download', this.ediid + '.csv');
-        link.style.visibility = 'hidden';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+            // Create link and download
+            var link = document.createElement('a');
+            link.setAttribute('href', 'data:text/csv;charset=utf-8,%EF%BB%BF' + encodeURIComponent(csv));
+            link.setAttribute('download', this.ediid + '.csv');
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
     }
 
     get TotalDatasetDownloads() {
