@@ -84,7 +84,7 @@
 </div>
 
 <!-- Display tree table -->
-<div class="flex-container" style="margin: 1em auto; width: 90%;max-height:420px;height: auto;">
+<div *ngIf="inBrowser; else filesLoading" class="flex-container" style="margin: 1em auto; width: 90%;max-height:420px;height: auto;">
     <p-treeTable *ngIf="visible" [value]="files" [columns]="cols" selectionMode="single" [style]="{'max-height':'400px','overflow':'auto'}" stickyHeader="true" stickyTopAt=".layout-topbar"
         [resizableColumns]="true" sortField="name">
         <ng-template pTemplate="header" let-columns>
@@ -125,3 +125,11 @@
         </ng-template>
     </p-treeTable>
 </div>
+<ng-template #filesLoading>
+    <div>
+        <b>Metrics </b>
+    </div>
+    <p>
+        <i>Loading metrics data...</i>
+    </p>
+</ng-template>
