@@ -17,7 +17,7 @@ from ...exceptions import (SIPDirectoryNotFound, IDNotFound,
 from ...utils import read_json, build_mime_type_map
 from . import midasclient as midas
 from ...preserv.bagger.midas3 import MIDASSIP
-from ....id import NIST_ARK_NAAN
+from ... import ARK_NAAN
 
 pdrsys = PublishSystem()
 log = logging.getLogger(pdrsys.system_abbrev)   \
@@ -165,7 +165,7 @@ class Handler(object):
 
         if parts[0] == "ark:":
             # support full ark identifiers
-            if len(parts) > 2 and parts[1] == NIST_ARK_NAAN:
+            if len(parts) > 2 and parts[1] == ARK_NAAN:
                 dsid = parts[2]
             else:
                 dsid = '/'.join(parts[:3])
@@ -210,7 +210,7 @@ class Handler(object):
 
         if parts[0] == "ark:":
             # support full ark identifiers
-            if len(parts) > 2 and parts[1] == NIST_ARK_NAAN:
+            if len(parts) > 2 and parts[1] == ARK_NAAN:
                 dsid = parts[2]
             else:
                 dsid = '/'.join(parts[:3])
