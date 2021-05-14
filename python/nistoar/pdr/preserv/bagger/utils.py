@@ -10,7 +10,7 @@ gov.nist.oar.bags.preservation.bags package provided by the oar-dist-service
 repository).  
 """
 import os, re
-from collections import Sequence, Mapping
+from collections import Sequence, Mapping, OrderedDict
 from urlparse import urlparse
 from copy import deepcopy
 
@@ -495,16 +495,14 @@ def update_nerdm_schema(nerdmd, version=None, byext={}):
         if 'releaseHistory' not in nerdmd:
             # update the location URLs
             for v in nerdmd['versionHistory']:
-                if location in v:
+                if 'location' in v:
                     vtag = ".v" + re.sub(r'\.','_', v['version'])
                     if not v['location'].endswith(vtag):
                         v['location'] += vtag
 
-            nerdm['releaseHistory'] = OrderedDict([
-                ("@id", nerdm["@id"]+".rel"),
-                ("@type", ["nrdr:ReleaseHistory"]),
-                ("hasRelease", nerdm['versionHistory'])
-            ])
+            nerdmd['releaseHistory'] = create_release_history_for(nerdmd["@id"])
+            nerdmd['releaseHistory']['hasRelease'] = nerdmd['versionHistory']
+
         del nerdmd['versionHistory']
 
     return nerdmd
@@ -551,3 +549,23 @@ def _upd_schema_ver(schuri, byext, defver):
     if match and defver:
         return match.group(1)+defver+match.group(2)
     return None
+
+def create_release_history_for(pdrid):
+    """
+    create an (empty) NERDm release history object for resource with the given PDR-ID.
+
+    Since the introduction of the current releaseHistory property (defined in the nerdm-schem/rls 
+    extension), the PDR adopted the convention that the traditional PDR-IDs (e.g. ark:/88434/mds2-3333) 
+    now resolve to the latest release in a sequence of versioned releases.  A special collection 
+    composed of these releases has the form PDR-ID.rel (e.g. ark:/88434/mds2-3333.rel).  This 
+    function will create a NERDm releaseHistory object with the '@id' property set according to this 
+    convention.  If the given ID ends in a version string (e.g. ".v1_1_3"), it will be removed before 
+    applending the ".rel" extension).
+    """
+    pdrid = re.sub(r'\.rel$', '', pdrid)
+    pdrid = re.sub(r'\.v\d+([\._]\d+)*$', '', pdrid)
+    return OrderedDict([
+        ("@id", pdrid+".rel"),
+        ("@type", ["nrdr:ReleaseHistory"]),
+        ("hasRelease", [])
+    ])

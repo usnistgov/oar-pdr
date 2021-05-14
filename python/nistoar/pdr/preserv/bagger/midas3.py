@@ -24,8 +24,8 @@ from . import utils as bagutils
 from ..bagit.builder import BagBuilder, NERDMD_FILENAME, FILEMD_FILENAME
 from ..bagit import NISTBag
 from ..bagit.tools import synchronize_enhanced_refs
-from ....id import PDRMinter, NIST_ARK_NAAN
-from ... import def_merge_etcdir, utils
+from ....id import PDRMinter
+from ... import def_merge_etcdir, utils, ARK_NAAN, PDR_PUBLIC_SERVER
 from .. import (SIPDirectoryError, SIPDirectoryNotFound, AIPValidationError,
                 ConfigurationException, StateException, PODError,
                 PreservationStateError)
@@ -48,6 +48,7 @@ DEF_MERGE_CONV = "initdef"  # For merging MIDAS-generated metadata with
 UNSYNCED_FILE = "_unsynced"
 DEF_BASE_POD_SCHEMA = "https://data.nist.gov/od/dm/pod-schema/v1.1#"
 DEF_POD_DATASET_SCHEMA = DEF_BASE_POD_SCHEMA + "/definitions/Dataset"
+ark_naan = ARK_NAAN
 
 # type of update (see determine_update_version())
 _NO_UPDATE    = 0
@@ -71,7 +72,7 @@ _minimal_pod = OrderedDict([
 def _midadid_to_dirname(midasid, log=None):
     out = midasid
 
-    if midasid.startswith("ark:/"+NIST_ARK_NAAN+"/"):
+    if midasid.startswith("ark:/"+ark_naan+"/"):
         # new ARK-based MIDAS identifiers: chars. after shoulder is the
         # record number and name of directory
         out = re.sub(r'^ark:/\d+/(mds\d+\-)?', '', midasid)
@@ -477,12 +478,12 @@ class MIDASMetadataBagger(SIPBagger):
 
         resmd = bag.nerd_metadata_for('')
         return MIDASMetadataBagger(resmd.get['ediid'], bgrmd.get('bag_parent'),
-                                   bgrmd.get('data_directory'), upldir, config, minter)
+                                   bgrmd.get('data_directory'), upldir, config, None, minter)
 
 
     @classmethod
     def fromMIDAS(cls, midasid, workdir, reviewparent, uploadparent=None, config={},
-                  minter=None, recnum=None):
+                  minter=None, replaces=None, recnum=None):
         """
         Find the data directories for a MIDAS submission and create a 
         MIDASMetadataBagger for it.  The output metadata bag from a previous session 
@@ -500,6 +501,11 @@ class MIDASMetadataBagger(SIPBagger):
                                datasets not yet in the review state.
         :param config   dict:  a dictionary providing configuration parameters
         :param minter IDMinter: a minter to use for minting new identifiers.
+        :param replaces  str:  the AIP identifier for a previous published resource 
+                               that this SIP replaces.  This should be used if the 
+                               EDI ID for a publication has changed because of the 
+                               type of revision it is.  If None, the EDI ID has not 
+                               changed (or the SIP has not been published before).
         :param recnum str:     the MIDAS record number for the submission, used 
                                to determine the submission directories.  If not 
                                provided, it is determined based on the provided 
@@ -513,10 +519,10 @@ class MIDASMetadataBagger(SIPBagger):
             revdir = os.path.join(reviewparent, recnum)
         if uploadparent:
             upldir = os.path.join(uploadparent, recnum)
-        return MIDASMetadataBagger(midasid, workdir, revdir, upldir, config, minter)
+        return MIDASMetadataBagger(midasid, workdir, revdir, upldir, config, replaces, minter)
 
 
-    def __init__(self, midasid, bagparent, reviewdir, uploaddir=None, config={}, minter=None):
+    def __init__(self, midasid, bagparent, reviewdir, uploaddir=None, config={}, replaces=None, minter=None):
         """
         Create an SIPBagger to operate on data provided by MIDAS
 
@@ -529,13 +535,15 @@ class MIDASMetadataBagger(SIPBagger):
         :param uploaddir str:  the path to the directory containing submitted
                                datasets not yet in the review state.
         :param config   dict:  a dictionary providing configuration parameters
+        :param replaces  str:  the AIP identifier for a previous published resource 
+                               that this SIP replaces.  This should be used if the 
+                               EDI ID for a publication has changed because of the 
+                               type of revision it is.  If None, the EDI ID has not 
+                               changed (or the SIP has not been published before).
         :param minter IDMinter: a minter to use for minting new identifiers.
-        :param sipdirname str: a relative directory name to look for that 
-                               represents the SIP's directory.  If not provided,
-                               the directory is determined based on the provided
-                               MIDAS ID.  
         """
         self.midasid = midasid
+        self.previd = replaces
         self.name = midasid_to_bagname(midasid)
 
         usenm = self.name
@@ -709,7 +717,7 @@ class MIDASMetadataBagger(SIPBagger):
         if not os.path.exists(self.bagdir):
             self.bagbldr.ensure_bag_structure()
 
-            if self.midasid.startswith("ark:/"+NIST_ARK_NAAN+"/"):
+            if self.midasid.startswith("ark:/"+ark_naan+"/"):
                 # new-style EDI ID is a NIST ARK identifier; use it as our SIP id
                 id = self.midasid
             else:
@@ -739,7 +747,8 @@ class MIDASMetadataBagger(SIPBagger):
     def get_prepper(self):
         if not self.prepsvc:
             return None
-        return self.prepsvc.prepper_for(self.name, log=self.log.getChild("prepper"))
+        replaces = (self.previd != self.midasid and self.previd) or None
+        return self.prepsvc.prepper_for(self.name, replaces=replaces, log=self.log.getChild("prepper"))
                 
     def ensure_res_metadata(self):
         """
@@ -1199,7 +1208,11 @@ class MIDASMetadataBagger(SIPBagger):
         else:
             adata = OrderedDict()
         adata['version'] = self.sip.nerd['version']
-        verhist = self.sip.nerd.get('versionHistory', [])
+        relhist = self.sip.nerd.get('releaseHistory')
+        if relhist is None:
+            relhist = bagutils.create_release_history_for(self.sip.nerd['@id'])
+            relhist['hasRelease'] = self.sip.nerd.get('versionHistory', [])
+        verhist = relhist['hasRelease']
 
         # set the version history
         if uptype != _NO_UPDATE and self.sip.nerd['version'] != lastver and \
@@ -1207,11 +1220,12 @@ class MIDASMetadataBagger(SIPBagger):
            not any([h['version'] == self.sip.nerd['version'] for h in verhist]):
             issued = ('modified' in self.sip.nerd and self.sip.nerd['modified']) or \
                      self.sip.nerd['issued']
-            verhist.append(OrderedDict([
+            relhist['hasRelease'].append(OrderedDict([
                 ('version', self.sip.nerd['version']),
                 ('issued', issued),
                 ('@id', self.sip.nerd['@id']),
-                ('location', 'https://data.nist.gov/od/id/'+self.sip.nerd['@id'])
+                ('location', 'https://'+PDR_PUBLIC_SERVER+'/od/id/'+ \
+                             re.sub(r'\.rel$', re.sub(r'\.','_', self.sip.nerd['version']), relhist['@id']))
             ]))
             if update_reason is None:
                 if uptype == _MDATA_UPDATE:
@@ -1221,12 +1235,12 @@ class MIDASMetadataBagger(SIPBagger):
                 else:
                     update_reason = ''
             verhist[-1]['description'] = update_reason
-            adata['versionHistory'] = verhist
-            self.sip.nerd['versionHistory'] = verhist
+            adata['releaseHistory'] = relhist
+            self.sip.nerd['releaseHistory'] = relhist
         
         utils.write_json(adata, annotf)
         self.bagbldr.record("Preparing for preservation of %s by setting version, "
-                            "version history", self.sip.nerd['version'])
+                            "release history", self.sip.nerd['version'])
         return self.sip.nerd
             
         

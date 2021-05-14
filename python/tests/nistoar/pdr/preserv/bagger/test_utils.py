@@ -435,6 +435,8 @@ class TestBagUtils(test.TestCase):
         self.assertEqual(bagut.select_version(names, "1"),
                          ["mds2-3812.mbag0_4-4.tgz"])
 
+class TestNerdmUtils(test.TestCase):
+
     def test_schuripat(self):
         self.assertTrue(
    bagut._nrdpat.match("https://data.nist.gov/od/dm/nerdm-schema/pub/v1.0#Res") )
@@ -619,6 +621,97 @@ class TestBagUtils(test.TestCase):
         self.assertEqual(data['bar']['tex']['_extensionSchemas'], PUB_SCHEMA_URI+"#Contact")
         self.assertEqual(data['bar']['_extensionSchemas'], [])
         
+    def test_update_nerdm_schema_version_history(self):
+        defver = "1.0"
+        data = {
+            "@id": "ark:/88888/goober",
+            "_schema": "https://data.nist.gov/od/dm/nerdm-schema/v0.3",
+            "foo": {
+                "_extensionSchemas": [ "http://example.com/anext/v88#goob",
+                          "http://goober.com/foop/v99#big" ],
+                "blah": "snooze"
+            },
+            "bar": {
+                "hank": "aaron",
+                "tex": {
+                    "_extensionSchemas": "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.3#Contact",
+                    "blah": "blah"
+                },
+                "_extensionSchemas": []
+            },
+            "versionHistory": [
+                {
+                    "version": "1.0",
+                    "issued": "2020-10-20",
+                    "location": "https://pdr.nist.gov/od/id/ark:/88888/goober",
+                    "hank": "aaron"
+                }
+            ]
+        }
+
+        bagut.update_nerdm_schema(data)
+        self.assertEqual(data['_schema'], CORE_SCHEMA_URI)
+        self.assertEqual(data['@id'], "ark:/88888/goober")
+        self.assertEqual(data['foo']['_extensionSchemas'], 
+                         [ "http://example.com/anext/v88#goob",
+                           "http://goober.com/foop/v99#big" ])
+        self.assertEqual(data['bar']['tex']['_extensionSchemas'], PUB_SCHEMA_URI+"#Contact")
+        self.assertEqual(data['bar']['_extensionSchemas'], [])
+
+        self.assertIn('releaseHistory', data)
+        self.assertNotIn('versionHistory', data)
+        self.assertEqual(data['releaseHistory']['@id'], "ark:/88888/goober.rel")
+        self.assertEqual(data['releaseHistory']['@type'], ["nrdr:ReleaseHistory"])
+        self.assertEqual(len(data['releaseHistory']['hasRelease']), 1)
+        self.assertEqual(data['releaseHistory']['hasRelease'][0]['hank'], 'aaron')
+        self.assertEqual(data['releaseHistory']['hasRelease'][0]['version'], '1.0')
+        self.assertEqual(data['releaseHistory']['hasRelease'][0]['location'],
+                         "https://pdr.nist.gov/od/id/ark:/88888/goober.v1_0")
+
+        data['versionHistory'] = [{
+            "version": "2.0",
+            "issued": "2020-10-20",
+            "goob": "gurn"
+        }]
+        data['releaseHistory']['hasRelease'][0]['location'] = \
+                         "https://pdr.nist.gov/od/id/ark:/88888/goober.v2_0"
+        bagut.update_nerdm_schema(data)
+        self.assertEqual(data['_schema'], CORE_SCHEMA_URI)
+        self.assertEqual(data['@id'], "ark:/88888/goober")
+        self.assertEqual(data['foo']['_extensionSchemas'], 
+                         [ "http://example.com/anext/v88#goob",
+                           "http://goober.com/foop/v99#big" ])
+        self.assertEqual(data['bar']['tex']['_extensionSchemas'], PUB_SCHEMA_URI+"#Contact")
+        self.assertEqual(data['bar']['_extensionSchemas'], [])
+
+        self.assertIn('releaseHistory', data)
+        self.assertNotIn('versionHistory', data)
+        self.assertEqual(data['releaseHistory']['@id'], "ark:/88888/goober.rel")
+        self.assertEqual(data['releaseHistory']['@type'], ["nrdr:ReleaseHistory"])
+        self.assertEqual(len(data['releaseHistory']['hasRelease']), 1)
+        self.assertEqual(data['releaseHistory']['hasRelease'][0]['hank'], 'aaron')
+        self.assertEqual(data['releaseHistory']['hasRelease'][0]['version'], '1.0')
+        self.assertEqual(data['releaseHistory']['hasRelease'][0]['location'],
+                         "https://pdr.nist.gov/od/id/ark:/88888/goober.v2_0")
+
+    def test_create_release_history_for(self):
+        hist = bagut.create_release_history_for("goob")
+        self.assertEqual(hist['@id'], "goob.rel")
+        self.assertEqual(hist['@type'], ["nrdr:ReleaseHistory"])
+        self.assertEqual(hist['hasRelease'], [])
+
+        self.assertEqual(bagut.create_release_history_for("goob.gurn")['@id'], "goob.gurn.rel")
+        self.assertEqual(bagut.create_release_history_for("goob.rel")['@id'], "goob.rel")
+        self.assertEqual(bagut.create_release_history_for("goob.v1")['@id'], "goob.rel")
+        self.assertEqual(bagut.create_release_history_for("goob.v1_2")['@id'], "goob.rel")
+        self.assertEqual(bagut.create_release_history_for("goob.v1.2")['@id'], "goob.rel")
+        self.assertEqual(bagut.create_release_history_for("goob.v1_2_3")['@id'], "goob.rel")
+        self.assertEqual(bagut.create_release_history_for("goob.v2_1_3_0")['@id'], "goob.rel")
+        
+        hist = bagut.create_release_history_for("gary.v1_0_0")
+        self.assertEqual(hist['@id'], "gary.rel")
+        self.assertEqual(hist['@type'], ["nrdr:ReleaseHistory"])
+        self.assertEqual(hist['hasRelease'], [])
 
                     
                          

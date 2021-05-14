@@ -897,8 +897,17 @@ class TestMIDASMetadataBaggerReview(test.TestCase):
                                                         self.revdir, config=config)
         nerd = self.bagr.finalize_version()
         self.assertEqual(nerd['version'], "1.1.0")
+        self.assertIn('releaseHistory', nerd)
+        self.assertEqual(nerd['releaseHistory']['@id'], nerd['@id']+".rel")
+        self.assertIn('hasRelease', nerd['releaseHistory'])
+        self.assertEqual(len(nerd['releaseHistory']['hasRelease']), 1)
+
         nerd = self.bagr.bagbldr.bag.nerd_metadata_for('', True)
         self.assertEqual(nerd['version'], "1.1.0")
+        self.assertIn('releaseHistory', nerd)
+        self.assertEqual(nerd['releaseHistory']['@id'], nerd['@id']+".rel")
+        self.assertIn('hasRelease', nerd['releaseHistory'])
+        self.assertEqual(len(nerd['releaseHistory']['hasRelease']), 1)
         
         
 class TestMIDASMetadataBaggerUpload(test.TestCase):

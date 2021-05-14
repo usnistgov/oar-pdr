@@ -362,6 +362,7 @@ class TestUpdatePrepper(test.TestCase):
         mdata = bag.nerdm_record(True)
         self.assertEquals(mdata['version'], "1.0+ (in edit)")
         self.assertIn('releaseHistory', mdata)
+        self.assertEquals(mdata['releaseHistory']['@id'], mdata['@id']+".rel")
         self.assertIn('hasRelease', mdata['releaseHistory'])
         self.assertEquals(len(mdata['releaseHistory']['hasRelease']), 1)
         self.assertEquals(mdata['releaseHistory']['hasRelease'][0]['version'], "1.0")
