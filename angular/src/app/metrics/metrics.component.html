@@ -1,6 +1,6 @@
 <!-- Top banner -->
 <div class="ui-g top-banner" [ngStyle]="{ 'background-image': 'url(' + imageURL + ')'}">
-    <div class="inner-top-banner">
+    <div *ngIf="inBrowser" class="inner-top-banner">
         <span class="top-banner-text top-label">
             <i class="faa faa-bar-chart faa-lg" style="padding-right: .5em;text-shadow: 1px 1px 2px darkgrey;"></i><label>Dataset Metrics</label>
         </span>
@@ -54,7 +54,7 @@
             </div>
 
         </div>
-        <div class="child min-height-300">
+        <div *ngIf="inBrowser" class="child min-height-300">
             <div class="dataset-summary-title"><h4 style="color: #fff;">File Details</h4></div>
             <div *ngIf="!noChartData">
                 <app-horizontal-barchart *ngIf="chartData" 
@@ -70,17 +70,6 @@
                 No metrics data available.
             </div>
         </div>
-
-        <!-- <div style="position: absolute; bottom: 20px; right: 20px;"> -->
-        <!-- <div style="clear: both;"></div>
-        <div style="width: 100%;">
-            <button (click)="saveMetricsAsImage()" pButton [ngStyle]="{'width':'150px', 'height':'35px', 'float':'right', 'background-color':'green'}">
-                Download Graphics
-            </button>
-            <button (click)="saveMetrics()" pButton [ngStyle]="{'width':'150px', 'height':'35px', 'float':'right', 'background-color':'green', 'margin-right':'0.5em'}">
-                Download Metrics
-            </button>
-        </div> -->
     </div>
 </div>
 
