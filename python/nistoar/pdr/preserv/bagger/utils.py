@@ -12,6 +12,7 @@ repository).
 import os, re
 from collections import Sequence, Mapping
 from urlparse import urlparse
+from copy import deepcopy
 
 from ..bagit.builder import (NERDM_SCH_ID_BASE, NERDM_SCH_VER, NERDMPUB_SCH_VER,
                              NERDMBIB_SCH_ID_BASE, NERDMBIB_SCH_VER)
@@ -444,7 +445,7 @@ def update_nerdm_schema(nerdmd, version=None, byext={}):
     elif "$schema" in nerdmd:
         mtc = "$"
     else:
-        raise ValueError("No _scheme metatag found (is this a NERDm record?)")
+        raise ValueError("No _schema metatag found (is this a NERDm record?)")
         
     defver = version
     if not version:
@@ -478,13 +479,33 @@ def update_nerdm_schema(nerdmd, version=None, byext={}):
         nerdmd[mtc+"schema"] = updated
     _upd_schema_ver_on_node(nerdmd, mtc+"extensionSchemas", matchrs, defver)
 
-    # correct to start using bib extension if needed
+    # from v0.3: correct to use bib extension if needed
     if any(mtc+"extensionSchemas" in r for r in nerdmd.get('references',[])):
         for ref in nerdmd['references']:
             for i, ext in enumerate(ref.get(mtc+"extensionSchemas", [])):
                 if ext.startswith(NERDM_SCH_ID_BASE+"v") and '#/definitions/DCite' in ext:
                     ref[mtc+"extensionSchemas"][i] = NERDMBIB_SCH_ID_BASE + byext['bib'] + \
                                                      ext[ext.index('#'):]
+
+    # ensure the PDR-ID is the form that refers to the latest version
+    nerdmd["@id"] = re.sub(r'\.v\d+(_\d+)*$','', nerdmd["@id"])
+
+    # from v0.4: convert versionHistory to releaseHistory
+    if 'versionHistory' in nerdmd:
+        if 'releaseHistory' not in nerdmd:
+            # update the location URLs
+            for v in nerdmd['versionHistory']:
+                if location in v:
+                    vtag = ".v" + re.sub(r'\.','_', v['version'])
+                    if not v['location'].endswith(vtag):
+                        v['location'] += vtag
+
+            nerdm['releaseHistory'] = OrderedDict([
+                ("@id", nerdm["@id"]+".rel"),
+                ("@type", ["nrdr:ReleaseHistory"]),
+                ("hasRelease", nerdm['versionHistory'])
+            ])
+        del nerdmd['versionHistory']
 
     return nerdmd
 

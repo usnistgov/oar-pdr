@@ -552,6 +552,7 @@ class TestBagUtils(test.TestCase):
         }
 
         data = {
+            "@id": "ark:/88888/goober.v12_3_177",
             "$schema": "https://data.nist.gov/od/dm/nerdm-schema/v0.3",
             "foo": {
                 "$extensionSchemas": [ "http://example.com/anext/v88#goob",
@@ -580,6 +581,7 @@ class TestBagUtils(test.TestCase):
         bagut.update_nerdm_schema(data, "1.0", byext)
         self.assertEqual(data['$schema'], 
                          "https://data.nist.gov/od/dm/nerdm-schema/v2.2")
+        self.assertEqual(data['@id'], "ark:/88888/goober")
         self.assertEqual(data['foo']['$extensionSchemas'], 
                          [ "http://example.com/anext/v0.1#goob",
                            "http://goober.com/foop/v99#big" ])
@@ -592,6 +594,7 @@ class TestBagUtils(test.TestCase):
                          "https://data.nist.gov/od/dm/nerdm-schema/bib/v0.8#/definitions/DCiteReference")
         
         data = {
+            "@id": "ark:/88888/goober",
             "_schema": "https://data.nist.gov/od/dm/nerdm-schema/v0.3",
             "foo": {
                 "_extensionSchemas": [ "http://example.com/anext/v88#goob",
@@ -609,6 +612,7 @@ class TestBagUtils(test.TestCase):
         }
         bagut.update_nerdm_schema(data)
         self.assertEqual(data['_schema'], CORE_SCHEMA_URI)
+        self.assertEqual(data['@id'], "ark:/88888/goober")
         self.assertEqual(data['foo']['_extensionSchemas'], 
                          [ "http://example.com/anext/v88#goob",
                            "http://goober.com/foop/v99#big" ])
