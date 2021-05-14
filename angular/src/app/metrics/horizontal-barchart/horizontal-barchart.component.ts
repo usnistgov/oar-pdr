@@ -121,9 +121,11 @@ export class HorizontalBarchartComponent implements OnInit {
      * On screen resize, re-draw the chart
      */
     onResize(){
-        this.svg.remove();
-        this.createChart();
-        this.updateChart();
+        if (this.inBrowser) {
+            this.svg.remove();
+            this.createChart();
+            this.updateChart();
+        }
     }
 
     /**
@@ -131,36 +133,38 @@ export class HorizontalBarchartComponent implements OnInit {
      * @param event Sort option
      */
     sortBarChart(event) {
-        var target = event.target;
-        console.log("target", target);
+        if (this.inBrowser) {
+            var target = event.target;
+            console.log("target", target);
 
-        switch(target.value) { 
-            case '1': { 
-                this.data = this.data.sort(function(a, b) {
-                    return d3.ascending(a[1], b[1])
-                });
+            switch(target.value) { 
+                case '1': { 
+                    this.data = this.data.sort(function(a, b) {
+                        return d3.ascending(a[1], b[1])
+                    });
 
-                this.updateChart();
+                    this.updateChart();
 
-                break; 
+                    break; 
+                } 
+                case '2': { 
+                    this.data = this.data.sort((a, b) => d3.descending(a[1], b[1]));
+
+                    this.updateChart();
+
+                    break; 
+                } 
+                default: { 
+                    this.data = JSON.parse(JSON.stringify(this.inputdata));
+                    this.data = this.data.sort(function(a, b) {
+                        return d3.ascending(a[0], b[0]);
+                    });
+
+                    this.updateChart();
+                    break; 
+                } 
             } 
-            case '2': { 
-                this.data = this.data.sort((a, b) => d3.descending(a[1], b[1]));
-
-                this.updateChart();
-
-                break; 
-            } 
-            default: { 
-                this.data = JSON.parse(JSON.stringify(this.inputdata));
-                this.data = this.data.sort(function(a, b) {
-                    return d3.ascending(a[0], b[0]);
-                });
-
-                this.updateChart();
-                break; 
-            } 
-        } 
+        }
     }
 
     /**
