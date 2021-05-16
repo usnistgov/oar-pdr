@@ -128,7 +128,7 @@ export class MetricsComponent implements OnInit {
             csv = "# Record id," + this.ediid
                 + "# Total file downloads," + this.recordLevelTotalDownloads + "\r\n"
                 + "# Total dataset downloads," + this.TotalDatasetDownloads + "\r\n"
-                + "# Total bytes downloaded," + this.totalDownloadSize + "\r\n"
+                + "# Total bytes downloaded," + this.totalDownloadSizeInByte + "\r\n"
                 + "# Total unique users," + this.TotalUniqueUsers
                 + "\r\n" + csv;
 
@@ -222,6 +222,14 @@ export class MetricsComponent implements OnInit {
     get totalDownloadSize() {
         if(this.recordLevelData.DataSetMetrics[0] != undefined){
             return this.commonFunctionService.formatBytes(this.recordLevelData.DataSetMetrics[0].total_size, 2);
+        }else{
+            return ""
+        }
+    }
+
+    get totalDownloadSizeInByte() {
+        if(this.recordLevelData.DataSetMetrics[0] != undefined){
+            return this.recordLevelData.DataSetMetrics[0].total_size;
         }else{
             return ""
         }
