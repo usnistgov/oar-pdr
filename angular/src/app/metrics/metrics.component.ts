@@ -62,6 +62,7 @@ export class MetricsComponent implements OnInit {
         }
 
     ngOnInit() {
+        console.log('this.inBrowser', this.inBrowser);
         this.recordLevelData = new RecordLevelMetrics();
 
         this.cols = [
@@ -77,7 +78,7 @@ export class MetricsComponent implements OnInit {
             this.route.params.subscribe(queryParams => {
                 this.ediid = queryParams.id;
                 // Get dataset title
-                this.searchService.searchById(this.ediid).subscribe(md => {
+                this.searchService.searchById(this.ediid, true).subscribe(md => {
                     if(md) {
                         this.datasetTitle = md['title'];
                     }
