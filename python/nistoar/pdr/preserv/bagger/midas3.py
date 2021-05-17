@@ -1225,7 +1225,9 @@ class MIDASMetadataBagger(SIPBagger):
                 ('issued', issued),
                 ('@id', self.sip.nerd['@id']),
                 ('location', 'https://'+PDR_PUBLIC_SERVER+'/od/id/'+ \
-                             re.sub(r'\.rel$', re.sub(r'\.','_', self.sip.nerd['version']), relhist['@id']))
+                          re.sub(r'\.rel$',
+                                 ".v"+re.sub(r'\.','_', self.sip.nerd['version']),
+                                 relhist['@id']))
             ]))
             if update_reason is None:
                 if uptype == _MDATA_UPDATE:

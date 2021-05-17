@@ -908,6 +908,9 @@ class TestMIDASMetadataBaggerReview(test.TestCase):
         self.assertEqual(nerd['releaseHistory']['@id'], nerd['@id']+".rel")
         self.assertIn('hasRelease', nerd['releaseHistory'])
         self.assertEqual(len(nerd['releaseHistory']['hasRelease']), 1)
+        self.assertTrue(nerd['releaseHistory']['hasRelease'][0]['location'].endswith(".v1_1_0"),
+                        "location does not end with version: "+
+                        nerd['releaseHistory']['hasRelease'][0]['location'])
         
         
 class TestMIDASMetadataBaggerUpload(test.TestCase):
