@@ -54,8 +54,7 @@
     "rxjs": "6.3.3",
     "rxjs-compat": "6.3.3",
     "webpack": "^4.12.2",
-    "zone.js": "^0.8.26",
-    "save-svg-as-png": "^1.4.17"
+    "zone.js": "^0.8.26"
   },
   "devDependencies": {
     "@angular-devkit/build-angular": "0.13.8",

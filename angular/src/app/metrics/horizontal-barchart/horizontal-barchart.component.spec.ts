@@ -65,19 +65,6 @@ describe('HorizontalBarchartComponent', () => {
         // So actual width of each bar = (90 - 4 * 3) / 3 = 26.
         expect(Math.floor(el[0].getAttribute("height"))).toEqual(26);
 
-        // Remove this testing because the actual with of the bars may a little different from machine to machine
-        // The height(value) of the first bar should be 339
-        // chart.width = svg.width(770) - calculated margin.left(41) - margin.right(50) = 679
-        // xscale = 679 / 206 = 3.2961
-        // 1st bar height(value) = 103 * 3.2961 = 339
-        // expect(Math.floor(el[0].getAttribute("width"))).toEqual(339);
-
-        // The height(value) of the 2nd bar should be 206 * 3.2961 = 678
-        // expect(Math.floor(el[1].getAttribute("width"))).toEqual(678);
-
-        // The height(value) of the 3rd bar should be 73 * 3.2961 = 240
-        // expect(Math.floor(el[2].getAttribute("width"))).toEqual(240);
-
         spyOn(component, 'sortBarChart').and.callThrough();
         let options: DebugElement[] = fixture.debugElement.queryAll(By.css('input[type="radio"]'));
 
@@ -105,8 +92,4 @@ describe('HorizontalBarchartComponent', () => {
         expect(component.data[1][1]).toEqual(206);
         expect(component.data[2][1]).toEqual(73);
     });
-
-    // it('should create', () => {
-    //     expect(component).toBeTruthy();
-    // });
 });

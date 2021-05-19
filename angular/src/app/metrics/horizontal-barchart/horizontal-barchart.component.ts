@@ -1,6 +1,5 @@
 import { Component, OnInit, Input, ViewChild, ElementRef, ViewEncapsulation } from '@angular/core';
 import * as d3 from 'd3';
-import { saveSvgAsPng } from 'save-svg-as-png';
 
 const barWidth: number = 30;
 
@@ -28,6 +27,7 @@ export class HorizontalBarchartComponent implements OnInit {
     colors: any;
     xAxis: any;
     yAxis: any;
+    grid: any;
     data: Array<any>;
     sortitem: string = '3';
 
@@ -57,15 +57,14 @@ export class HorizontalBarchartComponent implements OnInit {
 
         let nbars = this.data.length;
         this.height = (nbars * barWidth);
-        this.margin.left = this.calculateMarginForYScaleTicks();
-        console.log('this.margin.left', this.margin.left);
+        this.margin.left = this.calculateMarginForYScaleLabels();
     }
 
     /**
-     * Calculate the max length of the y scale ticks
-     * @returns the max length of the y scale ticks
+     * Calculate the max length of the y scale labels
+     * @returns the max length of the y scale labels
      */
-    calculateMarginForYScaleTicks() {
+    calculateMarginForYScaleLabels() {
         var maxTextWidth = 0;
         let element_chart = this.chartContainer.nativeElement;
 
@@ -97,7 +96,6 @@ export class HorizontalBarchartComponent implements OnInit {
         var maxTextWidth = 0;
         var labels = this.chart.selectAll(".label").data(this.data).text((d) => `${d[0]}`);
         labels.each(function() {
-            // console.log(this.getComputedTextLength());
             maxTextWidth = Math.max(maxTextWidth, this.getComputedTextLength());
         }).remove();
 
@@ -122,7 +120,7 @@ export class HorizontalBarchartComponent implements OnInit {
      */
     onResize(){
         if (this.inBrowser) {
-            this.svg.remove();
+            this.margin.left = this.calculateMarginForYScaleLabels();
             this.createChart();
             this.updateChart();
         }
@@ -133,38 +131,35 @@ export class HorizontalBarchartComponent implements OnInit {
      * @param event Sort option
      */
     sortBarChart(event) {
-        if (this.inBrowser) {
-            var target = event.target;
-            console.log("target", target);
+        var target = event.target;
 
-            switch(target.value) { 
-                case '1': { 
-                    this.data = this.data.sort(function(a, b) {
-                        return d3.ascending(a[1], b[1])
-                    });
+        switch(target.value) { 
+            case '1': { 
+                this.data = this.data.sort(function(a, b) {
+                    return d3.ascending(a[1], b[1])
+                });
 
-                    this.updateChart();
+                this.updateChart();
 
-                    break; 
-                } 
-                case '2': { 
-                    this.data = this.data.sort((a, b) => d3.descending(a[1], b[1]));
-
-                    this.updateChart();
-
-                    break; 
-                } 
-                default: { 
-                    this.data = JSON.parse(JSON.stringify(this.inputdata));
-                    this.data = this.data.sort(function(a, b) {
-                        return d3.ascending(a[0], b[0]);
-                    });
-
-                    this.updateChart();
-                    break; 
-                } 
+                break; 
             } 
-        }
+            case '2': { 
+                this.data = this.data.sort((a, b) => d3.descending(a[1], b[1]));
+
+                this.updateChart();
+
+                break; 
+            } 
+            default: { 
+                this.data = JSON.parse(JSON.stringify(this.inputdata));
+                this.data = this.data.sort(function(a, b) {
+                    return d3.ascending(a[0], b[0]);
+                });
+
+                this.updateChart();
+                break; 
+            } 
+        } 
     }
 
     /**
@@ -211,7 +206,9 @@ export class HorizontalBarchartComponent implements OnInit {
         this.colors = d3.scaleLinear().domain([0, this.data.length]).range(<any[]>['#257a2d', '#257a2d']);
 
         // Draw grid lines
-        this.svg.append('g')
+        this.chartCleanup();
+
+        this.grid = this.svg.append('g')
             .attr('class', 'x axis-grid')
             .attr('transform', `translate(${this.margin.left}, ${this.margin.top})`)
             .attr("opacity",".1")
@@ -250,7 +247,6 @@ export class HorizontalBarchartComponent implements OnInit {
      * Update the bar chart and draw the bars
      */
     updateChart() {
-        console.log("Updating chart...");
         // update scales & axis
         // If the values of all bars are zero, we will set domain to [0, 1].
         // Otherwise, domain [0,0] will cause the chart unpredictible  
@@ -280,7 +276,7 @@ export class HorizontalBarchartComponent implements OnInit {
         // remove exiting bars
         update.exit().remove();
  
-        // add new bars
+        // add new bars. Set with to 0 first. Then animate to actual width later.
         update
             .data(this.data)
             .enter()
@@ -290,7 +286,7 @@ export class HorizontalBarchartComponent implements OnInit {
             .attr('x', 0)
             .attr('y', d => this.yScale(d[0]))
             .attr('height', this.yScale.bandwidth())
-            .attr('width', 0)   // set with to 0 first. Then animate to actual width later.
+            .attr('width', 0) 
             .style('fill', (d, i) => this.colors(i))
             .on('mouseenter', function (actual, i) {
                 d3.select(this)
@@ -299,6 +295,8 @@ export class HorizontalBarchartComponent implements OnInit {
                     .attr('opacity', 0.6)
                     .style('fill', '#00e68a')
             
+                // draw a yellow dash line at the end of the active bar
+                // line style is defined in line#limit
                 chart.append('line')
                     .attr('id', 'limit')
                     .attr('x1', xScale(actual[1]))
@@ -338,6 +336,7 @@ export class HorizontalBarchartComponent implements OnInit {
                 tooltip.html(``).style('display', 'none');
             });
 
+        // This is where we animate the bars to actual width.
         this.chart.selectAll('rect')
             .transition()
             .duration(200)
@@ -360,13 +359,146 @@ export class HorizontalBarchartComponent implements OnInit {
             .text((d) => `${d[1]}`);
     }
 
-
-    saveMetricsAsImage(){
-        if(this.inBrowser)
-            saveSvgAsPng(document.getElementsByTagName("svg")[0], "plot.png", {scale: 2, backgroundColor: "#FFFFFF"});
-
-        // var svgString = this.getSVGString(this.svg.node());
-        // this.svgString2Image( svgString, 2*this.width, 2*this.height, 'png' ); // passes Blob and filesize String to 
+    /**
+     * Clean up chart for re-draw
+     */
+    chartCleanup(){
+        if(this.svg){
+            this.svg.selectAll('.axis-grid').remove();  
+            this.svg.selectAll('.axis').remove();  
+            this.svg.selectAll('.bar').remove();  
+            this.svg.selectAll('text').remove();  
+        } 
     }
 
+    /**
+     * Save the bar chart as a png file
+     */
+    saveMetricsAsImage(){
+        var svgString = this.getSVGString(this.svg.node());
+        this.svgString2Image( svgString, 2*this.width, 2*this.height, 'png' ); // passes Blob and filesize String to 
+    }
+
+    /**
+     * Convert svg string to image
+     * @param svgString 
+     * @param width image width
+     * @param height image height
+     * @param format - image format, for example, 'png'
+     */
+    svgString2Image( svgString, width, height, format ) {
+        var format = format ? format : 'png';
+
+        var imgsrc = 'data:image/svg+xml;base64,'+ btoa( unescape( encodeURIComponent( svgString ) ) ); // Convert SVG string to data URL
+
+        var canvas = document.createElement("canvas");
+        var context = canvas.getContext("2d");
+
+        canvas.width = width;
+        canvas.height = height;
+
+        var image = new Image();
+        image.onload = function() {
+            context.clearRect ( 0, 0, width, height );
+            context.drawImage(image, 0, 0, width, height);
+
+            canvas.toBlob( (blob: Blob) => {
+                saveAs( blob, 'D3 vis exported to PNG.png' ); // FileSaver.js function
+            });
+        };
+
+        image.src = imgsrc;
+    }
+
+    /**
+     * Convert svg to string
+     * @param svgNode 
+     * @returns svg string
+     */
+    getSVGString( svgNode ) {
+        svgNode.setAttribute('xlink', 'http://www.w3.org/1999/xlink');
+        var cssStyleText = this.getCSSStyles( svgNode );
+        this.appendCSS( cssStyleText, svgNode );
+
+        var serializer = new XMLSerializer();
+        var svgString = serializer.serializeToString(svgNode);
+        svgString = svgString.replace(/(\w+)?:?xlink=/g, 'xmlns:xlink='); // Fix root xlink without namespace
+        svgString = svgString.replace(/NS\d+:href/g, 'xlink:href'); // Safari NS namespace fix
+
+        return svgString;
+    }
+
+    /**
+     * Get style sheet as a string
+     * @param parentElement 
+     * @returns style sheet string
+     */
+    getCSSStyles( parentElement ) {
+        var selectorTextArr = [];
+
+        // Add Parent element Id and Classes to the list
+        selectorTextArr.push( '#'+parentElement.id );
+        for (var c = 0; c < parentElement.classList.length; c++)
+                if ( !this.contains('.'+parentElement.classList[c], selectorTextArr) )
+                    selectorTextArr.push( '.'+parentElement.classList[c] );
+
+        // Add Children element Ids and Classes to the list
+        var nodes = parentElement.getElementsByTagName("*");
+        for (var i = 0; i < nodes.length; i++) {
+            var id = nodes[i].id;
+            if ( !this.contains('#'+id, selectorTextArr) )
+                selectorTextArr.push( '#'+id );
+
+            var classes = nodes[i].classList;
+            for (var c = 0; c < classes.length; c++)
+                if ( !this.contains('.'+classes[c], selectorTextArr) )
+                    selectorTextArr.push( '.'+classes[c] );
+        }
+
+        // Extract CSS Rules
+        var extractedCSSText = "";
+        for (var i = 0; i < document.styleSheets.length; i++) {
+            // var s = document.styleSheets[i];
+            var s = document.styleSheets[i];
+            
+            try {
+                if(!(s as CSSStyleSheet).cssRules) continue;
+            } catch( e ) {
+                    if(e.name !== 'SecurityError') throw e; // for Firefox
+                    continue;
+                }
+
+            var cssRules = (s as CSSStyleSheet).cssRules;
+            for (var r = 0; r < cssRules.length; r++) {
+                if ( this.contains( cssRules[r].cssText, selectorTextArr ) )
+                    extractedCSSText += cssRules[r].cssText;
+            }
+        }
+        
+
+        return extractedCSSText;
+    }
+
+    /**
+     * Check if a string contains another string
+     * @param str searching string
+     * @param arr string to be searched
+     * @returns true if a string contains another string. False otherwise.
+     */
+    contains(str,arr) {
+        return arr.indexOf( str ) === -1 ? false : true;
+    }
+
+    /**
+     * Append a css text to an element
+     * @param cssText 
+     * @param element 
+     */
+    appendCSS( cssText, element ) {
+        var styleElement = document.createElement("style");
+        styleElement.setAttribute("type","text/css"); 
+        styleElement.innerHTML = cssText;
+        var refNode = element.hasChildNodes() ? element.children[0] : null;
+        element.insertBefore( styleElement, refNode );
+    }
 }

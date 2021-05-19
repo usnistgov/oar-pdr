@@ -17,12 +17,10 @@ export class MetricsService {
     }
 
     getDatasetMetrics(ediid: string): Observable<any> {
-        console.log("Queryng " + this.metricsBackend + "files?exclude=_id&include=ediid,filepath,success_get,download_size&ediid=" + ediid);
         return this.http.get(this.metricsBackend + "files?exclude=_id&include=ediid,filepath,success_get,download_size&ediid=" + ediid, { headers: new HttpHeaders({ timeout: '${10000}' }) });
     }
 
     getRecordLevelMetrics(ediid: string): Observable<any> {
-        console.log("Queryng " + this.metricsBackend + "records/" + ediid);
         return this.http.get(this.metricsBackend + "records/" + ediid, { headers: new HttpHeaders({ timeout: '${10000}' }) });
     }
 }
