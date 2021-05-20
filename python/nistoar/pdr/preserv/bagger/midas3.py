@@ -588,7 +588,8 @@ class MIDASMetadataBagger(SIPBagger):
         if 'repo_access' in self.cfg:
             # support for updates requires access to the distribution and
             # rmm services
-            self.prepsvc = UpdatePrepService(self.cfg['repo_access'])
+            self.prepsvc = UpdatePrepService(self.cfg['repo_access'],
+                                             os.path.join("metadata", self.BGRMD_FILENAME))
         else:
             self.log.warning("repo_access not configured; can't support updates!")
 
@@ -696,6 +697,11 @@ class MIDASMetadataBagger(SIPBagger):
         :return bool:  True if the initial state requires that the SIP-POD
                        be used to refresh the resource metadata
         """
+        # if this bag is a revision to a previous publication with a different MIDAS ID,
+        # determine the location of the metadata bag for the previous ID.
+        prevbagdir = None
+        if self.previd and self.previd != self.midasid:
+            prevbagdir = os.path.join(self.bagparent, midasid_to_bagname(self.previd))
         
         if os.path.exists(self.bagdir):
             # We already have an established working bag
@@ -706,6 +712,24 @@ class MIDASMetadataBagger(SIPBagger):
             self.prepared = True
             return False
 
+        elif prevbagdir and os.path.exists(prevbagdir):
+            # We've already established a working bag under the previous EDI-ID; 
+            # recast it with the new EDI-ID
+            try:
+                os.rename(prevbagdir, self.bagdir)
+            except OSError as ex:
+                raise PDRException("Failed to move bag dir, "+os.path.basename(prevbagdir)+
+                                   " to new name, "+os.path.basename(self.bagdir), cause=ex)
+            self.log.info("Recasting existing metadata bag to new EDI-ID: %s -> %s", 
+                          self.previd, self.midasid)
+            self.bagbldr.ensure_bagdir()  # sets builders bag instance
+            self.bagbldr.update_metadata_for("", {"ediid": self.midasid}, message="EDI ID updated")
+            self.bagbldr.update_annotations_for("", {"replaces": self.previd}, message="")
+            self.update_bagger_metadata_for('', {"replacedEDI": self.previd})
+
+            self.prepared = True
+            return False
+
         elif self.prepsvc:
             self.log.debug("Looking for previously published version of bag")
             prepper = self.get_prepper()
@@ -713,6 +737,9 @@ class MIDASMetadataBagger(SIPBagger):
             if prepper.create_new_update(self.bagdir):
                 self.log.info("Working bag initialized with metadata from previous "
                               "publication.")
+                if self.previd:
+                    self.bagbldr.update_annotations_for("", {"replaces": self.previd}, message="")
+                    self.update_bagger_metadata_for('', {"replacedEDI": self.previd})
 
         if not os.path.exists(self.bagdir):
             self.bagbldr.ensure_bag_structure()
@@ -747,7 +774,9 @@ class MIDASMetadataBagger(SIPBagger):
     def get_prepper(self):
         if not self.prepsvc:
             return None
-        replaces = (self.previd != self.midasid and self.previd) or None
+        replaces = self.previd
+        if replaces == self.midasid:
+            replaces = None
         return self.prepsvc.prepper_for(self.name, replaces=replaces, log=self.log.getChild("prepper"))
                 
     def ensure_res_metadata(self):
@@ -1180,19 +1209,24 @@ class MIDASMetadataBagger(SIPBagger):
                 for i in range(len(ver), 3):
                     ver.append(0)
 
-                if len(self.datafiles) > 0:
-                    # there're data files waiting to be included; it's a data update
+                bmd = self.baggermd_for('')
+                if len(self.datafiles) > 0 or bmd.get('replacedEDI'):
+                    # either there're data files waiting to be included; it's a data update
                     uptype = _DATA_UPDATE
                     ver[1] += 1
                     ver[2] = 0
-                    umsg = "incrementing for updated data files"
+                    umsg = "incrementing for change in EDI-ID"
+                    if len(self.datafiles) > 0:
+                        umsg = "incrementing for updated data files"
+                        if bmd.get('replacedEDI'):
+                            umsg += " (and change in EDI-ID)"
                     self.log.debug("data files being updated: %s", self.datafiles.keys())
                 else:
                     # otherwise, this is a metadata update, which increments the
                     # third field.
                     uptype = _MDATA_UPDATE
                     ver[2] += 1
-                    umsg = "incrementing for updated metadata only"
+                    umsg = "incrementing metadata version field for updated metadata only"
 
                 self.sip.nerd['version'] = ".".join([str(v) for v in ver])
                 self.log.info("finalizing version: %s: %s", umsg, self.sip.nerd['version'])
@@ -1600,6 +1634,8 @@ class PreservationBagger(SIPBagger):
         """
         if not self.bagbldr:
             self.establish_output_bag()
+        if not self.sip.nerd:
+            self.sip.nerd = self.bagbldr.bag.nerdm_record(True)
         if not nodata:
             self.add_data_files()
 
@@ -1735,6 +1771,20 @@ class PreservationBagger(SIPBagger):
         
         self.prepare(nodata=False)
 
+        # update a few dates in the metadata
+        now = datetime.fromtimestamp(time.time()).isoformat()
+        bmd = self.baggermd_for('')
+        dates = OrderedDict()
+        dates['annotated'] = now
+        if len(self.datafiles) > 0 or bmd.get('replacedEDI') or firstpub:
+            dates['revised'] = now
+        ## by default, keep the issued data passed in from MIDAS
+        if 'issued' not in self.sip.nerd:
+            dates['issued'] = now
+        if self.sip.nerd.get('version','1.0.0') == "1.0.0":
+            dates['firstIssued'] = self.sip.nerd.get('issued', now)
+        self.bagbldr.update_annotations_for('', dates, message="setting publishing dates")
+
         # get rid of artifacts from the metadata bag construction process
         self.clean_bag()
 
@@ -1866,8 +1916,13 @@ class PreservationBagger(SIPBagger):
         """
         # get rid of any administrative files at the top
         for bfile in [f for f in os.listdir(self.bagbldr.bagdir)
-                              if f.startswith('_') and os.path.isfile(f)]:
-            os.remove(f)
+                              if f.startswith('_') and os.path.isfile(os.path.join(self.bagbldr.bagdir,f))]:
+            os.remove(os.path.join(self.bagbldr.bagdir, bfile))
+
+        # get rid of any administrative files at the top in the metadata directory
+        for (root, dirs, files) in os.walk(self.bagbldr.bag.metadata_dir):
+            for bfile in [os.path.join(root, f) for f in files if f.startswith('_')]:
+                os.remove(bfile)
 
         # remove non-standard, administrative metadata from pod
         if os.path.exists(self.bagbldr.bag.pod_file()):
@@ -1879,14 +1934,15 @@ class PreservationBagger(SIPBagger):
                 utils.write_json(md, self.bagbldr.bag.pod_file())
 
         # remove non-standard, administrative metadata from nerdm
-        # for (files, dirs, root) in os.walk(self.bagbldr.bag.metadata_dir):
-        #     if 'nerdm.json' in files:
-        #         nf = os.path.join(root, 'nerdm.json')
-        #         md = utils.read_json(nf)
-        #         rmkeys = [k for k in md.keys() if k.startswith('__')]
-        #         if len(rmkeys) > 0
-        #             for key in rmkeys:
-        #                 del md[key]
-        #             utils.write_json(md, nf)
+        for (root, dirs, files) in os.walk(self.bagbldr.bag.metadata_dir):
+            for mdfile in ['nerdm.json', 'annot.json']:
+                if mdfile in files:
+                    nf = os.path.join(root, mdfile)
+                    md = utils.read_json(nf)
+                    rmkeys = [k for k in md.keys() if k.startswith('_')]
+                    if len(rmkeys) > 0:
+                        for key in rmkeys:
+                            del md[key]
+                        utils.write_json(md, nf)
     
 

@@ -148,7 +148,7 @@ class UpdatePrepService(object):
     """
     a factory class that creates UpdatePrepper instances
     """
-    def __init__(self, config):
+    def __init__(self, config, bgrmdf=None):
         self.cfg = config
 
         self.sercache = self.cfg.get('headbag_cache')
@@ -165,12 +165,14 @@ class UpdatePrepService(object):
         if scfg.get('service_endpoint'):
             self.mdsvc  = rmm.MetadataClient(scfg.get('service_endpoint'))
 
+        self._bgrmdf = bgrmdf
+
     def prepper_for(self, aipid, version=None, replaces=None, log=None):
         """
         return an UpdatePrepper instance for the given dataset identifier
         """
         return UpdatePrepper(aipid, self.cfg, self.cacher, self.mdsvc,
-                             self.storedir, version, replaces, log)
+                             self.storedir, version, replaces, log, self._bgrmdf)
 
 
 class UpdatePrepper(object):
@@ -179,9 +181,10 @@ class UpdatePrepper(object):
     to disk and prepares it for access and possible update by the PDR publishing 
     system.  
     """
+    PREPRMD_FILENAME = "__bagger-prepper.json"
 
     def __init__(self, aipid, config, headcacher, pubmdclient, storedir=None,
-                 version=None, replaces=None, log=None):
+                 version=None, replaces=None, log=None, bgrmdf=None):
         """
         create the prepper for the given dataset identifier.  
 
@@ -205,6 +208,10 @@ class UpdatePrepper(object):
         if not log:
             log = deflog.getChild(self.aipid[:8]+'...')
         self.log = log
+
+        if not bgrmdf:
+            bgrmdf = os.path.join("metadata", self.PREPRMD_FILENAME)
+        self._bgrmdf = bgrmdf
 
     @property
     def aipid(self):
@@ -379,6 +386,8 @@ class UpdatePrepper(object):
             self.log.info(fmt, os.path.basename(latest_headbag)) 
             self.create_from_headbag(latest_headbag, mdbag,
                                      (self.aipid != latest_aipid and self.aipid) or None)
+            if self.aipid != latest_aipid:
+                self._baggermd_update({"replacedEDI": self._prevaipid}, mdbag)
             return True
 
         # This dataset was "published" without a preservation bag
@@ -386,8 +395,22 @@ class UpdatePrepper(object):
                       "existing published NERDm record")
         self.create_from_nerdm(latest_nerd, mdbag, 
                                (self.aipid != latest_aipid and self.aipid) or None)
+        if self.aipid != latest_aipid:
+            self._baggermd_update({"replacedEDI": self._prevaipid}, mdbag)
+            
         return True
 
+    def _baggermd_replace(self, mdata, inbag):
+        utils.write_json(mdata, os.path.join(inbag, self._bgrmdf))
+    def _baggermd_update(self, mdata, inbag):
+        bgrmdf = os.path.join(inbag, self._bgrmdf)
+        if os.path.exists(bgrmdf):
+            md = utils.read_json()
+            md = merge_config(mdates, md)
+        else:
+            md = OrderedDict()
+        self._baggermd_replace(md, inbag)
+        
 
     def create_from_headbag(self, headbag, mdbag, foraip=None):
         """

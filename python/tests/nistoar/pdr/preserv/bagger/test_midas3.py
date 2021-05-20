@@ -1261,6 +1261,15 @@ class TestPreservationBagger(test.TestCase):
         self.assertTrue(os.path.isfile(os.path.join(self.bagr.bagdir,
                                                    "about.txt")))
 
+        # test for clean up
+        self.assertTrue(not os.path.exists(os.path.join(self.bagr.bagbldr.bag.metadata_dir,
+                                                        "__bagger-midas3.json")))
+
+        # test key metadata
+        nerdm = self.bagr.bagbldr.bag.nerd_metadata_for('')
+        for prop in "annotated revised firstIssued modified issued".split():
+            self.assertIn(prop, nerdm)
+
     def test_check_data_files(self):
         self.createPresBagger()
         self.bagr.prepare()
@@ -1281,11 +1290,61 @@ class TestPreservationBagger(test.TestCase):
             self.bagr._check_data_files(self.bagr.cfg.get('data_checker',{}),
                                         viadistrib=False)
 
+    def test_clean_bag(self):
+        self.createPresBagger()
+        self.bagr.prepare()
 
+        # add some things to clean up
+        open(os.path.join(self.bagr.bagdir, "_goober.txt"), 'a').close()
+        open(os.path.join(self.bagr.bagdir, "metadata", "trial1.json", "_goober.txt"), 'a').close()
+        data = utils.read_json(self.bagr.bagbldr.bag.pod_file())
+        data["_goober"] = "I am a"
+        utils.write_json(data, self.bagr.bagbldr.bag.pod_file())
+        self.bagr.bagbldr.update_metadata_for("", {"_goober": "I am a"})
+        self.bagr.bagbldr.update_annotations_for("trial1.json", {"_goober": "I am a"})
 
+        # test mods were successful
+        data = self.bagr.bagbldr.bag.nerd_metadata_for('trial1.json', True)
+        self.assertIn('_goober', data.keys())
+        dirtyfiles = []
+        dirtymd = []
+        for (r, d, files) in os.walk(self.bagr.bagdir):
+            dirtyfiles.extend([os.path.join(r,f) for f in files if f.startswith("_")])
+            for mdfile in [f for f in files if f in ['pod.json', 'nerdm.json', 'annot.json']]:
+                data = utils.read_json(os.path.join(r, mdfile))
+                if len([p for p in data.keys() if p.startswith('_')]) > 0:
+                    dirtymd.append(os.path.join(r, mdfile))
+        self.assertNotEqual(len(dirtyfiles), 0)
+        self.assertNotEqual(len(dirtymd), 0)
+        
+        self.bagr.clean_bag()
 
+        self.assertFalse(os.path.exists(os.path.join(self.bagr.bagdir, "_goober.txt")),
+                                        "top-level admin file not removed")
+        self.assertFalse(os.path.exists(os.path.join(self.bagr.bagdir, "metadata",
+                                                     "trial1.json", "_goober.txt")),
+                                        "metadata admin file not removed")
+        data = utils.read_json(self.bagr.bagbldr.bag.pod_file())
+        self.assertNotIn('_goober', data.keys())
+        data = self.bagr.bagbldr.bag.nerd_metadata_for('', True)
+        self.assertNotIn('_goober', data.keys())
+        data = self.bagr.bagbldr.bag.nerd_metadata_for('trial1.json', True)
+        self.assertNotIn('_goober', data.keys())
 
+        # confirm that we are fully clean
+        dirtyfiles = []
+        dirtymd = []
+        for (r, d, files) in os.walk(self.bagr.bagdir):
+            dirtyfiles.extend([os.path.join(r,f) for f in files if f.startswith("_")])
+            for mdfile in [f for f in files if f in ['pod.json', 'nerdm.json', 'annot.json']]:
+                data = utils.read_json(os.path.join(r, mdfile))
+                if len([p for p in data.keys() if p.startswith('_')]) > 0:
+                    dirtymd.append(os.path.join(r, mdfile))
+        self.assertEqual(len(dirtyfiles), 0)
+        self.assertEqual(len(dirtymd), 0)
 
+        
+                         
 
 
 if __name__ == '__main__':
