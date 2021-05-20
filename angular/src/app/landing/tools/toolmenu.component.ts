@@ -205,9 +205,9 @@ export class ToolMenuComponent implements OnChanges {
             this.commonFunctionService.formatBytes(this.recordLevelMetrics.DataSetMetrics[0].total_size, 2) : 0;
 
         subitems = [
-            this.createMenuItem('• Total # of downloads: ' + totalDownload, null,null, null),
-            this.createMenuItem('• Total users: ' + totalUsers, null,null, null),
-            this.createMenuItem('• Total download size: ' + totalDownloadSize, null,null, null),
+            this.createMenuItem('• Total dataset downloads: ' + totalDownload, null,null, null),
+            this.createMenuItem('• Total unique users: ' + totalUsers, null,null, null),
+            this.createMenuItem('• Total bytes downloaded: ' + totalDownloadSize, null,null, null),
             this.createMenuItem('More ...', null,null, this.metricsUrl)
         ];
 
