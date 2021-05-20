@@ -176,9 +176,7 @@
                 <td [ngStyle]="titleStyle()">
                     <p-treeTableToggler [rowNode]="rowNode" data-toggle="tooltip" title="Expand/Collapse">
                     </p-treeTableToggler>
-                    <a (click)="openDetails($event,rowData,op3) " style="color: #1471AE;cursor: pointer;"
-                        data-toggle="tooltip" title="Click for more details">
-                        {{rowData.name}} </a>
+                        {{rowData.name}} 
                 </td>
                 <td [ngStyle]="successGetStyle()">
                     <span *ngIf="rowData.isLeaf">{{rowData.success_get}}</span>
