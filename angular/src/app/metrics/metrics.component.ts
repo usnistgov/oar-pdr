@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, Inject, PLATFORM_ID } from '@angular/core';
+import { Component, OnInit, ViewChild, Inject, PLATFORM_ID, HostListener } from '@angular/core';
 import { userInfo } from 'os';
 import { CommonFunctionService } from '../shared/common-function/common-function.service';
 import { ActivatedRoute } from '@angular/router';
@@ -41,6 +41,11 @@ export class MetricsComponent implements OnInit {
     fontSize: string = '16px';  // Default font size
     noChartData: boolean = true;
 
+    //Display
+    screenSizeBreakPoint: number;
+    screenWidth: number = 1080;
+    mobileWidth: number = 500;
+
     // File tree
     isExpanded: boolean = false;
 
@@ -52,6 +57,7 @@ export class MetricsComponent implements OnInit {
 
     constructor(
         private route: ActivatedRoute,
+        private cfg: AppConfig,
         @Inject(PLATFORM_ID) private platformId: Object,
         public commonFunctionService: CommonFunctionService,
         private datePipe: DatePipe,
@@ -59,6 +65,7 @@ export class MetricsComponent implements OnInit {
         public metricsService: MetricsService) { 
 
             this.inBrowser = isPlatformBrowser(platformId);
+            this.screenSizeBreakPoint = +this.cfg.get("screenSizeBreakPoint", "1060");
         }
 
     ngOnInit() {
@@ -110,6 +117,27 @@ export class MetricsComponent implements OnInit {
                 });
             });
         }
+    }
+
+    /**
+     *  Following functions detect screen size
+     */
+    @HostListener("window:resize", [])
+        public onResize() {
+            this.detectScreenSize();
+    }
+    
+    public ngAfterViewInit() {
+        this.detectScreenSize();
+    }
+
+    private detectScreenSize() {
+        setTimeout(() => {
+            if(this.inBrowser){
+                this.screenWidth = window.innerWidth;
+                console.log('this.screenWidth', this.screenWidth);
+            }
+        }, 0);
     }
 
     /**

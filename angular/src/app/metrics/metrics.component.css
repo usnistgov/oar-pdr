@@ -25,6 +25,14 @@
     padding: 30px 50px 30px 50px;
 }
 
+.mobile-grid-container {
+    border: 2px solid rgb(218, 218, 218);
+    margin: 1em auto 0em auto;
+    width: 90%;
+    height: fit-content;
+    padding: 20px 20px 20px 20px;
+}
+
 .child{
     /* height: 100%; */
     height:40vh;
@@ -59,9 +67,19 @@
     font-size:1.2vw;
 }
 
+.float-left-mobile {
+    float: left;
+    font-size: medium;
+}
+
 .float-right {
     float: right;
     font-size:1.2vw;
+}
+
+.float-right-mobile {
+    float: right;
+    font-size: medium;
 }
 
 .min-height-300 {
@@ -76,4 +94,10 @@
 
 .odd-row {
     background-color: lightgray;
+}
+
+.dataset-title {
+    padding-top: 1em;
+    color: #12659c; 
+    margin: 0px 20px;
 }

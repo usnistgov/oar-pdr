@@ -22,6 +22,7 @@ export class HorizontalBarchartComponent implements OnInit {
     chart: any;
     width: number;
     height: number;
+    wholeChartWidth: number;
     xScale: any;
     yScale: any;
     colors: any;
@@ -172,6 +173,7 @@ export class HorizontalBarchartComponent implements OnInit {
             this.svg.exit().remove;
 
         let element_chart = this.chartContainer.nativeElement;
+        this.wholeChartWidth = element_chart.offsetWidth - this.margin.right * 2;
         this.width = element_chart.offsetWidth - this.margin.left - this.margin.right;
 
         if(this.svg){
@@ -237,7 +239,7 @@ export class HorizontalBarchartComponent implements OnInit {
             .text(`${this.yAxisLabel}`);
 
         this.svg.append('text')
-            .attr('x', this.width / 2 + this.margin.left)
+            .attr('x', this.wholeChartWidth/2  + this.margin.right)
             .attr('y', this.margin.top-40)
             .attr('text-anchor', 'middle')
             .text(`${this.xAxisLabel}`);
