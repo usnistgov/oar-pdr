@@ -17,6 +17,7 @@
     </div>
 </div>
 
+<!-- For small screen, display the two download buttons in the separated lines -->
 <div class="full-span" *ngIf="screenWidth <= screenSizeBreakPoint" style="width: fit-content;height: fit-content;margin:auto" >
     <button (click)="saveMetricsAsImage()" pButton [ngStyle]="{'width':'150px', 'height':'35px',  'background-color':'green','margin-top':'1em', 'margin-right':'1.5em'}">
         Download Graphics
@@ -26,12 +27,14 @@
     </button>
 </div>
 
+<!-- Metrics data -->
 <div style="text-align: center; margin-bottom: 1em;">
     <!-- Dataset title -->
     <div class="dataset-title"><h3>{{datasetTitle}}</h3></div>
 
-    <!-- Metrics details -->
+    <!-- Metrics details for large screen device -->
     <div class="grid-container" *ngIf="screenWidth > screenSizeBreakPoint; else mobile">
+        <!-- Dataset summary -->
         <div class="child min-height-300" style="position: relative;">
             <div class="dataset-summary-title"><h4 style="color: #fff;">Dataset Summary</h4></div>
             <div *ngIf="firstTimeLogged != ''" style="width: 95%; text-align: center; margin: 0em auto 1.5em auto; font-size: larger;border-bottom: 1px solid lightgray;">Since {{firstTimeLogged}}</div>
@@ -65,6 +68,7 @@
             </div>
 
         </div>
+        <!-- File details (bar chart) -->
         <div *ngIf="inBrowser" class="child min-height-300">
             <div class="dataset-summary-title"><h4 style="color: #fff;">File Details</h4></div>
             <div *ngIf="!noChartData">
@@ -82,8 +86,10 @@
             </div>
         </div>
     </div>
+    <!-- Metrics details for large screen device -->
     <ng-template #mobile>
         <div class="mobile-grid-container">
+            <!-- Dataset summary -->
             <div class="child" style="position: relative;height: 250px; margin-bottom: .5em;">
                 <div class="dataset-summary-title"><h4 style="color: #fff;">Dataset Summary</h4></div>
                 <div *ngIf="firstTimeLogged != ''" style="width: 95%; text-align: center; margin: 0em auto 1.5em auto; font-size: larger;border-bottom: 1px solid lightgray;">Since {{firstTimeLogged}}</div>
@@ -117,6 +123,7 @@
                 </div>
             </div>
 
+            <!-- File details (bar chart) -->
             <div *ngIf="inBrowser" class="child min-height-300">
                 <div class="dataset-summary-title"><h4 style="color: #fff;">File Details</h4></div>
                 <div *ngIf="!noChartData && screenWidth > mobileWidth">
@@ -132,6 +139,7 @@
                 <div *ngIf="noChartData" style="margin-top: 3em; font-size: larger;">
                     No metrics data available.
                 </div>
+                <!-- If screen width is very small, like vertical display of a call phone, display message instead of bar chart. -->
                 <div *ngIf="screenWidth <= mobileWidth" style="margin-top: 3em; font-size: larger;">
                     Please enlarge the screen or rotate the device to view the chart.
                 </div>

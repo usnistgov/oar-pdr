@@ -100,9 +100,6 @@ export class HorizontalBarchartComponent implements OnInit {
             maxTextWidth = Math.max(maxTextWidth, this.getComputedTextLength());
         }).remove();
 
-        // d3.selectAll("svg").remove();
-        // this.svg.remove();
-
         return maxTextWidth;
     }
 
@@ -208,7 +205,7 @@ export class HorizontalBarchartComponent implements OnInit {
         this.colors = d3.scaleLinear().domain([0, this.data.length]).range(<any[]>['#257a2d', '#257a2d']);
 
         // Draw grid lines
-        this.chartCleanup();
+        this.chartCleanup();    // Clean up existing grid lines
 
         this.grid = this.svg.append('g')
             .attr('class', 'x axis-grid')

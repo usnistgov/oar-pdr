@@ -69,7 +69,6 @@ export class MetricsComponent implements OnInit {
         }
 
     ngOnInit() {
-        console.log('this.inBrowser', this.inBrowser);
         this.recordLevelData = new RecordLevelMetrics();
 
         this.cols = [
@@ -92,7 +91,6 @@ export class MetricsComponent implements OnInit {
                 })
 
                 this.metricsService.getRecordLevelMetrics(this.ediid).subscribe(metricsData => {
-                    console.log('metricsData', metricsData);
                     this.recordLevelData = JSON.parse(JSON.stringify(metricsData));
                     if(this.recordLevelData.DataSetMetrics != undefined && this.recordLevelData.DataSetMetrics.length > 0){
                         this.firstTimeLogged = this.datePipe.transform(this.recordLevelData.DataSetMetrics[0].first_time_logged, "MMM d, y")
@@ -102,7 +100,6 @@ export class MetricsComponent implements OnInit {
                 });
 
                 this.metricsService.getDatasetMetrics(this.ediid).subscribe(metricsData => {
-                    console.log('fileLevelData', metricsData);
                     this.fileLevelData = metricsData;
                     if(this.fileLevelData.FilesMetrics != undefined && this.fileLevelData.FilesMetrics.length > 0){
                         this.noChartData = false;
@@ -135,24 +132,20 @@ export class MetricsComponent implements OnInit {
         setTimeout(() => {
             if(this.inBrowser){
                 this.screenWidth = window.innerWidth;
-                console.log('this.screenWidth', this.screenWidth);
             }
         }, 0);
     }
 
     /**
-     * Save metrics data in json format
+     * Save metrics data in csv format
      */
     saveMetrics() {
         // Make a deep copy of the metrics data
         let fileMetrics = JSON.parse(JSON.stringify(this.fileLevelData.FilesMetrics));
-        console.log("fileMetrics", fileMetrics);
         // Remove the ediid column
         for(let i in fileMetrics) {
             delete fileMetrics[i].ediid;
          }
-
-        console.log("fileMetrics2", fileMetrics);
 
         // convert JSON to CSV
         const replacer = (key, value) => value === null ? '' : value // specify how you want to handle null values here
@@ -180,6 +173,9 @@ export class MetricsComponent implements OnInit {
         document.body.removeChild(link);
     }
 
+    /**
+     * Return total dataset downloads
+     */
     get TotalDatasetDownloads() {
         if(this.recordLevelData.DataSetMetrics[0] != undefined){
             return this.recordLevelData.DataSetMetrics[0].success_get;
@@ -188,6 +184,9 @@ export class MetricsComponent implements OnInit {
         }
     }
 
+    /**
+     * Get total unique users
+     */
     get TotalUniqueUsers() {
         if(this.recordLevelData.DataSetMetrics[0] != undefined){
             return this.recordLevelData.DataSetMetrics[0].number_users;
@@ -196,6 +195,9 @@ export class MetricsComponent implements OnInit {
         }
     }
 
+    /**
+     * Save the bar chart as a png file
+     */
     saveMetricsAsImage() {
         this.barchart.saveMetricsAsImage();
     }
@@ -245,15 +247,21 @@ export class MetricsComponent implements OnInit {
         this.recordLevelTotalDownloads = sum;
     }
 
+    /**
+     * Get the last download date (file level)
+     * @returns last download date
+     */
     getLastDownloadDate(){
         if (this.fileLevelData.FilesMetrics.length) {
             var lastDownloadTime = this.fileLevelData.FilesMetrics.reduce((m,v,i) => (v.timestamp > m.timestamp) && i ? v : m).timestamp;
-            console.log("lastDownloadTime", lastDownloadTime);
 
             return this.datePipe.transform(this.fileLevelData.FilesMetrics.reduce((m,v,i) => (v.timestamp > m.timestamp) && i ? v : m).timestamp, "MMM d, y");
         }
     }
 
+    /**
+     * Get total recordset level download size
+     */
     get totalDownloadSize() {
         if(this.recordLevelData.DataSetMetrics[0] != undefined){
             return this.commonFunctionService.formatBytes(this.recordLevelData.DataSetMetrics[0].total_size, 2);
@@ -262,6 +270,9 @@ export class MetricsComponent implements OnInit {
         }
     }
 
+    /**
+     * Get total recordset level download size in bytes
+     */
     get totalDownloadSizeInByte() {
         if(this.recordLevelData.DataSetMetrics[0] != undefined){
             return this.recordLevelData.DataSetMetrics[0].total_size;
