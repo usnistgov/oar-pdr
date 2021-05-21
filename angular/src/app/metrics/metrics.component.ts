@@ -74,7 +74,7 @@ export class MetricsComponent implements OnInit {
         this.cols = [
             { field: 'name', header: 'Name', width: '60%' },
             { field: 'success_get', header: 'Downloads', width: '20%' },
-            { field: 'download_size', header: 'Total Bytes Downloaded', width: '20%' }];
+            { field: 'download_size', header: 'File Size', width: '20%' }];
 
         // Expend the data tree to level one
         this.chart_title = "File Level Details";
