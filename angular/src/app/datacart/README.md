@@ -25,7 +25,7 @@ At the center of the data cart framework is the [`DataCart`](cart.ts) class.  It
 files that have been placed in the cart.  Its key features are:
 
   *  it provides functions for adding and removing files to and from the cart
-  *  the information stored for each files is defined by the [`DataCartItem`](cart.ts) interface;
+  *  the information stored for each file is defined by the [`DataCartItem`](cart.ts) interface;
      it includes:
      *  the `NerdmComp` metadata for the file
      *  the download URL for retrieving the file
@@ -34,11 +34,12 @@ files that have been placed in the cart.  Its key features are:
         "failure", etc.
      *  a boolean to indicate if the file is selected for download
   *  The contents of the cart and all the metadata are saved int the browser's local storage via
-     the `save()` function; the contents is be brought back into memory via the `restore()` function.
+     the `save()` function; the contents can be brought back into memory via the `restore()` function.
   *  Anytime a client changes the cart's contents, including the status of any of the files, the
      contents are persisted to storage via `save()`.  (The call to `save()` can be delayed to make
      many changes in bulk.)  The cart also watches that storage for changes made in other browser 
-     windows; when those changes occur, the `restore()` function is load those changes into memory.
+     windows; when those changes occur, the `restore()` function is called to load those changes into 
+     memory.
   *  Clients of the cart can be alerted to changes in the cart via its `watchForChanges()` function. 
   *  There can be multiple, different carts within the system; each cart has a unique name.  
 
@@ -70,14 +71,14 @@ long time, and closing the tab while the downloads are in progress would interru
 Nevertheless, it is possible to have both components open in the same tab; the interactions at the
 `CartService` and `DataCart` interface level are the same.  
 
-Specifically, it is sub-components within these larger component that need access to the cart.
+Specifically, it is sub-components within these larger components that need access to the cart.
 The figure below illustrates which components interact with the data carts.
 
 ![DataCart interaction diagram](cartinteraction.png)
 
 Here is an inventory of components that need information from or access to a data cart:
 
-  * Landing Page:
+Landing Page:
     1. the [`HeadbarComponent`](../frame/headbar.component.ts) includes an icon representing the
        Global Data Cart:
         * the icon displays the number of data files currently in the cart
@@ -101,7 +102,8 @@ Here is an inventory of components that need information from or access to a dat
            * when the user clicks on the icon, the file is added to the cart; if the file is already
              in the cart, the file is removed.
            * when the file is added to the cart, the cart is annotated with the label, "Added".
-  * `DatacartComponent`:
+
+`DatacartComponent`:
   
      3. [`TreetableComponent`](treecomponent/treecomponent.component.ts) displays the contents of the cart
         * A checkbox by each file listed as in the cart allows the user to select (or unselect) the
@@ -111,9 +113,9 @@ Here is an inventory of components that need information from or access to a dat
      4. [`CartControlComponent`](cartcontrol.component.ts) provides control buttons for operating on
         the cart:
         * It needs to know how many are currently selected.  One button will
-          commence downloading on them, and another one can remove them from the cart.
+          commence downloading them, and another one can remove them from the cart.
         * It needs to know which files have been successfully downloaded (and how many); a button
-          allows those files to be removed.
+          allows those files to be removed from the cart.
      5. [`BundleplanComponent`](bundleplan/bundleplan.component.ts) manages the download process
         (triggered via `CartControlComponent` or a "download all" icon-click).
         * As particular data files are bundled into zip bundles, this component updates the download status
