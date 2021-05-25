@@ -59,7 +59,7 @@ describe('LandingPageComponent', () => {
         }
         */
         mdt = new MetadataTransfer();
-        mdt.set("NERDm Resource:goober", nrd)
+        mdt.set("goober", nrd)
         mds = new TransferMetadataService(mdt);
 
         let r : unknown = new mock.MockActivatedRoute("/id/goober", {id: "goober"});

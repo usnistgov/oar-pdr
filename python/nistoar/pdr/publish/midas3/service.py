@@ -278,10 +278,11 @@ class MIDAS3PublishingService(PublishSystem):
 
         return self._apply_pod_async(pod, async)
 
-    def _validate_pod(self, pod):
+    def _validate_pod(self, pod, schemauri=None):
+        if not schemauri:
+            schemauri = POD_DATASET_SCHEMA
         if self._podvalid8r:
-            self._podvalid8r.validate(pod, schemauri=POD_DATASET_SCHEMA,
-                                      strict=True, raiseex=True)
+            self._podvalid8r.validate(pod, schemauri=schemauri, strict=True, raiseex=True)
         else:
             self.log.warning("Unable to validate submitted POD data")
 
@@ -845,12 +846,12 @@ class MIDAS3PublishingService(PublishSystem):
         if not isinstance(pod, Mapping):
             raise TypeError("Not a dictionary: "+str(pod)[:20]+"...")
         if self.cfg.get('require_valid_pod', True):
-            self._validate_pod(pod)
+            self._validate_pod(pod, DEF_POD_DATASET_SCHEMA)
         if not pod.get('identifier'):
-            raise ValidationError("POD record missing required property: identifier")
+            raise ejs.ValidationError("POD record missing required property: identifier")
         if pod.get('accessLevel') != 'public':
-            raise ValidationError("Unacceptable accessLevel property value for preservation: " +
-                                  str(pod.get('accessLevel')))
+            raise ejs.ValidationError("Unacceptable accessLevel property value for preservation: " +
+                                      str(pod.get('accessLevel')))
 
     def preserve_update(self, pod, async=None):
         """

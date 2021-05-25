@@ -4,6 +4,7 @@ import yaml
 import unittest as test
 from collections import OrderedDict
 from copy import deepcopy
+from StringIO import StringIO
 
 from nistoar.testing import *
 from nistoar.pdr import utils
@@ -218,6 +219,54 @@ class TestPreserveHandler(test.TestCase):
 
         stat = json.loads("\n".join(body))
         self.assertEqual(stat['state'], ps.READY)
+
+
+    def test_preserve_badjson(self):
+        req = {
+            'REQUEST_METHOD': "PUT",
+            'CONTENT_TYPE': 'application/json',
+            'PATH_INFO': 'midas/'+self.midasid,
+            'HTTP_AUTHORIZATION': 'Bearer secret'
+        }
+        req['wsgi.input'] = StringIO('{goob="gurn" "foo": "bar"')
+        self.hdlr = self.gethandler(req['PATH_INFO'], req)
+
+        body = self.hdlr.handle()
+        self.assertIn("400 ", self.resp[0])
+        self.assertIn("Input not parseable as JSON:", "\n".join(body))
+
+
+    def test_preserve_wrongid(self):
+        req = {
+            'REQUEST_METHOD': "PUT",
+            'CONTENT_TYPE': 'application/json',
+            'PATH_INFO': 'midas/'+self.midasid,
+            'HTTP_AUTHORIZATION': 'Bearer secret'
+        }
+        req['wsgi.input'] = StringIO('{"identifier": "mds00000"}')
+        self.hdlr = self.gethandler(req['PATH_INFO'], req)
+
+        body = self.hdlr.handle()
+        self.assertIn("400 ", self.resp[0])
+        self.assertIn("Wrong POD record for ID", self.resp[0])
+        self.assertIn("Wrong POD record for ID:", "\n".join(body))
+
+
+    def test_preserve_invalidpod(self):
+        req = {
+            'REQUEST_METHOD': "PUT",
+            'CONTENT_TYPE': 'application/json',
+            'PATH_INFO': 'midas/'+self.midasid,
+            'HTTP_AUTHORIZATION': 'Bearer secret'
+        }
+        req['wsgi.input'] = StringIO('{"identifier": "%s", "accessLevel": "public", "distribution": true}'
+                                     % self.midasid)
+        self.hdlr = self.gethandler(req['PATH_INFO'], req)
+
+        body = self.hdlr.handle()
+        self.assertIn("400 ", self.resp[0])
+        self.assertIn("Input is not a valid POD record", self.resp[0])
+        self.assertIn("Input is not a valid POD record:", "\n".join(body))
 
 
     def test_preserve_cold(self):
