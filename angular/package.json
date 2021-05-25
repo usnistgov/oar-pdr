@@ -10,6 +10,7 @@
     "start": "ng serve",
     "build": "ng build",
     "test": "ng test",
+    "debug-test": "ng test --watch=true --browsers=DebugChrome",
     "lint": "ng lint oar-lps",
     "build:client-and-server-bundles": "ng build --prod && ng run oar-lps:server:production",
     "build:prerender": "npm run build:client-and-server-bundles && npm run compile:server && npm run webpack:server && npm run generate:prerender",
