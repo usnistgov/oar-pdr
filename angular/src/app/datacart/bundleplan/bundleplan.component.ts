@@ -73,7 +73,6 @@ export class BundleplanComponent implements OnInit {
     emailBodyBase: string = 'The information below describes an error that occurred while downloading data via the data cart. %0D%0A%0D%0A [From the PDR Team:  feel free to add additional information about the failure or your questions here. Thanks for sending this message!] %0D%0A%0D%0A';
 
     showMessage: boolean = true;
-    distApi: string;
 
     problemZip: ZipData = {
         fileName: "",
