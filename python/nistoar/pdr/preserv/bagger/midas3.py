@@ -739,7 +739,7 @@ class MIDASMetadataBagger(SIPBagger):
                               "publication.")
                 if self.previd:
                     self.bagbldr.update_annotations_for("", {"replaces": self.previd}, message="")
-                    self.update_bagger_metadata_for('', {"replacedEDI": self.previd})
+                    # self.update_bagger_metadata_for('', {"replacedEDI": self.previd})
 
         if not os.path.exists(self.bagdir):
             self.bagbldr.ensure_bag_structure()
@@ -1091,7 +1091,7 @@ class MIDASMetadataBagger(SIPBagger):
             md = self.bagbldr.describe_data_file(inpath, destpath, examine)
 
             if self.fileExaminer:
-                md["_status"] = "in progress"
+                md["__status"] = "in progress"
                 
                 # the file examiner will calculate the file's checksum;
                 # for now though, see if there is an associated checksum file 
@@ -1360,8 +1360,8 @@ class MIDASMetadataBagger(SIPBagger):
             
                 md = self.bagger.bagbldr.describe_data_file(location, filepath,
                                                             True, ct)
-                if '_status' in md:
-                    md['_status'] = "updated"
+                if '__status' in md:
+                    md['__status'] = "updated"
 
                 # it's possible that this file has been deleted while this
                 # thread was launched; make sure it still exists
@@ -1373,8 +1373,8 @@ class MIDASMetadataBagger(SIPBagger):
 
                 md = self.bagger.bagbldr.update_metadata_for(filepath, md, ct,
                                    "async metadata update for file, "+filepath)
-                if '_status' in md:
-                    del md['_status']
+                if '__status' in md:
+                    del md['__status']
                     self.bagger.bagbldr.replace_metadata_for(filepath, md, '')
                 self.bagger._mark_filepath_synced(filepath)
 
@@ -1927,7 +1927,7 @@ class PreservationBagger(SIPBagger):
         # remove non-standard, administrative metadata from pod
         if os.path.exists(self.bagbldr.bag.pod_file()):
             md = self.bagbldr.bag.pod_record()
-            rmkeys = [k for k in md.keys() if k.startswith('_')]
+            rmkeys = [k for k in md.keys() if k.startswith('__')]
             if len(rmkeys) > 0:
                 for key in rmkeys:
                     del md[key]
@@ -1939,7 +1939,7 @@ class PreservationBagger(SIPBagger):
                 if mdfile in files:
                     nf = os.path.join(root, mdfile)
                     md = utils.read_json(nf)
-                    rmkeys = [k for k in md.keys() if k.startswith('_')]
+                    rmkeys = [k for k in md.keys() if k.startswith('__')]
                     if len(rmkeys) > 0:
                         for key in rmkeys:
                             del md[key]

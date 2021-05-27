@@ -13,6 +13,7 @@ from .base import sys as _sys
 from .. import (ConfigurationException, StateException, CorruptedBagError,
                 NERDError)
 from . import utils as bagutils
+from ...config import merge_config
 from ...describe import rmm
 from ... import distrib
 from ...exceptions import IDNotFound
@@ -406,9 +407,9 @@ class UpdatePrepper(object):
         bgrmdf = os.path.join(inbag, self._bgrmdf)
         if os.path.exists(bgrmdf):
             md = utils.read_json()
-            md = merge_config(mdates, md)
         else:
             md = OrderedDict()
+        md = merge_config(mdata, md)
         self._baggermd_replace(md, inbag)
         
 

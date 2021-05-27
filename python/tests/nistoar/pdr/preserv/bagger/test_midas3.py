@@ -1300,12 +1300,12 @@ class TestPreservationBagger(test.TestCase):
         data = utils.read_json(self.bagr.bagbldr.bag.pod_file())
         data["_goober"] = "I am a"
         utils.write_json(data, self.bagr.bagbldr.bag.pod_file())
-        self.bagr.bagbldr.update_metadata_for("", {"_goober": "I am a"})
-        self.bagr.bagbldr.update_annotations_for("trial1.json", {"_goober": "I am a"})
+        self.bagr.bagbldr.update_metadata_for("", {"__goober": "I am a"})
+        self.bagr.bagbldr.update_annotations_for("trial1.json", {"__goober": "I am a"})
 
         # test mods were successful
         data = self.bagr.bagbldr.bag.nerd_metadata_for('trial1.json', True)
-        self.assertIn('_goober', data.keys())
+        self.assertIn('__goober', data.keys())
         dirtyfiles = []
         dirtymd = []
         for (r, d, files) in os.walk(self.bagr.bagdir):
@@ -1325,11 +1325,11 @@ class TestPreservationBagger(test.TestCase):
                                                      "trial1.json", "_goober.txt")),
                                         "metadata admin file not removed")
         data = utils.read_json(self.bagr.bagbldr.bag.pod_file())
-        self.assertNotIn('_goober', data.keys())
+        self.assertNotIn('__goober', data.keys())
         data = self.bagr.bagbldr.bag.nerd_metadata_for('', True)
-        self.assertNotIn('_goober', data.keys())
+        self.assertNotIn('__goober', data.keys())
         data = self.bagr.bagbldr.bag.nerd_metadata_for('trial1.json', True)
-        self.assertNotIn('_goober', data.keys())
+        self.assertNotIn('__goober', data.keys())
 
         # confirm that we are fully clean
         dirtyfiles = []
@@ -1338,7 +1338,7 @@ class TestPreservationBagger(test.TestCase):
             dirtyfiles.extend([os.path.join(r,f) for f in files if f.startswith("_")])
             for mdfile in [f for f in files if f in ['pod.json', 'nerdm.json', 'annot.json']]:
                 data = utils.read_json(os.path.join(r, mdfile))
-                if len([p for p in data.keys() if p.startswith('_')]) > 0:
+                if len([p for p in data.keys() if p.startswith('__')]) > 0:
                     dirtymd.append(os.path.join(r, mdfile))
         self.assertEqual(len(dirtyfiles), 0)
         self.assertEqual(len(dirtymd), 0)

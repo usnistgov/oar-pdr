@@ -604,7 +604,7 @@ class MIDASMetadataBagger(SIPBagger):
                                                  not self.fileExaminer)
 
             if self.fileExaminer:
-                md["_status"] = "in progress"
+                md["__status"] = "in progress"
                 
                 # the file examiner will calculate the file's checksum
                 # asynchronously; for now though, see if there is an associated
@@ -749,12 +749,12 @@ class MIDASMetadataBagger(SIPBagger):
             
                 md = self.bagger.bagbldr.describe_data_file(location, filepath,
                                                             True, ct)
-                if '_status' in md:
-                    md['_status'] = "updated"
+                if '__status' in md:
+                    md['__status'] = "updated"
                 md = self.bagger.bagbldr.update_metadata_for(filepath, md, ct,
                                    "async metadata update for file, "+filepath)
-                if '_status' in md:
-                    del md['_status']
+                if '__status' in md:
+                    del md['__status']
                     self.bagger.bagbldr.replace_metadata_for(filepath, md, '')
                 self.bagger._mark_filepath_synced(filepath)
 
