@@ -6,6 +6,7 @@ from nistoar.pdr.preserv import PreservationException
 from nistoar.pdr.preserv.service import siphandler as sip
 from nistoar.pdr.preserv.service import status
 from nistoar.pdr.preserv.bagger import midas3 as midas
+from nistoar.pdr.preserv.bagit import BagBuilder
 
 # datadir = nistoar/preserv/data
 datadir = os.path.join( os.path.dirname(os.path.dirname(__file__)), "data" )
@@ -261,6 +262,111 @@ class TestMIDAS3SIPHandler(test.TestCase):
         self.assertGreater(os.stat(destfile).st_size, 1)
             
         
+
+    def test_bagit_wdeactiv8(self):
+        self.assertEqual(self.sip.state, status.FORGOTTEN)
+        self.assertEqual(len(os.listdir(self.sip.stagedir)), 0)
+
+        bldr = BagBuilder(os.path.dirname(self.sipdir), os.path.basename(self.sipdir))
+        bldr.update_metadata_for("", {"status": "removed"})
+        bldr.disconnect_logfile()
+
+        self.sip.bagit()
+        self.assertTrue(os.path.exists(os.path.join(self.storedir, 
+                                          self.midasid+".1_0_0.mbag0_4-0.zip")))
+        self.assertTrue(os.path.exists(os.path.join(self.storedir, 
+                                          self.midasid+".1_0_0.mbag0_4-0.zip.sha256")))
+        self.assertTrue(os.path.exists(os.path.join(self.storedir, 
+                                          self.midasid+".1_0_0.mbag0_4-0.zip.removed")))
+        self.assertTrue(os.path.exists(os.path.join(self.storedir, 
+                                          self.midasid+".1_0_0.mbag0_4-0.zip.sha256.removed")))
+        
+
+    def test_bagit_wdeactiv8_2(self):
+        self.assertEqual(self.sip.state, status.FORGOTTEN)
+        self.assertEqual(len(os.listdir(self.sip.stagedir)), 0)
+
+        self.sip.bagit()
+        self.assertTrue(os.path.exists(os.path.join(self.storedir, 
+                                          self.midasid+".1_0_0.mbag0_4-0.zip")))
+        self.assertTrue(os.path.exists(os.path.join(self.storedir, 
+                                          self.midasid+".1_0_0.mbag0_4-0.zip.sha256")))
+        self.assertTrue(not os.path.exists(os.path.join(self.storedir, 
+                                          self.midasid+".1_0_0.mbag0_4-0.zip.removed")))
+        self.assertTrue(not os.path.exists(os.path.join(self.storedir, 
+                                          self.midasid+".1_0_0.mbag0_4-0.zip.sha256.removed")))
+
+        # copy input bag to writable location
+        if not os.path.exists(self.sipdir):
+            shutil.copytree(self.testsip, self.sipdir)
+
+        bldr = BagBuilder(os.path.dirname(self.sipdir), os.path.basename(self.sipdir))
+        bldr.update_metadata_for("", {"version": "1.0.1", "status": "removed"})
+        bldr.disconnect_logfile()
+        self.sip = sip.MIDAS3SIPHandler(self.midasid, self.config)
+
+        self.sip.bagit()
+        self.assertTrue(os.path.exists(os.path.join(self.storedir, 
+                                          self.midasid+".1_0_0.mbag0_4-0.zip")))
+        self.assertTrue(os.path.exists(os.path.join(self.storedir, 
+                                          self.midasid+".1_0_0.mbag0_4-0.zip.sha256")))
+        self.assertTrue(os.path.exists(os.path.join(self.storedir, 
+                                          self.midasid+".1_0_0.mbag0_4-0.zip.removed")))
+        self.assertTrue(os.path.exists(os.path.join(self.storedir, 
+                                          self.midasid+".1_0_0.mbag0_4-0.zip.sha256.removed")))
+        self.assertTrue(os.path.exists(os.path.join(self.storedir, 
+                                          self.midasid+".1_0_1.mbag0_4-0.zip")))
+        self.assertTrue(os.path.exists(os.path.join(self.storedir, 
+                                          self.midasid+".1_0_1.mbag0_4-0.zip.sha256")))
+        self.assertTrue(os.path.exists(os.path.join(self.storedir, 
+                                          self.midasid+".1_0_1.mbag0_4-0.zip.removed")))
+        self.assertTrue(os.path.exists(os.path.join(self.storedir, 
+                                          self.midasid+".1_0_1.mbag0_4-0.zip.sha256.removed")))
+
+        
+    def test_bagit_wdeactiv8_3(self):
+        self.assertEqual(self.sip.state, status.FORGOTTEN)
+        self.assertEqual(len(os.listdir(self.sip.stagedir)), 0)
+
+        self.sip.bagit()
+        self.assertTrue(os.path.exists(os.path.join(self.storedir, 
+                                          self.midasid+".1_0_0.mbag0_4-0.zip")))
+        self.assertTrue(os.path.exists(os.path.join(self.storedir, 
+                                          self.midasid+".1_0_0.mbag0_4-0.zip.sha256")))
+        self.assertTrue(not os.path.exists(os.path.join(self.storedir, 
+                                          self.midasid+".1_0_0.mbag0_4-0.zip.removed")))
+        self.assertTrue(not os.path.exists(os.path.join(self.storedir, 
+                                          self.midasid+".1_0_0.mbag0_4-0.zip.sha256.removed")))
+
+        # copy input bag to writable location
+        if not os.path.exists(self.sipdir):
+            shutil.copytree(self.testsip, self.sipdir)
+
+        bldr = BagBuilder(os.path.dirname(self.sipdir), os.path.basename(self.sipdir))
+        bldr.update_metadata_for("", {"version": "1.1.0", "status": "removed"})
+        bldr.disconnect_logfile()
+        self.sip = sip.MIDAS3SIPHandler(self.midasid, self.config)
+
+        self.sip.bagit()
+        self.assertTrue(os.path.exists(os.path.join(self.storedir, 
+                                          self.midasid+".1_0_0.mbag0_4-0.zip")))
+        self.assertTrue(os.path.exists(os.path.join(self.storedir, 
+                                          self.midasid+".1_0_0.mbag0_4-0.zip.sha256")))
+        self.assertTrue(not os.path.exists(os.path.join(self.storedir, 
+                                          self.midasid+".1_0_0.mbag0_4-0.zip.removed")))
+        self.assertTrue(not os.path.exists(os.path.join(self.storedir, 
+                                          self.midasid+".1_0_0.mbag0_4-0.zip.sha256.removed")))
+        self.assertTrue(os.path.exists(os.path.join(self.storedir, 
+                                          self.midasid+".1_1_0.mbag0_4-0.zip")))
+        self.assertTrue(os.path.exists(os.path.join(self.storedir, 
+                                          self.midasid+".1_1_0.mbag0_4-0.zip.sha256")))
+        self.assertTrue(os.path.exists(os.path.join(self.storedir, 
+                                          self.midasid+".1_1_0.mbag0_4-0.zip.removed")))
+        self.assertTrue(os.path.exists(os.path.join(self.storedir, 
+                                          self.midasid+".1_1_0.mbag0_4-0.zip.sha256.removed")))
+
+        
+
     def test_is_preserved(self):
         self.assertEqual(self.sip.state, status.FORGOTTEN)
         self.assertFalse(self.sip._is_preserved())

@@ -212,7 +212,9 @@ class TestUpdateMetadataBagger(test.TestCase):
         bag = NISTBag(self.updbagdir)
         nerdm = bag.nerdm_record(True)
         self.assertEqual(nerdm['ediid'], self.midasid)
-        self.assertEqual(nerdm['replaces'], self.prevmidasid)
+        self.assertEqual(len(nerdm.get('replaces',[])), 1)
+        self.assertEqual(nerdm['replaces'][0]['ediid'], self.prevmidasid)
+        self.assertTrue(nerdm['replaces'][0]['@id'].startswith("doi:"))
         self.assertEqual(nerdm['@id'], 'ark:/88434/edi00hw91c')
 
     def test_ensure_base_bag_onupdate2(self):
@@ -247,7 +249,10 @@ class TestUpdateMetadataBagger(test.TestCase):
         bag = NISTBag(self.updbagdir)
         nerdm = bag.nerdm_record(True)
         self.assertEqual(nerdm['ediid'], self.midasid)
-        self.assertEqual(nerdm['replaces'], self.prevmidasid)
+        self.assertEqual(len(nerdm.get('replaces',[])), 1)
+        self.assertIn('ediid', nerdm['replaces'][0])
+        self.assertEqual(nerdm['replaces'][0]['ediid'], self.prevmidasid)
+        self.assertTrue(nerdm['replaces'][0]['@id'].startswith("doi:"))
         self.assertEqual(nerdm['@id'], 'ark:/88434/edi00hw91c')
 
     def test_apply_pod_onupdate(self):
@@ -268,7 +273,9 @@ class TestUpdateMetadataBagger(test.TestCase):
         bag = NISTBag(self.updbagdir)
         nerdm = bag.nerdm_record(True)
         self.assertEqual(nerdm['ediid'], self.midasid)
-        self.assertEqual(nerdm['replaces'], self.prevmidasid)
+        self.assertEqual(len(nerdm.get('replaces',[])), 1)
+        self.assertEqual(nerdm['replaces'][0]['ediid'], self.prevmidasid)
+        self.assertTrue(nerdm['replaces'][0]['@id'].startswith("doi:"))
         self.assertEqual(nerdm['@id'], 'ark:/88434/edi00hw91c')
         self.assertEqual(nerdm['doi'], 'doi:10.80443/mds8-8888')
 

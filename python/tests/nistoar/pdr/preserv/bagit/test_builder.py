@@ -1728,7 +1728,7 @@ class TestBuilder2(test.TestCase):
         self.assertEqual(len(oxum), 1)
         oxum = [int(n) for n in oxum[0].split(': ')[1].split('.')]
         self.assertEqual(oxum[1], 14)
-        self.assertEqual(oxum[0], 12180)  # this will change if logging changes
+        self.assertEqual(oxum[0], 12207)  # this will change if logging changes
 
         bagsz = [l for l in lines if "Bag-Size: " in l]
         self.assertEqual(len(bagsz), 1)

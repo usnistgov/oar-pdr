@@ -34,6 +34,7 @@ from . import status
 from ...ingest.rmm import IngestClient
 from ...doimint import DOIMintingClient
 from ...utils import write_json
+from ... import distrib
 
 log = logging.getLogger(_sys.system_abbrev).getChild(_sys.subsystem_abbrev)
 
@@ -980,6 +981,11 @@ class MIDAS3SIPHandler(SIPHandler):
 
             raise PreservationException(msg, [str(ex)])
 
+        if nerdm.get('status', 'available') == "removed":
+            # This dataset needs to be "deactivated": make this version and previous minor versions
+            # inaccessable from the public bucket.
+            self._remove_bagfile_access(nerdm['ediid'], nerdm['version'], destdir, self.bagger.cfg)
+
         # Now write copies of the checksum files to the review SIP dir.
         # MIDAS will scoop these up and save them in its database.
         # The file with sequence number 0 must be written last; this is a
@@ -1108,6 +1114,57 @@ class MIDAS3SIPHandler(SIPHandler):
                          headers={'Authorization': "Bearer "+self.cfg.get('auth_key')})
 
         log.info("Completed preservation of SIP %s", self.bagger.name)
+
+    def _remove_bagfile_access(self, ediid, version, destdir, baggercfg):
+        aipid = re.sub(r'^ark:/\d+/', '', ediid)
+        distsvc = None
+        scfg = baggercfg.get('repo_access',{}).get('distrib_service',{})
+        if scfg:
+            distsvc = distrib.RESTServiceClient(scfg.get('service_endpoint'))
+            distsvc = distrib.BagDistribClient(aipid, distsvc)
+        else:
+            log.warn("No access to remote long-term storage for deactivating bag files: " +
+                     "missing configuration: distrib_service")
+            log.warn("Proceeding with deactivation using local storage dir")
+
+        majver = re.sub(r'\d+$', '', version)
+
+        # find the available bags/versions for this aipid via the distribution service
+        rmvers = set()
+        if distsvc:
+            rmvers.update([v for v in distsvc.list_versions() if v.startswith(majver)])
+
+        # there may be additional bags that have been copied to local LTS but which have
+        # not yet migrated to the AWS bucket that the distribution service sees; merge in
+        # the bags/versions found locally.
+        pfx = aipid+"."
+        localbags = [bagutils.BagName(b) for b in os.listdir(destdir)
+                                         if b.startswith(pfx) and bagutils.is_legal_bag_name(b)]
+        rmvers.update([b.version for b in localbags if b.version.startswith(majver)])
+
+        def touch_file(filepath):
+            open(filepath, 'a').close()
+
+        for ver in rmvers:
+            bags = set()
+            if distsvc:
+                bgs = []
+                try:
+                    bgs = distsvc.list_for_version(ver)
+                except distrib.DistribResourceNotFound as ex:
+                    pass
+                bags.update(bgs)
+            bags.update([str(b) for b in localbags if b.version == ver])
+            for bagf in bags:
+                sema = os.path.join(destdir, bagf) + ".removed"
+                if not os.path.exists(sema):
+                    touch_file(sema)
+
+                sema = os.path.join(destdir, bagf) + ".sha256.removed"
+                if not os.path.exists(sema):
+                    touch_file(sema)
+
+        return
         
     def _is_preserved(self):
         """

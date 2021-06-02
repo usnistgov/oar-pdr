@@ -723,8 +723,24 @@ class MIDASMetadataBagger(SIPBagger):
             self.log.info("Recasting existing metadata bag to new EDI-ID: %s -> %s", 
                           self.previd, self.midasid)
             self.bagbldr.ensure_bagdir()  # sets builders bag instance
-            self.bagbldr.update_metadata_for("", {"ediid": self.midasid}, message="EDI ID updated")
-            self.bagbldr.update_annotations_for("", {"replaces": self.previd}, message="")
+            resmd = self.bagbldr.bag.nerd_metadata_for("", True)
+            oldediid = self.bagbldr.ediid
+            self.bagbldr.ediid = self.midasid
+
+            # add a replaces reference
+            replaces = resmd.get('replaces', [])
+            newid = resmd.get('doi', resmd.get('@id'))
+            replaces.append(OrderedDict([
+                ("@id", newid),
+                ("ediid", oldediid),
+                ("issued", resmd.get('issued', resmd.get('modified','')))
+            ]))
+            if 'title' in resmd:
+                replaces[-1]['title'] = resmd['title']
+            if 'version' in resmd:
+                replaces[-1]['version'] = re.sub(r'\+\s*\([^\)]+\)', '', resmd['version'])
+            self.bagbldr.update_annotations_for("", {"replaces": replaces}, message="adding replacing info")
+
             self.update_bagger_metadata_for('', {"replacedEDI": self.previd})
 
             self.prepared = True
@@ -738,8 +754,10 @@ class MIDASMetadataBagger(SIPBagger):
                 self.log.info("Working bag initialized with metadata from previous "
                               "publication.")
                 if self.previd:
-                    self.bagbldr.update_annotations_for("", {"replaces": self.previd}, message="")
+                    # self.bagbldr.update_annotations_for("", {"replaces": replaces},
+                    #                                     message="adding replacing info")
                     # self.update_bagger_metadata_for('', {"replacedEDI": self.previd})
+                    pass
 
         if not os.path.exists(self.bagdir):
             self.bagbldr.ensure_bag_structure()
@@ -760,6 +778,9 @@ class MIDASMetadataBagger(SIPBagger):
             self.bagbldr.update_metadata_for("", updmd)
 
             self.sip.nerd = None  # set by ensure_res_metadata()
+
+        else:
+            self.bagbldr.ensure_bagdir()
 
         if not os.path.isfile(self.baggermd_file_for('')):
             self.update_bagger_metadata_for('', {
@@ -1210,7 +1231,8 @@ class MIDASMetadataBagger(SIPBagger):
                     ver.append(0)
 
                 bmd = self.baggermd_for('')
-                if len(self.datafiles) > 0 or bmd.get('replacedEDI'):
+                if self.sip.nerd.get('') != "removed" and \
+                   (len(self.datafiles) > 0 or bmd.get('replacedEDI')):
                     # either there're data files waiting to be included; it's a data update
                     uptype = _DATA_UPDATE
                     ver[1] += 1
@@ -1263,6 +1285,11 @@ class MIDASMetadataBagger(SIPBagger):
                                  ".v"+re.sub(r'\.','_', self.sip.nerd['version']),
                                  relhist['@id']))
             ]))
+            if self.sip.nerd.get('status', 'available') == 'removed':
+                # need to deprecate all previous minor versions
+                self._set_history_deactivated(relhist)
+            elif self.sip.nerd.get('status', 'available') != 'available':
+                verhist[-1]['status'] = self.sip.nerd.get('status')
             if update_reason is None:
                 if uptype == _MDATA_UPDATE:
                     update_reason = 'metadata update'
@@ -1278,7 +1305,16 @@ class MIDASMetadataBagger(SIPBagger):
         self.bagbldr.record("Preparing for preservation of %s by setting version, "
                             "release history", self.sip.nerd['version'])
         return self.sip.nerd
-            
+
+    def _set_history_deactivated(self, relhist):
+        # Note: possible error mode: if files were added without triggering an edi-id change,
+        # those major versions will not get marked as removed.  
+        lastver = verhist[-1].get('version','1.0.0')
+        lastmaj = re.sub(r'\.\d+$', '', lastver)
+        for rel in verhist:
+            if rel.get('version', '').startswith(lastmaj):
+                rel['status'] = 'removed'
+        return relhist
         
     class _AsyncFileExaminer():
         """

@@ -3,11 +3,11 @@ This bagger submodule provides functions for preparing an update to a previously
 preserved collection.  This includes a service client for retrieving previous
 head bags from cache or long-term storage.  
 """
-import os, shutil, json, logging, re
+import os, shutil, json, logging, re, time
 from abc import ABCMeta, abstractmethod, abstractproperty
 from collections import OrderedDict
 from zipfile import ZipFile
-from time import mktime
+from datetime import datetime
 
 from .base import sys as _sys
 from .. import (ConfigurationException, StateException, CorruptedBagError,
@@ -330,7 +330,7 @@ class UpdatePrepper(object):
             for entry in zip.infolist():
                 zip.extract(entry, destdir)
                 extracted = os.path.join(destdir, entry.filename)
-                date_time = mktime(entry.date_time + (0, 0, -1))
+                date_time = time.mktime(entry.date_time + (0, 0, -1))
 
                 if os.path.isdir(extracted):
                     dirs[extracted] = date_time
@@ -471,11 +471,26 @@ class UpdatePrepper(object):
 
         if foraip:
             # update the EDI-ID if this represents a change in the EDI-ID
+            oldediid = nerdm['ediid']
             foraip = re.sub(r'^ark:/\d+/','',foraip)
             ediid = foraip
             if len(ediid) < 30:
                 ediid = ARK_PFX + ediid
             nerdm['ediid'] = ediid
+
+            if 'doi' in nerdm:
+                if 'replaces' not in nerdm:
+                    nerdm['replaces'] = []
+                now = datetime.fromtimestamp(time.time()).isoformat()
+                nerdm['replaces'].append(OrderedDict([
+                    ("@id", nerdm['doi']),
+                    ("ediid", oldediid),
+                    ("issued", nerdm.get('issued', nerdm.get('modified', now)))
+                ]))
+                if 'version' in nerdm:
+                    nerdm['replaces'][-1]['version'] = nerdm['version']
+                if 'title' in nerdm:
+                    nerdm['replaces'][-1]['title'] = nerdm['title']
 
         bag = BagBuilder(parent, os.path.basename(mdbag), {'validate_id': False},
                          nerdm.get('@id'), logger=self.log)
@@ -519,11 +534,22 @@ class UpdatePrepper(object):
         
         if foraip:
             # update the EDI-ID if this represents a change in the EDI-ID
+            oldediid = nerdm['ediid']
             foraip = re.sub(r'^ark:/\d+/','',foraip)
             ediid = foraip
             if len(ediid) < 30:
                 ediid = ARK_PFX + ediid
             nerdm['ediid'] = ediid
+
+            if 'doi' in nerdm:
+                if 'replaces' not in nerdm:
+                    nerdm['replaces'] = []
+                now = datetime.fromtimestamp(time.time()).isoformat()
+                nerdm['replaces'] = OrderedDict([
+                    ("@id", nerdm['doi']),
+                    ("ediid", oldediid),
+                    ("issued", nerdm.get('issued', nerdm.get('modified', now)))
+                ])
 
         bldr = BagBuilder(parent, bagname, {'validate_id': False},
                           nerd['@id'], logger=self.log)

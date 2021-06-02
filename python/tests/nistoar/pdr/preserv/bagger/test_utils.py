@@ -90,7 +90,7 @@ class TestBagName(test.TestCase):
         self.assertEqual(str(bn), bagname)
         self.assertEqual(bn.fields, ["mds3812", "1_3", "0_4", "14", "tgz"])
         self.assertEqual(bn.aipid, "mds3812")
-        self.assertEqual(bn.version, "1_3")
+        self.assertEqual(bn.version, "1.3")
         self.assertEqual(bn.multibag_profile, "0_4")
         self.assertEqual(bn.sequence, "14")
         self.assertEqual(bn.serialization, "tgz")

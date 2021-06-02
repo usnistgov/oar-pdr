@@ -238,6 +238,8 @@ class BagName(object):
     a list of bag names.  In particular, the constructor can be used as a key function
     passed to the sort function.  
     """
+    _todotre = re.compile(r'_')
+
     def __init__(self, bagname):
         """
         wrap a bag name
@@ -263,7 +265,7 @@ class BagName(object):
         also be part of later versions of the AIP.)  If the version is an empty string,
         it can be taken as version 0 or version 1.
         """
-        return self.fields[1]
+        return self._todotre.sub('.', self.fields[1])
 
     @property
     def multibag_profile(self):
