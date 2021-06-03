@@ -18,6 +18,7 @@ from nistoar.pdr import utils
 import nistoar.pdr.preserv.bagit.builder as bldr
 from nistoar.pdr.preserv.bagit import NISTBag
 import nistoar.pdr.preserv.bagger.midas3 as midas
+from nistoar.pdr.preserv.bagger import utils as bagutils
 import nistoar.pdr.exceptions as exceptions
 from nistoar.pdr.preserv import AIPValidationError
 
@@ -1026,6 +1027,70 @@ class TestMIDASMetadataBaggerUpload(test.TestCase):
         self.assertEqual(datafiles["trial3/trial3a.json"],
                          os.path.join(uplsip, "trial3/trial3a.json"))
         self.assertEqual(len(datafiles), 1)
+
+    def test_finalize_version_deactiv8(self):
+        stagedir = os.path.join(self.bagparent,"stage")
+        if not os.path.isdir(stagedir):
+            os.mkdir(stagedir)
+        nerddir = os.path.join(stagedir, "_nerd")
+        if not os.path.isdir(nerddir):
+            os.mkdir(nerddir)
+        storedir = os.path.join(self.bagparent,"store")
+        if not os.path.isdir(storedir):
+            os.mkdir(storedir)
+        config = {
+            'repo_access': {
+                'headbag_cache': stagedir,
+                'store_dir': storedir,
+            }
+        }
+        self.bagr = midas.MIDASMetadataBagger.fromMIDAS(self.midasid, self.bagparent,
+                                                        None, self.upldir, config=config)
+
+        inpodfile = os.path.join(self.upldir,"1491","_pod.json")
+        self.bagr.apply_pod(inpodfile)
+        self.bagr.ensure_data_files(examine="sync")
+
+        self.bagr.datafiles = {}  # trick into thinking there are no files to update
+
+        # trick into thinking its been published before
+        nerd = self.bagr.bagbldr.bag.nerd_metadata_for('', True)
+        relhist = nerd.get('releaseHistory')
+        if not relhist:
+            relhist = bagutils.create_release_history_for(nerd['@id'])
+        relhist['hasRelease'].append(OrderedDict([
+            ('version', "1.0.0"),
+            ('issued', '2021-10-09'),
+            ('@id', nerd['@id']+".v1_0_0")
+        ]))
+        self.bagr.bagbldr.update_metadata_for('', {
+            'version': "1.0.0",
+            'releaseHistory': relhist,
+            'status': "removed"
+        })
+        self.bagr.bagbldr.update_annotations_for('', {'version': "1.0.0+ (in edit)"})
+        nerd = self.bagr.bagbldr.bag.nerd_metadata_for('', True)
+        self.bagr.sip.nerd = nerd
+        self.assertEqual(nerd['version'], "1.0.0+ (in edit)")
+        self.assertEqual(nerd['status'], "removed")
+
+        with open(os.path.join(stagedir, self.midasid+".1_0_0.mbag0_4-0.zip"), 'w') as fd:
+            fd.write("\n")
+        self.bagr = midas.MIDASMetadataBagger.fromMIDAS(self.midasid, self.bagparent,
+                                                        None, self.upldir, config=config)
+        self.bagr.datafiles = {}
+        nerd = self.bagr.finalize_version()
+        self.assertEqual(nerd['version'], "1.0.1")
+        nerd = self.bagr.bagbldr.bag.nerd_metadata_for('', True)
+        self.assertEqual(nerd['version'], "1.0.1")
+
+        relhist = nerd.get('releaseHistory')
+        self.assertEqual(len(relhist['hasRelease']), 2)
+        for rel in relhist['hasRelease']:
+            self.assertEqual(rel['status'], "removed",
+                             "release status for version=%s: '%s' != 'removed'" % (str(rel.get('version')),
+                                                                                   str(rel.get('status'))))
+        
 
     def test_finalize_version(self):
         stagedir = os.path.join(self.bagparent,"stage")

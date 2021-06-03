@@ -1231,7 +1231,7 @@ class MIDASMetadataBagger(SIPBagger):
                     ver.append(0)
 
                 bmd = self.baggermd_for('')
-                if self.sip.nerd.get('') != "removed" and \
+                if self.sip.nerd.get('status') != "removed" and \
                    (len(self.datafiles) > 0 or bmd.get('replacedEDI')):
                     # either there're data files waiting to be included; it's a data update
                     uptype = _DATA_UPDATE
@@ -1279,7 +1279,7 @@ class MIDASMetadataBagger(SIPBagger):
             relhist['hasRelease'].append(OrderedDict([
                 ('version', self.sip.nerd['version']),
                 ('issued', issued),
-                ('@id', self.sip.nerd['@id']),
+                ('@id', self.sip.nerd['@id']+".v"+re.sub(r'\.','_',self.sip.nerd['version'])),
                 ('location', 'https://'+PDR_PUBLIC_SERVER+'/od/id/'+ \
                           re.sub(r'\.rel$',
                                  ".v"+re.sub(r'\.','_', self.sip.nerd['version']),
@@ -1287,7 +1287,7 @@ class MIDASMetadataBagger(SIPBagger):
             ]))
             if self.sip.nerd.get('status', 'available') == 'removed':
                 # need to deprecate all previous minor versions
-                self._set_history_deactivated(relhist)
+                self._set_history_deactivated(relhist['hasRelease'])
             elif self.sip.nerd.get('status', 'available') != 'available':
                 verhist[-1]['status'] = self.sip.nerd.get('status')
             if update_reason is None:
@@ -1309,9 +1309,9 @@ class MIDASMetadataBagger(SIPBagger):
     def _set_history_deactivated(self, relhist):
         # Note: possible error mode: if files were added without triggering an edi-id change,
         # those major versions will not get marked as removed.  
-        lastver = verhist[-1].get('version','1.0.0')
+        lastver = relhist[-1].get('version','1.0.0')
         lastmaj = re.sub(r'\.\d+$', '', lastver)
-        for rel in verhist:
+        for rel in relhist:
             if rel.get('version', '').startswith(lastmaj):
                 rel['status'] = 'removed'
         return relhist
