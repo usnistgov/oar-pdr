@@ -798,6 +798,8 @@ class MIDASMetadataBagger(SIPBagger):
         replaces = self.previd
         if replaces == self.midasid:
             replaces = None
+        if replaces:
+            replaces = re.sub(r'^ark:/\d+/', '', replaces)
         return self.prepsvc.prepper_for(self.name, replaces=replaces, log=self.log.getChild("prepper"))
                 
     def ensure_res_metadata(self):
