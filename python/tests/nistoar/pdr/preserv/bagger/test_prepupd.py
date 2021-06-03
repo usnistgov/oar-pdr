@@ -366,7 +366,7 @@ class TestUpdatePrepper(test.TestCase):
         self.assertIn('hasRelease', mdata['releaseHistory'])
         self.assertEquals(len(mdata['releaseHistory']['hasRelease']), 1)
         self.assertEquals(mdata['releaseHistory']['hasRelease'][0]['version'], "1.0")
-        self.assertEquals(mdata['releaseHistory']['hasRelease'][0]['@id'], mdata["@id"])
+        self.assertEquals(mdata['releaseHistory']['hasRelease'][0]['@id'], mdata["@id"]+".v1_0")
         self.assertIn('issued', mdata['releaseHistory']['hasRelease'][0])
 
         depinfof = os.path.join(bag.dir, "multibag", "deprecated-info.txt")

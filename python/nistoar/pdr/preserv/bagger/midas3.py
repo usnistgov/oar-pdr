@@ -1223,7 +1223,7 @@ class MIDASMetadataBagger(SIPBagger):
             if prepr:
                 lastver = prepr.latest_version(["bag-cache", "bag-store", "repo"])
             if lastver == "0":
-                self.log.debug("finalizing version: dataset has never been published; setting version to 1.0.0")
+                self.log.info("finalizing version: dataset has never been published; setting version to 1.0.0")
                 self.sip.nerd['version'] = "1.0.0"
 
             else:

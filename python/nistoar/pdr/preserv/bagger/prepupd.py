@@ -239,16 +239,18 @@ class UpdatePrepper(object):
             # try again (now that the cache is clean)
             return self.cacher.cache_headbag(aipid, version)
 
-    def cache_nerdm_rec(self):
+    def cache_nerdm_rec(self, shallow=False):
         """
         ensure a cached copy of the latest NERDm record from the repository.
         This is called for datasets that are in the PDL but have not gone 
         through the preservation service.  
+        :param str shallow:  if True, cache the ancestor record if this is an unpublished AIP
+                             derived from a published one.  (default: False)
         :rtype: str giving the path to the cached NERDm record, or
                 None if no such bag exists.  
         """
         out = self._cache_nerdm_rec_for(self.aipid)
-        if not out and self._prevaipid != self.aipid:
+        if not shallow and not out and self._prevaipid != self.aipid:
             out = self._cache_nerdm_rec_for(self._prevaipid) # get only latest version
         return out
 
@@ -284,12 +286,14 @@ class UpdatePrepper(object):
 
         return os.path.join(self.storedir, bagutils.find_latest_head_bag(foraip))
 
-    def aip_exists(self):
+    def aip_exists(self, deep=False):
         """
         return true if a previously ingested AIP with the current ID exists in 
-        the repository.  
+        the repository.  By default, this function only considered the AIP ID attached to 
+        this prepper: if this AIP is derived from a previously published AIP with a different ID, 
+        this function returns False.  If deep=True, then this case will return True.  
         """
-        return self.cache_nerdm_rec() is not None
+        return self.cache_nerdm_rec(shallow=not deep) is not None
         
     def _unpack_bag_as(self, bagfile, destbag):
         destdir = os.path.dirname(destbag)
@@ -664,8 +668,8 @@ class UpdatePrepper(object):
             relhist['hasRelease'].append(OrderedDict([
                 ('version', oldvers),
                 ('issued', issued),
-                ('@id', mdata['@id']),
-                ('location', 'https://'+PDR_SERVER+'data.nist.gov/od/id/'+
+                ('@id', mdata['@id'] + ".v" + re.sub(r'\.','_',oldvers)),
+                ('location', 'https://'+PDR_SERVER+'/od/id/'+
                              mdata['@id']+'.v'+re.sub(r'\.','_', oldvers))
             ]))
             if oldvers == "1.0.0" or oldvers == "1.0" or oldvers == "1":
