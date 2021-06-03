@@ -603,12 +603,18 @@ class UpdatePrepper(object):
 
     def _latest_version_from_nerdcache(self):
         nerdf = os.path.join(self.mdcache, self.aipid+".json")
+        if not os.path.exists(nerdf) and self._prevaipid:
+            nerdf = os.path.join(self.mdcache, self._prevaipid+".json")
         return self._latest_version_from_nerdmfile(nerdf)
 
     def _latest_version_from_dir(self, bagparent):
         foraip = [f for f in os.listdir(bagparent)
                     if f.startswith(self.aipid+'.') and
                        not f.endswith('.sha256')        ]
+        if self._prevaipid and not foraip:
+            foraip = [f for f in os.listdir(bagparent)
+                        if f.startswith(self._prevaipid+'.') and
+                           not f.endswith('.sha256')        ]
         if not foraip:
             return "0"
         latest = bagutils.find_latest_head_bag(foraip)

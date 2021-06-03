@@ -1817,7 +1817,7 @@ class PreservationBagger(SIPBagger):
         if len(self.datafiles) > 0 or bmd.get('replacedEDI') or firstpub:
             dates['revised'] = now
         ## by default, keep the issued data passed in from MIDAS
-        if 'issued' not in self.sip.nerd:
+        if not self.sip.nerd.get('issued'):
             dates['issued'] = now
         if self.sip.nerd.get('version','1.0.0') == "1.0.0":
             dates['firstIssued'] = self.sip.nerd.get('issued', now)
