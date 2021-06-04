@@ -204,12 +204,19 @@ export class ToolMenuComponent implements OnChanges {
         let totalDownloadSize = this.recordLevelMetrics.DataSetMetrics[0] != undefined?
             this.commonFunctionService.formatBytes(this.recordLevelMetrics.DataSetMetrics[0].total_size, 2) : 0;
 
-        subitems = [
-            this.createMenuItem('• Total dataset downloads: ' + totalDownload, null,null, null),
-            this.createMenuItem('• Total unique users: ' + totalUsers, null,null, null),
-            this.createMenuItem('• Total bytes downloaded: ' + totalDownloadSize, null,null, null),
-            this.createMenuItem('More ...', null,null, this.metricsUrl)
-        ];
+        if(totalDownload > 0){
+            subitems = [
+                this.createMenuItem(totalDownload>1?totalDownload.toString() + ' files downloaded.':totalDownload.toString() + ' file downloaded.', null,null, null),
+                this.createMenuItem(totalUsers > 1?totalUsers.toString() + ' users.':totalUsers.toString() + ' user.', null,null, null),
+                this.createMenuItem(totalDownloadSize.toString() + ' downloaded.', null,null, null),
+                this.createMenuItem('More ...', null,null, this.metricsUrl)
+            ];
+        }else{
+            subitems = [
+                this.createMenuItem('Metrics not available.', null,null, null)
+            ];           
+        }
+
 
         mitems.push({ label: "Dataset Metrics", items: subitems });
 

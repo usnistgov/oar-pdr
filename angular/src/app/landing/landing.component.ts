@@ -206,6 +206,7 @@ export class LandingComponent implements OnInit, OnChanges {
 
         this.createNewDataHierarchy();
         if (this.files.length > 0) {
+            console.log("this.files", this.files);
             this.setLeafs(this.files[0].data);
         }
 

@@ -7,9 +7,9 @@ import * as d3 from 'd3';
 
 // Test data: expect 3 bars
 let inputData = [
-    ["file01",103],
-    ["file03",73],
-    ["file02",206]
+    [".../file01",103,"/sub1/file01","file01"],
+    ["file03",73,"/sub2/file03","file03"],
+    ["file02",206,"/sub3/file02","file02"]
 ];
 
 describe('HorizontalBarchartComponent', () => {
@@ -38,9 +38,9 @@ describe('HorizontalBarchartComponent', () => {
 
         expect(component).toBeTruthy();
 
-        expect(component.data[0][0]).toEqual("file01");
-        expect(component.data[1][0]).toEqual("file02");
-        expect(component.data[2][0]).toEqual("file03");
+        expect(component.data[0][3]).toEqual("file01");
+        expect(component.data[1][3]).toEqual("file02");
+        expect(component.data[2][3]).toEqual("file03");
 
         let cmpel = fixture.nativeElement;
         let el = cmpel.querySelector("svg"); 
@@ -48,8 +48,8 @@ describe('HorizontalBarchartComponent', () => {
         expect(el).not.toBeNull();
 
         // should have the correct height
-        // 3 bars x 30/bar + bargin top (60) + margin bottom(20) = 170
-        expect(el.getAttribute("height")).toBe('170');
+        // 3 bars x 30/bar + margin top (30) + margin bottom(20) = 140
+        expect(el.getAttribute("height")).toBe('140');
 
         // should have the correct width
         expect(el.getAttribute("width")).toBe('770');
@@ -60,10 +60,10 @@ describe('HorizontalBarchartComponent', () => {
         expect(el).not.toBeNull();
         expect(el.length).toEqual(3);
 
-        // The width(value) of each bar should be 26
-        // We defined the bar width = 30. Total width of 3 bars = 90. There are 4 gaps and each gap = bar width / 10 = 3.
-        // So actual width of each bar = (90 - 4 * 3) / 3 = 26.
-        expect(Math.floor(el[0].getAttribute("height"))).toEqual(26);
+        // The width(value) of each bar should be 28
+        // We defined the bar width = 30. Total width of 3 bars = 90. There are 2 gaps and each gap = bar width / 10 = 3.
+        // So actual width of each bar = (90 - 2 * 3) / 3 = 28.
+        expect(Math.floor(el[0].getAttribute("height"))).toEqual(28);
 
         spyOn(component, 'sortBarChart').and.callThrough();
         let options: DebugElement[] = fixture.debugElement.queryAll(By.css('input[type="radio"]'));

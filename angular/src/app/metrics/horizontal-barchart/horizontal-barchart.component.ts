@@ -17,7 +17,7 @@ export class HorizontalBarchartComponent implements OnInit {
     @Input() yAxisLabel: string = "";
     @Input() inBrowser: boolean = false;
 
-    margin: any = { top: 60, bottom: 20, left: 50, right: 50};
+    margin: any = { top: 30, bottom: 20, left: 50, right: 50};
     svg: any;
     chart: any;
     width: number;
@@ -41,6 +41,7 @@ export class HorizontalBarchartComponent implements OnInit {
 
             this.createChart();
             if (this.data) {
+                console.log("Updating chart...");
                 this.updateChart();
             }
         }
@@ -52,8 +53,9 @@ export class HorizontalBarchartComponent implements OnInit {
      */
     initData(){
         this.data = JSON.parse(JSON.stringify(this.inputdata));
+
         this.data = this.data.sort(function(a, b) {
-            return d3.ascending(a[0], b[0]);
+            return d3.ascending(a[3], b[3]);
         });
 
         let nbars = this.data.length;
@@ -125,12 +127,12 @@ export class HorizontalBarchartComponent implements OnInit {
     }
 
     /**
-     * Sort the data and update the bar chart
+     * Sort the data by file name (4th column) and update the bar chart
      * @param event Sort option
      */
     sortBarChart(event) {
         var target = event.target;
-
+        console.log("this.data", this.data);
         switch(target.value) { 
             case '1': { 
                 this.data = this.data.sort(function(a, b) {
@@ -151,7 +153,7 @@ export class HorizontalBarchartComponent implements OnInit {
             default: { 
                 this.data = JSON.parse(JSON.stringify(this.inputdata));
                 this.data = this.data.sort(function(a, b) {
-                    return d3.ascending(a[0], b[0]);
+                    return d3.ascending(a[3], b[3]);
                 });
 
                 this.updateChart();
@@ -235,11 +237,11 @@ export class HorizontalBarchartComponent implements OnInit {
             .attr('text-anchor', 'middle')
             .text(`${this.yAxisLabel}`);
 
-        this.svg.append('text')
-            .attr('x', this.wholeChartWidth/2  + this.margin.right)
-            .attr('y', this.margin.top-40)
-            .attr('text-anchor', 'middle')
-            .text(`${this.xAxisLabel}`);
+        // this.svg.append('text')
+        //     .attr('x', this.wholeChartWidth/2  + this.margin.right)
+        //     .attr('y', this.margin.top-40)
+        //     .attr('text-anchor', 'middle')
+        //     .text(`${this.xAxisLabel}`);
     }
 
     /**
@@ -258,7 +260,8 @@ export class HorizontalBarchartComponent implements OnInit {
         
         // let xDomain = [0, d3.max(this.data, d => d[1])];
         // let yDomain = this.data.map(d => d[0]);
-        this.yScale.domain(this.data.map(d => d[0]));
+        this.yScale = d3.scaleBand().paddingInner(0.1);
+        this.yScale.domain(this.data.map(d => d[0])).rangeRound([0, this.height]);
         
         this.xAxis.transition().call(d3.axisTop(this.xScale).ticks(5));
         this.yAxis.transition().call(d3.axisLeft(this.yScale));
@@ -284,7 +287,8 @@ export class HorizontalBarchartComponent implements OnInit {
             .attr('class', 'bar')
             .attr('x', 0)
             .attr('y', d => this.yScale(d[0]))
-            .attr('height', this.yScale.bandwidth())
+            .attr('height', yScale.bandwidth())
+            // .attr('height', 10)
             .attr('width', 0) 
             .style('fill', (d, i) => this.colors(i))
             .on('mouseenter', function (actual, i) {
@@ -310,10 +314,10 @@ export class HorizontalBarchartComponent implements OnInit {
                   .style('fill', '#000')
 
                 tooltip
-                    .style("left", d3.event.pageX - 50 + "px")
-                    .style("top", d3.event.pageY - 90 + "px")
+                    .style("left", d3.event.pageX - 450 + "px")
+                    .style("top", d3.event.pageY - 120 + "px")
                     .style("display", "inline-block")
-                    .html("<div style='width:100%; padding: 10px;'> File name: "+(actual[0]) + "</div><div style='padding-bottom: 10px'>" + "Total Times of Downloads: " + (actual[1]) + "</div>");
+                    .html("<div style='width:100%; padding: 10px 10px 0px 10px;'> File path: "+(actual[2]) + "</div><div style='width:100%; padding: 0 10px 10px 10px;'>" + "Total Downloads: " + (actual[1]) + "</div>");
             })
             .on("mousemove", (actual) => {
                 tooltip
@@ -333,6 +337,9 @@ export class HorizontalBarchartComponent implements OnInit {
         
                 chart.selectAll('#limit').remove()
                 tooltip.html(``).style('display', 'none');
+            })
+            .on("click",function(d){   
+                console.log("I am clicked!", d[0]);
             });
 
         // This is where we animate the bars to actual width.
@@ -349,7 +356,8 @@ export class HorizontalBarchartComponent implements OnInit {
         label.exit().remove();
         label.enter().append("text").attr("class", "label");
 
-        this.chart.selectAll(".label").data(this.data)
+        this.chart.selectAll(".label")
+            .data(this.data)
             .attr('x', (d) => xScale(d[1])-30)
             .attr('y', (d) => yScale(d[0]) + yScale.bandwidth()*5/8)
             .attr('text-anchor', 'right')
@@ -366,6 +374,7 @@ export class HorizontalBarchartComponent implements OnInit {
             this.svg.selectAll('.axis-grid').remove();  
             this.svg.selectAll('.axis').remove();  
             this.svg.selectAll('.bar').remove();  
+            this.svg.selectAll('.label').remove();  
             this.svg.selectAll('text').remove();  
         } 
     }

@@ -25,6 +25,16 @@
     padding: 30px 50px 30px 50px;
 }
 
+.message-container {
+    border: 2px solid rgb(218, 218, 218);
+    margin: 1em auto 0em auto;
+    width: 90%;
+    height: fit-content;
+    padding: 30px 50px 30px 50px;
+    font-size: large;
+    text-align: center;
+}
+
 .mobile-grid-container {
     border: 2px solid rgb(218, 218, 218);
     margin: 1em auto 0em auto;
@@ -44,6 +54,7 @@
 .left-side-data {
     width: 90%; 
     margin: auto; 
+    margin-top: 2em;
     /* font-size:small; */
 }
 

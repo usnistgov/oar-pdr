@@ -1,16 +1,21 @@
-import { Component, OnInit, ViewChild, Inject, PLATFORM_ID, HostListener } from '@angular/core';
+import { Component, OnInit, ViewChild, Inject, PLATFORM_ID, HostListener, ElementRef } from '@angular/core';
 import { userInfo } from 'os';
 import { CommonFunctionService } from '../shared/common-function/common-function.service';
 import { ActivatedRoute } from '@angular/router';
 import { MetricsService } from '../shared/metrics-service/metrics.service';
 import { AppConfig } from '../config/config';
-import { TreeNode } from 'primeng/api';
+import { TreeNode } from 'primeng/primeng';
 import { saveAs } from 'file-saver';
 import { RecordLevelMetrics } from './metrics';
 import { DatePipe } from '@angular/common';
 import { HorizontalBarchartComponent } from './horizontal-barchart/horizontal-barchart.component';
 import { SearchService } from '../shared/search-service/search-service.service';
 import { isPlatformBrowser } from '@angular/common';
+import { NerdmRes } from '../nerdm/nerdm';
+import { GoogleAnalyticsService } from '../shared/ga-service/google-analytics.service';
+
+const MOBIL_LABEL_LIMIT = 20;
+const DESKTOP_LABEL_LIMIT = 50;
 
 @Component({
     selector: 'app-metrics',
@@ -24,11 +29,19 @@ export class MetricsComponent implements OnInit {
 
     // Data
     ediid: string;
-    files: any[] = [];
+    files: TreeNode[] = [];
     fileLevelData: any;
     firstTimeLogged: string = '';
     datasetTitle: string = '';
+    datasetSubtitle: string = '';
     lastDownloadDate: string = "";
+    filescount: number = 0;
+    record: NerdmRes = null;
+    metricsData: any[] = [];
+    totalFileLevelSuccessfulGet: number = 0;
+    totalFileLevelDownloadSize: number = 0;
+    totalFilesinChart: number = 0;
+    noDatasetSummary: boolean = false;
 
     // Chart
     chartData: Array<any>;
@@ -38,22 +51,33 @@ export class MetricsComponent implements OnInit {
     recordLevelTotalDownloads: number = 0;
     visible: boolean = true;
     cols: any[] = [];
+    cols1: any[] = [];
     fontSize: string = '16px';  // Default font size
-    noChartData: boolean = true;
+    noChartData: boolean = false;
 
     //Display
     screenSizeBreakPoint: number;
     screenWidth: number = 1080;
     mobileWidth: number = 500;
+    maxLabelLength = 50;
+    readyDisplay: boolean = false;
 
     // File tree
     isExpanded: boolean = false;
+
+    // Error handling
+    hasError: boolean = false;
+    errorMsg: string = "";
+    emailSubject: string = "";
+    emailBody: string = "";
 
     recordLevelData : RecordLevelMetrics;
         
     // injected as ViewChilds so that this class can send messages to it with a synchronous method call.
     @ViewChild(HorizontalBarchartComponent)
     private barchart: HorizontalBarchartComponent;
+
+    @ViewChild('panel0', { read: ElementRef }) public panel0: ElementRef<any>;
 
     constructor(
         private route: ActivatedRoute,
@@ -62,6 +86,7 @@ export class MetricsComponent implements OnInit {
         public commonFunctionService: CommonFunctionService,
         private datePipe: DatePipe,
         private searchService: SearchService,
+        public gaService: GoogleAnalyticsService,
         public metricsService: MetricsService) { 
 
             this.inBrowser = isPlatformBrowser(platformId);
@@ -69,12 +94,19 @@ export class MetricsComponent implements OnInit {
         }
 
     ngOnInit() {
+        this.detectScreenSize();
         this.recordLevelData = new RecordLevelMetrics();
 
         this.cols = [
             { field: 'name', header: 'Name', width: '60%' },
             { field: 'success_get', header: 'Downloads', width: '20%' },
             { field: 'download_size', header: 'File Size', width: '20%' }];
+
+        this.cols1 = [
+            { field: 'name', header: 'Name', width: '60%' },
+            { field: 'mediatype', header: 'Media Type', width: 'auto' },
+            { field: 'size', header: 'Size', width: 'auto' },
+            { field: 'download', header: 'Status', width: 'auto' }];
 
         // Expend the data tree to level one
         this.chart_title = "File Level Details";
@@ -86,31 +118,86 @@ export class MetricsComponent implements OnInit {
                 // Get dataset title
                 this.searchService.searchById(this.ediid, true).subscribe(md => {
                     if(md) {
+                        this.record = md as NerdmRes;
                         this.datasetTitle = md['title'];
+
+                        this.createNewDataHierarchy();
+                        
+                        if (this.files.length != 0){
+                            this.files = <TreeNode[]>this.files[0].data;
+                        }
+
+                        this.expandToLevel(this.files, true, 0, 1);
                     }
                 })
 
-                this.metricsService.getRecordLevelMetrics(this.ediid).subscribe(metricsData => {
+                this.metricsService.getRecordLevelMetrics(this.ediid).subscribe((metricsData) => {
                     this.recordLevelData = JSON.parse(JSON.stringify(metricsData));
+
                     if(this.recordLevelData.DataSetMetrics != undefined && this.recordLevelData.DataSetMetrics.length > 0){
                         this.firstTimeLogged = this.datePipe.transform(this.recordLevelData.DataSetMetrics[0].first_time_logged, "MMM d, y")
 
-                        this.xAxisLabel = "Total Downloads Since " + this.firstTimeLogged;
+                        // this.xAxisLabel = "Total Downloads Since " + this.firstTimeLogged;
+                        this.datasetSubtitle = "Metrics Since " + this.firstTimeLogged;
+                        this.noDatasetSummary = false;
+                    }else{
+                        this.noDatasetSummary = true;
                     }
+                },
+                (err) => {
+                    let dateTime = new Date();
+                    console.log("err", err);
+                    this.errorMsg = JSON.stringify(err);
+                    this.hasError = true;
+                    console.log('this.hasError', this.hasError);
+
+                    this.emailSubject = 'PDR: Error getting file level metrics data';
+                    this.emailBody =
+                        'The information below describes an error that occurred while downloading metrics data.' + '%0D%0A%0D%0A'
+                        + '[From the PDR Team:  feel free to add additional information about the failure or your questions here.  Thanks for sending this message!]' + '%0D%0A%0D%0A'
+                        + 'ediid:' + this.ediid + '%0D%0A'
+                        + 'Time: ' + dateTime.toString() + '%0D%0A%0D%0A'
+                        + 'Error message:%0D%0A' + JSON.stringify(err);
+
+                    this.readyDisplay = true;
                 });
 
-                this.metricsService.getDatasetMetrics(this.ediid).subscribe(metricsData => {
+                this.metricsService.getDatasetMetrics(this.ediid).subscribe((metricsData) => {
                     this.fileLevelData = metricsData;
                     if(this.fileLevelData.FilesMetrics != undefined && this.fileLevelData.FilesMetrics.length > 0){
+                        this.totalFileLevelSuccessfulGet = 0;
+                        this.totalFileLevelDownloadSize = 0;
+                        this.totalFilesinChart = 0;
+                        this.cleanupFileLevelData(this.files);
+                        this.fileLevelData.FilesMetrics = this.metricsData;
+                        this.handleSum(this.files);
                         this.noChartData = false;
                         this.createChartData();
                         this.lastDownloadDate = this.getLastDownloadDate()
-                        this.files = JSON.parse(JSON.stringify(this.createTreeFromPaths(this.fileLevelData.FilesMetrics)));
-                        this.expandToLevel(this.files, true, 0, 1);
+                        // this.files = JSON.parse(JSON.stringify(this.createTreeFromPaths(this.fileLevelData.FilesMetrics)));
+                        // this.expandToLevel(this.files, true, 0, 1);
                     }else{
                         this.noChartData = true;
                     }
 
+                    // Display chart portion only after we know if there is data to display
+                    this.readyDisplay = true;
+                },
+                (err) => {
+                    let dateTime = new Date();
+                    console.log("err", err);
+                    this.errorMsg = JSON.stringify(err);
+                    this.hasError = true;
+                    console.log('this.hasError', this.hasError);
+                    this.emailSubject = 'PDR: Error getting file level metrics data';
+                    this.emailBody =
+                        'The information below describes an error that occurred while downloading metrics data.' + '%0D%0A%0D%0A'
+                        + '[From the PDR Team:  feel free to add additional information about the failure or your questions here.  Thanks for sending this message!]' + '%0D%0A%0D%0A'
+                        + 'ediid:' + this.ediid + '%0D%0A'
+                        + 'Time: ' + dateTime.toString() + '%0D%0A%0D%0A'
+                        + 'Error message:%0D%0A' + JSON.stringify(err);
+
+                    this.readyDisplay = true;
                 });
             });
         }
@@ -132,8 +219,71 @@ export class MetricsComponent implements OnInit {
         setTimeout(() => {
             if(this.inBrowser){
                 this.screenWidth = window.innerWidth;
+                if(this.screenWidth < 550){
+                    this.maxLabelLength = MOBIL_LABEL_LIMIT;
+                }else{
+                    this.maxLabelLength = DESKTOP_LABEL_LIMIT;
+                }
             }
         }, 0);
+    }
+
+    /**
+     * Remove outdated data from the metrics
+     */
+    cleanupFileLevelData(files: TreeNode[]){
+        let filenameWithPath: string;
+        let metricsData: any[] = [];
+
+        for(let node of files){
+            let found = this.fileLevelData.FilesMetrics.find(x => x.filepath.substr(x.filepath.indexOf(this.ediid)+this.ediid.length) == node.data.filePath);
+            if(found){
+                metricsData.push(found);
+                node.data.success_get = found.success_get;
+                // node.data.download_size = node.data.download_size? node.data.download_size : found.download_size;
+                if(!node.data.download_size || node.data.download_size == 0){
+                    node.data.download_size = found.download_size;
+                }
+
+                this.totalFileLevelSuccessfulGet += found.success_get;
+                this.totalFileLevelDownloadSize += node.data.download_size;
+                this.totalFilesinChart += 1;
+
+                node.data.inChart = true;
+                if(node.parent){
+                    node.parent.data.inChart = true;
+                }
+            }
+
+            if(node.children.length > 0){
+                this.cleanupFileLevelData(node.children);
+            }else{
+                this.filescount = this.filescount + 1;
+            }
+        }
+
+        // Append to existing metrics data
+        Object.assign(this.metricsData, metricsData);
+    }
+
+    handleSum(files: TreeNode[]){
+        files.forEach(child => {
+            this.sumFolder(child)
+        })
+    }
+
+    sumFolder(node: TreeNode){
+        if (node.children) {
+            node.children.forEach(child => {
+                 const {downloads, fileSize} = this.sumFolder(child);
+                 node.data.success_get += downloads;
+                 node.data.download_size += fileSize;
+            });
+          }
+        
+          var downloads = node.data.success_get;
+          var fileSize = node.data.download_size;
+          return {downloads, fileSize};
     }
 
     /**
@@ -185,6 +335,13 @@ export class MetricsComponent implements OnInit {
     }
 
     /**
+     * Return total download size from file level summary
+     */
+    get TotalFileLevelDownloadSize() {
+        return this.commonFunctionService.formatBytes(this.totalFileLevelDownloadSize, 2);
+    }
+
+    /**
      * Get total unique users
      */
     get TotalUniqueUsers() {
@@ -206,40 +363,93 @@ export class MetricsComponent implements OnInit {
      * Convert input data into chart data format and calculate recordLevelTotalDownloads
      */
     createChartData() {
+        if(!this.fileLevelData) return;
+
         this.chartData = [];
 
         let filename;
+        let filenameDisp;
         let filenameWithPath;
+        let filenameWithPathDisp;
         let nameList: string[] = [];
         let dupFileNames: string[] = [];
 
         // Find all duplicate file names if any
         for(let j = 0; j < this.fileLevelData.FilesMetrics.length; j++){
             // Get file name from path
-            filename = this.fileLevelData.FilesMetrics[j].filepath.replace(/^.*[\\\/]/, '');
-            filename = decodeURI(filename).replace(/^.*[\\\/]/, '');
-            if(nameList.find(x => x == filename)){
-                if(!dupFileNames.find(x => x == filename))
-                    dupFileNames.push(filename);
-            }else{
-                nameList.push(filename);
+            if(this.fileLevelData.FilesMetrics[j].filepath){
+                filename = this.fileLevelData.FilesMetrics[j].filepath.replace(/^.*[\\\/]/, '');
+                filename = decodeURI(filename).replace(/^.*[\\\/]/, '');
+                if(nameList.find(x => x == filename)){
+                    if(!dupFileNames.find(x => x == filename))
+                        dupFileNames.push(filename);
+                }else{
+                    nameList.push(filename);
+                }
             }
         }
 
         // Populate chartData. For dup file names, use full path without ediid.
+        // Handle long file name: to make it simple, if file name is longer than max label length
+        // (laptop and mobile are different), we will truncate the begining characters 
+        // and add a sequence number at the end and put it in the first column (for display
+        // purpose). The real file name with path saved in the 3rd column. 
+        // The real file name saved in the 4th column. 
+        
+        let filenameSq: number = 1;
+        let filenameWithPathSq: number = 1;
+
         for(let i = 0; i < this.fileLevelData.FilesMetrics.length; i++){
             // Get file name from path
-            filename = this.fileLevelData.FilesMetrics[i].filepath.replace(/^.*[\\\/]/, '');
-            filename = decodeURI(filename).replace(/^.*[\\\/]/, '');
+            if(this.fileLevelData.FilesMetrics[i].filepath){
 
-            filenameWithPath = this.fileLevelData.FilesMetrics[i].filepath.substr(this.fileLevelData.FilesMetrics[i].filepath.indexOf('/')+1);
-            filenameWithPath = decodeURI(filenameWithPath);
 
-            var value = Math.floor(this.fileLevelData.FilesMetrics[i].success_get);
-            if(dupFileNames.find(x => x == filename)){
-                this.chartData.push([filenameWithPath, value]);
-            }else{
-                this.chartData.push([filename, value]);
+                filename = this.fileLevelData.FilesMetrics[i].filepath.replace(/^.*[\\\/]/, '');
+                filename = decodeURI(filename).replace(/^.*[\\\/]/, '');
+                filename = filename.replace(new RegExp('%20', 'g'), " ").trim();
+                filenameDisp = filename;
+
+                if(filename.length > this.maxLabelLength) {
+                    filenameDisp = "..." + filename.substr(filename.length - this.maxLabelLength);
+                }
+
+                filenameWithPath = this.fileLevelData.FilesMetrics[i].filepath.substr(this.fileLevelData.FilesMetrics[i].filepath.indexOf(this.ediid)+this.ediid.length+1);
+                filenameWithPath = decodeURI(filenameWithPath);
+                filenameWithPath = '/' + filenameWithPath.replace(new RegExp('%20', 'g'), " ").trim();
+                filenameWithPathDisp = filenameWithPath;
+
+                if(filenameWithPath.length > this.maxLabelLength) {
+                    filenameWithPathDisp = "..." + filenameWithPath.substr(filenameWithPath.length - this.maxLabelLength);
+                }
+
+                // Discard blank file name and handle duplicates
+                let data = [];
+                if(filename != "" && filenameWithPath != ""){
+                    // First, check if any dup real name
+                    var value = Math.floor(this.fileLevelData.FilesMetrics[i].success_get);
+                    if(dupFileNames.find(x => x == filename)){
+                        if(!this.chartData.find(e => e[2] == filenameWithPath)){
+                            data = [filenameWithPathDisp, value, filenameWithPath, filename];
+                        }
+                    }else{
+                        data = [filenameDisp, value, filenameWithPath, filename];
+                    }
+
+                    // Second, check if any dup display name
+                    if(this.chartData.find(e => e[0] == filenameDisp)){
+                        data = [filenameDisp + "_" + filenameSq.toString(), value, filenameWithPath, filename];
+
+                        filenameSq++;
+                    }
+
+                    if(this.chartData.find(e => e[0] == filenameWithPathDisp)){
+                        data = [filenameWithPathDisp + "_" + filenameWithPathSq.toString(), value, filenameWithPath, filename];
+
+                        filenameWithPathSq++;
+                    }
+
+                    this.chartData.push(data);
+                }
             }
         }
 
@@ -282,67 +492,71 @@ export class MetricsComponent implements OnInit {
     }
 
     /**
+     * This function is currently not used.
      * Create a tree structure from a given object array. The elements of the object array must contain 
      * "filepath" property.
-     * @param paths Object array that contains "filepath" property
+     * @param filesMetrics Object array that contains "filepath" property
      * @returns tree object
      */
-    createTreeFromPaths(paths: any[]) {
-        const tree = [];
-        let i = 1;
-        let tempPaths = JSON.parse(JSON.stringify(paths));
+    // createTreeFromPaths(filesMetrics: any[]) {
+    //     const tree = [];
+    //     let i = 1;
+    //     let tempPaths = JSON.parse(JSON.stringify(filesMetrics));
 
-        tempPaths.forEach((path) => {
-            if (path.filepath) {
-                if (!path.filepath.startsWith("/"))
-                    path.filepath = "/" + path.filepath;
+    //     tempPaths.forEach((path) => {
+    //         if (path.filepath) {
+    //             if (!path.filepath.startsWith("/"))
+    //                 path.filepath = "/" + path.filepath;
 
-                // Remove ediis from filepath
-                var cleanPath = path.filepath.replace(path.ediid + '/', '')
+    //             // Remove ediis from filepath
+    //             var cleanPath = path.filepath.substr(path.filepath.indexOf(this.ediid)+this.ediid.length);
+    //             cleanPath = cleanPath.replace(new RegExp('%20', 'g'), " ");
 
-                var decodedPath = decodeURI(cleanPath).replace(/^.*[\\\/]/, '');
+    //             if(cleanPath != ""){
+    //                 var decodedPath = decodeURI(cleanPath).replace(/^.*[\\\/]/, '');
 
-                const pathParts = cleanPath.split('/');
-                pathParts.shift(); // Remove first blank element from the parts array.
-                let currentLevel = tree; // initialize currentLevel to root
-                let pathPartsLength = pathParts.length;
-                let j: number = 0;  // Counter to decide if a node is leaf
+    //                 const pathParts = cleanPath.split('/');
+    //                 pathParts.shift(); // Remove first blank element from the parts array.
+    //                 let currentLevel = tree; // initialize currentLevel to root
+    //                 let pathPartsLength = pathParts.length;
+    //                 let j: number = 0;  // Counter to decide if a node is leaf
 
-                pathParts.forEach((part) => {
-                    let isLeaf: boolean = false;
-                    if(j == pathPartsLength-1){
-                        isLeaf = true;
-                    }
+    //                 pathParts.forEach((part) => {
+    //                     let isLeaf: boolean = false;
+    //                     if(j == pathPartsLength-1){
+    //                         isLeaf = true;
+    //                     }
 
-                    // check to see if the path already exists.
-                    const existingPath = currentLevel.filter(level => level.data.name === part);
-                    if (existingPath.length > 0) {
+    //                     // check to see if the path already exists.
+    //                     const existingPath = currentLevel.filter(level => level.data.name === part);
+    //                     if (existingPath.length > 0) {
 
-                        // The path to this item was already in the tree, so don't add it again.
-                        // Set the current level to this path's children  
-                        currentLevel = existingPath[0].children;
-                    } else {
-                        let newPart = null;
-                        newPart = {
-                            data: {
-                                name: decodeURI(part).replace(/^.*[\\\/]/, ''),
-                                filePath: decodedPath,
-                                success_get: path.success_get,
-                                download_size: path.download_size,
-                                isLeaf: isLeaf
-                            }, children: []
-                        };
-                        currentLevel.push(newPart);
-                        currentLevel = newPart.children;
-                    }
+    //                         // The path to this item was already in the tree, so don't add it again.
+    //                         // Set the current level to this path's children  
+    //                         currentLevel = existingPath[0].children;
+    //                     } else {
+    //                         let newPart = null;
+    //                         newPart = {
+    //                             data: {
+    //                                 name: decodeURI(part).replace(/^.*[\\\/]/, '').replace(new RegExp('%20', 'g'), " "),
+    //                                 filePath: decodedPath,
+    //                                 success_get: path.success_get,
+    //                                 download_size: path.download_size,
+    //                                 isLeaf: isLeaf
+    //                             }, children: []
+    //                         };
+    //                         currentLevel.push(newPart);
+    //                         currentLevel = newPart.children;
+    //                     }
 
-                    j++;
-                });
-            }
-            i = i + 1;
-        });
-        return tree;
-    }
+    //                     j++;
+    //                 });
+    //             }
+    //         }
+    //         i = i + 1;
+    //     });
+    //     return tree;
+    // }
 
     /**
      * Reture style for Title column of the file tree
@@ -397,14 +611,95 @@ export class MetricsComponent implements OnInit {
         for (let i = 0; i < dataFiles.length; i++) {
             dataFiles[i].expanded = expanded;
             if (targetLevel != null) {
-                if (dataFiles[i].children.length > 0 && nextLevel < targetLevel) {
+                if (dataFiles[i].children && dataFiles[i].children.length > 0 && nextLevel < targetLevel) {
                     this.expandAll(dataFiles[i].children, expanded, nextLevel, targetLevel);
                 }
             } else {
-                if (dataFiles[i].children.length > 0) {
+                if (dataFiles[i].children && dataFiles[i].children.length > 0) {
                     this.expandAll(dataFiles[i].children, expanded, nextLevel, targetLevel);
                 }
             }
+        }
+    }
+
+    createNewDataHierarchy() {
+        var testdata: TreeNode = {}
+        if (this.record['components'] != null) {
+            testdata["data"] = this.arrangeIntoTree(this.record['components']);
+            this.files.push(testdata);
+        }
+    }
+
+    //This is to create a tree structure
+    private arrangeIntoTree(paths) {
+        const tree: TreeNode[] = [];
+        // This example uses the underscore.js library.
+        var i = 1;
+        var tempfiletest = "";
+
+        paths.forEach((path) => {
+            if (path.filepath && !path['@type'].includes('nrd:Hidden')) {
+                if (!path.filepath.startsWith("/"))
+                    path.filepath = "/" + path.filepath;
+
+                const pathParts = path.filepath.split('/');
+                pathParts.shift(); // Remove first blank element from the parts array.
+                let currentLevel = tree; // initialize currentLevel to root
+
+                pathParts.forEach((part) => {
+                    // check to see if the path already exists.
+                    const existingPath = currentLevel.filter(level => level.data.name === part);
+                    if (existingPath.length > 0) {
+                        // The path to this item was already in the tree, so don't add it again.
+                        // Set the current level to this path's children  
+                        currentLevel = existingPath[0].children;
+                    } else {
+                        let tempId = path['@id'];
+                        if (tempId == null || tempId == undefined)
+                            tempId = path.filepath;
+
+                        let newPart: TreeNode = null;
+                        newPart = {
+                            data: {
+                                cartId: tempId,
+                                ediid: this.ediid,
+                                name: part,
+                                mediatype: path.mediaType,
+                                size: path.size,
+                                downloadUrl: path.downloadURL,
+                                description: path.description,
+                                filetype: path['@type'][0],
+                                resId: tempId,
+                                // resId: path["filepath"].replace(/^.*[\\\/]/, ''),
+                                filePath: path.filepath,
+                                success_get: 0,
+                                download_size: path.size? path.size: 0,
+                                isLeaf: false,
+                                inChart: false,
+                                bkcolor: "white"
+                            }, children: []
+                        };
+                        currentLevel.push(newPart);
+                        currentLevel = newPart.children;
+                        // }
+                    }
+                    // this.filescount = this.filescount + 1;
+                });
+            }
+            i = i + 1;
+        });
+        return tree;
+    }
+
+    rowColor(rowNode){
+        if(rowNode.node.data.bkcolor != "white"){
+            return rowNode.node.data.bkcolor;
+        }else if(rowNode.node.children.length > 0){
+            return "#c2eeff";
+        }else if(rowNode.node.data.inChart){
+            return "#e6ffe6";
+        }else{
+            return "white";
         }
     }
 }

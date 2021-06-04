@@ -38,12 +38,25 @@ export class FakeBackendInterceptor implements HttpInterceptor {
       console.log("request.url.indexOf('usagemetrics')", request.url.indexOf('usagemetrics'));
 
         // metrics
-        if (request.url.indexOf('usagemetrics/files') > -1 && request.method === 'GET') {
-            return of(new HttpResponse({ status: 200, body: metricsRecordDetails }));
-        }
+        // if (request.url.indexOf('usagemetrics/files') > -1 && request.method === 'GET') {
+        //     return of(new HttpResponse({ status: 200, body: metricsRecordDetails }));
+        // }
 
         if (request.url.indexOf('usagemetrics/records') > -1 && request.method === 'GET') {
             return of(new HttpResponse({ status: 200, body: metricsRecordLevel }));
+        }
+
+        if (request.url.indexOf('usagemetrics/files') > -1 && request.method === 'GET') 
+        {
+          console.log("Throw error...");
+          throw new HttpErrorResponse(
+            {
+              error: 'internal error message goes here...',
+              headers: request.headers,
+              status: 500,
+              statusText: 'internal error',
+              url: request.url
+            });
         }
 
       // For e2e test
@@ -73,18 +86,18 @@ export class FakeBackendInterceptor implements HttpInterceptor {
       // }
 
     // Generate bundle download internal error
-      if (request.url.indexOf('_bundle') > -1 && request.url.indexOf('_bundle_plan') <= 0 && request.method === 'POST') 
-      {
-        console.log("Throw error...");
-        throw new HttpErrorResponse(
-          {
-            error: 'internal error message goes here...',
-            headers: request.headers,
-            status: 500,
-            statusText: 'internal error',
-            url: request.url
-          });
-      }
+    //   if (request.url.indexOf('_bundle') > -1 && request.url.indexOf('_bundle_plan') <= 0 && request.method === 'POST') 
+    //   {
+    //     console.log("Throw error...");
+    //     throw new HttpErrorResponse(
+    //       {
+    //         error: 'internal error message goes here...',
+    //         headers: request.headers,
+    //         status: 500,
+    //         statusText: 'internal error',
+    //         url: request.url
+    //       });
+    //   }
 
       // // authenticate
       // if (request.url.indexOf('auth/_perm/') > -1 && request.method === 'GET') {

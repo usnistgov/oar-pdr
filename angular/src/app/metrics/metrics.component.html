@@ -1,15 +1,19 @@
 <!-- Top banner -->
-<div class="ui-g top-banner" [ngStyle]="{ 'background-image': 'url(' + imageURL + ')'}">
+<div class="ui-g top-banner" [ngStyle]="{ 'background-image': 'url(' + imageURL + ')', 'background-position':'0 0px'}">
     <div *ngIf="inBrowser" class="inner-top-banner">
         <span class="top-banner-text top-label">
             <i class="faa faa-bar-chart faa-lg" style="padding-right: .5em;text-shadow: 1px 1px 2px darkgrey;"></i><label>Dataset Metrics</label>
         </span>
         <div *ngIf="screenWidth > screenSizeBreakPoint" style="float: right;">
-            <button (click)="saveMetricsAsImage()" pButton [ngStyle]="{'width':'200px', 'height':'35px', 'float':'right', 'background-color':'green','margin-top':'1em', 'margin-right':'1.5em'}">
+            <button (click)="saveMetricsAsImage()" pButton 
+                [disabled]="noChartData"
+                [ngStyle]="{'width':'200px', 'height':'35px', 'float':'right', 'background-color':'green','margin-top':'1em', 'margin-right':'1.5em'}">
                 <i class="faa faa-download faa-1x icon-white" style="color: #fff;"></i>
                 Download Graphics
             </button>
-            <button (click)="saveMetrics()" pButton [ngStyle]="{'width':'200px', 'height':'35px', 'float':'right', 'background-color':'green', 'margin-right':'0.5em','margin-top':'1em'}">
+            <button (click)="saveMetrics()" pButton 
+                [disabled]="noDatasetSummary"
+                [ngStyle]="{'width':'200px', 'height':'35px', 'float':'right', 'background-color':'green', 'margin-right':'0.5em','margin-top':'1em'}">
                 <i class="faa faa-download faa-1x icon-white" style="color: #fff;"></i>
                 Download Metrics
             </button>
@@ -28,128 +32,143 @@
 </div>
 
 <!-- Metrics data -->
-<div style="text-align: center; margin-bottom: 1em;">
+<div *ngIf="readyDisplay" style="text-align: center; margin-bottom: 1em;">
     <!-- Dataset title -->
     <div class="dataset-title"><h3>{{datasetTitle}}</h3></div>
+    <div style="font-size:larger;">{{datasetSubtitle}}</div>
 
     <!-- Metrics details for large screen device -->
-    <div class="grid-container" *ngIf="screenWidth > screenSizeBreakPoint; else mobile">
-        <!-- Dataset summary -->
-        <div class="child min-height-300" style="position: relative;">
-            <div class="dataset-summary-title"><h4 style="color: #fff;">Dataset Summary</h4></div>
-            <div *ngIf="firstTimeLogged != ''" style="width: 95%; text-align: center; margin: 0em auto 1.5em auto; font-size: larger;border-bottom: 1px solid lightgray;">Since {{firstTimeLogged}}</div>
-
-            <div class="left-side-data">
-                <div class="min-height-20">
-                    <span class="float-left">Total file downloads</span>
-                    <span class="float-right">{{recordLevelTotalDownloads}}</span>
-                </div>
-                <div style="clear: both;"></div>
-                <div class="min-height-20">
-                    <span class="float-left">Total dataset downloads</span>
-                    <span class="float-right">{{TotalDatasetDownloads}}</span>
-                </div>
-                <div style="clear: both;"></div>
-                <div class="min-height-20">
-                    <span class="float-left">Total bytes downloaded</span>
-                    <span class="float-right">{{totalDownloadSize}}</span>
-                </div>
-                <div style="clear: both;"></div>
-                <div class="min-height-20">
-                    <span class="float-left">Total unique users</span>
-                    <span class="float-right">{{TotalUniqueUsers}}</span>
-                </div>
-                <div style="clear: both;"></div>
-                <div class="min-height-20">
-                    <span class="float-left">Last download time</span>
-                    <span class="float-right">{{lastDownloadDate}}</span>
-                </div>
-                <div style="clear: both;"></div>
-            </div>
-
-        </div>
-        <!-- File details (bar chart) -->
-        <div *ngIf="inBrowser" class="child min-height-300">
-            <div class="dataset-summary-title"><h4 style="color: #fff;">File Details</h4></div>
-            <div *ngIf="!noChartData">
-                <app-horizontal-barchart *ngIf="chartData" 
-                    [inputdata]="chartData" 
-                    [chart_title]=""
-                    [xAxisLabel]="xAxisLabel"
-                    [yAxisLabel]="yAxisLabel"
-                    [inBrowser]="inBrowser">
-
-                </app-horizontal-barchart>
-            </div>
-            <div *ngIf="noChartData" style="margin-top: 3em; font-size: larger;">
-                No metrics data available.
-            </div>
-        </div>
-    </div>
-    <!-- Metrics details for large screen device -->
-    <ng-template #mobile>
-        <div class="mobile-grid-container">
+    <div *ngIf="!noChartData && !noDatasetSummary && !hasError">
+        <div class="grid-container" *ngIf="screenWidth > screenSizeBreakPoint; else mobile">
             <!-- Dataset summary -->
-            <div class="child" style="position: relative;height: 250px; margin-bottom: .5em;">
+            <div class="child min-height-300" style="position: relative;">
                 <div class="dataset-summary-title"><h4 style="color: #fff;">Dataset Summary</h4></div>
-                <div *ngIf="firstTimeLogged != ''" style="width: 95%; text-align: center; margin: 0em auto 1.5em auto; font-size: larger;border-bottom: 1px solid lightgray;">Since {{firstTimeLogged}}</div>
-    
+                <!-- <div *ngIf="firstTimeLogged != ''" style="width: 95%; text-align: center; margin: 0em auto 1.5em auto; font-size: larger;border-bottom: 1px solid lightgray;">Since {{firstTimeLogged}}</div> -->
+
                 <div class="left-side-data">
                     <div class="min-height-20">
-                        <span class="float-left-mobile">Total file downloads</span>
-                        <span class="float-right-mobile">{{recordLevelTotalDownloads}}</span>
+                        <span class="float-left">Total file downloads</span>
+                        <span class="float-right">{{recordLevelTotalDownloads}}</span>
                     </div>
                     <div style="clear: both;"></div>
                     <div class="min-height-20">
-                        <span class="float-left-mobile">Total dataset downloads</span>
-                        <span class="float-right-mobile">{{TotalDatasetDownloads}}</span>
+                        <span class="float-left">Total dataset downloads</span>
+                        <span class="float-right">{{TotalDatasetDownloads}}</span>
                     </div>
                     <div style="clear: both;"></div>
                     <div class="min-height-20">
-                        <span class="float-left-mobile">Total bytes downloaded</span>
-                        <span class="float-right-mobile">{{totalDownloadSize}}</span>
+                        <span class="float-left">Total bytes downloaded</span>
+                        <span class="float-right">{{totalDownloadSize}}</span>
                     </div>
                     <div style="clear: both;"></div>
                     <div class="min-height-20">
-                        <span class="float-left-mobile">Total unique users</span>
-                        <span class="float-right-mobile">{{TotalUniqueUsers}}</span>
+                        <span class="float-left">Total unique users</span>
+                        <span class="float-right">{{TotalUniqueUsers}}</span>
                     </div>
                     <div style="clear: both;"></div>
                     <div class="min-height-20">
-                        <span class="float-left-mobile">Last download time</span>
-                        <span class="float-right-mobile">{{lastDownloadDate}}</span>
+                        <span class="float-left">Last download time</span>
+                        <span class="float-right">{{lastDownloadDate}}</span>
                     </div>
                     <div style="clear: both;"></div>
                 </div>
-            </div>
 
+            </div>
             <!-- File details (bar chart) -->
             <div *ngIf="inBrowser" class="child min-height-300">
-                <div class="dataset-summary-title"><h4 style="color: #fff;">File Details</h4></div>
-                <div *ngIf="!noChartData && screenWidth > mobileWidth">
+                <div class="dataset-summary-title"><h4 style="color: #fff;">Total Downloads by File</h4></div>
+                <div *ngIf="!noChartData">
                     <app-horizontal-barchart *ngIf="chartData" 
                         [inputdata]="chartData" 
                         [chart_title]=""
                         [xAxisLabel]="xAxisLabel"
                         [yAxisLabel]="yAxisLabel"
                         [inBrowser]="inBrowser">
-    
+
                     </app-horizontal-barchart>
                 </div>
                 <div *ngIf="noChartData" style="margin-top: 3em; font-size: larger;">
                     No metrics data available.
                 </div>
-                <!-- If screen width is very small, like vertical display of a call phone, display message instead of bar chart. -->
-                <div *ngIf="screenWidth <= mobileWidth" style="margin-top: 3em; font-size: larger;">
-                    Please enlarge the screen or rotate the device to view the chart.
-                </div>
             </div>
         </div>
-    </ng-template>
+
+        <!-- Metrics details for mobile device -->
+        <ng-template #mobile>
+            <div class="mobile-grid-container">
+                <!-- Dataset summary -->
+                <div class="child" style="position: relative;height: 250px; margin-bottom: .5em;">
+                    <div class="dataset-summary-title"><h4 style="color: #fff;">Dataset Summary</h4></div>
+                    <div *ngIf="firstTimeLogged != ''" style="width: 95%; text-align: center; margin: 0em auto 1.5em auto; font-size: larger;border-bottom: 1px solid lightgray;">Since {{firstTimeLogged}}</div>
+        
+                    <div class="left-side-data">
+                        <div class="min-height-20">
+                            <span class="float-left-mobile">Total file downloads</span>
+                            <span class="float-right-mobile">{{recordLevelTotalDownloads}}</span>
+                        </div>
+                        <div style="clear: both;"></div>
+                        <div class="min-height-20">
+                            <span class="float-left-mobile">Total dataset downloads</span>
+                            <span class="float-right-mobile">{{TotalDatasetDownloads}}</span>
+                        </div>
+                        <div style="clear: both;"></div>
+                        <div class="min-height-20">
+                            <span class="float-left-mobile">Total bytes downloaded</span>
+                            <span class="float-right-mobile">{{totalDownloadSize}}</span>
+                        </div>
+                        <div style="clear: both;"></div>
+                        <div class="min-height-20">
+                            <span class="float-left-mobile">Total unique users</span>
+                            <span class="float-right-mobile">{{TotalUniqueUsers}}</span>
+                        </div>
+                        <div style="clear: both;"></div>
+                        <div class="min-height-20">
+                            <span class="float-left-mobile">Last download time</span>
+                            <span class="float-right-mobile">{{lastDownloadDate}}</span>
+                        </div>
+                        <div style="clear: both;"></div>
+                    </div>
+                </div>
+
+                <!-- File details (bar chart) -->
+                <div *ngIf="inBrowser" class="child min-height-300">
+                    <div class="dataset-summary-title"><h4 style="color: #fff;">Total Downloads by File</h4></div>
+                    <div *ngIf="!noChartData">
+                        <app-horizontal-barchart *ngIf="chartData" 
+                            [inputdata]="chartData" 
+                            [chart_title]=""
+                            [xAxisLabel]="xAxisLabel"
+                            [yAxisLabel]="yAxisLabel"
+                            [inBrowser]="inBrowser">
+        
+                        </app-horizontal-barchart>
+                    </div>
+                    <div *ngIf="noChartData" style="margin-top: 3em; font-size: larger;">
+                        No metrics data available.
+                    </div>
+                    <!-- If screen width is very small, like vertical display of a call phone, display message instead of bar chart. -->
+                    <!-- <div *ngIf="screenWidth <= mobileWidth" style="margin-top: 3em; font-size: larger;">
+                        Please enlarge the screen or rotate the device to view the chart.
+                    </div> -->
+                </div>
+            </div>
+        </ng-template>
+    </div>
+    <div *ngIf="(noChartData || noDatasetSummary) && !hasError">
+        <div class="message-container">Metrics data not available for dataset hosted outside of NIST public data repository.</div>
+    </div>
+    <div *ngIf="hasError" class="message-container">
+        An error occurred while downloading metrics data. For tech support, please email <a 
+            href="mailto:datasupport@nist.gov?subject={{emailSubject}}&body={{emailBody}}"
+            (click)="gaService.gaTrackEvent('Email', $event, 'AskHelp', 'mailto:datasupport@nist.gov')">datasupport@nist.gov.
+        </a> 
+    </div>
 </div>
 
+<!-- Display file level data summary -->
+<div *ngIf="filescount > 0" style="margin: 1em auto 0em auto; width: 90%; text-align: right;padding-right: 2em;font-size: small;">Total No. files: {{filescount}}, Total dataset size: {{TotalFileLevelDownloadSize}}</div>
 <!-- Display tree table -->
-<div *ngIf="inBrowser; else filesLoading" class="flex-container" style="margin: 1em auto; width: 90%;max-height:420px;height: auto;">
+<div #panel0 id="panel0" *ngIf="inBrowser; else filesLoading" class="flex-container" style="margin: -1em auto 1em auto; width: 90%;max-height:420px;height: auto;">
     <p-treeTable *ngIf="visible" [value]="files" [columns]="cols" selectionMode="single" [style]="{'max-height':'400px','overflow':'auto'}" stickyHeader="true" stickyTopAt=".layout-topbar"
         [resizableColumns]="true" sortField="name">
         <ng-template pTemplate="header" let-columns>
@@ -172,17 +191,17 @@
             </tr>
         </ng-template>
         <ng-template pTemplate="body" let-rowNode let-rowData="rowData" let-columns="columns">
-            <tr [ttSelectableRow]="rowNode">
+            <tr [ttSelectableRow]="rowNode" [ngStyle]="{'background-color': rowColor(rowNode)}">
                 <td [ngStyle]="titleStyle()">
                     <p-treeTableToggler [rowNode]="rowNode" data-toggle="tooltip" title="Expand/Collapse">
                     </p-treeTableToggler>
                         {{rowData.name}} 
                 </td>
                 <td [ngStyle]="successGetStyle()">
-                    <span *ngIf="rowData.isLeaf">{{rowData.success_get}}</span>
+                    <span>{{rowData.success_get}}</span>
                 </td>
                 <td [ngStyle]="totalDownloadsStyle()">
-                    <span *ngIf="rowData.isLeaf">{{commonFunctionService.formatBytes(rowData.download_size,2)}}</span>
+                    <span>{{commonFunctionService.formatBytes(rowData.download_size,2)}}</span>
                 </td>
             </tr>
         </ng-template>
