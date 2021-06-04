@@ -1139,7 +1139,8 @@ class MIDAS3SIPHandler(SIPHandler):
         # the bags/versions found locally.
         pfx = aipid+"."
         localbags = [bagutils.BagName(b) for b in os.listdir(destdir)
-                                         if b.startswith(pfx) and bagutils.is_legal_bag_name(b)]
+                                         if b.startswith(pfx) and bagutils.is_legal_bag_name(b)
+                                                              and not b.endswith(".sha256")]
         rmvers.update([b.version for b in localbags if b.version.startswith(majver)])
 
         def touch_file(filepath):

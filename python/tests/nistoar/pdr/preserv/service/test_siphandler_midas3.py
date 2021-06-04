@@ -280,6 +280,8 @@ class TestMIDAS3SIPHandler(test.TestCase):
                                           self.midasid+".1_0_0.mbag0_4-0.zip.removed")))
         self.assertTrue(os.path.exists(os.path.join(self.storedir, 
                                           self.midasid+".1_0_0.mbag0_4-0.zip.sha256.removed")))
+        self.assertTrue(not os.path.exists(os.path.join(self.storedir, 
+                                          self.midasid+".1_0_0.mbag0_4-0.zip.sha256.sha256.removed")))
         
 
     def test_bagit_wdeactiv8_2(self):
