@@ -1263,7 +1263,8 @@ class MIDAS3PublishingService(PublishSystem):
             # in other words, data files must appear in the review directory to be
             # considered part of this version of the dataset.  
             usebagger = MIDASMetadataBagger(self.bagger.midasid, self.bagger.bagparent,
-                                            self.bagger.sip.revdatadir, config=self.bagger.cfg)
+                                            self.bagger.sip.revdatadir, replaces=self.bagger.previd,
+                                            config=self.bagger.cfg)
             return usebagger.finalize_version()
 
         def full_wait(self, timeout):

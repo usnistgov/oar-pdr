@@ -615,7 +615,7 @@ class UpdatePrepper(object):
         foraip = [f for f in os.listdir(bagparent)
                     if f.startswith(self.aipid+'.') and
                        not f.endswith('.sha256')        ]
-        if self._prevaipid and not foraip:
+        if not foraip and self._prevaipid and self._prevaipid != self.aipid:
             foraip = [f for f in os.listdir(bagparent)
                         if f.startswith(self._prevaipid+'.') and
                            not f.endswith('.sha256')        ]
