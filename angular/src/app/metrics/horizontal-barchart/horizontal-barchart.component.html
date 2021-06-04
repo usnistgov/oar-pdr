@@ -8,9 +8,12 @@
 
     <!-- Thrre radio buttons to set orders of chart data -->
     <div style="margin: 10px; border-bottom: 1px solid lightgray; ">
-        <input type="radio" value="1" name="sortitem" [ngModel]="sortitem" (change)="sortBarChart($event)"> Ascending
-        <input type="radio" value="2" name="sortitem" [ngModel]="sortitem" (change)="sortBarChart($event)"> Descending
-        <input type="radio" value="3" name="sortitem" [ngModel]="sortitem" (change)="sortBarChart($event)"> Original
+        <input type="radio" value="1" name="sortitem1" [ngModel]="sortitem" (change)="sortBarChart($event)">
+        <label for="sortitem1"> &nbsp;Ascending&nbsp;&nbsp;&nbsp;</label>
+        <input type="radio" value="2" name="sortitem2" [ngModel]="sortitem" (change)="sortBarChart($event)">
+        <label for="sortitem2"> &nbsp;Descending&nbsp;&nbsp;&nbsp;</label>
+        <input type="radio" value="3" name="sortitem3" [ngModel]="sortitem" (change)="sortBarChart($event)">
+        <label for="sortitem3"> &nbsp;Original</label>
     </div>
 
     <!-- The bar chart -->
