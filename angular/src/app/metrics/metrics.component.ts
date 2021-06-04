@@ -51,7 +51,6 @@ export class MetricsComponent implements OnInit {
     recordLevelTotalDownloads: number = 0;
     visible: boolean = true;
     cols: any[] = [];
-    cols1: any[] = [];
     fontSize: string = '16px';  // Default font size
     noChartData: boolean = false;
 
@@ -101,12 +100,6 @@ export class MetricsComponent implements OnInit {
             { field: 'name', header: 'Name', width: '60%' },
             { field: 'success_get', header: 'Downloads', width: '20%' },
             { field: 'download_size', header: 'File Size', width: '20%' }];
-
-        this.cols1 = [
-            { field: 'name', header: 'Name', width: '60%' },
-            { field: 'mediatype', header: 'Media Type', width: 'auto' },
-            { field: 'size', header: 'Size', width: 'auto' },
-            { field: 'download', header: 'Status', width: 'auto' }];
 
         // Expend the data tree to level one
         this.chart_title = "File Level Details";
@@ -395,7 +388,7 @@ export class MetricsComponent implements OnInit {
         // and add a sequence number at the end and put it in the first column (for display
         // purpose). The real file name with path saved in the 3rd column. 
         // The real file name saved in the 4th column. 
-        
+
         let filenameSq: number = 1;
         let filenameWithPathSq: number = 1;
 
@@ -571,7 +564,7 @@ export class MetricsComponent implements OnInit {
      * @returns 
      */
     successGetStyle() {
-        return { 'width': this.cols[1].width, 'font-size': this.fontSize };
+        return { 'width': this.cols[1].width, 'font-size': this.fontSize, "text-align": "right" };
     }
 
     /**
@@ -579,7 +572,7 @@ export class MetricsComponent implements OnInit {
      * @returns 
      */
     totalDownloadsStyle() {
-        return { 'width': this.cols[2].width, 'font-size': this.fontSize };
+        return { 'width': this.cols[2].width, 'font-size': this.fontSize, "text-align": "right", "padding-right":"3em" };
     }
 
     /**
@@ -701,5 +694,27 @@ export class MetricsComponent implements OnInit {
         }else{
             return "white";
         }
+    }
+
+    /**
+     * Return table column header text align style
+     * The name column needs be left justified. Other columns need be right justified.
+     * @param index Column index
+     * @returns text align style
+     */
+    getTableHearderTextAlign(index){
+        if(index == 0) return "left";
+        else return "right";
+    }
+
+    /**
+     * Return table column heaser padding style
+     * The right most column need 3em padding
+     * @param index Column index
+     * @returns padding style
+     */
+    getTableHearderPadding(index){
+        if(index == 2) return "3em";
+        else return "0em";
     }
 }

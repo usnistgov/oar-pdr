@@ -24,7 +24,7 @@ export class CommonFunctionService {
             d = 0;
         else if (numAfterDecimal == null && v < 10.0)
             d = 2;
-        return v.toFixed(d) + e[f];
+        return v.toFixed(d) + ' ' + e[f];
     }
 
     deepCopy(obj) {

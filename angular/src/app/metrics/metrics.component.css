@@ -15,9 +15,9 @@
 } 
 
 .grid-container {
-    border: 2px solid rgb(218, 218, 218);
+    /* border: 2px solid rgb(218, 218, 218); */
     margin: 1em auto 0em auto;
-    width: 90%;
+    width: 98%;
     height: fit-content;
     display: grid;
     grid-template-columns: 3fr 6fr;
@@ -36,9 +36,9 @@
 }
 
 .mobile-grid-container {
-    border: 2px solid rgb(218, 218, 218);
+    /* border: 2px solid rgb(218, 218, 218); */
     margin: 1em auto 0em auto;
-    width: 90%;
+    width: 95%;
     height: fit-content;
     padding: 20px 20px 20px 20px;
 }

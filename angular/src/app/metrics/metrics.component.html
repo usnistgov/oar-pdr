@@ -35,7 +35,7 @@
 <div *ngIf="readyDisplay" style="text-align: center; margin-bottom: 1em;">
     <!-- Dataset title -->
     <div class="dataset-title"><h3>{{datasetTitle}}</h3></div>
-    <div style="font-size:larger;">{{datasetSubtitle}}</div>
+    <div *ngIf="!hasError" style="font-size:larger;">{{datasetSubtitle}}</div>
 
     <!-- Metrics details for large screen device -->
     <div *ngIf="!noChartData && !noDatasetSummary && !hasError">
@@ -43,7 +43,6 @@
             <!-- Dataset summary -->
             <div class="child min-height-300" style="position: relative;">
                 <div class="dataset-summary-title"><h4 style="color: #fff;">Dataset Summary</h4></div>
-                <!-- <div *ngIf="firstTimeLogged != ''" style="width: 95%; text-align: center; margin: 0em auto 1.5em auto; font-size: larger;border-bottom: 1px solid lightgray;">Since {{firstTimeLogged}}</div> -->
 
                 <div class="left-side-data">
                     <div class="min-height-20">
@@ -99,7 +98,6 @@
                 <!-- Dataset summary -->
                 <div class="child" style="position: relative;height: 250px; margin-bottom: .5em;">
                     <div class="dataset-summary-title"><h4 style="color: #fff;">Dataset Summary</h4></div>
-                    <div *ngIf="firstTimeLogged != ''" style="width: 95%; text-align: center; margin: 0em auto 1.5em auto; font-size: larger;border-bottom: 1px solid lightgray;">Since {{firstTimeLogged}}</div>
         
                     <div class="left-side-data">
                         <div class="min-height-20">
@@ -167,14 +165,15 @@
 
 <!-- Display file level data summary -->
 <div *ngIf="filescount > 0" style="margin: 1em auto 0em auto; width: 90%; text-align: right;padding-right: 2em;font-size: small;">Total No. files: {{filescount}}, Total dataset size: {{TotalFileLevelDownloadSize}}</div>
+
 <!-- Display tree table -->
-<div #panel0 id="panel0" *ngIf="inBrowser; else filesLoading" class="flex-container" style="margin: -1em auto 1em auto; width: 90%;max-height:420px;height: auto;">
+<div #panel0 id="panel0" *ngIf="inBrowser; else filesLoading" class="flex-container" style="margin: -1em auto 1em auto; width: 95%;max-height:420px;height: auto;">
     <p-treeTable *ngIf="visible" [value]="files" [columns]="cols" selectionMode="single" [style]="{'max-height':'400px','overflow':'auto'}" stickyHeader="true" stickyTopAt=".layout-topbar"
         [resizableColumns]="true" sortField="name">
         <ng-template pTemplate="header" let-columns>
             <tr>
-                <th *ngFor="let col of columns" [style.width]="col.width" [style.font-size]="fontSize"
-                    ttResizableColumn>
+                <th *ngFor="let col of columns; let i = index" [style.width]="col.width" [style.font-size]="fontSize"
+                    [style.text-align]="getTableHearderTextAlign(i)" [style.padding-right]="getTableHearderPadding(i)" ttResizableColumn>
                     <span *ngIf="col.header == 'Name'">
                         <span (click)="expandToLevel(files, !isExpanded, 0, null)"
                             style="padding-right:0.5em;">
