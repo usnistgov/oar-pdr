@@ -45,7 +45,6 @@ export class MetricsComponent implements OnInit {
 
     // Chart
     chartData: Array<any>;
-    chart_title: string;
     xAxisLabel: string = "";
     yAxisLabel: string = "";
     recordLevelTotalDownloads: number = 0;
@@ -102,7 +101,6 @@ export class MetricsComponent implements OnInit {
             { field: 'download_size', header: 'File Size', width: '20%' }];
 
         // Expend the data tree to level one
-        this.chart_title = "File Level Details";
         this.yAxisLabel = "";
 
         if(this.inBrowser){

@@ -1,18 +1,11 @@
 <div>
-    <!-- Chart title -->
-    <div style="margin: auto;width: 100%;text-align: center;">
-        <h2 >
-        {{chart_title}}
-        </h2>
-    </div>
-
     <!-- Thrre radio buttons to set orders of chart data -->
     <div style="margin: 10px; border-bottom: 1px solid lightgray; ">
-        <input type="radio" value="1" name="sortitem1" [ngModel]="sortitem" (change)="sortBarChart($event)">
+        <input type="radio" value="1" name="sortitem1" id="sortitem1" [ngModel]="sortitem" (change)="sortBarChart($event)">
         <label for="sortitem1"> &nbsp;Ascending&nbsp;&nbsp;&nbsp;</label>
-        <input type="radio" value="2" name="sortitem2" [ngModel]="sortitem" (change)="sortBarChart($event)">
+        <input type="radio" value="2" name="sortitem2" id="sortitem2" [ngModel]="sortitem" (change)="sortBarChart($event)">
         <label for="sortitem2"> &nbsp;Descending&nbsp;&nbsp;&nbsp;</label>
-        <input type="radio" value="3" name="sortitem3" [ngModel]="sortitem" (change)="sortBarChart($event)">
+        <input type="radio" value="3" name="sortitem3" id="sortitem3" [ngModel]="sortitem" (change)="sortBarChart($event)">
         <label for="sortitem3"> &nbsp;Original</label>
     </div>
 

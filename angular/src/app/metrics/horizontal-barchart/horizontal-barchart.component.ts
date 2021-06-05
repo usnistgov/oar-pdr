@@ -12,7 +12,6 @@ const barWidth: number = 30;
 export class HorizontalBarchartComponent implements OnInit {
     @ViewChild('chart') private chartContainer: ElementRef;
     @Input() inputdata: Array<any> = [];
-    @Input() chart_title: string = "";
     @Input() xAxisLabel: string = "";
     @Input() yAxisLabel: string = "";
     @Input() inBrowser: boolean = false;
