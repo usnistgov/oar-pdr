@@ -38,13 +38,13 @@
     <div *ngIf="!hasError" style="font-size:larger;">{{datasetSubtitle}}</div>
 
     <!-- Metrics details for large screen device -->
-    <div *ngIf="!noChartData && !noDatasetSummary && !hasError">
+    <div *ngIf="!hasError">
         <div class="grid-container" *ngIf="screenWidth > screenSizeBreakPoint; else mobile">
             <!-- Dataset summary -->
             <div class="child min-height-300" style="position: relative;">
                 <div class="dataset-summary-title"><h4 style="color: #fff;">Dataset Summary</h4></div>
 
-                <div class="left-side-data">
+                <div class="left-side-data" *ngIf="!noDatasetSummary">
                     <div class="min-height-20">
                         <span class="float-left">Total file downloads</span>
                         <span class="float-right">{{recordLevelTotalDownloads}}</span>
@@ -71,7 +71,9 @@
                     </div>
                     <div style="clear: both;"></div>
                 </div>
-
+                <div *ngIf="noDatasetSummary" style="margin-top: 3em; font-size: larger;">
+                    No summary data available.
+                </div>
             </div>
             <!-- File details (bar chart) -->
             <div *ngIf="inBrowser" class="child min-height-300">
@@ -86,7 +88,7 @@
                     </app-horizontal-barchart>
                 </div>
                 <div *ngIf="noChartData" style="margin-top: 3em; font-size: larger;">
-                    No metrics data available.
+                    Metrics data not available for dataset hosted outside of NIST public data repository.
                 </div>
             </div>
         </div>
@@ -98,7 +100,7 @@
                 <div class="child" style="position: relative;height: 250px; margin-bottom: .5em;">
                     <div class="dataset-summary-title"><h4 style="color: #fff;">Dataset Summary</h4></div>
         
-                    <div class="left-side-data">
+                    <div class="left-side-data" *ngIf="!noDatasetSummary">
                         <div class="min-height-20">
                             <span class="float-left-mobile">Total file downloads</span>
                             <span class="float-right-mobile">{{recordLevelTotalDownloads}}</span>
@@ -125,6 +127,9 @@
                         </div>
                         <div style="clear: both;"></div>
                     </div>
+                    <div *ngIf="noDatasetSummary" style="margin-top: 3em; font-size: larger;">
+                        No summary data available.
+                    </div>
                 </div>
 
                 <!-- File details (bar chart) -->
@@ -140,17 +145,13 @@
                         </app-horizontal-barchart>
                     </div>
                     <div *ngIf="noChartData" style="margin-top: 3em; font-size: larger;">
-                        No metrics data available.
+                        Metrics data not available for dataset hosted outside of NIST public data repository.
                     </div>
-                    <!-- If screen width is very small, like vertical display of a call phone, display message instead of bar chart. -->
-                    <!-- <div *ngIf="screenWidth <= mobileWidth" style="margin-top: 3em; font-size: larger;">
-                        Please enlarge the screen or rotate the device to view the chart.
-                    </div> -->
                 </div>
             </div>
         </ng-template>
     </div>
-    <div *ngIf="(noChartData || noDatasetSummary) && !hasError">
+    <div *ngIf="noChartData && noDatasetSummary && !hasError">
         <div class="message-container">Metrics data not available for dataset hosted outside of NIST public data repository.</div>
     </div>
     <div *ngIf="hasError" class="message-container">

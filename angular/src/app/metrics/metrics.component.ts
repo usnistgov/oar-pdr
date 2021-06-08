@@ -155,18 +155,21 @@ export class MetricsComponent implements OnInit {
 
                 this.metricsService.getDatasetMetrics(this.ediid).subscribe((metricsData) => {
                     this.fileLevelData = metricsData;
+                    
                     if(this.fileLevelData.FilesMetrics != undefined && this.fileLevelData.FilesMetrics.length > 0){
                         this.totalFileLevelSuccessfulGet = 0;
                         this.totalFileLevelDownloadSize = 0;
                         this.totalFilesinChart = 0;
                         this.cleanupFileLevelData(this.files);
                         this.fileLevelData.FilesMetrics = this.metricsData;
-                        this.handleSum(this.files);
-                        this.noChartData = false;
-                        this.createChartData();
-                        this.lastDownloadDate = this.getLastDownloadDate()
-                        // this.files = JSON.parse(JSON.stringify(this.createTreeFromPaths(this.fileLevelData.FilesMetrics)));
-                        // this.expandToLevel(this.files, true, 0, 1);
+                        if(this.fileLevelData.FilesMetrics.length > 0){
+                            this.handleSum(this.files);
+                            this.noChartData = false;
+                            this.createChartData();
+                            this.lastDownloadDate = this.getLastDownloadDate()
+                        }else{
+                            this.noChartData = true;
+                        }
                     }else{
                         this.noChartData = true;
                     }
@@ -231,7 +234,6 @@ export class MetricsComponent implements OnInit {
             if(found){
                 metricsData.push(found);
                 node.data.success_get = found.success_get;
-                // node.data.download_size = node.data.download_size? node.data.download_size : found.download_size;
                 if(!node.data.download_size || node.data.download_size == 0){
                     node.data.download_size = found.download_size;
                 }
@@ -257,12 +259,21 @@ export class MetricsComponent implements OnInit {
         Object.assign(this.metricsData, metricsData);
     }
 
+    /**
+     * Sum each folder in the file tree
+     * @param files 
+     */
     handleSum(files: TreeNode[]){
         files.forEach(child => {
             this.sumFolder(child)
         })
     }
 
+    /**
+     * Recursive call to sum each folder
+     * @param node 
+     * @returns 
+     */
     sumFolder(node: TreeNode){
         if (node.children) {
             node.children.forEach(child => {
@@ -482,74 +493,7 @@ export class MetricsComponent implements OnInit {
         }
     }
 
-    /**
-     * This function is currently not used.
-     * Create a tree structure from a given object array. The elements of the object array must contain 
-     * "filepath" property.
-     * @param filesMetrics Object array that contains "filepath" property
-     * @returns tree object
-     */
-    // createTreeFromPaths(filesMetrics: any[]) {
-    //     const tree = [];
-    //     let i = 1;
-    //     let tempPaths = JSON.parse(JSON.stringify(filesMetrics));
-
-    //     tempPaths.forEach((path) => {
-    //         if (path.filepath) {
-    //             if (!path.filepath.startsWith("/"))
-    //                 path.filepath = "/" + path.filepath;
-
-    //             // Remove ediis from filepath
-    //             var cleanPath = path.filepath.substr(path.filepath.indexOf(this.ediid)+this.ediid.length);
-    //             cleanPath = cleanPath.replace(new RegExp('%20', 'g'), " ");
-
-    //             if(cleanPath != ""){
-    //                 var decodedPath = decodeURI(cleanPath).replace(/^.*[\\\/]/, '');
-
-    //                 const pathParts = cleanPath.split('/');
-    //                 pathParts.shift(); // Remove first blank element from the parts array.
-    //                 let currentLevel = tree; // initialize currentLevel to root
-    //                 let pathPartsLength = pathParts.length;
-    //                 let j: number = 0;  // Counter to decide if a node is leaf
-
-    //                 pathParts.forEach((part) => {
-    //                     let isLeaf: boolean = false;
-    //                     if(j == pathPartsLength-1){
-    //                         isLeaf = true;
-    //                     }
-
-    //                     // check to see if the path already exists.
-    //                     const existingPath = currentLevel.filter(level => level.data.name === part);
-    //                     if (existingPath.length > 0) {
-
-    //                         // The path to this item was already in the tree, so don't add it again.
-    //                         // Set the current level to this path's children  
-    //                         currentLevel = existingPath[0].children;
-    //                     } else {
-    //                         let newPart = null;
-    //                         newPart = {
-    //                             data: {
-    //                                 name: decodeURI(part).replace(/^.*[\\\/]/, '').replace(new RegExp('%20', 'g'), " "),
-    //                                 filePath: decodedPath,
-    //                                 success_get: path.success_get,
-    //                                 download_size: path.download_size,
-    //                                 isLeaf: isLeaf
-    //                             }, children: []
-    //                         };
-    //                         currentLevel.push(newPart);
-    //                         currentLevel = newPart.children;
-    //                     }
-
-    //                     j++;
-    //                 });
-    //             }
-    //         }
-    //         i = i + 1;
-    //     });
-    //     return tree;
-    // }
-
-    /**
+     /**
      * Reture style for Title column of the file tree
      * @returns 
      */
@@ -613,6 +557,9 @@ export class MetricsComponent implements OnInit {
         }
     }
 
+    /**
+     * Create file tree from Nerdm record
+     */
     createNewDataHierarchy() {
         var testdata: TreeNode = {}
         if (this.record['components'] != null) {
@@ -621,7 +568,11 @@ export class MetricsComponent implements OnInit {
         }
     }
 
-    //This is to create a tree structure
+    /**
+     * Create a tree structure from a Nerdm component
+     * @param paths 
+     * @returns 
+     */
     private arrangeIntoTree(paths) {
         const tree: TreeNode[] = [];
         // This example uses the underscore.js library.
@@ -682,6 +633,11 @@ export class MetricsComponent implements OnInit {
         return tree;
     }
 
+    /**
+     * Set raw back color based on node attributes
+     * @param rowNode 
+     * @returns 
+     */
     rowColor(rowNode){
         if(rowNode.node.data.bkcolor != "white"){
             return rowNode.node.data.bkcolor;

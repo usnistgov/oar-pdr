@@ -16,13 +16,13 @@
 
 .grid-container {
     /* border: 2px solid rgb(218, 218, 218); */
-    margin: 1em auto 0em auto;
+    margin: 0em auto 0em auto;
     width: 98%;
     height: fit-content;
     display: grid;
     grid-template-columns: 3fr 6fr;
     grid-gap: 20px;
-    padding: 30px 50px 30px 50px;
+    padding: 10px 50px 10px 50px;
 }
 
 .message-container {

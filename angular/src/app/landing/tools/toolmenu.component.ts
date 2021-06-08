@@ -199,12 +199,16 @@ export class ToolMenuComponent implements OnChanges {
         // Dataset Metrics
         let totalDownload = this.recordLevelMetrics.DataSetMetrics[0] != undefined? this.recordLevelMetrics.DataSetMetrics[0].success_get : 0;
 
+        totalDownload = totalDownload == undefined? 0 : totalDownload;
+
         let totalUsers = this.recordLevelMetrics.DataSetMetrics[0] != undefined? this.recordLevelMetrics.DataSetMetrics[0].number_users : 0;
+
+        totalUsers = totalUsers == undefined? 0 : totalUsers;
 
         let totalDownloadSize = this.recordLevelMetrics.DataSetMetrics[0] != undefined?
             this.commonFunctionService.formatBytes(this.recordLevelMetrics.DataSetMetrics[0].total_size, 2) : 0;
 
-        if(totalDownload > 0){
+        if(this.recordLevelMetrics.DataSetMetrics.length > 0){
             subitems = [
                 this.createMenuItem(totalDownload>1?totalDownload.toString() + ' files downloaded.':totalDownload.toString() + ' file downloaded.', null,null, null),
                 this.createMenuItem(totalUsers > 1?totalUsers.toString() + ' users.':totalUsers.toString() + ' user.', null,null, null),

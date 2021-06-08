@@ -131,7 +131,6 @@ export class HorizontalBarchartComponent implements OnInit {
      */
     sortBarChart(event) {
         var target = event.target;
-        console.log("this.data", this.data);
         switch(target.value) { 
             case '1': { 
                 this.data = this.data.sort(function(a, b) {
@@ -236,11 +235,11 @@ export class HorizontalBarchartComponent implements OnInit {
             .attr('text-anchor', 'middle')
             .text(`${this.yAxisLabel}`);
 
-        // this.svg.append('text')
-        //     .attr('x', this.wholeChartWidth/2  + this.margin.right)
-        //     .attr('y', this.margin.top-40)
-        //     .attr('text-anchor', 'middle')
-        //     .text(`${this.xAxisLabel}`);
+        this.svg.append('text')
+            .attr('x', this.wholeChartWidth/2  + this.margin.right)
+            .attr('y', this.margin.top-40)
+            .attr('text-anchor', 'middle')
+            .text(`${this.xAxisLabel}`);
     }
 
     /**
@@ -257,8 +256,6 @@ export class HorizontalBarchartComponent implements OnInit {
             this.xScale.domain([0, xMax]);
         }
         
-        // let xDomain = [0, d3.max(this.data, d => d[1])];
-        // let yDomain = this.data.map(d => d[0]);
         this.yScale = d3.scaleBand().paddingInner(0.1);
         this.yScale.domain(this.data.map(d => d[0])).rangeRound([0, this.height]);
         
@@ -337,11 +334,8 @@ export class HorizontalBarchartComponent implements OnInit {
                 chart.selectAll('#limit').remove()
                 tooltip.html(``).style('display', 'none');
             })
-            .on("click",function(d){   
-                console.log("I am clicked!", d[0]);
-            });
 
-        // This is where we animate the bars to actual width.
+        // This is where we animate the bars to actual value.
         this.chart.selectAll('rect')
             .transition()
             .duration(200)
