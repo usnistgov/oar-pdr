@@ -63,6 +63,12 @@ export class DatacartComponent implements OnInit {
         this.routerparams = this.route.params.subscribe(params => {
             let cartName = params['cartname'];
             this.dataCart = this.cartService.getCart(cartName);
+
+            this.route.queryParamMap.subscribe(queryParams => {
+                var param = queryParams.get("downloadSelected");
+                if(param && param.toLowerCase() == 'true')
+                    this.downloadSelectedFiles(null);
+            });
         });
     }
 
