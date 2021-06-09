@@ -145,7 +145,38 @@ export class DataCart {
                 return DataCart.createCart(id, store);
             md = store.getItem(DataCart.storeKeyFor(id)+".md");
         }
-        return new DataCart(id, data, store, (md != null) ? parseMD(md).updated : 0);
+        let saveneeded: boolean = DataCart._cvtIfNec(data);
+        let out: DataCart = new DataCart(id, data, store, (md != null) ? parseMD(md).updated : 0);
+        if (saveneeded)
+            out.save();
+        return out;
+    }
+
+    /*
+     * Convert the cart data if it appears to be from a previous version
+     * @return boolean  True if the data was converted to the latest format
+     */
+    static _cvtIfNec(data: any) : boolean {
+        let converted: boolean = false;
+        for (let id in data) {
+            if (DataCart._cvtItemIfNec(data[id], id))
+                converted = true;
+        }
+        return converted;
+    }
+
+    static _cvtItemIfNec(item: any, key: string = null) : boolean {
+        if (item.cartId !== undefined) {
+            if (item.key === undefined) {
+                if (key)
+                    item['key'] = key;
+                else if (item.filePath !== undefined) 
+                    item['key'] = DataCart.itemKeyFor(item.ediid, item.filePath);
+            }
+            delete item.cartId;
+            return true;
+        }
+        return false;
     }
 
     /**

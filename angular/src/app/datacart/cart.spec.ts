@@ -511,5 +511,83 @@ describe('DataCart', () => {
         expect(saves).toEqual(5)
         expect(dc.matchFiles("foo", "bar").length).toBe(0);  
     });
+
+    it('_cvtIfNec', () => {
+        let data = {
+            "X/foo/bat": {
+                key: 'X/foo/bat',
+                ediid: 'X',
+                filePath: "foo/bunk"
+            },
+            "Y/foo/bar": {
+                cartId: 'goober',
+                ediid: 'Y',
+                filePath: "foo/bag"
+            }
+        };
+        expect(DataCart._cvtIfNec(data)).toBeTruthy();
+        expect(data['X/foo/bat']['key']).toBe('X/foo/bat');
+        expect(data['X/foo/bat']['cartId']).toBeUndefined();
+        expect(data['Y/foo/bar']['key']).toBe('Y/foo/bar');
+        expect(data['Y/foo/bar']['cartId']).toBeUndefined();
+    });
+
+    it('_cvtItemIfNec', () => {
+        let item = {
+            cartId: 'goober',
+            ediid: 'XXXXXXX',
+            filePath: "foo/bar"
+        };
+        expect(DataCart._cvtItemIfNec(item, '')).toBeTruthy();
+        expect(item['cartId']).toBeUndefined();
+        expect(item['key']).toBe("XXXXXXX/foo/bar");
+
+        expect(DataCart._cvtItemIfNec(item)).toBeFalsy();
+        expect(item['cartId']).toBeUndefined();
+        expect(item['key']).toBe("XXXXXXX/foo/bar");
+
+        item['cartId'] = 'goober';
+        item['ediid'] = 'YYYYY';
+        expect(DataCart._cvtItemIfNec(item)).toBeTruthy();
+        expect(item['cartId']).toBeUndefined();
+        expect(item['key']).toBe("XXXXXXX/foo/bar");
+
+        item['cartId'] = 'goober';
+        delete item['key'];
+        delete item['ediid'];
+        expect(DataCart._cvtItemIfNec(item)).toBeTruthy();
+        expect(item['cartId']).toBeUndefined();
+        expect(item['key']).toBe("/foo/bar");
+    });
+
+    it('auto-upgrade cart', () => {
+        let data = {
+            "X/foo/bat": {
+                cartId: 'X/foo/bat',
+                ediid: 'X',
+                filePath: "foo/bunk"
+            },
+            "Y/foo/bar": {
+                cartId: 'goober',
+                ediid: 'Y',
+                filePath: "foo/bag"
+            }
+        };
+
+        localStorage.setItem("cart:cart", JSON.stringify(data));
+        let dc = DataCart.openCart("cart");
+        expect(dc).not.toBeNull();
+        expect(dc.cartName).toEqual("cart");
+
+        expect(dc.contents['X/foo/bat']['key']).toBe('X/foo/bat');
+        expect(dc.contents['X/foo/bat']['cartId']).toBeUndefined();
+        expect(dc.contents['Y/foo/bar']['key']).toBe('Y/foo/bar');
+        expect(dc.contents['Y/foo/bar']['cartId']).toBeUndefined();
+
+        let item = dc.findFile("X", "foo/bat");
+        expect(item['key']).toBe('X/foo/bat');
+        expect(item['filePath']).toBe('foo/bunk');
+        expect(item['cartId']).toBeUndefined();
+    });
 })
 

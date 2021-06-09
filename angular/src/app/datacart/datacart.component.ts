@@ -34,8 +34,6 @@ export class DatacartComponent implements OnInit {
 
     //Data
     dataCart : DataCart = null;
-    selectedData: TreeNode[] = [];
-    dataFiles: TreeNode[] = [];
     zipData: ZipData[] = [];
 
     overallStatus: string = "";

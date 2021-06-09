@@ -140,7 +140,7 @@ export class CartTreeNode implements TreeNode {
         if (! this.data.cartItem) {
             this.data.filetype = "File";
             this.data.mediaType = item.mediaType || '';
-            this.data.size = (item.size) ? formatBytes(item.size) : '';
+            this.data.size = (item.size !== null && item.size !== undefined) ? formatBytes(item.size) : '';
             this.data.resTitle = item.resTitle;
         }
         this.data.cartItem = item;
