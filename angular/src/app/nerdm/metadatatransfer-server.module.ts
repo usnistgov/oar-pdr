@@ -8,7 +8,9 @@ import { NgModule, InjectionToken } from '@angular/core';
 import { DOCUMENT } from '@angular/platform-browser';
 import { BEFORE_APP_SERIALIZED } from '@angular/platform-server';
 
-import { MetadataTransfer } from './nerdm';
+import { NerdmRes, MetadataTransfer } from './nerdm';
+import { NERDResource } from '../nerdm/nerdm';
+import { NerdmConversionService, SchemaLabel, MetadataEnvelope } from '../nerdm/nerdmconversion.service';
 
 const escapeHTMLchars = function(text : string, doc : Document) : string {
     let div = doc.createElement('div');
@@ -35,23 +37,45 @@ const escapeHTMLchars = function(text : string, doc : Document) : string {
  * @return function -- a no-arg function that will actually write out the data 
  *                 synchronously.
  */
-export function serializeMetadataTransferFactory(doc : Document, mdtrx : MetadataTransfer) {
+export function serializeMetadataTransferFactory(doc : Document, mdtrx : MetadataTransfer,
+                                                 converter : NerdmConversionService = null)
+{
     return () => {
-        let insertPoint = doc.body.firstElementChild;
-        mdtrx.labels().forEach((label) => {
-            let data = mdtrx.get(label);
-            if (data == null)
-                data = null;
+        let mdclass = 'structured-data ';
 
+        mdtrx.labels().forEach((id) => {
+            let data = mdtrx.get(id) as NerdmRes;
+            if (data == null)
+                return;
+
+            // Creating the script for Nerdm data transfer
             let script = doc.createElement('script');
-            script.id = escapeHTMLchars(label, doc);
+            script.id = escapeHTMLchars(SchemaLabel.NERDM_RESOURCE+':'+id, doc);
             console.log("Embedding metadata with id='"+script.id+"'");
             let type = "application/json";
             if (data && data.hasOwnProperty("@context"))
                 type = "application/ld+json";
+
             script.setAttribute("type", type);
-            script.textContent = mdtrx.serialize(label);
-            doc.body.insertBefore(script, insertPoint)
+            script.setAttribute("class", mdclass + SchemaLabel.NERDM_RESOURCE.replace('#', ' '));
+            script.textContent = mdtrx.serialize(id);
+            doc.head.appendChild(script)
+
+            if (converter) {
+                // Creating the script elements for other formats (like Schema.org)
+                let converted: MetadataEnvelope = null;
+                for(let fmt of converter.formatsToEmbed()) {
+                    converted = converter.convertTo(data, fmt);
+                    if (converted === null)
+                        continue;
+                    script = doc.createElement('script');
+                    script.id = escapeHTMLchars(converted.label+':'+id, doc);
+                    script.type = converted.contentType;
+                    script.setAttribute("class", mdclass + converted.label.replace('#', ' '));
+                    script.text = converted.serialize();
+                    doc.head.appendChild(script);
+                }
+            }
         });
     };
 }
@@ -64,10 +88,11 @@ export function serializeMetadataTransferFactory(doc : Document, mdtrx : Metadat
 @NgModule({
     providers: [
         MetadataTransfer,
+        NerdmConversionService,
         {
             provide: BEFORE_APP_SERIALIZED,
             useFactory: serializeMetadataTransferFactory,
-            deps: [DOCUMENT, MetadataTransfer],
+            deps: [DOCUMENT, MetadataTransfer, NerdmConversionService],
             multi: true
         }
     ]

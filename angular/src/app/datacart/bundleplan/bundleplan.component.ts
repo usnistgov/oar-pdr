@@ -73,7 +73,6 @@ export class BundleplanComponent implements OnInit {
     emailBodyBase: string = 'The information below describes an error that occurred while downloading data via the data cart. %0D%0A%0D%0A [From the PDR Team:  feel free to add additional information about the failure or your questions here. Thanks for sending this message!] %0D%0A%0D%0A';
 
     showMessage: boolean = true;
-    distApi: string;
 
     problemZip: ZipData = {
         fileName: "",
@@ -291,6 +290,7 @@ export class BundleplanComponent implements OnInit {
         
         this.bundlePlanRef = this.downloadService.getBundlePlan(bundleBaseName, this.downloadFiles).subscribe(
             blob => {
+                console.log(JSON.stringify(blob, null, 2));
                 this.bundlePlanStatus = blob.status.toLowerCase();
                 this.bundlePlanMessage = blob.messages;
                 this.bundlePlanUnhandledFiles = blob.notIncluded;
@@ -316,11 +316,8 @@ export class BundleplanComponent implements OnInit {
                     this.bundleplan = blob;
                     this.downloadService.setTotalBundleSize(blob.size);
 
-                    let bundlePlan: any[] = blob.bundleNameFilePathUrl;
-                    let downloadUrl: any = this.distApi + blob.postEachTo;
-
-                    for (let bundle of bundlePlan) {
-                        this.zipData.push({ "fileName": bundle.bundleName, "downloadProgress": 0, "downloadStatus": null, "downloadInstance": null, "bundle": bundle, "downloadUrl": downloadUrl, "downloadErrorMessage": "","bundleSize": bundle.bundleSize, 'downloadTime': null });
+                    for (let bundle of blob.bundleNameFilePathUrl) {
+                        this.zipData.push({ "fileName": bundle.bundleName, "downloadProgress": 0, "downloadStatus": null, "downloadInstance": null, "bundle": bundle, "downloadUrl": blob.postEachTo, "downloadErrorMessage": "","bundleSize": bundle.bundleSize, 'downloadTime': null });
                     }
 
                     let ngbModalOptions: NgbModalOptions = {

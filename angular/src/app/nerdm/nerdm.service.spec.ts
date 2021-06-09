@@ -15,7 +15,7 @@ describe('TransferMetadataService', function() {
 
     beforeEach(() => {
         trx = new nerdm.MetadataTransfer();
-        trx.set(nerdsvc.NERDM_MT_PREFIX+"goober", tdata);
+        trx.set("goober", tdata);
         svc = new nerdsvc.TransferMetadataService(trx);
     });
 
@@ -83,7 +83,7 @@ describe('TransmittingMetadataService', function() {
     });
 
     it('getMetadata() via cache', function(done) {
-        trx.set(nerdsvc.NERDM_MT_PREFIX+"goober", tdata);
+        trx.set("goober", tdata);
         svc = new nerdsvc.TransmittingMetadataService(new FailingMetadataService(), trx);
 
         let t1 = svc.getMetadata("goober");
@@ -93,7 +93,7 @@ describe('TransmittingMetadataService', function() {
     });
 
     it('getMetadata() via delegate', function() {
-        trx.set(nerdsvc.NERDM_MT_PREFIX+"goober", tdata);
+        trx.set("goober", tdata);
         svc = new nerdsvc.TransmittingMetadataService(new FailingMetadataService(), trx);
 
         expect(() => { svc.getMetadata("gomer") }).toThrowError();
@@ -115,7 +115,7 @@ describe('TransmittingMetadataService', function() {
                 // data was cached to the MetadataTransfer object so that it can be
                 // serialized to the output HTML page. 
                 expect(trx.labels().length).toBe(1);
-                expect(trx.get(nerdsvc.NERDM_MT_PREFIX+"goober")).toBe(tdata);
+                expect(trx.get("goober")).toBe(tdata);
             },
             (err) => {  fail(err);  },
             () => {  done();  }
