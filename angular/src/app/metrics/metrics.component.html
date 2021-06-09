@@ -163,7 +163,7 @@
 </div>
 
 <!-- Display file level data summary -->
-<div *ngIf="filescount > 0" style="margin: 1em auto 0em auto; width: 90%; text-align: right;padding-right: 2em;font-size: small;">Total No. files: {{filescount}}, Total dataset size: {{TotalFileLevelDownloadSize}}</div>
+<div *ngIf="filescount > 0" style="margin: 1em auto 0em auto; width: 90%; text-align: right;font-size: small;">Total No. files: {{filescount}}, Total dataset size: {{TotalFileLevelDownloadSize}}</div>
 
 <!-- Display tree table -->
 <div #panel0 id="panel0" *ngIf="inBrowser; else filesLoading" class="flex-container" style="margin: -1em auto 1em auto; width: 95%;max-height:420px;height: auto;">
