@@ -154,6 +154,8 @@ class TestMIDAS3SIPHandler(test.TestCase):
         # check for checksum files in review dir
         cf = os.path.join(self.bagparent, self.midasid+"_0.sha256")
         self.assertTrue(os.path.exists(cf), "Does not exist: "+cf)
+        cf = os.path.join(self.bagparent, "_preserved")
+        self.assertTrue(os.path.exists(cf), "Does not exist: "+cf)
 
         # head bag still in staging area?
         staged = os.listdir(self.sip.stagedir)

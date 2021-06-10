@@ -1810,6 +1810,7 @@ class PreservationBagger(SIPBagger):
         self.prepare(nodata=False)
 
         # update a few dates in the metadata
+        firstpub = self.sip.nerd.get('version','1.0.0') == "1.0.0"
         now = datetime.fromtimestamp(time.time()).isoformat()
         bmd = self.baggermd_for('')
         dates = OrderedDict()
@@ -1819,7 +1820,7 @@ class PreservationBagger(SIPBagger):
         ## by default, keep the issued data passed in from MIDAS
         if not self.sip.nerd.get('issued'):
             dates['issued'] = now
-        if self.sip.nerd.get('version','1.0.0') == "1.0.0":
+        if firstpub:
             dates['firstIssued'] = self.sip.nerd.get('issued', now)
         self.bagbldr.update_annotations_for('', dates, message="setting publishing dates")
 

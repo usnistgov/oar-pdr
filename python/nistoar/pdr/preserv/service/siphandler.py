@@ -1014,19 +1014,30 @@ class MIDAS3SIPHandler(SIPHandler):
                     log.debug("copying checksum file to %s", sigfile)
                     shutil.copyfile(f, sigfile)
                 except Exception, ex:
-                    msg = "Failed to copy checksum file to review dir:" + \
-                          "\n %s to\n %s\nReason: %s" % \
-                          (f, sigfile, str(ex))
-                    log.exception(msg)
+                    msg = "\n %s to\n %s\nReason: %s" % (f, sigfile, str(ex))
+                    log.error("Failed to copy checksum file to review dirs: "+msg)
                     cpfailures.append(msg)
 
             if cpfailures and self.notifier:
                 # alert subscribers of these failures with an email
+                cnt = str(len(cpfailures))
+                if (len(cpfailurs) == len(cksfiles)):
+                    cnt = "all"
+                msg = "Failed to copy %s checksum file%s to review dir: e.g., %s" \
+                      % (cnt, ((len(cpfailures) > 1) and "s") or "", cpfailures[0])
                 self.notifier.alert("preserve.failure", origin=self.name,
                                     summary="checksum file copy failure", desc=msg,
                                     version=nerdm.get('version', 'unknown'))
+
+            donefile = os.path.join(cksdir, "_preserved")
+            try:
+                with open(donefile, 'a') as fd:
+                    fd.write(nerdm.get('version', 'unknown'))
+                    fd.write("\n")
+            except Exception as ex:
+                raise PreservationException(os.path.basename(donefile)+": "+str(ex), cause=ex)
                     
-        except Exception, ex:
+        except Exception as ex:
             msg = "%s: Failure while writing checksum file(s) to review dir: %s" \
                   % (self._sipid, str(ex))
             log.exception(msg)
@@ -1132,7 +1143,12 @@ class MIDAS3SIPHandler(SIPHandler):
         # find the available bags/versions for this aipid via the distribution service
         rmvers = set()
         if distsvc:
-            rmvers.update([v for v in distsvc.list_versions() if v.startswith(majver)])
+            try:
+                rmvers.update([v for v in distsvc.list_versions() if v.startswith(majver)])
+            except DistrbResourceNotFound as ex:
+                log.warn("Note: %s not yet found in via dist service (%s)", self.bagname, str(ex))
+            except Exception as ex:
+                log.warn("Problem querying distribution service for %s* versions: %s", majver, str(ex))
 
         # there may be additional bags that have been copied to local LTS but which have
         # not yet migrated to the AWS bucket that the distribution service sees; merge in
