@@ -69,11 +69,13 @@ export class DatacartComponent implements OnInit, AfterViewInit {
      */
     ngAfterViewInit() {
         // initiate the download if requested via a URL query parameter
-        this.route.queryParamMap.subscribe(queryParams => {
-            var param = queryParams.get("downloadSelected");
-            if(param && param.toLowerCase() == 'true')
-                this.downloadSelectedFiles(null);
-        });
+        if (this.inBrowser) {
+            this.route.queryParamMap.subscribe(queryParams => {
+                var param = queryParams.get("downloadSelected");
+                if(param && param.toLowerCase() == 'true')
+                    this.downloadSelectedFiles(null);
+            });
+        }
     }
 
     /**
