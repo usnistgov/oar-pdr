@@ -1,4 +1,4 @@
-import { Component, OnInit, PLATFORM_ID, Inject, ViewChild } from '@angular/core';
+import { Component, OnInit, AfterViewInit, PLATFORM_ID, Inject, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import 'rxjs/add/operator/map';
 import { TreeNode } from 'primeng/primeng';
@@ -29,9 +29,6 @@ import { BundleplanComponent } from './bundleplan/bundleplan.component';
 export class DatacartComponent implements OnInit {
     inBrowser: boolean = false;
 
-    //Connection
-    routerparams: any;
-
     //Data
     dataCart : DataCart = null;
     zipData: ZipData[] = [];
@@ -57,18 +54,25 @@ export class DatacartComponent implements OnInit {
     /**
      * Get the params OnInit
      */
-    ngOnInit() {
+    ngOnInit(): void {
         let currentUrl = this.router.url;
 
-        this.routerparams = this.route.params.subscribe(params => {
+        this.route.params.subscribe(params => {
             let cartName = params['cartname'];
             this.dataCart = this.cartService.getCart(cartName);
+        });
+    }
 
-            this.route.queryParamMap.subscribe(queryParams => {
-                var param = queryParams.get("downloadSelected");
-                if(param && param.toLowerCase() == 'true')
-                    this.downloadSelectedFiles(null);
-            });
+    /**
+     * initiate download if requested via URL query parameter.  (The download can't start
+     * until after all the children are initiated.)
+     */
+    ngAfterViewInit() {
+        // initiate the download if requested via a URL query parameter
+        this.route.queryParamMap.subscribe(queryParams => {
+            var param = queryParams.get("downloadSelected");
+            if(param && param.toLowerCase() == 'true')
+                this.downloadSelectedFiles(null);
         });
     }
 
