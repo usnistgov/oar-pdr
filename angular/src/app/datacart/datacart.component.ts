@@ -1,4 +1,4 @@
-import { Component, OnInit, AfterViewInit, PLATFORM_ID, Inject, ViewChild } from '@angular/core';
+import { Component, OnInit, AfterViewInit, PLATFORM_ID, Inject, ViewChild, HostListener } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import 'rxjs/add/operator/map';
 import { TreeNode } from 'primeng/primeng';
@@ -119,12 +119,13 @@ export class DatacartComponent implements OnInit, AfterViewInit {
         return (this.overallStatus != DownloadStatus.DOWNLOADING);
     }
 
-    /*
     @HostListener('window:beforeunload', ['$event'])
     unloadNotification($event: any) {
-        if (! this.canDeactivate()) $event.returnValue = true;
+        if (! this.canDeactivate()) {
+            $event.preventDefault();
+            alert("Please cancel downloads before attempting to leave this page");
+        }
     }
-    */
 
 
     /******************************************/
