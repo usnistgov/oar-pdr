@@ -26,7 +26,7 @@ import { BundleplanComponent } from './bundleplan/bundleplan.component';
     templateUrl: 'datacart.component.html',
     styleUrls: ['datacart.component.css'],
 })
-export class DatacartComponent implements OnInit {
+export class DatacartComponent implements OnInit, AfterViewInit {
     inBrowser: boolean = false;
 
     //Data
