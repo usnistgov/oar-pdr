@@ -140,7 +140,7 @@
 </p-overlayPanel>
 
 <!-- Popup dialog for download details -->
-<p-overlayPanel class="fileDialog" #op4 [dismissable]="true" [showCloseIcon]="false"
+<p-overlayPanel class="fileDialog" #op4 [dismissable]="true" [showCloseIcon]="true"
     [style]="{'display':'inline-block','position':'related','left':'50%','top':'80%','max-width':'400px'}"
     appendToBody=true>
     <div class="filecard">
@@ -149,7 +149,7 @@
                 <div class="warning-overlay-title">Message details</div>
                 <div class="long-text">File path: {{fileNode.cartItem.filePath}}</div>
                 <div class="long-text">Download URL: {{fileNode.cartItem.downloadURL}}</div>
-                <div class="long-text">Message: {{fileNode.message}}</div>
+                <div class="long-text">Message: {{fileNode.cartItem.message||'unknown'}}</div>
             </div>
         </div>
     </div>

@@ -552,7 +552,7 @@ export class BundleplanComponent implements OnInit {
             sub.unsubscribe();
         }
 
-        this.clearDownloadingStatus();
+        // this.clearDownloadingStatus();
         this.showCurrentTask = false;
         this.overallStatus = DownloadStatus.CANCELED;
         this.outputOverallStatus.emit(this.overallStatus);
