@@ -485,8 +485,10 @@ export class DataCart {
             return false;
 
         item.downloadStatus = downloadStatus;
-        if (extra) 
-            item = {...extra, ...item};
+        if (extra) {
+            for (let prop in extra)
+                item[prop] = extra[prop];
+        }
 
         if(dosave) this.save();
 
