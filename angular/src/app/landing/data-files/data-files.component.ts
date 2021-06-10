@@ -533,7 +533,7 @@ export class DataFilesComponent {
                 this._addAllWithinToCart(child, downloadAllCart, true);
             downloadAllCart.save();
             this.isAddingToDownloadAllCart = false;
-            window.open('/datacart/'+cartName, cartName);
+            window.open('/datacart/'+cartName+'?downloadSelected=true', cartName);
         }, 0);
     }
 
