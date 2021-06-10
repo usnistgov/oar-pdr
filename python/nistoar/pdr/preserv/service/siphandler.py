@@ -1145,7 +1145,7 @@ class MIDAS3SIPHandler(SIPHandler):
         if distsvc:
             try:
                 rmvers.update([v for v in distsvc.list_versions() if v.startswith(majver)])
-            except DistrbResourceNotFound as ex:
+            except distrib.DistribResourceNotFound as ex:
                 log.warn("Note: %s not yet found in via dist service (%s)", self.bagname, str(ex))
             except Exception as ex:
                 log.warn("Problem querying distribution service for %s* versions: %s", majver, str(ex))
