@@ -88,7 +88,7 @@
                             <span
                                 *ngIf="rowData.cartItem.downloadStatus == 'error' || rowData.cartItem.downloadStatus == 'failed'; else normal"
                                 style="cursor: pointer;"
-                                (click)="openDetails($event,op4,rowData) "><u>{{getStatusForDisplay(rowData.cartItem.downloadStatus)}}</u></span>
+                                (click)="openDetails($event,rowData,op4) "><u>{{getStatusForDisplay(rowData.cartItem.downloadStatus)}}</u></span>
                             <ng-template #normal>
                                 <span>{{getStatusForDisplay(rowData.cartItem.downloadStatus)}}</span>
                             </ng-template>
