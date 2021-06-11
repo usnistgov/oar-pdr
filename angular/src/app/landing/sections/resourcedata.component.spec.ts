@@ -17,11 +17,12 @@ import { CartService } from '../../datacart/cart.service';
 
 import { config, testdata } from '../../../environments/environment';
 
-describe('ResourceDataComponent', () => {
+fdescribe('ResourceDataComponent', () => {
     let component: ResourceDataComponent;
     let fixture: ComponentFixture<ResourceDataComponent>;
     let cfg : AppConfig = new AppConfig(config);
     let rec : NerdmRes = require('../../../assets/sampleRecord.json');
+    let authsvc : AuthService = new MockAuthService()
 
     let makeComp = function() {
         TestBed.configureTestingModule({
@@ -29,6 +30,7 @@ describe('ResourceDataComponent', () => {
             declarations: [  ],
             providers: [
                 { provide: AppConfig, useValue: cfg },
+                { provide: AuthService, useValue: authsvc }, 
                 GoogleAnalyticsService, UserMessageService, MetadataUpdateService, DatePipe,
                 CartService
             ]
