@@ -1,0 +1,60 @@
+<div class="ui-g" id="dataAccess">
+    <div class="ui-g-12 ui-md-12 ui-lg-12 ui-sm-12 font14">
+        <h3><b>Data Access</b></h3><br>
+        
+        <!-- Decide what to display based on access level -->
+        <p>
+        <span style="margin-left:0em" *ngIf="record['accessLevel'] === 'public'">
+            <i class="faa faa-globe"></i> These data are public.
+        </span>
+
+        <span *ngIf="record['accessLevel'] === 'restricted public'">
+            <i class="faa faa-lock"></i> This data has access restrictions.  
+            <span *ngIf="accessPages.length > 0">
+               Follow the links below for further information accessing the data. 
+            </span>
+        </span>
+        </p>
+
+        <!-- Display access right -->
+        <div id="accessRights" *ngIf="record['rights']">
+            <dl>
+              <dt>Access rights statement:</dt>
+              <dd> {{record.rights}} </dd>
+            </dl>   
+        </div>
+
+        <!-- Display Homepage button if 'landingPage field exist and does not contain '/od/id' -->
+        <p *ngIf="record['landingPage'] && record['landingPage'].indexOf('/od/id') === -1 ">
+            For more information, please visit the
+            <a target="_blank" href="{{ record['landingPage'] }}"
+               (click)="gaService.gaTrackEvent('homepage', $event, 'Resource title: ' + record.title, record['landingPage'])">home
+                page</a>.
+        </p>
+
+        <!-- Access Pages -->
+        <p id="accessPages" style="margin-left:0em" *ngIf="accessPages.length > 0">
+            <br>Data and related material can be found at the following locations:
+            <br>
+            <span style="padding-left:2.00em" *ngFor="let apage of accessPages">
+                <i class="faa faa-external-link"> <span style="margin-left:0.3em;">
+                    <span *ngIf="apage['description']; else noAccessTitle">
+                        <a href="{{apage['accessURL']}}" title="{{apage['description']}}"
+                           (click)="gaService.gaTrackEvent('homepage', $event, 
+                                                           'Resource title: ' + record.title,
+                                                           apage['accessURL'])">{{apage['title']}}</a>
+                    </span>
+                    <ng-template #noAccessTitle>
+                        <a href="{{apage['accessURL']}}" 
+                           (click)="gaService.gaTrackEvent('homepage', $event, 
+                                                           'Resource title: ' + record.title,
+                                                           apage['accessURL'])">{{apage['title']}}</a>
+                    </ng-template>
+                </span></i><br>
+            </span>
+        </p>
+
+        <pdr-data-files [record]="record" [inBrowser]="inBrowser" 
+                        [editEnabled]="editEnabled"></pdr-data-files>
+    </div>
+</div>

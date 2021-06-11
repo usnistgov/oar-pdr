@@ -4,7 +4,8 @@ import { AppConfig } from '../../config/config';
 import { NerdmRes, NERDResource } from '../../nerdm/nerdm';
 
 /**
- * a component that lays out the "identity" section of a landing page
+ * a component that lays out the "Description" section of a landing page which includes the prose 
+ * description, subject keywords, and research topics.
  */
 @Component({
     selector:      'pdr-resource-desc',
