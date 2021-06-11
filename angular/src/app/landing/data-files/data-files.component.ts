@@ -1,21 +1,22 @@
-import { Component, Input, Output, ChangeDetectorRef, NgZone, EventEmitter } from '@angular/core';
+import { Component, Input, ChangeDetectorRef, NgZone, OnInit, OnChanges, SimpleChanges } from '@angular/core';
 import { TreeNode } from 'primeng/api';
 import { CartService } from '../../datacart/cart.service';
 import { OverlayPanel } from 'primeng/overlaypanel';
-import { DownloadService } from '../../shared/download-service/download-service.service';
-import { ConfirmationService } from 'primeng/primeng';
+// import { DownloadService } from '../../shared/download-service/download-service.service';
+// import { ConfirmationService } from 'primeng/primeng';
 // import { ZipData } from '../../shared/download-service/zipData';  // currently disabled
-import { HttpClient, HttpRequest, HttpEventType } from '@angular/common/http';
+// import { HttpClient, HttpRequest, HttpEventType } from '@angular/common/http';
 import { AppConfig } from '../../config/config';
-import { FileSaverService } from 'ngx-filesaver';  // currently disabled
-import { Router } from '@angular/router';
-import { CommonFunctionService } from '../../shared/common-function/common-function.service';
+// import { FileSaverService } from 'ngx-filesaver';  // currently disabled
+// import { Router } from '@angular/router';
+// import { CommonFunctionService } from '../../shared/common-function/common-function.service';
+// import { NotificationService } from '../../shared/notification-service/notification.service';
 import { GoogleAnalyticsService } from '../../shared/ga-service/google-analytics.service';
-import { NotificationService } from '../../shared/notification-service/notification.service';
 import { NerdmRes, NerdmComp } from '../../nerdm/nerdm';
 import { DataCart, DataCartItem } from '../../datacart/cart';
 import { DownloadStatus } from '../../datacart/cartconstants';
 import { DataCartStatus } from '../../datacart/cartstatus';
+import { formatBytes } from '../../utils';
 
 declare var _initAutoTracker: Function;
 
@@ -66,22 +67,26 @@ interface DataFileItem {
     downloadProgress? : number;
 }
 
+/**
+ * A component that displays the hierarchical collection of files available as downloadable 
+ * distributions.  
+ *
+ * This implementation is based on the TreeTable component from primeng.  
+ */
 @Component({
     moduleId: module.id,
     styleUrls: ['../landing.component.css'],
-    selector: 'description-resources',
+    selector: 'pdr-data-files',
     templateUrl: `data-files.component.html`,
-    providers: [ConfirmationService]
+    providers: [ ]
 })
-
-export class DataFilesComponent {
+export class DataFilesComponent implements OnInit, OnChanges {
 
     @Input() record: NerdmRes;
-    @Input() metadata: boolean;
     @Input() inBrowser: boolean;   // false if running server-side
-    @Input() ediid: string;
     @Input() editEnabled: boolean;    //Disable download all functionality if edit is enabled
 
+    ediid: string = '';
     files: TreeNode[] = [];           // the hierarchy of collections and files
     fileCount: number = 0;            // number of files being displayed
     downloadStatus: string = '';      // the download status for the dataset collection as a whole
@@ -91,7 +96,6 @@ export class DataFilesComponent {
     isAddingToDownloadAllCart: boolean = false;
     isTogglingAllInGlobalCart: boolean = false;
 
-    accessPages: NerdmComp[] = [];
     cols: any[];
     fileNode: TreeNode;               // the node whose description has been opened
     isExpanded: boolean = false;
@@ -103,17 +107,11 @@ export class DataFilesComponent {
     mobHeight: number = 900;  // default value used in server context
     fontSize: string;
 
-    constructor(private cartService: CartService,
-        private cdr: ChangeDetectorRef,
-        private http: HttpClient,
-        private cfg: AppConfig,
-        private _FileSaverService: FileSaverService,
-        private confirmationService: ConfirmationService,
-        private commonFunctionService: CommonFunctionService,
-        private gaService: GoogleAnalyticsService,
-        public router: Router,
-        private notificationService: NotificationService,
-        ngZone: NgZone) {
+    constructor(private cfg: AppConfig,
+                private cartService: CartService,
+                private gaService: GoogleAnalyticsService,
+                ngZone: NgZone)
+    {
         this.cols = [
             { field: 'name', header: 'Name', width: '60%' },
             { field: 'mediaType', header: 'Media Type', width: 'auto' },
@@ -142,8 +140,16 @@ export class DataFilesComponent {
             this.globalDataCart.watchForChanges((ev) => { this.cartChanged(ev); })
 
             this.dataCartStatus = DataCartStatus.openCartStatus();
-            this.buildTree();
+            if (this.record)
+                this.buildTree();
         }
+    }
+
+    ngOnChanges(ch: SimpleChanges) {
+        if (this.record) 
+            this.ediid = this.record['ediid']
+        if (this.inBrowser && this.globalDataCart)
+            this.buildTree();
     }
 
     cartChanged(ev){
@@ -179,15 +185,6 @@ export class DataFilesComponent {
 
         return allIn;
     }
-
-    /*
-    ngOnChanges() {
-        this.accessPages = []
-        if (this.record['components'])
-            this.accessPages = this.selectAccessPages(this.record['components']);
-        this.buildTree();
-    }
-    */
 
     /**
      * Build data file tree
@@ -269,21 +266,6 @@ export class DataFilesComponent {
     }
 
     /**
-     *   Init object - edit buttons for animation purpose
-     */
-    editingObjectInit() {
-        var editingObject = {
-            "originalValue": '',
-            "detailEditmode": false,
-            "buttonOpacity": 0,
-            "borderStyle": "0px solid lightgrey",
-            "currentState": 'initial'
-        }
-
-        return editingObject;
-    }
-
-    /**
      * Function to expand tree display to certain level
      * @param dataFiles - file tree
      * @param expanded - expand flag 
@@ -358,36 +340,11 @@ export class DataFilesComponent {
     }
 
     /**
-     * Function to Check whether given record has references in it.
-     */
-    checkReferences() {
-        if (this.record['references'] && this.record['references'].length > 0) {
-            return true;
-        }else{
-            return false;
-        }
-    }
-
-    /**
-     * return an array of AccessPage components from the given input components array
-     * @param comps 
-     */
-    selectAccessPages(comps : NerdmComp[]) : NerdmComp[] {
-        let use : NerdmComp[] = comps.filter(cmp => cmp['@type'].includes("nrdp:AccessPage") &&
-                                       ! cmp['@type'].includes("nrd:Hidden"));
-        use = (JSON.parse(JSON.stringify(use))) as NerdmComp[];
-        return use.map((cmp) => {
-            if (! cmp['title']) cmp['title'] = cmp['accessURL']
-            return cmp;
-        });
-    }
-
-    /**
      * Function to display bytes in appropriate format.
      * @param bytes 
      */
     formatBytes(bytes) {
-        return this.commonFunctionService.formatBytes(bytes, null);
+        return formatBytes(bytes, null);
     }
 
     /**
@@ -467,7 +424,9 @@ export class DataFilesComponent {
     /**
      * add a single file component to the global data cart
      */
-    addFileToCart(file: NerdmComp, cart: DataCart, selected: boolean =false, dosave: boolean =true) : DataCartItem {
+    addFileToCart(file: NerdmComp, cart: DataCart,
+                  selected: boolean =false, dosave: boolean =true) : DataCartItem
+    {
         if (cart && file.filepath && file.downloadURL) {
             let added: DataCartItem = cart.addFile(this.ediid, file, selected, dosave);
             added['resTitle'] = this.record['title'];
@@ -555,7 +514,7 @@ export class DataFilesComponent {
     /**
      * Downloaded one file
      * @param rowData - tree node
-     */
+     *
     downloadOneFile(rowData: any) {
         let filename = decodeURI(rowData.downloadUrl).replace(/^.*[\\\/]/, '');
         rowData.downloadStatus = DownloadStatus.DOWNLOADING;
@@ -570,7 +529,7 @@ export class DataFilesComponent {
         rowData.downloadInstance = this.http.request(req).subscribe(event => {
             switch (event.type) {
                 case HttpEventType.Response:
-                    this._FileSaverService.save(<any>event.body, filename);
+                    this._fileSaverService.save(<any>event.body, filename);
                     this.showDownloadProgress = false;
                     this.setFileDownloaded(rowData);
                     break;
@@ -580,11 +539,12 @@ export class DataFilesComponent {
             }
         })
     }
+     */
 
     /**
      * Function to download all files based on download url.
      * @param files - file tree
-     */
+     *
     downloadAllFilesFromUrl(files: any) {
         for (let comp of files) {
             if (comp.children.length > 0) {
@@ -596,6 +556,7 @@ export class DataFilesComponent {
             }
         }
     }
+     */
 
     /**
      * Return "download all" button color based on download status
@@ -710,20 +671,5 @@ export class DataFilesComponent {
         }else{
             return "500px";
         }
-    }
-
-    /**
-     * Return the link text of the given reference.
-     * 1. the value of the citation property (if set and is not empty)
-     * 2. the value of the label property (if set and is not empty)
-     * 3. to "URL: " appended by the value of the location property.
-     * @param refs reference object
-     */
-    getReferenceText(refs){
-        if(refs['citation']) 
-            return refs['citation'];
-        if(refs['label'])
-            return refs['label'];
-        return refs['location'];
     }
 }
