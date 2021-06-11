@@ -128,6 +128,7 @@
     "fn": "Richard Candell"
   },
   "accessLevel": "public",
+  "rights": "You've got to fight for your right to party.",
   "@id": "ark:/88434/mds0149s9z",
   "publisher": {
     "@type": "org:Organization",

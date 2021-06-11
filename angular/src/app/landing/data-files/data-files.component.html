@@ -1,51 +1,5 @@
 <!-- This bloack is for the data access session of landing page -->
-<div id="dataAccess">
-    <div class="font14" [hidden]="metadata">
-        <h3><b>Data Access</b></h3><br>
-        
-        <!-- Decide what to display based on access level -->
-        <span style="margin-left:0em" *ngIf="record['accessLevel'] === 'public'">
-            <i class="faa faa-globe"></i> These data are public.
-        </span>
-
-        <span *ngIf="record['accessLevel'] === 'restricted public'">
-            <i class="faa faa-lock"></i> This data has access restrictions.
-        </span>
-
-        <!-- Display access right -->
-        <span *ngIf="record['rights']">
-            <br> The access rights are {{ record.rights }} <br>
-        </span>
-
-        <!-- Display Homepage button if 'landingPage field exist and does not contain '/od/id' -->
-        <span *ngIf="record['landingPage'] && record['landingPage'].indexOf('/od/id') === -1 ">
-            For more information, please visit the
-            <a target="_blank" href="{{ record['landingPage'] }}"
-                (click)="gaService.gaTrackEvent('homepage', $event, 'Resource title: ' + record.title, record['landingPage'])">home
-                page</a>.
-        </span>
-
-        <!-- Access Pages -->
-        <span style="margin-left:0em" *ngIf="accessPages.length > 0">
-            <br>Data and related material can be found at the following locations:
-            <br>
-            <span style="padding-left:2.00em" *ngFor="let apage of accessPages">
-                <i class="faa faa-external-link"> <span style="margin-left:0.3em;">
-                    <span *ngIf="apage['description']; else noAccessTitle">
-                        <a href="{{apage['accessURL']}}" title="{{apage['description']}}"
-                           (click)="gaService.gaTrackEvent('homepage', $event, 
-                                                           'Resource title: ' + record.title,
-                                                           apage['accessURL'])">{{apage['title']}}</a>
-                    </span>
-                    <ng-template #noAccessTitle>
-                        <a href="{{apage['accessURL']}}" 
-                           (click)="gaService.gaTrackEvent('homepage', $event, 
-                                                           'Resource title: ' + record.title,
-                                                           apage['accessURL'])">{{apage['title']}}</a>
-                    </ng-template>
-                </span></i><br>
-            </span>
-        </span>
+<div id="filelisting">
 
         <!-- Display 'Download all' and 'Add all to cart' buttons and other info -->
         <div *ngIf="files.length  > 0">
@@ -54,7 +8,7 @@
                     <!-- 'Download all' and 'Add all to cart' buttons disabled if this is internal landing page -->
                     <div *ngIf="editEnabled; else editDisabled"
                         style="flex: 0 0 110px; text-align: left; padding-bottom: 0em;">
-                        <span><b>Files </b> </span>
+                        <span><b id="filelist-heading">Files </b> </span>
                         <span class="faa-stack fa-lg icon-download grey-color">
                             <i class="faa faa-circle-thin faa-stack-2x" aria-hidden="true"></i>
                             <i class="faa faa-download faa-stack-1x" aria-hidden="true"></i>
@@ -67,7 +21,7 @@
                     </div>
                     <ng-template #editDisabled>
                         <div style="flex: 0 0 120px; text-align: left; padding-bottom: 0em;">
-                            <span><b>Files </b> </span>
+                            <span><b id="filelist-heading">Files </b> </span>
                             <a class="faa-stack fa-lg icon-download" *ngIf="!editEnabled"
                                 (click)="downloadAllFiles()"
                                 data-toggle="tooltip" title="Download all files"
@@ -186,21 +140,6 @@
                 </p>
             </ng-template>
         </div>
-    </div>
-</div>
-
-<!-- references -->
-<div id="reference" style="margin: 1em 0em;">
-    <div [hidden]="metadata">
-        <div *ngIf="checkReferences()">
-            <div style="margin-bottom: 1em;"><h3><b>References</b></h3></div>
-            <div class="font14" style="margin: 0em 0em .5em 1em;" *ngFor="let refs of record['references']">
-                <i class="faa faa-external-link"> &nbsp;
-                    <a href={{refs.location}} target="blank">{{ getReferenceText(refs) }}</a>
-                </i>
-            </div>
-        </div>
-    </div>
 </div>
 
 <!-- file details -->
