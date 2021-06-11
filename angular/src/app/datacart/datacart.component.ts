@@ -121,10 +121,8 @@ export class DatacartComponent implements OnInit, AfterViewInit {
 
     @HostListener('window:beforeunload', ['$event'])
     unloadNotification($event: any) {
-        if (! this.canDeactivate()) {
+        if (! this.canDeactivate()) 
             $event.preventDefault();
-            alert("Please cancel downloads before attempting to leave this page");
-        }
     }
 
 
