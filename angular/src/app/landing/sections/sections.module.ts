@@ -16,6 +16,7 @@ import { DataFilesModule } from '../data-files/data-files.module';
 import { ResourceIdentityComponent } from './resourceidentity.component';
 import { ResourceDescriptionComponent } from './resourcedescription.component';
 import { ResourceDataComponent } from './resourcedata.component';
+import { ResourceRefsComponent } from './resourcerefs.component';
 
 /**
  * A module for components that lay out the content of a resource landing page into sections.
@@ -52,20 +53,20 @@ import { ResourceDataComponent } from './resourcedata.component';
         DescriptionModule, DataFilesModule, TopicModule, KeywordModule
     ],
     declarations: [
-        ResourceIdentityComponent, ResourceDescriptionComponent, ResourceDataComponent // ,
-         // ResourceRefsComponent, ResourceMetadataComponent
+        ResourceIdentityComponent, ResourceDescriptionComponent, ResourceDataComponent,
+        ResourceRefsComponent // , ResourceMetadataComponent
     ],
     providers: [
     ],
     exports: [
-        ResourceIdentityComponent, ResourceDescriptionComponent, ResourceDataComponent // ,
-         // ResourceRefsComponent, ResourceMetadataComponent
+        ResourceIdentityComponent, ResourceDescriptionComponent, ResourceDataComponent,
+        ResourceRefsComponent // , ResourceMetadataComponent
     ]
 })
 export class SectionsModule { }
 
 export {
-    ResourceIdentityComponent, ResourceDescriptionComponent, ResourceDataComponent // ,
-     // ResourceRefsComponent, ResourceMetadataComponent
+    ResourceIdentityComponent, ResourceDescriptionComponent, ResourceDataComponent,
+    ResourceRefsComponent // , ResourceMetadataComponent
 };
     
