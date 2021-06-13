@@ -1,0 +1,13 @@
+<div class="ui-g" id="references">
+    <div class="ui-g-12 ui-md-12 ui-lg-12 ui-sm-12 font14">
+
+        <div *ngIf="hasDisplayableReferences()">
+            <div style="margin-bottom: 1em;"><h3>References</h3></div>
+            <div class="font14" style="margin: 0em 0em .5em 1em;" *ngFor="let ref of record['references']">
+                <i class="faa faa-external-link"> &nbsp;
+                    <a href={{ref.location}} target="blank">{{ getReferenceText(ref) }}</a>
+                </i>
+            </div>
+        </div>
+    </div>
+</div>
