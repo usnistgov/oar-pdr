@@ -4,15 +4,7 @@ import { AppConfig } from '../../config/config';
 import { NerdmRes, NERDResource } from '../../nerdm/nerdm';
 
 /**
- * a component that lays out the "identity" section of a landing page.
- * 
- * This component presents "front matter" for the resource description, including:
- *     - title
- *     - authors
- *     - contact 
- *     - identifier
- *     - the paper this resource is a supplement to, if applicable
- *     - a link to official landing page (if different from this one)
+ * a component that lays out the "identity" section of a landing page
  */
 @Component({
     selector:      'pdr-resource-refs',
