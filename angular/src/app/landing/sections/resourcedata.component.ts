@@ -9,7 +9,7 @@ import { GoogleAnalyticsService } from '../../shared/ga-service/google-analytics
  * the list of data files, links to data access pages, and access policies.  
  */
 @Component({
-    selector:      'pdr-data-desc',
+    selector:      'pdr-resource-data',
     templateUrl:   './resourcedata.component.html',
     styleUrls:   [
         '../landing.component.css'
@@ -21,7 +21,7 @@ export class ResourceDataComponent implements OnChanges {
     // passed in by the parent component:
     @Input() record: NerdmRes = null;
     @Input() inBrowser: boolean = false;
-    @Input() editEnabled: boolean;    //Disable download all functionality if edit is enabled
+    @Input() editEnabled: boolean; 
 
     /**
      * create an instance of the Identity section
