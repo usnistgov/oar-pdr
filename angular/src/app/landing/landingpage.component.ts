@@ -77,14 +77,14 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
      *                 ID with child components.
      */
     constructor(private route: ActivatedRoute,
-        private router: Router,
-        @Inject(PLATFORM_ID) private platformId: Object,
-        public titleSv: Title,
-        private cfg: AppConfig,
-        private mdserv: MetadataService,
-        public edstatsvc: EditStatusService,
-        private cartService: CartService,
-        private mdupdsvc: MetadataUpdateService) 
+                private router: Router,
+                @Inject(PLATFORM_ID) private platformId: Object,
+                public titleSv: Title,
+                private cfg: AppConfig,
+                private mdserv: MetadataService,
+                public edstatsvc: EditStatusService,
+                private cartService: CartService,
+                private mdupdsvc: MetadataUpdateService) 
     {
         this.reqId = this.route.snapshot.paramMap.get('id');
         this.inBrowser = isPlatformBrowser(platformId);
@@ -93,7 +93,9 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
 
         this.edstatsvc.watchEditMode((editMode) => {
             this.editMode = editMode;
-            if(this.editMode == this.EDIT_MODES.DONE_MODE || this.editMode == this.EDIT_MODES.OUTSIDE_MIDAS_MODE){
+            if (this.editMode == this.EDIT_MODES.DONE_MODE ||
+                this.editMode == this.EDIT_MODES.OUTSIDE_MIDAS_MODE)
+            {
                 this.displaySpecialMessage = true;
                 this._showContent = true;
                 this.setMessage();
@@ -133,7 +135,7 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
 
         this.route.queryParamMap.subscribe(queryParams => {
             var param = queryParams.get("editEnabled");
-            if(param)
+            if (param)
                 this.routerParamEditEnabled = (param.toLowerCase() == 'true');
             else
                 this.routerParamEditEnabled = false;
@@ -170,59 +172,57 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
                 // in editing mode.  This is done in concert with the authentication process that can involve 
                 // redirection to an authentication server; on successful authentication, the server can 
                 // redirect the browser back to this landing page with editing turned on. 
-                if(this.inBrowser){
+                if(this.inBrowser) {
                     // Display content after 15sec no matter what
                     setTimeout(() => {
                         this.edstatsvc.setShowLPContent(true);
                     }, 15000);
         
-                  if (this.edstatsvc.editingEnabled()) 
-                  {
-                      if (this.routerParamEditEnabled) {
-                          showError = false;
-                        //   console.log("Returning from authentication redirection (editmode="+this.routerParamEditEnabled+")");
-                          // Need to pass reqID (resID) because the resID in editControlComponent
-                          // has not been set yet and the startEditing function relies on it.
+                    if (this.edstatsvc.editingEnabled()) {
+                        if (this.routerParamEditEnabled) {
+                            showError = false;
+                            // console.log("Returning from authentication redirection (editmode="+
+                            //             this.routerParamEditEnabled+")");
+                            
+                            // Need to pass reqID (resID) because the resID in editControlComponent
+                            // has not been set yet and the startEditing function relies on it.
                             this.edstatsvc.startEditing(this.reqId);
-                      }else{
-                          showError = true;
-                      }
-                  }else{
-                      showError = true;
-                  }
+                        }
+                        else 
+                            showError = true;
+                    }
+                    else 
+                        showError = true;
                 }
             }
 
-            if(showError){
-                if(metadataError == "not-found"){
-                    if(this.routerParamEditEnabled){
+            if (showError) {
+                if (metadataError == "not-found") {
+                    if (this.routerParamEditEnabled) {
                         console.log("ID not found...");
                         this.edstatsvc._setEditMode(this.EDIT_MODES.OUTSIDE_MIDAS_MODE);
                         this.setMessage();
                         this.displaySpecialMessage = true;
-                    }else{
+                    }
+                    else {
                         this.router.navigateByUrl("not-found/" + this.reqId, { skipLocationChange: true });
                     }
                 }
-
             }
         },
         (err) => {
             console.error("Failed to retrieve metadata: ", err);
             this.edstatsvc.setShowLPContent(true);
-            if (err instanceof IDNotFound)
-            {
+            if (err instanceof IDNotFound) {
                 metadataError = "not-found";
-                  this.router.navigateByUrl("not-found/" + this.reqId, { skipLocationChange: true });
-            }else
-            {
+                this.router.navigateByUrl("not-found/" + this.reqId, { skipLocationChange: true });
+            }
+            else {
                 metadataError = "int-error";
                 // this.router.navigateByUrl("int-error/" + this.reqId, { skipLocationChange: true });
-
                 this.router.navigateByUrl("int-error/" + this.reqId, { skipLocationChange: true });
             }
-        }
-        );
+        });
     }
 
     /**
@@ -236,11 +236,10 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
     }
 
     showData() : void{
-      if(this.md != null){
-        this._showData = true;
-      }else{
-        this._showData = false;
-      }
+        if (this.md != null)
+            this._showData = true;
+        else
+            this._showData = false;
     }
 
     /**
@@ -332,8 +331,7 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
     /**
      * return text representing the recommended citation for this resource
      */
-    getCitation(): string 
-    {
+    getCitation(): string {
         this.citetext = (new NERDResource(this.md)).getCitation();
         return this.citetext;
     }
@@ -341,15 +339,11 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
     /**
      * Set the message to display based on the edit mode.
      */
-    setMessage(){
-        if(this.editMode == this.EDIT_MODES.DONE_MODE)
-        {
+    setMessage() {
+        if (this.editMode == this.EDIT_MODES.DONE_MODE) 
             this.message = 'You can now close this browser tab <p>and go back to MIDAS to either accept or discard the changes.'
-        }
 
-        if(this.editMode == this.EDIT_MODES.OUTSIDE_MIDAS_MODE)
-        {
+        if (this.editMode == this.EDIT_MODES.OUTSIDE_MIDAS_MODE)
             this.message = 'This record is not currently available for editing. <p>Please return to MIDAS and click "Edit Landing Page" to edit.'
-        }
     }
 }
