@@ -1,5 +1,5 @@
 import {
-    Component, OnInit, AfterViewInit,
+    Component, OnInit, AfterViewInit, ViewChild,
     ElementRef, PLATFORM_ID, Inject, ViewEncapsulation
 } from '@angular/core';
 import { ActivatedRoute, Router, NavigationEnd } from '@angular/router';
@@ -49,18 +49,18 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
     citetext: string = null;
     citationVisible: boolean = false;
     editEnabled: boolean = false;
+    public EDIT_MODES: any = LandingConstants.editModes;
+    editMode: string = LandingConstants.editModes.VIEWONLY_MODE;
+    editRequested: boolean = false;
     _showData: boolean = false;
-    _showContent: boolean;
+    _showContent: boolean = true;
     headerObj: any;
-    public EDIT_MODES: any;
-    editMode: string;
     message: string;
     displaySpecialMessage: boolean = false;
     citationDialogWith: number = 550; // Default width
 
     // this will be removed in next restructure
     showMetadata = false;
-    routerParamEditEnabled: boolean = false;
 
     loadingMessage = '<i class="faa faa-spinner faa-spin"></i> Loading...';
 
@@ -89,32 +89,33 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
         this.reqId = this.route.snapshot.paramMap.get('id');
         this.inBrowser = isPlatformBrowser(platformId);
         this.editEnabled = cfg.get('editEnabled', false) as boolean;
-        this.EDIT_MODES = LandingConstants.editModes;
+        this.editMode = this.EDIT_MODES.VIEWONLY_MODE;
 
-        this.edstatsvc.watchEditMode((editMode) => {
-            this.editMode = editMode;
-            if (this.editMode == this.EDIT_MODES.DONE_MODE ||
-                this.editMode == this.EDIT_MODES.OUTSIDE_MIDAS_MODE)
-            {
-                this.displaySpecialMessage = true;
-                this._showContent = true;
-                this.setMessage();
-            }
-        });
-
-        this.mdupdsvc.subscribe(
-            (md) => {
-                if (md && md != this.md) {
-                    this.md = md as NerdmRes;
+        if (this.editEnabled) {
+            this.edstatsvc.watchEditMode((editMode) => {
+                this.editMode = editMode;
+                if (this.editMode == this.EDIT_MODES.DONE_MODE ||
+                    this.editMode == this.EDIT_MODES.OUTSIDE_MIDAS_MODE)
+                {
+                    this.displaySpecialMessage = true;
+                    this._showContent = true;
+                    this.setMessage();
                 }
+            });
 
-                this.showData();
-            }
-        );
+            this.mdupdsvc.subscribe(
+                (md) => {
+                    if (md && md != this.md) 
+                        this.md = md as NerdmRes;
 
-        this.edstatsvc.watchShowLPContent((showContent) => {
-            this._showContent = showContent;
-        });
+                    this.showData();
+                }
+            );
+
+            this.edstatsvc.watchShowLPContent((showContent) => {
+                this._showContent = showContent;
+            });
+        }
     }
 
     /**
@@ -133,23 +134,20 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
         }
         // this.cartService.cleanUpStatusStorage();
 
-        this.route.queryParamMap.subscribe(queryParams => {
-            var param = queryParams.get("editEnabled");
-            if (param)
-                this.routerParamEditEnabled = (param.toLowerCase() == 'true');
-            else
-                this.routerParamEditEnabled = false;
-        })
+        if (this.editEnabled) {
+            this.route.queryParamMap.subscribe(queryParams => {
+                let param = queryParams.get("editEnabled");
+                if (param)
+                    this.editRequested = (param.toLowerCase() == 'true');
 
-        // if editEnabled = true, we don't want to display the data that came from mdserver
-        // Will set the display to true after the authentication process. If authentication failed, 
-        // we set it to true and the data loaded from mdserver will be displayed. If authentication 
-        // passed and draft data loaded from customization service, we will set this flag to true 
-        // to display the data from MIDAS.
-        if(this.routerParamEditEnabled) 
-            this.edstatsvc.setShowLPContent(false);
-        else 
-            this.edstatsvc.setShowLPContent(true);
+                // if editEnabled = true, we don't want to display the data that came from mdserver
+                // Will set the display to true after the authentication process. If authentication failed, 
+                // we set it to true and the data loaded from mdserver will be displayed. If authentication 
+                // passed and draft data loaded from customization service, we will set this flag to true 
+                // to display the data from MIDAS.
+                this.edstatsvc.setShowLPContent(! this.editRequested);
+            });
+        }
 
         // Retrive Nerdm record and keep it in case we need to display it in preview mode
         // use case: user manually open PDR landing page but the record was not edited by MIDAS
@@ -172,24 +170,20 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
                 // in editing mode.  This is done in concert with the authentication process that can involve 
                 // redirection to an authentication server; on successful authentication, the server can 
                 // redirect the browser back to this landing page with editing turned on. 
-                if(this.inBrowser) {
+                if (this.inBrowser) {
                     // Display content after 15sec no matter what
                     setTimeout(() => {
                         this.edstatsvc.setShowLPContent(true);
                     }, 15000);
         
-                    if (this.edstatsvc.editingEnabled()) {
-                        if (this.routerParamEditEnabled) {
-                            showError = false;
-                            // console.log("Returning from authentication redirection (editmode="+
-                            //             this.routerParamEditEnabled+")");
-                            
-                            // Need to pass reqID (resID) because the resID in editControlComponent
-                            // has not been set yet and the startEditing function relies on it.
-                            this.edstatsvc.startEditing(this.reqId);
-                        }
-                        else 
-                            showError = true;
+                    if (this.editRequested) {
+                        showError = false;
+                        // console.log("Returning from authentication redirection (editmode="+
+                        //             this.editRequested+")");
+                        
+                        // Need to pass reqID (resID) because the resID in editControlComponent
+                        // has not been set yet and the startEditing function relies on it.
+                        this.edstatsvc.startEditing(this.reqId);
                     }
                     else 
                         showError = true;
@@ -198,7 +192,7 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
 
             if (showError) {
                 if (metadataError == "not-found") {
-                    if (this.routerParamEditEnabled) {
+                    if (this.editRequested) {
                         console.log("ID not found...");
                         this.edstatsvc._setEditMode(this.EDIT_MODES.OUTSIDE_MIDAS_MODE);
                         this.setMessage();
@@ -235,6 +229,10 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
         }
     }
 
+    inViewMode() {
+        return this.editMode == this.EDIT_MODES.VIEWONLY_MODE;
+    }
+
     showData() : void{
         if (this.md != null)
             this._showData = true;
@@ -253,6 +251,7 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
         // set the document title
         this.setDocumentTitle();
         this.mdupdsvc.setOriginalMetadata(this.md);
+        this.showData();
     }
 
     /**

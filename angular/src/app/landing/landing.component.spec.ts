@@ -38,6 +38,9 @@ describe('LandingComponent', () => {
     let routes : Routes = [ ];
     let authsvc : AuthService = new MockAuthService(undefined);
 
+/*    
+ * this component is deprecated; turning off tests
+ *
     beforeEach(() => {
         cfg = (new AngularEnvironmentConfigService(plid, ts)).getConfig() as AppConfig;
         cfg.locations.pdrSearch = "https://goob.nist.gov/search";
@@ -52,7 +55,7 @@ describe('LandingComponent', () => {
             "@id": "goober",
             title: "All About Me!"
         }
-        */
+        -/
 
         let r : unknown = new mock.MockActivatedRoute("/id/goober", {id: "goober"});
         route = r as ActivatedRoute;
@@ -118,4 +121,5 @@ describe('LandingComponent', () => {
         component.record.landingPage = "https://www.nist.gov/data"
         expect(component.displayHomePageLink()).toBeTruthy();
     });
+*/
 });

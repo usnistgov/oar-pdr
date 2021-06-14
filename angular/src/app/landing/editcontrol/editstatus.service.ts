@@ -17,14 +17,12 @@ import { LandingConstants } from '../constants';
     providedIn: 'root'
 })
 export class EditStatusService {
-  public EDIT_MODES: any;
+    public EDIT_MODES: any = LandingConstants.editModes;
 
     /**
      * construct the service
      */
-    constructor(private cfg : AppConfig) {
-      this.EDIT_MODES = LandingConstants.editModes;
-    }
+    constructor(private cfg : AppConfig) { }
 
     /**
      * the date of the last update to the draft landing page.  
@@ -38,7 +36,8 @@ export class EditStatusService {
      * Make editMode observable so any component that subscribe to it will
      * get an update once the mode changed.
      */
-    _editMode : BehaviorSubject<string> = new BehaviorSubject<string>("");
+    _editMode : BehaviorSubject<string> =
+        new BehaviorSubject<string>(LandingConstants.editModes.VIEWONLY_MODE);
     _setEditMode(val : string) { 
         this._editMode.next(val); 
     }

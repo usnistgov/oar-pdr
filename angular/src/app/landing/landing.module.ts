@@ -21,6 +21,9 @@ import { NerdmComponent } from './nerdm.component';
 import { KeyValuePipe } from './keyvalue.pipe';
 import { MetadataView } from './metadata/metadataview.component';
 
+/**
+ * Deprecated: replaced by landingpage.module
+ */
 @NgModule({
   declarations: [
     LandingComponent,DataFilesComponent,TitleComponent,AuthorComponent,ContactComponent,
