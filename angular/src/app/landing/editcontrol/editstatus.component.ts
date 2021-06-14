@@ -36,7 +36,7 @@ export class EditStatusComponent implements OnInit {
      * @param mdupdsvc    the MetadataUpdateService that is receiving updates.  This will be 
      *                    used to be alerted when updates have been made.
      */
-    constructor(public mdupdsvc : MetadataUpdateService, public edstatsvc: EditStatusService,) {
+    constructor(public mdupdsvc : MetadataUpdateService, public edstatsvc: EditStatusService) {
 
         this.EDIT_MODES = LandingConstants.editModes;
         this.mdupdsvc.updated.subscribe((details) => { 
