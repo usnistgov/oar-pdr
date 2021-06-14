@@ -134,20 +134,23 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
         }
         // this.cartService.cleanUpStatusStorage();
 
-        if (this.editEnabled) {
-            this.route.queryParamMap.subscribe(queryParams => {
-                let param = queryParams.get("editEnabled");
-                if (param)
-                    this.editRequested = (param.toLowerCase() == 'true');
+        this.route.queryParamMap.subscribe(queryParams => {
+            var param = queryParams.get("editEnabled");
+            if (param)
+                this.routerParamEditEnabled = (param.toLowerCase() == 'true');
+            else
+                this.routerParamEditEnabled = false;
+        })
 
-                // if editEnabled = true, we don't want to display the data that came from mdserver
-                // Will set the display to true after the authentication process. If authentication failed, 
-                // we set it to true and the data loaded from mdserver will be displayed. If authentication 
-                // passed and draft data loaded from customization service, we will set this flag to true 
-                // to display the data from MIDAS.
-                this.edstatsvc.setShowLPContent(! this.editRequested);
-            });
-        }
+        // if editEnabled = true, we don't want to display the data that came from mdserver
+        // Will set the display to true after the authentication process. If authentication failed, 
+        // we set it to true and the data loaded from mdserver will be displayed. If authentication 
+        // passed and draft data loaded from customization service, we will set this flag to true 
+        // to display the data from MIDAS.
+        if(this.routerParamEditEnabled) 
+            this.edstatsvc.setShowLPContent(false);
+        else 
+            this.edstatsvc.setShowLPContent(true);
 
         // Retrive Nerdm record and keep it in case we need to display it in preview mode
         // use case: user manually open PDR landing page but the record was not edited by MIDAS
@@ -170,20 +173,24 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
                 // in editing mode.  This is done in concert with the authentication process that can involve 
                 // redirection to an authentication server; on successful authentication, the server can 
                 // redirect the browser back to this landing page with editing turned on. 
-                if (this.inBrowser) {
+                if(this.inBrowser) {
                     // Display content after 15sec no matter what
                     setTimeout(() => {
                         this.edstatsvc.setShowLPContent(true);
                     }, 15000);
         
-                    if (this.editRequested) {
-                        showError = false;
-                        // console.log("Returning from authentication redirection (editmode="+
-                        //             this.editRequested+")");
-                        
-                        // Need to pass reqID (resID) because the resID in editControlComponent
-                        // has not been set yet and the startEditing function relies on it.
-                        this.edstatsvc.startEditing(this.reqId);
+                    if (this.edstatsvc.editingEnabled()) {
+                        if (this.routerParamEditEnabled) {
+                            showError = false;
+                            // console.log("Returning from authentication redirection (editmode="+
+                            //             this.routerParamEditEnabled+")");
+                            
+                            // Need to pass reqID (resID) because the resID in editControlComponent
+                            // has not been set yet and the startEditing function relies on it.
+                            this.edstatsvc.startEditing(this.reqId);
+                        }
+                        else 
+                            showError = true;
                     }
                     else 
                         showError = true;
@@ -192,7 +199,7 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
 
             if (showError) {
                 if (metadataError == "not-found") {
-                    if (this.editRequested) {
+                    if (this.routerParamEditEnabled) {
                         console.log("ID not found...");
                         this.edstatsvc._setEditMode(this.EDIT_MODES.OUTSIDE_MIDAS_MODE);
                         this.setMessage();
