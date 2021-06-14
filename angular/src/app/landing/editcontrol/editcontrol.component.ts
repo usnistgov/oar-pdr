@@ -221,7 +221,7 @@ export class EditControlComponent implements OnInit, OnChanges {
                     {
                         if(md)
                         {
-                            console.log("Draft loaded:", md);
+                            // console.log("Draft loaded:", md);
                             this.mdupdsvc.setOriginalMetadata(md as NerdmRes);
                             this.mdupdsvc.checkUpdatedFields(md as NerdmRes);
                             this._setEditMode(this.EDIT_MODES.EDIT_MODE);
@@ -263,7 +263,7 @@ export class EditControlComponent implements OnInit, OnChanges {
         if (this._custsvc) {
             this._custsvc.discardDraft().subscribe(
                 (md) => {
-                    console.log("Discard edit return:", md);
+                    // console.log("Discard edit return:", md);
                     this.mdupdsvc.forgetUpdateDate();
                     this.mdupdsvc.fieldReset();
                     this._setEditMode(this.EDIT_MODES.PREVIEW_MODE);
