@@ -154,7 +154,6 @@ export class MetadataUpdateService {
             return new Promise<boolean>((resolve, reject) => {
                 this.custsvc.updateMetadata(md).subscribe(
                     (res) => {
-                        console.log('custsvc.updateMetadata return', res);
                         // console.log("###DBG  Draft data returned from server:\n  ", res)
                         this.stampUpdateDate();
                         this.mdres.next(res as NerdmRes);
