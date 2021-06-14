@@ -1,3 +1,6 @@
+/*
+ * This component is deprecated by landingbody.component
+ */
 import { Component, OnInit, OnChanges, ElementRef, Input, Inject, APP_ID, HostListener, ViewChild } from '@angular/core';
 import { Title, Meta } from '@angular/platform-browser';
 import { ActivatedRoute, Router, NavigationEnd } from '@angular/router';
@@ -89,6 +92,9 @@ function compare_histories(a, b) {
     return out;
 }
 
+/**
+ * This component is deprecated by LandingBodyComponent (in landingbody.component)
+ */
 @Component({
     selector: 'app-landing',
     templateUrl: './landing.component.html',

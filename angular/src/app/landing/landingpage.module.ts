@@ -5,7 +5,8 @@ import { ButtonModule } from 'primeng/button';
 
 import { NerdmModule } from '../nerdm/nerdm.module';
 import { LandingPageComponent } from './landingpage.component';
-import { LandingModule } from '../landing/landing.module';
+import { LandingBodyComponent } from './landingbody.component';
+import { SectionsModule } from './sections/sections.module';
 import { MetadataUpdateService } from './editcontrol/metadataupdate.service';
 import { EditControlModule } from './editcontrol/editcontrol.module';
 import { ToolsModule } from './tools/tools.module';
@@ -23,20 +24,20 @@ import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
         CommonModule,
         ButtonModule,
         NerdmModule,    // provider for MetadataService (which depends on AppConfig)
-        LandingModule,
         EditControlModule,
         ToolsModule,
         CitationModule,
+        SectionsModule,
         NgbModule
     ],
     declarations: [
-        LandingPageComponent, DoneComponent, DownloadstatusComponent
+        LandingPageComponent, DoneComponent, DownloadstatusComponent, LandingBodyComponent
     ],
     providers: [
         MetadataUpdateService, DatePipe
     ],
     exports: [
-        LandingPageComponent
+        LandingPageComponent, DoneComponent, DownloadstatusComponent, LandingBodyComponent
     ]
 })
 export class LandingPageModule { }
