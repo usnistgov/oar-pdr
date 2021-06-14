@@ -41,7 +41,7 @@ describe('ResourceIdentityComponent', () => {
     beforeEach(async(() => {
         makeComp();
         component.inBrowser = true;
-        component.editMode = false;
+        component.editEnabled = false;
         fixture.detectChanges();
     }));
 

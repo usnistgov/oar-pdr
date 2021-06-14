@@ -9,7 +9,7 @@ import { GoogleAnalyticsService } from '../../shared/ga-service/google-analytics
 
 import { config, testdata } from '../../../environments/environment';
 
-fdescribe('ResourceRefsComponent', () => {
+describe('ResourceRefsComponent', () => {
     let component: ResourceRefsComponent;
     let fixture: ComponentFixture<ResourceRefsComponent>;
     let cfg : AppConfig = new AppConfig(config);
