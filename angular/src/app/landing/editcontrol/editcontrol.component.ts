@@ -331,7 +331,7 @@ export class EditControlComponent implements OnInit, OnChanges {
       if (this._custsvc){
         this._custsvc.doneEditing().subscribe(
           (res) => {
-            console.log("Done edit return:", res);
+            // console.log("Done edit return:", res);
             this.mdupdsvc.forgetUpdateDate();
             this.mdupdsvc.fieldReset();
             this._setEditMode(this.EDIT_MODES.DONE_MODE);
