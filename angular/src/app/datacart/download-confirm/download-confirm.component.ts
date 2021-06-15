@@ -1,7 +1,7 @@
 import { Component, OnInit, Input, EventEmitter, Output, ElementRef, ViewChild } from '@angular/core';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { ZipData } from '../../shared/download-service/zipData';
-import { CommonFunctionService } from '../../shared/common-function/common-function.service';
+// import { deepCopy } from '../../../utils';
 import { AppConfig } from '../../config/config';
 
 @Component({
@@ -17,12 +17,8 @@ export class DownloadConfirmComponent implements OnInit {
 
     bundleSizeAlert: number;
 
-    constructor
-    (
-        public activeModal: NgbActiveModal,
-        private cfg: AppConfig,
-        public commonFunctionService: CommonFunctionService
-    ) 
+    constructor(public activeModal: NgbActiveModal,
+                private cfg: AppConfig) 
     { }
 
     ngOnInit() 

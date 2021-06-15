@@ -1,7 +1,7 @@
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { ContactService } from '../contact.service';
-import { CommonFunctionService } from '../../../shared/common-function/common-function.service';
+import { deepCopy } from '../../../utils';
 
 @Component({
     selector: 'app-contact-popup',
@@ -20,12 +20,12 @@ export class ContactPopupComponent implements OnInit {
     tempAddress: string;
 
     constructor(public activeModal: NgbActiveModal,
-        private cmFunctionService: CommonFunctionService,
-        private contactService: ContactService) { }
+                private contactService: ContactService)
+    { }
 
     ngOnInit() {
         if (this.inputValue != null && this.inputValue != undefined) {
-            this.tempContactPoint = this.cmFunctionService.deepCopy(this.inputValue['contactPoint']);
+            this.tempContactPoint = deepCopy(this.inputValue['contactPoint']);
         } else {
             this.tempContactPoint = this.contactService.getBlankContact();
         }

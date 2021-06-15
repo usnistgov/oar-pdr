@@ -1,7 +1,7 @@
 import { Component, OnInit, Input, Output, EventEmitter, ViewChild, ElementRef, HostListener } from '@angular/core';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { SearchService } from '../../../shared/search-service/index';
-import { CommonFunctionService } from '../../../shared/common-function/common-function.service';
+import { deepCopy } from '../../../utils';
 import { AuthorService } from '../author.service';
 
 @Component({
@@ -24,7 +24,6 @@ export class AuthorPopupComponent implements OnInit {
 
   constructor(
     public activeModal: NgbActiveModal,
-    private cmFunctionService: CommonFunctionService,
     private searchService: SearchService,
     private authorService: AuthorService) { 
 
@@ -32,7 +31,7 @@ export class AuthorPopupComponent implements OnInit {
 
   ngOnInit() {
     if (this.inputValue != undefined)
-      this.originalAuthors = this.cmFunctionService.deepCopy(this.inputValue);
+      this.originalAuthors = deepCopy(this.inputValue);
     else
       this.inputValue = {};
 
@@ -283,7 +282,7 @@ export class AuthorPopupComponent implements OnInit {
     if (i > this.originalAuthors.authors.length-1) {
       this.deleteAuthor(author);
     } else {
-      this.inputValue.authors[i] = this.cmFunctionService.deepCopy(this.originalAuthors.authors[this.inputValue.authors[i].originalIndex]);
+      this.inputValue.authors[i] = deepCopy(this.originalAuthors.authors[this.inputValue.authors[i].originalIndex]);
       author.dataChanged = false;
       author.fnLocked = false;
       author.isCollapsed = false;
@@ -295,10 +294,10 @@ export class AuthorPopupComponent implements OnInit {
   *   Move author up
   */
   moveAuthorUp(author: any, i: number) {
-    var tempAuth01 = this.cmFunctionService.deepCopy(this.inputValue.authors[i - 1]);
-    var tempAuth02 = this.cmFunctionService.deepCopy(this.inputValue.authors[i]);
-    this.inputValue.authors[i - 1] = this.cmFunctionService.deepCopy(tempAuth02);
-    this.inputValue.authors[i] = this.cmFunctionService.deepCopy(tempAuth01);
+    var tempAuth01 = deepCopy(this.inputValue.authors[i - 1]);
+    var tempAuth02 = deepCopy(this.inputValue.authors[i]);
+    this.inputValue.authors[i - 1] = deepCopy(tempAuth02);
+    this.inputValue.authors[i] = deepCopy(tempAuth01);
     author.dataChanged = true;
   }
 
@@ -306,10 +305,10 @@ export class AuthorPopupComponent implements OnInit {
   *   Move author down
   */
   moveAuthorDown(author: any, i: number) {
-    var tempAuth01 = this.cmFunctionService.deepCopy(this.inputValue.authors[i + 1]);
-    var tempAuth02 = this.cmFunctionService.deepCopy(this.inputValue.authors[i]);
-    this.inputValue.authors[i + 1] = this.cmFunctionService.deepCopy(tempAuth02);
-    this.inputValue.authors[i] = this.cmFunctionService.deepCopy(tempAuth01);
+    var tempAuth01 = deepCopy(this.inputValue.authors[i + 1]);
+    var tempAuth02 = deepCopy(this.inputValue.authors[i]);
+    this.inputValue.authors[i + 1] = deepCopy(tempAuth02);
+    this.inputValue.authors[i] = deepCopy(tempAuth01);
     author.dataChanged = true;
   }
 
