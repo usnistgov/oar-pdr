@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Observable, of } from 'rxjs';
 import { AppConfig } from '../../config/config';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpRequest } from '@angular/common/http';
 
 @Injectable({
   providedIn: 'root'
@@ -17,10 +17,22 @@ export class MetricsService {
     }
 
     getDatasetMetrics(ediid: string): Observable<any> {
-        return this.http.get(this.metricsBackend + "files?exclude=_id&include=ediid,filepath,success_get,download_size&ediid=" + ediid, { headers: new HttpHeaders({ timeout: '${10000}' }) });
+        let url = this.metricsBackend + "files?exclude=_id&include=ediid,filepath,success_get,download_size&ediid=" + ediid;
+
+        const request = new HttpRequest(
+            "GET", url, 
+            { headers: new HttpHeaders({ 'Content-Type': 'application/json', 'responseType': 'blob' }), reportProgress: true, responseType: 'blob' });
+
+        return this.http.request(request);
     }
 
     getRecordLevelMetrics(ediid: string): Observable<any> {
-        return this.http.get(this.metricsBackend + "records/" + ediid, { headers: new HttpHeaders({ timeout: '${10000}' }) });
+        let url = this.metricsBackend + "records/" + ediid;
+
+        const request = new HttpRequest(
+            "GET", url, 
+            { headers: new HttpHeaders({ 'Content-Type': 'application/json', 'responseType': 'blob' }), reportProgress: true, responseType: 'blob' });
+
+        return this.http.request(request);
     }
 }

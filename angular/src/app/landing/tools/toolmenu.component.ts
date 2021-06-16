@@ -197,30 +197,47 @@ export class ToolMenuComponent implements OnChanges {
         mitems.push({ label: "Find", items: subitems });
 
         // Dataset Metrics
-        let totalDownload = this.recordLevelMetrics.DataSetMetrics[0] != undefined? this.recordLevelMetrics.DataSetMetrics[0].success_get : 0;
+        // First check if there is any file in the dataset. If not, do not display metrics.
+        let hasFile = false;
+        let hasMetrics: boolean = false;
 
-        totalDownload = totalDownload == undefined? 0 : totalDownload;
+        this.record.components.forEach(element => {
+            if(element.filepath){
+                hasFile = true;
+                return;
+            }
+        });
 
-        let totalUsers = this.recordLevelMetrics.DataSetMetrics[0] != undefined? this.recordLevelMetrics.DataSetMetrics[0].number_users : 0;
+        if(hasFile){
+            //Now check if there is any metrics data
+            let totalDownload = this.recordLevelMetrics.DataSetMetrics[0] != undefined? this.recordLevelMetrics.DataSetMetrics[0].success_get : 0;
 
-        totalUsers = totalUsers == undefined? 0 : totalUsers;
+            totalDownload = totalDownload == undefined? 0 : totalDownload;
+    
+            let totalUsers = this.recordLevelMetrics.DataSetMetrics[0] != undefined? this.recordLevelMetrics.DataSetMetrics[0].number_users : 0;
+    
+            totalUsers = totalUsers == undefined? 0 : totalUsers;
+    
+            let totalDownloadSize = this.recordLevelMetrics.DataSetMetrics[0] != undefined?
+                this.commonFunctionService.formatBytes(this.recordLevelMetrics.DataSetMetrics[0].total_size, 2) : 0;
+    
+            if(this.recordLevelMetrics.DataSetMetrics.length > 0){
+                subitems = [
+                    this.createMenuItem(totalDownload>1?totalDownload.toString() + ' files downloaded.':totalDownload.toString() + ' file downloaded.', null,null, null),
+                    this.createMenuItem(totalUsers > 1?totalUsers.toString() + ' users.':totalUsers.toString() + ' user.', null,null, null),
+                    this.createMenuItem(totalDownloadSize.toString() + ' downloaded.', null,null, null),
+                    this.createMenuItem('More ...', null,null, this.metricsUrl)
+                ];
 
-        let totalDownloadSize = this.recordLevelMetrics.DataSetMetrics[0] != undefined?
-            this.commonFunctionService.formatBytes(this.recordLevelMetrics.DataSetMetrics[0].total_size, 2) : 0;
-
-        if(this.recordLevelMetrics.DataSetMetrics.length > 0){
-            subitems = [
-                this.createMenuItem(totalDownload>1?totalDownload.toString() + ' files downloaded.':totalDownload.toString() + ' file downloaded.', null,null, null),
-                this.createMenuItem(totalUsers > 1?totalUsers.toString() + ' users.':totalUsers.toString() + ' user.', null,null, null),
-                this.createMenuItem(totalDownloadSize.toString() + ' downloaded.', null,null, null),
-                this.createMenuItem('More ...', null,null, this.metricsUrl)
-            ];
-        }else{
+                hasMetrics = true;
+            }
+        }
+    
+        if(!hasMetrics){
             subitems = [
                 this.createMenuItem('Metrics not available.', null,null, null)
-            ];           
+            ]; 
         }
-
 
         mitems.push({ label: "Dataset Metrics", items: subitems });
 

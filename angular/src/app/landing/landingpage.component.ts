@@ -18,6 +18,7 @@ import { DataCartStatus } from '../datacart/cartstatus';
 import { RecordLevelMetrics } from '../metrics/metrics';
 import { MetricsService } from '../shared/metrics-service/metrics.service';
 import { CommonFunctionService } from '../shared/common-function/common-function.service';
+import { HttpEventType } from '@angular/common/http';
 
 /**
  * A component providing the complete display of landing page content associated with 
@@ -241,11 +242,12 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
      * Get metrics data
      */
     getMetrics() {
-        console.log("this.md", this.md);
         let ediid = this.md.ediid;
 
-        this.metricsService.getRecordLevelMetrics(ediid).subscribe(metricsData => {
-            this.recordLevelMetrics = metricsData;
+        this.metricsService.getRecordLevelMetrics(ediid).subscribe(async (event) => {
+            if(event.type == HttpEventType.Response){
+                this.recordLevelMetrics = JSON.parse(await event.body.text());
+            }
         });
     }
 
