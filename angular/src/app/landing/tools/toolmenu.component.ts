@@ -201,12 +201,14 @@ export class ToolMenuComponent implements OnChanges {
         let hasFile = false;
         let hasMetrics: boolean = false;
 
-        this.record.components.forEach(element => {
-            if(element.filepath){
-                hasFile = true;
-                return;
-            }
-        });
+        if(this.record.components && this.record.components.length > 0){
+            this.record.components.forEach(element => {
+                if(element.filepath){
+                    hasFile = true;
+                    return;
+                }
+            });
+        }
 
         if(hasFile){
             //Now check if there is any metrics data

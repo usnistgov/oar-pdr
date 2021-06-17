@@ -266,7 +266,6 @@ export class LandingComponent implements OnInit, OnChanges {
         const tree = [];
         // This example uses the underscore.js library.
         var i = 1;
-        var tempfiletest = "";
 
         paths.forEach((path) => {
             if (path.filepath && !path['@type'].includes('nrd:Hidden')) {
