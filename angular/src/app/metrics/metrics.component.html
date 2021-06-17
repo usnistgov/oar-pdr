@@ -6,7 +6,7 @@
         </span>
         <div *ngIf="screenWidth > screenSizeBreakPoint" style="float: right;">
             <button (click)="saveMetricsAsImage()" pButton 
-                [disabled]="noChartData"
+                [disabled]="noChartData || noDatasetSummary"
                 [ngStyle]="{'width':'200px', 'height':'35px', 'float':'right', 'background-color':'green','margin-top':'1em', 'margin-right':'1.5em'}">
                 <i class="faa faa-download faa-1x icon-white" style="color: #fff;"></i>
                 Download Graphics

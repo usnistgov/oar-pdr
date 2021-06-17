@@ -142,7 +142,6 @@ export class MetricsComponent implements OnInit {
                                     }else{
                                         this.noChartData = true;
                                     }
-                                    this.readyDisplay = true;
                                 }
                             },
                             (err) => {
@@ -161,8 +160,11 @@ export class MetricsComponent implements OnInit {
             
                                 this.readyDisplay = true;
                             });                            
+                        }else{
+                            this.noChartData = true;
                         }
 
+                        this.readyDisplay = true;
                         this.expandToLevel(this.files, true, 0, 1);
                     }
                 })
@@ -182,9 +184,12 @@ export class MetricsComponent implements OnInit {
                             }else{
                                 this.noDatasetSummary = true;
                             }
+
+                            break;
                         default:
                             break;
-                        }
+                    }
+
                 },
                 (err) => {
                     let dateTime = new Date();
