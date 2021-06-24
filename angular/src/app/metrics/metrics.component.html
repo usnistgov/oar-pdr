@@ -22,12 +22,16 @@
 </div>
 
 <!-- For small screen, display the two download buttons in the separated lines -->
-<div class="full-span" *ngIf="screenWidth <= screenSizeBreakPoint" style="width: fit-content;height: fit-content;margin:auto" >
-    <button (click)="saveMetricsAsImage()" pButton [ngStyle]="{'width':'150px', 'height':'35px',  'background-color':'green','margin-top':'1em', 'margin-right':'1.5em'}">
-        Download Graphics
-    </button>
-    <button (click)="saveMetrics()" pButton [ngStyle]="{'width':'150px', 'height':'35px', 'background-color':'green', 'margin-right':'0.5em','margin-top':'1em'}">
+<div class="mobile-button-container" *ngIf="screenWidth <= screenSizeBreakPoint" >
+    <button (click)="saveMetrics()" pButton 
+    [disabled]="noChartData || noDatasetSummary"
+    [ngStyle]="{'width':'150px', 'height':'35px', 'background-color':'green', 'margin-right':'0.5em'}">
         Download Metrics
+    </button>
+    <button (click)="saveMetricsAsImage()" pButton 
+    [disabled]="noChartData || noDatasetSummary"
+    [ngStyle]="{'width':'150px', 'height':'35px',  'background-color':'green'}">
+        Download Graphics
     </button>
 </div>
 
@@ -35,7 +39,7 @@
 <div *ngIf="readyDisplay" style="text-align: center; margin-bottom: 1em;padding: 0px 40px;">
     <!-- Dataset title -->
     <div class="dataset-title"><h3>{{datasetTitle}}</h3></div>
-    <div *ngIf="!hasError" style="font-size:larger;">{{datasetSubtitle}}</div>
+    <div *ngIf="!noChartData && !noDatasetSummary && !hasError" style="font-size:larger;">{{datasetSubtitle}}</div>
 
     <!-- Metrics details for large screen device -->
     <div *ngIf="!noChartData && !noDatasetSummary && !hasError">
@@ -75,15 +79,14 @@
             <!-- File details (bar chart) -->
             <div *ngIf="inBrowser" class="child min-height-300">
                 <div class="dataset-summary-title"><h4 style="color: #fff;">Total Downloads by File</h4></div>
-                <div *ngIf="!noChartData">
-                    <app-horizontal-barchart *ngIf="chartData" 
-                        [inputdata]="chartData" 
-                        [xAxisLabel]="xAxisLabel"
-                        [yAxisLabel]="yAxisLabel"
-                        [inBrowser]="inBrowser">
 
-                    </app-horizontal-barchart>
-                </div>
+                <app-horizontal-barchart *ngIf="chartData" 
+                    [inputdata]="chartData" 
+                    [xAxisLabel]="xAxisLabel"
+                    [yAxisLabel]="yAxisLabel"
+                    [inBrowser]="inBrowser">
+                </app-horizontal-barchart>
+
             </div>
         </div>
 
@@ -116,37 +119,30 @@
                         </div>
                         <div style="clear: both;"></div>
                         <div class="min-height-20">
-                            <span class="float-left-mobile">Last download time</span>
+                            <span class="float-left-mobile">Last downloaded</span>
                             <span class="float-right-mobile">{{lastDownloadDate}}</span>
                         </div>
                         <div style="clear: both;"></div>
-                    </div>
-                    <div *ngIf="noDatasetSummary" style="margin-top: 3em; font-size: larger;">
-                        No summary data available.
                     </div>
                 </div>
 
                 <!-- File details (bar chart) -->
                 <div *ngIf="inBrowser" class="child min-height-300">
                     <div class="dataset-summary-title"><h4 style="color: #fff;">Total Downloads by File</h4></div>
-                    <div *ngIf="!noChartData">
-                        <app-horizontal-barchart *ngIf="chartData" 
-                            [inputdata]="chartData" 
-                            [xAxisLabel]="xAxisLabel"
-                            [yAxisLabel]="yAxisLabel"
-                            [inBrowser]="inBrowser">
-        
-                        </app-horizontal-barchart>
-                    </div>
-                    <div *ngIf="noChartData" style="margin-top: 3em; font-size: larger;">
-                        Metrics data not available for datasets outside of the NIST Public Data Repository.
-                    </div>
+
+                    <app-horizontal-barchart *ngIf="chartData" 
+                        [inputdata]="chartData" 
+                        [xAxisLabel]="xAxisLabel"
+                        [yAxisLabel]="yAxisLabel"
+                        [inBrowser]="inBrowser">
+                    </app-horizontal-barchart>
+
                 </div>
             </div>
         </ng-template>
     </div>
     <div *ngIf="(noChartData || noDatasetSummary) && !hasError">
-        <div class="message-container">Metricsc data not available for datasets outside of the NIST Public Data Repository.</div>
+        <div class="message-container">Metrics data not available for datasets outside of the NIST Public Data Repository.</div>
     </div>
     <div *ngIf="hasError" class="message-container">
         An error occurred while downloading metrics data. For tech support, please email <a 
@@ -157,7 +153,7 @@
 </div>
 
 <!-- Display file level data summary -->
-<div *ngIf="filescount > 0" style="margin: 1em auto 0em auto; width: 100%; text-align: right;font-size: small;padding-right: 45px;">Total No. files: {{filescount}}, Total dataset size: {{TotalFileLevelDownloadSize}}</div>
+<div *ngIf="filescount > 0" style="margin: 1em auto 0em auto; width: 100%; text-align: right;font-size: small;padding-right: 45px;">Total No. files: {{filescount}}, Total dataset size: {{TotalFileSize}}</div>
 
 <!-- Display tree table -->
 <div #panel0 id="panel0" *ngIf="inBrowser; else filesLoading" class="flex-container" >

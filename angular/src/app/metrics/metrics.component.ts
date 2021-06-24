@@ -40,7 +40,7 @@ export class MetricsComponent implements OnInit {
     record: NerdmRes = null;
     metricsData: any[] = [];
     totalFileLevelSuccessfulGet: number = 0;
-    totalFileLevelDownloadSize: number = 0;
+    totalFileSize: number = 0;
     totalFilesinChart: number = 0;
     noDatasetSummary: boolean = false;
 
@@ -116,6 +116,7 @@ export class MetricsComponent implements OnInit {
                         this.createNewDataHierarchy();
                         if (this.files.length != 0){
                             this.files = <TreeNode[]>this.files[0].data;
+                            this.handleSum(this.files);
 
                             // Get metrics details
                             this.metricsService.getDatasetMetrics(this.ediid).subscribe(async (event) => {
@@ -127,12 +128,10 @@ export class MetricsComponent implements OnInit {
             
                                     if(this.fileLevelData.FilesMetrics != undefined && this.fileLevelData.FilesMetrics.length > 0){
                                         this.totalFileLevelSuccessfulGet = 0;
-                                        this.totalFileLevelDownloadSize = 0;
                                         this.totalFilesinChart = 0;
                                         this.cleanupFileLevelData(this.files);
                                         this.fileLevelData.FilesMetrics = this.metricsData;
                                         if(this.fileLevelData.FilesMetrics.length > 0){
-                                            this.handleSum(this.files);
                                             this.noChartData = false;
                                             this.createChartData();
                                             this.lastDownloadDate = this.getLastDownloadDate()
@@ -254,7 +253,6 @@ export class MetricsComponent implements OnInit {
                 }
 
                 this.totalFileLevelSuccessfulGet += found.success_get;
-                this.totalFileLevelDownloadSize += node.data.download_size;
                 this.totalFilesinChart += 1;
 
                 node.data.inChart = true;
@@ -279,8 +277,10 @@ export class MetricsComponent implements OnInit {
      * @param files 
      */
     handleSum(files: TreeNode[]){
+        this.totalFileSize = 0;
         files.forEach(child => {
-            this.sumFolder(child)
+            const {downloads, fileSize} = this.sumFolder(child);
+            this.totalFileSize += fileSize;
         })
     }
 
@@ -296,18 +296,18 @@ export class MetricsComponent implements OnInit {
                  node.data.success_get += downloads;
                  node.data.download_size += fileSize;
             });
-          }
-        
-          var downloads = node.data.success_get;
-          var fileSize = node.data.download_size;
-          return {downloads, fileSize};
+        }
+    
+        var downloads = node.data.success_get;
+        var fileSize = node.data.download_size;
+        return {downloads, fileSize};
     }
 
     /**
      * Save metrics data in csv format
      */
     saveMetrics() {
-        if(this.fileLevelData.FilesMetrics == undefined){
+        if(!this.fileLevelData || this.fileLevelData.FilesMetrics == undefined){
             // Need to display message in the future
             return;
         }
@@ -361,8 +361,8 @@ export class MetricsComponent implements OnInit {
     /**
      * Return total download size from file level summary
      */
-    get TotalFileLevelDownloadSize() {
-        return this.commonFunctionService.formatBytes(this.totalFileLevelDownloadSize, 2);
+    get TotalFileSize() {
+        return this.commonFunctionService.formatBytes(this.totalFileSize, 2);
     }
 
     /**
@@ -645,9 +645,7 @@ export class MetricsComponent implements OnInit {
                         };
                         currentLevel.push(newPart);
                         currentLevel = newPart.children;
-                        // }
                     }
-                    // this.filescount = this.filescount + 1;
                 });
             }
             i = i + 1;
