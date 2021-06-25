@@ -387,7 +387,7 @@ export class MetricsComponent implements OnInit {
      * Save the bar chart as a png file
      */
     saveMetricsAsImage() {
-        this.barchart.saveMetricsAsImage();
+        this.barchart.saveMetricsAsImage(this.datasetTitle + ".jpg");
     }
     
     /**

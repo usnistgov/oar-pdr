@@ -213,7 +213,7 @@ export class HorizontalBarchartComponent implements OnInit {
             .attr("opacity",".1")
             .call(d3.axisTop(this.xScale.domain(xDomain).range([0, this.width]))
                     .tickSize(-this.height)
-                    .tickFormat(null)
+                    .tickFormat("")
                     .ticks(5));
             
         // x & y axis
@@ -376,9 +376,9 @@ export class HorizontalBarchartComponent implements OnInit {
     /**
      * Save the bar chart as a png file
      */
-    saveMetricsAsImage(){
+    saveMetricsAsImage(filename: string = "Chart_Export.jpg"){
         var svgString = this.getSVGString(this.svg.node());
-        this.svgString2Image( svgString, 2*this.width, 2*this.height, 'png' ); // passes Blob and filesize String to 
+        this.svgString2Image( svgString, 2*this.width, 2*this.height, 'png', filename ); // passes Blob and filesize String to 
     }
 
     /**
@@ -388,28 +388,28 @@ export class HorizontalBarchartComponent implements OnInit {
      * @param height image height
      * @param format - image format, for example, 'png'
      */
-    svgString2Image( svgString, width, height, format ) {
+    svgString2Image( svgString, width, height, format, filename: string = "Chart_Export.jpg" ) {
         var format = format ? format : 'png';
-        console.log("format", format);
         var imgsrc = 'data:image/svg+xml;base64,'+ btoa( unescape( encodeURIComponent( svgString ) ) ); // Convert SVG string to data URL
 
         var canvas = document.createElement("canvas");
-        var context = canvas.getContext("2d");
-
         canvas.width = width;
         canvas.height = height;
 
+        var context = canvas.getContext("2d");
+        context.fillStyle = '#FFFFFF';  // Fill the background with white color
+
         var image = new Image();
         image.onload = function() {
-            context.clearRect ( 0, 0, width, height );
+            context.fillRect(0, 0, width, height);
             context.drawImage( image, 0, 0, width, height );
  
             try {
      
                 // Try to initiate a download of the image
                 var a = document.createElement("a");
-                a.download = "MDMS_Graph_Export.jpg";
-                a.href = canvas.toDataURL("image/jpg");
+                a.download = filename;
+                a.href = canvas.toDataURL("image/jpeg");
                 document.querySelector("body").appendChild(a);
                 a.click();
                 document.querySelector("body").removeChild(a);
