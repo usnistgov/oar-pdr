@@ -228,7 +228,7 @@ export class ToolMenuComponent implements OnChanges {
                     this.createMenuItem(totalDownload>1?totalDownload.toString() + ' files downloaded.':totalDownload.toString() + ' file downloaded.', null,null, null),
                     this.createMenuItem(totalUsers > 1?totalUsers.toString() + ' users.':totalUsers.toString() + ' user.', null,null, null),
                     this.createMenuItem(totalDownloadSize.toString() + ' downloaded.', null,null, null),
-                    this.createMenuItem('More ...', null,null, this.metricsUrl)
+                    this.createMenuItem('More ...', null,null, this.metricsUrl, "_self")
                 ];
 
                 hasMetrics = true;
@@ -255,7 +255,7 @@ export class ToolMenuComponent implements OnChanges {
      *                    event object
      * @param url       a URL that should be navigated to when the menu item is selected.
      */
-    createMenuItem(label: string, icon: string, command: any, url: string) {
+    createMenuItem(label: string, icon: string, command: any, url: string, target: string = "_blank") {
         let item : MenuItem = {
             label: label,
             icon: icon
@@ -264,7 +264,7 @@ export class ToolMenuComponent implements OnChanges {
             item.command = command;
         if (url) {
             item.url = url;
-            item.target = "_blank";
+            item.target = target;
         }
 
         return item;

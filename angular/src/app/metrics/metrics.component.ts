@@ -27,6 +27,8 @@ export class MetricsComponent implements OnInit {
 
     imageURL: string = 'assets/images/sdp-background.jpg';
     inBrowser: boolean = false;
+    distApi: string;
+    pdrHomeUrl: string = "";
 
     // Data
     ediid: string;
@@ -93,6 +95,8 @@ export class MetricsComponent implements OnInit {
         }
 
     ngOnInit() {
+        this.distApi = this.cfg.get("locations.portalBase", "/unconfigured")+"od/id/";
+        console.log('this.distApi', this.distApi);
         this.detectScreenSize();
         this.recordLevelData = new RecordLevelMetrics();
 
@@ -107,6 +111,7 @@ export class MetricsComponent implements OnInit {
         if(this.inBrowser){
             this.route.params.subscribe(queryParams => {
                 this.ediid = queryParams.id;
+                this.pdrHomeUrl = this.distApi + this.ediid;
                 // Get dataset title
                 this.searchService.searchById(this.ediid, true).subscribe(md => {
                     if(md) {

@@ -38,7 +38,7 @@
 <!-- Metrics data -->
 <div *ngIf="readyDisplay" style="text-align: center; margin-bottom: 1em;padding: 0px 40px;">
     <!-- Dataset title -->
-    <div class="dataset-title"><h3>{{datasetTitle}}</h3></div>
+    <div class="dataset-title"><h3><a [href]=pdrHomeUrl>{{datasetTitle}}</a></h3></div>
     <div *ngIf="!noChartData && !noDatasetSummary && !hasError" style="font-size:larger;">{{datasetSubtitle}}</div>
 
     <!-- Metrics details for large screen device -->

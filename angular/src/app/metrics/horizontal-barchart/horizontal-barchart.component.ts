@@ -284,6 +284,7 @@ export class HorizontalBarchartComponent implements OnInit {
             .attr('x', 0)
             .attr('y', d => this.yScale(d[0]))
             .attr('height', yScale.bandwidth())
+            .attr('opacity', 1)
             // .attr('height', 10)
             .attr('width', 0) 
             .style('fill', (d, i) => this.colors(i))
@@ -389,7 +390,7 @@ export class HorizontalBarchartComponent implements OnInit {
      */
     svgString2Image( svgString, width, height, format ) {
         var format = format ? format : 'png';
-
+        console.log("format", format);
         var imgsrc = 'data:image/svg+xml;base64,'+ btoa( unescape( encodeURIComponent( svgString ) ) ); // Convert SVG string to data URL
 
         var canvas = document.createElement("canvas");
@@ -401,11 +402,28 @@ export class HorizontalBarchartComponent implements OnInit {
         var image = new Image();
         image.onload = function() {
             context.clearRect ( 0, 0, width, height );
-            context.drawImage(image, 0, 0, width, height);
-
-            canvas.toBlob( (blob: Blob) => {
-                saveAs( blob, 'D3 vis exported to PNG.png' ); // FileSaver.js function
-            });
+            context.drawImage( image, 0, 0, width, height );
+ 
+            try {
+     
+                // Try to initiate a download of the image
+                var a = document.createElement("a");
+                a.download = "MDMS_Graph_Export.jpg";
+                a.href = canvas.toDataURL("image/jpg");
+                document.querySelector("body").appendChild(a);
+                a.click();
+                document.querySelector("body").removeChild(a);
+     
+            } catch (ex) {
+     
+                // If downloading not possible (as in IE due to canvas.toDataURL() security issue)
+                // then display image for saving via right-click
+     
+                var imgPreview = document.createElement("div");
+                imgPreview.appendChild(image);
+                document.querySelector("body").appendChild(imgPreview);
+     
+            }
         };
 
         image.src = imgsrc;
