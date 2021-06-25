@@ -215,6 +215,7 @@ class TestMIDAS3PublishingServiceOnUpdate(test.TestCase):
         self.assertTrue(not os.path.exists(self.updbagdir))
         data = utils.read_json(os.path.join(self.nrddir, self.prevmidasid+".json"))
         self.assertEqual(data.get('ediid'), self.prevmidasid)
+        self.assertEqual(data.get('version'), "1.0.0")
 
         oldwrkr = self.svc._get_bagging_worker(self.prevmidasid)
         newwrkr = self.svc._get_bagging_worker(self.updmidasid)
@@ -222,9 +223,10 @@ class TestMIDAS3PublishingServiceOnUpdate(test.TestCase):
 
         self.assertTrue(os.path.exists(self.replbagdir))
         self.assertTrue(os.path.exists(self.updbagdir))
-        data = utils.read_json(os.path.join(self.updbagdir, "metadata", "nerdm.json"))
+        data = newwrkr.bagger.sip.nerd
         self.assertEqual(data.get('ediid'), self.updmidasid)
-        
+        self.assertEqual(data.get('version'), "1.0.0+ (in edit)")
+
         
     def test_update_ds_with_pod_onupdate(self):
         podf = os.path.join(self.revdir, "1491", "_pod.json")
@@ -240,6 +242,11 @@ class TestMIDAS3PublishingServiceOnUpdate(test.TestCase):
         self.assertTrue(not os.path.exists(self.updbagdir))
         data = utils.read_json(os.path.join(self.nrddir, self.prevmidasid+".json"))
         self.assertEqual(data.get('ediid'), self.prevmidasid)
+        data = utils.read_json(os.path.join(self.mddir, self.prevmidasid, "metadata", "nerdm.json"))
+        self.assertEqual(data.get('ediid'), self.prevmidasid)
+        self.assertEqual(data.get('version'), "1.0.0")
+        # data = {'version': "1.0.1+ (in edit)"}
+        # utils.write_json(data, os.path.join(self.mddir, self.prevmidasid, "metadata", "annot.json"))
         
         # submit under new EDI-ID; POD record will have new MIDAS ID, new DOI, and new download URLs
         pod['replaces'] = pod['identifier']
@@ -255,6 +262,8 @@ class TestMIDAS3PublishingServiceOnUpdate(test.TestCase):
         self.assertTrue(os.path.exists(self.updbagdir))
         data = utils.read_json(os.path.join(self.nrddir, "mds8-8888.json"))
         self.assertEqual(data.get('ediid'), self.updmidasid)
+        # self.assertEqual(data.get('version'), "1.0.1+ (in edit)")
+        self.assertEqual(data.get('version'), "1.0.0+ (in edit)")
         
         self.assertTrue(os.path.exists(os.path.join(self.updbagdir,"metadata","__bagger-midas3.json")))
         bmd = utils.read_json(os.path.join(self.updbagdir,"metadata","__bagger-midas3.json"))

@@ -399,9 +399,13 @@ class MIDAS3PublishingService(PublishSystem):
             # fix the EDI-ID for the new bag
             replworker.bagger.ensure_filelock()
             with replworker.bagger.lock:
-                replworker.bagger.ensure_base_bag()
-                replworker.bagger.bagbldr.update_metadata_for("", {"ediid": replworker.bagger.midasid},
+                replworker.bagger.ensure_res_metadata()
+                version = replworker.bagger.sip.nerd.get("version", "1.0.0")
+                replworker.bagger.bagbldr.update_metadata_for("", {"ediid": replworker.bagger.midasid}, 
                                                               message="setting new EDI-ID for major update")
+                if not re.search(r'\+ \([\w\s]+\)', version):
+                    replworker.bagger.bagbldr.update_annotations_for("", {"version": version+"+ (in edit)"},
+                                                                     message="")
                 replworker.bagger.update_bagger_metadata_for('', {"replacedEDI": oldworker.id})
                 replworker.bagger.ensure_res_metadata()
 
