@@ -16,7 +16,7 @@ FROM node:10.9.0
 RUN sed -e '/jessie-updates/ s/^deb/#deb/' /etc/apt/sources.list \
     > /tmp/sources.list && mv /tmp/sources.list /etc/apt/sources.list
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends zip wget ca-certificates git
+    apt-get install -y --no-install-recommends zip wget ca-certificates git gnupg-curl
 
 ENV GOSU_VERSION 1.10
 RUN set -ex; \
