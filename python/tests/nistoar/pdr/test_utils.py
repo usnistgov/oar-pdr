@@ -116,7 +116,7 @@ class TestMeausreDirSize(test.TestCase):
     def test_measure2(self):
         vals = utils.measure_dir_size(testdatadir2)
         self.assertEqual(vals[1], 5)
-        self.assertEqual(vals[0], 9276)
+        self.assertEqual(vals[0], 9322)
 
 class TestRmtree(test.TestCase):
 

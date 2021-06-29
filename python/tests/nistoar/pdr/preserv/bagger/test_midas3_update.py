@@ -268,6 +268,7 @@ class TestUpdateMetadataBagger(test.TestCase):
                 dist['downloadURL'] = re.sub(self.prevmidasid, self.midasid, dist['downloadURL'])
             elif 'accessURL' in dist and 'doi.org' in dist['accessURL']:
                 dist['accessURL'] = re.sub(r'/[^/]+$', '/mds8-8888', dist['accessURL'])
+                pod['doi'] = dist['accessURL']
         self.bagr.apply_pod(pod)
 
         bag = NISTBag(self.updbagdir)
