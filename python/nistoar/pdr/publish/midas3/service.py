@@ -405,7 +405,7 @@ class MIDAS3PublishingService(PublishSystem):
                                                               message="setting new EDI-ID for major update")
                 if not re.search(r'\+ \([\w\s]+\)', version):
                     replworker.bagger.bagbldr.update_annotations_for("", {"version": version+"+ (in edit)"},
-                                                                     message="")
+                                                                     message="setting version to in-edit mode")
                 replworker.bagger.update_bagger_metadata_for('', {"replacedEDI": oldworker.id})
                 replworker.bagger.ensure_res_metadata()
 
