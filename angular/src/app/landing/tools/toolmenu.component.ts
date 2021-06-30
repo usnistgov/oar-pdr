@@ -7,6 +7,8 @@ import { AppConfig } from '../../config/config';
 import { NerdmRes } from '../../nerdm/nerdm';
 import { EditStatusService } from '../editcontrol/editstatus.service';
 import * as _ from 'lodash';
+import { RecordLevelMetrics } from '../../metrics/metrics';
+import { CommonFunctionService } from '../../shared/common-function/common-function.service';
 
 /**
  * A component for displaying access to landing page tools in a menu.
@@ -30,6 +32,12 @@ export class ToolMenuComponent implements OnChanges {
     // the resource record metadata that the tool menu data is drawn from
     @Input() record : NerdmRes|null = null;
 
+    // Record level metrics data
+    @Input() recordLevelMetrics : RecordLevelMetrics|null = new RecordLevelMetrics();
+
+    // Record level metrics data
+    @Input() metricsUrl : string|null = "";
+
     // true if this menu should appear as a popup
     @Input() isPopup : boolean = false;
 
@@ -52,6 +60,7 @@ export class ToolMenuComponent implements OnChanges {
      */
     constructor(
         private cfg : AppConfig,
+        public commonFunctionService: CommonFunctionService,
         public edstatsvc: EditStatusService,) {  }
 
     /**
@@ -187,6 +196,53 @@ export class ToolMenuComponent implements OnChanges {
         ];
         mitems.push({ label: "Find", items: subitems });
 
+        // Dataset Metrics
+        // First check if there is any file in the dataset. If not, do not display metrics.
+        let hasFile = false;
+        let hasMetrics: boolean = false;
+
+        if(this.record.components && this.record.components.length > 0){
+            this.record.components.forEach(element => {
+                if(element.filepath){
+                    hasFile = true;
+                    return;
+                }
+            });
+        }
+
+        if(hasFile){
+            //Now check if there is any metrics data
+            let totalDownload = this.recordLevelMetrics.DataSetMetrics[0] != undefined? this.recordLevelMetrics.DataSetMetrics[0].success_get : 0;
+
+            totalDownload = totalDownload == undefined? 0 : totalDownload;
+    
+            let totalUsers = this.recordLevelMetrics.DataSetMetrics[0] != undefined? this.recordLevelMetrics.DataSetMetrics[0].number_users : 0;
+    
+            totalUsers = totalUsers == undefined? 0 : totalUsers;
+    
+            let totalDownloadSize = this.recordLevelMetrics.DataSetMetrics[0] != undefined?
+                this.commonFunctionService.formatBytes(this.recordLevelMetrics.DataSetMetrics[0].total_size, 2) : 0;
+    
+            if(this.recordLevelMetrics.DataSetMetrics.length > 0){
+                subitems = [
+                    this.createMenuItem(totalDownload>1?totalDownload.toString() + ' files downloaded.':totalDownload.toString() + ' file downloaded.', null,null, null),
+                    this.createMenuItem(totalUsers > 1?totalUsers.toString() + ' users.':totalUsers.toString() + ' user.', null,null, null),
+                    this.createMenuItem(totalDownloadSize.toString() + ' downloaded.', null,null, null),
+                    this.createMenuItem('More ...', null,null, this.metricsUrl, "_self")
+                ];
+
+                hasMetrics = true;
+            }
+        }
+    
+        if(!hasMetrics){
+            subitems = [
+                this.createMenuItem('Metrics not available.', null,null, null)
+            ]; 
+        }
+
+        mitems.push({ label: "Dataset Metrics", items: subitems });
+
         this.items = mitems;
     }
 
@@ -199,7 +255,7 @@ export class ToolMenuComponent implements OnChanges {
      *                    event object
      * @param url       a URL that should be navigated to when the menu item is selected.
      */
-    createMenuItem(label: string, icon: string, command: any, url: string) {
+    createMenuItem(label: string, icon: string, command: any, url: string, target: string = "_blank") {
         let item : MenuItem = {
             label: label,
             icon: icon
@@ -208,7 +264,7 @@ export class ToolMenuComponent implements OnChanges {
             item.command = command;
         if (url) {
             item.url = url;
-            item.target = "_blank";
+            item.target = target;
         }
 
         return item;

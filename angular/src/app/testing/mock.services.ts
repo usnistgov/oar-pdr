@@ -71,12 +71,14 @@ export class MockActivatedRoute {
     // and pump new values into the `paramMap` observable
     private uparamSubj = new ReplaySubject<ParamMap>();
     private qparamSubj = new ReplaySubject<ParamMap>();
+    private paramsSubj = new ReplaySubject<ParamMap>();
     snapshot : Map;
     url : string;
 
     /** The mock paramMaps observables */
     readonly paramMap = this.uparamSubj.asObservable();
     readonly queryParamMap = this.qparamSubj.asObservable();
+    readonly params = this.paramsSubj.asObservable();
 
     /**
      * construct the instance
@@ -98,6 +100,11 @@ export class MockActivatedRoute {
     /** Set the paramMap observables's next value */
     setQueryParamMap(params?: Params) {
         this.qparamSubj.next(convertToParamMap(params));
+    };
+
+    /** Set the paramMap observables's next value */
+    setParams(params?: Params) {
+        this.paramsSubj.next(convertToParamMap(params));
     };
 }
 

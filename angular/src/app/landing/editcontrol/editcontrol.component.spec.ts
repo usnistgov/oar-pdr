@@ -1,6 +1,5 @@
 import { async, ComponentFixture, TestBed, ComponentFixtureAutoDetect } from '@angular/core/testing';
-import { HttpClientModule } from '@angular/common/http';
-
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { AppConfig } from '../../config/config';
 import { ConfirmationDialogService } from '../../shared/confirmation-dialog/confirmation-dialog.service';
 import { ConfirmationDialogComponent } from '../../shared/confirmation-dialog/confirmation-dialog.component';
@@ -25,7 +24,7 @@ describe('EditControlComponent', () => {
 
     let makeComp = function() {
         TestBed.configureTestingModule({
-            imports: [ EditControlModule, HttpClientModule ],
+            imports: [ EditControlModule, HttpClientTestingModule ],
             declarations: [  ],
             providers: [
                 { provide: AppConfig, useValue: cfg },

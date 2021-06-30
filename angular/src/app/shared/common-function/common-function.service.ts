@@ -15,7 +15,7 @@ export class CommonFunctionService {
         if (0 == bytes) return "0 Bytes";
         if (1 == bytes) return "1 Byte";
         var base = 1000,
-            e = ["Bytes", "kB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"],
+            e = ["Bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"],
             d = numAfterDecimal || 1,
             f = Math.floor(Math.log(bytes) / Math.log(base));
 
@@ -24,7 +24,7 @@ export class CommonFunctionService {
             d = 0;
         else if (numAfterDecimal == null && v < 10.0)
             d = 2;
-        return v.toFixed(d) + " " + e[f];
+        return v.toFixed(d) + ' ' + e[f];
     }
 
     deepCopy(obj) {

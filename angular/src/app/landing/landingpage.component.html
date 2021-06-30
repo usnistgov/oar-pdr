@@ -15,11 +15,21 @@
     <!-- Pop-up tool menu (for small-width devices) -->
     <div *ngIf="md !== null && inBrowser"
          class="ui-sm-1 d-none d-block d-sm-block d-md-none ">
-      <button style="position: absolute; top: 1.0rem; left: 1.5rem" type="button"
-              pButton icon="faa faa-list" class="ui-button ui-button-icon-only" 
-              (click)="menu3.togglePopup($event)"></button>
-      <tools-menu #menu3 [record]="md" [isPopup]="true" (toggle_citation)="toggleCitation('small')"
-                         (scroll)="goToSection($event)"></tools-menu>
+        <button style="position: absolute; top: 1.0rem; left: 1.5rem" type="button"
+                pButton icon="faa faa-list" class="ui-button ui-button-icon-only" 
+                (click)="menu3.togglePopup($event)"></button>
+
+        <app-downloadstatus [inBrowser]="inBrowser"></app-downloadstatus>  
+        
+        <tools-menu #menu3  [record]="md" 
+        [recordLevelMetrics]="recordLevelMetrics"
+        [metricsUrl]="metricsUrl"
+        [isPopup]="true"
+        (toggle_citation)="toggleCitation('small')"
+        (scroll)="goToSection($event)"></tools-menu>
+              
+      <!-- <tools-menu #menu3 [record]="md" [isPopup]="true" (toggle_citation)="toggleCitation('small')"
+                         (scroll)="goToSection($event)"></tools-menu> -->
     </div>
 
     <div *ngIf="_showData">
@@ -46,9 +56,12 @@
             <div class="ui-g-12 ui-md-12 ui-lg-12 ui-sm-12">
               <div *ngIf="inBrowser" class="d-none d-md-block d-lg-block d-xl-block ">
 
-                <tools-menu #menu2 [record]="md" [isPopup]="false"
-                                   (toggle_citation)="toggleCitation('large')"
-                                   (scroll)="goToSection($event)"></tools-menu>
+                <tools-menu #menu2  [record]="md" 
+                [recordLevelMetrics]="recordLevelMetrics"
+                [metricsUrl]="metricsUrl"
+                [isPopup]="false"
+                (toggle_citation)="toggleCitation('large')"
+                (scroll)="goToSection($event)"></tools-menu>
 
                 <app-downloadstatus [inBrowser]="inBrowser"></app-downloadstatus>
               </div>
