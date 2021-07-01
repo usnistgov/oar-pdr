@@ -225,10 +225,10 @@ export class ToolMenuComponent implements OnChanges {
     
             if(this.recordLevelMetrics.DataSetMetrics.length > 0 && totalDownload > 0){
                 subitems = [
-                    this.createMenuItem(totalDownload>1?totalDownload.toString() + ' files downloaded.':totalDownload.toString() + ' file downloaded.', null,null, null),
-                    this.createMenuItem(totalUsers > 1?totalUsers.toString() + ' users.':totalUsers.toString() + ' user.', null,null, null),
-                    this.createMenuItem(totalDownloadSize.toString() + ' downloaded.', null,null, null),
-                    this.createMenuItem('More ...', null,null, this.metricsUrl, "_self")
+                    this.createMenuItem(totalDownload>1?totalDownload.toString() + ' files downloaded':totalDownload.toString() + ' file downloaded', null,null, this.metricsUrl, "_self"),
+                    this.createMenuItem(totalUsers > 1?totalUsers.toString() + ' unique users':totalUsers.toString() + ' unique user', null,null, this.metricsUrl, "_self"),
+                    this.createMenuItem(totalDownloadSize.toString() + ' downloaded', null,null, this.metricsUrl, "_self")
+                    // this.createMenuItem('More ...', null,null, this.metricsUrl, "_self")
                 ];
 
                 hasMetrics = true;
@@ -237,7 +237,7 @@ export class ToolMenuComponent implements OnChanges {
     
         if(!hasMetrics){
             subitems = [
-                this.createMenuItem('Metrics not available.', null,null, null)
+                this.createMenuItem('Metrics not available', null,null, null)
             ]; 
         }
 
