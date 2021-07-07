@@ -347,6 +347,7 @@ export class TreetableComponent implements OnInit, AfterViewInit {
         }
         
         this.dataTree.children = [...this.dataTree.children];  // trigger refresh of table
+        this.refreshTree();
     }
 
     /**

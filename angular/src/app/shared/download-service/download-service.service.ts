@@ -178,7 +178,7 @@ export class DownloadService {
 
         // submit the request and return the Observable result; add some diagnostic information on the way out
         let url = this.distApi + "_bundle_plan";
-        console.log("Requesting bundle plan for " + reqfiles.length + " from " + url)
+        // console.log("Requesting bundle plan for " + reqfiles.length + " from " + url)
         return this._getBundlePlan(url, body).pipe(
             map(plan => {
                 diagnostics['time'] = Date();
@@ -245,6 +245,7 @@ export class DownloadService {
         let currentTime: number = 0;
         let currentDownloaded: number = 0;
 
+        console.log('dataCart', dataCart);
         nextZip.downloadStatus = DownloadStatus.DOWNLOADING;
         this.setDownloadStatus(nextZip, DownloadStatus.DOWNLOADING, dataCart);
         this.increaseNumberOfDownloading();
@@ -431,12 +432,10 @@ export class DownloadService {
         let p: number = -1;
 
         dataCart.restore();
-        
         for (let includeFile of zip.bundle.includeFiles) {
             resFilePath = includeFile.filePath;
-            if(includeFile.filePath.indexOf('ark:') >= 0){
-                resFilePath = includeFile.filePath.replace(/ark:\/\d\//, '');
-            }
+            if(includeFile.filePath.indexOf('ark:') >= 0)
+                resFilePath = includeFile.filePath.replace(/ark:\/\d+\//, '');
             
             p = resFilePath.indexOf('/');
             if (p < 0) {

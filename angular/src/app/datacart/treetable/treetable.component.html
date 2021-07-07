@@ -80,7 +80,7 @@
                     </td>
                     <td [ngStyle]="bodyStyle(statusWidth)">
                         <div id="downloadstatus" *ngIf="rowData.cartItem" style="display:inline;"
-                            [ngStyle]="{'color':getDownloadStatusColor(rowData.downloadStatus)}">
+                            [ngStyle]="{'color':getDownloadStatusColor(rowData.cartItem.downloadStatus)}">
                             <i [class]="getIconClass(rowData.cartItem.downloadStatus)" style="margin-right: .5em;"
                                 aria-hidden="true" data-toggle="tooltip" title="{{rowData.cartItem.downloadStatus}}"></i>
                             <p-progressSpinner *ngIf="rowData.cartItem.downloadStatus == 'downloading'"

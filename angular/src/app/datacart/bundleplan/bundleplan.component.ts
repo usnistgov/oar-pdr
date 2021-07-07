@@ -290,7 +290,7 @@ export class BundleplanComponent implements OnInit {
         
         this.bundlePlanRef = this.downloadService.getBundlePlan(bundleBaseName, this.downloadFiles).subscribe(
             blob => {
-                console.log(JSON.stringify(blob, null, 2));
+                // console.log(JSON.stringify(blob, null, 2));
                 this.bundlePlanStatus = blob.status.toLowerCase();
                 this.bundlePlanMessage = blob.messages;
                 this.bundlePlanUnhandledFiles = blob.notIncluded;
