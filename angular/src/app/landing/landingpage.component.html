@@ -22,6 +22,7 @@
         <app-downloadstatus [inBrowser]="inBrowser"></app-downloadstatus>  
         
         <tools-menu #menu3  [record]="md" 
+        [hasCurrentMetrics]="hasCurrentMetrics"
         [recordLevelMetrics]="recordLevelMetrics"
         [metricsUrl]="metricsUrl"
         [isPopup]="true"
@@ -58,6 +59,7 @@
 
                 <tools-menu #menu2  [record]="md" 
                 [recordLevelMetrics]="recordLevelMetrics"
+                [hasCurrentMetrics]="hasCurrentMetrics"
                 [metricsUrl]="metricsUrl"
                 [isPopup]="false"
                 (toggle_citation)="toggleCitation('large')"

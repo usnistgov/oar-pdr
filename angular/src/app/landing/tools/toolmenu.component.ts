@@ -35,6 +35,9 @@ export class ToolMenuComponent implements OnChanges {
     // Record level metrics data
     @Input() recordLevelMetrics : RecordLevelMetrics|null = new RecordLevelMetrics();
 
+    // flag if there is file level metrics data
+    @Input() hasCurrentMetrics : boolean|null = false;
+
     // Record level metrics data
     @Input() metricsUrl : string|null = "";
 
@@ -85,6 +88,7 @@ export class ToolMenuComponent implements OnChanges {
     updateMenu() {
         var mitems : MenuItem[] = [];
         var subitems : MenuItem[] = [];
+        let hasMetrics: boolean = false;
 
         let mdService: string;
         mdService = this.cfg.get("locations.mdService", "/unconfigured");
@@ -198,43 +202,46 @@ export class ToolMenuComponent implements OnChanges {
 
         // Dataset Metrics
         // First check if there is any file in the dataset. If not, do not display metrics.
-        let hasFile = false;
-        let hasMetrics: boolean = false;
-
-        if(this.record.components && this.record.components.length > 0){
-            this.record.components.forEach(element => {
-                if(element.filepath){
-                    hasFile = true;
-                    return;
-                }
-            });
-        }
-
-        if(hasFile){
-            //Now check if there is any metrics data
-            let totalDownload = this.recordLevelMetrics.DataSetMetrics[0] != undefined? this.recordLevelMetrics.DataSetMetrics[0].success_get : 0;
-
-            totalDownload = totalDownload == undefined? 0 : totalDownload;
+        if(this.hasCurrentMetrics){
+            let hasFile = false;
     
-            let totalUsers = this.recordLevelMetrics.DataSetMetrics[0] != undefined? this.recordLevelMetrics.DataSetMetrics[0].number_users : 0;
-    
-            totalUsers = totalUsers == undefined? 0 : totalUsers;
-    
-            let totalDownloadSize = this.recordLevelMetrics.DataSetMetrics[0] != undefined?
-                this.commonFunctionService.formatBytes(this.recordLevelMetrics.DataSetMetrics[0].total_size, 2) : 0;
-    
-            if(this.recordLevelMetrics.DataSetMetrics.length > 0 && totalDownload > 0){
-                subitems = [
-                    this.createMenuItem(totalDownload>1?totalDownload.toString() + ' files downloaded':totalDownload.toString() + ' file downloaded', null,null, this.metricsUrl, "_self"),
-                    this.createMenuItem(totalUsers > 1?totalUsers.toString() + ' unique users':totalUsers.toString() + ' unique user', null,null, this.metricsUrl, "_self"),
-                    this.createMenuItem(totalDownloadSize.toString() + ' downloaded', null,null, this.metricsUrl, "_self")
-                    // this.createMenuItem('More ...', null,null, this.metricsUrl, "_self")
-                ];
-
-                hasMetrics = true;
+            if(this.record.components && this.record.components.length > 0){
+                this.record.components.forEach(element => {
+                    if(element.filepath){
+                        hasFile = true;
+                        return;
+                    }
+                });
             }
-        }
+
+            if(hasFile){
+                //Now check if there is any metrics data
+                let totalFileDownload = this.recordLevelMetrics.DataSetMetrics[0] != undefined? this.recordLevelMetrics.DataSetMetrics[0].success_get : 0;
     
+                totalFileDownload = totalFileDownload == undefined? 0 : totalFileDownload;
+        
+                let totalUsers = this.recordLevelMetrics.DataSetMetrics[0] != undefined? this.recordLevelMetrics.DataSetMetrics[0].number_users : 0;
+        
+                totalUsers = totalUsers == undefined? 0 : totalUsers;
+        
+                let totalDownloadSize = this.recordLevelMetrics.DataSetMetrics[0] != undefined?
+                    this.commonFunctionService.formatBytes(this.recordLevelMetrics.DataSetMetrics[0].total_size, 2) : 0;
+        
+                if(this.recordLevelMetrics.DataSetMetrics.length > 0 && totalFileDownload > 0){
+                    subitems = [
+                        this.createMenuItem(totalFileDownload>1?totalFileDownload.toString() + ' files downloaded':totalFileDownload.toString() + ' file downloaded', null,null, this.metricsUrl, "_self"),
+                        this.createMenuItem(totalUsers > 1?totalUsers.toString() + ' unique users':totalUsers.toString() + ' unique user', null,null, this.metricsUrl, "_self"),
+                        this.createMenuItem(totalDownloadSize.toString() + ' downloaded', null,null, this.metricsUrl, "_self")
+                        // this.createMenuItem('More ...', null,null, this.metricsUrl, "_self")
+                    ];
+    
+                    hasMetrics = true;
+                }
+            }
+        }else{
+            hasMetrics = false;
+        }
+        
         if(!hasMetrics){
             subitems = [
                 this.createMenuItem('Metrics not available', null,null, null)

@@ -71,6 +71,8 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
     loadingMessage = '<i class="faa faa-spinner faa-spin"></i> Loading...';
 
     dataCartStatus: DataCartStatus;
+    fileLevelMetrics: any;
+    hasCurrentMetrics: boolean = false;
 
     /**
      * create the component.
@@ -243,6 +245,32 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
      */
     getMetrics() {
         let ediid = this.md.ediid;
+
+        this.metricsService.getFileLevelMetrics(ediid).subscribe(async (event) => {
+            // Some large dataset might take a while to download. Only handle the response
+            // when it finishes downloading
+            if(event.type == HttpEventType.Response){
+                let response = await event.body.text();
+                this.fileLevelMetrics = JSON.parse(response);
+
+                if(this.fileLevelMetrics.FilesMetrics != undefined && this.fileLevelMetrics.FilesMetrics.length > 0){
+                    // check if any current metrics data
+                    for(let i = 1; i < this.md.components.length; i++){
+                        let filepath = this.md.components[i].filepath;
+                        if(filepath) filepath = filepath.trim();
+
+                        this.hasCurrentMetrics = this.fileLevelMetrics.FilesMetrics.find(x => x.filepath.substr(x.filepath.indexOf(ediid)+ediid.length).trim() == filepath) != undefined;
+                        if(this.hasCurrentMetrics) break;
+                    }
+                }else{
+                    this.hasCurrentMetrics = false;
+                }
+            }
+        },
+        (err) => {
+            let dateTime = new Date();
+            console.log("err", err);
+        });                    
 
         this.metricsService.getRecordLevelMetrics(ediid).subscribe(async (event) => {
             if(event.type == HttpEventType.Response){
