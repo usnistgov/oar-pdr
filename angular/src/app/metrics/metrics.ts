@@ -27,6 +27,8 @@ export class DataSetMetrics {
     total_size : number;
     success_get : number;
     number_users : number;
+    record_download: number;
+
 
     constructor(        
         ediid : string = null,
@@ -34,12 +36,14 @@ export class DataSetMetrics {
         last_time_logged : string = null,
         total_size : number = null,
         success_get : number = null,
-        number_users : number = null) {
+        number_users : number = null,
+        record_download : number = null) {
             this.ediid = ediid;
             this.first_time_logged = first_time_logged;
             this.last_time_logged = last_time_logged;
             this.total_size = total_size;
             this.success_get = success_get;
-            this.number_users = number_users;            
+            this.number_users = number_users;   
+            this.record_download = record_download;         
     }
 }

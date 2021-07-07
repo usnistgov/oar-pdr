@@ -16,7 +16,7 @@ export class MetricsService {
         this.metricsBackend = cfg.get("metricsAPI", "/unconfigured");
     }
 
-    getDatasetMetrics(ediid: string): Observable<any> {
+    getFileLevelMetrics(ediid: string): Observable<any> {
         let url = this.metricsBackend + "files?exclude=_id&include=ediid,filepath,success_get,download_size&ediid=" + ediid;
 
         const request = new HttpRequest(

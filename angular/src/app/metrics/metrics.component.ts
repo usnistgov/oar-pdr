@@ -125,7 +125,7 @@ export class MetricsComponent implements OnInit {
                             this.handleSum(this.files);
 
                             // Get metrics details (file level)
-                            this.metricsService.getDatasetMetrics(this.ediid).subscribe(async (event) => {
+                            this.metricsService.getFileLevelMetrics(this.ediid).subscribe(async (event) => {
                                 // Some large dataset might take a while to download. Only handle the response
                                 // when it finishes downloading
                                 if(event.type == HttpEventType.Response){
@@ -183,7 +183,9 @@ export class MetricsComponent implements OnInit {
                             console.log("Record level metrics", this.recordLevelData);
 
                             if(this.recordLevelData.DataSetMetrics != undefined && this.recordLevelData.DataSetMetrics.length > 0){
-                                this.firstTimeLogged = this.datePipe.transform(this.recordLevelData.DataSetMetrics[0].first_time_logged, "MMM d, y")
+                                this.firstTimeLogged = this.datePipe.transform(this.recordLevelData.DataSetMetrics[0].first_time_logged, "MMM d, y");
+
+                                this.recordLevelTotalDownloads = this.recordLevelData.DataSetMetrics[0].success_get;
 
                                 // this.xAxisLabel = "Total Downloads Since " + this.firstTimeLogged;
                                 this.datasetSubtitle = "Metrics Since " + this.firstTimeLogged;
@@ -359,7 +361,7 @@ export class MetricsComponent implements OnInit {
      */
     get TotalDatasetDownloads() {
         if(this.recordLevelData.DataSetMetrics[0] != undefined){
-            return this.recordLevelData.DataSetMetrics[0].success_get;
+            return this.recordLevelData.DataSetMetrics[0].record_download;
         }else{
             return ""
         }
@@ -484,8 +486,8 @@ export class MetricsComponent implements OnInit {
             }
         }
 
-        var sum = this.chartData.reduce((sum, current) => sum + current[1], 0);
-        this.recordLevelTotalDownloads = sum;
+        // var sum = this.chartData.reduce((sum, current) => sum + current[1], 0);
+        // this.recordLevelTotalDownloads = sum;
     }
 
     /**
