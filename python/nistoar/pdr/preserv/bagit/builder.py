@@ -2124,7 +2124,7 @@ class BagBuilder(PreservationSystem):
         else:
             initdata['External-Description'] = \
 "This collection contains data for the NIST data resource entitled, {0}". \
-format(nerdm['title'])
+format(nerdm['title'].replace('\n', ' '))
 
         initdata['External-Identifier'] = [self.id]
         if nerdm.get('doi'):
@@ -2261,8 +2261,8 @@ format(nerdm['title'])
                 for val in vals:
                     # WARNING: when cvting to python3, careful with encoding
                     out = u"{0}: {1}".format(name, val)
-                    if len(out) > 79:
-                        out = textwrap.fill(out, 79, subsequent_indent=' ')
+                    # Not only wrap text, but also gets rid of embedded newlines, tabs, etc.
+                    out = textwrap.fill(out, 79, subsequent_indent=' ', expand_tabs=False)
                     print(out.encode('utf-8'), file=fd)
 
     def write_mbag_files(self, overwrite=False):
