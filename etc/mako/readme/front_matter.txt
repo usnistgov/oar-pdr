@@ -1,0 +1,99 @@
+<%!
+    import textwrap, re
+
+    labels = {
+        "SRD": "Standard Reference Dataset",
+        "SRM": "Standard Reference Material",
+        "PublicDataResource": "Public Data Resource",
+        "DataPublication": "Data Publication"
+    }
+
+    def resource_type_label(types):
+        for tp in types:
+            tp = tp.split(':', 1)[-1]
+            if tp in labels:
+                return labels[tp]
+        return "Data Resource"
+
+%>NIST ${resource_type_label(nrd['@type'])}:
+${textwrap.fill(title, 80)}
+Version ${version}
+% if nrd.get('doi'):
+DOI: ${re.sub(r'^doi:','https://doi.org/', doi)}
+% elif nrd.get('landingPage'):
+Home Page: ${landingPage}
+% endif
+
+% if _prompts:
+${'###'}
+# Attention Submitter:
+#
+# This prototype README file was automatically generated based on metadata
+# entered via MIDAS.  You may edit this file however you wish; however, it
+# includes prompts for recommended information to include.  Before submitting
+# this file as part of your publication, please edit the contents:
+# 
+#  o  replace [## ... ##] with prompted information as desired
+#  o  remove prompts you do not wish to include
+#  o  remove comments lines starting with # (like the lines in this note)
+#
+# Be sure to use an editor capable of saving plain text (e.g. Notepad on 
+# Windows, TextEdit on Macs, vi or emacs on Linux).  Use of MS-Word is not
+# recommended.
+#
+# All information is optional; delete or expand on any of the information seeded
+# here as desired.
+${'##'}
+
+% endif
+% if 'authors' in nrd:
+Authors:
+  % for auth in authors:
+  ${auth['fn']}
+    % for affil in auth.get('affiliation',[]):
+      % if 'title' in affil:
+    ${"\n    ".join(textwrap.wrap(affil['title'], 80))}
+      % endif
+      % for su in affil.get('subunits',[]):
+    ${"\n    ".join(textwrap.wrap(su, 80))}
+      % endfor
+    % endfor
+  % endfor
+% endif
+
+Contact:
+  ${contactPoint.get('fn','[## Contact name ##]')}
+    ${re.sub('^mailto:', '', contactPoint.get('hasEmail','[## Contact email addess ##]'))}
+
+% if not _brief:
+Description:
+
+  % for para in description:
+${textwrap.fill(re.sub(r'(\n|\\n)',' ',para), 80)}
+
+  % endfor
+% elif _prompts:
+Description:
+
+${'##'}
+# Summarize the contents of this data collection here
+${'##'}
+
+% endif
+<%
+    supto = [r for r in nrd.get('references',[]) if 'refType' in r and r['refType'] == 'IsSupplementTo']
+    docby = [r for r in nrd.get('references',[]) if 'refType' in r and r['refType'] == 'IsDocumentedBy']
+%>\
+% if supto:
+This collection is a supplement to:
+% for r in supto:
+  ${"  \n".join(textwrap.wrap(r.get('citation','[## citation for '+r.get('location','??')+' ##]'), 80))}
+% endfor
+% endif
+% if supto:
+This collection is documented in:
+% for r in supto:
+  ${"  \n".join(textwrap.wrap(r.get('citation','[## citation for '+r.get('location','??')+' ##]'), 80))}
+% endfor
+% endif
+
