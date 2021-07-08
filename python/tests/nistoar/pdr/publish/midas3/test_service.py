@@ -187,7 +187,7 @@ class TestMIDAS3PublishingService(test.TestCase):
         data = utils.read_json(os.path.join(self.nrddir, self.midasid+".json"))
         self.assertEqual(data.get('ediid'), self.midasid)
         self.assertTrue(data.get('_marker'), "Failed to retain annotations")
-                        
+
     def test_delete(self):
         podf = os.path.join(self.revdir, "1491", "_pod.json")
         pod = utils.read_json(podf)
@@ -348,6 +348,7 @@ class TestMIDAS3PublishingService(test.TestCase):
         self.assertEqual(nerd['title'], "Goober!")
         
         
+                        
 
 
 

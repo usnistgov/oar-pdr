@@ -10,8 +10,9 @@ gov.nist.oar.bags.preservation.bags package provided by the oar-dist-service
 repository).  
 """
 import os, re
-from collections import Sequence, Mapping
+from collections import Sequence, Mapping, OrderedDict
 from urlparse import urlparse
+from copy import deepcopy
 
 from ..bagit.builder import (NERDM_SCH_ID_BASE, NERDM_SCH_VER, NERDMPUB_SCH_VER,
                              NERDMBIB_SCH_ID_BASE, NERDMBIB_SCH_VER)
@@ -237,6 +238,8 @@ class BagName(object):
     a list of bag names.  In particular, the constructor can be used as a key function
     passed to the sort function.  
     """
+    _todotre = re.compile(r'_')
+
     def __init__(self, bagname):
         """
         wrap a bag name
@@ -262,7 +265,7 @@ class BagName(object):
         also be part of later versions of the AIP.)  If the version is an empty string,
         it can be taken as version 0 or version 1.
         """
-        return self.fields[1]
+        return self._todotre.sub('.', self.fields[1])
 
     @property
     def multibag_profile(self):
@@ -444,7 +447,7 @@ def update_nerdm_schema(nerdmd, version=None, byext={}):
     elif "$schema" in nerdmd:
         mtc = "$"
     else:
-        raise ValueError("No _scheme metatag found (is this a NERDm record?)")
+        raise ValueError("No _schema metatag found (is this a NERDm record?)")
         
     defver = version
     if not version:
@@ -478,13 +481,31 @@ def update_nerdm_schema(nerdmd, version=None, byext={}):
         nerdmd[mtc+"schema"] = updated
     _upd_schema_ver_on_node(nerdmd, mtc+"extensionSchemas", matchrs, defver)
 
-    # correct to start using bib extension if needed
+    # from v0.3: correct to use bib extension if needed
     if any(mtc+"extensionSchemas" in r for r in nerdmd.get('references',[])):
         for ref in nerdmd['references']:
             for i, ext in enumerate(ref.get(mtc+"extensionSchemas", [])):
                 if ext.startswith(NERDM_SCH_ID_BASE+"v") and '#/definitions/DCite' in ext:
                     ref[mtc+"extensionSchemas"][i] = NERDMBIB_SCH_ID_BASE + byext['bib'] + \
                                                      ext[ext.index('#'):]
+
+    # ensure the PDR-ID is the form that refers to the latest version
+    nerdmd["@id"] = re.sub(r'\.v\d+(_\d+)*$','', nerdmd["@id"])
+
+    # from v0.4: convert versionHistory to releaseHistory
+    if 'versionHistory' in nerdmd:
+        if 'releaseHistory' not in nerdmd:
+            # update the location URLs
+            for v in nerdmd['versionHistory']:
+                if 'location' in v:
+                    vtag = ".v" + re.sub(r'\.','_', v['version'])
+                    if not v['location'].endswith(vtag):
+                        v['location'] += vtag
+
+            nerdmd['releaseHistory'] = create_release_history_for(nerdmd["@id"])
+            nerdmd['releaseHistory']['hasRelease'] = nerdmd['versionHistory']
+
+        del nerdmd['versionHistory']
 
     return nerdmd
 
@@ -530,3 +551,23 @@ def _upd_schema_ver(schuri, byext, defver):
     if match and defver:
         return match.group(1)+defver+match.group(2)
     return None
+
+def create_release_history_for(pdrid):
+    """
+    create an (empty) NERDm release history object for resource with the given PDR-ID.
+
+    Since the introduction of the current releaseHistory property (defined in the nerdm-schem/rls 
+    extension), the PDR adopted the convention that the traditional PDR-IDs (e.g. ark:/88434/mds2-3333) 
+    now resolve to the latest release in a sequence of versioned releases.  A special collection 
+    composed of these releases has the form PDR-ID.rel (e.g. ark:/88434/mds2-3333.rel).  This 
+    function will create a NERDm releaseHistory object with the '@id' property set according to this 
+    convention.  If the given ID ends in a version string (e.g. ".v1_1_3"), it will be removed before 
+    applending the ".rel" extension).
+    """
+    pdrid = re.sub(r'\.rel$', '', pdrid)
+    pdrid = re.sub(r'\.v\d+([\._]\d+)*$', '', pdrid)
+    return OrderedDict([
+        ("@id", pdrid+".rel"),
+        ("@type", ["nrdr:ReleaseHistory"]),
+        ("hasRelease", [])
+    ])

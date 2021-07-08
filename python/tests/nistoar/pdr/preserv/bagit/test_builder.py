@@ -1694,6 +1694,10 @@ class TestBuilder2(test.TestCase):
         self.bag.add_data_file(path, datafile)
         with open(podfile) as fd:
             pod = json.load(fd)
+
+        # this is to test proper handling of single newlines embedded into the description
+        pod['description'] = pod['description'][:52]+"\n"+pod['description'][53:]
+        
         self.bag.add_ds_pod(pod, convert=True)
 
         self.bag.ensure_baginfo()
@@ -1714,6 +1718,7 @@ class TestBuilder2(test.TestCase):
                       lines)
         self.assertEqual(len([l for l in lines
                                 if "External-Identifier: " in l]), 2)
+        self.assertNotIn("in a standing-wave laser interference field\n", lines)
         wrapping = [l for l in lines if ':' not in l]
         self.assertEqual(len(wrapping), 1)
         self.assertEqual(len([l for l in wrapping if l.startswith(' ')]), 1)
@@ -1728,7 +1733,7 @@ class TestBuilder2(test.TestCase):
         self.assertEqual(len(oxum), 1)
         oxum = [int(n) for n in oxum[0].split(': ')[1].split('.')]
         self.assertEqual(oxum[1], 14)
-        self.assertEqual(oxum[0], 12180)  # this will change if logging changes
+        self.assertEqual(oxum[0], 12251)  # this will change if logging changes
 
         bagsz = [l for l in lines if "Bag-Size: " in l]
         self.assertEqual(len(bagsz), 1)

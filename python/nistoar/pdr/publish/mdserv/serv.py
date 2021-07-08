@@ -7,13 +7,14 @@ import os, logging, re, json, copy
 from collections import Mapping, OrderedDict
 
 from .. import PublishSystem
+from ... import ARK_NAAN
 from ...exceptions import (ConfigurationException, StateException,
                            SIPDirectoryNotFound, IDNotFound, PDRServiceException)
 from ...preserv.bagger import (MIDASMetadataBagger, UpdatePrepService,
                                midasid_to_bagname)
 from ...preserv.bagit import NISTBag, BagBuilder
 from ...utils import build_mime_type_map, read_nerd
-from ....id import PDRMinter, NIST_ARK_NAAN
+from ....id import PDRMinter
 from ....nerdm import validate_nerdm
 from ....nerdm.convert import Res2PODds
 from .... import pdr
@@ -21,6 +22,7 @@ from . import midasclient as midas
 
 log = logging.getLogger(PublishSystem().subsystem_abbrev)
 DEF_MERGE_CONV = "midas1"
+ark_naan = ARK_NAAN
 
 class PrePubMetadataService(PublishSystem):
     """
@@ -266,7 +268,7 @@ class PrePubMetadataService(PublishSystem):
              not starting with "ark:/" is assumed to be of this form.
         """
         if len(id) < 32 and not id.startswith("ark:/"):
-            naan = self.cfg.get('id_minter',{}).get('naan', NIST_ARK_NAAN)
+            naan = self.cfg.get('id_minter',{}).get('naan', ark_naan)
             id = "ark:/{}/{}".format(naan, id)
         return id
 

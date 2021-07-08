@@ -25,7 +25,9 @@ def load_into(subparser):
     p = subparser
     p.description = description
     p.add_argument("aipid", metavar="AIPID", type=str, nargs=1, help="the AIP-ID for the dataset to prep")
-    p.add_argument("-r", "--repo-url-base", metavar='BASEURL', type=str, dest='repourl',
+    p.add_argument("-r", "--replaces", metavar='AIPID', type=str, dest='replaces',
+                   help="the ID of a previously published AIP that the new AIP will replace/deprecate")
+    p.add_argument("-u", "--repo-url-base", metavar='BASEURL', type=str, dest='repourl',
                    help="the base URL to use for PDR data access services")
     p.add_argument("-d", "--output-dir", "-b", "--bag-parent-dir", metavar='DIR', type=str, dest='outdir',
                    help="the directory to cache write the bag into; if not provided, defaults to the "+
@@ -106,7 +108,7 @@ def execute(args, config=None, log=None):
     try:
         
         svc = UpdatePrepService(cfg)
-        if not prepare_update_bag(svc, args.aipid, outbag, log=log):
+        if not prepare_update_bag(svc, args.aipid, outbag, args.replaces, log=log):
             raise PDRCommandFailure(default_name, args.aipid + ": AIP was not previously published", 3)
         log.info("Working bag initialized with metadata from previous publication")
         
@@ -120,18 +122,20 @@ def execute(args, config=None, log=None):
         if cdir:
             shutil.rmtree(cdir)
 
-def prepare_update_bag(updsvc, aipid, destbag, log=None):
+def prepare_update_bag(updsvc, aipid, destbag, replaces=None, log=None):
     """
     create a base metadata bag to update a dataset based on its last published version.  The output 
     bag's name will match the provided aipid.
     :param UpdatePrepService updsvc:   the update service to use
     :param str                aipid:   the AIP ID of the dataset to create the bag for
     :param str              destbag:   the full path to the root directory of the metadata bag to create
+    :param str             replaces:   the AIP ID of a previously published dataset that this SIP should 
+                                       replace
     :param Logger               log:   the Logger to use for messages
     :rtype bool:
     :return:  False if the AIP was not previously published
     """
-    return updsvc.prepper_for(aipid, log=log).create_new_update(destbag)
+    return updsvc.prepper_for(aipid, replaces=replaces, log=log).create_new_update(destbag)
 
 
     

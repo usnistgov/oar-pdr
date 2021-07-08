@@ -1,5 +1,7 @@
 # The Preservation Service
 
+*Note:* _This needs to be revised for the MIDAS Mark III convention._
+
 The Preservation Service is a service that operates inside the NIST
 internal network.  Its general purpose to turn Submission Information
 Packages (SIPs) into Archive Information Packages--or bags, ingest
