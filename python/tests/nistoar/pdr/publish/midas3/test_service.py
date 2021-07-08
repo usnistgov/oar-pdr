@@ -197,6 +197,13 @@ class TestMIDAS3PublishingService(test.TestCase):
         self.svc.update_ds_with_pod(pod, False)
         self.assertTrue(os.path.isdir(bagdir))
 
+        with self.assertRaises(ValueError):
+            self.svc.delete("")
+        self.assertTrue(os.path.isdir(bagdir))
+        with self.assertRaises(ValueError):
+            self.svc.delete(None)
+        self.assertTrue(os.path.isdir(bagdir))
+
         self.svc.delete(pod['identifier'])
         self.assertTrue(not os.path.isdir(bagdir))
 

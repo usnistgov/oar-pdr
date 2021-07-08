@@ -320,6 +320,9 @@ class MIDAS3PublishingService(PublishSystem):
         delete the working metadata bag for the given identifier.  Afterward, it must be recreated 
         via a call to update_ds_with_pod(id).
         """
+        if not id:
+            raise ValueError("Empty or null identifier")
+
         worker = self._bagging_workers.get(id)
         if not worker:
             bagger = self._create_bagger(id)

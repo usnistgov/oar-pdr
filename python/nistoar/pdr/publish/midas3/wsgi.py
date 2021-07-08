@@ -436,8 +436,8 @@ class LatestHandler(Handler):
                 self._reqrec.add_body_text(body).record()
             return self.send_error(400, "Input not parseable as JSON")
 
-        if 'identifier' not in pod:
-            return self.send_error(400, "Input POD missing required identifier property")
+        if not pod.get('identifier'):
+            return self.send_error(400, "Input POD is missing required identifier property")
         # if 'accessLevel' not in pod:
         #    return self.send_error(400, "Input POD missing required accessLevel property")
 
