@@ -171,12 +171,15 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
                 // id not found; reroute
                 console.error("No data found for ID=" + this.reqId);
                 metadataError = "not-found";
-                //   this.router.navigateByUrl("/not-found/" + this.reqId, { skipLocationChange: true });
             }
             else{
-                // Get metrics 
-                if(this.inBrowser)
-                    this.getMetrics();
+                // Get metrics when edit is not enabled. Otherwise display "Metrics not available"
+                if(this.inBrowser){
+                    if(this.routerParamEditEnabled)
+                        this.hasCurrentMetrics = false;
+                    else
+                        this.getMetrics();
+                }
 
                 // proceed with rendering of the component
                 this.useMetadata();
