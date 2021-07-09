@@ -122,7 +122,6 @@ export class MetricsComponent implements OnInit {
                         this.createNewDataHierarchy();
                         if (this.files.length != 0){
                             this.files = <TreeNode[]>this.files[0].data;
-                            this.handleSum(this.files);
 
                             // Get metrics details (file level)
                             this.metricsService.getFileLevelMetrics(this.ediid).subscribe(async (event) => {
@@ -138,6 +137,8 @@ export class MetricsComponent implements OnInit {
                                         this.totalFilesinChart = 0;
                                         this.cleanupFileLevelData(this.files);
                                         this.fileLevelData.FilesMetrics = this.metricsData;
+                                        this.handleSum(this.files);
+
                                         if(this.fileLevelData.FilesMetrics.length > 0){
                                             this.noChartData = false;
                                             this.createChartData();
@@ -277,8 +278,11 @@ export class MetricsComponent implements OnInit {
             }
         }
 
-        // Append to existing metrics data
-        Object.assign(this.metricsData, metricsData);
+        // Append to existing metrics data - for some reason Object.assign did not work properly
+        // Had to append metricsData elements one by one!
+        // this.metricsData = Object.assign(JSON.parse(JSON.stringify(metricsData)), this.metricsData);
+        for(let k=0; k < metricsData.length; k++)
+            this.metricsData.push(metricsData[k]);
     }
 
     /**
@@ -286,6 +290,7 @@ export class MetricsComponent implements OnInit {
      * @param files 
      */
     handleSum(files: TreeNode[]){
+        console.log("files", files);
         this.totalFileSize = 0;
         files.forEach(child => {
             const {downloads, fileSize} = this.sumFolder(child);
@@ -299,11 +304,11 @@ export class MetricsComponent implements OnInit {
      * @returns 
      */
     sumFolder(node: TreeNode){
-        if (node.children) {
+        if (node.children.length > 0) {
             node.children.forEach(child => {
-                 const {downloads, fileSize} = this.sumFolder(child);
-                 node.data.success_get += downloads;
-                 node.data.download_size += fileSize;
+                const {downloads, fileSize} = this.sumFolder(child);              
+                node.data.success_get += downloads;
+                node.data.download_size += fileSize;
             });
         }
     
@@ -553,7 +558,7 @@ export class MetricsComponent implements OnInit {
      * @param dataFiles - file tree
      * @param expanded - expand flag 
      * @param currentLevel - current level
-     * @param targetLevel - the level to expand to
+     * @param targetLevel - the level to expand to. Null - expand all level
      */
     expandToLevel(dataFiles: any, expanded: boolean, currentLevel:number = 0, targetLevel: any = null) {
         this.expandAll(dataFiles, expanded, currentLevel, targetLevel)
