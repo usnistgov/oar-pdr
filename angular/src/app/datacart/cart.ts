@@ -196,8 +196,11 @@ export class DataCart {
 
     /**
      * save the contents of this cart to its persistent storage
+     * @param who   optionally, either the reference to the object responsible for the change in the cart 
+     *              needing to be saved, or identifier for that object.  This allows subscribers to identify 
+     *              themselves as the origin of a change to the cart when alerted via the call-back.
      */
-    public save() : void {
+    public save(who: any = null) : void {
         this.lastUpdated = Date.now();
         if (this._storage) {
             this._storage.setItem(this.getStoreKey()+".md", stringifyMD(this._updatedMD(this.lastUpdated))); 
@@ -206,13 +209,14 @@ export class DataCart {
 
         // alert watchers.  (Note that a window-originating event will only occur if the cart
         // was changed from _another_ window/tab; thus, no worry about double alerts.)
-        this._alertWatchers(this.lastUpdated);
+        this._alertWatchers(this.lastUpdated, who);
     }
 
-    private _alertWatchers(when : number) : void {
+    private _alertWatchers(when : number, who : any = null) : void {
         this._statusUpdated.next({
             cartName: this.cartName,
-            when: when
+            when: when,
+            who: who
         });
     }        
 
@@ -305,11 +309,17 @@ export class DataCart {
 
     /**
      * set a name to use for display purposes for this cart
+     * @param name    the name to set
+     * @param dosave  if true (default), this change is persisted in the cart's storage; set to false to 
+     *                batch several updates together before making an explicit call to save()
+     * @param who     optionally, either a reference to the caller of this function or an identifier for the 
+     *                caller.  This allows subscribers to identify themselves as the origin of a change to 
+     *                the cart when alerted via the call-back.
      */
-    public setDisplayName(name: string, dosave: boolean = true) : void {
+    public setDisplayName(name: string, dosave: boolean = true, who: any = null) : void {
         if (this.dispName != name) {
             this.dispName = name;
-            if (dosave) this.save();
+            if (dosave) this.save(who);
         }
     }
 
@@ -380,11 +390,17 @@ export class DataCart {
 
     /**
      * add a DataCartItem to the cart
+     * @param item    the DataCartItem object to add to this cart
+     * @param dosave  if true (default), this change is persisted in the cart's storage; set to false to 
+     *                batch several updates together before making an explicit call to save()
+     * @param who     optionally, either a reference to the caller of this function or an identifier for the 
+     *                caller.  This allows subscribers to identify themselves as the origin of a change to 
+     *                the cart when alerted via the call-back.
      */
-    addItem(item: DataCartItem, dosave: boolean = true) : void {
+    addItem(item: DataCartItem, dosave: boolean = true, who: any = null) : void {
         this.contents[this._idForItem(item)] = item;
 
-        if (dosave) this.save();
+        if (dosave) this.save(who);
     }
 
     /**
@@ -395,11 +411,15 @@ export class DataCart {
      * @param resid   a repository-local identifier for the resource that the file is from
      * @param file    the DataCartItem or NerdmComp that describes the file being added.
      * @param markSelected   if true, the new file will be marked as selected
-     * @param dosave         if true, the updated cart contents will be added after adding the file
+     * @param dosave  if true (default), this change is persisted in the cart's storage; set to false to 
+     *                batch several updates together before making an explicit call to save()
+     * @param who     optionally, either a reference to the caller of this function or an identifier for the 
+     *                caller.  This allows subscribers to identify themselves as the origin of a change to 
+     *                the cart when alerted via the call-back.
      * @return DataCartItem -- the item representing the file that was added to the cart
      */
     addFile(resid: string, file: DataCartItem|NerdmComp,
-            markSelected: boolean = false, dosave: boolean = true) : DataCartItem
+            markSelected: boolean = false, dosave: boolean = true, who: any = null) : DataCartItem
     {
         let fail = function(msg: string) : DataCartItem {
             console.error("Unable to load file NERDm component: "+msg+": "+JSON.stringify(file));
@@ -419,7 +439,7 @@ export class DataCart {
         if (item['downloadStatus'] === undefined)
             item['downloadStatus'] = "";
         item['isSelected'] = markSelected;
-        this.addItem(item, dosave);
+        this.addItem(item, dosave, who);
         return item;
     }
 
@@ -427,9 +447,16 @@ export class DataCart {
      * remove a single file from the cart as given by its identifiers.  
      * @param resid     a repository-local identifier for the resource that the file is from
      * @param filePath  the path to the file within the resource collection to remove.
+     * @param dosave    if true (default), this change is persisted in the cart's storage; set to false to 
+     *                  batch several updates together before making an explicit call to save()
+     * @param who       optionally, either a reference to the caller of this function or an identifier for the 
+     *                  caller.  This allows subscribers to identify themselves as the origin of a change to 
+     *                  the cart when alerted via the call-back.
      * @return boolean -- true if the file was found to be in the cart and then removed. 
      */
-    public removeFileById(resid: string, filePath: string, dosave: boolean = true) : boolean {
+    public removeFileById(resid: string, filePath: string,
+                          dosave: boolean = true, who: any = null) : boolean
+    {
         let id = this._idFor(resid, filePath);
 
         let found = this.contents[id];
@@ -437,18 +464,24 @@ export class DataCart {
             delete this.contents[id];
         }
 
-        if (dosave) this.save();
+        if (dosave) this.save(who);
         return !!found;
     }
 
     /**
-     * remove a list of files
+     * remove a list of files from this cart
+     * @param files   the files, described as an array of DataCartItem objects, to remove 
+     * @param dosave  if true (default), this change is persisted in the cart's storage; set to false to 
+     *                batch several updates together before making an explicit call to save()
+     * @param who     optionally, either a reference to the caller of this function or an identifier for the 
+     *                caller.  This allows subscribers to identify themselves as the origin of a change to 
+     *                the cart when alerted via the call-back.
      */
-    public removeFiles(files: DataCartItem[], dosave: boolean = true) : void {
+    public removeFiles(files: DataCartItem[], dosave: boolean = true, who: any = null) : void {
         for (let file of files) 
             delete this.contents[this._idForItem(file)]
 
-        if (dosave && files.length > 0) this.save();
+        if (dosave && files.length > 0) this.save(who);
     }
 
     /**
@@ -457,9 +490,16 @@ export class DataCart {
      * @param resId     the local identifier for the resource that the file is from
      * @param filePath  the path to a file or subcollection within the resource collection.  If empty, null,
      *                    or undefined, all files with the matching resId will be removed. 
+     * @param dosave    if true (default), this change is persisted in the cart's storage; set to false to 
+     *                  batch several updates together before making an explicit call to save()
+     * @param who       optionally, either a reference to the caller of this function or an identifier for the 
+     *                  caller.  This allows subscribers to identify themselves as the origin of a change to 
+     *                  the cart when alerted via the call-back.
      */
-    public removeMatchingFiles(resId: string, filepath: string = '', dosave: boolean = true) : void {
-        this.removeFiles(this.matchFiles(resId, filepath), dosave);
+    public removeMatchingFiles(resId: string, filepath: string = '',
+                               dosave: boolean = true, who: any = null) : void
+    {
+        this.removeFiles(this.matchFiles(resId, filepath), dosave, who);
     }
     
 
@@ -474,11 +514,14 @@ export class DataCart {
      * @param extra     an optional object of additional properties to associate and save with this item.  If 
      *                  null (default), no additional properties are saved.  This object should not include 
      *                  standard properties from the DataCartItem interface definition.
+     * @param who     optionally, either a reference to the caller of this function or an identifier for the 
+     *                caller.  This allows subscribers to identify themselves as the origin of a change to 
+     *                the cart when alerted via the call-back.
      * @return boolean -- true if the identified file was found in this cart and its status updated; 
      *                    false, otherwise.
      */
     public setDownloadStatus(resid: string, filePath: string, downloadStatus: string = DownloadStatus.DOWNLOADED, 
-                             dosave: boolean = true, extra: {[p:string]: any} = null) : boolean
+                             dosave: boolean = true, extra: {[p:string]: any} = null, who: any = null) : boolean
     {
         let item: DataCartItem = this.findFile(resid, filePath);
         if (! item)
@@ -490,7 +533,7 @@ export class DataCart {
                 item[prop] = extra[prop];
         }
 
-        if(dosave) this.save();
+        if(dosave) this.save(who);
 
         return true;
     }
@@ -545,15 +588,20 @@ export class DataCart {
      * @param resId     the local identifier for the resource that the file is from
      * @param filePath  the path to the file within the resource collection.
      * @param unselect  if true, unselect the referenced files rather than selecting them
+     * @param dosave    if true (default), this change is persisted in the cart's storage; set to false to 
+     *                  batch several updates together before making an explicit call to save()
+     * @param who       optionally, either a reference to the caller of this function or an identifier for the 
+     *                  caller.  This allows subscribers to identify themselves as the origin of a change to 
+     *                  the cart when alerted via the call-back.
      */
-    public setSelected(resid: string, filePath: string = '',
-                       unselect: boolean = false, dosave: boolean = true) : void
+    public setSelected(resid: string, filePath: string = '', unselect: boolean = false, 
+                       dosave: boolean = true, who: any = null) : void
     {
         let match = this.matchFiles(resid, filePath);
         if (match.length) {
             for (let file of match) 
                 file['isSelected'] = !unselect;
-            if (dosave) this.save();
+            if (dosave) this.save(who);
         }
     }
 
@@ -603,15 +651,15 @@ export class DataCart {
     /**
      * remove all of the selected files from this cart
      */
-    public removeSelectedFiles() : void {
-        this.removeFiles(this.getSelectedFiles());
+    public removeSelectedFiles(who: any = null) : void {
+        this.removeFiles(this.getSelectedFiles(), true, who);
     }
 
     /**
      * remove all of the selected files from this cart
      */
-    public removeDownloadedFiles() : void {
-        this.removeFiles(this.getDownloadedFiles());
+    public removeDownloadedFiles(who: any = null) : void {
+        this.removeFiles(this.getDownloadedFiles(), true, who);
     }
 
     /**

@@ -90,17 +90,24 @@ describe('DataCart', () => {
 
     it('save()', () => {
         let saves = 0;
+        let a = { goob: "gurn" };
+        let lastsaver = null;
 
         let dc = new DataCart("cart", {});
         expect(localStorage.getItem("cart:cart")).toBeNull();
         expect(dc.lastUpdated).toEqual(0);
 
-        dc.watchForChanges((w) => { saves++; });
+        dc.watchForChanges((w) => { saves++; lastsaver = w.who; });
         expect(saves).toEqual(0);  // saves does not get initialized
-        dc.save();
+        dc.save(a);
         expect(localStorage.getItem("cart:cart")).toEqual("{}");
         expect(dc.lastUpdated).toBeGreaterThan(0);
         expect(saves).toEqual(1);
+        expect(lastsaver).toBe(a);
+
+        dc.save();
+        expect(saves).toEqual(2);
+        expect(lastsaver).toBeNull();
         
         dc = new DataCart("cart", sample, sessionStorage);
         expect(sessionStorage.getItem("cart:cart")).toBeNull();
@@ -373,17 +380,21 @@ describe('DataCart', () => {
 
     it('getSelected()', () => {
         let saves = 0;
+        let a = { goob: "gurn" };
+        let lastsaver = null;
 
         let dc = DataCart.createCart("cart");
-        dc.watchForChanges((w) => { saves++; });
+        dc.watchForChanges((w) => { saves++; lastsaver = w.who; });
         dc.addFile("foo", { filePath: "bar/goo", count: 3, downloadURL: "http://here" }, false, false);
         dc.addFile("foo", { filePath: "bar/good", count: 8, downloadURL: "http://here" });
         dc.addFile("gov", { filePath: "fred", count: 1, downloadStatus: "downloaded", downloadURL: "http://here" }, true);
-        dc.addFile("gov", { filePath: "hank", count: 8, downloadStatus: "downloading", downloadURL: "http://here" });
+        dc.addFile("gov", { filePath: "hank", count: 8, downloadStatus: "downloading", downloadURL: "http://here" },
+                   false, true, a);
         expect(dc.size()).toEqual(4);
         expect(dc.countFilesDownloaded()).toEqual(1);
         expect(dc.getSelectedFiles().length).toEqual(1);
         expect(saves).toEqual(3);
+        expect(lastsaver).toBe(a);
 
         let sel = dc.getSelectedFiles();
         expect(sel.length).toEqual(1);

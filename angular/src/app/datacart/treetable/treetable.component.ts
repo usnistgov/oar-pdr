@@ -298,7 +298,7 @@ export class TreetableComponent implements OnInit, AfterViewInit {
     }
 
     /**
-     * ensure that parent nodes of selected files are properly shown as selecte or partially selected.
+     * ensure that parent nodes of selected files are properly shown as selected or partially selected.
      * 
      * When the tree table (this.dataTree) is built or updated from the data cart, only the file nodes 
      * are put into the selected list (this.selectedData).  This method will update the selection status
@@ -347,7 +347,7 @@ export class TreetableComponent implements OnInit, AfterViewInit {
         }
         
         this.dataTree.children = [...this.dataTree.children];  // trigger refresh of table
-        this.refreshTree();
+        // this.refreshTree();
     }
 
     /**
@@ -380,7 +380,7 @@ export class TreetableComponent implements OnInit, AfterViewInit {
     onNodeSelect(ev) {
         if (ev.node && ev.node.data) {
             let parts = this._keySplit(ev.node.data.key);
-            this.dataCart.setSelected(parts[0], parts[1], false, true);
+            this.dataCart.setSelected(parts[0], parts[1], false, true, this);
         }
     }
 
@@ -390,7 +390,7 @@ export class TreetableComponent implements OnInit, AfterViewInit {
     onNodeUnselect(ev) {
         if (ev.node && ev.node.data) {
             let parts = this._keySplit(ev.node.data.key);
-            this.dataCart.setSelected(parts[0], parts[1], true, true);
+            this.dataCart.setSelected(parts[0], parts[1], true, true, this);
         }
     }
 
@@ -523,7 +523,7 @@ export class TreetableComponent implements OnInit, AfterViewInit {
     clearDownloadStatus() {
         this.dataCart.restore();
         this._clearCartDownloadStatus(this.dataTree.children);
-        this.dataCart.save();
+        this.dataCart.save(this);
     }
 
     _clearCartDownloadStatus(dataFiles: TreeNode[]) {
@@ -533,7 +533,7 @@ export class TreetableComponent implements OnInit, AfterViewInit {
                 this._clearCartDownloadStatus(dfile.children);
             else if (dfile.data.downloadStatus != DownloadStatus.DOWNLOADING)
                 this.dataCart.setDownloadStatus(dfile.data.cartItem.resId, dfile.data.cartItem.filePath,
-                                                DownloadStatus.NO_STATUS, false);
+                                                DownloadStatus.NO_STATUS, false, null, this);
         }
     }
 
@@ -555,7 +555,8 @@ export class TreetableComponent implements OnInit, AfterViewInit {
 
         rowData.downloadStatus = DownloadStatus.DOWNLOADED;
 
-        this.dataCart.setDownloadStatus(rowData.resId, rowData.cartItem.filepath, rowData.downloadStatus, true);
+        this.dataCart.setDownloadStatus(rowData.resId, rowData.cartItem.filepath, rowData.downloadStatus, 
+                                        true, null, this);
     }
 
     /**
