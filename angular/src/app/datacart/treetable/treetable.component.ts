@@ -90,6 +90,7 @@ export class CartTreeNode implements TreeNode {
     };
     isExpanded = false;
     keyname: string = '';
+    parent = null;
     
     constructor(name: string='', key: string=null, title: string = '') {
         this.data.key = key;
@@ -125,7 +126,8 @@ export class CartTreeNode implements TreeNode {
         // ancestor does not exist yet; create it
         let key = (this.data.key) ? this.data.key + '/' + levels[0] : levels[0];
         let child = new CartTreeNode(levels[0], key, item.resTitle || '');
-        this.children.push(child);
+        child.parent = this;
+        this.children = [...this.children, child];
         if (levels.length > 1)
             return child._upsertNodeFor(levels.slice(1), item);
 
@@ -173,7 +175,11 @@ export class CartTreeNode implements TreeNode {
      *                  before it is removed (e.g. change its selection status and that of its 
      *                  parent nodes).  
      */
-    cleanNodes(cart: DataCart, removing: (TreeNode) => void = null) : boolean {
+    cleanNodes(cart: DataCart,
+               removing: (TreeNode) => void = null,
+               refreshParent: (TreeNode) => void = null)
+        : boolean
+    {
         if (this.children.length == 0 && this.data.cartItem)
             // only operates on parent nodes
             return true;
@@ -183,12 +189,12 @@ export class CartTreeNode implements TreeNode {
                                               //   being put into newchildren)
         for (let child of this.children) {
             if (child.children.length > 0) {
-                if (child.cleanNodes(cart, removing)) 
+                if (child.cleanNodes(cart, removing, refreshParent)) 
                     // child is not empty; retain it (otherwise, it will be dropped)
                     newchildren.push(child);
                 else {
-                    if (removing) removing(child);
                     updated = true;
+                    if (removing) removing(child);
                 }
             }
             else if (child.data.cartItem && cart.findFileById(child.data.cartItem.key))
@@ -196,13 +202,15 @@ export class CartTreeNode implements TreeNode {
                 newchildren.push(child);
             else {
                 // child was not found in cart
-                if (removing) removing(child);
                 updated = true;
+                if (removing) removing(child);
             }
         }
-        if (updated)
+        if (updated) {
             // we removed some children; update our list
             this.children = newchildren;
+            if (refreshParent) refreshParent(this)
+        }
 
         // false if this node is now empty
         return this.children.length > 0;
@@ -323,23 +331,43 @@ export class TreetableComponent implements OnInit, AfterViewInit {
      * @param event - change event
      */
     cartChanged(which) {
-        console.log("Updating view for change in cart");
+        console.log("Updating view for change in cart contents");
+
+        // update selections due to cart additions or changes to item data
         let node: CartTreeNode = null;
         for (let item of this.dataCart.getFiles()) {
             node = this.dataTree.upsertNodeFor(item);
-            if (item.isSelected && (!this.tt || !this.tt.isSelected(node))) {
+            if (item.isSelected && (!this.tt || !this.tt.isSelected(node))) 
                 this.selectedData.push(node);
-                if (this.tt) this.tt.propagateSelectionUp(node, true);
+            if (this.tt) {
+                this.tt.propagateSelectionDown(node, item.isSelected);
+                this.tt.propagateSelectionUp(node, item.isSelected);
             }
         }
 
-        // remove deleted items
-        this.dataTree.cleanNodes(this.dataCart, (node) => {
-            if (this.tt && this.tt.isSelected(node)) {
-                this.tt.propagateSelectionDown(node, false);
-                this.tt.propagateSelectionUp(node, false);
-            }
-        });
+        // remove deleted items and adjust selection view accordingly
+        this.dataTree.cleanNodes(this.dataCart,
+                                 (node) => {
+                                     if (this.tt && this.tt.isSelected(node))
+                                         this.tt.propagateSelectionUp(node, false);
+                                 },
+                                 (parent) => {
+                                     let findleaf = (parent) => {
+                                         if (parent.children.length == 0)
+                                             return null;
+                                         
+                                         // find a descendent leaf node
+                                         for (let child of parent.children) {
+                                             if (child.children == 0) 
+                                                 return child
+                                         }
+                                         return findleaf(parent.children[0])
+                                     }
+
+                                     let leaf = findleaf(parent);
+                                     if (leaf)
+                                         this.tt.propagateSelectionUp(leaf, this.tt.isSelected(leaf));
+                                 });
 
         // make sure the top level name is set to the resource title
         for (let child of this.dataTree.children) {
@@ -347,7 +375,6 @@ export class TreetableComponent implements OnInit, AfterViewInit {
         }
         
         this.dataTree.children = [...this.dataTree.children];  // trigger refresh of table
-        this.refreshTree();
     }
 
     /**
