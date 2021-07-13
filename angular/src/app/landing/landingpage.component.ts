@@ -171,12 +171,15 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
                 // id not found; reroute
                 console.error("No data found for ID=" + this.reqId);
                 metadataError = "not-found";
-                //   this.router.navigateByUrl("/not-found/" + this.reqId, { skipLocationChange: true });
             }
             else{
-                // Get metrics 
-                if(this.inBrowser)
-                    this.getMetrics();
+                // Get metrics when edit is not enabled. Otherwise display "Metrics not available"
+                if(this.inBrowser){
+                    if(this.editEnabled)
+                        this.hasCurrentMetrics = false;
+                    else
+                        this.getMetrics();
+                }
 
                 // proceed with rendering of the component
                 this.useMetadata();
@@ -268,15 +271,17 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
             }
         },
         (err) => {
-            let dateTime = new Date();
-            console.log("err", err);
+            console.error("Failed to retrieve file metrics: ", err);
         });                    
 
         this.metricsService.getRecordLevelMetrics(ediid).subscribe(async (event) => {
             if(event.type == HttpEventType.Response){
                 this.recordLevelMetrics = JSON.parse(await event.body.text());
             }
-        });
+        },
+        (err) => {
+            console.error("Failed to retrieve dataset metrics: ", err);
+        });  
     }
 
     get totalDownloadSize() {
