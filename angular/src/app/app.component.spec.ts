@@ -15,7 +15,7 @@ import { CartService } from './datacart/cart.service';
 import { HttpClientModule, HttpClient } from '@angular/common/http';
 import { ToastrModule } from 'ngx-toastr';
 
-describe('AppComponent', () => {
+fdescribe('AppComponent', () => {
     let cfg: AppConfig;
     let plid: Object = "browser";
     let ts: TransferState = new TransferState();
