@@ -271,15 +271,17 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
             }
         },
         (err) => {
-            let dateTime = new Date();
-            console.log("err", err);
+            console.error("Failed to retrieve file metrics: ", err);
         });                    
 
         this.metricsService.getRecordLevelMetrics(ediid).subscribe(async (event) => {
             if(event.type == HttpEventType.Response){
                 this.recordLevelMetrics = JSON.parse(await event.body.text());
             }
-        });
+        },
+        (err) => {
+            console.error("Failed to retrieve dataset metrics: ", err);
+        });  
     }
 
     get totalDownloadSize() {
