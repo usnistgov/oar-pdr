@@ -1,7 +1,7 @@
 import { Component, OnInit, Input, EventEmitter, Output, ElementRef, ViewChild } from '@angular/core';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { ZipData } from '../../shared/download-service/zipData';
-// import { deepCopy } from '../../../utils';
+import { formatBytes } from '../../utils';
 import { AppConfig } from '../../config/config';
 
 @Component({
@@ -48,8 +48,12 @@ export class DownloadConfirmComponent implements OnInit {
      * Return row background color
      * @param i - row number
      */
-    getBackColor(i: number) {
+    getBackColor(i: number) : string {
         if (i % 2 != 0) return 'rgb(231, 231, 231)';
         else return 'white';
+    }
+
+    getSizeForDisplay(size: number) : string {
+        return formatBytes(size);
     }
 }

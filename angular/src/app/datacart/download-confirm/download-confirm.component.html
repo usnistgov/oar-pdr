@@ -6,7 +6,7 @@
 
     <!-- Display zip info -->
     <div class="full-span" style="margin: auto; padding: .5em 0em;">
-        You have selected {{totalFiles}} file<span *ngIf="totalFiles > 1">s</span> with a total size of {{commonFunctionService.getSizeForDisplay(bundle_plan_size)}}.
+        You have selected {{totalFiles}} file<span *ngIf="totalFiles > 1">s</span> with a total size of {{getSizeForDisplay(bundle_plan_size)}}.
     
         <div *ngIf="bundle_plan_size > bundleSizeAlert" style="margin-top: .5em;">Warning:  this may a take a long time to download completely. </div> 
         
@@ -27,14 +27,14 @@
             <div [ngStyle]="{'width': '100%', 'background-color': getBackColor(i)}"
                 *ngFor="let zip of zipData; let i=index">
                 <span class="span50">{{zip.fileName}}</span>
-                <span class="span-end">{{commonFunctionService.getSizeForDisplay(zip.bundleSize)}}</span>
+                <span class="span-end">{{getSizeForDisplay(zip.bundleSize)}}</span>
             </div>
         </div>
 
         <!-- Summary -->
         <div id="summary">
             <span class="span50">{{totalFiles}} file<span *ngIf="totalFiles > 1">s</span> selected</span>
-            <span class="span-end">Total size: {{commonFunctionService.getSizeForDisplay(bundle_plan_size)}}</span>
+            <span class="span-end">Total size: {{getSizeForDisplay(bundle_plan_size)}}</span>
         </div>
     </div>
 
