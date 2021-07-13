@@ -175,7 +175,7 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
             else{
                 // Get metrics when edit is not enabled. Otherwise display "Metrics not available"
                 if(this.inBrowser){
-                    if(this.routerParamEditEnabled)
+                    if(this.editEnabled)
                         this.hasCurrentMetrics = false;
                     else
                         this.getMetrics();
