@@ -21,22 +21,22 @@ export class GoogleAnalyticsService {
     // Tracking events
     gaTrackEvent(category: string, event?: any, label?: string, action?: string) {
         if (action == undefined) {
-        // menu item
-        if (event.item != undefined) {
-            action = event.item.url;
-            label = event.item.label;
-        } else if (event.path != undefined) {
-            for (var i = 0; i < event.path.length; i++) {
-                if (event.path[i].href != undefined) {
-                    action = event.path[i].href;
-                    label = event.path[i].innerText;
-                    if (label == '' || label == undefined)
-                    label = event.path[i].hostname;
-                    break;
+            // menu item
+            if (event && event.item != undefined) {
+                action = event.item.url;
+                label = event.item.label;
+            } else if (event && event.path != undefined) {
+                for (var i = 0; i < event.path.length; i++) {
+                    if (event.path[i].href != undefined) {
+                        action = event.path[i].href;
+                        label = event.path[i].innerText;
+                        if (label == '' || label == undefined)
+                        label = event.path[i].hostname;
+                        break;
+                    }
                 }
-            }
-        } else
-            action = 'URL not catched';
+            } else
+                action = 'URL not catched';
         }
         action = (action == undefined) ? "" : action;
         label = (label == undefined) ? "" : label;
