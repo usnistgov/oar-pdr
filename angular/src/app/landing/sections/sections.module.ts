@@ -13,10 +13,12 @@ import { TopicModule } from '../topic/topic.module';
 import { KeywordModule } from '../keyword/keyword.module';
 import { CollapseModule } from '../collapseDirective/collapse.module';
 import { DataFilesModule } from '../data-files/data-files.module';
+import { MetadataModule } from '../metadata/metadata.module';
 import { ResourceIdentityComponent } from './resourceidentity.component';
 import { ResourceDescriptionComponent } from './resourcedescription.component';
 import { ResourceDataComponent } from './resourcedata.component';
 import { ResourceRefsComponent } from './resourcerefs.component';
+import { ResourceMetadataComponent } from './resourcemetadata.component';
 
 /**
  * A module for components that lay out the content of a resource landing page into sections.
@@ -50,23 +52,23 @@ import { ResourceRefsComponent } from './resourcerefs.component';
         CommonModule,
         NerdmModule,
         TitleModule, AuthorModule, ContactModule, CollapseModule, VersionModule,
-        DescriptionModule, DataFilesModule, TopicModule, KeywordModule
+        DescriptionModule, DataFilesModule, TopicModule, KeywordModule, MetadataModule
     ],
     declarations: [
         ResourceIdentityComponent, ResourceDescriptionComponent, ResourceDataComponent,
-        ResourceRefsComponent // , ResourceMetadataComponent
+        ResourceRefsComponent, ResourceMetadataComponent
     ],
     providers: [
     ],
     exports: [
         ResourceIdentityComponent, ResourceDescriptionComponent, ResourceDataComponent,
-        ResourceRefsComponent // , ResourceMetadataComponent
+        ResourceRefsComponent, ResourceMetadataComponent
     ]
 })
 export class SectionsModule { }
 
 export {
     ResourceIdentityComponent, ResourceDescriptionComponent, ResourceDataComponent,
-    ResourceRefsComponent // , ResourceMetadataComponent
+    ResourceRefsComponent, ResourceMetadataComponent
 };
     
