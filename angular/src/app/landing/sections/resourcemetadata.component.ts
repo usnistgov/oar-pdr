@@ -1,4 +1,4 @@
-import { Component, OnChanges, SimpleChanges, Input } from '@angular/core';
+import { Component, OnChanges, SimpleChanges, Input, ViewChild } from '@angular/core';
 
 import { AppConfig } from '../../config/config';
 import { NerdmRes, NERDResource } from '../../nerdm/nerdm';
@@ -21,6 +21,7 @@ export class ResourceMetadataComponent implements OnChanges {
     // passed in by the parent component:
     @Input() record: NerdmRes = null;
     @Input() inBrowser: boolean = false;
+    @Input() showNerdm: boolean = false;
 
     /**
      * create an instance of the Identity section

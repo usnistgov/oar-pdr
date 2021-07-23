@@ -7,6 +7,8 @@ import { GoogleAnalyticsService } from '../../shared/ga-service/google-analytics
 @Component({
   selector: 'metadata-detail',
   template: `
+  <div>
+  <p-fieldset legend="NERDm (JSON)" [toggleable]="true" [collapsed]="collapsed">
     <div class="ui-g" id="metadata-nerdm">
       <div *ngIf="inBrowser">
         <p style="margin-bottom: 0pt;">
@@ -24,11 +26,21 @@ import { GoogleAnalyticsService } from '../../shared/ga-service/google-analytics
         <div *ngIf="inBrowser"><fieldset-view [entry]="record"></fieldset-view></div>
       </div>
     </div>
-  `
+  </p-fieldset>
+  </div>
+  `,
+  styles: [`
+    :host /deep/ .ui-fieldset-legend {
+        font-size: 14pt;
+    }
+  `]
 })
 export class MetadataComponent implements OnChanges {
+    // collapsed: boolean = true;
+    
     @Input() record: NerdmRes;
-    @Input() inBrowser : boolean;
+    @Input() inBrowser: boolean;
+    @Input() collapsed: boolean = true;
 
     constructor(private cfg: AppConfig, private gaService: GoogleAnalyticsService) {  }
 
@@ -36,7 +48,7 @@ export class MetadataComponent implements OnChanges {
         if (this.record && this.record["_id"]) 
             delete this.record["_id"];
     }
-     
+
     onjson() {
         this.gaService.gaTrackEvent('download', undefined, this.record['title'], this.getDownloadURL());
     }

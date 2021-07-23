@@ -110,15 +110,22 @@ export class ToolMenuComponent implements OnChanges {
                 this.createMenuItem("References", "faa faa-arrow-circle-right ",
                                     (event) => { this.goToSection('reference'); }, null)
             );
+        
+        subitems.push(
+            this.createMenuItem("Metadata", "faa faa-arrow-circle-right ",
+                                (event) => { this.goToSection('metadata'); }, null)
+        );
         mitems.push({ label: 'Go To...', items: subitems });
 
         // Record Details
+        /*
         subitems = [
             this.createMenuItem("View Metadata", "faa faa-bars",
                                 (event) => { this.goToSection('metadata'); },null),
             this.createMenuItem("Export JSON", "faa faa-file-o", null, mdService)
         ];
         mitems.push({ label: "Record Details", items: subitems });
+        */
 
         // Use
         subitems = [

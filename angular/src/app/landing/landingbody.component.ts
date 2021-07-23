@@ -38,6 +38,7 @@ export class LandingBodyComponent {
     @Input() md: NerdmRes = null;
     @Input() inBrowser: boolean = false;
     @Input() editEnabled: boolean;
+    @Input() showMetadata: boolean = false;
 
     /**
      * create an instance of the Identity section

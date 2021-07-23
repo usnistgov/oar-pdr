@@ -59,7 +59,6 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
     displaySpecialMessage: boolean = false;
     citationDialogWith: number = 550; // Default width
 
-    // this will be removed in next restructure
     showMetadata = false;
 
     loadingMessage = '<i class="faa faa-spinner faa-spin"></i> Loading...';
