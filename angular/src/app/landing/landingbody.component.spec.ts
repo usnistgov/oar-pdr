@@ -53,19 +53,33 @@ describe('LandingBodyComponent', () => {
 
         let sect = cmpel.querySelector("#identity");
         expect(sect).toBeTruthy();
-        expect(sect.querySelector("h2")).toBeTruthy();
+        let title = sect.querySelector("h2");
+        expect(title).toBeTruthy();
+        expect(title.textContent).toContain("MEDS-I")
 
         sect = cmpel.querySelector("#description")
         expect(sect).toBeTruthy();
-        expect(sect.querySelector("h3")).toBeTruthy();
+        title = sect.querySelector("h3");
+        expect(title).toBeTruthy();
+        expect(title.textContent).toEqual("Description");
 
         sect = cmpel.querySelector("#dataAccess")
         expect(sect).toBeTruthy();
-        expect(sect.querySelector("h3")).toBeTruthy();
+        title = sect.querySelector("h3");
+        expect(title).toBeTruthy();
+        expect(title.textContent).toEqual("Data Access");
 
         sect = cmpel.querySelector("#references")
         expect(sect).toBeTruthy();
-        expect(sect.querySelector("h3")).toBeTruthy();
+        title = sect.querySelector("h3");
+        expect(title).toBeTruthy();
+        expect(title.textContent).toEqual("References");
+
+        sect = cmpel.querySelector("#metadata")
+        expect(sect).toBeTruthy();
+        title = sect.querySelector("h3");
+        expect(title).toBeTruthy();
+        expect(title.textContent).toEqual("Metadata");
 
     });
 });

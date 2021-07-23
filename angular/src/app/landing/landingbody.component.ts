@@ -23,7 +23,7 @@ import { NerdmRes, NERDResource } from '../nerdm/nerdm';
  *     - links to data access pages
  *     - statements of access policies and rights
  *  * References
- *  - Metadata -
+ *  * Metadata 
  */
 @Component({
     selector:    'pdr-landing-body',
