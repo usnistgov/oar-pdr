@@ -44,7 +44,7 @@ describe('ResourceRefsComponent', () => {
 
         expect(component.hasDisplayableReferences()).toBeTruthy();
 
-        // has a title
+        // has a section heading
         let el = cmpel.querySelector("h3");
         expect(el).toBeTruthy();
         expect(el.textContent).toContain("References");
