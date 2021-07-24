@@ -73,6 +73,7 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
     dataCartStatus: DataCartStatus;
     fileLevelMetrics: any;
     hasCurrentMetrics: boolean = false;
+    showMetrics: boolean = false;
 
     /**
      * create the component.
@@ -175,9 +176,10 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
             else{
                 // Get metrics when edit is not enabled. Otherwise display "Metrics not available"
                 if(this.inBrowser){
-                    if(this.editEnabled)
+                    if(this.editEnabled){
                         this.hasCurrentMetrics = false;
-                    else
+                        this.showMetrics = true;
+                    }else
                         this.getMetrics();
                 }
 
@@ -254,6 +256,7 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
             // when it finishes downloading
             if(event.type == HttpEventType.Response){
                 let response = await event.body.text();
+
                 this.fileLevelMetrics = JSON.parse(response);
 
                 if(this.fileLevelMetrics.FilesMetrics != undefined && this.fileLevelMetrics.FilesMetrics.length > 0){
@@ -268,10 +271,13 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
                 }else{
                     this.hasCurrentMetrics = false;
                 }
+
+                this.showMetrics = true;
             }
         },
         (err) => {
             console.error("Failed to retrieve file metrics: ", err);
+            this.showMetrics = true;
         });                    
 
         this.metricsService.getRecordLevelMetrics(ediid).subscribe(async (event) => {
@@ -281,6 +287,7 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
         },
         (err) => {
             console.error("Failed to retrieve dataset metrics: ", err);
+            this.showMetrics = true;
         });  
     }
 
