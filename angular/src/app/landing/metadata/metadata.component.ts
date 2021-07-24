@@ -8,7 +8,7 @@ import { GoogleAnalyticsService } from '../../shared/ga-service/google-analytics
   selector: 'metadata-detail',
   template: `
   <div>
-  <p-fieldset legend="NERDm (JSON)" [toggleable]="true" [collapsed]="collapsed">
+  <p-fieldset legend="Native JSON (NERDm)" [toggleable]="true" [collapsed]="collapsed">
     <div class="ui-g" id="metadata-nerdm">
       <div *ngIf="inBrowser">
         <p style="margin-bottom: 0pt;">
@@ -31,7 +31,7 @@ import { GoogleAnalyticsService } from '../../shared/ga-service/google-analytics
   `,
   styles: [`
     :host /deep/ .ui-fieldset-legend {
-        font-size: 14pt;
+        font-size: 12pt;
     }
   `]
 })
