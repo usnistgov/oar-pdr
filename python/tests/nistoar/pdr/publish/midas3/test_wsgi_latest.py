@@ -130,6 +130,47 @@ class TestLatestHandler(test.TestCase):
         self.assertTrue(not os.path.isfile(os.path.join(self.bagparent,"nrdserv",
                                                         self.midasid+".json")))
 
+    def test_block_private_clobber(self):
+        # first do a normal POST to create a submission
+        req = {
+            'REQUEST_METHOD': "POST",
+            'CONTENT_TYPE': 'application/json',
+            'PATH_INFO': '/pdr/latest',
+            'HTTP_AUTHORIZATION': 'Bearer secret'
+        }
+        self.hdlr = self.gethandler('', req)
+
+        pod = None
+        with open(self.podf) as fd:
+            pod = json.load(fd)
+        req['wsgi.input'] = StringIO(json.dumps(pod))
+        body = self.hdlr.handle()
+
+        self.assertIn("201", self.resp[0])
+        self.assertEquals(body, [])
+
+        bagdir = os.path.join(self.bagparent,"mdbags",self.midasid)
+        self.assertTrue(os.path.isdir(bagdir))
+        self.svc.wait_for_all_workers(300)
+
+        # now try to clobber it
+        self.resp = []
+        req = {
+            'REQUEST_METHOD': "POST",
+            'CONTENT_TYPE': 'application/json',
+            'PATH_INFO': '/pdr/latest',
+            'HTTP_AUTHORIZATION': 'Bearer secret'
+        }
+        self.hdlr = self.gethandler('', req)
+
+        pod['identifier'] = ""
+        pod['accessLevel'] = "non-public"
+        req['wsgi.input'] = StringIO(json.dumps(pod))
+        body = self.hdlr.handle()
+        self.assertIn("400", self.resp[0])
+        self.assertTrue(os.path.isdir(bagdir))
+        
+
     def test_do_unauthorized_POST(self):
         req = {
             'REQUEST_METHOD': "POST",

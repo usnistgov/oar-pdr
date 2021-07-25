@@ -4,6 +4,8 @@ Provide functionality for the Public Data Repository
 import os
 from abc import ABCMeta, abstractmethod, abstractproperty
 
+from .constants import *
+
 try:
     from .version import __version__
 except ImportError:

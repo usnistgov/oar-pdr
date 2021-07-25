@@ -121,6 +121,9 @@ class PreservationService(object):
         else:
             log.warning("repo_access not configured; can't support updates!")
 
+    def _get_def_siptype(self):
+        return 'midas3'
+
     def preserve(self, sipid, siptype=None, timeout=None):
         """
         request that an SIP with a given ID is preserved into long-term 
@@ -142,6 +145,8 @@ class PreservationService(object):
         :return dict:  a dictionary with metadata describing the status of 
                        preservation effort.
         """
+        if not siptype:
+            siptype = self._get_def_siptype()
         if siptype not in self.siptypes:
             raise ConfigurationException("No support configured for SIP type: "+
                                          siptype)
@@ -224,6 +229,8 @@ class PreservationService(object):
         :return dict:  a dictionary wiht metadata describing the status of 
                        preservation effort.
         """
+        if not siptype:
+            siptype = self._get_def_siptype()
         if siptype not in self.siptypes:
             raise ConfigurationException("No support configured for SIP type: "+
                                          siptype)
@@ -308,6 +315,8 @@ class PreservationService(object):
         :return dict:  a dictionary wiht metadata describing the status of 
                        preservation effort.
         """
+        if not siptype:
+            siptype = self._get_def_siptype()
         log.debug("Checking status of SIP=%s by request", sipid)
         try:
             hdlr = self._make_handler(sipid, siptype)
@@ -376,7 +385,7 @@ class PreservationService(object):
         create an SIPHandler of the given type for the given ID.
         """
         if not siptype:
-            siptype = 'midas3'
+            siptype = self._get_def_siptype()
         cls = None
         if siptype == hndlr.MIDASSIPHandler.key or siptype == hndlr.MIDASSIPHandler.name:
             # key = "midas"

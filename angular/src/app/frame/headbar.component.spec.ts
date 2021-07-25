@@ -3,7 +3,7 @@ import { TransferState } from '@angular/platform-browser';
 import { RouterModule } from '@angular/router';
 import { RouterTestingModule } from '@angular/router/testing';
 import { Component } from '@angular/core';
-import { HttpClientModule, HttpClient } from '@angular/common/http';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 
 import { HeadbarComponent } from './headbar.component';
 import { AngularEnvironmentConfigService } from '../config/config.service';
@@ -35,7 +35,7 @@ describe('HeadbarComponent', () => {
                 RouterTestingModule.withRoutes([
                     { path: 'datacart', component: DummyComponent }
                 ]),
-                HttpClientModule,
+                HttpClientTestingModule,
                 ToastrModule.forRoot()
             ],
             declarations: [ HeadbarComponent, DummyComponent ],
@@ -79,7 +79,7 @@ describe('HeadbarComponent', () => {
                 RouterTestingModule.withRoutes([
                     { path: 'datacart', component: DummyComponent }
                 ]),
-                HttpClientModule,
+                HttpClientTestingModule,
                 ToastrModule.forRoot()
             ],
             declarations: [ HeadbarComponent, DummyComponent ],
@@ -116,7 +116,7 @@ describe('HeadbarComponent', () => {
                 RouterTestingModule.withRoutes([
                     { path: 'datacart', component: DummyComponent }
                 ]),
-                HttpClientModule,
+                HttpClientTestingModule,
                 ToastrModule.forRoot()
             ],
             declarations: [ HeadbarComponent, DummyComponent ],

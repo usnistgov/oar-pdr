@@ -18,6 +18,7 @@ from nistoar.pdr import utils
 import nistoar.pdr.preserv.bagit.builder as bldr
 from nistoar.pdr.preserv.bagit import NISTBag
 import nistoar.pdr.preserv.bagger.midas3 as midas
+from nistoar.pdr.preserv.bagger import utils as bagutils
 import nistoar.pdr.exceptions as exceptions
 from nistoar.pdr.preserv import AIPValidationError
 
@@ -897,8 +898,20 @@ class TestMIDASMetadataBaggerReview(test.TestCase):
                                                         self.revdir, config=config)
         nerd = self.bagr.finalize_version()
         self.assertEqual(nerd['version'], "1.1.0")
+        self.assertIn('releaseHistory', nerd)
+        self.assertEqual(nerd['releaseHistory']['@id'], nerd['@id']+".rel")
+        self.assertIn('hasRelease', nerd['releaseHistory'])
+        self.assertEqual(len(nerd['releaseHistory']['hasRelease']), 1)
+
         nerd = self.bagr.bagbldr.bag.nerd_metadata_for('', True)
         self.assertEqual(nerd['version'], "1.1.0")
+        self.assertIn('releaseHistory', nerd)
+        self.assertEqual(nerd['releaseHistory']['@id'], nerd['@id']+".rel")
+        self.assertIn('hasRelease', nerd['releaseHistory'])
+        self.assertEqual(len(nerd['releaseHistory']['hasRelease']), 1)
+        self.assertTrue(nerd['releaseHistory']['hasRelease'][0]['location'].endswith(".v1_1_0"),
+                        "location does not end with version: "+
+                        nerd['releaseHistory']['hasRelease'][0]['location'])
         
         
 class TestMIDASMetadataBaggerUpload(test.TestCase):
@@ -1014,6 +1027,70 @@ class TestMIDASMetadataBaggerUpload(test.TestCase):
         self.assertEqual(datafiles["trial3/trial3a.json"],
                          os.path.join(uplsip, "trial3/trial3a.json"))
         self.assertEqual(len(datafiles), 1)
+
+    def test_finalize_version_deactiv8(self):
+        stagedir = os.path.join(self.bagparent,"stage")
+        if not os.path.isdir(stagedir):
+            os.mkdir(stagedir)
+        nerddir = os.path.join(stagedir, "_nerd")
+        if not os.path.isdir(nerddir):
+            os.mkdir(nerddir)
+        storedir = os.path.join(self.bagparent,"store")
+        if not os.path.isdir(storedir):
+            os.mkdir(storedir)
+        config = {
+            'repo_access': {
+                'headbag_cache': stagedir,
+                'store_dir': storedir,
+            }
+        }
+        self.bagr = midas.MIDASMetadataBagger.fromMIDAS(self.midasid, self.bagparent,
+                                                        None, self.upldir, config=config)
+
+        inpodfile = os.path.join(self.upldir,"1491","_pod.json")
+        self.bagr.apply_pod(inpodfile)
+        self.bagr.ensure_data_files(examine="sync")
+
+        self.bagr.datafiles = {}  # trick into thinking there are no files to update
+
+        # trick into thinking its been published before
+        nerd = self.bagr.bagbldr.bag.nerd_metadata_for('', True)
+        relhist = nerd.get('releaseHistory')
+        if not relhist:
+            relhist = bagutils.create_release_history_for(nerd['@id'])
+        relhist['hasRelease'].append(OrderedDict([
+            ('version', "1.0.0"),
+            ('issued', '2021-10-09'),
+            ('@id', nerd['@id']+".v1_0_0")
+        ]))
+        self.bagr.bagbldr.update_metadata_for('', {
+            'version': "1.0.0",
+            'releaseHistory': relhist,
+            'status': "removed"
+        })
+        self.bagr.bagbldr.update_annotations_for('', {'version': "1.0.0+ (in edit)"})
+        nerd = self.bagr.bagbldr.bag.nerd_metadata_for('', True)
+        self.bagr.sip.nerd = nerd
+        self.assertEqual(nerd['version'], "1.0.0+ (in edit)")
+        self.assertEqual(nerd['status'], "removed")
+
+        with open(os.path.join(stagedir, self.midasid+".1_0_0.mbag0_4-0.zip"), 'w') as fd:
+            fd.write("\n")
+        self.bagr = midas.MIDASMetadataBagger.fromMIDAS(self.midasid, self.bagparent,
+                                                        None, self.upldir, config=config)
+        self.bagr.datafiles = {}
+        nerd = self.bagr.finalize_version()
+        self.assertEqual(nerd['version'], "1.0.1")
+        nerd = self.bagr.bagbldr.bag.nerd_metadata_for('', True)
+        self.assertEqual(nerd['version'], "1.0.1")
+
+        relhist = nerd.get('releaseHistory')
+        self.assertEqual(len(relhist['hasRelease']), 2)
+        for rel in relhist['hasRelease']:
+            self.assertEqual(rel['status'], "removed",
+                             "release status for version=%s: '%s' != 'removed'" % (str(rel.get('version')),
+                                                                                   str(rel.get('status'))))
+        
 
     def test_finalize_version(self):
         stagedir = os.path.join(self.bagparent,"stage")
@@ -1249,6 +1326,15 @@ class TestPreservationBagger(test.TestCase):
         self.assertTrue(os.path.isfile(os.path.join(self.bagr.bagdir,
                                                    "about.txt")))
 
+        # test for clean up
+        self.assertTrue(not os.path.exists(os.path.join(self.bagr.bagbldr.bag.metadata_dir,
+                                                        "__bagger-midas3.json")))
+
+        # test key metadata
+        nerdm = self.bagr.bagbldr.bag.nerd_metadata_for('')
+        for prop in "annotated revised firstIssued modified issued".split():
+            self.assertIn(prop, nerdm)
+
     def test_check_data_files(self):
         self.createPresBagger()
         self.bagr.prepare()
@@ -1269,11 +1355,61 @@ class TestPreservationBagger(test.TestCase):
             self.bagr._check_data_files(self.bagr.cfg.get('data_checker',{}),
                                         viadistrib=False)
 
+    def test_clean_bag(self):
+        self.createPresBagger()
+        self.bagr.prepare()
 
+        # add some things to clean up
+        open(os.path.join(self.bagr.bagdir, "_goober.txt"), 'a').close()
+        open(os.path.join(self.bagr.bagdir, "metadata", "trial1.json", "_goober.txt"), 'a').close()
+        data = utils.read_json(self.bagr.bagbldr.bag.pod_file())
+        data["_goober"] = "I am a"
+        utils.write_json(data, self.bagr.bagbldr.bag.pod_file())
+        self.bagr.bagbldr.update_metadata_for("", {"__goober": "I am a"})
+        self.bagr.bagbldr.update_annotations_for("trial1.json", {"__goober": "I am a"})
 
+        # test mods were successful
+        data = self.bagr.bagbldr.bag.nerd_metadata_for('trial1.json', True)
+        self.assertIn('__goober', data.keys())
+        dirtyfiles = []
+        dirtymd = []
+        for (r, d, files) in os.walk(self.bagr.bagdir):
+            dirtyfiles.extend([os.path.join(r,f) for f in files if f.startswith("_")])
+            for mdfile in [f for f in files if f in ['pod.json', 'nerdm.json', 'annot.json']]:
+                data = utils.read_json(os.path.join(r, mdfile))
+                if len([p for p in data.keys() if p.startswith('_')]) > 0:
+                    dirtymd.append(os.path.join(r, mdfile))
+        self.assertNotEqual(len(dirtyfiles), 0)
+        self.assertNotEqual(len(dirtymd), 0)
+        
+        self.bagr.clean_bag()
 
+        self.assertFalse(os.path.exists(os.path.join(self.bagr.bagdir, "_goober.txt")),
+                                        "top-level admin file not removed")
+        self.assertFalse(os.path.exists(os.path.join(self.bagr.bagdir, "metadata",
+                                                     "trial1.json", "_goober.txt")),
+                                        "metadata admin file not removed")
+        data = utils.read_json(self.bagr.bagbldr.bag.pod_file())
+        self.assertNotIn('__goober', data.keys())
+        data = self.bagr.bagbldr.bag.nerd_metadata_for('', True)
+        self.assertNotIn('__goober', data.keys())
+        data = self.bagr.bagbldr.bag.nerd_metadata_for('trial1.json', True)
+        self.assertNotIn('__goober', data.keys())
 
+        # confirm that we are fully clean
+        dirtyfiles = []
+        dirtymd = []
+        for (r, d, files) in os.walk(self.bagr.bagdir):
+            dirtyfiles.extend([os.path.join(r,f) for f in files if f.startswith("_")])
+            for mdfile in [f for f in files if f in ['pod.json', 'nerdm.json', 'annot.json']]:
+                data = utils.read_json(os.path.join(r, mdfile))
+                if len([p for p in data.keys() if p.startswith('__')]) > 0:
+                    dirtymd.append(os.path.join(r, mdfile))
+        self.assertEqual(len(dirtyfiles), 0)
+        self.assertEqual(len(dirtymd), 0)
 
+        
+                         
 
 
 if __name__ == '__main__':

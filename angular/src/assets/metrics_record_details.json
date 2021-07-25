@@ -1,0 +1,54 @@
+{
+    "FilesMetricsCount": 3,
+    "PageSize": 0,
+    "FilesMetrics": [
+        {
+            "ediid": "3A1EE2F169DD3B8CE0531A570681DB5D1491",
+            "filepath": "3A1EE2F169DD3B8CE0531A570681DB5D1491/1491_optSortSph20160701.m",
+            "success_head": 0,
+            "success_get": 103,
+            "failure_head": 0,
+            "failure_get": 0,
+            "request_id": 0,
+            "timestamp": "2021-02-06T22:46:07.000+0000",
+            "download_size": 19121388,
+            "number_users":1
+        },
+        {
+            "ediid": "3A1EE2F169DD3B8CE0531A570681DB5D1491",
+            "filepath": "3A1EE2F169DD3B8CE0531A570681DB5D1491/sub1/1491_optSortSphEvaluated20160701.cdf",
+            "success_head": 0,
+            "success_get": 73,
+            "failure_head": 0,
+            "failure_get": 0,
+            "request_id": 0,
+            "timestamp": "2021-02-06T22:46:07.000+0000",
+            "download_size": 7616080,
+            "number_users":1
+        },
+        {
+            "ediid": "3A1EE2F169DD3B8CE0531A570681DB5D1491",
+            "filepath": "3A1EE2F169DD3B8CE0531A570681DB5D1491/1491_optSortSphEvaluated20160701.cdf",
+            "success_head": 0,
+            "success_get": 206,
+            "failure_head": 0,
+            "failure_get": 0,
+            "request_id": 0,
+            "timestamp": "2021-02-06T22:46:07.000+0000",
+            "download_size": 2558,
+            "number_users":1
+        },
+        {
+            "ediid": "3A1EE2F169DD3B8CE0531A570681DB5D1491",
+            "filepath": "3A1EE2F169DD3B8CE0531A570681DB5D1491/sub2/1491_optSortSphEvaluated20160701.cdf",
+            "success_head": 0,
+            "success_get": 207,
+            "failure_head": 0,
+            "failure_get": 0,
+            "request_id": 0,
+            "timestamp": "2021-02-06T22:46:07.000+0000",
+            "download_size": 2558,
+            "number_users":1
+        }
+    ]
+}

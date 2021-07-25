@@ -119,11 +119,23 @@ class TestPrepupdCmd(test.TestCase):
         self.assertEqual(args.cmd, "prepupd")
         self.assertEqual(args.aipid, ["pdr2222"])
 
-        argline = "-q -w "+self.workdir+" prepupd pdr2210 -C headbags -r https://data.nist.gov/"
+        argline = "-q -w "+self.workdir+" prepupd pdr2210 -C headbags -u https://data.nist.gov/"
         args = self.cmd.parser.parse_args(argline.split())
         self.assertEqual(args.workdir, self.workdir)
         self.assertEqual(args.cachedir, 'headbags')
         self.assertEqual(args.repourl, "https://data.nist.gov/")
+        self.assertIsNone(args.replaces)
+        self.assertTrue(args.quiet)
+        self.assertFalse(args.verbose)
+        self.assertEqual(args.cmd, "prepupd")
+        self.assertEqual(args.aipid, ["pdr2210"])
+
+        argline = "-q -w "+self.workdir+" prepupd pdr2210 -C headbags -r pdr2001"
+        args = self.cmd.parser.parse_args(argline.split())
+        self.assertEqual(args.workdir, self.workdir)
+        self.assertEqual(args.cachedir, 'headbags')
+        self.assertEqual(args.replaces, "pdr2001")
+        self.assertIsNone(args.repourl)
         self.assertTrue(args.quiet)
         self.assertFalse(args.verbose)
         self.assertEqual(args.cmd, "prepupd")
@@ -136,7 +148,7 @@ class TestPrepupdCmd(test.TestCase):
         self.assertNotIn('distrib_service', cfg)
         self.assertNotIn('metadata_service', cfg)
 
-        argline = "-q -w "+self.workdir+" prepupd pdr2210 -C headbags -r https://data.nist.gov/"
+        argline = "-q -w "+self.workdir+" prepupd pdr2210 -C headbags -u https://data.nist.gov/"
         args = self.cmd.parser.parse_args(argline.split())
         cfg = prepupd.get_access_config(args, {'working_dir': args.workdir})
         self.assertEqual(cfg['headbag_cache'], os.path.join(self.workdir,"headbags"))

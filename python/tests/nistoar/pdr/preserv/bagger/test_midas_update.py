@@ -49,6 +49,8 @@ def tearDownModule():
     if loghdlr:
         if rootlog:
             rootlog.removeHandler(loghdlr)
+            loghdlr.flush()
+            loghdlr.close()
         loghdlr = None
     stopServices()
     rmtmpdir()
@@ -354,10 +356,13 @@ class TestPreservationUpdateBagger(test.TestCase):
 
             mdata = bag.nerdm_record()
             self.assertEqual(mdata['version'], "1.1.0")
-            self.assertIn('versionHistory', mdata)
-            hist = mdata['versionHistory']
+            self.assertIn('releaseHistory', mdata)
+            self.assertNotIn('versionHistory', mdata)
+            hist = mdata['releaseHistory']['hasRelease']
             self.assertEqual(hist[-1]['version'], "1.1.0")
             self.assertEqual(hist[-1]['description'], "data update")
+            self.assertTrue(hist[-1]['location'].endswith(".v1_1_0"),
+                            "location does not end with version: "+hist[-1]['location'] )
             self.assertEqual(hist[0]['version'], "1.0.0")
             self.assertEqual(len(hist), 2)
             

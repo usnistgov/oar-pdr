@@ -13,7 +13,7 @@ from .. import PublishSystem
 from .serv import (PrePubMetadataService, SIPDirectoryNotFound, IDNotFound,
                    ConfigurationException, StateException, InvalidRequest)
 from . import midasclient as midas
-from ....id import NIST_ARK_NAAN
+from ... import ARK_NAAN
 
 log = logging.getLogger(PublishSystem().subsystem_abbrev).getChild("mdserv")
 
@@ -153,7 +153,7 @@ class Handler(object):
 
         if parts[0] == "ark:":
             # support full ark identifiers
-            if len(parts) > 2 and parts[1] == NIST_ARK_NAAN:
+            if len(parts) > 2 and parts[1] == ARK_NAAN:
                 dsid = parts[2]
             else:
                 dsid = '/'.join(parts[:3])
@@ -368,7 +368,7 @@ class Handler(object):
 
         if parts[0] == "ark:":
             # support full ark identifiers
-            if len(parts) > 2 and parts[1] == NIST_ARK_NAAN:
+            if len(parts) > 2 and parts[1] == ARK_NAAN:
                 dsid = parts[2]
             else:
                 dsid = '/'.join(parts[:3])

@@ -17,7 +17,7 @@ from .exceptions import (BagProfileError, BagWriteError, BadBagRequest,
 from ....nerdm.exceptions import (NERDError, NERDTypeError)
 from ....nerdm.convert import PODds2Res
 from ....nerdm.constants import core_schema_base, schema_versions
-from ....id import PDRMinter, NIST_ARK_NAAN
+from ....id import PDRMinter
 from ...utils import (build_mime_type_map, checksum_of, measure_dir_size,
                       read_nerd, read_pod, write_json)
 
@@ -34,6 +34,7 @@ NORM=15  # Log Level for recording normal activity
 logging.addLevelName(NORM, "NORMAL")
 # log = logging.getLogger(__name__)
 
+from ... import ARK_NAAN, PDR_PUBLIC_SERVER
 DEF_BAGLOG_FORMAT = "%(asctime)s %(levelname)s: %(message)s"
 
 POD_FILENAME = "pod.json"
@@ -66,10 +67,8 @@ CHECKSUMFILE_TYPE = NERDPUB_PRE + ":ChecksumFile"
 DOWNLOADABLEFILE_TYPE = NERDPUB_PRE + ":DownloadableFile"
 SUBCOLL_TYPE = NERDPUB_PRE + ":Subcollection"
 NERDM_CONTEXT = "https://data.nist.gov/od/dm/nerdm-pub-context.jsonld"
-DISTSERV = "https://data.nist.gov/od/ds/"
+DISTSERV = "https://" + PDR_PUBLIC_SERVER + "/od/ds/"
 DEF_MERGE_CONV = "midas0"
-
-ARK_NAAN = NIST_ARK_NAAN
 
 class BagBuilder(PreservationSystem):
     """
@@ -346,6 +345,7 @@ class BagBuilder(PreservationSystem):
             hdlrs = [h for h in self.plog.handlers if self._handles_logfile(h,lf)]
             for h in hdlrs:
                 self.plog.removeHandler(h)
+                h.flush()
                 h.close()
             self._log_handlers[lf] = None
         
@@ -2124,11 +2124,11 @@ class BagBuilder(PreservationSystem):
         else:
             initdata['External-Description'] = \
 "This collection contains data for the NIST data resource entitled, {0}". \
-format(nerdm['title'])
+format(nerdm['title'].replace('\n', ' '))
 
         initdata['External-Identifier'] = [self.id]
         if nerdm.get('doi'):
-            initdata['External-Identifier'].append("doi:"+nerdm['doi'])
+            initdata['External-Identifier'].append(nerdm['doi'])
 
         # Calculate the payload Oxum
         oxum = self._measure_oxum(self._bag._datadir)
@@ -2261,8 +2261,8 @@ format(nerdm['title'])
                 for val in vals:
                     # WARNING: when cvting to python3, careful with encoding
                     out = u"{0}: {1}".format(name, val)
-                    if len(out) > 79:
-                        out = textwrap.fill(out, 79, subsequent_indent=' ')
+                    # Not only wrap text, but also gets rid of embedded newlines, tabs, etc.
+                    out = textwrap.fill(out, 79, subsequent_indent=' ', expand_tabs=False)
                     print(out.encode('utf-8'), file=fd)
 
     def write_mbag_files(self, overwrite=False):

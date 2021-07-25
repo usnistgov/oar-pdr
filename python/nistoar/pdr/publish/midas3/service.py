@@ -18,7 +18,7 @@ from ...preserv.service import status as ps
 from ...preserv.service.service import MultiprocPreservationService
 from ...utils import build_mime_type_map, read_nerd, write_json, read_pod
 from ... import config as _configmod
-from ....id import PDRMinter, NIST_ARK_NAAN
+from ....id import PDRMinter
 from ....nerdm.convert import Res2PODds, topics2themes
 from ....nerdm.taxonomy import ResearchTopicsTaxonomy
 from ....nerdm import validate
@@ -146,7 +146,7 @@ class MIDAS3PublishingService(PublishSystem):
         self._podvalid8r = None
         if self.cfg.get('require_valid_pod', True):
             if not self._schemadir:
-                raise ConfigurationException("'reuqire_valid_pod' is set but cannot find schema dir")
+                raise ConfigurationException("'require_valid_pod' is set but cannot find schema dir")
             self._podvalid8r = validate.create_validator(self._schemadir, "_")
 
 
@@ -286,7 +286,7 @@ class MIDAS3PublishingService(PublishSystem):
         else:
             self.log.warning("Unable to validate submitted POD data")
 
-    def _create_bagger(self, id):
+    def _create_bagger(self, id, replaces=None):
         cfg = self.cfg.get('bagger', {})
         if 'store_dir' not in cfg and 'store_dir' in self.cfg:
             cfg['store_dir'] = self.cfg['store_dir']
@@ -302,14 +302,14 @@ class MIDAS3PublishingService(PublishSystem):
             raise StateException("Working directory path not a directory: " +
                                  self.workdir)
 
-        bagger = MIDASMetadataBagger.fromMIDAS(id, self.mddir, self.reviewdir,
-                                               self.uploaddir, cfg, self._minter)
+        bagger = MIDASMetadataBagger.fromMIDAS(id, self.mddir, self.reviewdir, self.uploaddir, 
+                                               cfg, replaces=replaces, minter=self._minter)
         return bagger
 
-    def _get_bagging_worker(self, id):
+    def _get_bagging_worker(self, id, replaces=None):
         worker = self._bagging_workers.get(id)
         if not worker:
-            bagger = self._create_bagger(id)
+            bagger = self._create_bagger(id, replaces)
             # bagger.prepare()
             worker = self.BaggingWorker(self, id, bagger, self.log)
             self._bagging_workers[id] = worker
@@ -320,6 +320,9 @@ class MIDAS3PublishingService(PublishSystem):
         delete the working metadata bag for the given identifier.  Afterward, it must be recreated 
         via a call to update_ds_with_pod(id).
         """
+        if not id:
+            raise ValueError("Empty or null identifier")
+
         worker = self._bagging_workers.get(id)
         if not worker:
             bagger = self._create_bagger(id)
@@ -355,7 +358,15 @@ class MIDAS3PublishingService(PublishSystem):
             # shouldn't happen since identifier is required for validity
             raise ValueError("POD record is missing required identifier")
 
-        worker = self._get_bagging_worker(id)
+        # is this an update that generated a new EDI-ID?
+        replaces = pod.get('replaces')
+        worker = self._get_bagging_worker(id, replaces=replaces)
+        if replaces and not os.path.exists(worker.bagger.bagdir):
+            oldworker = self._get_bagging_worker(replaces)
+            if oldworker.is_working() or os.path.exists(oldworker.bagger.bagdir):
+                # make a copy of the bag being replaced, but wait for it to finish its work
+                self._copy_oldbag_when_done(oldworker, worker)
+
         if not os.path.exists(worker.bagger.bagdir):
             # prep the bag synchronously (in case there's an issue)
             worker.bagger.prepare()
@@ -368,6 +379,45 @@ class MIDAS3PublishingService(PublishSystem):
             else:
                 worker.run("sync")
         return worker.bagger
+
+    def _copy_oldbag_when_done(self, oldworker, replworker):
+        # wait for worker to finish its work
+        try:
+            oldworker.full_wait(4)
+        except RuntimeException as ex:
+            # should not happen
+            self.log.error("Unexpected error while waiting for worker for %s: %s" %
+                           (oldworker.bagger.midasid, str(ex)))
+
+        try: 
+            # prevent updates to new worker's bag
+            replworker.halt_pod_processing("EDI-swapping")
+
+            # lock the old worker
+            oldworker.bagger.ensure_filelock()
+            with oldworker.bagger.lock:
+                # copy the bag
+                shutil.copytree(oldworker.bagger.bagdir, replworker.bagger.bagdir)
+
+            # fix the EDI-ID for the new bag
+            replworker.bagger.ensure_filelock()
+            with replworker.bagger.lock:
+                replworker.bagger.ensure_res_metadata()
+                version = replworker.bagger.sip.nerd.get("version", "1.0.0")
+                replworker.bagger.bagbldr.update_metadata_for("", {"ediid": replworker.bagger.midasid}, 
+                                                              message="setting new EDI-ID for major update")
+                if not re.search(r'\+ \([\w\s]+\)', version):
+                    replworker.bagger.bagbldr.update_annotations_for("", {"version": version+"+ (in edit)"},
+                                                                     message="setting version to in-edit mode")
+                replworker.bagger.update_bagger_metadata_for('', {"replacedEDI": oldworker.id})
+                replworker.bagger.ensure_res_metadata()
+
+        except OSError as ex:
+            self.log.exception("Trouble copying bag during EDI-ID update: "+str(ex))
+            raise PDRServiceException("Failed to shift to new EDI-ID during bag copy: "+str(e), cause=ex)
+
+        finally:
+            replworker.resume_pod_processing()
 
 
     def serve_nerdm(self, nerdm, name=None):
@@ -795,7 +845,7 @@ class MIDAS3PublishingService(PublishSystem):
         one for publishing so that it can be queued for preservation.  The bag worker will see 
         the mark and take responsibility for starting the preservation process.
 
-        :param str ediid:   the EDI ID for the dataset to be preserved.
+        :param dict pod:    the final version of the POD record for the SIP to preserve
         :param bool async:  if True (default), process any pending PODs asynchronously.  Note that this 
                             only affects POD processing, not the actual preservation.
         :rtype dict:  a status JSON object giving the status of the preservation.  
@@ -861,7 +911,7 @@ class MIDAS3PublishingService(PublishSystem):
         one for publishing so that it can be queued for preservation.  The bag worker will see 
         the mark and take responsibility for starting the preservation process.
 
-        :param str ediid:   the EDI ID for the dataset to be preserved.
+        :param dict pod:    the final version of the POD record for the SIP to preserve
         :param bool async:  if True (default), process any pending PODs asynchronously.  Note that this 
                             only affects POD processing, not the actual preservation.
         :rtype dict:  a status JSON object giving the status of the preservation.  
@@ -1057,6 +1107,7 @@ class MIDAS3PublishingService(PublishSystem):
                         pod = None
                         with self.qlock:
                             pod = read_pod(self.working_pod)
+
                         self.bagger.apply_pod(pod, False)
                         self.service.serve_nerdm(self.bagger.bagbldr.bag.nerdm_record(True))
 
@@ -1143,7 +1194,7 @@ class MIDAS3PublishingService(PublishSystem):
 
                 # assign next version to this submission
                 nerd = self.finalize_version()
-                nerd['_preserve'] = True
+                nerd['__preserve'] = True
                 self.service.serve_nerdm(nerd)
 
                 # copy the metadata bag to the preservation queue
@@ -1219,8 +1270,15 @@ class MIDAS3PublishingService(PublishSystem):
             # in other words, data files must appear in the review directory to be
             # considered part of this version of the dataset.  
             usebagger = MIDASMetadataBagger(self.bagger.midasid, self.bagger.bagparent,
-                                            self.bagger.sip.revdatadir, config=self.bagger.cfg)
+                                            self.bagger.sip.revdatadir, replaces=self.bagger.previd,
+                                            config=self.bagger.cfg)
             return usebagger.finalize_version()
+
+        def full_wait(self, timeout):
+            if self.is_working() and worker._thread is not threading.current_thread():
+                self._thread.join()
+            if self.bagger.fileExaminer and self.bagger.fileExaminer.running():
+                self.bagger.fileExaminer.waitForCompletion(timeout)
 
 
 

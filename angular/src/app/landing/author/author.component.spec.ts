@@ -1,5 +1,6 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-import { HttpClientModule } from '@angular/common/http';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
+
 import { AuthorComponent } from './author.component';
 import { FormsModule } from '@angular/forms';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
@@ -28,7 +29,7 @@ describe('AuthorComponent', () => {
         cfg.appVersion = "2.test";
 
         TestBed.configureTestingModule({
-            imports: [HttpClientModule, FormsModule, RouterTestingModule, ToastrModule.forRoot()],
+            imports: [HttpClientTestingModule, FormsModule, RouterTestingModule, ToastrModule.forRoot()],
             declarations: [AuthorComponent],
             schemas: [NO_ERRORS_SCHEMA],
             providers: [

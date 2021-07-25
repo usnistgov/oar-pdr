@@ -20,7 +20,7 @@ from . import utils as bagutils
 from ..bagit.builder import BagBuilder, NERDMD_FILENAME, FILEMD_FILENAME
 from ..bagit import NISTBag
 from ..bagit.tools import synchronize_enhanced_refs
-from ....id import PDRMinter, NIST_ARK_NAAN
+from ....id import PDRMinter
 from ... import def_merge_etcdir, utils
 from .. import (SIPDirectoryError, SIPDirectoryNotFound, AIPValidationError,
                 ConfigurationException, StateException, PODError,
@@ -28,6 +28,9 @@ from .. import (SIPDirectoryError, SIPDirectoryNotFound, AIPValidationError,
 from .prepupd import UpdatePrepService
 from .datachecker import DataChecker
 from nistoar.nerdm.merge import MergerFactory
+
+from .... import pdr
+ARK_NAAN = pdr.ARK_NAAN
 
 # _sys = PreservationSystem()
 log = logging.getLogger(_sys.system_abbrev)   \
@@ -50,7 +53,7 @@ _DATA_UPDATE  = 2
 def _midadid_to_dirname(midasid, log=None):
     out = midasid
 
-    if midasid.startswith("ark:/"+NIST_ARK_NAAN+"/"):
+    if midasid.startswith("ark:/"+ARK_NAAN+"/"):
         # new ARK-based MIDAS identifiers: chars. after shoulder is the
         # record number and name of directory
         out = re.sub(r'^ark:/\d+/(mds\d+\-)?', '', midasid)
@@ -393,7 +396,7 @@ class MIDASMetadataBagger(SIPBagger):
         if not os.path.exists(self.bagdir):
             self.bagbldr.ensure_bag_structure()
 
-            if self.midasid.startswith("ark:/"+NIST_ARK_NAAN+"/"):
+            if self.midasid.startswith("ark:/"+ARK_NAAN+"/"):
                 # new-style EDI ID is a NIST ARK identifier; use it as our SIP id
                 id = self.midasid
             else:
@@ -601,7 +604,7 @@ class MIDASMetadataBagger(SIPBagger):
                                                  not self.fileExaminer)
 
             if self.fileExaminer:
-                md["_status"] = "in progress"
+                md["__status"] = "in progress"
                 
                 # the file examiner will calculate the file's checksum
                 # asynchronously; for now though, see if there is an associated
@@ -746,12 +749,12 @@ class MIDASMetadataBagger(SIPBagger):
             
                 md = self.bagger.bagbldr.describe_data_file(location, filepath,
                                                             True, ct)
-                if '_status' in md:
-                    md['_status'] = "updated"
+                if '__status' in md:
+                    md['__status'] = "updated"
                 md = self.bagger.bagbldr.update_metadata_for(filepath, md, ct,
                                    "async metadata update for file, "+filepath)
-                if '_status' in md:
-                    del md['_status']
+                if '__status' in md:
+                    del md['__status']
                     self.bagger.bagbldr.replace_metadata_for(filepath, md, '')
                 self.bagger._mark_filepath_synced(filepath)
 
@@ -1123,7 +1126,11 @@ class PreservationBagger(SIPBagger):
         else:
             adata = OrderedDict()
         adata['version'] = newver
-        verhist = mdata.get('versionHistory', [])
+        relhist = mdata.get('releaseHistory')
+        if relhist is None:
+            relhist = bagutils.create_release_history_for(mdata['@id'])
+            relhist['hasRelease'] = mdata.get('versionHistory', [])
+        verhist = relhist['hasRelease']
 
         if uptype != _NO_UPDATE and newver != mdata['version'] and \
            ('issued' in mdata or 'modified' in mdata) and \
@@ -1134,7 +1141,8 @@ class PreservationBagger(SIPBagger):
                 ('version', newver),
                 ('issued', issued),
                 ('@id', mdata['@id']),
-                ('location', 'https://data.nist.gov/od/id/'+mdata['@id'])
+                ('location', 'https://'+pdr.PDR_PUBLIC_SERVER+ \
+                             re.sub(r'\.rel$', ".v"+re.sub(r'\.','_', adata['version']), relhist['@id']))
             ]))
             if update_reason is None:
                 if uptype == _MDATA_UPDATE:
@@ -1144,7 +1152,7 @@ class PreservationBagger(SIPBagger):
                 else:
                     update_reason = ''
             verhist[-1]['description'] = update_reason
-            adata['versionHistory'] = verhist
+            adata['releaseHistory'] = relhist
         
         utils.write_json(adata, annotf)
 

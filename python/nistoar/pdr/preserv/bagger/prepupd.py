@@ -3,24 +3,28 @@ This bagger submodule provides functions for preparing an update to a previously
 preserved collection.  This includes a service client for retrieving previous
 head bags from cache or long-term storage.  
 """
-import os, shutil, json, logging, re
+import os, shutil, json, logging, re, time
 from abc import ABCMeta, abstractmethod, abstractproperty
 from collections import OrderedDict
 from zipfile import ZipFile
-from time import mktime
+from datetime import datetime
 
 from .base import sys as _sys
 from .. import (ConfigurationException, StateException, CorruptedBagError,
                 NERDError)
 from . import utils as bagutils
+from ...config import merge_config
 from ...describe import rmm
 from ... import distrib
 from ...exceptions import IDNotFound
 from ... import utils
-from ..bagit.builder import BagBuilder
+from ..bagit.builder import BagBuilder, ARK_NAAN
 from ..bagit.bag import NISTBag
+from ... import PDR_PUBLIC_SERVER
 
+PDR_SERVER = PDR_PUBLIC_SERVER
 deflog = logging.getLogger(_sys.system_abbrev).getChild(_sys.subsystem_abbrev)
+ARK_PFX = "ark:/{0}/".format(ARK_NAAN)
 
 class HeadBagCacher(object):
     """
@@ -145,7 +149,7 @@ class UpdatePrepService(object):
     """
     a factory class that creates UpdatePrepper instances
     """
-    def __init__(self, config):
+    def __init__(self, config, bgrmdf=None):
         self.cfg = config
 
         self.sercache = self.cfg.get('headbag_cache')
@@ -162,12 +166,14 @@ class UpdatePrepService(object):
         if scfg.get('service_endpoint'):
             self.mdsvc  = rmm.MetadataClient(scfg.get('service_endpoint'))
 
-    def prepper_for(self, aipid, version=None, log=None):
+        self._bgrmdf = bgrmdf
+
+    def prepper_for(self, aipid, version=None, replaces=None, log=None):
         """
         return an UpdatePrepper instance for the given dataset identifier
         """
         return UpdatePrepper(aipid, self.cfg, self.cacher, self.mdsvc,
-                             self.storedir, version, log)
+                             self.storedir, version, replaces, log, self._bgrmdf)
 
 
 class UpdatePrepper(object):
@@ -176,16 +182,20 @@ class UpdatePrepper(object):
     to disk and prepares it for access and possible update by the PDR publishing 
     system.  
     """
+    PREPRMD_FILENAME = "__bagger-prepper.json"
 
     def __init__(self, aipid, config, headcacher, pubmdclient, storedir=None,
-                 version=None, log=None):
+                 version=None, replaces=None, log=None, bgrmdf=None):
         """
         create the prepper for the given dataset identifier.  
 
         This is not intended to be instantiated directly by the user; use
         the UpdatePrepService.prepper_for() factory method. 
         """
-        self.aipid = aipid
+        self._aipid = aipid
+        self._prevaipid = replaces
+        if not self._prevaipid:
+            self._prevaipid = aipid
         self.cacher = headcacher
         self.storedir = storedir
         self.version = version
@@ -200,63 +210,90 @@ class UpdatePrepper(object):
             log = deflog.getChild(self.aipid[:8]+'...')
         self.log = log
 
+        if not bgrmdf:
+            bgrmdf = os.path.join("metadata", self.PREPRMD_FILENAME)
+        self._bgrmdf = bgrmdf
+
+    @property
+    def aipid(self):
+        """
+        The AIP identifier for the dataset that this UpdatePrepper will look for
+        """
+        return self._aipid
+
     def cache_headbag(self):
         """
         ensure a copy of the serialized head bag in the read-only cache
         :rtype: str giving the path to the cached, serialized head bag or 
                 None if no such bag exists.  
         """
+        out = self._cache_headbag_for(self.aipid)
+        if not out and self._prevaipid != self.aipid:
+            out = self._cache_headbag_for(self._prevaipid, None) # get only latest version
+        return out
+
+    def _cache_headbag_for(self, aipid, version=None):
         try:
-            return self.cacher.cache_headbag(self.aipid, self.version)
+            return self.cacher.cache_headbag(aipid, version)
         except CorruptedBagError as ex:
             # try again (now that the cache is clean)
-            return self.cacher.cache_headbag(self.aipid, self.version)
+            return self.cacher.cache_headbag(aipid, version)
 
-    def cache_nerdm_rec(self):
+    def cache_nerdm_rec(self, shallow=False):
         """
         ensure a cached copy of the latest NERDm record from the repository.
         This is called for datasets that are in the PDL but have not gone 
         through the preservation service.  
+        :param str shallow:  if True, cache the ancestor record if this is an unpublished AIP
+                             derived from a published one.  (default: False)
         :rtype: str giving the path to the cached NERDm record, or
                 None if no such bag exists.  
         """
-        out = os.path.join(self.mdcache, self.aipid+".json")
+        out = self._cache_nerdm_rec_for(self.aipid)
+        if not shallow and not out and self._prevaipid != self.aipid:
+            out = self._cache_nerdm_rec_for(self._prevaipid) # get only latest version
+        return out
+
+    def _cache_nerdm_rec_for(self, aipid):
+        out = os.path.join(self.mdcache, aipid+".json")
         if not os.path.exists(out):
             if not self.mdcli:
                 # not configured to consult repository
                 return None
             try:
-                data = self.mdcli.describe(self.aipid)
+                data = self.mdcli.describe(aipid)
                 with open(out, 'w') as fd:
                     json.dump(data, fd, indent=2)
             except IDNotFound as ex:
                 return None
         return out
 
-    def find_bag_in_store(self, version):
+    def find_bag_in_store(self, aipid, version):
         """
-        look for a bag for a particular version of the current AIP 
-        in the bag storage directory.  (This is the directory where 
-        AIP bags are copied to for long-term storage.)
+        look for a bag for a particular version of the AIP with the given ID
+        in the bag storage directory.  (This is the directory where AIP bags 
+        are copied to for long-term storage.)
         """
         if not self.storedir:
             return None
 
         foraip = [f for f in os.listdir(self.storedir)
-                    if f.startswith(self.aipid+'.') and
-                       not f.endswith('.sha256')        ]
+                    if f.startswith(aipid+'.') and not f.endswith('.sha256')]
+
         foraip = bagutils.select_version(foraip, version)
         if len(foraip) == 0:
             return None
 
         return os.path.join(self.storedir, bagutils.find_latest_head_bag(foraip))
 
-    def aip_exists(self):
+    def aip_exists(self, deep=False):
         """
         return true if a previously ingested AIP with the current ID exists in 
-        the repository.  
+        the repository.  By default, this function only considered the AIP ID attached to 
+        this prepper: if this AIP is derived from a previously published AIP with a different ID, 
+        this function returns False.  If deep=True, then this case will return True.  
         """
-        return self.cache_nerdm_rec() is not None
+        return self.cache_nerdm_rec(shallow=not deep) is not None
         
     def _unpack_bag_as(self, bagfile, destbag):
         destdir = os.path.dirname(destbag)
@@ -297,7 +334,7 @@ class UpdatePrepper(object):
             for entry in zip.infolist():
                 zip.extract(entry, destdir)
                 extracted = os.path.join(destdir, entry.filename)
-                date_time = mktime(entry.date_time + (0, 0, -1))
+                date_time = time.mktime(entry.date_time + (0, 0, -1))
 
                 if os.path.isdir(extracted):
                     dirs[extracted] = date_time
@@ -330,13 +367,21 @@ class UpdatePrepper(object):
         if not latest_nerd:
             self.log.info("ID not published previously; will start afresh")
             return False
+        nerd = utils.read_nerd(latest_nerd)
+        latest_aipid = re.sub(r'^ark:/\d+/', '', nerd.get("ediid", self.aipid))
         version = self.version
         if not version:
-            nerd = utils.read_nerd(latest_nerd)
             version = nerd.get('version', '0')
 
+        if latest_aipid != self.aipid:
+            self.log.info("Note: previously published dataset being revised with new EDI ID")
+            prev_mdbag = os.path.join(os.path.dirname(mdbag), latest_aipid)
+            if os.path.exists(prev_mdbag):
+                self.log.warning("Removing existing metadata bag for previous id="+latest_aipid)
+                shutil.rmtree(prev_mdbag)
+
         # This has been published before; look for a head bag in the store dir
-        latest_headbag = self.find_bag_in_store(version)
+        latest_headbag = self.find_bag_in_store(latest_aipid, version)
         if not latest_headbag:
             # store dir came up empty; try the distribution service
             latest_headbag = self.cache_headbag()
@@ -344,17 +389,35 @@ class UpdatePrepper(object):
         if latest_headbag:
             fmt = "Preparing update based on previous head preservation bag (%s)"
             self.log.info(fmt, os.path.basename(latest_headbag)) 
-            self.create_from_headbag(latest_headbag, mdbag)
+            self.create_from_headbag(latest_headbag, mdbag,
+                                     (self.aipid != latest_aipid and self.aipid) or None)
+            if self.aipid != latest_aipid:
+                self._baggermd_update({"replacedEDI": self._prevaipid}, mdbag)
             return True
 
         # This dataset was "published" without a preservation bag
         self.log.info("No previous bag available; preparing based on " +
                       "existing published NERDm record")
-        self.create_from_nerdm(latest_nerd, mdbag)
+        self.create_from_nerdm(latest_nerd, mdbag, 
+                               (self.aipid != latest_aipid and self.aipid) or None)
+        if self.aipid != latest_aipid:
+            self._baggermd_update({"replacedEDI": self._prevaipid}, mdbag)
+            
         return True
 
+    def _baggermd_replace(self, mdata, inbag):
+        utils.write_json(mdata, os.path.join(inbag, self._bgrmdf))
+    def _baggermd_update(self, mdata, inbag):
+        bgrmdf = os.path.join(inbag, self._bgrmdf)
+        if os.path.exists(bgrmdf):
+            md = utils.read_json()
+        else:
+            md = OrderedDict()
+        md = merge_config(mdata, md)
+        self._baggermd_replace(md, inbag)
+        
 
-    def create_from_headbag(self, headbag, mdbag):
+    def create_from_headbag(self, headbag, mdbag, foraip=None):
         """
         create an updatable metadata bag from the latest headbag for
         the purposes of creating a new version.
@@ -362,6 +425,8 @@ class UpdatePrepper(object):
         :param str headbag:  the path to an existing head bag to convert
         :param str mdbag:    the destination metadata bag to create (and 
                              thus should not yet exist).
+        :param str foraip:   the AIP-ID that the mdbag metadata bag is for;
+                             if None, this defaults to that assigned to headbag
         """
         if os.path.exists(mdbag):
             raise StateException("UpdatePrepper: metadata bag already exists "+
@@ -407,6 +472,30 @@ class UpdatePrepper(object):
         if not nerdm.get('@id'):
             raise StateException("Bag {0}: missing @id"
                                  .format(os.path.basename(mdbag)))
+
+        if foraip:
+            # update the EDI-ID if this represents a change in the EDI-ID
+            oldediid = nerdm['ediid']
+            foraip = re.sub(r'^ark:/\d+/','',foraip)
+            ediid = foraip
+            if len(ediid) < 30:
+                ediid = ARK_PFX + ediid
+            nerdm['ediid'] = ediid
+
+            if 'doi' in nerdm:
+                if 'replaces' not in nerdm:
+                    nerdm['replaces'] = []
+                now = datetime.fromtimestamp(time.time()).isoformat()
+                nerdm['replaces'].append(OrderedDict([
+                    ("@id", nerdm['doi']),
+                    ("ediid", oldediid),
+                    ("issued", nerdm.get('issued', nerdm.get('modified', now)))
+                ]))
+                if 'version' in nerdm:
+                    nerdm['replaces'][-1]['version'] = nerdm['version']
+                if 'title' in nerdm:
+                    nerdm['replaces'][-1]['title'] = nerdm['title']
+
         bag = BagBuilder(parent, os.path.basename(mdbag), {'validate_id': False},
                          nerdm.get('@id'), logger=self.log)
         try:
@@ -418,7 +507,7 @@ class UpdatePrepper(object):
         # progress
         self.update_version_for_edit(mdbag)
 
-    def create_from_nerdm(self, nerdfile, mdbag):
+    def create_from_nerdm(self, nerdfile, mdbag, foraip=None):
         """
         create an updatable metadata bag from the latest NERDm record for
         the purposes of creating a new version of the dataset.
@@ -447,6 +536,25 @@ class UpdatePrepper(object):
         # (this assumes forward compatibility).
         bagutils.update_nerdm_schema(nerd)
         
+        if foraip:
+            # update the EDI-ID if this represents a change in the EDI-ID
+            oldediid = nerdm['ediid']
+            foraip = re.sub(r'^ark:/\d+/','',foraip)
+            ediid = foraip
+            if len(ediid) < 30:
+                ediid = ARK_PFX + ediid
+            nerdm['ediid'] = ediid
+
+            if 'doi' in nerdm:
+                if 'replaces' not in nerdm:
+                    nerdm['replaces'] = []
+                now = datetime.fromtimestamp(time.time()).isoformat()
+                nerdm['replaces'] = OrderedDict([
+                    ("@id", nerdm['doi']),
+                    ("ediid", oldediid),
+                    ("issued", nerdm.get('issued', nerdm.get('modified', now)))
+                ])
+
         bldr = BagBuilder(parent, bagname, {'validate_id': False},
                           nerd['@id'], logger=self.log)
         try:
@@ -499,12 +607,18 @@ class UpdatePrepper(object):
 
     def _latest_version_from_nerdcache(self):
         nerdf = os.path.join(self.mdcache, self.aipid+".json")
+        if not os.path.exists(nerdf) and self._prevaipid:
+            nerdf = os.path.join(self.mdcache, self._prevaipid+".json")
         return self._latest_version_from_nerdmfile(nerdf)
 
     def _latest_version_from_dir(self, bagparent):
         foraip = [f for f in os.listdir(bagparent)
                     if f.startswith(self.aipid+'.') and
                        not f.endswith('.sha256')        ]
+        if not foraip and self._prevaipid and self._prevaipid != self.aipid:
+            foraip = [f for f in os.listdir(bagparent)
+                        if f.startswith(self._prevaipid+'.') and
+                           not f.endswith('.sha256')        ]
         if not foraip:
             return "0"
         latest = bagutils.find_latest_head_bag(foraip)
@@ -531,7 +645,12 @@ class UpdatePrepper(object):
         bag = NISTBag(bagdir)
         mdata = bag.nerd_metadata_for('', merge_annots=True)
         oldvers = mdata.get('version', "1.0.0")
-        verhist = mdata.get('versionHistory', [])
+        relhist = mdata.get('releaseHistory')
+        if relhist is None:
+            relhist = OrderedDict([("@id", mdata['@id'] + ".rel"), ("@type", ["nrdr:ReleaseHistory"])])
+            relhist['hasRelease'] = mdata.get('versionHistory', [])
+        pdrid = re.sub(r'v\d+(_\d+)*$', '', mdata['@id'])
+
         edit_vers = self.make_edit_version(oldvers)
         self.log.debug('Setting edit version to "%s"', edit_vers)
 
@@ -543,18 +662,19 @@ class UpdatePrepper(object):
         adata['version'] = edit_vers
 
         if oldvers != edit_vers and ('issued' in mdata or 'modified' in mdata) \
-           and not any([h['version'] == oldvers] for h in verhist):
+           and not any([h['version'] == oldvers] for h in relhist['hasRelease']):
             issued = ('modified' in mdata and mdata['modified']) or \
                      mdata['issued']
-            verhist.append(OrderedDict([
+            relhist['hasRelease'].append(OrderedDict([
                 ('version', oldvers),
                 ('issued', issued),
-                ('@id', mdata['@id']),
-                ('location', 'https://data.nist.gov/od/id/'+mdata['@id'])
+                ('@id', mdata['@id'] + ".v" + re.sub(r'\.','_',oldvers)),
+                ('location', 'https://'+PDR_SERVER+'/od/id/'+
+                             mdata['@id']+'.v'+re.sub(r'\.','_', oldvers))
             ]))
             if oldvers == "1.0.0" or oldvers == "1.0" or oldvers == "1":
-                verhist[-1]['description'] = 'initial release'
-            adata['versionHistory'] = verhist
+                relhist['hasRelease'][-1]['description'] = 'initial release'
+            adata['releaseHistory'] = relhist
         
         utils.write_json(adata, annotf)
         
@@ -635,13 +755,14 @@ class UpdatePrepper(object):
         if not latest_nerd:
             self.log.info("ID not published previously; will start afresh")
             return False
+        nerd = utils.read_nerd(latest_nerd)
+        latest_aipid = re.sub(r'^ark:/\d+/', '', nerd.get("ediid", self.aipid))
         version = self.version
         if not version:
-            nerd = utils.read_nerd(latest_nerd)
             version = nerd.get('version', '0')
 
         # This has been published before; look for a head bag in the store dir
-        latest_headbag = self.find_bag_in_store(version)
+        latest_headbag = self.find_bag_in_store(latest_aipid, version)
         if not latest_headbag:
             # store dir came up empty; try the distribution service
             latest_headbag = self.cache_headbag()

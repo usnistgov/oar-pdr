@@ -15,6 +15,10 @@ import { MetadataUpdateService } from './editcontrol/metadataupdate.service';
 import { LandingConstants } from './constants';
 import { CartService } from '../datacart/cart.service';
 import { DataCartStatus } from '../datacart/cartstatus';
+import { RecordLevelMetrics } from '../metrics/metrics';
+import { MetricsService } from '../shared/metrics-service/metrics.service';
+import { CommonFunctionService } from '../shared/common-function/common-function.service';
+import { HttpEventType } from '@angular/common/http';
 
 /**
  * A component providing the complete display of landing page content associated with 
@@ -57,6 +61,8 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
     message: string;
     displaySpecialMessage: boolean = false;
     citationDialogWith: number = 550; // Default width
+    recordLevelMetrics : RecordLevelMetrics;
+    metricsUrl: string;
 
     // this will be removed in next restructure
     showMetadata = false;
@@ -65,6 +71,9 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
     loadingMessage = '<i class="faa faa-spinner faa-spin"></i> Loading...';
 
     dataCartStatus: DataCartStatus;
+    fileLevelMetrics: any;
+    hasCurrentMetrics: boolean = false;
+    showMetrics: boolean = false;
 
     /**
      * create the component.
@@ -84,7 +93,9 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
         private mdserv: MetadataService,
         public edstatsvc: EditStatusService,
         private cartService: CartService,
-        private mdupdsvc: MetadataUpdateService) 
+        private mdupdsvc: MetadataUpdateService,
+        public commonFunctionService: CommonFunctionService,
+        public metricsService: MetricsService) 
     {
         this.reqId = this.route.snapshot.paramMap.get('id');
         this.inBrowser = isPlatformBrowser(platformId);
@@ -120,6 +131,7 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
      * the Angular rendering infrastructure.
      */
     ngOnInit() {
+        this.recordLevelMetrics = new RecordLevelMetrics();
         var showError: boolean = true;
         let metadataError = "";
         this.displaySpecialMessage = false;
@@ -160,9 +172,17 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
                 // id not found; reroute
                 console.error("No data found for ID=" + this.reqId);
                 metadataError = "not-found";
-                //   this.router.navigateByUrl("/not-found/" + this.reqId, { skipLocationChange: true });
             }
             else{
+                // Get metrics when edit is not enabled. Otherwise display "Metrics not available"
+                if(this.inBrowser){
+                    if(this.editEnabled){
+                        this.hasCurrentMetrics = false;
+                        this.showMetrics = true;
+                    }else
+                        this.getMetrics();
+                }
+
                 // proceed with rendering of the component
                 this.useMetadata();
 
@@ -226,6 +246,59 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
     }
 
     /**
+     * Get metrics data
+     */
+    getMetrics() {
+        let ediid = this.md.ediid;
+
+        this.metricsService.getFileLevelMetrics(ediid).subscribe(async (event) => {
+            // Some large dataset might take a while to download. Only handle the response
+            // when it finishes downloading
+            if(event.type == HttpEventType.Response){
+                let response = await event.body.text();
+
+                this.fileLevelMetrics = JSON.parse(response);
+
+                if(this.fileLevelMetrics.FilesMetrics != undefined && this.fileLevelMetrics.FilesMetrics.length > 0){
+                    // check if any current metrics data
+                    for(let i = 1; i < this.md.components.length; i++){
+                        let filepath = this.md.components[i].filepath;
+                        if(filepath) filepath = filepath.trim();
+
+                        this.hasCurrentMetrics = this.fileLevelMetrics.FilesMetrics.find(x => x.filepath.substr(x.filepath.indexOf(ediid)+ediid.length).trim() == filepath) != undefined;
+                        if(this.hasCurrentMetrics) break;
+                    }
+                }else{
+                    this.hasCurrentMetrics = false;
+                }
+
+                this.showMetrics = true;
+            }
+        },
+        (err) => {
+            console.error("Failed to retrieve file metrics: ", err);
+            this.showMetrics = true;
+        });                    
+
+        this.metricsService.getRecordLevelMetrics(ediid).subscribe(async (event) => {
+            if(event.type == HttpEventType.Response){
+                this.recordLevelMetrics = JSON.parse(await event.body.text());
+            }
+        },
+        (err) => {
+            console.error("Failed to retrieve dataset metrics: ", err);
+            this.showMetrics = true;
+        });  
+    }
+
+    get totalDownloadSize() {
+        if(this.recordLevelMetrics.DataSetMetrics[0] != undefined)
+            return this.commonFunctionService.formatBytes(this.recordLevelMetrics.DataSetMetrics[0].total_size, 2);
+        else
+            return "";
+    }
+
+    /**
      * apply housekeeping after view has been initialized
      */
     ngAfterViewInit() {
@@ -251,6 +324,7 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
      *  * set the page's title (as displayed in the browser title bar).
      */
     useMetadata(): void {
+        this.metricsUrl = "/metrics/" + this.reqId;
         // set the document title
         this.setDocumentTitle();
         this.mdupdsvc.setOriginalMetadata(this.md);

@@ -293,6 +293,98 @@ class TestApp(test.TestCase):
         self.svc = wsgi.app(self.config)
         self.assertIsNotNone(self.svc._midascl)
 
+    def test_no_readme(self):
+        req = {
+            'PATH_INFO': '/3A1EE2F169DD3B8CE0531A570681DB5D1491/README.txt',
+            'REQUEST_METHOD': 'GET'
+        }
+        body = self.svc(req, self.start)
+        self.assertIn("404", self.resp[0])
+
+        self.resp = []
+        req = {
+            'PATH_INFO': '/3A1EE2F169DD3B8CE0531A570681DB5D1491/README.txt',
+            'REQUEST_METHOD': 'GET',
+            'QUERY_STRING': "auto="
+        }
+        body = self.svc(req, self.start)
+        self.assertIn("404", self.resp[0])
+
+        self.resp = []
+        req = {
+            'PATH_INFO': '/3A1EE2F169DD3B8CE0531A570681DB5D1491/README.txt',
+            'REQUEST_METHOD': 'GET',
+            'QUERY_STRING': "auto=false"
+        }
+        body = self.svc(req, self.start)
+        self.assertIn("404", self.resp[0])
+
+        self.resp = []
+        req = {
+            'PATH_INFO': '/3A1EE2F169DD3B8CE0531A570681DB5D1491/README.txt',
+            'REQUEST_METHOD': 'GET',
+            'QUERY_STRING': "auto=0"
+        }
+        body = self.svc(req, self.start)
+        self.assertIn("404", self.resp[0])
+
+    def test_auto_readme(self):
+        req = {
+            'PATH_INFO': '/3A1EE2F169DD3B8CE0531A570681DB5D1491/README.txt',
+            'REQUEST_METHOD': 'GET',
+            'QUERY_STRING': "auto=true"
+        }
+        body = self.svc(req, self.start)
+        self.assertIn("200", self.resp[0])
+        body = "".join(body)
+        self.assertIn("Version ", body)
+        self.assertIn("Version History", body)
+        self.assertIn("trial1.json", body)
+        self.assertIn("###", body)
+
+        self.resp = []
+        req = {
+            'PATH_INFO': '/3A1EE2F169DD3B8CE0531A570681DB5D1491/README.txt',
+            'REQUEST_METHOD': 'GET',
+            'QUERY_STRING': "auto=false&auto=1"
+        }
+        body = self.svc(req, self.start)
+        self.assertIn("200", self.resp[0])
+        body = "".join(body)
+        self.assertIn("Version ", body)
+        self.assertIn("Version History", body)
+        self.assertIn("trial1.json", body)
+        self.assertIn("###", body)
+
+    def test_brief_auto_readme(self):
+        req = {
+            'PATH_INFO': '/3A1EE2F169DD3B8CE0531A570681DB5D1491/README.txt',
+            'REQUEST_METHOD': 'GET',
+            'QUERY_STRING': "auto=true&flags=b&flags="
+        }
+        body = self.svc(req, self.start)
+        self.assertIn("200", self.resp[0])
+        body = "".join(body)
+        self.assertIn("Version ", body)
+        self.assertIn("Version History", body)
+        self.assertNotIn("trial1.json", body)
+        self.assertIn("###", body)
+
+    def test_auto_readme_noprompts(self):
+        req = {
+            'PATH_INFO': '/3A1EE2F169DD3B8CE0531A570681DB5D1491/README.txt',
+            'REQUEST_METHOD': 'GET',
+            'QUERY_STRING': "auto=true&flags=b&flags=P"
+        }
+        body = self.svc(req, self.start)
+        self.assertIn("200", self.resp[0])
+        body = "".join(body)
+        self.assertIn("Version ", body)
+        self.assertIn("Version History", body)
+        self.assertNotIn("trial1.json", body)
+        self.assertNotIn("###", body)
+        
+
 
 if __name__ == '__main__':
     test.main()

@@ -1,0 +1,17 @@
+<%!
+    import textwrap, re
+%>\
+% if _prompts:
+-------------------
+General Information
+-------------------
+
+This data was [## created/collected ##]: [## single date, approximate, or date
+range ##].
+
+Geographical coverage: [## description of coverage, including LAT/LONG if
+relevent ##]
+
+Key funding sources: [## Relevent sources of Non-NIST funding ##]
+
+% endif
