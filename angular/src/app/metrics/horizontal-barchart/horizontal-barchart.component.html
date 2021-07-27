@@ -1,0 +1,14 @@
+<div>
+    <!-- Thrre radio buttons to set orders of chart data -->
+    <div style="margin: 10px; border-bottom: 1px solid lightgray; ">
+        <input type="radio" value="1" name="sortitem" id="sortitem1" [ngModel]="sortitem" (change)="sortBarChart($event)">
+        <label for="sortitem1"> &nbsp;Ascending&nbsp;&nbsp;&nbsp;</label>
+        <input type="radio" value="2" name="sortitem" id="sortitem2" [ngModel]="sortitem" (change)="sortBarChart($event)">
+        <label for="sortitem2"> &nbsp;Descending&nbsp;&nbsp;&nbsp;</label>
+        <input type="radio" value="3" name="sortitem" id="sortitem3" [ngModel]="sortitem" (change)="sortBarChart($event)">
+        <label for="sortitem3"> &nbsp;Original</label>
+    </div>
+
+    <!-- The bar chart -->
+    <div class="d3-chart" #chart (window:resize)="onResize()" style="min-height: 200px;"></div>
+</div>

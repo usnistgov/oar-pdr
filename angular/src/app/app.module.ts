@@ -28,6 +28,14 @@ import { FrameModule } from './frame/frame.module';
 import { ConfigModule } from './config/config.module';
 import { DatacartModule } from './datacart/datacart.module';
 import { DirectivesModule } from './directives/directives.module';
+import { MetricsModule } from './metrics/metrics.module';
+
+import { ErrorComponent, UserErrorComponent } from './landing/error.component';
+import { ModalComponent } from './directives';
+import { ComboBoxComponent } from './shared/combobox/combo-box.component';
+import { AppComponent } from './app.component';
+import { LandingPageModule } from './landing/landingpage.module';
+import { LandingAboutComponent } from './landingAbout/landingAbout.component';
 import { SearchTopicsComponent } from './landing/topic/topic-popup/search-topics.component';
 import { DescriptionPopupComponent } from './landing/description/description-popup/description-popup.component';
 import { AuthorPopupComponent } from './landing/author/author-popup/author-popup.component';
@@ -52,6 +60,7 @@ enableProdMode();
         LandingAboutModule,
         DirectivesModule,
         DatacartModule,
+        MetricsModule,
         SharedModule.forRoot(), 
         FragmentPolyfillModule.forRoot({
             smooth: true

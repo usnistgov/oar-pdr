@@ -1,6 +1,6 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-import { HttpClientModule } from '@angular/common/http';
 import { KeywordModule, KeywordComponent } from './keyword.module';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { AppConfig } from '../../config/config';
 import { AngularEnvironmentConfigService } from '../../config/config.service';
 import { TransferState } from '@angular/platform-browser';
@@ -29,7 +29,7 @@ describe('KeywordComponent', () => {
         TestBed.configureTestingModule({
             imports: [
                 KeywordModule,
-                FormsModule, HttpClientModule, RouterTestingModule, ToastrModule.forRoot()
+                FormsModule, HttpClientTestingModule, RouterTestingModule, ToastrModule.forRoot()
             ],
             declarations: [],
             providers: [

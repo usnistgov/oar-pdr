@@ -1,6 +1,6 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-import { HttpClientModule } from '@angular/common/http';
 import { DescriptionModule, DescriptionComponent } from './description.module';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { AppConfig } from '../../config/config';
 import { AngularEnvironmentConfigService } from '../../config/config.service';
 import { TransferState } from '@angular/platform-browser';
@@ -30,7 +30,7 @@ describe('DescriptionComponent', () => {
         TestBed.configureTestingModule({
             imports: [
                 DescriptionModule,
-                FormsModule, HttpClientModule, RouterTestingModule, ToastrModule.forRoot()
+                FormsModule, HttpClientTestingModule, RouterTestingModule, ToastrModule.forRoot()
             ],
             declarations: [],
             providers: [

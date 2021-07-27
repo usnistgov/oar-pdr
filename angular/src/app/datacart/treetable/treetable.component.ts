@@ -578,11 +578,12 @@ export class TreetableComponent implements OnInit, AfterViewInit {
      */
     setFileDownloaded(rowData: any) {
             // Google Analytics code to track download event
-        this.gaService.gaTrackEvent('download', undefined, rowData.ediid, rowData.downloadUrl);
+        this.gaService.gaTrackEvent('download', undefined, rowData.ediid, rowData.cartItem.downloadURL);
 
         rowData.downloadStatus = DownloadStatus.DOWNLOADED;
 
-        this.dataCart.setDownloadStatus(rowData.resId, rowData.cartItem.filepath, rowData.downloadStatus, true);
+        this.dataCart.setDownloadStatus(rowData.cartItem.resId, rowData.cartItem.filePath, rowData.downloadStatus, true);
+
     }
 
     /**

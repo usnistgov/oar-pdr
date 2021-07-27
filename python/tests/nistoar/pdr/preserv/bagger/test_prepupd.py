@@ -245,9 +245,45 @@ class TestUpdatePrepper(test.TestCase):
         self.assertEqual(self.prepr.cache_headbag(), cached)
         self.assertTrue(os.path.exists(cached))
 
+    def test_cache_headbag_replace(self):
+        cached = os.path.join(self.headcache, "ABCDEFG.2.mbag0_4-4.zip")
+        self.assertTrue(not os.path.exists(cached))
+
+        self.prepr = self.prepsvc.prepper_for("goober")
+        self.prepr.mdcli = self.mdcli
+        self.prepr.cacher.distsvc = self.distcli
+
+        self.assertIsNone(self.prepr.cache_headbag())
+        self.assertTrue(not os.path.exists(cached))
+
+        self.prepr = self.prepsvc.prepper_for("goober", replaces="ABCDEFG")
+        self.prepr.mdcli = self.mdcli
+        self.prepr.cacher.distsvc = self.distcli
+
+        self.assertEqual(self.prepr.cache_headbag(), cached)
+        self.assertTrue(os.path.exists(cached))
+
     def test_cache_nerdm_rec(self):
         cached = os.path.join(self.headcache,"_nerd","ABCDEFG.json")
         self.assertTrue(not os.path.exists(cached))
+
+        self.assertEqual(self.prepr.cache_nerdm_rec(), cached)
+        self.assertTrue(os.path.exists(cached))
+
+    def test_cache_nerdm_rec_replace(self):
+        cached = os.path.join(self.headcache,"_nerd","ABCDEFG.json")
+        self.assertTrue(not os.path.exists(cached))
+
+        self.prepr = self.prepsvc.prepper_for("goober")
+        self.prepr.mdcli = self.mdcli
+        self.prepr.cacher.distsvc = self.distcli
+
+        self.assertIsNone(self.prepr.cache_nerdm_rec())
+        self.assertTrue(not os.path.exists(cached))
+
+        self.prepr = self.prepsvc.prepper_for("goober", replaces="ABCDEFG")
+        self.prepr.mdcli = self.mdcli
+        self.prepr.cacher.distsvc = self.distcli
 
         self.assertEqual(self.prepr.cache_nerdm_rec(), cached)
         self.assertTrue(os.path.exists(cached))
@@ -267,14 +303,16 @@ class TestUpdatePrepper(test.TestCase):
         self.assertTrue(os.path.exists(cached))
         self.assertEqual(self.prepr._latest_version_from_nerdcache(), "1.0")
         self.assertEqual(self.prepr.latest_version("nerdm-cache"), "1.0")
-        self.prepr.aipid = "goober"
+        self.prepr._aipid = "goober"
+        self.prepr._prevaipid = "gurn"
         self.assertEqual(self.prepr._latest_version_from_nerdcache(), "0")
         
     def test_latest_version_from_repo(self):
         self.assertEqual(self.prepr._latest_version_from_repo(), "1.0")
         self.assertEqual(self.prepr.latest_version("repo"), "1.0")
         self.assertEqual(self.prepr.latest_version(), "1.0")
-        self.prepr.aipid = "goober"
+        self.prepr._aipid = "goober"
+        self.prepr._prevaipid = "gurn"
         self.assertEqual(self.prepr._latest_version_from_repo(), "0")
 
     def test_latest_version_from_dir(self):
@@ -284,7 +322,8 @@ class TestUpdatePrepper(test.TestCase):
         
         self.assertEqual(self.prepr._latest_version_from_dir(self.headcache), "2")
         self.assertEqual(self.prepr.latest_version("bag-cache"), "2")
-        self.prepr.aipid = "goober"
+        self.prepr._aipid = "goober"
+        self.prepr._prevaipid = "gurn"
         self.assertEqual(self.prepr._latest_version_from_dir(self.headcache), "0")
         
 
@@ -322,11 +361,13 @@ class TestUpdatePrepper(test.TestCase):
         bag = NISTBag(root)
         mdata = bag.nerdm_record(True)
         self.assertEquals(mdata['version'], "1.0+ (in edit)")
-        self.assertIn('versionHistory', mdata)
-        self.assertEquals(len(mdata['versionHistory']), 1)
-        self.assertEquals(mdata['versionHistory'][0]['version'], "1.0")
-        self.assertEquals(mdata['versionHistory'][0]['@id'], mdata["@id"])
-        self.assertIn('issued', mdata['versionHistory'][0])
+        self.assertIn('releaseHistory', mdata)
+        self.assertEquals(mdata['releaseHistory']['@id'], mdata['@id']+".rel")
+        self.assertIn('hasRelease', mdata['releaseHistory'])
+        self.assertEquals(len(mdata['releaseHistory']['hasRelease']), 1)
+        self.assertEquals(mdata['releaseHistory']['hasRelease'][0]['version'], "1.0")
+        self.assertEquals(mdata['releaseHistory']['hasRelease'][0]['@id'], mdata["@id"]+".v1_0")
+        self.assertIn('issued', mdata['releaseHistory']['hasRelease'][0])
 
         depinfof = os.path.join(bag.dir, "multibag", "deprecated-info.txt")
         self.assertTrue(os.path.isfile(depinfof))
@@ -429,9 +470,9 @@ class TestUpdatePrepper(test.TestCase):
         with open(sf0,'w') as fd:
             pass
 
-        self.assertEqual(self.prepr.find_bag_in_store("12.7"), sf12_7)
-        self.assertEqual(self.prepr.find_bag_in_store("12.8"), sf12_8)
-        self.assertEqual(self.prepr.find_bag_in_store("0"), sf0)
+        self.assertEqual(self.prepr.find_bag_in_store(self.prepr.aipid, "12.7"), sf12_7)
+        self.assertEqual(self.prepr.find_bag_in_store(self.prepr.aipid, "12.8"), sf12_8)
+        self.assertEqual(self.prepr.find_bag_in_store(self.prepr.aipid, "0"), sf0)
 
     def test_create_new_update_fromstore(self):
         shutil.copy(os.path.join(storedir, "pdr2210.3_1_3.mbag0_3-5.zip"),

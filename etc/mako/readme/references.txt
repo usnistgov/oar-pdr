@@ -1,0 +1,19 @@
+<%!
+    import textwrap, re
+%>\
+% if nrd.get('references') or _prompts:
+----------
+References
+----------
+
+% for r in nrd.get('references',[]):
+${textwrap.fill(r.get('citation','[## citation for '+r.get('location','??')+' ##]'), 80)}
+
+% endfor
+% if _prompts:
+${'##'}
+# List any other relevant references, including related data publications
+# and ancillary data.
+${'##'}
+% endif 
+% endif

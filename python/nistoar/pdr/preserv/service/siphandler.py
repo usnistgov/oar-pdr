@@ -34,6 +34,7 @@ from . import status
 from ...ingest.rmm import IngestClient
 from ...doimint import DOIMintingClient
 from ...utils import write_json
+from ... import distrib
 
 log = logging.getLogger(_sys.system_abbrev).getChild(_sys.subsystem_abbrev)
 
@@ -980,6 +981,11 @@ class MIDAS3SIPHandler(SIPHandler):
 
             raise PreservationException(msg, [str(ex)])
 
+        if nerdm.get('status', 'available') == "removed":
+            # This dataset needs to be "deactivated": make this version and previous minor versions
+            # inaccessable from the public bucket.
+            self._remove_bagfile_access(nerdm['ediid'], nerdm['version'], destdir, self.bagger.cfg)
+
         # Now write copies of the checksum files to the review SIP dir.
         # MIDAS will scoop these up and save them in its database.
         # The file with sequence number 0 must be written last; this is a
@@ -1008,19 +1014,30 @@ class MIDAS3SIPHandler(SIPHandler):
                     log.debug("copying checksum file to %s", sigfile)
                     shutil.copyfile(f, sigfile)
                 except Exception, ex:
-                    msg = "Failed to copy checksum file to review dir:" + \
-                          "\n %s to\n %s\nReason: %s" % \
-                          (f, sigfile, str(ex))
-                    log.exception(msg)
+                    msg = "\n %s to\n %s\nReason: %s" % (f, sigfile, str(ex))
+                    log.error("Failed to copy checksum file to review dirs: "+msg)
                     cpfailures.append(msg)
 
             if cpfailures and self.notifier:
                 # alert subscribers of these failures with an email
+                cnt = str(len(cpfailures))
+                if (len(cpfailurs) == len(cksfiles)):
+                    cnt = "all"
+                msg = "Failed to copy %s checksum file%s to review dir: e.g., %s" \
+                      % (cnt, ((len(cpfailures) > 1) and "s") or "", cpfailures[0])
                 self.notifier.alert("preserve.failure", origin=self.name,
                                     summary="checksum file copy failure", desc=msg,
                                     version=nerdm.get('version', 'unknown'))
+
+            donefile = os.path.join(cksdir, "_preserved")
+            try:
+                with open(donefile, 'a') as fd:
+                    fd.write(nerdm.get('version', 'unknown'))
+                    fd.write("\n")
+            except Exception as ex:
+                raise PreservationException(os.path.basename(donefile)+": "+str(ex), cause=ex)
                     
-        except Exception, ex:
+        except Exception as ex:
             msg = "%s: Failure while writing checksum file(s) to review dir: %s" \
                   % (self._sipid, str(ex))
             log.exception(msg)
@@ -1108,6 +1125,63 @@ class MIDAS3SIPHandler(SIPHandler):
                          headers={'Authorization': "Bearer "+self.cfg.get('auth_key')})
 
         log.info("Completed preservation of SIP %s", self.bagger.name)
+
+    def _remove_bagfile_access(self, ediid, version, destdir, baggercfg):
+        aipid = re.sub(r'^ark:/\d+/', '', ediid)
+        distsvc = None
+        scfg = baggercfg.get('repo_access',{}).get('distrib_service',{})
+        if scfg:
+            distsvc = distrib.RESTServiceClient(scfg.get('service_endpoint'))
+            distsvc = distrib.BagDistribClient(aipid, distsvc)
+        else:
+            log.warn("No access to remote long-term storage for deactivating bag files: " +
+                     "missing configuration: distrib_service")
+            log.warn("Proceeding with deactivation using local storage dir")
+
+        majver = re.sub(r'\d+$', '', version)
+
+        # find the available bags/versions for this aipid via the distribution service
+        rmvers = set()
+        if distsvc:
+            try:
+                rmvers.update([v for v in distsvc.list_versions() if v.startswith(majver)])
+            except distrib.DistribResourceNotFound as ex:
+                log.warn("Note: %s not yet found in via dist service (%s)", self.bagname, str(ex))
+            except Exception as ex:
+                log.warn("Problem querying distribution service for %s* versions: %s", majver, str(ex))
+
+        # there may be additional bags that have been copied to local LTS but which have
+        # not yet migrated to the AWS bucket that the distribution service sees; merge in
+        # the bags/versions found locally.
+        pfx = aipid+"."
+        localbags = [bagutils.BagName(b) for b in os.listdir(destdir)
+                                         if b.startswith(pfx) and bagutils.is_legal_bag_name(b)
+                                                              and not b.endswith(".sha256")]
+        rmvers.update([b.version for b in localbags if b.version.startswith(majver)])
+
+        def touch_file(filepath):
+            open(filepath, 'a').close()
+
+        for ver in rmvers:
+            bags = set()
+            if distsvc:
+                bgs = []
+                try:
+                    bgs = distsvc.list_for_version(ver)
+                except distrib.DistribResourceNotFound as ex:
+                    pass
+                bags.update(bgs)
+            bags.update([str(b) for b in localbags if b.version == ver])
+            for bagf in bags:
+                sema = os.path.join(destdir, bagf) + ".removed"
+                if not os.path.exists(sema):
+                    touch_file(sema)
+
+                sema = os.path.join(destdir, bagf) + ".sha256.removed"
+                if not os.path.exists(sema):
+                    touch_file(sema)
+
+        return
         
     def _is_preserved(self):
         """

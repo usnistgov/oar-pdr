@@ -3,7 +3,8 @@ This distrib submodule provides a client interface to the part of the PDR
 Distribution Service that provides access to preservation bags. 
 """
 import os
-from .client import RESTServiceClient
+from .client import (RESTServiceClient, DistribResourceNotFound, DistribServiceException,
+                     DistribClientError, DistribServiceException)
 
 class BagDistribClient(object):
     """

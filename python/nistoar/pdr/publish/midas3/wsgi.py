@@ -17,9 +17,9 @@ from .service import (MIDAS3PublishingService, SIPDirectoryNotFound, IDNotFound,
 from ...preserv.service import status as ps
 from ...preserv.service.service import RerequestException, PreservationStateError
 from .webrecord import WebRecorder
-from ....id import NIST_ARK_NAAN
 from ejsonschema import ValidationError
 from ... import config as cfgmod
+from ... import ARK_NAAN
 
 from .. import sys as pdrsys
 log = logging.getLogger(pdrsys.system_abbrev)   \
@@ -27,7 +27,7 @@ log = logging.getLogger(pdrsys.system_abbrev)   \
              .getChild('wsgi')
 
 DEF_BASE_PATH = "/pod/"
-ARK_NAAN = NIST_ARK_NAAN
+ark_naan = ARK_NAAN
 
 class MIDAS3PublishingApp(object):
     """
@@ -111,7 +111,7 @@ class MIDAS3PublishingApp(object):
 app = MIDAS3PublishingApp
 
 _badidre = re.compile(r"[<>\s/]")
-_arkidre = re.compile(r"^ark:/"+ARK_NAAN+"/")
+_arkidre = re.compile(r"^ark:/"+ark_naan+"/")
 _arklocalre = re.compile(r"^mds\d+\-\d{3}\d+")
 
 class Handler(object):
@@ -257,7 +257,7 @@ class DraftHandler(Handler):
                     return self.send_error(400, "Bad identifier syntax")
             else:
                 # assume new style identifier and convert to ark: syntax
-                midasid = "ark:/"+ARK_NAAN+"/"+midasid
+                midasid = "ark:/"+ark_naan+"/"+midasid
         if midasid.startswith("ark:") and not _arkidre.search(path):
             return self.send_error(400, "Bad identifier syntax")
         
@@ -306,7 +306,7 @@ class DraftHandler(Handler):
                         return self.send_error(400, "Bad identifier syntax")
                 else:
                     # assume new style identifier and convert to ark: syntax
-                    midasid = "ark:/"+ARK_NAAN+"/"+midasid
+                    midasid = "ark:/"+ark_naan+"/"+midasid
             if midasid.startswith("ark:") and not _arkidre.search(path):
                 return self.send_error(400, "Bad identifier syntax")
         
@@ -373,7 +373,7 @@ class DraftHandler(Handler):
                     return self.send_error(400, "Bad identifier syntax")
             else:
                 # assume new style identifier and convert to ark: syntax
-                midasid = "ark:/"+ARK_NAAN+"/"+midasid
+                midasid = "ark:/"+ark_naan+"/"+midasid
         if midasid.startswith("ark:") and not _arkidre.search(path):
             return self.send_error(400, "Bad identifier syntax")
         
@@ -436,8 +436,8 @@ class LatestHandler(Handler):
                 self._reqrec.add_body_text(body).record()
             return self.send_error(400, "Input not parseable as JSON")
 
-        if 'identifier' not in pod:
-            return self.send_error(400, "Input POD missing required identifier property")
+        if not pod.get('identifier'):
+            return self.send_error(400, "Input POD is missing required identifier property")
         # if 'accessLevel' not in pod:
         #    return self.send_error(400, "Input POD missing required accessLevel property")
 
@@ -475,7 +475,7 @@ class LatestHandler(Handler):
         if not _arkidre.search(path) and _badidre.search(path):
             return self.send_error(400, "Bad identifier syntax")
         if _arklocalre.search(path):
-            path = "ark:/"+ARK_NAAN+"/"+path
+            path = "ark:/"+ark_naan+"/"+path
 
         try:
             pod = self._svc.get_pod(path)

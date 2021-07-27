@@ -1,0 +1,31 @@
+name: python-source
+on:
+  workflow_dispatch:
+  push:
+    branches-ignore: ['main', 'integration']
+    paths:
+      - 'python/**'
+      - 'scripts/*.py'
+      - 'scripts/**/*.py'
+jobs:
+  testall.python:
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+        with:
+          submodules: true
+
+      - name: Set up Docker
+        uses: docker/setup-buildx-action@v1
+
+      - name: Build Containers
+        env:
+          OAR_DOCKERHUB_CRED: ${{ secrets.OAR_DOCKERHUB_CRED }}
+        run: |
+          bash scripts/dhsetup.sh
+          cd docker && bash ./dockbuild.sh pdrtests
+
+      - name: Run Unit Tests via Docker
+        run: cd docker && ./testall python
+

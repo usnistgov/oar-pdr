@@ -15,7 +15,7 @@ RUN apt-get update && apt-get install -y python-yaml nginx curl wget less sudo \
                                          uwsgi uwsgi-plugin-python zip \
                                          p7zip-full git
 RUN pip install --upgrade pip 'setuptools==44.0.0'
-RUN pip install funcsigs 'bagit>=1.6.3,<2.0' 'fs>=2.0.21'
+RUN pip install funcsigs 'bagit>=1.6.3,<2.0' 'fs>=2.0.21' mako
 
 # install multibag from source
 RUN curl -L -o multibag-py.zip \
@@ -33,7 +33,7 @@ RUN set -ex; \
 "https://github.com/tianon/gosu/releases/download/$GOSU_VERSION/gosu-$arch.asc";\
     export GNUPGHOME="$(mktemp -d)"; \
     echo "disable-ipv6" >> "$GNUPGHOME/dirmngr.conf"; \
-    gpg --keyserver hkp://ha.pool.sks-keyservers.net:80 \
+    gpg --batch --keyserver hkps://keys.openpgp.org \
          --recv-keys B42F6819007F00F88E364FD4036A9C25BF357DD4; \
     gpg --batch --verify /usr/local/bin/gosu.asc /usr/local/bin/gosu; \
     rm -r "$GNUPGHOME" /usr/local/bin/gosu.asc; \
