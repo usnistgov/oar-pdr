@@ -13,7 +13,7 @@ import { TreeTableModule } from 'primeng/treetable';
 import { ButtonModule } from 'primeng/button';
 import { TooltipModule } from 'primeng/tooltip';
 import { TreetableComponent } from './treetable/treetable.component';
-import { CanDeactivateGuard } from '../can-deactivate/can-deactivate.guard';
+import { LeaveWhileDownloadingGuard } from './leave.guard';
 
 
 @NgModule({
@@ -34,7 +34,7 @@ import { CanDeactivateGuard } from '../can-deactivate/can-deactivate.guard';
   ],
   providers: [
     CartService,
-    CanDeactivateGuard
+    LeaveWhileDownloadingGuard
   ]
 })
 export class DatacartModule {

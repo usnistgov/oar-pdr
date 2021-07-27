@@ -1,37 +1,241 @@
-import { Component, OnInit, Output, Input, NgZone, HostListener, Inject, PLATFORM_ID, EventEmitter, SimpleChanges } from '@angular/core';
-import { TreeNode } from 'primeng/primeng';
-import { ZipData } from '../../shared/download-service/zipData';
+/**
+ * Classes supporting the view of the list of data cart files.  The files are displayed as a hierarchical 
+ * tree using the PrimeNG component, TreeTable.  The top level of the hierarchy represents the dataset the 
+ * files are a part of, and levels below it represent the subcollections that contain the files.  The key 
+ * entities provide in this source file are:
+ * 
+ *   * CartTreeData -- an interface representing the data used to visualize the file; it serves as the
+ *          data properties for the TreeNodes provided to the TreeTable.
+ *   * CartTreeNode -- an implementation of the TreeNode interface that provides functions useful for 
+ *          creating and updating the TreeNode hierarchy.  
+ *   * TreetableComponent -- the Angular component class that provides the view of the data cart list; it 
+ *          holds the TreeNode hierarchy and uses the PrimeNG TreeTable component to display it.
+ *
+ */
+import { Component, OnInit, OnChanges, AfterViewInit, Output, Input, ViewChild, NgZone, HostListener, Inject,
+         PLATFORM_ID, EventEmitter, SimpleChanges } from '@angular/core';
+import { TreeNode, TreeTable } from 'primeng/primeng';
 import { CartService } from '../cart.service';
 import { DownloadService } from '../../shared/download-service/download-service.service';
-import { CommonFunctionService } from '../../shared/common-function/common-function.service';
+import { formatBytes } from '../../utils';
 import { GoogleAnalyticsService } from '../../shared/ga-service/google-analytics.service';
-import { CartConstants } from '../cartconstants';
-import { DataCart } from '../cart';
+import { CartConstants, DownloadStatus } from '../cartconstants';
+import { DataCart, DataCartItem } from '../cart';
+import { DisplayPrefs } from '../displayprefs';
 import { DataCartStatus } from '../cartstatus';
 import { OverlayPanel } from 'primeng/overlaypanel';
 import { isPlatformBrowser } from '@angular/common';
 
+/**
+ * the structure used as the data item in a TreeNode displaying an item in the cart (or its parent collection) 
+ */
+interface CartTreeData {
+
+    /**
+     * a unique key for identifying this item
+     */
+    key: string;
+
+    /**
+     * the name of the file or collection
+     */
+    name: string;
+
+    /**
+     * a label indicating which type of file this represents.  The value should be one of "Subcollection",
+     * "DataFile", or "ChecksumFile".  
+     */
+    filetype: string;
+
+    /**
+     * the description of the file in the cart.  This is a direct reference to DataCartItem for the file
+     * that is in the cart.  If this item refers to a file's enclosing collection, this will not be set.
+     */
+    cartItem?: DataCartItem;
+
+    /**
+     * the media type to display for the file or subcollection
+     */
+    mediaType?: string;
+
+    /**
+     * the formatted size to display for the file (or subcollection)
+     */
+    size?: string;
+
+    /**
+     * the title of the resource that this file (or subcollection) is a part of 
+     */
+    resTitle?: string;
+
+    /**
+     * the name of the zip file that contains (or will contain) this file
+     */
+    zipFile?: string;
+
+    /**
+     * A message to display regarding the download status
+     */
+    message?: string;
+}
+
+/**
+ * A TreeNode that knows how to insert and update items from a data cart
+ */
+export class CartTreeNode implements TreeNode {
+    children = [];
+    data = {
+        key: '', name: '', filetype: 'Subcollection', cartItem: null,
+        mediaType: '',  size: '', resTitle: '', zipFile: '', message: ''
+    };
+    isExpanded = false;
+    keyname: string = '';
+    parent = null;
+    
+    constructor(name: string='', key: string=null, title: string = '') {
+        this.data.key = key;
+        this.data.name = name;
+        this.data.resTitle = title;
+        if (this.data.key == null)
+            this.data.key = name;
+        this.keyname = name;
+    }
+
+    /**
+     * insert or update a node within this tree corresponding to the given data cart item
+     * @return CartTreeNode   the node that was inserted or updated
+     */
+    upsertNodeFor(item: DataCartItem) : CartTreeNode {
+        let levels = item.key.split("/");
+        return this._upsertNodeFor(levels, item);
+    }
+
+    _upsertNodeFor(levels: string[], item: DataCartItem) : CartTreeNode {
+        // find the node corresponding to the given item in the data cart 
+        for (let child of this.children) {
+            if (child.keyname == levels[0]) {
+                if (levels.length > 1)
+                    return child._upsertNodeFor(levels.slice(1), item);
+                else {
+                    child.updateData(item);
+                    return child;
+                }
+            }
+        }
+
+        // ancestor does not exist yet; create it
+        let key = (this.data.key) ? this.data.key + '/' + levels[0] : levels[0];
+        let child = new CartTreeNode(levels[0], key, item.resTitle || '');
+        child.parent = this;
+        this.children = [...this.children, child];
+        if (levels.length > 1)
+            return child._upsertNodeFor(levels.slice(1), item);
+
+        child.updateData(item);
+        return child;
+    }
+
+    /**
+     * update the data for this node to match the given data cart item
+     */
+    updateData(item: DataCartItem) : void {
+        if (! this.data.cartItem) {
+            this.data.filetype = "File";
+            this.data.mediaType = item.mediaType || '';
+            this.data.size = (item.size !== null && item.size !== undefined) ? formatBytes(item.size) : '';
+            this.data.resTitle = item.resTitle;
+        }
+        this.data.cartItem = item;
+        if (item.zipFile) this.data.zipFile = item.zipFile;
+        if (item.message) this.data.message = item.message;
+    }
+
+    /**
+     * find the node within this tree with the given key or null if not found
+     */
+    findNode(key: string) : CartTreeNode {
+        for (let node of this.children) {
+            if (node.data.key == key)
+                return node;
+            else if (node.children.length > 0) {
+                let out = node.findNode(key);
+                if (out) return out;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * remove any descentdent node, along with its then empty ancestors, that is not found 
+     * in the given data cart
+     * @param cart      the data cart to use to determine if a file represented by a node is 
+     *                  currently in the cart.
+     * @param removing  a callback function that takes a TreeNode that is about to be removed 
+     *                  from the display tree.  This allows the caller to meddle with the node
+     *                  before it is removed (e.g. change its selection status and that of its 
+     *                  parent nodes).  
+     */
+    cleanNodes(cart: DataCart,
+               removing: (TreeNode) => void = null,
+               refreshParent: (TreeNode) => void = null)
+        : boolean
+    {
+        if (this.children.length == 0 && this.data.cartItem)
+            // only operates on parent nodes
+            return true;
+
+        let newchildren: CartTreeNode[] = []  // a modified list of the children (minus removed ones)
+        let updated = false;                  // true if any current children were removed (by not
+                                              //   being put into newchildren)
+        for (let child of this.children) {
+            if (child.children.length > 0) {
+                if (child.cleanNodes(cart, removing, refreshParent)) 
+                    // child is not empty; retain it (otherwise, it will be dropped)
+                    newchildren.push(child);
+                else {
+                    updated = true;
+                    if (removing) removing(child);
+                }
+            }
+            else if (child.data.cartItem && cart.findFileById(child.data.cartItem.key))
+                // found the child in the data cart
+                newchildren.push(child);
+            else {
+                // child was not found in cart
+                updated = true;
+                if (removing) removing(child);
+            }
+        }
+        if (updated) {
+            // we removed some children; update our list
+            this.children = newchildren;
+            if (refreshParent) refreshParent(this)
+        }
+
+        // false if this node is now empty
+        return this.children.length > 0;
+    }
+}
+
+/**
+ * the component providing the view of the files in the data cart.
+ */
 @Component({
   selector: 'app-treetable',
   templateUrl: './treetable.component.html',
   styleUrls: ['./treetable.component.css', '../datacart.component.css']
 })
-export class TreetableComponent implements OnInit {
+export class TreetableComponent implements OnInit, AfterViewInit {
     public CART_CONSTANTS: any;
 
     dataCart: DataCart;
     dataCartStatus: DataCartStatus;
     inBrowser: boolean = false;
-    isGlobalCart: boolean = true;
 
     // Data
-    selectedFileCount: number = 0;
-    selectedData: TreeNode[] = [];
-    treeRoot = [];
-    selectedNodes: TreeNode[] = [];
-    dataFiles: TreeNode[] = [];
-    fileNode: TreeNode;
-    totalDownloaded: number = 0;
+    dataTree: CartTreeNode = new CartTreeNode(); // its children are the TreeNode[] given to TreeTable
+    selectedData: TreeNode[] = [];               // selected data for TreeTable
+    fileNode: CartTreeData;
 
     // Display
     isExpanded: boolean = true;
@@ -47,20 +251,18 @@ export class TreetableComponent implements OnInit {
     mobHeight: number;
     defaultExpandLevel: number = 3;
 
-    @Input() ediid: string;
-    @Input() zipData: ZipData[] = [];
-    @Output() outputDataFiles = new EventEmitter<TreeNode[]>();
-    @Output() outputSelectedData = new EventEmitter<TreeNode[]>();
+    @Input() cartName: string;
+
+    @ViewChild("ngtt")
+    tt : TreeTable;
 
     // Remove the cart upon tab closed
     @HostListener('window:beforeunload', ['$event'])
     beforeunloadHandler(event) {
-        this.dataCartStatus.updateCartStatusInUse(this.ediid, false);
+        this.dataCartStatus.updateCartStatusInUse(this.cartName, false);
     }
 
     constructor(
-        private downloadService: DownloadService,
-        public commonFunctionService: CommonFunctionService,
         public cartService: CartService,
         public gaService: GoogleAnalyticsService,
         private ngZone: NgZone,
@@ -81,69 +283,45 @@ export class TreetableComponent implements OnInit {
                 });
             };
         }
-
-        // Watch remote command from cartControl component
-        // removeDownloaded - remove downloaded files from the data cart
-        // removeSelected - remove selected files from the data cart
-
-        this.cartService._watchRemoteCommand((command) => {
-            if(this.inBrowser){
-                switch(command.command) { 
-                    case 'removeDownloaded': { 
-                    this.removeAllDownloadedFiles();
-                    break; 
-                    } 
-                    case 'removeSelected': {
-                        this.removeSelectedData();
-                        break;
-                    }
-                    default: { 
-                    //statements; 
-                    break; 
-                    } 
-                } 
-            }
-        });
     }
 
     ngOnInit() {
         if(this.inBrowser){
             this.dataCartStatus = DataCartStatus.openCartStatus();
-            this.isGlobalCart = (this.ediid == this.CART_CONSTANTS.GLOBAL_CART_NAME);
-
-            if (!this.isGlobalCart) {
-                this.dataCart = DataCart.openCart(this.ediid);
-                this.loadDataTree();
-                this.cartService.executeCommand('downloadSelected', this.selectedData);
-            } else {
-                this.dataCart = DataCart.openCart(this.CART_CONSTANTS.GLOBAL_CART_NAME);
-                this.loadDataTree();
-            }
-            window.addEventListener("storage", this.cartChanged.bind(this));
+            this.dataCart = this.cartService.getCart(this.cartName);
+            this.loadDataTree();
+            this.dataCart.watchForChanges(this.cartChanged.bind(this));
         }
     }
 
     /**
-     * When zipData changed
      * @param changes 
      */
     ngOnChanges(changes: SimpleChanges) {
-        if (changes['zipData']) {
-            if(changes['zipData'].previousValue == undefined && changes['zipData'].currentValue.length == 0)
-                return;
+    }
 
-            this.updateDataFiles(this.zipData);
-        }
+    ngAfterViewInit() {
+        // this will properly select and mark parent nodes for selected files
+        this.propagateSelections();
     }
 
     /**
-     * Update dataFiles with input zipData
-     * @param zipData 
+     * ensure that parent nodes of selected files are properly shown as selecte or partially selected.
+     * 
+     * When the tree table (this.dataTree) is built or updated from the data cart, only the file nodes 
+     * are put into the selected list (this.selectedData).  This method will update the selection status
+     * for all the parent nodes accordingly.  Without calling this, the selection status may not initially 
+     * reflect the selection status until the user starts clicking boxes.  
      */
-    updateDataFiles(zipData: ZipData[]){
-        // Associate zipData with files
-        for (let zip of zipData) {
-            this.downloadService.setDownloadStatus(zip, this.dataFiles, zip.downloadStatus, this.dataCart);
+    propagateSelections() : void {
+        if (this.tt) {
+            let selcount = this.selectedData.length;
+            for (let selnode of this.selectedData) {
+                if (selnode.children && selnode.children.length == 0)
+                    this.tt.propagateSelectionUp(selnode, true);
+            }
+            if (this.tt.selection.length != selcount)
+                this.dataTree.children = [...this.dataTree.children];
         }
     }
 
@@ -152,14 +330,51 @@ export class TreetableComponent implements OnInit {
      * reload the datacart and refresh the tree table.
      * @param event - change event
      */
-    cartChanged(event){
-        if (event.key == this.dataCart.getKey()) {
-            this.dataCart.restore();
-            this.loadDataTree();
-            if (this.ediid == this.CART_CONSTANTS.GLOBAL_CART_NAME) {
-                this.cartService.setCartLength(this.dataCart.size());
+    cartChanged(which) {
+        console.log("Updating view for change in cart contents");
+
+        // update selections due to cart additions or changes to item data
+        let node: CartTreeNode = null;
+        for (let item of this.dataCart.getFiles()) {
+            node = this.dataTree.upsertNodeFor(item);
+            if (item.isSelected && (!this.tt || !this.tt.isSelected(node))) 
+                this.selectedData.push(node);
+            if (this.tt) {
+                this.tt.propagateSelectionDown(node, item.isSelected);
+                this.tt.propagateSelectionUp(node, item.isSelected);
             }
         }
+
+        // remove deleted items and adjust selection view accordingly
+        this.dataTree.cleanNodes(this.dataCart,
+                                 (node) => {
+                                     if (this.tt && this.tt.isSelected(node))
+                                         this.tt.propagateSelectionUp(node, false);
+                                 },
+                                 (parent) => {
+                                     let findleaf = (parent) => {
+                                         if (parent.children.length == 0)
+                                             return null;
+                                         
+                                         // find a descendent leaf node
+                                         for (let child of parent.children) {
+                                             if (child.children == 0) 
+                                                 return child
+                                         }
+                                         return findleaf(parent.children[0])
+                                     }
+
+                                     let leaf = findleaf(parent);
+                                     if (leaf)
+                                         this.tt.propagateSelectionUp(leaf, this.tt.isSelected(leaf));
+                                 });
+
+        // make sure the top level name is set to the resource title
+        for (let child of this.dataTree.children) {
+            if (child.data.resTitle) child.data.name = child.data.resTitle
+        }
+        
+        this.dataTree.children = [...this.dataTree.children];  // trigger refresh of table
     }
 
     /**
@@ -168,115 +383,48 @@ export class TreetableComponent implements OnInit {
      * @param isGlobal - indicates if this is a global data cart
      */
     loadDataTree() {
-        this.selectedData = [];
-        this.createDataCartHierarchy();
-
-        // create root
-        const root = {
-            data: {
-                resTitle: "root"
-            }, 
-            children: this.dataFiles
-        };
-
-        this.treeRoot.push(root);
-        this.buildSelectNodes(this.dataFiles);
-        this.checkNode(this.dataFiles, this.selectedNodes);
-        this.selectedDataFileCount();
-
-        this.outputSelectedData.emit(this.selectedData);
-        this.cartService.setSelectedFileCount(this.selectedFileCount);
-        this.outputDataFiles.emit(this.dataFiles);
-
-        if (this.ediid != this.CART_CONSTANTS.GLOBAL_CART_NAME) {
-            if(this.dataFiles[0])
-                this.dataCartStatus.updateCartStatusInUse(this.ediid, true, this.dataFiles[0].data.resTitle.substring(0,20)+"...");
-        } else {
-            this.dataCartStatus.updateCartStatusInUse(this.CART_CONSTANTS.GLOBAL_CART_NAME, true, this.CART_CONSTANTS.GLOBAL_CART_NAME);
+        let node: CartTreeNode = null;
+        this.selectedData = []
+        for (let item of this.dataCart.getFiles()) {
+            node = this.dataTree.upsertNodeFor(item);
+            if (item.isSelected) 
+                this.selectedData.push(node);
         }
+
+        // tweak the top level: set name to the resource title, open first level
+        for (let child of this.dataTree.children) {
+            if (child.data.resTitle) child.data.name = child.data.resTitle
+            child.expanded = true;
+        }
+
+        let dispname : string = this.dataCart.getDisplayName();
+        this.dataCartStatus.updateCartStatusInUse(this.cartName, true, dispname);
     }
 
     /**
-     * Build selected nodes to be used to pre-select file tree. It walks through the given treenodes 
-     * and collects the nodes whose isSelected field is set and put them in selectedNodes.
-     * @param nodes The treenodes to be walked through
+     * respond to the user's selection of a file or collection
      */
-    buildSelectNodes(nodes: TreeNode[]) {
-        for (let i = 0; i < nodes.length; i++) {
-            if (nodes[i].children.length > 0) {
-                this.buildSelectNodes(nodes[i].children);
-            } else {
-                if (nodes[i].data.isSelected) {
-                    this.addNode(nodes[i]);
-                }
-            }
+    onNodeSelect(ev) {
+        if (ev.node && ev.node.data) {
+            let parts = this._keySplit(ev.node.data.key);
+            this.dataCart.setSelected(parts[0], parts[1], false, true);
         }
     }
 
     /**
-     * Add the given treenode and it's children nodes to selectedNodes which will be used to 
-     * pre-select the file tree.
-     * @param node The treenode to be added to selectedNodes
+     * respond to the user's de-selection of a file or collection
      */
-    addNode(node: TreeNode) {
-        if (node.children.length == 0) {
-            if (!this.selectedNodes.includes(node)) {
-                this.selectedNodes.push(node);
-            }
-            return;
-        }
-        for (let i = 0; i < node.children.length; i++) {
-            this.addNode(node.children[i]);
+    onNodeUnselect(ev) {
+        if (ev.node && ev.node.data) {
+            let parts = this._keySplit(ev.node.data.key);
+            this.dataCart.setSelected(parts[0], parts[1], true, true);
         }
     }
 
-    /**
-     * Pre-select tree nodes based on a given selection
-     * 
-     * @param nodes  The treenodes to be pre-checked based on the 2nd param selectedNodes
-     * @param selectedNodes  Selected treenodes
-     **/
-    checkNode(nodes: TreeNode[], selectedNodes: TreeNode[]) {
-        for (let i = 0; i < nodes.length; i++) {
-            if (nodes[i].children.length > 0) {
-                for (let j = 0; j < nodes[i].children.length; j++) {
-                    if (nodes[i].children[j].children.length == 0) {
-                        if (selectedNodes.includes(nodes[i].children[j])) {
-                            if (!this.selectedData.includes(nodes[i].children[j])) {
-                                this.selectedData.push(nodes[i].children[j]);
-                            }
-                        }
-                    }
-                }
-            } else {
-                if (nodes[i].data.isSelected) {
-                    if (!this.selectedData.includes(nodes[i]))
-                        this.selectedData.push(nodes[i]);
-                }
-            }
-            if (nodes[i].children.length > 0) {
-                this.checkNode(nodes[i].children, selectedNodes);
-                let count = nodes[i].children.length;
-                let c = 0;
-                for (let j = 0; j < nodes[i].children.length; j++) {
-                    if (this.selectedData.includes(nodes[i].children[j])) {
-                        c++;
-                    }
-                    if (nodes[i].children[j].partialSelected) nodes[i].partialSelected = true;
-                }
-                if (c == 0) { }
-                else if (c == count) {
-                    nodes[i].partialSelected = false;
-                    if (!this.selectedData.includes(nodes[i])) {
-                        this.selectedData.push(nodes[i]);
-                    }
-                }
-                else {
-                    nodes[i].partialSelected = true;
-                }
-            }
-        }
-        this.outputSelectedData.emit(this.selectedData);
+    _keySplit(key: string) {
+        let p: number = key.indexOf("/");
+        if (p < 0) return [key];
+        return [key.substring(0,p), key.substring(p+1)]
     }
 
     /**
@@ -284,7 +432,7 @@ export class TreetableComponent implements OnInit {
      * @param downloadStatus download status
      */
     getDownloadStatusColor(downloadStatus: string){
-        return this.cartService.getDownloadStatusColor(downloadStatus);
+        return DisplayPrefs.getDownloadStatusColor(downloadStatus);
     }
 
     /**
@@ -293,7 +441,7 @@ export class TreetableComponent implements OnInit {
      * @param downloadStatus download status
      */
     getStatusForDisplay(downloadStatus: string){
-        return this.cartService.getStatusForDisplay(downloadStatus);
+        return DisplayPrefs.getDownloadStatusLabel(downloadStatus);
     }
 
     /**
@@ -301,44 +449,7 @@ export class TreetableComponent implements OnInit {
      * @param downloadStatus download status
      */
     getIconClass(downloadStatus: string){
-        return this.cartService.getIconClass(downloadStatus);
-    }
-
-    /**
-     * Removes all downloaded files from the dataFiles and the dataCart
-     **/
-    removeAllDownloadedFiles() {
-        this.dataCart.restore();
-        this.dataCart.removeDownloadedFiles();
-        this.createDataCartHierarchy();
-        this.outputDataFiles.emit(this.dataFiles);
-        this.cartService.setCartLength(this.dataCart.size());
-        this.downloadService.setTotalFileDownloaded(this.downloadService.getTotalDownloadedFiles(this.dataFiles));
-        this.selectedData = [];
-        this.selectedDataFileCount();
-        setTimeout(() => {
-            this.expandToLevel(this.dataFiles, true, 1);
-        }, 0);
-        this.refreshTree();
-    }
-    
-    /**
-     * Removes all selected files from the dataFiles and the dataCart
-     **/
-    removeSelectedData() {
-        this.dataCart.restore();
-        this.dataCart.removeSelectedData(this.selectedData);
-        this.dataCart.save();
-
-        this.createDataCartHierarchy();
-        this.cartService.setCartLength(this.dataCart.size());
-        this.selectedData = [];
-        this.selectedFileCount = 0;
-        this.outputSelectedData.emit(this.selectedData);
-        this.cartService.setSelectedFileCount(this.selectedFileCount);
-        //reset downloaded file count in case some were removed already
-        this.downloadService.setTotalFileDownloaded(this.downloadService.getTotalDownloadedFiles(this.dataFiles));
-        this.expandToLevel(this.dataFiles, true, 1);
+        return DisplayPrefs.getDownloadStatusIcon(downloadStatus);
     }
 
     /**
@@ -368,25 +479,6 @@ export class TreetableComponent implements OnInit {
             this.actionWidth = '10%';
             this.statusWidth = '20%';
             this.fontSize = '12px';
-        }
-    }
-
-    /**
-     * Count the selected files
-     */
-    selectedDataFileCount(emit:boolean = false) {
-        this.selectedFileCount = 0;
-        for (let selData of this.selectedData) {
-            if (selData.data['resFilePath'] != null) {
-                if (selData.data.isLeaf) {
-                    this.selectedFileCount++;
-                }
-            }
-        }
-
-        if(emit){
-            this.outputSelectedData.emit(this.selectedData);
-            this.cartService.setSelectedFileCount(this.selectedFileCount);
         }
     }
 
@@ -457,19 +549,27 @@ export class TreetableComponent implements OnInit {
      */
     clearDownloadStatus() {
         this.dataCart.restore();
-        this.dataCart.resetDatafileDownloadStatus(this.dataFiles, '');
+        this._clearCartDownloadStatus(this.dataTree.children);
         this.dataCart.save();
-        this.downloadService.setTotalFileDownloaded(0);
-        this.downloadService.resetDownloadData();
+    }
+
+    _clearCartDownloadStatus(dataFiles: TreeNode[]) {
+        // this will only clear the status of files that are not currently being downloaded
+        for (let dfile of dataFiles) {
+            if (dfile.children.length > 0)
+                this._clearCartDownloadStatus(dfile.children);
+            else if (dfile.data.downloadStatus != DownloadStatus.DOWNLOADING)
+                this.dataCart.setDownloadStatus(dfile.data.cartItem.resId, dfile.data.cartItem.filePath,
+                                                DownloadStatus.NO_STATUS, false);
+        }
     }
 
     /**
      * Function to display bytes in appropriate format.
      * @param bytes - input data in bytes
-     * @param numAfterDecimal - number of digits after decimal
      */
-    formatBytes(bytes, numAfterDecimal) {
-        return this.commonFunctionService.formatBytes(bytes, numAfterDecimal);
+    formatBytes(bytes) {
+        return formatBytes(bytes);
     }
 
     /**
@@ -478,172 +578,12 @@ export class TreetableComponent implements OnInit {
      */
     setFileDownloaded(rowData: any) {
             // Google Analytics code to track download event
-        this.gaService.gaTrackEvent('download', undefined, rowData.ediid, rowData.downloadUrl);
+        this.gaService.gaTrackEvent('download', undefined, rowData.ediid, rowData.cartItem.downloadURL);
 
-        rowData.downloadStatus = 'downloaded';
+        rowData.downloadStatus = DownloadStatus.DOWNLOADED;
 
-        this.dataCart.setDownloadStatus(rowData.resId, rowData.resFilePath, rowData.downloadStatus, true);
-        this.downloadService.setFileDownloadedFlag(true);
-        this.outputDataFiles.emit(this.dataFiles);
-    }
+        this.dataCart.setDownloadStatus(rowData.cartItem.resId, rowData.cartItem.filePath, rowData.downloadStatus, true);
 
-    /**
-     * Create Data hierarchy for the tree
-     * This is where dafaFiles get generated
-     */
-    createDataCartHierarchy() {
-        this.totalDownloaded = 0;
-
-        let arrayList = this.dataCart.getCartItems().reduce(function (result, current) {
-            result[current.resTitle] = result[current.resTitle] || [];
-            result[current.resTitle].push({data:current});
-            return result;
-        }, {});
-
-        var noFileDownloadedFlag = true;
-        this.dataFiles = [];
-        let parentObj: TreeNode = {};
-
-        var iii: number = 0;
-        for (var key in arrayList) {
-            if (arrayList.hasOwnProperty(key)) {
-                parentObj = {
-                    data: {
-                        'resTitle': key,
-                    },
-                    children:[]
-                };
-                let level = 0;
-                for (let fields of arrayList[key]) {
-                    level = 0;
-                    let resId = fields.data.resId;
-                    let ediid = fields.data.ediid;
-                    let fpath = fields.data.filePath.split("/");
-                    if (fpath.length > 0) {
-                        let child2: TreeNode = {};
-                        child2.children = [];
-                        let parent = parentObj;
-                        let folderExists: boolean = false;
-                        let folder = null;
-                        for (let path in fpath) {
-                            if (fields.data.downloadStatus == "downloaded") {
-                                noFileDownloadedFlag = false;
-                            }
-                            /// Added this code to avoid the issue of extra file layers in the datacart
-                            if (fpath[path] !== "") {
-                                child2 = this.createDataCartChildrenTree(iii,
-                                    "/" + fpath[path],
-                                    fields.data.cartId,
-                                    resId, ediid,
-                                    fpath[path],
-                                    fields.data.downloadURL,
-                                    fields.data.resFilePath,
-                                    fields.data.downloadStatus,
-                                    fields.data.mediatype,
-                                    fields.data.description,
-                                    fields.data.filetype,
-                                    fields.data.isSelected,
-                                    fields.data.fileSize,
-                                    fields.data.message
-                                );
-
-                                parent.children.push(child2);
-                                parent = child2;
-                                iii = iii + 1;
-                            }
-                            level++;
-                            if(level <= this.defaultExpandLevel){
-                                parent.expanded = true;
-                            }
-                        }
-                    }
-                }
-                this.walkData(parentObj, parentObj, 0);
-                this.dataFiles.push(parentObj);
-            }
-        }
-        this.downloadService.setFileDownloadedFlag(!noFileDownloadedFlag);
-        this.downloadService.setTotalFileDownloaded(this.totalDownloaded);
-    }
-
-
-    /**
-     * Create data hierarchy for children
-     */
-    createDataCartChildrenTree(iii: number, path: string, cartId: string, resId: string, ediid: string, resTitle: string, downloadUrl: string, resFilePath: string, downloadStatus: string, mediatype: string, description: string, filetype: string, isSelected: boolean, fileSize: any, message: string) {
-        let child1: TreeNode = {};
-        child1 = {
-            data: {
-                'filePath': path,
-                'cartId': cartId,
-                'resId': resId,
-                'ediid': ediid,
-                'resTitle': resTitle,
-                'downloadUrl': downloadUrl,
-                'resFilePath': resFilePath,
-                'downloadStatus': downloadStatus,
-                'mediatype': mediatype,
-                'description': description,
-                'filetype': filetype,
-                'isSelected': isSelected,
-                'fileSize': fileSize,
-                'message': message
-            },
-            children: []
-        };
-        return child1;
-    }
-
-    /**
-     * Create the hierarchy for the tree
-     */
-    walkData(inputArray, parent, level) {
-        let index: any = {};
-        level = level || '';
-        if (inputArray.children) {
-            let copy = inputArray.children.filter((item) => { return true });
-            copy.forEach((item) => {
-                var path = inputArray.data && inputArray.data.filePath ?
-                    inputArray.data.filePath : 'root';
-                this.walkData(item, inputArray, level + '/' + path);
-            });
-        }
-
-        if ((inputArray.data.filetype == 'nrdp:DataFile' || inputArray.data.filetype == 'nrdp:ChecksumFile') && inputArray.children.length == 0) {
-            inputArray.data.isLeaf = true;
-
-            if (inputArray.data.downloadStatus == "downloaded") {
-                this.totalDownloaded++;
-            }
-        } else {
-            inputArray.data.cartId = null;
-            inputArray.data.isLeaf = false;
-        }
-
-        if (inputArray && inputArray.data.filePath) {
-            var key = level + inputArray.data.filePath;
-            if (!(key in index)) {
-                index[key] = inputArray;
-            } else {
-                inputArray.children.forEach((item) => {
-                    index[key].children.push(item);
-                })
-                var indx = 0;
-                var found = false;
-                parent.children.forEach((item) => {
-                    if (!found &&
-                        item.filePath === inputArray.data.filePath &&
-                        item.resId === inputArray.data.resId
-                    ) {
-                        found = true;
-                    }
-                    else if (!found) {
-                        indx++;
-                    }
-                });
-                parent.children.splice(indx, 1);
-            }
-        }
     }
 
     /**
@@ -664,8 +604,8 @@ export class TreetableComponent implements OnInit {
      * @param fileNode 
      * @param overlaypanel 
      */
-    openDetails(event, fileNode: TreeNode, overlaypanel: OverlayPanel) {
-        this.fileNode = fileNode;
+    openDetails(event, rowdata: CartTreeData, overlaypanel: OverlayPanel) {
+        this.fileNode = rowdata;
         overlaypanel.hide();
         setTimeout(() => {
             overlaypanel.show(event);

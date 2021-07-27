@@ -1,18 +1,18 @@
 import { Routes, RouterModule } from '@angular/router';
 import { DatacartComponent } from './datacart.component';
-import {CanDeactivateGuard} from '../can-deactivate/can-deactivate.guard';
+import { LeaveWhileDownloadingGuard } from './leave.guard';
 
 export const DatacartRoutes: Routes = [
 
   {
     path: 'datacart',
     children: [
-        {   path: ':ediid',             
+        {   path: ':cartname',             
             component: DatacartComponent,
-            canDeactivate: [CanDeactivateGuard]   },
-        {   path: 'ark:/88434/:ediid',  
+            canDeactivate: [LeaveWhileDownloadingGuard]   },
+        {   path: 'ark:/:naan/:cartname',  
             component: DatacartComponent,
-            canDeactivate: [CanDeactivateGuard]   }
+            canDeactivate: [LeaveWhileDownloadingGuard]   }
     ]
   }
 ];

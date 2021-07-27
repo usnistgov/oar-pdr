@@ -5,8 +5,8 @@ import { Router } from '@angular/router';
 import { NotificationService } from '../shared/notification-service/notification.service';
 import { EditStatusService } from '../landing/editcontrol/editstatus.service';
 import { LandingConstants } from '../landing/constants';
-import { CartConstants } from '../datacart/cartconstants';
 import { DataCart, DataCartItem } from '../datacart/cart';
+import { CartConstants } from '../datacart/cartconstants';
 import { isPlatformBrowser } from '@angular/common';
 
 /**
@@ -42,7 +42,6 @@ export class HeadbarComponent {
     contactLink: string = "";
     public EDIT_MODES: any;
     public CART_CONSTANTS: any = CartConstants.cartConst;
-    generalDataCart: DataCart;
     globalCartUrl: string = "/datacart/" + this.CART_CONSTANTS.GLOBAL_CART_NAME;
 
     constructor(
@@ -62,10 +61,6 @@ export class HeadbarComponent {
         this.status = cfg.get("status", "");
         this.appVersion = cfg.get("appVersion", "");
         this.editEnabled = cfg.get("editEnabled", "");
-
-        this.cartService.watchCartLength().subscribe(value => {
-            this.cartLength = value;
-        });
         this.EDIT_MODES = LandingConstants.editModes;
     }
 
@@ -74,24 +69,17 @@ export class HeadbarComponent {
     */
     ngOnInit() {
         if(this.inBrowser){
-            this.generalDataCart = DataCart.openCart(this.CART_CONSTANTS.GLOBAL_CART_NAME);
-            this.cartLength = this.generalDataCart.size();
+            let globalcart = this.cartService.getGlobalCart();
+            this.cartLength = globalcart.size();
+            globalcart.watchForChanges((ev) => {
+                this.cartLength = this.cartService.getGlobalCart().size();
+            });
 
-            // this.cartLength = this.cartService.getCartSize();
             this.editMode = this.EDIT_MODES.VIEWONLY_MODE;
 
             this.editstatsvc.watchEditMode((editMode) => {
-            this.editMode = editMode;
+                this.editMode = editMode;
             });
-
-            window.addEventListener("storage", this.cartChanged.bind(this));
-        }
-    }
-
-    cartChanged(ev){
-        if (ev.key == this.generalDataCart.getKey()) {
-            this.generalDataCart = DataCart.openCart(this.CART_CONSTANTS.GLOBAL_CART_NAME);
-            this.cartLength = this.generalDataCart.size();
         }
     }
 

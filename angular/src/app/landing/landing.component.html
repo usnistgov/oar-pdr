@@ -100,8 +100,8 @@
                     <app-topic [record]="record" [inBrowser]="inBrowser"></app-topic>
                     <app-keyword [record]="record" [inBrowser]="inBrowser"></app-keyword>
                     <p></p>
-                    <description-resources [record]="record" [files]="files"
-                        [metadata]="showMetadata" [inBrowser]="inBrowser" [ediid]="ediid" [editEnabled]="editEnabled"></description-resources>
+                    <description-resources [inBrowser]="inBrowser" [record]="record" [ediid]="ediid" 
+                        [metadata]="showMetadata" [editEnabled]="editEnabled"></description-resources>
                     <metadata-detail [record]="record" [serviceApi]="getMdService()" [inBrowser]="inBrowser"
                         [metadata]="showMetadata">
                     </metadata-detail>

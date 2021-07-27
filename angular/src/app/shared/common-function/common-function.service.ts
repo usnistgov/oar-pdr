@@ -1,5 +1,8 @@
 import { Injectable } from '@angular/core';
 
+/**
+ * DEPRECATED!
+ */
 @Injectable({
     providedIn: 'root'
 })

@@ -114,7 +114,6 @@ export class LandingComponent implements OnInit, OnChanges {
     distdownload: string = '';
     mdApi: string = '';
     mdServer: string = '';
-    private files: TreeNode[] = [];
     pdrApi: string = '';
     isResultAvailable: boolean = true;
     isId: boolean = true;
@@ -204,19 +203,10 @@ export class LandingComponent implements OnInit, OnChanges {
         this.HomePageLink = this.displayHomePageLink();
         this.recordType = this.determineResourceLabel(this.record);
 
-        this.createNewDataHierarchy();
-        if (this.files.length > 0) {
-            this.setLeafs(this.files[0].data);
-        }
-
         if (this.record['doi'] !== undefined && this.record['doi'] !== "")
             this.doiUrl = "https://doi.org/" + this.record['doi'].split(':')[1];
 
         this.assessNewer();
-
-        if (this.files.length != 0)
-            this.files = <TreeNode[]>this.files[0].data;
-
     }
 
     /**
@@ -251,93 +241,6 @@ export class LandingComponent implements OnInit, OnChanges {
     //This is to check if empty
     isEmptyObject(obj) {
         return (Object.keys(obj).length === 0);
-    }
-
-    filescount: number = 0;
-    createNewDataHierarchy() {
-        var testdata = {}
-        if (this.record['components'] != null) {
-            testdata["data"] = this.arrangeIntoTree(this.record['components']);
-            this.files.push(testdata);
-        }
-    }
-    //This is to create a tree structure
-    private arrangeIntoTree(paths) {
-        const tree = [];
-        // This example uses the underscore.js library.
-        var i = 1;
-
-        paths.forEach((path) => {
-            if (path.filepath && !path['@type'].includes('nrd:Hidden')) {
-                if (!path.filepath.startsWith("/"))
-                    path.filepath = "/" + path.filepath;
-
-                const pathParts = path.filepath.split('/');
-                pathParts.shift(); // Remove first blank element from the parts array.
-                let currentLevel = tree; // initialize currentLevel to root
-
-                pathParts.forEach((part) => {
-                    // check to see if the path already exists.
-                    const existingPath = currentLevel.filter(level => level.data.name === part);
-                    if (existingPath.length > 0) {
-
-                        // The path to this item was already in the tree, so don't add it again.
-                        // Set the current level to this path's children  
-                        currentLevel = existingPath[0].children;
-                    } else {
-                        let tempId = path['@id'];
-                        if (tempId == null || tempId == undefined)
-                            tempId = path.filepath;
-
-                        let newPart = null;
-                        newPart = {
-                            data: {
-                                cartId: tempId,
-                                ediid: this.ediid,
-                                name: part,
-                                mediatype: path.mediaType,
-                                size: path.size,
-                                downloadUrl: path.downloadURL,
-                                description: path.description,
-                                filetype: path['@type'][0],
-                                resId: tempId,
-                                // resId: path["filepath"].replace(/^.*[\\\/]/, ''),
-                                filePath: path.filepath,
-                                downloadProgress: 0,
-                                downloadInstance: null,
-                                isIncart: false,
-                                zipFile: null,
-                                message: ''
-                            }, children: []
-                        };
-                        currentLevel.push(newPart);
-                        currentLevel = newPart.children;
-                        // }
-                    }
-                    this.filescount = this.filescount + 1;
-                });
-            }
-            i = i + 1;
-        });
-        return tree;
-    }
-
-    /**
-    * Set isLeaf to true for all leafs
-    */
-    setLeafs(files: any) {
-        for (let comp of files) {
-            if (comp.children.length > 0) {
-                comp.data.isLeaf = false;
-                this.setLeafs(comp.children);
-            } else {
-                if (comp.data.filetype == 'nrdp:DataFile' || comp.data.filetype == 'nrdp:ChecksumFile') {
-                    comp.data.isLeaf = true;
-                } else {
-                    comp.data.isLeaf = false;
-                }
-            }
-        }
     }
 
     visibleHistory = false;

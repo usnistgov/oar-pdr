@@ -69,26 +69,26 @@
                         <div style="flex: 0 0 120px; text-align: left; padding-bottom: 0em;">
                             <span><b>Files </b> </span>
                             <a class="faa-stack fa-lg icon-download" *ngIf="!editEnabled"
-                                (click)="downloadFromRoot()"
+                                (click)="downloadAllFiles()"
                                 data-toggle="tooltip" title="Download all files"
                                 [ngStyle]="{'color':getDownloadAllBtnColor(),'cursor':'pointer'}">
                                 <i class="faa faa-circle-thin faa-stack-2x" aria-hidden="true"></i>
                                 <!-- <i class="faa faa-download faa-stack-1x" aria-hidden="true"></i> -->
-                                <i *ngIf="!addingToCart; else show_spinner1" class="faa faa-download faa-stack-1x"
-                                aria-hidden="true"></i>
+                                <i *ngIf="!isAddingToDownloadAllCart; else show_spinner1" 
+                                    class="faa faa-download faa-stack-1x" aria-hidden="true"></i>
                                 <ng-template #show_spinner1><i class="faa faa-spinner faa-spin faa-stack-1x"
                                         style="color:#1E6BA1" aria-hidden="true"></i></ng-template>
                             </a>
                             <a id="routeToDatacart" target="_blank" [routerLink]="['/datacart', 'popup']"
                                 style="display:none"></a>
                             <span *ngIf="!editEnabled" class="faa-stack fa-lg icon-cart"
-                                (click)="cartProcess(files)"
+                                (click)="toggleAllFilesInGlobalCart(files)"
                                 [ngStyle]="{'color':getAddAllToDataCartBtnColor(), 'cursor': 'pointer',
                                 'margin-right': '1em'}"
                                 data-toggle="tooltip" [title]="getCartProcessTooltip()">
                                 <i class="faa faa-circle-thin faa-stack-2x" aria-hidden="true"></i>
-                                <i *ngIf="!isLocalProcessing; else show_spinner" class="faa faa-cart-plus faa-stack-1x"
-                                    aria-hidden="true"></i>
+                                <i *ngIf="!isTogglingAllInGlobalCart; else show_spinner" 
+                                    class="faa faa-cart-plus faa-stack-1x" aria-hidden="true"></i>
                                 <ng-template #show_spinner><i class="faa faa-spinner faa-spin faa-stack-1x"
                                         style="color:#1E6BA1" aria-hidden="true"></i></ng-template>
                                 <span class="w3-badge badge-notify" style="margin-right:0em;">{{cartLength}}</span>
@@ -100,13 +100,13 @@
                             details.</span>
                     </div>
                     <div class="font10 grey-color" style="flex-grow: 2; text-align: right;padding-top: 0.5em;">
-                        Total No. files: {{ totalFiles }}
+                        Total No. files: {{ fileCount }}
                     </div>
                 </div>
 
                 <!-- Display tree table -->
                 <p-treeTable *ngIf="visible" [value]="files" [columns]="cols" selectionMode="single"
-                    [resizableColumns]="true" sortField="name">
+                    [resizableColumns]="true" dataKey="key" sortField="name">
                     <ng-template pTemplate="header" let-columns>
                         <tr>
                             <th *ngFor="let col of columns" [style.width]="col.width" [style.font-size]="fontSize"
@@ -134,17 +134,17 @@
                                 <a (click)="openDetails($event,rowData,op3) " style="color: #1471AE;cursor: pointer;"
                                     data-toggle="tooltip" title="Click for more details">
                                     {{rowData.name}} </a>
-                                <span *ngIf="showZipFilesNmaes"
-                                    style="color:darkgreen; margin-left: 2em;">{{rowData.zipFile}}</span>
+                                <span *ngIf="showZipFilesNames"
+                                    style="color:darkgreen; margin-left: 2em;">{{rowData.zipFile || ''}}</span>
                             </td>
-                            <td [ngStyle]="typeStyle()">{{rowData.mediatype}}</td>
-                            <td [ngStyle]="sizeStyle()"><span *ngIf="rowData.size">{{formatBytes(rowData.size)}}</span>
+                            <td [ngStyle]="typeStyle()">{{rowData.mediaType}}</td>
+                            <td [ngStyle]="sizeStyle()"><span *ngIf="rowData.size">{{rowData.size}}</span>
                             </td>
                             <td [ngStyle]="statusStyle()">
                                 <div style="display: flex;">
-                                    <div *ngIf="rowData.isLeaf;else space_holder">
+                                    <div *ngIf="rowData.comp.downloadURL;else space_holder">
                                         <a *ngIf="rowData.downloadStatus != 'downloading'"
-                                            href='{{rowData.downloadUrl}}' target='_blank' download="download"
+                                            href='{{rowData.comp.downloadURL}}' target='_blank' download="download"
                                             data-toggle="tooltip" title="Direct download"
                                             (click)="setFileDownloaded(rowData)">
                                             <i class="faa faa-download"
@@ -158,15 +158,15 @@
                                     <ng-template #space_holder>
                                         <div style="padding-right: 0.4em;">&nbsp;&nbsp;</div>
                                     </ng-template>
-                                    <div style="padding-left:10px;" *ngIf="rowData.isIncart;else not_in_cart"
-                                        (click)="removeFromNode(rowData)">
+                                    <div style="padding-left:10px;" *ngIf="rowData.isInCart;else not_in_cart"
+                                        (click)="removeFromGlobalCart(rowData)">
                                         <i class="faa faa-cart-plus" style="color: green;cursor: pointer;"
                                             aria-hidden="true" data-toggle="tooltip" title="Remove from cart"></i>
                                     </div>
-                                    <div *ngIf="rowData.isIncart" style="margin-left: 0.5em;font-size: 0.5em">Added
+                                    <div *ngIf="rowData.isInCart" style="margin-left: 0.5em;font-size: 0.5em">Added
                                     </div>
                                     <ng-template #not_in_cart>
-                                        <div style="padding-left:10px;" (click)="addSubFilesToCartAndUpdate(rowData)">
+                                        <div style="padding-left:10px;" (click)="addToGlobalCart(rowData)">
                                             <i class="faa faa-cart-plus" style="color: #1E6BA1;cursor: pointer;"
                                                 aria-hidden="true" data-toggle="tooltip" title="Add to cart"></i>
                                         </div>
@@ -218,18 +218,17 @@
                 <span class="font14">{{ fileNode ? fileNode.name : '' }}</span>
                 <span class="font8" style="color:grey">
                     <br><b>Type:</b>
-                    <span style="margin-left:0.5em;" class="textstyle1">{{ fileNode.mediatype ? fileNode.mediatype : 'Not
-            Available'}} </span>
+                    <span style="margin-left:0.5em;" class="textstyle1">{{ fileNode.mediaType }} </span>
                 </span>
                 <span class="font8" style="margin-left: 2.5rem">
                     Size:
-                    <span *ngIf="fileNode.size" class="textstyle1">{{ formatBytes(fileNode.size) }} </span>
+                    <span *ngIf="fileNode.size" class="textstyle1">{{ fileNode.size }} </span>
                     <span *ngIf="!fileNode.size" class="textstyle1"><i>Not Available</i></span>
                 </span>
                 <br><span class="font10"><b>Description:</b> </span>
                 <div class="well filedesc">
-                    <span *ngIf="!fileNode.description"><i>No Description Available</i></span>
-                    <span *ngIf="fileNode.description">{{ fileNode.description }} </span>
+                    <span *ngIf="!fileNode.comp.description"><i>No Description Available</i></span>
+                    <span *ngIf="fileNode.comp.description">{{ fileNode.comp.description }} </span>
                 </div>
             </div>
         </div>

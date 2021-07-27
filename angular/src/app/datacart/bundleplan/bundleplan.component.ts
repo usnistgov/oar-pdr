@@ -2,19 +2,26 @@ import { Component, OnInit, Input, Output, Inject, PLATFORM_ID, EventEmitter } f
 import { ZipData } from '../../shared/download-service/zipData';
 import { TreeNode } from 'primeng/primeng';
 import { DownloadService } from '../../shared/download-service/download-service.service';
-import { CommonFunctionService } from '../../shared/common-function/common-function.service';
+import { formatBytes } from '../../utils';
 import { OverlayPanel } from 'primeng/overlaypanel';
-import { AppConfig } from '../../config/config';
 import { GoogleAnalyticsService } from '../../shared/ga-service/google-analytics.service';
 import { DownloadData } from '../../shared/download-service/downloadData';
 import { CartService } from '../cart.service';
 import { NgbModalOptions, NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { DownloadConfirmComponent } from '../download-confirm/download-confirm.component';
 import { ConfirmationDialogComponent } from '../../shared/confirmation-dialog/confirmation-dialog.component';
-import { DataCart } from '../cart';
-import { CartConstants } from '../cartconstants';
+import { DataCart, DataCartItem } from '../cart';
+import { DisplayPrefs } from '../displayprefs';
+import { CartConstants, DownloadStatus } from '../cartconstants';
 import { DataCartStatus } from '../cartstatus';
 import { isPlatformBrowser } from '@angular/common';
+
+class BundlePlanStatus {
+    static readonly COMPLETED : string = "complete";
+    static readonly WARNINGS  : string = "warnings";
+    static readonly ERROR     : string = "error";
+    static readonly INTERNAL_ERROR : string = "internal error";
+}
 
 @Component({
   selector: 'app-bundleplan',
@@ -50,16 +57,12 @@ export class BundleplanComponent implements OnInit {
     showZipFiles: boolean = true;
 
     //Download
-    downloadData: DownloadData[];
+    downloadFiles : DataCartItem[] = [];  // the files currently being downloaded
     allDownloadCancelled: boolean = false;
     subscriptions: any = [];
     downloadStarted: boolean = false;
 
     //Data
-    selectedTreeRoot = [];
-    minimum: number = 1;
-    maximum: number = 100000;
-    treeRoot = [];
     zipData: ZipData[] = [];
 
     // For pop up
@@ -70,7 +73,6 @@ export class BundleplanComponent implements OnInit {
     emailBodyBase: string = 'The information below describes an error that occurred while downloading data via the data cart. %0D%0A%0D%0A [From the PDR Team:  feel free to add additional information about the failure or your questions here. Thanks for sending this message!] %0D%0A%0D%0A';
 
     showMessage: boolean = true;
-    distApi: string;
 
     problemZip: ZipData = {
         fileName: "",
@@ -84,62 +86,26 @@ export class BundleplanComponent implements OnInit {
         downloadTime: 0
     };
 
-    @Input() dataFiles: TreeNode[] = [];
-    @Input() selectedData: TreeNode[];
-    @Input() ediid: string;
-    @Output() outputZipData = new EventEmitter<ZipData[]>();
+    @Input() cartName: string;
     @Output() outputOverallStatus = new EventEmitter<string>();
 
     constructor(
         private downloadService: DownloadService,
-        public commonFunctionService: CommonFunctionService,
-        private cfg: AppConfig,
         public gaService: GoogleAnalyticsService,
         public cartService: CartService,
         private modalService: NgbModal,
         @Inject(PLATFORM_ID) private platformId: Object
     ) { 
         this.inBrowser = isPlatformBrowser(platformId);
-        this.CART_CONSTANTS = CartConstants.cartConst;
-
-        this.cartService._watchRemoteCommand((command) => {
-            if(this.inBrowser){
-                switch(command.command) { 
-                    case 'downloadSelected': { 
-                        if(command.data)
-                            this.selectedData = command.data;
-                            this.downloadAllFilesFromAPI();
-                        break; 
-                    } 
-                    case 'resetDownloadParams': {
-                        this.resetDownloadParams();
-                        break;
-                    }
-                    case 'cancelDownloadAll': {
-                        this.cancelDownloadAll();
-                        break;
-                    }
-                    default: { 
-                    //statements; 
-                    break; 
-                    } 
-                } 
-            }
-        });
     }
 
     ngOnInit() {
-        if(this.inBrowser){
+        if(this.inBrowser) {
             this.dataCartStatus = DataCartStatus.openCartStatus();
 
-            if (this.ediid != this.CART_CONSTANTS.GLOBAL_CART_NAME) {
-                this.dataCart = DataCart.openCart(this.ediid);
-            }else{
-                this.dataCart = DataCart.openCart(this.CART_CONSTANTS.GLOBAL_CART_NAME);
-            }
+            this.dataCart = this.cartService.getCart(this.cartName);
+            // watch this cart?
         }
-
-        this.distApi = this.cfg.get("distService", "/od/ds/");
 
         this.downloadService.watchDownloadProcessStatus().subscribe(
             value => {
@@ -148,16 +114,6 @@ export class BundleplanComponent implements OnInit {
                 }
             }
         );
-
-        // create root
-        const newPart = {
-            data: {
-                resTitle: "root"
-            }, 
-            children: this.dataFiles
-        };
-
-        this.treeRoot.push(newPart);
     }
 
     /**
@@ -166,7 +122,7 @@ export class BundleplanComponent implements OnInit {
     setProcessComplete(){
         this.downloadEndTime = new Date();
         this.totalDownloadTime = this.downloadEndTime.getTime() / 1000 - this.downloadStartTime.getTime() / 1000;
-        this.overallStatus = 'complete';
+        this.overallStatus = DownloadStatus.COMPLETED
         this.outputOverallStatus.emit(this.overallStatus);
         setTimeout(() => {
             this.updateDownloadPercentage(100);
@@ -178,7 +134,7 @@ export class BundleplanComponent implements OnInit {
      * @param downloadStatus 
      */
     getDownloadStatusColor(downloadStatus: string){
-        return this.cartService.getDownloadStatusColor(downloadStatus);
+        return DisplayPrefs.getDownloadStatusColor(downloadStatus);
     }
 
     /**
@@ -186,7 +142,7 @@ export class BundleplanComponent implements OnInit {
      * @param downloadStatus 
      */
     getIconClass(downloadStatus: string){
-        return this.cartService.getIconClass(downloadStatus);
+        return DisplayPrefs.getDownloadStatusIcon(downloadStatus);
     }
 
     /**
@@ -194,18 +150,17 @@ export class BundleplanComponent implements OnInit {
      * @param downloadStatus 
      */
     getStatusForDisplay(downloadStatus: string){
-        return this.cartService.getStatusForDisplay(downloadStatus);
+        return DisplayPrefs.getDownloadStatusLabel(downloadStatus);
     }
 
     /**
      * Update the percentage in the cartstatus
      */
     updateDownloadPercentage(percentage: number){
-        if (this.ediid != this.CART_CONSTANTS.GLOBAL_CART_NAME) {
-            if(this.dataFiles[0])
-                this.dataCartStatus.updateDownloadPercentage(this.ediid, percentage, this.dataFiles[0].data.resTitle.substring(0,20)+"...");
-        } else {
-            this.dataCartStatus.updateDownloadPercentage(this.CART_CONSTANTS.GLOBAL_CART_NAME, percentage, this.CART_CONSTANTS.GLOBAL_CART_NAME);
+        if (this.dataCart && this.downloadFiles) {
+            let title = (this.dataCart.isGlobalCart()) ? "Global Data Cart"
+                                                       : this.downloadFiles[0].resTitle.substring(0,20)+"...";
+            this.dataCartStatus.updateDownloadPercentage(this.dataCart.getName(), percentage, title);
         }
     }
 
@@ -234,7 +189,7 @@ export class BundleplanComponent implements OnInit {
      * @param zip Current zip to be cancelled
      */
     cancelDownloadZip(zip: ZipData){
-        this.downloadService.cancelDownloadZip(zip, this.dataFiles, this.dataCart);
+        this.downloadService.cancelDownloadZip(zip, this.dataCart);
     }
 
     /**
@@ -265,7 +220,7 @@ export class BundleplanComponent implements OnInit {
 
         for (let zip of this.zipData) 
         {
-            if(zip.downloadStatus == 'error')
+            if (zip.downloadStatus == DownloadStatus.ERROR)
             {
                 emaibody += '%0D%0A%0D%0A'+ zip.fileName 
                          + ':%0D%0A download URL: ' + zip.downloadUrl
@@ -307,45 +262,35 @@ export class BundleplanComponent implements OnInit {
             zip.downloadInstance.unsubscribe();
         }
         this.downloadService.increaseTotalBundleBySize(zip.bundleSize);
-        this.downloadService.download(zip, this.zipData, this.dataFiles, this.dataCart);
+        this.downloadService.download(zip, this.zipData, this.dataCart);
+    }
+
+    private generateZipFileName(base : string = null) : string {
+        const MIN : number = 0;
+        const MAX : number = 100000;
+        let suffix = Math.floor(Math.random() * (MAX - MIN + 1)) + MIN;
+        return base + suffix;
     }
 
     /**
-     * Function to download all files from API call.
+     * download the selected files from this cart.
      */
-    downloadAllFilesFromAPI() {
+    public downloadSelectedFiles() {
         this.showCurrentTask = true;
         this.currentTask = "Preparing downloads...";
-        this.clearDownloadStatus();
-        let postMessage: any[] = [];
-        this.downloadData = [];
+        this.clearDownloadingStatus();
         this.zipData = [];
         this.allDownloadCancelled = false;
         this.bundlePlanMessage = null;
         this.downloadStartTime = new Date();
 
-        // create root
-        const newPart = {
-            data: {
-                resTitle: "root"
-            }, children: this.selectedData
-        };
-        this.selectedTreeRoot.push(newPart);
-
-        let files = this.selectedTreeRoot[0];
         // Sending data to _bundle_plan and get back the plan
-        this.downloadService.getDownloadData(this.selectedData, this.downloadData);
-        var randomnumber = Math.floor(Math.random() * (this.maximum - this.minimum + 1)) + this.minimum;
-
-        var zipFileBaseName = "download" + randomnumber;
-        files.data.downloadFileName = zipFileBaseName;
-        files.data.downloadStatus = 'downloading';
-
-        postMessage.push({ "bundleName": files.data.downloadFileName, "includeFiles": this.downloadData });
-        console.log("Calling following end point to get bundle plan:", this.distApi + "_bundle_plan");
+        this.downloadFiles = this.dataCart.getSelectedFiles();
+        let bundleBaseName = this.generateZipFileName(this.dataCart.getName());
         
-        this.bundlePlanRef = this.downloadService.getBundlePlan(this.distApi + "_bundle_plan", JSON.stringify(postMessage[0])).subscribe(
+        this.bundlePlanRef = this.downloadService.getBundlePlan(bundleBaseName, this.downloadFiles).subscribe(
             blob => {
+                // console.log(JSON.stringify(blob, null, 2));
                 this.bundlePlanStatus = blob.status.toLowerCase();
                 this.bundlePlanMessage = blob.messages;
                 this.bundlePlanUnhandledFiles = blob.notIncluded;
@@ -354,26 +299,25 @@ export class BundleplanComponent implements OnInit {
                 if (this.bundlePlanUnhandledFiles) {
                     this.markUnhandledFiles();
                 }
-                if (this.bundlePlanStatus == 'complete' || this.bundlePlanStatus == 'warnings') {
-                    if(this.bundlePlanStatus == 'warnings'){
+                if (this.bundlePlanStatus == BundlePlanStatus.COMPLETED ||
+                    this.bundlePlanStatus == BundlePlanStatus.WARNINGS    )
+                {
+                    if(this.bundlePlanStatus == BundlePlanStatus.WARNINGS) {
                         let dateTime = new Date();
 
                         this.showUnhandledFiles = false;
                         this.emailSubject = 'PDR: Error getting download plan';
                         this.emailBody = this.emailBodyBase
-                            + 'URL:' + this.distApi + '_bundle_plan; ' + '%0D%0A'
-                            + 'Time: ' + dateTime.toString() + '%0D%0A%0D%0A'
-                            + 'Post message:%0D%0A' + JSON.stringify(postMessage[0]) + ';' + '%0D%0A%0D%0A' + 'Return message:%0D%0A' + JSON.stringify(blob);
+                            + 'URL:' + blob.diagnostics['url'] + '; %0D%0A'
+                            + 'Time: ' + blob.diagnostics['time'] + '%0D%0A%0D%0A'
+                            + 'Post message:%0D%0A' + blob.diagnostics['body'] + ';' + '%0D%0A%0D%0A' + 'Return message:%0D%0A' + JSON.stringify(blob);
                     }
 
                     this.bundleplan = blob;
                     this.downloadService.setTotalBundleSize(blob.size);
 
-                    let bundlePlan: any[] = blob.bundleNameFilePathUrl;
-                    let downloadUrl: any = this.distApi + blob.postEachTo;
-
-                    for (let bundle of bundlePlan) {
-                        this.zipData.push({ "fileName": bundle.bundleName, "downloadProgress": 0, "downloadStatus": null, "downloadInstance": null, "bundle": bundle, "downloadUrl": downloadUrl, "downloadErrorMessage": "","bundleSize": bundle.bundleSize, 'downloadTime': null });
+                    for (let bundle of blob.bundleNameFilePathUrl) {
+                        this.zipData.push({ "fileName": bundle.bundleName, "downloadProgress": 0, "downloadStatus": null, "downloadInstance": null, "bundle": bundle, "downloadUrl": blob.postEachTo, "downloadErrorMessage": "","bundleSize": bundle.bundleSize, 'downloadTime': null });
                     }
 
                     let ngbModalOptions: NgbModalOptions = {
@@ -404,36 +348,35 @@ export class BundleplanComponent implements OnInit {
                 }
                 else // error
                 {
-                    let dateTime = new Date();
                     this.emailSubject = 'PDR: Error getting download plan';
                     this.emailBody = this.emailBodyBase
-                        + 'URL:' + this.distApi + '_bundle_plan; ' + '%0D%0A'
-                        + 'Time: ' + dateTime.toString() + '%0D%0A%0D%0A'
-                        + 'Post message:%0D%0A' + JSON.stringify(postMessage[0]) + ';' + '%0D%0A%0D%0A' + 'Return message:%0D%0A' + JSON.stringify(blob);
+                        + 'URL:' + blob.diagnostics['url'] + '; %0D%0A'
+                        + 'Time: ' + blob.diagnostics['time'] + '%0D%0A%0D%0A'
+                        + 'Post message:%0D%0A' + blob.diagnostics['body'] + ';' + '%0D%0A%0D%0A' + 'Return message:%0D%0A' + JSON.stringify(blob);
                     this.showUnhandledFiles = false;
                     this.showCurrentTask = false;
                     this.unsubscribeBundleplan();
                 }
             },
             err => {
-                let dateTime = new Date()
+                // err is an object with diagnostic information in it
                 console.log("Calling following end point returned error:");
-                console.log(this.distApi + "_bundle_plan");
-                console.log("Post message:", JSON.stringify(postMessage[0]));
-                console.log("Error message:", err);
-                this.bundlePlanMessage = err;
-                this.bundlePlanStatus = "internal error";
+                console.log(err['url']);
+                console.log("Post message:", err['body']);
+                console.log("Error message:", err['error']);
+                this.bundlePlanMessage = err['error'];
+                this.bundlePlanStatus = BundlePlanStatus.INTERNAL_ERROR;
                 this.showCurrentTask = false;
                 this.messageColor = this.getColor();
                 this.emailSubject = 'PDR: Error getting download plan';
                 this.emailBody =
                     'The information below describes an error that occurred while downloading data via the data cart.' + '%0D%0A%0D%0A'
                     + '[From the PDR Team:  feel free to add additional information about the failure or your questions here.  Thanks for sending this message!]' + '%0D%0A%0D%0A'
-                    + 'URL:' + this.distApi + '%0D%0A'
-                    + 'Time: ' + dateTime.toString() + '%0D%0A%0D%0A'
+                    + 'URL:' + err['url']
+                    + 'Time: ' + err['time'] + '%0D%0A%0D%0A'
                     + '_bundle_plan; ' + '%0D%0A%0D%0A'
-                    + 'Post message:%0D%0A' + JSON.stringify(postMessage[0]) + '%0D%0A%0D%0A'
-                    + 'Error message:%0D%0A' + JSON.stringify(err);
+                    + 'Post message:%0D%0A' + err['body'] + '%0D%0A%0D%0A'
+                    + 'Error message:%0D%0A' + JSON.stringify(err['error']);
                 console.log("emailBody:", this.emailBody);
             }
         );
@@ -457,19 +400,19 @@ export class BundleplanComponent implements OnInit {
 
         // Start downloading the first one, this will set the downloaded zip file to 1 which will
         // trigger the following listener
-        this.downloadService.downloadNextZip(this.zipData, this.dataFiles, this.dataCart);
+        this.downloadService.downloadNextZip(this.zipData, this.dataCart);
 
         this.subscriptions.push(this.downloadService.watchDownloadingNumber().subscribe(
             value => {
                 if (value >= 0) {
                     if (!this.allDownloadCancelled) {
-                        this.overallStatus = "downloading";
+                        this.overallStatus = DownloadStatus.DOWNLOADING;
                         this.outputOverallStatus.emit(this.overallStatus);
-                        this.downloadService.downloadNextZip(this.zipData, this.dataFiles, this.dataCart);
+                        this.downloadService.downloadNextZip(this.zipData, this.dataCart);
                     }
                     else
                     {
-                        this.overallStatus = "Cancelled";
+                        this.overallStatus = DownloadStatus.CANCELED;
                         this.outputOverallStatus.emit(this.overallStatus);
                         setTimeout(() => {
                             this.updateDownloadPercentage(0);
@@ -504,31 +447,39 @@ export class BundleplanComponent implements OnInit {
         this.zipData = [];
         this.downloadService.setDownloadingNumber(-1);
         this.allDownloadCancelled = true;
-        this.downloadService.resetZipName(this.treeRoot[0]);
         this.bundlePlanMessage = null;
         this.bundlePlanStatus = null;
         this.bundlePlanUnhandledFiles = null;
     }
 
     /**
-     * clears all download status
+     * clears all download status for the current set of files being downloaded
      */
-    clearDownloadStatus() {
+    clearDownloadingStatus() {
         this.resetDownloadParams();
 
         this.dataCart.restore();
-        this.dataCart.resetDatafileDownloadStatus(this.dataFiles, '');
+        this._clearCartDownloadStatus();
         this.dataCart.save();
         this.downloadService.resetDownloadData();
+    }
+
+    private _clearCartDownloadStatus() : void {
+        if (! this.downloadFiles)
+            return;
+        for (let dfile of this.downloadFiles) 
+            this.dataCart.setDownloadStatus(dfile.resId, dfile.filePath, DownloadStatus.NO_STATUS,
+                                            false, { zipFile: '', message: '' });
     }
 
     /**
      * Set color for the message from bundle plan
      */
     getColor() {
-        if (this.bundlePlanStatus == 'warnings') {
+        if (this.bundlePlanStatus == BundlePlanStatus.WARNINGS) {
             return "darkorange";
-        } else if (this.bundlePlanStatus == 'error' || this.bundlePlanStatus == 'internal error') {
+        } else if (this.bundlePlanStatus == BundlePlanStatus.ERROR ||
+                   this.bundlePlanStatus == BundlePlanStatus.INTERNAL_ERROR) {
             return "red";
         } else {
             return "black";
@@ -541,21 +492,19 @@ export class BundleplanComponent implements OnInit {
     markUnhandledFiles() {
         this.dataCart.restore();
 
+        let p: number = -1;
+        let resid: string = null;
+        let filepath: string = null;
         for (let unhandledFile of this.bundlePlanUnhandledFiles) {
-            let resFilePath = unhandledFile.filePath.substring(unhandledFile.filePath.indexOf('/'));
-            for (let dataFile of this.dataFiles) {
-                let node = this.downloadService.searchTreeByfilePath(dataFile, resFilePath);
-                if (node != null) {
-                    node.data.downloadStatus = 'failed';
-                    node.data.filePath = unhandledFile.filePath;
-                    node.data.downloadUrl = unhandledFile.downloadUrl;
-                    node.data.message = unhandledFile.message;
-                    let cartItem = this.dataCart.findFile(node.data.resId, node.data.filePath);
-                    if(cartItem) cartItem.downloadStatus = 'failed';
-
-                    break;
-                }
+            p = unhandledFile.filePath.indexOf('/');
+            if (p < 0) {
+                console.warn("markUnhandledFiles(): Unexpected file ID: " + unhandledFile.filePath);
+                continue;
             }
+            resid = unhandledFile.filePath.substring(0, p);
+            filepath = unhandledFile.filePath.substring(p+1);
+            this.dataCart.setDownloadStatus(resid, filepath, DownloadStatus.FAILED, false,
+                                            { message: unhandledFile.message });
         }
 
         this.dataCart.save();
@@ -603,44 +552,20 @@ export class BundleplanComponent implements OnInit {
             sub.unsubscribe();
         }
 
-        this.resetDownloadParams();
-        this.clearDownloadingStatus();
+        // this.clearDownloadingStatus();
         this.showCurrentTask = false;
-        this.overallStatus = "cancelled";
+        this.overallStatus = DownloadStatus.CANCELED;
         this.outputOverallStatus.emit(this.overallStatus);
-        this.downloadService.resetDownloadData();
         setTimeout(() => {
             this.updateDownloadPercentage(0)
         }, 1000);
     }
 
     /**
-     * Clear "downloading" and "pending" status in this.dataFiles
+     * Function to display bytes in appropriate format.
+     * @param bytes - input data in bytes
      */
-    clearDownloadingStatus() {
-        this.dataCart.restore();
-
-        for (let dataFile of this.dataFiles) {
-            this.clearTreeByDownloadStatus(dataFile);
-        }
-
-        this.dataCart.save();
-    }
-
-    /**
-     * Clear tree by download status - recursive
-     * @param element 
-     */
-    clearTreeByDownloadStatus(element) {
-        if (element.data.isLeaf && (element.data.downloadStatus == 'downloading' || element.data.downloadStatus == 'pending')) {
-            element.data.downloadStatus = null;
-            element.data.zipFile = null;
-
-            this.dataCart.setDownloadStatus(element.data.resId, element.data.filePath, '');
-        }
-
-        for (let i = 0; i < element.children.length; i++) {
-            this.clearTreeByDownloadStatus(element.children[i]);
-        }
+    formatBytes(bytes) {
+        return formatBytes(bytes);
     }
 }

@@ -1,8 +1,13 @@
-<!-- Top banner -->
-<app-cartcontrol [dataFiles]="dataFiles"></app-cartcontrol>
+<!-- Top control panel -->
+<app-cartcontrol [cartName]="dataCart.getName()" (onDownloadSelected)="downloadSelectedFiles($event)"
+                 (onRemoveSelected)="removeSelectedFiles($event)"
+                 (onRemoveDownloaded)="remvoeDownloadedFiles($event)">
+</app-cartcontrol>
 
 <!-- Bundle plan -->
-<app-bundleplan [dataFiles]="dataFiles" [selectedData]="selectedData" [ediid]="ediid" (outputZipData)="updateZipDafa($event)" (outputOverallStatus)=updateOverallStatus($event)></app-bundleplan>
+<app-bundleplan #bundler [cartName]="dataCart.getName()" 
+                (outputOverallStatus)="updateCartOperationalStatus($event)">
+</app-bundleplan>
 
 <!-- Tree table -->
-<app-treetable [ediid]="ediid" [zipData]="zipData" (outputDataFiles)="updateDafaFiles($event)" (outputSelectedData)="updateSelectedData($event)"></app-treetable>
+<app-treetable [cartName]="dataCart.getName()"></app-treetable>
