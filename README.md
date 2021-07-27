@@ -1,5 +1,8 @@
 # Publishing Data Repository (oar-pdr)
 
+[![main branch status](https://github.com/usnistgov/oar-pdr/actions/workflows/main.yml/badge.svg)](https://github.com/usnistgov/oar-pdr/actions/workflows/main.yml) | 
+[![integration branch status](https://github.com/usnistgov/oar-pdr/actions/workflows/integration.yml/badge.svg)](https://github.com/usnistgov/oar-pdr/actions/workflows/integration.yml)
+
 This repository provides the implementation of the NIST Publishing
 Data Repository (PDR) platform, the technology that provides the NIST
 Data Publishing Repository (DPR).
