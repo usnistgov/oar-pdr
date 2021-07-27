@@ -1,6 +1,6 @@
 name: python-source
 on:
-  workflow-dispatch:
+  workflow_dispatch:
   push:
     branches-ignore: ['main', 'integration']
     paths:

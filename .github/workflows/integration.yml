@@ -22,6 +22,15 @@ jobs:
           bash scripts/dhsetup.sh
           cd docker && bash ./dockbuild.sh
 
-      - name: Run Unit Tests via Docker
-        run: cd docker && ./testall
+      - name: Build & Run Python Tests via Docker
+        run: cd docker && ./testall python
+
+      - name: Build & Run Java Tests via Docker
+        run: cd docker && ./makedist java
+
+      - name: Build Angular Code
+        run: cd docker && ./makedist angular
+
+      - name: Run Angular Tests
+        run: cd docker && ./testall angular
 
