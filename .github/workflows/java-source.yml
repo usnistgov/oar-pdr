@@ -1,0 +1,36 @@
+name: source-update
+on:
+  workflow_dispatch:
+  push:
+    branches-ignore: ['main', 'integration']
+    paths:
+      - 'java/src/**'
+      - 'java/pom.xml'
+jobs:
+  buildtest:
+    runs-on: ubuntu-20.04
+#    strategy:
+#      matrix:
+#        java: [ '8' ]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Cache Maven packages
+        uses: actions/cache@v2
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('java/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
+
+      - name: Set up JDK
+        uses: actions/setup-java@v2
+        with:
+          java-version: '8'
+          distribution: 'adopt'
+
+      - name: Test with Maven
+        run: cd java && mvn --batch-mode test
+
+
+  

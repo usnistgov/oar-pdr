@@ -1,0 +1,38 @@
+name: source-update
+on:
+  workflow_dispatch:
+  push:
+    branches-ignore: ['main', 'integration']
+    paths:
+      - 'angular/src/**'
+      - 'angular/pom.xml'
+jobs:
+  buildtest:
+    runs-on: ubuntu-20.04
+#    strategy:
+#      matrix:
+#        java: [ '8' ]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Setup node.js 10.9
+        uses: actions/setup-node@v2
+        with:
+          node-version: 10.9
+
+      - name: Setup dependency caching
+        uses: actions/cache@v2
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('angular/package-lock.json') }}
+          restore-keys: ${{ runner.os }}-node
+
+      - name: Install dependencies
+        run: cd angular && npm install
+
+      - name: Run unit tests
+        run: cd angular && npm test
+
+
+  
