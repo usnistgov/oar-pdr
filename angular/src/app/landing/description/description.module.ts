@@ -8,6 +8,7 @@ import { ToastrModule } from 'ngx-toastr';
 import { DirectivesModule } from '../../directives/directives.module';
 import { DescriptionComponent } from './description.component';
 import { DescriptionPopupComponent } from './description-popup/description-popup.component';
+import { ButtonModule } from 'primeng/primeng';
 
 /**
  * module that provides support for rendering and managing a resource's text description 
@@ -18,6 +19,7 @@ import { DescriptionPopupComponent } from './description-popup/description-popup
         FormsModule,
         ToolbarModule,
         DirectivesModule,
+        ButtonModule,
         ToastrModule.forRoot()
     ],
     declarations: [

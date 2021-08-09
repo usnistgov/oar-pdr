@@ -8,7 +8,9 @@ import { GoogleAnalyticsService } from '../../shared/ga-service/google-analytics
   selector: 'metadata-detail',
   template: `
   <div>
-  <p-fieldset legend="Native JSON (NERDm)" [toggleable]="true" [collapsed]="collapsed">
+  <ngx-json-viewer [json]="nerdmRecord" [(expanded)]="!collapsed"></ngx-json-viewer>
+
+  <p-fieldset legend="Native JSON (NERDm)" [toggleable]="true" [(collapsed)]="collapsed">
     <div class="ui-g" id="metadata-nerdm">
       <div *ngIf="inBrowser">
         <p style="margin-bottom: 0pt;">
@@ -27,6 +29,7 @@ import { GoogleAnalyticsService } from '../../shared/ga-service/google-analytics
       </div>
     </div>
   </p-fieldset>
+
   </div>
   `,
   styles: [`
@@ -36,15 +39,28 @@ import { GoogleAnalyticsService } from '../../shared/ga-service/google-analytics
   `]
 })
 export class MetadataComponent implements OnChanges {
-    // collapsed: boolean = true;
-    
+    nerdmRecord: any = {};
+    private _collapsed: boolean = true;
     @Input() record: NerdmRes;
     @Input() inBrowser: boolean;
-    @Input() collapsed: boolean = true;
+    // @Input() _collapsed: boolean = true;
+
+    public get collapsed() { return this._collapsed; }
+    public set collapsed(newValue) {
+        // logic
+        this._collapsed = true;
+        this._collapsed = newValue;
+    }
 
     constructor(private cfg: AppConfig, private gaService: GoogleAnalyticsService) {  }
 
+    ngOnInit(): void {
+        this.nerdmRecord["Native JSON (NERDm)"] = this.record;
+        console.log('this.nerdmRecord', this.nerdmRecord)
+    }
+
     ngOnChanges(changes: SimpleChanges) {
+        // console.log("this.collapsed", this.collapsed);
         if (this.record && this.record["_id"]) 
             delete this.record["_id"];
     }
@@ -68,4 +84,7 @@ export class MetadataComponent implements OnChanges {
 
         return out;
     }
+
+
+
 }

@@ -9,6 +9,7 @@ import { ToastrModule } from 'ngx-toastr';
 
 import { TopicComponent } from './topic.component';
 import { SearchTopicsComponent } from './topic-popup/search-topics.component';
+import { ButtonModule } from 'primeng/primeng';
 
 /**
  * module that provide support for rendering and managing a resource's list of 
@@ -21,6 +22,7 @@ import { SearchTopicsComponent } from './topic-popup/search-topics.component';
         ToolbarModule,
         TreeTableModule,
         OverlayPanelModule,
+        ButtonModule,
         ToastrModule.forRoot()
     ],
     declarations: [

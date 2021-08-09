@@ -2,6 +2,7 @@ import { Component, OnChanges, SimpleChanges, Input, ViewChild } from '@angular/
 
 import { AppConfig } from '../../config/config';
 import { NerdmRes, NERDResource } from '../../nerdm/nerdm';
+import { MetadataComponent } from '../metadata/metadata.component';
 
 /**
  * a component that lays out the "metadata" section of a landing page
@@ -17,11 +18,23 @@ import { NerdmRes, NERDResource } from '../../nerdm/nerdm';
     ]
 })
 export class ResourceMetadataComponent implements OnChanges {
+    private _showMetadata: boolean = false;
 
     // passed in by the parent component:
     @Input() record: NerdmRes = null;
     @Input() inBrowser: boolean = false;
-    @Input() showNerdm: boolean = false;
+    // @Input() showNerdm: boolean = false;
+
+    @ViewChild(MetadataComponent)
+    metadataComponent: MetadataComponent;
+
+    get showMetadata() { return this._showMetadata; }
+    set showMetadata(newValue) {
+        this.metadataComponent.collapsed = !newValue;
+
+        // logic
+        this._showMetadata = newValue;
+    }
 
     /**
      * create an instance of the Identity section
@@ -30,6 +43,7 @@ export class ResourceMetadataComponent implements OnChanges {
     { }
 
     ngOnChanges(ch: SimpleChanges) {
+        // this.metadataComponent.collapsed = !this.showNerdm;
         if (this.record)
             this.useMetadata();  // initialize internal component data based on metadata
     }

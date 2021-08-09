@@ -10,6 +10,7 @@ import { SharedModule } from '../../shared/shared.module';
 import { AuthorComponent } from './author.component';
 import { AuthorPopupComponent } from './author-popup/author-popup.component';
 import { AuthorService } from './author.service';
+import { ButtonModule } from 'primeng/primeng';
 
 /**
  * module that provide support for rendering and managing a resource's 
@@ -22,6 +23,7 @@ import { AuthorService } from './author.service';
         SharedModule,
         ToolbarModule,
         CollapseModule,
+        ButtonModule,
         ToastrModule.forRoot()
     ],
     declarations: [

@@ -5,11 +5,10 @@
 
 <div class="popup-tool-bar">
     <!-- Buttons are arranged from right to left -->
-
-    <p-toolbar name="toolbar">
+    <p-toolbar name="toolbar" [style]="{'background':'none','border-width':'0'}">
         <div class="ui-toolbar-group-left">
             <i [ngClass]="getAuthorClass()" (click)="handleAuthorDisplay()"
-                style="cursor:pointer;vertical-align: middle;" data-toggle="tooltip"
+                style="cursor:pointer;vertical-align: middle;color: white;" data-toggle="tooltip"
                 title="Expend/collapse author details"></i>
         </div>
         <div class="ui-toolbar-group-right">

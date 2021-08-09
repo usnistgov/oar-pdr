@@ -19,6 +19,8 @@ import { DataCartStatus } from '../datacart/cartstatus';
 import { RecordLevelMetrics } from '../metrics/metrics';
 import { MetricsService } from '../shared/metrics-service/metrics.service';
 import { formatBytes } from '../utils';
+import { LandingBodyComponent } from './landingbody.component';
+
 
 /**
  * A component providing the complete display of landing page content associated with 
@@ -73,6 +75,9 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
     fileLevelMetrics: any;
     hasCurrentMetrics: boolean = false;
     showMetrics: boolean = false;
+
+    @ViewChild(LandingBodyComponent)
+    landingBodyComponent: LandingBodyComponent;
 
     /**
      * create the component.
@@ -372,10 +377,8 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
 
     goToSection(sectionId: string) {
         this.showMetadata = (sectionId == "metadata");
-        if (sectionId) 
-            this.router.navigate(['/od/id/', this.reqId], { fragment: sectionId });
-        else
-            this.router.navigate(['/od/id/', this.reqId], { fragment: "" });
+        this.landingBodyComponent.showMetadata = this.showMetadata;
+        this.landingBodyComponent.sectionId = sectionId;
     }
 
     /**
