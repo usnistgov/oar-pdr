@@ -8,8 +8,6 @@ import { GoogleAnalyticsService } from '../../shared/ga-service/google-analytics
   selector: 'metadata-detail',
   template: `
   <div>
-  <ngx-json-viewer [json]="nerdmRecord" [(expanded)]="!collapsed"></ngx-json-viewer>
-
   <p-fieldset legend="Native JSON (NERDm)" [toggleable]="true" [(collapsed)]="collapsed">
     <div class="ui-g" id="metadata-nerdm">
       <div *ngIf="inBrowser">
@@ -53,11 +51,6 @@ export class MetadataComponent implements OnChanges {
     }
 
     constructor(private cfg: AppConfig, private gaService: GoogleAnalyticsService) {  }
-
-    ngOnInit(): void {
-        this.nerdmRecord["Native JSON (NERDm)"] = this.record;
-        console.log('this.nerdmRecord', this.nerdmRecord)
-    }
 
     ngOnChanges(changes: SimpleChanges) {
         // console.log("this.collapsed", this.collapsed);

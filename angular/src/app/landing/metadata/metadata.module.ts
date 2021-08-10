@@ -7,15 +7,13 @@ import { ButtonModule } from 'primeng/button';
 
 import { MetadataComponent } from './metadata.component'
 import { MetadataView } from './metadataview.component'
-import { NgxJsonViewerModule } from 'ngx-json-viewer';
 
 /**
  * module that provides interfaces for accessing and visualizing the resource's metadata in various formats
  */
 @NgModule({
     imports: [
-        CommonModule, BrowserAnimationsModule, FieldsetModule, ButtonModule,
-        NgxJsonViewerModule
+        CommonModule, BrowserAnimationsModule, FieldsetModule, ButtonModule
     ],
     declarations: [
         MetadataComponent, MetadataView
