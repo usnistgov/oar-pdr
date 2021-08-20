@@ -67,8 +67,6 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
     recordLevelMetrics : RecordLevelMetrics;
     metricsUrl: string;
 
-    showMetadata = false;
-
     loadingMessage = '<i class="faa faa-spinner faa-spin"></i> Loading...';
 
     dataCartStatus: DataCartStatus;
@@ -375,10 +373,17 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
         });
     }
 
+    /**
+     * scroll the view to the named section.  
+     *
+     * This funtion delegates the scrolling to the LandingBodyComponent which defines the available 
+     * sections.  
+     */
     goToSection(sectionId: string) {
-        this.showMetadata = (sectionId == "metadata");
-        this.landingBodyComponent.showMetadata = this.showMetadata;
-        this.landingBodyComponent.sectionId = sectionId;
+        this.landingBodyComponent.showMetadata = (sectionId == "metadata");
+        setTimeout(() => {
+            this.landingBodyComponent.goToSection(sectionId);
+        }, 50);
     }
 
     /**

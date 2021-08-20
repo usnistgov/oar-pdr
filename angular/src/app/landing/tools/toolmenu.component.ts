@@ -124,7 +124,7 @@ export class ToolMenuComponent implements OnChanges {
         if (this.record['references'])
             subitems.push(
                 this.createMenuItem("References", "faa faa-arrow-circle-right ",
-                                    (event) => { this.goToSection('reference'); }, null)
+                                    (event) => { this.goToSection('references'); }, null)
             );
         
         subitems.push(

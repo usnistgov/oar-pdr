@@ -18,7 +18,6 @@ import { MetadataComponent } from '../metadata/metadata.component';
     ]
 })
 export class ResourceMetadataComponent implements OnChanges {
-    private _showMetadata: boolean = false;
 
     // passed in by the parent component:
     @Input() record: NerdmRes = null;
@@ -28,12 +27,9 @@ export class ResourceMetadataComponent implements OnChanges {
     @ViewChild(MetadataComponent)
     metadataComponent: MetadataComponent;
 
-    get showMetadata() { return this._showMetadata; }
+    get showMetadata() { return !this.metadataComponent.collapsed; }
     set showMetadata(newValue) {
         this.metadataComponent.collapsed = !newValue;
-
-        // logic
-        this._showMetadata = newValue;
     }
 
     /**

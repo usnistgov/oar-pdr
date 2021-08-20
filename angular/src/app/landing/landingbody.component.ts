@@ -35,38 +35,41 @@ import { Console } from 'console';
     ]
 })
 export class LandingBodyComponent {
-    private _showMetadata: boolean = false;
-    private _sectionId: string = "";
 
     // passed in by the parent component:
     @Input() md: NerdmRes = null;
     @Input() inBrowser: boolean = false;
     @Input() editEnabled: boolean;
-    // @Input() showMetadata: boolean = false;
 
     @ViewChild(ResourceMetadataComponent)
     resourceMetadataComponent: ResourceMetadataComponent;
 
-    @ViewChild('top') top: ElementRef;
     @ViewChild('description') description: ElementRef;
     @ViewChild('dataAccess') dataAccess: ElementRef;
-    @ViewChild('reference') reference: ElementRef;
+    @ViewChild('references') references: ElementRef;
     @ViewChild('metadata') metadata: ElementRef;
     
     // Show/hide metadata
-    get showMetadata() { return this._showMetadata; }
+    get showMetadata() { return this.resourceMetadataComponent.showMetadata; }
     set showMetadata(newValue) {
         this.resourceMetadataComponent.showMetadata = newValue;
-        // logic
-        this._showMetadata = newValue;
     }
 
-    // Go to section
-    get sectionId() { return this._sectionId; }
-    set sectionId(newValue) {
-        if(newValue == null) newValue = "top";
+    /**
+     * create an instance of the Identity section
+     */
+    constructor(private cfg: AppConfig)
+    { }
 
-        switch(newValue) { 
+    /**
+     * scroll the view to the named section.  The available sections are: "top", "description",
+     * "dataAccess", "references", and "metadata".  Any other value will be treated as "top".  
+     * (Note that the "references" section may be omitted if there are no references to be displayed.)
+     */
+    goToSection(sectionId) {
+        if(sectionId == null) sectionId = "top";
+
+        switch(sectionId) { 
             case "description": { 
                 this.description.nativeElement.scrollIntoView({behavior: 'smooth'}); 
                break; 
@@ -75,8 +78,8 @@ export class LandingBodyComponent {
                 this.dataAccess.nativeElement.scrollIntoView({behavior: 'smooth'}); 
                break; 
             } 
-            case "reference": {
-                this.reference.nativeElement.scrollIntoView({behavior: 'smooth'}); 
+            case "references": {
+                this.references.nativeElement.scrollIntoView({behavior: 'smooth'}); 
                 break;
             }
             case "metadata": {
@@ -89,18 +92,8 @@ export class LandingBodyComponent {
                     left: 0,
                     behavior: 'smooth'
                   });
-                // window.scrollTo(0, 0);
-                // this.top.nativeElement.scrollIntoView({behavior: 'smooth'}); 
-               break; 
+                break; 
             } 
         } 
-
-        this._sectionId = newValue;
     }
-
-    /**
-     * create an instance of the Identity section
-     */
-    constructor(private cfg: AppConfig)
-    { }
 }
