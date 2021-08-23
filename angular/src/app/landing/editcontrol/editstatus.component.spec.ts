@@ -2,6 +2,7 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { CommonModule, DatePipe } from '@angular/common';
 
 import { EditStatusComponent } from './editstatus.component';
+import { EditStatusService } from './editstatus.service';
 import { MetadataUpdateService } from './metadataupdate.service';
 import { UserMessageService } from '../../frame/usermessage.service';
 import { AuthService, WebAuthService, MockAuthService } from '../editcontrol/auth.service';
@@ -15,6 +16,7 @@ describe('EditStatusComponent', () => {
     let fixture : ComponentFixture<EditStatusComponent>;
     let authsvc : AuthService = new MockAuthService(undefined);
     let cfg : AppConfig = new AppConfig(config);
+    cfg['editEnabled'] = true;
     let userDetails: UserDetails = {
         'userId': 'dsn1',
         'userName': 'test01',
@@ -33,7 +35,7 @@ describe('EditStatusComponent', () => {
             imports: [ CommonModule ],
             declarations: [ EditStatusComponent ],
             providers: [
-                UserMessageService, MetadataUpdateService, DatePipe,
+                UserMessageService, MetadataUpdateService, DatePipe, EditStatusService,
                 { provide: AuthService, useValue: authsvc },
                 { provide: AppConfig, useValue: cfg }
             ]
@@ -41,6 +43,7 @@ describe('EditStatusComponent', () => {
 
         fixture = TestBed.createComponent(EditStatusComponent);
         component = fixture.componentInstance;
+        component._editmode = EDIT_MODES.EDIT_MODE;
     }
 
     beforeEach(async(() => {

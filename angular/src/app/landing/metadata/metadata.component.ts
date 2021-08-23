@@ -1,69 +1,83 @@
-import { Component, Input, Pipe,PipeTransform } from '@angular/core';
+import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
+
+import { AppConfig } from '../../config/config';
+import { NerdmRes, NERDResource } from '../../nerdm/nerdm';
 import { GoogleAnalyticsService } from '../../shared/ga-service/google-analytics.service';
 
 @Component({
   selector: 'metadata-detail',
   template: `
-    <div class="ui-g">
-     <div *ngIf="inBrowser">
-       <div [hidden]="!metadata" class = "ui-g-12 ui-md-12 ui-lg-12 ui-sm-12" >
-         <h3><b>Metadata</b></h3>
+  <div>
+  <p-fieldset legend="Native JSON (NERDm)" [toggleable]="true" [(collapsed)]="collapsed">
+    <div class="ui-g" id="metadata-nerdm">
+      <div *ngIf="inBrowser">
+        <p style="margin-bottom: 0pt;">
           <span style="">
-            For more information about the metadata, consult the <a href="/od/dm/nerdm/" (click)="gaService.gaTrackEvent('outbound', undefined, 'Resource title: ' + record.title, '/od/dm/nerdm/')">NERDm documentation</a>. 
+            For more information about the metadata, consult the 
+            <a href="/od/dm/nerdm/" (click)="gaService.gaTrackEvent('outbound', undefined, 'Resource title: ' + record.title, '/od/dm/nerdm/')">NERDm documentation</a>. 
           </span>
-          <a [href]='this.serviceApi' style="position:relative; float:right;">
-          <button style="background-color: #1371AE;" type="button" pButton icon="faa faa-file-code-o"
-                    title="Get Metadata in JSON format." label="json" (click)="onjson()"></button></a>
-          <br>
-          <span style="font-size:8pt;color:grey;" >* item[number] indicates an array not a key name</span>
-          <br><br>
-         <div *ngIf="inBrowser"><fieldset-view [entry]="record"></fieldset-view></div>
-        </div>
+          <a [href]='getDownloadURL()' style="position:relative; float:right;">
+          <button style="background-color: #1371AE; color: white;" type="button" pButton 
+                  icon="faa faa-file-code-o" title="Get Metadata in JSON format." label="JSON" 
+                  (click)="onjson()"></button></a>
+          <br/>
+          <span style="font-size:8pt;color:grey;" >* "item [<i>number</i>]" indicates an item in a list</span>
+        </p>
+        <div *ngIf="inBrowser"><fieldset-view [entry]="record"></fieldset-view></div>
       </div>
     </div>
-  `
-})
+  </p-fieldset>
 
-export class MetadataComponent {
-  
-  @Input() record: any[];
-  @Input() serviceApi : string;
-  @Input() metadata : boolean;
-  @Input() inBrowser : boolean;
-
-  constructor(private gaService: GoogleAnalyticsService){
-
-  }
-
-  ngOnInit() {
-    if(this.record != undefined && this.record != null){
-      delete this.record["_id"];
+  </div>
+  `,
+  styles: [`
+    :host /deep/ .ui-fieldset-legend {
+        font-size: 12pt;
     }
-  }
-   
-  generateArray(obj){
-     return Object.keys(obj).map((key)=>{ return obj[key]; });
-  }
+  `]
+})
+export class MetadataComponent implements OnChanges {
+    nerdmRecord: any = {};
+    private _collapsed: boolean = true;
+    @Input() record: NerdmRes;
+    @Input() inBrowser: boolean;
+    // @Input() _collapsed: boolean = true;
 
-  private testKeys: Object;
-  private testVals;
-   
-   createKeyVal(objArray){
-     this.testKeys = Object.keys(objArray);
-     this.testVals = this.generateArray(objArray);
-     let tempString ="";
-     for(let v of this.testVals)
-      tempString += v +",";
-     return tempString;
-  }
+    public get collapsed() { return this._collapsed; }
+    public set collapsed(newValue) {
+        // logic
+        this._collapsed = true;
+        this._collapsed = newValue;
+    }
 
-  isArray(obj : any ) {
-     return Array.isArray(obj);
-  }
+    constructor(private cfg: AppConfig, private gaService: GoogleAnalyticsService) {  }
 
-  onjson(){
-    this.gaService.gaTrackEvent('download', undefined, this.record['title'], this.serviceApi);
-    //alert(this.serviceApi);
-    // window.open(this.serviceApi);
-  }
+    ngOnChanges(changes: SimpleChanges) {
+        // console.log("this.collapsed", this.collapsed);
+        if (this.record && this.record["_id"]) 
+            delete this.record["_id"];
+    }
+
+    onjson() {
+        this.gaService.gaTrackEvent('download', undefined, this.record['title'], this.getDownloadURL());
+    }
+
+    /**
+     * return the URL that will download the NERDm metadata for the current resource
+     */
+    getDownloadURL() : string {
+        let out = this.cfg.get("locations.mdService", "/unconfigured");
+
+        if (out.search("/rmm/") >= 0) 
+            out += "?@id=" + this.record['@id'];
+        else {
+            if (out.slice(-1) != '/') out += '/';
+            out += this .record['ediid'];
+        }
+
+        return out;
+    }
+
+
+
 }

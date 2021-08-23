@@ -1,6 +1,6 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { KeywordModule, KeywordComponent } from './keyword.module';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
-import { KeywordComponent } from './keyword.component';
 import { AppConfig } from '../../config/config';
 import { AngularEnvironmentConfigService } from '../../config/config.service';
 import { TransferState } from '@angular/platform-browser';
@@ -27,8 +27,11 @@ describe('KeywordComponent', () => {
         cfg.appVersion = "2.test";
 
         TestBed.configureTestingModule({
-            imports: [FormsModule, HttpClientTestingModule, RouterTestingModule, ToastrModule.forRoot()],
-            declarations: [KeywordComponent],
+            imports: [
+                KeywordModule,
+                FormsModule, HttpClientTestingModule, RouterTestingModule, ToastrModule.forRoot()
+            ],
+            declarations: [],
             providers: [
                 MetadataUpdateService, UserMessageService, DatePipe,
                 { provide: AppConfig, useValue: cfg },

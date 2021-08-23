@@ -4,7 +4,7 @@ import {Component, Input} from '@angular/core';
   moduleId: module.id,
   styleUrls: ['metadataview.component.css'],
   template: `
-    <div *ngFor="let node of (entry | keyvalues)" >
+    <div *ngFor="let node of (entry | keyvalue)" >
       <div *ngIf="!isArrayOrObject(node.value)" class="ui-g break-long-words" style="padding:0;">
         <div class="ui-g-2 ui-md-3 ui-lg-2 ui-sm-3" style="padding:0;">
           <span style="color:#1471AE; word-wrap: break-word;">{{ifIntegerThenitem(node.key)}}</span>
@@ -24,7 +24,7 @@ import {Component, Input} from '@angular/core';
   `
 })
 export class MetadataView {
-  @Input() entry:any[];
+  @Input() entry: any;
   
   isArray(obj : any ) {
     return Array.isArray(obj);

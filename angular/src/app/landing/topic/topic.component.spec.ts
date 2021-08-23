@@ -1,6 +1,6 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { TopicModule, TopicComponent } from './topic.module';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
-import { TopicComponent } from './topic.component';
 import { RouterTestingModule } from '@angular/router/testing';
 import { FormsModule } from '@angular/forms';
 import { AppConfig } from '../../config/config';
@@ -27,8 +27,9 @@ describe('TopicComponent', () => {
         cfg.appVersion = "2.test";
 
         TestBed.configureTestingModule({
-            imports: [FormsModule, HttpClientTestingModule, RouterTestingModule, ToastrModule.forRoot()],
-            declarations: [TopicComponent],
+            imports: [TopicModule, FormsModule, HttpClientTestingModule, RouterTestingModule,
+                      ToastrModule.forRoot()],
+            declarations: [],
             providers: [
                 MetadataUpdateService, UserMessageService, DatePipe,
                 { provide: AppConfig, useValue: cfg },

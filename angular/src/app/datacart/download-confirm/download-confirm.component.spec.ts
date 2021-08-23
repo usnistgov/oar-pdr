@@ -1,7 +1,6 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { DownloadConfirmComponent } from './download-confirm.component';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
-import { CommonFunctionService } from '../../shared/common-function/common-function.service';
 import { config } from '../../../environments/environment';
 import { AppConfig } from '../../config/config';
 
@@ -13,7 +12,7 @@ describe('DownloadConfirmComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       declarations: [ DownloadConfirmComponent ],
-      providers: [{ provide: AppConfig, useValue: cfg }, NgbActiveModal, CommonFunctionService]
+      providers: [{ provide: AppConfig, useValue: cfg }, NgbActiveModal]
     })
     .compileComponents();
   }));

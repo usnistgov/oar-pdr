@@ -10,7 +10,7 @@
 import {Directive, Input, HostBinding,ElementRef, Renderer} from '@angular/core';
 
 @Directive({selector: '[collapse]'})
-export class Collaspe {
+export class Collapse {
 
   layoutCompact: boolean = true;
   layoutMode: string = 'horizontal';

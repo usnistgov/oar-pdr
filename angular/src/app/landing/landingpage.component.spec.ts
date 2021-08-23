@@ -1,22 +1,22 @@
 import { ElementRef } from '@angular/core';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { TransferState } from '@angular/platform-browser';
-import { Title }    from '@angular/platform-browser';
 import { ActivatedRoute, Router, Routes } from '@angular/router';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { ModalService } from '../shared/modal-service';
+import { DatePipe } from '@angular/common';
 import { ToastrModule } from 'ngx-toastr';
 
+import { ModalService } from '../shared/modal-service';
 import { LandingPageModule } from './landingpage.module';
 import { LandingPageComponent } from './landingpage.component';
-import { ToolsModule } from './tools/tools.module';
-import { CitationModule } from './citation/citation.module';
 import { AngularEnvironmentConfigService } from '../config/config.service';
 import { AppConfig } from '../config/config'
 import { MetadataTransfer, NerdmRes } from '../nerdm/nerdm'
 import { MetadataService, TransferMetadataService } from '../nerdm/nerdm.service'
+import { MetadataUpdateService } from './editcontrol/metadataupdate.service';
 import { UserMessageService } from '../frame/usermessage.service';
+import { AuthService, WebAuthService, MockAuthService } from './editcontrol/auth.service';
 import { CartService } from "../datacart/cart.service";
 import { DownloadService } from "../shared/download-service/download-service.service";
 import { TestDataService } from '../shared/testdata-service/testDataService';
@@ -36,6 +36,7 @@ describe('LandingPageComponent', () => {
     let mds : MetadataService;
     let route : ActivatedRoute;
     let router : Router;
+    let authsvc : AuthService = new MockAuthService()
     // let title : mock.MockTitle;
 
     let routes : Routes = [
@@ -69,8 +70,8 @@ describe('LandingPageComponent', () => {
     let setupComponent = function() {
         TestBed.configureTestingModule({
             imports: [
-                HttpClientTestingModule, BrowserAnimationsModule, LandingPageModule, ToolsModule, CitationModule,
-                RouterTestingModule.withRoutes(routes),
+                HttpClientTestingModule, BrowserAnimationsModule, LandingPageModule, 
+                RouterTestingModule.withRoutes(routes), 
                 ToastrModule.forRoot({
                     toastClass: 'toast toast-bootstrap-compatibility-fix'
                 })
@@ -80,7 +81,8 @@ describe('LandingPageComponent', () => {
                 { provide: ElementRef,      useValue: null },
                 { provide: AppConfig,       useValue: cfg },
                 { provide: MetadataService, useValue: mds },
-                UserMessageService,
+                { provide: AuthService,     useValue: authsvc }, 
+                UserMessageService, MetadataUpdateService, DatePipe,
                 CartService, DownloadService, TestDataService, GoogleAnalyticsService, ModalService
             ]
         }).compileComponents();
@@ -98,8 +100,10 @@ describe('LandingPageComponent', () => {
 
     it("includes landing display", function() {
         setupComponent();
+        expect(component).toBeTruthy();
         let cmpel = fixture.nativeElement;
-        let el = cmpel.querySelector("h2"); 
+        let el = cmpel.querySelector("h2");
+        expect(el).toBeTruthy();
         expect(el.textContent).toContain(nrd.title);
     });
 

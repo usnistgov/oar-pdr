@@ -1,0 +1,30 @@
+<div id="resourcebody" class="ui-grid ui-grid-responsive ui-grid-pad center" style="border: 0px solid white;">
+    <div class="card landing-body">
+        <div *ngIf="md">
+            <!-- sections of the landing page body -->
+
+            <!-- identity information -->
+            <a name="identity" #identity></a>
+            <pdr-resource-id [record]="md" [inBrowser]="inBrowser" [editEnabled]="editEnabled">
+            </pdr-resource-id>
+
+            <!-- description: abstract, keywords, research areas, etc. -->
+            <a name="description" #description></a>
+            <pdr-resource-desc [record]="md" [inBrowser]="inBrowser"></pdr-resource-desc>
+
+            <!-- data access, include available files -->
+            <a name="dataAccess" #dataAccess></a>
+            <pdr-resource-data [record]="md" [inBrowser]="inBrowser" [editEnabled]="editEnabled">
+            </pdr-resource-data>
+
+            <!-- references -->
+            <a name="references" #references></a>
+            <pdr-resource-refs [record]="md" [inBrowser]="inBrowser"></pdr-resource-refs>
+
+            <!-- metadata visualization and export -->
+            <a name="metadata" #metadata></a>
+            <pdr-resource-md [record]="md" [inBrowser]="inBrowser">
+            </pdr-resource-md>
+        </div>
+    </div>
+</div>

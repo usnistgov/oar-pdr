@@ -57,13 +57,17 @@ describe('DataFilesComponent', () => {
     fixture = TestBed.createComponent(DataFilesComponent);
     component = fixture.componentInstance;
     component.record = record;
-    component.ediid = record['ediid'];  
     // component.distdownload = "/od/ds/zip?id=ark:/88434/mds0149s9z";
     // component.filescount = 8;
-    component.metadata = false;
     // component.recordEditmode = false;
     component.inBrowser = true;
+    component.ngOnChanges({});
     fixture.detectChanges();
+  });
+
+  afterEach(() => {
+    localStorage.clear();
+    sessionStorage.clear();
   });
 
   it('should create', () => {
@@ -74,14 +78,22 @@ describe('DataFilesComponent', () => {
     expect(component.allInCart).toBeFalsy();
   });
 
-  it('Should have title Data Access', () => {
-    fixture.detectChanges();
-    expect(fixture.nativeElement.querySelector('h3').innerText).toEqual('Data Access');
+  it('Should have title Files', () => {
+    expect(fixture.nativeElement.querySelectorAll('#filelist-heading').length).toEqual(1);
+    expect(fixture.nativeElement.querySelector('#filelist-heading').innerText).toEqual('Files ');
   });
 
   it('Should have file tree table', () => {
-    fixture.detectChanges();
     expect(fixture.nativeElement.querySelectorAll('th').length).toBeGreaterThan(0);
+  });
+
+  it('Empty display when there are no files', () => {
+    let rec: any = JSON.parse(JSON.stringify(require('../../../assets/sampleRecord.json')));
+    rec['components'] = []
+    component.record = rec
+    component.ngOnChanges({});
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelectorAll('#filelist-heading').length).toEqual(0);
   });
 
   it('toggleAllFilesInGlobalCart() should be called', () => {

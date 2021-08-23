@@ -31,14 +31,25 @@ describe('NERDResource', function() {
     it("_striptypes", function() {
         let nrd = testdata['test1']
         expect(nerdm.NERDResource._striptypes(nrd)).toEqual(["PublicDataResource"]);
+        expect(nerdm.NERDResource._striptypes(nrd, "@type")).toEqual(["PublicDataResource"]);
+        expect(nerdm.NERDResource._striptypes(nrd, "goob")).toEqual([]);
         expect(nerdm.NERDResource._striptypes(nrd['components'][1])).toEqual(["DataFile","Distribution"]);
+
         expect(nerdm.NERDResource._striptypes({'@type': "goob"})).toEqual(["goob"]);
         expect(nerdm.NERDResource._striptypes({'@type': ["ns:gurn", "goob"]})).toEqual(["goob","gurn"]);
+
+        expect(nerdm.NERDResource._striptypes({'@type': "goob",
+                                               'mytype': "gurn" },"mytype")).toEqual(["gurn"]);
     });
 
     it("_typesintersect", function() {
         let nrd = testdata['test1']
         expect(nerdm.NERDResource._typesintersect(nrd, ["PublicDataResource"])).toBe(true);
+        expect(nerdm.NERDResource._typesintersect(nrd, ["PublicDataResource"], "@type")).toBe(true);
+        expect(nerdm.NERDResource._typesintersect(nrd, ["PublicDataResource"], "keyword")).toBe(false);
+        expect(nerdm.NERDResource._typesintersect(nrd, ["face","hand"], "keyword")).toBe(true);
+        expect(nerdm.NERDResource._typesintersect(nrd, ["foot","hand"], "keyword")).toBe(false);
+
         expect(nerdm.NERDResource._typesintersect(nrd, ["SRD"])).toBe(false);
         let cmp = nrd['components'][1];
         expect(nerdm.NERDResource._typesintersect(cmp, ["SRD"])).toBe(false);
@@ -133,6 +144,32 @@ describe('NERDResource', function() {
         expect(nrd.countFileListComponents()).toEqual(3);
     });
 
+    it("getReferencesByType", () => {
+        let nrd = new nerdm.NERDResource(testdata['test1']);
+        let refs : any[] = nrd.getReferencesByType(["IsReferencedBy","IsDocumentedBy"]);
+        expect(refs.length).toBe(1);
+        expect(refs[0].refType).toBe("IsDocumentedBy");
+
+        refs = nrd.getReferencesByType(["IsSupplementTo","IsReferencedBy"]);
+        expect(refs.length).toBe(0);
+    });
+
+    it("getPrimaryReferences", () => {
+        let nrd = new nerdm.NERDResource(JSON.parse(JSON.stringify(testdata['test1'])));
+        let refs : any[] = nrd.getPrimaryReferences();
+        expect(refs.length).toBe(1);
+        expect(refs[0]['refType']).toBe("IsDocumentedBy");
+
+        nrd.data.references[0]['refType'] = "IsSupplementTo"
+        refs = nrd.getPrimaryReferences();
+        expect(refs.length).toBe(1);
+        expect(refs[0]['refType']).toBe("IsSupplementTo");
+
+        nrd.data['references'][0]['refType'] = "IsReferencedBy"
+        refs = nrd.getPrimaryReferences();
+        expect(refs.length).toBe(0);
+    });
+
     it("getCitation", () => {
         let nrd = new nerdm.NERDResource(testdata['test2']);
         let cstr = nrd.getCitation();
@@ -141,13 +178,13 @@ describe('NERDResource', function() {
 
         nrd = new nerdm.NERDResource(testdata['test1']);
         cstr = nrd.getCitation();
-//        expect(cstr).toBe("Patricia Flanagan (2011), Multiple Encounter Dataset (MEDS-I) - NIST Special Database 32, National Institute of Standards and Technology, https://www.nist.gov/itl/iad/image-group/special-database-32-multiple-encounter-dataset-meds (Accessed ");
-        expect(cstr).toContain("Patricia Flanagan (2011), Multiple Encounter Dataset (MEDS-I) - NIST Special Database 32, National Institute of Standards and Technology, https://www.nist.gov/itl/iad/image-group/special-database-32-multiple-encounter-dataset-meds (Accessed ");
+//        expect(cstr).toBe("Patricia Flanagan (2019), Multiple Encounter Dataset (MEDS-I) - NIST Special Database 32, National Institute of Standards and Technology, https://www.nist.gov/itl/iad/image-group/special-database-32-multiple-encounter-dataset-meds (Accessed ");
+        expect(cstr).toContain("Patricia Flanagan (2019), Multiple Encounter Dataset (MEDS-I) - NIST Special Database 32, National Institute of Standards and Technology, https://www.nist.gov/itl/iad/image-group/special-database-32-multiple-encounter-dataset-meds (Accessed ");
 
         nrd = new nerdm.NERDResource(_.cloneDeep(testdata['test1']));
         delete nrd.data['contactPoint']['fn'];
         cstr = nrd.getCitation();
-        expect(cstr).toContain("National Institute of Standards and Technology (2011), Multiple Encounter Dataset (MEDS-I) - NIST Special Database 32, National Institute of Standards and Technology, https://www.nist.gov/itl/iad/image-group/special-database-32-multiple-encounter-dataset-meds (Accessed ");
+        expect(cstr).toContain("National Institute of Standards and Technology (2019), Multiple Encounter Dataset (MEDS-I) - NIST Special Database 32, National Institute of Standards and Technology, https://www.nist.gov/itl/iad/image-group/special-database-32-multiple-encounter-dataset-meds (Accessed ");
     });
 });
 

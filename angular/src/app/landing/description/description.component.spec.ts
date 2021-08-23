@@ -1,6 +1,6 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { DescriptionModule, DescriptionComponent } from './description.module';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
-import { DescriptionComponent } from './description.component';
 import { AppConfig } from '../../config/config';
 import { AngularEnvironmentConfigService } from '../../config/config.service';
 import { TransferState } from '@angular/platform-browser';
@@ -28,8 +28,11 @@ describe('DescriptionComponent', () => {
         cfg.appVersion = "2.test";
 
         TestBed.configureTestingModule({
-            imports: [FormsModule, HttpClientTestingModule, RouterTestingModule, ToastrModule.forRoot()],
-            declarations: [DescriptionComponent],
+            imports: [
+                DescriptionModule,
+                FormsModule, HttpClientTestingModule, RouterTestingModule, ToastrModule.forRoot()
+            ],
+            declarations: [],
             providers: [
                 MetadataUpdateService, UserMessageService, DatePipe,
                 { provide: AppConfig, useValue: cfg },

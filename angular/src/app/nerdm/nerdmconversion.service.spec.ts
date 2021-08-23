@@ -25,7 +25,7 @@ describe('convert functions', function() {
         expect(so.creator.length).toEqual(1);
         expect(so.creator[0]).toEqual(so.maintainer);
         expect(so.mainEntityOfPage).toEqual(testdata['test1']['landingPage']);
-        expect(so.url).toEqual("https://data.nist.gov/od/id/test1");
+        expect(so.url).toEqual("https://data.nist.gov/od/id/26DEA39AD677678AE0531A570681F32C1449");
     });
 });
 
@@ -70,7 +70,7 @@ describe('convert functions', function() {
         expect(so.md['publisher']).toBeTruthy();
         expect(so.md['citation']).toBeTruthy();
         expect(so.md['mainEntityOfPage']).toEqual(testdata['test1']['landingPage']);
-        expect(so.md['url']).toEqual("https://data.nist.gov/od/id/test1");
+        expect(so.md['url']).toEqual("https://data.nist.gov/od/id/26DEA39AD677678AE0531A570681F32C1449");
 
         expect(svc.convertTo(testdata['test1'], "scare")).toBeNull();
 

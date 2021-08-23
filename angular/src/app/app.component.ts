@@ -6,34 +6,32 @@ import { AppConfig } from './config/config';
 import { isPlatformBrowser } from '@angular/common';
 
 @Component({
-  selector: 'app-root',
-  templateUrl: './app.component.html',
-  styleUrls: ['./app.component.css']
+    selector: 'app-root',
+    templateUrl: './app.component.html',
+    styleUrls: ['./app.component.css']
 })
 export class AppComponent {
-  title = 'PDR Resource Landing Page';
-  gaCode: string;
-  inBrowser: boolean = false;
+    title = 'PDR Resource Landing Page';
+    gaCode: string;
+    inBrowser: boolean = false;
 
-  constructor(
-    private gaService: GoogleAnalyticsService,
-    private cfg: AppConfig,
-    @Inject(PLATFORM_ID) private platformId: Object
-  ) { 
-    this.inBrowser = isPlatformBrowser(platformId);
-  }
-
-  ngOnInit() {
-  }
-
-  ngAfterViewInit(): void {
-    //Called after ngAfterContentInit when the component's view has been initialized. Applies to components only.
-    //Add 'implements AfterViewInit' to the class.
-    // Add Google Analytics service
-    if(this.inBrowser){
-      this.gaCode = this.cfg.get("gaCode", "") as string;
-      this.gaService.appendGaTrackingCode(this.gaCode);
+    constructor(private gaService: GoogleAnalyticsService,
+                private cfg: AppConfig,
+                @Inject(PLATFORM_ID) private platformId: Object)
+    { 
+        this.inBrowser = isPlatformBrowser(platformId);
     }
-  }
+
+    ngOnInit() {
+    }
+
+    ngAfterViewInit(): void {
+        // Called after ngAfterContentInit when the component's view has been initialized.
+        // Applies to components only.
+        if(this.inBrowser){
+            this.gaCode = this.cfg.get("gaCode", "") as string;
+            this.gaService.appendGaTrackingCode(this.gaCode);
+        }
+    }
 }
 
