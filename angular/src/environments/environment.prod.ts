@@ -33,7 +33,9 @@ export const config : LPSConfig = {
     gacode: "not-set",
     screenSizeBreakPoint: 1060,
     bundleSizeAlert: 500000000,
-    embedMetadata: "schema.org"
+    embedMetadata: "schema.org",
+    // Decide how many seconds to wait to refresh metrics after user download one/more files
+    delayTimeForMetricsRefresh: 300  
 }
 
 export const testdata : {} = { }
