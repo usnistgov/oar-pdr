@@ -1,16 +1,8 @@
-import { Component, Input, ChangeDetectorRef, NgZone, OnInit, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, Input, Output, NgZone, OnInit, OnChanges, SimpleChanges, EventEmitter } from '@angular/core';
 import { TreeNode } from 'primeng/api';
 import { CartService } from '../../datacart/cart.service';
 import { OverlayPanel } from 'primeng/overlaypanel';
-// import { DownloadService } from '../../shared/download-service/download-service.service';
-// import { ConfirmationService } from 'primeng/primeng';
-// import { ZipData } from '../../shared/download-service/zipData';  // currently disabled
-// import { HttpClient, HttpRequest, HttpEventType } from '@angular/common/http';
 import { AppConfig } from '../../config/config';
-// import { FileSaverService } from 'ngx-filesaver';  // currently disabled
-// import { Router } from '@angular/router';
-// import { CommonFunctionService } from '../../shared/common-function/common-function.service';
-// import { NotificationService } from '../../shared/notification-service/notification.service';
 import { GoogleAnalyticsService } from '../../shared/ga-service/google-analytics.service';
 import { NerdmRes, NerdmComp } from '../../nerdm/nerdm';
 import { DataCart, DataCartItem } from '../../datacart/cart';
@@ -85,6 +77,7 @@ export class DataFilesComponent implements OnInit, OnChanges {
     @Input() record: NerdmRes;
     @Input() inBrowser: boolean;   // false if running server-side
     @Input() editEnabled: boolean;    //Disable download all functionality if edit is enabled
+    @Output() downloadCompleted: EventEmitter<boolean> = new EventEmitter();
 
     ediid: string = '';
     files: TreeNode[] = [];           // the hierarchy of collections and files
@@ -501,62 +494,14 @@ export class DataFilesComponent implements OnInit, OnChanges {
      * individual file download icon.
      */
     setFileDownloaded(rowData: DataFileItem) : void {
+        // Emit the download flag so parent component can refresh the metrics data after couple of minutes
+        this.downloadCompleted.emit(true);
+
         if (this.globalDataCart) {
             this.globalDataCart.restore();
             this.globalDataCart.setDownloadStatus(this.record.ediid, rowData.comp.filepath);
         }
     }
-
-    /*
-     * Note: downloadOneFile() and downloadAllFromUrl() are currently not used
-     */
-    
-    /**
-     * Downloaded one file
-     * @param rowData - tree node
-     *
-    downloadOneFile(rowData: any) {
-        let filename = decodeURI(rowData.downloadUrl).replace(/^.*[\\\/]/, '');
-        rowData.downloadStatus = DownloadStatus.DOWNLOADING;
-        this.showDownloadProgress = true;
-        rowData.downloadProgress = 0;
-        let url = rowData.downloadUrl.replace('http:', 'https:');
-
-        const req = new HttpRequest('GET', url, {
-            reportProgress: true, responseType: 'blob'
-        });
-
-        rowData.downloadInstance = this.http.request(req).subscribe(event => {
-            switch (event.type) {
-                case HttpEventType.Response:
-                    this._fileSaverService.save(<any>event.body, filename);
-                    this.showDownloadProgress = false;
-                    this.setFileDownloaded(rowData);
-                    break;
-                case HttpEventType.DownloadProgress:
-                    rowData.downloadProgress = Math.round(100 * event.loaded / event.total);
-                    break;
-            }
-        })
-    }
-     */
-
-    /**
-     * Function to download all files based on download url.
-     * @param files - file tree
-     *
-    downloadAllFilesFromUrl(files: any) {
-        for (let comp of files) {
-            if (comp.children.length > 0) {
-                this.downloadAllFilesFromUrl(comp.children);
-            } else {
-                if (comp.data.downloadUrl) {
-                    this.downloadOneFile(comp.data);
-                }
-            }
-        }
-    }
-     */
 
     /**
      * Return "download all" button color based on download status

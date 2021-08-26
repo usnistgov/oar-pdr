@@ -55,6 +55,6 @@
         </p>
 
         <pdr-data-files [record]="record" [inBrowser]="inBrowser" 
-                        [editEnabled]="editEnabled"></pdr-data-files>
+                        [editEnabled]="editEnabled" (downloadCompleted)="setDownloadStatus($event)"></pdr-data-files>
     </div>
 </div>

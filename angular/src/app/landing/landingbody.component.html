@@ -14,7 +14,7 @@
 
             <!-- data access, include available files -->
             <a name="dataAccess" #dataAccess></a>
-            <pdr-resource-data [record]="md" [inBrowser]="inBrowser" [editEnabled]="editEnabled">
+            <pdr-resource-data [record]="md" [inBrowser]="inBrowser" [editEnabled]="editEnabled" (downloadCompleted)="setDownloadStatus($event)">
             </pdr-resource-data>
 
             <!-- references -->

@@ -1,4 +1,4 @@
-import { Component, OnChanges, SimpleChanges, Input, ViewChild, ElementRef } from '@angular/core';
+import { Component, OnChanges, SimpleChanges, Input, Output, EventEmitter } from '@angular/core';
 
 import { AppConfig } from '../../config/config';
 import { NerdmRes, NerdmComp, NERDResource } from '../../nerdm/nerdm';
@@ -22,6 +22,7 @@ export class ResourceDataComponent implements OnChanges {
     @Input() record: NerdmRes = null;
     @Input() inBrowser: boolean = false;
     @Input() editEnabled: boolean; 
+    @Output() downloadCompleted: EventEmitter<boolean> = new EventEmitter();
 
     /**
      * create an instance of the Identity section
@@ -58,6 +59,15 @@ export class ResourceDataComponent implements OnChanges {
             if (! cmp['title']) cmp['title'] = cmp['accessURL']
             return cmp;
         });
+    }
+
+
+    /**
+     * Emit the download status
+     * @param ev
+     */
+     setDownloadStatus(ev){
+        this.downloadCompleted.emit(true);
     }
 }
 

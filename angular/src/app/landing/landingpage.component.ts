@@ -74,6 +74,9 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
     hasCurrentMetrics: boolean = false;
     showMetrics: boolean = false;
 
+    //Default: wait 5 minutes (300sec) after user download a file then refresh metrics data
+    delayTimeForMetricsRefresh: number = 300; 
+
     @ViewChild(LandingBodyComponent)
     landingBodyComponent: LandingBodyComponent;
 
@@ -102,6 +105,7 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
         this.inBrowser = isPlatformBrowser(platformId);
         this.editEnabled = cfg.get('editEnabled', false) as boolean;
         this.editMode = this.EDIT_MODES.VIEWONLY_MODE;
+        this.delayTimeForMetricsRefresh = +this.cfg.get("delayTimeForMetricsRefresh", "300");
 
         if (this.editEnabled) {
             this.edstatsvc.watchEditMode((editMode) => {
@@ -244,23 +248,24 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
      * Get metrics data
      */
     getMetrics() {
+        console.log("Retriving metrics data...");
         let ediid = this.md.ediid;
 
         this.metricsService.getFileLevelMetrics(ediid).subscribe(async (event) => {
             // Some large dataset might take a while to download. Only handle the response
-            // when it finishes downloading
+            // when download is completed
             if(event.type == HttpEventType.Response){
                 let response = await event.body.text();
 
                 this.fileLevelMetrics = JSON.parse(response);
 
                 if(this.fileLevelMetrics.FilesMetrics != undefined && this.fileLevelMetrics.FilesMetrics.length > 0){
-                    // check if any current metrics data
+                    // check if there is any current metrics data
                     for(let i = 1; i < this.md.components.length; i++){
                         let filepath = this.md.components[i].filepath;
                         if(filepath) filepath = filepath.trim();
 
-                        this.hasCurrentMetrics = this.fileLevelMetrics.FilesMetrics.find(x => x.filepath.substr(x.filepath.indexOf(ediid)+ediid.length).trim() == filepath) != undefined;
+                        this.hasCurrentMetrics = this.fileLevelMetrics.FilesMetrics.find(x => x.filepath.substr(x.filepath.indexOf(ediid)+ediid.length+1).trim() == filepath) != undefined;
                         if(this.hasCurrentMetrics) break;
                     }
                 }else{
@@ -286,6 +291,19 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
         });  
     }
 
+    /**
+     * Refresh metrics data in N minutes. N is defined in environment.ts
+     */
+     delayRefreshMetrics(){
+        console.log("Refresh metrics in seconds:", this.delayTimeForMetricsRefresh);
+        setTimeout(() => {
+            this.getMetrics();
+        }, this.delayTimeForMetricsRefresh*1000);
+    }
+
+    /**
+     * Reture record level total download size
+     */
     get totalDownloadSize() {
         if(this.recordLevelMetrics.DataSetMetrics[0] != undefined)
             return formatBytes(this.recordLevelMetrics.DataSetMetrics[0].total_size, 2);

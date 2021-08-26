@@ -1,4 +1,4 @@
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { DataCartStatus } from '../../datacart/cartstatus';
 import { CartConstants } from '../../datacart/cartconstants';
 
@@ -13,6 +13,8 @@ export class DownloadstatusComponent implements OnInit {
     inited: boolean = false;
 
     @Input() inBrowser: boolean;
+    @Input() ediid: string|null = "";
+    @Output() downloadCompleted: EventEmitter<boolean> = new EventEmitter();
 
     constructor() { 
 
@@ -42,6 +44,12 @@ export class DownloadstatusComponent implements OnInit {
             if(ev.key == this.dataCartStatus.getName()){
                 this.dataCartStatus.restore();
             }
+
+            // If download completed, refresh metrics data
+            if(this.ediid && this.dataCartStatus.dataCartStatusItems[this.ediid].downloadPercentage == 100){
+                this.downloadCompleted.emit(true);
+            }
+            
         }
     }
 

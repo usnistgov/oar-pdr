@@ -1,4 +1,4 @@
-import { Component, Input, ViewChild, ElementRef } from '@angular/core';
+import { Component, Input, ViewChild, ElementRef, Output, EventEmitter } from '@angular/core';
 
 import { AppConfig } from '../config/config';
 import { NerdmRes, NERDResource } from '../nerdm/nerdm';
@@ -40,6 +40,7 @@ export class LandingBodyComponent {
     @Input() md: NerdmRes = null;
     @Input() inBrowser: boolean = false;
     @Input() editEnabled: boolean;
+    @Output() downloadCompleted: EventEmitter<boolean> = new EventEmitter();
 
     @ViewChild(ResourceMetadataComponent)
     resourceMetadataComponent: ResourceMetadataComponent;
@@ -95,5 +96,13 @@ export class LandingBodyComponent {
                 break; 
             } 
         } 
+    }
+
+    /**
+     * Emit the download status
+     * @param ev
+     */
+     setDownloadStatus(ev){
+        this.downloadCompleted.emit(true);
     }
 }
