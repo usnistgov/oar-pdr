@@ -1,6 +1,10 @@
 .json-viewer-box {
-    margin-top: 1em; 
+    /* margin-top: 1em;  */
     border: 1px solid rgb(151, 151, 151, .2);
+}
+
+.more-info {
+    font-size: 14px;
 }
 
 .json-viewer-header {

@@ -46,9 +46,6 @@ describe('ResourceMetadataComponent', () => {
         let el = cmpel.querySelector("h3");
         expect(el).toBeTruthy();
         expect(el.textContent).toContain("Metadata");
-        el = cmpel.querySelector("legend");
-        expect(el).toBeTruthy();
-        expect(el.textContent).toContain("NERDm");
     });
 
 });

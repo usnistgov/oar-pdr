@@ -47,7 +47,7 @@ export class MetadataComponent implements OnChanges {
     public set jsonExpandDepth(newValue) {this._jsonExpandDepth = newValue}
 
     constructor(private cfg: AppConfig, 
-                private gaService: GoogleAnalyticsService) {  }
+                public gaService: GoogleAnalyticsService) {  }
 
     ngOnInit(): void {
         this.nerdmRecord["Native JSON (NERDm)"] = this.record;

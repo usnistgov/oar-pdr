@@ -1,13 +1,13 @@
 <!-- Info about the JSON viewer -->
 <div style="margin-bottom: 0pt;">
-    <span>
+    <span class="more-info" id="more-info">
       For more information about the metadata, consult the 
       <a href="/od/dm/nerdm/" (click)="gaService.gaTrackEvent('outbound', undefined, 'Resource title: ' + record.title, '/od/dm/nerdm/')">NERDm documentation</a>. 
     </span>
 </div>
 
 <!-- JSON viewer with a thin grey border -->
-<div class="json-viewer-box">
+<div class="json-viewer-box" id="json-viewer">
     <!-- Header bar with JSON tree navigate buttons (left) and JSON export button (right)-->
     <div class="json-viewer-header nist-blue-background">
         <!-- JSON export button (right alignment) -->
