@@ -1,0 +1,43 @@
+<!-- Info about the JSON viewer -->
+<div style="margin-bottom: 0pt;">
+    <span>
+      For more information about the metadata, consult the 
+      <a href="/od/dm/nerdm/" (click)="gaService.gaTrackEvent('outbound', undefined, 'Resource title: ' + record.title, '/od/dm/nerdm/')">NERDm documentation</a>. 
+    </span>
+</div>
+
+<!-- JSON viewer with a thin grey border -->
+<div class="json-viewer-box">
+    <!-- Header bar with JSON tree navigate buttons (left) and JSON export button (right)-->
+    <div class="json-viewer-header nist-blue-background">
+        <!-- JSON export button (right alignment) -->
+        <div >
+            <a [href]='getDownloadURL()'>
+                <span class="json-export-btn" (click)="onjson()"><i class="faa faa-file-code-o" style="margin-right: 5px;"></i>Export</span></a>
+        </div>
+
+        <!-- JSON tree navigate buttons (left alignment) -->
+        <div style="width: 100%;">
+            <div class="json-level">
+                <!-- Hide this label in mobile mode to save space -->
+                <span *ngIf="!mobileMode" class="json-label">JSON View: </span>
+                <span class="item-list">
+                    <ul>
+                        <li (click)="expandToLevel('1')">1</li>
+                        <li (click)="expandToLevel('2')">2</li>
+                        <!-- Hide the 3rd button in mobile mode to save space -->
+                        <li *ngIf="!mobileMode" (click)="expandToLevel('3')">3</li>
+                        <li *ngIf="!mobileMode" (click)="expandToLevel('all')">View Full Tree</li>
+                        <li *ngIf="mobileMode" (click)="expandToLevel('all')">Full Tree</li>
+                    </ul>
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <!-- JSON viewer -->
+    <div style="padding: 20px;">
+        <ngx-json-viewer *ngIf="showJson" [json]="nerdmRecord" [expanded]="!collapsed" [depth]='jsonExpandDepth'></ngx-json-viewer>
+    </div>
+
+</div>

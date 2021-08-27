@@ -8,7 +8,6 @@ import { ZipData } from './zipData';
 import { DownloadData } from './downloadData';
 import { CartService } from '../../datacart/cart.service';
 import { DataCartItem } from '../../datacart/cart';
-import { TestDataService } from '../../shared/testdata-service/testDataService';
 import { FileSaverService } from 'ngx-filesaver';
 import { DataCart } from '../../datacart/cart';
 import { DownloadStatus } from '../../datacart/cartconstants';
@@ -37,8 +36,7 @@ export class DownloadService {
         private cfg: AppConfig,
         private http: HttpClient,
         private cartService: CartService,
-        private _FileSaverService: FileSaverService,
-        private testDataService: TestDataService
+        private _FileSaverService: FileSaverService
     ) {
         this.distApi = this.cfg.get("distService", "/od/ds/");
         this.setDownloadingNumber(-1);

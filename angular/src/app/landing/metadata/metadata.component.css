@@ -1,0 +1,61 @@
+.json-viewer-box {
+    margin-top: 1em; 
+    border: 1px solid rgb(151, 151, 151, .2);
+}
+
+.json-viewer-header {
+    height: 1.8em;
+}
+
+.json-level {
+    display:inline;
+    color: white;
+}
+
+.item-list {
+    display: inline-block;
+    padding-top: 1px;
+    margin-left: -30px;
+    height: 1.5em;
+    width: auto;
+    /* font-weight: bold; */
+}
+
+.item-list li{
+    display:inline;
+    padding:1px 10px 2px 10px;
+    border-radius: 3px;
+    margin-right:8px;
+    background-color: #4CAF50;
+    font-weight:400;
+    font-size: 14px;
+}
+
+.item-list li:hover {
+    background-color:#98d655;
+    cursor: pointer;
+}
+
+.json-label {
+    margin-left: 10px;
+    display: inline-block;
+    font-weight:600;
+    font-size: 14px;
+}
+
+.json-export-btn {
+    position:relative; 
+    float:right;
+    height: 1.6em;
+    padding:1px 10px 3px 10px;
+    border-radius: 3px;
+    margin: 3px 8px;
+    color: white;
+    background-color: #4CAF50;
+    font-weight:400;
+    font-size: 14px;
+}
+
+.json-export-btn:hover {
+    background-color:#98d655;
+}

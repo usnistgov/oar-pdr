@@ -41,6 +41,9 @@ export class LandingBodyComponent {
     @Input() inBrowser: boolean = false;
     @Input() editEnabled: boolean;
 
+    // Flag to tell if current screen size is mobile or small device
+    @Input() mobileMode : boolean|null = false;
+
     @ViewChild(ResourceMetadataComponent)
     resourceMetadataComponent: ResourceMetadataComponent;
 

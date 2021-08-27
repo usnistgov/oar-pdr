@@ -20,7 +20,7 @@ import { RecordLevelMetrics } from '../metrics/metrics';
 import { MetricsService } from '../shared/metrics-service/metrics.service';
 import { formatBytes } from '../utils';
 import { LandingBodyComponent } from './landingbody.component';
-
+import { BreakpointObserver, BreakpointState } from '@angular/cdk/layout';
 
 /**
  * A component providing the complete display of landing page content associated with 
@@ -73,6 +73,7 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
     fileLevelMetrics: any;
     hasCurrentMetrics: boolean = false;
     showMetrics: boolean = false;
+    mobileMode: boolean = false;
 
     @ViewChild(LandingBodyComponent)
     landingBodyComponent: LandingBodyComponent;
@@ -96,7 +97,8 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
                 public edstatsvc: EditStatusService,
                 private cartService: CartService,
                 private mdupdsvc: MetadataUpdateService,
-                public metricsService: MetricsService) 
+                public metricsService: MetricsService,
+                public breakpointObserver: BreakpointObserver) 
     {
         this.reqId = this.route.snapshot.paramMap.get('id');
         this.inBrowser = isPlatformBrowser(platformId);
@@ -139,6 +141,17 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
         var showError: boolean = true;
         let metadataError = "";
         this.displaySpecialMessage = false;
+
+        // Bootstrap breakpoint observer (to switch between desktop/mobile mode)
+        this.breakpointObserver
+        .observe(['(min-width: 766px)'])
+        .subscribe((state: BreakpointState) => {
+            if (state.matches) {
+                this.mobileMode = false;
+            } else {
+                this.mobileMode = true;
+            }
+        });
 
         // Clean up cart status storage 
         if(this.inBrowser){
@@ -244,6 +257,7 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
      * Get metrics data
      */
     getMetrics() {
+        console.log("Getting netrics data...");
         let ediid = this.md.ediid;
 
         this.metricsService.getFileLevelMetrics(ediid).subscribe(async (event) => {
@@ -260,7 +274,7 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
                         let filepath = this.md.components[i].filepath;
                         if(filepath) filepath = filepath.trim();
 
-                        this.hasCurrentMetrics = this.fileLevelMetrics.FilesMetrics.find(x => x.filepath.substr(x.filepath.indexOf(ediid)+ediid.length).trim() == filepath) != undefined;
+                        this.hasCurrentMetrics = this.fileLevelMetrics.FilesMetrics.find(x => x.filepath.substr(x.filepath.indexOf(ediid)+ediid.length+1).trim() == filepath) != undefined;
                         if(this.hasCurrentMetrics) break;
                     }
                 }else{
@@ -278,6 +292,7 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
         this.metricsService.getRecordLevelMetrics(ediid).subscribe(async (event) => {
             if(event.type == HttpEventType.Response){
                 this.recordLevelMetrics = JSON.parse(await event.body.text());
+                console.log("this.recordLevelMetrics", this.recordLevelMetrics);
             }
         },
         (err) => {
