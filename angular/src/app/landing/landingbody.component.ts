@@ -40,7 +40,9 @@ export class LandingBodyComponent {
     @Input() md: NerdmRes = null;
     @Input() inBrowser: boolean = false;
     @Input() editEnabled: boolean;
-    @Output() downloadCompleted: EventEmitter<boolean> = new EventEmitter();
+
+    // Pass out download status
+    @Output() dlStatus: EventEmitter<string> = new EventEmitter();
 
     @ViewChild(ResourceMetadataComponent)
     resourceMetadataComponent: ResourceMetadataComponent;
@@ -100,9 +102,9 @@ export class LandingBodyComponent {
 
     /**
      * Emit the download status
-     * @param ev
+     * @param downloadStatus - download status ('downloading' or 'downloaded')
      */
-     setDownloadStatus(ev){
-        this.downloadCompleted.emit(true);
+     setDownloadStatus(downloadStatus){
+        this.dlStatus.emit(downloadStatus);
     }
 }

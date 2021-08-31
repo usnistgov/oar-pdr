@@ -22,7 +22,9 @@ export class ResourceDataComponent implements OnChanges {
     @Input() record: NerdmRes = null;
     @Input() inBrowser: boolean = false;
     @Input() editEnabled: boolean; 
-    @Output() downloadCompleted: EventEmitter<boolean> = new EventEmitter();
+
+    // pass out download status for metrics refresh
+    @Output() dlStatus: EventEmitter<string> = new EventEmitter();
 
     /**
      * create an instance of the Identity section
@@ -63,11 +65,11 @@ export class ResourceDataComponent implements OnChanges {
 
 
     /**
-     * Emit the download status
-     * @param ev
+     * Emit download status
+     * @param downloadStatus
      */
-     setDownloadStatus(ev){
-        this.downloadCompleted.emit(true);
+     setDownloadStatus(downloadStatus){
+        this.dlStatus.emit(downloadStatus);
     }
 }
 

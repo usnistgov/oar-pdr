@@ -13,8 +13,7 @@ export class DownloadstatusComponent implements OnInit {
     inited: boolean = false;
 
     @Input() inBrowser: boolean;
-    @Input() ediid: string|null = "";
-    @Output() downloadCompleted: EventEmitter<boolean> = new EventEmitter();
+    @Output() downloadedKeys: EventEmitter<string[]> = new EventEmitter();
 
     constructor() { 
 
@@ -37,7 +36,9 @@ export class DownloadstatusComponent implements OnInit {
     /**
      * When storage changed, if it's dataCartStatus, loop through each cart and restore dataCartStatus object.
      * The display will automatically pick up the data.
-     * @param ev Event - storage
+     * 
+     * All dataCartStatusItem's keys whose downloadPercentage = 100 will be emitted.
+     * @param ev Event - storage changed
      */
     cartChanged(ev){
         if(this.inited){
@@ -45,11 +46,10 @@ export class DownloadstatusComponent implements OnInit {
                 this.dataCartStatus.restore();
             }
 
-            // If download completed, refresh metrics data
-            if(this.ediid && this.dataCartStatus.dataCartStatusItems[this.ediid].downloadPercentage == 100){
-                this.downloadCompleted.emit(true);
-            }
-            
+            // Emit item IDs whose download status is 'completed' 
+            let keys = Object.keys(this.dataCartStatus.dataCartStatusItems).filter(key => this.dataCartStatus.dataCartStatusItems[key].downloadPercentage == 100);
+
+            this.downloadedKeys.emit(keys);
         }
     }
 

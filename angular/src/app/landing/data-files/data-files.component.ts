@@ -77,7 +77,9 @@ export class DataFilesComponent implements OnInit, OnChanges {
     @Input() record: NerdmRes;
     @Input() inBrowser: boolean;   // false if running server-side
     @Input() editEnabled: boolean;    //Disable download all functionality if edit is enabled
-    @Output() downloadCompleted: EventEmitter<boolean> = new EventEmitter();
+
+    // Download status to trigger metrics refresh in parent component
+    @Output() dlStatus: EventEmitter<string> = new EventEmitter();  
 
     ediid: string = '';
     files: TreeNode[] = [];           // the hierarchy of collections and files
@@ -96,8 +98,8 @@ export class DataFilesComponent implements OnInit, OnChanges {
     cartLength: number;
     showZipFileNames: boolean = false;    // zip file display is currently disabled
     showDownloadProgress: boolean = false;
-    mobWidth: number = 800;   // default value used in server context
-    mobHeight: number = 900;  // default value used in server context
+    appWidth: number = 800;   // default value used in server context
+    appHeight: number = 900;  // default value used in server context
     fontSize: string;
 
     constructor(private cfg: AppConfig,
@@ -112,15 +114,15 @@ export class DataFilesComponent implements OnInit, OnChanges {
             { field: 'download', header: 'Status', width: 'auto' }];
 
         if (this.inBrowser && typeof (window) !== 'undefined') {
-            this.mobHeight = (window.innerHeight);
-            this.mobWidth = (window.innerWidth);
-            this.setWidth(this.mobWidth);
+            this.appHeight = (window.innerHeight);
+            this.appWidth = (window.innerWidth);
+            this.setWidth(this.appWidth);
 
             window.onresize = (e) => {
                 ngZone.run(() => {
-                    this.mobWidth = window.innerWidth;
-                    this.mobHeight = window.innerHeight;
-                    this.setWidth(this.mobWidth);
+                    this.appWidth = window.innerWidth;
+                    this.appHeight = window.innerHeight;
+                    this.setWidth(this.appWidth);
                 });
             };
         }
@@ -479,10 +481,12 @@ export class DataFilesComponent implements OnInit, OnChanges {
         let downloadAllCart = this.cartService.getCart(cartName);
         downloadAllCart.setDisplayName(this.record['title'], false);
         this.isAddingToDownloadAllCart = true;
+        this.dlStatus.emit("downloading"); // for reseting metrics refresh flag
         
         setTimeout(() => {
             for (let child of this.files) 
                 this._addAllWithinToCart(child, downloadAllCart, true);
+
             downloadAllCart.save();
             this.isAddingToDownloadAllCart = false;
             window.open('/datacart/'+cartName+'?downloadSelected=true', cartName);
@@ -495,7 +499,8 @@ export class DataFilesComponent implements OnInit, OnChanges {
      */
     setFileDownloaded(rowData: DataFileItem) : void {
         // Emit the download flag so parent component can refresh the metrics data after couple of minutes
-        this.downloadCompleted.emit(true);
+        this.dlStatus.emit("downloading"); // for reseting metrics refresh flag
+        this.dlStatus.emit("downloaded");  // trigger metrics refresh
 
         if (this.globalDataCart) {
             this.globalDataCart.restore();
@@ -580,17 +585,17 @@ export class DataFilesComponent implements OnInit, OnChanges {
     }
 
     /**
-     * Set column width
-     * @param mobWidth 
+     * Set column width based on screen width
+     * @param appWidth - width of current window
      */
-    setWidth(mobWidth: number) {
-        if (mobWidth > 1340) {
+    setWidth(appWidth: number) {
+        if (appWidth > 1340) {
             this.cols[0].width = '60%';
             this.cols[1].width = '20%';
             this.cols[2].width = '15%';
             this.cols[3].width = '100px';
             this.fontSize = '16px';
-        } else if (mobWidth > 780 && this.mobWidth <= 1340) {
+        } else if (appWidth > 780 && this.appWidth <= 1340) {
             this.cols[0].width = '60%';
             this.cols[1].width = '170px';
             this.cols[2].width = '100px';

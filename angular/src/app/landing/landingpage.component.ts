@@ -73,6 +73,7 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
     fileLevelMetrics: any;
     hasCurrentMetrics: boolean = false;
     showMetrics: boolean = false;
+    metricsRefreshed: boolean = false;
 
     //Default: wait 5 minutes (300sec) after user download a file then refresh metrics data
     delayTimeForMetricsRefresh: number = 300; 
@@ -294,11 +295,57 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
     /**
      * Refresh metrics data in N minutes. N is defined in environment.ts
      */
-     delayRefreshMetrics(){
-        console.log("Refresh metrics in seconds:", this.delayTimeForMetricsRefresh);
+    refreshMetrics(){
+        console.log("Metrics will be refreshed in " + this.delayTimeForMetricsRefresh + " seconds.");
         setTimeout(() => {
             this.getMetrics();
         }, this.delayTimeForMetricsRefresh*1000);
+    }
+
+    /**
+     * Handle download status change event. 
+     *
+     * @param downloadStatus download status of a direct/bundle download event. should be one of the following two values:
+     *      "downloading" - indicates a download has started (either direct or bundle download). 
+     *                      Set this.metricsRefreshed to false so this.refreshMetrics() can be called 
+     *                      upon download has completed.
+     *      "downloaded" - only from a direct download.
+     */
+    onDownloadStatusChanged(downloadStatus) {
+        if(typeof downloadStatus === 'string') {
+            // When user starts an individual download or a bundle download. reset the metricsRefreshed flag
+            if(downloadStatus == "downloading") {
+                console.log("Download started.")
+                this.metricsRefreshed = false;
+            }
+    
+            // When download completed, refresh metrics and set the metricsRefreshed flag
+            if(downloadStatus == "downloaded" && !this.metricsRefreshed) {
+                console.log("Download completed.");
+                this.refreshMetrics();
+
+                // Do not place the following line inside refreshMetrics() because there are few minutes delay
+                // within the function and we don't want the function be triggered again during that time.
+                this.metricsRefreshed = true;
+            }
+        }else{
+            console.log("Invalid event type", typeof event);
+        }
+    }
+
+    /**
+     * When bundle download completed, it emits an array of item IDs of dataCartStatusItems whose download is completed.
+     * @param itemIDs an array of item IDs from CartStatus whose download status is complete.
+     */
+    onBundleDownloadCompleted(itemIDs) {
+        if(itemIDs.indexOf(this.md.ediid) > -1 && !this.metricsRefreshed) {
+            console.log("Download completed.")
+            this.refreshMetrics();
+
+            // Do not place the following line inside refreshMetrics() because there are few minutes delay
+            // within the function and we don't want the function be triggered again during that time.            
+            this.metricsRefreshed = true;
+        } 
     }
 
     /**
