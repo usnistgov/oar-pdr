@@ -12,6 +12,6 @@ range ##].
 Geographical coverage: [## description of coverage, including LAT/LONG if
 relevant ##]
 
-Key funding sources: [## Relevent sources of Non-NIST funding ##]
+Key funding sources: [## Relevant sources of Non-NIST funding ##]
 
 % endif
