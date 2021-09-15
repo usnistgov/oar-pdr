@@ -51,7 +51,6 @@ export class MetadataComponent implements OnChanges {
 
     ngOnInit(): void {
         this.nerdmRecord["Native JSON (NERDm)"] = this.record;
-        console.log('this.nerdmRecord', this.nerdmRecord)
     }
 
     ngOnChanges(changes: SimpleChanges) {
@@ -71,12 +70,15 @@ export class MetadataComponent implements OnChanges {
      */
     getDownloadURL() : string {
         let out = this.cfg.get("locations.mdService", "/unconfigured");
-
-        if (out.search("/rmm/") >= 0) 
+        console.log('mdService', out);
+        if (out.search("/rmm/") >= 0) {
+            if(!out.endsWith("records/")){
+                out += "records/";
+            }
             out += "?@id=" + this.record['@id'];
-        else {
+        }else {
             if (out.slice(-1) != '/') out += '/';
-            out += this .record['ediid'];
+            out += this.record['ediid'];
         }
 
         return out;
@@ -87,7 +89,6 @@ export class MetadataComponent implements OnChanges {
      * @param depth : the level the JSON viewer will expand to.
      */
     expandToLevel(depth){
-        console.log("depth", depth)
         this.jsonExpandDepth = depth;
         this.collapsed = false;
     }
