@@ -257,7 +257,6 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
      * Get metrics data
      */
     getMetrics() {
-        console.log("Getting netrics data...");
         let ediid = this.md.ediid;
 
         this.metricsService.getFileLevelMetrics(ediid).subscribe(async (event) => {
@@ -292,7 +291,6 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
         this.metricsService.getRecordLevelMetrics(ediid).subscribe(async (event) => {
             if(event.type == HttpEventType.Response){
                 this.recordLevelMetrics = JSON.parse(await event.body.text());
-                console.log("this.recordLevelMetrics", this.recordLevelMetrics);
             }
         },
         (err) => {

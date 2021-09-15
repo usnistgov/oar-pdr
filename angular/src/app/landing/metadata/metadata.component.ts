@@ -70,7 +70,6 @@ export class MetadataComponent implements OnChanges {
      */
     getDownloadURL() : string {
         let out = this.cfg.get("locations.mdService", "/unconfigured");
-        console.log('mdService', out);
         if (out.search("/rmm/") >= 0) {
             if(!out.endsWith("records/")){
                 out += "records/";
