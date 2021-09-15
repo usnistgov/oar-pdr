@@ -50,7 +50,7 @@ Data Use Notes
 --------------
 
 % if dataAccess != 'private':
-This data is publically available according to the NIST statements of
+This data is publicly available according to the NIST statements of
 copyright, fair use and licensing; see
 https://www.nist.gov/director/copyright-fair-use-and-licensing-statements-srd-data-and-software
 

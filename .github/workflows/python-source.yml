@@ -8,7 +8,7 @@ on:
       - 'scripts/*.py'
       - 'scripts/**/*.py'
 jobs:
-  testall.python:
+  testall_python:
     runs-on: ubuntu-20.04
     steps:
       - name: Checkout repository
