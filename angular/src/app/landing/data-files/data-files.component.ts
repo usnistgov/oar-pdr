@@ -137,7 +137,7 @@ export class DataFilesComponent implements OnInit, OnChanges {
         if(this.inBrowser){
             this.globalDataCart = this.cartService.getGlobalCart();
             this.cartLength = this.globalDataCart.size();
-            this.globalDataCart.watchForChanges((ev) => { this.cartChanged(ev); })
+            this.globalDataCart.watchForChanges((ev) => { this.cartChanged(); })
 
             this.dataCartStatus = DataCartStatus.openCartStatus();
             if (this.record)
@@ -152,15 +152,24 @@ export class DataFilesComponent implements OnInit, OnChanges {
             this.buildTree();
     }
 
-    cartChanged(ev){
+    /**
+     * Handle datacart change event
+     */
+    cartChanged(){
         this.cartLength = this.globalDataCart.size();
         if (this.files.length > 0) {
-            console.log("updating status from cart");
             setTimeout(() => {
                 this.allInCart = this._updateNodesFromCart(this.files, this.globalDataCart);
             }, 0);
         }
     }
+
+    /**
+     * Update treenode's downloadStatus and isInCart properties from a given datacart
+     * @param nodes Treenodes to be updated
+     * @param dc Datacart to update the treenodes
+     * @returns if all treenodes are in the datacart
+     */
     _updateNodesFromCart(nodes: TreeNode[], dc: DataCart): boolean {
         let allIn: boolean = true;
         for (let child of nodes) {
@@ -187,7 +196,7 @@ export class DataFilesComponent implements OnInit, OnChanges {
     }
 
     /**
-     * Build data file tree
+     * Build data file tree. Exclude .sha files.
      */
     buildTree() : void {
         if (! this.record['components'])
@@ -237,24 +246,19 @@ export class DataFilesComponent implements OnInit, OnChanges {
 
         let count = 0;
         let downloadedCount = 0;
-        let inCartCount = 0;
         let root: TreeNode = { data: { name: '', key: '' }, children: [] };
         let node: TreeNode = null;
-        let cartitem: DataCartItem = null;
+
+        // Filter out sha files
         for (let comp of this.record['components']) {
             if (comp.filepath && comp['@type'].filter(tp => tp.includes(':Hidden')).length == 0) {
-                node = insertComp(comp, root);
-                /*
-                cartitem = this.globalDataCart.findFile(this.record['@id'], comp.filepath);
-                if (cartitem) {
-                    node.data.isInCart = true;
-                    inCartCount++;
-                    node.data.downloadStatus = cartitem.downloadStatus;
-                }
-                */
-                if (node.data.comp['@type'].filter(tp => tp.endsWith("File")).length > 0) {
-                    count++;
-                    if (node.data.downloadStatus == DownloadStatus.DOWNLOADED) downloadedCount++;
+                if(!(comp['downloadURL'] && comp['downloadURL'].endsWith('sha256'))){
+                    node = insertComp(comp, root);
+
+                    if (node.data.comp['@type'].filter(tp => tp.endsWith("File")).length > 0) {
+                        count++;
+                        if (node.data.downloadStatus == DownloadStatus.DOWNLOADED) downloadedCount++;
+                    }
                 }
             }
         }
