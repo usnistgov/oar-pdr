@@ -22,13 +22,19 @@ export class ResourceMetadataComponent implements OnChanges {
     // passed in by the parent component:
     @Input() record: NerdmRes = null;
     @Input() inBrowser: boolean = false;
-    // @Input() showNerdm: boolean = false;
+
+    // Flag to tell if current screen size is mobile or small device
+    @Input() mobileMode : boolean|null = false;
 
     @ViewChild(MetadataComponent)
     metadataComponent: MetadataComponent;
 
+    /**
+     * Getter and setter to expand/collapse the JSON viewer
+     */
     get showMetadata() { return !this.metadataComponent.collapsed; }
     set showMetadata(newValue) {
+        this.metadataComponent.jsonExpandDepth = "all";
         this.metadataComponent.collapsed = !newValue;
     }
 

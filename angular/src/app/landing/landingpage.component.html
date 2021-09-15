@@ -37,7 +37,7 @@
         <!-- landing page content -->
         <div class="ui-g-10 ui-md-10 ui-lg-10 ui-sm-12">
 
-          <pdr-landing-body [md]="md" [inBrowser]="inBrowser" [editEnabled]="!inViewMode()" (dlStatus)="onDownloadStatusChanged($event)">
+          <pdr-landing-body [md]="md" [inBrowser]="inBrowser" [editEnabled]="!inViewMode()" [mobileMode]="mobileMode" (dlStatus)="onDownloadStatusChanged($event)">
           </pdr-landing-body>
 
         </div>

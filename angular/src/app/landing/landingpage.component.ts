@@ -20,7 +20,7 @@ import { RecordLevelMetrics } from '../metrics/metrics';
 import { MetricsService } from '../shared/metrics-service/metrics.service';
 import { formatBytes } from '../utils';
 import { LandingBodyComponent } from './landingbody.component';
-
+import { BreakpointObserver, BreakpointState } from '@angular/cdk/layout';
 
 /**
  * A component providing the complete display of landing page content associated with 
@@ -78,6 +78,8 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
     //Default: wait 5 minutes (300sec) after user download a file then refresh metrics data
     delayTimeForMetricsRefresh: number = 300; 
 
+    mobileMode: boolean = false;
+
     @ViewChild(LandingBodyComponent)
     landingBodyComponent: LandingBodyComponent;
 
@@ -100,7 +102,8 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
                 public edstatsvc: EditStatusService,
                 private cartService: CartService,
                 private mdupdsvc: MetadataUpdateService,
-                public metricsService: MetricsService) 
+                public metricsService: MetricsService,
+                public breakpointObserver: BreakpointObserver) 
     {
         this.reqId = this.route.snapshot.paramMap.get('id');
         this.inBrowser = isPlatformBrowser(platformId);
@@ -144,6 +147,17 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
         var showError: boolean = true;
         let metadataError = "";
         this.displaySpecialMessage = false;
+
+        // Bootstrap breakpoint observer (to switch between desktop/mobile mode)
+        this.breakpointObserver
+        .observe(['(min-width: 766px)'])
+        .subscribe((state: BreakpointState) => {
+            if (state.matches) {
+                this.mobileMode = false;
+            } else {
+                this.mobileMode = true;
+            }
+        });
 
         // Clean up cart status storage 
         if(this.inBrowser){
