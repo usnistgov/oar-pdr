@@ -9,6 +9,7 @@ import { AppConfig } from '../../config/config';
 import { NerdmRes, NERDResource } from '../../nerdm/nerdm';
 import { GoogleAnalyticsService } from '../../shared/ga-service/google-analytics.service';
 import { config, testdata } from '../../../environments/environment';
+import { By } from "@angular/platform-browser";
 
 describe('MetadataComponent', () => {
     let component: MetadataComponent;
@@ -35,22 +36,29 @@ describe('MetadataComponent', () => {
         fixture.detectChanges();
     });
 
-    it('should create', () => {
+    fit('should create', () => {
+        component.mobileMode = false;
         expect(component).toBeTruthy();
 
         let cmpel = fixture.nativeElement;
-        expect(cmpel.querySelector("#metadata-nerdm")).toBeTruthy();
+        let jsonViewer = cmpel.querySelector("#json-viewer");
+        expect(jsonViewer).toBeTruthy();
 
-        let el = cmpel.querySelector("p");
+        //For nornal mode, there should be 4 expand buttons ("1", "2", "3", "View Full Tree")
+        let jsonExpandButtons = fixture.debugElement.queryAll(By.css('li'));
+        expect(jsonExpandButtons.length).toBe(4);
+
+        //For mobile mode, there should be only 3 expand buttons ("1", "2", "Full Tree")
+        component.mobileMode = true;
+        fixture.detectChanges();
+        jsonExpandButtons = fixture.debugElement.queryAll(By.css('li'));
+        expect(jsonExpandButtons.length).toBe(3);
+
+        let el = cmpel.querySelector("#more-info");
         expect(el).toBeTruthy();
         el = el.querySelector("a");
         expect(el).toBeTruthy();
         expect(el.textContent).toContain("NERDm documentation");
-
-        expect(component.record).toBeTruthy();
-        el = cmpel.querySelector("legend");
-        expect(el).toBeTruthy();
-        expect(el.textContent).toContain("NERDm");
     });
 
     it('getDownloadURL()', () => {
