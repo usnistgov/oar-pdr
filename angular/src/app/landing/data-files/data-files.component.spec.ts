@@ -57,9 +57,6 @@ describe('DataFilesComponent', () => {
     fixture = TestBed.createComponent(DataFilesComponent);
     component = fixture.componentInstance;
     component.record = record;
-    // component.distdownload = "/od/ds/zip?id=ark:/88434/mds0149s9z";
-    // component.filescount = 8;
-    // component.recordEditmode = false;
     component.inBrowser = true;
     component.ngOnChanges({});
     fixture.detectChanges();
@@ -73,7 +70,7 @@ describe('DataFilesComponent', () => {
   it('should create', () => {
     expect(component).toBeTruthy();
     expect(component.files.length > 0).toBeTruthy();
-    expect(component.fileCount).toBe(3);
+    expect(component.fileCount).toBe(2);
     expect(component.downloadStatus).not.toBe("downloaded");
     expect(component.allInCart).toBeFalsy();
   });
@@ -120,8 +117,9 @@ describe('DataFilesComponent', () => {
   it('_updateNodesFromCart()', async(() => {
     let dc: DataCart = DataCart.openCart("goob");
     dc.addFile(component.ediid, component.record.components[1]);
+    dc.addFile(component.ediid, component.record.components[2]);
     let status = component._updateNodesFromCart(component.files, dc);
-    expect(status[0]).toBeFalsy();
+    expect(status[0]).toBeTruthy();
     expect(status[1]).toBeFalsy();
   }));
 

@@ -132,7 +132,7 @@ export class DataFilesComponent implements OnInit, OnChanges {
         if(this.inBrowser){
             this.globalDataCart = this.cartService.getGlobalCart();
             this.cartLength = this.globalDataCart.size();
-            this.globalDataCart.watchForChanges((ev) => { this.cartChanged(ev); })
+            this.globalDataCart.watchForChanges((ev) => { this.cartChanged(); })
 
             this.dataCartStatus = DataCartStatus.openCartStatus();
         }
@@ -150,15 +150,24 @@ export class DataFilesComponent implements OnInit, OnChanges {
         this.buildTree();
     }
 
-    cartChanged(ev){
+    /**
+     * Handle datacart change event
+     */
+    cartChanged(){
         this.cartLength = this.globalDataCart.size();
         if (this.files.length > 0) {
-            console.log("updating status from cart");
             setTimeout(() => {
                 this.updateStatusFromCart();
             }, 0);
         }
     }
+
+    /**
+     * Update treenode's downloadStatus and isInCart properties from a given datacart
+     * @param nodes Treenodes to be updated
+     * @param dc Datacart to update the treenodes
+     * @returns if all treenodes are in the datacart
+     */
     _updateNodesFromCart(nodes: TreeNode[], dc: DataCart): boolean[] {
         let allIn: boolean = true;   // whether all files are in the cart
         let allDld: boolean = true;  // whether all files have been downloaded
@@ -193,7 +202,7 @@ export class DataFilesComponent implements OnInit, OnChanges {
     }
 
     /**
-     * Build data file tree
+     * Build data file tree. Exclude .sha files.
      */
     buildTree() : void {
         if (! this.record['components'])
@@ -243,12 +252,14 @@ export class DataFilesComponent implements OnInit, OnChanges {
 
         let count = 0;
         let downloadedCount = 0;
-        let inCartCount = 0;
         let root: TreeNode = { data: { name: '', key: '' }, children: [] };
         let node: TreeNode = null;
-        let cartitem: DataCartItem = null;
+
+        // Filter out sha files
         for (let comp of this.record['components']) {
-            if (comp.filepath && comp['@type'].filter(tp => tp.includes(':Hidden')).length == 0) {
+            if (comp.filepath && comp['@type'].filter(tp => tp.includes(':Hidden')).length == 0 &&
+                comp['@type'].filter(tp => tp.includes(':ChecksumFile')).length == 0)
+            {
                 node = insertComp(comp, root);
                 if (node.data.comp['@type'].filter(tp => tp.endsWith("File")).length > 0) 
                     count++;

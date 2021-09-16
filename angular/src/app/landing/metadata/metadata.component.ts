@@ -6,58 +6,61 @@ import { GoogleAnalyticsService } from '../../shared/ga-service/google-analytics
 
 @Component({
   selector: 'metadata-detail',
-  template: `
-  <div>
-  <p-fieldset legend="Native JSON (NERDm)" [toggleable]="true" [(collapsed)]="collapsed">
-    <div class="ui-g" id="metadata-nerdm">
-      <div *ngIf="inBrowser">
-        <p style="margin-bottom: 0pt;">
-          <span style="">
-            For more information about the metadata, consult the 
-            <a href="/od/dm/nerdm/" (click)="gaService.gaTrackEvent('outbound', undefined, 'Resource title: ' + record.title, '/od/dm/nerdm/')">NERDm documentation</a>. 
-          </span>
-          <a [href]='getDownloadURL()' style="position:relative; float:right;">
-          <button style="background-color: #1371AE; color: white;" type="button" pButton 
-                  icon="faa faa-file-code-o" title="Get Metadata in JSON format." label="JSON" 
-                  (click)="onjson()"></button></a>
-          <br/>
-          <span style="font-size:8pt;color:grey;" >* "item [<i>number</i>]" indicates an item in a list</span>
-        </p>
-        <div *ngIf="inBrowser"><fieldset-view [entry]="record"></fieldset-view></div>
-      </div>
-    </div>
-  </p-fieldset>
-
-  </div>
-  `,
-  styles: [`
-    :host /deep/ .ui-fieldset-legend {
-        font-size: 12pt;
-    }
-  `]
+  templateUrl: './metadata.component.html',
+  styleUrls: ['./metadata.component.css']
 })
 export class MetadataComponent implements OnChanges {
     nerdmRecord: any = {};
+    showJson: boolean = true;
+    isOpen: boolean = false;
+    // JSON viewer expand depth. Default is all.
+    _jsonExpandDepth = "";
+
     private _collapsed: boolean = true;
     @Input() record: NerdmRes;
     @Input() inBrowser: boolean;
-    // @Input() _collapsed: boolean = true;
 
+    // Flag to tell if current screen size is mobile or small device
+    @Input() mobileMode : boolean|null = false;
+
+    /**
+     * Setter and getter of JSON viewer collapse flag
+     */
     public get collapsed() { return this._collapsed; }
     public set collapsed(newValue) {
         // logic
         this._collapsed = true;
-        this._collapsed = newValue;
+        setTimeout(() => {
+            this._collapsed = newValue;
+        }, 0);
+        
+        this.showJson = false;
+        setTimeout(() => {
+            this.showJson = true;
+        }, 0);
     }
 
-    constructor(private cfg: AppConfig, private gaService: GoogleAnalyticsService) {  }
+    /**
+     * Setter and getter of JSON viewer expand depth
+     */
+    public get jsonExpandDepth() { return this._jsonExpandDepth; }
+    public set jsonExpandDepth(newValue) {this._jsonExpandDepth = newValue}
+
+    constructor(private cfg: AppConfig, 
+                public gaService: GoogleAnalyticsService) {  }
+
+    ngOnInit(): void {
+        this.nerdmRecord["Native JSON (NERDm)"] = this.record;
+    }
 
     ngOnChanges(changes: SimpleChanges) {
-        // console.log("this.collapsed", this.collapsed);
         if (this.record && this.record["_id"]) 
             delete this.record["_id"];
     }
 
+    /**
+     * Once user export JSON, add an entry to Google Analytics
+     */
     onjson() {
         this.gaService.gaTrackEvent('download', undefined, this.record['title'], this.getDownloadURL());
     }
@@ -67,17 +70,25 @@ export class MetadataComponent implements OnChanges {
      */
     getDownloadURL() : string {
         let out = this.cfg.get("locations.mdService", "/unconfigured");
-
-        if (out.search("/rmm/") >= 0) 
+        if (out.search("/rmm/") >= 0) {
+            if(!out.endsWith("records/")){
+                out += "records/";
+            }
             out += "?@id=" + this.record['@id'];
-        else {
+        }else {
             if (out.slice(-1) != '/') out += '/';
-            out += this .record['ediid'];
+            out += this.record['ediid'];
         }
 
         return out;
     }
 
-
-
+    /**
+     * Expand the JSON viewer to certain level.
+     * @param depth : the level the JSON viewer will expand to.
+     */
+    expandToLevel(depth){
+        this.jsonExpandDepth = depth;
+        this.collapsed = false;
+    }
 }

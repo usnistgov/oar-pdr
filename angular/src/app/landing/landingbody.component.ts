@@ -43,6 +43,8 @@ export class LandingBodyComponent {
 
     // Pass out download status
     @Output() dlStatus: EventEmitter<string> = new EventEmitter();
+    // Flag to tell if current screen size is mobile or small device
+    @Input() mobileMode : boolean|null = false;
 
     @ViewChild(ResourceMetadataComponent)
     resourceMetadataComponent: ResourceMetadataComponent;
