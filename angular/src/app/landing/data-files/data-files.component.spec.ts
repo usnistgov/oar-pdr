@@ -1,4 +1,4 @@
-import { NO_ERRORS_SCHEMA } from '@angular/core';
+import { NO_ERRORS_SCHEMA, SimpleChange, SimpleChanges } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { async, fakeAsync, tick, ComponentFixture, TestBed } from '@angular/core/testing';
 import { DataFilesComponent } from './data-files.component';
@@ -90,10 +90,23 @@ describe('DataFilesComponent', () => {
   it('Empty display when there are no files', () => {
     let rec: any = JSON.parse(JSON.stringify(require('../../../assets/sampleRecord.json')));
     rec['components'] = []
+    let thechange = new SimpleChange(component.record, rec, false);
     component.record = rec
-    component.ngOnChanges({});
+    component.ngOnChanges({record: thechange});
     fixture.detectChanges();
     expect(fixture.nativeElement.querySelectorAll('#filelist-heading').length).toEqual(0);
+  });
+
+  it('Show Loading message on server-side', () => {
+    expect(component.inBrowser).toBeTruthy();
+    let pel = fixture.nativeElement.querySelector('p');  // Should be null
+    if (pel)
+        expect(pel.textContent.includes("oading file list...")).toBeFalsy();
+    component.inBrowser = false;
+    fixture.detectChanges();
+    pel = fixture.nativeElement.querySelector('p');
+    expect(pel).toBeTruthy();
+    expect(pel.textContent.includes("oading file list...")).toBeTruthy();
   });
 
   it('toggleAllFilesInGlobalCart() should be called', () => {
@@ -107,7 +120,9 @@ describe('DataFilesComponent', () => {
   it('_updateNodesFromCart()', async(() => {
     let dc: DataCart = DataCart.openCart("goob");
     dc.addFile(component.ediid, component.record.components[1]);
-    expect(component._updateNodesFromCart(component.files, dc)).toBeFalsy();
+    let status = component._updateNodesFromCart(component.files, dc);
+    expect(status[0]).toBeFalsy();
+    expect(status[1]).toBeFalsy();
   }));
 
   it('toggleAllFilesInGlobalCart()', fakeAsync(() => {

@@ -135,16 +135,19 @@ export class DataFilesComponent implements OnInit, OnChanges {
             this.globalDataCart.watchForChanges((ev) => { this.cartChanged(ev); })
 
             this.dataCartStatus = DataCartStatus.openCartStatus();
-            if (this.record)
-                this.buildTree();
         }
+        if (this.record)
+            this.useMetadata();
     }
 
     ngOnChanges(ch: SimpleChanges) {
-        if (this.record) 
-            this.ediid = this.record['ediid']
-        if (this.inBrowser && this.globalDataCart)
-            this.buildTree();
+        if (this.record && ch.record)
+            this.useMetadata();
+    }
+
+    useMetadata() {
+        this.ediid = this.record['ediid']
+        this.buildTree();
     }
 
     cartChanged(ev){
@@ -152,17 +155,23 @@ export class DataFilesComponent implements OnInit, OnChanges {
         if (this.files.length > 0) {
             console.log("updating status from cart");
             setTimeout(() => {
-                this.allInCart = this._updateNodesFromCart(this.files, this.globalDataCart);
+                this.updateStatusFromCart();
             }, 0);
         }
     }
-    _updateNodesFromCart(nodes: TreeNode[], dc: DataCart): boolean {
-        let allIn: boolean = true;
+    _updateNodesFromCart(nodes: TreeNode[], dc: DataCart): boolean[] {
+        let allIn: boolean = true;   // whether all files are in the cart
+        let allDld: boolean = true;  // whether all files have been downloaded
+        let allstats: boolean[] = [];
         for (let child of nodes) {
             if (child.children.length > 0) {
-                child.data.isInCart = this._updateNodesFromCart(child.children, dc);
+                allstats = this._updateNodesFromCart(child.children, dc);
+                child.data.isInCart = allstats[0];
+                child.data.downloadStatus=(allstats[1]) ? DownloadStatus.DOWNLOADED : DownloadStatus.NO_STATUS;
                 if (! child.data.isInCart) 
                     allIn = false;
+                if (child.data.downloadStatus != DownloadStatus.DOWNLOADED)
+                    allDld = false;
             }
             else if (child.data.comp && child.data.comp.downloadURL) {
                 // a file node
@@ -175,10 +184,12 @@ export class DataFilesComponent implements OnInit, OnChanges {
                     child.data.isInCart = false;
                 if (! child.data.isInCart)
                     allIn = false;
+                if (child.data.downloadStatus != DownloadStatus.DOWNLOADED)
+                    allDld = false;
             }
         }
 
-        return allIn;
+        return [allIn, allDld];
     }
 
     /**
@@ -191,7 +202,7 @@ export class DataFilesComponent implements OnInit, OnChanges {
         let makeNodeData = (name: string, parentKey: string, comp: NerdmComp) => {
             let key = (parentKey) ? parentKey + '/' + name : name;
             let out = { name: name, key: key, comp: null, size: '', mediaType: '',
-                        isInCart: false, downloadStatus: '', downloadProgress: 0   };
+                        isInCart: false, downloadStatus: DownloadStatus.NO_STATUS, downloadProgress: 0   };
             if (comp) {
                 out['comp'] = comp;
                 out['mediaType'] = comp.mediaType || '';
@@ -239,25 +250,13 @@ export class DataFilesComponent implements OnInit, OnChanges {
         for (let comp of this.record['components']) {
             if (comp.filepath && comp['@type'].filter(tp => tp.includes(':Hidden')).length == 0) {
                 node = insertComp(comp, root);
-                /*
-                cartitem = this.globalDataCart.findFile(this.record['@id'], comp.filepath);
-                if (cartitem) {
-                    node.data.isInCart = true;
-                    inCartCount++;
-                    node.data.downloadStatus = cartitem.downloadStatus;
-                }
-                */
-                if (node.data.comp['@type'].filter(tp => tp.endsWith("File")).length > 0) {
+                if (node.data.comp['@type'].filter(tp => tp.endsWith("File")).length > 0) 
                     count++;
-                    if (node.data.downloadStatus == DownloadStatus.DOWNLOADED) downloadedCount++;
-                }
             }
         }
         this.files = [...root.children];
         this.fileCount = count;
-        this.allInCart = this._updateNodesFromCart(this.files, this.globalDataCart);
-        if (count > 0 && downloadedCount == count) 
-            this.downloadStatus = DownloadStatus.DOWNLOADED
+        this.updateStatusFromCart();
     }
 
     /**
@@ -305,38 +304,30 @@ export class DataFilesComponent implements OnInit, OnChanges {
     resetStatus(files: any) {
         for (let comp of files) {
             comp.data['isInCart'] = false;
-            comp.data['downloadStatus'] = '';
+            comp.data['downloadStatus'] = DownloadStatus.NO_STATUS;
             if (comp.children && comp.children.length > 0) 
                 this.resetStatus(comp.children);
         }
+        this.allInCart = false;
+        this.downloadStatus = DownloadStatus.NO_STATUS;
         return Promise.resolve(files);
     }
 
     /**
-     * Function to sync the download status from data cart.
+     * Function to sync the all download statuses from data cart.
      */
     updateStatusFromCart() {
-        let _setStatus = (nodes: TreeNode[]) => {
-            for (let node of nodes) {
-                if (node.children.length > 0)
-                    _setStatus(node.children);
-                else {
-                    let cartitem = this.globalDataCart.findFile(node.data.resId, node.data.comp.filepath);
-                    if (cartitem) {
-                        node.data.isInCart = true;
-                        node.data.downloadStatus = cartitem.downloadStatus;
-                    }
-                }
-            }
+        if (this.globalDataCart) {  // Note: not set on server-side
+            let allstats: boolean[] = this._updateNodesFromCart(this.files, this.globalDataCart);
+            this.allInCart = allstats[0]
+            this.downloadStatus = (allstats[1]) ? DownloadStatus.DOWNLOADED : DownloadStatus.NO_STATUS;
         }
-        if (this.globalDataCart) 
-            _setStatus(this.files);
         return Promise.resolve(this.files);
     }
 
     /**
      * Function to display bytes in appropriate format.
-     * @param bytes 
+     * @param bytes  an integer file size in bytes
      */
     formatBytes(bytes) {
         return formatBytes(bytes, null);
@@ -344,9 +335,9 @@ export class DataFilesComponent implements OnInit, OnChanges {
 
     /**
      *  Open a popup window to display file details
-     * @param event 
-     * @param fileNode 
-     * @param overlaypanel 
+     * @param event          the event that triggered the display
+     * @param fileNode       the TreeNode for the file to provide details for
+     * @param overlaypanel   the OverlayPanel that is to contain the details
      */
     openDetails(event, fileNode: TreeNode, overlaypanel: OverlayPanel) {
         this.fileNode = fileNode;
