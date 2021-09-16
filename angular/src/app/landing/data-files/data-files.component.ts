@@ -251,14 +251,14 @@ export class DataFilesComponent implements OnInit, OnChanges {
 
         // Filter out sha files
         for (let comp of this.record['components']) {
-            if (comp.filepath && comp['@type'].filter(tp => tp.includes(':Hidden')).length == 0) {
-                if(!(comp['downloadURL'] && comp['downloadURL'].endsWith('sha256'))){
-                    node = insertComp(comp, root);
+            if (comp.filepath && comp['@type'].filter(tp => tp.includes(':Hidden')).length == 0 &&
+                comp['@type'].filter(tp => tp.includes(':ChecksumFile')).length == 0)
+            {
+                node = insertComp(comp, root);
 
-                    if (node.data.comp['@type'].filter(tp => tp.endsWith("File")).length > 0) {
-                        count++;
-                        if (node.data.downloadStatus == DownloadStatus.DOWNLOADED) downloadedCount++;
-                    }
+                if (node.data.comp['@type'].filter(tp => tp.endsWith("File")).length > 0) {
+                    count++;
+                    if (node.data.downloadStatus == DownloadStatus.DOWNLOADED) downloadedCount++;
                 }
             }
         }

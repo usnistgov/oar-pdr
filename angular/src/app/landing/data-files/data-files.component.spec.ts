@@ -104,6 +104,7 @@ describe('DataFilesComponent', () => {
   it('_updateNodesFromCart()', async(() => {
     let dc: DataCart = DataCart.openCart("goob");
     dc.addFile(component.ediid, component.record.components[1]);
+    dc.addFile(component.ediid, component.record.components[2]);
     expect(component._updateNodesFromCart(component.files, dc)).toBeTruthy();
   }));
 
@@ -113,7 +114,7 @@ describe('DataFilesComponent', () => {
     component.toggleAllFilesInGlobalCart();
     tick(1);
     dc.restore();
-    expect(dc.size()).toBe(1);
+    expect(dc.size()).toBe(2);
     component.toggleAllFilesInGlobalCart()
     tick(1);
     dc.restore();
