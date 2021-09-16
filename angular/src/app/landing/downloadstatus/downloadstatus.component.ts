@@ -1,4 +1,4 @@
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { DataCartStatus } from '../../datacart/cartstatus';
 import { CartConstants } from '../../datacart/cartconstants';
 
@@ -13,6 +13,7 @@ export class DownloadstatusComponent implements OnInit {
     inited: boolean = false;
 
     @Input() inBrowser: boolean;
+    @Output() downloadedKeys: EventEmitter<string[]> = new EventEmitter();
 
     constructor() { 
 
@@ -35,13 +36,20 @@ export class DownloadstatusComponent implements OnInit {
     /**
      * When storage changed, if it's dataCartStatus, loop through each cart and restore dataCartStatus object.
      * The display will automatically pick up the data.
-     * @param ev Event - storage
+     * 
+     * All dataCartStatusItem's keys whose downloadPercentage = 100 will be emitted.
+     * @param ev Event - storage changed
      */
     cartChanged(ev){
         if(this.inited){
             if(ev.key == this.dataCartStatus.getName()){
                 this.dataCartStatus.restore();
             }
+
+            // Emit item IDs whose download status is 'completed' 
+            let keys = Object.keys(this.dataCartStatus.dataCartStatusItems).filter(key => this.dataCartStatus.dataCartStatusItems[key].downloadPercentage == 100);
+
+            this.downloadedKeys.emit(keys);
         }
     }
 

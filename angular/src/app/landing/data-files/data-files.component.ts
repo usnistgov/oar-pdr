@@ -1,16 +1,8 @@
-import { Component, Input, ChangeDetectorRef, NgZone, OnInit, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, Input, Output, NgZone, OnInit, OnChanges, SimpleChanges, EventEmitter } from '@angular/core';
 import { TreeNode } from 'primeng/api';
 import { CartService } from '../../datacart/cart.service';
 import { OverlayPanel } from 'primeng/overlaypanel';
-// import { DownloadService } from '../../shared/download-service/download-service.service';
-// import { ConfirmationService } from 'primeng/primeng';
-// import { ZipData } from '../../shared/download-service/zipData';  // currently disabled
-// import { HttpClient, HttpRequest, HttpEventType } from '@angular/common/http';
 import { AppConfig } from '../../config/config';
-// import { FileSaverService } from 'ngx-filesaver';  // currently disabled
-// import { Router } from '@angular/router';
-// import { CommonFunctionService } from '../../shared/common-function/common-function.service';
-// import { NotificationService } from '../../shared/notification-service/notification.service';
 import { GoogleAnalyticsService } from '../../shared/ga-service/google-analytics.service';
 import { NerdmRes, NerdmComp } from '../../nerdm/nerdm';
 import { DataCart, DataCartItem } from '../../datacart/cart';
@@ -86,6 +78,9 @@ export class DataFilesComponent implements OnInit, OnChanges {
     @Input() inBrowser: boolean;   // false if running server-side
     @Input() editEnabled: boolean;    //Disable download all functionality if edit is enabled
 
+    // Download status to trigger metrics refresh in parent component
+    @Output() dlStatus: EventEmitter<string> = new EventEmitter();  
+
     ediid: string = '';
     files: TreeNode[] = [];           // the hierarchy of collections and files
     fileCount: number = 0;            // number of files being displayed
@@ -103,8 +98,8 @@ export class DataFilesComponent implements OnInit, OnChanges {
     cartLength: number;
     showZipFileNames: boolean = false;    // zip file display is currently disabled
     showDownloadProgress: boolean = false;
-    mobWidth: number = 800;   // default value used in server context
-    mobHeight: number = 900;  // default value used in server context
+    appWidth: number = 800;   // default value used in server context
+    appHeight: number = 900;  // default value used in server context
     fontSize: string;
 
     constructor(private cfg: AppConfig,
@@ -119,15 +114,15 @@ export class DataFilesComponent implements OnInit, OnChanges {
             { field: 'download', header: 'Status', width: 'auto' }];
 
         if (this.inBrowser && typeof (window) !== 'undefined') {
-            this.mobHeight = (window.innerHeight);
-            this.mobWidth = (window.innerWidth);
-            this.setWidth(this.mobWidth);
+            this.appHeight = (window.innerHeight);
+            this.appWidth = (window.innerWidth);
+            this.setWidth(this.appWidth);
 
             window.onresize = (e) => {
                 ngZone.run(() => {
-                    this.mobWidth = window.innerWidth;
-                    this.mobHeight = window.innerHeight;
-                    this.setWidth(this.mobWidth);
+                    this.appWidth = window.innerWidth;
+                    this.appHeight = window.innerHeight;
+                    this.setWidth(this.appWidth);
                 });
             };
         }
@@ -486,10 +481,12 @@ export class DataFilesComponent implements OnInit, OnChanges {
         let downloadAllCart = this.cartService.getCart(cartName);
         downloadAllCart.setDisplayName(this.record['title'], false);
         this.isAddingToDownloadAllCart = true;
+        this.dlStatus.emit("downloading"); // for reseting metrics refresh flag
         
         setTimeout(() => {
             for (let child of this.files) 
                 this._addAllWithinToCart(child, downloadAllCart, true);
+
             downloadAllCart.save();
             this.isAddingToDownloadAllCart = false;
             window.open('/datacart/'+cartName+'?downloadSelected=true', cartName);
@@ -501,62 +498,15 @@ export class DataFilesComponent implements OnInit, OnChanges {
      * individual file download icon.
      */
     setFileDownloaded(rowData: DataFileItem) : void {
+        // Emit the download flag so parent component can refresh the metrics data after couple of minutes
+        this.dlStatus.emit("downloading"); // for reseting metrics refresh flag
+        this.dlStatus.emit("downloaded");  // trigger metrics refresh
+
         if (this.globalDataCart) {
             this.globalDataCart.restore();
             this.globalDataCart.setDownloadStatus(this.record.ediid, rowData.comp.filepath);
         }
     }
-
-    /*
-     * Note: downloadOneFile() and downloadAllFromUrl() are currently not used
-     */
-    
-    /**
-     * Downloaded one file
-     * @param rowData - tree node
-     *
-    downloadOneFile(rowData: any) {
-        let filename = decodeURI(rowData.downloadUrl).replace(/^.*[\\\/]/, '');
-        rowData.downloadStatus = DownloadStatus.DOWNLOADING;
-        this.showDownloadProgress = true;
-        rowData.downloadProgress = 0;
-        let url = rowData.downloadUrl.replace('http:', 'https:');
-
-        const req = new HttpRequest('GET', url, {
-            reportProgress: true, responseType: 'blob'
-        });
-
-        rowData.downloadInstance = this.http.request(req).subscribe(event => {
-            switch (event.type) {
-                case HttpEventType.Response:
-                    this._fileSaverService.save(<any>event.body, filename);
-                    this.showDownloadProgress = false;
-                    this.setFileDownloaded(rowData);
-                    break;
-                case HttpEventType.DownloadProgress:
-                    rowData.downloadProgress = Math.round(100 * event.loaded / event.total);
-                    break;
-            }
-        })
-    }
-     */
-
-    /**
-     * Function to download all files based on download url.
-     * @param files - file tree
-     *
-    downloadAllFilesFromUrl(files: any) {
-        for (let comp of files) {
-            if (comp.children.length > 0) {
-                this.downloadAllFilesFromUrl(comp.children);
-            } else {
-                if (comp.data.downloadUrl) {
-                    this.downloadOneFile(comp.data);
-                }
-            }
-        }
-    }
-     */
 
     /**
      * Return "download all" button color based on download status
@@ -635,17 +585,17 @@ export class DataFilesComponent implements OnInit, OnChanges {
     }
 
     /**
-     * Set column width
-     * @param mobWidth 
+     * Set column width based on screen width
+     * @param appWidth - width of current window
      */
-    setWidth(mobWidth: number) {
-        if (mobWidth > 1340) {
+    setWidth(appWidth: number) {
+        if (appWidth > 1340) {
             this.cols[0].width = '60%';
             this.cols[1].width = '20%';
             this.cols[2].width = '15%';
             this.cols[3].width = '100px';
             this.fontSize = '16px';
-        } else if (mobWidth > 780 && this.mobWidth <= 1340) {
+        } else if (appWidth > 780 && this.appWidth <= 1340) {
             this.cols[0].width = '60%';
             this.cols[1].width = '170px';
             this.cols[2].width = '100px';

@@ -27,7 +27,7 @@ export const config: LPSConfig = {
         taxonomyService: "https://data.nist.gov/rmm/taxonomy"
     },
     mdAPI: "https://data.nist.gov/rmm/records/",
-    metricsAPI: "https://localhost/rmm/usagemetrics/",
+    metricsAPI: "https://data.nist.gov/rmm/usagemetrics/",
     // customizationAPI: "https://testdata.nist.gov/customization/",
     customizationAPI: "https://datapubtest.nist.gov/customization/",
     mode: "dev",
@@ -38,7 +38,9 @@ export const config: LPSConfig = {
     distService: "https://testdata.nist.gov/od/ds/",
     gacode: "not-set",
     screenSizeBreakPoint: 1060,
-    bundleSizeAlert: 500000000
+    bundleSizeAlert: 500000000,
+    // Decide how many seconds to wait to refresh metrics after user download one/more files
+    delayTimeForMetricsRefresh: 300  
 }
 
 export const testdata: {} = {

@@ -1,4 +1,4 @@
-import { Component, Input, ViewChild, ElementRef } from '@angular/core';
+import { Component, Input, ViewChild, ElementRef, Output, EventEmitter } from '@angular/core';
 
 import { AppConfig } from '../config/config';
 import { NerdmRes, NERDResource } from '../nerdm/nerdm';
@@ -41,6 +41,8 @@ export class LandingBodyComponent {
     @Input() inBrowser: boolean = false;
     @Input() editEnabled: boolean;
 
+    // Pass out download status
+    @Output() dlStatus: EventEmitter<string> = new EventEmitter();
     // Flag to tell if current screen size is mobile or small device
     @Input() mobileMode : boolean|null = false;
 
@@ -98,5 +100,13 @@ export class LandingBodyComponent {
                 break; 
             } 
         } 
+    }
+
+    /**
+     * Emit the download status
+     * @param downloadStatus - download status ('downloading' or 'downloaded')
+     */
+     setDownloadStatus(downloadStatus){
+        this.dlStatus.emit(downloadStatus);
     }
 }
