@@ -1,0 +1,20 @@
+.btn-primary, .btn-primary:hover, .btn-primary:active, .btn-primary:visited {
+    background-color: #257a2d !important;
+    border-color: #257a2d !important;
+}
+
+.button_icon {
+    padding-right: 10px;
+}
+
+.description {
+    padding: 10px 10px 10px 0px;
+}
+
+#accessPages {
+    margin-top: 1em;
+}
+
+.indent-content {
+    padding-left:20px;
+}

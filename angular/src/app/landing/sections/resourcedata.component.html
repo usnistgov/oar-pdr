@@ -1,58 +1,81 @@
 <div class="ui-g" id="dataAccess">
-    <div class="ui-g-12 ui-md-12 ui-lg-12 ui-sm-12 font14">
+    <div class="ui-g-12 ui-md-12 ui-lg-12 ui-sm-12">
         <h3><b>Data Access</b></h3><br>
+
+        <dl>
+            <dt>
+               <span style="margin-left:0em" *ngIf="record['accessLevel'] === 'public'">
+                   <i class="faa faa-globe"></i> These data are public.
+               </span>
         
-        <!-- Decide what to display based on access level -->
-        <p>
-        <span style="margin-left:0em" *ngIf="record['accessLevel'] === 'public'">
-            <i class="faa faa-globe"></i> These data are public.
-        </span>
-
-        <span *ngIf="record['accessLevel'] === 'restricted public'">
-            <i class="faa faa-lock"></i> This data has access restrictions.  
-            <span *ngIf="accessPages.length > 0">
-               Follow the links below for further information accessing the data. 
-            </span>
-        </span>
-        </p>
-
-        <!-- Display access right -->
-        <div id="accessRights" *ngIf="record['rights']">
-            <dl>
-              <dt>Access rights statement:</dt>
-              <dd> {{record.rights}} </dd>
-            </dl>   
-        </div>
+               <span *ngIf="record['accessLevel'] === 'restricted public'">
+                   <i class="faa faa-lock"></i> This data has access restrictions. 
+               </span>
+        
+               <!-- Display access right -->
+               <span id="accessRights" *ngIf="record['rights']">
+                     Access rights statement:
+               </span>
+           </dt>
+        
+           <dd *ngIf="record['rights']">
+               {{record['rights']}}
+           </dd>
+         </dl>        
 
         <!-- Display Homepage button if 'landingPage field exist and does not contain '/od/id' -->
-        <p *ngIf="record['landingPage'] && record['landingPage'].indexOf('/od/id') === -1 ">
+        <div *ngIf="record['landingPage'] && record['landingPage'].indexOf('/od/id') === -1 ">
             For more information, please visit the
             <a target="_blank" href="{{ record['landingPage'] }}"
                (click)="gaService.gaTrackEvent('homepage', $event, 'Resource title: ' + record.title, record['landingPage'])">home
                 page</a>.
-        </p>
+        </div>
 
         <!-- Access Pages -->
-        <p id="accessPages" style="margin-left:0em" *ngIf="accessPages.length > 0">
-            <br>Data and related material can be found at the following locations:
+        <div id="accessPages" *ngIf="accessPages.length > 0">
+            <b>Data and related material can be found at the following locations:</b>
             <br>
-            <span style="padding-left:2.00em" *ngFor="let apage of accessPages">
-                <i class="faa faa-external-link"> <span style="margin-left:0.3em;">
-                    <span *ngIf="apage['description']; else noAccessTitle">
-                        <a href="{{apage['accessURL']}}" title="{{apage['description']}}"
-                           (click)="gaService.gaTrackEvent('homepage', $event, 
-                                                           'Resource title: ' + record.title,
-                                                           apage['accessURL'])">{{apage['title']}}</a>
-                    </span>
-                    <ng-template #noAccessTitle>
-                        <a href="{{apage['accessURL']}}" 
-                           (click)="gaService.gaTrackEvent('homepage', $event, 
-                                                           'Resource title: ' + record.title,
-                                                           apage['accessURL'])">{{apage['title']}}</a>
-                    </ng-template>
-                </span></i><br>
-            </span>
-        </p>
+            <div [ngStyle]="{'margin-top': '10px', 'background-color': apage['backcolor']}" *ngFor="let apage of accessPages" (mouseover)="apage['backcolor'] = '#f2f2f2'" (mouseout)="apage['backcolor'] = 'white'">
+                <div class="indent-content" *ngIf="!apage['@type'].includes('nrdp:RestrictedAccessPage'); else RestrictedAccessPage">
+                    <i class="faa faa-external-link"> <span style="margin-left:0em;" (mouseover)="apage[showDesc] = true" (mouseout)="apage[showDesc] = false">
+                        <span *ngIf="apage['description']; else noAccessTitle">
+                            <a href="{{apage['accessURL']}}" title="{{apage['description']}}"
+                            (click)="gaService.gaTrackEvent('homepage', $event, 
+                                                            'Resource title: ' + record.title,
+                                                            apage['accessURL'])">&nbsp;&nbsp;{{apage['title']}}</a>
+                        </span>
+                        <ng-template #noAccessTitle>
+                            <a href="{{apage['accessURL']}}" 
+                            (click)="gaService.gaTrackEvent('homepage', $event, 
+                                                            'Resource title: ' + record.title,
+                                                            apage['accessURL'])">&nbsp;&nbsp;{{apage['title']}}</a>
+                        </ng-template>
+                    </span></i>
+                    <div *ngIf="apage['description']">
+                        <div style="cursor: pointer;color: #1471AE;" (click)="apage[showDesc] = !apage[showDesc]">About this link
+                            <i *ngIf="apage[showDesc]" class="faa faa-arrow-circle-up faa-1x"
+                            style="cursor: pointer; margin-left: .5em;" data-toggle="tooltip"
+                            title="Collapse All"></i>
+                        </div>
+                        <div class="description" *ngIf="apage[showDesc]" [@enterAnimation]>{{apage['description']}}</div>
+                    </div>
+                </div>
+                <ng-template #RestrictedAccessPage>
+                    <div style="padding:10px 20px;">
+                        <button style="margin-top: -6px;" type="button" class="btn btn-primary py-0" data-toggle="tooltip" data-placement="top" title="{{apage['title']}}" (mouseover)="apage[showDesc] = true" (mouseout)="apage[showDesc] = false" (click)="visitHomePage(apage['accessURL'], $event, 'Download Data')"><i class="faa faa-external-link button_icon"></i>Download Data</button>
+                        <div *ngIf="apage['description']">
+                            <div style="cursor: pointer;color: #1471AE;" (click)="apage[showDesc] = !apage[showDesc]">About downloading restricted public data
+                                <i *ngIf="apage[showDesc]" class="faa faa-arrow-circle-up faa-1x"
+                                style="cursor: pointer; margin-left: .5em;" data-toggle="tooltip"
+                                title="Collapse All"></i>
+                            </div>
+                            <div class="description" *ngIf="apage[showDesc]" [@enterAnimation]>{{apage['description']}}</div>
+                        </div>
+                    </div>
+                </ng-template>
+            </div>
+
+        </div>
 
         <pdr-data-files [record]="record" [inBrowser]="inBrowser" 
                         [editEnabled]="editEnabled" (dlStatus)="setDownloadStatus($event)"></pdr-data-files>

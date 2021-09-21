@@ -10,7 +10,7 @@
                 [ngStyle]="getFieldStyle()">
                 Contact:
                 <strong>
-                    <a class="font14" *ngIf="isEmail"
+                    <a *ngIf="isEmail"
                         href="{{record.contactPoint.hasEmail}}" target="_top">
                         {{record.contactPoint.fn}}</a>
                     <span *ngIf="!isEmail">{{record.contactPoint.fn}}</span>
@@ -23,14 +23,14 @@
                     <span class="" *ngIf="record.contactPoint.fn">
                         <span>{{record.contactPoint.fn}}</span>
                     </span>
-                    <span class="font14" *ngIf="isEmail">
+                    <span *ngIf="isEmail">
                         <br><strong>Email:</strong>
                         <a *ngIf="isEmail" href="{{record.contactPoint.hasEmail}}"
                             target="_top">
                             {{email(record.contactPoint.hasEmail)}}
                         </a>
                     </span>
-                    <div class="font14" *ngIf="record.contactPoint.address">
+                    <div *ngIf="record.contactPoint.address">
                         <span><b>Address:</b></span>
                         <div *ngFor="let address of record.contactPoint.address"
                             style="padding-left: 1em;">

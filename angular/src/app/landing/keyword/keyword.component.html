@@ -8,7 +8,7 @@
           <ng-template #hasKeyword>
             <div class="editable_field" style="max-width:calc(100% - 4em);" [ngStyle]="mdupdsvc.getFieldStyle(fieldName)" (click)="openModal()">
               <strong>Subject Keywords:</strong>
-              <span class="font14 keywords" contenteditable="false"
+              <span class="keywords" contenteditable="false"
                 *ngFor="let keyword of record['keyword']; let i =index">
                 {{ keyword }}<span *ngIf="i < record['keyword'].length-1 ">,</span>
               </span> &nbsp; &nbsp;
