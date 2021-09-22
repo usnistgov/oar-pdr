@@ -1,5 +1,5 @@
 <div style="display: table;" *ngIf="record">
-    <span class="" *ngIf="record.version"> Version: <strong>{{record.version}}</strong></span>
+    <span class="" *ngIf="record.version" style="padding-right: 10pt;"> Version: <strong>{{record.version}}</strong></span>
     <span class="" *ngIf="record.versionHistory" style="padding-right: 15pt;">...
         <i style="cursor: pointer;" class="faa" aria-hidden="true"
             [ngClass]="{'faa-plus-square-o': !clickHistory, 'faa-minus-square-o': clickHistory}"
@@ -8,7 +8,7 @@
     <span class="" *ngIf="record.issued" style="padding-right: 10pt;"> Released:
         <strong>{{record.issued}}</strong></span>
     <span class="" *ngIf="record.modified" style="padding-right: 10pt;"> Last modified:
-        <strong>{{record.modified}}</strong></span>
+        <strong>{{record.modified | date:'yyyy-MM-dd'}}</strong></span>
     <div class="card customcard" [collapse]="!closeHistory">
         <b>Version History:</b>
         <span *ngFor="let release of record.versionHistory">

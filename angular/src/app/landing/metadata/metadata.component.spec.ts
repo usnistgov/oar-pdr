@@ -36,7 +36,7 @@ describe('MetadataComponent', () => {
         fixture.detectChanges();
     });
 
-    fit('should create', () => {
+    it('should create', () => {
         component.mobileMode = false;
         expect(component).toBeTruthy();
 

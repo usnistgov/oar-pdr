@@ -87,6 +87,11 @@ export class ResourceIdentityComponent implements OnChanges {
         return "Data Resource";
     }
 
+    visitHomePage(url: string, event, title) {
+        this.gaService.gaTrackEvent('homepage', event, title, url);
+        window.open(url, '_blank');
+    }
+
     /*
      * uncomment this as needed for debugging purposes
      *
