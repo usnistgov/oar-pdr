@@ -87,9 +87,14 @@ export class ResourceIdentityComponent implements OnChanges {
         return "Data Resource";
     }
 
-    visitHomePage(url: string, event, title) {
+    /**
+     * Google Analytics track event
+     * @param url - URL that user visit
+     * @param event - action event
+     * @param title - action title
+     */
+     googleAnalytics(url: string, event, title) {
         this.gaService.gaTrackEvent('homepage', event, title, url);
-        window.open(url, '_blank');
     }
     
     /*

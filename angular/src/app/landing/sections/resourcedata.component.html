@@ -62,7 +62,10 @@
                 </div>
                 <ng-template #RestrictedAccessPage>
                     <div style="padding:10px 20px;">
-                        <button style="margin-top: -6px;" type="button" class="btn btn-primary py-0" data-toggle="tooltip" data-placement="top" title="{{apage['title']}}" (mouseover)="apage[showDesc] = true" (mouseout)="apage[showDesc] = false" (click)="visitHomePage(apage['accessURL'], $event, 'Download Data')"><i class="faa faa-external-link button_icon"></i>Download Data</button>
+                        <a href={{apage.accessURL}} target="_blank">
+                            <button style="margin-top: -6px;" type="button" class="btn btn-primary py-0" data-toggle="tooltip" data-placement="top" title="{{apage['title']}}" (mouseover)="apage[showDesc] = true" (mouseout)="apage[showDesc] = false" (click)="googleAnalytics(apage['accessURL'], $event, 'Download Data')"><i class="faa faa-external-link button_icon"></i>Download Data</button>
+                        </a> 
+
                         <div *ngIf="apage['description']">
                             <div style="cursor: pointer;color: #1471AE;" (click)="apage[showDesc] = !apage[showDesc]">About downloading restricted public data
                                 <i *ngIf="apage[showDesc]" class="faa faa-arrow-circle-up faa-1x"

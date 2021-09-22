@@ -105,14 +105,13 @@ export class ResourceDataComponent implements OnChanges {
     }
 
     /**
-     * function call when user clicks on "Download Data" button
-     * @param url - target url
-     * @param event - event for Google analytics
-     * @param title - title for Google analytics
+     * Google Analytics track event
+     * @param url - URL that user visit
+     * @param event - action event
+     * @param title - action title
      */
-    visitHomePage(url: string, event, title) {
+     googleAnalytics(url: string, event, title) {
         this.gaService.gaTrackEvent('homepage', event, title, url);
-        window.open(url, '_blank');
     }
 }
 
