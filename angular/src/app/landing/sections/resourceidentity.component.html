@@ -33,13 +33,15 @@
     <div class="ui-g-4 ui-md-4 ui-lg-4 ui-sm-12">
         <span *ngIf="showHomePageLink" style="float: right;">
             <span *ngIf="inBrowser; else visitHomeOnServer">
-                <button type="button" pButton type="submit" [disabled]="editEnabled"
+                <a href={{record.landingPage}} target="_blank">
+                    <button type="button" pButton type="submit" [disabled]="editEnabled"
                         class="home_button ui-button ui-widget ui-state-default ui-corner-all ui-button-text-empty"
-                        (click)="visitHomePage(record.landingPage, $event, 'Resource title: '+record.title)">
-                    <i class="faa faa-external-link"
-                        style="color: #fff;padding-left: .5em;padding-right: .5em;"></i>
-                    Visit Home Page
-                </button>
+                        (click)="googleAnalytics(record.landingPage, $event, 'Resource title: '+record.title)">
+                        <i class="faa faa-external-link"
+                            style="color: #fff;padding-left: .5em;padding-right: .5em;"></i>
+                        Visit Home Page
+                    </button>
+                </a> 
             </span>
             <ng-template #visitHomeOnServer>Visit Home Page</ng-template>
         </span>
