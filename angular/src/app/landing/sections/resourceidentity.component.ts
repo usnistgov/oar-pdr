@@ -93,10 +93,10 @@ export class ResourceIdentityComponent implements OnChanges {
      * @param event - action event
      * @param title - action title
      */
-     googleAnalytics(url: string, event, title) {
+    googleAnalytics(url: string, event, title) {
         this.gaService.gaTrackEvent('homepage', event, title, url);
     }
-    
+
     /*
      * uncomment this as needed for debugging purposes
      *
