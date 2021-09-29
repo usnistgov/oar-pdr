@@ -3,6 +3,7 @@ import { Component, OnChanges, SimpleChanges, Input, Output, EventEmitter } from
 import { AppConfig } from '../../config/config';
 import { NerdmRes, NerdmComp, NERDResource } from '../../nerdm/nerdm';
 import { GoogleAnalyticsService } from '../../shared/ga-service/google-analytics.service';
+import { trigger, state, style, animate, transition } from '@angular/animations';
 
 /**
  * a component that lays out the "Data Access" section of a landing page.  This includes (as applicable)
@@ -12,11 +13,30 @@ import { GoogleAnalyticsService } from '../../shared/ga-service/google-analytics
     selector:      'pdr-resource-data',
     templateUrl:   './resourcedata.component.html',
     styleUrls:   [
+        './resourcedata.component.css',
         '../landing.component.css'
+    ],
+    animations: [
+        trigger(
+          'enterAnimation', [
+            transition(':enter', [
+              style({height: '0px', opacity: 0}),
+              animate('500ms', style({height: '100%', opacity: 1}))
+            ]),
+            transition(':leave', [
+              style({height: '100%', opacity: 1}),
+              animate('500ms', style({height: 0, opacity: 0}))
+            //   animate('500ms', style({transform: 'translateY(0)', opacity: 1}))
+            ])
+          ]
+        )
     ]
 })
 export class ResourceDataComponent implements OnChanges {
     accessPages: NerdmComp[] = [];
+    showDescription: boolean = false;
+    showRestrictedDescription: boolean = false;
+    currentState = 'initial';
 
     // passed in by the parent component:
     @Input() record: NerdmRes = null;
@@ -58,7 +78,11 @@ export class ResourceDataComponent implements OnChanges {
                                        ! cmp['@type'].includes("nrd:Hidden"));
         use = (JSON.parse(JSON.stringify(use))) as NerdmComp[];
         return use.map((cmp) => {
-            if (! cmp['title']) cmp['title'] = cmp['accessURL']
+            if (! cmp['title']) cmp['title'] = cmp['accessURL'];
+
+            cmp['showDesc'] = false;
+            cmp['backcolor'] = 'white';
+
             return cmp;
         });
     }
@@ -68,8 +92,26 @@ export class ResourceDataComponent implements OnChanges {
      * Emit download status
      * @param downloadStatus
      */
-     setDownloadStatus(downloadStatus){
+    setDownloadStatus(downloadStatus){
         this.dlStatus.emit(downloadStatus);
+    }
+    /**
+     * For animation
+     * initial - mouse out
+     * final - mouse in
+     */
+    changeState() {
+        this.currentState = this.currentState === 'initial' ? 'final' : 'initial';
+    }
+
+    /**
+     * Google Analytics track event
+     * @param url - URL that user visit
+     * @param event - action event
+     * @param title - action title
+     */
+     googleAnalytics(url: string, event, title) {
+        this.gaService.gaTrackEvent('homepage', event, title, url);
     }
 }
 

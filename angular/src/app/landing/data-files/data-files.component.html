@@ -50,10 +50,10 @@
                         </div>
                     </ng-template>
                     <div style="flex-grow: 9; text-align: left; padding-top: 0.5em;">
-                        <span class="font8 grey-color">Click on the file/row in the table below to view more
+                        <span class="grey-color">Click on the file/row in the table below to view more
                             details.</span>
                     </div>
-                    <div class="font10 grey-color" style="flex-grow: 2; text-align: right;padding-top: 0.5em;">
+                    <div class="grey-color" style="flex-grow: 2; text-align: right;padding-top: 0.5em;">
                         Total No. files: {{ fileCount }}
                     </div>
                 </div>
@@ -85,7 +85,7 @@
                             <td [ngStyle]="titleStyle()">
                                 <p-treeTableToggler [rowNode]="rowNode" data-toggle="tooltip" title="Expand/Collapse">
                                 </p-treeTableToggler>
-                                <a (click)="openDetails($event,rowData,op3) " style="color: #1471AE;cursor: pointer;"
+                                <a (click)="openDetails($event,rowData,op3) " style="color: #1471AE;cursor: pointer; margin-left: 10px;"
                                     data-toggle="tooltip" title="Click for more details">
                                     {{rowData.name}} </a>
                                 <span *ngIf="showZipFilesNames"
@@ -148,23 +148,23 @@
     <div class="filecard" [ngStyle]="{'max-width':getDialogWidth()}">
         <div class="ui-g filesection">
             <div *ngIf="fileNode" class="ui-g-12 ui-md-12 ui-lg-12 ui-sm-10">
-                <span class="font8" style="color:grey">
+                <span style="color:grey">
                     <span *ngIf="fileNode.filetype == 'nrdp:DataFile' ">Selected File</span>
                     <span *ngIf="fileNode.filetype == 'nrdp:ChecksumFile' ">Selected Checksum File</span>
                     <span *ngIf="fileNode.filetype == 'nrdp:Subcollection'">Selected SubCollection </span>
                     <br>
                 </span>
-                <span class="font14">{{ fileNode ? fileNode.name : '' }}</span>
-                <span class="font8" style="color:grey">
+                <span>{{ fileNode ? fileNode.name : '' }}</span>
+                <span style="color:grey">
                     <br><b>Type:</b>
                     <span style="margin-left:0.5em;" class="textstyle1">{{ fileNode.mediaType }} </span>
                 </span>
-                <span class="font8" style="margin-left: 2.5rem">
+                <span style="margin-left: 2.5rem">
                     Size:
                     <span *ngIf="fileNode.size" class="textstyle1">{{ fileNode.size }} </span>
                     <span *ngIf="!fileNode.size" class="textstyle1"><i>Not Available</i></span>
                 </span>
-                <br><span class="font10"><b>Description:</b> </span>
+                <br><span ><b>Description:</b> </span>
                 <div class="well filedesc">
                     <span *ngIf="!fileNode.comp.description"><i>No Description Available</i></span>
                     <span *ngIf="fileNode.comp.description">{{ fileNode.comp.description }} </span>

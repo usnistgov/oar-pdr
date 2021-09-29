@@ -270,8 +270,8 @@
   text-align: left;
   color: white;
   word-wrap: break-word;
-  font-family: sans-serif;
-  font-size: 12px;
+  /* font-family: sans-serif; */
+  /* font-size: 12px; */
   padding: 1rem 1rem 1rem 1rem; 
 }
 
