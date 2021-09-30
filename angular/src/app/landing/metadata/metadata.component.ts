@@ -7,7 +7,7 @@ import { GoogleAnalyticsService } from '../../shared/ga-service/google-analytics
 @Component({
   selector: 'metadata-detail',
   templateUrl: './metadata.component.html',
-  styleUrls: ['./metadata.component.css']
+  styleUrls: ['./metadata.component.scss']
 })
 export class MetadataComponent implements OnChanges {
     nerdmRecord: any = {};
