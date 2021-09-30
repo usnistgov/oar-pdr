@@ -9,11 +9,11 @@
 <!-- JSON viewer with a thin grey border -->
 <div class="json-viewer-box" id="json-viewer">
     <!-- Header bar with JSON tree navigate buttons (left) and JSON export button (right)-->
-    <div class="json-viewer-header nist-blue-background">
+    <div class="json-viewer-header">
         <!-- JSON export button (right alignment) -->
         <div >
             <a [href]='getDownloadURL()'>
-                <span class="json-export-btn" (click)="onjson()"><i class="faa faa-file-code-o" style="margin-right: 5px;"></i>Export</span></a>
+                <span class="json-export-btn nist-blue-background" (click)="onjson()"><i class="faa faa-file-code-o" style="margin-right: 10px;"></i>Export</span></a>
         </div>
 
         <!-- JSON tree navigate buttons (left alignment) -->
