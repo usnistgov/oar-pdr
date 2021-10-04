@@ -210,8 +210,8 @@ ul, menu, dir {
 }
 .menu--footer-menu ul.menu li:before {
     content: '|';
-    margin-left: 1.6px;
-    margin-left: 0.1rem;
+    margin-left: 7px;
+    margin-right: 7PX;
     display: inherit;
     position: static;
     font: inherit;
@@ -321,4 +321,5 @@ ul, menu, dir {
   -webkit-margin-end: 0px;
   -webkit-padding-start: 40px;
 }
+
 
