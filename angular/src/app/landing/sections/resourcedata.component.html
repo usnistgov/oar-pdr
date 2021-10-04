@@ -37,7 +37,7 @@
             <br>
             <div [ngStyle]="{'margin-top': '10px', 'background-color': apage['backcolor']}" *ngFor="let apage of accessPages" (mouseover)="apage['backcolor'] = '#f2f2f2'" (mouseout)="apage['backcolor'] = 'white'">
                 <div class="indent-content" *ngIf="!apage['@type'].includes('nrdp:RestrictedAccessPage'); else RestrictedAccessPage">
-                    <i class="faa faa-external-link"> <span style="margin-left:0em;" (mouseover)="apage[showDesc] = true" (mouseout)="apage[showDesc] = false">
+                    <i class="faa faa-external-link"> <span style="margin-left:0em;">
                         <span *ngIf="apage['description']; else noAccessTitle">
                             <a href="{{apage['accessURL']}}" title="{{apage['description']}}"
                             (click)="gaService.gaTrackEvent('homepage', $event, 
@@ -52,10 +52,7 @@
                         </ng-template>
                     </span></i>
                     <div *ngIf="apage['description']">
-                        <div style="cursor: pointer;color: #1471AE;" (click)="apage[showDesc] = !apage[showDesc]">About this link
-                            <i *ngIf="apage[showDesc]" class="faa faa-arrow-circle-up faa-1x"
-                            style="cursor: pointer; margin-left: .5em;" data-toggle="tooltip"
-                            title="Collapse All"></i>
+                        <div style="cursor: pointer;color: #1471AE;" (click)="apage[showDesc] = !apage[showDesc]"><i class="faa faa-caret-right" *ngIf="!apage[showDesc]"></i><i class="faa faa-caret-down" *ngIf="apage[showDesc]"></i> About this link
                         </div>
                         <div class="description" *ngIf="apage[showDesc]" [@enterAnimation]>{{apage['description']}}</div>
                     </div>
@@ -63,14 +60,11 @@
                 <ng-template #RestrictedAccessPage>
                     <div style="padding:10px 20px;">
                         <a href={{apage.accessURL}} target="_blank">
-                            <button style="margin-top: -6px;" type="button" class="btn btn-primary py-0" data-toggle="tooltip" data-placement="top" title="{{apage['title']}}" (mouseover)="apage[showDesc] = true" (mouseout)="apage[showDesc] = false" (click)="googleAnalytics(apage['accessURL'], $event, 'Download Data')"><i class="faa faa-external-link button_icon"></i>Download Data</button>
+                            <button style="margin-top: -6px;" type="button" class="btn btn-primary py-0" data-toggle="tooltip" data-placement="top" title="{{apage['title']}}" (click)="googleAnalytics(apage['accessURL'], $event, 'Download Data')"><i class="faa faa-external-link button_icon"></i>Download Data</button>
                         </a> 
 
                         <div *ngIf="apage['description']">
-                            <div style="cursor: pointer;color: #1471AE;" (click)="apage[showDesc] = !apage[showDesc]">About downloading restricted public data
-                                <i *ngIf="apage[showDesc]" class="faa faa-arrow-circle-up faa-1x"
-                                style="cursor: pointer; margin-left: .5em;" data-toggle="tooltip"
-                                title="Collapse All"></i>
+                            <div style="cursor: pointer;color: #1471AE;" (click)="apage[showDesc] = !apage[showDesc]"><i class="faa faa-caret-right" *ngIf="!apage[showDesc]"></i><i class="faa faa-caret-down" *ngIf="apage[showDesc]"></i> About downloading restricted public data
                             </div>
                             <div class="description" *ngIf="apage[showDesc]" [@enterAnimation]>{{apage['description']}}</div>
                         </div>

@@ -1,6 +1,5 @@
 .json-viewer-box {
-    /* margin-top: 1em;  */
-    border: 1px solid rgb(151, 151, 151, .2);
+    border: 1px solid rgba(151, 151, 151, .2);
 }
 
 .more-info {
@@ -9,11 +8,11 @@
 
 .json-viewer-header {
     height: 1.8em;
+    background-color: rgb(216, 228, 240);
 }
 
 .json-level {
     display:inline;
-    color: white;
 }
 
 .item-list {
@@ -22,7 +21,6 @@
     margin-left: -30px;
     height: 1.5em;
     width: auto;
-    /* font-weight: bold; */
 }
 
 .item-list li{
@@ -30,13 +28,13 @@
     padding:1px 10px 2px 10px;
     border-radius: 3px;
     margin-right:8px;
-    background-color: #4CAF50;
     font-weight:400;
     font-size: 14px;
 }
 
 .item-list li:hover {
-    background-color:#98d655;
+    background-color:#0b67a8;
+    color: #fff;
     cursor: pointer;
 }
 
@@ -55,11 +53,31 @@
     border-radius: 3px;
     margin: 3px 8px;
     color: white;
-    background-color: #4CAF50;
     font-weight:400;
     font-size: 14px;
 }
 
 .json-export-btn:hover {
-    background-color:#98d655;
+    background-color:#5daae0;
+}
+
+// JSON viewer styling
+$type-colors: (
+  string: #ff0000,
+  number: #00443d,
+  boolean: #551d4c,
+  date: #014966,
+
+  array: rgb(0, 0, 0),
+  object: rgb(0, 0, 0),
+  function: rgb(0, 0, 0),
+
+  'null': #fff,
+  undefined: #fff,
+);
+
+@each $type, $color in $type-colors {
+  ::ng-deep .segment-type-#{$type} > .segment-main > .segment-value {
+    color: $color !important;
+  }
 }
