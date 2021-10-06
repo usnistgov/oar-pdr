@@ -7,7 +7,7 @@ describe('FootbarComponent', () => {
     let component : FootbarComponent;
     let fixture : ComponentFixture<FootbarComponent>;
 
-    it('should contain expected content', () => {
+    it('should contain expected content', async(() => {
         TestBed.configureTestingModule({
             declarations: [ FootbarComponent ],
             providers: [GoogleAnalyticsService]
@@ -15,8 +15,9 @@ describe('FootbarComponent', () => {
 
         fixture = TestBed.createComponent(FootbarComponent);
         component = fixture.componentInstance;
-        component.footerLinks = (footerlinks as any).default;
 
-        expect(component).toBeDefined();
-    });
+        fixture.whenStable().then(() => {
+            expect(component).toBeDefined();
+        })
+    }));
 });
