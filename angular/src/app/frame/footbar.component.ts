@@ -1,7 +1,6 @@
 import { Component, PLATFORM_ID, Inject } from '@angular/core';
 import { GoogleAnalyticsService } from '../shared/ga-service/google-analytics.service';
 import * as footerlinks from '../../assets/site-constants/footer-links.json';
-import { isPlatformBrowser } from '@angular/common';
 
 /**
  * A Component that serves as the footer of the landing page.  
@@ -16,8 +15,6 @@ import { isPlatformBrowser } from '@angular/common';
   styleUrls: ['footbar.component.css']
 })
 export class FootbarComponent { 
-    inBrowser: boolean = false;
-
     footerLinks: any;
 
     // Social media list
@@ -30,9 +27,7 @@ export class FootbarComponent {
     footerLinks02: any[];
 
     constructor(
-        public gaService: GoogleAnalyticsService,
-        @Inject(PLATFORM_ID) private platformId: Object){
-        this.inBrowser = isPlatformBrowser(platformId);
+        public gaService: GoogleAnalyticsService){
 
         // For some reason, footerlinks does not have "default" field in unit test
         // So we have to use following condition to make both production and unit test work. 
