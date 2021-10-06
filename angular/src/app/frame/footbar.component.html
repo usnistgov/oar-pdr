@@ -1,7 +1,7 @@
 <div id="footer" class="region region-footer ">
     <div class="footer__inner">
         <!-- Social Media list -->
-        <div class="social-links" *ngIf="socialMediaList != undefined">
+        <div class="social-links" *ngIf="socialMediaList">
             <div class="item-list">
                 <ul>
                     <li *ngFor="let socialMedia of socialMediaList">
@@ -23,7 +23,7 @@
         </div>
 
         <!-- Footer links line #1 -->
-        <div id="block-menu-menu-footer-menu" *ngIf="footerLinks01 != undefined"
+        <div id="block-menu-menu-footer-menu" *ngIf="footerLinks01"
         class="block menu--footer-menu first even block--menu block--menu-menu-footer-menu" role="navigation">
             <ul class="menu">
                 <li *ngFor="let link of footerLinks01; let i = index" [ngClass]="getLinkClass(i, footerLinks01)">
@@ -33,7 +33,7 @@
         </div>
 
         <!-- Footer links line #2 -->
-        <div id="block-menu-menu-footer-menu-3" *ngIf="footerLinks02 != undefined"
+        <div id="block-menu-menu-footer-menu-3" *ngIf="footerLinks02"
         class="block menu--footer-menu last even block--menu block--menu-menu-footer-menu-3" role="navigation">
             <ul class="menu">
                 <li *ngFor="let link of footerLinks02; let i = index" [ngClass]="getLinkClass(i, footerLinks02)">

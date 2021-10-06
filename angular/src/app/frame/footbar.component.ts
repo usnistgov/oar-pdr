@@ -3,9 +3,6 @@ import { GoogleAnalyticsService } from '../shared/ga-service/google-analytics.se
 import * as footerlinks from '../../assets/site-constants/footer-links.json';
 import { isPlatformBrowser } from '@angular/common';
 
-// All footer link details are stored in /assets/site-constants/footer-links.json
-const footerLinks: any = (footerlinks as any).default;
-
 /**
  * A Component that serves as the footer of the landing page.  
  * 
@@ -21,6 +18,8 @@ const footerLinks: any = (footerlinks as any).default;
 export class FootbarComponent { 
     inBrowser: boolean = false;
 
+    footerLinks: any;
+
     // Social media list
     socialMediaList : any[];
 
@@ -35,15 +34,17 @@ export class FootbarComponent {
         @Inject(PLATFORM_ID) private platformId: Object){
         this.inBrowser = isPlatformBrowser(platformId);
 
-        // Add footerLinks to the condition to avoid unit test error
-        if(this.inBrowser && footerLinks) {
-            this.socialMediaList = footerLinks.socialMediaList;
-            this.footerLinks01 = footerLinks.footerLinks01;
-            this.footerLinks02 = footerLinks.footerLinks02;
-        }
-    }
+        // For some reason, footerlinks does not have "default" field in unit test
+        // So we have to use following condition to make both production and unit test work. 
+        if((footerlinks as any).default)
+            this.footerLinks = (footerlinks as any).default;
+        else
+            this.footerLinks = footerlinks as any;
 
-    ngOnInit(): void {
+        // Add footerLinks to the condition to avoid unit test error
+        this.socialMediaList = this.footerLinks.socialMediaList;
+        this.footerLinks01 = this.footerLinks.footerLinks01;
+        this.footerLinks02 = this.footerLinks.footerLinks02;
 
     }
 
