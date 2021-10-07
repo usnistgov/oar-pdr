@@ -1,9 +1,7 @@
 #footer {
     background: #000000;
-    /*background-color: white;*/
     color: white;
     position: relative;
-    height: 400px;
 }
 
 .footer__inner {
