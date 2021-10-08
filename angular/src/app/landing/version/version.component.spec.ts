@@ -40,8 +40,10 @@ describe('VersionComponent', () => {
         let spans = cmpel.querySelectorAll("span"); 
         expect(spans[0].textContent).toContain("Version:");
         expect(spans[0].textContent).toContain("1.0.1");
-        expect(spans[2].textContent).toContain("Last modified:");
-        expect(spans[2].textContent).toContain("2019-03-28");
+        expect(spans[2].textContent).toContain("Released:");
+        expect(spans[2].textContent).toContain("2019-04-05");
+        expect(spans[3].textContent).toContain("Last modified:");
+        expect(spans[3].textContent).toContain("2019-03-28");
     });
 
     it('test renderRelAsLink()', () => {
