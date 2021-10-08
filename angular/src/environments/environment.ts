@@ -64,7 +64,8 @@ export const testdata: {} = {
             "hasEmail": "mailto:patricia.flanagan@nist.gov",
             "fn": "Patricia Flanagan"
         },
-        "modified": "2019-03-28",
+        "modified": "2019-03-28 12:24:31",
+        "issued": "2019-04-05T16:04:26.0",
         "ediid": "26DEA39AD677678AE0531A570681F32C1449",
         "landingPage": "https://www.nist.gov/itl/iad/image-group/special-database-32-multiple-encounter-dataset-meds",
         "version": "1.0.1",

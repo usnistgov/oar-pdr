@@ -6,7 +6,7 @@
             (click)="closeHistory = !closeHistory; clickHistory = expandHistory();"></i>
     </span>
     <span class="" *ngIf="record.issued" style="padding-right: 10pt;"> Released:
-        <strong>{{record.issued}}</strong></span>
+        <strong>{{record.issued.slice(0,10)}}</strong></span>
     <span class="" *ngIf="record.modified" style="padding-right: 10pt;"> Last modified:
         <strong>{{record.modified.slice(0,10)}}</strong></span>
     <div class="card customcard" [collapse]="!closeHistory">
