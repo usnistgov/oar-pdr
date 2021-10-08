@@ -79,7 +79,7 @@ export const testdata: {} = {
             },
             {
                 "version": "1.0.1",
-                "issued": "2019-03-28 00:00:00",
+                "issued": "2019-03-28 12:24:31",
                 "@id": "ark:/88434/mds0000fbkmds1103vzr",
                 "location": "https://data.nist.gov/od/id/ark:/88434/mds0000fbk",
                 "description": "metadata update"
