@@ -11,12 +11,23 @@
 
 # The parent should be an ancestor image of the operational container
 # 
-FROM node:10.9.0
+FROM debian:buster-slim
 
-RUN sed -e '/jessie-updates/ s/^deb/#deb/' /etc/apt/sources.list \
+RUN sed -e '/buster-updates/ s/^deb/#deb/' /etc/apt/sources.list \
     > /tmp/sources.list && mv /tmp/sources.list /etc/apt/sources.list
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends zip wget ca-certificates git gnupg-curl
+    apt-get install -y --no-install-recommends zip wget ca-certificates git xz-utils \
+                                               gnupg python
+
+COPY node-sha256.txt /tmp
+RUN cd /tmp && wget https://nodejs.org/dist/v10.9.0/node-v10.9.0-linux-x64.tar.xz  \
+            && sha256sum -c node-sha256.txt
+RUN cd /usr/local && tar xJf /tmp/node-v10.9.0-linux-x64.tar.xz \
+                  && ln -s node-v10.9.0-linux-x64 node          \
+                  && cd bin                                     \
+                  && ln -s ../node/bin/node node                \
+                  && ln -s ../node/bin/npm  npm                 \
+                  && ln -s ../node/bin/npx  npx            
 
 ENV GOSU_VERSION 1.10
 RUN set -ex; \
