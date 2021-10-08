@@ -13,7 +13,7 @@ FROM oar-metadata/ejsonschema
 
 RUN apt-get update && apt-get install -y python-yaml nginx curl wget less sudo \
                                          uwsgi uwsgi-plugin-python zip \
-                                         p7zip-full git
+                                         p7zip-full ca-certificates git
 RUN pip install --upgrade pip 'setuptools==44.0.0'
 RUN pip install funcsigs 'bagit>=1.6.3,<2.0' 'fs>=2.0.21' mako
 

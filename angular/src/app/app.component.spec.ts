@@ -26,25 +26,38 @@ describe('AppComponent', () => {
         TestBed.configureTestingModule({
 
             declarations: [
-                AppComponent
+                AppComponent,
             ], providers: [GoogleAnalyticsService, CartService, { provide: AppConfig, useValue: cfg }]
             , imports: [RouterTestingModule, FrameModule, ConfigModule, BrowserTransferStateModule, BrowserModule, HttpClientTestingModule, ToastrModule.forRoot()],
         }).compileComponents();
     }));
+
     it('should create the app', async(() => {
         const fixture = TestBed.createComponent(AppComponent);
         const app = fixture.debugElement.componentInstance;
-        expect(app).toBeTruthy();
+
+        fixture.whenStable().then(() => {
+            expect(app).toBeTruthy();
+        })
     }));
+
     it(`should have as title 'PDR Resource Landing Page'`, async(() => {
-      const fixture = TestBed.createComponent(AppComponent);
-      const app = fixture.debugElement.componentInstance;
-      expect(app.title).toEqual('PDR Resource Landing Page');
+        const fixture = TestBed.createComponent(AppComponent);
+        const app = fixture.debugElement.componentInstance;
+
+        fixture.whenStable().then(() => {
+            expect(app.title).toEqual('PDR Resource Landing Page');
+        })
     }));
+
     it(`should contain 'DATA REPOSITORY' in the first span`, async(() => {
-      const fixture = TestBed.createComponent(AppComponent);
-      fixture.detectChanges();
-      const compiled = fixture.debugElement.nativeElement;
-      expect(compiled.querySelector('span').textContent).toContain('DATA REPOSITORY');
+        const fixture = TestBed.createComponent(AppComponent);
+
+        fixture.whenStable().then(() => {
+            fixture.detectChanges();
+            const compiled = fixture.debugElement.nativeElement;
+            console.log("span", compiled.querySelector('span').textContent);
+            expect(compiled.querySelector('span').textContent).toContain('DATA REPOSITORY');
+        })
     }));
 });
