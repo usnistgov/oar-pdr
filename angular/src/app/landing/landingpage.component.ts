@@ -16,11 +16,15 @@ import { MetadataUpdateService } from './editcontrol/metadataupdate.service';
 import { LandingConstants } from './constants';
 import { CartService } from '../datacart/cart.service';
 import { DataCartStatus } from '../datacart/cartstatus';
+import { CartConstants } from '../datacart/cartconstants';
 import { RecordLevelMetrics } from '../metrics/metrics';
 import { MetricsService } from '../shared/metrics-service/metrics.service';
 import { formatBytes } from '../utils';
 import { LandingBodyComponent } from './landingbody.component';
 import { BreakpointObserver, BreakpointState } from '@angular/cdk/layout';
+import { MetricsinfoComponent } from './metricsinfo/metricsinfo.component';
+import { CartActions } from '../datacart/cartconstants';
+import { initBrowserMetadataTransfer } from '../nerdm/metadatatransfer-browser.module';
 
 /**
  * A component providing the complete display of landing page content associated with 
@@ -66,22 +70,24 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
     citationDialogWith: number = 550; // Default width
     recordLevelMetrics : RecordLevelMetrics;
     metricsUrl: string;
+    public CART_CONSTANTS: any;
 
     loadingMessage = '<i class="faa faa-spinner faa-spin"></i> Loading...';
 
     dataCartStatus: DataCartStatus;
-    fileLevelMetrics: any;
-    hasCurrentMetrics: boolean = false;
-    showMetrics: boolean = false;
-    metricsRefreshed: boolean = false;
 
     //Default: wait 5 minutes (300sec) after user download a file then refresh metrics data
     delayTimeForMetricsRefresh: number = 300; 
+    cartChangeHandler: any;
+    public CART_ACTIONS: CartActions;
 
     mobileMode: boolean = false;
 
     @ViewChild(LandingBodyComponent)
     landingBodyComponent: LandingBodyComponent;
+
+    @ViewChild(MetricsinfoComponent)
+    metricsinfoComponent: MetricsinfoComponent;
 
     /**
      * create the component.
@@ -110,6 +116,7 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
         this.editEnabled = cfg.get('editEnabled', false) as boolean;
         this.editMode = this.EDIT_MODES.VIEWONLY_MODE;
         this.delayTimeForMetricsRefresh = +this.cfg.get("delayTimeForMetricsRefresh", "300");
+        this.CART_CONSTANTS = CartConstants.cartConst;
 
         if (this.editEnabled) {
             this.edstatsvc.watchEditMode((editMode) => {
@@ -147,6 +154,13 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
         var showError: boolean = true;
         let metadataError = "";
         this.displaySpecialMessage = false;
+        this.CART_ACTIONS = CartActions.cartActions;
+
+        // Only listen to storage change if we are not in edit mode
+        if(!this.editEnabled){
+            this.cartChangeHandler = this.cartChanged.bind(this);
+            window.addEventListener("storage", this.cartChangeHandler);
+        }
 
         // Bootstrap breakpoint observer (to switch between desktop/mobile mode)
         this.breakpointObserver
@@ -164,7 +178,6 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
             this.dataCartStatus = DataCartStatus.openCartStatus();
             this.dataCartStatus.cleanUpStatusStorage();
         }
-        // this.cartService.cleanUpStatusStorage();
 
         if (this.editEnabled) {
             this.route.queryParamMap.subscribe(queryParams => {
@@ -188,20 +201,14 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
         (data) => {
             // successful metadata request
             this.md = data;
+
             if (!this.md) {
                 // id not found; reroute
                 console.error("No data found for ID=" + this.reqId);
                 metadataError = "not-found";
             }
             else{
-                // Get metrics when edit is not enabled. Otherwise display "Metrics not available"
-                if(this.inBrowser){
-                    if(this.editEnabled){
-                        this.hasCurrentMetrics = false;
-                        this.showMetrics = true;
-                    }else
-                        this.getMetrics();
-                }
+                this.refreshMetrics(false);
 
                 // proceed with rendering of the component
                 this.useMetadata();
@@ -260,106 +267,43 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
     }
 
     /**
-     * Get metrics data
+     * When storage changed, if it's dataCartStatus and action is "set download completed", 
+     * we want to refresh the metrics after certain period of time.
+     * 
+     * @param ev Event - storage changed
      */
-    getMetrics() {
-        console.log("Retriving metrics data...");
-        let ediid = this.md.ediid;
-
-        this.metricsService.getFileLevelMetrics(ediid).subscribe(async (event) => {
-            // Some large dataset might take a while to download. Only handle the response
-            // when download is completed
-            if(event.type == HttpEventType.Response){
-                let response = await event.body.text();
-
-                this.fileLevelMetrics = JSON.parse(response);
-
-                if(this.fileLevelMetrics.FilesMetrics != undefined && this.fileLevelMetrics.FilesMetrics.length > 0){
-                    // check if there is any current metrics data
-                    for(let i = 1; i < this.md.components.length; i++){
-                        let filepath = this.md.components[i].filepath;
-                        if(filepath) filepath = filepath.trim();
-
-                        this.hasCurrentMetrics = this.fileLevelMetrics.FilesMetrics.find(x => x.filepath.substr(x.filepath.indexOf(ediid)+ediid.length+1).trim() == filepath) != undefined;
-                        if(this.hasCurrentMetrics) break;
-                    }
-                }else{
-                    this.hasCurrentMetrics = false;
-                }
-
-                this.showMetrics = true;
-            }
-        },
-        (err) => {
-            console.error("Failed to retrieve file metrics: ", err);
-            this.showMetrics = true;
-        });                    
-
-        this.metricsService.getRecordLevelMetrics(ediid).subscribe(async (event) => {
-            if(event.type == HttpEventType.Response){
-                this.recordLevelMetrics = JSON.parse(await event.body.text());
-            }
-        },
-        (err) => {
-            console.error("Failed to retrieve dataset metrics: ", err);
-            this.showMetrics = true;
-        });  
+    cartChanged(ev){
+       if(ev.key == this.dataCartStatus.getName()){
+           let newValue = JSON.parse(ev.newValue);
+           setTimeout(() => {
+               this.dataCartStatus.restore();
+               if(newValue.action == this.CART_ACTIONS["SET_DOWNLOAD_COMPLETE"]){
+                   this.refreshMetrics();
+               }
+           }, 10);
+       }
     }
 
     /**
      * Refresh metrics data in N minutes. N is defined in environment.ts
      */
-    refreshMetrics(){
-        console.log("Metrics will be refreshed in " + this.delayTimeForMetricsRefresh + " seconds.");
-        setTimeout(() => {
-            this.getMetrics();
-        }, this.delayTimeForMetricsRefresh*1000);
+    refreshMetrics(delay:boolean = true){
+        this.metricsinfoComponent.refreshMetrics(delay);
     }
 
     /**
      * Handle download status change event. 
      *
-     * @param downloadStatus download status of a direct/bundle download event. should be one of the following two values:
-     *      "downloading" - indicates a download has started (either direct or bundle download). 
-     *                      Set this.metricsRefreshed to false so this.refreshMetrics() can be called 
-     *                      upon download has completed.
-     *      "downloaded" - only from a direct download.
+     * @param downloadStatus download status of a direct download event. Currently only handle "downloaded" status.
      */
     onDownloadStatusChanged(downloadStatus) {
         if(typeof downloadStatus === 'string') {
-            // When user starts an individual download or a bundle download. reset the metricsRefreshed flag
-            if(downloadStatus == "downloading") {
-                console.log("Download started.")
-                this.metricsRefreshed = false;
-            }
-    
-            // When download completed, refresh metrics and set the metricsRefreshed flag
-            if(downloadStatus == "downloaded" && !this.metricsRefreshed) {
-                console.log("Download completed.");
+            if(downloadStatus == "downloaded") {
                 this.refreshMetrics();
-
-                // Do not place the following line inside refreshMetrics() because there are few minutes delay
-                // within the function and we don't want the function be triggered again during that time.
-                this.metricsRefreshed = true;
             }
         }else{
-            console.log("Invalid event type", typeof event);
+            console.error("Invalid event type", typeof event);
         }
-    }
-
-    /**
-     * When bundle download completed, it emits an array of item IDs of dataCartStatusItems whose download is completed.
-     * @param itemIDs an array of item IDs from CartStatus whose download status is complete.
-     */
-    onBundleDownloadCompleted(itemIDs) {
-        if(itemIDs.indexOf(this.md.ediid) > -1 && !this.metricsRefreshed) {
-            console.log("Download completed.")
-            this.refreshMetrics();
-
-            // Do not place the following line inside refreshMetrics() because there are few minutes delay
-            // within the function and we don't want the function be triggered again during that time.            
-            this.metricsRefreshed = true;
-        } 
     }
 
     /**

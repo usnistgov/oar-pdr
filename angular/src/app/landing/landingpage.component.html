@@ -19,12 +19,7 @@
                 pButton icon="faa faa-list" class="ui-button ui-button-icon-only" 
                 (click)="menu3.togglePopup($event)"></button>
 
-        <app-downloadstatus [inBrowser]="inBrowser" (downloadedKeys)="onBundleDownloadCompleted($event)"></app-downloadstatus>  
-        
         <tools-menu #menu3  [record]="md" 
-        [hasCurrentMetrics]="hasCurrentMetrics"
-        [recordLevelMetrics]="recordLevelMetrics"
-        [metricsUrl]="metricsUrl"
         [isPopup]="true"
         (toggle_citation)="toggleCitation('small')"
         (scroll)="goToSection($event)"></tools-menu>
@@ -56,22 +51,45 @@
               <div *ngIf="inBrowser" class="d-none d-md-block d-lg-block d-xl-block ">
 
                 <tools-menu #menu2  [record]="md" 
-                [recordLevelMetrics]="recordLevelMetrics"
-                [hasCurrentMetrics]="hasCurrentMetrics"
-                [showMetrics]="showMetrics"
-                [metricsUrl]="metricsUrl"
                 [isPopup]="false"
                 (toggle_citation)="toggleCitation('large')"
                 (scroll)="goToSection($event)"></tools-menu>
 
-                <app-downloadstatus [inBrowser]="inBrowser" (downloadedKeys)="onBundleDownloadCompleted($event)"></app-downloadstatus>
+                <app-metricsinfo 
+                    [inBrowser]="inBrowser"
+                    [record]="md"
+                    [metricsUrl]="metricsUrl"
+                    [editEnabled]="editEnabled"></app-metricsinfo>
+                    
+                <app-downloadstatus [inBrowser]="inBrowser"></app-downloadstatus>
               </div>
             </div>
           </div>
         </div>
       </div>
     </div>
+
+    <div *ngIf="mobileMode">
+        <app-metricsinfo 
+            [inBrowser]="inBrowser"
+            [record]="md"
+            [metricsUrl]="metricsUrl"
+            [editEnabled]="editEnabled"></app-metricsinfo>
+    
+        <app-downloadstatus [inBrowser]="inBrowser" (downloadedKeys)="onBundleDownloadCompleted($event)"></app-downloadstatus>  
+    </div>
   </div>
+</div>
+
+<!-- Removing this hidden element will cause the app to fail. Need further investigation -->
+<div style="width: 90%;">
+    <div style="display: none;" class="card landingcard">
+        <app-metricsinfo 
+            [inBrowser]="inBrowser"
+            [record]="md"
+            [metricsUrl]="metricsUrl"
+            [editEnabled]="editEnabled"></app-metricsinfo>
+    </div>
 </div>
 
 <!-- Show spinner -->

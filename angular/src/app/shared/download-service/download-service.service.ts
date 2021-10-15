@@ -243,7 +243,6 @@ export class DownloadService {
         let currentTime: number = 0;
         let currentDownloaded: number = 0;
 
-        console.log('dataCart', dataCart);
         nextZip.downloadStatus = DownloadStatus.DOWNLOADING;
         this.setDownloadStatus(nextZip, DownloadStatus.DOWNLOADING, dataCart);
         this.increaseNumberOfDownloading();
@@ -257,8 +256,8 @@ export class DownloadService {
                         nextZip.downloadProgress = 0;
                         nextZip.downloadStatus = DownloadStatus.DOWNLOADED;
                         this.decreaseNumberOfDownloading();
-                        if(this.allDownloadFinished(zipdata))
-                            this.setDownloadProcessStatus(true);
+                        // if(this.allDownloadFinished(zipdata))
+                        //     this.setDownloadProcessStatus(true);
 
                         this.setDownloadStatus(nextZip, DownloadStatus.DOWNLOADED, dataCart);
                         this.setFileDownloadedFlag(true);
@@ -456,14 +455,14 @@ export class DownloadService {
      * Check if all doanload processes have finished
      * @param zipData 
      */
-    allDownloadFinished(zipData: any) {
-        for (let zip of zipData) {
-            if (zip.downloadStatus == null || zip.downloadStatus == DownloadStatus.DOWNLOADING) {
-                return false;
-            }
-        }
-        return true;
-    }
+    // allDownloadFinished(zipData: any) {
+    //     for (let zip of zipData) {
+    //         if (zip.downloadStatus == null || zip.downloadStatus == DownloadStatus.DOWNLOADING) {
+    //             return false;
+    //         }
+    //     }
+    //     return true;
+    // }
 
     /**
      * Return total downloaded zip files from a given zipData

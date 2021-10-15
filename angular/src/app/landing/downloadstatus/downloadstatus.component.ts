@@ -13,7 +13,7 @@ export class DownloadstatusComponent implements OnInit {
     inited: boolean = false;
 
     @Input() inBrowser: boolean;
-    @Output() downloadedKeys: EventEmitter<string[]> = new EventEmitter();
+    // @Output() downloadedKeys: EventEmitter<string[]> = new EventEmitter();
 
     constructor() { 
 
@@ -47,9 +47,11 @@ export class DownloadstatusComponent implements OnInit {
             }
 
             // Emit item IDs whose download status is 'completed' 
-            let keys = Object.keys(this.dataCartStatus.dataCartStatusItems).filter(key => this.dataCartStatus.dataCartStatusItems[key].downloadPercentage == 100);
+            // let keys = Object.keys(this.dataCartStatus.dataCartStatusItems).filter(key => this.dataCartStatus.dataCartStatusItems[key].downloadPercentage == 100);
 
-            this.downloadedKeys.emit(keys);
+            // if(keys.length > 0){
+            //     this.downloadedKeys.emit(keys);
+            // }
         }
     }
 
