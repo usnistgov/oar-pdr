@@ -73,10 +73,12 @@ export class ResourceIdentityComponent implements OnChanges {
      * the title.
      */
     public determineResourceLabel(resmd: NerdmRes): string {
-        if (this.record instanceof Array && this.record.length > 0) {
-            switch (this.record['@type'][0]) {
+        if (resmd['@type'] instanceof Array && resmd['@type'].length > 0) {
+            switch (resmd['@type'][0]) {
                 case 'nrd:SRD':
                     return "Standard Reference Data";
+                case 'nrd:SRM':
+                    return "Standard Reference Material";
                 case 'nrdp:DataPublication':
                     return "Data Publication";
                 case 'nrdp:PublicDataResource':
