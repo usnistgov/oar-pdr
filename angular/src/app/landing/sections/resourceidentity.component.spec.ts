@@ -42,6 +42,7 @@ describe('ResourceIdentityComponent', () => {
         makeComp();
         component.inBrowser = true;
         component.editEnabled = false;
+        component.ngOnChanges()
         fixture.detectChanges();
     }));
 
@@ -58,4 +59,23 @@ describe('ResourceIdentityComponent', () => {
 
         // expect(component.versionCmp.newer).toBeNull();
     });
+
+    it('should correctly determine resource type', () => {
+        expect(component).toBeDefined();
+        let cmpel = fixture.nativeElement;
+        
+        let el = cmpel.querySelector(".recordType");
+        expect(el).toBeTruthy();
+        expect(el.textContent).toContain("Public Data Resource");
+
+        let resmd = JSON.parse(JSON.stringify(rec))
+        expect(component.determineResourceLabel(resmd)).toEqual("Public Data Resource")
+        resmd['@type'][0] = "nrdp:DataPublication"
+        expect(component.determineResourceLabel(resmd)).toEqual("Data Publication")
+        resmd['@type'][0] = "nrd:SRD"
+        expect(component.determineResourceLabel(resmd)).toEqual("Standard Reference Data")
+        resmd['@type'][0] = "nrd:SRM"
+        expect(component.determineResourceLabel(resmd)).toEqual("Standard Reference Material")
+    });
+        
 })
