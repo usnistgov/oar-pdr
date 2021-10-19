@@ -13,6 +13,7 @@ import { ToastrModule } from 'ngx-toastr';
 import { MetadataUpdateService } from '../editcontrol/metadataupdate.service';
 import { UserMessageService } from '../../frame/usermessage.service';
 import { AuthService, WebAuthService, MockAuthService } from '../editcontrol/auth.service';
+import { testdata } from '../../../environments/environment';
 
 describe('AuthorComponent', () => {
     let component: AuthorComponent;
@@ -21,6 +22,7 @@ describe('AuthorComponent', () => {
     let plid: Object = "browser";
     let ts: TransferState = new TransferState();
     let authsvc: AuthService = new MockAuthService(undefined);
+    let rec = testdata['test2'];
 
     beforeEach(async(() => {
         cfg = (new AngularEnvironmentConfigService(plid, ts)).getConfig() as AppConfig;
@@ -42,14 +44,26 @@ describe('AuthorComponent', () => {
     }));
 
     beforeEach(() => {
-        let record: any = require('../../../assets/sampleRecord.json');
+        // let record: any = require('../../../assets/sampleRecord.json');
         fixture = TestBed.createComponent(AuthorComponent);
         component = fixture.componentInstance;
-        component.record = record;
+        component.record = rec;
         fixture.detectChanges();
     });
 
     it('should create', () => {
         expect(component).toBeTruthy();
+        expect(component.fieldName).toEqual("authors");
+    });
+
+    it('should have ORCID icon image displayed', () => {
+        expect(component).toBeTruthy();
+        expect(component.record['authors']).toBeTruthy();
+        expect(component.record['authors'].length).toEqual(2);
+        let cmpel = fixture.nativeElement;
+
+        let els = cmpel.querySelectorAll(".authorsbrief img"); 
+        expect(els).toBeTruthy();
+        expect(els.length).toEqual(1);
     });
 });
