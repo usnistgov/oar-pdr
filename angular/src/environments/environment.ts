@@ -231,7 +231,8 @@ export const testdata: {} = {
             {
                 "familyName": "Doe",
                 "givenName": "John",
-                "fn": "John Doe"
+                "fn": "John Doe",
+                "orcid": "0000-0000-0000-0000"
             },
             {
                 "familyName": "Plant",
