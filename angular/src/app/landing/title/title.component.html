@@ -6,7 +6,7 @@
                     <h2 [ngStyle]="mdupdsvc.getFieldStyle(fieldName)"><i style="color: #cccccc;">No title set</i></h2>
                 </span>
             </div>
-            <ng-template #hasTitle>
+            <ng-template #hasTitle >
                 <div class="title editable_field" [style.cursor]="mdupdsvc.isEditMode ? 'pointer' : 'default'">
                     <h2 [ngStyle]="mdupdsvc.getFieldStyle(fieldName)" (click)="openModal()">
                         {{record.title}}</h2>

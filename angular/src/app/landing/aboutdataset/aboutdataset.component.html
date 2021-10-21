@@ -1,13 +1,25 @@
-<!-- Info about the JSON viewer -->
-<div style="margin-bottom: 0pt;">
-    <span class="more-info" id="more-info">
-      For more information about the metadata, consult the 
-      <a href="/od/dm/nerdm/" (click)="gaService.gaTrackEvent('outbound', undefined, 'Resource title: ' + record.title, '/od/dm/nerdm/')">NERDm documentation</a>. 
-    </span>
+<!-- About This Dataset section -->
+
+<!-- Version info -->
+<pdr-version [record]="record" [editMode]="editEnabled"></pdr-version> 
+
+<!-- Citation info -->
+<div style="margin: 1em 0em;" id="cite">
+    <div><b>Cite this dataset  </b>
+        <span style="cursor: pointer; color: #1E6BA1;" (click)="copyToClipboard(citetext)" data-toggle="tooltip" title="Copy to clipboard"><i class="faa faa-clone"></i></span>
+    </div>
+    {{citetext}}
+</div>
+
+<!-- Repository metadata -->
+<div style="margin: 0em 0em 1em 0em;" id="metadata">
+    <div><b>Repository Metadata</b></div>
+    Machine-readable descriptions of this dataset are available in the following formats:
+    <div (click)="showJsonViewer = !showJsonViewer" style="cursor: pointer; color:#1471AE;margin-left: 1em;"><i class="faa faa-caret-right" *ngIf="!showJsonViewer"></i><i class="faa faa-caret-down" *ngIf="showJsonViewer"></i> NERDm</div>
 </div>
 
 <!-- JSON viewer with a thin grey border -->
-<div class="json-viewer-box" id="json-viewer">
+<div class="json-viewer-box" id="json-viewer" *ngIf="showJsonViewer">
     <!-- Header bar with JSON tree navigate buttons (left) and JSON export button (right)-->
     <div class="json-viewer-header">
         <!-- JSON export button (right alignment) -->
@@ -36,8 +48,19 @@
     </div>
 
     <!-- JSON viewer -->
-    <div style="padding: 20px;">
+    <div style="padding: 20px;" [@enterAnimation]>
         <ngx-json-viewer *ngIf="showJson" [json]="nerdmRecord" [expanded]="!collapsed" [depth]='jsonExpandDepth'></ngx-json-viewer>
     </div>
 
+</div>
+
+<!-- Metrics info -->
+<div style="margin: 0em 0em 1em 0em;" id="metrics">
+    <div><b>Access Metrics</b></div>
+    Number of unique downloads of some or all of this dataset: {{metricsData.totalDatasetDownload}}<br>
+    Number of unique users downloading this dataset: {{metricsData.totalUsers}}<br>
+    Total number of bytes delivered from this dataset: {{totalDownloadSize}}<br>
+    <div style="margin-left: 1em;color:#1471AE;">
+        <a href="{{metricsData.url}}" target="_blank">See more details...</a>
+    </div>
 </div>

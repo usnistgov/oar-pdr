@@ -15,6 +15,7 @@ import { GoogleAnalyticsService } from '../shared/ga-service/google-analytics.se
 import { CartService } from '../datacart/cart.service';
 
 import { config, testdata } from '../../environments/environment';
+import { MetricsData } from "./metrics-data";
 
 describe('LandingBodyComponent', () => {
     let component: LandingBodyComponent;
@@ -42,7 +43,10 @@ describe('LandingBodyComponent', () => {
     beforeEach(async(() => {
         makeComp();
         component.inBrowser = true;
+        component.mobileMode = false;
         component.md = JSON.parse(JSON.stringify(rec));
+        component.metricsData = new MetricsData();
+        component.editEnabled = false;
         fixture.detectChanges();
     }));
 
@@ -75,11 +79,11 @@ describe('LandingBodyComponent', () => {
         expect(title).toBeTruthy();
         expect(title.textContent).toEqual("References");
 
-        sect = cmpel.querySelector("#metadata")
+        sect = cmpel.querySelector("#about")
         expect(sect).toBeTruthy();
         title = sect.querySelector("h3");
         expect(title).toBeTruthy();
-        expect(title.textContent).toEqual("Metadata");
+        expect(title.textContent).toEqual("About This Dataset");
 
     });
 });

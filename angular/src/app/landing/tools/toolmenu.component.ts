@@ -128,8 +128,8 @@ export class ToolMenuComponent implements OnChanges {
             );
         
         subitems.push(
-            this.createMenuItem("Metadata", "faa faa-arrow-circle-right ",
-                                (event) => { this.goToSection('metadata'); }, null)
+            this.createMenuItem("About This Dataset", "faa faa-arrow-circle-right ",
+                                (event) => { this.goToSection('about'); }, null)
         );
         mitems.push({ label: 'Go To...', items: subitems });
 
@@ -147,8 +147,13 @@ export class ToolMenuComponent implements OnChanges {
         subitems = [
             this.createMenuItem('Citation', "faa faa-angle-double-right",
                                 (event) => { this.toggleCitation(); }, null),
+            this.createMenuItem("Repository Metadata", "faa faa-angle-double-right",
+                                (event) => { this.goToSection('Metadata'); }, null),            
             this.createMenuItem("Fair Use Statement", "faa faa-external-link", null,
+                                this.record['license']),
+            this.createMenuItem("Data Cart", "faa faa-cart-plus", null,
                                 this.record['license'])
+
         ];
         mitems.push({ label: "Use", items: subitems });
 

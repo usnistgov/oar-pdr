@@ -4,6 +4,7 @@ import { AppConfig } from '../config/config';
 import { NerdmRes, NERDResource } from '../nerdm/nerdm';
 import { ResourceMetadataComponent } from './sections/resourcemetadata.component';
 import { Console } from 'console';
+import { MetricsData } from "./metrics-data";
 
 /**
  * a component that presents the landing page's presentation of the resource description
@@ -46,19 +47,16 @@ export class LandingBodyComponent {
     // Flag to tell if current screen size is mobile or small device
     @Input() mobileMode : boolean|null = false;
 
+    @Input() metricsData: MetricsData;
+    @Input() showJsonViewer: boolean = false;
+
     @ViewChild(ResourceMetadataComponent)
     resourceMetadataComponent: ResourceMetadataComponent;
 
     @ViewChild('description') description: ElementRef;
     @ViewChild('dataAccess') dataAccess: ElementRef;
     @ViewChild('references') references: ElementRef;
-    @ViewChild('metadata') metadata: ElementRef;
-    
-    // Show/hide metadata
-    get showMetadata() { return this.resourceMetadataComponent.showMetadata; }
-    set showMetadata(newValue) {
-        this.resourceMetadataComponent.showMetadata = newValue;
-    }
+    @ViewChild('about') about: ElementRef;
 
     /**
      * create an instance of the Identity section
@@ -87,8 +85,8 @@ export class LandingBodyComponent {
                 this.references.nativeElement.scrollIntoView({behavior: 'smooth'}); 
                 break;
             }
-            case "metadata": {
-                this.metadata.nativeElement.scrollIntoView({behavior: 'smooth'}); 
+            case "about": {
+                this.about.nativeElement.scrollIntoView({behavior: 'smooth'}); 
                 break;
             }
             default: { // GO TOP

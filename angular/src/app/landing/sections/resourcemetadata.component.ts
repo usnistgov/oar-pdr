@@ -2,10 +2,11 @@ import { Component, OnChanges, SimpleChanges, Input, ViewChild } from '@angular/
 
 import { AppConfig } from '../../config/config';
 import { NerdmRes, NERDResource } from '../../nerdm/nerdm';
-import { MetadataComponent } from '../metadata/metadata.component';
+import { AboutdatasetComponent } from '../aboutdataset/aboutdataset.component';
+import { MetricsData } from "../metrics-data";
 
 /**
- * a component that lays out the "metadata" section of a landing page
+ * a component that lays out the "About This Dataset" section of a landing page
  *
  * Currently, this section only provides access to the native NERDm metadata; in the future,
  * this section will provide access to other formats as well.
@@ -26,17 +27,11 @@ export class ResourceMetadataComponent implements OnChanges {
     // Flag to tell if current screen size is mobile or small device
     @Input() mobileMode : boolean|null = false;
 
-    @ViewChild(MetadataComponent)
-    metadataComponent: MetadataComponent;
+    @Input() metricsData: MetricsData;
+    @Input() showJsonViewer: boolean = false;
 
-    /**
-     * Getter and setter to expand/collapse the JSON viewer
-     */
-    get showMetadata() { return !this.metadataComponent.collapsed; }
-    set showMetadata(newValue) {
-        this.metadataComponent.jsonExpandDepth = "all";
-        this.metadataComponent.collapsed = !newValue;
-    }
+    @ViewChild(AboutdatasetComponent)
+    aboutdatasetComponent: AboutdatasetComponent;
 
     /**
      * create an instance of the Identity section
@@ -45,7 +40,7 @@ export class ResourceMetadataComponent implements OnChanges {
     { }
 
     ngOnChanges(ch: SimpleChanges) {
-        // this.metadataComponent.collapsed = !this.showNerdm;
+        // this.aboutdatasetComponent.collapsed = !this.showNerdm;
         if (this.record)
             this.useMetadata();  // initialize internal component data based on metadata
     }
