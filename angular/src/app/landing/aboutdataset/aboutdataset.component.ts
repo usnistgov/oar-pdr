@@ -3,25 +3,49 @@ import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { AppConfig } from '../../config/config';
 import { NerdmRes, NERDResource } from '../../nerdm/nerdm';
 import { GoogleAnalyticsService } from '../../shared/ga-service/google-analytics.service';
+import { VersionComponent } from '../version/version.component';
+import { MetricsData } from "../metrics-data";
+import { trigger, state, style, animate, transition } from '@angular/animations';
+import { formatBytes } from '../../utils';
 
 @Component({
-  selector: 'metadata-detail',
-  templateUrl: './metadata.component.html',
-  styleUrls: ['./metadata.component.scss']
+    selector: 'aboutdataset-detail',
+    templateUrl: './aboutdataset.component.html',
+    styleUrls: ['./aboutdataset.component.scss'],
+    animations: [
+        trigger(
+          'enterAnimation', [
+            transition(':enter', [
+              style({height: '0px', opacity: 0}),
+              animate('700ms', style({height: '100%', opacity: 1}))
+            ]),
+            transition(':leave', [
+              style({height: '100%', opacity: 1}),
+              animate('700ms', style({height: 0, opacity: 0}))
+            //   animate('500ms', style({transform: 'translateY(0)', opacity: 1}))
+            ])
+          ]
+        )
+    ]
 })
-export class MetadataComponent implements OnChanges {
+export class AboutdatasetComponent implements OnChanges {
     nerdmRecord: any = {};
     showJson: boolean = true;
     isOpen: boolean = false;
     // JSON viewer expand depth. Default is all.
-    _jsonExpandDepth = "";
-
-    private _collapsed: boolean = true;
+    _jsonExpandDepth = "1";
+    citetext: string;
+    citeCopied: boolean = false;
+    
+    private _collapsed: boolean = false;
     @Input() record: NerdmRes;
     @Input() inBrowser: boolean;
 
     // Flag to tell if current screen size is mobile or small device
     @Input() mobileMode : boolean|null = false;
+
+    @Input() metricsData: MetricsData;
+    @Input() showJsonViewer: boolean = false;
 
     /**
      * Setter and getter of JSON viewer collapse flag
@@ -51,6 +75,7 @@ export class MetadataComponent implements OnChanges {
 
     ngOnInit(): void {
         this.nerdmRecord["Native JSON (NERDm)"] = this.record;
+        this.citetext = (new NERDResource(this.record)).getCitation();
     }
 
     ngOnChanges(changes: SimpleChanges) {
@@ -90,5 +115,35 @@ export class MetadataComponent implements OnChanges {
     expandToLevel(depth){
         this.jsonExpandDepth = depth;
         this.collapsed = false;
+    }
+
+    /**
+     * Reture record level total download size
+     */
+    get totalDownloadSize() {
+        if(this.metricsData != undefined)
+            return formatBytes(this.metricsData.totalDownloadSize, 2);
+        else
+            return "";
+    }
+
+    copyToClipboard(val: string){
+        const selBox = document.createElement('textarea');
+        selBox.style.position = 'fixed';
+        selBox.style.left = '0';
+        selBox.style.top = '0';
+        selBox.style.opacity = '0';
+        selBox.value = val;
+        document.body.appendChild(selBox);
+        selBox.focus();
+        selBox.select();
+        document.execCommand('copy');
+        document.body.removeChild(selBox);
+
+        this.citeCopied = true;
+        setTimeout(() => {
+            this.citeCopied = false;
+        }, 2000);
+
     }
 }

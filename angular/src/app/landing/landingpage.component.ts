@@ -21,6 +21,7 @@ import { MetricsService } from '../shared/metrics-service/metrics.service';
 import { formatBytes } from '../utils';
 import { LandingBodyComponent } from './landingbody.component';
 import { BreakpointObserver, BreakpointState } from '@angular/cdk/layout';
+import { MetricsData } from "./metrics-data";
 
 /**
  * A component providing the complete display of landing page content associated with 
@@ -65,15 +66,15 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
     displaySpecialMessage: boolean = false;
     citationDialogWith: number = 550; // Default width
     recordLevelMetrics : RecordLevelMetrics;
-    metricsUrl: string;
 
     loadingMessage = '<i class="faa faa-spinner faa-spin"></i> Loading...';
 
     dataCartStatus: DataCartStatus;
     fileLevelMetrics: any;
-    hasCurrentMetrics: boolean = false;
     showMetrics: boolean = false;
     metricsRefreshed: boolean = false;
+    metricsData: MetricsData;
+    showJsonViewer: boolean = false;
 
     //Default: wait 5 minutes (300sec) after user download a file then refresh metrics data
     delayTimeForMetricsRefresh: number = 300; 
@@ -147,6 +148,7 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
         var showError: boolean = true;
         let metadataError = "";
         this.displaySpecialMessage = false;
+        this.metricsData = new MetricsData();
 
         // Bootstrap breakpoint observer (to switch between desktop/mobile mode)
         this.breakpointObserver
@@ -197,7 +199,7 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
                 // Get metrics when edit is not enabled. Otherwise display "Metrics not available"
                 if(this.inBrowser){
                     if(this.editEnabled){
-                        this.hasCurrentMetrics = false;
+                        this.metricsData.hasCurrentMetrics = false;
                         this.showMetrics = true;
                     }else
                         this.getMetrics();
@@ -257,6 +259,7 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
                 this.router.navigateByUrl("int-error/" + this.reqId, { skipLocationChange: true });
             }
         });
+
     }
 
     /**
@@ -280,11 +283,47 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
                         let filepath = this.md.components[i].filepath;
                         if(filepath) filepath = filepath.trim();
 
-                        this.hasCurrentMetrics = this.fileLevelMetrics.FilesMetrics.find(x => x.filepath.substr(x.filepath.indexOf(ediid)+ediid.length+1).trim() == filepath) != undefined;
-                        if(this.hasCurrentMetrics) break;
+                        this.metricsData.hasCurrentMetrics = this.fileLevelMetrics.FilesMetrics.find(x => x.filepath.substr(x.filepath.indexOf(ediid)+ediid.length+1).trim() == filepath) != undefined;
+                        if(this.metricsData.hasCurrentMetrics) break;
                     }
                 }else{
-                    this.hasCurrentMetrics = false;
+                    this.metricsData.hasCurrentMetrics = false;
+                }
+
+                if(this.metricsData.hasCurrentMetrics){
+                    this.metricsService.getRecordLevelMetrics(ediid).subscribe(async (event) => {
+                        if(event.type == HttpEventType.Response){
+                            this.recordLevelMetrics = JSON.parse(await event.body.text());
+
+                            let hasFile = false;
+        
+                            if(this.md.components && this.md.components.length > 0){
+                                this.md.components.forEach(element => {
+                                    if(element.filepath){
+                                        hasFile = true;
+                                        return;
+                                    }
+                                });
+                            }
+            
+                            if(hasFile){
+                                //Now check if there is any metrics data
+                                this.metricsData.totalDatasetDownload = this.recordLevelMetrics.DataSetMetrics[0] != undefined? this.recordLevelMetrics.DataSetMetrics[0].record_download : 0;
+                    
+                                this.metricsData.totalDownloadSize = this.recordLevelMetrics.DataSetMetrics[0] != undefined? this.recordLevelMetrics.DataSetMetrics[0].total_size : 0;
+                    
+                                // totalFileDownload = totalFileDownload == undefined? 0 : totalFileDownload;
+                        
+                                this.metricsData.totalUsers = this.recordLevelMetrics.DataSetMetrics[0] != undefined? this.recordLevelMetrics.DataSetMetrics[0].number_users : 0;
+                        
+                                this.metricsData.totalUsers = this.metricsData.totalUsers == undefined? 0 : this.metricsData.totalUsers;
+                            }
+                        }
+                    },
+                    (err) => {
+                        console.error("Failed to retrieve dataset metrics: ", err);
+                        this.showMetrics = true;
+                    });  
                 }
 
                 this.showMetrics = true;
@@ -294,16 +333,6 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
             console.error("Failed to retrieve file metrics: ", err);
             this.showMetrics = true;
         });                    
-
-        this.metricsService.getRecordLevelMetrics(ediid).subscribe(async (event) => {
-            if(event.type == HttpEventType.Response){
-                this.recordLevelMetrics = JSON.parse(await event.body.text());
-            }
-        },
-        (err) => {
-            console.error("Failed to retrieve dataset metrics: ", err);
-            this.showMetrics = true;
-        });  
     }
 
     /**
@@ -401,7 +430,7 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
      *  * set the page's title (as displayed in the browser title bar).
      */
     useMetadata(): void {
-        this.metricsUrl = "/metrics/" + this.reqId;
+        this.metricsData.url = "/metrics/" + this.reqId;
         // set the document title
         this.setDocumentTitle();
         this.mdupdsvc.setOriginalMetadata(this.md);
@@ -459,7 +488,10 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
      * sections.  
      */
     goToSection(sectionId: string) {
-        this.landingBodyComponent.showMetadata = (sectionId == "metadata");
+        // If sectionID is "Metadata", scroll to About This Dataset and display JSON viewer
+        this.showJsonViewer = (sectionId == "Metadata");
+        if(sectionId == "Metadata") sectionId = "about";
+
         setTimeout(() => {
             this.landingBodyComponent.goToSection(sectionId);
         }, 50);

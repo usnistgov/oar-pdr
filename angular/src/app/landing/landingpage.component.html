@@ -22,9 +22,9 @@
         <app-downloadstatus [inBrowser]="inBrowser" (downloadedKeys)="onBundleDownloadCompleted($event)"></app-downloadstatus>  
         
         <tools-menu #menu3  [record]="md" 
-        [hasCurrentMetrics]="hasCurrentMetrics"
+        [hasCurrentMetrics]="metricsData.hasCurrentMetrics"
         [recordLevelMetrics]="recordLevelMetrics"
-        [metricsUrl]="metricsUrl"
+        [metricsUrl]="metricsData.url"
         [isPopup]="true"
         (toggle_citation)="toggleCitation('small')"
         (scroll)="goToSection($event)"></tools-menu>
@@ -37,7 +37,7 @@
         <!-- landing page content -->
         <div class="ui-g-10 ui-md-10 ui-lg-10 ui-sm-12">
 
-          <pdr-landing-body [md]="md" [inBrowser]="inBrowser" [editEnabled]="!inViewMode()" [mobileMode]="mobileMode" (dlStatus)="onDownloadStatusChanged($event)">
+          <pdr-landing-body [md]="md" [inBrowser]="inBrowser" [editEnabled]="!inViewMode()" [mobileMode]="mobileMode" [metricsData]="metricsData" [showJsonViewer]='showJsonViewer' (dlStatus)="onDownloadStatusChanged($event)">
           </pdr-landing-body>
 
         </div>
@@ -57,9 +57,9 @@
 
                 <tools-menu #menu2  [record]="md" 
                 [recordLevelMetrics]="recordLevelMetrics"
-                [hasCurrentMetrics]="hasCurrentMetrics"
+                [hasCurrentMetrics]="metricsData.hasCurrentMetrics"
                 [showMetrics]="showMetrics"
-                [metricsUrl]="metricsUrl"
+                [metricsUrl]="metricsData.url"
                 [isPopup]="false"
                 (toggle_citation)="toggleCitation('large')"
                 (scroll)="goToSection($event)"></tools-menu>

@@ -13,7 +13,7 @@ import { TopicModule } from '../topic/topic.module';
 import { KeywordModule } from '../keyword/keyword.module';
 import { CollapseModule } from '../collapseDirective/collapse.module';
 import { DataFilesModule } from '../data-files/data-files.module';
-import { MetadataModule } from '../metadata/metadata.module';
+import { AboutdatasetModule } from '../aboutdataset/aboutdataset.module';
 import { ResourceIdentityComponent } from './resourceidentity.component';
 import { ResourceDescriptionComponent } from './resourcedescription.component';
 import { ResourceDataComponent } from './resourcedata.component';
@@ -52,7 +52,7 @@ import { ResourceMetadataComponent } from './resourcemetadata.component';
         CommonModule,
         NerdmModule,
         TitleModule, AuthorModule, ContactModule, CollapseModule, VersionModule,
-        DescriptionModule, DataFilesModule, TopicModule, KeywordModule, MetadataModule
+        DescriptionModule, DataFilesModule, TopicModule, KeywordModule, AboutdatasetModule
     ],
     declarations: [
         ResourceIdentityComponent, ResourceDescriptionComponent, ResourceDataComponent,

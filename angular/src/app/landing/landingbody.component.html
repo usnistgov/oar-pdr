@@ -21,9 +21,10 @@
             <a name="references" #references></a>
             <pdr-resource-refs [record]="md" [inBrowser]="inBrowser"></pdr-resource-refs>
 
-            <!-- metadata visualization and export -->
-            <a name="metadata" #metadata></a>
-            <pdr-resource-md [record]="md" [inBrowser]="inBrowser" [mobileMode]="mobileMode">
+            <!-- About This Dataset visualization and export -->
+            <a name="about" #about></a>
+            <a name="references2" #references2></a>
+            <pdr-resource-md [record]="md" [inBrowser]="inBrowser" [mobileMode]="mobileMode"  [metricsData]="metricsData" [showJsonViewer]='showJsonViewer'>
             </pdr-resource-md>
         </div>
     </div>
