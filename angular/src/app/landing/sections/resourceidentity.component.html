@@ -16,7 +16,7 @@
         <span *ngIf="!doiUrl"><i> 
             <a href="{{ cfg.get('landingPageService','/od/id/') }}{{record['@id']}}">{{record["@id"]}}</a></i>
         </span>
-        <span *ngIf="primaryRefs.length > 0"><br>
+        <span class="describedin" *ngIf="primaryRefs.length > 0"><br>
             <span>Described in article: </span>
             <div *ngFor="let ref of primaryRefs; let i =index">
                 <span style="padding-left:20px">

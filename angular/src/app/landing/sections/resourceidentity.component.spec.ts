@@ -60,6 +60,35 @@ describe('ResourceIdentityComponent', () => {
         // expect(component.versionCmp.newer).toBeNull();
     });
 
+    it('should correctly render special references', () => {
+        expect(component).toBeDefined();
+        expect(component.primaryRefs.length).toEqual(1);
+        let cmpel = fixture.nativeElement;
+
+        let el = cmpel.querySelector(".describedin")
+        expect(el).toBeTruthy();
+        el = el.querySelector("a");
+        expect(el.textContent).toContain("Solids: In-situ");
+
+        let tstrec = JSON.parse(JSON.stringify(rec));
+        delete tstrec['references'][0]['label'];
+        component.record = tstrec;
+        component.useMetadata();
+        expect(component.primaryRefs[0]['label']).toEqual(component.primaryRefs[0]['title']);
+
+        delete tstrec['references'][0]['title'];
+        delete tstrec['references'][0]['label'];
+        component.record = tstrec;
+        component.useMetadata();
+        expect(component.primaryRefs[0]['label']).toEqual(component.primaryRefs[0]['citation']);
+
+        delete tstrec['references'][0]['citation'];
+        delete tstrec['references'][0]['label'];
+        component.record = tstrec;
+        component.useMetadata();
+        expect(component.primaryRefs[0]['label']).toEqual(component.primaryRefs[0]['location']);
+    });
+
     it('should correctly determine resource type', () => {
         expect(component).toBeDefined();
         let cmpel = fixture.nativeElement;
@@ -78,4 +107,5 @@ describe('ResourceIdentityComponent', () => {
         expect(component.determineResourceLabel(resmd)).toEqual("Standard Reference Material")
     });
         
-})
+});
+
