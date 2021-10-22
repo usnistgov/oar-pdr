@@ -35,6 +35,7 @@ export class AboutdatasetComponent implements OnChanges {
     // JSON viewer expand depth. Default is all.
     _jsonExpandDepth = "1";
     citetext: string;
+    citeCopied: boolean = false;
     
     private _collapsed: boolean = false;
     @Input() record: NerdmRes;
@@ -138,6 +139,11 @@ export class AboutdatasetComponent implements OnChanges {
         selBox.select();
         document.execCommand('copy');
         document.body.removeChild(selBox);
-        alert("Citation copied to clipboard.");
+
+        this.citeCopied = true;
+        setTimeout(() => {
+            this.citeCopied = false;
+        }, 2000);
+
     }
 }
