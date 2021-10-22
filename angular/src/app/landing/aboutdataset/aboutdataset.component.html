@@ -7,7 +7,7 @@
 <div style="margin: 1em 0em;" id="cite">
     <div><b style="margin-right: 10px;">Cite this dataset</b>
         <span style="cursor: pointer; color: #1E6BA1;" (click)="copyToClipboard(citetext)" data-toggle="tooltip" title="Copy to clipboard"><i class="faa faa-clone"></i></span><span [@enterAnimation] *ngIf="citeCopied" class="badge"
-        style="background-color:#f0f0f0; margin-left: 0.5em; color: black;">Cite copied to clipboard</span>
+        style="background-color:#f0f0f0; margin-left: 0.5em; color: black;">Citation copied to clipboard</span>
     </div>
     <span [ngClass]="{'highlight': citeCopied}" [@enterAnimation]>
         {{citetext}}
