@@ -9,6 +9,7 @@ import { EditStatusService } from '../editcontrol/editstatus.service';
 import * as _ from 'lodash';
 import { RecordLevelMetrics } from '../../metrics/metrics';
 import { CommonFunctionService } from '../../shared/common-function/common-function.service';
+import { CartConstants } from '../../datacart/cartconstants';
 
 /**
  * A component for displaying access to landing page tools in a menu.
@@ -59,6 +60,8 @@ export class ToolMenuComponent implements OnChanges {
 
     // the menu item configuration
     items: MenuItem[] = [];
+    public CART_CONSTANTS: any = CartConstants.cartConst;
+    globalCartUrl: string = "/datacart/" + this.CART_CONSTANTS.GLOBAL_CART_NAME;
 
     /**
      * create the component.
@@ -152,7 +155,7 @@ export class ToolMenuComponent implements OnChanges {
             this.createMenuItem("Fair Use Statement", "faa faa-external-link", null,
                                 this.record['license']),
             this.createMenuItem("Data Cart", "faa faa-cart-plus", null,
-                                this.record['license'])
+                                this.globalCartUrl)
 
         ];
         mitems.push({ label: "Use", items: subitems });
