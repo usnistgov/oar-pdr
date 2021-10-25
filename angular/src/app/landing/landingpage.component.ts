@@ -277,7 +277,7 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
 
                 this.fileLevelMetrics = JSON.parse(response);
 
-                if(this.fileLevelMetrics.FilesMetrics != undefined && this.fileLevelMetrics.FilesMetrics.length > 0){
+                if(this.fileLevelMetrics.FilesMetrics != undefined && this.fileLevelMetrics.FilesMetrics.length > 0 && this.md.components){
                     // check if there is any current metrics data
                     for(let i = 1; i < this.md.components.length; i++){
                         let filepath = this.md.components[i].filepath;
