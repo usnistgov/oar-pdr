@@ -62,6 +62,7 @@ export class ToolMenuComponent implements OnChanges {
     items: MenuItem[] = [];
     public CART_CONSTANTS: any = CartConstants.cartConst;
     globalCartUrl: string = "/datacart/" + this.CART_CONSTANTS.GLOBAL_CART_NAME;
+    editEnabled: any;
 
     /**
      * create the component.
@@ -70,7 +71,9 @@ export class ToolMenuComponent implements OnChanges {
     constructor(
         private cfg : AppConfig,
         public commonFunctionService: CommonFunctionService,
-        public edstatsvc: EditStatusService,) {  }
+        public edstatsvc: EditStatusService) {  
+            this.editEnabled = cfg.get("editEnabled", "");
+    }
 
     /**
      * toggle the appearance of a popup menu
@@ -147,6 +150,9 @@ export class ToolMenuComponent implements OnChanges {
         */
 
         // Use
+        let disableMenu = false;
+        if(this.editEnabled) disableMenu = true;
+
         subitems = [
             this.createMenuItem('Citation', "faa faa-angle-double-right",
                                 (event) => { this.toggleCitation(); }, null),
@@ -155,8 +161,7 @@ export class ToolMenuComponent implements OnChanges {
             this.createMenuItem("Fair Use Statement", "faa faa-external-link", null,
                                 this.record['license']),
             this.createMenuItem("Data Cart", "faa faa-cart-plus", null,
-                                this.globalCartUrl)
-
+                                this.globalCartUrl, "_blank", disableMenu)
         ];
         mitems.push({ label: "Use", items: subitems });
 
@@ -282,7 +287,7 @@ export class ToolMenuComponent implements OnChanges {
      *                    event object
      * @param url       a URL that should be navigated to when the menu item is selected.
      */
-    createMenuItem(label: string, icon: string, command: any, url: string, target: string = "_blank") {
+    createMenuItem(label: string, icon: string, command: any, url: string, target: string = "_blank", disabled: boolean = false) {
         let item : MenuItem = {
             label: label,
             icon: icon
@@ -293,6 +298,8 @@ export class ToolMenuComponent implements OnChanges {
             item.url = url;
             item.target = target;
         }
+
+        item.disabled = disabled;
 
         return item;
     }
