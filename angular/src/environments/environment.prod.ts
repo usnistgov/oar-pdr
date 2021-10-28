@@ -12,7 +12,7 @@ import { LPSConfig } from '../app/config/config';
 
 export const context = {
     production: true,
-    useMetadataService: true,
+    useMetadataService: false,
     useCustomizationService: true
 };
 
