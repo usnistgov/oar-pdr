@@ -33,7 +33,7 @@ class Archiver(ChannelService):
             self._pretty = self.cfg.get('pretty', True)
             self._timeout = self.cfg.get('timeout', 60)
         except KeyError as ex:
-            raise ConfigurationException("Missing email notification "+
+            raise ConfigurationException("Missing archive notification "+
                                          "configuration property: "+str(ex))
         if not os.path.isdir(self._cdir):
             raise StateException("Notification archive dir is not an existing "+

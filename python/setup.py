@@ -99,8 +99,9 @@ setup(name='nistoar',
                 'nistoar.pdr.publish.cmd', 'nistoar.pdr.preserv.cmd', 'nistoar.pdr.publish.cmd.fix',
                 'nistoar.pdr.preserv', 'nistoar.pdr.preserv.bagger',
                 'nistoar.pdr.preserv.bagit', 'nistoar.pdr.preserv.service',
-                'nistoar.pdr.preserv.bagit.validate', 'nistoar.pdr.notify',
-                'nistoar.pdr.preserv.bagit.tools', 'nistoar.testing'
+                'nistoar.pdr.preserv.bagit.validate', 'nistoar.pdr.preserv.bagit.tools', 
+                'nistoar.pdr.notify', 'nistoar.pdr.health', 'nistoar.pdr.health.servicechecker',
+                'nistoar.testing'
             ],
       package_data={'nistoar.pdr': [ 'data/*' ]},
       cmdclass={'build': build}
