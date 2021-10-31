@@ -31,11 +31,16 @@ def define_options(progname):
     parser.add_argument('-p', '--platform', type=str, metavar='PLAT', dest='platform', default="Unknown",
                         help="show PLAT as the name of the platform (e.g. prod, test, etc.) where the "+
                              "check was run on")
+    parser.add_argument('-l' '--logfile', action='store', dest='logfile', type=str, metavar='FILE',
+                        help="write messages that normally go to standard error to FILE as well.  If -q "+
+                             "is also specified, the messages will only go to the logfile")
+    parser.add_argument('-v', '--verbose', action='store_true', dest='verbose',
+                        help="print more (debug) messages to standard error and/or the log file")
+    parser.add_argument('-q', '--quiet', action='store_true', dest='quiet',
+                        help="suppress all error and warning messages to standard error")
     parser.add_argument('-O', '--stdout', action='store_true', dest='stdout',
                         help="send the notification message to standard output instead of "+
                              "submitting it to its configured channels (overrides -m).")
-    parser.add_argument('-q', '--quiet', action='store_true', dest='quiet',
-                        help="suppress all error and warning messages to stderr")
 
     parser.add_argument('checks', metavar='CHECK', type=str, nargs='*', default=[],
                         
@@ -51,14 +56,26 @@ def main(progname, args):
     opts = parser.parse_args(args)
 
     rootlog = logging.getLogger()
-    if not rootlog.handlers:
-        # configure a default log handler
-        if opts.quiet:
-            from logging.handlers import NullHandler
-            rootlog.addHandler(NullHandler())
-        else:
-            fmt = prog + ": %(levelname)s: %(message)s"
-            logging.basicConfig(format=fmt, level=logging.INFO, stream=sys.stderr)
+    level = (opts.verbose and logging.DEBUG) or logging.INFO
+    if opts.logfile:
+        # write messages to a log file
+        fmt = "%(asctime)s " + (opts.origin or prog) + ".%(name)s %(levelname)s: %(message)s"
+        hdlr = logging.FileHandler(opts.logfile)
+        hdlr.setFormatter(logging.Formatter(fmt))
+        hdlr.setLevel(logging.DEBUG)
+        rootlog.addHandler(hdlr)
+        rootlog.setLevel(level)
+
+    # configure a default log handler
+    if not opts.quiet:
+        fmt = prog + ": %(levelname)s: %(message)s"
+        hdlr = logging.StreamHandler(sys.stderr)
+        hdlr.setFormatter(logging.Formatter(fmt))
+        hdlr.setLevel(logging.DEBUG)
+        rootlog.addHandler(hdlr)
+        rootlog.setLevel(level)
+    elif not rootlog.handlers:
+        rootlog.addHandler(logging.NullHandler())
 
     # look for a provided configuration file
     config = {}
