@@ -93,7 +93,7 @@ def check_service(url, method='HEAD', ok_status=200, failure_status=[], desc=Non
 
     except requests.RequestException as ex:
         out.message = str(ex)
-        out.status = CONNECTION_FAILURE
+        out.status = CONNECTION_FAILED
         out.ok = False
 
     return out
