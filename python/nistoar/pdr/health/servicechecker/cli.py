@@ -4,6 +4,8 @@ a command-line interface to health checks.  The :py:func:`main` function provide
 import argparse, sys, os, re, logging, textwrap, traceback as tb
 from argparse import ArgumentParser
 
+import yaml
+
 from ... import config
 from ...exceptions import ConfigurationException
 from ...notify.service import TargetManager, NotificationService
