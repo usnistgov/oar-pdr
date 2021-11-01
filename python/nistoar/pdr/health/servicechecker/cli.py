@@ -22,7 +22,7 @@ def define_options(progname):
     
     parser = ArgumentParser(progname, None, description, epilog)
 
-    parser.add_argument('-c', '--config', type=str, dest='cfgfile', metavar='FILE', required=True,
+    parser.add_argument('-c', '--config', type=str, dest='cfgfile', metavar='FILE', 
                         help="a file containing the notification service configuration to use.")
     parser.add_argument('-m', '--smtp-server', type=str, dest='mailserver', metavar="SMTPSERVER[:PORT]", 
                         default=None, help="the SMTPSERVER to use to submit email to")
