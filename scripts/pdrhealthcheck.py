@@ -7,11 +7,15 @@ if prog.endswith('.py'):
     prog = prog[:-(len('.py'))]
 
 def err(msg):
-    if prog:
-        sys.stderr.write(prog)
-        sys.stderr.write(": ")
-    sys.stderr.write(msg)
-    sys.stderr.write("\n")
+    rootlog = logging.getLogger()
+    if rootlog.handlers:
+        rootlog.error(msg)
+    else:
+        if prog:
+            sys.stderr.write(prog)
+            sys.stderr.write(": ")
+        sys.stderr.write(msg)
+        sys.stderr.write("\n")
 
 try:
     

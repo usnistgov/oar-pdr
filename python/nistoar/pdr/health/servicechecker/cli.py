@@ -78,7 +78,7 @@ def main(progname, args):
         rootlog.addHandler(logging.NullHandler())
 
     # look for a provided configuration file
-    config = {}
+    cfg = {}
     if opts.cfgfile:
         try:
             cfg = read_config(opts.cfgfile)
