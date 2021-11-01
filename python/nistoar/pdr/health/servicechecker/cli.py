@@ -10,6 +10,7 @@ from ... import config
 from ...exceptions import ConfigurationException
 from ...notify.service import TargetManager, NotificationService
 from ...notify.cli import StdoutMailer, StdoutArchiver, Failure
+from ... import platform_profile
 from . import check_and_notify
 
 prog = re.sub(r'\.py$', '', os.path.basename(sys.argv[0]))
@@ -30,7 +31,7 @@ def define_options(progname):
                         default=None, help="the SMTPSERVER to use to submit email to")
     parser.add_argument('-o', '--origin', type=str, metavar='LABEL', dest='origin', default="PDR.Health",
                         help="show LABEL as the origin of the message")
-    parser.add_argument('-p', '--platform', type=str, metavar='PLAT', dest='platform', default="Unknown",
+    parser.add_argument('-p', '--platform', type=str, metavar='PLAT', dest='platform', 
                         help="show PLAT as the name of the platform (e.g. prod, test, etc.) where the "+
                              "check was run on")
     parser.add_argument('-l' '--logfile', action='store', dest='logfile', type=str, metavar='FILE',
@@ -89,6 +90,9 @@ def main(progname, args):
                           .format(opts.cfgfile, ex.strerror))
     else:
         cfg = config.service.get("pdr-health")
+
+    if not opts.platform:
+        opts.platform = platform_profile
 
     # modify configuration based on command line options
     notcfg = cfg.get('notifier', {})
