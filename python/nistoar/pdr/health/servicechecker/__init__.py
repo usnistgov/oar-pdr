@@ -46,7 +46,7 @@ class CheckResult(object):
         self.ok = ok
         self.returned_text = returned_text
         
-def check_service(url, method='HEAD', ok_status=200, failure_status=[], desc=None, **kw):
+def check_service(url, method='HEAD', ok_status=200, failure_status=[], desc=None, cred=None, **kw):
     """
     return a CheckResult instance reporting the result of checking a service.  To be considered 
     healthy, the service must not return an HTTP status from one of the `failure_status` values.
@@ -78,7 +78,10 @@ def check_service(url, method='HEAD', ok_status=200, failure_status=[], desc=Non
     out = CheckResult(url, method, message=desc)
     try:
 
-        resp = requests.request(method, url)
+        hdr={}
+        if cred:
+            hdr['Authorization'] = "Bearer "+cred
+        resp = requests.request(method, url, header=hdr)
         if not out.message:
             out.message = resp.reason
         out.status = "%i %s" % (resp.status_code, resp.reason)
