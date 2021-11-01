@@ -1,0 +1,59 @@
+notifier:
+  alerts: 
+    - type: healthcheck.failure
+      targets: [ opsmgr ]
+    - type: healthcheck.proofoflife
+      targets: [ opsmgr ]
+  channels:
+    - name: email
+      type: fakeemail
+      cachedir: notify_archive
+      smtp_server: email.nist.gov
+    - name: archive
+      type: archive
+      dir:  notify_archive
+  targets:
+    - name: opsmgr
+      fullname: "OAR Ops Manager"
+      channel: email
+      type: email
+      to: [ "Raymond Plante", "raymond.plante@nist.gov" ]
+      from: [ "Raymond Plante", "raymond.plante@nist.gov" ]
+  archive_targets: [ oarop, dev ]
+
+services:
+  - name:   sdp
+    url:    https://data.nist.gov/
+    ok_status: [ 200 ]
+    desc:   "SDP home page is not available."
+
+  - name:   proofoflife
+    url:    https://data.nist.gov/
+    ok_status: []
+
+  - name:   distservice
+    url:    https://data.nist.gov/od/ds/
+    ok_status: 200 
+    desc:   "Distributions service is not available."
+
+  - name:   rmm
+    method: GET
+    url:    https://data.nist.gov/rmm/resourceApi/
+    desc:   "RMM is not available."
+
+  - name:   cachemonitor
+    url:    https://data.nist.gov:8099/cache/monitor/running
+    desc:   "Cache Integrity Monitor is not running."
+
+checks:
+  - name:     services
+    services: [ sdp, distservice, rmm ]
+    failure:  healthcheck.failure
+  - name:     cache
+    services: [ cachemonitor ]
+    failure:  healthcheck.failure
+  - name:     proofoflife
+    services: [ proofoflife ]
+    failure:  healthcheck.proofoflife
+    success:  healthcheck.proofoflife
+
