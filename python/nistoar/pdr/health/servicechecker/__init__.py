@@ -81,7 +81,7 @@ def check_service(url, method='HEAD', ok_status=200, failure_status=[], desc=Non
         hdr={}
         if cred:
             hdr['Authorization'] = "Bearer "+cred
-        resp = requests.request(method, url, header=hdr)
+        resp = requests.request(method, url, headers=hdr)
         if not out.message:
             out.message = resp.reason
         out.status = "%i %s" % (resp.status_code, resp.reason)

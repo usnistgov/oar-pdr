@@ -117,7 +117,7 @@ def main(progname, args):
         for chan in notcfg.get('channels', []):
             if 'name' not in chan:
                 continue
-            if chan.get('type') == 'email':
+            if chan.get('type') == 'email' or chan.get('type') == 'fakeemail':
                 echans.add(chan['name'])
             elif chan.get('type') == 'archive':
                 achans.add(chan['name'])
@@ -125,7 +125,7 @@ def main(progname, args):
         achans.add('archive')
 
         # now update the targets to swap out the channels
-        for target in notcfg['targets']:
+        for target in notcfg.get('targets', []):
             if target.get('channel') in echans:
                 target['channel'] = 'stdoutmail'
             elif target.get('channel') in achans:
@@ -133,7 +133,8 @@ def main(progname, args):
 
         # remove the regular email and archive channels from the configuration
         notcfg['channels'] = [c for c in notcfg.get('channels', [])
-                                if c.get('type') != 'archive' and c.get('type') != 'email']
+                                if c.get('type') != 'archive' and c.get('type') != 'email'
+                                                              and c.get('type') != 'fakeemail']
         if 'archive_targets' in notcfg:
             del notcfg['archive_targets']
 
