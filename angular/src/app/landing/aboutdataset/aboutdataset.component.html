@@ -15,12 +15,16 @@
 </div>
 
 <!-- Repository metadata -->
-<div style="margin: 0em 0em 1em 0em;" id="metadata">
+<div style="margin: 0em 0em .5em 0em;" id="metadata">
     <div><b>Repository Metadata</b></div>
     Machine-readable descriptions of this dataset are available in the following formats:
-    <div (click)="showJsonViewer = !showJsonViewer" style="cursor: pointer; color:#1471AE;margin-left: 1em;"><i class="faa faa-caret-right" *ngIf="!showJsonViewer"></i><i class="faa faa-caret-down" *ngIf="showJsonViewer"></i> NERDm</div>
+    <div (click)="showJsonViewer = !showJsonViewer" class="linked-text"><i class="faa faa-caret-right" *ngIf="!showJsonViewer"></i><i class="faa faa-caret-down" *ngIf="showJsonViewer"></i> NERDm</div>
 </div>
-
+<div *ngIf="showJsonViewer" style="margin: 0 0 .5em 1em;">
+    <a href="https://data.nist.gov/dm/nerdm/" target="_blank">
+        NERDm documentation
+    </a>
+</div>
 <!-- JSON viewer with a thin grey border -->
 <div class="json-viewer-box" id="json-viewer" *ngIf="showJsonViewer">
     <!-- Header bar with JSON tree navigate buttons (left) and JSON export button (right)-->
