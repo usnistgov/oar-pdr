@@ -18,7 +18,7 @@ class CheckResult(object):
     """
 
     def __init__(self, url, method, message=None, status=CONNECTION_FAILED, ok=None,
-                 returned_text=None, returned_data=None):
+                 text=None, data=None):
         """
         initialize the public attributes of this instance that describes the result data.  
         This constructor allows one to create the result access with partial information 
@@ -34,9 +34,9 @@ class CheckResult(object):
                              "Connection failed".
         :param bool ok:      A boolean indicating whether the service responded with a
                              healthy response.  
-        :param str returned_text:  The plain-text format of the response contents.  This 
+        :param str text:     The plain-text format of the response contents.  This 
                              should be empty if the HTTP method used was "HEAD". 
-        :param str returned_data:  The JSON-parsed response data.  This should be empty if 
+        :param str data:     The JSON-parsed response data.  This should be empty if 
                              the response was not in JSON format. 
         """
         self.url = url
@@ -44,9 +44,11 @@ class CheckResult(object):
         self.message = message
         self.status = status
         self.ok = ok
-        self.returned_text = returned_text
+        self.text = text
+        self.data = data
         
-def check_service(url, method='HEAD', ok_status=200, failure_status=[], desc=None, cred=None, **kw):
+def check_service(url, method='HEAD', ok_status=200, failure_status=[], desc=None, cred=None,
+                  verifysite=None, **kw):
     """
     return a CheckResult instance reporting the result of checking a service.  To be considered 
     healthy, the service must not return an HTTP status from one of the `failure_status` values.
@@ -78,25 +80,53 @@ def check_service(url, method='HEAD', ok_status=200, failure_status=[], desc=Non
     out = CheckResult(url, method, message=desc)
     try:
 
-        hdr={}
+        extra={}
         if cred:
-            hdr['Authorization'] = "Bearer "+cred
-        resp = requests.request(method, url, headers=hdr)
+            extra['headers'] = dict([('Authorization', "Bearer "+cred)])
+        if verifysite is not None:
+            extra['verify'] = verifysite
+        resp = requests.request(method, url, **extra)
         if not out.message:
             out.message = resp.reason
         out.status = "%i %s" % (resp.status_code, resp.reason)
         out.ok = resp.status_code not in failure_status and resp.status_code in ok_status
         try:
-            out.json = resp.json()
+            out.data = resp.json()
         except JSONDecodeError:
             out.text = resp.text
 
+        if 'evaluate' in kw:
+            f = kw['evaluate']
+            if isinstance(f, (str, unicode)):
+                f = _to_function(f)
+            try:
+                out = f(out, resp, **kw.get('evaluate_opts',{}))
+            except Exception as ex:
+                out.message = "result evaluator function %s failed: %s" % (kw['evaluate'], str(ex))
+                out.ok = False
+                
     except requests.RequestException as ex:
         out.message = str(ex)
         out.status = CONNECTION_FAILED
         out.ok = False
 
+    except ImportError as ex:
+        raise ValueError("%s: unable to resolve to a function (%s)" % (str(kw.get('evaluate')), str(ex)))
+
     return out
+
+def _to_function(qualified_name):
+    from importlib import import_module
+    parts = qualified_name.rsplit('.', 1)
+    if len(parts) < 2:
+        raise ImportError("unqualified function name provided")
+    mod = import_module(parts[0])
+    if not hasattr(mod, parts[1]):
+        raise ImportError("function %s not found in module %s" % (parts[1], parts[0]))
+    func = getattr(mod, parts[1])
+    if not hasattr(func, '__call__'):
+        raise ImportError("function %s is not callable" % parts[1])
+    return func
 
 def check_and_notify(services, notifier, on_failure=None, on_success=None, message=None,
                      origin=None, platform="unknown", name="unnamed"):

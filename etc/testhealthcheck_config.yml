@@ -36,6 +36,15 @@ services:
     ok_status: 200 
     desc:   "Distributions service is not available."
 
+  - name:   ds
+    url:    https://data.nist.gov/od/ds/
+    method: GET
+    ok_status: 200 
+    desc:   "Distributions service is not available."
+    evaluate: nistoar.pdr.health.cache.check_for_ds_version
+    evaluate_opts:
+      version: "2.1.10"
+
   - name:   rmm
     method: GET
     url:    https://data.nist.gov/rmm/resourceApi/
@@ -44,13 +53,25 @@ services:
   - name:   cachemonitor
     url:    https://data.nist.gov:8099/cache/monitor/running
     desc:   "Cache Integrity Monitor is not running."
+    cred:   "XXXX"
+
+  - name:   cachevolumes
+    url:    https://data.nist.gov:8099/cache/monitor/running
+    desc:   "Cache Integrity Monitor is not running."
+    cred:   "XXXX"
+    evaluate: nistoar.pdr.health.cache.check_for_unchecked_volumes
+    evaluate_opts:
+      hourssince:  24
 
 checks:
   - name:     services
     services: [ sdp, distservice, rmm ]
     failure:  healthcheck.failure
+  - name:     ds
+    services: [ ds ]
+    failure:  healthcheck.failure
   - name:     cache
-    services: [ cachemonitor ]
+    services: [ cachemonitor, cachevolumes ]
     failure:  healthcheck.failure
   - name:     proofoflife
     services: [ proofoflife ]
