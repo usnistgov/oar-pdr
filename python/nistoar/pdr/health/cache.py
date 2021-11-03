@@ -15,7 +15,7 @@ def unchecked_volumes(volumes, hourssince=24):
                              the oldest check time for a volume to be included in the output list.
     """
     lim = time.time()*1000 - hourssince * 3600000
-    return [v for v in volumes if v.get('checked', 0) < lim]
+    return [v for v in volumes if v.get('filecount',0) > 0 and v.get('checked', 0) < lim]
 
 def check_for_unchecked_volumes(chkres, srvresp, **kw):
     """
