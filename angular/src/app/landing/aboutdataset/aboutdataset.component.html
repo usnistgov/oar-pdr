@@ -21,7 +21,7 @@
     <div (click)="showJsonViewer = !showJsonViewer" class="linked-text"><i class="faa faa-caret-right" *ngIf="!showJsonViewer"></i><i class="faa faa-caret-down" *ngIf="showJsonViewer"></i> NERDm</div>
 </div>
 <div *ngIf="showJsonViewer" style="margin: 0 0 .5em 1em;">
-    <a href="https://data.nist.gov/dm/nerdm/" target="_blank">
+    <a href="{{nerdmDocUrl}}" target="_blank">
         NERDm documentation
     </a>
 </div>
