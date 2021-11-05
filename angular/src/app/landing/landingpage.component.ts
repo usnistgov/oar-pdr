@@ -25,6 +25,7 @@ import { BreakpointObserver, BreakpointState } from '@angular/cdk/layout';
 import { MetricsinfoComponent } from './metricsinfo/metricsinfo.component';
 import { CartActions } from '../datacart/cartconstants';
 import { initBrowserMetadataTransfer } from '../nerdm/metadatatransfer-browser.module';
+import { NgbModalOptions, NgbModal } from '@ng-bootstrap/ng-bootstrap';
 
 /**
  * A component providing the complete display of landing page content associated with 
@@ -43,7 +44,7 @@ import { initBrowserMetadataTransfer } from '../nerdm/metadatatransfer-browser.m
 @Component({
     selector: 'pdr-landing-page',
     templateUrl: './landingpage.component.html',
-    styleUrls: ['./landingpage.component.css'],
+    styleUrls: ['./landingpage.component.scss'],
     providers: [
         Title
     ],
@@ -82,6 +83,8 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
     public CART_ACTIONS: CartActions;
 
     mobileMode: boolean = false;
+    dialogOpen: boolean = false;
+    modalReference: any;
 
     @ViewChild(LandingBodyComponent)
     landingBodyComponent: LandingBodyComponent;
@@ -109,7 +112,8 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
                 private cartService: CartService,
                 private mdupdsvc: MetadataUpdateService,
                 public metricsService: MetricsService,
-                public breakpointObserver: BreakpointObserver) 
+                public breakpointObserver: BreakpointObserver,
+                private ngbModal: NgbModal) 
     {
         this.reqId = this.route.snapshot.paramMap.get('id');
         this.inBrowser = isPlatformBrowser(platformId);
@@ -447,5 +451,40 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
 
         if (this.editMode == this.EDIT_MODES.OUTSIDE_MIDAS_MODE)
             this.message = 'This record is not currently available for editing. <p>Please return to MIDAS and click "Edit Landing Page" to edit.'
+    }
+
+    openModal() {
+        // let ngbModalOptions: NgbModalOptions = {
+        //     backdrop: 'static',
+        //     keyboard: false,
+        //     windowClass: "myCustomModalClass"
+        // };
+        let ngbModalOptions: NgbModalOptions = {
+            keyboard: false,
+            windowClass: "metricspopup"
+        };
+        this.modalReference = this.ngbModal.open(MetricsinfoComponent, ngbModalOptions);
+        this.modalReference.componentInstance.inBrowser = this.inBrowser;
+        this.modalReference.componentInstance.record = this.md;
+        this.modalReference.componentInstance.metricsUrl = this.metricsUrl;
+        this.modalReference.componentInstance.editEnabled = this.editEnabled;
+        this.modalReference.componentInstance.returnValue.subscribe((returnValue) => {
+            this.modalReference.close();
+        });
+
+        this.dialogOpen = true;
+    }
+
+    closeModal() {
+        this.ngbModal.dismissAll();
+        this.dialogOpen = false;
+    }
+
+    togglePopup() {
+        if(this.dialogOpen){
+            this.closeModal();
+        }else{
+            this.openModal();
+        }
     }
 }

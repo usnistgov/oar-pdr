@@ -1,4 +1,4 @@
-import { Component, OnInit, OnChanges, Input, SimpleChanges } from '@angular/core';
+import { Component, OnInit, OnChanges, Input, Output, SimpleChanges, EventEmitter } from '@angular/core';
 import { NerdmRes } from '../../nerdm/nerdm';
 import { RecordLevelMetrics } from '../../metrics/metrics';
 import { CommonFunctionService } from '../../shared/common-function/common-function.service';
@@ -9,12 +9,16 @@ import { Observable, of } from "rxjs";
 import { DataCartStatus } from '../../datacart/cartstatus';
 import { AppConfig } from '../../config/config';
 import { CartActions } from '../../datacart/cartconstants';
+import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import * as _ from 'lodash';
 
 @Component({
-  selector: 'app-metricsinfo',
-  templateUrl: './metricsinfo.component.html',
-  styleUrls: ['./metricsinfo.component.css']
+    selector: 'app-metricsinfo',
+    templateUrl: './metricsinfo.component.html',
+    styleUrls: ['./metricsinfo.component.css'],
+    providers: [
+        NgbActiveModal
+    ]
 })
 export class MetricsinfoComponent {
     // the resource record metadata that the tool menu data is drawn from
@@ -29,6 +33,8 @@ export class MetricsinfoComponent {
     @Input() metricsUrl : string|null = "";
 
     @Input() editEnabled: boolean = false;
+
+    @Output() returnValue: EventEmitter<any> = new EventEmitter();
 
     // flag if metrics is ready to display
     showMetrics : boolean = false;
@@ -56,7 +62,8 @@ export class MetricsinfoComponent {
     constructor(
         public commonFunctionService: CommonFunctionService,
         public metricsService: MetricsService,
-        private cfg: AppConfig
+        private cfg: AppConfig,
+        public activeModal: NgbActiveModal
     ) { 
         this.delayTimeForMetricsRefresh = +this.cfg.get("delayTimeForMetricsRefresh", "300");
     }
@@ -204,4 +211,9 @@ export class MetricsinfoComponent {
         })
     }
 
+    closeModal(){
+        console.log("Closing modal...");
+        this.returnValue.emit("close");
+        this.activeModal.close('Close click')
+    }
 }

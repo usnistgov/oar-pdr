@@ -43,6 +43,9 @@ import { MetricsinfoComponent } from './metricsinfo/metricsinfo.component';
     providers: [
         MetadataUpdateService, TaxonomyListService, DatePipe
     ],
+    entryComponents: [
+        MetricsinfoComponent
+    ],
     exports: [
         LandingPageComponent, LandingBodyComponent, DoneComponent, DownloadstatusComponent,
         ErrorComponent, UserErrorComponent, NoidComponent, NerdmComponent

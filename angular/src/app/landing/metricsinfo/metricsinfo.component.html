@@ -1,14 +1,17 @@
-<div class="metrics-header">
-    Dataset Metrics
-</div>
-<div *ngIf="showMetrics" class="metrics-info">
-    <ul>
-        <li *ngFor="let item of metricsInfoOb | async" style="font-size: 14px;">
-            {{item}}
-        </li>
-    </ul>
-    <div style="width: 100%;text-align: right;margin-top: -15px;font-size: small;">
-        <a *ngIf="hasCurrentMetrics" href="{{metricsUrl}}" target="_blank"><span data-toggle="tooltip" title="More Metrics Data">More...</span></a>
+<div (click)="closeModal()">
+    <div class="metrics-header">
+        Dataset Metrics
+    </div>
+    <div *ngIf="showMetrics" class="metrics-info">
+        <ul>
+            <li *ngFor="let item of metricsInfoOb | async" style="font-size: 14px;">
+                {{item}}
+            </li>
+        </ul>
+        <div style="width: 100%;text-align: right;margin-top: -15px;font-size: small;">
+            <a *ngIf="hasCurrentMetrics" href="{{metricsUrl}}" target="_blank"><span data-toggle="tooltip" title="More Metrics Data">More...</span></a>
+        </div>
     </div>
 </div>
+
 

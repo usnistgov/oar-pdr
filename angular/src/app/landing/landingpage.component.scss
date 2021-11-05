@@ -18,3 +18,15 @@
     font-weight: 400;
 }
 
+.metricspopup {
+    top: 100px;
+    width: 200px;
+}
+
+::ng-deep .metricspopup {
+    font-size: 2rem;
+    .modal-dialog { 
+        background-color: yellow;
+        padding:1rem;
+    } 
+}
