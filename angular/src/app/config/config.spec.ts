@@ -65,7 +65,7 @@ describe("config.AppConfig", function() {
         expect(cfg.locations.landingPageService).toBeDefined();
         expect(cfg.locations.landingPageService).toBe("https://data.nist.gov/od/id/");
         expect(cfg.locations.nerdmAbout).toBeDefined();
-        expect(cfg.locations.nerdmAbout).toBe("https://data.nist.gov/od/dm/aboutNerdm.html");
+        expect(cfg.locations.nerdmAbout).toBe("https://data.nist.gov/od/dm/nerdm/");
         expect(cfg.mdAPI).toBeDefined();
         expect(cfg.mdAPI).toBe("https://data.nist.gov/rmm/");
     });
