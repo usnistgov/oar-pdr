@@ -173,7 +173,7 @@ export class AppConfig implements LPSConfig {
         if (!this.locations.landingPageService)
         this.locations.landingPageService = this.locations.portalBase + "od/id/";
         if (!this.locations.nerdmAbout)
-        this.locations.nerdmAbout = this.locations.portalBase + "od/dm/aboutNerdm.html";
+        this.locations.nerdmAbout = this.locations.portalBase + "od/dm/nerdm/";
 
         if (!this.mdAPI) this.mdAPI = this.locations.mdService;
         if (!this.customizationAPI) this.customizationAPI = this.locations.mdService;
