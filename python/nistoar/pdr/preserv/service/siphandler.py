@@ -34,6 +34,7 @@ from . import status
 from ...ingest.rmm import IngestClient
 from ...doimint import DOIMintingClient
 from ...utils import write_json
+from ....nerdm import utils as nerdutils
 from ... import distrib
 
 log = logging.getLogger(_sys.system_abbrev).getChild(_sys.subsystem_abbrev)
@@ -100,10 +101,15 @@ class SIPHandler(object):
             os.mkdir(self.workdir)
 
         self.storedir = self.cfg['store_dir']
+        self.restricted_storedir = self.cfg['restricted_store_dir']
         assert self.storedir
+        assert self.restricted_storedir
         if not os.path.isdir(self.storedir):
             raise StateException("LT-storage directory does not exist as a "+
                                  "directory: " + self.storedir)
+        if not os.path.isdir(self.restricted_storedir):
+            raise StateException("LT-storage directory does not exist as a "+
+                                 "directory: " + self.restricted_storedir)
 
         # set up the Status manager
         stcfg = self.cfg.get('status_manager', {})
@@ -265,6 +271,29 @@ class SIPHandler(object):
                     log.warn("Trouble removing unserialized bag: "+bagd)
         
         return outfiles
+
+    def _serialize_restricted(self, bagdir, destdir, format=None):
+        """
+        serialize a given bag for distribution through the restricted public gateway.
+
+        Serialized bags for a restricted public data will be save to a separate bucket.  In 
+        addition, a bag containing the latest version of the data will also be put in the 
+        bucket with a version-independent name. (Currently, this is only supported for 
+        single-bag AIPs.)  This function generates that serialized bag and its SHA-file.  
+
+        This function pulls in bags from previously published versions to ensure all data is 
+        included in the output bag.  
+
+        :param bagdir   str:   path to the bag's root directory.
+        :param destdir str:     the path to a directory where the serialized
+                                bag(s) will be written.  If not provided the
+                                configured directory will be used.  
+        :param format str:  the type of serialization to apply; this 
+                                must be a name recognized by the system.  
+                                If not provided a default serialization 
+                                will be applied (as given in the configuration).
+        """
+        pass
 
     def _is_ingested(self):
         """
@@ -502,8 +531,12 @@ class MIDASSIPHandler(SIPHandler):
         bag = NISTBag(self.bagger.bagdir)
         nerdm = bag.nerdm_record()
         if self._ingester:
+            ingmd = nerdm
+            if not nerdm.get('accessLevel', 'public') and 'components' in nerdm:
+                ingmd = deepcopy(ingmd)
+                ingmd['components'] = [c for c in imgmd['components'] if 'filepath' in c]
             try:
-                self._ingester.stage(nerdm, self.bagger.name)
+                self._ingester.stage(ingmd, self.bagger.name)
             except Exception as ex:
                 msg = "Failure staging NERDm record for " + self.bagger.name + \
                       " for ingest: " + str(ex)
@@ -514,12 +547,26 @@ class MIDASSIPHandler(SIPHandler):
                                   summary="Ingest failed for "+self.bagger.name,
                                         desc=msg, id=self.bagger.name,
                                         version=nerdm.get('version', 'unknown'))
+            finally:
+                ingmd = None
 
         # zip it up; this may split the bag into multibags
         self._status.record_progress("Serializing")
         savefiles = self._serialize(bagdir, self.stagedir, serialtype)
 
-        # copy the zipped files to long-term storage ("public" directory)
+        # special handling for restricted public data going through the gateway
+        if nerdm.get('accessLevel', 'public') != 'public' and \
+           any([nerdutils.is_type(c, "RestrictedAccessPage") for c in nerdm.get('components',[])]):
+            if len(savefiles) > 2:
+                raise StateException("Too many bag artifacts (" + str(len(savefiles)) +
+                                     "; multiple bags not supported via restricted access gateway.")
+            savefiles += self._serialize_restricted(bagdir, self.stagedir, serialtype)
+
+        # copy the zipped files to long-term storage ("public" or "restricted-public" directory)
+        if not destdir:
+            destdir = self.storedir
+            if nerdm.get('accessLevel', 'public') != 'public':
+                destdir = self.restricted_storedir
         self._status.record_progress("Delivering preservation artifacts")
         log.debug("writing files to %s", destdir)
         errors = []
@@ -527,12 +574,16 @@ class MIDASSIPHandler(SIPHandler):
         try:
             for f in savefiles:
                 destfile = os.path.join(destdir, os.path.basename(f))
+
                 if os.path.exists(destfile) and \
-                   not self.cfg.get('allow_bag_overwrite', False):
-                    raise OSError(errno.EEXIST, os.strerror(errno.EEXIST),
-                                  destfile)
+                   not self.cfg.get('allow_bag_overwrite', False) and \
+                   # can overwrite restricted-public artifacts
+                   not bagutils.is_legal_bag_name(re.sub(r'.sha256$', '', os.path.basename(f))):
+                    raise OSError(errno.EEXIST, os.strerror(errno.EEXIST), destfile)
+                                  
                 shutil.copy(f, destdir)
                 saved.append(f)
+
         except OSError, ex:
             log.error("Failed to copy preservation file: %s\n" +
                       "  to long-term storage: %s", f, destdir)

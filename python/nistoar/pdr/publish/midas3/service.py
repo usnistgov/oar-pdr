@@ -899,7 +899,7 @@ class MIDAS3PublishingService(PublishSystem):
             self._validate_pod(pod, DEF_POD_DATASET_SCHEMA)
         if not pod.get('identifier'):
             raise ejs.ValidationError("POD record missing required property: identifier")
-        if pod.get('accessLevel') != 'public':
+        if pod.get('accessLevel') == 'non-public':
             raise ejs.ValidationError("Unacceptable accessLevel property value for preservation: " +
                                       str(pod.get('accessLevel')))
 
