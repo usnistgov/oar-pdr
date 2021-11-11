@@ -43,7 +43,10 @@ import gov.nist.oar.customizationapi.helpers.UserDetailsExtractor;
 import gov.nist.oar.customizationapi.service.JWTTokenGenerator;
 import gov.nist.oar.customizationapi.service.ResourceNotFoundException;
 import gov.nist.oar.customizationapi.service.UserToken;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.Parameters;
+
 
 /**
  * This controller sends JWT, a token generated after successful authentication.
@@ -76,8 +79,10 @@ public class AuthController {
 	 * @throws UnAuthenticatedUserException
 	 */
 	@RequestMapping(value = { "_perm/{ediid}" }, method = RequestMethod.GET, produces = "application/json")
-	@ApiOperation(value = "", nickname = "Authorize user to edit the record", notes = "Resource returns a JSON if Authorized user.")
-
+	@Parameters ({
+	    @Parameter(name = "Authentication", description = "authentication object."),
+	    @Parameter(name = "ediid", description = "The recordid for which user authorization is checked.")})
+	@Operation(summary = "Get the authorized token.", description = "Resource returns a JSON if Authorized user.")
 	public UserToken token( Authentication authentication,@PathVariable @Valid String ediid)
 			throws UnAuthorizedUserException, CustomizationException, UnAuthenticatedUserException, BadGetwayException {
 
@@ -109,6 +114,11 @@ public class AuthController {
 	 */
 
 	@RequestMapping(value = { "/_logininfo" }, method = RequestMethod.GET, produces = "application/json")
+	@Parameters ({
+	    @Parameter(name = "authentication", description = "authentication object."),
+	    @Parameter(name = "response", description = "HttpServletResponse .")})
+	@Operation(summary = "Get the authorized token.", description = "Resource returns a JSON if Authorized user.")
+	
 	public ResponseEntity<AuthenticatedUserDetails> login(HttpServletResponse response, Authentication authentication) throws IOException {
 		logger.info("Get the authenticated user info.");
 //		final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();

@@ -23,6 +23,8 @@ import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
 import org.apache.commons.httpclient.protocol.Protocol;
 import org.apache.commons.httpclient.protocol.ProtocolSocketFactory;
+//import org.apache.http.client.HttpClient;
+
 import org.apache.velocity.app.VelocityEngine;
 import org.opensaml.saml2.metadata.provider.MetadataProvider;
 import org.opensaml.saml2.metadata.provider.MetadataProviderException;
@@ -44,6 +46,11 @@ import org.springframework.security.config.annotation.authentication.builders.Au
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.saml.SAMLDiscovery;
+import org.springframework.security.saml.SAMLEntryPoint;
+import org.springframework.security.saml.SAMLProcessingFilter;
+import org.springframework.security.saml.metadata.MetadataDisplayFilter;
+import org.springframework.security.saml.websso.WebSSOProfileOptions;
 import org.springframework.security.saml.SAMLAuthenticationProvider;
 import org.springframework.security.saml.SAMLBootstrap;
 import org.springframework.security.saml.SAMLEntryPoint;
@@ -196,16 +203,11 @@ public class SamlSecurityConfig extends WebSecurityConfigurerAdapter {
 	 * @throws ConfigurationException
 	 */
 	@Bean
-	public WebSSOProfileOptions defaultWebSSOProfileOptions() throws ConfigurationException {
-		logger.info("Setting up authticated service redirect by setting web sso profiles.");
-		WebSSOProfileOptions webSSOProfileOptions = new WebSSOProfileOptions();
-		webSSOProfileOptions.setIncludeScoping(false);
-		/// Adding this force authenticate on failure to validate SAML cache
-		webSSOProfileOptions.setForceAuthN(true);
-		// Relay state can also be set here it will always go to this URL once
-		// authenticated
-		// webSSOProfileOptions.setRelayState("https://data.nist.gov/sdp");
-		return webSSOProfileOptions;
+	public WebSSOProfileOptions defaultWebSSOProfileOptions() {
+	    WebSSOProfileOptions webSSOProfileOptions = new WebSSOProfileOptions();
+	    webSSOProfileOptions.setIncludeScoping(false);
+	    webSSOProfileOptions.setForceAuthN(true);
+	    return webSSOProfileOptions;
 	}
 
 	/**
@@ -215,14 +217,17 @@ public class SamlSecurityConfig extends WebSecurityConfigurerAdapter {
 	 * @return
 	 * @throws ConfigurationException
 	 */
+
 	@Bean
-	public SAMLEntryPoint samlEntryPoint() throws ConfigurationException {
+	public SAMLEntryPoint samlEntryPoint() {
 		logger.info("SAML Entry point. with application url " + applicationURL);
 		SAMLEntryPoint samlEntryPoint = new SamlWithRelayStateEntryPoint(applicationURL);
 		samlEntryPoint.setDefaultProfileOptions(defaultWebSSOProfileOptions());
 		return samlEntryPoint;
 	}
 
+
+	
 	/**
 	 * Metadatadisplay filter is called to use IDP metadata and set up SP service
 	 * 
@@ -277,6 +282,22 @@ public class SamlSecurityConfig extends WebSecurityConfigurerAdapter {
 		
 		return samlWebSSOProcessingFilter;
 		
+	}
+	
+
+//	@Bean
+//	public SAMLProcessingFilter samlWebSSOProcessingFilter() throws Exception {
+//	    SAMLProcessingFilter samlWebSSOProcessingFilter = new SAMLProcessingFilter();
+//	    samlWebSSOProcessingFilter.setAuthenticationManager(authenticationManager());
+//	    samlWebSSOProcessingFilter.setAuthenticationSuccessHandler(successRedirectHandler());
+//	    samlWebSSOProcessingFilter.setAuthenticationFailureHandler(authenticationFailureHandler());
+//	    return samlWebSSOProcessingFilter;
+//	}
+	
+	@Bean
+	public SAMLDiscovery samlDiscovery() {
+	    SAMLDiscovery idpDiscovery = new SAMLDiscovery();
+	    return idpDiscovery;
 	}
 
 	/**
@@ -398,8 +419,6 @@ public class SamlSecurityConfig extends WebSecurityConfigurerAdapter {
 		logger.info("Setting up different saml filters and endpoints");
 		List<SecurityFilterChain> chains = new ArrayList<>();
 		
-		chains.add(new DefaultSecurityFilterChain(new AntPathRequestMatcher("/saml/metadata/**"),
-				metadataDisplayFilter()));
 
 		chains.add(new DefaultSecurityFilterChain(new AntPathRequestMatcher("/saml/login/**"),customFilter(), samlEntryPoint()));
 
@@ -411,8 +430,29 @@ public class SamlSecurityConfig extends WebSecurityConfigurerAdapter {
 		chains.add(new DefaultSecurityFilterChain(new AntPathRequestMatcher("/saml/singleLogout/**"),
 				samlLogoutProcessingFilter()));
 		
+		chains.add(new DefaultSecurityFilterChain(new AntPathRequestMatcher("/saml/metadata/**"),
+				metadataDisplayFilter()));
+		
 		return new FilterChainProxy(chains);
 	}
+	
+//	@Bean
+//	public FilterChainProxy samlFilter() throws Exception {
+//	    List<SecurityFilterChain> chains = new ArrayList<>();
+//	    chains.add(new DefaultSecurityFilterChain(new AntPathRequestMatcher("/saml/SSO/**"),
+//	        samlWebSSOProcessingFilter()));
+//	    chains.add(new DefaultSecurityFilterChain(new AntPathRequestMatcher("/saml/discovery/**"),
+//	        samlDiscovery()));
+//		chains.add(new DefaultSecurityFilterChain(new AntPathRequestMatcher("/saml/metadata/**"),
+//		metadataDisplayFilter()));
+//	    chains.add(new DefaultSecurityFilterChain(new AntPathRequestMatcher("/saml/login/**"),
+//	    		customFilter(), samlEntryPoint()));
+//	    chains.add(new DefaultSecurityFilterChain(new AntPathRequestMatcher("/saml/logout/**"),
+//	        samlLogoutFilter()));
+//	    chains.add(new DefaultSecurityFilterChain(new AntPathRequestMatcher("/saml/SingleLogout/**"),
+//	        samlLogoutProcessingFilter()));
+//	    return new FilterChainProxy(chains);
+//	}
 
 	/**
 	 * Making sure TLS security
@@ -755,13 +795,14 @@ public class SamlSecurityConfig extends WebSecurityConfigurerAdapter {
 
 		try {
 			
-			http.addFilterBefore(corsFilter(), SessionManagementFilter.class).exceptionHandling()
-					.authenticationEntryPoint(samlEntryPoint());
+		
 
 			http.csrf().disable();
 
 			http.addFilterBefore(metadataGeneratorFilter(), ChannelProcessingFilter.class).addFilterAfter(samlFilter(),
 					BasicAuthenticationFilter.class);
+			http.addFilterBefore(corsFilter(), SessionManagementFilter.class).exceptionHandling()
+			.authenticationEntryPoint(samlEntryPoint());
 			
 			http.authorizeRequests()
 				.antMatchers("/error").permitAll()
