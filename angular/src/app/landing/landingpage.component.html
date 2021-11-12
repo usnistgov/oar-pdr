@@ -78,9 +78,7 @@
                     [inBrowser]="inBrowser"
                     [record]="md"
                     [metricsData]="metricsData"
-                    [showMetrics]="showMetrics"
-                    [mobileMode]="mobileMode"
-                    [editEnabled]="editEnabled">
+                    [showMetrics]="showMetrics">
                 </app-metricsinfo>
                     
                 <app-downloadstatus [inBrowser]="inBrowser"></app-downloadstatus>
@@ -92,14 +90,6 @@
     </div>
 
     <div *ngIf="mobileMode" style="padding: 0 1.0em;">
-        <!-- <app-metricsinfo 
-            [inBrowser]="inBrowser"
-            [record]="md"
-            [metricsUrl]="metricsData.url"
-            [mobileMode]="mobileMode"
-            [editEnabled]="editEnabled">
-        </app-metricsinfo> -->
-    
         <app-downloadstatus [inBrowser]="inBrowser" (downloadedKeys)="onBundleDownloadCompleted($event)"></app-downloadstatus>  
     </div>
   </div>

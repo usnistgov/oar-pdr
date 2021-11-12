@@ -14,7 +14,7 @@ export class storedStructure {
 /**
  * convert the TreeNode[] data to a string appropriate for saving to local storage
  */
-export function stringifyCart(action: string, data: DataCartStatusLookup) : string { 
+export function stringifyCart(data: DataCartStatusLookup, action: string="") : string { 
     return JSON.stringify(
         {   
             action: action,
@@ -139,7 +139,7 @@ export class DataCartStatus {
      */
     public save() : void {
         if (this._storage)
-            this._storage.setItem(this.name, stringifyCart(this.action, this.dataCartStatusItems));
+            this._storage.setItem(this.name, stringifyCart(this.dataCartStatusItems, this.action));
     }
 
     /**

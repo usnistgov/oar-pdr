@@ -183,6 +183,7 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
                     this.mobileMode = false;
                 } else {
                     this.mobileMode = true;
+                    this.btnPosition = this.btnElement.nativeElement.offsetTop + 25;
                     console.log("Mobile mode")
                 }
             });
@@ -335,8 +336,6 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
                     
                                 this.metricsData.totalDownloadSize = this.recordLevelMetrics.DataSetMetrics[0] != undefined? this.recordLevelMetrics.DataSetMetrics[0].total_size : 0;
                     
-                                // totalFileDownload = totalFileDownload == undefined? 0 : totalFileDownload;
-                        
                                 this.metricsData.totalUsers = this.recordLevelMetrics.DataSetMetrics[0] != undefined? this.recordLevelMetrics.DataSetMetrics[0].number_users : 0;
                         
                                 this.metricsData.totalUsers = this.metricsData.totalUsers == undefined? 0 : this.metricsData.totalUsers;
@@ -433,7 +432,6 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
      * apply housekeeping after view has been initialized
      */
     ngAfterViewInit() {
-        this.btnPosition = this.btnElement.nativeElement.offsetTop + 25;
         if (this.md && this.inBrowser) {
             this.useFragment();
             window.history.replaceState({}, '', '/od/id/' + this.reqId);
