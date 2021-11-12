@@ -36,6 +36,7 @@ export class AboutdatasetComponent implements OnChanges {
     _jsonExpandDepth = "1";
     citetext: string;
     citeCopied: boolean = false;
+    nerdmDocUrl: string;
     
     private _collapsed: boolean = false;
     @Input() record: NerdmRes;
@@ -75,6 +76,7 @@ export class AboutdatasetComponent implements OnChanges {
 
     ngOnInit(): void {
         this.nerdmRecord["Native JSON (NERDm)"] = this.record;
+        this.nerdmDocUrl = this.cfg.get("locations.nerdmAbout", "/unconfigured");
         this.citetext = (new NERDResource(this.record)).getCitation();
     }
 
