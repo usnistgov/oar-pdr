@@ -11,7 +11,7 @@
                 </div>
             </div>
             <ng-template #hasDescription>
-                <div id="recordDescription" class="desc-card editable_field" style="max-width:calc(100% - 4em);"
+                <div id="recordDescription" class="editable_field" style="max-width:calc(100% - 4em);"
                     [ngStyle]="mdupdsvc.getFieldStyle(fieldName)" (click)="openModal()">
                     <div *ngFor="let desc of record['description']; let i =index">
                         {{ record["description"][i] }}

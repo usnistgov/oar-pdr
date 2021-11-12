@@ -4,6 +4,12 @@
     border: 0px;
 }
 
+.landingcard-mobile {
+    padding: 1rem 1.5rem 2rem 1.5rem;
+    margin-bottom: 0rem;
+    border: 0px;
+}
+
 .landing-body {
     border: 0px;
 }
@@ -21,4 +27,31 @@
 .metricspopup {
     top: 100px;
     width: 200px;
+}
+
+.menu-button {
+    float: right;
+    // position: absolute; 
+    // top: 1em; 
+    // right: 1.5em;
+    // overflow: hidden;
+    width: 2.3em;
+    z-index: 10;
+    border: 1px solid red;
+}
+
+.sticky{
+    position: fixed;
+    top: 1em; 
+    right: 1.5em;
+    overflow: hidden;
+    width: 2.3em;
+    height: 2.3em;
+    z-index: 10;
+}
+
+.ui-menu-dynamic {
+    position: fixed;
+    top: 1em; 
+    right: 1.5em;
 }

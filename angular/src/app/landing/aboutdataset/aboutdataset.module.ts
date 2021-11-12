@@ -5,27 +5,28 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { FieldsetModule } from 'primeng/fieldset';
 import { ButtonModule } from 'primeng/button';
 
-import { MetadataComponent } from './metadata.component';
+import { AboutdatasetComponent } from './aboutdataset.component';
 
 import { NgxJsonViewerModule } from 'ngx-json-viewer';
+import { VersionModule } from '../version/version.module';
 
 /**
  * module that provides interfaces for accessing and visualizing the resource's metadata in various formats
  */
 @NgModule({
     imports: [
-        CommonModule, BrowserAnimationsModule, FieldsetModule, ButtonModule, NgxJsonViewerModule
+        CommonModule, BrowserAnimationsModule, FieldsetModule, ButtonModule, NgxJsonViewerModule, VersionModule
     ],
     declarations: [
-        MetadataComponent
+        AboutdatasetComponent
     ],
     providers: [ ],
     exports: [
-        MetadataComponent
+        AboutdatasetComponent
     ]
 })
-export class MetadataModule { }
+export class AboutdatasetModule { }
 
 export {
-    MetadataComponent
+    AboutdatasetComponent
 };

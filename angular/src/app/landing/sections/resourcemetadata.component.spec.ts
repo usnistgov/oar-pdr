@@ -8,6 +8,7 @@ import { NerdmRes, NerdmComp } from '../../nerdm/nerdm';
 import { GoogleAnalyticsService } from '../../shared/ga-service/google-analytics.service';
 
 import { config, testdata } from '../../../environments/environment';
+import { MetricsData } from '../metrics-data';
 
 describe('ResourceMetadataComponent', () => {
     let component: ResourceMetadataComponent;
@@ -33,6 +34,8 @@ describe('ResourceMetadataComponent', () => {
         makeComp();
         component.inBrowser = true;
         component.record = JSON.parse(JSON.stringify(rec));
+        component.metricsData = new MetricsData();
+        component.showJsonViewer = false;
         component.ngOnChanges({});
         fixture.detectChanges();
     }));
@@ -40,12 +43,12 @@ describe('ResourceMetadataComponent', () => {
     it('should initialize', () => {
         expect(component).toBeTruthy();
         let cmpel = fixture.nativeElement;
-        expect(cmpel.querySelector("#metadata")).toBeTruthy();
+        expect(cmpel.querySelector("#about")).toBeTruthy();
 
         // has a section heading
         let el = cmpel.querySelector("h3");
         expect(el).toBeTruthy();
-        expect(el.textContent).toContain("Metadata");
+        expect(el.textContent).toContain("About This Dataset");
     });
 
 });

@@ -5,20 +5,17 @@ import { CommonFunctionService } from '../../shared/common-function/common-funct
 import { MenuItem } from 'primeng/api';
 import { MetricsService } from '../../shared/metrics-service/metrics.service';
 import { HttpEventType } from '@angular/common/http';
-import { Observable, of } from "rxjs";
-import { DataCartStatus } from '../../datacart/cartstatus';
+import { Observable, of, Observer } from "rxjs";
 import { AppConfig } from '../../config/config';
 import { CartActions } from '../../datacart/cartconstants';
-import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
+import { MetricsData } from "../metrics-data";
 import * as _ from 'lodash';
+import { formatBytes } from '../../utils';
 
 @Component({
     selector: 'app-metricsinfo',
     templateUrl: './metricsinfo.component.html',
-    styleUrls: ['./metricsinfo.component.css'],
-    providers: [
-        NgbActiveModal
-    ]
+    styleUrls: ['./metricsinfo.component.css']
 })
 export class MetricsinfoComponent {
     // the resource record metadata that the tool menu data is drawn from
@@ -30,17 +27,19 @@ export class MetricsinfoComponent {
     @Input() inBrowser: boolean = false;
 
     // Record level metrics data
-    @Input() metricsUrl : string|null = "";
+    @Input() metricsData : MetricsData;
+
+    // flag if metrics is ready to display
+    @Input() showMetrics : boolean = false;
 
     @Input() editEnabled: boolean = false;
 
+    @Input() mobileMode: boolean = false;
+
     @Output() returnValue: EventEmitter<any> = new EventEmitter();
 
-    // flag if metrics is ready to display
-    showMetrics : boolean = false;
-
     // flag if there is file level metrics data
-    hasCurrentMetrics: boolean = false;
+    hasFileLevelMetrics: boolean = false;
 
     hasMetrics: boolean = false;
 
@@ -51,169 +50,164 @@ export class MetricsinfoComponent {
     fileLevelMetrics: any;
     recordLevelMetrics : RecordLevelMetrics;
 
-    dataCartStatus: DataCartStatus;
-    cartChangeHandler: any;
-
     //Default: wait 5 minutes (300sec) after user download a file then refresh metrics data
     delayTimeForMetricsRefresh: number = 300; 
+    time: any;
 
     public CART_ACTIONS: CartActions;
 
     constructor(
         public commonFunctionService: CommonFunctionService,
         public metricsService: MetricsService,
-        private cfg: AppConfig,
-        public activeModal: NgbActiveModal
+        private cfg: AppConfig
     ) { 
         this.delayTimeForMetricsRefresh = +this.cfg.get("delayTimeForMetricsRefresh", "300");
     }
 
     ngOnInit(): void {
         this.CART_ACTIONS = CartActions.cartActions;
-        this.dataCartStatus = DataCartStatus.openCartStatus();
-        if(this.record){
-            this.refreshMetrics(false);
-        }
-    }
-
-    ngOnDestroy() {
-        // window.removeEventListener("storage", this.cartChangeHandler);
     }
 
     /**
      * Refresh metrics data in N minutes. N is defined in environment.ts
      * @param delay if this is false, refresh immediately
      */
-    refreshMetrics(delay:boolean = true){
-        let delayTime;
-        if(delay){
-            console.log("Metrics will be refreshed in " + this.delayTimeForMetricsRefresh + " seconds.");
-            delayTime = this.delayTimeForMetricsRefresh*1000;
-        }else{
-            delayTime = 0;
-        }
+    // refreshMetrics(delay:boolean = true){
+    //     let delayTime;
+    //     if(delay){
+    //         console.log("Metrics will be refreshed in " + this.delayTimeForMetricsRefresh + " seconds.");
+    //         delayTime = this.delayTimeForMetricsRefresh*1000;
+    //     }else{
+    //         delayTime = 0;
+    //     }
 
-        setTimeout(() => {
-            this.getMetrics();
-        }, delayTime);
-    }
+    //     setTimeout(() => {
+    //         this.getMetrics();
+    //     }, delayTime);
+    // }
 
     /**
      * Get metrics data
      */
-    getMetrics() {
-        console.log("Retriving metrics data...");
-        let ediid = this.record.ediid;
+    // getMetrics() {
+    //     console.log("Retriving metrics data...");
+    //     let ediid = this.record.ediid;
 
-        // Get metrics when edit is not enabled. Otherwise display "Metrics not available"
-        if(this.editEnabled) {
-            this.hasCurrentMetrics = false;
-            this.showMetrics = true;
-            return;
-        }
+    //     // Get metrics when edit is not enabled. Otherwise display "Metrics not available"
+    //     if(this.editEnabled) {
+    //         this.hasMetrics = false;
+    //         this.displayMetrics();
+    //         return;
+    //     }
 
-        this.metricsService.getFileLevelMetrics(ediid).subscribe(async (event) => {
-            // Some large dataset might take a while to download. Only handle the response
-            // when download is completed
-            if(event.type == HttpEventType.Response){
-                let response = await event.body.text();
+    //     this.metricsService.getFileLevelMetrics(ediid).subscribe(async (event) => {
+    //         // Some large dataset might take a while to download. Only handle the response
+    //         // when download is completed
+    //         if(event.type == HttpEventType.Response){
+    //             let response = await event.body.text();
 
-                this.fileLevelMetrics = JSON.parse(response);
+    //             this.fileLevelMetrics = JSON.parse(response);
 
-                if(this.fileLevelMetrics.FilesMetrics != undefined && this.fileLevelMetrics.FilesMetrics.length > 0){
-                    // check if there is any current metrics data
-                    for(let i = 1; i < this.record.components.length; i++){
-                        let filepath = this.record.components[i].filepath;
-                        if(filepath) filepath = filepath.trim();
+    //             if(this.fileLevelMetrics.FilesMetrics != undefined && this.fileLevelMetrics.FilesMetrics.length > 0){
+    //                 // check if there is any current metrics data
+    //                 for(let i = 1; i < this.record.components.length; i++){
+    //                     let filepath = this.record.components[i].filepath;
+    //                     if(filepath) filepath = filepath.trim();
 
-                        this.hasCurrentMetrics = this.fileLevelMetrics.FilesMetrics.find(x => x.filepath.substr(x.filepath.indexOf(ediid)+ediid.length+1).trim() == filepath) != undefined;
-                        if(this.hasCurrentMetrics) break;
-                    }
-                }else{
-                    this.hasCurrentMetrics = false;
-                }
+    //                     this.hasFileLevelMetrics = this.fileLevelMetrics.FilesMetrics.find(x => x.filepath.substr(x.filepath.indexOf(ediid)+ediid.length+1).trim() == filepath) != undefined;
+    //                     if(this.hasFileLevelMetrics) break;
+    //                 }
+    //             }else{
+    //                 this.hasFileLevelMetrics = false;
+    //             }
 
-                this.metricsService.getRecordLevelMetrics(ediid).subscribe(async (event) => {
-                    if(event.type == HttpEventType.Response){
-                        this.recordLevelMetrics = JSON.parse(await event.body.text());
-                        this.updateMetrics();
-                    }
-                },
-                (err) => {
-                    console.error("Failed to retrieve dataset metrics: ", err);
-                    this.showMetrics = true;
-                });  
-            }
-        },
-        (err) => {
-            console.error("Failed to retrieve file metrics: ", err);
-            this.showMetrics = true;
-        });                    
-    }
+    //             this.metricsService.getRecordLevelMetrics(ediid).subscribe(async (event) => {
+    //                 if(event.type == HttpEventType.Response){
+    //                     this.recordLevelMetrics = JSON.parse(await event.body.text());
+    //                     this.updateMetrics();
+    //                 }
+    //             },
+    //             (err) => {
+    //                 console.error("Failed to retrieve dataset metrics: ", err);
+    //                 this.showMetrics = true;
+    //             });  
+    //         }
+    //     },
+    //     (err) => {
+    //         console.error("Failed to retrieve file metrics: ", err);
+    //         this.showMetrics = true;
+    //     });                    
+    // }
     
     /**
      * Update metrics data
      */
-    updateMetrics() {
-        var subitems : MenuItem[] = [];
-        var hasMetrics: boolean = false;
+    // updateMetrics() {
+    //     var subitems : MenuItem[] = [];
+    //     this.hasMetrics = false;
 
-        this.metricsInfo = [];
-        // Dataset Metrics
-        // First check if there is any file in the dataset. If not, do not display metrics.
-        if(this.hasCurrentMetrics){
-            let hasFile = false;
-            if(this.record.components && this.record.components.length > 0){
-                this.record.components.forEach(element => {
-                    if(element.filepath){
-                        hasFile = true;
-                    }
-                });
-            }
-            if(hasFile){
-                //Now check if there is any metrics data
-                let totalDatasetDownload = this.recordLevelMetrics.DataSetMetrics[0] != undefined? this.recordLevelMetrics.DataSetMetrics[0].record_download : 0;
+    //     this.metricsInfo = [];
+    //     // Dataset Metrics
+    //     // First check if there is any file in the dataset. If not, do not display metrics.
+    //     if(this.hasFileLevelMetrics){
+    //         let hasFile = false;
+    //         if(this.record.components && this.record.components.length > 0){
+    //             this.record.components.forEach(element => {
+    //                 if(element.filepath){
+    //                     hasFile = true;
+    //                 }
+    //             });
+    //         }
+    //         if(hasFile){
+    //             //Now check if there is any metrics data
+    //             let totalDatasetDownload = this.recordLevelMetrics.DataSetMetrics[0] != undefined? this.recordLevelMetrics.DataSetMetrics[0].record_download : 0;
     
-                // totalFileDownload = totalFileDownload == undefined? 0 : totalFileDownload;
+    //             // totalFileDownload = totalFileDownload == undefined? 0 : totalFileDownload;
         
-                let totalUsers = this.recordLevelMetrics.DataSetMetrics[0] != undefined? this.recordLevelMetrics.DataSetMetrics[0].number_users : 0;
+    //             let totalUsers = this.recordLevelMetrics.DataSetMetrics[0] != undefined? this.recordLevelMetrics.DataSetMetrics[0].number_users : 0;
         
-                totalUsers = totalUsers == undefined? 0 : totalUsers;
+    //             totalUsers = totalUsers == undefined? 0 : totalUsers;
         
-                let totalDownloadSize = this.recordLevelMetrics.DataSetMetrics[0] != undefined?
-                    this.commonFunctionService.formatBytes(this.recordLevelMetrics.DataSetMetrics[0].total_size, 2) : 0;
+    //             let totalDownloadSize = this.recordLevelMetrics.DataSetMetrics[0] != undefined?
+    //                 this.commonFunctionService.formatBytes(this.recordLevelMetrics.DataSetMetrics[0].total_size, 2) : 0;
         
-                if(this.recordLevelMetrics.DataSetMetrics.length > 0 && totalDatasetDownload > 0){
+    //             if(this.recordLevelMetrics.DataSetMetrics.length > 0 && totalDatasetDownload > 0){
 
-                    this.metricsInfo.push(totalDatasetDownload.toString() + ' dataset downloads');
+    //                 this.metricsInfo.push(totalDatasetDownload.toString() + ' dataset downloads');
 
-                    this.metricsInfo.push(totalUsers > 1?totalUsers.toString() + ' unique users':totalUsers.toString() + ' unique user');
-                    this.metricsInfo.push(totalDownloadSize.toString() + ' downloaded');
+    //                 this.metricsInfo.push(totalUsers > 1?totalUsers.toString() + ' unique users':totalUsers.toString() + ' unique user');
+    //                 this.metricsInfo.push(totalDownloadSize.toString() + ' downloaded');
     
-                    hasMetrics = true;
-                }
-            }
+    //                 this.hasMetrics = true;
+    //             }
+    //         }
 
-        }else{
-            hasMetrics = false;
-        }
+    //     }else{
+    //         this.hasMetrics = false;
+    //     }
         
-        if(!hasMetrics){
-            this.metricsInfo.push('Metrics not available');
-        }
-        this.showMetrics = false;
-        setTimeout(() => { 
-            this.showMetrics = true; 
-        }, 0);
+    //     this.displayMetrics();
+    // }
 
-        this.metricsInfoOb = new Observable((observer) => {
-            setTimeout(() => { observer.next(this.metricsInfo) }, 100);
-        })
+    get totalUsers() {
+        return this.metricsData.totalUsers > 1? this.metricsData.totalUsers.toString() + ' unique users': this.metricsData.totalUsers.toString() + ' unique user';
     }
 
-    closeModal(){
-        console.log("Closing modal...");
-        this.returnValue.emit("close");
-        this.activeModal.close('Close click')
+    displayMetrics() {
+        if(!this.metricsData.hasCurrentMetrics){
+            this.metricsInfo = ['Metrics not available'];
+        }
+
+        this.showMetrics = true;
+    }
+
+    /**
+     * Reture record level total download size
+     */
+    get totalDownloadSize() {
+        if(this.metricsData != undefined)
+            return formatBytes(this.metricsData.totalDownloadSize, 2);
+        else
+            return "";
     }
 }

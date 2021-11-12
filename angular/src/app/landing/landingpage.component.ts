@@ -1,6 +1,6 @@
 import {
     Component, OnInit, AfterViewInit, ViewChild,
-    ElementRef, PLATFORM_ID, Inject, ViewEncapsulation
+    PLATFORM_ID, Inject, ViewEncapsulation, HostListener, ElementRef
 } from '@angular/core';
 import { ActivatedRoute, Router, NavigationEnd } from '@angular/router';
 import { isPlatformBrowser } from '@angular/common';
@@ -22,10 +22,10 @@ import { MetricsService } from '../shared/metrics-service/metrics.service';
 import { formatBytes } from '../utils';
 import { LandingBodyComponent } from './landingbody.component';
 import { BreakpointObserver, BreakpointState } from '@angular/cdk/layout';
-import { MetricsinfoComponent } from './metricsinfo/metricsinfo.component';
+// import { MetricsinfoComponent } from './metricsinfo/metricsinfo.component';
 import { CartActions } from '../datacart/cartconstants';
 import { initBrowserMetadataTransfer } from '../nerdm/metadatatransfer-browser.module';
-import { NgbModalOptions, NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { MetricsData } from "./metrics-data";
 
 /**
  * A component providing the complete display of landing page content associated with 
@@ -70,12 +70,14 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
     displaySpecialMessage: boolean = false;
     citationDialogWith: number = 550; // Default width
     recordLevelMetrics : RecordLevelMetrics;
-    metricsUrl: string;
-    public CART_CONSTANTS: any;
 
     loadingMessage = '<i class="faa faa-spinner faa-spin"></i> Loading...';
 
     dataCartStatus: DataCartStatus;
+    fileLevelMetrics: any;
+    metricsRefreshed: boolean = false;
+    metricsData: MetricsData;
+    showJsonViewer: boolean = false;
 
     //Default: wait 5 minutes (300sec) after user download a file then refresh metrics data
     delayTimeForMetricsRefresh: number = 300; 
@@ -85,12 +87,18 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
     mobileMode: boolean = false;
     dialogOpen: boolean = false;
     modalReference: any;
+    windowScrolled: boolean = false;
+    btnPosition: any;
+    menuBottom: string = "1em";
+    showMetrics: boolean = false;
 
     @ViewChild(LandingBodyComponent)
     landingBodyComponent: LandingBodyComponent;
 
-    @ViewChild(MetricsinfoComponent)
-    metricsinfoComponent: MetricsinfoComponent;
+    // @ViewChild(MetricsinfoComponent)
+    // metricsinfoComponent: MetricsinfoComponent;
+
+    @ViewChild('stickyButton') btnElement: ElementRef;
 
     /**
      * create the component.
@@ -112,15 +120,13 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
                 private cartService: CartService,
                 private mdupdsvc: MetadataUpdateService,
                 public metricsService: MetricsService,
-                public breakpointObserver: BreakpointObserver,
-                private ngbModal: NgbModal) 
+                public breakpointObserver: BreakpointObserver) 
     {
         this.reqId = this.route.snapshot.paramMap.get('id');
         this.inBrowser = isPlatformBrowser(platformId);
         this.editEnabled = cfg.get('editEnabled', false) as boolean;
         this.editMode = this.EDIT_MODES.VIEWONLY_MODE;
         this.delayTimeForMetricsRefresh = +this.cfg.get("delayTimeForMetricsRefresh", "300");
-        this.CART_CONSTANTS = CartConstants.cartConst;
 
         if (this.editEnabled) {
             this.edstatsvc.watchEditMode((editMode) => {
@@ -165,17 +171,21 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
             this.cartChangeHandler = this.cartChanged.bind(this);
             window.addEventListener("storage", this.cartChangeHandler);
         }
+        this.metricsData = new MetricsData();
 
         // Bootstrap breakpoint observer (to switch between desktop/mobile mode)
+        // The breakpoint for PrimeNG menu is 750. For some reason the following min-width
+        // need to set to 768 to be able to change the state at 750px. 
         this.breakpointObserver
-        .observe(['(min-width: 766px)'])
-        .subscribe((state: BreakpointState) => {
-            if (state.matches) {
-                this.mobileMode = false;
-            } else {
-                this.mobileMode = true;
-            }
-        });
+            .observe(['(min-width: 768px)'])
+            .subscribe((state: BreakpointState) => {
+                if (state.matches) {
+                    this.mobileMode = false;
+                } else {
+                    this.mobileMode = true;
+                    console.log("Mobile mode")
+                }
+            });
 
         // Clean up cart status storage 
         if(this.inBrowser){
@@ -212,7 +222,11 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
                 metadataError = "not-found";
             }
             else{
-                this.refreshMetrics(false);
+                if(this.editEnabled){
+                    this.metricsData.hasCurrentMetrics = false;
+                    this.showMetrics = true;
+                }else
+                    this.getMetrics();
 
                 // proceed with rendering of the component
                 this.useMetadata();
@@ -268,6 +282,90 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
                 this.router.navigateByUrl("int-error/" + this.reqId, { skipLocationChange: true });
             }
         });
+
+    }
+
+    /**
+     * Get metrics data
+     */
+     getMetrics() {
+        console.log("Retriving metrics data...");
+        let ediid = this.md.ediid;
+
+        this.metricsService.getFileLevelMetrics(ediid).subscribe(async (event) => {
+            // Some large dataset might take a while to download. Only handle the response
+            // when download is completed
+            if(event.type == HttpEventType.Response){
+                let response = await event.body.text();
+
+                this.fileLevelMetrics = JSON.parse(response);
+
+                if(this.fileLevelMetrics.FilesMetrics != undefined && this.fileLevelMetrics.FilesMetrics.length > 0 && this.md.components){
+                    // check if there is any current metrics data
+                    for(let i = 1; i < this.md.components.length; i++){
+                        let filepath = this.md.components[i].filepath;
+                        if(filepath) filepath = filepath.trim();
+
+                        this.metricsData.hasCurrentMetrics = this.fileLevelMetrics.FilesMetrics.find(x => x.filepath.substr(x.filepath.indexOf(ediid)+ediid.length+1).trim() == filepath) != undefined;
+                        if(this.metricsData.hasCurrentMetrics) break;
+                    }
+                }else{
+                    this.metricsData.hasCurrentMetrics = false;
+                }
+
+                if(this.metricsData.hasCurrentMetrics){
+                    this.metricsService.getRecordLevelMetrics(ediid).subscribe(async (event) => {
+                        if(event.type == HttpEventType.Response){
+                            this.recordLevelMetrics = JSON.parse(await event.body.text());
+
+                            let hasFile = false;
+        
+                            if(this.md.components && this.md.components.length > 0){
+                                this.md.components.forEach(element => {
+                                    if(element.filepath){
+                                        hasFile = true;
+                                        return;
+                                    }
+                                });
+                            }
+            
+                            if(hasFile){
+                                //Now check if there is any metrics data
+                                this.metricsData.totalDatasetDownload = this.recordLevelMetrics.DataSetMetrics[0] != undefined? this.recordLevelMetrics.DataSetMetrics[0].record_download : 0;
+                    
+                                this.metricsData.totalDownloadSize = this.recordLevelMetrics.DataSetMetrics[0] != undefined? this.recordLevelMetrics.DataSetMetrics[0].total_size : 0;
+                    
+                                // totalFileDownload = totalFileDownload == undefined? 0 : totalFileDownload;
+                        
+                                this.metricsData.totalUsers = this.recordLevelMetrics.DataSetMetrics[0] != undefined? this.recordLevelMetrics.DataSetMetrics[0].number_users : 0;
+                        
+                                this.metricsData.totalUsers = this.metricsData.totalUsers == undefined? 0 : this.metricsData.totalUsers;
+                            }
+                        }
+                    },
+                    (err) => {
+                        console.error("Failed to retrieve dataset metrics: ", err);
+                        this.metricsData.hasCurrentMetrics = false;
+                        this.showMetrics = true;
+                    });  
+                }
+                this.showMetrics = true;
+            }
+        },
+        (err) => {
+            console.error("Failed to retrieve file metrics: ", err);
+            this.metricsData.hasCurrentMetrics = false;
+            this.showMetrics = true;
+        });                    
+    }
+
+    /**
+     * Detect window scroll
+     */
+    @HostListener("window:scroll", [])
+    onWindowScroll() {
+        this.windowScrolled = (window.pageYOffset > this.btnPosition);
+        this.menuBottom = (window.pageYOffset).toString() + 'px';
     }
 
     /**
@@ -290,9 +388,20 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
 
     /**
      * Refresh metrics data in N minutes. N is defined in environment.ts
+     * @param delay if this is false, refresh immediately
      */
     refreshMetrics(delay:boolean = true){
-        this.metricsinfoComponent.refreshMetrics(delay);
+        let delayTime;
+        if(delay){
+            console.log("Metrics will be refreshed in " + this.delayTimeForMetricsRefresh + " seconds.");
+            delayTime = this.delayTimeForMetricsRefresh*1000;
+        }else{
+            delayTime = 0;
+        }
+
+        setTimeout(() => {
+            this.getMetrics();
+        }, delayTime);
     }
 
     /**
@@ -324,6 +433,7 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
      * apply housekeeping after view has been initialized
      */
     ngAfterViewInit() {
+        this.btnPosition = this.btnElement.nativeElement.offsetTop + 25;
         if (this.md && this.inBrowser) {
             this.useFragment();
             window.history.replaceState({}, '', '/od/id/' + this.reqId);
@@ -349,7 +459,7 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
      *  * set the page's title (as displayed in the browser title bar).
      */
     useMetadata(): void {
-        this.metricsUrl = "/metrics/" + this.reqId;
+        this.metricsData.url = "/metrics/" + this.reqId;
         // set the document title
         this.setDocumentTitle();
         this.mdupdsvc.setOriginalMetadata(this.md);
@@ -407,7 +517,10 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
      * sections.  
      */
     goToSection(sectionId: string) {
-        this.landingBodyComponent.showMetadata = (sectionId == "metadata");
+        // If sectionID is "Metadata", scroll to About This Dataset and display JSON viewer
+        this.showJsonViewer = (sectionId == "Metadata");
+        if(sectionId == "Metadata") sectionId = "about";
+
         setTimeout(() => {
             this.landingBodyComponent.goToSection(sectionId);
         }, 50);
@@ -451,40 +564,5 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
 
         if (this.editMode == this.EDIT_MODES.OUTSIDE_MIDAS_MODE)
             this.message = 'This record is not currently available for editing. <p>Please return to MIDAS and click "Edit Landing Page" to edit.'
-    }
-
-    openModal() {
-        // let ngbModalOptions: NgbModalOptions = {
-        //     backdrop: 'static',
-        //     keyboard: false,
-        //     windowClass: "myCustomModalClass"
-        // };
-        let ngbModalOptions: NgbModalOptions = {
-            keyboard: false,
-            windowClass: "metricspopup"
-        };
-        this.modalReference = this.ngbModal.open(MetricsinfoComponent, ngbModalOptions);
-        this.modalReference.componentInstance.inBrowser = this.inBrowser;
-        this.modalReference.componentInstance.record = this.md;
-        this.modalReference.componentInstance.metricsUrl = this.metricsUrl;
-        this.modalReference.componentInstance.editEnabled = this.editEnabled;
-        this.modalReference.componentInstance.returnValue.subscribe((returnValue) => {
-            this.modalReference.close();
-        });
-
-        this.dialogOpen = true;
-    }
-
-    closeModal() {
-        this.ngbModal.dismissAll();
-        this.dialogOpen = false;
-    }
-
-    togglePopup() {
-        if(this.dialogOpen){
-            this.closeModal();
-        }else{
-            this.openModal();
-        }
     }
 }

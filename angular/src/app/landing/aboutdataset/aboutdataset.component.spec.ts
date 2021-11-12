@@ -3,23 +3,24 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { CommonModule } from '@angular/common';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 
-import { MetadataComponent } from './metadata.component';
-import { MetadataModule } from './metadata.module';
+import { AboutdatasetComponent } from './aboutdataset.component';
+import { AboutdatasetModule } from './aboutdataset.module';
 import { AppConfig } from '../../config/config';
 import { NerdmRes, NERDResource } from '../../nerdm/nerdm';
 import { GoogleAnalyticsService } from '../../shared/ga-service/google-analytics.service';
 import { config, testdata } from '../../../environments/environment';
 import { By } from "@angular/platform-browser";
+import { MetricsData } from "../metrics-data";
 
 describe('MetadataComponent', () => {
-    let component: MetadataComponent;
-    let fixture: ComponentFixture<MetadataComponent>;
+    let component: AboutdatasetComponent;
+    let fixture: ComponentFixture<AboutdatasetComponent>;
     let cfg : AppConfig = new AppConfig(config);
     let rec : NerdmRes = testdata['test1'];
 
     beforeEach(async(() => {
         TestBed.configureTestingModule({
-            imports: [ MetadataModule ],
+            imports: [ AboutdatasetModule ],
             providers: [
                 { provide: AppConfig, useValue: cfg },
                 GoogleAnalyticsService
@@ -28,10 +29,12 @@ describe('MetadataComponent', () => {
     }));
 
     beforeEach(() => {
-        fixture = TestBed.createComponent(MetadataComponent);
+        fixture = TestBed.createComponent(AboutdatasetComponent);
         component = fixture.componentInstance;
         component.record = rec;
         component.inBrowser = true;
+        component.metricsData = new MetricsData();
+        component.showJsonViewer = true;
         component.ngOnChanges({});
         fixture.detectChanges();
     });
@@ -54,11 +57,17 @@ describe('MetadataComponent', () => {
         jsonExpandButtons = fixture.debugElement.queryAll(By.css('li'));
         expect(jsonExpandButtons.length).toBe(3);
 
-        let el = cmpel.querySelector("#more-info");
+        let el = cmpel.querySelector("#cite");
         expect(el).toBeTruthy();
-        el = el.querySelector("a");
+        expect(el.textContent).toContain("Cite this dataset");
+
+        el = cmpel.querySelector("#metadata");
         expect(el).toBeTruthy();
-        expect(el.textContent).toContain("NERDm documentation");
+        expect(el.textContent).toContain("Repository Metadata");
+
+        el = cmpel.querySelector("#metrics");
+        expect(el).toBeTruthy();
+        expect(el.textContent).toContain("Access Metrics");
     });
 
     it('getDownloadURL()', () => {

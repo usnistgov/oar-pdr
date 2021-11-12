@@ -9,6 +9,7 @@ import { EditStatusService } from '../editcontrol/editstatus.service';
 import * as _ from 'lodash';
 import { RecordLevelMetrics } from '../../metrics/metrics';
 import { CommonFunctionService } from '../../shared/common-function/common-function.service';
+import { CartConstants } from '../../datacart/cartconstants';
 
 /**
  * A component for displaying access to landing page tools in a menu.
@@ -23,7 +24,7 @@ import { CommonFunctionService } from '../../shared/common-function/common-funct
     selector: 'tools-menu',
     template: `
 <p-menu #tmenu [ngClass]="{'rightMenuStyle': !isPopup, 'rightMenuStylePop': isPopup}" 
-               [popup]="isPopup" [model]="items"></p-menu>
+               [popup]="isPopup" [model]="items" [appendTo]="appendTo"></p-menu>
 `,
     styleUrls: ['./toolmenu.component.css']
 })
@@ -34,6 +35,7 @@ export class ToolMenuComponent implements OnChanges {
 
     // true if this menu should appear as a popup
     @Input() isPopup : boolean = false;
+    @Input() appendTo : boolean = false;
 
     // signal for triggering display of the citation information
     @Output() toggle_citation = new EventEmitter<boolean>();
@@ -47,6 +49,9 @@ export class ToolMenuComponent implements OnChanges {
 
     // the menu item configuration
     items: MenuItem[] = [];
+    public CART_CONSTANTS: any = CartConstants.cartConst;
+    globalCartUrl: string = "/datacart/" + this.CART_CONSTANTS.GLOBAL_CART_NAME;
+    editEnabled: any;
 
     /**
      * create the component.
@@ -55,7 +60,9 @@ export class ToolMenuComponent implements OnChanges {
     constructor(
         private cfg : AppConfig,
         public commonFunctionService: CommonFunctionService,
-        public edstatsvc: EditStatusService,) {  }
+        public edstatsvc: EditStatusService) {  
+            this.editEnabled = cfg.get("editEnabled", "");
+    }
 
     /**
      * toggle the appearance of a popup menu
@@ -116,8 +123,8 @@ export class ToolMenuComponent implements OnChanges {
             );
         
         subitems.push(
-            this.createMenuItem("Metadata", "faa faa-arrow-circle-right ",
-                                (event) => { this.goToSection('metadata'); }, null)
+            this.createMenuItem("About This Dataset", "faa faa-arrow-circle-right ",
+                                (event) => { this.goToSection('about'); }, null)
         );
         mitems.push({ label: 'Go To...', items: subitems });
 
@@ -132,11 +139,18 @@ export class ToolMenuComponent implements OnChanges {
         */
 
         // Use
+        let disableMenu = false;
+        if(this.editEnabled) disableMenu = true;
+
         subitems = [
             this.createMenuItem('Citation', "faa faa-angle-double-right",
                                 (event) => { this.toggleCitation(); }, null),
+            this.createMenuItem("Repository Metadata", "faa faa-angle-double-right",
+                                (event) => { this.goToSection('Metadata'); }, null),            
             this.createMenuItem("Fair Use Statement", "faa faa-external-link", null,
-                                this.record['license'])
+                                this.record['license']),
+            this.createMenuItem("Data Cart", "faa faa-cart-plus", null,
+                                this.globalCartUrl, "_blank", disableMenu)
         ];
         mitems.push({ label: "Use", items: subitems });
 
@@ -210,7 +224,7 @@ export class ToolMenuComponent implements OnChanges {
      *                    event object
      * @param url       a URL that should be navigated to when the menu item is selected.
      */
-    createMenuItem(label: string, icon: string, command: any, url: string, target: string = "_blank") {
+    createMenuItem(label: string, icon: string, command: any, url: string, target: string = "_blank", disabled: boolean = false) {
         let item : MenuItem = {
             label: label,
             icon: icon
@@ -221,6 +235,8 @@ export class ToolMenuComponent implements OnChanges {
             item.url = url;
             item.target = target;
         }
+
+        item.disabled = disabled;
 
         return item;
     }
