@@ -39,11 +39,11 @@ describe('VersionComponent', () => {
         let cmpel = fixture.nativeElement;
         let spans = cmpel.querySelectorAll("span"); 
         expect(spans[0].textContent).toContain("Version:");
-        expect(spans[0].textContent).toContain("1.0.1");
+        expect(spans[0].textContent).toContain("1.0.2");
         expect(spans[2].textContent).toContain("Released:");
         expect(spans[2].textContent).toContain("2019-04-05");
         expect(spans[3].textContent).toContain("Last modified:");
-        expect(spans[3].textContent).toContain("2019-03-28");
+        expect(spans[3].textContent).toContain("2019-03-27");
     });
 
     it('test renderRelAsLink()', () => {
@@ -163,21 +163,21 @@ describe("version compare functions", () => {
     });
 
     it("normalize_date", () => {
-        expect(normalize_date("2017")).toBe("2017-01-01 00:00:00");
-        expect(normalize_date("2017-01")).toBe("2017-01-01 00:00:00");
-        expect(normalize_date("2017-01-01")).toBe("2017-01-01 00:00:00");
-        expect(normalize_date("2017-01-01 00:00")).toBe("2017-01-01 00:00:00");
+        expect(normalize_date("2017")).toBe("2017-01-01T00:00:00");
+        expect(normalize_date("2017-01")).toBe("2017-01-01T00:00:00");
+        expect(normalize_date("2017-01-01")).toBe("2017-01-01T00:00:00");
+        expect(normalize_date("2017-01-01 00:00")).toBe("2017-01-01T00:00:00");
         expect(normalize_date("2017-01-01T00:00")).toBe("2017-01-01T00:00:00");
-        expect(normalize_date("2017-01-01 00:00:00")).toBe("2017-01-01 00:00:00");
-        expect(normalize_date("2017-01-01 00:00:00.093")).toBe("2017-01-01 00:00:00.093");
+        expect(normalize_date("2017-01-01 00:00:00")).toBe("2017-01-01T00:00:00");
+        expect(normalize_date("2017-01-01 00:00:00.093")).toBe("2017-01-01T00:00:00.093");
 
-        expect(normalize_date("2017Z-0530")).toBe("2017-01-01 00:00:00");
-        expect(normalize_date("2017-01Z-0530")).toBe("2017-01-01 00:00:00");
-        expect(normalize_date("2017-01-01Z-0530")).toBe("2017-01-01 00:00:00");
-        expect(normalize_date("2017-01-01 00:00Z-0530")).toBe("2017-01-01 00:00:00");
+        expect(normalize_date("2017Z-0530")).toBe("2017-01-01T00:00:00");
+        expect(normalize_date("2017-01Z-0530")).toBe("2017-01-01T00:00:00");
+        expect(normalize_date("2017-01-01Z-0530")).toBe("2017-01-01T00:00:00");
+        expect(normalize_date("2017-01-01 00:00Z-0530")).toBe("2017-01-01T00:00:00");
         expect(normalize_date("2017-01-01T00:00Z-0530")).toBe("2017-01-01T00:00:00");
-        expect(normalize_date("2017-01-01 00:00:00Z-0530")).toBe("2017-01-01 00:00:00");
-        expect(normalize_date("2017-01-01 00:00:00.093Z-0530")).toBe("2017-01-01 00:00:00.093");
+        expect(normalize_date("2017-01-01 00:00:00Z-0530")).toBe("2017-01-01T00:00:00");
+        expect(normalize_date("2017-01-01 00:00:00.093Z-0530")).toBe("2017-01-01T00:00:00.093");
     });
 
     it("compare_dates", () => {
