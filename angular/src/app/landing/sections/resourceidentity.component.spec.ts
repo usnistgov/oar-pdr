@@ -53,7 +53,7 @@ describe('ResourceIdentityComponent', () => {
         let el = cmpel.querySelector("h2"); 
         expect(el.textContent).toContain(rec.title);
 
-        expect(component.record['version']).toBe("1.0.2");
+        expect(component.record['version']).toBe("1.0.1");
         let descs = cmpel.querySelectorAll("p");
         expect(descs.length).toBe(1);
 
