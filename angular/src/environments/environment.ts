@@ -68,7 +68,7 @@ export const testdata: {} = {
         "issued": "2019-04-05T16:04:26.0",
         "ediid": "26DEA39AD677678AE0531A570681F32C1449",
         "landingPage": "https://www.nist.gov/itl/iad/image-group/special-database-32-multiple-encounter-dataset-meds",
-        "version": "1.0.2",
+        "version": "1.0.1",
         "versionHistory": [
             {
                 "version": "1.0.0",
@@ -78,7 +78,7 @@ export const testdata: {} = {
                 "description": "initial release"
             },
             {
-                "version": "1.0.1",
+                "version": "1.0.2",
                 "issued": "2019-03-28 12:24:31",
                 "@id": "ark:/88434/mds0000fbkmds1103vzr",
                 "location": "https://data.nist.gov/od/id/ark:/88434/mds0000fbk",
