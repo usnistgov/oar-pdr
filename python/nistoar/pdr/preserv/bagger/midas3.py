@@ -25,6 +25,7 @@ from ..bagit.builder import BagBuilder, NERDMD_FILENAME, FILEMD_FILENAME
 from ..bagit import NISTBag
 from ..bagit.tools import synchronize_enhanced_refs
 from ....id import PDRMinter
+from ....nerdm import utils as nerdutils
 from ... import def_merge_etcdir, utils, ARK_NAAN, PDR_PUBLIC_SERVER
 from .. import (SIPDirectoryError, SIPDirectoryNotFound, AIPValidationError,
                 ConfigurationException, StateException, PODError,
@@ -586,8 +587,13 @@ class MIDASMetadataBagger(SIPBagger):
         # of this dataset
         self.prepsvc = None
         if 'repo_access' in self.cfg:
-            # support for updates requires access to the distribution and
-            # rmm services
+            # support for updates requires access to the distribution and rmm services
+
+            if 'store_dir' not in self.cfg['repo_access'] and 'store_dir' in self.cfg:
+                self.cfg['repo_access']['store_dir'] = self.cfg['store_dir']
+            if 'restricted_store_dir' not in self.cfg['repo_access'] and 'restricted_store_dir' in self.cfg:
+                self.cfg['repo_access']['restricted_store_dir'] = self.cfg['restricted_store_dir']
+
             self.prepsvc = UpdatePrepService(self.cfg['repo_access'],
                                              os.path.join("metadata", self.BGRMD_FILENAME))
         else:
@@ -902,6 +908,28 @@ class MIDASMetadataBagger(SIPBagger):
             nerd['doi'] = doi
             self.bagbldr.update_metadata_for('', {'doi': doi},
                                              message="added default DOI: "+doi)
+
+        # check for use of the restricted public gateway
+        if self.cfg.get('restricted_access',{}).get('gateway_url') and \
+           nerd['accessLevel'] == "restricted public":
+            racfg = self.cfg['restricted_access']
+            burl = racfg['gateway_url']
+            disclaimer = racfg.get('disclaimer')
+
+            nerdres = self.bagbldr.bag.nerd_metadata_for('', False)
+            rpg = [c for c in nerdres.get('components', [])
+                     if 'accessURL' in c and c['accessURL'].startswith(burl)]
+            for c in rpg:
+                if not nerdutils.is_type(c, "RestrictedAccessPage"):
+                    c['@type'] = ["nrdp:RestrictedAccessPage"] + c['@type']
+
+            if len(rpg) > 0:
+                nerdres = {'components': nerdres['components']}
+                if disclaimer:
+                    nerdres['disclaimer'] = disclaimer
+                self.bagbldr.update_metadata_for('', nerdres,
+                                                 message="enhancing metadata for restricted access")
+                    
 
         # we're done; update the cached NERDm metadata and the data file map
         if not self.sip.nerd or updated['updated'] or updated['added'] or updated['deleted']:
@@ -1853,9 +1881,16 @@ class PreservationBagger(SIPBagger):
         if finalcfg.get('validate', True):
             # this will raise an exception if any issues are found
             self._validate(finalcfg.get('validator', {}))
+
+        isrestricted = nerd.get('accessLevel', 'public') != 'public' and \
+                       any([ nerdutils.is_type(c, 'RestrictedAccessPage') 
+                             for c in nerd.get('components', []) if 'accessURL' in c ])
         if finalcfg.get('check_data_files', True):
-            # this will raise an exception if any issues are found
-            self._check_data_files(finalcfg.get('data_checker', {}))
+            if isrestricted:
+                log.warning("Must skip data availability check for restricted data")
+            else:
+                # this will raise an exception if any issues are found
+                self._check_data_files(finalcfg.get('data_checker', {}))
 
         return self.bagbldr.bagdir
 
@@ -1927,7 +1962,8 @@ class PreservationBagger(SIPBagger):
         """
         config = {
             "repo_access": self.cfg.get('repo_access', {}),
-            "store_dir":  self.cfg.get('store_dir')
+            "store_dir":  self.cfg.get('store_dir'),
+            "restricted_store_dir":  self.cfg.get('restricted_store_dir')
         }
         config.update( deepcopy(data_checker_config) )
 

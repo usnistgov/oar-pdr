@@ -157,6 +157,7 @@ class UpdatePrepService(object):
             raise ConfigurationException("UpdatePrepService: Missing property: "+
                                          "headbag_cache")
         self.storedir = self.cfg.get('store_dir')
+        self.restricted_storedir = self.cfg.get('restricted_store_dir')
         scfg = self.cfg.get('distrib_service', {})
         self.distsvc = distrib.RESTServiceClient(scfg.get('service_endpoint'))
         self.cacher = HeadBagCacher(self.distsvc, self.sercache)
@@ -173,7 +174,8 @@ class UpdatePrepService(object):
         return an UpdatePrepper instance for the given dataset identifier
         """
         return UpdatePrepper(aipid, self.cfg, self.cacher, self.mdsvc,
-                             self.storedir, version, replaces, log, self._bgrmdf)
+                             (self.storedir, self.restricted_storedir),
+                             version, replaces, log, self._bgrmdf)
 
 
 class UpdatePrepper(object):
@@ -197,6 +199,11 @@ class UpdatePrepper(object):
         if not self._prevaipid:
             self._prevaipid = aipid
         self.cacher = headcacher
+        self.restricted_storedir = None
+        if isinstance(storedir, (list, tuple)):
+            if len(storedir) > 1:
+                self.restricted_storedir = storedir[1]
+            storedir = storedir[0]
         self.storedir = storedir
         self.version = version
         self.mdcli = pubmdclient
@@ -274,17 +281,22 @@ class UpdatePrepper(object):
         in the bag storage directory.  (This is the directory where AIP bags 
         are copied to for long-term storage.)
         """
-        if not self.storedir:
+        if not self.storedir and not self.restricted_storedir:
             return None
 
-        foraip = [f for f in os.listdir(self.storedir)
+        indir = self.storedir
+        foraip = [f for f in os.listdir(indir)
                     if f.startswith(aipid+'.') and not f.endswith('.sha256')]
+        if not foraip and self.restricted_storedir:
+            indir = self.restricted_storedir
+            foraip = [f for f in os.listdir(indir)
+                        if f.startswith(aipid+'.') and not f.endswith('.sha256')]
 
         foraip = bagutils.select_version(foraip, version)
         if len(foraip) == 0:
             return None
 
-        return os.path.join(self.storedir, bagutils.find_latest_head_bag(foraip))
+        return os.path.join(indir, bagutils.find_latest_head_bag(foraip))
 
     def aip_exists(self, deep=False):
         """

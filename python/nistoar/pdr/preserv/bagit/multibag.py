@@ -7,6 +7,7 @@ import os, logging, re, json, shutil
 from functools import cmp_to_key
 
 import multibag
+from multibag.restore import restore_bag
 
 from .. import ConfigurationException, StateException, AIPValidationError
 from ... import utils

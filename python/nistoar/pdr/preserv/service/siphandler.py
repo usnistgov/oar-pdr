@@ -22,7 +22,7 @@ from copy import deepcopy
 from ..bagit.serialize import DefaultSerializer
 from ..bagit.bag import NISTBag
 from ..bagit.validate import NISTAIPValidator
-from ..bagit.multibag import MultibagSplitter
+from ..bagit.multibag import MultibagSplitter, restore_bag
 from ..bagger import utils as bagutils
 from ..bagger.base import checksum_of
 from ..bagger.midas import PreservationBagger, midasid_to_bagname, _midadid_to_dirname
@@ -31,6 +31,7 @@ from .. import (ConfigurationException, StateException, PODError, PreservationEx
                 PreservationStateError, SIPDirectoryError)
 from .. import sys as _sys
 from . import status
+from ... import distrib
 from ...ingest.rmm import IngestClient
 from ...doimint import DOIMintingClient
 from ...utils import write_json
@@ -272,7 +273,7 @@ class SIPHandler(object):
         
         return outfiles
 
-    def _serialize_restricted(self, bagdir, destdir, format=None):
+    def _serialize_restricted(self, headbagdir, aipid, destdir, format=None, workdir=None):
         """
         serialize a given bag for distribution through the restricted public gateway.
 
@@ -284,16 +285,72 @@ class SIPHandler(object):
         This function pulls in bags from previously published versions to ensure all data is 
         included in the output bag.  
 
-        :param bagdir   str:   path to the bag's root directory.
-        :param destdir str:     the path to a directory where the serialized
+        :param str headbagdir:  path to the headbag to reconstruct
+        :param str aipid:       the AIP-ID for headbag and the name to give to the 
+                                reconstituted bag
+        :param str destdir:     the path to a directory where the serialized
                                 bag(s) will be written.  If not provided the
                                 configured directory will be used.  
-        :param format str:  the type of serialization to apply; this 
+        :param str format:      the type of serialization to apply; this 
                                 must be a name recognized by the system.  
                                 If not provided a default serialization 
                                 will be applied (as given in the configuration).
+        :param str workdir:     the path to a directory where the reconstituted bag
+                                should be assembled.  If not specified, the headbag's 
+                                parent directory will be used.  
         """
-        pass
+        outbagname = aipid
+        if not workdir:
+            # by first default, work in the same directory as the head bag
+            workdir = os.path.dirname(headbagdir)
+            if outbagname == os.path.basename(headbagdir):
+                # outbag would be the inbag => switch workdir to destdir
+                workdir = destdir
+        outbag = os.path.join(workdir, outbagname)
+        if os.path.isdir(outbag):
+            log.warning("Cleaning out remnant of reconstituted bag")
+            shutil.rmtree(outbag)
+
+        if not format:
+            format = "zip"
+        bagcli = None
+        if 'distrib_service' in self.cfg.get('repo_access',{}):
+            baseurl = self.cfg['repo_access']['distrib_service'].get('service_endpoint')
+            if not baseurl:
+                raise ConfigurationException("Missing required repo_access.distrib property: "+
+                                             "service_endpoint")
+            bagcli = distrib.BagDistribClient(aipid, distrib.RESTServiceClient(baseurl))
+
+        def fetch(bagname, destd):
+            bagfile = "%s.%s" % (bagname, format)
+            bagpath = os.path.join(self.restricted_storedir, bagfile)
+            if os.path.isfile(bagpath):
+                shutil.copy(bagpath, destd)
+                return os.path.join(destd, bagfile)
+            
+            if not bagcli:
+                raise StateException("Bag service is not available to reconstruct bag")
+            # NOTE: this will not work because restricted data is not visible to the bag service
+            bagcli.save_bag(bagfile, destd)
+            return os.path.join(destd, bagfile)
+
+        restore_bag(headbagdir, outbag, destdir, fetch)
+
+        bagfile = self._ser.serialize(outbag, destdir, format)
+        csumfile = bagfile + ".sha256"
+        csum = checksum_of(bagfile)
+        with open(csumfile, 'w') as fd:
+            fd.write(csum)
+            fd.write('\n')
+
+        # write the checksum to our status object
+        self._status.data['user'].setdefault('bagfiles',[]).append({
+            'name': os.path.basename(bagfile),
+            'sha256': csum
+        })
+        self._status.cache()
+        
+        return [bagfile, csumfile]
 
     def _is_ingested(self):
         """
@@ -436,6 +493,8 @@ class MIDASSIPHandler(SIPHandler):
             bgrcfg['repo_access'] = config['repo_access']
             if 'store_dir' not in bgrcfg['repo_access'] and 'store_dir' in bgrcfg:
                 bgrcfg['repo_access']['store_dir'] = bgrcfg['store_dir']
+            if 'restricted_store_dir' not in bgrcfg['repo_access'] and 'restricted_store_dir' in bgrcfg:
+                bgrcfg['repo_access']['restricted_store_dir'] = bgrcfg['restricted_store_dir']
             
         self.bagger = PreservationBagger(sipid, bagparent, self.sipparent,
                                          self.mdbagdir, bgrcfg, self._minter, 
@@ -503,8 +562,6 @@ class MIDASSIPHandler(SIPHandler):
         self._status.start()
         if not serialtype:
             serialtype = 'zip'
-        if not destdir:
-            destdir = self.storedir
 
         if not self.isready(_inprogress=True):
             raise StateException("{0}: SIP is not ready: {1}".
@@ -550,17 +607,17 @@ class MIDASSIPHandler(SIPHandler):
             finally:
                 ingmd = None
 
-        # zip it up; this may split the bag into multibags
         self._status.record_progress("Serializing")
-        savefiles = self._serialize(bagdir, self.stagedir, serialtype)
+        savefiles = []
 
         # special handling for restricted public data going through the gateway
         if nerdm.get('accessLevel', 'public') != 'public' and \
            any([nerdutils.is_type(c, "RestrictedAccessPage") for c in nerdm.get('components',[])]):
-            if len(savefiles) > 2:
-                raise StateException("Too many bag artifacts (" + str(len(savefiles)) +
-                                     "; multiple bags not supported via restricted access gateway.")
-            savefiles += self._serialize_restricted(bagdir, self.stagedir, serialtype)
+            aipid = re.sub(r'^ark:/\d+/', '', nerdm['ediid'])
+            savefiles += self._serialize_restricted(bagdir, aipid, self.stagedir, serialtype)
+
+        # zip it up; this may split the bag into multibags
+        savefiles += self._serialize(bagdir, self.stagedir, serialtype)
 
         # copy the zipped files to long-term storage ("public" or "restricted-public" directory)
         if not destdir:
@@ -575,9 +632,9 @@ class MIDASSIPHandler(SIPHandler):
             for f in savefiles:
                 destfile = os.path.join(destdir, os.path.basename(f))
 
+                # (Note: can overwrite restricted-public artifacts)
                 if os.path.exists(destfile) and \
                    not self.cfg.get('allow_bag_overwrite', False) and \
-                   # can overwrite restricted-public artifacts
                    not bagutils.is_legal_bag_name(re.sub(r'.sha256$', '', os.path.basename(f))):
                     raise OSError(errno.EEXIST, os.strerror(errno.EEXIST), destfile)
                                   
@@ -948,8 +1005,6 @@ class MIDAS3SIPHandler(SIPHandler):
         self._status.start()
         if not serialtype:
             serialtype = 'zip'
-        if not destdir:
-            destdir = self.storedir
 
         if not self.isready(_inprogress=True):
             if self.bagger and not os.path.exists(self.bagger.datadir):
@@ -998,11 +1053,23 @@ class MIDAS3SIPHandler(SIPHandler):
                                         desc=msg, id=self.bagger.name,
                                         version=nerdm.get('version', 'unknown'))
 
-        # zip it up; this may split the bag into multibags
         self._status.record_progress("Serializing")
-        savefiles = self._serialize(bagdir, self.stagedir, serialtype)
+        savefiles = []
 
-        # copy the zipped files to long-term storage ("public" directory)
+        # special handling for restricted public data going through the gateway
+        if nerdm.get('accessLevel', 'public') != 'public' and \
+           any([nerdutils.is_type(c, "RestrictedAccessPage") for c in nerdm.get('components',[])]):
+            aipid = re.sub(r'^ark:/\d+/', '', nerdm['ediid'])
+            savefiles += self._serialize_restricted(bagdir, aipid, self.stagedir, serialtype)
+
+        # zip it up; this may split the bag into multibags
+        savefiles += self._serialize(bagdir, self.stagedir, serialtype)
+
+        # copy the zipped files to long-term storage ("public" or "restricted-public" directory)
+        if not destdir:
+            destdir = self.storedir
+            if nerdm.get('accessLevel', 'public') != 'public':
+                destdir = self.restricted_storedir
         self._status.record_progress("Delivering preservation artifacts")
         log.debug("writing files to %s", destdir)
         errors = []
