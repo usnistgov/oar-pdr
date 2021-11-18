@@ -17,7 +17,7 @@
                 </li>
             </ul>
             <div style="width: 100%;text-align: right;margin-top: -15px;font-size: small;">
-                <a *ngIf="hasMetrics" href="{{metricsUrl}}" target="_blank"><span data-toggle="tooltip" title="More Metrics Data">More...</span></a>
+                <a *ngIf="metricsData.hasCurrentMetrics" href="{{metricsUrl}}" target="_blank"><span data-toggle="tooltip" title="More Metrics Data">More...</span></a>
             </div>
         </div>
         <ng-template #noMetrics>

@@ -14,7 +14,7 @@ export class storedStructure {
 /**
  * convert the TreeNode[] data to a string appropriate for saving to local storage
  */
-export function stringifyCart(data: DataCartStatusLookup, action: string="") : string { 
+export function stringifyCart(data: DataCartStatusLookup, action: string=this.CART_ACTIONS.CREATE) : string { 
     return JSON.stringify(
         {   
             action: action,
@@ -254,7 +254,6 @@ export class DataCartStatus {
     setDownloadCompleted(itemId: string, displayName: string=itemId){
         this.restore();
         let targetItem : DataCartStatusItem = this.findStatusById(itemId);
-
         if(targetItem){
             targetItem.downloadPercentage = 100;
             this.action = this.CART_ACTIONS.SET_DOWNLOAD_COMPLETE;
