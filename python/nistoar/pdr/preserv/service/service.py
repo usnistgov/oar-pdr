@@ -74,14 +74,12 @@ class PreservationService(object):
                                  "directory: " + workdir, sys=self)
         self.workdir = workdir
 
-        storedir = self.cfg.get('store_dir')
-        if not storedir:
+        if not self.cfg.get('store_dir'):
             raise ConfigurationException("Missing required config parameter: "+
                                          "store_dir", sys=self)
-        if not os.path.isdir(storedir):
+        if not os.path.isdir(self.cfg.get('store_dir')):
             raise StateException("Store directory does not exist as a " +
-                                 "directory: " + storedir, sys=self)
-        self.storedir = storedir
+                                 "directory: " + self.cfg.get('store_dir'), sys=self)
 
         if not self.cfg.get('sip_type'):
             raise ConfigurationException("Missing required config parameter: "+
@@ -421,7 +419,9 @@ class PreservationService(object):
         if 'working_dir' not in pcfg:
             pcfg['working_dir'] = self.workdir
         if 'store_dir' not in pcfg:
-            pcfg['store_dir'] = self.storedir
+            pcfg['store_dir'] = self.cfg.get('store_dir')
+        if 'restricted_store_dir' not in pcfg and 'restricted_store_dir' in self.cfg:
+            pcfg['restricted_store_dir'] = self.cfg.get('restricted_store_dir')
         if 'id_registry_dir' not in pcfg:
             pcfg['id_registry_dir'] = self.idregdir
         if 'metadata_bags_dir' not in pcfg:
@@ -583,7 +583,7 @@ class MultiprocPreservationService(PreservationService):
         # for child process:
         try:
             log.info("Preserving %s SIP id=%s", handler.name, handler._sipid)
-            handler.bagit('zip', self.storedir)
+            handler.bagit('zip')
         except Exception, e:
             if isinstance(e, PreservationStateError):
                 log.exception("Incorrect state for client's request: "+str(e))

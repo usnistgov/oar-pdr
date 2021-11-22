@@ -599,7 +599,9 @@ class UpdatePrepper(object):
             if src == "repo":
                 out = self._latest_version_from_repo()
             elif src == "bag-store":
-                if self.storedir:
+                if self.restricted_storedir:
+                    out = self._latest_version_from_dir(self.restricted_storedir)
+                if out == "0" and self.storedir:
                     out = self._latest_version_from_dir(self.storedir)
             elif src == "bag-cache":
                 out = self._latest_version_from_dir(self.cacher.cachedir)

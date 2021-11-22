@@ -109,6 +109,7 @@ class MIDAS3PublishingService(PublishSystem):
         self.nrddir = None      # location to place nerdm records for pre-publication md service
         self.podqdir = None     # location where POD records get queued to be processed
         self.storedir = None    # location to write out zipped bags before delivery to LTS
+        self.restricted_storedir = None    # location to write out restricted public zipped bags before ...
         if not workdir:
             workdir = self.cfg.get('working_dir')
         self._set_working_dir(workdir)
@@ -161,8 +162,7 @@ class MIDAS3PublishingService(PublishSystem):
                                                       logger=self.log.getChild("customclient"))
 
         self._bagging_workers = {}
-        self.pressvc = MultiprocPreservationService(self.cfg.get('preservation_service',
-                                                                 self._presv_config()))
+        self.pressvc = MultiprocPreservationService(self._presv_config())
 
     def _presv_config(self):
         comm = {
@@ -171,20 +171,28 @@ class MIDAS3PublishingService(PublishSystem):
         for prop in "upload_dir id_minter mimetype_files".split():
             if prop in self.cfg:
                 comm[prop] = self.cfg[prop]
+
+        pcfg = { 
+            'store_dir': self.storedir,
+            'restricted_store_dir': self.restricted_storedir
+        }
             
         out = {
             "working_dir": self.workdir,
             "store_dir": self.storedir,
+            "restricted_store_dir": self.restricted_storedir,
             "id_registry_dir": self.cfg.get('id_registry_dir', self.workdir),
             "auth_key": self.cfg.get('auth_key', 'INCORRECT_AUTH_KEY'),
             "auth_method": self.cfg.get('auth_method', "header"),
             "sip_type": {
                 "midas3": {
                     "common": comm,
-                    "preserv": {}
+                    "preserv": pcfg
                 }
             }
         }
+        out = _configmod.merge_config(self.cfg.get('preservation_service',{}), out)
+        
         return out 
             
 
@@ -217,6 +225,14 @@ class MIDAS3PublishingService(PublishSystem):
         if not os.path.isabs(self.storedir):
             self.storedir = os.path.join(workdir, self.storedir)
             if not os.path.exists(self.storedir):  os.makedirs(self.storedir)
+        self.restricted_storedir = self.cfg.get('restricted_store_dir')
+        if not self.restricted_storedir:
+            self.log.warn("restricted_store_dir config param not set; setting it to %s",
+                          os.path.join(workdir, "restricted_store"))
+            self.restricted_storedir = "restricted_store"
+        if not os.path.isabs(self.restricted_storedir):
+            self.restricted_storedir = os.path.join(workdir, self.restricted_storedir)
+            if not os.path.exists(self.restricted_storedir):  os.makedirs(self.restricted_storedir)
 
     def _create_minter(self, parentdir):
         cfg = self.cfg.get('id_minter', {})

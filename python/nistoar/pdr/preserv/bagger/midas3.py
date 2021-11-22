@@ -929,6 +929,7 @@ class MIDASMetadataBagger(SIPBagger):
                     nerdres['disclaimer'] = disclaimer
                 self.bagbldr.update_metadata_for('', nerdres,
                                                  message="enhancing metadata for restricted access")
+                nerd = self.bagbldr.bag.nerdm_record(True)
                     
 
         # we're done; update the cached NERDm metadata and the data file map
@@ -1582,7 +1583,11 @@ class PreservationBagger(SIPBagger):
                                 AIP (see constructor documentation).
         """
         if not config:
-            config = mdbagger.cfg.get('preservation_service', {})
+            pcfg = mdbagger.cfg.get('preservation_service', {})
+            if 'sip_type' in pcfg:
+                config = pcfg['sip_type'].get('midas3', {}).get('preserv',{}).get('bagger', {})
+            else:
+                config = pcfg.get('bagger', {})
         datadir = mdbagger.sip.revdatadir
         return cls(mdbagger.bagdir, bagparent, datadir, config, asupdate=None)
 

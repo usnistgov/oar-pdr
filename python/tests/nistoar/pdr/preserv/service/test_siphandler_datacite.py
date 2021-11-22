@@ -150,6 +150,8 @@ class TestPreservationDOIMockSrvr(test.TestCase):
         self.stagedir = os.path.join(self.workdir, "staging")
         self.storedir = os.path.join(self.workdir, "store")
         os.mkdir(self.storedir)
+        self.restrictdir = os.path.join(self.workdir, "restricted")
+        os.mkdir(self.restrictdir)
         self.statusdir = os.path.join(self.workdir, "status")
         os.mkdir(self.statusdir)
         self.bagparent = os.path.join(self.datadir, "_preserv")
@@ -164,6 +166,7 @@ class TestPreservationDOIMockSrvr(test.TestCase):
             'review_dir': self.dataroot,
             "staging_dir": self.stagedir,
             'store_dir': self.storedir,
+            'restricted_store_dir': self.restrictdir,
             "status_manager": { "cachedir": self.statusdir },
             'bagger': baggercfg,
             "ingester": {
@@ -316,6 +319,8 @@ class TestPreservationDOIDataCite(test.TestCase):
         os.mkdir(self.storedir)
         self.statusdir = os.path.join(self.workdir, "status")
         os.mkdir(self.statusdir)
+        self.restrictdir = os.path.join(self.workdir, "restricted")
+        os.mkdir(self.restrictdir)
         self.bagparent = os.path.join(self.datadir, "_preserv")
         self.sipdir = os.path.join(self.mdbags, self.midasid)
 
