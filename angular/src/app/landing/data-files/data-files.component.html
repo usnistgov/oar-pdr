@@ -1,5 +1,7 @@
 <!-- This bloack is for the data access session of landing page -->
-<div id="filelisting">
+<!-- <div id="filelisting"> -->
+<div id="filelisting" *ngIf="displayMode != 'restrict_preview'" [ngClass]="displayMode == 'restrict' ? 'restrict-public' : ''">
+    <div *ngIf="displayMode == 'restrict'">Note:  This dataset is designated as restricted public data; this file list will not be shown in the public version of this page.</div>
 
         <!-- Display 'Download all' and 'Add all to cart' buttons and other info -->
         <div *ngIf="files.length  > 0">
@@ -7,7 +9,7 @@
                 <div class="flex-container" style="margin-top: 2em;">
                     <!-- 'Download all' and 'Add all to cart' buttons disabled if this is internal landing page -->
                     <div *ngIf="editEnabled; else editDisabled"
-                        style="flex: 0 0 110px; text-align: left; padding-bottom: 0em;">
+                        style="flex: 0 0 120px; text-align: left; padding-bottom: 0em;">
                         <span><b id="filelist-heading">Files </b> </span>
                         <span class="faa-stack fa-lg icon-download grey-color">
                             <i class="faa faa-circle-thin faa-stack-2x" aria-hidden="true"></i>
@@ -49,7 +51,7 @@
                             </span>
                         </div>
                     </ng-template>
-                    <div style="flex-grow: 9; text-align: left; padding-top: 0.5em;">
+                    <div style="flex-grow: 8; text-align: left; padding-top: 0.5em;">
                         <span class="grey-color">Click on the file/row in the table below to view more
                             details.</span>
                     </div>

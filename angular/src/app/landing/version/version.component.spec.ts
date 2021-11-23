@@ -7,12 +7,14 @@ import { VersionComponent, compare_versions, normalize_date, compare_dates, comp
 import { VersionModule } from './version.module';
 
 import { config, testdata } from '../../../environments/environment';
+import { LandingConstants } from '../constants';
 
 describe('VersionComponent', () => {
     let component : VersionComponent;
     let fixture : ComponentFixture<VersionComponent>;
     let cfg : AppConfig = new AppConfig(config);
     let rec : NerdmRes = testdata['test1'];
+    let EDIT_MODES = LandingConstants.editModes;
 
     let makeComp = function() {
         TestBed.configureTestingModule({
@@ -78,10 +80,10 @@ describe('VersionComponent', () => {
         let html = component.renderRelId(rel, "1.2.1");
         expect(html).toContain('<a href="https://data.nist.gov/od/id/ark:/88434/mds0000fbk">ark:/88434/mds0000fbk</a>');
 
-        component.editMode = true;
+        component.editMode = EDIT_MODES.editMode;
         html = component.renderRelId(rel, "1.2.1");
         expect(html).toBe('ark:/88434/mds0000fbk');
-        component.editMode = false;
+        component.editMode = EDIT_MODES.VIEWONLY_MODE;
         
         html = component.renderRelId(rel, "1.0.0");
         expect(html).toBe('this version');
@@ -90,7 +92,7 @@ describe('VersionComponent', () => {
         html = component.renderRelId(rel, "1.1.1");
         expect(html).toBe('<a href="https://data.nist.gov/od/id/ark:/88434/mds0000fbk">View...</a>');
 
-        component.editMode = true;
+        component.editMode = EDIT_MODES.editMode;
         html = component.renderRelId(rel, "1.1.1");
         expect(html).toBe('View...');
     });

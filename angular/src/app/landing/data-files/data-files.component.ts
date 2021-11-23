@@ -9,6 +9,8 @@ import { DataCart, DataCartItem } from '../../datacart/cart';
 import { DownloadStatus } from '../../datacart/cartconstants';
 import { DataCartStatus } from '../../datacart/cartstatus';
 import { formatBytes } from '../../utils';
+import { EditStatusService } from '../../landing/editcontrol/editstatus.service';
+import { LandingConstants } from '../../landing/constants';
 
 declare var _initAutoTracker: Function;
 
@@ -67,7 +69,7 @@ interface DataFileItem {
  */
 @Component({
     moduleId: module.id,
-    styleUrls: ['../landing.component.css'],
+    styleUrls: ['../landing.component.css', 'data-files.component.css'],
     selector: 'pdr-data-files',
     templateUrl: `data-files.component.html`,
     providers: [ ]
@@ -76,6 +78,8 @@ export class DataFilesComponent implements OnInit, OnChanges {
 
     @Input() record: NerdmRes;
     @Input() inBrowser: boolean;   // false if running server-side
+
+    // Flag to tell if this is a publishing platform
     @Input() editEnabled: boolean;    //Disable download all functionality if edit is enabled
 
     // Download status to trigger metrics refresh in parent component
@@ -101,10 +105,13 @@ export class DataFilesComponent implements OnInit, OnChanges {
     appWidth: number = 800;   // default value used in server context
     appHeight: number = 900;  // default value used in server context
     fontSize: string;
+    EDIT_MODES: any;
+    editMode: string;
 
     constructor(private cfg: AppConfig,
                 private cartService: CartService,
                 private gaService: GoogleAnalyticsService,
+                public editstatsvc: EditStatusService,
                 ngZone: NgZone)
     {
         this.cols = [
@@ -126,9 +133,15 @@ export class DataFilesComponent implements OnInit, OnChanges {
                 });
             };
         }
+
+        this.EDIT_MODES = LandingConstants.editModes;
     }
 
     ngOnInit() {
+        this.editstatsvc.watchEditMode((editMode) => {
+            this.editMode = editMode;
+        });
+
         if(this.inBrowser){
             this.globalDataCart = this.cartService.getGlobalCart();
             this.cartLength = this.globalDataCart.size();
@@ -138,6 +151,22 @@ export class DataFilesComponent implements OnInit, OnChanges {
         }
         if (this.record)
             this.useMetadata();
+    }
+
+    /**
+     * Decide how we want to display the restrcied data:
+     * Non-restrict or not publishing platform: normal display -- normal
+     * Restrct but not preview mode: display special note and set background color to grey -- restrict
+     * Restrict and preview mode: hide the whole block -- restrict_preview
+     */
+    get displayMode() {
+        if(!this.editEnabled || this.record['accessLevel'] === 'public') {
+            return "normal";
+        }else if(this.record['accessLevel'] === 'restricted public' && this.editMode != this.EDIT_MODES.PREVIEW_MODE) {
+            return "restrict";
+        }else {
+            return "restrict_preview";
+        }
     }
 
     ngOnChanges(ch: SimpleChanges) {
