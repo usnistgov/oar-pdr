@@ -594,9 +594,10 @@ class MIDASSIPHandler(SIPHandler):
         nerdm = bag.nerdm_record()
         if self._ingester:
             ingmd = nerdm
-            if not nerdm.get('accessLevel', 'public') and 'components' in nerdm:
+            if nerdm.get('accessLevel', 'public') != 'public' and 'components' in nerdm:
+                log.debug("Filtering out files from record sent to public PDR")
                 ingmd = deepcopy(ingmd)
-                ingmd['components'] = [c for c in imgmd['components'] if 'filepath' not in c]
+                ingmd['components'] = [c for c in ingmd['components'] if 'filepath' not in c]
             try:
                 self._ingester.stage(ingmd, self.bagger.name)
             except Exception as ex:
@@ -1044,9 +1045,10 @@ class MIDAS3SIPHandler(SIPHandler):
         nerdm = bag.nerdm_record()
         if self._ingester:
             ingmd = nerdm
-            if not nerdm.get('accessLevel', 'public') and 'components' in nerdm:
+            if nerdm.get('accessLevel', 'public') != 'public' and 'components' in nerdm:
+                log.debug("Filtering out files from record sent to public PDR")
                 ingmd = deepcopy(ingmd)
-                ingmd['components'] = [c for c in imgmd['components'] if 'filepath' not in c]
+                ingmd['components'] = [c for c in ingmd['components'] if 'filepath' not in c]
             try:
                 self._ingester.stage(ingmd, self.bagger.name)
             except Exception as ex:
