@@ -54,7 +54,7 @@ export class DownloadstatusComponent implements OnInit {
         if(this.inBrowser) {
             return Object.keys(this.dataCartStatus.dataCartStatusItems);
         }else{
-            return null;
+            return [];
         }
     }
 

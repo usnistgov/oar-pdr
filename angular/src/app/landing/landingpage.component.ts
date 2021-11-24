@@ -223,13 +223,11 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
                 metadataError = "not-found";
             }
             else{
-                if(this.inBrowser) {
-                    if(this.editEnabled){
-                        this.metricsData.hasCurrentMetrics = false;
-                        this.showMetrics = true;
-                    }else
-                        this.getMetrics();
-                }
+                if(this.editEnabled){
+                    this.metricsData.hasCurrentMetrics = false;
+                    this.showMetrics = true;
+                }else
+                    this.getMetrics();
 
                 // proceed with rendering of the component
                 this.useMetadata();
