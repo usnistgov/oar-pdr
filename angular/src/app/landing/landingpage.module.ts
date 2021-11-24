@@ -19,6 +19,7 @@ import { DoneComponent } from './done/done.component';
 import { DownloadstatusComponent } from './downloadstatus/downloadstatus.component';
 import { TaxonomyListService } from '../shared/taxonomy-list'
 import { ErrorComponent, UserErrorComponent } from './error.component';
+import { MetricsinfoComponent } from './metricsinfo/metricsinfo.component';
 
 /**
  * A module supporting the complete display of landing page content associated with 
@@ -37,10 +38,13 @@ import { ErrorComponent, UserErrorComponent } from './error.component';
     ],
     declarations: [
         LandingPageComponent, LandingBodyComponent, DoneComponent, DownloadstatusComponent,
-        ErrorComponent, UserErrorComponent, NoidComponent, NerdmComponent
+        ErrorComponent, UserErrorComponent, NoidComponent, NerdmComponent, MetricsinfoComponent
     ],
     providers: [
         MetadataUpdateService, TaxonomyListService, DatePipe
+    ],
+    entryComponents: [
+        MetricsinfoComponent
     ],
     exports: [
         LandingPageComponent, LandingBodyComponent, DoneComponent, DownloadstatusComponent,

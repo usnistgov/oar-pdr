@@ -5,18 +5,29 @@
  * and their download status.
  */
 
-import { CartConstants } from './cartconstants';
+import { CartConstants, CartActions } from './cartconstants';
 
+export class storedStructure {
+    action: string;
+    datacartStatusLookup: DataCartStatusLookup;
+}
 /**
  * convert the TreeNode[] data to a string appropriate for saving to local storage
  */
-export function stringifyCart(data: DataCartStatusLookup) : string { return JSON.stringify(data); }
+export function stringifyCart(data: DataCartStatusLookup, action: string=this.CART_ACTIONS.CREATE) : string { 
+    return JSON.stringify(
+        {   
+            action: action,
+            datacartStatusLookup: data
+        }
+    ); 
+}
 
 /**
  * parse a string pulled from local storage into TreeNode[] data 
  */
-export function parseCartStatus(datastr: string) : DataCartStatusLookup {
-    return <DataCartStatusLookup>((datastr) ? JSON.parse(datastr) : {});
+export function parseCartStatus(datastr: string) : storedStructure {
+    return <storedStructure>((datastr) ? JSON.parse(datastr) : {});
 }
 
 /**
@@ -82,13 +93,18 @@ export interface DataCartStatusLookup {
  */
 export class DataCartStatus {
     public CART_CONSTANTS: any;
+    public CART_ACTIONS: any;
     name: string = "cartstatus";
     _storage: Storage = null;           // the persistant storage; if null, this cart is in-memory only
     dataCartStatusItems: DataCartStatusLookup = {};
+    action: string = null;
 
     constructor(name: string = "cartstatus", dataCartStatusItems: DataCartStatusLookup, store: Storage|null = localStorage){
         this.CART_CONSTANTS = CartConstants.cartConst;
+        this.CART_ACTIONS = CartActions.cartActions;
         this.name = name;
+        this.action = this.CART_ACTIONS.CREATE;
+
         if(dataCartStatusItems){
             this.dataCartStatusItems = dataCartStatusItems;
         }
@@ -101,7 +117,7 @@ export class DataCartStatus {
     public static openCartStatus(cartName: string = "cartstatus", store: Storage = localStorage) : DataCartStatus {
         let cartstatusItems: DataCartStatusLookup = <DataCartStatusLookup>{};
         if (store) {
-            cartstatusItems = parseCartStatus(store.getItem(cartName));
+            cartstatusItems = parseCartStatus(store.getItem(cartName)).datacartStatusLookup;
             if (!cartstatusItems)
                 return DataCartStatus.createCartStatus(cartName, store);
         }
@@ -123,7 +139,7 @@ export class DataCartStatus {
      */
     public save() : void {
         if (this._storage)
-            this._storage.setItem(this.name, stringifyCart(this.dataCartStatusItems));
+            this._storage.setItem(this.name, stringifyCart(this.dataCartStatusItems, this.action));
     }
 
     /**
@@ -139,8 +155,12 @@ export class DataCartStatus {
      * this if they want to ensure they have the latest changes to the cart.  
      */
     public restore() : void {
-        if (this._storage)
-            this.dataCartStatusItems = parseCartStatus(this._storage.getItem(this.name));
+        let stored: storedStructure;
+        if (this._storage){
+            stored = parseCartStatus(this._storage.getItem(this.name));
+            this.dataCartStatusItems = <DataCartStatusLookup>stored.datacartStatusLookup;
+            this.action = stored.action;
+        }
     }
 
     /**
@@ -163,9 +183,10 @@ export class DataCartStatus {
     /**
      * add a DataCartStatusItem to the cart
      */
-    addItem(item: DataCartStatusItem) : void {
+    addItem(item: DataCartStatusItem, action: string = this.CART_ACTIONS.ADD_ITEM) : void {
         this.restore();
         this.dataCartStatusItems[item.itemId] = item;
+        this.action = action;
         this.save();
         // this._statusUpdated.next(true);
     }
@@ -180,6 +201,8 @@ export class DataCartStatus {
 
         if (this.dataCartStatusItems[itemId]){ 
             delete this.dataCartStatusItems[itemId];
+            this.action = this.CART_ACTIONS.REMOVE_ITEM;
+
             this.save();
             return true;
         }
@@ -193,6 +216,7 @@ export class DataCartStatus {
      */
     public updateCartStatusInUse(itemId: string, inUse: boolean=false, displayName?: string){
         let targetItem : DataCartStatusItem = this.findStatusById(itemId);
+
         let lDisplayName: string = displayName;
 
         if(!lDisplayName) lDisplayName = itemId;
@@ -202,9 +226,9 @@ export class DataCartStatus {
             this.addItem(targetItem);
         }else{
             targetItem.isInUse = inUse;
+            this.action = this.CART_ACTIONS.SET_IN_USE;
+            this.save();
         }
-
-        this.save();
     }
 
     /**
@@ -213,14 +237,30 @@ export class DataCartStatus {
      * @param percentage Status to be updated
      */
     public updateDownloadPercentage(itemId: string, percentage: number=0, displayName: string=itemId){
+        let action: string = "";
         this.restore();
         let targetItem : DataCartStatusItem = this.findStatusById(itemId);
+
         if(targetItem){
             targetItem.downloadPercentage = percentage;
+            this.action = this.CART_ACTIONS.SET_PERCENTAGE;
             this.save();
         }else{
             targetItem = new DataCartStatusItem(itemId, true, percentage, displayName);
-            this.addItem(targetItem);
+            this.addItem(targetItem, this.CART_ACTIONS.SET_PERCENTAGE);
+        }
+    }
+
+    setDownloadCompleted(itemId: string, displayName: string=itemId){
+        this.restore();
+        let targetItem : DataCartStatusItem = this.findStatusById(itemId);
+        if(targetItem){
+            targetItem.downloadPercentage = 100;
+            this.action = this.CART_ACTIONS.SET_DOWNLOAD_COMPLETE;
+            this.save();
+        }else{
+            targetItem = new DataCartStatusItem(itemId, true, 100, displayName);
+            this.addItem(targetItem, this.CART_ACTIONS.SET_DOWNLOAD_COMPLETE);
         }
     }
 
@@ -237,6 +277,7 @@ export class DataCartStatus {
             }
         }
 
+        this.action = this.CART_ACTIONS.CLEANUP_STATUS;
         this.save();
     }
 }

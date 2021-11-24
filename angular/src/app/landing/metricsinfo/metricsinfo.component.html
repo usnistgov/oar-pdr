@@ -1,0 +1,29 @@
+<div *ngIf="showMetrics" >
+    <div class="metrics-header">
+        Dataset Metrics
+    </div>
+
+    <div class="metrics-info">
+        <div *ngIf="metricsData.hasCurrentMetrics; else noMetrics">
+            <ul style="font-size: 14px;">
+                <li>
+                    {{metricsData.totalDatasetDownload}} dataset downloads
+                </li>
+                <li>
+                    {{totalUsers}}
+                </li>
+                <li>
+                    {{totalDownloadSize}} downloaded
+                </li>
+            </ul>
+            <div style="width: 100%;text-align: right;margin-top: -15px;font-size: small;">
+                <a *ngIf="metricsData.hasCurrentMetrics" href="{{metricsUrl}}" target="_blank"><span data-toggle="tooltip" title="More Metrics Data">More...</span></a>
+            </div>
+        </div>
+        <ng-template #noMetrics>
+            Metrics not available
+        </ng-template>
+    </div>
+</div>
+
+

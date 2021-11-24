@@ -1,18 +1,35 @@
 import { DataCartStatus, DataCartStatusLookup, DataCartStatusItem, DataCartStatusData, stringifyCart, parseCartStatus } from './cartstatus';
+import { CartConstants, CartActions } from './cartconstants';
 
+let CART_ACTIONS = CartActions.cartActions;
 let emptycoll: DataCartStatusLookup = <DataCartStatusLookup>{};
+let emptycoll_creat_json: string  = JSON.stringify({   
+    action: CART_ACTIONS.CREATE,
+    datacartStatusLookup: emptycoll
+});
+
 let fakecoll: DataCartStatusLookup = { "goob/gurn": { itemId: "gurn", displayName: "gurnDisplay", isInUse:true, downloadPercentage: 0 } };
-let fakecoll_json: string = JSON.stringify(fakecoll);
+let fakecoll_create_json: string = JSON.stringify({   
+    action: CART_ACTIONS.CREATE,
+    datacartStatusLookup: fakecoll
+});
+
+let fakecoll100percent: DataCartStatusLookup = { "goob/gurn": { itemId: "gurn", displayName: "gurnDisplay", isInUse:true, downloadPercentage: 100 } };
+
+let fakecoll_set_download_complete_json: string = JSON.stringify({   
+    action: CART_ACTIONS.SET_DOWNLOAD_COMPLETE,
+    datacartStatusLookup: fakecoll100percent
+});
 
 describe('stringify-parse', () => {
     it("empty", () => {
-        expect(stringifyCart(emptycoll)).toEqual('{}');
-        expect(parseCartStatus(stringifyCart(emptycoll))).toEqual(emptycoll);
+        expect(stringifyCart(emptycoll, CART_ACTIONS.CREATE)).toEqual(emptycoll_creat_json);
+        expect(parseCartStatus(stringifyCart(emptycoll, CART_ACTIONS.CREATE)).datacartStatusLookup).toEqual(emptycoll);
     });
 
     it("non-empty", () => {
-        expect(stringifyCart(fakecoll)).toEqual(fakecoll_json);
-        expect(parseCartStatus(stringifyCart(fakecoll))).toEqual(fakecoll);
+        expect(stringifyCart(fakecoll, CART_ACTIONS.CREATE)).toEqual(fakecoll_create_json);
+        expect(parseCartStatus(stringifyCart(fakecoll, CART_ACTIONS.CREATE)).datacartStatusLookup).toEqual(fakecoll);
     });
 });
 
@@ -50,7 +67,7 @@ describe('DataCartStatus', () => {
         let dcs = DataCartStatus.openCartStatus("cartStatus");
         expect(dcs).not.toBeNull();
 
-        localStorage.setItem("cartStatus", stringifyCart(sample));
+        localStorage.setItem("cartStatus", stringifyCart(sample, CART_ACTIONS.CREATE));
         dcs = DataCartStatus.openCartStatus("cartStatus");
         expect(dcs).not.toBeNull();
         expect(dcs.name).toEqual("cartStatus");
@@ -65,12 +82,12 @@ describe('DataCartStatus', () => {
         expect(dcs).not.toBeNull();
         expect(dcs.dataCartStatusItems).toEqual({});
         expect(dcs.name).toEqual("goob");
-        expect(localStorage.getItem("goob")).toEqual("{}");
+        expect(localStorage.getItem("goob")).toEqual(emptycoll_creat_json);
 
         expect(sessionStorage.getItem("goob")).toBeNull();
         localStorage.clear();
         dcs = DataCartStatus.createCartStatus("goob", sessionStorage)
-        expect(sessionStorage.getItem("goob")).toEqual("{}");
+        expect(sessionStorage.getItem("goob")).toEqual(emptycoll_creat_json);
         expect(localStorage.getItem("goob")).toBeNull();
     });
 
@@ -78,36 +95,36 @@ describe('DataCartStatus', () => {
         let dcs = new DataCartStatus("cartStatus", {});
         expect(localStorage.getItem("cartStatus")).toBeNull();
         dcs.save();
-        expect(localStorage.getItem("cartStatus")).toEqual("{}");
+        expect(localStorage.getItem("cartStatus")).toEqual(emptycoll_creat_json);
         
         dcs = new DataCartStatus("cartStatus", sample, sessionStorage);
         expect(sessionStorage.getItem("cartStatus")).toBeNull();
         dcs.save();
-        expect(sessionStorage.getItem("cartStatus")).toEqual(fakecoll_json);
-        expect(localStorage.getItem("cartStatus")).toEqual('{}');
+        expect(sessionStorage.getItem("cartStatus")).toEqual(fakecoll_create_json);
+        expect(localStorage.getItem("cartStatus")).toEqual(emptycoll_creat_json);
     });
 
     it('forget()', () => {
         let dcs = DataCartStatus.createCartStatus("cartStatus");
-        expect(localStorage.getItem("cartStatus")).toEqual("{}");
+        expect(localStorage.getItem("cartStatus")).toEqual(emptycoll_creat_json);
         dcs.forget();
         expect(localStorage.getItem("cartStatus")).toBeNull();
         dcs.save();
-        expect(localStorage.getItem("cartStatus")).toEqual("{}");
+        expect(localStorage.getItem("cartStatus")).toEqual(emptycoll_creat_json);
 
-        localStorage.setItem("cartStatus", stringifyCart(sample));
+        localStorage.setItem("cartStatus", stringifyCart(sample, CART_ACTIONS.CREATE));
         dcs = DataCartStatus.openCartStatus("cartStatus");
         expect(dcs.dataCartStatusItems).toEqual(sample);
         dcs.forget();
         expect(localStorage.getItem("cartStatus")).toBeNull();
         dcs.save();
-        expect(localStorage.getItem("cartStatus")).toEqual(fakecoll_json);
+        expect(localStorage.getItem("cartStatus")).toEqual(fakecoll_create_json);
     });
 
     it('restore()', () => {
         let dcs = DataCartStatus.createCartStatus("cartStatus");
-        expect(localStorage.getItem("cartStatus")).toEqual("{}");
-        localStorage.setItem("cartStatus", stringifyCart(sample));
+        expect(localStorage.getItem("cartStatus")).toEqual(emptycoll_creat_json);
+        localStorage.setItem("cartStatus", stringifyCart(sample, CART_ACTIONS.CREATE));
         expect(dcs.dataCartStatusItems).toEqual({});
         dcs.restore();
         expect(dcs.dataCartStatusItems).toEqual(sample);
@@ -140,6 +157,14 @@ describe('DataCartStatus', () => {
         expect(file.displayName).toEqual("oopsDisplay");
         expect(file.isInUse).toBeFalsy();
         expect(file.downloadPercentage).toEqual(0);
+    });
+
+    it('setDownloadCompleted()', () => {
+        let dcs = new DataCartStatus("cartStatus", fakecoll);
+        dcs.save();
+        expect(localStorage.getItem("cartStatus")).toEqual(fakecoll_create_json);
+        dcs.setDownloadCompleted("goob/gurn");
+        expect(localStorage.getItem("cartStatus")).toEqual(fakecoll_set_download_complete_json);
     });
 })
 
