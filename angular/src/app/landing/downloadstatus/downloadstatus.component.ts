@@ -13,7 +13,6 @@ export class DownloadstatusComponent implements OnInit {
     inited: boolean = false;
 
     @Input() inBrowser: boolean;
-    // @Output() downloadedKeys: EventEmitter<string[]> = new EventEmitter();
 
     constructor() { 
 
@@ -45,21 +44,18 @@ export class DownloadstatusComponent implements OnInit {
             if(ev.key == this.dataCartStatus.getName()){
                 this.dataCartStatus.restore();
             }
-
-            // Emit item IDs whose download status is 'completed' 
-            // let keys = Object.keys(this.dataCartStatus.dataCartStatusItems).filter(key => this.dataCartStatus.dataCartStatusItems[key].downloadPercentage == 100);
-
-            // if(keys.length > 0){
-            //     this.downloadedKeys.emit(keys);
-            // }
         }
     }
 
     /**
      * Get keys of dataCartStatus. The UI uses it to display download progress
      */
-    get getKeys(){
-        return Object.keys(this.dataCartStatus.dataCartStatusItems)
+    get getKeys() { 
+        if(this.inBrowser) {
+            return Object.keys(this.dataCartStatus.dataCartStatusItems);
+        }else{
+            return null;
+        }
     }
 
     /**
@@ -68,10 +64,13 @@ export class DownloadstatusComponent implements OnInit {
      */
     get showDownloadStatus(){
         let hasStatusToDisplay: boolean = false;
-        for(let key in this.dataCartStatus.dataCartStatusItems){
-            if(this.dataCartStatus.dataCartStatusItems[key].downloadPercentage > 0){
-                hasStatusToDisplay = true;
-                break;
+
+        if(this.inBrowser) {
+            for(let key in this.dataCartStatus.dataCartStatusItems){
+                if(this.dataCartStatus.dataCartStatusItems[key].downloadPercentage > 0){
+                    hasStatusToDisplay = true;
+                    break;
+                }
             }
         }
 
