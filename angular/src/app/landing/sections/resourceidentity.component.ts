@@ -4,6 +4,8 @@ import { AppConfig } from '../../config/config';
 import { NerdmRes, NERDResource } from '../../nerdm/nerdm';
 import { VersionComponent } from '../version/version.component';
 import { GoogleAnalyticsService } from '../../shared/ga-service/google-analytics.service';
+import { EditStatusService } from '../../landing/editcontrol/editstatus.service';
+import { LandingConstants } from '../../landing/constants';
 
 /**
  * a component that lays out the "identity" section of a landing page
@@ -21,18 +23,36 @@ export class ResourceIdentityComponent implements OnChanges {
     doiUrl: string = null;
     showHomePageLink: boolean = true;
     primaryRefs: any[] = [];
+    editMode: string;
+    EDIT_MODES: any;
 
     // passed in by the parent component:
     @Input() record: NerdmRes = null;
     @Input() inBrowser: boolean = false;
-    @Input() editEnabled: boolean = false;
 
     /**
      * create an instance of the Identity section
      */
     constructor(private cfg: AppConfig,
+                public editstatsvc: EditStatusService,
                 private gaService: GoogleAnalyticsService)
     { }
+
+    ngOnInit(): void {
+        this.EDIT_MODES = LandingConstants.editModes;
+
+        // Watch current edit mode set by edit controls
+        this.editstatsvc.watchEditMode((editMode) => {
+            this.editMode = editMode;
+        });
+    }
+
+    /**
+     * Decide if currently in view only mode
+     */
+    get inViewMode() {
+        return this.editMode == this.EDIT_MODES.VIEWONLY_MODE;
+    }
 
     ngOnChanges() {
         if (this.recordLoaded())

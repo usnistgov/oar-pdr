@@ -16,6 +16,7 @@ import { TransferState } from '@angular/platform-browser';
 import { GoogleAnalyticsService } from '../../shared/ga-service/google-analytics.service';
 import { ToastrModule } from 'ngx-toastr';
 import { TreeTableModule } from 'primeng/treetable';
+import { EditStatusService } from '../../landing/editcontrol/editstatus.service';
 
 describe('DataFilesComponent', () => {
   let component: DataFilesComponent;
@@ -46,6 +47,7 @@ describe('DataFilesComponent', () => {
         DownloadService,
         TestDataService,
         GoogleAnalyticsService,
+        EditStatusService,
         DatePipe,
         { provide: AppConfig, useValue: cfg }]
     })

@@ -11,7 +11,6 @@ import { MetadataUpdateService } from '../editcontrol/metadataupdate.service';
 import { UserMessageService } from '../../frame/usermessage.service';
 import { AuthService, WebAuthService, MockAuthService } from '../editcontrol/auth.service';
 import { GoogleAnalyticsService } from '../../shared/ga-service/google-analytics.service';
-
 import { config, testdata } from '../../../environments/environment';
 
 describe('ResourceIdentityComponent', () => {
@@ -41,7 +40,6 @@ describe('ResourceIdentityComponent', () => {
     beforeEach(async(() => {
         makeComp();
         component.inBrowser = true;
-        component.editEnabled = false;
         component.ngOnChanges()
         fixture.detectChanges();
     }));

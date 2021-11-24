@@ -2,6 +2,8 @@ import { Component, OnChanges, Input } from '@angular/core';
 
 import { AppConfig } from '../../config/config';
 import { NerdmRes } from '../../nerdm/nerdm';
+import { LandingConstants } from '../constants';
+import { EditStatusService } from '../../landing/editcontrol/editstatus.service';
 
 interface reference {
     refType?: string,
@@ -28,17 +30,26 @@ export class VersionComponent implements OnChanges {
     visibleHistory = false;
     newer : reference = null;
     lpssvc : string = null;
+    public EDIT_MODES: any = LandingConstants.editModes;
+    editMode: string;
 
     @Input() record: NerdmRes = null;
-    @Input() editMode: boolean = false;
 
     /**
      * create the component
      * @param cfg   the app configuration data
      */
-    constructor(private cfg : AppConfig) {
+    constructor(private cfg : AppConfig,
+        public editstatsvc: EditStatusService) {
         this.lpssvc = this.cfg.get('locations.landingPageService',
                                    'https://data.nist.gov/od/id/');
+    }
+
+    ngOnInit(): void {
+        // Watch current edit mode set by edit controls
+        this.editstatsvc.watchEditMode((editMode) => {
+            this.editMode = editMode;
+        });
     }
 
     ngOnChanges() {
@@ -91,7 +102,7 @@ export class VersionComponent implements OnChanges {
             return "this version";
         let id: string = "View...";
         if (relinfo['@id']) id = relinfo['@id'];
-        if (this.editMode)
+        if (this.editMode != this.EDIT_MODES.VIEWONLY_MODE)
             return id;
         else
             return this.renderRelAsLink(relinfo, id);
