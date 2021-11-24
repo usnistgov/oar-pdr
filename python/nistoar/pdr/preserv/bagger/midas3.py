@@ -910,26 +910,31 @@ class MIDASMetadataBagger(SIPBagger):
                                              message="added default DOI: "+doi)
 
         # check for use of the restricted public gateway
-        if self.cfg.get('restricted_access',{}).get('gateway_url') and \
-           nerd['accessLevel'] == "restricted public":
-            racfg = self.cfg['restricted_access']
-            burl = racfg['gateway_url']
-            disclaimer = racfg.get('disclaimer')
+        if nerd['accessLevel'] == "restricted public":
+            if self.cfg.get('restricted_access',{}).get('gateway_url'):
+                self.log.info("Detected use of restricted access gateway; updating metadata accordingly")
 
-            nerdres = self.bagbldr.bag.nerd_metadata_for('', False)
-            rpg = [c for c in nerdres.get('components', [])
-                     if 'accessURL' in c and c['accessURL'].startswith(burl)]
-            for c in rpg:
-                if not nerdutils.is_type(c, "RestrictedAccessPage"):
-                    c['@type'] = ["nrdp:RestrictedAccessPage"] + c['@type']
+                racfg = self.cfg['restricted_access']
+                burl = racfg['gateway_url']
+                disclaimer = racfg.get('disclaimer')
 
-            if len(rpg) > 0:
-                nerdres = {'components': nerdres['components']}
-                if disclaimer:
-                    nerdres['disclaimer'] = disclaimer
-                self.bagbldr.update_metadata_for('', nerdres,
-                                                 message="enhancing metadata for restricted access")
-                nerd = self.bagbldr.bag.nerdm_record(True)
+                nerdres = self.bagbldr.bag.nerd_metadata_for('', False)
+                rpg = [c for c in nerdres.get('components', [])
+                         if 'accessURL' in c and c['accessURL'].startswith(burl)]
+                for c in rpg:
+                    if not nerdutils.is_type(c, "RestrictedAccessPage"):
+                        c['@type'] = ["nrdp:RestrictedAccessPage"] + c['@type']
+
+                if len(rpg) > 0:
+                    nerdres = {'components': nerdres['components']}
+                    if disclaimer:
+                        nerdres['disclaimer'] = disclaimer
+                    self.bagbldr.update_metadata_for('', nerdres,
+                                                     message="enhancing metadata for restricted access")
+                    nerd = self.bagbldr.bag.nerdm_record(True)
+
+            else:
+                self.log.info("Note: SIP marked for restricted public access")
                     
 
         # we're done; update the cached NERDm metadata and the data file map
