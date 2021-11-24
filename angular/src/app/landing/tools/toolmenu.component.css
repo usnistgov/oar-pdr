@@ -50,7 +50,7 @@
   width: 12em;
   word-wrap: break-word;
   font-family: sans-serif;
-  
+
 }
 :host /deep/ .rightMenuStylePop > .ui-menu .ui-menuitem-link{
   padding: 0.5em 0.2em 0.5em 0.5em;

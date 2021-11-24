@@ -2,11 +2,26 @@
  * This module provide defined constant values used throughout the DataCartModule
  */
 
+export class CartActions {
+    public static get cartActions(): any { 
+        return {
+            CREATE: 'create',
+            REMOVE_ITEM: 'remove_item',
+            ADD_ITEM: 'add_item',
+            SET_IN_USE: 'set_in_use',
+            SET_PERCENTAGE: "set_percentage",
+            SET_DOWNLOAD_COMPLETE: "set_download_complete",
+            CLEANUP_STATUS: "cleanup_status"
+        }
+    }
+}
+
+
 export class CartConstants {
     public static get cartConst(): any { 
         return {
             GLOBAL_CART_NAME: 'global_datacart',
-            CART_STATUS_STORAGE_NAME: 'cartStatus'
+            CART_STATUS_STORAGE_NAME: 'cartstatus'
         }
     }
 }

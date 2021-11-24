@@ -39,6 +39,7 @@ describe('DownloadstatusComponent', () => {
 
   it('removeStatusItem', () => {
     component.dataCartStatus = new DataCartStatus("cartStatus", sample);
+    component.dataCartStatus.save();
     expect(component.dataCartStatus.findStatusById('goob/gurn')).toBeTruthy();
     component.removeStatusItem('goob/gurn');
     expect(component.dataCartStatus.findStatusById('goob/gurn')).toBeFalsy();

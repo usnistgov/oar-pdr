@@ -288,8 +288,11 @@ export class TreetableComponent implements OnInit, AfterViewInit {
     ngOnInit() {
         if(this.inBrowser){
             this.dataCartStatus = DataCartStatus.openCartStatus();
+
             this.dataCart = this.cartService.getCart(this.cartName);
+
             this.loadDataTree();
+
             this.dataCart.watchForChanges(this.cartChanged.bind(this));
         }
     }

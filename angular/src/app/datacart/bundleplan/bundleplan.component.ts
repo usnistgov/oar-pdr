@@ -124,6 +124,13 @@ export class BundleplanComponent implements OnInit {
         this.totalDownloadTime = this.downloadEndTime.getTime() / 1000 - this.downloadStartTime.getTime() / 1000;
         this.overallStatus = DownloadStatus.COMPLETED
         this.outputOverallStatus.emit(this.overallStatus);
+
+        if (this.dataCart && this.downloadFiles) {
+            let title = (this.dataCart.isGlobalCart()) ? "Global Data Cart"
+                                                       : this.downloadFiles[0].resTitle.substring(0,20)+"...";
+            this.dataCartStatus.setDownloadCompleted(this.dataCart.getName(), title);
+        }
+
         setTimeout(() => {
             this.updateDownloadPercentage(100);
         }, 1000);
@@ -160,6 +167,7 @@ export class BundleplanComponent implements OnInit {
         if (this.dataCart && this.downloadFiles) {
             let title = (this.dataCart.isGlobalCart()) ? "Global Data Cart"
                                                        : this.downloadFiles[0].resTitle.substring(0,20)+"...";
+
             this.dataCartStatus.updateDownloadPercentage(this.dataCart.getName(), percentage, title);
         }
     }
