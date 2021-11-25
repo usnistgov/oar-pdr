@@ -64,7 +64,7 @@ export const testdata: {} = {
             "hasEmail": "mailto:patricia.flanagan@nist.gov",
             "fn": "Patricia Flanagan"
         },
-        "modified": "2019-03-28 12:24:31",
+        "modified": "2019-03-27 12:24:31",
         "issued": "2019-04-05T16:04:26.0",
         "ediid": "26DEA39AD677678AE0531A570681F32C1449",
         "landingPage": "https://www.nist.gov/itl/iad/image-group/special-database-32-multiple-encounter-dataset-meds",
@@ -78,7 +78,7 @@ export const testdata: {} = {
                 "description": "initial release"
             },
             {
-                "version": "1.0.1",
+                "version": "1.0.2",
                 "issued": "2019-03-28 12:24:31",
                 "@id": "ark:/88434/mds0000fbkmds1103vzr",
                 "location": "https://data.nist.gov/od/id/ark:/88434/mds0000fbk",
@@ -204,7 +204,6 @@ export const testdata: {} = {
             "_updateDate": "2019-12-03T15:50:53.208+0000"
         }
         ]
-
     },
 
     test2: {

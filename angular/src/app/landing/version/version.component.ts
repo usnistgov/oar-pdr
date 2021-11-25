@@ -245,12 +245,15 @@ export function normalize_date(datestr : string) {
     // ignore zone designations
     if (datestr.includes("Z"))
         datestr = datestr.substring(0, datestr.indexOf("Z"));
-    
+        
+    // Safari requires a "T" between date and time
+    datestr = datestr.replace(" ", "T");
+
     let m = datestr.match(/^\s*\d{4}(-\d\d(-\d\d([ T]\d\d:\d\d(:\d\d(\.\d+)?)?)?)?)?\s*$/);
     if (! m) return datestr;
     if (! m[1]) datestr += "-01";
     if (! m[2]) datestr += "-01";
-    if (! m[3]) datestr += " 00:00";
+    if (! m[3]) datestr += "T00:00";
     if (! m[4]) datestr += ":00";
     return datestr
 }

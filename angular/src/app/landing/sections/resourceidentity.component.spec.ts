@@ -53,7 +53,7 @@ describe('ResourceIdentityComponent', () => {
 
         expect(component.record['version']).toBe("1.0.1");
         let descs = cmpel.querySelectorAll("p");
-        expect(descs.length).toBe(0);
+        expect(descs.length).toBe(1);
 
         // expect(component.versionCmp.newer).toBeNull();
     });
