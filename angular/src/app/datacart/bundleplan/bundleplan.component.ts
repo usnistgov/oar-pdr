@@ -402,6 +402,7 @@ export class BundleplanComponent implements OnInit {
      * Process data returned from bundle_plan (stored in zipData)
      */
     processBundle() {
+        let processingZip: ZipData;
         this.gaService.gaTrackEvent('download', undefined, 'all files', "Data cart");
 
         this.messageColor = this.getColor();
@@ -544,29 +545,34 @@ export class BundleplanComponent implements OnInit {
     }
 
     /**
-     * Cancell all download
+     * Cancell all download and cleanup all zipdata
      */
     cancelDownloadAll() {
         for (let zip of this.zipData) {
-            if (zip.downloadInstance != null) {
-                zip.downloadInstance.unsubscribe();
+            if(zip.downloadStatus == DownloadStatus.DOWNLOADING) {
+                this.cancelDownloadZip(zip);
+            }else{
+                if (zip.downloadInstance != null) {
+                    zip.downloadInstance.unsubscribe();
+                }
+                zip.downloadInstance = null;
+                zip.downloadProgress = 0;
+                zip.downloadStatus = null;
             }
-            zip.downloadInstance = null;
-            zip.downloadProgress = 0;
-            zip.downloadStatus = null;
-        }
+       }
 
         for (let sub of this.subscriptions) {
             sub.unsubscribe();
         }
 
-        // this.clearDownloadingStatus();
         this.showCurrentTask = false;
         this.overallStatus = DownloadStatus.CANCELED;
         this.outputOverallStatus.emit(this.overallStatus);
         setTimeout(() => {
             this.updateDownloadPercentage(0)
         }, 1000);
+
+        this.zipData = [];
     }
 
     /**

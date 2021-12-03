@@ -358,13 +358,16 @@ export class DownloadService {
      */
     downloadNextZip(zipData: ZipData[], dataCart: DataCart) {
         let sub = this.zipFilesDownloadingDataCartSub;
+        let nextZip: ZipData = null;
 
         if (sub.getValue() < this.getMaxConcurDownload()) {
-            let nextZip = this.getNextZipInQueue(zipData);
+            nextZip = this.getNextZipInQueue(zipData);
             if (nextZip != null) {
                 this.download(nextZip, zipData, dataCart);
             }
         }
+
+        return nextZip;
     }
 
     /**
