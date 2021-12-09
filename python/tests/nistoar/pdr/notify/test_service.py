@@ -49,16 +49,16 @@ class TestTargetManager(test.TestCase):
 
     def test_aa_register_channel_class(self):
         mgr = notify.TargetManager()
-        self.assertFalse(mgr.has_channel_class("fakeemail"))
-        fm = mgr.register_channel_class("fakeemail",
+        self.assertFalse(mgr.has_channel_class("fakeremail"))
+        fm = mgr.register_channel_class("fakeremail",
                                         "nistoar.pdr.notify.email.FakeMailer")
         self.assertTrue(issubclass(fm, Mailer))
-        self.assertTrue(mgr.has_channel_class("fakeemail"))
+        self.assertTrue(mgr.has_channel_class("fakeremail"))
         self.assertTrue(mgr._channelcls["fakeemail"] is fm)
 
-        fmer = mgr.register_channel_class("fakeremail", fm)
+        fmer = mgr.register_channel_class("fakieremail", fm)
         self.assertTrue(fmer is fm)
-        self.assertTrue(mgr.has_channel_class("fakeremail"))
+        self.assertTrue(mgr.has_channel_class("fakieremail"))
         self.assertTrue(mgr._channelcls["fakeremail"] is fmer)
 
         with self.assertRaises(ImportError):
@@ -82,8 +82,9 @@ class TestTargetManager(test.TestCase):
     def test_default_cls(self):
         mgr = notify.TargetManager()
         self.assertTrue(mgr.has_channel_class('email'))
+        self.assertTrue(mgr.has_channel_class('fakeemail'))
         self.assertTrue(mgr.has_channel_class('archive'))
-        self.assertTrue(not mgr.has_channel_class('fakeemail'))
+        self.assertTrue(not mgr.has_channel_class('fakeremail'))
         
         self.assertTrue(mgr.has_target_class('email'))
         self.assertTrue(mgr.has_target_class('archive'))

@@ -5,19 +5,20 @@ import logging, os, importlib
 from copy import copy as copyobj
 
 from .base import NotificationTarget, ChannelService, Notice
-from .email import Mailer, EmailTarget
+from .email import Mailer, FakeMailer, EmailTarget
 from .archive import Archiver, ArchiveTarget
 from ..exceptions import ConfigurationException
 
 log = logging.getLogger("Notify")
 
 _channel_cls = {
-    "email":   Mailer,
-    "archive": Archiver
+    "email":     Mailer,
+    "fakeemail": FakeMailer,
+    "archive":   Archiver
 }
 _target_cls = {
-    "email":   EmailTarget,
-    "archive": ArchiveTarget
+    "email":     EmailTarget,
+    "archive":   ArchiveTarget
 }
 
 class TargetManager(object):
@@ -312,14 +313,14 @@ class NotificationService(object):
         if channel_configs is None:
             channel_configs = []
         channel_cfgs = config.get('channels', []) + channel_configs
-        if len(channel_cfgs) == 0:
+        if len(channel_cfgs) == 0 and len(self._targetmgr.channel_names) == 0:
             log.warn("No notification channels configured")
 
         for cfg in channel_cfgs:
             self._targetmgr.define_channel(cfg)
 
         target_cfgs = config.get('targets', [])
-        if len(target_cfgs) == 0:
+        if len(target_cfgs) == 0 and len(self._targetmgr.targets) == 0:
             log.warn("No notification targets configured")
 
         for cfg in target_cfgs:

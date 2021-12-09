@@ -10,6 +10,7 @@ from .archive import Archiver
 from .base import ChannelService, Notice
 from ..config import load_from_file
 from ..exceptions import ConfigurationException
+from .. import platform_profile
 
 log = logging.getLogger("Notify").getChild("cli")
 
@@ -94,6 +95,9 @@ def main(progname, args):
         except EnvironmentError as ex:
             raise Failure("problem reading config file, {0}: {1}"
                           .format(opts.cfgfile, ex.strerror))
+
+    if not opts.platform:
+        opts.platform = platform_profile
 
     # build a configuration from command-line arguments (if present); the aim
     # is to build a target called 'ops' that will send an email alert
