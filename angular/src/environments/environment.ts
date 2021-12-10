@@ -69,22 +69,35 @@ export const testdata: {} = {
         "ediid": "26DEA39AD677678AE0531A570681F32C1449",
         "landingPage": "https://www.nist.gov/itl/iad/image-group/special-database-32-multiple-encounter-dataset-meds",
         "version": "1.0.1",
-        "versionHistory": [
+        "firstIssued": "2019-03-27 00:00:00",
+        "revised": "2019-03-28 12:24:31",
+        "annotated": "2019-03-29 12:24:31",
+        "releaseHistory": {
+            "@id": "ark:/88434/mds0000fbk/pdr:v",
+            "@type": [ "nrdr:ReleaseHistory" ],
+            "hasRelease": [
             {
                 "version": "1.0.0",
                 "issued": "2019-03-27 00:00:00",
-                "@id": "ark:/88434/mds0000fbk",
-                "location": "https://data.nist.gov/od/id/ark:/88434/mds0000fbk",
+                "@id": "ark:/88434/mds0000fbk/pdr:v/1.0.0",
+                "location": "https://data.nist.gov/od/id/mds0000fbk/pdr:v/1.0.0",
                 "description": "initial release"
             },
             {
-                "version": "1.0.2",
+                "version": "1.1.0",
                 "issued": "2019-03-28 12:24:31",
-                "@id": "ark:/88434/mds0000fbkmds1103vzr",
-                "location": "https://data.nist.gov/od/id/ark:/88434/mds0000fbk",
+                "@id": "ark:/88434/mds0000fbk/pdr:v/1.1.0",
+                "location": "https://data.nist.gov/od/id/ark:/88434/mds0000fbk/pdr:v/1.0.0",
+                "description": "data file update"
+            },
+            {
+                "version": "1.1.2",
+                "issued": "2019-03-29 12:24:31",
+                "@id": "ark:/88434/mds0000fbk/pdr:v/1.1.2",
+                "location": "https://data.nist.gov/od/id/ark:/88434/mds0000fbk/pdr:v/1.1.2",
                 "description": "metadata update"
             }
-        ],
+            ]},
         "description": [
             "Multiple Encounter Dataset (MEDS-I) is a test corpus organized from an extract of submissions of deceased persons with prior multiple encounters. MEDS is provided to assist the FBI and partner organizations refine tools, techniques, and procedures for face recognition as it supports Next Generation Identification (NGI), forensic comparison, training, and analysis, and face image conformance and inter-agency exchange standards. The MITRE Corporation (MITRE) prepared MEDS in the FBI Data Analysis Support Laboratory (DASL) with support from the FBI Biometric Center of Excellence."
         ],

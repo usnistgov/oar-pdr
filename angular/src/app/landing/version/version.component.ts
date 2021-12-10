@@ -66,6 +66,32 @@ export class VersionComponent implements OnChanges {
     }
 
     /**
+     * convert a full (3-field) version into an abbreviated version string 
+     * having just the first two fields
+     */
+    majorVersion(version: string) : string {
+        let ver = version.split('.');
+        if (ver.length < 2) return version;
+        return ver.slice(0, 2).join('.');
+    }
+
+    /**
+     * return a list of releases.  I
+     */
+    getReleases() {
+        if (! this.record)
+            return [];
+        let out = null;
+        if (this.record.releaseHistory) 
+            out = this.record.releaseHistory.hasRelease;
+        if (! out && this.record.versionHistory)
+            out = this.record.versionHistory;
+        if (! out)
+            out = [];
+        return out;
+    }
+
+    /**
      * create an HTML rendering of a version string for a NERDm VersionRelease.  
      * If there is information available for linking to version's home page, a 
      * link is returned.  Otherwise, just the version is returned (prepended 
@@ -83,9 +109,8 @@ export class VersionComponent implements OnChanges {
         else if (relinfo['@id']) {
             if (relinfo['@id'].startsWith("doi:"))
                 out = '<a href="https://doi.org/' + relinfo['@id'].substring(4) + '">' + linktext + '</a>';
-            else if (relinfo['@id'].startsWith("ark:/88434/"))
-                out = '<a href="'+ this.lpssvc + relinfo['@id'].substring("ark:/88434/".length) +
-                      '">' + linktext + '</a>';
+            else if (relinfo['@id'].startsWith("ark:/"))
+                out = '<a href="'+ this.lpssvc + relinfo['@id'] + '">' + linktext + '</a>';
             else if (relinfo['@id'].match(/^https?:\/\//))
                 out = '<a href="'+ relinfo['@id'] + '">' + linktext + '</a>';
         }
@@ -115,7 +140,7 @@ export class VersionComponent implements OnChanges {
      * <ol>
      *   <li> the 'isReplacedBy' property </li>
      *   <li> as a 'isPreviousVersionOf' reference in the references list.
-     *   <li> in the 'versionHistory' property </li>
+     *   <li> within the 'releaseHistory' (or 'versionHistory') property </li>
      * </ol>
      * The checks for last two places may be removed in a future release. 
      */
@@ -145,8 +170,8 @@ export class VersionComponent implements OnChanges {
         }
 
         // look at the version history to see if there is a newer version listed
-        if (this.record['version'] && this.record['versionHistory']) {
-            let history = this.record['versionHistory'];
+        if (this.record['version'] && (this.record['releaseHistory'] || this.record['versionHistory'])) {
+            let history = this.getReleases();
             history.sort(compare_histories);
 
             var thisversion = this.record['version'];
