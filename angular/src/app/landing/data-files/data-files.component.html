@@ -83,13 +83,14 @@
                         </tr>
                     </ng-template>
                     <ng-template pTemplate="body" let-rowNode let-rowData="rowData" let-columns="columns">
-                        <tr [ttSelectableRow]="rowNode">
-                            <td [ngStyle]="titleStyle()">
+                        <tr [ttSelectableRow]="rowNode" (mouseover)="mouseOver(rowData)" [ngStyle]="rowStyle(rowData)">
+                            <td [ngStyle]="titleStyle(rowData)" (click)="openDetails(rowData)">
                                 <p-treeTableToggler [rowNode]="rowNode" data-toggle="tooltip" title="Expand/Collapse">
                                 </p-treeTableToggler>
-                                <a (click)="openDetails($event,rowData,op3) " style="color: #1471AE;cursor: pointer; margin-left: 10px;"
-                                    data-toggle="tooltip" title="Click for more details">
-                                    {{rowData.name}} </a>
+                                <span data-toggle="tooltip" title="Click for more details">
+                                    {{rowData.name}} </span>
+                                <span style="margin-left: .5em;" *ngIf="isLeaf(rowData)">
+                                    <i [ngClass]='fileDetailsDisplayClass(rowData)'></i></span>    
                                 <span *ngIf="showZipFilesNames"
                                     style="color:darkgreen; margin-left: 2em;">{{rowData.zipFile || ''}}</span>
                             </td>
@@ -130,6 +131,45 @@
                                 </div>
                             </td>
                         </tr>
+                        <!-- File details. Will display when mouse over and close when mouse leaves or clicks -->
+                        <tr [hidden]="!showFileDetails02(rowData)">
+                            <td colspan="4" style="padding-left: 20px;background-color: rgb(243, 243, 243);">
+                                <div [@detailExpand]="showFileDetails(rowData) ? 'expanded' : 'collapsed'">
+                                    <span ><b>Description: </b> </span>
+                                    <div style="padding: 0 1em 0 1em; ">
+                                        <span *ngIf="!rowData.comp.description"><i>No Description Provided</i></span>
+                                        <span *ngIf="rowData.comp.description">{{ rowData.comp.description }} </span>
+                                    </div>
+                                    <div *ngIf="rowData.comp.format">
+                                        <b>Format</b>: {{rowData.comp.format.description}}
+                                    </div>
+                                    <div *ngIf="rowData.comp.checksum">
+                                        <b>{{rowData.comp.checksum.algorithm.tag}}</b>: 
+                                        <span [ngClass]="{'highlight': hashCopied}" [@enterAnimation]>
+                                            {{rowData.comp.checksum.hash}}
+                                        </span>
+                                        <span style="cursor: pointer; color: #1E6BA1; margin-left: 0.5em;" (click)="copyToClipboard(rowData.comp.checksum.hash)" data-toggle="tooltip" title="Copy to clipboard"><i class="faa faa-clone"></i></span><span [@enterAnimation] *ngIf="hashCopied" class="badge" style="background-color:#f0f0f0; margin-left: 0.5em; color: black;">Hash copied to clipboard</span>
+                                    </div>
+                                    <div *ngIf="rowData.comp.filepath">
+                                        <b>File path</b>: {{rowData.comp.filepath}}
+                                    </div>
+                                    <span style="color:grey;">
+                                        <span *ngIf="rowData.filetype == 'nrdp:DataFile' ">Selected File</span>
+                                        <span *ngIf="rowData.filetype == 'nrdp:ChecksumFile' ">Selected Checksum File</span>
+                                        <span *ngIf="rowData.filetype == 'nrdp:Subcollection'">Selected SubCollection </span>
+                                    </span>
+                                    <div>
+                                        <b>Type:</b>
+                                        <span style="margin-left:0.5em;" class="textstyle1">{{ rowData.mediaType }} </span>
+                                    </div>
+                                    <div>
+                                        <b>Size</b>: 
+                                        <span *ngIf="rowData.size" class="textstyle1">{{ rowData.size }} </span>
+                                        <span *ngIf="!rowData.size" class="textstyle1"><i>Not Available</i></span>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
                     </ng-template>
                 </p-treeTable>
             </div>
@@ -143,35 +183,3 @@
             </ng-template>
         </div>
 </div>
-
-<!-- file details -->
-<p-overlayPanel class="fileDialog" #op3 [dismissable]="true" [showCloseIcon]="true"
-    [style]="{'display':'inline-block','position':'related','left':'50%','top':'80%'}" [appendTo]="'body'">
-    <div class="filecard" [ngStyle]="{'max-width':getDialogWidth()}">
-        <div class="ui-g filesection">
-            <div *ngIf="fileNode" class="ui-g-12 ui-md-12 ui-lg-12 ui-sm-10">
-                <span style="color:grey">
-                    <span *ngIf="fileNode.filetype == 'nrdp:DataFile' ">Selected File</span>
-                    <span *ngIf="fileNode.filetype == 'nrdp:ChecksumFile' ">Selected Checksum File</span>
-                    <span *ngIf="fileNode.filetype == 'nrdp:Subcollection'">Selected SubCollection </span>
-                    <br>
-                </span>
-                <span>{{ fileNode ? fileNode.name : '' }}</span>
-                <span style="color:grey">
-                    <br><b>Type:</b>
-                    <span style="margin-left:0.5em;" class="textstyle1">{{ fileNode.mediaType }} </span>
-                </span>
-                <span style="margin-left: 2.5rem">
-                    Size:
-                    <span *ngIf="fileNode.size" class="textstyle1">{{ fileNode.size }} </span>
-                    <span *ngIf="!fileNode.size" class="textstyle1"><i>Not Available</i></span>
-                </span>
-                <br><span ><b>Description:</b> </span>
-                <div class="well filedesc">
-                    <span *ngIf="!fileNode.comp.description"><i>No Description Available</i></span>
-                    <span *ngIf="fileNode.comp.description">{{ fileNode.comp.description }} </span>
-                </div>
-            </div>
-        </div>
-    </div>
-</p-overlayPanel>

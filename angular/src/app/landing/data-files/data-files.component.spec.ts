@@ -17,6 +17,7 @@ import { GoogleAnalyticsService } from '../../shared/ga-service/google-analytics
 import { ToastrModule } from 'ngx-toastr';
 import { TreeTableModule } from 'primeng/treetable';
 import { EditStatusService } from '../../landing/editcontrol/editstatus.service';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations'; 
 
 describe('DataFilesComponent', () => {
   let component: DataFilesComponent;
@@ -40,6 +41,7 @@ describe('DataFilesComponent', () => {
         RouterTestingModule,
         HttpClientTestingModule,
         TreeTableModule,
+        BrowserAnimationsModule,
         ToastrModule.forRoot()],
       schemas: [NO_ERRORS_SCHEMA],
       providers: [
