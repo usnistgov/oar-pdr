@@ -54,6 +54,8 @@ class TestM3MultiprocessPreservationService(test.TestCase):
         self.stagedir = os.path.join(self.workdir, "staging")
         self.storedir = os.path.join(self.workdir, "store")
         os.mkdir(self.storedir)
+        self.restrictdir = os.path.join(self.workdir, "restricted")
+        os.mkdir(self.restrictdir)
         self.statusdir = os.path.join(self.workdir, "status")
         os.mkdir(self.statusdir)
         self.bagparent = os.path.join(self.datadir, "_preserv")
@@ -66,6 +68,7 @@ class TestM3MultiprocessPreservationService(test.TestCase):
         self.config = {
             "working_dir": self.workdir,
             "store_dir": self.storedir,
+            "restricted_store_dir": self.restrictdir,
             "id_registry_dir": self.workdir,
             "announce_subproc": False,
             "sip_type": {

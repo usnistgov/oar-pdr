@@ -363,6 +363,33 @@ class TestMIDASMetadataBaggerMixed(test.TestCase):
         # bagger was not configured to set a default DOI
         self.assertNotIn('doi', self.bagr.sip.nerd)
 
+    def test_apply_restricted_pod(self):
+        rpgurl = "https://rpg.nist.gov/pdr?"
+        inpodfile = os.path.join(self.revdir,"1491","_pod.json")
+        pod = utils.read_json(inpodfile)
+        pod['distribution'].append({
+            "accessURL": rpgurl+"id="+pod.get('identifier'),
+            "mediaType": "text/html"
+        })
+        pod.setdefault('rights', "gotta register")
+        pod['accessLevel'] = "restricted public"
+
+        cfg = {
+            'gateway_url': rpgurl,
+            'disclaimer': "Be careful."
+        }
+        self.bagr = midas.MIDASMetadataBagger.fromMIDAS(self.midasid, self.bagparent,
+                                                        self.revdir, self.upldir,
+                                                        {"restricted_access": cfg})
+        self.bagr.apply_pod(pod)
+        rpg = [c for c in self.bagr.sip.nerd.get('components')
+                 if 'accessURL' in c and c['accessURL'].startswith(rpgurl)]
+        self.assertEquals(len(rpg), 1)
+        self.assertEqual(rpg[0]['@type'][0], "nrdp:RestrictedAccessPage")
+        self.assertTrue(self.bagr.sip.nerd.get('rights'))
+        self.assertTrue(self.bagr.sip.nerd.get('disclaimer'))
+        
+
     def test_apply_defdoi(self):
         self.bagr = midas.MIDASMetadataBagger.fromMIDAS(self.midasid, self.bagparent,
                                                         self.revdir, self.upldir,

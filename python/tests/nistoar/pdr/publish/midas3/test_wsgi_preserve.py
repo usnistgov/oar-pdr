@@ -134,6 +134,7 @@ class TestPreserveHandler(test.TestCase):
         defcfg.update({
             "working_dir": self.workdir,
             "store_dir":   self.storedir,
+            "restricted_store_dir":   self.storedir,
             "announce_subproc": False,
             "auth_key": "secret",
             "repo_access": {

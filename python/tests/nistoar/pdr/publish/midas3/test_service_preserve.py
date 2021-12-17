@@ -108,6 +108,8 @@ class TestMIDAS3PublishingServicePreserve(test.TestCase):
         self.stagedir = os.path.join(self.workdir, "staging")
         self.storedir = os.path.join(self.workdir, "store")
         os.mkdir(self.storedir)
+        self.restrictdir = os.path.join(self.workdir, "restricted")
+        os.mkdir(self.restrictdir)
         self.statusdir = os.path.join(self.workdir, "status")
         os.mkdir(self.statusdir)
         self.sipdir = os.path.join(self.mdbags, self.midasid)
@@ -127,6 +129,7 @@ class TestMIDAS3PublishingServicePreserve(test.TestCase):
         defcfg.update({
             "working_dir": self.workdir,
             "store_dir":   self.storedir,
+            "restricted_store_dir":   self.storedir,
             "announce_subproc": False,
             "repo_access": {
                 "headbag_cache": self.stagedir,

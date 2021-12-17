@@ -16,6 +16,7 @@ RUN apt-get update && apt-get install -y python-yaml nginx curl wget less sudo \
                                          p7zip-full ca-certificates git
 RUN pip install --upgrade pip 'setuptools==44.0.0'
 RUN pip install funcsigs 'bagit>=1.6.3,<2.0' 'fs>=2.0.21' mako
+COPY verify-asc.sh /usr/local/bin
 
 # install multibag from source
 RUN curl -L -o multibag-py.zip \
@@ -24,18 +25,15 @@ RUN curl -L -o multibag-py.zip \
     cd multibag-py-master &&     \
     python setup.py install
 
-ENV GOSU_VERSION 1.10
+ENV GOSU_VERSION 1.14
 RUN set -ex; \
     arch="$(dpkg --print-architecture | awk -F- '{ print $NF }')"; \
     wget -O /usr/local/bin/gosu \
    "https://github.com/tianon/gosu/releases/download/$GOSU_VERSION/gosu-$arch"; \
     wget -O /usr/local/bin/gosu.asc \
 "https://github.com/tianon/gosu/releases/download/$GOSU_VERSION/gosu-$arch.asc";\
-    export GNUPGHOME="$(mktemp -d)"; \
-    echo "disable-ipv6" >> "$GNUPGHOME/dirmngr.conf"; \
-    gpg --batch --keyserver hkps://keys.openpgp.org \
-         --recv-keys B42F6819007F00F88E364FD4036A9C25BF357DD4; \
-    gpg --batch --verify /usr/local/bin/gosu.asc /usr/local/bin/gosu; \
+    verify-asc.sh /usr/local/bin/gosu /usr/local/bin/gosu.asc    \
+                  B42F6819007F00F88E364FD4036A9C25BF357DD4;      \
     sleep 1; rm -r "$GNUPGHOME" /usr/local/bin/gosu.asc || true; \
     chmod +x /usr/local/bin/gosu; \
     gosu nobody true

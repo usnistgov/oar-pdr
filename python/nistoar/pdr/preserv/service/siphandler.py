@@ -22,7 +22,7 @@ from copy import deepcopy
 from ..bagit.serialize import DefaultSerializer
 from ..bagit.bag import NISTBag
 from ..bagit.validate import NISTAIPValidator
-from ..bagit.multibag import MultibagSplitter
+from ..bagit.multibag import MultibagSplitter, restore_bag
 from ..bagger import utils as bagutils
 from ..bagger.base import checksum_of
 from ..bagger.midas import PreservationBagger, midasid_to_bagname, _midadid_to_dirname
@@ -31,9 +31,11 @@ from .. import (ConfigurationException, StateException, PODError, PreservationEx
                 PreservationStateError, SIPDirectoryError)
 from .. import sys as _sys
 from . import status
+from ... import distrib
 from ...ingest.rmm import IngestClient
 from ...doimint import DOIMintingClient
 from ...utils import write_json
+from ....nerdm import utils as nerdutils
 from ... import distrib
 
 log = logging.getLogger(_sys.system_abbrev).getChild(_sys.subsystem_abbrev)
@@ -99,8 +101,10 @@ class SIPHandler(object):
         if not os.path.exists(self.workdir):
             os.mkdir(self.workdir)
 
-        self.storedir = self.cfg['store_dir']
-        assert self.storedir
+        self.storedir = self.cfg.get('store_dir')
+        if not self.storedir:
+            raise ConfigurationException("Missing required SIPHandler property: "+
+                                         "store_dir")
         if not os.path.isdir(self.storedir):
             raise StateException("LT-storage directory does not exist as a "+
                                  "directory: " + self.storedir)
@@ -156,7 +160,10 @@ class SIPHandler(object):
                                 will be applied (as given in the configuration).
         :param destdir str:     the path to a directory where the serialized
                                 bag(s) will be written.  If not provided the
-                                configured directory will be used.  
+                                configured directory will be used.  Not 
+                                providing this allows the implementation to 
+                                adjust the destination depending on other
+                                conditions (e.g. restricted public data)
         :param params dict:     SIP-specific parameters to apply to the 
                                 creation of the AIP.  These can over-ride 
                                 SIP-default behavior as set by the 
@@ -265,6 +272,85 @@ class SIPHandler(object):
                     log.warn("Trouble removing unserialized bag: "+bagd)
         
         return outfiles
+
+    def _serialize_restricted(self, headbagdir, aipid, destdir, format=None, workdir=None):
+        """
+        serialize a given bag for distribution through the restricted public gateway.
+
+        Serialized bags for a restricted public data will be save to a separate bucket.  In 
+        addition, a bag containing the latest version of the data will also be put in the 
+        bucket with a version-independent name. (Currently, this is only supported for 
+        single-bag AIPs.)  This function generates that serialized bag and its SHA-file.  
+
+        This function pulls in bags from previously published versions to ensure all data is 
+        included in the output bag.  
+
+        :param str headbagdir:  path to the headbag to reconstruct
+        :param str aipid:       the AIP-ID for headbag and the name to give to the 
+                                reconstituted bag
+        :param str destdir:     the path to a directory where the serialized
+                                bag(s) will be written.  If not provided the
+                                configured directory will be used.  
+        :param str format:      the type of serialization to apply; this 
+                                must be a name recognized by the system.  
+                                If not provided a default serialization 
+                                will be applied (as given in the configuration).
+        :param str workdir:     the path to a directory where the reconstituted bag
+                                should be assembled.  If not specified, the headbag's 
+                                parent directory will be used.  
+        """
+        outbagname = aipid
+        if not workdir:
+            # by first default, work in the same directory as the head bag
+            workdir = os.path.dirname(headbagdir)
+            if outbagname == os.path.basename(headbagdir):
+                # outbag would be the inbag => switch workdir to destdir
+                workdir = destdir
+        outbag = os.path.join(workdir, outbagname)
+        if os.path.isdir(outbag):
+            log.warning("Cleaning out remnant of reconstituted bag")
+            shutil.rmtree(outbag)
+
+        if not format:
+            format = "zip"
+        bagcli = None
+        if 'distrib_service' in self.cfg.get('repo_access',{}):
+            baseurl = self.cfg['repo_access']['distrib_service'].get('service_endpoint')
+            if not baseurl:
+                raise ConfigurationException("Missing required repo_access.distrib property: "+
+                                             "service_endpoint")
+            bagcli = distrib.BagDistribClient(aipid, distrib.RESTServiceClient(baseurl))
+
+        def fetch(bagname, destd):
+            bagfile = "%s.%s" % (bagname, format)
+            bagpath = os.path.join(self.cfg['restricted_store_dir'], bagfile)
+            if os.path.isfile(bagpath):
+                shutil.copy(bagpath, destd)
+                return os.path.join(destd, bagfile)
+            
+            if not bagcli:
+                raise StateException("Bag service is not available to reconstruct bag")
+            # NOTE: this will not work because restricted data is not visible to the bag service
+            bagcli.save_bag(bagfile, destd)
+            return os.path.join(destd, bagfile)
+
+        restore_bag(headbagdir, outbag, destdir, fetch)
+
+        bagfile = self._ser.serialize(outbag, destdir, format)
+        csumfile = bagfile + ".sha256"
+        csum = checksum_of(bagfile)
+        with open(csumfile, 'w') as fd:
+            fd.write(csum)
+            fd.write('\n')
+
+        # write the checksum to our status object
+        self._status.data['user'].setdefault('bagfiles',[]).append({
+            'name': os.path.basename(bagfile),
+            'sha256': csum
+        })
+        self._status.cache()
+        
+        return [bagfile, csumfile]
 
     def _is_ingested(self):
         """
@@ -403,10 +489,14 @@ class MIDASSIPHandler(SIPHandler):
         bgrcfg = config.get('bagger', {})
         if 'store_dir' not in bgrcfg and 'store_dir' in config:
             bgrcfg['store_dir'] = config['store_dir']
+        if 'restricted_store_dir' not in bgrcfg and 'restricted_store_dir' in config:
+            bgrcfg['restricted_store_dir'] = config['restricted_store_dir']
         if 'repo_access' not in bgrcfg and 'repo_access' in config:
             bgrcfg['repo_access'] = config['repo_access']
             if 'store_dir' not in bgrcfg['repo_access'] and 'store_dir' in bgrcfg:
                 bgrcfg['repo_access']['store_dir'] = bgrcfg['store_dir']
+            if 'restricted_store_dir' not in bgrcfg['repo_access'] and 'restricted_store_dir' in bgrcfg:
+                bgrcfg['repo_access']['restricted_store_dir'] = bgrcfg['restricted_store_dir']
             
         self.bagger = PreservationBagger(sipid, bagparent, self.sipparent,
                                          self.mdbagdir, bgrcfg, self._minter, 
@@ -465,7 +555,10 @@ class MIDASSIPHandler(SIPHandler):
                                 will be applied (as given in the configuration).
         :param destdir str:     the path to a directory where the serialized
                                 bag(s) will be written.  If not provided the
-                                configured directory will be used.  
+                                configured directory will be used.  Not 
+                                providing this allows the implementation to 
+                                adjust the destination depending on other
+                                conditions (e.g. restricted public data)
         :param params dict:     SIP-specific parameters to apply to the 
                                 creation of the AIP.  These can over-ride 
                                 SIP-default behavior as set by the 
@@ -474,8 +567,6 @@ class MIDASSIPHandler(SIPHandler):
         self._status.start()
         if not serialtype:
             serialtype = 'zip'
-        if not destdir:
-            destdir = self.storedir
 
         if not self.isready(_inprogress=True):
             raise StateException("{0}: SIP is not ready: {1}".
@@ -502,8 +593,13 @@ class MIDASSIPHandler(SIPHandler):
         bag = NISTBag(self.bagger.bagdir)
         nerdm = bag.nerdm_record()
         if self._ingester:
+            ingmd = nerdm
+            if nerdm.get('accessLevel', 'public') != 'public' and 'components' in nerdm:
+                log.debug("Filtering out files from record sent to public PDR")
+                ingmd = deepcopy(ingmd)
+                ingmd['components'] = [c for c in ingmd['components'] if 'filepath' not in c]
             try:
-                self._ingester.stage(nerdm, self.bagger.name)
+                self._ingester.stage(ingmd, self.bagger.name)
             except Exception as ex:
                 msg = "Failure staging NERDm record for " + self.bagger.name + \
                       " for ingest: " + str(ex)
@@ -514,12 +610,26 @@ class MIDASSIPHandler(SIPHandler):
                                   summary="Ingest failed for "+self.bagger.name,
                                         desc=msg, id=self.bagger.name,
                                         version=nerdm.get('version', 'unknown'))
+            finally:
+                ingmd = None
+
+        self._status.record_progress("Serializing")
+        savefiles = []
+
+        # special handling for restricted public data going through the gateway
+        if nerdm.get('accessLevel', 'public') != 'public' and \
+           any([nerdutils.is_type(c, "RestrictedAccessPage") for c in nerdm.get('components',[])]):
+            aipid = re.sub(r'^ark:/\d+/', '', nerdm['ediid'])
+            savefiles += self._serialize_restricted(bagdir, aipid, self.stagedir, serialtype)
 
         # zip it up; this may split the bag into multibags
-        self._status.record_progress("Serializing")
-        savefiles = self._serialize(bagdir, self.stagedir, serialtype)
+        savefiles += self._serialize(bagdir, self.stagedir, serialtype)
 
-        # copy the zipped files to long-term storage ("public" directory)
+        # copy the zipped files to long-term storage ("public" or "restricted-public" directory)
+        if not destdir:
+            destdir = self.storedir
+            if nerdm.get('accessLevel', 'public') != 'public':
+                destdir = self.cfg['restricted_store_dir']
         self._status.record_progress("Delivering preservation artifacts")
         log.debug("writing files to %s", destdir)
         errors = []
@@ -527,12 +637,16 @@ class MIDASSIPHandler(SIPHandler):
         try:
             for f in savefiles:
                 destfile = os.path.join(destdir, os.path.basename(f))
+
+                # (Note: can overwrite restricted-public artifacts)
                 if os.path.exists(destfile) and \
-                   not self.cfg.get('allow_bag_overwrite', False):
-                    raise OSError(errno.EEXIST, os.strerror(errno.EEXIST),
-                                  destfile)
+                   not self.cfg.get('allow_bag_overwrite', False) and \
+                   bagutils.is_legal_bag_name(re.sub(r'.sha256$', '', os.path.basename(f))):
+                    raise OSError(errno.EEXIST, os.strerror(errno.EEXIST), destfile)
+                                  
                 shutil.copy(f, destdir)
                 saved.append(f)
+
         except OSError, ex:
             log.error("Failed to copy preservation file: %s\n" +
                       "  to long-term storage: %s", f, destdir)
@@ -747,6 +861,13 @@ class MIDAS3SIPHandler(SIPHandler):
         if workdir and not os.path.exists(workdir):
             os.mkdir(workdir)
 
+        if 'restricted_store_dir' not in self.cfg:
+            raise ConfigurationException("Missing required SIPHandler property: "+
+                                         "restricted_store_dir")
+        if not os.path.isdir(self.cfg['restricted_store_dir']):
+            raise StateException("LT-storage directory does not exist as a "+
+                                 "directory: " + self.cfg['restricted_store_dir'])
+
         self.stagedir = self.cfg.get('staging_dir')
         if not self.stagedir:
             self.stagedir = "stage"
@@ -770,6 +891,8 @@ class MIDAS3SIPHandler(SIPHandler):
         bgrcfg = config.get('bagger', {})
         if 'store_dir' not in bgrcfg and 'store_dir' in config:
             bgrcfg['store_dir'] = config['store_dir']
+        if 'restricted_store_dir' not in bgrcfg and 'restricted_store_dir' in config:
+            bgrcfg['restricted_store_dir'] = config['restricted_store_dir']
         if 'repo_access' not in bgrcfg and 'repo_access' in config:
             bgrcfg['repo_access'] = config['repo_access']
             if 'store_dir' not in bgrcfg['repo_access'] and 'store_dir' in bgrcfg:
@@ -888,7 +1011,10 @@ class MIDAS3SIPHandler(SIPHandler):
                                 will be applied (as given in the configuration).
         :param destdir str:     the path to a directory where the serialized
                                 bag(s) will be written.  If not provided the
-                                configured directory will be used.  
+                                configured directory will be used.  Not 
+                                providing this allows the implementation to 
+                                adjust the destination depending on other
+                                conditions (e.g. restricted public data)
         :param params dict:     SIP-specific parameters to apply to the 
                                 creation of the AIP.  These can over-ride 
                                 SIP-default behavior as set by the 
@@ -897,8 +1023,6 @@ class MIDAS3SIPHandler(SIPHandler):
         self._status.start()
         if not serialtype:
             serialtype = 'zip'
-        if not destdir:
-            destdir = self.storedir
 
         if not self.isready(_inprogress=True):
             if self.bagger and not os.path.exists(self.bagger.datadir):
@@ -920,8 +1044,13 @@ class MIDAS3SIPHandler(SIPHandler):
         bag = NISTBag(self.bagger.bagdir)
         nerdm = bag.nerdm_record()
         if self._ingester:
+            ingmd = nerdm
+            if nerdm.get('accessLevel', 'public') != 'public' and 'components' in nerdm:
+                log.debug("Filtering out files from record sent to public PDR")
+                ingmd = deepcopy(ingmd)
+                ingmd['components'] = [c for c in ingmd['components'] if 'filepath' not in c]
             try:
-                self._ingester.stage(nerdm, self.bagger.name)
+                self._ingester.stage(ingmd, self.bagger.name)
             except Exception as ex:
                 msg = "Failure staging NERDm record for " + self.bagger.name + \
                       " for ingest: " + str(ex)
@@ -947,11 +1076,23 @@ class MIDAS3SIPHandler(SIPHandler):
                                         desc=msg, id=self.bagger.name,
                                         version=nerdm.get('version', 'unknown'))
 
-        # zip it up; this may split the bag into multibags
         self._status.record_progress("Serializing")
-        savefiles = self._serialize(bagdir, self.stagedir, serialtype)
+        savefiles = []
 
-        # copy the zipped files to long-term storage ("public" directory)
+        # special handling for restricted public data going through the gateway
+        if nerdm.get('accessLevel', 'public') != 'public' and \
+           any([nerdutils.is_type(c, "RestrictedAccessPage") for c in nerdm.get('components',[])]):
+            aipid = re.sub(r'^ark:/\d+/', '', nerdm['ediid'])
+            savefiles += self._serialize_restricted(bagdir, aipid, self.stagedir, serialtype)
+
+        # zip it up; this may split the bag into multibags
+        savefiles += self._serialize(bagdir, self.stagedir, serialtype)
+
+        # copy the zipped files to long-term storage ("public" or "restricted-public" directory)
+        if not destdir:
+            destdir = self.storedir
+            if nerdm.get('accessLevel', 'public') != 'public':
+                destdir = self.cfg['restricted_store_dir']
         self._status.record_progress("Delivering preservation artifacts")
         log.debug("writing files to %s", destdir)
         errors = []
@@ -960,9 +1101,10 @@ class MIDAS3SIPHandler(SIPHandler):
             for f in savefiles:
                 destfile = os.path.join(destdir, os.path.basename(f))
                 if os.path.exists(destfile) and \
-                   not self.cfg.get('allow_bag_overwrite', False):
-                    raise OSError(errno.EEXIST, os.strerror(errno.EEXIST),
-                                  destfile)
+                   not self.cfg.get('allow_bag_overwrite', False) and \
+                   bagutils.is_legal_bag_name(re.sub(r'.sha256$', '', os.path.basename(f))):
+                    raise OSError(errno.EEXIST, os.strerror(errno.EEXIST), destfile)
+
                 shutil.copy(f, destdir)
                 saved.append(f)
         except OSError, ex:
