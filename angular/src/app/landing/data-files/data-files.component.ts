@@ -449,32 +449,6 @@ export class DataFilesComponent implements OnInit, OnChanges {
     }
 
     /**
-     * When mouse over a row, expand it to display file details.
-     * If already expanded, do nothing. 
-     * Disabled in mobile mode.
-     * @param fileNode file node in the tree
-     */
-    mouseOver(fileNode: any) {
-        if(!this.mobileMode){
-            if(!fileNode.comp.DetailsDisplayed){
-                this.cleanupDisplay();
-    
-                fileNode.comp.DetailsDisplayed = true;
-    
-                if(!fileNode.comp.DetailsDisplayed) {
-                    setTimeout(() => {
-                        fileNode.comp.DetailsDisplayed02 = true;
-                    }, 600);
-                }else{
-                    fileNode.comp.DetailsDisplayed02 = true;
-                }
-        
-                this.currentKey = fileNode.key;
-            }
-        }
-    }
-
-    /**
      * Determine if the file details need be displayed
      * @param fileNode file node in the tree
      * @returns boolean

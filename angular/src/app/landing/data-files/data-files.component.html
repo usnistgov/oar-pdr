@@ -83,7 +83,7 @@
                         </tr>
                     </ng-template>
                     <ng-template pTemplate="body" let-rowNode let-rowData="rowData" let-columns="columns">
-                        <tr [ttSelectableRow]="rowNode" (mouseover)="mouseOver(rowData)" [ngStyle]="rowStyle(rowData)">
+                        <tr [ttSelectableRow]="rowNode" [ngStyle]="rowStyle(rowData)">
                             <td [ngStyle]="titleStyle(rowData)" (click)="openDetails(rowData)">
                                 <p-treeTableToggler [rowNode]="rowNode" data-toggle="tooltip" title="Expand/Collapse">
                                 </p-treeTableToggler>
