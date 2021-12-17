@@ -1,7 +1,6 @@
 import { Component, Input, Output, NgZone, OnInit, OnChanges, SimpleChanges, EventEmitter } from '@angular/core';
 import { TreeNode } from 'primeng/api';
 import { CartService } from '../../datacart/cart.service';
-import { OverlayPanel } from 'primeng/overlaypanel';
 import { AppConfig } from '../../config/config';
 import { GoogleAnalyticsService } from '../../shared/ga-service/google-analytics.service';
 import { NerdmRes, NerdmComp } from '../../nerdm/nerdm';
@@ -11,6 +10,8 @@ import { DataCartStatus } from '../../datacart/cartstatus';
 import { formatBytes } from '../../utils';
 import { EditStatusService } from '../../landing/editcontrol/editstatus.service';
 import { LandingConstants } from '../../landing/constants';
+import { trigger, state, style, animate, transition } from '@angular/animations';
+import { BreakpointObserver, BreakpointState } from '@angular/cdk/layout';
 
 declare var _initAutoTracker: Function;
 
@@ -72,7 +73,32 @@ interface DataFileItem {
     styleUrls: ['../landing.component.css', 'data-files.component.css'],
     selector: 'pdr-data-files',
     templateUrl: `data-files.component.html`,
-    providers: [ ]
+    providers: [ ],
+    animations: [
+        trigger('detailExpand', [
+          state('collapsed', style({height: '0px', minHeight: '0', display: 'none'})),
+          state('expanded', style({height: '*'})),
+          transition('expanded <=> collapsed', animate('625ms cubic-bezier(0.4, 0.0, 0.2, 1)')),
+        ]),
+        trigger('detailExpand2', [
+            state('collapsed', style({opacity: 0})),
+            state('expanded', style({opacity: 1})),
+            transition('expanded <=> collapsed', animate('625ms')),
+        ]),
+        trigger(
+            'enterAnimation', [
+                transition(':enter', [
+                    style({height: '0px', opacity: 0}),
+                    animate('700ms', style({height: '100%', opacity: 1}))
+                ]),
+                transition(':leave', [
+                    style({height: '100%', opacity: 1}),
+                    animate('700ms', style({height: 0, opacity: 0}))
+                //   animate('500ms', style({transform: 'translateY(0)', opacity: 1}))
+                ])
+            ]
+        )
+    ]
 })
 export class DataFilesComponent implements OnInit, OnChanges {
 
@@ -96,7 +122,7 @@ export class DataFilesComponent implements OnInit, OnChanges {
     isTogglingAllInGlobalCart: boolean = false;
 
     cols: any[];
-    fileNode: TreeNode;               // the node whose description has been opened
+    fileNode: any;               // the node whose description has been opened
     isExpanded: boolean = false;
     visible: boolean = true;
     cartLength: number;
@@ -107,11 +133,17 @@ export class DataFilesComponent implements OnInit, OnChanges {
     fontSize: string;
     EDIT_MODES: any;
     editMode: string;
+    mobileMode: boolean = false;
+    hashCopied: boolean = false;
+
+    // The key of treenode whose details is currently displayed
+    currentKey: string = '';
 
     constructor(private cfg: AppConfig,
                 private cartService: CartService,
                 private gaService: GoogleAnalyticsService,
                 public editstatsvc: EditStatusService,
+                public breakpointObserver: BreakpointObserver,
                 ngZone: NgZone)
     {
         this.cols = [
@@ -140,6 +172,17 @@ export class DataFilesComponent implements OnInit, OnChanges {
     ngOnInit() {
         this.editstatsvc.watchEditMode((editMode) => {
             this.editMode = editMode;
+        });
+
+        // Bootstrap breakpoint observer (to switch between desktop/mobile mode)
+        this.breakpointObserver
+        .observe(['(min-width: 766px)'])
+        .subscribe((state: BreakpointState) => {
+            if (state.matches) {
+                this.mobileMode = false;
+            } else {
+                this.mobileMode = true;
+            }
         });
 
         if(this.inBrowser){
@@ -237,7 +280,7 @@ export class DataFilesComponent implements OnInit, OnChanges {
         if (! this.record['components'])
             return;
 
-        let makeNodeData = (name: string, parentKey: string, comp: NerdmComp) => {
+        let makeNodeData = (name: string, parentKey: string, comp: NerdmComp, isLeaf: boolean = false) => {
             let key = (parentKey) ? parentKey + '/' + name : name;
             let out = { name: name, key: key, comp: null, size: '', mediaType: '',
                         isInCart: false, downloadStatus: DownloadStatus.NO_STATUS, downloadProgress: 0   };
@@ -246,17 +289,18 @@ export class DataFilesComponent implements OnInit, OnChanges {
                 out['mediaType'] = comp.mediaType || '';
                 out['size'] = (comp.size === null || comp.size === undefined) ? ''
                                                                               : this.formatBytes(comp.size);
+                out['DetailsDisplayed'] = false;
+                out['DetailsDisplayed02'] = false;
             }
             return out;
         }
         let _insertComp = (levels: string[], comp: NerdmComp, tree: TreeNode) => {
             for (let child of tree.children) {
                 if (child.data.name == levels[0]) {
-                    if (levels.length > 1) 
+                    if (levels.length > 1) {
                         return _insertComp(levels.slice(1), comp, child);
-                    else  {
-                        // this is the node we are looking for
-                        child.data = makeNodeData(levels[0], tree.data.key, comp);
+                    } else  {
+                        child.data = makeNodeData(levels[0], tree.data.key, comp, true);
                         return child;
                     }
                 }
@@ -374,17 +418,106 @@ export class DataFilesComponent implements OnInit, OnChanges {
     }
 
     /**
-     *  Open a popup window to display file details
-     * @param event          the event that triggered the display
+     *  Expand the row to display file details. It's little tricky when hiding the details. 
+     *  We have to delay the action to let the animation to finish. 
      * @param fileNode       the TreeNode for the file to provide details for
-     * @param overlaypanel   the OverlayPanel that is to contain the details
      */
-    openDetails(event, fileNode: TreeNode, overlaypanel: OverlayPanel) {
-        this.fileNode = fileNode;
-        overlaypanel.hide();
-        setTimeout(() => {
-            overlaypanel.show(event);
-        }, 100);
+    openDetails(fileNode: any) {
+        //Close current details window if it's open
+        if(fileNode.comp.DetailsDisplayed){
+            fileNode.comp.DetailsDisplayed = false;
+            setTimeout(() => {
+                fileNode.comp.DetailsDisplayed02 = false;
+            }, 600);
+
+            this.currentKey = "";
+        }else{
+            this.cleanupDisplay();
+
+            fileNode.comp.DetailsDisplayed = true;
+
+            if(!fileNode.comp.DetailsDisplayed) {
+                setTimeout(() => {
+                    fileNode.comp.DetailsDisplayed02 = true;
+                }, 600);
+            }else{
+                fileNode.comp.DetailsDisplayed02 = true;
+            }
+    
+            this.currentKey = fileNode.key;
+        }
+    }
+
+    /**
+     * Determine if the file details need be displayed
+     * @param fileNode file node in the tree
+     * @returns boolean
+     *      true: display details
+     *      false: hide details
+     */
+    showFileDetails(fileNode: any) {
+        return this.isLeaf(fileNode) && fileNode.comp.DetailsDisplayed;
+    }
+
+    /**
+     * Determine if the file details need be displayed. This function is specifically for collapsing the detail row.
+     * @param fileNode file node in the tree
+     * @returns boolean
+     *      true: display details
+     *      false: hide details
+     */
+    showFileDetails02(fileNode: any) {
+        return this.isLeaf(fileNode) && fileNode.comp.DetailsDisplayed02;
+    }
+
+    /**
+     * Collapse the current expanded row if any.
+     * @returns 
+     */
+    cleanupDisplay(){
+        if(this.currentKey != '') {
+            let node : TreeNode = this.findNode(this.files, this.currentKey);
+            if(node) {
+                node.data.comp.DetailsDisplayed = false;
+                setTimeout(() => {
+                    node.data.comp.DetailsDisplayed02 = false;
+                }, 600);
+            }
+        }
+    }
+
+    /**
+     * Set the background color to light blue if the given row is expanded. 
+     * @param fileNode file node in the tree
+     */
+    rowStyle(fileNode: any) {
+        if(fileNode.comp.DetailsDisplayed){
+            return {'background-color': '#e6ffff'};
+        }else{
+            return {'background-color': 'white'};
+        }
+    }
+
+    /**
+     * Return the class of the arrow next to the file name.
+     * If the details is hidden, display the "right" arrow. Otherwise "down" arrow.
+     * @returns 
+     */
+    fileDetailsDisplayClass(fileNode: any) {
+        if(fileNode.comp.DetailsDisplayed){
+            return 'faa faa-caret-down';
+        }else{
+            return 'faa faa-caret-right';
+        }
+    }
+
+    /**
+     * Determine if this node is a leaf
+     * @param fileNode file node in the tree
+     * @returns boolean
+     */
+    isLeaf(fileNode: any) {
+        return (fileNode.comp['@type'].indexOf('nrdp:DataFile') > -1);
     }
 
     /**
@@ -599,8 +732,10 @@ export class DataFilesComponent implements OnInit, OnChanges {
         return { 'background-color': '#1E6BA1', 'width': this.cols[3].width, 'color': 'white', 'font-size': this.fontSize, 'white-space': 'nowrap' };
     }
 
-    titleStyle() {
-        return { 'width': this.cols[0].width, 'font-size': this.fontSize };
+    titleStyle(rowData: any) {
+        let cursor = this.isLeaf(rowData)? 'pointer' : 'default;';
+        let color = this.isLeaf(rowData)? '#1471AE' : 'black;';
+        return { 'width': this.cols[0].width, 'font-size': this.fontSize, 'margin-left': '10px', 'cursor': cursor, 'color': color };
     }
 
     typeStyle() {
@@ -647,10 +782,30 @@ export class DataFilesComponent implements OnInit, OnChanges {
      */
     getDialogWidth() {
         if(this.inBrowser){
-            var w = window.innerWidth > 500 ? 500 : window.innerWidth;
-            return w + 'px';
+            // var w = window.innerWidth > 500 ? 500 : window.innerWidth;
+            return window.innerWidth + 'px';
         }else{
             return "500px";
         }
+    }
+
+    copyToClipboard(val: string){
+        const selBox = document.createElement('textarea');
+        selBox.style.position = 'fixed';
+        selBox.style.left = '0';
+        selBox.style.top = '0';
+        selBox.style.opacity = '0';
+        selBox.value = val;
+        document.body.appendChild(selBox);
+        selBox.focus();
+        selBox.select();
+        document.execCommand('copy');
+        document.body.removeChild(selBox);
+
+        this.hashCopied = true;
+        setTimeout(() => {
+            this.hashCopied = false;
+        }, 2000);
+
     }
 }
