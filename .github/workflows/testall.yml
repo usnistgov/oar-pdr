@@ -29,8 +29,8 @@ jobs:
       - name: Build & Run Python Tests via Docker
         run: cd docker && ./testall python
 
-      - name: Build & Run Java Tests via Docker
-        run: cd docker && ./makedist java
+      - name: Test Java via Docker
+        run: cd docker && ./testall java
 
       - name: Build Angular Code
         run: cd docker && ./makedist angular

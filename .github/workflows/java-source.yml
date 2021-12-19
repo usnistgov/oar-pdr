@@ -4,8 +4,8 @@ on:
   push:
     branches-ignore: ['main', 'integration']
     paths:
-      - 'java/src/**'
-      - 'java/pom.xml'
+      - 'java/*/src/**'
+      - 'java/*/pom.xml'
 jobs:
   buildtest:
     runs-on: ubuntu-20.04
@@ -20,7 +20,7 @@ jobs:
         uses: actions/cache@v2
         with:
           path: ~/.m2
-          key: ${{ runner.os }}-m2-${{ hashFiles('java/pom.xml') }}
+          key: ${{ runner.os }}-m2-${{ hashFiles('java/customization-api/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2
 
       - name: Set up JDK
@@ -30,7 +30,7 @@ jobs:
           distribution: 'adopt'
 
       - name: Test with Maven
-        run: cd java && mvn --batch-mode test
+        run: cd java/customization-api && mvn --batch-mode test
 
 
   
