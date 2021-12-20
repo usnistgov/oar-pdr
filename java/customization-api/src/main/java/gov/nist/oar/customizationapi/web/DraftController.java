@@ -45,8 +45,10 @@ import gov.nist.oar.customizationapi.exceptions.UnAuthorizedUserException;
 import gov.nist.oar.customizationapi.repositories.DraftService;
 //import gov.nist.oar.customizationapi.repositories.UpdateRepository;
 import gov.nist.oar.customizationapi.service.ResourceNotFoundException;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.Parameters;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 /**
  * This is a webservice/restapi controller which gives access to customization
@@ -62,7 +64,7 @@ import io.swagger.annotations.ApiOperation;
  *
  */
 @RestController
-@Api(value = "Api endpoints to access editable data, update changes to data, save in the backend", tags = "Customization API")
+@Tag(description = "Api endpoints to access editable data, update changes to data, save in the backend", name = "Customization API")
 //@Validated
 @RequestMapping("/pdr/lp/draft/")
 public class DraftController {
@@ -85,7 +87,7 @@ public class DraftController {
 	 * @throws ResourceNotFoundException 
 	 */
 	@RequestMapping(value = { "{ediid}" }, method = RequestMethod.GET, produces = "application/json")
-	@ApiOperation(value = ".", nickname = "Access editable Record", notes = "Resource returns a record if it is editable and user is authenticated.")
+	@Operation(summary = "Access editable Record", description = "Resource returns a record if it is editable and user is authenticated.")
 	public Document getData(@PathVariable @Valid String ediid, @RequestParam(required = false) String view,
 			@RequestHeader(value = "Authorization", required = false) String serviceAuth, HttpServletRequest request)
 			throws CustomizationException, UnsatisfiedServletRequestParameterException, ResourceNotFoundException, InvalidInputException {
@@ -106,7 +108,7 @@ public class DraftController {
 	 * @throws CustomizationException
 	 */
 	@RequestMapping(value = { "{ediid}" }, method = RequestMethod.DELETE, produces = "application/json")
-	@ApiOperation(value = ".", nickname = "Delete the Record from drafts", notes = "This will allow user to delete all the changes made in the record in draft mode, original published record will remain as it is.")
+	@Operation(summary = "Delete the Record from drafts", description = "This will allow user to delete all the changes made in the record in draft mode, original published record will remain as it is.")
 	public boolean deleteRecord(@PathVariable @Valid String ediid,
 			@RequestHeader(value = "Authorization", required = false) String serviceAuth, HttpServletRequest request)
 			throws CustomizationException {
@@ -129,7 +131,7 @@ public class DraftController {
 	 */
 	@RequestMapping(value = {
 			"{ediid}" }, method = RequestMethod.PUT, headers = "accept=application/json", produces = "application/json")
-	@ApiOperation(value = ".", nickname = "Save changes to server", notes = "Resource returns a boolean based on success or failure of the request.")
+	@Operation(summary = "Save changes to server", description = "Resource returns a boolean based on success or failure of the request.")
 	@ResponseStatus(HttpStatus.CREATED)
 	public void createRecord(@PathVariable @Valid String ediid, @Valid @RequestBody Document params,
 			@RequestHeader(value = "Authorization", required = false) String serviceAuth, HttpServletRequest request)

@@ -9,11 +9,21 @@ spring:
       uri: http://localhost:8084
       
 logging:
-  path : /var/log/customization-api
+  file:
+    path: /var/log/customization-api
   exception-conversion-word: '%wEx'
   
-#samlauth:
-#  enabled: false
+springdoc:
+  swagger-ui:
+    tagsSorter: alpha
+    path: /swagger-ui.html
+#    configUrl: /v3/api-docs/swagger-config
+#    enabled: true 
+    disable-swagger-default-url: true
+#  packagesToScan: gov.nist.oar.rmm
+#  pathsToMatch: /rmm
+samlauth:
+  enabled: true
   
 server:
   servlet:

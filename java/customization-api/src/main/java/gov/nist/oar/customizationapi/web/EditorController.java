@@ -39,8 +39,8 @@ import gov.nist.oar.customizationapi.exceptions.UnAuthorizedUserException;
 import gov.nist.oar.customizationapi.repositories.EditorService;
 //import gov.nist.oar.customizationapi.repositories.UpdateRepository;
 import gov.nist.oar.customizationapi.service.ResourceNotFoundException;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 /**
  * This is a webservice/restapi controller which gives options to access, update
@@ -58,7 +58,7 @@ import io.swagger.annotations.ApiOperation;
  *
  */
 @RestController
-@Api(value = "Api endpoints to access editable data, update changes to data, save in the backend", tags = "Customization API")
+@Tag(description = "Api endpoints to access editable data, update changes to data, save in the backend", name = "Customization API")
 @Validated
 @CrossOrigin(origins = "*", allowedHeaders = "*")
 @RequestMapping("/pdr/lp/editor/")
@@ -79,7 +79,7 @@ public class EditorController {
 	 */
 	@RequestMapping(value = {
 			"{ediid}" }, method = RequestMethod.PATCH, headers = "accept=application/json", produces = "application/json")
-	@ApiOperation(value = ".", nickname = "Cache Record Changes", notes = "Resource returns a record if it is editable and user is authenticated.")
+	@Operation(summary = "Cache Record Changes", description = "Resource returns a record if it is editable and user is authenticated.")
 	public Document updateRecord(@PathVariable @Valid String ediid, @Valid @RequestBody String params)
 			throws CustomizationException, InvalidInputException {
 
@@ -96,7 +96,7 @@ public class EditorController {
 	 * @throws CustomizationException
 	 */
 	@RequestMapping(value = { "{ediid}" }, method = RequestMethod.GET, produces = "application/json")
-	@ApiOperation(value = ".", nickname = "Access editable Record", notes = "Resource returns a record if it is editable and user is authenticated.")
+	@Operation(summary = "Access editable Record", description = "Resource returns a record if it is editable and user is authenticated.")
 	public Document getRecord(@PathVariable @Valid String ediid) throws CustomizationException, ResourceNotFoundException {
 		logger.info("Access the record to be edited by ediid " + ediid);
 		return uRepo.getRecord(ediid);
@@ -110,7 +110,7 @@ public class EditorController {
 	 * @throws CustomizationException
 	 */
 	@RequestMapping(value = { "{ediid}" }, method = RequestMethod.DELETE, produces = "application/json" )
-	@ApiOperation(value = ".", nickname = "Access editable Record", notes = "Resource returns a record if it is editable and user is authenticated.")
+	@Operation(summary = "Access editable Record", description = "Resource returns a record if it is editable and user is authenticated.")
 	public Document deleteChanges(@PathVariable @Valid String ediid) throws CustomizationException, ResourceNotFoundException {
 		logger.info("Delete the changes made from client side of the record respresented by " + ediid);
 		return uRepo.deleteRecordChanges(ediid);

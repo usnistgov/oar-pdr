@@ -13,6 +13,7 @@
 package gov.nist.oar.customizationapi.config;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
@@ -25,14 +26,18 @@ import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
-import com.mongodb.Mongo;
-import com.mongodb.MongoClient;
-import com.mongodb.MongoClientOptions;
+//import com.mongodb.Mongo;
+//import com.mongodb.MongoClient;
+//import com.mongodb.MongoClientOptions;
 import com.mongodb.MongoCredential;
 import com.mongodb.ServerAddress;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 
+import com.mongodb.ConnectionString;
+import com.mongodb.MongoClientSettings;
+import com.mongodb.client.MongoClient;
+import com.mongodb.client.MongoClients;
 @Configuration
 @ConfigurationProperties
 @EnableAutoConfiguration
@@ -76,7 +81,7 @@ public class MongoConfig {
 	@PostConstruct
 	public void initIt() throws Exception {
 
-		mongoClient = (MongoClient) this.mongo();
+		mongoClient = this.mongo();
 		log.info("#### Initialize MongoDB with dbname:"+this.dbname+"####");
 		this.setMongodb(this.dbname);
 		this.setRecordCollection(this.record);
@@ -164,9 +169,28 @@ public class MongoConfig {
 	 * @return
 	 * @throws Exception
 	 */
-	public Mongo mongo() throws Exception {
-		servers.add(new ServerAddress(host, port));
-		return new MongoClient(servers, MongoCredential.createCredential(user, dbname, password.toCharArray()),
-				MongoClientOptions.builder().build());
+	public MongoClient mongo() throws Exception {
+//		servers.add(new ServerAddress(host, port));
+		
+//		MongoCredential credential = MongoCredential.createCredential(user, dbname, password.toCharArray());
+//	    ServerAddress serverAddress = new ServerAddress(host, port);
+//
+//	    // Mongo Client
+//	    MongoClient mongoClient = new MongoClient(serverAddress,Arrays.asList(credential)); 
+//
+//		return new MongoClient(servers, MongoCredential.createCredential(user, dbname, password.toCharArray()),
+//				MongoClientOptions.builder().build());
+//		
+		MongoCredential credential = MongoCredential.createCredential(user, dbname, password.toCharArray());
+
+	    MongoClientSettings settings = MongoClientSettings.builder()
+	            .credential(credential)
+	            .applyToSslSettings(builder -> builder.enabled(false))
+	            .applyToClusterSettings(builder -> 
+	                builder.hosts(Arrays.asList(new ServerAddress(host, port))))
+	            .build();
+
+	    MongoClient mongoClient = MongoClients.create(settings);
+	    return mongoClient;
 	}
 }

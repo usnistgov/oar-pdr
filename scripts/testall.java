@@ -9,5 +9,5 @@ execdir=`dirname $0`
 PACKAGE_DIR=`(cd $execdir/.. > /dev/null 2>&1; pwd)`
 
 $PACKAGE_DIR/scripts/setversion.sh
-(cd java/customization-api && mvn test)
+(cd java/customization-api && mvn --batch-mode test)
 
