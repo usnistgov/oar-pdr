@@ -92,13 +92,13 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
     menuBottom: string = "1em";
     showMetrics: boolean = false;
 
-    @ViewChild(LandingBodyComponent)
+    @ViewChild(LandingBodyComponent, { static: false })
     landingBodyComponent: LandingBodyComponent;
 
     // @ViewChild(MetricsinfoComponent)
     // metricsinfoComponent: MetricsinfoComponent;
 
-    @ViewChild('stickyButton') btnElement: ElementRef;
+    @ViewChild('stickyButton', { static: false }) btnElement: ElementRef;
 
     /**
      * create the component.

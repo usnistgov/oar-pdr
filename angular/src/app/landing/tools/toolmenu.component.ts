@@ -44,7 +44,7 @@ export class ToolMenuComponent implements OnChanges {
     @Output() scroll = new EventEmitter<string>();
 
     // reference to the child menu (needed to toggle display when isPopup = true)
-    @ViewChild('tmenu')
+    @ViewChild('tmenu', { static: true })
     private menu : Menu;
 
     // the menu item configuration

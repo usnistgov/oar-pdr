@@ -35,7 +35,7 @@ export class DatacartComponent implements OnInit, AfterViewInit {
 
     overallStatus: string = "";
 
-    @ViewChild('bundler')
+    @ViewChild('bundler', { static: true })
     bundler : BundleplanComponent;
 
     /**

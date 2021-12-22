@@ -21,7 +21,7 @@ export class SearchService {
     private rmmBackend: string;
     editEnabled: any;
 
-    @ViewChild(MessageBarComponent)
+    @ViewChild(MessageBarComponent, { static: true })
     private msgbar: MessageBarComponent;
 
     /**

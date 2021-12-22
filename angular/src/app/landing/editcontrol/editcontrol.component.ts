@@ -66,10 +66,10 @@ export class EditControlComponent implements OnInit, OnChanges {
     @Input() inBrowser: boolean = false;
 
     // injected as ViewChilds so that this class can send messages to it with a synchronous method call.
-    @ViewChild(EditStatusComponent)
+    @ViewChild(EditStatusComponent, { static: true })
     private statusbar: EditStatusComponent;
 
-    @ViewChild(MessageBarComponent)
+    @ViewChild(MessageBarComponent, { static: true })
     private msgbar: MessageBarComponent;
 
     /**

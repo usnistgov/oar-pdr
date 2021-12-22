@@ -253,7 +253,7 @@ export class TreetableComponent implements OnInit, AfterViewInit {
 
     @Input() cartName: string;
 
-    @ViewChild("ngtt")
+    @ViewChild("ngtt", { static: false })
     tt : TreeTable;
 
     // Remove the cart upon tab closed

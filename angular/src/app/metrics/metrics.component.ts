@@ -75,10 +75,10 @@ export class MetricsComponent implements OnInit {
     recordLevelData : RecordLevelMetrics;
         
     // injected as ViewChilds so that this class can send messages to it with a synchronous method call.
-    @ViewChild(HorizontalBarchartComponent)
+    @ViewChild(HorizontalBarchartComponent, { static: false })
     private barchart: HorizontalBarchartComponent;
 
-    @ViewChild('panel0', { read: ElementRef }) public panel0: ElementRef<any>;
+    @ViewChild('panel0', { read: ElementRef, static: false }) public panel0: ElementRef<any>;
 
     constructor(
         private route: ActivatedRoute,

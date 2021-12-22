@@ -30,7 +30,7 @@ export class ResourceMetadataComponent implements OnChanges {
     @Input() metricsData: MetricsData;
     @Input() showJsonViewer: boolean = false;
 
-    @ViewChild(AboutdatasetComponent)
+    @ViewChild(AboutdatasetComponent, { static: true })
     aboutdatasetComponent: AboutdatasetComponent;
 
     /**

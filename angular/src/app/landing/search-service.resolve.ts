@@ -2,12 +2,12 @@
 import { Injectable } from '@angular/core';
 import { Resolve, ActivatedRouteSnapshot } from '@angular/router';
 import { SearchService } from '../shared/search-service/index';
-import { RouterStateSnapshot } from '@angular/router/src/router_state';
+import { RouterStateSnapshot } from '@angular/router';
 import { Observable } from 'rxjs/Observable';
 // import { catchError } from 'rxjs/operators';
 import { Router } from '@angular/router';
 import * as _ from 'lodash';
-import { Console } from '@angular/core/src/console';
+// import { Console } from '@angular/core/src/console';
 import 'rxjs/add/observable/of';
 import { first, tap } from 'rxjs/operators';
 import { of } from 'rxjs/observable/of';

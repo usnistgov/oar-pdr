@@ -50,13 +50,13 @@ export class LandingBodyComponent {
     @Input() metricsData: MetricsData;
     @Input() showJsonViewer: boolean = false;
 
-    @ViewChild(ResourceMetadataComponent)
+    @ViewChild(ResourceMetadataComponent, { static: false })
     resourceMetadataComponent: ResourceMetadataComponent;
 
-    @ViewChild('description') description: ElementRef;
-    @ViewChild('dataAccess') dataAccess: ElementRef;
-    @ViewChild('references') references: ElementRef;
-    @ViewChild('about') about: ElementRef;
+    @ViewChild('description', { static: false }) description: ElementRef;
+    @ViewChild('dataAccess', { static: false }) dataAccess: ElementRef;
+    @ViewChild('references', { static: false }) references: ElementRef;
+    @ViewChild('about', { static: false }) about: ElementRef;
 
     /**
      * create an instance of the Identity section

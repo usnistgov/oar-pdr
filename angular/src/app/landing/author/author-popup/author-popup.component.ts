@@ -20,7 +20,7 @@ export class AuthorPopupComponent implements OnInit {
   errorMsg: any;
   affiliationList: any[] = [];
 
-  @ViewChild('authors') private myScrollContainer: ElementRef;
+  @ViewChild('authors', { static: true }) private myScrollContainer: ElementRef;
 
   constructor(
     public activeModal: NgbActiveModal,
