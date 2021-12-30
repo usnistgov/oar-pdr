@@ -28,7 +28,7 @@ export class SearchTopicsComponent implements OnInit {
   taxonomyTree: TreeNode[] = [];
   toggle: Boolean = true;  
 
-  @ViewChild('panel', { read: ElementRef, static: false }) public panel: ElementRef<any>;
+  @ViewChild('panel', { read: ElementRef }) public panel: ElementRef<any>;
   @ViewChild('panel0', { read: ElementRef, static: true }) public panel0: ElementRef<any>;
 
   constructor(

@@ -3,7 +3,7 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { SearchTopicsComponent } from './search-topics.component';
 import { FormsModule } from '@angular/forms';
-import { DataTableModule, TreeModule } from 'primeng/primeng';
+import { TreeModule } from 'primeng/tree';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { TreeNode } from 'primeng/api';
 import { TestDataService } from '../../../shared/testdata-service/testDataService';
@@ -38,7 +38,7 @@ describe('SearchTopicsComponent', () => {
 
         TestBed.configureTestingModule({
             declarations: [SearchTopicsComponent],
-            imports: [FormsModule, DataTableModule, TreeModule, HttpClientTestingModule, RouterTestingModule],
+            imports: [FormsModule, TreeModule, HttpClientTestingModule, RouterTestingModule],
             schemas: [NO_ERRORS_SCHEMA],
             providers: [
                 NgbActiveModal,

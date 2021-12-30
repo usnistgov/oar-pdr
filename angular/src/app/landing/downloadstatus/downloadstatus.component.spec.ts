@@ -14,7 +14,7 @@ describe('DownloadstatusComponent', () => {
     TestBed.configureTestingModule({
       declarations: [ DownloadstatusComponent ],
       imports: [
-        NgbModule.forRoot()
+        NgbModule
       ]
     })
     .compileComponents();

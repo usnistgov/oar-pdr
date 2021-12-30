@@ -14,7 +14,8 @@
  */
 import { Component, OnInit, OnChanges, AfterViewInit, Output, Input, ViewChild, NgZone, HostListener, Inject,
          PLATFORM_ID, EventEmitter, SimpleChanges } from '@angular/core';
-import { TreeNode, TreeTable } from 'primeng/primeng';
+import { TreeNode } from 'primeng/api';
+import { TreeTable } from 'primeng/treetable';
 import { CartService } from '../cart.service';
 import { DownloadService } from '../../shared/download-service/download-service.service';
 import { formatBytes } from '../../utils';
@@ -253,7 +254,7 @@ export class TreetableComponent implements OnInit, AfterViewInit {
 
     @Input() cartName: string;
 
-    @ViewChild("ngtt", { static: false })
+    @ViewChild("ngtt")
     tt : TreeTable;
 
     // Remove the cart upon tab closed

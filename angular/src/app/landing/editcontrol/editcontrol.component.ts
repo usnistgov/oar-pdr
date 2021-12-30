@@ -14,11 +14,6 @@ import { NerdmRes } from '../../nerdm/nerdm'
 import { LandingConstants } from '../constants';
 import { AppConfig } from '../../config/config';
 import { OverlayPanel } from 'primeng/overlaypanel';
-import {
-    TreeTableModule, TreeNode, MenuItem, OverlayPanelModule,
-    FieldsetModule, PanelModule, ContextMenuModule,
-    MenuModule
-} from 'primeng/primeng';
 
 /**
  * a panel that serves as a control center for editing metadata displayed in the 

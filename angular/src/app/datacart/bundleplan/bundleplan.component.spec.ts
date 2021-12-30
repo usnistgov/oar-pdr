@@ -29,7 +29,7 @@ describe('BundleplanComponent', () => {
         schemas: [NO_ERRORS_SCHEMA],
         imports: [
             HttpClientTestingModule,
-            NgbModule.forRoot()
+            NgbModule
         ],
         providers: [
             CartService,

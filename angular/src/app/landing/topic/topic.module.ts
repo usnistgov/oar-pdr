@@ -9,7 +9,7 @@ import { ToastrModule } from 'ngx-toastr';
 
 import { TopicComponent } from './topic.component';
 import { SearchTopicsComponent } from './topic-popup/search-topics.component';
-import { ButtonModule } from 'primeng/primeng';
+import { ButtonModule } from 'primeng/button';
 
 /**
  * module that provide support for rendering and managing a resource's list of 

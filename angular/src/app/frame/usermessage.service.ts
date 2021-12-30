@@ -1,4 +1,5 @@
 import { Subject } from 'rxjs';
+import { Injectable } from "@angular/core";
 
 export interface Message {
     type : string;
@@ -18,6 +19,7 @@ export interface Message {
  * This class can be extended to modify or decorate messages of particular types 
  * with, say, extra information. 
  */
+@Injectable()
 export class UserMessageService {
 
     private msg : Subject<Message> = new Subject<Message>();

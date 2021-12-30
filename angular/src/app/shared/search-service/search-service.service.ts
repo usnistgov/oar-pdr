@@ -1,4 +1,4 @@
-import { Injectable, ViewChild, PLATFORM_ID, APP_ID, Inject } from '@angular/core';
+import { Injectable, ViewChild, PLATFORM_ID, APP_ID, Inject, Directive } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { makeStateKey, TransferState } from '@angular/platform-browser';
@@ -14,6 +14,7 @@ import { MessageBarComponent } from '../../frame/messagebar.component';
 /**
  * This class provides the Search service with methods to search for records from tha rmm.
  */
+@Directive()
 @Injectable()
 export class SearchService {
 

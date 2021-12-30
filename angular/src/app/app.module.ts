@@ -59,16 +59,16 @@ enableProdMode();
         DatacartModule,
         MetricsModule,
         SharedModule.forRoot(), 
-        FragmentPolyfillModule.forRoot({
-            smooth: true
-        }),
+        // FragmentPolyfillModule.forRoot({
+        //     smooth: true
+        // }),
 
         HttpClientModule, FormsModule, ReactiveFormsModule,
         CommonModule, BrowserAnimationsModule, FormsModule,
         ToastrModule.forRoot({
             toastClass: 'toast toast-bootstrap-compatibility-fix'
         }),
-        NgbModule.forRoot()
+        NgbModule
     ],
     exports: [],
     providers: [

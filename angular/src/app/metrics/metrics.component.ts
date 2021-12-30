@@ -4,7 +4,7 @@ import { CommonFunctionService } from '../shared/common-function/common-function
 import { ActivatedRoute } from '@angular/router';
 import { MetricsService } from '../shared/metrics-service/metrics.service';
 import { AppConfig } from '../config/config';
-import { TreeNode } from 'primeng/primeng';
+import { TreeNode } from 'primeng/api';
 import { saveAs } from 'file-saver';
 import { RecordLevelMetrics } from './metrics';
 import { DatePipe } from '@angular/common';
@@ -75,10 +75,10 @@ export class MetricsComponent implements OnInit {
     recordLevelData : RecordLevelMetrics;
         
     // injected as ViewChilds so that this class can send messages to it with a synchronous method call.
-    @ViewChild(HorizontalBarchartComponent, { static: false })
+    @ViewChild(HorizontalBarchartComponent)
     private barchart: HorizontalBarchartComponent;
 
-    @ViewChild('panel0', { read: ElementRef, static: false }) public panel0: ElementRef<any>;
+    @ViewChild('panel0', { read: ElementRef }) public panel0: ElementRef<any>;
 
     constructor(
         private route: ActivatedRoute,

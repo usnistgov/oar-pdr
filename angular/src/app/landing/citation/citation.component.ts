@@ -36,7 +36,7 @@ export class CitationDescriptionComponent {
     selector: 'citation-popup',
     template: `
 <p-dialog #citepopup class="citationDialog" [closable]="false" [(visible)]="visible" 
-                     [modal]="false" [width]="width" [responsive]="true">
+                     [modal]="false" [responsive]="true">
   <p-header> Citation
     <button style="position:relative; float:right; background-color:#1E6BA1; " type="button" 
             pButton icon="faa faa-close" (click)="hide()"></button>
