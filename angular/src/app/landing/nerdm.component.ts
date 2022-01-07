@@ -6,7 +6,7 @@ import { Component } from '@angular/core';
   selector: 'nerdm-detail',
   
   template: `
-    <div class="ui-grid ui-grid-responsive ui-grid-pad center">
+    <div class="grid p-grid-responsive p-grid-pad center">
     <div class="" style="padding: 2.5rem 2.5rem 2.5rem 2.5rem">
       <label style="font-size: xx-large;float: left;display: block;">NERDm details</label>
       <div class="EmptyBox20"></div>

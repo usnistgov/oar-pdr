@@ -87,7 +87,7 @@ describe('LandingPageComponent', () => {
             ]
         }).compileComponents();
 
-        router = TestBed.get(Router);
+        router = TestBed.inject(Router);
         fixture = TestBed.createComponent(LandingPageComponent);
         component = fixture.componentInstance;
         fixture.detectChanges();

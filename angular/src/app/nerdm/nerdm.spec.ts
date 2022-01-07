@@ -1,7 +1,7 @@
 import * as nerdm from './nerdm';
 import { testdata } from '../../environments/environment';
 
-import * as _ from 'lodash';
+import * as _ from 'lodash-es';
 
 describe('NERDResource', function() {
 

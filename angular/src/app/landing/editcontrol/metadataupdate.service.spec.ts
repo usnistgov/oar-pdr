@@ -33,7 +33,7 @@ describe('MetadataUpdateService', () => {
             imports: [ CommonModule ],
             providers: [ DatePipe ]
         });
-        let dp : DatePipe = TestBed.get(DatePipe);
+        let dp : DatePipe = TestBed.inject(DatePipe);
         let cfgdata = null;
         cfgdata = JSON.parse(JSON.stringify(config));
         edstatsvc = new EditStatusService(new AppConfig(cfgdata));

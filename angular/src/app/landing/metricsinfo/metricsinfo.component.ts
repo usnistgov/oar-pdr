@@ -8,7 +8,7 @@ import { Observable, of, Observer } from "rxjs";
 import { AppConfig } from '../../config/config';
 import { CartActions } from '../../datacart/cartconstants';
 import { MetricsData } from "../metrics-data";
-import * as _ from 'lodash';
+import * as _ from 'lodash-es';
 import { formatBytes } from '../../utils';
 
 @Component({

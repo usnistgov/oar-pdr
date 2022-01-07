@@ -6,7 +6,7 @@ import { RouterStateSnapshot } from '@angular/router';
 import { Observable } from 'rxjs/Observable';
 // import { catchError } from 'rxjs/operators';
 import { Router } from '@angular/router';
-import * as _ from 'lodash';
+import * as _ from 'lodash-es';
 // import { Console } from '@angular/core/src/console';
 import 'rxjs/add/observable/of';
 import { first, tap } from 'rxjs/operators';

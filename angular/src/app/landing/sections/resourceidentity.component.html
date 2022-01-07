@@ -1,5 +1,5 @@
-<div class="ui-g" id="identity">
-    <div class="ui-g-12 ui-md-12 ui-lg-12 ui-sm-12">
+<div class="grid" id="identity">
+    <div class="col-12 col-md-12 col-lg-12 col-sm-12">
         <span class="recordType">
             <b>{{recordType}}</b>
         </span>
@@ -7,7 +7,7 @@
         <app-title [record]="record" [inBrowser]="inBrowser"></app-title>
         <app-author [record]="record" [inBrowser]="inBrowser"></app-author>
     </div>
-    <div class="ui-g-8 ui-md-8 ui-lg-8 ui-sm-12">
+    <div class="col-8 col-md-8 col-lg-8 col-sm-12">
         <app-contact [record]="record" [inBrowser]="inBrowser"></app-contact>
 
         <span>Identifier: </span>
@@ -30,7 +30,7 @@
         <pdr-version [record]="record"></pdr-version>
     </div>
 
-    <div class="ui-g-4 ui-md-4 ui-lg-4 ui-sm-12">
+    <div class="col-4 col-md-4 col-lg-4 col-sm-12">
         <span *ngIf="showHomePageLink" style="float: right;">
             <span *ngIf="inBrowser; else visitHomeOnServer">
                 <a href={{record.landingPage}} target="_blank">

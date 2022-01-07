@@ -28,7 +28,7 @@
 }
 
 
-:host /deep/ .rightMenuStyle > .ui-menu .ui-submenu-header{
+:host ::ng-deep .rightMenuStyle > .ui-menu .ui-submenu-header{
   /* background-color: #B8D4E6; */
   /* background-color:rgb(65, 68, 69); */
   background-color:#2C8034;
@@ -41,7 +41,7 @@
  
 }
 
-:host /deep/ .rightMenuStyle > .ui-menu  .ui-menuitem-link  .ui-state-hover{
+:host ::ng-deep .rightMenuStyle > .ui-menu  .ui-menuitem-link  .ui-state-hover{
   line-height: 1em;
   min-height: 1em;
   background-color: #e7f0f6;
@@ -50,7 +50,7 @@
   font-size: 14px;
 }
 
-:host /deep/ .rightMenuStyle > .ui-menu  .ui-menuitem{
+:host ::ng-deep .rightMenuStyle > .ui-menu  .ui-menuitem{
   line-height: 1em;
   min-height: 1em;
   /* background-color:  #e7f0f6; */
@@ -61,33 +61,33 @@
   padding: 0;
 }
 
-:host /deep/ .rightMenuStyle > .ui-menu .ui-menuitem-link{
+:host ::ng-deep .rightMenuStyle > .ui-menu .ui-menuitem-link{
   padding: 0.5em 0.2em 0.5em 0.5em;
   font-family:  sans-serif;
   font-size: 14px;
 }
-:host /deep/ .rightMenuStyle > .ui-menu{
+:host ::ng-deep .rightMenuStyle > .ui-menu{
   width: 100%;
 }
 
-:host /deep/ .rightMenuStyle > .ui-menu  .ui-menuitem-link:hover {
+:host ::ng-deep .rightMenuStyle > .ui-menu  .ui-menuitem-link:hover {
   background-color: #ffffff;
   color: #000000;
 }
 
-:host /deep/ .rightMenuStylePop  > .ui-menu {
+:host ::ng-deep .rightMenuStylePop  > .ui-menu {
   position: absolute;
   width: 12em;
   word-wrap: break-word;
   font-family: sans-serif;
   
 }
-:host /deep/ .rightMenuStylePop > .ui-menu .ui-menuitem-link{
+:host ::ng-deep .rightMenuStylePop > .ui-menu .ui-menuitem-link{
   padding: 0.5em 0.2em 0.5em 0.5em;
   font-size: 14px;
 }
 
-:host /deep/ .rightMenuStylePop > .ui-menu  .ui-menuitem{
+:host ::ng-deep .rightMenuStylePop > .ui-menu  .ui-menuitem{
   line-height: 1em;
   min-height: 1em;
   /* background-color:  #e7f0f6; */
@@ -98,7 +98,7 @@
   padding: 0;
 }
 
-:host /deep/ .rightMenuStylePop > .ui-menu  .ui-menuitem-link  .ui-state-hover{
+:host ::ng-deep .rightMenuStylePop > .ui-menu  .ui-menuitem-link  .ui-state-hover{
   line-height: 1em;
   min-height: 1em;
   background-color: #e7f0f6;
@@ -106,7 +106,7 @@
   font-family: 'Sans-Serif';
   font-size: 14px;
 }
-:host /deep/ .rightMenuStylePop > .ui-menu .ui-submenu-header {
+:host ::ng-deep .rightMenuStylePop > .ui-menu .ui-submenu-header {
   background-color:#2C8034;
   padding: 2%;
   padding-left: 5%;
@@ -117,19 +117,19 @@
  
 }
 
-:host /deep/ .rightMenuStylePop > .ui-menu .ui-submenu-header{
+:host ::ng-deep .rightMenuStylePop > .ui-menu .ui-submenu-header{
   padding: 0.5em 0.2em 0.5em 0.5em;
   font-size: 14px;
 }
 
-/* :host /deep/ .rightMenuStyle > .ui-menu .ui-menu-list li.ui-menuitem{
+/* :host ::ng-deep .rightMenuStyle > .ui-menu .ui-menu-list li.ui-menuitem{
   background-color:#E7F0F6;
   font-family: 'Sans-Serif';
   word-wrap: break-word;
   font-size: 0.9em;
 } */
 
-:host /deep/ .ui-widget-header{
+:host ::ng-deep .ui-widget-header{
   border: 0px;
   /* background-color:#336B87; */
    /* background-color: #1D72AC; */
@@ -137,15 +137,15 @@
    background-color: #f1f1f1;
 }
 
-:host /deep/ .ui-widget-content{
+:host ::ng-deep .ui-widget-content{
   border: 0px;
 }
-:host /deep/ .ui-menu{
+:host ::ng-deep .ui-menu{
   padding: 0;
   border:0;
 }
 
-:host /deep/ .ui-state-active, :host /deep/ .ui-state-highlight{
+:host ::ng-deep .ui-state-active, :host ::ng-deep .ui-state-highlight{
   background-color: #F3F3F3;
   color: black;
   font-family: sans-serif;
@@ -158,46 +158,46 @@
   color: black;
   padding: 1;
 }
-:host /deep/ citationDialog > button.ui-button-icon-only{  
+:host ::ng-deep citationDialog > button.ui-button-icon-only{  
   border-radius: 50%;
   width: 1.5em;
   height: 1.5em;
 }
 
 
-:host /deep/  .ui-dialog .ui-dialog-titlebar{
+:host ::ng-deep  .ui-dialog .ui-dialog-titlebar{
   background-color: #f1f1f1;
   color: #212121;
   font-family: sans-serif;
   font-size: 16px;
 }
 
-:host /deep/ .ui-treetable-resizable .ui-treetable-thead > tr > th{
+:host ::ng-deep .ui-treetable-resizable .ui-treetable-thead > tr > th{
   background-color: #1E6BA1;
   /* border-color: coral; */
   color: white;
   border: 0;
 }
 
-:host /deep/ .ui-treetable-tbody{
+:host ::ng-deep .ui-treetable-tbody{
   /* background-color: #E4F2FC; */
   font-family: sans-serif;
   font-size: 14px;
 }
 
-:host /deep/ .ui-treetable thead tr{
+:host ::ng-deep .ui-treetable thead tr{
   border-bottom: 0;
 }
 
-:host /deep/ .ui-treetable thead tr th .ui-column-resizer{
+:host ::ng-deep .ui-treetable thead tr th .ui-column-resizer{
   color: white;
 }
 
-:host /deep/ .ui-treetable .ui-treetable-tbody > tr > td{
+:host ::ng-deep .ui-treetable .ui-treetable-tbody > tr > td{
   border-bottom: #8c8c8c  1px solid;
   
 }
-:host /deep/  .ui-treetable thead tr th .ui-sortable-column-icon {
+:host ::ng-deep  .ui-treetable thead tr th .ui-sortable-column-icon {
   color: white;
 }
 
@@ -287,14 +287,14 @@
   text-align: left;
 }
 
-:host /deep/ .faa-cart-plus:before {
+:host ::ng-deep .faa-cart-plus:before {
   /* color: #1E6BA1; */
 }
-:host /deep/ reflinks > a {
+:host ::ng-deep reflinks > a {
   
   font-family: sans-serif;
 }
-/* :host /deep/ fileDialog > .ui-overlaypanel .ui-overlaypanel-close {
+/* :host ::ng-deep fileDialog > .ui-overlaypanel .ui-overlaypanel-close {
   background-color: #1E6BA1;
   border-radius: 50%;
   transition: background-color 0.3s;
@@ -305,7 +305,7 @@
   line-height: 1.2em;
   text-align: center;
 } */
-/* :host /deep/  a > .ui-overlaypanel .ui-overlaypanel-close{
+/* :host ::ng-deep  a > .ui-overlaypanel .ui-overlaypanel-close{
   background-color: #1E6BA1;
 } */
 

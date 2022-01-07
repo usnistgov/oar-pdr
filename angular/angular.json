@@ -10,6 +10,7 @@
         "build": {
           "builder": "@angular-devkit/build-angular:browser",
           "options": {
+            "allowedCommonJsDependencies": ["file-saver"],
             "aot": true,
             "outputPath": "dist/browser",
             "index": "src/index.html",
@@ -28,13 +29,16 @@
               "node_modules/bootstrap/dist/css/bootstrap.min.css",
               "node_modules/primeng/resources/primeng.css",
               "node_modules/primeicons/primeicons.css",
-              "node_modules/primeng/resources/themes/nova-light/theme.css",
+              "node_modules/primeflex/primeflex.css",
+              "node_modules/primeng/resources/themes/bootstrap4-light-blue/theme.css",
               "src/styles/font-awesome/css/font-awesome.min.css",
               "src/styles/main.css",
               "src/app/content/modal.less",
               "node_modules/ngx-toastr/toastr.css"
             ],
-            "scripts": []
+            "scripts": [
+                "node_modules/lodash-es/lodash.js"
+            ]
           },
           "configurations": {
             "production": {

@@ -14,13 +14,13 @@ import { Response } from 'express';
     styleUrls: [ '../landing/landing.component.css' ],
     template: `
 <div class="card landingcard">
-  <div class="ui-g">
-    <div class = "ui-g-12 ui-md-12 ui-lg-12 ui-sm-12">
+  <div class="grid">
+    <div class = "col-12 col-md-12 col-lg-12 col-sm-12">
       <div class="title"><h2 id="not-found" name="not-found">Hmm...</h2></div>
     </div>
   </div>
-  <div class="ui-g">
-    <div class = "ui-g-12 ui-md-12 ui-lg-12 ui-sm-12">
+  <div class="grid">
+    <div class = "col-12 col-md-12 col-lg-12 col-sm-12">
       <div *ngIf="requestedID; else generic">
         <p>Requested ID not found: {{requestedID}}.</p>
       </div>

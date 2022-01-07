@@ -2,11 +2,13 @@ import { Injectable, ViewChild, PLATFORM_ID, APP_ID, Inject, Directive } from '@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { makeStateKey, TransferState } from '@angular/platform-browser';
-import 'rxjs/add/operator/map';
-import 'rxjs/add/operator/catch';
-import 'rxjs/add/observable/throw';
+// import 'rxjs/add/operator/map';
+// import 'rxjs/add/operator/catch';
+// import 'rxjs/add/observable/throw';
+import { catchError, map } from 'rxjs/operators';
+import 'rxjs';
 import { AppConfig } from '../../config/config';
-import * as _ from 'lodash';
+import * as _ from 'lodash-es';
 import { tap } from 'rxjs/operators';
 import { isPlatformServer } from '@angular/common';
 import { MessageBarComponent } from '../../frame/messagebar.component';
@@ -89,30 +91,30 @@ export class SearchService {
         else {
             console.warn("record data not found in transfer state");
             return this.searchById(recordid)
-                .catch((err: Response, caught: Observable<any[]>) => {
-                    // console.log(err);
-                    if (err !== undefined) {
-                        console.error("Failed to retrieve data for id=" + recordid + "; error status=" + err.status);
-                        if ("message" in err) console.error("Reason: " + (<any>err).message);
-                        if ("url" in err) console.error("URL used: " + (<any>err).url);
-
-                        let msg = "Failed to retrieve data for id=" + recordid;
-                        this.msgbar.error(msg);
-
-                        if (err.status == 0) {
-                            console.warn("Possible causes: Unable to trust site cert, CORS restrictions, ...");
-                            return Observable.throw('Unknown error requesting data for id=' + recordid);
-                        }
-                    }
-                    return Observable.throw(caught);
-                })
                 .pipe(
                     tap(record => {
                         if (isPlatformServer(this.platformId)) {
                             this.transferState.set(recordid_KEY, record);
                         }
+                    }),
+                    catchError((err: Response, caught: Observable<any[]>) => {
+                        // console.log(err);
+                        if (err !== undefined) {
+                            console.error("Failed to retrieve data for id=" + recordid + "; error status=" + err.status);
+                            if ("message" in err) console.error("Reason: " + (<any>err).message);
+                            if ("url" in err) console.error("URL used: " + (<any>err).url);
+    
+                            let msg = "Failed to retrieve data for id=" + recordid;
+                            this.msgbar.error(msg);
+    
+                            if (err.status == 0) {
+                                console.warn("Possible causes: Unable to trust site cert, CORS restrictions, ...");
+                                return Observable.throw('Unknown error requesting data for id=' + recordid);
+                            }
+                        }
+                        return Observable.throw(caught);
                     })
-                );
+                )
         }
     }
 }

@@ -6,7 +6,7 @@ import { Menu } from 'primeng/menu';
 import { AppConfig } from '../../config/config';
 import { NerdmRes } from '../../nerdm/nerdm';
 import { EditStatusService } from '../editcontrol/editstatus.service';
-import * as _ from 'lodash';
+import * as _ from 'lodash-es';
 import { RecordLevelMetrics } from '../../metrics/metrics';
 import { CommonFunctionService } from '../../shared/common-function/common-function.service';
 import { CartConstants } from '../../datacart/cartconstants';

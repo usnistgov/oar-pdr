@@ -46,13 +46,13 @@ export class CitationDescriptionComponent {
 `,
     styles: [
         `
-:host /deep/ citationDialog > button.ui-button-icon-only{  
+:host ::ng-deep citationDialog > button.ui-button-icon-only{  
   border-radius: 50%;
   width: 1.5em;
   height: 1.5em;
 }
 
-:host /deep/  .ui-dialog .ui-dialog-titlebar{
+:host ::ng-deep  .ui-dialog .ui-dialog-titlebar{
   background-color: #f1f1f1;
   color: #212121;
   font-family: sans-serif;

@@ -7,7 +7,7 @@
   <div class="card" [ngClass]="mobileMode ? 'landingcard-mobile' : 'landingcard'">
     <!-- <div> -->
     <div *ngIf="md === null && edstatsvc.authorized && !edstatsvc.hasError">
-      <div class="ui-g-10 ui-md-10 ui-lg-10 ui-sm-12" style="padding-left: 1%">
+      <div class="col-10 col-md-10 col-lg-10 col-sm-12" style="padding-left: 1%">
         <b>Landing page is loading...</b>
       </div>
     </div>
@@ -37,10 +37,10 @@
     </div>
 
     <div *ngIf="_showData" >
-      <div class="ui-g">
+      <div class="grid">
 
         <!-- landing page content -->
-        <div class="ui-g-10 ui-md-10 ui-lg-10 ui-sm-12">
+        <div class="col-10 md:col-10 lg:col-10 sm:flex-nowrap">
 
             <pdr-landing-body 
                 [md]="md" 
@@ -64,9 +64,9 @@
         </div>
 
         <!-- side tool menu (for tablets and desktop displays  -->
-        <div class="ui-g-2 ui-md-2 ui-lg-2 ui-sm-12">
-          <div class="ui-g" style="position: sticky; top: 0;">
-            <div class="ui-g-12 ui-md-12 ui-lg-12 ui-sm-12">
+        <div class="col-2 md:col-2 lg:col-2">
+          <div style="position: sticky; top: 0;">
+            <!-- <div class="col-12"> -->
               <div *ngIf="inBrowser" class="d-none d-md-block d-lg-block d-xl-block ">
 
                 <tools-menu #menu2  
@@ -85,7 +85,7 @@
                     
                 <app-downloadstatus [inBrowser]="inBrowser"></app-downloadstatus>
               </div>
-            </div>
+            <!-- </div> -->
           </div>
         </div>
       </div>
