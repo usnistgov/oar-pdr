@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed, ComponentFixtureAutoDetect } from '@angular/core/testing';
+import { ComponentFixture, TestBed, ComponentFixtureAutoDetect, waitForAsync as  } from '@angular/core/testing';
 
 import { ResourceMetadataComponent } from './resourcemetadata.component';
 import { SectionsModule } from './sections.module';
@@ -30,7 +30,7 @@ describe('ResourceMetadataComponent', () => {
         component = fixture.componentInstance;
     }
 
-    beforeEach(async(() => {
+    beforeEach(waitForAsync(() => {
         makeComp();
         component.inBrowser = true;
         component.record = JSON.parse(JSON.stringify(rec));

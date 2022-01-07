@@ -2,7 +2,7 @@ import * as convert from './nerdmconversion.service';
 import { config, testdata } from '../../environments/environment';
 import { NerdmRes } from './nerdm';
 import { AppConfig } from '../config/config';
-import { async } from '@angular/core/testing';
+import { waitForAsync as  } from '@angular/core/testing';
 
 describe('convert functions', function() {
 
@@ -81,7 +81,7 @@ describe('convert functions', function() {
         expect(so.md).toEqual("boo!");
     });
 
-    it('convertToEmbedFormats()', async(() => {
+    it('convertToEmbedFormats()', waitForAsync(() => {
         svc.convertToEmbedFormats(testdata['test1']).subscribe({
             next(so) {
                 expect(so.contentType).toEqual("application/ld+json");

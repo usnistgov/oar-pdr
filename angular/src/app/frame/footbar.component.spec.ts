@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync as  } from '@angular/core/testing';
 import { FootbarComponent } from './footbar.component';
 import { GoogleAnalyticsService } from '../shared/ga-service/google-analytics.service';
 
@@ -6,7 +6,7 @@ describe('FootbarComponent', () => {
     let component : FootbarComponent;
     let fixture : ComponentFixture<FootbarComponent>;
 
-    it('should contain expected content', async(() => {
+    it('should contain expected content', waitForAsync(() => {
         TestBed.configureTestingModule({
             declarations: [ FootbarComponent ],
             providers: [GoogleAnalyticsService]

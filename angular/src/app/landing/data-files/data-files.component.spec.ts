@@ -1,6 +1,6 @@
 import { NO_ERRORS_SCHEMA, SimpleChange, SimpleChanges } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
-import { async, fakeAsync, tick, ComponentFixture, TestBed } from '@angular/core/testing';
+import { fakeAsync, tick, ComponentFixture, TestBed, waitForAsync as  } from '@angular/core/testing';
 import { DataFilesComponent } from './data-files.component';
 import { FormsModule } from '@angular/forms';
 import { CartService } from '../../datacart/cart.service';
@@ -26,7 +26,7 @@ describe('DataFilesComponent', () => {
   let plid: Object = "browser";
   let ts: TransferState = new TransferState();
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     let dc: DataCart = DataCart.openCart(CartConstants.cartConst.GLOBAL_CART_NAME);
     dc._forget();
 
@@ -118,7 +118,7 @@ describe('DataFilesComponent', () => {
     expect(component.toggleAllFilesInGlobalCart).toHaveBeenCalled();
   });
 
-  it('_updateNodesFromCart()', async(() => {
+  it('_updateNodesFromCart()', waitForAsync(() => {
     let dc: DataCart = DataCart.openCart("goob");
     dc.addFile(component.ediid, component.record.components[1]);
     dc.addFile(component.ediid, component.record.components[2]);

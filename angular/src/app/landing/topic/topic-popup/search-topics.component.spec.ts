@@ -1,5 +1,5 @@
 import { NO_ERRORS_SCHEMA } from '@angular/core';
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync as  } from '@angular/core/testing';
 
 import { SearchTopicsComponent } from './search-topics.component';
 import { FormsModule } from '@angular/forms';
@@ -30,7 +30,7 @@ describe('SearchTopicsComponent', () => {
     let plid: Object = "browser";
     let ts: TransferState = new TransferState();
 
-    beforeEach(async(() => {
+    beforeEach(waitForAsync(() => {
       cfg = (new AngularEnvironmentConfigService(plid, ts)).getConfig() as AppConfig;
       cfg.locations.pdrSearch = "https://goob.nist.gov/search";
       cfg.status = "Unit Testing";

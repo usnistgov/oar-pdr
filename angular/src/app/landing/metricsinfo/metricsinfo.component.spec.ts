@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync as  } from '@angular/core/testing';
 import { AppConfig } from '../../config/config';
 import { AngularEnvironmentConfigService } from '../../config/config.service';
 import { TransferState } from '@angular/platform-browser';
@@ -12,7 +12,7 @@ describe('MetricsinfoComponent', () => {
   let plid: Object = "browser";
   let ts: TransferState = new TransferState();
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     cfg = (new AngularEnvironmentConfigService(plid, ts)).getConfig() as AppConfig;
 
     TestBed.configureTestingModule({

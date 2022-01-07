@@ -1,6 +1,5 @@
 import { HttpClient, HttpResponse } from '@angular/common/http';
 import { Observable, of, throwError, Subscriber } from 'rxjs';
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 /**
  * a service for commiting metadata changes to a draft version stored on the server.

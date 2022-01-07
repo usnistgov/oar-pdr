@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync as  } from '@angular/core/testing';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap' ; 
 import { DownloadstatusComponent } from './downloadstatus.component';
 import { DataCartStatus, DataCartStatusLookup, DataCartStatusItem, DataCartStatusData, stringifyCart, parseCartStatus } from '../../datacart/cartstatus';
@@ -10,7 +10,7 @@ describe('DownloadstatusComponent', () => {
   let fixture: ComponentFixture<DownloadstatusComponent>;
   let sample: DataCartStatusLookup = null;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [ DownloadstatusComponent ],
       imports: [

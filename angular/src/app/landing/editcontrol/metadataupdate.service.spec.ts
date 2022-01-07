@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync as  } from '@angular/core/testing';
 import { CommonModule, DatePipe } from '@angular/common';
 import { of, throwError } from 'rxjs';
 
@@ -27,7 +27,7 @@ describe('MetadataUpdateService', () => {
         }
     };
 
-    beforeEach(async(() => {
+    beforeEach(waitForAsync(() => {
         resmd = null;
         TestBed.configureTestingModule({
             imports: [ CommonModule ],
