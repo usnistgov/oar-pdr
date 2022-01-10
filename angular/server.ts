@@ -1,4 +1,4 @@
-import 'zone.js/dist/zone-node';
+import 'zone.js/node';
 import { enableProdMode, InjectionToken } from '@angular/core';
 
 // Express Engine
