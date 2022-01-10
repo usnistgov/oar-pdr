@@ -17,7 +17,7 @@
                 </li>
             </ul>
             <div style="width: 100%;text-align: right;margin-top: -15px;font-size: small;">
-                <a *ngIf="metricsData.hasCurrentMetrics" href="{{metricsUrl}}" target="_blank"><span data-toggle="tooltip" title="More Metrics Data">More...</span></a>
+                <a *ngIf="metricsData.hasCurrentMetrics" href="{{metricsData.url}}" target="_blank"><span data-toggle="tooltip" title="More Metrics Data"><i class="faa faa-bar-chart" style="margin-right: 5px;"></i>More...</span></a>
             </div>
         </div>
         <ng-template #noMetrics>
