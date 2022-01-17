@@ -65,16 +65,80 @@ export abstract class ConfigService {
 }
 
 /**
+ * a ConfigService that can cache the configuration for transfer to a browser-side
+ * environment.  
+ * 
+ * This provides the ability (via cache(LPSConfig)) to save the configuration to the 
+ * cache which would typically be called after the configuration data is loaded into 
+ * the class for the first time.  The default implementation of getConfig() provided 
+ * by this subclass does just that, defering the loading to a new abstract function, 
+ * loadConfig().  
+ *
+ * The implementation of the getConfig() function provided by this class will manipulate
+ * the LPSConfig cached to the cache to hide the server-side-specific API endpoints from 
+ * browser-side.  
+ */
+export abstract class CachingConfigService extends ConfigService {
+    protected config : AppConfig|null = null;
+
+    /**
+     * initialize the cache for this service
+     * @param cache      the TransferState to cache the data to the first time it 
+     *                   is accessed via getConfig()
+     */
+    constructor(protected cache? : TransferState) {
+        super();
+    }
+
+    /**
+     * load the configuration data from the appropriate source for the implementation
+     * and return it.
+     * @return LPSConfig -- the loaded configuration data
+     */
+    abstract loadConfig() : LPSConfig;
+
+    /**
+     * return an AppConfig instance that is appropriate for the runtime 
+     * context.
+     */
+    getConfig() : AppConfig {
+        if (! this.config) {
+            let cfgdata : LPSConfig = this.loadConfig();
+            this.config = new AppConfig(this._useServerSide(cfgdata));
+
+            if (this.cache) 
+                this.cache.set(CONFIG_TS_KEY, new AppConfig(this._hideServerSide(cfgdata)))
+        }
+        return this.config;
+    }
+
+    protected _useServerSide(cfgdata : LPSConfig) {
+        cfgdata = deepCopy(cfgdata);
+        if (cfgdata['APIs'] && cfgdata['APIs']['serverSide']) {
+            cfgdata['APIs'] = { ...cfgdata['APIs'], ...cfgdata['APIs']['serverSide'] };
+            delete cfgdata['APIs']['serverSide'];
+        }
+        return cfgdata;
+    }
+
+    protected _hideServerSide(cfgdata : LPSConfig) {
+        cfgdata = deepCopy(cfgdata);
+        if (cfgdata['APIs'] && cfgdata['APIs']['serverSide'])
+            delete cfgdata['APIs']['serverSide'];
+        return cfgdata;
+    }
+}
+
+/**
  * A ConfigService that pulls it data from the environmental context
  * that Angular builds into the app.  
  * 
  * This service is intended for use in development mode running either as 
  * client-only in the browser or on the server.  
  */
-export class AngularEnvironmentConfigService extends ConfigService {
+export class AngularEnvironmentConfigService extends CachingConfigService {
     private source : string = "angular-env";
     private defMode : string = "dev";
-    private config : AppConfig|null = null;
 
     /**
      * construct the service
@@ -83,27 +147,34 @@ export class AngularEnvironmentConfigService extends ConfigService {
      * @param cache    the TransferState instance for the application.  If we are on the server,
      *                 getConfig() will cache the configuration to the TransferState object.
      */
-    constructor(private platid : object, private cache : TransferState) {
-        super();
+    constructor(private platid : object, cache : TransferState) {
+        super(cache);
+    }
+
+    /**
+     * load the configuration data from the appropriate source for the implementation
+     * and return it.
+     * @return LPSConfig -- the loaded configuration data
+     */
+    loadConfig() : LPSConfig {
+        console.log("Loading development-mode configuration data from the Angular built-in environment");
+        let out : LPSConfig = deepCopy(ngenv.config);
+        out["source"] = this.source;
+        if (! out["mode"]) 
+            out["mode"] = this.defMode;
+        return out;
     }
 
     /**
      * return an AppConfig instance that is appropriate for the runtime 
-     * context.  This will asynchronously return an AppConfig rather than a 
+     * context.  This will synchronously return an AppConfig rather than a 
      * Promise.  
      */
     getConfig() : AppConfig {
         if (! this.config) {
-            console.log("Loading development-mode configuration data from the Angular built-in environment");
-            let data : LPSConfig = deepCopy(ngenv.config);
-            let out : AppConfig = new AppConfig(data);
-            out["source"] = this.source;
-            if (! out["env"]) 
-                out["env"] = this.defMode;
-
+            this.config = new AppConfig(this.loadConfig());
             if (isPlatformServer(this.platid))
-                this.cache.set(CONFIG_TS_KEY, out);
-            this.config = out;
+                this.cache.set(CONFIG_TS_KEY, this.config);
         }
         return this.config;
     }
@@ -119,20 +190,21 @@ export class AngularEnvironmentConfigService extends ConfigService {
  * from oar-docker.  The container launch script pulls configuration from the
  * config-server and writes it to a file.
  */
-export class ServerFileConfigService extends ConfigService {
+export class ServerFileConfigService extends CachingConfigService {
 
     private source : string = "server-file";
     private defMode : string = "prod";       // i.e. in the docker context
-    private config : AppConfig|null = null;
 
     /**
      * construct the service.  
      * 
      * @param cfgfile   the (full) path to the file to read JSON-encoded data from
+     * @param cache     the TransferState to cache the data to the first time it 
+     *                  is accessed via getConfig()
      * @throw Error -- if cfgfile is not set or does not point to an existing file.  
      */
-    constructor(private cfgfile : string, private cache? : TransferState) {
-        super();
+    constructor(private cfgfile : string, cache? : TransferState) {
+        super(cache);
         if (! cfgfile)
             throw new Error("Configuration file not provided");
         if (! fs.existsSync(cfgfile))
@@ -142,13 +214,10 @@ export class ServerFileConfigService extends ConfigService {
     }
 
     /**
-     * return an AppConfig instance that is appropriate for the runtime 
-     * context.  This implementation reads the config data from a JSON file. 
+     * read the configuration data in from a JSON file
+     * @return LPSConfig -- the loaded configuration data
      */
-    getConfig() : AppConfig {
-        if (this.config)
-            return this.config;  // previously created AppConfig
-
+    loadConfig() : LPSConfig {
         console.log("Loading configuration data from " + this.cfgfile);
 
         // synchronous read.  (The file is typically short.)
@@ -156,11 +225,7 @@ export class ServerFileConfigService extends ConfigService {
         out["source"] = this.source;
         if (! out["mode"])
             out["mode"] = this.defMode;
-
-        this.config = new AppConfig(out);
-        if (this.cache)
-            this.cache.set(CONFIG_TS_KEY, this.config);
-        return this.config;
+        return out;
     }
 }
 
@@ -168,30 +233,29 @@ export class ServerFileConfigService extends ConfigService {
  * a server-side ConfigService that provides data that was loaded in when the 
  * server started. 
  */
-export class ServerLoadedConfigService extends ConfigService {
-    private config : AppConfig|null = null;
+export class ServerLoadedConfigService extends CachingConfigService {
 
-    constructor(private cfgdata : LPSConfig, private cache? : TransferState) {
-        super();
+    /**
+     * initialize the service
+     * @param cfgdata    the previously loaded configuration data.  It is assumed 
+     *                   that the "mode" and "source" properties have already been
+     *                   appropriately set.  
+     * @param cache      the TransferState to cache the data to the first time it 
+     *                   is accessed via getConfig()
+     */
+    constructor(private cfgdata : LPSConfig, cache? : TransferState) {
+        super(cache);
         if (! cfgdata)
             throw new Error("Server failed to load config data");
     }
 
     /**
-     * return an AppConfig instance that is appropriate for the runtime context.  
-     * This implementation loads that that was previously loaded by the server at 
-     * start-up time.  
+     * return configuration data previously loaded by the server.  This simply
+     * returns the data set at construction time.
      */
-    getConfig() : AppConfig {
-        if (this.config)
-            return this.config;  // previously created AppConfig
-
+    loadConfig() : LPSConfig {
         console.log("Loading configuration data previously loaded by server");
-
-        this.config = new AppConfig(this.cfgdata);
-        if (this.cache)
-            this.cache.set(CONFIG_TS_KEY, this.config);
-        return this.config;
+        return this.cfgdata;
     }
 }
 

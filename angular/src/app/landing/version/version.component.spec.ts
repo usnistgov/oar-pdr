@@ -9,7 +9,7 @@ import { VersionModule } from './version.module';
 import { config, testdata } from '../../../environments/environment';
 import { LandingConstants } from '../constants';
 
-fdescribe('VersionComponent', () => {
+describe('VersionComponent', () => {
     let component : VersionComponent;
     let fixture : ComponentFixture<VersionComponent>;
     let cfg : AppConfig = new AppConfig(config);

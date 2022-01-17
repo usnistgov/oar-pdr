@@ -24,11 +24,16 @@ describe("config.LPSConfig", function() {
             locations: {
                 orgHome: "https://nist.gov/",  portalBase: "https://data.nist.gov/"
             },
+            APIs: {
+                mdService:   "https://data.nist.gov/od/id/",
+                distService: "https://testdata.nist.gov/od/ds/"
+            },
             appVersion: "1.1.0",
             author: "ray"
         }
             
         expect(data.locations.portalBase).toBe("https://data.nist.gov/");
+        expect(data.APIs.mdService).toBe("https://data.nist.gov/od/id/");
         expect(data.status).toBe(undefined);
         expect(data["author"]).toBe("ray");
     });
@@ -40,6 +45,9 @@ describe("config.AppConfig", function() {
         let data : config.LPSConfig = {
             locations: {
                 orgHome: "https://nist.gov/",  portalBase: "https://data.nist.gov/"
+            },
+            APIs: {
+                distService: "https://testdata.nist.gov/od/ds/"
             },
             appVersion: "1.1.0",
             author: "ray"
@@ -61,19 +69,22 @@ describe("config.AppConfig", function() {
         expect(cfg.locations.distService).toBeDefined();
         expect(cfg.locations.distService).toBe("https://data.nist.gov/od/ds/");
         expect(cfg.locations.mdService).toBeDefined();
-        expect(cfg.locations.mdService).toBe("https://data.nist.gov/rmm/");
+        expect(cfg.locations.mdService).toBe("https://data.nist.gov/od/id/");
         expect(cfg.locations.landingPageService).toBeDefined();
         expect(cfg.locations.landingPageService).toBe("https://data.nist.gov/od/id/");
         expect(cfg.locations.nerdmAbout).toBeDefined();
         expect(cfg.locations.nerdmAbout).toBe("https://data.nist.gov/od/dm/nerdm/");
-        expect(cfg.mdAPI).toBeDefined();
-        expect(cfg.mdAPI).toBe("https://data.nist.gov/rmm/");
+        expect(cfg.APIs).toBeDefined();
+        expect(cfg.APIs.mdSearch).toBe("https://data.nist.gov/rmm/");
     });
 
     it("get()", function() {
         let data : config.LPSConfig = {
             locations: {
                 orgHome: "https://nist.gov/",  portalBase: "https://data.nist.gov/"
+            },
+            APIs: {
+                distService: "https://testdata.nist.gov/od/ds/"
             },
             appVersion: "1.1.0",
             author: "ray"
@@ -96,6 +107,7 @@ describe("config.AppConfig", function() {
 
         expect(cfg.get("locations.orgHome", "nowhere")).toBe("https://nist.gov/");
         expect(cfg.get("locations.pdrSearch", "nowhere")).toBe("https://data.nist.gov/sdp/");
+        expect(cfg.get("APIs.distService", "nowhere")).toBe("https://testdata.nist.gov/od/ds/");
         expect(cfg.get("locations.hell")).toBe(undefined);
         expect(cfg.get("locations.hell", "nowhere")).toBe("nowhere");
     });

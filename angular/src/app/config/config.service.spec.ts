@@ -53,11 +53,17 @@ describe("config.service newConfigService", function() {
         expect(ac["source"]).toBe("angular-env");
     });
 
-    it("transfer-state", function() {
+    it("browser: transfer-state", function() {
         let plid : Object = "browser";
         
         let data : cfg.LPSConfig = cfgsvc.deepCopy(ngenv.config);
         data["mode"] = "prod";
+        data['APIs'] = {
+            "resolver": "goob",
+            "serverSide": {
+                "resolver": "gurn"
+            }
+        }
         let ts = new TransferState();
         ts.set(cfgsvc.CONFIG_TS_KEY, data);
         
@@ -71,6 +77,38 @@ describe("config.service newConfigService", function() {
         expect(ac.status).toBe("Dev Version");
         expect(ac["mode"]).toBe("prod");
         expect(ac["source"]).toBe("transfer-state");
+        expect(ac.get("APIs.resolver")).toBe("goob");
+        expect(ac.get("APIs.serverSide")).not.toBeUndefined();
+    });
+
+    it("server: pre-loaded", function() {
+        let plid : Object = "server";
+        
+        let data : cfg.LPSConfig = cfgsvc.deepCopy(ngenv.config);
+        data["mode"] = "prod";
+        data['APIs'] = {
+            "resolver": "goob",
+            "serverSide": {
+                "resolver": "gurn"
+            }
+        }
+        let ts = new TransferState();
+        
+        let svc = cfgsvc.newConfigService(plid, ts, data);
+
+        expect(svc instanceof cfgsvc.ConfigService).toBe(true);
+        expect(svc instanceof cfgsvc.ServerLoadedConfigService).toBe(true);
+
+        let ac : cfg.AppConfig = svc.getConfig() as cfg.AppConfig;
+        expect(ac instanceof cfg.AppConfig).toBe(true);
+        expect(ac.status).toBe("Dev Version");
+        expect(ac.get("APIs.resolver")).toBe("gurn");
+        expect(ac.get("APIs.serverSide")).toBeUndefined();
+
+        let saved = ts.get(cfgsvc.CONFIG_TS_KEY, null);
+        expect(saved instanceof cfg.AppConfig).toBe(true);
+        expect(saved.get("APIs.resolver")).toBe("goob");
+        expect(saved.get("APIs.serverSide")).toBeUndefined();
     });
 
 });

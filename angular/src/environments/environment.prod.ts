@@ -18,13 +18,22 @@ export const context = {
 
 export const config : LPSConfig = {
     locations: {
-        orgHome:     "https://nist.gov/",
-        portalBase:  "https://data.nist.gov/",
-        pdrHome:     "https://data.nist.gov/pdr/",
-        pdrSearch:   "https://data.nist.gov/sdp/"
+        orgHome: "https://nist.gov/",
+        portalBase: "https://data.nist.gov/",
+        pdrHome: "https://data.nist.gov/pdr/",
+        pdrSearch: "https://data.nist.gov/sdp/",
+        mdService:   "https://data.nist.gov/rmm/records/",
+        taxonomyService: "https://data.nist.gov/rmm/taxonomy"
     },
-    mdAPI: "https://data.nist.gov/rmm/records/",
-    distService: "https://data.nist.gov/od/ds/",
+    APIs: {
+        mdService: "https://data.nist.gov/od/id/",
+        mdSearch:  "https://data.nist.gov/rmm",
+        metrics:   "https://data.nist.gov/rmm/usagemetrics",
+        taxonomy:   "https://data.nist.gov/rmm/taxonomy",
+        // customization: "https://testdata.nist.gov/customization",
+        customization: "https://data.nist.gov/customization",
+        distService: "https://data.nist.gov/od/ds/"
+    },
     mode:        "dev",
     status:      "Dev Version",
     appVersion:  "v1.1.0",
