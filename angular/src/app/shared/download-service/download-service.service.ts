@@ -38,7 +38,7 @@ export class DownloadService {
         private cartService: CartService,
         private _FileSaverService: FileSaverService
     ) {
-        this.distApi = this.cfg.get("distService", "/od/ds/");
+        this.distApi = this.cfg.get("APIs.distService", "/od/ds/");
         this.setDownloadingNumber(-1);
     }
 

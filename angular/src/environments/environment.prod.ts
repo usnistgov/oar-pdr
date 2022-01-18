@@ -27,7 +27,7 @@ export const config : LPSConfig = {
     },
     APIs: {
         mdService: "https://data.nist.gov/od/id/",
-        mdSearch:  "https://data.nist.gov/rmm",
+        mdSearch:  "https://data.nist.gov/rmm/",
         metrics:   "https://data.nist.gov/rmm/usagemetrics",
         taxonomy:   "https://data.nist.gov/rmm/taxonomy",
         // customization: "https://testdata.nist.gov/customization",

@@ -21,7 +21,7 @@ export class TaxonomyListService {
    */
   constructor(private http: HttpClient,
     private cfg: AppConfig) {
-      this.taxonomyService = cfg.get("locations.taxonomyService", "/unconfigured");
+      this.taxonomyService = cfg.get("APIs.taxonomy", "/unconfigured");
       console.log('this.taxonomyService', this.taxonomyService);
       if (this.taxonomyService == "/unconfigured")
           throw new Error("mdService endpoint not configured!");

@@ -32,7 +32,7 @@ export const config: LPSConfig = {
         // distService: "https://data.nist.gov/od/ds/",
         distService: "https://testdata.nist.gov/od/ds/",
         mdService: "https://data.nist.gov/od/id/",
-        mdSearch:  "https://data.nist.gov/rmm",
+        mdSearch:  "https://data.nist.gov/rmm/",
         metrics:   "https://data.nist.gov/rmm/usagemetrics",
         taxonomy:   "https://data.nist.gov/rmm/taxonomy"
     },

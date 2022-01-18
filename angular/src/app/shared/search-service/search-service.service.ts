@@ -29,17 +29,12 @@ export class SearchService {
      * @param {Http} http - The injected Http.
      * @constructor
      */
-    constructor(
-        private http: HttpClient, 
-        private transferState: TransferState,
-        @Inject(PLATFORM_ID) private platformId: Object,
-        private cfg: AppConfig) {
-        this.landingBackend = cfg.get("mdAPI", "/unconfigured");
-
-        if (this.landingBackend == "/unconfigured")
-            throw new Error("Metadata service endpoint not configured!");
-
-        this.rmmBackend = cfg.get("locations.mdService", "/unconfigured");
+    constructor(private http: HttpClient, 
+                private transferState: TransferState,
+                @Inject(PLATFORM_ID) private platformId: Object,
+                private cfg: AppConfig)
+    {
+        this.rmmBackend = cfg.get("APIs.mdSearch", "/unconfigured");
         if (this.rmmBackend == "/unconfigured")
             throw new Error("mdService endpoint not configured!");
     }
@@ -54,25 +49,19 @@ export class SearchService {
     }
     
     searchById(searchValue: string, browserside: boolean = false) {
-        var backend: string = this.landingBackend;
+        let backend: string = this.rmmBackend
+        if (! backend.endsWith("/")) backend += "/"
 
-        if(browserside){
-            backend = this.rmmBackend;
-        }
-
-        if (_.includes(backend, 'rmm') && _.includes(searchValue, 'ark'))
+        if (searchValue.startsWith('ark:'))
             backend += 'records?@id=';
-        else if (_.includes(backend, 'rmm')) {
-            if(!_.includes(backend, 'records'))
-                backend += 'records/';
-        }
+        else 
+            backend += 'records/';
 
         // console.log("Querying backend:", backend + searchValue);
         return this.http.get(backend + searchValue, { headers: new HttpHeaders({ timeout: '${10000}' }) });
     }
 
     getAllRecords(): Observable<any> {
-        // if (_.includes(this.landingBackend, 'rmm'))
         return this.http.get(this.rmmBackend + 'records?');
     }
 

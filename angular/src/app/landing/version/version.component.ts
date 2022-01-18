@@ -41,8 +41,7 @@ export class VersionComponent implements OnChanges {
      */
     constructor(private cfg : AppConfig,
         public editstatsvc: EditStatusService) {
-        this.lpssvc = this.cfg.get('locations.landingPageService',
-                                   'https://data.nist.gov/od/id/');
+        this.lpssvc = this.cfg.get('locations.landingPageService', '/od/id/');
     }
 
     ngOnInit(): void {
