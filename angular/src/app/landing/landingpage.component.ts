@@ -173,23 +173,6 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
         }
         this.metricsData = new MetricsData();
 
-        // Bootstrap breakpoint observer (to switch between desktop/mobile mode)
-        // The breakpoint for PrimeNG menu is 750. For some reason the following min-width
-        // need to set to 768 to be able to change the state at 750px. 
-        if(this.inBrowser){
-            this.breakpointObserver
-            .observe(['(min-width: 768px)'])
-            .subscribe((state: BreakpointState) => {
-                if (state.matches) {
-                    this.mobileMode = false;
-                } else {
-                    this.mobileMode = true;
-                    this.btnPosition = this.btnElement.nativeElement.offsetTop + 25;
-                    console.log("Mobile mode")
-                }
-            });
-        }
-
         // Clean up cart status storage 
         if(this.inBrowser){
             this.dataCartStatus = DataCartStatus.openCartStatus();
@@ -436,6 +419,23 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
      * apply housekeeping after view has been initialized
      */
     ngAfterViewInit() {
+        // Bootstrap breakpoint observer (to switch between desktop/mobile mode)
+        // The breakpoint for PrimeNG menu is 750. For some reason the following min-width
+        // need to set to 768 to be able to change the state at 750px. 
+        if(this.inBrowser){
+            this.breakpointObserver
+            .observe(['(min-width: 768px)'])
+            .subscribe((state: BreakpointState) => {
+                if (state.matches) {
+                    this.mobileMode = false;
+                } else {
+                    this.mobileMode = true;
+                    this.btnPosition = this.btnElement.nativeElement.offsetTop + 25;
+                    console.log("Mobile mode")
+                }
+            });
+        }
+
         if (this.md && this.inBrowser) {
             this.useFragment();
             window.history.replaceState({}, '', '/od/id/' + this.reqId);
@@ -566,5 +566,17 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
 
         if (this.editMode == this.EDIT_MODES.OUTSIDE_MIDAS_MODE)
             this.message = 'This record is not currently available for editing. <p>Please return to MIDAS and click "Edit Landing Page" to edit.'
+    }
+
+    /**
+     * Setup landing page layout
+     */
+    landingpageClass() {
+        console.log('this.mobileMode', this.mobileMode)
+        if(this.mobileMode){
+            return "col-12 md:col-12 lg:col-12 sm:flex-nowrap";
+        }else{
+            "col-10 md:col-10 lg:col-10 sm:flex-nowrap";
+        }
     }
 }

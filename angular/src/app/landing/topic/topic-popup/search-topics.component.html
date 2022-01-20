@@ -71,7 +71,7 @@
     style="width:90%; margin: 0em auto 2em auto; height: 50vh; overflow-y: scroll; border: 1px solid lightgrey;">
 
     <div style="margin: .5em 1em .5em 1em;">
-        <p-treeTable *ngIf="isVisible" [value]="taxonomyTree">
+        <p-treeTable *ngIf="isVisible" [value]="taxonomyTree" styleClass="p-treetable-sm">
             <ng-template pTemplate="body" let-rowNode let-rowData="rowData">
                 <tr (dblclick)="updateTopics(rowNode)" (click)="openPopup($event,op5)">
                     <td (mouseover)="setHighlight(rowData)" (mouseout)="setHighlight('')"

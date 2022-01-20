@@ -12,14 +12,14 @@
       </div>
     </div>
 
-    <!-- div to keep track of the menu button position -->
-    <div #stickyButton ></div>
-
     <!-- Menu button and the popup menu (mobile mode only) -->
     <div style="width: 100%; height: 0px;">
+        <!-- div to keep track of the menu button position -->
+        <div #stickyButton ></div>
+
         <button #menubtn
             *ngIf="md !== null && inBrowser && mobileMode" 
-            [ngClass]="windowScrolled ? 'sticky' : 'menu-button'" 
+            [ngClass]="windowScrolled ? 'sticky-button' : 'rightmenu-button'" 
             type="button"
             pButton 
             icon="faa faa-list" 

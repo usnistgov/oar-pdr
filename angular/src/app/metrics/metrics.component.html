@@ -158,7 +158,7 @@
 <!-- Display tree table -->
 <div #panel0 id="panel0" *ngIf="inBrowser; else filesLoading" class="flex-container" >
     <p-treeTable *ngIf="visible" [value]="files" [columns]="cols" selectionMode="single" [style]="{'max-height':'400px','overflow':'auto'}" stickyHeader="true" stickyTopAt=".layout-topbar"
-        [resizableColumns]="true" sortField="name">
+        [resizableColumns]="true" sortField="name" styleClass="p-treetable-sm">
         <ng-template pTemplate="header" let-columns>
             <tr>
                 <th *ngFor="let col of columns; let i = index" [style.width]="col.width" [style.font-size]="fontSize"
