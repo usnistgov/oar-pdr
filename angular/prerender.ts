@@ -9,7 +9,7 @@ import {enableProdMode} from '@angular/core';
 enableProdMode();
 
 // Import module map for lazy loading
-import {provideModuleMap} from '@nguniversal/module-map-ngfactory-loader';
+// import {provideModuleMap} from '@nguniversal/module-map-ngfactory-loader';
 import {renderModuleFactory} from '@angular/platform-server';
 import {ROUTES} from './static.paths';
 
@@ -35,9 +35,9 @@ ROUTES.forEach(route => {
   // Writes rendered HTML to index.html, replacing the file if it already exists.
   previousRender = previousRender.then(_ => renderModuleFactory(AppServerModuleNgFactory, {
     document: index,
-    url: route,
-    extraProviders: [
-      provideModuleMap(LAZY_MODULE_MAP)
-    ]
+    url: route
+    // extraProviders: [
+    //   provideModuleMap(LAZY_MODULE_MAP)
+    // ]
   })).then(html => writeFileSync(join(fullPath, 'index.html'), html));
 });

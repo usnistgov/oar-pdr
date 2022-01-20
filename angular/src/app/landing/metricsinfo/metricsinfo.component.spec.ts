@@ -1,4 +1,4 @@
-import { ComponentFixture, TestBed, waitForAsync as  } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync  } from '@angular/core/testing';
 import { AppConfig } from '../../config/config';
 import { AngularEnvironmentConfigService } from '../../config/config.service';
 import { TransferState } from '@angular/platform-browser';

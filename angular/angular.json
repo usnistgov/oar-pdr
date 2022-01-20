@@ -133,7 +133,7 @@
           "builder": "@angular-devkit/build-angular:server",
           "options": {
             "outputPath": "dist/server",
-            "main": "src/main.server.ts",
+            "main": "server.ts",
             "tsConfig": "src/tsconfig.server.json",
             "sourceMap": true,
             "optimization": false
@@ -150,6 +150,39 @@
 }
           },
           "defaultConfiguration": ""
+        },
+        "serve-ssr": {
+          "builder": "@nguniversal/builders:ssr-dev-server",
+          "configurations": {
+            "development": {
+              "browserTarget": "oar-lps:build:development",
+              "serverTarget": "oar-lps:server:development"
+            },
+            "production": {
+              "browserTarget": "oar-lps:build:production",
+              "serverTarget": "oar-lps:server:production"
+            }
+          },
+          "defaultConfiguration": "development"
+        },
+        "prerender": {
+          "builder": "@nguniversal/builders:prerender",
+          "options": {
+            "routes": [
+              "/"
+            ]
+          },
+          "configurations": {
+            "production": {
+              "browserTarget": "oar-lps:build:production",
+              "serverTarget": "oar-lps:server:production"
+            },
+            "development": {
+              "browserTarget": "oar-lps:build:development",
+              "serverTarget": "oar-lps:server:development"
+            }
+          },
+          "defaultConfiguration": "production"
         }
       }
     },

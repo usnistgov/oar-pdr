@@ -1,5 +1,5 @@
 import { ElementRef } from '@angular/core';
-import { ComponentFixture, TestBed, waitForAsync as  } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync  } from '@angular/core/testing';
 import { TransferState } from '@angular/platform-browser';
 import { ActivatedRoute, Router, Routes } from '@angular/router';
 import { HttpClientTestingModule } from '@angular/common/http/testing';

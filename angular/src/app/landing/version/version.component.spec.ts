@@ -1,4 +1,4 @@
-import { ComponentFixture, TestBed, ComponentFixtureAutoDetect, waitForAsync as  } from '@angular/core/testing';
+import { ComponentFixture, TestBed, ComponentFixtureAutoDetect, waitForAsync  } from '@angular/core/testing';
 
 import { AppConfig } from '../../config/config';
 import { NerdmRes } from '../../nerdm/nerdm';

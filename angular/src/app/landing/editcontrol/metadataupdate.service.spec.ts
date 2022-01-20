@@ -1,4 +1,4 @@
-import { ComponentFixture, TestBed, waitForAsync as  } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync  } from '@angular/core/testing';
 import { CommonModule, DatePipe } from '@angular/common';
 import { of, throwError } from 'rxjs';
 
@@ -56,7 +56,7 @@ describe('MetadataUpdateService', () => {
     });
 
     it('updates metadata', () => {
-        let upd : boolean = null;
+        let upd : UpdateDetails = null;
         resmd = testdata['test1'];
         expect(resmd['title']).toContain("Multiple Encounter");
         expect(resmd['accessLevel']).toBe("public");

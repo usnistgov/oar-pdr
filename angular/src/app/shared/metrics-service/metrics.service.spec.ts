@@ -1,4 +1,4 @@
-import { inject, TestBed, waitForAsync as  } from '@angular/core/testing';
+import { inject, TestBed, waitForAsync  } from '@angular/core/testing';
 import { AppConfig } from '../../config/config';
 import { MetricsService } from './metrics.service';
 import { AngularEnvironmentConfigService } from '../../config/config.service';

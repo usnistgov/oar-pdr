@@ -62,7 +62,7 @@
 
                 <!-- Display tree table -->
                 <p-treeTable *ngIf="visible" [value]="files" [columns]="cols" selectionMode="single"
-                    [resizableColumns]="true" dataKey="key" sortField="name">
+                    [resizableColumns]="true" dataKey="key" sortField="name" styleClass="p-treetable-sm">
                     <ng-template pTemplate="header" let-columns>
                         <tr>
                             <th *ngFor="let col of columns" [style.width]="col.width" [style.font-size]="fontSize"

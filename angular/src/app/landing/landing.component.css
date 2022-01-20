@@ -1,4 +1,4 @@
-.style-horizontal {
+/* .style-horizontal {
   border: 0;
   height: 1px;
   background: #333;
@@ -17,7 +17,6 @@
 
 .title
 {
-  /* color:#1471AE; */
   font-size: 20px;
 }
 
@@ -28,9 +27,7 @@
 }
 
 
-:host ::ng-deep .rightMenuStyle > .ui-menu .ui-submenu-header{
-  /* background-color: #B8D4E6; */
-  /* background-color:rgb(65, 68, 69); */
+:host ::ng-deep .rightMenuStyle > .p-menu .p-submenu-header{
   background-color:#2C8034;
   padding: 2%;
   padding-left: 5%;
@@ -41,7 +38,7 @@
  
 }
 
-:host ::ng-deep .rightMenuStyle > .ui-menu  .ui-menuitem-link  .ui-state-hover{
+:host ::ng-deep .rightMenuStyle > .p-menu  .p-menuitem-link  .p-state-hover{
   line-height: 1em;
   min-height: 1em;
   background-color: #e7f0f6;
@@ -50,10 +47,9 @@
   font-size: 14px;
 }
 
-:host ::ng-deep .rightMenuStyle > .ui-menu  .ui-menuitem{
+:host ::ng-deep .rightMenuStyle > .p-menu  .p-menuitem{
   line-height: 1em;
   min-height: 1em;
-  /* background-color:  #e7f0f6; */
   background-color: #F0FAF1;
   word-wrap: break-word;
   font-family: sans-serif;
@@ -61,36 +57,35 @@
   padding: 0;
 }
 
-:host ::ng-deep .rightMenuStyle > .ui-menu .ui-menuitem-link{
+:host ::ng-deep .rightMenuStyle > .p-menu .p-menuitem-link{
   padding: 0.5em 0.2em 0.5em 0.5em;
   font-family:  sans-serif;
   font-size: 14px;
 }
-:host ::ng-deep .rightMenuStyle > .ui-menu{
+:host ::ng-deep .rightMenuStyle > .p-menu{
   width: 100%;
 }
 
-:host ::ng-deep .rightMenuStyle > .ui-menu  .ui-menuitem-link:hover {
+:host ::ng-deep .rightMenuStyle > .p-menu  .p-menuitem-link:hover {
   background-color: #ffffff;
   color: #000000;
 }
 
-:host ::ng-deep .rightMenuStylePop  > .ui-menu {
+:host ::ng-deep .rightMenuStylePop  > .p-menu {
   position: absolute;
   width: 12em;
   word-wrap: break-word;
   font-family: sans-serif;
   
 }
-:host ::ng-deep .rightMenuStylePop > .ui-menu .ui-menuitem-link{
+:host ::ng-deep .rightMenuStylePop > .p-menu .p-menuitem-link{
   padding: 0.5em 0.2em 0.5em 0.5em;
   font-size: 14px;
 }
 
-:host ::ng-deep .rightMenuStylePop > .ui-menu  .ui-menuitem{
+:host ::ng-deep .rightMenuStylePop > .p-menu  .p-menuitem{
   line-height: 1em;
   min-height: 1em;
-  /* background-color:  #e7f0f6; */
   background-color: #F0FAF1;
   word-wrap: break-word;
   font-family: sans-serif;
@@ -98,7 +93,7 @@
   padding: 0;
 }
 
-:host ::ng-deep .rightMenuStylePop > .ui-menu  .ui-menuitem-link  .ui-state-hover{
+:host ::ng-deep .rightMenuStylePop > .p-menu  .p-menuitem-link  .p-state-hover{
   line-height: 1em;
   min-height: 1em;
   background-color: #e7f0f6;
@@ -106,7 +101,7 @@
   font-family: 'Sans-Serif';
   font-size: 14px;
 }
-:host ::ng-deep .rightMenuStylePop > .ui-menu .ui-submenu-header {
+:host ::ng-deep .rightMenuStylePop > .p-menu .p-submenu-header {
   background-color:#2C8034;
   padding: 2%;
   padding-left: 5%;
@@ -117,12 +112,12 @@
  
 }
 
-:host ::ng-deep .rightMenuStylePop > .ui-menu .ui-submenu-header{
+:host ::ng-deep .rightMenuStylePop > .p-menu .p-submenu-header{
   padding: 0.5em 0.2em 0.5em 0.5em;
   font-size: 14px;
-}
+} */
 
-/* :host ::ng-deep .rightMenuStyle > .ui-menu .ui-menu-list li.ui-menuitem{
+/* :host ::ng-deep .rightMenuStyle > .p-menu .p-menu-list li.p-menuitem{
   background-color:#E7F0F6;
   font-family: 'Sans-Serif';
   word-wrap: break-word;
@@ -140,12 +135,12 @@
 :host ::ng-deep .ui-widget-content{
   border: 0px;
 }
-:host ::ng-deep .ui-menu{
+:host ::ng-deep .p-menu{
   padding: 0;
   border:0;
 }
 
-:host ::ng-deep .ui-state-active, :host ::ng-deep .ui-state-highlight{
+:host ::ng-deep .p-state-active, :host ::ng-deep .p-state-highlight{
   background-color: #F3F3F3;
   color: black;
   font-family: sans-serif;
@@ -172,37 +167,36 @@
   font-size: 16px;
 }
 
-:host ::ng-deep .ui-treetable-resizable .ui-treetable-thead > tr > th{
+:host ::ng-deep .p-treetable-resizable .p-treetable-thead > tr > th{
   background-color: #1E6BA1;
-  /* border-color: coral; */
   color: white;
   border: 0;
 }
 
-:host ::ng-deep .ui-treetable-tbody{
+:host ::ng-deep .p-treetable-tbody{
   /* background-color: #E4F2FC; */
   font-family: sans-serif;
   font-size: 14px;
 }
 
-:host ::ng-deep .ui-treetable thead tr{
+:host ::ng-deep .p-treetable thead tr{
   border-bottom: 0;
 }
 
-:host ::ng-deep .ui-treetable thead tr th .ui-column-resizer{
+:host ::ng-deep .p-treetable thead tr th .p-column-resizer{
   color: white;
 }
 
-:host ::ng-deep .ui-treetable .ui-treetable-tbody > tr > td{
+:host ::ng-deep .p-treetable .p-treetable-tbody > tr > td{
   border-bottom: #8c8c8c  1px solid;
   
 }
-:host ::ng-deep  .ui-treetable thead tr th .ui-sortable-column-icon {
+:host ::ng-deep  .p-treetable thead tr th .p-sortable-column-icon {
   color: white;
 }
 
 
-/* .ui-treetable .ui-treetable-thead > tr > th, .ui-treetable .ui-treetable-tbody > tr > td, .ui-treetable .ui-treetable-tfoot > tr > td */
+/* .p-treetable .p-treetable-thead > tr > th, .p-treetable .p-treetable-tbody > tr > td, .p-treetable .p-treetable-tfoot > tr > td */
 .fileinfosection{
   background-color:#F3F3F3; 
   padding: 2.5rem 2.5rem 2.5rem 2.5rem;
@@ -294,7 +288,7 @@
   
   font-family: sans-serif;
 }
-/* :host ::ng-deep fileDialog > .ui-overlaypanel .ui-overlaypanel-close {
+/* :host ::ng-deep fileDialog > .p-overlaypanel .p-overlaypanel-close {
   background-color: #1E6BA1;
   border-radius: 50%;
   transition: background-color 0.3s;
@@ -305,7 +299,7 @@
   line-height: 1.2em;
   text-align: center;
 } */
-/* :host ::ng-deep  a > .ui-overlaypanel .ui-overlaypanel-close{
+/* :host ::ng-deep  a > .p-overlaypanel .p-overlaypanel-close{
   background-color: #1E6BA1;
 } */
 
@@ -315,7 +309,7 @@
   font-weight: bold;
    font-size: 10pt
 }
-:host >>> .ui-overlaypanel .ui-overlaypanel-close{
+:host >>> .p-overlaypanel .p-overlaypanel-close{
   background-color: #1E6BA1;
 }
 
@@ -395,7 +389,7 @@
   }
 }
 
-::ng-deep p-dialog .ui-dialog {
+::ng-deep p-dialog .p-dialog {
   overflow: scroll;
   max-height: 100%;
 }

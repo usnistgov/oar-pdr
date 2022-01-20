@@ -2,7 +2,7 @@ import * as convert from './nerdmconversion.service';
 import { config, testdata } from '../../environments/environment';
 import { NerdmRes } from './nerdm';
 import { AppConfig } from '../config/config';
-import { waitForAsync as  } from '@angular/core/testing';
+import { waitForAsync  } from '@angular/core/testing';
 
 describe('convert functions', function() {
 

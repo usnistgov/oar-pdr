@@ -1,6 +1,6 @@
 import { NO_ERRORS_SCHEMA, SimpleChange, SimpleChanges } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
-import { fakeAsync, tick, ComponentFixture, TestBed, waitForAsync as  } from '@angular/core/testing';
+import { fakeAsync, tick, ComponentFixture, TestBed, waitForAsync  } from '@angular/core/testing';
 import { DataFilesComponent } from './data-files.component';
 import { FormsModule } from '@angular/forms';
 import { CartService } from '../../datacart/cart.service';

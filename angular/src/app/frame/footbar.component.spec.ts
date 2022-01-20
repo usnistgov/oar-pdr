@@ -1,4 +1,4 @@
-import { ComponentFixture, TestBed, waitForAsync as  } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync  } from '@angular/core/testing';
 import { FootbarComponent } from './footbar.component';
 import { GoogleAnalyticsService } from '../shared/ga-service/google-analytics.service';
 

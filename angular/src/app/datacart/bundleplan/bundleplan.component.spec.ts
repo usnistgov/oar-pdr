@@ -1,4 +1,4 @@
-import { ComponentFixture, TestBed, waitForAsync as  } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync  } from '@angular/core/testing';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap' ; 
 import { BundleplanComponent } from './bundleplan.component';
 import { NO_ERRORS_SCHEMA } from '@angular/core';

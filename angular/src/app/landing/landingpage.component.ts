@@ -176,7 +176,8 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
         // Bootstrap breakpoint observer (to switch between desktop/mobile mode)
         // The breakpoint for PrimeNG menu is 750. For some reason the following min-width
         // need to set to 768 to be able to change the state at 750px. 
-        this.breakpointObserver
+        if(this.inBrowser){
+            this.breakpointObserver
             .observe(['(min-width: 768px)'])
             .subscribe((state: BreakpointState) => {
                 if (state.matches) {
@@ -187,6 +188,7 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
                     console.log("Mobile mode")
                 }
             });
+        }
 
         // Clean up cart status storage 
         if(this.inBrowser){

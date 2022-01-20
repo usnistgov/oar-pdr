@@ -1,4 +1,4 @@
-import { TestBed, waitForAsync as  } from '@angular/core/testing';
+import { TestBed, waitForAsync  } from '@angular/core/testing';
 import { AppComponent } from './app.component';
 import { RouterModule, Routes } from '@angular/router';
 import { RouterTestingModule } from '@angular/router/testing';

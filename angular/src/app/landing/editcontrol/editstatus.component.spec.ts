@@ -1,4 +1,4 @@
-import { ComponentFixture, TestBed, waitForAsync as  } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync  } from '@angular/core/testing';
 import { CommonModule, DatePipe } from '@angular/common';
 
 import { EditStatusComponent } from './editstatus.component';

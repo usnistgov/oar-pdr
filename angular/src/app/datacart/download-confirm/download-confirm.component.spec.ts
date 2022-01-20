@@ -1,4 +1,4 @@
-import { ComponentFixture, TestBed, waitForAsync as  } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync  } from '@angular/core/testing';
 import { DownloadConfirmComponent } from './download-confirm.component';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { config } from '../../../environments/environment';

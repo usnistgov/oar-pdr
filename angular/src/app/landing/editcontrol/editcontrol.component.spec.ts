@@ -1,4 +1,4 @@
-import { ComponentFixture, TestBed, ComponentFixtureAutoDetect, waitForAsync as  } from '@angular/core/testing';
+import { ComponentFixture, TestBed, ComponentFixtureAutoDetect, waitForAsync  } from '@angular/core/testing';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { AppConfig } from '../../config/config';
 import { ConfirmationDialogService } from '../../shared/confirmation-dialog/confirmation-dialog.service';

@@ -1,4 +1,4 @@
-import { ComponentFixture, TestBed, ComponentFixtureAutoDetect, waitForAsync as  } from '@angular/core/testing';
+import { ComponentFixture, TestBed, ComponentFixtureAutoDetect, waitForAsync  } from '@angular/core/testing';
 
 import { ResourceRefsComponent } from './resourcerefs.component';
 import { SectionsModule } from './sections.module';
