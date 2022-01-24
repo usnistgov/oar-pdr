@@ -17,7 +17,7 @@ const routes: Routes = [
 
     // app paths
     { path: 'about',         component: LandingAboutComponent },
-    { path: 'od/id',
+    { path: 'lps',
       children: [
           { path: '',                component: NoidComponent          },
           { path: ':id',             component: LandingPageComponent   },

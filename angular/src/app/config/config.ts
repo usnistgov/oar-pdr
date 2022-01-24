@@ -244,6 +244,8 @@ export class AppConfig implements LPSConfig {
 
         // set the default API URLs
 
+        if (! this.APIs)
+            this.APIs = {}
         if (! this.APIs.mdSearch)
             this.APIs.mdSearch = this.locations.portalBase + "rmm/"
         if (! this.APIs.mdService)

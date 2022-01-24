@@ -97,15 +97,10 @@ export class AboutdatasetComponent implements OnChanges {
      */
     getDownloadURL() : string {
         let out = this.cfg.get("locations.mdService", "/od/id/");
-        if (out.search("/rmm/") >= 0) {
-            if(!out.endsWith("records/")){
-                out += "records/";
-            }
-            out += "?@id=" + this.record['@id'];
-        }else {
-            if (out.slice(-1) != '/') out += '/';
-            out += this.record['ediid'];
-        }
+
+        // We're now assuming use of resolver service; force NERDm JSON format
+        if (out.slice(-1) != '/') out += '/';
+        out += this.record['@id'] + "?format=nerdm";
 
         return out;
     }

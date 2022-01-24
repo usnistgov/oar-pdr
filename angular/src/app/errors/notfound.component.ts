@@ -55,4 +55,13 @@ export class NotFoundComponent implements OnInit {
         // 
         // throw new Error("Testing error handling from ngOnInit");
     }
+
+    /**
+     * apply housekeeping after view has been initialized
+     */
+    ngAfterViewInit() {
+        if (this.inBrowser && this.requestedID) {
+            window.history.replaceState({}, '', '/od/id/' + this.requestedID);
+        }
+    }
 }
