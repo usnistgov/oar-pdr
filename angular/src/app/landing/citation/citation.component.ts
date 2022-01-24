@@ -34,8 +34,28 @@ export class CitationDescriptionComponent {
  */
 @Component({
     selector: 'citation-popup',
-    templateUrl: `citation.component.html`,
-    styleUrls: ['citation.component.css']
+    template: `
+    <p-dialog #citepopup header="Citation" modal="true" [(visible)]="visible" (click)="hide()" [style]="{width: '70vw'}" [baseZIndex]="10000">
+      <p-header> Citation
+      </p-header>
+      <citation-display [citetext]="citetext"></citation-display>
+    </p-dialog>
+    `,
+    styles: [
+        `
+        :host ::ng-deep .p-dialog.customDialog{
+            /* background-color:rgb(0, 255, 76); */
+            color: red;
+        }
+        
+        :host ::ng-deep .ui-dialog .ui-dialog-titlebar{
+            background-color: #05ff43 !important;
+            color: #212121;
+            font-family: sans-serif;
+            font-size: 16px;
+        }
+        `
+    ]
 })
 export class CitationPopupComponent {
     @Input() citetext : string;
