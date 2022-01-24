@@ -23,7 +23,7 @@ export const config: LPSConfig = {
         portalBase: "https://data.nist.gov/",
         pdrHome: "https://data.nist.gov/pdr/",
         pdrSearch: "https://data.nist.gov/sdp/",
-        mdService:   "https://data.nist.gov/rmm/records/",
+        mdService:   "https://data.nist.gov/od/id/",
         taxonomyService: "https://data.nist.gov/rmm/taxonomy"
     },
     APIs: {

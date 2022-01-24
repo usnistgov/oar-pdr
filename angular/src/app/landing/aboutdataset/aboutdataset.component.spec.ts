@@ -12,7 +12,7 @@ import { config, testdata } from '../../../environments/environment';
 import { By } from "@angular/platform-browser";
 import { MetricsData } from "../metrics-data";
 
-describe('MetadataComponent', () => {
+describe('AboutdatasetComponent', () => {
     let component: AboutdatasetComponent;
     let fixture: ComponentFixture<AboutdatasetComponent>;
     let cfg : AppConfig = new AppConfig(config);
@@ -71,6 +71,6 @@ describe('MetadataComponent', () => {
     });
 
     it('getDownloadURL()', () => {
-        expect(component.getDownloadURL()).toEqual("https://data.nist.gov/rmm/records/?@id=ark:/88434/mds0000fbk");
+        expect(component.getDownloadURL()).toEqual("https://data.nist.gov/od/id/ark:/88434/mds0000fbk?format=nerdm");
     });
 });

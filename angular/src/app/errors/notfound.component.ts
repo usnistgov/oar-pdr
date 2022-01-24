@@ -60,7 +60,7 @@ export class NotFoundComponent implements OnInit {
      * apply housekeeping after view has been initialized
      */
     ngAfterViewInit() {
-        if (this.inBrowser && this.requestedID) {
+        if (! isPlatformServer(this.platid) && this.requestedID) {
             window.history.replaceState({}, '', '/od/id/' + this.requestedID);
         }
     }
