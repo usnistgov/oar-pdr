@@ -7,7 +7,7 @@
   <div class="card" [ngClass]="mobileMode ? 'landingcard-mobile' : 'landingcard'">
     <!-- <div> -->
     <div *ngIf="md === null && edstatsvc.authorized && !edstatsvc.hasError">
-      <div class="col-10 col-md-10 col-lg-10 col-sm-12" style="padding-left: 1%">
+      <div class="p-col-10 col-md-10 col-lg-10 col-sm-12" style="padding-left: 1%">
         <b>Landing page is loading...</b>
       </div>
     </div>
@@ -40,7 +40,7 @@
       <div class="grid">
 
         <!-- landing page content -->
-        <div class="col-10 md:col-10 lg:col-10 sm:flex-nowrap">
+        <div class="p-col-12 col-md-10 col-lg-10 col-sm-12">
 
             <pdr-landing-body 
                 [md]="md" 
@@ -58,13 +58,14 @@
         <div *ngIf="inBrowser">
             <citation-popup 
                 [citetext]="getCitation()"
-                [(visible)]="citationVisible"
-                [width]="citationDialogWith">
+                [visible]="citationVisible"
+                [width]="citationDialogWith"
+                (visibleChange)="setCitationVisible($event)">
             </citation-popup>
         </div>
 
         <!-- side tool menu (for tablets and desktop displays  -->
-        <div class="col-2 md:col-2 lg:col-2">
+        <div class="p-col-2 col-md-2 col-lg-2">
           <div style="position: sticky; top: 0;">
             <!-- <div class="col-12"> -->
               <div *ngIf="inBrowser" class="d-none d-md-block d-lg-block d-xl-block ">

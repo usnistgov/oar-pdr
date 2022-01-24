@@ -30,7 +30,7 @@ import { MetricsinfoComponent } from './metricsinfo/metricsinfo.component';
         CommonModule,
         ButtonModule,
         NgbModule,
-        NerdmModule,    // provider for MetadataService (which depends on AppConfig)
+        NerdmModule,
         EditControlModule,
         ToolsModule,
         CitationModule,
@@ -42,9 +42,6 @@ import { MetricsinfoComponent } from './metricsinfo/metricsinfo.component';
     ],
     providers: [
         MetadataUpdateService, TaxonomyListService, DatePipe
-    ],
-    entryComponents: [
-        MetricsinfoComponent
     ],
     exports: [
         LandingPageComponent, LandingBodyComponent, DoneComponent, DownloadstatusComponent,

@@ -405,6 +405,10 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
         }
     }
 
+    setCitationVisible(citationVisible) {
+        this.citationVisible = citationVisible;
+    }
+
     /**
      * Reture record level total download size
      */

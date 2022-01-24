@@ -34,32 +34,8 @@ export class CitationDescriptionComponent {
  */
 @Component({
     selector: 'citation-popup',
-    template: `
-<p-dialog #citepopup class="citationDialog" [closable]="false" [(visible)]="visible" 
-                     [modal]="false" [responsive]="true">
-  <p-header> Citation
-    <button style="position:relative; float:right; background-color:#1E6BA1; " type="button" 
-            pButton icon="faa faa-close" (click)="hide()"></button>
-  </p-header>
-  <citation-display [citetext]="citetext"></citation-display>
-</p-dialog>
-`,
-    styles: [
-        `
-:host ::ng-deep citationDialog > button.ui-button-icon-only{  
-  border-radius: 50%;
-  width: 1.5em;
-  height: 1.5em;
-}
-
-:host ::ng-deep  .ui-dialog .ui-dialog-titlebar{
-  background-color: #f1f1f1;
-  color: #212121;
-  font-family: sans-serif;
-  font-size: 16px;
-}
-`
-    ],
+    templateUrl: `citation.component.html`,
+    styleUrls: ['citation.component.css']
 })
 export class CitationPopupComponent {
     @Input() citetext : string;

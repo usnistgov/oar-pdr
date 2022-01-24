@@ -1,0 +1,29 @@
+/* :host ::ng-deep citationDialog > button.p-button-icon-only{  
+    border-radius: 50%;
+    width: 1.5em;
+    height: 1.5em;
+}
+  
+:host ::ng-deep .p-dialog .p-dialog-titlebar{
+    background-color: #f1f1f1;
+    color: #212121;
+    font-family: sans-serif;
+    font-size: 16px;
+} */
+
+/* :host ::ng-deep .p-dialog .p-widget-content {
+    background-image: none;
+    background-color: red;
+} */
+
+:host ::ng-deep .p-dialog.customDialog{
+    /* background-color:rgb(0, 255, 76); */
+    color: red;
+}
+
+:host ::ng-deep .ui-dialog .ui-dialog-titlebar{
+    background-color: #05ff43 !important;
+    color: #212121;
+    font-family: sans-serif;
+    font-size: 16px;
+}

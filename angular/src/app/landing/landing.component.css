@@ -309,7 +309,7 @@
   font-weight: bold;
    font-size: 10pt
 }
-:host >>> .p-overlaypanel .p-overlaypanel-close{
+:host ::ng-deep .p-overlaypanel .p-overlaypanel-close{
   background-color: #1E6BA1;
 }
 

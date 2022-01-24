@@ -22,26 +22,23 @@ import { LeaveWhileDownloadingGuard } from './leave.guard';
 
 
 @NgModule({
-  declarations: [ 
-      DatacartComponent, 
-      DownloadConfirmComponent, 
-      CartcontrolComponent, 
-      BundleplanComponent, TreetableComponent
-  ],
-  imports: [
-      CommonModule, SharedModule, ProgressSpinnerModule, NgbModule, TreeModule, FieldsetModule,
-      DialogModule, OverlayPanelModule, TreeTableModule, ButtonModule, TooltipModule
-  ],
-  exports: [
-    DatacartComponent
-  ],
-  entryComponents: [
-    DownloadConfirmComponent
-  ],
-  providers: [
-    CartService,
-    LeaveWhileDownloadingGuard
-  ]
+    declarations: [
+        DatacartComponent,
+        DownloadConfirmComponent,
+        CartcontrolComponent,
+        BundleplanComponent, TreetableComponent
+    ],
+    imports: [
+        CommonModule, SharedModule, ProgressSpinnerModule, NgbModule, TreeModule, FieldsetModule,
+        DialogModule, OverlayPanelModule, TreeTableModule, ButtonModule, TooltipModule
+    ],
+    exports: [
+        DatacartComponent
+    ],
+    providers: [
+        CartService,
+        LeaveWhileDownloadingGuard
+    ]
 })
 export class DatacartModule {
 

@@ -131,7 +131,7 @@
                                 </div>
                             </td>
                         </tr>
-                        <!-- File details. Will display when mouse over and close when mouse leaves or clicks -->
+                        <!-- File details. Will display/hide when mouse clicks -->
                         <tr [hidden]="!showFileDetails02(rowData)">
                             <td colspan="4" style="padding-left: 20px;background-color: rgb(243, 243, 243);">
                                 <div [@detailExpand]="showFileDetails(rowData) ? 'expanded' : 'collapsed'">

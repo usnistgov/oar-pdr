@@ -94,7 +94,6 @@ interface DataFileItem {
                 transition(':leave', [
                     style({height: '100%', opacity: 1}),
                     animate('700ms', style({height: 0, opacity: 0}))
-                //   animate('500ms', style({transform: 'translateY(0)', opacity: 1}))
                 ])
             ]
         )
@@ -435,14 +434,7 @@ export class DataFilesComponent implements OnInit, OnChanges {
             this.cleanupDisplay();
 
             fileNode.comp.DetailsDisplayed = true;
-
-            if(!fileNode.comp.DetailsDisplayed) {
-                setTimeout(() => {
-                    fileNode.comp.DetailsDisplayed02 = true;
-                }, 600);
-            }else{
-                fileNode.comp.DetailsDisplayed02 = true;
-            }
+            fileNode.comp.DetailsDisplayed02 = true;
     
             this.currentKey = fileNode.key;
         }
@@ -739,15 +731,15 @@ export class DataFilesComponent implements OnInit, OnChanges {
     }
 
     typeStyle() {
-        return { 'width': this.cols[1].width, 'font-size': this.fontSize };
+        return { 'width': this.cols[1].width, 'font-size': this.fontSize, 'color': 'black' };
     }
 
     sizeStyle() {
-        return { 'width': this.cols[2].width, 'font-size': this.fontSize };
+        return { 'width': this.cols[2].width, 'font-size': this.fontSize, 'color': 'black' };
     }
 
     statusStyle() {
-        return { 'width': this.cols[3].width, 'font-size': this.fontSize };
+        return { 'width': this.cols[3].width, 'font-size': this.fontSize, 'color': 'black' };
     }
 
     /**
