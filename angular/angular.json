@@ -29,7 +29,7 @@
               "node_modules/primeng/resources/primeng.css",
               "node_modules/primeicons/primeicons.css",
               "node_modules/primeflex/primeflex.css",
-              "node_modules/primeng/resources/themes/bootstrap4-light-blue/theme.css",
+              "node_modules/primeng/resources/themes/saga-blue/theme.css",
               "src/styles/font-awesome/css/font-awesome.min.css",
               "src/styles/main.css",
               "src/app/content/modal.less",

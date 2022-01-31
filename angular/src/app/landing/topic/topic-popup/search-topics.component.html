@@ -6,8 +6,11 @@
 <div class="popup-tool-bar">
     <!-- Buttons are arranged from right to left -->
 
-    <p-toolbar name="toolbar" [style]="{'background':'none','border-width':'0'}">
-        <div class="ui-toolbar-group-right">
+    <p-toolbar name="toolbar" [style]="{'background':'none','border-width':'0','height':'3em'}">
+        <div class="ui-toolbar-group-left">
+
+        </div>
+        <div class="ui-toolbar-group-right" style="margin-top: -1em;">
             <!-- Cancel button -->
             <button pButton type="submit" class="btn-labeled" id="btn-cancel" (click)="activeModal.close('Close click')" label="Cancel"
                 icon="faa faa-trash faa-1x icon-white" iconPos="left">

@@ -1,3 +1,16 @@
 .restrict-public {
     background-color: rgb(238, 238, 238); padding: 20px;
 }
+
+.ui-treetable .ui-state-highlight {
+    background-image: none;
+    background-color: red !important;
+}
+
+tr.p-state-highlight .p-widget-content{
+    color:rgb(255, 0, 0);
+}
+
+body .p-treetable .p-treetable-data tr.p-state-highlight .p-row-editor a {
+    color: #ff0000 !important;
+}

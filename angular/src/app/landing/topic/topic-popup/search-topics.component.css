@@ -57,3 +57,11 @@
     color:white;
     margin: .5em;
 }
+
+.btn-labeled {
+    padding-top: 0;
+    padding-bottom: 0;
+    width:160px; 
+    height: 2.5em;
+    margin: 0em .5em .5em 0em;
+}

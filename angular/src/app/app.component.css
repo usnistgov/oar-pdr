@@ -7,20 +7,11 @@
     font-family: sans-serif;
   }
 
-  body .ui-widget-content {
-    border: 0px;
-  }
-  
-  body .ui-state-active, body .ui-state-highlight {
+  body .p-highlight {
     background-color: #FFFFFF;
   }
   
-  .ui-tree .ui-treenode-label.ui-state-highlight, body ui-tree .ui-treenode-label.ui-state-hover {
-    font-weight: 700;
-    color: #000;
-  }
-  
-  .ui-menu .ui-menu-list li.ui-widget-header {
+  .p-menu .p-menu-list {
     color: #000;
     background-color: #B8D4E6;
     font-family: 'Roboto';

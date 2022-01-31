@@ -3,8 +3,8 @@
                   [(mdrec)]="md" [requestID]="requestId"></pdr-edit-control>
 
 <!-- landing page panel -->
-<div *ngIf="!displaySpecialMessage && _showContent" class="ui-grid ui-grid-responsive ui-grid-pad center">
-  <div class="card" [ngClass]="mobileMode ? 'landingcard-mobile' : 'landingcard'">
+<div *ngIf="!displaySpecialMessage && _showContent" class="p-grid p-grid-responsive p-grid-pad center">
+  <div class="card" [ngClass]="mobileMode ? 'landingcard-mobile' : 'landingcard'"  style="width: 100%;">
     <!-- <div> -->
     <div *ngIf="md === null && edstatsvc.authorized && !edstatsvc.hasError">
       <div class="p-col-10 col-md-10 col-lg-10 col-sm-12" style="padding-left: 1%">

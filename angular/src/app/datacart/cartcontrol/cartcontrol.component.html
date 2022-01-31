@@ -6,31 +6,34 @@
 
         <!-- Control buttons for large screen -->
         <div class="control-btns" *ngIf="screenWidth > screenSizeBreakPoint" style="float: right;">
-            <button (click)="downloadSelected()" pButton type="submit"
+            <button 
+                (click)="downloadSelected()" 
+                pButton 
+                type="submit" 
                 [ngStyle]="{'margin-right':'1em','width':'max-content','height': '2.5em', 'background-color':'#307F38'}"
                 [disabled]="selectedFileCount==0">
-                <i class="faa faa-download faa-1x icon-white" style="color: #fff;"></i>
+                <i class="faa faa-trash faa-1x icon-white" style="color: #fff; margin-right: 10px;"></i>
                 Download Selected
                 <span class="w3-circle button-badge"
-                    [ngStyle]="{'color':'#307F38'}">&nbsp;{{selectedFileCount}}&nbsp;</span>
+                    [ngStyle]="{'color':'#307F38','margin-left':'10px'}">&nbsp;{{selectedFileCount}}&nbsp;</span>
             </button>
 
             <button (click)="removeDownloaded()" pButton type="submit"
                 style="margin-right:1em;width:max-content; height: 2.5em; background-color:rgb(82, 82, 82);"
                 [disabled]="!anyDownloaded()">
-                <i class="faa faa-trash faa-1x icon-white" style="color: #fff;"></i>
+                <i class="faa faa-trash faa-1x icon-white" style="color: #fff; margin-right: 10px;"></i>
                 Remove downloaded
                 <span class="w3-circle button-badge"
-                    [ngStyle]="{'color':getDownloadedColor(),'background-color':getDownloadedBkColor()}">&nbsp;{{totalDownloaded}}&nbsp;</span>
+                    [ngStyle]="{'color':getDownloadedColor(),'background-color':getDownloadedBkColor(),'margin-left':'10px'}">&nbsp;{{totalDownloaded}}&nbsp;</span>
             </button>
 
             <button (click)="removeSelected()" pButton type="submit"
                 style="width:max-content; height: 2.5em; background-color:rgb(82, 82, 82);"
                 [disabled]="selectedFileCount==0">
-                <i class="faa faa-trash faa-1x icon-white" style="color: #fff;"></i>
+                <i class="faa faa-trash faa-1x icon-white" style="color: #fff; margin-right: 10px;"></i>
                 Remove selected
                 <span class="w3-circle button-badge"
-                    [ngStyle]="{'color':'rgb(82, 82, 82)'}">&nbsp;{{selectedFileCount}}&nbsp;</span>
+                    [ngStyle]="{'color':'rgb(82, 82, 82)','margin-left':'10px'}">&nbsp;{{selectedFileCount}}&nbsp;</span>
             </button>
         </div>
     </div>

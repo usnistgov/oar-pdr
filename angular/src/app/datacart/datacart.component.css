@@ -1,43 +1,39 @@
 
-.ui-button.small-button {
+.p-button.small-button {
   font-size:.5em;
   background-color: green;
   margin-bottom: 1em;
 }
 
-:host ::ng-deep .ui-progress-spinner-svg {
+:host ::ng-deep .p-progress-spinner-svg {
   top:50%;
 }
 
-:host ::ng-deep p-dialog .ui-dialog {
+:host ::ng-deep p-dialog .p-dialog {
   background-color: #ebffff;
 }
 
-:host ::ng-deep .ui-dialog .ui-dialog-titlebar{
+:host ::ng-deep .p-dialog .p-dialog-titlebar{
   background-color: #232F3E;
   color: #fff;
 }
 
-:host ::ng-deep .ui-treetable .ui-treetable-row td {
+:host ::ng-deep .p-treetable .p-treetable-row td {
   border:1px solid #bdbdbd;
 }
 
-:host ::ng-deep .ui-treetable thead tr th {
+:host ::ng-deep .p-treetable thead tr th {
   border:1px solid #bdbdbd;
   background-color: lightgrey;
 }
 
-:host ::ng-deep .ui-chkbox .ui-chkbox-box {
+:host ::ng-deep .p-chkbox .p-chkbox-box {
   width: 1.2em;
   height: 1.2em;
 }
 
 :host ::ng-deep .faa-cart-plus:before {
   color: #1E6BA1;
-}
-
-:host ::ng-deep .ui-widget-content {
-  font-size: .95em ;
 }
 
 .badge-notify{
@@ -70,43 +66,43 @@
   border-radius: 100%;
 }
 
-:host ::ng-deep .ui-button, body .ui-datepicker-buttonpane button {
+:host ::ng-deep .p-button, body .p-datepicker-buttonpane button {
   padding:.4em;
 }
 
-:host ::ng-deep .ui-treetable thead th, .ui-treetable tbody td, .ui-treetable tfoot td {
+:host ::ng-deep .p-treetable thead th, .p-treetable tbody td, .p-treetable tfoot td {
   white-space: normal;
 }
 
-:host ::ng-deep .ui-state-active, body .ui-state-highlight {
+:host ::ng-deep body .p-highlight {
   background-color: #FFFFFF;
 }
 
-:host ::ng-deep .ui-tree .ui-treenode-label.ui-state-highlight, body ui-tree .ui-treenode-label.ui-state-hover {
+:host ::ng-deep .p-tree .p-treenode-label.p-highlight, body p-tree .p-treenode-label.p-state-hover {
   font-weight: 700;
   color: #000;
 }
 
-:host ::ng-deep .ui-menu .ui-menu-list li.ui-widget-header {
+:host ::ng-deep .p-menu .p-menu-list {
   color: #000;
   background-color: #B8D4E6;
   font-family: 'Roboto';
   font-weight: bold;
 }
 
-:host ::ng-deep .ui-paginator .ui-paginator-pages a.ui-state-active {
+:host ::ng-deep .p-paginator .p-paginator-pages {
   background-color: #03A9F4;
 }
 
-:host ::ng-deep .ui-datatable .ui-datatable-data tr.ui-datatable-even.ui-state-highlight {
+:host ::ng-deep .p-datatable .p-datatable-data tr.p-datatable-even.p-highlight {
   background-color: #03A9F4;
 }
 
-:host ::ng-deep .ui-datatable .ui-datatable-data tr.ui-datatable-odd.ui-state-highlight {
+:host ::ng-deep .p-datatable .p-datatable-data tr.p-datatable-odd.p-highlight {
   background-color: #03A9F4;
 }
 
-:host ::ng-deep .ui-treetable tbody .ui-treetable-row.ui-state-highlight {
+:host ::ng-deep .p-treetable tbody .p-treetable-row.p-highlight {
   background-color: #03A9F4;
 }
 
@@ -130,11 +126,6 @@
 
 .searchButton:hover{
   background-color:#1F5593;
-}
-
-:host ::ng-deep .ui-widget-header{
-  background-color: #FFFFFF;
-  border: 0;
 }
 
 .downloadStatusLimit{

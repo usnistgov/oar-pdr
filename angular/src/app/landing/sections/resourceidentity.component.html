@@ -35,7 +35,7 @@
             <span *ngIf="inBrowser; else visitHomeOnServer">
                 <a href={{record.landingPage}} target="_blank">
                     <button type="button" pButton type="submit" [disabled]="!inViewMode"
-                        class="home_button ui-button ui-widget ui-state-default ui-corner-all ui-button-text-empty"
+                        class="home_button p-button p-component ui-button-text-empty"
                         (click)="googleAnalytics(record.landingPage, $event, 'Resource title: '+record.title)">
                         <i class="faa faa-external-link"
                             style="color: #fff;padding-left: .5em;padding-right: .5em;"></i>

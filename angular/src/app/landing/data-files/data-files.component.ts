@@ -193,6 +193,8 @@ export class DataFilesComponent implements OnInit, OnChanges {
         }
         if (this.record)
             this.useMetadata();
+
+        console.log("files", this.files)
     }
 
     /**
@@ -483,11 +485,11 @@ export class DataFilesComponent implements OnInit, OnChanges {
      * @param fileNode file node in the tree
      */
     rowStyle(fileNode: any) {
-        if(fileNode.comp.DetailsDisplayed){
-            return {'background-color': '#e6ffff'};
-        }else{
-            return {'background-color': 'white'};
-        }
+        // if(fileNode.comp.DetailsDisplayed){
+        //     return {'background-color': '#80bfff'};
+        // }else{
+        //     return {'background-color': 'white'};
+        // }
     }
 
     /**
@@ -725,10 +727,10 @@ export class DataFilesComponent implements OnInit, OnChanges {
     }
 
     titleStyle(rowData: any) {
-        let cursor = this.isLeaf(rowData)? 'pointer' : 'default;';
-        let color = this.isLeaf(rowData)? '#1471AE' : 'black;';
+        let cursor = this.isLeaf(rowData)? 'pointer' : 'default';
+        let color = this.isLeaf(rowData)? '#1471AE' : 'black';
         return { 'width': this.cols[0].width, 'font-size': this.fontSize, 'margin-left': '10px', 'cursor': cursor, 'color': color };
-    }
+    }                        
 
     typeStyle() {
         return { 'width': this.cols[1].width, 'font-size': this.fontSize, 'color': 'black' };
