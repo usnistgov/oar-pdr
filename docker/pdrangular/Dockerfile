@@ -24,7 +24,7 @@ COPY node-sha256.txt /tmp
 RUN cd /tmp && wget https://nodejs.org/dist/$node_ver/node-$node_ver-linux-x64.tar.xz  \
             && sha256sum -c node-sha256.txt
 RUN cd /usr/local && tar xJf /tmp/node-$node_ver-linux-x64.tar.xz \
-                  && ln -s node-v10.9.0-linux-x64 node          \
+                  && ln -s node-$node_ver-linux-x64 node          \
                   && cd bin                                     \
                   && ln -s ../node/bin/node node                \
                   && ln -s ../node/bin/npm  npm                 \
