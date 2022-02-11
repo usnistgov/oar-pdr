@@ -72,7 +72,7 @@
     "@types/webpack-env": "^1.13.0",
     "angular-mocks": "^1.6.10",
     "ng-mock-e2e": "^0.1.4",
-    "ajv": "^6.9.1",
+    "ajv": "^6.12.3",
     "codelyzer": "^4.0.2",
     "http-server": "^0.10.0",
     "jasmine-core": "~3.3.0",
