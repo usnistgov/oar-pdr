@@ -3,11 +3,11 @@
                   [(mdrec)]="md" [requestID]="requestId"></pdr-edit-control>
 
 <!-- landing page panel -->
-<div *ngIf="!displaySpecialMessage && _showContent" class="p-grid p-grid-responsive p-grid-pad center">
+<div *ngIf="!displaySpecialMessage && _showContent" class="p-grid p-grid-responsive p-grid-pad" style="padding: 30px 20px 20px 20px;">
   <div class="card" [ngClass]="mobileMode ? 'landingcard-mobile' : 'landingcard'"  style="width: 100%;">
     <!-- <div> -->
     <div *ngIf="md === null && edstatsvc.authorized && !edstatsvc.hasError">
-      <div class="p-col-10 col-md-10 col-lg-10 col-sm-12" style="padding-left: 1%">
+      <div class="col-12 col-md-10 col-lg-10 col-sm-12" style="padding-left: 1%">
         <b>Landing page is loading...</b>
       </div>
     </div>
@@ -40,7 +40,7 @@
       <div class="grid">
 
         <!-- landing page content -->
-        <div class="p-col-12 col-md-10 col-lg-10 col-sm-12">
+        <div class="col-12 col-md-10 col-lg-10 col-sm-12">
 
             <pdr-landing-body 
                 [md]="md" 
@@ -65,9 +65,8 @@
         </div>
 
         <!-- side tool menu (for tablets and desktop displays  -->
-        <div class="p-col-2 col-md-2 col-lg-2">
-          <div style="position: sticky; top: 0;">
-            <!-- <div class="col-12"> -->
+        <div class="col-2 col-md-2 col-lg-2">
+          <div style="position: sticky; top: 1em;">
               <div *ngIf="inBrowser" class="d-none d-md-block d-lg-block d-xl-block ">
 
                 <tools-menu #menu2  
@@ -86,7 +85,6 @@
                     
                 <app-downloadstatus [inBrowser]="inBrowser"></app-downloadstatus>
               </div>
-            <!-- </div> -->
           </div>
         </div>
       </div>

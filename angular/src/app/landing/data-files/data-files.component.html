@@ -61,7 +61,7 @@
                 </div>
 
                 <!-- Display tree table -->
-                <p-treeTable *ngIf="visible" [value]="files" [columns]="cols" selectionMode="single"
+                <p-treeTable class="data-table" *ngIf="visible" [value]="files" [columns]="cols" selectionMode="single"
                     [resizableColumns]="true" dataKey="key" sortField="name" styleClass="p-treetable-sm">
                     <ng-template pTemplate="header" let-columns>
                         <tr>
@@ -84,11 +84,11 @@
                     </ng-template>
                     <ng-template pTemplate="body" let-rowNode let-rowData="rowData" let-columns="columns">
                         <tr [ttSelectableRow]="rowNode" [ngStyle]="rowStyle(rowData)" style="color: black;">
-                            <td [ngStyle]="titleStyle(rowData)" (click)="openDetails(rowData)">
+                            <td [ngStyle]="titleStyle(rowData)" (click)="openDetails(rowData)" style="font-size: 14px;">
                                 <p-treeTableToggler [rowNode]="rowNode" data-toggle="tooltip" title="Expand/Collapse">
                                 </p-treeTableToggler>
                                 <span data-toggle="tooltip" title="Click for more details">
-                                    {{rowData.name}} </span>
+                                    <b>{{rowData.name}}</b> </span>
                                 <span style="margin-left: .5em;" *ngIf="isLeaf(rowData)">
                                     <i [ngClass]='fileDetailsDisplayClass(rowData)'></i></span>    
                                 <span *ngIf="showZipFilesNames"
@@ -153,19 +153,19 @@
                                     <div *ngIf="rowData.comp.filepath">
                                         <b>File path</b>: {{rowData.comp.filepath}}
                                     </div>
-                                    <span style="color:grey;">
+                                    <span >
                                         <span *ngIf="rowData.filetype == 'nrdp:DataFile' ">Selected File</span>
                                         <span *ngIf="rowData.filetype == 'nrdp:ChecksumFile' ">Selected Checksum File</span>
                                         <span *ngIf="rowData.filetype == 'nrdp:Subcollection'">Selected SubCollection </span>
                                     </span>
                                     <div>
                                         <b>Type:</b>
-                                        <span style="margin-left:0.5em;" class="textstyle1">{{ rowData.mediaType }} </span>
+                                        <span style="margin-left:0.5em;" >{{ rowData.mediaType }} </span>
                                     </div>
                                     <div>
                                         <b>Size</b>: 
-                                        <span *ngIf="rowData.size" class="textstyle1">{{ rowData.size }} </span>
-                                        <span *ngIf="!rowData.size" class="textstyle1"><i>Not Available</i></span>
+                                        <span *ngIf="rowData.size">{{ rowData.size }} </span>
+                                        <span *ngIf="!rowData.size"><i>Not Available</i></span>
                                     </div>
                                 </div>
                             </td>

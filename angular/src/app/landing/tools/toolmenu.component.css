@@ -8,7 +8,7 @@
   font-size: 16px;
   font-weight: bold;
   color: white;
- 
+  border-radius: 3px;
 }
 
 :host ::ng-deep .rightMenuStyle > .p-menu  .p-menuitem-link  .p-state-hover{

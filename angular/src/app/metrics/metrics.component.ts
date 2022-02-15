@@ -290,7 +290,6 @@ export class MetricsComponent implements OnInit {
      * @param files 
      */
     handleSum(files: TreeNode[]){
-        // console.log("files", files);
         this.totalFileSize = 0;
         files.forEach(child => {
             const {downloads, fileSize} = this.sumFolder(child);

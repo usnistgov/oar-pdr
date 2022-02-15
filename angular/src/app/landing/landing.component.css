@@ -34,12 +34,14 @@
   background-color: #1E6BA1;
   color: white;
   border: 0;
+  padding: 5px 10px;
 }
 
 :host ::ng-deep .p-treetable-tbody{
   /* background-color: #E4F2FC; */
   font-family: sans-serif;
-  font-size: 14px;
+  font-size: 15px;
+  font-weight: 300;
 }
 
 :host ::ng-deep .p-treetable thead tr{
@@ -144,9 +146,6 @@
   text-align: left;
 }
 
-:host ::ng-deep .faa-cart-plus:before {
-  /* color: #1E6BA1; */
-}
 :host ::ng-deep reflinks > a {
   
   font-family: sans-serif;

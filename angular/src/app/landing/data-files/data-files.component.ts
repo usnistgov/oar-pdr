@@ -129,7 +129,7 @@ export class DataFilesComponent implements OnInit, OnChanges {
     showDownloadProgress: boolean = false;
     appWidth: number = 800;   // default value used in server context
     appHeight: number = 900;  // default value used in server context
-    fontSize: string;
+    fontSize: string = "60";
     EDIT_MODES: any;
     editMode: string;
     mobileMode: boolean = false;
@@ -164,7 +164,7 @@ export class DataFilesComponent implements OnInit, OnChanges {
                 });
             };
         }
-
+        
         this.EDIT_MODES = LandingConstants.editModes;
     }
 
@@ -193,8 +193,6 @@ export class DataFilesComponent implements OnInit, OnChanges {
         }
         if (this.record)
             this.useMetadata();
-
-        console.log("files", this.files)
     }
 
     /**
@@ -729,19 +727,19 @@ export class DataFilesComponent implements OnInit, OnChanges {
     titleStyle(rowData: any) {
         let cursor = this.isLeaf(rowData)? 'pointer' : 'default';
         let color = this.isLeaf(rowData)? '#1471AE' : 'black';
-        return { 'width': this.cols[0].width, 'font-size': this.fontSize, 'margin-left': '10px', 'cursor': cursor, 'color': color };
+        return { 'width': this.cols[0].width,'height': '10px', 'margin-left': '10px', 'cursor': cursor, 'color': color, 'padding': 0 };
     }                        
 
     typeStyle() {
-        return { 'width': this.cols[1].width, 'font-size': this.fontSize, 'color': 'black' };
+        return { 'width': this.cols[1].width,'height': '10px', 'font-size': this.fontSize, 'color': 'black', 'padding': 0 };
     }
 
     sizeStyle() {
-        return { 'width': this.cols[2].width, 'font-size': this.fontSize, 'color': 'black' };
+        return { 'width': this.cols[2].width,'height': '10px', 'font-size': this.fontSize, 'color': 'black', 'padding': 0};
     }
 
     statusStyle() {
-        return { 'width': this.cols[3].width, 'font-size': this.fontSize, 'color': 'black' };
+        return { 'width': this.cols[3].width,'height': '10px', 'font-size': this.fontSize, 'color': 'black', 'padding': 0 };
     }
 
     /**
@@ -769,6 +767,8 @@ export class DataFilesComponent implements OnInit, OnChanges {
             this.cols[3].width = '10%';
             this.fontSize = '12px';
         }
+
+        console.log('this.fontSize', this.fontSize)
     }
 
     /**
