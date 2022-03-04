@@ -84,7 +84,7 @@
                     </ng-template>
                     <ng-template pTemplate="body" let-rowNode let-rowData="rowData" let-columns="columns">
                         <tr [ttSelectableRow]="rowNode" [ngStyle]="rowStyle(rowData)" style="color: black;">
-                            <td [ngStyle]="titleStyle(rowData)" (click)="openDetails(rowData)" style="font-size: 14px;">
+                            <td [ngStyle]="titleStyle(rowData)" (click)="openDetails(rowData)">
                                 <p-treeTableToggler [rowNode]="rowNode" data-toggle="tooltip" title="Expand/Collapse">
                                 </p-treeTableToggler>
                                 <span data-toggle="tooltip" title="Click for more details">

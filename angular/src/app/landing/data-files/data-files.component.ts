@@ -129,7 +129,7 @@ export class DataFilesComponent implements OnInit, OnChanges {
     showDownloadProgress: boolean = false;
     appWidth: number = 800;   // default value used in server context
     appHeight: number = 900;  // default value used in server context
-    fontSize: string = "60";
+    fontSize: string = "16px";
     EDIT_MODES: any;
     editMode: string;
     mobileMode: boolean = false;
@@ -151,11 +151,7 @@ export class DataFilesComponent implements OnInit, OnChanges {
             { field: 'size', header: 'Size', width: 'auto' },
             { field: 'download', header: 'Status', width: 'auto' }];
 
-        if (this.inBrowser && typeof (window) !== 'undefined') {
-            this.appHeight = (window.innerHeight);
-            this.appWidth = (window.innerWidth);
-            this.setWidth(this.appWidth);
-
+        if (typeof (window) !== 'undefined') {
             window.onresize = (e) => {
                 ngZone.run(() => {
                     this.appWidth = window.innerWidth;
@@ -169,6 +165,10 @@ export class DataFilesComponent implements OnInit, OnChanges {
     }
 
     ngOnInit() {
+        this.appHeight = (window.innerHeight);
+        this.appWidth = (window.innerWidth);
+        this.setWidth(this.appWidth);
+
         this.editstatsvc.watchEditMode((editMode) => {
             this.editMode = editMode;
         });
@@ -727,7 +727,7 @@ export class DataFilesComponent implements OnInit, OnChanges {
     titleStyle(rowData: any) {
         let cursor = this.isLeaf(rowData)? 'pointer' : 'default';
         let color = this.isLeaf(rowData)? '#1471AE' : 'black';
-        return { 'width': this.cols[0].width,'height': '10px', 'margin-left': '10px', 'cursor': cursor, 'color': color, 'padding': 0 };
+        return { 'width': this.cols[0].width,'height': '10px', 'margin-left': '10px', 'cursor': cursor, 'color': color, 'padding': 0, 'font-size': this.fontSize };
     }                        
 
     typeStyle() {
@@ -767,8 +767,6 @@ export class DataFilesComponent implements OnInit, OnChanges {
             this.cols[3].width = '10%';
             this.fontSize = '12px';
         }
-
-        console.log('this.fontSize', this.fontSize)
     }
 
     /**
