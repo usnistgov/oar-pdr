@@ -1,20 +1,30 @@
-<div id="resourcebody" class="grid p-grid-responsive p-grid-pad center" style="border: 0px solid white;">
-    <div class="card landing-body">
+<div id="resourcebody" class="grid p-grid-responsive p-grid-pad center" style="border: 0px solid white; width: 100%;">
+    <div class="landing-body">
         <div *ngIf="md">
             <!-- sections of the landing page body -->
-
             <!-- identity information -->
-            <a name="identity" #identity></a>
-            <pdr-resource-id [record]="md" [inBrowser]="inBrowser">
-            </pdr-resource-id>
+                            
+            <!-- <img *ngIf="recordType=='Science Theme'" src="./assets/images/biometric-security-control-vector-icon.png" style="width:15%;float:right;margin-right: 3em;clear: both;"> -->
 
-            <!-- description: abstract, keywords, research areas, etc. -->
-            <a name="description" #description></a>
-            <pdr-resource-desc [record]="md" [inBrowser]="inBrowser"></pdr-resource-desc>
+            <a name="identity" #identity></a>
+            <!-- <div style="margin-left: -10px;"> -->
+            <div>
+                <pdr-resource-id [record]="md" [inBrowser]="inBrowser" [theme]="theme">
+                </pdr-resource-id>
+
+                <!-- description: abstract, keywords, research areas, etc. -->
+                <a name="description" #description></a>
+                <pdr-resource-desc [record]="md" [inBrowser]="inBrowser"></pdr-resource-desc>
+            </div>
 
             <!-- data access, include available files -->
             <a name="dataAccess" #dataAccess></a>
-            <pdr-resource-data [record]="md" [inBrowser]="inBrowser" [editEnabled]="editEnabled" (dlStatus)="setDownloadStatus($event)">
+            <pdr-resource-data 
+                [record]="md" 
+                [inBrowser]="inBrowser" 
+                [editEnabled]="editEnabled" 
+                [theme]="theme"
+                (dlStatus)="setDownloadStatus($event)">
             </pdr-resource-data>
 
             <!-- references -->

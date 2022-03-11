@@ -1,0 +1,162 @@
+{
+    "_schema": "https://data.nist.gov/od/dm/nerdm-schema/v0.2#",
+    "topic": [
+        {
+            "scheme": "https://data.nist.gov/od/dm/nist-themes-forensics/v1.0",
+            "tag": "Forensics: Biometrics",
+            "@type": "Concept"
+        },
+        {
+            "scheme": "https://data.nist.gov/od/dm/nist-themes/v1.1",
+            "tag": "Information Technology:Biometrics",
+            "@type": "Concept"
+        },
+        {
+            "scheme": "https://data.nist.gov/od/dm/nist-themes-forensics/v1.1",
+            "tag": "Forensics: Biometrics: Fingerprints",
+            "@type": "Concept"
+        }
+    ],
+    "references": [
+        {
+            "refType": "IsCitedBy",
+            "title": "NIST special database 301: nail to nail fingerprint challenge dry run",
+            "issued": "2018-07",
+            "citation": "Fiumara, G., Flanagan, P., Schwarz, M., Tabassi, E., & Boehnen, C. (2018). NIST special database 301: nail to nail fingerprint challenge dry run. doi:10.6028/nist.tn.2002\n",
+            "location": "https://doi.org/10.6028/NIST.TN.2002",
+            "@id": "#ref:10.6028/NIST.TN.2002",
+            "@type": [
+                "npg:Article"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/v0.2#/definitions/DCiteReference"
+            ]
+        }
+    ],
+    "keyword": [
+        "latent",
+        "fingerprints",
+        "rolled",
+        "plain",
+        "palm",
+        "friction ridge",
+        "biometrics"
+    ],
+    "_extensionSchemas": [
+        "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/PublicDataResource"
+    ],
+    "landingPage": "https://www.nist.gov/itl/iad/image-group/nist-special-database-301",
+    "title": "NIST Special Database 301 Nail to Nail (N2N) Fingerprint Challenge Dry Run",
+    "theme": [
+        "Information Technology:Biometrics",
+        "Forensics:Biometrics",
+        "Forensics: Biometrics: Fingerprints"
+    ],
+    "version": "1.0.4",
+    "programCode": [
+        "006:045"
+    ],
+    "@context": [
+        "https://data.nist.gov/od/dm/nerdm-pub-context.jsonld",
+        {
+            "@base": "ark:/88434/mds11ckbd2"
+        }
+    ],
+    "description": [
+        "In April 2017, the Intelligence Advanced Research Projects Activity (IARPA) held a dry run for the data collection portion of its Nail to Nail (N2N) Fingerprint Challenge. This data collection event was designed to ensure that the real data collection event held in September 2017 would be successful. To this end, biometric data from unhabituated individuals needed to be collected. That data is now released by NIST as Special Database 301.",
+        "In total, 14 fingerprint sensors were deployed during the data collection, amassing a series of rolled and plain images. The devices include rolled fingerprints captured by skilled experts from the Federal Bureau of Investigation (FBI) Biometric Training Team. Captures of slaps, palms, and other plain impression fingerprint impressions were additionally recorded.",
+        "NIST also partnered with the FBI and Schwarz Forensic Enterprises to design activity scenarios in which subjects would likely leave fingerprints on different objects. The activities and associated objects were chosen in order to use a number of latent print development techniques and simulate the types of objects often found in real law enforcement case work. NIST also collected some mugshot-style face and iris images of the subjects who participated in the dry run. These data are also available for download."
+    ],
+    "bureauCode": [
+        "006:55"
+    ],
+    "contactPoint": {
+        "hasEmail": "mailto:patricia.flanagan@nist.gov",
+        "fn": "Patricia A. Flanagan"
+    },
+    "accessLevel": "public",
+    "@id": "ark:/88434/mds11ckbd2",
+    "publisher": {
+        "name": "National Institute of Standards and Technology",
+        "@type": "org:Organization"
+    },
+    "doi": "doi:10.18434/T4/1502474",
+    "license": "https://www.nist.gov/open/license",
+    "language": [
+        "en"
+    ],
+    "modified": "2018-06-14 00:00:00",
+    "ediid": "6F1714704711023AE053245706818C1A1936",
+    "components": [
+        {
+            "accessURL": "https://doi.org/10.18434/T4/1502474",
+            "description": "DOI Access to NIST Special Database 301 Nail to Nail (N2N) Fingerprint Challenge Dry Run",
+            "format": "text/html",
+            "title": "DOI Access to NIST Special Database 301 Nail to Nail (N2N) Fingerprint Challenge Dry Run",
+            "@id": "#doi:10.18434/T4/1502474",
+            "@type": [
+                "nrd:Hidden",
+                "dcat:Distribution"
+            ]
+        }
+    ],
+    "versionHistory": [
+        {
+            "issued": "2018-06-14",
+            "version": "1.0.0",
+            "@id": "ark:/88434/mds11ckbd2",
+            "location": "https://data.nist.gov/od/id/ark:/88434/mds11ckbd2",
+            "description": "initial release"
+        },
+        {
+            "issued": "2018-06-14 00:00:00",
+            "version": "1.0.1",
+            "@id": "ark:/88434/mds11ckbd2",
+            "location": "https://data.nist.gov/od/id/ark:/88434/mds11ckbd2",
+            "description": "metadata update"
+        },
+        {
+            "issued": "2018-06-14 00:00:00",
+            "version": "1.0.2",
+            "@id": "ark:/88434/mds11ckbd2",
+            "location": "https://data.nist.gov/od/id/ark:/88434/mds11ckbd2",
+            "description": "metadata update"
+        },
+        {
+            "issued": "2018-06-14 00:00:00",
+            "version": "1.0.3",
+            "@id": "ark:/88434/mds11ckbd2",
+            "location": "https://data.nist.gov/od/id/ark:/88434/mds11ckbd2",
+            "description": "metadata update"
+        },
+        {
+            "issued": "2018-06-14 00:00:00",
+            "version": "1.0.4",
+            "@id": "ark:/88434/mds11ckbd2",
+            "location": "https://data.nist.gov/od/id/ark:/88434/mds11ckbd2",
+            "description": "metadata update"
+        }
+    ],
+    "@type": [
+        "nrd: IncludedResource",
+        "nrdp: PublicDataResource"
+    ],
+    "isPartOf": [
+        {
+            "title": "Biometrics Data Collection",
+            "proxyFor": "ark:/88434/mds991122",
+            "resType": [
+                "nrda: Aggregation",
+                "nrdp: PublicDataResource"
+            ]
+        },
+        {
+            "title": "Forensics Data Collection",
+            "proxyFor": "ark:/88434/mds9911",
+            "resType": [
+                "nrda: ScienceTheme",
+                "nrdp: PublicDataResource"
+            ]
+        }
+    ]
+}

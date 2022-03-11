@@ -5,10 +5,19 @@
             [ngClass]="{'faa-plus-square-o': !clickHistory, 'faa-minus-square-o': clickHistory}"
             (click)="closeHistory = !closeHistory; clickHistory = expandHistory();"></i>
     </span>
+
+    <!-- Releases, Last modified and creators -->
     <span class="" *ngIf="record.issued" style="padding-right: 10pt;"> Released:
         <strong>{{record.issued.slice(0,10)}}</strong></span>
     <span class="" *ngIf="record.modified" style="padding-right: 10pt;"> Last modified:
         <strong>{{record.modified.slice(0,10)}}</strong></span>
+    <span class="" *ngIf="record.creators" style="padding-right: 10pt;"> Created by:
+        <span *ngFor="let creator of record.creators">
+            <strong>{{creator.fn}}</strong>
+        </span>
+    </span>
+
+    <!-- Version history -->
     <div class="card customcard" [collapse]="!closeHistory">
         <b>Version History:</b>
         <span *ngFor="let release of record.versionHistory">

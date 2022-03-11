@@ -4,7 +4,7 @@ import { MenuItem } from 'primeng/api';
 import { Menu } from 'primeng/menu';
 
 import { AppConfig } from '../../config/config';
-import { NerdmRes } from '../../nerdm/nerdm';
+import { NerdmRes, NERDResource } from '../../nerdm/nerdm';
 import { EditStatusService } from '../editcontrol/editstatus.service';
 import * as _ from 'lodash-es';
 import { RecordLevelMetrics } from '../../metrics/metrics';
@@ -23,12 +23,13 @@ import { CartConstants } from '../../datacart/cartconstants';
 @Component({
     selector: 'tools-menu',
     template: `
-<p-menu #tmenu [ngClass]="{'rightMenuStyle': !isPopup, 'rightMenuStylePop': isPopup}" 
+<p-menu #tmenu [ngClass]="menuStyle()" 
                [popup]="isPopup" [model]="items" [appendTo]="appendTo"></p-menu>
 `,
     styleUrls: ['./toolmenu.component.css']
 })
 export class ToolMenuComponent implements OnChanges {
+    recordType: string = "";
 
     // the resource record metadata that the tool menu data is drawn from
     @Input() record : NerdmRes|null = null;
@@ -36,6 +37,7 @@ export class ToolMenuComponent implements OnChanges {
     // true if this menu should appear as a popup
     @Input() isPopup : boolean = false;
     @Input() appendTo : boolean = false;
+    @Input() theme: string = "nist"
 
     // signal for triggering display of the citation information
     @Output() toggle_citation = new EventEmitter<boolean>();
@@ -64,6 +66,12 @@ export class ToolMenuComponent implements OnChanges {
             this.editEnabled = cfg.get("editEnabled", "");
     }
 
+    ngOnInit(): void {
+        //Called after the constructor, initializing input properties, and the first call to ngOnChanges.
+        //Add 'implements OnInit' to the class.
+        console.log("menu this.theme", this.theme);
+    }
+
     /**
      * toggle the appearance of a popup menu
      */
@@ -76,8 +84,25 @@ export class ToolMenuComponent implements OnChanges {
      * update the component state when the record metadata is updated
      */
     ngOnChanges() {
-        if (this.record) 
+        if (this.record) {
+            this.recordType = (new NERDResource(this.record)).resourceLabel();
+            this.theme = (new NERDResource(this.record)).theme();
             this.updateMenu();
+        }
+    }
+
+    menuStyle() {
+        if(this.theme == "ScienceTheme") {
+            if(this.isPopup) 
+                return 'rightMenuStylePopST';
+            else
+                return 'rightMenuStyleST';
+        }else{
+            if(this.isPopup) 
+                return 'rightMenuStylePop';
+            else
+                return 'rightMenuStyle';
+        }
     }
 
     /**
@@ -121,30 +146,32 @@ export class ToolMenuComponent implements OnChanges {
                 this.createMenuItem("References", "faa faa-arrow-circle-right ",
                                     (event) => { this.goToSection('references'); }, null)
             );
-        
+
+            
+        let resourceType: string = "Dataset";
+        if(this.recordType == "Science Theme"){
+            resourceType = "Collection";
+        }
+
         subitems.push(
-            this.createMenuItem("About This Dataset", "faa faa-arrow-circle-right ",
+            this.createMenuItem("About This " + resourceType, "faa faa-arrow-circle-right ",
                                 (event) => { this.goToSection('about'); }, null)
         );
         mitems.push({ label: 'Go To...', items: subitems });
-
-        // Record Details
-        /*
-        subitems = [
-            this.createMenuItem("View Metadata", "faa faa-bars",
-                                (event) => { this.goToSection('metadata'); },null),
-            this.createMenuItem("Export JSON", "faa faa-file-o", null, mdService)
-        ];
-        mitems.push({ label: "Record Details", items: subitems });
-        */
 
         // Use
         let disableMenu = false;
         if(this.editEnabled) disableMenu = true;
 
-        subitems = [
-            this.createMenuItem('Citation', "faa faa-angle-double-right",
-                                (event) => { this.toggleCitation(); }, null),
+        subitems = [];
+
+        if(this.theme != 'ScienceTheme') {
+            subitems = [
+                this.createMenuItem('Citation', "faa faa-angle-double-right", (event) => { this.toggleCitation(); }, null)
+            ]
+        }
+
+        subitems = [...subitems, 
             this.createMenuItem("Repository Metadata", "faa faa-angle-double-right",
                                 (event) => { this.goToSection('Metadata'); }, null),            
             this.createMenuItem("Fair Use Statement", "faa faa-external-link", null,
@@ -152,6 +179,8 @@ export class ToolMenuComponent implements OnChanges {
             this.createMenuItem("Data Cart", "faa faa-cart-plus", null,
                                 this.globalCartUrl, "_blank", disableMenu)
         ];
+
+
         mitems.push({ label: "Use", items: subitems });
 
         // Find
@@ -204,8 +233,13 @@ export class ToolMenuComponent implements OnChanges {
             keywordString += keywords[i].trim();
         }
 
+        let resourceLabel: string = "Similar Resources";
+        if(this.recordType == "Science Theme"){
+            resourceLabel = "Resources in this Collection";
+        }
+
         subitems = [
-            this.createMenuItem("Similar Resources", "faa faa-external-link", null,
+            this.createMenuItem(resourceLabel, "faa faa-external-link", null,
                                 searchbase + "#/search?q=keyword%3D" + keywordString),
             this.createMenuItem('Resources by Authors', "faa faa-external-link", "",
             this.cfg.get("locations.pdrSearch", "/sdp/") + authorSearchString)

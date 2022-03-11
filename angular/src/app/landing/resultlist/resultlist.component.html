@@ -1,0 +1,151 @@
+<div style="width: 100%;margin: 20px 0 20px 10px; padding: 20px 10px; margin-top: 35px !important;" *ngIf="showResult">
+    <!-- Top bar -->
+    <!-- <div class="flex-container" style="width: 100%;height: 50px;border-bottom: 1px solid grey;align-items:center;margin-bottom: 1em;"> -->
+    <div class="grid p-fluid result-header">
+
+        <div class="col-12 md:col-5" style="font-weight: bold;color: white;margin-top: -10px !important;">
+            <span *ngIf="theme=='ScienceTheme'; else nistTheme"> {{resultCount}} datasets found in forensics</span>
+            <ng-template #nistTheme>
+                {{resultCount}} records found
+            </ng-template>
+        </div>
+
+        <!-- Pagination -->
+
+        <!-- <div style="flex-grow:6;height: 40px;padding:auto;margin-top: -3em;text-align: center;">
+            <app-pagination [totalItems]="resultCount" [currentPage]="currentPage"></app-pagination>
+        </div> -->
+
+        <!-- <div style="flex-grow:2;text-align: right;"> -->
+        <div class="col-12 md:col-3" style="margin-top: -10px !important;">
+            <div style="width: 100%;">
+                <p-dropdown [options]="options" [(ngModel)]="optionSelected" optionLabel="name" (onChange)="onSortByChange($event)" placeholder="Sorted by" [style]="{'text-align': 'left', 'height':'35px'}"></p-dropdown>
+            </div>
+        </div>
+
+        <!-- <div style="flex-grow:6;text-align: right;"> -->
+        <div class="col-12 md:col-4" style="margin-top: -10px !important;">
+            <span class="p-input-icon-right">
+                <i class="pi pi-search"></i>
+                <input type="text" 
+                    pInputText 
+                    [(ngModel)]="searchPhases" 
+                    placeholder="Search for"
+                    (input)="filterResults()"
+                    style="height: 35px;" >        
+            </span> 
+        </div>
+    </div>
+
+    <!-- Search result -->
+    <div *ngFor="let resultItem of searchResults; let i = index" style="width: 100%; padding: 0px 20px;">
+        <div  *ngIf="resultItem.active" style="border-bottom: 1px solid rgb(202, 202, 202);margin-bottom: 1em; ">
+            <a *ngIf="resultItem.landingPage" style="float: right; margin-top: -0.5em;"
+                href="{{resultItem.landingPage}}" target="_blank"
+                >
+                <button pButton label="Home Page" type="button" class="p-button-sm"
+                    icon="faa faa-external-link" iconPos="left" style="padding: 3px 10px;"
+                    [ngClass]="{'visit-home-page': theme=='nist', 'visit-home-page-forensics': theme=='ScienceTheme'}"></button>
+            </a>
+            
+            <a *ngIf="!resultItem.landingPage" style="float: right; margin-top: -0.5em;"
+                href="{{PDRAPIURL}}{{resultItem.ediid}}" target="_blank"
+                (click)="gaService.gaTrackEvent('outbound', $event, 'Visit to homepage',resultItem.landingPage)">
+                <button pButton label="Home Page" type="button" class="p-button-sm"
+                    icon="faa faa-external-link" iconPos="left" style="padding: 3px 10px;"
+                    [ngClass]="{'visit-home-page': theme=='nist', 'visit-home-page-forensics': theme=='ScienceTheme'}"></button>
+            </a>
+
+            <div style="width: 80% !important;">
+                <a 
+                    href="{{PDRAPIURL}}{{resultItem.ediid}}"
+                    onclick="window.open(this.href, 'search'); return false"
+                    class="title">
+                    {{resultItem.title}}
+                </a>
+                <span>
+                    <span style="margin-left: .5em;cursor: pointer;" (click)="openDetails(resultItem, i)">
+                        <i [ngClass]='fileDetailsDisplayClass(resultItem)'></i></span> 
+                </span>
+            </div>
+
+            <div [@detailExpand]="showFileDetails(resultItem) ? 'expanded' : 'collapsed'" style="overflow: hidden;">
+                <div class="ui-grid-row">
+                    <!-- <read-more [text]="resultItem.description" [maxLength]="270">
+                    </read-more> -->
+                    {{resultItem.description}}
+                </div>
+                <div class="ui-grid-row details">
+                    <div class="ui-grid-col-12"><b>Point of Contact: </b> <i
+                            style="color: gray;">
+                            {{resultItem.contactPoint}}
+                        </i>
+                    </div>
+                </div>
+                <div class="ui-grid-row details">
+                    <div class="ui-grid-col-12"><b>Contact Full Name: </b> <i
+                            style="color: gray;">
+                            {{resultItem.contactPoint.fn}}
+                        </i>
+                    </div>
+                </div>
+                <div class="ui-grid-row details">
+                    <div class="ui-grid-col-12"><b>Resource Home Page: </b> <i
+                            style="color: gray;">
+                            {{resultItem.landingPage}}
+                        </i>
+                    </div>
+                </div>
+                <div class="ui-grid-row details">
+                    <div class="ui-grid-col-12"><b>Research Topic: </b> <i
+                            style="color: gray;">
+                            <span
+                                *ngFor="let topic of resultItem.topic; let i = index">{{topic.tag}}<span
+                                    *ngIf="i<resultItem.topic.length-1">, </span>
+                            </span>
+                        </i>
+                    </div>
+                </div>
+                <div class="ui-grid-row details">
+                    <div class="ui-grid-col-12"><b>Research Topic - Component: </b>
+                    </div>
+                </div>
+                <div class="ui-grid-row details">
+                    <div class="ui-grid-col-12"><b>Subject Keywords: </b> <i
+                            style="color:#515151;">
+                            <read-more [text]="resultItem.keyword.join(', ')"
+                                [maxLength]="110"></read-more>
+                        </i>
+                    </div>
+                </div>
+                <div class="ui-grid-row details">
+                    <span class="ui-grid-col-1"><b>DOI: </b> </span>
+                    <span class="ui-grid-col-11" style="color:#1471AE;"
+                        *ngIf="resultItem.doi != null">
+                        {{(resultItem.doi) || "None"}}</span>
+                    <span class="ui-grid-col-11" style="color:#000;"
+                        *ngIf="resultItem.doi == null">None</span>
+                </div>
+                <div class="ui-grid-row">
+                    <!-- <div class="ui-grid-col-12" style="margin-top: 1.5em;padding-bottom:20px;">
+                        <a *ngIf="resultItem.landingPage"
+                            [(href)]="resultItem.landingPage" target="_blank"
+                            (click)="gaService.gaTrackEvent('outbound', $event, 'Visit to homepage',resultItem.landingPage)">
+                            <button pButton label="Visit Home Page" type="button"
+                                icon="faa faa-external-link" iconPos="left"
+                                [ngClass]="{'visit-home-page': theme=='nist', 'visit-home-page-forensics': theme=='forensics'}"></button>
+                        </a>
+                        <a *ngIf="!resultItem.landingPage"
+                            href="{{PDRAPIURL}}{{resultItem.ediid}}" target="_blank"
+                            (click)="gaService.gaTrackEvent('outbound', $event, 'Visit to homepage',resultItem.landingPage)">
+                            <button pButton label="Visit Home Page" type="button"
+                                icon="faa faa-external-link" iconPos="left"
+                                [ngClass]="{'visit-home-page': theme=='nist', 'visit-home-page-forensics': theme=='forensics'}"></button>
+                        </a>
+                    </div> -->
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>

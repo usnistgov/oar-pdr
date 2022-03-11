@@ -37,11 +37,13 @@ export class ResourceDataComponent implements OnChanges {
     showDescription: boolean = false;
     showRestrictedDescription: boolean = false;
     currentState = 'initial';
+    recordType: string = "";
 
     // passed in by the parent component:
     @Input() record: NerdmRes = null;
     @Input() inBrowser: boolean = false;
     @Input() editEnabled: boolean; 
+    @Input() theme: string = 'nist';
 
     // pass out download status for metrics refresh
     @Output() dlStatus: EventEmitter<string> = new EventEmitter();
@@ -52,6 +54,10 @@ export class ResourceDataComponent implements OnChanges {
     constructor(private cfg: AppConfig,
                 private gaService: GoogleAnalyticsService)
     { }
+
+    ngOnInit(): void {
+        this.recordType = (new NERDResource(this.record)).resourceLabel();
+    }
 
     ngOnChanges(ch : SimpleChanges) {
         if (this.record)
@@ -64,8 +70,10 @@ export class ResourceDataComponent implements OnChanges {
      */
     useMetadata(): void {
         this.accessPages = []
-        if (this.record['components'])
+        if (this.record['components']){
             this.accessPages = this.selectAccessPages(this.record['components']);
+            console.log('this.accessPages', this.accessPages);
+        }
     }
 
     /**
@@ -74,8 +82,14 @@ export class ResourceDataComponent implements OnChanges {
      *                  full list from the NERDm Resource record 
      */
     selectAccessPages(comps : NerdmComp[]) : NerdmComp[] {
-        let use : NerdmComp[] = comps.filter(cmp => cmp['@type'].includes("nrdp:AccessPage") &&
-                                       ! cmp['@type'].includes("nrd:Hidden"));
+        let use : NerdmComp[];
+        if(this.theme == "ScienceTheme") {
+            use = comps.filter(cmp => cmp['@type'].includes("nrda:DynamicResourceSet"));
+        }else{
+            use = comps.filter(cmp => cmp['@type'].includes("nrdp:AccessPage") &&
+            ! cmp['@type'].includes("nrd:Hidden"));
+        }
+
         use = (JSON.parse(JSON.stringify(use))) as NerdmComp[];
         return use.map((cmp) => {
             if (! cmp['title']) cmp['title'] = cmp['accessURL'];

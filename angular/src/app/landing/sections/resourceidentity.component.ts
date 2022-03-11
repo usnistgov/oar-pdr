@@ -29,6 +29,7 @@ export class ResourceIdentityComponent implements OnChanges {
     // passed in by the parent component:
     @Input() record: NerdmRes = null;
     @Input() inBrowser: boolean = false;
+    @Input() theme: string = 'nist';
 
     /**
      * create an instance of the Identity section
@@ -69,7 +70,7 @@ export class ResourceIdentityComponent implements OnChanges {
      */
     useMetadata(): void {
         this.showHomePageLink = this.isExternalHomePage(this.record['landingPage']);
-        this.recordType = this.determineResourceLabel(this.record);
+        this.recordType = (new NERDResource(this.record)).resourceLabel();
 
         if (this.record['doi'] !== undefined && this.record['doi'] !== "")
             this.doiUrl = "https://doi.org/" + this.record['doi'].substring(4);
@@ -89,28 +90,6 @@ export class ResourceIdentityComponent implements OnChanges {
             return false;
         let pdrhomeurl = /^https?:\/\/(\w+)(\.\w+)*\/od\/id\//
         return ((url.match(pdrhomeurl)) ? false : true);
-    }
-
-    /**
-     * analyze the NERDm resource metadata and return a label indicating the type of 
-     * the resource described.  This is used as a label at the top of the page, just above 
-     * the title.
-     */
-    public determineResourceLabel(resmd: NerdmRes): string {
-        if (resmd['@type'] instanceof Array && resmd['@type'].length > 0) {
-            switch (resmd['@type'][0]) {
-                case 'nrd:SRD':
-                    return "Standard Reference Data";
-                case 'nrd:SRM':
-                    return "Standard Reference Material";
-                case 'nrdp:DataPublication':
-                    return "Data Publication";
-                case 'nrdp:PublicDataResource':
-                    return "Public Data Resource";
-            }
-        }
-
-        return "Data Resource";
     }
 
     /**

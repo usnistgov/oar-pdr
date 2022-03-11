@@ -256,6 +256,52 @@ export class NERDResource {
     getPrimaryReferences() : any[] {
         return this.getReferencesByType(["IsDocumentedBy", "IsSupplementTo"]);
     }
+
+    /**
+     * analyze the NERDm resource metadata and return a label indicating the type of 
+     * the resource described. 
+     * @param resmd Nerdm record
+     * @returns Resource Label
+     */
+    public resourceLabel(): string {
+        if (this.data['@type'] instanceof Array && this.data['@type'].length > 0) {
+            switch (this.data['@type'][0].replace(/\s/g, '')) {
+                case 'nrd:SRD':
+                    return "Standard Reference Data";
+                case 'nrd:SRM':
+                    return "Standard Reference Material";
+                case 'nrdp:DataPublication':
+                    return "Data Publication";
+                case 'nrdp:PublicDataResource':
+                    return "Public Data Resource";
+                case 'nrda:ScienceTheme':
+                    return "Science Theme";
+            }
+        }
+
+        return "Data Resource";
+    }
+
+    /**
+     * Return theme
+     * @returns 
+     */
+    public theme(): string {
+        if (this.data['@type'] instanceof Array && this.data['@type'].length > 0) {
+            return this.data['@type'][0].replace(/\s/g, '').split(":")[1];
+        }else{
+            return "nist";
+        }
+    }
+
+    public resourceType(): string {
+        if (this.data['@type'] instanceof Array && this.data['@type'].length > 0) {
+            if(this.data['@type'][0].replace(/\s/g, '') == 'nrda:ScienceTheme')
+                return "Collection";
+        }
+
+        return "Dataset";
+    }
 }
 
 /**

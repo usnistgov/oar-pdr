@@ -19,6 +19,8 @@ import { ResourceDescriptionComponent } from './resourcedescription.component';
 import { ResourceDataComponent } from './resourcedata.component';
 import { ResourceRefsComponent } from './resourcerefs.component';
 import { ResourceMetadataComponent } from './resourcemetadata.component';
+import { FacilitatorsModule } from '../facilitators/facilitators.module';
+import { SearchresultModule } from '../searchresult/searchresult.module';
 
 /**
  * A module for components that lay out the content of a resource landing page into sections.
@@ -52,7 +54,8 @@ import { ResourceMetadataComponent } from './resourcemetadata.component';
         CommonModule,
         NerdmModule,
         TitleModule, AuthorModule, ContactModule, CollapseModule, VersionModule,
-        DescriptionModule, DataFilesModule, TopicModule, KeywordModule, AboutdatasetModule
+        DescriptionModule, DataFilesModule, TopicModule, KeywordModule, AboutdatasetModule, 
+        FacilitatorsModule, SearchresultModule
     ],
     declarations: [
         ResourceIdentityComponent, ResourceDescriptionComponent, ResourceDataComponent,

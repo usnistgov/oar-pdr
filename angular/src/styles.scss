@@ -1,5 +1,13 @@
 @import "~ngx-toastr/toastr.css";
 
+:root {
+    /* Colors */
+    --science-theme-background-default: #019fbb;
+    --science-theme-background-light: #f5fbfd;
+    --science-theme-background-blue: #017abb;
+    --science-theme-background-blue-hover: #2db2fa;
+}
+
 .myCustomModalClass .modal-dialog {
   max-width: 1920px;
 }
@@ -22,6 +30,7 @@ a:link {
   background-color: transparent;
   text-decoration: none;
 }
+
 a:visited {
   color: #1471AE;
 //   color: #551A8B;
@@ -172,6 +181,19 @@ a {
     color: white;
 }
 
-.nist-green {
+.nist-green-fc {
+    color: #257a2d;
+}
+
+.nist-green-bc {
     background-color: #257a2d;
 }
+
+.nist-blue-fc {
+    color: #12659c;
+}
+
+.nist-blue-bc {
+    background-color: #12659c;
+}
+

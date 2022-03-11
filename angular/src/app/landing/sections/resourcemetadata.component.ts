@@ -19,6 +19,7 @@ import { MetricsData } from "../metrics-data";
     ]
 })
 export class ResourceMetadataComponent implements OnChanges {
+    resourceType: string;
 
     // passed in by the parent component:
     @Input() record: NerdmRes = null;
@@ -50,6 +51,6 @@ export class ResourceMetadataComponent implements OnChanges {
      * input resource metadata
      */
     useMetadata(): void {
-        // nothing currently necessary
+        this.resourceType = (new NERDResource(this.record)).resourceType();
     }
 }

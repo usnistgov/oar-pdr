@@ -106,6 +106,7 @@ export class DataFilesComponent implements OnInit, OnChanges {
 
     // Flag to tell if this is a publishing platform
     @Input() editEnabled: boolean;    //Disable download all functionality if edit is enabled
+    @Input() theme: string = 'nist';
 
     // Download status to trigger metrics refresh in parent component
     @Output() dlStatus: EventEmitter<string> = new EventEmitter();  

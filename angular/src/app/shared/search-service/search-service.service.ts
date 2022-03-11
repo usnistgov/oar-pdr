@@ -12,7 +12,9 @@ import * as _ from 'lodash-es';
 import { tap } from 'rxjs/operators';
 import { isPlatformServer } from '@angular/common';
 import { MessageBarComponent } from '../../frame/messagebar.component';
+import { BehaviorSubject } from 'rxjs';
 
+export const SEARCH_SERVICE = 'SEARCH_SERVICE';
 /**
  * This class provides the Search service with methods to search for records from tha rmm.
  */
@@ -23,6 +25,9 @@ export class SearchService {
     private landingBackend: string = "";
     private rmmBackend: string;
     editEnabled: any;
+
+    currentPage = new BehaviorSubject<number>(1);
+    totalItems = new BehaviorSubject<number>(1);
 
     @ViewChild(MessageBarComponent, { static: true })
     private msgbar: MessageBarComponent;
@@ -116,6 +121,51 @@ export class SearchService {
                     })
                 )
         }
+    }
+
+    /**
+     * Returns an Observable for the HTTP GET request for the JSON resource.
+     * @return {string[]} The Observable for the HTTP request.
+     */
+    searchPhrase(): Observable<any> {
+        let url: string;
+
+        url = "/rmm/records?isPartOf.@id=ark:/88434/mds9911";
+ 
+
+        console.log('search url', url);
+        return this.http.get(url);
+    }
+
+    /**
+     * Watch current page
+     */
+        watchCurrentPage(): Observable<any> {
+        return this.currentPage.asObservable();
+    }
+    
+    /**
+     * Set curent page
+     * @param page 
+     */
+    setCurrentPage(page: number) {
+        this.currentPage.next(page);
+    }
+
+
+    /**
+     * Watch total items (search result)
+     */
+     watchTotalItems(): Observable<any>{
+        return this.totalItems.asObservable();
+    }
+
+    /**
+     * Set total items (search result)
+     * @param page 
+     */
+    setTotalItems(totalItems: number) {
+        this.totalItems.next(totalItems);
     }
 }
 

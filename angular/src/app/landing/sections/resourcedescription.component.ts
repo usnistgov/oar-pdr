@@ -16,6 +16,7 @@ import { NerdmRes, NERDResource } from '../../nerdm/nerdm';
 })
 export class ResourceDescriptionComponent implements OnChanges {
     desctitle : string = "Description";
+    recordType: string = "";
 
     // passed in by the parent component:
     @Input() record: NerdmRes = null;
@@ -26,6 +27,10 @@ export class ResourceDescriptionComponent implements OnChanges {
      */
     constructor(private cfg: AppConfig)
     { }
+
+    ngOnInit(): void {
+        this.recordType = (new NERDResource(this.record)).resourceLabel();
+    }
 
     ngOnChanges() {
         if (this.record)

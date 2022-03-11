@@ -56,7 +56,8 @@ export class HeadbarComponent {
         this.inBrowser = isPlatformBrowser(platformId);
         if (!(cfg instanceof AppConfig))
             throw new Error("HeadbarComponent: Wrong config type provided: " + cfg);
-        this.searchLink = cfg.get("locations.pdrSearch", "/sdp/");
+        // this.searchLink = cfg.get("locations.pdrSearch", "/sdp/");
+        this.searchLink = "localhost:5555";
         this.contactLink = cfg.get("locations.pdrSearch", "/sdp/") + "#/help/contactus";
         this.status = cfg.get("status", "");
         this.appVersion = cfg.get("appVersion", "");

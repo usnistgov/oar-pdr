@@ -1,0 +1,227 @@
+{
+    "issued": "2020-04-01",
+    "_schema": "https://data.nist.gov/od/dm/nerdm-schema/v0.2#",
+    "topic": [
+        {
+            "scheme": "https://data.nist.gov/od/dm/nist-themes-forensics/v1.0",
+            "tag": "Forensics: DNA and biological evidence",
+            "@type": "Concept"
+        },
+        {
+            "scheme": "https://data.nist.gov/od/dm/nist-themes/v1.0",
+            "tag": "Nanotechnology: Nanobiotechnology",
+            "@type": "Concept"
+        },
+        {
+            "scheme": "https://data.nist.gov/od/dm/nist-themes/v1.0",
+            "tag": "Chemistry: Molecular characterization",
+            "@type": "Concept"
+        },
+        {
+            "scheme": "https://data.nist.gov/od/dm/nist-themes/v1.0",
+            "tag": "Physics: Biological physics",
+            "@type": "Concept"
+        }
+    ],
+    "references": [
+        {
+            "refType": "IsCitedBy",
+            "title": "Real-Time Nanopore-Based Recognition of Protein Translocation Success",
+            "issued": "2018-02",
+            "citation": "Hoogerheide, D. P., Gurnev, P. A., Rostovtseva, T. K., & Bezrukov, S. M. (2018). Real-Time Nanopore-Based Recognition of Protein Translocation Success. Biophysical Journal, 114(4), 772â776. doi:10.1016/j.bpj.2017.12.019\n",
+            "location": "https://doi.org/10.1016/j.bpj.2017.12.019",
+            "@id": "#ref:10.1016/j.bpj.2017.12.019",
+            "@type": [
+                "npg:Article"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/v0.2#/definitions/DCiteReference"
+            ]
+        },
+        {
+            "refType": "IsCitedBy",
+            "title": "Sequence diversity of tubulin isotypes in regulation of the mitochondrial voltage-dependent anion channel",
+            "issued": "2018-05-18",
+            "citation": "Rostovtseva, T. K., Gurnev, P. A., Hoogerheide, D. P., Rovini, A., Sirajuddin, M., & Bezrukov, S. M. (2018). Sequence diversity of tubulin isotypes in regulation of the mitochondrial voltage-dependent anion channel. Journal of Biological Chemistry, 293(28), 10949â10962. doi:10.1074/jbc.ra117.001569\n",
+            "location": "https://doi.org/10.1074/jbc.RA117.001569",
+            "@id": "#ref:10.1074/jbc.RA117.001569",
+            "@type": [
+                "npg:Article"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/v0.2#/definitions/DCiteReference"
+            ]
+        },
+        {
+            "refType": "IsCitedBy",
+            "title": "Mechanism of α-synuclein translocation through a VDAC nanopore revealed by energy landscape modeling of escape time distributions",
+            "issued": "2017",
+            "citation": "Hoogerheide, D. P., Gurnev, P. A., Rostovtseva, T. K., & Bezrukov, S. M. (2017). Mechanism of Î±-synuclein translocation through a VDAC nanopore revealed by energy landscape modeling of escape time distributions. Nanoscale, 9(1), 183â192. doi:10.1039/c6nr08145b\n",
+            "location": "https://doi.org/10.1039/C6NR08145B",
+            "@id": "#ref:10.1039/C6NR08145B",
+            "@type": [
+                "npg:Article"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/v0.2#/definitions/DCiteReference"
+            ]
+        },
+        {
+            "refType": "IsCitedBy",
+            "title": "Escape of DNA from a Weakly Biased Thin Nanopore: Experimental Evidence for a Universal Diffusive Behavior",
+            "issued": "2013-12-12",
+            "citation": "Hoogerheide, D. P., Albertorio, F., & Golovchenko, J. A. (2013). Escape of DNA from a Weakly Biased Thin Nanopore: Experimental Evidence for a Universal Diffusive Behavior. Physical Review Letters, 111(24). doi:10.1103/physrevlett.111.248301\n",
+            "location": "https://doi.org/10.1103/PhysRevLett.111.248301",
+            "@id": "#ref:10.1103/PhysRevLett.111.248301",
+            "@type": [
+                "npg:Article"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/v0.2#/definitions/DCiteReference"
+            ]
+        },
+        {
+            "refType": "IsCitedBy",
+            "title": "Effective driving force applied on DNA inside a solid-state nanopore",
+            "issued": "2012-07-23",
+            "citation": "Lu, B., Hoogerheide, D. P., Zhao, Q., & Yu, D. (2012). Effective driving force applied on DNA inside a solid-state nanopore. Physical Review E, 86(1). doi:10.1103/physreve.86.011921\n",
+            "location": "https://doi.org/10.1103/PhysRevE.86.011921",
+            "@id": "#ref:10.1103/PhysRevE.86.011921",
+            "@type": [
+                "npg:Article"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/v0.2#/definitions/DCiteReference"
+            ]
+        },
+        {
+            "refType": "IsCitedBy",
+            "title": "Origin of the electrophoretic force on DNA in solid-state nanopores",
+            "issued": "2009-03-29",
+            "citation": "Van Dorp, S., Keyser, U. F., Dekker, N. H., Dekker, C., & Lemay, S. G. (2009). Origin of the electrophoretic force on DNA in solid-state nanopores. Nature Physics, 5(5), 347â351. doi:10.1038/nphys1230\n",
+            "location": "https://doi.org/10.1038/nphys1230",
+            "@id": "#ref:10.1038/nphys1230",
+            "@type": [
+                "npg:Article"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/v0.2#/definitions/DCiteReference"
+            ]
+        }
+    ],
+    "keyword": [
+        "diffusion",
+        "protein",
+        "nanopore",
+        "polypeptide",
+        "calculator"
+    ],
+    "_extensionSchemas": [
+        "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/PublicDataResource"
+    ],
+    "landingPage": "https://data.nist.gov/od/id/mds2-2176",
+    "title": "PPdiffuse: Web-based (html and javascript) calculator for voltage-driven transport of polypeptides in nanopores",
+    "theme": [
+        "Nanotechnology: Nanobiotechnology",
+        "Chemistry: Molecular characterization",
+        "Physics: Biological physics"
+    ],
+    "version": "1.0.1",
+    "programCode": [
+        "006:045"
+    ],
+    "@context": [
+        "https://data.nist.gov/od/dm/nerdm-pub-context.jsonld",
+        {
+            "@base": "ark:/88434/mds2-2176"
+        }
+    ],
+    "description": [
+        "Web calculator for polypeptide motion through nanopores. The calculation is done in the framework of conditional first passage times based on the Smoluchowski transport equation. These calculations are quite complex in general, but this calculator allows the piecewise construction of an energy landscape that reflects the average forces on a polymer confined in a nanopore based on its primary sequence. The calculator is written in HTML and javascript."
+    ],
+    "bureauCode": [
+        "006:55"
+    ],
+    "contactPoint": {
+        "hasEmail": "mailto:david.hoogerheide@nist.gov",
+        "fn": "David Hoogerheide"
+    },
+    "accessLevel": "public",
+    "@id": "ark:/88434/mds2-2176",
+    "publisher": {
+        "name": "National Institute of Standards and Technology",
+        "@type": "org:Organization"
+    },
+    "doi": "doi:10.18434/M32176",
+    "license": "https://www.nist.gov/open/license",
+    "language": [
+        "en"
+    ],
+    "modified": "2020-01-30 00:00:00",
+    "ediid": "ark:/88434/mds2-2176",
+    "components": [
+        {
+            "accessURL": "https://github.com/usnistgov/ppdiffuse",
+            "description": "Github site for PPdiffuse software",
+            "format": {
+                "description": "Github"
+            },
+            "title": "PPdiffuse Github site",
+            "@id": "#usnistgov/ppdiffuse",
+            "@type": [
+                "nrdp:AccessPage",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/AccessPage"
+            ]
+        },
+        {
+            "accessURL": "https://doi.org/10.18434/M32176",
+            "@id": "#doi:10.18434/M32176",
+            "@type": [
+                "nrd:Hidden",
+                "dcat:Distribution"
+            ],
+            "title": "DOI Access for PPdiffuse: Web-based (html and javascript) calculator for voltage-driven transport of polypeptides in nanopores"
+        }
+    ],
+    "versionHistory": [
+        {
+            "issued": "2020-01-30 00:00:00",
+            "version": "1.0.0",
+            "@id": "ark:/88434/mds2-2176",
+            "location": "https://data.nist.gov/od/id/ark:/88434/mds2-2176",
+            "description": "initial release"
+        },
+        {
+            "issued": "2020-01-30 00:00:00",
+            "version": "1.0.1",
+            "@id": "ark:/88434/mds2-2176",
+            "location": "https://data.nist.gov/od/id/ark:/88434/mds2-2176",
+            "description": "metadata update"
+        }
+    ],
+    "@type": [
+        "nrdp:PublicDataResource",
+        "nrda:DynamicResourceSet"
+    ],
+    "isPartOf": [
+        {
+            "title": "DNA and Biological Evidence data collection",
+            "proxyFor": "ark:/88434/mds991133",
+            "resType": [
+                "nrda: ScienceTheme",
+                "nrdp: PublicDataResource"
+            ]
+        },
+        {
+            "title": "Forensics Data Collection",
+            "proxyFor": "ark:/88434/mds9911",
+            "resType": [
+                "nrda: ScienceTheme",
+                "nrdp: PublicDataResource"
+            ]
+        }
+    ]
+}

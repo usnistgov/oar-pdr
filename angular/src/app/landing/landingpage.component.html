@@ -2,6 +2,20 @@
 <pdr-edit-control *ngIf="editEnabled" [inBrowser]="inBrowser"
                   [(mdrec)]="md" [requestID]="requestId"></pdr-edit-control>
 
+<div *ngIf="theme=='ScienceTheme'" >
+    <!-- Banner for Science Theme -->
+    <div class="science-theme-banner" [ngStyle]="{ 'background-image': 'url(' + imageURL + ')','margin-bottom':'-1em'}">
+    </div>    
+
+    <!-- Top portion of landing page -->
+    <!-- <app-forensicslandingbody [md]="md" [inBrowser]="inBrowser"></app-forensicslandingbody> -->
+
+    <!-- Forensics search result -->
+    <!-- <app-forensicssearchresult [md]="md" [inBrowser]="inBrowser"></app-forensicssearchresult> -->
+
+    <!-- Rest info -->
+</div>
+
 <!-- landing page panel -->
 <div *ngIf="!displaySpecialMessage && _showContent" class="p-grid p-grid-responsive p-grid-pad center">
   <div class="card" [ngClass]="mobileMode ? 'landingcard-mobile' : 'landingcard'"  style="width: 100%;">
@@ -31,6 +45,7 @@
             [record]="md" 
             [isPopup]="true"
             [appendTo]="body"
+            [theme]="theme"
             (toggle_citation)="toggleCitation('small')"
             (scroll)="goToSection($event)">
         </tools-menu>
@@ -40,7 +55,7 @@
       <div class="grid">
 
         <!-- landing page content -->
-        <div class="p-col-12 col-md-10 col-lg-10 col-sm-12">
+        <div class="p-col-12 col-md-10 col-lg-10 col-xl-10 col-sm-12">
 
             <pdr-landing-body 
                 [md]="md" 
@@ -49,6 +64,7 @@
                 [mobileMode]="mobileMode" 
                 [metricsData]="metricsData" 
                 [showJsonViewer]="showJsonViewer" 
+                [theme]="theme"
                 (dlStatus)="onDownloadStatusChanged($event)">
             </pdr-landing-body>
 
@@ -66,7 +82,7 @@
 
         <!-- side tool menu (for tablets and desktop displays  -->
         <div class="p-col-2 col-md-2 col-lg-2">
-          <div style="position: sticky; top: 0;">
+          <div style="position: sticky; top: 1em;">
             <!-- <div class="col-12"> -->
               <div *ngIf="inBrowser" class="d-none d-md-block d-lg-block d-xl-block ">
 
@@ -77,7 +93,7 @@
                     (scroll)="goToSection($event)">
                 </tools-menu>
 
-                <app-metricsinfo 
+                <app-metricsinfo *ngIf="recordType!='Science Theme'"
                     [inBrowser]="inBrowser"
                     [record]="md"
                     [metricsData]="metricsData"

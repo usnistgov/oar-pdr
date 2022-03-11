@@ -5,7 +5,7 @@
 
 <!-- Citation info -->
 <div style="margin: 1em 0em;" id="cite">
-    <div><b style="margin-right: 10px;">Cite this dataset</b>
+    <div><b style="margin-right: 10px;">Cite this {{resourceType.toLowerCase()}}</b>
         <span style="cursor: pointer; color: #1E6BA1;" (click)="copyToClipboard(citetext)" data-toggle="tooltip" title="Copy to clipboard"><i class="faa faa-clone"></i></span><span [@enterAnimation] *ngIf="citeCopied" class="badge"
         style="background-color:#f0f0f0; margin-left: 0.5em; color: black;">Citation copied to clipboard</span>
     </div>
@@ -17,7 +17,7 @@
 <!-- Repository metadata -->
 <div style="margin: 0em 0em .5em 0em;" id="metadata">
     <div><b>Repository Metadata</b></div>
-    Machine-readable descriptions of this dataset are available in the following formats:
+    Machine-readable descriptions of this {{resourceType.toLowerCase()}} are available in the following formats:
     <div (click)="showJsonViewer = !showJsonViewer" class="linked-text"><i class="faa faa-caret-right" *ngIf="!showJsonViewer"></i><i class="faa faa-caret-down" *ngIf="showJsonViewer"></i> NERDm</div>
 </div>
 <div *ngIf="showJsonViewer" style="margin: 0 0 .5em 1em;">
@@ -62,7 +62,7 @@
 </div>
 
 <!-- Metrics info -->
-<div style="margin: 0em 0em 1em 0em;" id="metrics">
+<div *ngIf="resourceType != 'Collection'" style="margin: 0em 0em 1em 0em;" id="metrics">
     <div>
         <b>Access Metrics</b>
     </div>

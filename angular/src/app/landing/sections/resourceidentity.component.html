@@ -7,6 +7,10 @@
         <app-title [record]="record" [inBrowser]="inBrowser"></app-title>
         <app-author [record]="record" [inBrowser]="inBrowser"></app-author>
     </div>
+    <!-- for Science Theme only-->
+    <div *ngIf="theme=='ScienceTheme'" class="col-12 col-md-12 col-lg-12 col-sm-12">
+        <app-facilitators [record]="record" [inBrowser]="inBrowser"></app-facilitators>
+    </div>
     <div class="col-8 col-md-8 col-lg-8 col-sm-12">
         <app-contact [record]="record" [inBrowser]="inBrowser"></app-contact>
 
@@ -27,11 +31,11 @@
                 </span>
             </div>
         </span>
-        <pdr-version [record]="record"></pdr-version>
+        <pdr-version [record]="record" *ngIf="recordType!='Science Theme'"></pdr-version>
     </div>
 
     <div class="col-4 col-md-4 col-lg-4 col-sm-12">
-        <span *ngIf="showHomePageLink" style="float: right;">
+        <span *ngIf="showHomePageLink && recordType!='Science Theme'" style="float: right;">
             <span *ngIf="inBrowser; else visitHomeOnServer">
                 <a href={{record.landingPage}} target="_blank">
                     <button type="button" pButton type="submit" [disabled]="!inViewMode"

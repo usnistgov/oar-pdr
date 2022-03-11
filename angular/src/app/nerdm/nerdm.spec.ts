@@ -186,6 +186,25 @@ describe('NERDResource', function() {
         cstr = nrd.getCitation();
         expect(cstr).toContain("National Institute of Standards and Technology (2019), Multiple Encounter Dataset (MEDS-I) - NIST Special Database 32, National Institute of Standards and Technology, https://www.nist.gov/itl/iad/image-group/special-database-32-multiple-encounter-dataset-meds (Accessed ");
     });
+
+    it('resourceLabel', () => {
+        let nrd = new nerdm.NERDResource(testdata['test1']);
+
+        nrd.data['@type'][0] = "nrdp:DataPublication"
+        expect(nrd.resourceLabel()).toEqual("Data Publication")
+
+        nrd.data['@type'][0] = "nrd:SRD"
+        expect(nrd.resourceLabel()).toEqual("Standard Reference Data")
+
+        nrd.data['@type'][0] = "nrd:SRM"
+        expect(nrd.resourceLabel()).toEqual("Standard Reference Material")
+
+        nrd.data['@type'][0] = "nrdp:PublicDataResource"
+        expect(nrd.resourceLabel()).toEqual("Public Data Resource")
+
+        nrd.data['@type'][0] = "nrdp:ScienceTheme"
+        expect(nrd.resourceLabel()).toEqual("Science Theme")
+    });
 });
 
 describe('MetadataTransfer', function() {

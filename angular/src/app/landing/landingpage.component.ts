@@ -27,6 +27,7 @@ import { CartActions } from '../datacart/cartconstants';
 import { initBrowserMetadataTransfer } from '../nerdm/metadatatransfer-browser.module';
 import { MetricsData } from "./metrics-data";
 
+
 /**
  * A component providing the complete display of landing page content associated with 
  * a resource identifier.  This content is handle in various sub-components.
@@ -91,6 +92,9 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
     btnPosition: any;
     menuBottom: string = "1em";
     showMetrics: boolean = false;
+    recordType: string = "";
+    imageURL: string;
+    theme: string;
 
     @ViewChild(LandingBodyComponent)
     landingBodyComponent: LandingBodyComponent;
@@ -165,6 +169,7 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
         let metadataError = "";
         this.displaySpecialMessage = false;
         this.CART_ACTIONS = CartActions.cartActions;
+        this.imageURL = 'assets/images/fingerprint.jpg';
 
         // Only listen to storage change if we are not in edit mode
         if(this.inBrowser && !this.editEnabled){
@@ -466,6 +471,9 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
      */
     useMetadata(): void {
         this.metricsData.url = "/metrics/" + this.reqId;
+        this.recordType = (new NERDResource(this.md)).resourceLabel();
+        this.theme = (new NERDResource(this.md)).theme();
+
         // set the document title
         this.setDocumentTitle();
         this.mdupdsvc.setOriginalMetadata(this.md);
@@ -576,7 +584,6 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
      * Setup landing page layout
      */
     landingpageClass() {
-        console.log('this.mobileMode', this.mobileMode)
         if(this.mobileMode){
             return "col-12 md:col-12 lg:col-12 sm:flex-nowrap";
         }else{

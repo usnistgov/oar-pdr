@@ -1,0 +1,48 @@
+.result-header {
+    width: 100%;
+    height: 45px;
+    border-bottom: 1px solid grey;
+    align-items:center;
+    margin-bottom: 2em;
+    background-color: var(--science-theme-background-blue); 
+    /* background-color: var(--science-theme-background-default); */
+}
+
+.title {
+    color:#1471AE;
+    font-size: 16px !important;
+  }
+  
+.title:hover {
+    text-decoration: underline;
+}
+
+.visit-home-page {
+    font-size: 13px; 
+    width:120px; 
+    background-color: #257a2d; 
+    height: 35px;
+    color: white;
+    float: right;
+}
+
+.visit-home-page:hover {
+    background-color: #6ac973; 
+}
+
+.visit-home-page-forensics {
+    font-size: 13px; 
+    width:120px; 
+    background-color: var(--science-theme-background-blue); 
+    height: 35px !important;
+    color: white;
+    float: right;
+}
+
+.visit-home-page-forensics:hover {
+    background-color: var(--science-theme-background-blue-hover); 
+}
+
+.search-button {
+    background-color: var(--science-theme-background-blue); 
+}

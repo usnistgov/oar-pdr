@@ -1,0 +1,128 @@
+{
+    "_schema": "https://data.nist.gov/od/dm/nerdm-schema/v0.5#",
+    "topic": [
+        {
+            "scheme": "https://data.nist.gov/od/dm/nist-themes-forensics/v1.0",
+            "tag": "Forensics: DNA and biological evidence",
+            "@type": "Concept"
+        }
+    ],
+    "keyword": [
+        "forensics",
+        "dna"
+    ],
+    "_extensionSchemas": [
+        "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/PublicDataResource",
+        "https://data.nist.gov/od/dm/nerdm-schema/agg/v0.1#/definitions/Aggregation"
+    ],
+    "landingPage": "https://www.nist.gov/itl/iad/image-group",
+    "title": "NIST Research in DNA and biological evidence.",
+    "theme": [
+        "Forensics:DNA and biological evidence"
+    ],
+    "version": "1.0.0",
+    "programCode": [
+        "006:045"
+    ],
+    "@context": [
+        "https://data.nist.gov/od/dm/nerdm-pub-context.jsonld",
+        {
+            "@base": "ark:/88434/mds991133"
+        }
+    ],
+    "description": [
+        "DNA is a complex molecule that contains the instructions for building and maintaining the bodies of humans and other organisms. With the exception of red blood cells, every cell in your body has DNA. And with the exception of identical twins, everyone’s DNA is different. If someone leaves blood, semen or other biological material at a crime scene, scientists can use it as DNA evidence and create a DNA profile, or genetic fingerprint of that person. That profile can be used to search a DNA database for a possible suspect, to associate a suspect with evidence left at a crime scene, or to link two crimes that may have been committed by the same person."
+    ],
+    "bureauCode": [
+        "006:55"
+    ],
+    "contactPoint": {
+        "hasEmail": "mailto:dna-forensics@nist.gov",
+        "fn": "NIST DNA research Group"
+    },
+    "accessLevel": "public",
+    "@id": "ark:/88434/mds991122",
+    "publisher": {
+        "name": "National Institute of Standards and Technology",
+        "@type": "org:Organization"
+    },
+    "doi": "doi:10.18434/T4/1502474",
+    "license": "https://www.nist.gov/open/license",
+    "language": [
+        "en"
+    ],
+    "modified": "2022-01-01 12:01:02",
+    "ediid": "ark:/88434/mds991122",
+    "versionHistory": [
+        {
+            "issued": "2021-12-31",
+            "version": "1.0.0",
+            "@id": "ark:/88434/mds991122",
+            "location": "https://data.nist.gov/od/id/ark:/88434/mds991122",
+            "description": "initial release"
+        }
+    ],
+    "@type": [
+        "nrda: ScienceTheme",
+        "nrdp: PublicDataResource"
+    ],
+    "facilitators": [
+        {
+            "middleName": "",
+            "familyName": "Fiumara",
+            "affiliation": [
+                {
+                    "@type": "org:Organization",
+                    "title": "NIST Forensics division"
+                }
+            ],
+            "orcid": "",
+            "givenName": "Gregory",
+            "@type": "foaf:Person",
+            "fn": "Greg Fiumara",
+            "jobTitle": "PI"
+        }
+    ],
+    "creators": [
+        {
+            "middleName": "",
+            "familyName": "Brady",
+            "affiliation": [
+                {
+                    "@type": "org:Organization",
+                    "title": "NIST Forensics division"
+                }
+            ],
+            "orcid": "",
+            "givenName": "Mary",
+            "@type": "foaf:Person",
+            "fn": "Mary Brady",
+            "jobTitle": "PI"
+        }
+    ],
+    "components": [
+        {
+            "@type": [
+                "nrda:DynamicResourceSet",
+                "nrdp:SearchPage"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/agg/v0.1#/definitions/DynamicResourceSet"
+            ],
+            "searchURL": "/rmm/records?isPartOf.@id=ark:/88434/mds991133",
+            "accessURL": "https://data.nist.gov/sdp/#/search?q=isPartOf.@id%3Dark:/88434/mds991133",
+            "title": "DNA and Biological Evidence data collection"
+        }
+    ],
+    "isPartOf": [
+        {
+            "title": "Forensics Data Collection",
+            "proxyFor": "ark:/88434/mds9911",
+            "resType": [
+                "nrda:ScienceTheme",
+                "nrda:Aggregation",
+                "nrdp:PublicDataResource"
+            ]
+        }
+    ]
+}
