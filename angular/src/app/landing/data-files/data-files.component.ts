@@ -165,10 +165,6 @@ export class DataFilesComponent implements OnInit, OnChanges {
     }
 
     ngOnInit() {
-        this.appHeight = (window.innerHeight);
-        this.appWidth = (window.innerWidth);
-        this.setWidth(this.appWidth);
-
         this.editstatsvc.watchEditMode((editMode) => {
             this.editMode = editMode;
         });
@@ -185,6 +181,10 @@ export class DataFilesComponent implements OnInit, OnChanges {
         });
 
         if(this.inBrowser){
+            this.appHeight = (window.innerHeight);
+            this.appWidth = (window.innerWidth);
+            this.setWidth(this.appWidth);
+            
             this.globalDataCart = this.cartService.getGlobalCart();
             this.cartLength = this.globalDataCart.size();
             this.globalDataCart.watchForChanges((ev) => { this.cartChanged(); })
