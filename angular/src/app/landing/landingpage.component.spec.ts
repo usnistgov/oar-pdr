@@ -24,6 +24,7 @@ import { GoogleAnalyticsService } from '../shared/ga-service/google-analytics.se
 import * as mock from '../testing/mock.services';
 import {RouterTestingModule} from "@angular/router/testing";
 import { testdata } from '../../environments/environment';
+import { CommonFunctionService } from "../shared/common-function/common-function.service";
 
 describe('LandingPageComponent', () => {
     let component : LandingPageComponent;
@@ -31,7 +32,7 @@ describe('LandingPageComponent', () => {
     let cfg : AppConfig;
     let plid : Object = "browser";
     let ts : TransferState = new TransferState();
-    let nrd : NerdmRes;
+    let nrd10 : NerdmRes;
     let mdt : MetadataTransfer;
     let mds : MetadataService;
     let route : ActivatedRoute;
@@ -51,7 +52,7 @@ describe('LandingPageComponent', () => {
         cfg.appVersion = "2.test";
         cfg.editEnabled = false;
 
-        nrd = testdata['test1'];
+        nrd10 = testdata['test1'];
         /*
         nrd = {
             "@type": [ "nrd:SRD", "nrdp:DataPublication", "nrdp:DataPublicResource" ],
@@ -60,7 +61,7 @@ describe('LandingPageComponent', () => {
         }
         */
         mdt = new MetadataTransfer();
-        mdt.set("goober", nrd)
+        mdt.set("goober", nrd10)
         mds = new TransferMetadataService(mdt);
 
         let r : unknown = new mock.MockActivatedRoute("/id/goober", {id: "goober"});
@@ -83,7 +84,8 @@ describe('LandingPageComponent', () => {
                 { provide: MetadataService, useValue: mds },
                 { provide: AuthService,     useValue: authsvc }, 
                 UserMessageService, MetadataUpdateService, DatePipe,
-                CartService, DownloadService, TestDataService, GoogleAnalyticsService, ModalService
+                CartService, DownloadService, TestDataService, GoogleAnalyticsService, 
+                ModalService, CommonFunctionService
             ]
         }).compileComponents();
 
@@ -95,7 +97,7 @@ describe('LandingPageComponent', () => {
 
     it("should set title bar", function() {
         setupComponent();
-        expect(component.getDocumentTitle()).toBe("PDR: "+nrd.title);
+        expect(component.getDocumentTitle()).toBe("PDR: "+nrd10.title);
     });
 
     it("includes landing display", function() {
@@ -104,7 +106,7 @@ describe('LandingPageComponent', () => {
         let cmpel = fixture.nativeElement;
         let el = cmpel.querySelector("h2");
         expect(el).toBeTruthy();
-        expect(el.textContent).toContain(nrd.title);
+        expect(el.textContent).toContain(nrd10.title);
     });
 
 });

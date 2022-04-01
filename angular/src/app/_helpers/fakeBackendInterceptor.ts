@@ -40,7 +40,7 @@ export class FakeBackendInterceptor implements HttpInterceptor {
         // }
 
         if (request.url.indexOf('isPartOf.@id=ark:/88434/mds9911') > -1 && request.method === 'GET') {
-            console.log("Getting forensics")
+            // console.log("Getting forensics")
             return of(new HttpResponse({ status: 200, body: testdata }));
         }
 

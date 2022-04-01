@@ -72,7 +72,6 @@ export class ResourceDataComponent implements OnChanges {
         this.accessPages = []
         if (this.record['components']){
             this.accessPages = this.selectAccessPages(this.record['components']);
-            console.log('this.accessPages', this.accessPages);
         }
     }
 

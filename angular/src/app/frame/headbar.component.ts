@@ -33,7 +33,7 @@ export class HeadbarComponent {
     inBrowser: boolean = false;
     layoutCompact: boolean = true;
     layoutMode: string = 'horizontal';
-    searchLink: string = "";
+    searchLink: string = "localhost:5555";
     status: string = "";
     appVersion: string = "";
     cartLength: number = 0;
@@ -43,6 +43,7 @@ export class HeadbarComponent {
     public EDIT_MODES: any;
     public CART_CONSTANTS: any = CartConstants.cartConst;
     globalCartUrl: string = "/datacart/" + this.CART_CONSTANTS.GLOBAL_CART_NAME;
+    theme: string = "nist";
 
     constructor(
         private el: ElementRef,
@@ -56,8 +57,8 @@ export class HeadbarComponent {
         this.inBrowser = isPlatformBrowser(platformId);
         if (!(cfg instanceof AppConfig))
             throw new Error("HeadbarComponent: Wrong config type provided: " + cfg);
-        // this.searchLink = cfg.get("locations.pdrSearch", "/sdp/");
-        this.searchLink = "localhost:5555";
+        this.searchLink = cfg.get("locations.pdrSearch", "/sdp/");
+
         this.contactLink = cfg.get("locations.pdrSearch", "/sdp/") + "#/help/contactus";
         this.status = cfg.get("status", "");
         this.appVersion = cfg.get("appVersion", "");

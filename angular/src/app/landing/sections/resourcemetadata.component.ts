@@ -30,6 +30,7 @@ export class ResourceMetadataComponent implements OnChanges {
 
     @Input() metricsData: MetricsData;
     @Input() showJsonViewer: boolean = false;
+    @Input() theme: string = 'nist';
 
     @ViewChild(AboutdatasetComponent, { static: true })
     aboutdatasetComponent: AboutdatasetComponent;
@@ -52,5 +53,6 @@ export class ResourceMetadataComponent implements OnChanges {
      */
     useMetadata(): void {
         this.resourceType = (new NERDResource(this.record)).resourceType();
+        console.log(' this.resourceType',  this.resourceType)
     }
 }

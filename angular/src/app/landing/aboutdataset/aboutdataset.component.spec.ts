@@ -12,7 +12,7 @@ import { config, testdata } from '../../../environments/environment';
 import { By } from "@angular/platform-browser";
 import { MetricsData } from "../metrics-data";
 
-describe('MetadataComponent', () => {
+describe('AboutdatasetComponent', () => {
     let component: AboutdatasetComponent;
     let fixture: ComponentFixture<AboutdatasetComponent>;
     let cfg : AppConfig = new AppConfig(config);

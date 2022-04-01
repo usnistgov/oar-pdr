@@ -1,4 +1,6 @@
 import { Injectable } from '@angular/core';
+import { Observable, of } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 
 /**
  * DEPRECATED!
@@ -7,7 +9,6 @@ import { Injectable } from '@angular/core';
     providedIn: 'root'
 })
 export class CommonFunctionService {
-
     constructor() { }
 
     /**

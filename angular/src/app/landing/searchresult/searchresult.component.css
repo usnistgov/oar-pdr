@@ -34,3 +34,22 @@
     height: 100%;
     cursor: ew-resize;
 }
+
+.rotate {
+    -webkit-transform: rotate(90deg);
+    -moz-transform: rotate(90deg);
+    -o-transform: rotate(90deg);
+    -ms-transform: rotate(90deg);
+    transform: rotate(45deg);
+    transform: rotate(90deg);
+}
+
+.splitter {
+    margin-left: 5px;
+    font-size:x-large;
+    cursor: col-resize;
+    background-color: var(--science-theme-background-light2);
+    /* height: 100%; */
+    /* margin: auto; */
+    /* color: grey; */
+}

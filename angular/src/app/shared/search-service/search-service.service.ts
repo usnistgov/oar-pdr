@@ -25,6 +25,7 @@ export class SearchService {
     private landingBackend: string = "";
     private rmmBackend: string;
     editEnabled: any;
+    portalBase: string = "https://data.nist.gov";
 
     currentPage = new BehaviorSubject<number>(1);
     totalItems = new BehaviorSubject<number>(1);
@@ -43,6 +44,7 @@ export class SearchService {
         @Inject(PLATFORM_ID) private platformId: Object,
         private cfg: AppConfig) {
         this.landingBackend = cfg.get("mdAPI", "/unconfigured");
+        this.portalBase = cfg.get("locations.portalBase", "data.nist.gov");
 
         if (this.landingBackend == "/unconfigured")
             throw new Error("Metadata service endpoint not configured!");
@@ -130,8 +132,8 @@ export class SearchService {
     searchPhrase(): Observable<any> {
         let url: string;
 
-        url = "/rmm/records?isPartOf.@id=ark:/88434/mds9911";
- 
+        // url = "/rmm/records?isPartOf.@id=ark:/88434/mds9911";
+        url = this.portalBase + "rmm/records?isPartOf.@id=ark:/88434/mds9911";
 
         console.log('search url', url);
         return this.http.get(url);
@@ -167,6 +169,7 @@ export class SearchService {
     setTotalItems(totalItems: number) {
         this.totalItems.next(totalItems);
     }
+
 }
 
 

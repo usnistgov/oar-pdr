@@ -1,22 +1,21 @@
 <div style="width: 100%;margin: 20px 0 20px 10px; padding: 20px 10px; margin-top: 35px !important;" *ngIf="showResult">
-    <!-- Top bar -->
-    <!-- <div class="flex-container" style="width: 100%;height: 50px;border-bottom: 1px solid grey;align-items:center;margin-bottom: 1em;"> -->
     <div class="grid p-fluid result-header">
 
-        <div class="col-12 md:col-5" style="font-weight: bold;color: white;margin-top: -10px !important;">
-            <span *ngIf="theme=='ScienceTheme'; else nistTheme"> {{resultCount}} datasets found in forensics</span>
+        <div class="col-12 md:col-3" style="font-weight: bold;color: white;margin-top: -10px !important;">
+            <span *ngIf="theme=='ScienceTheme'; else nistTheme"> {{totalResultItems}} datasets found</span>
             <ng-template #nistTheme>
-                {{resultCount}} records found
+                {{totalResultItems}} records found
             </ng-template>
         </div>
 
         <!-- Pagination -->
+        <div class="col-12 md:col-2" style="margin-top: -10px !important;">
+            <div style="width: 100%;">
+                <p-dropdown [options]="pages" [(ngModel)]="currentPage" optionLabel="name"[style]="{'text-align': 'left', 'height':'35px', 'vertical-align' : 'top'}"></p-dropdown>
+            </div>
+        </div>
 
-        <!-- <div style="flex-grow:6;height: 40px;padding:auto;margin-top: -3em;text-align: center;">
-            <app-pagination [totalItems]="resultCount" [currentPage]="currentPage"></app-pagination>
-        </div> -->
-
-        <!-- <div style="flex-grow:2;text-align: right;"> -->
+        <!-- Sorting -->
         <div class="col-12 md:col-3" style="margin-top: -10px !important;">
             <div style="width: 100%;">
                 <p-dropdown [options]="options" [(ngModel)]="optionSelected" optionLabel="name" (onChange)="onSortByChange($event)" placeholder="Sorted by" [style]="{'text-align': 'left', 'height':'35px'}"></p-dropdown>
@@ -38,8 +37,8 @@
     </div>
 
     <!-- Search result -->
-    <div *ngFor="let resultItem of searchResults; let i = index" style="width: 100%; padding: 0px 20px;">
-        <div  *ngIf="resultItem.active" style="border-bottom: 1px solid rgb(202, 202, 202);margin-bottom: 1em; ">
+    <div *ngFor="let resultItem of searchResultsForDisplay; let i = index" style="width: 100%; padding: 0px 20px;">
+        <div  *ngIf="resultItem.active && i >= (currentPage.value-1)*itemsPerPage && i <= currentPage.value*itemsPerPage-1" style="border-bottom: 1px solid rgb(202, 202, 202);margin-bottom: 1em; ">
             <a *ngIf="resultItem.landingPage" style="float: right; margin-top: -0.5em;"
                 href="{{resultItem.landingPage}}" target="_blank"
                 >
@@ -59,7 +58,7 @@
             <div style="width: 80% !important;">
                 <a 
                     href="{{PDRAPIURL}}{{resultItem.ediid}}"
-                    onclick="window.open(this.href, 'search'); return false"
+                    target="_blank"
                     class="title">
                     {{resultItem.title}}
                 </a>
@@ -71,8 +70,6 @@
 
             <div [@detailExpand]="showFileDetails(resultItem) ? 'expanded' : 'collapsed'" style="overflow: hidden;">
                 <div class="ui-grid-row">
-                    <!-- <read-more [text]="resultItem.description" [maxLength]="270">
-                    </read-more> -->
                     {{resultItem.description}}
                 </div>
                 <div class="ui-grid-row details">
@@ -126,23 +123,13 @@
                     <span class="ui-grid-col-11" style="color:#000;"
                         *ngIf="resultItem.doi == null">None</span>
                 </div>
-                <div class="ui-grid-row">
-                    <!-- <div class="ui-grid-col-12" style="margin-top: 1.5em;padding-bottom:20px;">
-                        <a *ngIf="resultItem.landingPage"
-                            [(href)]="resultItem.landingPage" target="_blank"
-                            (click)="gaService.gaTrackEvent('outbound', $event, 'Visit to homepage',resultItem.landingPage)">
-                            <button pButton label="Visit Home Page" type="button"
-                                icon="faa faa-external-link" iconPos="left"
-                                [ngClass]="{'visit-home-page': theme=='nist', 'visit-home-page-forensics': theme=='forensics'}"></button>
-                        </a>
-                        <a *ngIf="!resultItem.landingPage"
-                            href="{{PDRAPIURL}}{{resultItem.ediid}}" target="_blank"
-                            (click)="gaService.gaTrackEvent('outbound', $event, 'Visit to homepage',resultItem.landingPage)">
-                            <button pButton label="Visit Home Page" type="button"
-                                icon="faa faa-external-link" iconPos="left"
-                                [ngClass]="{'visit-home-page': theme=='nist', 'visit-home-page-forensics': theme=='forensics'}"></button>
-                        </a>
-                    </div> -->
+                <div class="ui-grid-row details">
+                    <span class="ui-grid-col-1"><b>Last modified: </b> </span>
+                    <span class="ui-grid-col-11" style="color:#1471AE;"
+                        *ngIf="resultItem.doi != null">
+                        {{resultItem.modified.slice(0,10) || ""}}</span>
+                    <span class="ui-grid-col-11" style="color:#000;"
+                        *ngIf="resultItem.doi == null">None</span>
                 </div>
             </div>
         </div>

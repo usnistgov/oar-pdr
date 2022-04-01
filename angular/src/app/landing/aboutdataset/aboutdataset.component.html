@@ -3,6 +3,11 @@
 <!-- Version info -->
 <pdr-version [record]="record"></pdr-version> 
 
+<!-- Facilitators -->
+<div *ngIf="theme=='ScienceTheme'" style="width: 100%; margin-bottom: 2em;">
+    <app-facilitators [record]="record" [inBrowser]="inBrowser"></app-facilitators>
+</div>
+
 <!-- Citation info -->
 <div style="margin: 1em 0em;" id="cite">
     <div><b style="margin-right: 10px;">Cite this {{resourceType.toLowerCase()}}</b>

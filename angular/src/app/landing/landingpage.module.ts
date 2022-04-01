@@ -23,7 +23,6 @@ import { MetricsinfoComponent } from './metricsinfo/metricsinfo.component';
 // import { ForensicslandingbodyModule } from './forensicslandingbody/forensicslandingbody.module';
 // import { ForensicssearchresultModule } from './forensicssearchresult/forensicssearchresult.module';
 import { SearchresultModule } from './searchresult/searchresult.module';
-import { PaginationModule } from './pagination/pagination.module';
 
 
 /**
@@ -40,8 +39,7 @@ import { PaginationModule } from './pagination/pagination.module';
         ToolsModule,
         CitationModule,
         SectionsModule,
-        SearchresultModule,
-        PaginationModule
+        SearchresultModule
     ],
     declarations: [
         LandingPageComponent, LandingBodyComponent, DoneComponent, DownloadstatusComponent,

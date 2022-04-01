@@ -16,16 +16,16 @@ const SEARCH_SERVICE = 'SEARCH_SERVICE';
     styleUrls: ['./filters.component.css'],
     providers: [TaxonomyListService, SearchfieldsListService],
     animations: [
-            trigger('expand', [
-                state('collapsed', style({height: '183px'})),
-                state('expanded', style({height: '*'})),
-                transition('expanded <=> collapsed', animate('625ms'))
-            ]),
-            trigger('expandOptions', [
-                state('collapsed', style({height: '0px'})),
-                state('expanded', style({height: '*'})),
-                transition('expanded <=> collapsed', animate('625ms'))
-            ])
+        trigger('expand', [
+            state('collapsed', style({height: '183px'})),
+            state('expanded', style({height: '*'})),
+            transition('expanded <=> collapsed', animate('625ms'))
+        ]),
+        trigger('expandOptions', [
+            state('collapsed', style({height: '0px'})),
+            state('expanded', style({height: '*'})),
+            transition('expanded <=> collapsed', animate('625ms'))
+        ])
     ]
 })
 export class FiltersComponent implements OnInit {
@@ -34,7 +34,7 @@ export class FiltersComponent implements OnInit {
     suggestedKeywords: string[] = [];
     suggestedAuthors: string[] = [];
     selectedAuthor: any[] = [];
-    selectedKeywords: any[] = [];
+    selectedKeywords: any[] = [];;
     selectedThemes: any[] = [];
     selectedComponents: any[] = [];
     selectedComponentsNode: any[] = [];
@@ -97,7 +97,7 @@ export class FiltersComponent implements OnInit {
     displayFields: string[] = [];
     queryAdvSearch: string;
     page: number = 1;
-    isActive: boolean = true;
+    isActive: boolean = false;
     filterClass: string;
     resultsClass: string;
     nodeExpanded: boolean = true;
@@ -144,6 +144,8 @@ export class FiltersComponent implements OnInit {
         }else{
             this.MoreOptionsDisplayed = false;
         }
+
+        this.setColumnWidth();
     }
 
     /**
@@ -151,7 +153,17 @@ export class FiltersComponent implements OnInit {
      * @param changes - changed detected
      */
     ngOnChanges(changes: SimpleChanges) {
+        if(changes.filterWidthNum != undefined && changes.filterWidthNum != null){
+            if (changes.filterWidthNum.currentValue != changes.filterWidthNum.previousValue) {
+                if(changes.filterWidthNum.currentValue < 40)
+                    this.isActive = false;
+                else
+                    this.isActive = true;
+            }
+        }
+
         if(changes.searchValue != undefined && changes.searchValue != null){
+
             if (changes.searchValue.currentValue != changes.searchValue.previousValue || 
                 changes.searchTaxonomyKey.currentValue != changes.searchTaxonomyKey.previousValue) {
 
@@ -405,7 +417,7 @@ export class FiltersComponent implements OnInit {
         let themeType = '';
         let compType = '';
         let resourceType = '';
-        
+
         // Resource type
         if (this.selectedResourceTypeNode.length > 0) {
             lFilterString += "@type=";
@@ -494,6 +506,7 @@ export class FiltersComponent implements OnInit {
         lFilterString = this.removeEndingComma(lFilterString);
 
         // Keywords
+        
         if (this.selectedKeywords.length > 0) {
             if(lFilterString != '') lFilterString += "&";
 
@@ -603,7 +616,7 @@ export class FiltersComponent implements OnInit {
         this.suggestedThemes = [];
         this.suggestedKeywords = [];
         this.suggestedAuthors = [];
-        // this.selectedAuthor = [];
+        this.selectedAuthor = [];
         this.selectedKeywords = [];
         this.selectedThemes = [];
         this.selectedThemesNode = [];
@@ -980,10 +993,9 @@ export class FiltersComponent implements OnInit {
      * If the filter is collapsed, set the width to 40px.
      */
     setColumnWidth() {
-        this.isActive = !this.isActive;
         if (!this.isActive) {
             this.filterMode.emit("collapsed");
-            this.filterClass = "collapsedFilter";
+            // this.filterClass = "collapsedFilter";
             // this.comheight = this.parent.clientHeight + 'px';
         } else {
             this.filterMode.emit('normal');

@@ -1,10 +1,10 @@
-<div [ngStyle]="{'width': filterWidthNum+'px'}">
+<div [ngStyle]="{'width': filterWidthNum+'px', 'overflow':'hidden'}">
     <div class="normalFilter" [hidden]="!isActive && !mobileMode" id="activeFilter" style="height:auto;padding-bottom: 1em;">
         <div style="padding: 0px;">
             <!-- Filter header -->
-            <div id="filterHeader" *ngIf="isActive || mobileMode">
+            <div id="filterHeader" *ngIf="isActive || mobileMode" style="overflow: auto;">
                 <a id="filtersLabel">Filters </a> <a
-                    class="btn-sm collapsed in" (click)="setColumnWidth()" data-toggle="collapse"
+                    class="btn-sm collapsed in" (click)="this.isActive = !this.isActive;setColumnWidth()" data-toggle="collapse"
                     style="border-color: #025277; color: #FFF;padding: 0em;border: 0em"
                     data-target="#demo"><i [ngClass]="getFilterImgClass()"
                         style="zoom: 100%;color: #fff;cursor: pointer;"></i></a>
@@ -85,7 +85,7 @@
                     <span class="show-more-less" style="float: right;" (click)="toggleMoreOptions()">{{moreOptionsText}}</span>
                 </div>
 
-                <div style="overflow:auto; width: 100%;">
+                <div style="overflow:hidden; width: 100%;">
                     <div [@expandOptions]="MoreOptionsDisplayed ? 'collapsed':'expanded'">
                         <!-- Resource type -->
                         <div class="filter-checkbox bottom-line">
@@ -176,12 +176,12 @@
         </div>
     </div>
 
-    <div *ngIf="!searching && !isActive && !mobileMode" class="collapsedFilter">
+    <div *ngIf="!searching && !isActive && !mobileMode" class="collapsedFilterBox" (click)="this.isActive = !this.isActive;setColumnWidth()">
         
         <!-- Collapsed filters -->
-        <div (click)="setColumnWidth()">
-            <i class="faa faa-angle-double-right" style="color: #fff;zoom: 130%;padding-top: -3em !important;"></i>
-            <div class="rotate rotatedFilter" style="height: 100px;"> Filters </div>
+        <div >
+            <i class="faa faa-angle-double-right collapsedFilterIcon"></i>
         </div>
+        <div class="rotate rotatedFilterText"> Filters </div>
     </div>
 </div>

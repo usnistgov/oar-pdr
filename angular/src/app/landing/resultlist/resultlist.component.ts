@@ -3,6 +3,9 @@ import { trigger, state, style, animate, transition } from '@angular/animations'
 import { NerdmRes, NERDResource } from '../../nerdm/nerdm';
 import { SearchService } from '../../shared/search-service/index';
 import { timeout } from 'rxjs-compat/operator/timeout';
+import { ThisReceiver } from '@angular/compiler';
+import * as e from 'express';
+import { connectableObservableDescriptor } from 'rxjs/internal/observable/ConnectableObservable';
 
 @Component({
   selector: 'app-resultlist',
@@ -35,20 +38,27 @@ import { timeout } from 'rxjs-compat/operator/timeout';
 })
 export class ResultlistComponent implements OnInit {
     searchResults: any[];
+    searchResultsForDisplay: any[];
     searchResultsOriginal: any[];
     currentIndex: number = 0;
     resultCount: number = 0;
-    options = [{name:'Title', value:'title'}, {name:'Description', value:'description'}, {name:'Last Modified Date', value:'modified'}, {name:'Keyword', value:'keyword'}];
+    options = [{name:'Title', value:'title'}, {name:'Description', value:'description'}, {name:'Last Modified Date (Default)', value:'modified'}, {name:'Keyword', value:'keyword'}];
     optionSelected: string;
     searchPhases: string = "";
     searchFields: string[] = ["title", "description", "keyword"];
     showResult: boolean = true;
     PDRAPIURL: string = "https://data.nist.gov/od/id/";
 
+    //Pagination
+    totalResultItems: number = 0;
+    totalPages: number = 0;
+    itemsPerPage: number = 5;
+    pages = [{name:'Page 1', value:1},{name:'Page 2', value:2}];
+    currentPage: number = 1;
+
     @Input() md: NerdmRes = null;
     @Input() searchValue: string;
     @Input() searchTaxonomyKey: string;
-    @Input() currentPage: number = 1;
     @Input() mobWidth: number = 1920;
     @Input() theme: string = 'nist';
     @Input() filterString: string = '';
@@ -56,6 +66,7 @@ export class ResultlistComponent implements OnInit {
     constructor(private searchService: SearchService) { }
 
     ngOnInit(): void {
+        console.log("page", this.currentPage)
         let that = this;
         this.searchService.searchPhrase()
         .subscribe(
@@ -73,7 +84,15 @@ export class ResultlistComponent implements OnInit {
         }
     }
 
+    /**
+     * Processing search results
+     * @param searchResults search results
+     */
     onSuccess(searchResults: any[]) {
+        searchResults.forEach((object) => {
+            object['active'] = true;
+        })
+
         this.searchResultsOriginal = JSON.parse(JSON.stringify(searchResults));
         this.searchResults = JSON.parse(JSON.stringify(searchResults));
 
@@ -83,6 +102,30 @@ export class ResultlistComponent implements OnInit {
             item.active = true;
         }
 
+        this.filterResults();
+        this.sortByDate();
+    }
+
+    /**
+     * Calculate total pages and total result items
+     * @returns 
+     */
+    getTotalResultItems() {
+        if(!this.searchResultsForDisplay) return;
+
+        let totalItems: number = 0;
+
+        this.totalResultItems = this.searchResultsForDisplay.length;
+
+        if(this.totalResultItems % this.itemsPerPage == 0)
+            this.totalPages = Math.trunc(this.totalResultItems / this.itemsPerPage);
+        else
+            this.totalPages = Math.trunc(this.totalResultItems / this.itemsPerPage) + 1;
+
+        this.pages = [];
+        for(let i=1; i <= this.totalPages; i++) {
+            this.pages.push({name:'Page '+i+' of '+this.totalPages, value:i})
+        }
     }
 
     /**
@@ -106,7 +149,7 @@ export class ResultlistComponent implements OnInit {
     openDetails(fileNode: any, index: number) {
         //Close current details window if it's open
         if(index != this.currentIndex) {
-            this.searchResults[this.currentIndex]['DetailsDisplayed'] = false;
+            this.searchResultsForDisplay[this.currentIndex]['DetailsDisplayed'] = false;
         }
         this.currentIndex = index;
 
@@ -162,39 +205,115 @@ export class ResultlistComponent implements OnInit {
 
     /**
      * Filter the search result with search text
-     * @param value search text from the search box
+     * Rules: 
+     *     A B -- A or B
+     *     A,B -- A or B
+     *     "A B" -- Search for "A B"
+     * @param searchString search text from the search box
      */
-    filterResultByPhase(value) {
+    filterResultByPhase(searchString: string) {
         if(!this.searchResults) return;
 
-        if(!value) value = "";
+        if(!searchString || searchString.trim() == "") {
+            searchString = "";
+            this.searchResults = this.searchResultsOriginal;
+            return;
+        }
 
-        let lSearchPhases = value.split(",");
-        let found: boolean = false;
+        let filteredResults: any;;
+        let finalFilteredResults: any[] = [];
 
-        this.searchResults.forEach((object) => {
-            object.active = false;
-            this.searchFields.forEach((key) => {
-                if(Array.isArray(object[key])) {
-                    object[key].forEach( (val) => {
-                        lSearchPhases.forEach((searchVal) => {
-                            if(val.toLowerCase().includes(searchVal.trim().toLowerCase())) {
-                                object.active = true;
-                            }
-                        })
-                    })
+        // Reserve everything in quotes
+        let quotes = searchString.match(/\"(.*?)\"/g);
+
+        if(quotes){
+            for(let i = 0; i < quotes.length; i++){
+                if(quotes[i].match(/\"(.*?)\"/)[1].trim() != '')
+                    searchString = searchString.replace(new RegExp(quotes[i].match(/\"(.*?)\"/)[1], 'g'), 'Quooooote'+i);
+                else
+                    searchString = searchString.replace(quotes[i], 'Quooooote'+i);
+            }
+        }
+
+        // Treat "," the same as " "
+        let tempValue = searchString.replace(/,/g, " ").replace(/  /g, " ");
+
+        let lSearchPhases = tempValue.split(" ");
+        console.log("lSearchPhases", lSearchPhases);
+        
+        lSearchPhases.forEach((searchPhase: string) => {
+            let searchWord: string = "";
+
+            if(searchPhase != ""){
+                filteredResults = JSON.parse(JSON.stringify(this.searchResultsOriginal));
+
+                // Restore the contents in quotes
+                if(searchPhase.indexOf('Quooooote') >= 0) {
+                    searchPhase = searchPhase.replace(/"/g, '');
+                    let index = searchPhase.substring(searchPhase.indexOf('Quooooote')+9);
+                    searchWord = quotes[index].replace(/"/g, '');
                 }else{
-                    lSearchPhases.forEach((searchVal) => {
-                        if(object[key].toLowerCase().includes(searchVal.toLowerCase())) {
-                            object.active = true;
-                        }
-                    })
+                    searchWord = searchPhase.replace(/"/g, '');
                 }
+
+                // Do search
+                filteredResults = this.filterResultByWord(filteredResults, searchWord);
+
+                filteredResults.forEach((object)=>{
+                    finalFilteredResults.push(object);
+                })
                 
-            });
-        });
+                finalFilteredResults.map(item => item["@id"])
+                    .filter((value, index, self) => self.indexOf(value) === index);
+            }
+        })
+        
+        this.searchResults = finalFilteredResults;
     }
 
+    /**
+     * Filter search result using searchString
+     * @param searchResults The result list to be searched
+     * @param searchString search string
+     * @returns filtered result list
+     */
+    filterResultByWord(searchResults:any[], searchString: string) {
+        let retuenVal: any[] = [];
+        let found: boolean = false;
+
+        for(let object of searchResults) {
+            found = false;
+            for(let key of this.searchFields) {
+                if(Array.isArray(object[key])) {
+                    for(let val of object[key]) {
+                        if(val.toLowerCase().includes(searchString.trim().toLowerCase())) {
+                            retuenVal.push(object);
+                            found = true;
+                            break;
+                        }
+                    }
+                }else{
+                    if(object[key].toLowerCase().includes(searchString.toLowerCase())) {
+                        retuenVal.push(object);
+                        found = true;
+                        break;
+                    }
+                }
+
+                if(found) break;
+            };
+        }
+
+        // Remove items with duplicated @id
+        retuenVal.map(item => item["@id"])
+                .filter((value, index, self) => self.indexOf(value) === index);
+
+        return retuenVal;
+    }
+
+    /**
+     * Reset active flags of all search result items to true (default)
+     */
     resetResult() {
         if(this.searchResults) {
             this.searchResults.forEach((object) => {
@@ -203,7 +322,12 @@ export class ResultlistComponent implements OnInit {
         }
     }
 
+    /**
+     * Apply filters from left side panel and the search word(s) from the search text box
+     */
     filterResults() {
+        if(!this.searchResults) return;
+
         let filters: string[];
         
         this.resetResult();
@@ -257,26 +381,90 @@ export class ResultlistComponent implements OnInit {
                         });
 
                         break;
+                    case "contactPoint.fn":
+                        this.searchResults.forEach((object) => {
+                            if(object.active == true){
+                                object.active = false;
+                            
+                                // object["contactPoint"].forEach((contactPoint) => {
+                                    if(object["contactPoint"]["fn"].includes(filter.split("=")[1]))
+                                        object.active = true;
+                                // })
+                            }
+                        });
+
+                        break;
+                    case "keyword":
+                        this.searchResults.forEach((object) => {
+                            if(object.active == true){
+                                object.active = false;
+                            
+                                object["keyword"].forEach((keyword) => {
+                                        if(keyword.includes(filter.split("=")[1]))
+                                        object.active = true;
+                                })
+                            }
+                        });
+
+                        break;
                     default:
                         break;
                 }
             })
         }
+
+        this.searchResultsForDisplay = [];
+        this.searchResults.forEach((object) => {
+            if(object.active) this.searchResultsForDisplay.push(object);
+        })
+
+        this.getTotalResultItems();
     }
 
+    /**
+     * Sort the search result
+     * @param event sort item
+     */
     onSortByChange(event: any) {
         let key = event.value.value;
-        this.searchResults.sort((a, b)=> {
-            if(Array.isArray(a[key])){
-                return a[key][0].localeCompare(b[key][0]);
-            }else{
-                return a[key].localeCompare(b[key]);
-            }
+
+        if(key == "modified"){
+            this.sortByDate();
+        }else{
+            this.searchResultsForDisplay.sort((a, b)=> {
+                if(Array.isArray(a[key])){
+                    if(key == "modified")
+                        return b[key][0].localeCompare(a[key][0]);
+                    else
+                        return a[key][0].localeCompare(b[key][0]);
+                }else{
+                    if(key == "modified")
+                        return b[key].localeCompare(a[key]);
+                    else
+                        return a[key].localeCompare(b[key]);
+                }
+            });
+    
+            this.refreshResult();
+        }
+    }
+
+    /**
+     * Sort the result by date
+     */
+    sortByDate(){
+        if(!this.searchResultsForDisplay) return;
+
+        this.searchResultsForDisplay.sort((a, b)=> {
+            return b["modified"].localeCompare(a["modified"]);
         });
 
         this.refreshResult();
     }
 
+    /**
+     * Refresh the search result list
+     */
     refreshResult() {
         this.showResult = false;
         setTimeout(() => {

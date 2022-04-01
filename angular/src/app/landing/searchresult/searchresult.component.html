@@ -1,15 +1,19 @@
-<div #parentDiv style="background-color: white; color: black;align-content: center;">
+<div #parentDiv style="background-color: white; color: black;align-content: center;" (mouseup)="onMouseUp($event)" (mousemove)="onMouseMove($event)" (window:resize)="onResize($event)">
     <div style="display: flex; width: 100%; margin-top: 1em;">
-        <div [@filterStatus]="filterToggler" style="vertical-align: top;width: 35%;">
+        <!-- Left side filters -->
+        <div [@filterStatus]="filterToggler" style="vertical-align: top;" [style.width.px]="filterWidth">
                 <app-filters [searchValue]='searchValue' [searchTaxonomyKey]='searchTaxonomyKey' [filterWidthNum]="filterWidth" [parent]="parentDiv" [mobileMode]="mobileMode" [theme]="theme" (filterMode)="updateWidth($event)" (filterString)="updateFilterString($event)"></app-filters>
 
         </div>
-        <!-- <div style="margin-left: 5px;font-size:x-large;cursor: col-resize;">||</div> -->
+
+        <!-- Drag bar to resize the filter panel -->
+        <div *ngIf="!mobileMode" class="splitter" (mousedown)="onMousedown($event)" (mouseup)="onMouseUp($event)">
+            <div style="margin-top: 2px;color: grey;">||</div>
+        </div>
+
+        <!-- Search result list -->
         <div style="vertical-align: top;margin-top: -3em;width: auto;">
-
-                <app-resultlist [md]="record" [searchValue]='searchValue' [searchTaxonomyKey]='searchTaxonomyKey' [currentPage]="page" [mobWidth]="mobWidth" [theme]="theme" [filterString]="filterString"></app-resultlist>
-
+                <app-resultlist [md]="record" [searchValue]='searchValue' [searchTaxonomyKey]='searchTaxonomyKey' [mobWidth]="mobWidth" [theme]="theme" [filterString]="filterString"></app-resultlist>
         </div>
     </div>
-
 </div>

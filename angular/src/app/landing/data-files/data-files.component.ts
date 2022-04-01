@@ -195,7 +195,7 @@ export class DataFilesComponent implements OnInit, OnChanges {
         if (this.record)
             this.useMetadata();
 
-        console.log("files", this.files)
+        // console.log("files", this.files)
     }
 
     /**

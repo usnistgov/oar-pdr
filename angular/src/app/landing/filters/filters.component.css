@@ -40,23 +40,32 @@
     transform: rotate(90deg);
 }
 
-.rotatedFilter {
+.rotatedFilterText {
     display: block; 
     color: #fff; 
-    padding-left: .5em;
+    padding: 55px 5px 5px 45px;
     font-size: larger;
+    width: 120px;
+    height: 20px;
 }
 
-.collapsedFilter {
-    text-align:center;
-    padding: 0px 0px 0px .5em;
-    background-color: #019fbb;
+.collapsedFilterIcon {
+    color: #fff;
+    zoom: 130%;
+    padding-top: -3em !important;
+    padding-left: 10px;
+}
+
+.collapsedFilterBox {
+    /* text-align:center;
+    padding: 0px 5pxpx 0px 5px; */
+    /* background-color: var(--science-theme-background-default); */
+    background-image: linear-gradient( var(--science-theme-background-default), white);
     color: #fff; 
     width: 40px;
-    height: 44px;
+    height: 300px;
     cursor: pointer;
     padding-top: 10px;
-    border: 1px solid blue;
 }
 
 .normalFilter {

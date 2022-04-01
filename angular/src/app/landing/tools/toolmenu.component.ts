@@ -69,7 +69,7 @@ export class ToolMenuComponent implements OnChanges {
     ngOnInit(): void {
         //Called after the constructor, initializing input properties, and the first call to ngOnChanges.
         //Add 'implements OnInit' to the class.
-        console.log("menu this.theme", this.theme);
+        // console.log("menu this.theme", this.theme);
     }
 
     /**

@@ -5,7 +5,6 @@ import { FiltersModule } from '../filters/filters.module';
 import { ResultlistModule } from '../resultlist/resultlist.module';
 import { TreeModule } from 'primeng/tree';
 import { PanelMenuModule } from 'primeng/panelmenu';
-import { AutoCompleteModule } from 'primeng/autocomplete';
 import { MessagesModule } from 'primeng/messages';
 import { MessageModule } from 'primeng/message';
 import { DialogModule } from 'primeng/dialog';
@@ -16,7 +15,6 @@ import { MultiSelectModule } from 'primeng/multiselect';
 import { OverlayPanelModule } from 'primeng/overlaypanel';
 import { CheckboxModule } from 'primeng/checkbox';
 import { TooltipModule } from 'primeng/tooltip';
-import { PaginationModule } from '../pagination/pagination.module';
 
 @NgModule({
   declarations: [SearchresultComponent],
@@ -29,13 +27,11 @@ import { PaginationModule } from '../pagination/pagination.module';
     OverlayPanelModule, 
     CheckboxModule, 
     TooltipModule,
-    AutoCompleteModule,
     MessagesModule,
     MessageModule,
     InputTextareaModule,
     ProgressSpinnerModule,
-    MultiSelectModule,
-    PaginationModule
+    MultiSelectModule
   ],
   exports: [
     SearchresultComponent

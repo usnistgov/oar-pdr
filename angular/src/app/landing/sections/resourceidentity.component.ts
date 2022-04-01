@@ -74,6 +74,7 @@ export class ResourceIdentityComponent implements OnChanges {
 
         if (this.record['doi'] !== undefined && this.record['doi'] !== "")
             this.doiUrl = "https://doi.org/" + this.record['doi'].substring(4);
+
         this.primaryRefs = (new NERDResource(this.record)).getPrimaryReferences();
         for (let ref of this.primaryRefs) {
             if (! ref['label'])

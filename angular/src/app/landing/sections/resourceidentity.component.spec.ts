@@ -33,6 +33,8 @@ describe('ResourceIdentityComponent', () => {
 
         fixture = TestBed.createComponent(ResourceIdentityComponent);
         component = fixture.componentInstance;
+        rec["@type"][0] = "nrdp:PublicDataResource";
+        rec["references"][0]["refType"] = "IsDocumentedBy";
         component.record = rec;
         // fixture.detectChanges();
     }

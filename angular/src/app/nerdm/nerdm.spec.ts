@@ -4,11 +4,10 @@ import { testdata } from '../../environments/environment';
 import * as _ from 'lodash-es';
 
 describe('NERDResource', function() {
-
     it("constructor", function() {
-        let nrd = new nerdm.NERDResource(testdata['test1']);
+        let nrd = new nerdm.NERDResource(testdata['test4']);
         expect(nrd.data).toBeDefined();
-        expect(nrd.data['@id']).toBe("ark:/88434/mds0000fbk");
+        expect(nrd.data['@id']).toBe("ark:/88434/mds0000fbk4");
     });
 
     it("_isstring", function() {
@@ -29,11 +28,12 @@ describe('NERDResource', function() {
     });
 
     it("_striptypes", function() {
-        let nrd = testdata['test1']
-        expect(nerdm.NERDResource._striptypes(nrd)).toEqual(["PublicDataResource"]);
-        expect(nerdm.NERDResource._striptypes(nrd, "@type")).toEqual(["PublicDataResource"]);
-        expect(nerdm.NERDResource._striptypes(nrd, "goob")).toEqual([]);
-        expect(nerdm.NERDResource._striptypes(nrd['components'][1])).toEqual(["DataFile","Distribution"]);
+        let nrd1 = testdata['test1'];
+        nrd1["@type"][0] = "nrdp:PublicDataResource";
+        expect(nerdm.NERDResource._striptypes(nrd1)).toEqual(["PublicDataResource"]);
+        expect(nerdm.NERDResource._striptypes(nrd1, "@type")).toEqual(["PublicDataResource"]);
+        expect(nerdm.NERDResource._striptypes(nrd1, "goob")).toEqual([]);
+        expect(nerdm.NERDResource._striptypes(nrd1['components'][1])).toEqual(["DataFile","Distribution"]);
 
         expect(nerdm.NERDResource._striptypes({'@type': "goob"})).toEqual(["goob"]);
         expect(nerdm.NERDResource._striptypes({'@type': ["ns:gurn", "goob"]})).toEqual(["goob","gurn"]);
@@ -43,30 +43,32 @@ describe('NERDResource', function() {
     });
 
     it("_typesintersect", function() {
-        let nrd = testdata['test1']
-        expect(nerdm.NERDResource._typesintersect(nrd, ["PublicDataResource"])).toBe(true);
-        expect(nerdm.NERDResource._typesintersect(nrd, ["PublicDataResource"], "@type")).toBe(true);
-        expect(nerdm.NERDResource._typesintersect(nrd, ["PublicDataResource"], "keyword")).toBe(false);
-        expect(nerdm.NERDResource._typesintersect(nrd, ["face","hand"], "keyword")).toBe(true);
-        expect(nerdm.NERDResource._typesintersect(nrd, ["foot","hand"], "keyword")).toBe(false);
+        let nrd1 = testdata['test1'];
+        nrd1["@type"][0] = "nrdp:PublicDataResource";
+        expect(nerdm.NERDResource._typesintersect(nrd1, ["PublicDataResource"])).toBe(true);
+        expect(nerdm.NERDResource._typesintersect(nrd1, ["PublicDataResource"], "@type")).toBe(true);
+        expect(nerdm.NERDResource._typesintersect(nrd1, ["PublicDataResource"], "keyword")).toBe(false);
+        expect(nerdm.NERDResource._typesintersect(nrd1, ["face","hand"], "keyword")).toBe(true);
+        expect(nerdm.NERDResource._typesintersect(nrd1, ["foot","hand"], "keyword")).toBe(false);
 
-        expect(nerdm.NERDResource._typesintersect(nrd, ["SRD"])).toBe(false);
-        let cmp = nrd['components'][1];
+        expect(nerdm.NERDResource._typesintersect(nrd1, ["SRD"])).toBe(false);
+        let cmp = nrd1['components'][1];
         expect(nerdm.NERDResource._typesintersect(cmp, ["SRD"])).toBe(false);
         expect(nerdm.NERDResource._typesintersect(cmp, ["DataFile","Gurn","SRD"])).toBe(true);
         expect(nerdm.NERDResource._typesintersect(cmp, ["DataFile","Distribution"])).toBe(true);
         expect(nerdm.NERDResource._typesintersect(cmp, ["Hank","Gurn","SRD"])).toBe(false);
-        cmp = nrd['components'][0];
+        cmp = nrd1['components'][0];
         expect(nerdm.NERDResource._typesintersect(cmp, ["AKA","Hidden","Distribution"])).toBe(true);
-        cmp = nrd['components'][2];
+        cmp = nrd1['components'][2];
         expect(nerdm.NERDResource._typesintersect(cmp, ["AKA","Hidden","ZZZ"])).toBe(false);
     });
 
     it("objectMatchesType", function() {
-        let nrd = testdata['test1']
-        expect(nerdm.NERDResource.objectMatchesTypes(nrd, ["PublicDataResource"])).toBe(true);
-        expect(nerdm.NERDResource.objectMatchesTypes(nrd, ["SRD"])).toBe(false);
-        let cmp = nrd['components'][1];
+        let nrdtest2 = testdata['test1'];
+        nrdtest2["@type"][0] = "nrdp:PublicDataResource";
+        expect(nerdm.NERDResource.objectMatchesTypes(nrdtest2, ["PublicDataResource"])).toBe(true);
+        expect(nerdm.NERDResource.objectMatchesTypes(nrdtest2, ["SRD"])).toBe(false);
+        let cmp = nrdtest2['components'][1];
         expect(nerdm.NERDResource.objectMatchesTypes(cmp, ["SRD"])).toBe(false);
         expect(nerdm.NERDResource.objectMatchesTypes(cmp, ["DataFile","Gurn","SRD"])).toBe(true);
         expect(nerdm.NERDResource.objectMatchesTypes(cmp, ["Gurn","SRD","DataFile"])).toBe(true);
@@ -74,64 +76,70 @@ describe('NERDResource', function() {
         expect(nerdm.NERDResource.objectMatchesTypes(cmp, ["DataFile","Distribution"])).toBe(true);
         expect(nerdm.NERDResource.objectMatchesTypes(cmp, ["Distribution","DataFile"])).toBe(true);
         expect(nerdm.NERDResource.objectMatchesTypes(cmp, ["Hank","Gurn","SRD"])).toBe(false);
-        cmp = nrd['components'][0];
+        cmp = nrdtest2['components'][0];
         expect(nerdm.NERDResource.objectMatchesTypes(cmp, ["AKA","Hidden","Distribution"])).toBe(true);
         expect(nerdm.NERDResource.objectMatchesTypes(cmp, "Hidden")).toBe(true);
         expect(nerdm.NERDResource.objectMatchesTypes(cmp, "ZZZ")).toBe(false);
-        expect(nerdm.NERDResource.objectMatchesTypes(nrd['contactPoint'], ["ZZZ"])).toBe(false);
-        cmp = nrd['components'][2];
+        expect(nerdm.NERDResource.objectMatchesTypes(nrdtest2['contactPoint'], ["ZZZ"])).toBe(false);
+        cmp = nrdtest2['components'][2];
         expect(nerdm.NERDResource.objectMatchesTypes(cmp, ["ZZZ","AKA","Hidden"])).toBe(false);
 
         expect(nerdm.NERDResource.objectMatchesTypes(cmp, ["ZZZ","AKA","Hidden"])).toBe(false);
     });
 
     it("getComponentsByType", () => {
-        let nrd = new nerdm.NERDResource(testdata['test1']);
-        let cmps : any[] = nrd.getComponentsByType("DataFile");
+        let nrd1 = new nerdm.NERDResource(testdata['test1']);
+        nrd1.data["@type"][0] = "nrdp:PublicDataResource";
+
+        let cmps : any[] = nrd1.getComponentsByType("DataFile");
         expect(cmps.length).toEqual(2);
         expect(cmps[0]['@type']).toEqual(["nrdp:DataFile", "dcat:Distribution"]);
         expect(cmps[1]['@type']).toEqual(["nrdp:DataFile", "dcat:Distribution"]);
 
-        cmps = nrd.getComponentsByType("nrdm:Hidden");
+        cmps = nrd1.getComponentsByType("nrdm:Hidden");
         expect(cmps.length).toEqual(1);
         expect(cmps[0]['@type']).toEqual(["nrdp:Hidden", "nrdp:AccessPage", "dcat:Distribution"]);
 
-        cmps = nrd.getComponentsByType(["Hidden", "nrdm:DataFile"]);
+        cmps = nrd1.getComponentsByType(["Hidden", "nrdm:DataFile"]);
         expect(cmps.length).toEqual(3);
         expect(cmps[0]['@type']).toEqual(["nrdp:Hidden", "nrdp:AccessPage", "dcat:Distribution"]);
         expect(cmps[1]['@type']).toEqual(["nrdp:DataFile", "dcat:Distribution"]);
         expect(cmps[2]['@type']).toEqual(["nrdp:DataFile", "dcat:Distribution"]);
 
-        cmps = nrd.getComponentsByType(["Distribution"]);
+        cmps = nrd1.getComponentsByType(["Distribution"]);
         expect(cmps.length).toEqual(3);
         expect(cmps[0]['@type']).toEqual(["nrdp:Hidden", "nrdp:AccessPage", "dcat:Distribution"]);
         expect(cmps[1]['@type']).toEqual(["nrdp:DataFile", "dcat:Distribution"]);
         expect(cmps[2]['@type']).toEqual(["nrdp:DataFile", "dcat:Distribution"]);
 
-        cmps = nrd.getComponentsByType("Goob");
+        cmps = nrd1.getComponentsByType("Goob");
         expect(cmps.length).toEqual(0);
 
         let nrdd = _.cloneDeep(testdata['test1']);
+        nrdd["@type"] = "nrdp:PublicDataResource";
+
         nrdd['components'] = []
-        nrd = new nerdm.NERDResource(nrdd);
-        cmps = nrd.getComponentsByType(["Distribution"]);
+        nrd1 = new nerdm.NERDResource(nrdd);
+        cmps = nrd1.getComponentsByType(["Distribution"]);
         expect(cmps.length).toEqual(0);
-        delete nrd.data['components'];
-        expect(nrd.data['components']).not.toBeDefined()
-        cmps = nrd.getComponentsByType(["Distribution"]);
+        delete nrd1.data['components'];
+        expect(nrd1.data['components']).not.toBeDefined()
+        cmps = nrd1.getComponentsByType(["Distribution"]);
         expect(cmps.length).toEqual(0);
     });
 
     it("countComponentsByType", () => {
-        let nrd = new nerdm.NERDResource(testdata['test1']);
-        expect(nrd.countComponentsByType("DataFile")).toEqual(2);
+        let nrd1 = new nerdm.NERDResource(testdata['test1']);
+        expect(nrd1.countComponentsByType("DataFile")).toEqual(2);
     });
 
     it("getFilecListComponents", () => {
-        let nrd = new nerdm.NERDResource(testdata['test2']);
-        expect(nrd.data['components'].length).toEqual(5);
+        let nrd2 = new nerdm.NERDResource(testdata['test2']);
+        nrd2.data["@type"][0] = "nrdp:PublicDataResource";
 
-        let cmps : any[] = nrd.getFileListComponents();
+        expect(nrd2.data['components'].length).toEqual(5);
+
+        let cmps : any[] = nrd2.getFileListComponents();
         expect(cmps.length).toEqual(3);
         expect(cmps[0]['filepath']).toEqual("README.txt");
         expect(cmps[1]['filepath']).toEqual("data");
@@ -139,71 +147,78 @@ describe('NERDResource', function() {
     });
 
     it("countFilecListComponents", () => {
-        let nrd = new nerdm.NERDResource(testdata['test2']);
-        expect(nrd.data['components'].length).toEqual(5);
-        expect(nrd.countFileListComponents()).toEqual(3);
+        let nrd2 = new nerdm.NERDResource(testdata['test2']);
+        nrd2.data["@type"][0] = "nrdp:PublicDataResource";
+
+        expect(nrd2.data['components'].length).toEqual(5);
+        expect(nrd2.countFileListComponents()).toEqual(3);
     });
 
     it("getReferencesByType", () => {
-        let nrd = new nerdm.NERDResource(testdata['test1']);
-        let refs : any[] = nrd.getReferencesByType(["IsReferencedBy","IsDocumentedBy"]);
+        let nrd1 = new nerdm.NERDResource(testdata['test1']);
+        nrd1.data["@type"][0] = "nrdp:PublicDataResource";
+        nrd1.data["references"][0]["refType"] = "IsDocumentedBy";
+
+        let refs : any[] = nrd1.getReferencesByType(["IsReferencedBy","IsDocumentedBy"]);
         expect(refs.length).toBe(1);
         expect(refs[0].refType).toBe("IsDocumentedBy");
 
-        refs = nrd.getReferencesByType(["IsSupplementTo","IsReferencedBy"]);
+        refs = nrd1.getReferencesByType(["IsSupplementTo","IsReferencedBy"]);
         expect(refs.length).toBe(0);
     });
 
     it("getPrimaryReferences", () => {
-        let nrd = new nerdm.NERDResource(JSON.parse(JSON.stringify(testdata['test1'])));
-        let refs : any[] = nrd.getPrimaryReferences();
+        let nrd1 = new nerdm.NERDResource(testdata['test1']);
+        nrd1.data["@type"][0] = "nrdp:PublicDataResource";
+
+        let refs : any[] = nrd1.getPrimaryReferences();
         expect(refs.length).toBe(1);
         expect(refs[0]['refType']).toBe("IsDocumentedBy");
 
-        nrd.data.references[0]['refType'] = "IsSupplementTo"
-        refs = nrd.getPrimaryReferences();
+        nrd1.data.references[0]['refType'] = "IsSupplementTo"
+        refs = nrd1.getPrimaryReferences();
         expect(refs.length).toBe(1);
         expect(refs[0]['refType']).toBe("IsSupplementTo");
 
-        nrd.data['references'][0]['refType'] = "IsReferencedBy"
-        refs = nrd.getPrimaryReferences();
+        nrd1.data['references'][0]['refType'] = "IsReferencedBy"
+        refs = nrd1.getPrimaryReferences();
         expect(refs.length).toBe(0);
     });
 
     it("getCitation", () => {
-        let nrd = new nerdm.NERDResource(testdata['test2']);
-        let cstr = nrd.getCitation();
+        let nrd2 = new nerdm.NERDResource(testdata['test2']);
+        nrd2.data["@type"][0] = "nrdp:PublicDataResource";
+        let cstr = nrd2.getCitation();
         expect(cstr.startsWith("Doe, John, Plant, Robert (2011), Test2, National Institute of Standards and Technology, https://doi.org/XXXXX/MMMMM (Accessed ")).toBe(true);
         // expect(cstr).toEqual("Doe, John, Plant, Robert (2011) Test2, National Institute of Standards and Technology, https://doi.org/XXXXX/MMMMM (Accessed ");
 
-        nrd = new nerdm.NERDResource(testdata['test1']);
-        cstr = nrd.getCitation();
+        nrd2 = new nerdm.NERDResource(testdata['test1']);
+        cstr = nrd2.getCitation();
 //        expect(cstr).toBe("Patricia Flanagan (2019), Multiple Encounter Dataset (MEDS-I) - NIST Special Database 32, National Institute of Standards and Technology, https://www.nist.gov/itl/iad/image-group/special-database-32-multiple-encounter-dataset-meds (Accessed ");
         expect(cstr).toContain("Patricia Flanagan (2019), Multiple Encounter Dataset (MEDS-I) - NIST Special Database 32, National Institute of Standards and Technology, https://www.nist.gov/itl/iad/image-group/special-database-32-multiple-encounter-dataset-meds (Accessed ");
 
-        nrd = new nerdm.NERDResource(_.cloneDeep(testdata['test1']));
-        delete nrd.data['contactPoint']['fn'];
-        cstr = nrd.getCitation();
+        let nrd1 = new nerdm.NERDResource(_.cloneDeep(testdata['test1']));
+        delete nrd1.data['contactPoint']['fn'];
+        cstr = nrd1.getCitation();
         expect(cstr).toContain("National Institute of Standards and Technology (2019), Multiple Encounter Dataset (MEDS-I) - NIST Special Database 32, National Institute of Standards and Technology, https://www.nist.gov/itl/iad/image-group/special-database-32-multiple-encounter-dataset-meds (Accessed ");
     });
 
     it('resourceLabel', () => {
-        let nrd = new nerdm.NERDResource(testdata['test1']);
+        let nrdl = new nerdm.NERDResource(testdata['test1']);
+        nrdl.data['@type'][0] = "nrdp:DataPublication"
+        expect(nrdl.resourceLabel()).toEqual("Data Publication")
 
-        nrd.data['@type'][0] = "nrdp:DataPublication"
-        expect(nrd.resourceLabel()).toEqual("Data Publication")
+        nrdl.data['@type'][0] = "nrd:SRD"
+        expect(nrdl.resourceLabel()).toEqual("Standard Reference Data")
 
-        nrd.data['@type'][0] = "nrd:SRD"
-        expect(nrd.resourceLabel()).toEqual("Standard Reference Data")
+        nrdl.data['@type'][0] = "nrd:SRM"
+        expect(nrdl.resourceLabel()).toEqual("Standard Reference Material")
 
-        nrd.data['@type'][0] = "nrd:SRM"
-        expect(nrd.resourceLabel()).toEqual("Standard Reference Material")
+        nrdl.data['@type'][0] = "nrdp:PublicDataResource"
+        expect(nrdl.resourceLabel()).toEqual("Public Data Resource")
 
-        nrd.data['@type'][0] = "nrdp:PublicDataResource"
-        expect(nrd.resourceLabel()).toEqual("Public Data Resource")
-
-        nrd.data['@type'][0] = "nrdp:ScienceTheme"
-        expect(nrd.resourceLabel()).toEqual("Science Theme")
+        nrdl.data['@type'][0] = "nrda:ScienceTheme"
+        expect(nrdl.resourceLabel()).toEqual("Science Theme")
     });
 });
 

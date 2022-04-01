@@ -127,6 +127,7 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
                 public breakpointObserver: BreakpointObserver) 
     {
         this.reqId = this.route.snapshot.paramMap.get('id');
+        console.log('this.reqId', this.reqId)
         this.inBrowser = isPlatformBrowser(platformId);
         this.editEnabled = cfg.get('editEnabled', false) as boolean;
         this.editMode = this.EDIT_MODES.VIEWONLY_MODE;
@@ -282,7 +283,7 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
      * Get metrics data
      */
      getMetrics() {
-        console.log("Retriving metrics data...");
+        // console.log("Retriving metrics data...");
         let ediid = this.md.ediid;
 
         this.metricsService.getFileLevelMetrics(ediid).subscribe(async (event) => {

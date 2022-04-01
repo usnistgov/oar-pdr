@@ -14,6 +14,7 @@ import { MultiSelectModule } from 'primeng/multiselect';
 import { OverlayPanelModule } from 'primeng/overlaypanel';
 import { CheckboxModule } from 'primeng/checkbox';
 import { TooltipModule } from 'primeng/tooltip';
+import { FormsModule } from '@angular/forms';
 
 @NgModule({
   declarations: [FiltersComponent],
@@ -30,7 +31,8 @@ import { TooltipModule } from 'primeng/tooltip';
     MessageModule,
     InputTextareaModule,
     ProgressSpinnerModule,
-    MultiSelectModule
+    MultiSelectModule,
+    FormsModule
   ],
   exports: [
     FiltersComponent
