@@ -20,7 +20,7 @@ export const context = {
 export const config: LPSConfig = {
     locations: {
         orgHome: "https://nist.gov/",
-        portalBase: "https://data.nist.gov/",
+        portalBase: "https://oardev.nist.gov/",
         pdrHome: "https://data.nist.gov/pdr/",
         pdrSearch: "https://data.nist.gov/sdp/",
         mdService:   "https://data.nist.gov/rmm/records/",

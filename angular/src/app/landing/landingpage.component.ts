@@ -283,10 +283,6 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
      * Get metrics data
      */
      getMetrics() {
-<<<<<<< HEAD
-        // console.log("Retriving metrics data...");
-=======
->>>>>>> feature/ODD-945-angular-upgrade13
         let ediid = this.md.ediid;
 
         this.metricsService.getFileLevelMetrics(ediid).subscribe(async (event) => {

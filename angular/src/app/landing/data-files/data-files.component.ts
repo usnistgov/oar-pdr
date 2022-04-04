@@ -194,11 +194,6 @@ export class DataFilesComponent implements OnInit, OnChanges {
         }
         if (this.record)
             this.useMetadata();
-<<<<<<< HEAD
-
-        // console.log("files", this.files)
-=======
->>>>>>> feature/ODD-945-angular-upgrade13
     }
 
     /**
