@@ -27,13 +27,15 @@ export class SearchfieldsListService {
 
     }
 
-  /**
-   * Returns an Observable for the HTTP GET request for the JSON resource.
-   * @return {string[]} The Observable for the HTTP request.
-   */
-  get(): Observable<any> {
-   return this.http.get(this.RMMAPIURL + 'fields');
-  }
+    /**
+     * Returns an Observable for the HTTP GET request for the JSON resource.
+     * @return {string[]} The Observable for the HTTP request.
+     */
+    get(): Observable<any> {
+        console.log("Getting fields:", this.RMMAPIURL + 'fields')
+        return this.http.get(this.RMMAPIURL + 'fields');
+    }
+    
   /**
     * Handle HTTP error
     */
