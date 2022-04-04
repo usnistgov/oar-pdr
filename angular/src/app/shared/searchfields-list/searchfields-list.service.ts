@@ -33,7 +33,7 @@ export class SearchfieldsListService {
    */
   get(): Observable<any> {
       console.log("Getting fields from:", this.RMMAPIURL + 'fields');
-   return this.http.get(this.RMMAPIURL + 'fields');
+   return this.http.get(this.RMMAPIURL + 'records/fields');
   }
   /**
     * Handle HTTP error

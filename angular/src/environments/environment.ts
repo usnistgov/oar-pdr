@@ -14,19 +14,19 @@ import { LPSConfig } from '../app/config/config';
 export const context = {
     production: false,
     useMetadataService: false,
-    useCustomizationService: false
+    useCustomizationService: true
 };
 
 export const config: LPSConfig = {
     locations: {
         orgHome: "https://nist.gov/",
-        portalBase: "https://data.nist.gov/",
-        pdrHome: "https://data.nist.gov/pdr/",
-        pdrSearch: "https://data.nist.gov/sdp/",
-        mdService:   "https://data.nist.gov/rmm/records/",
-        taxonomyService: "https://data.nist.gov/rmm/taxonomy"
+        portalBase: "https://oardev.nist.gov/",
+        pdrHome: "https://oardev.nist.gov/pdr/",
+        pdrSearch: "https://oardev.nist.gov/sdp/",
+        mdService:   "https://oardev.nist.gov/rmm/",
+        taxonomyService: "https://oardev.nist.gov/rmm/taxonomy"
     },
-    mdAPI: "https://data.nist.gov/rmm/records/",
+    mdAPI: "https://oardev.nist.gov/rmm/records/",
     metricsAPI: "https://data.nist.gov/rmm/usagemetrics/",
     // customizationAPI: "https://testdata.nist.gov/customization/",
     customizationAPI: "https://datapubtest.nist.gov/customization/",
