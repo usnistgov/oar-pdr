@@ -20,7 +20,7 @@ export class SearchfieldsListService {
   constructor(private http: HttpClient,
     private appConfig: AppConfig,
     private cfg: AppConfig) {
-      this.RMMAPIURL = cfg.get("mdAPI", "/unconfigured");
+      this.RMMAPIURL = cfg.get("locations.mdService", "/unconfigured");
     }
 
     ngOnInit(): void {
@@ -32,6 +32,7 @@ export class SearchfieldsListService {
    * @return {string[]} The Observable for the HTTP request.
    */
   get(): Observable<any> {
+      console.log("Getting fields from:", this.RMMAPIURL + 'fields');
    return this.http.get(this.RMMAPIURL + 'fields');
   }
   /**
