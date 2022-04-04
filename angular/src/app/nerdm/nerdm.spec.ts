@@ -169,7 +169,7 @@ describe('NERDResource', function() {
 
     it("getPrimaryReferences", () => {
         let nrd1 = new nerdm.NERDResource(testdata['test1']);
-        nrd1.data["@type"][0] = "nrdp:PublicDataResource";
+        // nrd1.data["@type"][0] = "nrdp:PublicDataResource";
 
         let refs : any[] = nrd1.getPrimaryReferences();
         expect(refs.length).toBe(1);
@@ -205,20 +205,22 @@ describe('NERDResource', function() {
 
     it('resourceLabel', () => {
         let nrdl = new nerdm.NERDResource(testdata['test1']);
-        nrdl.data['@type'][0] = "nrdp:DataPublication"
-        expect(nrdl.resourceLabel()).toEqual("Data Publication")
+        nrdl.data['@type'][0] = "nrdp:DataPublication";
+        expect(nrdl.resourceLabel()).toEqual("Data Publication");
 
-        nrdl.data['@type'][0] = "nrd:SRD"
-        expect(nrdl.resourceLabel()).toEqual("Standard Reference Data")
+        nrdl.data['@type'][0] = "nrd:SRD";
+        expect(nrdl.resourceLabel()).toEqual("Standard Reference Data");
 
-        nrdl.data['@type'][0] = "nrd:SRM"
-        expect(nrdl.resourceLabel()).toEqual("Standard Reference Material")
+        nrdl.data['@type'][0] = "nrd:SRM";
+        expect(nrdl.resourceLabel()).toEqual("Standard Reference Material");
 
-        nrdl.data['@type'][0] = "nrdp:PublicDataResource"
-        expect(nrdl.resourceLabel()).toEqual("Public Data Resource")
+        nrdl.data['@type'][0] = "nrdp:PublicDataResource";
+        expect(nrdl.resourceLabel()).toEqual("Public Data Resource");
 
-        nrdl.data['@type'][0] = "nrda:ScienceTheme"
-        expect(nrdl.resourceLabel()).toEqual("Science Theme")
+        nrdl.data['@type'][0] = "nrda:ScienceTheme";
+        expect(nrdl.resourceLabel()).toEqual("Science Theme");
+
+        nrdl = null;
     });
 });
 

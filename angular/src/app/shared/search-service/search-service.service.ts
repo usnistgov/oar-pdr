@@ -132,8 +132,7 @@ export class SearchService {
     searchPhrase(): Observable<any> {
         let url: string;
 
-        // url = "/rmm/records?isPartOf.@id=ark:/88434/mds9911";
-        url = this.portalBase + "rmm/records?isPartOf.@id=ark:/88434/mds9911";
+        url = this.portalBase + "rmm/records?isPartOf.proxyFor=ark:/88434/mds9911";
 
         console.log('search url', url);
         return this.http.get(url);

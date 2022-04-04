@@ -52,7 +52,7 @@ export class ResultlistComponent implements OnInit {
     //Pagination
     totalResultItems: number = 0;
     totalPages: number = 0;
-    itemsPerPage: number = 5;
+    itemsPerPage: number = 10;
     pages = [{name:'Page 1', value:1},{name:'Page 2', value:2}];
     currentPage: number = 1;
 
@@ -71,6 +71,7 @@ export class ResultlistComponent implements OnInit {
         this.searchService.searchPhrase()
         .subscribe(
             searchResults => {
+                console.log("searchResults", searchResults);
                 this.resultCount = searchResults['ResultCount'];
                 that.onSuccess(searchResults.ResultData);
             },
@@ -92,7 +93,7 @@ export class ResultlistComponent implements OnInit {
         searchResults.forEach((object) => {
             object['active'] = true;
         })
-
+        
         this.searchResultsOriginal = JSON.parse(JSON.stringify(searchResults));
         this.searchResults = JSON.parse(JSON.stringify(searchResults));
 
