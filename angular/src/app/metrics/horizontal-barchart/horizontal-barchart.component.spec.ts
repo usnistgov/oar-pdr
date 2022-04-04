@@ -52,7 +52,7 @@ describe('HorizontalBarchartComponent', () => {
         expect(el.getAttribute("height")).toBe('140');
 
         // should have the correct width
-        expect(el.getAttribute("width")).toBe('770');
+        expect(el.getAttribute("width")).toBe('800');
 
         el = cmpel.querySelectorAll("rect"); 
 
