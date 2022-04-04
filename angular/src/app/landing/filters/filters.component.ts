@@ -306,6 +306,8 @@ export class FiltersComponent implements OnInit {
      * @param searchResults 
      */
     onSuccess(searchResults: any[]) {
+        console.log("filters searchResults", searchResults);
+        
         this.resultStatus = this.RESULT_STATUS.success;
         this.themesWithCount = [];
         this.componentsWithCount = [];
